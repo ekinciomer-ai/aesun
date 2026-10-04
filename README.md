@@ -4,7 +4,7 @@ Aksaray Enerji GES ve madencilik izleme paneli (Otocoin v3).
 
 ## Kapsam
 
-1. OSOS sayaç verisi: 5 abone (T1, T2, A3, YD, AM) ve EPDK 14531 mahsuplaşması
+1. OSOS sayaç verisi: 5 abone (T1, T2, A3, YD, Anka) ve EPDK 14531 mahsuplaşması
 2. İnverter izleme: Huawei FusionSolar ve Sungrow iSolarCloud
 3. Analiz ve rapor
 4. Uyarılar (panel ve WhatsApp)
@@ -19,7 +19,7 @@ Aksaray Enerji GES ve madencilik izleme paneli (Otocoin v3).
 | T2 | Tekyıldız 2 | 11116968 | 1890 | Dahil |
 | A3 | Aksaray 3 | 11200108 | 3150 | Dahil |
 | YD | Yılmaz Darılmaz | 11201655 | 1260 | Sadece izleme |
-| AM | Anka Mineral | 11111411 | 6300 | Sadece izleme |
+| Anka | Anka Mineral | 11111411 | 6300 | Sadece izleme |
 
 ## Veri kaynağı
 

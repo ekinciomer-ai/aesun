@@ -2,7 +2,7 @@
 
 - 2026-01..04: AYLIK mantik (A3 icin manuel deger varsa once A3, sonra T2, T1; yoksa basamakli)
 - 2026-05+   : SAATLIK kaynak takipli havuz (uretim buyukten kucuge; her ureticiden T2 -> A3 -> T1)
-Mahsup disi aboneler (YD, AM) ayri 'izleme' alaninda tasinir, hesaba girmez.
+Mahsup disi aboneler (YD, Anka) ayri 'izleme' alaninda tasinir, hesaba girmez.
 """
 
 SAATLIK_BASLANGIC = "2026-05"

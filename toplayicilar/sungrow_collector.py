@@ -42,8 +42,10 @@ log = logging.getLogger("aesun.sungrow")
 
 
 def _env_yukle():
-    """Repo kokundeki .env dosyasini (varsa) ortam degiskenlerine yukler. Mevcut degiskenleri ezmez."""
-    for yol in (Path.cwd() / ".env", Path(__file__).resolve().parent.parent / ".env"):
+    """Repo kokundeki .env (veya env.txt) dosyasini (varsa) ortam degiskenlerine yukler. Mevcut degiskenleri ezmez."""
+    kok = Path(__file__).resolve().parent.parent
+    adaylar = [d / ad for d in (Path.cwd(), kok) for ad in (".env", "env.txt", ".env.txt")]
+    for yol in adaylar:
         if not yol.is_file():
             continue
         for satir in yol.read_text(encoding="utf-8").splitlines():

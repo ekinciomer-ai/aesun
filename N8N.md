@@ -7,14 +7,14 @@ n8n Cloud `xbay.app.n8n.cloud`, proje "ömer" (kişisel), klasör **aesun**. Saa
 | İş akışı | ID | Tetik | Zaman aşımı |
 |---|---|---|---|
 | aesun · Ana döngü | `0uPcmIjFGiZjGsLn` | Gündüz `*/15 5-19 * * *`, gece `0,30 0-4,20-23 * * *` | 180 sn |
-| aesun · alt · Sungrow | `NxHobbuF95vE0K9c` | Ana döngüden | 45 sn |
-| aesun · alt · FusionSolar | `DTjR9O7JpCLL94wP` | Ana döngüden | 40 sn |
-| aesun · alt · Inavitas | `XuNH8m81DWnrje5a` | Ana döngüden (:00 ve :30) | 45 sn |
-| aesun · alt · OSOS | `1pZY4rggv3OKTwKk` | Ana döngüden (:00) | 30 sn |
+| aesun · alt · Sungrow | `NxHobbuF95vE0K9c` | Ana döngüden | 35 sn |
+| aesun · alt · FusionSolar | `DTjR9O7JpCLL94wP` | Ana döngüden | 30 sn |
+| aesun · alt · Inavitas | `XuNH8m81DWnrje5a` | Ana döngüden (:00 ve :30) | 35 sn |
+| aesun · alt · OSOS | `1pZY4rggv3OKTwKk` | Ana döngüden (:00) | 15 sn |
 | aesun · Uyarı motoru (alt) | `dXJtI1t230MPBIfz` | Ana döngüden | 15 sn |
 | aesun · Pi nabız + canlı veri | `4CaY5XeOFjK4B3Kr` | POST `/webhook/aesun-nabiz` (header auth) | 30 sn |
 | aesun · Hata yakalayıcı | `QQkA9MHLmFtH6FYx` | Error Trigger | 60 sn |
-| aesun · Arşiv + temizlik | `xOY3YabJkrISGkxv` | `5 0 * * *` | 180 sn |
+| aesun · Arşiv + temizlik | `xOY3YabJkrISGkxv` | `5 0-5 * * *` (gece saatlik, kaçan günleri doldurur) | 180 sn |
 | aesun · EPİAŞ PTF/SMF | `HwcYHM8phNl8SN4Z` | `5,35 13-17 * * *` ve `15 6 * * *` | 120 sn |
 
 Alt iş akışlarını yalnız Ana döngü çağırabilir (callerPolicy).
@@ -35,9 +35,15 @@ Eski 5 iş akışı (`mGUBazyZw83HLiQG`, `wMuIzwWRebIRngsg`, `i783dL0YIX2xE0EL`,
 
 ## Hata ve oturum kuralları
 - Toplayıcı hata mesajı önekleri: `GIRIS:` → `bekle_until = şimdi + 1 saat`, giriş denenmez; `OTURUM:` → token/çerez silinir, sonraki turda yeniden giriş; `LIMIT:` → normal hata.
-- HTTP düğümleri: `retryOnFail`, 3 deneme, 5 sn ara (n8n üst sınırı 5 sn). Giriş cevapları 200 döndüğü için yanlış şifre tekrar denenmez; Inavitas giriş POST'unda tekrar deneme hiç yok.
-- Token yeniden kullanımı: Sungrow 12 saat, FusionSolar 25 dk, Inavitas çerezi 12 saat (RememberMe=true).
+- HTTP düğümleri: zaman aşımı 10 sn, `retryOnFail`, 3 deneme, 5 sn ara (n8n üst sınırı 5 sn). Giriş cevapları 200 döndüğü için yanlış şifre tekrar denenmez; Inavitas giriş POST'unda tekrar deneme hiç yok.
+- Token yeniden kullanımı: Sungrow 12 saat, FusionSolar son başarılı kullanımdan 25 dk (her başarılı turda `son_giris` yenilenir, oturum düşerse `OTURUM:` ile yeniden giriş), Inavitas çerezi 12 saat (RememberMe=true).
 - Kaynak hatasında son bilinen değer korunur, `durum=bayat`, `ardisik_hata+1`; bayat satırlar üretim kurallarına girmez.
+- OSOS: zaman damgası öncekiyle aynıysa `aesun_olcum`'a yeni satır eklenmez.
+- Sungrow "şebekede değil" kuralı yalnız üretim saatinde çalışır.
+
+## Arşiv
+- Her çalıştırma arşivlenmemiş en eski günü (yoksa dünü) `n8n/arsiv/YYYY-MM-DD.json`'a yazar; gece 6 çalıştırma ile en fazla 6 kaçan gün/gece geri dolar.
+- Temizlik: 7 günden eski ve `aesun_arsiv`'de kaydı olan günler silinir; arşivlenmemiş bir güne gelince durur.
 
 ## Kimlik bilgileri (n8n > Credentials)
 
@@ -63,6 +69,7 @@ Yanıt `onbellek/son.json`'a, n8n'e ulaşılamazsa GitHub yedeği `onbellek/son_
 ## EPİAŞ
 - TGT girişi (giris.epias.com.tr/cas/v1/tickets) → GÖP PTF (`markets/dam/data/mcp`) ve DGP SMF (`markets/bpm/data/system-marginal-price`), dün/bugün/yarın.
 - `aesun_son` içinde `kaynak=epias, plant_id=ptf` satırı: ek alanında bugün/yarın PTF dizileri ve özetler; Pi yanıtıyla panele gider.
+- 06:15 tetiği son 7 günü yeniden çeker (kaçanları doldurur); diğer tetikler dünden başlar.
 - `aylik_ptf.json` yalnız yeni/değişen tam gün varsa güncellenir (eski panel biçimi korunur).
 - Uyarılar: 15:30'dan sonra yarının PTF'si yoksa; EPİAŞ verisi 26 saattir alınamıyorsa.
 - GitHub Actions'taki `main.py` (madencilik kârlılık sinyali, WhatsApp) şimdilik çalışmaya devam ediyor; aynı dosyaya aynı değerleri yazar.

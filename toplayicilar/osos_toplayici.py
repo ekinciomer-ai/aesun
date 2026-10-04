@@ -103,20 +103,56 @@ def cerez_kaydet(s):
         pass
 
 
-def giris(s, env):
+def _formu_bul(html):
+    """Şifre alanı içeren formu bulur: (action, gizli alanlar, kullanıcı alanı adı, şifre alanı adı)."""
+    for fm in re.finditer(r"<form\b([^>]*)>(.*?)</form>", html, re.S | re.I):
+        govde_ = fm.group(2)
+        if not re.search(r'type=["\']?password', govde_, re.I):
+            continue
+        act = (re.search(r'action=["\']([^"\']*)', fm.group(1), re.I) or [None, ""])[1]
+        gizli, kullanici, sifre = [], None, None
+        for inp in re.finditer(r"<input\b[^>]*>", govde_, re.I):
+            t = inp.group(0)
+            ad = (re.search(r'name=["\']([^"\']+)', t, re.I) or [None, None])[1]
+            tip = ((re.search(r'type=["\']?([a-z]+)', t, re.I) or [None, "text"])[1]).lower()
+            if not ad:
+                continue
+            if tip == "password":
+                sifre = ad
+            elif tip in ("text", "email") and not kullanici:
+                kullanici = ad
+            elif tip in ("hidden", "checkbox"):
+                val = (re.search(r'value=["\']([^"\']*)', t, re.I) or [None, ""])[1]
+                if tip == "checkbox":
+                    val = "true"
+                gizli.append((ad, val))
+        return act, gizli, kullanici, sifre
+    return None
+
+
+def giris(s, env, tani=False):
     s.cookies.clear()
-    r = s.get(BASE + "/home/Index", timeout=90)
-    m = re.search(r'<input[^>]*__RequestVerificationToken[^>]*value="([^"]+)"', r.text)
-    if not m:
-        raise OturumHatasi(f"giriş sayfasında form anahtarı yok (HTTP {r.status_code})")
-    veri = [("__RequestVerificationToken", m.group(1)), ("UsernamePassword", env["OSOS_KULLANICI"]),
-            ("Password", env["OSOS_SIFRE"]), ("RememberMe", "true"), ("RememberMe", "false"),
-            ("CurrentRetryCount", "0")]
-    r = s.post(BASE + "/Home/Login", data=veri, timeout=90,
-               headers={"Referer": BASE + "/home/Index", "Origin": BASE})
+    r = s.get(BASE + "/", timeout=90)
+    f = _formu_bul(r.text)
+    if not f:
+        raise OturumHatasi(f"giriş formu bulunamadı (HTTP {r.status_code}, adres {r.url})")
+    act, gizli, k_alan, s_alan = f
+    if tani:
+        log("Giriş sayfası:", r.url, "| form:", act or "(aynı adres)", "| kullanıcı alanı:", k_alan, "| şifre alanı:", s_alan,
+            "| diğer alanlar:", ", ".join(a for a, _ in gizli))
+    if not k_alan or not s_alan:
+        raise OturumHatasi(f"formda kullanıcı/şifre alanı yok ({k_alan}, {s_alan})")
+    hedef = requests.compat.urljoin(r.url, act) if act else r.url
+    veri = gizli + [(k_alan, env["OSOS_KULLANICI"]), (s_alan, env["OSOS_SIFRE"])]
+    r2 = s.post(hedef, data=veri, timeout=90, headers={"Referer": r.url, "Origin": BASE})
     k = s.get(BASE + "/WiringDashboard/Index", timeout=90, allow_redirects=False)
-    if k.status_code != 200 or "UsernamePassword" in k.text:
-        raise OturumHatasi(f"giriş başarısız (login HTTP {r.status_code}, kontrol HTTP {k.status_code})")
+    basarili = k.status_code == 200 and not _formu_bul(k.text)
+    if tani:
+        mesaj = re.sub(r"<[^>]+>", " ", " ".join(re.findall(r'(?:validation-summary|alert|error)[^>]*>(.*?)</', r2.text, re.S | re.I)))
+        log("Giriş yanıtı: HTTP", r2.status_code, "adres", r2.url, "| kontrol HTTP", k.status_code, "| başarılı:", basarili,
+            "| site mesajı:", re.sub(r"\s+", " ", mesaj).strip()[:200] or "-")
+    if not basarili:
+        raise OturumHatasi(f"giriş başarısız (login HTTP {r2.status_code}, kontrol HTTP {k.status_code})")
     cerez_kaydet(s)
     log("OSOS girişi yapıldı")
 
@@ -163,8 +199,8 @@ def yuk_profili(s, wid, aralik):
     try:
         j = r.json()
     except ValueError:
-        if r.status_code == 200:
-            raise OturumHatasi("JSON yerine sayfa döndü")
+        if r.status_code == 200 or r.status_code >= 500:
+            raise OturumHatasi(f"JSON yerine sayfa döndü (HTTP {r.status_code})")
         raise RuntimeError(f"HTTP {r.status_code}")
     if not isinstance(j.get("data"), list):
         raise RuntimeError("beklenmeyen yanıt")
@@ -267,6 +303,7 @@ def gonder(env, yuk):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gun", type=int, default=1, help="kaç gün geriye (varsayılan 1 = dün+bugün)")
+    ap.add_argument("--tani", action="store_true", help="yalnız girişi dener ve form alanlarını yazar (şifre yazılmaz)")
     args = ap.parse_args()
     env = ayar_oku()
     bugun = datetime.now()
@@ -274,6 +311,16 @@ def main():
     simdi = datetime.now().astimezone().isoformat(timespec="seconds")
     s = oturum_ac()
     satirlar, hatalar, girildi = [], [], False
+    if args.tani or not CEREZ.exists():
+        try:
+            giris(s, env, tani=args.tani)
+            girildi = True
+        except Exception as e:
+            log("GIRIS:", e)
+            if args.tani:
+                return
+            gonder(env, {"kaynak": "osos", "cihaz": platform.node(), "ts": simdi, "durum": "hata", "hata_mesaji": f"GIRIS: {e}"[:300], "satirlar": []})
+            return
     for tesisat, kod, wid, carpan, _ in ABONE:
         for deneme in range(2):
             try:

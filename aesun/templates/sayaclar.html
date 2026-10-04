@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block baslik %}Otocoin sayaçlar ve mahsup{% endblock %}
+{% block stil %}
+.tablo{overflow-x:auto;border:1px solid var(--kenar);border-radius:12px;background:var(--panel)}
+table.s{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+table.s th,table.s td{padding:6px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--cizgi)}
+table.s thead th{background:var(--zemin);font-weight:600;color:var(--ink2);position:sticky;top:0}
+table.s th:first-child,table.s td:first-child{position:sticky;left:0;background:var(--panel);text-align:left;font-weight:600;z-index:1}
+table.s thead th:first-child{background:var(--zemin);z-index:2}
+table.s tfoot td{font-weight:700;background:var(--zemin);border-top:2px solid var(--kenar)}
+table.s tfoot td:first-child{background:var(--zemin)}
+table.s td.sifir{color:var(--ink2);opacity:.55}
+table.s .grup{border-left:2px solid var(--kenar)}
+table.s tbody tr:hover td{background:var(--zemin)}
+.sekmeler{display:flex;gap:4px;border-bottom:1px solid var(--kenar)}
+.sekmeler a{padding:10px 16px;text-decoration:none;color:var(--ink2);font-weight:600;border-bottom:3px solid transparent;margin-bottom:-1px;min-height:44px;display:flex;align-items:center}
+.sekmeler a[aria-current]{color:var(--ink);border-bottom-color:var(--s1)}
+.gunsec{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gunsec input{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--kenar);background:var(--panel);color:var(--ink);min-height:40px}
+{% endblock %}
+{% macro h(v, bos_sifir=True) -%}
+{%- if v is none -%}<td></td>{%- elif v|round(0) == 0 and bos_sifir -%}<td class="sifir">0</td>{%- else -%}<td>{{ sayi(v) }}</td>{%- endif -%}
+{%- endmacro %}
+{% block icerik %}
+<main>
+<header style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+<div>
+<h1>Sayaçlar ve mahsup</h1>
+<p style="margin:6px 0 0;font-size:15px;color:var(--ink2)">{{ gun_metin }}. Saatlik değerler, kWh.</p>
+</div>
+<form class="gunsec" method="get" action="/sayaclar">
+<input type="hidden" name="sekme" value="{{ sekme }}">
+{% if onceki %}<a class="btn" href="/sayaclar?sekme={{ sekme }}&gun={{ onceki }}" style="text-decoration:none;display:flex;align-items:center">Önceki gün</a>{% endif %}
+<label class="k" for="gun">Gün</label>
+<input id="gun" type="date" name="gun" value="{{ gun }}" min="{{ ilk }}" max="{{ son }}" onchange="this.form.submit()">
+{% if sonraki %}<a class="btn" href="/sayaclar?sekme={{ sekme }}&gun={{ sonraki }}" style="text-decoration:none;display:flex;align-items:center">Sonraki gün</a>{% endif %}
+</form>
+</header>
+
+<nav class="sekmeler" aria-label="Alt sekmeler">
+<a href="/sayaclar?sekme=sayac&gun={{ gun }}" {% if sekme == 'sayac' %}aria-current="page"{% endif %}>Sayaçlar</a>
+<a href="/sayaclar?sekme=mahsup&gun={{ gun }}" {% if sekme == 'mahsup' %}aria-current="page"{% endif %}>Mahsup</a>
+</nav>
+
+{% if sekme == 'sayac' %}
+<section aria-labelledby="h-osos" style="display:flex;flex-direction:column;gap:10px">
+<h2 id="h-osos">OSOS sayaç verisi</h2>
+<div class="tablo"><table class="s">
+<thead>
+<tr><th rowspan="2">Saat</th>
+{% for ab, n in osos_gruplar %}<th colspan="{{ n }}" class="grup" style="text-align:center"><span class="kare" style="width:10px;height:10px;background:var(--s{{ ab.renk }});margin-right:6px"></span>{{ ab.kod }} <span style="font-weight:400">{{ ab.ad }}</span></th>{% endfor %}
+</tr>
+<tr>{% for c in osos %}<th {% if loop.first or c.abone.key != osos[loop.index0-1].abone.key %}class="grup"{% endif %}>{{ c.tur }}</th>{% endfor %}</tr>
+</thead>
+<tbody>
+{% for hh in saatler %}<tr><td>{{ hh }}:00</td>{% for c in osos %}{% set v = c.deger[hh] %}{% if loop.first or c.abone.key != osos[loop.index0-1].abone.key %}{% if v is none %}<td class="grup"></td>{% elif v|round(0)==0 %}<td class="grup sifir">0</td>{% else %}<td class="grup">{{ sayi(v) }}</td>{% endif %}{% else %}{{ h(v) }}{% endif %}{% endfor %}</tr>
+{% endfor %}
+</tbody>
+<tfoot><tr><td>Toplam</td>{% for c in osos %}<td {% if loop.first or c.abone.key != osos[loop.index0-1].abone.key %}class="grup"{% endif %}>{{ sayi(c.toplam) if c.toplam is not none else '' }}</td>{% endfor %}</tr></tfoot>
+</table></div>
+<p class="k" style="margin:0">Boş hücre o saatin sayaç verisi henüz gelmedi demek. Saat 13:00 satırı 13:00–14:00 arasını gösterir.</p>
+</section>
+
+<section aria-labelledby="h-inv" style="display:flex;flex-direction:column;gap:10px">
+<h2 id="h-inv">İnverter verisi</h2>
+<div class="tablo"><table class="s">
+<thead><tr><th>Saat</th>{% for c in inverter %}<th class="grup"><span class="kare" style="width:10px;height:10px;background:var(--s{{ c.abone.renk }});margin-right:6px"></span>{{ c.abone.kod }} <span style="font-weight:400">{{ c.kaynak }}</span></th>{% endfor %}</tr></thead>
+<tbody>
+{% for hh in saatler %}<tr><td>{{ hh }}:00</td>{% for c in inverter %}{% set v = c.deger[hh] %}{% if v is none %}<td class="grup"></td>{% elif v|round(0)==0 %}<td class="grup sifir">0</td>{% else %}<td class="grup">{{ sayi(v) }}</td>{% endif %}{% endfor %}</tr>
+{% endfor %}
+</tbody>
+<tfoot>
+<tr><td>İnverter toplamı</td>{% for c in inverter %}<td class="grup">{{ sayi(c.toplam) if c.veri_var else 'Veri yok' }}</td>{% endfor %}</tr>
+<tr><td>OSOS üretimi</td>{% for c in inverter %}<td class="grup">{{ sayi(c.osos_toplam) if c.osos_toplam is not none else '' }}</td>{% endfor %}</tr>
+<tr><td>Fark</td>{% for c in inverter %}<td class="grup" {% if c.fark is not none and (c.fark > 5 or c.fark < -5) %}style="color:var(--uy)"{% endif %}>{% if c.fark is not none %}%{{ '%.1f'|format(c.fark)|replace('.',',') }}{% endif %}</td>{% endfor %}</tr>
+</tfoot>
+</table></div>
+<ul class="k" style="margin:0;padding-left:18px">
+{% for c in inverter %}<li>{{ c.abone.kod }}: {{ c.not }}</li>{% endfor %}
+</ul>
+</section>
+
+{% else %}
+<section aria-labelledby="h-mhs" style="display:flex;flex-direction:column;gap:10px">
+<h2 id="h-mhs">Saatlik mahsup</h2>
+{% if not mahsup %}<p class="k">Bu gün için mahsup verisi yok.</p>
+{% else %}
+{% if not mahsup.saatlik %}<p class="k" style="margin:0">Bu ay aylık mahsuplaşma dönemine giriyor (Mayıs 2026 öncesi), saatlik mahsup hesaplanmaz.</p>{% endif %}
+{% set m = mahsup %}
+<div class="tablo"><table class="s">
+<thead>
+<tr><th rowspan="2">Saat</th>
+<th colspan="3" class="grup" style="text-align:center">Üretim</th>
+<th colspan="4" class="grup" style="text-align:center">Tüketim</th>
+<th colspan="4" class="grup" style="text-align:center">Mahsup</th>
+<th rowspan="2" class="grup">Mahsup<br>sonrası</th>
+<th rowspan="2" class="grup">Bedelli</th>
+{% for a in m.izleme %}<th colspan="2" class="grup" style="text-align:center">{{ a.kod }} <span style="font-weight:400">izleme</span></th>{% endfor %}
+</tr>
+<tr><th class="grup">T1</th><th>T2</th><th>Top.</th><th class="grup">T1</th><th>T2</th><th>A3</th><th>Top.</th><th class="grup">T1</th><th>T2</th><th>A3</th><th>Top.</th>
+{% for a in m.izleme %}<th class="grup">Ür.</th><th>Tük.</th>{% endfor %}</tr>
+</thead>
+<tbody>
+{% for r in m.satirlar %}<tr><td>{{ r.saat }}:00</td>
+{% if r.bos %}<td class="grup" colspan="{{ 13 + 2*m.izleme|length }}"></td>{% else %}
+<td class="grup">{{ sayi(r.u.T1) }}</td>{{ h(r.u.T2) }}<td style="font-weight:600">{{ sayi(r.u.TPL) }}</td>
+<td class="grup">{{ sayi(r.t.T1) }}</td>{{ h(r.t.T2) }}{{ h(r.t.A3) }}<td style="font-weight:600">{{ sayi(r.t.TPL) }}</td>
+<td class="grup">{{ sayi(r.m.T1 or 0) }}</td>{{ h(r.m.T2 or 0) }}{{ h(r.m.A3 or 0) }}<td style="font-weight:600;color:var(--s3)">{{ sayi(r.m.TPL or 0) }}</td>
+<td class="grup">{{ sayi(r.s.TPL or 0) }}</td><td class="grup" style="color:var(--iyi);font-weight:600">{{ sayi(r.b) if r.b else '' }}</td>
+{% for a in m.izleme %}{% set z = r.iz.get(a.key) %}<td class="grup">{{ sayi(z.u) if z else '' }}</td><td>{{ sayi(z.t) if z else '' }}</td>{% endfor %}
+{% endif %}</tr>
+{% endfor %}
+</tbody>
+<tfoot><tr><td>Toplam</td>
+<td class="grup">{{ sayi(m.top.u.T1) }}</td><td>{{ sayi(m.top.u.T2) }}</td><td>{{ sayi(m.top.u.TPL) }}</td>
+<td class="grup">{{ sayi(m.top.t.T1) }}</td><td>{{ sayi(m.top.t.T2) }}</td><td>{{ sayi(m.top.t.A3) }}</td><td>{{ sayi(m.top.t.TPL) }}</td>
+<td class="grup">{{ sayi(m.top.m.T1 or 0) }}</td><td>{{ sayi(m.top.m.T2 or 0) }}</td><td>{{ sayi(m.top.m.A3 or 0) }}</td><td>{{ sayi(m.top.m.TPL or 0) }}</td>
+<td class="grup">{{ sayi(m.top.s.TPL or 0) }}</td><td class="grup">{{ sayi(m.top.b) }}</td>
+{% for a in m.izleme %}{% set z = m.top.iz.get(a.key) %}<td class="grup">{{ sayi(z.u) if z else '' }}</td><td>{{ sayi(z.t) if z else '' }}</td>{% endfor %}
+</tr></tfoot>
+</table></div>
+<p class="k" style="margin:0">Her saatte üretim büyükten küçüğe işlenir; önce T2, sonra A3, en son T1 tüketimine mahsup edilir, artan bedelli satılır. İzleme sütunları hesaba katılmaz.</p>
+{% endif %}
+</section>
+{% endif %}
+</main>
+{% endblock %}

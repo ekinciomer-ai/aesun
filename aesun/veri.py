@@ -157,3 +157,86 @@ def f2pool_son_kayit() -> str | None:
     ay = simdi().strftime("%Y-%m")
     arsiv = json_oku(f"arsiv_f2pool_{ay}.json") or {}
     return max(arsiv) if arsiv else None
+
+
+# ------------------------------------------------------------------ saatlik inverter verisi
+def _saat_etiketi(etiket, i, n):
+    """Grafik etiketinden saat (0-23) cikar; cikaramazsa 24 elemanli seride sira numarasi."""
+    s = str(etiket)
+    for parca in (s[:2], s.split(":")[0], s.split(" ")[-1].split(":")[0]):
+        if parca.isdigit() and 0 <= int(parca) <= 23:
+            return int(parca)
+    return i if n == 24 else None
+
+
+_inav_saat: dict[str, tuple[float, list]] = {}
+
+
+def inavitas_saatlik(gun: str, ttl: int = 600) -> dict:
+    """{santral_ad: {saat: kWh}} — INAVITAS_USER/PASS yoksa bos."""
+    if not (os.getenv("INAVITAS_USER") and os.getenv("INAVITAS_PASS")):
+        return {}
+    k = _inav_saat.get(gun)
+    if k and time.time() - k[0] < ttl:
+        return k[1]
+    sonuc = {}
+    try:
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "toplayicilar"))
+        from inavitas import Inavitas  # type: ignore
+        cli = Inavitas()
+        for p in cli.plants():
+            seri = cli.plant_hourly(p["id"], gun)
+            if not seri:
+                continue
+            veri_ = seri[0]["veri"]
+            saatler = {}
+            for i, x in enumerate(veri_):
+                h = _saat_etiketi(x["t"], i, len(veri_))
+                if h is not None and x["kwh"] is not None:
+                    saatler[h] = saatler.get(h, 0) + float(x["kwh"])
+            sonuc[p["name"]] = saatler
+    except Exception:
+        return k[1] if k else {}
+    _inav_saat[gun] = (time.time(), sonuc)
+    return sonuc
+
+
+def sungrow_saatlik(gun: str, db_yolu: str = SUNGROW_DB) -> dict:
+    """{ps_id: {saat: kWh}} — santral gunluk sayacinin saatlik artisi (toplayici surekli calismali)."""
+    if not Path(db_yolu).is_file():
+        return {}
+    con = sqlite3.connect(db_yolu)
+    try:
+        sonuc: dict[str, dict[int, float]] = {}
+        for ps_id, ts, deger in con.execute(
+                "SELECT ps_id, ts, value FROM sg_reading WHERE device_type=11 AND metric='daily_yield_wh' ORDER BY ts"):
+            if str(ps_id) in SUNGROW_HARIC:
+                continue
+            yerel = datetime.fromisoformat(ts).astimezone(TR)
+            if yerel.date().isoformat() != gun:
+                continue
+            s = sonuc.setdefault(str(ps_id), {})
+            s[yerel.hour] = max(s.get(yerel.hour, 0), (deger or 0) / 1000)  # saat sonu kumulatif
+        cikti = {}
+        for ps, kum in sonuc.items():
+            onceki, saatlik = 0.0, {}
+            for h in sorted(kum):
+                saatlik[h] = max(kum[h] - onceki, 0)
+                onceki = kum[h]
+            cikti[ps] = saatlik
+        return cikti
+    finally:
+        con.close()
+
+
+def fusion_saatlik(gun: str) -> dict:
+    """{istasyon_ad: {saat: kWh}} fusion_data.json'daki gunluk seriden (sadece o gunse)."""
+    fu = json_oku("fusion_data.json") or {}
+    sonuc = {}
+    for kod, d in (fu.get("daily") or {}).items():
+        if d.get("date") != gun:
+            continue
+        sonuc[d.get("stationName", kod)] = {int(h): (v or {}).get("production_kWh") or 0
+                                           for h, v in (d.get("hourly") or {}).items()}
+    return sonuc

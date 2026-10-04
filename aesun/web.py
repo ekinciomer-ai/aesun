@@ -6,9 +6,10 @@ import os
 import urllib.parse
 import urllib.request
 
-from flask import Flask, jsonify, redirect, render_template
+from flask import Flask, jsonify, redirect, render_template, request
 
 from . import ozet as ozet_mod
+from . import sayaclar as sayaclar_mod
 
 
 def _whatsapp(mesaj: str) -> tuple[bool, str]:
@@ -29,13 +30,27 @@ def _whatsapp(mesaj: str) -> tuple[bool, str]:
 def create_app() -> Flask:
     app = Flask(__name__)
 
+    def _nav(uy):
+        return {
+            "inverter_uyari": sum(1 for u in uy if u["kategori"] == "inverter" and u["seviye"] != "bilgi"),
+            "madencilik_uyari": sum(1 for u in uy if u["kategori"] == "madencilik"),
+            "uyari_kritik": sum(1 for u in uy if u["seviye"] == "kritik"),
+            "fusion_bayat": any(u["kategori"] == "inverter" and "FusionSolar" in u["baslik"] for u in uy),
+        }
+
     @app.route("/")
     def genel():
         d = ozet_mod.genel_bakis()
-        d["inverter_uyari"] = sum(1 for u in d["uyarilar"] if u["kategori"] == "inverter" and u["seviye"] != "bilgi")
-        d["madencilik_uyari"] = sum(1 for u in d["uyarilar"] if u["kategori"] == "madencilik")
-        d["fusion_bayat"] = any(u["kategori"] == "inverter" and "FusionSolar" in u["baslik"] for u in d["uyarilar"])
-        return render_template("genel.html", **d)
+        d.update(_nav(d["uyarilar"]))
+        return render_template("genel.html", aktif="genel", **d)
+
+    @app.route("/sayaclar")
+    def sayaclar():
+        sekme = request.args.get("sekme", "sayac")
+        sekme = sekme if sekme in ("sayac", "mahsup") else "sayac"
+        d = sayaclar_mod.gun_detay(request.args.get("gun"))
+        nav = _nav(ozet_mod.genel_bakis()["uyarilar"])
+        return render_template("sayaclar.html", aktif="sayaclar", sekme=sekme, **nav, **d)
 
     @app.route("/api/genel")
     def api_genel():

@@ -60,7 +60,7 @@ python toplayicilar/inavitas.py 2026-10-03   # belirli gün
 ## Paneli çalıştırma
 
 ```
-python app.py                 # http://localhost:8080
+python app.py                 # http://localhost:5080
 ```
 
 Veri kaynakları: `AESUN_VERI_DIZIN` (yerel epias-ptf klasörü) tanımlı değilse JSON'lar GitHub'dan okunur.

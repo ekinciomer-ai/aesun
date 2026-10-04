@@ -16,11 +16,14 @@ ABONELER = [
      "carpan": 3150.0, "uretim": False, "tuketim": True, "mahsup": True, "kurulu_kwp": None,
      "renk": 3},
     {"key": "yilmaz_darilmaz", "kod": "YD", "ad": "Yılmaz Darılmaz", "tesisat": "11201655",
-     "carpan": 1260.0, "uretim": True, "tuketim": True, "mahsup": False, "kurulu_kwp": None,
+     "carpan": 1260.0, "uretim": True, "tuketim": True, "mahsup": False, "kurulu_kwp": 1300.0,
+     "inverter": {"kaynak": "sungrow", "ps_id": "5064453", "ad": "Darilmaz Ges"},
      "renk": 4},
     {"key": "anka_mineral", "kod": "Anka", "ad": "Anka Mineral", "tesisat": "11111411",
      "carpan": 6300.0, "sayac_seri": "40304004", "uretim": True, "tuketim": True,
-     "mahsup": False, "kurulu_kwp": None, "renk": 5},
+     "mahsup": False, "kurulu_kwp": 3300.0,
+     "inverter": {"kaynak": "sungrow", "ps_id": "5038906", "ad": "HG YATIRIM AŞ (Halil Gökçe)"},
+     "renk": 5},
 ]
 
 DUZENLENEBILIR = ("ad", "kod", "carpan", "uretim", "tuketim", "kurulu_kwp")

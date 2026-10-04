@@ -13,13 +13,13 @@ Aksaray Enerji GES ve madencilik izleme paneli (Otocoin v3).
 
 ## Aboneler
 
-| Kod | Ad | Tesisat | Çarpan | Mahsup |
-|---|---|---|---|---|
-| T1 | Tekyıldız 1 | 11116344 | 1890 | Dahil |
-| T2 | Tekyıldız 2 | 11116968 | 1890 | Dahil |
-| A3 | Aksaray 3 | 11200108 | 3150 | Dahil |
-| YD | Yılmaz Darılmaz | 11201655 | 1260 | Sadece izleme |
-| Anka | Anka Mineral | 11111411 | 6300 | Sadece izleme |
+| Kod | Ad | Tesisat | Çarpan | Mahsup | İnverter |
+|---|---|---|---|---|---|
+| T1 | Tekyıldız 1 | 11116344 | 1890 | Dahil | FusionSolar |
+| T2 | Tekyıldız 2 | 11116968 | 1890 | Dahil | FusionSolar |
+| A3 | Aksaray 3 | 11200108 | 3150 | Dahil | — |
+| YD | Yılmaz Darılmaz | 11201655 | 1260 | Sadece izleme | Sungrow: Darilmaz Ges (5064453) |
+| Anka | Anka Mineral | 11111411 | 6300 | Sadece izleme | Sungrow: HG YATIRIM AŞ / Halil Gökçe (5038906) |
 
 ## Veri kaynağı
 

@@ -45,6 +45,20 @@ ul.uy li.kritik{background:#FDECEA}ul.uy li.uyari{background:#FFF4DC}
 .durum-k{font-size:13px;color:#B42318;font-weight:600;display:flex;align-items:center;gap:6px}
 .durum-u{font-size:13px;color:#9A5B00;font-weight:600;display:flex;align-items:center;gap:6px}
 .hata{padding:20px;color:#B42318}
+.sekmeler{display:flex;gap:4px;border-bottom:1px solid #D5DCE5}
+.sekmeler button{font:inherit;font-size:16px;font-weight:600;background:none;border:0;border-bottom:3px solid transparent;padding:10px 18px;color:#4A5A70;cursor:pointer;min-height:44px}
+.sekmeler button[aria-selected=true]{color:#10233F;border-bottom-color:#2a78d6}
+.tablo-kutu{overflow-x:auto;background:#fff;border:1px solid #D5DCE5;border-radius:14px}
+table.tb{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+table.tb th{font-weight:600;color:#4A5A70;font-size:13px;padding:8px 10px;background:#F5F7FA;text-align:right;white-space:nowrap}
+table.tb th.sol,table.tb td.sol{text-align:left}
+table.tb td{padding:6px 10px;text-align:right;border-top:1px solid #EEF1F5;white-space:nowrap}
+table.tb td.sifir{color:#9AA6B5}
+table.tb tr.top td{font-weight:700;border-top:2px solid #D5DCE5;background:#F5F7FA}
+table.tb .ayr{border-left:1px solid #E3E8EE}
+table.tb td.saat{font-weight:600;text-align:left}
+input[type=date]{font:inherit;font-size:15px;border:1px solid #B9C4D2;border-radius:8px;padding:8px 10px;min-height:40px;color:#10233F;background:#fff}
+.kartlar5{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
 @media (max-width:700px){main{padding:20px 16px 40px}.nav{max-width:none;flex-basis:100%;flex-direction:row;flex-wrap:wrap;padding:14px}.nav .bosluk{display:none}.sayac{border-left:0;padding:4px 0}}
 </style>
 </head>
@@ -56,8 +70,8 @@ ul.uy li.kritik{background:#FDECEA}ul.uy li.uyari{background:#FFF4DC}
     <div><div style="font-size:18px;color:#fff;font-stretch:110%"><b style="font-weight:800">AE</b><span style="font-weight:600;color:#F2555B">Monitoring</span></div>
     <div style="font-size:12px;color:#9FB0C6">Aksaray Enerji · GES izleme</div></div>
   </div>
-  <a href="#genel" class="aktif"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Genel bakış</a>
-  <a href="#sayaclar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Sayaçlar ve mahsup</a>
+  <a href="#genel" data-sayfa="genel" class="aktif"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Genel bakış</a>
+  <a href="#sayac" data-sayfa="sayac"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Sayaçlar ve mahsup</a>
   <a href="#inverterler"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>İnverterler<span id="r-inv"></span></a>
   <a href="#madencilik"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2M15 10v4"/></svg>Madencilik<span id="r-mad"></span></a>
   <a href="#piyasa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 6"/></svg>Piyasa (PTF)</a>
@@ -68,8 +82,8 @@ ul.uy li.kritik{background:#FDECEA}ul.uy li.uyari{background:#FFF4DC}
 
 <main id="genel">
   <header class="bas" style="align-items:flex-end">
-    <div><h1>Genel bakış</h1><p style="margin:6px 0 0;font-size:15px;color:#4A5A70" id="altBaslik">Yükleniyor…</p></div>
-    <div style="display:flex;gap:8px"><button class="btn koyu" type="button" onclick="yukle()">Yenile</button></div>
+    <div><h1 id="baslik">Genel bakış</h1><p style="margin:6px 0 0;font-size:15px;color:#4A5A70" id="altBaslik">Yükleniyor…</p></div>
+    <div id="kontrol" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"></div>
   </header>
   <div id="icerik"></div>
 </main>
@@ -117,18 +131,63 @@ function gunluk(osos, key, gun) {
   for (const [s, x] of Object.entries(v)) { veris += Number(x.veris) || 0; cekis += Number(x.cekis) || 0; saat = Math.max(saat, parseInt(s, 10) + 1); }
   return { veris, cekis, saat };
 }
+const MAN_A3 = { '2026-01': 29373.75, '2026-02': 63949.58, '2026-03': 89689.95, '2026-04': 191206.98 };
+const AB = { T1: 'tekyildiz_1', T2: 'tekyildiz_2', A3: 'aksaray_3' };
+function saatVeri(osos, gun, s) {
+  const v = k => ((((osos[AB[k]] || {}).veri || {})[gun] || {})[s]) || null;
+  const x1 = v('T1'), x2 = v('T2'), x3 = v('A3');
+  return { var: !!(x1 || x2 || x3), u: { T1: x1 ? +x1.veris || 0 : 0, T2: x2 ? +x2.veris || 0 : 0 }, t: { T1: x1 ? +x1.cekis || 0 : 0, T2: x2 ? +x2.cekis || 0 : 0, A3: x3 ? +x3.cekis || 0 : 0 } };
+}
+// Ofis paneli "kaynak takipli havuz": üreticiler büyükten küçüğe; her üreticiden önce T2, sonra A3, en son T1; artan bedelli
+function havuz(u, t) {
+  const tuk = { ...t }, mahsup = { T1: 0, T2: 0, A3: 0 }, kaynak = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };
+  for (const [ges, mik] of Object.entries(u).sort((a, b) => b[1] - a[1])) {
+    let kal = mik;
+    for (const ab of ['T2', 'A3', 'T1']) { if (kal <= 0 || tuk[ab] <= 0) continue; const m = Math.min(kal, tuk[ab]); kaynak[ges][ab] += m; mahsup[ab] += m; kal -= m; tuk[ab] -= m; }
+    if (kal > 0) kaynak[ges].bedelli += kal;
+  }
+  return { mahsup, kaynak, sonra: tuk, bedelli: kaynak.T1.bedelli + kaynak.T2.bedelli, mTop: mahsup.T1 + mahsup.T2 + mahsup.A3 };
+}
 function mahsupGun(osos, gun) {
-  let uretim = 0, tuketim = 0, mahsup = 0;
+  const r = { uretim: 0, tuketim: 0, mahsup: 0, bedelli: 0, sebeke: 0, saatler: [] };
   for (let h = 0; h < 24; h++) {
     const s = String(h).padStart(2, '0');
-    let u = 0, t = 0;
-    for (const sc of SAYAC.filter(x => x.mahsup)) {
-      const x = (((osos[sc.key] || {}).veri || {})[gun] || {})[s];
-      if (x) { u += Number(x.veris) || 0; t += Number(x.cekis) || 0; }
-    }
-    uretim += u; tuketim += t; mahsup += Math.min(u, t);
+    const v = saatVeri(osos, gun, s);
+    const hv = havuz(v.u, v.t);
+    const U = v.u.T1 + v.u.T2, T = v.t.T1 + v.t.T2 + v.t.A3;
+    r.saatler.push({ saat: s, var: v.var, u: v.u, t: v.t, U, T, ...hv });
+    r.uretim += U; r.tuketim += T; r.mahsup += hv.mTop; r.bedelli += hv.bedelli; r.sebeke += T - hv.mTop;
   }
-  return { uretim, tuketim, mahsup, bedelli: uretim - mahsup, sebeke: tuketim - mahsup };
+  return r;
+}
+// Ay sonucu: 2026 Mayıs öncesi aylık (Ocak–Nisan A3 manuel mahsup), sonrası saatlik
+function aySonuc(osos, ay) {
+  const gunler = Object.keys((osos.tekyildiz_1 || {}).veri || {}).filter(g => g.startsWith(ay)).sort();
+  const t = { uretim: 0, tuketim: 0, mahsup: 0, bedelli: 0, sebeke: 0, gunler, aylik: false, ab: { T1: 0, T2: 0, A3: 0 }, tAb: { T1: 0, T2: 0, A3: 0 }, uAb: { T1: 0, T2: 0 }, kaynak: { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } } };
+  for (const g of gunler) {
+    const m = mahsupGun(osos, g);
+    t.uretim += m.uretim; t.tuketim += m.tuketim;
+    for (const sa of m.saatler) {
+      for (const k of ['T1', 'T2', 'A3']) { t.tAb[k] += sa.t[k]; }
+      t.uAb.T1 += sa.u.T1; t.uAb.T2 += sa.u.T2;
+      for (const k of ['T1', 'T2', 'A3']) t.ab[k] += sa.mahsup[k];
+      for (const ges of ['T1', 'T2']) for (const k of ['T1', 'T2', 'A3', 'bedelli']) t.kaynak[ges][k] += sa.kaynak[ges][k];
+    }
+    t.mahsup += m.mahsup; t.bedelli += m.bedelli;
+  }
+  if (ay < '2026-05') {
+    t.aylik = true;
+    let kal = t.uretim; const ab = { T1: 0, T2: 0, A3: 0 };
+    if (MAN_A3[ay] !== undefined) {
+      ab.A3 = Math.min(MAN_A3[ay], t.tAb.A3); kal -= ab.A3;
+      for (const k of ['T2', 'T1']) if (kal > 0 && t.tAb[k] > 0) { ab[k] = Math.min(kal, t.tAb[k]); kal -= ab[k]; }
+    } else {
+      for (const k of ['T1', 'T2', 'A3'].sort((a, b) => t.tAb[b] - t.tAb[a])) { const m = Math.min(Math.max(kal, 0), t.tAb[k]); ab[k] = m; kal -= m; }
+    }
+    t.ab = ab; t.mahsup = ab.T1 + ab.T2 + ab.A3; t.bedelli = Math.max(0, kal); t.kaynak = null;
+  }
+  t.sebeke = t.tuketim - t.mahsup;
+  return t;
 }
 function sonOsosSaati(osos) {
   let enSon = null;
@@ -169,8 +228,10 @@ function grafik(gunler, seriler) {
   return s + '</g></svg>';
 }
 
-function ciz() {
+function cizGenel() {
   const { son, osos, mad } = D;
+  document.getElementById('baslik').textContent = 'Genel bakış';
+  document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
   const bugun = bugunTR();
   const simdiTR = trSimdi();
   const sonSaat = sonOsosSaati(osos);
@@ -195,11 +256,10 @@ function ciz() {
   // ---- Ay seçimi ve enerji dengesi
   const ayList = [...new Set(Object.keys((osos.tekyildiz_1 || {}).veri || {}).map(x => x.slice(0, 7)))].sort().reverse();
   if (!secAy || !ayList.includes(secAy)) secAy = sonOsosGun.slice(0, 7);
-  const ayGunleri = Object.keys((osos.tekyildiz_1 || {}).veri || {}).filter(x => x.startsWith(secAy)).sort();
-  const ay = { uretim: 0, tuketim: 0, mahsup: 0, bedelli: 0, sebeke: 0 };
-  for (const gg of ayGunleri) { const m = mahsupGun(osos, gg); for (const k in ay) ay[k] += m[k]; }
+  const ay = aySonuc(osos, secAy);
+  const ayGunleri = ay.gunler;
   let yilBedelli = 0;
-  for (const gg of Object.keys((osos.tekyildiz_1 || {}).veri || {}).filter(x => x.startsWith(sonOsosGun.slice(0, 4)))) yilBedelli += mahsupGun(osos, gg).bedelli;
+  for (const m of ayList.filter(m => m.startsWith(sonOsosGun.slice(0, 4)))) yilBedelli += aySonuc(osos, m).bedelli;
   const enBuyuk = Math.max(ay.uretim, ay.tuketim, 1);
   const limitPct = yilBedelli / LIMIT_2026 * 100;
   const [yy, aa] = secAy.split('-').map(Number);
@@ -209,7 +269,7 @@ function ciz() {
 
   const denge = '<section class="panel" aria-labelledby="h-denge" style="gap:18px">'
     + '<div class="bas"><h2 id="h-denge">' + AYLAR[aa - 1] + ' enerji dengesi</h2><label class="k" style="display:flex;align-items:center;gap:8px">Ay <select id="aySec" onchange="secAy=this.value;ciz()">' + ayList.map(m => '<option value="' + m + '"' + (m === secAy ? ' selected' : '') + '>' + AYLAR[Number(m.slice(5)) - 1] + ' ' + m.slice(0, 4) + '</option>').join('') + '</select></label></div>'
-    + '<div class="k" style="margin-top:-10px">Saatlik mahsup, ' + aralik + '</div>'
+    + '<div class="k" style="margin-top:-10px">' + (ay.aylik ? 'Aylık mahsup' : 'Saatlik mahsup') + ', ' + aralik + '</div>'
     + '<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Üretim (T1 + T2)</span><span class="num" style="font-size:22px;font-weight:700">' + say(ay.uretim) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></span></div>'
     + '<div class="cubuk" style="width:' + (ay.uretim / enBuyuk * 100).toFixed(1) + '%">' + (ay.mahsup ? '<div style="flex:' + ay.mahsup + ' 1 0;background:#1baf7a"></div>' : '') + (ay.bedelli ? '<div style="flex:' + ay.bedelli + ' 1 0;background:#eda100"></div>' : '') + '</div></div>'
     + '<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Tüketim (T1 + T2 + A3)</span><span class="num" style="font-size:22px;font-weight:700">' + say(ay.tuketim) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></span></div>'
@@ -327,6 +387,82 @@ function ciz() {
     + '</div>';
   document.getElementById('kaynakNot').textContent = 'Veri: n8n · OSOS · saha PC';
 }
+
+
+let secGun = null, sekme = 'sayac';
+function hucre(v, var_) { if (!var_) return '<td class="sifir"></td>'; const r = Math.round(v); return '<td' + (r === 0 ? ' class="sifir"' : '') + '>' + say(v) + '</td>'; }
+function cizSayac() {
+  const { osos } = D;
+  const tumGunler = [...new Set(SAYAC.flatMap(sc => Object.keys((osos[sc.key] || {}).veri || {})))].sort();
+  const sonG = tumGunler[tumGunler.length - 1];
+  if (!secGun || !tumGunler.includes(secGun)) secGun = sonG;
+  const ix = tumGunler.indexOf(secGun);
+  const [y, a, d] = secGun.split('-').map(Number);
+  const gunAdi = GUNLER[new Date(Date.UTC(y, a - 1, d)).getUTCDay()];
+  document.getElementById('baslik').textContent = 'Sayaçlar ve mahsup';
+  document.getElementById('altBaslik').textContent = d + ' ' + AYLAR[a - 1] + ' ' + y + ', ' + gunAdi + '. Saatlik değerler, kWh.';
+  document.getElementById('kontrol').innerHTML = '<button class="btn" type="button"' + (ix <= 0 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix - 1] || '') + '\';cizSayac()">Önceki gün</button>'
+    + '<label class="k" style="display:flex;align-items:center;gap:8px">Gün <input type="date" value="' + secGun + '" min="' + tumGunler[0] + '" max="' + sonG + '" onchange="if(this.value){secGun=this.value;cizSayac()}"></label>'
+    + '<button class="btn" type="button"' + (ix >= tumGunler.length - 1 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix + 1] || '') + '\';cizSayac()">Sonraki gün</button>'
+    + '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
+  const sekmeHtml = '<div class="sekmeler" role="tablist">' + [['sayac', 'Sayaçlar'], ['mahsup', 'Mahsup']].map(([k, ad]) => '<button role="tab" type="button" aria-selected="' + (sekme === k) + '" onclick="sekme=\'' + k + '\';cizSayac()">' + ad + '</button>').join('') + '</div>';
+  let govde = '';
+  if (sekme === 'sayac') {
+    const veri = sc => ((osos[sc.key] || {}).veri || {})[secGun] || {};
+    let th1 = '<th class="sol" rowspan="2">Saat</th>', th2 = '';
+    for (const sc of SAYAC) {
+      th1 += '<th class="ayr" style="text-align:center" colspan="' + (sc.uretir ? 2 : 1) + '"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + sc.renk + ';margin-right:6px"></span><b style="color:#10233F">' + sc.kod + '</b> ' + esc(sc.ad) + '</th>';
+      th2 += (sc.uretir ? '<th class="ayr">Üretim</th><th>Tüketim</th>' : '<th class="ayr">Tüketim</th>');
+    }
+    const top = SAYAC.map(() => ({ u: 0, t: 0 }));
+    let satir = '';
+    for (let h = 0; h < 24; h++) {
+      const s = String(h).padStart(2, '0');
+      satir += '<tr><td class="saat">' + s + ':00</td>';
+      SAYAC.forEach((sc, i) => {
+        const x = veri(sc)[s];
+        if (x) { top[i].u += +x.veris || 0; top[i].t += +x.cekis || 0; }
+        if (sc.uretir) satir += hucre(x ? x.veris : 0, !!x).replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"') + hucre(x ? x.cekis : 0, !!x);
+        else satir += hucre(x ? x.cekis : 0, !!x).replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"');
+      });
+      satir += '</tr>';
+    }
+    satir += '<tr class="top"><td class="sol">Toplam</td>' + SAYAC.map((sc, i) => sc.uretir ? '<td class="ayr">' + say(top[i].u) + '</td><td>' + say(top[i].t) + '</td>' : '<td class="ayr">' + say(top[i].t) + '</td>').join('') + '</tr>';
+    govde = '<h2>OSOS sayaç verisi</h2><div class="tablo-kutu"><table class="tb"><thead><tr>' + th1 + '</tr><tr>' + th2 + '</tr></thead><tbody>' + satir + '</tbody></table></div>'
+      + '<div class="k">Boş hücre o saatin sayaç verisi henüz gelmedi demek. Saat 13:00 satırı 13:00–14:00 arasını gösterir.</div>';
+  } else {
+    const m = mahsupGun(osos, secGun);
+    const ab = { T1: 0, T2: 0, A3: 0 }, tAb = { T1: 0, T2: 0, A3: 0 }, uAb = { T1: 0, T2: 0 }, kay = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };
+    for (const sa of m.saatler) { for (const k of ['T1', 'T2', 'A3']) { ab[k] += sa.mahsup[k]; tAb[k] += sa.t[k]; } uAb.T1 += sa.u.T1; uAb.T2 += sa.u.T2; for (const g of ['T1', 'T2']) for (const k in kay[g]) kay[g][k] += sa.kaynak[g][k]; }
+    const kart = (ad, v, r) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k" style="display:flex;align-items:center;gap:6px">' + (r ? '<span style="width:10px;height:10px;border-radius:2px;background:' + r + '"></span>' : '') + ad + '</div><div class="num" style="font-size:24px;font-weight:700">' + say(v) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></div></div>';
+    const aylikNot = secGun < '2026-05' ? '<div class="panel" style="background:#FFF4DC;border-color:#F0D9A8;padding:12px 16px"><div style="font-size:14px;color:#5E3800">Mayıs 2026 öncesi aylar ofis panelinde <b>aylık</b> mahsupla hesaplanıyor. Bu günün saatlik dökümü yalnız bilgi içindir; ay toplamı Genel bakıştaki enerji dengesindedir.</div></div>' : '';
+    const tukSatir = ['T2', 'A3', 'T1'].map(k => { const sc = SAYAC.find(x => x.kod === k); const pct = tAb[k] ? ab[k] / tAb[k] * 100 : 0; return '<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;gap:8px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + sc.renk + ';margin-right:6px"></span><b>' + k + '</b> <span class="k">' + esc(sc.ad) + '</span></span><span class="num"><b>' + say(ab[k]) + '</b> / ' + say(tAb[k]) + ' kWh</span></div><div style="height:8px;background:#F3D9CB;border-radius:4px"><div style="width:' + pct.toFixed(1) + '%;height:100%;background:#1baf7a;border-radius:4px"></div></div></div>'; }).join('');
+    const kaySatir = ['T1', 'T2'].map(g => { const sc = SAYAC.find(x => x.kod === g); const top = uAb[g] || 1; const parca = [['T2', '#eb6834'], ['A3', '#1baf7a'], ['T1', '#2a78d6'], ['bedelli', '#eda100']].filter(([k]) => kay[g][k] > 0.5); return '<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between"><span><b>' + g + '</b> <span class="k">' + esc(sc.ad) + ' üretimi</span></span><span class="num"><b>' + say(uAb[g]) + '</b> kWh</span></div><div class="cubuk" style="height:14px">' + (parca.length ? parca.map(([k, r]) => '<div title="' + (k === 'bedelli' ? 'Bedelli' : k + ' mahsubu') + ': ' + say(kay[g][k]) + ' kWh" style="flex:' + kay[g][k] + ' 1 0;background:' + r + '"></div>').join('') : '<div style="flex:1;background:#E3E8EE"></div>') + '</div><div class="k">' + (parca.length ? parca.map(([k]) => (k === 'bedelli' ? 'bedelli ' : k + ' ') + say(kay[g][k])).join(' · ') : 'üretim yok') + '</div></div>'; }).join('');
+    let satir = '';
+    const tp = { u1: 0, u2: 0, U: 0, t1: 0, t2: 0, t3: 0, T: 0, m2: 0, m3: 0, m1: 0, M: 0, B: 0, S: 0 };
+    for (const sa of m.saatler) {
+      const M = sa.mTop, S = sa.T - M;
+      const d = [sa.u.T1, sa.u.T2, sa.U, sa.t.T1, sa.t.T2, sa.t.A3, sa.T, sa.mahsup.T2, sa.mahsup.A3, sa.mahsup.T1, M, sa.bedelli, S];
+      Object.keys(tp).forEach((k, i) => tp[k] += d[i]);
+      const ayr = [0, 3, 7, 11];
+      satir += '<tr><td class="saat">' + sa.saat + ':00</td>' + d.map((v, i) => { const h = hucre(v, sa.var); return ayr.includes(i) ? h.replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"') : h; }).join('') + '</tr>';
+    }
+    satir += '<tr class="top"><td class="sol">Toplam</td>' + Object.values(tp).map((v, i) => '<td' + ([0, 3, 7, 11].includes(i) ? ' class="ayr"' : '') + '>' + say(v) + '</td>').join('') + '</tr>';
+    govde = aylikNot
+      + '<div class="kartlar5">' + kart('Üretim (T1 + T2)', m.uretim) + kart('Tüketim (T1 + T2 + A3)', m.tuketim) + kart('Mahsuplaşan', m.mahsup, '#1baf7a') + kart('Bedelli satış', m.bedelli, '#eda100') + kart('Şebekeden alınan', m.sebeke, '#eb6834') + '</div>'
+      + '<div class="iki"><section class="panel"><h2>Tüketiciler, mahsup / tüketim</h2>' + tukSatir + '<div class="k">Her üreticiden önce T2, sonra A3, en son T1 karşılanır.</div></section>'
+      + '<section class="panel"><h2>Üretim nereye gitti</h2>' + kaySatir + '<div class="k">Büyük üretici önce işlenir; kalan üretim bedelli satılır.</div></section></div>'
+      + '<h2>Saatlik mahsup</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol" rowspan="2">Saat</th><th class="ayr" colspan="3" style="text-align:center">Üretim</th><th class="ayr" colspan="4" style="text-align:center">Tüketim</th><th class="ayr" colspan="4" style="text-align:center">Mahsuplaşan</th><th class="ayr" colspan="2" style="text-align:center">Kalan</th></tr>'
+      + '<tr><th class="ayr">T1</th><th>T2</th><th>Toplam</th><th class="ayr">T1</th><th>T2</th><th>A3</th><th>Toplam</th><th class="ayr">T2</th><th>A3</th><th>T1</th><th>Toplam</th><th class="ayr">Bedelli</th><th>Şebekeden</th></tr></thead><tbody>' + satir + '</tbody></table></div>';
+  }
+  document.getElementById('icerik').innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeHtml + govde + '</div>';
+}
+function ciz() {
+  const sayfa = (location.hash || '#genel').startsWith('#sayac') ? 'sayac' : 'genel';
+  document.querySelectorAll('.nav a[data-sayfa]').forEach(a => a.classList.toggle('aktif', a.dataset.sayfa === sayfa));
+  if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
+}
+window.addEventListener('hashchange', () => { if (D) { ciz(); if (!location.hash.startsWith('#sayac')) {} else window.scrollTo(0, 0); } });
 
 async function yukle() {
   try {

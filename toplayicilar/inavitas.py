@@ -77,8 +77,10 @@ class Inavitas:
             "Password": self.password,
             "RememberMe": "false",
         }
-        r = self.s.post(f"{BASE}/Login", data=data, timeout=30, allow_redirects=True)
-        if "/Login" in r.url and 'name="Password"' in r.text:
+        # Form action "/" (kok) — /Login'e post edilirse giris yapilmaz
+        r = self.s.post(f"{BASE}/", data=data, timeout=30, allow_redirects=True,
+                        headers={"Referer": f"{BASE}/Login", "Origin": BASE})
+        if 'name="Password"' in r.text:
             raise RuntimeError("Inavitas giriş başarısız (kullanıcı/şifre)")
         self._logged = True
 

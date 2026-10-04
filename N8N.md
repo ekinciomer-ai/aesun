@@ -77,3 +77,15 @@ Yanıt `onbellek/son.json`'a, n8n'e ulaşılamazsa GitHub yedeği `onbellek/son_
 ## Web paneli
 - Sayfa: `docs/index.html` (GitHub Pages ile yayınlanır; Pages'i repo sahibi açar).
 - Ana döngü her turda `epias-ptf/n8n/aesun_son.json` dosyasına `{guncellendi, ozet, son, uyarilar, pi}` yazar; sayfa bu dosyayı okur, 2 dakikada bir yeniler. Açılışlar n8n kotasından düşmez.
+
+## OSOS (Pi)
+MEDAŞ n8n bulut IP'lerini kabul etmediği için OSOS Pi'den çekilir: `toplayicilar/osos_toplayici.py`, her saat xx:10 (`pi/aesun-osos.timer`).
+6 abone (T1, T2, A3, YD, Anka, AE) dün+bugün 15 dk profilini saatliğe toplar; tamamlanmış saatleri `epias-ptf/2026_osos_endeks.json`'a birleştirir, n8n "OSOS veri alıcı"ya da gönderir.
+Ayar: `~/.aesun/osos.env` (chmod 600): `OSOS_KULLANICI`, `OSOS_SIFRE`, `GITHUB_TOKEN` (epias-ptf, Contents: Read and write), `AESUN_ANAHTAR`.
+```bash
+cd ~/aesun && git pull
+mkdir -p ~/.aesun && nano ~/.aesun/osos.env && chmod 600 ~/.aesun/osos.env
+python3 toplayicilar/osos_toplayici.py --gun 3   # ilk elle deneme, son 3 gün
+sudo cp pi/aesun-osos.service pi/aesun-osos.timer /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now aesun-osos.timer
+```

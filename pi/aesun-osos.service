@@ -1,0 +1,11 @@
+[Unit]
+Description=AEMonitoring OSOS toplayici (MEDAS -> GitHub 2026_osos_endeks.json)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=pi
+ExecStart=/usr/bin/python3 /home/pi/aesun/toplayicilar/osos_toplayici.py
+StandardOutput=append:/home/pi/aesun/osos.log
+StandardError=append:/home/pi/aesun/osos.log

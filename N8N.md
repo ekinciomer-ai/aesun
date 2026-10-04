@@ -1,4 +1,4 @@
-# aesun — n8n mimarisi (v2)
+# AEMonitoring — n8n mimarisi (v2)
 
 n8n Cloud `xbay.app.n8n.cloud`, proje "ömer" (kişisel), klasör **aesun**. Saat dilimi Europe/Istanbul. Hiçbir iş akışı yayında değil.
 
@@ -6,16 +6,16 @@ n8n Cloud `xbay.app.n8n.cloud`, proje "ömer" (kişisel), klasör **aesun**. Saa
 
 | İş akışı | ID | Tetik | Zaman aşımı |
 |---|---|---|---|
-| aesun · Ana döngü | `0uPcmIjFGiZjGsLn` | Gündüz `*/15 5-19 * * *`, gece `0,30 0-4,20-23 * * *` | 180 sn |
-| aesun · alt · Sungrow | `NxHobbuF95vE0K9c` | Ana döngüden | 35 sn |
-| aesun · alt · FusionSolar | `DTjR9O7JpCLL94wP` | Ana döngüden | 30 sn |
-| aesun · alt · Inavitas | `XuNH8m81DWnrje5a` | Ana döngüden (:00 ve :30) | 35 sn |
-| aesun · alt · OSOS | `1pZY4rggv3OKTwKk` | Ana döngüden (:00) | 15 sn |
-| aesun · Uyarı motoru (alt) | `dXJtI1t230MPBIfz` | Ana döngüden | 15 sn |
-| aesun · Pi nabız + canlı veri | `4CaY5XeOFjK4B3Kr` | POST `/webhook/aesun-nabiz` (header auth) | 30 sn |
-| aesun · Hata yakalayıcı | `QQkA9MHLmFtH6FYx` | Error Trigger | 60 sn |
-| aesun · Arşiv + temizlik | `xOY3YabJkrISGkxv` | `5 0-5 * * *` (gece saatlik, kaçan günleri doldurur) | 180 sn |
-| aesun · EPİAŞ PTF/SMF | `HwcYHM8phNl8SN4Z` | `5,35 13-17 * * *` ve `15 6 * * *` | 120 sn |
+| AEMonitoring · Ana döngü | `0uPcmIjFGiZjGsLn` | Gündüz `*/15 5-19 * * *`, gece `0,30 0-4,20-23 * * *` | 180 sn |
+| AEMonitoring · alt · Sungrow | `NxHobbuF95vE0K9c` | Ana döngüden | 35 sn |
+| AEMonitoring · alt · FusionSolar | `DTjR9O7JpCLL94wP` | Ana döngüden | 30 sn |
+| AEMonitoring · alt · Inavitas | `XuNH8m81DWnrje5a` | Ana döngüden (:00 ve :30) | 35 sn |
+| AEMonitoring · alt · OSOS | `1pZY4rggv3OKTwKk` | Ana döngüden (:00) | 15 sn |
+| AEMonitoring · Uyarı motoru (alt) | `dXJtI1t230MPBIfz` | Ana döngüden | 15 sn |
+| AEMonitoring · Pi nabız + canlı veri | `4CaY5XeOFjK4B3Kr` | POST `/webhook/aesun-nabiz` (header auth) | 30 sn |
+| AEMonitoring · Hata yakalayıcı | `QQkA9MHLmFtH6FYx` | Error Trigger | 60 sn |
+| AEMonitoring · Arşiv + temizlik | `xOY3YabJkrISGkxv` | `5 0-5 * * *` (gece saatlik, kaçan günleri doldurur) | 180 sn |
+| AEMonitoring · EPİAŞ PTF/SMF | `HwcYHM8phNl8SN4Z` | `5,35 13-17 * * *` ve `15 6 * * *` | 120 sn |
 
 Alt iş akışlarını yalnız Ana döngü çağırabilir (callerPolicy).
 Eski 5 iş akışı (`mGUBazyZw83HLiQG`, `wMuIzwWRebIRngsg`, `i783dL0YIX2xE0EL`, `v8WZV9rcADpvp9zT`, `3gaBo1YnRgSQ2Djp`) değiştirilmedi.

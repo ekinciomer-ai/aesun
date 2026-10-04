@@ -24,6 +24,10 @@ ABONELER = [
      "mahsup": False, "kurulu_kwp": 3300.0,
      "inverter": {"kaynak": "sungrow", "ps_id": "5038906", "ad": "HG YATIRIM AŞ (Halil Gökçe)"},
      "renk": 5},
+    {"key": "aksaray_enerji", "kod": "AE", "ad": "Aksaray Enerji", "tesisat": "80010874",
+     "carpan": 1575.0, "uretim": True, "tuketim": True, "mahsup": False, "kurulu_kwp": None,
+     "inverter": {"kaynak": "inavitas", "plant_id": 189, "ad": "Aksaray_GES (AKS_Sapmaz)"},
+     "renk": 6},
 ]
 
 DUZENLENEBILIR = ("ad", "kod", "carpan", "uretim", "tuketim", "kurulu_kwp")

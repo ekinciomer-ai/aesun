@@ -4,8 +4,8 @@ Aksaray Enerji GES ve madencilik izleme paneli (Otocoin v3).
 
 ## Kapsam
 
-1. OSOS sayaç verisi: 5 abone (T1, T2, A3, YD, Anka) ve EPDK 14531 mahsuplaşması
-2. İnverter izleme: Huawei FusionSolar ve Sungrow iSolarCloud
+1. OSOS sayaç verisi: 6 abone (T1, T2, A3, YD, Anka, AE) ve EPDK 14531 mahsuplaşması
+2. İnverter izleme: Huawei FusionSolar, Sungrow iSolarCloud ve Inavitas
 3. Analiz ve rapor
 4. Uyarılar (panel ve WhatsApp)
 5. Madencilik cihazlarının izlenmesi ve yönetimi
@@ -20,6 +20,7 @@ Aksaray Enerji GES ve madencilik izleme paneli (Otocoin v3).
 | A3 | Aksaray 3 | 11200108 | 3150 | Dahil | — |
 | YD | Yılmaz Darılmaz | 11201655 | 1260 | Sadece izleme | Sungrow: Darilmaz Ges (5064453) |
 | Anka | Anka Mineral | 11111411 | 6300 | Sadece izleme | Sungrow: HG YATIRIM AŞ / Halil Gökçe (5038906) |
+| AE | Aksaray Enerji | 80010874 | 1575 | Sadece izleme | Inavitas: Aksaray_GES (189) |
 
 ## Veri kaynağı
 
@@ -38,6 +39,16 @@ pip install -r requirements.txt
 python toplayicilar/sungrow_collector.py --list   # erişilen santraller
 python toplayicilar/sungrow_collector.py --once   # tek tur topla
 python toplayicilar/sungrow_collector.py          # sürekli
+```
+
+## Inavitas bağlayıcı
+
+`toplayicilar/inavitas.py`, insos.inavitas.io'dan AKSARAY firmasının santral özetini, saatlik üretimini ve
+inverter tablosunu çeker. `.env` (veya `env.txt`) içinde `INAVITAS_USER` ve `INAVITAS_PASS` gerekir.
+
+```
+python toplayicilar/inavitas.py              # bugünün özeti (JSON)
+python toplayicilar/inavitas.py 2026-10-03   # belirli gün
 ```
 
 ## Durum

@@ -40,6 +40,23 @@ import requests
 
 log = logging.getLogger("aesun.sungrow")
 
+
+def _env_yukle():
+    """Repo kokundeki .env dosyasini (varsa) ortam degiskenlerine yukler. Mevcut degiskenleri ezmez."""
+    for yol in (Path.cwd() / ".env", Path(__file__).resolve().parent.parent / ".env"):
+        if not yol.is_file():
+            continue
+        for satir in yol.read_text(encoding="utf-8").splitlines():
+            satir = satir.strip()
+            if not satir or satir.startswith("#") or "=" not in satir:
+                continue
+            k, v = satir.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        return
+
+
+_env_yukle()
+
 HOST = os.getenv("SUNGROW_HOST", "https://gateway.isolarcloud.eu").rstrip("/")
 APPKEY = os.getenv("SUNGROW_APPKEY", "")
 SECRET = os.getenv("SUNGROW_SECRET", "")

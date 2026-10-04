@@ -81,7 +81,12 @@ class Inavitas:
         r = self.s.post(f"{BASE}/", data=data, timeout=30, allow_redirects=True,
                         headers={"Referer": f"{BASE}/Login", "Origin": BASE})
         if 'name="Password"' in r.text:
-            raise RuntimeError("Inavitas giriş başarısız (kullanıcı/şifre)")
+            sp = BeautifulSoup(r.text, "html.parser")
+            mesaj = " | ".join(t.get_text(" ", strip=True) for t in sp.select(
+                ".validation-summary-errors, .text-danger, .field-validation-error, .alert") if t.get_text(strip=True))
+            raise RuntimeError(f"Inavitas giriş başarısız: HTTP {r.status_code}, adres {r.url}, "
+                               f"site mesajı: {mesaj or 'yok'}, token bulundu: {bool(tok)}, "
+                               f"kullanıcı adı {len(self.user)} karakter")
         self._logged = True
 
     def _get(self, path, **params):

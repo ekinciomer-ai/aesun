@@ -27,6 +27,19 @@ Veriler şimdilik mevcut `ekinciomer-ai/epias-ptf` reposundaki JSON dosyalarınd
 (`2026_osos_endeks.json`, `antminer_panel.json`, `fusion_data.json`, `arsiv_f2pool_*.json`, `aylik_ptf.json`).
 Eski panel (`ofis_panel.py`) geçiş tamamlanana kadar çalışmaya devam eder.
 
+## Sungrow toplayıcı
+
+`toplayicilar/sungrow_collector.py`, iSolarCloud OpenAPI'den (EU gateway) santral ve inverter verisini
+her 5 dakikada bir SQLite'a yazar. Ayarlar için `.env.example` dosyasını `.env` olarak kopyalayıp doldur
+(`.env` repoya gönderilmez).
+
+```
+pip install -r requirements.txt
+python toplayicilar/sungrow_collector.py --list   # erişilen santraller
+python toplayicilar/sungrow_collector.py --once   # tek tur topla
+python toplayicilar/sungrow_collector.py          # sürekli
+```
+
 ## Durum
 
 - `aesun/mahsup.py`: Eski paneldeki mahsup hesabının Python karşılığı. Eski panelle aynı sonucu veriyor.

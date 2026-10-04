@@ -16,7 +16,6 @@ n8n Cloud `xbay.app.n8n.cloud`, proje "ömer" (kişisel), klasör **aesun**. Saa
 | AEMonitoring · Hata yakalayıcı | `QQkA9MHLmFtH6FYx` | Error Trigger | 60 sn |
 | AEMonitoring · Arşiv + temizlik | `xOY3YabJkrISGkxv` | `5 0-5 * * *` (gece saatlik, kaçan günleri doldurur) | 180 sn |
 | AEMonitoring · EPİAŞ PTF/SMF | `HwcYHM8phNl8SN4Z` | `5,35 13-17 * * *` ve `15 6 * * *` | 120 sn |
-| AEMonitoring · Web panel | `AnULunEOoFcnoyH5` | GET `/webhook/aemonitoring` (Basic Auth: AEMonitoring panel girişi), yalnız okur, sayfa 60 sn'de yenilenir | — |
 
 Alt iş akışlarını yalnız Ana döngü çağırabilir (callerPolicy).
 Eski 5 iş akışı (`mGUBazyZw83HLiQG`, `wMuIzwWRebIRngsg`, `i783dL0YIX2xE0EL`, `v8WZV9rcADpvp9zT`, `3gaBo1YnRgSQ2Djp`) değiştirilmedi.
@@ -56,7 +55,6 @@ Eski 5 iş akışı (`mGUBazyZw83HLiQG`, `wMuIzwWRebIRngsg`, `i783dL0YIX2xE0EL`,
 | GitHub epias-ptf | GitHub API | fine-grained token, yalnız epias-ptf, Contents: Read and write |
 | EPİAŞ Şeffaflık | Templated Custom Auth | `{"body":{"username":"{{kullanici}}","password":"{{sifre}}"}}` |
 | Twilio | Twilio API | SID + token (düğümler kapalı) |
-| AEMonitoring panel girişi | Basic Auth | Web paneli kullanıcı adı ve şifresi |
 | aesun Pi anahtarı | Header Auth | ad `X-Aesun-Anahtar`, değer: rastgele uzun anahtar (Pi `env.txt` → `AESUN_PI_ANAHTAR`) |
 
 ## Pi
@@ -75,3 +73,7 @@ Yanıt `onbellek/son.json`'a, n8n'e ulaşılamazsa GitHub yedeği `onbellek/son_
 - `aylik_ptf.json` yalnız yeni/değişen tam gün varsa güncellenir (eski panel biçimi korunur).
 - Uyarılar: 15:30'dan sonra yarının PTF'si yoksa; EPİAŞ verisi 26 saattir alınamıyorsa.
 - GitHub Actions'taki `main.py` (madencilik kârlılık sinyali, WhatsApp) şimdilik çalışmaya devam ediyor; aynı dosyaya aynı değerleri yazar.
+
+## Web paneli
+- Sayfa: `docs/index.html` (GitHub Pages ile yayınlanır; Pages'i repo sahibi açar).
+- Ana döngü her turda `epias-ptf/n8n/aesun_son.json` dosyasına `{guncellendi, ozet, son, uyarilar, pi}` yazar; sayfa bu dosyayı okur, 2 dakikada bir yeniler. Açılışlar n8n kotasından düşmez.

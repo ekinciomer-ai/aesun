@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AEMonitoring</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cpath%20d%3D%22M60%208%20A52%2052%200%200%200%2060%20112%20Z%22%20fill%3D%22%23D7262E%22/%3E%3Cpath%20d%3D%22M60%208%20A52%2052%200%200%201%2060%20112%20Z%22%20fill%3D%22%232B2D31%22/%3E%3Cpath%20d%3D%22M20%2063%20H44%20L66%2030%20L76%2063%20H100%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#F4F4F2;color:#26282C;font-family:'Archivo',system-ui,sans-serif}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace}.ince{font-size:13px;color:#5E626A}.kalin{font-weight:600}.sag{text-align:right}
+header{background:#1C1D20;color:#fff}.hi{max-width:1360px;margin:0 auto;padding:14px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px}
+.marka{display:flex;align-items:center;gap:10px;font-size:22px;letter-spacing:-.5px}.marka b{font-weight:800}.marka span{font-weight:600;color:#F2555B}
+.hs{margin-left:auto;font-size:13px;color:#C9CCD2;display:flex;align-items:center;gap:14px}.yenile{color:#fff;background:#2E3035;padding:10px 16px;border-radius:8px;font-family:'Archivo',sans-serif;font-weight:600}.yenile:hover{background:#3A3D43}
+main{max-width:1360px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:20px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}.kutu{background:#fff;border-radius:12px;padding:18px}
+.kpi .v{font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:500;line-height:1.1;margin:6px 0}.kpi small,.buyuk small{font-size:14px;color:#5E626A}
+.saglik{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center}.sg{display:flex;align-items:center;gap:7px;font-size:14px}
+.nk{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0}.nk.bayat{border:2px dashed #8A8F98}
+.duzen{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}.sol{flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:20px}.sagk{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.kartlar{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.kart{background:#fff;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;border-top:4px solid #1E8A5F}.kart.uyari{border-top-color:#E0A21B}.kart.bayat{border-top-color:#C4C7CC;opacity:.85}
+.kart h3{margin:0;font-size:19px}.kb{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.rz{padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}.rz.ok{background:#E3F2EA;color:#155F42}.rz.uyari{background:#FBF0D6;color:#7A5608}.rz.bayat{background:#EDEEF0;color:#4A4E55}
+.deger{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}.buyuk{font-size:28px;font-weight:500}
+.ivs{display:flex;gap:3px}.iv{flex:1;height:8px;border-radius:2px;background:#1E8A5F}.iv.sifir{background:#E0A21B}.iv.yok{background:#D7262E}.iv.bayat{background:transparent;border:1px dashed #8A8F98}
+h2{margin:0 0 12px;font-size:17px}table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;font-weight:600;color:#5E626A;font-size:12px;padding:6px 8px;border-bottom:1px solid #E2E2DE}td{padding:8px;border-bottom:1px solid #F0F0EC}
+.tablo{overflow-x:auto}.uy{display:flex;gap:10px;align-items:flex-start;padding:6px 0}.uy .nk{margin-top:5px}
+.cubuklar{display:flex;align-items:flex-end;gap:2px;height:112px}.cubuklar span{flex:1;border-radius:2px 2px 0 0}.eksen{display:flex;justify-content:space-between;font-size:12px;color:#5E626A;margin:4px 0 8px}
+.koyu{background:#1C1D20;color:#fff}.koyu .ince{color:#A9ADB5}
+footer{max-width:1360px;margin:0 auto;padding:0 20px 24px;font-size:12px;color:#8A8F98}
+button.yenile{border:0;cursor:pointer;font-size:14px}.hata{max-width:1360px;margin:20px auto;padding:0 20px;color:#9E1A21}
+</style>
+</head>
+<body>
+<div id="sayfa"><p class="hata" style="color:#5E626A">Yükleniyor…</p></div>
+<footer>AEMonitoring · Aksaray Enerji · veri n8n Ana döngüsünün her turunda güncellenir, sayfa 2 dakikada bir yeniden okur</footer>
+<script>
+const VERI = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/aesun_son.json';
+function ciz(veri) {
+const simdi = new Date();
+const coz = s => { if (s && typeof s === 'object') return s; try { return JSON.parse(s || 'null'); } catch (e) { return null; } };
+const esc = v => String(v === null || v === undefined ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const TR = 3 * 3600000;
+
+const yerel = d => new Date(new Date(d).getTime() + TR);
+const saatDk = d => { if (!d) return '—'; const y = yerel(d); return String(y.getUTCHours()).padStart(2, '0') + ':' + String(y.getUTCMinutes()).padStart(2, '0'); };
+const tarihSaat = d => { if (!d) return '—'; const y = yerel(d); return String(y.getUTCDate()).padStart(2, '0') + '.' + String(y.getUTCMonth() + 1).padStart(2, '0') + ' ' + saatDk(d); };
+const once = d => { if (!d) return 'hiç'; const dk = Math.round((simdi - new Date(d)) / 60000); if (dk < 1) return 'şimdi'; if (dk < 60) return dk + ' dk önce'; const s = Math.floor(dk / 60); if (s < 48) return s + ' sa önce'; return Math.floor(s / 24) + ' gün önce'; };
+const sayi = (v, h) => { if (v === null || v === undefined || v === '' || isNaN(Number(v))) return '—'; return Number(v).toLocaleString('tr-TR', { minimumFractionDigits: h || 0, maximumFractionDigits: h || 0 }); };
+
+const son = (veri.son || []).filter(r => r && r.anahtar && r.durum !== 'kaldirildi')
+  .map(r => ({ ...r, ek: coz(r.ek) || {}, inverterler: coz(r.inverterler) || [] }));
+const uyarilar = (veri.uyarilar || []).filter(r => r && r.anahtar && r.seviye !== 'bilgi')
+  .sort((p, q) => (p.seviye === 'kritik' ? 0 : 1) - (q.seviye === 'kritik' ? 0 : 1));
+const pi = veri.pi && veri.pi.son_ts ? { cihaz: 'saha-pi', ...veri.pi } : null;
+
+const RENK = { ok: '#1E8A5F', uyari: '#E0A21B', kritik: '#D7262E', bayat: '#8A8F98', hata: '#D7262E', bilgi: '#2F6FB3' };
+const nokta = d => d === 'bayat' ? '<span class="nk bayat"></span>' : '<span class="nk" style="background:' + (RENK[d] || '#8A8F98') + '"></span>';
+
+const INV = ['sungrow', 'fusion', 'inavitas'];
+const santral = son.filter(r => INV.includes(r.kaynak) && r.plant_id !== '*').sort((p, q) => String(p.ad).localeCompare(String(q.ad), 'tr'));
+const toplamGuc = santral.reduce((t, r) => t + (Number(r.guc_kw) || 0), 0);
+const toplamGun = santral.reduce((t, r) => t + (Number(r.gunluk_kwh) || 0), 0);
+const bayatSay = santral.filter(r => r.durum !== 'ok').length;
+
+const KAYNAK = [['sungrow', 'Sungrow'], ['fusion', 'FusionSolar'], ['inavitas', 'Inavitas'], ['osos', 'OSOS'], ['epias', 'EPİAŞ']];
+const kaynakSaglik = KAYNAK.map(([k, ad]) => {
+  const r = son.filter(x => x.kaynak === k);
+  if (!r.length) return { ad, d: 'bayat', not: 'henüz veri yok' };
+  const hatali = r.find(x => x.durum !== 'ok');
+  const sonOk = r.map(x => x.son_ok_ts).filter(Boolean).sort().pop();
+  if (hatali) return { ad, d: Number(hatali.ardisik_hata) >= 2 ? 'uyari' : 'bayat', not: (hatali.ardisik_hata || 0) + ' tur hata · son başarılı ' + once(sonOk), baslik: hatali.hata_mesaji };
+  return { ad, d: 'ok', not: once(sonOk) };
+});
+const piD = !pi ? { d: 'bayat', not: 'nabız yok' } : ((simdi - new Date(pi.son_ts)) / 60000 > 25 ? { d: 'kritik', not: 'sessiz · ' + once(pi.son_ts) } : { d: 'ok', not: once(pi.son_ts) });
+kaynakSaglik.push({ ad: 'Saha Pi', d: piD.d, not: piD.not });
+
+const kartlar = santral.map(r => {
+  const e = r.ek || {};
+  const d = r.durum !== 'ok' ? 'bayat' : (r.alarm > 0 || e.inv_uretmeyen > 0 ? 'uyari' : 'ok');
+  const rozet = { ok: 'Normal', uyari: e.inv_uretmeyen > 0 ? e.inv_uretmeyen + ' inverter 0 kW' : r.alarm + ' alarm', bayat: 'Bayat' }[d];
+  const inv = (r.inverterler || []).map(x => {
+    const c = r.durum !== 'ok' ? 'bayat' : (x.guc_kw === null ? 'yok' : (x.guc_kw > 0 ? 'ok' : 'sifir'));
+    return '<span class="iv ' + c + '" title="' + esc(x.ad) + ' · ' + esc(x.guc_kw === null ? 'veri yok' : sayi(x.guc_kw, 1) + ' kW') + '"></span>';
+  }).join('');
+  const kaynakAd = { sungrow: 'Sungrow', fusion: 'FusionSolar', inavitas: 'Inavitas' }[r.kaynak];
+  const alt = [e.inv_toplam ? (e.inv_toplam - (e.inv_uretmeyen || 0)) + '/' + e.inv_toplam + ' inverter üretiyor' : '', e.isinim_wm2 ? 'ışınım ' + sayi(e.isinim_wm2) + ' W/m²' : ''].filter(Boolean).join(' · ');
+  return '<article class="kart ' + d + '"><div class="kb"><div><h3>' + esc(r.ad) + '</h3><div class="ince">' + kaynakAd + ' · ' + (r.durum === 'ok' ? saatDk(r.ts) : 'son veri ' + tarihSaat(r.son_ok_ts)) + '</div></div><span class="rz ' + d + '">' + esc(rozet) + '</span></div>'
+    + '<div class="deger"><span class="mono buyuk">' + sayi(r.guc_kw, 1) + '<small> kW</small></span><span class="mono ince">' + sayi(r.gunluk_kwh) + ' kWh bugün</span></div>'
+    + (inv ? '<div class="ivs">' + inv + '</div>' : '') + '<div class="ince">' + esc(r.durum !== 'ok' ? (r.hata_mesaji || 'Kaynak okunamadı, son değer gösteriliyor') : alt) + '</div></article>';
+}).join('') || '<p class="ince">Henüz santral verisi yok. Ana döngünün ilk turu bekleniyor.</p>';
+
+const osos = son.filter(r => r.kaynak === 'osos' && r.plant_id !== '*').sort((p, q) => String(p.ad).localeCompare(String(q.ad), 'tr'));
+const ososSatir = osos.map(r => {
+  const e = r.ek || {};
+  const yas = r.ts ? (simdi - new Date(r.ts)) / 3600000 : null;
+  const d = e.veri_yok || yas === null ? 'bayat' : (yas > 72 ? 'kritik' : (yas > 30 ? 'uyari' : 'ok'));
+  return '<tr><td>' + nokta(d) + ' <b>' + esc(e.kod || r.ad) + '</b></td><td class="mono">' + esc(r.plant_id) + '</td><td class="mono">' + (e.veri_yok ? '—' : tarihSaat(r.ts)) + '</td><td class="mono sag">' + (e.uretir ? sayi(r.gunluk_kwh) : '—') + '</td><td class="mono sag">' + sayi(e.gunluk_cekis_kwh) + '</td></tr>';
+}).join('');
+
+const ep = son.find(r => r.kaynak === 'epias');
+let ptfHtml = '<p class="ince">EPİAŞ verisi henüz alınmadı.</p>';
+if (ep && ep.ek && Array.isArray(ep.ek.bugun_ptf)) {
+  const e = ep.ek;
+  const bugunTR = yerel(simdi).toISOString().slice(0, 10);
+  const dizi = e.bugun === bugunTR ? e.bugun_ptf : (e.yarin === bugunTR ? e.yarin_ptf : e.bugun_ptf);
+  const oz = e.bugun === bugunTR ? e.bugun_ozet : (e.yarin === bugunTR ? e.yarin_ozet : e.bugun_ozet);
+  const mx = Math.max(1, ...dizi.filter(x => x !== null));
+  const saat = yerel(simdi).getUTCHours();
+  ptfHtml = '<div class="cubuklar">' + dizi.map((v, i) => '<span title="' + String(i).padStart(2, '0') + ':00 · ' + sayi(v, 2) + '" style="height:' + (v === null ? 2 : Math.max(2, Math.round(v / mx * 110))) + 'px;background:' + (v === null ? '#E2E2DE' : (i === saat ? '#2B2D31' : '#2F6FB3')) + '"></span>').join('') + '</div>'
+    + '<div class="eksen mono"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>'
+    + '<div class="mono">' + (oz ? 'Ort ' + sayi(oz.ort, 2) + ' · Min ' + sayi(oz.min, 2) + ' · Max ' + sayi(oz.max, 2) : '') + '</div>'
+    + '<div class="ince">Şu an (' + String(saat).padStart(2, '0') + ':00): <b class="mono">' + sayi(dizi[saat], 2) + '</b> TL/MWh · yarın ' + (e.yarin_var ? 'alındı' : 'henüz yok') + '</div>';
+}
+const ptfSimdi = (() => { if (!ep || !ep.ek || !Array.isArray(ep.ek.bugun_ptf)) return null; const s = yerel(simdi).getUTCHours(); return ep.ek.bugun_ptf[s]; })();
+
+const uyHtml = uyarilar.length ? uyarilar.map(u => '<div class="uy">' + nokta(u.seviye) + '<div><div class="kalin">' + esc(u.baslik) + '</div><div class="ince">' + tarihSaat(u.ilk_ts) + ' tarihinden beri</div></div></div>').join('') : '<p class="ince">Etkin uyarı yok.</p>';
+const kritikSay = uyarilar.filter(u => u.seviye === 'kritik').length;
+const sonTur = son.map(r => r.son_ok_ts).filter(Boolean).sort().pop();
+
+
+const LOGO = '<svg width="34" height="34" viewBox="0 0 120 120" aria-hidden="true"><path d="M60 8 A52 52 0 0 0 60 112 Z" fill="#E0353C"/><path d="M60 8 A52 52 0 0 1 60 112 Z" fill="#3A3D43"/><path d="M16 63 H38 L46 50 L56 82 L65 28 L74 63 H104" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+return ''
+  + '<header><div class="hi"><div class="marka">' + LOGO + '<div><b>AE</b><span>Monitoring</span></div></div><div class="hs mono"><span>Son tur ' + tarihSaat(sonTur) + ' · sayfa ' + saatDk(simdi) + '</span><button class="yenile" type="button" onclick="yukle()">Yenile</button></div></div></header><main>'
+  + '<section class="kpi">'
+  + '<div class="kutu"><div class="ince">Anlık güç</div><div class="v">' + sayi(toplamGuc, 1) + '<small> kW</small></div><div class="ince">' + santral.length + ' santral' + (bayatSay ? ' · ' + bayatSay + ' bayat' : '') + '</div></div>'
+  + '<div class="kutu"><div class="ince">Bugünkü üretim</div><div class="v">' + sayi(toplamGun) + '<small> kWh</small></div><div class="ince">İnverter kaynakları toplamı</div></div>'
+  + '<div class="kutu"><div class="ince">Etkin uyarı</div><div class="v">' + uyarilar.length + '</div><div class="ince">' + (kritikSay ? kritikSay + ' kritik · ' : 'Kritik yok · ') + (uyarilar.length - kritikSay) + ' uyarı</div></div>'
+  + '<div class="kutu"><div class="ince">PTF şu an</div><div class="v">' + sayi(ptfSimdi, 1) + '<small> TL/MWh</small></div><div class="ince">EPİAŞ GÖP</div></div>'
+  + '</section>'
+  + '<section class="kutu saglik"><b class="ince" style="letter-spacing:2px;text-transform:uppercase">Kaynaklar</b>' + kaynakSaglik.map(k => '<span class="sg" title="' + esc(k.baslik || '') + '">' + nokta(k.d) + '<b>' + esc(k.ad) + '</b><span class="ince">' + esc(k.not) + '</span></span>').join('') + '</section>'
+  + '<div class="duzen"><div class="sol"><section class="kartlar">' + kartlar + '</section>'
+  + '<section class="kutu"><h2>OSOS aboneleri</h2><div class="tablo"><table><thead><tr><th>Abone</th><th>Tesisat</th><th>Son veri</th><th class="sag">Veriş kWh (gün)</th><th class="sag">Çekiş kWh (gün)</th></tr></thead><tbody>' + (ososSatir || '<tr><td colspan="5" class="ince">OSOS verisi yok</td></tr>') + '</tbody></table></div></section></div>'
+  + '<aside class="sagk"><section class="kutu"><h2>Etkin uyarılar</h2>' + uyHtml + '</section>'
+  + '<section class="kutu"><h2>PTF bugün</h2>' + ptfHtml + '</section>'
+  + '<section class="kutu koyu"><h2>Saha Pi</h2>' + (pi ? '<div>' + nokta(piD.d) + ' nabız ' + once(pi.son_ts) + '</div><div class="ince">' + esc(Object.entries(coz(pi.servisler) || {}).map(([a, b]) => a + ': ' + b).join(' · ')) + '</div>' : '<div class="ince">Pi henüz nabız göndermedi.</div>') + '</section></aside></div>'
+  + '</main>';
+}
+async function yukle() {
+  try {
+    const r = await fetch(VERI + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const veri = await r.json();
+    if (!veri || !Array.isArray(veri.son)) throw new Error('Veri dosyası henüz panel biçiminde değil');
+    document.getElementById('sayfa').innerHTML = ciz(veri);
+  } catch (e) {
+    const el = document.getElementById('sayfa');
+    if (!el.querySelector('main')) el.innerHTML = '<p class="hata">Veri okunamadı: ' + String(e.message || e) + '</p>';
+  }
+}
+yukle();
+setInterval(yukle, 120000);
+</script>
+</body>
+</html>

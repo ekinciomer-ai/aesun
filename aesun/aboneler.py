@@ -18,7 +18,7 @@ ABONELER = [
     {"key": "yilmaz_darilmaz", "kod": "YD", "ad": "Yılmaz Darılmaz", "tesisat": "11201655",
      "carpan": 1260.0, "uretim": True, "tuketim": True, "mahsup": False, "kurulu_kwp": None,
      "renk": 4},
-    {"key": "abone_11111411", "kod": "A5", "ad": "Abone 11111411", "tesisat": "11111411",
+    {"key": "anka_mineral", "kod": "AM", "ad": "Anka Mineral", "tesisat": "11111411",
      "carpan": 6300.0, "sayac_seri": "40304004", "uretim": True, "tuketim": True,
      "mahsup": False, "kurulu_kwp": None, "renk": 5},
 ]

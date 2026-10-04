@@ -2,7 +2,7 @@
 
 - 2026-01..04: AYLIK mantik (A3 icin manuel deger varsa once A3, sonra T2, T1; yoksa basamakli)
 - 2026-05+   : SAATLIK kaynak takipli havuz (uretim buyukten kucuge; her ureticiden T2 -> A3 -> T1)
-Mahsup disi aboneler (YD, A5) ayri 'izleme' alaninda tasinir, hesaba girmez.
+Mahsup disi aboneler (YD, AM) ayri 'izleme' alaninda tasinir, hesaba girmez.
 """
 
 SAATLIK_BASLANGIC = "2026-05"
@@ -82,7 +82,7 @@ def _ekle(hedef, kaynak):
         hedef[k] += kaynak[k]
 
 
-def hesapla(endeks, izleme_keys=("yilmaz_darilmaz", "abone_11111411"), yil="2026"):
+def hesapla(endeks, izleme_keys=("yilmaz_darilmaz", "anka_mineral"), yil="2026"):
     """endeks: 2026_osos_endeks.json icerigi.
     Donus: {ay: {uretim, tuketim, mahsup, mahsup_dag, sonra, bedelli, izleme:{key:{u,t}}, gunler:{gun:{...,saatler:{..}}}}}"""
     aylar = {}

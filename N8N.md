@@ -15,6 +15,7 @@ n8n Cloud `xbay.app.n8n.cloud`, proje "ömer" (kişisel), klasör **aesun**. Saa
 | aesun · Pi nabız + canlı veri | `4CaY5XeOFjK4B3Kr` | POST `/webhook/aesun-nabiz` (header auth) | 30 sn |
 | aesun · Hata yakalayıcı | `QQkA9MHLmFtH6FYx` | Error Trigger | 60 sn |
 | aesun · Arşiv + temizlik | `xOY3YabJkrISGkxv` | `5 0 * * *` | 180 sn |
+| aesun · EPİAŞ PTF/SMF | `HwcYHM8phNl8SN4Z` | `5,35 13-17 * * *` ve `15 6 * * *` | 120 sn |
 
 Alt iş akışlarını yalnız Ana döngü çağırabilir (callerPolicy).
 Eski 5 iş akışı (`mGUBazyZw83HLiQG`, `wMuIzwWRebIRngsg`, `i783dL0YIX2xE0EL`, `v8WZV9rcADpvp9zT`, `3gaBo1YnRgSQ2Djp`) değiştirilmedi.
@@ -30,6 +31,7 @@ Eski 5 iş akışı (`mGUBazyZw83HLiQG`, `wMuIzwWRebIRngsg`, `i783dL0YIX2xE0EL`,
 | aesun_nabiz | cihaz, son_ts, servisler (JSON), not_ | Pi webhook, upsert cihaz |
 | aesun_hata | ts, workflow, dugum, mesaj, execution_url | Hata yakalayıcı |
 | aesun_arsiv | gun, yazildi_ts, satir | Arşiv, upsert gun |
+| aesun_ptf | tarih, saat, ptf, ptf_usd, ptf_eur, smf, guncellendi | EPİAŞ, upsert tarih+saat |
 
 ## Hata ve oturum kuralları
 - Toplayıcı hata mesajı önekleri: `GIRIS:` → `bekle_until = şimdi + 1 saat`, giriş denenmez; `OTURUM:` → token/çerez silinir, sonraki turda yeniden giriş; `LIMIT:` → normal hata.
@@ -45,6 +47,7 @@ Eski 5 iş akışı (`mGUBazyZw83HLiQG`, `wMuIzwWRebIRngsg`, `i783dL0YIX2xE0EL`,
 | FusionSolar Northbound | Templated Custom Auth | `{"body":{"userName":"{{kullanici}}","systemCode":"{{sifre}}"}}` |
 | Inavitas | Templated Custom Auth | `{"body":{"UserName":"{{kullanici}}","Password":"{{sifre}}"}}` |
 | GitHub epias-ptf | GitHub API | fine-grained token, yalnız epias-ptf, Contents: Read and write |
+| EPİAŞ Şeffaflık | Templated Custom Auth | `{"body":{"username":"{{kullanici}}","password":"{{sifre}}"}}` |
 | Twilio | Twilio API | SID + token (düğümler kapalı) |
 | aesun Pi anahtarı | Header Auth | ad `X-Aesun-Anahtar`, değer: rastgele uzun anahtar (Pi `env.txt` → `AESUN_PI_ANAHTAR`) |
 
@@ -56,3 +59,10 @@ sudo cp pi/aesun-nabiz.service pi/aesun-nabiz.timer /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now aesun-nabiz.timer
 ```
 Yanıt `onbellek/son.json`'a, n8n'e ulaşılamazsa GitHub yedeği `onbellek/son_yedek.json`'a yazılır; `onbellek/kaynak.txt` hangisinin kullanıldığını söyler.
+
+## EPİAŞ
+- TGT girişi (giris.epias.com.tr/cas/v1/tickets) → GÖP PTF (`markets/dam/data/mcp`) ve DGP SMF (`markets/bpm/data/system-marginal-price`), dün/bugün/yarın.
+- `aesun_son` içinde `kaynak=epias, plant_id=ptf` satırı: ek alanında bugün/yarın PTF dizileri ve özetler; Pi yanıtıyla panele gider.
+- `aylik_ptf.json` yalnız yeni/değişen tam gün varsa güncellenir (eski panel biçimi korunur).
+- Uyarılar: 15:30'dan sonra yarının PTF'si yoksa; EPİAŞ verisi 26 saattir alınamıyorsa.
+- GitHub Actions'taki `main.py` (madencilik kârlılık sinyali, WhatsApp) şimdilik çalışmaya devam ediyor; aynı dosyaya aynı değerleri yazar.

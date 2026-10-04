@@ -48,9 +48,15 @@ def create_app() -> Flask:
     def sayaclar():
         sekme = request.args.get("sekme", "sayac")
         sekme = sekme if sekme in ("sayac", "mahsup") else "sayac"
-        d = sayaclar_mod.gun_detay(request.args.get("gun"))
+        gorunum = "ay" if request.args.get("gorunum") == "ay" else "gun"
+        if gorunum == "ay":
+            d = sayaclar_mod.ay_detay(request.args.get("ay"))
+            d.update(gun=None)
+        else:
+            d = sayaclar_mod.gun_detay(request.args.get("gun"))
+            d.update(ay=None)
         nav = _nav(ozet_mod.genel_bakis()["uyarilar"])
-        return render_template("sayaclar.html", aktif="sayaclar", sekme=sekme, **nav, **d)
+        return render_template("sayaclar.html", aktif="sayaclar", sekme=sekme, gorunum=gorunum, **nav, **d)
 
     @app.route("/api/genel")
     def api_genel():

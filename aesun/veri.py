@@ -240,3 +240,78 @@ def fusion_saatlik(gun: str) -> dict:
         sonuc[d.get("stationName", kod)] = {int(h): (v or {}).get("production_kWh") or 0
                                            for h, v in (d.get("hourly") or {}).items()}
     return sonuc
+
+
+# ------------------------------------------------------------------ gunluk (aylik gorunum) inverter verisi
+_inav_ay: dict[str, tuple[float, dict]] = {}
+
+
+def inavitas_gunluk(ay: str, ttl: int = 900) -> dict:
+    """{santral_ad: {gun_no: kWh}} — Inavitas aylik grafigi (intervl=M)."""
+    if not (os.getenv("INAVITAS_USER") and os.getenv("INAVITAS_PASS")):
+        return {}
+    k = _inav_ay.get(ay)
+    if k and time.time() - k[0] < ttl:
+        return k[1]
+    sonuc = {}
+    try:
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "toplayicilar"))
+        from inavitas import Inavitas  # type: ignore
+        cli = Inavitas()
+        for p in cli.plants():
+            seri = cli.plant_hourly(p["id"], f"{ay}-01", intervl="M")
+            if not seri:
+                continue
+            gunler = {}
+            veri_ = seri[0]["veri"]
+            for i, x in enumerate(veri_):
+                s = str(x["t"])
+                no = None
+                for parca in (s[:2], s.split(".")[0], s.split("-")[-1], s.split("/")[0]):
+                    if parca.strip().isdigit() and 1 <= int(parca) <= 31:
+                        no = int(parca); break
+                if no is None:
+                    no = i + 1
+                if x["kwh"] is not None:
+                    gunler[no] = gunler.get(no, 0) + float(x["kwh"])
+            sonuc[p["name"]] = gunler
+    except Exception:
+        return k[1] if k else {}
+    _inav_ay[ay] = (time.time(), sonuc)
+    return sonuc
+
+
+def sungrow_gunluk(ay: str, db_yolu: str = SUNGROW_DB) -> dict:
+    """{ps_id: {gun_no: kWh}} — her gunun en yuksek 'gunluk uretim' okumasi."""
+    if not Path(db_yolu).is_file():
+        return {}
+    con = sqlite3.connect(db_yolu)
+    try:
+        sonuc: dict[str, dict[int, float]] = {}
+        for ps_id, ts, deger in con.execute(
+                "SELECT ps_id, ts, value FROM sg_reading WHERE device_type=11 AND metric='daily_yield_wh'"):
+            if str(ps_id) in SUNGROW_HARIC:
+                continue
+            yerel = datetime.fromisoformat(ts).astimezone(TR)
+            if yerel.strftime("%Y-%m") != ay:
+                continue
+            s = sonuc.setdefault(str(ps_id), {})
+            s[yerel.day] = max(s.get(yerel.day, 0), (deger or 0) / 1000)
+        return sonuc
+    finally:
+        con.close()
+
+
+def fusion_gunluk(ay: str) -> dict:
+    fu = json_oku("fusion_data.json") or {}
+    sonuc = {}
+    for kod, d in (fu.get("monthly") or {}).items():
+        if d.get("month") != ay:
+            continue
+        g = {}
+        for tarih, v in (d.get("daily") or {}).items():
+            val = v.get("production_kWh") if isinstance(v, dict) else v
+            g[int(tarih[8:10])] = val or 0
+        sonuc[d.get("stationName", kod)] = g
+    return sonuc

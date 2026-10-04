@@ -37,7 +37,8 @@ _env_yukle()
 
 BASE = os.getenv("INAVITAS_BASE", "https://insos.inavitas.io")
 COMPANY = os.getenv("INAVITAS_COMPANY", "AKSARAY")
-UA = "Mozilla/5.0 (aesun-inavitas)"
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/129.0 Safari/537.36")
 
 
 def _num(s):
@@ -69,24 +70,30 @@ class Inavitas:
 
     # ---------- oturum ----------
     def login(self):
-        r = self.s.get(f"{BASE}/Login", timeout=30)
-        tok = BeautifulSoup(r.text, "html.parser").find("input", {"name": "__RequestVerificationToken"})
+        # Giriş formu kök adreste: GET /  ->  POST /  (action="/")
+        self.s.cookies.clear()
+        r = self.s.get(f"{BASE}/", timeout=30)
+        soup = BeautifulSoup(r.text, "html.parser")
+        form = soup.find("form")
+        tok = soup.find("input", {"name": "__RequestVerificationToken"})
+        action = (form.get("action") if form else None) or "/"
         data = {
             "__RequestVerificationToken": tok["value"] if tok else "",
-            "UserName": self.user,
+            "UserName": self.user.strip(),
             "Password": self.password,
             "RememberMe": "false",
         }
-        # Form action "/" (kok) — /Login'e post edilirse giris yapilmaz
-        r = self.s.post(f"{BASE}/", data=data, timeout=30, allow_redirects=True,
-                        headers={"Referer": f"{BASE}/Login", "Origin": BASE})
-        if 'name="Password"' in r.text:
-            sp = BeautifulSoup(r.text, "html.parser")
-            mesaj = " | ".join(t.get_text(" ", strip=True) for t in sp.select(
-                ".validation-summary-errors, .text-danger, .field-validation-error, .alert") if t.get_text(strip=True))
-            raise RuntimeError(f"Inavitas giriş başarısız: HTTP {r.status_code}, adres {r.url}, "
-                               f"site mesajı: {mesaj or 'yok'}, token bulundu: {bool(tok)}, "
-                               f"kullanıcı adı {len(self.user)} karakter")
+        r = self.s.post(f"{BASE}{action}", data=data, timeout=30, allow_redirects=True,
+                        headers={"Origin": BASE, "Referer": f"{BASE}/"})
+        # Başarı testi: korumalı bir uç cevap veriyor mu?
+        chk = self.s.get(f"{BASE}/Home/GetTreeData", timeout=30, allow_redirects=True)
+        if chk.status_code != 200 or 'name="Password"' in chk.text:
+            msg = BeautifulSoup(r.text, "html.parser").select_one(
+                ".validation-summary-errors, .text-danger, .field-validation-error, .alert")
+            msg = msg.get_text(" ", strip=True) if msg else ""
+            raise RuntimeError(
+                f"Inavitas giriş başarısız | POST {action} -> {r.status_code} {r.url} | "
+                f"token={'var' if tok else 'YOK'} | kullanıcı='{self.user.strip()}' | site mesajı: {msg or '-'}")
         self._logged = True
 
     def _get(self, path, **params):

@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Otocoin genel bakış</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..750&amp;display=swap">
+<style>
+body{margin:0;background:#E9EDF2}
+a{color:#10233F}a:hover{color:#2a78d6}
+.num{font-variant-numeric:tabular-nums;font-stretch:88%}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:#C9D3E0;font-size:14px;min-height:24px}
+.nav a:hover{background:#1B3254;color:#FFFFFF}
+.nav a:focus-visible,button:focus-visible{outline:2px solid #86b6ef;outline-offset:2px}
+.panel{background:#FFFFFF;border-radius:14px;border:1px solid #D5DCE5}
+.k{font-size:13px;color:#4A5A70}
+.btn{font:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:40px}
+</style>
+</helmet>
+<div style="font-family: 'Archivo', system-ui, sans-serif; color: #10233F; background: #E9EDF2; display: flex; flex-wrap: wrap; min-height: 100vh">
+
+<nav class="nav" aria-label="Ana menü" style="flex: 1 1 232px; max-width: 260px; background: #10233F; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 12px 24px 12px">
+<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="#eda100" stroke-width="2.5"></circle><path d="M15 6 L15 24 M9 15 L21 15" stroke="#eda100" stroke-width="2.5" stroke-linecap="round"></path></svg>
+<div>
+<div style="font-size: 18px; font-weight: 700; color: #FFFFFF; font-stretch: 110%">Otocoin</div>
+<div style="font-size: 12px; color: #9FB0C6">Tekyıldız GES ve madencilik</div>
+</div>
+</div>
+<a href="#" aria-current="page" style="background: #FFFFFF; color: #10233F; font-weight: 600">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"></rect><rect x="14" y="3" width="7" height="5" rx="1.5"></rect><rect x="14" y="12" width="7" height="9" rx="1.5"></rect><rect x="3" y="16" width="7" height="5" rx="1.5"></rect></svg>
+Genel bakış</a>
+<a href="#">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg>
+Sayaçlar ve mahsup</a>
+<a href="#">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"></path></svg>
+İnverterler<span style="margin-left: auto; background: #B42318; color: #FFFFFF; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 1px 8px">1</span></a>
+<a href="#">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"></rect><path d="M7 10h4M7 14h2M15 10v4"></path></svg>
+Madencilik<span style="margin-left: auto; background: #C98500; color: #10233F; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 1px 8px">3</span></a>
+<a href="#">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v9l6 6"></path></svg>
+Gelir dağılımı</a>
+<a href="#">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 12h7M9 16h7M9 8h3"></path></svg>
+Analiz ve rapor</a>
+<a href="#">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18v.5"></path></svg>
+Uyarılar<span style="margin-left: auto; background: #B42318; color: #FFFFFF; font-size: 12px; font-weight: 700; border-radius: 10px; padding: 1px 8px">2</span></a>
+<div style="flex: 1 1 auto; min-height: 24px"></div>
+<a href="#">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>
+Ayarlar</a>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 48px 32px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px; max-width: 1240px">
+
+<header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div>
+<h1 style="margin: 0; font-size: 34px; line-height: 1.1; font-weight: 700; font-stretch: 105%">Genel bakış</h1>
+<p style="margin: 6px 0 0 0; font-size: 15px; color: #4A5A70">Pazar, 4 Ekim 2026. Sayaç verisi saat 13:00'e kadar, saha verisi 17:14 itibarıyla.</p>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button class="btn" style="background: #FFFFFF; color: #10233F; border: 1px solid #B9C4D2">Excel yükle</button>
+<button class="btn" style="background: #10233F; color: #FFFFFF; border: 1px solid #10233F">Uyarıları WhatsApp'a gönder</button>
+</div>
+</header>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px">
+
+<section class="panel" aria-labelledby="h-uyari" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+<h2 id="h-uyari" style="margin: 0; font-size: 20px; font-weight: 700">Dikkat isteyenler</h2>
+<a href="#" style="font-size: 13px">Tümü (7)</a>
+</div>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+<li style="display: flex; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #FDECEA">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6M12 16.5v.5"></path></svg>
+<div><div style="font-size: 15px; font-weight: 650; color: #7A1A12">YD santrali 19 Eylül'den beri üretmiyor</div>
+<div style="font-size: 13px; color: #5B2A24; margin-top: 2px">16 gündür 0 kWh. Önceki ortalama günde yaklaşık 5.900 kWh.</div></div>
+<span style="margin-left: auto; font-size: 12px; font-weight: 700; color: #B42318; flex: none">Kritik</span>
+</li>
+<li style="display: flex; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #FDECEA">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" aria-hidden="true" style="flex: none; margin-top: 1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6M12 16.5v.5"></path></svg>
+<div><div style="font-size: 15px; font-weight: 650; color: #7A1A12">FusionSolar verisi 13 Mayıs'tan beri gelmiyor</div>
+<div style="font-size: 13px; color: #5B2A24; margin-top: 2px">T1 ve T2'deki 18 inverterin arızaları şu an görünmüyor.</div></div>
+<span style="margin-left: auto; font-size: 12px; font-weight: 700; color: #B42318; flex: none">Kritik</span>
+</li>
+<li style="display: flex; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #FFF4DC">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A5B00" stroke-width="2.2" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M12 3l10 18H2z"></path><path d="M12 10v4.5M12 17.5v.5"></path></svg>
+<div><div style="font-size: 15px; font-weight: 650; color: #5E3800">3 madenci yanıt vermiyor</div>
+<div style="font-size: 13px; color: #5E3800; margin-top: 2px">Miner-100 ve 101 zaman aşımında, Miner-115 çevrimdışı.</div></div>
+<span style="margin-left: auto; font-size: 12px; font-weight: 700; color: #9A5B00; flex: none">Uyarı</span>
+</li>
+<li style="display: flex; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #FFF4DC">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A5B00" stroke-width="2.2" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M12 3l10 18H2z"></path><path d="M12 10v4.5M12 17.5v.5"></path></svg>
+<div><div style="font-size: 15px; font-weight: 650; color: #5E3800">OSOS otomatik çekimi 2 gündür çalışmadı</div>
+<div style="font-size: 13px; color: #5E3800; margin-top: 2px">Son otomatik kayıt 2 Ekim 12:19. Bugünkü veri elle yüklendi.</div></div>
+<span style="margin-left: auto; font-size: 12px; font-weight: 700; color: #9A5B00; flex: none">Uyarı</span>
+</li>
+<li style="display: flex; gap: 12px; padding: 10px 12px; border-radius: 10px; background: #FFF4DC">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A5B00" stroke-width="2.2" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M12 3l10 18H2z"></path><path d="M12 10v4.5M12 17.5v.5"></path></svg>
+<div><div style="font-size: 15px; font-weight: 650; color: #5E3800">YD tüketimi iki katına çıktı</div>
+<div style="font-size: 13px; color: #5E3800; margin-top: 2px">11 Eylül'den beri günde 300 yerine 600–1.200 kWh.</div></div>
+<span style="margin-left: auto; font-size: 12px; font-weight: 700; color: #9A5B00; flex: none">Uyarı</span>
+</li>
+</ul>
+</section>
+
+<section class="panel" aria-labelledby="h-denge" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+<h2 id="h-denge" style="margin: 0; font-size: 20px; font-weight: 700">Ekim enerji dengesi</h2>
+<span class="k">Saatlik mahsup, 1–4 Ekim</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Üretim (T1 + T2)</span><span class="num" style="font-size: 22px; font-weight: 700">18.688 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">kWh</span></span></div>
+<div style="display: flex; gap: 2px; height: 26px; width: 65.2%">
+<div style="flex: 12408 1 0; background: #1baf7a; border-radius: 4px 0 0 4px"></div>
+<div style="flex: 6280 1 0; background: #eda100; border-radius: 0 4px 4px 0"></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 14px; font-weight: 600">Tüketim (T1 + T2 + A3)</span><span class="num" style="font-size: 22px; font-weight: 700">28.657 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">kWh</span></span></div>
+<div style="display: flex; gap: 2px; height: 26px; width: 100%">
+<div style="flex: 12408 1 0; background: #1baf7a; border-radius: 4px 0 0 4px"></div>
+<div style="flex: 16249 1 0; background: #eb6834; border-radius: 0 4px 4px 0"></div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-top: 4px">
+<div><div style="display: flex; align-items: center; gap: 6px" class="k"><span style="width: 10px; height: 10px; border-radius: 2px; background: #1baf7a"></span>Mahsuplaşan</div><div class="num" style="font-size: 20px; font-weight: 700; margin-top: 2px">12.408</div></div>
+<div><div style="display: flex; align-items: center; gap: 6px" class="k"><span style="width: 10px; height: 10px; border-radius: 2px; background: #eda100"></span>Bedelli satış</div><div class="num" style="font-size: 20px; font-weight: 700; margin-top: 2px">6.280</div></div>
+<div><div style="display: flex; align-items: center; gap: 6px" class="k"><span style="width: 10px; height: 10px; border-radius: 2px; background: #eb6834"></span>Şebekeden alınan</div><div class="num" style="font-size: 20px; font-weight: 700; margin-top: 2px">16.249</div></div>
+</div>
+<div style="border-top: 1px solid #E3E8EE; padding-top: 14px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px"><span style="font-size: 14px; font-weight: 600">2026 bedelli satış limiti</span><span class="num" style="font-size: 14px"><strong>1.014.776</strong> / 2.905.914 kWh</span></div>
+<div role="meter" aria-label="Bedelli satış limiti kullanımı" aria-valuemin="0" aria-valuemax="100" aria-valuenow="35" style="height: 10px; background: #E3E8EE; border-radius: 5px; overflow: hidden"><div style="width: 34.9%; height: 100%; background: #1E7A3C; border-radius: 5px"></div></div>
+<div class="k">Yüzde 34,9 kullanıldı. Yüzde 80'de uyarı verilecek.</div>
+</div>
+</section>
+</div>
+
+<section class="panel" aria-labelledby="h-abone" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px">
+<h2 id="h-abone" style="margin: 0; font-size: 20px; font-weight: 700">Sayaçlar</h2>
+<span class="k">Bugün 00:00–13:00, son 30 gün çizgisi</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0">
+
+<div style="padding: 4px 18px 4px 0; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #2a78d6"></span><span style="font-size: 17px; font-weight: 700">T1</span><span class="k">Tekyıldız 1</span></div>
+<div class="k">11116344 ile mahsupta</div>
+<div><div class="k">Üretim</div><div class="num" style="font-size: 24px; font-weight: 700">2.882 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">kWh</span></div></div>
+<div class="k">Tüketim <span class="num" style="color: #10233F; font-weight: 600">15 kWh</span></div>
+<svg width="174" height="40" viewBox="0 0 174 40" role="img" aria-label="T1 son 30 gün üretimi, azalıyor"><polyline fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" points="0,1.4 6,0.5 12,1.1 18,3.6 24,0 30,0.8 36,1.3 42,2.1 48,2.4 54,3.1 60,3.7 66,4.2 72,5.2 78,20.8 84,10.8 90,10.5 96,18.5 102,4.7 108,6.2 114,15.9 120,22.3 126,7.2 132,6.3 138,10.8 144,21.6 150,29.5 156,15.3 162,17.6 168,23.2 174,17.5"></polyline></svg>
+<div style="font-size: 13px; color: #1E7A3C; display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E7A3C" stroke-width="2.5" aria-hidden="true"><path d="M4 12l5 5L20 6"></path></svg>Veri güncel</div>
+</div>
+
+<div style="padding: 4px 18px; border-left: 1px solid #E3E8EE; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #eb6834"></span><span style="font-size: 17px; font-weight: 700">T2</span><span class="k">Tekyıldız 2</span></div>
+<div class="k">11116968 ile mahsupta</div>
+<div><div class="k">Üretim</div><div class="num" style="font-size: 24px; font-weight: 700">1.461 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">kWh</span></div></div>
+<div class="k">Tüketim <span class="num" style="color: #10233F; font-weight: 600">113 kWh</span></div>
+<svg width="174" height="40" viewBox="0 0 174 40" role="img" aria-label="T2 son 30 gün üretimi"><polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="0,3.5 6,2.3 12,2.5 18,3 24,0 30,0.4 36,2.7 42,4.8 48,4.9 54,6 60,6.1 66,6.5 72,7.7 78,27.2 84,12.2 90,12.8 96,8.5 102,5.8 108,7.4 114,20.1 120,25.5 126,10.2 132,9 138,14.1 144,28.2 150,34.9 156,18 162,22.9 168,29.2 174,21.9"></polyline></svg>
+<div style="font-size: 13px; color: #1E7A3C; display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E7A3C" stroke-width="2.5" aria-hidden="true"><path d="M4 12l5 5L20 6"></path></svg>Veri güncel</div>
+</div>
+
+<div style="padding: 4px 18px; border-left: 1px solid #E3E8EE; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #1baf7a"></span><span style="font-size: 17px; font-weight: 700">A3</span><span class="k">Aksaray 3</span></div>
+<div class="k">11200108 ile mahsupta</div>
+<div><div class="k">Tüketim</div><div class="num" style="font-size: 24px; font-weight: 700">252 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">kWh</span></div></div>
+<div class="k">Üretim yok</div>
+<svg width="174" height="40" viewBox="0 0 174 40" role="img" aria-label="A3 son 30 gün tüketimi"><polyline fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" points="0,23.5 6,10 12,35.4 18,7 24,9.5 30,24.4 36,6.4 42,9.3 48,24.5 54,25.3 60,1.8 66,5.6 72,0.4 78,4.8 84,5.9 90,15.2 96,20.6 102,19.5 108,20.9 114,3.7 120,0 126,22.8 132,23.4 138,26.7 144,7.3 150,24.5 156,5.5 162,7.1 168,14.3 174,12.6"></polyline></svg>
+<div style="font-size: 13px; color: #1E7A3C; display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E7A3C" stroke-width="2.5" aria-hidden="true"><path d="M4 12l5 5L20 6"></path></svg>Veri güncel</div>
+</div>
+
+<div style="padding: 4px 18px; border-left: 1px solid #E3E8EE; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #eda100"></span><span style="font-size: 17px; font-weight: 700">YD</span><span class="k">Yılmaz Darılmaz</span></div>
+<div class="k">11201655, sadece izleme</div>
+<div><div class="k">Üretim</div><div class="num" style="font-size: 24px; font-weight: 700; color: #B42318">0 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">kWh</span></div></div>
+<div class="k">Tüketim <span class="num" style="color: #10233F; font-weight: 600">407 kWh</span></div>
+<svg width="174" height="40" viewBox="0 0 174 40" role="img" aria-label="YD son 30 gün üretimi, 19 Eylül'de sıfıra düştü"><polyline fill="none" stroke="#C98500" stroke-width="2" stroke-linejoin="round" points="0,1.1 6,0.7 12,1.6 18,1.5 24,0 30,1.3 36,2.3 42,3.8 48,5.5 54,5.7 60,6.8 66,7.6 72,8.9 78,19 84,14.9 90,36 96,36 102,36 108,36 114,36 120,36 126,36 132,36 138,36 144,36 150,36 156,36 162,36 168,36 174,35.3"></polyline></svg>
+<div style="font-size: 13px; color: #B42318; font-weight: 600; display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6M12 16.5v.5"></path></svg>Üretim durdu</div>
+</div>
+
+<div style="padding: 4px 0 4px 18px; border-left: 1px solid #E3E8EE; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #e87ba4"></span><span style="font-size: 17px; font-weight: 700">A5</span><span class="k">Yeni abone</span></div>
+<div class="k">11111411, sadece izleme</div>
+<div><div class="k">Çarpan</div><div class="num" style="font-size: 24px; font-weight: 700">6.300</div></div>
+<div class="k">Sayaç seri 40304004</div>
+<div style="height: 40px; border: 1px dashed #B9C4D2; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #4A5A70">Henüz veri yok</div>
+<a href="#" style="font-size: 13px; font-weight: 600">İlk Excel'i yükle</a>
+</div>
+
+</div>
+</section>
+
+<section class="panel" aria-labelledby="h-trend" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px">
+<h2 id="h-trend" style="margin: 0; font-size: 20px; font-weight: 700">Mahsup havuzu, son 30 gün</h2>
+<div style="display: flex; gap: 18px; font-size: 13px; color: #4A5A70">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 16px; height: 3px; border-radius: 2px; background: #2a78d6"></span>Üretim (T1 + T2)</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 16px; height: 3px; border-radius: 2px; background: #eb6834"></span>Tüketim (T1 + T2 + A3)</span>
+</div>
+</div>
+<div style="overflow-x: auto">
+<svg viewBox="0 0 900 222" width="100%" style="min-width: 640px; display: block" role="img" aria-label="4 Eylül – 3 Ekim günlük üretim ve tüketim. Üretim 11.000 kWh'den 3.000–5.000 kWh'e geriliyor, tüketim 4.000 ile 13.700 kWh arasında dalgalanıyor.">
+<g font-family="Archivo, sans-serif" font-size="11" fill="#4A5A70">
+<line x1="48" y1="10" x2="900" y2="10" stroke="#E3E8EE"></line><text x="40" y="14" text-anchor="end">15.000</text>
+<line x1="48" y1="70" x2="900" y2="70" stroke="#E3E8EE"></line><text x="40" y="74" text-anchor="end">10.000</text>
+<line x1="48" y1="130" x2="900" y2="130" stroke="#E3E8EE"></line><text x="40" y="134" text-anchor="end">5.000</text>
+<line x1="48" y1="190" x2="900" y2="190" stroke="#B9C4D2"></line><text x="40" y="194" text-anchor="end">0</text>
+<text x="52" y="212">4 Eyl</text><text x="340" y="212">14 Eyl</text><text x="630" y="212">24 Eyl</text><text x="896" y="212" text-anchor="end">3 Eki</text>
+</g>
+<g transform="translate(52,10)">
+<polyline fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" points="0.0,123.0 29.0,62.2 57.9,174.8 86.9,50.4 115.9,62.3 144.8,127.6 173.8,48.3 202.8,60.4 231.7,126.3 260.7,130.7 289.7,27.5 318.6,43.9 347.6,19.7 376.6,36.8 405.5,40.7 434.5,85.7 463.4,111.4 492.4,105.0 521.4,110.4 550.3,33.5 579.3,15.8 608.3,118.5 637.2,120.4 666.2,133.6 695.2,48.9 724.1,119.0 753.1,40.6 782.1,49.8 811.0,79.2 840.0,71.7"></polyline>
+<polyline fill="none" stroke="#2a78d6" stroke-width="2.5" stroke-linejoin="round" points="0.0,46.7 29.0,42.7 57.9,44.7 86.9,51.4 115.9,38.2 144.8,40.8 173.8,45.4 202.8,50.4 231.7,51.4 260.7,54.7 289.7,56.4 318.6,58.1 347.6,62.5 376.6,129.7 405.5,82.8 434.5,83.0 463.4,96.2 492.4,58.4 521.4,64.4 550.3,107.0 579.3,130.8 608.3,71.0 637.2,67.1 666.2,85.5 695.2,133.2 724.1,162.6 753.1,102.5 782.1,115.4 811.0,138.7 840.0,113.8"></polyline>
+<circle cx="840" cy="113.8" r="4" fill="#2a78d6" stroke="#FFFFFF" stroke-width="2"></circle>
+<circle cx="840" cy="71.7" r="4" fill="#eb6834" stroke="#FFFFFF" stroke-width="2"></circle>
+</g>
+</svg>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px">
+
+<section class="panel" aria-labelledby="h-inv" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<h2 id="h-inv" style="margin: 0; font-size: 20px; font-weight: 700">İnverterler</h2>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 15px; font-weight: 650">FusionSolar</span><span style="font-size: 12px; font-weight: 700; color: #B42318">Veri yok</span></div>
+<div class="k">2 santral, 18 inverter, 2,04 MWp. Son kayıt 13 Mayıs 14:30.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #E3E8EE; padding-top: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 15px; font-weight: 650">Sungrow</span><span style="font-size: 12px; font-weight: 700; color: #3B5878">Bağlı değil</span></div>
+<div class="k">iSolarCloud bilgileri girilince santraller burada görünecek.</div>
+</div>
+<a href="#" style="font-size: 13px; font-weight: 600; margin-top: auto">Bağlantıyı kur</a>
+</section>
+
+<section class="panel" aria-labelledby="h-mine" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 id="h-mine" style="margin: 0; font-size: 20px; font-weight: 700">Madencilik</h2><span class="k">Saha PC 17:14</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<div><div class="k">Çalışan cihaz</div><div class="num" style="font-size: 24px; font-weight: 700">26 <span style="font-size: 15px; font-weight: 500; color: #4A5A70">/ 29</span></div></div>
+<div><div class="k">Toplam hash</div><div class="num" style="font-size: 24px; font-weight: 700">8.209 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">TH/s</span></div></div>
+<div><div class="k">Hedefe göre</div><div class="num" style="font-size: 24px; font-weight: 700">%103</div></div>
+<div><div class="k">Ortalama sıcaklık</div><div class="num" style="font-size: 24px; font-weight: 700">64 <span style="font-size: 13px; font-weight: 500; color: #4A5A70">°C</span></div></div>
+</div>
+<div style="display: flex; gap: 3px; flex-wrap: wrap" role="img" aria-label="29 cihazın durumu: 26 çalışıyor, 2 zaman aşımında, 1 çevrimdışı">
+<span title="100" style="width: 14px; height: 14px; border-radius: 3px; background: #B42318"></span><span title="101" style="width: 14px; height: 14px; border-radius: 3px; background: #B42318"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span title="115" style="width: 14px; height: 14px; border-radius: 3px; background: #9AA6B5"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span><span style="width: 14px; height: 14px; border-radius: 3px; background: #1E7A3C"></span>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<button class="btn" style="background: #FFFFFF; color: #10233F; border: 1px solid #B9C4D2">Uyut</button>
+<button class="btn" style="background: #FFFFFF; color: #10233F; border: 1px solid #B9C4D2">Çalıştır</button>
+<a href="#" style="font-size: 13px; font-weight: 600; align-self: center; margin-left: auto">Cihazlar</a>
+</div>
+</section>
+
+<section class="panel" aria-labelledby="h-gelir" style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 id="h-gelir" style="margin: 0; font-size: 20px; font-weight: 700">Mining geliri</h2><span class="k">F2Pool, aylık BTC</span></div>
+<div><div class="k">Eylül</div><div class="num" style="font-size: 24px; font-weight: 700">0,05626 BTC <span style="font-size: 15px; font-weight: 500; color: #4A5A70">≈ 235.500 ₺</span></div></div>
+<svg viewBox="0 0 280 110" width="100%" role="img" aria-label="Aylık BTC: Mayıs 0,0320, Haziran 0,0532, Temmuz 0,0447, Ağustos 0,0629, Eylül 0,0563, Ekim 4 günde 0,0067">
+<g font-family="Archivo, sans-serif" font-size="11" fill="#4A5A70" text-anchor="middle">
+<rect x="8" y="49" width="32" height="40" rx="4" fill="#2a78d6"></rect><text x="24" y="104">May</text>
+<rect x="54" y="22.5" width="32" height="66.5" rx="4" fill="#2a78d6"></rect><text x="70" y="104">Haz</text>
+<rect x="100" y="33" width="32" height="56" rx="4" fill="#2a78d6"></rect><text x="116" y="104">Tem</text>
+<rect x="146" y="10" width="32" height="79" rx="4" fill="#2a78d6"></rect><text x="162" y="104">Ağu</text>
+<rect x="192" y="18.5" width="32" height="70.5" rx="4" fill="#2a78d6"></rect><text x="208" y="104">Eyl</text>
+<rect x="238" y="80.6" width="32" height="8.4" rx="4" fill="#86b6ef"></rect><text x="254" y="104">Eki</text>
+<line x1="0" y1="89" x2="280" y2="89" stroke="#B9C4D2"></line>
+</g>
+</svg>
+<div style="border-top: 1px solid #E3E8EE; padding-top: 12px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 14px; font-weight: 600">Dağılım</div>
+<div style="display: flex; justify-content: space-between" class="k"><span>[ORTAK 1]</span><span class="num">[PAY %]</span></div>
+<div style="display: flex; justify-content: space-between" class="k"><span>[ORTAK 2]</span><span class="num">[PAY %]</span></div>
+</div>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1640}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

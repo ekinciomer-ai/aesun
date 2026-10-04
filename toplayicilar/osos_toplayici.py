@@ -158,14 +158,20 @@ def giris(s, env, tani=False):
 
 
 def wiring_bul(s, tesisat):
-    """Yük profili sayfasındaki tesisat listesinden wiringId bulur."""
-    r = s.get(BASE + "/LoadProfile/Index", timeout=90, allow_redirects=False)
-    if r.status_code != 200 or "UsernamePassword" in r.text:
-        raise OturumHatasi(f"yük profili sayfası açılmadı (HTTP {r.status_code})")
-    for m in re.finditer(r'<option[^>]*value="(\d+)"[^>]*>([^<]*)</option>', r.text):
-        if tesisat in m.group(2):
+    """Tesisat listesinden wiringId bulur (yük profili ve pano sayfalarındaki seçim kutuları)."""
+    gorulen = 0
+    for yol in ("/LoadProfile/Index", "/WiringDashboard/Index"):
+        r = s.get(BASE + yol, timeout=90, allow_redirects=False)
+        if r.status_code in (301, 302) or (r.status_code == 200 and _formu_bul(r.text)):
+            raise OturumHatasi(f"{yol} giriş sayfasına yönlendi")
+        for m in re.finditer(r'<option[^>]*value="(\d+)"[^>]*>([^<]*)</option>', r.text):
+            gorulen += 1
+            if tesisat in m.group(2):
+                return m.group(1)
+        m = re.search(r'"(?:id|Id|wiringId|WiringId)"\s*:\s*(\d+)[^{}]{0,200}?' + tesisat, r.text)
+        if m:
             return m.group(1)
-    raise RuntimeError(f"{tesisat} tesisat listesinde bulunamadı")
+    raise RuntimeError(f"{tesisat} wiringId bulunamadı ({gorulen} seçenek tarandı); osos.env'e WID_{tesisat}=... eklenebilir")
 
 
 def govde(wid, aralik):
@@ -325,7 +331,7 @@ def main():
         for deneme in range(2):
             try:
                 if not wid:
-                    wid = wiring_bul(s, tesisat)
+                    wid = env.get("WID_" + tesisat) or os.environ.get("WID_" + tesisat) or wiring_bul(s, tesisat)
                     log(f"{kod} wiringId: {wid}")
                 satirlar += topla(tesisat, kod, carpan, yuk_profili(s, wid, aralik), simdi, wid)
                 break

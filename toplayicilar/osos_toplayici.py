@@ -20,6 +20,7 @@ import argparse
 import base64
 import json
 import os
+import platform
 import re
 import sys
 import time
@@ -96,7 +97,10 @@ def oturum_ac():
 def cerez_kaydet(s):
     KLASOR.mkdir(parents=True, exist_ok=True)
     CEREZ.write_text(json.dumps(requests.utils.dict_from_cookiejar(s.cookies)))
-    os.chmod(CEREZ, 0o600)
+    try:
+        os.chmod(CEREZ, 0o600)
+    except OSError:
+        pass
 
 
 def giris(s, env):
@@ -302,7 +306,7 @@ def main():
     except Exception as e:
         log("GitHub'a yazılamadı:", e)
         hatalar.append(f"GITHUB: {e}")
-    gonder(env, {"kaynak": "osos", "cihaz": os.uname().nodename, "ts": simdi, "aralik": aralik,
+    gonder(env, {"kaynak": "osos", "cihaz": platform.node(), "ts": simdi, "aralik": aralik,
                  "durum": "hata" if hatalar else "ok", "hata_mesaji": "; ".join(hatalar)[:300],
                  "giris_yapildi": girildi, "satirlar": satirlar})
 

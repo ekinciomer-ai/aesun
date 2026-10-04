@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Otocoin genel bakış</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..750&display=swap">
+<script>try{var t=localStorage.getItem('aesun-tema');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+:root{--zemin:#E9EDF2;--panel:#FFFFFF;--kenar:#D5DCE5;--cizgi:#E3E8EE;--ink:#10233F;--ink2:#4A5A70;--nav:#10233F;--nav-ink:#C9D3E0;--nav-hover:#1B3254;
+--kr-bg:#FDECEA;--kr:#B42318;--kr-ink:#7A1A12;--kr-ink2:#5B2A24;--uy-bg:#FFF4DC;--uy:#9A5B00;--uy-ink:#5E3800;--bl-bg:#EAF0F6;--bl:#3B5878;--iyi:#1E7A3C;--bos:#9AA6B5;--meter:#E3E8EE;
+--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#4a3aa7;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--zemin:#0E1621;--panel:#152030;--kenar:#243346;--cizgi:#243346;--ink:#EAF0F7;--ink2:#A9B6C8;--nav:#0A111A;--nav-ink:#A9B6C8;--nav-hover:#1C2836;
+--kr-bg:#3A1518;--kr:#FF8A80;--kr-ink:#FFCDC9;--kr-ink2:#FFB4AE;--uy-bg:#3A2A10;--uy:#F5B83D;--uy-ink:#FFE2A8;--bl-bg:#1C2836;--bl:#9CC3F5;--iyi:#6EE7A0;--bos:#5A6678;--meter:#243346;
+--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#9085e9;color-scheme:dark}}
+:root[data-theme="dark"]{--zemin:#0E1621;--panel:#152030;--kenar:#243346;--cizgi:#243346;--ink:#EAF0F7;--ink2:#A9B6C8;--nav:#0A111A;--nav-ink:#A9B6C8;--nav-hover:#1C2836;
+--kr-bg:#3A1518;--kr:#FF8A80;--kr-ink:#FFCDC9;--kr-ink2:#FFB4AE;--uy-bg:#3A2A10;--uy:#F5B83D;--uy-ink:#FFE2A8;--bl-bg:#1C2836;--bl:#9CC3F5;--iyi:#6EE7A0;--bos:#5A6678;--meter:#243346;
+--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#9085e9;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--zemin);color:var(--ink);font-family:'Archivo',system-ui,sans-serif}
+a{color:var(--s1)}a:hover{color:var(--ink)}
+.num{font-variant-numeric:tabular-nums;font-stretch:88%}
+.k{font-size:13px;color:var(--ink2)}
+.yer{display:flex;flex-wrap:wrap;min-height:100vh}
+.nav{flex:1 1 232px;max-width:260px;background:var(--nav);padding:24px 16px;display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:var(--nav-ink);font-size:14px;min-height:44px}
+.nav a:hover{background:var(--nav-hover);color:#fff}
+.nav a[aria-current]{background:#fff;color:#10233F;font-weight:600}
+.rozet{margin-left:auto;font-size:12px;font-weight:700;border-radius:10px;padding:1px 8px}
+main{flex:999 1 560px;min-width:0;padding:28px 32px 48px;display:flex;flex-direction:column;gap:24px;max-width:1240px}
+.panel{background:var(--panel);border-radius:14px;border:1px solid var(--kenar);padding:22px 24px}
+h1{margin:0;font-size:34px;line-height:1.1;font-weight:700;font-stretch:105%}
+h2{margin:0;font-size:20px;font-weight:700}
+.btn{font:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:40px;border:1px solid var(--kenar);background:var(--panel);color:var(--ink)}
+.btn.koyu{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+:focus-visible{outline:2px solid #86b6ef;outline-offset:2px}
+.uyari{display:flex;gap:12px;padding:10px 12px;border-radius:10px}
+.uyari.kritik{background:var(--kr-bg)}.uyari.uyari_{background:var(--uy-bg)}.uyari.bilgi{background:var(--bl-bg)}
+.uyari .b{font-size:15px;font-weight:650}.uyari .d{font-size:13px;margin-top:2px}
+.kritik .b{color:var(--kr-ink)}.kritik .d{color:var(--kr-ink2)}.uyari_ .b,.uyari_ .d{color:var(--uy-ink)}.bilgi .b{color:var(--ink)}.bilgi .d{color:var(--ink2)}
+.sev{margin-left:auto;font-size:12px;font-weight:700;flex:none}
+.sayac{padding:4px 18px;border-left:1px solid var(--cizgi);display:flex;flex-direction:column;gap:10px;min-width:0}
+.sayaclar{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.sayaclar .sayac:first-child{border-left:0;padding-left:0}
+.buyuk{font-size:24px;font-weight:700}.birim{font-size:13px;font-weight:500;color:var(--ink2)}
+.durum{font-size:13px;display:flex;align-items:center;gap:6px}
+.kare{width:14px;height:14px;border-radius:3px;display:inline-block}
+@media (max-width:760px){.nav{max-width:none;flex-basis:100%;flex-direction:row;flex-wrap:wrap;padding:12px}.nav .bosluk,.nav .marka small{display:none}main{padding:20px 16px 40px}.sayac{border-left:0;padding:12px 0;border-top:1px solid var(--cizgi)}}
+@media (prefers-reduced-motion:no-preference){.uyari{transition:background .2s}}
+</style>
+</head>
+<body>
+<div class="yer">
+<nav class="nav" aria-label="Ana menü">
+<div class="marka" style="display:flex;align-items:center;gap:10px;padding:4px 12px 20px">
+<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="#eda100" stroke-width="2.5"/><path d="M15 6 L15 24 M9 15 L21 15" stroke="#eda100" stroke-width="2.5" stroke-linecap="round"/></svg>
+<div><div style="font-size:18px;font-weight:700;color:#fff;font-stretch:110%">Otocoin</div><small style="font-size:12px;color:#9FB0C6">Tekyıldız GES ve madencilik</small></div>
+</div>
+<a href="/" aria-current="page">Genel bakış</a>
+<a href="#sayaclar">Sayaçlar ve mahsup</a>
+<a href="#inverter">İnverterler{% if inverter_uyari %}<span class="rozet" style="background:#B42318;color:#fff">{{ inverter_uyari }}</span>{% endif %}</a>
+<a href="#madencilik">Madencilik{% if madencilik_uyari %}<span class="rozet" style="background:#C98500;color:#10233F">{{ madencilik_uyari }}</span>{% endif %}</a>
+<a href="#gelir">Gelir dağılımı</a>
+<a href="#uyarilar">Uyarılar{% if uyari_kritik %}<span class="rozet" style="background:#B42318;color:#fff">{{ uyari_kritik }}</span>{% endif %}</a>
+<div class="bosluk" style="flex:1 1 auto;min-height:24px"></div>
+<button class="btn" id="tema" type="button" style="background:transparent;color:var(--nav-ink);border-color:#2A3D58">Koyu / açık tema</button>
+</nav>
+
+<main>
+<header style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+<div>
+<h1>Genel bakış</h1>
+<p style="margin:6px 0 0;font-size:15px;color:var(--ink2)">{{ tarih_metin }}.{% if son_veri %} Sayaç verisi saat {{ son_veri }}'a kadar{% endif %}{% if madencilik.ts %}, saha verisi {{ madencilik.ts }} itibarıyla{% endif %}.</p>
+</div>
+<form method="post" action="/api/uyarilar/whatsapp"><button class="btn koyu" type="submit">Uyarıları WhatsApp'a gönder</button></form>
+</header>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px">
+<section class="panel" id="uyarilar" aria-labelledby="h-uyari" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><h2 id="h-uyari">Dikkat isteyenler</h2><span class="k">{{ uyari_sayisi }} kayıt</span></div>
+{% if uyarilar %}
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px">
+{% for u in uyarilar %}
+<li class="uyari {{ 'uyari_' if u.seviye == 'uyari' else u.seviye }}">
+{% if u.seviye == 'kritik' %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kr)" stroke-width="2.2" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+{% elif u.seviye == 'uyari' %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--uy)" stroke-width="2.2" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 3l10 18H2z"/><path d="M12 10v4.5M12 17.5v.5"/></svg>
+{% else %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--bl)" stroke-width="2.2" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>{% endif %}
+<div><div class="b">{{ u.baslik }}</div>{% if u.detay %}<div class="d">{{ u.detay }}</div>{% endif %}</div>
+<span class="sev" style="color:{{ 'var(--kr)' if u.seviye=='kritik' else ('var(--uy)' if u.seviye=='uyari' else 'var(--bl)') }}">{{ {'kritik':'Kritik','uyari':'Uyarı','bilgi':'Bilgi'}[u.seviye] }}</span>
+</li>
+{% endfor %}
+</ul>
+{% else %}<p class="k" style="margin:0">Şu an dikkat isteyen bir şey yok.</p>{% endif %}
+</section>
+
+{% if denge %}
+<section class="panel" aria-labelledby="h-denge" style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><h2 id="h-denge">{{ denge.ay_ad }} enerji dengesi</h2><span class="k">Saatlik mahsup, {{ denge.aralik }}</span></div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Üretim (T1 + T2)</span><span class="num" style="font-size:22px;font-weight:700">{{ sayi(denge.u) }} <span class="birim">kWh</span></span></div>
+<div style="display:flex;gap:2px;height:26px;width:{{ '%.1f'|format(denge.u_gen) }}%"><div style="flex:{{ denge.m|round|int }} 1 0;background:var(--s3);border-radius:4px 0 0 4px"></div><div style="flex:{{ denge.b|round|int }} 1 0;background:var(--s4);border-radius:0 4px 4px 0"></div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Tüketim (T1 + T2 + A3)</span><span class="num" style="font-size:22px;font-weight:700">{{ sayi(denge.t) }} <span class="birim">kWh</span></span></div>
+<div style="display:flex;gap:2px;height:26px;width:{{ '%.1f'|format(denge.t_gen) }}%"><div style="flex:{{ denge.m|round|int }} 1 0;background:var(--s3);border-radius:4px 0 0 4px"></div><div style="flex:{{ denge.sebeke|round|int }} 1 0;background:var(--s2);border-radius:0 4px 4px 0"></div></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div><div class="k" style="display:flex;align-items:center;gap:6px"><span class="kare" style="width:10px;height:10px;background:var(--s3)"></span>Mahsuplaşan</div><div class="num" style="font-size:20px;font-weight:700">{{ sayi(denge.m) }}</div></div>
+<div><div class="k" style="display:flex;align-items:center;gap:6px"><span class="kare" style="width:10px;height:10px;background:var(--s4)"></span>Bedelli satış</div><div class="num" style="font-size:20px;font-weight:700">{{ sayi(denge.b) }}</div></div>
+<div><div class="k" style="display:flex;align-items:center;gap:6px"><span class="kare" style="width:10px;height:10px;background:var(--s2)"></span>Şebekeden alınan</div><div class="num" style="font-size:20px;font-weight:700">{{ sayi(denge.sebeke) }}</div></div>
+</div>
+<div style="border-top:1px solid var(--cizgi);padding-top:14px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:600">2026 bedelli satış limiti</span><span class="num" style="font-size:14px"><strong>{{ sayi(bedelli.bedelli) }}</strong> / {{ sayi(bedelli.bedelli_limit) }} kWh</span></div>
+<div role="meter" aria-label="Bedelli satış limiti kullanımı" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (bedelli.bedelli_oran*100)|round|int }}" style="height:10px;background:var(--meter);border-radius:5px;overflow:hidden"><div style="width:{{ '%.1f'|format(bedelli.bedelli_oran*100) }}%;height:100%;background:{{ 'var(--kr)' if bedelli.bedelli_oran>=0.95 else ('var(--uy)' if bedelli.bedelli_oran>=0.8 else 'var(--iyi)') }};border-radius:5px"></div></div>
+<div class="k">Yüzde {{ '%.1f'|format(bedelli.bedelli_oran*100)|replace('.',',') }} kullanıldı. Yüzde 80'de uyarı verilir.</div>
+</div>
+</section>
+{% endif %}
+</div>
+
+<section class="panel" id="sayaclar" aria-labelledby="h-abone" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px"><h2 id="h-abone">Sayaçlar</h2><span class="k">Son veri günü, son 30 gün çizgisi</span></div>
+<div class="sayaclar">
+{% for s in sayaclar %}
+<div class="sayac">
+<div style="display:flex;align-items:center;gap:8px"><span class="kare" style="width:12px;height:12px;background:var(--s{{ s.renk }})"></span><span style="font-size:17px;font-weight:700">{{ s.kod }}</span><span class="k" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.ad }}</span></div>
+<div class="k">{{ s.tesisat }}, {{ 'mahsupta' if s.mahsup else 'sadece izleme' }}</div>
+{% if s.veri_var %}
+{% if s.uretim %}
+<div><div class="k">Üretim</div><div class="num buyuk" {% if s.durum=='kritik' %}style="color:var(--kr)"{% endif %}>{{ sayi(s.bugun_u) }} <span class="birim">kWh</span></div></div>
+<div class="k">Tüketim <span class="num" style="color:var(--ink);font-weight:600">{{ sayi(s.bugun_t) }} kWh</span></div>
+{% else %}
+<div><div class="k">Tüketim</div><div class="num buyuk">{{ sayi(s.bugun_t) }} <span class="birim">kWh</span></div></div>
+<div class="k">Üretim yok</div>
+{% endif %}
+<svg width="100%" height="40" viewBox="0 0 174 40" preserveAspectRatio="none" role="img" aria-label="{{ s.kod }} son 30 gün {{ s.cizgi_ad }}" style="max-width:200px"><polyline fill="none" stroke="var(--s{{ s.renk }})" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke" points="{{ s.cizgi }}" transform="translate(0,2)"/></svg>
+<div class="k">{{ s.gun[8:]|int }}.{{ s.gun[5:7] }} saat {{ s.son_saat }}:00'a kadar{% if s.inverter_metin %}. {{ s.inverter_metin }}{% endif %}</div>
+{% else %}
+<div style="height:40px;border:1px dashed var(--kenar);border-radius:8px;display:flex;align-items:center;justify-content:center" class="k">Henüz veri yok</div>
+{% endif %}
+<div class="durum" style="color:{{ 'var(--kr)' if s.durum=='kritik' else ('var(--uy)' if s.durum=='uyari' else 'var(--iyi)') }};font-weight:{{ '600' if s.durum!='iyi' else '400' }}">
+{% if s.durum=='iyi' %}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>{% else %}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>{% endif %}{{ s.durum_metin }}</div>
+</div>
+{% endfor %}
+</div>
+</section>
+
+{% if trend %}
+<section class="panel" aria-labelledby="h-trend" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px"><h2 id="h-trend">Mahsup havuzu, son 30 gün</h2>
+<div style="display:flex;gap:18px;font-size:13px;color:var(--ink2)"><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;border-radius:2px;background:var(--s1)"></span>Üretim (T1 + T2)</span><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;border-radius:2px;background:var(--s2)"></span>Tüketim (T1 + T2 + A3)</span></div></div>
+<div style="overflow-x:auto"><svg viewBox="0 0 900 222" width="100%" style="min-width:640px;display:block" role="img" aria-label="Son 30 günün günlük üretim ve tüketimi">
+<g font-family="Archivo, sans-serif" font-size="11" fill="var(--ink2)">
+{% for y, et in trend.izgara %}<line x1="48" y1="{{ '%.1f'|format(y) }}" x2="900" y2="{{ '%.1f'|format(y) }}" stroke="var(--cizgi)"/><text x="40" y="{{ '%.1f'|format(y+4) }}" text-anchor="end">{{ et }}</text>{% endfor %}
+{% for x, et in trend.etiketler %}<text x="{{ '%.1f'|format(x) }}" y="212" text-anchor="{{ 'end' if loop.last else 'start' }}">{{ et }}</text>{% endfor %}
+</g>
+<g transform="translate(52,10)">
+<polyline fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round" points="{{ trend.t }}"/>
+<polyline fill="none" stroke="var(--s1)" stroke-width="2.5" stroke-linejoin="round" points="{{ trend.u }}"/>
+</g></svg></div>
+</section>
+{% endif %}
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+<section class="panel" id="inverter" aria-labelledby="h-inv" style="display:flex;flex-direction:column;gap:14px">
+<h2 id="h-inv">İnverterler</h2>
+{% set f = inverter.fusion %}
+<div><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">FusionSolar, T1 ve T2</span>
+{% if fusion_bayat %}<span style="font-size:12px;font-weight:700;color:var(--kr)">Veri yok</span>{% else %}<span style="font-size:12px;font-weight:700;color:var(--iyi)">Güncel</span>{% endif %}</div>
+<div class="k">{{ f.santral or '—' }} santral, {{ f.inverter or '—' }} inverter{% if f.ts_metin %}. Son kayıt {{ f.ts_metin }}.{% endif %}</div></div>
+{% for ps, s in inverter.sungrow.santraller.items() %}
+<div style="border-top:1px solid var(--cizgi);padding-top:12px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">Sungrow, {{ s.ad }}</span>
+{% if s.sebeke == 0 and s.gunluk_kwh <= 0 %}<span style="font-size:12px;font-weight:700;color:var(--kr)">Şebekede değil</span>{% elif s.inv_uretmeyen %}<span style="font-size:12px;font-weight:700;color:var(--uy)">{{ s.inv_uretmeyen }} inverter durgun</span>{% else %}<span style="font-size:12px;font-weight:700;color:var(--iyi)">Normal</span>{% endif %}</div>
+<div class="k">{{ s.kapasite_mwp }} MWp, {{ s.inverterler|length }} inverter, bugün {{ sayi(s.gunluk_kwh) }} kWh{% if s.inv_ariza %}, {{ s.inv_ariza }} arızada{% endif %}.</div></div>
+{% else %}
+<div style="border-top:1px solid var(--cizgi);padding-top:12px"><div style="display:flex;justify-content:space-between"><span style="font-size:15px;font-weight:650">Sungrow</span><span style="font-size:12px;font-weight:700;color:var(--bl)">Veri yok</span></div><div class="k">Toplayıcının veritabanı bu sunucuda bulunamadı.</div></div>
+{% endfor %}
+<div style="border-top:1px solid var(--cizgi);padding-top:12px"><div style="display:flex;justify-content:space-between"><span style="font-size:15px;font-weight:650">Inavitas, AE</span>
+{% if not inverter.inavitas.bagli %}<span style="font-size:12px;font-weight:700;color:var(--bl)">Bağlı değil</span>{% elif inverter.inavitas.hata %}<span style="font-size:12px;font-weight:700;color:var(--uy)">Hata</span>{% else %}<span style="font-size:12px;font-weight:700;color:var(--iyi)">Bağlı</span>{% endif %}</div>
+{% for p in inverter.inavitas.veri or [] %}<div class="k">{{ p.ad }}: bugün {{ p.ozet.uretim_mwh or 0 }} MWh, {{ p.inverterler|length }} inverter.</div>{% else %}<div class="k">{{ inverter.inavitas.hata or 'Giriş bilgileri tanımlanınca santral burada görünecek.' }}</div>{% endfor %}</div>
+</section>
+
+<section class="panel" id="madencilik" aria-labelledby="h-mine" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><h2 id="h-mine">Madencilik</h2><span class="k">Saha PC {{ madencilik.ts or '—' }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+<div><div class="k">Çalışan cihaz</div><div class="num buyuk">{{ madencilik.online }} <span class="birim" style="font-size:15px">/ {{ madencilik.toplam }}</span></div></div>
+<div><div class="k">Toplam hash</div><div class="num buyuk">{{ sayi(madencilik.hash) }} <span class="birim">TH/s</span></div></div>
+<div><div class="k">Hedefe göre</div><div class="num buyuk">%{{ madencilik.verim|round|int }}</div></div>
+<div><div class="k">Ortalama sıcaklık</div><div class="num buyuk">{{ madencilik.sicaklik|round|int if madencilik.sicaklik else '—' }} <span class="birim">°C</span></div></div>
+</div>
+<div style="display:flex;gap:3px;flex-wrap:wrap" role="img" aria-label="{{ madencilik.toplam }} cihazın durumu, {{ madencilik.online }} çalışıyor">
+{% for c in madencilik.cihazlar %}<span class="kare" title="{{ c.etiket }}" style="background:{{ 'var(--iyi)' if c.durum=='iyi' else ('var(--bos)' if c.durum=='kapali' else 'var(--kr)') }}"></span>{% endfor %}
+</div>
+<div class="k">Yeşil çalışıyor, kırmızı yanıt vermiyor, gri çevrimdışı.</div>
+</section>
+
+<section class="panel" id="gelir" aria-labelledby="h-gelir" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><h2 id="h-gelir">Mining geliri</h2><span class="k">F2Pool, aylık BTC</span></div>
+{% if gelir %}
+<div><div class="k">{{ gelir.son_ay }}</div><div class="num buyuk">{{ '%.5f'|format(gelir.son_btc)|replace('.',',') }} BTC <span class="birim" style="font-size:15px">≈ {{ sayi(gelir.son_tl) }} ₺</span></div></div>
+<svg viewBox="0 0 280 110" width="100%" role="img" aria-label="Aylık BTC geliri">
+<g font-family="Archivo, sans-serif" font-size="11" fill="var(--ink2)" text-anchor="middle">
+{% for b in gelir.barlar %}<rect x="{{ b.x }}" y="{{ '%.1f'|format(89-b.h) }}" width="32" height="{{ '%.1f'|format(b.h) }}" rx="4" fill="var(--s1)" {% if b.kismi %}opacity="0.45"{% endif %}><title>{{ b.ad }}: {{ '%.5f'|format(b.btc) }} BTC</title></rect><text x="{{ b.x+16 }}" y="104">{{ b.ad }}</text>{% endfor %}
+<line x1="0" y1="89" x2="280" y2="89" stroke="var(--kenar)"/></g></svg>
+<div class="k">Soluk sütun içinde bulunulan ay. TL karşılığı güncel kurla.</div>
+{% else %}<p class="k">F2Pool arşivi okunamadı.</p>{% endif %}
+</section>
+</div>
+</main>
+</div>
+<script>
+document.getElementById('tema').addEventListener('click',function(){var r=document.documentElement;var koyu=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=koyu?'light':'dark';try{localStorage.setItem('aesun-tema',r.dataset.theme);}catch(e){}});
+</script>
+</body>
+</html>

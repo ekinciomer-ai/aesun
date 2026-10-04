@@ -56,3 +56,13 @@ python toplayicilar/inavitas.py 2026-10-03   # belirli gün
 - `aesun/mahsup.py`: Eski paneldeki mahsup hesabının Python karşılığı. Eski panelle aynı sonucu veriyor.
 - `aesun/aboneler.py`: Abone kayıtları.
 - `tasarim/genel-bakis.dc.html`: Ana sayfa taslağı (onay bekliyor).
+
+## Paneli çalıştırma
+
+```
+python app.py                 # http://localhost:8080
+```
+
+Veri kaynakları: `AESUN_VERI_DIZIN` (yerel epias-ptf klasörü) tanımlı değilse JSON'lar GitHub'dan okunur.
+Sungrow verisi için `AESUN_DB` toplayıcının veritabanını göstermeli. WhatsApp için `TWILIO_SID`,
+`TWILIO_TOKEN` ve `AESUN_WHATSAPP_KIME` (virgülle ayrılmış `whatsapp:+90...` numaraları) gerekir.

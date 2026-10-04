@@ -68,6 +68,8 @@ RSA_PUBLIC = os.getenv("SUNGROW_RSA_PUBLIC", "").strip()
 DB_PATH = os.getenv("AESUN_DB", "aesun_sungrow.db")
 POLL_SECONDS = int(os.getenv("POLL_SECONDS", "300"))
 TOKEN_FILE = Path(os.getenv("SUNGROW_TOKEN_FILE", ".sungrow_token.json"))
+# Takip edilmeyecek santraller (ps_id). Akbulut GES (5052814) bize ait degil.
+HARIC_PS = {"5052814"} | {x.strip() for x in os.getenv("SUNGROW_HARIC", "").split(",") if x.strip()}
 
 # Santral (device_type 11) ölçüm noktaları
 PLANT_POINTS = {
@@ -216,7 +218,7 @@ class SungrowClient:
             rows = rd.get("pageList") or []
             out += rows
             if len(out) >= int(rd.get("rowCount") or 0) or not rows:
-                return out
+                return [p for p in out if str(p.get("ps_id")) not in HARIC_PS]
             page += 1
 
     def devices(self, ps_id) -> list[dict]:
@@ -260,6 +262,9 @@ def _num(v):
 def collect(cli: SungrowClient, con: sqlite3.Connection) -> int:
     now = datetime.now(timezone.utc).replace(second=0, microsecond=0).isoformat()
     n = 0
+    for ps in HARIC_PS:  # haric tutulan santrallerin eski kayitlarini temizle
+        for t in ("sg_reading", "sg_device", "sg_plant"):
+            con.execute(f"DELETE FROM {t} WHERE ps_id=?", (ps,))
     plants = cli.plants()
     for p in plants:
         ps_id = str(p.get("ps_id"))

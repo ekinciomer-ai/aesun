@@ -1,9 +1,9 @@
 [Unit]
-Description=aesun Pi nabzi - 5 dakikada bir
+Description=aesun Pi nabzi - 10 dakikada bir
 
 [Timer]
 OnBootSec=1min
-OnUnitActiveSec=5min
+OnUnitActiveSec=10min
 Persistent=true
 
 [Install]

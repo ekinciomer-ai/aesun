@@ -1,0 +1,11 @@
+[Unit]
+Description=PTF: her gun 13:00-18:00 arasi 10 dk'da bir
+
+[Timer]
+OnCalendar=*-*-* 13..17:00/10:00 Europe/Istanbul
+OnCalendar=*-*-* 18:00:00 Europe/Istanbul
+OnBootSec=2min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

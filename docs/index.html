@@ -93,6 +93,7 @@ input[type=date]{font:inherit;font-size:15px;border:1px solid #B9C4D2;border-rad
 <script>
 const KOK = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/';
 const LIMIT_2026 = 2905914;
+const ESLE = { T1: 'fusionsolar:NE=59224704', T2: 'fusionsolar:NE=73686040', YD: 'sungrow:5064453' }, ESLE_KISA = { T1: 'Sera-1', T2: 'Sera-2' };
 const SAYAC = [
   { key: 'tekyildiz_1', kod: 'T1', ad: 'Tekyıldız 1', renk: '#2a78d6', mahsup: true, uretir: true },
   { key: 'tekyildiz_2', kod: 'T2', ad: 'Tekyıldız 2', renk: '#eb6834', mahsup: true, uretir: true },
@@ -443,12 +444,21 @@ function cizSayac() {
   let govde = '';
   if (sekme === 'sayac') {
     const veri = sc => ((osos[sc.key] || {}).veri || {})[secGun] || {};
+    const yilS = Number(secGun.slice(0, 4));
+    if (!INV_CACHE[yilS] && !invYukleniyor) { invYukleniyor = true; invYilYukle(yilS).then(() => { invYukleniyor = false; if (location.hash.startsWith('#sayac')) cizSayac(); }).catch(() => { invYukleniyor = false; }); }
+    const invS = INV_CACHE[yilS] ? invBirlestir(INV_CACHE[yilS]) : {};
+    const bugunMu = secGun === bugunTR();
+    const invSaat = kod => { const k = ESLE[kod]; if (!k || !k.startsWith('fusionsolar')) return null; if (bugunMu) return (D.fs && D.fs.saatlik_bugun || {})[ESLE_KISA[kod]] || null; const x = invS[k]; return x && x.saat && x.saat[secGun] || null; };
+    const invGun = (kod, g) => { const k = ESLE[kod]; if (!k) return null; if (g === bugunTR()) { if (!k.startsWith('fusionsolar') || !D.fs) return null; const t = Object.values(D.fs.tesisler || {}).find(x => x.kisa === ESLE_KISA[kod]); return t ? t.bugun_kwh : null; } const x = invS[k]; return x && x.gun[g] != null ? +x.gun[g] : null; };
+    const saatInv = {}; for (const sc of SAYAC) saatInv[sc.kod] = invSaat(sc.kod);
     let th1 = '<th class="sol" rowspan="2">Saat</th>', th2 = '';
     for (const sc of SAYAC) {
-      th1 += '<th class="ayr" style="text-align:center" colspan="' + (sc.uretir ? 2 : 1) + '"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + sc.renk + ';margin-right:6px"></span><b style="color:#10233F">' + sc.kod + '</b> ' + esc(sc.ad) + '</th>';
-      th2 += (sc.uretir ? '<th class="ayr">Üretim</th><th>Tüketim</th>' : '<th class="ayr">Tüketim</th>');
+      const iv = sc.uretir && saatInv[sc.kod];
+      th1 += '<th class="ayr" style="text-align:center" colspan="' + (sc.uretir ? (iv ? 4 : 2) : 1) + '"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + sc.renk + ';margin-right:6px"></span><b style="color:#10233F">' + sc.kod + '</b> ' + esc(sc.ad) + '</th>';
+      th2 += (sc.uretir ? '<th class="ayr">Üretim</th>' + (iv ? '<th title="İnverter üretimi (FusionSolar)">İnverter</th><th title="İnverter üretimi − sayaç verişi">İç tük.</th>' : '') + '<th>Tüketim</th>' : '<th class="ayr">Tüketim</th>');
     }
-    const top = SAYAC.map(() => ({ u: 0, t: 0 }));
+    const top = SAYAC.map(() => ({ u: 0, t: 0, i: 0, f: 0, ei: 0, eu: 0 }));
+    const sonSaat = sc => bugunMu ? Object.keys(veri(sc)).sort().pop() : null;
     let satir = '';
     for (let h = 0; h < 24; h++) {
       const s = String(h).padStart(2, '0');
@@ -456,14 +466,33 @@ function cizSayac() {
       SAYAC.forEach((sc, i) => {
         const x = veri(sc)[s];
         if (x) { top[i].u += +x.veris || 0; top[i].t += +x.cekis || 0; }
-        if (sc.uretir) satir += hucre(x ? x.veris : 0, !!x).replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"') + hucre(x ? x.cekis : 0, !!x);
+        const iv = sc.uretir && saatInv[sc.kod];
+        let ek = '';
+        if (iv) { const v = iv[s]; const tam = x && s !== sonSaat(sc); const fark = v != null && tam ? Math.max(0, v - (+x.veris || 0)) : null; if (v != null) top[i].i += +v; if (fark != null) { top[i].f += fark; top[i].ei += +v; top[i].eu += +x.veris || 0; } ek = hucre(v || 0, v != null) + hucre(fark || 0, fark != null); }
+        if (sc.uretir) satir += hucre(x ? x.veris : 0, !!x).replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"') + ek + hucre(x ? x.cekis : 0, !!x);
         else satir += hucre(x ? x.cekis : 0, !!x).replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"');
       });
       satir += '</tr>';
     }
-    satir += '<tr class="top"><td class="sol">Toplam</td>' + SAYAC.map((sc, i) => sc.uretir ? '<td class="ayr">' + say(top[i].u) + '</td><td>' + say(top[i].t) + '</td>' : '<td class="ayr">' + say(top[i].t) + '</td>').join('') + '</tr>';
+    satir += '<tr class="top"><td class="sol">Toplam</td>' + SAYAC.map((sc, i) => sc.uretir ? '<td class="ayr">' + say(top[i].u) + '</td>' + (saatInv[sc.kod] ? '<td>' + say(top[i].i) + '</td><td>' + say(top[i].f) + '</td>' : '') + '<td>' + say(top[i].t) + '</td>' : '<td class="ayr">' + say(top[i].t) + '</td>').join('') + '</tr>';
     govde = '<h2>OSOS sayaç verisi</h2><div class="tablo-kutu"><table class="tb"><thead><tr>' + th1 + '</tr><tr>' + th2 + '</tr></thead><tbody>' + satir + '</tbody></table></div>'
-      + '<div class="k">Boş hücre o saatin sayaç verisi henüz gelmedi demek. Saat 13:00 satırı 13:00–14:00 arasını gösterir.</div>';
+      + '<div class="k">Boş hücre o saatin verisi henüz gelmedi demek. Saat 13:00 satırı 13:00–14:00 arasını gösterir. İnverter: FusionSolar saatlik üretimi (5 dk güç ortalamasından, yaklaşık). İç tük.: inverter üretiminin sayaca veriş olarak düşmeyen kısmı (sayaç arkası tüketim ve kayıplar).</div>';
+    // Günlük ve yıllık karşılaştırma
+    const kar = ['T1', 'T2', 'YD'].map(kod => {
+      const sc = SAYAC.find(x => x.kod === kod), o = (osos[sc.key] || {}).veri || {};
+      let gv = gunluk(osos, sc.key, secGun), ig = invGun(kod, secGun);
+      const ti = SAYAC.indexOf(sc);
+      if (bugunMu) { if (saatInv[kod]) { gv = { veris: top[ti].eu }; ig = top[ti].ei; } else ig = null; }
+      let yI = 0, yV = 0, yC = 0, n = 0;
+      for (const g of Object.keys(o)) if (g.startsWith(secGun.slice(0, 4)) && g <= secGun) { const iv = invGun(kod, g), gg = gunluk(osos, sc.key, g); if (iv != null && gg && gg.saat >= 24) { yI += iv; yV += gg.veris; yC += gg.cekis; n++; } }
+      return { kod, sc, gv, ig, yI, yV, yC, n };
+    });
+    const pc = (a, b) => b > 0 ? say((a - b) / b * 100, 1) + '%' : '—';
+    govde += '<h2 style="margin-top:8px">İnverter ve sayaç karşılaştırması</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol" rowspan="2">Abone</th><th class="ayr" colspan="4" style="text-align:center">' + tarihK(secGun) + '</th><th class="ayr" colspan="4" style="text-align:center">' + secGun.slice(0, 4) + ' başından (tam günler)</th></tr><tr><th class="ayr">İnverter</th><th>Sayaç veriş</th><th>İç tüketim</th><th>Oran</th><th class="ayr">İnverter</th><th>Sayaç veriş</th><th>İç tüketim</th><th>Gün</th></tr></thead><tbody>'
+      + kar.map(r => '<tr><td class="sol"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + r.sc.renk + ';margin-right:6px"></span><b>' + r.kod + '</b> ' + esc(r.sc.ad) + '</td>'
+        + '<td class="ayr">' + (r.ig == null ? '—' : say(r.ig)) + '</td><td>' + (r.gv ? say(r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? say(r.ig - r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? pc(r.ig, r.gv.veris) : '—') + '</td>'
+        + '<td class="ayr">' + (r.n ? say(r.yI) : '—') + '</td><td>' + (r.n ? say(r.yV) : '—') + '</td><td><b>' + (r.n ? say(r.yI - r.yV) : '—') + '</b></td><td>' + r.n + '</td></tr>').join('')
+      + '</tbody></table></div><div class="k">İç tüketim = inverter üretimi − sayaç verişi; üretim saatlerinde sayaç arkasında tüketilen enerji ile trafo/kablo kayıplarını içerir. Oran, inverterin sayaçtan ne kadar fazla gösterdiğidir. Bugün için yalnız iki tarafın da verisi tamamlanmış saatler karşılaştırılır. T1/T2 FusionSolar (Sera-1/Sera-2), YD Sungrow (Darılmaz) verisidir; YD için saatlik inverter verisi yok. ' + (INV_CACHE[yilS] ? '' : 'İnverter verisi yükleniyor…') + '</div>';
   } else {
     const m = mahsupGun(osos, secGun);
     const ab = { T1: 0, T2: 0, A3: 0 }, tAb = { T1: 0, T2: 0, A3: 0 }, uAb = { T1: 0, T2: 0 }, kay = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };
@@ -507,6 +536,7 @@ function invBirlestir(dosyalar) {
     const t = S[key] || (S[key] = { key, kaynak: f.kaynak, id, ad: s.ad, kwp: s.kwp, gun: {}, ay: {}, inv: {} });
     if (s.kwp) t.kwp = s.kwp;
     Object.assign(t.gun, s.gun || {}); Object.assign(t.ay, s.ay || {});
+    if (s.saat) t.saat = Object.assign(t.saat || {}, s.saat);
     for (const [ik, iv] of Object.entries(s.inv || {})) {
       const ti = t.inv[ik] || (t.inv[ik] = { key: ik, ad: iv.ad, kwp: iv.kwp, gun: {}, ay: {} });
       if (iv.kwp) ti.kwp = iv.kwp;

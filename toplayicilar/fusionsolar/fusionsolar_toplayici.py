@@ -513,6 +513,10 @@ class Collector:
                                                (str(yil), bugun)):
                 if dn in veri["santraller"] and kwh is not None:
                     veri["santraller"][dn]["gun"][d] = round(kwh, 1)
+            for dn, h, kwh in self.con.execute("SELECT dn, hour, kwh FROM station_hour WHERE substr(hour,1,4)=? AND substr(hour,1,10)<?",
+                                               (str(yil), bugun)):
+                if dn in veri["santraller"] and kwh is not None:
+                    veri["santraller"][dn].setdefault("saat", {}).setdefault(h[:10], {})[h[11:13]] = round(kwh, 1)
             for dn, st, d, kwh in self.con.execute(
                     "SELECT dn, station_dn, substr(ts,1,10) d, MAX(gunluk_kwh) FROM inverter_real "
                     "WHERE substr(ts,1,4)=? AND substr(ts,1,10)<? GROUP BY dn, d", (str(yil), bugun)):
@@ -578,6 +582,8 @@ class Collector:
             time.sleep(1)
         for m in sorted(months):
             self._safe(self.month, m)
+        if self.gh_token:
+            self.gecmis_yaz(sorted({m.year for m in months}))
 
     def forever(self):
         jobs = [("meta", self.meta), ("station", self.stations), ("inverter", self.inverters),

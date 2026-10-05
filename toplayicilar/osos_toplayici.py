@@ -35,7 +35,7 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 ABONE = [
     ("80010874", "AE", "29456", 1575, "aksaray_enerji"),
     ("11116344", "T1", "138134", 1890, "tekyildiz_1"),
-    ("11116968", "T2", "203573", 1890, "tekyildiz_2"),
+    # ("11116968", "T2", "203573", 1890, "tekyildiz_2"),  # MEDAŞ listesinden çıkmış, MEDAŞ ile görüşülecek (05.10.2026)
     ("11111411", "Anka", "71195", 6300, "anka_mineral"),
     ("11201655", "YD", "26904", 1260, "yilmaz_darilmaz"),
     ("11200108", "A3", "11657", 3150, "aksaray_3"),

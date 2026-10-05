@@ -75,7 +75,7 @@ input[type=date]{font:inherit;font-size:15px;border:1px solid #B9C4D2;border-rad
   <a href="#inverterler"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>İnverterler<span id="r-inv"></span></a>
   <a href="#inverter" data-sayfa="inverter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20h18M6 16V10M10 16V6M14 16v-4M18 16V8"/></svg>İnverter analizi</a>
   <a href="#madencilik"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2M15 10v4"/></svg>Madencilik<span id="r-mad"></span></a>
-  <a href="#piyasa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 6"/></svg>Piyasa (PTF)</a>
+  <a href="#epias" data-sayfa="epias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 6"/></svg>EPİAŞ</a>
   <a href="#genel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>Uyarılar<span id="r-uy"></span></a>
   <div class="bosluk" style="flex:1 1 auto;min-height:24px"></div>
   <div class="k" style="color:#9FB0C6;padding:0 12px;font-size:12px" id="kaynakNot"></div>
@@ -742,13 +742,144 @@ function invCsv() {
   a.click();
 }
 
+// ===== EPİAŞ: PTF / SMF / YEKDEM geçmişi (n8n/epias_gecmis.json) =====
+let EP = null, epYukleniyor = null;
+const epSec = { yil: null, ay: 'yil', gun: null };
+const EP_RENK = { ptf: '#2a78d6', smf: '#eb6834', yek: '#1baf7a', top: '#6b5bd6' };
+function epYukle() {
+  if (EP) return Promise.resolve(EP);
+  if (!epYukleniyor) epYukleniyor = al('n8n/epias_gecmis.json').then(d => (EP = d)).finally(() => { epYukleniyor = null; });
+  return epYukleniyor;
+}
+const epDolu = a => (a || []).filter(x => x != null);
+const epOrt = a => { const v = epDolu(a); return v.length ? v.reduce((t, x) => t + x, 0) / v.length : null; };
+// Eski paneldeki kural: gerçekleşme varsa kesin; yoksa önceki ayın gerçekleşme/öngörü oranıyla düzeltilmiş tahmin; o da yoksa resmi öngörü
+function yekdemAy(ay) {
+  const Y = (EP && EP.yekdem) || {}, v = Y[ay];
+  if (!v) return null;
+  if (v.gercek != null) return { deger: v.gercek, durum: 'kesin', ad: 'Gerçekleşen', ongoru: v.ongoru, gercek: v.gercek, not: v.not };
+  const [y, a] = ay.split('-').map(Number), onc = (a === 1 ? (y - 1) + '-12' : y + '-' + String(a - 1).padStart(2, '0')), o = Y[onc];
+  if (v.ongoru != null && o && o.gercek != null && o.ongoru) { const kat = o.gercek / o.ongoru; return { deger: v.ongoru * kat, durum: 'tahmin', ad: 'Tahmin', ongoru: v.ongoru, kat, oncAy: onc, not: v.not }; }
+  if (v.ongoru != null) return { deger: v.ongoru, durum: 'ongoru', ad: 'Öngörü', ongoru: v.ongoru, not: v.not };
+  return null;
+}
+function epAyOzet(ay) {
+  const gunler = Object.keys(EP.ptf).filter(g => g.startsWith(ay));
+  const p = gunler.flatMap(g => epDolu(EP.ptf[g])), s = gunler.flatMap(g => epDolu((EP.smf || {})[g]));
+  const yk = yekdemAy(ay), pOrt = p.length ? p.reduce((t, x) => t + x, 0) / p.length : null;
+  return { ay, gun: gunler.length, pOrt, pMin: p.length ? Math.min(...p) : null, pMax: p.length ? Math.max(...p) : null, sOrt: s.length ? s.reduce((t, x) => t + x, 0) / s.length : null,
+    sifir: p.filter(x => x <= 1).length, yk, toplam: pOrt != null && yk ? pOrt + yk.deger : null };
+}
+function epCizgi(seriler, etiket, birim) {
+  const W = 900, H = 260, L = 56, R = 12, T = 12, B = 30, n = etiket.length;
+  const tum = seriler.flatMap(s => epDolu(s.v)); if (!tum.length || n < 2) return '<p class="k">Grafik için yeterli veri yok.</p>';
+  const max = Math.max(...tum) * 1.05 || 1, min = Math.min(0, ...tum);
+  const x = i => L + (W - L - R) * i / (n - 1), y = v => T + (H - T - B) * (1 - (v - min) / (max - min));
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = min + (max - min) * k / 4; g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="#EEF1F5"/><text x="' + (L - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#4A5A70">' + say(v) + '</text>'; }
+  const adim = Math.max(1, Math.ceil(n / 12));
+  etiket.forEach((e, i) => { if (i % adim === 0 || i === n - 1) g += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + esc(e) + '</text>'; });
+  for (const s of seriler) {
+    let d = '', ac = false;
+    s.v.forEach((v, i) => { if (v == null) { ac = false; return; } d += (ac ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; ac = true; });
+    g += '<path d="' + d + '" fill="none" stroke="' + s.renk + '" stroke-width="2" stroke-linejoin="round"' + (s.kesik ? ' stroke-dasharray="5 4"' : '') + '/>';
+  }
+  const lej = seriler.map(s => '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:16px"><span style="width:14px;height:3px;background:' + s.renk + ';display:inline-block"></span>' + esc(s.ad) + '</span>').join('');
+  return '<div class="k">' + lej + '<span style="float:right">' + esc(birim) + '</span></div><svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Fiyat grafiği" style="display:block">' + g + '</svg>';
+}
+async function cizEpias() {
+  document.getElementById('baslik').textContent = 'EPİAŞ';
+  const ic = document.getElementById('icerik');
+  if (!EP) { document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…'; document.getElementById('kontrol').innerHTML = ''; ic.innerHTML = '<div class="panel"><p class="k">EPİAŞ geçmişi yükleniyor…</p></div>'; }
+  try { await epYukle(); } catch (e) { ic.innerHTML = '<div class="panel hata">EPİAŞ geçmişi okunamadı: ' + esc(e.message || e) + '</div>'; return; }
+  if (!location.hash.startsWith('#epias')) return;
+  const gunler = Object.keys(EP.ptf).sort(), bugun = bugunTR(), yarin = gunEkle(bugun, 1);
+  const yillar = [...new Set(gunler.map(g => Number(g.slice(0, 4))))].sort((a, b) => b - a);
+  if (!epSec.yil || !yillar.includes(epSec.yil)) epSec.yil = Number(bugun.slice(0, 4));
+  if (!epSec.gun || !EP.ptf[epSec.gun]) epSec.gun = EP.ptf[yarin] ? yarin : (EP.ptf[bugun] ? bugun : gunler[gunler.length - 1]);
+  const ylS = String(epSec.yil), aylar = [...new Set(gunler.filter(g => g.startsWith(ylS)).map(g => g.slice(0, 7)))].sort();
+  if (epSec.ay !== 'yil' && !aylar.includes(epSec.ay)) epSec.ay = 'yil';
+  const donemGun = gunler.filter(g => epSec.ay === 'yil' ? g.startsWith(ylS) : g.startsWith(epSec.ay)).filter(g => g <= yarin);
+
+  document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Yıl <select onchange="epSec.yil=Number(this.value);epSec.ay=\'yil\';cizEpias()">' + yillar.map(y => '<option' + (y === epSec.yil ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></label>'
+    + '<label class="k" style="display:flex;align-items:center;gap:8px">Dönem <select onchange="epSec.ay=this.value;cizEpias()"><option value="yil">Tüm yıl</option>' + aylar.slice().reverse().map(m => '<option value="' + m + '"' + (m === epSec.ay ? ' selected' : '') + '>' + AYLAR[Number(m.slice(5)) - 1] + '</option>').join('') + '</select></label>'
+    + '<button class="btn" type="button" onclick="epCsv()">CSV indir</button>';
+  document.getElementById('altBaslik').textContent = 'PTF (GÖP), SMF (DGP) ve YEKDEM birim bedeli, TL/MWh. Veri ' + tarihK(gunler[0]) + ' ' + gunler[0].slice(0, 4) + ' – ' + tarihK(gunler[gunler.length - 1]) + ' ' + gunler[gunler.length - 1].slice(0, 4) + ' · güncelleme ' + saatTR(EP.guncellendi);
+
+  // Özet kartları
+  const pAll = donemGun.flatMap(g => epDolu(EP.ptf[g])), sAll = donemGun.flatMap(g => epDolu((EP.smf || {})[g]));
+  const ayOz = (epSec.ay === 'yil' ? aylar : [epSec.ay]).map(epAyOzet);
+  const ykAgir = (() => { let t = 0, n = 0; for (const o of ayOz) if (o.yk && o.pOrt != null) { t += o.yk.deger * o.gun; n += o.gun; } return n ? t / n : null; })();
+  const pOrt = epOrt(pAll), yp = EP.ptf[yarin] ? epOrt(EP.ptf[yarin]) : null, bp = EP.ptf[bugun] ? epOrt(EP.ptf[bugun]) : null;
+  const kart = (ad, v, alt, renk) => '<div class="panel" style="gap:6px;padding:18px 20px"><div class="k">' + ad + '</div><div class="num" style="font-size:28px;font-weight:700;color:' + (renk || '#10233F') + '">' + say(v, 0) + '</div><div class="k">' + alt + '</div></div>';
+  let h = '<div class="kartlar5">'
+    + kart('Bugün PTF ort.', bp, tarihK(bugun), EP_RENK.ptf)
+    + kart('Yarın PTF ort.', yp, yp == null ? 'henüz yayınlanmadı' : tarihK(yarin), EP_RENK.ptf)
+    + kart('Dönem PTF ort.', pOrt, pAll.length ? 'min ' + say(Math.min(...pAll)) + ' · max ' + say(Math.max(...pAll)) : '—', EP_RENK.ptf)
+    + kart('Dönem SMF ort.', epOrt(sAll), sAll.length + ' saat', EP_RENK.smf)
+    + kart('PTF + YEKDEM', pOrt != null && ykAgir != null ? pOrt + ykAgir : null, 'YEKDEM ' + (ykAgir == null ? 'yok' : say(ykAgir, 2)), EP_RENK.top)
+    + '</div>';
+
+  // Günlük ortalama grafiği
+  const gEt = donemGun.map(tarihK);
+  h += '<section class="panel"><div class="bas"><h2>Günlük ortalama fiyat</h2><span class="k">' + (epSec.ay === 'yil' ? ylS : AYLAR[Number(epSec.ay.slice(5)) - 1] + ' ' + ylS) + '</span></div>'
+    + epCizgi([{ ad: 'PTF', renk: EP_RENK.ptf, v: donemGun.map(g => epOrt(EP.ptf[g])) }, { ad: 'SMF', renk: EP_RENK.smf, v: donemGun.map(g => epOrt((EP.smf || {})[g])) }], gEt, 'TL/MWh') + '</section>';
+
+  // Saatlik profil (dönem ortalaması)
+  const prof = k => Array.from({ length: 24 }, (_, s) => epOrt(donemGun.map(g => ((EP[k] || {})[g] || [])[s])));
+  const pp = prof('ptf'), sp = prof('smf'), pmx = Math.max(1, ...epDolu(pp), ...epDolu(sp));
+  h += '<section class="panel"><div class="bas"><h2>Saatlik profil</h2><span class="k">dönem ortalaması, TL/MWh</span></div><div style="display:grid;grid-template-columns:repeat(24,1fr);gap:4px;align-items:end;height:160px">'
+    + pp.map((v, s) => '<div title="' + String(s).padStart(2, '0') + ':00 · PTF ' + say(v) + ' · SMF ' + say(sp[s]) + '" style="display:flex;gap:1px;align-items:end;height:100%"><div style="flex:1;background:' + EP_RENK.ptf + ';height:' + ((v || 0) / pmx * 100).toFixed(1) + '%;border-radius:2px 2px 0 0"></div><div style="flex:1;background:' + EP_RENK.smf + ';opacity:.8;height:' + ((sp[s] || 0) / pmx * 100).toFixed(1) + '%;border-radius:2px 2px 0 0"></div></div>').join('')
+    + '</div><div style="display:grid;grid-template-columns:repeat(24,1fr);gap:4px" class="k">' + pp.map((_, s) => '<div style="text-align:center;font-size:11px">' + (s % 3 === 0 ? s : '') + '</div>').join('') + '</div>'
+    + '<div class="k"><span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.ptf + ';margin-right:6px"></span>PTF <span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.smf + ';margin:0 6px 0 14px"></span>SMF. Öğle saatlerindeki düşük fiyatlar mahsuplaşma dışı satışın değerini gösterir.</div></section>';
+
+  // Aylık tablo
+  const ykHucre = yk => yk ? '<span title="' + esc(yk.ad + (yk.ongoru != null ? ' · öngörü ' + say(yk.ongoru, 2) : '') + (yk.kat ? ' · önceki ay katsayısı ' + yk.kat.toFixed(4) : '') + (yk.not ? ' · ' + yk.not : '')) + '">' + say(yk.deger, 2) + ' <span style="font-size:11px;font-weight:700;color:' + (yk.durum === 'kesin' ? '#1E7A3C' : yk.durum === 'tahmin' ? '#9A5B00' : '#B54708') + '">' + yk.ad + '</span></span>' : '—';
+  h += '<section class="panel"><div class="bas"><h2>Aylık özet</h2><span class="k">TL/MWh</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th>Gün</th><th>PTF ort.</th><th>PTF min</th><th>PTF max</th><th>≈0 TL saat</th><th class="ayr">SMF ort.</th><th class="ayr">YEKDEM</th><th>PTF + YEKDEM</th></tr></thead><tbody>'
+    + aylar.slice().reverse().map(epAyOzet).map(o => '<tr' + (o.ay === epSec.ay ? ' style="background:#EEF5FD"' : '') + '><td class="sol"><a href="#epias" onclick="epSec.ay=\'' + o.ay + '\';cizEpias();return false">' + AYLAR[Number(o.ay.slice(5)) - 1] + '</a></td><td>' + o.gun + '</td><td><b>' + say(o.pOrt, 2) + '</b></td><td>' + say(o.pMin) + '</td><td>' + say(o.pMax) + '</td><td' + (o.sifir ? '' : ' class="sifir"') + '>' + o.sifir + '</td><td class="ayr">' + say(o.sOrt, 2) + '</td><td class="ayr">' + ykHucre(o.yk) + '</td><td><b>' + say(o.toplam, 2) + '</b></td></tr>').join('')
+    + '</tbody></table></div><div class="k">≈0 TL saat: PTF ≤ 1 TL/MWh olan saat sayısı. Enerji maliyeti eski paneldeki gibi (PTF + YEKDEM) × 1,035 / 1000 TL/kWh olarak hesaplanır.</div></section>';
+
+  // YEKDEM kartları
+  const ykAylar = Object.keys(EP.yekdem || {}).sort();
+  if (ykAylar.length) {
+    const renk = { kesin: ['#E7F6EC', '#1E7A3C'], tahmin: ['#FFF4DC', '#9A5B00'], ongoru: ['#FEF0E6', '#B54708'] };
+    h += '<section class="panel"><div class="bas"><h2>YEKDEM birim bedelleri</h2><span class="k">TL/MWh · yeşil gerçekleşen, sarı önceki ay sapmasıyla tahmin, turuncu resmi öngörü</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">'
+      + ykAylar.map(ay => { const yk = yekdemAy(ay); if (!yk) return ''; const [bg, fg] = renk[yk.durum];
+        const alt = yk.durum === 'kesin' && yk.ongoru ? 'Öngörü ' + say(yk.ongoru, 2) + ' (' + ((yk.gercek / yk.ongoru - 1) * 100 >= 0 ? '+' : '') + say((yk.gercek / yk.ongoru - 1) * 100, 1) + '%)' : yk.durum === 'tahmin' ? 'Öngörü ' + say(yk.ongoru, 2) + ' × ' + yk.kat.toFixed(3) : 'Ay sonu kesinleşir';
+        return '<div style="background:' + bg + ';border-radius:10px;padding:12px 14px" title="' + esc(yk.not || '') + '"><div class="k" style="font-weight:700;text-transform:uppercase;font-size:11px">' + AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4) + '</div><div class="num" style="font-size:22px;font-weight:700;color:' + fg + '">' + say(yk.deger, 2) + '</div><div style="font-size:12px;color:' + fg + ';font-weight:600">' + yk.ad + '</div><div class="k" style="font-size:11px;margin-top:4px">' + alt + '</div></div>'; }).join('')
+      + '</div></section>';
+  }
+
+  // Gün detayı
+  const gg = epSec.gun, pd = EP.ptf[gg] || [], sd = (EP.smf || {})[gg] || [], ud = (EP.ptf_usd || {})[gg] || [], ykG = yekdemAy(gg.slice(0, 7));
+  h += '<section class="panel"><div class="bas"><h2>Saatlik fiyatlar · ' + tarihK(gg) + ' ' + gg.slice(0, 4) + ' ' + GUNLER[new Date(gg + 'T12:00:00Z').getUTCDay()] + '</h2><label class="k" style="display:flex;align-items:center;gap:8px">Gün <input type="date" value="' + gg + '" min="' + gunler[0] + '" max="' + gunler[gunler.length - 1] + '" onchange="if(this.value){epSec.gun=this.value;cizEpias()}"></label></div>'
+    + '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Saat</th><th>PTF</th><th>PTF ($)</th><th>SMF</th><th>SMF − PTF</th><th class="ayr">PTF + YEKDEM</th><th>Maliyet TL/kWh</th></tr></thead><tbody>'
+    + Array.from({ length: 24 }, (_, s) => { const p = pd[s], sm = sd[s], top = p != null && ykG ? p + ykG.deger : null;
+        return '<tr><td class="saat">' + String(s).padStart(2, '0') + ':00</td><td' + (p != null && p <= 1 ? ' class="sifir"' : '') + '>' + say(p, 2) + '</td><td>' + say(ud[s], 2) + '</td><td>' + say(sm, 2) + '</td><td>' + (p != null && sm != null ? say(sm - p, 2) : '—') + '</td><td class="ayr">' + say(top, 2) + '</td><td>' + (top != null ? say(top * 1.035 / 1000, 3) : '—') + '</td></tr>'; }).join('')
+    + '<tr class="top"><td class="sol">Ortalama</td><td>' + say(epOrt(pd), 2) + '</td><td>' + say(epOrt(ud), 2) + '</td><td>' + say(epOrt(sd), 2) + '</td><td></td><td class="ayr">' + say(epOrt(pd) != null && ykG ? epOrt(pd) + ykG.deger : null, 2) + '</td><td></td></tr></tbody></table></div>'
+    + '<div class="k">SMF gün içinde saatlik kesinleşir; boş saatler henüz yayınlanmamış demektir.' + (ykG ? ' YEKDEM: ' + say(ykG.deger, 2) + ' (' + ykG.ad.toLowerCase() + ').' : '') + '</div></section>';
+
+  ic.innerHTML = h;
+}
+function epCsv() {
+  if (!EP) return;
+  const ylS = String(epSec.yil), gunler = Object.keys(EP.ptf).filter(g => epSec.ay === 'yil' ? g.startsWith(ylS) : g.startsWith(epSec.ay)).sort();
+  const sat = ['Tarih;Saat;PTF (TL/MWh);PTF ($/MWh);SMF (TL/MWh);YEKDEM (TL/MWh)'];
+  const f = v => v == null ? '' : String(v).replace('.', ',');
+  for (const g of gunler) { const yk = yekdemAy(g.slice(0, 7)); for (let s = 0; s < 24; s++) sat.push([g, String(s).padStart(2, '0') + ':00', f((EP.ptf[g] || [])[s]), f(((EP.ptf_usd || {})[g] || [])[s]), f(((EP.smf || {})[g] || [])[s]), f(yk ? Math.round(yk.deger * 1000) / 1000 : null)].join(';')); }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + sat.join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'epias_' + (epSec.ay === 'yil' ? ylS : epSec.ay) + '.csv';
+  a.click();
+}
+
 function ciz() {
   const h0 = location.hash || '#genel';
-  const sayfa = h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
+  const sayfa = h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
   document.querySelectorAll('.nav a[data-sayfa]').forEach(a => a.classList.toggle('aktif', a.dataset.sayfa === sayfa));
-  if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
+  if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
 }
-window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter') window.scrollTo(0, 0); } });
+window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias') window.scrollTo(0, 0); } });
 
 async function yukle() {
   try {

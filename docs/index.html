@@ -265,6 +265,15 @@ function cizGenel() {
   const ayGunleri = ay.gunler;
   let yilBedelli = 0;
   for (const m of ayList.filter(m => m.startsWith(sonOsosGun.slice(0, 4)))) yilBedelli += aySonuc(osos, m).bedelli;
+  // 2027 bedelli satış kotası = 2026'da mahsuptaki abonelerin (T1, T2, A3) toplam tüketimi × 2
+  const kotaYil = sonOsosGun.slice(0, 4), kotaAb = { T1: 0, T2: 0, A3: 0 };
+  const kotaGunler = Object.keys((osos.tekyildiz_1 || {}).veri || {}).filter(x => x.startsWith(kotaYil)).sort();
+  for (const k of Object.keys(kotaAb)) for (const x of Object.keys((osos[AB[k]] || {}).veri || {})) if (x.startsWith(kotaYil)) kotaAb[k] += (gunluk(osos, AB[k], x) || {}).cekis || 0;
+  const kotaTuk = kotaAb.T1 + kotaAb.T2 + kotaAb.A3;
+  const kotaSon = gunEkle(sonOsosGun, -1), son28 = []; for (let i = 27; i >= 0; i--) son28.push(gunEkle(kotaSon, -i));
+  const gunOrt = son28.reduce((t, x) => t + Object.keys(kotaAb).reduce((u, k) => u + ((gunluk(osos, AB[k], x) || {}).cekis || 0), 0), 0) / 28;
+  const kalanGun = Math.max(0, Math.round((Date.parse((Number(kotaYil) + 1) + '-01-01T00:00:00Z') - Date.parse(kotaSon + "T00:00:00Z")) / 86400000) - 1);
+  const kotaTahmin = (kotaTuk + gunOrt * kalanGun) * 2;
   const enBuyuk = Math.max(ay.uretim, ay.tuketim, 1);
   const limitPct = yilBedelli / LIMIT_2026 * 100;
   const [yy, aa] = secAy.split('-').map(Number);
@@ -283,7 +292,10 @@ function cizGenel() {
     + [['Mahsuplaşan', '#1baf7a', ay.mahsup], ['Bedelli satış', '#eda100', ay.bedelli], ['Şebekeden alınan', '#eb6834', ay.sebeke]].map(([ad, r, v]) => '<div><div class="k" style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:' + r + '"></span>' + ad + '</div><div class="num" style="font-size:20px;font-weight:700;margin-top:2px">' + say(v) + '</div></div>').join('') + '</div>'
     + '<div style="border-top:1px solid #E3E8EE;padding-top:14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:600">' + sonOsosGun.slice(0, 4) + ' bedelli satış limiti</span><span class="num" style="font-size:14px"><strong>' + say(yilBedelli) + '</strong> / ' + say(LIMIT_2026) + ' kWh</span></div>'
     + '<div role="meter" aria-label="Bedelli satış limiti kullanımı" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(limitPct) + '" style="height:10px;background:#E3E8EE;border-radius:5px;overflow:hidden"><div style="width:' + Math.min(100, limitPct).toFixed(1) + '%;height:100%;background:' + (limitPct >= 80 ? '#B42318' : '#1E7A3C') + ';border-radius:5px"></div></div>'
-    + '<div class="k">Yüzde ' + say(limitPct, 1) + ' kullanıldı. Yüzde 80\'de uyarı verilecek. (OSOS kayıtlarından, ' + sonOsosGun.slice(0, 4) + ' başından bugüne)</div></div></section>';
+    + '<div class="k">Yüzde ' + say(limitPct, 1) + ' kullanıldı. Yüzde 80\'de uyarı verilecek. (OSOS kayıtlarından, ' + sonOsosGun.slice(0, 4) + ' başından bugüne)</div></div>'
+    + '<div style="border-top:1px solid #E3E8EE;padding-top:14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:600">' + (Number(kotaYil) + 1) + ' bedelli satış kotası</span><span class="num" style="font-size:14px">şu ana kadar <strong>' + say(kotaTuk * 2) + '</strong> kWh</span></div>'
+    + '<div class="num" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">' + ['T1', 'T2', 'A3'].map(k => '<div><div class="k">' + k + ' tüketimi</div><div style="font-size:16px;font-weight:700">' + say(kotaAb[k]) + '</div></div>').join('') + '</div>'
+    + '<div class="k">' + kotaYil + ' tüketimi ' + say(kotaTuk) + ' kWh × 2 (1 Oca–' + tarihK(sonOsosGun) + '). Yıl sonu tahmini ≈ <b style="color:#10233F">' + say(kotaTahmin) + ' kWh</b>: son 28 günün ortalama tüketimi (' + say(gunOrt) + ' kWh/gün) kalan ' + kalanGun + ' güne uygulanarak. Eksik OSOS saatleri kotayı düşük gösterir.</div></div></section>';
 
   // ---- Sayaçlar
   const otuz = []; for (let i = 29; i >= 0; i--) otuz.push(gunEkle(sonOsosGun, -i));

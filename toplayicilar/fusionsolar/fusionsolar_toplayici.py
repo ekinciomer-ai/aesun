@@ -208,9 +208,19 @@ class Web:
         p = self.page
         try:
             p.wait_for_selector("input[type=password]", timeout=25000)
-            u = p.query_selector("#username") or p.query_selector("input[type=text]:visible")
+            u = None
+            for sec in ("input#username", "input[name=username]", "#username input",
+                        "input[type=text]:visible", "input:not([type=password]):not([type=hidden]):not([type=checkbox]):visible"):
+                u = p.query_selector(sec)
+                if u:
+                    break
+            if not u:
+                raise RuntimeError("kullanıcı adı alanı bulunamadı")
+            u.click()
             u.fill(USER)
-            p.fill("input[type=password]", PASS)
+            pw = p.query_selector("input[type=password]:visible") or p.query_selector("input[type=password]")
+            pw.click()
+            pw.fill(PASS)
             btn = (p.query_selector("#submitDataverify") or p.query_selector("#btn_outerverify")
                    or p.query_selector("button:has-text('Giriş')") or p.query_selector("button:has-text('Log In')")
                    or p.query_selector("div.loginBtn"))

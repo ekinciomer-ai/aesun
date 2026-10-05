@@ -275,6 +275,18 @@ function cizGenel() {
   const gunOrt = son28.reduce((t, x) => t + Object.keys(kotaAb).reduce((u, k) => u + ((gunluk(osos, AB[k], x) || {}).cekis || 0), 0), 0) / 28;
   const kalanGun = Math.max(0, Math.round((Date.parse((Number(kotaYil) + 1) + '-01-01T00:00:00Z') - Date.parse(kotaSon + "T00:00:00Z")) / 86400000) - 1);
   const kotaTahmin = (kotaTuk + gunOrt * kalanGun) * 2;
+  // T1/T2 sayaç arkası iç tüketim (inverter − sayaç verişi), tam günler — tahmini
+  const kYil = Number(kotaYil);
+  if (!INV_CACHE[kYil] && !invYukleniyor) { invYukleniyor = true; invYilYukle(kYil).then(() => { invYukleniyor = false; if (!location.hash.startsWith('#sayac') && !location.hash.startsWith('#inverter')) cizGenel(); }).catch(() => { invYukleniyor = false; }); }
+  const kInv = INV_CACHE[kYil] ? invBirlestir(INV_CACHE[kYil]) : null;
+  let icTuk = null, icSon28 = 0;
+  if (kInv) {
+    icTuk = { T1: 0, T2: 0 };
+    for (const k of ['T1', 'T2']) { const iv = kInv[ESLE[k]]; if (!iv) continue;
+      for (const [g, v] of Object.entries(iv.gun)) { if (!g.startsWith(kotaYil)) continue; const gg = gunluk(osos, AB[k], g); if (!gg || gg.saat < 24) continue; const f = Math.max(0, +v - gg.veris); icTuk[k] += f; if (son28.includes(g)) icSon28 += f / 28; } }
+  }
+  const icTop = icTuk ? icTuk.T1 + icTuk.T2 : 0;
+  const kotaIcTahmin = (kotaTuk + icTop + (gunOrt + icSon28) * kalanGun) * 2;
   const enBuyuk = Math.max(ay.uretim, ay.tuketim, 1);
   const limitPct = yilBedelli / LIMIT_2026 * 100;
   const [yy, aa] = secAy.split('-').map(Number);
@@ -296,7 +308,9 @@ function cizGenel() {
     + '<div class="k">Yüzde ' + say(limitPct, 1) + ' kullanıldı. Yüzde 80\'de uyarı verilecek. (OSOS kayıtlarından, ' + sonOsosGun.slice(0, 4) + ' başından bugüne)</div></div>'
     + '<div style="border-top:1px solid #E3E8EE;padding-top:14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:600">' + (Number(kotaYil) + 1) + ' bedelli satış kotası</span><span class="num" style="font-size:14px">şu ana kadar <strong>' + say(kotaTuk * 2) + '</strong> kWh</span></div>'
     + '<div class="num" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">' + ['T1', 'T2', 'A3'].map(k => '<div><div class="k">' + k + ' tüketimi</div><div style="font-size:16px;font-weight:700">' + say(kotaAb[k]) + '</div></div>').join('') + '</div>'
-    + '<div class="k">' + kotaYil + ' tüketimi ' + say(kotaTuk) + ' kWh × 2 (1 Oca–' + tarihK(sonOsosGun) + '). Yıl sonu tahmini ≈ <b style="color:#10233F">' + say(kotaTahmin) + ' kWh</b>: son 28 günün ortalama tüketimi (' + say(gunOrt) + ' kWh/gün) kalan ' + kalanGun + ' güne uygulanarak. Eksik OSOS saatleri kotayı düşük gösterir.</div></div></section>';
+    + '<div class="k">' + kotaYil + ' tüketimi ' + say(kotaTuk) + ' kWh × 2 (1 Oca–' + tarihK(sonOsosGun) + '). Yıl sonu tahmini ≈ <b style="color:#10233F">' + say(kotaTahmin) + ' kWh</b>: son 28 günün ortalama tüketimi (' + say(gunOrt) + ' kWh/gün) kalan ' + kalanGun + ' güne uygulanarak. Eksik OSOS saatleri kotayı düşük gösterir.</div>'
+    + '<div style="background:#F5F7FA;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:13px;font-weight:600">İç tüketim dahil kota (tahmini)</span><span class="num" style="font-size:14px">' + (icTuk ? '<strong>' + say((kotaTuk + icTop) * 2) + '</strong> kWh' : 'yükleniyor…') + '</span></div>'
+    + (icTuk ? '<div class="k">T1 ' + say(icTuk.T1) + ' + T2 ' + say(icTuk.T2) + ' kWh sayaç arkası iç tüketim (inverter üretimi − sayaç verişi, tam günler) sayaç tüketimine eklenip × 2. Yıl sonu ≈ <b style="color:#10233F">' + say(kotaIcTahmin) + ' kWh</b>. OSOS iç tüketimi ölçmediği için resmi kota hesabında yer almayabilir.</div>' : '') + '</div></div></section>';
 
   // ---- Sayaçlar
   const otuz = []; for (let i = 29; i >= 0; i--) otuz.push(gunEkle(sonOsosGun, -i));

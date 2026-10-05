@@ -20,6 +20,7 @@ Kullanım (CMD):
   py fusionsolar_toplayici.py --test         giriş + tesis/invertör listesi
   py fusionsolar_toplayici.py --once         her şeyi 1 kez çek
   py fusionsolar_toplayici.py --backfill 90  son 90 günün eğrisi + günlükleri
+  py fusionsolar_toplayici.py --gecmis       şebeke bağlantısından bugüne günlük üretim (+ GitHub)
   py fusionsolar_toplayici.py                sürekli çalış
 """
 import argparse
@@ -62,7 +63,8 @@ DATA.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA / "fusionsolar.db"
 LATEST = DATA / "latest.json"
 PROFILE = DATA / "tarayici_profili"
-GH_DOSYA = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/n8n/fusionsolar_son.json"
+GH_KOK = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/"
+GH_PANEL = "n8n/fusionsolar_son.json"
 GH_ARALIK = int(os.getenv("FS_GITHUB_DK", "10")) * 60
 
 
@@ -281,6 +283,7 @@ class Collector:
         self.latest = {"tesisler": {}, "invertorler": {}, "alarmlar": []}
         self.gh_token = gh_token()
         self.gh_son = 0.0
+        self.gh_gecmis_son = 0.0
 
     def now(self):
         return dt.datetime.now().isoformat(timespec="seconds")
@@ -441,7 +444,43 @@ class Collector:
             except Exception as e:
                 log.warning("GitHub yazılamadı: %s", e)
 
-    # --- AEMonitoring paneli (GitHub)
+    # --- GitHub (AEMonitoring paneli ve inverter geçmişi)
+    def _gh(self, method, path, govde=None):
+        h = {"Authorization": "Bearer " + self.gh_token, "Accept": "application/vnd.github+json",
+             "User-Agent": "aemonitoring-fusionsolar"}
+        req = urllib.request.Request(GH_KOK + path, method=method, headers=h,
+                                     data=json.dumps(govde).encode() if govde else None)
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.loads(r.read().decode())
+        except urllib.error.HTTPError as e:
+            if method == "GET" and e.code == 404:
+                return {}
+            raise
+
+    def gh_put(self, path, veri, mesaj, sadece_degisirse=False):
+        icerik = json.dumps(veri, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        for deneme in range(3):
+            mevcut = self._gh("GET", path)
+            if sadece_degisirse and mevcut.get("content"):
+                eski = json.loads(base64.b64decode(mevcut["content"]).decode())
+                eski.pop("guncellendi", None)
+                yeni = dict(veri)
+                yeni.pop("guncellendi", None)
+                if json.dumps(eski, sort_keys=True) == json.dumps(yeni, sort_keys=True):
+                    return False
+            govde = {"message": mesaj, "content": base64.b64encode(icerik.encode()).decode()}
+            if mevcut.get("sha"):
+                govde["sha"] = mevcut["sha"]
+            try:
+                self._gh("PUT", path, govde)
+                return True
+            except urllib.error.HTTPError as e:
+                if e.code in (409, 422) and deneme < 2:
+                    time.sleep(3)
+                    continue
+                raise
+
     def panel_yaz(self):
         kisa = {dn: v["kisa"] for dn, v in self.st.items()}
         bas = (dt.date.today() - dt.timedelta(days=35)).isoformat()
@@ -453,36 +492,63 @@ class Collector:
                                            (bugun + "%",)):
             saatlik.setdefault(kisa.get(dn, dn), {})[h[11:13]] = kwh
         veri = dict(self.latest, gunluk=gunluk, saatlik_bugun=saatlik)
-        h = {"Authorization": "Bearer " + self.gh_token, "Accept": "application/vnd.github+json",
-             "User-Agent": "aemonitoring-fusionsolar"}
+        self.gh_put(GH_PANEL, veri, f"FusionSolar {dt.datetime.now():%Y-%m-%d %H:%M}")
+        log.info("GitHub: panel verisi yazıldı")
+        if time.time() - self.gh_gecmis_son >= 3600:
+            self.gecmis_yaz()
+            self.gh_gecmis_son = time.time()
 
-        def istek(method, govde=None):
-            req = urllib.request.Request(GH_DOSYA, method=method, headers=h,
-                                         data=json.dumps(govde).encode() if govde else None)
-            with urllib.request.urlopen(req, timeout=60) as r:
-                return json.loads(r.read().decode())
+    def gecmis_yaz(self, yillar=None):
+        """inverter/fusionsolar_<yıl>.json: tesis günlük üretimi + inverter günlük üretimi (panel analiz sayfası)."""
+        dun = dt.date.today() - dt.timedelta(days=1)
+        yillar = yillar or sorted({dt.date.today().year, dun.year})
+        tesis = {dn: (r[0], r[1]) for dn, *r in self.con.execute("SELECT dn, kisa, dc_kwp FROM stations")}
+        invad = {dn: (ad, st) for dn, ad, st in self.con.execute("SELECT dn, name, station_dn FROM inverters")}
+        bugun = dt.date.today().isoformat()
+        for yil in yillar:
+            veri = {"kaynak": "fusionsolar", "yil": yil, "santraller": {}}
+            for dn, (ad, kwp) in tesis.items():
+                veri["santraller"][dn] = {"ad": ad, "kwp": kwp, "gun": {}, "ay": {}, "inv": {}}
+            for dn, d, kwh in self.con.execute("SELECT dn, date, kwh FROM station_day WHERE substr(date,1,4)=? AND date<?",
+                                               (str(yil), bugun)):
+                if dn in veri["santraller"] and kwh is not None:
+                    veri["santraller"][dn]["gun"][d] = round(kwh, 1)
+            for dn, st, d, kwh in self.con.execute(
+                    "SELECT dn, station_dn, substr(ts,1,10) d, MAX(gunluk_kwh) FROM inverter_real "
+                    "WHERE substr(ts,1,4)=? AND substr(ts,1,10)<? GROUP BY dn, d", (str(yil), bugun)):
+                if st in veri["santraller"] and kwh is not None:
+                    inv = veri["santraller"][st]["inv"].setdefault(dn, {"ad": invad.get(dn, (dn,))[0], "gun": {}, "ay": {}})
+                    inv["gun"][d] = round(kwh, 1)
+            if not any(s["gun"] for s in veri["santraller"].values()):
+                continue
+            veri["guncellendi"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
+            if self.gh_put(f"inverter/fusionsolar_{yil}.json", veri, f"İnverter geçmişi: fusionsolar_{yil}.json",
+                           sadece_degisirse=True):
+                log.info("GitHub: fusionsolar_%s.json yazıldı", yil)
 
-        for deneme in range(3):
+    def gecmis(self):
+        """Tesislerin şebekeye bağlandığı aydan bugüne tüm aylık (günlük çözünürlüklü) üretimi çeker."""
+        self.meta()
+        bas = dt.date.today().replace(day=1)
+        for (gd,) in self.con.execute("SELECT grid_date FROM stations"):
+            g = str(gd or "")
             try:
-                sha = istek("GET").get("sha")
-            except urllib.error.HTTPError as e:
-                if e.code != 404:
-                    raise
-                sha = None
-            govde = {"message": f"FusionSolar {dt.datetime.now():%Y-%m-%d %H:%M}",
-                     "content": base64.b64encode(json.dumps(veri, ensure_ascii=False,
-                                                            separators=(",", ":")).encode()).decode()}
-            if sha:
-                govde["sha"] = sha
-            try:
-                istek("PUT", govde)
-                log.info("GitHub: panel verisi yazıldı")
-                return
-            except urllib.error.HTTPError as e:
-                if e.code in (409, 422) and deneme < 2:
-                    time.sleep(3)
-                    continue
-                raise
+                d = (dt.datetime.fromtimestamp(int(g) / 1000).date() if g.isdigit()
+                     else dt.date.fromisoformat(g[:10]))
+                bas = min(bas, d.replace(day=1))
+            except ValueError:
+                pass
+        if bas == dt.date.today().replace(day=1):
+            bas = dt.date(2021, 1, 1)
+        log.info("Geçmiş: %s ayından bugüne", bas.strftime("%Y-%m"))
+        d, yillar = bas, set()
+        while d <= dt.date.today():
+            self._safe(self.month, d)
+            yillar.add(d.year)
+            d = (d + dt.timedelta(days=32)).replace(day=1)
+            time.sleep(1)
+        if self.gh_token:
+            self.gecmis_yaz(sorted(yillar))
 
     # --- akışlar
     def _safe(self, f, *a):
@@ -535,6 +601,7 @@ def main():
     ap.add_argument("--test", action="store_true")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--backfill", type=int, metavar="GUN")
+    ap.add_argument("--gecmis", action="store_true", help="şebeke bağlantısından bugüne günlük üretim + GitHub")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s",
                         handlers=[logging.StreamHandler(sys.stdout),
@@ -551,6 +618,8 @@ def main():
             c.once()
         elif a.backfill:
             c.backfill(a.backfill)
+        elif a.gecmis:
+            c.gecmis()
         else:
             log.info("Sürekli mod — Ctrl+C ile durur")
             c.forever()

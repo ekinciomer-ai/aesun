@@ -89,3 +89,12 @@ python3 toplayicilar/osos_toplayici.py --gun 3   # ilk elle deneme, son 3 gün
 sudo cp pi/aesun-osos.service pi/aesun-osos.timer /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now aesun-osos.timer
 ```
+
+## İnverter geçmişi (analiz sayfası)
+
+- **AEMonitoring · İnverter geçmişi** (`tK5fXBieGElj52Up`): Sungrow (`getDevicePointsDayMonthYearDataList`, p1 günlük) ve Inavitas (`GetPlantInverterTable`, D günlük / M aylık) inverter bazında üretim geçmişini çeker, `epias-ptf/inverter/<kaynak>_<yıl>.json` dosyalarına birleştirir. Her gece 00:25–08:25 saatlik çalışır; eksik günleri geriye doğru doldurur (Inavitas çalışma başına 120 gün), son 3 günü her seferinde tazeler. Değişmeyen dosyaya yazmaz.
+  - Sungrow geçmiş uç noktası sık istekte boş yanıt döner: istekler 2 sn arayla gider.
+  - Inavitas aylık tablo (`intervl=M`) verilen tarihten **sonraki** ayı döndürür; m ayı için önceki ayın 15'i istenir.
+  - Çalışma kayıtları saklanmaz (Inavitas çerezi).
+- **FusionSolar**: saha PC'deki `fusionsolar_toplayici.py` saatte bir `inverter/fusionsolar_<yıl>.json` yazar (tesis günlük + inverter günlük, inverter günlükleri 5 Ekim 2026'dan itibaren). Tesis geçmişi için bir kez: `python fusionsolar_toplayici.py --gecmis`.
+- Panel: `#inverter` sayfası (santral/yıl/dönem seçimi, geçen yıl kıyası, inverter performans haritası, aylık rapor, CSV).

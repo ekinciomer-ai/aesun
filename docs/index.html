@@ -93,7 +93,7 @@ input[type=date]{font:inherit;font-size:15px;border:1px solid #B9C4D2;border-rad
 <script>
 const KOK = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/';
 const LIMIT_2026 = 2905914;
-const ESLE = { T1: 'fusionsolar:NE=59224704', T2: 'fusionsolar:NE=73686040', YD: 'sungrow:5064453' }, ESLE_KISA = { T1: 'Sera-1', T2: 'Sera-2' };
+const ESLE = { T1: 'fusionsolar:NE=59224704', T2: 'fusionsolar:NE=73686040', YD: 'sungrow:5064453', Anka: 'sungrow:5038906', AE: 'inavitas:189' }, ESLE_KISA = { T1: 'Sera-1', T2: 'Sera-2' };
 const SAYAC = [
   { key: 'tekyildiz_1', kod: 'T1', ad: 'Tekyıldız 1', renk: '#2a78d6', mahsup: true, uretir: true },
   { key: 'tekyildiz_2', kod: 'T2', ad: 'Tekyıldız 2', renk: '#eb6834', mahsup: true, uretir: true },
@@ -478,7 +478,7 @@ function cizSayac() {
     govde = '<h2>OSOS sayaç verisi</h2><div class="tablo-kutu"><table class="tb"><thead><tr>' + th1 + '</tr><tr>' + th2 + '</tr></thead><tbody>' + satir + '</tbody></table></div>'
       + '<div class="k">Boş hücre o saatin verisi henüz gelmedi demek. Saat 13:00 satırı 13:00–14:00 arasını gösterir. İnverter: FusionSolar saatlik üretimi (5 dk güç ortalamasından, yaklaşık). İç tük.: inverter üretiminin sayaca veriş olarak düşmeyen kısmı (sayaç arkası tüketim ve kayıplar).</div>';
     // Günlük ve yıllık karşılaştırma
-    const kar = ['T1', 'T2', 'YD'].map(kod => {
+    const kar = ['T1', 'T2', 'YD', 'Anka', 'AE'].map(kod => {
       const sc = SAYAC.find(x => x.kod === kod), o = (osos[sc.key] || {}).veri || {};
       let gv = gunluk(osos, sc.key, secGun), ig = invGun(kod, secGun);
       const ti = SAYAC.indexOf(sc);
@@ -492,7 +492,7 @@ function cizSayac() {
       + kar.map(r => '<tr><td class="sol"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + r.sc.renk + ';margin-right:6px"></span><b>' + r.kod + '</b> ' + esc(r.sc.ad) + '</td>'
         + '<td class="ayr">' + (r.ig == null ? '—' : say(r.ig)) + '</td><td>' + (r.gv ? say(r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? say(r.ig - r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? pc(r.ig, r.gv.veris) : '—') + '</td>'
         + '<td class="ayr">' + (r.n ? say(r.yI) : '—') + '</td><td>' + (r.n ? say(r.yV) : '—') + '</td><td><b>' + (r.n ? say(r.yI - r.yV) : '—') + '</b></td><td>' + r.n + '</td></tr>').join('')
-      + '</tbody></table></div><div class="k">İç tüketim = inverter üretimi − sayaç verişi; üretim saatlerinde sayaç arkasında tüketilen enerji ile trafo/kablo kayıplarını içerir. Oran, inverterin sayaçtan ne kadar fazla gösterdiğidir. Bugün için yalnız iki tarafın da verisi tamamlanmış saatler karşılaştırılır. T1/T2 FusionSolar (Sera-1/Sera-2), YD Sungrow (Darılmaz) verisidir; YD için saatlik inverter verisi yok. ' + (INV_CACHE[yilS] ? '' : 'İnverter verisi yükleniyor…') + '</div>';
+      + '</tbody></table></div><div class="k">İç tüketim = inverter üretimi − sayaç verişi; üretim saatlerinde sayaç arkasında tüketilen enerji ile trafo/kablo kayıplarını içerir. Oran, inverterin sayaçtan ne kadar fazla gösterdiğidir. Bugün için yalnız iki tarafın da verisi tamamlanmış saatler karşılaştırılır. T1/T2 FusionSolar (Sera-1/Sera-2), YD Sungrow Darılmaz, Anka Sungrow HG YATIRIM AŞ, AE Inavitas Aksaray_GES verisidir; YD, Anka ve AE için saatlik inverter verisi yok, günlük kıyaslanır. ' + (INV_CACHE[yilS] ? '' : 'İnverter verisi yükleniyor…') + '</div>';
   } else {
     const m = mahsupGun(osos, secGun);
     const ab = { T1: 0, T2: 0, A3: 0 }, tAb = { T1: 0, T2: 0, A3: 0 }, uAb = { T1: 0, T2: 0 }, kay = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };

@@ -333,7 +333,10 @@ def main():
                 if not wid:
                     wid = env.get("WID_" + tesisat) or os.environ.get("WID_" + tesisat) or wiring_bul(s, tesisat)
                     log(f"{kod} wiringId: {wid}")
-                satirlar += topla(tesisat, kod, carpan, yuk_profili(s, wid, aralik), simdi, wid)
+                veri = yuk_profili(s, wid, aralik)
+                if not veri and not girildi and not deneme:
+                    raise OturumHatasi("boş yanıt (oturum süresi dolmuş olabilir)")
+                satirlar += topla(tesisat, kod, carpan, veri, simdi, wid)
                 break
             except OturumHatasi as e:
                 if girildi or deneme:

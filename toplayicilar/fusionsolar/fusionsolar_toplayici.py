@@ -540,6 +540,7 @@ def main():
                         handlers=[logging.StreamHandler(sys.stdout),
                                   logging.FileHandler(DATA / "toplayici.log", encoding="utf-8")])
     log.info("Ayar dosyası: %s", ENV_FILE or "yok (giriş elle yapılacak)")
+    log.info("Panel (GitHub): %s", "açık" if gh_token() else "KAPALI — .env dosyasına GITHUB_TOKEN= satırı ekleyin")
     c = Collector()
     try:
         if a.test:

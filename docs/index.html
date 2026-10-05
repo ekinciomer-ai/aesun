@@ -245,6 +245,10 @@ function cizGenel() {
     uy.push({ seviye: 'uyari', baslik: mad.summary.offline + ' madenci yanıt vermiyor', detay: off.join(', ') });
   }
   if (mad && mad.timestamp && (Date.now() - new Date(mad.timestamp + '+03:00').getTime()) / 60000 > 60) uy.push({ seviye: 'uyari', baslik: 'Saha madencilik verisi güncel değil', detay: 'Son kayıt ' + mad.timestamp.slice(0, 16).replace('T', ' ') });
+  const fs = D.fs && D.fs.tesisler && Object.keys(D.fs.tesisler).length ? D.fs : null;
+  const fsDk = fs ? (Date.now() - new Date(fs.guncelleme + '+03:00').getTime()) / 60000 : 0;
+  if (fs && fsDk > 30) uy.push({ seviye: 'uyari', baslik: 'FusionSolar verisi güncel değil', detay: 'Son kayıt ' + String(fs.guncelleme).slice(0, 16).replace('T', ' ') + '. Bilgisayardaki toplayıcı çalışıyor mu?' });
+  if (fs && fsDk <= 30) (fs.alarmlar || []).filter(a => /kritik|major|önemli|critical/i.test(a.seviye || '')).forEach(a => uy.push({ seviye: /kritik|critical/i.test(a.seviye) ? 'kritik' : 'uyari', baslik: 'FusionSolar: ' + (a.alarm || 'alarm'), detay: [a.tesis, a.cihaz, a.zaman].filter(Boolean).join(' · ') }));
   uy.sort((a, b) => (a.seviye === 'kritik' ? 0 : 1) - (b.seviye === 'kritik' ? 0 : 1));
   const kritikN = uy.filter(u => u.seviye === 'kritik').length;
   document.getElementById('r-uy').outerHTML = '<span id="r-uy" class="rozet ' + (kritikN ? 'k' : 'u') + '"' + (uy.length ? '' : ' hidden') + '>' + uy.length + '</span>';
@@ -314,7 +318,24 @@ function cizGenel() {
   const santraller = (son && son.son || []).filter(r => ['sungrow', 'fusion', 'inavitas'].includes(r.kaynak));
   const invUy = uy.filter(u => /inverter|şebeke|üretim saatinde|Sungrow|Inavitas|FusionSolar/i.test(u.baslik)).length;
   document.getElementById('r-inv').outerHTML = '<span id="r-inv" class="rozet k"' + (invUy ? '' : ' hidden') + '>' + invUy + '</span>';
+  const fusionSatir = () => {
+    const ts = Object.values(fs.tesisler).sort((a, b) => String(a.kisa).localeCompare(String(b.kisa)));
+    const iv = Object.values(fs.invertorler || {});
+    const bayat = fsDk > 30, alarmN = (fs.alarmlar || []).length;
+    const top = ts.reduce((t, r) => t + (Number(r.anlik_guc_kw) || 0), 0), gun = ts.reduce((t, r) => t + (Number(r.bugun_kwh) || 0), 0);
+    const uretiyor = iv.filter(v => Number(v.guc_kw) > 0).length;
+    const gunler = []; for (let i = 30; i >= 1; i--) gunler.push(gunEkle(bugunTR(), -i));
+    return '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">FusionSolar</span><span style="font-size:12px;font-weight:700;color:' + (bayat ? '#B42318' : '#1E7A3C') + '">' + (bayat ? 'Bayat · ' : 'Bağlı · ') + saatTR(fs.guncelleme + '+03:00') + '</span></div>'
+      + '<div class="k">' + ts.length + ' santral' + (iv.length ? ', ' + iv.length + ' inverter' : '') + '. Anlık ' + say(top, 1) + ' kW, bugün ' + say(gun) + ' kWh' + (iv.length ? ', ' + uretiyor + '/' + iv.length + ' üretiyor' : '') + (alarmN ? ', ' + alarmN + ' aktif alarm' : '') + '.</div>'
+      + ts.map(r => {
+        const g = (fs.gunluk || {})[r.kisa] || {};
+        const sp = gunler.some(x => g[x] != null) ? '<div title="Son 30 gün günlük üretim">' + spark(gunler.map(x => Number(g[x]) || 0), '#2a78d6', r.kisa + ' son 30 gün üretim') + '</div>' : '';
+        const ivT = iv.filter(v => v.tesis === r.kisa), ivU = ivT.filter(v => Number(v.guc_kw) > 0).length;
+        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;white-space:nowrap"><span>' + esc(r.kisa) + (ivT.length ? ' <span class="k">(' + ivU + '/' + ivT.length + ')</span>' : '') + '</span><span class="num">' + say(r.anlik_guc_kw, 1) + ' kW · ' + say(r.bugun_kwh) + ' kWh</span></div>' + sp;
+      }).join('');
+  };
   const kaynakSatir = (ad, k) => {
+    if (k === 'fusion' && fs) return fusionSatir();
     const rs = santraller.filter(r => r.kaynak === k);
     const ozet = son && son.ozet ? son.ozet[k] : null;
     if (ozet === 'kapali') return '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">' + ad + '</span><span style="font-size:12px;font-weight:700;color:#3B5878">Bağlı değil</span></div><div class="k">Kimlik bilgisi eklenince santraller burada görünecek.</div>';
@@ -466,12 +487,13 @@ window.addEventListener('hashchange', () => { if (D) { ciz(); if (!location.hash
 
 async function yukle() {
   try {
-    const [son, osos, mad] = await Promise.all([
+    const [son, osos, mad, fs] = await Promise.all([
       al('n8n/aesun_son.json').catch(() => null),
       al('2026_osos_endeks.json'),
-      al('antminer_panel.json').catch(() => null)
+      al('antminer_panel.json').catch(() => null),
+      al('n8n/fusionsolar_son.json').catch(() => null)
     ]);
-    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad };
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs };
     ciz();
   } catch (e) {
     if (!D) document.getElementById('icerik').innerHTML = '<div class="panel hata">Veri okunamadı: ' + esc(e.message || e) + '</div>';

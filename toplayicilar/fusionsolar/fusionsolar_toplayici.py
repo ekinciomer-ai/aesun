@@ -13,6 +13,8 @@ sitenin kendi veri adreslerinden çeker:
   - Ay içi günlük üretim                               6 saatte bir
 
 Kayıt: data/fusionsolar.db (SQLite) + data/latest.json
+Panel: GITHUB_TOKEN varsa (.env ya da ~/.aesun/osos.env) 10 dakikada bir
+       epias-ptf/n8n/fusionsolar_son.json'a yazılır → AEMonitoring panelinde görünür.
 
 Kullanım (CMD):
   py fusionsolar_toplayici.py --test         giriş + tesis/invertör listesi
@@ -21,6 +23,9 @@ Kullanım (CMD):
   py fusionsolar_toplayici.py                sürekli çalış
 """
 import argparse
+import base64
+import urllib.error
+import urllib.request
 import datetime as dt
 import json
 import logging
@@ -57,6 +62,20 @@ DATA.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA / "fusionsolar.db"
 LATEST = DATA / "latest.json"
 PROFILE = DATA / "tarayici_profili"
+GH_DOSYA = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/n8n/fusionsolar_son.json"
+GH_ARALIK = int(os.getenv("FS_GITHUB_DK", "10")) * 60
+
+
+def gh_token():
+    t = os.getenv("GITHUB_TOKEN", "")
+    f = Path.home() / ".aesun" / "osos.env"
+    if not t and f.exists():
+        for line in f.read_text(encoding="utf-8-sig").splitlines():
+            if line.strip().startswith("GITHUB_TOKEN="):
+                t = line.split("=", 1)[1].strip()
+    return t
+
+
 LIST_URL = BASE + "/uniportal/pvmswebsite/assets/build/cloud.html#/home/list"
 
 # Gerçek DC kurulu güç (portaldaki değer yanlış)
@@ -260,6 +279,8 @@ class Collector:
         self.st = {}      # dn -> {name, kisa, dc, company}
         self.inv = {}     # dn -> {name, station_dn}
         self.latest = {"tesisler": {}, "invertorler": {}, "alarmlar": []}
+        self.gh_token = gh_token()
+        self.gh_son = 0.0
 
     def now(self):
         return dt.datetime.now().isoformat(timespec="seconds")
@@ -413,6 +434,55 @@ class Collector:
     def write_latest(self):
         self.latest["guncelleme"] = self.now()
         LATEST.write_text(json.dumps(self.latest, ensure_ascii=False, indent=2), encoding="utf-8")
+        if self.gh_token and self.latest["tesisler"] and time.time() - self.gh_son >= GH_ARALIK:
+            try:
+                self.panel_yaz()
+                self.gh_son = time.time()
+            except Exception as e:
+                log.warning("GitHub yazılamadı: %s", e)
+
+    # --- AEMonitoring paneli (GitHub)
+    def panel_yaz(self):
+        kisa = {dn: v["kisa"] for dn, v in self.st.items()}
+        bas = (dt.date.today() - dt.timedelta(days=35)).isoformat()
+        gunluk, saatlik = {}, {}
+        for dn, d, kwh in self.con.execute("SELECT dn, date, kwh FROM station_day WHERE date>=? ORDER BY date", (bas,)):
+            gunluk.setdefault(kisa.get(dn, dn), {})[d] = kwh
+        bugun = dt.date.today().isoformat()
+        for dn, h, kwh in self.con.execute("SELECT dn, hour, kwh FROM station_hour WHERE hour LIKE ? ORDER BY hour",
+                                           (bugun + "%",)):
+            saatlik.setdefault(kisa.get(dn, dn), {})[h[11:13]] = kwh
+        veri = dict(self.latest, gunluk=gunluk, saatlik_bugun=saatlik)
+        h = {"Authorization": "Bearer " + self.gh_token, "Accept": "application/vnd.github+json",
+             "User-Agent": "aemonitoring-fusionsolar"}
+
+        def istek(method, govde=None):
+            req = urllib.request.Request(GH_DOSYA, method=method, headers=h,
+                                         data=json.dumps(govde).encode() if govde else None)
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.loads(r.read().decode())
+
+        for deneme in range(3):
+            try:
+                sha = istek("GET").get("sha")
+            except urllib.error.HTTPError as e:
+                if e.code != 404:
+                    raise
+                sha = None
+            govde = {"message": f"FusionSolar {dt.datetime.now():%Y-%m-%d %H:%M}",
+                     "content": base64.b64encode(json.dumps(veri, ensure_ascii=False,
+                                                            separators=(",", ":")).encode()).decode()}
+            if sha:
+                govde["sha"] = sha
+            try:
+                istek("PUT", govde)
+                log.info("GitHub: panel verisi yazıldı")
+                return
+            except urllib.error.HTTPError as e:
+                if e.code in (409, 422) and deneme < 2:
+                    time.sleep(3)
+                    continue
+                raise
 
     # --- akışlar
     def _safe(self, f, *a):

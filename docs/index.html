@@ -396,13 +396,15 @@ function cizGenel() {
     const payYas = sonPay ? (Date.now() / 1000 - sonPay) / 60 : null;
     const payMetni = sonPay ? new Date(sonPay * 1000).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' }) : '';
     const tire = '<span style="color:#4A5A70">—</span>';
+    const f2 = (son && son.son || []).find(r => r.kaynak === 'f2pool' && r.durum === 'ok');
+    const f2e = f2 ? (f2.ek || {}) : null;
     document.getElementById('r-mad').outerHTML = '<span id="r-mad" class="rozet u"' + (offN ? '' : ' hidden') + '>' + offN + '</span>';
     madH = '<section class="panel" id="madencilik" aria-labelledby="h-mine"><div class="bas"><h2 id="h-mine">Madencilik</h2><span class="k">Toplayıcı ' + esc((mad.timestamp || '').slice(11, 16)) + '</span></div>'
       + (agDisi ? '<p class="k" style="margin:0 0 12px;padding:8px 10px;border-radius:6px;background:#EEF1F5;color:#2B3A4F">Toplayıcı saha ağında değil; cihaz durumu okunamıyor.'
         + (sonPay ? ' F2Pool son pay: <b>' + payMetni + '</b>' + (payYas < 15 ? ' (madenciler çalışıyor).' : '.') : '') + '</p>' : '')
       + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">'
-      + '<div><div class="k">Çalışan cihaz</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : s.online) + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">/ ' + s.total + '</span></div></div>'
-      + '<div><div class="k">Toplam hash</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : say(s.total_hashrate_TH)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s</span></div></div>'
+      + '<div><div class="k">Çalışan cihaz' + (agDisi && f2e ? ' (F2Pool)' : '') + '</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? (f2e ? f2e.worker_online + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">/ ' + f2e.worker_toplam + '</span>' : tire + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">/ ' + s.total + '</span>') : s.online + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">/ ' + s.total + '</span>') + '</div></div>'
+      + '<div><div class="k">Toplam hash' + (agDisi && f2e ? ' (F2Pool)' : '') + '</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? (f2e ? say(f2e.hashrate_th) : tire) : say(s.total_hashrate_TH)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s' + '</span></div></div>'
       + '<div><div class="k">Hedefe göre</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : '%' + say(s.efficiency_pct)) + '</div></div>'
       + '<div><div class="k">Ortalama sıcaklık</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : say(s.avg_temp_C)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">°C</span></div></div></div>'
       + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + (agDisi ? 'durum bilinmiyor' : s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor') + '">' + cihazlar.map(d => '<span title="' + esc(d.name + ' · ' + (agDisi ? 'durum bilinmiyor' : d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (agDisi ? '#C9D1DC' : d.online ? (d.health_issues && d.health_issues.some(h => h.severity === 'high') ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
@@ -419,6 +421,29 @@ function cizGenel() {
       + ay6.map((m, i) => { const h = deger(m) / mx * 79; return '<rect x="' + (i * bw + 8) + '" y="' + (89 - h) + '" width="' + (bw - 14) + '" height="' + h + '" rx="4" fill="' + (i === ay6.length - 1 ? '#86b6ef' : '#2a78d6') + '"><title>' + m.month + ': ' + (btcVar ? say(m.earn_btc, 5) + ' BTC' : say(m.avg_hash_TH) + ' TH/s') + '</title></rect><text x="' + (i * bw + bw / 2 + 1) + '" y="104">' + AYK[Number(m.month.slice(5)) - 1] + '</text>'; }).join('')
       + '<line x1="0" y1="89" x2="280" y2="89" stroke="#B9C4D2"/></g></svg>'
       + (btcVar ? '' : '<div class="k" style="border-top:1px solid #E3E8EE;padding-top:12px">BTC kazanç verisi şu an gelmiyor: F2Pool eşleşmesi ' + ((s.f2pool || {}).matched_devices || 0) + '/' + s.total + ' cihaz.</div>') + '</section>';
+  }
+
+  // ---- F2Pool (n8n Ana döngü, her turda)
+  let f2H = '';
+  const f2r = (son && son.son || []).find(r => r.kaynak === 'f2pool');
+  if (f2r) {
+    const e = f2r.ek || {}, ws = (f2r.inverterler || []).slice().sort((a, b) => String(a.ad).localeCompare(String(b.ad), 'tr', { numeric: true }));
+    const RENK = { online: '#1E7A3C', yavas: '#C98500', uyuyor: '#9AA6B5', offline: '#B42318', expired: '#B42318' };
+    const ADI = { online: 'çalışıyor', yavas: 'yavaşladı', uyuyor: 'uyuyor', offline: 'kapalı', expired: 'süresi dolmuş' };
+    const btc = v => v == null ? '—' : say(v, 5);
+    const kut = (k, v, b) => '<div><div class="k">' + k + '</div><div class="num" style="font-size:22px;font-weight:700">' + v + (b ? ' <span style="font-size:13px;font-weight:500;color:#4A5A70">' + b + '</span>' : '') + '</div></div>';
+    const sonPayW = Math.max(0, ...ws.map(w => w.son_pay ? Date.parse(w.son_pay) : 0));
+    f2H = '<section class="panel" id="f2pool" aria-labelledby="h-f2"><div class="bas"><h2 id="h-f2">F2Pool</h2><span class="k">' + esc(f2r.plant_id) + ' · ' + saatTR(f2r.ts) + '</span></div>'
+      + (f2r.durum !== 'ok' ? '<p class="k" style="margin:0;color:#7A1A12">Veri alınamadı: ' + esc(f2r.hata_mesaji || '') + '</p>' : '')
+      + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">'
+      + kut('Anlık hash', say(e.hashrate_th), 'TH/s') + kut('Son 24 saat ort.', say(e.h24_th), 'TH/s')
+      + kut('Çalışan işçi', (e.worker_online ?? '—'), '/ ' + (e.worker_toplam ?? '—')) + kut('Son 1 saat ort.', say(e.h1_th), 'TH/s')
+      + kut('Bugün (tahmini)', btc(e.bugun_tahmini), 'BTC') + kut('Dün', e.dun_gelir > 0 ? btc(e.dun_gelir) : '—', e.dun_gelir > 0 ? 'BTC' : '')
+      + kut('Bakiye', btc(e.bakiye), 'BTC') + (e.odenen > 0 ? kut('Ödenen (toplam)', btc(e.odenen), 'BTC') : kut('Bayat pay (24s)', say(e.h24_stale_th, 1), 'TH/s')) + '</div>'
+      + (ws.length ? '<div class="kutular" role="img" aria-label="' + ws.length + ' işçi">' + ws.map(w => '<span title="' + esc(w.ad + ' · ' + (ADI[w.durum] || w.durum) + ' · ' + say(w.hashrate_th, 1) + ' TH/s (24s ' + say(w.h24_th, 1) + ')' + (w.son_pay ? ' · son pay ' + saatTR(w.son_pay) : '')) + '" style="background:' + (RENK[w.durum] || '#9AA6B5') + '"></span>').join('') + '</div>'
+        + '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap">' + ['online', 'yavas', 'uyuyor', 'offline'].filter(d => ws.some(w => w.durum === d || (d === 'offline' && w.durum === 'expired'))).map(d => '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + RENK[d] + '"></span> ' + ADI[d] + ' ' + ws.filter(w => w.durum === d || (d === 'offline' && w.durum === 'expired')).length + '</span>').join('') + '</div>' : '')
+      + (sonPayW ? '<div class="k">Son pay ' + saatTR(new Date(sonPayW).toISOString()) + '</div>' : '')
+      + '</section>';
   }
 
   // ---- PTF
@@ -442,7 +467,7 @@ function cizGenel() {
     + '<div class="iki"><section class="panel" aria-labelledby="h-uyari"><div class="bas"><h2 id="h-uyari">Dikkat isteyenler</h2><span class="k">' + uy.length + ' etkin</span></div>' + uyHtml + '</section>' + denge + '</div>'
     + '<section class="panel" id="sayaclar" aria-labelledby="h-abone" style="gap:16px"><div class="bas"><h2 id="h-abone">Sayaçlar</h2><span class="k">' + tarihK(sonOsosGun) + ' 00:00–' + String(sonSaatNo).padStart(2, '0') + ':00, son 30 gün çizgisi</span></div><div class="sayaclar">' + sayaclar + '</div></section>'
     + trend
-    + '<div class="uc">' + inv + madH + gelirH + ptfH + '</div>'
+    + '<div class="uc">' + inv + madH + f2H + gelirH + ptfH + '</div>'
     + '</div>';
   document.getElementById('kaynakNot').textContent = 'Veri: n8n · OSOS · saha PC';
 }

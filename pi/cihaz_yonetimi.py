@@ -27,7 +27,7 @@ YEREL = Path.home() / ".aesun" / "cihaz_yonetimi_yerel.json"
 VARSAYILAN = {
     "mod": "izleme",
     "cihaz_sayisi": 29,
-    "cihaz_guc_kw": 6.0,          # cihaz başı çekilen güç
+    "cihaz_guc_kw": "oto",        # cihaz başı güç (kW); "oto": son antminer arşivindeki tahmini güç ortalaması
     "cihaz_th": "oto",            # cihaz başı hashrate (TH/s); "oto": cihazların son 7 gün çalışırkenki ortalaması
     "maliyet_carpani": 1.05,      # PTF+YEKDEM üzerine dağıtım/vergi payı (saat_kontrol.py ile aynı)
     "uretim_esik_kw": 50,         # Sera-1 + Sera-2 anlık gücü bunun üstündeyse "üretim var"
@@ -118,6 +118,20 @@ def cihaz_th_hesapla(a, mad, simdi):
         return round(canli[len(canli) // 2], 1), f"sahadaki {len(canli)} çalışan cihaz"
     return 300.0, "varsayılan"
 
+def cihaz_guc_hesapla(a, simdi):
+    if isinstance(a.get("cihaz_guc_kw"), (int, float)):
+        return float(a["cihaz_guc_kw"]), "ayar"
+    for i in range(0, 6):
+        ay = (simdi.replace(day=1) - timedelta(days=31 * i)).strftime("%Y-%m")
+        d, _ = gh(f"arsiv_antminer_{ay}.json")
+        if d:
+            k = sorted(d)[-1]
+            c = (d[k] or {}).get("cihazlar") or {}
+            v = [float(x.get("guc_tahmini")) for x in c.values() if x.get("guc_tahmini")]
+            if v:
+                return round(sum(v) / len(v), 2), f"antminer arşivi {k}, {len(v)} cihaz ortalaması"
+    return 6.0, "varsayılan"
+
 def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
     maliyet = (ptf + yekdem) / 1000 * a["maliyet_carpani"] * a["cihaz_guc_kw"] if ptf is not None else None
     gelir = hp * a["cihaz_th"] / 24 * btc_try if hp and btc_try else None
@@ -144,7 +158,8 @@ def calistir():
     fiyat, _ = gh("arsiv_btc_fiyat.json")
     mad, _ = gh("antminer_panel.json")
     th, th_kaynak = cihaz_th_hesapla(a, mad, simdi)
-    a = {**a, "cihaz_th": th, "cihaz_th_kaynak": th_kaynak}
+    kw, kw_kaynak = cihaz_guc_hesapla(a, simdi)
+    a = {**a, "cihaz_th": th, "cihaz_th_kaynak": th_kaynak, "cihaz_guc_kw": kw, "cihaz_guc_kaynak": kw_kaynak}
     # PTF ve YEKDEM
     def ptf_al(t):
         g = (ep or {}).get("ptf", {}).get(t.strftime("%Y-%m-%d")) or []

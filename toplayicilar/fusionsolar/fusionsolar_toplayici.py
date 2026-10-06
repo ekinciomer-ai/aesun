@@ -607,6 +607,42 @@ class Collector:
             log.error("%s: %s", f.__name__, e)
         return False
 
+    def kesif_inv(self):
+        """Tanı: inverter bazında geçmiş günlük üretim veren uç noktayı bulmak için adayları dener ve arayüzün ağ isteklerini yazar."""
+        self.meta()
+        dn = next(iter(self.inv))
+        d = dt.date.today() - dt.timedelta(days=1)
+        ms, t = midnight_ms(d), int(time.time() * 1000)
+        print(f"== İnverter: {self.inv[dn]['name']} ({dn}), tarih {d}")
+        q4 = (f"stationDn={quote(dn)}&timeDim=4&queryTime={midnight_ms(d.replace(day=1))}&timeZone=3"
+              f"&timeZoneStr=Europe%2FIstanbul&dateStr={quote(d.replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00')}&_={t}")
+        adaylar = [
+            ("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=10032&deviceDn={quote(dn)}&date={ms}&_={t}", None),
+            ("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=10018&deviceDn={quote(dn)}&date={ms}&_={t}", None),
+            ("GET", f"/rest/pvms/web/device/v1/device-statistics-signal?deviceDn={quote(dn)}&_={t}", None),
+            ("GET", "/rest/pvms/web/station/v1/overview/energy-balance?" + q4, None),
+        ]
+        for m, u, b in adaylar:
+            r = self.web.page.evaluate(JS_CALL, [m, u, b])
+            print(f"-- {m} {u.split('?')[0]} -> {r['s']}: {r['t'][:500]}")
+        istek = {}
+        def kaydet(req):
+            if "/rest/" in req.url and any(k in req.url for k in ("report", "history", "kpi", "statistic", "energy", "device")):
+                istek.setdefault(req.method + " " + req.url.split("?")[0], (req.url[:300], (req.post_data or "")[:400]))
+        self.web.page.on("request", kaydet)
+        kok = BASE + "/uniportal/pvmswebsite/assets/build/cloud.html"
+        for frag in (f"#/view/device/{quote(dn)}/inverter/history", f"#/view/device/{quote(dn)}/inverter/overview",
+                     "#/view/report/inverter", "#/report/inverter", "#/view/report", "#/report"):
+            try:
+                self.web.page.goto(kok + frag, wait_until="domcontentloaded", timeout=60000)
+                time.sleep(8)
+                print(f"-- sayfa {frag} -> {self.web.page.url[-80:]}")
+            except Exception as e:
+                print(f"-- sayfa {frag} hata: {e}")
+        print("== Arayüzün çağırdığı uç noktalar:")
+        for k, (u, b) in sorted(istek.items()):
+            print(" ", k, "|", u, "|", b)
+
     def once(self):
         self.meta()
         for f in (self.stations, self.inverters, self.alarms, self.curve, self.month):
@@ -650,6 +686,7 @@ def main():
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--backfill", type=int, metavar="GUN")
     ap.add_argument("--gecmis", action="store_true", help="şebeke bağlantısından bugüne günlük üretim + GitHub")
+    ap.add_argument("--kesif-inv", action="store_true", help="tanı: inverter geçmiş uç noktalarını dener")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s",
                         handlers=[logging.StreamHandler(sys.stdout),
@@ -668,6 +705,8 @@ def main():
             c.backfill(a.backfill)
         elif a.gecmis:
             c.gecmis()
+        elif a.kesif_inv:
+            c.kesif_inv()
         else:
             log.info("Sürekli mod — Ctrl+C ile durur")
             c.forever()

@@ -98,3 +98,9 @@ sudo systemctl daemon-reload && sudo systemctl enable --now aesun-osos.timer
   - Çalışma kayıtları saklanmaz (Inavitas çerezi).
 - **FusionSolar**: saha PC'deki `fusionsolar_toplayici.py` saatte bir `inverter/fusionsolar_<yıl>.json` yazar (tesis günlük + inverter günlük, inverter günlükleri 5 Ekim 2026'dan itibaren). Tesis geçmişi için bir kez: `python fusionsolar_toplayici.py --gecmis`.
 - Panel: `#inverter` sayfası (santral/yıl/dönem seçimi, geçen yıl kıyası, inverter performans haritası, aylık rapor, CSV).
+
+## Kredi tasarrufu (2026-10-06)
+- Ana döngü: gündüz 30 dk (05:00–20:30), gece saatlik (21:00–04:00). OSOS alt akışı her turda yalnız GitHub dosyasını okur.
+- Pi nabzı: `pi/nabiz.py` her 10 dk `epias-ptf/n8n/pi_nabiz.json`'a yazar; Ana döngü bunu `aesun_nabiz`'e işler. "Pi nabız + canlı veri" webhook'u artık çağrılmıyor.
+- OSOS: `osos_toplayici.py` yalnız GitHub'a yazar; n8n "OSOS veri alıcı" webhook'una gönderim `AESUN_WEBHOOK` yazılmadıkça kapalı.
+- F2Pool: `antminer_panel.py` (her dakika) ve GitHub Actions `arsiv.yml` (saatlik) n8n dışında çalışıyor.

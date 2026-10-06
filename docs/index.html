@@ -1012,7 +1012,7 @@ async function cizYonetim() {
     const bas = q => q.gelir != null ? q.gelir / kw * 1000 : null;                           // başabaş enerji maliyeti ₺/MWh
     const DUR = q => q.karar === 'uyut' ? { ad: 'Uyut', ik: '✕', bg: '#FDECEA', fg: '#B42318', bar: '#D64545' }
       : q.karar === 'calis' && q.gunes_tahmini && emal(q) != null && bas(q) != null && emal(q) <= bas(q) ? { ad: 'Çalış · güneş + kârlı', ik: '☀✓', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
-      : q.karar === 'calis' && q.gunes_tahmini ? { ad: 'Çalış · güneş', ik: '☀', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429' }
+      : q.karar === 'calis' && q.gunes_tahmini ? { ad: 'Çalış · güneş', ik: '☀', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
       : q.karar === 'calis' ? { ad: 'Çalış · kârlı', ik: '✓', bg: '#E6F4EA', fg: '#1E7A3C', bar: '#2F9E55' }
       : { ad: '—', ik: '', bg: '#F1F3F6', fg: '#4A5A70', bar: '#C9D1DC' };
     const calisSaat = pl.filter(q => q.karar === 'calis').length, uyuSaat = pl.filter(q => q.karar === 'uyut').length;
@@ -1047,7 +1047,7 @@ async function cizYonetim() {
           pl.forEach((q, i) => { if (i % Math.max(1, Math.round(n / 12)) === 0 || i === n - 1) g += '<text x="' + x(i).toFixed(1) + '" y="' + (PT + PH + 16) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + q.t.slice(11, 13) + ':00</text>'; });
           pl.forEach((q, i) => { g += '<rect x="' + (i * cw).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + (PT + PH) + '" fill="transparent" data-tip="' + esc(q.t.slice(8, 10) + '.' + q.t.slice(5, 7) + ' ' + q.t.slice(11) + ' · ' + DUR(q).ad + '\nEnerji maliyeti ' + say(mv[i]) + ' ₺/MWh\nPTF ' + say(pv[i]) + ' ₺/MWh\nBaşabaş ' + say(bv[i]) + ' ₺/MWh') + '"/>'; });
           g += '</svg>';
-          const lej = [['#F0B429', '☀ Güneşle çalış'], ['linear-gradient(135deg,#F0B429 50%,#2F9E55 50%)', '☀✓ Güneş var, zaten kârlı'], ['#2F9E55', '✓ Kârlı, çalış'], ['#D64545', '✕ Zararlı, uyut']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
+          const lej = [['linear-gradient(135deg,#F0B429 50%,#2F9E55 50%)', '☀ Güneşle çalış'], ['#2F9E55', '✓ Kârlı, çalış'], ['#D64545', '✕ Zararlı, uyut']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
             + [['#eb6834', 'Enerji maliyeti', ''], ['#2a78d6', 'PTF', ''], ['#1E7A3C', 'Başabaş (BTC geliri)', 'dashed']].map(([r, t, k]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px ' + (k || 'solid') + ' ' + r + '"></span>' + t + '</span>').join('');
           return g + '<div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + lej + '<span>₺/MWh</span></div>';
         })()

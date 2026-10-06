@@ -336,7 +336,7 @@ function grafikX(sp) {
 // Tablolar: başlığa tıklayınca sırala (Toplam satırları altta kalır)
 document.addEventListener('click', e => {
   const th = e.target.closest && e.target.closest('table.tb thead th');
-  if (!th || (th.colSpan || 1) > 1) return;
+  if (!th || (th.colSpan || 1) > 1 || th.closest('table').classList.contains('sirasiz')) return;
   const tablo = th.closest('table'), satirlar = Array.from(tablo.tHead.rows);
   // başlık ızgarası: bu th hangi sütun?
   const izg = []; let sutun = -1;
@@ -823,6 +823,50 @@ function madenGunAc(g, kaydir) {
   }
   if (kaydir) tr.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
+// Gelir dağılımı ağacı: ay > gün > saat > cihaz
+let DAGV = null;
+function dagSatir(key, ust, sev, etk, o, nEff, cb, acilir, cihazTh) {
+  const r = DAGV ? DAGV.oran : [16 / 29, 13 / 29];
+  const g16 = o.a != null ? o.a : o.btc * r[0], g13 = o.b != null ? o.b : o.btc * r[1];
+  const tl = (v, k) => o[k] != null && o.btc ? o[k] * v / o.btc : null;
+  const ic = '<span style="display:inline-block;width:' + (sev * 18) + 'px"></span>' + (acilir ? '<a href="#maden" onclick="dagAc(\'' + key + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + etk + '</a>' : '<span style="display:inline-block;width:14px"></span>' + etk);
+  return '<tr data-k="' + key + '" data-u="' + ust + '"' + (sev ? ' style="background:' + ['', '#FAFBFD', '#F4F7FB', '#EEF3FA'][sev] + '"' : '') + '><td class="sol">' + ic + '</td><td class="ayr">' + btcY(o.btc) + '</td><td>' + (cihazTh != null ? say(cihazTh) + ' TH/s' : nEff != null ? say(nEff, 1) : '') + '</td><td>' + (cb != null ? btcY(cb) : '') + '</td>'
+    + (cihazTh != null ? '<td class="ayr" colspan="3"></td><td class="ayr" colspan="3"></td>' : '<td class="ayr">' + btcY(g16) + '</td><td>' + say(tl(g16, 'tl')) + '</td><td>' + say(tl(g16, 'usd')) + '</td><td class="ayr">' + btcY(g13) + '</td><td>' + say(tl(g13, 'tl')) + '</td><td>' + say(tl(g13, 'usd')) + '</td>') + '</tr>';
+}
+function dagAc(key) {
+  const tr = document.querySelector('#dagTablo tr[data-k="' + key + '"]'); if (!tr) return;
+  if (tr.classList.contains('acilmis')) {
+    document.querySelectorAll('#dagTablo tr[data-u]').forEach(r => { if ((r.dataset.u || '').split('|').includes(key)) r.remove(); });
+    tr.classList.remove('acilmis'); return;
+  }
+  const ust = (tr.dataset.u ? tr.dataset.u + '|' : '') + key, [tip, deger] = [key.slice(0, 1), key.slice(2)];
+  let h = '';
+  if (tip === 'A') {
+    for (const x of Object.values(DAGV.gun).filter(x => x.g.startsWith(deger)).sort((p, q) => p.g.localeCompare(q.g))) {
+      const o = { btc: x.btc, tl: x.tl, usd: x.usd };
+      h += dagSatir('G:' + x.g, ust, 1, tarihK(x.g) + ' ' + x.g.slice(0, 4) + (x.havuzdan || !x.veri ? ' <span class="k">(saatlik veri yok)</span>' : ''), o, x.nEff, x.cihazBasi, !!(x.veri && x.top > 0));
+    }
+  } else if (tip === 'G') {
+    const x = DAGV.gun[deger];
+    x.saat.forEach((sa, i) => {
+      if (!sa || !(sa.t > 0)) return;
+      const f = sa.t / x.top, o = { btc: x.btc * f, tl: x.tl != null ? x.tl * f : null, usd: x.usd != null ? x.usd * f : null };
+      h += dagSatir('S:' + deger + ' ' + String(i).padStart(2, '0'), ust, 2, String(i).padStart(2, '0') + ':00 <span class="k">' + say(sa.t) + ' TH/s</span>', o, sa.n, sa.n ? o.btc / sa.n : null, true);
+    });
+    if (!h) h = '<tr data-u="' + ust + '"><td class="sol k" colspan="10">Bu gün için saatlik veri yok.</td></tr>';
+  } else if (tip === 'S') {
+    const g = deger.slice(0, 10), x = DAGV.gun[g], hs = Number(deger.slice(11)), sa = x.saat[hs];
+    const f = sa.t / x.top, saatBtc = x.btc * f, tlS = x.tl != null ? x.tl * f : null, usdS = x.usd != null ? x.usd * f : null;
+    const cs = Object.entries(sa.o).sort((p, q) => p[0].localeCompare(q[0], 'tr', { numeric: true }));
+    for (const [c, th] of cs) {
+      const k = th / sa.t, o = { btc: saatBtc * k, tl: tlS != null ? tlS * k : null, usd: usdS != null ? usdS * k : null };
+      h += th > 0 ? dagSatir('C:' + deger + ' ' + c, ust, 3, '<b>' + esc(c) + '</b>', o, null, null, false, th)
+        : '<tr data-u="' + ust + '" style="background:#EEF3FA"><td class="sol"><span style="display:inline-block;width:68px"></span><b>' + esc(c) + '</b> <span style="color:#B42318">çalışmıyor</span></td><td class="ayr">—</td><td>0 TH/s</td><td></td><td class="ayr" colspan="3"></td><td class="ayr" colspan="3"></td></tr>';
+    }
+  }
+  tr.insertAdjacentHTML('afterend', h);
+  tr.classList.add('acilmis');
+}
 async function cizMaden() {
   document.getElementById('baslik').textContent = 'Madencilik';
   const ic = document.getElementById('icerik');
@@ -888,8 +932,9 @@ async function cizMaden() {
       ekle(at, o); ekle(topl, o); at.gun++; if (x.nEff != null) { at.nEff += x.nEff; at.nG++; }
       dt += satir(tarihK(x.g) + ' ' + x.g.slice(0, 4) + (x.havuzdan || !x.veri ? ' <span class="k">(saatlik veri yok)</span>' : ''), o, '', x.nEff, x.cihazBasi, x.g);
     }
+    DAGV = { gun: Object.fromEntries(dg.map(x => [x.g, x])), oran: DAG.map(v => v / DAG_TOP) };
     let at = '';
-    for (const [ay, t] of Object.entries(aylik).sort()) { const n = t.nG ? t.nEff / t.nG : null; at += satir(AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4) + ' <span class="k">(' + t.gun + ' gün)</span>', t, '', n, n ? t.btc / t.gun / n : null, ay); }
+    for (const [ay, t] of Object.entries(aylik).sort()) { const n = t.nG ? t.nEff / t.nG : null; at += dagSatir('A:' + ay, '', 0, AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4) + ' <span class="k">(' + t.gun + ' gün)</span>', t, n, n ? t.btc / t.gun / n : null, true); }
     at += satir('Genel toplam <span class="k">(' + dg.length + ' gün)</span>', topl, 'top');
     const bas2 = (ilk) => '<thead><tr><th class="sol" rowspan="2">' + ilk + '</th><th class="ayr" rowspan="2">Gelir (BTC)</th><th rowspan="2" title="Çalışma saatine göre eşdeğer çalışan cihaz sayısı (ayda: günlük ortalama)">Çalışan cihaz</th><th rowspan="2" title="Günlük gelir ÷ çalışan cihaz (ayda: günlük ortalama)">Cihaz başı / gün (BTC)</th><th class="ayr" colspan="3" style="text-align:center">16 cihaz</th><th class="ayr" colspan="3" style="text-align:center">13 cihaz</th></tr><tr><th class="ayr">BTC</th><th>₺</th><th>$</th><th class="ayr">BTC</th><th>₺</th><th>$</th></tr></thead>';
     const kartD = (ad, btc, tl, usd) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:22px;font-weight:700">' + btcY(btc) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">BTC</span></div><div class="k">' + say(tl) + ' ₺ · $' + say(usd) + '</div></div>';
@@ -897,8 +942,8 @@ async function cizMaden() {
       + '<div class="kartlar5" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">' + kartD('Toplam gelir', topl.btc, topl.tl, topl.usd) + kartD('16 cihaz payı (16/29)', topl.a, topl.aTl, topl.aUsd) + kartD('13 cihaz payı (13/29)', topl.b, topl.bTl, topl.bUsd) + '</div>'
       + grafikX({ id: 'mdagilim', ad: 'Gelir dağılımı', etiket: dg.map(x => tarihK(x.g)), etiketAd: 'Gün', turler: ['yigin', 'cubuk', 'cizgi', 'tablo'], birim: 'BTC', toplam: 'top', fmt: v => say(v, 6) + ' BTC', eksen: v => say(v, 4),
           seriler: [{ ad: '16 cihaz', renk: '#2a78d6', grup: 'g', v: dg.map(x => pay(x, 0)) }, { ad: '13 cihaz', renk: '#1baf7a', grup: 'g', v: dg.map(x => pay(x, 1)) }] })
-      + '<h3 style="margin:4px 0 0;font-size:16px">Aylık</h3><div class="tablo-kutu"><table class="tb">' + bas2('Ay') + '<tbody>' + at + '</tbody></table></div>'
-      + '<h3 style="margin:8px 0 0;font-size:16px">Gün gün</h3><div class="tablo-kutu" style="max-height:560px;overflow:auto"><table class="tb">' + bas2('Gün') + '<tbody>' + dt + '</tbody></table></div>'
+      + '<div class="tablo-kutu" style="max-height:640px;overflow:auto"><table class="tb sirasiz" id="dagTablo">' + bas2('Ay / gün / saat / cihaz') + '<tbody>' + at + '</tbody></table></div>'
+      + '<div class="k">Aya tıklayınca günler, güne tıklayınca saatler, saate tıklayınca o saatte çalışan cihazlar açılır. Günün geliri saatlere o saatteki toplam hash oranında, saatin geliri cihazlara kendi hash payı oranında dağıtılır.</div>'
       + '<div class="k">Hangi cihazın hangi gruba ait olduğu bilinmediği için her günün geliri 16/29 ve 13/29 oranında bölünür. "Çalışan cihaz", her cihazın o gün sahanın çalıştığı saatlerin ne kadarında çalıştığına göre eşdeğer sayıdır; "cihaz başı" günlük gelirin bu sayıya bölümüdür. ₺ ve $ o günün BTC kapanış fiyatıyla.</div></section>';
   }
   // günlük grafikler

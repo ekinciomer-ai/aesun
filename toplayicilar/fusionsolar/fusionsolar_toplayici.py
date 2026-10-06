@@ -535,6 +535,26 @@ class Collector:
                     inv["gun"][d] = round(kwh, 1)
             if not any(s["gun"] for s in veri["santraller"].values()):
                 continue
+            # GitHub'daki mevcut dosyayla birleştir: başka bilgisayarda toplanmış geçmiş kaybolmasın
+            try:
+                mevcut = self._gh("GET", f"inverter/fusionsolar_{yil}.json")
+                eski = json.loads(base64.b64decode(mevcut["content"]).decode()) if mevcut.get("content") else {}
+            except Exception as e:
+                log.warning("GitHub mevcut dosya okunamadı (%s), birleştirme atlandı", e)
+                eski = {}
+            for dn, es in (eski.get("santraller") or {}).items():
+                ys = veri["santraller"].setdefault(dn, {"ad": es.get("ad"), "kwp": es.get("kwp"), "gun": {}, "ay": {}, "inv": {}})
+                for alan in ("gun", "ay"):
+                    ys[alan] = {**(es.get(alan) or {}), **ys.get(alan, {})}
+                if es.get("saat") or ys.get("saat"):
+                    saat = {g: dict(v) for g, v in (es.get("saat") or {}).items()}
+                    for g, v in (ys.get("saat") or {}).items():
+                        saat.setdefault(g, {}).update(v)
+                    ys["saat"] = saat
+                for idn, ei in (es.get("inv") or {}).items():
+                    yi = ys["inv"].setdefault(idn, {"ad": ei.get("ad"), "gun": {}, "ay": {}})
+                    for alan in ("gun", "ay"):
+                        yi[alan] = {**(ei.get(alan) or {}), **yi.get(alan, {})}
             veri["guncellendi"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
             if self.gh_put(f"inverter/fusionsolar_{yil}.json", veri, f"İnverter geçmişi: fusionsolar_{yil}.json",
                            sadece_degisirse=True):

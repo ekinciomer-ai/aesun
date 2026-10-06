@@ -69,6 +69,7 @@ rect.hit.on{fill:rgba(16,35,63,.07)}
 .tursec button[aria-pressed=true]{background:#10233F;color:#fff}
 table.tb thead th{cursor:pointer;user-select:none}
 table.tb thead th[colspan]{cursor:default}
+.btn:disabled{opacity:.45;cursor:not-allowed}
 tr.acilmis .ok{display:inline-block;transform:rotate(90deg)}
 tr.acik table.tb{font-size:13px}
 table.tb thead th[aria-sort=ascending]::after{content:" ▲";font-size:10px}
@@ -868,6 +869,88 @@ function dagAc(key) {
   tr.insertAdjacentHTML('afterend', h);
   tr.classList.add('acilmis');
 }
+// ===== Madencilik > Cihazlar: cihaz kartları (F2Pool + son bilinen donanım + sahadaki canlı durum) ve elle uyut/çalıştır
+const KOMUT_URL = 'https://xbay.app.n8n.cloud/webhook/aesun-komut';
+let SON_DONANIM = null;
+async function sonDonanimYukle() {
+  if (SON_DONANIM) return SON_DONANIM;
+  const aylar = madenAyListesi().slice().reverse();
+  for (const a of aylar) {
+    try { const d = await al('arsiv_antminer_' + a + '.json'); const k = Object.keys(d).sort().pop(); if (k && d[k] && d[k].cihazlar) { SON_DONANIM = { ts: k, ...d[k] }; return SON_DONANIM; } } catch (e) {}
+  }
+  SON_DONANIM = { ts: null, cihazlar: {} }; return SON_DONANIM;
+}
+const komutAnahtar = () => { try { return localStorage.getItem('aesun_komut_anahtar') || ''; } catch (e) { return ''; } };
+function komutAnahtarKaydet(v) { try { localStorage.setItem('aesun_komut_anahtar', v); } catch (e) {} }
+async function cihazKomut(action, targets, ad) {
+  const anahtar = komutAnahtar();
+  const durum = document.getElementById('komutDurum');
+  if (!anahtar) { durum.innerHTML = '<span style="color:#B42318">Önce komut anahtarını girin (Pi anahtarı).</span>'; return; }
+  const ne = action === 'sleep' ? 'UYUT' : 'ÇALIŞTIR';
+  if (!window.confirm(ad + ' → ' + ne + '\nKomut sahadaki cihazlara gönderilecek. Emin misiniz?')) return;
+  durum.innerHTML = '<span class="k">Komut gönderiliyor…</span>';
+  try {
+    const r = await fetch(KOMUT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Aesun-Anahtar': anahtar }, body: JSON.stringify({ action, targets, delay_sec: targets === 'all' ? 10 : 0, kim: 'panel' }) });
+    const t = await r.text(); let j = null; try { j = JSON.parse(t); } catch (e) {}
+    if (r.ok && j && j.ok) durum.innerHTML = '<span style="color:#1E7A3C">Komut kuyruğa alındı (' + esc(j.id) + '). Sahadaki toplayıcı ~15 sn içinde uygular; sonuç birkaç dakika içinde burada görünür.</span>';
+    else durum.innerHTML = '<span style="color:#B42318">Komut gönderilemedi: HTTP ' + r.status + (r.status === 403 || r.status === 401 ? ' (anahtar yanlış)' : r.status === 404 ? ' (n8n iş akışı yayında değil)' : '') + '</span>';
+  } catch (e) { durum.innerHTML = '<span style="color:#B42318">Komut gönderilemedi: ' + esc(e.message || e) + '</span>'; }
+}
+async function cizCihazlar() {
+  const don = await sonDonanimYukle();
+  let sonuc = null; try { sonuc = await al('antminer_command_results.json'); } catch (e) {}
+  const mad = D.mad || {}, canli = {};
+  for (const d of mad.devices || []) { const w = String(d.actual_worker || d.f2pool_name || '').split('.').pop(); if (w) canli[w] = d; }
+  const agDisi = (mad.devices || []).length && (mad.devices || []).every(d => !d.online && !d.sleeping);
+  const f2 = (D.son && D.son.son || []).find(r => r.kaynak === 'f2pool'), f2w = {};
+  for (const w of (f2 && f2.inverterler) || []) f2w[String(w.ad)] = w;
+  // son 7 gün (saatlik arşiv) ve gelir payı
+  const bugun = bugunTR(), gun7 = []; for (let i = 1; i <= 7; i++) gun7.push(gunEkle(bugun, -i));
+  const s7 = {}; let topTH = 0, btc7 = 0, sahaTop = 0;
+  for (const g of gun7) { const r = madenGun(g); btc7 += r.btc || 0; for (const [c, z] of Object.entries(r.cihaz)) { const o = s7[c] || (s7[c] = { ths: 0, s: 0, saha: 0 }); o.ths += z.ths; o.s += z.s; topTH += z.ths; } sahaTop += r.calisan; }
+  const kodlar = [...new Set([...Object.keys(f2w), ...Object.keys(don.cihazlar || {}).map(k => k.split('.').pop()), ...Object.keys(canli), ...Object.keys(s7)])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
+  const DUR = { calisiyor: ['Çalışıyor', '#1E7A3C', '#E8F5EC'], uyuyor: ['Uyuyor', '#4A5A70', '#EEF1F5'], yavas: ['Yavaşladı', '#9A5B00', '#FFF4DC'], kapali: ['Kapalı / yanıtsız', '#B42318', '#FDECEA'], durmus: ['Durmuş (F2Pool)', '#9A5B00', '#FFF4DC'], bilinmiyor: ['Bilinmiyor', '#4A5A70', '#F5F7FA'] };
+  const kartlar = kodlar.map(c => {
+    const hw = (don.cihazlar || {})['mehmetas.' + c] || {}, cv = canli[c], fw = f2w[c], st = s7[c];
+    let durum = 'bilinmiyor';
+    if (cv && (cv.online || cv.sleeping)) durum = cv.sleeping ? 'uyuyor' : 'calisiyor';
+    else if (fw) durum = fw.durum === 'online' ? 'calisiyor' : fw.durum === 'yavas' ? 'yavas' : 'durmus';
+    const [dAd, dRenk, dZemin] = DUR[durum];
+    const th7 = st && st.s ? st.ths / st.s : null, cal7 = st && sahaTop ? st.s / sahaTop : null, pay7 = st && topTH ? btc7 * st.ths / topTH : null;
+    const sat = (k, v) => '<div style="display:flex;justify-content:space-between;gap:8px"><span class="k">' + k + '</span><span class="num" style="font-weight:600">' + v + '</span></div>';
+    const ipSon = cv && cv.suffix;
+    const dugme = (act, et) => '<button type="button" class="btn" style="flex:1;padding:6px 8px;font-size:13px"' + (ipSon ? ' onclick="cihazKomut(\'' + act + '\',[' + ipSon + '],\'Cihaz ' + c + '\')"' : ' disabled title="Cihazın IP adresi bilinmiyor (toplayıcı saha ağındayken öğrenilir)"') + '>' + et + '</button>';
+    return '<div class="panel" style="padding:14px;gap:8px;border-left:4px solid ' + dRenk + '">'
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><b style="font-size:18px">' + esc(c) + '</b><span style="font-size:12px;font-weight:700;color:' + dRenk + ';background:' + dZemin + ';padding:2px 8px;border-radius:10px">' + dAd + '</span></div>'
+      + '<div class="k" style="margin-top:-4px">' + esc(hw.model || (cv && cv.model !== '?' ? cv.model : '') || 'model ?') + (ipSon ? ' · 192.168.0.' + ipSon : '') + '</div>'
+      + sat('Anlık (F2Pool)', fw ? say(fw.hashrate_th) + ' TH/s' : '—')
+      + sat('24 saat ort.', fw ? say(fw.h24_th) + ' TH/s' : '—')
+      + sat('7 gün çalışırken', th7 != null ? say(th7) + ' TH/s' : '—')
+      + sat('7 gün çalışma', cal7 != null ? '%' + say(cal7 * 100) : '—')
+      + sat('7 gün gelir payı', pay7 != null ? say(pay7 * 1e3, 3) + ' mBTC' : '—')
+      + sat('Sıcaklık / su', cv && cv.temp_max != null ? say(cv.temp_max) + ' / ' + say(cv.temp_water) + ' °C' : hw.temp != null ? say(hw.temp) + ' / ' + (hw.su != null ? say(hw.su) : '—') + ' °C*' : '—')
+      + sat('Güç', hw.guc_tahmini != null ? say(hw.guc_tahmini, 2) + ' kW*' : '—')
+      + (fw && fw.son_pay ? '<div class="k">Son pay ' + saatTR(fw.son_pay) + '</div>' : '')
+      + '<div style="display:flex;gap:6px;margin-top:2px">' + dugme('wake', '▶ Çalıştır') + dugme('sleep', '⏸ Uyut') + '</div></div>';
+  });
+  const say_ = k => kodlar.filter(c => { const cv = canli[c], fw = f2w[c]; const d = cv && (cv.online || cv.sleeping) ? (cv.sleeping ? 'uyuyor' : 'calisiyor') : fw ? (fw.durum === 'online' ? 'calisiyor' : 'durmus') : 'bilinmiyor'; return d === k; }).length;
+  let h = '<div class="kartlar5">'
+    + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Cihaz</div><div class="num" style="font-size:22px;font-weight:700">' + kodlar.length + '</div><div class="k">' + Object.entries((don.cihazlar ? Object.values(don.cihazlar) : []).reduce((m, x) => (m[x.model] = (m[x.model] || 0) + 1, m), {})).map(([m, n]) => n + '× ' + esc(m)).join(' · ') + '</div></div>'
+    + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Çalışıyor</div><div class="num" style="font-size:22px;font-weight:700;color:#1E7A3C">' + say_('calisiyor') + '</div></div>'
+    + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Uyuyor</div><div class="num" style="font-size:22px;font-weight:700">' + say_('uyuyor') + '</div></div>'
+    + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Durmuş / yanıtsız</div><div class="num" style="font-size:22px;font-weight:700;color:#B42318">' + (say_('kapali') + say_('durmus')) + '</div>' + (say_('durmus') ? '<div class="k">F2Pool\'a göre hash yok (saha durumu bilinmiyor)</div>' : '') + '</div>'
+    + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Son 7 gün gelir</div><div class="num" style="font-size:22px;font-weight:700">' + btcY(btc7) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">BTC</span></div></div></div>';
+  h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Elle komut</h2><span class="k">' + (agDisi || !(mad.devices || []).some(d => d.online || d.sleeping) ? 'Toplayıcı saha ağında değil: komut kuyruğa alınır ama cihazlara ancak toplayıcı sahadayken ulaşır' : 'Toplayıcı sahada, cihazlara ulaşılıyor') + '</span></div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><label class="k" style="display:flex;align-items:center;gap:6px">Komut anahtarı <input type="password" autocomplete="off" placeholder="Pi anahtarı" value="' + (komutAnahtar() ? '••••••••' : '') + '" onchange="if(this.value&&!/^•+$/.test(this.value)){komutAnahtarKaydet(this.value);this.value=\'••••••••\';document.getElementById(\'komutDurum\').textContent=\'Anahtar bu tarayıcıya kaydedildi.\'}" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;width:160px"></label>'
+    + '<button class="btn" type="button" onclick="cihazKomut(\'wake\',\'all\',\'TÜM CİHAZLAR\')">▶ Tümünü çalıştır</button><button class="btn" type="button" onclick="cihazKomut(\'sleep\',\'all\',\'TÜM CİHAZLAR\')">⏸ Tümünü uyut</button></div>'
+    + '<div id="komutDurum" class="k" style="min-height:18px"></div>'
+    + '<div class="k">Komutlar n8n üzerinden <code>antminer_commands.json</code>\'a yazılır, sahadaki toplayıcı (altminer) uygular. Tümü komutunda cihazlar 10 sn arayla açılır/kapanır. Anahtar yalnız bu tarayıcıda saklanır.</div></section>';
+  h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Cihazlar</h2><span class="k">* son bilinen değer (' + (don.ts ? esc(don.ts) : '—') + '); canlı değerler toplayıcı sahadayken gelir</span></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px">' + kartlar.join('') + '</div></section>';
+  const sr = ((sonuc && sonuc.results) || []).slice().reverse().slice(0, 10);
+  h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Son komutlar</h2></div>' + (sr.length ? '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Zaman</th><th class="sol">Komut</th><th class="sol">Veren</th><th class="sol">Durum</th><th>Başarılı</th><th>Hatalı</th></tr></thead><tbody>' + sr.map(r => '<tr><td class="sol">' + esc(String(r.executed_at || '').replace('T', ' ').slice(0, 16)) + '</td><td class="sol">' + (r.action === 'sleep' ? 'Uyut' : r.action === 'wake' ? 'Çalıştır' : esc(r.action || '')) + '</td><td class="sol">' + esc(r.issued_by || '') + '</td><td class="sol">' + esc(r.status || '') + (r.message ? ' <span class="k">' + esc(r.message) + '</span>' : '') + '</td><td>' + (r.success_count ?? '') + '</td><td>' + (r.fail_count ?? '') + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="k" style="margin:0">Henüz komut sonucu yok.</p>') + '</section>';
+  return h;
+}
 async function cizYonetim() {
   try { YONETIM = await al('n8n/cihaz_yonetimi_durum.json'); } catch (e) { if (!YONETIM) return '<div class="panel"><p class="k" style="margin:0">Cihaz yönetimi henüz çalışmadı (Pi\'de <code>pi/cihaz_yonetimi.py</code> kurulunca durum burada görünür).</p></div>'; }
   const y = YONETIM, a = y.ayarlar || {}, c = y.cihaz || {};
@@ -917,7 +1000,8 @@ async function cizMaden() {
   const ay = madenSec.ay, ayAd = AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4);
   document.getElementById('altBaslik').textContent = 'F2Pool cihaz arşivi (saatlik, ' + Object.keys(MADEN.H).length + ' saat) ve günlük gelir. Saatler Türkiye saatidir.';
   document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Ay <select onchange="madenSec.ay=this.value;cizMaden()">' + aylar.slice().reverse().map(a => '<option value="' + a + '"' + (a === ay ? ' selected' : '') + '>' + AYLAR[Number(a.slice(5)) - 1] + ' ' + a.slice(0, 4) + '</option>').join('') + '</select></label><button class="btn koyu" type="button" onclick="madenYukle(true).then(cizMaden)">Yenile</button>';
-  const sekmeH = '<div class="sekmeler" role="tablist">' + [['genel', 'Üretim ve gelir'], ['yonetim', 'Cihaz yönetimi']].map(([k, a]) => '<button role="tab" type="button" aria-selected="' + (madenSec.sekme === k) + '" onclick="madenSec.sekme=\'' + k + '\';cizMaden()">' + a + '</button>').join('') + '</div>';
+  const sekmeH = '<div class="sekmeler" role="tablist">' + [['genel', 'Üretim ve gelir'], ['cihazlar', 'Cihazlar'], ['yonetim', 'Cihaz yönetimi']].map(([k, a]) => '<button role="tab" type="button" aria-selected="' + (madenSec.sekme === k) + '" onclick="madenSec.sekme=\'' + k + '\';cizMaden()">' + a + '</button>').join('') + '</div>';
+  if (madenSec.sekme === 'cihazlar') { ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + await cizCihazlar() + '</div>'; return; }
   if (madenSec.sekme === 'yonetim') { ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + await cizYonetim() + '</div>'; return; }
   const gunler = madenGunleri(ay);
   // ay özetleri

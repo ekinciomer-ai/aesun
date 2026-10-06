@@ -546,7 +546,7 @@ class Collector:
                 if st in veri["santraller"] and kwh is not None:
                     inv = veri["santraller"][st]["inv"].setdefault(dn, {"ad": invad.get(dn, (dn,))[0], "gun": {}, "ay": {}})
                     inv["gun"][d] = round(kwh, 1)
-            # FusionSolar inverter geçmişinden (device-history-data, 10032 günlük enerji) gelen günler önceliklidir
+            # FusionSolar inverter geçmişinden (device-history-data, 30016 Günün verimi) gelen günler önceliklidir
             for dn, d, kwh in self.con.execute("SELECT dn, date, kwh FROM inverter_day WHERE substr(date,1,4)=? AND date<?",
                                                (str(yil), bugun)):
                 st = invad.get(dn, (None, None))[1]
@@ -622,12 +622,12 @@ class Collector:
         return False
 
     def inv_gun(self, d: dt.date):
-        """Bir günün inverter bazında üretimi: FusionSolar 5 dk geçmişinde 10032 (günlük enerji) sinyalinin en büyük değeri."""
+        """Bir günün inverter bazında üretimi: FusionSolar 5 dk geçmişinde 30016 "Günün verimi" (kWh) sinyalinin en büyük değeri."""
         n = 0
         for dn in self.inv:
-            r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=10032&deviceDn={quote(dn)}"
+            r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=30016&deviceDn={quote(dn)}"
                                      f"&date={midnight_ms(d)}&_={int(time.time()*1000)}")
-            liste = ((r.get("data") or {}).get("10032") or {}).get("pmDataList") or []
+            liste = ((r.get("data") or {}).get("30016") or {}).get("pmDataList") or []
             v = [num(p.get("counterValue")) for p in liste]
             v = [x for x in v if x is not None and 0 <= x < 1e9]
             if v:

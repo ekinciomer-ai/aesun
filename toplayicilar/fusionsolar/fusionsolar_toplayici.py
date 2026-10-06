@@ -675,40 +675,23 @@ class Collector:
             self.gecmis_yaz(sorted(yillar))
 
     def kesif_inv(self):
-        """Tanı: inverter bazında geçmiş günlük üretim veren uç noktayı bulmak için adayları dener ve arayüzün ağ isteklerini yazar."""
+        """Tanı: inverterin geçmişi tutulan sinyallerini listeler ve dün için hangisinde veri olduğunu gösterir."""
         self.meta()
         dn = next(iter(self.inv))
         d = dt.date.today() - dt.timedelta(days=1)
-        ms, t = midnight_ms(d), int(time.time() * 1000)
-        print(f"== İnverter: {self.inv[dn]['name']} ({dn}), tarih {d}")
-        q4 = (f"stationDn={quote(dn)}&timeDim=4&queryTime={midnight_ms(d.replace(day=1))}&timeZone=3"
-              f"&timeZoneStr=Europe%2FIstanbul&dateStr={quote(d.replace(day=1).strftime('%Y-%m-%d') + ' 00:00:00')}&_={t}")
-        adaylar = [
-            ("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=10032&deviceDn={quote(dn)}&date={ms}&_={t}", None),
-            ("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=10018&deviceDn={quote(dn)}&date={ms}&_={t}", None),
-            ("GET", f"/rest/pvms/web/device/v1/device-statistics-signal?deviceDn={quote(dn)}&_={t}", None),
-            ("GET", "/rest/pvms/web/station/v1/overview/energy-balance?" + q4, None),
-        ]
-        for m, u, b in adaylar:
-            r = self.web.page.evaluate(JS_CALL, [m, u, b])
-            print(f"-- {m} {u.split('?')[0]} -> {r['s']}: {r['t'][:500]}")
-        istek = {}
-        def kaydet(req):
-            if "/rest/" in req.url and any(k in req.url for k in ("report", "history", "kpi", "statistic", "energy", "device")):
-                istek.setdefault(req.method + " " + req.url.split("?")[0], (req.url[:300], (req.post_data or "")[:400]))
-        self.web.page.on("request", kaydet)
-        kok = BASE + "/uniportal/pvmswebsite/assets/build/cloud.html"
-        for frag in (f"#/view/device/{quote(dn)}/inverter/history", f"#/view/device/{quote(dn)}/inverter/overview",
-                     "#/view/report/inverter", "#/report/inverter", "#/view/report", "#/report"):
-            try:
-                self.web.page.goto(kok + frag, wait_until="domcontentloaded", timeout=60000)
-                time.sleep(8)
-                print(f"-- sayfa {frag} -> {self.web.page.url[-80:]}")
-            except Exception as e:
-                print(f"-- sayfa {frag} hata: {e}")
-        print("== Arayüzün çağırdığı uç noktalar:")
-        for k, (u, b) in sorted(istek.items()):
-            print(" ", k, "|", u, "|", b)
+        t = int(time.time() * 1000)
+        r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-statistics-signal?deviceDn={quote(dn)}&_={t}")
+        sig = (r.get("data") or {}).get("signalList") or []
+        print(f"== {self.inv[dn]['name']} ({dn}), {d}: {len(sig)} sinyal, varsayılan {(r.get('data') or {}).get('defaultList')}")
+        for x in sig:
+            q = self.web.call("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds={x['id']}&deviceDn={quote(dn)}"
+                                     f"&date={midnight_ms(d)}&_={int(time.time()*1000)}")
+            liste = ((q.get("data") or {}).get(str(x["id"])) or {}).get("pmDataList") or []
+            v = [num(p.get("counterValue")) for p in liste]
+            v = [z for z in v if z is not None and abs(z) < 1e9]
+            birim = (x.get("unit") or {}).get("unit", "") if isinstance(x.get("unit"), dict) else x.get("unit", "")
+            print(f"{x['id']:>6} | {x.get('name','')[:40]:40} | {birim:6} | {x.get('period','')[:16]:16} | {len(v):3} nokta | en büyük {max(v) if v else '-'} | toplam {round(sum(v), 1) if v else '-'}")
+            time.sleep(0.3)
 
     def once(self):
         self.meta()

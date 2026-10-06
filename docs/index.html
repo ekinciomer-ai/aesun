@@ -244,7 +244,9 @@ function cizGenel() {
 
   // ---- Uyarılar
   const uy = (son && son.uyarilar || []).filter(u => u.seviye === 'kritik' || u.seviye === 'uyari').map(u => ({ seviye: u.seviye, baslik: u.baslik, detay: u.detay || '' }));
-  if (mad && mad.summary && mad.summary.offline > 0) {
+  const madAgDisi = mad && (mad.devices || []).length > 0 && mad.devices.every(d => !d.online && !d.sleeping);
+  // Toplayıcı saha ağında değilse (tüm cihazlar yanıtsız) uyarı üretme; Madencilik kartı bunu ayrıca belirtir.
+  if (!madAgDisi && mad && mad.summary && mad.summary.offline > 0) {
     const off = (mad.devices || []).filter(d => !d.online && !d.sleeping).map(d => d.name);
     uy.push({ seviye: 'uyari', baslik: mad.summary.offline + ' madenci yanıt vermiyor', detay: off.join(', ') });
   }
@@ -386,16 +388,25 @@ function cizGenel() {
   let madH = '<section class="panel" id="madencilik"><h2>Madencilik</h2><p class="k">Saha verisi okunamadı.</p></section>', gelirH = '';
   if (mad && mad.summary) {
     const s = mad.summary;
-    const offN = s.offline || 0;
+    const cihazlar = mad.devices || [];
+    // Toplayıcı (Pi) saha ağında değilse hiçbir cihaza ulaşamaz: hepsi yanıtsız görünür. Bu durumda arıza gibi gösterme.
+    const agDisi = cihazlar.length > 0 && cihazlar.every(d => !d.online && !d.sleeping);
+    const offN = agDisi ? 0 : (s.offline || 0);
+    const sonPay = Math.max(0, ...cihazlar.map(d => Number(d.f2pool_last_share) || 0));
+    const payYas = sonPay ? (Date.now() / 1000 - sonPay) / 60 : null;
+    const payMetni = sonPay ? new Date(sonPay * 1000).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' }) : '';
+    const tire = '<span style="color:#4A5A70">—</span>';
     document.getElementById('r-mad').outerHTML = '<span id="r-mad" class="rozet u"' + (offN ? '' : ' hidden') + '>' + offN + '</span>';
-    madH = '<section class="panel" id="madencilik" aria-labelledby="h-mine"><div class="bas"><h2 id="h-mine">Madencilik</h2><span class="k">Saha PC ' + esc((mad.timestamp || '').slice(11, 16)) + '</span></div>'
+    madH = '<section class="panel" id="madencilik" aria-labelledby="h-mine"><div class="bas"><h2 id="h-mine">Madencilik</h2><span class="k">Toplayıcı ' + esc((mad.timestamp || '').slice(11, 16)) + '</span></div>'
+      + (agDisi ? '<p class="k" style="margin:0 0 12px;padding:8px 10px;border-radius:6px;background:#EEF1F5;color:#2B3A4F">Toplayıcı saha ağında değil; cihaz durumu okunamıyor.'
+        + (sonPay ? ' F2Pool son pay: <b>' + payMetni + '</b>' + (payYas < 15 ? ' (madenciler çalışıyor).' : '.') : '') + '</p>' : '')
       + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">'
-      + '<div><div class="k">Çalışan cihaz</div><div class="num" style="font-size:24px;font-weight:700">' + s.online + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">/ ' + s.total + '</span></div></div>'
-      + '<div><div class="k">Toplam hash</div><div class="num" style="font-size:24px;font-weight:700">' + say(s.total_hashrate_TH) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s</span></div></div>'
-      + '<div><div class="k">Hedefe göre</div><div class="num" style="font-size:24px;font-weight:700">%' + say(s.efficiency_pct) + '</div></div>'
-      + '<div><div class="k">Ortalama sıcaklık</div><div class="num" style="font-size:24px;font-weight:700">' + say(s.avg_temp_C) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">°C</span></div></div></div>'
-      + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor">' + (mad.devices || []).map(d => '<span title="' + esc(d.name + ' · ' + (d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (d.online ? (d.health_issues && d.health_issues.some(h => h.severity === 'high') ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
-      + '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1E7A3C"></span> çalışıyor</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C98500"></span> sıcaklık uyarısı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#B42318"></span> yanıt yok</span></div></section>';
+      + '<div><div class="k">Çalışan cihaz</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : s.online) + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">/ ' + s.total + '</span></div></div>'
+      + '<div><div class="k">Toplam hash</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : say(s.total_hashrate_TH)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s</span></div></div>'
+      + '<div><div class="k">Hedefe göre</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : '%' + say(s.efficiency_pct)) + '</div></div>'
+      + '<div><div class="k">Ortalama sıcaklık</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : say(s.avg_temp_C)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">°C</span></div></div></div>'
+      + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + (agDisi ? 'durum bilinmiyor' : s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor') + '">' + cihazlar.map(d => '<span title="' + esc(d.name + ' · ' + (agDisi ? 'durum bilinmiyor' : d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (agDisi ? '#C9D1DC' : d.online ? (d.health_issues && d.health_issues.some(h => h.severity === 'high') ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
+      + '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1E7A3C"></span> çalışıyor</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C98500"></span> sıcaklık uyarısı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#B42318"></span> yanıt yok</span>' + (agDisi ? '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C9D1DC"></span> durum bilinmiyor</span>' : '') + '</div></section>';
     const ay6 = (mad.monthly_history || []).slice().sort((a, b) => a.month.localeCompare(b.month)).slice(-6);
     const btcVar = ay6.some(m => m.earn_btc > 0);
     const deger = m => btcVar ? m.earn_btc : m.avg_hash_TH;

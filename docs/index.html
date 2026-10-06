@@ -560,6 +560,15 @@ function cizSayac() {
       satir += '<tr><td class="saat">' + sa.saat + ':00</td>' + d.map((v, i) => { const h = hucre(v, sa.var); return ayr.includes(i) ? h.replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"') : h; }).join('') + '</tr>';
     }
     satir += '<tr class="top"><td class="sol">Toplam</td>' + Object.values(tp).map((v, i) => '<td' + ([0, 3, 7, 11].includes(i) ? ' class="ayr"' : '') + '>' + say(v) + '</td>').join('') + '</tr>';
+    // Ay toplamı: seçili ayın veri gelmiş tüm günleri, aynı saatlik mahsup kuralıyla
+    const ayKod = secGun.slice(0, 7);
+    const ayGunleri = [...new Set(['tekyildiz_1', 'tekyildiz_2', 'aksaray_3'].flatMap(k => Object.keys((osos[k] || {}).veri || {})))].filter(g => g.startsWith(ayKod)).sort();
+    const ta = Object.fromEntries(Object.keys(tp).map(k => [k, 0]));
+    for (const g of ayGunleri) for (const sa of mahsupGun(osos, g).saatler) {
+      const d = [sa.u.T1, sa.u.T2, sa.U, sa.t.T1, sa.t.T2, sa.t.A3, sa.T, sa.mahsup.T2, sa.mahsup.A3, sa.mahsup.T1, sa.mTop, sa.bedelli, sa.T - sa.mTop];
+      Object.keys(ta).forEach((k, i) => ta[k] += d[i]);
+    }
+    if (ayGunleri.length) satir += '<tr class="top"><td class="sol" title="' + tarihK(ayGunleri[0]) + '–' + tarihK(ayGunleri[ayGunleri.length - 1]) + ', ' + ayGunleri.length + ' gün">' + AYLAR[Number(ayKod.slice(5)) - 1] + ' toplamı</td>' + Object.values(ta).map((v, i) => '<td' + ([0, 3, 7, 11].includes(i) ? ' class="ayr"' : '') + '>' + say(v) + '</td>').join('') + '</tr>';
     govde = aylikNot
       + '<div class="kartlar5">' + kart('Üretim (T1 + T2)', m.uretim) + kart('Tüketim (T1 + T2 + A3)', m.tuketim) + kart('Mahsuplaşan', m.mahsup, '#1baf7a') + kart('Bedelli satış', m.bedelli, '#eda100') + kart('Şebekeden alınan', m.sebeke, '#eb6834') + '</div>'
       + '<div class="iki"><section class="panel"><h2>Tüketiciler, mahsup / tüketim</h2>' + tukSatir + '<div class="k">Her üreticiden önce T2, sonra A3, en son T1 karşılanır.</div></section>'

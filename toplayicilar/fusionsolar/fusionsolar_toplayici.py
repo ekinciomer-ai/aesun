@@ -171,7 +171,8 @@ class Web:
 
     def logged_in(self) -> bool:
         try:
-            if "fusionsolar" not in self.page.url or "login" in self.page.url:
+            # yeni arayüzde giriş sonrası adres de "pvmswebsite/login/build/..." olabiliyor; asıl ölçü oturum API'si
+            if "fusionsolar" not in self.page.url or "unisso" in self.page.url:
                 return False
             r = self.page.evaluate(JS_CALL, ["GET", "/rest/dpcloud/auth/v1/is-session-alive", None])
             return r["s"] == 200 and "true" in r["t"]

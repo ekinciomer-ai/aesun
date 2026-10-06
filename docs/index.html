@@ -1226,7 +1226,13 @@ function isiRenk(h) {
 
 // ===== String analizi (FusionSolar, epias-ptf/inverter/fusionsolar_string.json) =====
 let STR = null;
-async function strYukle() { if (!STR) { try { STR = await al('inverter/fusionsolar_string.json'); } catch (e) { STR = {}; } } return STR; }
+async function strYukle() {
+  if (STR) return STR;
+  const [fs, sg] = await Promise.all(['inverter/fusionsolar_string.json', 'inverter/sungrow_string.json'].map(y => al(y).catch(() => null)));
+  STR = { inverterler: {} };
+  for (const [k, d] of [['fusionsolar', fs], ['sungrow', sg]]) if (d && d.inverterler) for (const [id, v] of Object.entries(d.inverterler)) STR.inverterler[k + ':' + id] = Object.assign(v, { kaynak: k, gunler: d.gunler || [], guncellendi: d.guncellendi });
+  return STR;
+}
 function strSupheli(L) {
   // Bir giriş santraldeki inverterlerin %80+'ında kullanılıyorken bu inverterde boşsa şüpheli
   const out = [];
@@ -1235,7 +1241,7 @@ function strSupheli(L) {
     const kul = L.filter(v => v.stringler[i] && v.stringler[i].durum !== 'bos').length;
     if (kul >= 0.8 * L.length) L.forEach(v => { if (v.stringler[i] && v.stringler[i].durum === 'bos') out.push({ v, pv: i + 1, kul, n: L.length }); });
   }
-  L.forEach(v => v.stringler.forEach(s => { if (s.durum === 'dusuk' || s.durum === 'zayif') out.push({ v, pv: s.pv, dusuk: s }); }));
+  L.forEach(v => v.stringler.forEach(s => { if (s.durum === 'kesik') out.push({ v, pv: s.pv, kesik: s }); else if (s.durum === 'dusuk' || s.durum === 'zayif') out.push({ v, pv: s.pv, dusuk: s }); }));
   return out;
 }
 function strSantral(ad) {
@@ -1246,23 +1252,23 @@ function strSantral(ad) {
 function strBolum(ad) {
   const L = strSantral(ad);
   if (!L.length) return '';
-  const gun = (STR.gunler || []), sup = strSupheli(L);
+  const gun = L[0].gunler || [], sup = strSupheli(L), kesik = sup.filter(x => x.kesik).length;
   const supK = new Set(sup.map(x => x.v.ad + '|' + x.pv));
   const n = Math.max(...L.map(v => v.stringler.length));
-  const RENK = { normal: '#D9EBDD', zayif: '#FBE6C2', dusuk: '#EC7B3A', bos: '#F1F3F6' };
+  const RENK = { normal: '#D9EBDD', zayif: '#FBE6C2', dusuk: '#EC7B3A', bos: '#F1F3F6', kesik: '#B42318' };
   const kul = L.reduce((t, v) => t + v.stringler.filter(s => s.durum !== 'bos').length, 0);
-  let h = '<section class="panel" style="gap:12px"><div class="bas"><h2>String analizi · ' + esc(ad) + '</h2><span class="k">' + (gun.length ? tarihK(gun[0]) + '–' + tarihK(gun[gun.length - 1]) : '') + ' · güncellendi ' + tarihK((STR.guncellendi || '').slice(0, 10)) + '</span></div>'
-    + '<div class="k">' + L.length + ' inverter · ' + kul + ' string kullanımda · ' + (sup.length ? '<b style="color:#9A5B00">' + sup.length + ' giriş sahada teyit edilmeli</b>' : 'farklı giriş yok') + '. Her string\'in günlük akım-zamanı (Ah) santral medyanıyla kıyaslanır.</div>';
+  let h = '<section class="panel" style="gap:12px"><div class="bas"><h2>String analizi · ' + esc(ad) + '</h2><span class="k">' + (gun.length ? tarihK(gun[0]) + '–' + tarihK(gun[gun.length - 1]) : '') + ' · güncellendi ' + tarihK(String(L[0].guncellendi || '').slice(0, 10)) + ' · ' + ({ fusionsolar: 'FusionSolar', sungrow: 'Sungrow' }[L[0].kaynak] || '') + '</span></div>'
+    + '<div class="k">' + L.length + ' inverter · ' + kul + ' string kullanımda · ' + (kesik ? '<b style="color:#B42318">' + kesik + ' string kesik (önceden üretiyordu, şimdi 0)</b> · ' : '') + (sup.length - kesik ? '<b style="color:#9A5B00">' + (sup.length - kesik) + ' giriş kontrol edilmeli</b>' : 'farklı giriş yok') + '. Her string\'in günlük akım-zamanı (Ah) santral medyanıyla kıyaslanır.</div>';
   h += '<div style="overflow-x:auto"><table style="border-collapse:separate;border-spacing:2px;font-size:12px"><thead><tr><th></th>' + Array.from({ length: n }, (_, i) => '<th style="font-weight:500;color:#4A5A70;min-width:30px;text-align:center">PV' + (i + 1) + '</th>').join('') + '</tr></thead><tbody>'
     + L.map(v => '<tr><th style="text-align:right;padding-right:8px;font-weight:600;white-space:nowrap">' + esc(v.ad) + '</th>' + Array.from({ length: n }, (_, i) => {
         const s = v.stringler[i]; if (!s) return '<td></td>';
-        const sp = supK.has(v.ad + '|' + (i + 1));
-        const tip = v.ad + ' · PV' + s.pv + ': ' + ({ normal: 'normal', zayif: 'zayıf', dusuk: 'düşük', bos: 'boş' }[s.durum] || s.durum) + (sp ? ' (KONTROL: santraldeki inverterlerin çoğunda bu giriş dolu)' : '') + '\nMedyana oran %' + say((s.oran_medyan || 0) * 100) + ' · tepe ' + say(s.tepe_a, 1) + ' A / ' + say(s.tepe_v) + ' V\nGünlük Ah: ' + (s.ah || []).map(x => say(x, 1)).join(' · ');
-        return '<td data-tip="' + esc(tip) + '" style="height:22px;border-radius:3px;text-align:center;font-size:11px;background:' + (sp ? '#9A5B00' : RENK[s.durum] || '#F1F3F6') + ';color:' + (sp ? '#fff' : '#4A5A70') + '">' + (sp ? '!' : s.durum === 'bos' ? '' : say((s.oran_medyan || 0) * 100)) + '</td>';
+        const sp = supK.has(v.ad + '|' + (i + 1)) && s.durum === 'bos';
+        const tip = v.ad + ' · PV' + s.pv + ': ' + ({ normal: 'normal', zayif: 'zayıf', dusuk: 'düşük', bos: 'boş', kesik: 'KESİK (önceden üretiyordu, son günlerde 0)' }[s.durum] || s.durum) + (sp ? ' (KONTROL: santraldeki inverterlerin çoğunda bu giriş dolu)' : '') + '\nMedyana oran %' + say((s.oran_medyan || 0) * 100) + ' · tepe ' + say(s.tepe_a, 1) + ' A / ' + say(s.tepe_v) + ' V\nGünlük Ah: ' + (s.ah || []).map(x => say(x, 1)).join(' · ');
+        return '<td data-tip="' + esc(tip) + '" style="height:22px;border-radius:3px;text-align:center;font-size:11px;background:' + (sp ? '#9A5B00' : RENK[s.durum] || '#F1F3F6') + ';color:' + (sp || s.durum === 'kesik' ? '#fff' : '#4A5A70') + '">' + (sp || s.durum === 'kesik' ? '!' : s.durum === 'bos' ? '' : say((s.oran_medyan || 0) * 100)) + '</td>';
       }).join('') + '</tr>').join('') + '</tbody></table></div>'
-    + '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#4A5A70">' + [['#D9EBDD', 'Normal (sayı: medyana oran %)'], ['#FBE6C2', 'Zayıf (< %93)'], ['#EC7B3A', 'Düşük (< %85)'], ['#F1F3F6', 'Boş (bağlı değil)'], ['#9A5B00', 'Kontrol: düzen farkı']].map(([r, a]) => '<span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:' + r + '"></span>' + a + '</span>').join('') + '</div>';
+    + '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#4A5A70">' + [['#D9EBDD', 'Normal (sayı: medyana oran %)'], ['#FBE6C2', 'Zayıf (< %93)'], ['#EC7B3A', 'Düşük (< %85)'], ['#F1F3F6', 'Boş (bağlı değil)'], ['#9A5B00', 'Kontrol: düzen farkı'], ['#B42318', 'Kesik: önceden üretiyordu, şimdi 0']].map(([r, a]) => '<span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:' + r + '"></span>' + a + '</span>').join('') + '</div>';
   if (sup.length) h += '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">İnverter</th><th class="sol">Giriş</th><th class="sol">Neden</th><th class="sol">Bakılacak</th></tr></thead><tbody>'
-    + sup.map(x => '<tr><td class="sol"><b>' + esc(x.v.ad) + '</b></td><td class="sol">PV' + x.pv + ' (MPPT ' + Math.ceil(x.pv / 2) + ')</td><td class="sol">' + (x.dusuk ? 'Akım medyanın %' + say(x.dusuk.oran_medyan * 100) + '\'i' : 'Boş; aynı giriş ' + x.kul + '/' + x.n + ' inverterde kullanılıyor') + '</td><td class="sol k">' + (x.dusuk ? 'Gölge, kirlilik, modül/konnektör' : 'Projede bu girişe string var mı? Varsa sigorta, MC4, kablo') + '</td></tr>').join('') + '</tbody></table></div>';
+    + sup.map(x => '<tr><td class="sol"><b>' + esc(x.v.ad) + '</b></td><td class="sol">PV' + x.pv + ' (MPPT ' + Math.ceil(x.pv / 2) + ')</td><td class="sol">' + (x.kesik ? '<b style="color:#B42318">Kesik:</b> son günlerde akım 0, daha önce ' + say(x.kesik.tepe_a, 1) + ' A\'e çıkıyordu' : x.dusuk ? 'Akım medyanın %' + say(x.dusuk.oran_medyan * 100) + '\'i' : 'Boş; aynı giriş ' + x.kul + '/' + x.n + ' inverterde kullanılıyor') + '</td><td class="sol k">' + (x.kesik ? 'Sigorta, MC4 konnektör, kablo — acil' : x.dusuk ? 'Gölge, kirlilik, modül/konnektör' : 'Projede bu girişe string var mı? Varsa sigorta, MC4, kablo') + '</td></tr>').join('') + '</tbody></table></div>';
   return h + '<div class="k">Boş girişlerin çoğu tasarım gereği (inverter başına 11–14 string). Kontrol: santraldeki inverterlerin en az %80\'inde dolu olan giriş bu inverterde boş. String başına üretim akranlarıyla aynı olduğu için veri, bunun tasarım mı (string bağlanmamış) yoksa kopuk string mi olduğunu ayıramaz; tek hat/as-built ile teyit edin.</div></section>';
 }
 async function cizInverter() {
@@ -1353,7 +1359,7 @@ async function cizInverter() {
     govde += '<section class="panel"><div class="bas"><h2>İnverterler · ' + esc(s.ad) + '</h2><span class="k">' + an.length + ' inverter</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">İnverter</th><th class="sol">Durum</th>' + (kwpVar ? '<th>DC kWp</th>' : '') + '<th>Üretim (kWh)</th>' + (kwpVar ? '<th>kWh/kWp</th>' : '') + '<th>Medyana göre</th><th>Durma günü</th><th class="sol">Son 30 gün</th></tr></thead><tbody>' + satir + '</tbody></table></div><div class="k">' + (kwpVar ? 'Kıyas kWp başına üretimle yapılır.' : 'Platform inverter gücünü vermediği için kıyas, santralin medyan inverterine göre üretimdir; farklı güçteki inverterler kalıcı olarak farklı görünebilir.') + ' Durma günü: santral üretirken inverterin neredeyse hiç üretmediği gün.</div></section>';
     if (!an.length) govde += '<section class="panel"><div class="bas"><h2>İnverterler · ' + esc(s.ad) + '</h2></div><p class="k" style="margin:0">Bu santral için inverter bazında günlük veri henüz yok. '
       + (s.key.startsWith('fusionsolar') ? 'FusionSolar inverter günlük üretimi Pi\'deki toplayıcının canlı okumalarından birikiyor; ilk tam gün 7 Ekim\'de görünür. Santral toplamı (yukarıdaki grafik) 2026 başından itibaren tam.' : 'Geçmiş verisi henüz çekilmedi.') + '</p></section>';
-    govde += strBolum(s.ad);
+    govde += strBolum(s.ad) || (s.kaynak === 'inavitas' ? '<section class="panel" style="gap:8px"><div class="bas"><h2>String analizi · ' + esc(s.ad) + '</h2></div><p class="k" style="margin:0">Inavitas bu santral için string akımı vermiyor; her inverter yalnız tek DC akım/gerilim ve faz akımlarını gönderiyor. Arıza tespiti yukarıdaki inverter kıyası (kWh/kWp) ve performans haritasıyla yapılır.</p></section>' : '');
     // Isı haritası
     const hg = Dn.tip === 'gun' ? Dn.gunler : gunlerAn.slice(-62);
     const ix = hg.map(g => gunlerAn.indexOf(g));

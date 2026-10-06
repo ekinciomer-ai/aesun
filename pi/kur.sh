@@ -36,7 +36,8 @@ if [ ! -s "$ENV" ]; then
 fi
 A="$(grep '^AESUN_ANAHTAR=' "$ENV" | cut -d= -f2-)"
 NABIZ=1; [ -z "$A" ] && NABIZ=0 && echo "Pi anahtarı boş: nabız şimdilik kurulmuyor (sonra bu komutu tekrar çalıştırın)."
-if [ "$NABIZ" = 1 ] && ! grep -q '^AESUN_PI_ANAHTAR=' "$KOK/env.txt" 2>/dev/null; then
+if [ "$NABIZ" = 1 ] && ! grep -q '^AESUN_PI_ANAHTAR=..' "$KOK/env.txt" 2>/dev/null; then
+  sed -i '/^AESUN_PI_ANAHTAR=/d;/^AESUN_SERVISLER=/d' "$KOK/env.txt" 2>/dev/null
   printf 'AESUN_PI_ANAHTAR=%s\nAESUN_SERVISLER="osos altminer"\n' "$A" >> "$KOK/env.txt"; chmod 600 "$KOK/env.txt"
 fi
 chmod +x "$KOK/pi/nabiz.sh"

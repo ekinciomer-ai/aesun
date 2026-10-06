@@ -760,7 +760,7 @@ function gunAc(g, kaydir) {
 const MADEN = { aylar: {}, gelir: null, H: null, yuklendi: 0 };
 let madenSec = { ay: null };
 function madenAyListesi() {
-  const a = [], son = bugunTR().slice(0, 7); let d = new Date(Date.UTC(2026, 4, 1));
+  const a = [], son = bugunTR().slice(0, 7); let d = new Date(Date.UTC(2026, 2, 1));
   for (;;) { const k = d.toISOString().slice(0, 7); a.push(k); if (k >= son) break; d.setUTCMonth(d.getUTCMonth() + 1); }
   return a;
 }
@@ -790,6 +790,8 @@ function madenGun(g) {
   }
   r.ort24 = r.veri ? r.top / r.veri : null; r.ortCalisma = r.calisan ? r.top / r.calisan : null; r.aktifOrt = r.calisan ? akt / r.calisan : 0;
   const gl = (MADEN.gelir || {})[g]; r.btc = gl ? gl.btc : null;
+  if (!r.veri && gl && gl.hash_rate != null) { r.ort24 = gl.hash_rate; r.havuzdan = true; r.top = gl.hash_rate * 24; r.veri = 0; }
+  r.f2hash = gl && gl.hash_rate != null ? gl.hash_rate : null;
   r.verim = r.btc != null && r.top > 0 ? r.btc / (r.top / 24 / 1000) : null; // BTC / PH·gün
   return r;
 }
@@ -832,8 +834,8 @@ async function cizMaden() {
   document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Ay <select onchange="madenSec.ay=this.value;cizMaden()">' + aylar.slice().reverse().map(a => '<option value="' + a + '"' + (a === ay ? ' selected' : '') + '>' + AYLAR[Number(a.slice(5)) - 1] + ' ' + a.slice(0, 4) + '</option>').join('') + '</select></label><button class="btn koyu" type="button" onclick="madenYukle(true).then(cizMaden)">Yenile</button>';
   const gunler = madenGunleri(ay);
   // ay özetleri
-  const ayOzet = a => { const gs = madenGunleri(a); const ths = gs.reduce((t, x) => t + x.top, 0), sa = gs.reduce((t, x) => t + x.veri, 0), cal = gs.reduce((t, x) => t + x.calisan, 0), btc = gs.reduce((t, x) => t + (x.btc || 0), 0), btcG = gs.filter(x => x.btc != null).length;
-    return { a, gun: gs.length, ort: sa ? ths / sa : null, ortCal: cal ? ths / cal : null, cal, sa, btc: btcG ? btc : null, btcG, verim: btcG && ths ? btc / (gs.filter(x => x.btc != null).reduce((t, x) => t + x.top, 0) / 24 / 1000) : null }; };
+  const ayOzet = a => { const gs = madenGunleri(a); const ths = gs.reduce((t, x) => t + x.top, 0), saT = gs.reduce((t, x) => t + (x.havuzdan ? 24 : x.veri), 0), sa = gs.reduce((t, x) => t + x.veri, 0), cal = gs.reduce((t, x) => t + x.calisan, 0), btc = gs.reduce((t, x) => t + (x.btc || 0), 0), btcG = gs.filter(x => x.btc != null).length;
+    return { a, gun: gs.length, ort: saT ? ths / saT : null, ortCal: cal ? gs.filter(x => !x.havuzdan).reduce((t, x) => t + x.top, 0) / cal : null, cal, sa, btc: btcG ? btc : null, btcG, verim: btcG && ths ? btc / (gs.filter(x => x.btc != null).reduce((t, x) => t + x.top, 0) / 24 / 1000) : null }; };
   const oz = aylar.map(ayOzet), bu = oz.find(x => x.a === ay) || {};
   const f2 = (D.son && D.son.son || []).find(r => r.kaynak === 'f2pool'), fe = f2 ? f2.ek || {} : {};
   const kart = (ad, v, alt) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:22px;font-weight:700">' + v + '</div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
@@ -860,7 +862,7 @@ async function cizMaden() {
       tik: i => "madenGunAc('" + gunler[i].g + "',true)", seriler: [{ ad: 'Gelir', renk: '#eda100', v: gunler.map(x => x.btc) }] }) + '</section>';
   // günlük tablo
   h += '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Gün</th><th class="ayr">Ort. hash (24 sa)</th><th>Çalışırken</th><th>En yüksek</th><th class="ayr">Çalışma (saat)</th><th>Ort. cihaz</th><th class="ayr">Gelir (BTC)</th><th>Verim</th></tr></thead><tbody>'
-    + gunler.map(x => '<tr data-mg="' + x.g + '"><td class="sol" data-s="' + x.g + '"><a href="#maden" onclick="madenGunAc(\'' + x.g + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + tarihK(x.g) + '</a>' + (x.veri < 24 ? ' <span class="k">(' + x.veri + ' sa)</span>' : '') + '</td><td class="ayr">' + say(x.ort24) + '</td><td>' + say(x.ortCalisma) + '</td><td>' + say(x.tepe) + '</td><td class="ayr">' + x.calisan + '</td><td>' + say(x.aktifOrt, 1) + '</td><td class="ayr">' + btcY(x.btc) + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td></tr>').join('')
+    + gunler.map(x => '<tr data-mg="' + x.g + '"><td class="sol" data-s="' + x.g + '"><a href="#maden" onclick="madenGunAc(\'' + x.g + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + tarihK(x.g) + '</a>' + (x.havuzdan ? ' <span class="k">(F2Pool günlük)</span>' : x.veri < 24 ? ' <span class="k">(' + x.veri + ' sa)</span>' : '') + '</td><td class="ayr">' + say(x.ort24) + '</td><td>' + say(x.ortCalisma) + '</td><td>' + say(x.tepe) + '</td><td class="ayr">' + x.calisan + '</td><td>' + say(x.aktifOrt, 1) + '</td><td class="ayr">' + btcY(x.btc) + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td></tr>').join('')
     + '<tr class="top"><td class="sol">' + ayAd + '</td><td class="ayr">' + say(bu.ort) + '</td><td>' + say(bu.ortCal) + '</td><td></td><td class="ayr">' + say(bu.cal) + '</td><td></td><td class="ayr">' + btcY(bu.btc) + '</td><td>' + (bu.verim != null ? say(bu.verim * 1e3, 3) : '—') + '</td></tr></tbody></table></div><div class="k">Verim: mBTC / PH·gün (gelir ÷ günlük ortalama hash). F2Pool günü UTC\'ye göre kapandığı için gelir ile hash arasında 3 saatlik kayma vardır.</div>';
   // cihaz tablosu + ısı haritası
   const cih = {};

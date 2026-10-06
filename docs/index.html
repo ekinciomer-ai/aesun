@@ -564,9 +564,14 @@ function cizSayac() {
     const ayKod = secGun.slice(0, 7);
     const ayGunleri = [...new Set(['tekyildiz_1', 'tekyildiz_2', 'aksaray_3'].flatMap(k => Object.keys((osos[k] || {}).veri || {})))].filter(g => g.startsWith(ayKod)).sort();
     const ta = Object.fromEntries(Object.keys(tp).map(k => [k, 0]));
-    for (const g of ayGunleri) for (const sa of mahsupGun(osos, g).saatler) {
-      const d = [sa.u.T1, sa.u.T2, sa.U, sa.t.T1, sa.t.T2, sa.t.A3, sa.T, sa.mahsup.T2, sa.mahsup.A3, sa.mahsup.T1, sa.mTop, sa.bedelli, sa.T - sa.mTop];
-      Object.keys(ta).forEach((k, i) => ta[k] += d[i]);
+    const ayGun = [];
+    for (const g of ayGunleri) {
+      const mg = mahsupGun(osos, g);
+      ayGun.push({ g, U: mg.uretim, T: mg.tuketim, M: mg.mahsup, B: mg.bedelli, S: mg.sebeke, n: mg.saatler.filter(x => x.var).length });
+      for (const sa of mg.saatler) {
+        const d = [sa.u.T1, sa.u.T2, sa.U, sa.t.T1, sa.t.T2, sa.t.A3, sa.T, sa.mahsup.T2, sa.mahsup.A3, sa.mahsup.T1, sa.mTop, sa.bedelli, sa.T - sa.mTop];
+        Object.keys(ta).forEach((k, i) => ta[k] += d[i]);
+      }
     }
     if (ayGunleri.length) satir += '<tr class="top"><td class="sol" title="' + tarihK(ayGunleri[0]) + '–' + tarihK(ayGunleri[ayGunleri.length - 1]) + ', ' + ayGunleri.length + ' gün">' + AYLAR[Number(ayKod.slice(5)) - 1] + ' toplamı</td>' + Object.values(ta).map((v, i) => '<td' + ([0, 3, 7, 11].includes(i) ? ' class="ayr"' : '') + '>' + say(v) + '</td>').join('') + '</tr>';
     govde = aylikNot
@@ -574,9 +579,41 @@ function cizSayac() {
       + '<div class="iki"><section class="panel"><h2>Tüketiciler, mahsup / tüketim</h2>' + tukSatir + '<div class="k">Her üreticiden önce T2, sonra A3, en son T1 karşılanır.</div></section>'
       + '<section class="panel"><h2>Üretim nereye gitti</h2>' + kaySatir + '<div class="k">Büyük üretici önce işlenir; kalan üretim bedelli satılır.</div></section></div>'
       + '<h2>Saatlik mahsup</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol" rowspan="2">Saat</th><th class="ayr" colspan="3" style="text-align:center">Üretim</th><th class="ayr" colspan="4" style="text-align:center">Tüketim</th><th class="ayr" colspan="4" style="text-align:center">Mahsuplaşan</th><th class="ayr" colspan="2" style="text-align:center">Kalan</th></tr>'
-      + '<tr><th class="ayr">T1</th><th>T2</th><th>Toplam</th><th class="ayr">T1</th><th>T2</th><th>A3</th><th>Toplam</th><th class="ayr">T2</th><th>A3</th><th>T1</th><th>Toplam</th><th class="ayr">Bedelli</th><th>Şebekeden</th></tr></thead><tbody>' + satir + '</tbody></table></div>';
+      + '<tr><th class="ayr">T1</th><th>T2</th><th>Toplam</th><th class="ayr">T1</th><th>T2</th><th>A3</th><th>Toplam</th><th class="ayr">T2</th><th>A3</th><th>T1</th><th>Toplam</th><th class="ayr">Bedelli</th><th>Şebekeden</th></tr></thead><tbody>' + satir + '</tbody></table></div>'
+      + (ayGun.length ? ayMahsupBolum(ayKod, ayGun, ta) : '');
   }
   document.getElementById('icerik').innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeHtml + govde + '</div>';
+}
+// Seçili ayın günlük mahsup dökümü: yığılmış çubuk (üretim = mahsup + bedelli, tüketim = mahsup + şebeke) ve tablo
+function ayMahsupBolum(ayKod, gunler, ta) {
+  const R = { M: '#1baf7a', B: '#eda100', S: '#eb6834' };
+  const VW = grafGen(), W = VW - 52, H = 180, n = gunler.length;
+  const max0 = Math.max(1, ...gunler.map(x => Math.max(x.U, x.T)));
+  const adim = Math.pow(10, Math.floor(Math.log10(max0))), tavan = Math.ceil(max0 / adim) * adim;
+  const y = v => H - v / tavan * H, gen = W / Math.max(n, 1), bw = Math.max(2, Math.min(16, gen * 0.34));
+  const kE = v => v >= 1000 ? say(v / 1000, v >= 10000 ? 0 : 1) + ' MWh' : say(v) + ' kWh';
+  let g = '<svg viewBox="0 0 ' + VW + ' 222" width="100%" style="display:block" role="img" aria-label="' + AYLAR[Number(ayKod.slice(5)) - 1] + ' günlük üretim ve tüketim"><g font-family="Archivo, sans-serif" font-size="11" fill="#4A5A70">';
+  for (let k = 0; k <= 4; k++) { const v = tavan * k / 4, yy = 8 + y(v); g += '<line x1="52" y1="' + yy + '" x2="' + VW + '" y2="' + yy + '" stroke="' + (k ? '#E3E8EE' : '#B9C4D2') + '"/><text x="46" y="' + (yy + 4) + '" text-anchor="end">' + (v >= 1000 ? say(v / 1000, v % 1000 ? 1 : 0) + ' MWh' : say(v)) + '</text>'; }
+  const adimE = Math.max(1, Math.ceil(n / (VW < 520 ? 8 : 16)));
+  gunler.forEach((x, i) => { if (i % adimE === 0 || i === n - 1) g += '<text x="' + (52 + gen * i + gen / 2) + '" y="214" text-anchor="middle"' + (x.g === secGun ? ' font-weight="700" fill="#10233F"' : '') + '>' + Number(x.g.slice(8)) + '</text>'; });
+  g += '</g><g transform="translate(52,8)">';
+  const yig = (x0, parca) => { let taban = H, o = ''; for (const [v, r] of parca) { if (!(v > 0)) continue; const h = v / tavan * H; o += '<rect x="' + x0 + '" y="' + (taban - h) + '" width="' + bw + '" height="' + Math.max(0.5, h) + '" fill="' + r + '"/>'; taban -= h; } return o; };
+  gunler.forEach((x, i) => {
+    const cx = gen * i + gen / 2;
+    if (x.g === secGun) g += '<rect x="' + (gen * i + 1) + '" y="0" width="' + (gen - 2) + '" height="' + H + '" fill="#EEF3FA" rx="3"/>';
+    g += yig(cx - bw - 1, [[x.M, R.M], [x.B, R.B]]) + yig(cx + 1, [[x.M, R.M], [x.S, R.S]]);
+    g += '<rect x="' + (gen * i) + '" y="0" width="' + gen + '" height="' + H + '" fill="transparent" style="cursor:pointer" onclick="secGun=\'' + x.g + '\';cizSayac()"><title>' + tarihK(x.g) + (x.n < 24 ? ' (' + x.n + ' saat)' : '') + '\nÜretim ' + kE(x.U) + ' = mahsup ' + kE(x.M) + ' + bedelli ' + kE(x.B) + '\nTüketim ' + kE(x.T) + ' = mahsup ' + kE(x.M) + ' + şebeke ' + kE(x.S) + '</title></rect>';
+  });
+  g += '</g></svg>';
+  const ley = '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap">' + [['Mahsuplaşan', R.M], ['Bedelli satış', R.B], ['Şebekeden alınan', R.S]].map(([a, r]) => '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + r + ';margin-right:5px"></span>' + a + '</span>').join('') + '<span>Her günde sol çubuk üretim, sağ çubuk tüketim. Güne tıklayınca o günün saatlik dökümü açılır.</span></div>';
+  const oran = (a, b) => b > 0 ? '%' + say(a / b * 100) : '—';
+  let t = '';
+  for (const x of gunler) t += '<tr' + (x.g === secGun ? ' style="background:#EEF3FA"' : '') + '><td class="sol"><a href="#sayac" onclick="secGun=\'' + x.g + '\';cizSayac();return false">' + tarihK(x.g) + '</a>' + (x.n < 24 ? ' <span class="k">(' + x.n + ' sa)</span>' : '') + '</td><td class="ayr">' + say(x.U) + '</td><td>' + say(x.T) + '</td><td class="ayr">' + say(x.M) + '</td><td>' + say(x.B) + '</td><td>' + say(x.S) + '</td><td class="ayr">' + oran(x.M, x.T) + '</td><td>' + oran(x.M, x.U) + '</td></tr>';
+  const U = ta.U, T = ta.T, M = ta.M, B = ta.B, S = ta.S;
+  t += '<tr class="top"><td class="sol">' + AYLAR[Number(ayKod.slice(5)) - 1] + ' toplamı</td><td class="ayr">' + say(U) + '</td><td>' + say(T) + '</td><td class="ayr">' + say(M) + '</td><td>' + say(B) + '</td><td>' + say(S) + '</td><td class="ayr">' + oran(M, T) + '</td><td>' + oran(M, U) + '</td></tr>';
+  const ayAd = AYLAR[Number(ayKod.slice(5)) - 1] + ' ' + ayKod.slice(0, 4);
+  return '<section class="panel" style="gap:12px"><div class="bas"><h2>' + ayAd + ', günlük mahsup</h2><span class="k">' + gunler.length + ' gün, kWh</span></div>' + g + ley + '</section>'
+    + '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Gün</th><th class="ayr">Üretim</th><th>Tüketim</th><th class="ayr">Mahsuplaşan</th><th>Bedelli</th><th>Şebekeden</th><th class="ayr" title="Tüketimin mahsupla karşılanan payı">Karşılama</th><th title="Üretimin mahsupta kullanılan payı">Kullanım</th></tr></thead><tbody>' + t + '</tbody></table></div>';
 }
 // ===== İnverter analizi =====
 const INV_KAYNAK = { sungrow: 'Sungrow', inavitas: 'Inavitas', fusionsolar: 'FusionSolar' };

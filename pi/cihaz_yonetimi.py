@@ -41,7 +41,7 @@ VARSAYILAN = {
     "cihaz_sayisi": 29,
     "cihaz_guc_kw": "oto",        # cihaz başı güç (kW); "oto": son antminer arşivindeki tahmini güç ortalaması
     "cihaz_th": "oto",            # cihaz başı hashrate (TH/s); "oto": cihazların son 7 gün çalışırkenki ortalaması
-    "maliyet_carpani": 1.05,      # PTF+YEKDEM üzerine dağıtım/vergi payı (saat_kontrol.py ile aynı)
+    "maliyet_carpani": 1.035,     # PTF+YEKDEM üzerine dağıtım/vergi payı
     "uretim_esik_kw": 50,         # Sera-1 + Sera-2 anlık gücü bunun üstündeyse "üretim var"
     "hashprice_gun": 7,           # hashprice için son kaç günün F2Pool geliri
     "komut_arasi_dk": 15,         # aynı komut en erken bu kadar dakika sonra tekrarlanır

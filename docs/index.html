@@ -1401,7 +1401,7 @@ let EP = null, epYukleniyor = null;
 const epSec = { yil: null, ay: 'yil', gun: null };
 const EP_RENK = { ptf: '#2a78d6', mal: '#eb6834', yek: '#1baf7a', top: '#6b5bd6' };
 // Enerji maliyeti = (PTF + YEKDEM) × çarpan (dağıtım/vergi payı). Çarpan cihaz yönetimiyle aynı: epias-ptf/cihaz_yonetimi.json maliyet_carpani.
-let MAL_KAT = 1.05, malKatYuklendi = false;
+let MAL_KAT = 1.035, malKatYuklendi = false;
 async function malKatYukle() { if (malKatYuklendi) return; malKatYuklendi = true; try { const a = await al('cihaz_yonetimi.json'); if (a && Number(a.maliyet_carpani) > 0) MAL_KAT = Number(a.maliyet_carpani); } catch (e) {} }
 const epMal = (ptf, yk) => ptf != null && yk != null ? (ptf + yk) * MAL_KAT : null;
 function epYukle() {

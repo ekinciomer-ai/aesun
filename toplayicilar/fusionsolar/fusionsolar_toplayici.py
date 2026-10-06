@@ -189,7 +189,9 @@ class Web:
             return
         if self._auto_login():
             return
-        # otomatik giriş olmadı -> görünür pencerede elle giriş
+        # otomatik giriş olmadı -> görünür pencerede elle giriş (ekranı olmayan Pi'de mümkün değil)
+        if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
+            raise NoAuth("Otomatik giriş olmadı ve ekran yok: .env içindeki kullanıcı adı/şifreyi kontrol edin")
         if self.headless:
             self._reopen(False)
             self.page.goto(LIST_URL, wait_until="domcontentloaded", timeout=60000)
@@ -204,6 +206,7 @@ class Web:
 
     def _auto_login(self) -> bool:
         if not (USER and PASS):
+            log.warning("Otomatik giriş yok: .env içinde FUSIONSOLAR_USER / FUSIONSOLAR_PASS boş")
             return False
         p = self.page
         try:

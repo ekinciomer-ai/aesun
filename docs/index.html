@@ -1005,7 +1005,7 @@ async function cizYonetim() {
     + '<div class="k">Maliyet (cihaz/saat) = (PTF + YEKDEM) ÷ 1000 × ' + say(a.maliyet_carpani, 2) + ' × ' + say(a.cihaz_guc_kw, 2) + ' kW (' + esc(a.cihaz_guc_kaynak || 'ayar') + ') = <b>' + say(y.maliyet_tl_saat, 1) + ' ₺</b> · Gelir (cihaz/saat) = hashprice × ' + say(a.cihaz_th) + ' TH/s ÷ 24 × BTC = <b>' + say(y.gelir_tl_saat, 1) + ' ₺</b>. '
     + 'Cihaz hashrate\'i ' + say(a.cihaz_th, 1) + ' TH/s (' + esc(a.cihaz_th_kaynak || 'ayar') + '). ' + 'Hashprice ' + (y.hashprice_btc_th_gun ? say(y.hashprice_btc_th_gun * 1e8, 2) + ' sat/TH·gün (F2Pool ' + (y.hashprice_aralik || []).filter(Boolean).map(g => tarihK(g)).join('–') + ')' : '—') + ', BTC ' + say(y.btc_try) + ' ₺ (' + (y.btc_tarih ? tarihK(y.btc_tarih) : '—') + '). '
     + 'Ayarlar <code>epias-ptf/cihaz_yonetimi.json</code> dosyasında.</div></section>';
-  const pl = y.plan || [];
+  const pl = (y.plan || []).filter(q => q.karar != null && q.ptf != null);   // fiyatı henüz yayınlanmamış saatler gösterilmez
   if (pl.length) {
     const kat = a.maliyet_carpani || 1.035, kw = a.cihaz_guc_kw || 1;
     const emal = q => q.ptf != null ? (q.ptf + (q.yekdem || 0)) * kat : null;               // enerji maliyeti ₺/MWh

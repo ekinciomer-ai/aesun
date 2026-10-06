@@ -1,29 +1,41 @@
 #!/usr/bin/env python3
-"""AEMonitoring · Madenci cihaz yönetimi (Pi, crontab ile 5 dakikada bir).
+"""AEMonitoring · Madenci cihaz yönetimi (Pi, crontab: 5 dakikada bir tam hesap, dakikada bir --tetik).
 
 Kural:
   a) Güneş üretimi varken (FusionSolar Sera-1 + Sera-2 anlık güç > eşik) cihazlar ÇALIŞIR; PTF'ye bakılmaz.
   b) Üretim yokken: saatlik enerji maliyeti > saatlik BTC geliri ise cihazlar UYUR, aksi halde ÇALIŞIR.
 
+Zamanlama (gerçek ısınma verisinden öğrenilir — cihaz_ogrenme.py):
+  - Hydro cihazlar uyanınca önce suyu ~45 °C'ye ısıtır, sonra hash'e başlar. Su soğuksa ısınma uzar.
+  - UYANDIRMA, kârlı saat başlamadan ÖNCE verilir: öncü süre, saat başlarken filo %95'te olacak şekilde
+    dakika dakika maliyet/gelir hesabıyla seçilir (ısınma eğrisi + sıralı komut yayılımı) + emniyet payı.
+    Emniyet payı, her uyandırmanın gerçekleşen sonucuna göre kendini ayarlar.
+  - UYUTMA, zararlı saat başlarken verilir (sıralı yayılımın yarısı kadar önce).
+  - KISA DURUŞ kontrolü: zararlı pencere kısa ise ve uyutup yeniden ısıtmanın kaybı (soğuyan su, ön ısıtma
+    enerjisi, eksik hash) kazancı aşıyorsa cihazlar uyutulmaz.
+
 Maliyet (cihaz başı, TL/saat) = (PTF + YEKDEM) / 1000 × maliyet_carpani × cihaz_guc_kw
 Gelir   (cihaz başı, TL/saat) = hashprice (BTC / TH / gün, F2Pool son N gün) × cihaz_th / 24 × BTC/TL
 
-Ayarlar ve mod GitHub epias-ptf/cihaz_yonetimi.json dosyasında:
-  mod: "izleme"   -> yalnız karar verir ve yazar, komut GÖNDERMEZ (varsayılan)
-       "otomatik" -> karar değişince antminer_commands.json'a sleep/wake komutu yazar (Pi'deki altminer uygular)
-       "kapali"   -> hiçbir şey yapmaz
-Durum ve 24 saatlik plan: epias-ptf/n8n/cihaz_yonetimi_durum.json (panel buradan okur).
+Ayarlar ve mod: GitHub epias-ptf/cihaz_yonetimi.json
+  mod: "izleme" (yalnız hesaplar, komut göndermez) | "otomatik" (antminer_commands.json'a yazar) | "kapali"
+Durum, plan ve takvim: epias-ptf/n8n/cihaz_yonetimi_durum.json (panel buradan okur).
 
-Elle:  python3 cihaz_yonetimi.py            (bir kez çalışır)
-       python3 cihaz_yonetimi.py --mod otomatik|izleme|kapali   (modu değiştirir)
+Elle:  python3 cihaz_yonetimi.py            (tam hesap)
+       python3 cihaz_yonetimi.py --tetik    (yalnız zamanı gelen komutu gönderir; dakikada bir)
+       python3 cihaz_yonetimi.py --mod otomatik|izleme|kapali
 """
-import argparse, base64, json, os, sys, time, urllib.error, urllib.request, uuid
+import argparse, json, math, sys, time, uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-REPO = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/"
-TR = timezone(timedelta(hours=3))
-YEREL = Path.home() / ".aesun" / "cihaz_yonetimi_yerel.json"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from ortak import AESUN, TOK, TR, gh, log, zaman  # noqa: E402
+import cihaz_ogrenme as OG  # noqa: E402
+
+YEREL = AESUN / "cihaz_yonetimi_yerel.json"
+TAKVIM = AESUN / "cihaz_takvim.json"
+ENLEM, BOYLAM = 38.37, 34.03          # Aksaray (güneş doğuş/batış tahmini)
 VARSAYILAN = {
     "mod": "izleme",
     "cihaz_sayisi": 29,
@@ -34,50 +46,15 @@ VARSAYILAN = {
     "hashprice_gun": 7,           # hashprice için son kaç günün F2Pool geliri
     "komut_arasi_dk": 15,         # aynı komut en erken bu kadar dakika sonra tekrarlanır
     "sirali_gecikme_sn": 10,      # cihazlar arasına konan gecikme (ani yük binmesin)
+    "on_isitma": True,            # kârlı saatten önce öğrenilmiş süre kadar erken uyandır
+    "kisa_durus_kontrol": True,   # uyutup ısıtmak zararlıysa kısa pencerede uyutma
+    "en_fazla_oncu_dk": 60,
+    "oncu_politika": "hazir",     # "hazir": saat başında filo %95'te olsun | "ekonomik": dakika bazlı kâr en yüksek
 }
 
 
-def log(*a):
-    print(datetime.now(TR).strftime("%Y-%m-%d %H:%M:%S"), *a, flush=True)
-
-
-def token():
-    for f in (Path.home() / ".aesun/osos.env", Path.home() / "aesun/env.txt"):
-        if f.exists():
-            for s in f.read_text().splitlines():
-                if s.startswith("GITHUB_TOKEN="):
-                    return s.split("=", 1)[1].strip()
-    return os.environ.get("GITHUB_TOKEN", "")
-
-
-TOK = token()
-
-
-def gh(yol, veri=None, sha=None, mesaj=None):
-    h = {"Authorization": "Bearer " + TOK, "Accept": "application/vnd.github+json", "User-Agent": "aesun-pi"}
-    if veri is None:
-        try:
-            with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers=h), timeout=30) as r:
-                m = json.loads(r.read())
-            if m.get("content"):
-                return json.loads(base64.b64decode(m["content"]).decode()), m["sha"]
-            with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers={**h, "Accept": "application/vnd.github.raw+json"}), timeout=60) as r:
-                return json.loads(r.read()), m["sha"]
-        except urllib.error.HTTPError as e:
-            if e.code == 404:
-                return None, None
-            raise
-    govde = {"message": mesaj or ("cihaz yönetimi " + datetime.now(TR).strftime("%Y-%m-%d %H:%M")),
-             "content": base64.b64encode(json.dumps(veri, ensure_ascii=False, indent=1).encode()).decode()}
-    if sha:
-        govde["sha"] = sha
-    r = urllib.request.Request(REPO + yol, data=json.dumps(govde).encode(), headers=h, method="PUT")
-    with urllib.request.urlopen(r, timeout=30) as y:
-        return json.loads(y.read())
-
-
 def ayar_oku():
-    a, sha = gh("cihaz_yonetimi.json")
+    a, _ = gh("cihaz_yonetimi.json")
     if a is None:
         a = dict(VARSAYILAN)
         gh("cihaz_yonetimi.json", a, None, "cihaz yönetimi: varsayılan ayarlar (izleme modu)")
@@ -118,11 +95,14 @@ def cihaz_th_hesapla(a, mad, simdi):
         return round(canli[len(canli) // 2], 1), f"sahadaki {len(canli)} çalışan cihaz"
     return 300.0, "varsayılan"
 
+
 def cihaz_guc_hesapla(a, simdi):
     if isinstance(a.get("cihaz_guc_kw"), (int, float)):
         return float(a["cihaz_guc_kw"]), "ayar"
+    y, a_ = simdi.year, simdi.month
     for i in range(0, 6):
-        ay = (simdi.replace(day=1) - timedelta(days=31 * i)).strftime("%Y-%m")
+        ay = f"{y}-{a_:02d}"
+        y, a_ = (y, a_ - 1) if a_ > 1 else (y - 1, 12)
         d, _ = gh(f"arsiv_antminer_{ay}.json")
         if d:
             k = sorted(d)[-1]
@@ -131,6 +111,7 @@ def cihaz_guc_hesapla(a, simdi):
             if v:
                 return round(sum(v) / len(v), 2), f"antminer arşivi {k}, {len(v)} cihaz ortalaması"
     return 6.0, "varsayılan"
+
 
 def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
     maliyet = (ptf + yekdem) / 1000 * a["maliyet_carpani"] * a["cihaz_guc_kw"] if ptf is not None else None
@@ -144,12 +125,215 @@ def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
     return "calis", f"gelir {gelir:.0f} ₺ ≥ maliyet {maliyet:.0f} ₺ (cihaz/saat)", maliyet, gelir
 
 
+def gunes_saatleri(gun):
+    """Aksaray için doğuş/batış (TR saati, ondalık). Basit NOAA yaklaşımı."""
+    n = gun.timetuple().tm_yday
+    g = 2 * math.pi / 365 * (n - 1)
+    dek = 0.006918 - 0.399912 * math.cos(g) + 0.070257 * math.sin(g) - 0.006758 * math.cos(2 * g) + 0.000907 * math.sin(2 * g)
+    eq = 229.18 * (0.000075 + 0.001868 * math.cos(g) - 0.032077 * math.sin(g) - 0.014615 * math.cos(2 * g) - 0.040849 * math.sin(2 * g))
+    la = math.radians(ENLEM)
+    ha = math.degrees(math.acos(math.cos(math.radians(90.833)) / (math.cos(la) * math.cos(dek)) - math.tan(la) * math.tan(dek)))
+    oglen = (720 - 4 * BOYLAM - eq) / 60 + 3
+    return oglen - ha / 15, oglen + ha / 15
+
+
+# ---------------------------------------------------------------- zamanlama
+def dakika_fiyat(plan):
+    """{saat başı datetime: (maliyet, gelir)} cihaz başı TL/saat."""
+    return {p["_t"]: (p["maliyet"], p["gelir"]) for p in plan}
+
+
+def _deger(fiyat, bas, bit, w, m, su0, yay):
+    """[bas, bit) aralığında, w anında uyandırılan cihazın kârı (TL). Uyandırmadan önce 0; sonra tam güç maliyeti,
+    gelir ısınma oranıyla. Sıralı komut yayılımı yay dk: ortalama cihaz yay/2 dk geç başlar."""
+    top = 0.0
+    t = bas
+    while t < bit:
+        s = t.replace(minute=0, second=0, microsecond=0)
+        mal, gel = fiyat.get(s, (None, None))
+        if mal is None or gel is None:
+            return None
+        if t >= w:
+            top += (gel * OG.oran(m, su0, (t - w).total_seconds() / 60 - yay / 2) - mal) / 60
+        t += timedelta(minutes=1)
+    return top
+
+
+def oncu_sec(fiyat, B, m, su0, yay, en_fazla):
+    """B anında başlayan kârlı pencere için en iyi uyandırma öncü süresi (dk) ve beklenen kâr."""
+    en, en_L = None, None
+    for L in range(0, int(en_fazla) + 1):
+        v = _deger(fiyat, B - timedelta(minutes=en_fazla), B + timedelta(minutes=60), B - timedelta(minutes=L), m, su0, yay)
+        if v is None:
+            break
+        if en is None or v > en + 1e-6:
+            en, en_L = v, L
+    if en_L is None:                       # fiyat yoksa: model süresi kadar
+        s = OG.isinma(m, su0, filo=True)
+        return int(round(s["t95"] + yay / 2)), None
+    return en_L, en
+
+
+def takvim_kur(plan, m, a, simdi, filo, canli_su):
+    """Saatlik kararlardan dakika hassasiyetinde komut takvimi üretir. plan[0] = içinde bulunulan saat."""
+    fiyat = dakika_fiyat(plan)
+    n = filo["calisan"] + filo["uyuyan"] or a.get("cihaz_sayisi", 29)
+    yay = n * (a["sirali_gecikme_sn"] + 2) / 60 if a["sirali_gecikme_sn"] else n * m.get("sn_cihaz", 12) / 60
+    yay = max(yay, n * m.get("sn_cihaz", 12) / 60)
+    k = [p["karar"] for p in plan]
+    notlar = {}
+    # 1) kısa duruş: [i, j) uyut penceresi, j'de calis
+    if a.get("kisa_durus_kontrol"):
+        i = 0
+        while i < len(k):
+            if k[i] != "uyut":
+                i += 1
+                continue
+            j = i
+            while j < len(k) and k[j] == "uyut":
+                j += 1
+            if j >= len(k) or k[j] != "calis":
+                break
+            B1, B2 = plan[i]["_t"], plan[j]["_t"]
+            simdi_uyuyor = i == 0 and filo["uyuyan"] > 0 and filo["calisan"] == 0
+            if not simdi_uyuyor:
+                bas = max(B1, simdi)
+                kapali_saat = (B2 - bas).total_seconds() / 3600
+                su0, _ = OG.su_tahmin(m, kapali_saat)
+                if a.get("oncu_politika") == "ekonomik":
+                    L, _ = oncu_sec(fiyat, B2, m, su0, yay, a["en_fazla_oncu_dk"])
+                else:
+                    L = math.ceil(OG.isinma(m, su0, filo=True)["t95"] + yay)
+                w = B2 - timedelta(minutes=min(L + m.get("emniyet_dk", 0), a["en_fazla_oncu_dk"]))
+                bit = B2 + timedelta(minutes=60)
+                uyut_v = _deger(fiyat, bas, bit, max(w, bas), m, su0, yay)
+                calis_v = _deger(fiyat, bas, bit, bas - timedelta(hours=2), m, 99.0, 0)   # zaten sıcak, tam hash
+                if uyut_v is not None and calis_v is not None and uyut_v <= calis_v:
+                    for x in range(i, j):
+                        k[x] = "calis"
+                        notlar[x] = (f"kısa duruş kârsız: uyutmak {uyut_v:.0f} ₺, çalışmak {calis_v:.0f} ₺ "
+                                     f"(cihaz başı; su ~{su0:.0f} °C'ye düşer, {L} dk önce uyandırma gerekir)")
+            i = j
+    # 2) geçişler
+    anahtar = []
+    for x in range(1, len(k)):
+        if k[x] is None or k[x - 1] is None or k[x] == k[x - 1]:
+            continue
+        B = plan[x]["_t"]
+        if k[x] == "uyut":
+            t = B - timedelta(minutes=yay / 2)
+            anahtar.append({"t_komut": t, "eylem": "sleep", "hedef": B, "neden": f"{B:%H}:00 zararlı saat", "oncu_dk": round(yay / 2, 1)})
+        else:
+            # pencere ne kadar uyuyacak? (geriye doğru uyut saatleri)
+            y = x - 1
+            while y > 0 and k[y - 1] == "uyut":
+                y -= 1
+            bas_uyku = max(plan[y]["_t"], simdi) if not (y == 0 and filo["uyuyan"] and not filo["calisan"]) else None
+            canli = canli_su if (y == 0 and canli_su) else None
+            kapali_saat = (B - bas_uyku).total_seconds() / 3600 if bas_uyku else None
+            su0, su_kaynak = OG.su_tahmin(m, kapali_saat, canli)
+            s = OG.isinma(m, su0, filo=True)
+            L_eko, _ = oncu_sec(fiyat, B, m, su0, yay, a["en_fazla_oncu_dk"])
+            L_hazir = math.ceil(s["t95"] + yay)            # son cihaz da saat başında %95'te
+            if not a.get("on_isitma"):
+                L = 0
+            elif a.get("oncu_politika") == "ekonomik":
+                L = L_eko + m.get("emniyet_dk", 0)
+            else:
+                L = L_hazir + m.get("emniyet_dk", 0)
+            L = min(L, a["en_fazla_oncu_dk"])
+            # iki politikanın kâr farkı (filo, TL): ön ısıtmanın bedeli
+            pen = (B - timedelta(minutes=a["en_fazla_oncu_dk"]), B + timedelta(minutes=60))
+            v_sec = _deger(fiyat, *pen, B - timedelta(minutes=L), m, su0, yay)
+            v_eko = _deger(fiyat, *pen, B - timedelta(minutes=L_eko), m, su0, yay)
+            fark = round((v_eko - v_sec) * n, 1) if v_sec is not None and v_eko is not None else None
+            anahtar.append({"t_komut": B - timedelta(minutes=L), "eylem": "wake", "hedef": B, "oncu_dk": round(L, 1),
+                            "oncu_hazir_dk": L_hazir, "oncu_ekonomik_dk": L_eko, "politika": a.get("oncu_politika"),
+                            "on_isitma_bedeli_tl": fark,
+                            "su_tahmin": su0, "su_kaynak": su_kaynak, "t95_tahmin": s["t95"],
+                            "neden": f"{B:%H}:00 kârlı saat; su ~{su0:.0f} °C → %95 hash {s['t95']:.0f} dk + yayılım {yay:.0f} dk"
+                                     f" + emniyet {m.get('emniyet_dk', 0):.0f} dk"})
+    # geçişler sıralı kalsın (bir önceki geçişten önce olamaz)
+    for x in range(1, len(anahtar)):
+        if anahtar[x]["t_komut"] < anahtar[x - 1]["t_komut"]:
+            anahtar[x]["t_komut"] = anahtar[x - 1]["t_komut"]
+    # 3) şu an olması gereken durum
+    istenen = k[0]
+    gecerli = None
+    for s_ in anahtar:
+        if s_["t_komut"] <= simdi:
+            istenen = "uyut" if s_["eylem"] == "sleep" else "calis"
+            gecerli = s_
+    return k, notlar, anahtar, istenen, gecerli, yay
+
+
+def komut_gonder(eylem, a, neden):
+    kom, sha = gh("antminer_commands.json")
+    kom = kom or {"commands": []}
+    cmd = {"id": str(uuid.uuid4())[:8], "action": eylem, "targets": "all", "delay_sec": a["sirali_gecikme_sn"],
+           "sort_by": None, "issued_at": datetime.now().isoformat(), "issued_by": "otomatik (cihaz yönetimi)"}
+    kom["commands"] = (kom.get("commands") or [])[-49:] + [cmd]
+    kom["updated_at"] = cmd["issued_at"]
+    gh("antminer_commands.json", kom, sha, f"otomatik {eylem}: {neden}")
+    return cmd["id"]
+
+
+def tk_oku():
+    return json.loads(TAKVIM.read_text()) if TAKVIM.exists() else {}
+
+
+def tk_yaz(tk):
+    TAKVIM.parent.mkdir(parents=True, exist_ok=True)
+    TAKVIM.write_text(json.dumps(tk, ensure_ascii=False, default=str))
+
+
+def tekrar_mi(eylem, a):
+    yerel = json.loads(YEREL.read_text()) if YEREL.exists() else {}
+    son = yerel.get("son_komut") or {}
+    return son.get("action") == eylem and (time.time() - son.get("t", 0)) < a["komut_arasi_dk"] * 60
+
+
+def son_komut_kaydet(eylem, cid):
+    yerel = json.loads(YEREL.read_text()) if YEREL.exists() else {}
+    yerel["son_komut"] = {"action": eylem, "t": time.time(), "id": cid}
+    YEREL.parent.mkdir(parents=True, exist_ok=True)
+    YEREL.write_text(json.dumps(yerel))
+
+
+def tetik():
+    """Dakikada bir: takvimde zamanı gelmiş ve henüz gönderilmemiş geçiş varsa gönderir (yalnız otomatik modda)."""
+    tk = tk_oku()
+    if tk.get("mod") != "otomatik" or not tk.get("filo_taze"):
+        return
+    simdi = datetime.now(TR)
+    if simdi - zaman(tk.get("olusturuldu", "2000-01-01T00:00:00+03:00")) > timedelta(minutes=20):
+        return                                   # takvim eski: tam hesap çalışmıyor demek, kör komut verme
+    gonderilen = {g["anahtar"] for g in tk.get("gonderilen") or []}
+    for s in tk.get("anahtarlar") or []:
+        t = zaman(s["t_komut"])
+        anahtar = f"{s['eylem']}|{s['hedef']}"
+        if anahtar in gonderilen or not (t <= simdi < t + timedelta(minutes=10)):
+            continue
+        if tekrar_mi(s["eylem"], {"komut_arasi_dk": tk.get("komut_arasi_dk", 15)}):
+            continue
+        cid = komut_gonder(s["eylem"], tk["ayar_ozet"], s["neden"])
+        son_komut_kaydet(s["eylem"], cid)
+        tk.setdefault("gonderilen", []).append({"anahtar": anahtar, "eylem": s["eylem"], "hedef": s["hedef"],
+                                               "t_komut": simdi.isoformat(timespec="seconds"), "id": cid, "kim": "tetik"})
+        tk["gonderilen"] = tk["gonderilen"][-100:]
+        tk_yaz(tk)
+        log("TETİK", s["eylem"], "→", s["hedef"], "-", s["neden"])
+
+
 def calistir():
     if not TOK:
         sys.exit("GITHUB_TOKEN yok (~/.aesun/osos.env)")
     a = ayar_oku()
     simdi = datetime.now(TR)
     if a["mod"] == "kapali":
+        tk = tk_oku()
+        tk["mod"] = "kapali"
+        tk_yaz(tk)
         log("mod kapalı, çıkılıyor")
         return
     ep, _ = gh("n8n/epias_gecmis.json")
@@ -157,17 +341,20 @@ def calistir():
     gelir, _ = gh("arsiv_f2pool_gelir.json")
     fiyat, _ = gh("arsiv_btc_fiyat.json")
     mad, _ = gh("antminer_panel.json")
+    og, _ = gh(OG.DOSYA)
+    m = {**OG.VARSAYILAN_MODEL, **((og or {}).get("model") or {})}
     th, th_kaynak = cihaz_th_hesapla(a, mad, simdi)
     kw, kw_kaynak = cihaz_guc_hesapla(a, simdi)
     a = {**a, "cihaz_th": th, "cihaz_th_kaynak": th_kaynak, "cihaz_guc_kw": kw, "cihaz_guc_kaynak": kw_kaynak}
-    # PTF ve YEKDEM
+
     def ptf_al(t):
         g = (ep or {}).get("ptf", {}).get(t.strftime("%Y-%m-%d")) or []
         return g[t.hour] if len(g) > t.hour and g[t.hour] is not None else None
+
     def yekdem_al(t):
         y = (ep or {}).get("yekdem", {}).get(t.strftime("%Y-%m")) or {}
         return y.get("gercek") if y.get("gercek") is not None else y.get("ongoru")
-    # BTC/TL: arşivdeki en son kapanış
+
     fg = (fiyat or {}).get("gun", {})
     son_fg = max((g for g in fg if fg[g].get("try")), default=None)
     btc_try = fg[son_fg]["try"] if son_fg else None
@@ -176,15 +363,13 @@ def calistir():
     uretim_kw, fs_taze = None, False
     if fs:
         try:
-            ts = datetime.fromisoformat(fs.get("guncelleme")).replace(tzinfo=TR)
+            ts = zaman(fs.get("guncelleme"))
             fs_taze = (simdi - ts) < timedelta(minutes=30)
             uretim_kw = sum(float(t.get("anlik_guc_kw") or 0) for t in (fs.get("tesisler") or {}).values())
         except Exception:
             pass
     uretim = (uretim_kw or 0) > a["uretim_esik_kw"] if fs_taze else None
-    # Saat sonuna 5 dk kala bir sonraki saatin fiyatına göre davran (geçiş önceden yapılsın)
-    hedef = simdi + timedelta(minutes=5) if simdi.minute >= 55 else simdi
-    ptf, yekdem = ptf_al(hedef), yekdem_al(hedef)
+    ptf, yekdem = ptf_al(simdi), yekdem_al(simdi)
     if uretim is None:
         karar, neden, maliyet, gel = None, "FusionSolar verisi eski ya da yok (değişiklik yapılmaz)", None, None
     else:
@@ -194,81 +379,113 @@ def calistir():
     ulasilan = [d for d in cihazlar if d.get("online") or d.get("sleeping")]
     calisan = sum(1 for d in cihazlar if d.get("online") and not d.get("sleeping"))
     uyuyan = sum(1 for d in cihazlar if d.get("sleeping"))
+    canli_su = [d.get("temp_water") for d in cihazlar if d.get("sleeping") and d.get("temp_water")]
+    canli_su = round(sum(canli_su) / len(canli_su), 1) if canli_su else None
     try:
-        mad_ts = datetime.fromisoformat((mad or {}).get("timestamp", "")).replace(tzinfo=TR)
-        mad_taze = (simdi - mad_ts) < timedelta(minutes=15)
+        mad_taze = (simdi - zaman((mad or {}).get("timestamp", ""))) < timedelta(minutes=15)
     except Exception:
         mad_taze = False
-    # Eylem
-    yerel = json.loads(YEREL.read_text()) if YEREL.exists() else {}
-    eylem, eylem_not = None, ""
-    if karar and mad_taze and ulasilan:
-        if karar == "uyut" and calisan > 0:
-            eylem = "sleep"
-        elif karar == "calis" and uyuyan > 0:
-            eylem = "wake"
-    elif karar and not (mad_taze and ulasilan):
-        eylem_not = "cihaz durumu okunamıyor (toplayıcı saha ağında değil ya da veri eski)"
-    if eylem:
-        son = yerel.get("son_komut") or {}
-        if son.get("action") == eylem and (time.time() - son.get("t", 0)) < a["komut_arasi_dk"] * 60:
-            eylem_not = f"aynı komut {a['komut_arasi_dk']} dk içinde gönderilmişti, bekleniyor"
-            eylem = None
-    gonderildi = False
-    if eylem and a["mod"] == "otomatik":
-        kom, sha = gh("antminer_commands.json")
-        kom = kom or {"commands": []}
-        cmd = {"id": str(uuid.uuid4())[:8], "action": eylem, "targets": "all", "delay_sec": a["sirali_gecikme_sn"],
-               "sort_by": None, "issued_at": datetime.now().isoformat(), "issued_by": "otomatik (cihaz yönetimi)"}
-        kom["commands"] = (kom.get("commands") or [])[-49:] + [cmd]
-        kom["updated_at"] = cmd["issued_at"]
-        gh("antminer_commands.json", kom, sha, f"otomatik {eylem}: {neden}")
-        yerel["son_komut"] = {"action": eylem, "t": time.time(), "id": cmd["id"]}
-        YEREL.parent.mkdir(parents=True, exist_ok=True)
-        YEREL.write_text(json.dumps(yerel))
-        gonderildi = True
-        log("KOMUT", eylem, "-", neden)
-    elif eylem:
-        eylem_not = "izleme modu: komut gönderilmedi"
-    # 24 saatlik plan (üretim varsayımı: bugünkü FusionSolar saatlik profili)
+    filo = {"calisan": calisan, "uyuyan": uyuyan}
+    # Saatlik plan: bu saat + 29 saat (güneş: bugünün gerçekleşen profili, ileri saatler için doğuş/batış)
     saatlik = {}
     for v in ((fs or {}).get("saatlik_bugun") or {}).values():
-        for s_, k in (v or {}).items():
+        for s_, kk in (v or {}).items():
             try:
-                saatlik[int(str(s_)[:2])] = saatlik.get(int(str(s_)[:2]), 0) + float(k or 0)
+                saatlik[int(str(s_)[:2])] = saatlik.get(int(str(s_)[:2]), 0) + float(kk or 0)
             except Exception:
                 pass
     plan = []
-    for i in range(24):
+    for i in range(30):
         t = (simdi + timedelta(hours=i)).replace(minute=0, second=0, microsecond=0)
         p, y = ptf_al(t), yekdem_al(t)
-        gunes = saatlik.get(t.hour, 0) > a["uretim_esik_kw"]
-        k, n, m, g = karar_ver(gunes, p, y or 0, a, hp, btc_try)
-        plan.append({"t": t.strftime("%Y-%m-%d %H:00"), "ptf": p, "yekdem": y, "gunes_tahmini": gunes, "maliyet": m, "gelir": g, "karar": k})
+        if i == 0 and uretim is not None:
+            gunes, gk = uretim, "anlık"
+        elif t.date() == simdi.date() and t.hour < simdi.hour and t.hour in saatlik:
+            gunes, gk = saatlik[t.hour] > a["uretim_esik_kw"], "gerçekleşen"
+        else:
+            dog, bat = gunes_saatleri(t)
+            gunes, gk = (dog + 1.0) <= t.hour and (t.hour + 1) <= (bat - 1.0), "doğuş/batış"
+        kk, n, mm, g = karar_ver(gunes, p, y or 0, a, hp, btc_try)
+        if i == 0 and karar is None and uretim is None:
+            kk = None
+        plan.append({"_t": t, "t": t.strftime("%Y-%m-%d %H:00"), "ptf": p, "yekdem": y, "gunes_tahmini": gunes,
+                     "gunes_kaynak": gk, "maliyet": mm, "gelir": g, "karar": kk})
+    # Takvim (öğrenilmiş ısınma ile)
+    k2, notlar, anahtar, istenen, gecerli, yay = takvim_kur(plan, m, a, simdi, filo, canli_su)
+    for i, p in enumerate(plan):
+        p["karar_ham"] = p["karar"]
+        p["karar"] = k2[i]
+        if i in notlar:
+            p["not"] = notlar[i]
+    # Eylem: şu an olması gereken durum ile filo durumu farklıysa
+    tk = tk_oku()
+    gonderilen = tk.get("gonderilen") or []
+    eylem, eylem_not = None, ""
+    if istenen and mad_taze and ulasilan:
+        if istenen == "uyut" and calisan > 0:
+            eylem = "sleep"
+        elif istenen == "calis" and uyuyan > 0:
+            eylem = "wake"
+    elif istenen and not (mad_taze and ulasilan):
+        eylem_not = "cihaz durumu okunamıyor (toplayıcı saha ağında değil ya da veri eski)"
+    if eylem and gecerli and f"{eylem}|{gecerli['hedef'].isoformat(timespec='seconds')}" in {g["anahtar"] for g in gonderilen}:
+        # bu geçiş için komut zaten gitti; uyanan Hydro cihazlar ön ısıtmada "uyku" görünür — tekrar gönderme
+        eylem_not = "komut gönderildi, cihazlar ısınıyor/geçişte"
+        eylem = None
+    if eylem and tekrar_mi(eylem, a):
+        eylem_not = f"aynı komut {a['komut_arasi_dk']} dk içinde gönderilmişti, bekleniyor"
+        eylem = None
+    gonderildi = False
+    neden_eylem = (gecerli or {}).get("neden") or neden
+    if eylem and a["mod"] == "otomatik":
+        cid = komut_gonder(eylem, a, neden_eylem)
+        son_komut_kaydet(eylem, cid)
+        hedef = (gecerli or {}).get("hedef") or simdi.replace(minute=0, second=0, microsecond=0)
+        gonderilen.append({"anahtar": f"{eylem}|{hedef.isoformat(timespec='seconds')}", "eylem": eylem,
+                           "hedef": hedef.isoformat(timespec="seconds"), "t_komut": simdi.isoformat(timespec="seconds"),
+                           "id": cid, "kim": "tam"})
+        gonderildi = True
+        log("KOMUT", eylem, "-", neden_eylem)
+    elif eylem:
+        eylem_not = "izleme modu: komut gönderilmedi"
+    # takvimi yerel dosyaya yaz (tetik buradan okur)
+    anahtar_j = [{**s_, "t_komut": s_["t_komut"].isoformat(timespec="seconds"), "hedef": s_["hedef"].isoformat(timespec="seconds")} for s_ in anahtar]
+    tk = {"olusturuldu": simdi.isoformat(timespec="seconds"), "mod": a["mod"], "filo_taze": bool(mad_taze and ulasilan),
+          "komut_arasi_dk": a["komut_arasi_dk"], "ayar_ozet": {"sirali_gecikme_sn": a["sirali_gecikme_sn"]},
+          "anahtarlar": anahtar_j, "gonderilen": gonderilen[-100:]}
+    tk_yaz(tk)
+    for p in plan:
+        p.pop("_t", None)
     basabas = None
     if hp and btc_try:
         g1 = hp * a["cihaz_th"] / 24 * btc_try
         basabas = g1 / (a["maliyet_carpani"] * a["cihaz_guc_kw"]) * 1000 - (yekdem or 0)
+    sonraki_uyan = next((s_ for s_ in anahtar_j if s_["eylem"] == "wake"), None)
     durum, sha = gh("n8n/cihaz_yonetimi_durum.json")
     durum = durum or {}
     gec = durum.get("gecmis") or []
-    if gonderildi or durum.get("karar") != karar:
-        gec.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "karar": karar, "eylem": eylem or "-", "neden": neden,
-                    "not": eylem_not, "gonderildi": gonderildi, "mod": a["mod"]})
+    if gonderildi or durum.get("karar") != karar or durum.get("istenen") != istenen:
+        gec.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "karar": karar, "istenen": istenen, "eylem": eylem or "-",
+                    "neden": neden_eylem, "not": eylem_not, "gonderildi": gonderildi, "mod": a["mod"]})
     yeni = {
         "guncellendi": simdi.isoformat(timespec="seconds"), "mod": a["mod"], "ayarlar": a,
         "uretim_kw": uretim_kw, "uretim": uretim, "fs_taze": fs_taze, "ptf": ptf, "yekdem": yekdem,
         "btc_try": btc_try, "btc_tarih": son_fg, "hashprice_btc_th_gun": hp, "hashprice_aralik": [hp_bas, hp_son],
         "maliyet_tl_saat": maliyet, "gelir_tl_saat": gel, "basabas_ptf": basabas,
-        "karar": karar, "neden": neden, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
-        "cihaz": {"toplam": len(cihazlar), "ulasilan": len(ulasilan), "calisan": calisan, "uyuyan": uyuyan, "taze": mad_taze},
+        "karar": karar, "neden": neden, "istenen": istenen, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
+        "cihaz": {"toplam": len(cihazlar), "ulasilan": len(ulasilan), "calisan": calisan, "uyuyan": uyuyan, "taze": mad_taze,
+                  "su_uyuyan": canli_su},
+        "zamanlama": {"model": {k_: m.get(k_) for k_ in ("a", "b", "a_ilk", "b_ilk", "d99", "p80_ek", "emniyet_dk", "sn_cihaz", "n")},
+                      "yayilim_dk": round(yay, 1), "sonraki_uyandirma": sonraki_uyan, "takvim": anahtar_j[:12]},
         "plan": plan, "gecmis": gec[-200:],
     }
-    kiyas = {k: v for k, v in yeni.items() if k != "guncellendi"}
-    eski = {k: v for k, v in durum.items() if k != "guncellendi"}
-    if kiyas != eski or (simdi - datetime.fromisoformat(durum.get("guncellendi", "2000-01-01T00:00:00+03:00"))) > timedelta(minutes=30):
-        gh("n8n/cihaz_yonetimi_durum.json", yeni, sha, f"cihaz yönetimi: {karar or '-'} ({a['mod']})")
-    log(f"mod={a['mod']} üretim={uretim_kw} kW ptf={ptf} karar={karar} ({neden}) cihaz {calisan}/{uyuyan} eylem={eylem or '-'} {eylem_not}")
+    kiyas = {k_: v for k_, v in yeni.items() if k_ != "guncellendi"}
+    eski = {k_: v for k_, v in durum.items() if k_ != "guncellendi"}
+    if kiyas != eski or (simdi - zaman(durum.get("guncellendi", "2000-01-01T00:00:00+03:00"))) > timedelta(minutes=30):
+        gh("n8n/cihaz_yonetimi_durum.json", yeni, sha, f"cihaz yönetimi: {istenen or '-'} ({a['mod']})")
+    su = f" sonraki uyandırma {sonraki_uyan['t_komut'][11:16]}→{sonraki_uyan['hedef'][11:16]} ({sonraki_uyan['oncu_dk']} dk önce)" if sonraki_uyan else ""
+    log(f"mod={a['mod']} üretim={uretim_kw} kW ptf={ptf} karar={karar} istenen={istenen} cihaz {calisan}/{uyuyan} "
+        f"eylem={eylem or '-'} {eylem_not}{su}")
 
 
 def mod_degistir(mod):
@@ -282,8 +499,11 @@ def mod_degistir(mod):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--mod", choices=["izleme", "otomatik", "kapali"])
+    ap.add_argument("--tetik", action="store_true")
     x = ap.parse_args()
     if x.mod:
         mod_degistir(x.mod)
+    elif x.tetik:
+        tetik()
     else:
         calistir()

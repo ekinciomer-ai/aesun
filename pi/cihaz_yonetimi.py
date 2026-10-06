@@ -28,7 +28,7 @@ VARSAYILAN = {
     "mod": "izleme",
     "cihaz_sayisi": 29,
     "cihaz_guc_kw": 6.0,          # cihaz başı çekilen güç
-    "cihaz_th": 300,              # cihaz başı hashrate (TH/s)
+    "cihaz_th": "oto",            # cihaz başı hashrate (TH/s); "oto": cihazların son 7 gün çalışırkenki ortalaması
     "maliyet_carpani": 1.05,      # PTF+YEKDEM üzerine dağıtım/vergi payı (saat_kontrol.py ile aynı)
     "uretim_esik_kw": 50,         # Sera-1 + Sera-2 anlık gücü bunun üstündeyse "üretim var"
     "hashprice_gun": 7,           # hashprice için son kaç günün F2Pool geliri
@@ -91,6 +91,33 @@ def hashprice(gelir, n):
     return (sum(v) / len(v) if v else None), (gunler[0] if gunler else None), (gunler[-1] if gunler else None)
 
 
+def cihaz_th_hesapla(a, mad, simdi):
+    """Cihaz başı hashrate: ayarda sayı varsa o; "oto" ise F2Pool saatlik arşivinden (son 7 gün, çalıştığı saatler)
+    cihaz ortalamalarının medyanı; arşiv yoksa sahadaki çalışan cihazların anlık ortalaması; o da yoksa 300."""
+    if isinstance(a.get("cihaz_th"), (int, float)):
+        return float(a["cihaz_th"]), "ayar"
+    sinir = (simdi - timedelta(days=7)).astimezone(timezone.utc).strftime("%Y-%m-%dT%H")
+    toplam = {}
+    for ay in sorted({simdi.strftime("%Y-%m"), (simdi - timedelta(days=7)).strftime("%Y-%m")}):
+        d, _ = gh(f"arsiv_cihaz_{ay}.json")
+        for k, v in (d or {}).items():
+            if k.replace(" ", "T")[:13] < sinir:
+                continue
+            for c, x in (v or {}).items():
+                h = float((x or {}).get("h") or 0)
+                if h > 0:
+                    t = toplam.setdefault(c, [0.0, 0])
+                    t[0] += h
+                    t[1] += 1
+    ort = sorted(t[0] / t[1] for t in toplam.values() if t[1] >= 6)
+    if ort:
+        return round(ort[len(ort) // 2], 1), f"F2Pool son 7 gün, {len(ort)} cihaz medyanı"
+    canli = [float(d.get("hashrate_TH") or 0) for d in (mad or {}).get("devices") or [] if d.get("online") and not d.get("sleeping") and d.get("hashrate_TH")]
+    if canli:
+        canli.sort()
+        return round(canli[len(canli) // 2], 1), f"sahadaki {len(canli)} çalışan cihaz"
+    return 300.0, "varsayılan"
+
 def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
     maliyet = (ptf + yekdem) / 1000 * a["maliyet_carpani"] * a["cihaz_guc_kw"] if ptf is not None else None
     gelir = hp * a["cihaz_th"] / 24 * btc_try if hp and btc_try else None
@@ -116,6 +143,8 @@ def calistir():
     gelir, _ = gh("arsiv_f2pool_gelir.json")
     fiyat, _ = gh("arsiv_btc_fiyat.json")
     mad, _ = gh("antminer_panel.json")
+    th, th_kaynak = cihaz_th_hesapla(a, mad, simdi)
+    a = {**a, "cihaz_th": th, "cihaz_th_kaynak": th_kaynak}
     # PTF ve YEKDEM
     def ptf_al(t):
         g = (ep or {}).get("ptf", {}).get(t.strftime("%Y-%m-%d")) or []

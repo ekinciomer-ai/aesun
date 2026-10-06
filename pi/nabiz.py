@@ -33,8 +33,12 @@ def komut(*a):
 
 def servisler(env):
     sv = {}
-    for s in env.get("AESUN_SERVISLER", "altminer").split():
-        sv[s] = komut("systemctl", "is-active", s) or "unknown"
+    # Eski systemd zamanlayıcıları (aesun-*.timer) artık kullanılmıyor; crontab ile çalışan işler aşağıda.
+    for s in env.get("AESUN_SERVISLER", "altminer").replace("osos", "").split() or ["altminer"]:
+        if not s.startswith("aesun-"):
+            sv[s] = komut("systemctl", "is-active", s) or "unknown"
+    if not sv:
+        sv["altminer"] = komut("systemctl", "is-active", "altminer") or "unknown"
     cr = komut("crontab", "-l")
     for ad, iz in (("osos", "osos_toplayici.py"), ("fusionsolar", "fusionsolar_toplayici.py")):
         if iz in cr:

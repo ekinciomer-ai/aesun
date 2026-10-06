@@ -87,7 +87,7 @@ table.tb thead th[aria-sort=descending]::after{content:" ▼";font-size:10px}
   <a href="#sayac" data-sayfa="sayac"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Sayaçlar ve mahsup</a>
   <a href="#inverterler"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>İnverterler<span id="r-inv"></span></a>
   <a href="#inverter" data-sayfa="inverter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20h18M6 16V10M10 16V6M14 16v-4M18 16V8"/></svg>İnverter analizi</a>
-  <a href="#madencilik"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2M15 10v4"/></svg>Madencilik<span id="r-mad"></span></a>
+  <a href="#maden" data-sayfa="maden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2M15 10v4"/></svg>Madencilik<span id="r-mad"></span></a>
   <a href="#epias" data-sayfa="epias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 6"/></svg>EPİAŞ</a>
   <a href="#genel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>Uyarılar<span id="r-uy"></span></a>
   <div class="bosluk" style="flex:1 1 auto;min-height:24px"></div>
@@ -522,7 +522,7 @@ function cizGenel() {
     const f2 = (son && son.son || []).find(r => r.kaynak === 'f2pool' && r.durum === 'ok');
     const f2e = f2 ? (f2.ek || {}) : null;
     document.getElementById('r-mad').outerHTML = '<span id="r-mad" class="rozet u"' + (offN ? '' : ' hidden') + '>' + offN + '</span>';
-    madH = '<section class="panel" id="madencilik" aria-labelledby="h-mine"><div class="bas"><h2 id="h-mine">Madencilik</h2><span class="k">Toplayıcı ' + esc((mad.timestamp || '').slice(11, 16)) + '</span></div>'
+    madH = '<section class="panel" id="madencilik" aria-labelledby="h-mine"><div class="bas"><h2 id="h-mine">Madencilik</h2><span class="k">Toplayıcı ' + esc((mad.timestamp || '').slice(11, 16)) + ' · <a href="#maden">Ayrıntı</a></span></div>'
       + (agDisi ? '<p class="k" style="margin:0 0 12px;padding:8px 10px;border-radius:6px;background:#EEF1F5;color:#2B3A4F">Toplayıcı saha ağında değil; cihaz durumu okunamıyor.'
         + (sonPay ? ' F2Pool son pay: <b>' + payMetni + '</b>' + (payYas < 15 ? ' (madenciler çalışıyor).' : '.') : '') + '</p>' : '')
       + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">'
@@ -755,6 +755,134 @@ function gunAc(g, kaydir) {
     tr.after(yeni); tr.classList.add('acilmis');
   }
   if (kaydir) tr.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+// ===== Madencilik sayfası: F2Pool cihaz saatlik arşivi (arsiv_cihaz_AAAA-AA.json, saatler UTC) + günlük BTC geliri =====
+const MADEN = { aylar: {}, gelir: null, H: null, yuklendi: 0 };
+let madenSec = { ay: null };
+function madenAyListesi() {
+  const a = [], son = bugunTR().slice(0, 7); let d = new Date(Date.UTC(2026, 4, 1));
+  for (;;) { const k = d.toISOString().slice(0, 7); a.push(k); if (k >= son) break; d.setUTCMonth(d.getUTCMonth() + 1); }
+  return a;
+}
+async function madenYukle(zorla) {
+  if (!zorla && MADEN.H && Date.now() - MADEN.yuklendi < 10 * 60000) return;
+  const aylar = madenAyListesi(), son = aylar[aylar.length - 1];
+  await Promise.all(aylar.filter(a => zorla || !MADEN.aylar[a] || a === son).map(a => al('arsiv_cihaz_' + a + '.json').then(d => { MADEN.aylar[a] = d; }).catch(() => { MADEN.aylar[a] = MADEN.aylar[a] || {}; })));
+  MADEN.gelir = await al('arsiv_f2pool_gelir.json').catch(() => MADEN.gelir || {});
+  const H = {};
+  for (const d of Object.values(MADEN.aylar)) for (const [k, v] of Object.entries(d)) {
+    const t = Date.parse(k.replace(' ', 'T').slice(0, 13) + ':00:00Z'); if (isNaN(t)) continue;
+    const tr = new Date(t + 3 * 3600000).toISOString(), key = tr.slice(0, 10) + ' ' + tr.slice(11, 13);
+    const o = H[key] || (H[key] = {});
+    for (const [c, x] of Object.entries(v || {})) o[c] = Number(x && x.h) || 0;
+  }
+  MADEN.H = H; MADEN.yuklendi = Date.now();
+}
+function madenGun(g) {
+  const r = { g, saat: [], top: 0, calisan: 0, tepe: 0, aktifOrt: 0, veri: 0, cihaz: {} };
+  let akt = 0;
+  for (let h = 0; h < 24; h++) {
+    const o = MADEN.H[g + ' ' + String(h).padStart(2, '0')];
+    if (!o) { r.saat.push(null); continue; }
+    const t = Object.values(o).reduce((a, b) => a + b, 0), n = Object.values(o).filter(x => x > 0).length;
+    r.saat.push({ t, n, o }); r.veri++; r.top += t; if (t > 0) { r.calisan++; akt += n; } r.tepe = Math.max(r.tepe, t);
+    for (const [c, x] of Object.entries(o)) { const z = r.cihaz[c] || (r.cihaz[c] = { ths: 0, s: 0 }); z.ths += x; if (x > 0) z.s++; }
+  }
+  r.ort24 = r.veri ? r.top / r.veri : null; r.ortCalisma = r.calisan ? r.top / r.calisan : null; r.aktifOrt = r.calisan ? akt / r.calisan : 0;
+  const gl = (MADEN.gelir || {})[g]; r.btc = gl ? gl.btc : null;
+  r.verim = r.btc != null && r.top > 0 ? r.btc / (r.top / 24 / 1000) : null; // BTC / PH·gün
+  return r;
+}
+function madenGunleri(ay) {
+  const out = [], [y, m] = ay.split('-').map(Number), n = new Date(Date.UTC(y, m, 0)).getUTCDate(), bugun = bugunTR();
+  for (let d = 1; d <= n; d++) { const g = ay + '-' + String(d).padStart(2, '0'); if (g > bugun) break; const r = madenGun(g); if (r.veri || r.btc != null) out.push(r); }
+  return out;
+}
+const btcY = v => v == null ? '—' : say(v, 6);
+function madenGunAc(g, kaydir) {
+  const tr = document.querySelector('tr[data-mg="' + g + '"]'); if (!tr) return;
+  const s = tr.nextElementSibling;
+  if (s && s.classList.contains('acik')) { s.remove(); tr.classList.remove('acilmis'); if (!kaydir) return; }
+  else {
+    const r = madenGun(g), cihazlar = Object.keys(r.cihaz).sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
+    let h = '<table class="tb"><thead><tr><th class="sol">Saat</th><th class="ayr">Toplam TH/s</th><th>Çalışan cihaz</th><th class="sol ayr">Duran cihazlar (diğerleri çalışırken)</th></tr></thead><tbody>';
+    r.saat.forEach((x, i) => {
+      const s2 = String(i).padStart(2, '0') + ':00';
+      if (!x) { h += '<tr><td class="sol">' + s2 + '</td><td class="sifir ayr" colspan="3">veri yok</td></tr>'; return; }
+      const duran = x.n > 0 ? cihazlar.filter(c => !(x.o[c] > 0)) : [];
+      h += '<tr><td class="sol">' + s2 + '</td><td class="ayr' + (x.t ? '' : ' sifir') + '">' + say(x.t) + '</td><td' + (x.n ? '' : ' class="sifir"') + '>' + x.n + ' / ' + cihazlar.length + '</td><td class="sol ayr">' + (duran.length ? esc(duran.join(', ')) : '') + '</td></tr>';
+    });
+    h += '<tr class="top"><td class="sol">Gün</td><td class="ayr">ort. ' + say(r.ort24) + '</td><td>' + r.calisan + ' saat çalıştı</td><td class="sol ayr">' + (r.btc != null ? 'Gelir ' + btcY(r.btc) + ' BTC' : '') + '</td></tr></tbody></table>';
+    const yeni = document.createElement('tr'); yeni.className = 'acik';
+    yeni.innerHTML = '<td colspan="8" style="padding:6px 0 14px 18px;background:#F8FAFC"><div class="k" style="margin:4px 0 6px">' + tarihK(g) + ' ' + g.slice(0, 4) + ', saatlik (Türkiye saati)</div>' + h + '</td>';
+    tr.after(yeni); tr.classList.add('acilmis');
+  }
+  if (kaydir) tr.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+async function cizMaden() {
+  document.getElementById('baslik').textContent = 'Madencilik';
+  const ic = document.getElementById('icerik');
+  if (!MADEN.H) { document.getElementById('altBaslik').textContent = 'F2Pool arşivi yükleniyor…'; ic.innerHTML = '<div class="panel"><p class="k">F2Pool cihaz arşivi yükleniyor…</p></div>'; }
+  try { await madenYukle(); } catch (e) { ic.innerHTML = '<div class="panel hata">Arşiv okunamadı: ' + esc(e.message || e) + '</div>'; return; }
+  if (location.hash !== '#maden') return;
+  const aylar = madenAyListesi().filter(a => Object.keys(MADEN.H).some(k => k.startsWith(a)) || Object.keys(MADEN.gelir || {}).some(k => k.startsWith(a)));
+  if (!madenSec.ay || !aylar.includes(madenSec.ay)) madenSec.ay = aylar[aylar.length - 1];
+  const ay = madenSec.ay, ayAd = AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4);
+  document.getElementById('altBaslik').textContent = 'F2Pool cihaz arşivi (saatlik, ' + Object.keys(MADEN.H).length + ' saat) ve günlük gelir. Saatler Türkiye saatidir.';
+  document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Ay <select onchange="madenSec.ay=this.value;cizMaden()">' + aylar.slice().reverse().map(a => '<option value="' + a + '"' + (a === ay ? ' selected' : '') + '>' + AYLAR[Number(a.slice(5)) - 1] + ' ' + a.slice(0, 4) + '</option>').join('') + '</select></label><button class="btn koyu" type="button" onclick="madenYukle(true).then(cizMaden)">Yenile</button>';
+  const gunler = madenGunleri(ay);
+  // ay özetleri
+  const ayOzet = a => { const gs = madenGunleri(a); const ths = gs.reduce((t, x) => t + x.top, 0), sa = gs.reduce((t, x) => t + x.veri, 0), cal = gs.reduce((t, x) => t + x.calisan, 0), btc = gs.reduce((t, x) => t + (x.btc || 0), 0), btcG = gs.filter(x => x.btc != null).length;
+    return { a, gun: gs.length, ort: sa ? ths / sa : null, ortCal: cal ? ths / cal : null, cal, sa, btc: btcG ? btc : null, btcG, verim: btcG && ths ? btc / (gs.filter(x => x.btc != null).reduce((t, x) => t + x.top, 0) / 24 / 1000) : null }; };
+  const oz = aylar.map(ayOzet), bu = oz.find(x => x.a === ay) || {};
+  const f2 = (D.son && D.son.son || []).find(r => r.kaynak === 'f2pool'), fe = f2 ? f2.ek || {} : {};
+  const kart = (ad, v, alt) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:22px;font-weight:700">' + v + '</div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
+  let h = '<div class="kartlar5">'
+    + kart(ayAd + ' geliri', bu.btc != null ? btcY(bu.btc) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">BTC</span>' : '—', bu.btcG ? bu.btcG + ' gün' : 'gelir arşivi bekleniyor')
+    + kart('Ortalama hash (24 saat)', say(bu.ort) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s</span>', 'Çalışırken ' + say(bu.ortCal) + ' TH/s')
+    + kart('Çalışma süresi', bu.sa ? '%' + say(bu.cal / bu.sa * 100) : '—', say(bu.cal) + ' / ' + say(bu.sa) + ' saat')
+    + kart('Verim', bu.verim != null ? say(bu.verim * 1e3, 3) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">mBTC/PH·gün</span>' : '—', 'Gelir ÷ ortalama hash')
+    + kart('Şu an (F2Pool)', f2 ? say(fe.hashrate_th) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s</span>' : '—', f2 ? (fe.worker_online ?? '—') + ' / ' + (fe.worker_toplam ?? '—') + ' işçi · bugün ~' + btcY(fe.bugun_tahmini) + ' BTC' : '')
+    + '</div>';
+  // aylar tablosu
+  h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Aylar</h2><span class="k">Aya tıklayınca günleri açılır</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th class="ayr">Gelir (BTC)</th><th>Verim (mBTC/PH·gün)</th><th class="ayr">Ort. hash (TH/s)</th><th>Çalışırken (TH/s)</th><th class="ayr">Çalışma</th><th>Gün</th></tr></thead><tbody>'
+    + oz.slice().reverse().map(x => '<tr' + (x.a === ay ? ' style="background:#EEF3FA;font-weight:600"' : '') + '><td class="sol" data-s="' + x.a + '"><a href="#maden" onclick="madenSec.ay=\'' + x.a + '\';cizMaden();return false">' + AYLAR[Number(x.a.slice(5)) - 1] + ' ' + x.a.slice(0, 4) + '</a></td><td class="ayr">' + btcY(x.btc) + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td><td class="ayr">' + say(x.ort) + '</td><td>' + say(x.ortCal) + '</td><td class="ayr">' + (x.sa ? '%' + say(x.cal / x.sa * 100) : '—') + '</td><td>' + x.gun + '</td></tr>').join('')
+    + '</tbody></table></div></section>';
+  // günlük grafikler
+  const et = gunler.map(x => String(Number(x.g.slice(8))));
+  h += '<section class="panel" style="gap:12px"><div class="bas"><h2>' + ayAd + ', günlük hash</h2><span class="k">Güne tıklayınca 24 saatlik döküm açılır</span></div>'
+    + grafikX({ id: 'mhash', ad: 'Günlük hash', etiket: et, etiketAd: 'Gün', turler: ['cubuk', 'cizgi', 'alan', 'tablo'], birim: 'TH/s', toplam: 'ort', fmt: v => say(v) + ' TH/s',
+      tik: i => "madenGunAc('" + gunler[i].g + "',true)",
+      seriler: [{ ad: 'Ortalama (24 saat)', renk: '#2a78d6', v: gunler.map(x => x.ort24 == null ? null : Math.round(x.ort24)) }, { ad: 'Çalışırken ortalama', renk: '#10233F', tip: 'isaret', v: gunler.map(x => x.ortCalisma == null ? null : Math.round(x.ortCalisma)) }] })
+    + '</section>';
+  if (gunler.some(x => x.btc != null)) h += '<section class="panel" style="gap:12px"><div class="bas"><h2>' + ayAd + ', günlük gelir</h2><span class="k">F2Pool günlük ödeme (UTC günü)</span></div>'
+    + grafikX({ id: 'mbtc', ad: 'Günlük gelir', etiket: et, etiketAd: 'Gün', turler: ['cubuk', 'cizgi', 'tablo'], birim: 'BTC', toplam: 'top', fmt: v => say(v, 6) + ' BTC', eksen: v => say(v, 4),
+      tik: i => "madenGunAc('" + gunler[i].g + "',true)", seriler: [{ ad: 'Gelir', renk: '#eda100', v: gunler.map(x => x.btc) }] }) + '</section>';
+  // günlük tablo
+  h += '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Gün</th><th class="ayr">Ort. hash (24 sa)</th><th>Çalışırken</th><th>En yüksek</th><th class="ayr">Çalışma (saat)</th><th>Ort. cihaz</th><th class="ayr">Gelir (BTC)</th><th>Verim</th></tr></thead><tbody>'
+    + gunler.map(x => '<tr data-mg="' + x.g + '"><td class="sol" data-s="' + x.g + '"><a href="#maden" onclick="madenGunAc(\'' + x.g + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + tarihK(x.g) + '</a>' + (x.veri < 24 ? ' <span class="k">(' + x.veri + ' sa)</span>' : '') + '</td><td class="ayr">' + say(x.ort24) + '</td><td>' + say(x.ortCalisma) + '</td><td>' + say(x.tepe) + '</td><td class="ayr">' + x.calisan + '</td><td>' + say(x.aktifOrt, 1) + '</td><td class="ayr">' + btcY(x.btc) + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td></tr>').join('')
+    + '<tr class="top"><td class="sol">' + ayAd + '</td><td class="ayr">' + say(bu.ort) + '</td><td>' + say(bu.ortCal) + '</td><td></td><td class="ayr">' + say(bu.cal) + '</td><td></td><td class="ayr">' + btcY(bu.btc) + '</td><td>' + (bu.verim != null ? say(bu.verim * 1e3, 3) : '—') + '</td></tr></tbody></table></div><div class="k">Verim: mBTC / PH·gün (gelir ÷ günlük ortalama hash). F2Pool günü UTC\'ye göre kapandığı için gelir ile hash arasında 3 saatlik kayma vardır.</div>';
+  // cihaz tablosu + ısı haritası
+  const cih = {};
+  for (const x of gunler) for (const [c, z] of Object.entries(x.cihaz)) { const o = cih[c] || (cih[c] = { ths: 0, s: 0, gun: {} }); o.ths += z.ths; o.s += z.s; o.gun[x.g] = z; }
+  const siteSaat = gunler.reduce((t, x) => t + x.calisan, 0);
+  const kodlar = Object.keys(cih).sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
+  const ortlar = kodlar.map(c => cih[c].s ? cih[c].ths / cih[c].s : 0).filter(v => v > 0).sort((a, b) => a - b), medOrt = ortlar[Math.floor(ortlar.length / 2)] || 0;
+  let ct = '';
+  for (const c of kodlar) {
+    const o = cih[c], ort = o.s ? o.ths / o.s : 0, cal = siteSaat ? o.s / siteSaat : 0, oran = medOrt ? ort / medOrt : null;
+    const durum = o.s === 0 ? ['Çalışmadı', '#B42318'] : cal < 0.9 ? ['Az çalıştı', '#9A5B00'] : oran != null && oran < 0.9 ? ['Düşük hash', '#9A5B00'] : ['Normal', '#1E7A3C'];
+    ct += '<tr><td class="sol"><b>' + esc(c) + '</b></td><td class="sol" style="color:' + durum[1] + ';font-weight:600">' + durum[0] + '</td><td class="ayr">' + say(ort) + '</td><td>' + (oran != null ? '%' + say(oran * 100) : '—') + '</td><td class="ayr">' + say(o.s) + '</td><td>%' + say(cal * 100) + '</td><td class="ayr">' + say(o.ths / 1000, 1) + '</td></tr>';
+  }
+  h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Cihazlar · ' + ayAd + '</h2><span class="k">' + kodlar.length + ' cihaz · çalışma oranı sahanın çalıştığı ' + say(siteSaat) + ' saate göre</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Cihaz</th><th class="sol">Durum</th><th class="ayr">Ort. hash (çalışırken, TH/s)</th><th>Medyana göre</th><th class="ayr">Çalışma (saat)</th><th>Oran</th><th class="ayr">Toplam (PH·saat)</th></tr></thead><tbody>' + ct + '</tbody></table></div>';
+  // ısı haritası: cihaz × gün, günlük TH·saat / o günün cihaz medyanı
+  const hw = Math.max(6, Math.min(26, Math.floor((grafGen() - 60) / Math.max(1, gunler.length)) - 2));
+  let isi = '<div style="overflow-x:auto"><table style="border-collapse:separate;border-spacing:2px;font-size:12px"><thead><tr><th></th>' + gunler.map((x, i) => '<th style="font-weight:500;color:#4A5A70;width:' + hw + 'px;text-align:center">' + (i % Math.max(1, Math.ceil(gunler.length / 16)) === 0 ? Number(x.g.slice(8)) : '') + '</th>').join('') + '</tr></thead><tbody>';
+  const medGun = gunler.map(x => { const v = Object.values(x.cihaz).map(z => z.ths).filter(v => v > 0).sort((a, b) => a - b); return v[Math.floor(v.length / 2)] || 0; });
+  for (const c of kodlar) isi += '<tr><th style="text-align:right;padding-right:8px;font-weight:600">' + esc(c) + '</th>' + gunler.map((x, j) => { const z = cih[c].gun[x.g], r = z && medGun[j] ? z.ths / medGun[j] : (medGun[j] ? 0 : null); return '<td style="width:' + hw + 'px;height:16px;border-radius:3px;background:' + isiRenk(r) + '" data-tip="' + esc(c + ' · ' + tarihK(x.g) + '\n' + (z ? say(z.ths / Math.max(1, z.s)) + ' TH/s · ' + z.s + ' saat' : 'veri yok') + (r != null ? '\nGünün medyanına göre %' + say(r * 100) : '')) + '"></td>'; }).join('') + '</tr>';
+  isi += '</tbody></table></div><div class="k">Renk: cihazın o günkü toplam hash-saatinin, o gün çalışan cihazların medyanına oranı (koyu kırmızı: çalışmadı).</div>';
+  h += '<h2 style="margin-top:6px">Günlük performans haritası</h2>' + isi + '</section>';
+  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + h + '</div>';
 }
 // ===== İnverter analizi =====
 const INV_KAYNAK = { sungrow: 'Sungrow', inavitas: 'Inavitas', fusionsolar: 'FusionSolar' };
@@ -1076,11 +1204,11 @@ function epCsv() {
 
 function ciz() {
   const h0 = location.hash || '#genel';
-  const sayfa = h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
+  const sayfa = h0 === '#maden' ? 'maden' : h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
   document.querySelectorAll('.nav a[data-sayfa]').forEach(a => a.classList.toggle('aktif', a.dataset.sayfa === sayfa));
-  if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
+  if (sayfa === 'maden') cizMaden(); else if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
 }
-window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias') window.scrollTo(0, 0); } });
+window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias' || location.hash === '#maden') window.scrollTo(0, 0); } });
 
 async function yukle() {
   try {

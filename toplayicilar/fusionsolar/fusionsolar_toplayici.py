@@ -241,8 +241,16 @@ class Web:
                     if self.logged_in():
                         log.info("Giriş OK (otomatik)")
                         return True
+            log.warning("Otomatik giriş 60 sn içinde tamamlanmadı (adres: %s)", p.url)
         except Exception as e:
             log.warning("Otomatik giriş olmadı: %s", e)
+        try:  # tanı için: sayfadaki uyarı metni ve ekran görüntüsü
+            p.screenshot(path=str(DATA / "giris_hata.png"))
+            metin = p.evaluate("() => document.body ? document.body.innerText : ''") or ""
+            (DATA / "giris_hata.txt").write_text(metin[:3000], encoding="utf-8")
+            log.warning("Giriş sayfası metni: %s", " | ".join(x.strip() for x in metin.splitlines() if x.strip())[:400])
+        except Exception:
+            pass
         return False
 
     def call(self, method, url, body=None, _retry=True):

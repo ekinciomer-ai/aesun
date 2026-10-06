@@ -876,28 +876,29 @@ async function cizMaden() {
   if (dg.length) {
     for (const x of dg) { const sh = x.calisan || 0; x.nEff = sh ? Object.values(x.cihaz).reduce((t, z) => t + z.s, 0) / sh : null; x.cihazBasi = x.nEff ? x.btc / x.nEff : null; }
     const pay = (x, i) => x.btc * DAG[i] / DAG_TOP, payP = (v, x, k) => v != null && x[k] != null && x.btc ? x[k] * v / x.btc : null;
-    let dt = '', ayT = null, topl = { btc: 0, tl: 0, usd: 0, a: 0, b: 0, aTl: 0, bTl: 0, aUsd: 0, bUsd: 0 };
-    const satir = (etk, o, cls, nEff, cb) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="sol">' + etk + '</td><td class="ayr">' + btcY(o.btc) + '</td><td>' + (nEff != null ? say(nEff, 1) : '') + '</td><td>' + (cb != null ? btcY(cb) : '') + '</td><td class="ayr">' + btcY(o.a) + '</td><td>' + say(o.aTl) + '</td><td>' + say(o.aUsd) + '</td><td class="ayr">' + btcY(o.b) + '</td><td>' + say(o.bTl) + '</td><td>' + say(o.bUsd) + '</td></tr>';
-    const yeniT = () => ({ btc: 0, tl: 0, usd: 0, a: 0, b: 0, aTl: 0, bTl: 0, aUsd: 0, bUsd: 0 });
-    const ekle = (t, o) => { for (const k in t) t[k] += o[k] || 0; };
-    let ayKod = null;
+    let dt = '', topl = { btc: 0, tl: 0, usd: 0, a: 0, b: 0, aTl: 0, bTl: 0, aUsd: 0, bUsd: 0 };
+    const satir = (etk, o, cls, nEff, cb, ds) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="sol"' + (ds ? ' data-s="' + ds + '"' : '') + '>' + etk + '</td><td class="ayr">' + btcY(o.btc) + '</td><td>' + (nEff != null ? say(nEff, 1) : '') + '</td><td>' + (cb != null ? btcY(cb) : '') + '</td><td class="ayr">' + btcY(o.a) + '</td><td>' + say(o.aTl) + '</td><td>' + say(o.aUsd) + '</td><td class="ayr">' + btcY(o.b) + '</td><td>' + say(o.bTl) + '</td><td>' + say(o.bUsd) + '</td></tr>';
+    const yeniT = () => ({ btc: 0, tl: 0, usd: 0, a: 0, b: 0, aTl: 0, bTl: 0, aUsd: 0, bUsd: 0, gun: 0, nEff: 0, nG: 0 });
+    const ekle = (t, o) => { for (const k of ['btc', 'tl', 'usd', 'a', 'b', 'aTl', 'bTl', 'aUsd', 'bUsd']) t[k] += o[k] || 0; };
+    const aylik = {};
     for (const x of dg) {
-      if (ayKod && x.g.slice(0, 7) !== ayKod) { dt += satir(AYLAR[Number(ayKod.slice(5)) - 1] + ' toplamı', ayT, 'top'); }
-      if (x.g.slice(0, 7) !== ayKod) { ayKod = x.g.slice(0, 7); ayT = yeniT(); }
       const a = pay(x, 0), b = pay(x, 1);
       const o = { btc: x.btc, tl: x.tl || 0, usd: x.usd || 0, a, b, aTl: payP(a, x, 'tl'), bTl: payP(b, x, 'tl'), aUsd: payP(a, x, 'usd'), bUsd: payP(b, x, 'usd') };
-      ekle(ayT, o); ekle(topl, o);
-      dt += satir(tarihK(x.g) + (x.havuzdan || !x.veri ? ' <span class="k">(saatlik veri yok)</span>' : ''), o, '', x.nEff, x.cihazBasi);
+      const at = aylik[x.g.slice(0, 7)] || (aylik[x.g.slice(0, 7)] = yeniT());
+      ekle(at, o); ekle(topl, o); at.gun++; if (x.nEff != null) { at.nEff += x.nEff; at.nG++; }
+      dt += satir(tarihK(x.g) + ' ' + x.g.slice(0, 4) + (x.havuzdan || !x.veri ? ' <span class="k">(saatlik veri yok)</span>' : ''), o, '', x.nEff, x.cihazBasi, x.g);
     }
-    if (ayKod) dt += satir(AYLAR[Number(ayKod.slice(5)) - 1] + ' toplamı', ayT, 'top');
-    dt += satir('Genel toplam', topl, 'top');
+    let at = '';
+    for (const [ay, t] of Object.entries(aylik).sort()) { const n = t.nG ? t.nEff / t.nG : null; at += satir(AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4) + ' <span class="k">(' + t.gun + ' gün)</span>', t, '', n, n ? t.btc / t.gun / n : null, ay); }
+    at += satir('Genel toplam <span class="k">(' + dg.length + ' gün)</span>', topl, 'top');
+    const bas2 = (ilk) => '<thead><tr><th class="sol" rowspan="2">' + ilk + '</th><th class="ayr" rowspan="2">Gelir (BTC)</th><th rowspan="2" title="Çalışma saatine göre eşdeğer çalışan cihaz sayısı (ayda: günlük ortalama)">Çalışan cihaz</th><th rowspan="2" title="Günlük gelir ÷ çalışan cihaz (ayda: günlük ortalama)">Cihaz başı / gün (BTC)</th><th class="ayr" colspan="3" style="text-align:center">16 cihaz</th><th class="ayr" colspan="3" style="text-align:center">13 cihaz</th></tr><tr><th class="ayr">BTC</th><th>₺</th><th>$</th><th class="ayr">BTC</th><th>₺</th><th>$</th></tr></thead>';
     const kartD = (ad, btc, tl, usd) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:22px;font-weight:700">' + btcY(btc) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">BTC</span></div><div class="k">' + say(tl) + ' ₺ · $' + say(usd) + '</div></div>';
     h += '<section class="panel" id="dagilim" style="gap:12px"><div class="bas"><h2>Gelir dağılımı</h2><span class="k">' + tarihK(DAG_BAS) + ' ' + DAG_BAS.slice(0, 4) + ' – ' + tarihK(dg[dg.length - 1].g) + ', ' + dg.length + ' gün</span></div>'
       + '<div class="kartlar5" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">' + kartD('Toplam gelir', topl.btc, topl.tl, topl.usd) + kartD('16 cihaz payı (16/29)', topl.a, topl.aTl, topl.aUsd) + kartD('13 cihaz payı (13/29)', topl.b, topl.bTl, topl.bUsd) + '</div>'
       + grafikX({ id: 'mdagilim', ad: 'Gelir dağılımı', etiket: dg.map(x => tarihK(x.g)), etiketAd: 'Gün', turler: ['yigin', 'cubuk', 'cizgi', 'tablo'], birim: 'BTC', toplam: 'top', fmt: v => say(v, 6) + ' BTC', eksen: v => say(v, 4),
           seriler: [{ ad: '16 cihaz', renk: '#2a78d6', grup: 'g', v: dg.map(x => pay(x, 0)) }, { ad: '13 cihaz', renk: '#1baf7a', grup: 'g', v: dg.map(x => pay(x, 1)) }] })
-      + '<div class="tablo-kutu" style="max-height:520px;overflow:auto"><table class="tb"><thead><tr><th class="sol" rowspan="2">Gün</th><th class="ayr" rowspan="2">Günlük gelir (BTC)</th><th rowspan="2" title="Çalışma saatine göre eşdeğer çalışan cihaz sayısı">Çalışan cihaz</th><th rowspan="2" title="Günlük gelir ÷ çalışan cihaz">Cihaz başı (BTC)</th><th class="ayr" colspan="3" style="text-align:center">16 cihaz</th><th class="ayr" colspan="3" style="text-align:center">13 cihaz</th></tr>'
-      + '<tr><th class="ayr">BTC</th><th>₺</th><th>$</th><th class="ayr">BTC</th><th>₺</th><th>$</th></tr></thead><tbody>' + dt + '</tbody></table></div>'
+      + '<h3 style="margin:4px 0 0;font-size:16px">Aylık</h3><div class="tablo-kutu"><table class="tb">' + bas2('Ay') + '<tbody>' + at + '</tbody></table></div>'
+      + '<h3 style="margin:8px 0 0;font-size:16px">Gün gün</h3><div class="tablo-kutu" style="max-height:560px;overflow:auto"><table class="tb">' + bas2('Gün') + '<tbody>' + dt + '</tbody></table></div>'
       + '<div class="k">Hangi cihazın hangi gruba ait olduğu bilinmediği için her günün geliri 16/29 ve 13/29 oranında bölünür. "Çalışan cihaz", her cihazın o gün sahanın çalıştığı saatlerin ne kadarında çalıştığına göre eşdeğer sayıdır; "cihaz başı" günlük gelirin bu sayıya bölümüdür. ₺ ve $ o günün BTC kapanış fiyatıyla.</div></section>';
   }
   // günlük grafikler

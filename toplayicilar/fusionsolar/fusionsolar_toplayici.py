@@ -85,7 +85,7 @@ DC_KWP = {"NE=59224704": 1230.755,   # Tek Yıldız-1 / Sera-1
           "NE=73686040": 1035.0}     # Tek Yıldız-2 / Sera-2
 KISA = {"NE=59224704": "Sera-1", "NE=73686040": "Sera-2"}
 
-PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600}
+PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600}
 
 INV_SIG = {  # device-realtime-data sinyal id -> alan
     "10018": "aktif_kw", "10019": "reaktif_kvar", "10032": "gunluk_kwh", "10029": "toplam_kwh",
@@ -287,6 +287,7 @@ CREATE TABLE IF NOT EXISTS inverter_real(ts TEXT, dn TEXT, station_dn TEXT, akti
   PRIMARY KEY(ts, dn));
 CREATE TABLE IF NOT EXISTS station_5min(dn TEXT, t TEXT, power_kw REAL, PRIMARY KEY(dn, t));
 CREATE TABLE IF NOT EXISTS station_hour(dn TEXT, hour TEXT, kwh REAL, PRIMARY KEY(dn, hour));
+CREATE TABLE IF NOT EXISTS inverter_day(dn TEXT, date TEXT, kwh REAL, PRIMARY KEY(dn, date));
 CREATE TABLE IF NOT EXISTS station_day(dn TEXT, date TEXT, kwh REAL, spec_kwh_kwp REAL,
   PRIMARY KEY(dn, date));
 CREATE TABLE IF NOT EXISTS alarms(csn TEXT PRIMARY KEY, station TEXT, device TEXT, name TEXT,
@@ -545,6 +546,19 @@ class Collector:
                 if st in veri["santraller"] and kwh is not None:
                     inv = veri["santraller"][st]["inv"].setdefault(dn, {"ad": invad.get(dn, (dn,))[0], "gun": {}, "ay": {}})
                     inv["gun"][d] = round(kwh, 1)
+            # FusionSolar inverter geçmişinden (device-history-data, 10032 günlük enerji) gelen günler önceliklidir
+            for dn, d, kwh in self.con.execute("SELECT dn, date, kwh FROM inverter_day WHERE substr(date,1,4)=? AND date<?",
+                                               (str(yil), bugun)):
+                st = invad.get(dn, (None, None))[1]
+                if st in veri["santraller"] and kwh is not None:
+                    inv = veri["santraller"][st]["inv"].setdefault(dn, {"ad": invad.get(dn, (dn,))[0], "gun": {}, "ay": {}})
+                    inv["gun"][d] = round(kwh, 1)
+            for sv in veri["santraller"].values():
+                for inv in sv["inv"].values():
+                    ay = {}
+                    for d, k in inv["gun"].items():
+                        ay[d[:7]] = round(ay.get(d[:7], 0) + k, 1)
+                    inv["ay"] = ay
             if not any(s["gun"] for s in veri["santraller"].values()):
                 continue
             # GitHub'daki mevcut dosyayla birleştir: başka bilgisayarda toplanmış geçmiş kaybolmasın
@@ -607,6 +621,59 @@ class Collector:
             log.error("%s: %s", f.__name__, e)
         return False
 
+    def inv_gun(self, d: dt.date):
+        """Bir günün inverter bazında üretimi: FusionSolar 5 dk geçmişinde 10032 (günlük enerji) sinyalinin en büyük değeri."""
+        n = 0
+        for dn in self.inv:
+            r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=10032&deviceDn={quote(dn)}"
+                                     f"&date={midnight_ms(d)}&_={int(time.time()*1000)}")
+            liste = ((r.get("data") or {}).get("10032") or {}).get("pmDataList") or []
+            v = [num(p.get("counterValue")) for p in liste]
+            v = [x for x in v if x is not None and 0 <= x < 1e9]
+            if v:
+                self.con.execute("INSERT OR REPLACE INTO inverter_day VALUES(?,?,?)", (dn, d.isoformat(), round(max(v), 2)))
+                n += 1
+            time.sleep(0.4)
+        self.con.commit()
+        return n
+
+    def invgun(self):
+        """Sürekli modda: dün ve önceki gün (Pi kapalı kalmış olsa bile tam değer)."""
+        bugun = dt.date.today()
+        for i in (1, 2):
+            self.inv_gun(bugun - dt.timedelta(days=i))
+        log.info("İnverter günlük geçmişi: dün ve önceki gün OK")
+
+    def inv_gecmis(self, gun=None):
+        """Yıl başından (ya da GUN gün geriden) bugüne inverter günlük geçmişi; olan günleri atlar, 5 boş günde durur."""
+        self.meta()
+        bugun = dt.date.today()
+        bas = bugun - dt.timedelta(days=gun) if gun else dt.date(bugun.year, 1, 1)
+        olan = {(dn, d) for dn, d in self.con.execute("SELECT dn, date FROM inverter_day")}
+        d, bos, yillar = bugun - dt.timedelta(days=1), 0, set()
+        while d >= bas:
+            if all((dn, d.isoformat()) in olan for dn in self.inv):
+                n = len(self.inv)
+            else:
+                try:
+                    n = self.inv_gun(d)
+                except RuntimeError as e:
+                    log.warning("%s: %s", d, e)
+                    n = 0
+            log.info("İnverter geçmişi %s: %d/%d inverter", d, n, len(self.inv))
+            if n:
+                bos, yillar = 0, yillar | {d.year}
+            else:
+                bos += 1
+                if bos >= 5:
+                    log.info("5 gün üst üste veri yok: geçmiş burada bitiyor")
+                    break
+            if d.day == 1 and self.gh_token:
+                self.gecmis_yaz(sorted(yillar))  # ay ay ilerleme panele düşsün
+            d -= dt.timedelta(days=1)
+        if self.gh_token and yillar:
+            self.gecmis_yaz(sorted(yillar))
+
     def kesif_inv(self):
         """Tanı: inverter bazında geçmiş günlük üretim veren uç noktayı bulmak için adayları dener ve arayüzün ağ isteklerini yazar."""
         self.meta()
@@ -665,7 +732,7 @@ class Collector:
 
     def forever(self):
         jobs = [("meta", self.meta), ("station", self.stations), ("inverter", self.inverters),
-                ("alarm", self.alarms), ("curve", self.curve), ("month", self.month)]
+                ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun)]
         nxt = {k: 0.0 for k, _ in jobs}
         while True:
             t = time.time()
@@ -686,6 +753,7 @@ def main():
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--backfill", type=int, metavar="GUN")
     ap.add_argument("--gecmis", action="store_true", help="şebeke bağlantısından bugüne günlük üretim + GitHub")
+    ap.add_argument("--inv-gecmis", type=int, nargs="?", const=0, metavar="GUN", help="inverter günlük geçmişi (varsayılan yıl başından) + GitHub")
     ap.add_argument("--kesif-inv", action="store_true", help="tanı: inverter geçmiş uç noktalarını dener")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s",
@@ -705,6 +773,8 @@ def main():
             c.backfill(a.backfill)
         elif a.gecmis:
             c.gecmis()
+        elif a.inv_gecmis is not None:
+            c.inv_gecmis(a.inv_gecmis or None)
         elif a.kesif_inv:
             c.kesif_inv()
         else:

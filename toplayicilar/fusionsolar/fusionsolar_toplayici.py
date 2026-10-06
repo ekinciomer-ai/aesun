@@ -287,7 +287,7 @@ CREATE TABLE IF NOT EXISTS inverter_real(ts TEXT, dn TEXT, station_dn TEXT, akti
   PRIMARY KEY(ts, dn));
 CREATE TABLE IF NOT EXISTS station_5min(dn TEXT, t TEXT, power_kw REAL, PRIMARY KEY(dn, t));
 CREATE TABLE IF NOT EXISTS station_hour(dn TEXT, hour TEXT, kwh REAL, PRIMARY KEY(dn, hour));
-CREATE TABLE IF NOT EXISTS inverter_day(dn TEXT, date TEXT, kwh REAL, PRIMARY KEY(dn, date));
+CREATE TABLE IF NOT EXISTS inverter_gun(dn TEXT, date TEXT, kwh REAL, PRIMARY KEY(dn, date));
 CREATE TABLE IF NOT EXISTS station_day(dn TEXT, date TEXT, kwh REAL, spec_kwh_kwp REAL,
   PRIMARY KEY(dn, date));
 CREATE TABLE IF NOT EXISTS alarms(csn TEXT PRIMARY KEY, station TEXT, device TEXT, name TEXT,
@@ -547,7 +547,7 @@ class Collector:
                     inv = veri["santraller"][st]["inv"].setdefault(dn, {"ad": invad.get(dn, (dn,))[0], "gun": {}, "ay": {}})
                     inv["gun"][d] = round(kwh, 1)
             # FusionSolar inverter geçmişinden (device-history-data, 30016 Günün verimi) gelen günler önceliklidir
-            for dn, d, kwh in self.con.execute("SELECT dn, date, kwh FROM inverter_day WHERE substr(date,1,4)=? AND date<?",
+            for dn, d, kwh in self.con.execute("SELECT dn, date, kwh FROM inverter_gun WHERE substr(date,1,4)=? AND date<?",
                                                (str(yil), bugun)):
                 st = invad.get(dn, (None, None))[1]
                 if st in veri["santraller"] and kwh is not None:
@@ -622,16 +622,22 @@ class Collector:
         return False
 
     def inv_gun(self, d: dt.date):
-        """Bir günün inverter bazında üretimi: FusionSolar 5 dk geçmişinde 30016 "Günün verimi" (kWh) sinyalinin en büyük değeri."""
+        """Bir günün inverter bazında üretimi: 30016 "Günün verimi" (kWh) sinyalinin o günkü en büyük değeri.
+        Not: device-history-data, verilen tarihten BİR ÖNCEKİ günü döndürüyor; bu yüzden d+1 istenir ve noktalar
+        kendi zaman damgalarına göre güne ayrılır."""
         n = 0
         for dn in self.inv:
             r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds=30016&deviceDn={quote(dn)}"
-                                     f"&date={midnight_ms(d)}&_={int(time.time()*1000)}")
-            liste = ((r.get("data") or {}).get("30016") or {}).get("pmDataList") or []
-            v = [num(p.get("counterValue")) for p in liste]
-            v = [x for x in v if x is not None and 0 <= x < 1e9]
-            if v:
-                self.con.execute("INSERT OR REPLACE INTO inverter_day VALUES(?,?,?)", (dn, d.isoformat(), round(max(v), 2)))
+                                     f"&date={midnight_ms(d + dt.timedelta(days=1))}&_={int(time.time()*1000)}")
+            gunluk = {}
+            for p in ((r.get("data") or {}).get("30016") or {}).get("pmDataList") or []:
+                v = num(p.get("counterValue"))
+                if v is None or not (0 <= v < 1e9) or p.get("startTime") is None:
+                    continue
+                yerel = dt.datetime.fromtimestamp(int(p["startTime"]) + int(p.get("timeZoneOffset") or 180) * 60, dt.timezone.utc).date()
+                gunluk[yerel] = max(gunluk.get(yerel, 0), v)
+            if d in gunluk:
+                self.con.execute("INSERT OR REPLACE INTO inverter_gun VALUES(?,?,?)", (dn, d.isoformat(), round(gunluk[d], 2)))
                 n += 1
             time.sleep(0.4)
         self.con.commit()
@@ -649,7 +655,7 @@ class Collector:
         self.meta()
         bugun = dt.date.today()
         bas = bugun - dt.timedelta(days=gun) if gun else dt.date(bugun.year, 1, 1)
-        olan = {(dn, d) for dn, d in self.con.execute("SELECT dn, date FROM inverter_day")}
+        olan = {(dn, d) for dn, d in self.con.execute("SELECT dn, date FROM inverter_gun")}
         d, bos, yillar = bugun - dt.timedelta(days=1), 0, set()
         while d >= bas:
             if all((dn, d.isoformat()) in olan for dn in self.inv):

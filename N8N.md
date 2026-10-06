@@ -103,4 +103,4 @@ sudo systemctl daemon-reload && sudo systemctl enable --now aesun-osos.timer
 - Ana döngü: gündüz 30 dk (05:00–20:30), gece saatlik (21:00–04:00). OSOS alt akışı her turda yalnız GitHub dosyasını okur.
 - Pi nabzı: `pi/nabiz.py` her 10 dk `epias-ptf/n8n/pi_nabiz.json`'a yazar; Ana döngü bunu `aesun_nabiz`'e işler. "Pi nabız + canlı veri" webhook'u artık çağrılmıyor.
 - OSOS: `osos_toplayici.py` yalnız GitHub'a yazar; n8n "OSOS veri alıcı" webhook'una gönderim `AESUN_WEBHOOK` yazılmadıkça kapalı.
-- F2Pool: `antminer_panel.py` (her dakika) ve GitHub Actions `arsiv.yml` (saatlik) n8n dışında çalışıyor.
+- F2Pool: Ana döngü her turda alt · F2Pool ile hesap özeti + işçi listesini aesun_son.json'a yazar (panel F2Pool kartı). Ayrıca `antminer_panel.py` (Pi) ve GitHub Actions `arsiv.yml` (arşiv) çalışır.

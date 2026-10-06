@@ -680,6 +680,89 @@ class Collector:
         if self.gh_token and yillar:
             self.gecmis_yaz(sorted(yillar))
 
+    def _gecmis_sinyal(self, dn, ids, d):
+        """d günü için birden fazla sinyalin 5 dk geçmişi: {id: [(yerel_datetime, değer)]} (uç nokta bir önceki günü döndürdüğü için d+1 istenir)."""
+        sonuc = {}
+        def al(liste):
+            r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-history-data?signalIds={','.join(map(str, liste))}"
+                                     f"&deviceDn={quote(dn)}&date={midnight_ms(d + dt.timedelta(days=1))}&_={int(time.time()*1000)}")
+            for k, v in (r.get("data") or {}).items():
+                noktalar = []
+                for p in (v or {}).get("pmDataList") or []:
+                    x = num(p.get("counterValue"))
+                    if x is None or abs(x) >= 1e9 or p.get("startTime") is None:
+                        continue
+                    t = dt.datetime.fromtimestamp(int(p["startTime"]) + int(p.get("timeZoneOffset") or 180) * 60, dt.timezone.utc).replace(tzinfo=None)
+                    if t.date() == d:
+                        noktalar.append((t, x))
+                sonuc[str(k)] = noktalar
+        try:
+            al(ids)
+        except RuntimeError:
+            sonuc = {}
+        eksik = [i for i in ids if str(i) not in sonuc]
+        for i in eksik:  # çoklu istek desteklenmiyorsa tek tek
+            try:
+                al([i])
+            except RuntimeError as e:
+                log.warning("%s sinyal %s: %s", dn, i, e)
+            time.sleep(0.2)
+        return sonuc
+
+    def string_analiz(self, gun=7):
+        """Her inverterin PV girişleri (string) için akım/gerilim analizi; son GUN tam günü; sonuç inverter/fusionsolar_string.json."""
+        self.meta()
+        bugun = dt.date.today()
+        gunler = [bugun - dt.timedelta(days=i) for i in range(gun, 0, -1)]
+        sonuc = {"guncellendi": dt.datetime.now().astimezone().isoformat(timespec="seconds"), "gunler": [g.isoformat() for g in gunler], "inverterler": {}}
+        for dn, meta in self.inv.items():
+            r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-statistics-signal?deviceDn={quote(dn)}&_={int(time.time()*1000)}")
+            sig = {int(x["id"]): x.get("name", "") for x in ((r.get("data") or {}).get("signalList") or [])}
+            pv = sorted(n for n in range(1, 41) if 31002 + 3 * (n - 1) in sig)
+            ids = [31002 + 3 * (n - 1) for n in pv] + sorted({31001 + 3 * (n - 1) for n in pv}) + [30014]
+            st = {n: {"pv": n, "ah": [], "tepe_a": 0.0, "tepe_v": 0.0} for n in pv}
+            kwh = []
+            for d in gunler:
+                h = self._gecmis_sinyal(dn, ids, d)
+                for n in pv:
+                    a = [x for _, x in h.get(str(31002 + 3 * (n - 1)), [])]
+                    v = [x for _, x in h.get(str(31001 + 3 * (n - 1)), [])]
+                    st[n]["ah"].append(round(sum(max(0.0, x) for x in a) * 5 / 60, 1) if a else None)
+                    st[n]["tepe_a"] = max(st[n]["tepe_a"], max(a) if a else 0)
+                    st[n]["tepe_v"] = max(st[n]["tepe_v"], max(v) if v else 0)
+                kwh.append(round(sum(max(0.0, x) for _, x in h.get("30014", [])) * 5 / 60, 1) if h.get("30014") else None)
+                time.sleep(0.3)
+            sonuc["inverterler"][dn] = {"ad": meta["name"], "santral": self.st.get(meta["station_dn"], {}).get("kisa", meta["station_dn"]),
+                                        "ac_kwh": kwh, "stringler": list(st.values())}
+            log.info("String analizi: %s (%d giriş)", meta["name"], len(pv))
+        # değerlendirme: santral bazında aktif stringlerin günlük Ah medyanına oran
+        for kisa in {v["santral"] for v in sonuc["inverterler"].values()}:
+            invs = [v for v in sonuc["inverterler"].values() if v["santral"] == kisa]
+            for i in range(len(gunler)):
+                vals = sorted(x["ah"][i] for v in invs for x in v["stringler"] if x["ah"][i] and x["tepe_a"] >= 1)
+                med = vals[len(vals) // 2] if vals else 0
+                for v in invs:
+                    for x in v["stringler"]:
+                        x.setdefault("oran", []).append(round(x["ah"][i] / med, 3) if med and x["ah"][i] is not None else None)
+            for v in invs:
+                for x in v["stringler"]:
+                    o = sorted(y for y in x["oran"] if y is not None)
+                    x["oran_medyan"] = o[len(o) // 2] if o else None
+                    x["durum"] = ("bos" if x["tepe_a"] < 1 else "dusuk" if (x["oran_medyan"] or 0) < 0.85
+                                  else "zayif" if (x["oran_medyan"] or 0) < 0.93 else "normal")
+        ozet = {}
+        for v in sonuc["inverterler"].values():
+            for x in v["stringler"]:
+                ozet[x["durum"]] = ozet.get(x["durum"], 0) + 1
+        sonuc["ozet"] = ozet
+        print("== String analizi", gunler[0], "–", gunler[-1], ozet)
+        for v in sorted(sonuc["inverterler"].values(), key=lambda z: (z["santral"], z["ad"])):
+            kotu = [f"PV{x['pv']}:{x['durum']}({x['oran_medyan']})" for x in v["stringler"] if x["durum"] != "normal"]
+            print(f"{v['santral']:7} {v['ad']:14} {len(v['stringler']):2} giriş | " + (", ".join(kotu) or "hepsi normal"))
+        (DATA / "string_analiz.json").write_text(json.dumps(sonuc, ensure_ascii=False), encoding="utf-8")
+        if self.gh_token:
+            self.gh_put("inverter/fusionsolar_string.json", sonuc, "String analizi FusionSolar")
+
     def kesif_inv(self):
         """Tanı: inverterin geçmişi tutulan sinyallerini listeler ve dün için hangisinde veri olduğunu gösterir."""
         self.meta()
@@ -743,6 +826,7 @@ def main():
     ap.add_argument("--backfill", type=int, metavar="GUN")
     ap.add_argument("--gecmis", action="store_true", help="şebeke bağlantısından bugüne günlük üretim + GitHub")
     ap.add_argument("--inv-gecmis", type=int, nargs="?", const=0, metavar="GUN", help="inverter günlük geçmişi (varsayılan yıl başından) + GitHub")
+    ap.add_argument("--string-analiz", type=int, nargs="?", const=7, metavar="GUN", help="PV girişi (string) akım/gerilim analizi, son GUN gün")
     ap.add_argument("--kesif-inv", action="store_true", help="tanı: inverter geçmiş uç noktalarını dener")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s",
@@ -764,6 +848,8 @@ def main():
             c.gecmis()
         elif a.inv_gecmis is not None:
             c.inv_gecmis(a.inv_gecmis or None)
+        elif a.string_analiz:
+            c.string_analiz(a.string_analiz)
         elif a.kesif_inv:
             c.kesif_inv()
         else:

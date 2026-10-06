@@ -1,13 +1,27 @@
 #!/usr/bin/env bash
 # AEMonitoring — Raspberry Pi kurulumu (tek komut):
 #   curl -fsSL https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/pi/kur.sh | bash
-# Yapar: depoyu ~/aesun'a indirir/günceller, ayar dosyalarını sorarak oluşturur,
-# OSOS toplayıcıyı (her saat xx:10) ve Pi nabzını (10 dk) systemd ile kurar, ilk denemeyi çalıştırır.
-set -euo pipefail
+# sudo şifresi varsa systemd, yoksa kullanıcı crontab'ı ile kurar (şifre gerekmez).
+set -uo pipefail
 KULLANICI="$(id -un)"; EV="$HOME"; KOK="$EV/aesun"
 echo "== AEMonitoring Pi kurulumu ($KULLANICI, $KOK)"
-sudo apt-get update -qq && sudo apt-get install -y -qq git python3 python3-requests curl >/dev/null
-if [ -d "$KOK/.git" ]; then git -C "$KOK" pull -q; else git clone -q https://github.com/ekinciomer-ai/aesun "$KOK"; fi
+SUDO=0; sudo -n true 2>/dev/null && SUDO=1
+[ "$SUDO" = 1 ] && echo "sudo: var (systemd ile kurulacak)" || echo "sudo: şifresiz yetki yok, crontab ile kurulacak (şifre gerekmez)"
+
+# Kod
+if command -v git >/dev/null; then
+  if [ -d "$KOK/.git" ]; then git -C "$KOK" pull -q; else git clone -q https://github.com/ekinciomer-ai/aesun "$KOK"; fi
+else
+  mkdir -p "$KOK" && curl -fsSL https://github.com/ekinciomer-ai/aesun/archive/refs/heads/main.tar.gz | tar xz -C "$KOK" --strip-components=1
+fi
+# Python ve requests
+PY=python3
+if ! $PY -c "import requests" 2>/dev/null; then
+  if [ -x "$EV/SAHA/venv/bin/python" ] && "$EV/SAHA/venv/bin/python" -c "import requests" 2>/dev/null; then PY="$EV/SAHA/venv/bin/python"
+  elif [ "$SUDO" = 1 ]; then sudo apt-get install -y -qq python3-requests >/dev/null
+  else $PY -m pip install --user -q --break-system-packages requests || $PY -m pip install --user -q requests; fi
+fi
+echo "python: $PY"
 
 # OSOS ayarları
 mkdir -p "$EV/.aesun"; ENV="$EV/.aesun/osos.env"
@@ -20,25 +34,27 @@ if [ ! -s "$ENV" ]; then
   printf 'OSOS_KULLANICI=%s\nOSOS_SIFRE=%s\nGITHUB_TOKEN=%s\nAESUN_ANAHTAR=%s\n' "$U" "$S" "$G" "$A" > "$ENV"
   chmod 600 "$ENV"
 fi
-# Pi nabzı aynı anahtarı kullanır
 if ! grep -q '^AESUN_PI_ANAHTAR=' "$KOK/env.txt" 2>/dev/null; then
   A="$(grep '^AESUN_ANAHTAR=' "$ENV" | cut -d= -f2-)"
-  printf 'AESUN_PI_ANAHTAR=%s\nAESUN_SERVISLER="aesun-osos.timer aesun-nabiz.timer"\n' "$A" >> "$KOK/env.txt"; chmod 600 "$KOK/env.txt"
+  printf 'AESUN_PI_ANAHTAR=%s\nAESUN_SERVISLER="osos altminer"\n' "$A" >> "$KOK/env.txt"; chmod 600 "$KOK/env.txt"
 fi
 chmod +x "$KOK/pi/nabiz.sh"
 
-# systemd birimleri (kullanıcı adı ve klasöre göre)
-for b in aesun-osos.service aesun-osos.timer aesun-nabiz.service aesun-nabiz.timer; do
-  sed -e "s#/home/pi/aesun#$KOK#g" -e "s#^User=pi#User=$KULLANICI#" "$KOK/pi/$b" | sudo tee "/etc/systemd/system/$b" >/dev/null
-done
-grep -q '^User=' /etc/systemd/system/aesun-nabiz.service || sudo sed -i "/^\[Service\]/a User=$KULLANICI" /etc/systemd/system/aesun-nabiz.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now aesun-osos.timer aesun-nabiz.timer
+if [ "$SUDO" = 1 ]; then
+  for b in aesun-osos.service aesun-osos.timer aesun-nabiz.service aesun-nabiz.timer; do
+    sed -e "s#/home/pi/aesun#$KOK#g" -e "s#^User=pi#User=$KULLANICI#" -e "s#/usr/bin/python3#$PY#" "$KOK/pi/$b" | sudo tee "/etc/systemd/system/$b" >/dev/null
+  done
+  grep -q '^User=' /etc/systemd/system/aesun-nabiz.service || sudo sed -i "/^\[Service\]/a User=$KULLANICI" /etc/systemd/system/aesun-nabiz.service
+  sudo systemctl daemon-reload && sudo systemctl enable --now aesun-osos.timer aesun-nabiz.timer
+else
+  ( crontab -l 2>/dev/null | grep -v 'aesun/' ;
+    echo "10 * * * * $PY $KOK/toplayicilar/osos_toplayici.py >> $KOK/osos.log 2>&1";
+    echo "*/10 * * * * $KOK/pi/nabiz.sh >> $KOK/nabiz.log 2>&1" ) | crontab -
+  echo "crontab:"; crontab -l | grep aesun/
+fi
 
 echo "-- İlk OSOS denemesi (son 2 gün)"
-python3 "$KOK/toplayicilar/osos_toplayici.py" --gun 2 || true
+$PY "$KOK/toplayicilar/osos_toplayici.py" --gun 2
 echo "-- Nabız"
-sudo systemctl start aesun-nabiz.service && cat "$KOK/onbellek/kaynak.txt" 2>/dev/null || true
-echo
-systemctl list-timers 'aesun-*' --no-pager
+"$KOK/pi/nabiz.sh" && cat "$KOK/onbellek/kaynak.txt"
 echo "== Bitti. Kayıt: $KOK/osos.log  |  Güncelleme: bu komutu tekrar çalıştırın."

@@ -30,16 +30,11 @@ if [ ! -s "$ENV" ]; then
   read -rp  "OSOS kullanıcı adı: " U </dev/tty
   read -rsp "OSOS şifresi: " S </dev/tty; echo
   read -rsp "GitHub token (epias-ptf, Contents: Read and write): " G </dev/tty; echo
-  read -rsp "Pi anahtarı (n8n 'aesun Pi anahtarı'; bilmiyorsanız boş bırakıp Enter): " A </dev/tty; echo
-  printf 'OSOS_KULLANICI=%s\nOSOS_SIFRE=%s\nGITHUB_TOKEN=%s\nAESUN_ANAHTAR=%s\n' "$U" "$S" "$G" "$A" > "$ENV"
+  printf 'OSOS_KULLANICI=%s\nOSOS_SIFRE=%s\nGITHUB_TOKEN=%s\n' "$U" "$S" "$G" > "$ENV"
   chmod 600 "$ENV"
 fi
-A="$(grep '^AESUN_ANAHTAR=' "$ENV" | cut -d= -f2-)"
-NABIZ=1; [ -z "$A" ] && NABIZ=0 && echo "Pi anahtarı boş: nabız şimdilik kurulmuyor (sonra bu komutu tekrar çalıştırın)."
-if [ "$NABIZ" = 1 ] && ! grep -q '^AESUN_PI_ANAHTAR=..' "$KOK/env.txt" 2>/dev/null; then
-  sed -i '/^AESUN_PI_ANAHTAR=/d;/^AESUN_SERVISLER=/d' "$KOK/env.txt" 2>/dev/null
-  printf 'AESUN_PI_ANAHTAR=%s\nAESUN_SERVISLER="osos altminer"\n' "$A" >> "$KOK/env.txt"; chmod 600 "$KOK/env.txt"
-fi
+G="$(grep '^GITHUB_TOKEN=' "$ENV" | cut -d= -f2-)"
+NABIZ=1; [ -z "$G" ] && NABIZ=0 && echo "GitHub token boş: nabız kurulmuyor."
 chmod +x "$KOK/pi/nabiz.sh"
 
 if [ "$SUDO" = 1 ]; then
@@ -49,7 +44,7 @@ if [ "$SUDO" = 1 ]; then
   grep -q '^User=' /etc/systemd/system/aesun-nabiz.service || sudo sed -i "/^\[Service\]/a User=$KULLANICI" /etc/systemd/system/aesun-nabiz.service
   sudo systemctl daemon-reload && sudo systemctl enable --now aesun-osos.timer aesun-nabiz.timer
 else
-  ( crontab -l 2>/dev/null | grep -v 'aesun/' ;
+  ( crontab -l 2>/dev/null | grep -v -e 'osos_toplayici.py' -e 'pi/nabiz.sh' ;
     echo "10 * * * * $PY $KOK/toplayicilar/osos_toplayici.py >> $KOK/osos.log 2>&1";
     [ "$NABIZ" = 1 ] && echo "*/10 * * * * $KOK/pi/nabiz.sh >> $KOK/nabiz.log 2>&1" ) | crontab -
   echo "crontab:"; crontab -l | grep aesun/

@@ -3,14 +3,14 @@
 
 Her saat xx:10'da çalışır (cron). MEDAŞ GridBox OSOS yük profilinden 5 tesisatın
 dün+bugün 15 dk verisini çeker, saatlik veriş/çekiş kWh'a toplar (× çarpan) ve
-GitHub'daki epias-ptf/2026_osos_endeks.json dosyasına birleştirir (panel ve n8n buradan okur)
-ve n8n'deki "AEMonitoring · OSOS veri alıcı" webhook'una da gönderir.
+GitHub'daki epias-ptf/2026_osos_endeks.json dosyasına birleştirir (panel ve n8n buradan okur).
+n8n "OSOS veri alıcı" webhook'una gönderim varsayılan olarak kapalı (AESUN_WEBHOOK yazılırsa açılır).
 
 Ayar dosyası: ~/.aesun/osos.env  (chmod 600)
     OSOS_KULLANICI=...
     OSOS_SIFRE=...
     AESUN_ANAHTAR=...            # n8n "aesun Pi anahtarı" (X-Aesun-Anahtar)
-    AESUN_WEBHOOK=https://xbay.app.n8n.cloud/webhook/aesun-osos
+    AESUN_WEBHOOK=               # boş = n8n'e gönderme (varsayılan)
     GITHUB_TOKEN=...             # yalnız epias-ptf, Contents: Read and write (n8n'dekiyle aynı olabilir)
 
 Zamanlayıcı: pi/aesun-osos.timer (her saat xx:10)
@@ -73,8 +73,7 @@ def ayar_oku():
                 env[k.strip()] = v.strip()
     for k in ("OSOS_KULLANICI", "OSOS_SIFRE", "AESUN_ANAHTAR", "AESUN_WEBHOOK", "GITHUB_TOKEN"):
         env[k] = os.environ.get(k, env.get(k, ""))
-    if not env["AESUN_WEBHOOK"]:
-        env["AESUN_WEBHOOK"] = "https://xbay.app.n8n.cloud/webhook/aesun-osos"
+    # n8n webhook'u isteğe bağlı (kredi harcar). Yalnız osos.env'de AESUN_WEBHOOK yazılıysa gönderilir.
     eksik = [k for k in ("OSOS_KULLANICI", "OSOS_SIFRE") if not env[k]]
     if not env["GITHUB_TOKEN"] and not env["AESUN_ANAHTAR"]:
         eksik.append("GITHUB_TOKEN veya AESUN_ANAHTAR")
@@ -283,7 +282,7 @@ def github_yaz(env, satirlar):
 
 
 def gonder(env, yuk):
-    if not env["AESUN_ANAHTAR"]:
+    if not env["AESUN_ANAHTAR"] or not env["AESUN_WEBHOOK"]:
         return
     kuyruk = []
     if KUYRUK.exists():

@@ -302,10 +302,12 @@ def son_komut_kaydet(eylem, cid):
 
 def tetik():
     """Dakikada bir: takvimde zamanı gelmiş ve henüz gönderilmemiş geçiş varsa gönderir (yalnız otomatik modda)."""
+    simdi = datetime.now(TR)
+    if simdi.minute % 5 == 0:
+        return                                   # tam çalıştırmanın dakikası: kilidi ona bırak (cron yarışı)
     tk = tk_oku()
     if tk.get("mod") != "otomatik" or not tk.get("filo_taze"):
         return
-    simdi = datetime.now(TR)
     if simdi - zaman(tk.get("olusturuldu", "2000-01-01T00:00:00+03:00")) > timedelta(minutes=20):
         return                                   # takvim eski: tam hesap çalışmıyor demek, kör komut verme
     gonderilen = {g["anahtar"] for g in tk.get("gonderilen") or []}

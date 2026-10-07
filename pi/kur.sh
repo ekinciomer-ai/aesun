@@ -47,7 +47,7 @@ else
   ( crontab -l 2>/dev/null | grep -v -e 'osos_toplayici.py' -e 'pi/nabiz.sh' -e 'pi/cihaz_yonetimi.py' -e 'pi/cihaz_ogrenme.py' -e 'pi/ag_tara.py' -e 'aesun pull' ;
     echo "10 * * * * $PY $KOK/toplayicilar/osos_toplayici.py >> $KOK/osos.log 2>&1";
     [ "$NABIZ" = 1 ] && echo "*/10 * * * * $KOK/pi/nabiz.sh >> $KOK/nabiz.log 2>&1"
-    [ "$NABIZ" = 1 ] && echo "*/5 * * * * flock -n /tmp/aesun_cy.lock python3 $KOK/pi/cihaz_yonetimi.py >> $KOK/cihaz_yonetimi.log 2>&1"
+    [ "$NABIZ" = 1 ] && echo "*/5 * * * * flock -w 90 /tmp/aesun_cy.lock python3 $KOK/pi/cihaz_yonetimi.py >> $KOK/cihaz_yonetimi.log 2>&1"
     [ "$NABIZ" = 1 ] && echo "* * * * * flock -n /tmp/aesun_cy.lock python3 $KOK/pi/cihaz_yonetimi.py --tetik >> $KOK/cihaz_yonetimi.log 2>&1"
     [ "$NABIZ" = 1 ] && echo "* * * * * flock -n /tmp/aesun_og.lock python3 $KOK/pi/cihaz_ogrenme.py >> $KOK/cihaz_ogrenme.log 2>&1"
     echo "*/30 * * * * git -C $KOK pull -q --ff-only >> $KOK/guncelle.log 2>&1 # aesun pull"

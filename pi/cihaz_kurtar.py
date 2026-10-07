@@ -58,7 +58,15 @@ def main():
     c["pools"] = [dict(p, user="mehmetas." + no) for p in c["pools"]]
     c["bitmain-work-mode"] = "0"
     # önce filo şifresiyle dene (reset gerekmemiş olabilir), olmazsa fabrika şifresi
-    kod, _ = istek(ip, "get_miner_conf.cgi", fa)
+    kod = 0
+    for deneme in range(12):                     # açılış sırasında web girişi bir süre 401 verir: 3 dk'ya kadar bekle
+        try:
+            kod, _ = istek(ip, "get_miner_conf.cgi", fa)
+        except Exception:
+            kod = -1
+        if kod == 200:
+            break
+        print(f"cihaz hazır değil ({kod}), 15 sn sonra tekrar..."); time.sleep(15)
     if kod == 401:
         fab = getpass.getpass(f"{ip} fabrika web şifresi (kullanıcı adı {fa.username}; cihaz etiketinde/kılavuzda yazar): ")
         auth = HTTPDigestAuth(fa.username, fab)

@@ -527,6 +527,9 @@ if __name__ == "__main__":
     ap.add_argument("--mod", choices=["izleme", "otomatik", "kapali"])
     ap.add_argument("--tetik", action="store_true")
     x = ap.parse_args()
+    import signal, socket
+    socket.setdefaulttimeout(60)            # ağ kesilirse (DNS dahil) sonsuza dek bekleme
+    signal.alarm(50 if x.tetik else 240)    # takılan çalıştırma kilidi tutup sonrakileri engellemesin
     if x.mod:
         mod_degistir(x.mod)
     elif x.tetik:

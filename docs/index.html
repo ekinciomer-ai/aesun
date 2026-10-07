@@ -1018,6 +1018,70 @@ async function ogrenmeBolum(a, z) {
   if (su && su.on_isitma_bedeli_tl != null) h += '<div class="k">Sonraki uyandırma: hazır politikası ' + su.oncu_hazir_dk + ' dk (+ emniyet), salt ekonomik hesap ' + su.oncu_ekonomik_dk + ' dk önce derdi. Erken ısıtmanın filo bedeli ≈ <b>' + say(su.on_isitma_bedeli_tl) + ' ₺</b> (ısınırken cihaz hash vermeden enerji harcar; bu kayıp her uyanışta oluşur, erken ısıtma onu bir önceki saate taşır). Ayar: <code>oncu_politika</code> = hazir | ekonomik.</div>';
   return h + '</section>';
 }
+// ===== Saatlik plan animasyonu: seçilen tarih aralığında gün gün oynat ve video (mp4/webm) olarak indir
+let PLAN_ANIM = null;
+function planGunAd(g) { const d = new Date(g + 'T12:00:00Z'); return d.getUTCDate() + ' ' + AYK[d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ' · ' + ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][d.getUTCDay()]; }
+function planHazirla() {
+  const X = window.PLANX; if (!X) return null;
+  let bas = (document.getElementById('anBas') || {}).value || X.bugun, bit = (document.getElementById('anBit') || {}).value || X.bugun;
+  if (bas > bit) [bas, bit] = [bit, bas];
+  window.ANIM_ARALIK = { bas, bit };
+  const gunler = [];
+  for (let g = bas; g <= bit; g = gunEkle(g, 1)) {
+    const pl = X.gunPl(g).filter(q => !q.ertesi); if (!pl.length) continue;
+    const S = X.planSeri(pl), t = X.gunToplam(pl);
+    gunler.push({ g, pl, S, alt: t ? 'Enerji ' + say(t.m) + ' ₺ · BTC ' + say(t.g) + ' ₺ · Net ' + (t.net > 0 ? '+' : '') + say(t.net) + ' ₺' : '' });
+  }
+  if (!gunler.length) return null;
+  const tum = gunler.flatMap(d => [...d.S.mv, ...d.S.bv, ...d.S.gmv, ...d.S.ggv]).filter(v => v != null);
+  const ymax = Math.ceil(Math.max(1000, ...tum) * 1.08 / 1000) * 1000;
+  return { X, gunler, ymax };
+}
+const ANIM_GECIS = 700, ANIM_BEKLE = 1100;
+function planKare(H, ms) {   // ms: oynatma başından geçen süre → SVG metni (son kare sabit kalır)
+  const adim = ANIM_GECIS + ANIM_BEKLE, n = H.gunler.length;
+  let i = Math.floor(ms / adim), f = ((ms % adim) / ANIM_GECIS);
+  if (i >= n) { i = n - 1; f = 1; }
+  const B = H.gunler[i], A = H.gunler[Math.max(0, i - 1)];
+  f = i === 0 ? 1 : Math.min(1, f); const e = f < .5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;
+  const ara = k => Array.from({ length: Math.max(A.S[k].length, B.S[k].length) }, (_, j) => { const a = A.S[k][j], b = B.S[k][j];
+    return a == null ? (e > .5 ? (b ?? null) : null) : b == null ? (e < .5 ? a : null) : a + (b - a) * e; });
+  const D = e < .5 ? A : B;
+  return H.X.grafik(D.pl, { seri: { mv: ara('mv'), bv: ara('bv'), gmv: ara('gmv'), ggv: ara('ggv') }, ymax: H.ymax, baslik: planGunAd(D.g), altBaslik: D.alt });
+}
+function planOynat() {
+  const btn = document.getElementById('anOynat'), kutu = document.getElementById('planGrafik'), dur = document.getElementById('anDurum');
+  if (PLAN_ANIM) { cancelAnimationFrame(PLAN_ANIM.raf); PLAN_ANIM = null; if (btn) btn.textContent = '▶ Oynat'; cizMaden(); return; }
+  const H = planHazirla(); if (!H || !kutu) { if (dur) dur.textContent = 'Seçilen aralıkta veri yok.'; return; }
+  const t0 = performance.now(), toplam = H.gunler.length * (ANIM_GECIS + ANIM_BEKLE);
+  PLAN_ANIM = { raf: 0 }; if (btn) btn.textContent = '■ Durdur';
+  const dongu = () => { if (!PLAN_ANIM) return; const ms = performance.now() - t0; kutu.innerHTML = planKare(H, ms);
+    if (dur) dur.textContent = H.gunler.length + ' gün · ' + Math.min(H.gunler.length, Math.floor(ms / (ANIM_GECIS + ANIM_BEKLE)) + 1) + '. gün';
+    if (ms < toplam) PLAN_ANIM.raf = requestAnimationFrame(dongu); else { PLAN_ANIM = null; if (btn) btn.textContent = '▶ Oynat'; if (dur) dur.textContent = 'Bitti. Tekrar oynatmak için ▶, günün kendisine dönmek için sayfayı yenileyin.'; } };
+  dongu();
+}
+async function planVideo() {
+  const dur = document.getElementById('anDurum');
+  const H = planHazirla(); if (!H) { if (dur) dur.textContent = 'Seçilen aralıkta veri yok.'; return; }
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) { if (dur) dur.textContent = 'Bu tarayıcı video kaydını desteklemiyor (Chrome ya da Edge deneyin).'; return; }
+  const W = 1600, ilk = planKare(H, 0), vb = /viewBox="0 0 (\d+) (\d+)"/.exec(ilk), Hh = Math.round(W * Number(vb[2]) / Number(vb[1]) / 2) * 2;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = Hh; const cx = cv.getContext('2d');
+  const tip = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'].find(t => MediaRecorder.isTypeSupported(t));
+  const rec = new MediaRecorder(cv.captureStream(30), { mimeType: tip, videoBitsPerSecond: 6e6 }), par = [];
+  rec.ondataavailable = e => e.data.size && par.push(e.data);
+  const bitti = new Promise(r => rec.onstop = r);
+  const ciz = async svg => { const img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('width="100%"', 'width="' + W + '" height="' + Hh + '"'));
+    await img.decode(); cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, Hh); cx.drawImage(img, 0, 0, W, Hh); };
+  await ciz(ilk); rec.start();
+  const toplam = H.gunler.length * (ANIM_GECIS + ANIM_BEKLE) + 800, t0 = performance.now();
+  while (true) { const ms = performance.now() - t0; await ciz(planKare(H, ms));
+    if (dur) dur.textContent = 'Video kaydediliyor… %' + Math.min(100, Math.round(ms / toplam * 100));
+    if (ms >= toplam) break; await new Promise(r => setTimeout(r, 16)); }
+  rec.stop(); await bitti;
+  const uz = tip.startsWith('video/mp4') ? 'mp4' : 'webm', blob = new Blob(par, { type: tip.split(';')[0] });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'aesun_plan_' + window.ANIM_ARALIK.bas + '_' + window.ANIM_ARALIK.bit + '.' + uz; document.body.appendChild(a); a.click(); a.remove();
+  if (dur) dur.textContent = 'Video indirildi (' + uz + ', ' + H.gunler.length + ' gün, ' + Math.round(toplam / 1000) + ' sn).';
+}
 async function cizYonetim() {
   try { YONETIM = await al('n8n/cihaz_yonetimi_durum.json'); } catch (e) { if (!YONETIM) return '<div class="panel"><p class="k" style="margin:0">Cihaz yönetimi henüz çalışmadı (Pi\'de <code>pi/cihaz_yonetimi.py</code> kurulunca durum burada görünür).</p></div>'; }
   const y = YONETIM, a = y.ayarlar || {}, c = y.cihaz || {};
@@ -1051,118 +1115,155 @@ async function cizYonetim() {
     try { await epYukle(); } catch (e) {}
     let FSG = null; try { FSG = await al('n8n/fusionsolar_son.json'); } catch (e) {}
     try { await madenYukle(); } catch (e) {}
-    // Gerçekleşen gelir (cihaz/saat): F2Pool saatlik arşivinde o saat çalışan cihazların ortalama hash'i × hashprice ÷ 24 × BTC/TL
+    // Gerçekleşen (filo, ₺/saat). Güç: Pi'nin dakikalık ölçümü; yoksa (eski günler) F2Pool cihaz hash'i × model verimi.
+    // Gelir: o günün gerçek F2Pool kazancı saatlik hash payına göre; gün kapanmadıysa hash × hashprice × BTC.
     const hpG = y.hashprice_btc_th_gun, btcG = y.btc_try;
     let SAHA = null, KIMF = {}; try { SAHA = await al('n8n/saha_saatlik.json'); } catch (e) {} try { KIMF = await al('n8n/cihaz_kimlik.json'); } catch (e) {}
     const NF = Object.keys(KIMF || {}).length || c.toplam || 28, FKW = NF * kw;                // filo: cihaz sayısı ve tam yük gücü (kW)
-    // Gerçekleşen (filo, ₺/saat): enerji = Pi'nin ölçtüğü ortalama filo gücü × (PTF+YEKDEM)×çarpan; gelir = toplam hash × hashprice ÷ 24 × BTC.
-    // Hash kaynağı: F2Pool saatlik arşivi o saate geldiyse F2Pool, yoksa Pi'nin anlık ölçümü.
-    const gerF = (q, m) => { const sa = SAHA && SAHA.saat && SAHA.saat[q.t.slice(0, 13)], fo = MADEN.H && MADEN.H[q.t.slice(0, 13)];
+    const JTH = (SAHA && SAHA.jth) || { 'S21e Hyd': 17.5, 'S19 XP+ Hyd': 21.5, 'S19e XP Hyd': 34.5 };
+    const p2 = h => String(h).padStart(2, '0'), gunF2T = {};
+    const gunF2 = g => { if (gunF2T[g] != null) return gunF2T[g]; let t = 0, ns = 0; for (let h = 0; h < 24; h++) { const o = MADEN.H && MADEN.H[g + ' ' + p2(h)]; if (o) for (const v of Object.values(o)) if (v > 0) { t += v; ns++; } } return (gunF2T[g] = { t, ns }); };
+    const gerF = (q, m) => { const k = q.t.slice(0, 13), g = k.slice(0, 10), sa = SAHA && SAHA.saat && SAHA.saat[k], fo = MADEN.H && MADEN.H[k];
       const fth = fo ? Object.values(fo).reduce((a, b) => a + (b > 0 ? b : 0), 0) : null, fn = fo ? Object.values(fo).filter(v => v > 0).length : 0;
       if (!sa && fth == null) return null;
       const th = fth != null && fth > 0 ? fth : sa ? sa.th : 0, kaynak = fth != null && fth > 0 ? 'F2Pool' : 'saha';
-      const r = { th, kaynak, sa, fth, fn, gelir: hpG && btcG ? th * hpG / 24 * btcG : null, maliyet: sa && m != null ? sa.kw * m / 1000 : null, kw: sa ? sa.kw : null };
+      let kwv = sa ? sa.kw : null, kwk = 'Pi ölçümü';
+      if (kwv == null && fo) { kwv = Object.entries(fo).reduce((a, [w, v]) => a + (v > 0 ? v * (JTH[(KIMF[w] || {}).model] || 17.5) / 1000 : 0), 0); kwk = 'F2Pool hash × verim'; }
+      const gl = (MADEN.gelir || {})[g], fy = (MADEN.btc || {})[g], tg = gunF2(g).t;
+      let gelir = null, gk = '';
+      if (gl && gl.btc && fy && fy.try && fth > 0 && tg > 0 && g < bugunTR()) { gelir = gl.btc * fy.try * fth / tg; gk = 'F2Pool günlük kazanç'; }
+      else if (hpG && btcG) { gelir = th * hpG / 24 * btcG; gk = kaynak === 'saha' ? 'anlık hash × hashprice' : 'hash × hashprice'; }
+      const r = { th, kaynak, sa, fth, fn, gelir, gk, kw: kwv, kwk, maliyet: kwv != null && m != null ? kwv * m / 1000 : null };
       r.net = r.gelir != null && r.maliyet != null ? r.gelir - r.maliyet : null; return r; };
-    const gercek = q => { const o = MADEN.H && MADEN.H[q.t.slice(0, 13)]; if (!o || !hpG || !btcG) return null; const v = Object.values(o).filter(x => x > 0);
-      return v.length ? { gelir: v.reduce((a, b) => a + b, 0) / v.length * hpG / 24 * btcG, n: v.length, th: v.reduce((a, b) => a + b, 0) / v.length } : { gelir: 0, n: 0, th: 0 }; };
     const bugun = bugunTR(), yarin = gunEkle(bugun, 1), simdiT = bugun + ' ' + trSimdi().toISOString().slice(11, 13) + ':00';
     const yarinVar = plHam.some(q => q.t.startsWith(yarin));
-    if (!window.YSEC || (YSEC.gun === yarin && !yarinVar) || ![bugun, yarin].includes(YSEC.gun)) window.YSEC = { gun: bugun };
+    const ilkGun = Object.keys(MADEN.H || {}).sort()[0] ? Object.keys(MADEN.H).sort()[0].slice(0, 10) : bugun;
+    if (!window.YSEC || (YSEC.gun === yarin && !yarinVar) || YSEC.gun > yarin || YSEC.gun < ilkGun) window.YSEC = { gun: bugun };
     const gun = YSEC.gun;
     const gunesSaat = {};   // bugünün gerçekleşen güneş üretimi (kWh/saat, Sera-1 + Sera-2)
     for (const v of Object.values((FSG && FSG.saatlik_bugun) || {})) for (const [s_, k] of Object.entries(v || {})) gunesSaat[Number(String(s_).slice(0, 2))] = (gunesSaat[Number(String(s_).slice(0, 2))] || 0) + (Number(k) || 0);
     const gelirSabit = plHam[0].gelir, esik = a.uretim_esik_kw || 50;
-    const pl = [];
-    for (let s = 0; s < 24; s++) {
-      const t = gun + ' ' + String(s).padStart(2, '0') + ':00';
-      const p = plHam.find(q => q.t === t);
-      if (p) { pl.push(p); continue; }
-      if (t > simdiT) continue;                                   // gelecekte ama fiyatı yok
-      const ptf = ((EP && EP.ptf && EP.ptf[gun]) || [])[s];
-      if (ptf == null) continue;
-      const yk = (() => { const v = typeof yekdemAy === 'function' ? yekdemAy(gun.slice(0, 7)) : null; return v ? v.deger : (plHam[0].yekdem || 0); })();
-      const maliyet = (ptf + yk) / 1000 * kat * kw;
-      const gunes = gun === bugun ? (gunesSaat[s] || 0) > esik : false;
-      pl.push({ t, ptf, yekdem: yk, maliyet, gelir: gelirSabit, gunes_tahmini: gunes, gunes_kaynak: 'gerçekleşen', karar: gunes ? 'calis' : (gelirSabit != null && maliyet > gelirSabit ? 'uyut' : 'calis'), gecmis: true });
-    }
-    // Yarının PTF'si açıklandıysa bugünün grafiğine ertesi günün ilk 5 saati (00–04) eklenir
-    if (gun === bugun) for (let s = 0; s < 5; s++) { const p = plHam.find(q => q.t === yarin + ' ' + String(s).padStart(2, '0') + ':00'); if (p) pl.push(Object.assign({}, p, { ertesi: true })); }
+    // Güneş doğuş/batış (Aksaray, NOAA yaklaşımı; Pi'deki ile aynı) → geçmiş günlerde "güneşle" saatleri
+    const gunesTahmin = (g, s) => { const d = new Date(g + 'T12:00:00Z'), n = Math.round((d - Date.UTC(d.getUTCFullYear(), 0, 0)) / 86400000), G = 2 * Math.PI / 365 * (n - 1);
+      const dek = 0.006918 - 0.399912 * Math.cos(G) + 0.070257 * Math.sin(G) - 0.006758 * Math.cos(2 * G) + 0.000907 * Math.sin(2 * G);
+      const eq = 229.18 * (0.000075 + 0.001868 * Math.cos(G) - 0.032077 * Math.sin(G) - 0.014615 * Math.cos(2 * G) - 0.040849 * Math.sin(2 * G));
+      const la = 38.37 * Math.PI / 180, ha = Math.acos(Math.cos(90.833 * Math.PI / 180) / (Math.cos(la) * Math.cos(dek)) - Math.tan(la) * Math.tan(dek)) * 180 / Math.PI;
+      const og = (720 - 4 * 34.03 - eq) / 60 + 3; return og - ha / 15 + 1 <= s && s + 1 <= og + ha / 15 - 1; };
+    const gelirGunCihaz = g => { const gl = (MADEN.gelir || {})[g], fy = (MADEN.btc || {})[g], f = gunF2(g); return gl && gl.btc && fy && fy.try && f.ns ? gl.btc * fy.try / f.ns : gelirSabit; };
+    // Bir günün 24 saati: bugün/yarın Pi planı + geçen saatler kuralla; geçmiş günler gerçekleşen duruma göre (çalıştı / uyudu)
+    const gunPl = gun => { const pl = [], gecmisGun = gun < bugun;
+      for (let s = 0; s < 24; s++) {
+        const t = gun + ' ' + p2(s) + ':00';
+        const p = gecmisGun ? null : plHam.find(q => q.t === t);
+        if (p) { pl.push(p); continue; }
+        if (t > simdiT) continue;
+        const ptf = ((EP && EP.ptf && EP.ptf[gun]) || [])[s];
+        if (ptf == null) continue;
+        const yk = (() => { const v = typeof yekdemAy === 'function' ? yekdemAy(gun.slice(0, 7)) : null; return v ? v.deger : (plHam[0].yekdem || 0); })();
+        const maliyet = (ptf + yk) / 1000 * kat * kw;
+        if (gecmisGun) {
+          const k = gun + ' ' + p2(s), sa = SAHA && SAHA.saat && SAHA.saat[k], fo = MADEN.H && MADEN.H[k];
+          const n = sa ? sa.calisan : fo ? Object.values(fo).filter(v => v > 0).length : null;
+          const cal = n == null ? null : n >= NF / 2, gunes = !!cal && gunesTahmin(gun, s);
+          pl.push({ t, ptf, yekdem: yk, maliyet, gelir: gelirGunCihaz(gun), gunes_tahmini: gunes, karar: cal == null ? null : cal ? 'calis' : 'uyut', gecmis: true, gerc: true, ncal: n });
+        } else {
+          const gunes = (gunesSaat[s] || 0) > esik;
+          pl.push({ t, ptf, yekdem: yk, maliyet, gelir: gelirSabit, gunes_tahmini: gunes, gunes_kaynak: 'gerçekleşen', karar: gunes ? 'calis' : (gelirSabit != null && maliyet > gelirSabit ? 'uyut' : 'calis'), gecmis: true });
+        }
+      }
+      // Yarının PTF'si açıklandıysa bugünün grafiğine ertesi günün ilk 5 saati (00–04) eklenir
+      if (gun === bugun) for (let s = 0; s < 5; s++) { const p = plHam.find(q => q.t === yarin + ' ' + p2(s) + ':00'); if (p) pl.push(Object.assign({}, p, { ertesi: true })); }
+      return pl; };
+    const pl = gunPl(gun);
     const emal = q => q.ptf != null ? (q.ptf + (q.yekdem || 0)) * kat : null;               // enerji maliyeti ₺/MWh
     const bas = q => q.gelir != null ? q.gelir / kw * 1000 : null;                           // başabaş enerji maliyeti ₺/MWh
-    const DUR = q => q.karar === 'uyut' ? { ad: 'Uyut', ik: '✕', bg: '#FDECEA', fg: '#B42318', bar: '#D64545' }
-      : q.karar === 'calis' && q.gunes_tahmini && emal(q) != null && bas(q) != null && emal(q) <= bas(q) ? { ad: 'Çalış · güneş + kârlı', ik: '☀✓', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
-      : q.karar === 'calis' && q.gunes_tahmini ? { ad: 'Çalış · güneş', ik: '☀', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
-      : q.karar === 'calis' ? { ad: 'Çalış · kârlı', ik: '✓', bg: '#E6F4EA', fg: '#1E7A3C', bar: '#2F9E55' }
+    const DUR = q => q.karar === 'uyut' ? { ad: q.gerc ? 'Uyudu' : 'Uyut', ik: '✕', bg: '#FDECEA', fg: '#B42318', bar: '#D64545' }
+      : q.karar === 'calis' && q.gunes_tahmini && emal(q) != null && bas(q) != null && emal(q) <= bas(q) ? { ad: q.gerc ? 'Çalıştı · güneş + kârlı' : 'Çalış · güneş + kârlı', ik: '☀✓', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
+      : q.karar === 'calis' && q.gunes_tahmini ? { ad: q.gerc ? 'Çalıştı · güneş' : 'Çalış · güneş', ik: '☀', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
+      : q.karar === 'calis' ? { ad: q.gerc ? 'Çalıştı' : 'Çalış · kârlı', ik: '✓', bg: '#E6F4EA', fg: '#1E7A3C', bar: '#2F9E55' }
       : { ad: '—', ik: '', bg: '#F1F3F6', fg: '#4A5A70', bar: '#C9D1DC' };
     const si = pl.findIndex(q => q.t === simdiT);                                           // şimdiki saatin sırası
     const ileri = pl.filter(q => q.t >= simdiT);
     const calisSaat = pl.filter(q => !q.ertesi && q.karar === 'calis').length, uyuSaat = pl.filter(q => !q.ertesi && q.karar === 'uyut').length;
     const ei = pl.findIndex(q => q.ertesi);                                                  // ertesi güne geçiş sırası
     const gunAd = g => g === bugun ? 'Bugün' : g === yarin ? 'Yarın' : tarihK(g);
-    h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Saatlik plan · ' + gunAd(gun) + ' ' + tarihK(gun) + '</h2><span class="k" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' + calisSaat + ' saat çalış · ' + uyuSaat + ' saat uyut'
-      + '<span class="tursec">' + [bugun].concat(yarinVar ? [yarin] : []).map(g => '<button type="button" class="' + (g === gun ? 'on' : '') + '" onclick="YSEC.gun=\'' + g + '\';cizMaden()">' + gunAd(g) + '</button>').join('') + '</span></span></div>'
-      // derlenmiş aralıklar: şimdiden sonrası (yarın seçiliyse tüm gün)
-      + (() => { const kaynak = gun === bugun ? ileri : pl; if (!kaynak.length) return ''; const ar = []; for (const q of kaynak) { const c = q.karar === 'calis', son = ar[ar.length - 1];
+    // gün toplamı (gerçekleşen): enerji maliyeti, BTC geliri, net
+    const gunToplam = pl_ => { let m = 0, g_ = 0, sa = 0, var_ = false, kaynak = new Set(); const dk = trSimdi().getUTCMinutes();
+      pl_.forEach(q => { if (q.ertesi || q.t > simdiT) return; const r = gerF(q, emal(q)); if (!r) return; const k = q.t === simdiT ? dk / 60 : 1;
+        if (r.maliyet != null) { m += r.maliyet * k; var_ = true; sa += k; kaynak.add(r.kwk); } if (r.gelir != null) g_ += r.gelir * k; });
+      return var_ ? { m, g: g_, net: g_ - m, saat: sa, kaynak: [...kaynak] } : null; };
+    // Grafik: saat şeridi + çizgiler tek SVG. o.seri ile değerler dışarıdan verilebilir (animasyon ara kareleri), o.baslik videoda gün başlığı.
+    const grafik = (pl_, o = {}) => {
+      const si_ = pl_.findIndex(q => q.t === simdiT), ei_ = pl_.findIndex(q => q.ertesi);
+      const n = pl_.length || 24, W = 1000, cw = W / n, BH = o.baslik ? 34 : 0, SH = 30, PT = BH + SH + 10, PH = 230, H = PT + PH + 22 + (o.baslik ? 22 : 0);
+      const S = o.seri || planSeri(pl_);
+      const { mv, bv, gmv, ggv, gf } = S;
+      const ymax = o.ymax || Math.ceil(Math.max(1000, ...[...mv, ...bv, ...gmv, ...ggv].filter(v => v != null)) * 1.08 / 1000) * 1000;
+      const yy = v => PT + PH - v / ymax * PH, x = i => i * cw + cw / 2;
+      const yol = (arr, renk, kesik) => { let d = '', ac = false; arr.forEach((v, i) => { if (v == null) { ac = false; return; } d += (ac ? 'L' : 'M') + x(i).toFixed(1) + ' ' + yy(v).toFixed(1); ac = true; });
+        return '<path d="' + d + '" fill="none" stroke="' + renk + '" stroke-width="' + (kesik ? 2 : 2.6) + '"' + (kesik ? ' stroke-dasharray="7 5"' : '') + ' stroke-linejoin="round"/>' + arr.map((v, i) => v == null || kesik ? '' : '<circle cx="' + x(i).toFixed(1) + '" cy="' + yy(v).toFixed(1) + '" r="' + (i === si_ ? 5 : 3) + '" fill="' + renk + '"' + (i === si_ ? ' stroke="#fff" stroke-width="2"' : '') + '/>').join(''); };
+      const ZEMIN = { calisG: '#FFF1C7', calis: '#DDF1E3', uyut: '#FBE0DD', yok: '#F1F3F6' };
+      let g = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="Saatlik karar ve enerji maliyeti">';
+      if (o.baslik) g += '<rect x="0" y="0" width="' + W + '" height="' + (BH - 4) + '" fill="#10233F" rx="6"/><text x="12" y="' + (BH / 2 + 3) + '" font-size="17" font-weight="800" fill="#fff">' + esc(o.baslik) + '</text>' + (o.altBaslik ? '<text x="' + (W - 12) + '" y="' + (BH / 2 + 3) + '" text-anchor="end" font-size="14" font-weight="700" fill="#fff">' + esc(o.altBaslik) + '</text>' : '');
+      pl_.forEach((q, i) => { const d = DUR(q), z = q.karar === 'uyut' ? ZEMIN.uyut : q.karar === 'calis' ? (q.gunes_tahmini ? ZEMIN.calisG : ZEMIN.calis) : ZEMIN.yok, op = q.gecmis && !q.gerc ? ' opacity=".6"' : '';
+        g += '<g' + op + '><rect x="' + (i * cw + 1).toFixed(1) + '" y="' + BH + '" width="' + (cw - 2).toFixed(1) + '" height="' + SH + '" rx="4" fill="' + d.bar + '"/>'
+          + (d.bar2 ? '<path d="M' + (i * cw + 1).toFixed(1) + ' ' + (BH + SH) + 'L' + (i * cw + cw - 1).toFixed(1) + ' ' + BH + 'V' + (BH + SH - 4) + 'Q' + (i * cw + cw - 1).toFixed(1) + ' ' + (BH + SH) + ' ' + (i * cw + cw - 5).toFixed(1) + ' ' + (BH + SH) + 'Z" fill="' + d.bar2 + '"/>' : '')
+          + '<text x="' + x(i).toFixed(1) + '" y="' + (BH + SH / 2 + 4.5) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">' + q.t.slice(11, 13) + '</text></g>'
+          + '<rect x="' + (i * cw).toFixed(1) + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="' + z + '"' + (q.gecmis && !q.gerc ? ' fill-opacity=".55"' : '') + '/>'; });
+      if (ei_ > 0) { const xe = (ei_ * cw).toFixed(1);   // gün ayracı
+        g += '<line x1="' + xe + '" x2="' + xe + '" y1="' + BH + '" y2="' + (PT + PH) + '" stroke="#10233F" stroke-width="2.5"/>'
+          + '<text x="' + (ei_ * cw + 5).toFixed(1) + '" y="' + (PT + 14) + '" font-size="11" font-weight="800" fill="#10233F">' + tarihK(yarin) + ' →</text>'; }
+      if (si_ >= 0 && !o.baslik) {   // şimdiki saat: kendi renginde kalır; üstüne beyaz yanıp sönen örtü + kesikli çerçeve
+        const x0 = (si_ * cw).toFixed(1);
+        g += '<rect class="simdi-nabiz" x="' + x0 + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="#fff"/>'
+          + '<rect x="' + (si_ * cw + 1.5).toFixed(1) + '" y="' + (BH + 1.5) + '" width="' + (cw - 3).toFixed(1) + '" height="' + (PT + PH - BH - 3) + '" rx="4" fill="none" stroke="#10233F" stroke-width="2" stroke-dasharray="5 4"/>'
+          + '<text x="' + x(si_).toFixed(1) + '" y="' + (PT + 14) + '" text-anchor="middle" font-size="11" font-weight="800" fill="#10233F">ŞU AN</text>';
+      }
+      for (let k = 0; k <= 4; k++) { const v = ymax * k / 4; g += '<line x1="0" x2="' + W + '" y1="' + yy(v).toFixed(1) + '" y2="' + yy(v).toFixed(1) + '" stroke="#10233F" stroke-opacity=".08"/>' + (k && k < 4 ? '<text x="4" y="' + (yy(v) - 4).toFixed(1) + '" font-size="11" fill="#4A5A70">' + say(v) + '</text><text x="' + (W - 4) + '" y="' + (yy(v) - 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#6B3FA0">' + say(v * FKW / 1000) + ' ₺</text>' : ''); }
+      g += '<text x="4" y="' + (PT + 12) + '" font-size="10" font-weight="700" fill="#4A5A70">₺/MWh</text><text x="' + (W - 4) + '" y="' + (PT + 12) + '" text-anchor="end" font-size="10" font-weight="700" fill="#6B3FA0">₺/saat · filo (' + NF + ' cihaz)</text>';
+      g += yol(bv, '#1E7A3C', true) + yol(mv, '#F4A27C', true) + yol(gmv, '#D9480F') + yol(ggv, '#7C3AED');
+      pl_.forEach((q, i) => { if (i % Math.max(1, Math.round(n / 12)) === 0 || i === n - 1) g += '<text x="' + x(i).toFixed(1) + '" y="' + (PT + PH + 16) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + q.t.slice(11, 13) + ':00</text>'; });
+      if (o.baslik) { let lx = 4; [['#D9480F', 'Gerçekleşen enerji maliyeti', 0], ['#7C3AED', 'Gerçekleşen BTC geliri', 0], ['#F4A27C', 'Planlanan enerji maliyeti', 1], ['#1E7A3C', 'Başabaş', 1], ['#F0B429', 'Güneşle', 2], ['#2F9E55', 'Çalıştı', 2], ['#D64545', 'Uyudu', 2]].forEach(([r, t, k]) => {
+          const yl = PT + PH + 36; g += k === 2 ? '<rect x="' + lx + '" y="' + (yl - 9) + '" width="10" height="10" rx="2" fill="' + r + '"/>' : '<line x1="' + lx + '" x2="' + (lx + 16) + '" y1="' + (yl - 4) + '" y2="' + (yl - 4) + '" stroke="' + r + '" stroke-width="3"' + (k ? ' stroke-dasharray="5 3"' : '') + '/>';
+          g += '<text x="' + (lx + (k === 2 ? 14 : 20)) + '" y="' + yl + '" font-size="11" fill="#4A5A70">' + t + '</text>'; lx += (k === 2 ? 22 : 28) + t.length * 6.2; }); }
+      if (!o.baslik) pl_.forEach((q, i) => { g += '<rect x="' + (i * cw).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + (PT + PH) + '" fill="transparent" data-tip="' + esc(q.t.slice(8, 10) + '.' + q.t.slice(5, 7) + ' ' + q.t.slice(11) + (i === si_ ? ' (şu an)' : q.gecmis ? ' (geçti)' : '') + ' · ' + DUR(q).ad + (q.gerc && q.ncal != null ? ' (' + say(q.ncal) + ' cihaz)' : '') + '\nEnerji maliyeti ' + say(mv[i]) + ' ₺/MWh = ' + say(q.maliyet, 1) + ' ₺/cihaz·saat (filo tam yük ' + say(mv[i] * FKW / 1000) + ' ₺/saat)\n' + (q.gerc ? 'Gerçekleşen gelir ' : 'Tahmini gelir ') + say(q.gelir, 1) + ' ₺/cihaz·saat (başabaş ' + say(bv[i]) + ' ₺/MWh)' + (r => !r ? '' : '\n— Gerçekleşen (filo) —' + (r.sa ? '\nPi: ' + say(r.sa.calisan) + ' cihaz çalıştı' + (r.sa.isinan >= 0.5 ? ', ' + say(r.sa.isinan) + ' ısındı' : '') + (r.sa.uyuyan >= 0.5 ? ', ' + say(r.sa.uyuyan) + ' uyudu' : '') + ' · ' + r.sa.ilk + '–' + r.sa.son : '\n' + r.fn + ' cihaz (F2Pool)') + '\nEnerji ' + say(r.kw) + ' kW (' + r.kwk + ') → maliyet ' + say(r.maliyet) + ' ₺/saat\nBTC geliri ' + say(r.gelir) + ' ₺/saat (' + say(r.th) + ' TH/s, ' + r.gk + ')' + (r.net != null ? '\nNet ' + (r.net > 0 ? '+' : '') + say(r.net) + ' ₺/saat' : ''))(gf ? gf[i] : null)) + '"/>'; });
+      return g + '</svg>'; };
+    const planSeri = pl_ => { const mv = pl_.map(emal), bv = pl_.map(bas), gf = pl_.map((q, i) => gerF(q, mv[i]));
+      const sol = v => v == null ? null : v * 1000 / FKW;                                      // filo ₺/saat → sol eksen ₺/MWh
+      return { mv, bv, gf, gmv: gf.map(r => r && r.maliyet != null ? sol(r.maliyet) : null), ggv: gf.map(r => r && r.gelir != null ? sol(r.gelir) : null) }; };
+    window.PLANX = { gunPl, grafik, planSeri, gunToplam, DUR, bugun, ilkGun, tarihK };
+    const lejant = '<div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + [['linear-gradient(135deg,#F0B429 50%,#2F9E55 50%)', '☀ Güneşle çalış'], ['#2F9E55', '✓ Kârlı, çalış'], ['#D64545', '✕ Zararlı, uyut']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
+      + [['#D9480F', 'Gerçekleşen enerji maliyeti (filo)', ''], ['#7C3AED', 'Gerçekleşen BTC geliri (filo)', ''], ['#F4A27C', 'Planlanan enerji maliyeti (tam yük)', 'dashed'], ['#1E7A3C', 'BTC geliri (başabaş)', 'dashed']].map(([r, t, k]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px ' + (k || 'solid') + ' ' + r + '"></span>' + t + '</span>').join('')
+      + '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border:2px dashed #10233F;border-radius:3px"></span>Şu an</span><span>Soluk: geçmiş saat</span></div>';
+    const tg_ = gunToplam(pl), gecmisSec = gun < bugun;
+    const anB = window.ANIM_ARALIK || { bas: gunEkle(bugun, -13) < ilkGun ? ilkGun : gunEkle(bugun, -13), bit: bugun };
+    h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Saatlik plan · ' + gunAd(gun) + (gun === bugun || gun === yarin ? ' ' + tarihK(gun) : ' ' + gun.slice(0, 4)) + (gecmisSec ? ' · gerçekleşen' : '') + '</h2><span class="k" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' + calisSaat + ' saat ' + (gecmisSec ? 'çalıştı · ' : 'çalış · ') + uyuSaat + ' saat ' + (gecmisSec ? 'uyudu' : 'uyut')
+      + '<span class="tursec"><button type="button" title="Önceki gün"' + (gun <= ilkGun ? ' disabled' : '') + ' onclick="YSEC.gun=\'' + gunEkle(gun, -1) + '\';cizMaden()">◀</button>' + [bugun].concat(yarinVar ? [yarin] : []).map(g => '<button type="button" class="' + (g === gun ? 'on' : '') + '" onclick="YSEC.gun=\'' + g + '\';cizMaden()">' + gunAd(g) + '</button>').join('') + '<button type="button" title="Sonraki gün"' + (gun >= (yarinVar ? yarin : bugun) ? ' disabled' : '') + ' onclick="YSEC.gun=\'' + gunEkle(gun, 1) + '\';cizMaden()">▶</button></span>'
+      + '<input type="date" value="' + gun + '" min="' + ilkGun + '" max="' + (yarinVar ? yarin : bugun) + '" onchange="if(this.value){YSEC.gun=this.value;cizMaden()}" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></span></div>'
+      // derlenmiş aralıklar: bugün şimdiden sonrası; yarın tüm gün; geçmiş gün gerçekleşen
+      + (() => { const kaynak = gun === bugun ? ileri : pl.filter(q => q.karar); if (!kaynak.length) return ''; const ar = []; for (const q of kaynak) { const c = q.karar === 'calis', son = ar[ar.length - 1];
           if (son && son.c === c) { son.bit = q.t; son.n++; son.gunes += q.gunes_tahmini ? 1 : 0; } else ar.push({ c, bas: q.t, bit: q.t, n: 1, gunes: q.gunes_tahmini ? 1 : 0 }); }
           const sa = t => t.slice(11, 16), sonraT = t => new Date(Date.parse(t.replace(' ', 'T') + ':00Z') + 3600000).toISOString().slice(0, 16).replace('T', ' ');
           const gn = t => t.slice(0, 10) === gun ? '' : (t.slice(8, 10) + '.' + t.slice(5, 7) + ' ');
           return '<div style="display:flex;flex-direction:column;gap:6px">' + ar.map((x, k) => '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:' + (x.c ? '#E6F4EA' : '#FDECEA') + ';border-left:6px solid ' + (x.c ? '#2F9E55' : '#D64545') + '">'
-            + '<span style="font-weight:800;font-size:15px;min-width:110px;color:' + (x.c ? '#1E7A3C' : '#B42318') + '">' + (gun === bugun && k === 0 ? (x.c ? '▶ ŞU AN ÇALIŞIYOR' : '■ ŞU AN UYKUDA') : (x.c ? '▶ ÇALIŞACAK' : '■ ÇALIŞMAYACAK')) + '</span>'
+            + '<span style="font-weight:800;font-size:15px;min-width:110px;color:' + (x.c ? '#1E7A3C' : '#B42318') + '">' + (gecmisSec ? (x.c ? '▶ ÇALIŞTI' : '■ UYUDU') : gun === bugun && k === 0 ? (x.c ? '▶ ŞU AN ÇALIŞIYOR' : '■ ŞU AN UYKUDA') : (x.c ? '▶ ÇALIŞACAK' : '■ ÇALIŞMAYACAK')) + '</span>'
             + '<span class="num" style="font-size:20px;font-weight:700;color:#10233F">' + sa(x.bas) + ' – ' + gn(sonraT(x.bit)) + sa(sonraT(x.bit)) + '</span>'
             + '<span class="k">' + x.n + ' saat' + (x.c && x.gunes ? ' · ' + x.gunes + ' saati güneşle' : '') + '</span></div>').join('') + '</div>'; })()
-      // gün toplamı: gerçekleşen enerji maliyeti ve BTC geliri (şimdiki saat geçen dakika kadar)
-      + (() => { let m = 0, g_ = 0, sa = 0, var_ = false; const dk = trSimdi().getUTCMinutes();
-          pl.forEach(q => { if (q.t > simdiT) return; const r = gerF(q, emal(q)); if (!r) return; const k = q.t === simdiT ? dk / 60 : 1;
-            if (r.maliyet != null) { m += r.maliyet * k; var_ = true; sa += k; } if (r.gelir != null) g_ += r.gelir * k; });
-          if (!var_) return '';
-          const net = g_ - m, kut = (ad, v, renk, alt) => '<div style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;background:#F7F9FC;border-left:5px solid ' + renk + '"><div class="k">' + ad + '</div><div class="num" style="font-size:22px;font-weight:800;color:' + renk + '">' + v + '</div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
-          return '<div style="display:flex;gap:8px;flex-wrap:wrap">' + kut((gun === bugun ? 'Bugün' : tarihK(gun)) + ' enerji maliyeti', say(m) + ' ₺', '#D9480F', "Pi " + say(sa, 1) + " saat ölçtü (öncesi veri yok)")
-            + kut('BTC geliri', say(g_) + ' ₺', '#7C3AED', 'F2Pool gelene kadar Pi\'nin anlık hash\'i') + kut('Net', (net > 0 ? '+' : '') + say(net) + ' ₺', net < 0 ? '#B42318' : '#1E7A3C', 'Gelir − enerji') + '</div>'; })()
-      // saat şeridi + grafik tek SVG'de; şimdiki saat kesikli çerçeve + yavaş yanıp sönme; geçmiş saatler hafif soluk
-      + (() => {
-          const n = pl.length, W = 1000, cw = W / n, SH = 30, PT = SH + 10, PH = 230, H = PT + PH + 22;
-          const mv = pl.map(emal), bv = pl.map(bas);
-          const gf = pl.map((q, i) => gerF(q, mv[i]));
-          const sol = v => v == null ? null : v * 1000 / FKW;                                    // filo ₺/saat → sol eksen ₺/MWh
-          const gmv = gf.map(r => r && r.maliyet != null ? sol(r.maliyet) : null), ggv = gf.map(r => r && r.gelir != null ? sol(r.gelir) : null);
-          const ymax = Math.ceil(Math.max(1000, ...[...mv, ...bv, ...gmv, ...ggv].filter(v => v != null)) * 1.08 / 1000) * 1000;
-          const y = v => PT + PH - v / ymax * PH, x = i => i * cw + cw / 2;
-          const yol = (arr, renk, kesik) => { let d = '', ac = false; arr.forEach((v, i) => { if (v == null) { ac = false; return; } d += (ac ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); ac = true; });
-            return '<path d="' + d + '" fill="none" stroke="' + renk + '" stroke-width="' + (kesik ? 2 : 2.6) + '"' + (kesik ? ' stroke-dasharray="7 5"' : '') + ' stroke-linejoin="round"/>' + arr.map((v, i) => v == null || kesik ? '' : '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="' + (i === si ? 5 : 3) + '" fill="' + renk + '"' + (i === si ? ' stroke="#fff" stroke-width="2"' : '') + '/>').join(''); };
-          const ZEMIN = { calisG: '#FFF1C7', calis: '#DDF1E3', uyut: '#FBE0DD', yok: '#F1F3F6' };
-          let g = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block" role="img" aria-label="Saatlik karar ve enerji maliyeti">';
-          pl.forEach((q, i) => { const d = DUR(q), z = q.karar === 'uyut' ? ZEMIN.uyut : q.karar === 'calis' ? (q.gunes_tahmini ? ZEMIN.calisG : ZEMIN.calis) : ZEMIN.yok, op = q.gecmis ? ' opacity=".6"' : '';
-            g += '<g' + op + '><rect x="' + (i * cw + 1).toFixed(1) + '" y="0" width="' + (cw - 2).toFixed(1) + '" height="' + SH + '" rx="4" fill="' + d.bar + '"/>'
-              + (d.bar2 ? '<path d="M' + (i * cw + 1).toFixed(1) + ' ' + SH + 'L' + (i * cw + cw - 1).toFixed(1) + ' 0V' + (SH - 4) + 'Q' + (i * cw + cw - 1).toFixed(1) + ' ' + SH + ' ' + (i * cw + cw - 5).toFixed(1) + ' ' + SH + 'Z" fill="' + d.bar2 + '"/>' : '')
-              + '<text x="' + x(i).toFixed(1) + '" y="' + (SH / 2 + 4.5) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">' + q.t.slice(11, 13) + '</text></g>'
-              + '<rect x="' + (i * cw).toFixed(1) + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="' + z + '"' + (q.gecmis ? ' fill-opacity=".55"' : '') + '/>'; });
-          if (ei > 0) { const xe = (ei * cw).toFixed(1);   // gün ayracı
-            g += '<line x1="' + xe + '" x2="' + xe + '" y1="0" y2="' + (PT + PH) + '" stroke="#10233F" stroke-width="2.5"/>'
-              + '<text x="' + (ei * cw + 5).toFixed(1) + '" y="' + (PT + 14) + '" font-size="11" font-weight="800" fill="#10233F">' + tarihK(yarin) + ' →</text>'; }
-          if (si >= 0) {   // şimdiki saat: kendi renginde kalır; üstüne beyaz yanıp sönen örtü + kesikli çerçeve
-            const x0 = (si * cw).toFixed(1);
-            g += '<rect class="simdi-nabiz" x="' + x0 + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="#fff"/>'
-              + '<rect x="' + (si * cw + 1.5).toFixed(1) + '" y="1.5" width="' + (cw - 3).toFixed(1) + '" height="' + (PT + PH - 3) + '" rx="4" fill="none" stroke="#10233F" stroke-width="2" stroke-dasharray="5 4"/>'
-              + '<text x="' + x(si).toFixed(1) + '" y="' + (PT + 14) + '" text-anchor="middle" font-size="11" font-weight="800" fill="#10233F">ŞU AN</text>';
-          }
-          for (let k = 0; k <= 4; k++) { const v = ymax * k / 4; g += '<line x1="0" x2="' + W + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="#10233F" stroke-opacity=".08"/>' + (k && k < 4 ? '<text x="4" y="' + (y(v) - 4).toFixed(1) + '" font-size="11" fill="#4A5A70">' + say(v) + '</text><text x="' + (W - 4) + '" y="' + (y(v) - 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#6B3FA0">' + say(v * FKW / 1000) + ' ₺</text>' : ''); }
-          g += '<text x="4" y="' + (PT + 12) + '" font-size="10" font-weight="700" fill="#4A5A70">₺/MWh</text><text x="' + (W - 4) + '" y="' + (PT + 12) + '" text-anchor="end" font-size="10" font-weight="700" fill="#6B3FA0">₺/saat · filo (' + NF + ' cihaz)</text>';
-          g += yol(bv, '#1E7A3C', true) + yol(mv, '#F4A27C', true) + yol(gmv, '#D9480F') + yol(ggv, '#7C3AED');
-          pl.forEach((q, i) => { if (i % Math.max(1, Math.round(n / 12)) === 0 || i === n - 1) g += '<text x="' + x(i).toFixed(1) + '" y="' + (PT + PH + 16) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + q.t.slice(11, 13) + ':00</text>'; });
-          pl.forEach((q, i) => { g += '<rect x="' + (i * cw).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + (PT + PH) + '" fill="transparent" data-tip="' + esc(q.t.slice(8, 10) + '.' + q.t.slice(5, 7) + ' ' + q.t.slice(11) + (i === si ? ' (şu an)' : q.gecmis ? ' (geçti)' : '') + ' · ' + DUR(q).ad + '\nEnerji maliyeti ' + say(mv[i]) + ' ₺/MWh = ' + say(q.maliyet, 1) + ' ₺/cihaz·saat (filo tam yük ' + say(mv[i] * FKW / 1000) + ' ₺/saat)\nTahmini gelir ' + say(q.gelir, 1) + ' ₺/cihaz·saat (başabaş ' + say(bv[i]) + ' ₺/MWh)' + (r => !r ? '' : '\n— Gerçekleşen (filo) —' + (r.sa ? '\nPi: ' + say(r.sa.calisan) + ' cihaz çalıştı' + (r.sa.isinan >= 0.5 ? ', ' + say(r.sa.isinan) + ' ısındı' : '') + (r.sa.uyuyan >= 0.5 ? ', ' + say(r.sa.uyuyan) + ' uyudu' : '') + ' · ' + r.sa.ilk + '–' + r.sa.son + '\nEnerji ' + say(r.kw) + ' kW → maliyet ' + say(r.maliyet) + ' ₺/saat' : '\nPi verisi yok') + '\nBTC geliri ' + say(r.gelir) + ' ₺/saat (' + say(r.th) + ' TH/s, ' + r.kaynak + (r.kaynak === 'F2Pool' ? ', ' + r.fn + ' cihaz' : '') + ')' + (r.net != null ? '\nNet ' + (r.net > 0 ? '+' : '') + say(r.net) + ' ₺/saat' : ''))(gf[i])) + '"/>'; });
-          g += '</svg>';
-          const lej = [['linear-gradient(135deg,#F0B429 50%,#2F9E55 50%)', '☀ Güneşle çalış'], ['#2F9E55', '✓ Kârlı, çalış'], ['#D64545', '✕ Zararlı, uyut']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
-            + [['#D9480F', 'Gerçekleşen enerji maliyeti (filo)', ''], ['#7C3AED', 'Gerçekleşen BTC geliri (filo)', ''], ['#F4A27C', 'Planlanan enerji maliyeti (tam yük)', 'dashed'], ['#1E7A3C', 'Tahmini BTC geliri (başabaş)', 'dashed']].map(([r, t, k]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px ' + (k || 'solid') + ' ' + r + '"></span>' + t + '</span>').join('')
-            + '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border:2px dashed #10233F;border-radius:3px"></span>Şu an</span><span>Soluk: geçmiş saat</span>';
-          return g + '<div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + lej + '</div>';
-        })()
+      + (tg_ ? (() => { const kut = (ad, v, renk, alt) => '<div style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;background:#F7F9FC;border-left:5px solid ' + renk + '"><div class="k">' + ad + '</div><div class="num" style="font-size:22px;font-weight:800;color:' + renk + '">' + v + '</div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
+          return '<div style="display:flex;gap:8px;flex-wrap:wrap">' + kut(gunAd(gun) + ' enerji maliyeti', say(tg_.m) + ' ₺', '#D9480F', say(tg_.saat, 1) + ' saat · ' + tg_.kaynak.join(', '))
+            + kut('BTC geliri', say(tg_.g) + ' ₺', '#7C3AED', gecmisSec ? 'F2Pool günlük kazanç (gerçek)' : 'F2Pool gelene kadar Pi\'nin anlık hash\'i') + kut('Net', (tg_.net > 0 ? '+' : '') + say(tg_.net) + ' ₺', tg_.net < 0 ? '#B42318' : '#1E7A3C', 'Gelir − enerji') + '</div>'; })() : '')
+      + '<div id="planGrafik">' + grafik(pl) + '</div>' + lejant
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;border-radius:10px;background:#F7F9FC"><b style="font-size:14px">Gün gün oynat</b>'
+      + '<label class="k" style="display:flex;gap:6px;align-items:center">Başlangıç <input id="anBas" type="date" value="' + anB.bas + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'
+      + '<label class="k" style="display:flex;gap:6px;align-items:center">Bitiş <input id="anBit" type="date" value="' + anB.bit + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'
+      + '<button type="button" class="btn" id="anOynat" onclick="planOynat()">▶ Oynat</button><button type="button" class="btn" onclick="planVideo()">⬇ Video indir</button><span id="anDurum" class="k"></span></div>'
       + '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">Saat</th><th class="sol">Karar</th><th class="ayr">PTF</th><th>Enerji maliyeti</th><th>Başabaş</th><th class="ayr">Maliyet</th><th>Tahmini gelir</th><th>Fark</th><th class="ayr" style="color:#D9480F">Gerç. maliyet</th><th style="color:#7C3AED">Gerç. gelir</th><th>Gerç. net</th><th class="sol ayr">Komut</th></tr><tr><th></th><th></th><th class="ayr k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="ayr k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="ayr k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th></th></tr></thead><tbody>'
       + pl.map((q, i) => { const d = DUR(q), m = emal(q), b = bas(q), f = q.gelir != null && q.maliyet != null ? q.gelir - q.maliyet : null, simdi = i === si;
           return (i === ei ? '<tr><td class="sol" colspan="12" style="background:#10233F;color:#fff;font-weight:800;padding:6px 12px">' + tarihK(yarin) + ' · yarın (PTF açıklandı, ilk 5 saat)</td></tr>' : '') + '<tr class="' + (simdi ? 'simdi-satir' : '') + '" style="background:' + d.bg + (q.gecmis ? ';opacity:.6' : '') + '"><td class="sol" style="font-weight:600;white-space:nowrap">' + q.t.slice(11) + (simdi ? ' <span style="display:inline-block;padding:1px 7px;border-radius:999px;background:#10233F;color:#fff;font-size:11px;font-weight:800">ŞU AN</span>' : '') + '</td>'
             + '<td class="sol"' + (q.not ? ' data-tip="' + esc(q.not) + '"' : '') + '><span style="display:inline-block;padding:3px 10px;border-radius:999px;background:' + d.bar + ';color:#fff;font-weight:700;font-size:13px;white-space:nowrap">' + d.ik + ' ' + d.ad + '</span>' + (q.karar_ham && q.karar_ham !== q.karar ? ' <span class="k">(kısa duruş)</span>' : '') + '</td>'
             + '<td class="ayr">' + say(q.ptf) + '</td><td style="font-weight:700;color:' + (m != null && b != null ? (m > b ? '#B42318' : '#1E7A3C') : '#10233F') + '">' + say(m) + '</td><td class="k">' + say(b) + '</td>'
             + '<td class="ayr">' + say(q.maliyet, 1) + '</td><td>' + say(q.gelir, 1) + '</td><td style="font-weight:600;color:' + (f == null ? '#4A5A70' : f < 0 ? '#B42318' : '#1E7A3C') + '">' + (f == null ? '—' : (f > 0 ? '+' : '') + say(f, 1)) + '</td>'
-            + (r => !r ? '<td class="ayr"></td><td></td><td></td>' : '<td class="ayr" style="color:#D9480F;font-weight:600"' + (r.sa ? ' data-tip="' + say(r.sa.calisan) + ' cihaz çalıştı · ' + say(r.kw) + ' kW · ' + r.sa.ilk + '–' + r.sa.son + '"' : '') + '>' + say(r.maliyet) + '</td><td style="color:#7C3AED;font-weight:600" data-tip="' + say(r.th) + ' TH/s · kaynak ' + r.kaynak + '">' + say(r.gelir) + (r.kaynak === 'saha' ? ' <span class="k" style="font-weight:400">anlık</span>' : '') + '</td><td style="font-weight:700;color:' + (r.net == null ? '#4A5A70' : r.net < 0 ? '#B42318' : '#1E7A3C') + '">' + (r.net == null ? '—' : (r.net > 0 ? '+' : '') + say(r.net)) + '</td>')(gerF(q, emal(q)))
+            + (r => !r ? '<td class="ayr"></td><td></td><td></td>' : '<td class="ayr" style="color:#D9480F;font-weight:600"' + (r.sa ? ' data-tip="' + say(r.sa.calisan) + ' cihaz çalıştı · ' + say(r.kw) + ' kW · ' + r.sa.ilk + '–' + r.sa.son + '"' : '') + '>' + say(r.maliyet) + '</td><td style="color:#7C3AED;font-weight:600" data-tip="' + say(r.th) + ' TH/s · kaynak ' + r.kaynak + '">' + say(r.gelir) + (/anlık/.test(r.gk) && r.th > 0 ? ' <span class="k" style="font-weight:400">anlık</span>' : '') + '</td><td style="font-weight:700;color:' + (r.net == null ? '#4A5A70' : r.net < 0 ? '#B42318' : '#1E7A3C') + '">' + (r.net == null ? '—' : (r.net > 0 ? '+' : '') + say(r.net)) + '</td>')(gerF(q, emal(q)))
             + '<td class="sol ayr">' + (TK[q.t.slice(0, 13)] ? (t => (t.eylem === 'wake' ? '⏰ ' : '☾ ') + t.t_komut.slice(11, 16) + ' ' + (t.eylem === 'wake' ? 'uyandır · ' + say(t.oncu_dk) + ' dk önce' : 'uyut'))(TK[q.t.slice(0, 13)]) : '') + '</td></tr>'; }).join('')
       + '</tbody></table></div><div class="k">Enerji maliyeti = (PTF + YEKDEM) × ' + say(kat, 3) + '. Başabaş: cihazın saatlik BTC gelirine denk gelen enerji maliyeti; maliyet bunun üstündeyse (kırmızı) ve güneş yoksa cihaz uyur. Geçmiş saatler aynı kuralla gerçekleşen PTF ve güneş üretiminden hesaplanır. Gerçekleşen (filo): Pi\'nin dakikalık ölçümünden saatlik ortalama güç × enerji maliyeti ve toplam hash × hashprice; F2Pool saatlik verisi gelince gelir onunla güncellenir. Güç, hash × model verimi (S21e 17,5 · S19 XP+ 21,5 J/TH); ısınan cihaz 1 kW sayılır.</div></section>';
   }

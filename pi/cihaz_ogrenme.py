@@ -462,8 +462,12 @@ def saatlik_yaz(zorla=False):
                    "ilk": r["ilk"].strftime("%H:%M"), "son": r["son"].strftime("%H:%M")}
     if not saat:
         return
-    _, sha = gh(SAATLIK)
-    gh(SAATLIK, {"guncellendi": simdi.isoformat(timespec="seconds"), "jth": JTH, "isinma_kw": ISINMA_KW, "saat": saat}, sha,
+    eski, sha = gh(SAATLIK)
+    tum = dict((eski or {}).get("saat") or {})      # arşiv: son 2 günü yenile, eskileri koru (en çok 400 gün)
+    tum.update(saat)
+    sinir_k = (simdi - timedelta(days=400)).strftime("%Y-%m-%d")
+    tum = {k: v for k, v in sorted(tum.items()) if k >= sinir_k}
+    gh(SAATLIK, {"guncellendi": simdi.isoformat(timespec="seconds"), "jth": JTH, "isinma_kw": ISINMA_KW, "saat": tum}, sha,
        "Saha saatlik " + simdi.strftime("%H:%M"))
     son.write_text(simdi.isoformat())
 

@@ -195,7 +195,7 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
             if j >= len(k) or k[j] != "calis":
                 break
             B1, B2 = plan[i]["_t"], plan[j]["_t"]
-            simdi_uyuyor = i == 0 and filo["uyuyan"] > 0 and filo["calisan"] == 0
+            simdi_uyuyor = i == 0 and filo["uyuyan"] > filo["calisan"]       # filonun çoğu uyuyorsa "uyuyor" say
             if not simdi_uyuyor:
                 bas = max(B1, simdi)
                 kapali_saat = (B2 - bas).total_seconds() / 3600
@@ -208,7 +208,8 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
                 bit = B2 + timedelta(minutes=60)
                 uyut_v = _deger(fiyat, bas, bit, max(w, bas), m, su0, yay)
                 calis_v = _deger(fiyat, bas, bit, bas - timedelta(hours=2), m, 99.0, 0)   # zaten sıcak, tam hash
-                if uyut_v is not None and calis_v is not None and uyut_v <= calis_v:
+                # plan "uyut" diyor; ancak uyutmak açıkça (cihaz başı 0,5 ₺'den fazla) daha kötüyse çalıştır (eşitlikte uyut)
+                if uyut_v is not None and calis_v is not None and uyut_v < calis_v - 0.5:
                     for x in range(i, j):
                         k[x] = "calis"
                         notlar[x] = (f"kısa duruş kârsız: uyutmak {uyut_v:.0f} ₺, çalışmak {calis_v:.0f} ₺ "
@@ -228,7 +229,7 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
             y = x - 1
             while y > 0 and k[y - 1] == "uyut":
                 y -= 1
-            bas_uyku = max(plan[y]["_t"], simdi) if not (y == 0 and filo["uyuyan"] and not filo["calisan"]) else None
+            bas_uyku = max(plan[y]["_t"], simdi) if not (y == 0 and filo["uyuyan"] > filo["calisan"]) else None
             canli = canli_su if (y == 0 and canli_su) else None
             kapali_saat = (B - bas_uyku).total_seconds() / 3600 if bas_uyku else None
             su0, su_kaynak = OG.su_tahmin(m, kapali_saat, canli)
@@ -379,7 +380,9 @@ def calistir():
     # Mevcut cihaz durumu
     cihazlar = (mad or {}).get("devices") or []
     ulasilan = [d for d in cihazlar if d.get("online") or d.get("sleeping")]
-    calisan = sum(1 for d in cihazlar if d.get("online") and not d.get("sleeping"))
+    # çalışan: açık, uykuda değil ve hash veriyor ya da havuza bağlı (ısınan). Açılışta takılı kalan, worker'ı ve hash'i
+    # olmayan cihazlar (7 Eki .101/.105/.115) sayılmaz; yoksa filo uyurken "çalışıyor" sanılıp herkes uyandırılıyordu.
+    calisan = sum(1 for d in cihazlar if d.get("online") and not d.get("sleeping") and ((d.get("hashrate_TH") or 0) > 0 or d.get("actual_worker")))
     uyuyan = sum(1 for d in cihazlar if d.get("sleeping"))
     canli_su = [d.get("temp_water") for d in cihazlar if d.get("sleeping") and d.get("temp_water")]
     canli_su = round(sum(canli_su) / len(canli_su), 1) if canli_su else None

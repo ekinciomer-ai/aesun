@@ -267,10 +267,10 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
     return k, notlar, anahtar, istenen, gecerli, yay
 
 
-def komut_gonder(eylem, a, neden):
+def komut_gonder(eylem, a, neden, hedefler="all"):
     kom, sha = gh("antminer_commands.json")
     kom = kom or {"commands": []}
-    cmd = {"id": str(uuid.uuid4())[:8], "action": eylem, "targets": "all", "delay_sec": a["sirali_gecikme_sn"],
+    cmd = {"id": str(uuid.uuid4())[:8], "action": eylem, "targets": hedefler, "delay_sec": a["sirali_gecikme_sn"],
            "sort_by": None, "issued_at": datetime.now().isoformat(), "issued_by": "otomatik (cihaz yönetimi)"}
     kom["commands"] = (kom.get("commands") or [])[-49:] + [cmd]
     kom["updated_at"] = cmd["issued_at"]
@@ -428,22 +428,39 @@ def calistir():
             eylem = "wake"
     elif istenen and not (mad_taze and ulasilan):
         eylem_not = "cihaz durumu okunamıyor (toplayıcı saha ağında değil ya da veri eski)"
+    takip = None
     if eylem and gecerli and f"{eylem}|{gecerli['hedef'].isoformat(timespec='seconds')}" in {g["anahtar"] for g in gonderilen}:
-        # bu geçiş için komut zaten gitti; uyanan Hydro cihazlar ön ısıtmada "uyku" görünür — tekrar gönderme
-        eylem_not = "komut gönderildi, cihazlar ısınıyor/geçişte"
-        eylem = None
-    if eylem and tekrar_mi(eylem, a):
+        # Bu geçiş için komut gitti. Uymayan cihaz kaldıysa yalnız onlara yeniden gönder (en çok 3 kez):
+        #   uyut: komuttan 8 dk sonra hâlâ hash veren; çalış: hedef saatten 15 dk sonra hâlâ uykuda olan
+        #   (uyanan Hydro cihaz ön ısıtmada "uyku" görünür, bu yüzden uyandırmada bekleme uzun)
+        an = f"{eylem}|{gecerli['hedef'].isoformat(timespec='seconds')}"
+        gk = [g for g in gonderilen if g["anahtar"] == an]
+        son_t = max(zaman(g["t_komut"]) for g in gk)
+        if eylem == "sleep":
+            uymayan = [d["suffix"] for d in cihazlar if d.get("online") and not d.get("sleeping") and (d.get("hashrate_TH") or 0) > 0]
+            vakit = simdi - son_t >= timedelta(minutes=8)
+        else:
+            uymayan = [d["suffix"] for d in cihazlar if d.get("sleeping")]
+            vakit = simdi >= gecerli["hedef"] + timedelta(minutes=15) and simdi - son_t >= timedelta(minutes=10)
+        if uymayan and vakit and len(gk) <= 3:
+            takip = sorted(uymayan)
+            eylem_not = f"{len(takip)} cihaz komuta uymadı, yalnız onlara yeniden gönderiliyor ({len(gk)}. tekrar)"
+        else:
+            eylem_not = ("komut gönderildi, cihazlar ısınıyor/geçişte" if not uymayan or not vakit else
+                         f"{len(uymayan)} cihaz 3 tekrara rağmen uymadı: " + ", ".join(map(str, sorted(uymayan))))
+            eylem = None
+    if eylem and not takip and tekrar_mi(eylem, a):
         eylem_not = f"aynı komut {a['komut_arasi_dk']} dk içinde gönderilmişti, bekleniyor"
         eylem = None
     gonderildi = False
     neden_eylem = (gecerli or {}).get("neden") or neden
     if eylem and a["mod"] == "otomatik":
-        cid = komut_gonder(eylem, a, neden_eylem)
+        cid = komut_gonder(eylem, a, neden_eylem + (" (tekrar: " + ",".join(map(str, takip)) + ")" if takip else ""), takip or "all")
         son_komut_kaydet(eylem, cid)
         hedef = (gecerli or {}).get("hedef") or simdi.replace(minute=0, second=0, microsecond=0)
         gonderilen.append({"anahtar": f"{eylem}|{hedef.isoformat(timespec='seconds')}", "eylem": eylem,
                            "hedef": hedef.isoformat(timespec="seconds"), "t_komut": simdi.isoformat(timespec="seconds"),
-                           "id": cid, "kim": "tam"})
+                           "id": cid, "kim": "tekrar" if takip else "tam", "hedefler": takip or "all"})
         gonderildi = True
         log("KOMUT", eylem, "-", neden_eylem)
     elif eylem:

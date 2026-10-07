@@ -391,7 +391,7 @@ def calistir():
     except Exception:
         mad_taze = False
     filo = {"calisan": calisan, "uyuyan": uyuyan}
-    # Saatlik plan: bu saat + 29 saat (güneş: bugünün gerçekleşen profili, ileri saatler için doğuş/batış)
+    # Saatlik plan: bu saattan yarının sonuna kadar (en az 30 saat; güneş: bugünün gerçekleşen profili, ileri saatler için doğuş/batış)
     saatlik = {}
     for v in ((fs or {}).get("saatlik_bugun") or {}).values():
         for s_, kk in (v or {}).items():
@@ -400,7 +400,7 @@ def calistir():
             except Exception:
                 pass
     plan = []
-    for i in range(30):
+    for i in range(max(30, 48 - simdi.hour)):
         t = (simdi + timedelta(hours=i)).replace(minute=0, second=0, microsecond=0)
         p, y = ptf_al(t), yekdem_al(t)
         if i == 0 and uretim is not None:

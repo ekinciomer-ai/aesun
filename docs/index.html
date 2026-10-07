@@ -1080,6 +1080,8 @@ async function cizYonetim() {
       const gunes = gun === bugun ? (gunesSaat[s] || 0) > esik : false;
       pl.push({ t, ptf, yekdem: yk, maliyet, gelir: gelirSabit, gunes_tahmini: gunes, gunes_kaynak: 'gerçekleşen', karar: gunes ? 'calis' : (gelirSabit != null && maliyet > gelirSabit ? 'uyut' : 'calis'), gecmis: true });
     }
+    // Yarının PTF'si açıklandıysa bugünün grafiğine ertesi günün ilk 5 saati (00–04) eklenir
+    if (gun === bugun) for (let s = 0; s < 5; s++) { const p = plHam.find(q => q.t === yarin + ' ' + String(s).padStart(2, '0') + ':00'); if (p) pl.push(Object.assign({}, p, { ertesi: true })); }
     const emal = q => q.ptf != null ? (q.ptf + (q.yekdem || 0)) * kat : null;               // enerji maliyeti ₺/MWh
     const bas = q => q.gelir != null ? q.gelir / kw * 1000 : null;                           // başabaş enerji maliyeti ₺/MWh
     const DUR = q => q.karar === 'uyut' ? { ad: 'Uyut', ik: '✕', bg: '#FDECEA', fg: '#B42318', bar: '#D64545' }
@@ -1089,7 +1091,8 @@ async function cizYonetim() {
       : { ad: '—', ik: '', bg: '#F1F3F6', fg: '#4A5A70', bar: '#C9D1DC' };
     const si = pl.findIndex(q => q.t === simdiT);                                           // şimdiki saatin sırası
     const ileri = pl.filter(q => q.t >= simdiT);
-    const calisSaat = pl.filter(q => q.karar === 'calis').length, uyuSaat = pl.filter(q => q.karar === 'uyut').length;
+    const calisSaat = pl.filter(q => !q.ertesi && q.karar === 'calis').length, uyuSaat = pl.filter(q => !q.ertesi && q.karar === 'uyut').length;
+    const ei = pl.findIndex(q => q.ertesi);                                                  // ertesi güne geçiş sırası
     const gunAd = g => g === bugun ? 'Bugün' : g === yarin ? 'Yarın' : tarihK(g);
     h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Saatlik plan · ' + gunAd(gun) + ' ' + tarihK(gun) + '</h2><span class="k" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' + calisSaat + ' saat çalış · ' + uyuSaat + ' saat uyut'
       + '<span class="tursec">' + [bugun].concat(yarinVar ? [yarin] : []).map(g => '<button type="button" class="' + (g === gun ? 'on' : '') + '" onclick="YSEC.gun=\'' + g + '\';cizMaden()">' + gunAd(g) + '</button>').join('') + '</span></span></div>'
@@ -1128,6 +1131,9 @@ async function cizYonetim() {
               + (d.bar2 ? '<path d="M' + (i * cw + 1).toFixed(1) + ' ' + SH + 'L' + (i * cw + cw - 1).toFixed(1) + ' 0V' + (SH - 4) + 'Q' + (i * cw + cw - 1).toFixed(1) + ' ' + SH + ' ' + (i * cw + cw - 5).toFixed(1) + ' ' + SH + 'Z" fill="' + d.bar2 + '"/>' : '')
               + '<text x="' + x(i).toFixed(1) + '" y="' + (SH / 2 + 4.5) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">' + q.t.slice(11, 13) + '</text></g>'
               + '<rect x="' + (i * cw).toFixed(1) + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="' + z + '"' + (q.gecmis ? ' fill-opacity=".55"' : '') + '/>'; });
+          if (ei > 0) { const xe = (ei * cw).toFixed(1);   // gün ayracı
+            g += '<line x1="' + xe + '" x2="' + xe + '" y1="0" y2="' + (PT + PH) + '" stroke="#10233F" stroke-width="2.5"/>'
+              + '<text x="' + (ei * cw + 5).toFixed(1) + '" y="' + (PT + 14) + '" font-size="11" font-weight="800" fill="#10233F">' + tarihK(yarin) + ' →</text>'; }
           if (si >= 0) {   // şimdiki saat: kendi renginde kalır; üstüne beyaz yanıp sönen örtü + kesikli çerçeve
             const x0 = (si * cw).toFixed(1);
             g += '<rect class="simdi-nabiz" x="' + x0 + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="#fff"/>'
@@ -1147,7 +1153,7 @@ async function cizYonetim() {
         })()
       + '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">Saat</th><th class="sol">Karar</th><th class="ayr">PTF</th><th>Enerji maliyeti</th><th>Başabaş</th><th class="ayr">Maliyet</th><th>Tahmini gelir</th><th>Fark</th><th class="ayr" style="color:#D9480F">Gerç. maliyet</th><th style="color:#7C3AED">Gerç. gelir</th><th>Gerç. net</th><th class="sol ayr">Komut</th></tr><tr><th></th><th></th><th class="ayr k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="ayr k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="ayr k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th></th></tr></thead><tbody>'
       + pl.map((q, i) => { const d = DUR(q), m = emal(q), b = bas(q), f = q.gelir != null && q.maliyet != null ? q.gelir - q.maliyet : null, simdi = i === si;
-          return '<tr class="' + (simdi ? 'simdi-satir' : '') + '" style="background:' + d.bg + (q.gecmis ? ';opacity:.6' : '') + '"><td class="sol" style="font-weight:600;white-space:nowrap">' + q.t.slice(11) + (simdi ? ' <span style="display:inline-block;padding:1px 7px;border-radius:999px;background:#10233F;color:#fff;font-size:11px;font-weight:800">ŞU AN</span>' : '') + '</td>'
+          return (i === ei ? '<tr><td class="sol" colspan="12" style="background:#10233F;color:#fff;font-weight:800;padding:6px 12px">' + tarihK(yarin) + ' · yarın (PTF açıklandı, ilk 5 saat)</td></tr>' : '') + '<tr class="' + (simdi ? 'simdi-satir' : '') + '" style="background:' + d.bg + (q.gecmis ? ';opacity:.6' : '') + '"><td class="sol" style="font-weight:600;white-space:nowrap">' + q.t.slice(11) + (simdi ? ' <span style="display:inline-block;padding:1px 7px;border-radius:999px;background:#10233F;color:#fff;font-size:11px;font-weight:800">ŞU AN</span>' : '') + '</td>'
             + '<td class="sol"' + (q.not ? ' data-tip="' + esc(q.not) + '"' : '') + '><span style="display:inline-block;padding:3px 10px;border-radius:999px;background:' + d.bar + ';color:#fff;font-weight:700;font-size:13px;white-space:nowrap">' + d.ik + ' ' + d.ad + '</span>' + (q.karar_ham && q.karar_ham !== q.karar ? ' <span class="k">(kısa duruş)</span>' : '') + '</td>'
             + '<td class="ayr">' + say(q.ptf) + '</td><td style="font-weight:700;color:' + (m != null && b != null ? (m > b ? '#B42318' : '#1E7A3C') : '#10233F') + '">' + say(m) + '</td><td class="k">' + say(b) + '</td>'
             + '<td class="ayr">' + say(q.maliyet, 1) + '</td><td>' + say(q.gelir, 1) + '</td><td style="font-weight:600;color:' + (f == null ? '#4A5A70' : f < 0 ? '#B42318' : '#1E7A3C') + '">' + (f == null ? '—' : (f > 0 ? '+' : '') + say(f, 1)) + '</td>'

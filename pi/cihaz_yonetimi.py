@@ -360,10 +360,10 @@ def calistir():
     btc_try = fg[son_fg]["try"] if son_fg else None
     hp, hp_bas, hp_son = hashprice(gelir or {}, a["hashprice_gun"])
     # Güneş üretimi: FusionSolar anlık güç (en çok 30 dk eski)
-    uretim_kw, fs_taze = None, False
+    uretim_kw, fs_taze, fs_ts = None, False, None
     if fs:
         try:
-            ts = zaman(fs.get("guncelleme"))
+            ts = fs_ts = zaman(fs.get("guncelleme"))
             fs_taze = (simdi - ts) < timedelta(minutes=30)
             uretim_kw = sum(float(t.get("anlik_guc_kw") or 0) for t in (fs.get("tesisler") or {}).values())
         except Exception:
@@ -448,6 +448,15 @@ def calistir():
         else:
             eylem_not = ("komut gönderildi, cihazlar ısınıyor/geçişte" if not uymayan or not vakit else
                          f"{len(uymayan)} cihaz 3 tekrara rağmen uymadı: " + ", ".join(map(str, sorted(uymayan))))
+            eylem = None
+    # Zıt komut kilidi: son 30 dk içinde bir geçiş komutu gittiyse, tersini ancak o komuttan SONRA gelmiş güneş verisi
+    # gerektiriyorsa gönder. (7 Eki 18:03 uyut → 18:05 17:51 tarihli 103 kW verisiyle çalıştır gidip gelmesini önler.)
+    if eylem and gonderilen:
+        sk = max(gonderilen, key=lambda g: g["t_komut"])
+        skt = zaman(sk["t_komut"])
+        if sk["eylem"] != eylem and simdi - skt < timedelta(minutes=30) and not (fs_ts and fs_ts > skt):
+            eylem_not = (f"{sk['t_komut'][11:16]}'de {('uyut' if sk['eylem'] == 'sleep' else 'çalıştır')} gönderildi; "
+                         "tersi için daha yeni güneş verisi bekleniyor")
             eylem = None
     if eylem and not takip and tekrar_mi(eylem, a):
         eylem_not = f"aynı komut {a['komut_arasi_dk']} dk içinde gönderilmişti, bekleniyor"

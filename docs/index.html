@@ -1119,7 +1119,7 @@ async function cizYonetim() {
     // Gelir: o günün gerçek F2Pool kazancı saatlik hash payına göre; gün kapanmadıysa hash × hashprice × BTC.
     const hpG = y.hashprice_btc_th_gun, btcG = y.btc_try;
     let SAHA = null, KIMF = {}; try { SAHA = await al('n8n/saha_saatlik.json'); } catch (e) {} try { KIMF = await al('n8n/cihaz_kimlik.json'); } catch (e) {}
-    const NF = Object.keys(KIMF || {}).length || c.toplam || 28, FKW = NF * kw;                // filo: cihaz sayısı ve tam yük gücü (kW)
+    const NF = Object.values(KIMF || {}).filter(v => !v.not).length || c.toplam || 28, FKW = NF * kw;   // devre dışı (not'lu) cihaz sayılmaz                // filo: cihaz sayısı ve tam yük gücü (kW)
     const JTH = (SAHA && SAHA.jth) || { 'S21e Hyd': 17.5, 'S19 XP+ Hyd': 21.5, 'S19e XP Hyd': 34.5 };
     const p2 = h => String(h).padStart(2, '0'), gunF2T = {};
     const gunF2 = g => { if (gunF2T[g] != null) return gunF2T[g]; let t = 0, ns = 0; for (let h = 0; h < 24; h++) { const o = MADEN.H && MADEN.H[g + ' ' + p2(h)]; if (o) for (const v of Object.values(o)) if (v > 0) { t += v; ns++; } } return (gunF2T[g] = { t, ns }); };
@@ -1200,7 +1200,17 @@ async function cizYonetim() {
       const { mv, bv, gmv, ggv, gf } = S;
       const ymax = o.ymax || Math.ceil(Math.max(1000, ...[...mv, ...bv, ...gmv, ...ggv].filter(v => v != null)) * 1.08 / 1000) * 1000;
       const yy = v => PT + PH - v / ymax * PH, x = i => i * cw + cw / 2;
-      const yol = (arr, renk, kesik) => { let d = '', ac = false; arr.forEach((v, i) => { if (v == null) { ac = false; return; } d += (ac ? 'L' : 'M') + x(i).toFixed(1) + ' ' + yy(v).toFixed(1); ac = true; });
+      // kavisli çizgi: monoton kübik eğri (Fritsch–Carlson) — tepe/dip noktalarını aşmaz, sıfırın altına sarkmaz
+      const egri = P => { if (P.length < 3) return P.map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+        const n_ = P.length, dx = [], m = [], t = [];
+        for (let k = 0; k < n_ - 1; k++) { dx.push(P[k + 1][0] - P[k][0]); m.push((P[k + 1][1] - P[k][1]) / dx[k]); }
+        t.push(m[0]); for (let k = 1; k < n_ - 1; k++) t.push(m[k - 1] * m[k] <= 0 ? 0 : (m[k - 1] + m[k]) / 2); t.push(m[n_ - 2]);
+        for (let k = 0; k < n_ - 1; k++) { if (m[k] === 0) { t[k] = t[k + 1] = 0; continue; } const al = t[k] / m[k], be = t[k + 1] / m[k], h = al * al + be * be; if (h > 9) { const r = 3 / Math.sqrt(h); t[k] = r * al * m[k]; t[k + 1] = r * be * m[k]; } }
+        let d = 'M' + P[0][0].toFixed(1) + ' ' + P[0][1].toFixed(1);
+        for (let k = 0; k < n_ - 1; k++) { const h = dx[k] / 3; d += 'C' + (P[k][0] + h).toFixed(1) + ' ' + (P[k][1] + t[k] * h).toFixed(1) + ' ' + (P[k + 1][0] - h).toFixed(1) + ' ' + (P[k + 1][1] - t[k + 1] * h).toFixed(1) + ' ' + P[k + 1][0].toFixed(1) + ' ' + P[k + 1][1].toFixed(1); }
+        return d; };
+      const yol = (arr, renk, kesik) => { let d = '', P = []; const bitir = () => { if (P.length) d += egri(P); P = []; };
+        arr.forEach((v, i) => { if (v == null) { bitir(); return; } P.push([x(i), yy(v)]); }); bitir();
         return '<path d="' + d + '" fill="none" stroke="' + renk + '" stroke-width="' + (kesik ? 2 : 2.6) + '"' + (kesik ? ' stroke-dasharray="7 5"' : '') + ' stroke-linejoin="round"/>' + arr.map((v, i) => v == null || kesik ? '' : '<circle cx="' + x(i).toFixed(1) + '" cy="' + yy(v).toFixed(1) + '" r="' + (i === si_ ? 5 : 3) + '" fill="' + renk + '"' + (i === si_ ? ' stroke="#fff" stroke-width="2"' : '') + '/>').join(''); };
       const ZEMIN = { calisG: '#FFF1C7', calis: '#DDF1E3', uyut: '#FBE0DD', yok: '#F1F3F6' };
       let g = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif" role="img" aria-label="Saatlik karar ve enerji maliyeti">';

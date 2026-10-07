@@ -90,7 +90,7 @@ table.tb thead th[aria-sort=descending]::after{content:" ▼";font-size:10px}
   <a href="#inverter" data-sayfa="inverter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20h18M6 16V10M10 16V6M14 16v-4M18 16V8"/></svg>İnverter analizi</a>
   <a href="#maden" data-sayfa="maden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2M15 10v4"/></svg>Madencilik<span id="r-mad"></span></a>
   <a href="#epias" data-sayfa="epias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 6"/></svg>EPİAŞ</a>
-  <a href="#bildirim" data-sayfa="bildirim"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z"/></svg>Bildirimler</a>
+  <a href="#bildirim" data-sayfa="bildirim"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z"/></svg>Panel Yönetimi</a>
   <a href="#genel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>Uyarılar<span id="r-uy"></span></a>
   <div class="bosluk" style="flex:1 1 auto;min-height:24px"></div>
   <div class="k" style="color:#9FB0C6;padding:0 12px;font-size:12px" id="kaynakNot"></div>
@@ -1798,8 +1798,8 @@ let BILD = null, BILD_KAYIT = null, BILD_SHA = null, BILD_DEGISTI = false;
 const ghAnahtar = () => { try { return localStorage.getItem('aesun_gh_anahtar') || ''; } catch (e) { return ''; } };
 function ghAnahtarKaydet(v) { try { localStorage.setItem('aesun_gh_anahtar', v); } catch (e) {} }
 async function cizBildirim(zorla) {
-  document.getElementById('baslik').textContent = 'Bildirimler';
-  document.getElementById('altBaslik').textContent = 'WhatsApp mesajları: kim hangi konuyu alır';
+  document.getElementById('baslik').textContent = 'Panel Yönetimi';
+  document.getElementById('altBaslik').textContent = 'WhatsApp bildirimleri: kim hangi konuyu alır';
   document.getElementById('kontrol').innerHTML = '';
   const ic = document.getElementById('icerik');
   if (!BILD || zorla) {
@@ -1812,7 +1812,7 @@ async function cizBildirim(zorla) {
   const sonu = a => kay.filter(x => x.anahtar === a).slice(-1)[0];
   const kutu = 'width:22px;height:22px;cursor:pointer;flex:none';
   const inp = 'padding:7px 9px;border:1px solid #D5DCE5;border-radius:6px;font:inherit';
-  let h = '<section class="panel" style="gap:12px"><div class="bas"><h2>Kim neyi alsın</h2><span class="k">Kutucukları işaretleyip <b>Kaydet</b>\'e basın</span></div>'
+  let h = '<section class="panel" style="gap:12px"><div class="bas"><h2>WhatsApp bildirimleri: kim neyi alsın</h2><span class="k">Kutucukları işaretleyip <b>Kaydet</b>\'e basın</span></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
   P.forEach((p, i) => {
     const s = sonu(p.anahtar), kapali = p.aktif === false;

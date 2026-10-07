@@ -911,7 +911,12 @@ async function cizCihazlar() {
   const s7 = {}; let topTH = 0, btc7 = 0, sahaTop = 0;
   for (const g of gun7) { const r = madenGun(g); btc7 += r.btc || 0; for (const [c, z] of Object.entries(r.cihaz)) { const o = s7[c] || (s7[c] = { ths: 0, s: 0, saha: 0 }); o.ths += z.ths; o.s += z.s; topTH += z.ths; } sahaTop += r.calisan; }
   const kodlar = [...new Set([...Object.keys(f2w), ...Object.keys(don.cihazlar || {}).map(k => k.split('.').pop()), ...Object.keys(canli), ...Object.keys(s7)])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
-  let KIM = {}, AG = null; try { KIM = await al('n8n/cihaz_kimlik.json'); } catch (e) {} try { AG = await al('n8n/ag_tarama.json'); } catch (e) {}
+  let KIM = {}, AG = null, DET = null, BEK = null; try { KIM = await al('n8n/cihaz_kimlik.json'); } catch (e) {} try { AG = await al('n8n/ag_tarama.json'); } catch (e) {}
+  try { DET = await al('n8n/cihaz_detay.json'); } catch (e) {} try { BEK = await al('n8n/bekci.json'); } catch (e) {}
+  // kart (hashboard) özeti: ideal hıza oran ve en sıcak çip
+  const kartH = c => { const o = DET && DET.cihaz && DET.cihaz[c]; if (!o || !(o.kart || []).length) return '';
+    return '<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span class="k" style="font-size:11px">Kartlar</span>' + o.kart.map(k => { const or = k.ideal ? k.hiz / k.ideal : null, kotu = !(k.hiz > 0) || (or != null && or < 0.85), sicak = k.t_chip >= 85;
+      return '<span title="Kart ' + (k.i ?? '') + ': ' + say(k.hiz) + ' / ideal ' + say(k.ideal) + ' · frekans ' + say(k.frek) + ' · çip ' + say(k.asic) + ' · PCB ' + say(k.t_pcb) + ' °C · çip ' + say(k.t_chip) + ' °C · HW ' + say(k.hw) + '" style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:' + (kotu ? '#FDECEA' : sicak ? '#FFF4DC' : '#E8F5EC') + ';color:' + (kotu ? '#B42318' : sicak ? '#9A5B00' : '#1E7A3C') + '">' + (or != null ? '%' + say(or * 100) : say(k.hiz)) + (k.t_chip ? ' · ' + say(k.t_chip) + '°' : '') + '</span>'; }).join('') + '</div>'; };
   for (const k of Object.keys(KIM || {})) if (!kodlar.includes(k)) kodlar.push(k);
   kodlar.sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
   const sonHash = {}; for (const k of Object.keys(MADEN.H || {}).sort()) for (const [w, v] of Object.entries(MADEN.H[k] || {})) if (v > 0) sonHash[w] = k;
@@ -958,6 +963,7 @@ async function cizCihazlar() {
       + '<span style="font-family:monospace;font-size:12px;color:#7A4E00">SN ' + (seri ? esc(seri) : '—') + '</span>' + (mac ? '<span style="font-family:monospace;font-size:11px;color:#8A96A8">' + esc(mac) + '</span>' : '') + '</div>'
       + (uyari ? '<div style="font-size:12px;line-height:1.35;color:' + dRenk + ';background:' + dZemin + ';border-radius:6px;padding:6px 8px">' + uyari + '</div>' : '')
       + '<div style="display:flex;gap:6px">' + kol('SAHA (Pi)', sahaSut, '#F3F8F4') + kol('F2POOL', f2Sut, '#F2F5FB') + '</div>'
+      + kartH(c)
       + (fark != null ? sat('F2Pool 1 sa / saha', (fark >= 0 ? '+' : '') + say(fark, 1) + '%', Math.abs(fark) > 15 ? '#9A5B00' : null) : '')
       + sat('7 gün: çalışırken / oran', (th7 != null ? say(th7) + ' TH/s' : '—') + ' · ' + (cal7 != null ? '%' + say(cal7 * 100) : '—'))
       + sat('7 gün gelir payı', pay7 != null ? say(pay7 * 1e3, 3) + ' mBTC' : '—')
@@ -973,6 +979,9 @@ async function cizCihazlar() {
     + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Son 7 gün gelir</div><div class="num" style="font-size:22px;font-weight:700">' + btcY(btc7) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">BTC</span></div></div></div>';
   const yasDk = mad.timestamp ? (Date.now() - Date.parse(mad.timestamp + '+03:00')) / 60000 : null;
   if (yasDk != null && yasDk > 5) h = '<div class="panel" style="background:#FDECEA;border-color:#F3B8B1;padding:12px 16px"><div style="font-size:14px;color:#8A1C12;font-weight:700">Saha verisi ' + Math.round(yasDk) + ' dk önce geldi (' + esc(String(mad.timestamp).slice(11, 16)) + '). Aşağıdaki sayılar o anki durum; Pi ya da saha interneti şu an veri göndermiyor.</div></div>' + h;
+  const bo = ((BEK && BEK.olaylar) || []).slice().reverse().slice(0, 8);
+  if (bo.length) h += '<section class="panel" style="gap:8px"><div class="bas"><h2>Bekçi (otomatik onarım)</h2><span class="k">takılan cihaz önce yeniden başlatılır; ayarı bozulan cihaz fabrika ayarı + yedekten onarılır</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Zaman</th><th class="sol">Cihaz</th><th class="sol">İşlem</th><th class="sol">Sonuç</th></tr></thead><tbody>'
+    + bo.map(o => '<tr><td class="sol">' + esc(o.t.slice(8, 10) + '.' + o.t.slice(5, 7) + ' ' + o.t.slice(11, 16)) + '</td><td class="sol"><b>' + esc(o.cihaz) + '</b> <span class="k">' + esc(o.ip) + '</span></td><td class="sol">' + esc(o.olay) + '</td><td class="sol" style="color:' + (o.sonuc === 'BAŞARISIZ' ? '#B42318' : '#1E7A3C') + '">' + esc(o.sonuc) + (o.ayrinti ? ' <span class="k">' + esc(o.ayrinti) + '</span>' : '') + '</td></tr>').join('') + '</tbody></table></div></section>';
   const yanitsizIP = (mad.devices || []).filter(d => !d.online && !d.sleeping && !d.serial).map(d => d.ip);
   if (nErisim || yanitsizIP.length) h += '<section class="panel" style="gap:6px;border-left:4px solid #C2410C"><div class="bas"><h2>Erişim</h2><span class="k">' + (AG ? 'Ağ taraması ' + esc(String(AG.zaman || '').replace('T', ' ').slice(0, 16)) + ' · ' + AG.alt_ag + ' · ' + AG.madenci_sayisi + ' madenci bulundu' : 'Ağ taraması henüz çalışmadı') + '</span></div>'
     + (nErisim ? '<p style="margin:0">' + nErisim + ' cihaz F2Pool\'da çalışıyor ama Pi ulaşamıyor: <b>' + kodlar.filter(c => durumBul(c) === 'erisim').map(esc).join(', ') + '</b>. Bunlar "Tümünü uyut" ile uyumaz. Kalıcı çözüm: modemde her cihaza sabit IP (DHCP rezervasyonu).</p>' : '')

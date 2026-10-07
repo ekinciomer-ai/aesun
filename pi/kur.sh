@@ -44,12 +44,13 @@ if [ "$SUDO" = 1 ]; then
   grep -q '^User=' /etc/systemd/system/aesun-nabiz.service || sudo sed -i "/^\[Service\]/a User=$KULLANICI" /etc/systemd/system/aesun-nabiz.service
   sudo systemctl daemon-reload && sudo systemctl enable --now aesun-osos.timer aesun-nabiz.timer
 else
-  ( crontab -l 2>/dev/null | grep -v -e 'osos_toplayici.py' -e 'pi/nabiz.sh' -e 'pi/cihaz_yonetimi.py' -e 'pi/cihaz_ogrenme.py' ;
+  ( crontab -l 2>/dev/null | grep -v -e 'osos_toplayici.py' -e 'pi/nabiz.sh' -e 'pi/cihaz_yonetimi.py' -e 'pi/cihaz_ogrenme.py' -e 'pi/ag_tara.py' ;
     echo "10 * * * * $PY $KOK/toplayicilar/osos_toplayici.py >> $KOK/osos.log 2>&1";
     [ "$NABIZ" = 1 ] && echo "*/10 * * * * $KOK/pi/nabiz.sh >> $KOK/nabiz.log 2>&1"
     [ "$NABIZ" = 1 ] && echo "*/5 * * * * flock -n /tmp/aesun_cy.lock python3 $KOK/pi/cihaz_yonetimi.py >> $KOK/cihaz_yonetimi.log 2>&1"
     [ "$NABIZ" = 1 ] && echo "* * * * * flock -n /tmp/aesun_cy.lock python3 $KOK/pi/cihaz_yonetimi.py --tetik >> $KOK/cihaz_yonetimi.log 2>&1"
-    [ "$NABIZ" = 1 ] && echo "* * * * * flock -n /tmp/aesun_og.lock python3 $KOK/pi/cihaz_ogrenme.py >> $KOK/cihaz_ogrenme.log 2>&1" ) | crontab -
+    [ "$NABIZ" = 1 ] && echo "* * * * * flock -n /tmp/aesun_og.lock python3 $KOK/pi/cihaz_ogrenme.py >> $KOK/cihaz_ogrenme.log 2>&1"
+    [ "$NABIZ" = 1 ] && echo "3,18,33,48 * * * * flock -n /tmp/aesun_ag.lock python3 $KOK/pi/ag_tara.py >> $KOK/ag_tara.log 2>&1" ) | crontab -
   echo "crontab:"; crontab -l | grep aesun/
 fi
 

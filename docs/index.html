@@ -1212,8 +1212,8 @@ async function cizMaden() {
         seriler: [{ ad: 'BTC (' + (para === 'usd' ? 'USD' : 'TL') + ', günlük kapanış)', renk: '#eda100', v: ince.map(g => MADEN.btc[g][para]) }] })
       + '<div class="k">Kaynak: Binance günlük kapanış (UTC). USD 17 Ağustos 2017\'den, TL 20 Aralık 2019\'dan beri.</div></section>';
   }
-  // Gelir dağılımı: 24 Eylül 2026'dan itibaren günlük gelir 16 / 13 cihaz oranında (cihaz eşleşmesi bilinmediği için)
-  const DAG_BAS = '2026-09-24', DAG = [16, 13], DAG_TOP = DAG[0] + DAG[1];
+  // Gelir dağılımı: 14 Eylül 2026'dan itibaren günlük gelir 16 / 13 cihaz oranında (cihaz eşleşmesi bilinmediği için)
+  const DAG_BAS = '2026-09-14', DAG = [16, 13], DAG_TOP = DAG[0] + DAG[1];
   const dg = Object.keys(MADEN.gelir || {}).filter(g => /^\d{4}-\d{2}-\d{2}$/.test(g) && g >= DAG_BAS).sort().map(madenGun).filter(x => x.btc != null);
   if (dg.length) {
     for (const x of dg) { const sh = x.calisan || 0; x.nEff = sh ? Object.values(x.cihaz).reduce((t, z) => t + z.s, 0) / sh : null; x.cihazBasi = x.nEff ? x.btc / x.nEff : null; }

@@ -901,6 +901,8 @@ async function cizCihazlar() {
   let sonuc = null; try { sonuc = await al('antminer_command_results.json'); } catch (e) {}
   const mad = D.mad || {}, canli = {};
   for (const d of mad.devices || []) { const w = String(d.actual_worker || d.f2pool_name || '').split('.').pop(); if (w) canli[w] = d; }
+  let KIM0 = {}; try { KIM0 = await al('n8n/cihaz_kimlik.json'); } catch (e) {}
+  for (const d of mad.devices || []) if (!d.actual_worker && (d.online || d.sleeping)) { const w = Object.keys(KIM0).find(k => KIM0[k].son_ip === d.ip); if (w && !canli[w]) canli[w] = d; }
   const agDisi = (mad.devices || []).length && (mad.devices || []).every(d => !d.online && !d.sleeping);
   const f2 = (D.son && D.son.son || []).find(r => r.kaynak === 'f2pool'), f2w = {};
   for (const w of (f2 && f2.inverterler) || []) f2w[String(w.ad)] = w;
@@ -913,13 +915,14 @@ async function cizCihazlar() {
   for (const k of Object.keys(KIM || {})) if (!kodlar.includes(k)) kodlar.push(k);
   kodlar.sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
   const sonHash = {}; for (const k of Object.keys(MADEN.H || {}).sort()) for (const [w, v] of Object.entries(MADEN.H[k] || {})) if (v > 0) sonHash[w] = k;
-  const DUR = { calisiyor: ['Çalışıyor', '#1E7A3C', '#E8F5EC'], uyuyor: ['Uyuyor', '#4A5A70', '#EEF1F5'], yavas: ['Yavaşladı', '#9A5B00', '#FFF4DC'], erisim: ['Sahada erişilemiyor', '#C2410C', '#FFEDD5'], kapali: ['Kapalı', '#B42318', '#FDECEA'], bilinmiyor: ['Bilinmiyor', '#4A5A70', '#F5F7FA'] };
+  const DUR = { calisiyor: ['Çalışıyor', '#1E7A3C', '#E8F5EC'], uyuyor: ['Uyuyor', '#4A5A70', '#EEF1F5'], yavas: ['Yavaşladı', '#9A5B00', '#FFF4DC'], erisim: ['Sahada erişilemiyor', '#C2410C', '#FFEDD5'], gecis: ['Geçişte (ısınıyor / uykuya geçiyor)', '#4A5A70', '#EEF1F5'], kapali: ['Kapalı', '#B42318', '#FDECEA'], bilinmiyor: ['Bilinmiyor', '#4A5A70', '#F5F7FA'] };
   const durumBul = c => { const cv = canli[c], fw = f2w[c];
     if (cv && cv.sleeping) return 'uyuyor';
+    if (cv && cv.online && !(cv.hashrate_TH > 0)) return 'gecis';                              // açık ama hash yok: uyanıyor/uyuyor (geçişte)
     if (cv && cv.online) return fw && fw.durum === 'yavas' ? 'yavas' : 'calisiyor';
     if (fw && fw.durum !== 'offline' && (fw.hashrate_th > 0 || fw.durum === 'online')) return agDisi ? (fw.durum === 'yavas' ? 'yavas' : 'calisiyor') : 'erisim';
     return fw || KIM[c] || cv || sonHash[c] || (don.cihazlar || {})['mehmetas.' + c] ? 'kapali' : 'bilinmiyor'; };
-  const SIRA = { erisim: 0, kapali: 1, yavas: 2, bilinmiyor: 3, uyuyor: 4, calisiyor: 5 };
+  const SIRA = { erisim: 0, kapali: 1, yavas: 2, bilinmiyor: 3, gecis: 4, uyuyor: 5, calisiyor: 6 };
   const sirali = kodlar.slice().sort((a, b) => (SIRA[durumBul(a)] - SIRA[durumBul(b)]) || a.localeCompare(b, 'tr', { numeric: true }));
   const agBul = c => ((AG && AG.eksik) || []).find(e => e.worker === c);
   const sureY = h => h == null ? '—' : h >= 48 ? say(h / 24, 1) + ' gün' : say(h, 1) + ' sa';
@@ -931,7 +934,7 @@ async function cizCihazlar() {
     const sahaOk = cv && (cv.online || cv.sleeping);
     const ipSon = sahaOk ? cv.suffix : null;
     const seri = (cv && cv.serial) || ki.serial, mac = (cv && cv.mac) || ki.mac, ip = sahaOk ? cv.ip : null;
-    const model = (cv && cv.model && cv.model !== '?' ? cv.model : '') || ki.model || hw.model || 'model ?';
+    const model = ki.model || (cv && cv.model && cv.model !== '?' ? cv.model : '') || hw.model || 'model ?';
     const dugme = (act, et) => '<button type="button" class="btn" style="flex:1;padding:6px 8px;font-size:13px"' + (ipSon ? ' onclick="cihazKomut(\'' + act + '\',[' + ipSon + '],\'Cihaz ' + c + '\')"' : ' disabled title="Sahada bu cihaza erişilemiyor"') + '>' + et + '</button>';
     const sahaSut = sahaOk
       ? sat('Hash', say(cv.hashrate_TH) + ' TH/s') + sat('Hedef', say(cv.target_hashrate_TH) + ' TH/s') + sat('Verim', '%' + say(cv.efficiency_pct), cv.efficiency_pct < 90 ? '#B42318' : null)
@@ -963,11 +966,13 @@ async function cizCihazlar() {
   const say_ = k => kodlar.filter(c => durumBul(c) === k).length;
   const nErisim = say_('erisim'), nKapali = say_('kapali');
   let h = '<div class="kartlar5">'
-    + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Cihaz</div><div class="num" style="font-size:22px;font-weight:700">' + kodlar.length + '</div><div class="k">' + Object.entries(kodlar.reduce((m, c) => { const x = (canli[c] && canli[c].model !== '?' && canli[c].model) || (KIM[c] || {}).model || ((don.cihazlar || {})['mehmetas.' + c] || {}).model; if (x) m[x] = (m[x] || 0) + 1; return m; }, {})).map(([m, n]) => n + '× ' + esc(m)).join(' · ') + '</div></div>'
+    + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Cihaz</div><div class="num" style="font-size:22px;font-weight:700">' + kodlar.length + '</div><div class="k">' + Object.entries(kodlar.reduce((m, c) => { const x = (KIM[c] || {}).model || (canli[c] && canli[c].model !== '?' && canli[c].model) || ((don.cihazlar || {})['mehmetas.' + c] || {}).model; if (x) m[x] = (m[x] || 0) + 1; return m; }, {})).map(([m, n]) => n + '× ' + esc(m)).join(' · ') + '</div></div>'
     + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Çalışıyor</div><div class="num" style="font-size:22px;font-weight:700;color:#1E7A3C">' + (say_('calisiyor') + say_('yavas')) + '</div>' + (say_('yavas') ? '<div class="k">' + say_('yavas') + ' yavaş</div>' : '') + '</div>'
     + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Uyuyor</div><div class="num" style="font-size:22px;font-weight:700">' + say_('uyuyor') + '</div></div>'
     + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Sorunlu</div><div class="num" style="font-size:22px;font-weight:700;color:#B42318">' + (nErisim + nKapali) + '</div><div class="k">' + nErisim + ' sahada erişilemiyor · ' + nKapali + ' kapalı</div></div>'
     + '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Son 7 gün gelir</div><div class="num" style="font-size:22px;font-weight:700">' + btcY(btc7) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">BTC</span></div></div></div>';
+  const yasDk = mad.timestamp ? (Date.now() - Date.parse(mad.timestamp + '+03:00')) / 60000 : null;
+  if (yasDk != null && yasDk > 5) h = '<div class="panel" style="background:#FDECEA;border-color:#F3B8B1;padding:12px 16px"><div style="font-size:14px;color:#8A1C12;font-weight:700">Saha verisi ' + Math.round(yasDk) + ' dk önce geldi (' + esc(String(mad.timestamp).slice(11, 16)) + '). Aşağıdaki sayılar o anki durum; Pi ya da saha interneti şu an veri göndermiyor.</div></div>' + h;
   const yanitsizIP = (mad.devices || []).filter(d => !d.online && !d.sleeping && !d.serial).map(d => d.ip);
   if (nErisim || yanitsizIP.length) h += '<section class="panel" style="gap:6px;border-left:4px solid #C2410C"><div class="bas"><h2>Erişim</h2><span class="k">' + (AG ? 'Ağ taraması ' + esc(String(AG.zaman || '').replace('T', ' ').slice(0, 16)) + ' · ' + AG.alt_ag + ' · ' + AG.madenci_sayisi + ' madenci bulundu' : 'Ağ taraması henüz çalışmadı') + '</span></div>'
     + (nErisim ? '<p style="margin:0">' + nErisim + ' cihaz F2Pool\'da çalışıyor ama Pi ulaşamıyor: <b>' + kodlar.filter(c => durumBul(c) === 'erisim').map(esc).join(', ') + '</b>. Bunlar "Tümünü uyut" ile uyumaz. Kalıcı çözüm: modemde her cihaza sabit IP (DHCP rezervasyonu).</p>' : '')

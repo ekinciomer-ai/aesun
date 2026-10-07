@@ -1810,22 +1810,25 @@ async function cizBildirim(zorla) {
   if (location.hash !== '#bildirim') return;
   const K = BILD.konular || [], P = BILD.kisiler || [], kay = (BILD_KAYIT && BILD_KAYIT.kayit) || [];
   const sonu = a => kay.filter(x => x.anahtar === a).slice(-1)[0];
-  const tik = (i, k) => '<input type="checkbox" style="width:22px;height:22px;cursor:pointer" ' + ((P[i].konular || []).includes(k) ? 'checked ' : '') + 'onchange="bildTik(' + i + ',\'' + k + '\',this.checked)">';
+  const kutu = 'width:22px;height:22px;cursor:pointer;flex:none';
+  const inp = 'padding:7px 9px;border:1px solid #D5DCE5;border-radius:6px;font:inherit';
   let h = '<section class="panel" style="gap:12px"><div class="bas"><h2>Kim neyi alsın</h2><span class="k">Kutucukları işaretleyip <b>Kaydet</b>\'e basın</span></div>'
-    + '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Kişi</th><th class="sol">Numara</th><th>Açık</th>'
-    + K.map(k => '<th style="text-align:center;white-space:normal;min-width:92px" title="' + esc(k.aciklama) + '">' + esc(k.ad) + '</th>').join('')
-    + '<th style="text-align:center">Test</th><th class="sol">Son mesaj</th><th></th></tr></thead><tbody>';
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
   P.forEach((p, i) => {
-    const s = sonu(p.anahtar);
-    h += '<tr><td class="sol"><input value="' + esc(p.ad) + '" onchange="bildAlan(' + i + ',\'ad\',this.value)" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;width:120px"></td>'
-      + '<td class="sol"><span class="k">' + esc(p.anahtar) + ' · </span>…<input value="' + esc(p.son4 || '') + '" maxlength="4" inputmode="numeric" placeholder="son 4" onchange="bildAlan(' + i + ',\'son4\',this.value)" style="padding:6px;border:1px solid #D5DCE5;border-radius:6px;width:56px"></td>'
-      + '<td style="text-align:center"><input type="checkbox" style="width:20px;height:20px" ' + (p.aktif !== false ? 'checked ' : '') + 'onchange="bildAlan(' + i + ',\'aktif\',this.checked)"></td>'
-      + K.map(k => '<td style="text-align:center">' + tik(i, k.id) + '</td>').join('')
-      + '<td style="text-align:center"><input type="checkbox" title="Kaydedince bu kişiye hangi konuları alacağını yazan bir deneme mesajı gider" style="width:20px;height:20px" ' + ((BILD.test || []).includes(p.anahtar) ? 'checked ' : '') + 'onchange="bildTest(' + i + ',this.checked)"></td>'
-      + '<td class="sol" style="white-space:normal;max-width:260px;font-size:12px">' + (s ? (s.ok ? '<span style="color:#1E7A3C">✓</span> ' : '<span style="color:#B42318">✗ ' + esc(s.hata || '') + '</span> ') + '<span class="k">' + esc(String(s.t).slice(5, 16).replace('T', ' ')) + ' · ' + esc(s.konu) + '</span>' : '<span class="k">henüz yok</span>') + '</td>'
-      + '<td><button class="btn" type="button" style="min-height:32px;padding:4px 10px" onclick="bildSil(' + i + ')">Sil</button></td></tr>';
+    const s = sonu(p.anahtar), kapali = p.aktif === false;
+    h += '<div style="border:1px solid #D5DCE5;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px' + (kapali ? ';opacity:.6' : '') + '">'
+      + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input value="' + esc(p.ad) + '" aria-label="Ad" onchange="bildAlan(' + i + ',\'ad\',this.value)" style="' + inp + ';flex:1 1 0;min-width:0;font-weight:600">'
+      + '<span class="k">…</span><input value="' + esc(p.son4 || '') + '" aria-label="Son 4 hane" maxlength="4" inputmode="numeric" placeholder="son 4" onchange="bildAlan(' + i + ',\'son4\',this.value)" style="' + inp + ';width:64px"></div>'
+      + '<div class="k" style="font-size:12px">Anahtar <b>' + esc(p.anahtar) + '</b> · GitHub gizli değişkeni <code>BILDIRIM_' + esc(p.anahtar) + '</code></div>'
+      + '<label style="display:flex;gap:10px;align-items:center;cursor:pointer;font-weight:600"><input type="checkbox" style="' + kutu + '" ' + (!kapali ? 'checked ' : '') + 'onchange="bildAlan(' + i + ',\'aktif\',this.checked)">Mesaj gönder' + (kapali ? ' (kapalı)' : '') + '</label>'
+      + '<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #EEF1F5;padding-top:10px">'
+      + K.map(k => '<label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer" title="' + esc(k.aciklama) + '"><input type="checkbox" style="' + kutu + '" ' + ((p.konular || []).includes(k.id) ? 'checked ' : '') + 'onchange="bildTik(' + i + ',\'' + k.id + '\',this.checked)"><span>' + esc(k.ad) + '</span></label>').join('')
+      + '</div><div style="display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #EEF1F5;padding-top:10px;flex-wrap:wrap">'
+      + '<label class="k" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" style="width:18px;height:18px" ' + ((BILD.test || []).includes(p.anahtar) ? 'checked ' : '') + 'onchange="bildTest(' + i + ',this.checked)">Deneme mesajı gönder</label>'
+      + '<button class="btn" type="button" style="min-height:32px;padding:4px 10px" onclick="bildSil(' + i + ')">Sil</button></div>'
+      + '<div style="font-size:12px">' + (s ? (s.ok ? '<span style="color:#1E7A3C">✓ son mesaj</span> ' : '<span style="color:#B42318">✗ ' + esc(s.hata || '') + '</span> ') + '<span class="k">' + esc(String(s.t).slice(5, 16).replace('T', ' ')) + ' · ' + esc(s.konu) + '</span>' : '<span class="k">Henüz mesaj gönderilmedi</span>') + '</div></div>';
   });
-  h += '</tbody></table></div>'
+  h += '</div>'
     + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><button class="btn" type="button" onclick="bildEkle()">+ Kişi ekle</button>'
     + '<button class="btn" type="button" style="background:#10233F;color:#fff;border-color:#10233F" onclick="bildKaydet()">Kaydet</button>'
     + '<label class="k" style="display:flex;align-items:center;gap:6px">GitHub anahtarı <input type="password" autocomplete="off" placeholder="github_pat_…" value="' + (ghAnahtar() ? '••••••••' : '') + '" onchange="if(this.value&&!/^•+$/.test(this.value)){ghAnahtarKaydet(this.value.trim());this.value=\'••••••••\';document.getElementById(\'bildDurum\').textContent=\'Anahtar bu tarayıcıya kaydedildi.\'}" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;width:170px"></label>'

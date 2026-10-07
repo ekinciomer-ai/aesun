@@ -478,8 +478,5 @@ if __name__ == "__main__":
         ornek_al()
     except Exception as e:
         log("örnek alınamadı:", e)
-    try:
-        saatlik_yaz(zorla=x.analiz)
-    except Exception as e:
-        log("saatlik özet yazılamadı:", e)
+    # saatlik saha özeti artık epias-ptf GitHub Actions'ta (saha_saatlik.yml); saatlik_yaz() elle kullanım için duruyor
     analiz(zorla=x.analiz)

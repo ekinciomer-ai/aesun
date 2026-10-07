@@ -397,6 +397,77 @@ def analiz(zorla=False):
         f"emniyet {m['emniyet_dk']} dk; {m['sn_cihaz']} sn/cihaz")
 
 
+# ---------------------------------------------------------------- saatlik saha özeti (panel: anlık gerçekleşen maliyet / gelir)
+JTH = {"S21e Hyd": 17.5, "S19 XP+ Hyd": 21.5, "S19e XP Hyd": 34.5}   # J/TH: antminer arşivindeki güç tahmini / hash (plan ile aynı kaynak)
+ISINMA_KW = 1.0     # ön ısıtmada (açık, hash yok) cihaz başına varsayılan çekiş; pompa + ısıtma
+SAATLIK = "n8n/saha_saatlik.json"
+
+
+def saatlik_yaz(zorla=False):
+    """Son 2 günün örneklerinden saat saat: ortalama toplam hash (TH/s), ortalama filo gücü (kW), çalışan/ısınan/uyuyan sayısı.
+    Panel bunu PTF+YEKDEM ve hashprice ile çarpıp saatlik gerçekleşen enerji maliyeti ve BTC gelirini (₺/saat) çizer."""
+    son = AESUN / "saatlik_son"
+    simdi = datetime.now(TR)
+    if not zorla and son.exists() and time.time() - son.stat().st_mtime < 290:
+        return
+    kim = {}
+    try:
+        kf = AESUN / "cihaz_kimlik.json"
+        if not kf.exists() or time.time() - kf.stat().st_mtime > 6 * 3600:
+            k, _ = gh("n8n/cihaz_kimlik.json")
+            if k:
+                kf.write_text(json.dumps(k))
+        kim = json.loads(kf.read_text()) if kf.exists() else {}
+    except Exception:
+        pass
+    satirlar = {}
+    sinir = (simdi - timedelta(days=2)).strftime("%Y-%m-%d")
+    for f in sorted(IZ.glob("*.jsonl")):
+        if f.stem < sinir:
+            continue
+        for s_ in f.read_text().splitlines():
+            try:
+                o = json.loads(s_)
+            except Exception:
+                continue
+            ts = zaman(o["ts"])
+            th = kw = 0.0
+            cal = isi = uy = ulas = 0
+            for x in o["c"]:
+                x = list(x) + [None] * (10 - len(x))
+                on, sl, h, w = x[1], x[2], x[3] or 0, str(x[8] or "").split(".")[-1]
+                if not (on or sl):
+                    continue
+                ulas += 1
+                if sl:
+                    uy += 1
+                elif h > 0:
+                    cal += 1
+                    th += h
+                    kw += h * JTH.get((kim.get(w) or {}).get("model"), 17.5) / 1000
+                else:
+                    isi += 1
+                    kw += ISINMA_KW
+            k = ts.strftime("%Y-%m-%d %H")
+            r = satirlar.setdefault(k, {"n": 0, "th": 0.0, "kw": 0.0, "cal": 0, "isi": 0, "uy": 0, "ulas": 0, "ilk": ts, "son": ts})
+            r["n"] += 1; r["th"] += th; r["kw"] += kw; r["cal"] += cal; r["isi"] += isi; r["uy"] += uy; r["ulas"] += ulas
+            r["son"] = max(r["son"], ts); r["ilk"] = min(r["ilk"], ts)
+    saat = {}
+    for k, r in sorted(satirlar.items()):
+        n = r["n"]
+        if r["ulas"] / n < 1:        # toplayıcı cihazlara ulaşamamış: veri yok (sıfır değil)
+            continue
+        saat[k] = {"n": n, "th": round(r["th"] / n, 1), "kw": round(r["kw"] / n, 2), "calisan": round(r["cal"] / n, 1),
+                   "isinan": round(r["isi"] / n, 1), "uyuyan": round(r["uy"] / n, 1), "ulasilan": round(r["ulas"] / n, 1),
+                   "ilk": r["ilk"].strftime("%H:%M"), "son": r["son"].strftime("%H:%M")}
+    if not saat:
+        return
+    _, sha = gh(SAATLIK)
+    gh(SAATLIK, {"guncellendi": simdi.isoformat(timespec="seconds"), "jth": JTH, "isinma_kw": ISINMA_KW, "saat": saat}, sha,
+       "Saha saatlik " + simdi.strftime("%H:%M"))
+    son.write_text(simdi.isoformat())
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--analiz", action="store_true")
@@ -407,4 +478,8 @@ if __name__ == "__main__":
         ornek_al()
     except Exception as e:
         log("örnek alınamadı:", e)
+    try:
+        saatlik_yaz(zorla=x.analiz)
+    except Exception as e:
+        log("saatlik özet yazılamadı:", e)
     analiz(zorla=x.analiz)

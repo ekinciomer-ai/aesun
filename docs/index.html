@@ -971,7 +971,7 @@ async function hashCiz() {
   const tip = i => et[i] + '\n' + 'Cihaz ' + c + ': ' + (cihaz[i] == null ? 'kayıt yok' : cihaz[i] === 0 ? '0 (uykuda)' : say(cihaz[i], 1) + ' TH/s') + '\nFilo medyanı: ' + (filo[i] == null ? '—' : say(filo[i], 1)) + '\nF2Pool: ' + (f2[i] == null ? '—' : say(f2[i], 1));
   h += grafikX({ id: 'hashc', ad: 'Cihaz ' + c + ' hashrate', etiket: etKisa, etGoster, tip, turler: ['cizgi'], birim: 'TH/s', yuk: 220, fmt: v => say(v, 1),
     seriler: [{ ad: 'F2Pool (saatlik)', renk: '#7FA6D6', v: f2, kesik: true }, { ad: 'Filo medyanı', renk: '#8A96A8', v: filo, kesik: true },
-      { ad: 'Cihaz ' + c + ' (saha, ' + (adim === 5 ? '5 dk' : adim === 30 ? '30 dk ort.' : '2 sa ort.') + ')', renk: '#1E7A3C', v: cihaz, kalin: true }] });
+      { ad: 'Cihaz ' + c + ' (saha, ' + (adim === 5 ? '5 dk' : adim === 30 ? '30 dk ort.' : '2 sa ort.') + ')', renk: '#D92D20', v: cihaz, kalin: true }] });
   h += '<div class="k">0 = uykuda (ya da uyanırken/ısınırken hash yok) · boşluk = o dilimde saha kaydı yok (toplayıcı ağ dışında ya da cihaz yanıt vermedi). Saha değeri toplayıcının ölçtüğü anlık hızdır; Pi her 5 dakikada bir kaydeder. F2Pool çizgisi havuzun saatlik ortalamasıdır.</div>';
   m.firstChild.innerHTML = h;
 }

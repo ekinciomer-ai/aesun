@@ -276,7 +276,7 @@ function grafikX(sp) {
       let d = '', ac = false, ilk = -1, son = -1;
       s.v.forEach((v, i) => { if (v == null) { ac = false; return; } d += (ac ? 'L' : 'M') + cx(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; ac = true; if (ilk < 0) ilk = i; son = i; });
       if (tur === 'alan' && s.tip !== 'isaret' && ilk >= 0 && !s.v.slice(ilk, son + 1).includes(null)) g += '<path d="' + d + 'L' + cx(son).toFixed(1) + ' ' + y0.toFixed(1) + ' L' + cx(ilk).toFixed(1) + ' ' + y0.toFixed(1) + ' Z" fill="' + s.renk + '" fill-opacity="0.14"/>';
-      g += '<path d="' + d + '" fill="none" stroke="' + s.renk + '" stroke-width="' + (s.kalin ? 2.6 : 2) + '" stroke-linejoin="round" stroke-linecap="round"' + (s.kesik || s.tip === 'isaret' ? ' stroke-dasharray="5 4"' : '') + '/>';
+      g += '<path d="' + d + '" fill="none" stroke="' + s.renk + '" stroke-width="' + (s.kalinlik || (s.kalin ? 2.6 : 2)) + '" stroke-linejoin="round" stroke-linecap="round"' + (s.kesik || s.tip === 'isaret' ? ' stroke-dasharray="5 4"' : '') + '/>';
       if (n <= 45) s.v.forEach((v, i) => { if (v != null) g += '<circle cx="' + cx(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="' + (n <= 16 ? 3 : 2) + '" fill="' + s.renk + '"/>'; });
     }
   } else {
@@ -971,7 +971,7 @@ async function hashCiz() {
   const tip = i => et[i] + '\n' + 'Cihaz ' + c + ': ' + (cihaz[i] == null ? 'kayıt yok' : cihaz[i] === 0 ? '0 (uykuda)' : say(cihaz[i], 1) + ' TH/s') + '\nFilo medyanı: ' + (filo[i] == null ? '—' : say(filo[i], 1)) + '\nF2Pool: ' + (f2[i] == null ? '—' : say(f2[i], 1));
   h += grafikX({ id: 'hashc', ad: 'Cihaz ' + c + ' hashrate', etiket: etKisa, etGoster, tip, turler: ['cizgi'], birim: 'TH/s', yuk: 220, fmt: v => say(v, 1),
     seriler: [{ ad: 'F2Pool (saatlik)', renk: '#7FA6D6', v: f2, kesik: true }, { ad: 'Filo medyanı', renk: '#8A96A8', v: filo, kesik: true },
-      { ad: 'Cihaz ' + c + ' (saha, ' + (adim === 5 ? '5 dk' : adim === 30 ? '30 dk ort.' : '2 sa ort.') + ')', renk: '#D92D20', v: cihaz, kalin: true }] });
+      { ad: 'Cihaz ' + c + ' (saha, ' + (adim === 5 ? '5 dk' : adim === 30 ? '30 dk ort.' : '2 sa ort.') + ')', renk: '#D92D20', v: cihaz, kalin: true, kalinlik: 3.4 }] });
   h += '<div class="k">0 = uykuda (ya da uyanırken/ısınırken hash yok) · boşluk = o dilimde saha kaydı yok (toplayıcı ağ dışında ya da cihaz yanıt vermedi). Saha değeri toplayıcının ölçtüğü anlık hızdır; Pi her 5 dakikada bir kaydeder. F2Pool çizgisi havuzun saatlik ortalamasıdır.</div>';
   m.firstChild.innerHTML = h;
 }

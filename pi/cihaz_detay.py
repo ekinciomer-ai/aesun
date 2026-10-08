@@ -80,6 +80,46 @@ def oku(d, w, ayar_vakti):
     return o
 
 
+HASH_ADIM = 5                                                # dk; panelde cihaza tıklayınca açılan hashrate grafiği
+
+
+def hash_kaydet(mad, kim, simdi):
+    """Cihaz başı anlık hashrate'i günlük dosyaya 5 dk dilimle yazar: n8n/hash/YYYY-MM-DD.json
+    {"c": {"008": [288 değer]}} · TH/s = çalışıyor, 0 = uykuda / açık ama hash yok, null = veri yok."""
+    try:
+        ts = datetime.fromisoformat(str((mad or {}).get("timestamp"))[:19]).replace(tzinfo=TR)
+    except Exception:
+        return
+    if abs((simdi - ts).total_seconds()) > 10 * 60:         # toplayıcı verisi eski: dilim boş kalsın
+        return
+    ip2w = {v.get("son_ip"): k for k, v in (kim or {}).items() if v.get("son_ip")}
+    deger = {}
+    for d in (mad or {}).get("devices") or []:
+        if not (d.get("online") or d.get("sleeping")):
+            continue
+        w = kimlik_bul(d, kim) or ip2w.get(d.get("ip"))
+        if w:
+            deger[w] = 0 if d.get("sleeping") else round(float(d.get("hashrate_TH") or 0), 1)
+    if not deger:
+        return
+    gun, i = ts.strftime("%Y-%m-%d"), (ts.hour * 60 + ts.minute) // HASH_ADIM
+    n = 24 * 60 // HASH_ADIM
+    yol = f"n8n/hash/{gun}.json"
+    d, sha = gh(yol)
+    yeni = d is None
+    d = d or {"gun": gun, "adim_dk": HASH_ADIM, "kaynak": "toplayıcı (antminer_panel.json), Pi cihaz_detay.py", "c": {}}
+    for w, v in deger.items():
+        d["c"].setdefault(w, [None] * n)[i] = v
+    d["c"] = dict(sorted(d["c"].items()))
+    gh(yol, d, sha, "Hash " + ts.strftime("%H:%M"))
+    if yeni:
+        ix, isha = gh("n8n/hash/gunler.json")
+        ix = ix or {"gunler": [], "adim_dk": HASH_ADIM}
+        if gun not in ix["gunler"]:
+            ix["gunler"] = sorted(ix["gunler"] + [gun])
+            gh("n8n/hash/gunler.json", ix, isha, "Hash gün listesi " + gun)
+
+
 def main():
     simdi = datetime.now(TR)
     mad, _ = gh("antminer_panel.json")
@@ -111,6 +151,10 @@ def main():
             log("bekçi hatası:", e); veri["bekci"] = {"hata": str(e)[:200]}
     _, sha = gh(DOSYA)
     gh(DOSYA, veri, sha, "Cihaz detay " + simdi.strftime("%H:%M"))
+    try:
+        hash_kaydet(mad, kim, simdi)
+    except Exception as e:
+        log("hash kaydı hatası:", e)
     sorunlu = [o["worker"] or o["ip"] for o in sonuc if o.get("ayar_kod") not in (None, 200) or (o.get("kart") and any((k.get("hiz") or 0) <= 0 for k in o["kart"]))]
     log(f"{len(sonuc)} cihaz okundu; dikkat: {', '.join(sorunlu) or 'yok'}")
 

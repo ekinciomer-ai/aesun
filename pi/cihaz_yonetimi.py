@@ -317,6 +317,8 @@ def tetik():
         anahtar = f"{s['eylem']}|{s['hedef']}"
         if anahtar in gonderilen or not (t <= simdi < t + timedelta(minutes=10)):
             continue
+        if s["eylem"] == "sleep" and tk.get("uretim"):
+            continue                             # son tam hesapta güneş üretimi vardı: uyutma, tam hesap karar versin
         if tekrar_mi(s["eylem"], {"komut_arasi_dk": tk.get("komut_arasi_dk", 15)}):
             continue
         cid = komut_gonder(s["eylem"], tk["ayar_ozet"], s["neden"])
@@ -417,6 +419,10 @@ def calistir():
                      "gunes_kaynak": gk, "maliyet": mm, "gelir": g, "karar": kk})
     # Takvim (öğrenilmiş ısınma ile)
     k2, notlar, anahtar, istenen, gecerli, yay = takvim_kur(plan, m, a, simdi, filo, canli_su)
+    # Güneş kuralı önceliklidir: takvim (doğuş/batış tahmini) "uyut" dese de anlık üretim eşiğin üstündeyse uyutma.
+    # (8 Eki 16:55: takvim 17:00'yi zararlı saydı ve uyuttu, 435 kW üretim varken 17:00'de yeniden uyandırıldı.)
+    if uretim and istenen == "uyut":
+        istenen, gecerli = "calis", None
     for i, p in enumerate(plan):
         p["karar_ham"] = p["karar"]
         p["karar"] = k2[i]
@@ -482,6 +488,7 @@ def calistir():
     # takvimi yerel dosyaya yaz (tetik buradan okur)
     anahtar_j = [{**s_, "t_komut": s_["t_komut"].isoformat(timespec="seconds"), "hedef": s_["hedef"].isoformat(timespec="seconds")} for s_ in anahtar]
     tk = {"olusturuldu": simdi.isoformat(timespec="seconds"), "mod": a["mod"], "filo_taze": bool(mad_taze and ulasilan),
+          "uretim": bool(uretim),
           "komut_arasi_dk": a["komut_arasi_dk"], "ayar_ozet": {"sirali_gecikme_sn": a["sirali_gecikme_sn"]},
           "anahtarlar": anahtar_j, "gonderilen": gonderilen[-100:]}
     tk_yaz(tk)

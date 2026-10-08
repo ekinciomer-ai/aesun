@@ -541,6 +541,11 @@ if __name__ == "__main__":
         tetik()
     else:
         try:
+            import altminer_ip_ekle
+            altminer_ip_ekle.uygula(log)
+        except Exception as e:
+            log("altminer IP ekleme hatası:", e)
+        try:
             calistir()
         finally:
             try:

@@ -120,6 +120,36 @@ def hash_kaydet(mad, kim, simdi):
             gh("n8n/hash/gunler.json", ix, isha, "Hash gün listesi " + gun)
 
 
+LOG_DIR = "n8n/cihaz_log"
+LOG_ARALIK_DK = 30
+_ONEMLI = ("temp", "sicak", "power", "psu", "volt", "chain", "fail", "error", "err", "pic", "sensor", "protect",
+           "shutdown", "stop", "lost", "hashboard", "board", "fan", "water", "reboot", "restart")
+
+
+def log_kaydet(o, simdi):
+    """Kartları duran (hepsi 0 hız, açılalı 10 dk'dan fazla) cihazın çekirdek günlüğünü okur (salt okuma),
+    en çok 30 dk'da bir n8n/cihaz_log/<no>.json'a yazar. Şifre/parola geçen satırlar maskelenir."""
+    import re
+    w = o.get("worker")
+    kart = o.get("kart") or []
+    if not w or o.get("uyku") or not kart or any((k.get("hiz") or 0) > 0 for k in kart) or (o.get("sure_sn") or 0) < 600:
+        return
+    yol = f"{LOG_DIR}/{w}.json"
+    eski, sha = gh(yol)
+    if eski and simdi - datetime.fromisoformat(eski["zaman"]) < timedelta(minutes=LOG_ARALIK_DK):
+        return
+    try:
+        r = M.requests.get(f"http://{o['ip']}/cgi-bin/log.cgi", auth=M.filo_auth(), timeout=20)
+        metin = r.text.replace("\x00", "")
+    except Exception as e:
+        log("günlük okunamadı", w, e); return
+    satir = [re.sub(r"(pass\w*|sifre|password)(\S*\s*[:=]\s*)\S+", r"\1\2***", x, flags=re.I) for x in metin.splitlines() if x.strip()]
+    onemli = [x for x in satir if any(k in x.lower() for k in _ONEMLI)]
+    gh(yol, {"zaman": simdi.isoformat(timespec="seconds"), "ip": o["ip"], "neden": "tüm kartlar 0 hız",
+             "satir_sayisi": len(satir), "onemli": onemli[-200:], "son": satir[-120:]}, sha, f"Cihaz günlüğü {w} " + simdi.strftime("%H:%M"))
+    log("günlük kaydedildi", w, len(satir), "satır")
+
+
 def main():
     simdi = datetime.now(TR)
     mad, _ = gh("antminer_panel.json")
@@ -142,6 +172,10 @@ def main():
             gh(ORNEK, {"gun": simdi.strftime("%Y-%m-%d"), "modeller": om}, osha, "Cihaz ham örnek " + simdi.strftime("%d.%m"))
     for o in sonuc:
         o.pop("_ham", None)
+        try:
+            log_kaydet(o, simdi)
+        except Exception as e:
+            log("günlük hatası:", e)
     veri = {"zaman": simdi.isoformat(timespec="seconds"), "cihaz": {(o["worker"] or o["ip"]): o for o in sonuc}}
     if "--bekci-yok" not in sys.argv:
         try:

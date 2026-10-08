@@ -30,7 +30,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ortak import AESUN, TOK, TR, gh, log, zaman  # noqa: E402
+from ortak import AESUN, TOK, TR, bildirim_tetikle, gh, log, zaman  # noqa: E402
 import cihaz_ogrenme as OG  # noqa: E402
 
 YEREL = AESUN / "cihaz_yonetimi_yerel.json"
@@ -540,4 +540,11 @@ if __name__ == "__main__":
     elif x.tetik:
         tetik()
     else:
-        calistir()
+        try:
+            calistir()
+        finally:
+            try:
+                if bildirim_tetikle():
+                    log("bildirimler tetiklendi")
+            except Exception as e:
+                log("bildirim tetikleme hatası:", e)

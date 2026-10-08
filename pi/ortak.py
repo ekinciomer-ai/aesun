@@ -60,3 +60,24 @@ def zaman(s):
     """ISO metni -> TR saat dilimli datetime (dilimsiz metin yerel/TR kabul edilir)."""
     t = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
     return t.replace(tzinfo=TR) if t.tzinfo is None else t.astimezone(TR)
+
+
+def bildirim_tetikle(aralik_dk=15):
+    """GitHub'ın zamanlanmış iş akışları saatlerce gecikebiliyor (8 Eki: 15 dk yerine ~6 saatte bir).
+    Bildirimler iş akışını Pi düzenli tetikler: repository_dispatch (event_type "bildirim"), en çok aralik_dk'da bir."""
+    durum = AESUN / "bildirim_tetik.json"
+    try:
+        son = json.loads(durum.read_text()).get("t", 0) if durum.exists() else 0
+    except Exception:
+        son = 0
+    simdi = datetime.now(timezone.utc).timestamp()
+    if simdi - son < aralik_dk * 60 - 30:
+        return False
+    r = urllib.request.Request(REPO.replace("/contents/", "/dispatches"), data=json.dumps({"event_type": "bildirim"}).encode(),
+                               headers={"Authorization": "Bearer " + TOK, "Accept": "application/vnd.github+json",
+                                        "User-Agent": "aesun-pi", "Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(r, timeout=30):
+        pass
+    AESUN.mkdir(parents=True, exist_ok=True)
+    durum.write_text(json.dumps({"t": simdi}))
+    return True

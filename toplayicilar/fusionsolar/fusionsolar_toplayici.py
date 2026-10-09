@@ -31,6 +31,7 @@ import datetime as dt
 import json
 import logging
 import os
+import re
 import sqlite3
 import sys
 import time
@@ -97,6 +98,19 @@ INV_STATE = {512: "Şebekede", 513: "Şebekede (sınırlı)", 768: "Kapalı", 0:
 SEV = {1: "Kritik", 2: "Büyük", 3: "Küçük", 4: "Uyarı"}
 
 log = logging.getLogger("fs")
+
+
+def pv_sinyal(sid, ad):
+    """Gerçek zamanlı sinyal → (PV no, 0=gerilim / 1=akım) ya da (None, None).
+    Önce adına bakar ("PV1 giriş gerilimi", "PV3 input current"), yoksa Huawei kimlik düzeni 11001 + 3·(n−1) (+1 akım)."""
+    m = re.search(r"PV\s*(\d+)\D{0,25}?(gerilim|voltage|akım|akim|current)", str(ad or ""), re.I)
+    if m:
+        return int(m.group(1)), 0 if m.group(2).lower() in ("gerilim", "voltage") else 1
+    if str(sid).isdigit():
+        i = int(sid) - 11001
+        if 0 <= i < 3 * 40 and i % 3 < 2:
+            return i // 3 + 1, i % 3
+    return None, None
 
 JS_CALL = """
 async ([m, u, b]) => {
@@ -304,6 +318,7 @@ class Collector:
         self.st = {}      # dn -> {name, kisa, dc, company}
         self.inv = {}     # dn -> {name, station_dn}
         self.latest = {"tesisler": {}, "invertorler": {}, "alarmlar": []}
+        self.sinyal_ornek = None
         self.gh_token = gh_token()
         self.gh_son = 0.0
         self.gh_gecmis_son = 0.0
@@ -377,12 +392,21 @@ class Collector:
             except RuntimeError as e:
                 log.warning("%s: %s", meta["name"], e)
                 continue
-            vals = {}
+            vals, pv, ornek = {}, {}, []
             for g in r.get("data", []):
                 for sg in g.get("signals", []) or []:
-                    k = INV_SIG.get(str(sg.get("id")))
+                    sid = str(sg.get("id"))
+                    k = INV_SIG.get(sid)
                     if k:
                         vals[k] = sg.get("realValue")
+                    n, tur = pv_sinyal(sid, sg.get("name"))
+                    if n:
+                        pv.setdefault(n, [None, None])[tur] = num(sg.get("realValue"))
+                    if not self.sinyal_ornek:
+                        ornek.append([sid, str(sg.get("name") or "")[:40], str(sg.get("unit") or "")[:8]])
+            if ornek:
+                self.sinyal_ornek = {"inverter": meta["name"], "sinyaller": ornek}   # tanı: ad/kimlik listesi (değer yok)
+                self.latest["sinyal_ornek"] = self.sinyal_ornek
             dk = num(vals.get("durum_kodu"))
             self.con.execute("INSERT OR REPLACE INTO inverter_real VALUES(?,?,?,?,?,?,?,?,?)",
                              (ts, dn, meta["station_dn"], num(vals.get("aktif_kw")), num(vals.get("gunluk_kwh")),
@@ -392,7 +416,11 @@ class Collector:
                 "ad": meta["name"], "tesis": self.st[meta["station_dn"]]["kisa"],
                 "guc_kw": num(vals.get("aktif_kw")), "gunluk_kwh": num(vals.get("gunluk_kwh")),
                 "sicaklik_c": num(vals.get("sicaklik_c")),
-                "durum": INV_STATE.get(int(dk) if dk is not None else -1, vals.get("durum_kodu")), "ts": ts}
+                "durum": INV_STATE.get(int(dk) if dk is not None else -1, vals.get("durum_kodu")), "ts": ts,
+                # şebeke tarafı (faz akımı A, hat gerilimi V) ve PV girişleri [no, V, A]
+                **{k: num(vals.get(k)) for k in ("ia", "ib", "ic", "uab", "ubc", "uca", "guc_faktoru", "frekans_hz",
+                                                  "nominal_kw", "reaktif_kvar", "yalitim_mohm")},
+                "pv": [[n, v[0], v[1]] for n, v in sorted(pv.items()) if v[0] is not None or v[1] is not None]}
             time.sleep(0.3)
         self.con.commit()
         log.info("İnvertör: %d okundu", len(self.inv))
@@ -806,8 +834,16 @@ class Collector:
         jobs = [("meta", self.meta), ("station", self.stations), ("inverter", self.inverters),
                 ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun)]
         nxt = {k: 0.0 for k, _ in jobs}
+        kod = Path(__file__).resolve()
+        kod_mt = kod.stat().st_mtime
         while True:
             t = time.time()
+            try:
+                if kod.stat().st_mtime != kod_mt:          # git pull yeni sürüm getirdi: çık, cron yeni kodla başlatır
+                    log.info("Kod değişti; yeniden başlamak için çıkılıyor")
+                    return
+            except OSError:
+                pass
             ran = False
             for k, f in jobs:
                 if t >= nxt[k]:

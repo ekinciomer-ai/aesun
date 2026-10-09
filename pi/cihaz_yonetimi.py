@@ -571,6 +571,11 @@ if __name__ == "__main__":
         except Exception as e:
             log("altminer IP ekleme hatası:", e)
         try:
+            import surec_yenile
+            surec_yenile.uygula(log)
+        except Exception as e:
+            log("süreç yenileme hatası:", e)
+        try:
             calistir()
         finally:
             try:

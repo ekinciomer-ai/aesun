@@ -2030,6 +2030,59 @@ function ciz() {
   if (sayfa === 'bildirim') cizBildirim(); else if (sayfa === 'maden') cizMaden(); else if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
 }
 window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias' || location.hash === '#maden' || location.hash === '#bildirim') window.scrollTo(0, 0); } });
+// Prensip tek hat (bir sera): inverterler → AG bara (→ madencilik) → AG/OG trafo → OSOS sayacı → OG şebeke. Değerler canlı.
+function tekHatSvg(k, L, t, mk, os) {
+  const W = 500, kol = Math.min(5, Math.max(1, L.length)), bw = 84, bh = 50, gx = 8, sat = Math.ceil(L.length / kol);
+  const x0 = (W - (kol * bw + (kol - 1) * gx)) / 2, y0 = 44, top = L.reduce((a, x) => a + (Number(x.guc_kw) || 0), 0), ort = L.length ? top / L.length : 0;
+  const busY = y0 + sat * (bh + 26) + 4, cx = W / 2 + (mk != null ? -10 : 40);
+  const T = (x, y, m, o) => '<text x="' + x + '" y="' + y + '"' + (o || '') + '>' + m + '</text>';
+  let g = '<svg viewBox="0 0 ' + W + ' ' + (busY + 330) + '" width="100%" role="img" aria-label="' + esc(k) + ' prensip tek hat" style="display:block;font-family:inherit">'
+    + '<defs>' + [['', '#10233F'], ['y', '#1E7A3C'], ['r', '#B42318']].map(([e, c]) => '<marker id="ok' + k + e + '" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="' + c + '"/></marker>').join('') + '</defs>'
+    + '<g style="--hat:#10233F" fill="#10233F" font-size="13">'
+    + T(W / 2, 22, '<tspan font-weight="700" font-size="15">' + esc(k) + '</tspan>' + (t && t.ad ? ' · ' + esc(t.ad.replace(' GES', '')) : '') + (t && t.dc_kwp ? ' · ' + say(t.dc_kwp) + ' kWp' : ''), ' text-anchor="middle"');
+  L.forEach((x, i) => {
+    const r = Math.floor(i / kol), c = i % kol, bx = x0 + c * (bw + gx), by = y0 + r * (bh + 26), v = Number(x.guc_kw) || 0;
+    const kapali = !/şebekede/i.test(x.durum || ''), dus = !kapali && ort > 2 && v < ort * 0.8;
+    const dolgu = kapali ? '#FDECEC' : dus ? '#FFF4DC' : '#E8F5EC', cizgi = kapali ? '#B42318' : dus ? '#9A5B00' : '#1E7A3C';
+    const n = (String(x.ad).match(/(\d+)\s*$/) || [, '?'])[1];
+    g += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="6" fill="' + dolgu + '" stroke="' + cizgi + '"/>'
+      + T(bx + bw / 2, by + 18, 'INV ' + esc(n), ' text-anchor="middle" font-size="11.5" fill="#4A5A70"')
+      + T(bx + bw / 2, by + 38, '<tspan font-weight="700">' + say(v, 1) + '</tspan> kW', ' text-anchor="middle" font-size="13.5" fill="' + (kapali ? '#B42318' : '#10233F') + '"')
+      + '<line x1="' + (bx + bw / 2) + '" y1="' + (by + bh) + '" x2="' + (bx + bw / 2) + '" y2="' + busY + '" stroke="#7A8799" stroke-width="1.2"/>';
+  });
+  // AG bara
+  g += '<line x1="' + (x0 - 6) + '" y1="' + busY + '" x2="' + (W - x0 + 6) + '" y2="' + busY + '" stroke="#10233F" stroke-width="5" stroke-linecap="round"/>'
+    + T(x0 - 6, busY + 20, 'AG bara · Σ <tspan font-weight="700">' + say(top, 1) + ' kW</tspan>', ' font-size="12.5"');
+  let y = busY;
+  // madencilik kolu (yalnız Sera-2)
+  if (mk != null) {
+    const mx = W - x0 - 70;
+    g += '<line x1="' + mx + '" y1="' + y + '" x2="' + mx + '" y2="' + (y + 40) + '" stroke="#10233F" stroke-width="2" marker-end="url(#ok' + k + ')"/>'
+      + '<rect x="' + (mx - 78) + '" y="' + (y + 42) + '" width="156" height="56" rx="8" fill="#EEF3FA" stroke="#2a78d6"/>'
+      + T(mx, y + 62, '⛏ Madencilik', ' text-anchor="middle" font-size="12" fill="#4A5A70"')
+      + T(mx, y + 84, '<tspan font-weight="700" font-size="15">' + say(mk.kw, 1) + '</tspan> kW · ' + say(mk.n) + ' cihaz', ' text-anchor="middle"');
+  }
+  // trafo
+  const ty = y + 70;
+  g += '<line x1="' + cx + '" y1="' + y + '" x2="' + cx + '" y2="' + (ty - 18) + '" stroke="#10233F" stroke-width="2"/>'
+    + '<circle cx="' + cx + '" cy="' + (ty - 6) + '" r="13" fill="none" stroke="#10233F" stroke-width="2"/><circle cx="' + cx + '" cy="' + (ty + 12) + '" r="13" fill="none" stroke="#10233F" stroke-width="2"/>'
+    + T(cx - 22, ty + 7, 'AG / OG trafo', ' text-anchor="end" font-size="12" fill="#4A5A70"');
+  // sayaç
+  const net = top - (mk ? mk.kw : 0), sy = ty + 48, sk = k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2', ab = k === 'Sera-1' ? 'T1' : 'T2';
+  const ov = ((os || {})[sk] || {}).veri || {}, og = Object.keys(ov).sort().pop(), osa = og ? Object.keys(ov[og]).sort().pop() : null, oo = osa ? ov[og][osa] : null;
+  g += '<line x1="' + cx + '" y1="' + (ty + 25) + '" x2="' + cx + '" y2="' + sy + '" stroke="#10233F" stroke-width="2"/>'
+    + '<rect x="' + (cx - 118) + '" y="' + sy + '" width="236" height="' + (oo ? 74 : 54) + '" rx="8" fill="#fff" stroke="#10233F" stroke-width="1.5"/>'
+    + T(cx, sy + 18, 'Sayaç ' + ab + ' (OSOS)', ' text-anchor="middle" font-size="12" fill="#4A5A70"')
+    + T(cx, sy + 40, (net >= 0 ? 'Veriş ≈ ' : 'Çekiş ≈ ') + '<tspan font-weight="700" font-size="15">' + say(Math.abs(net), 1) + ' kW</tspan>', ' text-anchor="middle" fill="' + (net >= 0 ? '#1E7A3C' : '#B42318') + '"')
+    + (oo ? T(cx, sy + 62, 'OSOS ' + tarihK(og) + ' ' + osa + ':00 · çekiş ' + say(oo.cekis) + ' · veriş ' + say(oo.veris) + ' kWh', ' text-anchor="middle" font-size="10.5" fill="#4A5A70"') : '');
+  const by2 = sy + (oo ? 74 : 54), gy = by2 + 62;
+  g += '<line x1="' + cx + '" y1="' + (net >= 0 ? by2 : gy) + '" x2="' + cx + '" y2="' + (net >= 0 ? gy - 3 : by2 + 3) + '" stroke="' + (net >= 0 ? '#1E7A3C' : '#B42318') + '" stroke-width="3" marker-end="url(#ok' + k + (net >= 0 ? 'y' : 'r') + ')"/>'
+    + T(cx + 12, by2 + 36, net >= 0 ? 'şebekeye' : 'şebekeden', ' font-size="12" fill="' + (net >= 0 ? '#1E7A3C' : '#B42318') + '"')
+    + '<line x1="0" y1="' + gy + '" x2="' + W + '" y2="' + gy + '" stroke="#10233F" stroke-width="5"/>'
+    + T(6, gy + 20, 'OG şebeke · MEDAŞ (34,5 kV)', ' font-size="12" fill="#4A5A70"');
+  return g.replace(/viewBox="0 0 (\d+) \d+"/, 'viewBox="0 0 $1 ' + (gy + 30) + '"') + '</g></svg>';
+}
+
 // ===== Anlık üretim: FusionSolar (Sera-1 = Tek Yıldız-1, Sera-2 = Tek Yıldız-2) inverter bazında + madencilik yükü (Pi ölçümü)
 function anlikUretimBolum(fs, saha, mad) {
   if (!fs || !fs.invertorler) return '';
@@ -2042,7 +2095,7 @@ function anlikUretimBolum(fs, saha, mad) {
   const top = k => (ser[k] || []).reduce((a, x) => a + (Number(x.guc_kw) || 0), 0), topG = k => (ser[k] || []).reduce((a, x) => a + (Number(x.gunluk_kwh) || 0), 0);
   // madencilik yükü: Pi'nin son saatlik ortalaması (kW); yoksa çalışan cihaz × ortalama güç
   let mk = null, mkNot = '';
-  if (saha && saha.saat) { const k = Object.keys(saha.saat).sort().pop(), o = saha.saat[k]; if (o && o.kw != null) { mk = o.kw; mkNot = 'Pi ölçümü, ' + k.slice(11) + ':00 saati ortalaması · ' + say(o.calisan) + ' cihaz çalışıyor'; } }
+  if (saha && saha.saat) { const k = Object.keys(saha.saat).sort().pop(), o = saha.saat[k]; if (o && o.kw != null) { mk = o.kw; var mkN = o.calisan; mkNot = 'Pi ölçümü, ' + k.slice(11) + ':00 saati ortalaması · ' + say(o.calisan) + ' cihaz çalışıyor'; } }
   const kw = {}; let T = 0; for (const k of adlar) { kw[k] = top(k); T += kw[k]; }
   const kartA = (ad, v, alt, renk) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:24px;font-weight:700' + (renk ? ';color:' + renk : '') + '">' + v + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kW</span></div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
   const fark = kw['Sera-2'] != null && mk != null ? kw['Sera-2'] - mk : null;
@@ -2052,7 +2105,11 @@ function anlikUretimBolum(fs, saha, mad) {
     + kartA('Toplam (Sera-1 + Sera-2)', say(T, 1), 'bugün ' + say(adlar.reduce((a, k) => a + topG(k), 0)) + ' kWh', '#10233F')
     + (mk != null ? kartA('Madencilik yükü', say(mk, 1), mkNot) : '')
     + (fark != null ? kartA(fark >= 0 ? 'Sera-2 fazlası (madencilik sonrası)' : 'Sera-2 açığı (şebekeden)', say(Math.abs(fark), 1), fark >= 0 ? 'Sera-2 madencilikten fazla üretiyor' : 'Madencilik Sera-2 üretimini aşıyor', fark >= 0 ? '#1E7A3C' : '#B42318') : '')
-    + '</div><div class="iki">';
+    + '</div>'
+    + '<div><h3 style="margin:0 0 8px;font-size:15px">Prensip tek hat</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px">'
+    + adlar.map(k => '<div class="panel" style="padding:10px;min-width:0">' + tekHatSvg(k, (ser[k] || []).slice().sort((a, b) => no(a.ad) - no(b.ad)), tes[k], k === 'Sera-2' && mk != null ? { kw: mk, n: mkN } : null, D.osos) + '</div>').join('')
+    + '</div><div class="k" style="margin-top:6px">Prensip şemadır: kesici, ayırıcı, koruma ve trafo güçleri gösterilmez; OG gerilimi temsilîdir. Sayaç değeri anlık tahmindir (inverter AC çıkışı − madencilik, iç tüketim hariç); kesin değer altındaki OSOS saatlik ölçümüdür. Yeşil inverter normal, turuncu sera ortalamasının %20 altı, kırmızı şebekede değil.</div></div>'
+    + '<div class="iki">';
   for (const k of adlar) {
     const L = (ser[k] || []).slice().sort((a, b) => no(a.ad) - no(b.ad)), ort = L.length ? kw[k] / L.length : 0;
     const sat = L.map(x => { const g = Number(x.guc_kw) || 0, dus = ort > 2 && g < ort * 0.8, kapali = !/şebekede/i.test(x.durum || '');

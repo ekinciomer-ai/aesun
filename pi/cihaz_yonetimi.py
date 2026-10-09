@@ -14,7 +14,7 @@ Zamanlama (gerçek ısınma verisinden öğrenilir — cihaz_ogrenme.py):
   - KISA DURUŞ kontrolü: zararlı pencere kısa ise ve uyutup yeniden ısıtmanın kaybı (soğuyan su, ön ısıtma
     enerjisi, eksik hash) kazancı aşıyorsa cihazlar uyutulmaz.
 
-Maliyet (cihaz başı, TL/saat) = (PTF + YEKDEM) / 1000 × maliyet_carpani × cihaz_guc_kw
+Maliyet (cihaz başı, TL/saat) = [(PTF + YEKDEM) × komisyon × (1 + BTV) + dağıtım] / 1000 × cihaz_guc_kw   (KDV hariç; fatura birimleri)
 Gelir   (cihaz başı, TL/saat) = hashprice (BTC / TH / gün, F2Pool son N gün) × cihaz_th / 24 × BTC/TL
 
 Ayarlar ve mod: GitHub epias-ptf/cihaz_yonetimi.json
@@ -41,7 +41,9 @@ VARSAYILAN = {
     "cihaz_sayisi": 29,
     "cihaz_guc_kw": "oto",        # cihaz başı güç (kW); "oto": son antminer arşivindeki tahmini güç ortalaması
     "cihaz_th": "oto",            # cihaz başı hashrate (TH/s); "oto": cihazların son 7 gün çalışırkenki ortalaması
-    "maliyet_carpani": 1.035,     # PTF+YEKDEM üzerine dağıtım/vergi payı
+    "komisyon": 1.025,            # tedarikçi PTF + YEKDEM komisyonu (%2,5, Erkim)
+    "btv": 0.01,                  # belediye tüketim vergisi (enerji bedeli üzerinden)
+    "dagitim_tl_mwh": 1182.457,   # dağıtım bedeli (OG tek terim sanayi); KDV hesaba katılmaz (indirilir)
     "uretim_esik_kw": 50,         # Sera-1 + Sera-2 anlık gücü bunun üstündeyse "üretim var"
     "hashprice_gun": 7,           # hashprice için son kaç günün F2Pool geliri
     "komut_arasi_dk": 15,         # aynı komut en erken bu kadar dakika sonra tekrarlanır
@@ -113,8 +115,13 @@ def cihaz_guc_hesapla(a, simdi):
     return 6.0, "varsayılan"
 
 
+def birim_maliyet(ptf, yekdem, a):
+    """Şebekeden 1 MWh'in KDV hariç bedeli (TL/MWh): fatura formülü."""
+    return (ptf + yekdem) * a["komisyon"] * (1 + a["btv"]) + a["dagitim_tl_mwh"]
+
+
 def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
-    maliyet = (ptf + yekdem) / 1000 * a["maliyet_carpani"] * a["cihaz_guc_kw"] if ptf is not None else None
+    maliyet = birim_maliyet(ptf, yekdem, a) / 1000 * a["cihaz_guc_kw"] if ptf is not None else None
     gelir = hp * a["cihaz_th"] / 24 * btc_try if hp and btc_try else None
     if uretim:
         return "calis", "güneş üretimi var", maliyet, gelir
@@ -497,7 +504,7 @@ def calistir():
     basabas = None
     if hp and btc_try:
         g1 = hp * a["cihaz_th"] / 24 * btc_try
-        basabas = g1 / (a["maliyet_carpani"] * a["cihaz_guc_kw"]) * 1000 - (yekdem or 0)
+        basabas = (g1 / a["cihaz_guc_kw"] * 1000 - a["dagitim_tl_mwh"]) / (a["komisyon"] * (1 + a["btv"])) - (yekdem or 0)
     sonraki_uyan = next((s_ for s_ in anahtar_j if s_["eylem"] == "wake"), None)
     durum, sha = gh("n8n/cihaz_yonetimi_durum.json")
     durum = durum or {}

@@ -1699,6 +1699,20 @@ async function cizInverter() {
   document.getElementById('baslik').textContent = 'İnverter analizi';
   document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…';
   const ic = document.getElementById('icerik');
+  if (!invSec.sekme) invSec.sekme = 'analiz';
+  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
+  if (invSec.sekme !== 'analiz') {
+    document.getElementById('baslik').textContent = invSec.sekme === 'mining' ? 'Mining prensip tek hat' : 'Santraller ve abonelikler';
+    document.getElementById('altBaslik').textContent = invSec.sekme === 'mining' ? 'Sera-1 / Sera-2 ve madencilik: OG bara → sayaç → trafo → AG bara → inverter → string. Değerler canlı, sayfa 3 dk\'da bir yenilenir.' : 'Her santral ve abonelik bağımsız: OG bara → sayaç → trafo → AG bara → inverter → string.';
+    document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
+    if (!ic.querySelector('svg')) ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + '<div class="panel"><p class="k">Yükleniyor…</p></div></div>';
+    let g = '';
+    try { g = invSec.sekme === 'mining' ? await cizMiningPrensip() : await cizDigerPrensip(); } catch (e) { g = '<div class="panel hata">Şema çizilemedi: ' + esc(e.message || e) + '</div>'; }
+    if (!location.hash.startsWith('#inverter') || location.hash.startsWith('#inverterler')) return;
+    ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + g + '</div>';
+    ic.querySelectorAll('[data-mx]').forEach(e => { if (e.scrollWidth > e.clientWidth) e.scrollLeft = Math.max(0, Number(e.dataset.mx) - e.clientWidth / 2); });   // sayaç görünür olsun
+    return;
+  }
   if (!INV_CACHE[invSec.yil]) ic.innerHTML = '<div class="panel"><p class="k">Geçmiş veri yükleniyor…</p></div>';
   const ilkYil = invSec.donem === 'son30' ? Number(gunEkle(dun, -29).slice(0, 4)) : invSec.yil;
   const yillar = [...new Set([ilkYil, invSec.yil])];
@@ -1798,7 +1812,7 @@ async function cizInverter() {
       + '<tr class="top"><td class="sol">Santral</td>' + aylar.map(m => '<td>' + say(ayToplam(s, m)) + '</td>').join('') + '<td>' + say(toplamN(aylar.map(m => ayToplam(s, m)))) + '</td></tr></tbody></table></div></section>';
   }
   const kapsam = liste.map(s => { const g = Object.keys(s.gun).filter(k => s.gun[k] > 0).sort(); return esc(s.ad) + ': ' + (g.length ? tarihK(g[0]) + ' ' + g[0].slice(0, 4) + '–' + tarihK(g[g.length - 1]) : 'günlük veri yok'); }).join(' · ');
-  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + kartlar + grafikH + govde + '<div class="k">Bu yıldaki günlük veri kapsamı: ' + kapsam + '. Sungrow ve Inavitas geçmişi n8n tarafından her gece güncellenir; FusionSolar inverter günlükleri 5 Ekim 2026\'dan itibaren toplanıyor.</div></div>';
+  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + kartlar + grafikH + govde + '<div class="k">Bu yıldaki günlük veri kapsamı: ' + kapsam + '. Sungrow ve Inavitas geçmişi n8n tarafından her gece güncellenir; FusionSolar inverter günlükleri 5 Ekim 2026\'dan itibaren toplanıyor.</div></div>';
   document.getElementById('kaynakNot').textContent = 'Veri: Sungrow · Inavitas · FusionSolar geçmişi';
 }
 function invCsv() {
@@ -2030,59 +2044,231 @@ function ciz() {
   if (sayfa === 'bildirim') cizBildirim(); else if (sayfa === 'maden') cizMaden(); else if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
 }
 window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias' || location.hash === '#maden' || location.hash === '#bildirim') window.scrollTo(0, 0); } });
-// Prensip tek hat (bir sera): inverterler → AG bara (→ madencilik) → AG/OG trafo → OSOS sayacı → OG şebeke. Değerler canlı.
-function tekHatSvg(k, L, t, mk, os) {
-  const W = 500, kol = Math.min(5, Math.max(1, L.length)), bw = 84, bh = 50, gx = 8, sat = Math.ceil(L.length / kol);
-  const x0 = (W - (kol * bw + (kol - 1) * gx)) / 2, y0 = 44, top = L.reduce((a, x) => a + (Number(x.guc_kw) || 0), 0), ort = L.length ? top / L.length : 0;
-  const busY = y0 + sat * (bh + 26) + 4, cx = W / 2 + (mk != null ? -10 : 40);
-  const T = (x, y, m, o) => '<text x="' + x + '" y="' + y + '"' + (o || '') + '>' + m + '</text>';
-  let g = '<svg viewBox="0 0 ' + W + ' ' + (busY + 330) + '" width="100%" role="img" aria-label="' + esc(k) + ' prensip tek hat" style="display:block;font-family:inherit">'
-    + '<defs>' + [['', '#10233F'], ['y', '#1E7A3C'], ['r', '#B42318']].map(([e, c]) => '<marker id="ok' + k + e + '" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="' + c + '"/></marker>').join('') + '</defs>'
-    + '<g style="--hat:#10233F" fill="#10233F" font-size="13">'
-    + T(W / 2, 22, '<tspan font-weight="700" font-size="15">' + esc(k) + '</tspan>' + (t && t.ad ? ' · ' + esc(t.ad.replace(' GES', '')) : '') + (t && t.dc_kwp ? ' · ' + say(t.dc_kwp) + ' kWp' : ''), ' text-anchor="middle"');
-  L.forEach((x, i) => {
-    const r = Math.floor(i / kol), c = i % kol, bx = x0 + c * (bw + gx), by = y0 + r * (bh + 26), v = Number(x.guc_kw) || 0;
-    const kapali = !/şebekede/i.test(x.durum || ''), dus = !kapali && ort > 2 && v < ort * 0.8;
-    const dolgu = kapali ? '#FDECEC' : dus ? '#FFF4DC' : '#E8F5EC', cizgi = kapali ? '#B42318' : dus ? '#9A5B00' : '#1E7A3C';
-    const n = (String(x.ad).match(/(\d+)\s*$/) || [, '?'])[1];
-    g += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" rx="6" fill="' + dolgu + '" stroke="' + cizgi + '"/>'
-      + T(bx + bw / 2, by + 18, 'INV ' + esc(n), ' text-anchor="middle" font-size="11.5" fill="#4A5A70"')
-      + T(bx + bw / 2, by + 38, '<tspan font-weight="700">' + say(v, 1) + '</tspan> kW', ' text-anchor="middle" font-size="13.5" fill="' + (kapali ? '#B42318' : '#10233F') + '"')
-      + '<line x1="' + (bx + bw / 2) + '" y1="' + (by + bh) + '" x2="' + (bx + bw / 2) + '" y2="' + busY + '" stroke="#7A8799" stroke-width="1.2"/>';
-  });
-  // AG bara
-  g += '<line x1="' + (x0 - 6) + '" y1="' + busY + '" x2="' + (W - x0 + 6) + '" y2="' + busY + '" stroke="#10233F" stroke-width="5" stroke-linecap="round"/>'
-    + T(x0 - 6, busY + 20, 'AG bara · Σ <tspan font-weight="700">' + say(top, 1) + ' kW</tspan>', ' font-size="12.5"');
-  let y = busY;
-  // madencilik kolu (yalnız Sera-2)
-  if (mk != null) {
-    const mx = W - x0 - 70;
-    g += '<line x1="' + mx + '" y1="' + y + '" x2="' + mx + '" y2="' + (y + 40) + '" stroke="#10233F" stroke-width="2" marker-end="url(#ok' + k + ')"/>'
-      + '<rect x="' + (mx - 78) + '" y="' + (y + 42) + '" width="156" height="56" rx="8" fill="#EEF3FA" stroke="#2a78d6"/>'
-      + T(mx, y + 62, '⛏ Madencilik', ' text-anchor="middle" font-size="12" fill="#4A5A70"')
-      + T(mx, y + 84, '<tspan font-weight="700" font-size="15">' + say(mk.kw, 1) + '</tspan> kW · ' + say(mk.n) + ' cihaz', ' text-anchor="middle"');
-  }
-  // trafo
-  const ty = y + 70;
-  g += '<line x1="' + cx + '" y1="' + y + '" x2="' + cx + '" y2="' + (ty - 18) + '" stroke="#10233F" stroke-width="2"/>'
-    + '<circle cx="' + cx + '" cy="' + (ty - 6) + '" r="13" fill="none" stroke="#10233F" stroke-width="2"/><circle cx="' + cx + '" cy="' + (ty + 12) + '" r="13" fill="none" stroke="#10233F" stroke-width="2"/>'
-    + T(cx - 22, ty + 7, 'AG / OG trafo', ' text-anchor="end" font-size="12" fill="#4A5A70"');
-  // sayaç
-  const net = top - (mk ? mk.kw : 0), sy = ty + 48, sk = k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2', ab = k === 'Sera-1' ? 'T1' : 'T2';
-  const ov = ((os || {})[sk] || {}).veri || {}, og = Object.keys(ov).sort().pop(), osa = og ? Object.keys(ov[og]).sort().pop() : null, oo = osa ? ov[og][osa] : null;
-  g += '<line x1="' + cx + '" y1="' + (ty + 25) + '" x2="' + cx + '" y2="' + sy + '" stroke="#10233F" stroke-width="2"/>'
-    + '<rect x="' + (cx - 118) + '" y="' + sy + '" width="236" height="' + (oo ? 74 : 54) + '" rx="8" fill="#fff" stroke="#10233F" stroke-width="1.5"/>'
-    + T(cx, sy + 18, 'Sayaç ' + ab + ' (OSOS)', ' text-anchor="middle" font-size="12" fill="#4A5A70"')
-    + T(cx, sy + 40, (net >= 0 ? 'Veriş ≈ ' : 'Çekiş ≈ ') + '<tspan font-weight="700" font-size="15">' + say(Math.abs(net), 1) + ' kW</tspan>', ' text-anchor="middle" fill="' + (net >= 0 ? '#1E7A3C' : '#B42318') + '"')
-    + (oo ? T(cx, sy + 62, 'OSOS ' + tarihK(og) + ' ' + osa + ':00 · çekiş ' + say(oo.cekis) + ' · veriş ' + say(oo.veris) + ' kWh', ' text-anchor="middle" font-size="10.5" fill="#4A5A70"') : '');
-  const by2 = sy + (oo ? 74 : 54), gy = by2 + 62;
-  g += '<line x1="' + cx + '" y1="' + (net >= 0 ? by2 : gy) + '" x2="' + cx + '" y2="' + (net >= 0 ? gy - 3 : by2 + 3) + '" stroke="' + (net >= 0 ? '#1E7A3C' : '#B42318') + '" stroke-width="3" marker-end="url(#ok' + k + (net >= 0 ? 'y' : 'r') + ')"/>'
-    + T(cx + 12, by2 + 36, net >= 0 ? 'şebekeye' : 'şebekeden', ' font-size="12" fill="' + (net >= 0 ? '#1E7A3C' : '#B42318') + '"')
-    + '<line x1="0" y1="' + gy + '" x2="' + W + '" y2="' + gy + '" stroke="#10233F" stroke-width="5"/>'
-    + T(6, gy + 20, 'OG şebeke · MEDAŞ (34,5 kV)', ' font-size="12" fill="#4A5A70"');
-  return g.replace(/viewBox="0 0 (\d+) \d+"/, 'viewBox="0 0 $1 ' + (gy + 30) + '"') + '</g></svg>';
+// ===== Tek hat şemaları (İnverter sayfası sekmeleri): OG bara üstte → sayaç → trafo → AG bara → inverter → string; madencilik yükü
+const TH_R = { yesil: '#1E7A3C', sari: '#9A5B00', kirmizi: '#B42318', gri: '#7A8799', koyu: '#10233F', mavi: '#2a78d6' };
+const thNo = a => { const m = String(a || '').match(/(\d+)\s*$/); return m ? Number(m[1]) : 999; };
+const thT = (x, y, m, o) => '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '"' + (o || '') + '>' + m + '</text>';
+const thL = (x1, y1, x2, y2, o) => '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"' + (o || ' stroke="#10233F" stroke-width="2"') + '/>';
+function thOsos(key) {
+  const v = (((D && D.osos) || {})[key] || {}).veri || {}, g = Object.keys(v).sort().pop(), s = g ? Object.keys(v[g]).sort().pop() : null;
+  return s ? { g, s, cekis: v[g][s].cekis, veris: v[g][s].veris } : null;
 }
-
+// cfg: { id, baslik, alt, sayac: { ab, net, netNot, osos }, bloklar: [{ ad, inv: [...], yuk }], mod: 'liste' | 'nokta' }
+// inv: { ad, kw, ust, satir: [..], renk, pv: [{ n, txt, renk, ipucu }], bos: [n...] }
+// yuk: { ad, kw, alt, cihaz: [{ no, renk, s1, s2 }] } | { ad, kw, alt } (tek yük kutusu)
+function thSvg(cfg) {
+  const liste = cfg.mod !== 'nokta', CW = liste ? 128 : 100, IH = liste ? 82 : 62, SP = 10, SIRA = liste ? 10 : 8;
+  const strH = v => liste ? (v.pv.length * 14 + (v.bos && v.bos.length ? 14 : 0) + 6) : (Math.ceil(v.pv.length / 7) * 12 + 8);
+  let x = 20, h = '', maxY = 0;
+  const merk = [];
+  for (const b of cfg.bloklar) {
+    const sat = []; for (let i = 0; i < b.inv.length; i += SIRA) sat.push(b.inv.slice(i, i + SIRA));
+    const invW = Math.max(1, Math.min(SIRA, b.inv.length)) * (CW + SP) + 24;
+    b.alta = !!(b.yuk && b.yuk.cihaz && b.inv.length);              // cihazlı yük (madencilik) inverterlerin altına
+    const ykW = b.yuk && !b.alta ? (b.yuk.cihaz ? 3 * 140 + 24 : 290) : 0;
+    b.x = x; b.w = (b.inv.length ? invW : 0) + (b.yuk ? ykW + (b.inv.length ? 20 : 0) : 0); b.w = Math.max(b.w, 230);
+    b.tx = x + Math.min(b.w / 2, (b.inv.length ? invW : b.w) / 2);
+    merk.push(b.tx); b.sat = sat; b.invW = invW; b.ykW = ykW; x += b.w + 30;
+  }
+  const W = Math.max(x - 10, 520), mx = Math.max(merk[0], 140);   // sayaç ilk trafonun üstünde; diğer trafolar OG ara barasından
+  // OG bara
+  h += thL(10, 40, W - 10, 40, ' stroke="#10233F" stroke-width="6" stroke-linecap="round"') + thT(12, 26, '<tspan font-weight="700">OG bara</tspan> · MEDAŞ 31,5 kV', ' font-size="13"');
+  // sayaç ve akış yönü
+  const S = cfg.sayac || {}, net = S.net, akR = net == null ? TH_R.gri : net >= 0 ? TH_R.yesil : TH_R.kirmizi;
+  h += thL(mx, 43, mx, 74, ' stroke="' + akR + '" stroke-width="3"' + (net == null ? '' : ' marker-' + (net >= 0 ? 'start' : 'end') + '="url(#thOk' + (net >= 0 ? 'Y' : 'K') + ')"'));
+  if (net != null) h += thT(mx + 10, 62, (net >= 0 ? 'şebekeye ' : 'şebekeden ') + say(Math.abs(net), 1) + ' kW', ' font-size="12" fill="' + akR + '"');
+  const sh = S.osos ? 70 : 52;
+  h += '<rect x="' + (mx - 125) + '" y="76" width="250" height="' + sh + '" rx="8" fill="#fff" stroke="#10233F" stroke-width="1.6"/>'
+    + thT(mx, 94, 'Sayaç ' + esc(S.ab || '') + ' · OSOS', ' text-anchor="middle" font-size="12" fill="#4A5A70"')
+    + thT(mx, 115, net == null ? esc(S.netNot || 'anlık değer yok') : (net >= 0 ? 'Veriş ≈ ' : 'Çekiş ≈ ') + '<tspan font-weight="700" font-size="15">' + say(Math.abs(net), 1) + ' kW</tspan>', ' text-anchor="middle" fill="' + akR + '"')
+    + (S.osos ? thT(mx, 135, 'Son saat ' + tarihK(S.osos.g) + ' ' + S.osos.s + ':00 → çekiş ' + say(S.osos.cekis) + ' · veriş ' + say(S.osos.veris) + ' kWh', ' text-anchor="middle" font-size="10.5" fill="#4A5A70"') : '');
+  const y1 = 76 + sh, yA = y1 + 16;
+  h += thL(mx, y1, mx, yA);
+  if (cfg.bloklar.length > 1) h += thL(merk[0], yA, merk[merk.length - 1], yA, ' stroke="#10233F" stroke-width="3"');
+  for (const b of cfg.bloklar) {
+    const tx = b.tx, ty = yA + 30, yAG = ty + 64;
+    h += thL(tx, yA, tx, ty - 12) + '<circle cx="' + tx + '" cy="' + ty + '" r="13" fill="#fff" stroke="#10233F" stroke-width="2"/><circle cx="' + tx + '" cy="' + (ty + 18) + '" r="13" fill="none" stroke="#10233F" stroke-width="2"/>'
+      + thT(tx + 20, ty + 4, '<tspan font-weight="700">' + esc(b.ad || 'Trafo') + '</tspan>', ' font-size="12"') + thT(tx + 20, ty + 19, '31,5 / 0,4 kV', ' font-size="11" fill="#4A5A70"')
+      + thL(tx, ty + 31, tx, yAG);
+    // AG bara
+    const bx1 = b.x + 4, bx2 = b.x + b.w - 4, invTop = b.inv.reduce((a, v) => a + (v.kw || 0), 0);
+    h += thL(bx1, yAG, bx2, yAG, ' stroke="#10233F" stroke-width="5" stroke-linecap="round"')
+      + thT(bx1, yAG + 18, 'AG bara 0,4 kV' + (b.baraNot ? ' · ' + b.baraNot : ''), ' font-size="12" font-weight="600"');
+    let yEnd = yAG + 24;
+    // inverter sıraları
+    let y = yAG + 30;
+    b.sat.forEach((row, r) => {
+      const rowH = IH + Math.max(...row.map(strH)) + 30, busY = y - 10;
+      if (r > 0) h += thL(b.x + 10, busY, b.x + 24 + row.length * (CW + SP) - SP, busY, ' stroke="#10233F" stroke-width="3"');
+      row.forEach((v, i) => {
+        const ix = b.x + 24 + i * (CW + SP), cx = ix + CW / 2, renk = v.renk || TH_R.yesil;
+        h += thL(cx, r === 0 ? yAG : busY, cx, y + 4, ' stroke="#7A8799" stroke-width="1.3"')
+          + '<rect x="' + ix + '" y="' + (y + 4) + '" width="' + CW + '" height="' + IH + '" rx="6" fill="' + (renk === TH_R.kirmizi ? '#FDECEC' : renk === TH_R.sari ? '#FFF4DC' : renk === TH_R.gri ? '#F1F3F6' : '#E8F5EC') + '" stroke="' + renk + '"/>'
+          + thT(cx, y + 19, esc(v.ad), ' text-anchor="middle" font-size="11.5" font-weight="600" fill="#4A5A70"')
+          + thT(cx, y + 38, v.ust, ' text-anchor="middle" font-size="14" font-weight="700" fill="' + (renk === TH_R.kirmizi ? TH_R.kirmizi : TH_R.koyu) + '"');
+        (v.satir || []).slice(0, liste ? 3 : 1).forEach((s, j) => { h += thT(cx, y + 54 + j * 12.5, s, ' text-anchor="middle" font-size="10.5" fill="#4A5A70"'); });
+        // stringler
+        const sy = y + IH + 6;
+        h += thL(cx, y + IH + 4, cx, sy + 2, ' stroke="#7A8799" stroke-width="1"');
+        if (liste) {
+          v.pv.forEach((p, j) => {
+            const yy = sy + 10 + j * 14;
+            h += '<g><title>' + esc(p.ipucu || '') + '</title><circle cx="' + (ix + 7) + '" cy="' + (yy - 4) + '" r="3.5" fill="' + p.renk + '"/>' + thT(ix + 14, yy, p.txt, ' font-size="10.5" fill="' + (p.renk === TH_R.kirmizi ? TH_R.kirmizi : TH_R.koyu) + '"') + '</g>';
+          });
+          if (v.bos && v.bos.length) h += thT(ix + 2, sy + 10 + v.pv.length * 14, 'boş: PV' + v.bos.join(','), ' font-size="9.5" fill="#7A8799"');
+        } else {
+          v.pv.forEach((p, j) => { h += '<circle cx="' + (ix + 10 + (j % 7) * 13.5) + '" cy="' + (sy + 6 + Math.floor(j / 7) * 12) + '" r="4.2" fill="' + p.renk + '"><title>' + esc(p.ipucu || '') + '</title></circle>'; });
+        }
+      });
+      if (r > 0) h += thL(b.x + 10, yAG, b.x + 10, busY, ' stroke="#10233F" stroke-width="3"');
+      y += rowH; yEnd = Math.max(yEnd, y);
+    });
+    // yük (madencilik / tüketim)
+    if (b.yuk) {
+      const Y = b.yuk, kol = b.alta ? Math.max(3, Math.floor((b.invW - 24) / 140)) : 3;
+      const lx = b.alta ? b.x + 24 : b.x + (b.inv.length ? b.invW + 20 : 24), lw = b.alta ? 280 : b.ykW - 24, lc = lx + lw / 2, y0 = b.alta ? yEnd + 4 : yAG + 32;
+      if (b.alta) h += thL(b.x + 10, yAG, b.x + 10, y0 + 26, ' stroke="#10233F" stroke-width="3"') + thL(b.x + 10, y0 + 26, lx - 2, y0 + 26, ' stroke="#10233F" stroke-width="2.5" marker-end="url(#thOkD)"');
+      else h += thL(lc, yAG, lc, y0 - 2, ' stroke="#10233F" stroke-width="2.5" marker-end="url(#thOkD)"');
+      h += '<rect x="' + lx + '" y="' + y0 + '" width="' + lw + '" height="52" rx="8" fill="#EEF3FA" stroke="#2a78d6" stroke-width="1.5"/>'
+        + thT(lc, y0 + 18, esc(Y.ad), ' text-anchor="middle" font-size="12.5" font-weight="700"')
+        + thT(lc, y0 + 39, (Y.kw != null ? '<tspan font-weight="700" font-size="15">' + say(Y.kw, 1) + ' kW</tspan>' : '') + (Y.alt ? ' · ' + esc(Y.alt) : ''), ' text-anchor="middle" font-size="12"');
+      let yy = y0 + 64;
+      if (Y.cihaz) {
+        Y.cihaz.forEach((c, i) => {
+          const cx = lx + (i % kol) * 140, cy = yy + Math.floor(i / kol) * 56;
+          h += '<rect x="' + cx + '" y="' + cy + '" width="132" height="50" rx="6" fill="#fff" stroke="' + c.renk + '"/>'
+            + '<circle cx="' + (cx + 10) + '" cy="' + (cy + 12) + '" r="4" fill="' + c.renk + '"/>'
+            + thT(cx + 18, cy + 16, '<tspan font-weight="700">' + esc(c.no) + '</tspan> ' + esc(c.durum || ''), ' font-size="11.5"')
+            + thT(cx + 8, cy + 31, c.s1, ' font-size="11" fill="#10233F"') + thT(cx + 8, cy + 44, c.s2, ' font-size="10.5" fill="#4A5A70"');
+        });
+        yy += Math.ceil(Y.cihaz.length / kol) * 56;
+      }
+      yEnd = Math.max(yEnd, yy);
+    }
+    maxY = Math.max(maxY, yEnd);
+  }
+  const H = maxY + 16;
+  return '<div data-mx="' + Math.round(mx) + '" style="overflow-x:auto;border:1px solid #E3E8EE;border-radius:10px;background:#FBFCFD"><svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="' + esc(cfg.baslik) + ' tek hat şeması" style="display:block;font-family:inherit;max-width:none">'
+    + '<defs>' + [['Y', TH_R.yesil], ['K', TH_R.kirmizi], ['D', TH_R.koyu]].map(([e, c]) => '<marker id="thOk' + e + '" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="' + c + '"/></marker>').join('') + '</defs>'
+    + '<g fill="#10233F" font-size="12">' + h + '</g></svg></div>';
+}
+function thBolum(cfg) {
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>' + esc(cfg.baslik) + '</h2><span class="k">' + (cfg.alt || '') + '</span></div>' + thSvg(cfg) + (cfg.not ? '<div class="k">' + cfg.not + '</div>' : '') + '</section>';
+}
+const thStrRenk = d => d === 'dusuk' ? TH_R.kirmizi : d === 'zayif' || d === 'farkli' ? TH_R.sari : d === 'bos' ? TH_R.gri : TH_R.yesil;
+const thStrAd = { normal: 'normal', zayif: 'zayıf', dusuk: 'düşük', farkli: 'farklı', bos: 'boş' };
+// FusionSolar inverteri → tek hat kutusu (canlı güç, faz akım/gerilim, sıcaklık, PV girişleri)
+const FS_DURUM = { '40960': 'Bekleme', '45056': 'Kapalı', '49152': 'Bekleme', 'Bekleme (ışınım yok)': 'Bekleme', 'Bekleme (algılama)': 'Bekleme' };
+function thFsInv(dn, v, ort) {
+  v = Object.assign({}, v, { durum: FS_DURUM[String(v.durum)] || v.durum });
+  const an = (((STR || {}).inverterler || {})['fusionsolar:' + dn] || {}).stringler || [], anM = {}; an.forEach(s => { anM[s.pv] = s; });
+  const kw = Number(v.guc_kw) || 0, kapali = !/şebekede/i.test(v.durum || '');
+  const canli = {}; (v.pv || []).forEach(([n, V, A]) => { canli[n] = { V, A }; });
+  const aDeg = Object.values(canli).map(c => c.A).filter(a => a != null && a > 0.2).sort((a, b) => a - b), aMed = aDeg.length ? aDeg[Math.floor(aDeg.length / 2)] : null;
+  const nler = [...new Set([...Object.keys(anM), ...Object.keys(canli)].map(Number))].sort((a, b) => a - b);
+  const pv = [], bos = [];
+  for (const n of nler) {
+    const a = anM[n], c = canli[n], tas = STR && v ? (STR.tasarim || {})[v.tesis + '|' + v.ad + '|' + n] : null;
+    const bosMu = (tas && tas.durum === 'bos') || (a && a.durum === 'bos' && !(c && c.A > 0.5));
+    if (bosMu) { bos.push(n); continue; }
+    let renk = a ? thStrRenk(a.durum) : TH_R.yesil;
+    if (c && aMed && kw > 2 && c.A != null && c.A < aMed * 0.5) renk = TH_R.kirmizi;
+    const txt = c ? 'PV' + n + '  ' + (c.V != null ? say(c.V) + ' V' : '—') + ' · ' + (c.A != null ? say(c.A, 2) + ' A' : '—') : 'PV' + n + '  tepe ' + (a ? say(a.tepe_a, 1) + ' A' : '—');
+    pv.push({ n, txt, renk, ipucu: 'PV' + n + (c ? ' · anlık ' + (c.V != null ? say(c.V) + ' V ' : '') + (c.A != null ? say(c.A, 2) + ' A' : '') : '') + (a ? ' · 7 gün: ' + (thStrAd[a.durum] || a.durum) + ', oran ' + say(a.oran_medyan, 2) + ', tepe ' + say(a.tepe_a, 1) + ' A / ' + say(a.tepe_v) + ' V' : '') });
+  }
+  const dc = Object.values(canli).reduce((t, c) => t + (c.V || 0) * (c.A || 0), 0) / 1000;
+  const satir = [];
+  if (v.ia != null) satir.push('I ' + [v.ia, v.ib, v.ic].map(z => z == null ? '—' : say(z, 1)).join(' / ') + ' A');
+  if (v.uab != null) satir.push('U ' + [v.uab, v.ubc, v.uca].map(z => z == null ? '—' : say(z)).join(' / ') + ' V');
+  satir.push((v.sicaklik_c != null ? say(v.sicaklik_c, 1) + ' °C' : '') + (dc > 0.1 ? ' · DC ' + say(dc, 1) + ' kW' : '') + (v.ia == null && !(v.durum) ? '' : (kapali ? ' · ' + esc(v.durum || '') : '')));
+  return { ad: v.ad, kw, ust: say(kw, 1) + ' kW', satir, renk: kapali ? (kw > 0 ? TH_R.kirmizi : TH_R.gri) : ort > 2 && kw < ort * 0.8 ? TH_R.sari : TH_R.yesil, pv, bos };
+}
+async function cizMiningPrensip() {
+  await strYukle();
+  const fs = D.fs || {}, mad = D.mad || {}, saha = D.saha;
+  const tes = {}; for (const t of Object.values(fs.tesisler || {})) tes[t.kisa] = t;
+  const gr = {}; for (const [dn, v] of Object.entries(fs.invertorler || {})) (gr[v.tesis] || (gr[v.tesis] = [])).push([dn, v]);
+  // madencilik: toplayıcının cihaz listesi; güç = Pi'nin ölçtüğü toplam güç, cihazlara hash payıyla
+  let mk = null; if (saha && saha.saat) { const k = Object.keys(saha.saat).sort().pop(); mk = saha.saat[k]; }
+  const dv = (mad.devices || []).map(d => ({ d, no: String(d.actual_worker || '').split('.').pop() || null })).filter(x => x.no || x.d.online || x.d.sleeping);
+  const thT2 = dv.reduce((t, x) => t + (x.d.online && !x.d.sleeping ? Number(x.d.hashrate_TH) || 0 : 0), 0);
+  const calisan = dv.filter(x => x.d.online && !x.d.sleeping && (Number(x.d.hashrate_TH) || 0) > 1);
+  const kwT = mk && mk.kw != null ? mk.kw : null, cihazKw = (D.yon && D.yon.ayarlar && D.yon.ayarlar.cihaz_guc_kw) || null;
+  const cihaz = dv.sort((a, b) => String(a.no || 'zz').localeCompare(String(b.no || 'zz'), 'tr', { numeric: true })).map(({ d, no }) => {
+    const th = Number(d.hashrate_TH) || 0, cal = d.online && !d.sleeping && th > 1, uy = d.sleeping;
+    const kw = cal ? (kwT != null && thT2 ? kwT * th / thT2 : cihazKw) : uy ? 0 : null;
+    return { no: no || ('IP .' + String(d.ip).split('.').pop()), durum: cal ? 'çalışıyor' : uy ? 'uykuda' : d.online ? 'hash yok' : 'yanıtsız', renk: cal ? TH_R.yesil : uy ? TH_R.mavi : TH_R.kirmizi,
+      s1: cal ? say(th, 1) + ' TH/s · ' + (kw != null ? say(kw, 2) + ' kW' : '—') : uy ? 'uyku · 0 kW' : '—',
+      s2: (d.temp_max != null ? 'çip ' + say(d.temp_max) + ' °C' : 'sıcaklık —') + (d.temp_water != null ? ' · su ' + say(d.temp_water) + ' °C' : '') };
+  });
+  const mkKw = calisan.length ? kwT : 0;
+  const ts = mad.timestamp ? String(mad.timestamp).slice(11, 16) : '—';
+  let h = '';
+  for (const k of ['Sera-1', 'Sera-2']) {
+    const L = (gr[k] || []).sort((a, b) => thNo(a[1].ad) - thNo(b[1].ad)), top = L.reduce((t, [, v]) => t + (Number(v.guc_kw) || 0), 0), ort = L.length ? top / L.length : 0;
+    const inv = L.map(([dn, v]) => thFsInv(dn, v, ort)), t = tes[k] || {}, ab = k === 'Sera-1' ? 'T1' : 'T2';
+    const yuk = k === 'Sera-2' ? { ad: '⛏ Madencilik panosu', kw: mkKw, alt: calisan.length + ' / ' + cihaz.length + ' cihaz çalışıyor', cihaz } : null;
+    const net = top - (yuk ? mkKw || 0 : 0);
+    h += thBolum({ baslik: k + ' · ' + (t.ad || '') + (t.dc_kwp ? ' · ' + say(t.dc_kwp) + ' kWp' : ''), alt: 'FusionSolar ' + esc(String(fs.guncelleme || '').slice(11, 16)) + (k === 'Sera-2' ? ' · madencilik toplayıcı ' + esc(ts) : ''),
+      sayac: { ab, net, osos: thOsos(k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2') },
+      bloklar: [{ ad: 'Trafo', inv, yuk, baraNot: 'Σ inverter ' + say(top, 1) + ' kW' }] });
+  }
+  const pvVar = Object.values(fs.invertorler || {}).some(v => (v.pv || []).length);
+  h += '<div class="k">Akış: OG baradan aşağı; sayaçtaki ok şebekeye (yeşil, veriş) ya da şebekeden (kırmızı, çekiş) yönü gösterir. Sayaç değeri anlık tahmindir (inverter AC çıkışı' + ' − madencilik yükü), iç tüketim hariç; altındaki satır OSOS\'un son saatlik ölçümüdür. '
+    + 'İnverter kutusu: anlık AC güç, faz akımları (Ia/Ib/Ic) ve hat gerilimleri (Uab/Ubc/Uca), sıcaklık. Stringler: '
+    + (pvVar ? 'PV girişinin anlık gerilim ve akımı (FusionSolar, ~5 dk); renk 7 günlük string analizinden, anlık akımı inverterdeki diğer stringlerin yarısının altına düşen kırmızı. ' : 'anlık PV gerilim/akımı toplayıcının yeni sürümü Pi\'de devreye girince görünecek; şimdilik 7 günlük analizin tepe akımı ve durumu (yeşil normal, turuncu zayıf, kırmızı düşük). ')
+    + 'Boş girişler (bağlı string yok) kutunun altında listelenir. Madencilik: cihaz gücü Pi\'nin ölçtüğü toplam yükün hash payıyla bölünmesidir; sıcaklık en yüksek çip ve su sıcaklığı. Prensip şemadır; kesici, ayırıcı ve koruma elemanları gösterilmez.</div>';
+  return h;
+}
+// Diğer santraller ve abonelikler: her biri bağımsız tek hat
+const TH_DIGER = [
+  { ab: 'YD', key: 'yilmaz_darilmaz', kaynak: 'sungrow', id: '5064453', ad: 'Yılmaz Darılmaz GES' },
+  { ab: 'Anka', key: 'anka_mineral', kaynak: 'sungrow', id: '5038906', ad: 'Anka Mineral GES (HG Yatırım)' },
+  { ab: 'AE', key: 'aksaray_enerji', kaynak: 'inavitas', id: '189', ad: 'Aksaray Enerji Üretim GES (Sapmaz)' },
+  { ab: 'A3', key: 'aksaray_3', ad: 'Aksaray 3 · tüketim aboneliği' }];
+async function cizDigerPrensip() {
+  await strYukle();
+  const yil = bugunTR().slice(0, 4), veri = {};
+  for (const k of ['sungrow', 'inavitas']) { try { veri[k] = await al('inverter/' + k + '_' + yil + '.json'); } catch (e) { veri[k] = null; } }
+  const son = {}; for (const r of ((D.son && D.son.son) || [])) son[r.anahtar] = r;
+  let h = '';
+  for (const P of TH_DIGER) {
+    const os = thOsos(P.key);
+    if (!P.kaynak) {
+      const kw = os ? os.cekis : null;
+      h += thBolum({ baslik: P.ab + ' · ' + P.ad, alt: 'OSOS saatlik ölçüm', mod: 'nokta',
+        sayac: { ab: P.ab, net: kw != null ? -kw : null, osos: os },
+        bloklar: [{ ad: 'Trafo', inv: [], yuk: { ad: 'Tesis yükü', kw, alt: 'son saat ortalaması' } }],
+        not: 'Tüketim aboneliği: üretimi yok; değer OSOS\'un son saatlik çekişidir (kWh ≈ saat ortalaması kW). Mahsup havuzunda T1/T2 üretiminden karşılanır.' });
+      continue;
+    }
+    const sant = ((veri[P.kaynak] || {}).santraller || {})[P.id] || {}, r = son[P.kaynak + ':' + P.id] || {};
+    const invs = Object.entries(sant.inv || {}).map(([id, v]) => {
+      const gunler = Object.keys(v.gun || {}).sort(), g = gunler[gunler.length - 1];
+      return { id, v, g, kwh: g ? v.gun[g] : null };
+    });
+    const sonG = invs.reduce((m, x) => x.g && x.g > m ? x.g : m, '');
+    const deg = invs.filter(x => x.g === sonG).map(x => x.kwh || 0).sort((a, b) => a - b), med = deg.length ? deg[Math.floor(deg.length / 2)] : 0;
+    const kutu = invs.map(({ id, v, g, kwh }) => {
+      const st = ((STR || {}).inverterler || {})[P.kaynak + ':' + id], ss = (st && st.stringler) || [];
+      const pv = ss.filter(s => s.durum !== 'bos').map(s => ({ n: s.pv, renk: thStrRenk(s.durum), ipucu: 'PV' + s.pv + ' · ' + (thStrAd[s.durum] || s.durum) + ' · oran ' + say(s.oran_medyan, 2) + ' · tepe ' + say(s.tepe_a, 1) + ' A / ' + say(s.tepe_v) + ' V' }));
+      const kotu = ss.filter(s => s.durum === 'dusuk').length, zay = ss.filter(s => s.durum === 'zayif' || s.durum === 'farkli').length;
+      const eski = g !== sonG, sifir = !kwh;
+      return { ad: v.ad || id, kw: 0, ust: (kwh != null ? say(kwh) : '—') + ' kWh', satir: [(eski ? tarihK(g) + ' · eski' : (pv.length ? pv.length + ' string' + (kotu ? ' · ' + kotu + ' düşük' : '') + (zay ? ' · ' + zay + ' farklı' : '') : 'string verisi yok'))],
+        renk: sifir || eski ? TH_R.kirmizi : med && kwh < med * 0.8 ? TH_R.sari : TH_R.yesil, pv, bos: [], _s: v.ad || id };
+    }).sort((a, b) => String(a._s).localeCompare(String(b._s), 'tr', { numeric: true }));
+    // trafo grupları (ad önekinden: TR1-…, TR2-…)
+    const grp = {}; for (const k of kutu) { const m = String(k._s).match(/^(TR\d+)/i); const t = m ? m[1].toUpperCase() : 'Trafo'; (grp[t] || (grp[t] = [])).push(k); }
+    const bloklar = Object.keys(grp).sort().map(t => ({ ad: t, inv: grp[t], baraNot: grp[t].length + ' inverter · ' + (sonG ? tarihK(sonG) : '') + ' Σ ' + say(grp[t].reduce((a, x) => a + (parseFloat(String(x.ust).replace(/\./g, '').replace(',', '.')) || 0), 0)) + ' kWh' }));
+    const canli = r.guc_kw != null ? Number(r.guc_kw) : null;
+    h += thBolum({ baslik: P.ab + ' · ' + P.ad + (sant.kwp ? ' · ' + say(sant.kwp) + ' kWp' : ''), mod: 'nokta',
+      alt: (P.kaynak === 'sungrow' ? 'Sungrow' : 'Inavitas') + (r.ts ? ' · ' + saatTR(r.ts) : '') + ' · inverter değerleri ' + (sonG ? tarihK(sonG) : '—') + ' günlük üretimi',
+      sayac: { ab: P.ab, net: canli, netNot: 'santral anlık gücü yok', osos: os }, bloklar,
+      not: 'Bu platformdan inverter bazında anlık güç gelmiyor: sayaçtaki değer santralin anlık gücü (' + (P.kaynak === 'sungrow' ? 'Sungrow' : 'Inavitas') + '), inverter kutularında son günün üretimi (kWh). Kutu rengi: santral medyanının %80\'i altı turuncu, üretmeyen kırmızı. Noktalar stringler'
+        + (P.kaynak === 'sungrow' ? ' (7 günlük analiz; üzerine gelince oran ve tepe akım/gerilim görünür; yeşil normal, turuncu zayıf/farklı, kırmızı düşük).' : '; Inavitas string akımı vermediği için gösterilmez.') + ' Trafo grupları inverter adındaki TR öneki ile ayrıldı; prensip şemadır.' });
+  }
+  return h;
+}
 // ===== Anlık üretim: FusionSolar (Sera-1 = Tek Yıldız-1, Sera-2 = Tek Yıldız-2) inverter bazında + madencilik yükü (Pi ölçümü)
 function anlikUretimBolum(fs, saha, mad) {
   if (!fs || !fs.invertorler) return '';
@@ -2106,9 +2292,7 @@ function anlikUretimBolum(fs, saha, mad) {
     + (mk != null ? kartA('Madencilik yükü', say(mk, 1), mkNot) : '')
     + (fark != null ? kartA(fark >= 0 ? 'Sera-2 fazlası (madencilik sonrası)' : 'Sera-2 açığı (şebekeden)', say(Math.abs(fark), 1), fark >= 0 ? 'Sera-2 madencilikten fazla üretiyor' : 'Madencilik Sera-2 üretimini aşıyor', fark >= 0 ? '#1E7A3C' : '#B42318') : '')
     + '</div>'
-    + '<div><h3 style="margin:0 0 8px;font-size:15px">Prensip tek hat</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px">'
-    + adlar.map(k => '<div class="panel" style="padding:10px;min-width:0">' + tekHatSvg(k, (ser[k] || []).slice().sort((a, b) => no(a.ad) - no(b.ad)), tes[k], k === 'Sera-2' && mk != null ? { kw: mk, n: mkN } : null, D.osos) + '</div>').join('')
-    + '</div><div class="k" style="margin-top:6px">Prensip şemadır: kesici, ayırıcı, koruma ve trafo güçleri gösterilmez; OG gerilimi temsilîdir. Sayaç değeri anlık tahmindir (inverter AC çıkışı − madencilik, iç tüketim hariç); kesin değer altındaki OSOS saatlik ölçümüdür. Yeşil inverter normal, turuncu sera ortalamasının %20 altı, kırmızı şebekede değil.</div></div>'
+    + '<div class="k"><a href="#inverter" onclick="invSec.sekme=\'mining\'">Tek hat şeması (inverter, string ve madencilik cihazlarıyla) → İnverter analizi › Mining prensip</a></div>'
     + '<div class="iki">';
   for (const k of adlar) {
     const L = (ser[k] || []).slice().sort((a, b) => no(a.ad) - no(b.ad)), ort = L.length ? kw[k] / L.length : 0;

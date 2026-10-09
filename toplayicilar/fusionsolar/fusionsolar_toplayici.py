@@ -94,7 +94,8 @@ INV_SIG = {  # device-realtime-data sinyal id -> alan
     "10024": "yalitim_mohm", "10025": "durum_kodu", "10014": "ia", "10015": "ib", "10016": "ic",
     "10008": "uab", "10009": "ubc", "10010": "uca", "10027": "baslama", "10028": "kapanma"}
 INV_STATE = {512: "Şebekede", 513: "Şebekede (sınırlı)", 768: "Kapalı", 0: "Bekleme",
-             1: "Bekleme (algılama)", 2: "Bekleme (ışınım yok)", 1025: "Bekleme"}
+             1: "Bekleme (algılama)", 2: "Bekleme (ışınım yok)", 1025: "Bekleme",
+             40960: "Bekleme (ışınım yok)"}
 SEV = {1: "Kritik", 2: "Büyük", 3: "Küçük", 4: "Uyarı"}
 
 log = logging.getLogger("fs")

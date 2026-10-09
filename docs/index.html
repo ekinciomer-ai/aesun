@@ -590,6 +590,7 @@ function cizGenel() {
   document.getElementById('icerik').innerHTML =
     '<div style="display:flex;flex-direction:column;gap:24px">'
     + '<div class="iki"><section class="panel" aria-labelledby="h-uyari"><div class="bas"><h2 id="h-uyari">Dikkat isteyenler</h2><span class="k">' + uy.length + ' etkin</span></div>' + uyHtml + '</section>' + denge + '</div>'
+    + anlikUretimBolum(D.fs, D.saha, mad)
     + '<section class="panel" id="sayaclar" aria-labelledby="h-abone" style="gap:16px"><div class="bas"><h2 id="h-abone">Sayaçlar</h2><span class="k">' + tarihK(sonOsosGun) + ' 00:00–' + String(sonSaatNo).padStart(2, '0') + ':00, son 30 gün çizgisi</span></div><div class="sayaclar">' + sayaclar + '</div></section>'
     + trend
     + '<div class="uc">' + inv + madH + f2H + gelirH + ptfH + '</div>'
@@ -2029,16 +2030,49 @@ function ciz() {
   if (sayfa === 'bildirim') cizBildirim(); else if (sayfa === 'maden') cizMaden(); else if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
 }
 window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias' || location.hash === '#maden' || location.hash === '#bildirim') window.scrollTo(0, 0); } });
+// ===== Anlık üretim: FusionSolar (Sera-1 = Tek Yıldız-1, Sera-2 = Tek Yıldız-2) inverter bazında + madencilik yükü (Pi ölçümü)
+function anlikUretimBolum(fs, saha, mad) {
+  if (!fs || !fs.invertorler) return '';
+  const dk = (Date.now() - new Date(fs.guncelleme + '+03:00').getTime()) / 60000;
+  const no = a => { const m = String(a || '').match(/(\d+)\s*$/); return m ? Number(m[1]) : 999; };
+  const ser = {};
+  for (const [id, v] of Object.entries(fs.invertorler)) (ser[v.tesis] || (ser[v.tesis] = [])).push(Object.assign({ id }, v));
+  const tes = {}; for (const t of Object.values(fs.tesisler || {})) tes[t.kisa] = t;
+  const adlar = ['Sera-1', 'Sera-2'].filter(k => ser[k] || tes[k]);
+  const top = k => (ser[k] || []).reduce((a, x) => a + (Number(x.guc_kw) || 0), 0), topG = k => (ser[k] || []).reduce((a, x) => a + (Number(x.gunluk_kwh) || 0), 0);
+  // madencilik yükü: Pi'nin son saatlik ortalaması (kW); yoksa çalışan cihaz × ortalama güç
+  let mk = null, mkNot = '';
+  if (saha && saha.saat) { const k = Object.keys(saha.saat).sort().pop(), o = saha.saat[k]; if (o && o.kw != null) { mk = o.kw; mkNot = 'Pi ölçümü, ' + k.slice(11) + ':00 saati ortalaması · ' + say(o.calisan) + ' cihaz çalışıyor'; } }
+  const kw = {}; let T = 0; for (const k of adlar) { kw[k] = top(k); T += kw[k]; }
+  const kartA = (ad, v, alt, renk) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:24px;font-weight:700' + (renk ? ';color:' + renk : '') + '">' + v + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kW</span></div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
+  const fark = kw['Sera-2'] != null && mk != null ? kw['Sera-2'] - mk : null;
+  let h = '<section class="panel" id="anlik" aria-labelledby="h-anlik" style="gap:14px"><div class="bas"><h2 id="h-anlik">Anlık üretim</h2><span class="k">FusionSolar · ' + esc(String(fs.guncelleme).slice(11, 16)) + (dk > 30 ? ' <b style="color:#B42318">(' + Math.round(dk) + ' dk eski)</b>' : ' (' + Math.max(0, Math.round(dk)) + ' dk önce)') + '</span></div>'
+    + '<div class="kartlar5" style="grid-template-columns:repeat(auto-fit,minmax(165px,1fr))">'
+    + adlar.map(k => { const t = tes[k] || {}; return kartA(k + (t.ad ? ' <span class="k">· ' + esc(t.ad.replace(' GES', '')) + '</span>' : ''), say(kw[k], 1), (t.dc_kwp ? '%' + say(kw[k] / t.dc_kwp * 100) + ' kapasite (' + say(t.dc_kwp) + ' kWp) · ' : '') + 'bugün ' + say(topG(k)) + ' kWh'); }).join('')
+    + kartA('Toplam (Sera-1 + Sera-2)', say(T, 1), 'bugün ' + say(adlar.reduce((a, k) => a + topG(k), 0)) + ' kWh', '#10233F')
+    + (mk != null ? kartA('Madencilik yükü', say(mk, 1), mkNot) : '')
+    + (fark != null ? kartA(fark >= 0 ? 'Sera-2 fazlası (madencilik sonrası)' : 'Sera-2 açığı (şebekeden)', say(Math.abs(fark), 1), fark >= 0 ? 'Sera-2 madencilikten fazla üretiyor' : 'Madencilik Sera-2 üretimini aşıyor', fark >= 0 ? '#1E7A3C' : '#B42318') : '')
+    + '</div><div class="iki">';
+  for (const k of adlar) {
+    const L = (ser[k] || []).slice().sort((a, b) => no(a.ad) - no(b.ad)), ort = L.length ? kw[k] / L.length : 0;
+    const sat = L.map(x => { const g = Number(x.guc_kw) || 0, dus = ort > 2 && g < ort * 0.8, kapali = !/şebekede/i.test(x.durum || '');
+      return '<tr><td class="sol"><b>' + esc(x.ad) + '</b></td><td class="sol" style="color:' + (kapali ? '#B42318' : '#1E7A3C') + ';font-weight:600">' + esc(x.durum || '—') + '</td><td class="ayr" style="font-weight:700' + (dus ? ';color:#9A5B00' : '') + '">' + say(g, 1) + '</td><td>%' + say(kw[k] ? g / kw[k] * 100 : 0, 1) + '</td><td class="ayr">' + say(x.gunluk_kwh) + '</td></tr>'; }).join('');
+    h += '<div style="min-width:0"><h3 style="margin:0 0 8px;font-size:15px">' + k + ' · ' + L.length + ' inverter · ' + L.filter(x => /şebekede/i.test(x.durum || '')).length + ' şebekede</h3><div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">İnverter</th><th class="sol">Durum</th><th class="ayr">Anlık (kW)</th><th>Pay</th><th class="ayr">Bugün (kWh)</th></tr></thead><tbody>' + sat
+      + '<tr class="top"><td class="sol">' + k + ' toplam</td><td></td><td class="ayr">' + say(kw[k], 1) + '</td><td>%100</td><td class="ayr">' + say(topG(k)) + '</td></tr></tbody></table></div></div>';
+  }
+  return h + '</div><div class="k">Anlık güç inverterlerin AC çıkışıdır (FusionSolar, ~15 dk\'da bir). Turuncu: o seradaki inverter ortalamasının %20\'den fazla altında. Madencilik Sera-2 (Tek Yıldız-2) sayacının arkasındadır; "fazla/açık" = Sera-2 anlık üretimi − madencilik yükü (iç tüketim hariç). Sayfa 3 dk\'da bir yenilenir.</div></section>';
+}
 
 async function yukle() {
   try {
-    const [son, osos, mad, fs] = await Promise.all([
+    const [son, osos, mad, fs, saha] = await Promise.all([
       al('n8n/aesun_son.json').catch(() => null),
       al('2026_osos_endeks.json'),
       al('antminer_panel.json').catch(() => null),
-      al('n8n/fusionsolar_son.json').catch(() => null)
+      al('n8n/fusionsolar_son.json').catch(() => null),
+      al('n8n/saha_saatlik.json').catch(() => null)
     ]);
-    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs };
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs, saha };
     ciz();
   } catch (e) {
     if (!D) document.getElementById('icerik').innerHTML = '<div class="panel hata">Veri okunamadı: ' + esc(e.message || e) + '</div>';

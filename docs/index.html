@@ -872,6 +872,43 @@ function dagAc(key) {
   tr.insertAdjacentHTML('afterend', h);
   tr.classList.add('acilmis');
 }
+// ===== Aylık enerji maliyeti ve pay: T2'nin güneş yokken/yetmezken şebekeden çektiği elektriğin fatura bedeli (n8n/maden_maliyet.json)
+function aylikMaliyetBolum(dg, DAG, DAG_TOP) {
+  const mal = MADEN.mal || {}, gel = {}, aylar = {};
+  for (const x of dg) gel[x.g] = x;
+  for (const [g, m] of Object.entries(mal)) {
+    const ay = g.slice(0, 7), a = aylar[ay] || (aylar[ay] = { gun: [], kwh: 0, en: 0, dag: 0, btv: 0, kdv: 0, top: 0, fat: 0, tah: 0, btc: 0, tl: 0 });
+    a.gun.push(g); a.kwh += m.kwh || 0; a.en += m.enerji_tl || 0; a.dag += m.dagitim_tl || 0; a.btv += m.btv_tl || 0; a.kdv += m.kdv_tl || 0; a.top += m.toplam_tl || 0;
+    if (m.kaynak === 'fatura') a.fat++; else a.tah++;
+  }
+  for (const x of dg) { const a = aylar[x.g.slice(0, 7)]; if (a) { a.btc += x.btc || 0; a.tl += x.tl || 0; } }
+  const liste = Object.entries(aylar).sort((p, q) => q[0].localeCompare(p[0]));
+  if (!liste.length) return '';
+  const r0 = DAG[0] / DAG_TOP, r1 = DAG[1] / DAG_TOP;
+  const rozet = a => a.tah ? '<span style="font-size:11px;font-weight:700;color:#9A5B00;background:#FFF4DC;padding:2px 7px;border-radius:9px">Tahmini' + (a.fat ? ' (' + a.fat + ' gün fatura)' : '') + '</span>' : '<span style="font-size:11px;font-weight:700;color:#1E7A3C;background:#E8F5EC;padding:2px 7px;border-radius:9px">Fatura · kesin</span>';
+  const netH = v => '<td style="font-weight:700;color:' + (v < 0 ? '#B42318' : '#1E7A3C') + '">' + say(v) + '</td>';
+  let kart = '', sat = '';
+  for (const [ay, a] of liste) {
+    a.gun.sort(); const ad = AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4), aralik = Number(a.gun[0].slice(8)) + '–' + Number(a.gun[a.gun.length - 1].slice(8)) + ' ' + AYK[Number(ay.slice(5)) - 1];
+    sat += '<tr><td class="sol"><b>' + ad + '</b> <span class="k">' + aralik + '</span><br>' + rozet(a) + '</td><td class="ayr">' + say(a.kwh) + '</td><td>' + say(a.en) + '</td><td>' + say(a.dag) + '</td><td>' + say(a.btv) + '</td><td>' + say(a.kdv) + '</td><td style="font-weight:700">' + say(a.top) + '</td>'
+      + '<td class="ayr">' + say(a.tl) + '</td><td class="ayr">' + say(a.tl * r0) + '</td><td>' + say(a.top * r0) + '</td>' + netH((a.tl - a.top) * r0) + '<td class="ayr">' + say(a.tl * r1) + '</td><td>' + say(a.top * r1) + '</td>' + netH((a.tl - a.top) * r1) + '</tr>';
+  }
+  const [ay0, a0] = liste[0], s0 = liste.find(([, a]) => !a.tah) || liste[0];
+  const fat = (ust, a, ad) => {
+    const satir = (k, v, kalin) => '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0' + (kalin ? ';border-top:1px solid #D5DCE5;margin-top:4px;padding-top:7px;font-weight:700;font-size:15px' : '') + '"><span' + (kalin ? '' : ' class="k"') + '>' + k + '</span><span class="num">' + v + '</span></div>';
+    return '<div class="panel" style="padding:16px 18px;gap:2px;min-width:0"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px"><b>' + ust + '</b>' + rozet(a) + '</div>'
+      + satir('Şebekeden çekiş', say(a.kwh) + ' kWh') + satir('Enerji (PTF + YEKDEM, %2,5 kom.)', say(a.en) + ' ₺') + satir('Dağıtım', say(a.dag) + ' ₺') + satir('BTV (%1)', say(a.btv) + ' ₺') + satir('KDV (%20)', say(a.kdv) + ' ₺')
+      + satir('Toplam maliyet', say(a.top) + ' ₺', true)
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">'
+      + [['16 cihaz', r0], ['13 cihaz', r1]].map(([n, r]) => '<div style="background:#F5F7FA;border-radius:8px;padding:8px 10px"><div class="k" style="font-size:12px">' + n + '</div><div style="font-size:12.5px">Gelir ' + say(a.tl * r) + ' ₺</div><div style="font-size:12.5px">Maliyet ' + say(a.top * r) + ' ₺</div><div style="font-weight:700;color:' + ((a.tl - a.top) * r < 0 ? '#B42318' : '#1E7A3C') + '">Net ' + say((a.tl - a.top) * r) + ' ₺</div></div>').join('') + '</div></div>';
+  };
+  kart = fat(AYLAR[Number(ay0.slice(5)) - 1] + ' ' + ay0.slice(0, 4), a0) + (s0[0] !== ay0 ? fat(AYLAR[Number(s0[0].slice(5)) - 1] + ' ' + s0[0].slice(0, 4), s0[1]) : '');
+  return '<section class="panel" id="aylikMaliyet" style="gap:12px"><div class="bas"><h2>Aylık enerji maliyeti ve pay</h2><span class="k">Tek Yıldız 2 · güneş yokken / yetmezken şebekeden çekilen elektrik · fatura esası, KDV dahil</span></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px">' + kart + '</div>'
+    + '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol" rowspan="2">Ay</th><th class="ayr" colspan="6" style="text-align:center">Maliyet (₺)</th><th class="ayr" rowspan="2">Gelir ₺</th><th class="ayr" colspan="3" style="text-align:center">16 cihaz (16/29)</th><th class="ayr" colspan="3" style="text-align:center">13 cihaz (13/29)</th></tr>'
+    + '<tr><th class="ayr">kWh</th><th>Enerji</th><th>Dağıtım</th><th>BTV</th><th>KDV</th><th>Toplam</th><th class="ayr">Gelir</th><th>Maliyet</th><th>Net</th><th class="ayr">Gelir</th><th>Maliyet</th><th>Net</th></tr></thead><tbody>' + sat + '</tbody></table></div>'
+    + '<div class="k">Fatura gelen ayda faturanın saatlik tüketimi ve PTF\'si kullanılır (kesin); gelmeyen ayda OSOS sayacı ve EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025 · dağıtım 1.182,457 TL/MWh · BTV enerjinin %1\'i · KDV %20. Gelir ve maliyet 16/29 · 13/29 oranında bölünür. Ay bitince özet WhatsApp\'a da gider.</div></section>';
+}
 // ===== Madencilik > Cihazlar: cihaz kartları (F2Pool + son bilinen donanım + sahadaki canlı durum) ve elle uyut/çalıştır
 const KOMUT_URL = 'https://xbay.app.n8n.cloud/webhook/aesun-komut';
 let SON_DONANIM = null;
@@ -1456,8 +1493,9 @@ async function cizMaden() {
           seriler: [{ ad: '16 cihaz', renk: '#2a78d6', grup: 'g', v: dg.map(x => pay(x, 0)) }, { ad: '13 cihaz', renk: '#1baf7a', grup: 'g', v: dg.map(x => pay(x, 1)) }] })
       + '<div class="tablo-kutu" style="max-height:640px;overflow:auto"><table class="tb sirasiz" id="dagTablo">' + bas2('Ay / gün / saat / cihaz') + '<tbody>' + at + '</tbody></table></div>'
       + '<div class="k">Aya tıklayınca günler, güne tıklayınca saatler, saate tıklayınca o saatte çalışan cihazlar açılır. Günün geliri saatlere o saatteki toplam hash oranında, saatin geliri cihazlara kendi hash payı oranında dağıtılır.</div>'
-      + '<div class="k">Maliyet: madencilik sahasının (Tek Yıldız 2) güneşin olmadığı / yetmediği saatlerde şebekeden çektiği elektriğin fatura bedeli (KDV dahil). Fatura gelen ayda faturanın saatlik tüketim ve PTF'si, gelmeyen ayda OSOS sayacı + EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025; dağıtım 1.182,457 TL/MWh; BTV %1; KDV %20. Gelirle aynı 16/29 · 13/29 oranında bölünür.</div>'
+      + '<div class="k">Maliyet: madencilik sahasının (Tek Yıldız 2) güneşin olmadığı / yetmediği saatlerde şebekeden çektiği elektriğin fatura bedeli (KDV dahil). Fatura gelen ayda faturanın saatlik tüketim ve PTF\'si, gelmeyen ayda OSOS sayacı + EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025; dağıtım 1.182,457 TL/MWh; BTV %1; KDV %20. Gelirle aynı 16/29 · 13/29 oranında bölünür.</div>'
       + '<div class="k">Hangi cihazın hangi gruba ait olduğu bilinmediği için her günün geliri 16/29 ve 13/29 oranında bölünür. "Çalışan cihaz", her cihazın o gün sahanın çalıştığı saatlerin ne kadarında çalıştığına göre eşdeğer sayıdır; "cihaz başı" günlük gelirin bu sayıya bölümüdür. ₺ ve $ o günün BTC kapanış fiyatıyla.</div></section>';
+    h += aylikMaliyetBolum(dg, DAG, DAG_TOP);
   }
   // günlük grafikler
   const et = gunler.map(x => String(Number(x.g.slice(8))));

@@ -1243,7 +1243,7 @@ async function cizYonetim() {
     + '</div>';
   if (y.eylem_not) h += '<div class="panel" style="background:#FFF4DC;border-color:#F0D9A8;padding:12px 16px"><div style="font-size:14px;color:#5E3800">' + esc(y.eylem_not) + (y.eylem ? ' (yapılacak işlem: ' + (y.eylem === 'sleep' ? 'uyut' : 'çalıştır') + ')' : '') + '</div></div>';
   h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Kural</h2><span class="k">Son değerlendirme ' + saatTR(y.guncellendi) + '</span></div>'
-    + '<ol style="margin:0;padding-left:20px;line-height:1.7"><li><b>Güneş üretimi varken</b> (Sera-1 + Sera-2 anlık güç &gt; ' + say(a.uretim_esik_kw) + ' kW) cihazlar <b>çalışır</b>; PTF\'ye bakılmaz.</li><li><b>Üretim yokken</b> saatlik enerji maliyeti BTC gelirinden büyükse cihazlar <b>uyur</b>, değilse <b>çalışır</b>. </li>'
+    + '<ol style="margin:0;padding-left:20px;line-height:1.7"><li><b>Güneş üretimi varken</b> (Sera-1 + Sera-2 anlık güç &gt; ' + say(a.uretim_esik_kw) + ' kW) cihazlar <b>çalışır</b>; PTF\'ye bakılmaz.</li><li><b>Üretim yokken</b> PTF, başabaş PTF\'nin %' + say((a.basabas_tolerans ?? 0) * 100) + ' fazlasını (eşik' + (y.esik_ptf != null ? ' ' + say(y.esik_ptf) + ' ₺/MWh, başabaş ' + say(y.basabas_ptf) : '') + ') aşarsa cihazlar <b>uyur</b>, değilse <b>çalışır</b>. Başabaş: şebeke maliyetinin (KDV hariç) cihazın saatlik BTC gelirine eşit olduğu PTF.</li>'
       + '<li><b>Zamanlama gerçek ısınma verisinden öğrenilir:</b> Hydro cihazlar uyanınca önce suyu ~45 °C\'ye ısıtır, sonra hash verir; su soğuksa süre uzar. Kârlı saatten <b>önce</b>, saat başında filo %95 hash\'te olacak kadar erken uyandırılır (' + (a.oncu_politika === 'ekonomik' ? 'ekonomik politika: dakika bazlı kâr en yüksek' : 'hazır politikası') + ' + emniyet payı ' + say((z.model || {}).emniyet_dk) + ' dk). Uyutma zararlı saat başlarken (komut yayılımının yarısı kadar önce) verilir.</li>'
       + '<li><b>Kısa duruş kontrolü:</b> zararlı pencere kısa ve uyutup yeniden ısıtmanın kaybı kazancı aşıyorsa cihazlar uyutulmaz.</li></ol>'
     + '<div class="k">Maliyet (cihaz/saat) = [(PTF + YEKDEM) × ' + say(a.komisyon || 1.025, 3) + ' × ' + say(1 + (a.btv ?? 0.01), 2) + ' + dağıtım ' + say(a.dagitim_tl_mwh || 1182.457, 2) + '] ÷ 1000 × ' + say(a.cihaz_guc_kw, 2) + ' kW, KDV hariç (' + esc(a.cihaz_guc_kaynak || 'ayar') + ') = <b>' + say(y.maliyet_tl_saat, 1) + ' ₺</b> · Gelir (cihaz/saat) = hashprice × ' + say(a.cihaz_th) + ' TH/s ÷ 24 × BTC = <b>' + say(y.gelir_tl_saat, 1) + ' ₺</b>. '
@@ -1254,6 +1254,7 @@ async function cizYonetim() {
   const plHam = (y.plan || []).filter(q => q.karar != null && q.ptf != null);
   if (plHam.length) {
     const kw = a.cihaz_guc_kw || 1;
+    const esikPtf = (gel, yk) => { const q = Object.assign({}, MAL_P, a), bb = (gel / kw * 1000 - q.dagitim_tl_mwh) / (q.komisyon * (1 + q.btv)) - yk; return bb > 0 ? bb * (1 + (a.basabas_tolerans || 0)) : bb; };
     try { await epYukle(); } catch (e) {}
     let FSG = null; try { FSG = await al('n8n/fusionsolar_son.json'); } catch (e) {}
     try { await madenYukle(); } catch (e) {}
@@ -1310,7 +1311,7 @@ async function cizYonetim() {
           pl.push({ t, ptf, yekdem: yk, maliyet, gelir: gelirGunCihaz(gun), gunes_tahmini: gunes, karar: cal == null ? null : cal ? 'calis' : 'uyut', gecmis: true, gerc: true, ncal: n });
         } else {
           const gunes = (gunesSaat[s] || 0) > esik;
-          pl.push({ t, ptf, yekdem: yk, maliyet, gelir: gelirSabit, gunes_tahmini: gunes, gunes_kaynak: 'gerçekleşen', karar: gunes ? 'calis' : (gelirSabit != null && maliyet > gelirSabit ? 'uyut' : 'calis'), gecmis: true });
+          pl.push({ t, ptf, yekdem: yk, maliyet, gelir: gelirSabit, gunes_tahmini: gunes, gunes_kaynak: 'gerçekleşen', karar: gunes ? 'calis' : (gelirSabit != null && ptf > esikPtf(gelirSabit, yk) ? 'uyut' : 'calis'), gecmis: true });
         }
       }
       // Yarının PTF'si açıklandıysa bugünün grafiğine ertesi günün ilk 5 saati (00–04) eklenir

@@ -44,6 +44,7 @@ VARSAYILAN = {
     "komisyon": 1.025,            # tedarikçi PTF + YEKDEM komisyonu (%2,5, Erkim)
     "btv": 0.01,                  # belediye tüketim vergisi (enerji bedeli üzerinden)
     "dagitim_tl_mwh": 1182.457,   # dağıtım bedeli (OG tek terim sanayi); KDV hesaba katılmaz (indirilir)
+    "basabas_tolerans": 0.25,     # PTF, başabaş PTF'nin bu oran fazlasına kadar ise yine çalış (8 Eki kararı: %25)
     "uretim_esik_kw": 50,         # Sera-1 + Sera-2 anlık gücü bunun üstündeyse "üretim var"
     "hashprice_gun": 7,           # hashprice için son kaç günün F2Pool geliri
     "komut_arasi_dk": 15,         # aynı komut en erken bu kadar dakika sonra tekrarlanır
@@ -120,6 +121,11 @@ def birim_maliyet(ptf, yekdem, a):
     return (ptf + yekdem) * a["komisyon"] * (1 + a["btv"]) + a["dagitim_tl_mwh"]
 
 
+def basabas_ptf(gelir, yekdem, a):
+    """Cihazın saatlik gelirine denk gelen PTF (TL/MWh)."""
+    return (gelir / a["cihaz_guc_kw"] * 1000 - a["dagitim_tl_mwh"]) / (a["komisyon"] * (1 + a["btv"])) - yekdem
+
+
 def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
     maliyet = birim_maliyet(ptf, yekdem, a) / 1000 * a["cihaz_guc_kw"] if ptf is not None else None
     gelir = hp * a["cihaz_th"] / 24 * btc_try if hp and btc_try else None
@@ -127,9 +133,13 @@ def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
         return "calis", "güneş üretimi var", maliyet, gelir
     if maliyet is None or gelir is None:
         return None, "PTF ya da gelir verisi yok", maliyet, gelir
-    if maliyet > gelir:
-        return "uyut", f"maliyet {maliyet:.0f} ₺ > gelir {gelir:.0f} ₺ (cihaz/saat)", maliyet, gelir
-    return "calis", f"gelir {gelir:.0f} ₺ ≥ maliyet {maliyet:.0f} ₺ (cihaz/saat)", maliyet, gelir
+    bb = basabas_ptf(gelir, yekdem, a)
+    tol = a.get("basabas_tolerans") or 0
+    esik = bb * (1 + tol) if bb > 0 else bb
+    if ptf > esik:
+        return "uyut", f"PTF {ptf:.0f} > eşik {esik:.0f} (başabaş {bb:.0f} +%{tol * 100:.0f}) · maliyet {maliyet:.0f} ₺ / gelir {gelir:.0f} ₺", maliyet, gelir
+    return "calis", (f"PTF {ptf:.0f} ≤ eşik {esik:.0f} (başabaş {bb:.0f} +%{tol * 100:.0f})" + (" · zararına ama tolerans içinde" if maliyet > gelir else "")
+                     + f" · maliyet {maliyet:.0f} ₺ / gelir {gelir:.0f} ₺"), maliyet, gelir
 
 
 def gunes_saatleri(gun):
@@ -504,7 +514,7 @@ def calistir():
     basabas = None
     if hp and btc_try:
         g1 = hp * a["cihaz_th"] / 24 * btc_try
-        basabas = (g1 / a["cihaz_guc_kw"] * 1000 - a["dagitim_tl_mwh"]) / (a["komisyon"] * (1 + a["btv"])) - (yekdem or 0)
+        basabas = basabas_ptf(g1, yekdem or 0, a)
     sonraki_uyan = next((s_ for s_ in anahtar_j if s_["eylem"] == "wake"), None)
     durum, sha = gh("n8n/cihaz_yonetimi_durum.json")
     durum = durum or {}
@@ -517,6 +527,7 @@ def calistir():
         "uretim_kw": uretim_kw, "uretim": uretim, "fs_taze": fs_taze, "ptf": ptf, "yekdem": yekdem,
         "btc_try": btc_try, "btc_tarih": son_fg, "hashprice_btc_th_gun": hp, "hashprice_aralik": [hp_bas, hp_son],
         "maliyet_tl_saat": maliyet, "gelir_tl_saat": gel, "basabas_ptf": basabas,
+        "esik_ptf": (basabas * (1 + (a.get("basabas_tolerans") or 0)) if basabas and basabas > 0 else basabas),
         "karar": karar, "neden": neden, "istenen": istenen, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
         "cihaz": {"toplam": len(cihazlar), "ulasilan": len(ulasilan), "calisan": calisan, "uyuyan": uyuyan, "taze": mad_taze,
                   "su_uyuyan": canli_su},

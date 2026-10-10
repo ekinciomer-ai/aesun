@@ -2272,6 +2272,28 @@ async function cizDigerPrensip() {
   return h;
 }
 // ===== Anlık üretim: FusionSolar (Sera-1 = Tek Yıldız-1, Sera-2 = Tek Yıldız-2) inverter bazında + madencilik yükü (Pi ölçümü)
+// Bugünün saatlik üretimi: Sera-1 + Sera-2 (kWh/saat ≈ ortalama kW), madencilik yükü çizgisi
+function anlikSaatGrafik(fs, saha, adlar) {
+  const sb = fs.saatlik_bugun || {}; if (!adlar.some(k => sb[k])) return '';
+  const gun = String(fs.guncelleme || '').slice(0, 10), suan = String(fs.guncelleme || '').slice(11, 13);
+  const saatler = [...new Set(adlar.flatMap(k => Object.keys(sb[k] || {})))].sort();
+  const dolu = saatler.filter(h => adlar.some(k => (sb[k] || {})[h] > 0.5));
+  if (!dolu.length) return '';
+  const ilk = dolu[0], son = saatler[saatler.length - 1];
+  const hs = saatler.filter(h => h >= ilk && h <= son);
+  const v = k => hs.map(h => (sb[k] || {})[h] != null ? Math.round(sb[k][h] * 10) / 10 : null);
+  const mk = hs.map(h => { const o = saha && saha.saat ? saha.saat[gun + ' ' + h] : null; return o && o.kw != null ? Math.round(o.kw * 10) / 10 : null; });
+  const sR = { 'Sera-1': '#2a78d6', 'Sera-2': '#eb6834' };
+  const seri = adlar.map(k => ({ ad: k, renk: sR[k] || '#8A96A8', v: v(k), grup: 'u' }));
+  const top = hs.map((_, i) => seri.reduce((a, x) => a + (x.v[i] || 0), 0));
+  const isaret = mk.some(x => x != null) ? [{ ad: 'Madencilik yükü (kW)', renk: '#10233F', v: mk, tip: 'isaret' }] : [];
+  return '<div style="display:flex;flex-direction:column;gap:6px"><h3 style="margin:0;font-size:15px">Bugün saatlik üretim</h3>' + grafikX({
+    id: 'anlik_saat', ad: 'Bugün saatlik üretim', etiket: hs.map(h => h + ':00' + (h === suan ? '*' : '')), etiketAd: 'Saat',
+    seriler: seri.concat([{ ad: 'Toplam', renk: '#6b5bd6', v: top.map(x => Math.round(x * 10) / 10), kalin: true }]).concat(isaret),
+    yiginSeriler: seri.concat(isaret), turler: ['yigin', 'cizgi', 'tablo'], tur: 'yigin', birim: 'kWh/saat', toplam: 'top', yuk: 170,
+    tip: i => hs[i] + ':00' + (hs[i] === suan ? ' (saat devam ediyor)' : '') + '\n' + seri.map(x => x.ad + ': ' + say(x.v[i], 1) + ' kWh').join('\n') + '\nToplam: ' + say(top[i], 1) + ' kWh' + (mk[i] != null ? '\nMadencilik: ' + say(mk[i], 1) + ' kW' : '')
+  }) + '<div class="k">* Devam eden saat (eksik). Saatlik değer kWh = o saatin ortalama kW\'ı; koyu çizgi madencilik yükü (Pi ölçümü).</div></div>';
+}
 function anlikUretimBolum(fs, saha, mad) {
   if (!fs || !fs.invertorler) return '';
   const dk = (Date.now() - new Date(fs.guncelleme + '+03:00').getTime()) / 60000;
@@ -2294,12 +2316,14 @@ function anlikUretimBolum(fs, saha, mad) {
     + (mk != null ? kartA('Madencilik yükü', say(mk, 1), mkNot) : '')
     + (fark != null ? kartA(fark >= 0 ? 'Sera-2 fazlası (madencilik sonrası)' : 'Sera-2 açığı (şebekeden)', say(Math.abs(fark), 1), fark >= 0 ? 'Sera-2 madencilikten fazla üretiyor' : 'Madencilik Sera-2 üretimini aşıyor', fark >= 0 ? '#1E7A3C' : '#B42318') : '')
     + '</div>'
+    + anlikSaatGrafik(fs, saha, adlar)
     + '<div class="k"><a href="#inverter" onclick="invSec.sekme=\'mining\'">Tek hat şeması (inverter, string ve madencilik cihazlarıyla) → İnverter analizi › Mining prensip</a></div>'
     + '<div class="iki">';
   for (const k of adlar) {
     const L = (ser[k] || []).slice().sort((a, b) => no(a.ad) - no(b.ad)), ort = L.length ? kw[k] / L.length : 0;
+    const mxI = Math.max(1, ...Object.values(fs.invertorler).map(x => Number(x.nominal_kw) || Number(x.guc_kw) || 0)), sRenk = k === 'Sera-1' ? '#2a78d6' : '#eb6834';
     const sat = L.map(x => { const g = Number(x.guc_kw) || 0, dus = ort > 2 && g < ort * 0.8, kapali = !/şebekede/i.test(x.durum || '');
-      return '<tr><td class="sol"><b>' + esc(x.ad) + '</b></td><td class="sol" style="color:' + (kapali ? '#B42318' : '#1E7A3C') + ';font-weight:600">' + esc(x.durum || '—') + '</td><td class="ayr" style="font-weight:700' + (dus ? ';color:#9A5B00' : '') + '">' + say(g, 1) + '</td><td>%' + say(kw[k] ? g / kw[k] * 100 : 0, 1) + '</td><td class="ayr">' + say(x.gunluk_kwh) + '</td></tr>'; }).join('');
+      return '<tr><td class="sol"><b>' + esc(x.ad) + '</b></td><td class="sol" style="color:' + (kapali ? '#B42318' : '#1E7A3C') + ';font-weight:600">' + esc(x.durum || '—') + '</td><td class="ayr" style="font-weight:700;min-width:118px' + (dus ? ';color:#9A5B00' : '') + '"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span style="flex:1;height:10px;border-radius:3px;background:#EEF1F5;overflow:hidden;min-width:44px;max-width:110px" aria-hidden="true"><span style="display:block;height:100%;width:' + Math.min(100, g / mxI * 100).toFixed(1) + '%;background:' + (kapali ? '#B42318' : dus ? '#C98500' : sRenk) + '"></span></span><span style="min-width:42px">' + say(g, 1) + '</span></div></td><td>%' + say(kw[k] ? g / kw[k] * 100 : 0, 1) + '</td><td class="ayr">' + say(x.gunluk_kwh) + '</td></tr>'; }).join('');
     h += '<div style="min-width:0"><h3 style="margin:0 0 8px;font-size:15px">' + k + ' · ' + L.length + ' inverter · ' + L.filter(x => /şebekede/i.test(x.durum || '')).length + ' şebekede</h3><div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">İnverter</th><th class="sol">Durum</th><th class="ayr">Anlık (kW)</th><th>Pay</th><th class="ayr">Bugün (kWh)</th></tr></thead><tbody>' + sat
       + '<tr class="top"><td class="sol">' + k + ' toplam</td><td></td><td class="ayr">' + say(kw[k], 1) + '</td><td>%100</td><td class="ayr">' + say(topG(k)) + '</td></tr></tbody></table></div></div>';
   }

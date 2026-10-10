@@ -1,0 +1,32 @@
+name: Site önizleme (aksarayenerji.com.tr)
+# Yeni web sitesi paketini indirip docs/onizleme/ altına açar; GitHub Pages'te geçici önizleme.
+on:
+  workflow_dispatch:
+  push:
+    paths: ['docs/onizleme.paket']
+permissions:
+  contents: write
+jobs:
+  ac:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paketi indir ve aç
+        run: |
+          set -e
+          URL=$(head -1 docs/onizleme.paket)
+          curl -fsSL "$URL" -o /tmp/site.zip
+          rm -rf docs/onizleme && mkdir -p docs/onizleme
+          unzip -q /tmp/site.zip -d docs/onizleme
+          rm -f docs/onizleme/KURULUM.txt docs/onizleme/.htaccess docs/onizleme/iletisim.php
+          # önizleme arama motorlarına kapalı
+          for f in docs/onizleme/*.html; do sed -i 's#<meta charset="utf-8">#<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">#' "$f"; done
+          printf 'User-agent: *\nDisallow: /\n' > docs/onizleme/robots.txt
+          ls -la docs/onizleme docs/onizleme/assets
+      - name: Kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/onizleme
+          git commit -m "Site önizleme güncellendi" || exit 0
+          git push

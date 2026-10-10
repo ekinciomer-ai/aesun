@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """AEMonitoring · Madenci cihaz yönetimi (Pi, crontab: 5 dakikada bir tam hesap, dakikada bir --tetik).
 
-Kural:
-  a) Güneş üretimi varken (FusionSolar Sera-1 + Sera-2 anlık güç > eşik) cihazlar ÇALIŞIR; PTF'ye bakılmaz.
-  b) Üretim yokken: saatlik enerji maliyeti > saatlik BTC geliri ise cihazlar UYUR, aksi halde ÇALIŞIR.
+Kural (hiyerarşi, 10 Eki):
+  1) Ekonomik katman (tüm filo): şebekeden çekilen 1 saatlik enerji maliyeti, başabaşın tolerans fazlasından
+     düşükse TÜM cihazlar çalışır (ön ısıtmalı takvim aşağıda).
+  2) Güneş takibi (ekonomik katman "uyut" dediğinde): madencilik yükü Sera-2 anlık üretimine eşitlenir.
+     Üretimin karşıladığı kadar cihaz çalışır; üretim düşünce fazlası kademeli uyutulur, artınca kademeli
+     uyandırılır. Cihaz gücü bilinir (≈ 5,6–5,8 kW); 50 kW sabit eşiği kalktı.
+       açık kalabilecek = taban((üretim + kapatma toleransı) / cihaz kW)   → fazlası uyutulur
+       uyandırılabilecek = taban((son iki okumanın küçüğü − pay) / cihaz kW) → tur başına en çok N cihaz
+     Uyutma sırası: en düşük hash. Uyandırma sırası: en yüksek hash. Bir cihaz en az X dk çalışmadan
+     uyutulmaz, en az Y dk uyumadan uyandırılmaz (zorunlu açık hariç); uyanan cihaz ısınırken "çalışıyor" sayılır.
 
 Zamanlama (gerçek ısınma verisinden öğrenilir — cihaz_ogrenme.py):
   - Hydro cihazlar uyanınca önce suyu ~45 °C'ye ısıtır, sonra hash'e başlar. Su soğuksa ısınma uzar.
@@ -45,7 +52,15 @@ VARSAYILAN = {
     "btv": 0.01,                  # belediye tüketim vergisi (enerji bedeli üzerinden)
     "dagitim_tl_mwh": 1182.457,   # dağıtım bedeli (OG tek terim sanayi); KDV hesaba katılmaz (indirilir)
     "basabas_tolerans": 0.25,     # PTF, başabaş PTF'nin bu oran fazlasına kadar ise yine çalış (8 Eki kararı: %25)
-    "uretim_esik_kw": 50,         # Sera-1 + Sera-2 anlık gücü bunun üstündeyse "üretim var"
+    "uretim_esik_kw": 50,         # (artık karar için kullanılmaz; yalnız gösterim)
+    "gunes_takip": True,          # ekonomik katman "uyut" derken üretim kadar cihaz çalıştır (kademeli)
+    "gunes_kaynak": "Sera-2",     # madencilik Sera-2 (T2) sayacının arkasında; "toplam" = Sera-1 + Sera-2
+    "gunes_pay_kw": 3.0,          # uyandırırken üretimin bu kadar altında kal
+    "kapatma_tolerans_kw": 3.0,   # yük üretimi bu kadar aşınca cihaz uyut
+    "acma_adim": 3,               # bir turda (5 dk) en çok kaç cihaz uyandırılır
+    "en_az_calisma_dk": 20,       # uyanan cihaz en az bu kadar çalışmadan uyutulmaz (açık 2 cihazı aşmadıkça)
+    "en_az_uyku_dk": 10,          # uyutulan cihaz en az bu kadar uyumadan uyandırılmaz
+    "uyanma_bekleme_dk": 25,      # uyandırılan Hydro cihaz ısınırken bu süre "çalışıyor" sayılır
     "hashprice_gun": 7,           # hashprice için son kaç günün F2Pool geliri
     "komut_arasi_dk": 15,         # aynı komut en erken bu kadar dakika sonra tekrarlanır
     "sirali_gecikme_sn": 10,      # cihazlar arasına konan gecikme (ani yük binmesin)
@@ -129,8 +144,6 @@ def basabas_ptf(gelir, yekdem, a):
 def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
     maliyet = birim_maliyet(ptf, yekdem, a) / 1000 * a["cihaz_guc_kw"] if ptf is not None else None
     gelir = hp * a["cihaz_th"] / 24 * btc_try if hp and btc_try else None
-    if uretim:
-        return "calis", "güneş üretimi var", maliyet, gelir
     if maliyet is None or gelir is None:
         return None, "PTF ya da gelir verisi yok", maliyet, gelir
     bb = basabas_ptf(gelir, yekdem, a)
@@ -285,6 +298,99 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
     return k, notlar, anahtar, istenen, gecerli, yay
 
 
+def yerel_oku():
+    try:
+        return json.loads(YEREL.read_text()) if YEREL.exists() else {}
+    except Exception:
+        return {}
+
+
+def yerel_yaz(y):
+    YEREL.parent.mkdir(parents=True, exist_ok=True)
+    YEREL.write_text(json.dumps(y, ensure_ascii=False))
+
+
+def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel):
+    """Ekonomik katman "uyut" derken: madencilik yükünü anlık üretime eşitler.
+    Dönüş: {"eylem": "sleep"|"wake"|None, "hedefler": [suffix], "neden", "hedef_kapat", "hedef_ac", "calisan", ...}.
+    yerel["cihaz_kom"] (cihaz başı son komut) ve yerel["gunes_okuma"] (son okumalar) güncellenir; kaydetmek çağırana kalır."""
+    t = simdi.timestamp()
+    kom = yerel.setdefault("cihaz_kom", {})
+    # okuma geçmişi: aynı FusionSolar zaman damgası bir kez sayılır
+    ok = yerel.setdefault("gunes_okuma", [])
+    if fs_ts is not None and uretim_kw is not None and (not ok or ok[-1][0] != fs_ts.isoformat()):
+        ok.append([fs_ts.isoformat(), round(uretim_kw, 1)])
+    del ok[:-4]
+    son2 = [x[1] for x in ok[-2:]]
+    # TH sıralaması için cihaz başı en yüksek gözlenen hash (çalışırken)
+    thm = yerel.setdefault("cihaz_th", {})
+    for d in cihazlar:
+        h = d.get("hashrate_TH") or 0
+        if d.get("online") and not d.get("sleeping") and h > 0:
+            k = str(d.get("suffix"))
+            thm[k] = round(max(h, 0.98 * thm.get(k, 0)), 1)
+
+    def son_kom(d):
+        return kom.get(str(d.get("suffix"))) or {}
+
+    def dk_once(d):
+        return (t - (son_kom(d).get("t") or 0)) / 60
+
+    calisan, uyuyan = [], []
+    for d in cihazlar:
+        if d.get("suffix") is None or not (d.get("online") or d.get("sleeping")):
+            continue
+        sk = son_kom(d)
+        hash_var = d.get("online") and not d.get("sleeping") and ((d.get("hashrate_TH") or 0) > 0 or d.get("actual_worker"))
+        if sk.get("eylem") == "wake" and dk_once(d) < a["uyanma_bekleme_dk"]:
+            calisan.append(d)                     # ısınıyor: uyku görünse de yük çekiyor
+        elif sk.get("eylem") == "sleep" and dk_once(d) < 8:
+            uyuyan.append(d)                      # uyku komutu yolda
+        elif hash_var:
+            calisan.append(d)
+        elif d.get("sleeping"):
+            uyuyan.append(d)
+    C = len(calisan)
+    sonuc = {"uretim_kw": uretim_kw, "kw_cihaz": kw_c, "calisan": C, "uyuyan": len(uyuyan), "okumalar": ok[-3:],
+             "eylem": None, "hedefler": [], "neden": ""}
+    if uretim_kw is None or not kw_c:
+        sonuc["neden"] = "üretim verisi yok/eski: değişiklik yapılmaz"
+        return sonuc
+    dusen = len(ok) >= 2 and ok[-1][1] < ok[-2][1] - 1.0          # üretim düşüyor (akşam / bulut girişi)
+    hk = max(0, math.floor((uretim_kw + (0 if dusen else a["kapatma_tolerans_kw"])) / kw_c))
+    ha = max(0, math.floor((min(son2) - a["gunes_pay_kw"]) / kw_c)) if len(son2) >= 2 else min(hk, C)
+    sonuc.update({"hedef_kapat": hk, "hedef_ac": ha})
+    th = lambda d: thm.get(str(d.get("suffix")), d.get("hashrate_TH") or 0)
+    if C > hk:
+        fazla = C - hk
+        # kısa bulut: 1–2 cihazlık açık ilk okumada beklenir, ikinci okumada da sürüyorsa uyutulur
+        onceki_acik = len(ok) >= 2 and math.floor((ok[-2][1] + a["kapatma_tolerans_kw"]) / kw_c) < C
+        if fazla <= 1 and not onceki_acik and not dusen:
+            sonuc["neden"] = "yük üretimi 1 cihaz kadar aşıyor (üretim düşmüyor); bir sonraki okumada sürerse uyutulacak"
+            return sonuc
+        uygun = sorted([d for d in calisan if dk_once(d) >= a["en_az_calisma_dk"] or son_kom(d).get("eylem") != "wake"], key=th)
+        yeni = sorted([d for d in calisan if d not in uygun], key=th)
+        sec = (uygun + (yeni if fazla > 2 else []))[:fazla]
+        if sec:
+            sonuc.update({"eylem": "sleep", "hedefler": sorted(d["suffix"] for d in sec),
+                          "neden": f"güneş takibi: {a['gunes_kaynak']} {uretim_kw:.0f} kW, {C} cihaz × {kw_c:.2f} kW = {C * kw_c:.0f} kW → {len(sec)} cihaz uyut"})
+        else:
+            sonuc["neden"] = "fazla cihazlar en az çalışma süresini doldurmadı, bekleniyor"
+        return sonuc
+    if C < ha and uyuyan:
+        n = min(ha - C, a["acma_adim"])
+        uygun = sorted([d for d in uyuyan if not (son_kom(d).get("eylem") == "sleep" and dk_once(d) < a["en_az_uyku_dk"])], key=th, reverse=True)
+        sec = uygun[:n]
+        if sec:
+            sonuc.update({"eylem": "wake", "hedefler": sorted(d["suffix"] for d in sec),
+                          "neden": f"güneş takibi: {a['gunes_kaynak']} {min(son2):.0f} kW (son iki okuma), {C} cihaz çalışıyor, {ha} cihaza yetiyor → {len(sec)} cihaz uyandır"})
+        else:
+            sonuc["neden"] = "uyandırılacak cihazlar en az uyku süresini doldurmadı"
+        return sonuc
+    sonuc["neden"] = f"yük üretimle dengede ({C} cihaz, {C * kw_c:.0f} kW / üretim {uretim_kw:.0f} kW)"
+    return sonuc
+
+
 def komut_gonder(eylem, a, neden, hedefler="all"):
     kom, sha = gh("antminer_commands.json")
     kom = kom or {"commands": []}
@@ -334,8 +440,8 @@ def tetik():
         anahtar = f"{s['eylem']}|{s['hedef']}"
         if anahtar in gonderilen or not (t <= simdi < t + timedelta(minutes=10)):
             continue
-        if s["eylem"] == "sleep" and tk.get("uretim"):
-            continue                             # son tam hesapta güneş üretimi vardı: uyutma, tam hesap karar versin
+        if s["eylem"] == "sleep" and (tk.get("gunes_hedef") or 0) > 0:
+            continue                             # güneş birkaç cihazı karşılıyor: toplu uyutma yok, tam hesap kademeli uyutur
         if tekrar_mi(s["eylem"], {"komut_arasi_dk": tk.get("komut_arasi_dk", 15)}):
             continue
         cid = komut_gonder(s["eylem"], tk["ayar_ozet"], s["neden"])
@@ -382,20 +488,20 @@ def calistir():
     btc_try = fg[son_fg]["try"] if son_fg else None
     hp, hp_bas, hp_son = hashprice(gelir or {}, a["hashprice_gun"])
     # Güneş üretimi: FusionSolar anlık güç (en çok 30 dk eski)
-    uretim_kw, fs_taze, fs_ts = None, False, None
+    uretim_kw, fs_taze, fs_ts, toplam_kw = None, False, None, None
     if fs:
         try:
             ts = fs_ts = zaman(fs.get("guncelleme"))
             fs_taze = (simdi - ts) < timedelta(minutes=30)
-            uretim_kw = sum(float(t.get("anlik_guc_kw") or 0) for t in (fs.get("tesisler") or {}).values())
+            tes = (fs.get("tesisler") or {}).values()
+            toplam_kw = sum(float(t.get("anlik_guc_kw") or 0) for t in tes)
+            kay = [t for t in tes if t.get("kisa") == a.get("gunes_kaynak")]
+            uretim_kw = toplam_kw if a.get("gunes_kaynak") == "toplam" or not kay else float(kay[0].get("anlik_guc_kw") or 0)
         except Exception:
             pass
-    uretim = (uretim_kw or 0) > a["uretim_esik_kw"] if fs_taze else None
+    uretim = (uretim_kw or 0) > 0.5 if fs_taze else None
     ptf, yekdem = ptf_al(simdi), yekdem_al(simdi)
-    if uretim is None:
-        karar, neden, maliyet, gel = None, "FusionSolar verisi eski ya da yok (değişiklik yapılmaz)", None, None
-    else:
-        karar, neden, maliyet, gel = karar_ver(uretim, ptf, yekdem or 0, a, hp, btc_try)
+    karar, neden, maliyet, gel = karar_ver(False, ptf, yekdem or 0, a, hp, btc_try)
     # Mevcut cihaz durumu
     cihazlar = (mad or {}).get("devices") or []
     ulasilan = [d for d in cihazlar if d.get("online") or d.get("sleeping")]
@@ -430,25 +536,39 @@ def calistir():
             dog, bat = gunes_saatleri(t)
             gunes, gk = (dog + 1.0) <= t.hour and (t.hour + 1) <= (bat - 1.0), "doğuş/batış"
         kk, n, mm, g = karar_ver(gunes, p, y or 0, a, hp, btc_try)
-        if i == 0 and karar is None and uretim is None:
-            kk = None
         plan.append({"_t": t, "t": t.strftime("%Y-%m-%d %H:00"), "ptf": p, "yekdem": y, "gunes_tahmini": gunes,
                      "gunes_kaynak": gk, "maliyet": mm, "gelir": g, "karar": kk})
     # Takvim (öğrenilmiş ısınma ile)
     k2, notlar, anahtar, istenen, gecerli, yay = takvim_kur(plan, m, a, simdi, filo, canli_su)
-    # Güneş kuralı önceliklidir: takvim (doğuş/batış tahmini) "uyut" dese de anlık üretim eşiğin üstündeyse uyutma.
-    # (8 Eki 16:55: takvim 17:00'yi zararlı saydı ve uyuttu, 435 kW üretim varken 17:00'de yeniden uyandırıldı.)
-    if uretim and istenen == "uyut":
-        istenen, gecerli = "calis", None
+    # Güneş takibi: ekonomik katman "uyut" derken üretimin karşıladığı kadar cihaz çalışır (kademeli).
+    yerel = yerel_oku()
+    gt = None
+    if a.get("gunes_takip") and istenen == "uyut" and mad_taze and ulasilan:
+        kw_c = a["cihaz_guc_kw"]
+        sh, _ = gh("n8n/saha_saatlik.json")             # Pi'nin ölçtüğü madencilik yükü / çalışan cihaz
+        try:
+            son_s = (sh or {}).get("saat", {})[sorted((sh or {}).get("saat", {}))[-1]]
+            if son_s.get("kw") and (son_s.get("calisan") or 0) >= 5:
+                kw_c = round(max(kw_c, son_s["kw"] / son_s["calisan"]), 2)
+        except Exception:
+            pass
+        gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel)
     for i, p in enumerate(plan):
         p["karar_ham"] = p["karar"]
         p["karar"] = k2[i]
         if i in notlar:
             p["not"] = notlar[i]
+    # tetik için: üretim şu an kaç cihazı karşılıyor (>0 ise toplu uyutma gönderilmez)
+    gunes_hedef = 0
+    if a.get("gunes_takip") and fs_taze and uretim_kw:
+        gunes_hedef = max(0, math.floor((uretim_kw + a["kapatma_tolerans_kw"]) / ((gt or {}).get("kw_cihaz") or a["cihaz_guc_kw"])))
     # Eylem: şu an olması gereken durum ile filo durumu farklıysa
     tk = tk_oku()
     gonderilen = tk.get("gonderilen") or []
     eylem, eylem_not = None, ""
+    if gt is not None:
+        istenen_eski = istenen
+        istenen = None                       # toplu eylem yok; aşağıda kademeli
     if istenen and mad_taze and ulasilan:
         if istenen == "uyut" and calisan > 0:
             eylem = "sleep"
@@ -502,10 +622,26 @@ def calistir():
         log("KOMUT", eylem, "-", neden_eylem)
     elif eylem:
         eylem_not = "izleme modu: komut gönderilmedi"
+    if gt is not None:
+        istenen = istenen_eski
+        eylem, eylem_not = gt["eylem"], gt["neden"]
+        if eylem and a["mod"] == "otomatik":
+            cid = komut_gonder(eylem, a, gt["neden"], gt["hedefler"])   # toplu komut kilidini (son_komut) etkilemez
+            for sfx in gt["hedefler"]:
+                yerel.setdefault("cihaz_kom", {})[str(sfx)] = {"eylem": eylem, "t": simdi.timestamp(), "id": cid}
+            gonderilen.append({"anahtar": f"gunes|{eylem}|{simdi.isoformat(timespec='minutes')}", "eylem": eylem,
+                               "hedef": simdi.isoformat(timespec="seconds"), "t_komut": simdi.isoformat(timespec="seconds"),
+                               "id": cid, "kim": "güneş", "hedefler": gt["hedefler"]})
+            gonderildi = True
+            log("GÜNEŞ", eylem, gt["hedefler"], "-", gt["neden"])
+        elif eylem:
+            eylem_not = "izleme modu: " + gt["neden"]
+        yerel_yaz(yerel)
+        neden_eylem = gt["neden"]
     # takvimi yerel dosyaya yaz (tetik buradan okur)
     anahtar_j = [{**s_, "t_komut": s_["t_komut"].isoformat(timespec="seconds"), "hedef": s_["hedef"].isoformat(timespec="seconds")} for s_ in anahtar]
     tk = {"olusturuldu": simdi.isoformat(timespec="seconds"), "mod": a["mod"], "filo_taze": bool(mad_taze and ulasilan),
-          "uretim": bool(uretim),
+          "uretim": bool(uretim), "gunes_hedef": gunes_hedef,
           "komut_arasi_dk": a["komut_arasi_dk"], "ayar_ozet": {"sirali_gecikme_sn": a["sirali_gecikme_sn"]},
           "anahtarlar": anahtar_j, "gonderilen": gonderilen[-100:]}
     tk_yaz(tk)
@@ -529,6 +665,7 @@ def calistir():
         "maliyet_tl_saat": maliyet, "gelir_tl_saat": gel, "basabas_ptf": basabas,
         "esik_ptf": (basabas * (1 + (a.get("basabas_tolerans") or 0)) if basabas and basabas > 0 else basabas),
         "karar": karar, "neden": neden, "istenen": istenen, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
+        "gunes_takip": gt, "toplam_uretim_kw": toplam_kw if fs else None,
         "cihaz": {"toplam": len(cihazlar), "ulasilan": len(ulasilan), "calisan": calisan, "uyuyan": uyuyan, "taze": mad_taze,
                   "su_uyuyan": canli_su},
         "zamanlama": {"model": {k_: m.get(k_) for k_ in ("a", "b", "a_ilk", "b_ilk", "d99", "p80_ek", "emniyet_dk", "sn_cihaz", "n")},

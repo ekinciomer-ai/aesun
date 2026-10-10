@@ -357,7 +357,9 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel):
         sonuc["neden"] = "üretim verisi yok/eski: değişiklik yapılmaz"
         return sonuc
     dusen = len(ok) >= 2 and ok[-1][1] < ok[-2][1] - 1.0          # üretim düşüyor (akşam / bulut girişi)
-    hk = max(0, math.floor((uretim_kw + (0 if dusen else a["kapatma_tolerans_kw"])) / kw_c))
+    # akşam düşüşünde FusionSolar ~10 dk geriden gelir: bir sonraki okumanın yarısı kadar ileriye bak
+    p_kapat = max(0.0, uretim_kw + 0.5 * (ok[-1][1] - ok[-2][1])) if dusen else uretim_kw + a["kapatma_tolerans_kw"]
+    hk = max(0, math.floor(p_kapat / kw_c))
     ha = max(0, math.floor((min(son2) - a["gunes_pay_kw"]) / kw_c)) if len(son2) >= 2 else min(hk, C)
     sonuc.update({"hedef_kapat": hk, "hedef_ac": ha})
     th = lambda d: thm.get(str(d.get("suffix")), d.get("hashrate_TH") or 0)

@@ -86,7 +86,7 @@ DC_KWP = {"NE=59224704": 1230.755,   # Tek Yıldız-1 / Sera-1
           "NE=73686040": 1035.0}     # Tek Yıldız-2 / Sera-2
 KISA = {"NE=59224704": "Sera-1", "NE=73686040": "Sera-2"}
 
-PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600}
+PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600, "pvanlik": 600}
 
 INV_SIG = {  # device-realtime-data sinyal id -> alan
     "10018": "aktif_kw", "10019": "reaktif_kvar", "10032": "gunluk_kwh", "10029": "toplam_kwh",
@@ -320,6 +320,7 @@ class Collector:
         self.inv = {}     # dn -> {name, station_dn}
         self.latest = {"tesisler": {}, "invertorler": {}, "alarmlar": []}
         self.sinyal_ornek = None
+        self.pv_no = {}   # dn -> [PV no] (geçmişi tutulan string girişleri)
         self.gh_token = gh_token()
         self.gh_son = 0.0
         self.gh_gecmis_son = 0.0
@@ -421,7 +422,9 @@ class Collector:
                 # şebeke tarafı (faz akımı A, hat gerilimi V) ve PV girişleri [no, V, A]
                 **{k: num(vals.get(k)) for k in ("ia", "ib", "ic", "uab", "ubc", "uca", "guc_faktoru", "frekans_hz",
                                                   "nominal_kw", "reaktif_kvar", "yalitim_mohm")},
-                "pv": [[n, v[0], v[1]] for n, v in sorted(pv.items()) if v[0] is not None or v[1] is not None]}
+                "pv": [[n, v[0], v[1]] for n, v in sorted(pv.items()) if v[0] is not None or v[1] is not None]
+                      or (self.latest["invertorler"].get(dn) or {}).get("pv") or [],
+                "pv_ts": (self.latest["invertorler"].get(dn) or {}).get("pv_ts")}
             time.sleep(0.3)
         self.con.commit()
         log.info("İnvertör: %d okundu", len(self.inv))
@@ -738,6 +741,34 @@ class Collector:
             time.sleep(0.2)
         return sonuc
 
+    def pv_anlik(self):
+        """String (PV girişi) anlık gerilim/akım: gerçek zamanlı uç nokta PV sinyali vermediği için 5 dk geçmişin son noktası (31001/31002 + 3·(n−1))."""
+        bugun = dt.date.today()
+        for dn, meta in self.inv.items():
+            if dn not in self.pv_no:
+                r = self.web.call("GET", f"/rest/pvms/web/device/v1/device-statistics-signal?deviceDn={quote(dn)}&_={int(time.time()*1000)}")
+                sig = {int(x["id"]) for x in ((r.get("data") or {}).get("signalList") or [])}
+                self.pv_no[dn] = sorted(n for n in range(1, 41) if 31002 + 3 * (n - 1) in sig)
+            nler = self.pv_no[dn]
+            if not nler:
+                continue
+            ids = [31001 + 3 * (n - 1) for n in nler] + [31002 + 3 * (n - 1) for n in nler]
+            h = self._gecmis_sinyal(dn, ids, bugun)
+            pv, son = [], None
+            for n in nler:
+                v = h.get(str(31001 + 3 * (n - 1))) or []
+                a = h.get(str(31002 + 3 * (n - 1))) or []
+                if not v and not a:
+                    continue
+                t = max([x[0] for x in (v[-1:] + a[-1:])])
+                son = t if son is None or t > son else son
+                pv.append([n, v[-1][1] if v else None, a[-1][1] if a else None])
+            iv = self.latest["invertorler"].get(dn)
+            if iv is not None and pv:
+                iv["pv"], iv["pv_ts"] = pv, son.isoformat(timespec="minutes") if son else None
+            time.sleep(0.3)
+        log.info("PV anlık: %d inverter", len(self.inv))
+
     def string_analiz(self, gun=7):
         """Her inverterin PV girişleri (string) için akım/gerilim analizi; son GUN tam günü; sonuç inverter/fusionsolar_string.json."""
         self.meta()
@@ -813,7 +844,7 @@ class Collector:
 
     def once(self):
         self.meta()
-        for f in (self.stations, self.inverters, self.alarms, self.curve, self.month):
+        for f in (self.stations, self.inverters, self.pv_anlik, self.alarms, self.curve, self.month):
             self._safe(f)
         self.write_latest()
 
@@ -833,7 +864,7 @@ class Collector:
 
     def forever(self):
         jobs = [("meta", self.meta), ("station", self.stations), ("inverter", self.inverters),
-                ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun)]
+                ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun), ("pvanlik", self.pv_anlik)]
         nxt = {k: 0.0 for k, _ in jobs}
         kod = Path(__file__).resolve()
         kod_mt = kod.stat().st_mtime

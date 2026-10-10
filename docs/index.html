@@ -2158,12 +2158,13 @@ function thBolum(cfg) {
 const thStrRenk = d => d === 'dusuk' ? TH_R.kirmizi : d === 'zayif' || d === 'farkli' ? TH_R.sari : d === 'bos' ? TH_R.gri : TH_R.yesil;
 const thStrAd = { normal: 'normal', zayif: 'zayıf', dusuk: 'düşük', farkli: 'farklı', bos: 'boş' };
 // FusionSolar inverteri → tek hat kutusu (canlı güç, faz akım/gerilim, sıcaklık, PV girişleri)
+const thGuc = w => w >= 1000 ? say(w / 1000, 2) + ' kW' : say(w) + ' W';
 const FS_DURUM = { '40960': 'Bekleme', '45056': 'Kapalı', '49152': 'Bekleme', 'Bekleme (ışınım yok)': 'Bekleme', 'Bekleme (algılama)': 'Bekleme' };
 function thFsInv(dn, v, ort) {
   v = Object.assign({}, v, { durum: FS_DURUM[String(v.durum)] || v.durum });
   const an = (((STR || {}).inverterler || {})['fusionsolar:' + dn] || {}).stringler || [], anM = {}; an.forEach(s => { anM[s.pv] = s; });
   const kw = Number(v.guc_kw) || 0, kapali = !/şebekede/i.test(v.durum || '');
-  const canli = {}; (v.pv || []).forEach(([n, V, A]) => { canli[n] = { V, A }; });
+  const canli = {}, pvTaze = !v.pv_ts || Date.parse(v.pv_ts) > Date.now() - 40 * 60e3; if (pvTaze) (v.pv || []).forEach(([n, V, A]) => { canli[n] = { V, A }; });
   const aDeg = Object.values(canli).map(c => c.A).filter(a => a != null && a > 0.2).sort((a, b) => a - b), aMed = aDeg.length ? aDeg[Math.floor(aDeg.length / 2)] : null;
   const nler = [...new Set([...Object.keys(anM), ...Object.keys(canli)].map(Number))].sort((a, b) => a - b);
   const pv = [], bos = [];
@@ -2173,8 +2174,9 @@ function thFsInv(dn, v, ort) {
     if (bosMu) { bos.push(n); continue; }
     let renk = a ? thStrRenk(a.durum) : TH_R.yesil;
     if (c && aMed && kw > 2 && c.A != null && c.A < aMed * 0.5) renk = TH_R.kirmizi;
-    const txt = c ? 'PV' + n + '  ' + (c.V != null ? say(c.V) + ' V' : '—') + ' · ' + (c.A != null ? say(c.A, 2) + ' A' : '—') : 'PV' + n + '  tepe ' + (a ? say(a.tepe_a, 1) + ' A' : '—');
-    pv.push({ n, txt, renk, ipucu: 'PV' + n + (c ? ' · anlık ' + (c.V != null ? say(c.V) + ' V ' : '') + (c.A != null ? say(c.A, 2) + ' A' : '') : '') + (a ? ' · 7 gün: ' + (thStrAd[a.durum] || a.durum) + ', oran ' + say(a.oran_medyan, 2) + ', tepe ' + say(a.tepe_a, 1) + ' A / ' + say(a.tepe_v) + ' V' : '') });
+    const pW = c && c.V != null && c.A != null ? c.V * c.A : null, tW = a && a.tepe_a != null && a.tepe_v != null ? a.tepe_a * a.tepe_v : null;
+    const txt = c ? 'PV' + n + '  ' + (pW != null ? thGuc(pW) : '—') : 'PV' + n + '  tepe ≈ ' + (tW != null ? thGuc(tW) : '—');
+    pv.push({ n, txt, renk, ipucu: 'PV' + n + (c ? ' · anlık ' + (pW != null ? thGuc(pW) + ' (' + say(c.V) + ' V × ' + say(c.A, 2) + ' A)' : '') : '') + (a ? ' · 7 gün: ' + (thStrAd[a.durum] || a.durum) + ', oran ' + say(a.oran_medyan, 2) + (tW != null ? ', tepe ≈ ' + thGuc(tW) : '') : '') });
   }
   const dc = Object.values(canli).reduce((t, c) => t + (c.V || 0) * (c.A || 0), 0) / 1000;
   const satir = [];
@@ -2251,7 +2253,7 @@ async function cizDigerPrensip() {
     const deg = invs.filter(x => x.g === sonG).map(x => x.kwh || 0).sort((a, b) => a - b), med = deg.length ? deg[Math.floor(deg.length / 2)] : 0;
     const kutu = invs.map(({ id, v, g, kwh }) => {
       const st = ((STR || {}).inverterler || {})[P.kaynak + ':' + id], ss = (st && st.stringler) || [];
-      const pv = ss.filter(s => s.durum !== 'bos').map(s => ({ n: s.pv, renk: thStrRenk(s.durum), ipucu: 'PV' + s.pv + ' · ' + (thStrAd[s.durum] || s.durum) + ' · oran ' + say(s.oran_medyan, 2) + ' · tepe ' + say(s.tepe_a, 1) + ' A / ' + say(s.tepe_v) + ' V' }));
+      const pv = ss.filter(s => s.durum !== 'bos').map(s => ({ n: s.pv, renk: thStrRenk(s.durum), ipucu: 'PV' + s.pv + ' · ' + (thStrAd[s.durum] || s.durum) + ' · oran ' + say(s.oran_medyan, 2) + (s.tepe_a != null && s.tepe_v != null ? ' · tepe ≈ ' + thGuc(s.tepe_a * s.tepe_v) : '') }));
       const kotu = ss.filter(s => s.durum === 'dusuk').length, zay = ss.filter(s => s.durum === 'zayif' || s.durum === 'farkli').length;
       const eski = g !== sonG, sifir = !kwh;
       return { ad: v.ad || id, kw: 0, ust: (kwh != null ? say(kwh) : '—') + ' kWh', satir: [(eski ? tarihK(g) + ' · eski' : (pv.length ? pv.length + ' string' + (kotu ? ' · ' + kotu + ' düşük' : '') + (zay ? ' · ' + zay + ' farklı' : '') : 'string verisi yok'))],

@@ -269,7 +269,8 @@ def pilot_adim(sonuc, simdi, kesif):
 def calis(sonuc, simdi):
     eski, sha = gh(KESIF)
     if not (eski and eski.get("v") == KESIF_V and eski.get("gun") == simdi.strftime("%Y-%m-%d") and eski.get("md5_dogru")):
-        s21 = [o for o in sonuc if "S21e Hyd" in str(o.get("tip") or o.get("model")) and (o.get("stats_kod") == 200 or o.get("ayar_kod") == 200)]
+        # arayüz filo genelinde aynı; gece cihazlar uykuda (model/tip okunamaz) → ayarı okunabilen herhangi bir cihaz
+        s21 = [o for o in sonuc if "S21e Hyd" in str(o.get("tip") or o.get("model"))] or [o for o in sonuc if o.get("ayar_kod") == 200]
         if s21:
             o = s21[0]
             v = {"v": KESIF_V, "gun": simdi.strftime("%Y-%m-%d"), "zaman": simdi.isoformat(timespec="seconds"), "ip": o["ip"], "fw_su_an": o.get("fw")}

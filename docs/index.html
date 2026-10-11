@@ -631,8 +631,10 @@ function cizSayac() {
     if (!INV_CACHE[yilS] && !invYukleniyor) { invYukleniyor = true; invYilYukle(yilS).then(() => { invYukleniyor = false; if (location.hash.startsWith('#sayac')) cizSayac(); }).catch(() => { invYukleniyor = false; }); }
     const invS = INV_CACHE[yilS] ? invBirlestir(INV_CACHE[yilS]) : {};
     const bugunMu = secGun === bugunTR();
-    const invSaat = kod => { const k = ESLE[kod]; if (!k || !k.startsWith('fusionsolar')) return null; if (bugunMu) return (D.fs && D.fs.saatlik_bugun || {})[ESLE_KISA[kod]] || null; const x = invS[k]; return x && x.saat && x.saat[secGun] || null; };
-    const invGun = (kod, g) => { const k = ESLE[kod]; if (!k) return null; if (g === bugunTR()) { if (!k.startsWith('fusionsolar') || !D.fs) return null; const t = Object.values(D.fs.tesisler || {}).find(x => x.kisa === ESLE_KISA[kod]); return t ? t.bugun_kwh : null; } const x = invS[k]; return x && x.gun[g] != null ? +x.gun[g] : null; };
+    // Sungrow (YD, Anka) / Inavitas (AE) bugünkü canlı veri: Pi saha_inverter.py → n8n/sungrow_son.json, inavitas_son.json
+    const canliInv = kod => { const k = ESLE[kod] || ''; const [kay, id] = k.split(':'); const f = kay === 'sungrow' ? D.sg : kay === 'inavitas' ? D.inav : null; if (!f || !f.santraller || String(f.guncelleme || '').slice(0, 10) !== bugunTR()) return null; return f.santraller[id] || null; };
+    const invSaat = kod => { const k = ESLE[kod]; if (k && !k.startsWith('fusionsolar')) { if (!bugunMu) return null; const c = canliInv(kod); return c && c.saatlik_bugun && Object.keys(c.saatlik_bugun).length ? c.saatlik_bugun : null; } if (!k) return null; if (bugunMu) return (D.fs && D.fs.saatlik_bugun || {})[ESLE_KISA[kod]] || null; const x = invS[k]; return x && x.saat && x.saat[secGun] || null; };
+    const invGun = (kod, g) => { const k = ESLE[kod]; if (!k) return null; if (g === bugunTR()) { if (!k.startsWith('fusionsolar')) { const c = canliInv(kod); return c ? c.bugun_kwh : null; } if (!D.fs) return null; const t = Object.values(D.fs.tesisler || {}).find(x => x.kisa === ESLE_KISA[kod]); return t ? t.bugun_kwh : null; } const x = invS[k]; return x && x.gun[g] != null ? +x.gun[g] : null; };
     const saatInv = {}; for (const sc of SAYAC) saatInv[sc.kod] = invSaat(sc.kod);
     let th1 = '<th class="sol" rowspan="2">Saat</th>', th2 = '';
     for (const sc of SAYAC) {
@@ -675,7 +677,7 @@ function cizSayac() {
       + kar.map(r => '<tr><td class="sol"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + r.sc.renk + ';margin-right:6px"></span><b>' + r.kod + '</b> ' + esc(r.sc.ad) + '</td>'
         + '<td class="ayr">' + (r.ig == null ? '—' : say(r.ig)) + '</td><td>' + (r.gv ? say(r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? say(r.ig - r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? pc(r.ig, r.gv.veris) : '—') + '</td>'
         + '<td class="ayr">' + (r.n ? say(r.yI) : '—') + '</td><td>' + (r.n ? say(r.yV) : '—') + '</td><td><b>' + (r.n ? say(r.yI - r.yV) : '—') + '</b></td><td>' + r.n + '</td></tr>').join('')
-      + '</tbody></table></div><div class="k">İç tüketim = inverter üretimi − sayaç verişi; üretim saatlerinde sayaç arkasında tüketilen enerji ile trafo/kablo kayıplarını içerir. Oran, inverterin sayaçtan ne kadar fazla gösterdiğidir. Bugün için yalnız iki tarafın da verisi tamamlanmış saatler karşılaştırılır. T1/T2 FusionSolar (Sera-1/Sera-2), YD Sungrow Darılmaz, Anka Sungrow HG YATIRIM AŞ, AE Inavitas Aksaray_GES verisidir; YD, Anka ve AE için saatlik inverter verisi yok, günlük kıyaslanır. ' + (INV_CACHE[yilS] ? '' : 'İnverter verisi yükleniyor…') + '</div>';
+      + '</tbody></table></div><div class="k">İç tüketim = inverter üretimi − sayaç verişi; üretim saatlerinde sayaç arkasında tüketilen enerji ile trafo/kablo kayıplarını içerir. Oran, inverterin sayaçtan ne kadar fazla gösterdiğidir. Bugün için yalnız iki tarafın da verisi tamamlanmış saatler karşılaştırılır. T1/T2 FusionSolar (Sera-1/Sera-2), YD Sungrow Darılmaz, Anka Sungrow HG YATIRIM AŞ, AE Inavitas Aksaray_GES verisidir; YD, Anka ve AE\'nin bugünkü saatlik verisi Pi\'nin canlı toplayıcısından (Sungrow/Inavitas, 10 dk), geçmiş günler günlük arşivden gelir. ' + (INV_CACHE[yilS] ? '' : 'İnverter verisi yükleniyor…') + '</div>';
   } else {
     const m = mahsupGun(osos, secGun);
     const ab = { T1: 0, T2: 0, A3: 0 }, tAb = { T1: 0, T2: 0, A3: 0 }, uAb = { T1: 0, T2: 0 }, kay = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };
@@ -2405,14 +2407,16 @@ function anlikUretimBolum(fs, saha, mad) {
 
 async function yukle() {
   try {
-    const [son, osos, mad, fs, saha] = await Promise.all([
+    const [son, osos, mad, fs, saha, sg, inav] = await Promise.all([
       al('n8n/aesun_son.json').catch(() => null),
       al('2026_osos_endeks.json'),
       al('antminer_panel.json').catch(() => null),
       al('n8n/fusionsolar_son.json').catch(() => null),
-      al('n8n/saha_saatlik.json').catch(() => null)
+      al('n8n/saha_saatlik.json').catch(() => null),
+      al('n8n/sungrow_son.json').catch(() => null),
+      al('n8n/inavitas_son.json').catch(() => null)
     ]);
-    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs, saha };
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs, saha, sg, inav };
     ciz();
   } catch (e) {
     if (!D) document.getElementById('icerik').innerHTML = '<div class="panel hata">Veri okunamadı: ' + esc(e.message || e) + '</div>';

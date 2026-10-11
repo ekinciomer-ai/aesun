@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """AEMonitoring · Madenci cihaz yönetimi (Pi, crontab: 5 dakikada bir tam hesap, dakikada bir --tetik).
 
-Kural (hiyerarşi, 10 Eki):
-  1) Ekonomik katman (tüm filo): şebekeden çekilen 1 saatlik enerji maliyeti, başabaşın tolerans fazlasından
-     düşükse TÜM cihazlar çalışır (ön ısıtmalı takvim aşağıda).
-  2) Güneş takibi (ekonomik katman "uyut" dediğinde): madencilik yükü Sera-2 anlık üretimine eşitlenir.
+Kural (hiyerarşi, 11 Eki):
+  1) Güneş takibi (üretim olan saatler, fiyata bakılmaz): madencilik yükü Sera-2 anlık üretimine eşitlenir.
      Üretimin karşıladığı kadar cihaz çalışır; üretim düşünce fazlası kademeli uyutulur, artınca kademeli
      uyandırılır. Cihaz gücü bilinir (≈ 5,6–5,8 kW); 50 kW sabit eşiği kalktı.
+  2) Fiyat katmanı (yalnız üretimsiz saatler, tüm filo): şebekeden çekilen 1 saatlik enerji maliyeti, başabaşın
+     tolerans fazlasından düşükse TÜM cihazlar çalışır (ön ısıtmalı takvim aşağıda), değilse uyur.
        açık kalabilecek = taban((üretim + kapatma toleransı) / cihaz kW)   → fazlası uyutulur
        uyandırılabilecek = taban((son iki okumanın küçüğü − pay) / cihaz kW) → tur başına en çok N cihaz
+     Üretim olan saatlerde fiyata bakılmaz; cihaz sayısını yalnız üretim belirler (fiyat katmanı yalnız üretimsiz saatler).
      Uyutma sırası: hashrate'i en düşük önce. Uyandırma sırası: hashrate'i en yüksek önce (cihazların çoğu
      güç bildirmiyor; verim yerine hashrate ölçü alınır, verim yalnız bilgi olarak durum dosyasına yazılır). Bir cihaz en az X dk çalışmadan
      uyutulmaz, en az Y dk uyumadan uyandırılmaz (zorunlu açık hariç); uyanan cihaz ısınırken "çalışıyor" sayılır.
@@ -314,7 +315,9 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
 
 
 def gunes_plan_tahmin(plan, fs, a, simdi, uretim_kw, kw_c, filo_n):
-    """Ekonomik "uyut" saatleri için beklenen kaynak (Sera-2) üretimi ve karşıladığı cihaz sayısı:
+    """Üretim olan saatlerde fiyata bakılmaz: cihaz sayısını üretim belirler (güneş takibi). Bu saatlerde filo katmanı
+    "uyut" sayılır (toplu komut yok, güneş takibi yönetir); ekonomik karar p["karar_ham"]'da kalır.
+    Beklenen kaynak (Sera-2) üretimi ve karşıladığı cihaz sayısı:
     p["gunes_cihaz"], p["gunes_kw"], p["gunes_kaynak"]. Kaynak: şu anki saat anlık; bugünün geçmiş saatleri gerçekleşen;
     yarının saatleri bugünün aynı saati; yoksa doğuş/batış arası açık gök eğrisi (bugünün öğle tepesine ölçekli)."""
     kay_s = {}
@@ -326,20 +329,19 @@ def gunes_plan_tahmin(plan, fs, a, simdi, uretim_kw, kw_c, filo_n):
     tam = {h: v for h, v in kay_s.items() if h < simdi.hour}
     tepe = max([v for h, v in tam.items() if 10 <= h <= 14] or [0]) or a.get("gunes_tepe_kw", 640)
     for i, p in enumerate(plan):
-        if p["karar"] != "uyut":
-            continue
+        p["karar_ham"] = p["karar"]
         t = p["_t"]
-        if i == 0 and uretim_kw is not None:
-            P, kay = uretim_kw, "anlık"
-        elif t.hour in tam:
+        if t.hour in tam:
             P, kay = tam[t.hour], ("gerçekleşen" if t.date() == simdi.date() else "bugünün aynı saati")
         else:
             dog, bat = gunes_saatleri(t)
             x = (t.hour + 0.5 - dog) / max(bat - dog, 1)
             P, kay = (tepe * math.sin(math.pi * x) if 0 < x < 1 else 0.0), "açık gök tahmini"
+        if i == 0 and uretim_kw is not None and uretim_kw >= P:
+            P, kay = uretim_kw, "anlık"     # saat başında üretim henüz düşük olabilir: tahmin de güneş saati sayılır
         n = min(max(0, math.floor((P - a["gunes_pay_kw"]) / kw_c)), filo_n)
         if n >= 1:
-            p.update(gunes_cihaz=n, gunes_kw=round(P), gunes_kaynak=kay)
+            p.update(gunes_cihaz=n, gunes_kw=round(P), gunes_kaynak=kay, karar="uyut")
 
 
 def yerel_oku():
@@ -626,7 +628,7 @@ def calistir():
         detay, _ = gh("n8n/cihaz_detay.json")           # cihaz başı watt (bildiren cihazlar)
         gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel, detay)
     for i, p in enumerate(plan):
-        p["karar_ham"] = p["karar"]
+        p.setdefault("karar_ham", p["karar"])
         p["karar"] = k2[i]
         if i in notlar:
             p["not"] = notlar[i]
@@ -635,7 +637,7 @@ def calistir():
         if p["karar"] == "uyut" and p.get("gunes_cihaz"):
             p["karar"] = "calis"
             p["gunes_tahmini"] = True
-            p["not"] = (p.get("not", "") + " · " if p.get("not") else "") + f"güneş takibi: ~{p['gunes_kw']} kW → ~{p['gunes_cihaz']} cihaz"
+            p["not"] = (p.get("not", "") + " · " if p.get("not") else "") + f"üretim var, fiyata bakılmaz: ~{p['gunes_kw']} kW → ~{p['gunes_cihaz']} cihaz"
     # tetik için: üretim şu an kaç cihazı karşılıyor (>0 ise toplu uyutma gönderilmez)
     gunes_hedef = 0
     if a.get("gunes_takip") and fs_taze and uretim_kw:

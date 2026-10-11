@@ -1338,7 +1338,7 @@ async function cizYonetim() {
     const bas = q => q.gelir != null ? q.gelir / kw * 1000 : null;                           // başabaş enerji maliyeti ₺/MWh
     const DUR = q => q.karar === 'uyut' ? { ad: q.gerc ? 'Uyudu' : 'Uyut', ik: '✕', bg: '#FDECEA', fg: '#B42318', bar: '#D64545' }
       : q.karar === 'calis' && q.gunes_tahmini && emal(q) != null && bas(q) != null && emal(q) <= bas(q) ? { ad: q.gerc ? 'Çalıştı · güneş + kârlı' : 'Çalış · güneş + kârlı', ik: '☀✓', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
-      : q.karar === 'calis' && q.gunes_tahmini ? { ad: q.gerc ? 'Çalıştı · güneş' : 'Çalış · güneş', ik: '☀', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
+      : q.karar === 'calis' && q.gunes_tahmini ? { ad: q.gerc ? 'Çalıştı · güneş' : 'Çalış · güneş' + (q.gunes_cihaz ? ' (~' + q.gunes_cihaz + ' cihaz)' : ''), ik: '☀', bg: '#FFF4D6', fg: '#8A5A00', bar: '#F0B429', bar2: '#2F9E55' }
       : q.karar === 'calis' ? { ad: q.gerc ? 'Çalıştı' : 'Çalış · kârlı', ik: '✓', bg: '#E6F4EA', fg: '#1E7A3C', bar: '#2F9E55' }
       : { ad: '—', ik: '', bg: '#F1F3F6', fg: '#4A5A70', bar: '#C9D1DC' };
     const si = pl.findIndex(q => q.t === simdiT);                                           // şimdiki saatin sırası

@@ -252,6 +252,11 @@ def main():
         guc_kesif(sonuc, simdi)
     except Exception as e:
         log("güç keşfi hatası:", e)
+    try:
+        import firmware
+        firmware.calis(sonuc, simdi)
+    except Exception as e:
+        log("firmware keşfi hatası:", e)
     for o in sonuc:
         o.pop("_ham", None)
         try:

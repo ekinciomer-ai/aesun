@@ -208,7 +208,7 @@ def pilot_adim(sonuc, simdi, kesif):
             return
         if not o:
             return
-        if not o.get("uyku"):
+        if not o.get("uyku") and not gorev.get("calisirken_izin"):
             c["bekleme"] = "cihaz uykuda değil"; pilot_yaz(p); return
         sec, neden = uc_sec((kesif or {}).get("arayuz"))
         md5_ok = (kesif or {}).get("md5_dogru")

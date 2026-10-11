@@ -9,7 +9,8 @@ Kural (hiyerarşi, 10 Eki):
      uyandırılır. Cihaz gücü bilinir (≈ 5,6–5,8 kW); 50 kW sabit eşiği kalktı.
        açık kalabilecek = taban((üretim + kapatma toleransı) / cihaz kW)   → fazlası uyutulur
        uyandırılabilecek = taban((son iki okumanın küçüğü − pay) / cihaz kW) → tur başına en çok N cihaz
-     Uyutma sırası: en düşük hash. Uyandırma sırası: en yüksek hash. Bir cihaz en az X dk çalışmadan
+     Uyutma sırası: verimi (TH/kW) en düşük önce. Uyandırma sırası: verimi en yüksek önce. Güç: cihazın
+     bildirdiği watt (cihaz_detay), yoksa modelin bilinen gücü. Bir cihaz en az X dk çalışmadan
      uyutulmaz, en az Y dk uyumadan uyandırılmaz (zorunlu açık hariç); uyanan cihaz ısınırken "çalışıyor" sayılır.
 
 Zamanlama (gerçek ısınma verisinden öğrenilir — cihaz_ogrenme.py):
@@ -57,7 +58,8 @@ VARSAYILAN = {
     "gunes_kaynak": "Sera-2",     # madencilik Sera-2 (T2) sayacının arkasında; "toplam" = Sera-1 + Sera-2
     "gunes_pay_kw": 3.0,          # uyandırırken üretimin bu kadar altında kal
     "kapatma_tolerans_kw": 3.0,   # yük üretimi bu kadar aşınca cihaz uyut
-    "acma_adim": 3,               # bir turda (5 dk) en çok kaç cihaz uyandırılır
+    "acma_adim": 3,
+    "model_guc_w": {"S21e Hyd": 5300, "S19 XP+ Hyd": 5300, "S19e XP Hyd": 5830},   # cihaz watt bildirmiyorsa sıralama için               # bir turda (5 dk) en çok kaç cihaz uyandırılır
     "en_az_calisma_dk": 20,       # uyanan cihaz en az bu kadar çalışmadan uyutulmaz (açık 2 cihazı aşmadıkça)
     "en_az_uyku_dk": 10,          # uyutulan cihaz en az bu kadar uyumadan uyandırılmaz
     "uyanma_bekleme_dk": 25,      # uyandırılan Hydro cihaz ısınırken bu süre "çalışıyor" sayılır
@@ -310,7 +312,7 @@ def yerel_yaz(y):
     YEREL.write_text(json.dumps(y, ensure_ascii=False))
 
 
-def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel):
+def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
     """Ekonomik katman "uyut" derken: madencilik yükünü anlık üretime eşitler.
     Dönüş: {"eylem": "sleep"|"wake"|None, "hedefler": [suffix], "neden", "hedef_kapat", "hedef_ac", "calisan", ...}.
     yerel["cihaz_kom"] (cihaz başı son komut) ve yerel["gunes_okuma"] (son okumalar) güncellenir; kaydetmek çağırana kalır."""
@@ -362,7 +364,26 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel):
     hk = max(0, math.floor(p_kapat / kw_c))
     ha = max(0, math.floor((min(son2) - a["gunes_pay_kw"]) / kw_c)) if len(son2) >= 2 else min(hk, C)
     sonuc.update({"hedef_kapat": hk, "hedef_ac": ha})
+    # Verim = TH / kW. Güç: cihazın bildirdiği watt (son ölçüm saklanır), yoksa model gücü, yoksa ortalama cihaz gücü.
+    wm = yerel.setdefault("cihaz_w", {})
+    md = yerel.setdefault("cihaz_model", {})
+    for c in ((detay or {}).get("cihaz") or {}).values():
+        try:
+            if c.get("ip") and c.get("model"):
+                md[str(int(str(c["ip"]).rsplit(".", 1)[-1]))] = c["model"]
+        except Exception:
+            pass
+        w = (c.get("diger") or {}).get("watt") or c.get("watt")
+        try:
+            if w and 1000 < float(w) < 10000 and c.get("ip"):
+                wm[str(int(str(c["ip"]).rsplit(".", 1)[-1]))] = round(float(w))
+        except Exception:
+            pass
+    mg = a.get("model_guc_w") or {}
     th = lambda d: thm.get(str(d.get("suffix")), d.get("hashrate_TH") or 0)
+    kw_d = lambda d: (wm.get(str(d.get("suffix"))) or mg.get(md.get(str(d.get("suffix"))) or d.get("model")) or kw_c * 1000) / 1000
+    verim = lambda d: (round(th(d) / kw_d(d), 2), th(d))       # eşitlikte düşük hash'li önce uyur
+    sonuc["verim"] = {str(d.get("suffix")): round(th(d) / kw_d(d), 1) for d in calisan + uyuyan if kw_d(d)}
     if C > hk:
         fazla = C - hk
         # kısa bulut: 1–2 cihazlık açık ilk okumada beklenir, ikinci okumada da sürüyorsa uyutulur
@@ -370,8 +391,8 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel):
         if fazla <= 1 and not onceki_acik and not dusen:
             sonuc["neden"] = "yük üretimi 1 cihaz kadar aşıyor (üretim düşmüyor); bir sonraki okumada sürerse uyutulacak"
             return sonuc
-        uygun = sorted([d for d in calisan if dk_once(d) >= a["en_az_calisma_dk"] or son_kom(d).get("eylem") != "wake"], key=th)
-        yeni = sorted([d for d in calisan if d not in uygun], key=th)
+        uygun = sorted([d for d in calisan if dk_once(d) >= a["en_az_calisma_dk"] or son_kom(d).get("eylem") != "wake"], key=verim)
+        yeni = sorted([d for d in calisan if d not in uygun], key=verim)
         sec = (uygun + (yeni if fazla > 2 else []))[:fazla]
         if sec:
             sonuc.update({"eylem": "sleep", "hedefler": sorted(d["suffix"] for d in sec),
@@ -381,7 +402,7 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel):
         return sonuc
     if C < ha and uyuyan:
         n = min(ha - C, a["acma_adim"])
-        uygun = sorted([d for d in uyuyan if not (son_kom(d).get("eylem") == "sleep" and dk_once(d) < a["en_az_uyku_dk"])], key=th, reverse=True)
+        uygun = sorted([d for d in uyuyan if not (son_kom(d).get("eylem") == "sleep" and dk_once(d) < a["en_az_uyku_dk"])], key=verim, reverse=True)
         sec = uygun[:n]
         if sec:
             sonuc.update({"eylem": "wake", "hedefler": sorted(d["suffix"] for d in sec),
@@ -554,7 +575,8 @@ def calistir():
                 kw_c = round(max(kw_c, son_s["kw"] / son_s["calisan"]), 2)
         except Exception:
             pass
-        gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel)
+        detay, _ = gh("n8n/cihaz_detay.json")           # cihaz başı watt (bildiren cihazlar)
+        gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel, detay)
     for i, p in enumerate(plan):
         p["karar_ham"] = p["karar"]
         p["karar"] = k2[i]

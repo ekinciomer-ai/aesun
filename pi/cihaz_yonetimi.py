@@ -9,8 +9,8 @@ Kural (hiyerarşi, 10 Eki):
      uyandırılır. Cihaz gücü bilinir (≈ 5,6–5,8 kW); 50 kW sabit eşiği kalktı.
        açık kalabilecek = taban((üretim + kapatma toleransı) / cihaz kW)   → fazlası uyutulur
        uyandırılabilecek = taban((son iki okumanın küçüğü − pay) / cihaz kW) → tur başına en çok N cihaz
-     Uyutma sırası: verimi (TH/kW) en düşük önce. Uyandırma sırası: verimi en yüksek önce. Güç: cihazın
-     bildirdiği watt (cihaz_detay), yoksa modelin bilinen gücü. Bir cihaz en az X dk çalışmadan
+     Uyutma sırası: hashrate'i en düşük önce. Uyandırma sırası: hashrate'i en yüksek önce (cihazların çoğu
+     güç bildirmiyor; verim yerine hashrate ölçü alınır, verim yalnız bilgi olarak durum dosyasına yazılır). Bir cihaz en az X dk çalışmadan
      uyutulmaz, en az Y dk uyumadan uyandırılmaz (zorunlu açık hariç); uyanan cihaz ısınırken "çalışıyor" sayılır.
 
 Zamanlama (gerçek ısınma verisinden öğrenilir — cihaz_ogrenme.py):
@@ -391,8 +391,8 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
         if fazla <= 1 and not onceki_acik and not dusen:
             sonuc["neden"] = "yük üretimi 1 cihaz kadar aşıyor (üretim düşmüyor); bir sonraki okumada sürerse uyutulacak"
             return sonuc
-        uygun = sorted([d for d in calisan if dk_once(d) >= a["en_az_calisma_dk"] or son_kom(d).get("eylem") != "wake"], key=verim)
-        yeni = sorted([d for d in calisan if d not in uygun], key=verim)
+        uygun = sorted([d for d in calisan if dk_once(d) >= a["en_az_calisma_dk"] or son_kom(d).get("eylem") != "wake"], key=th)
+        yeni = sorted([d for d in calisan if d not in uygun], key=th)
         sec = (uygun + (yeni if fazla > 2 else []))[:fazla]
         if sec:
             sonuc.update({"eylem": "sleep", "hedefler": sorted(d["suffix"] for d in sec),
@@ -402,7 +402,7 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
         return sonuc
     if C < ha and uyuyan:
         n = min(ha - C, a["acma_adim"])
-        uygun = sorted([d for d in uyuyan if not (son_kom(d).get("eylem") == "sleep" and dk_once(d) < a["en_az_uyku_dk"])], key=verim, reverse=True)
+        uygun = sorted([d for d in uyuyan if not (son_kom(d).get("eylem") == "sleep" and dk_once(d) < a["en_az_uyku_dk"])], key=th, reverse=True)
         sec = uygun[:n]
         if sec:
             sonuc.update({"eylem": "wake", "hedefler": sorted(d["suffix"] for d in sec),

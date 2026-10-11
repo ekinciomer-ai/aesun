@@ -92,8 +92,39 @@ def arayuz_kesif(ip):
     return out
 
 
+def bmu_parca(veri, miner_type, subtype):
+    """Bitmain .bmu kapsayıcısından cihaza uyan alt imaj (arayüzün update.js'i ile birebir):
+    başlık 9×uint32 LE (magic 0xabababab, …, ItemCount, ItemSize, DataOffset, Crc32); CRC32 = başlık (crc alanı sıfır) + geri kalan.
+    Öğe: ad/çip/kontrol kartı/model uzunlukları (4 bayt), ad[64], çip[32], kart[32], model[32], DataOffset, DataSize.
+    Eşleşme: MinerModel == miner_type ve CtrlBoardModel == subtype. Dönüş: (bayt, bilgi) ya da (None, neden)."""
+    import struct, zlib
+    if len(veri) < 36:
+        return None, "dosya çok kısa"
+    magic, _, _, adet, boy, _, crc, _, _ = struct.unpack("<9I", veri[:36])
+    if magic != 0xABABABAB:
+        return None, "kapsayıcı değil (magic)"
+    bas = bytearray(veri[:36]); bas[24:28] = b"\0\0\0\0"
+    if zlib.crc32(bytes(bas) + veri[36:]) != crc:
+        return None, "kapsayıcı CRC tutmadı"
+    for g in range(adet):
+        it = veri[36 + g * boy: 36 + (g + 1) * boy]
+        oku = lambda a, b, l: it[a:b][:l].decode("latin1")
+        kart, model = oku(100, 132, it[2]), oku(132, 164, it[3])
+        ofs, uz = struct.unpack("<2I", it[164:172])
+        if (model == miner_type or miner_type == "Antminer BHB42XXX") and kart == subtype:
+            if ofs + uz > len(veri):
+                return None, "alt imaj dosya dışına taşıyor"
+            return veri[ofs: ofs + uz], {"kart": kart, "model": model, "ofs": ofs, "boyut": uz}
+    return None, f"eşleşen alt imaj yok (miner_type={miner_type}, subtype={subtype})"
+
+
 def uc_sec(kesif):
     """((cgi, alan, diger_alanlar), "tamam") ya da (None, neden). Ayarı silen uç (clear/reset) seçilmez."""
+    # Bitmain arayüzü (update.*.js): "ayarları koru" işaretliyken /cgi-bin/upgrade.cgi, değilse upgrade_clear.cgi;
+    # dosya FormData'ya append("firmware", Blob) ile eklenir. Ayarı silen uç asla seçilmez.
+    kaynak = " ".join(((kesif or {}).get("kaynak") or {}).values())
+    if "/cgi-bin/upgrade.cgi" in kaynak and re.search(r'append\(\s*["\']firmware["\']', kaynak):
+        return ("/cgi-bin/upgrade.cgi", "firmware", []), "tamam"
     aday = [u for u in (kesif or {}).get("upgrade_cgi") or [] if not re.search(r"clear|reset|factory", u["cgi"], re.I)]
     if not aday:
         return None, "yükseltme uç noktası bulunamadı"
@@ -193,6 +224,12 @@ def pilot_adim(sonuc, simdi, kesif):
         yol, _, _, ok = indir("S21e Hyd")
         if not ok:
             p["durdu"] = True; olay("DURDU: dosya MD5 tutmadı"); pilot_yaz(p); _rapor(p, simdi); return
+        k3, mt = M.cgi(ip, "miner_type.cgi", timeout=10)
+        mt = mt if k3 == 200 and isinstance(mt, dict) else {}
+        veri, bilgi = bmu_parca(yol.read_bytes(), mt.get("miner_type"), mt.get("subtype"))
+        if veri is None:
+            p["durdu"] = True; olay(f"DURDU .{suf}: {bilgi} — yükleme yapılmadı"); pilot_yaz(p); _rapor(p, simdi); return
+        c["miner_type"], c["parca"] = mt, bilgi
         eski = (si or {}).get("system_filesystem_version") or (si or {}).get("firmware_version")
         if not eski:
             if c.get("bekleme") != "sürüm okunamadı":
@@ -202,11 +239,17 @@ def pilot_adim(sonuc, simdi, kesif):
         olay(f".{suf} yükleme başlıyor: {cgi} alan={alan}")
         pilot_yaz(p); _rapor(p, simdi)
         try:
-            with open(yol, "rb") as fh:
-                r = M.requests.post(f"http://{ip}{cgi}", auth=M.filo_auth(),
-                                    files={alan: (FW["S21e Hyd"]["ad"], fh, "application/octet-stream")}, timeout=600)
+            r = M.requests.post(f"http://{ip}{cgi}", auth=M.filo_auth(),
+                                files={alan: ("blob", veri, "application/octet-stream")}, timeout=600)
             c["yukleme_yanit"] = [r.status_code, r.text[:300]]
             olay(f".{suf} yükleme yanıtı {r.status_code}: {r.text[:120]!r}")
+            try:
+                stats = (r.json() or {}).get("stats")
+            except Exception:
+                stats = None
+            if r.status_code == 200 and stats not in (None, "success"):
+                p["durdu"] = True; olay(f"DURDU .{suf}: cihaz yüklemeyi kabul etmedi (stats={stats}), eski sürümde kalır")
+                pilot_yaz(p); _rapor(p, simdi); return
             if r.status_code in (401, 403, 404, 405):
                 p["durdu"] = True; olay(f"DURDU .{suf}: yükleme reddedildi ({r.status_code}), cihaz eski sürümde kalır")
                 pilot_yaz(p); _rapor(p, simdi); return

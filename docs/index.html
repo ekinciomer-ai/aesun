@@ -93,6 +93,7 @@ table.tb thead th[aria-sort=descending]::after{content:" ▼";font-size:10px}
   <a href="#bildirim" data-sayfa="bildirim"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z"/></svg>Panel Yönetimi</a>
   <a href="#genel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>Uyarılar<span id="r-uy"></span></a>
   <div class="bosluk" style="flex:1 1 auto;min-height:24px"></div>
+  <button type="button" id="hizBekci" onclick="hizAc()" title="Hız bekçisi: geçiş süreleri ve veri tazeliği" style="all:unset;cursor:pointer;color:#C9D4E3;font-size:12px;line-height:1.5;padding:6px 12px;margin:0 0 8px">Hız bekçisi…</button>
   <div class="k" style="color:#9FB0C6;padding:0 12px;font-size:12px" id="kaynakNot"></div>
 </nav>
 
@@ -134,10 +135,119 @@ const ICON_U = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stro
 const TIK = c => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2.5" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>';
 const UNL = c => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>';
 
-async function al(yol) {
-  const r = await fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' });
-  if (!r.ok) throw new Error(yol + ' okunamadı (HTTP ' + r.status + ')');
-  return r.json();
+// ===== Hız bekçisi: veri istekleri önbellekten anında döner, arka planda tazelenir; değişen veri sayfayı sessizce yeniler.
+// Önceki ziyaretin verisi tarayıcı deposundan (Cache Storage) ilk açılışta hemen gösterilir. Yavaş istek ve geçişler HIZ'a kaydedilir.
+const AL = {}, HIZ = { istek: [], gecis: [], yavasIstek: 1500, yavasGecis: 700, basla: Date.now(), sunucu: null };
+const ON_KAPALI = /[?&]onbellek=0/.test(location.search);
+const ayTR = () => new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 7);
+function alTTL(yol) {
+  const m = yol.match(/^arsiv_(?:cihaz|antminer)_(\d{4}-\d{2})\.json$/); if (m) return m[1] === ayTR() ? 5 * 60e3 : 12 * 3600e3;
+  const y = yol.match(/^inverter\/\w+_(\d{4})\.json$/); if (y) return y[1] === ayTR().slice(0, 4) ? 30 * 60e3 : 12 * 3600e3;
+  if (yol === '2026_osos_endeks.json' || /_osos_endeks\.json$/.test(yol)) return 5 * 60e3;   // OSOS saatlik gelir; 1,1 MB — dakikada bir indirilmez
+  if (/^inverter\/|^arsiv_|epias_gecmis|maden_maliyet|cihaz_ogrenme|firmware_gecmis|bildirim_ayar|cihaz_kimlik/.test(yol)) return 10 * 60e3;
+  return 55e3;                                                     // canlı dosyalar: dakikada bir
+}
+let ON_DEPO = null; try { if (window.caches && !ON_KAPALI) ON_DEPO = caches.open('aem-veri-v1').catch(() => null); } catch (e) {}
+function hizIstek(yol, ms, bayt, onb) {
+  HIZ.istek.push({ yol, ms: Math.round(ms), kb: Math.round(bayt / 1024), onb, t: Date.now() }); if (HIZ.istek.length > 300) HIZ.istek.splice(0, 100);
+  if (!onb && ms > HIZ.yavasIstek) hizGoster();
+}
+function alHam(yol) {
+  const c = AL[yol] || (AL[yol] = {});
+  if (c.p) return c.p;
+  const t0 = performance.now();
+  c.p = fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' }).then(async r => {
+    if (!r.ok) throw new Error(yol + ' okunamadı (HTTP ' + r.status + ')');
+    const txt = await r.text(); JSON.parse(txt);
+    const degisti = c.txt != null && c.txt !== txt, arka = c.arka;
+    c.txt = txt; c.t = Date.now(); hizIstek(yol, performance.now() - t0, txt.length, false);
+    if (ON_DEPO && txt.length < 3e6) ON_DEPO.then(d => d && d.put(KOK + yol, new Response(txt, { headers: { 'x-t': String(c.t) } }))).catch(() => {});
+    if (degisti && arka) yenidenCizPlanla();
+    return txt;
+  }).finally(() => { c.p = null; c.arka = false; });
+  return c.p;
+}
+// taze = true: ağdan bekle (komut sonrası, "Yenile"); aksi halde önbellek → hemen, eskiyse arkada tazele
+async function al(yol, taze) {
+  if (!taze && !ON_KAPALI) {
+    const c = AL[yol] || (AL[yol] = {});
+    if (c.txt != null) {
+      if (Date.now() - c.t > alTTL(yol) && !c.p) { c.arka = true; alHam(yol).catch(() => {}); }
+      hizIstek(yol, 0, c.txt.length, true);
+      return JSON.parse(c.txt);
+    }
+    if (ON_DEPO && !c.depo) {
+      c.depo = true;
+      const r = await ON_DEPO.then(d => d && d.match(KOK + yol)).catch(() => null);
+      if (r && Date.now() - Number(r.headers.get('x-t') || 0) < 3 * 86400e3) {
+        const txt = await r.text();
+        if (c.txt == null) { c.txt = txt; c.t = 0; }
+        if (!c.p) { c.arka = true; alHam(yol).catch(() => {}); } else c.arka = true;
+        hizIstek(yol, 0, c.txt.length, true);
+        return JSON.parse(c.txt);
+      }
+    }
+  }
+  return JSON.parse(await alHam(yol));
+}
+// Arka planda değişen veri: D yeniden kurulur ve açık sayfa sessizce yenilenir (pencere açıkken ya da yazı yazılırken beklenir)
+let ycZ = null;
+function yenidenCizPlanla() {
+  clearTimeout(ycZ);
+  ycZ = setTimeout(() => {
+    const ae = document.activeElement, mesgul = document.querySelector('dialog[open]') || document.getElementById('hashModal') || (ae && /INPUT|SELECT|TEXTAREA/.test(ae.tagName));
+    if (mesgul) { yenidenCizPlanla(); return; }
+    if (D) yukle();
+  }, 700);
+}
+// Canlı tutma: sayfa görünürken her 30 sn süresi dolan dosyalar arkada tazelenir; değişiklik varsa sayfa kendini yeniler
+setInterval(() => {
+  if (document.hidden || ON_KAPALI) return;
+  for (const [yol, c] of Object.entries(AL)) if (c.txt != null && !c.p && Date.now() - c.t > alTTL(yol)) { c.arka = true; alHam(yol).catch(() => {}); }
+}, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) for (const [yol, c] of Object.entries(AL)) if (c.txt != null && !c.p && Date.now() - c.t > alTTL(yol)) { c.arka = true; alHam(yol).catch(() => {}); } });
+// Ön yükleme: ilk çizimden sonra boşta, diğer sayfaların dosyaları sırayla önbelleğe alınır → sekme geçişi beklemesiz
+const ON_YUKLE = ['n8n/cihaz_kimlik.json', 'n8n/cihaz_yonetimi_durum.json', 'antminer_command_results.json', 'n8n/ag_tarama.json', 'n8n/cihaz_detay.json', 'n8n/bekci.json', 'n8n/firmware_gecmis.json',
+  'cihaz_yonetimi.json', 'n8n/epias_gecmis.json', 'n8n/maden_maliyet.json', 'arsiv_f2pool_gelir.json', 'arsiv_btc_fiyat.json', 'n8n/hash/gunler.json', 'n8n/bildirim_ayar.json', 'n8n/bildirim_kayit.json',
+  'inverter/fusionsolar_string.json', 'inverter/sungrow_string.json', 'inverter/string_tasarim.json', 'inverter/tasarim.json', 'n8n/analiz/durum.json'];
+let onYuklendi = false;
+function onYukle() {
+  if (onYuklendi || ON_KAPALI) return; onYuklendi = true;
+  const bos = f => (window.requestIdleCallback || (g => setTimeout(g, 200)))(f);
+  const sira = ON_YUKLE.concat(['arsiv_cihaz_' + ayTR() + '.json']);
+  let akan = 0, bitti = false;
+  const son = () => { if (bitti) return; bitti = true; bos(async () => { try { await madenYukle(); } catch (e) {} try { await sonDonanimYukle(); } catch (e) {} try { await epYukle(); } catch (e) {} try { await invYilYukle(Number(ayTR().slice(0, 4))); } catch (e) {} try { await strYukle(); } catch (e) {} }); };
+  const sonraki = () => { while (akan < 4 && sira.length) { const y = sira.shift(); akan++; bos(() => al(y).catch(() => {}).finally(() => { akan--; sonraki(); })); } if (!sira.length && !akan) son(); };
+  setTimeout(sonraki, 300);
+}
+// Bekçi göstergesi (menü altı) ve ayrıntı penceresi
+function hizGoster() {
+  const el = document.getElementById('hizBekci'); if (!el) return;
+  const ag = HIZ.istek.filter(x => !x.onb), son = ag.slice(-20), ort = son.length ? son.reduce((t, x) => t + x.ms, 0) / son.length : 0;
+  const g = HIZ.gecis.slice(-10), gOrt = g.length ? g.reduce((t, x) => t + x.ms, 0) / g.length : 0;
+  const yavas = ag.filter(x => x.ms > HIZ.yavasIstek && Date.now() - x.t < 10 * 60e3).length + g.filter(x => x.ms > HIZ.yavasGecis && Date.now() - x.t < 10 * 60e3).length;
+  const enYeni = Math.max(0, ...Object.values(AL).map(c => c.t || 0)), yas = enYeni ? Math.round((Date.now() - enYeni) / 1000) : null;
+  const renk = yavas ? '#F2B84B' : '#5CCB7E';
+  el.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + renk + ';margin-right:6px"></span>' + (yavas ? 'Yavaşlama (' + yavas + ')' : 'Akıcı')
+    + ' · geçiş ' + (g.length ? say(gOrt) + ' ms' : '—') + '<br><span style="opacity:.8">veri ' + (yas == null ? '—' : yas < 90 ? yas + ' sn' : Math.round(yas / 60) + ' dk') + ' önce · ağ ort. ' + say(ort) + ' ms</span>';
+}
+setInterval(hizGoster, 5000);
+function hizAc() {
+  let dl = document.getElementById('hizDlg');
+  if (!dl) { dl = document.createElement('dialog'); dl.id = 'hizDlg'; dl.style.cssText = 'border:0;border-radius:14px;padding:0;max-width:min(860px,96vw);width:96vw;box-shadow:0 20px 60px rgba(16,35,63,.35)'; dl.addEventListener('click', e => { if (e.target === dl) dl.close(); }); document.body.appendChild(dl); }
+  const dosya = Object.entries(AL).filter(([, c]) => c.txt != null).map(([yol, c]) => { const ag = HIZ.istek.filter(x => x.yol === yol && !x.onb); return { yol, kb: c.txt.length / 1024, yas: c.t ? (Date.now() - c.t) / 1000 : null, ms: ag.length ? ag[ag.length - 1].ms : null, ttl: alTTL(yol) / 1000 }; }).sort((a, b) => (b.ms || 0) - (a.ms || 0));
+  const g = HIZ.gecis.slice(-15).reverse(), S = HIZ.sunucu;
+  const sat = (a, b) => '<tr><td class="sol">' + a + '</td>' + b.map(x => '<td>' + x + '</td>').join('') + '</tr>';
+  dl.innerHTML = '<div class="panel" style="gap:10px"><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px">Hız bekçisi</b><button type="button" class="btn" onclick="document.getElementById(\'hizDlg\').close()">Kapat</button></div>'
+    + '<div class="k">Sayfalar veriyi önbellekten anında açar; dosyalar süresi dolunca arka planda tazelenir (canlı dosyalar ~1 dk), değişiklik gelirse sayfa kendini yeniler. Diğer sekmelerin verisi açılışta boşta önceden yüklenir. Eşik: istek ' + HIZ.yavasIstek + ' ms, geçiş ' + HIZ.yavasGecis + ' ms.</div>'
+    + '<div style="font-weight:700">Son geçişler</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Sayfa</th><th>Süre</th><th>Saat</th></tr></thead><tbody>'
+    + (g.map(x => sat(esc(x.sayfa), ['<b style="color:' + (x.ms > HIZ.yavasGecis ? '#B42318' : '#1E7A3C') + '">' + say(x.ms) + ' ms</b>', new Date(x.t).toTimeString().slice(0, 8)])).join('') || sat('—', ['', ''])) + '</tbody></table></div>'
+    + '<div style="font-weight:700">Veri dosyaları</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Dosya</th><th>Boyut</th><th>Son indirme</th><th>Yaş</th><th>Tazeleme</th></tr></thead><tbody>'
+    + dosya.map(x => sat(esc(x.yol), [(x.kb > 700 ? '<b style="color:#9A5B00">' : '<span>') + say(x.kb) + ' KB' + (x.kb > 700 ? '</b>' : '</span>'), x.ms == null ? 'önbellek' : '<span style="color:' + (x.ms > HIZ.yavasIstek ? '#B42318' : 'inherit') + '">' + say(x.ms) + ' ms</span>', x.yas == null ? 'depodan' : x.yas < 90 ? say(x.yas) + ' sn' : say(x.yas / 60) + ' dk', x.ttl < 120 ? say(x.ttl) + ' sn' : say(x.ttl / 60) + ' dk'])).join('') + '</tbody></table></div>'
+    + (S && S.dosyalar ? '<div style="font-weight:700">Sunucu ölçümü <span class="k" style="font-weight:400">· ' + esc(String(S.zaman || '').slice(11, 16)) + ' (saatlik durum analizi)</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Dosya</th><th>Boyut</th><th>İndirme</th><th>Not</th></tr></thead><tbody>'
+      + S.dosyalar.map(x => sat(esc(x.yol), [say(x.kb) + ' KB', x.ms != null ? say(x.ms) + ' ms' : '—', esc(x.not || '')])).join('') + '</tbody></table></div>' : '')
+    + '</div>';
+  if (!dl.open) dl.showModal();
 }
 
 // OSOS: gün → { veris, cekis } toplamları ve saatlik mahsup
@@ -368,7 +478,7 @@ document.addEventListener('click', e => {
 function cizGenel() {
   const { son, osos, mad } = D;
   document.getElementById('baslik').textContent = 'Genel bakış';
-  document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
+  document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle(true)">Yenile</button>';
   const bugun = bugunTR();
   const simdiTR = trSimdi();
   const sonSaat = sonOsosSaati(osos);
@@ -622,7 +732,7 @@ function cizSayac() {
   document.getElementById('kontrol').innerHTML = '<button class="btn" type="button"' + (ix <= 0 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix - 1] || '') + '\';cizSayac()">Önceki gün</button>'
     + '<label class="k" style="display:flex;align-items:center;gap:8px">Gün <input type="date" value="' + secGun + '" min="' + tumGunler[0] + '" max="' + sonG + '" onchange="if(this.value){secGun=this.value;cizSayac()}"></label>'
     + '<button class="btn" type="button"' + (ix >= tumGunler.length - 1 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix + 1] || '') + '\';cizSayac()">Sonraki gün</button>'
-    + '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
+    + '<button class="btn koyu" type="button" onclick="yukle(true)">Yenile</button>';
   const sekmeHtml = '<div class="sekmeler" role="tablist">' + [['sayac', 'Sayaçlar'], ['mahsup', 'Mahsup']].map(([k, ad]) => '<button role="tab" type="button" aria-selected="' + (sekme === k) + '" onclick="sekme=\'' + k + '\';cizSayac()">' + ad + '</button>').join('') + '</div>';
   let govde = '';
   if (sekme === 'sayac') {
@@ -781,10 +891,10 @@ function madenAyListesi() {
 async function madenYukle(zorla) {
   if (!zorla && MADEN.H && Date.now() - MADEN.yuklendi < 10 * 60000) return;
   const aylar = madenAyListesi(), son = aylar[aylar.length - 1];
-  await Promise.all(aylar.filter(a => zorla || !MADEN.aylar[a] || a === son).map(a => al('arsiv_cihaz_' + a + '.json').then(d => { MADEN.aylar[a] = d; }).catch(() => { MADEN.aylar[a] = MADEN.aylar[a] || {}; })));
-  MADEN.gelir = await al('arsiv_f2pool_gelir.json').catch(() => MADEN.gelir || {});
-  MADEN.btc = await al('arsiv_btc_fiyat.json').then(d => d.gun || {}).catch(() => MADEN.btc || {});
-  await al('n8n/maden_maliyet.json').then(d => { MADEN.mal = d.gun || {}; MADEN.malPay = d.maliyet_payi || null; }).catch(() => { MADEN.mal = MADEN.mal || {}; });
+  await Promise.all(aylar.filter(a => zorla || !MADEN.aylar[a] || a === son).map(a => al('arsiv_cihaz_' + a + '.json', zorla).then(d => { MADEN.aylar[a] = d; }).catch(() => { MADEN.aylar[a] = MADEN.aylar[a] || {}; })));
+  const [g1, b1] = await Promise.all([al('arsiv_f2pool_gelir.json', zorla).catch(() => MADEN.gelir || {}), al('arsiv_btc_fiyat.json', zorla).then(d => d.gun || {}).catch(() => MADEN.btc || {})]);
+  MADEN.gelir = g1; MADEN.btc = b1;
+  await al('n8n/maden_maliyet.json', zorla).then(d => { MADEN.mal = d.gun || {}; MADEN.malPay = d.maliyet_payi || null; }).catch(() => { MADEN.mal = MADEN.mal || {}; });
   const H = {};
   for (const d of Object.values(MADEN.aylar)) for (const [k, v] of Object.entries(d)) {
     const t = Date.parse(k.replace(' ', 'T').slice(0, 13) + ':00:00Z'); if (isNaN(t)) continue;
@@ -958,14 +1068,14 @@ async function cihazKomut(action, targets, ad) {
 const HASH = { gun: {}, liste: null }, HS = { c: null, bit: null, aralik: 1 };
 async function hashGunAl(g) {
   if (g in HASH.gun && (g !== bugunTR() || Date.now() - (HASH.gun[g] || {})._t < 4 * 60000)) return HASH.gun[g];
-  try { const d = await al('n8n/hash/' + g + '.json'); d._t = Date.now(); HASH.gun[g] = d; } catch (e) { HASH.gun[g] = null; }
+  try { const d = await al('n8n/hash/' + g + '.json', g === bugunTR()); d._t = Date.now(); HASH.gun[g] = d; } catch (e) { HASH.gun[g] = null; }
   return HASH.gun[g];
 }
 function hashKapat() { const m = document.getElementById('hashModal'); if (m) m.remove(); document.removeEventListener('keydown', hashTus); clearInterval(HS.zaman); HS.zaman = null; }
 // Canlı izleme: modal açıkken dakikada bir saha verisi (antminer_panel) ve bugünün 5 dk kaydı yenilenir
 async function hashYenile() {
   if (!document.getElementById('hashModal')) { clearInterval(HS.zaman); HS.zaman = null; return; }
-  try { D.mad = await al('antminer_panel.json'); } catch (e) {}
+  try { D.mad = await al('antminer_panel.json', true); } catch (e) {}
   delete HASH.gun[bugunTR()];
   hashCiz();
 }
@@ -1072,6 +1182,7 @@ async function hashCiz() {
 }
 
 async function cizCihazlar() {
+  await Promise.all(['antminer_command_results.json', 'n8n/cihaz_kimlik.json', 'n8n/ag_tarama.json', 'n8n/cihaz_detay.json', 'n8n/bekci.json', 'n8n/firmware_gecmis.json'].map(y => al(y).catch(() => null)));
   const don = await sonDonanimYukle();
   let sonuc = null; try { sonuc = await al('antminer_command_results.json'); } catch (e) {}
   const mad = D.mad || {}, canli = {};
@@ -1761,7 +1872,7 @@ async function cizInverter() {
   if (invSec.sekme !== 'analiz') {
     document.getElementById('baslik').textContent = invSec.sekme === 'mining' ? 'Mining prensip tek hat' : 'Santraller ve abonelikler';
     document.getElementById('altBaslik').textContent = invSec.sekme === 'mining' ? 'Sera-1 / Sera-2 ve madencilik: OG bara → sayaç → trafo → AG bara → inverter → string. Değerler canlı, sayfa 3 dk\'da bir yenilenir.' : 'Her santral ve abonelik bağımsız: OG bara → sayaç → trafo → AG bara → inverter → string.';
-    document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
+    document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle(true)">Yenile</button>';
     if (!ic.querySelector('svg')) ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + '<div class="panel"><p class="k">Yükleniyor…</p></div></div>';
     let g = '';
     try { g = invSec.sekme === 'mining' ? await cizMiningPrensip() : await cizDigerPrensip(); } catch (e) { g = '<div class="panel hata">Şema çizilemedi: ' + esc(e.message || e) + '</div>'; }
@@ -2025,8 +2136,8 @@ async function cizBildirim(zorla) {
   const ic = document.getElementById('icerik');
   if (!BILD || zorla) {
     ic.innerHTML = '<div class="panel"><p class="k">Yükleniyor…</p></div>';
-    try { BILD = await al('n8n/bildirim_ayar.json'); BILD_DEGISTI = false; } catch (e) { ic.innerHTML = '<div class="panel hata">Bildirim ayarı okunamadı: ' + esc(e.message || e) + '</div>'; return; }
-    try { BILD_KAYIT = await al('n8n/bildirim_kayit.json'); } catch (e) { BILD_KAYIT = { kayit: [] }; }
+    try { BILD = await al('n8n/bildirim_ayar.json', zorla); BILD_DEGISTI = false; } catch (e) { ic.innerHTML = '<div class="panel hata">Bildirim ayarı okunamadı: ' + esc(e.message || e) + '</div>'; return; }
+    try { BILD_KAYIT = await al('n8n/bildirim_kayit.json', zorla); } catch (e) { BILD_KAYIT = { kayit: [] }; }
   }
   if (location.hash !== '#bildirim') return;
   const K = BILD.konular || [], P = BILD.kisiler || [], kay = (BILD_KAYIT && BILD_KAYIT.kayit) || [];
@@ -2098,7 +2209,9 @@ function ciz() {
   const h0 = location.hash || '#genel';
   const sayfa = h0 === '#bildirim' ? 'bildirim' : h0 === '#maden' ? 'maden' : h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
   document.querySelectorAll('.nav a[data-sayfa]').forEach(a => a.classList.toggle('aktif', a.dataset.sayfa === sayfa));
-  if (sayfa === 'bildirim') cizBildirim(); else if (sayfa === 'maden') cizMaden(); else if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
+  const t0 = performance.now(), ad = sayfa + (sayfa === 'maden' ? ':' + madenSec.sekme : sayfa === 'inverter' ? ':' + (invSec.sekme || 'analiz') : '');
+  const bitir = pr => Promise.resolve(pr).finally(() => { const ms = performance.now() - t0; HIZ.gecis.push({ sayfa: ad, ms: Math.round(ms), t: Date.now() }); if (HIZ.gecis.length > 100) HIZ.gecis.shift(); hizGoster(); onYukle(); });
+  if (sayfa === 'bildirim') bitir(cizBildirim()); else if (sayfa === 'maden') bitir(cizMaden()); else if (sayfa === 'epias') bitir(cizEpias()); else if (sayfa === 'inverter') bitir(cizInverter()); else if (sayfa === 'sayac') bitir(cizSayac()); else { bitir(); cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
 }
 window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias' || location.hash === '#maden' || location.hash === '#bildirim') window.scrollTo(0, 0); } });
 // ===== Tek hat şemaları (İnverter sayfası sekmeleri): OG bara üstte → sayaç → trafo → AG bara → inverter → string; madencilik yükü
@@ -2539,16 +2652,16 @@ function anlikUretimBolum(fs, saha, mad) {
   return h + '</div><div class="k">Anlık güç inverterlerin AC çıkışıdır (FusionSolar, ~15 dk\'da bir). Turuncu: o seradaki inverter ortalamasının %20\'den fazla altında. Madencilik Sera-2 (Tek Yıldız-2) sayacının arkasındadır; "fazla/açık" = Sera-2 anlık üretimi − madencilik yükü (iç tüketim hariç). Sayfa 3 dk\'da bir yenilenir.</div></section>';
 }
 
-async function yukle() {
+async function yukle(taze) {
   try {
     const [son, osos, mad, fs, saha, sg, inav] = await Promise.all([
-      al('n8n/aesun_son.json').catch(() => null),
-      al('2026_osos_endeks.json'),
-      al('antminer_panel.json').catch(() => null),
-      al('n8n/fusionsolar_son.json').catch(() => null),
-      al('n8n/saha_saatlik.json').catch(() => null),
-      al('n8n/sungrow_son.json').catch(() => null),
-      al('n8n/inavitas_son.json').catch(() => null)
+      al('n8n/aesun_son.json', taze).catch(() => null),
+      al('2026_osos_endeks.json', taze),
+      al('antminer_panel.json', taze).catch(() => null),
+      al('n8n/fusionsolar_son.json', taze).catch(() => null),
+      al('n8n/saha_saatlik.json', taze).catch(() => null),
+      al('n8n/sungrow_son.json', taze).catch(() => null),
+      al('n8n/inavitas_son.json', taze).catch(() => null)
     ]);
     D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs, saha, sg, inav };
     ciz();
@@ -2557,7 +2670,7 @@ async function yukle() {
   }
 }
 yukle();
-setInterval(yukle, 180000);
+al('n8n/analiz/durum.json').then(d => { HIZ.sunucu = d && d.performans; }).catch(() => {});
 let boyutZ = null, sonGen = window.innerWidth;
 window.addEventListener('resize', () => { clearTimeout(boyutZ); boyutZ = setTimeout(() => { if (D && Math.abs(window.innerWidth - sonGen) > 40) { sonGen = window.innerWidth; ciz(); } }, 300); });
 </script>

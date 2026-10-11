@@ -2159,11 +2159,11 @@ function thSvg(cfg) {
       if (r > 0) h += thL(b.x + 10, busY, b.x + 24 + row.length * (CW + SP) - SP, busY, ' stroke="#10233F" stroke-width="3"');
       row.forEach((v, i) => {
         const ix = b.x + 24 + i * (CW + SP), cx = ix + CW / 2, renk = v.renk || TH_R.yesil;
-        h += thL(cx, r === 0 ? yAG : busY, cx, y + 4, ' stroke="#7A8799" stroke-width="1.3"')
+        h += thL(cx, r === 0 ? yAG : busY, cx, y + 4, ' stroke="#7A8799" stroke-width="1.3"') + (v.tik ? '<g class="thTik" style="cursor:pointer" onclick="' + v.tik + '"><title>' + esc(v.ad) + ' · ayrıntı için tıklayın</title>' : '')
           + '<rect x="' + ix + '" y="' + (y + 4) + '" width="' + CW + '" height="' + IH + '" rx="6" fill="' + (renk === TH_R.kirmizi ? '#FDECEC' : renk === TH_R.sari ? '#FFF4DC' : renk === TH_R.gri ? '#F1F3F6' : '#E8F5EC') + '" stroke="' + renk + '"/>'
           + thT(cx, y + 19, esc(v.ad), ' text-anchor="middle" font-size="11.5" font-weight="600" fill="#4A5A70"')
           + thT(cx, y + 38, v.ust, ' text-anchor="middle" font-size="14" font-weight="700" fill="' + (renk === TH_R.kirmizi ? TH_R.kirmizi : TH_R.koyu) + '"');
-        (v.satir || []).slice(0, liste ? 3 : 1).forEach((s, j) => { h += thT(cx, y + 54 + j * 12.5, s, ' text-anchor="middle" font-size="10.5" fill="#4A5A70"'); });
+        (v.satir || []).filter(z => z != null).slice(0, liste ? 3 : 1).forEach((s, j) => { h += thT(cx, y + 54 + j * 12.5, s, ' text-anchor="middle" font-size="10.5" fill="#4A5A70"'); });
         // stringler
         const sy = y + IH + 6;
         h += thL(cx, y + IH + 4, cx, sy + 2, ' stroke="#7A8799" stroke-width="1"');
@@ -2176,6 +2176,7 @@ function thSvg(cfg) {
         } else {
           v.pv.forEach((p, j) => { h += '<circle cx="' + (ix + 10 + (j % 7) * 13.5) + '" cy="' + (sy + 6 + Math.floor(j / 7) * 12) + '" r="4.2" fill="' + p.renk + '"><title>' + esc(p.ipucu || '') + '</title></circle>'; });
         }
+        if (v.tik) h += '<rect x="' + ix + '" y="' + (y + 4) + '" width="' + CW + '" height="' + (IH + strH(v) + 4) + '" fill="transparent" stroke="none"/></g>';
       });
       if (r > 0) h += thL(b.x + 10, yAG, b.x + 10, busY, ' stroke="#10233F" stroke-width="3"');
       y += rowH; yEnd = Math.max(yEnd, y);
@@ -2193,10 +2194,10 @@ function thSvg(cfg) {
       if (Y.cihaz) {
         Y.cihaz.forEach((c, i) => {
           const cx = lx + (i % kol) * 140, cy = yy + Math.floor(i / kol) * 56;
-          h += '<rect x="' + cx + '" y="' + cy + '" width="132" height="50" rx="6" fill="#fff" stroke="' + c.renk + '"/>'
+          h += (c.tik ? '<g class="thTik" style="cursor:pointer" onclick="' + c.tik + '"><title>' + esc(c.no) + ' · canlı hashrate için tıklayın</title>' : '') + '<rect x="' + cx + '" y="' + cy + '" width="132" height="50" rx="6" fill="#fff" stroke="' + c.renk + '"/>'
             + '<circle cx="' + (cx + 10) + '" cy="' + (cy + 12) + '" r="4" fill="' + c.renk + '"/>'
             + thT(cx + 18, cy + 16, '<tspan font-weight="700">' + esc(c.no) + '</tspan> ' + esc(c.durum || ''), ' font-size="11.5"')
-            + thT(cx + 8, cy + 31, c.s1, ' font-size="11" fill="#10233F"') + thT(cx + 8, cy + 44, c.s2, ' font-size="10.5" fill="#4A5A70"');
+            + thT(cx + 8, cy + 31, c.s1, ' font-size="11" fill="#10233F"') + thT(cx + 8, cy + 44, c.s2, ' font-size="10.5" fill="#4A5A70"') + (c.tik ? '</g>' : '');
         });
         yy += Math.ceil(Y.cihaz.length / kol) * 56;
       }
@@ -2210,7 +2211,93 @@ function thSvg(cfg) {
     + '<g fill="#10233F" font-size="12">' + h + '</g></svg></div>';
 }
 function thBolum(cfg) {
+  if (!document.getElementById('thTikCss')) { const st = document.createElement('style'); st.id = 'thTikCss'; st.textContent = '.thTik:hover>rect:first-of-type{stroke-width:2.6;filter:drop-shadow(0 2px 4px rgba(16,35,63,.25))}'; document.head.appendChild(st); }
   return '<section class="panel" style="gap:10px"><div class="bas"><h2>' + esc(cfg.baslik) + '</h2><span class="k">' + (cfg.alt || '') + '</span></div>' + (cfg.ust || '') + thSvg(cfg) + (cfg.not ? '<div class="k">' + cfg.not + '</div>' : '') + '</section>';
+}
+// ===== İnverter detayı (prensip şemada kutuya tıklayınca): canlı değerler + proje tasarımı (inverter/tasarim.json) + string tablosu + son 14 gün
+let TAS = null; const INVY = {};
+const INV_SAN = { fusionsolar: { 'Sera-1': 'NE=59224704', 'Sera-2': 'NE=73686040' }, sungrow: { YD: '5064453', Anka: '5038906' }, inavitas: { AE: '189' } };
+async function invDetayAc(kay, san, id) {
+  let dl = document.getElementById('invDlg');
+  if (!dl) { dl = document.createElement('dialog'); dl.id = 'invDlg'; dl.style.cssText = 'border:0;border-radius:14px;padding:0;max-width:min(1040px,96vw);width:96vw;box-shadow:0 20px 60px rgba(16,35,63,.35)'; dl.addEventListener('click', e => { if (e.target === dl) dl.close(); }); document.body.appendChild(dl); }
+  dl.innerHTML = '<div class="panel" style="gap:10px"><p class="k" style="margin:0">Yükleniyor…</p></div>';
+  if (!dl.open) dl.showModal();
+  const yil = bugunTR().slice(0, 4);
+  if (!TAS) TAS = await al('inverter/tasarim.json').catch(() => ({ santraller: {} }));
+  await strYukle();
+  if (!INVY[kay]) INVY[kay] = await al('inverter/' + kay + '_' + yil + '.json').catch(() => null);
+  const f = (v, d) => v == null || v === '' || Number.isNaN(v) ? '—' : say(v, d);
+  const sid = INV_SAN[kay][san], ts = (TAS.santraller || {})[san] || {};
+  const gy = (((INVY[kay] || {}).santraller || {})[sid] || {}).inv || {};
+  // canlı kayıt
+  let L = {}, ad = id, pvCanli = {}, guncel = '';
+  if (kay === 'fusionsolar') {
+    L = ((D.fs || {}).invertorler || {})[id] || {}; ad = L.ad || id; guncel = (D.fs || {}).guncelleme || '';
+    const taze = !L.pv_ts || Date.parse(L.pv_ts) > Date.now() - 40 * 60e3; if (taze) (L.pv || []).forEach(([n, V, A]) => { pvCanli[n] = { V, A }; });
+  } else {
+    const src = kay === 'sungrow' ? D.sg : D.inav, s = ((src || {}).santraller || {})[sid] || {}; guncel = (src || {}).guncelleme || '';
+    ad = (gy[id] || {}).ad || id;
+    const r = (s.inverterler || []).find(x => x.ps_key === id || String(x.ad || '').split(' ').pop() === id) || {};
+    L = { guc_kw: r.anlik_kw, gunluk_kwh: r.bugun_kwh, alarm: r.alarm };
+  }
+  const T = (ts.inverterler || {})[ad] || Object.values(ts.inverterler || {}).find(x => x.id === id) || {};
+  const P = Object.assign({}, ts.panel || {}, T.panel || {});
+  const an = ((STR.inverterler || {})[kay + ':' + id] || {});
+  const anM = {}; (an.stringler || []).forEach(s => { anM[s.pv] = s; });
+  const ts2 = T.stringler || {};
+  const nler = [...new Set([...Object.keys(ts2), ...Object.keys(anM), ...Object.keys(pvCanli)].map(Number))].sort((a, b) => a - b);
+  const wp = Number(P.wp) || null;
+  let topPanel = 0, panelBilinen = 0, bagli = 0;
+  const satir = nler.map(n => {
+    const t = ts2[n] || {}, a = anM[n], c = pvCanli[n], tas = (STR.tasarim || {})[san + '|' + ad + '|' + n];
+    const ps = Number(t.panel_sayisi) || null, kwp = ps && wp ? ps * wp / 1000 : null; if (ps) { topPanel += ps; panelBilinen++; }
+    const pW = c && c.V != null && c.A != null ? c.V * c.A : null;
+    const bos = (tas && tas.durum === 'bos') || (a && a.durum === 'bos' && !(c && c.A > 0.5));
+    const vPan = c && ps && c.V ? c.V / ps : null;
+    if (!bos) bagli++;
+    const renk = bos ? TH_R.gri : a ? thStrRenk(a.durum) : TH_R.koyu;
+    return '<tr><td class="sol"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + renk + ';margin-right:6px"></span>PV' + n + (t.mppt ? ' <span class="k">MPPT' + t.mppt + '</span>' : '') + '</td>'
+      + '<td>' + (bos ? 'boş' : f(ps)) + '</td><td>' + f(kwp, 2) + '</td>'
+      + '<td>' + (c ? f(c.V) : '—') + '</td><td>' + (c ? f(c.A, 2) : '—') + '</td><td>' + (pW != null ? thGuc(pW) : '—') + '</td>'
+      + '<td>' + (pW != null && kwp ? '%' + f(pW / 10 / kwp) : '—') + '</td><td>' + (vPan != null ? f(vPan, 1) : '—') + '</td>'
+      + '<td>' + (a ? (thStrAd[a.durum] || a.durum) + ' · ' + f(a.oran_medyan, 2) : '—') + '</td><td>' + (a && a.tepe_a != null ? f(a.tepe_a, 1) + ' A · ' + f(a.tepe_v) + ' V' : '—') + '</td></tr>';
+  }).join('');
+  const dcKwp = T.dc_kwp || (panelBilinen && wp ? topPanel * wp / 1000 : null), nom = T.nominal_kw || L.nominal_kw;
+  const dcCanli = Object.values(pvCanli).reduce((t, c) => t + (c.V || 0) * (c.A || 0), 0) / 1000;
+  const kart = (b, v, alt, renk) => '<div style="flex:1 1 130px;min-width:120px;background:#F5F8FB;border-radius:10px;padding:8px 10px"><div class="k" style="font-size:12px">' + b + '</div><div style="font-size:18px;font-weight:700' + (renk ? ';color:' + renk : '') + '">' + v + '</div>' + (alt ? '<div class="k" style="font-size:11.5px">' + alt + '</div>' : '') + '</div>';
+  const durum = FS_DURUM[String(L.durum)] || L.durum;
+  let kartlar = kart('AC güç', f(L.guc_kw, 1) + ' kW', nom ? 'nominal ' + f(nom) + ' kW · %' + f((L.guc_kw || 0) / nom * 100) : '')
+    + kart('Bugün', f(L.gunluk_kwh, 1) + ' kWh', dcKwp && L.gunluk_kwh != null ? f(L.gunluk_kwh / dcKwp, 2) + ' kWh/kWp' : '');
+  if (kay === 'fusionsolar') {
+    kartlar += kart('DC güç (stringler)', dcCanli > 0.05 ? f(dcCanli, 1) + ' kW' : '—', dcCanli > 0.5 && L.guc_kw ? 'verim %' + f(L.guc_kw / dcCanli * 100, 1) : '')
+      + kart('Faz akımı', [L.ia, L.ib, L.ic].map(z => f(z, 1)).join(' / ') + ' A')
+      + kart('Hat gerilimi', [L.uab, L.ubc, L.uca].map(z => f(z)).join(' / ') + ' V', 'f ' + f(L.frekans_hz, 2) + ' Hz')
+      + kart('Sıcaklık', f(L.sicaklik_c, 1) + ' °C', 'yalıtım ' + f(L.yalitim_mohm, 2) + ' MΩ', L.sicaklik_c >= 70 ? TH_R.kirmizi : null)
+      + kart('Güç faktörü', f(L.guc_faktoru, 3), 'reaktif ' + f(L.reaktif_kvar, 1) + ' kvar')
+      + kart('Durum', esc(durum || '—'), L.ts ? 'veri ' + esc(String(L.ts).slice(11, 16)) : '', /şebekede/i.test(L.durum || '') ? TH_R.yesil : TH_R.koyu);
+  } else if (L.alarm) kartlar += kart('Alarm', esc(String(L.alarm)), '', TH_R.kirmizi);
+  // tasarım
+  const tas = [['İnverter modeli', T.model || an.model], ['Nominal AC', nom ? f(nom) + ' kW' : null], ['MPPT', T.mppt_sayisi],
+    ['String (bağlı)', nler.length ? bagli + (bagli < nler.length ? ' (' + (nler.length - bagli) + ' boş giriş)' : '') : null],
+    ['Panel sayısı', panelBilinen ? topPanel + (panelBilinen < nler.length ? ' (' + panelBilinen + '/' + nler.length + ' string)' : '') : null],
+    ['Panel', P.model ? esc(P.model) + (wp ? ' · ' + f(wp) + ' Wp' : '') : wp ? f(wp) + ' Wp' : null],
+    ['Panel Voc / Vmp', P.voc_v ? f(P.voc_v, 1) + ' / ' + f(P.vmp_v, 1) + ' V' : null], ['Panel Isc / Imp', P.isc_a ? f(P.isc_a, 2) + ' / ' + f(P.imp_a, 2) + ' A' : null],
+    ['DC kurulu', dcKwp ? f(dcKwp, 2) + ' kWp' : null], ['DC/AC oranı', dcKwp && nom ? f(dcKwp / nom, 2) : null]];
+  const eksik = tas.filter(x => x[1] == null).length;
+  const tasHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 16px">' + tas.map(([k, v]) => '<div style="display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed #E3E8EE;padding:3px 0"><span class="k">' + k + '</span><b style="text-align:right">' + (v == null ? '<span class="k" style="font-weight:400">tek hattan girilecek</span>' : v) + '</b></div>').join('') + '</div>';
+  // son 14 gün
+  const g = (gy[id] || {}).gun || {}, gun = Object.keys(g).sort().slice(-14);
+  const mx = Math.max(1, ...gun.map(k => g[k] || 0));
+  const bar = gun.length ? '<div style="display:flex;align-items:flex-end;gap:4px;height:110px;padding-top:6px">' + gun.map(k => { const v = g[k] || 0; return '<div title="' + tarihK(k) + ': ' + say(v, 1) + ' kWh' + (dcKwp ? ' · ' + say(v / dcKwp, 2) + ' kWh/kWp' : '') + '" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0"><span style="font-size:9.5px;color:#4A5A70">' + say(v) + '</span><div style="width:100%;height:' + Math.max(2, v / mx * 80) + 'px;background:' + (v < mx * 0.3 ? '#E8A33D' : '#2a78d6') + ';border-radius:3px 3px 0 0"></div><span style="font-size:9.5px;color:#4A5A70">' + k.slice(8, 10) + '</span></div>'; }).join('') + '</div>' : '<p class="k">Günlük üretim verisi yok.</p>';
+  dl.innerHTML = '<div class="panel" role="dialog" aria-label="' + esc(ad) + ' detayı" style="gap:12px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><div><b style="font-size:19px">' + esc(ad) + '</b> <span class="k">' + esc(san + ' · ' + (ts.ad || '')) + ' · ' + (kay === 'fusionsolar' ? 'FusionSolar' : kay === 'sungrow' ? 'Sungrow' : 'Inavitas') + (guncel ? ' · ' + esc(String(guncel).slice(11, 16)) : '') + '</span></div>'
+    + '<button type="button" class="btn" onclick="document.getElementById(\'invDlg\').close()">Kapat</button></div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px">' + kartlar + '</div>'
+    + '<div style="font-weight:700">Proje bilgisi' + (ts.kaynak_belge ? ' <span class="k" style="font-weight:400">· ' + esc(ts.kaynak_belge) + '</span>' : '') + '</div>' + tasHtml
+    + (eksik > 3 ? '<div class="k">Panel ve string tasarımı tek hat şemalarından <code>inverter/tasarim.json</code> dosyasına işlenince burada ve string tablosunda kWp, beklenen güç ve panel başı gerilim görünür.</div>' : '')
+    + (nler.length ? '<div style="font-weight:700">Stringler</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Giriş</th><th>Panel</th><th>kWp</th><th>Gerilim V</th><th>Akım A</th><th>Güç</th><th>Güç/kWp</th><th>V/panel</th><th>7 gün (durum · oran)</th><th>7 gün tepe</th></tr></thead><tbody>' + satir + '</tbody></table></div>'
+      + '<div class="k">Anlık V/A FusionSolar\'dan (~5 dk); Sungrow ve Inavitas anlık string değeri vermez. 7 gün sütunu string analizinden: oran = stringin akımı / inverterdeki stringlerin medyanı. V/panel ≈ panel Vmp\'ye yakın olmalı; belirgin düşükse stringde by-pass/kısa devre panel olabilir.</div>' : '<div class="k">Bu inverter için string verisi yok.</div>')
+    + '<div style="font-weight:700">Son 14 gün üretim (kWh)</div>' + bar + '</div>';
 }
 // ===== Giriş / çıkış grafiği (bugün, saatlik): üretim + şebekeden çekiş = şebekeye veriş + madencilik + diğer iç tüketim =====
 const AKIS = {};
@@ -2301,7 +2388,7 @@ function thFsInv(dn, v, ort) {
   if (v.ia != null) satir.push('I ' + [v.ia, v.ib, v.ic].map(z => z == null ? '—' : say(z, 1)).join(' / ') + ' A');
   if (v.uab != null) satir.push('U ' + [v.uab, v.ubc, v.uca].map(z => z == null ? '—' : say(z)).join(' / ') + ' V');
   satir.push((v.sicaklik_c != null ? say(v.sicaklik_c, 1) + ' °C' : '') + (dc > 0.1 ? ' · DC ' + say(dc, 1) + ' kW' : '') + (v.ia == null && !(v.durum) ? '' : (kapali ? ' · ' + esc(v.durum || '') : '')));
-  return { ad: v.ad, kw, ust: say(kw, 1) + ' kW', satir, renk: kapali ? (kw > 0 ? TH_R.kirmizi : TH_R.gri) : ort > 2 && kw < ort * 0.8 ? TH_R.sari : TH_R.yesil, pv, bos };
+  return { tik: "invDetayAc('fusionsolar','" + esc(v.tesis) + "','" + esc(dn) + "')", ad: v.ad, kw, ust: say(kw, 1) + ' kW', satir, renk: kapali ? (kw > 0 ? TH_R.kirmizi : TH_R.gri) : ort > 2 && kw < ort * 0.8 ? TH_R.sari : TH_R.yesil, pv, bos };
 }
 async function cizMiningPrensip() {
   await strYukle();
@@ -2319,7 +2406,7 @@ async function cizMiningPrensip() {
     // cihaz başı güç = son saatin ölçülen kW'ı / o saatte çalışan cihaz (saatlik toplamı şu anki az cihaza bölmek yanlış), hash payıyla
     const kwC = mk && mk.kw && mk.calisan >= 1 ? mk.kw / mk.calisan : cihazKw, thOrt = calisan.length ? thT2 / calisan.length : 0;
     const kw = cal ? (kwC != null ? (thOrt ? kwC * th / thOrt : kwC) : null) : uy ? 0 : null;
-    return { no: no || ('IP .' + String(d.ip).split('.').pop()), durum: cal ? 'çalışıyor' : uy ? 'uykuda' : d.online ? 'hash yok' : 'yanıtsız', renk: cal ? TH_R.yesil : uy ? TH_R.mavi : TH_R.kirmizi,
+    return { tik: no ? "hashAc('" + esc(no) + "')" : null, no: no || ('IP .' + String(d.ip).split('.').pop()), durum: cal ? 'çalışıyor' : uy ? 'uykuda' : d.online ? 'hash yok' : 'yanıtsız', renk: cal ? TH_R.yesil : uy ? TH_R.mavi : TH_R.kirmizi,
       s1: cal ? say(th, 1) + ' TH/s · ' + (kw != null ? say(kw, 2) + ' kW' : '—') : uy ? 'uyku · 0 kW' : '—',
       s2: (d.temp_max != null ? 'çip ' + say(d.temp_max) + ' °C' : 'sıcaklık —') + (d.temp_water != null ? ' · su ' + say(d.temp_water) + ' °C' : '') };
   });
@@ -2377,7 +2464,8 @@ async function cizDigerPrensip() {
       const pv = ss.filter(s => s.durum !== 'bos').map(s => ({ n: s.pv, renk: thStrRenk(s.durum), ipucu: 'PV' + s.pv + ' · ' + (thStrAd[s.durum] || s.durum) + ' · oran ' + say(s.oran_medyan, 2) + (s.tepe_a != null && s.tepe_v != null ? ' · tepe ≈ ' + thGuc(s.tepe_a * s.tepe_v) : '') }));
       const kotu = ss.filter(s => s.durum === 'dusuk').length, zay = ss.filter(s => s.durum === 'zayif' || s.durum === 'farkli').length;
       const eski = g !== sonG, sifir = !kwh;
-      return { ad: v.ad || id, kw: 0, ust: (kwh != null ? say(kwh) : '—') + ' kWh', satir: [(eski ? tarihK(g) + ' · eski' : (pv.length ? pv.length + ' string' + (kotu ? ' · ' + kotu + ' düşük' : '') + (zay ? ' · ' + zay + ' farklı' : '') : 'string verisi yok'))],
+      const cS = P.kaynak === 'sungrow' ? D.sg : D.inav, cR = cS && String(cS.guncelleme || '').slice(0, 10) === bugunTR() ? ((((cS.santraller || {})[P.id] || {}).inverterler) || []).find(x => x.ps_key === id || String(x.ad || '').split(' ').pop() === id) : null;
+      return { tik: "invDetayAc('" + P.kaynak + "','" + P.ab + "','" + esc(id) + "')", ad: v.ad || id, kw: 0, ust: (kwh != null ? say(kwh) : '—') + ' kWh', satir: [(cR && (cR.anlik_kw > 0 || cR.bugun_kwh > 0) ? 'şimdi ' + say(cR.anlik_kw, 1) + ' kW · bugün ' + say(cR.bugun_kwh) + ' kWh' : null), (eski ? tarihK(g) + ' · eski' : (pv.length ? pv.length + ' string' + (kotu ? ' · ' + kotu + ' düşük' : '') + (zay ? ' · ' + zay + ' farklı' : '') : 'string verisi yok'))],
         renk: sifir || eski ? TH_R.kirmizi : med && kwh < med * 0.8 ? TH_R.sari : TH_R.yesil, pv, bos: [], _s: v.ad || id };
     }).sort((a, b) => String(a._s).localeCompare(String(b._s), 'tr', { numeric: true }));
     // trafo grupları (ad önekinden: TR1-…, TR2-…)

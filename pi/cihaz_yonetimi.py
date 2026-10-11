@@ -542,6 +542,14 @@ def calistir():
     gelir, _ = gh("arsiv_f2pool_gelir.json")
     fiyat, _ = gh("arsiv_btc_fiyat.json")
     mad, _ = gh("antminer_panel.json")
+    try:                                                 # firmware yükseltmesindeki cihaz yönetim dışı (firmware.py durumu)
+        fp = json.loads((AESUN / "firmware_pilot.json").read_text()) if (AESUN / "firmware_pilot.json").exists() else {}
+        c_ = fp.get("cihaz") or {}
+        hr = None if fp.get("durdu") or c_.get("asama") in (None, "bekliyor", "bitti") else c_.get("suffix")
+        if hr and mad:
+            mad = {**mad, "devices": [d for d in mad.get("devices") or [] if d.get("suffix") != hr]}
+    except Exception as e:
+        log("firmware hariç okunamadı:", e)
     og, _ = gh(OG.DOSYA)
     m = {**OG.VARSAYILAN_MODEL, **((og or {}).get("model") or {})}
     th, th_kaynak = cihaz_th_hesapla(a, mad, simdi)

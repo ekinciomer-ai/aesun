@@ -267,7 +267,13 @@ def main():
     if "--bekci-yok" not in sys.argv:
         try:
             import bekci
-            veri["bekci"] = bekci.calis(sonuc, mad, kim)
+            try:
+                import firmware
+                hr = firmware.pilot_haric()
+            except Exception:
+                hr = None
+            hr_ip = f"192.168.0.{hr}" if hr else None          # yükseltilen cihaza bekçi dokunmaz
+            veri["bekci"] = bekci.calis([o for o in sonuc if o.get("ip") != hr_ip], mad, kim)
         except Exception as e:
             log("bekçi hatası:", e); veri["bekci"] = {"hata": str(e)[:200]}
     _, sha = gh(DOSYA)

@@ -51,8 +51,10 @@ def sungrow(simdi):
         pt = (rows[0].get("device_point", rows[0]) if rows else {}) or {}
         guc, gwh = S._num(pt.get("p83033")), S._num(pt.get("p83022"))
         d = durum.get(ps) or {}
-        if d.get("gun") != gun:
-            d = {"gun": gun, "son_wh": 0.0, "saat": {}}
+        if d.get("gun") != gun or d.get("v") != 2:
+            # yeni gün ya da ilk çalışma: gün içinde zaten üretilmiş miktar o anki saate yazılmaz (yalnız başlangıç)
+            ilk = d.get("gun") != gun and saat <= "05"
+            d = {"gun": gun, "v": 2, "son_wh": 0.0 if ilk else (gwh or 0.0), "saat": {}, "baslangic_wh": None if ilk else gwh}
         if gwh is not None:
             artis = max(0.0, gwh - (d.get("son_wh") or 0.0))
             if gwh + 1 < (d.get("son_wh") or 0.0):        # sayaç sıfırlandı (gün dönümü gecikmesi)

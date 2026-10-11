@@ -67,6 +67,10 @@ def oku(d, w, ayar_vakti):
             o.update(kart_ozet(st)); o["_ham"] = st
             o["fw"] = ((st.get("INFO") or {}).get("miner_version"))
             o["tip"] = ((st.get("INFO") or {}).get("type"))
+    k_, si = M.cgi(ip, "get_system_info.cgi", timeout=8)                 # yazılım sürümü (uykuda da yanıt verir)
+    if k_ == 200 and isinstance(si, dict):
+        o["fw_surum"] = si.get("system_filesystem_version") or si.get("firmware_version")
+        o["fw_tip"] = si.get("firmware_type")
     if ayar_vakti or d.get("online"):
         k, c = M.cgi(ip, "get_miner_conf.cgi", timeout=10)
         o["ayar_kod"] = k

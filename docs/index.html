@@ -1101,6 +1101,14 @@ async function cizCihazlar() {
   const kodlar = [...new Set([...Object.keys(f2w), ...Object.keys(don.cihazlar || {}).map(k => k.split('.').pop()), ...Object.keys(canli), ...Object.keys(s7)])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
   let KIM = {}, AG = null, DET = null, BEK = null; try { KIM = await al('n8n/cihaz_kimlik.json'); } catch (e) {} try { AG = await al('n8n/ag_tarama.json'); } catch (e) {}
   try { DET = await al('n8n/cihaz_detay.json'); } catch (e) {} try { BEK = await al('n8n/bekci.json'); } catch (e) {}
+  let FWG = {}; try { FWG = await al('n8n/firmware_gecmis.json'); } catch (e) {}
+  // yazılım: sürüm (Pi get_system_info) + son güncelleme (firmware_gecmis.json, IP son hanesine göre)
+  const fwSatir = (c, ipSon) => { const o = DET && DET.cihaz && DET.cihaz[c]; const sf = ipSon || (o && o.ip ? +String(o.ip).split('.').pop() : null);
+    const g = sf != null ? (FWG[String(sf)] || []).filter(x => x.basarili).pop() : null; const v = (o && o.fw_surum) || (g && g.yeni);
+    if (!v && !g) return '';
+    const m = String(v || '').match(/^([^(]+)\((\d{6})/); const ad = m ? m[1].trim() : v, tar = m ? m[2].slice(4, 6) + '.' + m[2].slice(2, 4) + '.20' + m[2].slice(0, 2) : '';
+    return '<span style="font-size:12px;color:#4A5A70">Yazılım <b style="color:#10233F">' + esc(ad || '—') + '</b>' + (tar ? ' (' + tar + ')' : '')
+      + (g ? ' · <span style="color:#1E7A3C;font-weight:600">güncellendi ' + esc(g.t.slice(8, 10) + '.' + g.t.slice(5, 7) + ' ' + g.t.slice(11, 16)) + '</span>' + (g.eski ? ' <span title="önceki sürüm">(' + esc(String(g.eski).split('(')[0]) + ' →)</span>' : '') : '') + '</span>'; };
   // kart (hashboard) özeti: ideal hıza oran ve en sıcak çip
   const kartH = c => { const o = DET && DET.cihaz && DET.cihaz[c]; if (!o || !(o.kart || []).length) return '';
     return '<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span class="k" style="font-size:11px">Kartlar</span>' + o.kart.map(k => { const or = k.ideal ? k.hiz / k.ideal : null, kotu = !(k.hiz > 0) || (or != null && or < 0.85), tc = k.t_chip || k.t_pic, sicak = tc >= 85;
@@ -1148,7 +1156,7 @@ async function cizCihazlar() {
     return '<div class="panel" style="padding:14px;gap:8px;border-left:4px solid ' + dRenk + '">'
       + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:6px"><span style="display:flex;align-items:center;gap:8px"><b style="font-size:18px">' + esc(c) + '</b><button type="button" onclick="hashAc(\'' + esc(c) + '\')" title="Bu cihazın hashrate grafiğini aç" style="display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:12.5px;font-weight:700;color:#fff;background:#2F6FB5;border:0;border-radius:14px;padding:4px 10px;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M4 16l5-6 4 3 7-8"/></svg>Hash grafiği</button></span><span style="font-size:12px;font-weight:700;color:' + dRenk + ';background:' + dZemin + ';padding:2px 8px;border-radius:10px">' + dAd + '</span></div>'
       + '<div style="margin-top:-4px;display:flex;flex-direction:column;gap:1px"><span class="k">' + esc(model) + (ip ? ' · ' + esc(ip) : '') + '</span>'
-      + '<span style="font-family:monospace;font-size:12px;color:#7A4E00">SN ' + (seri ? esc(seri) : '—') + '</span>' + (mac ? '<span style="font-family:monospace;font-size:11px;color:#8A96A8">' + esc(mac) + '</span>' : '') + '</div>'
+      + fwSatir(c, ipSon) + '<span style="font-family:monospace;font-size:12px;color:#7A4E00">SN ' + (seri ? esc(seri) : '—') + '</span>' + (mac ? '<span style="font-family:monospace;font-size:11px;color:#8A96A8">' + esc(mac) + '</span>' : '') + '</div>'
       + (uyari ? '<div style="font-size:12px;line-height:1.35;color:' + dRenk + ';background:' + dZemin + ';border-radius:6px;padding:6px 8px">' + uyari + '</div>' : '')
       + '<div style="display:flex;gap:6px">' + kol('SAHA (Pi)', sahaSut, '#F3F8F4') + kol('F2POOL', f2Sut, '#F2F5FB') + '</div>'
       + kartH(c)

@@ -16,6 +16,7 @@ from ortak import AESUN, TR, gh, log
 import madenci as M
 
 KESIF, GOREV, RAPOR = "n8n/firmware_kesif.json", "n8n/firmware_gorev.json", "n8n/firmware_pilot.json"
+GECMIS = "n8n/firmware_gecmis.json"
 KESIF_V = 5
 FW = {"S21e Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S21eHyd_FR-1.42_251016.bmu",
                    "md5": "684efb616a07f67730a423c773a5881c", "ad": "S21eHyd_FR-1.42_251016.bmu"}}
@@ -306,6 +307,14 @@ def pilot_adim(sonuc, simdi, kesif):
                 _komut("sleep", suf, "izleme bitti")
             c["asama"] = "bitti"
             p["tamam"].append(suf)
+            try:                                                   # kalıcı geçmiş: panel cihaz kartı buradan okur
+                fg, fsha = gh(GECMIS)
+                fg = fg or {}
+                fg.setdefault(str(suf), []).append({"t": c.get("t_acilis") or now, "eski": c.get("eski_fw"), "yeni": c.get("yeni_fw"),
+                                                    "basarili": bool(basarili), "en_hash": en_hash, "watt": watt})
+                gh(GECMIS, fg, fsha, f"Firmware geçmişi .{suf}")
+            except Exception as e:
+                log("firmware geçmişi yazılamadı:", e)
             p.setdefault("sonuclar", []).append({k_: c.get(k_) for k_ in ("suffix", "eski_fw", "yeni_fw", "en_hash", "watt", "basarili")})
             olay(f".{suf} bitti: sürüm {c.get('eski_fw')}→{c.get('yeni_fw')}, en yüksek hash {en_hash}, watt {watt}"
                  + ("" if basarili else " — BAŞARISIZ, sıra durduruldu"))

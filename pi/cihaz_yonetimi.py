@@ -226,6 +226,9 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
                 j += 1
             if j >= len(k) or k[j] != "calis":
                 break
+            if any(plan[x].get("gunes_cihaz") for x in range(i, j)):
+                i = j                                # güneş saatleri: cihazlar üretimle çalışır, kısa duruş hesabı gereksiz
+                continue
             B1, B2 = plan[i]["_t"], plan[j]["_t"]
             simdi_uyuyor = i == 0 and filo["uyuyan"] > filo["calisan"]       # filonun çoğu uyuyorsa "uyuyor" say
             if not simdi_uyuyor:
@@ -253,6 +256,16 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
         if k[x] is None or k[x - 1] is None or k[x] == k[x - 1]:
             continue
         B = plan[x]["_t"]
+        if k[x] == "uyut" and plan[x].get("gunes_cihaz"):
+            # kârlı saatten güneş saatine: toplu uyutma yok, saat başında güneş takibi devralır (fazlası kademeli uyur)
+            anahtar.append({"t_komut": B, "eylem": "sleep", "hedef": B, "gunes": True, "oncu_dk": 0,
+                            "neden": f"{B:%H}:00 güneş takibine geçiş (~{plan[x]['gunes_cihaz']} cihaz üretimle çalışır)"})
+            continue
+        if k[x] == "calis" and plan[x - 1].get("gunes_cihaz"):
+            # güneş saatinden kârlı saate: cihazlar güneşle zaten çalışıyor/sıcak → ön ısıtma yok, saat başında kalanlar uyanır
+            anahtar.append({"t_komut": B, "eylem": "wake", "hedef": B, "gunes": True, "oncu_dk": 0,
+                            "neden": f"{B:%H}:00 kârlı saat; önceki saatte ~{plan[x - 1]['gunes_cihaz']} cihaz güneşle çalışıyor, ön ısıtma gerekmez"})
+            continue
         if k[x] == "uyut":
             t = B - timedelta(minutes=yay / 2)
             anahtar.append({"t_komut": t, "eylem": "sleep", "hedef": B, "neden": f"{B:%H}:00 zararlı saat", "oncu_dk": round(yay / 2, 1)})
@@ -298,6 +311,35 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
             istenen = "uyut" if s_["eylem"] == "sleep" else "calis"
             gecerli = s_
     return k, notlar, anahtar, istenen, gecerli, yay
+
+
+def gunes_plan_tahmin(plan, fs, a, simdi, uretim_kw, kw_c, filo_n):
+    """Ekonomik "uyut" saatleri için beklenen kaynak (Sera-2) üretimi ve karşıladığı cihaz sayısı:
+    p["gunes_cihaz"], p["gunes_kw"], p["gunes_kaynak"]. Kaynak: şu anki saat anlık; bugünün geçmiş saatleri gerçekleşen;
+    yarının saatleri bugünün aynı saati; yoksa doğuş/batış arası açık gök eğrisi (bugünün öğle tepesine ölçekli)."""
+    kay_s = {}
+    for s_, kk in (((fs or {}).get("saatlik_bugun") or {}).get(a.get("gunes_kaynak")) or {}).items():
+        try:
+            kay_s[int(str(s_)[:2])] = float(kk or 0)
+        except Exception:
+            pass
+    tam = {h: v for h, v in kay_s.items() if h < simdi.hour}
+    tepe = max([v for h, v in tam.items() if 10 <= h <= 14] or [0]) or a.get("gunes_tepe_kw", 640)
+    for i, p in enumerate(plan):
+        if p["karar"] != "uyut":
+            continue
+        t = p["_t"]
+        if i == 0 and uretim_kw is not None:
+            P, kay = uretim_kw, "anlık"
+        elif t.hour in tam:
+            P, kay = tam[t.hour], ("gerçekleşen" if t.date() == simdi.date() else "bugünün aynı saati")
+        else:
+            dog, bat = gunes_saatleri(t)
+            x = (t.hour + 0.5 - dog) / max(bat - dog, 1)
+            P, kay = (tepe * math.sin(math.pi * x) if 0 < x < 1 else 0.0), "açık gök tahmini"
+        n = min(max(0, math.floor((P - a["gunes_pay_kw"]) / kw_c)), filo_n)
+        if n >= 1:
+            p.update(gunes_cihaz=n, gunes_kw=round(P), gunes_kaynak=kay)
 
 
 def yerel_oku():
@@ -561,20 +603,26 @@ def calistir():
         kk, n, mm, g = karar_ver(gunes, p, y or 0, a, hp, btc_try)
         plan.append({"_t": t, "t": t.strftime("%Y-%m-%d %H:00"), "ptf": p, "yekdem": y, "gunes_tahmini": gunes,
                      "gunes_kaynak": gk, "maliyet": mm, "gelir": g, "karar": kk})
+    # Cihaz başı güç: Pi'nin ölçtüğü madencilik yükü / çalışan cihaz
+    kw_c = a["cihaz_guc_kw"]
+    sh, _ = gh("n8n/saha_saatlik.json")
+    try:
+        son_s = (sh or {}).get("saat", {})[sorted((sh or {}).get("saat", {}))[-1]]
+        if son_s.get("kw") and (son_s.get("calisan") or 0) >= 5:
+            kw_c = round(max(kw_c, son_s["kw"] / son_s["calisan"]), 2)
+    except Exception:
+        pass
+    # Güneş tahmini (ekonomik "uyut" saatleri): beklenen kaynak üretimi kaç cihaza yeter. Takvim bunu bilir:
+    # güneşle çalışan saatten kârlı saate geçişte ön ısıtma/toplu uyandırma gerekmez; kârlı saatten güneş saatine
+    # geçişte toplu uyutma yerine güneş takibi devralır.
+    if a.get("gunes_takip"):
+        gunes_plan_tahmin(plan, fs, a, simdi, uretim_kw if fs_taze else None, kw_c, len(ulasilan) or a.get("cihaz_sayisi", 29))
     # Takvim (öğrenilmiş ısınma ile)
     k2, notlar, anahtar, istenen, gecerli, yay = takvim_kur(plan, m, a, simdi, filo, canli_su)
     # Güneş takibi: ekonomik katman "uyut" derken üretimin karşıladığı kadar cihaz çalışır (kademeli).
     yerel = yerel_oku()
     gt = None
     if a.get("gunes_takip") and istenen == "uyut" and mad_taze and ulasilan:
-        kw_c = a["cihaz_guc_kw"]
-        sh, _ = gh("n8n/saha_saatlik.json")             # Pi'nin ölçtüğü madencilik yükü / çalışan cihaz
-        try:
-            son_s = (sh or {}).get("saat", {})[sorted((sh or {}).get("saat", {}))[-1]]
-            if son_s.get("kw") and (son_s.get("calisan") or 0) >= 5:
-                kw_c = round(max(kw_c, son_s["kw"] / son_s["calisan"]), 2)
-        except Exception:
-            pass
         detay, _ = gh("n8n/cihaz_detay.json")           # cihaz başı watt (bildiren cihazlar)
         gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel, detay)
     for i, p in enumerate(plan):
@@ -582,42 +630,12 @@ def calistir():
         p["karar"] = k2[i]
         if i in notlar:
             p["not"] = notlar[i]
-    # Plan gösterimi: ekonomik katman "uyut" dese de güneş takibi o saatte üretimin karşıladığı kadar cihaz çalıştırır.
-    # Beklenen kaynak üretimi (kWh≈ort. kW): bugünün geçmiş saatleri gerçekleşen; ileri saatler için bugünün aynı saati,
-    # yoksa doğuş/batış arası açık gök eğrisi (bugünün tepe değerine ölçekli). Takvim (k2) değişmez → toplu uyandırma yok.
-    if a.get("gunes_takip"):
-        kay_s = {}
-        for s_, kk in (((fs or {}).get("saatlik_bugun") or {}).get(a.get("gunes_kaynak")) or {}).items():
-            try:
-                kay_s[int(str(s_)[:2])] = float(kk or 0)
-            except Exception:
-                pass
-        tam = {h: v for h, v in kay_s.items() if h < simdi.hour}
-        tepe = max([v for h, v in tam.items() if 10 <= h <= 14] or [0]) or a.get("gunes_tepe_kw", 640)
-        kw_p = (gt or {}).get("kw_cihaz") or a["cihaz_guc_kw"]
-        toplam_cihaz = len(cihazlar) or None
-        for i, p in enumerate(plan):
-            if p["karar"] != "uyut":
-                continue
-            t = p["_t"]
-            if i == 0 and fs_taze and uretim_kw is not None:
-                P, kay = uretim_kw, "anlık"
-            elif t.hour in tam and (t.date() == simdi.date() or t.date() > simdi.date()):
-                P, kay = tam[t.hour], ("gerçekleşen" if t.date() == simdi.date() else "bugünün aynı saati")
-            else:
-                dog, bat = gunes_saatleri(t)
-                x = (t.hour + 0.5 - dog) / max(bat - dog, 1)
-                P, kay = (tepe * math.sin(math.pi * x) if 0 < x < 1 else 0.0), "açık gök tahmini"
-            n = max(0, math.floor((P - a["gunes_pay_kw"]) / kw_p))
-            if toplam_cihaz:
-                n = min(n, toplam_cihaz)
-            if n >= 1:
-                p["karar"] = "calis"
-                p["gunes_tahmini"] = True
-                p["gunes_cihaz"] = n
-                p["gunes_kw"] = round(P)
-                p["gunes_kaynak"] = kay
-                p["not"] = (p.get("not", "") + " · " if p.get("not") else "") + f"güneş takibi: ~{round(P)} kW → ~{n} cihaz"
+    # Plan gösterimi: ekonomik "uyut" saatinde güneş takibi üretimin karşıladığı kadar cihaz çalıştırır
+    for i, p in enumerate(plan):
+        if p["karar"] == "uyut" and p.get("gunes_cihaz"):
+            p["karar"] = "calis"
+            p["gunes_tahmini"] = True
+            p["not"] = (p.get("not", "") + " · " if p.get("not") else "") + f"güneş takibi: ~{p['gunes_kw']} kW → ~{p['gunes_cihaz']} cihaz"
     # tetik için: üretim şu an kaç cihazı karşılıyor (>0 ise toplu uyutma gönderilmez)
     gunes_hedef = 0
     if a.get("gunes_takip") and fs_taze and uretim_kw:

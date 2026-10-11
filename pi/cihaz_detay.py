@@ -65,6 +65,8 @@ def oku(d, w, ayar_vakti):
         o["stats_kod"] = k
         if k == 200 and isinstance(st, dict):
             o.update(kart_ozet(st)); o["_ham"] = st
+            o["fw"] = ((st.get("INFO") or {}).get("miner_version"))
+            o["tip"] = ((st.get("INFO") or {}).get("type"))
     if ayar_vakti or d.get("online"):
         k, c = M.cgi(ip, "get_miner_conf.cgi", timeout=10)
         o["ayar_kod"] = k
@@ -150,6 +152,81 @@ def log_kaydet(o, simdi):
     log("günlük kaydedildi", w, len(satir), "satır")
 
 
+KESIF = "n8n/guc_kesif.json"
+_GUC_RE = None
+
+
+def _guc_alanlari(x, yol=""):
+    """İç içe yanıtta güç/gerilim/akım/PSU ile ilgili alanları (yol, değer) olarak toplar."""
+    import re
+    global _GUC_RE
+    _GUC_RE = _GUC_RE or re.compile(r"pow|watt|volt|curr|amp|psu|pwr|consum|energy|jt\b|vin|vout|iin|iout|pin\b|pout", re.I)
+    out = []
+    if isinstance(x, dict):
+        for k, v in x.items():
+            if isinstance(v, (dict, list)):
+                out += _guc_alanlari(v, f"{yol}/{k}")
+            elif _GUC_RE.search(str(k)):
+                out.append([f"{yol}/{k}", v])
+    elif isinstance(x, list):
+        for i, v in enumerate(x[:6]):
+            out += _guc_alanlari(v, f"{yol}[{i}]")
+    return out
+
+
+def _api4028(ip, komut, timeout=4):
+    import socket
+    try:
+        with socket.create_connection((ip, 4028), timeout=timeout) as so:
+            so.sendall(json.dumps({"command": komut}).encode())
+            b = b""
+            while True:
+                p = so.recv(65536)
+                if not p:
+                    break
+                b += p
+        t = b.replace(b"\x00", b"").decode(errors="replace")
+        try:
+            return json.loads(t)
+        except Exception:
+            return t[:300]
+    except Exception as e:
+        return {"_hata": str(e)[:100]}
+
+
+def guc_kesif(sonuc, simdi):
+    """Günde bir kez (salt okuma): her (model, yazılım sürümü) grubundan bir çalışan cihazda güç/akım/gerilim
+    bilgisi veren uç nokta var mı bakar → n8n/guc_kesif.json. Watt bildiren ve bildirmeyen cihazların sürümleri de yazılır."""
+    eski, sha = gh(KESIF)
+    if eski and eski.get("gun") == simdi.strftime("%Y-%m-%d"):
+        return
+    gruplar = {}
+    for o in sonuc:
+        if o.get("_ham") and not o.get("uyku"):
+            gruplar.setdefault(f"{o.get('tip') or o.get('model')} | {o.get('fw')}", o)
+    cgi_uclar = ["summary.cgi", "miner_summary.cgi", "get_system_info.cgi", "chart.cgi", "warning.cgi", "miner_type.cgi",
+                 "get_miner_status.cgi", "get_psu_info.cgi", "psu.cgi", "get_power.cgi"]
+    api_kom = ["stats", "summary", "devs", "estats", "psu", "power"]
+    sonuc_g = {}
+    for g, o in gruplar.items():
+        r = {"ip": o["ip"], "worker": o["worker"], "stats_guc": _guc_alanlari(o["_ham"]), "cgi": {}, "api4028": {}}
+        for u in cgi_uclar:
+            k, v = M.cgi(o["ip"], u, timeout=8)
+            r["cgi"][u] = {"kod": k, "guc": _guc_alanlari(v) if isinstance(v, (dict, list)) else [],
+                           "anahtar": sorted(v)[:40] if isinstance(v, dict) else (str(v)[:120] if k == 200 else None)}
+        for c in api_kom:
+            v = _api4028(o["ip"], c)
+            r["api4028"][c] = {"guc": _guc_alanlari(v) if isinstance(v, (dict, list)) else [],
+                               "ozet": (v.get("_hata") if isinstance(v, dict) and "_hata" in v else
+                                        (sorted(v)[:20] if isinstance(v, dict) else str(v)[:120]))}
+        sonuc_g[g] = r
+    surum = {(o["worker"] or o["ip"]): {"ip": o["ip"], "tip": o.get("tip"), "fw": o.get("fw"),
+                                        "watt": (o.get("diger") or {}).get("watt")} for o in sonuc if o.get("fw")}
+    gh(KESIF, {"gun": simdi.strftime("%Y-%m-%d"), "zaman": simdi.isoformat(timespec="seconds"),
+               "gruplar": sonuc_g, "cihaz_surum": dict(sorted(surum.items()))}, sha, "Güç keşfi " + simdi.strftime("%d.%m"))
+    log("güç keşfi:", len(sonuc_g), "grup")
+
+
 def main():
     simdi = datetime.now(TR)
     mad, _ = gh("antminer_panel.json")
@@ -166,10 +243,15 @@ def main():
     if not ornek or (ornek.get("gun") != simdi.strftime("%Y-%m-%d")):
         om = {}
         for o in sonuc:
-            if o.get("_ham") and o.get("model") and o["model"] not in om:
-                om[o["model"]] = {"ip": o["ip"], "worker": o["worker"], "stats": o["_ham"]}
+            m_ = (o.get("model") if o.get("model") not in (None, "?") else o.get("tip")) or "?"
+            if o.get("_ham") and m_ not in om:
+                om[m_] = {"ip": o["ip"], "worker": o["worker"], "fw": o.get("fw"), "stats": o["_ham"]}
         if om:
             gh(ORNEK, {"gun": simdi.strftime("%Y-%m-%d"), "modeller": om}, osha, "Cihaz ham örnek " + simdi.strftime("%d.%m"))
+    try:
+        guc_kesif(sonuc, simdi)
+    except Exception as e:
+        log("güç keşfi hatası:", e)
     for o in sonuc:
         o.pop("_ham", None)
         try:

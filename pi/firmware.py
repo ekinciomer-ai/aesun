@@ -25,7 +25,12 @@ FW = {"S21e Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun
                    "tip": "Antminer S21e Hyd.", "kapsayici": True},
       "S19e XP Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S19eXPHyd_FR-1.12_260127.bmu",
                       "md5": "349a71fb0ee3e2723def6439405cd8e4", "ad": "S19eXPHyd_FR-1.12_260127.bmu",
-                      "tip": "Antminer S19e XP Hyd.", "kapsayici": False}}
+                      "tip": "Antminer S19e XP Hyd.", "kapsayici": False},
+      # Bitmain listesinde XP+ Hyd ayrı yok; S19 XP Hyd dosyası XP+ cihazlara ancak yüklü yazılım aynı aileden
+      # ("S19 XP Hyd.") ise denenir (kullanıcı onayı 11.10 23:57, sıranın en sonunda)
+      "S19 XP Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S19XPHyd_FR-1.27_251009.bmu",
+                     "md5": "c7ad3b0df9a4e8ac71b6ca5ac22c2fee", "ad": "S19XPHyd_FR-1.27_251009.bmu",
+                     "tip": "Antminer S19 XP+ Hyd.", "kapsayici": False, "eski_icerir": "S19 XP Hyd."}}
 FW_DIR = AESUN / "firmware"
 PILOT = AESUN / "firmware_pilot.json"
 BASARI_TH = 250
@@ -201,12 +206,15 @@ def pilot_adim(sonuc, simdi, kesif):
 
     c = p.get("cihaz")
     if not c or c.get("asama") == "bitti":
-        kalan = [int(s) for s in gorev.get("sira") or [] if int(s) not in p["tamam"]]
+        # sıra öğesi: 115 ya da {"s": 114, "model": "S19e XP Hyd"} (öğe modeli yoksa görevin modeli)
+        sira = [(int(x["s"]), x.get("model")) if isinstance(x, dict) else (int(x), None) for x in gorev.get("sira") or []]
+        kalan = [x for x in sira if x[0] not in p["tamam"]]
         if not kalan:
             if not p.get("bitti_bildirildi"):
                 p["bitti_bildirildi"] = True; olay("sıradaki tüm cihazlar tamamlandı"); pilot_yaz(p); _rapor(p, simdi)
             return
-        c = p["cihaz"] = {"suffix": kalan[0], "ip": f"192.168.0.{kalan[0]}", "asama": "bekliyor"}
+        c = p["cihaz"] = {"suffix": kalan[0][0], "ip": f"192.168.0.{kalan[0][0]}", "asama": "bekliyor",
+                          "model": kalan[0][1] or gorev.get("model") or "S21e Hyd"}
     suf, ip = c["suffix"], c["ip"]
     o = next((x for x in sonuc if x.get("ip") == ip), None)
 
@@ -225,7 +233,7 @@ def pilot_adim(sonuc, simdi, kesif):
             return
         k_, si = M.cgi(ip, "get_system_info.cgi", timeout=10)          # uykuda da yanıt verir
         tip = (si or {}).get("minertype") if k_ == 200 and isinstance(si, dict) else None
-        model = gorev.get("model") or "S21e Hyd"
+        model = c.get("model") or gorev.get("model") or "S21e Hyd"
         fw = FW.get(model)
         if not fw or str(tip or "").strip() != fw["tip"]:
             p["durdu"] = True; olay(f"DURDU .{suf}: cihaz modeli {tip!r}, görev dosyası {model} ({(fw or {}).get('tip')}) — yükleme yapılmadı")
@@ -246,6 +254,10 @@ def pilot_adim(sonuc, simdi, kesif):
             p["durdu"] = True; olay(f"DURDU .{suf}: {bilgi} — yükleme yapılmadı"); pilot_yaz(p); _rapor(p, simdi); return
         c["miner_type"], c["parca"] = mt, bilgi
         eski = (si or {}).get("system_filesystem_version") or (si or {}).get("firmware_version")
+        if fw.get("eski_icerir") and fw["eski_icerir"] not in str(eski or ""):
+            p["durdu"] = True
+            olay(f"DURDU .{suf}: yüklü yazılım {eski!r} '{fw['eski_icerir']}' ailesinden değil — {model} dosyası bu cihaza uygun sayılmadı, yükleme yapılmadı")
+            pilot_yaz(p); _rapor(p, simdi); return
         if not eski:
             if c.get("bekleme") != "sürüm okunamadı":
                 c["bekleme"] = "sürüm okunamadı"; olay(f".{suf} bekliyor: mevcut sürüm okunamadı"); pilot_yaz(p)

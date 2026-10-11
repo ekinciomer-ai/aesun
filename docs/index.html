@@ -2153,7 +2153,68 @@ function thSvg(cfg) {
     + '<g fill="#10233F" font-size="12">' + h + '</g></svg></div>';
 }
 function thBolum(cfg) {
-  return '<section class="panel" style="gap:10px"><div class="bas"><h2>' + esc(cfg.baslik) + '</h2><span class="k">' + (cfg.alt || '') + '</span></div>' + thSvg(cfg) + (cfg.not ? '<div class="k">' + cfg.not + '</div>' : '') + '</section>';
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>' + esc(cfg.baslik) + '</h2><span class="k">' + (cfg.alt || '') + '</span></div>' + (cfg.ust || '') + thSvg(cfg) + (cfg.not ? '<div class="k">' + cfg.not + '</div>' : '') + '</section>';
+}
+// ===== Giriş / çıkış grafiği (bugün, saatlik): üretim + şebekeden çekiş = şebekeye veriş + madencilik + diğer iç tüketim =====
+const AKIS = {};
+function akisVeri(k, fs, saha) {
+  const g = bugunTR(), key = k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2';
+  const ur = ((fs || {}).saatlik_bugun || {})[k] || {}, os = ((((D || {}).osos || {})[key] || {}).veri || {})[g] || {};
+  const sh = (saha && saha.saat) || {}, suan = String((fs || {}).guncelleme || '').slice(11, 13);
+  const hs = []; for (let i = 0; i < 24; i++) hs.push(String(i).padStart(2, '0'));
+  const r = hs.map(h => {
+    const u = ur[h] != null ? Number(ur[h]) : null, o = os[h], m = k === 'Sera-2' && sh[g + ' ' + h] && sh[g + ' ' + h].kw != null ? Number(sh[g + ' ' + h].kw) : null;
+    const v = o ? Number(o.veris) || 0 : null, c = o ? Number(o.cekis) || 0 : null;
+    const ic = o && u != null ? Math.max(0, u + c - v) : null;                 // sayaç arkasındaki toplam tüketim
+    const diger = ic != null && m != null ? Math.max(0, ic - m) : null;
+    return { h, u, v, c, m, ic, diger, devam: h === suan };
+  });
+  return { k, g, r, suan };
+}
+function akisGrafik(k, fs, saha, anlik) {
+  const A = akisVeri(k, fs, saha); A.anlik = anlik; AKIS[k] = A;
+  const R = A.r, ilk = R.findIndex(x => (x.u || 0) > 0.5 || (x.c || 0) > 0.5 || (x.m || 0) > 0.5);
+  const son = Math.max(...R.map((x, i) => (x.u != null || x.v != null || x.m != null) ? i : -1));
+  if (ilk < 0 || son < 0) return '';
+  const a = Math.max(0, Math.min(ilk, 6)), b = Math.max(son, Math.min(23, a + 12));
+  const S = R.slice(a, b + 1);
+  const ser = [{ ad: 'GES üretimi', renk: '#1E9E5A', v: S.map(x => x.u) },
+    { ad: 'Şebekeye veriş', renk: '#2a78d6', v: S.map(x => x.v) },
+    { ad: 'Şebekeden çekiş', renk: '#D92D20', v: S.map(x => x.c == null ? null : -x.c) }];
+  if (k === 'Sera-2') ser.push({ ad: 'Madencilik yükü', renk: '#10233F', v: S.map(x => x.m), tip: 'isaret' });
+  const an = anlik || {}, yon = an.net == null ? '' : an.net >= 0 ? '<b style="color:#1E7A3C">→ şebekeye ' + say(an.net, 1) + ' kW</b>' : '<b style="color:#B42318">← şebekeden ' + say(-an.net, 1) + ' kW</b>';
+  return '<div style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">'
+    + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline"><b style="font-size:14px">Giriş / çıkış · bugün</b>'
+    + '<span class="k">Şu an: üretim <b>' + say(an.uretim, 1) + ' kW</b>' + (an.yuk != null ? ' · madencilik <b>' + say(an.yuk, 1) + ' kW</b>' : '') + (yon ? ' · ' + yon : '') + '</span></div>'
+    + grafikX({ id: 'akis_' + k, ad: k + ' giriş çıkış', etiket: S.map(x => x.h + ':00' + (x.devam ? '*' : '')), etiketAd: 'Saat', seriler: ser,
+      turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top',
+      tip: i => akisMetin(S[i]) + '\n(ayrıntı için tıklayın)', tik: i => "akisAc('" + k + "'," + (a + i) + ")" })
+    + '<div class="k">Yukarı: üretim ve şebekeye veriş · aşağı (eksi): şebekeden çekiş' + (k === 'Sera-2' ? ' · çizgi: madencilik yükü' : '') + '. Sayaç değerleri OSOS\'tan saatlik gelir; son saatler gecikebilir. Saate tıklayınca ayrıntı açılır.</div></div>';
+}
+function akisMetin(x) {
+  const f = v => v == null ? '—' : say(v, 1) + ' kWh';
+  return x.h + ':00' + (x.devam ? ' (devam ediyor)' : '') + '\nGiriş: üretim ' + f(x.u) + ' · çekiş ' + f(x.c) + '\nÇıkış: veriş ' + f(x.v) + (x.m != null ? ' · madencilik ' + f(x.m) : '') + (x.diger != null ? ' · diğer ' + f(x.diger) : (x.ic != null ? ' · iç tüketim ' + f(x.ic) : ''));
+}
+function akisAc(k, i) {
+  const A = AKIS[k]; if (!A) return;
+  let dl = document.getElementById('akisDlg');
+  if (!dl) { dl = document.createElement('dialog'); dl.id = 'akisDlg'; dl.style.cssText = 'border:0;border-radius:14px;padding:0;max-width:min(980px,96vw);width:96vw;box-shadow:0 20px 60px rgba(16,35,63,.35)'; dl.addEventListener('click', e => { if (e.target === dl) dl.close(); }); document.body.appendChild(dl); }
+  const x = A.r[i], f = v => v == null ? '—' : say(v, 1);
+  const satir = (ad, v, renk, kalin) => '<tr><td class="sol"' + (kalin ? ' style="font-weight:700"' : '') + '><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + renk + ';margin-right:8px"></span>' + ad + '</td><td' + (kalin ? ' style="font-weight:700"' : '') + '>' + f(v) + '</td></tr>';
+  const gir = (x.u || 0) + (x.c || 0), cik = (x.v || 0) + (x.ic || 0);
+  const kutu = (bas, ic) => '<div style="flex:1 1 260px;min-width:0"><div style="font-weight:700;margin-bottom:6px">' + bas + '</div><div class="tablo-kutu"><table class="tb"><tbody>' + ic + '</tbody></table></div></div>';
+  const tablo = '<div class="tablo-kutu" style="max-height:300px;overflow:auto"><table class="tb"><thead><tr><th class="sol">Saat</th><th>Üretim</th><th>Çekiş</th><th>Veriş</th>' + (k === 'Sera-2' ? '<th>Madencilik</th>' : '') + '<th>İç tüketim</th></tr></thead><tbody>'
+    + A.r.filter(z => z.u != null || z.v != null || z.m != null).map(z => '<tr style="cursor:pointer' + (z.h === x.h ? ';background:#EEF3FA' : '') + '" onclick="akisAc(\'' + k + '\',' + Number(z.h) + ')"><td class="sol">' + z.h + ':00' + (z.devam ? '*' : '') + '</td><td>' + f(z.u) + '</td><td>' + f(z.c) + '</td><td>' + f(z.v) + '</td>' + (k === 'Sera-2' ? '<td>' + f(z.m) + '</td>' : '') + '<td>' + f(z.ic) + '</td></tr>').join('') + '</tbody></table></div>';
+  dl.innerHTML = '<div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;font-family:inherit">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">' + esc(k) + ' · ' + x.h + ':00–' + String(Number(x.h) + 1).padStart(2, '0') + ':00' + (x.devam ? ' <span class="k">(devam ediyor)</span>' : '') + '</h2>'
+    + '<button type="button" class="btn" onclick="document.getElementById(\'akisDlg\').close()">Kapat</button></div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:16px">'
+    + kutu('Giriş (kWh)', satir('GES üretimi', x.u, '#1E9E5A') + satir('Şebekeden çekiş', x.c, '#D92D20') + satir('Toplam giriş', x.u == null && x.c == null ? null : gir, '#10233F', true))
+    + kutu('Çıkış (kWh)', satir('Şebekeye veriş', x.v, '#2a78d6') + (k === 'Sera-2' ? satir('Madencilik', x.m, '#10233F') + satir('Diğer iç tüketim', x.diger, '#8A96A8') : satir('İç tüketim', x.ic, '#8A96A8')) + satir('Toplam çıkış', x.v == null ? null : cik, '#10233F', true))
+    + '</div>'
+    + (x.v == null ? '<div class="k">Bu saatin sayaç (OSOS) verisi henüz gelmedi; yalnız üretim' + (k === 'Sera-2' ? ' ve madencilik' : '') + ' görünüyor.</div>' : '<div class="k">İç tüketim = üretim + çekiş − veriş (sayaç arkasındaki tüm yük' + (k === 'Sera-2' ? '; madencilik Pi ölçümü, kalan "diğer"' : '') + ').</div>')
+    + '<div style="font-weight:700">Gün boyu</div>' + tablo + '</div>';
+  if (!dl.open) dl.showModal();
 }
 const thStrRenk = d => d === 'dusuk' ? TH_R.kirmizi : d === 'zayif' || d === 'farkli' ? TH_R.sari : d === 'bos' ? TH_R.gri : TH_R.yesil;
 const thStrAd = { normal: 'normal', zayif: 'zayıf', dusuk: 'düşük', farkli: 'farklı', bos: 'boş' };
@@ -2213,7 +2274,8 @@ async function cizMiningPrensip() {
     const net = top - (yuk ? mkKw || 0 : 0);
     h += thBolum({ baslik: k + ' · ' + (t.ad || '') + (t.dc_kwp ? ' · ' + say(t.dc_kwp) + ' kWp' : ''), alt: 'FusionSolar ' + esc(String(fs.guncelleme || '').slice(11, 16)) + (k === 'Sera-2' ? ' · madencilik toplayıcı ' + esc(ts) : ''),
       sayac: { ab, net, osos: thOsos(k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2') },
-      bloklar: [{ ad: 'Trafo', inv, yuk, baraNot: 'Σ inverter ' + say(top, 1) + ' kW' }] });
+      bloklar: [{ ad: 'Trafo', inv, yuk, baraNot: 'Σ inverter ' + say(top, 1) + ' kW' }],
+      ust: akisGrafik(k, fs, saha, { uretim: top, yuk: yuk ? mkKw : null, net }) });
   }
   const pvVar = Object.values(fs.invertorler || {}).some(v => (v.pv || []).length);
   h += '<div class="k">Akış: OG baradan aşağı; sayaçtaki ok şebekeye (yeşil, veriş) ya da şebekeden (kırmızı, çekiş) yönü gösterir. Sayaç değeri anlık tahmindir (inverter AC çıkışı' + ' − madencilik yükü), iç tüketim hariç; altındaki satır OSOS\'un son saatlik ölçümüdür. '

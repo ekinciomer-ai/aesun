@@ -961,7 +961,43 @@ async function hashGunAl(g) {
   try { const d = await al('n8n/hash/' + g + '.json'); d._t = Date.now(); HASH.gun[g] = d; } catch (e) { HASH.gun[g] = null; }
   return HASH.gun[g];
 }
-function hashKapat() { const m = document.getElementById('hashModal'); if (m) m.remove(); document.removeEventListener('keydown', hashTus); }
+function hashKapat() { const m = document.getElementById('hashModal'); if (m) m.remove(); document.removeEventListener('keydown', hashTus); clearInterval(HS.zaman); HS.zaman = null; }
+// Canlı izleme: modal açıkken dakikada bir saha verisi (antminer_panel) ve bugünün 5 dk kaydı yenilenir
+async function hashYenile() {
+  if (!document.getElementById('hashModal')) { clearInterval(HS.zaman); HS.zaman = null; return; }
+  try { D.mad = await al('antminer_panel.json'); } catch (e) {}
+  delete HASH.gun[bugunTR()];
+  hashCiz();
+}
+// Üst özet (canlı): anlık, 1 saat / 24 saat ortalama, durum, bugünkü tahmini kazanç, çalışma saati
+async function hashOzet(c) {
+  const bugun = bugunTR(), dun = gunEkle(bugun, -1);
+  const [db, dd] = await Promise.all([hashGunAl(bugun), hashGunAl(dun)]);
+  const s = trSimdi(), j = Math.floor((s.getUTCHours() * 60 + s.getUTCMinutes()) / 5);
+  const bA = ((db && db.c && db.c[c]) || []).slice(0, j + 1), dA = ((dd && dd.c && dd.c[c]) || []);
+  const son24 = dA.slice(j + 1).concat(bA), son1 = bA.slice(-12);
+  const ort = a => { const x = a.filter(v => v != null); return x.length ? x.reduce((t, v) => t + v, 0) / x.length : null; };
+  const saat = a => a.filter(v => v > 0).length * 5 / 60;
+  const d = ((D.mad || {}).devices || []).find(x => String(x.actual_worker || x.f2pool_name || '').split('.').pop() === String(c));
+  const anlik = d ? (d.online && !d.sleeping ? Number(d.hashrate_TH) || 0 : 0) : null;
+  const durum = !d ? ['Bilinmiyor', '#4A5A70'] : d.sleeping ? ['Uykuda', '#4A5A70'] : d.online && (d.hashrate_TH || 0) > 0 ? ['Çalışıyor', '#1E7A3C'] : d.online ? ['Hash yok', '#9A5B00'] : ['Yanıt yok', '#B42318'];
+  if (!YONETIM) YONETIM = await al('n8n/cihaz_yonetimi_durum.json').catch(() => null);
+  const hp = YONETIM && YONETIM.hashprice_btc_th_gun, btcTl = YONETIM && YONETIM.btc_try;
+  const thGun = bA.reduce((t, v) => t + (v > 0 ? v : 0), 0) * 5 / 1440;            // bugün üretilen TH·gün
+  const btc = hp ? thGun * hp : null, btcUsd = (() => { const b = MADEN.btc || {}; const k = Object.keys(b).sort().pop(); return k ? b[k].usd : null; })();
+  const ts = (D.mad || {}).timestamp ? String(D.mad.timestamp).slice(11, 16) : '—';
+  const kart = (k, v, alt, r) => '<div style="flex:1;min-width:140px;background:#F5F7FA;border-radius:10px;padding:10px 12px"><div class="k" style="font-size:12px;letter-spacing:.04em;text-transform:uppercase">' + k + '</div><div class="num" style="font-size:24px;font-weight:800' + (r ? ';color:' + r : '') + '">' + v + '</div><div class="k" style="font-size:12px">' + alt + '</div></div>';
+  return '<div style="display:flex;flex-wrap:wrap;gap:8px">'
+    + kart('Anlık', anlik != null ? say(anlik, 0) : '—', 'TH/s · ' + ts, '#1E7A3C')
+    + kart('1 saat ort.', son1.length ? say(ort(son1), 0) : '—', 'TH/s', '#2563EB')
+    + kart('24 saat ort.', son24.length ? say(ort(son24), 0) : '—', 'TH/s', '#7C3AED')
+    + kart('Durum', '<span style="color:' + durum[1] + '">' + durum[0] + '</span>', d && d.temp_water != null ? 'su ' + say(d.temp_water) + ' °C' + (d.temp_max != null ? ' · çip ' + say(d.temp_max) + ' °C' : '') : '')
+    + '</div><div style="display:flex;flex-wrap:wrap;gap:8px">'
+    + kart('Bugün BTC (tahmini)', btc != null ? btc.toFixed(6) : '—', btc != null && btcTl ? say(btc * btcTl) + ' ₺' + (btcUsd ? ' · ' + say(btc * btcUsd, 1) + ' $' : '') : 'hashprice yok', '#B7791F')
+    + kart('Çalışma bugün', say(saat(bA), 1), 'saat')
+    + kart('Çalışma son 24 saat', say(saat(son24), 1), 'saat')
+    + '</div>';
+}
 function hashTus(e) { if (e.key === 'Escape') hashKapat(); }
 async function hashAc(c) {
   HS.c = c; HS.bit = HS.bit || bugunTR();
@@ -975,6 +1011,7 @@ async function hashAc(c) {
   m.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Cihaz ' + esc(c) + ' hashrate" style="width:min(960px,100%);gap:12px"><p class="k" style="margin:0">Yükleniyor…</p></div>';
   if (!HASH.liste) HASH.liste = await al('n8n/hash/gunler.json').then(d => d.gunler || []).catch(() => []);
   await madenYukle().catch(() => {});
+  clearInterval(HS.zaman); HS.zaman = setInterval(hashYenile, 60000);
   hashCiz();
 }
 function hashSec(alan, v) { HS[alan] = v; hashCiz(); }
@@ -1018,6 +1055,7 @@ async function hashCiz() {
     + '<span class="tursec"><button type="button" title="Geri"' + (gunEkle(HS.bit, -n) < ilk && gunler[0] <= ilk ? ' disabled' : '') + ' onclick="hashSec(\'bit\',\'' + gunEkle(HS.bit, -n) + '\')">◀</button><button type="button" title="İleri"' + (HS.bit >= bugun ? ' disabled' : '') + ' onclick="hashSec(\'bit\',\'' + (gunEkle(HS.bit, n) > bugun ? bugun : gunEkle(HS.bit, n)) + '\')">▶</button><button type="button"' + (HS.bit === bugun ? ' disabled' : '') + ' onclick="hashSec(\'bit\',\'' + bugun + '\')">Bugün</button></span>'
     + '<label class="k" style="display:flex;align-items:center;gap:6px">' + (n === 1 ? 'Gün' : 'Bitiş') + ' <input type="date" value="' + HS.bit + '" min="' + ilk + '" max="' + bugun + '" onchange="if(this.value)hashSec(\'bit\',this.value)" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px"></label>'
     + '<span class="k">' + etk + '</span></div>';
+  h += await hashOzet(c);
   if (!veriVar) h += '<p class="k" style="margin:0">Bu dönemde cihaz ' + esc(c) + ' için saha kaydı yok' + (HASH.liste && HASH.liste.length ? ' (kayıtlar ' + tarihK(ilk) + ' ' + ilk.slice(0, 4) + '\'ten itibaren).' : '.') + '</p>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px">' + kutu('Çalışırken ort.', calOrt != null ? say(calOrt, 1) + ' TH/s' : '—') + kutu('Filoya göre', fark != null ? (fark >= 0 ? '+' : '') + say(fark, 1) + '%' : '—', fark != null && fark < -10 ? '#B42318' : null)
     + kutu('Tepe', cal.length ? say(Math.max(...cal), 1) + ' TH/s' : '—') + kutu('Çalıştı', sure(cal.length), '#1E7A3C') + kutu('Uyudu', sure(uyku)) + kutu('Kayıt yok', sure(bos), bos > ham.length / 2 ? '#9A5B00' : null) + '</div>';

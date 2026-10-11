@@ -16,7 +16,7 @@ from ortak import AESUN, TR, gh, log
 import madenci as M
 
 KESIF, GOREV, RAPOR = "n8n/firmware_kesif.json", "n8n/firmware_gorev.json", "n8n/firmware_pilot.json"
-KESIF_V = 4
+KESIF_V = 5
 FW = {"S21e Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S21eHyd_FR-1.42_251016.bmu",
                    "md5": "684efb616a07f67730a423c773a5881c", "ad": "S21eHyd_FR-1.42_251016.bmu"}}
 FW_DIR = AESUN / "firmware"
@@ -71,6 +71,7 @@ def arayuz_kesif(ip):
             for c in (s2, "/views" + s2, "/html" + s2, "/pages" + s2):
                 if c not in gorulen and c not in kuyruk and len(kuyruk) < 60:
                     kuyruk.append(c)
+    out["kaynak"] = {p: t for p, t in metin.items() if re.search(r"/(update|upgrade)[^/]*\.(js|html)$", p)}   # yükleme kodu (salt okuma, inceleme için)
     for p, t in metin.items():
         if p.endswith(".js"):
             for m in re.finditer(r"loadInner|\.load\(|\.html|upgrade|cgi-bin", t, re.I):

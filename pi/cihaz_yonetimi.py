@@ -258,6 +258,9 @@ def takvim_kur(plan, m, a, simdi, filo, canli_su):
         if k[x] is None or k[x - 1] is None or k[x] == k[x - 1]:
             continue
         B = plan[x]["_t"]
+        # güneş tüm filoyu karşılıyor: geçişte filo durumu değişmez (hepsi zaten çalışıyor/çalışacak) → komut yok
+        if (k[x] == "uyut" and (plan[x].get("gunes_cihaz") or 0) >= n) or (k[x] == "calis" and (plan[x - 1].get("gunes_cihaz") or 0) >= n):
+            continue
         if k[x] == "uyut" and plan[x].get("gunes_cihaz"):
             # kârlı saatten güneş saatine: toplu uyutma yok, saat başında güneş takibi devralır (fazlası kademeli uyur)
             anahtar.append({"t_komut": B, "eylem": "sleep", "hedef": B, "gunes": True, "oncu_dk": 0,

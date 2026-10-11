@@ -16,7 +16,7 @@ from ortak import AESUN, TR, gh, log
 import madenci as M
 
 KESIF, GOREV, RAPOR = "n8n/firmware_kesif.json", "n8n/firmware_gorev.json", "n8n/firmware_pilot.json"
-KESIF_V = 3
+KESIF_V = 4
 FW = {"S21e Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S21eHyd_FR-1.42_251016.bmu",
                    "md5": "684efb616a07f67730a423c773a5881c", "ad": "S21eHyd_FR-1.42_251016.bmu"}}
 FW_DIR = AESUN / "firmware"
@@ -60,6 +60,10 @@ def arayuz_kesif(ip):
         if k != 200:
             continue
         metin[p] = t
+        for i_ in re.findall(r'data-id=["\']([A-Za-z0-9_-]+)["\']', t):     # menü: loadInner(id) → "/<id>.html"
+            c = "/" + i_ + ".html"
+            if c not in gorulen and c not in kuyruk:
+                kuyruk.insert(0, c)
         for s in re.findall(r'["\']([A-Za-z0-9_./-]+\.(?:js|html))["\']', t):
             if "min.js" in s or "jquery" in s or "vue" in s:
                 continue

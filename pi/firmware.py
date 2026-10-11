@@ -18,8 +18,14 @@ import madenci as M
 KESIF, GOREV, RAPOR = "n8n/firmware_kesif.json", "n8n/firmware_gorev.json", "n8n/firmware_pilot.json"
 GECMIS = "n8n/firmware_gecmis.json"
 KESIF_V = 5
+# tip = cihazın get_system_info "minertype" değeri birebir; kapsayici = .bmu içinde kart başına alt imaj var mı
+# (yoksa arayüz gibi dosyanın tamamı gönderilir — Bitmain arayüzünün "old upgrade" yolu)
 FW = {"S21e Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S21eHyd_FR-1.42_251016.bmu",
-                   "md5": "684efb616a07f67730a423c773a5881c", "ad": "S21eHyd_FR-1.42_251016.bmu"}}
+                   "md5": "684efb616a07f67730a423c773a5881c", "ad": "S21eHyd_FR-1.42_251016.bmu",
+                   "tip": "Antminer S21e Hyd.", "kapsayici": True},
+      "S19e XP Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S19eXPHyd_FR-1.12_260127.bmu",
+                      "md5": "349a71fb0ee3e2723def6439405cd8e4", "ad": "S19eXPHyd_FR-1.12_260127.bmu",
+                      "tip": "Antminer S19e XP Hyd.", "kapsayici": False}}
 FW_DIR = AESUN / "firmware"
 PILOT = AESUN / "firmware_pilot.json"
 BASARI_TH = 250
@@ -219,15 +225,23 @@ def pilot_adim(sonuc, simdi, kesif):
             return
         k_, si = M.cgi(ip, "get_system_info.cgi", timeout=10)          # uykuda da yanıt verir
         tip = (si or {}).get("minertype") if k_ == 200 and isinstance(si, dict) else None
-        if not md5_ok or "S21e Hyd" not in str(tip or ""):
-            p["durdu"] = True; olay(f"DURDU .{suf}: md5={md5_ok}, model={tip}"); pilot_yaz(p); _rapor(p, simdi); return
+        model = gorev.get("model") or "S21e Hyd"
+        fw = FW.get(model)
+        if not fw or str(tip or "").strip() != fw["tip"]:
+            p["durdu"] = True; olay(f"DURDU .{suf}: cihaz modeli {tip!r}, görev dosyası {model} ({(fw or {}).get('tip')}) — yükleme yapılmadı")
+            pilot_yaz(p); _rapor(p, simdi); return
         cgi, alan, _ = sec
-        yol, _, _, ok = indir("S21e Hyd")
+        yol, _, _, ok = indir(model)
         if not ok:
             p["durdu"] = True; olay("DURDU: dosya MD5 tutmadı"); pilot_yaz(p); _rapor(p, simdi); return
         k3, mt = M.cgi(ip, "miner_type.cgi", timeout=10)
         mt = mt if k3 == 200 and isinstance(mt, dict) else {}
-        veri, bilgi = bmu_parca(yol.read_bytes(), mt.get("miner_type"), mt.get("subtype"))
+        if fw["kapsayici"]:
+            veri, bilgi = bmu_parca(yol.read_bytes(), mt.get("miner_type"), mt.get("subtype"))
+        elif str(mt.get("miner_type") or "").strip() == fw["tip"]:
+            veri, bilgi = yol.read_bytes(), {"tek_imaj": True, "boyut": yol.stat().st_size}
+        else:
+            veri, bilgi = None, f"miner_type {mt.get('miner_type')!r} ≠ {fw['tip']}"
         if veri is None:
             p["durdu"] = True; olay(f"DURDU .{suf}: {bilgi} — yükleme yapılmadı"); pilot_yaz(p); _rapor(p, simdi); return
         c["miner_type"], c["parca"] = mt, bilgi
@@ -241,7 +255,7 @@ def pilot_adim(sonuc, simdi, kesif):
         pilot_yaz(p); _rapor(p, simdi)
         try:
             r = M.requests.post(f"http://{ip}{cgi}", auth=M.filo_auth(),
-                                files={alan: ("blob", veri, "application/octet-stream")}, timeout=600)
+                                files={alan: ("blob" if fw["kapsayici"] else fw["ad"], veri, "application/octet-stream")}, timeout=600)
             c["yukleme_yanit"] = [r.status_code, r.text[:300]]
             olay(f".{suf} yükleme yanıtı {r.status_code}: {r.text[:120]!r}")
             try:

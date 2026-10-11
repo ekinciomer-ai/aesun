@@ -13,3 +13,4 @@ Her çalıştırma: bulgular → yapılan düzeltmeler (commit) → kullanıcı 
 
 ## Kayıtlar
 - 2026-10-11 — Görev kuruldu. Açık bulgular: Pi'nin başabaşı (≈2.220) gerçekleşen gelirden hesaplanandan (≈2.540) %13 düşük → hashprice/TH/kW varsayımı incelenecek. .100 ve .129 yanıt vermiyor. Firmware pilotu (.115) yükleme uç noktası keşfi bekliyor. Twilio sandbox katılımı düştü (WhatsApp mesajları gitmiyor) — kullanıcı "join" yazmalı / kendi numarası alınmalı.
+- 2026-10-11 22:15 — Firmware pilotu hazır: uç /cgi-bin/upgrade.cgi (ayarları koru), alan "firmware", .bmu kapsayıcısından cihazın miner_type/subtype'ına uyan alt imaj gönderiliyor (1c683e8). .115 uykuya geçince (≈05:54) başlar. İzlenecek: n8n/firmware_pilot.json — sürüm değişti mi, hash > 250 TH/s, watt geliyor mu; sonucu kullanıcıya bildir, başarılıysa kalan S21e'leri sıraya eklemeyi ÖNER (ekleme kullanıcı onayıyla).

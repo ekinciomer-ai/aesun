@@ -241,7 +241,7 @@ function grafikX(sp) {
   const ser = tur === 'yigin' && sp.yiginSeriler ? sp.yiginSeriler : sp.seriler;
   const cizgiMi = tur === 'cizgi' || tur === 'alan';
   const lej = '<div class="k" style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center">' + ser.filter(s => s.lej !== false).map(s => '<span style="display:inline-flex;align-items:center;gap:6px">'
-    + (cizgiMi || s.tip === 'isaret' ? '<span style="width:14px;height:3px;border-radius:2px;background:' + s.renk + '"></span>' : '<span style="width:10px;height:10px;border-radius:2px;background:' + s.renk + '"></span>') + esc(s.ad) + '</span>').join('')
+    + (s.tip === 'alan' ? '<span style="width:14px;height:10px;border-radius:2px;background:' + s.renk + '33;border-top:2px solid ' + s.renk + '"></span>' : cizgiMi || s.tip === 'isaret' ? '<span style="width:14px;height:3px;border-radius:2px;background:' + s.renk + '"></span>' : '<span style="width:10px;height:10px;border-radius:2px;background:' + s.renk + '"></span>') + esc(s.ad) + '</span>').join('')
     + (sp.birim ? '<span>' + esc(sp.birim) + '</span>' : '') + '</div>';
   const ust = '<div class="grafust">' + lej + (sp.turler.length > 1 ? turSecici(sp.id, sp.turler, tur) : '') + '</div>';
   if (!n) return ust + '<p class="k">Veri yok.</p>';
@@ -256,7 +256,7 @@ function grafikX(sp) {
   // değer aralığı
   const gruplar = [];
   if (tur === 'yigin') { for (const s of ser) if (s.tip !== 'isaret') { const g = s.grup || s.ad; if (!gruplar.includes(g)) gruplar.push(g); } }
-  else if (!cizgiMi) for (const s of ser) if (s.tip !== 'isaret') gruplar.push(s.ad);
+  else if (!cizgiMi) for (const s of ser) if (s.tip !== 'isaret' && s.tip !== 'alan') gruplar.push(s.ad);
   let ust0 = 0, alt0 = 0;
   for (let i = 0; i < n; i++) {
     if (tur === 'yigin') for (const g of gruplar) { let p = 0, m = 0; for (const s of ser) if ((s.grup || s.ad) === g && s.tip !== 'isaret' && s.v[i] != null) { if (s.v[i] >= 0) p += s.v[i]; else m += s.v[i]; } ust0 = Math.max(ust0, p); alt0 = Math.min(alt0, m); }
@@ -275,18 +275,26 @@ function grafikX(sp) {
     for (const s of ser) {
       let d = '', ac = false, ilk = -1, son = -1;
       s.v.forEach((v, i) => { if (v == null) { ac = false; return; } d += (ac ? 'L' : 'M') + cx(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; ac = true; if (ilk < 0) ilk = i; son = i; });
-      if (tur === 'alan' && s.tip !== 'isaret' && ilk >= 0 && !s.v.slice(ilk, son + 1).includes(null)) g += '<path d="' + d + 'L' + cx(son).toFixed(1) + ' ' + y0.toFixed(1) + ' L' + cx(ilk).toFixed(1) + ' ' + y0.toFixed(1) + ' Z" fill="' + s.renk + '" fill-opacity="0.14"/>';
+      if ((tur === 'alan' || s.tip === 'alan') && s.tip !== 'isaret' && ilk >= 0 && !s.v.slice(ilk, son + 1).includes(null)) g += '<path d="' + d + 'L' + cx(son).toFixed(1) + ' ' + y0.toFixed(1) + ' L' + cx(ilk).toFixed(1) + ' ' + y0.toFixed(1) + ' Z" fill="' + s.renk + '" fill-opacity="0.14"/>';
       g += '<path d="' + d + '" fill="none" stroke="' + s.renk + '" stroke-width="' + (s.kalinlik || (s.kalin ? 2.6 : 2)) + '" stroke-linejoin="round" stroke-linecap="round"' + (s.kesik || s.tip === 'isaret' ? ' stroke-dasharray="5 4"' : '') + '/>';
       if (n <= 45) s.v.forEach((v, i) => { if (v != null) g += '<circle cx="' + cx(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="' + (n <= 16 ? 3 : 2) + '" fill="' + s.renk + '"/>'; });
     }
   } else {
+    for (const s of ser) {
+      if (s.tip !== 'alan') continue;
+      let d = '', ilk = -1, son = -1;
+      s.v.forEach((v, i) => { if (v == null) return; d += (ilk < 0 ? 'M' : 'L') + cx(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; if (ilk < 0) ilk = i; son = i; });
+      if (ilk < 0) continue;
+      g += '<path d="' + d + 'L' + cx(son).toFixed(1) + ' ' + y0.toFixed(1) + ' L' + cx(ilk).toFixed(1) + ' ' + y0.toFixed(1) + ' Z" fill="' + s.renk + '" fill-opacity="0.16"/>'
+        + '<path d="' + d + '" fill="none" stroke="' + s.renk + '" stroke-width="2" stroke-linejoin="round"/>';
+    }
     const ng = Math.max(1, gruplar.length), bw = Math.max(1.5, Math.min(26, gen * 0.72 / ng)), aral = ng > 1 ? Math.min(2, bw * 0.15) : 0;
     for (let i = 0; i < n; i++) {
       gruplar.forEach((gr, j) => {
         const x0 = cx(i) - (ng * bw + (ng - 1) * aral) / 2 + j * (bw + aral);
         let p = 0, m = 0;
         for (const s of ser) {
-          if (s.tip === 'isaret' || (tur === 'yigin' ? (s.grup || s.ad) : s.ad) !== gr) continue;
+          if (s.tip === 'isaret' || s.tip === 'alan' || (tur === 'yigin' ? (s.grup || s.ad) : s.ad) !== gr) continue;
           const v = s.v[i]; if (v == null || v === 0) continue;
           const a = v >= 0 ? p : m, b = a + v; if (v >= 0) p = b; else m = b;
           const ya = y(Math.max(a, b)), yb = y(Math.min(a, b));
@@ -2181,7 +2189,7 @@ function akisGrafik(k, fs, saha, anlik) {
   const ser = [{ ad: 'GES üretimi', renk: '#1E9E5A', v: S.map(x => x.u) },
     { ad: 'Şebekeye veriş', renk: '#2a78d6', v: S.map(x => x.v) },
     { ad: 'Şebekeden çekiş', renk: '#D92D20', v: S.map(x => x.c == null ? null : -x.c) }];
-  if (k === 'Sera-2') ser.push({ ad: 'Madencilik yükü', renk: '#10233F', v: S.map(x => x.m), tip: 'isaret' });
+  if (k === 'Sera-2') ser.unshift({ ad: 'Madencilik yükü', renk: '#7A4FD0', v: S.map(x => x.m), tip: 'alan' });
   const an = anlik || {}, yon = an.net == null ? '' : an.net >= 0 ? '<b style="color:#1E7A3C">→ şebekeye ' + say(an.net, 1) + ' kW</b>' : '<b style="color:#B42318">← şebekeden ' + say(-an.net, 1) + ' kW</b>';
   return '<div style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">'
     + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline"><b style="font-size:14px">Giriş / çıkış · bugün</b>'
@@ -2189,7 +2197,7 @@ function akisGrafik(k, fs, saha, anlik) {
     + grafikX({ id: 'akis_' + k, ad: k + ' giriş çıkış', etiket: S.map(x => x.h + ':00' + (x.devam ? '*' : '')), etiketAd: 'Saat', seriler: ser,
       turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top',
       tip: i => akisMetin(S[i]) + '\n(ayrıntı için tıklayın)', tik: i => "akisAc('" + k + "'," + (a + i) + ")" })
-    + '<div class="k">Yukarı: üretim ve şebekeye veriş · aşağı (eksi): şebekeden çekiş' + (k === 'Sera-2' ? ' · çizgi: madencilik yükü' : '') + '. Sayaç değerleri OSOS\'tan saatlik gelir; son saatler gecikebilir. Saate tıklayınca ayrıntı açılır.</div></div>';
+    + '<div class="k">Yukarı: üretim ve şebekeye veriş · aşağı (eksi): şebekeden çekiş' + (k === 'Sera-2' ? ' · mor alan: madencilik yükü' : '') + '. Sayaç değerleri OSOS\'tan saatlik gelir; son saatler gecikebilir. Saate tıklayınca ayrıntı açılır.</div></div>';
 }
 function akisMetin(x) {
   const f = v => v == null ? '—' : say(v, 1) + ' kWh';

@@ -16,7 +16,7 @@ from ortak import AESUN, TR, gh, log
 import madenci as M
 
 KESIF, GOREV, RAPOR = "n8n/firmware_kesif.json", "n8n/firmware_gorev.json", "n8n/firmware_pilot.json"
-KESIF_V = 2
+KESIF_V = 3
 FW = {"S21e Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S21eHyd_FR-1.42_251016.bmu",
                    "md5": "684efb616a07f67730a423c773a5881c", "ad": "S21eHyd_FR-1.42_251016.bmu"}}
 FW_DIR = AESUN / "firmware"
@@ -46,9 +46,10 @@ def _get(ip, p):
 
 def arayuz_kesif(ip):
     """Web arayüzünü salt GET ile tarar; yükseltme uç noktası ve dosya alanı adayları."""
-    out = {"sayfalar": {}, "upgrade_cgi": [], "parca": []}
+    out = {"sayfalar": {}, "upgrade_cgi": [], "parca": [], "js_ipucu": [], "dizgiler": []}
     metin = {}
-    kuyruk, gorulen = ["/"], set()
+    kuyruk, gorulen = ["/", "/views/upgrade.html", "/html/upgrade.html", "/pages/upgrade.html", "/upgrade/index.html",
+                      "/views/firmware.html", "/firmware.html", "/system.html", "/views/system.html"], set()
     while kuyruk and len(gorulen) < 40:
         p = kuyruk.pop(0)
         if p in gorulen:
@@ -67,6 +68,12 @@ def arayuz_kesif(ip):
                 if c not in gorulen and c not in kuyruk and len(kuyruk) < 60:
                     kuyruk.append(c)
     for p, t in metin.items():
+        if p.endswith(".js"):
+            for m in re.finditer(r"loadInner|\.load\(|\.html|upgrade|cgi-bin", t, re.I):
+                if len(out["js_ipucu"]) < 60:
+                    out["js_ipucu"].append([p, t[max(0, m.start() - 250): m.end() + 250]])
+            out["dizgiler"] = sorted(set(out["dizgiler"]) | set(s_ for s_ in re.findall(r"[\"']([^\"'\s]{3,80})[\"']", t)
+                                                                 if "/" in s_ or "." in s_ or "upgrade" in s_.lower()))[:400]
         for m in re.finditer(r"/?cgi-bin/[A-Za-z0-9_]*upgrade[A-Za-z0-9_]*\.cgi", t, re.I):
             c = "/" + m.group(0).lstrip("/")
             cevre = t[max(0, m.start() - 700): m.end() + 700]
@@ -169,13 +176,24 @@ def pilot_adim(sonuc, simdi, kesif):
             c["bekleme"] = "cihaz uykuda değil"; pilot_yaz(p); return
         sec, neden = uc_sec((kesif or {}).get("arayuz"))
         md5_ok = (kesif or {}).get("md5_dogru")
-        if not sec or not md5_ok or "S21e Hyd" not in str(o.get("model") or o.get("tip") or ""):
-            p["durdu"] = True; olay(f"DURDU .{suf}: uç={neden}, md5={md5_ok}, model={o.get('model')}"); pilot_yaz(p); _rapor(p, simdi); return
+        if not sec:
+            if c.get("bekleme") != neden:
+                c["bekleme"] = neden; olay(f".{suf} bekliyor: {neden} (cihaza dokunulmadı)"); pilot_yaz(p); _rapor(p, simdi)
+            return
+        k_, si = M.cgi(ip, "get_system_info.cgi", timeout=10)          # uykuda da yanıt verir
+        tip = (si or {}).get("minertype") if k_ == 200 and isinstance(si, dict) else None
+        if not md5_ok or "S21e Hyd" not in str(tip or ""):
+            p["durdu"] = True; olay(f"DURDU .{suf}: md5={md5_ok}, model={tip}"); pilot_yaz(p); _rapor(p, simdi); return
         cgi, alan, _ = sec
         yol, _, _, ok = indir("S21e Hyd")
         if not ok:
             p["durdu"] = True; olay("DURDU: dosya MD5 tutmadı"); pilot_yaz(p); _rapor(p, simdi); return
-        c.update(asama="yukleniyor", eski_fw=o.get("fw"), uc=cgi, alan=alan, t_yukleme=now)
+        eski = (si or {}).get("system_filesystem_version") or (si or {}).get("firmware_version")
+        if not eski:
+            if c.get("bekleme") != "sürüm okunamadı":
+                c["bekleme"] = "sürüm okunamadı"; olay(f".{suf} bekliyor: mevcut sürüm okunamadı"); pilot_yaz(p)
+            return
+        c.update(asama="yukleniyor", eski_fw=eski, uc=cgi, alan=alan, t_yukleme=now, sistem_once=si)
         olay(f".{suf} yükleme başlıyor: {cgi} alan={alan}")
         pilot_yaz(p); _rapor(p, simdi)
         try:
@@ -198,8 +216,10 @@ def pilot_adim(sonuc, simdi, kesif):
         t0 = datetime.fromisoformat(c["t_yukleme"])
         if simdi - t0 < timedelta(minutes=3):
             return
-        k, st = M.cgi(ip, "stats.cgi", timeout=10)
-        fw = ((st or {}).get("INFO") or {}).get("miner_version") if k == 200 and isinstance(st, dict) else None
+        k, si2 = M.cgi(ip, "get_system_info.cgi", timeout=10)
+        fw = ((si2 or {}).get("system_filesystem_version") or (si2 or {}).get("firmware_version")) if k == 200 and isinstance(si2, dict) else None
+        if fw:
+            c["sistem_sonra"] = si2
         if fw and fw == c.get("eski_fw"):
             if simdi - t0 > timedelta(minutes=15):
                 p["durdu"] = True

@@ -146,7 +146,12 @@ def madencilik_kurallari(simdi: datetime) -> list[dict]:
         if yas > timedelta(minutes=45):
             sonuc.append(_u("uyari", "madencilik", "Saha PC'si veri göndermiyor",
                             f"Son veri {tarih_tr(ts)} {ts[11:16]}."))
-    kapali = [d for d in ap.get("devices", []) if not d.get("online")]
+    # boş IP yuvaları (toplayıcı 100–129 tarar; cihaz kimlik kaydında olmayan, işçi adı olmayan yanıtsız IP) cihaz sayılmaz
+    kim = veri.json_oku("n8n/cihaz_kimlik.json") or {}
+    ipler = {k.get("son_ip") for k in kim.values() if isinstance(k, dict)}
+    def bos(d):
+        return bool(kim) and not d.get("online") and not d.get("sleeping") and not d.get("actual_worker") and d.get("ip") not in ipler
+    kapali = [d for d in ap.get("devices", []) if not d.get("online") and not d.get("sleeping") and not bos(d)]
     if kapali:
         isim = ", ".join(f"Miner-{d.get('suffix')}" for d in kapali)
         sonuc.append(_u("uyari", "madencilik", f"{len(kapali)} madenci yanıt vermiyor", isim))

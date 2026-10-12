@@ -650,8 +650,8 @@ function cizGenel() {
       + '<div><div class="k">Toplam hash' + (agDisi && f2e ? ' (F2Pool)' : '') + '</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? (f2e ? say(f2e.hashrate_th) : tire) : say(s.total_hashrate_TH)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s' + '</span></div></div>'
       + '<div><div class="k">Hedefe göre</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : '%' + say(s.efficiency_pct)) + '</div></div>'
       + '<div><div class="k">Ortalama sıcaklık</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : say(s.avg_temp_C)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">°C</span></div></div></div>'
-      + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + (agDisi ? 'durum bilinmiyor' : s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor') + '">' + cihazlar.map(d => '<span title="' + esc(d.name + ' · ' + (agDisi ? 'durum bilinmiyor' : d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (agDisi ? '#C9D1DC' : d.online ? (d.health_issues && d.health_issues.some(h => h.severity === 'high') ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
-      + '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1E7A3C"></span> çalışıyor</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C98500"></span> sıcaklık uyarısı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#B42318"></span> yanıt yok</span>' + (agDisi ? '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C9D1DC"></span> durum bilinmiyor</span>' : '') + '</div></section>';
+      + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + (agDisi ? 'durum bilinmiyor' : s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor') + '">' + cihazlar.map(d => '<span title="' + esc(d.name + ' · ' + (agDisi ? 'durum bilinmiyor' : d.sleeping ? 'uykuda' : d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (agDisi ? '#C9D1DC' : d.sleeping ? '#2a78d6' : d.online ? (d.health_issues && d.health_issues.some(h => h.severity === 'high') ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
+      + '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1E7A3C"></span> çalışıyor</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C98500"></span> sıcaklık uyarısı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#B42318"></span> yanıt yok</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2a78d6"></span> uykuda</span>' + (agDisi ? '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C9D1DC"></span> durum bilinmiyor</span>' : '') + '</div></section>';
     const ay6 = (mad.monthly_history || []).slice().sort((a, b) => a.month.localeCompare(b.month)).slice(-6);
     const btcVar = ay6.some(m => m.earn_btc > 0);
     const deger = m => btcVar ? m.earn_btc : m.avg_hash_TH;
@@ -2652,6 +2652,19 @@ function anlikUretimBolum(fs, saha, mad) {
   return h + '</div><div class="k">Anlık güç inverterlerin AC çıkışıdır (FusionSolar, ~15 dk\'da bir). Turuncu: o seradaki inverter ortalamasının %20\'den fazla altında. Madencilik Sera-2 (Tek Yıldız-2) sayacının arkasındadır; "fazla/açık" = Sera-2 anlık üretimi − madencilik yükü (iç tüketim hariç). Sayfa 3 dk\'da bir yenilenir.</div></section>';
 }
 
+// Filo = cihaz kimlik kaydındaki cihazlar (29). Toplayıcı 100–129 aralığını tarar; hiç cihaz görülmemiş boş IP'ler
+// (yanıtsız, işçi adı yok, bilinen bir cihazın son IP'si değil) cihaz sayılmaz, uyarı üretmez.
+function bosYuva(d, ipler) { return !d.online && !d.sleeping && !d.actual_worker && !ipler.has(d.ip); }
+function filoSuz(mad, kim) {
+  if (!mad || !Array.isArray(mad.devices) || !kim || !Object.keys(kim).length) return mad;
+  const ipler = new Set(Object.values(kim).map(k => k.son_ip).filter(Boolean));
+  const dv = mad.devices.filter(d => !bosYuva(d, ipler));
+  if (dv.length === mad.devices.length) return mad;
+  const s = Object.assign({}, mad.summary || {});
+  s.total = dv.length; s.online = dv.filter(d => d.online && !d.sleeping).length; s.sleeping = dv.filter(d => d.sleeping).length;
+  s.offline = dv.filter(d => !d.online && !d.sleeping).length;
+  return Object.assign({}, mad, { devices: dv, summary: s, bos_ip: mad.devices.filter(d => bosYuva(d, ipler)).map(d => d.ip) });
+}
 async function yukle(taze) {
   try {
     const [son, osos, mad, fs, saha, sg, inav] = await Promise.all([
@@ -2663,7 +2676,8 @@ async function yukle(taze) {
       al('n8n/sungrow_son.json', taze).catch(() => null),
       al('n8n/inavitas_son.json', taze).catch(() => null)
     ]);
-    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs, saha, sg, inav };
+    const kim = await al('n8n/cihaz_kimlik.json').catch(() => null);
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad: filoSuz(mad, kim), fs, saha, sg, inav, kim };
     ciz();
   } catch (e) {
     if (!D) document.getElementById('icerik').innerHTML = '<div class="panel hata">Veri okunamadı: ' + esc(e.message || e) + '</div>';

@@ -101,7 +101,10 @@ const DEPO = 'ekinciomer-ai/epias-ptf', YOL = 'portal/veri.json';
 const API = 'https://api.github.com/repos/' + DEPO + '/contents/' + YOL, RAW = 'https://raw.githubusercontent.com/' + DEPO + '/main/' + YOL;
 const ITER = 600000, OTURUM_SN = 12 * 3600;
 // Uygulama alt başlıkları (yetki kutuları). Monitoring paneli bu kimliklere göre sekme ve para bilgisini gösterir.
-const KONULAR = { monitoring: [['genel', 'Genel bakış'], ['sayac', 'Sayaçlar ve mahsup'], ['inverter', 'İnverter analizi'], ['maden', 'Madencilik'], ['epias', 'EPİAŞ'], ['parasal', 'Parasal bilgiler (₺, fatura, gelir, pay)']] };
+const KONULAR = {
+  monitoring: [['genel', 'Genel bakış'], ['sayac', 'Sayaçlar ve mahsup'], ['inverter', 'İnverter analizi'], ['maden', 'Madencilik'], ['epias', 'EPİAŞ'], ['parasal', 'Parasal bilgiler (₺, fatura, gelir, pay)']],
+  saha: [['gunluk', 'Günlük'], ['puantaj', 'Puantaj'], ['odeme', 'Ödemeler (maaş / harcama)'], ['parasal', 'Hakediş & parasal bilgiler']]
+};
 const te = new TextEncoder(), td = new TextDecoder();
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

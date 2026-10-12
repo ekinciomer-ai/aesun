@@ -2645,6 +2645,29 @@ const TH_DIGER = [
   { ab: 'Anka', key: 'anka_mineral', kaynak: 'sungrow', id: '5038906', ad: 'Anka Mineral GES (HG Yatırım)' },
   { ab: 'AE', key: 'aksaray_enerji', kaynak: 'inavitas', id: '189', ad: 'Aksaray Enerji Üretim GES (Sapmaz)' },
   { ab: 'A3', key: 'aksaray_3', ad: 'Aksaray 3 · tüketim aboneliği' }];
+// Tüketim aboneliği (A3): son OSOS gününün saatlik çekişi (aşağı yönde kırmızı) + önceki gün (kesik çizgi) + saatin PTF'si
+function osTukGrafik(key, ab) {
+  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = Object.keys(v).sort(), g = gunler[gunler.length - 1], o = gunler[gunler.length - 2];
+  if (!g) return '';
+  const p2 = n => String(n).padStart(2, '0'), saat = [...Array(24).keys()];
+  const c = (gn, s) => { const x = gn && v[gn] && v[gn][p2(s)]; return x && x.cekis != null ? x.cekis : null; };
+  const bu = saat.map(s => c(g, s)), dn = saat.map(s => c(o, s));
+  const sonS = Math.max(...bu.map((x, i) => x != null ? i : -1));
+  const ptf = s => ((EP && EP.ptf && EP.ptf[g]) || [])[s];
+  const top = a => a.reduce((t, x) => t + (x || 0), 0), dnKadar = dn.slice(0, sonS + 1);
+  const tg = d => d.slice(8, 10) + '.' + d.slice(5, 7);
+  const ser = [{ ad: 'Çekiş ' + tg(g), renk: '#D92D20', v: bu.map(x => x == null ? null : -x) }];
+  if (o) ser.push({ ad: 'Çekiş ' + tg(o) + ' (önceki gün)', renk: '#8A96A8', v: dn.map(x => x == null ? null : -x), tip: 'isaret' });
+  const fark = o && sonS >= 0 ? top(bu) - top(dnKadar) : null;
+  if (!EP) epYukle().then(() => { if (typeof yenidenCizPlanla === 'function') yenidenCizPlanla(); }).catch(() => {});
+  return '<div style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">'
+    + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline"><b style="font-size:14px">Saatlik tüketim · ' + tg(g) + '</b>'
+    + '<span class="k">Bugüne kadar <b>' + say(top(bu)) + ' kWh</b> (' + (sonS + 1) + ' saat)' + (fark != null ? ' · önceki günün aynı saatlerine göre <b style="color:' + (fark > 0 ? '#B42318' : '#1E7A3C') + '">' + (fark > 0 ? '+' : '') + say(fark) + ' kWh</b>' : '') + (o ? ' · ' + tg(o) + ' toplam ' + say(top(dn)) + ' kWh' : '') + '</span></div>'
+    + grafikX({ id: 'tuk_' + key, ad: ab + ' saatlik tüketim', etiket: saat.map(s => p2(s) + ':00'), etiketAd: 'Saat', seriler: ser,
+      turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top', fmt: x => say(Math.abs(x), 1), eksen: x => say(Math.abs(x)),
+      tip: i => p2(i) + ':00–' + p2(i + 1) + ':00\nÇekiş ' + tg(g) + ': ' + (bu[i] == null ? '—' : say(bu[i], 1) + ' kWh') + (o ? '\nÇekiş ' + tg(o) + ': ' + (dn[i] == null ? '—' : say(dn[i], 1) + ' kWh') : '') + (ptf(i) != null ? '\nPTF: ' + say(ptf(i), 2) + ' ₺/MWh' : '') })
+    + '<div class="k">Aşağı (kırmızı): şebekeden çekiş, OSOS saatlik ölçümü (kWh ≈ saat ortalaması kW). Gri çizgi önceki günün aynı saati. Son saatler OSOS gecikmesiyle sonradan dolar.</div></div>';
+}
 async function cizDigerPrensip() {
   await strYukle();
   const yil = bugunTR().slice(0, 4), veri = {};
@@ -2657,6 +2680,7 @@ async function cizDigerPrensip() {
       const kw = os ? os.cekis : null;
       h += thBolum({ baslik: P.ab + ' · ' + P.ad, alt: 'OSOS saatlik ölçüm', mod: 'nokta',
         sayac: { ab: P.ab, net: kw != null ? -kw : null, osos: os },
+        ust: osTukGrafik(P.key, P.ab),
         bloklar: [{ ad: 'Trafo', inv: [], yuk: { ad: 'Tesis yükü', kw, alt: 'son saat ortalaması' } }],
         not: 'Tüketim aboneliği: üretimi yok; değer OSOS\'un son saatlik çekişidir (kWh ≈ saat ortalaması kW). Mahsup havuzunda T1/T2 üretiminden karşılanır.' });
       continue;

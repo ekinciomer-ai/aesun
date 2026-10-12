@@ -35,7 +35,20 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 .satir{display:flex;gap:12px;flex-wrap:wrap}.satir>*{flex:1 1 200px}
 .secim{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:6px}.secim label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:14px}
 .blok{margin-bottom:18px}
-.yetki{display:flex;flex-direction:column;gap:8px}.yt{border:1px solid var(--c);border-radius:10px;padding:10px 12px}.ytm{display:flex;gap:8px;align-items:center;margin:0;color:var(--s);font-weight:600;font-size:14px}.ytk{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 0 26px}.ytk label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:13.5px}.ince{color:var(--y);font-size:13px}
+.ybas{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.ysekler{display:flex;gap:4px;background:#E9ECF0;padding:4px;border-radius:11px}.ysek{border:0;background:none;font:inherit;font-weight:600;color:var(--y);padding:8px 14px;border-radius:8px;cursor:pointer}.ysek.on{background:#fff;color:var(--s);box-shadow:0 1px 3px rgba(0,0,0,.08)}.ysek span{font-size:12px;background:#D9DDE3;border-radius:99px;padding:1px 7px;margin-left:4px}.ysek.on span{background:#FBE9EA;color:var(--kk)}
+.ust2{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.kartlar{display:grid;gap:10px}.kkart{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--c);border-radius:14px;padding:16px}
+.kav{width:44px;height:44px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-weight:700;color:#fff;background:linear-gradient(135deg,#D7262E,#3A3F47)}
+.kbt{display:flex;flex-direction:column;gap:6px;align-items:flex-end}.bag.sil{color:var(--kk);font-size:13px}
+.et small{color:var(--y)}.et b{color:var(--kk)}
+dialog.ydlg{width:min(620px,96vw);border-radius:16px}.ydf{padding:22px 24px}.ydbas{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.ydbas b{font-size:19px}.ydbas .kapat{position:static}
+.ydalt{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:22px;padding-top:16px;border-top:1px solid var(--c)}
+.yt{border:1px solid var(--c);border-radius:12px;padding:10px 12px;transition:border-color .15s,background .15s}.yt.on{border-color:#F0B7BA;background:#FFF8F8}
+.ytm{display:flex;gap:10px;align-items:center;margin:0;color:var(--s);font-weight:600;font-size:14.5px;cursor:pointer}.ytm .hd svg{width:16px;height:16px}
+.anah{position:relative;width:42px;height:24px;flex:0 0 auto}.anah input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;z-index:1}.anah i{position:absolute;inset:0;border-radius:99px;background:#CCD2DA;transition:.15s}.anah i:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.anah input:checked+i{background:var(--k)}.anah input:checked+i:after{left:21px}
+.ytk{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px 40px}.cip{margin:0;cursor:pointer}.cip input{position:absolute;opacity:0;pointer-events:none}.cip span{display:inline-block;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid #CCD2DA;color:var(--y);background:#fff}.cip input:checked+span{background:var(--s);border-color:var(--s);color:#fff}.cip.para input:checked+span{background:var(--k);border-color:var(--k)}.cip input:focus-visible+span{outline:2px solid #F3B4B7}
+.ince{color:var(--y);font-size:13px}
 details{border:1px solid var(--c);border-radius:10px;padding:10px 14px;margin:8px 0;background:#fff}summary{cursor:pointer;font-weight:600}
 .bekle{display:grid;place-items:center;min-height:40vh;color:var(--y)}
 .hub{position:relative;width:min(700px,100%);aspect-ratio:1/1;margin:0 auto}
@@ -239,7 +252,8 @@ async function giris(kul, sifre) {
   try {
     const key = await kdf(sifre, e ? e.tuz : b64(rnd(16)), e ? e.iter : ITER);   // kullanıcı yoksa da aynı süre
     if (!e) throw 0;
-    S = await coz(key, e);
+    const { ku } = await coz(key, e.sar);
+    S = await coz(await hamAnahtar(ku), e);
   } catch (x) { await new Promise(r => setTimeout(r, 600)); throw new Error('Kullanıcı adı veya şifre hatalı.'); }
   R = null; oturumKaydet(); await modOnbellek(); ust();
   git(SAYFA);
@@ -312,8 +326,8 @@ function kurulumCiz(hata) {
       const ka = b64(rnd(32)); R = { kullanicilar: {}, anahtarlar: {} };
       let i = 0;
       for (const m of VARSAYILAN) { const km = b64(rnd(32)); R.anahtarlar[m.id] = km; V.moduller[m.id] = await sifrele(await hamAnahtar(km), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: true, yeni_sekme: true, sira: i++ }); }
-      R.kullanicilar[kul] = { ad: $('kad').value.trim(), yonetici: true, moduller: [], hesaplar: {}, olusturma: new Date().toISOString().slice(0, 16) };
-      S = { kul, ad: $('kad').value.trim(), ka, hesaplar: {} };
+      R.kullanicilar[kul] = { ad: $('kad').value.trim(), yonetici: true, moduller: [], izinler: {}, olusturma: new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) };
+      S = { kul, ad: $('kad').value.trim(), ka, yonetici: true };
       await kullaniciYaz(kul, s1, S);
       V.rehber = await sifrele(await hamAnahtar(ka), R);
       await veriKaydet('kurulum');
@@ -321,117 +335,158 @@ function kurulumCiz(hata) {
     } catch (er) { V = null; S = null; R = null; kurulumCiz(er.message); }
   };
 }
+// Kullanıcı kaydı: içerik kullanıcıya özel anahtarla (Ku) şifreli; Ku hem kullanıcının şifresiyle hem yönetici rehberinde saklanır.
+// Böylece yönetici yetkiyi şifre sormadan değiştirebilir; şifre yalnız sıfırlarken girilir.
 async function kullaniciYaz(kul, sifre, yuk) {
-  const tuz = b64(rnd(16)), key = await kdf(sifre, tuz, ITER);
-  V.kullanicilar[await kulOz(V.kul_tuz, kul)] = { tuz, iter: ITER, ...(await sifrele(key, yuk)) };
+  const x = R.kullanicilar[kul], h = await kulOz(V.kul_tuz, kul), e0 = V.kullanicilar[h] || {};
+  if (!x.ku) x.ku = b64(rnd(32));
+  let sar = { tuz: e0.tuz, iter: e0.iter, sar: e0.sar };
+  if (sifre) { const tuz = b64(rnd(16)); sar = { tuz, iter: ITER, sar: await sifrele(await kdf(sifre, tuz, ITER), { ku: x.ku }) }; }
+  if (!sar.sar) throw new Error('Bu kullanıcı için şifre belirleyin.');
+  V.kullanicilar[h] = { ...sar, ...(await sifrele(await hamAnahtar(x.ku), yuk)) };
 }
+const simdiTR = () => new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
+const yukHazirla = (kul, x) => x.yonetici ? { kul, ad: x.ad, ka: S.ka, yonetici: true }
+  : { kul, ad: x.ad, izinler: x.izinler || {}, anahtarlar: Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
+const sifreUret = () => { const h = 'abcdefghjkmnpqrstuvwxyz', r = '23456789', a = rnd(8); let s = ''; for (let i = 0; i < 8; i++) s += (i % 3 === 2 ? r : h)[a[i] % (i % 3 === 2 ? r.length : h.length)]; return s; };
+const basHarf = a => String(a || '?').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toLocaleUpperCase('tr');
 
 // ---- yönetim ----
-let MESAJ = null;
+let MESAJ = null, YSEKME = 'kul';
+function ydlg() {
+  let d = $('ydlg');
+  if (!d) { d = document.createElement('dialog'); d.id = 'ydlg'; d.className = 'ydlg'; d.addEventListener('click', e => { if (e.target === d) d.close(); }); document.body.appendChild(d); }
+  return d;
+}
 async function yonetimCiz() {
   await rehber();
   const ms = await modulleriAc(), modAd = Object.fromEntries(ms.map(m => [m.id, m.ad]));
-  let h = '<h1>Yönetim</h1>' + (MESAJ ? '<div class="' + (MESAJ[0] ? 'ok' : 'hata') + '">' + esc(MESAJ[1]) + '</div>' : ''); MESAJ = null;
-  const kulForm = (kul, x, yeni) => {
-    const ben = kul === S.kul, iz = x.izinler || {};
-    let f = '<form data-kul="' + esc(kul) + '" class="kform"><div class="satir">'
-      + '<div><label>Ad soyad</label><input name="ad" type="text" value="' + esc(x.ad || '') + '" required></div>'
-      + (yeni ? '<div><label>Kullanıcı adı</label><input name="kul" type="text" autocapitalize="none" required placeholder="ör. mehmet"></div>' : '')
-      + '<div><label>' + (yeni ? 'Şifre' : 'Şifre (yeniden yazın)') + '</label><input name="sifre" type="text" autocomplete="off" required placeholder="en az 6, harf + rakam"></div></div>';
-    if (ben) f += '<p class="ince" style="margin:12px 0">Yönetici: tüm uygulamalar ve konular açık.</p>';
-    else {
-      f += '<label style="margin-top:16px">Yetkiler</label><div class="yetki">';
-      for (const m of ms) {
-        const var_ = (x.moduller || []).includes(m.id), kn = KONULAR[m.id] || [];
-        f += '<div class="yt"><label class="ytm"><input type="checkbox" name="m" value="' + esc(m.id) + '"' + (var_ ? ' checked' : '') + ' onchange="ytMod(this)"> ' + esc(m.ad) + '</label>';
-        if (kn.length) f += '<div class="ytk">' + kn.map(([k, a]) => '<label><input type="checkbox" name="k_' + esc(m.id) + '" value="' + k + '"' + (var_ && (!iz[m.id] || iz[m.id].includes(k)) && !(k === 'parasal' && !iz[m.id]) ? ' checked' : '') + ' onchange="ytKonu(this)"> ' + esc(a) + '</label>').join('') + '</div>';
-        f += '</div>';
-      }
+  const sek = (k, a, n) => '<button class="ysek' + (YSEKME === k ? ' on' : '') + '" onclick="YSEKME=\'' + k + '\';yonetimCiz()">' + a + (n != null ? ' <span>' + n + '</span>' : '') + '</button>';
+  let h = '<div class="ybas"><h1 style="margin:0">Yönetim</h1><div class="ysekler">' + sek('kul', 'Kullanıcılar', Object.keys(R.kullanicilar).length) + sek('mod', 'Uygulamalar', ms.length) + sek('ayar', 'Ayar') + '</div></div>'
+    + (MESAJ ? '<div class="' + (MESAJ[0] ? 'ok' : 'hata') + '">' + esc(MESAJ[1]) + '</div>' : ''); MESAJ = null;
+  if (YSEKME === 'kul') {
+    h += '<div class="ust2"><p class="ince" style="margin:0">Kişiyi ekleyin, açabileceği uygulamaları ve konuları işaretleyin. Değişiklik için şifre gerekmez.</p><button class="btn" onclick="kulDlg()">+ Kullanıcı ekle</button></div><div class="kartlar">';
+    for (const [kul, x] of Object.entries(R.kullanicilar).sort((a, b) => (b[1].yonetici ? 1 : 0) - (a[1].yonetici ? 1 : 0) || a[0].localeCompare(b[0]))) {
+      const cips = x.yonetici ? '<span class="et k">Yönetici · tümü</span>' : ((x.moduller || []).map(id => {
+        const kn = KONULAR[id], iz = (x.izinler || {})[id] || [];
+        return '<span class="et">' + esc(modAd[id] || id) + (kn ? ' <small>' + iz.filter(k => k !== 'parasal').length + '/' + (kn.length - 1) + '</small>' : '') + (iz.includes('parasal') ? ' <b title="Parasal bilgileri görür">₺</b>' : '') + '</span>';
+      }).join('') || '<span class="ince">Yetki yok</span>');
+      h += '<div class="kkart"><div class="kav">' + esc(basHarf(x.ad || kul)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.ad || kul) + '</b><div class="ince">@' + esc(kul) + (x.degisiklik ? ' · ' + esc(x.degisiklik) : '') + '</div><div style="margin-top:8px">' + cips + '</div></div>'
+        + '<div class="kbt"><button class="btn ik kc" onclick="kulDlg(\'' + esc(kul) + '\')">Düzenle</button>' + (kul !== S.kul ? '<button class="bag sil" onclick="kulSil(\'' + esc(kul) + '\')">Sil</button>' : '') + '</div></div>';
+    }
+    h += '</div>';
+  } else if (YSEKME === 'mod') {
+    h += '<div class="ust2"><p class="ince" style="margin:0">Ana ekrandaki uygulama kutuları. Adı, simgesi ve rengi herkese görünür; bağlantı yalnız yetkiliye açılır.</p><button class="btn" onclick="modDlg()">+ Uygulama ekle</button></div><div class="kartlar">';
+    for (const m of ms) {
+      const bos = !String(m.url || '').trim();
+      h += '<div class="kkart"><span class="hd" style="--r:' + renkHex(m.renk) + ';width:48px;height:48px;box-shadow:none;flex:0 0 auto">' + ikon(m.ikon) + '</span><div style="flex:1;min-width:0"><b>' + esc(m.ad) + '</b>' + (m.aktif === false ? ' <span class="et">kapalı</span>' : '')
+        + '<div class="ince" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (bos ? '<span style="color:var(--kk)">Bağlantı yok</span>' : esc(m.url)) + '</div>' + (KONULAR[m.id] ? '<div class="ince">' + KONULAR[m.id].length + ' konu başlığı</div>' : '') + '</div>'
+        + '<div class="kbt"><button class="btn ik kc" onclick="modDlg(\'' + esc(m.id) + '\')">Düzenle</button></div></div>';
+    }
+    h += '</div>';
+  } else {
+    h += '<section class="kart blok" style="max-width:640px"><h2>GitHub anahtarı</h2><p class="ince" style="margin-top:0">Değişiklikleri kaydetmek için gerekir; yalnız bu tarayıcıda saklanır (epias-ptf, Contents: Read and write).</p><div class="satir"><input id="tok" type="password" autocomplete="off" value="' + esc(ghAnahtar()) + '"><div style="flex:0 0 auto"><button class="btn kc" onclick="ghKaydet($(\'tok\').value.trim());MESAJ=[1,\'Anahtar kaydedildi.\'];yonetimCiz()">Kaydet</button></div></div>'
+      + '<p class="ince">Anahtar almak için: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></p></section>';
+  }
+  $('ana').innerHTML = h;
+}
+// Kullanıcı ekle / düzenle penceresi
+function kulDlg(kul) {
+  const yeni = !kul, x = yeni ? { moduller: [], izinler: {} } : R.kullanicilar[kul], ben = kul === S.kul, d = ydlg();
+  const ms = Object.values(MOD).sort((a, b) => (a.sira || 0) - (b.sira || 0));
+  let f = '<form id="kf2" class="ydf"><div class="ydbas"><b>' + (yeni ? 'Yeni kullanıcı' : esc(x.ad || kul)) + '</b><button type="button" class="kapat" onclick="$(\'ydlg\').close()">×</button></div>'
+    + '<div class="satir"><div><label>Ad soyad</label><input name="ad" type="text" value="' + esc(x.ad || '') + '" required></div>'
+    + (yeni ? '<div><label>Kullanıcı adı</label><input name="kul" type="text" autocapitalize="none" required placeholder="ör. mehmet"></div>' : '') + '</div>'
+    + '<label>' + (yeni ? 'Şifre' : 'Yeni şifre <span class="ince">(değiştirmeyecekseniz boş bırakın)</span>') + '</label><div class="satir" style="gap:8px"><input name="sifre" type="text" autocomplete="off"' + (yeni ? ' required' : '') + ' placeholder="en az 6 karakter, harf + rakam"><div style="flex:0 0 auto"><button type="button" class="btn ik kc" style="height:100%" onclick="this.form.sifre.value=sifreUret()">Üret</button></div></div>';
+  if (ben) f += '<p class="ok" style="margin-top:16px">Yönetici hesabı: tüm uygulamalar ve konular açık.</p>';
+  else {
+    f += '<label style="margin-top:18px">Yetkiler</label><div class="yetki">';
+    for (const m of ms) {
+      const var_ = (x.moduller || []).includes(m.id), kn = KONULAR[m.id] || [], iz = (x.izinler || {})[m.id];
+      f += '<div class="yt' + (var_ ? ' on' : '') + '"><label class="ytm"><span class="hd" style="--r:' + renkHex(m.renk) + ';width:30px;height:30px;box-shadow:none">' + ikon(m.ikon) + '</span><span style="flex:1">' + esc(m.ad) + '</span><span class="anah"><input type="checkbox" name="m" value="' + esc(m.id) + '"' + (var_ ? ' checked' : '') + ' onchange="ytMod(this)"><i></i></span></label>';
+      if (kn.length) f += '<div class="ytk">' + kn.map(([k, a]) => '<label class="cip' + (k === 'parasal' ? ' para' : '') + '"><input type="checkbox" name="k_' + esc(m.id) + '" value="' + k + '"' + (var_ && (iz ? iz.includes(k) : k !== 'parasal') ? ' checked' : '') + ' onchange="ytKonu(this)"><span>' + esc(a) + '</span></label>').join('') + '</div>';
       f += '</div>';
     }
-    return f + '<button class="btn kc" style="margin-top:14px">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></form>';
-  };
-  h += '<section class="kart blok"><h2>Kullanıcılar</h2><div style="overflow-x:auto"><table><thead><tr><th>Kullanıcı</th><th>Uygulamalar</th><th>Değişiklik</th><th></th></tr></thead><tbody>';
-  for (const [kul, x] of Object.entries(R.kullanicilar).sort()) {
-    const mods = x.yonetici ? '<span class="ince">Tümü</span>' : ((x.moduller || []).map(id => '<span class="et">' + esc(modAd[id] || id) + (KONULAR[id] && x.izinler && x.izinler[id] ? ' · ' + x.izinler[id].length + '/' + KONULAR[id].length + (x.izinler[id].includes('parasal') ? ' ₺' : '') : '') + '</span>').join('') || '<span class="ince">—</span>');
-    h += '<tr><td><b>' + esc(kul) + '</b><br><span class="ince">' + esc(x.ad || '') + '</span><br>' + (x.yonetici ? '<span class="et k">Yönetici</span>' : '') + '</td><td>' + mods + '</td><td class="ince">' + esc(x.degisiklik || x.olusturma || '—') + '</td>'
-      + '<td style="text-align:right">' + (kul !== S.kul ? '<button class="btn ik kc" onclick="kulSil(\'' + esc(kul) + '\')">Sil</button>' : '') + '</td></tr>'
-      + '<tr><td colspan="4"><details><summary>Düzenle</summary>' + kulForm(kul, x, false) + '</details></td></tr>';
+    f += '</div>';
   }
-  h += '</tbody></table></div><details style="margin-top:14px"><summary>+ Yeni kullanıcı</summary>' + kulForm('', {}, true) + '</details></section>';
-  h += '<section class="kart blok"><h2>Uygulamalar</h2><form id="mform">' + ms.map(m => {
-    const bos = !String(m.url || '').trim();
-    return '<details' + (bos ? ' open' : '') + ' data-id="' + esc(m.id) + '"><summary>' + esc(m.ad) + (bos ? ' <span class="et k">bağlantı yok</span>' : '') + (m.aktif === false ? ' <span class="et">kapalı</span>' : '') + '</summary><div class="satir">'
-      + '<div><label>Ad</label><input name="ad" type="text" value="' + esc(m.ad) + '"></div><div><label>Açıklama</label><input name="aciklama" type="text" value="' + esc(m.aciklama || '') + '"></div></div>'
-      + '<label>Bağlantı (https://…)</label><input name="url" type="text" value="' + esc(m.url || '') + '" placeholder="https://">'
-      + '<div class="satir"><div><label>Simge</label><select name="ikon">' + Object.entries(IKON_AD).map(([k, a]) => '<option value="' + k + '"' + ((m.ikon || 'diger') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div>'
-      + '<div><label>Renk</label><select name="renk">' + Object.entries(RENKLER).map(([k, [a]]) => '<option value="' + k + '"' + ((m.renk || 'kirmizi') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div>'
-      + '<div style="flex:0 0 auto;align-self:end"><span class="hd" style="--r:' + renkHex(m.renk) + ';width:44px;height:44px;box-shadow:none">' + ikon(m.ikon) + '</span></div></div>'
-      + '<div class="secim" style="margin-top:10px"><label><input type="checkbox" name="aktif"' + (m.aktif !== false ? ' checked' : '') + '> Etkin</label><label><input type="checkbox" name="yeni_sekme"' + (m.yeni_sekme !== false ? ' checked' : '') + '> Yeni sekmede aç</label><label><input type="checkbox" name="sil"> Kaldır</label></div></details>';
-  }).join('')
-    + '<details data-id=""><summary>+ Yeni uygulama</summary><div class="satir"><div><label>Ad</label><input name="ad" type="text"></div><div><label>Açıklama</label><input name="aciklama" type="text"></div></div><label>Bağlantı</label><input name="url" type="text" placeholder="https://"></details>'
-    + '<button class="btn kc" style="margin-top:12px">Uygulamaları kaydet</button></form></section>';
-  h += '<section class="kart blok"><h2>Ayar</h2><label>GitHub anahtarı (yalnız bu tarayıcıda saklanır; epias-ptf, Contents: Read and write)</label><div class="satir"><input id="tok" type="password" autocomplete="off" value="' + esc(ghAnahtar()) + '"><div style="flex:0 0 auto"><button class="btn ik kc" onclick="ghKaydet($(\'tok\').value.trim());MESAJ=[1,\'Anahtar kaydedildi.\'];yonetimCiz()">Kaydet</button></div></div>'
-    + '<p class="ince">Değişiklikler GitHub\'a yazılır, herkes için 1–2 dk içinde geçerli olur. Kullanıcı kendi şifresini değiştiremez; yönetici yeni şifre belirler.</p></section>';
-  $('ana').innerHTML = h;
-  document.querySelectorAll('.kform').forEach(f => f.onsubmit = e => { e.preventDefault(); kulKaydet(f); });
-  $('mform').onsubmit = e => { e.preventDefault(); modKaydet($('mform')); };
+  f += '<div class="ydalt"><button type="button" class="btn ik" onclick="$(\'ydlg\').close()">Vazgeç</button><button class="btn" id="kf2b">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></div></form>';
+  d.innerHTML = f; if (!d.open) d.showModal();
+  $('kf2').onsubmit = e => { e.preventDefault(); kulKaydet($('kf2'), kul); };
 }
+function ytMod(c) { const yt = c.closest('.yt'); yt.classList.toggle('on', c.checked); yt.querySelectorAll('.ytk input').forEach(x => { x.checked = c.checked ? (x.value === 'parasal' ? x.checked : true) : false; }); }
+function ytKonu(c) { const yt = c.closest('.yt'), v = [...yt.querySelectorAll('.ytk input')].some(x => x.checked); yt.querySelector('.ytm input').checked = v; yt.classList.toggle('on', v); }
 async function islem(ad, fn) {
   const b = document.activeElement; if (b && b.tagName === 'BUTTON') { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
-  try { await fn(); MESAJ = [1, ad]; }
-  catch (e) { MESAJ = [0, e.message]; R = null; await veriYukle(); }
+  try { await fn(); MESAJ = [1, ad]; if ($('ydlg') && $('ydlg').open) $('ydlg').close(); }
+  catch (e) { if (b && b.tagName === 'BUTTON') { b.disabled = false; b.textContent = 'Tekrar dene'; } const yer = $('ydlg') && $('ydlg').open ? $('ydlg').querySelector('.ydbas') : null; if (yer) { const old = $('ydlg').querySelector('.hata'); if (old) old.remove(); yer.insertAdjacentHTML('afterend', '<div class="hata">' + esc(e.message) + '</div>'); return; } MESAJ = [0, e.message]; R = null; await veriYukle(); }
   await yonetimCiz(); scrollTo(0, 0);
 }
-function kulKaydet(f) {
-  const yeni = !f.dataset.kul, kul = yeni ? f.kul.value.trim().toLocaleLowerCase('tr') : f.dataset.kul, sifre = f.sifre.value;
-  islem(yeni ? 'Kullanıcı eklendi.' : 'Kullanıcı kaydedildi.', async () => {
-    const h = (yeni ? kulUygun(kul) : null) || (yeni && R.kullanicilar[kul] ? 'Bu kullanıcı adı zaten var.' : null) || sifreUygun(sifre);
+function kulKaydet(f, kul0) {
+  const yeni = !kul0, kul = yeni ? f.kul.value.trim().toLocaleLowerCase('tr') : kul0, sifre = f.sifre.value.trim();
+  islem(yeni ? 'Kullanıcı eklendi.' : 'Kaydedildi.', async () => {
+    const h = (yeni ? kulUygun(kul) : null) || (yeni && R.kullanicilar[kul] ? 'Bu kullanıcı adı zaten var.' : null) || (sifre || yeni ? sifreUygun(sifre) : null);
     if (h) throw new Error(h);
+    if (!f.ad.value.trim()) throw new Error('Ad soyad gerekli.');
     const yon = kul === S.kul, mods = yon ? [] : [...f.querySelectorAll('input[name=m]:checked')].map(x => x.value), izinler = {};
     for (const id of mods) if (KONULAR[id]) izinler[id] = [...f.querySelectorAll('input[name="k_' + id + '"]:checked')].map(x => x.value);
-    if (!f.ad.value.trim()) throw new Error('Ad soyad gerekli.');
-    const x = R.kullanicilar[kul] || { olusturma: new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) };
-    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, degisiklik: new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) });
-    delete x.hesaplar;
+    const x = R.kullanicilar[kul] || { olusturma: simdiTR() };
+    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, degisiklik: simdiTR() });
     R.kullanicilar[kul] = x;
-    const yuk = yon ? { kul, ad: x.ad, ka: S.ka, yonetici: true } : { kul, ad: x.ad, izinler, anahtarlar: Object.fromEntries(mods.filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
-    await kullaniciYaz(kul, sifre, yuk);
+    const yuk = yukHazirla(kul, x);
+    await kullaniciYaz(kul, sifre || null, yuk);
     V.rehber = await sifrele(await hamAnahtar(S.ka), R);
     await veriKaydet((yeni ? 'kullanıcı eklendi' : 'kullanıcı güncellendi'));
     if (kul === S.kul) { S = yuk; oturumKaydet(); }
   });
 }
-function ytMod(c) { const k = c.closest('.yt').querySelectorAll('.ytk input'); k.forEach(x => { x.checked = c.checked && x.value !== 'parasal' ? true : (c.checked ? x.checked : false); }); }
-function ytKonu(c) { const yt = c.closest('.yt'); yt.querySelector('.ytm input').checked = [...yt.querySelectorAll('.ytk input')].some(x => x.checked); }
 function kulSil(kul) {
-  if (!confirm(kul + ' silinsin mi?')) return;
+  if (!confirm((R.kullanicilar[kul].ad || kul) + ' silinsin mi?')) return;
   islem('Kullanıcı silindi.', async () => {
     delete V.kullanicilar[await kulOz(V.kul_tuz, kul)]; delete R.kullanicilar[kul];
     V.rehber = await sifrele(await hamAnahtar(S.ka), R);
     await veriKaydet('kullanıcı silindi');
   });
 }
-function modKaydet(f) {
-  islem('Uygulamalar kaydedildi.', async () => {
-    let sira = 0;
-    for (const d of f.querySelectorAll('details[data-id]')) {
-      const id0 = d.dataset.id, g = n => d.querySelector('[name=' + n + ']'), ad = g('ad').value.trim(), url = g('url').value.trim();
-      if (url && !/^https:\/\//i.test(url)) throw new Error((ad || 'Uygulama') + ': bağlantı https:// ile başlamalı.');
-      if (!id0) {
-        if (!ad) continue;
-        let id = ad.toLocaleLowerCase('tr').replace(/[çğıöşü]/g, c => ({ ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' }[c])).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'modul';
-        while (R.anahtarlar[id]) id += '2';
-        R.anahtarlar[id] = b64(rnd(32));
-        V.moduller[id] = await sifrele(await hamAnahtar(R.anahtarlar[id]), { ad, aciklama: g('aciklama').value.trim(), url, ikon: 'diger', aktif: true, yeni_sekme: true, sira: sira++ });
-        continue;
-      }
-      if (g('sil').checked) { delete V.moduller[id0]; delete R.anahtarlar[id0]; Object.values(R.kullanicilar).forEach(x => x.moduller = (x.moduller || []).filter(y => y !== id0)); continue; }
-      const eski = await coz(await hamAnahtar(R.anahtarlar[id0]), V.moduller[id0]);
-      V.moduller[id0] = await sifrele(await hamAnahtar(R.anahtarlar[id0]), { ...eski, ad: ad || eski.ad, aciklama: g('aciklama').value.trim(), url, ikon: g('ikon').value, renk: g('renk').value, aktif: g('aktif').checked, yeni_sekme: g('yeni_sekme').checked, sira: sira++ });
-    }
+// Uygulama ekle / düzenle penceresi
+function modDlg(id) {
+  const yeni = !id, m = yeni ? { ad: '', aciklama: '', url: '', ikon: 'diger', renk: 'kirmizi', aktif: true, yeni_sekme: true } : MOD[id], d = ydlg();
+  const onz = () => '<span class="hd" id="mOnz" style="--r:' + renkHex(m.renk) + ';width:56px;height:56px;box-shadow:none">' + ikon(m.ikon) + '</span>';
+  d.innerHTML = '<form id="mf2" class="ydf"><div class="ydbas"><b>' + (yeni ? 'Yeni uygulama' : esc(m.ad)) + '</b><button type="button" class="kapat" onclick="$(\'ydlg\').close()">×</button></div>'
+    + '<div style="display:flex;gap:14px;align-items:center">' + onz() + '<div style="flex:1"><label style="margin-top:0">Ad</label><input name="ad" type="text" value="' + esc(m.ad) + '" required></div></div>'
+    + '<label>Açıklama</label><input name="aciklama" type="text" value="' + esc(m.aciklama || '') + '">'
+    + '<label>Bağlantı</label><input name="url" type="text" value="' + esc(m.url || '') + '" placeholder="https://…">'
+    + '<div class="satir"><div><label>Simge</label><select name="ikon" onchange="modOnz(this.form)">' + Object.entries(IKON_AD).map(([k, a]) => '<option value="' + k + '"' + ((m.ikon || 'diger') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div>'
+    + '<div><label>Renk</label><select name="renk" onchange="modOnz(this.form)">' + Object.entries(RENKLER).map(([k, [a]]) => '<option value="' + k + '"' + ((m.renk || 'kirmizi') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div></div>'
+    + '<div class="secim" style="margin-top:14px"><label><input type="checkbox" name="aktif"' + (m.aktif !== false ? ' checked' : '') + '> Ana ekranda göster</label><label><input type="checkbox" name="yeni_sekme"' + (m.yeni_sekme !== false ? ' checked' : '') + '> Yeni sekmede aç</label></div>'
+    + '<div class="ydalt">' + (yeni || KONULAR[id] ? '' : '<button type="button" class="bag sil" style="margin-right:auto" onclick="modSil(\'' + esc(id) + '\')">Uygulamayı kaldır</button>') + '<button type="button" class="btn ik" onclick="$(\'ydlg\').close()">Vazgeç</button><button class="btn">' + (yeni ? 'Ekle' : 'Kaydet') + '</button></div></form>';
+  if (!d.open) d.showModal();
+  $('mf2').onsubmit = e => { e.preventDefault(); modKaydet($('mf2'), id); };
+}
+function modOnz(f) { $('mOnz').outerHTML = '<span class="hd" id="mOnz" style="--r:' + renkHex(f.renk.value) + ';width:56px;height:56px;box-shadow:none">' + ikon(f.ikon.value) + '</span>'; }
+function modKaydet(f, id0) {
+  islem(id0 ? 'Uygulama kaydedildi.' : 'Uygulama eklendi.', async () => {
+    const ad = f.ad.value.trim(), url = f.url.value.trim();
+    if (!ad) throw new Error('Ad gerekli.');
+    if (url && !/^https:\/\//i.test(url)) throw new Error('Bağlantı https:// ile başlamalı.');
+    const veri = { ad, aciklama: f.aciklama.value.trim(), url, ikon: f.ikon.value, renk: f.renk.value, aktif: f.aktif.checked, yeni_sekme: f.yeni_sekme.checked };
+    let id = id0;
+    if (!id) {
+      id = ad.toLocaleLowerCase('tr').replace(/[çğıöşü]/g, c => ({ ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' }[c])).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'modul';
+      while (R.anahtarlar[id]) id += '2';
+      R.anahtarlar[id] = b64(rnd(32)); veri.sira = Object.keys(R.anahtarlar).length;
+    } else veri.sira = (MOD[id] || {}).sira || 0;
+    V.moduller[id] = await sifrele(await hamAnahtar(R.anahtarlar[id]), veri);
     V.rehber = await sifrele(await hamAnahtar(S.ka), R);
-    await veriKaydet('uygulamalar güncellendi'); await modOnbellek();
+    await veriKaydet(id0 ? 'uygulama güncellendi' : 'uygulama eklendi'); await modOnbellek();
+  });
+}
+function modSil(id) {
+  if (!confirm((MOD[id] || {}).ad + ' kaldırılsın mı?')) return;
+  islem('Uygulama kaldırıldı.', async () => {
+    delete V.moduller[id]; delete R.anahtarlar[id];
+    for (const [kul, x] of Object.entries(R.kullanicilar)) if ((x.moduller || []).includes(id)) { x.moduller = x.moduller.filter(y => y !== id); delete (x.izinler || {})[id]; await kullaniciYaz(kul, null, yukHazirla(kul, x)); }
+    V.rehber = await sifrele(await hamAnahtar(S.ka), R);
+    await veriKaydet('uygulama kaldırıldı'); await modOnbellek();
   });
 }
 

@@ -542,10 +542,12 @@ def calistir():
     gelir, _ = gh("arsiv_f2pool_gelir.json")
     fiyat, _ = gh("arsiv_btc_fiyat.json")
     mad, _ = gh("antminer_panel.json")
+    fw_haric = None
     try:                                                 # firmware yükseltmesindeki cihaz yönetim dışı (firmware.py durumu)
         fp = json.loads((AESUN / "firmware_pilot.json").read_text()) if (AESUN / "firmware_pilot.json").exists() else {}
         c_ = fp.get("cihaz") or {}
         hr = None if fp.get("durdu") or c_.get("asama") in (None, "bekliyor", "bitti") else c_.get("suffix")
+        fw_haric = hr
         if hr and mad:
             mad = {**mad, "devices": [d for d in mad.get("devices") or [] if d.get("suffix") != hr]}
     except Exception as e:
@@ -706,12 +708,15 @@ def calistir():
     gonderildi = False
     neden_eylem = (gecerli or {}).get("neden") or neden
     if eylem and a["mod"] == "otomatik":
-        cid = komut_gonder(eylem, a, neden_eylem + (" (tekrar: " + ",".join(map(str, takip)) + ")" if takip else ""), takip or "all")
+        hedefler = takip or "all"
+        if hedefler == "all" and fw_haric:          # firmware'i yükseltilen cihaz "tümü" komutuna girmez (uyandırılmışken uyutulmasın)
+            hedefler = sorted({d.get("suffix") for d in (mad or {}).get("devices") or [] if d.get("suffix") and d.get("suffix") != fw_haric})
+        cid = komut_gonder(eylem, a, neden_eylem + (" (tekrar: " + ",".join(map(str, takip)) + ")" if takip else ""), hedefler)
         son_komut_kaydet(eylem, cid)
         hedef = (gecerli or {}).get("hedef") or simdi.replace(minute=0, second=0, microsecond=0)
         gonderilen.append({"anahtar": f"{eylem}|{hedef.isoformat(timespec='seconds')}", "eylem": eylem,
                            "hedef": hedef.isoformat(timespec="seconds"), "t_komut": simdi.isoformat(timespec="seconds"),
-                           "id": cid, "kim": "tekrar" if takip else "tam", "hedefler": takip or "all"})
+                           "id": cid, "kim": "tekrar" if takip else "tam", "hedefler": hedefler})
         gonderildi = True
         log("KOMUT", eylem, "-", neden_eylem)
     elif eylem:

@@ -197,6 +197,25 @@ def pilot_adim(sonuc, simdi, kesif):
     if p.get("gorev_id") != gorev.get("id"):
         p = {"gorev_id": gorev.get("id"), "tamam": [], "olaylar": []}
     if p.get("durdu"):
+        # Görev dosyasındaki "tekrar_izle": [suffix] — sürümü değişmiş ama izlemede hash'e geçmemiş (ör. uyandırma sonrası
+        # başka bir uyut komutuyla tekrar uyutulmuş) cihazı yeniden uyandırıp izler; sıra aynı görev id'siyle devam eder. Her cihaz için bir kez.
+        c0 = p.get("cihaz") or {}
+        suf0 = c0.get("suffix")
+        yap = p.setdefault("tekrar_yapildi", [])
+        if (suf0 in (gorev.get("tekrar_izle") or []) and suf0 not in yap and c0.get("asama") == "bitti" and not c0.get("basarili")
+                and c0.get("yeni_fw") and c0.get("yeni_fw") != c0.get("eski_fw")):
+            yap.append(suf0)
+            p["durdu"] = False
+            p["tamam"] = [x for x in p.get("tamam") or [] if x != suf0]
+            p["sonuclar"] = [x for x in p.get("sonuclar") or [] if x.get("suffix") != suf0]
+            nw = simdi.isoformat(timespec="seconds")
+            cid = _komut("wake", suf0, "yükseltme sonrası yeniden izleme")
+            c0.update(asama="uyandirildi", t_uyandir=nw, wake_id=cid, uyandirma_sayisi=1, olcumler=[], basarili=None, en_hash=None)
+            c0.pop("t_hash", None)
+            p["olaylar"] = (p.get("olaylar") or [])[-150:] + [[nw, f".{suf0} yeniden izleniyor: sürüm {c0.get('yeni_fw')} yüklüydü, "
+                                                                   "uyandırma sonrası cihaz yeniden uyutulmuştu; tekrar uyandırıldı"]]
+            log("firmware: .%s yeniden izleme" % suf0)
+            pilot_yaz(p); _rapor(p, simdi)
         return
     now = simdi.isoformat(timespec="seconds")
 
@@ -322,6 +341,13 @@ def pilot_adim(sonuc, simdi, kesif):
                                              "t_pcb": [k_.get("t_pcb") for k_ in s.get("kart") or []], "diger": s.get("diger")})
         if c["asama"] == "uyandirildi" and (s.get("hash_th") or 0) > 1:
             c.update(asama="izleniyor", t_hash=now); olay(f".{suf} hash başladı: {s.get('hash_th')} TH/s")
+        elif (c["asama"] == "uyandirildi" and s.get("uyku") and (c.get("uyandirma_sayisi") or 1) < 4
+              and simdi - datetime.fromisoformat(c["t_uyandir"]) > timedelta(minutes=8)):
+            # uyandırma komutundan sonra hâlâ uykuda (ör. sıralı bir "uyut" komutu cihazı sonradan uyuttu): yeniden uyandır
+            n = (c.get("uyandirma_sayisi") or 1) + 1
+            cid = _komut("wake", suf, f"yükseltme sonrası izleme ({n}. uyandırma)")
+            c.update(t_uyandir=now, wake_id=cid, uyandirma_sayisi=n)
+            olay(f".{suf} hâlâ uykuda; yeniden uyandırıldı ({n}. deneme)")
         sure_doldu = bool(c.get("t_hash")) and simdi - datetime.fromisoformat(c["t_hash"]) >= timedelta(minutes=int(gorev.get("izle_dk", 20)))
         zaman_asimi = simdi - datetime.fromisoformat(c["t_uyandir"]) > timedelta(minutes=60)
         if sure_doldu or zaman_asimi:

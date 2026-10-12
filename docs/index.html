@@ -372,7 +372,7 @@ function grafikX(sp) {
     if (tur === 'yigin') for (const g of gruplar) { let p = 0, m = 0; for (const s of ser) if ((s.grup || s.ad) === g && s.tip !== 'isaret' && s.v[i] != null) { if (s.v[i] >= 0) p += s.v[i]; else m += s.v[i]; } ust0 = Math.max(ust0, p); alt0 = Math.min(alt0, m); }
     for (const s of ser) if ((tur !== 'yigin' || s.tip === 'isaret') && s.v[i] != null) { ust0 = Math.max(ust0, s.v[i]); alt0 = Math.min(alt0, s.v[i]); }
   }
-  const adim = guzelAdim(((ust0 - alt0) || 1) / 4), tavan = Math.ceil(ust0 / adim) * adim || adim, taban = Math.floor(alt0 / adim) * adim;
+  const adim = guzelAdim(((ust0 - alt0) || 1) / 4), tavan = Math.ceil(ust0 / adim) * adim || (alt0 < 0 ? 0 : adim), taban = Math.floor(alt0 / adim) * adim;
   const y = v => T + H - (v - taban) / (tavan - taban) * H;
   let g = '<svg viewBox="0 0 ' + VW + ' ' + (T + H + B) + '" width="100%" style="display:block" role="img" aria-label="' + esc(sp.ad || 'Grafik') + '"><g font-family="Archivo, sans-serif" font-size="11" fill="#4A5A70">';
   for (let v = taban; v <= tavan + adim / 2; v += adim) { const yy = y(v).toFixed(1); g += '<line x1="' + L + '" y1="' + yy + '" x2="' + (VW - R) + '" y2="' + yy + '" stroke="' + (Math.abs(v) < adim / 2 ? '#B9C4D2' : '#E3E8EE') + '"/><text x="' + (L - 6) + '" y="' + (+yy + 4) + '" text-anchor="end">' + eks(v) + '</text>'; }
@@ -2645,28 +2645,49 @@ const TH_DIGER = [
   { ab: 'Anka', key: 'anka_mineral', kaynak: 'sungrow', id: '5038906', ad: 'Anka Mineral GES (HG Yatırım)' },
   { ab: 'AE', key: 'aksaray_enerji', kaynak: 'inavitas', id: '189', ad: 'Aksaray Enerji Üretim GES (Sapmaz)' },
   { ab: 'A3', key: 'aksaray_3', ad: 'Aksaray 3 · tüketim aboneliği' }];
-// Tüketim aboneliği (A3): son OSOS gününün saatlik çekişi (aşağı yönde kırmızı) + önceki gün (kesik çizgi) + saatin PTF'si
+// Tüketim aboneliği (A3): seçilen OSOS gününün saatlik çekişi (aşağı yönde kırmızı) + önceki gün (kesik çizgi) + saatin PTF'si
+const TUK_GUN = {};
 function osTukGrafik(key, ab) {
-  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = Object.keys(v).sort(), g = gunler[gunler.length - 1], o = gunler[gunler.length - 2];
-  if (!g) return '';
+  return '<div id="tukK_' + key + '" data-ab="' + esc(ab) + '" style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">' + osTukIc(key, ab) + '</div>';
+}
+function tukGunSec(key, g) {
+  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = Object.keys(v).sort();
+  if (!g || !v[g]) return;
+  TUK_GUN[key] = g === gunler[gunler.length - 1] ? null : g;
+  const k = document.getElementById('tukK_' + key); if (k) k.innerHTML = osTukIc(key, k.dataset.ab);
+}
+function osTukIc(key, ab) {
+  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = Object.keys(v).sort();
+  if (!gunler.length) return '<p class="k">OSOS verisi yok.</p>';
+  const songun = gunler[gunler.length - 1], g = TUK_GUN[key] && v[TUK_GUN[key]] ? TUK_GUN[key] : songun, gi = gunler.indexOf(g), o = gunler[gi - 1];
   const p2 = n => String(n).padStart(2, '0'), saat = [...Array(24).keys()];
   const c = (gn, s) => { const x = gn && v[gn] && v[gn][p2(s)]; return x && x.cekis != null ? x.cekis : null; };
   const bu = saat.map(s => c(g, s)), dn = saat.map(s => c(o, s));
-  const sonS = Math.max(...bu.map((x, i) => x != null ? i : -1));
+  const sonS = Math.max(...bu.map((x, i) => x != null ? i : -1)), tam = sonS >= 23;
   const ptf = s => ((EP && EP.ptf && EP.ptf[g]) || [])[s];
   const top = a => a.reduce((t, x) => t + (x || 0), 0), dnKadar = dn.slice(0, sonS + 1);
-  const tg = d => d.slice(8, 10) + '.' + d.slice(5, 7);
+  const tg = d => d.slice(8, 10) + '.' + d.slice(5, 7), GA = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'], gAd = d => GA[new Date(d + 'T12:00:00').getDay()];
   const ser = [{ ad: 'Çekiş ' + tg(g), renk: '#D92D20', v: bu.map(x => x == null ? null : -x) }];
   if (o) ser.push({ ad: 'Çekiş ' + tg(o) + ' (önceki gün)', renk: '#8A96A8', v: dn.map(x => x == null ? null : -x), tip: 'isaret' });
   const fark = o && sonS >= 0 ? top(bu) - top(dnKadar) : null;
-  if (!EP) epYukle().then(() => { if (typeof yenidenCizPlanla === 'function') yenidenCizPlanla(); }).catch(() => {});
-  return '<div style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">'
-    + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline"><b style="font-size:14px">Saatlik tüketim · ' + tg(g) + '</b>'
-    + '<span class="k">Bugüne kadar <b>' + say(top(bu)) + ' kWh</b> (' + (sonS + 1) + ' saat)' + (fark != null ? ' · önceki günün aynı saatlerine göre <b style="color:' + (fark > 0 ? '#B42318' : '#1E7A3C') + '">' + (fark > 0 ? '+' : '') + say(fark) + ' kWh</b>' : '') + (o ? ' · ' + tg(o) + ' toplam ' + say(top(dn)) + ' kWh' : '') + '</span></div>'
+  // maliyet tahmini: kWh × (PTF + YEKDEM) × 1,025 / 1000 (enerji bedeli, dağıtım/vergi hariç)
+  const yk = typeof yekdemAy === 'function' && EP ? (yekdemAy(g.slice(0, 7)) || {}).deger : null;
+  let enerji = 0, enerjiVar = false; saat.forEach(s => { if (bu[s] != null && ptf(s) != null && yk != null) { enerji += bu[s] * (ptf(s) + yk) * 1.025 / 1000; enerjiVar = true; } });
+  if (!EP) epYukle().then(() => tukGunSec(key, g)).catch(() => {});
+  const btn = (et, hedef, ip) => '<button type="button" class="btn"' + (hedef ? ' onclick="tukGunSec(\'' + key + '\',\'' + hedef + '\')"' : ' disabled') + ' title="' + ip + '" style="padding:2px 10px">' + et + '</button>';
+  const sec = '<span style="display:inline-flex;gap:6px;align-items:center">'
+    + btn('‹', gunler[gi - 1], 'Önceki gün')
+    + '<input type="date" value="' + g + '" min="' + gunler[0] + '" max="' + songun + '" onchange="tukGunSec(\'' + key + '\',this.value)" style="font:inherit;padding:2px 6px;border:1px solid #CBD3DD;border-radius:6px">'
+    + btn('›', gunler[gi + 1], 'Sonraki gün')
+    + (g !== songun ? btn('Bugün', songun, 'Son OSOS günü') : '') + '</span>';
+  return '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:center"><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap"><b style="font-size:14px">Saatlik tüketim · ' + tg(g) + ' ' + gAd(g) + '</b>' + sec + '</span>'
+    + '<span class="k">' + (tam ? 'Gün toplamı' : 'Bugüne kadar') + ' <b>' + say(top(bu)) + ' kWh</b>' + (tam ? '' : ' (' + (sonS + 1) + ' saat)')
+    + (enerjiVar ? ' · enerji ≈ <b>' + say(enerji) + ' ₺</b>' : '')
+    + (fark != null ? ' · ' + tg(o) + '\'e göre <b style="color:' + (fark > 0 ? '#B42318' : '#1E7A3C') + '">' + (fark > 0 ? '+' : '') + say(fark) + ' kWh</b>' : '') + '</span></div>'
     + grafikX({ id: 'tuk_' + key, ad: ab + ' saatlik tüketim', etiket: saat.map(s => p2(s) + ':00'), etiketAd: 'Saat', seriler: ser,
       turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top', fmt: x => say(Math.abs(x), 1), eksen: x => say(Math.abs(x)),
       tip: i => p2(i) + ':00–' + p2(i + 1) + ':00\nÇekiş ' + tg(g) + ': ' + (bu[i] == null ? '—' : say(bu[i], 1) + ' kWh') + (o ? '\nÇekiş ' + tg(o) + ': ' + (dn[i] == null ? '—' : say(dn[i], 1) + ' kWh') : '') + (ptf(i) != null ? '\nPTF: ' + say(ptf(i), 2) + ' ₺/MWh' : '') })
-    + '<div class="k">Aşağı (kırmızı): şebekeden çekiş, OSOS saatlik ölçümü (kWh ≈ saat ortalaması kW). Gri çizgi önceki günün aynı saati. Son saatler OSOS gecikmesiyle sonradan dolar.</div></div>';
+    + '<div class="k">Aşağı (kırmızı): şebekeden çekiş, OSOS saatlik ölçümü (kWh ≈ saat ortalaması kW). Gri çizgi önceki günün aynı saati. Enerji ≈ kWh × (PTF + YEKDEM) × 1,025 (dağıtım ve vergiler hariç). Günü ‹ › veya takvimden seçin.</div>';
 }
 async function cizDigerPrensip() {
   await strYukle();

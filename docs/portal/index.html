@@ -19,7 +19,7 @@ a{color:var(--kk)}
 .kart{background:var(--b);border:1px solid var(--c);border-radius:14px;padding:22px}
 .giris{max-width:380px;margin:8vh auto 0}.giris .marka{margin-bottom:18px}
 label{display:block;font-size:13px;color:var(--y);margin:12px 0 4px}
-input[type=text],input[type=password]{width:100%;padding:11px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;background:#fff;color:var(--s)}
+select,input[type=text],input[type=password]{width:100%;padding:11px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;background:#fff;color:var(--s)}
 input:focus{outline:2px solid #F3B4B7;border-color:var(--k)}
 .btn{display:inline-block;background:var(--k);color:#fff;border:0;border-radius:9px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}.btn:hover{background:var(--kk)}.btn:disabled{opacity:.6;cursor:wait}
 .btn.ik{background:#fff;color:var(--s);border:1px solid #CCD2DA}.btn.ik:hover{border-color:var(--s)}.btn.kc{padding:6px 12px;font-size:13px}.btn.tam{width:100%;margin-top:18px}
@@ -37,6 +37,39 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 .blok{margin-bottom:18px}.ince{color:var(--y);font-size:13px}
 details{border:1px solid var(--c);border-radius:10px;padding:10px 14px;margin:8px 0;background:#fff}summary{cursor:pointer;font-weight:600}
 .bekle{display:grid;place-items:center;min-height:40vh;color:var(--y)}
+.hub{position:relative;width:min(700px,100%);aspect-ratio:1/1;margin:0 auto}
+.halka{position:absolute;inset:11%;border:2px dashed #D9DDE3;border-radius:50%}
+.merkez{position:absolute;left:50%;top:50%;width:46%;transform:translate(-50%,-50%)}.merkez svg{width:100%;height:auto;display:block}
+.hm{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;width:150px;background:none;border:0;cursor:pointer;font:inherit;color:var(--s);padding:0}
+.hd{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--r);box-shadow:0 0 0 7px color-mix(in srgb,var(--r) 18%,#fff),0 6px 16px rgba(43,47,53,.18);transition:transform .15s,box-shadow .15s}
+.hd svg{width:38px;height:38px}
+.hm:hover .hd,.hm:focus-visible .hd{transform:scale(1.08);box-shadow:0 0 0 9px color-mix(in srgb,var(--r) 26%,#fff),0 10px 24px rgba(43,47,53,.24)}
+.hm:focus-visible{outline:none}.ha{font-weight:700;font-size:14px;line-height:1.25;text-align:center;color:color-mix(in srgb,var(--r) 75%,#1c2026)}
+.hm.kilit .hd{filter:grayscale(.15)}
+.baslik{text-align:center;margin:0 0 6px}.alt{text-align:center;color:var(--y);margin:0 0 10px}
+dialog{border:0;border-radius:16px;padding:0;width:min(400px,94vw);box-shadow:0 24px 70px rgba(16,24,40,.35)}dialog::backdrop{background:rgba(20,24,30,.45)}
+.dlg{padding:22px}.dlgb{display:flex;align-items:center;gap:12px;margin-bottom:6px}.dlgb .hd{width:52px;height:52px;box-shadow:none}.dlgb .hd svg{width:26px;height:26px}
+.kapat{position:absolute;right:12px;top:10px;background:none;border:0;font-size:22px;color:var(--y);cursor:pointer}
+.oturum{color:var(--y);font-size:14px}
+dialog.cam{background:#fff;width:min(820px,95vw);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(20,24,30,.35)}
+dialog.cam::backdrop{background:radial-gradient(circle at 12% 18%,rgba(215,38,46,.18) 0 22%,transparent 23%),radial-gradient(circle at 88% 85%,rgba(58,63,71,.16) 0 18%,transparent 19%),rgba(244,245,247,.94)}
+.cam .ikili{display:grid;grid-template-columns:1fr 1fr;min-height:440px}
+.cam .sol{position:relative;overflow:hidden;color:#fff;padding:34px 30px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(155deg,#3A3F47 0%,#2B2F35 45%,#8E1117 100%)}
+.cam .sol .daire{position:absolute;border-radius:50%}
+.cam .sol .ill{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:78%}
+.cam .sol b{font-size:20px;position:relative}.cam .sol span{opacity:.8;font-size:13px;position:relative;margin-top:4px}
+.cam .dlg{position:relative;padding:34px 34px 28px;display:flex;flex-direction:column;justify-content:center}
+.cam .dbas{margin:14px 0 4px}.cam .dbas b{display:block;font-size:21px}.cam .dbas span{color:var(--y);font-size:13px}
+.cam .alan{display:block;margin-top:14px}.cam .alan>span{display:block;font-size:13px;color:var(--y);margin-bottom:4px}
+.cam .alan input{width:100%;padding:11px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;color:var(--s)}
+.cam .alan input:focus{outline:2px solid #F3B4B7;border-color:var(--k)}
+.cam .alt2{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;margin-top:12px}.cam .alt2 label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:12.5px}
+.cam .unut{color:var(--kk);text-decoration:none}.cam .unut:hover{text-decoration:underline}
+.cam .btn.tam{margin-top:20px}
+.cam .kapat{color:var(--y);z-index:2}
+.cam p{margin:6px 0 0}
+@media (max-width:700px){.cam .ikili{grid-template-columns:1fr}.cam .sol{min-height:150px;padding:20px 24px}.cam .sol .ill{width:42%;left:auto;right:-4%;top:50%;transform:translateY(-50%);opacity:.9}.cam .sol b{font-size:17px}.cam .dlg{padding:24px}}
+@media (max-width:640px){.hub{aspect-ratio:auto;display:grid;grid-template-columns:1fr 1fr;gap:22px 10px}.halka{display:none}.merkez{position:static;transform:none;width:70%;margin:0 auto 6px;grid-column:1/-1}.hm{position:static;transform:none;width:auto}.hd{width:72px;height:72px}.hd svg{width:32px;height:32px}}
 @media (max-width:560px){.ust{padding:10px 14px}.marka b{font-size:15px}th:nth-child(3),td:nth-child(3){display:none}}
 </style>
 </head>
@@ -85,7 +118,14 @@ async function veriYukle() {
   if (!r2.ok) throw new Error('Veri alınamadı (' + r2.status + ')');
   V = await r2.json(); VSHA = null;
 }
+async function vitrinGuncelle() {
+  if (!R) return;
+  const vs = [];
+  for (const [id, r] of Object.entries(R.anahtarlar)) { if (!V.moduller[id]) continue; const d = await coz(await hamAnahtar(r), V.moduller[id]); vs.push({ id, ad: d.ad, ikon: d.ikon || 'diger', renk: d.renk || 'kirmizi', aktif: d.aktif !== false, sira: d.sira || 0 }); }
+  V.vitrin = vs.sort((a, b) => a.sira - b.sira);
+}
 async function veriKaydet(mesaj) {
+  await vitrinGuncelle();
   const t = ghAnahtar(); if (!t) throw new Error('Kaydetmek için GitHub anahtarı gerekli (Yönetim → Ayar).');
   const hd = { Authorization: 'Bearer ' + t, Accept: 'application/vnd.github+json' };
   if (!VSHA) { const r0 = await fetch(API + '?t=' + Date.now(), { headers: hd, cache: 'no-store' }); if (r0.ok) VSHA = (await r0.json()).sha; }
@@ -104,17 +144,40 @@ const IKON = {
   monitoring: '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
   muhasebe: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  proje: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13h8M8 16h5"/>',
+  insan: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  ekip: '<circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M3 20a6 6 0 0 1 12 0M14.5 20a4.5 4.5 0 0 1 7-3.7"/>',
+  tedarik: '<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/>',
+  egitim: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+  iletisim: '<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',
+  belge: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  takvim: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  sepet: '<path d="M3 4h2l2.5 11h10L20 7H6.2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',
+  gunes: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   diger: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'
 };
+const IKON_AD = { saha: 'Saha', monitoring: 'Grafik', muhasebe: 'Hesap', mail: 'Posta', proje: 'Klasör', insan: 'Kişi', ekip: 'Ekip', tedarik: 'Sevkiyat', egitim: 'Eğitim', iletisim: 'Mesaj', belge: 'Belge', takvim: 'Takvim', sepet: 'Sipariş', gunes: 'Güneş', diger: 'Diğer' };
+const RENKLER = { kirmizi: ['Kırmızı', '#D7262E'], antrasit: ['Antrasit', '#3A3F47'], mavi: ['Mavi', '#2F6DB5'], turuncu: ['Turuncu', '#F08A24'], sari: ['Sarı', '#E9A800'], yesil: ['Yeşil', '#1E9E5A'], lacivert: ['Lacivert', '#1F3B66'], turkuaz: ['Turkuaz', '#1A97B5'] };
+const renkHex = r => (RENKLER[r] || RENKLER.kirmizi)[1];
+const MERKEZ = '<svg viewBox="0 0 320 250" aria-hidden="true"><g fill="none" stroke="#C9CED6" stroke-width="2" stroke-linecap="round"><path d="M18 120h22M28 110v20"/><path d="M290 60h18M299 51v18"/></g>'
+  + '<rect x="40" y="40" width="210" height="140" rx="10" fill="#2B2F35"/><rect x="50" y="50" width="190" height="112" rx="3" fill="#F5F6F8"/>'
+  + '<g fill="#D7262E"><rect x="62" y="60" width="78" height="14" rx="2"/><rect x="62" y="80" width="38" height="30" rx="2"/><rect x="104" y="80" width="36" height="30" rx="2" opacity=".75"/><rect x="146" y="60" width="82" height="50" rx="2" opacity=".9"/><rect x="62" y="116" width="52" height="34" rx="2" opacity=".6"/><rect x="120" y="116" width="54" height="34" rx="2"/><rect x="180" y="116" width="48" height="34" rx="2" opacity=".75"/></g>'
+  + '<path d="M128 180h34l6 26h-46z" fill="#3A3F47"/><rect x="104" y="204" width="82" height="8" rx="4" fill="#2B2F35"/>'
+  + '<rect x="232" y="120" width="44" height="80" rx="7" fill="#2B2F35"/><rect x="237" y="128" width="34" height="62" rx="2" fill="#F5F6F8"/><rect x="241" y="134" width="26" height="9" rx="1.5" fill="#D7262E"/><rect x="241" y="147" width="12" height="16" rx="1.5" fill="#D7262E" opacity=".7"/><rect x="255" y="147" width="12" height="16" rx="1.5" fill="#3A3F47" opacity=".5"/>'
+  + '<path d="M214 14h62a10 10 0 0 1 10 10v26a10 10 0 0 1-10 10h-34l-14 12v-12h-14a10 10 0 0 1-10-10V24a10 10 0 0 1 10-10z" fill="#3A3F47"/><g fill="#fff"><circle cx="230" cy="37" r="4"/><circle cx="245" cy="37" r="4"/><circle cx="260" cy="37" r="4"/></g>'
+  + '<path d="M250 52h46a8 8 0 0 1 8 8v22a8 8 0 0 1-8 8h-8v10l-12-10h-26a8 8 0 0 1-8-8V60a8 8 0 0 1 8-8z" fill="#D7262E" opacity=".92"/>'
+  + '<rect x="6" y="160" width="30" height="21" rx="3" fill="none" stroke="#3A3F47" stroke-width="2.2"/><path d="M6 162l15 10 15-10" fill="none" stroke="#3A3F47" stroke-width="2.2"/>'
+  + '<circle cx="22" cy="60" r="13" fill="none" stroke="#D7262E" stroke-width="2.4"/><path d="M22 52v8l5 4" stroke="#D7262E" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
 const ikon = a => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IKON[a] || IKON.diger) + '</svg>';
 const VARSAYILAN = [
-  { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha' },
-  { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/', ikon: 'monitoring' },
-  { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe' },
-  { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail' }];
+  { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha', renk: 'kirmizi' },
+  { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/', ikon: 'monitoring', renk: 'mavi' },
+  { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
+  { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' }];
 function ust() {
-  $('ust').innerHTML = S ? '<header class="ust"><a href="#" class="marka" onclick="git(\'ana\');return false">' + MARKA.replace(/^<span class="marka">|<\/span>$/g, '') + '</a><nav>'
-    + (S.ka ? '<button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button></nav></header>' : '';
+  $('ust').innerHTML = '<header class="ust"><a href="#" class="marka" onclick="git(\'ana\');return false">' + MARKA.replace(/^<span class="marka">|<\/span>$/g, '') + '</a><nav>'
+    + (S ? '<span class="oturum">' + esc(S.ad || S.kul) + '</span>' + (S.ka ? '<button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button>'
+         : '<button class="bag" onclick="girisModal(null)">Giriş</button>') + '</nav></header>';
 }
 const sifreUygun = s => s.length < 10 ? 'Şifre en az 10 karakter olmalı.' : !/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(s) || !/\d/.test(s) ? 'Şifrede harf ve rakam bulunmalı.' : null;
 const kulUygun = k => /^[a-z0-9._-]{3,32}$/.test(k) ? null : 'Kullanıcı adı 3–32 karakter; küçük harf, rakam, nokta, tire.';
@@ -122,28 +185,71 @@ const kulUygun = k => /^[a-z0-9._-]{3,32}$/.test(k) ? null : 'Kullanıcı adı 3
 // ---- giriş / oturum ----
 function oturumKaydet() { ss.koy('ae_portal', JSON.stringify({ t: Date.now(), S })); }
 function oturumOku() { try { const o = JSON.parse(ss.al('ae_portal') || 'null'); if (o && Date.now() - o.t < OTURUM_SN * 1000) return o.S; } catch (e) {} return null; }
-function cikis() { ss.sil('ae_portal'); S = null; R = null; ust(); girisCiz(); }
-function girisCiz(hata) {
-  $('ana').innerHTML = '<div class="giris kart">' + MARKA + '<h1>Giriş</h1>' + (hata ? '<div class="hata">' + esc(hata) + '</div>' : '')
-    + '<form id="gf" autocomplete="on"><label for="kul">Kullanıcı adı</label><input id="kul" type="text" autocomplete="username" autocapitalize="none" required autofocus>'
-    + '<label for="sif">Şifre</label><input id="sif" type="password" autocomplete="current-password" required>'
-    + '<button class="btn tam" id="gb">Giriş yap</button></form></div>';
+function cikis() { ss.sil('ae_portal'); S = null; R = null; MOD = {}; ust(); git('ana'); }
+let MOD = {};
+async function modOnbellek() { MOD = Object.fromEntries((await modulleriAc()).map(m => [m.id, m])); }
+const vitrinBul = id => ((V && V.vitrin) || []).find(x => x.id === id);
+function dlgBas(id, bas, alt) {
+  const v = id && vitrinBul(id);
+  const sol = '<div class="sol"><span class="daire" style="width:180px;height:180px;right:-60px;top:-60px;background:rgba(215,38,46,.35)"></span><span class="daire" style="width:90px;height:90px;left:-30px;bottom:70px;background:rgba(255,255,255,.06)"></span>'
+    + '<div class="ill">' + MERKEZ.replace(/#2B2F35/g, '#5A616C').replace(/#3A3F47/g, '#6B7380') + '</div>'
+    + '<b>' + esc(v ? v.ad : 'Kurumsal Portal') + '</b><span>Aksaray Enerji · tek giriş ile tüm uygulamalar</span></div>';
+  return '<div class="ikili">' + sol + '<div class="dlg"><button class="kapat" onclick="$(\'dlg\').close()" aria-label="Kapat">×</button>'
+    + MARKA + '<div class="dbas"><b>' + esc(bas || 'Hesabınıza giriş yapın') + '</b><span>' + esc(alt || (v ? v.ad + ' için kullanıcı adı ve şifreniz' : 'Kullanıcı adı ve şifreniz')) + '</span></div>';
+}
+function dlg() {
+  let d = $('dlg');
+  if (!d) { d = document.createElement('dialog'); d.id = 'dlg'; d.className = 'cam'; d.addEventListener('click', e => { if (e.target === d) d.close(); }); document.body.appendChild(d); }
+  return d;
+}
+const IK_KUL = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>';
+const IK_KILIT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+function girisModal(id, hata) {
+  const d = dlg();
+  d.innerHTML = dlgBas(id) + (hata ? '<div class="hata">' + esc(hata) + '</div>' : '')
+    + '<form id="gf" autocomplete="on"><label class="alan"><span>Kullanıcı adı</span><input id="kul" type="text" autocomplete="username" autocapitalize="none" required></label>'
+    + '<label class="alan"><span>Şifre</span><input id="sif" type="password" autocomplete="current-password" required></label>'
+    + '<div class="alt2"><label><input type="checkbox" id="hatirla"' + (hatirla() ? ' checked' : '') + '> Beni hatırla</label><a href="#" class="unut" onclick="return unuttum(this)">Şifremi unuttum</a></div>'
+    + '<button class="btn tam" id="gb">Giriş yap</button></form></div></div>';
+  if (!d.open) d.showModal();
+  const hk = hatirla(); if (hk) { $('kul').value = hk; $('sif').focus(); } else $('kul').focus();
   $('gf').onsubmit = async e => {
     e.preventDefault(); const b = $('gb'); b.disabled = true; b.textContent = 'Kontrol ediliyor…';
     try { await giris($('kul').value, $('sif').value); }
-    catch (er) { girisCiz(er.message); }
+    catch (er) { return girisModal(id, er.message); }
+    try { if ($('hatirla') && $('hatirla').checked) localStorage.setItem('ae_portal_kul', $('kul').value.trim()); else localStorage.removeItem('ae_portal_kul'); } catch (x) {}
+    if (id) acSonuc(id); else d.close();
   };
 }
+function unuttum(a) { a.textContent = 'Yeni şifreyi yöneticiniz belirler'; return false; }
+const hatirla = () => { try { return localStorage.getItem('ae_portal_kul') || ''; } catch (e) { return ''; } };
+function girisCiz() { git('ana'); }
 async function giris(kul, sifre) {
   await veriYukle();
-  if (!V) { kurulumCiz(); return; }
+  if (!V) { $('dlg') && $('dlg').close(); kurulumCiz(); throw new Error('Portal henüz kurulmadı.'); }
   const k = kul.trim().toLocaleLowerCase('tr'), e = V.kullanicilar[await kulOz(V.kul_tuz, k)];
   try {
     const key = await kdf(sifre, e ? e.tuz : b64(rnd(16)), e ? e.iter : ITER);   // kullanıcı yoksa da aynı süre
     if (!e) throw 0;
     S = await coz(key, e);
   } catch (x) { await new Promise(r => setTimeout(r, 600)); throw new Error('Kullanıcı adı veya şifre hatalı.'); }
-  oturumKaydet(); ust(); await git('ana');
+  R = null; oturumKaydet(); await modOnbellek(); ust();
+  git(SAYFA);
+}
+// Uygulamaya tıklama: oturum yoksa giriş sorar; varsa (yetki varsa) doğrudan açar
+function ac(id) {
+  if (!S) return girisModal(id);
+  const m = MOD[id];
+  if (m && m.aktif !== false && String(m.url || '').trim()) { window.open(m.url, m.yeni_sekme !== false ? '_blank' : '_self', 'noopener'); return; }
+  acSonuc(id);
+}
+function acSonuc(id) {
+  const d = dlg(), m = MOD[id], url = m && m.aktif !== false ? String(m.url || '').trim() : '';
+  d.innerHTML = dlgBas(id, url ? 'Hoş geldiniz' : 'Açılamadı', S.ad || S.kul) + (url
+    ? ((S.hesaplar || {})[id] ? '<p class="ince">Hesap: ' + esc(S.hesaplar[id]) + '</p>' : '') + '<a class="btn tam" href="' + esc(url) + '"' + (m.yeni_sekme !== false ? ' target="_blank"' : '') + ' rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(m.ad) + ' uygulamasını aç →</a>'
+    : '<div class="hata">' + (m ? 'Bu uygulamanın bağlantısı henüz tanımlanmadı.' : 'Bu uygulamaya erişim yetkiniz yok. Yöneticinize başvurun.') + '</div><button class="btn ik tam" onclick="$(\'dlg\').close()">Kapat</button>')
+    + '</div></div>';
+  if (!d.open) d.showModal();
 }
 async function modulleriAc() {
   const out = [];
@@ -160,18 +266,20 @@ async function rehber() { if (!R) R = await coz(await hamAnahtar(S.ka), V.rehber
 let SAYFA = 'ana';
 async function git(s) {
   SAYFA = s;
-  if (!S) return girisCiz();
   if (!V) await veriYukle();
+  if (s === 'yonetim' && !S) { SAYFA = 'yonetim'; return girisModal(null); }
   if (s === 'yonetim' && S.ka) return yonetimCiz();
-  const ms = (await modulleriAc()).filter(m => m.aktif !== false);
-  let h = '<h1>Merhaba, ' + esc(S.ad || S.kul) + '</h1>';
-  if (!ms.length) h += '<div class="kart">Size henüz bir uygulama tanımlanmadı. Yöneticinize başvurun.</div>';
-  h += '<div class="izgara">' + ms.map(m => {
-    const bos = !String(m.url || '').trim(), hes = (S.hesaplar || {})[m.id];
-    return '<a class="modul' + (bos ? ' bos' : '') + '" href="' + esc(bos ? '#' : m.url) + '"' + (m.yeni_sekme !== false ? ' target="_blank" rel="noopener noreferrer"' : ' rel="noreferrer"') + '>'
-      + '<span class="ikn">' + ikon(m.ikon) + '</span><b>' + esc(m.ad) + '</b><span>' + esc(bos ? 'Bağlantı henüz tanımlanmadı' : m.aciklama) + '</span>'
-      + (hes ? '<span class="ince">Hesap: ' + esc(hes) + '</span>' : '') + '</a>';
-  }).join('') + '</div>';
+  const vs = ((V && V.vitrin) || []).filter(x => x.aktif !== false).sort((x, y) => (x.sira || 0) - (y.sira || 0));
+  const n = vs.length, R0 = n > 8 ? 42 : 40;
+  let h = '<h1 class="baslik">Kurumsal Portal</h1><p class="alt">' + (S ? 'Açmak istediğiniz uygulamaya tıklayın.' : 'Uygulamaya tıklayın; kullanıcı adı ve şifrenizle giriş yapın.') + '</p>'
+    + '<div class="hub"><div class="halka"></div><div class="merkez">' + MERKEZ + '</div>';
+  vs.forEach((v, i) => {
+    const a = (-90 + i * 360 / n) * Math.PI / 180, x = 50 + R0 * Math.cos(a), y = 50 + R0 * Math.sin(a);
+    const yetki = !S || MOD[v.id];
+    h += '<button class="hm' + (yetki ? '' : ' kilit') + '" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + renkHex(v.renk) + '" onclick="ac(\'' + esc(v.id) + '\')"><span class="hd">' + ikon(v.ikon) + '</span><span class="ha">' + esc(v.ad) + '</span></button>';
+  });
+  if (!n) h += '<div class="kart" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%)">Henüz uygulama yok.</div>';
+  h += '</div>';
   $('ana').innerHTML = h;
 }
 
@@ -194,13 +302,13 @@ function kurulumCiz(hata) {
       V = { v: 1, kul_tuz: b64(rnd(16)), moduller: {}, kullanicilar: {} };
       const ka = b64(rnd(32)); R = { kullanicilar: {}, anahtarlar: {} };
       let i = 0;
-      for (const m of VARSAYILAN) { const km = b64(rnd(32)); R.anahtarlar[m.id] = km; V.moduller[m.id] = await sifrele(await hamAnahtar(km), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, aktif: true, yeni_sekme: true, sira: i++ }); }
+      for (const m of VARSAYILAN) { const km = b64(rnd(32)); R.anahtarlar[m.id] = km; V.moduller[m.id] = await sifrele(await hamAnahtar(km), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: true, yeni_sekme: true, sira: i++ }); }
       R.kullanicilar[kul] = { ad: $('kad').value.trim(), yonetici: true, moduller: [], hesaplar: {}, olusturma: new Date().toISOString().slice(0, 16) };
       S = { kul, ad: $('kad').value.trim(), ka, hesaplar: {} };
       await kullaniciYaz(kul, s1, S);
       V.rehber = await sifrele(await hamAnahtar(ka), R);
       await veriKaydet('kurulum');
-      oturumKaydet(); ust(); git('ana');
+      oturumKaydet(); await modOnbellek(); ust(); git('ana');
     } catch (er) { V = null; S = null; R = null; kurulumCiz(er.message); }
   };
 }
@@ -237,6 +345,9 @@ async function yonetimCiz() {
     return '<details' + (bos ? ' open' : '') + ' data-id="' + esc(m.id) + '"><summary>' + esc(m.ad) + (bos ? ' <span class="et k">bağlantı yok</span>' : '') + (m.aktif === false ? ' <span class="et">kapalı</span>' : '') + '</summary><div class="satir">'
       + '<div><label>Ad</label><input name="ad" type="text" value="' + esc(m.ad) + '"></div><div><label>Açıklama</label><input name="aciklama" type="text" value="' + esc(m.aciklama || '') + '"></div></div>'
       + '<label>Bağlantı (https://…)</label><input name="url" type="text" value="' + esc(m.url || '') + '" placeholder="https://">'
+      + '<div class="satir"><div><label>Simge</label><select name="ikon">' + Object.entries(IKON_AD).map(([k, a]) => '<option value="' + k + '"' + ((m.ikon || 'diger') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div>'
+      + '<div><label>Renk</label><select name="renk">' + Object.entries(RENKLER).map(([k, [a]]) => '<option value="' + k + '"' + ((m.renk || 'kirmizi') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div>'
+      + '<div style="flex:0 0 auto;align-self:end"><span class="hd" style="--r:' + renkHex(m.renk) + ';width:44px;height:44px;box-shadow:none">' + ikon(m.ikon) + '</span></div></div>'
       + '<div class="secim" style="margin-top:10px"><label><input type="checkbox" name="aktif"' + (m.aktif !== false ? ' checked' : '') + '> Etkin</label><label><input type="checkbox" name="yeni_sekme"' + (m.yeni_sekme !== false ? ' checked' : '') + '> Yeni sekmede aç</label><label><input type="checkbox" name="sil"> Kaldır</label></div></details>';
   }).join('')
     + '<details data-id=""><summary>+ Yeni uygulama</summary><div class="satir"><div><label>Ad</label><input name="ad" type="text"></div><div><label>Açıklama</label><input name="aciklama" type="text"></div></div><label>Bağlantı</label><input name="url" type="text" placeholder="https://"></details>'
@@ -295,10 +406,10 @@ function modKaydet(f) {
       }
       if (g('sil').checked) { delete V.moduller[id0]; delete R.anahtarlar[id0]; Object.values(R.kullanicilar).forEach(x => x.moduller = (x.moduller || []).filter(y => y !== id0)); continue; }
       const eski = await coz(await hamAnahtar(R.anahtarlar[id0]), V.moduller[id0]);
-      V.moduller[id0] = await sifrele(await hamAnahtar(R.anahtarlar[id0]), { ...eski, ad: ad || eski.ad, aciklama: g('aciklama').value.trim(), url, aktif: g('aktif').checked, yeni_sekme: g('yeni_sekme').checked, sira: sira++ });
+      V.moduller[id0] = await sifrele(await hamAnahtar(R.anahtarlar[id0]), { ...eski, ad: ad || eski.ad, aciklama: g('aciklama').value.trim(), url, ikon: g('ikon').value, renk: g('renk').value, aktif: g('aktif').checked, yeni_sekme: g('yeni_sekme').checked, sira: sira++ });
     }
     V.rehber = await sifrele(await hamAnahtar(S.ka), R);
-    await veriKaydet('uygulamalar güncellendi');
+    await veriKaydet('uygulamalar güncellendi'); await modOnbellek();
   });
 }
 
@@ -308,7 +419,8 @@ function modKaydet(f) {
   S = oturumOku(); ust();
   try { await veriYukle(); } catch (e) { $('ana').innerHTML = '<div class="kart hata">' + esc(e.message) + '</div>'; return; }
   if (!V) return kurulumCiz();
-  if (S) git('ana'); else girisCiz();
+  if (S) { try { await modOnbellek(); } catch (e) { S = null; ss.sil('ae_portal'); ust(); } }
+  git('ana');
 })();
 </script>
 </body>

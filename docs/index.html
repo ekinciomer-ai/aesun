@@ -1861,6 +1861,13 @@ function strBolum(ad) {
     + sup.map(x => '<tr><td class="sol"><b>' + esc(x.v.ad) + '</b></td><td class="sol">' + (x.inv ? 'İnverter' : 'PV' + x.pv + ' (MPPT ' + Math.ceil(x.pv / 2) + ')') + '</td><td class="sol">' + (x.inv ? (x.v.inv_durum === 'durdu' ? '<b style="color:#B42318">Durdu:</b> ' : 'Düşük: ') + 'son gün üretimi ' + say((x.v.ac_kwh || []).slice(-1)[0]) + ' kWh (santral medyanının %' + say(((x.v.inv_oran || []).slice(-1)[0] || 0) * 100) + '\'i)' : x.kesik ? '<b style="color:#B42318">Kesik:</b> ' + (x.tas ? 'sahada string bağlı olduğu teyit edildi ama akım yok' : 'son günlerde akım 0, daha önce ' + say(x.kesik.tepe_a, 1) + ' A\'e çıkıyordu') : x.dusuk ? 'Akım medyanın %' + say(x.dusuk.oran_medyan * 100) + '\'i' : 'Boş; aynı giriş ' + x.kul + '/' + x.n + ' inverterde kullanılıyor') + '</td><td class="sol k">' + (x.inv ? 'İnverter alarmı / AC şalter / haberleşme — acil' : x.kesik ? 'Sigorta, MC4 konnektör, kablo — acil' : x.dusuk ? 'Gölge, kirlilik, modül/konnektör' : 'Projede bu girişe string var mı? Varsa sigorta, MC4, kablo') + '</td></tr>').join('') + '</tbody></table></div>';
   return h + '<div class="k">Boş girişlerin çoğu tasarım gereği (inverterlerde bağlı string sayısı farklı). Kontrol: santraldeki inverterlerin en az %80\'inde dolu olan giriş bu inverterde boş. String başına üretim akranlarıyla aynı olduğu için veri, bunun tasarım mı (string bağlanmamış) yoksa kopuk string mi olduğunu ayıramaz; tek hat/as-built ile teyit edin.</div></section>';
 }
+// Santral seçimi: tarayıcının / telefonun geri tuşu da tüm santraller listesine döner
+function invSantralSec(k) {
+  const once = invSec.santral; invSec.santral = k || 'hepsi';
+  if (invSec.santral !== 'hepsi' && once !== invSec.santral) { try { history.pushState({ invS: invSec.santral }, ''); } catch (e) {} }
+  cizInverter(); window.scrollTo(0, 0);
+}
+window.addEventListener('popstate', e => { if (location.hash.startsWith('#inverter') && !location.hash.startsWith('#inverterler')) { invSec.santral = (e.state && e.state.invS) || 'hepsi'; if (D) cizInverter(); } });
 async function cizInverter() {
   const dun = gunEkle(bugunTR(), -1);
   if (!invSec.yil) invSec.yil = Number(dun.slice(0, 4));
@@ -1899,7 +1906,7 @@ async function cizInverter() {
   const ilk = 2022, yilOps = []; for (let y = Number(dun.slice(0, 4)); y >= ilk; y--) yilOps.push('<option' + (y === invSec.yil ? ' selected' : '') + '>' + y + '</option>');
   const donOps = ['<option value="son30"' + (invSec.donem === 'son30' ? ' selected' : '') + '>Son 30 gün</option>', '<option value="yil"' + (invSec.donem === 'yil' ? ' selected' : '') + '>Tüm yıl</option>'];
   for (let a = 12; a >= 1; a--) { const m = invSec.yil + '-' + String(a).padStart(2, '0'); if (m <= dun.slice(0, 7)) donOps.push('<option value="' + m + '"' + (invSec.donem === m ? ' selected' : '') + '>' + AYLAR[a - 1] + '</option>'); }
-  document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Santral <select onchange="invSec.santral=this.value;cizInverter()"><option value="hepsi">Tümü</option>' + liste.map(s => '<option value="' + esc(s.key) + '"' + (s.key === invSec.santral ? ' selected' : '') + '>' + esc(s.ad) + ' (' + INV_KAYNAK[s.kaynak] + ')</option>').join('') + '</select></label>'
+  document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Santral <select onchange="invSantralSec(this.value)"><option value="hepsi">Tümü</option>' + liste.map(s => '<option value="' + esc(s.key) + '"' + (s.key === invSec.santral ? ' selected' : '') + '>' + esc(s.ad) + ' (' + INV_KAYNAK[s.kaynak] + ')</option>').join('') + '</select></label>'
     + '<label class="k" style="display:flex;align-items:center;gap:8px">Yıl <select onchange="invSec.yil=Number(this.value);invSec.donem=\'yil\';cizInverter()">' + yilOps.join('') + '</select></label>'
     + '<label class="k" style="display:flex;align-items:center;gap:8px">Dönem <select onchange="invSec.donem=this.value;cizInverter()">' + donOps.join('') + '</select></label>'
     + '<button class="btn" type="button" onclick="invCsv()">CSV indir</button>';
@@ -1937,7 +1944,7 @@ async function cizInverter() {
     const satir = liste.map((s, i) => {
       const t = toplamN(seri[i]), o = SO[s.key] ? toplamN(seriO[i].filter((_, j) => seri[i][j] != null)) : 0, tt = toplamN(seri[i].filter((_, j) => seriO[i][j] != null));
       const f = o > 0 ? (tt / o - 1) * 100 : null, an = analiz[s.key], ds = an.filter(a => a.durma > 0).length;
-      return '<tr style="cursor:pointer" onclick="invSec.santral=\'' + esc(s.key) + '\';cizInverter()"><td class="sol"><a href="javascript:void 0">' + esc(s.ad) + '</a></td><td class="sol">' + INV_KAYNAK[s.kaynak] + '</td><td>' + (s.kwp ? say(s.kwp) : '—') + '</td><td>' + say(t) + '</td><td>' + (s.kwp ? say(t / s.kwp, 1) : '—') + '</td><td>' + (f == null ? '—' : (f >= 0 ? '+' : '') + say(f, 1) + '%') + '</td><td>' + an.length + '</td><td' + (ds ? ' style="color:#B42318;font-weight:600"' : '') + '>' + ds + '</td></tr>';
+      return '<tr style="cursor:pointer" onclick="invSantralSec(\'' + esc(s.key) + '\')"><td class="sol"><a href="javascript:void 0">' + esc(s.ad) + '</a></td><td class="sol">' + INV_KAYNAK[s.kaynak] + '</td><td>' + (s.kwp ? say(s.kwp) : '—') + '</td><td>' + say(t) + '</td><td>' + (s.kwp ? say(t / s.kwp, 1) : '—') + '</td><td>' + (f == null ? '—' : (f >= 0 ? '+' : '') + say(f, 1) + '%') + '</td><td>' + an.length + '</td><td' + (ds ? ' style="color:#B42318;font-weight:600"' : '') + '>' + ds + '</td></tr>';
     }).join('');
     govde += '<section class="panel"><h2>Santraller</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Santral</th><th class="sol">Platform</th><th>kWp</th><th>Üretim (kWh)</th><th>kWh/kWp</th><th>Geçen yıla göre</th><th>İnverter</th><th>Duran inverter</th></tr></thead><tbody>' + satir + '<tr class="top"><td class="sol">Toplam</td><td></td><td>' + say(kwp) + '</td><td>' + say(top) + '</td><td>' + (kwp ? say(top / kwp, 1) : '—') + '</td><td>' + (fark == null ? '—' : (fark >= 0 ? '+' : '') + say(fark, 1) + '%') + '</td><td>' + toplamN(liste.map(s => analiz[s.key].length)) + '</td><td></td></tr></tbody></table></div><div class="k">Santral adına tıklayınca inverter ayrıntısı açılır.</div></section>';
     const strSant = [...new Set(Object.values((STR || {}).inverterler || {}).map(v => v.santral))];
@@ -1980,7 +1987,11 @@ async function cizInverter() {
       + '<tr class="top"><td class="sol">Santral</td>' + aylar.map(m => '<td>' + say(ayToplam(s, m)) + '</td>').join('') + '<td>' + say(toplamN(aylar.map(m => ayToplam(s, m)))) + '</td></tr></tbody></table></div></section>';
   }
   const kapsam = liste.map(s => { const g = Object.keys(s.gun).filter(k => s.gun[k] > 0).sort(); return esc(s.ad) + ': ' + (g.length ? tarihK(g[0]) + ' ' + g[0].slice(0, 4) + '–' + tarihK(g[g.length - 1]) : 'günlük veri yok'); }).join(' · ');
-  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + kartlar + grafikH + govde + '<div class="k">Bu yıldaki günlük veri kapsamı: ' + kapsam + '. Sungrow ve Inavitas geçmişi n8n tarafından her gece güncellenir; FusionSolar inverter günlükleri 5 Ekim 2026\'dan itibaren toplanıyor.</div></div>';
+  const geriH = invSec.santral === 'hepsi' ? '' : '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">'
+    + '<button type="button" class="btn koyu" onclick="invSantralSec(\'hepsi\')" style="display:inline-flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Tüm santraller</button>'
+    + '<span class="k" style="margin-left:6px">Diğer santraller:</span>'
+    + liste.filter(x => x.key !== invSec.santral).map(x => '<button type="button" class="btn" style="padding:5px 12px;font-size:13px" onclick="invSantralSec(\'' + esc(x.key) + '\')">' + esc(x.ad) + '</button>').join('') + '</div>';
+  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + geriH + kartlar + grafikH + govde + '<div class="k">Bu yıldaki günlük veri kapsamı: ' + kapsam + '. Sungrow ve Inavitas geçmişi n8n tarafından her gece güncellenir; FusionSolar inverter günlükleri 5 Ekim 2026\'dan itibaren toplanıyor.</div></div>';
   document.getElementById('kaynakNot').textContent = 'Veri: Sungrow · Inavitas · FusionSolar geçmişi';
 }
 function invCsv() {

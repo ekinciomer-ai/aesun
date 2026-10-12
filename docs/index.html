@@ -107,6 +107,38 @@ table.tb thead th[aria-sort=descending]::after{content:" ▼";font-size:10px}
 </div>
 
 <script>
+// ===== Portal girişi ve yetkiler: oturum portal sayfasından (aynı site, localStorage 'ae_portal') okunur =====
+const PORTAL = (() => { try { const o = JSON.parse(localStorage.getItem('ae_portal') || 'null'); if (o && o.S && Date.now() < (o.son || 0)) return o.S; } catch (e) {} return null; })();
+if (!PORTAL) location.replace('portal/?git=monitoring');
+const YONETICI = !!(PORTAL && PORTAL.ka);
+const IZIN = YONETICI ? null : new Set((((PORTAL || {}).izinler || {}).monitoring) || []);
+const yetkili = k => k === 'bildirim' ? YONETICI : (!IZIN || IZIN.has(k));
+const PARA = yetkili('parasal');
+const PARA_DOSYA = /(^|\/)(fatura\/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat)/;
+(function () {
+  const nav = document.querySelector('.nav'); if (!nav) return;
+  nav.querySelectorAll('a[href^="#"]').forEach(a => {
+    const sf = a.dataset.sayfa || (a.getAttribute('href') === '#inverterler' || a.getAttribute('href') === '#genel' ? 'genel' : null);
+    if (sf && !yetkili(sf)) a.style.display = 'none';
+  });
+  if (PORTAL) {
+    const d = document.createElement('div');
+    d.style.cssText = 'color:#C9D4E3;font-size:12.5px;padding:8px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap';
+    d.innerHTML = '<span>👤 ' + String(PORTAL.ad || PORTAL.kul).replace(/[<>&"]/g, '') + '</span><a href="portal/" style="color:#F2555B;padding:0;display:inline">Portal</a><a href="#" style="color:#9FB0C6;padding:0;display:inline" onclick="localStorage.removeItem(\'ae_portal\');location.replace(\'portal/\');return false">Çıkış</a>';
+    const k = document.getElementById('kaynakNot'); nav.insertBefore(d, k);
+  }
+  if (!PARA) {
+    // Para tutarlarını ekranda maskele (₺/TL, $/USD, BTC); birim fiyatlar (₺/kWh, TL/MWh) kalır
+    const RX = /([-+−]?\s?\d[\d.,]*\s?(?:₺|TL|USD|\$|BTC|mBTC|sat)(?![\/\w]))|((?:₺|\$)\s?[-+−]?\d[\d.,]*)/g;
+    const maske = kok => {
+      const w = document.createTreeWalker(kok, NodeFilter.SHOW_TEXT); let n;
+      while ((n = w.nextNode())) if (RX.test(n.nodeValue)) { RX.lastIndex = 0; n.nodeValue = n.nodeValue.replace(RX, '•••'); }
+      kok.querySelectorAll && kok.querySelectorAll('[data-tip],[title]').forEach(e => { for (const at of ['data-tip', 'title']) { const v = e.getAttribute(at); if (v && RX.test(v)) { RX.lastIndex = 0; e.setAttribute(at, v.replace(RX, '•••')); } } });
+    };
+    new MutationObserver(ms => { for (const m of ms) for (const nd of m.addedNodes) { if (nd.nodeType === 1) maske(nd); else if (nd.nodeType === 3 && RX.test(nd.nodeValue)) { RX.lastIndex = 0; nd.nodeValue = nd.nodeValue.replace(RX, '•••'); } } })
+      .observe(document.body, { childList: true, subtree: true });
+  }
+})();
 const KOK = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/';
 const LIMIT_2026 = 2905914;
 const ESLE = { T1: 'fusionsolar:NE=59224704', T2: 'fusionsolar:NE=73686040', YD: 'sungrow:5064453', Anka: 'sungrow:5038906', AE: 'inavitas:189' }, ESLE_KISA = { T1: 'Sera-1', T2: 'Sera-2' };
@@ -169,6 +201,7 @@ function alHam(yol) {
 }
 // taze = true: ağdan bekle (komut sonrası, "Yenile"); aksi halde önbellek → hemen, eskiyse arkada tazele
 async function al(yol, taze) {
+  if (!PARA && PARA_DOSYA.test(yol)) throw new Error('yetki yok');
   if (!taze && !ON_KAPALI) {
     const c = AL[yol] || (AL[yol] = {});
     if (c.txt != null) {
@@ -2283,6 +2316,11 @@ async function bildKaydet() {
 function ciz() {
   const h0 = location.hash || '#genel';
   const sayfa = h0 === '#bildirim' ? 'bildirim' : h0 === '#maden' ? 'maden' : h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
+  if (!yetkili(sayfa)) {
+    const ilk = ['genel', 'sayac', 'inverter', 'maden', 'epias'].find(yetkili);
+    if (ilk) { location.hash = '#' + ilk; return; }
+    document.getElementById('icerik').innerHTML = '<div class="panel">Monitoring için size tanımlı konu yok. Yöneticinize başvurun.</div>'; return;
+  }
   document.querySelectorAll('.nav a[data-sayfa]').forEach(a => a.classList.toggle('aktif', a.dataset.sayfa === sayfa));
   const t0 = performance.now(), ad = sayfa + (sayfa === 'maden' ? ':' + madenSec.sekme : sayfa === 'inverter' ? ':' + (invSec.sekme || 'analiz') : '');
   const bitir = pr => Promise.resolve(pr).finally(() => { const ms = performance.now() - t0; HIZ.gecis.push({ sayfa: ad, ms: Math.round(ms), t: Date.now() }); if (HIZ.gecis.length > 100) HIZ.gecis.shift(); hizGoster(); onYukle(); });

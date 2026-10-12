@@ -34,7 +34,8 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 .et{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:#EEF0F3;margin:0 4px 4px 0}.et.k{background:#FBE9EA;color:var(--kk)}
 .satir{display:flex;gap:12px;flex-wrap:wrap}.satir>*{flex:1 1 200px}
 .secim{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:6px}.secim label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:14px}
-.blok{margin-bottom:18px}.ince{color:var(--y);font-size:13px}
+.blok{margin-bottom:18px}
+.yetki{display:flex;flex-direction:column;gap:8px}.yt{border:1px solid var(--c);border-radius:10px;padding:10px 12px}.ytm{display:flex;gap:8px;align-items:center;margin:0;color:var(--s);font-weight:600;font-size:14px}.ytk{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 0 26px}.ytk label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:13.5px}.ince{color:var(--y);font-size:13px}
 details{border:1px solid var(--c);border-radius:10px;padding:10px 14px;margin:8px 0;background:#fff}summary{cursor:pointer;font-weight:600}
 .bekle{display:grid;place-items:center;min-height:40vh;color:var(--y)}
 .hub{position:relative;width:min(700px,100%);aspect-ratio:1/1;margin:0 auto}
@@ -85,7 +86,9 @@ dialog.cam::backdrop{background:radial-gradient(circle at 12% 18%,rgba(215,38,46
 // Yönetim kayıtları (rehber + tüm uygulama anahtarları) yönetici anahtarıyla şifrelidir. Veri: epias-ptf/portal/veri.json
 const DEPO = 'ekinciomer-ai/epias-ptf', YOL = 'portal/veri.json';
 const API = 'https://api.github.com/repos/' + DEPO + '/contents/' + YOL, RAW = 'https://raw.githubusercontent.com/' + DEPO + '/main/' + YOL;
-const ITER = 600000, OTURUM_SN = 8 * 3600;
+const ITER = 600000, OTURUM_SN = 12 * 3600;
+// Uygulama alt başlıkları (yetki kutuları). Monitoring paneli bu kimliklere göre sekme ve para bilgisini gösterir.
+const KONULAR = { monitoring: [['genel', 'Genel bakış'], ['sayac', 'Sayaçlar ve mahsup'], ['inverter', 'İnverter analizi'], ['maden', 'Madencilik'], ['epias', 'EPİAŞ'], ['parasal', 'Parasal bilgiler (₺, fatura, gelir, pay)']] };
 const te = new TextEncoder(), td = new TextDecoder();
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -183,9 +186,12 @@ const sifreUygun = s => s.length < 6 ? 'Şifre en az 6 karakter olmalı.' : !/[A
 const kulUygun = k => /^[a-z0-9._-]{3,32}$/.test(k) ? null : 'Kullanıcı adı 3–32 karakter; küçük harf, rakam, nokta, tire.';
 
 // ---- giriş / oturum ----
-function oturumKaydet() { ss.koy('ae_portal', JSON.stringify({ t: Date.now(), S })); }
-function oturumOku() { try { const o = JSON.parse(ss.al('ae_portal') || 'null'); if (o && Date.now() - o.t < OTURUM_SN * 1000) return o.S; } catch (e) {} return null; }
-function cikis() { ss.sil('ae_portal'); S = null; R = null; MOD = {}; ust(); git('ana'); }
+const ls = { al(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, koy(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, sil(k) { try { localStorage.removeItem(k); } catch (e) {} } };
+let UZUN = false;
+function oturumKaydet() { const o = oturumHam(); ls.koy('ae_portal', JSON.stringify({ t: Date.now(), son: UZUN ? Date.now() + 30 * 864e5 : (o && o.S && o.S.kul === (S || {}).kul ? o.son : Date.now() + OTURUM_SN * 1000), S })); }
+function oturumHam() { try { return JSON.parse(ls.al('ae_portal') || 'null'); } catch (e) { return null; } }
+function oturumOku() { const o = oturumHam(); if (o && o.S && Date.now() < (o.son || 0)) return o.S; ls.sil('ae_portal'); return null; }
+function cikis() { ls.sil('ae_portal'); S = null; R = null; MOD = {}; ust(); git('ana'); }
 let MOD = {};
 async function modOnbellek() { MOD = Object.fromEntries((await modulleriAc()).map(m => [m.id, m])); }
 const vitrinBul = id => ((V && V.vitrin) || []).find(x => x.id === id);
@@ -209,14 +215,16 @@ function girisModal(id, hata) {
   d.innerHTML = dlgBas(id) + (hata ? '<div class="hata">' + esc(hata) + '</div>' : '')
     + '<form id="gf" autocomplete="on"><label class="alan"><span>Kullanıcı adı</span><input id="kul" type="text" autocomplete="username" autocapitalize="none" required></label>'
     + '<label class="alan"><span>Şifre</span><input id="sif" type="password" autocomplete="current-password" required></label>'
-    + '<div class="alt2"><label><input type="checkbox" id="hatirla"' + (hatirla() ? ' checked' : '') + '> Beni hatırla</label><a href="#" class="unut" onclick="return unuttum(this)">Şifremi unuttum</a></div>'
+    + '<div class="alt2"><label><input type="checkbox" id="hatirla"' + (hatirla() ? ' checked' : '') + '> Beni hatırla (30 gün)</label><a href="#" class="unut" onclick="return unuttum(this)">Şifremi unuttum</a></div>'
     + '<button class="btn tam" id="gb">Giriş yap</button></form></div></div>';
   if (!d.open) d.showModal();
   const hk = hatirla(); if (hk) { $('kul').value = hk; $('sif').focus(); } else $('kul').focus();
   $('gf').onsubmit = async e => {
     e.preventDefault(); const b = $('gb'); b.disabled = true; b.textContent = 'Kontrol ediliyor…';
+    UZUN = !!($('hatirla') && $('hatirla').checked);
     try { await giris($('kul').value, $('sif').value); }
     catch (er) { return girisModal(id, er.message); }
+    if (HEDEF && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(MOD[HEDEF].url); return; }
     try { if ($('hatirla') && $('hatirla').checked) localStorage.setItem('ae_portal_kul', $('kul').value.trim()); else localStorage.removeItem('ae_portal_kul'); } catch (x) {}
     if (id) acSonuc(id); else d.close();
   };
@@ -264,6 +272,7 @@ async function rehber() { if (!R) R = await coz(await hamAnahtar(S.ka), V.rehber
 
 // ---- sayfalar ----
 let SAYFA = 'ana';
+const HEDEF = new URLSearchParams(location.search).get('git');
 async function git(s) {
   SAYFA = s;
   if (!V) await veriYukle();
@@ -323,18 +332,28 @@ async function yonetimCiz() {
   await rehber();
   const ms = await modulleriAc(), modAd = Object.fromEntries(ms.map(m => [m.id, m.ad]));
   let h = '<h1>Yönetim</h1>' + (MESAJ ? '<div class="' + (MESAJ[0] ? 'ok' : 'hata') + '">' + esc(MESAJ[1]) + '</div>' : ''); MESAJ = null;
-  const kulForm = (kul, x, yeni) => '<form data-kul="' + esc(kul) + '" class="kform"><div class="satir">'
-    + (yeni ? '<div><label>Kullanıcı adı</label><input name="kul" type="text" autocapitalize="none" required placeholder="ör. mehmet"></div>' : '')
-    + '<div><label>Ad soyad</label><input name="ad" type="text" value="' + esc(x.ad || '') + '"></div>'
-    + '<div><label>Şifre ' + (yeni ? '' : '(kaydetmek için gerekli; aynı ya da yeni)') + '</label><input name="sifre" type="password" autocomplete="new-password" required></div></div>'
-    + '<label>Açabileceği uygulamalar</label><div class="secim">' + ms.map(m => '<label><input type="checkbox" name="m" value="' + esc(m.id) + '"' + ((x.moduller || []).includes(m.id) ? ' checked' : '') + '> ' + esc(m.ad) + '</label>').join('') + '</div>'
-    + '<details><summary class="ince">Uygulama hesap adları (isteğe bağlı; kutuda görünür, şifre yazılmaz)</summary><div class="satir">'
-    + ms.map(m => '<div><label>' + esc(m.ad) + '</label><input name="h_' + esc(m.id) + '" type="text" value="' + esc((x.hesaplar || {})[m.id] || '') + '" placeholder="kullanıcı adı / e-posta"></div>').join('') + '</div></details>'
-    + (kul === S.kul ? '<p class="ince">Yönetim yetkisi yalnız bu hesapta; tüm uygulamaları açar.</p>' : '<div style="height:12px"></div>')
-    + '<button class="btn kc">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></form>';
+  const kulForm = (kul, x, yeni) => {
+    const ben = kul === S.kul, iz = x.izinler || {};
+    let f = '<form data-kul="' + esc(kul) + '" class="kform"><div class="satir">'
+      + '<div><label>Ad soyad</label><input name="ad" type="text" value="' + esc(x.ad || '') + '" required></div>'
+      + (yeni ? '<div><label>Kullanıcı adı</label><input name="kul" type="text" autocapitalize="none" required placeholder="ör. mehmet"></div>' : '')
+      + '<div><label>' + (yeni ? 'Şifre' : 'Şifre (yeniden yazın)') + '</label><input name="sifre" type="text" autocomplete="off" required placeholder="en az 6, harf + rakam"></div></div>';
+    if (ben) f += '<p class="ince" style="margin:12px 0">Yönetici: tüm uygulamalar ve konular açık.</p>';
+    else {
+      f += '<label style="margin-top:16px">Yetkiler</label><div class="yetki">';
+      for (const m of ms) {
+        const var_ = (x.moduller || []).includes(m.id), kn = KONULAR[m.id] || [];
+        f += '<div class="yt"><label class="ytm"><input type="checkbox" name="m" value="' + esc(m.id) + '"' + (var_ ? ' checked' : '') + ' onchange="ytMod(this)"> ' + esc(m.ad) + '</label>';
+        if (kn.length) f += '<div class="ytk">' + kn.map(([k, a]) => '<label><input type="checkbox" name="k_' + esc(m.id) + '" value="' + k + '"' + (var_ && (!iz[m.id] || iz[m.id].includes(k)) && !(k === 'parasal' && !iz[m.id]) ? ' checked' : '') + ' onchange="ytKonu(this)"> ' + esc(a) + '</label>').join('') + '</div>';
+        f += '</div>';
+      }
+      f += '</div>';
+    }
+    return f + '<button class="btn kc" style="margin-top:14px">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></form>';
+  };
   h += '<section class="kart blok"><h2>Kullanıcılar</h2><div style="overflow-x:auto"><table><thead><tr><th>Kullanıcı</th><th>Uygulamalar</th><th>Değişiklik</th><th></th></tr></thead><tbody>';
   for (const [kul, x] of Object.entries(R.kullanicilar).sort()) {
-    const mods = x.yonetici ? '<span class="ince">Tümü</span>' : ((x.moduller || []).map(id => '<span class="et">' + esc(modAd[id] || id) + '</span>').join('') || '<span class="ince">—</span>');
+    const mods = x.yonetici ? '<span class="ince">Tümü</span>' : ((x.moduller || []).map(id => '<span class="et">' + esc(modAd[id] || id) + (KONULAR[id] && x.izinler && x.izinler[id] ? ' · ' + x.izinler[id].length + '/' + KONULAR[id].length + (x.izinler[id].includes('parasal') ? ' ₺' : '') : '') + '</span>').join('') || '<span class="ince">—</span>');
     h += '<tr><td><b>' + esc(kul) + '</b><br><span class="ince">' + esc(x.ad || '') + '</span><br>' + (x.yonetici ? '<span class="et k">Yönetici</span>' : '') + '</td><td>' + mods + '</td><td class="ince">' + esc(x.degisiklik || x.olusturma || '—') + '</td>'
       + '<td style="text-align:right">' + (kul !== S.kul ? '<button class="btn ik kc" onclick="kulSil(\'' + esc(kul) + '\')">Sil</button>' : '') + '</td></tr>'
       + '<tr><td colspan="4"><details><summary>Düzenle</summary>' + kulForm(kul, x, false) + '</details></td></tr>';
@@ -369,18 +388,22 @@ function kulKaydet(f) {
   islem(yeni ? 'Kullanıcı eklendi.' : 'Kullanıcı kaydedildi.', async () => {
     const h = (yeni ? kulUygun(kul) : null) || (yeni && R.kullanicilar[kul] ? 'Bu kullanıcı adı zaten var.' : null) || sifreUygun(sifre);
     if (h) throw new Error(h);
-    const yon = kul === S.kul, mods = [...f.querySelectorAll('input[name=m]:checked')].map(x => x.value), hes = {};
-    f.querySelectorAll('input[name^=h_]').forEach(x => { if (x.value.trim()) hes[x.name.slice(2)] = x.value.trim().slice(0, 80); });
-    const x = R.kullanicilar[kul] || { olusturma: new Date().toISOString().slice(0, 16) };
-    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: yon ? [] : mods, hesaplar: hes, degisiklik: new Date().toISOString().slice(0, 16).replace('T', ' ') });
+    const yon = kul === S.kul, mods = yon ? [] : [...f.querySelectorAll('input[name=m]:checked')].map(x => x.value), izinler = {};
+    for (const id of mods) if (KONULAR[id]) izinler[id] = [...f.querySelectorAll('input[name="k_' + id + '"]:checked')].map(x => x.value);
+    if (!f.ad.value.trim()) throw new Error('Ad soyad gerekli.');
+    const x = R.kullanicilar[kul] || { olusturma: new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) };
+    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, degisiklik: new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) });
+    delete x.hesaplar;
     R.kullanicilar[kul] = x;
-    const yuk = yon ? { kul, ad: x.ad, ka: S.ka, hesaplar: hes } : { kul, ad: x.ad, hesaplar: hes, anahtarlar: Object.fromEntries(mods.filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
+    const yuk = yon ? { kul, ad: x.ad, ka: S.ka, yonetici: true } : { kul, ad: x.ad, izinler, anahtarlar: Object.fromEntries(mods.filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
     await kullaniciYaz(kul, sifre, yuk);
     V.rehber = await sifrele(await hamAnahtar(S.ka), R);
     await veriKaydet((yeni ? 'kullanıcı eklendi' : 'kullanıcı güncellendi'));
     if (kul === S.kul) { S = yuk; oturumKaydet(); }
   });
 }
+function ytMod(c) { const k = c.closest('.yt').querySelectorAll('.ytk input'); k.forEach(x => { x.checked = c.checked && x.value !== 'parasal' ? true : (c.checked ? x.checked : false); }); }
+function ytKonu(c) { const yt = c.closest('.yt'); yt.querySelector('.ytm input').checked = [...yt.querySelectorAll('.ytk input')].some(x => x.checked); }
 function kulSil(kul) {
   if (!confirm(kul + ' silinsin mi?')) return;
   islem('Kullanıcı silindi.', async () => {
@@ -418,7 +441,11 @@ function modKaydet(f) {
   S = oturumOku(); ust();
   try { await veriYukle(); } catch (e) { $('ana').innerHTML = '<div class="kart hata">' + esc(e.message) + '</div>'; return; }
   if (!V) return kurulumCiz();
-  if (S) { try { await modOnbellek(); } catch (e) { S = null; ss.sil('ae_portal'); ust(); } }
+  if (S) { try { await modOnbellek(); } catch (e) { S = null; ls.sil('ae_portal'); ust(); } }
+  if (HEDEF) {
+    if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(MOD[HEDEF].url); return; }
+    git('ana'); return S ? acSonuc(HEDEF) : girisModal(HEDEF);
+  }
   git('ana');
 })();
 </script>

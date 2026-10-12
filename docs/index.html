@@ -2516,7 +2516,7 @@ function akisGrafik(k, fs, saha, anlik) {
     { ad: 'Şebekeye veriş', renk: '#2a78d6', v: S.map(x => x.v) },
     { ad: 'Şebekeden çekiş', renk: '#D92D20', v: S.map(x => x.c == null ? null : -x.c) },
     { ad: 'Tüketim (üretimden)', renk: 'rgba(217,45,32,0.30)', v: S.map(tuk) }];
-  if (k === 'Sera-2') ser.unshift({ ad: 'Madencilik yükü', renk: '#7A4FD0', v: S.map(x => x.m), tip: 'alan' });
+  if (k === 'Sera-2') ser.unshift({ ad: 'Madencilik yükü', renk: '#7A4FD0', v: S.map(x => x.m == null ? null : -x.m), tip: 'alan' });   // tüketim: aşağı yönde
   const an = anlik || {}, yon = an.net == null ? '' : an.net >= 0 ? '<b style="color:#1E7A3C">→ şebekeye ' + say(an.net, 1) + ' kW</b>' : '<b style="color:#B42318">← şebekeden ' + say(-an.net, 1) + ' kW</b>';
   return '<div style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">'
     + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline"><b style="font-size:14px">Giriş / çıkış · bugün</b>'
@@ -2524,7 +2524,7 @@ function akisGrafik(k, fs, saha, anlik) {
     + grafikX({ id: 'akis_' + k, ad: k + ' giriş çıkış', etiket: S.map(x => x.h + ':00' + (x.devam ? '*' : '')), etiketAd: 'Saat', seriler: ser,
       turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top',
       tip: i => akisMetin(S[i]) + '\n(ayrıntı için tıklayın)', tik: i => "akisAc('" + k + "'," + (a + i) + ")" })
-    + '<div class="k">Yukarı: üretim ve şebekeye veriş · aşağı (eksi): şebekeden çekiş ve silik kırmızı: üretim anında üretimden karşılanan tüketim (üretim − veriş)' + (k === 'Sera-2' ? ' · mor alan: madencilik yükü' : '') + '. Sayaç değerleri OSOS\'tan saatlik gelir; son saatler gecikebilir. Saate tıklayınca ayrıntı açılır.</div></div>';
+    + '<div class="k">Yukarı: üretim ve şebekeye veriş · aşağı (eksi): şebekeden çekiş ve silik kırmızı: üretim anında üretimden karşılanan tüketim (üretim − veriş)' + (k === 'Sera-2' ? ' · mor alan (aşağı): madencilik yükü' : '') + '. Sayaç değerleri OSOS\'tan saatlik gelir; son saatler gecikebilir. Saate tıklayınca ayrıntı açılır.</div></div>';
 }
 function akisMetin(x) {
   const f = v => v == null ? '—' : say(v, 1) + ' kWh';

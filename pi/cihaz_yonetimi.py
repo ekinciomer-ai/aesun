@@ -757,6 +757,15 @@ def calistir():
         g1 = hp * a["cihaz_th"] / 24 * btc_try
         basabas = basabas_ptf(g1, yekdem or 0, a)
     sonraki_uyan = next((s_ for s_ in anahtar_j if s_["eylem"] == "wake"), None)
+    # Görünen karar: üretim varken (güneş takibi devrede) cihazlar PTF'den bağımsız çalışır → "çalış (güneş)".
+    # Ekonomik (PTF) karar ayrıca saklanır; yalnız üretimin karşılamadığı cihazlar için geçerlidir.
+    karar_eko, neden_eko, istenen_eko = karar, neden, istenen
+    ha_ = (gt or {}).get("hedef_ac") or 0
+    if gt is not None and uretim_kw and ha_ >= 1:
+        filo_n_ = len(ulasilan) or a.get("cihaz_sayisi", 29)
+        karar = istenen = "calis"
+        neden = (f"☀ Üretim var: cihazlar PTF'den bağımsız çalışır — {a.get('gunes_kaynak') or 'Sera-2'} {uretim_kw:.0f} kW, "
+                 + (f"tüm filoya yetiyor ({ha_} cihazlık)" if ha_ >= filo_n_ else f"{ha_} cihaza yetiyor; kalanlar PTF kuralına göre ({neden_eko})"))
     durum, sha = gh("n8n/cihaz_yonetimi_durum.json")
     durum = durum or {}
     gec = durum.get("gecmis") or []
@@ -769,7 +778,7 @@ def calistir():
         "btc_try": btc_try, "btc_tarih": son_fg, "hashprice_btc_th_gun": hp, "hashprice_aralik": [hp_bas, hp_son],
         "maliyet_tl_saat": maliyet, "gelir_tl_saat": gel, "basabas_ptf": basabas,
         "esik_ptf": (basabas * (1 + (a.get("basabas_tolerans") or 0)) if basabas and basabas > 0 else basabas),
-        "karar": karar, "neden": neden, "istenen": istenen, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
+        "karar": karar, "neden": neden, "istenen": istenen, "karar_ekonomik": karar_eko, "neden_ekonomik": neden_eko, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
         "gunes_takip": gt, "toplam_uretim_kw": toplam_kw if fs else None,
         "cihaz": {"toplam": len(cihazlar), "ulasilan": len(ulasilan), "calisan": calisan, "uyuyan": uyuyan, "taze": mad_taze,
                   "su_uyuyan": canli_su},

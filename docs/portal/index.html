@@ -187,11 +187,11 @@ const MERKEZ = '<svg viewBox="0 0 320 250" aria-hidden="true"><g fill="none" str
 const ikon = a => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IKON[a] || IKON.diger) + '</svg>';
 const VARSAYILAN = [
   { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha', renk: 'kirmizi' },
-  { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/', ikon: 'monitoring', renk: 'mavi' },
+  { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/monitoring/', ikon: 'monitoring', renk: 'mavi' },
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
   { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' }];
 function ust() {
-  $('ust').innerHTML = '<header class="ust"><a href="#" class="marka" onclick="git(\'ana\');return false">' + MARKA.replace(/^<span class="marka">|<\/span>$/g, '') + '</a><nav>'
+  $('ust').innerHTML = '<header class="ust"><a href="#" class="marka" onclick="git(\'ana\');return false">' + MARKA.replace(/^<span class="marka">|<\/span>$/g, '') + '</a><nav><a class="bag" href="../">← Web sitesi</a>'
     + (S ? '<span class="oturum">' + esc(S.ad || S.kul) + '</span>' + (S.ka ? '<button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button>'
          : '<button class="bag" onclick="girisModal(null)">Giriş</button>') + '</nav></header>';
 }
@@ -206,7 +206,8 @@ function oturumHam() { try { return JSON.parse(ls.al('ae_portal') || 'null'); } 
 function oturumOku() { const o = oturumHam(); if (o && o.S && Date.now() < (o.son || 0)) return o.S; ls.sil('ae_portal'); return null; }
 function cikis() { ls.sil('ae_portal'); S = null; R = null; MOD = {}; ust(); git('ana'); }
 let MOD = {};
-async function modOnbellek() { MOD = Object.fromEntries((await modulleriAc()).map(m => [m.id, m])); }
+const URL_ESKI = { 'https://ekinciomer-ai.github.io/aesun/': 'https://ekinciomer-ai.github.io/aesun/monitoring/', 'https://ekinciomer-ai.github.io/aesun': 'https://ekinciomer-ai.github.io/aesun/monitoring/' };
+async function modOnbellek() { MOD = Object.fromEntries((await modulleriAc()).map(m => [m.id, Object.assign(m, { url: URL_ESKI[String(m.url || '').trim()] || m.url })])); }
 const vitrinBul = id => ((V && V.vitrin) || []).find(x => x.id === id);
 function dlgBas(id, bas, alt) {
   const v = id && vitrinBul(id);

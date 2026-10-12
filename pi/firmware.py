@@ -22,15 +22,15 @@ KESIF_V = 5
 # (yoksa arayüz gibi dosyanın tamamı gönderilir — Bitmain arayüzünün "old upgrade" yolu)
 FW = {"S21e Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S21eHyd_FR-1.42_251016.bmu",
                    "md5": "684efb616a07f67730a423c773a5881c", "ad": "S21eHyd_FR-1.42_251016.bmu",
-                   "tip": "Antminer S21e Hyd.", "kapsayici": True},
+                   "tip": "Antminer S21e Hyd.", "kapsayici": True, "surum": "FR-1.42(251016"},
       "S19e XP Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S19eXPHyd_FR-1.12_260127.bmu",
                       "md5": "349a71fb0ee3e2723def6439405cd8e4", "ad": "S19eXPHyd_FR-1.12_260127.bmu",
-                      "tip": "Antminer S19e XP Hyd.", "kapsayici": False},
+                      "tip": "Antminer S19e XP Hyd.", "kapsayici": False, "surum": "FR-1.12(260127"},
       # Bitmain listesinde XP+ Hyd ayrı yok; S19 XP Hyd dosyası XP+ cihazlara ancak yüklü yazılım aynı aileden
       # ("S19 XP Hyd.") ise denenir (kullanıcı onayı 11.10 23:57, sıranın en sonunda)
       "S19 XP Hyd": {"url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/firmware/S19XPHyd_FR-1.27_251009.bmu",
                      "md5": "c7ad3b0df9a4e8ac71b6ca5ac22c2fee", "ad": "S19XPHyd_FR-1.27_251009.bmu",
-                     "tip": "Antminer S19 XP+ Hyd.", "kapsayici": False, "eski_icerir": "S19 XP Hyd."}}
+                     "tip": "Antminer S19 XP+ Hyd.", "kapsayici": False, "eski_icerir": "S19 XP Hyd.", "surum": "FR-1.27(251009"}}
 FW_DIR = AESUN / "firmware"
 PILOT = AESUN / "firmware_pilot.json"
 BASARI_TH = 250
@@ -197,6 +197,19 @@ def pilot_adim(sonuc, simdi, kesif):
     if p.get("gorev_id") != gorev.get("id"):
         p = {"gorev_id": gorev.get("id"), "tamam": [], "olaylar": []}
     if p.get("durdu"):
+        # Cihaz yüklemeden önce zaten hedef sürümdeyse "eski sürümde kaldı" durması yanlış alarmdır: başarı sayılır, sıra sürer.
+        c0 = p.get("cihaz") or {}
+        hedef = (FW.get(c0.get("model") or gorev.get("model") or "S21e Hyd") or {}).get("surum")
+        if c0.get("asama") == "bitti" and hedef and hedef in str(c0.get("eski_fw") or "") and not c0.get("basarili"):
+            nw = simdi.isoformat(timespec="seconds")
+            p["durdu"] = False; c0["basarili"] = True; c0["zaten_guncel"] = True
+            if c0.get("suffix") not in p.setdefault("tamam", []): p["tamam"].append(c0.get("suffix"))
+            p["sonuclar"] = [x for x in p.get("sonuclar") or [] if x.get("suffix") != c0.get("suffix")] + [
+                {"suffix": c0.get("suffix"), "eski_fw": c0.get("eski_fw"), "yeni_fw": c0.get("eski_fw"), "basarili": True, "not": "zaten güncel"}]
+            p["olaylar"] = (p.get("olaylar") or [])[-150:] + [[nw, f".{c0.get('suffix')} zaten {c0.get('eski_fw')} sürümündeydi; durma yanlış alarm, başarılı sayıldı — sıra devam ediyor"]]
+            log("firmware: .%s zaten güncel, sıra devam" % c0.get("suffix"))
+            pilot_yaz(p); _rapor(p, simdi)
+            return
         # Görev dosyasındaki "tekrar_izle": [suffix] — sürümü değişmiş ama izlemede hash'e geçmemiş (ör. uyandırma sonrası
         # başka bir uyut komutuyla tekrar uyutulmuş) cihazı yeniden uyandırıp izler; sıra aynı görev id'siyle devam eder. Her cihaz için bir kez.
         c0 = p.get("cihaz") or {}
@@ -281,6 +294,12 @@ def pilot_adim(sonuc, simdi, kesif):
             if c.get("bekleme") != "sürüm okunamadı":
                 c["bekleme"] = "sürüm okunamadı"; olay(f".{suf} bekliyor: mevcut sürüm okunamadı"); pilot_yaz(p)
             return
+        if fw.get("surum") and fw["surum"] in str(eski):
+            c.update(asama="bitti", eski_fw=eski, yeni_fw=eski, basarili=True, zaten_guncel=True)
+            p["tamam"].append(suf)
+            p.setdefault("sonuclar", []).append({"suffix": suf, "eski_fw": eski, "yeni_fw": eski, "basarili": True, "not": "zaten güncel"})
+            olay(f".{suf} zaten {eski} sürümünde — yükleme atlandı, sıradakine geçiliyor")
+            pilot_yaz(p); _rapor(p, simdi); return
         c.update(asama="yukleniyor", eski_fw=eski, uc=cgi, alan=alan, t_yukleme=now, sistem_once=si)
         olay(f".{suf} yükleme başlıyor: {cgi} alan={alan}")
         pilot_yaz(p); _rapor(p, simdi)

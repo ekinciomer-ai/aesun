@@ -409,8 +409,14 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
         sonuc["neden"] = "üretim verisi yok/eski: değişiklik yapılmaz"
         return sonuc
     dusen = len(ok) >= 2 and ok[-1][1] < ok[-2][1] - 1.0          # üretim düşüyor (akşam / bulut girişi)
-    # akşam düşüşünde FusionSolar ~10 dk geriden gelir: bir sonraki okumanın yarısı kadar ileriye bak
-    p_kapat = max(0.0, uretim_kw + 0.5 * (ok[-1][1] - ok[-2][1])) if dusen else uretim_kw + a["kapatma_tolerans_kw"]
+    # akşam düşüşünde FusionSolar ~10 dk geriden gelir: bir sonraki okumanın yarısı kadar ileriye bak.
+    # Yalnız öğleden sonra ve düşüş en az iki okumadır sürüyorsa; tahmin anlık üretimin %80'inin altına inmez.
+    # (12 Eki 09:30: 207 → 490 (anlık sıçrama) → 200 kW okumalarında ileri tahmin 55 kW çıktı, 28 cihazın 19'u gereksiz uyutuldu.)
+    surekli_dusus = len(ok) >= 3 and ok[-2][1] < ok[-3][1] - 1.0
+    if dusen and surekli_dusus and simdi.hour >= 13:
+        p_kapat = max(0.8 * uretim_kw, uretim_kw + 0.5 * (ok[-1][1] - ok[-2][1]))
+    else:
+        p_kapat = uretim_kw + a["kapatma_tolerans_kw"]
     hk = max(0, math.floor(p_kapat / kw_c))
     ha = max(0, math.floor((min(son2) - a["gunes_pay_kw"]) / kw_c)) if len(son2) >= 2 else min(hk, C)
     sonuc.update({"hedef_kapat": hk, "hedef_ac": ha})
@@ -451,7 +457,7 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
             sonuc["neden"] = "fazla cihazlar en az çalışma süresini doldurmadı, bekleniyor"
         return sonuc
     if C < ha and uyuyan:
-        n = min(ha - C, a["acma_adim"])
+        n = min(ha - C, a["acma_adim"] if ha - C < 10 else 2 * a["acma_adim"])   # büyük açıkta (≥10 cihaz) iki kat hızlı aç
         uygun = sorted([d for d in uyuyan if not (son_kom(d).get("eylem") == "sleep" and dk_once(d) < a["en_az_uyku_dk"])], key=th, reverse=True)
         sec = uygun[:n]
         if sec:

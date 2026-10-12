@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="same-origin">
+<title>Portal · Aksaray Enerji</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4a28 28 0 0 0 0 56z' fill='%23D7262E'/%3E%3Cpath d='M32 4a28 28 0 0 1 0 56z' fill='%232B2F35'/%3E%3Cpath d='M36 10 20 36h11l-4 18 18-28H34z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{--k:#D7262E;--kk:#A8131B;--s:#2B2F35;--y:#5B6470;--z:#F4F5F7;--c:#E2E5EA;--b:#fff}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--s);background:var(--z);min-height:100vh;display:flex;flex-direction:column}
+main{flex:1;width:100%;max-width:960px;margin:0 auto;padding:24px 16px}
+footer{text-align:center;color:var(--y);font-size:12px;padding:18px}
+a{color:var(--kk)}
+.ust{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--b);border-bottom:1px solid var(--c)}
+.ust nav{display:flex;gap:16px;align-items:center}.bag{color:var(--s);text-decoration:none;font:inherit;background:none;border:0;cursor:pointer;padding:0}.bag:hover{color:var(--k)}
+.marka{display:inline-flex;align-items:center;gap:10px;color:var(--s);text-decoration:none}.marka b{letter-spacing:.06em;font-size:17px}.m2{color:var(--k)}.marka small{display:block;color:var(--y);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:-3px}
+.kart{background:var(--b);border:1px solid var(--c);border-radius:14px;padding:22px}
+.giris{max-width:380px;margin:8vh auto 0}.giris .marka{margin-bottom:18px}
+label{display:block;font-size:13px;color:var(--y);margin:12px 0 4px}
+input[type=text],input[type=password]{width:100%;padding:11px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;background:#fff;color:var(--s)}
+input:focus{outline:2px solid #F3B4B7;border-color:var(--k)}
+.btn{display:inline-block;background:var(--k);color:#fff;border:0;border-radius:9px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}.btn:hover{background:var(--kk)}.btn:disabled{opacity:.6;cursor:wait}
+.btn.ik{background:#fff;color:var(--s);border:1px solid #CCD2DA}.btn.ik:hover{border-color:var(--s)}.btn.kc{padding:6px 12px;font-size:13px}.btn.tam{width:100%;margin-top:18px}
+.hata{background:#FDECEC;color:#8E1117;border-radius:9px;padding:10px 12px;margin:10px 0}.ok{background:#E8F5EC;color:#1D6B36;border-radius:9px;padding:10px 12px;margin:10px 0}
+h1{font-size:22px;margin:4px 0 18px}h2{font-size:17px;margin:0 0 12px}
+.izgara{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.modul{display:flex;flex-direction:column;gap:10px;background:var(--b);border:1px solid var(--c);border-radius:14px;padding:20px;color:var(--s);text-decoration:none;transition:border-color .15s,transform .15s,box-shadow .15s;min-height:150px}
+.modul:hover{border-color:var(--k);transform:translateY(-2px);box-shadow:0 8px 24px rgba(43,47,53,.08)}
+.modul .ikn{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;background:#FBE9EA;color:var(--k)}
+.modul b{font-size:16px}.modul span{color:var(--y);font-size:13px}.modul.bos{opacity:.55;pointer-events:none}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--c);vertical-align:top}th{color:var(--y);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.et{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:#EEF0F3;margin:0 4px 4px 0}.et.k{background:#FBE9EA;color:var(--kk)}
+.satir{display:flex;gap:12px;flex-wrap:wrap}.satir>*{flex:1 1 200px}
+.secim{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:6px}.secim label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:14px}
+.blok{margin-bottom:18px}.ince{color:var(--y);font-size:13px}
+details{border:1px solid var(--c);border-radius:10px;padding:10px 14px;margin:8px 0;background:#fff}summary{cursor:pointer;font-weight:600}
+.bekle{display:grid;place-items:center;min-height:40vh;color:var(--y)}
+@media (max-width:560px){.ust{padding:10px 14px}.marka b{font-size:15px}th:nth-child(3),td:nth-child(3){display:none}}
+</style>
+</head>
+<body>
+<div id="ust"></div>
+<main id="ana"><div class="bekle">Yükleniyor…</div></main>
+<footer>Aksaray Enerji San. ve Tic. Ltd. Şti.</footer>
+<script>
+'use strict';
+// ===== Aksaray Enerji Portal (GitHub Pages) =====
+// Sunucu yok: kayıtlar şifreli. Her kullanıcının kaydı kendi şifresinden türetilen anahtarla (PBKDF2-SHA256 600k + AES-GCM)
+// şifrelenir; uygulama bağlantıları ayrı anahtarlarla şifrelidir ve yalnız yetkili kullanıcının kaydında o anahtar bulunur.
+// Yönetim kayıtları (rehber + tüm uygulama anahtarları) yönetici anahtarıyla şifrelidir. Veri: epias-ptf/portal/veri.json
+const DEPO = 'ekinciomer-ai/epias-ptf', YOL = 'portal/veri.json';
+const API = 'https://api.github.com/repos/' + DEPO + '/contents/' + YOL, RAW = 'https://raw.githubusercontent.com/' + DEPO + '/main/' + YOL;
+const ITER = 600000, OTURUM_SN = 8 * 3600;
+const te = new TextEncoder(), td = new TextDecoder();
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const b64 = u => btoa(String.fromCharCode(...new Uint8Array(u)));
+const ub = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const rnd = n => crypto.getRandomValues(new Uint8Array(n));
+const ss = { al(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, koy(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }, sil(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
+const ghAnahtar = () => { try { return localStorage.getItem('aesun_gh_anahtar') || ''; } catch (e) { return ''; } };
+const ghKaydet = v => { try { localStorage.setItem('aesun_gh_anahtar', v); } catch (e) {} };
+
+async function kdf(sifre, tuz, iter) {
+  const k = await crypto.subtle.importKey('raw', te.encode(sifre), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: ub(tuz), iterations: iter }, k, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+const hamAnahtar = r => crypto.subtle.importKey('raw', ub(r), 'AES-GCM', false, ['encrypt', 'decrypt']);
+async function sifrele(key, obj) { const iv = rnd(12); const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(JSON.stringify(obj))); return { iv: b64(iv), ct: b64(ct) }; }
+async function coz(key, k) { const p = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub(k.iv) }, key, ub(k.ct)); return JSON.parse(td.decode(p)); }
+async function kulOz(tuz, kul) { const h = await crypto.subtle.digest('SHA-256', te.encode(tuz + ':' + kul.trim().toLocaleLowerCase('tr'))); return Array.from(new Uint8Array(h)).slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join(''); }
+
+// ---- veri ----
+let V = null, VSHA = null, S = null, R = null;   // V: veri.json, S: oturum (çözülmüş kullanıcı kaydı), R: yönetim rehberi
+async function veriYukle() {
+  try {
+    const r = await fetch(API + '?t=' + Date.now(), { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+    if (r.status === 404) { V = null; VSHA = null; return; }
+    if (r.ok) { const j = await r.json(); VSHA = j.sha; V = JSON.parse(td.decode(ub(j.content.replace(/\n/g, '')))); return; }
+  } catch (e) {}
+  const r2 = await fetch(RAW + '?t=' + Date.now(), { cache: 'no-store' });     // API sınırı dolarsa CDN kopyası
+  if (r2.status === 404) { V = null; return; }
+  if (!r2.ok) throw new Error('Veri alınamadı (' + r2.status + ')');
+  V = await r2.json(); VSHA = null;
+}
+async function veriKaydet(mesaj) {
+  const t = ghAnahtar(); if (!t) throw new Error('Kaydetmek için GitHub anahtarı gerekli (Yönetim → Ayar).');
+  const hd = { Authorization: 'Bearer ' + t, Accept: 'application/vnd.github+json' };
+  if (!VSHA) { const r0 = await fetch(API + '?t=' + Date.now(), { headers: hd, cache: 'no-store' }); if (r0.ok) VSHA = (await r0.json()).sha; }
+  V.guncellendi = new Date().toISOString();
+  const icerik = b64(te.encode(JSON.stringify(V, null, 1)));
+  const r = await fetch(API, { method: 'PUT', headers: hd, body: JSON.stringify({ message: 'portal: ' + mesaj, content: icerik, ...(VSHA ? { sha: VSHA } : {}) }) });
+  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error('GitHub ' + r.status + ': ' + (j.message || '') + (r.status === 409 ? ' — başka bir yerden değişmiş; sayfayı yenileyin.' : r.status === 401 || r.status === 403 ? ' — anahtar geçersiz ya da yetkisi yok (epias-ptf, Contents: Read and write).' : '')); }
+  VSHA = (await r.json()).content.sha;
+}
+
+// ---- görünüm ----
+const LOGO = '<svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="gr" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#F0525A"/><stop offset="1" stop-color="#B5121B"/></radialGradient><radialGradient id="gk" cx=".6" cy=".3" r=".8"><stop offset="0" stop-color="#5A6068"/><stop offset="1" stop-color="#25282D"/></radialGradient></defs><path d="M32 4a28 28 0 0 0 0 56z" fill="url(#gr)"/><path d="M32 4a28 28 0 0 1 0 56z" fill="url(#gk)"/><path d="M36 10 20 36h11l-4 18 18-28H34z" fill="#fff"/></svg>';
+const MARKA = '<span class="marka">' + LOGO + '<span><b>AKSARAY</b> <b class="m2">ENERJİ</b><small>Portal</small></span></span>';
+const IKON = {
+  saha: '<path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/>',
+  monitoring: '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
+  muhasebe: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  diger: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'
+};
+const ikon = a => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IKON[a] || IKON.diger) + '</svg>';
+const VARSAYILAN = [
+  { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha' },
+  { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/', ikon: 'monitoring' },
+  { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe' },
+  { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail' }];
+function ust() {
+  $('ust').innerHTML = S ? '<header class="ust"><a href="#" class="marka" onclick="git(\'ana\');return false">' + MARKA.replace(/^<span class="marka">|<\/span>$/g, '') + '</a><nav>'
+    + (S.ka ? '<button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button></nav></header>' : '';
+}
+const sifreUygun = s => s.length < 10 ? 'Şifre en az 10 karakter olmalı.' : !/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(s) || !/\d/.test(s) ? 'Şifrede harf ve rakam bulunmalı.' : null;
+const kulUygun = k => /^[a-z0-9._-]{3,32}$/.test(k) ? null : 'Kullanıcı adı 3–32 karakter; küçük harf, rakam, nokta, tire.';
+
+// ---- giriş / oturum ----
+function oturumKaydet() { ss.koy('ae_portal', JSON.stringify({ t: Date.now(), S })); }
+function oturumOku() { try { const o = JSON.parse(ss.al('ae_portal') || 'null'); if (o && Date.now() - o.t < OTURUM_SN * 1000) return o.S; } catch (e) {} return null; }
+function cikis() { ss.sil('ae_portal'); S = null; R = null; ust(); girisCiz(); }
+function girisCiz(hata) {
+  $('ana').innerHTML = '<div class="giris kart">' + MARKA + '<h1>Giriş</h1>' + (hata ? '<div class="hata">' + esc(hata) + '</div>' : '')
+    + '<form id="gf" autocomplete="on"><label for="kul">Kullanıcı adı</label><input id="kul" type="text" autocomplete="username" autocapitalize="none" required autofocus>'
+    + '<label for="sif">Şifre</label><input id="sif" type="password" autocomplete="current-password" required>'
+    + '<button class="btn tam" id="gb">Giriş yap</button></form></div>';
+  $('gf').onsubmit = async e => {
+    e.preventDefault(); const b = $('gb'); b.disabled = true; b.textContent = 'Kontrol ediliyor…';
+    try { await giris($('kul').value, $('sif').value); }
+    catch (er) { girisCiz(er.message); }
+  };
+}
+async function giris(kul, sifre) {
+  await veriYukle();
+  if (!V) { kurulumCiz(); return; }
+  const k = kul.trim().toLocaleLowerCase('tr'), e = V.kullanicilar[await kulOz(V.kul_tuz, k)];
+  try {
+    const key = await kdf(sifre, e ? e.tuz : b64(rnd(16)), e ? e.iter : ITER);   // kullanıcı yoksa da aynı süre
+    if (!e) throw 0;
+    S = await coz(key, e);
+  } catch (x) { await new Promise(r => setTimeout(r, 600)); throw new Error('Kullanıcı adı veya şifre hatalı.'); }
+  oturumKaydet(); ust(); await git('ana');
+}
+async function modulleriAc() {
+  const out = [];
+  const anah = S.ka ? (await rehber()).anahtarlar : S.anahtarlar || {};
+  for (const [id, r] of Object.entries(anah)) {
+    const m = V.moduller[id]; if (!m) continue;
+    try { const d = await coz(await hamAnahtar(r), m); out.push({ id, ...d }); } catch (e) {}
+  }
+  return out.sort((a, b) => (a.sira || 0) - (b.sira || 0) || a.ad.localeCompare(b.ad, 'tr'));
+}
+async function rehber() { if (!R) R = await coz(await hamAnahtar(S.ka), V.rehber); return R; }
+
+// ---- sayfalar ----
+let SAYFA = 'ana';
+async function git(s) {
+  SAYFA = s;
+  if (!S) return girisCiz();
+  if (!V) await veriYukle();
+  if (s === 'yonetim' && S.ka) return yonetimCiz();
+  const ms = (await modulleriAc()).filter(m => m.aktif !== false);
+  let h = '<h1>Merhaba, ' + esc(S.ad || S.kul) + '</h1>';
+  if (!ms.length) h += '<div class="kart">Size henüz bir uygulama tanımlanmadı. Yöneticinize başvurun.</div>';
+  h += '<div class="izgara">' + ms.map(m => {
+    const bos = !String(m.url || '').trim(), hes = (S.hesaplar || {})[m.id];
+    return '<a class="modul' + (bos ? ' bos' : '') + '" href="' + esc(bos ? '#' : m.url) + '"' + (m.yeni_sekme !== false ? ' target="_blank" rel="noopener noreferrer"' : ' rel="noreferrer"') + '>'
+      + '<span class="ikn">' + ikon(m.ikon) + '</span><b>' + esc(m.ad) + '</b><span>' + esc(bos ? 'Bağlantı henüz tanımlanmadı' : m.aciklama) + '</span>'
+      + (hes ? '<span class="ince">Hesap: ' + esc(hes) + '</span>' : '') + '</a>';
+  }).join('') + '</div>';
+  $('ana').innerHTML = h;
+}
+
+// ---- kurulum (veri.json yokken) ----
+function kurulumCiz(hata) {
+  $('ana').innerHTML = '<div class="giris kart">' + MARKA + '<h1>İlk kurulum</h1><p class="ince">Portalın ilk yöneticisini oluşturun. Kayıt GitHub\'a (epias-ptf/portal) şifreli yazılır.</p>' + (hata ? '<div class="hata">' + esc(hata) + '</div>' : '')
+    + '<form id="kf"><label>Ad soyad</label><input id="kad" type="text" required><label>Kullanıcı adı</label><input id="kkul" type="text" autocapitalize="none" required>'
+    + '<label>Şifre</label><input id="ks1" type="password" autocomplete="new-password" required><label>Şifre (tekrar)</label><input id="ks2" type="password" autocomplete="new-password" required>'
+    + '<label>GitHub anahtarı (epias-ptf, Contents: Read and write)</label><input id="ktok" type="password" value="' + esc(ghAnahtar()) + '" autocomplete="off" required>'
+    + '<button class="btn tam" id="kb">Oluştur</button></form></div>';
+  $('kf').onsubmit = async e => {
+    e.preventDefault();
+    const kul = $('kkul').value.trim().toLocaleLowerCase('tr'), s1 = $('ks1').value;
+    const hata = kulUygun(kul) || (s1 !== $('ks2').value ? 'Şifreler aynı değil.' : sifreUygun(s1));
+    if (hata) return kurulumCiz(hata);
+    $('kb').disabled = true; $('kb').textContent = 'Oluşturuluyor…';
+    try {
+      ghKaydet($('ktok').value.trim());
+      await veriYukle(); if (V) throw new Error('Portal zaten kurulmuş; sayfayı yenileyin.');
+      V = { v: 1, kul_tuz: b64(rnd(16)), moduller: {}, kullanicilar: {} };
+      const ka = b64(rnd(32)); R = { kullanicilar: {}, anahtarlar: {} };
+      let i = 0;
+      for (const m of VARSAYILAN) { const km = b64(rnd(32)); R.anahtarlar[m.id] = km; V.moduller[m.id] = await sifrele(await hamAnahtar(km), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, aktif: true, yeni_sekme: true, sira: i++ }); }
+      R.kullanicilar[kul] = { ad: $('kad').value.trim(), yonetici: true, moduller: [], hesaplar: {}, olusturma: new Date().toISOString().slice(0, 16) };
+      S = { kul, ad: $('kad').value.trim(), ka, hesaplar: {} };
+      await kullaniciYaz(kul, s1, S);
+      V.rehber = await sifrele(await hamAnahtar(ka), R);
+      await veriKaydet('kurulum');
+      oturumKaydet(); ust(); git('ana');
+    } catch (er) { V = null; S = null; R = null; kurulumCiz(er.message); }
+  };
+}
+async function kullaniciYaz(kul, sifre, yuk) {
+  const tuz = b64(rnd(16)), key = await kdf(sifre, tuz, ITER);
+  V.kullanicilar[await kulOz(V.kul_tuz, kul)] = { tuz, iter: ITER, ...(await sifrele(key, yuk)) };
+}
+
+// ---- yönetim ----
+let MESAJ = null;
+async function yonetimCiz() {
+  await rehber();
+  const ms = await modulleriAc(), modAd = Object.fromEntries(ms.map(m => [m.id, m.ad]));
+  let h = '<h1>Yönetim</h1>' + (MESAJ ? '<div class="' + (MESAJ[0] ? 'ok' : 'hata') + '">' + esc(MESAJ[1]) + '</div>' : ''); MESAJ = null;
+  const kulForm = (kul, x, yeni) => '<form data-kul="' + esc(kul) + '" class="kform"><div class="satir">'
+    + (yeni ? '<div><label>Kullanıcı adı</label><input name="kul" type="text" autocapitalize="none" required placeholder="ör. mehmet"></div>' : '')
+    + '<div><label>Ad soyad</label><input name="ad" type="text" value="' + esc(x.ad || '') + '"></div>'
+    + '<div><label>Şifre ' + (yeni ? '' : '(kaydetmek için gerekli; aynı ya da yeni)') + '</label><input name="sifre" type="password" autocomplete="new-password" required></div></div>'
+    + '<label>Açabileceği uygulamalar</label><div class="secim">' + ms.map(m => '<label><input type="checkbox" name="m" value="' + esc(m.id) + '"' + ((x.moduller || []).includes(m.id) ? ' checked' : '') + '> ' + esc(m.ad) + '</label>').join('') + '</div>'
+    + '<details><summary class="ince">Uygulama hesap adları (isteğe bağlı; kutuda görünür, şifre yazılmaz)</summary><div class="satir">'
+    + ms.map(m => '<div><label>' + esc(m.ad) + '</label><input name="h_' + esc(m.id) + '" type="text" value="' + esc((x.hesaplar || {})[m.id] || '') + '" placeholder="kullanıcı adı / e-posta"></div>').join('') + '</div></details>'
+    + '<div class="secim" style="margin:10px 0 14px"><label><input type="checkbox" name="yonetici"' + (x.yonetici ? ' checked' : '') + '> Yönetici (tüm uygulamalar + bu sayfa)</label></div>'
+    + '<button class="btn kc">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></form>';
+  h += '<section class="kart blok"><h2>Kullanıcılar</h2><div style="overflow-x:auto"><table><thead><tr><th>Kullanıcı</th><th>Uygulamalar</th><th>Değişiklik</th><th></th></tr></thead><tbody>';
+  for (const [kul, x] of Object.entries(R.kullanicilar).sort()) {
+    const mods = x.yonetici ? '<span class="ince">Tümü</span>' : ((x.moduller || []).map(id => '<span class="et">' + esc(modAd[id] || id) + '</span>').join('') || '<span class="ince">—</span>');
+    h += '<tr><td><b>' + esc(kul) + '</b><br><span class="ince">' + esc(x.ad || '') + '</span><br>' + (x.yonetici ? '<span class="et k">Yönetici</span>' : '') + '</td><td>' + mods + '</td><td class="ince">' + esc(x.degisiklik || x.olusturma || '—') + '</td>'
+      + '<td style="text-align:right">' + (kul !== S.kul ? '<button class="btn ik kc" onclick="kulSil(\'' + esc(kul) + '\')">Sil</button>' : '') + '</td></tr>'
+      + '<tr><td colspan="4"><details><summary>Düzenle</summary>' + kulForm(kul, x, false) + '</details></td></tr>';
+  }
+  h += '</tbody></table></div><details style="margin-top:14px"><summary>+ Yeni kullanıcı</summary>' + kulForm('', {}, true) + '</details></section>';
+  h += '<section class="kart blok"><h2>Uygulamalar</h2><form id="mform">' + ms.map(m => {
+    const bos = !String(m.url || '').trim();
+    return '<details' + (bos ? ' open' : '') + ' data-id="' + esc(m.id) + '"><summary>' + esc(m.ad) + (bos ? ' <span class="et k">bağlantı yok</span>' : '') + (m.aktif === false ? ' <span class="et">kapalı</span>' : '') + '</summary><div class="satir">'
+      + '<div><label>Ad</label><input name="ad" type="text" value="' + esc(m.ad) + '"></div><div><label>Açıklama</label><input name="aciklama" type="text" value="' + esc(m.aciklama || '') + '"></div></div>'
+      + '<label>Bağlantı (https://…)</label><input name="url" type="text" value="' + esc(m.url || '') + '" placeholder="https://">'
+      + '<div class="secim" style="margin-top:10px"><label><input type="checkbox" name="aktif"' + (m.aktif !== false ? ' checked' : '') + '> Etkin</label><label><input type="checkbox" name="yeni_sekme"' + (m.yeni_sekme !== false ? ' checked' : '') + '> Yeni sekmede aç</label><label><input type="checkbox" name="sil"> Kaldır</label></div></details>';
+  }).join('')
+    + '<details data-id=""><summary>+ Yeni uygulama</summary><div class="satir"><div><label>Ad</label><input name="ad" type="text"></div><div><label>Açıklama</label><input name="aciklama" type="text"></div></div><label>Bağlantı</label><input name="url" type="text" placeholder="https://"></details>'
+    + '<button class="btn kc" style="margin-top:12px">Uygulamaları kaydet</button></form></section>';
+  h += '<section class="kart blok"><h2>Ayar</h2><label>GitHub anahtarı (yalnız bu tarayıcıda saklanır; epias-ptf, Contents: Read and write)</label><div class="satir"><input id="tok" type="password" autocomplete="off" value="' + esc(ghAnahtar()) + '"><div style="flex:0 0 auto"><button class="btn ik kc" onclick="ghKaydet($(\'tok\').value.trim());MESAJ=[1,\'Anahtar kaydedildi.\'];yonetimCiz()">Kaydet</button></div></div>'
+    + '<p class="ince">Değişiklikler GitHub\'a yazılır, herkes için 1–2 dk içinde geçerli olur. Kullanıcı kendi şifresini değiştiremez; yönetici yeni şifre belirler.</p></section>';
+  $('ana').innerHTML = h;
+  document.querySelectorAll('.kform').forEach(f => f.onsubmit = e => { e.preventDefault(); kulKaydet(f); });
+  $('mform').onsubmit = e => { e.preventDefault(); modKaydet($('mform')); };
+}
+async function islem(ad, fn) {
+  const b = document.activeElement; if (b && b.tagName === 'BUTTON') { b.disabled = true; b.textContent = 'Kaydediliyor…'; }
+  try { await fn(); MESAJ = [1, ad]; }
+  catch (e) { MESAJ = [0, e.message]; R = null; await veriYukle(); }
+  await yonetimCiz(); scrollTo(0, 0);
+}
+function kulKaydet(f) {
+  const yeni = !f.dataset.kul, kul = yeni ? f.kul.value.trim().toLocaleLowerCase('tr') : f.dataset.kul, sifre = f.sifre.value;
+  islem(yeni ? 'Kullanıcı eklendi.' : 'Kullanıcı kaydedildi.', async () => {
+    const h = (yeni ? kulUygun(kul) : null) || (yeni && R.kullanicilar[kul] ? 'Bu kullanıcı adı zaten var.' : null) || sifreUygun(sifre);
+    if (h) throw new Error(h);
+    const yon = f.yonetici.checked, mods = [...f.querySelectorAll('input[name=m]:checked')].map(x => x.value), hes = {};
+    f.querySelectorAll('input[name^=h_]').forEach(x => { if (x.value.trim()) hes[x.name.slice(2)] = x.value.trim().slice(0, 80); });
+    if (kul === S.kul && !yon) throw new Error('Kendi yönetici yetkinizi kaldıramazsınız.');
+    const x = R.kullanicilar[kul] || { olusturma: new Date().toISOString().slice(0, 16) };
+    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: yon ? [] : mods, hesaplar: hes, degisiklik: new Date().toISOString().slice(0, 16).replace('T', ' ') });
+    R.kullanicilar[kul] = x;
+    const yuk = yon ? { kul, ad: x.ad, ka: S.ka, hesaplar: hes } : { kul, ad: x.ad, hesaplar: hes, anahtarlar: Object.fromEntries(mods.filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
+    await kullaniciYaz(kul, sifre, yuk);
+    V.rehber = await sifrele(await hamAnahtar(S.ka), R);
+    await veriKaydet((yeni ? 'kullanıcı eklendi' : 'kullanıcı güncellendi'));
+    if (kul === S.kul) { S = yuk; oturumKaydet(); }
+  });
+}
+function kulSil(kul) {
+  if (!confirm(kul + ' silinsin mi?')) return;
+  islem('Kullanıcı silindi.', async () => {
+    delete V.kullanicilar[await kulOz(V.kul_tuz, kul)]; delete R.kullanicilar[kul];
+    V.rehber = await sifrele(await hamAnahtar(S.ka), R);
+    await veriKaydet('kullanıcı silindi');
+  });
+}
+function modKaydet(f) {
+  islem('Uygulamalar kaydedildi.', async () => {
+    let sira = 0;
+    for (const d of f.querySelectorAll('details[data-id]')) {
+      const id0 = d.dataset.id, g = n => d.querySelector('[name=' + n + ']'), ad = g('ad').value.trim(), url = g('url').value.trim();
+      if (url && !/^https:\/\//i.test(url)) throw new Error((ad || 'Uygulama') + ': bağlantı https:// ile başlamalı.');
+      if (!id0) {
+        if (!ad) continue;
+        let id = ad.toLocaleLowerCase('tr').replace(/[çğıöşü]/g, c => ({ ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' }[c])).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'modul';
+        while (R.anahtarlar[id]) id += '2';
+        R.anahtarlar[id] = b64(rnd(32));
+        V.moduller[id] = await sifrele(await hamAnahtar(R.anahtarlar[id]), { ad, aciklama: g('aciklama').value.trim(), url, ikon: 'diger', aktif: true, yeni_sekme: true, sira: sira++ });
+        continue;
+      }
+      if (g('sil').checked) { delete V.moduller[id0]; delete R.anahtarlar[id0]; Object.values(R.kullanicilar).forEach(x => x.moduller = (x.moduller || []).filter(y => y !== id0)); continue; }
+      const eski = await coz(await hamAnahtar(R.anahtarlar[id0]), V.moduller[id0]);
+      V.moduller[id0] = await sifrele(await hamAnahtar(R.anahtarlar[id0]), { ...eski, ad: ad || eski.ad, aciklama: g('aciklama').value.trim(), url, aktif: g('aktif').checked, yeni_sekme: g('yeni_sekme').checked, sira: sira++ });
+    }
+    V.rehber = await sifrele(await hamAnahtar(S.ka), R);
+    await veriKaydet('uygulamalar güncellendi');
+  });
+}
+
+// ---- başlangıç ----
+(async () => {
+  if (!window.crypto || !crypto.subtle) { $('ana').innerHTML = '<div class="kart">Bu tarayıcı güvenli bağlantı (HTTPS) olmadan çalışmaz.</div>'; return; }
+  S = oturumOku(); ust();
+  try { await veriYukle(); } catch (e) { $('ana').innerHTML = '<div class="kart hata">' + esc(e.message) + '</div>'; return; }
+  if (!V) return kurulumCiz();
+  if (S) git('ana'); else girisCiz();
+})();
+</script>
+</body>
+</html>

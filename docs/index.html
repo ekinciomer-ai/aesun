@@ -2438,7 +2438,7 @@ async function invDetayAc(kay, san, id) {
   let topPanel = 0, panelBilinen = 0, bagli = 0;
   const satir = nler.map(n => {
     const t = ts2[n] || {}, a = anM[n], c = pvCanli[n], tas = (STR.tasarim || {})[san + '|' + ad + '|' + n];
-    const ps = Number(t.panel_sayisi) || null, kwp = ps && wp ? ps * wp / 1000 : null; if (ps) { topPanel += ps; panelBilinen++; }
+    const ps = Number(t.panel_sayisi) || null, wpS = Number(t.wp) || wp, kwp = ps && wpS ? ps * wpS / 1000 : null; if (ps) { topPanel += ps; panelBilinen++; }
     const pW = c && c.V != null && c.A != null ? c.V * c.A : null;
     const bos = (tas && tas.durum === 'bos') || (a && a.durum === 'bos' && !(c && c.A > 0.5));
     const vPan = c && ps && c.V ? c.V / ps : null;
@@ -2499,7 +2499,7 @@ async function invDetayAc(kay, san, id) {
     + (olu.length ? '<div style="padding:8px 10px;border-radius:8px;background:#FDECEC;color:#B42318;font-weight:600">Tasarımda dizi bağlı olan ' + olu.map(n => 'PV' + n + ' (' + ts2[n].panel_sayisi + ' panel)').join(', ') + ' girişlerinden 7 gündür akım gelmiyor — dizi kopuk / sigorta / konnektör kontrolü</div>' : '')
     + (diziFark != null && diziFark <= -1.5 ? '<div style="padding:8px 10px;border-radius:8px;background:#FDECEC;color:#B42318;font-weight:600">Tasarımda ' + T.dizi_sayisi + ' dizi var; son 7 günün akım toplamı ≈' + f(esDizi, 1) + ' diziye karşılık geliyor (' + aktifDizi + ' girişte akım var): ≈' + Math.round(-diziFark) + ' dizi üretmiyor — kopuk dizi / sigorta / konnektör kontrolü</div>'
       : diziFark != null ? '<div class="k" style="color:#1E7A3C">Dizi kontrolü (tahmini): akım toplamı ≈' + f(esDizi, 1) + ' dizi, tasarım ' + T.dizi_sayisi + ' dizi — eksik yok.</div>' : '')
-    + (T.pv_not ? '<div class="k">' + esc(T.pv_not) + '</div>' : '') + (ts.not ? '<div class="k">Santral: ' + esc(ts.not) + '</div>' : '')
+    + (T.saha_notu ? '<div class="k" style="color:#8A5A00">Saha: ' + esc(T.saha_notu) + '</div>' : '') + (T.pv_not ? '<div class="k">' + esc(T.pv_not) + '</div>' : '') + (ts.not ? '<div class="k">Santral: ' + esc(ts.not) + '</div>' : '')
     + (eksik > 3 ? '<div class="k">Panel ve string tasarımı tek hat şemalarından <code>inverter/tasarim.json</code> dosyasına işlenince burada ve string tablosunda kWp, beklenen güç ve panel başı gerilim görünür.</div>' : '')
     + (nler.length ? '<div style="font-weight:700">Stringler</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Giriş</th><th>Panel</th><th>kWp</th><th>Gerilim V</th><th>Akım A</th><th>Güç</th><th>Güç/kWp</th><th>V/panel</th><th>7 gün (durum · oran)</th><th>7 gün tepe</th></tr></thead><tbody>' + satir + '</tbody></table></div>'
       + '<div class="k">Anlık V/A FusionSolar\'dan (~5 dk); Sungrow ve Inavitas anlık string değeri vermez. 7 gün sütunu string analizinden: oran = stringin akımı / inverterdeki stringlerin medyanı. V/panel ≈ panel Vmp\'ye yakın olmalı; belirgin düşükse stringde by-pass/kısa devre panel olabilir.</div>' : '<div class="k">Bu inverter için string verisi yok.</div>')

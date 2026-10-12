@@ -179,7 +179,7 @@ function ust() {
     + (S ? '<span class="oturum">' + esc(S.ad || S.kul) + '</span>' + (S.ka ? '<button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button>'
          : '<button class="bag" onclick="girisModal(null)">Giriş</button>') + '</nav></header>';
 }
-const sifreUygun = s => s.length < 10 ? 'Şifre en az 10 karakter olmalı.' : !/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(s) || !/\d/.test(s) ? 'Şifrede harf ve rakam bulunmalı.' : null;
+const sifreUygun = s => s.length < 6 ? 'Şifre en az 6 karakter olmalı.' : !/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(s) || !/\d/.test(s) ? 'Şifrede harf ve rakam bulunmalı.' : null;
 const kulUygun = k => /^[a-z0-9._-]{3,32}$/.test(k) ? null : 'Kullanıcı adı 3–32 karakter; küçük harf, rakam, nokta, tire.';
 
 // ---- giriş / oturum ----
@@ -330,7 +330,7 @@ async function yonetimCiz() {
     + '<label>Açabileceği uygulamalar</label><div class="secim">' + ms.map(m => '<label><input type="checkbox" name="m" value="' + esc(m.id) + '"' + ((x.moduller || []).includes(m.id) ? ' checked' : '') + '> ' + esc(m.ad) + '</label>').join('') + '</div>'
     + '<details><summary class="ince">Uygulama hesap adları (isteğe bağlı; kutuda görünür, şifre yazılmaz)</summary><div class="satir">'
     + ms.map(m => '<div><label>' + esc(m.ad) + '</label><input name="h_' + esc(m.id) + '" type="text" value="' + esc((x.hesaplar || {})[m.id] || '') + '" placeholder="kullanıcı adı / e-posta"></div>').join('') + '</div></details>'
-    + '<div class="secim" style="margin:10px 0 14px"><label><input type="checkbox" name="yonetici"' + (x.yonetici ? ' checked' : '') + '> Yönetici (tüm uygulamalar + bu sayfa)</label></div>'
+    + (kul === S.kul ? '<p class="ince">Yönetim yetkisi yalnız bu hesapta; tüm uygulamaları açar.</p>' : '<div style="height:12px"></div>')
     + '<button class="btn kc">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></form>';
   h += '<section class="kart blok"><h2>Kullanıcılar</h2><div style="overflow-x:auto"><table><thead><tr><th>Kullanıcı</th><th>Uygulamalar</th><th>Değişiklik</th><th></th></tr></thead><tbody>';
   for (const [kul, x] of Object.entries(R.kullanicilar).sort()) {
@@ -369,9 +369,8 @@ function kulKaydet(f) {
   islem(yeni ? 'Kullanıcı eklendi.' : 'Kullanıcı kaydedildi.', async () => {
     const h = (yeni ? kulUygun(kul) : null) || (yeni && R.kullanicilar[kul] ? 'Bu kullanıcı adı zaten var.' : null) || sifreUygun(sifre);
     if (h) throw new Error(h);
-    const yon = f.yonetici.checked, mods = [...f.querySelectorAll('input[name=m]:checked')].map(x => x.value), hes = {};
+    const yon = kul === S.kul, mods = [...f.querySelectorAll('input[name=m]:checked')].map(x => x.value), hes = {};
     f.querySelectorAll('input[name^=h_]').forEach(x => { if (x.value.trim()) hes[x.name.slice(2)] = x.value.trim().slice(0, 80); });
-    if (kul === S.kul && !yon) throw new Error('Kendi yönetici yetkinizi kaldıramazsınız.');
     const x = R.kullanicilar[kul] || { olusturma: new Date().toISOString().slice(0, 16) };
     Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: yon ? [] : mods, hesaplar: hes, degisiklik: new Date().toISOString().slice(0, 16).replace('T', ' ') });
     R.kullanicilar[kul] = x;

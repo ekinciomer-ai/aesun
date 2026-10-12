@@ -109,7 +109,7 @@ table.tb thead th[aria-sort=descending]::after{content:" ▼";font-size:10px}
 <script>
 // ===== Portal girişi ve yetkiler: oturum portal sayfasından (aynı site, localStorage 'ae_portal') okunur =====
 const PORTAL = (() => { try { const o = JSON.parse(localStorage.getItem('ae_portal') || 'null'); if (o && o.S && Date.now() < (o.son || 0)) return o.S; } catch (e) {} return null; })();
-if (!PORTAL) location.replace('../portal/?git=monitoring');
+if (!PORTAL || !(PORTAL.ka || (PORTAL.anahtarlar && PORTAL.anahtarlar.monitoring))) location.replace('../portal/?git=monitoring');
 const YONETICI = !!(PORTAL && PORTAL.ka);
 const IZIN = YONETICI ? null : new Set((((PORTAL || {}).izinler || {}).monitoring) || []);
 const yetkili = k => k === 'bildirim' ? YONETICI : (!IZIN || IZIN.has(k));

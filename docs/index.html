@@ -2510,7 +2510,10 @@ function akisGrafik(k, fs, saha, anlik) {
   if (ilk < 0 || son < 0) return '';
   const a = Math.max(0, Math.min(ilk, 6)), b = Math.max(son, Math.min(23, a + 12));
   const S = R.slice(a, b + 1);
+  // üretim olan saatlerde toplam tüketim (üretim + çekiş − veriş): üretimin ne kadarının sahada kullanıldığı, silik tonda
+  const tuk = x => (x.u || 0) > 0.5 && x.v != null ? Math.max(0, Math.round(((x.u || 0) + (x.c || 0) - x.v) * 10) / 10) : null;
   const ser = [{ ad: 'GES üretimi', renk: '#1E9E5A', v: S.map(x => x.u) },
+    { ad: 'Tüketim (üretim anında)', renk: 'rgba(30,158,90,0.28)', v: S.map(tuk) },
     { ad: 'Şebekeye veriş', renk: '#2a78d6', v: S.map(x => x.v) },
     { ad: 'Şebekeden çekiş', renk: '#D92D20', v: S.map(x => x.c == null ? null : -x.c) }];
   if (k === 'Sera-2') ser.unshift({ ad: 'Madencilik yükü', renk: '#7A4FD0', v: S.map(x => x.m), tip: 'alan' });
@@ -2521,11 +2524,11 @@ function akisGrafik(k, fs, saha, anlik) {
     + grafikX({ id: 'akis_' + k, ad: k + ' giriş çıkış', etiket: S.map(x => x.h + ':00' + (x.devam ? '*' : '')), etiketAd: 'Saat', seriler: ser,
       turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top',
       tip: i => akisMetin(S[i]) + '\n(ayrıntı için tıklayın)', tik: i => "akisAc('" + k + "'," + (a + i) + ")" })
-    + '<div class="k">Yukarı: üretim ve şebekeye veriş · aşağı (eksi): şebekeden çekiş' + (k === 'Sera-2' ? ' · mor alan: madencilik yükü' : '') + '. Sayaç değerleri OSOS\'tan saatlik gelir; son saatler gecikebilir. Saate tıklayınca ayrıntı açılır.</div></div>';
+    + '<div class="k">Yukarı: üretim, üretim anındaki tüketim (silik yeşil = üretim + çekiş − veriş) ve şebekeye veriş · aşağı (eksi): şebekeden çekiş' + (k === 'Sera-2' ? ' · mor alan: madencilik yükü' : '') + '. Sayaç değerleri OSOS\'tan saatlik gelir; son saatler gecikebilir. Saate tıklayınca ayrıntı açılır.</div></div>';
 }
 function akisMetin(x) {
   const f = v => v == null ? '—' : say(v, 1) + ' kWh';
-  return x.h + ':00' + (x.devam ? ' (devam ediyor)' : '') + '\nGiriş: üretim ' + f(x.u) + ' · çekiş ' + f(x.c) + '\nÇıkış: veriş ' + f(x.v) + (x.m != null ? ' · madencilik ' + f(x.m) : '') + (x.diger != null ? ' · diğer ' + f(x.diger) : (x.ic != null ? ' · iç tüketim ' + f(x.ic) : ''));
+  return x.h + ':00' + (x.devam ? ' (devam ediyor)' : '') + '\nGiriş: üretim ' + f(x.u) + ' · çekiş ' + f(x.c) + ((x.u || 0) > 0.5 && x.v != null ? '\nTüketim (üretim anında): ' + f(Math.max(0, (x.u || 0) + (x.c || 0) - x.v)) : '') + '\nÇıkış: veriş ' + f(x.v) + (x.m != null ? ' · madencilik ' + f(x.m) : '') + (x.diger != null ? ' · diğer ' + f(x.diger) : (x.ic != null ? ' · iç tüketim ' + f(x.ic) : ''));
 }
 function akisAc(k, i) {
   const A = AKIS[k]; if (!A) return;

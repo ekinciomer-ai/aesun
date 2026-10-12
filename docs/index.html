@@ -1793,8 +1793,8 @@ function invAnaliz(S, gunler) {
   });
 }
 
-function cubukGrafik(etiket, bu, onceki, adBu, adOnceki, birim) {
-  return grafikX({ id: 'inv', ad: adBu + ' üretimi', etiket, etiketAd: 'Dönem', turler: ['cubuk', 'cizgi', 'alan', 'tablo'], birim, toplam: 'top', fmt: enerji,
+function cubukGrafik(etiket, bu, onceki, adBu, adOnceki, birim, tik) {
+  return grafikX({ id: 'inv', tik, ad: adBu + ' üretimi', etiket, etiketAd: 'Dönem', turler: ['cubuk', 'cizgi', 'alan', 'tablo'], birim, toplam: 'top', fmt: enerji,
     eksen: v => birim === 'MWh' ? say(v / 1000) : say(v),
     seriler: [{ ad: adBu, renk: '#2a78d6', v: bu }, { ad: adOnceki, renk: '#10233F', tip: 'isaret', v: onceki }] });
 }
@@ -1809,6 +1809,69 @@ function isiRenk(h) {
   return '#D9E6F5';
 }
 
+// ===== Gün ayrıntısı (İnverter analizi grafiğinde güne tıklayınca): saatlik üretim, santral ve inverter bazında o gün
+let INVG = null;
+const GUN_ADI = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+function invGunAc(g) {
+  if (!INVG) return;
+  const { S, SO, keys } = INVG, sec = keys.map(k => S[k]).filter(Boolean);
+  let dl = document.getElementById('invGunDlg');
+  if (!dl) { dl = document.createElement('dialog'); dl.id = 'invGunDlg'; dl.style.cssText = 'border:0;border-radius:14px;padding:0;max-width:min(1080px,96vw);width:96vw;box-shadow:0 20px 60px rgba(16,35,63,.35)'; dl.addEventListener('click', e => { if (e.target === dl) dl.close(); }); document.body.appendChild(dl); }
+  const f = (v, d) => v == null || Number.isNaN(v) ? '—' : say(v, d);
+  const med = a => { const b = a.filter(x => x != null).sort((x, y) => x - y); return b.length ? b[Math.floor(b.length / 2)] : null; };
+  const medU = a => med(a.filter(x => x != null && x > 0.5));          // geçmiş medyanı: santral/inverter duruş günleri (0) hariç
+  const once30 = o => Array.from({ length: 30 }, (_, i) => o.gun[gunEkle(g, -1 - i)]).map(v => v == null ? null : +v);
+  const gecen = String(Number(g.slice(0, 4)) - 1) + g.slice(4);
+  const v = o => o.gun[g] == null ? null : +o.gun[g];
+  const top = sec.reduce((t, o) => t + (v(o) || 0), 0), kwp = sec.reduce((t, o) => t + (o.kwp || 0), 0);
+  const topO = sec.reduce((t, o) => { const x = SO[o.key] && SO[o.key].gun[gecen]; return x == null ? t : (t || 0) + +x; }, null);
+  const m30 = medU(Array.from({ length: 30 }, (_, i) => { const gg = gunEkle(g, -1 - i); const d = sec.map(o => o.gun[gg]); return d.some(x => x == null) ? null : d.reduce((t, x) => t + +x, 0); }));
+  const kart = (b, d, alt, renk) => '<div style="flex:1 1 150px;background:#F5F8FB;border-radius:10px;padding:8px 12px"><div class="k" style="font-size:12px">' + b + '</div><div style="font-size:20px;font-weight:700' + (renk ? ';color:' + renk : '') + '">' + d + '</div>' + (alt ? '<div class="k" style="font-size:11.5px">' + alt + '</div>' : '') + '</div>';
+  const oran = m30 ? top / m30 : null;
+  let h = '<div style="display:flex;flex-wrap:wrap;gap:8px">'
+    + kart('Gün üretimi', enerji(top), sec.length > 1 ? sec.length + ' santral' : esc(sec[0].ad))
+    + kart('Özgül verim', kwp ? f(top / kwp, 2) + ' kWh/kWp' : '—', kwp ? f(kwp) + ' kWp' : '')
+    + kart('Son 30 gün medyanına göre', oran == null ? '—' : '%' + f(oran * 100), m30 ? 'medyan ' + enerji(m30) : '', oran != null && oran < 0.6 ? TH_R.kirmizi : oran != null && oran < 0.85 ? TH_R.sari : null)
+    + kart('Geçen yıl aynı gün', topO == null ? '—' : enerji(topO), topO ? (top >= topO ? '+' : '') + f((top / topO - 1) * 100, 1) + '%' : '') + '</div>';
+  // saatlik
+  const saatli = sec.filter(o => o.saat && o.saat[g]);
+  if (saatli.length) {
+    const hs = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).filter(hh => saatli.some(o => (o.saat[g][hh] || 0) > 0.05));
+    const ilk = hs[0] || '06', son = hs[hs.length - 1] || '19', ss = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).filter(hh => hh >= ilk && hh <= son);
+    const renk = ['#2a78d6', '#eb6834', '#1E7A3C', '#6b5bd6', '#C98500'];
+    const ser = saatli.map((o, j) => ({ ad: o.ad, renk: renk[j % renk.length], v: ss.map(hh => o.saat[g][hh] == null ? null : Math.round(o.saat[g][hh] * 10) / 10), grup: 'u' }));
+    const tepe = ss.reduce((b, hh, i) => { const t = ser.reduce((a, s) => a + (s.v[i] || 0), 0); return t > b.t ? { t, h: hh } : b; }, { t: 0, h: null });
+    h += '<div style="font-weight:700">Saatlik üretim' + (tepe.h ? ' <span class="k" style="font-weight:400">· tepe ' + tepe.h + ':00, ' + enerji(tepe.t) + '</span>' : '') + '</div>'
+      + grafikX({ id: 'inv_gun_saat', ad: 'Saatlik üretim', etiket: ss.map(hh => hh + ':00'), etiketAd: 'Saat', seriler: ser, yiginSeriler: ser, turler: ['yigin', 'cizgi', 'tablo'], tur: 'yigin', birim: 'kWh', toplam: 'top', yuk: 170, fmt: x => say(x, 1) })
+      + (saatli.length < sec.length ? '<div class="k">Saatlik veri yalnız FusionSolar santrallerinde (' + saatli.map(o => esc(o.ad)).join(', ') + ') var; Sungrow ve Inavitas geçmişi günlük.</div>' : '');
+  } else h += '<div class="k">Bu santral için saatlik geçmiş yok (Sungrow ve Inavitas geçmişi günlük); aşağıda inverter bazında günlük değerler var.</div>';
+  // santraller
+  if (sec.length > 1) {
+    h += '<div style="font-weight:700">Santraller</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Santral</th><th>Üretim</th><th>kWh/kWp</th><th>30 gün medyanına göre</th><th>Geçen yıl</th><th>Üretmeyen inverter</th></tr></thead><tbody>'
+      + sec.map(o => { const x = v(o), m = medU(once30(o)), r = x != null && m ? x / m : null, go = SO[o.key] && SO[o.key].gun[gecen], sif = Object.values(o.inv).filter(i => i.gun[g] != null && +i.gun[g] < 0.5).length;
+        return '<tr style="cursor:pointer" onclick="document.getElementById(\'invGunDlg\').close();invSantralSec(\'' + esc(o.key) + '\');setTimeout(()=>invGunAc(\'' + g + '\'),400)"><td class="sol"><a href="javascript:void 0">' + esc(o.ad) + '</a></td><td>' + (x == null ? '—' : enerji(x)) + '</td><td>' + (x != null && o.kwp ? f(x / o.kwp, 2) : '—') + '</td><td style="color:' + (r != null && r < 0.6 ? TH_R.kirmizi : r != null && r < 0.85 ? TH_R.sari : 'inherit') + '">' + (r == null ? '—' : '%' + f(r * 100)) + '</td><td>' + (go == null ? '—' : enerji(+go)) + '</td><td style="color:' + (sif ? TH_R.kirmizi : 'inherit') + '">' + sif + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  }
+  // inverterler
+  for (const o of sec) {
+    const L = Object.values(o.inv).map(i => ({ i, x: i.gun[g] == null ? null : +i.gun[g], m: medU(Array.from({ length: 14 }, (_, k) => i.gun[gunEkle(g, -1 - k)]).map(z => z == null ? null : +z)) }));
+    if (!L.length) continue;
+    const nrm = x => x.x == null ? null : x.i.kwp ? x.x / x.i.kwp : x.x;
+    const sMed = med(L.map(nrm)), sorunlu = L.filter(x => x.x != null && (x.x < 0.5 || (sMed && nrm(x) < sMed * 0.85)));
+    const gost = sec.length > 1 ? sorunlu : L;
+    if (sec.length > 1 && !gost.length) continue;
+    gost.sort((a, b) => String(a.i.ad).localeCompare(String(b.i.ad), 'tr', { numeric: true }));
+    h += '<div style="font-weight:700">' + esc(o.ad) + ' · inverterler' + (sec.length > 1 ? ' <span class="k" style="font-weight:400">(yalnız sorunlu olanlar)</span>' : '') + '</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">İnverter</th><th>Üretim kWh</th>' + (L.some(x => x.i.kwp) ? '<th>kWh/kWp</th>' : '') + '<th>Santral medyanına göre</th><th>Önceki 14 gün medyanı</th><th>Durum</th></tr></thead><tbody>'
+      + gost.map(x => { const r = sMed && nrm(x) != null ? nrm(x) / sMed : null, dur = x.x == null ? 'veri yok' : x.x < 0.5 ? 'üretmedi' : r != null && r < 0.6 ? 'çok düşük' : r != null && r < 0.85 ? 'düşük' : 'normal', rk = dur === 'normal' ? TH_R.yesil : dur === 'düşük' ? TH_R.sari : TH_R.kirmizi;
+        return '<tr><td class="sol">' + esc(x.i.ad || x.i.key) + '</td><td>' + f(x.x, 1) + '</td>' + (L.some(y => y.i.kwp) ? '<td>' + (x.x != null && x.i.kwp ? f(x.x / x.i.kwp, 2) : '—') + '</td>' : '') + '<td>' + (r == null ? '—' : '%' + f(r * 100)) + '</td><td>' + f(x.m, 1) + '</td><td style="color:' + rk + ';font-weight:600">' + dur + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  }
+  const dt = new Date(g + 'T12:00:00Z'), dun = gunEkle(bugunTR(), -1);
+  const ok = (y, ad, aktif) => '<button type="button" class="btn" ' + (aktif ? 'onclick="invGunAc(\'' + y + '\')"' : 'disabled style="opacity:.4"') + '>' + ad + '</button>';
+  dl.innerHTML = '<div class="panel" role="dialog" aria-label="' + tarihK(g) + ' gün ayrıntısı" style="gap:12px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><b style="font-size:19px">' + tarihK(g) + ' ' + GUN_ADI[dt.getUTCDay()] + '</b> <span class="k">' + esc(sec.length > 1 ? 'Tüm santraller' : sec[0].ad) + '</span></div>'
+    + '<div style="display:flex;gap:6px">' + ok(gunEkle(g, -1), '‹ Önceki gün', true) + ok(gunEkle(g, 1), 'Sonraki gün ›', gunEkle(g, 1) <= dun) + '<button type="button" class="btn koyu" onclick="document.getElementById(\'invGunDlg\').close()">Kapat</button></div></div>'
+    + h + '</div>';
+  if (!dl.open) dl.showModal();
+}
 // ===== String analizi (FusionSolar, epias-ptf/inverter/fusionsolar_string.json) =====
 let STR = null;
 async function strYukle() {
@@ -1937,7 +2000,8 @@ async function cizInverter() {
     + kart('En iyi ' + (Dn.tip === 'gun' ? 'gün' : 'ay'), enIyi < 0 ? '—' : enerji(bu[enIyi]), enIyi < 0 ? '' : etiket[enIyi])
     + kart('Dikkat isteyen inverter', String(sorunlu), 'Duran ya da son 7 günde normalinin %10 altında')
     + '</div>';
-  const grafikH = '<section class="panel"><div class="bas"><h2>' + (Dn.tip === 'gun' ? 'Günlük' : 'Aylık') + ' üretim</h2></div><div style="overflow-x:auto">' + cubukGrafik(etiket, bu, onceki, Dn.tip === 'gun' ? Dn.ad : String(invSec.yil), 'Geçen yıl aynı ' + (Dn.tip === 'gun' ? 'gün' : 'ay'), Dn.tip === 'ay' ? 'MWh' : 'kWh') + '</div><div class="k">Eksen ' + (Dn.tip === 'ay' ? 'MWh' : 'kWh') + '. Üzerine gelince değerler görünür; sağ üstten grafik türünü seçebilirsiniz.</div></section>';
+  const grafikH = '<section class="panel"><div class="bas"><h2>' + (Dn.tip === 'gun' ? 'Günlük' : 'Aylık') + ' üretim</h2></div><div style="overflow-x:auto">' + cubukGrafik(etiket, bu, onceki, Dn.tip === 'gun' ? Dn.ad : String(invSec.yil), 'Geçen yıl aynı ' + (Dn.tip === 'gun' ? 'gün' : 'ay'), Dn.tip === 'ay' ? 'MWh' : 'kWh', i => Dn.tip === 'gun' ? "invGunAc('" + Dn.gunler[i] + "')" : "invSec.donem='" + Dn.aylar[i] + "';cizInverter()") + '</div><div class="k">Eksen ' + (Dn.tip === 'ay' ? 'MWh' : 'kWh') + '. ' + (Dn.tip === 'gun' ? 'Bir güne tıklayınca o günün ayrıntısı (saatlik üretim, santral ve inverter bazında) açılır.' : 'Bir aya tıklayınca o ayın günleri açılır.') + ' Sağ üstten grafik türünü seçebilirsiniz.</div></section>';
+  INVG = { S, SO, keys: secili.map(x => x.key) };
 
   let govde = '';
   if (invSec.santral === 'hepsi') {

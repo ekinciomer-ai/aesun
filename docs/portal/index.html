@@ -252,10 +252,12 @@ async function giris(kul, sifre) {
   try {
     const key = await kdf(sifre, e ? e.tuz : b64(rnd(16)), e ? e.iter : ITER);   // kullanıcı yoksa da aynı süre
     if (!e) throw 0;
-    const { ku } = await coz(key, e.sar);
-    S = await coz(await hamAnahtar(ku), e);
+    if (e.sar) { const { ku } = await coz(key, e.sar); S = await coz(await hamAnahtar(ku), e); }
+    else { S = await coz(key, e); ESKI = { kul: k, sifre }; }   // ilk sürüm kaydı: şifreyle doğrudan şifreli
   } catch (x) { await new Promise(r => setTimeout(r, 600)); throw new Error('Kullanıcı adı veya şifre hatalı.'); }
   R = null; oturumKaydet(); await modOnbellek(); ust();
+  if (ESKI && S.ka && ghAnahtar()) { try { await rehber(); const x = R.kullanicilar[ESKI.kul]; if (x) { await kullaniciYaz(ESKI.kul, ESKI.sifre, yukHazirla(ESKI.kul, x)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); await veriKaydet('kayıt biçimi güncellendi'); } } catch (x) {} }
+  ESKI = null;
   git(SAYFA);
 }
 // Uygulamaya tıklama: oturum yoksa giriş sorar; varsa (yetki varsa) doğrudan açar
@@ -285,7 +287,7 @@ async function modulleriAc() {
 async function rehber() { if (!R) R = await coz(await hamAnahtar(S.ka), V.rehber); return R; }
 
 // ---- sayfalar ----
-let SAYFA = 'ana';
+let SAYFA = 'ana', ESKI = null;
 const HEDEF = new URLSearchParams(location.search).get('git');
 async function git(s) {
   SAYFA = s;

@@ -627,6 +627,43 @@ def calistir():
         kk, n, mm, g = karar_ver(gunes, p, y or 0, a, hp, btc_try)
         plan.append({"_t": t, "t": t.strftime("%Y-%m-%d %H:00"), "ptf": p, "yekdem": y, "gunes_tahmini": gunes,
                      "gunes_kaynak": gk, "maliyet": mm, "gelir": g, "karar": kk})
+    # Karar kilidi (histerezis): yaklaşan saatin kararı bir kez verilince, maliyet ile gelir birbirine çok yakınken
+    # BTC fiyatı / hashprice oynaması yüzünden ileri geri dönmez. (13 Eki 00:30: 01:00 için ön ısıtma başladı, PTF 2.695 ile
+    # eşik 2.698 neredeyse eşitti; eşik oynayınca karar döndü ve 00:40'ta 29 cihaz geri uyutuldu.)
+    #  - kilit, saat başlangıcına 3 saatten az kala o anki kararla kurulur;
+    #  - kilitli karar ancak maliyet/gelir farkı bant dışına çıkarsa değişir (%5; o saat için uyandırma komutu gittiyse %10);
+    #  - her gerçek değişiklik gerekçesiyle "karar_degisim" olarak kayda geçer.
+    tk0 = tk_oku()
+    kilit = {k_: v for k_, v in (tk0.get("kilit") or {}).items() if k_ >= simdi.replace(minute=0, second=0, microsecond=0).isoformat(timespec="seconds")}
+    uyanan = {g["hedef"] for g in (tk0.get("gonderilen") or []) if g.get("eylem") == "wake" and g.get("kim") != "güneş"}
+    karar_degisim = []
+    BANT, BANT_UYANIK = a.get("karar_bandi", 0.05), a.get("karar_bandi_uyandirildi", 0.10)
+    for p_ in plan:
+        if p_["_t"] - simdi > timedelta(hours=3) or p_.get("maliyet") is None or not p_.get("gelir"):
+            continue
+        an = p_["_t"].isoformat(timespec="seconds")
+        oran = p_["maliyet"] / p_["gelir"] - 1          # >0: zararlı, <0: kârlı (cihaz başı)
+        k_ = kilit.get(an)
+        if not k_:
+            kilit[an] = {"karar": p_["karar"], "t": simdi.isoformat(timespec="seconds"), "oran": round(oran, 4), "ptf": p_["ptf"]}
+            continue
+        if k_["karar"] == p_["karar"]:
+            continue
+        bant = BANT_UYANIK if an in uyanan else BANT
+        guclu = (p_["karar"] == "uyut" and oran > bant) or (p_["karar"] == "calis" and oran < -bant)
+        if guclu:
+            karar_degisim.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "saat": p_["t"][11:16], "eski": k_["karar"], "yeni": p_["karar"],
+                                  "neden": f"{p_['t'][11:16]} kararı {k_['karar']} → {p_['karar']}: maliyet {p_['maliyet']:.1f} ₺, gelir {p_['gelir']:.1f} ₺ "
+                                           f"(fark %{oran * 100:+.1f}, bant ±%{bant * 100:.0f}); PTF {p_['ptf']:.0f}, BTC {btc_try or 0:,.0f} ₺".replace(",", ".")})
+            kilit[an] = {"karar": p_["karar"], "t": simdi.isoformat(timespec="seconds"), "oran": round(oran, 4), "ptf": p_["ptf"]}
+        else:
+            p_["not"] = (f"karar kilitli ({k_['karar']}): fark %{oran * 100:+.1f}, ±%{bant * 100:.0f} bandı içinde; "
+                         f"BTC/hashprice oynaması kararı değiştirmez")
+            p_["karar"] = k_["karar"]
+            p_["kilitli"] = True
+    if plan and plan[0].get("kilitli") and plan[0]["karar"] != karar:
+        karar = plan[0]["karar"]
+        neden = plan[0]["not"]
     # Cihaz başı güç: Pi'nin ölçtüğü madencilik yükü / çalışan cihaz
     kw_c = a["cihaz_guc_kw"]
     sh, _ = gh("n8n/saha_saatlik.json")
@@ -649,6 +686,12 @@ def calistir():
     if a.get("gunes_takip") and istenen == "uyut" and mad_taze and ulasilan:
         detay, _ = gh("n8n/cihaz_detay.json")           # cihaz başı watt (bildiren cihazlar)
         gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel, detay)
+        if gt and gt.get("eylem") == "sleep" and not (uretim_kw or 0) >= 1:
+            # Üretim yokken uyutmanın asıl nedeni ekonomik karardır; kayıtta "güneş takibi" diye görünmesin
+            p0 = plan[0] if plan else {}
+            gt["neden"] = (f"Üretim yok, saat {p0.get('t', '')[11:16]} zararlı: maliyet {p0.get('maliyet') or 0:.1f} ₺ > gelir {p0.get('gelir') or 0:.1f} ₺ "
+                           f"(PTF {p0.get('ptf') or 0:.0f}) → {len(gt.get('hedefler') or [])} cihaz uyut"
+                           + (f" · {p0['not']}" if p0.get("not") else ""))
     for i, p in enumerate(plan):
         p.setdefault("karar_ham", p["karar"])
         p["karar"] = k2[i]
@@ -748,7 +791,7 @@ def calistir():
     tk = {"olusturuldu": simdi.isoformat(timespec="seconds"), "mod": a["mod"], "filo_taze": bool(mad_taze and ulasilan),
           "uretim": bool(uretim), "gunes_hedef": gunes_hedef,
           "komut_arasi_dk": a["komut_arasi_dk"], "ayar_ozet": {"sirali_gecikme_sn": a["sirali_gecikme_sn"]},
-          "anahtarlar": anahtar_j, "gonderilen": gonderilen[-100:]}
+          "anahtarlar": anahtar_j, "gonderilen": gonderilen[-100:], "kilit": kilit}
     tk_yaz(tk)
     for p in plan:
         p.pop("_t", None)
@@ -769,6 +812,9 @@ def calistir():
     durum, sha = gh("n8n/cihaz_yonetimi_durum.json")
     durum = durum or {}
     gec = durum.get("gecmis") or []
+    for kd in karar_degisim:
+        gec.append({"t": kd["t"], "karar": karar, "istenen": istenen, "eylem": "-", "neden": kd["neden"],
+                    "not": "plan kararı değişti", "gonderildi": False, "mod": a["mod"], "tur": "karar_degisim"})
     if gonderildi or durum.get("karar") != karar or durum.get("istenen") != istenen:
         gec.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "karar": karar, "istenen": istenen, "eylem": eylem or "-",
                     "neden": neden_eylem, "not": eylem_not, "gonderildi": gonderildi, "mod": a["mod"]})
@@ -779,7 +825,7 @@ def calistir():
         "maliyet_tl_saat": maliyet, "gelir_tl_saat": gel, "basabas_ptf": basabas,
         "esik_ptf": (basabas * (1 + (a.get("basabas_tolerans") or 0)) if basabas and basabas > 0 else basabas),
         "karar": karar, "neden": neden, "istenen": istenen, "karar_ekonomik": karar_eko, "neden_ekonomik": neden_eko, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
-        "gunes_takip": gt, "toplam_uretim_kw": toplam_kw if fs else None,
+        "gunes_takip": gt, "toplam_uretim_kw": toplam_kw if fs else None, "karar_degisim": karar_degisim,
         "cihaz": {"toplam": len(cihazlar), "ulasilan": len(ulasilan), "calisan": calisan, "uyuyan": uyuyan, "taze": mad_taze,
                   "su_uyuyan": canli_su},
         "zamanlama": {"model": {k_: m.get(k_) for k_ in ("a", "b", "a_ilk", "b_ilk", "d99", "p80_ek", "emniyet_dk", "sn_cihaz", "n")},

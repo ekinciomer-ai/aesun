@@ -101,9 +101,11 @@ const DEPO = 'ekinciomer-ai/epias-ptf', YOL = 'portal/veri.json';
 const API = 'https://api.github.com/repos/' + DEPO + '/contents/' + YOL, RAW = 'https://raw.githubusercontent.com/' + DEPO + '/main/' + YOL;
 const ITER = 600000, OTURUM_SN = 12 * 3600;
 // Uygulama alt başlıkları (yetki kutuları). Monitoring paneli bu kimliklere göre sekme ve para bilgisini gösterir.
+/* varsayılan KAPALI (hassas / yönetici) yetkiler — modül açılınca otomatik verilmez, elle seçilir */
+const KAPALI = new Set(['parasal', 'yedek', 'proje', 'rapor', 'ilerleme', 'ekip', 'od_hakedis', 'od_taseron']);
 const KONULAR = {
   monitoring: [['genel', 'Genel bakış'], ['sayac', 'Sayaçlar ve mahsup'], ['inverter', 'İnverter analizi'], ['maden', 'Madencilik'], ['epias', 'EPİAŞ'], ['parasal', 'Parasal bilgiler (₺, fatura, gelir, pay)']],
-  saha: [['gunluk', 'Günlük'], ['puantaj', 'Puantaj'], ['ilerleme', 'İlerleme (iş kalemleri)'], ['od_maas', 'Ödeme · Maaş'], ['od_harcama', 'Ödeme · Harcamalar'], ['od_taseron', 'Ödeme · Taşeron'], ['od_hakedis', 'Ödeme · Hakediş'], ['parasal', 'Hakediş & parasal (tümü)']]
+  saha: [['gunluk', 'Günlük'], ['puantaj', 'Puantaj'], ['ilerleme', 'İlerleme (iş kalemleri)'], ['od_maas', 'Ödeme · Maaş'], ['od_harcama', 'Ödeme · Harcamalar'], ['od_taseron', 'Ödeme · Taşeron'], ['od_hakedis', 'Ödeme · Hakediş'], ['ekip', 'Ekip yönetimi (personel/araç)'], ['rapor', 'Saha raporu'], ['yedek', 'Yedek / geri yükle']]
 };
 const te = new TextEncoder(), td = new TextDecoder();
 const $ = id => document.getElementById(id);
@@ -402,7 +404,7 @@ async function yonetimCiz() {
     for (const [kul, x] of Object.entries(R.kullanicilar).sort((a, b) => (b[1].yonetici ? 1 : 0) - (a[1].yonetici ? 1 : 0) || a[0].localeCompare(b[0]))) {
       const cips = x.yonetici ? '<span class="et k">Yönetici · tümü</span>' : ((x.moduller || []).map(id => {
         const kn = KONULAR[id], iz = (x.izinler || {})[id] || [];
-        return '<span class="et">' + esc(modAd[id] || id) + (kn ? ' <small>' + iz.filter(k => k !== 'parasal').length + '/' + (kn.length - 1) + '</small>' : '') + (iz.includes('parasal') ? ' <b title="Parasal bilgileri görür">₺</b>' : '') + '</span>';
+        return '<span class="et">' + esc(modAd[id] || id) + (kn ? ' <small>' + iz.filter(k => k !== 'parasal').length + '/' + kn.filter(p => p[0] !== 'parasal').length + '</small>' : '') + (iz.includes('parasal') ? ' <b title="Parasal bilgileri görür">₺</b>' : '') + '</span>';
       }).join('') || '<span class="ince">Yetki yok</span>');
       h += '<div class="kkart"><div class="kav">' + esc(basHarf(x.ad || kul)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.ad || kul) + '</b><div class="ince">@' + esc(kul) + (x.degisiklik ? ' · ' + esc(x.degisiklik) : '') + '</div><div style="margin-top:8px">' + cips + '</div></div>'
         + '<div class="kbt"><button class="btn ik kc" onclick="kulDlg(\'' + esc(kul) + '\')">Düzenle</button>' + (kul !== S.kul ? '<button class="bag sil" onclick="kulSil(\'' + esc(kul) + '\')">Sil</button>' : '') + '</div></div>';
@@ -437,7 +439,7 @@ function kulDlg(kul) {
     for (const m of ms) {
       const var_ = (x.moduller || []).includes(m.id), kn = KONULAR[m.id] || [], iz = (x.izinler || {})[m.id];
       f += '<div class="yt' + (var_ ? ' on' : '') + '"><label class="ytm"><span class="hd" style="--r:' + renkHex(m.renk) + ';width:30px;height:30px;box-shadow:none">' + ikon(m.ikon) + '</span><span style="flex:1">' + esc(m.ad) + '</span><span class="anah"><input type="checkbox" name="m" value="' + esc(m.id) + '"' + (var_ ? ' checked' : '') + ' onchange="ytMod(this)"><i></i></span></label>';
-      if (kn.length) f += '<div class="ytk">' + kn.map(([k, a]) => '<label class="cip' + (k === 'parasal' ? ' para' : '') + '"><input type="checkbox" name="k_' + esc(m.id) + '" value="' + k + '"' + (var_ && (iz ? iz.includes(k) : k !== 'parasal') ? ' checked' : '') + ' onchange="ytKonu(this)"><span>' + esc(a) + '</span></label>').join('') + '</div>';
+      if (kn.length) f += '<div class="ytk">' + kn.map(([k, a]) => '<label class="cip' + (KAPALI.has(k) ? ' para' : '') + '"><input type="checkbox" name="k_' + esc(m.id) + '" value="' + k + '"' + (var_ && (iz ? iz.includes(k) : !KAPALI.has(k)) ? ' checked' : '') + ' onchange="ytKonu(this)"><span>' + esc(a) + '</span></label>').join('') + '</div>';
       f += '</div>';
     }
     f += '</div>';
@@ -446,7 +448,7 @@ function kulDlg(kul) {
   d.innerHTML = f; if (!d.open) d.showModal();
   $('kf2').onsubmit = e => { e.preventDefault(); kulKaydet($('kf2'), kul); };
 }
-function ytMod(c) { const yt = c.closest('.yt'); yt.classList.toggle('on', c.checked); yt.querySelectorAll('.ytk input').forEach(x => { x.checked = c.checked ? (x.value === 'parasal' ? x.checked : true) : false; }); }
+function ytMod(c) { const yt = c.closest('.yt'); yt.classList.toggle('on', c.checked); yt.querySelectorAll('.ytk input').forEach(x => { x.checked = c.checked ? (KAPALI.has(x.value) ? x.checked : true) : false; }); }
 function ytKonu(c) { const yt = c.closest('.yt'), v = [...yt.querySelectorAll('.ytk input')].some(x => x.checked); yt.querySelector('.ytm input').checked = v; yt.classList.toggle('on', v); }
 async function islem(ad, fn) {
   const b = document.activeElement; if (b && b.tagName === 'BUTTON') { b.disabled = true; b.textContent = 'Kaydediliyor…'; }

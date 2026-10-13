@@ -103,7 +103,7 @@ const ITER = 600000, OTURUM_SN = 12 * 3600;
 // Uygulama alt başlıkları (yetki kutuları). Monitoring paneli bu kimliklere göre sekme ve para bilgisini gösterir.
 const KONULAR = {
   monitoring: [['genel', 'Genel bakış'], ['sayac', 'Sayaçlar ve mahsup'], ['inverter', 'İnverter analizi'], ['maden', 'Madencilik'], ['epias', 'EPİAŞ'], ['parasal', 'Parasal bilgiler (₺, fatura, gelir, pay)']],
-  saha: [['gunluk', 'Günlük'], ['puantaj', 'Puantaj'], ['odeme', 'Ödemeler (maaş / harcama)'], ['parasal', 'Hakediş & parasal bilgiler']]
+  saha: [['gunluk', 'Günlük'], ['puantaj', 'Puantaj'], ['ilerleme', 'İlerleme (iş kalemleri)'], ['od_maas', 'Ödeme · Maaş'], ['od_harcama', 'Ödeme · Harcamalar'], ['od_taseron', 'Ödeme · Taşeron'], ['od_hakedis', 'Ödeme · Hakediş'], ['parasal', 'Hakediş & parasal (tümü)']]
 };
 const te = new TextEncoder(), td = new TextDecoder();
 const $ = id => document.getElementById(id);

@@ -419,6 +419,9 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
         p_kapat = uretim_kw + a["kapatma_tolerans_kw"]
     hk = max(0, math.floor(p_kapat / kw_c))
     ha = max(0, math.floor((min(son2) - a["gunes_pay_kw"]) / kw_c)) if len(son2) >= 2 else min(hk, C)
+    # Açma hedefi kapatma hedefini aşamaz: düşüşte kapatma ileri tahminle (hk), açma son iki okumayla (ha) hesaplanıyor;
+    # ha > hk iken aynı okumalarla 5 dk'da bir uyandır/uyut döngüsü oluşuyordu (13 Eki 16:05–17:00: hk 8, ha 10 → 2 cihaz aç/kapa ×4).
+    ha = min(ha, hk)
     sonuc.update({"hedef_kapat": hk, "hedef_ac": ha})
     # Verim = TH / kW. Güç: cihazın bildirdiği watt (son ölçüm saklanır), yoksa model gücü, yoksa ortalama cihaz gücü.
     wm = yerel.setdefault("cihaz_w", {})
@@ -642,7 +645,13 @@ def calistir():
         if p_["_t"] - simdi > timedelta(hours=3) or p_.get("maliyet") is None or not p_.get("gelir"):
             continue
         an = p_["_t"].isoformat(timespec="seconds")
-        oran = p_["maliyet"] / p_["gelir"] - 1          # >0: zararlı, <0: kârlı (cihaz başı)
+        # Fark, karar sınırına (PTF = eşik = başabaş × (1 + tolerans)) göre ölçülür: >0 uyut tarafı, <0 çalış tarafı.
+        # (Önce maliyet/gelir − 1 idi; tolerans %25 iken sınır ≈ +%14'e düşüyor, bant 0 etrafında kaldığı için
+        #  çalış → uyut dönüşü hiç tutulmuyor, uyut → çalış dönüşü ise PTF başabaşın %5 altına inmedikçe engelleniyordu.)
+        bb_ = basabas_ptf(p_["gelir"], p_.get("yekdem") or 0, a)
+        es_ = bb_ * (1 + (a.get("basabas_tolerans") or 0)) if bb_ > 0 else bb_
+        m_es = birim_maliyet(es_, p_.get("yekdem") or 0, a) / 1000 * a["cihaz_guc_kw"]
+        oran = p_["maliyet"] / (m_es if m_es > 0 else p_["gelir"]) - 1
         k_ = kilit.get(an)
         if not k_:
             kilit[an] = {"karar": p_["karar"], "t": simdi.isoformat(timespec="seconds"), "oran": round(oran, 4), "ptf": p_["ptf"]}
@@ -654,10 +663,10 @@ def calistir():
         if guclu:
             karar_degisim.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "saat": p_["t"][11:16], "eski": k_["karar"], "yeni": p_["karar"],
                                   "neden": f"{p_['t'][11:16]} kararı {k_['karar']} → {p_['karar']}: maliyet {p_['maliyet']:.1f} ₺, gelir {p_['gelir']:.1f} ₺ "
-                                           f"(fark %{oran * 100:+.1f}, bant ±%{bant * 100:.0f}); PTF {p_['ptf']:.0f}, BTC " + f"{btc_try or 0:,.0f}".replace(",", ".") + " ₺"})
+                                           f"(eşiğe göre fark %{oran * 100:+.1f}, bant ±%{bant * 100:.0f}); PTF {p_['ptf']:.0f}, BTC " + f"{btc_try or 0:,.0f}".replace(",", ".") + " ₺"})
             kilit[an] = {"karar": p_["karar"], "t": simdi.isoformat(timespec="seconds"), "oran": round(oran, 4), "ptf": p_["ptf"]}
         else:
-            p_["not"] = (f"karar kilitli ({k_['karar']}): fark %{oran * 100:+.1f}, ±%{bant * 100:.0f} bandı içinde; "
+            p_["not"] = (f"karar kilitli ({k_['karar']}): eşiğe göre fark %{oran * 100:+.1f}, ±%{bant * 100:.0f} bandı içinde; "
                          f"BTC/hashprice oynaması kararı değiştirmez")
             p_["karar"] = k_["karar"]
             p_["kilitli"] = True

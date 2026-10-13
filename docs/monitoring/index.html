@@ -1477,7 +1477,9 @@ async function cizYonetim() {
     const gerF = (q, m) => { const k = q.t.slice(0, 13), g = k.slice(0, 10), sa = SAHA && SAHA.saat && SAHA.saat[k], fo = MADEN.H && MADEN.H[k];
       const fth = fo ? Object.values(fo).reduce((a, b) => a + (b > 0 ? b : 0), 0) : null, fn = fo ? Object.values(fo).filter(v => v > 0).length : 0;
       if (!sa && fth == null) return null;
-      const th = fth != null && fth > 0 ? fth : sa ? sa.th : 0, kaynak = fth != null && fth > 0 ? 'F2Pool' : 'saha';
+      // F2Pool saatlik hash'i geç ve eksik gelir (içinde bulunulan/son saat yarım görünür); Pi ölçümü belirgin yüksekse onu kullan
+      const fOk = fth != null && fth > 0 && !(sa && sa.th > 0 && (q.t === simdiT || fth < sa.th * 0.8));
+      const th = fOk ? fth : sa ? sa.th : 0, kaynak = fOk ? 'F2Pool' : 'saha';
       let kwv = sa ? sa.kw : null, kwk = 'Pi ölçümü';
       if (kwv == null && fo) { kwv = Object.entries(fo).reduce((a, [w, v]) => a + (v > 0 ? v * (JTH[(KIMF[w] || {}).model] || 17.5) / 1000 : 0), 0); kwk = 'F2Pool hash × verim'; }
       const gl = (MADEN.gelir || {})[g], fy = (MADEN.btc || {})[g], tg = gunF2(g).t;

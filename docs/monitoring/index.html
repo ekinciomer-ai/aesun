@@ -2586,10 +2586,27 @@ async function invDetayAc(kay, san, id) {
 }
 // ===== Giriş / çıkış grafiği (bugün, saatlik): üretim + şebekeden çekiş = şebekeye veriş + madencilik + diğer iç tüketim =====
 const AKIS = {};
+const AKIS_GUN = {}, AKIS_ARG = {};
+// Seçilen günün saatlik üretimi: bugün → FusionSolar canlı; geçmiş → inverter arşivi (saat[gün])
+function akisUretim(k, g, fs) {
+  if (g === bugunTR()) return ((fs || {}).saatlik_bugun || {})[k] || {};
+  for (const f of (INV_CACHE[g.slice(0, 4)] || [])) for (const s of Object.values(f.santraller || {})) if (s.ad === k && s.saat && s.saat[g]) return s.saat[g];
+  return {};
+}
+function akisGunler(k) {
+  const key = k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2', G = new Set(Object.keys(((((D || {}).osos || {})[key] || {}).veri || {})));
+  for (const f of Object.values(INV_CACHE).flat()) for (const s of Object.values(f.santraller || {})) if (s.ad === k) Object.keys(s.saat || {}).forEach(x => G.add(x));
+  G.add(bugunTR()); return [...G].filter(x => x <= bugunTR()).sort();
+}
+function akisGunSec(k, g) {
+  if (!g) return; AKIS_GUN[k] = g === bugunTR() ? null : g;
+  const yil = g.slice(0, 4), yenile = () => { const el = document.getElementById('akisK_' + k), A = AKIS_ARG[k]; if (el && A) el.outerHTML = akisGrafik(k, A.fs, A.saha, A.anlik); };
+  if (!INV_CACHE[yil]) { invYilYukle(yil).then(yenile).catch(yenile); } yenile();
+}
 function akisVeri(k, fs, saha) {
-  const g = bugunTR(), key = k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2';
-  const ur = ((fs || {}).saatlik_bugun || {})[k] || {}, os = ((((D || {}).osos || {})[key] || {}).veri || {})[g] || {};
-  const sh = (saha && saha.saat) || {}, suan = String((fs || {}).guncelleme || '').slice(11, 13);
+  const g = AKIS_GUN[k] || bugunTR(), key = k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2';
+  const ur = akisUretim(k, g, fs), os = ((((D || {}).osos || {})[key] || {}).veri || {})[g] || {};
+  const sh = (saha && saha.saat) || {}, suan = g === bugunTR() ? String((fs || {}).guncelleme || '').slice(11, 13) : '';
   const hs = []; for (let i = 0; i < 24; i++) hs.push(String(i).padStart(2, '0'));
   const r = hs.map(h => {
     const u = ur[h] != null ? Number(ur[h]) : null, o = os[h], m = k === 'Sera-2' && sh[g + ' ' + h] && sh[g + ' ' + h].kw != null ? Number(sh[g + ' ' + h].kw) : null;
@@ -2601,11 +2618,21 @@ function akisVeri(k, fs, saha) {
   return { k, g, r, suan };
 }
 function akisGrafik(k, fs, saha, anlik) {
+  AKIS_ARG[k] = { fs, saha, anlik };
+  const yil = (AKIS_GUN[k] || bugunTR()).slice(0, 4); if (!INV_CACHE[yil] && !akisGrafik.yuk) { akisGrafik.yuk = 1; invYilYukle(yil).then(() => { akisGrafik.yuk = 0; const el = document.getElementById('akisK_' + k); if (el) for (const kk of Object.keys(AKIS_ARG)) { const e2 = document.getElementById('akisK_' + kk), a2 = AKIS_ARG[kk]; if (e2) e2.outerHTML = akisGrafik(kk, a2.fs, a2.saha, a2.anlik); } }).catch(() => { akisGrafik.yuk = 0; }); }
   const A = akisVeri(k, fs, saha); A.anlik = anlik; AKIS[k] = A;
+  const bugunMu = A.g === bugunTR(), gl = akisGunler(k), gi = gl.indexOf(A.g);
+  const tg = d => d.slice(8, 10) + '.' + d.slice(5, 7), GA = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'], gAd = d => GA[new Date(d + 'T12:00:00').getDay()];
+  const btn = (et, hedef, ip) => '<button type="button" class="btn"' + (hedef ? ' onclick="akisGunSec(\'' + k + '\',\'' + hedef + '\')"' : ' disabled') + ' title="' + ip + '" style="padding:2px 10px">' + et + '</button>';
+  const sec = '<span style="display:inline-flex;gap:6px;align-items:center">' + btn('‹', gl[gi - 1], 'Önceki gün')
+    + '<input type="date" value="' + A.g + '" min="' + gl[0] + '" max="' + bugunTR() + '" onchange="akisGunSec(\'' + k + '\',this.value)" style="font:inherit;padding:2px 6px;border:1px solid #CBD3DD;border-radius:6px">'
+    + btn('›', gl[gi + 1], 'Sonraki gün') + (bugunMu ? '' : btn('Bugün', bugunTR(), 'Bugüne dön')) + '</span>';
   const R = A.r, ilk = R.findIndex(x => (x.u || 0) > 0.5 || (x.c || 0) > 0.5 || (x.m || 0) > 0.5);
   const son = Math.max(...R.map((x, i) => (x.u != null || x.v != null || x.m != null) ? i : -1));
-  if (ilk < 0 || son < 0) return '';
-  const a = Math.max(0, Math.min(ilk, 6)), b = Math.max(son, Math.min(23, a + 12));
+  const bas_ = '<div id="akisK_' + k + '" style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">'
+    + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:center"><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap"><b style="font-size:14px">Giriş / çıkış · ' + (bugunMu ? 'bugün' : tg(A.g) + ' ' + gAd(A.g)) + '</b>' + sec + '</span>';
+  if (ilk < 0 || son < 0) return bas_ + '</div><p class="k" style="margin:0">' + (bugunMu ? 'Bugün için henüz veri yok.' : 'Bu gün için saatlik veri bulunamadı (inverter arşivi son 7 günü tutar; sayaç verisi OSOS\'tan).') + '</p></div>';
+  const a = Math.max(0, Math.min(ilk, 6)), b = bugunMu ? Math.max(son, Math.min(23, a + 12)) : Math.max(son, 23);
   const S = R.slice(a, b + 1);
   // üretim olan saatlerde üretimden karşılanan tüketim (üretim − veriş): çekiş gibi aşağı yönde, silik kırmızı
   const tuk = x => (x.u || 0) > 0.5 && x.v != null && x.u >= x.v ? -Math.round((x.u - x.v) * 10) / 10 : null;
@@ -2615,9 +2642,10 @@ function akisGrafik(k, fs, saha, anlik) {
     { ad: 'Tüketim (üretimden)', renk: 'rgba(217,45,32,0.30)', v: S.map(tuk) }];
   if (k === 'Sera-2') ser.unshift({ ad: 'Madencilik yükü', renk: '#7A4FD0', v: S.map(x => x.m == null ? null : -x.m), tip: 'alan' });   // tüketim: aşağı yönde
   const an = anlik || {}, yon = an.net == null ? '' : an.net >= 0 ? '<b style="color:#1E7A3C">→ şebekeye ' + say(an.net, 1) + ' kW</b>' : '<b style="color:#B42318">← şebekeden ' + say(-an.net, 1) + ' kW</b>';
-  return '<div style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">'
-    + '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline"><b style="font-size:14px">Giriş / çıkış · bugün</b>'
-    + '<span class="k">Şu an: üretim <b>' + say(an.uretim, 1) + ' kW</b>' + (an.yuk != null ? ' · madencilik <b>' + say(an.yuk, 1) + ' kW</b>' : '') + (yon ? ' · ' + yon : '') + '</span></div>'
+  const tp = f => { let t = 0, v = false; S.forEach(x => { const z = f(x); if (z != null) { t += z; v = true; } }); return v ? t : null; };
+  const ozet = bugunMu ? '<span class="k">Şu an: üretim <b>' + say(an.uretim, 1) + ' kW</b>' + (an.yuk != null ? ' · madencilik <b>' + say(an.yuk, 1) + ' kW</b>' : '') + (yon ? ' · ' + yon : '') + '</span>'
+    : '<span class="k">Gün: üretim <b>' + say(tp(x => x.u)) + ' kWh</b> · veriş <b>' + say(tp(x => x.v)) + '</b> · çekiş <b>' + say(tp(x => x.c)) + '</b>' + (k === 'Sera-2' ? ' · madencilik <b>' + say(tp(x => x.m)) + '</b>' : '') + ' kWh</span>';
+  return bas_ + ozet + '</div>'
     + grafikX({ id: 'akis_' + k, ad: k + ' giriş çıkış', etiket: S.map(x => x.h + ':00' + (x.devam ? '*' : '')), etiketAd: 'Saat', seriler: ser,
       turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top',
       tip: i => akisMetin(S[i]) + '\n(ayrıntı için tıklayın)', tik: i => "akisAc('" + k + "'," + (a + i) + ")" })

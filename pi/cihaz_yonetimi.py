@@ -654,7 +654,7 @@ def calistir():
         if guclu:
             karar_degisim.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "saat": p_["t"][11:16], "eski": k_["karar"], "yeni": p_["karar"],
                                   "neden": f"{p_['t'][11:16]} kararı {k_['karar']} → {p_['karar']}: maliyet {p_['maliyet']:.1f} ₺, gelir {p_['gelir']:.1f} ₺ "
-                                           f"(fark %{oran * 100:+.1f}, bant ±%{bant * 100:.0f}); PTF {p_['ptf']:.0f}, BTC {btc_try or 0:,.0f} ₺".replace(",", ".")})
+                                           f"(fark %{oran * 100:+.1f}, bant ±%{bant * 100:.0f}); PTF {p_['ptf']:.0f}, BTC " + f"{btc_try or 0:,.0f}".replace(",", ".") + " ₺"})
             kilit[an] = {"karar": p_["karar"], "t": simdi.isoformat(timespec="seconds"), "oran": round(oran, 4), "ptf": p_["ptf"]}
         else:
             p_["not"] = (f"karar kilitli ({k_['karar']}): fark %{oran * 100:+.1f}, ±%{bant * 100:.0f} bandı içinde; "

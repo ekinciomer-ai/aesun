@@ -1491,6 +1491,41 @@ async function cizYonetim() {
       if (!fOk && sa) gk += ' (F2Pool gelince düzelir)';
       const r = { th, kaynak, sa, fth, fn, gelir, gk, kesin, kw: kwv, kwk, maliyet: kwv != null && m != null ? kwv * m / 1000 : null };
       r.net = r.gelir != null && r.maliyet != null ? r.gelir - r.maliyet : null; return r; };
+    // Geçen/şu anki saat için kısa özet: ne oldu + neden (Pi geçmişi, gerçekleşen ölçüm, güneş, karar)
+    const GEC = (y.gecmis || []);
+    const neOldu = (q, simdi_) => {
+      if (!(q.gecmis || simdi_)) return '';
+      const r = gerF(q, emal(q)), h = Number(q.t.slice(11, 13)), gs0 = q.t.startsWith(bugunTR()) ? gunesSaat[h] : null;
+      const gs = simdi_ && !(gs0 > esik) && q.karar === 'calis' && emal(q) > bas(q) ? esik + 1 : gs0, gsY = gs0 > esik ? ' · üretim ' + say(gs0) + ' kWh' : '';
+      const cal = r && r.sa ? r.sa.calisan : r ? r.fn : null, n = NF;
+      let yorum;
+      if (cal == null) yorum = '<span class="k">ölçüm yok</span>';
+      else if (cal < 0.5) yorum = (gs > esik ? 'Uyudu' : 'Uyudu · zararlı saat') + (q.ptf != null ? ' (PTF ' + say(q.ptf) + ')' : '');
+      else if (gs > esik && cal < n - 0.5) yorum = '☀ Güneşle ' + say(cal, 1) + ' cihaz' + gsY;
+      else if (gs > esik) yorum = '☀ Güneşle tam filo' + gsY;
+      else if (cal >= n - 0.5) yorum = 'Kârlı saat · tam filo çalıştı';
+      else yorum = 'Kısmen: ' + say(cal, 1) + ' cihaz';
+      if (r && r.net != null && cal >= 0.5) yorum += ' · net <b style="color:' + (r.net < 0 ? '#B42318' : '#1E7A3C') + '">' + (r.net > 0 ? '+' : '') + say(r.net) + ' ₺</b>';
+      // o saatteki olaylar (komutlar, karar değişimleri)
+      const ev = GEC.filter(g => String(g.t).startsWith(q.t.slice(0, 13)) && (g.gonderildi || g.tur === 'karar_degisim'));
+      const kisa = g => { const t = String(g.t).slice(11, 16), m = String(g.neden || '').match(/(\d+) cihaz (uyandır|uyut)/);
+        if (g.tur === 'karar_degisim') return t + ' karar döndü';
+        return t + ' ' + (g.eylem === 'wake' ? '↑' : g.eylem === 'sleep' ? '↓' : '') + (m ? m[1] : 'tümü'); };
+      const evs = ev.length ? ev.slice(0, 4).map(kisa).join(' · ') + (ev.length > 4 ? ' · +' + (ev.length - 4) : '') : '';
+      const tip = ev.map(g => String(g.t).slice(11, 16) + ' ' + (g.neden || '')).join('\n');
+      return '<div>' + yorum + '</div>' + (evs ? '<div class="k" data-tip="' + esc(tip) + '" style="cursor:help">' + evs + '</div>' : '');
+    };
+    // Plan / Olan: saat gelmeden ne yapılacağı (plan), saat geçince ne olduğu
+    const komutH = (q, i) => (q.gunes_cihaz && !(pl[i - 1] || {}).gunes_cihaz && (pl[i - 1] || {}).karar !== 'calis' ? '<div style="color:#8A5A00;font-weight:600">☀ ' + q.t.slice(11, 16) + ' güneşle kademeli uyanma başlar (~' + q.gunes_cihaz + ' cihaz)</div>' : '')
+              + (q.gunes_cihaz && pl[i + 1] && !pl[i + 1].gunes_cihaz && pl[i + 1].karar === 'uyut' ? '<div style="color:#8A5A00">☀ üretim düştükçe kademeli uyku</div>' : '') + (TK[q.t.slice(0, 13)] ? (t => t.gunes ? (t.eylem === 'wake' ? '⏰ ' + t.t_komut.slice(11, 16) + ' kalanlar uyanır (güneşle sıcak)' : '☀ ' + t.t_komut.slice(11, 16) + ' güneş takibi') : (t.eylem === 'wake' ? '⏰ ' : '☾ ') + t.t_komut.slice(11, 16) + ' ' + (t.eylem === 'wake' ? 'uyandır · ' + say(t.oncu_dk) + ' dk önce' : 'uyut'))(TK[q.t.slice(0, 13)]) : '');
+    const planOlay = (q, i, d, m, b) => {
+      const simdi_ = i === si, kh = komutH(q, i);
+      const neden = m != null && b != null ? (m > b ? (q.karar === 'calis' ? '☀ güneş enerjisiyle (şebeke pahalı)' : 'şebeke maliyeti başabaşın üstünde') : 'şebeke maliyeti başabaşın altında, kârlı') : '';
+      const plan = kh || ('<span style="color:#4A5A70">' + (q.karar === 'calis' ? ((pl[i - 1] || {}).karar === 'uyut' ? 'Çalıştırılır' : 'Çalışmaya devam') : q.karar === 'uyut' ? ((pl[i - 1] || {}).karar === 'calis' ? 'Uyutulur' : 'Uykuda kalır') : d.ad) + (neden ? ' · ' + neden : '') + '</span>');
+      if (q.gecmis) return '<div data-tip="' + esc('Plan: ' + plan.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()) + '">' + (neOldu(q, false) || '<span class="k">ölçüm yok</span>') + '</div>';
+      if (simdi_) return '<div class="k" style="font-size:11px;font-weight:700">PLAN</div>' + plan + '<div class="k" style="font-size:11px;font-weight:700;margin-top:3px">ŞU ANA KADAR</div>' + neOldu(q, true);
+      return plan;
+    };
     const bugun = bugunTR(), yarin = gunEkle(bugun, 1), simdiT = bugun + ' ' + trSimdi().toISOString().slice(11, 13) + ':00';
     const yarinVar = plHam.some(q => q.t.startsWith(yarin));
     const ilkGun = Object.keys(MADEN.H || {}).sort()[0] ? Object.keys(MADEN.H).sort()[0].slice(0, 10) : bugun;
@@ -1623,15 +1658,14 @@ async function cizYonetim() {
       + '<label class="k" style="display:flex;gap:6px;align-items:center">Başlangıç <input id="anBas" type="date" value="' + anB.bas + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'
       + '<label class="k" style="display:flex;gap:6px;align-items:center">Bitiş <input id="anBit" type="date" value="' + anB.bit + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'
       + '<button type="button" class="btn" id="anOynat" onclick="planOynat()">▶ Oynat</button><button type="button" class="btn" onclick="planVideo()">⬇ Video indir</button><span id="anDurum" class="k"></span></div>'
-      + '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">Saat</th><th class="sol">Karar</th><th class="ayr">PTF</th><th>Enerji maliyeti</th><th>Başabaş</th><th class="ayr">Maliyet</th><th>Tahmini gelir</th><th>Fark</th><th class="ayr" style="color:#D9480F">Gerç. maliyet</th><th style="color:#7C3AED">Gerç. gelir</th><th>Gerç. net</th><th class="sol ayr">Komut</th></tr><tr><th></th><th></th><th class="ayr k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="ayr k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="ayr k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th></th></tr></thead><tbody>'
+      + '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">Saat</th><th class="sol">Karar</th><th class="ayr">PTF</th><th>Enerji maliyeti</th><th>Başabaş</th><th class="ayr">Maliyet</th><th>Tahmini gelir</th><th>Fark</th><th class="ayr" style="color:#D9480F">Gerç. maliyet</th><th style="color:#7C3AED">Gerç. gelir</th><th>Gerç. net</th><th class="sol ayr" data-tip="Saat gelmeden: yapılacak plan · saat geçince: ne oldu">Plan → Olan</th></tr><tr><th></th><th></th><th class="ayr k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="k" style="font-weight:400">₺/MWh</th><th class="ayr k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="k" style="font-weight:400">₺/cihaz·sa</th><th class="ayr k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th class="k" style="font-weight:400">₺/saat · filo</th><th></th></tr></thead><tbody>'
       + pl.map((q, i) => { const d = DUR(q), m = emal(q), b = bas(q), f = q.gelir != null && q.maliyet != null ? q.gelir - q.maliyet : null, simdi = i === si;
           return (i === ei ? '<tr><td class="sol" colspan="12" style="background:#10233F;color:#fff;font-weight:800;padding:6px 12px">' + tarihK(yarin) + ' · yarın (PTF açıklandı, ilk 5 saat)</td></tr>' : '') + '<tr class="' + (simdi ? 'simdi-satir' : '') + '" style="background:' + d.bg + (q.gecmis ? ';opacity:.6' : '') + '"><td class="sol" style="font-weight:600;white-space:nowrap">' + q.t.slice(11) + (simdi ? ' <span style="display:inline-block;padding:1px 7px;border-radius:999px;background:#10233F;color:#fff;font-size:11px;font-weight:800">ŞU AN</span>' : '') + '</td>'
             + '<td class="sol"' + (q.not ? ' data-tip="' + esc(q.not) + '"' : '') + '><span style="display:inline-block;padding:3px 10px;border-radius:999px;background:' + d.bar + ';color:#fff;font-weight:700;font-size:13px;white-space:nowrap">' + d.ik + ' ' + d.ad + '</span>' + (q.karar_ham && q.karar_ham !== q.karar ? ' <span class="k">(kısa duruş)</span>' : '') + '</td>'
             + '<td class="ayr">' + say(q.ptf) + '</td><td style="font-weight:700;color:' + (m != null && b != null ? (m > b ? '#B42318' : '#1E7A3C') : '#10233F') + '">' + say(m) + '</td><td class="k">' + say(b) + '</td>'
             + '<td class="ayr">' + say(q.maliyet, 1) + '</td><td>' + say(q.gelir, 1) + '</td><td style="font-weight:600;color:' + (f == null ? '#4A5A70' : f < 0 ? '#B42318' : '#1E7A3C') + '">' + (f == null ? '—' : (f > 0 ? '+' : '') + say(f, 1)) + '</td>'
             + (r => !r ? '<td class="ayr"></td><td></td><td></td>' : '<td class="ayr" style="color:#D9480F;font-weight:600"' + (r.sa ? ' data-tip="' + say(r.sa.calisan) + ' cihaz çalıştı · ' + say(r.kw) + ' kW · ' + r.sa.ilk + '–' + r.sa.son + '"' : '') + '>' + say(r.maliyet) + '</td><td style="color:#7C3AED;font-weight:600" data-tip="' + say(r.th) + ' TH/s · kaynak ' + r.kaynak + '">' + say(r.gelir) + (/düzelir/.test(r.gk) && r.th > 0 ? ' <span class="k" style="font-weight:400" data-tip="Pi ölçümüyle geçici; F2Pool verisi gelince (saat bitiminden ~45 dk sonra) kendiliğinden düzelir">geçici</span>' : '') + '</td><td style="font-weight:700;color:' + (r.net == null ? '#4A5A70' : r.net < 0 ? '#B42318' : '#1E7A3C') + '">' + (r.net == null ? '—' : (r.net > 0 ? '+' : '') + say(r.net)) + '</td>')(gerF(q, emal(q)))
-            + '<td class="sol ayr">' + (q.gunes_cihaz && !(pl[i - 1] || {}).gunes_cihaz && (pl[i - 1] || {}).karar !== 'calis' ? '<div style="color:#8A5A00;font-weight:600">☀ ' + q.t.slice(11, 16) + ' güneşle kademeli uyanma başlar (~' + q.gunes_cihaz + ' cihaz)</div>' : '')
-              + (q.gunes_cihaz && pl[i + 1] && !pl[i + 1].gunes_cihaz && pl[i + 1].karar === 'uyut' ? '<div style="color:#8A5A00">☀ üretim düştükçe kademeli uyku</div>' : '') + (TK[q.t.slice(0, 13)] ? (t => t.gunes ? (t.eylem === 'wake' ? '⏰ ' + t.t_komut.slice(11, 16) + ' kalanlar uyanır (güneşle sıcak)' : '☀ ' + t.t_komut.slice(11, 16) + ' güneş takibi') : (t.eylem === 'wake' ? '⏰ ' : '☾ ') + t.t_komut.slice(11, 16) + ' ' + (t.eylem === 'wake' ? 'uyandır · ' + say(t.oncu_dk) + ' dk önce' : 'uyut'))(TK[q.t.slice(0, 13)]) : '') + '</td></tr>'; }).join('')
+            + '<td class="sol ayr" style="font-size:12.5px;line-height:1.35;min-width:240px">' + planOlay(q, i, d, m, b) + '</td></tr>'; }).join('')
       + '</tbody></table></div><div class="k">Şebeke maliyeti = (PTF + YEKDEM) × komisyon × (1 + BTV) + dağıtım, KDV hariç. Başabaş: cihazın saatlik BTC gelirine denk gelen enerji maliyeti; maliyet bunun üstündeyse (kırmızı) ve güneş yoksa cihaz uyur. Geçmiş saatler aynı kuralla gerçekleşen PTF ve güneş üretiminden hesaplanır. Gerçekleşen (filo): Pi\'nin dakikalık ölçümünden saatlik ortalama güç × enerji maliyeti ve toplam hash × hashprice; F2Pool saatlik verisi gelince gelir onunla güncellenir. Güç, hash × model verimi (S21e 17,5 · S19 XP+ 21,5 J/TH); ısınan cihaz 1 kW sayılır.</div></section>';
   }
   h += await ogrenmeBolum(a, z);

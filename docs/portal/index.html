@@ -162,6 +162,7 @@ const IKON = {
   saha: '<path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/>',
   monitoring: '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
   muhasebe: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/>',
+  mali: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M15.5 14h2.5"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   proje: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13h8M8 16h5"/>',
   insan: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
@@ -175,7 +176,7 @@ const IKON = {
   gunes: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   diger: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'
 };
-const IKON_AD = { saha: 'Saha', monitoring: 'Grafik', muhasebe: 'Hesap', mail: 'Posta', proje: 'Klasör', insan: 'Kişi', ekip: 'Ekip', tedarik: 'Sevkiyat', egitim: 'Eğitim', iletisim: 'Mesaj', belge: 'Belge', takvim: 'Takvim', sepet: 'Sipariş', gunes: 'Güneş', diger: 'Diğer' };
+const IKON_AD = { saha: 'Saha', monitoring: 'Grafik', mali: 'Mali', muhasebe: 'Hesap', mail: 'Posta', proje: 'Klasör', insan: 'Kişi', ekip: 'Ekip', tedarik: 'Sevkiyat', egitim: 'Eğitim', iletisim: 'Mesaj', belge: 'Belge', takvim: 'Takvim', sepet: 'Sipariş', gunes: 'Güneş', diger: 'Diğer' };
 const RENKLER = { kirmizi: ['Kırmızı', '#D7262E'], antrasit: ['Antrasit', '#3A3F47'], mavi: ['Mavi', '#2F6DB5'], turuncu: ['Turuncu', '#F08A24'], sari: ['Sarı', '#E9A800'], yesil: ['Yeşil', '#1E9E5A'], lacivert: ['Lacivert', '#1F3B66'], turkuaz: ['Turkuaz', '#1A97B5'] };
 const renkHex = r => (RENKLER[r] || RENKLER.kirmizi)[1];
 const MERKEZ = '<svg viewBox="0 0 320 250" aria-hidden="true"><g fill="none" stroke="#C9CED6" stroke-width="2" stroke-linecap="round"><path d="M18 120h22M28 110v20"/><path d="M290 60h18M299 51v18"/></g>'
@@ -279,6 +280,30 @@ function acSonuc(id) {
     + '</div></div>';
   if (!d.open) d.showModal();
 }
+// ---- Mali grubu: tek kutu, içinde Mail / Muhasebe / Hukuk-Sözleşme iç giriş sekmeleri ----
+const MALI_ALT = [
+  { id: 'mail', ids: ['mail'], ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', ikon: 'mail' },
+  { id: 'muhasebe', ids: ['muhasebe'], ad: 'Muhasebe', aciklama: 'Muhasebe programı', ikon: 'muhasebe' },
+  { id: 'hukuk', ids: ['hukuk', 'hukuk-sozlesme', 'hukuksozlesme'], ad: 'Hukuk / Sözleşme', aciklama: 'Sözleşmeler ve hukuki belgeler', ikon: 'belge' }
+];
+const MALI_ICIN = MALI_ALT.reduce((a, x) => a.concat(x.ids), []);   // hub'da gizlenecek modül kimlikleri
+let MALI_SEK = 'mail';
+function acMali(sek) {
+  if (!S) { SAYFA = 'ana'; return girisModal(null); }
+  if (sek) MALI_SEK = sek;
+  const a = MALI_ALT.find(x => x.id === MALI_SEK) || MALI_ALT[0];
+  const d = dlg();
+  const sekler = MALI_ALT.map(x => '<button type="button" class="ysek' + (x.id === a.id ? ' on' : '') + '" onclick="acMali(\'' + x.id + '\')">' + esc(x.ad) + '</button>').join('');
+  const m = (a.ids || [a.id]).map(i => MOD[i]).find(Boolean);
+  const url = m && m.aktif !== false ? String(m.url || '').trim() : '';
+  const govde = url
+    ? ((S.hesaplar || {})[a.id] ? '<p class="ince">Hesap: ' + esc(S.hesaplar[a.id]) + '</p>' : '') + '<p class="ince">' + esc(a.aciklama) + '</p><a class="btn tam" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(a.ad) + ' aç →</a>'
+    : '<p class="ince" style="margin-bottom:10px">' + esc(a.aciklama) + '</p><div class="hata">Bağlantı henüz tanımlanmadı' + (S.ka ? ' — Yönetim → Uygulamalar\'dan “' + esc(a.ad) + '” (kimlik: ' + esc(a.id) + ') için adres ekleyin.' : ', yakında.') + '</div>';
+  d.innerHTML = dlgBas('', 'Mali', 'Mail · Muhasebe · Hukuk / Sözleşme')
+    + '<div class="ysekler" style="margin-top:14px;justify-content:center">' + sekler + '</div>'
+    + '<div style="margin-top:16px">' + govde + '</div></div></div>';
+  if (!d.open) d.showModal();
+}
 async function modulleriAc() {
   const out = [];
   const anah = S.ka ? (await rehber()).anahtarlar : S.anahtarlar || {};
@@ -298,14 +323,16 @@ async function git(s) {
   if (!V) await veriYukle();
   if (s === 'yonetim' && !S) { SAYFA = 'yonetim'; return girisModal(null); }
   if (s === 'yonetim' && S.ka) return yonetimCiz();
-  const vs = ((V && V.vitrin) || []).filter(x => x.aktif !== false).sort((x, y) => (x.sira || 0) - (y.sira || 0));
+  const vs = ((V && V.vitrin) || []).filter(x => x.aktif !== false && MALI_ICIN.indexOf(x.id) < 0).sort((x, y) => (x.sira || 0) - (y.sira || 0));
+  vs.push({ id: 'mali', ad: 'Mali', ikon: 'mali', renk: 'yesil', aktif: true, _grup: true });
   const n = vs.length, R0 = n > 8 ? 42 : 40;
   let h = '<h1 class="baslik">Kurumsal Portal</h1><p class="alt">' + (S ? 'Açmak istediğiniz uygulamaya tıklayın.' : 'Uygulamaya tıklayın; kullanıcı adı ve şifrenizle giriş yapın.') + '</p>'
     + '<div class="hub"><div class="halka"></div><div class="merkez">' + MERKEZ + '</div>';
   vs.forEach((v, i) => {
     const a = (-90 + i * 360 / n) * Math.PI / 180, x = 50 + R0 * Math.cos(a), y = 50 + R0 * Math.sin(a);
-    const yetki = !S || MOD[v.id];
-    h += '<button class="hm' + (yetki ? '' : ' kilit') + '" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + renkHex(v.renk) + '" onclick="ac(\'' + esc(v.id) + '\')"><span class="hd">' + ikon(v.ikon) + '</span><span class="ha">' + esc(v.ad) + '</span></button>';
+    const yetki = v._grup ? true : (!S || MOD[v.id]);
+    const tik = v._grup ? 'acMali()' : ('ac(\'' + esc(v.id) + '\')');
+    h += '<button class="hm' + (yetki ? '' : ' kilit') + '" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + renkHex(v.renk) + '" onclick="' + tik + '"><span class="hd">' + ikon(v.ikon) + '</span><span class="ha">' + esc(v.ad) + '</span></button>';
   });
   if (!n) h += '<div class="kart" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%)">Henüz uygulama yok.</div>';
   h += '</div>';

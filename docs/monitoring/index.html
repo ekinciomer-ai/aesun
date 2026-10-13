@@ -928,14 +928,14 @@ async function madenYukle(zorla) {
   const [g1, b1] = await Promise.all([al('arsiv_f2pool_gelir.json', zorla).catch(() => MADEN.gelir || {}), al('arsiv_btc_fiyat.json', zorla).then(d => d.gun || {}).catch(() => MADEN.btc || {})]);
   MADEN.gelir = g1; MADEN.btc = b1;
   await al('n8n/maden_maliyet.json', zorla).then(d => { MADEN.mal = d.gun || {}; MADEN.malPay = d.maliyet_payi || null; }).catch(() => { MADEN.mal = MADEN.mal || {}; });
-  const H = {};
+  const H = {}, HE = {};   // HE: o saatte F2Pool kaydı yarım ('u'/'k') olan cihaz sayısı
   for (const d of Object.values(MADEN.aylar)) for (const [k, v] of Object.entries(d)) {
     const t = Date.parse(k.replace(' ', 'T').slice(0, 13) + ':00:00Z'); if (isNaN(t)) continue;
     const tr = new Date(t + 3 * 3600000).toISOString(), key = tr.slice(0, 10) + ' ' + tr.slice(11, 13);
     const o = H[key] || (H[key] = {});
-    for (const [c, x] of Object.entries(v || {})) o[c] = Number(x && x.h) || 0;
+    for (const [c, x] of Object.entries(v || {})) { o[c] = Number(x && x.h) || 0; if (x && (x.d === 'u' || x.d === 'k') && o[c] > 0) HE[key] = (HE[key] || 0) + 1; }
   }
-  MADEN.H = H; MADEN.yuklendi = Date.now();
+  MADEN.H = H; MADEN.HE = HE; MADEN.yuklendi = Date.now();
 }
 function madenGun(g) {
   const r = { g, saat: [], top: 0, calisan: 0, tepe: 0, aktifOrt: 0, veri: 0, cihaz: {} };
@@ -1480,7 +1480,9 @@ async function cizYonetim() {
       // F2Pool saatlik hash'i geç ve eksik gelir (içinde bulunulan/son saat yarım görünür); Pi ölçümü belirgin yüksekse onu kullan
       // Saat bittikten 45 dk sonra F2Pool verisi kesin sayılır ve her zaman o kullanılır (Pi tahmini geriye dönük düzelir).
       const bitis = Date.parse(k.replace(' ', 'T') + ':00:00+03:00') + 3600000, kesin = Date.now() - bitis > 45 * 60000;
-      const fOk = fth != null && fth > 0 && (kesin || !(sa && sa.th > 0 && (q.t === simdiT || fth < sa.th * 0.8)));
+      // F2Pool kaydı yarım kalmışsa (cihazların çoğu 'u') kesin sayılmaz; Pi ölçümü belirgin yüksekse o kullanılır
+      const yarim = ((MADEN.HE || {})[k] || 0) > fn / 2;
+      const fOk = fth != null && fth > 0 && ((kesin && !yarim) || !(sa && sa.th > 0 && (q.t === simdiT || fth < sa.th * 0.8)));
       const th = fOk ? fth : sa ? sa.th : 0, kaynak = fOk ? 'F2Pool' : 'saha';
       let kwv = sa ? sa.kw : null, kwk = 'Pi ölçümü';
       if (kwv == null && fo) { kwv = Object.entries(fo).reduce((a, [w, v]) => a + (v > 0 ? v * (JTH[(KIMF[w] || {}).model] || 17.5) / 1000 : 0), 0); kwk = 'F2Pool hash × verim'; }

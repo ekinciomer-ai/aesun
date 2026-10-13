@@ -310,6 +310,24 @@ function acMali(sek) {
     + '<div style="margin-top:16px">' + govde + '</div></div></div>';
   if (!d.open) d.showModal();
 }
+// ---- Saha: güneş-gezegen proje seçici (Saha = güneş, projeler = yörüngedeki balonlar) ----
+function sahaUrl() { const m = MOD['saha']; return (m && String(m.url || '').trim()) || 'https://ekinciomer-ai.github.io/saha/'; }
+function sahaAc(id) { try { localStorage.setItem('sh2:aktif', id); } catch (e) {} const u = sahaUrl(), s = u.indexOf('?') < 0 ? '?' : '&'; window.open(u + s + 'proje=' + encodeURIComponent(id), '_blank', 'noopener'); }
+function sahaProjeOlustur(ad, renk) { const list = sahaProjeListesi(), id = 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), p = { id, ad: (ad || 'Yeni proje').trim(), renk: renk || '#3f6fb0', oln: Date.now() }; list.push(p); try { localStorage.setItem('sh2:projeler', JSON.stringify(list)); } catch (e) {} try { fetch(N8N_SAHA + '/saha-set', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ proje: 'SHAMS1-reg', cihaz: 'portal', items: [{ anahtar: 'projeler', deger: JSON.stringify(list) }] }) }).catch(() => {}); } catch (e) {} return p; }
+function sahaYeniProje() { const d = dlg(); d.innerHTML = dlgBas('', 'Yeni proje', 'Saha İş Yönetimi · yeni proje') + '<form id="npf"><label class="alan"><span>Proje adı</span><input id="np_ad" required placeholder="ör. SHAMS-2 GES" autocomplete="off"></label><label class="alan"><span>Renk</span><input id="np_renk" type="color" value="#3f6fb0" style="height:44px;padding:3px"></label><button class="btn tam" id="npb">Oluştur</button></form></div></div>'; if (!d.open) d.showModal(); setTimeout(() => $('np_ad') && $('np_ad').focus(), 30); $('npf').onsubmit = e => { e.preventDefault(); const ad = $('np_ad').value.trim(); if (!ad) return; const p = sahaProjeOlustur(ad, $('np_renk').value); d.close(); acSaha(); if (confirm('"' + ad + '" oluşturuldu. Şimdi açılsın mı?')) sahaAc(p.id); }; }
+function acSaha() {
+  if (!S) { SAYFA = 'ana'; return girisModal('saha'); }
+  const all = sahaProjeListesi(), allowed = S.ka ? all : all.filter(p => !((S.projeler || []).length) || (S.projeler || []).includes(p.id));
+  if (!S.ka && allowed.length === 1) return sahaAc(allowed[0].id);
+  const before = all.length; sahaProjeTazele(p => { if (p && p.length !== before) acSaha(); });
+  const items = allowed.slice(); if (S.ka) items.push({ _add: true, ad: 'Yeni proje', renk: '#2E7D46' });
+  const n = Math.max(items.length, 1), R0 = n > 8 ? 44 : (n > 4 ? 41 : 34);
+  let h = '<h1 class="baslik">Saha İş Yönetimi</h1><p class="alt">Projeyi seçin' + (S.ka ? ' ya da yeni proje açın.' : '.') + ' · <a href="#" onclick="git(\'ana\');return false" style="color:#D7262E;font-weight:600">← Portal</a></p>';
+  h += '<div class="hub"><div class="halka"></div><div class="merkez"><div style="width:min(150px,38vw);aspect-ratio:1;border-radius:50%;margin:0 auto;display:grid;place-items:center;color:#fff;background:#D7262E;box-shadow:0 0 0 14px rgba(215,38,46,.14),0 0 46px rgba(215,38,46,.4)">' + ikon('saha') + '</div><div style="text-align:center;font-weight:800;margin-top:10px;color:#D7262E">Saha</div></div>';
+  items.forEach((v, i) => { const a = (-90 + i * 360 / n) * Math.PI / 180, x = 50 + R0 * Math.cos(a), y = 50 + R0 * Math.sin(a); const tik = v._add ? 'sahaYeniProje()' : ('sahaAc(\'' + esc(v.id) + '\')'); const rk = v._add ? '#2E7D46' : (v.renk || '#E8622A'); const ic = v._add ? '<span class="hd" style="--r:' + rk + ';font-size:42px;font-weight:300;line-height:1">＋</span>' : '<span class="hd" style="--r:' + rk + '">' + ikon('proje') + '</span>'; h += '<button class="hm" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + rk + '" onclick="' + tik + '">' + ic + '<span class="ha">' + esc(v.ad) + '</span></button>'; });
+  h += '</div>';
+  $('ana').innerHTML = h;
+}
 async function modulleriAc() {
   const out = [];
   const anah = S.ka ? (await rehber()).anahtarlar : S.anahtarlar || {};
@@ -337,7 +355,7 @@ async function git(s) {
   vs.forEach((v, i) => {
     const a = (-90 + i * 360 / n) * Math.PI / 180, x = 50 + R0 * Math.cos(a), y = 50 + R0 * Math.sin(a);
     const yetki = v._grup ? true : (!S || MOD[v.id]);
-    const tik = v._grup ? 'acMali()' : ('ac(\'' + esc(v.id) + '\')');
+    const tik = v._grup ? 'acMali()' : (v.id === 'saha' ? 'acSaha()' : ('ac(\'' + esc(v.id) + '\')'));
     h += '<button class="hm' + (yetki ? '' : ' kilit') + '" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + renkHex(v.renk) + '" onclick="' + tik + '"><span class="hd">' + ikon(v.ikon) + '</span><span class="ha">' + esc(v.ad) + '</span></button>';
   });
   if (!n) h += '<div class="kart" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%)">Henüz uygulama yok.</div>';

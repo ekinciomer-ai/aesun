@@ -103,6 +103,10 @@ const ITER = 600000, OTURUM_SN = 12 * 3600;
 // Uygulama alt başlıkları (yetki kutuları). Monitoring paneli bu kimliklere göre sekme ve para bilgisini gösterir.
 /* varsayılan KAPALI (hassas / yönetici) yetkiler — modül açılınca otomatik verilmez, elle seçilir */
 const KAPALI = new Set(['parasal', 'yedek', 'proje', 'rapor', 'ilerleme', 'ekip', 'od_hakedis', 'od_taseron']);
+/* Saha projeleri — saha uygulaması ile AYNI origin'de localStorage'ta tutulur; n8n yedeği */
+const N8N_SAHA = (() => { try { return localStorage.getItem('sh2:n8n') || 'https://xbay.app.n8n.cloud/webhook'; } catch (e) { return 'https://xbay.app.n8n.cloud/webhook'; } })();
+function sahaProjeListesi() { let l = []; try { l = JSON.parse(localStorage.getItem('sh2:projeler') || '[]') || []; } catch (e) {} if (!l.some(p => p && p.id === 'tr1')) l.unshift({ id: 'tr1', ad: 'SHAMS-1 GES', renk: '#E8622A' }); return l; }
+function sahaProjeTazele(cb) { try { fetch(N8N_SAHA + '/saha-get?proje=SHAMS1-reg&t=' + Date.now()).then(r => r.ok ? r.json() : null).then(rows => { const arr = Array.isArray(rows) ? rows : (rows && rows.data) || []; let p = null; arr.forEach(x => { if (x.anahtar === 'projeler') { try { p = JSON.parse(x.deger); } catch (e) {} } }); if (p && p.length) { try { localStorage.setItem('sh2:projeler', JSON.stringify(p)); } catch (e) {} cb && cb(p); } }).catch(() => {}); } catch (e) {} }
 const KONULAR = {
   monitoring: [['genel', 'Genel bakış'], ['sayac', 'Sayaçlar ve mahsup'], ['inverter', 'İnverter analizi'], ['maden', 'Madencilik'], ['epias', 'EPİAŞ'], ['parasal', 'Parasal bilgiler (₺, fatura, gelir, pay)']],
   saha: [['gunluk', 'Günlük'], ['puantaj', 'Puantaj'], ['ilerleme', 'İlerleme (iş kalemleri)'], ['od_maas', 'Ödeme · Maaş'], ['od_harcama', 'Ödeme · Harcamalar'], ['od_taseron', 'Ödeme · Taşeron'], ['od_hakedis', 'Ödeme · Hakediş'], ['ekip', 'Ekip yönetimi (personel/araç)'], ['rapor', 'Saha raporu'], ['yedek', 'Yedek / geri yükle']]
@@ -382,7 +386,7 @@ async function kullaniciYaz(kul, sifre, yuk) {
 }
 const simdiTR = () => new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
 const yukHazirla = (kul, x) => x.yonetici ? { kul, ad: x.ad, ka: S.ka, yonetici: true }
-  : { kul, ad: x.ad, izinler: x.izinler || {}, anahtarlar: Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
+  : { kul, ad: x.ad, izinler: x.izinler || {}, projeler: x.projeler || [], anahtarlar: Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
 const sifreUret = () => { const h = 'abcdefghjkmnpqrstuvwxyz', r = '23456789', a = rnd(8); let s = ''; for (let i = 0; i < 8; i++) s += (i % 3 === 2 ? r : h)[a[i] % (i % 3 === 2 ? r.length : h.length)]; return s; };
 const basHarf = a => String(a || '?').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toLocaleUpperCase('tr');
 
@@ -427,6 +431,7 @@ async function yonetimCiz() {
 }
 // Kullanıcı ekle / düzenle penceresi
 function kulDlg(kul) {
+  sahaProjeTazele(p => { const box = $('prjbox'); if (!box || !p || !p.length) return; const ua = ((kul && R.kullanicilar[kul]) || {}).projeler || []; box.innerHTML = '<div style="width:100%;font-size:12px;color:#8a9099;margin:2px 0 4px">📁 Projeler (erişim) — hiçbiri ya da tümü seçili = tüm projeler</div>' + p.map(q => '<label class="cip"><input type="checkbox" name="prj" value="' + esc(q.id) + '"' + ((!ua.length || ua.includes(q.id)) ? ' checked' : '') + '><span>' + esc(q.ad || q.id) + '</span></label>').join(''); });
   const yeni = !kul, x = yeni ? { moduller: [], izinler: {} } : R.kullanicilar[kul], ben = kul === S.kul, d = ydlg();
   const ms = Object.values(MOD).sort((a, b) => (a.sira || 0) - (b.sira || 0));
   let f = '<form id="kf2" class="ydf"><div class="ydbas"><b>' + (yeni ? 'Yeni kullanıcı' : esc(x.ad || kul)) + '</b><button type="button" class="kapat" onclick="$(\'ydlg\').close()">×</button></div>'
@@ -440,6 +445,7 @@ function kulDlg(kul) {
       const var_ = (x.moduller || []).includes(m.id), kn = KONULAR[m.id] || [], iz = (x.izinler || {})[m.id];
       f += '<div class="yt' + (var_ ? ' on' : '') + '"><label class="ytm"><span class="hd" style="--r:' + renkHex(m.renk) + ';width:30px;height:30px;box-shadow:none">' + ikon(m.ikon) + '</span><span style="flex:1">' + esc(m.ad) + '</span><span class="anah"><input type="checkbox" name="m" value="' + esc(m.id) + '"' + (var_ ? ' checked' : '') + ' onchange="ytMod(this)"><i></i></span></label>';
       if (kn.length) f += '<div class="ytk">' + kn.map(([k, a]) => '<label class="cip' + (KAPALI.has(k) ? ' para' : '') + '"><input type="checkbox" name="k_' + esc(m.id) + '" value="' + k + '"' + (var_ && (iz ? iz.includes(k) : !KAPALI.has(k)) ? ' checked' : '') + ' onchange="ytKonu(this)"><span>' + esc(a) + '</span></label>').join('') + '</div>';
+      if (m.id === 'saha') { const prj = sahaProjeListesi(), ua = (x.projeler || []); f += '<div class="ytk" id="prjbox" style="margin-top:4px"><div style="width:100%;font-size:12px;color:#8a9099;margin:2px 0 4px">📁 Projeler (erişim) — hiçbiri ya da tümü seçili = tüm projeler</div>' + prj.map(p => '<label class="cip"><input type="checkbox" name="prj" value="' + esc(p.id) + '"' + ((!ua.length || ua.includes(p.id)) ? ' checked' : '') + '><span>' + esc(p.ad || p.id) + '</span></label>').join('') + '</div>'; }
       f += '</div>';
     }
     f += '</div>';
@@ -464,8 +470,10 @@ function kulKaydet(f, kul0) {
     if (!f.ad.value.trim()) throw new Error('Ad soyad gerekli.');
     const yon = kul === S.kul, mods = yon ? [] : [...f.querySelectorAll('input[name=m]:checked')].map(x => x.value), izinler = {};
     for (const id of mods) if (KONULAR[id]) izinler[id] = [...f.querySelectorAll('input[name="k_' + id + '"]:checked')].map(x => x.value);
+    let projeler = [];
+    if (mods.includes('saha')) { const allP = sahaProjeListesi().map(p => p.id), sel = [...f.querySelectorAll('input[name="prj"]:checked')].map(x => x.value); projeler = (sel.length && sel.length < allP.length) ? sel : []; } /* kısmi seçim = kısıt; tümü/hiçbiri = tüm projeler */
     const x = R.kullanicilar[kul] || { olusturma: simdiTR() };
-    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, degisiklik: simdiTR() });
+    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, projeler, degisiklik: simdiTR() });
     R.kullanicilar[kul] = x;
     const yuk = yukHazirla(kul, x);
     await kullaniciYaz(kul, sifre || null, yuk);

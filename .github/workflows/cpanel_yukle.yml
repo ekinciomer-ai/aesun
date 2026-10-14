@@ -47,5 +47,6 @@ jobs:
           CP_HOST: ${{ secrets.CPANEL_ALAN || 'aksarayenerji.net' }}
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
+          CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
           CP_DIR: ${{ secrets.FTP_DIZIN || 'public_html' }}
         run: python3 cpanel/yukle.py dist

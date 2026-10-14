@@ -5,13 +5,14 @@ Ortam: CP_HOST, CP_USER, CP_PASS, CP_DIR (varsayılan public_html)."""
 import base64, hashlib, io, json, os, ssl, sys, time, urllib.parse, urllib.request, uuid, zipfile
 
 HOST = os.environ.get("CP_HOST") or "aksarayenerji.net"
-USER, PASS = os.environ["CP_USER"], os.environ["CP_PASS"]
+USER, PASS, TOKEN = os.environ["CP_USER"], os.environ.get("CP_PASS", ""), os.environ.get("CP_TOKEN", "").strip()
 DIZIN = (os.environ.get("CP_DIR") or "public_html").strip("/").rstrip("/") or "public_html"
 if DIZIN in (".", "./"):
     DIZIN = "public_html"
 KAYNAK = sys.argv[1] if len(sys.argv) > 1 else "dist"
 MANIFEST = ".dagitim.json"
-AUTH = "Basic " + base64.b64encode(f"{USER}:{PASS}".encode()).decode()
+# API anahtarı (cPanel → Güvenlik → Manage API Tokens) varsa o, yoksa hesap şifresi kullanılır
+AUTH = f"cpanel {USER}:{TOKEN}" if TOKEN else "Basic " + base64.b64encode(f"{USER}:{PASS}".encode()).decode()
 CTX = ssl.create_default_context()
 
 
@@ -29,7 +30,7 @@ def istek(yol, veri=None, tip=None):
                 CTX = ssl._create_unverified_context()
                 continue
             if isinstance(e, urllib.error.HTTPError) and e.code in (401, 403):
-                sys.exit("::error::cPanel girişi reddedildi (kullanıcı adı/şifre). FTP_KULLANICI cPanel hesap adı olmalı.")
+                sys.exit("::error::cPanel girişi reddedildi (" + ("API anahtarı" if TOKEN else "şifre") + ", HTTP " + str(e.code) + "). FTP_KULLANICI cPanel hesap adı olmalı (ör. aksaraye), user@alanadi biçiminde FTP alt hesabı değil.")
             raise
 
 

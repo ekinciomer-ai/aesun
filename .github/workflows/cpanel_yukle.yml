@@ -1,5 +1,5 @@
 name: cPanel'e yükle (aksarayenerji.net)
-# docs/ (web sitesi + portal + monitoring + demo) ve saha uygulamasını cPanel'e FTP ile yükler.
+# docs/ (web sitesi + portal + monitoring + demo) ve saha uygulamasını cPanel API'si (2083) ile yükler; FTP portu kapalı.
 # Gerekli depo sırları (Settings → Secrets and variables → Actions):
 #   FTP_SUNUCU    ör. ftp.aksarayenerji.net
 #   FTP_KULLANICI cPanel FTP kullanıcısı
@@ -41,14 +41,11 @@ jobs:
           PY
           grep -c "mailto:bilgi@aksarayenerji.com.tr?subject" dist/iletisim.html || true
           du -sh dist; find dist -maxdepth 1 | sort
-      - name: FTP ile yükle
+      - name: cPanel'e yükle (API, port 2083)
         if: env.ATLA != '1'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SUNUCU }}
-          username: ${{ secrets.FTP_KULLANICI }}
-          password: ${{ secrets.FTP_SIFRE }}
-          protocol: ${{ secrets.FTP_PROTOKOL || 'ftp' }}
-          local-dir: ./dist/
-          server-dir: ${{ secrets.FTP_DIZIN || 'public_html/' }}
-          timeout: 120000
+        env:
+          CP_HOST: ${{ secrets.CPANEL_ALAN || 'aksarayenerji.net' }}
+          CP_USER: ${{ secrets.FTP_KULLANICI }}
+          CP_PASS: ${{ secrets.FTP_SIFRE }}
+          CP_DIR: ${{ secrets.FTP_DIZIN || 'public_html' }}
+        run: python3 cpanel/yukle.py dist

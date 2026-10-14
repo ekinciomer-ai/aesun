@@ -10,7 +10,7 @@ DIZIN = (os.environ.get("CP_DIR") or "public_html").strip("/").rstrip("/") or "p
 if DIZIN in (".", "./"):
     DIZIN = "public_html"
 KAYNAK = sys.argv[1] if len(sys.argv) > 1 else "dist"
-MANIFEST = ".dagitim2.json"
+MANIFEST = ".dagitim3.json"
 # API anahtarı (cPanel → Güvenlik → Manage API Tokens) varsa o, yoksa hesap şifresi kullanılır
 AUTH = f"cpanel {USER}:{TOKEN}" if TOKEN else "Basic " + base64.b64encode(f"{USER}:{PASS}".encode()).decode()
 CTX = ssl.create_default_context()
@@ -50,17 +50,39 @@ def api2(mod, fn, **p):
     return r.get("data")
 
 
-def yukle_dosya(ad, icerik):
+def yukle_dizine(hedef, dosyalar):
+    """dosyalar: [(ad, bayt)] → hedef klasöre tek istekte yükler."""
     sinir = uuid.uuid4().hex
     govde = io.BytesIO()
-    for k, v in (("dir", DIZIN), ("overwrite", "1")):
+    for k, v in (("dir", hedef), ("overwrite", "1")):
         govde.write(f"--{sinir}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode())
-    govde.write(f"--{sinir}\r\nContent-Disposition: form-data; name=\"file-1\"; filename=\"{ad}\"\r\nContent-Type: application/zip\r\n\r\n".encode())
-    govde.write(icerik)
-    govde.write(f"\r\n--{sinir}--\r\n".encode())
+    for i, (ad, icerik) in enumerate(dosyalar, 1):
+        govde.write(f"--{sinir}\r\nContent-Disposition: form-data; name=\"file-{i}\"; filename=\"{ad}\"\r\nContent-Type: application/octet-stream\r\n\r\n".encode())
+        govde.write(icerik)
+        govde.write(b"\r\n")
+    govde.write(f"--{sinir}--\r\n".encode())
     j = istek("execute/Fileman/upload_files", govde.getvalue(), f"multipart/form-data; boundary={sinir}")
     if not j.get("status"):
-        raise RuntimeError(f"yükleme: {j.get('errors')}")
+        raise RuntimeError(f"yükleme ({hedef}): {j.get('errors')}")
+
+
+VAR_DIZIN = set()
+
+
+def dizin_hazirla(goreli):
+    """public_html altındaki klasörü (gerekirse üst klasörleriyle) oluşturur."""
+    parca = [p for p in goreli.split("/") if p]
+    for i in range(len(parca)):
+        yol = "/".join(parca[:i + 1])
+        if yol in VAR_DIZIN:
+            continue
+        ust = DIZIN + ("/" + "/".join(parca[:i]) if i else "")
+        try:
+            api2("Fileman", "mkdir", path=ust, name=parca[i], permissions="0755")
+        except Exception as e:
+            if "exist" not in str(e).lower() and "mevcut" not in str(e).lower():
+                print(f"::warning::klasör {yol}: {e}")
+        VAR_DIZIN.add(yol)
 
 
 def main():
@@ -77,20 +99,22 @@ def main():
     degisen = sorted(y for y, h in yerel.items() if eski.get(y) != h)
     print(f"::notice::{len(yerel)} dosya, {len(degisen)} değişmiş → {HOST}/{DIZIN}")
     if degisen:
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
-            dizinler = sorted({"/".join(y.split("/")[:i]) + "/" for y in degisen for i in range(1, y.count("/") + 1)})
-            for d in dizinler:                       # klasör kayıtları: sunucudaki açıcı alt klasörleri oluştursun
-                z.writestr(zipfile.ZipInfo(d), "")
-            for y in degisen:
-                z.write(os.path.join(KAYNAK, y), y)
-        ad = f"_dagitim_{int(time.time())}.zip"
-        yukle_dosya(ad, buf.getvalue())
-        api2("Fileman", "fileop", op="extract", sourcefiles=f"{DIZIN}/{ad}", destfiles=DIZIN, doubledecode=0)
-        try:
-            api2("Fileman", "fileop", op="unlink", sourcefiles=f"{DIZIN}/{ad}", doubledecode=0)
-        except Exception as e:
-            print("::warning::geçici zip silinemedi:", e)
+        gruplar = {}
+        for y in degisen:
+            gruplar.setdefault(y.rsplit("/", 1)[0] if "/" in y else "", []).append(y)
+        for d, liste in sorted(gruplar.items()):
+            if d:
+                dizin_hazirla(d)
+            hedef = DIZIN + ("/" + d if d else "")
+            paket, boy = [], 0
+            for y in liste:
+                b = open(os.path.join(KAYNAK, y), "rb").read()
+                if paket and boy + len(b) > 20 * 1024 * 1024:
+                    yukle_dizine(hedef, paket); paket, boy = [], 0
+                paket.append((y.rsplit("/", 1)[-1], b)); boy += len(b)
+            if paket:
+                yukle_dizine(hedef, paket)
+            print(f"::notice::{hedef or DIZIN}: {len(liste)} dosya")
         uapi("Fileman", "save_file_content", dir=DIZIN, file=MANIFEST, content=json.dumps(yerel))
     for y in degisen[:40]:
         print("  +", y)

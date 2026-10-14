@@ -4,7 +4,7 @@ name: cPanel'e yükle (aksarayenerji.net)
 #   FTP_SUNUCU    ör. ftp.aksarayenerji.net
 #   FTP_KULLANICI cPanel FTP kullanıcısı
 #   FTP_SIFRE     FTP şifresi
-#   FTP_DIZIN     (isteğe bağlı) hedef klasör; varsayılan public_html/
+#   FTP_DIZIN     (isteğe bağlı) hedef klasör; boşsa alan adının cPanel'deki kök klasörü
 on:
   workflow_dispatch:
   push:
@@ -48,5 +48,5 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_DIR: ${{ secrets.FTP_DIZIN || 'public_html' }}
+          CP_DIR: ${{ secrets.FTP_DIZIN }}
         run: python3 cpanel/yukle.py dist

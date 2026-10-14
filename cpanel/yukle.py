@@ -6,9 +6,7 @@ import base64, hashlib, io, json, os, ssl, sys, time, urllib.parse, urllib.reque
 
 HOST = os.environ.get("CP_HOST") or "aksarayenerji.net"
 USER, PASS, TOKEN = os.environ["CP_USER"], os.environ.get("CP_PASS", ""), os.environ.get("CP_TOKEN", "").strip()
-DIZIN = (os.environ.get("CP_DIR") or "public_html").strip("/").rstrip("/") or "public_html"
-if DIZIN in (".", "./"):
-    DIZIN = "public_html"
+DIZIN = (os.environ.get("CP_DIR") or "").strip().strip("/")   # boşsa alan adının kök klasörü cPanel'den bulunur
 KAYNAK = sys.argv[1] if len(sys.argv) > 1 else "dist"
 MANIFEST = ".dagitim3.json"
 # API anahtarı (cPanel → Güvenlik → Manage API Tokens) varsa o, yoksa hesap şifresi kullanılır
@@ -86,6 +84,15 @@ def dizin_hazirla(goreli):
 
 
 def main():
+    global DIZIN
+    if not DIZIN or DIZIN == ".":
+        d = uapi("DomainInfo", "single_domain_data", domain=HOST) or {}
+        kok = str(d.get("documentroot") or "")
+        ev = str(d.get("homedir") or "")
+        if not kok:
+            sys.exit(f"::error::{HOST} için kök klasör bulunamadı")
+        DIZIN = kok[len(ev):].strip("/") if ev and kok.startswith(ev) else kok.split("/", 3)[-1].strip("/")
+        print(f"::notice::{HOST} kök klasörü: {DIZIN}")
     yerel = {}
     for kok, _, dosyalar in os.walk(KAYNAK):
         for d in dosyalar:
@@ -130,15 +137,6 @@ def main():
         print("::notice::izinler: " + ", ".join(f"{x.get('file')}={x.get('nicemode')}" for x in l if x.get('type') == 'dir'))
     except Exception as e:
         print("::warning::izin listesi:", e)
-    sonuc = []
-    try:
-        l2 = uapi("Fileman", "list_files", dir=f"{DIZIN}/aksarayenerji.net") or []
-        sonuc.append("addon_ici=" + ",".join(f"{x.get('file')}[{x.get('type')[0]}]" for x in l2[:30]))
-        dl = uapi("DomainInfo", "list_domains") or {}
-        sonuc.append("ana=" + str(dl.get("main_domain")) + " addon=" + str(dl.get("addon_domains")) + " sub=" + str(dl.get("sub_domains")))
-    except Exception as e:
-        sonuc.append("hata=" + str(e)[:200])
-    print("::notice::TANI " + " ; ".join(sonuc))
     print("::notice::Yükleme tamam.")
     # canlı kontrol: site ve alt uygulamalar yanıt veriyor mu
     for yol, aranan in (("", "kdemo"), ("portal/", "Kurumsal Portal"), ("demo/", "mining-demo"), ("monitoring/", "<title"), ("saha/", "<title")):

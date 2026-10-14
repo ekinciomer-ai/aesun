@@ -10,7 +10,7 @@ DIZIN = (os.environ.get("CP_DIR") or "public_html").strip("/").rstrip("/") or "p
 if DIZIN in (".", "./"):
     DIZIN = "public_html"
 KAYNAK = sys.argv[1] if len(sys.argv) > 1 else "dist"
-MANIFEST = ".dagitim.json"
+MANIFEST = ".dagitim2.json"
 # API anahtarı (cPanel → Güvenlik → Manage API Tokens) varsa o, yoksa hesap şifresi kullanılır
 AUTH = f"cpanel {USER}:{TOKEN}" if TOKEN else "Basic " + base64.b64encode(f"{USER}:{PASS}".encode()).decode()
 CTX = ssl.create_default_context()
@@ -79,6 +79,9 @@ def main():
     if degisen:
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            dizinler = sorted({"/".join(y.split("/")[:i]) + "/" for y in degisen for i in range(1, y.count("/") + 1)})
+            for d in dizinler:                       # klasör kayıtları: sunucudaki açıcı alt klasörleri oluştursun
+                z.writestr(zipfile.ZipInfo(d), "")
             for y in degisen:
                 z.write(os.path.join(KAYNAK, y), y)
         ad = f"_dagitim_{int(time.time())}.zip"

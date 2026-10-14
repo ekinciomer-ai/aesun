@@ -19,7 +19,7 @@ AddType image/svg+xml .svg
   Header always set X-Frame-Options "SAMEORIGIN"
 </IfModule>
 # Yükleme durum dosyası dışarı açık olmasın
-<FilesMatch "^(\.ftp-deploy-sync-state|\.dagitim)\.json$">
+<FilesMatch "^(\.ftp-deploy-sync-state|\.dagitim\d*)\.json$">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

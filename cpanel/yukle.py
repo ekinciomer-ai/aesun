@@ -130,6 +130,29 @@ def main():
         print("::notice::izinler: " + ", ".join(f"{x.get('file')}={x.get('nicemode')}" for x in l if x.get('type') == 'dir'))
     except Exception as e:
         print("::warning::izin listesi:", e)
+    sonuc = []
+    try:
+        for alt in ("css", "js", "assets", "enerji"):
+            l2 = [x.get("file") for x in (uapi("Fileman", "list_files", dir=f"{DIZIN}/{alt}") or []) if x.get("type") == "file"][:1]
+            for f in l2:
+                u = f"https://{HOST}/{alt}/{f}"
+                try:
+                    with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r:
+                        sonuc.append(f"{alt}/{f}={r.status}")
+                except Exception as e:
+                    sonuc.append(f"{alt}/{f}={getattr(e, 'code', e)}")
+        ht = (uapi("Fileman", "get_file_content", dir=DIZIN, file=".htaccess") or {}).get("content", "")
+        sonuc.append("htaccess_satir=" + str(ht.count(chr(10))))
+        try:
+            ust = (uapi("Fileman", "get_file_content", dir=".", file=".htaccess") or {}).get("content", "")
+            sonuc.append("ev_htaccess=" + ust[:200].replace(chr(10), " | "))
+        except Exception as e:
+            sonuc.append("ev_htaccess=yok")
+        d = uapi("DomainInfo", "single_domain_data", domain=HOST) or {}
+        sonuc.append("docroot=" + str(d.get("documentroot")) + " tip=" + str(d.get("type")))
+    except Exception as e:
+        sonuc.append("hata=" + str(e)[:200])
+    print("::notice::TANI " + " ; ".join(sonuc))
     print("::notice::Yükleme tamam.")
     # canlı kontrol: site ve alt uygulamalar yanıt veriyor mu
     for yol, aranan in (("", "kdemo"), ("portal/", "Kurumsal Portal"), ("demo/", "mining-demo"), ("monitoring/", "<title"), ("saha/", "<title")):

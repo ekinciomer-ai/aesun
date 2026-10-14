@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sunucu  # noqa: E402
 REPO = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/"
 DOSYA = "n8n/pi_nabiz.json"
 
@@ -63,7 +65,7 @@ def istek(url, token, veri=None, metot="GET"):
 def main():
     env = env_oku()
     token = env.get("GITHUB_TOKEN", "")
-    if not token:
+    if not token and not sunucu.yalniz_sunucu():
         sys.exit("GITHUB_TOKEN yok (~/.aesun/osos.env)")
     try:
         disk = komut("df", "-h", "/").splitlines()[1].split()[4]
@@ -81,7 +83,7 @@ def main():
         "osos_son": son_satir(KOK / "osos.log"),
     }
     icerik = base64.b64encode(json.dumps(govde, ensure_ascii=False, indent=1).encode()).decode()
-    for deneme in range(2):
+    for deneme in range(0 if sunucu.yalniz_sunucu() else 2):
         sha = None
         try:
             sha = istek(REPO + DOSYA, token).get("sha")
@@ -98,13 +100,19 @@ def main():
         except urllib.error.HTTPError as e:
             if e.code not in (409, 422) or deneme:
                 raise
+    if sunucu.yaz(DOSYA, govde, zorunlu=sunucu.yalniz_sunucu()):
+        print("nabız sunucuya yazıldı")
     # Yerel panel önbelleği
     ob = Path(env.get("AESUN_ONBELLEK", KOK / "onbellek"))
     ob.mkdir(parents=True, exist_ok=True)
     try:
-        with urllib.request.urlopen("https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/aesun_son.json", timeout=30) as y:
-            (ob / "son.json").write_bytes(y.read())
-        (ob / "kaynak.txt").write_text("github\n")
+        if sunucu.anahtar():
+            (ob / "son.json").write_text(json.dumps(sunucu.oku("n8n/aesun_son.json"), ensure_ascii=False))
+            (ob / "kaynak.txt").write_text("sunucu\n")
+        else:
+            with urllib.request.urlopen("https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/aesun_son.json", timeout=30) as y:
+                (ob / "son.json").write_bytes(y.read())
+            (ob / "kaynak.txt").write_text("github\n")
     except Exception as e:
         (ob / "kaynak.txt").write_text("yok\n")
         print("aesun_son okunamadı:", e)

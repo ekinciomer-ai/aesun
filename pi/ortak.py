@@ -4,6 +4,8 @@ import base64, json, os, urllib.error, urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import sunucu  # Aksaray Enerji sunucusu (portal.aksarayenerji.net) — ayrıntı: sunucu.py
+
 REPO = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/"
 TR = timezone(timedelta(hours=3))
 AESUN = Path.home() / ".aesun"
@@ -26,7 +28,14 @@ TOK = token()
 
 
 def gh(yol, veri=None, sha=None, mesaj=None):
-    """GitHub epias-ptf dosyası oku (veri=None) ya da yaz. Okuma (json, sha) döner; yoksa (None, None)."""
+    """epias-ptf dosyası oku (veri=None) ya da yaz. Okuma (json, sha) döner; yoksa (None, None).
+    AE_KAYNAK=sunucu ise yalnız sunucu; değilse GitHub + sunucuya kopya."""
+    if sunucu.yalniz_sunucu():
+        if veri is None:
+            v = sunucu.oku(yol)
+            return (v, "sunucu") if v is not None else (None, None)
+        sunucu.yaz(yol, veri, zorunlu=True)
+        return {"content": {"sha": "sunucu"}}
     h = {"Authorization": "Bearer " + TOK, "Accept": "application/vnd.github+json", "User-Agent": "aesun-pi"}
     if veri is None:
         try:
@@ -48,7 +57,9 @@ def gh(yol, veri=None, sha=None, mesaj=None):
         try:
             r = urllib.request.Request(REPO + yol, data=json.dumps(govde).encode(), headers={**h, "Content-Type": "application/json"}, method="PUT")
             with urllib.request.urlopen(r, timeout=30) as y:
-                return json.loads(y.read())
+                sonuc = json.loads(y.read())
+            sunucu.yaz(yol, veri)
+            return sonuc
         except urllib.error.HTTPError as e:
             if e.code in (409, 422) and not deneme:   # sha eskimiş: tazele ve bir kez daha dene
                 _, govde["sha"] = gh(yol)

@@ -121,7 +121,7 @@ def main():
                 paket.append((y.rsplit("/", 1)[-1], b)); boy += len(b)
             if paket:
                 yukle_dizine(hedef, paket)
-            print(f"::notice::{hedef or DIZIN}: {len(liste)} dosya")
+            print(f"  {hedef or DIZIN}: {len(liste)} dosya")
         uapi("Fileman", "save_file_content", dir=DIZIN, file=MANIFEST, content=json.dumps(yerel))
     for y in degisen[:40]:
         print("  +", y)
@@ -134,21 +134,23 @@ def main():
             print(f"::warning::chmod {d}: {e}")
     try:
         l = uapi("Fileman", "list_files", dir=DIZIN, include_mime=0) or []
-        print("::notice::izinler: " + ", ".join(f"{x.get('file')}={x.get('nicemode')}" for x in l if x.get('type') == 'dir'))
+        print("izinler: " + ", ".join(f"{x.get('file')}={x.get('nicemode')}" for x in l if x.get('type') == 'dir'))
     except Exception as e:
         print("::warning::izin listesi:", e)
     print("::notice::Yükleme tamam.")
     # canlı kontrol: site ve alt uygulamalar yanıt veriyor mu
+    CANLI = []
     for yol, aranan in (("", "kdemo"), ("portal/", "Kurumsal Portal"), ("demo/", "mining-demo"), ("monitoring/", "<title"), ("saha/", "<title")):
         try:
             with urllib.request.urlopen(urllib.request.Request(f"https://{HOST}/{yol}?k={int(time.time())}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r:
                 g = r.read().decode("utf-8", "ignore")
-                print(f"::notice::https://{HOST}/{yol} → {r.status} " + ("✓" if aranan in g else "içerik beklenenden farklı"))
+                CANLI.append(f"/{yol} {r.status}" + ("✓" if aranan in g else "?"))
         except Exception as e:
             ek = ""
             if isinstance(e, urllib.error.HTTPError):
                 ek = f" sunucu={e.headers.get('Server')} cf={e.headers.get('CF-Cache-Status')} gövde={e.read()[:160]!r}"
-            print(f"::warning::https://{HOST}/{yol} → {e}{ek}")
+            CANLI.append(f"/{yol} {getattr(e, 'code', e)}✗")
+            print(f"https://{HOST}/{yol} → {e}{ek}")
             for alt in (f"https://{HOST}/{yol}index.html", f"https://www.{HOST}/{yol}"):
                 try:
                     with urllib.request.urlopen(urllib.request.Request(alt + f"?k={int(time.time())}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r2:
@@ -161,9 +163,10 @@ def main():
                     print(f"::warning::{DIZIN}/{yol} içeriği: " + ", ".join(f"{x.get('file')}({x.get('humansize')},{x.get('nicemode')})" for x in l[:12]))
                 except Exception as e2:
                     print(f"::warning::{DIZIN}/{yol} listelenemedi: {e2}")
+    print("::notice::Canlı kontrol: " + " · ".join(CANLI))
     try:
         l = uapi("Fileman", "list_files", dir=DIZIN) or []
-        print("::notice::kök: " + ", ".join(f"{x.get('file')}[{x.get('type')}]" for x in l[:40]))
+        print("kök: " + ", ".join(f"{x.get('file')}[{x.get('type')}]" for x in l[:40]))
     except Exception as e:
         print("::warning::kök listelenemedi:", e)
 

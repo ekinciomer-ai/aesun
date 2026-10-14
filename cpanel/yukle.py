@@ -142,6 +142,18 @@ def main():
                     print(f"::warning::{DIZIN}/{yol} içeriği: " + ", ".join(f"{x.get('file')}({x.get('humansize')},{x.get('nicemode')})" for x in l[:12]))
                 except Exception as e2:
                     print(f"::warning::{DIZIN}/{yol} listelenemedi: {e2}")
+    for y in ("kvkk.html", "iletisim.html", "assets/site.css", "assets/ges-drone.jpg", "favicon.svg", "saha/sw.js", "enerji/", "css/", "aksarayenerji.net/", "public_html/"):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(f"https://{HOST}/{y}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r:
+                print(f"::notice::test {y} → {r.status} {r.headers.get('Content-Length')}")
+        except Exception as e:
+            print(f"::notice::test {y} → {e}")
+    try:
+        for alt in ("aksarayenerji.net", "public_html"):
+            l2 = uapi("Fileman", "list_files", dir=f"{DIZIN}/{alt}") or []
+            print(f"::notice::{alt}/ içi: " + ", ".join(f"{x.get('file')}" for x in l2[:25]))
+    except Exception as e:
+        print("::notice::alt liste:", e)
     try:
         l = uapi("Fileman", "list_files", dir=DIZIN) or []
         print("::notice::kök: " + ", ".join(f"{x.get('file')}[{x.get('type')}]" for x in l[:40]))

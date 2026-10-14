@@ -59,7 +59,7 @@ table.tb .ayr{border-left:1px solid #E3E8EE}
 table.tb td.saat{font-weight:600;text-align:left}
 input[type=date]{font:inherit;font-size:15px;border:1px solid #B9C4D2;border-radius:8px;padding:8px 10px;min-height:40px;color:#10233F;background:#fff}
 .kartlar5{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
-@media (max-width:700px){main{padding:16px 16px 40px;gap:16px}.nav{max-width:none;flex-basis:100%;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:4px;padding:10px 12px;position:sticky;top:0;z-index:5;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.nav>div:first-child{padding:0 8px 0 0!important;flex:none}.nav>div:first-child>div{display:none}.nav a{flex:none;white-space:nowrap;padding:8px 10px}.nav .bosluk,#kaynakNot{display:none}.sayac{border-left:0;padding:4px 0}h1{font-size:26px}.panel{padding:16px}.iki,.uc{grid-template-columns:minmax(0,1fr)}.kartlar5{grid-template-columns:repeat(2,minmax(0,1fr))}#kontrol{width:100%}#kontrol select{max-width:100%}}
+@media (max-width:700px){main{padding:16px 16px 40px;gap:16px}.nav{max-width:none;flex-basis:100%;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:4px;padding:10px 12px;position:sticky;top:0;z-index:5;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.nav>div:first-child{padding:0 8px 0 0!important;flex:none}.nav>div:first-child>div{display:none}.nav a{flex:none;white-space:nowrap;padding:8px 10px}.nav .bosluk,#kaynakNot{display:none}.sayac{border-left:0;padding:4px 0}h1{font-size:26px}.panel{padding:16px}.iki,.uc{grid-template-columns:minmax(0,1fr)}.kartlar5{grid-template-columns:repeat(2,minmax(0,1fr))}#kontrol{width:100%}#kontrol select{max-width:100%}#hizBekci{display:none!important}.nav .kullanici{flex:none!important;flex-wrap:nowrap!important;white-space:nowrap;padding:8px 6px!important;order:99}}
 #ipucu{position:fixed;z-index:60;pointer-events:none;display:none;background:#10233F;color:#fff;font-size:12.5px;line-height:1.5;padding:7px 10px;border-radius:6px;white-space:pre-line;max-width:300px;box-shadow:0 6px 18px rgba(16,35,63,.22);font-variant-numeric:tabular-nums}
 rect.hit.on{fill:rgba(16,35,63,.07)}
 .grafust{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap}
@@ -122,7 +122,7 @@ const PARA_DOSYA = /(^|\/)(fatura\/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_f
     if (sf && !yetkili(sf)) a.style.display = 'none';
   });
   if (PORTAL) {
-    const d = document.createElement('div');
+    const d = document.createElement('div'); d.className = 'kullanici';
     d.style.cssText = 'color:#C9D4E3;font-size:12.5px;padding:8px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap';
     d.innerHTML = '<span>👤 ' + String(PORTAL.ad || PORTAL.kul).replace(/[<>&"]/g, '') + '</span><a href="../portal/" style="color:#F2555B;padding:0;display:inline">Portal</a><a href="#" style="color:#9FB0C6;padding:0;display:inline" onclick="localStorage.removeItem(\'ae_portal\');location.replace(\'../portal/\');return false">Çıkış</a>';
     const k = document.getElementById('kaynakNot'); nav.insertBefore(d, k);

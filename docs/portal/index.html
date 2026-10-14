@@ -219,7 +219,11 @@ function oturumOku() { const o = oturumHam(); if (o && o.S && Date.now() < (o.so
 function cikis() { ls.sil('ae_portal'); S = null; R = null; MOD = {}; ust(); git('ana'); }
 let MOD = {};
 const URL_ESKI = { 'https://ekinciomer-ai.github.io/aesun/': 'https://ekinciomer-ai.github.io/aesun/monitoring/', 'https://ekinciomer-ai.github.io/aesun': 'https://ekinciomer-ai.github.io/aesun/monitoring/' };
-async function modOnbellek() { MOD = Object.fromEntries((await modulleriAc()).map(m => [m.id, Object.assign(m, { url: URL_ESKI[String(m.url || '').trim()] || m.url })])); }
+// Portal kendi alan adında (ör. aksarayenerji.com.tr) çalışıyorsa GitHub Pages adresleri aynı sunucudaki karşılığına çevrilir
+const GH_KOK = 'https://ekinciomer-ai.github.io/';
+const yerelUrl = u => { u = String(u || '').trim(); u = URL_ESKI[u] || u; if (location.hostname.slice(-9) === 'github.io' || location.protocol === 'file:' || u.indexOf(GH_KOK) !== 0) return u;
+  const yol = u.slice(GH_KOK.length); return location.origin + '/' + (yol.indexOf('aesun/') === 0 ? yol.slice(6) : yol); };
+async function modOnbellek() { MOD = Object.fromEntries((await modulleriAc()).map(m => [m.id, Object.assign(m, { url: m.url ? yerelUrl(m.url) : m.url })])); }
 const vitrinBul = id => ((V && V.vitrin) || []).find(x => x.id === id);
 function dlgBas(id, bas, alt) {
   const v = id && vitrinBul(id);
@@ -327,7 +331,7 @@ function acMali(sek) {
   if (!d.open) d.showModal();
 }
 // ---- Saha: güneş-gezegen proje seçici (Saha = güneş, projeler = yörüngedeki balonlar) ----
-function sahaUrl() { const m = MOD['saha']; return (m && String(m.url || '').trim()) || 'https://ekinciomer-ai.github.io/saha/'; }
+function sahaUrl() { const m = MOD['saha']; return (m && String(m.url || '').trim()) || yerelUrl('https://ekinciomer-ai.github.io/saha/'); }
 function sahaAc(id) { try { localStorage.setItem('sh2:aktif', id); } catch (e) {} const u = sahaUrl(), s = u.indexOf('?') < 0 ? '?' : '&'; window.open(u + s + 'proje=' + encodeURIComponent(id), '_blank', 'noopener'); }
 function sahaProjeOlustur(ad, renk) { const list = sahaProjeListesi(), id = 'p' + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36), p = { id, ad: (ad || 'Yeni proje').trim(), renk: renk || '#3f6fb0', oln: Date.now() }; list.push(p); try { localStorage.setItem('sh2:projeler', JSON.stringify(list)); } catch (e) {} try { fetch(N8N_SAHA + '/saha-set', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ proje: 'SHAMS1-reg', cihaz: 'portal', items: [{ anahtar: 'projeler', deger: JSON.stringify(list) }] }) }).catch(() => {}); } catch (e) {} return p; }
 function sahaYeniProje() { const d = dlg(); d.innerHTML = dlgBas('', 'Yeni proje', 'Saha İş Yönetimi · yeni proje') + '<form id="npf"><label class="alan"><span>Proje adı</span><input id="np_ad" required placeholder="ör. SHAMS-2 GES" autocomplete="off"></label><label class="alan"><span>Renk</span><input id="np_renk" type="color" value="#3f6fb0" style="height:44px;padding:3px"></label><button class="btn tam" id="npb">Oluştur</button></form></div></div>'; if (!d.open) d.showModal(); setTimeout(() => $('np_ad') && $('np_ad').focus(), 30); $('npf').onsubmit = e => { e.preventDefault(); const ad = $('np_ad').value.trim(); if (!ad) return; const p = sahaProjeOlustur(ad, $('np_renk').value); d.close(); acSaha(); if (confirm('"' + ad + '" oluşturuldu. Şimdi açılsın mı?')) sahaAc(p.id); }; }

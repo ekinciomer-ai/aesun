@@ -6,7 +6,7 @@
 // Portal oturumu: yönetici ya da "demo" uygulama yetkisi gerekir
 (function(){try{var o=JSON.parse(localStorage.getItem('ae_portal')||'null'),S=o&&o.S;
 if(S&&Date.now()<(o.son||0)&&(S.ka||Object.keys(S.anahtarlar||{}).some(function(k){return /demo/.test(k);})))return;}catch(e){}
-location.replace('/aesun/portal/?git=mining-demo');})();
+location.replace('../portal/?git=mining-demo');})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Uzaktan Madencilik Kontrolü · Aksaray Enerji</title>

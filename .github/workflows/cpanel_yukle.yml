@@ -1,0 +1,54 @@
+name: cPanel'e yükle (aksarayenerji.com.tr)
+# docs/ (web sitesi + portal + monitoring + demo) ve saha uygulamasını cPanel'e FTP ile yükler.
+# Gerekli depo sırları (Settings → Secrets and variables → Actions):
+#   FTP_SUNUCU    ör. ftp.aksarayenerji.com.tr
+#   FTP_KULLANICI cPanel FTP kullanıcısı
+#   FTP_SIFRE     FTP şifresi
+#   FTP_DIZIN     (isteğe bağlı) hedef klasör; varsayılan public_html/
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['docs/**', 'cpanel/**', '.github/workflows/cpanel_yukle.yml']
+  schedule:
+    - cron: '23 */3 * * *'   # saha uygulamasındaki değişiklikleri de taşımak için
+concurrency:
+  group: cpanel
+  cancel-in-progress: false
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ekinciomer-ai/saha
+          path: _saha
+      - name: Paketi hazırla
+        run: |
+          set -e
+          if [ -z "${{ secrets.FTP_SUNUCU }}" ]; then echo "FTP sırları tanımlı değil; yükleme atlandı."; echo "ATLA=1" >> $GITHUB_ENV; exit 0; fi
+          mkdir -p dist
+          rsync -a --exclude 'onizleme/' --exclude 'onizleme.paket' --exclude 'site/' --exclude '*.md' --exclude '.nojekyll' docs/ dist/
+          cp cpanel/.htaccess cpanel/robots.txt cpanel/sitemap.xml cpanel/iletisim.php dist/
+          rsync -a --exclude '.git' --exclude '.github' --exclude '*.md' --exclude 'eski.html' _saha/ dist/saha/
+          # iletişim formu: cPanel'de PHP ile gönderilir (GitHub sürümündeki mailto yedeğini kaldır)
+          python3 - <<'PY'
+          import re
+          p = 'dist/iletisim.html'; s = open(p, encoding='utf-8').read()
+          s = re.sub(r'<script>\s*\(function\(\)\{\s*var f=document\.querySelector\(\'form\.f\'\).*?</script>', '', s, flags=re.S)
+          open(p, 'w', encoding='utf-8').write(s)
+          PY
+          grep -c "mailto:bilgi@aksarayenerji.com.tr?subject" dist/iletisim.html || true
+          du -sh dist; find dist -maxdepth 1 | sort
+      - name: FTP ile yükle
+        if: env.ATLA != '1'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SUNUCU }}
+          username: ${{ secrets.FTP_KULLANICI }}
+          password: ${{ secrets.FTP_SIFRE }}
+          protocol: ${{ secrets.FTP_PROTOKOL || 'ftp' }}
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_DIZIN || 'public_html/' }}
+          timeout: 120000

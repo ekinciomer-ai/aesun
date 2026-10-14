@@ -29,6 +29,9 @@ from pathlib import Path
 
 import requests
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "pi"))
+import sunucu  # noqa: E402  Aksaray Enerji sunucusu
+
 BASE = "https://osos.meramedas.com.tr"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36"
 # tesisat, kısa ad, OSOS wiringId (None = sayfadan bulunur), çarpan, 2026_osos_endeks.json anahtarı
@@ -238,8 +241,10 @@ def topla(tesisat, kod, carpan, data, simdi, wid=None):
 
 def github_yaz(env, satirlar):
     """Tamamlanmış saatleri 2026_osos_endeks.json'a birleştirir. Diğer günlere/abonelere dokunmaz."""
-    if not env["GITHUB_TOKEN"] or not satirlar:
+    if not satirlar or not (env["GITHUB_TOKEN"] or sunucu.yalniz_sunucu()):
         return
+    if sunucu.yalniz_sunucu():
+        return sunucu_birlestir(satirlar)
     h = {"Authorization": "Bearer " + env["GITHUB_TOKEN"], "Accept": "application/vnd.github+json"}
     anahtar = {a[0]: a for a in ABONE}
     for deneme in range(3):
@@ -278,7 +283,39 @@ def github_yaz(env, satirlar):
             continue
         w.raise_for_status()
         log(f"GitHub: {degisen} saat yazıldı")
+        if sunucu.yaz("2026_osos_endeks.json", data):
+            log("sunucu: kopya yazıldı")
         return
+
+
+def _birlestir(data, satirlar):
+    anahtar = {a[0]: a for a in ABONE}
+    degisen = 0
+    for x in satirlar:
+        if x["aralik"] < 4:
+            continue
+        tes, kod, _, carpan, key = anahtar[x["tesisat"]]
+        ab = data.setdefault(key, {"tesisat_no": tes, "carpan": float(carpan), "veri": {}})
+        gun = ab.setdefault("veri", {}).setdefault(x["tarih"], {})
+        yeni = {"cekis": x["cekis_kwh"], "veris": x["veris_kwh"]}
+        s_ = f'{x["saat"]:02d}'
+        if gun.get(s_) != yeni:
+            gun[s_] = yeni
+            degisen += 1
+        ab["gun_sayisi"] = len(ab["veri"])
+        ab["son_guncelleme"] = x["guncellendi"]
+    return degisen
+
+
+def sunucu_birlestir(satirlar):
+    """AE_KAYNAK=sunucu: 2026_osos_endeks.json sunucuda okunur, birleştirilir, yazılır."""
+    data = sunucu.oku("2026_osos_endeks.json") or {}
+    degisen = _birlestir(data, satirlar)
+    if not degisen:
+        log("sunucu: yeni saat yok")
+        return
+    sunucu.yaz("2026_osos_endeks.json", data, zorunlu=True)
+    log(f"sunucu: {degisen} saat yazıldı")
 
 
 def gonder(env, yuk):

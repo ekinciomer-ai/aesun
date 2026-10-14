@@ -265,13 +265,21 @@ function girisCiz() { git('ana'); }
 async function giris(kul, sifre) {
   await veriYukle();
   if (!V) { $('dlg') && $('dlg').close(); kurulumCiz(); throw new Error('Portal henüz kurulmadı.'); }
-  const k = kul.trim().toLocaleLowerCase('tr'), e = V.kullanicilar[await kulOz(V.kul_tuz, k)];
-  try {
-    const key = await kdf(sifre, e ? e.tuz : b64(rnd(16)), e ? e.iter : ITER);   // kullanıcı yoksa da aynı süre
-    if (!e) throw 0;
-    if (e.sar) { const { ku } = await coz(key, e.sar); S = await coz(await hamAnahtar(ku), e); }
-    else { S = await coz(key, e); ESKI = { kul: k, sifre }; }   // ilk sürüm kaydı: şifreyle doğrudan şifreli
-  } catch (x) { await new Promise(r => setTimeout(r, 600)); throw new Error('Kullanıcı adı veya şifre hatalı.'); }
+  // kullanıcı adı: Türkçe/İngilizce küçük harf farkı (I/ı, İ/i) ve boşluklar tolere edilir
+  const ham = kul.trim().replace(/\s+/g, ''), adaylar = [...new Set([ham.toLocaleLowerCase('tr'), ham.toLowerCase(), ham.toLocaleLowerCase('tr').replace(/ı/g, 'i')])];
+  let k = adaylar[0], e = null;
+  for (const a of adaylar) { const x = V.kullanicilar[await kulOz(V.kul_tuz, a)]; if (x) { k = a; e = x; break; } }
+  let ok = false;
+  for (const sf of [...new Set([sifre, sifre.trim()])]) {
+    try {
+      const key = await kdf(sf, e ? e.tuz : b64(rnd(16)), e ? e.iter : ITER);   // kullanıcı yoksa da aynı süre
+      if (!e) throw 0;
+      if (e.sar) { const { ku } = await coz(key, e.sar); S = await coz(await hamAnahtar(ku), e); }
+      else { S = await coz(key, e); ESKI = { kul: k, sifre: sf }; }   // ilk sürüm kaydı: şifreyle doğrudan şifreli
+      ok = true; break;
+    } catch (x) { if (!e) break; }
+  }
+  if (!ok) { await new Promise(r => setTimeout(r, 600)); throw new Error(e ? 'Şifre hatalı.' : 'Bu kullanıcı adı bulunamadı.'); }
   R = null; oturumKaydet(); await modOnbellek(); ust();
   if (ESKI && S.ka && ghAnahtar()) { try { await rehber(); const x = R.kullanicilar[ESKI.kul]; if (x) { await kullaniciYaz(ESKI.kul, ESKI.sifre, yukHazirla(ESKI.kul, x)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); await veriKaydet('kayıt biçimi güncellendi'); } } catch (x) {} }
   ESKI = null;

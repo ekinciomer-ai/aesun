@@ -100,6 +100,17 @@ def main():
                 print(f"::notice::https://{HOST}/{yol} → {r.status} " + ("✓" if aranan in g else "içerik beklenenden farklı"))
         except Exception as e:
             print(f"::warning::https://{HOST}/{yol} → {e}")
+            if yol:
+                try:
+                    l = uapi("Fileman", "list_files", dir=f"{DIZIN}/{yol.rstrip('/')}") or []
+                    print(f"::warning::{DIZIN}/{yol} içeriği: " + ", ".join(f"{x.get('file')}({x.get('humansize')},{x.get('nicemode')})" for x in l[:12]))
+                except Exception as e2:
+                    print(f"::warning::{DIZIN}/{yol} listelenemedi: {e2}")
+    try:
+        l = uapi("Fileman", "list_files", dir=DIZIN) or []
+        print("::notice::kök: " + ", ".join(f"{x.get('file')}[{x.get('type')}]" for x in l[:40]))
+    except Exception as e:
+        print("::warning::kök listelenemedi:", e)
 
 
 if __name__ == "__main__":

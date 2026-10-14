@@ -92,6 +92,14 @@ def main():
     for y in degisen[:40]:
         print("  +", y)
     print("::notice::Yükleme tamam.")
+    # canlı kontrol: site ve alt uygulamalar yanıt veriyor mu
+    for yol, aranan in (("", "kdemo"), ("portal/", "Kurumsal Portal"), ("demo/", "mining-demo"), ("monitoring/", "<title"), ("saha/", "<title")):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(f"https://{HOST}/{yol}?k={int(time.time())}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r:
+                g = r.read().decode("utf-8", "ignore")
+                print(f"::notice::https://{HOST}/{yol} → {r.status} " + ("✓" if aranan in g else "içerik beklenenden farklı"))
+        except Exception as e:
+            print(f"::warning::https://{HOST}/{yol} → {e}")
 
 
 if __name__ == "__main__":

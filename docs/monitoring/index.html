@@ -1621,7 +1621,8 @@ async function cizYonetim() {
         const x0 = (si_ * cw).toFixed(1);
         g += '<rect class="simdi-nabiz" x="' + x0 + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="#fff"/>'
           + '<rect x="' + (si_ * cw + 1.5).toFixed(1) + '" y="' + (BH + 1.5) + '" width="' + (cw - 3).toFixed(1) + '" height="' + (PT + PH - BH - 3) + '" rx="4" fill="none" stroke="#10233F" stroke-width="2" stroke-dasharray="5 4"/>'
-          + '<text x="' + x(si_).toFixed(1) + '" y="' + (PT + 14) + '" text-anchor="middle" font-size="11" font-weight="800" fill="#10233F">ŞU AN</text>';
+          + (() => { const xs = x(si_), cakis = xs < 70 || xs > W - 190, ys = PT + (cakis ? 30 : 14);   // köşe eksen yazılarıyla çakışmasın
+            return '<rect x="' + (xs - 22).toFixed(1) + '" y="' + (ys - 10) + '" width="44" height="14" rx="3" fill="#fff" fill-opacity=".9"/><text x="' + xs.toFixed(1) + '" y="' + ys + '" text-anchor="middle" font-size="11" font-weight="800" fill="#10233F">ŞU AN</text>'; })();
       }
       for (let k = 0; k <= 4; k++) { const v = ymax * k / 4; g += '<line x1="0" x2="' + W + '" y1="' + yy(v).toFixed(1) + '" y2="' + yy(v).toFixed(1) + '" stroke="#10233F" stroke-opacity=".08"/>' + (k && k < 4 ? '<text x="4" y="' + (yy(v) - 4).toFixed(1) + '" font-size="11" fill="#4A5A70">' + say(v) + '</text><text x="' + (W - 4) + '" y="' + (yy(v) - 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#6B3FA0">' + say(v * FKW / 1000) + ' ₺</text>' : ''); }
       g += '<text x="4" y="' + (PT + 12) + '" font-size="10" font-weight="700" fill="#4A5A70">₺/MWh</text><text x="' + (W - 4) + '" y="' + (PT + 12) + '" text-anchor="end" font-size="10" font-weight="700" fill="#6B3FA0">₺/saat · filo (' + NF + ' cihaz)</text>';

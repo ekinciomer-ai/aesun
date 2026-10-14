@@ -1588,7 +1588,7 @@ async function cizYonetim() {
     // Grafik: saat şeridi + çizgiler tek SVG. o.seri ile değerler dışarıdan verilebilir (animasyon ara kareleri), o.baslik videoda gün başlığı.
     const grafik = (pl_, o = {}) => {
       const si_ = pl_.findIndex(q => q.t === simdiT), ei_ = pl_.findIndex(q => q.ertesi);
-      const n = pl_.length || 24, W = 1000, cw = W / n, BH = o.baslik ? 34 : 0, SH = 30, PT = BH + SH + 10, PH = 230, H = PT + PH + 22 + (o.baslik ? 22 : 0);
+      const n = pl_.length || 24, W = 1000, cw = W / n, BH = o.baslik ? 34 : 0, SH = 30, HR = 16, PT = BH + SH + HR + 8, PH = 230, H = PT + PH + 22 + (o.baslik ? 22 : 0);
       const S = o.seri || planSeri(pl_);
       const { mv, bv, gmv, ggv, gf } = S;
       const ymax = o.ymax || Math.ceil(Math.max(1000, ...[...mv, ...bv, ...gmv, ...ggv].filter(v => v != null)) * 1.08 / 1000) * 1000;
@@ -1612,6 +1612,7 @@ async function cizYonetim() {
         g += '<g' + op + '><rect x="' + (i * cw + 1).toFixed(1) + '" y="' + BH + '" width="' + (cw - 2).toFixed(1) + '" height="' + SH + '" rx="4" fill="' + d.bar + '"/>'
           + (d.bar2 ? '<path d="M' + (i * cw + 1).toFixed(1) + ' ' + (BH + SH) + 'L' + (i * cw + cw - 1).toFixed(1) + ' ' + BH + 'V' + (BH + SH - 4) + 'Q' + (i * cw + cw - 1).toFixed(1) + ' ' + (BH + SH) + ' ' + (i * cw + cw - 5).toFixed(1) + ' ' + (BH + SH) + 'Z" fill="' + d.bar2 + '"/>' : '')
           + '<text x="' + x(i).toFixed(1) + '" y="' + (BH + SH / 2 + 4.5) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">' + q.t.slice(11, 13) + '</text></g>'
+          + (r_ => r_ && r_.th > 0 ? '<text x="' + x(i).toFixed(1) + '" y="' + (BH + SH + 13) + '" text-anchor="middle" font-size="10.5" font-weight="700" fill="' + (r_.kaynak === 'F2Pool' ? '#6B3FA0' : '#8A6FC0') + '"' + (r_.kaynak === 'F2Pool' ? '' : ' font-style="italic"') + '>' + say(r_.th / 1000, 1) + '</text>' : '')(gerF(q, emal(q)))
           + '<rect x="' + (i * cw).toFixed(1) + '" y="' + PT + '" width="' + cw.toFixed(1) + '" height="' + PH + '" fill="' + z + '"' + (q.gecmis && !q.gerc ? ' fill-opacity=".55"' : '') + '/>'; });
       if (ei_ > 0) { const xe = (ei_ * cw).toFixed(1);   // gün ayracı
         g += '<line x1="' + xe + '" x2="' + xe + '" y1="' + BH + '" y2="' + (PT + PH) + '" stroke="#10233F" stroke-width="2.5"/>'
@@ -1637,7 +1638,7 @@ async function cizYonetim() {
     window.PLANX = { gunPl, grafik, planSeri, gunToplam, DUR, bugun, ilkGun, tarihK };
     const lejant = '<div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + [['linear-gradient(135deg,#F0B429 50%,#2F9E55 50%)', '☀ Güneşle çalış'], ['#2F9E55', '✓ Kârlı, çalış'], ['#D64545', '✕ Zararlı, uyut']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
       + [['#D9480F', 'Gerçekleşen enerji maliyeti (filo)', ''], ['#7C3AED', 'Gerçekleşen BTC geliri (filo)', ''], ['#F4A27C', 'Planlanan enerji maliyeti (tam yük)', 'dashed'], ['#1E7A3C', 'BTC geliri (başabaş)', 'dashed']].map(([r, t, k]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px ' + (k || 'solid') + ' ' + r + '"></span>' + t + '</span>').join('')
-      + '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border:2px dashed #10233F;border-radius:3px"></span>Şu an</span><span>Soluk: geçmiş saat</span></div>';
+      + '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border:2px dashed #10233F;border-radius:3px"></span>Şu an</span><span>Soluk: geçmiş saat</span><span><b style="color:#6B3FA0">9,1</b> saat altındaki sayı: o saatin ortalama hash\'i (PH/s; F2Pool, eğik: Pi ölçümü)</span></div>';
     const tg_ = gunToplam(pl), gecmisSec = gun < bugun;
     const anB = window.ANIM_ARALIK || { bas: gunEkle(bugun, -13) < ilkGun ? ilkGun : gunEkle(bugun, -13), bit: bugun };
     h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Saatlik plan · ' + gunAd(gun) + (gun === bugun || gun === yarin ? ' ' + tarihK(gun) : ' ' + gun.slice(0, 4)) + (gecmisSec ? ' · gerçekleşen' : '') + '</h2><span class="k" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' + calisSaat + ' saat ' + (gecmisSec ? 'çalıştı · ' : 'çalış · ') + uyuSaat + ' saat ' + (gecmisSec ? 'uyudu' : 'uyut')

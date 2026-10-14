@@ -2776,6 +2776,18 @@ function osTukIc(key, ab) {
   const tg = d => d.slice(8, 10) + '.' + d.slice(5, 7), GA = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'], gAd = d => GA[new Date(d + 'T12:00:00').getDay()];
   const ser = [{ ad: 'Çekiş ' + tg(g), renk: '#D92D20', v: bu.map(x => x == null ? null : -x) }];
   if (o) ser.push({ ad: 'Çekiş ' + tg(o) + ' (önceki gün)', renk: '#8A96A8', v: dn.map(x => x == null ? null : -x), tip: 'isaret' });
+  // Mahsup (yalnız A3): Sera-1/Sera-2 saatlik verişi ve aynı saatte A3 çekişinden mahsuplaşan kısım (ofis paneli havuz kuralı)
+  const MH = key === 'aksaray_3' ? mahsupGun(D.osos || {}, g).saatler : null;
+  let yser = null, MT = null;
+  if (MH) {
+    const u1 = MH.map(x => x.var ? x.u.T1 : null), u2 = MH.map(x => x.var ? x.u.T2 : null), mA = MH.map((x, i) => bu[i] == null ? null : x.mahsup.A3), kal = MH.map((x, i) => bu[i] == null ? null : Math.max(0, bu[i] - x.mahsup.A3));
+    const veri = i => u1[i] != null || u2[i] != null;
+    yser = [{ ad: 'Sera-1 veriş', renk: '#2a78d6', grup: 'u', v: u1.map((x, i) => veri(i) ? x : null) }, { ad: 'Sera-2 veriş', renk: '#eb6834', grup: 'u', v: u2.map((x, i) => veri(i) ? x : null) },
+      { ad: 'A3 mahsuplaşan', renk: '#1baf7a', grup: 't', v: mA.map(x => x == null ? null : -x) }, { ad: 'A3 şebekeden (mahsup sonrası)', renk: '#D92D20', grup: 't', v: kal.map(x => x == null ? null : -x) }];
+    if (o) yser.push({ ad: 'Çekiş ' + tg(o) + ' (önceki gün)', renk: '#8A96A8', v: dn.map(x => x == null ? null : -x), tip: 'isaret' });
+    const tt = a => a.reduce((t, x) => t + (x || 0), 0);
+    MT = { u1: tt(u1), u2: tt(u2), m: tt(mA), k: tt(kal), mh: MH, kal };
+  }
   const fark = o && sonS >= 0 ? top(bu) - top(dnKadar) : null;
   // maliyet tahmini: kWh × (PTF + YEKDEM) × 1,025 / 1000 (enerji bedeli, dağıtım/vergi hariç)
   const yk = typeof yekdemAy === 'function' && EP ? (yekdemAy(g.slice(0, 7)) || {}).deger : null;
@@ -2791,10 +2803,15 @@ function osTukIc(key, ab) {
     + '<span class="k">' + (tam ? 'Gün toplamı' : 'Bugüne kadar') + ' <b>' + say(top(bu)) + ' kWh</b>' + (tam ? '' : ' (' + (sonS + 1) + ' saat)')
     + (enerjiVar ? ' · enerji ≈ <b>' + say(enerji) + ' ₺</b>' : '')
     + (fark != null ? ' · ' + tg(o) + '\'e göre <b style="color:' + (fark > 0 ? '#B42318' : '#1E7A3C') + '">' + (fark > 0 ? '+' : '') + say(fark) + ' kWh</b>' : '') + '</span></div>'
-    + grafikX({ id: 'tuk_' + key, ad: ab + ' saatlik tüketim', etiket: saat.map(s => p2(s) + ':00'), etiketAd: 'Saat', seriler: ser,
-      turler: ['cubuk', 'cizgi', 'tablo'], tur: 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top', fmt: x => say(Math.abs(x), 1), eksen: x => say(Math.abs(x)),
-      tip: i => p2(i) + ':00–' + p2(i + 1) + ':00\nÇekiş ' + tg(g) + ': ' + (bu[i] == null ? '—' : say(bu[i], 1) + ' kWh') + (o ? '\nÇekiş ' + tg(o) + ': ' + (dn[i] == null ? '—' : say(dn[i], 1) + ' kWh') : '') + (ptf(i) != null ? '\nPTF: ' + say(ptf(i), 2) + ' ₺/MWh' : '') })
-    + '<div class="k">Aşağı (kırmızı): şebekeden çekiş, OSOS saatlik ölçümü (kWh ≈ saat ortalaması kW). Gri çizgi önceki günün aynı saati. Enerji ≈ kWh × (PTF + YEKDEM) × 1,025 (dağıtım ve vergiler hariç). Günü ‹ › veya takvimden seçin.</div>';
+    + (MT ? '<div class="k" style="display:flex;flex-wrap:wrap;gap:4px 16px">'
+      + '<span>Üretim (şebekeye veriş): Sera-1 <b style="color:#2a78d6">' + say(MT.u1) + '</b> · Sera-2 <b style="color:#eb6834">' + say(MT.u2) + '</b> kWh</span>'
+      + '<span>A3 mahsuplaşan <b style="color:#1BAF7A">' + say(MT.m) + ' kWh</b>' + (top(bu) > 0 ? ' (%' + say(MT.m / top(bu) * 100) + ')' : '') + '</span>'
+      + '<span>Mahsup sonrası şebekeden <b style="color:#B42318">' + say(MT.k) + ' kWh</b></span></div>' : '')
+    + grafikX({ id: 'tuk_' + key, ad: ab + ' saatlik tüketim', etiket: saat.map(s => p2(s) + ':00'), etiketAd: 'Saat', seriler: ser, yiginSeriler: yser || undefined,
+      turler: MT ? ['yigin', 'cubuk', 'tablo'] : ['cubuk', 'cizgi', 'tablo'], tur: MT ? 'yigin' : 'cubuk', birim: 'kWh/saat', yuk: 150, toplam: 'top', fmt: x => say(Math.abs(x), 1), eksen: x => say(Math.abs(x)),
+      tip: i => p2(i) + ':00–' + p2(i + 1) + ':00\nÇekiş ' + tg(g) + ': ' + (bu[i] == null ? '—' : say(bu[i], 1) + ' kWh') + (o ? '\nÇekiş ' + tg(o) + ': ' + (dn[i] == null ? '—' : say(dn[i], 1) + ' kWh') : '') + (MT && MT.mh[i].var ? '\nSera-1 veriş: ' + say(MT.mh[i].u.T1, 1) + ' · Sera-2 veriş: ' + say(MT.mh[i].u.T2, 1) + ' kWh\nA3 mahsuplaşan: ' + say(MT.mh[i].mahsup.A3, 1) + ' · şebekeden: ' + (MT.kal[i] == null ? '—' : say(MT.kal[i], 1)) + ' kWh' + (MT.mh[i].bedelli > 0.5 ? '\nArtan (bedelli satış): ' + say(MT.mh[i].bedelli, 1) + ' kWh' : '') : '') + (ptf(i) != null ? '\nPTF: ' + say(ptf(i), 2) + ' ₺/MWh' : '') })
+    + (MT ? '<div class="k">Yukarı: Sera-1 (T1) ve Sera-2 (T2) şebekeye verişi · aşağı: A3 çekişi; yeşil kısım aynı saatte T1/T2 üretiminden mahsuplaşan, kırmızı mahsup sonrası şebekeden alınan. Saatlik havuz kuralı: üretim önce T2, sonra A3, sonra T1 tüketimini karşılar; artan bedelli satılır.</div>' : '')
+    + (MT ? '<div class="k">' : '<div class="k">Aşağı (kırmızı): şebekeden çekiş, OSOS saatlik ölçümü (kWh ≈ saat ortalaması kW). ') + 'Gri çizgi önceki günün aynı saati. Enerji ≈ kWh × (PTF + YEKDEM) × 1,025 (dağıtım ve vergiler hariç). Günü ‹ › veya takvimden seçin.</div>';
 }
 async function cizDigerPrensip() {
   await strYukle();

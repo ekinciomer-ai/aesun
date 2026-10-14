@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""cPanel paketleri:
+  dist_site/   → aksarayenerji.net          (kurumsal web sitesi)
+  dist_portal/ → portal.aksarayenerji.net   (portal kökte; /monitoring/ /demo/ /saha/)
+Portal oturumu tarayıcıda alan adına bağlı olduğu için portal ve uygulamalar aynı alt alandadır."""
+import os, re, shutil, sys
+
+KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DOCS, CP = os.path.join(KOK, "docs"), os.path.join(KOK, "cpanel")
+SAHA = sys.argv[1] if len(sys.argv) > 1 else os.path.join(KOK, "_saha")
+SITE_URL, PORTAL_URL = "https://aksarayenerji.net/", "https://portal.aksarayenerji.net/"
+
+
+def oku(p):
+    return open(p, encoding="utf-8").read()
+
+
+def yaz(p, s):
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    open(p, "w", encoding="utf-8").write(s)
+
+
+def kopya(src, dst, haric=()):
+    shutil.copytree(src, dst, dirs_exist_ok=True, ignore=shutil.ignore_patterns(*haric))
+
+
+for d in ("dist_site", "dist_portal"):
+    shutil.rmtree(os.path.join(KOK, d), ignore_errors=True)
+S, P = os.path.join(KOK, "dist_site"), os.path.join(KOK, "dist_portal")
+
+# ---- site ----
+for f in ("index.html", "referanslar.html", "iletisim.html", "kvkk.html", "favicon.svg"):
+    s = oku(os.path.join(DOCS, f)) if f.endswith(".html") else None
+    if s is None:
+        os.makedirs(S, exist_ok=True); shutil.copy(os.path.join(DOCS, f), S); continue
+    s = s.replace('href="portal/"', f'href="{PORTAL_URL}"').replace('href="demo/"', f'href="{PORTAL_URL}demo/"')
+    s = s.replace('location.replace("monitoring/"+location.hash)', f'location.replace("{PORTAL_URL}monitoring/"+location.hash)')
+    if f == "iletisim.html":   # cPanel'de form PHP ile gönderilir; GitHub sürümündeki mailto yedeği kaldırılır
+        s = re.sub(r"<script>\s*\(function\(\)\{\s*var f=document\.querySelector\('form\.f'\).*?</script>", "", s, flags=re.S)
+    yaz(os.path.join(S, f), s)
+kopya(os.path.join(DOCS, "assets"), os.path.join(S, "assets"))
+for f in (".htaccess", "robots.txt", "sitemap.xml", "iletisim.php"):
+    shutil.copy(os.path.join(CP, f), S)
+
+# ---- portal alt alanı ----
+s = oku(os.path.join(DOCS, "portal", "index.html"))
+s = s.replace('class="bag" href="../"', f'class="bag" href="{SITE_URL}"')
+yaz(os.path.join(P, "index.html"), s)
+for app in ("monitoring", "demo"):
+    s = oku(os.path.join(DOCS, app, "index.html"))
+    s = s.replace("../portal/", "../")
+    yaz(os.path.join(P, app, "index.html"), s)
+kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
+shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
+shutil.copy(os.path.join(CP, ".htaccess"), P)
+yaz(os.path.join(P, "robots.txt"), "User-agent: *\nDisallow: /\n")
+
+for d in (S, P):
+    n = sum(len(f) for _, _, f in os.walk(d))
+    print(d, n, "dosya")
+kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html"))]
+if kalan or 'href="portal/"' in oku(os.path.join(S, "index.html")):
+    sys.exit("bağlantı dönüşümü eksik")

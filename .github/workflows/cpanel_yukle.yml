@@ -1,4 +1,4 @@
-name: cPanel'e yükle (aksarayenerji.net)
+name: cPanel'e yükle (aksarayenerji.net + portal.aksarayenerji.net)
 # docs/ (web sitesi + portal + monitoring + demo) ve saha uygulamasını cPanel API'si (2083) ile yükler; FTP portu kapalı.
 # Gerekli depo sırları (Settings → Secrets and variables → Actions):
 #   FTP_SUNUCU    ör. ftp.aksarayenerji.net
@@ -24,29 +24,27 @@ jobs:
         with:
           repository: ekinciomer-ai/saha
           path: _saha
-      - name: Paketi hazırla
+      - name: Paketleri hazırla
         run: |
-          set -e
-          if [ -z "${{ secrets.FTP_SUNUCU }}" ]; then echo "FTP sırları tanımlı değil; yükleme atlandı."; echo "ATLA=1" >> $GITHUB_ENV; exit 0; fi
-          mkdir -p dist
-          rsync -a --exclude 'onizleme/' --exclude 'onizleme.paket' --exclude 'site/' --exclude '*.md' --exclude '.nojekyll' docs/ dist/
-          cp cpanel/.htaccess cpanel/robots.txt cpanel/sitemap.xml cpanel/iletisim.php dist/
-          rsync -a --exclude '.git' --exclude '.github' --exclude '*.md' --exclude 'eski.html' _saha/ dist/saha/
-          # iletişim formu: cPanel'de PHP ile gönderilir (GitHub sürümündeki mailto yedeğini kaldır)
-          python3 - <<'PY'
-          import re
-          p = 'dist/iletisim.html'; s = open(p, encoding='utf-8').read()
-          s = re.sub(r'<script>\s*\(function\(\)\{\s*var f=document\.querySelector\(\'form\.f\'\).*?</script>', '', s, flags=re.S)
-          open(p, 'w', encoding='utf-8').write(s)
-          PY
-          grep -c "mailto:bilgi@aksarayenerji.com.tr?subject" dist/iletisim.html || true
-          du -sh dist; find dist -maxdepth 1 | sort
-      - name: cPanel'e yükle (API, port 2083)
+          if [ -z "${{ secrets.CPANEL_ANAHTAR }}${{ secrets.FTP_SIFRE }}" ]; then echo "cPanel sırları yok; atlandı."; echo "ATLA=1" >> $GITHUB_ENV; exit 0; fi
+          python3 cpanel/paketle.py _saha
+      - name: Site → aksarayenerji.net
         if: env.ATLA != '1'
         env:
-          CP_HOST: ${{ secrets.CPANEL_ALAN || 'aksarayenerji.net' }}
+          CP_HOST: aksarayenerji.net
+          CP_ALAN: aksarayenerji.net
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_DIR: ${{ secrets.FTP_DIZIN }}
-        run: python3 cpanel/yukle.py dist
+          CP_KONTROL: "/=kdemo;/referanslar.html=<title;/iletisim.html=<form"
+        run: python3 cpanel/yukle.py dist_site
+      - name: Portal → portal.aksarayenerji.net
+        if: env.ATLA != '1'
+        env:
+          CP_HOST: aksarayenerji.net
+          CP_ALAN: portal.aksarayenerji.net
+          CP_USER: ${{ secrets.FTP_KULLANICI }}
+          CP_PASS: ${{ secrets.FTP_SIFRE }}
+          CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
+          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/demo/=mining-demo;/saha/=<title"
+        run: python3 cpanel/yukle.py dist_portal

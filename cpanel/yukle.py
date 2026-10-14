@@ -4,7 +4,9 @@ Yalnız değişen dosyalar tek bir zip olarak gönderilir ve sunucuda açılır.
 Ortam: CP_HOST, CP_USER, CP_PASS, CP_DIR (varsayılan public_html)."""
 import base64, hashlib, io, json, os, ssl, sys, time, urllib.parse, urllib.request, uuid, zipfile
 
-HOST = os.environ.get("CP_HOST") or "aksarayenerji.net"
+HOST = os.environ.get("CP_HOST") or "aksarayenerji.net"          # cPanel API sunucusu
+ALAN = os.environ.get("CP_ALAN") or HOST                           # yüklenecek alan adı
+KONTROL = [x.split("=", 1) for x in (os.environ.get("CP_KONTROL") or "=<title").split(";") if x]
 USER, PASS, TOKEN = os.environ["CP_USER"], os.environ.get("CP_PASS", ""), os.environ.get("CP_TOKEN", "").strip()
 DIZIN = (os.environ.get("CP_DIR") or "").strip().strip("/")   # boşsa alan adının kök klasörü cPanel'den bulunur
 KAYNAK = sys.argv[1] if len(sys.argv) > 1 else "dist"
@@ -86,13 +88,13 @@ def dizin_hazirla(goreli):
 def main():
     global DIZIN
     if not DIZIN or DIZIN == ".":
-        d = uapi("DomainInfo", "single_domain_data", domain=HOST) or {}
+        d = uapi("DomainInfo", "single_domain_data", domain=ALAN) or {}
         kok = str(d.get("documentroot") or "")
         ev = str(d.get("homedir") or "")
         if not kok:
-            sys.exit(f"::error::{HOST} için kök klasör bulunamadı")
+            sys.exit(f"::error::{ALAN} için kök klasör bulunamadı")
         DIZIN = kok[len(ev):].strip("/") if ev and kok.startswith(ev) else kok.split("/", 3)[-1].strip("/")
-        print(f"::notice::{HOST} kök klasörü: {DIZIN}")
+        print(f"::notice::{ALAN} kök klasörü: {DIZIN}")
     yerel = {}
     for kok, _, dosyalar in os.walk(KAYNAK):
         for d in dosyalar:
@@ -104,7 +106,7 @@ def main():
     except Exception:
         eski = {}
     degisen = sorted(y for y, h in yerel.items() if eski.get(y) != h)
-    print(f"::notice::{len(yerel)} dosya, {len(degisen)} değişmiş → {HOST}/{DIZIN}")
+    print(f"::notice::{len(yerel)} dosya, {len(degisen)} değişmiş → {ALAN} ({DIZIN})")
     if degisen:
         gruplar = {}
         for y in degisen:
@@ -138,38 +140,19 @@ def main():
     except Exception as e:
         print("::warning::izin listesi:", e)
     print("::notice::Yükleme tamam.")
-    # canlı kontrol: site ve alt uygulamalar yanıt veriyor mu
+    # canlı kontrol
     CANLI = []
-    for yol, aranan in (("", "kdemo"), ("portal/", "Kurumsal Portal"), ("demo/", "mining-demo"), ("monitoring/", "<title"), ("saha/", "<title")):
+    for yol, aranan in KONTROL:
+        yol = yol.lstrip("/")
         try:
-            with urllib.request.urlopen(urllib.request.Request(f"https://{HOST}/{yol}?k={int(time.time())}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r:
+            with urllib.request.urlopen(urllib.request.Request(f"https://{ALAN}/{yol}?k={int(time.time())}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r:
                 g = r.read().decode("utf-8", "ignore")
                 CANLI.append(f"/{yol} {r.status}" + ("✓" if aranan in g else "?"))
         except Exception as e:
-            ek = ""
-            if isinstance(e, urllib.error.HTTPError):
-                ek = f" sunucu={e.headers.get('Server')} cf={e.headers.get('CF-Cache-Status')} gövde={e.read()[:160]!r}"
             CANLI.append(f"/{yol} {getattr(e, 'code', e)}✗")
-            print(f"https://{HOST}/{yol} → {e}{ek}")
-            for alt in (f"https://{HOST}/{yol}index.html", f"https://www.{HOST}/{yol}"):
-                try:
-                    with urllib.request.urlopen(urllib.request.Request(alt + f"?k={int(time.time())}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r2:
-                        print(f"::notice::{alt} → {r2.status}")
-                except Exception as e3:
-                    print(f"::warning::{alt} → {e3}")
-            if yol:
-                try:
-                    l = uapi("Fileman", "list_files", dir=f"{DIZIN}/{yol.rstrip('/')}") or []
-                    print(f"::warning::{DIZIN}/{yol} içeriği: " + ", ".join(f"{x.get('file')}({x.get('humansize')},{x.get('nicemode')})" for x in l[:12]))
-                except Exception as e2:
-                    print(f"::warning::{DIZIN}/{yol} listelenemedi: {e2}")
-    print("::notice::Canlı kontrol: " + " · ".join(CANLI))
-    try:
-        l = uapi("Fileman", "list_files", dir=DIZIN) or []
-        print("kök: " + ", ".join(f"{x.get('file')}[{x.get('type')}]" for x in l[:40]))
-    except Exception as e:
-        print("::warning::kök listelenemedi:", e)
-
+    print(f"::notice::{ALAN} canlı: " + " · ".join(CANLI))
+    if any("✗" in c for c in CANLI):
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

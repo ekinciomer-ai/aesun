@@ -78,7 +78,7 @@ def dizin_hazirla(goreli):
             continue
         ust = DIZIN + ("/" + "/".join(parca[:i]) if i else "")
         try:
-            api2("Fileman", "mkdir", path=ust, name=parca[i], permissions="0755")
+            api2("Fileman", "mkdir", path=ust, name=parca[i])
         except Exception as e:
             if "exist" not in str(e).lower() and "mevcut" not in str(e).lower():
                 print(f"::warning::klasör {yol}: {e}")
@@ -118,6 +118,18 @@ def main():
         uapi("Fileman", "save_file_content", dir=DIZIN, file=MANIFEST, content=json.dumps(yerel))
     for y in degisen[:40]:
         print("  +", y)
+    # klasör izinleri 0755 (web sunucusu okuyabilsin)
+    dizinler = sorted({y.rsplit("/", 1)[0] for y in yerel if "/" in y})
+    for d in dizinler:
+        try:
+            api2("Fileman", "fileop", op="chmod", metadata="0755", sourcefiles=f"{DIZIN}/{d}", doubledecode=0)
+        except Exception as e:
+            print(f"::warning::chmod {d}: {e}")
+    try:
+        l = uapi("Fileman", "list_files", dir=DIZIN, include_mime=0) or []
+        print("::notice::izinler: " + ", ".join(f"{x.get('file')}={x.get('nicemode')}" for x in l if x.get('type') == 'dir'))
+    except Exception as e:
+        print("::warning::izin listesi:", e)
     print("::notice::Yükleme tamam.")
     # canlı kontrol: site ve alt uygulamalar yanıt veriyor mu
     for yol, aranan in (("", "kdemo"), ("portal/", "Kurumsal Portal"), ("demo/", "mining-demo"), ("monitoring/", "<title"), ("saha/", "<title")):
@@ -142,18 +154,6 @@ def main():
                     print(f"::warning::{DIZIN}/{yol} içeriği: " + ", ".join(f"{x.get('file')}({x.get('humansize')},{x.get('nicemode')})" for x in l[:12]))
                 except Exception as e2:
                     print(f"::warning::{DIZIN}/{yol} listelenemedi: {e2}")
-    for y in ("kvkk.html", "iletisim.html", "assets/site.css", "assets/ges-drone.jpg", "favicon.svg", "saha/sw.js", "enerji/", "css/", "aksarayenerji.net/", "public_html/"):
-        try:
-            with urllib.request.urlopen(urllib.request.Request(f"https://{HOST}/{y}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r:
-                print(f"::notice::test {y} → {r.status} {r.headers.get('Content-Length')}")
-        except Exception as e:
-            print(f"::notice::test {y} → {e}")
-    try:
-        for alt in ("aksarayenerji.net", "public_html"):
-            l2 = uapi("Fileman", "list_files", dir=f"{DIZIN}/{alt}") or []
-            print(f"::notice::{alt}/ içi: " + ", ".join(f"{x.get('file')}" for x in l2[:25]))
-    except Exception as e:
-        print("::notice::alt liste:", e)
     try:
         l = uapi("Fileman", "list_files", dir=DIZIN) or []
         print("::notice::kök: " + ", ".join(f"{x.get('file')}[{x.get('type')}]" for x in l[:40]))

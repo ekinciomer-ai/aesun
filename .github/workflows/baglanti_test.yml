@@ -1,0 +1,13 @@
+name: cPanel bağlantı testi
+on: workflow_dispatch
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Port taraması
+        env:
+          H: ${{ secrets.FTP_SUNUCU }}
+        run: |
+          IP=$(getent hosts "$H" | awk '{print $1}' | head -1); echo "ip=$IP"
+          for h in "$H" aksarayenerji.net www.aksarayenerji.net; do echo "$h -> $(getent hosts $h | awk '{print $1}' | head -1)"; done
+          for p in 21 22 990 2082 2083 443; do timeout 6 bash -c "</dev/tcp/$IP/$p" 2>/dev/null && echo "port $p: AÇIK" || echo "port $p: kapalı"; done

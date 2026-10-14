@@ -65,6 +65,11 @@ DB_PATH = DATA / "fusionsolar.db"
 LATEST = DATA / "latest.json"
 PROFILE = DATA / "tarayici_profili"
 GH_KOK = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/"
+sys.path.insert(0, str(ROOT.parent.parent / "pi"))
+try:
+    import sunucu  # Aksaray Enerji sunucusu (portal.aksarayenerji.net)
+except ImportError:   # pi klasörü yanında değilse (ör. ayrı kopyalanmış Windows kurulumu) yalnız GitHub
+    sunucu = None
 GH_PANEL = "n8n/fusionsolar_son.json"
 GH_ARALIK = int(os.getenv("FS_GITHUB_DK", "10")) * 60
 
@@ -492,7 +497,7 @@ class Collector:
     def write_latest(self):
         self.latest["guncelleme"] = self.now()
         LATEST.write_text(json.dumps(self.latest, ensure_ascii=False, indent=2), encoding="utf-8")
-        if self.gh_token and self.latest["tesisler"] and time.time() - self.gh_son >= GH_ARALIK:
+        if (self.gh_token or (sunucu and sunucu.yalniz_sunucu())) and self.latest["tesisler"] and time.time() - self.gh_son >= GH_ARALIK:
             try:
                 self.panel_yaz()
                 self.gh_son = time.time()
@@ -514,6 +519,20 @@ class Collector:
             raise
 
     def gh_put(self, path, veri, mesaj, sadece_degisirse=False):
+        if sunucu and sunucu.yalniz_sunucu():
+            if sadece_degisirse:
+                eski = dict(sunucu.oku(path) or {}); yeni = dict(veri)
+                eski.pop("guncellendi", None); yeni.pop("guncellendi", None)
+                if json.dumps(eski, sort_keys=True) == json.dumps(yeni, sort_keys=True):
+                    return False
+            sunucu.yaz(path, veri, zorunlu=True)
+            return True
+        sonuc = self._gh_put(path, veri, mesaj, sadece_degisirse)
+        if sonuc and sunucu:
+            sunucu.yaz(path, veri)
+        return sonuc
+
+    def _gh_put(self, path, veri, mesaj, sadece_degisirse=False):
         icerik = json.dumps(veri, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
         for deneme in range(3):
             mevcut = self._gh("GET", path)

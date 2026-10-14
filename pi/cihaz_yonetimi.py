@@ -845,9 +845,52 @@ def calistir():
     eski = {k_: v for k_, v in durum.items() if k_ != "guncellendi"}
     if kiyas != eski or (simdi - zaman(durum.get("guncellendi", "2000-01-01T00:00:00+03:00"))) > timedelta(minutes=30):
         gh("n8n/cihaz_yonetimi_durum.json", yeni, sha, f"cihaz yönetimi: {istenen or '-'} ({a['mod']})")
+    demo_yaz(yeni, cihazlar, simdi)
     su = f" sonraki uyandırma {sonraki_uyan['t_komut'][11:16]}→{sonraki_uyan['hedef'][11:16]} ({sonraki_uyan['oncu_dk']} dk önce)" if sonraki_uyan else ""
     log(f"mod={a['mod']} üretim={uretim_kw} kW ptf={ptf} karar={karar} istenen={istenen} cihaz {calisan}/{uyuyan} "
         f"eylem={eylem or '-'} {eylem_not}{su}")
+
+
+def demo_yaz(yeni, cihazlar, simdi):
+    """Demo sayfası için anonim özet (IP, seri no, worker, fiyat, üretim yok): n8n/demo_durum.json.
+    Yalnız durum değişince (ya da 30 dk'da bir) yazılır."""
+    try:
+        def drm(d):
+            if d.get("sleeping"):
+                return "u"
+            if d.get("online") and ((d.get("hashrate_TH") or 0) > 0):
+                return "c"
+            if d.get("online"):
+                return "i"           # açık, hash'e başlıyor (ısınıyor)
+            return "x"
+        sirali = sorted([d for d in cihazlar if d.get("online") or d.get("sleeping") or d.get("model") not in (None, "", "?")],
+                        key=lambda d: d.get("suffix") or 0)
+        dur = "".join(drm(d) for d in sirali)
+        th = sum((d.get("hashrate_TH") or 0) for d in sirali if drm(d) == "c")
+        def kat(g):
+            m = " ".join([str(g.get("neden") or ""), str(g.get("not") or "")])
+            return "denge" if "güneş" in m else "fiyat" if ("PTF" in m or "eşik" in m) else "plan"
+        def adet(g):
+            import re as _re
+            m = _re.search(r"→\s*(\d+)\s*cihaz", str(g.get("neden") or "") + " " + str(g.get("not") or ""))
+            return int(m.group(1)) if m else None
+        olay = [{"t": g["t"], "e": g.get("eylem"), "n": adet(g), "k": kat(g)}
+                for g in (yeni.get("gecmis") or []) if g.get("gonderildi") and g.get("eylem") in ("wake", "sleep")][-20:]
+        plan = [{"t": p_["t"], "k": p_.get("karar"), "n": p_.get("gunes_cihaz")} for p_ in (yeni.get("plan") or [])[:30]]
+        su = (yeni.get("zamanlama") or {}).get("sonraki_uyandirma") or None
+        demo = {"mod": yeni.get("mod"), "karar": yeni.get("karar"), "durum": dur,
+                "ozet": {"toplam": len(sirali), "calisan": dur.count("c"), "isinan": dur.count("i"), "uyuyan": dur.count("u"),
+                         "ulasilamayan": dur.count("x"), "th": int(round(th / 100.0) * 100)},
+                "plan": plan, "olaylar": olay,
+                "sonraki": ({"t_komut": su.get("t_komut"), "hedef": su.get("hedef"), "eylem": su.get("eylem"), "oncu_dk": su.get("oncu_dk")} if su else None),
+                "ogrenme": {"uyanma_dk": ((yeni.get("zamanlama") or {}).get("model") or {}).get("a"), "yayilim_dk": (yeni.get("zamanlama") or {}).get("yayilim_dk")}}
+        eski, sha = gh("n8n/demo_durum.json")
+        eski = eski or {}
+        if {k: v for k, v in eski.items() if k != "guncellendi"} != demo or \
+           (simdi - zaman(eski.get("guncellendi", "2000-01-01T00:00:00+03:00"))) > timedelta(minutes=30):
+            gh("n8n/demo_durum.json", {"guncellendi": simdi.isoformat(timespec="seconds"), **demo}, sha, "demo durum")
+    except Exception as e:
+        log("demo yazılamadı:", e)
 
 
 def mod_degistir(mod):

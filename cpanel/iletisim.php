@@ -2,7 +2,7 @@
 // Aksaray Enerji · iletişim formu -> bilgi@aksarayenerji.com.tr
 declare(strict_types=1);
 $ALICI = 'bilgi@aksarayenerji.com.tr';
-$GONDEREN = 'web@aksarayenerji.com.tr'; // alan adına ait bir adres olmalı (SPF)
+$GONDEREN = 'web@aksarayenerji.net'; // alan adına ait bir adres olmalı (SPF)
 
 function geri(string $d): void { header('Location: iletisim.html?durum=' . $d, true, 303); exit; }
 function al(string $k, int $max): string {

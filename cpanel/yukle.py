@@ -126,7 +126,16 @@ def main():
                 g = r.read().decode("utf-8", "ignore")
                 print(f"::notice::https://{HOST}/{yol} → {r.status} " + ("✓" if aranan in g else "içerik beklenenden farklı"))
         except Exception as e:
-            print(f"::warning::https://{HOST}/{yol} → {e}")
+            ek = ""
+            if isinstance(e, urllib.error.HTTPError):
+                ek = f" sunucu={e.headers.get('Server')} cf={e.headers.get('CF-Cache-Status')} gövde={e.read()[:160]!r}"
+            print(f"::warning::https://{HOST}/{yol} → {e}{ek}")
+            for alt in (f"https://{HOST}/{yol}index.html", f"https://www.{HOST}/{yol}"):
+                try:
+                    with urllib.request.urlopen(urllib.request.Request(alt + f"?k={int(time.time())}", headers={"User-Agent": "Mozilla/5.0"}), context=ssl._create_unverified_context(), timeout=30) as r2:
+                        print(f"::notice::{alt} → {r2.status}")
+                except Exception as e3:
+                    print(f"::warning::{alt} → {e3}")
             if yol:
                 try:
                     l = uapi("Fileman", "list_files", dir=f"{DIZIN}/{yol.rstrip('/')}") or []

@@ -2759,16 +2759,17 @@ const TUK_GUN = {};
 function osTukGrafik(key, ab) {
   return '<div id="tukK_' + key + '" data-ab="' + esc(ab) + '" style="display:flex;flex-direction:column;gap:6px;border:1px solid #E3E8EE;border-radius:10px;padding:10px 12px;background:#FBFCFD">' + osTukIc(key, ab) + '</div>';
 }
+function tukGunler(v) { const g = Object.keys(v).sort(), b = bugunTR(); if (g.length && !g.includes(b) && b > g[g.length - 1]) g.push(b); return g; }   // bugün veri gelmese de seçilebilir
 function tukGunSec(key, g) {
-  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = Object.keys(v).sort();
-  if (!g || !v[g]) return;
+  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = tukGunler(v);
+  if (!g || !gunler.includes(g)) return;
   TUK_GUN[key] = g === gunler[gunler.length - 1] ? null : g;
   const k = document.getElementById('tukK_' + key); if (k) k.innerHTML = osTukIc(key, k.dataset.ab);
 }
 function osTukIc(key, ab) {
-  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = Object.keys(v).sort();
+  const v = (((D && D.osos) || {})[key] || {}).veri || {}, gunler = tukGunler(v);
   if (!gunler.length) return '<p class="k">OSOS verisi yok.</p>';
-  const songun = gunler[gunler.length - 1], g = TUK_GUN[key] && v[TUK_GUN[key]] ? TUK_GUN[key] : songun, gi = gunler.indexOf(g), o = gunler[gi - 1];
+  const songun = gunler[gunler.length - 1], g = TUK_GUN[key] && gunler.includes(TUK_GUN[key]) ? TUK_GUN[key] : songun, gi = gunler.indexOf(g), o = gunler[gi - 1];
   const p2 = n => String(n).padStart(2, '0'), saat = [...Array(24).keys()];
   const c = (gn, s) => { const x = gn && v[gn] && v[gn][p2(s)]; return x && x.cekis != null ? x.cekis : null; };
   const bu = saat.map(s => c(g, s)), dn = saat.map(s => c(o, s));
@@ -2802,7 +2803,7 @@ function osTukIc(key, ab) {
     + btn('›', gunler[gi + 1], 'Sonraki gün')
     + (g !== songun ? btn('Bugün', songun, 'Son OSOS günü') : '') + '</span>';
   return '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:center"><span style="display:inline-flex;gap:10px;align-items:center;flex-wrap:wrap"><b style="font-size:14px">Saatlik tüketim · ' + tg(g) + ' ' + gAd(g) + '</b>' + sec + '</span>'
-    + '<span class="k">' + (tam ? 'Gün toplamı' : 'Bugüne kadar') + ' <b>' + say(top(bu)) + ' kWh</b>' + (tam ? '' : ' (' + (sonS + 1) + ' saat)')
+    + '<span class="k">' + (sonS < 0 ? '<b>Bu günün OSOS verisi henüz gelmedi</b> (sayaç verisi 1–2 saat gecikmeli gelir)' : (tam ? 'Gün toplamı' : 'Bugüne kadar') + ' <b>' + say(top(bu)) + ' kWh</b>' + (tam ? '' : ' (' + (sonS + 1) + ' saat)'))
     + (enerjiVar ? ' · enerji ≈ <b>' + say(enerji) + ' ₺</b>' : '')
     + (fark != null ? ' · ' + tg(o) + '\'e göre <b style="color:' + (fark > 0 ? '#B42318' : '#1E7A3C') + '">' + (fark > 0 ? '+' : '') + say(fark) + ' kWh</b>' : '') + '</span></div>'
     + (MT ? '<div class="k" style="display:flex;flex-wrap:wrap;gap:4px 16px">'

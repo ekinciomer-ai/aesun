@@ -58,6 +58,11 @@ for pe in d["projects"]["edges"]:
                             gql("mutation($id:String!){ deploymentCancel(id:$id) }", {"id": de["node"]["id"]}); iptal0 += 1
                         except Exception as e:
                             hata0 = str(e)[:160]
+                if ld.get("status") in ("QUEUED", "WAITING", "INITIALIZING", "BUILDING") and os.environ.get("FILTRE") != "striking-flexibility":
+                    try:
+                        gql("mutation($id:String!){ deploymentCancel(id:$id) }", {"id": ld["id"]}); iptal0 += 1
+                    except Exception as e:
+                        hata0 = str(e)[:160]
                 not_(f"{p['name']}/{s['name']}: kuyruktan {iptal0} dağıtım iptal edildi" + (f" (hata: {hata0})" if hata0 else ""))
             if ISLEM == "duzelt" and (i.get("source") or {}).get("repo", "").lower().endswith("epias-ptf"):
                 try:

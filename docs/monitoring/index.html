@@ -2524,6 +2524,16 @@ async function invDetayAc(kay, san, id) {
     ad = (gy[id] || {}).ad || id;
     const r = (s.inverterler || []).find(x => x.ps_key === id || String(x.ad || '').split(' ').pop() === id) || {};
     L = { guc_kw: r.anlik_kw, gunluk_kwh: r.bugun_kwh, alarm: r.alarm };
+    if (kay === 'sungrow') {
+      if (!D.sgd || Date.now() - (D.sgd._t || 0) > 5 * 60e3) { D.sgd = await al('n8n/sungrow_detay.json', true).catch(() => null); if (D.sgd) D.sgd._t = Date.now(); }
+      const sd = ((((D.sgd || {}).santraller || {})[sid]) || {})[id];
+      if (sd) {
+        const v = sd.v || {}, taze = D.sgd.guncelleme && Date.parse(D.sgd.guncelleme) > Date.now() - 40 * 60e3;
+        L.sg = sd; L.sg_ts = D.sgd.guncelleme; if (sd.ad) ad = sd.ad;
+        if (v['24'] != null) L.guc_kw = v['24'] / 1000; if (v['1'] != null) L.gunluk_kwh = v['1'] / 1000;
+        if (taze) (sd.string || []).forEach(([A, V], i) => { if (A != null) pvCanli[i + 1] = { V, A }; });
+      }
+    }
   }
   const T = (ts.inverterler || {})[ad] || Object.values(ts.inverterler || {}).find(x => x.id === id) || {};
   const P = Object.assign({}, ts.panel || {}, T.panel || {});
@@ -2572,6 +2582,15 @@ async function invDetayAc(kay, san, id) {
       + kart('Sıcaklık', f(L.sicaklik_c, 1) + ' °C', 'yalıtım ' + f(L.yalitim_mohm, 2) + ' MΩ', L.sicaklik_c >= 70 ? TH_R.kirmizi : null)
       + kart('Güç faktörü', f(L.guc_faktoru, 3), 'reaktif ' + f(L.reaktif_kvar, 1) + ' kvar')
       + kart('Durum', esc(durum || '—'), L.ts ? 'veri ' + esc(String(L.ts).slice(11, 16)) : '', /şebekede/i.test(L.durum || '') ? TH_R.yesil : TH_R.koyu);
+  } else if (kay === 'sungrow' && L.sg) {
+    const v = L.sg.v || {}, dc = v['14'] != null ? v['14'] / 1000 : null, dk = v['29'];
+    kartlar += kart('DC güç', f(dc, 1) + ' kW', dc > 0.5 && L.guc_kw ? 'verim %' + f(v['28'] != null ? v['28'] : L.guc_kw / dc * 100, 1) : '')
+      + kart('Faz akımı', [v['21'], v['22'], v['23']].map(z => f(z, 1)).join(' / ') + ' A')
+      + kart('Faz gerilimi', [v['18'], v['19'], v['20']].map(z => f(z, 1)).join(' / ') + ' V', 'f ' + f(v['27'], 2) + ' Hz')
+      + kart('Sıcaklık', f(v['4'], 1) + ' °C', 'izolasyon ' + f(v['94']) + ' kΩ', v['4'] >= 70 ? TH_R.kirmizi : null)
+      + kart('Güç faktörü', f(v['26'], 3), 'reaktif ' + f(v['25'] != null ? v['25'] / 1000 : null, 2) + ' kvar')
+      + kart('Durum', dk === 0 ? 'Çalışıyor' : dk == null ? '—' : 'kod ' + esc(String(dk)), (L.sg_ts ? 'veri ' + esc(String(L.sg_ts).slice(11, 16)) : '') + (v['540'] ? ' · ' + esc(String(v['540'])) : ''), dk === 0 ? TH_R.yesil : TH_R.kirmizi);
+    if (L.alarm) kartlar += kart('Alarm', esc(String(L.alarm)), '', TH_R.kirmizi);
   } else if (L.alarm) kartlar += kart('Alarm', esc(String(L.alarm)), '', TH_R.kirmizi);
   // tasarım
   const tas = [['İnverter modeli', T.model || an.model], ['Nominal AC', nom ? f(nom) + ' kW' : null], ['MPPT', T.mppt_sayisi],
@@ -2599,7 +2618,8 @@ async function invDetayAc(kay, san, id) {
     + (T.saha_notu ? '<div class="k" style="color:#8A5A00">Saha: ' + esc(T.saha_notu) + '</div>' : '') + (T.pv_not ? '<div class="k">' + esc(T.pv_not) + '</div>' : '') + (ts.not ? '<div class="k">Santral: ' + esc(ts.not) + '</div>' : '')
     + (eksik > 3 ? '<div class="k">Panel ve string tasarımı tek hat şemalarından <code>inverter/tasarim.json</code> dosyasına işlenince burada ve string tablosunda kWp, beklenen güç ve panel başı gerilim görünür.</div>' : '')
     + (nler.length ? '<div style="font-weight:700">Stringler</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Giriş</th><th>Panel</th><th>kWp</th><th>Gerilim V</th><th>Akım A</th><th>Güç</th><th>Güç/kWp</th><th>V/panel</th><th>7 gün (durum · oran)</th><th>7 gün tepe</th></tr></thead><tbody>' + satir + '</tbody></table></div>'
-      + '<div class="k">Anlık V/A FusionSolar\'dan (~5 dk); Sungrow ve Inavitas anlık string değeri vermez. 7 gün sütunu string analizinden: oran = stringin akımı / inverterdeki stringlerin medyanı. V/panel ≈ panel Vmp\'ye yakın olmalı; belirgin düşükse stringde by-pass/kısa devre panel olabilir.</div>' : '<div class="k">Bu inverter için string verisi yok.</div>')
+      + '<div class="k">Anlık V/A: FusionSolar (~5 dk) ve Sungrow (Pi, 10 dk; string gerilimi = MPPT gerilimi); Inavitas anlık string değeri vermez. 7 gün sütunu string analizinden: oran = stringin akımı / inverterdeki stringlerin medyanı. V/panel ≈ panel Vmp\'ye yakın olmalı; belirgin düşükse stringde by-pass/kısa devre panel olabilir.</div>' : '<div class="k">Bu inverter için string verisi yok.</div>')
+    + (L.sg && (L.sg.mppt || []).length ? '<div style="font-weight:700">MPPT (anlık)</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px">' + (() => { const m = L.sg.mppt, vMed = m.map(x => x[0]).filter(x => x > 50).sort((a, b) => a - b)[Math.floor(m.filter(x => x[0] > 50).length / 2)] || 0; return m.map(([V, A], i) => { const kotu = V != null && vMed && V < vMed * 0.8, bos = !A || A < 0.2; return '<div style="border:1px solid ' + (kotu ? '#F0A3A3' : '#E3E8EE') + ';background:' + (kotu ? '#FDECEC' : bos ? '#F5F7FA' : '#fff') + ';border-radius:8px;padding:6px 8px"><div class="k" style="font-size:11.5px">MPPT' + (i + 1) + '</div><b>' + f(V) + ' V</b> · ' + f(A, 1) + ' A<div class="k" style="font-size:11.5px">' + (V != null && A != null ? f(V * A / 1000, 2) + ' kW' : '—') + (kotu ? ' · <span style="color:#B42318">gerilim düşük</span>' : '') + '</div></div>'; }).join(''); })() + '</div><div class="k">Aynı MPPT\'ye bağlı stringler aynı gerilimdedir; bir MPPT diğerlerinden %20+ düşük gerilimdeyse o MPPT\'deki dizide kopuk/kısa devre panel ya da yanlış bağlantı olabilir.</div>' : '')
     + '<div style="font-weight:700">Son 14 gün üretim (kWh)</div>' + bar + '</div>';
 }
 // ===== Giriş / çıkış grafiği (bugün, saatlik): üretim + şebekeden çekiş = şebekeye veriş + madencilik + diğer iç tüketim =====

@@ -37,6 +37,48 @@ def _yaz(yol, veri, mesaj):
     gh(yol, veri, sha, mesaj)
 
 
+# Sungrow inverter ayrıntı noktaları (keşif: inverter/sungrow_kesif_5038906.json)
+DETAY_ADLAR = {
+    "1": "Bugün Wh", "2": "Toplam Wh", "4": "İç sıcaklık °C", "14": "DC güç W", "18": "Faz A V", "19": "Faz B V", "20": "Faz C V",
+    "21": "Faz A A", "22": "Faz B A", "23": "Faz C A", "24": "Aktif güç W", "25": "Reaktif güç var", "26": "Güç faktörü",
+    "27": "Frekans Hz", "28": "Verim %", "29": "Durum kodu", "43": "Görünür güç VA", "44": "Bugün çalışma dk",
+    "86": "AC güç / kWp", "90": "Negatif-toprak V", "94": "İzolasyon kΩ", "95": "Bus V", "117": "Güç sınırlama modu",
+    "118": "AFCI", "120": "AFCI arıza sayısı", "311": "PID durumu", "312": "PID arıza kodu", "540": "ARM yazılım", "556": "Haberleşme yazılım",
+}
+MPPT_V = [5, 7, 9, 45, 47, 49, 51, 53, 55, 57]                        # MPPT1..10 gerilim (akım = +1)
+STR_A = list(range(70, 86)) + [92, 93] + list(range(313, 319))        # string 1..24 akım
+STR_V = list(range(96, 114))                                          # string 1..18 gerilim
+
+
+def sungrow_detay(cli, S, cihazlar):
+    """Her inverter: AC/DC/sağlık değerleri + MPPT [V, A] + string [A, V]."""
+    ids = sorted({*DETAY_ADLAR, *[str(x) for x in MPPT_V], *[str(x + 1) for x in MPPT_V], *[str(x) for x in STR_A], *[str(x) for x in STR_V]}, key=int)
+    bilgi = {x["ps_key"]: x for x in cihazlar}
+    out = {}
+    keys = list(bilgi)
+    for i in range(0, len(keys), 50):
+        for r in cli.realtime(1, keys[i:i + 50], ids):
+            p = r.get("device_point", r); k = p.get("ps_key")
+            if not k:
+                continue
+            g = lambda n: p.get("p" + str(n))
+            sy = lambda n: S._num(g(n))
+            mppt = [[sy(v), sy(v + 1)] for v in MPPT_V]
+            while mppt and mppt[-1] == [None, None]:
+                mppt.pop()
+            st = []
+            for j, a in enumerate(STR_A):
+                v = sy(STR_V[j]) if j < len(STR_V) else (mppt[j // 2][0] if j // 2 < len(mppt) else None)
+                st.append([sy(a), v])
+            while st and st[-1][0] is None:
+                st.pop()
+            d = bilgi.get(k, {})
+            out[k] = {"ad": d.get("device_name"), "model": d.get("device_model_code"), "iletisim": d.get("dev_status"),
+                      "v": {n: (g(n) if n in ("540", "556") else sy(n)) for n in DETAY_ADLAR if g(n) not in (None, "", "--")},
+                      "mppt": mppt, "string": st}
+    return out
+
+
 def sungrow(simdi):
     import sungrow_collector as S
     cli = S.SungrowClient()
@@ -45,7 +87,7 @@ def sungrow(simdi):
     except Exception:
         durum = {}
     gun, saat = simdi.strftime("%Y-%m-%d"), simdi.strftime("%H")
-    out = {}
+    out, detay = {}, {}
     for ps in SG_ADLAR:
         rows = cli.realtime(11, [f"{ps}_11_0_0"], ["83033", "83022"])
         pt = (rows[0].get("device_point", rows[0]) if rows else {}) or {}
@@ -64,7 +106,12 @@ def sungrow(simdi):
         durum[ps] = d
         invs = []
         try:
-            keys = [x.get("ps_key") for x in cli.devices(ps) if int(x.get("device_type") or 0) == 1 and x.get("ps_key")]
+            cihazlar = [x for x in cli.devices(ps) if int(x.get("device_type") or 0) == 1 and x.get("ps_key")]
+            keys = [x.get("ps_key") for x in cihazlar]
+            try:
+                detay[ps] = sungrow_detay(cli, S, cihazlar)
+            except Exception as e:
+                log("sungrow detay:", ps, e)
             for r in cli.realtime(1, keys[:50], ["24", "1"]) if keys else []:
                 p2 = r.get("device_point", r)
                 invs.append({"ps_key": p2.get("ps_key"), "anlik_kw": round((S._num(p2.get("p24")) or 0) / 1000, 2),
@@ -74,6 +121,12 @@ def sungrow(simdi):
         out[ps] = {"ad": SG_ADLAR[ps], "anlik_kw": round(guc / 1000, 2) if guc is not None else None,
                    "bugun_kwh": round(gwh / 1000, 1) if gwh is not None else None,
                    "saatlik_bugun": dict(sorted(d["saat"].items())), "inverterler": invs}
+    if detay:
+        try:
+            _yaz("n8n/sungrow_detay.json", {"guncelleme": simdi.isoformat(timespec="seconds"), "noktalar": DETAY_ADLAR,
+                                            "santraller": detay}, "Sungrow detay " + simdi.strftime("%H:%M"))
+        except Exception as e:
+            log("sungrow detay yazılamadı:", e)
     DURUM.parent.mkdir(parents=True, exist_ok=True)
     DURUM.write_text(json.dumps(durum))
     _yaz("n8n/sungrow_son.json", {"guncelleme": simdi.isoformat(timespec="seconds"), "kaynak": "sungrow", "santraller": out},

@@ -17,7 +17,13 @@ jobs:
           if [ -z "$ANAHTAR" ] || [ -z "$ADRES" ]; then echo "::error::SUNUCU_SSH / SUNUCU_ADRES sırları yok"; exit 1; fi
           mkdir -p ~/.ssh && printf '%s\n' "$ANAHTAR" > ~/.ssh/k && chmod 600 ~/.ssh/k
           S="ssh -i $HOME/.ssh/k -p ${PORT:-22} -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o BatchMode=yes ${KUL:-root}@$ADRES"
-          $S 'true' || { echo "::error::SSH bağlantısı kurulamadı (anahtar authorized_keys içinde mi, port açık mı?)"; exit 1; }
+          head -1 ~/.ssh/k | grep -q 'BEGIN' || echo "::warning::Anahtarın ilk satırı BEGIN ile başlamıyor"
+          echo "::notice title=Anahtar::$(ssh-keygen -y -f ~/.ssh/k >/dev/null 2>&1 && echo 'özel anahtar geçerli; açık anahtar parmak izi:' $(ssh-keygen -lf ~/.ssh/k | awk '{print $2}') || echo 'özel anahtar OKUNAMADI (eksik/bozuk yapıştırılmış)')"
+          for p in ${PORT:-22} 22 2222 2200; do timeout 6 bash -c "</dev/tcp/$ADRES/$p" 2>/dev/null && echo "::notice title=Port $p::açık" || echo "::notice title=Port $p::kapalı/erişilemiyor"; done
+          if ! $S 'true' 2>/tmp/ssh_hata; then
+            echo "::error title=SSH::$(grep -v '^Warning' /tmp/ssh_hata | tail -3 | tr '\n' ' ' | cut -c1-400)"
+            exit 1
+          fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
           not "Sistem" "$($S 'hostname; . /etc/os-release 2>/dev/null; echo $PRETTY_NAME; uname -r; uptime -p; nproc; echo çekirdek')"
           not "Bellek/disk" "$($S 'free -h | sed -n 2p; df -h / | tail -1')"

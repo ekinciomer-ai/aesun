@@ -124,6 +124,18 @@ def main():
             log(ad, "HATA:", str(e)[:300])
             if test:
                 raise
+    # Sungrow keşfi (sürüm başına bir kez, en çok 3 deneme): okunabilen tüm noktalar → inverter/sungrow_kesif_<ps>.json
+    if all(os.environ.get(k) for k in ("SUNGROW_APPKEY", "SUNGROW_SECRET", "SUNGROW_USER", "SUNGROW_PASSWORD")):
+        try:
+            import sungrow_kesif as K
+            isaret = AESUN / f"sungrow_kesif_v{K.SURUM}"
+            n = int(isaret.read_text() or 0) if isaret.exists() else 0
+            if 0 <= n < 3:
+                isaret.write_text(str(n + 1))
+                K.main("5038906")
+                isaret.write_text("-1")
+        except Exception as e:
+            log("Sungrow keşif HATA:", str(e)[:300])
 
 
 if __name__ == "__main__":

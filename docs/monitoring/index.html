@@ -376,6 +376,9 @@ const grafGen = () => Math.min(900, Math.max(300, Math.round(((document.getEleme
 // ===== Etkileşimli grafik: tür seçimi (çizgi / çubuk / yığılmış / alan / tablo), üzerine gelince değerler =====
 const GTUR = (() => { try { return JSON.parse(localStorage.getItem('aesun_gtur') || '{}'); } catch (e) { return {}; } })();
 function grafTur(id, t) { GTUR[id] = t; try { localStorage.setItem('aesun_gtur', JSON.stringify(GTUR)); } catch (e) {} const y = window.scrollY; ciz(); window.scrollTo(0, y); }
+// Lejanttaki seriye tıklayınca seri gizlenir/gösterilir; eksen ölçeği yalnız görünen serilere göre kurulur
+const GGIZ = (() => { try { return JSON.parse(localStorage.getItem('aesun_ggiz') || '{}'); } catch (e) { return {}; } })();
+function seriGizle(id, ad) { const a = GGIZ[id] || (GGIZ[id] = []); const i = a.indexOf(ad); if (i >= 0) a.splice(i, 1); else a.push(ad); try { localStorage.setItem('aesun_ggiz', JSON.stringify(GGIZ)); } catch (e) {} const y = window.scrollY; ciz(); window.scrollTo(0, y); }
 const TUR_AD = { cizgi: 'Çizgi', alan: 'Alan', cubuk: 'Çubuk', yigin: 'Yığılmış', tablo: 'Tablo' };
 const turSecici = (id, turler, sec) => '<div class="tursec" role="group" aria-label="Grafik türü">' + turler.map(t => '<button type="button" aria-pressed="' + (t === sec) + '" onclick="grafTur(\'' + id + '\',\'' + t + '\')">' + TUR_AD[t] + '</button>').join('') + '</div>';
 function guzelAdim(x) { const p = Math.pow(10, Math.floor(Math.log10(x || 1))), f = x / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; }
@@ -383,15 +386,17 @@ function guzelAdim(x) { const p = Math.pow(10, Math.floor(Math.log10(x || 1))), 
 function grafikX(sp) {
   const tur = sp.turler.includes(GTUR[sp.id]) ? GTUR[sp.id] : (sp.tur || sp.turler[0]);
   const et = sp.etiket, n = et.length, fmt = sp.fmt || (v => say(v)), eks = sp.eksen || (v => say(v));
-  const ser = tur === 'yigin' && sp.yiginSeriler ? sp.yiginSeriler : sp.seriler;
+  const serT = tur === 'yigin' && sp.yiginSeriler ? sp.yiginSeriler : sp.seriler, giz = GGIZ[sp.id] || [];
+  const gizli = s => giz.includes(s.ad) || (s.grup && giz.includes(s.grup));
+  const ser = serT.filter(s => !gizli(s));
   const cizgiMi = tur === 'cizgi' || tur === 'alan';
-  const lej = '<div class="k" style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center">' + ser.filter(s => s.lej !== false).map(s => '<span style="display:inline-flex;align-items:center;gap:6px">'
+  const lej = '<div class="k" style="display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center">' + serT.filter(s => s.lej !== false).map(s => '<span role="button" tabindex="0" title="Göster / gizle" onclick="seriGizle(\'' + sp.id + '\',' + esc(JSON.stringify(s.ad)).replace(/'/g, '&#39;') + ')" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none' + (gizli(s) ? ';opacity:.38;text-decoration:line-through' : '') + '">'
     + (s.tip === 'alan' ? '<span style="width:14px;height:10px;border-radius:2px;background:' + s.renk + '33;border-top:2px solid ' + s.renk + '"></span>' : cizgiMi || s.tip === 'isaret' ? '<span style="width:14px;height:3px;border-radius:2px;background:' + s.renk + '"></span>' : '<span style="width:10px;height:10px;border-radius:2px;background:' + s.renk + '"></span>') + esc(s.ad) + '</span>').join('')
     + (sp.birim ? '<span>' + esc(sp.birim) + '</span>' : '') + '</div>';
   const ust = '<div class="grafust">' + lej + (sp.turler.length > 1 ? turSecici(sp.id, sp.turler, tur) : '') + '</div>';
   if (!n) return ust + '<p class="k">Veri yok.</p>';
   if (tur === 'tablo') {
-    const s0 = sp.seriler;
+    const s0 = sp.seriler.filter(s => !gizli(s));
     let t = '<div class="tablo-kutu" style="max-height:420px;overflow:auto"><table class="tb"><thead><tr><th class="sol">' + esc(sp.etiketAd || 'Dönem') + '</th>' + s0.map(s => '<th>' + esc(s.ad) + '</th>').join('') + '</tr></thead><tbody>';
     et.forEach((e, i) => { t += '<tr' + (sp.vurgu === i ? ' style="background:#EEF3FA"' : '') + '><td class="sol" data-s="' + String(i).padStart(5, '0') + '">' + esc(e) + '</td>' + s0.map(s => '<td>' + (s.v[i] == null ? '—' : fmt(s.v[i])) + '</td>').join('') + '</tr>'; });
     if (sp.toplam) t += '<tr class="top"><td class="sol">' + (sp.toplam === 'ort' ? 'Ortalama' : 'Toplam') + '</td>' + s0.map(s => { const d = s.v.filter(v => v != null); const top = d.reduce((a, b) => a + b, 0); return '<td>' + (d.length ? fmt(sp.toplam === 'ort' ? top / d.length : top) : '—') + '</td>'; }).join('') + '</tr>';
@@ -1883,10 +1888,10 @@ async function cizYilKiyas(sabit) {
   const PAL = ['#1F5FAE', '#D92D20', '#1E7A3C', '#B25E00', '#6941C6', '#0E7490', '#9A3412', '#475467'];
   const ser2 = []; let pi = 0;
   for (const x of anahtar) { const kw = (() => { for (const y of [...yillar].reverse()) if (D[y][x] && D[y][x].kwp) return D[y][x].kwp; })(); if (!kw) { pi++; continue; } const renk = PAL[pi++ % PAL.length];
-    for (const y of yv) { if (!yeter(y, x) || (y !== invSec.kyB && x !== k)) continue; ser2.push({ ad: ad(x) + ' ' + y, renk, kesik: y !== invSec.kyB, v: AYK.map((_, i) => { const v = ayTop(D[y][x], y, i + 1); return v == null ? null : v / kw; }) }); } }
-  h += '<div class="panel" style="gap:12px"><h2 style="margin:0">Santraller: aylık özgül üretim (kWh/kWp)</h2>'
+    for (const y of (sabit ? yv : yillar)) { if (!yeter(y, x) || (sabit && x !== k)) continue; ser2.push({ ad: ad(x) + ' ' + y, renk: sabit ? RY(y) : renk, kesik: sabit ? false : y !== buYil, v: AYK.map((_, i) => { const v = ayTop(D[y][x], y, i + 1); return v == null ? null : v / kw; }) }); } }
+  h += '<div class="panel" style="gap:12px"><h2 style="margin:0">' + (sabit ? 'Aylık özgül üretim (kWh/kWp)' : 'Santraller: aylık özgül üretim (kWh/kWp)') + '</h2>'
     + grafikX({ id: 'yk2', etiket: AYK, turler: ['cizgi', 'cubuk', 'tablo'], birim: 'kWh/kWp', yuk: 240, fmt: v => say(v, 1), seriler: ser2 })
-    + '<div class="k">Düz çizgi: tüm santraller ' + invSec.kyB + '; kesik çizgi: ' + esc(ad(k)) + (invSec.kyA ? ' ' + invSec.kyA : '') + '. Kurulu güce bölündüğü için farklı büyüklükteki santraller doğrudan karşılaştırılabilir; ay eksikse (veri başlamadan önce) boş bırakılır.</div></div>';
+    + '<div class="k">' + (sabit ? esc(ad(k)) + ': seçili yıllar. ' : 'Tüm santraller ve yıllar; düz çizgi ' + buYil + ', kesik çizgi önceki yıllar. ') + 'Lejanttaki adlara tıklayarak çizgileri açıp kapatabilirsiniz; ölçek görünen çizgilere göre ayarlanır. Kurulu güce bölündüğü için farklı büyüklükteki santraller doğrudan karşılaştırılabilir; ay eksikse (veri başlamadan önce) boş bırakılır.</div></div>';
   // 3) inverterler: aynı gün aralığında (her iki yılda da verisi olan günler) kWh/kWp
   const invAd = new Map(); for (const y of yv) for (const iv of Object.values(D[y][k].inv || {})) if (!invAd.has(iv.key)) invAd.set(iv.key, iv.ad);
   const invler = [...invAd.keys()].sort((a, b) => String(invAd.get(a)).localeCompare(String(invAd.get(b)), 'tr', { numeric: true }));

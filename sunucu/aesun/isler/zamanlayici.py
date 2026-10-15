@@ -26,7 +26,7 @@ def sirlar():
 
 ISLER = [  # ad, dakikalar, komut, ek olarak yazılacak yollar
     ("Bildirimler", {7, 22, 37, 52}, ["python", "bildirim_isler.py"], ["n8n/bildirim_*.json", "n8n/maden_maliyet.json"], "Bildirim durumu"),
-    ("Veri arşivi", {5}, ["python", "arsiv_kaydet.py"], [], None),
+    ("Veri arşivi", {5}, ["python", "arsiv_kaydet.py"], ["-A"], "Veri arşivi"),
     ("Durum analizi", {41}, ["python", "durum_analizi.py"], ["n8n/analiz/"], "Durum analizi"),
 ]
 
@@ -42,7 +42,7 @@ def hazirla():
 def calistir(ad, komut, yollar, mesaj):
     r = sh("git", "pull", "--rebase", "--autostash", "-q")
     t0 = time.time()
-    r = subprocess.run(["bash", "is_calistir.sh", ad, *komut], cwd=D, capture_output=True, text=True, timeout=900, env={**os.environ, **SIR})
+    r = subprocess.run(["bash", "is_calistir.sh", ad, *komut], cwd=D, capture_output=True, text=True, timeout=900, env={**os.environ, **SIR, "YEREL_GIT": "1"})
     if yollar:
         sh("bash", "-c", "git add " + " ".join(yollar) + " 2>/dev/null; true")
         if sh("git", "diff", "--cached", "--quiet").returncode:

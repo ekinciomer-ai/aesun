@@ -90,6 +90,11 @@ def main():
         sonuc["yerel"]["iz"] = subprocess.run(["traceroute", "-n", "-m", "4", "-w", "1", "1.1.1.1"], capture_output=True, text=True, timeout=25).stdout.strip().splitlines()[1:5]
     except Exception as e:
         sonuc["yerel"]["hata"] = str(e)[:100]
+    try:
+        with urllib.request.urlopen("https://api.ipify.org", timeout=8) as r:
+            sonuc["yerel"]["dis_ip"] = r.read().decode().strip()
+    except Exception as e:
+        sonuc["yerel"]["dis_ip"] = "hata: " + str(e)[:40]
     hedef = []
     for ag in ADAY_AGLAR:
         n = ipaddress.ip_network(ag)

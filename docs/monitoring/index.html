@@ -142,6 +142,30 @@ const PARA_DOSYA = /(^|\/)(fatura\/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_f
   }
 })();
 const KOK = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/';
+// Merkez API: veriyi yetkiyle sunar (api.aksarayenerji.net). Belirteç portal oturumundaki anahtardan türetilir; ulaşılamazsa geçiş süresince GitHub'a düşülür.
+const API = 'https://api.aksarayenerji.net/v1/dosya/';
+const API_BEL = (async () => {
+  const P = PORTAL || {}, h = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)))].map(x => x.toString(16).padStart(2, '0')).join('');
+  try {
+    if (P.ka) return await h('aesun-api|yonetici|' + P.ka);
+    if (P.parasal && P.parasal.d) return await h('aesun-api|parasal|' + P.parasal.d);
+    if (P.anahtarlar && P.anahtarlar.monitoring) return await h('aesun-api|monitoring|' + P.anahtarlar.monitoring);
+  } catch (e) {}
+  return null;
+})();
+let API_DURUM = 'bekliyor';   // ok | kapali
+async function veriFetch(yol) {
+  const b = await API_BEL;
+  if (b && API_DURUM !== 'kapali') {
+    try {
+      const r = await fetch(API + yol, { headers: { 'X-AE-Anahtar': b }, cache: 'no-cache' });
+      if (r.ok) { API_DURUM = 'ok'; return r; }
+      if (r.status === 404 || r.status === 403) return r;
+      if (r.status === 401) API_DURUM = 'kapali';      // yetki özeti henüz yayımlanmadı: geçişte GitHub'a düş
+    } catch (e) { API_DURUM = 'kapali'; setTimeout(() => { API_DURUM = 'bekliyor'; }, 60e3); }
+  }
+  return fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' });
+}
 const LIMIT_2026 = 2905914;
 const ESLE = { T1: 'fusionsolar:NE=59224704', T2: 'fusionsolar:NE=73686040', YD: 'sungrow:5064453', Anka: 'sungrow:5038906', AE: 'inavitas:189' }, ESLE_KISA = { T1: 'Sera-1', T2: 'Sera-2' };
 const SAYAC = [
@@ -190,7 +214,7 @@ function alHam(yol) {
   const c = AL[yol] || (AL[yol] = {});
   if (c.p) return c.p;
   const t0 = performance.now();
-  c.p = fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' }).then(async r => {
+  c.p = veriFetch(yol).then(async r => {
     if (!r.ok) throw new Error(yol + ' okunamadı (HTTP ' + r.status + ')');
     const txt = await r.text(); JSON.parse(txt);
     const degisti = c.txt != null && c.txt !== txt, arka = c.arka;
@@ -3587,7 +3611,7 @@ window.addEventListener('resize', () => { clearTimeout(boyutZ); boyutZ = setTime
 const ANLIK = { t: null, acik: false, aralik: 120, canli: [], sn: 10, gh: null, ghT: 0, cs: [], son: null };
 const CANLI_API = 'https://portal.aksarayenerji.net/api/canli.php';
 async function canliOku() { try { const s = ANLIK.cs.length ? ANLIK.cs[ANLIK.cs.length - 1][0] : 0; const r = await fetch(CANLI_API + '?s=' + s + '&t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return; const j = await r.json(); if (j.son) ANLIK.son = j.son; for (const p of j.seri || []) if (!ANLIK.cs.length || p[0] > ANLIK.cs[ANLIK.cs.length - 1][0]) ANLIK.cs.push(p); ANLIK.cs = ANLIK.cs.filter(p => p[0] > Date.now() / 1000 - 6 * 3600); } catch (e) {} }
-async function anlikVeri(yol) { const r = await fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error(yol + ' ' + r.status); return r.json(); }
+async function anlikVeri(yol) { const r = await veriFetch(yol); if (!r.ok) throw new Error(yol + ' ' + r.status); return r.json(); }
 const anlikYas = ts => { if (!ts) return '—'; const m = (Date.now() - Date.parse(String(ts).replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(ts) ? '' : '+03:00'))) / 60000; return m < 1 ? 'şimdi' : m < 60 ? Math.round(m) + ' dk önce' : Math.round(m / 60) + ' sa önce'; };
 function anlikAc() {
   let w = document.getElementById('anlikPen');

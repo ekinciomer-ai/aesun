@@ -285,7 +285,7 @@ async function giris(kul, sifre) {
   if (ESKI && S.ka && ghAnahtar()) { try { await rehber(); const x = R.kullanicilar[ESKI.kul]; if (x) { await kullaniciYaz(ESKI.kul, ESKI.sifre, yukHazirla(ESKI.kul, x)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); await veriKaydet('kayıt biçimi güncellendi'); } } catch (x) {} }
   ESKI = null;
   if (S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (x) {} }
-  if (S.ka) { try { await parasalAnahtar(); } catch (x) { console.warn('parasal anahtar', x); } }
+  if (S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (x) { console.warn('parasal anahtar', x); } }
   git(SAYFA);
 }
 // Parasal veri anahtarı (RSA-OAEP 3072): açık anahtar veri.json → parasal_acik (herkese açık, üreticiler bununla şifreler);
@@ -304,6 +304,19 @@ async function parasalAnahtar() {
     await veriKaydet('parasal veri anahtarı oluşturuldu');
   }
   if (R.parasal && JSON.stringify(S.parasal) !== JSON.stringify(R.parasal.ozel)) { S.parasal = R.parasal.ozel; oturumKaydet(); }
+}
+// Merkez API (api.aksarayenerji.net) belirteç özetleri: belirteç = SHA-256('aesun-api|<rol>|' + rol anahtarı), sunucuya yalnız özetin özeti gider
+const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+const sha = async t => hex(await crypto.subtle.digest('SHA-256', te.encode(t)));
+const apiBelirtec = async (rol, anahtar) => sha('aesun-api|' + rol + '|' + anahtar);
+async function apiOzet() {
+  await rehber();
+  const oz = {};
+  if (S.ka) oz.yonetici = await sha(await apiBelirtec('yonetici', S.ka));
+  if (R.anahtarlar.monitoring) oz.monitoring = await sha(await apiBelirtec('monitoring', R.anahtarlar.monitoring));
+  if (R.parasal && R.parasal.ozel && R.parasal.ozel.d) oz.parasal = await sha(await apiBelirtec('parasal', R.parasal.ozel.d));
+  if (JSON.stringify(V.api_ozet || {}) === JSON.stringify(oz) || !ghAnahtar()) return;
+  V.api_ozet = oz; await veriKaydet('merkez API yetki özetleri');
 }
 // Sonradan eklenen hazır uygulamalar: yönetici girişinde eksikse portala eklenir (bir kez)
 async function ekModulEkle() {
@@ -607,7 +620,7 @@ function modSil(id) {
   if (!V) return kurulumCiz();
   if (S) { try { await modOnbellek(); } catch (e) { S = null; ls.sil('ae_portal'); ust(); } }
   if (S && S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (e) {} }
-  if (S && S.ka) { try { await parasalAnahtar(); } catch (e) { console.warn('parasal anahtar', e); } }
+  if (S && S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (e) { console.warn('parasal anahtar', e); } }
   if (HEDEF) {
     if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(MOD[HEDEF].url); return; }
     git('ana'); return S ? acSonuc(HEDEF) : girisModal(HEDEF);

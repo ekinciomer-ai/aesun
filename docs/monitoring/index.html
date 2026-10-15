@@ -2089,7 +2089,7 @@ async function cizInverter() {
   document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…';
   const ic = document.getElementById('icerik');
   if (!invSec.sekme) invSec.sekme = 'analiz';
-  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
+  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['yil', 'Yıl kıyası'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
   if (invSec.sekme === 'yil') {
     document.getElementById('baslik').textContent = 'Yıl kıyası';
     document.getElementById('altBaslik').textContent = 'Santral ve inverter üretimi yıllara göre: aylık üretim, kWh/kWp ve aynı tarih aralığında inverter karşılaştırması.';

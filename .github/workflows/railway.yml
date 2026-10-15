@@ -1,0 +1,15 @@
+name: Railway yönetimi
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: "durum | duzelt"
+        default: durum
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: python3 cpanel/railway.py "${{ inputs.islem }}"

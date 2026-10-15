@@ -1,3 +1,2 @@
-select string_agg(x,' ; ') from (select coalesce(invoice_type,'-')||'|'||coalesce(installation_number,'-')||'|'||to_char(invoice_date,'YYYY-MM')||'|n'||count(*)||'|dup'||count(duplicate_of_invoice_id) x, installation_number i, to_char(invoice_date,'YYYY-MM') m from invoices group by invoice_type,installation_number,to_char(invoice_date,'YYYY-MM') order by i,m) t;
 select string_agg(distinct k,',') from (select jsonb_object_keys(ai_raw_response) k from invoice_extractions where jsonb_typeof(ai_raw_response)='object') t;
-select left(ai_raw_response::text,1500) from invoice_extractions where jsonb_typeof(ai_raw_response)='object' order by id desc limit 1;
+select string_agg(distinct k,',') from (select jsonb_object_keys(ai_raw_response->'invoice') k from invoice_extractions where jsonb_typeof(ai_raw_response->'invoice')='object') t;

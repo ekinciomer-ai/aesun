@@ -10,7 +10,10 @@ if [ ! -f $H/.env ]; then
 fi
 chmod 600 $H/.env
 cd $H
-docker compose build -q && docker compose up -d
+docker compose build -q
+# veri birimi kapsayıcı kullanıcısına ait olmalı
+docker compose run --rm --no-deps --user root --entrypoint sh api -c 'chown -R 1001:1001 /veri' >/dev/null 2>&1 || true
+docker compose up -d --force-recreate
 sleep 8
 echo "NOT: aesun-api: $(docker ps --filter name=aesun-api --format '{{.Status}}')"
 # --- Caddy: yalnız yeni blok, doğrulama ve geri alma ile ---

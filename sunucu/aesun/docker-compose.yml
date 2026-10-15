@@ -21,6 +21,7 @@ services:
     volumes:
       - aesun_isler:/veri
       - /opt/aesun/ssh:/home/aesun/.ssh:ro
+      - /opt/aesun/sir:/sir:ro
     mem_limit: 384m
     logging:
       driver: json-file

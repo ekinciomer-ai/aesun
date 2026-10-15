@@ -1,7 +1,8 @@
 #!/bin/bash
-# Sır devri için ns1'e özel RSA anahtarı (yoksa üretir). Özel anahtar yalnız root okur; açık anahtar tek satır base64 yazdırılır.
+# ns1 sır anahtarı (RSA 3072): özel anahtar yalnız sunucuda; açık anahtar yazdırılır, GitHub iş akışı sırları bununla şifreler.
 set -euo pipefail
-D=/opt/aesun/sir; mkdir -p $D; chmod 700 $D
-[ -f $D/ns1.pem ] || openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out $D/ns1.pem 2>/dev/null
-chmod 600 $D/ns1.pem
-echo "NOT: ACIK $(openssl pkey -in $D/ns1.pem -pubout | base64 -w0)"
+D=/opt/aesun/sir; mkdir -p $D
+[ -f $D/ozel.pem ] || openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out $D/ozel.pem 2>/dev/null
+openssl pkey -in $D/ozel.pem -pubout -out $D/acik.pem
+chown -R 1001:1001 $D; chmod 700 $D; chmod 600 $D/ozel.pem
+echo "NOT: ACIK $(grep -v -- '-----' $D/acik.pem | tr -d '\n')"

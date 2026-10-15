@@ -8,6 +8,22 @@ import json, os, subprocess, time, datetime
 REPO = os.environ.get("AESUN_ISLER_REPO", "git@github.com:ekinciomer-ai/epias-ptf.git")
 D = "/veri/epias-ptf"
 DURUM = "/veri/durum.json"
+SIFRELI = "n8n/ns1_isler.sifreli.json"   # epias-ptf iş akışı sırları ns1 açık anahtarıyla şifreleyip buraya yazar
+
+def sirlar():
+    """Şifreli sır paketini ns1 özel anahtarıyla çözer; değerler yalnız bellekte tutulur."""
+    import base64
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import padding
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    p = os.path.join(D, SIFRELI)
+    if not os.path.exists(p) or not os.path.exists("/sir/ozel.pem"):
+        return {}
+    j = json.load(open(p)); b = base64.b64decode
+    oz = serialization.load_pem_private_key(open("/sir/ozel.pem", "rb").read(), None)
+    k = oz.decrypt(b(j["ak"]), padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
+    return json.loads(AESGCM(k).decrypt(b(j["iv"]), b(j["ct"]), None))
+
 ISLER = [  # ad, dakikalar, komut, ek olarak yazılacak yollar
     ("Bildirimler", {7, 22, 37, 52}, ["python", "bildirim_isler.py"], ["n8n/bildirim_*.json", "n8n/maden_maliyet.json"], "Bildirim durumu"),
     ("Veri arşivi", {5}, ["python", "arsiv_kaydet.py"], [], None),
@@ -26,7 +42,7 @@ def hazirla():
 def calistir(ad, komut, yollar, mesaj):
     r = sh("git", "pull", "--rebase", "--autostash", "-q")
     t0 = time.time()
-    r = sh("bash", "is_calistir.sh", ad, *komut, t=900)
+    r = subprocess.run(["bash", "is_calistir.sh", ad, *komut], cwd=D, capture_output=True, text=True, timeout=900, env={**os.environ, **SIR})
     if yollar:
         sh("bash", "-c", "git add " + " ".join(yollar) + " 2>/dev/null; true")
         if sh("git", "diff", "--cached", "--quiet").returncode:
@@ -36,6 +52,8 @@ def calistir(ad, komut, yollar, mesaj):
                 time.sleep(5)
     return {"son": datetime.datetime.now().isoformat(timespec="seconds"), "sn": round(time.time() - t0), "cikti": (r.stdout or "")[-300:]}
 
+SIR = {}
+
 def main():
     durum = {"basla": datetime.datetime.now().isoformat(timespec="seconds"), "isler": {}, "hata": None}
     son_dk = None
@@ -44,10 +62,17 @@ def main():
         dk = (simdi.hour, simdi.minute)
         if dk != son_dk:
             son_dk = dk
-            etkin = os.environ.get("ETKIN", "0") == "1"
+            global SIR
+            try:
+                hazirla(); sh("git", "pull", "--rebase", "--autostash", "-q"); SIR = sirlar()
+            except Exception as e:
+                SIR = {}; durum["hata"] = "sır: " + str(e)[:200]
+            else:
+                durum["hata"] = None
+            etkin = SIR.get("ETKIN", "0") == "1"
+            durum["sir_sayisi"] = len(SIR)
             durum["etkin"] = etkin; durum["nabiz"] = simdi.isoformat(timespec="seconds")
             try:
-                hazirla(); durum["hata"] = None
                 if etkin:
                     for ad, dakikalar, komut, yollar, mesaj in ISLER:
                         if simdi.minute in dakikalar:

@@ -3,6 +3,10 @@ name: Sunucu tanı (yalnız okuma)
 # Gerekli sırlar: SUNUCU_SSH (özel anahtar), SUNUCU_ADRES (IP/alan adı), isteğe bağlı SUNUCU_KULLANICI (varsayılan root), SUNUCU_PORT (varsayılan 22)
 on:
   workflow_dispatch:
+    inputs:
+      bolum:
+        description: "1 = sistem, 2 = docker / uygulamalar / ağ"
+        default: "1"
 jobs:
   tani:
     runs-on: ubuntu-latest
@@ -28,6 +32,15 @@ jobs:
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "2" ]; then
+            not "Docker" "$($S 'docker ps --format "{{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}" 2>/dev/null | head -20')"
+            not "opt" "$($S 'ls -la /opt; ls /opt/* 2>/dev/null | head -40')"
+            not "Compose" "$($S 'docker compose ls 2>/dev/null; find /opt /root -maxdepth 3 -name "docker-compose*.y*ml" -o -maxdepth 3 -name "compose*.y*ml" 2>/dev/null | head')"
+            not "Güvenlik duvarı" "$($S 'ufw status 2>/dev/null | head -12; iptables -S INPUT 2>/dev/null | head -8')"
+            not "Dış erişim" "$($S 'curl -s -4 --max-time 8 ifconfig.me; echo; curl -s -o /dev/null -w "github %{http_code}" --max-time 8 https://api.github.com')"
+            not "Diskte büyükler" "$($S 'du -xsh /var/lib/docker /opt/* /root /var/log 2>/dev/null | sort -h | tail -8')"
+            exit 0
+          fi
           not "Sistem" "$($S 'hostname; . /etc/os-release 2>/dev/null; echo $PRETTY_NAME; uname -r; uptime -p; nproc; echo çekirdek')"
           not "Bellek/disk" "$($S 'free -h | sed -n 2p; df -h / | tail -1')"
           not "Yazılımlar" "$($S 'for p in python3 pip3 node docker nginx apache2 httpd caddy psql mysql redis-server named pdns_server git certbot cloudflared; do command -v $p >/dev/null && echo -n "$p "; done; echo; python3 --version 2>&1')"

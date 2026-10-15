@@ -1853,6 +1853,59 @@ function ayToplam(o, m) {
   if (gs.length >= beklenen || o.ay[m] == null) return gs.length ? gs.reduce((t, g) => t + (+o.gun[g] || 0), 0) : null;
   return +o.ay[m];
 }
+// ===== Yıl kıyası: santral aylık üretimi ve inverterlerin aynı tarih aralığındaki verimi, yıllara göre =====
+async function cizYilKiyas() {
+  const buYil = Number(bugunTR().slice(0, 4)), yillar = [buYil - 2, buYil - 1, buYil];
+  const D = {}; for (const y of yillar) D[y] = invBirlestir(await invYilYukle(y));
+  const anahtar = [...new Set(yillar.flatMap(y => Object.keys(D[y])))].filter(k => yillar.some(y => Object.keys((D[y][k] || {}).gun || {}).length >= 30));
+  const ad = k => { for (const y of yillar) if (D[y][k]) return D[y][k].ad; return k; };
+  anahtar.sort((a, b) => a.localeCompare(b) || String(ad(a)).localeCompare(String(ad(b)), 'tr'));
+  if (!invSec.ys || !anahtar.includes(invSec.ys)) invSec.ys = anahtar.find(k => /Sera-1/.test(ad(k))) || anahtar[0];
+  const yeter = (y, x) => D[y][x] && Object.keys(D[y][x].gun || {}).length >= 30;   // 30 günden az veri: kıyasa alınmaz
+  const k = invSec.ys, yv = yillar.filter(y => yeter(y, k));
+  const RENK = ['#9FB3C8', '#7FA6D6', '#1F5FAE'], RY = y => RENK[yillar.indexOf(y)];
+  const kwpS = (() => { for (const y of [...yillar].reverse()) if (D[y][k] && D[y][k].kwp) return D[y][k].kwp; return null; })();
+  const ayTop = (o, y, a) => { const m = y + '-' + String(a).padStart(2, '0'); const v = ayToplam(o, m); return v == null || v === 0 && !Object.keys(o.gun).some(g => g.startsWith(m)) ? null : v; };
+  const sec = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="k">Santral</span><select onchange="invSec.ys=this.value;cizInverter()" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit">' + anahtar.map(x => '<option value="' + esc(x) + '"' + (x === k ? ' selected' : '') + '>' + esc(ad(x)) + ' · ' + esc(INV_KAYNAK[x.split(':')[0]] || '') + '</option>').join('') + '</select><span class="k">' + (kwpS ? say(kwpS, 0) + ' kWp' : '') + ' · veri: ' + yv.join(', ') + '</span></div>';
+  // 1) aylık üretim, yıllar yan yana
+  const ser1 = yv.map(y => ({ ad: String(y), renk: RY(y), v: AYK.map((_, i) => { const v = ayTop(D[y][k], y, i + 1); return v == null ? null : v / 1000; }) }));
+  let h = '<div class="panel" style="gap:12px">' + sec + '<h2 style="margin:0">Aylık üretim (MWh)</h2>'
+    + grafikX({ id: 'yk1', etiket: AYK, turler: ['cubuk', 'cizgi', 'tablo'], birim: 'MWh', yuk: 220, fmt: v => say(v, 1), toplam: 'top', seriler: ser1 });
+  const yilTop = yv.map(y => { const g = Object.values(D[y][k].gun).reduce((a, b) => a + (+b || 0), 0); return '<b>' + y + ':</b> ' + say(g / 1000, 1) + ' MWh (' + Object.keys(D[y][k].gun).length + ' gün' + (kwpS ? ', ' + say(g / kwpS, 0) + ' kWh/kWp' : '') + ')'; }).join(' · ');
+  h += '<div class="k">' + yilTop + '</div></div>';
+  // 2) santraller karşılaştırması: aylık kWh/kWp (her santral-yıl ayrı çizgi)
+  const PAL = ['#1F5FAE', '#D92D20', '#1E7A3C', '#B25E00', '#6941C6', '#0E7490', '#9A3412', '#475467'];
+  const ser2 = []; let pi = 0;
+  for (const x of anahtar) { const kw = (() => { for (const y of [...yillar].reverse()) if (D[y][x] && D[y][x].kwp) return D[y][x].kwp; })(); if (!kw) { pi++; continue; } const renk = PAL[pi++ % PAL.length];
+    for (const y of yillar) { if (!yeter(y, x) || (y !== buYil && x !== k)) continue; ser2.push({ ad: ad(x) + ' ' + y, renk, kesik: y !== buYil, v: AYK.map((_, i) => { const v = ayTop(D[y][x], y, i + 1); return v == null ? null : v / kw; }) }); } }
+  h += '<div class="panel" style="gap:12px"><h2 style="margin:0">Santraller: aylık özgül üretim (kWh/kWp)</h2>'
+    + grafikX({ id: 'yk2', etiket: AYK, turler: ['cizgi', 'cubuk', 'tablo'], birim: 'kWh/kWp', yuk: 240, fmt: v => say(v, 1), seriler: ser2 })
+    + '<div class="k">Düz çizgi: tüm santraller ' + buYil + '; kesik çizgi: seçili santralin önceki yılları. Kurulu güce bölündüğü için farklı büyüklükteki santraller doğrudan karşılaştırılabilir; ay eksikse (veri başlamadan önce) boş bırakılır.</div></div>';
+  // 3) inverterler: aynı gün aralığında (her iki yılda da verisi olan günler) kWh/kWp
+  const invAd = new Map(); for (const y of yv) for (const iv of Object.values(D[y][k].inv || {})) if (!invAd.has(iv.key)) invAd.set(iv.key, iv.ad);
+  const invler = [...invAd.keys()].sort((a, b) => String(invAd.get(a)).localeCompare(String(invAd.get(b)), 'tr', { numeric: true }));
+  if (invler.length) {
+    const ortak = (() => { if (yv.length < 2) return null; const md = y => new Set(Object.keys(D[y][k].gun || {}).map(g => g.slice(5))); let o = md(yv[0]); for (const y of yv.slice(1)) { const b = md(y); o = new Set([...o].filter(x => b.has(x))); } return [...o].sort(); })();
+    const pencere = ortak && ortak.length >= 7 ? ortak : null;
+    const kw = (iv, y) => { const a = (D[y][k].inv || {})[iv]; if (a && a.kwp) return a.kwp; for (const yy of yillar) { const b = (D[yy][k] || {}).inv && D[yy][k].inv[iv]; if (b && b.kwp) return b.kwp; } return null; };
+    const deger = (iv, y) => { const a = (D[y][k].inv || {})[iv]; if (!a) return null; const gs = Object.entries(a.gun || {}).filter(([g]) => !pencere || pencere.includes(g.slice(5))); if (!gs.length) return null; const t = gs.reduce((s, [, v]) => s + (+v || 0), 0), w = kw(iv, y); return w ? t / w : null; };
+    const ser3 = yv.map(y => ({ ad: String(y), renk: RY(y), v: invler.map(iv => deger(iv, y)) }));
+    const son = ser3[ser3.length - 1].v, med = (() => { const x = son.filter(v => v != null).sort((a, b) => a - b); return x.length ? x[Math.floor(x.length / 2)] : null; })();
+    const pAd = pencere ? tarihK(yv[0] + '-' + pencere[0]) + ' – ' + tarihK(yv[0] + '-' + pencere[pencere.length - 1]) + ' (' + pencere.length + ' gün, her yıl aynı günler)' : 'yılın tüm günleri';
+    h += '<div class="panel" style="gap:12px"><h2 style="margin:0">İnverterler: özgül üretim (kWh/kWp)</h2><div class="k">Dönem: ' + pAd + '</div>'
+      + grafikX({ id: 'yk3', etiket: invler.map(iv => invAd.get(iv)), etiketAd: 'İnverter', turler: ['cubuk', 'tablo'], birim: 'kWh/kWp', yuk: 230, fmt: v => say(v, 0), seriler: ser3 });
+    let t = '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">İnverter</th><th>kWp</th>' + yv.map(y => '<th>' + y + ' kWh</th><th>' + y + ' kWh/kWp</th>').join('') + (yv.length > 1 ? '<th>Değişim</th>' : '') + '<th>Medyana göre (' + yv[yv.length - 1] + ')</th></tr></thead><tbody>';
+    for (const iv of invler) {
+      const v = yv.map(y => deger(iv, y)), w = kw(iv, yv[yv.length - 1]);
+      const deg = v.length > 1 && v[0] && v[v.length - 1] != null ? (v[v.length - 1] / v[0] - 1) * 100 : null, sapma = med && v[v.length - 1] != null ? (v[v.length - 1] / med - 1) * 100 : null;
+      const r = x => x == null ? '' : x <= -5 ? ';color:#B42318;font-weight:600' : x >= 3 ? ';color:#1E7A3C' : '';
+      t += '<tr><td class="sol">' + esc(invAd.get(iv)) + '</td><td>' + (w ? say(w, 1) : '—') + '</td>' + yv.map((y, i) => '<td>' + (v[i] != null && w ? say(v[i] * kw(iv, y), 0) : '—') + '</td><td>' + (v[i] != null ? say(v[i], 0) : '—') + '</td>').join('')
+        + (yv.length > 1 ? '<td style="text-align:right' + r(deg) + '">' + (deg == null ? '—' : (deg >= 0 ? '+' : '') + say(deg, 1) + '%') + '</td>' : '') + '<td style="text-align:right' + r(sapma) + '">' + (sapma == null ? '—' : (sapma >= 0 ? '+' : '') + say(sapma, 1) + '%') + '</td></tr>';
+    }
+    h += t + '</tbody></table></div><div class="k">Değişim: aynı günlerde bu yıl / geçen yıl. Medyana göre: inverterin bu yılki özgül üretiminin santraldeki inverterlerin ortancasına göre farkı; –%5 ve altı kırmızı (string kaybı, kirlenme, kesinti adayı). Yıllar arası fark hava koşullarını da içerir; inverterler arası fark ise aynı hava altında karşılaştırmadır.</div></div>';
+  } else h += '<div class="panel"><p class="k">Bu santral için inverter bazında geçmiş veri yok.</p></div>';
+  return h;
+}
 function invDonem(yil, donem) {
   const dun = gunEkle(bugunTR(), -1);
   if (donem === 'son30') return { tip: 'gun', gunler: Array.from({ length: 30 }, (_, i) => gunEkle(dun, i - 29)), ad: 'Son 30 gün' };
@@ -2030,7 +2083,17 @@ async function cizInverter() {
   document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…';
   const ic = document.getElementById('icerik');
   if (!invSec.sekme) invSec.sekme = 'analiz';
-  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
+  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['yil', 'Yıl kıyası'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
+  if (invSec.sekme === 'yil') {
+    document.getElementById('baslik').textContent = 'Yıl kıyası';
+    document.getElementById('altBaslik').textContent = 'Santral ve inverter üretimi yıllara göre: aylık üretim, kWh/kWp ve aynı tarih aralığında inverter karşılaştırması.';
+    document.getElementById('kontrol').innerHTML = '';
+    if (!ic.querySelector('.yilk')) ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + '<div class="panel"><p class="k">Yükleniyor…</p></div></div>';
+    let g = ''; try { g = await cizYilKiyas(); } catch (e) { g = '<div class="panel hata">Çizilemedi: ' + esc(e.message || e) + '</div>'; }
+    if (!location.hash.startsWith('#inverter') || invSec.sekme !== 'yil') return;
+    ic.innerHTML = '<div class="yilk" style="display:flex;flex-direction:column;gap:20px">' + sekmeH + g + '</div>';
+    return;
+  }
   if (invSec.sekme !== 'analiz') {
     document.getElementById('baslik').textContent = invSec.sekme === 'mining' ? 'Mining prensip tek hat' : 'Santraller ve abonelikler';
     document.getElementById('altBaslik').textContent = invSec.sekme === 'mining' ? 'Sera-1 / Sera-2 ve madencilik: OG bara → sayaç → trafo → AG bara → inverter → string. Değerler canlı, sayfa 3 dk\'da bir yenilenir.' : 'Her santral ve abonelik bağımsız: OG bara → sayaç → trafo → AG bara → inverter → string.';

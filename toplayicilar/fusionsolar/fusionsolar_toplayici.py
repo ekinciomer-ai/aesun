@@ -632,6 +632,9 @@ class Collector:
                     yi = ys["inv"].setdefault(idn, {"ad": ei.get("ad"), "gun": {}, "ay": {}})
                     for alan in ("gun", "ay"):
                         yi[alan] = {**(ei.get(alan) or {}), **yi.get(alan, {})}
+                    for alan, deger in ei.items():          # kwp vb. elle eklenen alanlar korunur
+                        if alan not in ("gun", "ay"):
+                            yi.setdefault(alan, deger)
             veri["guncellendi"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
             if self.gh_put(f"inverter/fusionsolar_{yil}.json", veri, f"İnverter geçmişi: fusionsolar_{yil}.json",
                            sadece_degisirse=True):

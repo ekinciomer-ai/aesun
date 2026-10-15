@@ -2007,7 +2007,7 @@ async function cizAnaliz() {
 }
 // ===== Fatura analizi: fatura.aksarayenerji.net (gesfin) faturaları ↔ sayaç (OSOS) ↔ inverter =====
 const FAT_TES = { '80010874': 'AE', '11116344': 'T1', '11116968': 'T2', '11111411': 'Anka', '11201655': 'YD', '11200108': 'A3' };
-const fatSec = { ab: 'hepsi', yil: null };
+const fatSec = { ab: 'hepsi', yil: null, ay: null };
 let FATG = null;
 async function fatYukle() {
   if (FATG && Date.now() - FATG._t < 10 * 60e3) return FATG;
@@ -2091,6 +2091,99 @@ async function cizFatura() {
     + '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><span class="tursec">' + btn('hepsi', 'Tümü') + abler.map(k => btn(k, k)).join('') + '</span>'
     + '<span class="tursec">' + yillar.map(y => '<button type="button" aria-pressed="' + (fatSec.yil === y) + '" onclick="fatSec.yil=\'' + y + '\';cizFatura()">' + y + '</button>').join('') + '</span>'
     + '<span class="k">' + say(FT.length) + ' fatura · kaynak: ' + esc(F.kaynak || 'gesfin') + ' · güncelleme ' + esc(String(F.olusturma || '').replace('T', ' ').slice(0, 16)) + '</span></div>';
+  // ---- dönem tablosu: abone × ay (her faturanın enerji dönemi = sayaca en yakın ay; eşleşmezse fatura ayından bir önceki ay)
+  const donemOf = f => f.es && !f.es.belirsiz ? f.es.m : ayEkle(f.tarih.slice(0, 7), -1);
+  const DM = {};
+  for (const f of FT) {
+    const m = donemOf(f), o = ((DM[f.kod] = DM[f.kod] || {})[m] = DM[f.kod][m] || { sat: { kwh: 0, tl: 0, n: 0 }, tuk: { kwh: 0, tl: 0, n: 0 }, sis: { kwh: 0, tl: 0, n: 0 }, rea: { kvar: 0, tl: 0 }, dig: 0, fat: [] });
+    o.fat.push(f);
+    if (f.kwh.uretim || f.turTL.uretim) { o.sat.kwh += f.kwh.uretim || 0; o.sat.n++; }
+    if (f.kwh.tuketim || f.turTL.tuketim) { o.tuk.kwh += f.kwh.tuketim || 0; o.tuk.n++; }
+    if (f.kwh.sistem || f.turTL.sistem) { o.sis.kwh += f.kwh.sistem || 0; o.sis.n++; }
+    o.sat.tl += f.turTL.uretim || 0; o.tuk.tl += Math.abs(f.turTL.tuketim || 0); o.sis.tl += Math.abs(f.turTL.sistem || 0);
+    o.rea.tl += Math.abs(f.turTL.reaktif || 0); o.rea.kvar += f.kvar || 0; o.dig += (f.turTL.isletim || 0);
+  }
+  const hucre = (kod, m) => {
+    const o = (DM[kod] || {})[m]; if (!o) return null;
+    const sy = sayAy(kod, m), inv = invAy(kod, m);
+    const fk = (q, ref) => q && ref ? q / ref - 1 : null;
+    const r = { o, sy, inv, fSat: fk(o.sat.kwh, sy && sy.v), fTuk: fk(o.tuk.kwh, sy && sy.c), fSis: fk(o.sis.kwh, sy && sy.v) };
+    const fs = [r.fSat, r.fTuk, r.fSis].filter(x => x != null).map(Math.abs);
+    r.durum = !sy || !fs.length ? 'olcum' : Math.max(...fs) <= 0.01 ? 'tamam' : Math.max(...fs) <= 0.05 ? 'kucuk' : 'buyuk';
+    r.net = o.sat.tl - o.tuk.tl - o.sis.tl - o.rea.tl - o.dig;
+    return r;
+  };
+  const DR = { tamam: ['#1E7A3C', '#E7F5EC', 'Fatura = sayaç (fark ≤ %1)'], kucuk: ['#B25E00', '#FFF4E0', 'Küçük fark (%1–5)'], buyuk: ['#B42318', '#FDECEC', 'Büyük fark (> %5)'], olcum: ['#475467', '#EEF2F6', 'Sayaç verisi yok, kıyaslanamadı'] };
+  const aylarY = []; for (let a = 1; a <= 12; a++) aylarY.push(fatSec.yil + '-' + String(a).padStart(2, '0'));
+  const satirlar = fatSec.ab === 'hepsi' ? abler : [fatSec.ab];
+  if (fatSec.ab !== 'hepsi') { const var_ = aylarY.filter(m => (DM[fatSec.ab] || {})[m]); if (!var_.includes(fatSec.ay)) fatSec.ay = var_[var_.length - 1] || null; }
+  const kTL = v => (Math.abs(v) >= 1e6 ? say(v / 1e6, 2) + ' M' : say(v / 1e3, 0) + ' b') + '₺';
+  let mx = '<div class="panel" style="gap:12px"><div class="bas"><h2>Aylık durum haritası</h2><span class="k">' + (fatSec.ab === 'hepsi' ? 'bir kutuya tıklayın: o abone ve ayın akış şeması açılır' : 'ay seçmek için kutuya tıklayın') + '</span></div>'
+    + '<div style="overflow-x:auto"><div style="display:grid;grid-template-columns:64px repeat(12,minmax(58px,1fr));gap:4px;min-width:760px">'
+    + '<div></div>' + AYK.map(a => '<div class="k" style="text-align:center;font-size:12px">' + a + '</div>').join('');
+  for (const kod of satirlar) {
+    mx += '<div style="font-weight:700;display:flex;align-items:center">' + esc(kod) + '</div>';
+    for (const m of aylarY) {
+      const r = hucre(kod, m), secili = fatSec.ab === kod && fatSec.ay === m;
+      if (!r) { mx += '<div style="height:52px;border-radius:8px;background:#F6F8FA;border:1px dashed #E1E6EC"></div>'; continue; }
+      const [rk, bg] = DR[r.durum];
+      mx += '<button type="button" onclick="fatSec.ab=\'' + kod + '\';fatSec.ay=\'' + m + '\';cizFatura().then(()=>{const e=document.getElementById(\'fsema\');e&&e.scrollIntoView({behavior:\'smooth\',block:\'start\'})})" title="' + esc(kod + ' · ' + AYLAR[+m.slice(5) - 1] + ' ' + m.slice(0, 4) + ' · ' + DR[r.durum][2]) + '" style="height:52px;border-radius:8px;cursor:pointer;font:inherit;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:' + bg + ';border:' + (secili ? '3px solid #10233F' : '1px solid ' + rk + '55') + ';color:' + rk + '">'
+        + '<span style="font-size:15px;font-weight:800;line-height:1">' + (r.durum === 'tamam' ? '✓' : r.durum === 'olcum' ? '?' : '!') + '</span>'
+        + '<span style="font-size:11px;color:#344054">' + kTL(r.net) + '</span>'
+        + (r.o.rea.tl ? '<span style="font-size:10px;color:#6941C6;font-weight:700">● reaktif</span>' : '') + '</button>';
+    }
+  }
+  mx += '</div></div><div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px">' + Object.values(DR).map(([rk, bg, ad]) => '<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;background:' + bg + ';border:1px solid ' + rk + '"></span>' + ad + '</span>').join('')
+    + '<span style="color:#6941C6;font-weight:700">● reaktif cezası var</span><span class="k">Kutudaki tutar: o dönemin neti (satış − tüketim − sistem − reaktif − işletim)</span></div></div>';
+  h += mx;
+  // ---- akış şeması: seçili abone + ay
+  if (fatSec.ab !== 'hepsi' && fatSec.ay) {
+    const r = hucre(fatSec.ab, fatSec.ay), m = fatSec.ay, o = r.o, sy = r.sy;
+    const W = 980, H = 420;
+    const renkF = f => f == null ? '#98A2B3' : Math.abs(f) <= 0.01 ? '#1E7A3C' : Math.abs(f) <= 0.05 ? '#B25E00' : '#B42318';
+    const yuzde = f => f == null ? 'kıyas yok' : (f >= 0 ? '+' : '') + say(f * 100, 1) + '%';
+    const kwh = v => v ? (Math.abs(v) >= 1e4 ? say(v / 1000, 1) + ' MWh' : say(v, 0) + ' kWh') : '—';
+    const kutu = (x, y, w, h_, renk, ikon, bas, deger, alt) => '<g><rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h_ + '" rx="14" fill="#fff" stroke="' + renk + '" stroke-width="2"/><rect x="' + x + '" y="' + y + '" width="6" height="' + h_ + '" rx="3" fill="' + renk + '"/>'
+      + '<text x="' + (x + 18) + '" y="' + (y + 24) + '" font-size="13" fill="#475467">' + ikon + ' ' + bas + '</text>'
+      + '<text x="' + (x + 18) + '" y="' + (y + 52) + '" font-size="21" font-weight="800" fill="#10233F">' + deger + '</text>'
+      + (alt ? '<text x="' + (x + 18) + '" y="' + (y + 74) + '" font-size="12.5" fill="' + renk + '" font-weight="600">' + alt + '</text>' : '') + '</g>';
+    const ok = (x1, y1, x2, y2, renk, etiket) => { const mxx = (x1 + x2) / 2, my = (y1 + y2) / 2, ew = Math.max(70, etiket.length * 7.2 + 16);
+      return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + (x2 - 8) + '" y2="' + y2 + '" stroke="' + renk + '" stroke-width="3"/><path d="M' + (x2 - 10) + ',' + (y2 - 7) + ' L' + x2 + ',' + y2 + ' L' + (x2 - 10) + ',' + (y2 + 7) + ' z" fill="' + renk + '"/>'
+        + (etiket ? '<rect x="' + (mxx - ew / 2) + '" y="' + (my - 13) + '" width="' + ew + '" height="26" rx="13" fill="' + renk + '"/><text x="' + mxx + '" y="' + (my + 5) + '" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">' + etiket + '</text>' : ''); };
+    const ic_ = r.inv && sy && sy.v ? r.inv - sy.v : null;
+    let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;max-width:1100px;font-family:inherit" role="img" aria-label="Enerji ve fatura akış şeması">';
+    [['SAHA', 95], ['SAYAÇ (OSOS)', 420], ['FATURA', 835]].forEach(([t, x]) => svg += '<text x="' + x + '" y="22" font-size="12" font-weight="700" fill="#98A2B3" text-anchor="middle" letter-spacing="1.5">' + t + '</text>');
+    // üretim → veriş → satış faturası (+ sistem bedeli)
+    svg += kutu(10, 40, 170, 90, '#1E7A3C', '☀', 'İnverter üretimi', kwh(r.inv), r.inv ? 'inverterlerin ürettiği' : 'inverter verisi yok');
+    svg += ok(180, 85, 330, 85, ic_ == null ? '#98A2B3' : '#475467', ic_ == null ? '' : '−' + kwh(ic_)) + (ic_ == null ? '' : '<text x="255" y="60" font-size="11.5" fill="#475467" text-anchor="middle">sahada tüketim</text>');
+    svg += kutu(330, 40, 180, 90, '#0E7490', '⇢', 'Şebekeye veriş', kwh(sy && sy.v), sy ? 'sayacın ölçtüğü' : 'sayaç verisi yok');
+    svg += ok(510, 85, 700, 85, renkF(r.fSat), o.sat.n ? yuzde(r.fSat) : 'satış faturası yok');
+    svg += kutu(700, 40, 270, 90, '#1E7A3C', '₺', 'Üretim satış faturası', o.sat.n ? kwh(o.sat.kwh) : '—', o.sat.n ? '+' + say(o.sat.tl, 0) + ' ₺ gelir' : '');
+    svg += ok(510, 112, 700, 175, renkF(r.fSis), o.sis.n ? yuzde(r.fSis) : '');
+    svg += kutu(700, 140, 270, 84, '#B25E00', '⚙', 'Sistem kullanım bedeli', o.sis.n ? '−' + say(o.sis.tl, 0) + ' ₺' : '—', o.sis.n ? kwh(o.sis.kwh) + ' üzerinden' : 'bu dönem yok');
+    // şebeke → çekiş → tüketim faturası
+    svg += kutu(10, 240, 170, 90, '#D92D20', '⚡', 'Şebeke', 'çekilen', 'gece / bulutlu saatler');
+    svg += ok(180, 285, 330, 285, '#475467', '');
+    svg += kutu(330, 240, 180, 90, '#D92D20', '⇠', 'Şebekeden çekiş', kwh(sy && sy.c), sy ? 'sayacın ölçtüğü' : 'sayaç verisi yok');
+    svg += ok(510, 285, 700, 285, renkF(r.fTuk), o.tuk.n ? yuzde(r.fTuk) : 'tüketim faturası yok');
+    svg += kutu(700, 240, 270, 90, '#D92D20', '₺', 'Tüketim faturası', o.tuk.n ? kwh(o.tuk.kwh) : '—', o.tuk.n ? '−' + say(o.tuk.tl, 0) + ' ₺ gider' : '');
+    // reaktif
+    svg += kutu(330, 345, 180, 66, '#6941C6', '∿', 'Reaktif enerji', o.rea.kvar ? say(o.rea.kvar, 0) + ' kVArh' : '—', '');
+    svg += ok(510, 378, 700, 378, o.rea.tl ? '#6941C6' : '#98A2B3', o.rea.tl ? 'limit aşıldı' : 'ceza yok');
+    svg += kutu(700, 345, 270, 66, '#6941C6', '⚠', 'Reaktif cezası', o.rea.tl ? '−' + say(o.rea.tl, 0) + ' ₺' : '0 ₺', '');
+    svg += '</svg>';
+    const cumle = [];
+    if (r.inv && sy && sy.v) cumle.push('İnverterler <b>' + kwh(r.inv) + '</b> üretti, sayaç <b>' + kwh(sy.v) + '</b> veriş ölçtü. Aradaki <b>' + kwh(ic_) + '</b> (%' + say(ic_ / r.inv * 100, 1) + ') sahada tüketildi (madenciler, sera, yardımcı yükler) ya da kayıp oldu.');
+    if (o.sat.n) cumle.push(r.fSat == null ? 'Satış faturası ' + kwh(o.sat.kwh) + '; sayaç verisi olmadığı için kontrol edilemedi.' : Math.abs(r.fSat) <= 0.01 ? '<span style="color:#1E7A3C">✓ Satış faturası sayaçla uyumlu</span> (' + yuzde(r.fSat) + ').' : '<span style="color:#B42318">! Satış faturası sayaçtan ' + yuzde(r.fSat) + ' farklı</span>: ' + kwh(Math.abs(o.sat.kwh - sy.v)) + (r.fSat < 0 ? ' eksik faturalanmış olabilir.' : ' fazla görünüyor (dönem kayması ya da düzeltme faturası olabilir).'));
+    if (o.tuk.n) cumle.push(r.fTuk == null ? 'Tüketim faturası ' + kwh(o.tuk.kwh) + '; sayaçla kıyaslanamadı.' : Math.abs(r.fTuk) <= 0.01 ? '<span style="color:#1E7A3C">✓ Tüketim faturası sayaçla uyumlu</span> (' + yuzde(r.fTuk) + ').' : '<span style="color:#B42318">! Tüketim faturası sayaçtan ' + yuzde(r.fTuk) + ' farklı</span>.');
+    if (o.rea.tl) cumle.push('<span style="color:#6941C6">⚠ ' + say(o.rea.tl, 0) + ' ₺ reaktif cezası</span> ödendi; inverterlerle gece kompanzasyonu kurulunca bu kalem sıfırlanmalı.');
+    cumle.push('Bu dönemin neti: <b style="color:' + (r.net >= 0 ? '#1E7A3C' : '#B42318') + '">' + (r.net >= 0 ? '+' : '') + say(r.net, 0) + ' ₺</b>.');
+    h += '<div class="panel" id="fsema" style="gap:12px"><div class="bas"><h2>' + esc(fatSec.ab) + ' · ' + AYLAR[+m.slice(5) - 1] + ' ' + m.slice(0, 4) + ' · enerji ve para akışı</h2><span class="k">soldan sağa: üretilen → ölçülen → faturalanan</span></div>'
+      + svg + '<div style="display:flex;flex-direction:column;gap:6px;font-size:14.5px;line-height:1.5">' + cumle.map(c => '<div>' + c + '</div>').join('') + '</div>'
+      + '<div class="k" style="font-size:12px">Oklardaki yüzde: faturadaki kWh ile sayacın aynı ayda ölçtüğü kWh arasındaki fark. Yeşil ≤ %1, turuncu %1–5, kırmızı > %5. Bu dönemin faturaları: ' + o.fat.map(f => tarihK(f.tarih) + ' ' + f.tarih.slice(0, 4) + ' (' + esc(FAT_TUR[f.tur][0]) + ', ' + say(f.toplam, 0) + ' ₺)').join(' · ') + '</div></div>';
+  } else if (fatSec.ab === 'hepsi') {
+    h += '<div class="panel" style="padding:12px 16px;display:block"><span class="k">Haritadan bir kutuya ya da yukarıdan bir aboneye tıklayın: o ayın <b>üretim → sayaç → fatura</b> akış şeması burada çizilir.</span></div>';
+  }
   // ---- özet kartları
   const top = t => sec.reduce((s, f) => s + (f.turTL[t] || 0), 0), kw = t => sec.reduce((s, f) => s + (f.kwh[t] || 0), 0);
   const kart = (b, v, alt, r) => '<div class="panel" style="padding:10px 14px;gap:2px;border-radius:12px;border-left:4px solid ' + r + '"><div class="k" style="font-size:12.5px">' + b + '</div><div class="num" style="font-size:20px;font-weight:700">' + v + '</div><div class="k" style="font-size:12px">' + (alt || '') + '</div></div>';
@@ -2108,6 +2201,7 @@ async function cizFatura() {
   h += '<div class="panel" style="gap:12px"><div class="bas"><h2>Aylık fatura tutarları (fatura tarihine göre)</h2><span class="k">₺</span></div>'
     + grafikX({ id: 'ft1', etiket: AYK, etiketAd: 'Ay', turler: ['yigin', 'cubuk', 'tablo'], birim: '₺', yuk: 230, fmt: v => say(v, 0), toplam: 'top', seriler: turler.map(t => ({ ad: FAT_TUR[t][0], grup: 'tl', renk: FAT_TUR[t][1], v: aylar.map(m => { const x = sec.filter(f => f.tarih.startsWith(m)).reduce((s, f) => s + (f.turTL[t] || 0), 0); return x || null; }) })) })
     + '</div>';
+  h += '<details class="panel" style="gap:16px"><summary style="cursor:pointer;font-weight:700;font-size:16px">Ayrıntılı tablolar (fatura ↔ sayaç, reaktif kalemler, tüm faturalar)</summary><div style="display:flex;flex-direction:column;gap:16px;margin-top:12px">';
   // ---- fatura ↔ sayaç ↔ inverter (kWh)
   const es = sec.filter(f => f.es);
   if (es.length) {
@@ -2124,6 +2218,7 @@ async function cizFatura() {
   h += '<div class="panel" style="gap:10px"><div class="bas"><h2>Faturalar</h2><span class="k">' + sec.length + ' adet</span></div><div class="tablo-kutu" style="max-height:520px;overflow:auto"><table class="tb"><thead><tr><th class="sol">Tarih</th><th class="sol">Abone</th><th class="sol">Tür</th><th class="sol">Karşı taraf</th><th class="sol">Kalemler</th><th>Toplam</th><th class="sol">Durum</th></tr></thead><tbody>'
     + sec.slice().sort((a, b) => b.tarih.localeCompare(a.tarih)).map(f => '<tr><td class="sol">' + tarihK(f.tarih) + ' ' + f.tarih.slice(0, 4) + '</td><td class="sol"><b>' + esc(f.kod) + '</b></td><td class="sol"><span style="color:' + FAT_TUR[f.tur][1] + '">' + esc(FAT_TUR[f.tur][0]) + '</span></td><td class="sol">' + esc(String(f.ted).slice(0, 24)) + '</td><td class="sol k" style="font-size:12px">' + f.k.map(x => esc(String(x.ad || '').slice(0, 30)) + (x.kwh ? ' ' + say(x.kwh) + ' kWh' : x.kvar ? ' ' + say(x.kvar) + ' kVArh' : '') + ' · ' + say(x.tl, 0) + ' ₺').join('<br>') + '</td><td><b>' + say(f.toplam, 0) + ' ₺</b></td><td class="sol k">' + esc(f.durum || '') + (f.inceleme ? ' · inceleme' : '') + '</td></tr>').join('')
     + '</tbody></table></div></div>';
+  h += '</div></details>';
   // ---- enerji dengesi (sayaç · inverter · saatlik fatura) — önceki analiz
   let an = ''; try { if (fatSec.ab !== 'hepsi' && AN_AB.some(a => a.kod === fatSec.ab)) anSec.ab = fatSec.ab; an = await cizAnaliz(); } catch (e) { an = '<div class="panel hata">' + esc(e.message || e) + '</div>'; }
   h += '<h2 style="margin:6px 0 -8px">Enerji dengesi · sayaç · inverter</h2>' + an + '</div>';

@@ -2535,7 +2535,7 @@ async function invDetayAc(kay, san, id) {
       }
     }
   }
-  const T = (ts.inverterler || {})[ad] || Object.values(ts.inverterler || {}).find(x => x.id === id) || {};
+  const T = Object.values(ts.inverterler || {}).find(x => x.id === id) || (ts.inverterler || {})[ad] || {};
   const P = Object.assign({}, ts.panel || {}, T.panel || {});
   const an = ((STR.inverterler || {})[kay + ':' + id] || {});
   const anM = {}; (an.stringler || []).forEach(s => { anM[s.pv] = s; });

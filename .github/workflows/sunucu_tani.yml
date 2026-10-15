@@ -11,6 +11,7 @@ jobs:
   tani:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Bağlan ve oku
         env:
           ANAHTAR: ${{ secrets.SUNUCU_SSH }}
@@ -37,7 +38,7 @@ jobs:
             not "gesfin dosyalar" "$($S 'cd /opt/gesfin && ls -la | awk "{print \$NF}" | tr "\n" " "; echo; find app -maxdepth 3 -type d | head -40 | tr "\n" " "')"
             not "gesfin compose" "$($S 'cd /opt/gesfin && grep -vE "(PASSWORD|SECRET|TOKEN|KEY)=" docker-compose.yml | grep -E "^[a-z ]|image:|ports:|- \"|container_name|command" | head -40')"
             not "gesfin api" "$($S 'cd /opt/gesfin && grep -rhoE "@(router|app)\.(get|post|put|delete)\(\"[^\"]+\"" app 2>/dev/null | sort -u | head -80 | tr "\n" " "')"
-            not "gesfin tablolar" "$($S 'docker exec gesfin-db sh -c "psql -U \$POSTGRES_USER -d \$POSTGRES_DB -At -c \"select relname||\x27=\x27||n_live_tup from pg_stat_user_tables order by relname\"" 2>&1 | tr "\n" " " | head -c 3000')"
+            not "gesfin tablolar" "$($S 'docker exec -i gesfin-db psql -U gesfin -d gesfin -At' < sunucu/gesfin_sema.sql 2>&1 | tr "\n" " " | head -c 3800)"
             not "gesfin modeller" "$($S 'cd /opt/gesfin && grep -rhoE "__tablename__ *= *\"[a-z_]+\"|class [A-Za-z]+\((Base|SQLModel)" app 2>/dev/null | sort -u | head -80 | tr "\n" " "')"
             exit 0
           fi

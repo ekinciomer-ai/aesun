@@ -15,7 +15,10 @@ jobs:
           PORT: ${{ secrets.SUNUCU_PORT }}
         run: |
           if [ -z "$ANAHTAR" ] || [ -z "$ADRES" ]; then echo "::error::SUNUCU_SSH / SUNUCU_ADRES sırları yok"; exit 1; fi
-          mkdir -p ~/.ssh && printf '%s\n' "$ANAHTAR" > ~/.ssh/k && chmod 600 ~/.ssh/k
+          mkdir -p ~/.ssh
+          # yapıştırırken oluşan boşluk/boş satır/CR farklarını düzelt: gövdeyi tek satıra indirip 70 karakterde yeniden böl
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); assert m, 'BEGIN/END bulunamadı'; g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k || { echo "::error::Anahtarda BEGIN/END satırları bulunamadı"; exit 1; }
+          chmod 600 ~/.ssh/k
           S="ssh -i $HOME/.ssh/k -p ${PORT:-22} -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o BatchMode=yes ${KUL:-root}@$ADRES"
           head -1 ~/.ssh/k | grep -q 'BEGIN' || echo "::warning::Anahtarın ilk satırı BEGIN ile başlamıyor"
           echo "::notice title=Anahtar::$(ssh-keygen -y -f ~/.ssh/k >/dev/null 2>&1 && echo 'özel anahtar geçerli; açık anahtar parmak izi:' $(ssh-keygen -lf ~/.ssh/k | awk '{print $2}') || echo 'özel anahtar OKUNAMADI (eksik/bozuk yapıştırılmış)')"

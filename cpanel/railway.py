@@ -109,3 +109,17 @@ if ISLEM == "eski_imaj":
                         break
                     except Exception as e:
                         hata_son = str(e)[:120]
+
+if ISLEM == "sil":
+    # Yalnız onaylı gereksiz projeler; asıl panel (striking-flexibility) asla silinmez
+    SILINECEK = {"alluring-bravery", "cheerful-quietude", "sublime-rejoicing", "capable-simplicity"}
+    for pe in d["projects"]["edges"]:
+        p = pe["node"]
+        if p["name"] not in SILINECEK or p["name"] == "striking-flexibility":
+            continue
+        servisler = [se["node"]["name"] for se in p["services"]["edges"]]
+        try:
+            gql("mutation($id:String!){ projectDelete(id:$id) }", {"id": p["id"]})
+            not_(f"silindi: {p['name']} ({', '.join(servisler)})")
+        except Exception as e:
+            not_(f"silinemedi: {p['name']}: {str(e)[:200]}")

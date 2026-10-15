@@ -85,3 +85,27 @@ for pe in d["projects"]["edges"]:
                     not_(f"{p['name']}/{s['name']}: {iptal} bekleyen iptal edildi, yeniden dağıtım başlatıldı")
                 except Exception as e:
                     not_(f"yeniden dağıtım hatası: {e}")
+
+if ISLEM == "eski_imaj":
+    hedef = os.environ.get("FILTRE") or "striking-flexibility"
+    for pe in d["projects"]["edges"]:
+        p = pe["node"]
+        if p["name"] != hedef:
+            continue
+        for se in p["services"]["edges"]:
+            s = se["node"]
+            for ie in s["serviceInstances"]["edges"]:
+                i = ie["node"]
+                if not (i.get("source") or {}).get("repo", "").lower().endswith("epias-ptf"):
+                    continue
+                deps = gql("""query($p:String!,$s:String!,$e:String!){ deployments(first:100, input:{projectId:$p, serviceId:$s, environmentId:$e}) { edges { node { id status createdAt } } } }""",
+                           {"p": p["id"], "s": s["id"], "e": i["environmentId"]})["deployments"]["edges"]
+                adaylar = [x["node"] for x in deps if x["node"]["status"] in ("REMOVED", "SUCCESS")]
+                not_(f"eski dağıtım adayları: " + ", ".join(f"{x['createdAt'][:16]} {x['status']}" for x in adaylar[:5]))
+                for n in adaylar[:3]:
+                    try:
+                        r = gql("mutation($id:String!){ deploymentRedeploy(id:$id, usePreviousImageTag:true) { id status } }", {"id": n["id"]})
+                        not_(f"hazır imajla yeniden açıldı: {n['createdAt'][:16]} → {r['deploymentRedeploy']}")
+                        break
+                    except Exception as e:
+                        not_(f"{n['createdAt'][:16]} açılamadı: {str(e)[:200]}")

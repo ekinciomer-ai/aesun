@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       islem:
-        description: "durum | duzelt"
+        description: "durum | duzelt | eski_imaj"
         default: durum
       filtre:
         description: "yalnız bu proje (boş = hepsi)"

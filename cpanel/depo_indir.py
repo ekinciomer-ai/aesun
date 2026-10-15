@@ -21,9 +21,19 @@ def gez(d, rel):
         if tip == "dir":
             gez(d + "/" + ad, rel + ad + "/")
         elif ad.endswith(".json"):
-            c = oku(d, ad); p = HEDEF / "depo" / (rel + ad); p.parent.mkdir(parents=True, exist_ok=True); p.write_text(c, encoding="utf-8")
+            try:
+                c = oku(d, ad)
+            except Exception as e:
+                print(f"::warning::okunamadı {rel}{ad}: {str(e)[:120]}"); continue
+            p = HEDEF / "depo" / (rel + ad); p.parent.mkdir(parents=True, exist_ok=True); p.write_text(c, encoding="utf-8")
             say += 1; bayt += len(c)
-gez(KOK + "/depo", "")
-(HEDEF / "anahtarlar.json").write_text(oku(KOK, "anahtarlar.json"), encoding="utf-8")
+try:
+    gez(KOK + "/depo", "")
+except Exception as e:
+    print(f"::error::liste hatası: {str(e)[:300]}"); raise
+try:
+    (HEDEF / "anahtarlar.json").write_text(oku(KOK, "anahtarlar.json"), encoding="utf-8")
+except Exception as e:
+    print(f"::error::anahtarlar.json: {str(e)[:300]}"); raise
 ad = list(json.loads((HEDEF / "anahtarlar.json").read_text()).keys())
 print(f"::notice::depo: {say} dosya, {bayt//1024} KB · toplayıcı anahtar özetleri: {', '.join(ad)}")

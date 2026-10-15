@@ -1854,19 +1854,25 @@ function ayToplam(o, m) {
   return +o.ay[m];
 }
 // ===== Yıl kıyası: santral aylık üretimi ve inverterlerin aynı tarih aralığındaki verimi, yıllara göre =====
-async function cizYilKiyas() {
-  const buYil = Number(bugunTR().slice(0, 4)), yillar = [buYil - 2, buYil - 1, buYil];
+async function cizYilKiyas(sabit) {
+  const buYil = Number(bugunTR().slice(0, 4)), yillar = [buYil - 3, buYil - 2, buYil - 1, buYil];
   const D = {}; for (const y of yillar) D[y] = invBirlestir(await invYilYukle(y));
   const anahtar = [...new Set(yillar.flatMap(y => Object.keys(D[y])))].filter(k => yillar.some(y => Object.keys((D[y][k] || {}).gun || {}).length >= 30));
   const ad = k => { for (const y of yillar) if (D[y][k]) return D[y][k].ad; return k; };
   anahtar.sort((a, b) => a.localeCompare(b) || String(ad(a)).localeCompare(String(ad(b)), 'tr'));
+  if (sabit && anahtar.includes(sabit)) invSec.ys = sabit;
   if (!invSec.ys || !anahtar.includes(invSec.ys)) invSec.ys = anahtar.find(k => /Sera-1/.test(ad(k))) || anahtar[0];
   const yeter = (y, x) => D[y][x] && Object.keys(D[y][x].gun || {}).length >= 30;   // 30 günden az veri: kıyasa alınmaz
-  const k = invSec.ys, yv = yillar.filter(y => yeter(y, k));
-  const RENK = ['#9FB3C8', '#7FA6D6', '#1F5FAE'], RY = y => RENK[yillar.indexOf(y)];
+  const k = invSec.ys, yvTum = yillar.filter(y => yeter(y, k));
+  if (!yvTum.includes(invSec.kyB)) invSec.kyB = yvTum[yvTum.length - 1];
+  if (!yvTum.includes(invSec.kyA) || invSec.kyA === invSec.kyB) invSec.kyA = yvTum.filter(y => y !== invSec.kyB).pop() || null;
+  const yv = [invSec.kyA, invSec.kyB].filter(y => y != null).sort();
+  const ySec = (alan, v) => '<select onchange="invSec.' + alan + '=Number(this.value);cizInverter()" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit">' + yvTum.map(y => '<option' + (y === v ? ' selected' : '') + '>' + y + '</option>').join('') + '</select>';
+  const RY = y => y === Math.max(...yv) ? '#1F5FAE' : '#9FB3C8';
   const kwpS = (() => { for (const y of [...yillar].reverse()) if (D[y][k] && D[y][k].kwp) return D[y][k].kwp; return null; })();
   const ayTop = (o, y, a) => { const m = y + '-' + String(a).padStart(2, '0'); const v = ayToplam(o, m); return v == null || v === 0 && !Object.keys(o.gun).some(g => g.startsWith(m)) ? null : v; };
-  const sec = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="k">Santral</span><select onchange="invSec.ys=this.value;cizInverter()" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit">' + anahtar.map(x => '<option value="' + esc(x) + '"' + (x === k ? ' selected' : '') + '>' + esc(ad(x)) + ' · ' + esc(INV_KAYNAK[x.split(':')[0]] || '') + '</option>').join('') + '</select><span class="k">' + (kwpS ? say(kwpS, 0) + ' kWp' : '') + ' · veri: ' + yv.join(', ') + '</span></div>';
+  const kiyasSec = yvTum.length > 1 ? '<span class="k">Kıyas</span>' + ySec('kyA', invSec.kyA) + '<span class="k">↔</span>' + ySec('kyB', invSec.kyB) : '<span class="k">Kıyas için ikinci bir yılın verisi yok (en az 30 gün gerekir).</span>';
+  const sec = sabit ? '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><h2 style="margin:0;margin-right:auto">Yıllara göre karşılaştırma · ' + esc(ad(k)) + '</h2>' + kiyasSec + '</div>' : '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + kiyasSec + '<span class="k">Santral</span><select onchange="invSec.ys=this.value;cizInverter()" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit">' + anahtar.map(x => '<option value="' + esc(x) + '"' + (x === k ? ' selected' : '') + '>' + esc(ad(x)) + ' · ' + esc(INV_KAYNAK[x.split(':')[0]] || '') + '</option>').join('') + '</select><span class="k">' + (kwpS ? say(kwpS, 0) + ' kWp' : '') + ' · veri: ' + yvTum.join(', ') + '</span></div>';
   // 1) aylık üretim, yıllar yan yana
   const ser1 = yv.map(y => ({ ad: String(y), renk: RY(y), v: AYK.map((_, i) => { const v = ayTop(D[y][k], y, i + 1); return v == null ? null : v / 1000; }) }));
   let h = '<div class="panel" style="gap:12px">' + sec + '<h2 style="margin:0">Aylık üretim (MWh)</h2>'
@@ -1877,10 +1883,10 @@ async function cizYilKiyas() {
   const PAL = ['#1F5FAE', '#D92D20', '#1E7A3C', '#B25E00', '#6941C6', '#0E7490', '#9A3412', '#475467'];
   const ser2 = []; let pi = 0;
   for (const x of anahtar) { const kw = (() => { for (const y of [...yillar].reverse()) if (D[y][x] && D[y][x].kwp) return D[y][x].kwp; })(); if (!kw) { pi++; continue; } const renk = PAL[pi++ % PAL.length];
-    for (const y of yillar) { if (!yeter(y, x) || (y !== buYil && x !== k)) continue; ser2.push({ ad: ad(x) + ' ' + y, renk, kesik: y !== buYil, v: AYK.map((_, i) => { const v = ayTop(D[y][x], y, i + 1); return v == null ? null : v / kw; }) }); } }
+    for (const y of yv) { if (!yeter(y, x) || (y !== invSec.kyB && x !== k)) continue; ser2.push({ ad: ad(x) + ' ' + y, renk, kesik: y !== invSec.kyB, v: AYK.map((_, i) => { const v = ayTop(D[y][x], y, i + 1); return v == null ? null : v / kw; }) }); } }
   h += '<div class="panel" style="gap:12px"><h2 style="margin:0">Santraller: aylık özgül üretim (kWh/kWp)</h2>'
     + grafikX({ id: 'yk2', etiket: AYK, turler: ['cizgi', 'cubuk', 'tablo'], birim: 'kWh/kWp', yuk: 240, fmt: v => say(v, 1), seriler: ser2 })
-    + '<div class="k">Düz çizgi: tüm santraller ' + buYil + '; kesik çizgi: seçili santralin önceki yılları. Kurulu güce bölündüğü için farklı büyüklükteki santraller doğrudan karşılaştırılabilir; ay eksikse (veri başlamadan önce) boş bırakılır.</div></div>';
+    + '<div class="k">Düz çizgi: tüm santraller ' + invSec.kyB + '; kesik çizgi: ' + esc(ad(k)) + (invSec.kyA ? ' ' + invSec.kyA : '') + '. Kurulu güce bölündüğü için farklı büyüklükteki santraller doğrudan karşılaştırılabilir; ay eksikse (veri başlamadan önce) boş bırakılır.</div></div>';
   // 3) inverterler: aynı gün aralığında (her iki yılda da verisi olan günler) kWh/kWp
   const invAd = new Map(); for (const y of yv) for (const iv of Object.values(D[y][k].inv || {})) if (!invAd.has(iv.key)) invAd.set(iv.key, iv.ad);
   const invler = [...invAd.keys()].sort((a, b) => String(invAd.get(a)).localeCompare(String(invAd.get(b)), 'tr', { numeric: true }));
@@ -2083,7 +2089,7 @@ async function cizInverter() {
   document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…';
   const ic = document.getElementById('icerik');
   if (!invSec.sekme) invSec.sekme = 'analiz';
-  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['yil', 'Yıl kıyası'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
+  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
   if (invSec.sekme === 'yil') {
     document.getElementById('baslik').textContent = 'Yıl kıyası';
     document.getElementById('altBaslik').textContent = 'Santral ve inverter üretimi yıllara göre: aylık üretim, kWh/kWp ve aynı tarih aralığında inverter karşılaştırması.';
@@ -2210,7 +2216,9 @@ async function cizInverter() {
     + '<button type="button" class="btn koyu" onclick="invSantralSec(\'hepsi\')" style="display:inline-flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Tüm santraller</button>'
     + '<span class="k" style="margin-left:6px">Diğer santraller:</span>'
     + liste.filter(x => x.key !== invSec.santral).map(x => '<button type="button" class="btn" style="padding:5px 12px;font-size:13px" onclick="invSantralSec(\'' + esc(x.key) + '\')">' + esc(x.ad) + '</button>').join('') + '</div>';
-  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + geriH + kartlar + grafikH + govde + '<div class="k">Bu yıldaki günlük veri kapsamı: ' + kapsam + '. Sungrow ve Inavitas geçmişi n8n tarafından her gece güncellenir; FusionSolar inverter günlükleri 5 Ekim 2026\'dan itibaren toplanıyor.</div></div>';
+  let yk = ''; try { yk = await cizYilKiyas(invSec.santral !== 'hepsi' ? invSec.santral : null); } catch (e) { yk = '<div class="panel hata">Yıl karşılaştırması çizilemedi: ' + esc(e.message || e) + '</div>'; }
+  if (!location.hash.startsWith('#inverter') || invSec.sekme !== 'analiz') return;
+  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + geriH + kartlar + grafikH + govde + yk + '<div class="k">Bu yıldaki günlük veri kapsamı: ' + kapsam + '. Sungrow ve Inavitas geçmişi n8n tarafından her gece güncellenir; FusionSolar inverter günlükleri Sera-1 için 18 Haz 2025, Sera-2 için 31 Ara 2025\'ten itibaren (FusionSolar dışa aktarımı + Pi toplayıcı).</div></div>';
   document.getElementById('kaynakNot').textContent = 'Veri: Sungrow · Inavitas · FusionSolar geçmişi';
 }
 function invCsv() {

@@ -69,7 +69,8 @@ def main(ps="5038906"):
         out["cihazlar"].append({"ps_key": d.get("ps_key"), "tur": d.get("device_type"), "tur_ad": d.get("type_name"),
                                 "ad": d.get("device_name"), "model": d.get("device_model_code") or d.get("device_model"),
                                 "sn": _maske(d.get("device_sn")), "iletisim": d.get("dev_status"),
-                                "ariza": d.get("dev_fault_status"), "alanlar": sorted(d.keys())})
+                                "ariza": d.get("dev_fault_status"), "alanlar": sorted(d.keys()),
+                                "surum": {k: v for k, v in d.items() if any(x in k.lower() for x in ("version", "firmware", "soft", "arm", "dsp", "mdsp", "lcd"))}})
     # tür / model başına bir örnek
     ornek = {}
     for d in cihaz:

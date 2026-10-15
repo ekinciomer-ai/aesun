@@ -174,7 +174,7 @@ footer{padding:30px 0 50px;color:var(--soluk);font-size:13px;border-top:1px soli
 <footer><div class="kap">Bu sayfa tanıtım amaçlıdır. Gösterilen durumlar gerçek filodan anonim olarak alınır; cihaz kimlikleri, ağ adresleri, konum, enerji ve finansal bilgiler paylaşılmaz. © Aksaray Enerji</div></footer>
 
 <script>
-const KAYNAK = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/demo_durum.json';
+const KAYNAK = 'https://api.aksarayenerji.net/v1/acik/n8n/demo_durum.json', KAYNAK2 = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/demo_durum.json';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const p2 = n => String(n).padStart(2, '0');
@@ -256,7 +256,7 @@ function hepsi() { if (!V) return; const dur = SIM ? SIM.dur : V.durum; filoCiz(
 
 async function yukle() {
   try {
-    const r = await fetch(KAYNAK + '?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error(r.status);
+    let r = await fetch(KAYNAK + '?t=' + Date.now(), { cache: 'no-store' }).catch(() => ({ ok: false })); if (!r.ok) r = await fetch(KAYNAK2 + '?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error(r.status);
     const ilk = !V; V = await r.json();
     const yas = (Date.now() - Date.parse(V.guncellendi)) / 60000;
     $('canli').classList.toggle('eski', yas > 20); $('canliY').textContent = yas > 20 ? 'SON VERİ ' + V.guncellendi.slice(11, 16) : 'CANLI · ' + V.guncellendi.slice(11, 16);

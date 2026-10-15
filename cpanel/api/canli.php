@@ -16,7 +16,7 @@ if (strpos($dizin, '/_veri') !== false && !file_exists($dizin . '/.htaccess')) {
 $SON = $dizin . '/son.json';
 $SERI = $dizin . '/seri.json';
 $OZET = $dizin . '/ozet.json';
-$OZET_URL = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/canli_anahtar.json';
+$OZET_URLLER = ['https://api.aksarayenerji.net/v1/acik/n8n/canli_anahtar.json', 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/canli_anahtar.json'];
 $SAKLA = 6 * 3600;
 
 function cevap($kod, $v) { http_response_code($kod); echo json_encode($v, JSON_UNESCAPED_UNICODE); exit; }
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (empty($kayit['sha256']) || !hash_equals($kayit['sha256'], $oz)) {
     // özet yok ya da farklı: GitHub'dan en çok 2 dakikada bir tazele
     if (empty($kayit['t']) || time() - $kayit['t'] > 120) {
-      $u = uzak_ozet($OZET_URL);
+      $u = null; foreach ($OZET_URLLER as $ou) { $u = uzak_ozet($ou); if ($u) break; }
       $kayit = ['sha256' => $u, 't' => time()];
       @file_put_contents($OZET, json_encode($kayit), LOCK_EX);
     }

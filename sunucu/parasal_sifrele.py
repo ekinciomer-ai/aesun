@@ -12,7 +12,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-VERI = "https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/portal/veri.json"
+VERILER = ["https://api.aksarayenerji.net/v1/acik/portal/veri.json", "https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/portal/veri.json"]
 
 
 def b64u_int(s):
@@ -24,8 +24,13 @@ def acik_anahtar():
     if yol:
         j = json.load(open(yol))
     else:
-        with urllib.request.urlopen(VERI + "?t=" + str(int(time.time())), timeout=30) as r:
-            j = json.loads(r.read().decode()).get("parasal_acik")
+        j = None
+        for u in VERILER:
+            try:
+                with urllib.request.urlopen(u + "?t=" + str(int(time.time())), timeout=30) as r:
+                    j = json.loads(r.read().decode()).get("parasal_acik"); break
+            except Exception:
+                continue
     if not j or not j.get("n"):
         return None, None
     return rsa.RSAPublicNumbers(b64u_int(j["e"]), b64u_int(j["n"])).public_key(), j.get("olusturma")

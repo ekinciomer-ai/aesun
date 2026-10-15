@@ -16,6 +16,7 @@ REPO = os.environ.get("AESUN_REPO", "https://github.com/ekinciomer-ai/epias-ptf.
 TOKEN = os.environ.get("AESUN_GH_OKU", "")          # depo gizli olunca: yalnız okuma yetkili belirteç (root-only .env)
 ARALIK = int(os.environ.get("AESUN_ESITLE_SN", "30"))
 PARA = re.compile(r"(^|/)(fatura/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat|pay_|gelir)")
+ACIK = {"portal/veri.json", "n8n/canli_anahtar.json", "n8n/demo_durum.json"}   # zaten şifreli/özet ya da herkese açık içerik
 IZINLI = re.compile(r"^[A-Za-z0-9_\-./]+\.(json|csv)$")
 DURUM = {"sha": None, "son": 0.0, "hata": None, "ozet": {}, "basla": time.time(), "istek": 0, "red": 0}
 
@@ -57,6 +58,15 @@ def dongu():
 app = FastAPI(title="aesun-api", docs_url=None, redoc_url=None, openapi_url=None)
 app.add_middleware(CORSMiddleware, allow_origins=["https://portal.aksarayenerji.net", "https://aksarayenerji.net"],
                    allow_methods=["GET"], allow_headers=["X-AE-Anahtar"], max_age=3600)
+
+@app.get("/v1/acik/{yol:path}")
+def acik(yol: str, request: Request):
+    if yol not in ACIK:
+        raise HTTPException(404, "yok")
+    p = VERI / yol
+    if not p.is_file():
+        raise HTTPException(404, "yok")
+    return Response(p.read_bytes(), media_type="application/json", headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*", "X-Veri-Sha": DURUM["sha"] or ""})
 
 @app.on_event("startup")
 def basla():

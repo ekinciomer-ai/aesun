@@ -134,15 +134,20 @@ async function kulOz(tuz, kul) { const h = await crypto.subtle.digest('SHA-256',
 // ---- veri ----
 let V = null, VSHA = null, S = null, R = null;   // V: veri.json, S: oturum (çözülmüş kullanıcı kaydı), R: yönetim rehberi
 async function veriYukle() {
-  try {
-    const r = await fetch(API + '?t=' + Date.now(), { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
-    if (r.status === 404) { V = null; VSHA = null; return; }
-    if (r.ok) { const j = await r.json(); VSHA = j.sha; V = JSON.parse(td.decode(ub(j.content.replace(/\n/g, '')))); return; }
-  } catch (e) {}
-  const r2 = await fetch(RAW + '?t=' + Date.now(), { cache: 'no-store' });     // API sınırı dolarsa CDN kopyası
-  if (r2.status === 404) { V = null; return; }
-  if (!r2.ok) throw new Error('Veri alınamadı (' + r2.status + ')');
-  V = await r2.json(); VSHA = null;
+  // Depo gizli olabilir: yetkisiz GitHub isteğinin 404'ü "veri yok" sayılmaz. Yönetici anahtarı varsa GitHub API, yoksa merkez (api.aksarayenerji.net) ya da CDN.
+  const t = ghAnahtar();
+  if (t) {
+    try {
+      const r = await fetch(API + '?t=' + Date.now(), { headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + t }, cache: 'no-store' });
+      if (r.status === 404) { V = null; VSHA = null; return; }
+      if (r.ok) { const j = await r.json(); VSHA = j.sha; V = JSON.parse(td.decode(ub(j.content.replace(/\n/g, '')))); return; }
+    } catch (e) {}
+  }
+  let son = '';
+  for (const u of ['https://api.aksarayenerji.net/v1/acik/' + YOL, RAW]) {
+    try { const r = await fetch(u + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) { V = await r.json(); VSHA = null; return; } son = r.status; } catch (e) { son = e.message; }
+  }
+  throw new Error('Veri alınamadı (' + son + ')');
 }
 async function vitrinGuncelle() {
   if (!R) return;

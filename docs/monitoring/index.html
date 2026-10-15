@@ -1106,6 +1106,16 @@ async function hashGunAl(g) {
   try { const d = await al('n8n/hash/' + g + '.json', g === bugunTR()); d._t = Date.now(); HASH.gun[g] = d; } catch (e) { HASH.gun[g] = null; }
   return HASH.gun[g];
 }
+async function havuzGunAl(g) {
+  HASH.havuz = HASH.havuz || {};
+  if (g in HASH.havuz && (g !== bugunTR() || Date.now() - (HASH.havuz[g] || {})._t < 10 * 60000)) return HASH.havuz[g];
+  try { const d = await al('n8n/havuz/' + g + '.json', g === bugunTR()); d._t = Date.now(); HASH.havuz[g] = d; } catch (e) { HASH.havuz[g] = null; }
+  return HASH.havuz[g];
+}
+// grafikte gösterilecek çizgiler (seçim tarayıcıda saklanır)
+const SERI_VARS = { saha: 1, filo: 1, f2s: 1, f210: 0 };
+function seriSec() { try { return Object.assign({}, SERI_VARS, JSON.parse(localStorage.getItem('ae_hash_seri') || '{}')); } catch (e) { return Object.assign({}, SERI_VARS); } }
+function seriDegis(k) { const s = seriSec(); s[k] = s[k] ? 0 : 1; if (!Object.values(s).some(Boolean)) s.saha = 1; try { localStorage.setItem('ae_hash_seri', JSON.stringify(s)); } catch (e) {} HS.seri = s; hashCiz(); }
 function hashKapat() { const m = document.getElementById('hashModal'); if (m) m.remove(); document.removeEventListener('keydown', hashTus); clearInterval(HS.zaman); HS.zaman = null; }
 // Canlı izleme: modal açıkken dakikada bir saha verisi (antminer_panel) ve bugünün 5 dk kaydı yenilenir
 async function hashYenile() {
@@ -1166,9 +1176,11 @@ async function hashCiz() {
   if (HS.bit > bugun) HS.bit = bugun; if (HS.bit < ilk) HS.bit = ilk;
   const gunler = []; for (let i = n - 1; i >= 0; i--) gunler.push(gunEkle(HS.bit, -i));
   const veri = await Promise.all(gunler.map(hashGunAl));
+  const SEC = HS.seri || (HS.seri = seriSec());
+  const hv = SEC.f210 ? await Promise.all(gunler.map(havuzGunAl)) : [];
   // dilim: 1 gün 5 dk · 7 gün 30 dk · 30 gün 2 saat (ortalama)
   const birles = n === 1 ? 1 : n <= 7 ? 6 : 24, adim = 5 * birles, nG = 288 / birles;
-  const et = [], cihaz = [], filo = [], f2 = [];
+  const et = [], cihaz = [], filo = [], f2 = [], f10 = [];
   gunler.forEach((g, gi) => {
     const d = veri[gi], cs = (d && d.c) || {};
     for (let j = 0; j < nG; j++) {
@@ -1181,10 +1193,11 @@ async function hashCiz() {
       for (let k = j * birles; k < (j + 1) * birles; k++) { const v = Object.values(cs).map(a => a[k]).filter(x => x > 0).sort((a, b) => a - b); if (v.length >= 3) med.push(v[Math.floor(v.length / 2)]); }
       filo.push(ort(med));
       const h = MADEN.H && MADEN.H[g + ' ' + hh]; f2.push(h && h[c] != null ? h[c] : null);
+      const hc = hv[gi] && hv[gi].c && hv[gi].c[c]; if (hc) { const a = []; for (let k = j * birles; k < (j + 1) * birles; k++) { const v = hc[Math.floor(k / 2)]; if (v != null) a.push(v); } f10.push(a.length ? a.reduce((x, y) => x + y, 0) / a.length : null); } else f10.push(null);
     }
   });
   // geleceğe ait dilimleri boş bırak
-  if (HS.bit === bugun) { const s = trSimdi(), simdiDk = s.getUTCHours() * 60 + s.getUTCMinutes(); for (let j = 0; j < nG; j++) if (j * adim > simdiDk) { const k = et.length - nG + j; cihaz[k] = filo[k] = f2[k] = null; } }
+  if (HS.bit === bugun) { const s = trSimdi(), simdiDk = s.getUTCHours() * 60 + s.getUTCMinutes(); for (let j = 0; j < nG; j++) if (j * adim > simdiDk) { const k = et.length - nG + j; cihaz[k] = filo[k] = f2[k] = f10[k] = null; } }
   const ham = gunler.flatMap((g, gi) => ((veri[gi] && veri[gi].c && veri[gi].c[c]) || Array(288).fill(null)));
   const cal = ham.filter(v => v > 0), uyku = ham.filter(v => v === 0).length, bos = ham.filter(v => v == null).length;
   const sure = k => { const d = k * 5; return d >= 1440 ? say(d / 1440, 1) + ' gün' : d >= 60 ? say(d / 60, 1) + ' sa' : d + ' dk'; };
@@ -1204,15 +1217,16 @@ async function hashCiz() {
   if (!veriVar) h += '<p class="k" style="margin:0">Bu dönemde cihaz ' + esc(c) + ' için saha kaydı yok' + (HASH.liste && HASH.liste.length ? ' (kayıtlar ' + tarihK(ilk) + ' ' + ilk.slice(0, 4) + '\'ten itibaren).' : '.') + '</p>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px">' + kutu('Çalışırken ort.', calOrt != null ? say(calOrt, 1) + ' TH/s' : '—') + kutu('Filoya göre', fark != null ? (fark >= 0 ? '+' : '') + say(fark, 1) + '%' : '—', fark != null && fark < -10 ? '#B42318' : null)
     + kutu('Tepe', cal.length ? say(Math.max(...cal), 1) + ' TH/s' : '—') + kutu('Çalıştı', sure(cal.length), '#1E7A3C') + kutu('Uyudu', sure(uyku)) + kutu('Kayıt yok', sure(bos), bos > ham.length / 2 ? '#9A5B00' : null) + '</div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="k">Çizgiler:</span><span class="tursec">' + [['saha', 'Saha (cihaz)'], ['f210', 'F2Pool 10 dk'], ['f2s', 'F2Pool saatlik'], ['filo', 'Filo medyanı']].map(([k, a]) => '<button type="button" aria-pressed="' + !!SEC[k] + '" onclick="seriDegis(\'' + k + '\')">' + (SEC[k] ? '✓ ' : '') + a + '</button>').join('') + '</span></div>';
   // eksen: 1 günde 3 saatte bir saat, çok günde gün başları (sığdığı kadar)
   const gunAdim = Math.max(1, Math.ceil(n / (grafGen() < 520 ? 4 : 10)));
   const etKisa = et.map((e, i) => n === 1 ? e : (i % nG === 0 ? tarihK(gunler[Math.floor(i / nG)]) : ''));
   const etGoster = i => n === 1 ? i % 36 === 0 : (i % nG === 0 && Math.floor(i / nG) % gunAdim === 0);
-  const tip = i => et[i] + '\n' + 'Cihaz ' + c + ': ' + (cihaz[i] == null ? 'kayıt yok' : cihaz[i] === 0 ? '0 (uykuda)' : say(cihaz[i], 1) + ' TH/s') + '\nFilo medyanı: ' + (filo[i] == null ? '—' : say(filo[i], 1)) + '\nF2Pool: ' + (f2[i] == null ? '—' : say(f2[i], 1));
+  const tip = i => et[i] + '\n' + 'Cihaz ' + c + ': ' + (cihaz[i] == null ? 'kayıt yok' : cihaz[i] === 0 ? '0 (uykuda)' : say(cihaz[i], 1) + ' TH/s') + '\nFilo medyanı: ' + (filo[i] == null ? '—' : say(filo[i], 1)) + '\nF2Pool saatlik: ' + (f2[i] == null ? '—' : say(f2[i], 1)) + (SEC.f210 ? '\nF2Pool 10 dk: ' + (f10[i] == null ? '—' : say(f10[i], 1)) : '');
   h += grafikX({ id: 'hashc', ad: 'Cihaz ' + c + ' hashrate', etiket: etKisa, etGoster, tip, turler: ['cizgi'], birim: 'TH/s', yuk: 220, fmt: v => say(v, 1),
-    seriler: [{ ad: 'F2Pool (saatlik)', renk: '#7FA6D6', v: f2, kesik: true }, { ad: 'Filo medyanı', renk: '#8A96A8', v: filo, kesik: true },
-      { ad: 'Cihaz ' + c + ' (saha, ' + (adim === 5 ? '5 dk' : adim === 30 ? '30 dk ort.' : '2 sa ort.') + ')', renk: '#D92D20', v: cihaz, kalin: true, kalinlik: 3.4 }] });
-  h += '<div class="k">0 = uykuda (ya da uyanırken/ısınırken hash yok) · boşluk = o dilimde saha kaydı yok (toplayıcı ağ dışında ya da cihaz yanıt vermedi). Saha değeri toplayıcının ölçtüğü anlık hızdır; Pi her 5 dakikada bir kaydeder. F2Pool çizgisi havuzun saatlik ortalamasıdır.</div>';
+    seriler: [SEC.f210 && { ad: 'F2Pool 10 dk' + (adim === 5 ? '' : ' (' + (adim === 30 ? '30 dk' : '2 sa') + ' ort.)'), renk: '#22B8CF', v: f10 }, SEC.f2s && { ad: 'F2Pool (saatlik)', renk: '#7FA6D6', v: f2, kesik: true }, SEC.filo && { ad: 'Filo medyanı', renk: '#8A96A8', v: filo, kesik: true },
+      SEC.saha && { ad: 'Cihaz ' + c + ' (saha, ' + (adim === 5 ? '5 dk' : adim === 30 ? '30 dk ort.' : '2 sa ort.') + ')', renk: '#D92D20', v: cihaz, kalin: true, kalinlik: 3.4 }].filter(Boolean) });
+  h += '<div class="k">0 = uykuda (ya da uyanırken/ısınırken hash yok) · boşluk = o dilimde saha kaydı yok (toplayıcı ağ dışında ya da cihaz yanıt vermedi). Saha değeri toplayıcının ölçtüğü anlık hızdır; Pi her 5 dakikada bir kaydeder. F2Pool çizgileri havuzun share sayımından tahminidir: 10 dk çizgisi testere dişi gibi oynar (şans), saatlik ortalama ve uzun dönemde sahayla örtüşmelidir; 10 dk verisi saatlik arşivle gelir.</div>';
   m.firstChild.innerHTML = h;
 }
 
@@ -2980,9 +2994,10 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && ANLIK.acik
 async function anlikCiz() {
   const w = document.getElementById('anlikPen'); if (!w || !ANLIK.acik) return;
   const gun = bugunTR();
-  if (!ANLIK.gh || Date.now() - ANLIK.ghT > 60000) { ANLIK.ghT = Date.now(); ANLIK.gh = await Promise.all([anlikVeri('antminer_panel.json'), anlikVeri('n8n/cihaz_yonetimi_durum.json'), anlikVeri('n8n/fusionsolar_son.json'), anlikVeri('n8n/saha_saatlik.json'), anlikVeri('n8n/hash/' + gun + '.json'), canliOku()].map(p => p.catch(() => null))); } else await canliOku();
+  if (!ANLIK.gh || Date.now() - ANLIK.ghT > 60000) { ANLIK.ghT = Date.now(); ANLIK.gh = await Promise.all([anlikVeri('antminer_panel.json'), anlikVeri('n8n/cihaz_yonetimi_durum.json'), anlikVeri('n8n/fusionsolar_son.json'), anlikVeri('n8n/saha_saatlik.json'), anlikVeri('n8n/hash/' + gun + '.json'), anlikVeri('n8n/havuz/' + gun + '.json'), canliOku()].map(p => p.catch(() => null))); } else await canliOku();
   if (!ANLIK.acik) return;
-  const [mad, yon, fs, saha, hs] = ANLIK.gh;
+  const [mad, yon, fs, saha, hs, hvz] = ANLIK.gh;
+  if (ANLIK.havuz == null) { try { ANLIK.havuz = localStorage.getItem('ae_anlik_havuz') === '1'; } catch (e) { ANLIK.havuz = false; } }
   const cs = ANLIK.son, canliTaze = cs && Date.now() / 1000 - cs.t < 90;
   const JT = (saha && saha.jth) || { 'S21e Hyd': 17.5, 'S19 XP+ Hyd': 21.5, 'S19e XP Hyd': 34.5 }, ISI = (saha && saha.isinma_kw) || 1;
   const dv = ((mad && mad.devices) || []).filter(d => d.online || d.sleeping || (d.model && d.model !== '?'));
@@ -3022,6 +3037,11 @@ async function anlikCiz() {
   for (let t = Math.ceil(x0 / (adimEt * 60000)) * adimEt * 60000; t <= x1; t += adimEt * 60000) { const xx = X(t), d = new Date(t + 3 * 3600e3); grafik += '<line x1="' + xx.toFixed(1) + '" x2="' + xx.toFixed(1) + '" y1="0" y2="' + (H - 18) + '" stroke="#24364F"/><text x="' + Math.min(W - 30, xx + 2).toFixed(1) + '" y="' + (H - 4) + '" font-size="11" fill="#8FA2BC">' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0') + '</text>'; }
   for (let k = 1; k <= 3; k++) { const v = ymin + (ymax - ymin) * k / 4; grafik += '<text x="4" y="' + (Y(v) - 3).toFixed(1) + '" font-size="11" fill="#8FA2BC">' + say(v / 1000, 2) + ' PH/s</text><line x1="0" x2="' + W + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="#24364F" stroke-dasharray="3 5"/>'; }
   if (yol) grafik += '<g clip-path="url(#anlikKlip)"><path d="' + alan + '" fill="rgba(43,210,122,.12)"/><path d="' + yol + '" fill="none" stroke="#2BD27A" stroke-width="2.2" stroke-linejoin="round"/>' + ANLIK.canli.filter(c => c[0] >= x0).filter((c, i, a) => a.length < 150).map(c => '<circle cx="' + X(c[0]).toFixed(1) + '" cy="' + Y(c[1]).toFixed(1) + '" r="3" fill="#2BD27A"/>').join('') + '</g>';
+  if (ANLIK.havuz && hvz && hvz.c) {
+    const HV = []; for (let i = 0; i < 144; i++) { let t = 0, v = false; for (const a of Object.values(hvz.c)) if (a[i] != null) { t += a[i]; v = true; } if (v) HV.push([g0 + i * 600000, t]); }
+    const hvG = HV.filter(p => p[0] >= x0 - 600000 && p[0] <= x1);
+    if (hvG.length) grafik += '<g clip-path="url(#anlikKlip)"><path d="' + hvG.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Math.max(0, Math.min(H - 18, Y(p[1]))).toFixed(1)).join(' ') + '" fill="none" stroke="#22B8CF" stroke-width="1.6" stroke-linejoin="round" opacity=".9"/></g>';
+  }
   const sonN = G.filter(p => p[1] != null).pop(); if (sonN) grafik += '<circle cx="' + X(sonN[0]).toFixed(1) + '" cy="' + Y(sonN[1]).toFixed(1) + '" r="6" fill="#2BD27A" stroke="#0E1A2B" stroke-width="2"><animate attributeName="r" values="5;8;5" dur="1.6s" repeatCount="indefinite"/></circle><text x="' + Math.min(W - 70, X(sonN[0]) + 8).toFixed(1) + '" y="' + (Y(sonN[1]) - 8).toFixed(1) + '" font-size="12" font-weight="700" fill="#fff">' + say(sonN[1] / 1000, 2) + '</text>';
   grafik += '<line x1="' + X(simdi).toFixed(1) + '" x2="' + X(simdi).toFixed(1) + '" y1="0" y2="' + (H - 18) + '" stroke="#F0525A" stroke-dasharray="4 4"/></svg>';
   const seri = P;
@@ -3045,7 +3065,7 @@ async function anlikCiz() {
     + kart('Karar · PTF', kararAd, 'PTF ' + say(yon && yon.ptf) + ' ₺/MWh · ' + esc((yon && yon.mod) || ''), yon && yon.karar === 'calis' ? '#2BD27A' : '#5B8DEF')
     + (para ? kart('Bu saat (cihaz başı)', '<span style="font-size:22px">' + say(yon.gelir_tl_saat, 1) + ' / ' + say(yon.maliyet_tl_saat, 1) + ' ₺</span>', 'gelir / şebeke maliyeti · ₺/saat', yon.gelir_tl_saat >= yon.maliyet_tl_saat ? '#2BD27A' : '#F0525A') : '')
     + '</div>'
-    + '<div style="background:#132238;border:1px solid #24364F;border-radius:14px;padding:12px 14px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:#8FA2BC;font-size:12.5px;margin-bottom:6px"><b style="color:#fff">Filo hash</b><span style="display:flex;gap:6px;flex-wrap:wrap">' + aralikDug + '</span><span>' + (canliTaze ? adim + ' dk kayıt + Pi\'den ~10 sn\'de bir canlı okuma' : adim + ' dk kayıt + 1–2 dk\'da bir okuma (canlı bağlantı yok)') + '</span></div>' + (seri.length ? grafik : '<p style="color:#8FA2BC">Bugünün 5 dk verisi henüz yok.</p>') + '</div>'
+    + '<div style="background:#132238;border:1px solid #24364F;border-radius:14px;padding:12px 14px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:#8FA2BC;font-size:12.5px;margin-bottom:6px"><b style="color:#fff">Filo hash</b><span style="display:flex;gap:6px;flex-wrap:wrap">' + aralikDug + '</span><button type="button" onclick="ANLIK.havuz=!ANLIK.havuz;try{localStorage.setItem(\'ae_anlik_havuz\',ANLIK.havuz?\'1\':\'0\')}catch(e){}anlikCiz()" style="font:inherit;font-size:12px;padding:4px 10px;border-radius:999px;cursor:pointer;border:1px solid ' + (ANLIK.havuz ? '#22B8CF;background:#22B8CF22;color:#fff' : '#33496A;background:transparent;color:#8FA2BC') + '">' + (ANLIK.havuz ? '✓ ' : '') + 'F2Pool 10 dk</button><span>' + (canliTaze ? adim + ' dk kayıt + Pi\'den ~10 sn\'de bir canlı okuma' : adim + ' dk kayıt + 1–2 dk\'da bir okuma (canlı bağlantı yok)') + '</span></div>' + (seri.length ? grafik : '<p style="color:#8FA2BC">Bugünün 5 dk verisi henüz yok.</p>') + '</div>'
     + (yon && yon.eylem_not ? '<div style="background:#132238;border:1px solid #24364F;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#B9C7DA"><b style="color:#fff">Son karar:</b> ' + esc(PARA ? String(yon.neden || '') : String(yon.neden || '').replace(/[^·()]*₺[^·()]*/g, '').replace(/\(\s*\)/g, '')) + (yon.eylem ? ' · <b>' + (yon.eylem === 'wake' ? '↑ uyandır' : '↓ uyut') + '</b> ' + esc(yon.eylem_not) : '') + '</div>' : '')
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px">' + dv.map(tile).join('') + '</div>'
     + '<p style="color:#5F7391;font-size:12px;margin-top:14px">Cihaz verisi ' + (canliTaze ? 'Pi\'den doğrudan (~10 sn)' : 'Pi toplayıcısından (~2 dk)') + ', güneş FusionSolar\'dan (~10 dk), karar cihaz yönetiminden (~5 dk) gelir. Güç, hash × model verimi ile tahmindir; ısınan cihaz ' + ISI + ' kW sayılır. Kutuya tıklayınca cihazın hash grafiği açılır.</p></div>';

@@ -123,3 +123,19 @@ if ISLEM == "sil":
             not_(f"silindi: {p['name']} ({', '.join(servisler)})")
         except Exception as e:
             not_(f"silinemedi: {p['name']}: {str(e)[:200]}")
+
+if ISLEM == "degisken":
+    # Yalnız değişken ADLARI (değerler yazdırılmaz)
+    for pe in d["projects"]["edges"]:
+        p = pe["node"]
+        if p["name"] != (os.environ.get("FILTRE") or "striking-flexibility"):
+            continue
+        for se in p["services"]["edges"]:
+            s = se["node"]
+            for ie in s["serviceInstances"]["edges"]:
+                i = ie["node"]
+                try:
+                    v = gql("query($p:String!,$e:String!,$s:String!){ variables(projectId:$p, environmentId:$e, serviceId:$s) }", {"p": p["id"], "e": i["environmentId"], "s": s["id"]})["variables"]
+                    not_(f"{p['name']}/{s['name']} değişkenler: " + ", ".join(sorted(v.keys())))
+                except Exception as e:
+                    not_(f"değişkenler alınamadı: {e}")

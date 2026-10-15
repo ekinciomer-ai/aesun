@@ -28,21 +28,24 @@ for pe in d["projects"]["edges"]:
             i = ie["node"]; env = i["environmentId"]
             dom = ",".join(x["domain"] for x in ((i.get("domains") or {}).get("serviceDomains") or []))
             ld = i.get("latestDeployment") or {}
-            deps = gql("""query($p:String!,$s:String!,$e:String!){ deployments(first:30, input:{projectId:$p, serviceId:$s, environmentId:$e}) { edges { node { id status createdAt } } } }""",
+            try:
+                deps = gql("""query($p:String!,$s:String!,$e:String!){ deployments(first:30, input:{projectId:$p, serviceId:$s, environmentId:$e}) { edges { node { id status createdAt } } } }""",
                        {"p": p["id"], "s": s["id"], "e": env})["deployments"]["edges"]
+            except Exception as e:
+                not_(f"{p['name']}/{s['name']}: dağıtım listesi alınamadı: {e}"); deps = []
             sayim = {}
             for de in deps:
                 sayim[de["node"]["status"]] = sayim.get(de["node"]["status"], 0) + 1
             not_(f"proje={p['name']} servis={s['name']} repo={(i.get('source') or {}).get('repo')} alan={dom or '-'} son={ld.get('status')} {str(ld.get('createdAt'))[:16]} dağıtımlar={sayim}")
             if ISLEM == "duzelt" and (i.get("source") or {}).get("repo"):
-                iptal0 = 0
+                iptal0, hata0 = 0, ""
                 for de in deps:
                     if de["node"]["status"] in ("QUEUED", "WAITING", "INITIALIZING", "BUILDING"):
                         try:
                             gql("mutation($id:String!){ deploymentCancel(id:$id) }", {"id": de["node"]["id"]}); iptal0 += 1
-                        except Exception:
-                            pass
-                not_(f"{p['name']}/{s['name']}: kuyruktan {iptal0} dağıtım iptal edildi")
+                        except Exception as e:
+                            hata0 = str(e)[:160]
+                not_(f"{p['name']}/{s['name']}: kuyruktan {iptal0} dağıtım iptal edildi" + (f" (hata: {hata0})" if hata0 else ""))
             if ISLEM == "duzelt" and (i.get("source") or {}).get("repo", "").lower().endswith("epias-ptf"):
                 try:
                     gql("""mutation($s:String!,$e:String!,$w:[String!]){ serviceInstanceUpdate(serviceId:$s, environmentId:$e, input:{watchPatterns:$w}) }""",

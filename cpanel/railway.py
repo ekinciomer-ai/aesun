@@ -34,6 +34,15 @@ for pe in d["projects"]["edges"]:
             for de in deps:
                 sayim[de["node"]["status"]] = sayim.get(de["node"]["status"], 0) + 1
             not_(f"proje={p['name']} servis={s['name']} repo={(i.get('source') or {}).get('repo')} alan={dom or '-'} son={ld.get('status')} {str(ld.get('createdAt'))[:16]} dağıtımlar={sayim}")
+            if ISLEM == "duzelt" and (i.get("source") or {}).get("repo"):
+                iptal0 = 0
+                for de in deps:
+                    if de["node"]["status"] in ("QUEUED", "WAITING", "INITIALIZING", "BUILDING"):
+                        try:
+                            gql("mutation($id:String!){ deploymentCancel(id:$id) }", {"id": de["node"]["id"]}); iptal0 += 1
+                        except Exception:
+                            pass
+                not_(f"{p['name']}/{s['name']}: kuyruktan {iptal0} dağıtım iptal edildi")
             if ISLEM == "duzelt" and (i.get("source") or {}).get("repo", "").lower().endswith("epias-ptf"):
                 try:
                     gql("""mutation($s:String!,$e:String!,$w:[String!]){ serviceInstanceUpdate(serviceId:$s, environmentId:$e, input:{watchPatterns:$w}) }""",
@@ -48,6 +57,8 @@ for pe in d["projects"]["edges"]:
                             gql("mutation($id:String!){ deploymentCancel(id:$id) }", {"id": de["node"]["id"]}); iptal += 1
                         except Exception as e:
                             pass
+                if p["name"] != (os.environ.get("HEDEF_PROJE") or "striking-flexibility"):
+                    continue
                 try:
                     gql("""mutation($s:String!,$e:String!){ serviceInstanceDeploy(serviceId:$s, environmentId:$e, latestCommit:true) }""", {"s": s["id"], "e": env})
                     not_(f"{p['name']}/{s['name']}: {iptal} bekleyen iptal edildi, yeniden dağıtım başlatıldı")

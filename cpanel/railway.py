@@ -102,10 +102,10 @@ if ISLEM == "eski_imaj":
                            {"p": p["id"], "s": s["id"], "e": i["environmentId"]})["deployments"]["edges"]
                 adaylar = [x["node"] for x in deps if x["node"]["status"] in ("REMOVED", "SUCCESS")]
                 not_(f"eski dağıtım adayları: " + ", ".join(f"{x['createdAt'][:16]} {x['status']}" for x in adaylar[:5]))
-                for n in adaylar[:3]:
+                for n in [x for x in adaylar if x["createdAt"][:13] <= "2026-10-15T09"][:40]:
                     try:
                         r = gql("mutation($id:String!){ deploymentRedeploy(id:$id, usePreviousImageTag:true) { id status } }", {"id": n["id"]})
                         not_(f"hazır imajla yeniden açıldı: {n['createdAt'][:16]} → {r['deploymentRedeploy']}")
                         break
                     except Exception as e:
-                        not_(f"{n['createdAt'][:16]} açılamadı: {str(e)[:200]}")
+                        hata_son = str(e)[:120]

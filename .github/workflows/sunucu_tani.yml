@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       bolum:
-        description: "1 = sistem, 2 = docker / uygulamalar / ağ"
+        description: "1 = sistem, 2 = docker / uygulamalar / ağ, 3 = disk temizlik analizi"
         default: "1"
 jobs:
   tani:
@@ -32,6 +32,18 @@ jobs:
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "3" ]; then
+            not "Docker df" "$($S 'docker system df 2>/dev/null')"
+            not "Kullanılmayan imajlar" "$($S 'U=$(docker ps -a --format "{{.Image}}" | sort -u); docker images --format "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}} {{.CreatedSince}}" | while read r id sz c; do echo "$U" | grep -qx "$r" || echo "$U" | grep -qx "${r%:latest}" || echo "$r|$sz|$c;"; done | head -25')"
+            not "Sahipsiz birimler" "$($S 'for v in $(docker volume ls -qf dangling=true); do echo -n "$v $(du -sh /var/lib/docker/volumes/$v 2>/dev/null | cut -f1); "; done')"
+            not "Durmuş konteynerler" "$($S 'docker ps -a --filter status=exited --filter status=created --format "{{.Names}} {{.Image}} {{.Status}} {{.Size}}" | head -15')"
+            not "Günlük/önbellek" "$($S 'journalctl --disk-usage 2>/dev/null; du -sh /var/log /var/cache/apt /root/.cache /root/.npm /tmp 2>/dev/null | tr "\n" " "; echo; ls /var/lib/docker/containers/*/*-json.log 2>/dev/null | xargs -r du -ch | tail -1')"
+            not "Büyük dosyalar" "$($S 'find / -xdev -type f -size +150M -not -path "/proc/*" -not -path "/var/lib/docker/overlay2/*" -printf "%s %p\n" 2>/dev/null | sort -rn | head -15 | awk "{printf \"%.0fMB %s; \", \$1/1048576, \$2}"')"
+            not "Yedek/arşiv dosyaları" "$($S 'find /opt /root /home /srv /var/backups -xdev -type f \( -iname "*.sql" -o -iname "*.sql.gz" -o -iname "*.dump" -o -iname "*.tar*" -o -iname "*.zip" -o -iname "*.bak" -o -iname "*backup*" -o -iname "*.yedek" \) -size +5M -printf "%s %TY-%Tm-%Td %p\n" 2>/dev/null | sort -rn | head -20 | awk "{printf \"%.0fMB %s %s; \", \$1/1048576, \$2, \$3}"')"
+            not "Klasör boyutları" "$($S 'du -xsh /opt/* /root /home /var/lib/docker/volumes /var/lib/docker/overlay2 /var/lib/containerd /snap /usr 2>/dev/null | sort -h | tr "\t\n" ": "')"
+            not "Çekirdek/snap" "$($S 'dpkg -l "linux-image-*" 2>/dev/null | awk "/^ii/{print \$2}" | tr "\n" " "; echo; uname -r; snap list --all 2>/dev/null | awk "/disabled/{print \$1\" \"\$3}" | tr "\n" " "')"
+            exit 0
+          fi
           if [ "${{ inputs.bolum }}" = "2" ]; then
             not "Docker" "$($S 'docker ps --format "{{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}" 2>/dev/null | head -20')"
             not "opt" "$($S 'ls -la /opt; ls /opt/* 2>/dev/null | head -40')"

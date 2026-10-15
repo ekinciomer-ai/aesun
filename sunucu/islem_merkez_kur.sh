@@ -11,6 +11,7 @@ if [ ! -f $H/.env ]; then
   echo "NOT: .env oluşturuldu (root-only)"
 fi
 chmod 600 $H/.env
+grep -q '^AESUN_REPO=' $H/.env || echo 'AESUN_REPO=git@github.com:ekinciomer-ai/epias-ptf.git' >> $H/.env   # dağıtım anahtarı: depo gizli olunca da okur
 cd $H
 docker compose build -q
 # veri birimi kapsayıcı kullanıcısına ait olmalı

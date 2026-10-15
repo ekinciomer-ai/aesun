@@ -2,6 +2,7 @@
 // Anlık izleme deposu — Pi (pi/canli.py) ~10 sn'de bir POST eder, monitoring sayfası GET ile okur.
 // Kimlik: X-AE-Canli başlığındaki anahtarın SHA-256 özeti, GitHub'daki epias-ptf/n8n/canli_anahtar.json
 // ile karşılaştırılır. Bu dosyada sır yoktur.
+ini_set('serialize_precision', '-1');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('Access-Control-Allow-Origin: *');

@@ -69,7 +69,7 @@ def oku(c):
         hiz = hiz / 1000 if birim.startswith("GH") else hiz if birim.startswith("TH") else hiz / 1e6
     else:
         hiz = None
-    tc = _maks([_maks(ch.get("temp_chip")) for ch in s.get("chain") or []])
+    tc = _maks([_maks(ch.get("temp_chip") or ch.get("temp_chip_out") or ch.get("temp2") or ch.get("temp_pcb")) for ch in s.get("chain") or []])
     return no, [round(hiz, 1) if hiz is not None else None, tc]
 
 

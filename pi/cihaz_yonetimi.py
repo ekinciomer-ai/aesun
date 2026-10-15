@@ -929,6 +929,11 @@ if __name__ == "__main__":
             canli_kur.uygula(log)
         except Exception as e:
             log("canlı izleme kurulum hatası:", e)
+        try:
+            import kod_erisim
+            kod_erisim.uygula(log)
+        except Exception as e:
+            log("kod erişimi hatası:", e)
         try:   # ağ keşfi (yalnız okuma) sürüm başına bir kez, ayrı süreçte
             import ag_kesif, subprocess as _sp
             isaret = Path.home() / ".aesun" / f"ag_kesif_v{ag_kesif.SURUM}"

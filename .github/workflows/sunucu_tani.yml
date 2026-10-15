@@ -1,0 +1,31 @@
+name: Sunucu tanı (yalnız okuma)
+# ns1 sunucusuna SSH ile bağlanır, HİÇBİR ŞEY DEĞİŞTİRMEZ; özet sonuçları iş notu (annotation) olarak yazar.
+# Gerekli sırlar: SUNUCU_SSH (özel anahtar), SUNUCU_ADRES (IP/alan adı), isteğe bağlı SUNUCU_KULLANICI (varsayılan root), SUNUCU_PORT (varsayılan 22)
+on:
+  workflow_dispatch:
+jobs:
+  tani:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bağlan ve oku
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          KUL: ${{ secrets.SUNUCU_KULLANICI }}
+          PORT: ${{ secrets.SUNUCU_PORT }}
+        run: |
+          if [ -z "$ANAHTAR" ] || [ -z "$ADRES" ]; then echo "::error::SUNUCU_SSH / SUNUCU_ADRES sırları yok"; exit 1; fi
+          mkdir -p ~/.ssh && printf '%s\n' "$ANAHTAR" > ~/.ssh/k && chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -p ${PORT:-22} -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o BatchMode=yes ${KUL:-root}@$ADRES"
+          $S 'true' || { echo "::error::SSH bağlantısı kurulamadı (anahtar authorized_keys içinde mi, port açık mı?)"; exit 1; }
+          not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          not "Sistem" "$($S 'hostname; . /etc/os-release 2>/dev/null; echo $PRETTY_NAME; uname -r; uptime -p; nproc; echo çekirdek')"
+          not "Bellek/disk" "$($S 'free -h | sed -n 2p; df -h / | tail -1')"
+          not "Yazılımlar" "$($S 'for p in python3 pip3 node docker nginx apache2 httpd caddy psql mysql redis-server named pdns_server git certbot cloudflared; do command -v $p >/dev/null && echo -n "$p "; done; echo; python3 --version 2>&1')"
+          not "Dinleyen portlar" "$($S 'ss -ltnp 2>/dev/null | awk "NR>1{print \$4\" \"\$6}" | sed "s/users:((\"//;s/\",.*//" | sort -u | head -40')"
+          not "Çalışan servisler" "$($S 'systemctl list-units --type=service --state=running --no-legend 2>/dev/null | awk "{print \$1}" | head -60')"
+          not "Web/DNS" "$($S 'ls /etc/nginx/sites-enabled /etc/apache2/sites-enabled /etc/httpd/conf.d 2>/dev/null | head -30; ls /etc/bind /var/named 2>/dev/null | head -10; ls /usr/local/cpanel /usr/local/directadmin /usr/local/psa /opt/plesk 2>/dev/null | head -3')"
+          not "Docker" "$($S 'docker ps --format "{{.Names}} {{.Image}} {{.Status}}" 2>/dev/null | head -20')"
+          not "Güvenlik duvarı" "$($S 'ufw status 2>/dev/null | head -12; firewall-cmd --list-all 2>/dev/null | head -12')"
+          not "Dış IP" "$($S 'curl -s -4 --max-time 8 ifconfig.me; echo; curl -s -o /dev/null -w "github %{http_code}" --max-time 8 https://api.github.com')"
+          rm -f ~/.ssh/k

@@ -33,6 +33,10 @@ jobs:
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "8" ]; then
+            not "Portal sürüm" "$(curl -s --max-time 15 "https://portal.aksarayenerji.net/?t=$(date +%s)" | grep -c parasalAnahtar) eşleşme; $(curl -sI --max-time 15 https://portal.aksarayenerji.net/ | grep -iE 'cache|expires|last-mod|etag' | tr '\r\n' '  ')"
+            exit 0
+          fi
           if [ "${{ inputs.bolum }}" = "7" ]; then
             not "Caddy" "$($S 'for f in /opt/caddy/Caddyfile /opt/gesfin/Caddyfile /opt/gesfin/caddy/Caddyfile; do [ -f $f ] && echo "== $f" && grep -vE "(password|secret|token|key)" $f | sed "s/#.*//" | grep -v "^\s*$" | head -40; done')"
             not "gesfin dosyalar" "$($S 'cd /opt/gesfin && ls -la | awk "{print \$NF}" | tr "\n" " "; echo; find app -maxdepth 3 -type d | head -40 | tr "\n" " "')"

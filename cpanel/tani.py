@@ -29,4 +29,6 @@ for u in ("https://epias-ptf-production.up.railway.app/", "https://epias-ptf-pro
             t = _re.search(r"<title>(.*?)</title>", b, _re.S)
             print(f"::notice::{u} → {x.status} {x.geturl()} başlık={t.group(1).strip()[:60] if t else '-'}")
     except Exception as e:
-        print(f"::notice::{u} → {getattr(e,'code',e)}")
+        b = e.read().decode("utf-8", "ignore")[:200] if hasattr(e, "read") else ""
+        h = dict(e.headers) if hasattr(e, "headers") and e.headers else {}
+        print(f"::notice::{u} → {getattr(e,'code',e)} gövde={b!r} server={h.get('Server')} x-railway={h.get('X-Railway-Fallback') or h.get('x-railway-fallback')}")

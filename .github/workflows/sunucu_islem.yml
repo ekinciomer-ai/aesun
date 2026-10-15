@@ -1,0 +1,39 @@
+name: Sunucu işlemi (ns1)
+# ns1 üzerinde onaylı işlemleri yapar. Her işlem sunucu/islem_<ad>.sh dosyasındadır ve ns1'de root olarak çalışır.
+# Sırlar: SUNUCU_SSH, SUNUCU_ADRES. Çıktının sırlar içermemesi betiklerin sorumluluğundadır.
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: "betik adı (sunucu/islem_<ad>.sh)"
+        required: true
+concurrency:
+  group: sunucu-islem
+  cancel-in-progress: false
+jobs:
+  calis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Çalıştır
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          ISLEM: ${{ inputs.islem }}
+        run: |
+          set -o pipefail
+          case "$ISLEM" in *[!a-z0-9_]*|"") echo "::error::geçersiz işlem adı"; exit 1;; esac
+          B="sunucu/islem_${ISLEM}.sh"; [ -f "$B" ] || { echo "::error::$B yok"; exit 1; }
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
+          # betik ve ek dosyalar (sunucu/aesun/ klasörü) sunucuya taşınır
+          tar czf /tmp/paket.tgz sunucu
+          $S 'rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket' && $S 'tar xzf - -C /tmp/aesun_paket' < /tmp/paket.tgz
+          $S "cd /tmp/aesun_paket && bash sunucu/islem_${ISLEM}.sh" 2>&1 | tee /tmp/cikti.txt
+          kod=${PIPESTATUS[0]}
+          grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
+          $S 'rm -rf /tmp/aesun_paket'
+          rm -f ~/.ssh/k
+          exit $kod

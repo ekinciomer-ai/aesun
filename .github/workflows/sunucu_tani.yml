@@ -32,6 +32,10 @@ jobs:
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "5" ]; then
+            not "Canlı API" "$($S 'curl -s --max-time 15 "https://portal.aksarayenerji.net/api/canli.php?s=9999999999"; echo; echo simdi=$(date +%s)')"
+            exit 0
+          fi
           if [ "${{ inputs.bolum }}" = "3" ] || [ "${{ inputs.bolum }}" = "4" ]; then
             [ "${{ inputs.bolum }}" = "3" ] && not "Docker df" "$($S 'docker system df 2>/dev/null')"
             [ "${{ inputs.bolum }}" = "3" ] && not "Kullanılmayan imajlar" "$($S 'U=$(docker ps -a --format "{{.Image}}" | sort -u); docker images --format "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}} {{.CreatedSince}}" | while read r id sz c; do echo "$U" | grep -qx "$r" || echo "$U" | grep -qx "${r%:latest}" || echo "$r|$sz|$c;"; done | head -25')"

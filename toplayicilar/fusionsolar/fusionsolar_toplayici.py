@@ -91,7 +91,7 @@ DC_KWP = {"NE=59224704": 1230.755,   # Tek Yıldız-1 / Sera-1
           "NE=73686040": 1035.0}     # Tek Yıldız-2 / Sera-2
 KISA = {"NE=59224704": "Sera-1", "NE=73686040": "Sera-2"}
 
-PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600, "pvanlik": 600}
+PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600, "pvanlik": 600, "kkesif": 3600}
 
 INV_SIG = {  # device-realtime-data sinyal id -> alan
     "10018": "aktif_kw", "10019": "reaktif_kvar", "10032": "gunluk_kwh", "10029": "toplam_kwh",
@@ -861,6 +861,71 @@ class Collector:
             print(f"{x['id']:>6} | {x.get('name','')[:40]:40} | {birim:6} | {x.get('period','')[:16]:16} | {len(v):3} nokta | en büyük {max(v) if v else '-'} | toplam {round(sum(v), 1) if v else '-'}")
             time.sleep(0.3)
 
+    KONTROL_KESIF_SURUM = 1
+
+    def kontrol_kesif(self):
+        """YALNIZ OKUMA: SmartLogger'a uzaktan reaktif güç komutu gönderen web uç noktasını bulmak için
+        yüklü JS dosyalarındaki /rest/ adreslerini ve ekran rotalarını tarar, cihaz listesini (tüm türler) çıkarır.
+        Hiçbir kontrol komutu göndermez. Sonuç: epias-ptf/n8n/fs_kontrol_kesif.json"""
+        isaret = DATA / f"kontrol_kesif_v{self.KONTROL_KESIF_SURUM}"
+        if isaret.exists() or not self.gh_token:
+            return
+        isaret.write_text("1")
+        self.web.ensure()
+        out = {"surum": self.KONTROL_KESIF_SURUM, "zaman": self.now(), "cihazlar": [], "uclar": {}, "rotalar": [], "xhr": []}
+        for comp in {v["company"] for v in self.st.values()}:
+            q = (f"conditionParams.parentDn={quote(comp)}&conditionParams.curPage=1&conditionParams.recordperpage=100&_={int(time.time()*1000)}")
+            try:
+                r = self.web.call("GET", "/rest/neteco/web/config/device/v1/device-list?" + q)
+                for d in r.get("data", []):
+                    if d.get("stationDn") in self.st:
+                        out["cihazlar"].append({k: d.get(k) for k in ("dn", "name", "stationDn", "mocTypeId", "mocType", "mocTypeName", "devTypeId", "status", "parentDn")})
+            except Exception as e:
+                out["cihaz_hata"] = str(e)[:200]
+        js = r"""async () => {
+          const urls = [...new Set(performance.getEntriesByType('resource').map(e => e.name).filter(u => /\.js(\?|$)/.test(u)))];
+          const uc = {}, rota = new Set();
+          for (const u of urls) {
+            let t = ''; try { t = await (await fetch(u)).text(); } catch (e) { continue; }
+            for (const m of t.matchAll(/["'`](\/rest\/[A-Za-z0-9_\-\/{}.$]+)["'`]/g)) {
+              const p = m[1]; if (/reactive|control|dispatch|adjust|schedul|power|command|setting|param|logger|remote/i.test(p)) uc[p] = (uc[p] || 0) + 1;
+            }
+            for (const m of t.matchAll(/["'`](#?\/view\/[A-Za-z0-9_\-\/]+)["'`]/g)) rota.add(m[1]);
+            const i = t.search(/reactivePower|ReactivePower|reactive_power/);
+            if (i > 0) uc['__parca__' + u.split('/').pop()] = t.slice(Math.max(0, i - 600), i + 600);
+          }
+          return {urls, uc, rota: [...rota].slice(0, 200)};
+        }"""
+        try:
+            sonuc = self.web.page.evaluate(js)
+            out["js_dosya"] = len(sonuc.get("urls", [])); out["uclar"] = sonuc.get("uc", {}); out["rotalar"] = sonuc.get("rota", [])
+        except Exception as e:
+            out["js_hata"] = str(e)[:200]
+        # cihaz sayfası açılınca yüklenen ek modüller ve XHR'ler (yalnız GET; sayfa açılır, hiçbir düğmeye basılmaz)
+        kayit = []
+        self.web.page.on("request", lambda rq: kayit.append(rq.method + " " + rq.url.split("?")[0]) if "/rest/" in rq.url else None)
+        logger = next((c for c in out["cihazlar"] if "logger" in str(c.get("name", "")).lower()), None)
+        if logger:
+            for rota in [x for x in out["rotalar"] if "device" in x.lower()][:6]:
+                try:
+                    url = BASE + "/uniportal/pvmswebsite/assets/build/cloud.html" + ("#" + rota.lstrip("#")) + "?devDn=" + quote(logger["dn"])
+                    self.web.page.goto(url, wait_until="domcontentloaded", timeout=40000); time.sleep(6)
+                except Exception:
+                    continue
+            try:
+                sonuc = self.web.page.evaluate(js)
+                for k, v in sonuc.get("uc", {}).items():
+                    out["uclar"].setdefault(k, v)
+            except Exception:
+                pass
+        out["xhr"] = sorted(set(kayit))[:200]
+        try:
+            self.web.page.goto(LIST_URL, wait_until="domcontentloaded", timeout=60000)
+        except Exception:
+            pass
+        self.gh_put("n8n/fs_kontrol_kesif.json", out, "FusionSolar kontrol keşfi (yalnız okuma)")
+        log.info("Kontrol keşfi: %d cihaz, %d uç nokta", len(out["cihazlar"]), len(out["uclar"]))
+
     def once(self):
         self.meta()
         for f in (self.stations, self.inverters, self.pv_anlik, self.alarms, self.curve, self.month):
@@ -883,7 +948,8 @@ class Collector:
 
     def forever(self):
         jobs = [("meta", self.meta), ("station", self.stations), ("inverter", self.inverters),
-                ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun), ("pvanlik", self.pv_anlik)]
+                ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun), ("pvanlik", self.pv_anlik),
+                ("kkesif", self.kontrol_kesif)]
         nxt = {k: 0.0 for k, _ in jobs}
         kod = Path(__file__).resolve()
         kod_mt = kod.stat().st_mtime

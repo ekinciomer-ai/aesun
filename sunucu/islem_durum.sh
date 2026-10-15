@@ -6,3 +6,5 @@ echo "NOT: açık uç: veri.json $(curl -s -o /dev/null -w "%{http_code}" https:
 echo "NOT: başka aesun zamanlayıcı: $(crontab -l 2>/dev/null | grep -i aesun | cut -c1-120 | tr '\n' ' ') $(systemctl list-timers --all --no-legend 2>/dev/null | grep -i aesun | tr '\n' ' ') $(ls /opt/aesun | tr '\n' ' ')"
 echo "NOT: eski panel: $(curl -s -o /dev/null -w "%{http_code}" --max-time 25 https://epias-ptf-production.up.railway.app/) · monitoring: $(curl -s -o /dev/null -w "%{http_code}" https://portal.aksarayenerji.net/monitoring/)"
 echo "NOT: bellek: $(free -m | awk '/Mem/{print "kullanılabilir "$7" MB / "$2" MB"}') · disk $(df -h / | tail -1 | awk '{print $5}')"
+echo "NOT: ns1 depo yazımları (son 8): $(docker exec aesun-api tail -8 /veri/depo_yazim.log 2>/dev/null | awk -F'\t' '{print substr($1,12,8)" "$2" "$3}' | tr '\n' ';')"
+echo "NOT: depo dosya: $(docker exec aesun-api find /veri/depo -name '*.json' | wc -l)"

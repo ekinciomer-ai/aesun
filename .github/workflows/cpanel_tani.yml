@@ -1,0 +1,11 @@
+name: cPanel tanı
+on: workflow_dispatch
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          CP_USER: ${{ secrets.FTP_KULLANICI }}
+          CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
+        run: python3 cpanel/tani.py

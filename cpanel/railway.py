@@ -36,6 +36,17 @@ for pe in d["projects"]["edges"]:
             except Exception as e:
                 not_(f"{p['name']}/{s['name']}: dağıtım listesi alınamadı: {e}"); deps = []
             sayim = {}
+            if ISLEM == "durum" and os.environ.get("FILTRE"):
+                for de in deps[:6]:
+                    n = de["node"]
+                    ek = ""
+                    if n["status"] in ("FAILED", "QUEUED", "BUILDING"):
+                        try:
+                            lg = gql("query($id:String!){ buildLogs(deploymentId:$id, limit:3) { message } }", {"id": n["id"]})["buildLogs"]
+                            ek = " | ".join(x["message"] for x in lg)[:150]
+                        except Exception as e:
+                            ek = "log yok"
+                    not_(f"  {n['createdAt'][11:16]} {n['status']} {ek}")
             for de in deps:
                 sayim[de["node"]["status"]] = sayim.get(de["node"]["status"], 0) + 1
             not_(f"proje={p['name']} servis={s['name']} repo={(i.get('source') or {}).get('repo')} alan={dom or '-'} son={ld.get('status')} {str(ld.get('createdAt'))[:16]} dağıtımlar={sayim}")

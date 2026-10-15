@@ -607,6 +607,7 @@ function modSil(id) {
   if (!V) return kurulumCiz();
   if (S) { try { await modOnbellek(); } catch (e) { S = null; ls.sil('ae_portal'); ust(); } }
   if (S && S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (e) {} }
+  if (S && S.ka) { try { await parasalAnahtar(); } catch (e) { console.warn('parasal anahtar', e); } }
   if (HEDEF) {
     if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(MOD[HEDEF].url); return; }
     git('ana'); return S ? acSonuc(HEDEF) : girisModal(HEDEF);

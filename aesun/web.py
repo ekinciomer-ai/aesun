@@ -14,7 +14,7 @@ from . import sayaclar as sayaclar_mod
 
 def _whatsapp(mesaj: str) -> tuple[bool, str]:
     sid, tok = os.getenv("TWILIO_SID", ""), os.getenv("TWILIO_TOKEN", "")
-    kimden = os.getenv("TWILIO_NUMARA", "whatsapp:+14155238886")
+    kimden = os.getenv("TWILIO_NUMARA", "whatsapp:+17434336868")
     kime = [x.strip() for x in os.getenv("AESUN_WHATSAPP_KIME", "").split(",") if x.strip()]
     if not (sid and tok and kime):
         return False, "TWILIO_SID, TWILIO_TOKEN ve AESUN_WHATSAPP_KIME tanımlı değil"

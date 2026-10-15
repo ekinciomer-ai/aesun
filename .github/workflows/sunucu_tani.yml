@@ -32,6 +32,15 @@ jobs:
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "7" ]; then
+            not "Caddy" "$($S 'for f in /opt/caddy/Caddyfile /opt/gesfin/Caddyfile /opt/gesfin/caddy/Caddyfile; do [ -f $f ] && echo "== $f" && grep -vE "(password|secret|token|key)" $f | sed "s/#.*//" | grep -v "^\s*$" | head -40; done')"
+            not "gesfin dosyalar" "$($S 'cd /opt/gesfin && ls -la | awk "{print \$NF}" | tr "\n" " "; echo; find app -maxdepth 3 -type d | head -40 | tr "\n" " "')"
+            not "gesfin compose" "$($S 'cd /opt/gesfin && grep -vE "(PASSWORD|SECRET|TOKEN|KEY)=" docker-compose.yml | grep -E "^[a-z ]|image:|ports:|- \"|container_name|command" | head -40')"
+            not "gesfin api" "$($S 'cd /opt/gesfin && grep -rhoE "@(router|app)\.(get|post|put|delete)\(\"[^\"]+\"" app 2>/dev/null | sort -u | head -80 | tr "\n" " "')"
+            not "gesfin tablolar" "$($S 'docker exec gesfin-db sh -c "psql -U \$POSTGRES_USER -d \$POSTGRES_DB -At -c \"select relname||\x27=\x27||n_live_tup from pg_stat_user_tables order by relname\"" 2>&1 | tr "\n" " " | head -c 3000')"
+            not "gesfin modeller" "$($S 'cd /opt/gesfin && grep -rhoE "__tablename__ *= *\"[a-z_]+\"|class [A-Za-z]+\((Base|SQLModel)" app 2>/dev/null | sort -u | head -80 | tr "\n" " "')"
+            exit 0
+          fi
           if [ "${{ inputs.bolum }}" = "6" ]; then
             for ip in 5.27.1.254 5.229.203.28; do
               not "SmartLogger $ip" "$($S "for p in 502 6607 443 80 16100 2121 22; do timeout 4 bash -c \"</dev/tcp/$ip/\$p\" 2>/dev/null && echo -n \"\$p:açık \" || echo -n \"\$p:kapalı \"; done; echo; ping -c2 -W2 $ip | tail -2")"

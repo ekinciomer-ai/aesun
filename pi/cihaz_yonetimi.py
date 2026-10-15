@@ -929,6 +929,16 @@ if __name__ == "__main__":
             canli_kur.uygula(log)
         except Exception as e:
             log("canlı izleme kurulum hatası:", e)
+        try:   # ağ keşfi (yalnız okuma) sürüm başına bir kez, ayrı süreçte
+            import ag_kesif, subprocess as _sp
+            isaret = Path.home() / ".aesun" / f"ag_kesif_v{ag_kesif.SURUM}"
+            if not isaret.exists():
+                isaret.write_text("1")
+                _sp.Popen([sys.executable, str(Path(__file__).resolve().parent / "ag_kesif.py")], start_new_session=True,
+                          stdout=open(Path.home() / "aesun" / "ag_kesif.log", "a"), stderr=_sp.STDOUT)
+                log("ağ keşfi başlatıldı")
+        except Exception as e:
+            log("ağ keşfi başlatılamadı:", e)
         try:
             calistir()
         finally:

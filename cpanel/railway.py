@@ -2,7 +2,7 @@
 """Railway yönetimi (GitHub Actions üzerinden). İşlem: durum | duzelt
 duzelt: epias-ptf servislerine watch path + kuyruktaki dağıtımları iptal + son commit'i yeniden dağıt.
 Silme yapmaz."""
-import json, os, sys, urllib.request
+import json, os, sys, traceback, urllib.request
 TOK = os.environ.get("RAILWAY_TOKEN", "").strip()
 ISLEM = (sys.argv[1] if len(sys.argv) > 1 else "durum")
 if not TOK:
@@ -22,6 +22,8 @@ d = gql("""{ projects { edges { node { id name environments { edges { node { id 
 WATCH = ["/ofis_panel.py", "/requirements.txt", "/Procfile", "/railway.json"]
 for pe in d["projects"]["edges"]:
     p = pe["node"]
+    if os.environ.get("FILTRE") and p["name"] != os.environ["FILTRE"]:
+        continue
     for se in p["services"]["edges"]:
         s = se["node"]
         for ie in s["serviceInstances"]["edges"]:

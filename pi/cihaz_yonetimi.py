@@ -925,6 +925,11 @@ if __name__ == "__main__":
         except Exception as e:
             log("süreç yenileme hatası:", e)
         try:
+            import canli_kur
+            canli_kur.uygula(log)
+        except Exception as e:
+            log("canlı izleme kurulum hatası:", e)
+        try:
             calistir()
         finally:
             try:

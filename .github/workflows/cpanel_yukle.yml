@@ -46,5 +46,5 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/demo/=mining-demo;/saha/=<title"
+          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/demo/=mining-demo;/saha/=<title;/api/canli.php=durum"
         run: python3 cpanel/yukle.py dist_portal

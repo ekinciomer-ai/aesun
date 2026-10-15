@@ -2959,7 +2959,9 @@ let boyutZ = null, sonGen = window.innerWidth;
 window.addEventListener('resize', () => { clearTimeout(boyutZ); boyutZ = setTimeout(() => { if (D && Math.abs(window.innerWidth - sonGen) > 40) { sonGen = window.innerWidth; ciz(); } }, 300); });
 
 // ===== Anlık izleme penceresi: cihaz hash/sıcaklık, filo gücü, güneş, karar — her 60 sn yenilenir =====
-const ANLIK = { t: null, acik: false, aralik: 120, canli: [], sn: 30 };
+const ANLIK = { t: null, acik: false, aralik: 120, canli: [], sn: 10, gh: null, ghT: 0, cs: [], son: null };
+const CANLI_API = 'https://portal.aksarayenerji.net/api/canli.php';
+async function canliOku() { try { const s = ANLIK.cs.length ? ANLIK.cs[ANLIK.cs.length - 1][0] : 0; const r = await fetch(CANLI_API + '?s=' + s + '&t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return; const j = await r.json(); if (j.son) ANLIK.son = j.son; for (const p of j.seri || []) if (!ANLIK.cs.length || p[0] > ANLIK.cs[ANLIK.cs.length - 1][0]) ANLIK.cs.push(p); ANLIK.cs = ANLIK.cs.filter(p => p[0] > Date.now() / 1000 - 6 * 3600); } catch (e) {} }
 async function anlikVeri(yol) { const r = await fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error(yol + ' ' + r.status); return r.json(); }
 const anlikYas = ts => { if (!ts) return '—'; const m = (Date.now() - Date.parse(String(ts).replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(ts) ? '' : '+03:00'))) / 60000; return m < 1 ? 'şimdi' : m < 60 ? Math.round(m) + ' dk önce' : Math.round(m / 60) + ' sa önce'; };
 function anlikAc() {
@@ -2971,18 +2973,22 @@ function anlikAc() {
   }
   w.style.display = 'block'; document.body.style.overflow = 'hidden'; ANLIK.acik = true;
   w.innerHTML = '<div style="padding:18px 22px"><p style="color:#8FA2BC">Canlı veriler yükleniyor…</p></div>';
-  anlikCiz(); clearInterval(ANLIK.t); ANLIK.t = setInterval(() => { if (!document.hidden && ANLIK.acik) anlikCiz(); }, ANLIK.sn * 1000);
+  ANLIK.ghT = 0; anlikCiz(); clearInterval(ANLIK.t); ANLIK.t = setInterval(() => { if (!document.hidden && ANLIK.acik) anlikCiz(); }, ANLIK.sn * 1000);
 }
 function anlikKapat() { ANLIK.acik = false; clearInterval(ANLIK.t); const w = document.getElementById('anlikPen'); if (w) w.style.display = 'none'; document.body.style.overflow = ''; }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && ANLIK.acik) anlikKapat(); });
 async function anlikCiz() {
   const w = document.getElementById('anlikPen'); if (!w || !ANLIK.acik) return;
   const gun = bugunTR();
-  const [mad, yon, fs, saha, hs] = await Promise.all([anlikVeri('antminer_panel.json'), anlikVeri('n8n/cihaz_yonetimi_durum.json'), anlikVeri('n8n/fusionsolar_son.json'), anlikVeri('n8n/saha_saatlik.json'), anlikVeri('n8n/hash/' + gun + '.json')].map(p => p.catch(() => null)));
+  if (!ANLIK.gh || Date.now() - ANLIK.ghT > 60000) { ANLIK.ghT = Date.now(); ANLIK.gh = await Promise.all([anlikVeri('antminer_panel.json'), anlikVeri('n8n/cihaz_yonetimi_durum.json'), anlikVeri('n8n/fusionsolar_son.json'), anlikVeri('n8n/saha_saatlik.json'), anlikVeri('n8n/hash/' + gun + '.json'), canliOku()].map(p => p.catch(() => null))); } else await canliOku();
+  if (!ANLIK.acik) return;
+  const [mad, yon, fs, saha, hs] = ANLIK.gh;
+  const cs = ANLIK.son, canliTaze = cs && Date.now() / 1000 - cs.t < 90;
   const JT = (saha && saha.jth) || { 'S21e Hyd': 17.5, 'S19 XP+ Hyd': 21.5, 'S19e XP Hyd': 34.5 }, ISI = (saha && saha.isinma_kw) || 1;
   const dv = ((mad && mad.devices) || []).filter(d => d.online || d.sleeping || (d.model && d.model !== '?'));
   const no = d => String(d.actual_worker || d.havuz_worker || '').split('.').pop() || ('.' + String(d.ip || '').split('.').pop());
   dv.sort((a, b) => String(no(a)).localeCompare(String(no(b)), 'tr', { numeric: true }));
+  if (canliTaze) for (let i = 0; i < dv.length; i++) { const v = cs.c[no(dv[i])]; if (v && v[0] != null) dv[i] = Object.assign({}, dv[i], { hashrate_TH: v[0], temp_max: v[1] != null ? v[1] : dv[i].temp_max }); }
   const durum = d => d.sleeping ? 'u' : d.online && (d.hashrate_TH || 0) > 1 ? 'c' : d.online ? 'i' : 'x';
   const kwC = d => { const k = durum(d); return k === 'c' ? (d.hashrate_TH || 0) * (JT[d.model] || 17.5) / 1000 : k === 'i' ? ISI : 0; };
   const top = dv.reduce((t, d) => t + (durum(d) === 'c' ? d.hashrate_TH || 0 : 0), 0), hedef = dv.reduce((t, d) => t + (durum(d) === 'c' ? d.target_hashrate_TH || 0 : 0), 0);
@@ -2997,7 +3003,8 @@ async function anlikCiz() {
   const g0 = Date.parse(gun + 'T00:00:00+03:00'), adim = (hs && hs.adim_dk) || 5, P = [];
   if (hs && hs.c) { const n = Math.max(...Object.values(hs.c).map(a => a.length)); for (let i = 0; i < n; i++) { let t = 0, v = false; for (const a of Object.values(hs.c)) if (a[i] != null) { t += a[i]; v = true; } P.push([g0 + i * adim * 60000, v ? t : null]); } }
   const mts = mad && mad.timestamp ? Date.parse(String(mad.timestamp).slice(0, 19) + '+03:00') : null;
-  if (mts && !ANLIK.canli.some(x => x[0] === mts)) ANLIK.canli.push([mts, top]);
+  if (!ANLIK.cs.length && mts && !ANLIK.canli.some(x => x[0] === mts)) ANLIK.canli.push([mts, top]);
+  if (ANLIK.cs.length) ANLIK.canli = ANLIK.cs.map(p => [p[0] * 1000, p[1]]);
   ANLIK.canli = ANLIK.canli.filter(x => x[0] > Date.now() - 24 * 3600e3);
   while (P.length && P[P.length - 1][1] == null) P.pop();
   const sonP = P.length ? P[P.length - 1][0] : 0;
@@ -3014,7 +3021,7 @@ async function anlikCiz() {
   let grafik = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block"><defs><clipPath id="anlikKlip"><rect x="0" y="0" width="' + W + '" height="' + H + '"/></clipPath></defs>';
   for (let t = Math.ceil(x0 / (adimEt * 60000)) * adimEt * 60000; t <= x1; t += adimEt * 60000) { const xx = X(t), d = new Date(t + 3 * 3600e3); grafik += '<line x1="' + xx.toFixed(1) + '" x2="' + xx.toFixed(1) + '" y1="0" y2="' + (H - 18) + '" stroke="#24364F"/><text x="' + Math.min(W - 30, xx + 2).toFixed(1) + '" y="' + (H - 4) + '" font-size="11" fill="#8FA2BC">' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0') + '</text>'; }
   for (let k = 1; k <= 3; k++) { const v = ymin + (ymax - ymin) * k / 4; grafik += '<text x="4" y="' + (Y(v) - 3).toFixed(1) + '" font-size="11" fill="#8FA2BC">' + say(v / 1000, 2) + ' PH/s</text><line x1="0" x2="' + W + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="#24364F" stroke-dasharray="3 5"/>'; }
-  if (yol) grafik += '<g clip-path="url(#anlikKlip)"><path d="' + alan + '" fill="rgba(43,210,122,.12)"/><path d="' + yol + '" fill="none" stroke="#2BD27A" stroke-width="2.2" stroke-linejoin="round"/>' + ANLIK.canli.filter(c => c[0] >= x0).map(c => '<circle cx="' + X(c[0]).toFixed(1) + '" cy="' + Y(c[1]).toFixed(1) + '" r="3" fill="#2BD27A"/>').join('') + '</g>';
+  if (yol) grafik += '<g clip-path="url(#anlikKlip)"><path d="' + alan + '" fill="rgba(43,210,122,.12)"/><path d="' + yol + '" fill="none" stroke="#2BD27A" stroke-width="2.2" stroke-linejoin="round"/>' + ANLIK.canli.filter(c => c[0] >= x0).filter((c, i, a) => a.length < 150).map(c => '<circle cx="' + X(c[0]).toFixed(1) + '" cy="' + Y(c[1]).toFixed(1) + '" r="3" fill="#2BD27A"/>').join('') + '</g>';
   const sonN = G.filter(p => p[1] != null).pop(); if (sonN) grafik += '<circle cx="' + X(sonN[0]).toFixed(1) + '" cy="' + Y(sonN[1]).toFixed(1) + '" r="6" fill="#2BD27A" stroke="#0E1A2B" stroke-width="2"><animate attributeName="r" values="5;8;5" dur="1.6s" repeatCount="indefinite"/></circle><text x="' + Math.min(W - 70, X(sonN[0]) + 8).toFixed(1) + '" y="' + (Y(sonN[1]) - 8).toFixed(1) + '" font-size="12" font-weight="700" fill="#fff">' + say(sonN[1] / 1000, 2) + '</text>';
   grafik += '<line x1="' + X(simdi).toFixed(1) + '" x2="' + X(simdi).toFixed(1) + '" y1="0" y2="' + (H - 18) + '" stroke="#F0525A" stroke-dasharray="4 4"/></svg>';
   const seri = P;
@@ -3027,7 +3034,7 @@ async function anlikCiz() {
       + '<div style="font-size:11.5px;color:#8FA2BC">' + (k === 'c' || k === 'i' ? '<span style="color:' + tr + '">' + say(t) + '°</span> · su ' + say(d.temp_water) + '°<br>' + say(kwC(d), 1) + ' kW' : '&nbsp;') + '</div></div>'; };
   w.innerHTML = '<div style="padding:16px 22px 30px;max-width:1500px;margin:0 auto">'
     + '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px"><span style="display:inline-flex;align-items:center;gap:8px;font:700 12px monospace;letter-spacing:.12em;color:#2BD27A;border:1px solid rgba(43,210,122,.4);border-radius:999px;padding:6px 11px"><span style="width:8px;height:8px;border-radius:50%;background:#2BD27A"></span>CANLI</span>'
-    + '<h2 style="margin:0;font-size:22px;color:#fff">Anlık izleme</h2><span style="color:#8FA2BC;font-size:13px">Cihazlar ' + anlikYas(mad && mad.timestamp) + ' · güneş ' + anlikYas(fs && fs.guncelleme) + ' · karar ' + anlikYas(yon && yon.guncellendi) + ' · ' + ANLIK.sn + ' sn\'de bir yenilenir</span>'
+    + '<h2 style="margin:0;font-size:22px;color:#fff">Anlık izleme</h2><span style="color:#8FA2BC;font-size:13px">Cihazlar ' + (canliTaze ? '<b style="color:#2BD27A">' + Math.max(0, Math.round(Date.now() / 1000 - cs.t)) + ' sn önce</b>' : anlikYas(mad && mad.timestamp)) + ' · güneş ' + anlikYas(fs && fs.guncelleme) + ' · karar ' + anlikYas(yon && yon.guncellendi) + ' · ' + ANLIK.sn + ' sn\'de bir yenilenir</span>'
     + '<span style="flex:1"></span><button type="button" onclick="anlikCiz()" style="font:inherit;background:#1C2F4A;color:#fff;border:1px solid #33496A;border-radius:10px;padding:8px 14px;cursor:pointer">↻ Yenile</button><button type="button" onclick="anlikKapat()" style="font:inherit;background:#D7262E;color:#fff;border:0;border-radius:10px;padding:8px 16px;cursor:pointer">✕ Kapat</button></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px">'
     + kart('Filo hash', say(top / 1000, 2) + ' <span style="font-size:14px">PH/s</span>', (hedef ? '%' + say(top / hedef * 100, 1) + ' hedef · ' : '') + say(say_('c')) + ' cihaz', '#2BD27A')
@@ -3038,10 +3045,10 @@ async function anlikCiz() {
     + kart('Karar · PTF', kararAd, 'PTF ' + say(yon && yon.ptf) + ' ₺/MWh · ' + esc((yon && yon.mod) || ''), yon && yon.karar === 'calis' ? '#2BD27A' : '#5B8DEF')
     + (para ? kart('Bu saat (cihaz başı)', '<span style="font-size:22px">' + say(yon.gelir_tl_saat, 1) + ' / ' + say(yon.maliyet_tl_saat, 1) + ' ₺</span>', 'gelir / şebeke maliyeti · ₺/saat', yon.gelir_tl_saat >= yon.maliyet_tl_saat ? '#2BD27A' : '#F0525A') : '')
     + '</div>'
-    + '<div style="background:#132238;border:1px solid #24364F;border-radius:14px;padding:12px 14px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:#8FA2BC;font-size:12.5px;margin-bottom:6px"><b style="color:#fff">Filo hash</b><span style="display:flex;gap:6px;flex-wrap:wrap">' + aralikDug + '</span><span>' + adim + ' dk kayıt + her ' + ANLIK.sn + ' sn anlık okuma</span></div>' + (seri.length ? grafik : '<p style="color:#8FA2BC">Bugünün 5 dk verisi henüz yok.</p>') + '</div>'
+    + '<div style="background:#132238;border:1px solid #24364F;border-radius:14px;padding:12px 14px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;color:#8FA2BC;font-size:12.5px;margin-bottom:6px"><b style="color:#fff">Filo hash</b><span style="display:flex;gap:6px;flex-wrap:wrap">' + aralikDug + '</span><span>' + (canliTaze ? adim + ' dk kayıt + Pi\'den ~10 sn\'de bir canlı okuma' : adim + ' dk kayıt + 1–2 dk\'da bir okuma (canlı bağlantı yok)') + '</span></div>' + (seri.length ? grafik : '<p style="color:#8FA2BC">Bugünün 5 dk verisi henüz yok.</p>') + '</div>'
     + (yon && yon.eylem_not ? '<div style="background:#132238;border:1px solid #24364F;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#B9C7DA"><b style="color:#fff">Son karar:</b> ' + esc(PARA ? String(yon.neden || '') : String(yon.neden || '').replace(/[^·()]*₺[^·()]*/g, '').replace(/\(\s*\)/g, '')) + (yon.eylem ? ' · <b>' + (yon.eylem === 'wake' ? '↑ uyandır' : '↓ uyut') + '</b> ' + esc(yon.eylem_not) : '') + '</div>' : '')
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px">' + dv.map(tile).join('') + '</div>'
-    + '<p style="color:#5F7391;font-size:12px;margin-top:14px">Cihaz verisi Pi toplayıcısından (~2 dk), güneş FusionSolar\'dan (~10 dk), karar cihaz yönetiminden (~5 dk) gelir. Güç, hash × model verimi ile tahmindir; ısınan cihaz ' + ISI + ' kW sayılır. Kutuya tıklayınca cihazın hash grafiği açılır.</p></div>';
+    + '<p style="color:#5F7391;font-size:12px;margin-top:14px">Cihaz verisi ' + (canliTaze ? 'Pi\'den doğrudan (~10 sn)' : 'Pi toplayıcısından (~2 dk)') + ', güneş FusionSolar\'dan (~10 dk), karar cihaz yönetiminden (~5 dk) gelir. Güç, hash × model verimi ile tahmindir; ısınan cihaz ' + ISI + ' kW sayılır. Kutuya tıklayınca cihazın hash grafiği açılır.</p></div>';
 }
 </script>
 </body>

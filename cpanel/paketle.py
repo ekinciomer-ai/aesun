@@ -53,6 +53,7 @@ for app in ("monitoring", "demo"):
 kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
 shutil.copy(os.path.join(CP, ".htaccess"), P)
+kopya(os.path.join(CP, "api"), os.path.join(P, "api"))   # anlık izleme deposu (canli.php)
 yaz(os.path.join(P, "robots.txt"), "User-agent: *\nDisallow: /\n")
 
 for d in (S, P):

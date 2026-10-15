@@ -25,19 +25,19 @@ jobs:
           chmod 600 ~/.ssh/k
           S="ssh -i $HOME/.ssh/k -p ${PORT:-22} -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o BatchMode=yes ${KUL:-root}@$ADRES"
           head -1 ~/.ssh/k | grep -q 'BEGIN' || echo "::warning::Anahtarın ilk satırı BEGIN ile başlamıyor"
-          echo "::notice title=Anahtar::$(ssh-keygen -y -f ~/.ssh/k >/dev/null 2>&1 && echo 'özel anahtar geçerli; açık anahtar parmak izi:' $(ssh-keygen -lf ~/.ssh/k | awk '{print $2}') || echo 'özel anahtar OKUNAMADI (eksik/bozuk yapıştırılmış)')"
-          for p in ${PORT:-22} 22 2222 2200; do timeout 6 bash -c "</dev/tcp/$ADRES/$p" 2>/dev/null && echo "::notice title=Port $p::açık" || echo "::notice title=Port $p::kapalı/erişilemiyor"; done
+          [ "${{ inputs.bolum }}" = "1" ] && echo "::notice title=Anahtar::$(ssh-keygen -y -f ~/.ssh/k >/dev/null 2>&1 && echo 'özel anahtar geçerli; açık anahtar parmak izi:' $(ssh-keygen -lf ~/.ssh/k | awk '{print $2}') || echo 'özel anahtar OKUNAMADI (eksik/bozuk yapıştırılmış)')"
+          [ "${{ inputs.bolum }}" = "1" ] && for p in ${PORT:-22} 22 2222 2200; do timeout 6 bash -c "</dev/tcp/$ADRES/$p" 2>/dev/null && echo "::notice title=Port $p::açık" || echo "::notice title=Port $p::kapalı/erişilemiyor"; done
           if ! $S 'true' 2>/tmp/ssh_hata; then
             echo "::error title=SSH::$(grep -v '^Warning' /tmp/ssh_hata | tail -3 | tr '\n' ' ' | cut -c1-400)"
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
-          if [ "${{ inputs.bolum }}" = "3" ]; then
-            not "Docker df" "$($S 'docker system df 2>/dev/null')"
-            not "Kullanılmayan imajlar" "$($S 'U=$(docker ps -a --format "{{.Image}}" | sort -u); docker images --format "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}} {{.CreatedSince}}" | while read r id sz c; do echo "$U" | grep -qx "$r" || echo "$U" | grep -qx "${r%:latest}" || echo "$r|$sz|$c;"; done | head -25')"
-            not "Sahipsiz birimler" "$($S 'for v in $(docker volume ls -qf dangling=true); do echo -n "$v $(du -sh /var/lib/docker/volumes/$v 2>/dev/null | cut -f1); "; done')"
-            not "Durmuş konteynerler" "$($S 'docker ps -a --filter status=exited --filter status=created --format "{{.Names}} {{.Image}} {{.Status}} {{.Size}}" | head -15')"
-            not "Günlük/önbellek" "$($S 'journalctl --disk-usage 2>/dev/null; du -sh /var/log /var/cache/apt /root/.cache /root/.npm /tmp 2>/dev/null | tr "\n" " "; echo; ls /var/lib/docker/containers/*/*-json.log 2>/dev/null | xargs -r du -ch | tail -1')"
+          if [ "${{ inputs.bolum }}" = "3" ] || [ "${{ inputs.bolum }}" = "4" ]; then
+            [ "${{ inputs.bolum }}" = "3" ] && not "Docker df" "$($S 'docker system df 2>/dev/null')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Kullanılmayan imajlar" "$($S 'U=$(docker ps -a --format "{{.Image}}" | sort -u); docker images --format "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}} {{.CreatedSince}}" | while read r id sz c; do echo "$U" | grep -qx "$r" || echo "$U" | grep -qx "${r%:latest}" || echo "$r|$sz|$c;"; done | head -25')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Sahipsiz birimler" "$($S 'for v in $(docker volume ls -qf dangling=true); do echo -n "$v $(du -sh /var/lib/docker/volumes/$v 2>/dev/null | cut -f1); "; done')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Durmuş konteynerler" "$($S 'docker ps -a --filter status=exited --filter status=created --format "{{.Names}} {{.Image}} {{.Status}} {{.Size}}" | head -15')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Günlük/önbellek" "$($S 'journalctl --disk-usage 2>/dev/null; du -sh /var/log /var/cache/apt /root/.cache /root/.npm /tmp 2>/dev/null | tr "\n" " "; echo; ls /var/lib/docker/containers/*/*-json.log 2>/dev/null | xargs -r du -ch | tail -1')"
             not "Büyük dosyalar" "$($S 'find / -xdev -type f -size +150M -not -path "/proc/*" -not -path "/var/lib/docker/overlay2/*" -printf "%s %p\n" 2>/dev/null | sort -rn | head -15 | awk "{printf \"%.0fMB %s; \", \$1/1048576, \$2}"')"
             not "Yedek/arşiv dosyaları" "$($S 'find /opt /root /home /srv /var/backups -xdev -type f \( -iname "*.sql" -o -iname "*.sql.gz" -o -iname "*.dump" -o -iname "*.tar*" -o -iname "*.zip" -o -iname "*.bak" -o -iname "*backup*" -o -iname "*.yedek" \) -size +5M -printf "%s %TY-%Tm-%Td %p\n" 2>/dev/null | sort -rn | head -20 | awk "{printf \"%.0fMB %s %s; \", \$1/1048576, \$2, \$3}"')"
             not "Klasör boyutları" "$($S 'du -xsh /opt/* /root /home /var/lib/docker/volumes /var/lib/docker/overlay2 /var/lib/containerd /snap /usr 2>/dev/null | sort -h | tr "\t\n" ": "')"

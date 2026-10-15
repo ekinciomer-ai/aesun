@@ -13,8 +13,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ortak import TR, gh, log  # noqa: E402
 
-SURUM = 1
-KAPILAR = [502, 6607, 80, 443, 8080, 8443, 16100]
+SURUM = 2
+KAPILAR = [502, 6607, 80, 443, 8080, 8443, 16100, 2404, 1502, 503]
 ADAY_AGLAR = ["192.168.0.0/24", "192.168.1.0/24", "192.168.2.0/24", "192.168.8.0/24", "192.168.10.0/24",
               "192.168.100.0/24", "192.168.200.0/24", "192.168.88.0/24", "10.0.0.0/24", "10.10.10.0/24", "172.16.0.0/24"]
 # yaygın üretici MAC önekleri (ilk 3 bayt)
@@ -45,6 +45,28 @@ def baslik(ip, p):
             return ((m.group(1).strip() if m else "") or r.headers.get("Server") or "")[:80]
     except Exception as e:
         return "hata: " + str(e)[:50]
+
+
+def tanit(ip):
+    """443'te sertifika konusu/yayıncısı ve sayfa içeriğinden üretici ipucu (SmartLogger vb.)."""
+    out = {}
+    try:
+        der = ssl.get_server_certificate((ip, 443), timeout=4)
+        r = subprocess.run(["openssl", "x509", "-noout", "-subject", "-issuer"], input=der, capture_output=True, text=True, timeout=5)
+        out["sertifika"] = " | ".join(x.strip() for x in r.stdout.splitlines())[:200]
+    except Exception as e:
+        out["sertifika"] = "hata: " + str(e)[:60]
+    for yol in ("/", "/index.html", "/action/GetLoginInfo"):
+        try:
+            ctx = ssl._create_unverified_context()
+            with urllib.request.urlopen(urllib.request.Request(f"https://{ip}{yol}", headers={"User-Agent": "Mozilla/5.0"}), timeout=4, context=ctx) as r:
+                g = r.read(30000).decode("utf-8", "ignore").lower()
+            ip_ = [k for k in ("smartlogger", "huawei", "sun2000", "fusionsolar", "netcol", "hikvision", "dahua", "mikrotik", "ubnt", "ubiquiti", "zte", "tp-link", "sungrow", "janitza") if k in g]
+            if ip_:
+                out["ipucu"] = ip_; break
+        except Exception:
+            continue
+    return out
 
 
 def arp():
@@ -98,6 +120,8 @@ def main():
         for p in (443, 80, 8080, 8443):
             if p in ps:
                 d["web"] = baslik(ip, p); break
+        if 443 in ps and not d.get("web", "").strip(" -"):
+            d.update(tanit(ip))
         if 502 in ps or 6607 in ps:
             d["not"] = "Modbus TCP açık" + (" (Huawei 6607)" if 6607 in ps else "")
         sonuc["cihazlar"].append(d)

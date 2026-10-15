@@ -2,5 +2,6 @@
 echo "NOT: kapsayıcılar: $(docker ps --filter name=aesun --format '{{.Names}} {{.Status}}' | tr '\n' ' ')"
 echo "NOT: işler: $(docker exec aesun-isler cat /veri/durum.json 2>&1 | cut -c1-600)"
 echo "NOT: api: $(curl -s --max-time 15 https://api.aksarayenerji.net/v1/saglik | cut -c1-300)"
+echo "NOT: açık uç: veri.json $(curl -s -o /dev/null -w "%{http_code}" https://api.aksarayenerji.net/v1/acik/portal/veri.json) · canli_anahtar $(curl -s -o /dev/null -w "%{http_code}" https://api.aksarayenerji.net/v1/acik/n8n/canli_anahtar.json) · yasak $(curl -s -o /dev/null -w "%{http_code}" https://api.aksarayenerji.net/v1/acik/maden_maliyet.json) · canli.php $(curl -s --max-time 15 "https://portal.aksarayenerji.net/api/canli.php?s=9999999999" | cut -c1-60)"
 echo "NOT: başka aesun zamanlayıcı: $(crontab -l 2>/dev/null | grep -i aesun | cut -c1-120 | tr '\n' ' ') $(systemctl list-timers --all --no-legend 2>/dev/null | grep -i aesun | tr '\n' ' ') $(ls /opt/aesun | tr '\n' ' ')"
 echo "NOT: bellek: $(free -m | awk '/Mem/{print "kullanılabilir "$7" MB / "$2" MB"}') · disk $(df -h / | tail -1 | awk '{print $5}')"

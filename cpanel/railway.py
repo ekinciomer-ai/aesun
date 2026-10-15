@@ -139,3 +139,29 @@ if ISLEM == "degisken":
                     not_(f"{p['name']}/{s['name']} değişkenler: " + ", ".join(sorted(v.keys())))
                 except Exception as e:
                     not_(f"değişkenler alınamadı: {e}")
+
+if ISLEM == "durdur":
+    # Eski paneli durdurur: son dağıtımı kaldırır, depodan otomatik dağıtımı engeller. Veritabanına (Postgres) dokunmaz, silmez.
+    for pe in d["projects"]["edges"]:
+        p = pe["node"]
+        if p["name"] != (os.environ.get("FILTRE") or "striking-flexibility"):
+            continue
+        for se in p["services"]["edges"]:
+            s = se["node"]
+            for ie in s["serviceInstances"]["edges"]:
+                i = ie["node"]
+                if not (i.get("source") or {}).get("repo", "").lower().endswith("epias-ptf"):
+                    continue
+                try:
+                    gql("""mutation($s:String!,$e:String!,$w:[String!]){ serviceInstanceUpdate(serviceId:$s, environmentId:$e, input:{watchPatterns:$w}) }""",
+                        {"s": s["id"], "e": i["environmentId"], "w": ["/__kapali__/yok"]})
+                    not_(f"{p['name']}/{s['name']}: otomatik dağıtım kapatıldı")
+                except Exception as e:
+                    not_(f"izleme yolu hatası: {e}")
+                ld = i.get("latestDeployment") or {}
+                if ld.get("id"):
+                    try:
+                        gql("mutation($id:String!){ deploymentRemove(id:$id) }", {"id": ld["id"]})
+                        not_(f"{p['name']}/{s['name']}: çalışan dağıtım durduruldu ({ld.get('status')})")
+                    except Exception as e:
+                        not_(f"durdurma hatası: {e}")

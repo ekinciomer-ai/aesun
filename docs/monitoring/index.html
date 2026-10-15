@@ -1858,6 +1858,153 @@ function ayToplam(o, m) {
   if (gs.length >= beklenen || o.ay[m] == null) return gs.length ? gs.reduce((t, g) => t + (+o.gun[g] || 0), 0) : null;
   return +o.ay[m];
 }
+// ===== Analiz: fatura (tüketim/üretim) ↔ sayaç (OSOS) ↔ inverter karşılaştırması =====
+const AN_AB = [
+  { kod: 'T1', ad: 'Tek Yıldız 1 (Sera-1)', osos: 'tekyildiz_1', inv: 'fusionsolar:NE=59224704', not: 'Sayaç arkasında yük yok: inverter − veriş ≈ trafo + kablo kaybı (%1–3 beklenir).' },
+  { kod: 'T2', ad: 'Tek Yıldız 2 (Sera-2)', osos: 'tekyildiz_2', inv: 'fusionsolar:NE=73686040', maden: true, not: 'Sayaç arkasında madencilik var: iç tüketim = inverter + çekiş − veriş = madencilik + kayıp.' },
+  { kod: 'YD', ad: 'Yılmaz Darılmaz', osos: 'yilmaz_darilmaz', inv: 'sungrow:5064453', yuk: true, not: 'Sayaç arkasında tesis tüketimi var (sadece izleme).' },
+  { kod: 'Anka', ad: 'Anka Mineral', osos: 'anka_mineral', inv: 'sungrow:5038906', not: 'Sayaç arkasında yük yok: inverter − veriş ≈ kayıp.' },
+  { kod: 'AE', ad: 'Aksaray Enerji', osos: 'aksaray_enerji', inv: 'inavitas:189', not: 'Inavitas günlük üretimi ile karşılaştırılır.' },
+  { kod: 'A3', ad: 'Aksaray 3 (tüketici)', osos: 'aksaray_3', inv: null, not: 'Üretim yok; tüketim faturası ve sayaç karşılaştırılır.' },
+];
+const anSec = { ab: 'T2', ay: null };
+async function cizAnaliz() {
+  const [osos, rk, saha, d25, d26] = await Promise.all([al('2026_osos_endeks.json').catch(() => ({})), al('2026_osos_reaktif.json').catch(() => null), al('n8n/saha_saatlik.json').catch(() => null), invYilYukle(2025), invYilYukle(2026)]);
+  const S = invBirlestir([...d25, ...d26]);
+  const AB = AN_AB.find(a => a.kod === anSec.ab) || AN_AB[1];
+  const ov = k => ((osos[k] || {}).veri) || {};
+  const invG = a => a.inv && S[a.inv] ? S[a.inv].gun : {};
+  // ayların listesi: sayaç verisi olan aylar
+  const aylarOf = a => [...new Set(Object.keys(ov(a.osos)).map(g => g.slice(0, 7)))].sort();
+  const aylar = aylarOf(AB), dun = gunEkle(bugunTR(), -1);
+  if (!anSec.ay || !aylar.includes(anSec.ay)) anSec.ay = aylar.filter(m => m < bugunTR().slice(0, 7)).pop() || aylar[aylar.length - 1];
+  const ay = anSec.ay;
+  // gün bazında denge
+  const gunDenge = (a, g) => {
+    const o = ov(a.osos)[g] || {}; let c = 0, v = 0, n = 0;
+    for (const x of Object.values(o)) { c += +x.cekis || 0; v += +x.veris || 0; n++; }
+    const iu = invG(a)[g];
+    return { g, c: n ? c : null, v: n ? v : null, n, i: iu == null ? null : +iu };
+  };
+  const ayDenge = (a, m) => {
+    const gs = Object.keys(ov(a.osos)).filter(g => g.startsWith(m) && g <= dun).sort();
+    let c = 0, v = 0, i = 0, iGun = 0, sGun = 0;
+    for (const g of gs) { const d = gunDenge(a, g); if (d.n < 20) continue; sGun++; c += d.c; v += d.v; if (d.i != null) { i += d.i; iGun++; } }
+    return { m, c, v, i: iGun ? i : null, sGun, iGun, ic: iGun === sGun && iGun ? i + c - v : null };
+  };
+  const yuz = (a, b) => a != null && b ? a / b * 100 : null;
+  const fmtK = v => v == null ? '—' : Math.abs(v) >= 10000 ? say(v / 1000, 1) + ' MWh' : say(v) + ' kWh';
+  const R = ayDenge(AB, ay);
+  // fatura (varsa ve yetki varsa)
+  const fat = PARA ? await al('n8n/fatura/' + ay + '_' + AB.kod + '.json').catch(() => null) : null;
+  // ---- seçim çubuğu
+  const sel = (id, v, ops) => '<select onchange="' + id + '" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit">' + ops.map(([k, a]) => '<option value="' + esc(k) + '"' + (k === v ? ' selected' : '') + '>' + esc(a) + '</option>').join('') + '</select>';
+  let h = '<div class="panel" style="gap:10px"><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><h2 style="margin:0;margin-right:auto">Fatura · sayaç · inverter analizi</h2>'
+    + '<span class="k">Abone</span>' + sel('anSec.ab=this.value;anSec.ay=null;cizInverter()', AB.kod, AN_AB.map(a => [a.kod, a.kod + ' · ' + a.ad]))
+    + '<span class="k">Ay</span>' + sel('anSec.ay=this.value;cizInverter()', ay, aylar.slice().reverse().map(m => [m, AYK[+m.slice(5) - 1] + ' ' + m.slice(0, 4)])) + '</div>'
+    + '<div class="k">' + esc(AB.not) + ' Sayaç: OSOS saatlik veriş/çekiş (çarpan uygulanmış). İnverter: ' + (AB.inv ? esc(INV_KAYNAK[AB.inv.split(':')[0]]) + ' günlük üretimi' : 'yok') + '. Fatura: ' + (fat ? esc(fat.kaynak || 'var') : PARA ? 'bu ay için yüklenmiş fatura yok' : 'parasal yetki gerekli') + '.</div></div>';
+  // ---- özet kartları
+  const kart = (b, v, alt, renk) => '<div class="panel" style="padding:14px 16px;gap:4px;flex:1 1 170px"><div class="k">' + b + '</div><div class="num" style="font-size:22px;font-weight:700' + (renk ? ';color:' + renk : '') + '">' + v + '</div><div class="k" style="font-size:12px">' + (alt || '') + '</div></div>';
+  const icY = yuz(R.ic, R.i);
+  let fatC = null; if (fat && fat.saat) { fatC = 0; for (const a of Object.values(fat.saat)) for (const x of a) fatC += +(Array.isArray(x) ? x[0] : x) || 0; }
+  h += '<div style="display:flex;flex-wrap:wrap;gap:12px">'
+    + (AB.inv ? kart('İnverter üretimi', fmtK(R.i), R.iGun + '/' + R.sGun + ' gün inverter verisi') : '')
+    + kart('Sayaç veriş (şebekeye)', fmtK(R.v), R.sGun + ' gün sayaç verisi')
+    + kart('Sayaç çekiş (şebekeden)', fmtK(R.c), fatC != null ? 'fatura: ' + fmtK(fatC) + ' (' + (R.c ? (fatC / R.c * 100 - 100 >= 0 ? '+' : '') + say(fatC / R.c * 100 - 100, 2) + '%' : '—') + ')' : '')
+    + (AB.inv ? kart(AB.maden ? 'İç tüketim (madencilik + kayıp)' : AB.yuk ? 'İç tüketim (tesis + kayıp)' : 'İç tüketim / kayıp', fmtK(R.ic), icY != null ? 'inverter üretiminin %' + say(icY, 1) + '\'i' : 'inverter günleri eksik', !AB.maden && !AB.yuk && icY != null && (icY > 4 || icY < 0) ? '#B42318' : null) : '')
+    + (AB.inv ? kart('Öz tüketim oranı', R.i ? '%' + say((R.i - R.v) / R.i * 100, 1) : '—', 'üretimin şebekeye verilmeyen kısmı') : '')
+    + '</div>';
+  // ---- aylık enerji dengesi (tüm aylar)
+  const AD = aylar.map(m => ayDenge(AB, m));
+  const et = AD.map(x => AYK[+x.m.slice(5) - 1] + ' ' + x.m.slice(2, 4));
+  const ser = [];
+  if (AB.inv) ser.push({ ad: 'İnverter üretimi', renk: '#F5A623', v: AD.map(x => x.i == null ? null : x.i / 1000) });
+  ser.push({ ad: 'Sayaç veriş', renk: '#1F5FAE', v: AD.map(x => x.sGun ? x.v / 1000 : null) }, { ad: 'Sayaç çekiş', renk: '#D92D20', v: AD.map(x => x.sGun ? x.c / 1000 : null) });
+  if (AB.inv) ser.push({ ad: AB.maden ? 'İç tüketim (madencilik+kayıp)' : 'İç tüketim / kayıp', renk: '#6941C6', v: AD.map(x => x.ic == null ? null : x.ic / 1000) });
+  h += '<div class="panel" style="gap:12px"><div class="bas"><h2>Aylık enerji dengesi · ' + esc(AB.kod) + '</h2><span class="k">MWh</span></div>'
+    + grafikX({ id: 'an1', etiket: et, etiketAd: 'Ay', turler: ['cubuk', 'cizgi', 'tablo'], birim: 'MWh', yuk: 230, fmt: v => say(v, 1), toplam: 'top', seriler: ser, vurgu: aylar.indexOf(ay), tik: i => 'anSec.ay=\'' + AD[i].m + '\';cizInverter()' });
+  if (AB.inv) {
+    h += '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th>Gün (sayaç / inverter)</th><th>İnverter</th><th>Veriş</th><th>Çekiş</th><th>İç tüketim</th><th>İç tüketim %</th><th>Veriş / inverter</th></tr></thead><tbody>'
+      + AD.map(x => { const p = yuz(x.ic, x.i), vr = yuz(x.v, x.i); const kirm = !AB.maden && !AB.yuk && p != null && (p > 4 || p < 0); return '<tr' + (x.m === ay ? ' style="background:#EEF3FA"' : '') + '><td class="sol"><a href="#inverter" onclick="anSec.ay=\'' + x.m + '\';cizInverter();return false">' + AYK[+x.m.slice(5) - 1] + ' ' + x.m.slice(0, 4) + '</a></td><td>' + x.sGun + ' / ' + x.iGun + '</td><td>' + fmtK(x.i) + '</td><td>' + fmtK(x.v) + '</td><td>' + fmtK(x.c) + '</td><td>' + fmtK(x.ic) + '</td><td' + (kirm ? ' style="color:#B42318;font-weight:600"' : '') + '>' + (p == null ? '—' : '%' + say(p, 1)) + '</td><td>' + (vr == null ? '—' : '%' + say(vr, 1)) + '</td></tr>'; }).join('')
+      + '</tbody></table></div>';
+  }
+  h += '<div class="k">Aya tıklayınca o ayın günlük ve saatlik ayrıntısı açılır. İç tüketim yalnız sayaç ve inverter verisi tam olan aylarda hesaplanır; eksik günler varsa "—".</div></div>';
+  // ---- günlük kıyas (seçili ay)
+  const gunler = []; { const [y, a] = ay.split('-').map(Number); const n = new Date(Date.UTC(y, a, 0)).getUTCDate(); for (let d = 1; d <= n; d++) { const g = ay + '-' + String(d).padStart(2, '0'); if (g <= dun) gunler.push(g); } }
+  const GD = gunler.map(g => gunDenge(AB, g));
+  const fatGun = g => { if (!fat || !fat.saat || !fat.saat[g]) return null; return fat.saat[g].reduce((t, x) => t + (+(Array.isArray(x) ? x[0] : x) || 0), 0); };
+  const ser2 = [];
+  if (AB.inv) ser2.push({ ad: 'İnverter', renk: '#F5A623', v: GD.map(x => x.i) });
+  ser2.push({ ad: 'Veriş', renk: '#1F5FAE', v: GD.map(x => x.n ? x.v : null) }, { ad: 'Çekiş', renk: '#D92D20', v: GD.map(x => x.n ? x.c : null) });
+  if (fat) ser2.push({ ad: 'Fatura tüketimi', renk: '#111827', tip: 'isaret', v: gunler.map(fatGun) });
+  const supheli = [];
+  for (const x of GD) {
+    if (!x.n) { supheli.push([x.g, 'sayaç verisi yok']); continue; }
+    if (x.n < 24) supheli.push([x.g, 'sayaçta ' + x.n + '/24 saat']);
+    if (AB.inv) {
+      if (x.i == null) supheli.push([x.g, 'inverter verisi yok']);
+      else if (x.v > x.i * 1.02 + 20) supheli.push([x.g, 'veriş inverter üretiminden fazla (' + fmtK(x.v) + ' > ' + fmtK(x.i) + ') — inverter eksik kayıt ya da sayaç kayması']);
+      else if (!AB.maden && !AB.yuk && x.i > 200 && (x.i + x.c - x.v) / x.i > 0.06) supheli.push([x.g, 'kayıp %' + say((x.i + x.c - x.v) / x.i * 100, 1) + ' (beklenen %1–3)']);
+    }
+    const fg = fatGun(x.g); if (fg != null && Math.abs(fg - x.c) > Math.max(5, x.c * 0.01)) supheli.push([x.g, 'fatura tüketimi ' + fmtK(fg) + ' ≠ sayaç çekişi ' + fmtK(x.c)]);
+  }
+  h += '<div class="panel" style="gap:12px"><div class="bas"><h2>Günlük karşılaştırma · ' + AYK[+ay.slice(5) - 1] + ' ' + ay.slice(0, 4) + '</h2><span class="k">kWh</span></div>'
+    + grafikX({ id: 'an2', etiket: gunler.map(g => String(+g.slice(8))), etiketAd: 'Gün', turler: ['cubuk', 'cizgi', 'tablo'], birim: 'kWh', yuk: 220, fmt: v => say(v), toplam: 'top', seriler: ser2 })
+    + (supheli.length ? '<div style="display:flex;flex-direction:column;gap:4px"><b style="color:#9A5B00">Dikkat edilecek günler (' + supheli.length + ')</b>' + supheli.slice(0, 20).map(([g, t]) => '<div class="k">• ' + tarihK(g) + ': ' + esc(t) + '</div>').join('') + (supheli.length > 20 ? '<div class="k">… ' + (supheli.length - 20) + ' daha</div>' : '') + '</div>' : '<div class="k" style="color:#1E7A3C">Bu ay sayaç, inverter' + (fat ? ' ve fatura' : '') + ' günlük olarak tutarlı.</div>')
+    + '</div>';
+  // ---- saatlik profil (ay ortalaması)
+  const HS = []; for (let i = 0; i < 24; i++) HS.push(String(i).padStart(2, '0'));
+  const ort = f => HS.map(hh => { let t = 0, n = 0; for (const g of gunler) { const v = f(g, hh); if (v != null) { t += v; n++; } } return n ? t / n : null; });
+  const invS = AB.inv && S[AB.inv] && S[AB.inv].saat;
+  const ser3 = [];
+  if (invS) ser3.push({ ad: 'İnverter', renk: '#F5A623', v: ort((g, hh) => invS[g] && invS[g][hh] != null ? +invS[g][hh] : null) });
+  ser3.push({ ad: 'Veriş', renk: '#1F5FAE', v: ort((g, hh) => { const o = ov(AB.osos)[g]; return o && o[hh] ? +o[hh].veris : null; }) }, { ad: 'Çekiş', renk: '#D92D20', v: ort((g, hh) => { const o = ov(AB.osos)[g]; return o && o[hh] ? +o[hh].cekis : null; }) });
+  if (AB.maden && saha && saha.saat) { const m = ort((g, hh) => { const x = saha.saat[g + ' ' + hh]; return x && x.kw != null ? +x.kw : null; }); if (m.some(v => v != null)) ser3.push({ ad: 'Madencilik (Pi ölçümü)', renk: '#6941C6', v: m }); }
+  if (fat) ser3.push({ ad: 'Fatura tüketimi', renk: '#111827', kesik: true, v: ort((g, hh) => fat.saat[g] ? +(Array.isArray(fat.saat[g][+hh]) ? fat.saat[g][+hh][0] : fat.saat[g][+hh]) : null) });
+  h += '<div class="panel" style="gap:12px"><div class="bas"><h2>Saatlik profil (ay ortalaması)</h2><span class="k">kWh / saat ≈ kW</span></div>'
+    + grafikX({ id: 'an3', etiket: HS, etiketAd: 'Saat', turler: ['cizgi', 'cubuk', 'tablo'], birim: 'kWh', yuk: 220, fmt: v => say(v, 1), seriler: ser3 })
+    + '<div class="k">' + (invS ? (gunler.some(g => invS[g]) ? '' : 'Bu ay için saatlik inverter kaydı yok (FusionSolar saatlik veri 6 Eki 2026\'dan itibaren). ') : 'Bu kaynak için saatlik inverter verisi yok; sayaç profili gösteriliyor. ') + (AB.maden ? 'Madencilik ölçümü Pi saatlik kaydından (7 Eki 2026\'dan itibaren).' : '') + '</div></div>';
+  // ---- fatura doğrulama
+  if (fat && fat.saat) {
+    let topF = 0, topS = 0, sapan = 0, enB = 0, enBs = '', tutar = 0, ptfAg = 0, mutlak = 0, nS = 0; const coz = ((osos[AB.osos] || {}).carpan || 1000) / 1000, esik = Math.max(2, 2 * coz);
+    for (const [g, a] of Object.entries(fat.saat)) a.forEach((x, i) => {
+      const kwh = +(Array.isArray(x) ? x[0] : x) || 0, ptf = Array.isArray(x) ? +x[1] || 0 : 0; const o = ov(AB.osos)[g], s = o && o[String(i).padStart(2, '0')] ? +o[String(i).padStart(2, '0')].cekis : null;
+      topF += kwh; ptfAg += kwh * ptf; if (s != null) { topS += s; const d = Math.abs(kwh - s); mutlak += d; nS++; if (d > esik) sapan++; if (d > enB) { enB = d; enBs = tarihK(g) + ' ' + String(i).padStart(2, '0') + ':00'; } }
+    });
+    const k = fat.kalemler || {};
+    h += '<div class="panel" style="gap:10px"><div class="bas"><h2>Fatura doğrulama · ' + esc(AB.kod) + ' ' + AYK[+ay.slice(5) - 1] + ' ' + ay.slice(0, 4) + '</h2><span class="k">' + esc(fat.kaynak || '') + '</span></div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:12px">'
+      + kart('Faturadaki tüketim', fmtK(topF), 'saatlik toplam') + kart('Sayaç çekişi (OSOS)', fmtK(topS), 'aynı saatler')
+      + kart('Fark', fmtK(topF - topS), topS ? (topF / topS * 100 - 100 >= 0 ? '+' : '') + say(topF / topS * 100 - 100, 2) + '%' : '', Math.abs(topF - topS) > Math.max(10, topS * 0.005) ? '#B42318' : '#1E7A3C')
+      + kart('Saatlik ortalama fark', nS ? say(mutlak / nS, 1) + ' kWh' : '—', 'sayaç çözünürlüğü ' + say(coz, 2) + ' kWh')
+      + kart(say(esik, 1) + ' kWh\'i aşan saat', say(sapan) + ' / ' + say(nS), enB ? 'en büyük ' + say(enB, 1) + ' kWh · ' + enBs : '', sapan > nS * 0.1 ? '#9A5B00' : null)
+      + kart('Ağırlıklı PTF', topF ? say(ptfAg / topF, 0) + ' TL/MWh' : '—', 'tüketim ağırlıklı')
+      + (fat.fatura_toplam_tl ? kart('Fatura toplamı', say(fat.fatura_toplam_tl, 0) + ' ₺', topF ? say(fat.fatura_toplam_tl / topF, 2) + ' ₺/kWh (KDV dahil)' : '') : '')
+      + '</div>'
+      + (k.tuketim_mwh ? '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Kalem</th><th>Tutar (₺)</th><th>Pay</th></tr></thead><tbody>' + [['Enerji (PTF)', k.ptf_maliyet_tl], ['YEKDEM', k.yekdem_tl], ['Dağıtım', k.dagitim_tl], ['BTV', k.btv_tl], ['KDV', k.kdv_tl]].filter(x => x[1] != null).map(([a, v]) => '<tr><td class="sol">' + a + '</td><td>' + say(v, 0) + '</td><td>%' + say(v / fat.fatura_toplam_tl * 100, 1) + '</td></tr>').join('') + '<tr class="top"><td class="sol">Toplam</td><td>' + say(fat.fatura_toplam_tl, 0) + '</td><td></td></tr></tbody></table></div>' : '')
+      + '<div class="k">Faturanın saatlik tüketimi OSOS sayacının çekişiyle saat saat karşılaştırılır. Fark %0,5\'i aşarsa kırmızı: sayaç verisi eksik ya da tedarikçi farklı ölçüm kullanmış olabilir. Saatlik küçük farklar sayaç çarpanının basamak çözünürlüğünden ve 15 dakikalık okumaların saate dağıtımından gelir; aylık toplam tutuyorsa fatura doğrudur.</div></div>';
+  }
+  // ---- tüm aboneler (seçili ay)
+  const rkAy = (a) => { const r = rk && rk.aboneler && rk.aboneler[a.osos]; if (!r) return null; let ri = 0, rc = 0; for (const [g, s] of Object.entries(r.veri || {})) if (g.startsWith(ay)) for (const x of Object.values(s)) { ri += x.ri || 0; rc += x.rc || 0; } return { ri, rc }; };
+  h += '<div class="panel" style="gap:12px"><div class="bas"><h2>Tüm aboneler · ' + AYK[+ay.slice(5) - 1] + ' ' + ay.slice(0, 4) + '</h2><span class="k">enerji dengesi ve reaktif</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Abone</th><th>İnverter</th><th>Veriş</th><th>Çekiş</th><th>İç tüketim %</th><th>Endüktif %</th><th>Kapasitif %</th><th>Değerlendirme</th></tr></thead><tbody>';
+  const bul = [];
+  for (const a of AN_AB) {
+    const x = ayDenge(a, ay), p = yuz(x.ic, x.i), r = rkAy(a), ri = r && x.c ? r.ri / x.c * 100 : null, rc = r && x.c ? r.rc / x.c * 100 : null;
+    const not = [];
+    if (a.inv && x.i == null) not.push('inverter verisi yok');
+    if (!a.maden && !a.yuk && a.inv && p != null && p > 4) not.push('kayıp yüksek');
+    if (!a.maden && a.inv && p != null && p < -0.5) not.push('veriş > üretim (veri tutarsız)');
+    if (ri != null && ri > 20) not.push('endüktif sınır aşımı');
+    if (rc != null && rc > 15) not.push('kapasitif sınır aşımı');
+    if (x.sGun && x.sGun < gunler.length) not.push('sayaçta ' + (gunler.length - x.sGun) + ' gün eksik');
+    if (not.length) bul.push('<b>' + a.kod + ':</b> ' + not.join(', '));
+    h += '<tr' + (a.kod === AB.kod ? ' style="background:#EEF3FA"' : '') + '><td class="sol"><a href="#inverter" onclick="anSec.ab=\'' + a.kod + '\';cizInverter();return false">' + esc(a.kod) + '</a> <span class="k">' + esc(a.ad) + '</span></td><td>' + (a.inv ? fmtK(x.i) : '—') + '</td><td>' + fmtK(x.v) + '</td><td>' + fmtK(x.c) + '</td><td>' + (p == null ? '—' : '%' + say(p, 1)) + '</td>'
+      + '<td' + (ri > 20 ? ' style="color:#B42318;font-weight:600"' : '') + '>' + (ri == null ? '—' : '%' + say(ri, 1)) + '</td><td' + (rc > 15 ? ' style="color:#B42318;font-weight:600"' : '') + '>' + (rc == null ? '—' : '%' + say(rc, 1)) + '</td><td class="k" style="text-align:left">' + (not.length ? esc(not.join(', ')) : '<span style="color:#1E7A3C">uygun</span>') + '</td></tr>';
+  }
+  h += '</tbody></table></div><div class="k">Reaktif oranlar = reaktif enerji / şebekeden çekilen aktif enerji (sınırlar: endüktif %20, kapasitif %15). İç tüketim %: inverter üretimine göre; madencilik olan T2 ve tesis tüketimi olan YD\'de yük de içerir.</div></div>';
+  h += '<div class="panel" style="gap:6px"><h2 style="margin:0">Bulgular</h2>' + (bul.length ? bul.map(b => '<div>• ' + b + '</div>').join('') : '<div class="k">Bu ay belirgin bir sorun yok.</div>') + '</div>';
+  return h;
+}
 // ===== Yıl kıyası: santral aylık üretimi ve inverterlerin aynı tarih aralığındaki verimi, yıllara göre =====
 async function cizYilKiyas(sabit) {
   const buYil = Number(bugunTR().slice(0, 4)), yillar = [buYil - 3, buYil - 2, buYil - 1, buYil];
@@ -2094,7 +2241,17 @@ async function cizInverter() {
   document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…';
   const ic = document.getElementById('icerik');
   if (!invSec.sekme) invSec.sekme = 'analiz';
-  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['yil', 'Yıl kıyası'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
+  const sekmeH = '<div class="sekmeler" role="tablist" style="overflow-x:auto">' + [['analiz', 'İnverter analizi'], ['an', 'Analiz'], ['yil', 'Yıl kıyası'], ['mining', 'Mining prensip'], ['diger', 'Diğer santraller ve abonelikler']].map(([k, a]) => '<button role="tab" type="button" style="white-space:nowrap" aria-selected="' + (invSec.sekme === k) + '" onclick="invSec.sekme=\'' + k + '\';cizInverter()">' + a + '</button>').join('') + '</div>';
+  if (invSec.sekme === 'an') {
+    document.getElementById('baslik').textContent = 'Analiz';
+    document.getElementById('altBaslik').textContent = 'Fatura, sayaç (OSOS) ve inverter üretiminin karşılaştırması: enerji dengesi, iç tüketim / kayıp, fatura doğrulama, reaktif.';
+    document.getElementById('kontrol').innerHTML = '';
+    if (!ic.querySelector('.anlz')) ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeH + '<div class="panel"><p class="k">Yükleniyor…</p></div></div>';
+    let g = ''; try { g = await cizAnaliz(); } catch (e) { g = '<div class="panel hata">Analiz çizilemedi: ' + esc(e.message || e) + '</div>'; }
+    if (!location.hash.startsWith('#inverter') || invSec.sekme !== 'an') return;
+    ic.innerHTML = '<div class="anlz" style="display:flex;flex-direction:column;gap:20px">' + sekmeH + g + '</div>';
+    return;
+  }
   if (invSec.sekme === 'yil') {
     document.getElementById('baslik').textContent = 'Yıl kıyası';
     document.getElementById('altBaslik').textContent = 'Santral ve inverter üretimi yıllara göre: aylık üretim, kWh/kWp ve aynı tarih aralığında inverter karşılaştırması.';
@@ -2158,7 +2315,7 @@ async function cizInverter() {
   const analiz = {}; let sorunlu = 0;
   for (const s of secili) { analiz[s.key] = invAnaliz(s, gunlerAn); sorunlu += analiz[s.key].filter(a => a.durma > 0 || (a.hucre.slice(-7).filter(h => h != null).length >= 3 && medyan(a.hucre.slice(-7)) < 0.9)).length; }
 
-  const kart = (ad, deger, alt) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:24px;font-weight:700">' + deger + '</div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
+  const kart = (ad, deger, alt) => '<div class="panel" style="padding:10px 14px;gap:2px;border-radius:12px"><div class="k" style="font-size:12.5px">' + ad + '</div><div class="num" style="font-size:20px;font-weight:700">' + deger + '</div>' + (alt ? '<div class="k" style="font-size:12px">' + alt + '</div>' : '') + '</div>';
   const kartlar = '<div class="kartlar5">'
     + kart('Dönem üretimi', enerji(top), secili.length > 1 ? secili.length + ' santral' : esc(secili[0].ad))
     + kart('Özgül verim', kwp ? say(top / kwp, 1) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh/kWp</span>' : '—', kwp ? say(kwp) + ' kWp kurulu' : 'Kurulu güç bilinmiyor')
@@ -2217,7 +2374,9 @@ async function cizInverter() {
       + '<tr class="top"><td class="sol">Santral</td>' + aylar.map(m => '<td>' + say(ayToplam(s, m)) + '</td>').join('') + '<td>' + say(toplamN(aylar.map(m => ayToplam(s, m)))) + '</td></tr></tbody></table></div></section>';
   }
   const kapsam = liste.map(s => { const g = Object.keys(s.gun).filter(k => s.gun[k] > 0).sort(); return esc(s.ad) + ': ' + (g.length ? tarihK(g[0]) + ' ' + g[0].slice(0, 4) + '–' + tarihK(g[g.length - 1]) : 'günlük veri yok'); }).join(' · ');
-  const balon = '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="k" style="margin-right:2px">Santral detayı:</span>' + liste.map((x, i) => '<button type="button" onclick="invSantralSec(\'' + esc(x.key) + '\')" title="' + esc(x.ad) + ' detayına git" style="display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;border:1px solid #C9D6E8;background:#fff;color:#10233F;font:inherit;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 1px 2px rgba(16,35,63,.06)" onmouseover="this.style.background=\'#EEF3FA\'" onmouseout="this.style.background=\'#fff\'"><span style="width:9px;height:9px;border-radius:50%;background:' + ['#1F5FAE', '#D92D20', '#1E7A3C', '#B25E00', '#6941C6', '#0E7490'][i % 6] + '"></span>' + esc(x.ad) + '<span class="k" style="font-weight:400;font-size:12px">' + esc(INV_KAYNAK[x.kaynak] || '') + (x.kwp ? ' · ' + say(x.kwp, 0) + ' kWp' : '') + '</span><span aria-hidden="true" style="color:#7A8BA3">›</span></button>').join('') + '</div>';
+  const SRENK = ['#1F5FAE', '#D92D20', '#1E7A3C', '#B25E00', '#6941C6', '#0E7490'];
+  const sUret = x => Dn.tip === 'gun' ? Dn.gunler.reduce((t, g) => t + (+x.gun[g] || 0), 0) : Dn.aylar.reduce((t, m) => t + (ayToplam(x, m) || 0), 0);
+  const balon = '<div class="kartlar5">' + liste.map((x, i) => { const r = SRENK[i % SRENK.length], u = sUret(x); return '<button type="button" onclick="invSantralSec(\'' + esc(x.key) + '\')" title="' + esc(x.ad) + ' detayına git" style="text-align:left;display:flex;flex-direction:column;gap:3px;padding:10px 14px;border-radius:12px;border:1px solid ' + r + '33;border-left:4px solid ' + r + ';background:' + r + '12;color:#10233F;font:inherit;cursor:pointer;min-width:0;transition:transform .08s" onmouseover="this.style.background=\'' + r + '22\'" onmouseout="this.style.background=\'' + r + '12\'"><span style="display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%"><b style="font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.ad) + '</b><span aria-hidden="true" style="color:' + r + ';font-weight:700">›</span></span><span class="k" style="font-size:12px">' + esc(INV_KAYNAK[x.kaynak] || '') + (x.kwp ? ' · ' + say(x.kwp, 0) + ' kWp' : '') + '</span><span style="font-size:13px;font-weight:600;color:' + r + '">' + enerji(u) + (x.kwp ? ' <span style="font-weight:400;color:#4A5A70">· ' + say(u / x.kwp, 0) + ' kWh/kWp</span>' : '') + '</span></button>'; }).join('') + '</div>';
   const geriH = invSec.santral === 'hepsi' ? balon : '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">'
     + '<button type="button" class="btn koyu" onclick="invSantralSec(\'hepsi\')" style="display:inline-flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Tüm santraller</button>'
     + '<span class="k" style="margin-left:6px">Diğer santraller:</span>'

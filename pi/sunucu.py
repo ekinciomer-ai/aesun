@@ -1,4 +1,4 @@
-"""Aksaray Enerji sunucusu (portal.aksarayenerji.net) veri deposu istemcisi — yalnız standart kütüphane.
+"""Aksaray Enerji merkez sunucusu (ns1, api.aksarayenerji.net) veri deposu istemcisi — yalnız standart kütüphane.
 
 Ayarlar ~/.aesun/osos.env içinde (koda yazılmaz):
   AE_SUNUCU_ANAHTAR=...   toplayıcı anahtarı (yoksa sunucu kullanılmaz, eski davranış sürer)
@@ -8,7 +8,7 @@ Ayarlar ~/.aesun/osos.env içinde (koda yazılmaz):
 import json, os, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
 
-ADRES = os.environ.get("AE_SUNUCU_ADRES", "https://portal.aksarayenerji.net/api/veri.php")
+ADRES = os.environ.get("AE_SUNUCU_ADRES", "https://api.aksarayenerji.net/v1/veri")   # 16.10.2026: depo ns1'e taşındı
 _AYAR = None
 
 

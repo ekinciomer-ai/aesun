@@ -91,7 +91,7 @@ DC_KWP = {"NE=59224704": 1230.755,   # Tek Yıldız-1 / Sera-1
           "NE=73686040": 1035.0}     # Tek Yıldız-2 / Sera-2
 KISA = {"NE=59224704": "Sera-1", "NE=73686040": "Sera-2"}
 
-PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600, "pvanlik": 600, "kkesif": 3600}
+PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600, "pvanlik": 600, "kkesif": 3600, "kokuma": 3600}
 
 INV_SIG = {  # device-realtime-data sinyal id -> alan
     "10018": "aktif_kw", "10019": "reaktif_kvar", "10032": "gunluk_kwh", "10029": "toplam_kwh",
@@ -931,6 +931,69 @@ class Collector:
         self.gh_put("n8n/fs_kontrol_kesif.json", out, "FusionSolar kontrol keşfi (yalnız okuma)")
         log.info("Kontrol keşfi: %d cihaz, %d uç nokta", len(out["cihazlar"]), len(out["uclar"]))
 
+    KONTROL_OKUMA_SURUM = 1
+
+    def kontrol_okuma(self):
+        """YALNIZ OKUMA: SmartLogger'ların ayar (config) sinyallerini ve güç aralıklarını okur; reaktif güç ayarının
+        sinyal kimliğini bulmak için. Yalnız 'query/get/device-signals' adresleri çağrılır; power-control ÇAĞRILMAZ.
+        Sonuç: epias-ptf/n8n/fs_kontrol_okuma.json"""
+        isaret = DATA / f"kontrol_okuma_v{self.KONTROL_OKUMA_SURUM}"
+        if isaret.exists() or not self.gh_token:
+            return
+        isaret.write_text("1")
+        self.web.ensure()
+        out = {"surum": self.KONTROL_OKUMA_SURUM, "zaman": self.now(), "loggerlar": {}, "kod": {}}
+        izinli = re.compile(r"/(query-|get-|device-signals|device-realtime-data|moc-type-name)")
+        def oku(m, u, b=None):
+            assert izinli.search(u.split("?")[0]) and "power-control" not in u, u
+            try:
+                return self.web.call(m, u, b)
+            except Exception as e:
+                return {"_hata": str(e)[:300]}
+        loggerlar = {"T1": "NE=59224706", "T2": "NE=73686042"}
+        for ad, dn in loggerlar.items():
+            L = out["loggerlar"][ad] = {"dn": dn}
+            L["moc"] = oku("GET", f"/rest/neteco/web/config/device/v1/moc-type-name?deviceDn={quote(dn)}")
+            L["power_signals_get"] = oku("GET", f"/rest/neteco/web/config/device/v1/config/get-device-power-signals?dn={quote(dn)}")
+            L["power_signals_post"] = oku("POST", "/rest/neteco/web/config/device/v1/config/get-device-power-signals", {"dn": dn})
+            ds = oku("GET", f"/rest/pvms/web/device/v1/device-signals?deviceDn={quote(dn)}&displayAccessModel=true")
+            L["device_signals"] = ds
+            ids = [str(x.get("id")) for x in (ds.get("data") or []) if isinstance(x, dict) and x.get("id") is not None] if isinstance(ds, dict) else []
+            ids = ids or [str(i) for i in range(10001, 10061)]
+            for parca in [ids[i:i + 60] for i in range(0, min(len(ids), 600), 60)]:
+                sig = ",".join(parca)
+                for m in ("POST", "GET"):
+                    r = oku(m, "/rest/neteco/web/config/device/v1/config/query-moc-config-signal" + ("" if m == "POST" else f"?dn={quote(dn)}&signals={sig}"), {"dn": dn, "signals": sig} if m == "POST" else None)
+                    if isinstance(r, dict) and not r.get("_hata") and r.get("data"):
+                        L.setdefault("config_signal", []).extend(r["data"] if isinstance(r["data"], list) else [r["data"]]); L["config_yontem"] = m
+                        break
+                    L.setdefault("config_hata", []).append({m: r})
+                time.sleep(0.5)
+            for m in ("POST", "GET"):
+                cs = ",".join(str(x.get("id")) for x in L.get("config_signal", []) if isinstance(x, dict))[:3000] or ",".join(ids[:60])
+                r = oku(m, "/rest/neteco/config/device/v1/config/query-power-range" + ("" if m == "POST" else f"?dn={quote(dn)}&signals={cs}"), {"dn": dn, "signals": cs} if m == "POST" else None)
+                L["power_range_" + m] = r
+                if isinstance(r, dict) and not r.get("_hata"):
+                    break
+        js = r"""async () => {
+          const urls = [...new Set(performance.getEntriesByType('resource').map(e => e.name).filter(u => /\.js(\?|$)/.test(u)))];
+          const kod = {};
+          for (const u of urls) {
+            let t = ''; try { t = await (await fetch(u)).text(); } catch (e) { continue; }
+            for (const anah of ['get-device-power-signals', 'reactivePower', 'REACTIVE_POWER_COMP', 'reactive_power', 'powerControl', 'devControlDialog']) {
+              let j = t.indexOf(anah), say = 0;
+              while (j > 0 && say < 2) { kod[anah + '__' + u.split('/').pop() + '__' + say] = t.slice(Math.max(0, j - 1500), j + 1500); j = t.indexOf(anah, j + 1); say++; }
+            }
+          }
+          return kod;
+        }"""
+        try:
+            out["kod"] = self.web.page.evaluate(js)
+        except Exception as e:
+            out["kod_hata"] = str(e)[:200]
+        self.gh_put("n8n/fs_kontrol_okuma.json", out, "FusionSolar SmartLogger ayar okuma (yalnız okuma)")
+        log.info("Kontrol okuma yazıldı")
+
     def once(self):
         self.meta()
         for f in (self.stations, self.inverters, self.pv_anlik, self.alarms, self.curve, self.month):
@@ -954,7 +1017,7 @@ class Collector:
     def forever(self):
         jobs = [("meta", self.meta), ("station", self.stations), ("inverter", self.inverters),
                 ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun), ("pvanlik", self.pv_anlik),
-                ("kkesif", self.kontrol_kesif)]
+                ("kkesif", self.kontrol_kesif), ("kokuma", self.kontrol_okuma)]
         nxt = {k: 0.0 for k, _ in jobs}
         kod = Path(__file__).resolve()
         kod_mt = kod.stat().st_mtime

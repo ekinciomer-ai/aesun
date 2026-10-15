@@ -864,7 +864,7 @@ class Collector:
             print(f"{x['id']:>6} | {x.get('name','')[:40]:40} | {birim:6} | {x.get('period','')[:16]:16} | {len(v):3} nokta | en büyük {max(v) if v else '-'} | toplam {round(sum(v), 1) if v else '-'}")
             time.sleep(0.3)
 
-    KONTROL_KESIF_SURUM = 1
+    KONTROL_KESIF_SURUM = 2
 
     def kontrol_kesif(self):
         """YALNIZ OKUMA: SmartLogger'a uzaktan reaktif güç komutu gönderen web uç noktasını bulmak için
@@ -894,8 +894,10 @@ class Collector:
               const p = m[1]; if (/reactive|control|dispatch|adjust|schedul|power|command|setting|param|logger|remote/i.test(p)) uc[p] = (uc[p] || 0) + 1;
             }
             for (const m of t.matchAll(/["'`](#?\/view\/[A-Za-z0-9_\-\/]+)["'`]/g)) rota.add(m[1]);
-            const i = t.search(/reactivePower|ReactivePower|reactive_power/);
-            if (i > 0) uc['__parca__' + u.split('/').pop()] = t.slice(Math.max(0, i - 600), i + 600);
+            for (const anah of ['config/power-control', 'query-power-range', 'remote_on_off']) {
+              let j = t.indexOf(anah), say = 0;
+              while (j > 0 && say < 3) { uc['__kod__' + anah + '__' + u.split('/').pop() + '__' + say] = t.slice(Math.max(0, j - 2500), j + 2500); j = t.indexOf(anah, j + 1); say++; }
+            }
           }
           return {urls, uc, rota: [...rota].slice(0, 200)};
         }"""

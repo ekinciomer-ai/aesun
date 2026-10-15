@@ -1,0 +1,19 @@
+# AEMonitoring merkez servisi. gesfin'in ağına (gesfin-net) yalnız Caddy'nin ulaşması için katılır; dışarıya port açmaz.
+services:
+  api:
+    build: .
+    container_name: aesun-api
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - aesun_veri:/veri
+    networks: [gesfin-net]
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+volumes:
+  aesun_veri:
+networks:
+  gesfin-net:
+    external: true

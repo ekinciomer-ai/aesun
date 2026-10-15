@@ -515,6 +515,31 @@ document.addEventListener('click', e => {
   for (const r of oyn.concat(sabit)) govde.appendChild(r);
 });
 
+// Genel bakış: fatura özeti kartı (yıl toplamları + abone × ay mini harita)
+async function genelFatura() {
+  let F; try { F = await fatYukle(); } catch (e) { const el = document.getElementById('genelFatura'); if (el) el.innerHTML = '<h2>Faturalar</h2><p class="k" style="margin:0">' + esc(e.message || e) + '</p>'; return; }
+  const el = document.getElementById('genelFatura'); if (!el) return;
+  const yil = bugunTR().slice(0, 4), AB = ['T1', 'T2', 'A3', 'AE', 'YD', 'Anka'], M = {};
+  let sat = 0, gid = 0, rea = 0, n = 0;
+  for (const f of F.faturalar || []) {
+    const t = String(f.tarih || ''); if (!t.startsWith(yil)) continue;
+    const kod = FAT_TES[String(f.tesisat || '').replace(/^0+/, '')]; if (!kod) continue;
+    const ay = +t.slice(5, 7), o = ((M[kod] = M[kod] || {})[ay] = M[kod][ay] || { net: 0, rea: 0 }); n++;
+    for (const k of (f.kalemler || []).map(fatKalem)) {
+      if (k.tur === 'uretim') { sat += k.tl; o.net += k.tl; }
+      else if (k.tur === 'reaktif') { rea += Math.abs(k.tl); o.rea += Math.abs(k.tl); o.net -= Math.abs(k.tl); }
+      else if (['tuketim', 'sistem', 'isletim'].includes(k.tur)) { gid += Math.abs(k.tl); o.net -= Math.abs(k.tl); }
+    }
+  }
+  const kTL = v => (Math.abs(v) >= 1e6 ? say(v / 1e6, 2) + ' M' : say(v / 1e3, 0) + ' bin') + ' ₺';
+  const sat_ = AB.filter(k => M[k]);
+  el.innerHTML = '<div class="bas"><h2>Faturalar ' + yil + '</h2><a class="k" href="#fatura" style="text-decoration:underline">Fatura analizi →</a></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">'
+    + [['Satış geliri', kTL(sat), '#1E7A3C'], ['Giderler', kTL(gid), '#D92D20'], ['Reaktif cezası', kTL(rea), '#6941C6'], ['Net', kTL(sat - gid - rea), sat - gid - rea >= 0 ? '#1E7A3C' : '#B42318']].map(([b, v, r]) => '<div><div class="k" style="font-size:12.5px">' + b + '</div><div class="num" style="font-size:20px;font-weight:700;color:' + r + '">' + v + '</div></div>').join('') + '</div>'
+    + '<div style="display:grid;grid-template-columns:40px repeat(12,1fr);gap:3px;align-items:center;font-size:11px">' + '<span></span>' + AYK.map(a => '<span class="k" style="text-align:center;font-size:10px">' + a[0] + '</span>').join('')
+    + sat_.map(k => '<b>' + k + '</b>' + AYK.map((_, i) => { const o = (M[k] || {})[i + 1]; if (!o) return '<span style="height:16px;border-radius:3px;background:#F2F4F7"></span>'; const r = o.rea ? '#6941C6' : o.net >= 0 ? '#1baf7a' : '#eb6834'; return '<span title="' + k + ' ' + AYLAR[i] + ': net ' + say(o.net, 0) + ' ₺' + (o.rea ? ' · reaktif ' + say(o.rea, 0) + ' ₺' : '') + '" style="height:16px;border-radius:3px;background:' + r + '"></span>'; }).join('')).join('') + '</div>'
+    + '<div class="k" style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1baf7a"></span> net artı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#eb6834"></span> net eksi</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#6941C6"></span> reaktif cezası</span><span>' + n + ' fatura (fatura tarihine göre)</span></div>';
+}
 function cizGenel() {
   const { son, osos, mad } = D;
   document.getElementById('baslik').textContent = 'Genel bakış';
@@ -751,8 +776,9 @@ function cizGenel() {
     + anlikUretimBolum(D.fs, D.saha, mad)
     + '<section class="panel" id="sayaclar" aria-labelledby="h-abone" style="gap:16px"><div class="bas"><h2 id="h-abone">Sayaçlar</h2><span class="k">' + tarihK(sonOsosGun) + ' 00:00–' + String(sonSaatNo).padStart(2, '0') + ':00, son 30 gün çizgisi</span></div><div class="sayaclar">' + sayaclar + '</div></section>'
     + trend
-    + '<div class="uc">' + inv + madH + f2H + gelirH + ptfH + '</div>'
+    + '<div class="uc">' + inv + madH + f2H + gelirH + ptfH + (PARA ? '<section class="panel" id="genelFatura"><h2>Faturalar</h2><p class="k" style="margin:0">Yükleniyor…</p></section>' : '') + '</div>'
     + '</div>';
+  if (PARA) genelFatura();
   document.getElementById('kaynakNot').textContent = 'Veri: n8n · OSOS · saha PC';
 }
 
@@ -2117,7 +2143,7 @@ async function cizFatura() {
   const aylarY = []; for (let a = 1; a <= 12; a++) aylarY.push(fatSec.yil + '-' + String(a).padStart(2, '0'));
   const satirlar = fatSec.ab === 'hepsi' ? abler : [fatSec.ab];
   if (fatSec.ab !== 'hepsi') { const var_ = aylarY.filter(m => (DM[fatSec.ab] || {})[m]); if (!var_.includes(fatSec.ay)) fatSec.ay = var_[var_.length - 1] || null; }
-  const kTL = v => (Math.abs(v) >= 1e6 ? say(v / 1e6, 2) + ' M' : say(v / 1e3, 0) + ' b') + '₺';
+  const kTL = v => (Math.abs(v) >= 1e6 ? say(v / 1e6, 2) + ' M' : say(v / 1e3, 0) + ' bin') + ' ₺';
   let mx = '<div class="panel" style="gap:12px"><div class="bas"><h2>Aylık durum haritası</h2><span class="k">' + (fatSec.ab === 'hepsi' ? 'bir kutuya tıklayın: o abone ve ayın akış şeması açılır' : 'ay seçmek için kutuya tıklayın') + '</span></div>'
     + '<div style="overflow-x:auto"><div style="display:grid;grid-template-columns:64px repeat(12,minmax(58px,1fr));gap:4px;min-width:760px">'
     + '<div></div>' + AYK.map(a => '<div class="k" style="text-align:center;font-size:12px">' + a + '</div>').join('');

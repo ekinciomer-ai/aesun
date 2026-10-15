@@ -1644,7 +1644,7 @@ async function cizYonetim() {
       + '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border:2px dashed #10233F;border-radius:3px"></span>Şu an</span><span>Soluk: geçmiş saat</span><span><b style="color:#6B3FA0">9,1</b> saat altındaki sayı: o saatin ortalama hash\'i (PH/s; F2Pool, eğik: Pi ölçümü)</span></div>';
     const tg_ = gunToplam(pl), gecmisSec = gun < bugun;
     const anB = window.ANIM_ARALIK || { bas: gunEkle(bugun, -13) < ilkGun ? ilkGun : gunEkle(bugun, -13), bit: bugun };
-    h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Saatlik plan · ' + gunAd(gun) + (gun === bugun || gun === yarin ? ' ' + tarihK(gun) : ' ' + gun.slice(0, 4)) + (gecmisSec ? ' · gerçekleşen' : '') + '</h2><span class="k" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' + calisSaat + ' saat ' + (gecmisSec ? 'çalıştı · ' : 'çalış · ') + uyuSaat + ' saat ' + (gecmisSec ? 'uyudu' : 'uyut')
+    h += '<section class="panel" style="gap:12px"><div class="bas"><h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button type="button" onclick="anlikAc()" style="font:inherit;font-size:14px;font-weight:700;padding:6px 14px;border-radius:999px;border:0;background:#10233F;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px"><span style="width:9px;height:9px;border-radius:50%;background:#2BD27A;box-shadow:0 0 0 3px rgba(43,210,122,.3)"></span>Anlık izleme</button>Saatlik plan · ' + gunAd(gun) + (gun === bugun || gun === yarin ? ' ' + tarihK(gun) : ' ' + gun.slice(0, 4)) + (gecmisSec ? ' · gerçekleşen' : '') + '</h2><span class="k" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' + calisSaat + ' saat ' + (gecmisSec ? 'çalıştı · ' : 'çalış · ') + uyuSaat + ' saat ' + (gecmisSec ? 'uyudu' : 'uyut')
       + '<span class="tursec"><button type="button" title="Önceki gün"' + (gun <= ilkGun ? ' disabled' : '') + ' onclick="YSEC.gun=\'' + gunEkle(gun, -1) + '\';cizMaden()">◀</button>' + [bugun].concat(yarinVar ? [yarin] : []).map(g => '<button type="button" class="' + (g === gun ? 'on' : '') + '" onclick="YSEC.gun=\'' + g + '\';cizMaden()">' + gunAd(g) + '</button>').join('') + '<button type="button" title="Sonraki gün"' + (gun >= (yarinVar ? yarin : bugun) ? ' disabled' : '') + ' onclick="YSEC.gun=\'' + gunEkle(gun, 1) + '\';cizMaden()">▶</button></span>'
       + '<input type="date" value="' + gun + '" min="' + ilkGun + '" max="' + (yarinVar ? yarin : bugun) + '" onchange="if(this.value){YSEC.gun=this.value;cizMaden()}" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></span></div>'
       // derlenmiş aralıklar: bugün şimdiden sonrası; yarın tüm gün; geçmiş gün gerçekleşen
@@ -2957,6 +2957,80 @@ yukle();
 al('n8n/analiz/durum.json').then(d => { HIZ.sunucu = d && d.performans; }).catch(() => {});
 let boyutZ = null, sonGen = window.innerWidth;
 window.addEventListener('resize', () => { clearTimeout(boyutZ); boyutZ = setTimeout(() => { if (D && Math.abs(window.innerWidth - sonGen) > 40) { sonGen = window.innerWidth; ciz(); } }, 300); });
+
+// ===== Anlık izleme penceresi: cihaz hash/sıcaklık, filo gücü, güneş, karar — her 60 sn yenilenir =====
+const ANLIK = { t: null, acik: false };
+async function anlikVeri(yol) { const r = await fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error(yol + ' ' + r.status); return r.json(); }
+const anlikYas = ts => { if (!ts) return '—'; const m = (Date.now() - Date.parse(String(ts).replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(ts) ? '' : '+03:00'))) / 60000; return m < 1 ? 'şimdi' : m < 60 ? Math.round(m) + ' dk önce' : Math.round(m / 60) + ' sa önce'; };
+function anlikAc() {
+  let w = document.getElementById('anlikPen');
+  if (!w) {
+    w = document.createElement('div'); w.id = 'anlikPen';
+    w.style.cssText = 'position:fixed;inset:0;z-index:50;background:#0E1A2B;color:#E8EEF6;overflow:auto;font-family:inherit';
+    document.body.appendChild(w);
+  }
+  w.style.display = 'block'; document.body.style.overflow = 'hidden'; ANLIK.acik = true;
+  w.innerHTML = '<div style="padding:18px 22px"><p style="color:#8FA2BC">Canlı veriler yükleniyor…</p></div>';
+  anlikCiz(); clearInterval(ANLIK.t); ANLIK.t = setInterval(() => { if (!document.hidden && ANLIK.acik) anlikCiz(); }, 60000);
+}
+function anlikKapat() { ANLIK.acik = false; clearInterval(ANLIK.t); const w = document.getElementById('anlikPen'); if (w) w.style.display = 'none'; document.body.style.overflow = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && ANLIK.acik) anlikKapat(); });
+async function anlikCiz() {
+  const w = document.getElementById('anlikPen'); if (!w || !ANLIK.acik) return;
+  const gun = bugunTR();
+  const [mad, yon, fs, saha, hs] = await Promise.all([anlikVeri('antminer_panel.json'), anlikVeri('n8n/cihaz_yonetimi_durum.json'), anlikVeri('n8n/fusionsolar_son.json'), anlikVeri('n8n/saha_saatlik.json'), anlikVeri('n8n/hash/' + gun + '.json')].map(p => p.catch(() => null)));
+  const JT = (saha && saha.jth) || { 'S21e Hyd': 17.5, 'S19 XP+ Hyd': 21.5, 'S19e XP Hyd': 34.5 }, ISI = (saha && saha.isinma_kw) || 1;
+  const dv = ((mad && mad.devices) || []).filter(d => d.online || d.sleeping || (d.model && d.model !== '?'));
+  const no = d => String(d.actual_worker || d.havuz_worker || '').split('.').pop() || ('.' + String(d.ip || '').split('.').pop());
+  dv.sort((a, b) => String(no(a)).localeCompare(String(no(b)), 'tr', { numeric: true }));
+  const durum = d => d.sleeping ? 'u' : d.online && (d.hashrate_TH || 0) > 1 ? 'c' : d.online ? 'i' : 'x';
+  const kwC = d => { const k = durum(d); return k === 'c' ? (d.hashrate_TH || 0) * (JT[d.model] || 17.5) / 1000 : k === 'i' ? ISI : 0; };
+  const top = dv.reduce((t, d) => t + (durum(d) === 'c' ? d.hashrate_TH || 0 : 0), 0), hedef = dv.reduce((t, d) => t + (durum(d) === 'c' ? d.target_hashrate_TH || 0 : 0), 0);
+  const kw = dv.reduce((t, d) => t + kwC(d), 0), say_ = k => dv.filter(d => durum(d) === k).length;
+  const tes = Object.values((fs && fs.tesisler) || {}), gk = k => (tes.find(t => t.kisa === k) || {}).anlik_guc_kw, s2 = gk('Sera-2'), s1 = gk('Sera-1');
+  const net = s2 != null ? s2 - kw : null;
+  const sicMax = Math.max(...dv.filter(d => durum(d) === 'c').map(d => d.temp_max || 0), 0);
+  const kart = (bas, deg, alt, renk) => '<div style="background:#132238;border:1px solid #24364F;border-radius:14px;padding:14px 16px;min-width:0"><div style="color:#8FA2BC;font-size:12.5px">' + bas + '</div><div style="font:800 26px/1.15 system-ui;margin:4px 0 2px;color:' + (renk || '#fff') + '">' + deg + '</div><div style="color:#8FA2BC;font-size:12px">' + alt + '</div></div>';
+  const kararAd = { calis: '▲ ÇALIŞ', uyut: '▼ UYUT' }[yon && yon.karar] || '—';
+  const para = PARA && yon && yon.maliyet_tl_saat != null;
+  // 5 dk'lık filo hash'i (bugün)
+  let seri = [];
+  if (hs && hs.c) { const n = Math.max(...Object.values(hs.c).map(a => a.length)); for (let i = 0; i < n; i++) { let t = 0, v = false; for (const a of Object.values(hs.c)) if (a[i] != null) { t += a[i]; v = true; } seri.push(v ? t : null); } }
+  const adim = (hs && hs.adim_dk) || 5, W = 1000, H = 190, ymax = Math.max(1, ...seri.filter(x => x != null)) * 1.1;
+  const X = i => i * W / (24 * 60 / adim - 1), Y = v => H - 18 - v / ymax * (H - 30);
+  let yol = '', alan = '', bas = null, son = null;
+  const kapa = () => { if (bas != null) alan += 'L' + X(son).toFixed(1) + ' ' + (H - 18) + 'L' + X(bas).toFixed(1) + ' ' + (H - 18) + 'Z'; bas = null; };
+  seri.forEach((v, i) => { if (v == null) { kapa(); return; } const nk = X(i).toFixed(1) + ' ' + Y(v).toFixed(1); if (bas == null) { bas = i; yol += 'M' + nk; alan += 'M' + nk; } else { yol += 'L' + nk; alan += 'L' + nk; } son = i; }); kapa();
+  let grafik = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block">';
+  for (let h = 0; h <= 24; h += 3) grafik += '<line x1="' + (h / 24 * W) + '" x2="' + (h / 24 * W) + '" y1="0" y2="' + (H - 18) + '" stroke="#24364F"/><text x="' + Math.min(W - 16, h / 24 * W + 2) + '" y="' + (H - 4) + '" font-size="11" fill="#8FA2BC">' + String(h).padStart(2, '0') + ':00</text>';
+  for (let k = 1; k <= 3; k++) { const v = ymax * k / 4; grafik += '<text x="4" y="' + (Y(v) - 3).toFixed(1) + '" font-size="11" fill="#8FA2BC">' + say(v / 1000, 1) + ' PH/s</text><line x1="0" x2="' + W + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '" stroke="#24364F" stroke-dasharray="3 5"/>'; }
+  if (yol) grafik += '<path d="' + alan + '" fill="rgba(43,210,122,.12)"/><path d="' + yol + '" fill="none" stroke="#2BD27A" stroke-width="2.2"/>';
+  const sonI = seri.length - 1; if (sonI >= 0 && seri[sonI] != null) grafik += '<circle cx="' + X(sonI).toFixed(1) + '" cy="' + Y(seri[sonI]).toFixed(1) + '" r="5" fill="#2BD27A" stroke="#0E1A2B" stroke-width="2"/>';
+  grafik += '</svg>';
+  const RENK = { c: '#2BD27A', i: '#F5B83D', u: '#5B8DEF', x: '#55657C' }, DAD = { c: 'çalışıyor', i: 'ısınıyor', u: 'uykuda', x: 'yanıtsız' };
+  const tile = d => { const k = durum(d), t = d.temp_max || 0, tr = t >= 80 ? '#F0525A' : t >= 72 ? '#F5B83D' : '#B9C7DA';
+    return '<div onclick="anlikKapat();hashAc(\'' + esc(no(d)) + '\')" title="' + esc(no(d) + ' · ' + (d.model || '') + ' · ' + DAD[k]) + '" style="cursor:pointer;border:1px solid ' + RENK[k] + '55;background:' + RENK[k] + '14;border-radius:10px;padding:8px 9px;min-width:0">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;font:700 12px system-ui"><span>' + esc(no(d)) + '</span><span style="width:8px;height:8px;border-radius:50%;background:' + RENK[k] + '"></span></div>'
+      + '<div style="font:800 16px system-ui;margin:3px 0 1px;color:' + (k === 'c' ? '#fff' : '#8FA2BC') + '">' + (k === 'c' ? say(d.hashrate_TH, 0) + ' <span style="font-size:11px;font-weight:600;color:#8FA2BC">TH/s</span>' : DAD[k]) + '</div>'
+      + '<div style="font-size:11.5px;color:#8FA2BC">' + (k === 'c' || k === 'i' ? '<span style="color:' + tr + '">' + say(t) + '°</span> · su ' + say(d.temp_water) + '°<br>' + say(kwC(d), 1) + ' kW' : '&nbsp;') + '</div></div>'; };
+  w.innerHTML = '<div style="padding:16px 22px 30px;max-width:1500px;margin:0 auto">'
+    + '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px"><span style="display:inline-flex;align-items:center;gap:8px;font:700 12px monospace;letter-spacing:.12em;color:#2BD27A;border:1px solid rgba(43,210,122,.4);border-radius:999px;padding:6px 11px"><span style="width:8px;height:8px;border-radius:50%;background:#2BD27A"></span>CANLI</span>'
+    + '<h2 style="margin:0;font-size:22px;color:#fff">Anlık izleme</h2><span style="color:#8FA2BC;font-size:13px">Cihazlar ' + anlikYas(mad && mad.timestamp) + ' · güneş ' + anlikYas(fs && fs.guncelleme) + ' · karar ' + anlikYas(yon && yon.guncellendi) + ' · 60 sn\'de bir yenilenir</span>'
+    + '<span style="flex:1"></span><button type="button" onclick="anlikCiz()" style="font:inherit;background:#1C2F4A;color:#fff;border:1px solid #33496A;border-radius:10px;padding:8px 14px;cursor:pointer">↻ Yenile</button><button type="button" onclick="anlikKapat()" style="font:inherit;background:#D7262E;color:#fff;border:0;border-radius:10px;padding:8px 16px;cursor:pointer">✕ Kapat</button></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px">'
+    + kart('Filo hash', say(top / 1000, 2) + ' <span style="font-size:14px">PH/s</span>', (hedef ? '%' + say(top / hedef * 100, 1) + ' hedef · ' : '') + say(say_('c')) + ' cihaz', '#2BD27A')
+    + kart('Cihazlar', say_('c') + ' <span style="font-size:14px;color:#8FA2BC">/ ' + dv.length + '</span>', say_('u') + ' uykuda · ' + say_('i') + ' ısınıyor · ' + say_('x') + ' yanıtsız')
+    + kart('Madencilik yükü', say(kw, 0) + ' <span style="font-size:14px">kW</span>', 'hash × verim · en sıcak çip ' + say(sicMax) + '°', '#F5B83D')
+    + kart('Güneş (Sera-2)', s2 != null ? say(s2, 0) + ' <span style="font-size:14px">kW</span>' : '—', 'Sera-1 ' + (s1 != null ? say(s1, 0) + ' kW' : '—'), '#F0B429')
+    + kart('Şebeke (Sera-2 sayacı)', net == null ? '—' : (net >= 0 ? '→ ' : '← ') + say(Math.abs(net), 0) + ' <span style="font-size:14px">kW</span>', net == null ? '' : net >= 0 ? 'şebekeye veriliyor (tahmini)' : 'şebekeden çekiliyor (tahmini)', net == null ? '#fff' : net >= 0 ? '#2BD27A' : '#F0525A')
+    + kart('Karar · PTF', kararAd, 'PTF ' + say(yon && yon.ptf) + ' ₺/MWh · ' + esc((yon && yon.mod) || ''), yon && yon.karar === 'calis' ? '#2BD27A' : '#5B8DEF')
+    + (para ? kart('Bu saat (cihaz başı)', '<span style="font-size:22px">' + say(yon.gelir_tl_saat, 1) + ' / ' + say(yon.maliyet_tl_saat, 1) + ' ₺</span>', 'gelir / şebeke maliyeti · ₺/saat', yon.gelir_tl_saat >= yon.maliyet_tl_saat ? '#2BD27A' : '#F0525A') : '')
+    + '</div>'
+    + '<div style="background:#132238;border:1px solid #24364F;border-radius:14px;padding:12px 14px;margin-bottom:14px"><div style="display:flex;justify-content:space-between;color:#8FA2BC;font-size:12.5px;margin-bottom:6px"><b style="color:#fff">Filo hash · bugün (' + adim + ' dk)</b><span>Pi ölçümü</span></div>' + (seri.length ? grafik : '<p style="color:#8FA2BC">Bugünün 5 dk verisi henüz yok.</p>') + '</div>'
+    + (yon && yon.eylem_not ? '<div style="background:#132238;border:1px solid #24364F;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#B9C7DA"><b style="color:#fff">Son karar:</b> ' + esc(PARA ? String(yon.neden || '') : String(yon.neden || '').replace(/[^·()]*₺[^·()]*/g, '').replace(/\(\s*\)/g, '')) + (yon.eylem ? ' · <b>' + (yon.eylem === 'wake' ? '↑ uyandır' : '↓ uyut') + '</b> ' + esc(yon.eylem_not) : '') + '</div>' : '')
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px">' + dv.map(tile).join('') + '</div>'
+    + '<p style="color:#5F7391;font-size:12px;margin-top:14px">Cihaz verisi Pi toplayıcısından (~2 dk), güneş FusionSolar\'dan (~10 dk), karar cihaz yönetiminden (~5 dk) gelir. Güç, hash × model verimi ile tahmindir; ısınan cihaz ' + ISI + ' kW sayılır. Kutuya tıklayınca cihazın hash grafiği açılır.</p></div>';
+}
 </script>
 </body>
 </html>

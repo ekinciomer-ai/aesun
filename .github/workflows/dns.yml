@@ -1,0 +1,20 @@
+name: DNS (aksarayenerji.net)
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: "listele | ekle"
+        default: listele
+      ad:
+        description: "alt alan adı (ekle için), IP = ns1"
+        default: ""
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          CP_USER: ${{ secrets.FTP_KULLANICI }}
+          CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
+          IP: ${{ secrets.SUNUCU_ADRES }}
+        run: python3 cpanel/dns.py "${{ inputs.islem }}" "${{ inputs.ad }}" "$IP"

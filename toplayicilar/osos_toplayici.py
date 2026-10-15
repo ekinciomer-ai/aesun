@@ -342,6 +342,133 @@ def gonder(env, yuk):
     KUYRUK.write_text(json.dumps(kalan))
 
 
+# ---------------------------------------------------------------- reaktif (endüktif / kapasitif)
+# Yük profilindeki reaktif endekslerden saatlik kVArh çıkarılır (× çarpan) ve 2026_osos_reaktif.json'a yazılır.
+#   ri / rc   : çekiş yönü endüktif (Q1) / kapasitif (Q4) — ReactiveInductiveEndex / ReactiveCapacitiveEndex
+#   rio / rco : veriş yönü endüktif / kapasitif          — ...EndexOut
+#   q2 / q3   : sayacın Q2 / Q3 fark alanları (varsa)
+GH_REAKTIF = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/2026_osos_reaktif.json"
+R_ALAN = {"ri": "reactiveInductiveEndex", "rc": "reactiveCapacitiveEndex",
+          "rio": "reactiveInductiveEndexOut", "rco": "reactiveCapacitiveEndexOut"}
+R_FARK = {"q2": "reactiveIndexQ2Difference", "q3": "reactiveIndexQ3Difference"}
+REAKTIF_ISARET = KLASOR / "osos_reaktif_v1"
+ORNEK = {}
+
+
+def sayi_r(v):
+    if v is None or v == "":
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    t = str(v).strip()
+    if "," in t:
+        t = t.replace(".", "").replace(",", ".")
+    try:
+        return float(t)
+    except ValueError:
+        return None
+
+
+def reaktif_topla(kod, carpan, data):
+    """{(tarih, saat): {alan: kVArh, 'n': aralık sayısı}}"""
+    kay = sorted((str(x.get("profileDateTime") or ""), x) for x in data if len(str(x.get("profileDateTime") or "")) >= 16)
+    if kay and kod not in ORNEK:
+        ORNEK[kod] = {k: v for k, v in kay[-1][1].items() if not isinstance(v, (dict, list))}
+    out, onceki = {}, None
+    for dt, x in kay:
+        try:
+            t = datetime.strptime(dt[:16].replace("T", " "), "%Y-%m-%d %H:%M")
+        except ValueError:
+            onceki = None
+            continue
+        k = (dt[:10], int(dt[11:13]))
+        a = out.setdefault(k, {"n": 0})
+        if onceki and (t - onceki[0]) == timedelta(minutes=15):
+            gecerli = True
+            for ad, alan in R_ALAN.items():
+                v0, v1 = sayi_r(onceki[1].get(alan)), sayi_r(x.get(alan))
+                if v0 is None or v1 is None or v1 < v0:
+                    if ad in ("ri", "rc"):
+                        gecerli = False
+                    continue
+                a[ad] = a.get(ad, 0.0) + (v1 - v0) * carpan
+            if gecerli:
+                a["n"] += 1
+        for ad, alan in R_FARK.items():
+            v = sayi_r(x.get(alan))
+            if v is not None:
+                a[ad] = a.get(ad, 0.0) + v * carpan
+        onceki = (t, x)
+    return out
+
+
+def reaktif_yaz(env, toplam):
+    """toplam: {anahtar: {(tarih, saat): {...}}} → 2026_osos_reaktif.json (yalnız 4 aralığı tam saatler)."""
+    if not toplam or not env.get("GITHUB_TOKEN"):
+        return
+    h = {"Authorization": "Bearer " + env["GITHUB_TOKEN"], "Accept": "application/vnd.github+json"}
+    for deneme in range(3):
+        r = requests.get(GH_REAKTIF, headers=h, timeout=60)
+        if r.status_code == 404:
+            data, sha = {"aciklama": "OSOS reaktif (kVArh, × çarpan). ri/rc: çekiş endüktif/kapasitif (Q1/Q4), "
+                                     "rio/rco: veriş yönü endüktif/kapasitif, q2/q3: sayaç fark alanları. "
+                                     "Aktif çekiş/veriş: 2026_osos_endeks.json", "aboneler": {}}, None
+        else:
+            r.raise_for_status()
+            meta = r.json(); sha = meta["sha"]
+            icerik = meta.get("content")
+            data = json.loads(base64.b64decode(icerik).decode()) if icerik else requests.get(
+                GH_REAKTIF, headers={**h, "Accept": "application/vnd.github.raw+json"}, timeout=120).json()
+        degisen = 0
+        anahtar = {a[4]: a for a in ABONE}
+        for key, saatler in toplam.items():
+            tes, kod, _, carpan, _ = anahtar[key]
+            ab = data["aboneler"].setdefault(key, {"tesisat_no": tes, "kod": kod, "carpan": float(carpan), "veri": {}})
+            for (t, s_), v in saatler.items():
+                if v.get("n", 0) < 4:
+                    continue
+                yeni = {k: round(x, 2) for k, x in v.items() if k != "n"}
+                g = ab["veri"].setdefault(t, {})
+                if g.get(f"{s_:02d}") != yeni:
+                    g[f"{s_:02d}"] = yeni
+                    degisen += 1
+            ab["veri"] = dict(sorted(ab["veri"].items()))
+        if ORNEK:
+            data["ornek_kayit"] = ORNEK
+        if not degisen:
+            log("reaktif: yeni saat yok"); return
+        data["guncelleme"] = datetime.now().astimezone().isoformat(timespec="seconds")
+        govde_ = {"message": f"OSOS reaktif {datetime.now():%Y-%m-%d %H:%M} ({degisen} saat)",
+                  "content": base64.b64encode(json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()).decode()}
+        if sha:
+            govde_["sha"] = sha
+        w = requests.put(GH_REAKTIF, headers=h, json=govde_, timeout=120)
+        if w.status_code in (409, 422) and deneme < 2:
+            time.sleep(3); continue
+        w.raise_for_status()
+        log(f"reaktif: {degisen} saat yazıldı"); return
+
+
+def reaktif_gecmis(s, env, gun=120, pencere=18):
+    """İlk kurulumda geçmişi pencere pencere çeker (her pencere ≤ 2000 kayıt); sürüm işaretiyle bir kez."""
+    bugun = datetime.now()
+    toplam = {}
+    for tesisat, kod, wid, carpan, key in ABONE:
+        bas = bugun - timedelta(days=gun)
+        while bas < bugun:
+            son = min(bugun, bas + timedelta(days=pencere))
+            aralik = (bas - timedelta(days=1)).strftime("%d.%m.%Y") + " - " + son.strftime("%d.%m.%Y")
+            try:
+                for k, v in reaktif_topla(kod, carpan, yuk_profili(s, wid, aralik)).items():
+                    if v.get("n", 0) >= toplam.setdefault(key, {}).get(k, {}).get("n", 0):
+                        toplam[key][k] = v
+            except Exception as e:
+                log("reaktif geçmiş", kod, aralik, e)
+            bas = son
+            time.sleep(2)
+    reaktif_yaz(env, toplam)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gun", type=int, default=1, help="kaç gün geriye (varsayılan 1 = dün+bugün)")
@@ -363,7 +490,8 @@ def main():
                 return
             gonder(env, {"kaynak": "osos", "cihaz": platform.node(), "ts": simdi, "durum": "hata", "hata_mesaji": f"GIRIS: {e}"[:300], "satirlar": []})
             return
-    for tesisat, kod, wid, carpan, _ in ABONE:
+    REAKTIF = {}
+    for tesisat, kod, wid, carpan, _key in ABONE:
         for deneme in range(2):
             try:
                 if not wid:
@@ -373,6 +501,10 @@ def main():
                 if not veri and not girildi and not deneme:
                     raise OturumHatasi("boş yanıt (oturum süresi dolmuş olabilir)")
                 satirlar += topla(tesisat, kod, carpan, veri, simdi, wid)
+                try:
+                    REAKTIF.setdefault(_key, {}).update(reaktif_topla(kod, carpan, veri))
+                except Exception as e:
+                    log('reaktif', kod, e)
                 break
             except OturumHatasi as e:
                 if girildi or deneme:
@@ -391,6 +523,14 @@ def main():
         if hatalar and hatalar[-1].startswith("GIRIS"):
             break
         time.sleep(1)
+    if not hatalar:
+        try:
+            if not REAKTIF_ISARET.exists():
+                REAKTIF_ISARET.write_text("1")
+                reaktif_gecmis(s, env)
+            reaktif_yaz(env, REAKTIF)
+        except Exception as e:
+            log("reaktif yazılamadı:", e)
     cerez_kaydet(s)
     log(f"{len(satirlar)} saatlik satır, {len(hatalar)} hata", "; ".join(hatalar))
     try:

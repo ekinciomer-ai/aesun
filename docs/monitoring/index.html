@@ -2014,7 +2014,19 @@ async function fatYukle() {
   const kok = /^portal\./.test(location.hostname) ? '' : 'https://portal.aksarayenerji.net';
   const r = await fetch(kok + '/veri/fatura_gesfin.json?t=' + Math.floor(Date.now() / 600e3), { cache: 'no-store' });
   if (!r.ok) throw new Error('fatura verisi alınamadı (HTTP ' + r.status + ')');
-  FATG = await r.json(); FATG._t = Date.now(); return FATG;
+  FATG = await parasalCoz(await r.json()); FATG._t = Date.now(); return FATG;
+}
+// Parasal dosyalar portal açık anahtarıyla şifreli gelir (RSA-OAEP-256 + AES-256-GCM); özel anahtar yalnız yetkilinin portal oturumunda (S.parasal)
+async function parasalCoz(j) {
+  if (!j || !j.sifreli) return j;
+  if (j.bekliyor) throw new Error('Fatura verisi şifreli yayına alınıyor: yönetici portala bir kez giriş yapınca açılır.');
+  const oz = PORTAL && PORTAL.parasal;
+  if (!oz) throw new Error('Bu veri şifreli. Portaldan çıkış yapıp yeniden giriş yapın (parasal anahtar oturuma yüklenir).');
+  const ub = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const rk = await crypto.subtle.importKey('jwk', oz, { name: 'RSA-OAEP', hash: 'SHA-256' }, false, ['decrypt']);
+  const ham = await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, rk, ub(j.ak));
+  const ak = await crypto.subtle.importKey('raw', ham, 'AES-GCM', false, ['decrypt']);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: ub(j.iv) }, ak, ub(j.ct))));
 }
 // Fatura kalemlerini türüne göre ayırır; "184.734 KWH" gibi binlik ayırıcı ondalık sanılmış miktarları birim fiyattan düzeltir
 function fatKalem(k) {

@@ -1,6 +1,6 @@
 name: Fatura verisini aktar (gesfin → portal)
 # ns1'deki fatura uygulamasının (gesfin) veritabanından fatura özetini okur (yalnız SELECT) ve
-# portal.aksarayenerji.net/veri/fatura_gesfin.json olarak yükler; monitoring > Fatura analizi buradan okur.
+# portal açık anahtarıyla ŞİFRELEYİP portal.aksarayenerji.net/veri/fatura_gesfin.json olarak yükler; monitoring > Fatura analizi buradan okur.
 on:
   workflow_dispatch:
     inputs:
@@ -31,7 +31,11 @@ jobs:
           ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES 'docker exec -i gesfin-db psql -U gesfin -d gesfin -At -v ON_ERROR_STOP=1' < sunucu/fatura_disari.sql > fatura_gesfin.json
           rm -f ~/.ssh/k
           python3 -c "import json;d=json.load(open('fatura_gesfin.json'));print('::notice::fatura', len(d.get('faturalar') or []), 'tesis', len(d.get('tesisler') or []))"
-          python3 cpanel/tek_yukle.py fatura_gesfin.json veri
+          # parasal veri: açık metin YÜKLENMEZ; portal açık anahtarıyla şifrelenmiş hali yüklenir
+          pip install -q cryptography
+          python3 sunucu/parasal_sifrele.py fatura_gesfin.json sifreli.json || true
+          mkdir -p yukle && mv sifreli.json yukle/fatura_gesfin.json
+          python3 cpanel/tek_yukle.py yukle/fatura_gesfin.json veri
       - name: Özet (isteğe bağlı)
         if: ${{ inputs.ozet == 'evet' }}
         run: python3 sunucu/fatura_ozet.py fatura_gesfin.json

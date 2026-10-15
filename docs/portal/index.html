@@ -285,7 +285,25 @@ async function giris(kul, sifre) {
   if (ESKI && S.ka && ghAnahtar()) { try { await rehber(); const x = R.kullanicilar[ESKI.kul]; if (x) { await kullaniciYaz(ESKI.kul, ESKI.sifre, yukHazirla(ESKI.kul, x)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); await veriKaydet('kayıt biçimi güncellendi'); } } catch (x) {} }
   ESKI = null;
   if (S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (x) {} }
+  if (S.ka) { try { await parasalAnahtar(); } catch (x) { console.warn('parasal anahtar', x); } }
   git(SAYFA);
+}
+// Parasal veri anahtarı (RSA-OAEP 3072): açık anahtar veri.json → parasal_acik (herkese açık, üreticiler bununla şifreler);
+// özel anahtar rehberde (R.parasal) ve yalnız yöneticiler ile monitoring 'parasal' yetkililerinin şifreli kaydında durur.
+const parasalMi = x => !!(x.yonetici || ((x.izinler || {}).monitoring || []).includes('parasal'));
+async function parasalAnahtar() {
+  await rehber();
+  if (!R.parasal && ghAnahtar()) {
+    const kp = await crypto.subtle.generateKey({ name: 'RSA-OAEP', modulusLength: 3072, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['encrypt', 'decrypt']);
+    const ozel = await crypto.subtle.exportKey('jwk', kp.privateKey), acik = await crypto.subtle.exportKey('jwk', kp.publicKey);
+    const ol = new Date().toISOString();
+    R.parasal = { ozel, olusturma: ol };
+    V.parasal_acik = { kty: acik.kty, n: acik.n, e: acik.e, alg: 'RSA-OAEP-256', olusturma: ol };
+    for (const [kul, x] of Object.entries(R.kullanicilar)) { if (!parasalMi(x)) continue; try { await kullaniciYaz(kul, null, yukHazirla(kul, x)); } catch (e) {} }
+    V.rehber = await sifrele(await hamAnahtar(S.ka), R);
+    await veriKaydet('parasal veri anahtarı oluşturuldu');
+  }
+  if (R.parasal && JSON.stringify(S.parasal) !== JSON.stringify(R.parasal.ozel)) { S.parasal = R.parasal.ozel; oturumKaydet(); }
 }
 // Sonradan eklenen hazır uygulamalar: yönetici girişinde eksikse portala eklenir (bir kez)
 async function ekModulEkle() {
@@ -432,8 +450,9 @@ async function kullaniciYaz(kul, sifre, yuk) {
   V.kullanicilar[h] = { ...sar, ...(await sifrele(await hamAnahtar(x.ku), yuk)) };
 }
 const simdiTR = () => new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
-const yukHazirla = (kul, x) => x.yonetici ? { kul, ad: x.ad, ka: S.ka, yonetici: true }
-  : { kul, ad: x.ad, izinler: x.izinler || {}, projeler: x.projeler || [], anahtarlar: Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) };
+const yukHazirla = (kul, x) => ({ ...(x.yonetici ? { kul, ad: x.ad, ka: S.ka, yonetici: true }
+  : { kul, ad: x.ad, izinler: x.izinler || {}, projeler: x.projeler || [], anahtarlar: Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) }),
+  ...(R.parasal && parasalMi(x) ? { parasal: R.parasal.ozel } : {}) });
 const sifreUret = () => { const h = 'abcdefghjkmnpqrstuvwxyz', r = '23456789', a = rnd(8); let s = ''; for (let i = 0; i < 8; i++) s += (i % 3 === 2 ? r : h)[a[i] % (i % 3 === 2 ? r.length : h.length)]; return s; };
 const basHarf = a => String(a || '?').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toLocaleUpperCase('tr');
 

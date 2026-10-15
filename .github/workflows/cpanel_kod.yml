@@ -2,6 +2,9 @@ name: cPanel kod incele (yalnız okuma)
 on:
   workflow_dispatch:
     inputs:
+      tam:
+        description: "evet = tam içerik (sırlar maskeli)"
+        default: "hayir"
       dosyalar:
         description: "docroot'a göre dosyalar, boşlukla"
         default: "api/portal.php"
@@ -13,4 +16,5 @@ jobs:
       - env:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-        run: python3 cpanel/kod_incele.py ${{ inputs.dosyalar }}
+        run: |
+          if [ "${{ inputs.tam }}" = "evet" ]; then python3 cpanel/kod_tam.py ${{ inputs.dosyalar }}; else python3 cpanel/kod_incele.py ${{ inputs.dosyalar }}; fi

@@ -931,7 +931,7 @@ class Collector:
         self.gh_put("n8n/fs_kontrol_kesif.json", out, "FusionSolar kontrol keşfi (yalnız okuma)")
         log.info("Kontrol keşfi: %d cihaz, %d uç nokta", len(out["cihazlar"]), len(out["uclar"]))
 
-    KONTROL_OKUMA_SURUM = 1
+    KONTROL_OKUMA_SURUM = 2
 
     def kontrol_okuma(self):
         """YALNIZ OKUMA: SmartLogger'ların ayar (config) sinyallerini ve güç aralıklarını okur; reaktif güç ayarının
@@ -953,6 +953,13 @@ class Collector:
         loggerlar = {"T1": "NE=59224706", "T2": "NE=73686042"}
         for ad, dn in loggerlar.items():
             L = out["loggerlar"][ad] = {"dn": dn}
+            # v2: güç kontrol sinyalleri (21003 aktif, 21004 reaktif, 21013 güç faktörü) için aralık ve mevcut değer
+            sg = "21003,21004,21013"
+            L["guc_aralik"] = oku("GET", f"/rest/neteco/config/device/v1/config/query-power-range?dn={quote(dn)}&signals={sg}")
+            L["guc_aralik_tek"] = {x: oku("GET", f"/rest/neteco/config/device/v1/config/query-power-range?dn={quote(dn)}&signals={x}") for x in sg.split(",")}
+            L["guc_deger"] = oku("GET", f"/rest/neteco/web/config/device/v1/config/query-moc-config-signal?dn={quote(dn)}&signals={sg}")
+            L["guc_sinyal"] = oku("GET", f"/rest/neteco/web/config/device/v1/config/get-device-power-signals?dn={quote(dn)}")
+            continue
             L["moc"] = oku("GET", f"/rest/neteco/web/config/device/v1/moc-type-name?deviceDn={quote(dn)}")
             L["power_signals_get"] = oku("GET", f"/rest/neteco/web/config/device/v1/config/get-device-power-signals?dn={quote(dn)}")
             L["power_signals_post"] = oku("POST", "/rest/neteco/web/config/device/v1/config/get-device-power-signals", {"dn": dn})
@@ -991,7 +998,7 @@ class Collector:
             out["kod"] = self.web.page.evaluate(js)
         except Exception as e:
             out["kod_hata"] = str(e)[:200]
-        self.gh_put("n8n/fs_kontrol_okuma.json", out, "FusionSolar SmartLogger ayar okuma (yalnız okuma)")
+        self.gh_put(f"n8n/fs_kontrol_okuma{'' if self.KONTROL_OKUMA_SURUM == 1 else self.KONTROL_OKUMA_SURUM}.json", out, "FusionSolar SmartLogger ayar okuma (yalnız okuma)")
         log.info("Kontrol okuma yazıldı")
 
     def once(self):

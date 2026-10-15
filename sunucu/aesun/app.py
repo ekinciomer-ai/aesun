@@ -10,6 +10,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
+import secrets as _secrets
 
 VERI = Path(os.environ.get("AESUN_VERI", "/veri/epias-ptf"))
 REPO = os.environ.get("AESUN_REPO", "https://github.com/ekinciomer-ai/epias-ptf.git")
@@ -104,3 +105,70 @@ def dosya(yol: str, request: Request):
         return Response(status_code=304, headers={"ETag": etag})
     return Response(p.read_bytes(), media_type="application/json" if yol.endswith(".json") else "text/csv",
                     headers={"ETag": etag, "Cache-Control": "private, no-cache", "X-Veri-Sha": DURUM["sha"] or ""})
+
+
+# ---------------- Veri deposu (eski cPanel veri.php ile uyumlu) ----------------
+# Toplayıcılar (Pi, n8n, ns1 işleri) X-AE-Anahtar ile yazar/okur; özetler /veri/anahtarlar.json'da (yalnız SHA-256).
+# Okuma ayrıca portal rol belirteciyle de yapılabilir (parasal dosyalar yalnız parasal/yönetici).
+DEPO = Path(os.environ.get("AESUN_DEPO", "/veri/depo"))
+ANAHTARLAR = Path(os.environ.get("AESUN_ANAHTARLAR", "/veri/anahtarlar.json"))
+DEPO_YOL = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_./-]*\.json$")
+
+def toplayici(req: Request):
+    an = req.headers.get("x-ae-anahtar", "")
+    if len(an) < 32:
+        return None
+    h = hashlib.sha256(an.encode()).hexdigest()
+    try:
+        for ad, oz in json.loads(ANAHTARLAR.read_text()).items():
+            if hmac.compare_digest(str(oz).lower(), h):
+                return ad
+    except Exception:
+        pass
+    return None
+
+def depo_yol(yol: str):
+    if not yol or len(yol) > 200 or not DEPO_YOL.match(yol) or ".." in yol or "//" in yol or yol.startswith("portal/"):
+        raise HTTPException(400, "Geçersiz yol")
+    return yol
+
+@app.api_route("/v1/veri", methods=["GET", "POST"])
+@app.api_route("/api/veri.php", methods=["GET", "POST"])
+async def veri(request: Request, a: str = "oku", yol: str = ""):
+    DURUM["istek"] += 1
+    yol = depo_yol(yol)
+    kim = toplayici(request)
+    if a == "oku":
+        if not kim:
+            r = roller(request)
+            gerek = {"yonetici", "parasal"} if PARA.search(yol) else {"yonetici", "parasal", "monitoring"}
+            if not r & gerek:
+                DURUM["red"] += 1
+                raise HTTPException(401, "Anahtar gerekli")
+        for kok in (DEPO, VERI):
+            p = kok / yol
+            if p.is_file():
+                return Response(p.read_bytes(), media_type="application/json",
+                                headers={"X-AE-Guncel": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(p.stat().st_mtime)), "Cache-Control": "no-store"})
+        raise HTTPException(404, "Yok: " + yol)
+    if a == "yaz":
+        if request.method != "POST":
+            raise HTTPException(405, "POST")
+        if not kim:
+            DURUM["red"] += 1
+            raise HTTPException(401, "Anahtar gerekli")
+        g = await request.body()
+        if len(g) > 20 * 1024 * 1024:
+            raise HTTPException(413, "Çok büyük")
+        try:
+            json.loads(g)
+        except Exception:
+            raise HTTPException(400, "JSON değil")
+        p = DEPO / yol
+        p.parent.mkdir(parents=True, exist_ok=True)
+        t = p.with_name(p.name + ".tmp" + _secrets.token_hex(4))
+        t.write_bytes(g); os.replace(t, p)
+        with open(DEPO.parent / "depo_yazim.log", "a") as f:
+            f.write(f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\t{kim}\t{yol}\t{len(g)}\n")
+        return {"tamam": True}
+    raise HTTPException(404, "Bilinmeyen işlem")

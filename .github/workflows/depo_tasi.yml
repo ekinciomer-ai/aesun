@@ -1,0 +1,26 @@
+name: Veri deposunu ns1'e taşı (cPanel → ns1)
+on: workflow_dispatch
+concurrency:
+  group: sunucu-islem
+  cancel-in-progress: false
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: cPanel'den indir
+        env:
+          CP_USER: ${{ secrets.FTP_KULLANICI }}
+          CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
+        run: python3 cpanel/depo_indir.py /tmp/tasi
+      - name: ns1'e yaz
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
+          tar czf - -C /tmp/tasi . | $S 'docker exec -i aesun-api sh -c "mkdir -p /veri/depo && tar xzf - -C /veri && echo \$(find /veri/depo -name \"*.json\" | wc -l) dosya"' | sed 's/^/::notice::ns1: /'
+          rm -rf /tmp/tasi ~/.ssh/k

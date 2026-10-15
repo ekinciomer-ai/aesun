@@ -3,6 +3,10 @@ name: Fatura verisini aktar (gesfin → portal)
 # portal.aksarayenerji.net/veri/fatura_gesfin.json olarak yükler; monitoring > Fatura analizi buradan okur.
 on:
   workflow_dispatch:
+    inputs:
+      ozet:
+        description: 'Fatura özetini iş notlarına yaz (geliştirme)'
+        default: 'hayir'
   schedule:
     - cron: '17 */3 * * *'
 concurrency:
@@ -28,3 +32,6 @@ jobs:
           rm -f ~/.ssh/k
           python3 -c "import json;d=json.load(open('fatura_gesfin.json'));print('::notice::fatura', len(d.get('faturalar') or []), 'tesis', len(d.get('tesisler') or []))"
           python3 cpanel/tek_yukle.py fatura_gesfin.json veri
+      - name: Özet (isteğe bağlı)
+        if: ${{ inputs.ozet == 'evet' }}
+        run: python3 sunucu/fatura_ozet.py fatura_gesfin.json

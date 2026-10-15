@@ -76,6 +76,7 @@ def zaman(s):
 def bildirim_tetikle(aralik_dk=15):
     """GitHub'ın zamanlanmış iş akışları saatlerce gecikebiliyor (8 Eki: 15 dk yerine ~6 saatte bir).
     Bildirimler iş akışını Pi düzenli tetikler: repository_dispatch (event_type "bildirim"), en çok aralik_dk'da bir."""
+    return False   # 15.10.2026: Bildirimler artık ns1'de (aesun-isler) 15 dk'da bir çalışıyor; tetik gereksiz
     durum = AESUN / "bildirim_tetik.json"
     try:
         son = json.loads(durum.read_text()).get("t", 0) if durum.exists() else 0

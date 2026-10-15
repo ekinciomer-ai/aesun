@@ -13,8 +13,21 @@ services:
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }
+  isler:
+    build: ./isler
+    container_name: aesun-isler
+    restart: unless-stopped
+    env_file: [/opt/aesun/isler.env]
+    volumes:
+      - aesun_isler:/veri
+      - /opt/aesun/ssh:/home/aesun/.ssh:ro
+    mem_limit: 384m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
 volumes:
   aesun_veri:
+  aesun_isler:
 networks:
   gesfin-net:
     external: true

@@ -3,7 +3,9 @@
 set -euo pipefail
 H=/opt/aesun
 mkdir -p $H && chmod 700 $H
-cp sunucu/aesun/app.py sunucu/aesun/Dockerfile sunucu/aesun/docker-compose.yml $H/
+cp -r sunucu/aesun/. $H/
+[ -f $H/isler.env ] || { umask 077; printf 'ETKIN=0\n' > $H/isler.env; echo "NOT: isler.env oluşturuldu (işler kapalı)"; }
+chmod 600 $H/isler.env
 if [ ! -f $H/.env ]; then
   umask 077; printf 'AESUN_ESITLE_SN=30\n' > $H/.env
   echo "NOT: .env oluşturuldu (root-only)"
@@ -15,7 +17,7 @@ docker compose build -q
 docker compose run --rm --no-deps --user root --entrypoint sh api -c 'chown -R 1001:1001 /veri' >/dev/null 2>&1 || true
 docker compose up -d --force-recreate
 sleep 8
-echo "NOT: aesun-api: $(docker ps --filter name=aesun-api --format '{{.Status}}')"
+echo "NOT: kapsayıcılar: $(docker ps --filter name=aesun- --format '{{.Names}} {{.Status}}' | tr '\n' ' ')"
 # --- Caddy: yalnız yeni blok, doğrulama ve geri alma ile ---
 CF=/opt/caddy/Caddyfile
 C=gesfin-caddy
@@ -59,4 +61,5 @@ sleep 25
 echo "NOT: iç sağlık: $(docker exec aesun-api python -c "import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:8000/v1/saglik').read().decode())" 2>&1 | cut -c1-300)"
 echo "NOT: dış sağlık: $(curl -s --max-time 20 https://api.aksarayenerji.net/v1/saglik | cut -c1-300)"
 echo "NOT: yetkisiz deneme: $(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://api.aksarayenerji.net/v1/dosya/antminer_panel.json)"
-echo "NOT: bellek: $(docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' aesun-api)"
+echo "NOT: bellek: $(docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' aesun-api aesun-isler | tr '\n' ' ')"
+sleep 20; echo "NOT: işler durumu: $(docker exec aesun-isler cat /veri/durum.json 2>&1 | cut -c1-300)"

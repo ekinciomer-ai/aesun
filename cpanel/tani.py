@@ -21,7 +21,7 @@ with urllib.request.urlopen(r, context=ctx, timeout=60) as x:
     d = json.loads(x.read().decode()).get("data") or {}
 ilgili = sorted(k for k, v in d.items() if v and any(t in k.lower() for t in ("python", "node", "ruby", "passenger", "app", "ssh", "cron", "selector", "lve")))
 print("::notice::özellikler: " + ", ".join(ilgili))
-for u in ("https://epias-ptf-production.up.railway.app/", "https://epias-ptf-production.up.railway.app/giris"):
+for u in ("https://web-production-19053.up.railway.app/giris", "https://epias-ptf-production.up.railway.app/"):
     try:
         with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=30) as x:
             b = x.read().decode("utf-8", "ignore")

@@ -32,6 +32,12 @@ jobs:
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "6" ]; then
+            for ip in 5.27.1.254 5.229.203.28; do
+              not "SmartLogger $ip" "$($S "for p in 502 6607 443 80 16100 2121 22; do timeout 4 bash -c \"</dev/tcp/$ip/\$p\" 2>/dev/null && echo -n \"\$p:açık \" || echo -n \"\$p:kapalı \"; done; echo; ping -c2 -W2 $ip | tail -2")"
+            done
+            exit 0
+          fi
           if [ "${{ inputs.bolum }}" = "5" ]; then
             not "Canlı API" "$($S 'curl -s --max-time 15 "https://portal.aksarayenerji.net/api/canli.php?s=9999999999"; echo; echo simdi=$(date +%s)')"
             exit 0

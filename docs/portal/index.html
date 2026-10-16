@@ -214,10 +214,13 @@ const VARSAYILAN = [
   { id: 'fatura', ad: 'Fatura', aciklama: 'GesFin · fatura takibi (portal girişiyle)', url: 'https://fatura.aksarayenerji.net/', ikon: 'belge', renk: 'yesil' }];
 // Tek giriş (SSO): bu uygulamalar portal belirteciyle açılır — belirteç URL parçasında (#) taşınır, sunucu günlüğüne düşmez
 const SSO = { fatura: 'https://fatura.aksarayenerji.net/sso' };
+const SSO_YOK = 'Bu uygulama için yetkiniz görünmüyor. Yetkiniz yeni verildiyse <b>çıkış yapıp tekrar giriş yapın</b> (oturumdaki yetkiler girişte alınır); sorun sürerse yöneticinize başvurun.';
+function ssoYokDlg(id) { const d = dlg(), m = MOD[id] || {}; d.innerHTML = dlgBas(id, 'Açılamadı', S && (S.ad || S.kul)) + '<div class="hata">' + SSO_YOK + '</div><div class="satir" style="margin-top:10px"><button class="btn tam" onclick="cikis();girisModal(\'' + esc(id) + '\')">Çıkış yap ve yeniden gir</button><button class="btn ik tam" onclick="$(\'dlg\').close()">Kapat</button></div></div></div>'; if (!d.open) d.showModal(); }
 async function ssoUrl(id) {
   const m = MOD[id]; if (!SSO[id] || !S || !m) return m ? String(m.url || '').trim() : '';
   const rol = S.ka ? 'yonetici' : (S.anahtarlar || {})[id] ? id : (S.parasal && S.parasal.d) ? 'parasal' : '';
-  if (!rol) return String(m.url || '').trim();
+  if (!rol) return '';   // yetki yok ya da oturum eski — çağıran açık mesaj gösterir
+
   const an = rol === 'yonetici' ? S.ka : rol === 'parasal' ? S.parasal.d : S.anahtarlar[id];
   return SSO[id] + '#t=' + await apiBelirtec(rol, an) + '&r=' + encodeURIComponent(rol);
 }
@@ -273,7 +276,7 @@ function girisModal(id, hata) {
     UZUN = !!($('hatirla') && $('hatirla').checked);
     try { await giris($('kul').value, $('sif').value); }
     catch (er) { return girisModal(id, er.message); }
-    if (HEDEF && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(await ssoUrl(HEDEF)); return; }
+    if (HEDEF && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { const u = await ssoUrl(HEDEF); if (u) { location.replace(u); return; } d.close(); git('ana'); return ssoYokDlg(HEDEF); }
     try { if ($('hatirla') && $('hatirla').checked) localStorage.setItem('ae_portal_kul', $('kul').value.trim()); else localStorage.removeItem('ae_portal_kul'); } catch (x) {}
     if (id) acSonuc(id); else d.close();
   };
@@ -293,7 +296,7 @@ async function giris(kul, sifre) {
     try {
       const key = await kdf(sf, e ? e.tuz : b64(rnd(16)), e ? e.iter : ITER);   // kullanıcı yoksa da aynı süre
       if (!e) throw 0;
-      if (e.sar) { const { ku } = await coz(key, e.sar); S = await coz(await hamAnahtar(ku), e); }
+      if (e.sar) { const { ku } = await coz(key, e.sar); S = await coz(await hamAnahtar(ku), e); S.ku = ku; S.kulOz = await kulOz(V.kul_tuz, k); }   // ku: oturum yenileme için (kayıt zaten çözülmüş halde oturumda)
       else { S = await coz(key, e); ESKI = { kul: k, sifre: sf }; }   // ilk sürüm kaydı: şifreyle doğrudan şifreli
       ok = true; break;
     } catch (x) { if (!e) break; }
@@ -305,6 +308,18 @@ async function giris(kul, sifre) {
   if (S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (x) {} }
   if (S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (x) { console.warn('parasal anahtar', x); } }
   git(SAYFA);
+}
+// Oturum yenileme: yöneticinin verdiği yeni yetki/uygulama, kullanıcı çıkış-giriş yapmadan oturuma iner.
+// Kullanıcının kendi kaydı (veri.json) oturumdaki ku ile yeniden çözülür; kayıt silinmiş/değişmişse oturum kapanır.
+async function oturumYenile() {
+  if (!S || !S.ku || !S.kulOz || !V || !V.kullanicilar) return;
+  const e = V.kullanicilar[S.kulOz];
+  if (!e) { cikis(); return; }
+  try {
+    const y = await coz(await hamAnahtar(S.ku), e);
+    y.ku = S.ku; y.kulOz = S.kulOz;
+    if (JSON.stringify(y) !== JSON.stringify(S)) { S = y; oturumKaydet(); }
+  } catch (x) { cikis(); }   // anahtar değişmiş (şifre sıfırlanmış) → yeniden giriş
 }
 // Parasal veri anahtarı (RSA-OAEP 3072): açık anahtar veri.json → parasal_acik (herkese açık, üreticiler bununla şifreler);
 // özel anahtar rehberde (R.parasal) ve yalnız yöneticiler ile monitoring 'parasal' yetkililerinin şifreli kaydında durur.
@@ -358,7 +373,7 @@ function ac(id) {
   if (m && m.aktif !== false && String(m.url || '').trim()) {
     if (!SSO[id]) { window.open(m.url, m.yeni_sekme !== false ? '_blank' : '_self', 'noopener'); return; }
     const w = m.yeni_sekme !== false ? window.open('about:blank', '_blank') : null;   // pencere tıklama anında açılır (engelleyici yemesin)
-    ssoUrl(id).then(u => { if (w && !w.closed) { w.opener = null; w.location.replace(u); } else location.href = u; });
+    ssoUrl(id).then(u => { if (!u) { if (w) w.close(); return ssoYokDlg(id); } if (w && !w.closed) { w.opener = null; w.location.replace(u); } else location.href = u; });
     return;
   }
   acSonuc(id);
@@ -370,7 +385,7 @@ function acSonuc(id) {
     : '<div class="hata">' + (m ? 'Bu uygulamanın bağlantısı henüz tanımlanmadı.' : 'Bu uygulamaya erişim yetkiniz yok. Yöneticinize başvurun.') + '</div><button class="btn ik tam" onclick="$(\'dlg\').close()">Kapat</button>')
     + '</div></div>';
   if (!d.open) d.showModal();
-  if (url && SSO[id]) ssoUrl(id).then(u => { const a = $('acLink'); if (a) a.href = u; });
+  if (url && SSO[id]) ssoUrl(id).then(u => { if (!u) return ssoYokDlg(id); const a = $('acLink'); if (a) a.href = u; });
 }
 // ---- Mali grubu: tek kutu, içinde Mail / Muhasebe / Hukuk-Sözleşme iç giriş sekmeleri ----
 const MALI_ALT = [
@@ -644,11 +659,12 @@ function modSil(id) {
   S = oturumOku(); ust();
   try { await veriYukle(); } catch (e) { $('ana').innerHTML = '<div class="kart hata">' + esc(e.message) + '</div>'; return; }
   if (!V) return kurulumCiz();
+  if (S) await oturumYenile();
   if (S) { try { await modOnbellek(); } catch (e) { S = null; ls.sil('ae_portal'); ust(); } }
   if (S && S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (e) {} }
   if (S && S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (e) { console.warn('parasal anahtar', e); } }
   if (HEDEF) {
-    if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(await ssoUrl(HEDEF)); return; }
+    if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { const u = await ssoUrl(HEDEF); if (u) { location.replace(u); return; } git('ana'); return ssoYokDlg(HEDEF); }
     git('ana'); return S ? acSonuc(HEDEF) : girisModal(HEDEF);
   }
   git('ana');

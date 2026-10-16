@@ -29,10 +29,12 @@ from ortak import AESUN, TR, gh, log, zaman
 AYAR_YOL = "kompanzasyon.json"
 DURUM_YOL = "n8n/kompanzasyon_durum.json"
 KOMUT_YOL = "n8n/kompanzasyon_komut.json"
+KARAR_YOL = "n8n/kompanzasyon_karar.json"        # n8n iş akışının hedef Q kararı (Pi okur, uygular)
 DAMGA = AESUN / "kompanzasyon_son"
 
 VARSAYILAN = {
     "mod": "oneri",                                   # izle | oneri | otomatik
+    "karar_kaynagi": "n8n",                           # n8n: hedef Q'yu n8n iş akışı verir (n8n/kompanzasyon_karar.json), Pi uygular · pi: Pi kendi hesaplar
     "sinir": {"enduktif": 0.20, "kapasitif": 0.15},   # yönetmelik: şebekeden çekilen aktif enerjiye oranla
     "hedef": {"enduktif": 0.12, "kapasitif": 0.08},   # otomasyonun tutmaya çalıştığı değer (emniyet payı)
     "uyari": {"enduktif": 0.16, "kapasitif": 0.12},   # bu oranı geçince bildirim
@@ -164,6 +166,14 @@ def main(kuru=False):
     duz = dict(eski.get("duzeltme") or {})
     olaylar = list(eski.get("olaylar") or [])
     kuyruk, k_sha = gh(KOMUT_YOL) if a["mod"] == "otomatik" else (None, None)
+    # n8n kararı: "AEMonitoring · Kompanzasyon" iş akışı 15 dk'da bir hedef Q yazar. Bayat/yoksa Pi güvenli konuma (0) geçer.
+    n8k, n8_taze = None, False
+    if a.get("karar_kaynagi") == "n8n":
+        try:
+            n8k, _ = gh(KARAR_YOL)
+            n8_taze = bool(n8k) and (simdi - zaman(n8k["guncellendi"])) <= timedelta(minutes=float(n8k.get("gecerli_dk") or 20) + 10)
+        except Exception as e:
+            log("n8n kararı okunamadı:", e)
     kuyruk = kuyruk or {"komutlar": []}
     yeni_komut = False
     h_simdi = simdi.hour
@@ -201,8 +211,19 @@ def main(kuru=False):
         q = 0.0 if bayat else plan[h_simdi] + d
         adim = a["adim_kvar"] or 1
         q = max(-qs, min(qs, round(q / adim) * adim)) if ey else round(q, 1)
+        n8_not = None
+        if a.get("karar_kaynagi") == "n8n" and ey == "fusionsolar":
+            km = next((x for x in ((n8k or {}).get("komutlar") or []) if x.get("abone") == ab), None)
+            if n8_taze and km and km.get("uygula"):
+                q = max(-qs, min(qs, round(float(km.get("q_kvar") or 0) / adim) * adim))
+                n8_not = f"n8n kararı ({n8k.get('guncellendi', '')[11:16]})"
+            elif yaz:
+                q = 0.0
+                n8_not = "n8n kararı yok ya da bayat → güvenli konum (Q = 0)"
         yon = "endüktif" if q > 0 else "kapasitif" if q < 0 else "nötr (cosφ 1)"
         neden = []
+        if n8_not:
+            neden.append(n8_not)
         if bayat:
             neden.append("OSOS verisi bayat → güvenli konum (Q = 0)")
         if sk:

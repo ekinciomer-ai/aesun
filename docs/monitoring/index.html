@@ -166,6 +166,12 @@ async function veriFetch(yol) {
   }
   return fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' });
 }
+// S19e XP Hyd ayrı su sensörü bildirmez: "temp_water" aslında kart (PCB) sıcaklığıdır ve S21e'lerden ~20 °C yüksek çalışması
+// normaldir. Sıcaklık sınırları modele göre (epias-ptf/bildirim_isler.py SAGLIK_MODEL ile aynı).
+const SUSUZ = d => /S19e XP/.test((d && d.model) || '');
+const suEt = d => SUSUZ(d) ? 'kart' : 'su';
+const SICAK_SINIR = d => SUSUZ(d) ? 85 : 75;
+const sicakUyari = d => (d.health_issues || []).some(h => h.severity === 'high' && !(SUSUZ(d) && /HOT/.test(h.code || '') && (d.temp_max || 0) < 85));
 const LIMIT_2026 = 2905914;
 const ESLE = { T1: 'fusionsolar:NE=59224704', T2: 'fusionsolar:NE=73686040', YD: 'sungrow:5064453', Anka: 'sungrow:5038906', AE: 'inavitas:189' }, ESLE_KISA = { T1: 'Sera-1', T2: 'Sera-2' };
 const SAYAC = [
@@ -740,7 +746,7 @@ function cizGenel() {
       + '<div><div class="k">Toplam hash' + (agDisi && f2e ? ' (F2Pool)' : '') + '</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? (f2e ? say(f2e.hashrate_th) : tire) : say(s.total_hashrate_TH)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s' + '</span></div></div>'
       + '<div><div class="k">Hedefe göre</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : '%' + say(s.efficiency_pct)) + '</div></div>'
       + '<div><div class="k">Ortalama sıcaklık</div><div class="num" style="font-size:24px;font-weight:700">' + (agDisi ? tire : say(s.avg_temp_C)) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">°C</span></div></div></div>'
-      + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + (agDisi ? 'durum bilinmiyor' : s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor') + '">' + cihazlar.map(d => '<span title="' + esc(d.name + ' · ' + (agDisi ? 'durum bilinmiyor' : d.sleeping ? 'uykuda' : d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (agDisi ? '#C9D1DC' : d.sleeping ? '#2a78d6' : d.online ? (d.health_issues && d.health_issues.some(h => h.severity === 'high') ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
+      + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + (agDisi ? 'durum bilinmiyor' : s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor') + '">' + cihazlar.map(d => '<span title="' + esc(d.name + ' · ' + (agDisi ? 'durum bilinmiyor' : d.sleeping ? 'uykuda' : d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (agDisi ? '#C9D1DC' : d.sleeping ? '#2a78d6' : d.online ? (sicakUyari(d) ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
       + '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1E7A3C"></span> çalışıyor</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C98500"></span> sıcaklık uyarısı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#B42318"></span> yanıt yok</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#2a78d6"></span> uykuda</span>' + (agDisi ? '<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C9D1DC"></span> durum bilinmiyor</span>' : '') + '</div></section>';
     const ay6 = (mad.monthly_history || []).slice().sort((a, b) => a.month.localeCompare(b.month)).slice(-6);
     const btcVar = ay6.some(m => m.earn_btc > 0);
@@ -1202,7 +1208,7 @@ async function hashOzet(c) {
     + kart('Anlık', anlik != null ? say(anlik, 0) : '—', 'TH/s · ' + ts, '#1E7A3C')
     + kart('1 saat ort.', son1.length ? say(ort(son1), 0) : '—', 'TH/s', '#2563EB')
     + kart('24 saat ort.', son24.length ? say(ort(son24), 0) : '—', 'TH/s', '#7C3AED')
-    + kart('Durum', '<span style="color:' + durum[1] + '">' + durum[0] + '</span>', d && d.temp_water != null ? 'su ' + say(d.temp_water) + ' °C' + (d.temp_max != null ? ' · çip ' + say(d.temp_max) + ' °C' : '') : '')
+    + kart('Durum', '<span style="color:' + durum[1] + '">' + durum[0] + '</span>', d && d.temp_water != null ? suEt(d) + ' ' + say(d.temp_water) + ' °C' + (d.temp_max != null ? ' · çip ' + say(d.temp_max) + ' °C' : '') : '')
     + '</div><div style="display:flex;flex-wrap:wrap;gap:8px">'
     + kart('Bugün BTC (tahmini)', btc != null ? btc.toFixed(6) : '—', btc != null && btcTl ? say(btc * btcTl) + ' ₺' + (btcUsd ? ' · ' + say(btc * btcUsd, 1) + ' $' : '') : 'hashprice yok', '#B7791F')
     + kart('Çalışma bugün', say(saat(bA), 1), 'saat')
@@ -1327,8 +1333,8 @@ async function cizCihazlar() {
       + (g ? ' · <span style="color:#1E7A3C;font-weight:600">güncellendi ' + esc(g.t.slice(8, 10) + '.' + g.t.slice(5, 7) + ' ' + g.t.slice(11, 16)) + '</span>' + (g.eski ? ' <span title="önceki sürüm">(' + esc(String(g.eski).split('(')[0]) + ' →)</span>' : '') : '') + '</span>'; };
   // kart (hashboard) özeti: ideal hıza oran ve en sıcak çip
   const kartH = c => { const o = DET && DET.cihaz && DET.cihaz[c]; if (!o || !(o.kart || []).length) return '';
-    return '<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span class="k" style="font-size:11px">Kartlar</span>' + o.kart.map(k => { const or = k.ideal ? k.hiz / k.ideal : null, kotu = !(k.hiz > 0) || (or != null && or < 0.85), tc = k.t_chip || k.t_pic, sicak = tc >= 85;
-      return '<span title="Kart ' + (k.i ?? '') + ': ' + say(k.hiz) + ' / ideal ' + say(k.ideal) + ' · frekans ' + say(k.frek) + ' · çip ' + say(k.asic) + ' · PCB ' + say(k.t_pcb) + ' °C · çip ' + say(tc) + ' °C · HW ' + say(k.hw) + '" style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:' + (kotu ? '#FDECEA' : sicak ? '#FFF4DC' : '#E8F5EC') + ';color:' + (kotu ? '#B42318' : sicak ? '#9A5B00' : '#1E7A3C') + '">' + (or != null ? '%' + say(or * 100) : say(k.hiz)) + (tc ? ' · ' + say(tc) + '°' : '') + '</span>'; }).join('') + '</div>'; };
+    return '<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"><span class="k" style="font-size:11px">Kartlar</span>' + o.kart.map(k => { const or = k.ideal ? k.hiz / k.ideal : null, kotu = !(k.hiz > 0) || (or != null && or < 0.85) || (k.hwp || 0) >= 5, tc = k.t_chip || k.t_pic, sicak = tc >= 85;
+      return '<span title="Kart ' + (k.i ?? '') + ': ' + say(k.hiz) + ' / ideal ' + say(k.ideal) + ' · frekans ' + say(k.frek) + ' · çip ' + say(k.asic) + ' · PCB ' + say(k.t_pcb) + ' °C · çip ' + say(tc) + ' °C · HW ' + say(k.hw) + (k.hwp != null ? ' (%' + say(k.hwp, 2) + ')' : '') + '" style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:' + (kotu ? '#FDECEA' : sicak ? '#FFF4DC' : '#E8F5EC') + ';color:' + (kotu ? '#B42318' : sicak ? '#9A5B00' : '#1E7A3C') + '">' + (or != null ? '%' + say(or * 100) : say(k.hiz)) + (tc ? ' · ' + say(tc) + '°' : '') + ((k.hwp || 0) >= 1 ? ' · HW %' + say(k.hwp, 1) : '') + '</span>'; }).join('') + '</div>'; };
   for (const k of Object.keys(KIM || {})) if (!kodlar.includes(k)) kodlar.push(k);
   kodlar.sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
   const sonHash = {}; for (const k of Object.keys(MADEN.H || {}).sort()) for (const [w, v] of Object.entries(MADEN.H[k] || {})) if (v > 0) sonHash[w] = k;
@@ -1355,7 +1361,7 @@ async function cizCihazlar() {
     const dugme = (act, et) => '<button type="button" class="btn" style="flex:1;padding:6px 8px;font-size:13px"' + (ipSon ? ' onclick="cihazKomut(\'' + act + '\',[' + ipSon + '],\'Cihaz ' + c + '\')"' : ' disabled title="Sahada bu cihaza erişilemiyor"') + '>' + et + '</button>';
     const sahaSut = sahaOk
       ? sat('Hash', say(cv.hashrate_TH) + ' TH/s') + sat('Hedef', say(cv.target_hashrate_TH) + ' TH/s') + sat('Verim', '%' + say(cv.efficiency_pct), cv.efficiency_pct < 90 ? '#B42318' : null)
-        + sat('Çip / su', say(cv.temp_max) + ' / ' + say(cv.temp_water) + ' °C', cv.temp_max >= 75 ? '#B42318' : null) + (cv.fan_avg_rpm > 0 ? sat('Fan', say(cv.fan_avg_rpm) + ' rpm') : '') + sat('Çalışma', sureY(cv.elapsed_hours))
+        + sat('Çip / ' + suEt(cv), say(cv.temp_max) + ' / ' + say(cv.temp_water) + ' °C', cv.temp_max >= SICAK_SINIR(cv) ? '#B42318' : null) + (cv.fan_avg_rpm > 0 ? sat('Fan', say(cv.fan_avg_rpm) + ' rpm') : '') + sat('Çalışma', sureY(cv.elapsed_hours))
         + sat('Durum', cv.sleeping ? 'Uyku' : cv.status === 'ONLINE' ? 'Çevrimiçi' : esc(cv.status || ''), cv.sleeping ? null : cv.status === 'ONLINE' ? '#1E7A3C' : '#9A5B00')
       : '<div class="k" style="color:#B42318;font-weight:600">' + (cv ? esc(cv.status || 'yanıt yok') : 'Toplayıcı listesinde değil') + '</div>'
         + (hw.hash != null ? sat('Son bilinen', say(hw.hash) + ' TH/s') : '') + (ki.son_gorulme ? sat('Son görülme', esc(ki.son_gorulme.slice(8, 10) + '.' + ki.son_gorulme.slice(5, 7) + ' ' + ki.son_gorulme.slice(11, 16))) : '');
@@ -3390,7 +3396,7 @@ async function cizMiningPrensip() {
     const kw = cal ? (kwC != null ? (thOrt ? kwC * th / thOrt : kwC) : null) : uy ? 0 : null;
     return { tik: no ? "hashAc('" + esc(no) + "')" : null, no: no || ('IP .' + String(d.ip).split('.').pop()), durum: cal ? 'çalışıyor' : uy ? 'uykuda' : d.online ? 'hash yok' : 'yanıtsız', renk: cal ? TH_R.yesil : uy ? TH_R.mavi : TH_R.kirmizi,
       s1: cal ? say(th, 1) + ' TH/s · ' + (kw != null ? say(kw, 2) + ' kW' : '—') : uy ? 'uyku · 0 kW' : '—',
-      s2: (d.temp_max != null ? 'çip ' + say(d.temp_max) + ' °C' : 'sıcaklık —') + (d.temp_water != null ? ' · su ' + say(d.temp_water) + ' °C' : '') };
+      s2: (d.temp_max != null ? 'çip ' + say(d.temp_max) + ' °C' : 'sıcaklık —') + (d.temp_water != null ? ' · ' + suEt(d) + ' ' + say(d.temp_water) + ' °C' : '') };
   });
   const mkKw = calisan.length ? kwT : 0;
   const ts = mad.timestamp ? String(mad.timestamp).slice(11, 16) : '—';
@@ -3695,11 +3701,11 @@ async function anlikCiz() {
   const seri = P;
   const aralikDug = [[15, '15 dk'], [30, '30 dk'], [60, '1 sa'], [120, '2 sa'], [360, '6 sa'], [0, 'Gün']].map(([m, ad]) => '<button type="button" onclick="ANLIK.aralik=' + m + ';anlikCiz()" style="font:inherit;font-size:12px;padding:4px 10px;border-radius:999px;cursor:pointer;border:1px solid ' + (ANLIK.aralik === m ? '#2BD27A;background:#2BD27A22;color:#fff' : '#33496A;background:transparent;color:#8FA2BC') + '">' + ad + '</button>').join('');
   const RENK = { c: '#2BD27A', i: '#F5B83D', u: '#5B8DEF', x: '#55657C' }, DAD = { c: 'çalışıyor', i: 'ısınıyor', u: 'uykuda', x: 'yanıtsız' };
-  const tile = d => { const k = durum(d), t = d.temp_max || 0, tr = t >= 80 ? '#F0525A' : t >= 72 ? '#F5B83D' : '#B9C7DA';
+  const tile = d => { const k = durum(d), t = d.temp_max || 0, ek = SUSUZ(d) ? 10 : 0, tr = t >= 80 + ek ? '#F0525A' : t >= 72 + ek ? '#F5B83D' : '#B9C7DA';
     return '<div onclick="anlikKapat();hashAc(\'' + esc(no(d)) + '\')" title="' + esc(no(d) + ' · ' + (d.model || '') + ' · ' + DAD[k]) + '" style="cursor:pointer;border:1px solid ' + RENK[k] + '55;background:' + RENK[k] + '14;border-radius:10px;padding:8px 9px;min-width:0">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;font:700 12px system-ui"><span>' + esc(no(d)) + '</span><span style="width:8px;height:8px;border-radius:50%;background:' + RENK[k] + '"></span></div>'
       + '<div style="font:800 16px system-ui;margin:3px 0 1px;color:' + (k === 'c' ? '#fff' : '#8FA2BC') + '">' + (k === 'c' ? say(d.hashrate_TH, 0) + ' <span style="font-size:11px;font-weight:600;color:#8FA2BC">TH/s</span>' : DAD[k]) + '</div>'
-      + '<div style="font-size:11.5px;color:#8FA2BC">' + (k === 'c' || k === 'i' ? '<span style="color:' + tr + '">' + say(t) + '°</span> · su ' + say(d.temp_water) + '°<br>' + say(kwC(d), 1) + ' kW' : '&nbsp;') + '</div></div>'; };
+      + '<div style="font-size:11.5px;color:#8FA2BC">' + (k === 'c' || k === 'i' ? '<span style="color:' + tr + '">' + say(t) + '°</span> · ' + suEt(d) + ' ' + say(d.temp_water) + '°<br>' + say(kwC(d), 1) + ' kW' : '&nbsp;') + '</div></div>'; };
   w.innerHTML = '<div style="padding:16px 22px 30px;max-width:1500px;margin:0 auto">'
     + '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px"><span style="display:inline-flex;align-items:center;gap:8px;font:700 12px monospace;letter-spacing:.12em;color:#2BD27A;border:1px solid rgba(43,210,122,.4);border-radius:999px;padding:6px 11px"><span style="width:8px;height:8px;border-radius:50%;background:#2BD27A"></span>CANLI</span>'
     + '<h2 style="margin:0;font-size:22px;color:#fff">Anlık izleme</h2><span style="color:#8FA2BC;font-size:13px">Cihazlar ' + (canliTaze ? '<b style="color:#2BD27A">' + Math.max(0, Math.round(Date.now() / 1000 - cs.t)) + ' sn önce</b>' : anlikYas(mad && mad.timestamp)) + ' · güneş ' + anlikYas(fs && fs.guncelleme) + ' · karar ' + anlikYas(yon && yon.guncellendi) + ' · ' + ANLIK.sn + ' sn\'de bir yenilenir</span>'

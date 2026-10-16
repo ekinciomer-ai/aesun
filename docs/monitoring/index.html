@@ -88,6 +88,7 @@ table.tb thead th[aria-sort=descending]::after{content:" ▼";font-size:10px}
   <a href="#sayac" data-sayfa="sayac"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Sayaçlar ve mahsup</a>
   <a href="#fatura" data-sayfa="fatura"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>Fatura analizi</a>
   <a href="#inverter" data-sayfa="inverter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20h18M6 16V10M10 16V6M14 16v-4M18 16V8"/></svg>İnverter analizi</a>
+  <a href="#kompanzasyon" data-sayfa="kompanzasyon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12h4l3-7 6 14 3-7h4"/></svg>Kompanzasyon</a>
   <a href="#maden" data-sayfa="maden"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2M15 10v4"/></svg>Madencilik<span id="r-mad"></span></a>
   <a href="#epias" data-sayfa="epias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 6"/></svg>EPİAŞ</a>
   <a href="#bildirim" data-sayfa="bildirim"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-5A8 8 0 1 1 21 12z"/></svg>Panel Yönetimi</a>
@@ -113,7 +114,7 @@ const PORTAL = (() => { try { const o = JSON.parse(localStorage.getItem('ae_port
 if (!PORTAL || !(PORTAL.ka || (PORTAL.anahtarlar && PORTAL.anahtarlar.monitoring))) location.replace('../portal/?git=monitoring');
 const YONETICI = !!(PORTAL && PORTAL.ka);
 const IZIN = YONETICI ? null : new Set((((PORTAL || {}).izinler || {}).monitoring) || []);
-const yetkili = k => k === 'bildirim' ? YONETICI : k === 'fatura' ? yetkili('parasal') : (!IZIN || IZIN.has(k));
+const yetkili = k => k === 'bildirim' ? YONETICI : k === 'kompanzasyon' ? yetkili('inverter') : k === 'fatura' ? yetkili('parasal') : (!IZIN || IZIN.has(k));
 const PARA = yetkili('parasal');
 const PARA_DOSYA = /(^|\/)(fatura\/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat)/;
 (function () {
@@ -3006,9 +3007,144 @@ async function bildKaydet() {
     BILD_DEGISTI = false; d.innerHTML = '<span style="color:#1E7A3C">Kaydedildi. En geç 15 dakikada geçerli olur' + ((BILD.test || []).length ? '; deneme mesajı da o zaman gider' : '') + '.</span>';
   } catch (e) { d.innerHTML = '<span style="color:#B42318">Kaydedilemedi: ' + esc(e.message || e) + '</span>'; }
 }
+// ===== Kompanzasyon: reaktif oranları sınır içinde tutan otomasyon (Pi kompanzasyon.py → n8n/kompanzasyon_durum.json) =====
+// Şema: ölçüm (OSOS + inverter) → ns1 → Pi döngüsü (ölç · değerlendir · hesapla · uygula) → eyleyiciler (SmartLogger / Sungrow / pano) → geri besleme.
+const kmpSec = { ab: 'tekyildiz_2' };
+const KMP_R = { iyi: '#1E7A3C', dikkat: '#B25E00', asim: '#B42318', yok: '#7A8799' };
+const KMP_Y = { iyi: '#E7F5EC', dikkat: '#FFF4E0', asim: '#FDECEC', yok: '#EEF2F6' };
+const KMP_AD = { iyi: 'Uygun', dikkat: 'Sınıra yakın', asim: 'Sınır aşıldı', yok: 'Veri yok' };
+const KMP_IS = [
+  ['15 Eki', 'OSOS reaktif toplayıcı', '6 abonenin saatlik endüktif/kapasitif kVArh verisi (2026_osos_reaktif.json)', 'ok'],
+  ['15 Eki', 'Fatura analizi › Reaktif', 'abone başına oran ölçerleri, saatlik profil, faturadaki ceza şeridi', 'ok'],
+  ['15 Eki', 'SmartLogger okuma keşfi', 'Sera-1 / Sera-2 güç kontrol sinyalleri bulundu: aktif 21003, reaktif 21004, cosφ 21013 (yalnız okuma)', 'ok'],
+  ['16 Eki', 'Kompanzasyon otomasyonu', 'Pi 15 dk’da bir: ay oranı, ay sonu tahmini, saat profili → inverter reaktif hedefi (kVAr); pano önerisi', 'ok'],
+  ['16 Eki', 'WhatsApp reaktif uyarısı', 'oran uyarı eşiğini ya da sınırı geçince “GES uyarısı”, düşünce “düzeldi”', 'ok'],
+  ['Sırada', 'SmartLogger yazma doğrulaması', 'reaktif/cosφ ayarının yazılması tek santralde, geri alınabilir denenecek → otomatik mod', 'bekl'],
+  ['Sırada', 'Gece reaktif desteği (Q at night)', 'Sera-2’nin gece kapasitif çekişi için inverterlerin gece Q özelliği SmartLogger’da açılmalı', 'bekl'],
+  ['Sahada', 'AE kompanzasyon panosu', 'Aksaray Enerji’de inverter kontrolü yok; gece endüktif çekiş için kondansatör kademesi/röle kontrolü', 'saha']
+];
+const kmpYuz = v => v == null ? '—' : '%' + say(v * 100, 1);
+function kmpKotu(v) { const d = v.durum || {}, s = ['asim', 'dikkat', 'iyi', 'yok']; return s.find(x => d.enduktif === x || d.kapasitif === x) || 'yok'; }
+function kmpSema(K) {
+  const A = (K && K.aboneler) || {}, W = 1120, H = 470, yz = K && K.yazici || {};
+  const t = (x, y, s, o) => '<text x="' + x + '" y="' + y + '"' + (o || '') + '>' + s + '</text>';
+  const kutu = (x, y, w, h, ren, dol, ek) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="10" fill="' + (dol || '#fff') + '" stroke="' + (ren || '#B9C4D2') + '" stroke-width="1.5"' + (ek || '') + '/>';
+  const ok = (d, ren, kesik) => '<path d="' + d + '" fill="none" stroke="' + (ren || '#10233F') + '" stroke-width="2"' + (kesik ? ' stroke-dasharray="6 5"' : '') + ' marker-end="url(#kmpOk' + (ren === '#B25E00' ? 'S' : ren === '#1E7A3C' ? 'Y' : '') + ')"/>';
+  let g = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;max-width:1120px;min-width:860px;font-family:inherit" role="img" aria-label="Kompanzasyon otomasyonu şeması">'
+    + '<defs>' + [['', '#10233F'], ['S', '#B25E00'], ['Y', '#1E7A3C']].map(([k, c]) => '<marker id="kmpOk' + k + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="' + c + '"/></marker>').join('') + '</defs>'
+    + '<g font-size="12" fill="#10233F">';
+  // sütun başlıkları
+  [[20, 'ÖLÇÜM'], [262, 'VERİ'], [420, 'PI · KOMPANZASYON DÖNGÜSÜ (15 dk)'], [842, 'EYLEYİCİ']].forEach(([x, s]) => g += t(x, 18, s, ' font-size="11" font-weight="700" fill="#7A8799" letter-spacing=".06em"'));
+  // ölçüm: OSOS sayaçları
+  const ab = Object.entries(A);
+  g += kutu(20, 30, 210, 40 + Math.max(6, ab.length) * 24, '#10233F') + t(34, 52, 'OSOS sayaçları', ' font-weight="700"') + t(150, 52, 'saatlik kVArh', ' font-size="10.5" fill="#7A8799"');
+  ab.forEach(([k, v], i) => { const d = kmpKotu(v), y = 76 + i * 24; g += '<circle cx="40" cy="' + (y - 4) + '" r="5" fill="' + KMP_R[d] + '"/>' + t(52, y, esc(String(v.ad).replace(/ \(.*\)/, '').replace(' Üretim', '').slice(0, 17)), ' font-size="11.5"') + t(222, y, kmpYuz(v.ay && v.ay.enduktif) + ' / ' + kmpYuz(v.ay && v.ay.kapasitif), ' font-size="10.5" text-anchor="end" fill="' + KMP_R[d] + '" font-weight="600"'); });
+  const osH = 40 + Math.max(6, ab.length) * 24;
+  g += t(34, 30 + osH + 16, 'endüktif / kapasitif (ay başından)', ' font-size="10" fill="#7A8799"');
+  g += kutu(20, 260, 210, 74, '#10233F') + t(34, 282, 'İnverter ölçümü', ' font-weight="700"') + t(34, 300, 'FusionSolar · Sungrow', ' font-size="11" fill="#4A5A70"') + t(34, 318, 'anlık Q (kVAr), cosφ', ' font-size="11" fill="#4A5A70"');
+  // veri: ns1
+  g += kutu(262, 140, 128, 70, '#10233F', '#F5F7FA') + t(326, 168, 'ns1 veri deposu', ' font-weight="700" text-anchor="middle"') + t(326, 188, 'api.aksarayenerji.net', ' font-size="10" fill="#7A8799" text-anchor="middle"');
+  g += ok('M230 120 C 248 120, 246 160, 260 165') + ok('M230 297 C 248 297, 246 200, 260 192');
+  // Pi döngüsü
+  g += kutu(420, 30, 380, 330, '#10233F', '#FBFCFD');
+  const ad = [['1 · Ölç', 'OSOS oranları + inverter Q okunur'], ['2 · Değerlendir', 'ay oranı, ay sonu tahmini; sınır ' + (K ? '%' + say(K.sinir.enduktif * 100) + ' / %' + say(K.sinir.kapasitif * 100) : '%20 / %15') + ', hedef ' + (K ? '%' + say(K.hedef.enduktif * 100) + ' / %' + say(K.hedef.kapasitif * 100) : '')],
+    ['3 · Hesapla', 'son 7 gün saat profili → bu saatin Q hedefi (kVAr)'], ['4 · Uygula', K ? (K.mod === 'otomatik' ? 'otomatik: doğrulanmış eyleyiciye komut' : K.mod === 'izle' ? 'izle: yalnız ölçüm' : 'öneri: hedef hesaplanır, inverter ayarına dokunulmaz') : '—']];
+  ad.forEach(([b, a], i) => { const y = 48 + i * 74; g += kutu(440, y, 340, 58, i === 3 && (!K || K.mod !== 'otomatik') ? '#B25E00' : '#1E7A3C', i === 3 && (!K || K.mod !== 'otomatik') ? '#FFF8EC' : '#F1F8F3') + t(456, y + 23, b, ' font-weight="700"') + t(456, y + 43, esc(a), ' font-size="11" fill="#4A5A70"'); if (i < 3) g += ok('M610 ' + (y + 58) + ' L610 ' + (y + 72)); });
+  g += ok('M390 175 L418 175');
+  // eyleyiciler
+  const ey = [
+    ['tekyildiz_2', 'SmartLogger · Sera-2', 'fusionsolar'], ['tekyildiz_1', 'SmartLogger · Sera-1', 'fusionsolar'],
+    [['yilmaz_darilmaz', 'anka_mineral'], 'Sungrow · YD / Anka', 'sungrow'], [['aksaray_enerji', 'aksaray_3'], 'Yalnız sayaç · AE / A3', null]];
+  ey.forEach(([k, b, y_], i) => {
+    const y = 30 + i * 84, ks = Array.isArray(k) ? k : [k], v = ks.map(x => A[x]).filter(Boolean), yaz = y_ && yz[y_] && yz[y_].dogrulandi && K.mod === 'otomatik';
+    const d = v.length ? ['asim', 'dikkat', 'iyi'].find(s => v.some(x => kmpKotu(x) === s)) || 'yok' : 'yok';
+    g += kutu(842, y, 258, 70, KMP_R[d], KMP_Y[d]) + t(856, y + 22, b, ' font-weight="700"');
+    if (y_) { const q = v.map(x => x.oneri && x.oneri.q_kvar || 0), o = v.map(x => x.olcum && x.olcum.q_kvar).filter(x => x != null);
+      g += t(856, y + 41, 'hedef ' + q.map(x => (x > 0 ? '+' : '') + say(x)).join(' / ') + ' kVAr · ölçülen ' + (o.length ? o.map(x => say(x, 1)).join(' / ') : '—'), ' font-size="11" fill="#4A5A70"')
+        + t(856, y + 58, yaz ? '● otomatik yazım açık' : '○ yazım kapalı — öneri', ' font-size="11" font-weight="600" fill="' + (yaz ? '#1E7A3C' : '#B25E00') + '"');
+    } else { const p = v.map(x => x.pano).filter(Boolean); g += t(856, y + 41, p.length ? 'pano önerisi:' : 'inverter kontrolü yok', ' font-size="11" fill="#4A5A70"') + t(856, y + 58, esc((p[0] || 'kompanzasyon panosu sahada').replace(/ — .*/, '').replace(/ \(.*\)/, '').slice(0, 36)), ' font-size="11" font-weight="600" fill="#4A5A70"'); }
+    g += ok('M800 ' + Math.min(330, 300) + ' C 820 300, 820 ' + (y + 35) + ', 840 ' + (y + 35), yaz ? '#1E7A3C' : y_ ? '#B25E00' : '#7A8799', !yaz);
+  });
+  // çıktılar
+  g += kutu(420, 382, 180, 52, '#10233F') + t(436, 404, 'Panel · bu sayfa', ' font-weight="700"') + t(436, 422, 'oranlar, plan, olaylar', ' font-size="11" fill="#4A5A70"');
+  g += kutu(620, 382, 180, 52, '#10233F') + t(636, 404, 'WhatsApp · GES', ' font-weight="700"') + t(636, 422, 'sınır yaklaşınca / düzelince', ' font-size="11" fill="#4A5A70"');
+  g += ok('M520 360 L520 380') + ok('M700 360 L700 380');
+  // geri besleme
+  g += '<path d="M1100 ' + (30 + 3 * 84 + 70) + ' L1100 456 L125 456 L125 338" fill="none" stroke="#2a78d6" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#kmpOk)"/>'
+    + t(840, 450, 'geri besleme: bir sonraki saatin OSOS ölçümü → düzeltme', ' font-size="11" fill="#2a78d6" font-weight="600" text-anchor="end"');
+  return g + '</g></svg>';
+}
+function kmpOlcer(ad, v, th, sinir, hedef, d) {
+  const mx = Math.max(sinir * 2, (v || 0) * 1.05, (th || 0) * 1.05), x = z => Math.min(100, (z || 0) / mx * 100);
+  return '<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:12.5px"><span class="k">' + ad + '</span><b style="color:' + KMP_R[d] + '">' + kmpYuz(v) + '</b></div>'
+    + '<div style="position:relative;height:10px;background:#EEF2F6;border-radius:5px" title="sınır %' + say(sinir * 100) + ' · hedef %' + say(hedef * 100) + ' · ay sonu tahmini ' + kmpYuz(th) + '">'
+    + '<div style="position:absolute;left:0;top:0;bottom:0;width:' + x(v) + '%;background:' + KMP_R[d] + ';border-radius:5px"></div>'
+    + (th != null ? '<div style="position:absolute;top:-3px;bottom:-3px;left:calc(' + x(th) + '% - 1px);width:2px;background:#10233F;opacity:.55"></div>' : '')
+    + '<div style="position:absolute;top:-4px;bottom:-4px;left:' + x(hedef) + '%;width:2px;background:#1E7A3C"></div><div style="position:absolute;top:-4px;bottom:-4px;left:' + x(sinir) + '%;width:2px;background:#B42318"></div></div>'
+    + '<div class="k" style="font-size:11.5px">ay sonu tahmini ' + kmpYuz(th) + ' · <span style="color:#1E7A3C">hedef %' + say(hedef * 100) + '</span> · <span style="color:#B42318">sınır %' + say(sinir * 100) + '</span></div></div>';
+}
+function kmpPlan(v) {
+  const p = v.plan_kvar || [], pr = v.profil || {}, W = 760, H = 210, L = 44, T = 14, B = 30, CH = H - T - B, cw = (W - L - 10) / 24;
+  const mx = Math.max(2, ...p.map(Math.abs), ...(pr.rc || []), ...(pr.ri || [])), y0 = T + CH / 2, s = z => z / mx * (CH / 2), hs = trSimdi().getUTCHours();
+  let g = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;font-family:inherit" role="img" aria-label="Saatlik reaktif hedef planı"><g font-size="11" fill="#4A5A70">';
+  [mx, mx / 2, 0, -mx / 2, -mx].forEach(z => { const y = y0 - s(z); g += '<line x1="' + L + '" x2="' + (W - 10) + '" y1="' + y + '" y2="' + y + '" stroke="' + (z ? '#EEF2F6' : '#B9C4D2') + '"/><text x="' + (L - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + say(z, mx < 6 ? 1 : 0) + '</text>'; });
+  for (let i = 0; i < 24; i++) {
+    const x = L + i * cw, q = p[i] || 0, h = Math.abs(s(q));
+    if (i === hs) g += '<rect x="' + x + '" y="' + T + '" width="' + cw + '" height="' + CH + '" fill="#2a78d6" opacity=".08"/>';
+    g += '<rect x="' + (x + 3) + '" y="' + (q > 0 ? y0 - h : y0) + '" width="' + (cw - 6) + '" height="' + Math.max(h, q ? 1 : 0) + '" rx="2" fill="' + (q > 0 ? '#6941C6' : '#C98500') + '"><title>' + String(i).padStart(2, '0') + ':00 · hedef ' + say(q, 1) + ' kVAr ' + (q > 0 ? 'endüktif' : q < 0 ? 'kapasitif' : '') + ' · ort. kapasitif çekiş ' + say((pr.rc || [])[i], 1) + ' · endüktif ' + say((pr.ri || [])[i], 1) + ' kVArh · aktif çekiş ' + say((pr.cekis || [])[i], 1) + ' kWh</title></rect>';
+    if (i % 3 === 0) g += '<text x="' + (x + cw / 2) + '" y="' + (H - 10) + '" text-anchor="middle">' + String(i).padStart(2, '0') + '</text>';
+  }
+  const ln = (a, c) => '<polyline fill="none" stroke="' + c + '" stroke-width="1.6" stroke-dasharray="3 3" points="' + a.map((z, i) => (L + i * cw + cw / 2) + ',' + (y0 - s(z || 0))).join(' ') + '"/>';
+  if (pr.rc) g += ln(pr.rc, '#B42318'); if (pr.ri) g += ln(pr.ri.map(z => -z), '#1E7A3C');
+  return g + '</g></svg><div class="k" style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px"><span><span style="display:inline-block;width:10px;height:10px;background:#6941C6;border-radius:2px"></span> inverter endüktif çalışmalı (kapasitif fazlasını yutar)</span><span><span style="display:inline-block;width:10px;height:10px;background:#C98500;border-radius:2px"></span> inverter kapasitif çalışmalı (endüktif fazlasını karşılar)</span><span style="color:#B42318">┄ ort. kapasitif çekiş</span><span style="color:#1E7A3C">┄ ort. endüktif çekiş (aşağı)</span><span>mavi bant: şu anki saat</span></div>';
+}
+async function cizKompanzasyon(zorla) {
+  document.getElementById('baslik').textContent = 'Kompanzasyon';
+  document.getElementById('altBaslik').textContent = 'Reaktif enerji oranlarını sınır içinde tutan otomasyon';
+  document.getElementById('kontrol').innerHTML = '';
+  const ic = document.getElementById('icerik');
+  let K = null, hata = '';
+  try { K = await al('n8n/kompanzasyon_durum.json', zorla); } catch (e) { hata = e.message || String(e); }
+  if (location.hash !== '#kompanzasyon') return;
+  const A = (K && K.aboneler) || {}, modAd = { oneri: 'Öneri modu', otomatik: 'Otomatik', izle: 'Yalnız izleme' };
+  let h = '<section class="panel" style="gap:12px"><div class="bas"><h2>Otomasyon şeması</h2><span class="k">'
+    + (K ? '<b style="color:' + (K.mod === 'otomatik' ? '#1E7A3C' : '#B25E00') + '">' + (modAd[K.mod] || K.mod) + '</b> · son hesap ' + saatTR(K.guncellendi) + ' · <a href="#kompanzasyon" onclick="cizKompanzasyon(true);return false">Yenile</a>' : 'Pi ilk hesabı bekleniyor') + '</span></div>'
+    + (hata ? '<div class="k" style="color:#B25E00">Durum dosyası henüz okunamadı (' + esc(hata) + '). Pi kodu çektikten sonra 15 dk içinde dolar.</div>' : '')
+    + '<div style="overflow-x:auto">' + kmpSema(K) + '</div>'
+    + '<div class="k">Oranlar: şebekeden çekilen reaktif enerjinin aktif çekişe oranı (ay başından). Yönetmelik sınırı endüktif %20, kapasitif %15. '
+    + (K && K.mod !== 'otomatik' ? 'İnvertere yazım kapalı: hedefler hesaplanıyor ve bildiriliyor, inverter ayarına dokunulmuyor. Otomatik moda geçiş SmartLogger yazma yolu tek santralde denenip onaylandıktan sonra.' : '') + '</div></section>';
+  // abone kartları
+  if (K) {
+    h += '<section class="panel" style="gap:14px"><div class="bas"><h2>Aboneler · ' + AYLAR[+String(K.guncellendi).slice(5, 7) - 1] + '</h2><span class="k">Kartı seçin → saatlik plan aşağıda</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px">';
+    for (const [k, v] of Object.entries(A)) {
+      const d = kmpKotu(v), o = v.oneri || {}, ol = v.olcum || {}, ay = v.ay || {}, sec = k === kmpSec.ab;
+      h += '<div onclick="kmpSec.ab=\'' + k + '\';cizKompanzasyon()" style="cursor:pointer;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:' + (sec ? '#F5F8FD' : '#fff') + ';border:' + (sec ? '2px solid #2a78d6' : '1px solid ' + KMP_R[d] + '55') + '">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>' + esc(v.ad) + '</b><span style="font-size:11.5px;font-weight:700;color:' + KMP_R[d] + ';background:' + KMP_Y[d] + ';padding:2px 8px;border-radius:999px">' + KMP_AD[d] + '</span></div>'
+        + kmpOlcer('Endüktif', ay.enduktif, ay.tahmin_enduktif, K.sinir.enduktif, K.hedef.enduktif, (v.durum || {}).enduktif || 'yok')
+        + kmpOlcer('Kapasitif', ay.kapasitif, ay.tahmin_kapasitif, K.sinir.kapasitif, K.hedef.kapasitif, (v.durum || {}).kapasitif || 'yok')
+        + '<div class="k" style="font-size:12px;border-top:1px solid #EEF2F6;padding-top:8px">' + say(ay.cekis) + ' kWh çekiş · ' + say(ay.ri) + ' / ' + say(ay.rc) + ' kVArh<br>'
+        + (v.eyleyici ? 'Şu anki hedef: <b>' + (o.q_kvar ? say(Math.abs(o.q_kvar)) + ' kVAr ' + esc(o.yon) : 'cosφ 1') + '</b> · ölçülen ' + (ol.q_kvar != null ? say(ol.q_kvar, 1) + ' kVAr' : '—') + ' (' + (ol.inverter || 0) + ' inverter)<br><span style="color:' + (v.yazma ? '#1E7A3C' : '#B25E00') + '">' + (v.yazma ? 'otomatik uygulanıyor' : 'öneri — inverter yazımı kapalı') + '</span>'
+          : '<span style="color:#4A5A70">' + esc(v.pano || 'İnverter kontrolü yok; oranlar uygun.') + '</span>') + '</div></div>';
+    }
+    h += '</div></section>';
+    const v = A[kmpSec.ab] || Object.values(A)[0];
+    if (v) h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Saatlik reaktif hedefi · ' + esc(v.ad) + '</h2><span class="k">son 7 günün saat profilinden; ' + esc((v.oneri || {}).neden || '') + '</span></div>' + kmpPlan(v) + '</section>';
+  }
+  // yapılan işler (zaman çizelgesi)
+  h += '<section class="panel" style="gap:12px"><h2>Yapılan işler</h2><div style="display:flex;flex-direction:column;gap:0;position:relative;padding-left:22px">'
+    + '<div style="position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:#D5DCE5"></div>'
+    + KMP_IS.map(([z, b, a, s]) => { const c = s === 'ok' ? '#1E7A3C' : s === 'saha' ? '#7A8799' : '#B25E00';
+      return '<div style="position:relative;padding:6px 0 10px"><span style="position:absolute;left:-21px;top:9px;width:12px;height:12px;border-radius:50%;background:' + (s === 'ok' ? c : '#fff') + ';border:2px solid ' + c + '"></span>'
+        + '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><span class="k" style="min-width:54px;font-weight:600;color:' + c + '">' + z + '</span><b>' + esc(b) + '</b></div><div class="k" style="font-size:12.5px;margin-left:64px">' + esc(a) + '</div></div>'; }).join('')
+    + '</div></section>';
+  const ol = ((K && K.olaylar) || []).slice(-30).reverse();
+  if (K) h += '<section class="panel" style="gap:8px"><div class="bas"><h2>Olaylar</h2><span class="k">' + ((K.olaylar || []).length) + ' kayıt</span></div>' + (ol.length ? '<div class="tablo-kutu" style="max-height:320px;overflow:auto"><table class="tb"><thead><tr><th class="sol">Zaman</th><th class="sol">Abone</th><th class="sol">Olay</th></tr></thead><tbody>'
+    + ol.map(x => '<tr><td class="sol">' + esc(String(x.t).slice(5)) + '</td><td class="sol">' + esc((A[x.abone] || {}).ad || x.abone) + '</td><td class="sol" style="white-space:normal">' + esc(x.olay) + (x.oran != null ? ' <span class="k">(ay %' + say(x.oran * 100, 1) + ')</span>' : '') + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="k" style="margin:0">Henüz olay yok (durum değişince ve hedef değişince yazılır).</p>') + '</section>';
+  ic.innerHTML = h;
+}
 function ciz() {
   const h0 = location.hash || '#genel';
-  const sayfa = h0 === '#bildirim' ? 'bildirim' : h0 === '#maden' ? 'maden' : h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#fatura') ? 'fatura' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
+  const sayfa = h0 === '#bildirim' ? 'bildirim' : h0 === '#kompanzasyon' ? 'kompanzasyon' : h0 === '#maden' ? 'maden' : h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#fatura') ? 'fatura' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
   if (!yetkili(sayfa)) {
     const ilk = ['genel', 'sayac', 'inverter', 'maden', 'epias'].find(yetkili);
     if (ilk) { location.hash = '#' + ilk; return; }
@@ -3017,9 +3153,9 @@ function ciz() {
   document.querySelectorAll('.nav a[data-sayfa]').forEach(a => a.classList.toggle('aktif', a.dataset.sayfa === sayfa));
   const t0 = performance.now(), ad = sayfa + (sayfa === 'maden' ? ':' + madenSec.sekme : sayfa === 'inverter' ? ':' + (invSec.sekme || 'analiz') : '');
   const bitir = pr => Promise.resolve(pr).finally(() => { const ms = performance.now() - t0; HIZ.gecis.push({ sayfa: ad, ms: Math.round(ms), t: Date.now() }); if (HIZ.gecis.length > 100) HIZ.gecis.shift(); hizGoster(); onYukle(); });
-  if (sayfa === 'bildirim') bitir(cizBildirim()); else if (sayfa === 'maden') bitir(cizMaden()); else if (sayfa === 'epias') bitir(cizEpias()); else if (sayfa === 'inverter') bitir(cizInverter()); else if (sayfa === 'sayac') bitir(cizSayac()); else if (sayfa === 'fatura') bitir(cizFatura()); else { bitir(); cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
+  if (sayfa === 'bildirim') bitir(cizBildirim()); else if (sayfa === 'kompanzasyon') bitir(cizKompanzasyon()); else if (sayfa === 'maden') bitir(cizMaden()); else if (sayfa === 'epias') bitir(cizEpias()); else if (sayfa === 'inverter') bitir(cizInverter()); else if (sayfa === 'sayac') bitir(cizSayac()); else if (sayfa === 'fatura') bitir(cizFatura()); else { bitir(); cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
 }
-window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias' || location.hash === '#fatura' || location.hash === '#maden' || location.hash === '#bildirim') window.scrollTo(0, 0); } });
+window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias' || location.hash === '#fatura' || location.hash === '#maden' || location.hash === '#bildirim' || location.hash === '#kompanzasyon') window.scrollTo(0, 0); } });
 // ===== Tek hat şemaları (İnverter sayfası sekmeleri): OG bara üstte → sayaç → trafo → AG bara → inverter → string; madencilik yükü
 const TH_R = { yesil: '#1E7A3C', sari: '#9A5B00', kirmizi: '#B42318', gri: '#7A8799', koyu: '#10233F', mavi: '#2a78d6' };
 const thNo = a => { const m = String(a || '').match(/(\d+)\s*$/); return m ? Number(m[1]) : 999; };

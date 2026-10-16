@@ -948,6 +948,16 @@ if __name__ == "__main__":
                 log("ağ keşfi başlatıldı")
         except Exception as e:
             log("ağ keşfi başlatılamadı:", e)
+        try:   # kompanzasyon (reaktif oran takibi/hedef Q) 15 dk'da bir, ayrı süreçte — cihaz yönetimini bekletmez
+            import kompanzasyon, subprocess as _sp
+            if kompanzasyon.zamani_geldi():
+                kompanzasyon.DAMGA.parent.mkdir(parents=True, exist_ok=True)
+                kompanzasyon.DAMGA.touch()
+                _sp.Popen(["flock", "-n", "/tmp/aesun_komp.lock", "timeout", "300", sys.executable,
+                           str(Path(__file__).resolve().parent / "kompanzasyon.py")], start_new_session=True,
+                          stdout=open(Path.home() / "aesun" / "kompanzasyon.log", "a"), stderr=_sp.STDOUT)
+        except Exception as e:
+            log("kompanzasyon başlatılamadı:", e)
         try:
             calistir()
         finally:

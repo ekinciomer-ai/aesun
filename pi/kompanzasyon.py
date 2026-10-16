@@ -41,14 +41,17 @@ VARSAYILAN = {
     "komut_gecerlilik_dk": 20,
     "veri_bayat_saat": 4,
     "aboneler": {
-        "tekyildiz_2": {"ad": "Tekyıldız 2 (Sera-2)", "eyleyici": "fusionsolar", "tesis": "Sera-2", "logger": "NE=73686042", "q_sinir_kvar": 30},
-        "tekyildiz_1": {"ad": "Tekyıldız 1 (Sera-1)", "eyleyici": "fusionsolar", "tesis": "Sera-1", "logger": "NE=59224706", "q_sinir_kvar": 30},
+        "tekyildiz_2": {"ad": "Tekyıldız 2 (Sera-2)", "eyleyici": "fusionsolar", "tesis": "Sera-2", "logger": "NE=73686042", "ip": None, "q_sinir_kvar": 30},
+        "tekyildiz_1": {"ad": "Tekyıldız 1 (Sera-1)", "eyleyici": "fusionsolar", "tesis": "Sera-1", "logger": "NE=59224706", "ip": None, "q_sinir_kvar": 30},
         "yilmaz_darilmaz": {"ad": "Yılmaz Darılmaz", "eyleyici": "sungrow", "santral": "5064453", "q_sinir_kvar": 20},
         "anka_mineral": {"ad": "Anka Mineral", "eyleyici": "sungrow", "santral": "5038906", "q_sinir_kvar": 20},
         "aksaray_enerji": {"ad": "Aksaray Enerji Üretim", "eyleyici": None},
         "aksaray_3": {"ad": "Aksaray 3", "eyleyici": None},
     },
+    "smartlogger_ip": ["192.168.1.10", "192.168.1.181"],   # saha ağında bulunan Huawei SmartLogger'lar (15 Eki ağ keşfi)
     "yazici": {
+        "modbus": {"dogrulandi": False, "birim": 0, "q_kayit": None, "q_tur": "I32", "q_kazanc": 10, "q_isaret": 1,
+                   "not": "doğrudan SmartLogger (saha ağı, Modbus TCP 502). 502 kapalı: SmartLogger web › Modbus TCP etkinleştirilmeli; kayıt ve işaret denemeyle doğrulanacak"},
         "fusionsolar": {"dogrulandi": False, "not": "SmartLogger reaktif ayarı (21004 / 21013) okundu; yazma uç noktası ve gece Q desteği doğrulanmadı"},
         "sungrow": {"dogrulandi": False, "not": "iSolarCloud parametre yazma doğrulanmadı"},
     },
@@ -164,6 +167,8 @@ def main(kuru=False):
     kuyruk = kuyruk or {"komutlar": []}
     yeni_komut = False
     h_simdi = simdi.hour
+    erisim = erisim_yokla(a, eski)
+    mb = a["yazici"].get("modbus") or {}
     sonuc = {}
     for ab, cfg in a["aboneler"].items():
         r = ((rk or {}).get("aboneler") or {}).get(ab)
@@ -177,7 +182,10 @@ def main(kuru=False):
             bayat = True
         ey = cfg.get("eyleyici")
         q_olc, p_olc, n_inv, q_ts = inverter_q(fs, sg, cfg)
-        yaz = a["mod"] == "otomatik" and ey and (a["yazici"].get(ey) or {}).get("dogrulandi")
+        # yazma yolu: 1) doğrudan SmartLogger Modbus (saha ağı) 2) uzaktan FusionSolar 3) yok (öneri)
+        yol = ("modbus" if ey == "fusionsolar" and mb.get("dogrulandi") and cfg.get("ip") else
+               ey if ey and (a["yazici"].get(ey) or {}).get("dogrulandi") else None)
+        yaz = a["mod"] == "otomatik" and yol
         # geri besleme: komut uygulanıyorsa son tam saatte kalan fazlaya göre düzelt
         d = float(duz.get(ab) or 0)
         if yaz and son24:
@@ -216,18 +224,27 @@ def main(kuru=False):
             onceki = (eski.get("aboneler") or {}).get(ab, {}).get("komut") or {}
             gecen = (simdi - zaman(onceki["t"])).total_seconds() / 60 if onceki.get("t") else 1e9
             if abs(q - (onceki.get("q_kvar") or 0)) >= adim or gecen >= a["komut_gecerlilik_dk"] - 5:
-                if gecen >= a["en_az_aralik_dk"] or abs(q - (onceki.get("q_kvar") or 0)) >= adim:
+                if (gecen >= a["en_az_aralik_dk"] or abs(q - (onceki.get("q_kvar") or 0)) >= adim) and yol == "modbus":
+                    import smartlogger
+                    try:
+                        geri = smartlogger.q_yaz(cfg["ip"], q * float(mb.get("q_isaret", 1)), mb, qs)
+                        eylem = "modbus"
+                        olaylar.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "abone": ab, "olay": f"Modbus: Q {q:+.0f} kVAr yazıldı (geri okunan {geri:+.1f})"})
+                    except Exception as e:
+                        eylem = "hata"
+                        olaylar.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "abone": ab, "olay": f"Modbus yazma hatası: {str(e)[:120]}"})
+                elif gecen >= a["en_az_aralik_dk"] or abs(q - (onceki.get("q_kvar") or 0)) >= adim:
                     k = {"id": f"{ab}-{simdi:%Y%m%d%H%M}", "t": simdi.isoformat(timespec="seconds"), "abone": ab, "eyleyici": ey,
                          "logger": cfg.get("logger"), "santral": cfg.get("santral"), "q_kvar": q, "yon": yon,
                          "gecerli_dk": a["komut_gecerlilik_dk"], "durum": "bekliyor"}
                     kuyruk["komutlar"] = ([x for x in kuyruk["komutlar"] if x.get("abone") != ab or x.get("durum") != "bekliyor"] + [k])[-50:]
                     yeni_komut = True
                     eylem = "komut"
-            komut = {"t": simdi.isoformat(timespec="seconds"), "q_kvar": q} if eylem == "komut" else onceki
+            komut = {"t": simdi.isoformat(timespec="seconds"), "q_kvar": q, "yol": yol} if eylem in ("komut", "modbus") else onceki
         else:
             komut = None
             eylem = "öneri" if a["mod"] != "izle" else "izle"
-        sonuc[ab] = {"ad": cfg.get("ad", ab), "eyleyici": ey, "yazma": bool(yaz), "ay": o, "durum": durum, "profil": prof,
+        sonuc[ab] = {"ad": cfg.get("ad", ab), "eyleyici": ey, "yazma": bool(yaz), "yol": yol, "ay": o, "durum": durum, "profil": prof,
                      "plan_kvar": plan, "son24": son24, "oneri": oneri, "pano": pano, "eylem": eylem, "komut": komut,
                      "olcum": {"q_kvar": q_olc, "p_kw": p_olc, "inverter": n_inv, "ts": q_ts},
                      "gece_saat": gece}
@@ -242,7 +259,7 @@ def main(kuru=False):
             olaylar.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "abone": ab, "olay": f"hedef Q {eo:+.0f} → {q:+.0f} kVAr ({eylem})"})
     cikti = {"guncellendi": simdi.isoformat(timespec="seconds"), "surum": 1, "mod": a["mod"],
              "sinir": a["sinir"], "hedef": a["hedef"], "uyari": a["uyari"],
-             "yazici": a["yazici"], "aboneler": sonuc, "duzeltme": duz, "olaylar": olaylar[-100:],
+             "yazici": a["yazici"], "erisim": erisim, "aboneler": sonuc, "duzeltme": duz, "olaylar": olaylar[-100:],
              "ozet": {t: {k: v["durum"][t] for k, v in sonuc.items()} for t in ("enduktif", "kapasitif")}}
     if kuru:
         for ab, v in sonuc.items():
@@ -259,6 +276,22 @@ def main(kuru=False):
         except Exception as e:
             log("kompanzasyon ayarı yazılamadı:", e)
     return cikti
+
+
+def erisim_yokla(a, eski, dk=60):
+    """Saatte bir YALNIZ OKUMA: SmartLogger'lara doğrudan erişim (443 / 502) — sonuç durum dosyasında "erisim"."""
+    e = dict(eski.get("erisim") or {})
+    try:
+        son = zaman(e["t"]) if e.get("t") else None
+    except Exception:
+        son = None
+    if son and datetime.now(TR) - son < timedelta(minutes=dk):
+        return e
+    try:
+        import smartlogger
+        return {"t": datetime.now(TR).isoformat(timespec="seconds"), "smartlogger": smartlogger.yokla(a.get("smartlogger_ip") or [])}
+    except Exception as x:
+        return {"t": datetime.now(TR).isoformat(timespec="seconds"), "hata": str(x)[:200]}
 
 
 def zamani_geldi(dk=14):

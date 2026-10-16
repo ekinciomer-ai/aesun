@@ -3019,6 +3019,7 @@ const KMP_IS = [
   ['15 Eki', 'SmartLogger okuma keşfi', 'Sera-1 / Sera-2 güç kontrol sinyalleri bulundu: aktif 21003, reaktif 21004, cosφ 21013 (yalnız okuma)', 'ok'],
   ['16 Eki', 'Kompanzasyon otomasyonu', 'Pi 15 dk’da bir: ay oranı, ay sonu tahmini, saat profili → inverter reaktif hedefi (kVAr); pano önerisi', 'ok'],
   ['16 Eki', 'WhatsApp reaktif uyarısı', 'oran uyarı eşiğini ya da sınırı geçince “GES uyarısı”, düşünce “düzeldi”', 'ok'],
+  ['16 Eki', 'İki yazma yolu hazır', 'doğrudan: Pi → SmartLogger Modbus TCP (saha ağı) · uzaktan: FusionSolar; ikisi de doğrulanana kadar kapalı', 'ok'],
   ['Sırada', 'SmartLogger yazma doğrulaması', 'reaktif/cosφ ayarının yazılması tek santralde, geri alınabilir denenecek → otomatik mod', 'bekl'],
   ['Sırada', 'Gece reaktif desteği (Q at night)', 'Sera-2’nin gece kapasitif çekişi için inverterlerin gece Q özelliği SmartLogger’da açılmalı', 'bekl'],
   ['Sahada', 'AE kompanzasyon panosu', 'Aksaray Enerji’de inverter kontrolü yok; gece endüktif çekiş için kondansatör kademesi/röle kontrolü', 'saha']
@@ -3098,6 +3099,22 @@ function kmpPlan(v) {
   if (pr.rc) g += ln(pr.rc, '#B42318'); if (pr.ri) g += ln(pr.ri.map(z => -z), '#1E7A3C');
   return g + '</g></svg><div class="k" style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px"><span><span style="display:inline-block;width:10px;height:10px;background:#6941C6;border-radius:2px"></span> inverter endüktif çalışmalı (kapasitif fazlasını yutar)</span><span><span style="display:inline-block;width:10px;height:10px;background:#C98500;border-radius:2px"></span> inverter kapasitif çalışmalı (endüktif fazlasını karşılar)</span><span style="color:#B42318">┄ ort. kapasitif çekiş</span><span style="color:#1E7A3C">┄ ort. endüktif çekiş (aşağı)</span><span>mavi bant: şu anki saat</span></div>';
 }
+function kmpErisim(K) {
+  const e = (K && K.erisim) || {}, sl = e.smartlogger || {}, yz = (K && K.yazici) || {}, mb = yz.modbus || {}, fs = yz.fusionsolar || {};
+  const ipl = Object.keys(sl), acikMb = ipl.filter(i => sl[i].modbus), acikW = ipl.filter(i => sl[i].https);
+  const sat = (no, ad, adim, durum, renk, not_) => '<div style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:10px 0;border-top:1px solid #EEF2F6">'
+    + '<span style="width:26px;height:26px;border-radius:50%;background:' + renk + ';color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center">' + no + '</span>'
+    + '<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>' + ad + '</b><span style="font-size:12px;font-weight:700;color:' + renk + '">' + durum + '</span></div>'
+    + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px">' + adim.map((x, i) => (i ? '<span style="color:#7A8799">→</span>' : '') + '<span style="border:1px solid #D5DCE5;border-radius:6px;padding:3px 8px;background:#F8FAFC">' + x + '</span>').join('') + '</div>'
+    + (not_ ? '<div class="k" style="font-size:12px">' + not_ + '</div>' : '') + '</div></div>';
+  const d1 = mb.dogrulandi ? ['açık', '#1E7A3C'] : acikMb.length ? ['Modbus açık · kayıt doğrulanacak', '#B25E00'] : ipl.length ? ['Modbus kapalı', '#B42318'] : ['ilk yoklama bekleniyor', '#7A8799'];
+  const d2 = fs.dogrulandi ? ['açık', '#1E7A3C'] : ['keşif sürüyor', '#B25E00'];
+  return '<section class="panel" style="gap:4px"><div class="bas"><h2>Ayar yazma yolu</h2><span class="k">önce 1, olmazsa 2 kullanılır' + (e.t ? ' · yoklama ' + saatTR(e.t) : '') + '</span></div>'
+    + sat(1, 'Doğrudan · saha ağı', ['Pi', 'SmartLogger ' + (ipl.length ? ipl.map(i => i.split('.').slice(-2).join('.')).join(' / ') : '192.168.1.x'), 'inverterler'], d1[0], d1[1],
+      ipl.length && !acikMb.length ? 'Web (443) ' + (acikW.length ? 'erişilebilir' : 'yok') + ', Modbus TCP (502) kapalı. Sahada: SmartLogger web › Ayarlar › İletişim › Modbus TCP › <b>Etkin</b> (istemci 192.168.0.132).' : '')
+    + sat(2, 'Uzaktan · FusionSolar', ['Pi toplayıcı', 'FusionSolar', 'SmartLogger', 'inverterler'], d2[0], d2[1], fs.dogrulandi ? '' : 'Yazma adresi okuma keşfiyle aranıyor; bulununca Sera-2’de 3 kVAr / 10 dk denenip geri alınacak.')
+    + '</section>';
+}
 async function cizKompanzasyon(zorla) {
   document.getElementById('baslik').textContent = 'Kompanzasyon';
   document.getElementById('altBaslik').textContent = 'Reaktif enerji oranlarını sınır içinde tutan otomasyon';
@@ -3113,6 +3130,7 @@ async function cizKompanzasyon(zorla) {
     + '<div style="overflow-x:auto">' + kmpSema(K) + '</div>'
     + '<div class="k">Oranlar: şebekeden çekilen reaktif enerjinin aktif çekişe oranı (ay başından). Yönetmelik sınırı endüktif %20, kapasitif %15. '
     + (K && K.mod !== 'otomatik' ? 'İnvertere yazım kapalı: hedefler hesaplanıyor ve bildiriliyor, inverter ayarına dokunulmuyor. Otomatik moda geçiş SmartLogger yazma yolu tek santralde denenip onaylandıktan sonra.' : '') + '</div></section>';
+  h += kmpErisim(K);
   // abone kartları
   if (K) {
     h += '<section class="panel" style="gap:14px"><div class="bas"><h2>Aboneler · ' + AYLAR[+String(K.guncellendi).slice(5, 7) - 1] + '</h2><span class="k">Kartı seçin → saatlik plan aşağıda</span></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px">';

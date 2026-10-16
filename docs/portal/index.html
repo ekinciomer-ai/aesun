@@ -210,7 +210,17 @@ const VARSAYILAN = [
   { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/monitoring/', ikon: 'monitoring', renk: 'mavi' },
   { id: 'mining-demo', ad: 'Mining Demo', aciklama: 'Uzaktan madencilik kontrolü · tanıtım', url: 'https://ekinciomer-ai.github.io/aesun/demo/', ikon: 'maden', renk: 'lacivert' },
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
-  { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' }];
+  { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' },
+  { id: 'fatura', ad: 'Fatura', aciklama: 'GesFin · fatura takibi (portal girişiyle)', url: 'https://fatura.aksarayenerji.net/', ikon: 'belge', renk: 'yesil' }];
+// Tek giriş (SSO): bu uygulamalar portal belirteciyle açılır — belirteç URL parçasında (#) taşınır, sunucu günlüğüne düşmez
+const SSO = { fatura: 'https://fatura.aksarayenerji.net/sso' };
+async function ssoUrl(id) {
+  const m = MOD[id]; if (!SSO[id] || !S || !m) return m ? String(m.url || '').trim() : '';
+  const rol = S.ka ? 'yonetici' : (S.anahtarlar || {})[id] ? id : (S.parasal && S.parasal.d) ? 'parasal' : '';
+  if (!rol) return String(m.url || '').trim();
+  const an = rol === 'yonetici' ? S.ka : rol === 'parasal' ? S.parasal.d : S.anahtarlar[id];
+  return SSO[id] + '#t=' + await apiBelirtec(rol, an) + '&r=' + encodeURIComponent(rol);
+}
 function ust() {
   $('ust').innerHTML = '<header class="ust"><a href="#" class="marka" onclick="git(\'ana\');return false">' + MARKA.replace(/^<span class="marka">|<\/span>$/g, '') + '</a><nav><a class="bag" href="../">← Web sitesi</a>'
     + (S ? '<span class="oturum">' + esc(S.ad || S.kul) + '</span>' + (S.ka ? '<button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button>'
@@ -263,7 +273,7 @@ function girisModal(id, hata) {
     UZUN = !!($('hatirla') && $('hatirla').checked);
     try { await giris($('kul').value, $('sif').value); }
     catch (er) { return girisModal(id, er.message); }
-    if (HEDEF && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(MOD[HEDEF].url); return; }
+    if (HEDEF && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(await ssoUrl(HEDEF)); return; }
     try { if ($('hatirla') && $('hatirla').checked) localStorage.setItem('ae_portal_kul', $('kul').value.trim()); else localStorage.removeItem('ae_portal_kul'); } catch (x) {}
     if (id) acSonuc(id); else d.close();
   };
@@ -323,6 +333,7 @@ async function apiOzet() {
   if (S.ka) oz.yonetici = await sha(await apiBelirtec('yonetici', S.ka));
   if (R.anahtarlar.monitoring) oz.monitoring = await sha(await apiBelirtec('monitoring', R.anahtarlar.monitoring));
   if (R.anahtarlar.saha) oz.saha = await sha(await apiBelirtec('saha', R.anahtarlar.saha));
+  if (R.anahtarlar.fatura) oz.fatura = await sha(await apiBelirtec('fatura', R.anahtarlar.fatura));
   if (R.parasal && R.parasal.ozel && R.parasal.ozel.d) oz.parasal = await sha(await apiBelirtec('parasal', R.parasal.ozel.d));
   if (JSON.stringify(V.api_ozet || {}) === JSON.stringify(oz) || !ghAnahtar()) return;
   V.api_ozet = oz; await veriKaydet('merkez API yetki özetleri');
@@ -330,7 +341,7 @@ async function apiOzet() {
 // Sonradan eklenen hazır uygulamalar: yönetici girişinde eksikse portala eklenir (bir kez)
 async function ekModulEkle() {
   await rehber(); let degisti = false;
-  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo')) {
+  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura')) {
     if (R.anahtarlar[m.id]) continue;
     R.anahtarlar[m.id] = b64(rnd(32));
     V.moduller[m.id] = await sifrele(await hamAnahtar(R.anahtarlar[m.id]), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: true, yeni_sekme: true, sira: Object.keys(R.anahtarlar).length });
@@ -338,22 +349,28 @@ async function ekModulEkle() {
   }
   if (!degisti) return;
   V.rehber = await sifrele(await hamAnahtar(S.ka), R);
-  await veriKaydet('uygulama eklendi: Mining Demo'); await modOnbellek();
+  await veriKaydet('hazır uygulama eklendi'); await modOnbellek();
 }
 // Uygulamaya tıklama: oturum yoksa giriş sorar; varsa (yetki varsa) doğrudan açar
 function ac(id) {
   if (!S) return girisModal(id);
   const m = MOD[id];
-  if (m && m.aktif !== false && String(m.url || '').trim()) { window.open(m.url, m.yeni_sekme !== false ? '_blank' : '_self', 'noopener'); return; }
+  if (m && m.aktif !== false && String(m.url || '').trim()) {
+    if (!SSO[id]) { window.open(m.url, m.yeni_sekme !== false ? '_blank' : '_self', 'noopener'); return; }
+    const w = m.yeni_sekme !== false ? window.open('about:blank', '_blank') : null;   // pencere tıklama anında açılır (engelleyici yemesin)
+    ssoUrl(id).then(u => { if (w && !w.closed) { w.opener = null; w.location.replace(u); } else location.href = u; });
+    return;
+  }
   acSonuc(id);
 }
 function acSonuc(id) {
   const d = dlg(), m = MOD[id], url = m && m.aktif !== false ? String(m.url || '').trim() : '';
   d.innerHTML = dlgBas(id, url ? 'Hoş geldiniz' : 'Açılamadı', S.ad || S.kul) + (url
-    ? ((S.hesaplar || {})[id] ? '<p class="ince">Hesap: ' + esc(S.hesaplar[id]) + '</p>' : '') + '<a class="btn tam" href="' + esc(url) + '"' + (m.yeni_sekme !== false ? ' target="_blank"' : '') + ' rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(m.ad) + ' uygulamasını aç →</a>'
+    ? ((S.hesaplar || {})[id] ? '<p class="ince">Hesap: ' + esc(S.hesaplar[id]) + '</p>' : '') + '<a class="btn tam" id="acLink" href="' + esc(url) + '"' + (m.yeni_sekme !== false ? ' target="_blank"' : '') + ' rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(m.ad) + ' uygulamasını aç →</a>'
     : '<div class="hata">' + (m ? 'Bu uygulamanın bağlantısı henüz tanımlanmadı.' : 'Bu uygulamaya erişim yetkiniz yok. Yöneticinize başvurun.') + '</div><button class="btn ik tam" onclick="$(\'dlg\').close()">Kapat</button>')
     + '</div></div>';
   if (!d.open) d.showModal();
+  if (url && SSO[id]) ssoUrl(id).then(u => { const a = $('acLink'); if (a) a.href = u; });
 }
 // ---- Mali grubu: tek kutu, içinde Mail / Muhasebe / Hukuk-Sözleşme iç giriş sekmeleri ----
 const MALI_ALT = [
@@ -631,7 +648,7 @@ function modSil(id) {
   if (S && S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (e) {} }
   if (S && S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (e) { console.warn('parasal anahtar', e); } }
   if (HEDEF) {
-    if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(MOD[HEDEF].url); return; }
+    if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { location.replace(await ssoUrl(HEDEF)); return; }
     git('ana'); return S ? acSonuc(HEDEF) : girisModal(HEDEF);
   }
   git('ana');

@@ -172,3 +172,95 @@ async def veri(request: Request, a: str = "oku", yol: str = ""):
             f.write(f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\t{kim}\t{yol}\t{len(g)}\n")
         return {"tamam": True}
     raise HTTPException(404, "Bilinmeyen işlem")
+
+
+# ---------------- Tek giriş (SSO) · fatura.aksarayenerji.net ----------------
+# Akış: portal → https://fatura…/sso#t=<rol belirteci>&r=<rol>  (parça: sunucu günlüğüne düşmez)
+#   /sso sayfası belirteci POST /sso/giris'e yollar → SHA-256 özeti veri.json api_ozet ile karşılaştırılır
+#   → HttpOnly imzalı çerez (ae_sso) → Caddy forward_auth her istekte GET /v1/sso/dogrula ile çerezi doğrular.
+# İmza anahtarı sunucuda üretilir (/veri/sso_sir, root-only); belirtecin kendisi hiçbir yerde saklanmaz.
+from fastapi.responses import HTMLResponse, RedirectResponse
+SSO_SIR_YOL = Path(os.environ.get("AESUN_SSO_SIR", "/veri/sso_sir"))
+SSO_ROL = {"fatura", "yonetici", "parasal"}
+SSO_SURE = int(os.environ.get("AESUN_SSO_SN", str(14 * 24 * 3600)))
+SSO_PORTAL = "https://portal.aksarayenerji.net/?git=fatura"
+COOKIE = "ae_sso"
+
+def sso_sir():
+    try:
+        s = SSO_SIR_YOL.read_bytes()
+        if len(s) >= 32:
+            return s
+    except Exception:
+        pass
+    s = _secrets.token_bytes(32)
+    SSO_SIR_YOL.parent.mkdir(parents=True, exist_ok=True)
+    SSO_SIR_YOL.write_bytes(s); os.chmod(SSO_SIR_YOL, 0o600)
+    return s
+
+def sso_imzala(rol: str, son: int):
+    g = f"{rol}.{son}"
+    return g + "." + hmac.new(sso_sir(), g.encode(), hashlib.sha256).hexdigest()
+
+def sso_coz(c: str):
+    try:
+        rol, son, im = c.split(".")
+        if rol not in SSO_ROL or int(son) < time.time():
+            return None
+        if not hmac.compare_digest(hmac.new(sso_sir(), f"{rol}.{son}".encode(), hashlib.sha256).hexdigest(), im):
+            return None
+        return rol
+    except Exception:
+        return None
+
+SSO_SAYFA = """<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fatura · giriş</title><style>body{font:16px system-ui,sans-serif;color:#1C1F24;background:#F3F4F6;display:grid;place-items:center;min-height:100vh;margin:0}
+.k{background:#fff;border-radius:16px;padding:28px 32px;box-shadow:0 2px 8px rgba(0,0,0,.08);text-align:center;max-width:360px}.k b{display:block;font-size:18px;margin-bottom:6px}
+.k p{color:#6B7280;margin:0}.k a{display:inline-block;margin-top:14px;color:#E8622A;font-weight:700}</style>
+<div class="k"><b id="b">Giriş yapılıyor…</b><p id="p">Portal oturumunuz doğrulanıyor.</p><a id="a" href="PORTAL" style="display:none">Portala dön</a></div>
+<script>(function(){var q=new URLSearchParams(location.hash.slice(1)),t=q.get('t')||'',r=q.get('r')||'';history.replaceState(null,'',location.pathname);
+function hata(m){document.getElementById('b').textContent='Giriş yapılamadı';document.getElementById('p').textContent=m;document.getElementById('a').style.display='inline-block';}
+if(!t){hata('Bu sayfa portaldan açılmalı.');return;}
+fetch('/sso/giris',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:t,r:r}),credentials:'same-origin'}).then(function(x){return x.json().catch(function(){return {};}).then(function(j){return [x.status,j];});})
+.then(function(a){if(a[0]===200&&a[1].tamam){location.replace('/');}else hata(a[1].hata||('HTTP '+a[0]));}).catch(function(){hata('Sunucuya ulaşılamadı.');});})();</script></html>"""
+
+@app.get("/sso")
+def sso_sayfa():
+    return HTMLResponse(SSO_SAYFA.replace("PORTAL", SSO_PORTAL), headers={"Cache-Control": "no-store"})
+
+@app.post("/sso/giris")
+async def sso_giris(request: Request):
+    DURUM["istek"] += 1
+    try:
+        g = json.loads(await request.body())
+        t = str(g.get("t", ""))
+    except Exception:
+        raise HTTPException(400, "JSON değil")
+    if len(t) < 32 or len(t) > 200:
+        raise HTTPException(400, "belirteç yok")
+    h = hashlib.sha256(t.encode()).hexdigest()
+    rol = next((r for r, v in DURUM["ozet"].items() if r in SSO_ROL and hmac.compare_digest(v, h)), None)
+    if not rol:
+        DURUM["red"] += 1
+        return JSONResponse({"tamam": False, "hata": "Portal belirteci tanınmadı. Portalda Fatura yetkiniz yoksa yöneticinize başvurun."}, status_code=401)
+    son = int(time.time()) + SSO_SURE
+    r = JSONResponse({"tamam": True, "rol": rol})
+    r.set_cookie(COOKIE, sso_imzala(rol, son), max_age=SSO_SURE, httponly=True, secure=True, samesite="lax", path="/")
+    return r
+
+@app.get("/v1/sso/dogrula")
+def sso_dogrula(request: Request):
+    rol = sso_coz(request.cookies.get(COOKIE, ""))
+    if rol:
+        return Response(status_code=204, headers={"X-AE-Rol": rol})
+    uri = request.headers.get("x-forwarded-uri", "/")
+    # tarayıcı gezintisi → portala yönlendir; XHR/API → 401
+    if "text/html" in request.headers.get("accept", "") and not uri.startswith("/api/"):
+        return RedirectResponse(SSO_PORTAL, status_code=302)
+    return JSONResponse({"hata": "portal girişi gerekli"}, status_code=401)
+
+@app.get("/sso/cikis")
+def sso_cikis():
+    r = RedirectResponse("https://portal.aksarayenerji.net/", status_code=302)
+    r.delete_cookie(COOKIE, path="/")
+    return r

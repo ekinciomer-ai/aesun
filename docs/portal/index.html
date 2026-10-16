@@ -142,7 +142,7 @@ async function veriYukle() {
   if (t) {
     try {
       const r = await fetch(API + '?t=' + Date.now(), { headers: { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + t }, cache: 'no-store' });
-      if (r.status === 404) { V = null; VSHA = null; return; }
+      if (!r.ok) console.warn('GitHub anahtarı veri.json okuyamadı (' + r.status + '); merkezden okunuyor');   // 404: anahtarın gizli depoya yetkisi yok — girişi engellemez
       if (r.ok) { const j = await r.json(); VSHA = j.sha; V = JSON.parse(td.decode(ub(j.content.replace(/\n/g, '')))); return; }
     } catch (e) {}
   }

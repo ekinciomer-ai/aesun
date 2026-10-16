@@ -211,7 +211,7 @@ const VARSAYILAN = [
   { id: 'mining-demo', ad: 'Mining Demo', aciklama: 'Uzaktan madencilik kontrolü · tanıtım', url: 'https://ekinciomer-ai.github.io/aesun/demo/', ikon: 'maden', renk: 'lacivert' },
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
   { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' },
-  { id: 'fatura', ad: 'Fatura', aciklama: 'GesFin · fatura takibi (portal girişiyle)', url: 'https://fatura.aksarayenerji.net/', ikon: 'belge', renk: 'yesil' }];
+  { id: 'fatura', ad: 'Fatura', aciklama: 'GesFin · fatura takibi (portal girişiyle)', url: 'https://fatura.aksarayenerji.net/', ikon: 'belge', renk: 'yesil', gizli: true }];   // ana ekranda kart yok; fatura.aksarayenerji.net adresi portal girişiyle açılır
 // Tek giriş (SSO): bu uygulamalar portal belirteciyle açılır — belirteç URL parçasında (#) taşınır, sunucu günlüğüne düşmez
 const SSO = { fatura: 'https://fatura.aksarayenerji.net/sso' };
 const SSO_YOK = 'Bu uygulama için yetkiniz görünmüyor. Yetkiniz yeni verildiyse <b>çıkış yapıp tekrar giriş yapın</b> (oturumdaki yetkiler girişte alınır); sorun sürerse yöneticinize başvurun.';
@@ -359,7 +359,12 @@ async function ekModulEkle() {
   for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura')) {
     if (R.anahtarlar[m.id]) continue;
     R.anahtarlar[m.id] = b64(rnd(32));
-    V.moduller[m.id] = await sifrele(await hamAnahtar(R.anahtarlar[m.id]), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: true, yeni_sekme: true, sira: Object.keys(R.anahtarlar).length });
+    V.moduller[m.id] = await sifrele(await hamAnahtar(R.anahtarlar[m.id]), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: !m.gizli, yeni_sekme: true, sira: Object.keys(R.anahtarlar).length });
+    degisti = true;
+  }
+  // Fatura kartı ana ekrandan kaldırıldı (bir kez): kayıt varsa gizle
+  if (R.anahtarlar.fatura && MOD.fatura && MOD.fatura.aktif !== false && !MOD.fatura.fg1) {
+    const m = MOD.fatura; V.moduller.fatura = await sifrele(await hamAnahtar(R.anahtarlar.fatura), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: false, yeni_sekme: true, sira: m.sira || 0, fg1: true });
     degisti = true;
   }
   if (!degisti) return;

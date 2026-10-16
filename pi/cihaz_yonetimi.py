@@ -697,7 +697,11 @@ def calistir():
         gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel, detay)
         if gt and gt.get("eylem") == "sleep" and not (uretim_kw or 0) >= 1:
             # Üretim yokken uyutmanın asıl nedeni ekonomik karardır; kayıtta "güneş takibi" diye görünmesin
+            # Saat sonuna doğru takvim bir sonraki saatin "uyut" kararını önden uygular (16 Eki 05:55: kayıt
+            # "saat 05:00 zararlı, PTF 2440" diyordu, oysa 05:00 tolerans içinde "çalış"tı; karar 06:00 içindi).
             p0 = plan[0] if plan else {}
+            if p0.get("karar") != "uyut" and len(plan) > 1 and plan[1].get("karar") == "uyut":
+                p0 = plan[1]
             gt["neden"] = (f"Üretim yok, saat {p0.get('t', '')[11:16]} zararlı: maliyet {p0.get('maliyet') or 0:.1f} ₺ > gelir {p0.get('gelir') or 0:.1f} ₺ "
                            f"(PTF {p0.get('ptf') or 0:.0f}) → {len(gt.get('hedefler') or [])} cihaz uyut"
                            + (f" · {p0['not']}" if p0.get("not") else ""))

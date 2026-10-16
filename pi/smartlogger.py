@@ -110,6 +110,26 @@ def yokla(ipler, birimler=(0, 3, 1)):
     return out
 
 
+# Kimlik: yazmadan önce doğru SmartLogger'la konuştuğumuzu doğrula (16 Eki Sera-1: IP çakışması — aynı adrese bir
+# Ruijie telsiz köprü de cevap verdi). Toplam enerji (40560, kWh) santrale özgü ve yalnız artar.
+KIMLIK = {"Sera-1": (2_400_000, 3_500_000), "Sera-2": (1_300_000, 2_300_000)}   # toplam kWh aralığı (2026–2027)
+
+
+def kimlik(ip, beklenen=None):
+    """Toplam enerji ve aktif güç okur; beklenen tesis verilmişse aralığa uymazsa ValueError."""
+    m = Modbus(ip, 0)
+    try:
+        e = _coz(m.oku(40560, 2), "U32", 10)
+        p = _coz(m.oku(40525, 2), "I32", 1000)
+    finally:
+        m.kapat()
+    if beklenen:
+        lo, hi = KIMLIK[beklenen]
+        if not lo <= e <= hi:
+            raise ValueError(f"{ip} {beklenen} değil gibi: toplam {e:,.0f} kWh (beklenen {lo:,}–{hi:,})")
+    return {"toplam_kwh": e, "p_kw": p}
+
+
 def q_yaz(ip, kvar, harita, q_sinir):
     """Reaktif güç ayarını yazar ve geri okur. harita: kompanzasyon.json → yazici.modbus (dogrulandi, birim, q_kayit,
     q_tur, q_kazanc). Doğrulanmamışsa ya da değer sınır dışındaysa yazmaz."""
@@ -117,6 +137,8 @@ def q_yaz(ip, kvar, harita, q_sinir):
         raise PermissionError("Modbus kayıt haritası doğrulanmadı")
     if abs(kvar) > q_sinir:
         raise ValueError(f"{kvar} kVAr sınır dışında (±{q_sinir})")
+    if harita.get("tesis"):
+        kimlik(ip, harita["tesis"])           # yanlış cihaza yazma: önce kimlik
     adr, tur, kaz = int(harita["q_kayit"]), harita.get("q_tur", "I32"), float(harita.get("q_kazanc", 10))
     ham = int(round(kvar * kaz))
     k = [(ham >> 16) & 0xFFFF, ham & 0xFFFF] if tur.endswith("32") else [ham & 0xFFFF]

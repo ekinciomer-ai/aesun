@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Kompanzasyon — SmartLogger reaktif güç YAZMA denemesi (elle, adım adım; Ctrl+C her an güvenle geri alır).
 
-Kullanım (Pi'de):  python3 ~/aesun/pi/kompanzasyon_deneme.py --ip 192.168.1.181 --fark 3 --sure 10
+Kullanım (Pi'de):  python3 ~/aesun/pi/kompanzasyon_deneme.py --ip 192.168.1.10 --tesis Sera-2 --fark 3 --sure 10
 
 Adımlar:
   1. Ölç     Şu anki aktif güç, reaktif güç, cosφ (3 okuma ortalaması) = TABAN.
@@ -10,7 +10,8 @@ Adımlar:
              (betik bekler; Enter'a basınca ölçer: Q tabanda kalmalı).
   4. Dene    TABAN + fark yazılır, --sure dakika boyunca 30 sn'de bir ölçülür (Q yeni değere gitmeli).
   5. Geri al TABAN yazılır, Q'nun döndüğü doğrulanır. Sonuç: ~/.aesun/kompanzasyon_deneme.json (+ epias-ptf/n8n/).
-Güvenlik: |fark| ≤ 5 kVAr · aktif güç %40'tan fazla düşerse ya da Q beklenenden 10 kVAr'dan fazla saparsa deneme durur ve geri alır ·
+Güvenlik (16 Eki Sera-1 kopmasından sonra sıkılaştırıldı): her yazmadan önce KİMLİK (toplam enerji tesis aralığında mı) ·
+mod değişikliğinden sonra 5 dk izleme · geri alma bağlantı koparsa 10 dk boyunca 10 sn'de bir yeniden denenir · |fark| ≤ 5 kVAr · aktif güç %40'tan fazla düşerse ya da Q beklenenden 10 kVAr'dan fazla saparsa deneme durur ve geri alır ·
 hata/Ctrl+C olursa da TABAN geri yazılır. Mod değişikliğini yalnız kullanıcı yapar; betik modu değiştirmez.
 """
 import argparse, json, sys, time
@@ -38,7 +39,8 @@ def olc(ip, n=3, ara=2):
     return round(p / n, 2), round(q / n, 2), round(pf / n, 3)
 
 
-def yaz(ip, kvar, kazanc):
+def yaz(ip, kvar, kazanc, tesis):
+    SL.kimlik(ip, tesis)                      # yanlış cihaz (IP çakışması) ise yazmadan hata
     ham = int(round(kvar * kazanc))
     m = SL.Modbus(ip, 0)
     try:
@@ -51,7 +53,8 @@ def yaz(ip, kvar, kazanc):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ip", default="192.168.1.181")
+    ap.add_argument("--ip", required=True)
+    ap.add_argument("--tesis", required=True, choices=sorted(SL.KIMLIK))
     ap.add_argument("--fark", type=float, default=3.0, help="tabana eklenecek kVAr (en çok ±5)")
     ap.add_argument("--sure", type=float, default=10.0, help="deneme süresi (dk)")
     ap.add_argument("--kazanc", type=float, default=10.0)
@@ -64,26 +67,28 @@ def main():
         print(f"[{v['t']}] {ad}: " + ", ".join(f"{a}={b}" for a, b in v.items() if a not in ("t", "adim")), flush=True)
     taban = None
     try:
+        kim = SL.kimlik(x.ip, x.tesis)
+        k("0 kimlik", tesis=x.tesis, toplam_kwh=kim["toplam_kwh"])
         p0, q0, pf0 = olc(x.ip)
         taban = q0
         k("1 ölç (taban)", p_kw=p0, q_kvar=q0, cosphi=pf0)
         if p0 < 20:
             sys.exit("Üretim çok düşük (< 20 kW): deneme gündüz, üretim varken yapılmalı.")
         try:
-            geri = yaz(x.ip, taban, x.kazanc)
+            geri = yaz(x.ip, taban, x.kazanc, x.tesis)
             k("2 hazırla", yazilan=taban, geri_okunan=geri)
         except Exception as e:
             k("2 hazırla", hata=str(e)[:120], not_="mod 'Çıkış yok' iken yazma kabul edilmeyebilir; mod değişince yeniden yazılacak")
         input("\n3) Şimdi SmartLogger web › Ayarlar › Güç Parametreleri › Reaktif Güç Kontrolü › 'Uzaktan iletişim programlama' seçip Gönder'e basın, sonra burada Enter... ")
-        geri = yaz(x.ip, taban, x.kazanc)
+        geri = yaz(x.ip, taban, x.kazanc, x.tesis)
         k("3 mod sonrası taban yazıldı", yazilan=taban, geri_okunan=geri)
-        for _ in range(4):
+        for _ in range(20):                    # 5 dk: mod değişikliği sonrası cihaz/ağ kararlı mı
             time.sleep(15)
             p, q, pf = olc(x.ip, 2, 1)
             k("3 izle", p_kw=p, q_kvar=q, cosphi=pf, hedef=taban)
         hedef = round(taban + x.fark, 1)
         input(f"\n4) Deneme: Q {taban:+.1f} → {hedef:+.1f} kVAr, {x.sure:g} dk. Başlatmak için Enter (vazgeçmek için Ctrl+C)... ")
-        geri = yaz(x.ip, hedef, x.kazanc)
+        geri = yaz(x.ip, hedef, x.kazanc, x.tesis)
         k("4 deneme yazıldı", yazilan=hedef, geri_okunan=geri)
         t_bit, tepki = time.time() + x.sure * 60, None
         t0 = time.time()
@@ -108,14 +113,24 @@ def main():
         kayit["sonuc"] = {"hata": str(e)[:200]}
     finally:
         if taban is not None:
-            try:
-                geri = yaz(x.ip, taban, x.kazanc)
-                k("5 geri al", yazilan=taban, geri_okunan=geri)
-                time.sleep(60)
-                p, q, pf = olc(x.ip)
-                k("5 kontrol", p_kw=p, q_kvar=q, cosphi=pf, hedef=taban)
-            except Exception as e:
-                k("5 geri al", hata=str(e)[:150])
+            son = time.time() + 600                     # bağlantı koparsa 10 dk boyunca yeniden dene
+            while True:
+                try:
+                    geri = yaz(x.ip, taban, x.kazanc, x.tesis)
+                    k("5 geri al", yazilan=taban, geri_okunan=geri)
+                    time.sleep(60)
+                    p, q, pf = olc(x.ip)
+                    k("5 kontrol", p_kw=p, q_kvar=q, cosphi=pf, hedef=taban)
+                    break
+                except KeyboardInterrupt:
+                    k("5 geri al", hata="kullanıcı geri almayı durdurdu — SmartLogger modu 'Çıkış yok' yapılmalı")
+                    break
+                except Exception as e:
+                    k("5 geri al", hata=str(e)[:150])
+                    if time.time() > son:
+                        print("!! Geri alma 10 dk içinde yazılamadı: SmartLogger web › Reaktif Güç Kontrolü › 'Çıkış yok' yapın.")
+                        break
+                    time.sleep(10)
         kayit["bitis"] = datetime.now().isoformat(timespec="seconds")
         yol = Path.home() / ".aesun" / "kompanzasyon_deneme.json"
         yol.parent.mkdir(parents=True, exist_ok=True)

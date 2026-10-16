@@ -227,7 +227,7 @@ def main(kuru=False):
                 if (gecen >= a["en_az_aralik_dk"] or abs(q - (onceki.get("q_kvar") or 0)) >= adim) and yol == "modbus":
                     import smartlogger
                     try:
-                        geri = smartlogger.q_yaz(cfg["ip"], q * float(mb.get("q_isaret", 1)), mb, qs)
+                        geri = smartlogger.q_yaz(cfg["ip"], q * float(mb.get("q_isaret", 1)), dict(mb, tesis=cfg.get("tesis")), qs)
                         eylem = "modbus"
                         olaylar.append({"t": simdi.strftime("%Y-%m-%d %H:%M"), "abone": ab, "olay": f"Modbus: Q {q:+.0f} kVAr yazıldı (geri okunan {geri:+.1f})"})
                     except Exception as e:

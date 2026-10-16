@@ -7,3 +7,4 @@ for i in 0 1 2 3; do p=${BLOK:$((i*300)):300}; [ -n "$p" ] && echo "NOT: blok$i 
 Y=$(ls -t $CF.yedek-* 2>/dev/null | head -1)
 D=$(diff <(grep -v '^\s*$' $Y) <(grep -v '^\s*$' $CF) | grep '^[<>]' | mask | tr '\n' '|' | tr -s ' ')
 for i in 0 1 2; do p=${D:$((i*300)):300}; [ -n "$p" ] && echo "NOT: fark$i $p"; done
+true

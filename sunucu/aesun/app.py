@@ -17,7 +17,7 @@ REPO = os.environ.get("AESUN_REPO", "https://github.com/ekinciomer-ai/epias-ptf.
 TOKEN = os.environ.get("AESUN_GH_OKU", "")          # depo gizli olunca: yalnız okuma yetkili belirteç (root-only .env)
 ARALIK = int(os.environ.get("AESUN_ESITLE_SN", "30"))
 PARA = re.compile(r"(^|/)(fatura/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat|pay_|gelir)")
-ACIK = {"portal/veri.json", "n8n/canli_anahtar.json", "n8n/demo_durum.json"}   # zaten şifreli/özet ya da herkese açık içerik
+ACIK = {"portal/veri.json", "n8n/canli_anahtar.json"}   # zaten şifreli/özet ya da herkese açık içerik
 IZINLI = re.compile(r"^[A-Za-z0-9_\-./]+\.(json|csv)$")
 DURUM = {"sha": None, "son": 0.0, "hata": None, "ozet": {}, "basla": time.time(), "istek": 0, "red": 0}
 
@@ -265,3 +265,30 @@ def sso_cikis():
     r = RedirectResponse("https://portal.aksarayenerji.net/", status_code=302)
     r.delete_cookie(COOKIE, path="/")
     return r
+
+
+# ---------------- Bağımsız demo · Mining Takip Sistemi (yalnız IP adresinden, Caddy basic_auth arkasında) ----------------
+# Alan adı üzerinden erişilemez: Host başlığı yalnız DEMO_HOST olduğunda yanıt verir (Caddy o siteyi basic_auth ile korur).
+DEMO_HOST = os.environ.get("AESUN_DEMO_HOST", "185.22.184.51")
+DEMO_SAYFA = Path(__file__).with_name("demo") / "index.html"
+DEMO_ALAN = ("guncellendi", "mod", "karar", "durum", "ozet", "plan", "olaylar", "sonraki", "ogrenme")
+
+def demo_kapi(req: Request):
+    if req.headers.get("host", "").split(":")[0] != DEMO_HOST:
+        raise HTTPException(404, "yok")
+
+DEMO_BAS = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer"}
+
+@app.get("/")
+def demo_ana(request: Request):
+    demo_kapi(request)
+    return HTMLResponse(DEMO_SAYFA.read_text(encoding="utf-8"), headers=DEMO_BAS)
+
+@app.get("/veri.json")
+def demo_veri(request: Request):
+    demo_kapi(request)
+    try:
+        d = json.loads((VERI / "n8n/demo_durum.json").read_text())
+    except Exception:
+        raise HTTPException(503, "veri hazır değil")
+    return JSONResponse({k: d[k] for k in DEMO_ALAN if k in d}, headers=DEMO_BAS)

@@ -36,7 +36,7 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_KONTROL: "/=kdemo;/referanslar.html=<title;/iletisim.html=<form"
+          CP_KONTROL: "/=<title;/referanslar.html=<title;/iletisim.html=<form"
         run: python3 cpanel/yukle.py dist_site
       - name: Portal → portal.aksarayenerji.net
         if: env.ATLA != '1'
@@ -46,5 +46,5 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/demo/=mining-demo;/saha/=<title;/api/canli.php=durum"
+          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/saha/=<title;/api/canli.php=durum"
         run: python3 cpanel/yukle.py dist_portal

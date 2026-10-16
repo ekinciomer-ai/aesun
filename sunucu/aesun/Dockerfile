@@ -4,5 +4,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends git openssh-cli
  && useradd -m -u 1001 aesun && mkdir -p /veri && chown aesun:aesun /veri
 WORKDIR /app
 COPY app.py .
+COPY demo/ demo/
 USER aesun
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*", "--workers", "1"]

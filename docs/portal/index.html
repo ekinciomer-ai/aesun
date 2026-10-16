@@ -208,7 +208,7 @@ const ikon = a => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" s
 const VARSAYILAN = [
   { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha', renk: 'kirmizi' },
   { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/monitoring/', ikon: 'monitoring', renk: 'mavi' },
-  { id: 'mining-demo', ad: 'Mining Demo', aciklama: 'Uzaktan madencilik kontrolü · tanıtım', url: 'https://ekinciomer-ai.github.io/aesun/demo/', ikon: 'maden', renk: 'lacivert' },
+  { id: 'mining-demo', ad: 'Mining Demo', aciklama: 'Uzaktan madencilik kontrolü · tanıtım', url: '', ikon: 'maden', renk: 'lacivert', gizli: true },
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
   { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' },
   { id: 'fatura', ad: 'Fatura', aciklama: 'GesFin · fatura takibi (portal girişiyle)', url: 'https://fatura.aksarayenerji.net/', ikon: 'belge', renk: 'yesil', gizli: true }];   // ana ekranda kart yok; fatura.aksarayenerji.net adresi portal girişiyle açılır
@@ -360,6 +360,11 @@ async function ekModulEkle() {
     if (R.anahtarlar[m.id]) continue;
     R.anahtarlar[m.id] = b64(rnd(32));
     V.moduller[m.id] = await sifrele(await hamAnahtar(R.anahtarlar[m.id]), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: !m.gizli, yeni_sekme: true, sira: Object.keys(R.anahtarlar).length });
+    degisti = true;
+  }
+  // Mining demo portaldan çıkarıldı (bağımsız sunucuda yayında): kayıt varsa bir kez kapat
+  if (R.anahtarlar['mining-demo'] && MOD['mining-demo'] && !MOD['mining-demo'].dm1) {
+    const m = MOD['mining-demo']; V.moduller['mining-demo'] = await sifrele(await hamAnahtar(R.anahtarlar['mining-demo']), { ad: m.ad, aciklama: m.aciklama, url: '', ikon: m.ikon, renk: m.renk, aktif: false, yeni_sekme: true, sira: m.sira || 0, dm1: true });
     degisti = true;
   }
   // Fatura kartı ana ekrandan kaldırıldı (bir kez): kayıt varsa gizle

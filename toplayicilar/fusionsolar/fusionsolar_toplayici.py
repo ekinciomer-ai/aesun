@@ -91,7 +91,7 @@ DC_KWP = {"NE=59224704": 1230.755,   # Tek Yıldız-1 / Sera-1
           "NE=73686040": 1035.0}     # Tek Yıldız-2 / Sera-2
 KISA = {"NE=59224704": "Sera-1", "NE=73686040": "Sera-2"}
 
-PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600, "pvanlik": 600, "kkesif": 3600, "kokuma": 3600}
+PERIOD = {"meta": 86400, "station": 300, "inverter": 300, "alarm": 900, "curve": 3600, "month": 21600, "invgun": 21600, "pvanlik": 600, "kkesif": 3600, "kokuma": 3600, "kokuma3": 3600}
 
 INV_SIG = {  # device-realtime-data sinyal id -> alan
     "10018": "aktif_kw", "10019": "reaktif_kvar", "10032": "gunluk_kwh", "10029": "toplam_kwh",
@@ -1001,6 +1001,73 @@ class Collector:
         self.gh_put(f"n8n/fs_kontrol_okuma{'' if self.KONTROL_OKUMA_SURUM == 1 else self.KONTROL_OKUMA_SURUM}.json", out, "FusionSolar SmartLogger ayar okuma (yalnız okuma)")
         log.info("Kontrol okuma yazıldı")
 
+    KONTROL_OKUMA3_SURUM = 3
+
+    def kontrol_okuma3(self):
+        """YALNIZ OKUMA (kompanzasyon hazırlığı, 16 Eki): SmartLogger reaktif ayarının
+          (1) yazma uç noktasını ve gövde biçimini bulmak için yüklü JS'te "setPowerSignalValue / getRegulateValues /
+              power-control / regulat" çevresini ve /rest/... adreslerini toplar,
+          (2) güç kontrolü parametre ağacını (powerControl / reactive) JS'ten çıkarır,
+          (3) Sera-1 / Sera-2 SmartLogger'larında bu parametrelerin MEVCUT değerlerini yalnız 'query'/'get' ile okur.
+        Hiçbir ayar yazılmaz (adres süzgeci: query-/get-; power-control ve set ÇAĞRILMAZ). İşaret yalnız başarıda konur;
+        hata olursa ayrıntı dosyaya yazılır ve bir saat sonra yeniden denenir. Sonuç: epias-ptf/n8n/fs_kontrol_okuma3.json"""
+        isaret = DATA / f"kontrol_okuma_v{self.KONTROL_OKUMA3_SURUM}"
+        if isaret.exists() or not self.gh_token:
+            return
+        self.web.ensure()
+        out = {"surum": self.KONTROL_OKUMA3_SURUM, "zaman": self.now(), "loggerlar": {}, "js": {}, "hatalar": []}
+        izinli = re.compile(r"/(query-|get-)")
+        def oku(m, u, b=None):
+            assert izinli.search(u.split("?")[0]) and "power-control" not in u and "/set" not in u, u
+            try:
+                return self.web.call(m, u, b)
+            except Exception as e:
+                return {"_hata": str(e)[:300]}
+        js = r"""async () => {
+          const urls = [...new Set(performance.getEntriesByType('resource').map(e => e.name).filter(u => /\.js(\?|$)/.test(u)))];
+          const o = { dosyalar: urls.length, adresler: [], parca: {}, agac: {} };
+          const adr = new Set();
+          for (const u of urls) {
+            let t = ''; try { t = await (await fetch(u)).text(); } catch (e) { continue; }
+            const ad = u.split('/').pop();
+            for (const m of t.matchAll(/["'`](\/rest\/[A-Za-z0-9_\-\/\.]+)["'`]/g)) if (/power|regulat|signal|config|control|reactive|dispatch/i.test(m[1])) adr.add(m[1]);
+            for (const anah of ['setPowerSignalValue', 'getRegulateValues', 'power-control', 'powerControlQuery', 'regulate', 'set-signal', 'setSignal', 'deliver', 'REACTIVE_POWER']) {
+              let j = t.indexOf(anah), say = 0;
+              while (j > 0 && say < 4) { o.parca[anah + '__' + ad + '__' + say] = t.slice(Math.max(0, j - 900), j + 1400); j = t.indexOf(anah, j + anah.length); say++; }
+            }
+            for (const anah of ['"powerControl":{', '"reactivePower', 'reactivePowerAdjust', '"reactive', '无功']) {
+              const j = t.indexOf(anah); if (j > 0 && !o.agac[anah + '__' + ad]) o.agac[anah + '__' + ad] = t.slice(Math.max(0, j - 200), j + 7000);
+            }
+          }
+          o.adresler = [...adr].sort();
+          return o;
+        }"""
+        try:
+            out["js"] = self.web.page.evaluate(js)
+        except Exception as e:
+            out["hatalar"].append("js: " + str(e)[:200])
+        # parametre ağacındaki kimlikler (5 haneli ve 9 haneli id'ler) + bilinen güç sinyalleri
+        ids = set(["21003", "21004", "21013"])
+        for t in (out.get("js") or {}).get("agac", {}).values():
+            ids.update(re.findall(r'"id":"(\d{5}|2309\d{5})"', t))
+        ids = sorted(ids)
+        out["okunan_idler"] = ids
+        for ad, dn in {"T1": "NE=59224706", "T2": "NE=73686042"}.items():
+            L = out["loggerlar"][ad] = {"dn": dn}
+            L["guc_sinyal"] = oku("GET", f"/rest/neteco/web/config/device/v1/config/get-device-power-signals?dn={quote(dn)}")
+            L["deger"] = []
+            for i in range(0, len(ids), 40):
+                r = oku("GET", f"/rest/neteco/web/config/device/v1/config/query-moc-config-signal?dn={quote(dn)}&signals={','.join(ids[i:i + 40])}")
+                L["deger"].append(r)
+                time.sleep(0.5)
+            # okuma uç noktaları JS'ten geldiyse (query-/get- ve power/regulat içeren) dene
+            for a in ((out.get("js") or {}).get("adresler") or [])[:40]:
+                if izinli.search(a) and re.search(r"power|regulat", a, re.I) and "power-control" not in a:
+                    L.setdefault("uc_deneme", {})[a] = oku("GET", f"{a}?dn={quote(dn)}&deviceDn={quote(dn)}&signals=21003,21004,21013")
+        self.gh_put("n8n/fs_kontrol_okuma3.json", out, "FusionSolar kompanzasyon keşfi (yalnız okuma)")
+        isaret.write_text("1")
+        log.info("Kontrol okuma v3 yazıldı")
+
     def once(self):
         self.meta()
         for f in (self.stations, self.inverters, self.pv_anlik, self.alarms, self.curve, self.month):
@@ -1024,7 +1091,7 @@ class Collector:
     def forever(self):
         jobs = [("meta", self.meta), ("station", self.stations), ("inverter", self.inverters),
                 ("alarm", self.alarms), ("curve", self.curve), ("month", self.month), ("invgun", self.invgun), ("pvanlik", self.pv_anlik),
-                ("kkesif", self.kontrol_kesif), ("kokuma", self.kontrol_okuma)]
+                ("kkesif", self.kontrol_kesif), ("kokuma", self.kontrol_okuma), ("kokuma3", self.kontrol_okuma3)]
         nxt = {k: 0.0 for k, _ in jobs}
         kod = Path(__file__).resolve()
         kod_mt = kod.stat().st_mtime

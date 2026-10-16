@@ -222,7 +222,8 @@ SSO_SAYFA = """<!doctype html><html lang="tr"><meta charset="utf-8"><meta name="
 function hata(m){document.getElementById('b').textContent='Giriş yapılamadı';document.getElementById('p').textContent=m;document.getElementById('a').style.display='inline-block';}
 if(!t){hata('Bu sayfa portaldan açılmalı.');return;}
 fetch('/sso/giris',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:t,r:r}),credentials:'same-origin'}).then(function(x){return x.json().catch(function(){return {};}).then(function(j){return [x.status,j];});})
-.then(function(a){if(a[0]===200&&a[1].tamam){location.replace('/');}else hata(a[1].hata||('HTTP '+a[0]));}).catch(function(){hata('Sunucuya ulaşılamadı.');});})();</script></html>"""
+.then(function(a){if(a[0]===200&&a[1].tamam){try{localStorage.clear();sessionStorage.clear();}catch(e){} /* GesFin'in süresi dolmuş eski oturumu kalmasın */
+location.replace('/');}else hata(a[1].hata||('HTTP '+a[0]));}).catch(function(){hata('Sunucuya ulaşılamadı.');});})();</script></html>"""
 
 @app.get("/sso")
 def sso_sayfa():

@@ -17,7 +17,7 @@ function pjAltOner(base) {
   return L.map((a) => ({ ...a, durum: 'bekliyor' }));
 }
 function pjYerlesim() {
-  if (!G.bound) { msg('Önce arazi sınırını girin.', 'err'); return; }
+  if (!sinirOto()) { msg('Önce arazi sınırını girin: kapalı polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   if (PJ.busy) { msg('GES-ÇİZ çalışıyor; bitince yeniden deneyin.'); return; }
   formToPanel(); pjSave();
   let base; try { base = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }

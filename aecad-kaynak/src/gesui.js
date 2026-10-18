@@ -52,7 +52,7 @@ function tplSecInit() {
 function boundInfo() {
   if (typeof cepheBilgi === 'function') cepheBilgi();
   const el = gv('g-binfo');
-  if (!G.bound) { el.textContent = 'Sınır seçilmedi. Çizimdeki kapalı bir polyline\'ı seçin veya KML/KMZ yükleyin.'; return; }
+  if (!G.bound) { el.textContent = 'Sınır seçilmedi. Kapalı bir polyline çizin (Araziyi doldur onu otomatik alır), çizimden seçin ya da KML/KMZ yükleyin.'; return; }
   const a = Math.abs(polyArea(G.bound)); const np = (G.parcels || []).length;
   el.textContent = (np > 1 ? np + ' parsel birleşik' + ((G.parcelOut || []).length ? ' (' + G.parcelOut.length + ' bitişik değil)' : '') + ' · ' : '') + 'Sınır: ' + G.bound.length + ' köşe · ' + fmtNum(a, 0) + ' m² · ' + fmtNum(a / 10000, 3) + ' ha · ' + fmtNum(a / 1000, 2) + ' dönüm';
 }
@@ -180,6 +180,24 @@ CMD.GBOUND = async () => {
   const p = await getPoint('Arazi sınırı olan kapalı polyline\'ı tıklayın:', {}); if (!Array.isArray(p)) return;
   sinirSec(p);
 };
+// Elle çizilen sınır: seçili kapalı polyline, yoksa çizimdeki en büyük kapalı polyline (GES/ÖRNEK katmanları hariç) otomatik sınır olur.
+function sinirOto() {
+  if (G.bound) return true;
+  const kapali = (it) => it && it.t === 'pline' && it.cl && it.pts && it.pts.length >= 3 && !/^(GES-|ORNEK-)/i.test(it.layer);
+  const sec = [...(V().sel || [])].map((id) => S.doc.items.get(id)).filter(kapali);
+  const aday = sec.length ? sec : [...S.doc.items.values()].filter(kapali);
+  if (!aday.length) return false;
+  const it = aday.reduce((a, b) => (Math.abs(polyArea(b.pts)) > Math.abs(polyArea(a.pts)) ? b : a));
+  const a = [it.pts[0][0], it.pts[0][1]]; const v = it.pts;
+  for (let i = 1; i < v.length; i++) bulgeArcPts(v[i - 1][0], v[i - 1][1], v[i][0], v[i][1], v[i - 1][2], a);
+  bulgeArcPts(v[v.length - 1][0], v[v.length - 1][1], v[0][0], v[0][1], v[v.length - 1][2], a);
+  const pts = []; for (let i = 0; i < a.length; i += 2) pts.push([a[i], a[i + 1]]);
+  if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
+  G.parcels = []; G.parcelIds = []; G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; boundInfo(); autoLat(); pitchUpdate();
+  if (typeof cepheCiz === 'function') cepheCiz();
+  msg('Çizimdeki kapalı polyline arazi sınırı olarak alındı: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha' + (aday.length > 1 && !sec.length ? ' (en büyüğü; başka sınır için “Sınırı çizimden seç”)' : '') + '.', 'res');
+  return true;
+}
 // tıklanan noktadaki kapalı polyline'ı arazi sınırı yapar (GBOUND ve CEPHE ortak)
 function sinirSec(p) {
   const q = V().w2s(p[0], p[1]); const it = pickItem(q[0], q[1]);
@@ -193,7 +211,7 @@ function sinirSec(p) {
   return true;
 }
 CMD.GFILL = async () => {
-  if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
+  if (!sinirOto()) { msg('Arazi sınırı yok: kapalı bir polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   formToPanel();
   const sel = G.tpl.filter((t) => t.use !== false); if (!sel.length) { msg('Doldurma için en az bir masa şablonu işaretleyin.', 'err'); return; }
   const pitch = pitchUpdate(); if (!pitch) return;

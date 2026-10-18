@@ -95,7 +95,7 @@ function pjWorker() {
   return PJ.worker;
 }
 function pjRun(over) {
-  if (!G.bound) { msg('Önce arazi sınırını seçin (3. adım).', 'err'); return; }
+  if (!sinirOto()) { msg('Önce arazi sınırını girin: kapalı polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   formToPanel(); pjSave();
   if (PJ.busy || PJ.altMod) { PJ.again = true; return; }
   let param; try { param = over || buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }

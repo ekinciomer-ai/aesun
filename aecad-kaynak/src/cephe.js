@@ -61,7 +61,7 @@ function cepheCiz() {
 }
 CMD.GCEPHE = async () => {
   for (;;) {
-    const p = await getPoint(G.bound ? 'Cepheyi (sınır kenarını) tıklayın — bitirmek için Enter:' : 'Arazi sınırının bir kenarını tıklayın (kapalı polyline; sınır olarak da seçilir):', {}); if (!Array.isArray(p)) return;
+    sinirOto(); const p = await getPoint(G.bound ? 'Cepheyi (sınır kenarını) tıklayın — bitirmek için Enter:' : 'Arazi sınırının bir kenarını tıklayın (kapalı polyline; sınır olarak da seçilir):', {}); if (!Array.isArray(p)) return;
     if (!G.bound || segMin(p) > 20 / V().s) { const q = V().w2s(p[0], p[1]), it = pickItem(q[0], q[1]); if (it && (it.t === 'pline' || it.t === 'geo') && !sinirSec(p)) continue; if (!G.bound) continue; }
     const K = cepheKenarlar(); let best = null, bd = Infinity;
     for (const k of K) { const d = segDist(p, k.a, k.b); if (d < bd) { bd = d; best = k; } }

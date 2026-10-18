@@ -3,8 +3,8 @@
 // DXF'ten geri açılınca veri etiketten okunur (TASARIM_ETIKET_RE). Özet (adet × güç, kablo boyları) çizim değiştikçe güncellenir.
 const TS = {
   inv: { ad: 'İnverter', kat: 'GES-INV', renk: 6, alan: [['kw', 'Güç (kW)', () => pn('p-inv') ?? 100], ['model', 'Model', () => pv('p-invm') || '']] },
-  tm: { ad: 'Trafo (TM)', kat: 'GES-TM', renk: 30, alan: [['kva', 'Güç (kVA)', () => pn('p-trafo') ?? 1250], ['gerilim', 'Gerilim', () => '33/0,4 kV']] },
-  dm: { ad: 'DM', kat: 'GES-TM', renk: 30, alan: [['not', 'Not', () => 'Dağıtım merkezi']] },
+  tm: { ad: 'Trafo (TM)', kat: 'GES-TM', renk: 30, alan: [['kva', 'Güç (kVA)', () => pn('p-trafo') ?? 1250], ['gerilim', 'Gerilim (boş = güce göre)', () => ''], ['hucre', 'OG hücre sayısı', () => 3], ['en', 'Bina eni (m) — imalatçı ölçüsü', () => 2.5]] },
+  dm: { ad: 'DM', kat: 'GES-TM', renk: 30, alan: [['hucre', 'OG hücre sayısı (giriş+ölçü+çıkışlar)', () => 5], ['en', 'Bina eni (m) — imalatçı ölçüsü', () => 2.5], ['not', 'Not', () => 'Dağıtım merkezi']] },
   og: { ad: 'OG kablo', kat: 'GES-OG-KABLO', renk: 1, alan: [['kablo', 'Kablo', () => pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV'], ['pay', 'Uç payı (m)', () => 20]] },
   ac: { ad: 'AC kablo', kat: 'GES-AC-KABLO', renk: 3, alan: [['kablo', 'Kablo', () => pv('p-ack') || '3x240/120 NA2XY'], ['pay', 'Uç payı (m)', () => 10]] },
   dc: { ad: 'DC kablo', kat: 'GES-DC-KABLO', renk: 5, alan: [['kablo', 'Kablo', () => 'H1Z2Z2-K 1x6'], ['pay', 'Uç payı (m)', () => 3]] },
@@ -34,23 +34,83 @@ function tsEtiket(tip, v, L) {
   if (tip === 'dm') return 'DM' + (v.not ? ' · ' + v.not : '');
   return TS[tip].ad.split(' ')[0].toUpperCase() + ' · ' + v.kablo + ' · L=' + fmtNum((L || 0) + (+v.pay || 0), 0) + ' m';
 }
-function tsSembol(tip, x, y, s) {   // basit sembol (çizim ölçeğinde, s = boyut m)
-  const o = []; const kat = TS[tip].kat, c = TS[tip].renk;
-  if (tip === 'inv') { o.push({ t: 'pline', cl: true, pts: [[x - s, y - s * 0.6, 0], [x + s, y - s * 0.6, 0], [x + s, y + s * 0.6, 0], [x - s, y + s * 0.6, 0]] }, { t: 'line', x1: x - s, y1: y - s * 0.6, x2: x + s, y2: y + s * 0.6 }); }
-  else { const w = tip === 'tm' ? 3 * s : 2.4 * s, h = 1.6 * s; o.push({ t: 'pline', cl: true, pts: [[x - w / 2, y - h / 2, 0], [x + w / 2, y - h / 2, 0], [x + w / 2, y + h / 2, 0], [x - w / 2, y + h / 2, 0]] }); if (tip === 'tm') { o.push({ t: 'circle', cx: x - s * 0.35, cy: y, r: s * 0.55 }, { t: 'circle', cx: x + s * 0.35, cy: y, r: s * 0.55 }); } }
-  return o.map((q) => ({ id: newId(), layer: kat, c, lt: '', ...q }));
-}
 function tsSonNo(tip) { let n = 0; for (const it of S.doc.items.values()) if (it.ges && it.ges.tip === tip && it.ges.no) n = Math.max(n, it.ges.no); return n + 1; }
 function tsOlcek() { return Math.max(0.6, 12 / V().s); }   // ekranda ~12 px
+// ---- blok varlıkları (yerel koordinat, m) ----
+const bR = (x0, y0, x1, y1, c = 256) => rectEnt(Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1), Math.max(y0, y1), c);
+const bL = (x0, y0, x1, y1, c = 256) => lineEnt(x0, y0, x1, y1, c);
+const bC = (x, y, r, c = 256) => ({ type: 'CIRCLE', layer: '0', colorIndex: c, center: { x, y, z: 0 }, radius: r });
+const bA = (x, y, r, a0, a1, c = 256) => ({ type: 'ARC', layer: '0', colorIndex: c, center: { x, y, z: 0 }, radius: r, startAngle: a0, endAngle: a1 });
+const bT = (x, y, h, t, c = 256, ha = 1) => ({ type: 'TEXT', layer: '0', colorIndex: c, text: t, startPoint: { x, y, z: 0 }, endPoint: { x, y, z: 0 }, textHeight: h, rotation: 0, halign: ha, valign: 2 });
+// kapı: duvar açıklığı (x0..x0+w, ön duvar y), içe açılan kanat yayı
+function bKapi(o, x0, w, y, ic) { const d = ic > 0 ? 1 : -1; o.push(bL(x0, y, x0, y + d * w, 7), bA(x0, y, w, d > 0 ? 0 : -Math.PI / 2, d > 0 ? Math.PI / 2 : 0, 8)); }
+// Trafo merkezi / DM köşkü — gerçek içerik: duvarlar, bölmeler, OG hücreleri, trafo + yağ çukuru, AG pano, kapılar.
+// Ölçüler varsayılandır (imalatçı köşk ölçüsüyle değiştirilir); uzun kenar x ekseni, ön (kapı) cephe −y.
+function tsKosk(tip, v) {
+  const o = [], t = 0.12, W = +v.en || 2.5, n = Math.max(1, Math.round(+v.hucre || (tip === 'dm' ? 5 : 3)));
+  const kva = +v.kva || 0, harici = tip === 'tm' && kva >= 2500;
+  const wOG = Math.max(1.6, n * 0.5 + 0.6), wAG = tip === 'dm' ? 1.6 : 1.4;
+  const wTR = tip === 'tm' && !harici ? (kva <= 630 ? 1.8 : kva <= 1250 ? 2.2 : 2.6) : 0;
+  const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', wAG]);
+  const L = t * (bol.length + 1) + bol.reduce((a, b) => a + b[1], 0), x0 = -L / 2, y0 = -W / 2, y1 = W / 2;
+  o.push(bR(x0, y0, x0 + L, y1, 7), bR(x0 + t, y0 + t, x0 + L - t, y1 - t, 8));
+  let x = x0 + t; const hT = Math.max(0.1, W * 0.055);
+  bol.forEach(([ad, w], k) => {
+    if (k) o.push(bR(x - t, y0 + t, x, y1 - t, 7));
+    o.push(bT(x + w / 2, y1 - t - hT * 1.2, hT, ad, 7));
+    if (ad === 'OG HÜCRE') {
+      const cw = (w - 0.3) / n;
+      for (let i = 0; i < n; i++) { const cx = x + 0.15 + i * cw; o.push(bR(cx + 0.02, y1 - t - 0.85 - hT * 2.4, cx + cw - 0.02, y1 - t - hT * 2.4, 1), bT(cx + cw / 2, y1 - t - hT * 2.4 - 0.45, hT * 0.8, 'H-' + String(i + 1).padStart(2, '0'), 1)); }
+      bKapi(o, x + 0.2, 0.9, y0 + t, 1);
+    } else if (ad === 'TRAFO') {
+      const m = 0.25; o.push(bR(x + m - 0.1, y0 + t + 0.2, x + w - m + 0.1, y1 - t - hT * 2.6, 8));
+      o.push(bR(x + m, y0 + t + 0.35, x + w - m, y1 - t - hT * 2.8, 30), bC(x + w / 2 - 0.22, (y0 + y1) / 2, 0.32, 30), bC(x + w / 2 + 0.22, (y0 + y1) / 2, 0.32, 30));
+      o.push(bT(x + w / 2, y0 + t + 0.25 + hT, hT * 0.85, 'TR ' + kva + ' kVA', 30), bT(x + w / 2, (y0 + y1) / 2 - 0.5, hT * 0.7, 'yağ çukuru', 8));
+      bKapi(o, x + 0.15, Math.min(1.6, w - 0.3), y0 + t, 1);
+    } else {
+      o.push(bR(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3), bT(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, tip === 'dm' ? 'SCADA / AKÜ' : 'ADP', 3));
+      bKapi(o, x + 0.2, 0.9, y0 + t, 1);
+    }
+    x += w + t;
+  });
+  if (harici) {   // ≥ 2500 kVA: harici trafo, yağ çukuru ve çit binanın yanında (esas D)
+    const ex = x0 + L + 1.2, tw = 2.6, th = 2.2;
+    o.push(bR(ex, -th / 2, ex + tw, th / 2, 30), bC(ex + tw / 2 - 0.35, 0, 0.5, 30), bC(ex + tw / 2 + 0.35, 0, 0.5, 30), bR(ex - 0.4, -th / 2 - 0.4, ex + tw + 0.4, th / 2 + 0.4, 8), bR(ex - 1.0, -th / 2 - 1.0, ex + tw + 1.0, th / 2 + 1.0, 3));
+    o.push(bT(ex + tw / 2, th / 2 + 1.25, hT, 'TR ' + kva + ' kVA (harici) · yağ çukuru · çit', 30));
+  }
+  const ad = tip === 'dm' ? 'DM' + (v.not ? ' · ' + v.not : '') : 'TM-' + v.no + ' · ' + fmtNum(kva, 0) + ' kVA · ' + v.gerilim;
+  o.push(bT(0, y1 + hT * 2.2, hT * 1.6, ad, 30), bT(0, y0 - hT * 2.2, hT, fmtNum(L, 2) + ' × ' + fmtNum(W, 2) + ' m · ' + n + ' OG hücre', 8));
+  return { ents: o, L: L + (harici ? 4.8 : 0), W };
+}
+function tsInvBlok(v) {
+  const o = [], a = 0.6, b = 0.4;
+  o.push(bR(-a, -b, a, b, 6), bL(-a, -b, a, b, 6), bT(0, b + 0.35, 0.3, 'INV-' + v.no + ' · ' + fmtNum(+v.kw, 0) + ' kW', 6), bT(0, -b - 0.3, 0.22, v.model || '', 8));
+  return { ents: o, L: 2 * a, W: 2 * b };
+}
+function tsBlok(tip, v, eski) {
+  const B = tip === 'inv' ? tsInvBlok(v) : tsKosk(tip, v);
+  const ad = 'AE_' + tip.toUpperCase() + '_' + (tip === 'tm' ? (+v.kva || 0) + 'kVA' : tip === 'inv' ? (+v.kw || 0) + 'kW' : 'X') + '_' + (eski || newId());
+  setBlock(ad, B.ents); return { ad, ...B };
+}
+// yerleştir: merkez → (TM/DM) uzun kenar yönü → blok
 async function tsNokta(tip) {
   const T = TS[tip]; const v = await formDlg(T.ad + ' ekle', T.alan); if (!v) return;
   v.no = tip === 'dm' ? null : tsSonNo(tip);
+  if (tip === 'tm' && !v.gerilim) v.gerilim = (+v.kva || 0) > 2000 ? '33/0,8 kV' : '33/0,4 kV';
   for (;;) {
-    const p = await getPoint(T.ad + ' konumu (bitirmek için Enter):'); if (!Array.isArray(p)) return;
-    S.doc.addLayer(T.kat, T.renk); const s = tip === 'inv' ? 1.2 : 2.5; const g = { ...v, tip };
-    const sem = tsSembol(tip, p[0], p[1], s); sem[0].ges = g;
-    const yz = { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: p[0] + s * 1.8, y: p[1], h: Math.max(0.8, s * 0.7), rot: 0, s: tsEtiket(tip, g), ha: 0, va: 2, gesEt: sem[0].id };
-    addItems([...sem, yz], T.ad.toLowerCase()); renderLayers(); msg(tsEtiket(tip, g) + ' eklendi.', 'res');
+    const B = tsBlok(tip, v);
+    const p = await getPoint(T.ad + ' merkezi (bitirmek için Enter):', { preview: (m) => [{ pts: [[m[0] - B.L / 2, m[1] - B.W / 2], [m[0] + B.L / 2, m[1] - B.W / 2], [m[0] + B.L / 2, m[1] + B.W / 2], [m[0] - B.L / 2, m[1] + B.W / 2]], cl: true }] });
+    if (!Array.isArray(p)) { S.doc.blocks.delete(B.ad); return; }
+    let ang = 0;
+    if (tip !== 'inv') {
+      const kose = (m) => { const a = Math.atan2(m[1] - p[1], m[0] - p[0]), c = Math.cos(a), s = Math.sin(a); return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => [p[0] + i * B.L / 2 * c - j * B.W / 2 * s, p[1] + i * B.L / 2 * s + j * B.W / 2 * c]); };
+      const q = await getPoint('Bina uzun kenarı yönü (tıklayın; kapılar uzun kenarın sağ tarafında):', { base: p, preview: (m) => [{ pts: kose(m), cl: true }, { pts: [p, m] }] });
+      if (!Array.isArray(q)) { S.doc.blocks.delete(B.ad); return; }
+      ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
+    }
+    S.doc.addLayer(T.kat, T.renk);
+    const it = { id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(p[0], p[1]), mRz(ang)), ap: [], ges: { ...v, tip } };
+    addItems([it], T.ad.toLowerCase()); renderLayers(); msg(T.ad + ' eklendi (' + fmtNum(B.L, 2) + ' × ' + fmtNum(B.W, 2) + ' m). Taşı (M) / Döndür (RO) ile tek parça hareket eder; verisi için “Veri”.', 'res');
     if (tip === 'dm') return; v.no++;
   }
 }
@@ -76,7 +136,7 @@ CMD.GVERI = async () => {
     if (it && !it.ges && it.gesEt) it = S.doc.items.get(it.gesEt);
     if (!it || !it.ges) { msg('Tasarım öğesi değil (İnverter, Trafo, DM ya da kablo seçin).', 'err'); continue; }
     const g = it.ges, T = TS[g.tip]; const v = await formDlg(T.ad + ' verisi', T.alan, g); if (!v) continue;
-    const ng = { ...g, ...v }; const pairs = [[it, { ...it, ges: ng }]];
+    const ng = { ...g, ...v }; if (ng.tip === 'tm' && !ng.gerilim) ng.gerilim = (+ng.kva || 0) > 2000 ? '33/0,8 kV' : '33/0,4 kV'; const n2 = { ...it, ges: ng }; if (it.t === 'insert') { const B = tsBlok(g.tip, ng, it.id); n2.block = B.ad; } const pairs = [[it, n2]];
     for (const e of S.doc.items.values()) if (e.gesEt === it.id) pairs.push([e, { ...e, s: tsEtiket(g.tip, ng, it.t === 'pline' ? tsBoy(it.pts) : 0) }]);
     replaceItems(pairs, 'veri'); msg(tsEtiket(g.tip, ng, it.t === 'pline' ? tsBoy(it.pts) : 0) + ' güncellendi.', 'res');
   }
@@ -106,6 +166,10 @@ function tasarimOzet() {
     const g = it.ges; if (!g) continue; veri.add(it.id);
     if (g.tip === 'inv') inv.push(+g.kw || 0); else if (g.tip === 'tm') tm.push(+g.kva || 0); else if (g.tip === 'dm') dm++;
     else if (it.t === 'pline') kabEkle(g.tip, g.kablo, tsBoy(it.pts) + (+g.pay || 0));
+  }
+  for (const it of S.doc.items.values()) {                    // DXF'ten açılmış bloklar: blok adından (AE_TM_1250kVA_…, AE_INV_110kW_…)
+    if (it.t !== 'insert' || it.ges) continue; const m = /^AE_(TM|INV|DM)_([\d.]+)?/.exec(it.block || ''); if (!m) continue;
+    if (m[1] === 'TM') tm.push(+m[2] || 0); else if (m[1] === 'INV') inv.push(+m[2] || 0); else dm++;
   }
   for (const it of S.doc.items.values()) {                    // veri alanı olmayan (DXF'ten açılmış) etiketler
     if (it.t !== 'text' || (it.gesEt && veri.has(it.gesEt)) || !/^GES-(INV|TM|OG-KABLO|AC-KABLO|DC-KABLO)$/.test(it.layer) || !TASARIM_ETIKET_RE.test(it.s || '')) continue;

@@ -61,6 +61,24 @@ if tr.hour>=6 and dun not in m: s.append(f'{dun} enerji maliyeti hesaplanmadı')
 if tr.hour>=5 and dun not in (gel or {}): s.append(f'{dun} F2Pool günlük geliri arşive girmedi')   # havuz günü 03:00'te kapanır; arşiv 03:05/04:05'te alır
 print(json.dumps({'sorun':'; '.join(s) or None},ensure_ascii=False))" 2>/dev/null || echo '{"sorun":"veri denetimi çalışmadı"}')
 
+# 2c) güneş fırsat bedeli birimleri fatura sisteminden (gesfin): Sera2 satış faturası "elektrik üretim bedeli" ve "sistem kullanım bedeli"
+#     6 saatte bir n8n/tarife_birim.json olarak iş klonuna yazılır; Veri arşivi işi (git add -A) depoya işler. Yalnız birim fiyat (tutar/kimlik yok).
+tf=$D/.tarife_son; if [ $(( simdi - $(cat $tf 2>/dev/null || echo 0) )) -gt 21600 ]; then
+  TQ="select json_build_object('kaynak','fatura sistemi (gesfin) · Sera2 GES satış faturaları','guncellendi',to_char(now() at time zone 'Europe/Istanbul','YYYY-MM-DD\"T\"HH24:MI:SS'),
+     'not','ay = fatura tarihinin ayı; birim TL/kWh KDV hariç','aylar',(select json_object_agg(ay, j) from (select ay, json_object_agg(tur, f) j from (
+       select distinct on (to_char(i.invoice_date,'YYYY-MM'), case when k.description ilike '%sistem kullan%' then 'skb' else 'uretim_bedeli' end)
+         to_char(i.invoice_date,'YYYY-MM') ay, case when k.description ilike '%sistem kullan%' then 'skb' else 'uretim_bedeli' end tur, k.unit_price f
+       from invoices i join invoice_items k on k.invoice_id=i.id join facilities fa on fa.installation_number=i.installation_number
+       where i.duplicate_of_invoice_id is null and i.invoice_type='SATIS' and fa.name ilike 'Sera2%' and k.unit_price > 0 and k.unit_price < 20
+         and (k.description ilike '%sistem kullan%' or k.description ilike '%üretim bedeli%' or k.description ilike '%uretim bedeli%')
+       order by 1, 2, k.quantity desc nulls last) a group by ay) b))"
+  tj=$(docker exec gesfin-db psql -U gesfin -d gesfin -At -c "$TQ" 2>/dev/null)
+  if echo "$tj" | python3 -c "import json,sys;d=json.load(sys.stdin);assert d['aylar']" 2>/dev/null; then
+    echo "$tj" > /tmp/tarife_birim.json && docker cp /tmp/tarife_birim.json aesun-isler:/veri/epias-ptf/n8n/tarife_birim.json >/dev/null 2>&1 && echo $simdi > $tf
+    rm -f /tmp/tarife_birim.json
+  fi
+fi
+
 # 3) onarım (30 dk'da en çok bir / kapsayıcı)
 onar() {  # $1 kapsayıcı  $2 neden
   f=$D/.bekci_son_$1; son=$(cat $f 2>/dev/null || echo 0)

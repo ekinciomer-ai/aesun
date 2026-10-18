@@ -57,6 +57,8 @@ VARSAYILAN = {
     "basabas_tolerans": 0.25,     # PTF, başabaş PTF'nin bu oran fazlasına kadar ise yine çalış (8 Eki kararı: %25)
     "uretim_esik_kw": 50,         # (artık karar için kullanılmaz; yalnız gösterim)
     "gunes_takip": True,          # ekonomik katman "uyut" derken üretim kadar cihaz çalıştır (kademeli)
+    "gunes_firsat": "fatura",     # güneşle çalışma şartı: gelir > güneşin satış fırsat bedeli (₺/MWh, KDV'siz).
+                                  # "fatura": n8n/tarife_birim.json (fatura sistemi: üretim bedeli − sistem kullanım bedeli); sayı: elle
     "gunes_kaynak": "Sera-2",     # madencilik Sera-2 (T2) sayacının arkasında; "toplam" = Sera-1 + Sera-2
     "gunes_pay_kw": 3.0,          # uyandırırken üretimin bu kadar altında kal
     "kapatma_tolerans_kw": 3.0,   # yük üretimi bu kadar aşınca cihaz uyut
@@ -143,6 +145,26 @@ def birim_maliyet(ptf, yekdem, a):
 def basabas_ptf(gelir, yekdem, a):
     """Cihazın saatlik gelirine denk gelen PTF (TL/MWh)."""
     return (gelir / a["cihaz_guc_kw"] * 1000 - a["dagitim_tl_mwh"]) / (a["komisyon"] * (1 + a["btv"])) - yekdem
+
+
+def gunes_firsat_hesapla(a, simdi):
+    """Güneşin karşıladığı 1 MWh'in fırsat bedeli (₺/MWh, KDV'siz): satılsaydı alınacak = üretim bedeli − sistem kullanım bedeli.
+    Dağıtım bedeli yok (üretim ve tüketim aynı noktada). Kaynak fatura sistemi (ns1 bekçisi → n8n/tarife_birim.json)."""
+    v = a.get("gunes_firsat", "fatura")
+    if isinstance(v, (int, float)):
+        return float(v), "ayar"
+    try:
+        t, _ = gh("n8n/tarife_birim.json")
+        u = k = None
+        for ay in sorted((t or {}).get("aylar") or {}):
+            if ay > simdi.strftime("%Y-%m"):
+                break
+            x = t["aylar"][ay]; u = x.get("uretim_bedeli") or u; k = x.get("skb") or k
+        if u and k:
+            return round((u - k) * 1000, 3), "fatura sistemi"
+    except Exception as e:
+        log("tarife okunamadı:", e)
+    return 2253.679, "varsayılan"
 
 
 def karar_ver(uretim, ptf, yekdem, a, hp, btc_try):
@@ -594,6 +616,14 @@ def calistir():
     uretim = (uretim_kw or 0) > 0.5 if fs_taze else None
     ptf, yekdem = ptf_al(simdi), yekdem_al(simdi)
     karar, neden, maliyet, gel = karar_ver(False, ptf, yekdem or 0, a, hp, btc_try)
+    # Güneşle çalışma şartı (18 Eki kararı): güneşin karşıladığı enerji satılabilir; madencilik geliri bu fırsat bedelini
+    # geçmiyorsa güneş takibi devre dışı (cihazlar uyur, enerji satılır).
+    firsat, firsat_kay = gunes_firsat_hesapla(a, simdi)
+    gelir_mwh = gel / a["cihaz_guc_kw"] * 1000 if gel and a.get("cihaz_guc_kw") else None
+    gunes_kosul = gelir_mwh is None or gelir_mwh > firsat      # gelir bilinmiyorsa eski davranış (güneşle çalış)
+    gunes_aktif = bool(a.get("gunes_takip")) and gunes_kosul
+    if a.get("gunes_takip") and not gunes_kosul:
+        log(f"güneş takibi kapalı: gelir {gelir_mwh or 0:.0f} ₺/MWh ≤ satış fırsat bedeli {firsat:.0f} ₺/MWh ({firsat_kay})")
     # Mevcut cihaz durumu
     cihazlar = (mad or {}).get("devices") or []
     ulasilan = [d for d in cihazlar if d.get("online") or d.get("sleeping")]
@@ -685,14 +715,14 @@ def calistir():
     # Güneş tahmini (ekonomik "uyut" saatleri): beklenen kaynak üretimi kaç cihaza yeter. Takvim bunu bilir:
     # güneşle çalışan saatten kârlı saate geçişte ön ısıtma/toplu uyandırma gerekmez; kârlı saatten güneş saatine
     # geçişte toplu uyutma yerine güneş takibi devralır.
-    if a.get("gunes_takip"):
+    if gunes_aktif:
         gunes_plan_tahmin(plan, fs, a, simdi, uretim_kw if fs_taze else None, kw_c, len(ulasilan) or a.get("cihaz_sayisi", 29))
     # Takvim (öğrenilmiş ısınma ile)
     k2, notlar, anahtar, istenen, gecerli, yay = takvim_kur(plan, m, a, simdi, filo, canli_su)
     # Güneş takibi: ekonomik katman "uyut" derken üretimin karşıladığı kadar cihaz çalışır (kademeli).
     yerel = yerel_oku()
     gt = None
-    if a.get("gunes_takip") and istenen == "uyut" and mad_taze and ulasilan:
+    if gunes_aktif and istenen == "uyut" and mad_taze and ulasilan:
         detay, _ = gh("n8n/cihaz_detay.json")           # cihaz başı watt (bildiren cihazlar)
         gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel, detay)
         if gt and gt.get("eylem") == "sleep" and not (uretim_kw or 0) >= 1:
@@ -718,7 +748,7 @@ def calistir():
             p["not"] = (p.get("not", "") + " · " if p.get("not") else "") + f"güneş takibi: ~{p['gunes_kw']} kW → ~{p['gunes_cihaz']} cihaz"
     # tetik için: üretim şu an kaç cihazı karşılıyor (>0 ise toplu uyutma gönderilmez)
     gunes_hedef = 0
-    if a.get("gunes_takip") and fs_taze and uretim_kw:
+    if gunes_aktif and fs_taze and uretim_kw:
         gunes_hedef = max(0, math.floor((uretim_kw + a["kapatma_tolerans_kw"]) / ((gt or {}).get("kw_cihaz") or a["cihaz_guc_kw"])))
     # Eylem: şu an olması gereken durum ile filo durumu farklıysa
     tk = tk_oku()
@@ -838,7 +868,10 @@ def calistir():
         "maliyet_tl_saat": maliyet, "gelir_tl_saat": gel, "basabas_ptf": basabas,
         "esik_ptf": (basabas * (1 + (a.get("basabas_tolerans") or 0)) if basabas and basabas > 0 else basabas),
         "karar": karar, "neden": neden, "istenen": istenen, "karar_ekonomik": karar_eko, "neden_ekonomik": neden_eko, "eylem": eylem, "eylem_not": eylem_not, "gonderildi": gonderildi,
-        "gunes_takip": gt, "toplam_uretim_kw": toplam_kw if fs else None, "karar_degisim": karar_degisim,
+        "gunes_takip": gt, "gunes_kosul": {"aktif": gunes_aktif, "gelir_tl_mwh": round(gelir_mwh, 1) if gelir_mwh else None,
+                                             "firsat_tl_mwh": firsat, "kaynak": firsat_kay,
+                                             "kural": "güneşle çalış ⇔ gelir > üretim bedeli − sistem kullanım bedeli"},
+        "toplam_uretim_kw": toplam_kw if fs else None, "karar_degisim": karar_degisim,
         "cihaz": {"toplam": len(cihazlar), "ulasilan": len(ulasilan), "calisan": calisan, "uyuyan": uyuyan, "taze": mad_taze,
                   "su_uyuyan": canli_su},
         "zamanlama": {"model": {k_: m.get(k_) for k_ in ("a", "b", "a_ilk", "b_ilk", "d99", "p80_ek", "emniyet_dk", "sn_cihaz", "n")},

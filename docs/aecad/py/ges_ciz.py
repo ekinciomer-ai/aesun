@@ -833,10 +833,28 @@ class Model:
                 bl = max(bloklar, key=len)
                 if len(bl) < 2: break
                 bloklar.remove(bl); h = len(bl) // 2; bloklar += [bl[:h], bl[h:]]
+        if e.get("inverter_adet") and len(bloklar) > int(e["inverter_adet"]):
+            # kullanıcı adedi kesin (kullanıcı kuralı 19.10.2026): A.1 yüzünden fazla çıkan bloklar en yakın komşuyla birleştirilir;
+            # DC tek yön sınırı aşılırsa kontrol ✖ ve uyarı yazılır, inverter sayısı artırılmaz
+            fazla = len(bloklar) - int(e["inverter_adet"])
+            while len(bloklar) > int(e["inverter_adet"]):
+                best = None
+                for a_ in bloklar:
+                    for b_ in bloklar:
+                        if a_ is b_ or a_[0]["taraf"] != b_[0]["taraf"]: continue
+                        k = (len(a_) + len(b_), math.dist(mrk(a_), mrk(b_)))
+                        if best is None or k < best[0]: best = (k, a_, b_)
+                if best is None:   # farklı taraf: en yakın iki blok
+                    for a_ in bloklar:
+                        for b_ in bloklar:
+                            if a_ is b_: continue
+                            k = (len(a_) + len(b_), math.dist(mrk(a_), mrk(b_)))
+                            if best is None or k < best[0]: best = (k, a_, b_)
+                _, a_, b_ = best; i_ = bloklar.index(a_); bloklar.remove(a_); bloklar.remove(b_); bloklar.insert(min(i_, len(bloklar)), a_ + b_)
+            if not getattr(self, "_adet_uy", False):
+                self._adet_uy = True
+                self.uyari.append(f"İnverter adedi kullanıcıdan: {int(e['inverter_adet'])} (A.1 DC sınırı tek yön ≤ {self.dc_lim:.0f} m için {int(e['inverter_adet']) + fazla} gerekirdi; aşan stringler kontrolde ✖). Modül Vmp/Imp girilirse sınır gerilim düşümünden hesaplanır.")
         ni = len(bloklar)
-        if e.get("inverter_adet") and ni > int(e["inverter_adet"]) and not getattr(self, "_adet_uy", False):
-            self._adet_uy = True
-            self.uyari.append(f"İstenen {int(e['inverter_adet'])} inverter; A.1 DC sınırı (tek yön ≤ {self.dc_lim:.0f} m) yüzünden {ni} oldu — modül Vmp/Imp girin ya da iç yol aralığını daraltın.")
         # H.8: TR sayısı GÜÇTEN — tesis AC çıkışı = min(Σ inverter AC, DC / DC-AC hedefi). A.1 yüzünden inverter adedi
         #      artsa bile DC'den fazla AC çıkmaz; kullanıcı trafo gücü verdiyse TR = ⌈AC çıkış / (kVA × %yük)⌉.
         IT = e["inverter_tr"]

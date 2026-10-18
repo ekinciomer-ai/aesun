@@ -15,7 +15,7 @@ function gesLoad() {
 }
 const gv = (id) => document.getElementById(id);
 const gnum = (id, d = 0) => { const v = parseFloat(String(gv(id).value).replace(',', '.')); return isFinite(v) ? v : d; };
-function gesSettings() { const ids = ['g-lat', 'g-zone', 'g-set', 'g-gap', 'g-ang', 'g-hrs', 'g-pitch', 'g-align', 'g-valign']; const o = {}; for (const i of ids) if (gv(i)) o[i] = gv(i).value; return o; }
+function gesSettings() { const ids = ['g-lat', 'g-zone', 'g-set', 'g-gap', 'g-ang', 'g-hrs', 'g-pitch', 'g-align', 'g-valign', 'g-mrenk']; const o = {}; for (const i of ids) if (gv(i)) o[i] = gv(i).value; return o; }
 
 function panelToForm() {
   const P = G.panel; gv('g-model').value = P.model || ''; gv('g-p').value = P.p; gv('g-L').value = P.L; gv('g-W').value = P.W; gv('g-T').value = P.T || ''; gv('g-cells').value = P.cells || '';
@@ -183,7 +183,7 @@ CMD.GPANEL = async () => {
 };
 CMD.GTABLE = async () => {
   const t = tplFromForm(); const name = makeTableBlock(t); const d = tplDims(t);
-  S.doc.addLayer('GES-MASA', 5);
+  S.doc.addLayer('GES-MASA', 5); S.doc.layers.get('GES-MASA').c = masaRenk();
   for (;;) {
     const p = await getPoint('Masa ' + t.rows + t.orient + t.per + ' yerleşim noktası (sol alt köşe, bitirmek için Enter):', { preview: (m) => [{ pts: [m, [m[0] + d.len, m[1]], [m[0] + d.len, m[1] + d.depth], [m[0], m[1] + d.depth]], cl: true }] });
     if (!Array.isArray(p)) return;
@@ -228,6 +228,14 @@ function sinirSec(p) {
   if (typeof cepheCiz === 'function') cepheCiz();
   return true;
 }
+// Masa rengi: GES-MASA katman rengi (doldurma + proje yerleşimi masaları); açık renkli tek masalar katmana uyar
+function masaRenk() { const v = parseInt((gv('g-mrenk') || {}).value, 10); return isFinite(v) ? v : 5; }
+function masaRenkUygula() {
+  const c = masaRenk(), L = S.doc.layers.get('GES-MASA'); if (!L) return;
+  const eski = L.c; L.c = c; const ch = [];
+  for (const it of S.doc.items.values()) if (it.layer === 'GES-MASA' && it.c !== 256 && (it.c === eski || it.c === 5)) ch.push([it, { ...it, c: 256 }]);
+  if (ch.length) replaceItems(ch, 'masa rengi'); renderLayers(); redraw();
+}
 CMD.GFILL = async () => {
   if (!sinirOto()) { msg('Arazi sınırı yok: kapalı bir polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   // arazide masa varsa doldurma yapılmaz (çakışan masa): önce Sıfırla ya da sil
@@ -258,7 +266,7 @@ CMD.GFILL = async () => {
   } else res = fillLand({ ...base, xm: am, ym: vm });
   if (!res.placed.length) { msg('Sınırın içine hiç masa sığmadı. Sınır mesafesini veya şablonu kontrol edin.', 'err'); return; }
   const items = []; const cnt = types.map(() => 0);
-  S.doc.addLayer('GES-MASA', 5);
+  S.doc.addLayer('GES-MASA', 5); S.doc.layers.get('GES-MASA').c = masaRenk();
   for (const p of res.placed) { const t = types[p.type]; cnt[p.type]++; items.push({ id: newId(), t: 'insert', layer: 'GES-MASA', c: types.length > 1 && p.type > 0 ? 4 : 256, lt: '', block: t.name, M: mMul(mT(p.x, p.y), mRz(res.rowAng)), ap: [] }); }
   S.doc.addLayer('GES-CEKME', 1, 'DASHED'); S.doc.addLayer('GES-NOT', 7);
   // setback outline (approx: offset polygon via miter)
@@ -295,6 +303,7 @@ function gesInit() {
   for (const id of ['g-model', 'g-p', 'g-L', 'g-W', 'g-T', 'g-cells']) gv(id).addEventListener('change', formToPanel);
   for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) { gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); }); gv(id).addEventListener('change', masaFormdan); }
   { const pm = gv('p-masa'); if (pm) pm.addEventListener('change', () => masaSec(+pm.value)); }
+  if (gv('g-mrenk')) gv('g-mrenk').addEventListener('change', () => { gesSave(); masaRenkUygula(); });
   for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); doldurYenile(); });
   gv('g-ds').onchange = (e) => { const f = e.target.files[0]; if (f) gesDatasheet(f); e.target.value = ''; };
   gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };

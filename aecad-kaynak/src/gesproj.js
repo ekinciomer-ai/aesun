@@ -119,7 +119,7 @@ function pjOpenPafta(name, auto, dosyalar) {
   const f = (dosyalar || PJ.files || {})[name]; if (!f) return;
   if (!PJ.srcDoc) PJ.srcDoc = S.doc;
   const norm = parseDxf(decodeDxfBytes(f)); const doc = importNormalized(norm);
-  const keep = G.bound; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; PJ.cur = name; gv('p-back').hidden = false;
+  const keep = G.bound; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
   if (!auto) msg('Pafta açıldı: ' + name, 'res');
   document.querySelectorAll('.pf-row').forEach((r) => r.classList.toggle('on', r.dataset.f === name));
 }

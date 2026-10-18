@@ -62,7 +62,10 @@ def calis(simdi=None):
             sorun["ns1_bekci"] = f"ns1 bekçisi {round(b['yas_sn'] / 60)} dk'dır çalışmıyor"
         elif b.get("durum") == "sorun":
             m = "; ".join(x for x in ((b.get("api") or {}).get("sorun"), (b.get("isler") or {}).get("sorun")) if x)
-            sorun["ns1_sorun"] = f"ns1 bekçisi sorun görüyor: {m[:120]}"
+            if m:
+                sorun["ns1_sorun"] = f"ns1 bekçisi sorun görüyor: {m[:120]}"
+            if (b.get("veri") or {}).get("sorun"):
+                sorun["veri"] = f"Eksik veri: {b['veri']['sorun'][:160]}"
         if (b.get("onarim_24s") or 0) >= 3:
             sorun["ns1_onarim"] = f"ns1 son 24 saatte {b['onarim_24s']} kez kendini onardı — kalıcı bir arıza olabilir"
     except Exception as e:

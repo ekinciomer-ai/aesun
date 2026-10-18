@@ -264,6 +264,7 @@ function yenidenCizPlanla() {
   ycZ = setTimeout(() => {
     const ae = document.activeElement, mesgul = document.querySelector('dialog[open]') || document.getElementById('hashModal') || (ae && /INPUT|SELECT|TEXTAREA/.test(ae.tagName));
     if (mesgul) { yenidenCizPlanla(); return; }
+    MADEN.yuklendi = 0;                 // arkada gelen yeni dosya madencilik tablolarına da insin (10 dk önbelleği atla)
     if (D) yukle();
   }, 700);
 }

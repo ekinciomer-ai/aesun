@@ -42,6 +42,25 @@ gec=$(echo "$isler_json" | python3 -c "import json,sys;print(', '.join(k for k,v
 pidsI=$(docker stats --no-stream --format '{{.PIDs}}' aesun-isler 2>/dev/null || echo 0)
 [ "${pidsI:-0}" -gt 300 ] && sorun_isler="${sorun_isler:+$sorun_isler; }süreç $pidsI"
 
+# 2b) veri bütünlüğü (onarım yok, yalnız bildirilir): saatlik cihaz arşivi, günlük maliyet, F2Pool günlük gelir
+ay=$(date -u +%Y-%m)
+veri_json=$( { docker exec aesun-isler cat /veri/epias-ptf/arsiv_cihaz_$ay.json 2>/dev/null; echo; echo '#AYRAC#'; docker exec aesun-isler cat /veri/epias-ptf/n8n/maden_maliyet.json 2>/dev/null; echo; echo '#AYRAC#'; docker exec aesun-isler cat /veri/epias-ptf/arsiv_f2pool_gelir.json 2>/dev/null; } | python3 -c "
+import sys,json,datetime as dt
+p=sys.stdin.read().split('#AYRAC#'); j=[]
+for x in p:
+    try: j.append(json.loads(x))
+    except Exception: j.append(None)
+ars,mal,gel=(j+[None,None,None])[:3]
+tr=dt.datetime.utcnow()+dt.timedelta(hours=3); dun=(tr-dt.timedelta(days=1)).strftime('%Y-%m-%d'); s=[]
+if ars:
+    son=max(ars); yas=round((dt.datetime.utcnow()-dt.datetime.fromisoformat(son)).total_seconds()/3600,1)
+    if yas>6: s.append(f'cihaz arşivi {yas} saat geride (son {son})')
+else: s.append('cihaz arşivi okunamadı')
+m=(mal or {}).get('gun',{})
+if tr.hour>=6 and dun not in m: s.append(f'{dun} enerji maliyeti hesaplanmadı')
+if tr.hour>=10 and dun not in (gel or {}): s.append(f'{dun} F2Pool günlük geliri arşive girmedi')
+print(json.dumps({'sorun':'; '.join(s) or None},ensure_ascii=False))" 2>/dev/null || echo '{"sorun":"veri denetimi çalışmadı"}')
+
 # 3) onarım (30 dk'da en çok bir / kapsayıcı)
 onar() {  # $1 kapsayıcı  $2 neden
   f=$D/.bekci_son_$1; son=$(cat $f 2>/dev/null || echo 0)
@@ -58,13 +77,14 @@ if [ -n "$sorun_isler" ] && yeni aesun-isler; then ayrinti+=("aesun-isler yeni b
 
 onarim24=$(awk -F'|' -v t="$(date -d '-24 hours' -Iseconds)" '$1>t' $D/bekci_onarim.log 2>/dev/null | wc -l)
 son_onarim=$(tail -1 $D/bekci_onarim.log 2>/dev/null)
-python3 - "$DURUM" "$iso" "$sorun_api" "$sorun_isler" "$es" "$na" "$pidsA" "$pidsI" "$onarim24" "$son_onarim" "$isler_json" "${ayrinti[@]+"${ayrinti[@]}"}" <<'PY'
+python3 - "$DURUM" "$iso" "$sorun_api" "$sorun_isler" "$es" "$na" "$pidsA" "$pidsI" "$onarim24" "$son_onarim" "$isler_json" "$veri_json" "${ayrinti[@]+"${ayrinti[@]}"}" <<'PY'
 import json, sys
-p, iso, sa, si, es, na, pa, pi, o24, son, isler, *ayr = sys.argv[1:]
-d = {"t": iso, "durum": "sorun" if (sa or si) else "iyi",
+p, iso, sa, si, es, na, pa, pi, o24, son, isler, veri, *ayr = sys.argv[1:]
+veri = json.loads(veri or "{}")
+d = {"t": iso, "durum": "sorun" if (sa or si or veri.get("sorun")) else "iyi",
      "api": {"sorun": sa or None, "esitleme_sn": int(es), "surec": int(pa or 0)},
      "isler": {"sorun": si or None, "nabiz_sn": int(na), "surec": int(pi or 0), "is": json.loads(isler or "{}")},
-     "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
+     "veri": veri, "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
 open(p + ".tmp", "w").write(json.dumps(d, ensure_ascii=False)); import os; os.replace(p + ".tmp", p)
 PY
 docker cp $DURUM aesun-api:/veri/bekci_ns1.json >/dev/null 2>&1 || true

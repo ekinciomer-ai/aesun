@@ -62,7 +62,7 @@ VARSAYILAN = {
   "elektrik": {"string_modul": 26, "inverter_tr": 19, "string_inverter_max": 20, "inverter_ac_kw": None,
                "inverter_model": "", "trafo_kva": 5750, "trafo_gerilim": "33/0,8 kV Dy11 ONAN",
                "trafo_marj_min_pct": 10, "og_kablo": "3x(1x120/16) NA2XSY 36 kV", "og_kablo_dm": "3x(1x240/25) NA2XSY 36 kV",
-               "ac_kablo": "3x300/150 NA2XY", "ac_kesit_mm2": 300, "ac_iletken": "Al", "dc_kablo": "H1Z2Z2-K 1x6",
+               "ac_kablo": "3x300/150 NA2XY", "ac_kesit_mm2": 300, "ac_iletken": "Al", "ag_kesit_oto": True, "dc_kablo": "H1Z2Z2-K 1x6",
                "dc_kesit_mm2": 6, "ag_gerilim_v": 800, "cosphi": 1.0,
                "rho_cu": 0.0206, "rho_al": 0.0333, "dc_dusum_max_pct": 1.5, "ac_dusum_max_pct": 1.5,
                "tm_hucreler": None, "dm_hucreler": None, "dm_yedek_fider": 1,   # None = SHAMS-1 onaylı tek hat hücre seti
@@ -700,6 +700,35 @@ class Model:
             self.uyari.append(f"Trafo gücü {self._trafo_oto[0]}→{self._trafo_oto[1]} kVA otomatik seçildi "
                               f"(TR başına AC ≤ %{(e.get('trafo_yuklenme_max_pct') or 90):g}; 1600 kVA'dan kaçınıldı).")
 
+    def _ag_kesit_sec(self):
+        """D / EKAT md.58: en uzun AG hattının gerilim düşümü sınırı aşarsa AG kesitini standart merdivenden büyüt.
+        0,4 kV sistemde akım 2× olduğundan uzun hatlarda gerekir. ag_kesit_oto=False → kullanıcı kesiti korunur."""
+        e = self.P["elektrik"]
+        if not e.get("ag_kesit_oto", True) or not e["inverter_ac_kw"] or not getattr(self, "inverterler", None):
+            return
+        rho = e["rho_cu"] if e["ac_iletken"] == "Cu" else e["rho_al"]
+        merdiven = [(300, "3x300/150"), (400, "3x400/185"), (500, "3x500/240"), (630, "3x630/300"), (800, "3x800/400")]
+        def enfazla(S):
+            m = 0.0
+            for i in self.inverterler:
+                I = (i.get("ac_kw") or e["inverter_ac_kw"]) * 1000 / (math.sqrt(3) * e["ag_gerilim_v"] * e["cosphi"])
+                m = max(m, math.sqrt(3) * i["ac_m"] * I * rho * e["cosphi"] / S / e["ag_gerilim_v"] * 100)
+            return m
+        S0 = e["ac_kesit_mm2"]
+        if enfazla(S0) <= e["ac_dusum_max_pct"]:
+            return
+        for S, ad in merdiven:
+            if S < S0:
+                continue
+            if enfazla(S) <= e["ac_dusum_max_pct"]:
+                if S != S0:
+                    self.uyari.append(f"AG kesiti {S0}→{S} mm² büyütüldü (AG ΔU ≤ %{e['ac_dusum_max_pct']:g}; en uzun hat {enfazla(S):.2f}%).")
+                    e["ac_kesit_mm2"] = S; e["ac_kablo"] = f"{ad} NA2XY"
+                return
+        S, ad = merdiven[-1]
+        e["ac_kesit_mm2"] = S; e["ac_kablo"] = f"{ad} NA2XY"
+        self.uyari.append(f"AG ΔU en büyük kesitte ({S} mm²) bile %{enfazla(S):.2f} — sınırı aşıyor; köşkü yük merkezine yaklaştır ya da trafo adedini artır.")
+
     # ---------------------------------------------------------------- 5) güzergâh
     def _halka_yol(self, p, q):
         from shapely.ops import substring
@@ -912,6 +941,7 @@ class Model:
         if self.n_tr != len(self.tm_loc): self.tm_yerlestir()
         self._boyutlandir()                      # DC/AC hedefi (1.25) → inverter gücü; TR AC/%90 → trafo kVA (üst standart)
         self.guzergah()
+        self._ag_kesit_sec()                     # D/EKAT md.58: AG ΔU sınırı aşılırsa AG kesitini büyüt
         if self.max_kesilen: self.uyari.append(f"Hedef güç sınırı (parsel.max_masa = {pr['max_masa']}): {self.max_kesilen} masa yeri kullanılmadı; orta sıralar korundu.")
         self.topraklama(); self.guvenlik()
         self.kontroller(); self.metraj_hesapla()

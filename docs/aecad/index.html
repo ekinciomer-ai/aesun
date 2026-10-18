@@ -3210,7 +3210,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190207', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190209', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3927,6 +3927,50 @@ async function tsKablo(tip) {
   const k = Math.floor(pts.length / 2), a = pts[k - 1], b = pts[k]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
   const yz = { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, h: Math.max(0.6, tsOlcek() * 0.8), rot: ang, s: tsEtiket(tip, g, L), ha: 1, va: 0, gesEt: pl.id };
   addItems([pl, yz], T.ad.toLowerCase()); renderLayers(); msg(tsEtiket(tip, g, L) + ' eklendi.', 'res');
+  if (tip === 'ac' || tip === 'dc') await tsKabloCogalt(tip, g, pts);
+}
+// ---- AC/DC kabloyu diğer inverterlere çoğalt: çizilen hat ana güzergâh (trunk) sayılır; her inverter en yakın noktadan ona bağlanır ----
+function tsMerkez(it) {
+  if (it.t === 'insert') return [it.M[3], it.M[7]];
+  if (it.t === 'pline') { const p = it.pts; return [p.reduce((a, q) => a + q[0], 0) / p.length, p.reduce((a, q) => a + q[1], 0) / p.length]; }
+  return null;
+}
+function tsInverterler() { return [...S.doc.items.values()].filter((it) => it.ges && it.ges.tip === 'inv').map((it) => ({ it, p: tsMerkez(it) })).filter((x) => x.p); }
+function tsYakin(pts, p) {   // polyline üzerinde p'ye en yakın nokta ve o noktanın segment indeksi
+  let best = null;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i], dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+    const t = L2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2)) : 0; const q = [a[0] + t * dx, a[1] + t * dy];
+    const d = Math.hypot(p[0] - q[0], p[1] - q[1]); if (!best || d < best.d) best = { d, q, i };
+  }
+  return best;
+}
+async function tsKabloCogalt(tip, g, pts) {
+  const inv = tsInverterler(); if (inv.length < 2) return;
+  const tol = Math.max(2.5, 15 / V().s);
+  const uc = (p) => inv.find((x) => Math.hypot(x.p[0] - p[0], x.p[1] - p[1]) <= tol);
+  let yol = pts.map((q) => [q[0], q[1]]); let bas = uc(yol[0]);
+  if (!bas) { bas = uc(yol[yol.length - 1]); if (bas) yol = yol.reverse(); }
+  if (!bas) return;                                                    // çizilen kablo bir inverterden başlamıyor
+  // kablosu olan inverterler (aynı türde bir kablonun ucu inverterde)
+  const bagli = new Set([bas.it.id]);
+  for (const it of S.doc.items.values()) if (it.ges && it.ges.tip === tip && it.t === 'pline') { for (const p of [it.pts[0], it.pts[it.pts.length - 1]]) { const x = uc(p); if (x) bagli.add(x.it.id); } }
+  const kalan = inv.filter((x) => !bagli.has(x.it.id)); if (!kalan.length) return;
+  const T = TS[tip];
+  const r = await askDlg(T.ad + ' — diğer inverterler', 'Çizdiğiniz hat ana güzergâh sayılsın mı? Kablosu olmayan ' + kalan.length + ' invertere de ' + T.ad + ' (' + g.kablo + ') eklenir: her inverter ana hatta en kısa yoldan bağlanır, oradan sizin güzergâhınızla aynı uca gider. Her hat ayrı kablo, boyu ayrı hesaplanır.', [['Evet, ' + kalan.length + ' invertere ekle', 'ok', 'primary'], ['Hayır', null, 'ghost']]);
+  if (r !== 'ok') return;
+  const yeni = []; let top = 0;
+  for (const x of kalan) {
+    const y = tsYakin(yol, x.p); const p2 = [x.p, y.q, ...yol.slice(y.i)];
+    const temiz = p2.filter((q, k) => !k || Math.hypot(q[0] - p2[k - 1][0], q[1] - p2[k - 1][1]) > 1e-3); if (temiz.length < 2) continue;
+    const Lx = tsBoy(temiz); top += Lx + (+g.pay || 0);
+    const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: temiz.map((q) => [q[0], q[1], 0]), ges: { ...g } };
+    const a = temiz[0], b = temiz[1]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
+    yeni.push(pl, { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, h: Math.max(0.5, tsOlcek() * 0.7), rot: ang, s: tsEtiket(tip, g, Lx), ha: 1, va: 0, gesEt: pl.id });
+  }
+  if (!yeni.length) return;
+  addItems(yeni, T.ad.toLowerCase() + ' çoğalt'); renderLayers();
+  msg(yeni.length / 2 + ' invertere ' + T.ad + ' eklendi · toplam ' + fmtNum(top, 0) + ' m (her hat ayrı). Geri al ile tek adımda kaldırılır.', 'res');
 }
 // Veri düzenle: öğeye (sembol, kablo ya da etiketi) tıkla → form → veri + etiket güncellenir
 CMD.GVERI = async () => {

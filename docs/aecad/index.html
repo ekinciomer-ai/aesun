@@ -225,6 +225,13 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .tf-prev figcaption { color: var(--muted); font-size: 12.5px; }
 .tf-prev .pb { fill: rgba(95, 211, 138, .10); stroke: var(--ok); stroke-width: 1.6; stroke-linejoin: round; }
 .tf-prev .pb.draft { fill: rgba(255, 210, 63, .08); stroke: var(--warn); stroke-dasharray: 6 4; }
+.tf-plist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.tf-plist:empty { display: none; }
+.tf-plist li { display: flex; align-items: center; gap: 10px; background: var(--raise); border: 1px solid var(--line); border-radius: 5px; padding: 5px 6px 5px 10px; }
+.tf-plist li b { font-weight: 500; font-family: var(--mono); font-size: 12px; } .tf-plist li span { flex: 1; color: var(--muted); font-size: 12px; }
+.tf-plist li.out { border-color: var(--warn); } .tf-plist li.out span { color: var(--warn); }
+.tf-prev .pp { fill: none; stroke: var(--muted); stroke-width: .8; stroke-dasharray: 2 2; } .tf-prev .pp.out { stroke: var(--warn); stroke-dasharray: none; fill: rgba(255,210,63,.08); }
+.tf-prev .pn { fill: var(--muted); font: 10px var(--mono); text-anchor: middle; dominant-baseline: middle; }
 .tf-prev .pc { fill: none; stroke: var(--red); stroke-width: 1; stroke-dasharray: 4 3; }
 .tf-prev .pv { fill: var(--fg); } .tf-prev .pl { fill: var(--muted); font: 10px var(--mono); }
 .tf-prev .sc path { fill: none; stroke: var(--fg); stroke-width: 1.2; } .tf-prev .sc text, .tf-prev .na text { fill: var(--fg); font: 10px var(--mono); text-anchor: middle; }
@@ -365,7 +372,7 @@ details.tf-sec:not([open]) { gap: 0; }
         </section>
         <section>
           <h3><span>3</span>Arazi doldurma</h3>
-          <div class="brow"><button class="gb" id="g-bbound">Sınırı çizimden seç</button><button class="gb" id="g-bkml">KML / KMZ yükle</button><input type="file" id="g-kml" accept=".kml,.kmz" hidden></div>
+          <div class="brow"><button class="gb" id="g-bbound">Sınırı çizimden seç</button><button class="gb" id="g-bkml">KML / KMZ ekle</button><input type="file" id="g-kml" accept=".kml,.kmz" multiple hidden></div>
           <p class="gi" id="g-binfo"></p>
           <div class="grid3">
             <label class="gf">Enlem (°)<input id="g-lat" type="number" step="0.001" value="39.2"></label>
@@ -492,6 +499,33 @@ details.tf-sec:not([open]) { gap: 0; }
   <dialog id="pjdlg"><div class="pjh"><div class="ptabs"><button class="ptab" data-t="paftalar">Paftalar</button><button class="ptab" data-t="kontrol">Kontroller</button><button class="ptab" data-t="kesif">Keşif</button><button class="ptab" data-t="teklif">Teklif</button></div><button class="mini" id="pj-close" aria-label="Kapat">✕</button></div><div id="pj-body"></div></dialog>
   <dialog id="qdlg"><h3></h3><p></p><div class="qb"></div></dialog>
 </div>
+<script>
+!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).polygonClipping=e()}(this,(function(){"use strict";
+/**
+     * splaytree v3.1.2
+     * Fast Splay tree for Node and browser
+     *
+     * @author Alexander Milevski <info@w8r.name>
+     * @license MIT
+     * @preserve
+     */
+/*! *****************************************************************************
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+    this file except in compliance with the License. You may obtain a copy of the
+    License at http://www.apache.org/licenses/LICENSE-2.0
+
+    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+    MERCHANTABLITY OR NON-INFRINGEMENT.
+
+    See the Apache Version 2.0 License for specific language governing permissions
+    and limitations under the License.
+    ***************************************************************************** */function t(t,e){var n,r,i,o,s={label:0,sent:function(){if(1&i[0])throw i[1];return i[1]},trys:[],ops:[]};return o={next:l(0),throw:l(1),return:l(2)},"function"==typeof Symbol&&(o[Symbol.iterator]=function(){return this}),o;function l(o){return function(l){return function(o){if(n)throw new TypeError("Generator is already executing.");for(;s;)try{if(n=1,r&&(i=2&o[0]?r.return:o[0]?r.throw||((i=r.return)&&i.call(r),0):r.next)&&!(i=i.call(r,o[1])).done)return i;switch(r=0,i&&(o=[2&o[0],i.value]),o[0]){case 0:case 1:i=o;break;case 4:return s.label++,{value:o[1],done:!1};case 5:s.label++,r=o[1],o=[0];continue;case 7:o=s.ops.pop(),s.trys.pop();continue;default:if(!(i=s.trys,(i=i.length>0&&i[i.length-1])||6!==o[0]&&2!==o[0])){s=0;continue}if(3===o[0]&&(!i||o[1]>i[0]&&o[1]<i[3])){s.label=o[1];break}if(6===o[0]&&s.label<i[1]){s.label=i[1],i=o;break}if(i&&s.label<i[2]){s.label=i[2],s.ops.push(o);break}i[2]&&s.ops.pop(),s.trys.pop();continue}o=e.call(t,s)}catch(t){o=[6,t],r=0}finally{n=i=0}if(5&o[0])throw o[1];return{value:o[0]?o[1]:void 0,done:!0}}([o,l])}}}var e=function(t,e){this.next=null,this.key=t,this.data=e,this.left=null,this.right=null};function n(t,e){return t>e?1:t<e?-1:0}function r(t,n,r){for(var i=new e(null,null),o=i,s=i;;){var l=r(t,n.key);if(l<0){if(null===n.left)break;if(r(t,n.left.key)<0){var h=n.left;if(n.left=h.right,h.right=n,null===(n=h).left)break}s.left=n,s=n,n=n.left}else{if(!(l>0))break;if(null===n.right)break;if(r(t,n.right.key)>0){h=n.right;if(n.right=h.left,h.left=n,null===(n=h).right)break}o.right=n,o=n,n=n.right}}return o.right=n.left,s.left=n.right,n.left=i.right,n.right=i.left,n}function i(t,n,i,o){var s=new e(t,n);if(null===i)return s.left=s.right=null,s;var l=o(t,(i=r(t,i,o)).key);return l<0?(s.left=i.left,s.right=i,i.left=null):l>=0&&(s.right=i.right,s.left=i,i.right=null),s}function o(t,e,n){var i=null,o=null;if(e){var s=n((e=r(t,e,n)).key,t);0===s?(i=e.left,o=e.right):s<0?(o=e.right,e.right=null,i=e):(i=e.left,e.left=null,o=e)}return{left:i,right:o}}function s(t,e,n,r,i){if(t){r(e+(n?"└── ":"├── ")+i(t)+"\n");var o=e+(n?"    ":"│   ");t.left&&s(t.left,o,!1,r,i),t.right&&s(t.right,o,!0,r,i)}}var l=function(){function l(t){void 0===t&&(t=n),this._root=null,this._size=0,this._comparator=t}return l.prototype.insert=function(t,e){return this._size++,this._root=i(t,e,this._root,this._comparator)},l.prototype.add=function(t,n){var i=new e(t,n);null===this._root&&(i.left=i.right=null,this._size++,this._root=i);var o=this._comparator,s=r(t,this._root,o),l=o(t,s.key);return 0===l?this._root=s:(l<0?(i.left=s.left,i.right=s,s.left=null):l>0&&(i.right=s.right,i.left=s,s.right=null),this._size++,this._root=i),this._root},l.prototype.remove=function(t){this._root=this._remove(t,this._root,this._comparator)},l.prototype._remove=function(t,e,n){var i;return null===e?null:0===n(t,(e=r(t,e,n)).key)?(null===e.left?i=e.right:(i=r(t,e.left,n)).right=e.right,this._size--,i):e},l.prototype.pop=function(){var t=this._root;if(t){for(;t.left;)t=t.left;return this._root=r(t.key,this._root,this._comparator),this._root=this._remove(t.key,this._root,this._comparator),{key:t.key,data:t.data}}return null},l.prototype.findStatic=function(t){for(var e=this._root,n=this._comparator;e;){var r=n(t,e.key);if(0===r)return e;e=r<0?e.left:e.right}return null},l.prototype.find=function(t){return this._root&&(this._root=r(t,this._root,this._comparator),0!==this._comparator(t,this._root.key))?null:this._root},l.prototype.contains=function(t){for(var e=this._root,n=this._comparator;e;){var r=n(t,e.key);if(0===r)return!0;e=r<0?e.left:e.right}return!1},l.prototype.forEach=function(t,e){for(var n=this._root,r=[],i=!1;!i;)null!==n?(r.push(n),n=n.left):0!==r.length?(n=r.pop(),t.call(e,n),n=n.right):i=!0;return this},l.prototype.range=function(t,e,n,r){for(var i=[],o=this._comparator,s=this._root;0!==i.length||s;)if(s)i.push(s),s=s.left;else{if(o((s=i.pop()).key,e)>0)break;if(o(s.key,t)>=0&&n.call(r,s))return this;s=s.right}return this},l.prototype.keys=function(){var t=[];return this.forEach((function(e){var n=e.key;return t.push(n)})),t},l.prototype.values=function(){var t=[];return this.forEach((function(e){var n=e.data;return t.push(n)})),t},l.prototype.min=function(){return this._root?this.minNode(this._root).key:null},l.prototype.max=function(){return this._root?this.maxNode(this._root).key:null},l.prototype.minNode=function(t){if(void 0===t&&(t=this._root),t)for(;t.left;)t=t.left;return t},l.prototype.maxNode=function(t){if(void 0===t&&(t=this._root),t)for(;t.right;)t=t.right;return t},l.prototype.at=function(t){for(var e=this._root,n=!1,r=0,i=[];!n;)if(e)i.push(e),e=e.left;else if(i.length>0){if(e=i.pop(),r===t)return e;r++,e=e.right}else n=!0;return null},l.prototype.next=function(t){var e=this._root,n=null;if(t.right){for(n=t.right;n.left;)n=n.left;return n}for(var r=this._comparator;e;){var i=r(t.key,e.key);if(0===i)break;i<0?(n=e,e=e.left):e=e.right}return n},l.prototype.prev=function(t){var e=this._root,n=null;if(null!==t.left){for(n=t.left;n.right;)n=n.right;return n}for(var r=this._comparator;e;){var i=r(t.key,e.key);if(0===i)break;i<0?e=e.left:(n=e,e=e.right)}return n},l.prototype.clear=function(){return this._root=null,this._size=0,this},l.prototype.toList=function(){return function(t){var n=t,r=[],i=!1,o=new e(null,null),s=o;for(;!i;)n?(r.push(n),n=n.left):r.length>0?n=(n=s=s.next=r.pop()).right:i=!0;return s.next=null,o.next}(this._root)},l.prototype.load=function(t,n,r){void 0===n&&(n=[]),void 0===r&&(r=!1);var i=t.length,o=this._comparator;if(r&&f(t,n,0,i-1,o),null===this._root)this._root=h(t,n,0,i),this._size=i;else{var s=function(t,n,r){var i=new e(null,null),o=i,s=t,l=n;for(;null!==s&&null!==l;)r(s.key,l.key)<0?(o.next=s,s=s.next):(o.next=l,l=l.next),o=o.next;null!==s?o.next=s:null!==l&&(o.next=l);return i.next}(this.toList(),function(t,n){for(var r=new e(null,null),i=r,o=0;o<t.length;o++)i=i.next=new e(t[o],n[o]);return i.next=null,r.next}(t,n),o);i=this._size+i,this._root=u({head:s},0,i)}return this},l.prototype.isEmpty=function(){return null===this._root},Object.defineProperty(l.prototype,"size",{get:function(){return this._size},enumerable:!0,configurable:!0}),Object.defineProperty(l.prototype,"root",{get:function(){return this._root},enumerable:!0,configurable:!0}),l.prototype.toString=function(t){void 0===t&&(t=function(t){return String(t.key)});var e=[];return s(this._root,"",!0,(function(t){return e.push(t)}),t),e.join("")},l.prototype.update=function(t,e,n){var s=this._comparator,l=o(t,this._root,s),h=l.left,u=l.right;s(t,e)<0?u=i(e,n,u,s):h=i(e,n,h,s),this._root=function(t,e,n){return null===e?t:(null===t||((e=r(t.key,e,n)).left=t),e)}(h,u,s)},l.prototype.split=function(t){return o(t,this._root,this._comparator)},l.prototype[Symbol.iterator]=function(){var e,n,r;return t(this,(function(t){switch(t.label){case 0:e=this._root,n=[],r=!1,t.label=1;case 1:return r?[3,6]:null===e?[3,2]:(n.push(e),e=e.left,[3,5]);case 2:return 0===n.length?[3,4]:[4,e=n.pop()];case 3:return t.sent(),e=e.right,[3,5];case 4:r=!0,t.label=5;case 5:return[3,1];case 6:return[2]}}))},l}();function h(t,n,r,i){var o=i-r;if(o>0){var s=r+Math.floor(o/2),l=t[s],u=n[s],f=new e(l,u);return f.left=h(t,n,r,s),f.right=h(t,n,s+1,i),f}return null}function u(t,e,n){var r=n-e;if(r>0){var i=e+Math.floor(r/2),o=u(t,e,i),s=t.head;return s.left=o,t.head=t.head.next,s.right=u(t,i+1,n),s}return null}function f(t,e,n,r,i){if(!(n>=r)){for(var o=t[n+r>>1],s=n-1,l=r+1;;){do{s++}while(i(t[s],o)<0);do{l--}while(i(t[l],o)>0);if(s>=l)break;var h=t[s];t[s]=t[l],t[l]=h,h=e[s],e[s]=e[l],e[l]=h}f(t,e,n,l,i),f(t,e,l+1,r,i)}}const c=(t,e)=>t.ll.x<=e.x&&e.x<=t.ur.x&&t.ll.y<=e.y&&e.y<=t.ur.y,p=(t,e)=>{if(e.ur.x<t.ll.x||t.ur.x<e.ll.x||e.ur.y<t.ll.y||t.ur.y<e.ll.y)return null;const n=t.ll.x<e.ll.x?e.ll.x:t.ll.x,r=t.ur.x<e.ur.x?t.ur.x:e.ur.x;return{ll:{x:n,y:t.ll.y<e.ll.y?e.ll.y:t.ll.y},ur:{x:r,y:t.ur.y<e.ur.y?t.ur.y:e.ur.y}}};let g=Number.EPSILON;void 0===g&&(g=Math.pow(2,-52));const a=g*g,y=(t,e)=>{if(-g<t&&t<g&&-g<e&&e<g)return 0;const n=t-e;return n*n<a*t*e?0:t<e?-1:1};class x{constructor(){this.tree=new l,this.round(0)}round(t){const e=this.tree.add(t),n=this.tree.prev(e);if(null!==n&&0===y(e.key,n.key))return this.tree.remove(t),n.key;const r=this.tree.next(e);return null!==r&&0===y(e.key,r.key)?(this.tree.remove(t),r.key):t}}const b=new class{constructor(){this.reset()}reset(){this.xRounder=new x,this.yRounder=new x}round(t,e){return{x:this.xRounder.round(t),y:this.yRounder.round(e)}}},v=11102230246251565e-32,d=134217729,m=(3+8*v)*v;function E(t,e,n,r,i){let o,s,l,h,u=e[0],f=r[0],c=0,p=0;f>u==f>-u?(o=u,u=e[++c]):(o=f,f=r[++p]);let g=0;if(c<t&&p<n)for(f>u==f>-u?(s=u+o,l=o-(s-u),u=e[++c]):(s=f+o,l=o-(s-f),f=r[++p]),o=s,0!==l&&(i[g++]=l);c<t&&p<n;)f>u==f>-u?(s=o+u,h=s-o,l=o-(s-h)+(u-h),u=e[++c]):(s=o+f,h=s-o,l=o-(s-h)+(f-h),f=r[++p]),o=s,0!==l&&(i[g++]=l);for(;c<t;)s=o+u,h=s-o,l=o-(s-h)+(u-h),u=e[++c],o=s,0!==l&&(i[g++]=l);for(;p<n;)s=o+f,h=s-o,l=o-(s-h)+(f-h),f=r[++p],o=s,0!==l&&(i[g++]=l);return 0===o&&0!==g||(i[g++]=o),g}function S(t){return new Float64Array(t)}const _=22204460492503146e-32,w=11093356479670487e-47,k=S(4),R=S(8),I=S(12),P=S(16),N=S(4);function A(t,e,n,r,i,o){const s=(e-o)*(n-i),l=(t-i)*(r-o),h=s-l,u=Math.abs(s+l);return Math.abs(h)>=33306690738754716e-32*u?h:-function(t,e,n,r,i,o,s){let l,h,u,f,c,p,g,a,y,x,b,v,S,A,O,L,$,M;const z=t-i,B=n-i,G=e-o,T=r-o;A=z*T,p=d*z,g=p-(p-z),a=z-g,p=d*T,y=p-(p-T),x=T-y,O=a*x-(A-g*y-a*y-g*x),L=G*B,p=d*G,g=p-(p-G),a=G-g,p=d*B,y=p-(p-B),x=B-y,$=a*x-(L-g*y-a*y-g*x),b=O-$,c=O-b,k[0]=O-(b+c)+(c-$),v=A+b,c=v-A,S=A-(v-c)+(b-c),b=S-L,c=S-b,k[1]=S-(b+c)+(c-L),M=v+b,c=M-v,k[2]=v-(M-c)+(b-c),k[3]=M;let q=function(t,e){let n=e[0];for(let r=1;r<t;r++)n+=e[r];return n}(4,k),C=_*s;if(q>=C||-q>=C)return q;if(c=t-z,l=t-(z+c)+(c-i),c=n-B,u=n-(B+c)+(c-i),c=e-G,h=e-(G+c)+(c-o),c=r-T,f=r-(T+c)+(c-o),0===l&&0===h&&0===u&&0===f)return q;if(C=w*s+m*Math.abs(q),q+=z*f+T*l-(G*u+B*h),q>=C||-q>=C)return q;A=l*T,p=d*l,g=p-(p-l),a=l-g,p=d*T,y=p-(p-T),x=T-y,O=a*x-(A-g*y-a*y-g*x),L=h*B,p=d*h,g=p-(p-h),a=h-g,p=d*B,y=p-(p-B),x=B-y,$=a*x-(L-g*y-a*y-g*x),b=O-$,c=O-b,N[0]=O-(b+c)+(c-$),v=A+b,c=v-A,S=A-(v-c)+(b-c),b=S-L,c=S-b,N[1]=S-(b+c)+(c-L),M=v+b,c=M-v,N[2]=v-(M-c)+(b-c),N[3]=M;const F=E(4,k,4,N,R);A=z*f,p=d*z,g=p-(p-z),a=z-g,p=d*f,y=p-(p-f),x=f-y,O=a*x-(A-g*y-a*y-g*x),L=G*u,p=d*G,g=p-(p-G),a=G-g,p=d*u,y=p-(p-u),x=u-y,$=a*x-(L-g*y-a*y-g*x),b=O-$,c=O-b,N[0]=O-(b+c)+(c-$),v=A+b,c=v-A,S=A-(v-c)+(b-c),b=S-L,c=S-b,N[1]=S-(b+c)+(c-L),M=v+b,c=M-v,N[2]=v-(M-c)+(b-c),N[3]=M;const j=E(F,R,4,N,I);A=l*f,p=d*l,g=p-(p-l),a=l-g,p=d*f,y=p-(p-f),x=f-y,O=a*x-(A-g*y-a*y-g*x),L=h*u,p=d*h,g=p-(p-h),a=h-g,p=d*u,y=p-(p-u),x=u-y,$=a*x-(L-g*y-a*y-g*x),b=O-$,c=O-b,N[0]=O-(b+c)+(c-$),v=A+b,c=v-A,S=A-(v-c)+(b-c),b=S-L,c=S-b,N[1]=S-(b+c)+(c-L),M=v+b,c=M-v,N[2]=v-(M-c)+(b-c),N[3]=M;const U=E(j,I,4,N,P);return P[U-1]}(t,e,n,r,i,o,u)}const O=(t,e)=>t.x*e.y-t.y*e.x,L=(t,e)=>t.x*e.x+t.y*e.y,$=(t,e,n)=>{const r=A(t.x,t.y,e.x,e.y,n.x,n.y);return r>0?-1:r<0?1:0},M=t=>Math.sqrt(L(t,t)),z=(t,e,n)=>{const r={x:e.x-t.x,y:e.y-t.y},i={x:n.x-t.x,y:n.y-t.y};return O(i,r)/M(i)/M(r)},B=(t,e,n)=>{const r={x:e.x-t.x,y:e.y-t.y},i={x:n.x-t.x,y:n.y-t.y};return L(i,r)/M(i)/M(r)},G=(t,e,n)=>0===e.y?null:{x:t.x+e.x/e.y*(n-t.y),y:n},T=(t,e,n)=>0===e.x?null:{x:n,y:t.y+e.y/e.x*(n-t.x)};class q{static compare(t,e){const n=q.comparePoints(t.point,e.point);return 0!==n?n:(t.point!==e.point&&t.link(e),t.isLeft!==e.isLeft?t.isLeft?1:-1:F.compare(t.segment,e.segment))}static comparePoints(t,e){return t.x<e.x?-1:t.x>e.x?1:t.y<e.y?-1:t.y>e.y?1:0}constructor(t,e){void 0===t.events?t.events=[this]:t.events.push(this),this.point=t,this.isLeft=e}link(t){if(t.point===this.point)throw new Error("Tried to link already linked events");const e=t.point.events;for(let t=0,n=e.length;t<n;t++){const n=e[t];this.point.events.push(n),n.point=this.point}this.checkForConsuming()}checkForConsuming(){const t=this.point.events.length;for(let e=0;e<t;e++){const n=this.point.events[e];if(void 0===n.segment.consumedBy)for(let r=e+1;r<t;r++){const t=this.point.events[r];void 0===t.consumedBy&&(n.otherSE.point.events===t.otherSE.point.events&&n.segment.consume(t.segment))}}}getAvailableLinkedEvents(){const t=[];for(let e=0,n=this.point.events.length;e<n;e++){const n=this.point.events[e];n!==this&&!n.segment.ringOut&&n.segment.isInResult()&&t.push(n)}return t}getLeftmostComparator(t){const e=new Map,n=n=>{const r=n.otherSE;e.set(n,{sine:z(this.point,t.point,r.point),cosine:B(this.point,t.point,r.point)})};return(t,r)=>{e.has(t)||n(t),e.has(r)||n(r);const{sine:i,cosine:o}=e.get(t),{sine:s,cosine:l}=e.get(r);return i>=0&&s>=0?o<l?1:o>l?-1:0:i<0&&s<0?o<l?-1:o>l?1:0:s<i?-1:s>i?1:0}}}let C=0;class F{static compare(t,e){const n=t.leftSE.point.x,r=e.leftSE.point.x,i=t.rightSE.point.x,o=e.rightSE.point.x;if(o<n)return 1;if(i<r)return-1;const s=t.leftSE.point.y,l=e.leftSE.point.y,h=t.rightSE.point.y,u=e.rightSE.point.y;if(n<r){if(l<s&&l<h)return 1;if(l>s&&l>h)return-1;const n=t.comparePoint(e.leftSE.point);if(n<0)return 1;if(n>0)return-1;const r=e.comparePoint(t.rightSE.point);return 0!==r?r:-1}if(n>r){if(s<l&&s<u)return-1;if(s>l&&s>u)return 1;const n=e.comparePoint(t.leftSE.point);if(0!==n)return n;const r=t.comparePoint(e.rightSE.point);return r<0?1:r>0?-1:1}if(s<l)return-1;if(s>l)return 1;if(i<o){const n=e.comparePoint(t.rightSE.point);if(0!==n)return n}if(i>o){const n=t.comparePoint(e.rightSE.point);if(n<0)return 1;if(n>0)return-1}if(i!==o){const t=h-s,e=i-n,f=u-l,c=o-r;if(t>e&&f<c)return 1;if(t<e&&f>c)return-1}return i>o?1:i<o||h<u?-1:h>u?1:t.id<e.id?-1:t.id>e.id?1:0}constructor(t,e,n,r){this.id=++C,this.leftSE=t,t.segment=this,t.otherSE=e,this.rightSE=e,e.segment=this,e.otherSE=t,this.rings=n,this.windings=r}static fromRing(t,e,n){let r,i,o;const s=q.comparePoints(t,e);if(s<0)r=t,i=e,o=1;else{if(!(s>0))throw new Error(`Tried to create degenerate segment at [${t.x}, ${t.y}]`);r=e,i=t,o=-1}const l=new q(r,!0),h=new q(i,!1);return new F(l,h,[n],[o])}replaceRightSE(t){this.rightSE=t,this.rightSE.segment=this,this.rightSE.otherSE=this.leftSE,this.leftSE.otherSE=this.rightSE}bbox(){const t=this.leftSE.point.y,e=this.rightSE.point.y;return{ll:{x:this.leftSE.point.x,y:t<e?t:e},ur:{x:this.rightSE.point.x,y:t>e?t:e}}}vector(){return{x:this.rightSE.point.x-this.leftSE.point.x,y:this.rightSE.point.y-this.leftSE.point.y}}isAnEndpoint(t){return t.x===this.leftSE.point.x&&t.y===this.leftSE.point.y||t.x===this.rightSE.point.x&&t.y===this.rightSE.point.y}comparePoint(t){if(this.isAnEndpoint(t))return 0;const e=this.leftSE.point,n=this.rightSE.point,r=this.vector();if(e.x===n.x)return t.x===e.x?0:t.x<e.x?1:-1;const i=(t.y-e.y)/r.y,o=e.x+i*r.x;if(t.x===o)return 0;const s=(t.x-e.x)/r.x,l=e.y+s*r.y;return t.y===l?0:t.y<l?-1:1}getIntersection(t){const e=this.bbox(),n=t.bbox(),r=p(e,n);if(null===r)return null;const i=this.leftSE.point,o=this.rightSE.point,s=t.leftSE.point,l=t.rightSE.point,h=c(e,s)&&0===this.comparePoint(s),u=c(n,i)&&0===t.comparePoint(i),f=c(e,l)&&0===this.comparePoint(l),g=c(n,o)&&0===t.comparePoint(o);if(u&&h)return g&&!f?o:!g&&f?l:null;if(u)return f&&i.x===l.x&&i.y===l.y?null:i;if(h)return g&&o.x===s.x&&o.y===s.y?null:s;if(g&&f)return null;if(g)return o;if(f)return l;const a=((t,e,n,r)=>{if(0===e.x)return T(n,r,t.x);if(0===r.x)return T(t,e,n.x);if(0===e.y)return G(n,r,t.y);if(0===r.y)return G(t,e,n.y);const i=O(e,r);if(0==i)return null;const o={x:n.x-t.x,y:n.y-t.y},s=O(o,e)/i,l=O(o,r)/i;return{x:(t.x+l*e.x+(n.x+s*r.x))/2,y:(t.y+l*e.y+(n.y+s*r.y))/2}})(i,this.vector(),s,t.vector());return null===a?null:c(r,a)?b.round(a.x,a.y):null}split(t){const e=[],n=void 0!==t.events,r=new q(t,!0),i=new q(t,!1),o=this.rightSE;this.replaceRightSE(i),e.push(i),e.push(r);const s=new F(r,o,this.rings.slice(),this.windings.slice());return q.comparePoints(s.leftSE.point,s.rightSE.point)>0&&s.swapEvents(),q.comparePoints(this.leftSE.point,this.rightSE.point)>0&&this.swapEvents(),n&&(r.checkForConsuming(),i.checkForConsuming()),e}swapEvents(){const t=this.rightSE;this.rightSE=this.leftSE,this.leftSE=t,this.leftSE.isLeft=!0,this.rightSE.isLeft=!1;for(let t=0,e=this.windings.length;t<e;t++)this.windings[t]*=-1}consume(t){let e=this,n=t;for(;e.consumedBy;)e=e.consumedBy;for(;n.consumedBy;)n=n.consumedBy;const r=F.compare(e,n);if(0!==r){if(r>0){const t=e;e=n,n=t}if(e.prev===n){const t=e;e=n,n=t}for(let t=0,r=n.rings.length;t<r;t++){const r=n.rings[t],i=n.windings[t],o=e.rings.indexOf(r);-1===o?(e.rings.push(r),e.windings.push(i)):e.windings[o]+=i}n.rings=null,n.windings=null,n.consumedBy=e,n.leftSE.consumedBy=e.leftSE,n.rightSE.consumedBy=e.rightSE}}prevInResult(){return void 0!==this._prevInResult||(this.prev?this.prev.isInResult()?this._prevInResult=this.prev:this._prevInResult=this.prev.prevInResult():this._prevInResult=null),this._prevInResult}beforeState(){if(void 0!==this._beforeState)return this._beforeState;if(this.prev){const t=this.prev.consumedBy||this.prev;this._beforeState=t.afterState()}else this._beforeState={rings:[],windings:[],multiPolys:[]};return this._beforeState}afterState(){if(void 0!==this._afterState)return this._afterState;const t=this.beforeState();this._afterState={rings:t.rings.slice(0),windings:t.windings.slice(0),multiPolys:[]};const e=this._afterState.rings,n=this._afterState.windings,r=this._afterState.multiPolys;for(let t=0,r=this.rings.length;t<r;t++){const r=this.rings[t],i=this.windings[t],o=e.indexOf(r);-1===o?(e.push(r),n.push(i)):n[o]+=i}const i=[],o=[];for(let t=0,r=e.length;t<r;t++){if(0===n[t])continue;const r=e[t],s=r.poly;if(-1===o.indexOf(s))if(r.isExterior)i.push(s);else{-1===o.indexOf(s)&&o.push(s);const t=i.indexOf(r.poly);-1!==t&&i.splice(t,1)}}for(let t=0,e=i.length;t<e;t++){const e=i[t].multiPoly;-1===r.indexOf(e)&&r.push(e)}return this._afterState}isInResult(){if(this.consumedBy)return!1;if(void 0!==this._isInResult)return this._isInResult;const t=this.beforeState().multiPolys,e=this.afterState().multiPolys;switch(H.type){case"union":{const n=0===t.length,r=0===e.length;this._isInResult=n!==r;break}case"intersection":{let n,r;t.length<e.length?(n=t.length,r=e.length):(n=e.length,r=t.length),this._isInResult=r===H.numMultiPolys&&n<r;break}case"xor":{const n=Math.abs(t.length-e.length);this._isInResult=n%2==1;break}case"difference":{const n=t=>1===t.length&&t[0].isSubject;this._isInResult=n(t)!==n(e);break}default:throw new Error(`Unrecognized operation type found ${H.type}`)}return this._isInResult}}class j{constructor(t,e,n){if(!Array.isArray(t)||0===t.length)throw new Error("Input geometry is not a valid Polygon or MultiPolygon");if(this.poly=e,this.isExterior=n,this.segments=[],"number"!=typeof t[0][0]||"number"!=typeof t[0][1])throw new Error("Input geometry is not a valid Polygon or MultiPolygon");const r=b.round(t[0][0],t[0][1]);this.bbox={ll:{x:r.x,y:r.y},ur:{x:r.x,y:r.y}};let i=r;for(let e=1,n=t.length;e<n;e++){if("number"!=typeof t[e][0]||"number"!=typeof t[e][1])throw new Error("Input geometry is not a valid Polygon or MultiPolygon");let n=b.round(t[e][0],t[e][1]);n.x===i.x&&n.y===i.y||(this.segments.push(F.fromRing(i,n,this)),n.x<this.bbox.ll.x&&(this.bbox.ll.x=n.x),n.y<this.bbox.ll.y&&(this.bbox.ll.y=n.y),n.x>this.bbox.ur.x&&(this.bbox.ur.x=n.x),n.y>this.bbox.ur.y&&(this.bbox.ur.y=n.y),i=n)}r.x===i.x&&r.y===i.y||this.segments.push(F.fromRing(i,r,this))}getSweepEvents(){const t=[];for(let e=0,n=this.segments.length;e<n;e++){const n=this.segments[e];t.push(n.leftSE),t.push(n.rightSE)}return t}}class U{constructor(t,e){if(!Array.isArray(t))throw new Error("Input geometry is not a valid Polygon or MultiPolygon");this.exteriorRing=new j(t[0],this,!0),this.bbox={ll:{x:this.exteriorRing.bbox.ll.x,y:this.exteriorRing.bbox.ll.y},ur:{x:this.exteriorRing.bbox.ur.x,y:this.exteriorRing.bbox.ur.y}},this.interiorRings=[];for(let e=1,n=t.length;e<n;e++){const n=new j(t[e],this,!1);n.bbox.ll.x<this.bbox.ll.x&&(this.bbox.ll.x=n.bbox.ll.x),n.bbox.ll.y<this.bbox.ll.y&&(this.bbox.ll.y=n.bbox.ll.y),n.bbox.ur.x>this.bbox.ur.x&&(this.bbox.ur.x=n.bbox.ur.x),n.bbox.ur.y>this.bbox.ur.y&&(this.bbox.ur.y=n.bbox.ur.y),this.interiorRings.push(n)}this.multiPoly=e}getSweepEvents(){const t=this.exteriorRing.getSweepEvents();for(let e=0,n=this.interiorRings.length;e<n;e++){const n=this.interiorRings[e].getSweepEvents();for(let e=0,r=n.length;e<r;e++)t.push(n[e])}return t}}class Y{constructor(t,e){if(!Array.isArray(t))throw new Error("Input geometry is not a valid Polygon or MultiPolygon");try{"number"==typeof t[0][0][0]&&(t=[t])}catch(t){}this.polys=[],this.bbox={ll:{x:Number.POSITIVE_INFINITY,y:Number.POSITIVE_INFINITY},ur:{x:Number.NEGATIVE_INFINITY,y:Number.NEGATIVE_INFINITY}};for(let e=0,n=t.length;e<n;e++){const n=new U(t[e],this);n.bbox.ll.x<this.bbox.ll.x&&(this.bbox.ll.x=n.bbox.ll.x),n.bbox.ll.y<this.bbox.ll.y&&(this.bbox.ll.y=n.bbox.ll.y),n.bbox.ur.x>this.bbox.ur.x&&(this.bbox.ur.x=n.bbox.ur.x),n.bbox.ur.y>this.bbox.ur.y&&(this.bbox.ur.y=n.bbox.ur.y),this.polys.push(n)}this.isSubject=e}getSweepEvents(){const t=[];for(let e=0,n=this.polys.length;e<n;e++){const n=this.polys[e].getSweepEvents();for(let e=0,r=n.length;e<r;e++)t.push(n[e])}return t}}class V{static factory(t){const e=[];for(let n=0,r=t.length;n<r;n++){const r=t[n];if(!r.isInResult()||r.ringOut)continue;let i=null,o=r.leftSE,s=r.rightSE;const l=[o],h=o.point,u=[];for(;i=o,o=s,l.push(o),o.point!==h;)for(;;){const t=o.getAvailableLinkedEvents();if(0===t.length){const t=l[0].point,e=l[l.length-1].point;throw new Error(`Unable to complete output ring starting at [${t.x}, ${t.y}]. Last matching segment found ends at [${e.x}, ${e.y}].`)}if(1===t.length){s=t[0].otherSE;break}let n=null;for(let t=0,e=u.length;t<e;t++)if(u[t].point===o.point){n=t;break}if(null!==n){const t=u.splice(n)[0],r=l.splice(t.index);r.unshift(r[0].otherSE),e.push(new V(r.reverse()));continue}u.push({index:l.length,point:o.point});const r=o.getLeftmostComparator(i);s=t.sort(r)[0].otherSE;break}e.push(new V(l))}return e}constructor(t){this.events=t;for(let e=0,n=t.length;e<n;e++)t[e].segment.ringOut=this;this.poly=null}getGeom(){let t=this.events[0].point;const e=[t];for(let n=1,r=this.events.length-1;n<r;n++){const r=this.events[n].point,i=this.events[n+1].point;0!==$(r,t,i)&&(e.push(r),t=r)}if(1===e.length)return null;const n=e[0],r=e[1];0===$(n,t,r)&&e.shift(),e.push(e[0]);const i=this.isExteriorRing()?1:-1,o=this.isExteriorRing()?0:e.length-1,s=this.isExteriorRing()?e.length:-1,l=[];for(let t=o;t!=s;t+=i)l.push([e[t].x,e[t].y]);return l}isExteriorRing(){if(void 0===this._isExteriorRing){const t=this.enclosingRing();this._isExteriorRing=!t||!t.isExteriorRing()}return this._isExteriorRing}enclosingRing(){return void 0===this._enclosingRing&&(this._enclosingRing=this._calcEnclosingRing()),this._enclosingRing}_calcEnclosingRing(){let t=this.events[0];for(let e=1,n=this.events.length;e<n;e++){const n=this.events[e];q.compare(t,n)>0&&(t=n)}let e=t.segment.prevInResult(),n=e?e.prevInResult():null;for(;;){if(!e)return null;if(!n)return e.ringOut;if(n.ringOut!==e.ringOut)return n.ringOut.enclosingRing()!==e.ringOut?e.ringOut:e.ringOut.enclosingRing();e=n.prevInResult(),n=e?e.prevInResult():null}}}class X{constructor(t){this.exteriorRing=t,t.poly=this,this.interiorRings=[]}addInterior(t){this.interiorRings.push(t),t.poly=this}getGeom(){const t=[this.exteriorRing.getGeom()];if(null===t[0])return null;for(let e=0,n=this.interiorRings.length;e<n;e++){const n=this.interiorRings[e].getGeom();null!==n&&t.push(n)}return t}}class Q{constructor(t){this.rings=t,this.polys=this._composePolys(t)}getGeom(){const t=[];for(let e=0,n=this.polys.length;e<n;e++){const n=this.polys[e].getGeom();null!==n&&t.push(n)}return t}_composePolys(t){const e=[];for(let n=0,r=t.length;n<r;n++){const r=t[n];if(!r.poly)if(r.isExteriorRing())e.push(new X(r));else{const t=r.enclosingRing();t.poly||e.push(new X(t)),t.poly.addInterior(r)}}return e}}class W{constructor(t){let e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:F.compare;this.queue=t,this.tree=new l(e),this.segments=[]}process(t){const e=t.segment,n=[];if(t.consumedBy)return t.isLeft?this.queue.remove(t.otherSE):this.tree.remove(e),n;const r=t.isLeft?this.tree.add(e):this.tree.find(e);if(!r)throw new Error(`Unable to find segment #${e.id} [${e.leftSE.point.x}, ${e.leftSE.point.y}] -> [${e.rightSE.point.x}, ${e.rightSE.point.y}] in SweepLine tree.`);let i,o,s=r,l=r;for(;void 0===i;)s=this.tree.prev(s),null===s?i=null:void 0===s.key.consumedBy&&(i=s.key);for(;void 0===o;)l=this.tree.next(l),null===l?o=null:void 0===l.key.consumedBy&&(o=l.key);if(t.isLeft){let r=null;if(i){const t=i.getIntersection(e);if(null!==t&&(e.isAnEndpoint(t)||(r=t),!i.isAnEndpoint(t))){const e=this._splitSafely(i,t);for(let t=0,r=e.length;t<r;t++)n.push(e[t])}}let s=null;if(o){const t=o.getIntersection(e);if(null!==t&&(e.isAnEndpoint(t)||(s=t),!o.isAnEndpoint(t))){const e=this._splitSafely(o,t);for(let t=0,r=e.length;t<r;t++)n.push(e[t])}}if(null!==r||null!==s){let t=null;if(null===r)t=s;else if(null===s)t=r;else{t=q.comparePoints(r,s)<=0?r:s}this.queue.remove(e.rightSE),n.push(e.rightSE);const i=e.split(t);for(let t=0,e=i.length;t<e;t++)n.push(i[t])}n.length>0?(this.tree.remove(e),n.push(t)):(this.segments.push(e),e.prev=i)}else{if(i&&o){const t=i.getIntersection(o);if(null!==t){if(!i.isAnEndpoint(t)){const e=this._splitSafely(i,t);for(let t=0,r=e.length;t<r;t++)n.push(e[t])}if(!o.isAnEndpoint(t)){const e=this._splitSafely(o,t);for(let t=0,r=e.length;t<r;t++)n.push(e[t])}}}this.tree.remove(e)}return n}_splitSafely(t,e){this.tree.remove(t);const n=t.rightSE;this.queue.remove(n);const r=t.split(e);return r.push(n),void 0===t.consumedBy&&this.tree.add(t),r}}const Z="undefined"!=typeof process&&process.env.POLYGON_CLIPPING_MAX_QUEUE_SIZE||1e6,D="undefined"!=typeof process&&process.env.POLYGON_CLIPPING_MAX_SWEEPLINE_SEGMENTS||1e6;const H=new class{run(t,e,n){H.type=t,b.reset();const r=[new Y(e,!0)];for(let t=0,e=n.length;t<e;t++)r.push(new Y(n[t],!1));if(H.numMultiPolys=r.length,"difference"===H.type){const t=r[0];let e=1;for(;e<r.length;)null!==p(r[e].bbox,t.bbox)?e++:r.splice(e,1)}if("intersection"===H.type)for(let t=0,e=r.length;t<e;t++){const e=r[t];for(let n=t+1,i=r.length;n<i;n++)if(null===p(e.bbox,r[n].bbox))return[]}const i=new l(q.compare);for(let t=0,e=r.length;t<e;t++){const e=r[t].getSweepEvents();for(let t=0,n=e.length;t<n;t++)if(i.insert(e[t]),i.size>Z)throw new Error("Infinite loop when putting segment endpoints in a priority queue (queue size too big).")}const o=new W(i);let s=i.size,h=i.pop();for(;h;){const t=h.key;if(i.size===s){const e=t.segment;throw new Error(`Unable to pop() ${t.isLeft?"left":"right"} SweepEvent [${t.point.x}, ${t.point.y}] from segment #${e.id} [${e.leftSE.point.x}, ${e.leftSE.point.y}] -> [${e.rightSE.point.x}, ${e.rightSE.point.y}] from queue.`)}if(i.size>Z)throw new Error("Infinite loop when passing sweep line over endpoints (queue size too big).");if(o.segments.length>D)throw new Error("Infinite loop when passing sweep line over endpoints (too many sweep line segments).");const e=o.process(t);for(let t=0,n=e.length;t<n;t++){const n=e[t];void 0===n.consumedBy&&i.insert(n)}s=i.size,h=i.pop()}b.reset();const u=V.factory(o.segments);return new Q(u).getGeom()}};var J={union:function(t){for(var e=arguments.length,n=new Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];return H.run("union",t,n)},intersection:function(t){for(var e=arguments.length,n=new Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];return H.run("intersection",t,n)},xor:function(t){for(var e=arguments.length,n=new Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];return H.run("xor",t,n)},difference:function(t){for(var e=arguments.length,n=new Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];return H.run("difference",t,n)}};return J}));
+//# sourceMappingURL=polygon-clipping.umd.min.js.map
+
+</script>
 <script>
 "use strict";
 // ---- core: colours, matrices, geometry, compile ----
@@ -2787,7 +2821,8 @@ function renderTpl() {
 function boundInfo() {
   const el = gv('g-binfo');
   if (!G.bound) { el.textContent = 'Sınır seçilmedi. Çizimdeki kapalı bir polyline\'ı seçin veya KML/KMZ yükleyin.'; return; }
-  const a = Math.abs(polyArea(G.bound)); el.textContent = 'Sınır: ' + G.bound.length + ' köşe · ' + fmtNum(a, 0) + ' m² · ' + fmtNum(a / 10000, 3) + ' ha · ' + fmtNum(a / 1000, 2) + ' dönüm';
+  const a = Math.abs(polyArea(G.bound)); const np = (G.parcels || []).length;
+  el.textContent = (np > 1 ? np + ' parsel birleşik' + ((G.parcelOut || []).length ? ' (' + G.parcelOut.length + ' bitişik değil)' : '') + ' · ' : '') + 'Sınır: ' + G.bound.length + ' köşe · ' + fmtNum(a, 0) + ' m² · ' + fmtNum(a / 10000, 3) + ' ha · ' + fmtNum(a / 1000, 2) + ' dönüm';
 }
 function autoLat() {
   if (!G.bound) return; const cx = G.bound.reduce((s, p) => s + p[0], 0) / G.bound.length, cy = G.bound.reduce((s, p) => s + p[1], 0) / G.bound.length;
@@ -2823,20 +2858,65 @@ async function gesDatasheet(file) {
   } catch (e) { console.error(e); msg('Datasheet okunamadı: ' + (e.message || e), 'err'); }
   finally { busy(null); }
 }
+// ---- Parseller: birden çok KML/KMZ ya da koordinat bloğu eklenir; bitişik parseller tek saha olarak birleştirilir.
+// Çekme yalnız birleşik dış sınırdan uygulanır (ortak parsel kenarlarında çekme yok). GES-ÇİZ'e parsel listesi gider (script de birleştirir).
+const SNAP = 0.5;   // m — KML/ölçüm farkından kalan kenar boşluklarını kapatır (GES-ÇİZ ile aynı tolerans)
+function parselEkle(list, src, crs) {
+  if (!G.parcels) G.parcels = [];
+  const n0 = G.parcels.length;
+  for (const p of list) {
+    let pts = p.pts; if (pts.length > 3 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01) pts = pts.slice(0, -1);
+    if (pts.length < 3 || Math.abs(polyArea(pts)) < 1) continue;
+    // aynı parsel ikinci kez eklenmesin
+    const a = Math.abs(polyArea(pts)), c = centroidOf(pts);
+    if (G.parcels.some((q) => Math.abs(Math.abs(polyArea(q.pts)) - a) < 0.5 && Math.hypot(centroidOf(q.pts)[0] - c[0], centroidOf(q.pts)[1] - c[1]) < 0.5)) continue;
+    G.parcels.push({ ad: p.ad || ('P' + (G.parcels.length + 1)), pts, src, crs: crs || null });
+  }
+  parselBirlestir(); return G.parcels.length - n0;
+}
+function parselSil(i) { G.parcels.splice(i, 1); parselBirlestir(); }
+function parselBirlestir() {
+  const P = G.parcels || [];
+  // eski parsel/sınır çizimlerini kaldır
+  if (G.parcelIds && S.doc) { const ch = G.parcelIds.map((id) => ({ o: S.doc.items.get(id), n: null })).filter((x) => x.o); if (ch.length) S.doc.commit(ch, 'parsel'); }
+  G.parcelIds = []; G.parcelOut = [];
+  if (!P.length) { G.bound = null; G.boundSrc = null; G.boundCrs = null; boundInfo(); redraw(); return; }
+  // köşe yakalama: başka parselin köşesine SNAP içinde olan köşe ona taşınır
+  const all = []; P.forEach((q, k) => q.pts.forEach((v) => all.push([v, k])));
+  const snapped = P.map((q, k) => q.pts.map((v) => { let b = v, bd = SNAP; for (const [w, kk] of all) { if (kk === k) continue; const d = Math.hypot(w[0] - v[0], w[1] - v[1]); if (d < bd) { bd = d; b = w; } } return [b[0], b[1]]; }));
+  let parts;
+  try { parts = polygonClipping.union(...snapped.map((r) => [[...r, r[0]]])); } catch (e) { console.warn(e); parts = snapped.map((r) => [[...r, r[0]]]); }
+  parts = parts.map((pg) => pg[0].slice(0, -1)).sort((a, b) => Math.abs(polyArea(b)) - Math.abs(polyArea(a)));
+  G.bound = parts[0]; G.parcelOut = [];
+  if (parts.length > 1) P.forEach((q, k) => { const c = centroidOf(snapped[k]); if (!pointInPoly(c, parts[0])) G.parcelOut.push(q.ad); });
+  const crs = P.find((q) => q.crs); G.boundSrc = P.every((q) => q.src === 'kml') ? 'kml' : 'koordinat'; G.boundCrs = crs ? crs.crs : null;
+  if (S.doc) {
+    S.doc.addLayer('GES-PARSEL', 8); S.doc.addLayer('GES-SINIR', 3);
+    const its = [];
+    if (P.length > 1) P.forEach((q) => { its.push({ id: newId(), t: 'pline', layer: 'GES-PARSEL', c: 256, lt: '', cl: true, pts: q.pts.map((v) => [v[0], v[1], 0]) }); const c = centroidOf(q.pts); its.push({ id: newId(), t: 'text', layer: 'GES-PARSEL', c: 256, lt: '', x: c[0], y: c[1], h: Math.max(2, Math.sqrt(Math.abs(polyArea(q.pts))) / 25), rot: 0, s: q.ad, ha: 1, va: 2 }); });
+    its.push({ id: newId(), t: 'pline', layer: 'GES-SINIR', c: 256, lt: '', cl: true, pts: G.bound.map((v) => [v[0], v[1], 0]) });
+    S.doc.commit(its.map((n) => ({ o: null, n })), 'parsel'); G.parcelIds = its.map((x) => x.id);
+    renderLayers(); zoomTo(itemBB(S.doc, its[its.length - 1])); redraw();
+  }
+  boundInfo(); autoLat(); pitchUpdate();
+  if (G.parcelOut.length) msg('⚠ Bitişik olmayan parsel: ' + G.parcelOut.join(', ') + '. Proje en büyük birleşik alanda yapılır; bu parseller ayrı proje olarak çizilmeli.', 'err');
+}
+function pointInPoly(p, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; }
 async function gesKml(file) {
   try {
     const buf = await file.arrayBuffer(); const txt = /\.kmz$/i.test(file.name) ? await unzipFirstKml(buf) : new TextDecoder().decode(buf);
     const polys = kmlPolys(txt); if (!polys.length) throw new Error('Dosyada poligon koordinatı bulunamadı.');
-    const best = polys.map((p) => { const lon = p.reduce((s, q) => s + q[0], 0) / p.length; const lat = p.reduce((s, q) => s + q[1], 0) / p.length; return { p, lon, lat }; })
-      .map((o) => { const z = utmZoneOf(o.lon); const pts = o.p.map((q) => ll2utm(q[1], q[0], z)); return { ...o, z, pts, a: Math.abs(polyArea(pts)) }; }).sort((a, b) => b.a - a.a)[0];
-    let pts = best.pts; if (pts.length > 3 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01) pts = pts.slice(0, -1);
-    G.bound = pts; G.boundSrc = 'kml'; G.boundCrs = null; gv('g-zone').value = best.z; gv('g-lat').value = best.lat.toFixed(4);
-    // draw boundary into drawing
-    S.doc.addLayer('GES-SINIR', 3);
-    const it = { id: newId(), t: 'pline', layer: 'GES-SINIR', c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) };
-    addItems([it], 'arazi sınırı'); renderLayers(); zoomTo(itemBB(S.doc, it));
-    boundInfo(); pitchUpdate(); msg('KML sınırı eklendi (UTM ' + best.z + 'N, WGS84). ' + polys.length + ' poligondan en büyüğü alındı.', 'res');
-  } catch (e) { console.error(e); msg('KML/KMZ okunamadı: ' + (e.message || e), 'err'); }
+    // UTM dilimi: ilk parselden belirlenir, sonraki parseller aynı dilimde hesaplanır (tek koordinat sistemi)
+    if (!(G.parcels && G.parcels.length && G.parcelZone)) { const lon0 = polys[0].reduce((s, q) => s + q[0], 0) / polys[0].length; G.parcelZone = utmZoneOf(lon0); }
+    const z = G.parcelZone; let list = polys.map((p) => ({ pts: p.map((q) => ll2utm(q[1], q[0], z)), lat: p.reduce((s, q) => s + q[1], 0) / p.length }));
+    // aynı dosyada iç içe poligonlar (bina, delik) parsel sayılmaz
+    list = list.filter((o, i) => !list.some((b, j) => j !== i && Math.abs(polyArea(b.pts)) > Math.abs(polyArea(o.pts)) && pointInPoly(centroidOf(o.pts), b.pts)));
+    const base = file.name.replace(/\.(kml|kmz)$/i, '');
+    list.forEach((o, i) => { o.ad = list.length > 1 ? base + '-' + (i + 1) : base; });
+    gv('g-zone').value = z; gv('g-lat').value = list[0].lat.toFixed(4);
+    const n = parselEkle(list, 'kml', null);
+    msg('KML: ' + file.name + ' → ' + n + ' parsel eklendi (UTM ' + z + 'N, WGS84). Toplam ' + G.parcels.length + ' parsel.', 'res');
+  } catch (e) { console.error(e); msg('KML/KMZ okunamadı (' + file.name + '): ' + (e.message || e), 'err'); }
 }
 
 CMD.GPANEL = async () => {
@@ -2872,7 +2952,7 @@ CMD.GBOUND = async () => {
   else if (it && it.t === 'geo') { const pr = it.prims.find((x) => x.k === 0 && x.p.length >= 9); if (pr) { const w = xfArr(pr.p, it.M); pts = []; for (let i = 0; i < w.length; i += 3) pts.push([w[i], w[i + 1]]); } }
   if (!pts || pts.length < 3) { msg('Kapalı bir polyline seçin (en az 3 köşe).', 'err'); return; }
   if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
-  G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
+  G.parcels = []; G.parcelIds = []; G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
 };
 CMD.GFILL = async () => {
   if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
@@ -2911,7 +2991,7 @@ function gesInit() {
   for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); });
   for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); });
   gv('g-ds').onchange = (e) => { const f = e.target.files[0]; if (f) gesDatasheet(f); e.target.value = ''; };
-  gv('g-kml').onchange = (e) => { const f = e.target.files[0]; if (f) gesKml(f); e.target.value = ''; };
+  gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };
   gv('g-bds').onclick = () => gv('g-ds').click();
   gv('g-bkml').onclick = () => gv('g-kml').click();
   gv('g-bpanel').onclick = () => runCommand('GPANEL');
@@ -2977,7 +3057,7 @@ function buildParam() {
   const statikVar = pn('p-aks') !== null;
   return {
     proje: { kod: pv('p-kod') || 'AECAD', isin_adi: pv('p-ad') || 'GES Projesi', proje_sahibi: pv('p-yat') || '', yatirimci: pv('p-yat') || '', il_ilce_ada_parsel: pv('p-yer') || '', cizen: 'AeCAD · GES-ÇİZ', revizyon: pv('p-rev') || 'R00', seviye: pv('p-sev') || 'teklif', enlem: gnum('g-lat', 39), tesis_tipi: pv('p-tip') || 'lisanssiz', muellif: pv('p-mue') || '', muellif_unvan: 'Elektrik Mühendisi' },
-    parsel: { koordinat: G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: G.boundCrs || (fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)'), cekme_mesafesi_m: pn('p-cekme') ?? 5, max_masa: a.maxMasa, hedef_masa: null },
+    parsel: { koordinat: (G.parcels && G.parcels.length > 1) ? G.parcels.map((q) => q.pts.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)])) : G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: G.boundCrs || (fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)'), cekme_mesafesi_m: pn('p-cekme') ?? 5, max_masa: a.maxMasa, hedef_masa: null },
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
     masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, parca_carpani: statikVar ? undefined : pc },
     elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: a.invKw, inverter_model: pv('p-invm') || '', trafo_kva: a.kva, trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
@@ -2985,7 +3065,7 @@ function buildParam() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610181906', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610181932', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
@@ -3214,7 +3294,7 @@ function pjInit() {
 const TF = {
   sec: [
     { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
-    { n: '2', h: 'Arazi', d: 'Parsel sınırını KML/KMZ ile yükleyin ya da köşe koordinatlarını yapıştırın.', arazi: true, f: ['g-lat', 'p-cekme'] },
+    { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur.', arazi: true, f: ['g-lat', 'p-cekme'] },
     { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invm'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
     { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'p-acik', 'p-aks', 'p-aksa'] },
@@ -3231,9 +3311,10 @@ function tfBuild() {
     hd.querySelector('.tf-n').textContent = s.n; hd.querySelector('h2').textContent = s.h; hd.querySelector('p').textContent = s.d; sec.appendChild(hd);
     if (s.arazi) {
       const box = document.createElement('div'); box.className = 'tf-arazi';
-      box.innerHTML = '<div class="tf-row"><button class="gb" id="tf-kml" type="button">KML / KMZ yükle</button><span class="gi" id="tf-binfo"></span></div>' +
-        '<label class="gf tf-wide">Köşe koordinatları — her satıra bir köşe: Y (sağa) X (yukarı)<textarea id="tf-koor" rows="5" spellcheck="false" placeholder="512345.12  4234567.89&#10;512645.40  4234560.10&#10;…"></textarea></label>' +
-        '<div class="tf-row"><label class="gf">Koordinat sistemi<select id="tf-crs"><option>ITRF96 / TM 3° DOM 27</option><option>ITRF96 / TM 3° DOM 30</option><option selected>ITRF96 / TM 3° DOM 33</option><option>ITRF96 / TM 3° DOM 36</option><option>ITRF96 / TM 3° DOM 39</option><option>ITRF96 / TM 3° DOM 42</option><option>ITRF96 / TM 3° DOM 45</option><option>WGS84 / UTM 35N</option><option>WGS84 / UTM 36N</option><option>WGS84 / UTM 37N</option><option>WGS84 / UTM 38N</option><option>ED50 / UTM 6°</option></select></label><button class="gb" id="tf-koorok" type="button">Koordinatlardan sınır oluştur</button></div>' +
+      box.innerHTML = '<div class="tf-row"><button class="gb" id="tf-kml" type="button">KML / KMZ ekle (birden çok seçilebilir)</button><button class="gb" id="tf-pclr" type="button" hidden>Parselleri temizle</button><span class="gi" id="tf-binfo"></span></div>' +
+        '<ul class="tf-plist" id="tf-plist"></ul>' +
+        '<label class="gf tf-wide">Köşe koordinatları — her satıra bir köşe: Y (sağa) X (yukarı). Birden çok parsel için parseller arasına boş satır bırakın.<textarea id="tf-koor" rows="5" spellcheck="false" placeholder="512345.12  4234567.89&#10;512645.40  4234560.10&#10;…&#10;&#10;(2. parsel)&#10;512645.40  4234560.10&#10;…"></textarea></label>' +
+        '<div class="tf-row"><label class="gf">Koordinat sistemi<select id="tf-crs"><option>ITRF96 / TM 3° DOM 27</option><option>ITRF96 / TM 3° DOM 30</option><option selected>ITRF96 / TM 3° DOM 33</option><option>ITRF96 / TM 3° DOM 36</option><option>ITRF96 / TM 3° DOM 39</option><option>ITRF96 / TM 3° DOM 42</option><option>ITRF96 / TM 3° DOM 45</option><option>WGS84 / UTM 35N</option><option>WGS84 / UTM 36N</option><option>WGS84 / UTM 37N</option><option>WGS84 / UTM 38N</option><option>ED50 / UTM 6°</option></select></label><button class="gb" id="tf-koorok" type="button">Koordinatları parsel olarak ekle</button></div>' +
         '<figure class="tf-prev" id="tf-prev"><svg id="tf-svg" role="img" aria-label="Arazi önizlemesi"></svg><figcaption id="tf-pcap"></figcaption></figure>';
       sec.appendChild(box);
     }
@@ -3264,7 +3345,8 @@ function tfBuild() {
     }
     sec.appendChild(grid); body.appendChild(sec);
   }
-  gv('tf-kml').onclick = () => { gv('tf-koor').value = ''; gv('g-kml').click(); };
+  gv('tf-kml').onclick = () => gv('g-kml').click();
+  gv('tf-pclr').onclick = () => { G.parcels = []; parselBirlestir(); gesSave(); tfSync(); };
   gv('tf-ds').onclick = () => gv('g-ds').click();
   gv('tf-koorok').onclick = tfKoor;
   for (const id of ['tf-mor', 'tf-mrows', 'tf-mper', 'tf-mtilt', 'tf-mfront']) gv(id).addEventListener('change', tfMasaSet);
@@ -3311,7 +3393,7 @@ function tfCheck() {
   gv('tf-miss').textContent = miss.length ? 'Eksik: ' + miss.join(', ') + '. Eksik değer "VERİ YOK" olarak raporlanır; arazi sınırı zorunlu.' : (can ? 'Bilgiler tamam. Proje esaslara göre çizilecek.' : gv('p-stage').textContent);
   ok.disabled = !G.bound || !can;
 }
-function tfParse(txt) {
+function tfParseRing(txt) {
   const pts = [];
   for (const l of txt.split(/\n+/).map((x) => x.trim()).filter(Boolean)) {
     const nums = (l.match(/-?\d+(?:[.,]\d+)?/g) || []).map((s) => parseFloat(s.replace(',', '.'))).filter((v) => Math.abs(v) > 1000);
@@ -3321,41 +3403,62 @@ function tfParse(txt) {
   if (pts.length > 3 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01) pts.pop();
   return pts;
 }
-// Önizleme: sınır (taslak ya da uygulanmış), çekme çizgisi, köşe noktaları, kuzey oku, ölçek çubuğu
+// boş satırla ayrılmış bloklar = ayrı parseller
+function tfParse(txt) { return txt.split(/\n\s*\n/).map(tfParseRing).filter((r) => r.length >= 3); }
+function tfPList() {
+  const ul = gv('tf-plist'); if (!ul) return; ul.innerHTML = ''; const P = G.parcels || [];
+  gv('tf-pclr').hidden = !P.length;
+  P.forEach((q, i) => {
+    const li = document.createElement('li'); const out = (G.parcelOut || []).includes(q.ad);
+    li.className = out ? 'out' : '';
+    li.innerHTML = '<b></b><span></span><button class="mini" type="button" aria-label="Parseli kaldır">×</button>';
+    li.querySelector('b').textContent = q.ad;
+    li.querySelector('span').textContent = fmtNum(Math.abs(polyArea(q.pts)) / 10000, 3) + ' ha · ' + q.pts.length + ' köşe · ' + (q.src === 'kml' ? 'KML' : (q.crs || 'koordinat')) + (out ? ' · bitişik değil' : '');
+    li.querySelector('button').onclick = () => { parselSil(i); gesSave(); tfSync(); };
+    ul.appendChild(li);
+  });
+}
+// Önizleme: parseller (gri, numaralı), birleşik sınır (yeşil), çekme (kırmızı kesikli), yapıştırılan taslak (sarı)
 function tfPreview() {
   const svg = gv('tf-svg'), cap = gv('tf-pcap'); if (!svg) return;
-  const draftTxt = gv('tf-koor').value.trim(); const draft = draftTxt ? tfParse(draftTxt) : [];
-  const useDraft = draft.length >= 3 && !(G.bound && G.boundSrc === 'koordinat' && G._koorTxt === draftTxt);
-  const pts = useDraft ? draft : G.bound;
-  gv('tf-prev').classList.toggle('empty', !pts);
-  if (!pts) { svg.innerHTML = ''; cap.textContent = draft.length ? draft.length + ' köşe okundu; en az 3 köşe gerekli.' : 'KML/KMZ yükleyin ya da köşe koordinatlarını yapıştırın; sınır burada görünür.'; return; }
-  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  tfPList();
+  const draft = gv('tf-koor').value.trim() ? tfParse(gv('tf-koor').value) : [];
+  const P = G.parcels || [];
+  const rings = [...P.map((q) => q.pts), ...(G.bound && !P.length ? [G.bound] : []), ...draft];
+  gv('tf-prev').classList.toggle('empty', !rings.length);
+  if (!rings.length) { svg.innerHTML = ''; cap.textContent = 'KML/KMZ ekleyin ya da köşe koordinatlarını yapıştırın; parseller burada görünür.'; return; }
+  const all = rings.flat(); const xs = all.map((p) => p[0]), ys = all.map((p) => p[1]);
   const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), w = x1 - x0 || 1, h = y1 - y0 || 1;
   const W = 640, H = 300, pad = 26, k = Math.min((W - 2 * pad) / w, (H - 2 * pad) / h);
   const ox = (W - w * k) / 2, oy = (H - h * k) / 2;
-  const P = (p) => (ox + (p[0] - x0) * k).toFixed(1) + ',' + (H - oy - (p[1] - y0) * k).toFixed(1);
-  let s = '<polygon class="pb' + (useDraft ? ' draft' : '') + '" points="' + pts.map(P).join(' ') + '"/>';
+  const X = (p) => ox + (p[0] - x0) * k, Y = (p) => H - oy - (p[1] - y0) * k;
+  const Pt = (p) => X(p).toFixed(1) + ',' + Y(p).toFixed(1);
+  let s = '';
+  if (G.bound) s += '<polygon class="pb" points="' + G.bound.map(Pt).join(' ') + '"/>';
+  if (P.length > 1) P.forEach((q) => { const out = (G.parcelOut || []).includes(q.ad); s += '<polygon class="pp' + (out ? ' out' : '') + '" points="' + q.pts.map(Pt).join(' ') + '"/>'; const c = centroidOf(q.pts); s += '<text class="pn" x="' + X(c).toFixed(1) + '" y="' + Y(c).toFixed(1) + '">' + q.ad.replace(/[<&>]/g, '') + '</text>'; });
   const sb = pn('p-cekme') ?? 5;
-  if (sb > 0 && pts.length >= 3) { try { const o = offsetItem({ id: -1, t: 'pline', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(pts)); if (o && o.pts) s += '<polygon class="pc" points="' + o.pts.map(P).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
-  if (pts.length <= 60) s += pts.map((p, i) => '<circle class="pv" r="2.6" cx="' + P(p).split(',')[0] + '" cy="' + P(p).split(',')[1] + '"/>' + (pts.length <= 20 ? '<text class="pl" x="' + (+P(p).split(',')[0] + 4) + '" y="' + (+P(p).split(',')[1] - 4) + '">' + (i + 1) + '</text>' : '')).join('');
-  // ölçek çubuğu: 1-2-5 × 10^n, genişliğin ~%25'i
+  if (G.bound && sb > 0) { try { const o = offsetItem({ id: -1, t: 'pline', cl: true, pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o && o.pts) s += '<polygon class="pc" points="' + o.pts.map(Pt).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
+  for (const r of draft) s += '<polygon class="pb draft" points="' + r.map(Pt).join(' ') + '"/>';
   const tgt = w * 0.25, e = Math.pow(10, Math.floor(Math.log10(tgt))), m = [1, 2, 5, 10].find((v) => v * e >= tgt * 0.6) * e, L = m * k;
   s += '<g class="sc" transform="translate(' + (W - pad - L) + ',' + (H - 10) + ')"><path d="M0 -4V0H' + L.toFixed(1) + 'V-4"/><text x="' + (L / 2).toFixed(1) + '" y="-7">' + (m >= 1000 ? m / 1000 + ' km' : m + ' m') + '</text></g>';
   s += '<g class="na" transform="translate(' + (W - 18) + ',22)"><path d="M0 -12 6 6 0 2 -6 6Z"/><text y="18">K</text></g>';
   svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = s;
-  const a = Math.abs(polyArea(pts));
-  cap.textContent = (useDraft ? 'Önizleme (henüz uygulanmadı): ' : 'Arazi sınırı: ') + pts.length + ' köşe · ' + fmtNum(a / 10000, 3) + ' ha · ' + fmtNum(w, 0) + ' × ' + fmtNum(h, 0) + ' m' + (sb > 0 ? ' · kesikli çizgi: ' + fmtNum(sb, 1) + ' m çekme' : '') + (useDraft ? ' — uygulamak için "Koordinatlardan sınır oluştur"' : '');
+  const parts = [];
+  if (G.bound) { const top = P.reduce((t, q) => t + Math.abs(polyArea(q.pts)), 0); parts.push((P.length > 1 ? P.length + ' parsel · parseller toplamı ' + fmtNum(top / 10000, 3) + ' ha · birleşik saha ' : 'Saha ') + fmtNum(Math.abs(polyArea(G.bound)) / 10000, 3) + ' ha · ' + fmtNum(w, 0) + ' × ' + fmtNum(h, 0) + ' m' + (sb > 0 ? ' · kırmızı kesikli: ' + fmtNum(sb, 1) + ' m çekme (yalnız dış sınır)' : '')); }
+  if ((G.parcelOut || []).length) parts.push('⚠ bitişik olmayan: ' + G.parcelOut.join(', ') + ' — proje en büyük birleşik alanda yapılır');
+  if (draft.length) parts.push('sarı: yapıştırılan ' + draft.length + ' parsel, henüz eklenmedi — "Koordinatları parsel olarak ekle"');
+  cap.textContent = parts.join(' · ');
 }
 function tfKoor() {
-  const pts = tfParse(gv('tf-koor').value);
-  if (pts.length < 3) { msg('En az 3 köşe gerekli (her satırda Y ve X).', 'err'); gv('tf-miss').textContent = 'Koordinat okunamadı: her satıra "Y X" yazın, en az 3 köşe.'; return; }
-  const crs = gv('tf-crs').value; G.bound = pts; G.boundSrc = 'koordinat'; G.boundCrs = crs; G._koorTxt = gv('tf-koor').value.trim();
+  const rings = tfParse(gv('tf-koor').value);
+  if (!rings.length) { msg('En az 3 köşe gerekli (her satırda Y ve X).', 'err'); gv('tf-miss').textContent = 'Koordinat okunamadı: her satıra "Y X" yazın, en az 3 köşe; parseller arasında boş satır.'; return; }
+  const crs = gv('tf-crs').value; const n0 = (G.parcels || []).length;
+  if (n0 && G.boundSrc === 'kml' && !/UTM/.test(crs)) msg('⚠ KML parselleri UTM (WGS84) koordinatında; ' + crs + ' koordinatlarıyla aynı sahada birleşmez. Aynı koordinat sistemini kullanın.', 'err');
+  const n = parselEkle(rings.map((r, i) => ({ pts: r, ad: 'K' + (n0 + i + 1) })), 'koordinat', crs);
   const z = (crs.match(/UTM (\d+)/) || [])[1]; if (z) gv('g-zone').value = z;
-  const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length; gv('g-lat').value = utm2lat(500000, cy, 36).toFixed(3);
-  S.doc.addLayer('GES-SINIR', 3);
-  const it = { id: newId(), t: 'pline', layer: 'GES-SINIR', c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) };
-  addItems([it], 'arazi sınırı'); renderLayers(); zoomTo(itemBB(S.doc, it)); boundInfo(); pitchUpdate(); gesSave();
-  msg('Koordinatlardan arazi sınırı: ' + pts.length + ' köşe, ' + crs + '.', 'res'); tfSync();
+  const cy = G.bound.reduce((s, p) => s + p[1], 0) / G.bound.length; if (!z || !gv('g-lat').value) gv('g-lat').value = utm2lat(500000, cy, 36).toFixed(3);
+  gv('tf-koor').value = ''; gesSave();
+  msg('Koordinatlardan ' + n + ' parsel eklendi (' + crs + '). Toplam ' + G.parcels.length + ' parsel.', 'res'); tfSync();
 }
 function tfFresh() { if (!S.doc || (S.doc.isSample && !S.doc.undo.length)) blankDoc('Yeni proje'); }
 function startShow(on) { gv('start').hidden = !on; document.body.classList.toggle('ovl', on || !gv('tarif').hidden); }
@@ -3379,7 +3482,8 @@ function tarifInit() {
   gv('tf-cad').onclick = () => { pjSave(); toCad(true); };
   gv('tf-ok').onclick = () => { if (!G.bound) return; toCad(true); setTimeout(pjRun, 60); };
   // KML/datasheet yüklemeleri GES panelindeki işlevlerle yapılır; bitince tarif sayfası tazelenir
-  for (const id of ['g-kml', 'g-ds']) gv(id).addEventListener('change', () => { let n = 0; const t = setInterval(() => { tfSync(); if (++n > 20) clearInterval(t); }, 300); });
+  gv('g-kml').addEventListener('yuklendi', tfSync);
+  gv('g-ds').addEventListener('change', () => { let n = 0; const t = setInterval(() => { tfSync(); if (++n > 20) clearInterval(t); }, 300); });
   new MutationObserver(() => { if (!gv('tarif').hidden) tfCheck(); }).observe(gv('p-stage'), { childList: true, characterData: true, subtree: true });
   startShow(true);
 }

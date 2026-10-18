@@ -29,7 +29,7 @@ jobs:
           chmod 600 ~/.ssh/k
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
           # betik ve ek dosyalar (sunucu/aesun/ klasörü) sunucuya taşınır
-          tar czf /tmp/paket.tgz sunucu
+          tar czf /tmp/paket.tgz sunucu izleme
           $S 'rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket' && $S 'tar xzf - -C /tmp/aesun_paket' < /tmp/paket.tgz
           $S "cd /tmp/aesun_paket && bash sunucu/islem_${ISLEM}.sh" 2>&1 | tee /tmp/cikti.txt
           kod=${PIPESTATUS[0]}
@@ -37,3 +37,6 @@ jobs:
           $S 'rm -rf /tmp/aesun_paket'
           rm -f ~/.ssh/k
           exit $kod
+      - name: Duman testi (bilgi)
+        if: always()
+        run: python3 izleme/duman_testi.py ns1 cpanel demo || echo "::warning::uçlardan biri yanıt vermiyor (yukarıdaki listeye bakın)"

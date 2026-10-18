@@ -100,16 +100,28 @@ if [ -n "$sorun_isler" ] && yeni aesun-isler; then ayrinti+=("aesun-isler yeni b
 [ -n "$sorun_api" ] && onar aesun-api "$sorun_api"
 [ -n "$sorun_isler" ] && onar aesun-isler "$sorun_isler"
 
+# 4) öğrenen tarama (15 dk) + tüm uçların duman testi (10 dk): sabit liste yerine geçmişten öğrenilen düzen ve tek uç kaydı
+tt=$D/.tarama_son; if [ $(( simdi - $(cat $tt 2>/dev/null || echo 0) )) -gt 840 ]; then echo $simdi > $tt; timeout 600 python3 $D/bekci_tarama.py >/dev/null 2>&1 || true; fi
+ut=$D/.uclar_son; if [ $(( simdi - $(cat $ut 2>/dev/null || echo 0) )) -gt 540 ] && [ -f $D/izleme/duman_testi.py ]; then echo $simdi > $ut
+  timeout 300 python3 $D/izleme/duman_testi.py --json > $D/uclar_durum.json.tmp 2>/dev/null; mv -f $D/uclar_durum.json.tmp $D/uclar_durum.json; fi
+
 onarim24=$(awk -F'|' -v t="$(date -d '-24 hours' -Iseconds)" '$1>t' $D/bekci_onarim.log 2>/dev/null | wc -l)
 son_onarim=$(tail -1 $D/bekci_onarim.log 2>/dev/null)
 python3 - "$DURUM" "$iso" "$sorun_api" "$sorun_isler" "$es" "$na" "$pidsA" "$pidsI" "$onarim24" "$son_onarim" "$isler_json" "$veri_json" "${ayrinti[@]+"${ayrinti[@]}"}" <<'PY'
 import json, sys
 p, iso, sa, si, es, na, pa, pi, o24, son, isler, veri, *ayr = sys.argv[1:]
 veri = json.loads(veri or "{}")
-d = {"t": iso, "durum": "sorun" if (sa or si or veri.get("sorun")) else "iyi",
+def oku(f, v):
+    try: return json.load(open(f))
+    except Exception: return v
+tar = oku("/opt/aesun/tarama_durum.json", {})
+ucl = [u for u in oku("/opt/aesun/uclar_durum.json", []) if not u.get("ok")]
+tarama = {"t": tar.get("t"), "izlenen": tar.get("izlenen"), "hata": tar.get("hata"), "geciken": tar.get("geciken") or []}
+uclar = {"kalan": ucl, "sorun": "; ".join(f"{u['ad']}: {u['neden']}" for u in ucl) or None}
+d = {"t": iso, "durum": "sorun" if (sa or si or veri.get("sorun") or tarama["geciken"] or uclar["sorun"]) else "iyi",
      "api": {"sorun": sa or None, "esitleme_sn": int(es), "surec": int(pa or 0)},
      "isler": {"sorun": si or None, "nabiz_sn": int(na), "surec": int(pi or 0), "is": json.loads(isler or "{}")},
-     "veri": veri, "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
+     "veri": veri, "tarama": tarama, "uclar": uclar, "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
 open(p + ".tmp", "w").write(json.dumps(d, ensure_ascii=False)); import os; os.replace(p + ".tmp", p)
 PY
 docker cp $DURUM aesun-api:/veri/bekci_ns1.json >/dev/null 2>&1 || true

@@ -51,6 +51,9 @@ for app in ("monitoring", "demo"):
     s = s.replace("../portal/", "../")
     yaz(os.path.join(P, app, "index.html"), s)
 kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
+# CAD (portal oturumuyla açılır; DWG okuyucu wasm + pdf.js yerel)
+kopya(os.path.join(DOCS, "cad"), os.path.join(P, "cad"))
+yaz(os.path.join(P, "cad", "index.html"), oku(os.path.join(DOCS, "cad", "index.html")).replace("../portal/", "../"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
 shutil.copy(os.path.join(CP, ".htaccess"), P)
 kopya(os.path.join(CP, "api"), os.path.join(P, "api"))   # anlık izleme deposu (canli.php)
@@ -59,6 +62,6 @@ yaz(os.path.join(P, "robots.txt"), "User-agent: *\nDisallow: /\n")
 for d in (S, P):
     n = sum(len(f) for _, _, f in os.walk(d))
     print(d, n, "dosya")
-kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html"))]
+kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html")) + oku(os.path.join(P, "cad", "index.html"))]
 if kalan or 'href="portal/"' in oku(os.path.join(S, "index.html")):
     sys.exit("bağlantı dönüşümü eksik")

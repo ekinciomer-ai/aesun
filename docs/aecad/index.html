@@ -406,8 +406,8 @@ details.tf-sec:not([open]) { gap: 0; }
             <label class="gf">Proje masası<select id="p-masa"></select></label>
             <label class="gf">Hedef DC güç (MWp)<input id="p-mwp" type="number" step="0.1" min="0" placeholder="boş = arazinin tamamı"></label>
             <label class="gf">DC/AC oranı<input id="p-ratio" type="number" step="0.01" value="1.25"></label>
-            <label class="gf">Trafo gücü (kVA)<select id="p-trafo"><option>1000</option><option>1250</option><option>1600</option><option>2000</option><option>2500</option><option>3150</option><option>4000</option><option>5000</option><option selected>5750</option><option>6300</option></select></label>
-            <label class="gf">İnverter AC (kW)<input id="p-inv" type="number" step="5" value="300"></label>
+            <label class="gf">Trafo gücü (kVA)<select id="p-trafo"><option value="">Oto (yüke göre)</option><option>630</option><option>800</option><option>1000</option><option>1250</option><option>1600</option><option>2000</option><option>2500</option><option>3000</option><option>4000</option><option>5000</option><option selected>5750</option><option>6250</option></select></label>
+            <label class="gf">İnverter AC (kW)<input id="p-inv" type="number" step="5" value="300" placeholder="boş = oto"></label>
           </div>
           <p class="gi" id="p-auto"></p>
           <details class="det">
@@ -3079,12 +3079,12 @@ function buildParam0() {
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
     masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, parca_carpani: statikVar ? undefined : pc },
     yol: { ic_yol: (pv('p-icyol') || '1') === '1', ic_genislik_m: pn('p-icw') ?? 5, ic_aralik_m: pn('p-icar') },
-    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: a.invKw, inverter_model: pv('p-invm') || '', trafo_kva: a.kva, trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
+    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
   };
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610182330', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190030', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3155,16 +3155,19 @@ const FIYAT0 = {
 };
 function fiyatlar() { let o = {}; try { o = JSON.parse(localStorage.getItem(FKEY) || '{}'); } catch (e) { /* ignore */ } const f = {}; for (const [k, d] of Object.entries(FIYAT0)) f[k] = { ...d, v: o[k] !== undefined ? o[k] : d.v }; return f; }
 function fiyatKaydet(k, v) { let o = {}; try { o = JSON.parse(localStorage.getItem(FKEY) || '{}'); } catch (e) { /* ignore */ } o[k] = v; try { localStorage.setItem(FKEY, JSON.stringify(o)); } catch (e) { /* ignore */ } }
+function msum(re) { return (PJ.res.metraj || []).filter((x) => re.test(x.kalem)).reduce((s, r) => s + (typeof r.miktar === 'number' ? r.miktar : (parseFloat(r.miktar) || 0)), 0); }
+function trafoMva() { return (PJ.res.metraj || []).filter((x) => /^Trafo \d+ kVA/.test(x.kalem)).reduce((s, r) => s + (parseFloat(r.kalem.match(/^Trafo (\d+)/)[1]) * (parseFloat(r.miktar) || 0)) / 1000, 0); }
+function trafoAd() { return (PJ.res.metraj || []).filter((x) => /^Trafo \d+ kVA/.test(x.kalem)).map((r) => r.miktar + ' × ' + r.kalem.match(/^Trafo (\d+)/)[1]).join(' + ') + ' kVA'; }
 function mq(re) { const r = (PJ.res.metraj || []).find((x) => re.test(x.kalem)); return r ? (typeof r.miktar === 'number' ? r.miktar : parseFloat(String(r.miktar).split('+').reduce((s, t) => s + (parseFloat(t) || 0), 0))) : 0; }
 function teklifSatirlar(mod) {
   const f = fiyatlar(), m = PJ.res.metraj; const P = G.panel;
   const modul = mq(/^PV modül/), masa = mq(/^Masa /), inv = mq(/^İnverter$/), trafoN = mq(/^Trafo .*kVA/);
-  const trafoKva = PJ.param.elektrik.trafo_kva, dcm = mq(/^DC solar kablo/), agm = mq(/^AG kablo/), ogm = mq(/^OG tek damar/);
+  const trafoKva = PJ.param.elektrik.trafo_kva, dcm = mq(/^DC solar kablo/), agm = msum(/^AG kablo/), ogm = mq(/^OG tek damar/);
   const kanal = mq(/^AG\/OG kanal/), dch = mq(/^DC hendek/), ser = mq(/^Galvaniz şerit/), cit = mq(/^Tel çit/), cctv = mq(/^Aydınlatma \+ CCTV/);
   const L = [];
   const add = (k, q, birim, extra) => { const p = f[k]; L.push({ k, ad: p.ad + (extra || ''), miktar: q, birim, fiyat: p.v, fbirim: p.birim, tutar: p.v === null ? null : (k === 'panel_wp' ? q * P.p * p.v : k === 'salt_mva' ? q * p.v : q * p.v) }); };
   if (mod === 'epc') {
-    add('panel_wp', modul, 'adet', ' (' + P.p + ' Wp)'); add('inverter', inv, 'adet'); add('salt_mva', trafoN * trafoKva / 1000, 'MVA', ' (' + trafoN + ' × ' + trafoKva + ' kVA)');
+    add('panel_wp', modul, 'adet', ' (' + P.p + ' Wp)'); add('inverter', inv, 'adet'); add('salt_mva', trafoMva(), 'MVA', ' (' + trafoAd() + ')');
     add('tasiyici', masa, 'masa'); add('ac_kablo', agm, 'm'); add('dc_kablo', dcm, 'm'); add('og_kablo', ogm, 'm');
   }
   add('isc_panel', modul, 'panel'); add('hafriyat', kanal, 'm'); add('dc_hendek', dch, 'm');

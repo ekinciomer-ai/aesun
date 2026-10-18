@@ -372,6 +372,44 @@ def gunes_plan_tahmin(plan, fs, a, simdi, uretim_kw, kw_c, filo_n):
             p.update(gunes_cihaz=n, gunes_kw=round(P), gunes_kaynak=kay, karar="uyut")
 
 
+def gunes_firsat_plan(plan, fs, a, simdi, uretim_kw, filo_n, firsat):
+    """Her saat için beklenen Sera-2 üretimi (p["gunes_beklenen_kw"]) ve fırsat bedeli kuralı (18 Eki):
+    güneşin karşıladığı enerji satılabilir (fırsat ₺/MWh), aşan kısım şebekeden (birim_maliyet). Gelir fırsat bedelinin
+    altındaysa "çalış" saatinde de tam filonun toplam kârı hesaplanır: kâr = gelir·L − fırsat·min(L, P) − şebeke·max(0, L − P);
+    ≤ 0 ise o saat uyutulur (enerji satılır). Gelir fırsatın üstündeyse karar değişmez."""
+    kay_s = {}
+    for s_, kk in (((fs or {}).get("saatlik_bugun") or {}).get(a.get("gunes_kaynak")) or {}).items():
+        try:
+            kay_s[int(str(s_)[:2])] = float(kk or 0)
+        except Exception:
+            pass
+    tam = {h: v for h, v in kay_s.items() if h < simdi.hour}
+    tepe = max([v for h, v in tam.items() if 10 <= h <= 14] or [0]) or a.get("gunes_tepe_kw", 640)
+    kw = a["cihaz_guc_kw"]; L = filo_n * kw
+    for i, p in enumerate(plan):
+        t = p["_t"]
+        if i == 0 and uretim_kw is not None:
+            P = uretim_kw
+        elif t.hour in tam:
+            P = tam[t.hour]
+        else:
+            dog, bat = gunes_saatleri(t)
+            x = (t.hour + 0.5 - dog) / max(bat - dog, 1)
+            P = tepe * math.sin(math.pi * x) if 0 < x < 1 else 0.0
+        p["gunes_beklenen_kw"] = round(P, 1)
+        if p.get("karar") != "calis" or P <= 0.5 or not p.get("gelir") or p.get("ptf") is None:
+            continue
+        g_mwh = p["gelir"] / kw * 1000
+        if g_mwh > firsat:
+            continue
+        seb = birim_maliyet(p["ptf"], p.get("yekdem") or 0, a)
+        kar = g_mwh * L - firsat * min(L, P) - seb * max(0.0, L - P)
+        if kar <= 0:
+            p["karar"] = "uyut"
+            p["not"] = (p.get("not", "") + " · " if p.get("not") else "") + (
+                f"güneş satışı daha kârlı: gelir {g_mwh:.0f} ≤ fırsat {firsat:.0f} ₺/MWh (üretim ~{P:.0f} kW)")
+
+
 def yerel_oku():
     try:
         return json.loads(YEREL.read_text()) if YEREL.exists() else {}
@@ -715,6 +753,7 @@ def calistir():
     # Güneş tahmini (ekonomik "uyut" saatleri): beklenen kaynak üretimi kaç cihaza yeter. Takvim bunu bilir:
     # güneşle çalışan saatten kârlı saate geçişte ön ısıtma/toplu uyandırma gerekmez; kârlı saatten güneş saatine
     # geçişte toplu uyutma yerine güneş takibi devralır.
+    gunes_firsat_plan(plan, fs, a, simdi, uretim_kw if fs_taze else None, len(ulasilan) or a.get("cihaz_sayisi", 29), firsat)
     if gunes_aktif:
         gunes_plan_tahmin(plan, fs, a, simdi, uretim_kw if fs_taze else None, kw_c, len(ulasilan) or a.get("cihaz_sayisi", 29))
     # Takvim (öğrenilmiş ısınma ile)

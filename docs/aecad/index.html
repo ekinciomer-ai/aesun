@@ -479,7 +479,7 @@ details.tf-sec:not([open]) { gap: 0; }
           <div class="dh">Çizimde düzenle</div>
           <div class="brow"><button class="gb" id="p-tmtasi" type="button">Trafo taşı</button><button class="gb" id="p-invtasi" type="button">İnverter taşı</button></div>
           <div class="brow"><button class="gb" id="p-yolciz" type="button">Yol çiz</button><button class="gb" id="p-yolsil" type="button">Yol sil</button></div>
-          <div class="brow"><button class="gb primary" id="p-duzcalis" type="button" disabled>Düzenlemeyle yeniden çiz</button><button class="gb ghost" id="p-duzsif" type="button">Sıfırla</button></div>
+          <div class="brow"><button class="gb primary" id="p-duzcalis" type="button" disabled>Düzenlemeyle yeniden çiz</button><button class="gb ghost" id="p-duzsif" type="button" title="Tüm masaları, yerleşimleri ve hesapları siler; arazi sınırı kalır">Sıfırla</button></div>
           <p class="gi" id="p-duzinfo"></p>
         </section>
       </div>
@@ -3093,7 +3093,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190113', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190116', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3518,7 +3518,27 @@ function pjDuzenCiz(not) {
   if (!gv('pjdlg').open) pjDialog('yerlesim');
   pjAltEkle({ ad: 'Düzenleme ' + PJ.duzNo, acik: (temel ? temel.ad + ' üzerine: ' : '') + (acik || 'değişiklik'), param: base, duzen: true, uygula: () => { if (temel) temel.uygula(); } });
 }
-function pjDuzenSifirla() { PJ.duzen = { tm: [], inv: [], ekYol: [], silYol: [] }; pjSave(); pjDuzenBilgi(); msg('Düzenlemeler temizlendi.'); }
+function pjDuzenSifirla() { PJ.duzen = { tm: [], inv: [], ekYol: [], silYol: [] }; pjSave(); pjDuzenBilgi(); }
+// Projeyi sıfırla: çizimdeki tüm GES nesneleri (masa, çekme, özet, panel/kesit) + yerleşim seçenekleri, düzenlemeler ve hesap sonuçları silinir.
+// Arazi sınırı/parselleri ve form değerleri kalır. Çizim silmesi Geri al ile döner.
+const GES_KORU = new Set(['GES-PARSEL', 'GES-SINIR']);
+async function pjSifirla() {
+  const r = await askDlg('Projeyi sıfırla', 'Çizimdeki tüm masalar ve GES nesneleri, yerleşim seçenekleri, düzenlemeler ve hesap sonuçları (paftalar, kontrol, keşif, teklif, kayıtlı son proje) silinecek. Arazi sınırı ve form değerleri kalır. Çizimdeki silme Geri al ile döner; hesap sonuçları dönmez.', [['Sıfırla', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
+  if (r !== 'ok') return;
+  if (S.cmd) cancelCmd();
+  if (PJ.srcDoc) pjBack();
+  const sil = []; for (const it of S.doc.items.values()) if (/^GES-/i.test(it.layer) && !GES_KORU.has(String(it.layer).toUpperCase())) sil.push([it, null]);
+  if (sil.length) { replaceItems(sil, 'proje sıfırla'); V().sel.clear(); renderLayers(); }
+  PJ.again = false; PJ.res = null; PJ.files = null; PJ.pdf = null; PJ.param = null; PJ.t = null; PJ.cur = null; PJ.dm = null;
+  PJ.alt = []; PJ.aktif = null; PJ.revNo = 0; PJ.revNot = null; PJ.duzNo = 0; G.last = null;
+  pjDuzenSifirla();
+  try { const db = await pjIdb(); db.transaction('proje', 'readwrite').objectStore('proje').delete('son'); } catch (e) { console.warn('arşiv', e); }
+  for (const id of ['g-result', 'bfiles', 'st-son', 'p-back']) { const el = gv(id); if (el) el.hidden = true; }
+  const po = gv('p-open'); if (po) po.disabled = true;
+  const dl = gv('pjdlg'); if (dl && dl.open) dl.close();
+  pjSave(); redraw();
+  msg('Proje sıfırlandı: ' + sil.length + ' çizim nesnesi ve tüm hesaplar silindi.', 'res');
+}
 // yazılı düzenleme: "TM2'yi kuzeye 50 m taşı", "trafo 3 batıya 30 m", "TR1 INV3 güneye 20 m", "2. yolu kaldır", "yol 3 sil"
 const YON = { kuzey: [0, 1], güney: [0, -1], doğu: [1, 0], batı: [-1, 0] };
 function pjDuzenCoz(T) {
@@ -3540,12 +3560,13 @@ function pjDuzenCoz(T) {
   if (yap.length) { pjSave(); pjDuzenBilgi(); }
   return yap;
 }
-Object.assign(ALIAS, { GTMTASI: 'GTMTASI', TRAFOTASI: 'GTMTASI', TMTASI: 'GTMTASI', GINVTASI: 'GINVTASI', INVTASI: 'GINVTASI', GYOLCIZ: 'GYOLCIZ', YOLCIZ: 'GYOLCIZ', GYOLSIL: 'GYOLSIL', YOLSIL: 'GYOLSIL', GDUZCIZ: 'GDUZCIZ', YENIDENCIZ: 'GDUZCIZ' });
-Object.assign(LABEL, { GTMTASI: 'TRAFO TAŞI', GINVTASI: 'İNVERTER TAŞI', GYOLCIZ: 'YOL ÇİZ', GYOLSIL: 'YOL SİL', GDUZCIZ: 'DÜZENLEMEYLE YENİDEN ÇİZ' });
+Object.assign(ALIAS, { GTMTASI: 'GTMTASI', TRAFOTASI: 'GTMTASI', TMTASI: 'GTMTASI', GINVTASI: 'GINVTASI', INVTASI: 'GINVTASI', GYOLCIZ: 'GYOLCIZ', YOLCIZ: 'GYOLCIZ', GYOLSIL: 'GYOLSIL', YOLSIL: 'GYOLSIL', GDUZCIZ: 'GDUZCIZ', YENIDENCIZ: 'GDUZCIZ', GSIFIRLA: 'GSIFIRLA', SIFIRLA: 'GSIFIRLA' });
+CMD.GSIFIRLA = async () => pjSifirla();
+Object.assign(LABEL, { GTMTASI: 'TRAFO TAŞI', GINVTASI: 'İNVERTER TAŞI', GYOLCIZ: 'YOL ÇİZ', GYOLSIL: 'YOL SİL', GDUZCIZ: 'DÜZENLEMEYLE YENİDEN ÇİZ', GSIFIRLA: 'PROJEYİ SIFIRLA' });
 function pjDuzenInit() {
   gv('p-tmtasi').onclick = () => runCommand('GTMTASI'); gv('p-invtasi').onclick = () => runCommand('GINVTASI');
   gv('p-yolciz').onclick = () => runCommand('GYOLCIZ'); gv('p-yolsil').onclick = () => runCommand('GYOLSIL');
-  gv('p-duzcalis').onclick = () => pjDuzenCiz(); gv('p-duzsif').onclick = pjDuzenSifirla; pjDuzenBilgi();
+  gv('p-duzcalis').onclick = () => pjDuzenCiz(); gv('p-duzsif').onclick = pjSifirla; pjDuzenBilgi();
 }
 
 // ---- Başlangıç ekranı + Proje tarif sayfası ----

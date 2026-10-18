@@ -155,4 +155,10 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:   # hata özette (annotation) de görünsün
+        print(f"::error::{ALAN} yükleme hatası: {type(e).__name__}: {str(e)[:400]}")
+        raise

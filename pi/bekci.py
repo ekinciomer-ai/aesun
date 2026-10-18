@@ -92,7 +92,14 @@ def calis(sonuc, mad, kim):
         ozet["izlenen"] += 1
         d = durum.setdefault(w, {})
         ayar_bozuk = o.get("ayar_kod") == 500 or (o.get("ayar_kod") == 200 and not o.get("ayar_saglam"))
-        takili = (not o.get("uyku") and o.get("durum") in ("ONLINE", "ONLINE_HTTP") and not (o.get("hash_th") or 0) > 0
+        # hash_th panelin açılıştan beri ORTALAMASI: kartlar durunca saatlerce >0 kalır (18 Eki 02:17 PSU hatası, 28 cihaz
+        # 5 sa hash 0 iken bekçi görmedi). Anlık hız (rate_5s) ya da kart hızları okunabildiyse onlar esas alınır.
+        kartlar = o.get("kart") or []
+        if o.get("hiz") is not None or kartlar:
+            hash_yok = not (o.get("hiz") or 0) > 0 or (kartlar and all(not (k.get("hiz") or 0) > 0 for k in kartlar))
+        else:
+            hash_yok = not (o.get("hash_th") or 0) > 0
+        takili = (not o.get("uyku") and o.get("durum") in ("ONLINE", "ONLINE_HTTP") and hash_yok
                   and istenen == "calis" and simdi - son_wake > timedelta(minutes=30))
         sorun = "ayar_bozuk" if ayar_bozuk else "takili" if takili else None
         if not sorun:

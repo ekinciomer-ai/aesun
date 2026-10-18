@@ -3,6 +3,7 @@ services:
   api:
     build: .
     container_name: aesun-api
+    init: true          # yetim süreçleri (git/ssh) toplar; birikirse fork EAGAIN verir
     restart: unless-stopped
     env_file: .env
     volumes:
@@ -16,6 +17,7 @@ services:
   isler:
     build: ./isler
     container_name: aesun-isler
+    init: true
     restart: unless-stopped
     env_file: [/opt/aesun/isler.env]
     volumes:

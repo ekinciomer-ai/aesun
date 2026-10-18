@@ -231,8 +231,15 @@ function sinirSec(p) {
 CMD.GFILL = async () => {
   if (!sinirOto()) { msg('Arazi sınırı yok: kapalı bir polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   // arazide masa varsa doldurma yapılmaz (çakışan masa): önce Sıfırla ya da sil
-  const sonDol = new Set(G.fillIds || []); const mevcut = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.layer === 'GES-MASA' && !sonDol.has(it.id) && pointInPoly([it.M[3], it.M[7]], G.bound));
-  if (mevcut.length) { await askDlg('Çakışan masa var', 'Arazide ' + mevcut.length + ' masa zaten çizili. Yeni doldurma bunlarla çakışır, bu yüzden yapılmadı. Önce mevcut masaları silin ya da "Sıfırla" ile temizleyin.', [['Tamam', 'ok', 'primary']]); msg('Doldurma yapılmadı: arazide ' + mevcut.length + ' masa var (çakışma).', 'err'); return; }
+  const sonDol = new Set(G.fillIds || []);
+  const mrk = (it) => it.t === 'insert' ? [it.M[3], it.M[7]] : it.pts && it.pts.length ? [it.pts.reduce((a, q) => a + q[0], 0) / it.pts.length, it.pts.reduce((a, q) => a + q[1], 0) / it.pts.length] : null;
+  const mevcut = [...S.doc.items.values()].filter((it) => String(it.layer).toUpperCase() === 'GES-MASA' && !sonDol.has(it.id) && (it.t === 'insert' || it.t === 'pline') && (() => { const c = mrk(it); return c && pointInPoly(c, G.bound); })());
+  if (mevcut.length) {
+    const proje = mevcut.some((it) => it.t === 'pline') || !!(PJ && (PJ.res || PJ.aktif));
+    const r = await askDlg('Çakışan masa var', 'Arazide ' + mevcut.length + ' masa zaten çizili' + (proje ? ' (proje yerleşimi: masalar, inverter, trafo, kablolar)' : '') + '. Üstüne doldurulursa masalar üst üste biner. Mevcut GES çizimi silinip yeniden doldurulsun mu? (Geri al ile döner; proje hesapları yeniden çizilmeli.)', [['Sil ve yeniden doldur', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
+    if (r !== 'ok') { msg('Doldurma yapılmadı: arazide ' + mevcut.length + ' masa var (çakışma).', 'err'); return; }
+    if (typeof pjSifirla === 'function') await pjSifirla(false); G.fillIds = [];
+  }
   formToPanel();
   const sel = G.tpl.filter((t) => t.use !== false); if (!sel.length) { msg('Doldurma için en az bir masa şablonu işaretleyin.', 'err'); return; }
   const pitch = pitchUpdate(); if (!pitch) return;

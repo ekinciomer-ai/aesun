@@ -52,7 +52,7 @@ function cepheCiz() {
       const mx = (k.a[0] + k.b[0]) / 2, my = (k.a[1] + k.b[1]) / 2; let nx = -(k.b[1] - k.a[1]) / (k.L || 1), ny = (k.b[0] - k.a[0]) / (k.L || 1);
       if ((cen[0] - mx) * nx + (cen[1] - my) * ny < 0) { nx = -nx; ny = -ny; }
       let ang = Math.atan2(k.b[1] - k.a[1], k.b[0] - k.a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
-      yeni.push({ id: newId(), t: 'text', layer: 'GES-CEPHE', c: T.c, lt: '', x: mx + nx * th * 1.6, y: my + ny * th * 1.6, h: th, rot: ang, s: T.kisa + ' · ' + fmtNum(cepheD(k.tip, g), 1) + ' m', ha: 1, va: 2 });
+      if (k.L >= th * 9) yeni.push({ id: newId(), t: 'text', layer: 'GES-CEPHE', c: T.c, lt: '', x: mx + nx * th * 1.6, y: my + ny * th * 1.6, h: th, rot: ang, s: T.kisa + ' · ' + fmtNum(cepheD(k.tip, g), 1) + ' m', ha: 1, va: 2 });
     }
   }
   if (!eski.length && !yeni.length) return;
@@ -78,15 +78,26 @@ Object.assign(LABEL, { GCEPHE: 'CEPHE İŞARETLE' });
 // fillLand için: cephe bazlı iç alan halkaları (yerel koordinatta); işaret yoksa null
 function cepheIcHalkalar(toL, genel) {
   const K = cepheKenarlar(); if (!K.some((k) => k.tip)) return null;
-  const circ = (c, r) => { const o = []; for (let j = 0; j < 20; j++) { const t = j / 20 * 2 * Math.PI; o.push([c[0] + r * Math.cos(t), c[1] + r * Math.sin(t)]); } o.push(o[0]); return [o]; };
-  const parts = [];
-  for (const k of K) {
-    const d = k.tip ? cepheD(k.tip, genel) : genel; if (!(d > 0)) continue;
-    const a = toL(k.a), b = toL(k.b), L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / L * d, ny = (b[0] - a[0]) / L * d;
-    parts.push([[[a[0] + nx, a[1] + ny], [b[0] + nx, b[1] + ny], [b[0] - nx, b[1] - ny], [a[0] - nx, a[1] - ny], [a[0] + nx, a[1] + ny]]], circ(a, d));
+  // Büyük (UTM) koordinatta polygon-clipping kayan nokta hatası verir: ilk köşeye göre yerel, mm'ye yuvarlanmış koordinatta kes, sonra geri taşı.
+  const o = toL(G.bound[0]); const Lc = (p) => { const q = toL(p); return [Math.round((q[0] - o[0]) * 1000) / 1000, Math.round((q[1] - o[1]) * 1000) / 1000]; };
+  // Köşeler sivri (mitre): kenar şeritleri + iç bükey köşede iki ofset doğrusu kesişene kadar dolgu; yuvarlak yok.
+  const sg = Math.sign(polyArea(G.bound.map(Lc))) || 1;   // CCW → sol normal içe
+  const E = K.map((k) => { const a = Lc(k.a), b = Lc(k.b), L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; const u = [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; return { a, b, u, n: [-u[1] * sg, u[0] * sg], d: k.tip ? cepheD(k.tip, genel) : genel, L }; }).filter((e) => e.L > 1e-3);
+  const parts = [], cl = (r) => [[...r, r[0]]];
+  for (const e of E) if (e.d > 0) parts.push(cl([e.a, e.b, [e.b[0] + e.n[0] * e.d, e.b[1] + e.n[1] * e.d], [e.a[0] + e.n[0] * e.d, e.a[1] + e.n[1] * e.d]]));
+  for (let i = 0; i < E.length; i++) {
+    const e0 = E[(i - 1 + E.length) % E.length], e1 = E[i]; const cr = (e0.u[0] * e1.u[1] - e0.u[1] * e1.u[0]) * sg;
+    if (cr >= -1e-9 || Math.max(e0.d, e1.d) <= 0) continue;               // yalnız iç bükey köşe
+    const P0 = [e0.b[0] + e0.n[0] * e0.d, e0.b[1] + e0.n[1] * e0.d], P1 = [e1.a[0] + e1.n[0] * e1.d, e1.a[1] + e1.n[1] * e1.d];
+    const den = e0.u[0] * e1.u[1] - e0.u[1] * e1.u[0]; const t = ((P1[0] - P0[0]) * e1.u[1] - (P1[1] - P0[1]) * e1.u[0]) / den;
+    const X = [P0[0] + e0.u[0] * t, P0[1] + e0.u[1] * t], V = e0.b;
+    parts.push(cl(Math.hypot(X[0] - V[0], X[1] - V[1]) <= 10 * Math.max(e0.d, e1.d) ? [V, P0, X, P1] : [V, P0, P1]));
   }
-  const R = G.bound.map(toL); const res = polygonClipping.difference([[...R, R[0]]], ...parts);
-  return res.flatMap((pg) => pg.map((r) => r.slice(0, -1))).filter((r) => r.length >= 3);
+  const R = G.bound.map(Lc);
+  let res;
+  try { res = polygonClipping.difference([[...R, R[0]]], polygonClipping.union(...parts)); }
+  catch (e) { try { res = polygonClipping.difference([[...R, R[0]]], ...parts); } catch (e2) { console.warn('cephe', e2); msg('Cephe bazlı çekme alanı hesaplanamadı; genel çekme kullanıldı.', 'err'); return null; } }
+  return res.flatMap((pg) => pg.map((r) => r.slice(0, -1).map((p) => [p[0] + o[0], p[1] + o[1]]))).filter((r) => r.length >= 3 && Math.abs(polyArea(r)) > 1);
 }
 function scanXR(rings, y) {
   const xs = []; for (const poly of rings) { const n = poly.length; for (let i = 0; i < n; i++) { const a = poly[i], b = poly[(i + 1) % n]; if ((a[1] <= y && b[1] > y) || (b[1] <= y && a[1] > y)) xs.push(a[0] + (y - a[1]) / (b[1] - a[1]) * (b[0] - a[0])); } }

@@ -38,7 +38,9 @@ g.dxf_yaz(M, pf1, d + f"/{kod}_01_GENEL_{rev}.dxf"); g.dxf_yaz(M, pf4, d + f"/{k
 smax = max(M.stringler, key=lambda s: s["dc_tek_yon_m"]); imax = max(M.inverterler, key=lambda i: i["ac_m"])
 oz = {"masa": len(M.masalar), "modul": len(M.masalar) * M.masa_modul, "string": len(M.stringler), "inverter": len(M.inverterler), "tm": M.n_tr,
       "ic_yol": len(M.ic_yollar), "dc_lim": round(M.dc_lim, 1), "dc_max": round(smax["dc_tek_yon_m"], 1), "ac_max": round(imax["ac_m"], 0),
-      "yol_gecis": len(M.yol_gecis), "kesisim": len(M.kesisim), "cekme": M.cekme}
+      "yol_gecis": len(M.yol_gecis), "kesisim": len(M.kesisim), "cekme": M.cekme,
+      "inv_kw": M.P["elektrik"].get("inverter_ac_kw"), "ac_kw": sum((i.get("ac_kw") or M.P["elektrik"].get("inverter_ac_kw") or 0) for i in M.inverterler),
+      "tr_kva": list(getattr(M, "tr_kva", None) or [M.P["elektrik"].get("trafo_kva")] * M.n_tr), "cikis_kw": round(sum(M.tr_ac(t) for t in range(M.n_tr)))}
 nes = {"tm": [{"ad": f"TM{t+1}", "x": M.W(q).centroid.x, "y": M.W(q).centroid.y} for t, q in enumerate(M.tm_loc)],
        "dm": {"x": M.W(M.dm_loc).centroid.x, "y": M.W(M.dm_loc).centroid.y},
        "inv": [{"ad": i["ad"], "x": M.Wp(i["x"], i["y"])[0], "y": M.Wp(i["x"], i["y"])[1]} for i in M.inverterler],

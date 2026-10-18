@@ -36,15 +36,18 @@ function tplUpdate() {
   for (const [k, v] of kv) { const r = document.createElement('div'); r.innerHTML = '<span></span><b></b>'; r.firstChild.textContent = k; r.lastChild.textContent = v; gv('g-tinfo').appendChild(r); }
 }
 function renderTpl() {
-  const ul = gv('g-tlist'); ul.innerHTML = ''; if (typeof pjMasaList === 'function') pjMasaList();
-  G.tpl.forEach((t, i) => {
-    const d = tplDims(t); const li = document.createElement('li'); li.className = 'trow';
-    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = t.use !== false; cb.id = 'g-use-' + i; cb.title = 'Arazi doldurmada kullan'; cb.onchange = () => { t.use = cb.checked; gesSave(); };
-    const nm = document.createElement('label'); nm.htmlFor = cb.id; nm.innerHTML = '<b></b><small></small>'; nm.firstChild.textContent = t.rows + t.orient + t.per + ' · ' + t.tilt + '°'; nm.lastChild.textContent = fmtNum(d.len, 2) + ' × ' + fmtNum(d.depth, 2) + ' m · ' + fmtNum(d.kwp, 1) + ' kWp';
-    const ed = document.createElement('button'); ed.className = 'mini'; ed.textContent = 'Düzenle'; ed.title = 'Bu şablonu forma yükle'; ed.onclick = () => { gv('g-or').value = t.orient; gv('g-rows').value = t.rows; gv('g-n').value = t.rows * t.per; gv('g-tilt').value = t.tilt; gv('g-front').value = t.front; gv('g-gx').value = Math.round(t.gx * 100); tplUpdate(); };
-    const del = document.createElement('button'); del.className = 'mini'; del.textContent = '×'; del.title = 'Şablonu sil'; del.setAttribute('aria-label', 'Şablonu sil'); del.onclick = () => { G.tpl.splice(i, 1); renderTpl(); gesSave(); };
-    li.append(cb, nm, ed, del); ul.appendChild(li);
-  });
+  if (typeof pjMasaList === 'function') pjMasaList();
+  const sel = gv('g-tsel'); if (!sel) return; const cur = +sel.value || 0; sel.innerHTML = '';
+  G.tpl.forEach((t, i) => { const d = tplDims(t); const o = document.createElement('option'); o.value = i; o.textContent = (t.use !== false ? '✓ ' : '\u2003') + t.rows + t.orient + t.per + ' · ' + t.tilt + '° — ' + fmtNum(d.len, 2) + ' × ' + fmtNum(d.depth, 2) + ' m · ' + fmtNum(d.kwp, 1) + ' kWp'; sel.appendChild(o); });
+  sel.value = String(Math.min(cur, Math.max(0, G.tpl.length - 1)));
+  const t = G.tpl[+sel.value]; gv('g-tuse').checked = !!t && t.use !== false; gv('g-tuse').disabled = gv('g-tedit').disabled = gv('g-tdel').disabled = !t;
+}
+function tplSecInit() {
+  const sel = gv('g-tsel'); const cur = () => G.tpl[+sel.value];
+  sel.onchange = () => { const t = cur(); gv('g-tuse').checked = !!t && t.use !== false; };
+  gv('g-tuse').onchange = () => { const t = cur(); if (!t) return; t.use = gv('g-tuse').checked; gesSave(); renderTpl(); };
+  gv('g-tedit').onclick = () => { const t = cur(); if (!t) return; gv('g-or').value = t.orient; gv('g-rows').value = t.rows; gv('g-n').value = t.rows * t.per; gv('g-tilt').value = t.tilt; gv('g-front').value = t.front; gv('g-gx').value = Math.round(t.gx * 100); tplUpdate(); };
+  gv('g-tdel').onclick = () => { const i = +sel.value; if (!G.tpl[i]) return; G.tpl.splice(i, 1); sel.value = String(Math.max(0, i - 1)); renderTpl(); gesSave(); };
 }
 function boundInfo() {
   if (typeof cepheBilgi === 'function') cepheBilgi();
@@ -225,7 +228,7 @@ Object.assign(ALIAS, { GTABLE: 'GTABLE', GSECTION: 'GSECTION', GBOUND: 'GBOUND',
 Object.assign(LABEL, { GPANEL: 'PANEL ÇİZ', GTABLE: 'MASA ÇİZ', GSECTION: 'MASA KESİTİ', GBOUND: 'ARAZİ SINIRI', GFILL: 'ARAZİ DOLDUR' });
 
 function gesInit() {
-  gesLoad();
+  gesLoad(); tplSecInit();
   if (G._set) for (const [k, v] of Object.entries(G._set)) if (gv(k)) gv(k).value = v;
   panelToForm(); tplUpdate(); renderTpl(); boundInfo(); pitchUpdate();
   for (const id of ['g-model', 'g-p', 'g-L', 'g-W', 'g-T', 'g-cells']) gv(id).addEventListener('change', formToPanel);

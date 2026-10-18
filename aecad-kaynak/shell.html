@@ -279,6 +279,7 @@ details.tf-sec:not([open]) { gap: 0; }
 .tf-bar .tf-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 #tf-miss { flex: 1 1 260px; color: var(--muted); font-size: 12.5px; }
 @media (max-width: 640px) { .st-cards { grid-template-columns: 1fr; } .st-card { min-height: 0; } .tf-grid { grid-template-columns: 1fr 1fr; } }
+.tsel select { width: 100%; } .tsel-r { align-items: center; } .tsel-r .gck { flex: 1; display: flex; gap: 6px; align-items: center; font-size: 12px; }
 </style>
 <div id="app">
   <header>
@@ -378,7 +379,9 @@ details.tf-sec:not([open]) { gap: 0; }
           <div class="brow"><button class="gb" id="g-btable">Masa planı çiz</button><button class="gb" id="g-bsec">Kesit çiz</button></div>
           <button class="gb ghost" id="g-bsave">Şablonlara ekle</button>
           <div class="ph sub">Hazır şablonlar <em>✓ = doldurmada kullan</em></div>
-          <ul id="g-tlist" class="tlist"></ul>
+          <div class="tsel"><select id="g-tsel" aria-label="Hazır şablon"></select></div>
+          <div class="brow tsel-r"><label class="gck"><input type="checkbox" id="g-tuse"> Doldurmada kullan</label><button class="gb mini" id="g-tedit" type="button">Düzenle</button><button class="gb mini" id="g-tdel" type="button" title="Şablonu sil" aria-label="Şablonu sil">×</button></div>
+          <ul id="g-tlist" class="tlist" hidden></ul>
         </section>
         <section>
           <h3><span>3</span>Arazi doldurma</h3>

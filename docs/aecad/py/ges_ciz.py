@@ -236,7 +236,7 @@ class Model:
         kn = self._cephe_kenarlar(loc, rot, cekme)
         self.cekme_cephe = kn
         if kn and any(abs(d - cekme) > 1e-6 for _, d, _ in kn):
-            ofs = lambda f: loc.difference(unary_union([sg.buffer(f(d), cap_style=1) for sg, d, _ in kn if f(d) > 0])).buffer(0)
+            ofs = lambda f: self._duz_ofset(loc, kn, f)
             ic = ofs(lambda d: d)
             self.cekme = min(d for _, d, _ in kn)
         else:
@@ -263,13 +263,39 @@ class Model:
         self.koridor_loc = []
         self.ic_yollar = []
 
+    @staticmethod
+    def _duz_ofset(loc, kn, f):
+        """Kenar başına farklı mesafeyle içe ofset — köşeler sivri (mitre), yuvarlak yok. kn: CCW sırada (kenar, d, tip)."""
+        def nrm(e):
+            (ax, ay), (bx, by) = e.coords[0], e.coords[-1]; L = math.hypot(bx - ax, by - ay) or 1.0
+            return (ax, ay), (bx, by), ((bx - ax) / L, (by - ay) / L), (-(by - ay) / L, (bx - ax) / L)
+        parca = []; K = len(kn)
+        for e, d, _ in kn:
+            dd = f(d)
+            if dd <= 0: continue
+            a, b, u, n = nrm(e)
+            parca.append(Polygon([a, b, (b[0] + n[0] * dd, b[1] + n[1] * dd), (a[0] + n[0] * dd, a[1] + n[1] * dd)]))
+        for i in range(K):                       # iç bükey (reflex) köşede iki ofset doğrusu kesişene kadar doldur
+            e0, d0, _ = kn[i - 1]; e1, d1, _ = kn[i]
+            a0, b0, u0, n0 = nrm(e0); a1, b1, u1, n1 = nrm(e1); D0, D1 = f(d0), f(d1)
+            if u0[0] * u1[1] - u0[1] * u1[0] >= -1e-9 or max(D0, D1) <= 0: continue
+            P0 = (b0[0] + n0[0] * D0, b0[1] + n0[1] * D0); P1 = (a1[0] + n1[0] * D1, a1[1] + n1[1] * D1)
+            den = u0[0] * u1[1] - u0[1] * u1[0]
+            t = ((P1[0] - P0[0]) * u1[1] - (P1[1] - P0[1]) * u1[0]) / den
+            X = (P0[0] + u0[0] * t, P0[1] + u0[1] * t)
+            V = b0
+            q = Polygon([V, P0, X, P1]) if math.dist(X, V) <= 10 * max(D0, D1) else Polygon([V, P0, P1])
+            if q.is_valid and q.area > 0: parca.append(q)
+        return loc.difference(unary_union(parca)).buffer(0) if parca else loc
+
     def _cephe_kenarlar(self, loc, rot, cekme):
         """parsel.cepheler: [{"a":[x,y],"b":[x,y],"tip":"yol|parsel|diger","cekme_m":5}]. Dış sınırın her kenarı,
         iki ucu bir cephe doğrusuna ≤ 0,5 m ise o cephenin mesafesini alır; eşleşmeyen kenar genel çekmeyi (kademe) alır."""
         cs = self.P["parsel"].get("cepheler") or []
         if not cs: return []
         segs = [(rot(LineString([c["a"], c["b"]])), c) for c in cs if c.get("a") and c.get("b") and c.get("cekme_m") is not None]
-        k = list(loc.exterior.coords); out = []
+        from shapely.geometry.polygon import orient
+        k = list(orient(loc, 1.0).exterior.coords); out = []
         for i in range(len(k) - 1):
             e = LineString([k[i], k[i + 1]]); d, tip = cekme, None
             for sg, c in segs:
@@ -579,25 +605,30 @@ class Model:
                 ys = sorted(q["y"] for q in grp); cy0 = ys[len(ys) // 2]
                 xc = r["x1"] + w / 2 + 0.5; c = None
                 for xx in (xc, r["x0"] - w / 2 - 0.5):
-                    for dy in [0] + [s * k * 5 for k in range(1, 60) for s in (1, -1)]:
+                    for dy in [0] + [s * k * 5 for k in range(1, 13) for s in (1, -1)]:   # grubun yanında (≤ 60 m); yoksa saha içi boş yer
                         bx = box(xx - w / 2, cy0 + dy - h / 2, xx + w / 2, cy0 + dy + h / 2)
                         if self.ic_loc.contains(bx) and not any(bx.intersects(o) for o in self.tm_loc): c = Point(xx, cy0 + dy); break
                     if c is not None: break
-                if c is None: c = Point(xc, cy0)
+                if c is None: c = self._tm_bos_yer(grp, w, h)
             else:   # A.6: TM servis yolu kenarında, masa alanının kenar şeridinde
                 cy = sorted(q["y"] for q in grp)[len(grp) // 2]
                 xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf)) if taraf == "E" else \
                      max(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf))
                 c = Point(xe - w / 2 if taraf == "E" else xe + w / 2, cy)
             self.tm_loc.append(box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2))
+        self.dm_ortak = False
         if e["dm_konum"]:
             c = rot(e["dm_konum"])
+        elif len(self.tm_loc) == 1 and not e.get("dm_ayri"):
+            # tek trafolu tesis: DM hücreleri TM köşkünde — ayrı DM binası yok (tek bina)
+            c = self.tm_loc[0].centroid; self.dm_ortak = True
         else:   # DM: kuzey-TM tarafı köşesi (giriş/ENH tarafı parametreyle verilmeli)
             ymax = self.ic_loc.bounds[3] - h / 2 - 0.1
             xe = self._kenar_x(ymax, taraf)
             c = Point(xe - w / 2 if taraf == "E" else xe + w / 2, ymax)
             self.uyari.append("DM konumu otomatik (TM tarafı kuzey köşe). ENH bağlantı noktasına göre elektrik.dm_konum verin.")
         self.dm_loc = box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2)
+        if self.dm_ortak: self.dm_loc = self.tm_loc[0]
         # kullanıcı düzenlemesi: TM taşıma (den noktasına en yakın TM → ye)
         for t in e.get("tm_tasi") or []:
             if not self.tm_loc: break
@@ -605,6 +636,25 @@ class Model:
             i = min(range(len(self.tm_loc)), key=lambda i: self.tm_loc[i].centroid.distance(f))
             if self.tm_loc[i].centroid.distance(f) <= 80:
                 self.tm_loc[i] = box(to.x - w / 2, to.y - h / 2, to.x + w / 2, to.y + h / 2)
+
+    def _tm_bos_yer(self, grp, w, h):
+        """Yol kenarında yer yoksa: saha içinde (çekme bandının içinde), grubun ağırlık merkezine en yakın boş TM yeri.
+        TM hiçbir durumda parsel/çit dışına konmaz; altında kalan masalar dizilimde kaldırılır."""
+        cx = sum(q["x"] for q in grp) / len(grp); cy = sum(q["y"] for q in grp) / len(grp)
+        mnx, mny, mxx, mxy = self.ic_loc.bounds; best = None; st = 3.0
+        erisim = unary_union([self.halka] + [q["yol"] for q in self.ic_yollar])     # TM servis yoluna / iç yola bitişik (A.6/A.7)
+        yy = mny + h / 2
+        while yy <= mxy - h / 2:
+            xx = mnx + w / 2
+            while xx <= mxx - w / 2:
+                bx = box(xx - w / 2, yy - h / 2, xx + w / 2, yy + h / 2)
+                if bx.distance(erisim) <= 3.0 and self.ic_loc.contains(bx) and not any(bx.intersects(o.buffer(2)) for o in self.tm_loc) and not any(bx.intersects(q["yol"]) for q in self.ic_yollar):
+                    d = math.hypot(xx - cx, yy - cy)
+                    if best is None or d < best[0]: best = (d, xx, yy)
+                xx += st
+            yy += st
+        if best: return Point(best[1], best[2])
+        p = self.ic_loc.representative_point(); return Point(p.x, p.y)
 
     def _tm_elle_yol(self, grp, w, h):
         """Grubun inverterlerinin çoğu elle çizilmiş bir yoldaysa TM o yolun kanal tarafında, gruba en yakın noktada."""
@@ -729,6 +779,35 @@ class Model:
                     bl = a_ + b_
                     if enuzun(bl) <= lim:
                         bloklar.remove(a_); bloklar.remove(b_); bloklar.append(bl); degisti = True; break
+        # H.7 en az inverter: k komşu küçük blok toplamı (k−1)·MX'e sığıyorsa k−1 bloğa yeniden böl (A.1 korunur).
+        #     Örn. MX=3, 2+2+2 → 3+3. İnverter sayısı alt sınıra (⌈string/MX⌉) iner; gereksiz inverter/TR çıkmaz.
+        def _yeniden_bol(grup, k):
+            strs = sorted([q for bl in grup for q in bl], key=lambda q: (q["sira"], q["uc_x"]))
+            b0, r0 = divmod(len(strs), k); out, i0 = [], 0
+            for i in range(k):
+                c = b0 + 1 if i < r0 else b0; out.append(strs[i0:i0 + c]); i0 += c
+            return out
+        alt_sinir = math.ceil(sum(len(b) for b in bloklar) / MX)
+        for _ in range(200):
+            if len(bloklar) <= alt_sinir: break
+            kucuk = sorted([b for b in bloklar if len(b) < MX], key=len)
+            yapildi = False
+            for a_ in kucuk:
+                ma = mrk(a_)
+                kom = sorted([b_ for b_ in bloklar if b_ is not a_ and len(b_) < MX and b_[0]["taraf"] == a_[0]["taraf"] and math.dist(mrk(b_), ma) <= 2 * lim],
+                             key=lambda b_: math.dist(mrk(b_), ma))
+                grup = [a_]
+                for b_ in kom:
+                    grup.append(b_)
+                    k = len(grup) - 1
+                    if sum(len(g) for g in grup) <= k * MX:
+                        yeni = _yeniden_bol(grup, k)
+                        if all(enuzun(y) <= lim for y in yeni):
+                            for g in grup: bloklar.remove(g)
+                            bloklar += yeni; yapildi = True
+                        break
+                if yapildi: break
+            if not yapildi: break
         # TR ataması: bloklar kuzeyden güneye (ort. y), TR başına eşit sayıda
         if self.ic_yollar:   # A.7: TR blokları iç yol boyunca (yol sırası, kuzeyden güneye); TM o yolun kenarında
             def yol_no(bl):
@@ -747,19 +826,36 @@ class Model:
         else:
             bloklar.sort(key=lambda bl: (-sum(q["y"] for q in bl) / len(bl), sum(q["x"] for q in bl) / len(bl)))
         ni = len(bloklar)
+        # H.8: TR sayısı GÜÇTEN — tesis AC çıkışı = min(Σ inverter AC, DC / DC-AC hedefi). A.1 yüzünden inverter adedi
+        #      artsa bile DC'den fazla AC çıkmaz; kullanıcı trafo gücü verdiyse TR = ⌈AC çıkış / (kVA × %yük)⌉.
+        IT = e["inverter_tr"]
+        _kw = (self._sys[2] if self._sys else None) or e.get("inverter_ac_kw")
+        _kva = e.get("trafo_kva") if not getattr(self, "_oto_trafo", True) else None
+        if _kw and _kva and guc:
+            _dc = sum(len(b) for b in bloklar) * e["string_modul"] * guc / 1000.0
+            _ac = min(ni * _kw, _dc / (e.get("dcac_hedef") or 1.25))
+            _nt = max(1, math.ceil(_ac / (_kva * (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0) - 1e-9))
+            IT = max(1, math.ceil(ni / _nt))
+        n_tot = max(1, math.ceil(ni / IT))
         if self.ic_yollar:   # A.7: her TR tek bir iç yolun blokları (TR yollar arası bölünmez); yol başına eşit dağıtım
             yollar = {}
             for bl in bloklar: yollar.setdefault(yol_no(bl), []).append(bl)
             tr_bl = []
             sabit = getattr(self, "_tr_yol", None) or {}; self._tr_yol_son = {}
-            for k_ in sorted(yollar):
-                lst = yollar[k_]; nt = max(1, math.ceil(len(lst) / e["inverter_tr"]))
+            if sum(max(1, math.ceil(len(l) / IT)) for l in yollar.values()) > n_tot:
+                # H.8: TR sayısı toplam güçten (⌈inverter / TR başına⌉) — yol başına TR açılmaz; komşu yollar tek TR'de birleşir
+                sira_ = [bl for k_ in sorted(yollar, key=lambda k: self.ic_yollar[k]["xk"]) for bl in yollar[k_]]
+                s_ = [round(i * ni / n_tot) for i in range(n_tot + 1)]
+                tr_bl = [sira_[s_[t]:s_[t + 1]] for t in range(n_tot)]
+            else:
+              for k_ in sorted(yollar):
+                lst = yollar[k_]; nt = max(1, math.ceil(len(lst) / IT))
                 if k_ in sabit: nt = max(nt, sabit[k_])       # yalnız artabilir → TM döngüsü yakınsar
                 self._tr_yol_son[k_] = nt
                 s_ = [round(i * len(lst) / nt) for i in range(nt + 1)]
                 tr_bl += [lst[s_[t]:s_[t + 1]] for t in range(nt)]
         else:
-            nt = max(1, math.ceil(ni / e["inverter_tr"]))
+            nt = n_tot
             s_ = [round(i * ni / nt) for i in range(nt + 1)]
             tr_bl = [bloklar[s_[t]:s_[t + 1]] for t in range(nt)]
         self.n_tr = len(tr_bl)
@@ -798,6 +894,14 @@ class Model:
             _, ms, tf, hx = best
             inv["masa"], inv["taraf"], inv["x"], inv["y"] = ms, tf, hx, ms["y"]; inv["elle"] = True
 
+    def tr_ac(self, t):
+        """TR çıkış gücü (kW): min(Σ inverter AC, TR'nin DC'si / DC-AC hedefi) — DC'den fazla AC üretilemez."""
+        e = self.P["elektrik"]; guc = self.P["modul"]["guc_wp"] or 0
+        invs = [i for i in self.inverterler if i["tr"] == t + 1]
+        ac = sum((i.get("ac_kw") or e["inverter_ac_kw"] or 0) for i in invs)
+        dc = sum(i["n_str"] for i in invs) * e["string_modul"] * guc / 1000.0
+        return min(ac, dc / (e.get("dcac_hedef") or 1.25)) if dc else ac
+
     def _oto(self, anahtar, deger_anahtari):
         e = self.P["elektrik"]; v = e.get(anahtar)
         return (e.get(deger_anahtari) is None) if v is None else bool(v)
@@ -827,7 +931,7 @@ class Model:
         ac_top = sum((i.get("ac_kw") or e["inverter_ac_kw"] or 0) for i in self.inverterler)
         # trafo: TR başına AC ≤ %yük → üst standart (1600 kaçın); tüm TR'ler en büyük gereken
         yuk = (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0
-        ac_tr = [sum((i.get("ac_kw") or e["inverter_ac_kw"] or 0) for i in self.inverterler if i["tr"] == t + 1) for t in range(self.n_tr)]
+        ac_tr = [self.tr_ac(t) for t in range(self.n_tr)]
         if self._oto_trafo and ac_top:
             volt0 = _sistem_sec(_trafo_sec(sum(ac_tr) / yuk))[0] if not sys else sys[0]
             self.tr_kva = [_trafo_sec(ac / yuk, volt0) for ac in ac_tr]          # H.4: her TR kendi yüküne göre
@@ -940,7 +1044,9 @@ class Model:
                 ls = LineString([(onceki.x, onceki.y)] + list(arc.coords) + [(q.x, q.y)])
                 out.append({"den": ad, "ye": f"TM{i+1}", "m": ls.length + 20.0, "hat": ls}); onceki, ad = q, f"TM{i+1}"
             return out
-        if getattr(self, "ag", None):   # iç yollu ağ: DM'den en yakın komşu sırası, güzergâh kanal ağı üzerinden
+        if getattr(self, "dm_ortak", False) and len(self.tm_loc) == 1:   # DM + TM aynı köşkte: köşk içi bağlantı
+            self.og = [{"den": "DM", "ye": "TM1", "m": 10.0, "hat": LineString(), "kosk_ici": True}]
+        elif getattr(self, "ag", None):   # iç yollu ağ: DM'den en yakın komşu sırası, güzergâh kanal ağı üzerinden
             U = self.ag["U"]; P_ = lambda g: (lambda q: (q.x, q.y))(nearest_points(U, g.centroid)[0])
             kalan = list(range(len(self.tm_loc))); sira, onceki = [], P_(self.dm_loc)
             while kalan:
@@ -1020,7 +1126,7 @@ class Model:
         yol_ser = [k for r_ in self.ic_yollar for k in r_["kanal"]]     # A.7: iç yol kanalı boyunca şerit (sıra şeritlerini ve çevre halkasını bağlar)
         ser += yol_ser
         cubuk = []
-        for tm in self.tm_loc + [self.dm_loc]:
+        for tm in self.tm_loc + ([] if getattr(self, "dm_ortak", False) else [self.dm_loc]):
             r = tm.buffer(1.0, join_style=2).exterior
             ser.append(LineString(r.coords)); cubuk += list(r.coords)[:t["tm_cubuk"]]
             c = tm.centroid
@@ -1187,10 +1293,12 @@ class Model:
             imax = max(self.inverterler, key=_acdu); pct = _acdu(imax)
             ekle("AC gerilim düşümü (en uzun)", pct <= e["ac_dusum_max_pct"], f"%{pct:.2f} ({imax['ad']}, {imax['ac_m']:.0f} m, {imax.get('ag_kablo', e['ac_kablo'])})", f"≤ %{e['ac_dusum_max_pct']}")
             for t, n in enumerate(ninv):
-                ac = sum(i.get("ac_kw") or e["inverter_ac_kw"] for i in self.inverterler if i["tr"] == t + 1)
+                ap = sum(i.get("ac_kw") or e["inverter_ac_kw"] for i in self.inverterler if i["tr"] == t + 1)
+                ac = self.tr_ac(t)
                 kva = self.tr_kva[t] if getattr(self, "tr_kva", None) else e["trafo_kva"]
                 marj = (kva - ac) / ac * 100
-                ekle(f"TR{t+1} trafo marjı", marj >= e["trafo_marj_min_pct"], f"{ac:.0f} kW / {kva} kVA → %{marj:.1f}", f"≥ %{e['trafo_marj_min_pct']}")
+                kw_ = e["inverter_ac_kw"]; ni_ = sum(1 for i in self.inverterler if i["tr"] == t + 1)
+                ekle(f"TR{t+1} trafo marjı", marj >= e["trafo_marj_min_pct"], f"{ni_} × {kw_:g} kW = {ap:,.0f} kW kurulu · çıkış {ac:,.0f} kW (DC sınırlı) / {kva} kVA → %{marj:.1f}" + (" · inverterlerde aktif güç sınırlaması" if ap > kva * 0.9 else ""), f"≥ %{e['trafo_marj_min_pct']}")
         else:
             ekle("AC düşüm / trafo marjı", None, "elektrik.inverter_ac_kw yok", "")
         # ---- A.2: hiçbir kablo/şerit masa altından geçmez
@@ -1272,7 +1380,8 @@ class Model:
             if k in pc: r("Mekanik", ad, nm * pc[k], "adet", "01+statik", hk)
         r("Mekanik", "Aplikasyon noktası (kolon)", nm * pc.get("kolon", 0), "nokta", "01 (uygulama)", "Aplikasyon")
         r("Elektrik", "String", len(self.stringler), "adet", "01/02")
-        r("Elektrik", "İnverter", len(self.inverterler), "adet", "01/02", "İnverter ve Trafo Montajı")
+        _kw = e["inverter_ac_kw"]
+        r("Elektrik", f"İnverter {e.get('inverter_model') or ''} {len(self.inverterler)} × {_kw:g} kW = {len(self.inverterler) * _kw:,.0f} kW".replace("  ", " ") if _kw else "İnverter", len(self.inverterler), "adet", "01/02", "İnverter ve Trafo Montajı")
         tk = getattr(self, "tr_kva", None) or [e["trafo_kva"]] * self.n_tr; ts = {}
         for v in tk: ts[v] = ts.get(v, 0) + 1
         nh = 0
@@ -1357,10 +1466,11 @@ def pafta_yerlesim(M, seviye):
         x, y = M.Wp(inv["x"], inv["y"])
         pf.daire("GES-INV", x, y, 0.9, info=f"{inv['ad']} | {inv['n_str']} string | AC {inv['ac_m']:.0f} m")
         pf.yazi("GES-INV", x + 1.2, y + 0.3, 1.2 if seviye == "uygulama" else 1.8, inv["ad"].replace("-ACB1", "") if seviye == "uygulama" else f"INV{inv['no']}")
+    ort = getattr(M, "dm_ortak", False)
     for t, tm in enumerate(M.tm_loc):
-        g = W(tm); geom_ciz(pf, "GES-TM", g, info=f"TM{t+1}"); c = g.centroid
-        pf.yazi("GES-TM", c.x, c.y, 2.5, f"TM{t+1}", hiz="C")
-    g = W(M.dm_loc); geom_ciz(pf, "GES-TM", g, info="DM"); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, "DM", hiz="C")
+        g = W(tm); geom_ciz(pf, "GES-TM", g, info=f"TM{t+1}" + (" + DM (tek köşk)" if ort else "")); c = g.centroid
+        pf.yazi("GES-TM", c.x, c.y, 2.5, f"TM{t+1}+DM" if ort else f"TM{t+1}", hiz="C")
+    if not ort: g = W(M.dm_loc); geom_ciz(pf, "GES-TM", g, info="DM"); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, "DM", hiz="C")
     for p in M.direkler: pf.daire("GES-AYD-CCTV", p[0], p[1], 0.8, info="Aydınlatma+CCTV")
     if seviye == "uygulama":
         for i, (x, y) in enumerate(list(M.parsel.exterior.coords)[:-1]):
@@ -1402,8 +1512,9 @@ def pafta_kablo(M):
         x, y = M.Wp(inv["x"], inv["y"]); pf.daire("GES-INV", x, y, 0.9, info=inv["ad"])
     for t, tm in enumerate(M.tm_loc):
         g = W(tm); geom_ciz(pf, "GES-TM", g); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, f"TM{t+1}", hiz="C")
-    g = W(M.dm_loc); geom_ciz(pf, "GES-TM", g); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, "DM", hiz="C")
+    if not getattr(M, "dm_ortak", False): g = W(M.dm_loc); geom_ciz(pf, "GES-TM", g); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, "DM", hiz="C")
     for o in M.og:
+        if o["hat"].is_empty: continue
         c = W(o["hat"]).interpolate(0.5, normalized=True)
         pf.yazi("GES-OG-KABLO", c.x + 1, c.y, 2.0, f"{o['den']}-{o['ye']} {o['m']:.0f} m")
     for i, g in enumerate(M.yol_gecis):     # AG yol geçişi: boru içinde

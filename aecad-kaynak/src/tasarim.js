@@ -134,9 +134,10 @@ async function tsNokta(tip) {
     let ang = 0;
     if (tip !== 'inv') {
       const kose = (m) => { const a = Math.atan2(m[1] - p[1], m[0] - p[0]), c = Math.cos(a), s = Math.sin(a); return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([i, j]) => [p[0] + i * B.L / 2 * c - j * B.W / 2 * s, p[1] + i * B.L / 2 * s + j * B.W / 2 * c]); };
-      const q = await getPoint('Bina uzun kenarı yönü (tıklayın; kapılar uzun kenarın sağ tarafında):', { base: p, preview: (m) => [{ pts: kose(m), cl: true }, { pts: [p, m] }] });
-      if (!Array.isArray(q)) { S.doc.blocks.delete(B.ad); return; }
-      ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
+      const q = await getPoint('Bina uzun kenarı yönü (tıklayın) [Kenara paralel(K)]:', { base: p, kw: ['K'], preview: (m) => [{ pts: kose(m), cl: true }, { pts: [p, m] }] });
+      if (q && q.kw === 'K') { const k = await kenarSec('Bina uzun kenarı hangi kenara / çizgiye paralel (tıklayın):'); if (!k) { S.doc.blocks.delete(B.ad); return; } ang = k.ang; }
+      else if (!Array.isArray(q)) { S.doc.blocks.delete(B.ad); return; }
+      else ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
     }
     if (B.kisa) msg('Bina boyu ' + fmtNum(+v.boy, 1) + ' m bu hücre/trafo düzenine yetmiyor; en az ' + fmtNum(B.kisa, 2) + ' m alındı.', 'err');
     S.doc.addLayer(T.kat, T.renk);

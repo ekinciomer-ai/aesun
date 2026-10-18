@@ -429,6 +429,38 @@ CMD.POINT = async () => { for (;;) { const p = await getPoint('Nokta konumu (bit
 function editableIds(ids) {
   return ids.filter((id) => { const it = S.doc.items.get(id); const L = it && S.doc.layers.get(it.layer); if (L && L.lk) return false; return !!it; });
 }
+// Döndürme yardımcıları: tıklanan noktaya en yakın kenar (çizgi, polyline, arazi sınırı) ve seçimin ana doğrultusu
+function kenarlarHepsi(haric) {
+  const H = new Set(haric || []), out = [];
+  const ek = (a, b) => { if (Math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-6) out.push([a, b]); };
+  for (const it of S.doc.items.values()) {
+    if (H.has(it.id)) continue; const L = S.doc.layers.get(it.layer); if (L && L.on === false) continue;
+    if (it.t === 'line') ek([it.x1, it.y1], [it.x2, it.y2]);
+    else if (it.t === 'pline' && it.pts) { for (let i = 0; i + 1 < it.pts.length; i++) ek(it.pts[i], it.pts[i + 1]); if (it.cl && it.pts.length > 2) ek(it.pts[it.pts.length - 1], it.pts[0]); }
+  }
+  if (typeof G !== 'undefined' && G.bound) G.bound.forEach((p, i) => ek(p, G.bound[(i + 1) % G.bound.length]));
+  return out;
+}
+function enYakinKenar(p, haric) {
+  let best = null;
+  for (const [a, b] of kenarlarHepsi(haric)) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy, t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2));
+    const d = Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy); if (!best || d < best.d) best = { d, a, b, ang: Math.atan2(dy, dx) };
+  }
+  return best;
+}
+async function kenarSec(prompt, haric) {
+  const p = await getPoint(prompt, { preview: (m) => { const k = enYakinKenar(m, haric); return k ? [{ pts: [k.a, k.b], dash: true }] : []; } });
+  if (!Array.isArray(p)) return null; const k = enYakinKenar(p, haric); if (!k) { msg('Yakında kenar yok.', 'err'); return null; } return k;
+}
+function aciYakin(d) { while (d > Math.PI / 2) d -= Math.PI; while (d <= -Math.PI / 2) d += Math.PI; return d; }   // en küçük döndürme (±90°)
+function yonSecim(ids) {
+  const its = ids.map((id) => S.doc.items.get(id)).filter(Boolean);
+  const ins = its.find((it) => it.t === 'insert'); if (ins && its.length === 1) return Math.atan2(ins.M[4], ins.M[0]);
+  let best = null;
+  for (const it of its) { const P = it.t === 'line' ? [[it.x1, it.y1], [it.x2, it.y2]] : it.t === 'pline' ? it.pts : null; if (!P) continue; for (let i = 0; i + 1 < P.length; i++) { const L = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); if (!best || L > best.L) best = { L, a: Math.atan2(P[i + 1][1] - P[i][1], P[i + 1][0] - P[i][0]) }; } }
+  if (best) return best.a; if (ins) return Math.atan2(ins.M[4], ins.M[0]); return 0;
+}
 async function xformCmd(kind) {
   let ids = editableIds(await getSelection());
   if (!ids.length) { msg('Seçili nesne yok.'); return; }
@@ -451,8 +483,22 @@ async function xformCmd(kind) {
   } else if (kind === 'rotate') {
     const T = (a) => mMul(mT(base[0], base[1]), mMul(mRz(a), mT(-base[0], -base[1])));
     S.ghost = (m) => T(Math.atan2(m[1] - base[1], m[0] - base[0]));
-    const a = await getNumber('Döndürme açısı (derece):', { base, angle: true, preview: (m) => [{ pts: [base, m], dash: true }] }); if (typeof a !== 'number') return;
-    apply(T(a * Math.PI / 180));
+    const a = await getNumber('Döndürme açısı (derece ya da tıklayın) [Kenara paralel(K)/Referans(R)]:', { base, angle: true, kw: ['K', 'R'], preview: (m) => [{ pts: [base, m], dash: true }] });
+    if (a && a.kw === 'K') {
+      S.ghost = null; const cur = yonSecim(ids);
+      const k = await kenarSec('Paralel olacağı kenar / çizgi (tıklayın):', ids); if (!k) return;
+      apply(T(aciYakin(k.ang - cur))); msg('Kenara paralel döndürüldü (' + fmtNum(k.ang * 180 / Math.PI, 2) + '°). Ters yön için RO → 180.', 'res');
+    } else if (a && a.kw === 'R') {
+      S.ghost = null;
+      const r1 = await getPoint('Referans doğrultusu 1. nokta:'); if (!Array.isArray(r1)) return;
+      const r2 = await getPoint('Referans doğrultusu 2. nokta:', { base: r1, preview: (m) => [{ pts: [r1, m], dash: true }] }); if (!Array.isArray(r2)) return;
+      const ref = Math.atan2(r2[1] - r1[1], r2[0] - r1[0]);
+      S.ghost = (m) => T(Math.atan2(m[1] - base[1], m[0] - base[0]) - ref);
+      const y = await getNumber('Yeni açı (derece ya da tıklayın) [Kenar(K)]:', { base, angle: true, kw: ['K'], preview: (m) => [{ pts: [base, m], dash: true }] });
+      let yeni; if (y && y.kw === 'K') { S.ghost = null; const k = await kenarSec('Hizalanacak kenar / çizgi (tıklayın):', ids); if (!k) return; yeni = ref + aciYakin(k.ang - ref); } else if (typeof y === 'number') yeni = y * Math.PI / 180; else return;
+      apply(T(yeni - ref));
+    } else if (typeof a === 'number') apply(T(a * Math.PI / 180));
+    else { S.ghost = null; return; }
   } else if (kind === 'scale') {
     const T = (f) => mMul(mT(base[0], base[1]), mMul(mS(f, f, 1), mT(-base[0], -base[1])));
     S.ghost = (m) => { const f = Math.hypot(m[0] - base[0], m[1] - base[1]); return f > 1e-9 ? T(f) : null; };

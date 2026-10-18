@@ -1,6 +1,8 @@
 # Aksaray Enerji statik site
 Options -Indexes
 DirectoryIndex index.html
+# AeCAD eski adresi
+RedirectMatch 301 ^/cad(/.*)?$ /aecad$1
 AddType video/mp4 .mp4
 AddType image/svg+xml .svg
 AddType application/wasm .wasm

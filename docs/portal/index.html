@@ -212,7 +212,7 @@ const VARSAYILAN = [
   { id: 'mining-demo', ad: 'Mining Demo', aciklama: 'Uzaktan madencilik kontrolü · tanıtım', url: '', ikon: 'maden', renk: 'lacivert', gizli: true },
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
   { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' },
-  { id: 'cad', ad: 'AeCAD', aciklama: 'DWG/DXF açma, 2D çizim, GES masa yerleşimi', url: 'https://ekinciomer-ai.github.io/aesun/cad/', ikon: 'cad', renk: 'antrasit' },
+  { id: 'cad', ad: 'AeCAD', aciklama: 'DWG/DXF açma, 2D çizim, GES masa yerleşimi', url: 'https://ekinciomer-ai.github.io/aesun/aecad/', ikon: 'cad', renk: 'antrasit' },
   { id: 'fatura', ad: 'Fatura', aciklama: 'GesFin · fatura takibi (portal girişiyle)', url: 'https://fatura.aksarayenerji.net/', ikon: 'belge', renk: 'yesil', gizli: true }];   // ana ekranda kart yok; fatura.aksarayenerji.net adresi portal girişiyle açılır
 // Tek giriş (SSO): bu uygulamalar portal belirteciyle açılır — belirteç URL parçasında (#) taşınır, sunucu günlüğüne düşmez
 const SSO = { fatura: 'https://fatura.aksarayenerji.net/sso' };
@@ -372,6 +372,11 @@ async function ekModulEkle() {
   // Fatura kartı ana ekrandan kaldırıldı (bir kez): kayıt varsa gizle
   if (R.anahtarlar.fatura && MOD.fatura && MOD.fatura.aktif !== false && !MOD.fatura.fg1) {
     const m = MOD.fatura; V.moduller.fatura = await sifrele(await hamAnahtar(R.anahtarlar.fatura), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: false, yeni_sekme: true, sira: m.sira || 0, fg1: true });
+    degisti = true;
+  }
+  // CAD → AeCAD (ad ve /aecad/ adresi; bir kez)
+  if (R.anahtarlar.cad && MOD.cad && !MOD.cad.ae1) {
+    const m = MOD.cad, v = VARSAYILAN.find(x => x.id === 'cad'); V.moduller.cad = await sifrele(await hamAnahtar(R.anahtarlar.cad), { ad: v.ad, aciklama: v.aciklama, url: v.url, ikon: v.ikon, renk: m.renk || v.renk, aktif: m.aktif !== false, yeni_sekme: true, sira: m.sira || 0, ae1: true });
     degisti = true;
   }
   if (!degisti) return;

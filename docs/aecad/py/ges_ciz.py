@@ -44,6 +44,8 @@ VARSAYILAN = {
                "og_bara": {"un_kv": 36, "in_a": 630, "ik_ka": 16, "malzeme": "Cu"},
                "dm_bara": {"un_kv": 36, "in_a": 1250, "ik_ka": 25, "malzeme": "Cu"},
                "dm_konum": None, "tm_konumlari": None, "tm_taraf": "dogu",
+               # kullanıcı düzenlemesi: {"den": [x,y], "ye": [x,y]} — den noktasına en yakın TM/inverter ye noktasına taşınır
+               "tm_tasi": [], "inv_tasi": [],
                "mppt_sayisi": None, "mppt_akim_a": None, "voc_marj_min_pct": 2.0, "dc_tek_yon_max_m": 80.0,
                "inverter_derinlik_masa": 3, "sebeke_gerilim_kv": None, "dc_fire_pct": 3.0,
                "harici_trafo_min_kva": 2500, "og_gerilim_kv": 33.0, "og_kesit_mm2": 120, "og_kesit_dm_mm2": 240,
@@ -53,7 +55,9 @@ VARSAYILAN = {
              "kum_cm": 10, "koruyucu_cm": 6, "uyari_ust_cm": 30, "kablo_aralik_cm": 7, "yol_gecis_boru_ust_m": 1.0},
   "yol": {"genislik_m": 4.0, "tm_alan_m": [12.0, 10.0],
           # A.7 (18.10.2026): sıraları kesen K-G iç işletme-bakım yolları; aralık DC gerilim düşümünden (A.1)
-          "ic_yol": True, "ic_genislik_m": 5.0, "ic_kanal_m": 1.0, "ic_pay_m": 1.0, "ic_aralik_m": None},
+          "ic_yol": True, "ic_genislik_m": 5.0, "ic_kanal_m": 1.0, "ic_pay_m": 1.0, "ic_aralik_m": None,
+          # kullanıcı düzenlemesi: ek_yollar = [[x,y],…] polyline listesi (gerçek koordinat), sil_yollar = [x,y] (o noktaya en yakın otomatik iç yol kaldırılır)
+          "ek_yollar": [], "sil_yollar": []},
   "metraj_pafta": {},
   "topraklama": {"serit": "Galvaniz şerit 30x3,5 mm", "goz_max_m": 40.0, "derinlik_m": 0.60, "mod": "kopru",
                  "kopru_kablo": "1x16 NYAF", "cit_baglanti_m": 50.0, "cubuk_araligi_m": 40.0, "tm_cubuk": 4,
@@ -211,7 +215,8 @@ class Model:
         masaya DC tek yön ≤ dc_lim (A.1, ΔU %1) olacak en geniş blok: K masa / yarım açıklık."""
         y, e, m = self.P["yol"], self.P["elektrik"], self.P["masa"]
         self.ic_yollar = []; self.K_ic = None; self.ag = None
-        if not y.get("ic_yol", True): return
+        oto = y.get("ic_yol", True)
+        if not oto and not y.get("ek_yollar"): return
         Lg = self.masa_L + m["masa_arasi_m"]; MX = e["string_inverter_max"]; s_ = self.str_masa; pitch = m["pitch_m"]
         K = 1
         for k in range(1, 60):
@@ -225,8 +230,7 @@ class Model:
         Wt = maxx - minx
         B = aralik + 0.05                                          # iç blok: tam 2K masa (masa boyunun katı, artık şerit yok)
         E = K * Lg                                                 # kenar bloğu ≤ K masa: inverterler iç yol kenarında
-        n = max(0, math.ceil((Wt - 2 * E + B) / (serit + B) - 1e-9)) if Wt > 2 * E else 0
-        if n == 0: return
+        n = max(0, math.ceil((Wt - 2 * E + B) / (serit + B) - 1e-9)) if (Wt > 2 * E and oto) else 0
         e0 = (Wt - n * serit - (n - 1) * B) / 2                    # kenar blokları eşit (ortalanmış)
         cevre = Polygon(self.halka.coords)                         # yollar kenar servis yoluna bağlanır
         seritler = []
@@ -238,12 +242,57 @@ class Model:
             kanal = [g for g in (getattr(kl, "geoms", None) or [kl]) if g.geom_type == "LineString" and g.length > 1]
             if yol.is_empty or not kanal: continue
             self.ic_yollar.append({"no": len(self.ic_yollar) + 1, "x0": x0, "x1": x0 + serit, "xk": kx, "yol": yol, "kanal": kanal,
-                                   "eksen": LineString([(x0 + pay + w / 2, miny - 50), (x0 + pay + w / 2, maxy + 50)]).intersection(cevre)})
-            seritler.append(box(x0, miny - 50, x0 + serit, maxy + 50))
-        if seritler:
-            self.alan_loc = self.alan_loc.difference(unary_union(seritler))
+                                   "eksen": LineString([(x0 + pay + w / 2, miny - 50), (x0 + pay + w / 2, maxy + 50)]).intersection(cevre),
+                                   "serit": box(x0, miny - 50, x0 + serit, maxy + 50)})
+        # kullanıcı düzenlemesi: silinen otomatik yollar
+        self.duzen_not = []
+        for p in y.get("sil_yollar") or []:
+            q = self._loc(p)
+            if not self.ic_yollar: break
+            r = min(self.ic_yollar, key=lambda r: r["yol"].distance(q))
+            if r["yol"].distance(q) <= 15 and not r.get("elle"): self.ic_yollar.remove(r); self.duzen_not.append("iç yol kaldırıldı")
+        # kullanıcı düzenlemesi: elle çizilen yollar (her yöne). Ucu ağa (kenar halka / başka kanal) değmiyorsa en yakın noktaya uzatılır.
+        for pl in y.get("ek_yollar") or []:
+            if not pl or len(pl) < 2: continue
+            L = LineString([tuple(self._loc(q).coords[0]) for q in pl])
+            if L.length < 5: continue
+            ag_ = unary_union([self.halka] + [k for r in self.ic_yollar for k in r["kanal"]])
+            c = list(L.coords)
+            for uc in (0, -1):
+                P_ = Point(c[uc])
+                if P_.distance(ag_) > 2.0:
+                    q = nearest_points(ag_, P_)[0]
+                    if uc == 0: c.insert(0, (q.x, q.y))
+                    else: c.append((q.x, q.y))
+            L = LineString(c)
+            yol = L.buffer(w / 2, cap_style=2, join_style=2).intersection(cevre)
+            ko = L.parallel_offset(w / 2 + kn / 2, "left", join_style=2)
+            ko = ko.intersection(cevre.buffer(0.3)) if not ko.is_empty else ko
+            kanal = [g for g in (getattr(ko, "geoms", None) or [ko]) if g.geom_type == "LineString" and g.length > 1]
+            # kanal uçlarını ağa bağla (düğümlenme)
+            for k_i, kg in enumerate(kanal):
+                kc = list(kg.coords)
+                for uc in (0, -1):
+                    P_ = Point(kc[uc])
+                    if P_.distance(ag_) > 0.05 and P_.distance(ag_) < w + kn + 3:
+                        q = nearest_points(ag_, P_)[0]
+                        if uc == 0: kc.insert(0, (q.x, q.y))
+                        else: kc.append((q.x, q.y))
+                kanal[k_i] = LineString(kc)
+            if yol.is_empty or not kanal: continue
+            bx = L.bounds
+            self.ic_yollar.append({"no": len(self.ic_yollar) + 1, "x0": bx[0] - w / 2 - pay, "x1": bx[2] + w / 2 + kn + pay, "xk": L.centroid.x,
+                                   "yol": yol, "kanal": kanal, "eksen": L, "serit": L.buffer(w / 2 + kn + pay, cap_style=2, join_style=2).intersection(cevre), "elle": True})
+            self.duzen_not.append("elle yol eklendi")
+        for i, r in enumerate(self.ic_yollar): r["no"] = i + 1
+        if self.ic_yollar:
+            self.alan_loc = self.alan_loc.difference(unary_union([r["serit"] for r in self.ic_yollar]))
             self.yol_loc = unary_union([self.yol_loc] + [r["yol"] for r in self.ic_yollar])
-        self.ag_kur()
+            self.ag_kur()
+
+    def _loc(self, p):
+        """Gerçek koordinat → model (azimuta göre döndürülmüş) koordinatı."""
+        return affinity.rotate(Point(p), -self.az, origin=self.merkez) if self.az else Point(p)
 
     # ---- kablo ağı: kenar halka + iç yol kanalları (en kısa yol, Dijkstra)
     def ag_kur(self):
@@ -454,9 +503,11 @@ class Model:
         for t, grp in enumerate(self.tr_gruplari):
             if e["tm_konumlari"] and t < len(e["tm_konumlari"]):
                 c = rot(e["tm_konumlari"][t])
+            elif self.ic_yollar and self._tm_elle_yol(grp, w, h) is not None:
+                c = self._tm_elle_yol(grp, w, h)
             elif self.ic_yollar:   # A.7: TM iç yol kenarında, kablo kanalı tarafında; grubun ortasında
                 cx = sum(q["x"] for q in grp) / len(grp)
-                r = min(self.ic_yollar, key=lambda r: abs(r["xk"] - cx))
+                r = min([r for r in self.ic_yollar if not r.get("elle")] or self.ic_yollar, key=lambda r: abs(r["xk"] - cx))
                 ys = sorted(q["y"] for q in grp); cy0 = ys[len(ys) // 2]
                 xc = r["x1"] + w / 2 + 0.5; c = None
                 for xx in (xc, r["x0"] - w / 2 - 0.5):
@@ -479,6 +530,28 @@ class Model:
             c = Point(xe - w / 2 if taraf == "E" else xe + w / 2, ymax)
             self.uyari.append("DM konumu otomatik (TM tarafı kuzey köşe). ENH bağlantı noktasına göre elektrik.dm_konum verin.")
         self.dm_loc = box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2)
+        # kullanıcı düzenlemesi: TM taşıma (den noktasına en yakın TM → ye)
+        for t in e.get("tm_tasi") or []:
+            if not self.tm_loc: break
+            f, to = self._loc(t["den"]), self._loc(t["ye"])
+            i = min(range(len(self.tm_loc)), key=lambda i: self.tm_loc[i].centroid.distance(f))
+            if self.tm_loc[i].centroid.distance(f) <= 80:
+                self.tm_loc[i] = box(to.x - w / 2, to.y - h / 2, to.x + w / 2, to.y + h / 2)
+
+    def _tm_elle_yol(self, grp, w, h):
+        """Grubun inverterlerinin çoğu elle çizilmiş bir yoldaysa TM o yolun kanal tarafında, gruba en yakın noktada."""
+        cx = sum(q["x"] for q in grp) / len(grp); cy = sum(q["y"] for q in grp) / len(grp); G_ = Point(cx, cy)
+        r = min(self.ic_yollar, key=lambda r: r["yol"].distance(G_))
+        if not r.get("elle"): return None
+        kan = unary_union(r["kanal"]); P0 = nearest_points(kan, G_)[0]; A0 = nearest_points(r["eksen"], P0)[0]
+        dx, dy = P0.x - A0.x, P0.y - A0.y; d = math.hypot(dx, dy) or 1.0; nx, ny = dx / d, dy / d
+        hm = max(w, h) / 2 + 0.6
+        for k in [0] + [s_ * j * 5 for j in range(1, 40) for s_ in (1, -1)]:
+            base = kan.interpolate(max(0.0, min(kan.length, kan.project(P0) + k))) if kan.geom_type == "LineString" else P0
+            c = Point(base.x + nx * hm, base.y + ny * hm)
+            bx = box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2)
+            if self.ic_loc.contains(bx) and not any(bx.intersects(o) for o in self.tm_loc) and not any(bx.intersects(q["yol"]) for q in self.ic_yollar): return c
+        return Point(P0.x + nx * hm, P0.y + ny * hm)
 
     # ---------------------------------------------------------------- 4) inverter (A.1, A.4, A.5)
     def inverter_ata(self):
@@ -590,6 +663,20 @@ class Model:
                 inv["yol_tarafi"] = (hm["derinlik"] == 0)
                 self.inverterler.append(inv)
             self.tr_gruplari.append(grp)
+        # kullanıcı düzenlemesi: inverter taşıma — kendi masalarından hedefe en yakın masa başına (A.4 korunur)
+        for t in e.get("inv_tasi") or []:
+            if not self.inverterler: break
+            f, to = self._loc(t["den"]), self._loc(t["ye"])
+            inv = min(self.inverterler, key=lambda i: math.dist((i["x"], i["y"]), (f.x, f.y)))
+            if math.dist((inv["x"], inv["y"]), (f.x, f.y)) > 40: continue
+            best = None
+            for ms in inv["masalar"]:
+                for tf in ("E", "W"):
+                    hx = ms["loc"].bounds[2] + 0.4 if tf == "E" else ms["loc"].bounds[0] - 0.4
+                    dd = math.dist((hx, ms["y"]), (to.x, to.y))
+                    if best is None or dd < best[0]: best = (dd, ms, tf, hx)
+            _, ms, tf, hx = best
+            inv["masa"], inv["taraf"], inv["x"], inv["y"] = ms, tf, hx, ms["y"]; inv["elle"] = True
 
     # ---------------------------------------------------------------- 5) güzergâh
     def _halka_yol(self, p, q):
@@ -833,6 +920,9 @@ class Model:
             ekle("İç işletme-bakım yolları (K-G, sıraları keser)", True, f"{len(self.ic_yollar)} yol × {P['yol']['ic_genislik_m']:g} m · blok yarı genişliği {self.K_ic} masa · DC sınırı {self.dc_lim_kaynak}", "A.7: aralık DC gerilim düşümüne göre")
         else:
             ekle("İç işletme-bakım yolu", True if not P["yol"].get("ic_yol", True) else "uyari", "kapalı (yol.ic_yol=false)" if not P["yol"].get("ic_yol", True) else "saha dar — kenar yol yeterli", "A.7")
+        dn = getattr(self, "duzen_not", []); ntm = len(e.get("tm_tasi") or []); ninv = len(e.get("inv_tasi") or [])
+        if dn or ntm or ninv:
+            ekle("Kullanıcı düzenlemeleri uygulandı", "uyari", f"{ntm} TM taşıma · {ninv} inverter taşıma · " + ", ".join(dn), "elle düzenleme — esaslara uygunluk kontrollerle doğrulanır")
         ekle("Kablo yol geçişleri boru içinde", True, f"{len(self.yol_gecis)} AG yol geçişi (boru, üstü yüzeyden ≥ {P['hendek']['yol_gecis_boru_ust_m']:g} m) · {len(self.kesisim)} DC–AG kesişimi (tuğla/beton plaka)", "EKAT md.58-b/16")
         ekle("Sıra açıklığı / eksen / arazi kullanımı", "uyari", f"açıklık {self.acik:.2f} m · eksen {m['pitch_m']:.2f} m · kullanım %{self.masa_D / m['pitch_m'] * 100:.0f}",
              "B: açıklık mı eksen mi müellifle teyit")

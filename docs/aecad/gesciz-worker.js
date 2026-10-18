@@ -39,11 +39,15 @@ smax = max(M.stringler, key=lambda s: s["dc_tek_yon_m"]); imax = max(M.inverterl
 oz = {"masa": len(M.masalar), "modul": len(M.masalar) * M.masa_modul, "string": len(M.stringler), "inverter": len(M.inverterler), "tm": M.n_tr,
       "ic_yol": len(M.ic_yollar), "dc_lim": round(M.dc_lim, 1), "dc_max": round(smax["dc_tek_yon_m"], 1), "ac_max": round(imax["ac_m"], 0),
       "yol_gecis": len(M.yol_gecis), "kesisim": len(M.kesisim), "cekme": M.cekme}
-json.dumps({'d': d, 'oz': oz, 'kontrol': M.kontrol, 'metraj': M.metraj, 'uyari': M.uyari}, ensure_ascii=False, default=str)
+nes = {"tm": [{"ad": f"TM{t+1}", "x": M.W(q).centroid.x, "y": M.W(q).centroid.y} for t, q in enumerate(M.tm_loc)],
+       "dm": {"x": M.W(M.dm_loc).centroid.x, "y": M.W(M.dm_loc).centroid.y},
+       "inv": [{"ad": i["ad"], "x": M.Wp(i["x"], i["y"])[0], "y": M.Wp(i["x"], i["y"])[1]} for i in M.inverterler],
+       "yol": [{"no": r["no"], "elle": bool(r.get("elle")), "pts": [list(c) for c in M.W(r["eksen"] if r["eksen"].geom_type == "LineString" else max(getattr(r["eksen"], "geoms", [r["eksen"]]), key=lambda g: g.length)).coords]} for r in M.ic_yollar]}
+json.dumps({'d': d, 'oz': oz, 'nes': nes, 'kontrol': M.kontrol, 'metraj': M.metraj, 'uyari': M.uyari}, ensure_ascii=False, default=str)
 `);
   const o = JSON.parse(out); const files = {}; const tr = [];
   for (const f of py.FS.readdir(o.d)) { if (f === '.' || f === '..') continue; const b = py.FS.readFile(o.d + '/' + f); files[f] = b; tr.push(b.buffer); }
-  post({ id, ok: true, yer: true, files, oz: o.oz, kontrol: o.kontrol, metraj: o.metraj, uyari: o.uyari }, tr);
+  post({ id, ok: true, yer: true, files, oz: o.oz, nes: o.nes, kontrol: o.kontrol, metraj: o.metraj, uyari: o.uyari }, tr);
 }
 self.onmessage = async (e) => {
   const { id, base, json, pdf, mode } = e.data;

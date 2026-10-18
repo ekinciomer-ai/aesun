@@ -214,12 +214,51 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
   header { justify-content: space-between; }
   .hb { padding: 5px 7px; }
 }
+
+/* ---- başlangıç + proje tarif ---- */
+body.ovl #app { visibility: hidden; }
+.ovp { visibility: visible; position: fixed; inset: 0; z-index: 50; background: var(--ink); overflow-y: auto; padding: 24px max(16px, env(safe-area-inset-left, 0px)) 32px; box-sizing: border-box; }
+#start { display: grid; place-items: center; }
+.st-in { width: min(880px, 100%); display: grid; gap: 28px; }
+.st-brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 600; letter-spacing: .02em; }
+.st-brand svg { width: 34px; height: 34px; } .st-brand b { color: var(--red); font-weight: 600; }
+.st-in h1 { margin: 0; font-size: clamp(22px, 3.4vw, 32px); font-weight: 600; line-height: 1.2; text-wrap: balance; }
+.st-in > p { margin: -12px 0 0; color: var(--muted); font-size: 14px; max-width: 60ch; }
+.st-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.st-card { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px 22px 20px; display: grid; gap: 10px; align-content: start; min-height: 190px; }
+.st-card:hover { border-color: #4a525b; background: var(--raise); }
+.st-card.primary { border-color: var(--red); }
+.st-card svg { width: 30px; height: 30px; color: var(--red); }
+.st-card b { font-size: 18px; font-weight: 600; } .st-card span { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.st-card em { font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--fg); opacity: .8; }
+.st-foot { color: var(--muted); font-size: 12px; font-family: var(--mono); }
+#tarif { padding-top: 0; }
+.tf-top { position: sticky; top: 0; z-index: 2; background: var(--ink); display: flex; align-items: center; gap: 12px; padding: 14px 0 12px; border-bottom: 1px solid var(--line); }
+.tf-top h1 { margin: 0; font-size: 18px; font-weight: 600; flex: 1; }
+.tf-wrap { width: min(920px, 100%); margin: 0 auto; }
+#tf-body { display: grid; gap: 14px; padding: 18px 0 110px; }
+.tf-sec { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px 18px; display: grid; gap: 14px; }
+.tf-h { display: flex; gap: 12px; align-items: flex-start; list-style: none; cursor: default; }
+details.tf-sec > summary { cursor: pointer; } details.tf-sec > summary::-webkit-details-marker { display: none; }
+details.tf-sec:not([open]) { gap: 0; }
+.tf-n { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--raise); border: 1px solid var(--line); display: grid; place-items: center; font-family: var(--mono); font-size: 12px; }
+.tf-h h2 { margin: 1px 0 2px; font-size: 15px; font-weight: 600; } .tf-h p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+.tf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 12px; }
+.tf-row { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 12px; }
+.tf-arazi { display: grid; gap: 10px; }
+.tf-arazi textarea { width: 100%; box-sizing: border-box; font-family: var(--mono); font-size: 12px; background: var(--raise); border: 1px solid var(--line); border-radius: 5px; padding: 8px; resize: vertical; }
+.tf-wide { grid-column: 1 / -1; }
+.tf-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; background: var(--panel); border-top: 1px solid var(--line); padding: 12px max(16px, env(safe-area-inset-left, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)); }
+.tf-bar .tf-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+#tf-miss { flex: 1 1 260px; color: var(--muted); font-size: 12.5px; }
+@media (max-width: 640px) { .st-cards { grid-template-columns: 1fr; } .st-card { min-height: 0; } .tf-grid { grid-template-columns: 1fr 1fr; } }
 </style>
 <div id="app">
   <header>
     <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0 0 20z" fill="#e2342b"/><path d="M12 2a10 10 0 0 1 0 20z" fill="#3b4148"/><path d="M13.6 4.5 8.4 13h3.4l-1.4 6.5 5.2-8.6h-3.4z" fill="#fff"/></svg><span class="bt">Ae</span><b>CAD</b></div>
     <span id="fname">Örnek çizim</span>
     <div class="hbtns">
+      <button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
       <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
       <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>
       <button class="hb" id="bclose" title="Çizimi kapat"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor"/></svg><span class="k">Kapat</span></button>
@@ -415,6 +454,25 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
     </div>
   </footer>
   <div id="palette" hidden></div>
+  <section id="start" class="ovp" hidden>
+    <div class="st-in">
+      <div class="st-brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0 0 20z" fill="#e2342b"/><path d="M12 2a10 10 0 0 1 0 20z" fill="#3b4148"/><path d="M13.6 4.5 8.4 13h3.4l-1.4 6.5 5.2-8.6h-3.4z" fill="#fff"/></svg><span>Ae<b>CAD</b></span></div>
+      <h1>Ne yapmak istiyorsunuz?</h1>
+      <p>Projeyi bilgileriyle tarif edin, AeCAD proje çizim esaslarına göre çizsin; ya da doğrudan çizim ekranına geçin.</p>
+      <div class="st-cards">
+        <button class="st-card primary" id="st-tarif" type="button"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 11h7M9 15h7M9 19h4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>Proje tarif et</b><span>Proje bilgileri, arazi (KML veya köşe koordinatı), hedef güç, trafo, inverter ve panel datasheet'i form üzerinden girilir. Yerleşim, tek hat, topraklama, kablo, metraj ve PDF otomatik üretilir.</span><em>Form → GES-ÇİZ → paftalar</em></button>
+        <button class="st-card" id="st-cad" type="button"><svg viewBox="0 0 24 24"><path d="M4 20 18 6l2 2L6 22H4zM14 4l6 6M3 3h6M3 3v6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>Çizime geç</b><span>DWG/DXF açın, 2B çizin, ölçün. GES sekmesinde panel, masa şablonu, arazi doldurma ve proje tanımı da bu ekrandan yapılır.</span><em>AeCAD çizim ekranı</em></button>
+      </div>
+      <div class="st-foot">Aksaray Enerji · AeCAD</div>
+    </div>
+  </section>
+  <section id="tarif" class="ovp" hidden>
+    <div class="tf-wrap">
+      <div class="tf-top"><button class="hb" id="tf-back" type="button" aria-label="Başlangıca dön"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor"/></svg></button><h1>Proje tarifi</h1></div>
+      <div id="tf-body"></div>
+    </div>
+    <div class="tf-bar"><div class="tf-wrap"><span id="tf-miss"></span><button class="gb" id="tf-cad" type="button">Kaydet, çizime geç</button><button class="gb primary" id="tf-ok" type="button">Projeyi çiz</button></div></div>
+  </section>
   <dialog id="pjdlg"><div class="pjh"><div class="ptabs"><button class="ptab" data-t="paftalar">Paftalar</button><button class="ptab" data-t="kontrol">Kontroller</button><button class="ptab" data-t="kesif">Keşif</button><button class="ptab" data-t="teklif">Teklif</button></div><button class="mini" id="pj-close" aria-label="Kapat">✕</button></div><div id="pj-body"></div></dialog>
   <dialog id="qdlg"><h3></h3><p></p><div class="qb"></div></dialog>
 </div>
@@ -2756,7 +2814,7 @@ async function gesKml(file) {
     const best = polys.map((p) => { const lon = p.reduce((s, q) => s + q[0], 0) / p.length; const lat = p.reduce((s, q) => s + q[1], 0) / p.length; return { p, lon, lat }; })
       .map((o) => { const z = utmZoneOf(o.lon); const pts = o.p.map((q) => ll2utm(q[1], q[0], z)); return { ...o, z, pts, a: Math.abs(polyArea(pts)) }; }).sort((a, b) => b.a - a.a)[0];
     let pts = best.pts; if (pts.length > 3 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01) pts = pts.slice(0, -1);
-    G.bound = pts; G.boundSrc = 'kml'; gv('g-zone').value = best.z; gv('g-lat').value = best.lat.toFixed(4);
+    G.bound = pts; G.boundSrc = 'kml'; G.boundCrs = null; gv('g-zone').value = best.z; gv('g-lat').value = best.lat.toFixed(4);
     // draw boundary into drawing
     S.doc.addLayer('GES-SINIR', 3);
     const it = { id: newId(), t: 'pline', layer: 'GES-SINIR', c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) };
@@ -2798,7 +2856,7 @@ CMD.GBOUND = async () => {
   else if (it && it.t === 'geo') { const pr = it.prims.find((x) => x.k === 0 && x.p.length >= 9); if (pr) { const w = xfArr(pr.p, it.M); pts = []; for (let i = 0; i < w.length; i += 3) pts.push([w[i], w[i + 1]]); } }
   if (!pts || pts.length < 3) { msg('Kapalı bir polyline seçin (en az 3 köşe).', 'err'); return; }
   if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
-  G.bound = pts; G.boundSrc = 'draw'; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
+  G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
 };
 CMD.GFILL = async () => {
   if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
@@ -2901,7 +2959,7 @@ function buildParam() {
   const statikVar = pn('p-aks') !== null;
   return {
     proje: { kod: pv('p-kod') || 'AECAD', isin_adi: pv('p-ad') || 'GES Projesi', proje_sahibi: pv('p-yat') || '', yatirimci: pv('p-yat') || '', il_ilce_ada_parsel: pv('p-yer') || '', cizen: 'AeCAD · GES-ÇİZ', revizyon: pv('p-rev') || 'R00', seviye: pv('p-sev') || 'teklif', enlem: gnum('g-lat', 39), tesis_tipi: pv('p-tip') || 'lisanssiz', muellif: pv('p-mue') || '', muellif_unvan: 'Elektrik Mühendisi' },
-    parsel: { koordinat: G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)', cekme_mesafesi_m: pn('p-cekme') ?? 5, max_masa: a.maxMasa, hedef_masa: null },
+    parsel: { koordinat: G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: G.boundCrs || (fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)'), cekme_mesafesi_m: pn('p-cekme') ?? 5, max_masa: a.maxMasa, hedef_masa: null },
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
     masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, parca_carpani: statikVar ? undefined : pc },
     elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: a.invKw, inverter_model: pv('p-invm') || '', trafo_kva: a.kva, trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
@@ -3111,9 +3169,118 @@ function pjInit() {
   pjMasaList(); pjLoad(); pjMasaList(); pjAutoHints(); if (PJ.dm) gv('p-dmtxt').textContent = 'DM: ' + PJ.dm.join(', ');
   gv('p-run').onclick = pjRun; gv('p-open').onclick = () => pjDialog('paftalar'); gv('p-back').onclick = pjBack; gv('p-dm').onclick = () => runCommand('GDM');
   let t = null;
-  for (const id of PJ_IDS) { const el = gv(id); if (!el) continue; el.addEventListener('change', () => { pjAutoHints(); pjSave(); if (PJ.res && id !== 'p-pdf2') { clearTimeout(t); t = setTimeout(pjRun, 900); } }); }
+  for (const id of PJ_IDS) { const el = gv(id); if (!el) continue; el.addEventListener('change', () => { pjAutoHints(); pjSave(); if (PJ.res && id !== 'p-pdf2' && gv('tarif').hidden) { clearTimeout(t); t = setTimeout(pjRun, 900); } }); }
   document.querySelectorAll('.ptab').forEach((b) => b.onclick = () => pjDialog(b.dataset.t));
   gv('pj-close').onclick = () => gv('pjdlg').close();
+}
+
+// ---- Başlangıç ekranı + Proje tarif sayfası ----
+// Tarif sayfası kendi verisini tutmaz: her alan AeCAD'deki GES/Proje alanına (data-to) bağlıdır, tek veri kaynağı odur.
+const TF = {
+  sec: [
+    { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
+    { n: '2', h: 'Arazi', d: 'Parsel sınırını KML/KMZ ile yükleyin ya da köşe koordinatlarını yapıştırın.', arazi: true, f: ['g-lat', 'p-cekme'] },
+    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invm'] },
+    { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
+    { n: '5', h: 'Masa ve statik', d: 'Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', f: ['p-masa', 'p-acik', 'p-aks', 'p-aksa'] },
+    { n: '6', h: 'Elektrik detayı', d: 'İsteğe bağlı. Boş alanlar esaslardaki varsayılanlarla hesaplanır (gri değerler).', det: true, f: ['p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-sebeke', 'p-ogkv', 'p-trg', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-dcmax', 'p-taraf'] },
+    { n: '7', h: 'Çıktı', d: 'Paftalar DXF, etkileşimli HTML, metraj ve kontrol olarak üretilir.', f: ['p-pdf2'] },
+  ],
+};
+function tfLabel(el) { const l = el.closest('label'); if (!l) return el.id; for (const n of l.childNodes) if (n.nodeType === 3 && n.textContent.trim()) return n.textContent.trim(); return el.id; }
+function tfBuild() {
+  const body = gv('tf-body'); body.innerHTML = '';
+  for (const s of TF.sec) {
+    const sec = document.createElement(s.det ? 'details' : 'section'); sec.className = 'tf-sec';
+    const hd = document.createElement(s.det ? 'summary' : 'div'); hd.className = 'tf-h'; hd.innerHTML = '<span class="tf-n"></span><div><h2></h2><p></p></div>';
+    hd.querySelector('.tf-n').textContent = s.n; hd.querySelector('h2').textContent = s.h; hd.querySelector('p').textContent = s.d; sec.appendChild(hd);
+    if (s.arazi) {
+      const box = document.createElement('div'); box.className = 'tf-arazi';
+      box.innerHTML = '<div class="tf-row"><button class="gb" id="tf-kml" type="button">KML / KMZ yükle</button><span class="gi" id="tf-binfo"></span></div>' +
+        '<label class="gf tf-wide">Köşe koordinatları — her satıra bir köşe: Y (sağa) X (yukarı)<textarea id="tf-koor" rows="5" spellcheck="false" placeholder="512345.12  4234567.89&#10;512645.40  4234560.10&#10;…"></textarea></label>' +
+        '<div class="tf-row"><label class="gf">Koordinat sistemi<select id="tf-crs"><option>ITRF96 / TM 3° DOM 27</option><option>ITRF96 / TM 3° DOM 30</option><option selected>ITRF96 / TM 3° DOM 33</option><option>ITRF96 / TM 3° DOM 36</option><option>ITRF96 / TM 3° DOM 39</option><option>ITRF96 / TM 3° DOM 42</option><option>ITRF96 / TM 3° DOM 45</option><option>WGS84 / UTM 35N</option><option>WGS84 / UTM 36N</option><option>WGS84 / UTM 37N</option><option>WGS84 / UTM 38N</option><option>ED50 / UTM 6°</option></select></label><button class="gb" id="tf-koorok" type="button">Koordinatlardan sınır oluştur</button></div>';
+      sec.appendChild(box);
+    }
+    if (s.ds) { const r = document.createElement('div'); r.className = 'tf-row'; r.innerHTML = '<button class="gb" id="tf-ds" type="button">Datasheet yükle (PDF)</button><span class="gi" id="tf-pinfo"></span>'; sec.appendChild(r); }
+    const grid = document.createElement('div'); grid.className = 'tf-grid';
+    for (const id of s.f) {
+      const t = gv(id); if (!t) continue;
+      const lab = document.createElement('label'); lab.className = 'gf' + (t.type === 'checkbox' ? ' ck' : '');
+      let el;
+      if (t.tagName === 'SELECT') { el = document.createElement('select'); }
+      else { el = document.createElement('input'); el.type = t.type; if (t.step) el.step = t.step; el.inputMode = t.type === 'number' ? 'decimal' : ''; }
+      el.dataset.to = id; el.id = 'tf-' + id;
+      if (t.type === 'checkbox') { lab.append(el, document.createTextNode(' ' + (tfLabel(t) === id ? 'PDF pafta seti üret' : tfLabel(t)))); }
+      else lab.append(document.createTextNode(tfLabel(t)), el);
+      el.addEventListener('change', () => { if (t.type === 'checkbox') t.checked = el.checked; else t.value = el.value; t.dispatchEvent(new Event('change')); tfSync(); });
+      grid.appendChild(lab);
+    }
+    sec.appendChild(grid); body.appendChild(sec);
+  }
+  gv('tf-kml').onclick = () => gv('g-kml').click();
+  gv('tf-ds').onclick = () => gv('g-ds').click();
+  gv('tf-koorok').onclick = tfKoor;
+}
+function tfSync() {
+  if (typeof pjAutoHints === 'function') pjAutoHints();
+  for (const el of document.querySelectorAll('#tf-body [data-to]')) {
+    const t = gv(el.dataset.to); if (!t) continue;
+    if (t.tagName === 'SELECT') { if (el.options.length !== t.options.length || [...el.options].some((o, i) => o.textContent !== t.options[i].textContent)) el.innerHTML = t.innerHTML; el.value = t.value; }
+    else if (t.type === 'checkbox') el.checked = t.checked;
+    else { if (document.activeElement !== el) el.value = t.value; el.placeholder = t.placeholder || ''; }
+  }
+  const bi = gv('tf-binfo'); if (bi) bi.textContent = G.bound ? gv('g-binfo').textContent + (G.boundCrs ? ' · ' + G.boundCrs : G.boundSrc === 'kml' ? ' · KML (WGS84/UTM ' + gv('g-zone').value + 'N)' : '') : 'Sınır yok.';
+  const pi = gv('tf-pinfo'); if (pi) { const P = G.panel; pi.textContent = (P.model || '') + ' · ' + P.p + ' Wp · ' + P.L + '×' + P.W + ' mm' + (P.voc ? ' · Voc ' + P.voc + ' V' : ' · Voc/Isc yok'); }
+  tfCheck();
+}
+function tfCheck() {
+  const miss = [];
+  if (!G.bound) miss.push('arazi sınırı');
+  if (!pv('p-ad')) miss.push('işin adı');
+  if (!(pn('p-voc') ?? G.panel.voc)) miss.push('panel Voc (datasheet)');
+  const ok = gv('tf-ok'); const can = !gv('p-run').disabled || PJ.busy;
+  gv('tf-miss').textContent = miss.length ? 'Eksik: ' + miss.join(', ') + '. Eksik değer "VERİ YOK" olarak raporlanır; arazi sınırı zorunlu.' : (can ? 'Bilgiler tamam. Proje esaslara göre çizilecek.' : gv('p-stage').textContent);
+  ok.disabled = !G.bound || !can;
+}
+function tfKoor() {
+  const lines = gv('tf-koor').value.split(/\n+/).map((l) => l.trim()).filter(Boolean); const pts = [];
+  for (const l of lines) {
+    const nums = (l.match(/-?\d+(?:[.,]\d+)?/g) || []).map((s) => parseFloat(s.replace(',', '.'))).filter((v) => Math.abs(v) > 1000);
+    if (nums.length < 2) continue; let [a, b] = nums.slice(-2); if (a > b) [a, b] = [b, a];   // Y (sağa) < X (yukarı) Türkiye'de
+    pts.push([a, b]);
+  }
+  if (pts.length < 3) { msg('En az 3 köşe gerekli (her satırda Y ve X).', 'err'); gv('tf-miss').textContent = 'Koordinat okunamadı: her satıra "Y X" yazın, en az 3 köşe.'; return; }
+  if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01) pts.pop();
+  const crs = gv('tf-crs').value; G.bound = pts; G.boundSrc = 'koordinat'; G.boundCrs = crs;
+  const z = (crs.match(/UTM (\d+)/) || [])[1]; if (z) gv('g-zone').value = z;
+  const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length; gv('g-lat').value = utm2lat(500000, cy, 36).toFixed(3);
+  S.doc.addLayer('GES-SINIR', 3);
+  const it = { id: newId(), t: 'pline', layer: 'GES-SINIR', c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) };
+  addItems([it], 'arazi sınırı'); renderLayers(); zoomTo(itemBB(S.doc, it)); boundInfo(); pitchUpdate(); gesSave();
+  msg('Koordinatlardan arazi sınırı: ' + pts.length + ' köşe, ' + crs + '.', 'res'); tfSync();
+}
+function tfFresh() { if (!S.doc || (S.doc.isSample && !S.doc.undo.length)) blankDoc('Yeni proje'); }
+function startShow(on) { gv('start').hidden = !on; document.body.classList.toggle('ovl', on || !gv('tarif').hidden); }
+function tarifShow(on) {
+  gv('tarif').hidden = !on; document.body.classList.toggle('ovl', on || !gv('start').hidden);
+  if (on) { tfFresh(); tfSync(); gv('tarif').scrollTop = 0; } else { requestAnimationFrame(() => { S.view.resize(); redraw(); }); }
+}
+function toCad(ges) {
+  startShow(false); tarifShow(false);
+  if (ges) document.querySelector('.stab[data-tab="ges"]').click();
+}
+function tarifInit() {
+  tfBuild();
+  gv('st-tarif').onclick = () => { startShow(false); tarifShow(true); };
+  gv('st-cad').onclick = () => toCad(false);
+  gv('bhome').onclick = () => { tarifShow(false); startShow(true); };
+  gv('tf-back').onclick = () => { tarifShow(false); startShow(true); };
+  gv('tf-cad').onclick = () => { pjSave(); toCad(true); };
+  gv('tf-ok').onclick = () => { if (!G.bound) return; toCad(true); setTimeout(pjRun, 60); };
+  // KML/datasheet yüklemeleri GES panelindeki işlevlerle yapılır; bitince tarif sayfası tazelenir
+  for (const id of ['g-kml', 'g-ds']) gv(id).addEventListener('change', () => { let n = 0; const t = setInterval(() => { tfSync(); if (++n > 20) clearInterval(t); }, 300); });
+  new MutationObserver(() => { if (!gv('tarif').hidden) tfCheck(); }).observe(gv('p-stage'), { childList: true, characterData: true, subtree: true });
+  startShow(true);
 }
 
 // ---- bootstrap, events, file io ----
@@ -3231,7 +3398,7 @@ function init() {
     box.append(nm, a, c); document.querySelector('header').insertBefore(box, document.querySelector('.hbtns')); }
   const resize = () => { view.resize(); if (S.fitPending) zoomExtents(false); redraw(); };
   new ResizeObserver(resize).observe($('#stage')); resize();
-  setDoc(sampleDoc(), 'Örnek çizim'); S.textH = 1;
+  setDoc(sampleDoc(), 'Örnek çizim'); S.doc.isSample = true; S.textH = 1; tarifInit();
   msg('AeCAD hazır. Komut yazın (ör. L, PL, C, M) veya soldaki araçları kullanın. Kısayollar için ? yazın.', 'note');
   setPrompt('Komut:');
   setTimeout(() => { libre().then(() => { S.libOk = true; }).catch((e) => { console.error(e); msg('DWG okuyucu yüklenemedi (' + (e.message || e) + '). DXF dosyaları yine açılabilir.', 'err'); }); }, 1200);
@@ -3313,6 +3480,7 @@ function init() {
   });
   document.addEventListener('keydown', (e) => {
     if (e.target.closest('input, textarea, select') && e.target !== inp) return;
+    if (document.body.classList.contains('ovl')) return;
     if (e.key === 'F3') { e.preventDefault(); S.osnap = !S.osnap; msg('Nesne yakalama ' + (S.osnap ? 'açık' : 'kapalı')); updateStatus(); return; }
     if (e.key === 'F8') { e.preventDefault(); S.ortho = !S.ortho; msg('Orto ' + (S.ortho ? 'açık' : 'kapalı')); updateStatus(); return; }
     if (e.key === 'F11') { e.preventDefault(); S.otrack = !S.otrack; S.track = []; msg('Nesne yakalama izi ' + (S.otrack ? 'açık' : 'kapalı')); updateStatus(); return; }

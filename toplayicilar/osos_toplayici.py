@@ -449,6 +449,61 @@ def reaktif_yaz(env, toplam):
         log(f"reaktif: {degisen} saat yazıldı"); return
 
 
+GH_GERILIM = "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/2026_osos_gerilim.json"
+GERILIM = {}
+
+
+def gerilim_topla(key, data):
+    """19 Eki: yük profilindeki faz gerilimleri (sayaç sekonder değeri, V) ve kayıt boşlukları → kesinti/gerilim olayı izi."""
+    for x in data:
+        dt = str(x.get("profileDateTime") or "")
+        if len(dt) < 16:
+            continue
+        v = [sayi_r(x.get(f"voltageL{i}")) for i in (1, 2, 3)]
+        GERILIM.setdefault(key, {}).setdefault(dt[:10], {})[dt[11:16]] = v if any(z is not None for z in v) else None
+
+
+def gerilim_yaz(env):
+    if not GERILIM or not env.get("GITHUB_TOKEN"):
+        return
+    h = {"Authorization": "Bearer " + env["GITHUB_TOKEN"], "Accept": "application/vnd.github+json"}
+    for deneme in range(3):
+        r = requests.get(GH_GERILIM, headers=h, timeout=60)
+        if r.status_code == 404:
+            data, sha = {"aciklama": "OSOS yük profili faz gerilimleri (L1, L2, L3; sayaç sekonder V; null = sayaç gerilim göndermiyor). "
+                                     "15 dk kayıtları; eksik dakika = sayaç o aralığı kaydetmemiş (kesinti izi).", "aboneler": {}}, None
+        else:
+            r.raise_for_status()
+            meta = r.json(); sha = meta["sha"]
+            icerik = meta.get("content")
+            data = json.loads(base64.b64decode(icerik).decode()) if icerik else requests.get(
+                GH_GERILIM, headers={**h, "Accept": "application/vnd.github.raw+json"}, timeout=120).json()
+        degisen = 0
+        for key, gunler in GERILIM.items():
+            ab = data["aboneler"].setdefault(key, {})
+            for t, kay in gunler.items():
+                g = ab.setdefault(t, {})
+                for dk, v in kay.items():
+                    if g.get(dk) != v:
+                        g[dk] = v; degisen += 1
+                ab[t] = dict(sorted(g.items()))
+            for eski in [t for t in ab if t < (datetime.now() - timedelta(days=120)).strftime("%Y-%m-%d")]:
+                del ab[eski]
+            data["aboneler"][key] = dict(sorted(ab.items()))
+        if not degisen:
+            return
+        data["guncelleme"] = datetime.now().astimezone().isoformat(timespec="seconds")
+        govde_ = {"message": f"OSOS gerilim {datetime.now():%Y-%m-%d %H:%M} ({degisen})",
+                  "content": base64.b64encode(json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()).decode()}
+        if sha:
+            govde_["sha"] = sha
+        w = requests.put(GH_GERILIM, headers=h, json=govde_, timeout=120)
+        if w.status_code in (409, 422) and deneme < 2:
+            time.sleep(3); continue
+        w.raise_for_status()
+        log(f"gerilim: {degisen} kayıt yazıldı"); return
+
+
 def reaktif_gecmis(s, env, gun=120, pencere=18):
     """İlk kurulumda geçmişi pencere pencere çeker (her pencere ≤ 2000 kayıt); sürüm işaretiyle bir kez."""
     bugun = datetime.now()
@@ -502,6 +557,10 @@ def main():
                     raise OturumHatasi("boş yanıt (oturum süresi dolmuş olabilir)")
                 satirlar += topla(tesisat, kod, carpan, veri, simdi, wid)
                 try:
+                    gerilim_topla(_key, veri)
+                except Exception as e:
+                    log('gerilim', kod, e)
+                try:
                     REAKTIF.setdefault(_key, {}).update(reaktif_topla(kod, carpan, veri))
                 except Exception as e:
                     log('reaktif', kod, e)
@@ -531,6 +590,10 @@ def main():
             reaktif_yaz(env, REAKTIF)
         except Exception as e:
             log("reaktif yazılamadı:", e)
+        try:
+            gerilim_yaz(env)
+        except Exception as e:
+            log("gerilim yazılamadı:", e)
     cerez_kaydet(s)
     log(f"{len(satirlar)} saatlik satır, {len(hatalar)} hata", "; ".join(hatalar))
     try:

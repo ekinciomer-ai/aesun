@@ -17,10 +17,39 @@ function mplYukle(base) {
   if (!mplP) mplP = (async () => { await py.loadPackage(['cycler', 'kiwisolver', 'pillow', 'python-dateutil', 'pytz', 'six', 'packaging'], { messageCallback: () => {} }); await py.loadPackage(base + 'py/mpl/matplotlib-3.5.2-cp312-cp312-pyodide_2024_0_wasm32.whl', { messageCallback: () => {} }); await py.runPythonAsync("import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot; from matplotlib.backends.backend_pdf import PdfPages"); mpl = true; })();
   return mplP;
 }
+async function yerlesim(id, json) {
+  // Aşama 1: yalnız yerleşim (model + 01 genel + 04 kablo planı), alternatif karşılaştırması için hızlı
+  py.FS.writeFile('/home/pyodide/p.json', new TextEncoder().encode(json));
+  post({ id, stage: 'Yerleşim hesaplanıyor (masa, iç yol, inverter, trafo, kablo güzergâhı)…' });
+  const out = await py.runPythonAsync(`
+import sys, json, os, shutil, importlib, datetime
+sys.path.insert(0, '/home/pyodide'); sys.argv = ['ges_ciz']
+import shapely
+import ges_ciz as g
+importlib.reload(g)
+g.unary_union = lambda gs: shapely.union_all(list(getattr(gs, 'geoms', gs)), grid_size=0.001)
+P = g.birlestir(g.VARSAYILAN, json.load(open('/home/pyodide/p.json', encoding='utf-8')))
+P["proje"]["tarih"] = P["proje"]["tarih"] or datetime.date.today().strftime("%d.%m.%Y")
+M = g.Model(P).kur()
+d = '/home/pyodide/yer'; shutil.rmtree(d, ignore_errors=True); os.makedirs(d)
+kod, rev = P["proje"]["kod"], P["proje"]["revizyon"]
+pf1 = g.pafta_yerlesim(M, P["proje"]["seviye"]); pf4 = g.pafta_kablo(M); pf1.toplam = pf4.toplam = 2
+g.dxf_yaz(M, pf1, d + f"/{kod}_01_GENEL_{rev}.dxf"); g.dxf_yaz(M, pf4, d + f"/{kod}_04_KABLO_{rev}.dxf")
+smax = max(M.stringler, key=lambda s: s["dc_tek_yon_m"]); imax = max(M.inverterler, key=lambda i: i["ac_m"])
+oz = {"masa": len(M.masalar), "modul": len(M.masalar) * M.masa_modul, "string": len(M.stringler), "inverter": len(M.inverterler), "tm": M.n_tr,
+      "ic_yol": len(M.ic_yollar), "dc_lim": round(M.dc_lim, 1), "dc_max": round(smax["dc_tek_yon_m"], 1), "ac_max": round(imax["ac_m"], 0),
+      "yol_gecis": len(M.yol_gecis), "kesisim": len(M.kesisim), "cekme": M.cekme}
+json.dumps({'d': d, 'oz': oz, 'kontrol': M.kontrol, 'metraj': M.metraj, 'uyari': M.uyari}, ensure_ascii=False, default=str)
+`);
+  const o = JSON.parse(out); const files = {}; const tr = [];
+  for (const f of py.FS.readdir(o.d)) { if (f === '.' || f === '..') continue; const b = py.FS.readFile(o.d + '/' + f); files[f] = b; tr.push(b.buffer); }
+  post({ id, ok: true, yer: true, files, oz: o.oz, kontrol: o.kontrol, metraj: o.metraj, uyari: o.uyari }, tr);
+}
 self.onmessage = async (e) => {
-  const { id, base, json, pdf } = e.data;
+  const { id, base, json, pdf, mode } = e.data;
   try {
     await init(base, id);
+    if (mode === 'yer') { await yerlesim(id, json); return; }
     let usePdf = !!pdf;
     if (usePdf && !mpl) {
       post({ id, stage: 'PDF modülü hazırlanıyor (ilk seferde ~7 MB, sonra önbellekten)…' });

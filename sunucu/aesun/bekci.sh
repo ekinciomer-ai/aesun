@@ -61,6 +61,13 @@ if tr.hour>=6 and dun not in m: s.append(f'{dun} enerji maliyeti hesaplanmadı')
 if tr.hour>=5 and dun not in (gel or {}): s.append(f'{dun} F2Pool günlük geliri arşive girmedi')   # havuz günü 03:00'te kapanır; arşiv 03:05/04:05'te alır
 print(json.dumps({'sorun':'; '.join(s) or None},ensure_ascii=False))" 2>/dev/null || echo '{"sorun":"veri denetimi çalışmadı"}')
 
+# 2b+) cPanel köprüsü (n8n ve portal oradan okur): PHP çalışıyor mu? Anahtarsız istek 401 dönmeli; 5xx = PHP hatası (18 Eki: PHP 7.2'ye düştü)
+kk=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 'https://portal.aksarayenerji.net/api/veri.php?a=oku&yol=n8n/pi_nabiz.json')
+pk=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 'https://portal.aksarayenerji.net/api/portal.php')
+if [ "${kk:0:1}" = "5" ] || [ "${pk:0:1}" = "5" ] || [ "$kk" = "000" ]; then
+  veri_json=$(echo "$veri_json" | python3 -c "import json,sys;d=json.load(sys.stdin);m='cPanel köprüsü hata veriyor (veri.php $kk, portal.php $pk) — n8n ve portal girişi etkilenir';d['sorun']=(d.get('sorun')+'; '+m) if d.get('sorun') else m;print(json.dumps(d,ensure_ascii=False))")
+fi
+
 # 2c) güneş fırsat bedeli birimleri fatura sisteminden (gesfin): Sera2 satış faturası "elektrik üretim bedeli" ve "sistem kullanım bedeli"
 #     6 saatte bir n8n/tarife_birim.json olarak iş klonuna yazılır; Veri arşivi işi (git add -A) depoya işler. Yalnız birim fiyat (tutar/kimlik yok).
 tf=$D/.tarife_son; if [ $(( simdi - $(cat $tf 2>/dev/null || echo 0) )) -gt 21600 ]; then

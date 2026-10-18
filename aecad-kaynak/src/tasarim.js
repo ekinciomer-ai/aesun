@@ -47,7 +47,7 @@ function bKapi(o, x0, w, y, ic) { const d = ic > 0 ? 1 : -1; o.push(bL(x0, y, x0
 // Trafo merkezi / DM köşkü — gerçek içerik: duvarlar, bölmeler, OG hücreleri, trafo + yağ çukuru, AG pano, kapılar.
 // Ölçüler varsayılandır (imalatçı köşk ölçüsüyle değiştirilir); uzun kenar x ekseni, ön (kapı) cephe −y.
 function tsKosk(tip, v) {
-  const o = [], t = 0.12, W = +v.en || 2.5, n = Math.max(1, Math.round(+v.hucre || (tip === 'dm' ? 5 : 3)));
+  let adp = null; const o = [], t = 0.12, W = +v.en || 2.5, n = Math.max(1, Math.round(+v.hucre || (tip === 'dm' ? 5 : 3)));
   const kva = +v.kva || 0, harici = tip === 'tm' && kva >= 2500;
   const wOG = Math.max(1.6, n * 0.5 + 0.6), wAG = tip === 'dm' ? 1.6 : 1.4;
   const wTR = tip === 'tm' && !harici ? (kva <= 630 ? 1.8 : kva <= 1250 ? 2.2 : 2.6) : 0;
@@ -68,6 +68,7 @@ function tsKosk(tip, v) {
       o.push(bT(x + w / 2, y0 + t + 0.25 + hT, hT * 0.85, 'TR ' + kva + ' kVA', 30), bT(x + w / 2, (y0 + y1) / 2 - 0.5, hT * 0.7, 'yağ çukuru', 8));
       bKapi(o, x + 0.15, Math.min(1.6, w - 0.3), y0 + t, 1);
     } else {
+      adp = [x + w / 2, y1 - t - hT * 2.4 - 0.6];   // AC kablo bağlantı noktası: ADP alt kenarı
       o.push(bR(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3), bT(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, tip === 'dm' ? 'SCADA / AKÜ' : 'ADP', 3));
       bKapi(o, x + 0.2, 0.9, y0 + t, 1);
     }
@@ -80,7 +81,7 @@ function tsKosk(tip, v) {
   }
   const ad = tip === 'dm' ? 'DM' + (v.not ? ' · ' + v.not : '') : 'TM-' + v.no + ' · ' + fmtNum(kva, 0) + ' kVA · ' + v.gerilim;
   o.push(bT(0, y1 + hT * 2.2, hT * 1.6, ad, 30), bT(0, y0 - hT * 2.2, hT, fmtNum(L, 2) + ' × ' + fmtNum(W, 2) + ' m · ' + n + ' OG hücre', 8));
-  return { ents: o, L: L + (harici ? 4.8 : 0), W };
+  return { ents: o, L: L + (harici ? 4.8 : 0), W, adp };
 }
 function tsInvBlok(v) {
   const o = [], a = 0.6, b = 0.4;
@@ -122,6 +123,7 @@ async function tsKablo(tip) {
     if (r === null || r === undefined) break; if (r.kw === 'G') { if (pts.length > 1) pts.pop(); continue; } if (!Array.isArray(r)) break; pts.push(r);
   }
   if (pts.length < 2) return;
+  if (tip === 'ac') { const d = tsAcDuzelt(pts); if (d) { pts.length = 0; pts.push(...d.pts); msg('AC kablo nizami güzergâha düzeltildi: ' + d.not + '.', 'note'); } }
   const L = tsBoy(pts), g = { ...v, tip }; S.doc.addLayer(T.kat, T.renk);
   const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: pts.map((q) => [q[0], q[1], 0]), ges: g };
   const k = Math.floor(pts.length / 2), a = pts[k - 1], b = pts[k]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
@@ -129,6 +131,43 @@ async function tsKablo(tip) {
   addItems([pl, yz], T.ad.toLowerCase()); renderLayers(); msg(tsEtiket(tip, g, L) + ' eklendi.', 'res');
   if (tip === 'ac' || tip === 'dc') await tsKabloCogalt(tip, g, pts);
 }
+// ---- AC kablo nizami güzergâh: inverterden başlar, MUTLAKA trafo binasındaki AG panodan (ADP) çıkar/biter;
+//      eğik ya da eksik çizim sıra eksenine (sıra açısı) paralel/dik dik açılı parçalara çevrilir, çizilen ara noktalar korunur.
+function tsAdp(it) {   // TM bloğunun ADP noktası (dünya koordinatı)
+  const B = tsKosk('tm', { ...it.ges, no: it.ges.no || 1 }); const a = B.adp || [0, 0], M = it.M;
+  return [M[0] * a[0] + M[1] * a[1] + M[3], M[4] * a[0] + M[5] * a[1] + M[7]];
+}
+function tsAcDuzelt(pts) {
+  if (!pts || pts.length < 2) return null;
+  const inv = tsInverterler(), tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+  if (!tms.length) return null;
+  const son = pts[pts.length - 1], ilk = pts[0];
+  const tm = tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - son[0], tsMerkez(b)[1] - son[1]) < Math.hypot(tsMerkez(a)[0] - son[0], tsMerkez(a)[1] - son[1]) ? b : a));
+  const A = tsAdp(tm);
+  const iv = inv.length ? inv.reduce((a, b) => (Math.hypot(b.p[0] - ilk[0], b.p[1] - ilk[1]) < Math.hypot(a.p[0] - ilk[0], a.p[1] - ilk[1]) ? b : a)) : null;
+  const P0 = iv && Math.hypot(iv.p[0] - ilk[0], iv.p[1] - ilk[1]) <= Math.max(6, 40 / V().s) ? iv.p : ilk;
+  const th = (typeof gnum === 'function' ? gnum('g-ang', 0) : 0) * D2R, c = Math.cos(th), s = Math.sin(th);
+  const toL = (p) => [p[0] * c + p[1] * s, -p[0] * s + p[1] * c], toW = (p) => [p[0] * c - p[1] * s, p[0] * s + p[1] * c];
+  const ara = pts.slice(1, -1).map(toL), out = [toL(P0)];
+  const git = (q) => { const l = out[out.length - 1], dx = q[0] - l[0], dy = q[1] - l[1]; if (Math.abs(dx) > 1e-3 && Math.abs(dy) > 1e-3) out.push(Math.abs(dx) >= Math.abs(dy) ? [q[0], l[1]] : [l[0], q[1]]); out.push(q); };
+  for (const q of ara) git(q);
+  git(toL(A));
+  const tem = [out[0]];   // tekrar ve doğrusal ara noktaları at
+  for (let i = 1; i < out.length; i++) { const q = out[i], l = tem[tem.length - 1]; if (Math.hypot(q[0] - l[0], q[1] - l[1]) < 1e-3) continue; if (tem.length >= 2) { const k = tem[tem.length - 2]; if ((Math.abs(k[0] - l[0]) < 1e-3 && Math.abs(l[0] - q[0]) < 1e-3) || (Math.abs(k[1] - l[1]) < 1e-3 && Math.abs(l[1] - q[1]) < 1e-3)) { tem[tem.length - 1] = q; continue; } } tem.push(q); }
+  return { pts: tem.map(toW), not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP), dik açılı' };
+}
+CMD.GKDUZ = async () => {   // mevcut tüm AC kabloları nizami güzergâha getir
+  const pairs = []; let n = 0;
+  for (const it of [...S.doc.items.values()]) {
+    if (!(it.t === 'pline' && it.ges && it.ges.tip === 'ac')) continue;
+    const d = tsAcDuzelt(it.pts.map((q) => [q[0], q[1]])); if (!d) continue; n++;
+    const np = { ...it, pts: d.pts.map((q) => [q[0], q[1], 0]) }; pairs.push([it, np]);
+    for (const e of S.doc.items.values()) if (e.gesEt === it.id) pairs.push([e, { ...e, s: tsEtiket('ac', it.ges, tsBoy(d.pts)) }]);
+  }
+  if (!n) { msg('Düzeltilecek AC kablo yok (önce Trafo + ile trafo binası ekleyin).', 'err'); return; }
+  replaceItems(pairs, 'kablo düzelt'); msg(n + ' AC kablo nizami güzergâha getirildi; hepsi AG panodan (ADP) çıkıyor.', 'res');
+};
+Object.assign(ALIAS, { GKDUZ: 'GKDUZ', KABLODUZELT: 'GKDUZ' }); Object.assign(LABEL, { GKDUZ: 'KABLO DÜZELT' });
 // ---- AC/DC kabloyu diğer inverterlere çoğalt: çizilen hat ana güzergâh (trunk) sayılır; her inverter en yakın noktadan ona bağlanır ----
 function tsMerkez(it) {
   if (it.t === 'insert') return [it.M[3], it.M[7]];
@@ -161,7 +200,7 @@ async function tsKabloCogalt(tip, g, pts) {
   if (r !== 'ok') return;
   const yeni = []; let top = 0;
   for (const x of kalan) {
-    const y = tsYakin(yol, x.p); const p2 = [x.p, y.q, ...yol.slice(y.i)];
+    const y = tsYakin(yol, x.p); let p2 = [x.p, y.q, ...yol.slice(y.i)]; if (tip === 'ac') { const d = tsAcDuzelt(p2); if (d) p2 = d.pts; }
     const temiz = p2.filter((q, k) => !k || Math.hypot(q[0] - p2[k - 1][0], q[1] - p2[k - 1][1]) > 1e-3); if (temiz.length < 2) continue;
     const Lx = tsBoy(temiz); top += Lx + (+g.pay || 0);
     const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: temiz.map((q) => [q[0], q[1], 0]), ges: { ...g } };

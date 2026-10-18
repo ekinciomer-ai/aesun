@@ -216,6 +216,17 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 }
 
 /* ---- başlangıç + proje tarif ---- */
+.tf-prev { margin: 0; display: grid; gap: 6px; }
+.tf-prev svg { width: 100%; height: auto; max-height: 320px; aspect-ratio: 640 / 300; background: var(--ink); border: 1px solid var(--line); border-radius: 6px; display: block; }
+.tf-prev.empty svg { aspect-ratio: 640 / 120; background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgba(255,255,255,.025) 10px 20px); }
+.tf-prev figcaption { color: var(--muted); font-size: 12.5px; }
+.tf-prev .pb { fill: rgba(95, 211, 138, .10); stroke: var(--ok); stroke-width: 1.6; stroke-linejoin: round; }
+.tf-prev .pb.draft { fill: rgba(255, 210, 63, .08); stroke: var(--warn); stroke-dasharray: 6 4; }
+.tf-prev .pc { fill: none; stroke: var(--red); stroke-width: 1; stroke-dasharray: 4 3; }
+.tf-prev .pv { fill: var(--fg); } .tf-prev .pl { fill: var(--muted); font: 10px var(--mono); }
+.tf-prev .sc path { fill: none; stroke: var(--fg); stroke-width: 1.2; } .tf-prev .sc text, .tf-prev .na text { fill: var(--fg); font: 10px var(--mono); text-anchor: middle; }
+.tf-prev .na path { fill: var(--fg); }
+
 body.ovl #app { visibility: hidden; }
 .ovp { visibility: visible; position: fixed; inset: 0; z-index: 50; background: var(--ink); overflow-y: auto; padding: 24px max(16px, env(safe-area-inset-left, 0px)) 32px; box-sizing: border-box; }
 #start { display: grid; place-items: center; }
@@ -3198,7 +3209,8 @@ function tfBuild() {
       const box = document.createElement('div'); box.className = 'tf-arazi';
       box.innerHTML = '<div class="tf-row"><button class="gb" id="tf-kml" type="button">KML / KMZ yükle</button><span class="gi" id="tf-binfo"></span></div>' +
         '<label class="gf tf-wide">Köşe koordinatları — her satıra bir köşe: Y (sağa) X (yukarı)<textarea id="tf-koor" rows="5" spellcheck="false" placeholder="512345.12  4234567.89&#10;512645.40  4234560.10&#10;…"></textarea></label>' +
-        '<div class="tf-row"><label class="gf">Koordinat sistemi<select id="tf-crs"><option>ITRF96 / TM 3° DOM 27</option><option>ITRF96 / TM 3° DOM 30</option><option selected>ITRF96 / TM 3° DOM 33</option><option>ITRF96 / TM 3° DOM 36</option><option>ITRF96 / TM 3° DOM 39</option><option>ITRF96 / TM 3° DOM 42</option><option>ITRF96 / TM 3° DOM 45</option><option>WGS84 / UTM 35N</option><option>WGS84 / UTM 36N</option><option>WGS84 / UTM 37N</option><option>WGS84 / UTM 38N</option><option>ED50 / UTM 6°</option></select></label><button class="gb" id="tf-koorok" type="button">Koordinatlardan sınır oluştur</button></div>';
+        '<div class="tf-row"><label class="gf">Koordinat sistemi<select id="tf-crs"><option>ITRF96 / TM 3° DOM 27</option><option>ITRF96 / TM 3° DOM 30</option><option selected>ITRF96 / TM 3° DOM 33</option><option>ITRF96 / TM 3° DOM 36</option><option>ITRF96 / TM 3° DOM 39</option><option>ITRF96 / TM 3° DOM 42</option><option>ITRF96 / TM 3° DOM 45</option><option>WGS84 / UTM 35N</option><option>WGS84 / UTM 36N</option><option>WGS84 / UTM 37N</option><option>WGS84 / UTM 38N</option><option>ED50 / UTM 6°</option></select></label><button class="gb" id="tf-koorok" type="button">Koordinatlardan sınır oluştur</button></div>' +
+        '<figure class="tf-prev" id="tf-prev"><svg id="tf-svg" role="img" aria-label="Arazi önizlemesi"></svg><figcaption id="tf-pcap"></figcaption></figure>';
       sec.appendChild(box);
     }
     if (s.ds) { const r = document.createElement('div'); r.className = 'tf-row'; r.innerHTML = '<button class="gb" id="tf-ds" type="button">Datasheet yükle (PDF)</button><span class="gi" id="tf-pinfo"></span>'; sec.appendChild(r); }
@@ -3217,9 +3229,10 @@ function tfBuild() {
     }
     sec.appendChild(grid); body.appendChild(sec);
   }
-  gv('tf-kml').onclick = () => gv('g-kml').click();
+  gv('tf-kml').onclick = () => { gv('tf-koor').value = ''; gv('g-kml').click(); };
   gv('tf-ds').onclick = () => gv('g-ds').click();
   gv('tf-koorok').onclick = tfKoor;
+  let pt = null; gv('tf-koor').addEventListener('input', () => { clearTimeout(pt); pt = setTimeout(tfPreview, 250); });
 }
 function tfSync() {
   if (typeof pjAutoHints === 'function') pjAutoHints();
@@ -3231,7 +3244,7 @@ function tfSync() {
   }
   const bi = gv('tf-binfo'); if (bi) bi.textContent = G.bound ? gv('g-binfo').textContent + (G.boundCrs ? ' · ' + G.boundCrs : G.boundSrc === 'kml' ? ' · KML (WGS84/UTM ' + gv('g-zone').value + 'N)' : '') : 'Sınır yok.';
   const pi = gv('tf-pinfo'); if (pi) { const P = G.panel; pi.textContent = (P.model || '') + ' · ' + P.p + ' Wp · ' + P.L + '×' + P.W + ' mm' + (P.voc ? ' · Voc ' + P.voc + ' V' : ' · Voc/Isc yok'); }
-  tfCheck();
+  tfCheck(); tfPreview();
 }
 function tfCheck() {
   const miss = [];
@@ -3242,16 +3255,45 @@ function tfCheck() {
   gv('tf-miss').textContent = miss.length ? 'Eksik: ' + miss.join(', ') + '. Eksik değer "VERİ YOK" olarak raporlanır; arazi sınırı zorunlu.' : (can ? 'Bilgiler tamam. Proje esaslara göre çizilecek.' : gv('p-stage').textContent);
   ok.disabled = !G.bound || !can;
 }
-function tfKoor() {
-  const lines = gv('tf-koor').value.split(/\n+/).map((l) => l.trim()).filter(Boolean); const pts = [];
-  for (const l of lines) {
+function tfParse(txt) {
+  const pts = [];
+  for (const l of txt.split(/\n+/).map((x) => x.trim()).filter(Boolean)) {
     const nums = (l.match(/-?\d+(?:[.,]\d+)?/g) || []).map((s) => parseFloat(s.replace(',', '.'))).filter((v) => Math.abs(v) > 1000);
     if (nums.length < 2) continue; let [a, b] = nums.slice(-2); if (a > b) [a, b] = [b, a];   // Y (sağa) < X (yukarı) Türkiye'de
     pts.push([a, b]);
   }
+  if (pts.length > 3 && Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01) pts.pop();
+  return pts;
+}
+// Önizleme: sınır (taslak ya da uygulanmış), çekme çizgisi, köşe noktaları, kuzey oku, ölçek çubuğu
+function tfPreview() {
+  const svg = gv('tf-svg'), cap = gv('tf-pcap'); if (!svg) return;
+  const draftTxt = gv('tf-koor').value.trim(); const draft = draftTxt ? tfParse(draftTxt) : [];
+  const useDraft = draft.length >= 3 && !(G.bound && G.boundSrc === 'koordinat' && G._koorTxt === draftTxt);
+  const pts = useDraft ? draft : G.bound;
+  gv('tf-prev').classList.toggle('empty', !pts);
+  if (!pts) { svg.innerHTML = ''; cap.textContent = draft.length ? draft.length + ' köşe okundu; en az 3 köşe gerekli.' : 'KML/KMZ yükleyin ya da köşe koordinatlarını yapıştırın; sınır burada görünür.'; return; }
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), w = x1 - x0 || 1, h = y1 - y0 || 1;
+  const W = 640, H = 300, pad = 26, k = Math.min((W - 2 * pad) / w, (H - 2 * pad) / h);
+  const ox = (W - w * k) / 2, oy = (H - h * k) / 2;
+  const P = (p) => (ox + (p[0] - x0) * k).toFixed(1) + ',' + (H - oy - (p[1] - y0) * k).toFixed(1);
+  let s = '<polygon class="pb' + (useDraft ? ' draft' : '') + '" points="' + pts.map(P).join(' ') + '"/>';
+  const sb = pn('p-cekme') ?? 5;
+  if (sb > 0 && pts.length >= 3) { try { const o = offsetItem({ id: -1, t: 'pline', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(pts)); if (o && o.pts) s += '<polygon class="pc" points="' + o.pts.map(P).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
+  if (pts.length <= 60) s += pts.map((p, i) => '<circle class="pv" r="2.6" cx="' + P(p).split(',')[0] + '" cy="' + P(p).split(',')[1] + '"/>' + (pts.length <= 20 ? '<text class="pl" x="' + (+P(p).split(',')[0] + 4) + '" y="' + (+P(p).split(',')[1] - 4) + '">' + (i + 1) + '</text>' : '')).join('');
+  // ölçek çubuğu: 1-2-5 × 10^n, genişliğin ~%25'i
+  const tgt = w * 0.25, e = Math.pow(10, Math.floor(Math.log10(tgt))), m = [1, 2, 5, 10].find((v) => v * e >= tgt * 0.6) * e, L = m * k;
+  s += '<g class="sc" transform="translate(' + (W - pad - L) + ',' + (H - 10) + ')"><path d="M0 -4V0H' + L.toFixed(1) + 'V-4"/><text x="' + (L / 2).toFixed(1) + '" y="-7">' + (m >= 1000 ? m / 1000 + ' km' : m + ' m') + '</text></g>';
+  s += '<g class="na" transform="translate(' + (W - 18) + ',22)"><path d="M0 -12 6 6 0 2 -6 6Z"/><text y="18">K</text></g>';
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = s;
+  const a = Math.abs(polyArea(pts));
+  cap.textContent = (useDraft ? 'Önizleme (henüz uygulanmadı): ' : 'Arazi sınırı: ') + pts.length + ' köşe · ' + fmtNum(a / 10000, 3) + ' ha · ' + fmtNum(w, 0) + ' × ' + fmtNum(h, 0) + ' m' + (sb > 0 ? ' · kesikli çizgi: ' + fmtNum(sb, 1) + ' m çekme' : '') + (useDraft ? ' — uygulamak için "Koordinatlardan sınır oluştur"' : '');
+}
+function tfKoor() {
+  const pts = tfParse(gv('tf-koor').value);
   if (pts.length < 3) { msg('En az 3 köşe gerekli (her satırda Y ve X).', 'err'); gv('tf-miss').textContent = 'Koordinat okunamadı: her satıra "Y X" yazın, en az 3 köşe.'; return; }
-  if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 0.01) pts.pop();
-  const crs = gv('tf-crs').value; G.bound = pts; G.boundSrc = 'koordinat'; G.boundCrs = crs;
+  const crs = gv('tf-crs').value; G.bound = pts; G.boundSrc = 'koordinat'; G.boundCrs = crs; G._koorTxt = gv('tf-koor').value.trim();
   const z = (crs.match(/UTM (\d+)/) || [])[1]; if (z) gv('g-zone').value = z;
   const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length; gv('g-lat').value = utm2lat(500000, cy, 36).toFixed(3);
   S.doc.addLayer('GES-SINIR', 3);

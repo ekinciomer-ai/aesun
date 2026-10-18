@@ -230,6 +230,9 @@ function sinirSec(p) {
 }
 CMD.GFILL = async () => {
   if (!sinirOto()) { msg('Arazi sınırı yok: kapalı bir polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
+  // arazide masa varsa doldurma yapılmaz (çakışan masa): önce Sıfırla ya da sil
+  const mevcut = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.layer === 'GES-MASA' && pointInPoly([it.M[3], it.M[7]], G.bound));
+  if (mevcut.length) { await askDlg('Çakışan masa var', 'Arazide ' + mevcut.length + ' masa zaten çizili. Yeni doldurma bunlarla çakışır, bu yüzden yapılmadı. Önce mevcut masaları silin ya da "Sıfırla" ile temizleyin.', [['Tamam', 'ok', 'primary']]); msg('Doldurma yapılmadı: arazide ' + mevcut.length + ' masa var (çakışma).', 'err'); return; }
   formToPanel();
   const sel = G.tpl.filter((t) => t.use !== false); if (!sel.length) { msg('Doldurma için en az bir masa şablonu işaretleyin.', 'err'); return; }
   const pitch = pitchUpdate(); if (!pitch) return;

@@ -18,7 +18,7 @@ function toast(t) { const el = $('#toast'); el.textContent = t; el.hidden = fals
 
 // ---------- redraw scheduling ----------
 let _rq = false, _oq = false;
-function redraw() { if (!_rq) { _rq = true; requestAnimationFrame(() => { _rq = false; V().render(); drawOverlay(); updateStatus(); }); } }
+function redraw() { if (!_rq) { _rq = true; requestAnimationFrame(() => { _rq = false; V().render(); drawOverlay(); updateStatus(); if (typeof tasarimTik === 'function') tasarimTik(); }); } }
 function redrawOverlay() { if (!_oq) { _oq = true; requestAnimationFrame(() => { _oq = false; drawOverlay(); }); } }
 
 // ---------- extents ----------

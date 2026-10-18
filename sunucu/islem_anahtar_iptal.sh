@@ -1,7 +1,7 @@
 #!/bin/bash
 # n8n toplayıcı anahtarını ns1'de iptal eder (19 Eki: n8n artık sunucuya anahtarla yazmıyor/okumuyor). Yalnız özet dosyası; değer yok.
 set -e
-docker exec aesun-api python - <<'PY'
+docker exec -i aesun-api python - <<'PY'
 import json, shutil, time
 p = "/veri/anahtarlar.json"
 shutil.copy(p, p + ".yedek-" + time.strftime("%Y%m%d%H%M"))

@@ -7,6 +7,7 @@
    Her model için ham örnek günde bir kez → n8n/cihaz_detay_ornek.json (alan adlarını görmek için).
 2) Sağlam ayarı (havuz + worker) olan her cihazın ayarını yerelde yedekler: ~/.aesun/yedek/ayar/<no>.json
 3) Bekçi (bekci.py): ayarı bozulan ya da takılan cihazı kendisi onarır (bkz. bekci.py).
+4) Sistem bekçisi (sistem_bekci.py): ns1 sunucusu ve periyodik işler (bildirim, arşiv, analiz) zamanında mı; değilse uyarı + yedek yol.
 
 Elle:  ~/SAHA/antminer/venv/bin/python ~/aesun/pi/cihaz_detay.py [--bekci-yok]
 """
@@ -282,6 +283,11 @@ def main():
             log("bekçi hatası:", e); veri["bekci"] = {"hata": str(e)[:200]}
     _, sha = gh(DOSYA)
     gh(DOSYA, veri, sha, "Cihaz detay " + simdi.strftime("%H:%M"))
+    try:
+        import sistem_bekci            # ns1 ve işler dışarıdan denetlenir (10 dk'da bir), gerekirse yedek yol
+        sistem_bekci.calis(simdi)
+    except Exception as e:
+        log("sistem bekçisi hatası:", e)
     try:
         hash_kaydet(mad, kim, simdi)
     except Exception as e:

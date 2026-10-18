@@ -573,6 +573,17 @@ async function genelFatura() {
     + sat_.map(k => '<b style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + esc(fatAd(k)) + '">' + esc(fatAd(k)) + '</b>' + AYK.map((_, i) => { const o = (M[k] || {})[i + 1]; if (!o) return '<span style="height:16px;border-radius:3px;background:#F2F4F7"></span>'; const r = o.rea ? '#6941C6' : o.net >= 0 ? '#1baf7a' : '#eb6834'; return '<span title="' + k + ' ' + AYLAR[i] + ': net ' + say(o.net, 0) + ' ₺' + (o.rea ? ' · reaktif ' + say(o.rea, 0) + ' ₺' : '') + '" style="height:16px;border-radius:3px;background:' + r + '"></span>'; }).join('')).join('') + '</div>'
     + '<div class="k" style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1baf7a"></span> net artı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#eb6834"></span> net eksi</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#6941C6"></span> reaktif cezası</span><span>' + n + ' fatura (fatura tarihine göre)</span></div>';
 }
+// Sol menü altı: sistem bekçisinin son denetimi (ns1 + işler)
+function sistemBekciNot(sb) {
+  let el = document.getElementById('sistemNot');
+  if (!el) { const k = document.getElementById('kaynakNot'); if (!k) return; el = document.createElement('div'); el.id = 'sistemNot'; el.className = 'k'; el.style.cssText = 'color:#9FB0C6;padding:4px 12px 0;font-size:12px'; k.after(el); }
+  if (!sb || !sb.t) { el.textContent = ''; return; }
+  const dk = Math.round((Date.now() - new Date(sb.t).getTime()) / 60000), n = Object.keys(sb.sorunlar || {}).length;
+  const renk = dk > 40 ? '#F5B83D' : n ? '#F04438' : '#2BD27A';
+  el.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + renk + ';margin-right:6px"></span>Sistem bekçisi: '
+    + (dk > 40 ? dk + ' dk önce' : n ? n + ' sorun' : 'işler zamanında') + (sb.bilgi && sb.bilgi.isler ? '<br><span style="opacity:.8">' + Object.entries(sb.bilgi.isler).map(([a, v]) => esc(a.split(' ')[0]) + ' ' + (v == null ? '—' : v + ' dk')).join(' · ') + '</span>' : '');
+  el.title = n ? Object.values(sb.sorunlar).join('\n') : 'ns1 sunucusu, merkez API ve bildirim/arşiv/analiz işleri saha Pi\'sinden 10 dk\'da bir denetleniyor';
+}
 function cizGenel() {
   const { son, osos, mad } = D;
   document.getElementById('baslik').textContent = 'Genel bakış';
@@ -596,6 +607,11 @@ function cizGenel() {
   const fsDk = fs ? (Date.now() - new Date(fs.guncelleme + '+03:00').getTime()) / 60000 : 0;
   if (fs && fsDk > 30) uy.push({ seviye: 'uyari', baslik: 'FusionSolar verisi güncel değil', detay: 'Son kayıt ' + String(fs.guncelleme).slice(0, 16).replace('T', ' ') + '. Bilgisayardaki toplayıcı çalışıyor mu?' });
   if (fs && fsDk <= 30) (fs.alarmlar || []).filter(a => /kritik|major|önemli|critical/i.test(a.seviye || '')).forEach(a => uy.push({ seviye: /kritik|critical/i.test(a.seviye) ? 'kritik' : 'uyari', baslik: 'FusionSolar: ' + (a.alarm || 'alarm'), detay: [a.tesis, a.cihaz, a.zaman].filter(Boolean).join(' · ') }));
+  // Sistem bekçisi (saha Pi'si dışarıdan denetler: ns1 sunucusu, merkez API, bildirim/arşiv/analiz işleri)
+  if (D.sb && D.sb.t) {
+    if ((Date.now() - new Date(D.sb.t).getTime()) / 60000 > 40) uy.push({ seviye: 'uyari', baslik: 'Sistem bekçisi güncel değil', detay: 'Son denetim ' + D.sb.t.slice(0, 16).replace('T', ' ') + ' (saha Pi\'si denetliyor)' });
+    else Object.values(D.sb.sorunlar || {}).forEach(m => uy.push({ seviye: /ulaşılamıyor|çalışmıyor/.test(m) ? 'kritik' : 'uyari', baslik: 'Sistem: ' + m.split(':')[0].split(' — ')[0], detay: m }));
+  }
   uy.sort((a, b) => (a.seviye === 'kritik' ? 0 : 1) - (b.seviye === 'kritik' ? 0 : 1));
   const kritikN = uy.filter(u => u.seviye === 'kritik').length;
   document.getElementById('r-uy').outerHTML = '<span id="r-uy" class="rozet ' + (kritikN ? 'k' : 'u') + '"' + (uy.length ? '' : ' hidden') + '>' + uy.length + '</span>';
@@ -3760,17 +3776,19 @@ function filoSuz(mad, kim) {
 }
 async function yukle(taze) {
   try {
-    const [son, osos, mad, fs, saha, sg, inav] = await Promise.all([
+    const [son, osos, mad, fs, saha, sg, inav, sb] = await Promise.all([
       al('n8n/aesun_son.json', taze).catch(() => null),
       al('2026_osos_endeks.json', taze),
       al('antminer_panel.json', taze).catch(() => null),
       al('n8n/fusionsolar_son.json', taze).catch(() => null),
       al('n8n/saha_saatlik.json', taze).catch(() => null),
       al('n8n/sungrow_son.json', taze).catch(() => null),
-      al('n8n/inavitas_son.json', taze).catch(() => null)
+      al('n8n/inavitas_son.json', taze).catch(() => null),
+      al('n8n/sistem_bekci.json', taze).catch(() => null)
     ]);
     const kim = await al('n8n/cihaz_kimlik.json').catch(() => null);
-    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad: filoSuz(mad, kim), fs, saha, sg, inav, kim };
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad: filoSuz(mad, kim), fs, saha, sg, inav, kim, sb };
+    sistemBekciNot(sb);
     ciz();
   } catch (e) {
     if (!D) document.getElementById('icerik').innerHTML = '<div class="panel hata">Veri okunamadı: ' + esc(e.message || e) + '</div>';

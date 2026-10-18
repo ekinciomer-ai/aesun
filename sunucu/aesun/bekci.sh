@@ -50,6 +50,9 @@ onar() {  # $1 kapsayıcı  $2 neden
   if docker restart -t 20 $1 >/dev/null 2>&1; then ayrinti+=("$1 yeniden başlatıldı: $2"); echo "$iso|$1|$2" >> $D/bekci_onarim.log
   else ayrinti+=("$1 yeniden başlatılamadı: $2"); fi
 }
+yeni() { b=$(docker inspect -f '{{.State.StartedAt}}' $1 2>/dev/null); [ -n "$b" ] && [ $(( simdi - $(date -d "$b" +%s) )) -lt 240 ]; }   # yeni açıldıysa (4 dk) hüküm verme
+if [ -n "$sorun_api" ] && yeni aesun-api; then ayrinti+=("aesun-api yeni başladı, bekleniyor"); sorun_api=""; fi
+if [ -n "$sorun_isler" ] && yeni aesun-isler; then ayrinti+=("aesun-isler yeni başladı, bekleniyor"); sorun_isler=""; fi
 [ -n "$sorun_api" ] && onar aesun-api "$sorun_api"
 [ -n "$sorun_isler" ] && onar aesun-isler "$sorun_isler"
 

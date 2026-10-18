@@ -1746,6 +1746,37 @@ async function cizYonetim() {
     const planSeri = pl_ => { const mv = pl_.map(emalPlan), bv = pl_.map(bas), gf = pl_.map(q => gerF(q, emal(q)));
       const sol = v => v == null ? null : v * 1000 / FKW;                                      // filo ₺/saat → sol eksen ₺/MWh
       return { mv, bv, gf, gmv: gf.map(r => r && r.maliyet != null ? sol(r.maliyet) : null), ggv: gf.map(r => r && r.gelir != null ? sol(r.gelir) : null) }; };
+    // 18 Eki: güneş mahsuplaşması (alan grafiği) — tüketim = güneşin karşıladığı (2,25 ₺/kWh) + şebekeden çekilen (PTF formülü); altta satılan (veriş)
+    const mahsupGrafik = g => {
+      const m = (MADEN.mal || {})[g];
+      if (!m || !m.saat_kwh) return '<section class="panel" style="gap:8px"><div class="bas"><h2>☀ Güneş mahsuplaşması</h2><span class="k">' + tarihK(g) + '</span></div><div class="k">Gün bitince (sayaç ve inverter verisi gelince) gösterilir.</div></section>';
+      const H_ = [...Array(24).keys()], gk = H_.map(h => Number(m.saat_gunes_kwh?.[h]) || 0), sk = H_.map(h => Number(m.saat_kwh?.[h]) || 0);
+      const vk = H_.map(h => Number(m.saat_veris_kwh?.[h]) || 0), uk = H_.map(h => m.saat_uretim_kwh?.[h] == null ? null : Number(m.saat_uretim_kwh[h]));
+      const W = 1000, PL = 46, PR = 12, PT = 14, PH = 210, NH = 70, H = PT + PH + NH + 30, cw = (W - PL - PR) / 24;
+      const ust = Math.ceil(Math.max(50, ...H_.map(h => gk[h] + sk[h]), ...uk.filter(v => v != null)) * 1.1 / 100) * 100, alt = Math.ceil(Math.max(20, ...vk) * 1.15 / 25) * 25;
+      const x = h => PL + h * cw + cw / 2, yU = v => PT + PH - v / ust * PH, yA = v => PT + PH + v / alt * NH;
+      const alan = (ust_, alt_) => 'M' + H_.map(h => x(h).toFixed(1) + ' ' + ust_(h).toFixed(1)).join(' L') + ' L' + H_.slice().reverse().map(h => x(h).toFixed(1) + ' ' + alt_(h).toFixed(1)).join(' L') + 'Z';
+      let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" font-family="inherit">';
+      for (let k = 0; k <= 4; k++) { const v = ust * k / 4, y = yU(v); svg += '<line x1="' + PL + '" x2="' + (W - PR) + '" y1="' + y + '" y2="' + y + '" stroke="#E5EAF0"/><text x="' + (PL - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="#4A5A70">' + say(v) + '</text>'; }
+      svg += '<text x="' + (PL - 6) + '" y="' + (yA(alt) + 4) + '" text-anchor="end" font-size="11" fill="#1E7A3C">−' + say(alt) + '</text>';
+      svg += '<path d="' + alan(h => yU(gk[h]), () => yU(0)) + '" fill="#F0B429" fill-opacity=".85"/>';
+      svg += '<path d="' + alan(h => yU(gk[h] + sk[h]), h => yU(gk[h])) + '" fill="#D9480F" fill-opacity=".55"/>';
+      svg += '<path d="' + alan(() => yA(0), h => yA(vk[h])) + '" fill="#2F9E55" fill-opacity=".6"/>';
+      svg += '<line x1="' + PL + '" x2="' + (W - PR) + '" y1="' + yU(0) + '" y2="' + yU(0) + '" stroke="#10233F"/>';
+      const uP = H_.filter(h => uk[h] != null); if (uP.length > 1) svg += '<path d="M' + uP.map(h => x(h).toFixed(1) + ' ' + yU(uk[h]).toFixed(1)).join(' L') + '" fill="none" stroke="#8A5A00" stroke-width="2.5" stroke-dasharray="6 4"/>';
+      H_.forEach(h => { if (h % 2 === 0) svg += '<text x="' + x(h) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + String(h).padStart(2, '0') + ':00</text>';
+        svg += '<rect x="' + (PL + h * cw) + '" y="' + PT + '" width="' + cw + '" height="' + (PH + NH) + '" fill="transparent" data-tip="' + esc(String(h).padStart(2, '0') + ':00 · tüketim ' + say(gk[h] + sk[h]) + ' kWh\n☀ Güneşten ' + say(gk[h]) + ' kWh × ' + say(GUNES_B / 1000, 2) + ' ₺ = ' + say(gk[h] * GUNES_B / 1000) + ' ₺\n⚡ Şebekeden ' + say(sk[h]) + ' kWh (PTF formülü)\n↓ Satılan (veriş) ' + say(vk[h]) + ' kWh' + (uk[h] != null ? '\nSera-2 üretimi ' + say(uk[h]) + ' kWh' : '')) + '"/>'; });
+      svg += '</svg>';
+      const tG = gk.reduce((a, b) => a + b, 0), tS = sk.reduce((a, b) => a + b, 0), tV = vk.reduce((a, b) => a + b, 0), tU = uk.reduce((a, b) => a + (b || 0), 0);
+      const kut = (ad, v, renk, alt_) => '<div style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;background:#F7F9FC;border-left:5px solid ' + renk + '"><div class="k">' + ad + '</div><div class="num" style="font-size:20px;font-weight:800;color:' + renk + '">' + v + '</div><div class="k">' + alt_ + '</div></div>';
+      const lj = [['#F0B429', 'Güneşin karşıladığı tüketim (2,25 ₺/kWh)'], ['#D9480F', 'Şebekeden çekilen (PTF formülü)'], ['#2F9E55', 'Satılan (veriş, eksenin altı)']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
+        + '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px dashed #8A5A00"></span>Sera-2 üretimi</span>';
+      return '<section class="panel" style="gap:12px"><div class="bas"><h2>☀ Güneş mahsuplaşması · ' + tarihK(g) + '</h2><span class="k">Tek Yıldız 2 · saatlik kWh</span></div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap">' + kut('Güneşten', say(tG) + ' kWh', '#B7791F', say(tG * GUNES_B / 1000) + ' ₺ · %' + say(tG / Math.max(1, tG + tS) * 100) + ' tüketim')
+        + kut('Şebekeden', say(tS) + ' kWh', '#D9480F', say(m.sebeke_tl) + ' ₺ (KDV dahil)') + kut('Satılan', say(tV) + ' kWh', '#1E7A3C', 'üretimin %' + say(tV / Math.max(1, tU) * 100) + '\'i') + kut('Sera-2 üretimi', say(tU) + ' kWh', '#8A5A00', 'güneşin %' + say(tG / Math.max(1, tU) * 100) + '\'i madencilikte') + '</div>'
+        + '<div style="overflow-x:auto">' + svg + '</div><div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + lj + '</div>'
+        + '<div class="k">Güneşin karşıladığı = Pi\'nin ölçtüğü madencilik + yardımcı yük − sayaç çekişi (en çok Sera-2 üretimi kadar). Üretimin yetmediği kısım şebekeden çekilir ve PTF formülüyle; fazlası satılır.</div></section>';
+    };
     window.PLANX = { gunPl, grafik, planSeri, gunToplam, DUR, bugun, ilkGun, tarihK };
     const lejant = '<div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + [['linear-gradient(135deg,#F0B429 50%,#2F9E55 50%)', '☀ Güneşle çalış'], ['#2F9E55', '✓ Kârlı, çalış'], ['#D64545', '✕ Zararlı, uyut']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
       + [['#D9480F', 'Gerçekleşen enerji maliyeti (filo)', ''], ['#7C3AED', 'Gerçekleşen BTC geliri (filo)', ''], ['#F4A27C', 'Planlanan enerji maliyeti (tam yük)', 'dashed'], ['#1E7A3C', 'BTC geliri (başabaş)', 'dashed']].map(([r, t, k]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px ' + (k || 'solid') + ' ' + r + '"></span>' + t + '</span>').join('')
@@ -1768,6 +1799,7 @@ async function cizYonetim() {
           return '<div style="display:flex;gap:8px;flex-wrap:wrap">' + kut(gunAd(gun) + ' enerji maliyeti', say(tg_.m) + ' ₺', '#D9480F', say(tg_.saat, 1) + ' saat · ' + tg_.kaynak.join(', '))
             + kut('BTC geliri', say(tg_.g) + ' ₺', '#7C3AED', gecmisSec ? 'F2Pool günlük kazanç (gerçek)' : 'F2Pool gelene kadar Pi\'nin anlık hash\'i') + kut('Net', (tg_.net > 0 ? '+' : '') + say(tg_.net) + ' ₺', tg_.net < 0 ? '#B42318' : '#1E7A3C', 'Gelir − enerji') + '</div>'; })() : '')
       + '<div id="planGrafik">' + grafik(pl) + '</div>' + lejant
+      + mahsupGrafik(gun)
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;border-radius:10px;background:#F7F9FC"><b style="font-size:14px">Gün gün oynat</b>'
       + '<label class="k" style="display:flex;gap:6px;align-items:center">Başlangıç <input id="anBas" type="date" value="' + anB.bas + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'
       + '<label class="k" style="display:flex;gap:6px;align-items:center">Bitiş <input id="anBit" type="date" value="' + anB.bit + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'

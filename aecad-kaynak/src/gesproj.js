@@ -1,7 +1,7 @@
 // ---- GES project: AeCAD -> GES-ÇİZ (Pyodide worker) -> paftalar, kontrol, keşif, teklif ----
 const PJ = { worker: null, seq: 0, busy: false, again: false, res: null, files: null, srcDoc: null, dm: null, cur: null };
 const PKEY = 'aecad.proje.v1', FKEY = 'aecad.fiyat.v1';
-const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar', 'p-cyol', 'p-cpar', 'p-cdig'];
+const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar', 'p-cyol', 'p-cpar', 'p-cdig', 'p-invn'];
 
 function pjSave() { try { const o = {}; for (const id of PJ_IDS) { const el = gv(id); if (el) o[id] = el.type === 'checkbox' ? el.checked : el.value; } o.dm = PJ.dm; o.duzen = PJ.duzen; localStorage.setItem(PKEY, JSON.stringify(o)); } catch (e) { /* ignore */ } }
 function pjLoad() { try { const o = JSON.parse(localStorage.getItem(PKEY) || 'null'); if (!o) return; for (const id of PJ_IDS) { const el = gv(id); if (el && o[id] !== undefined) { if (el.type === 'checkbox') el.checked = o[id]; else el.value = o[id]; } } PJ.dm = o.dm || null; if (o.duzen) PJ.duzen = o.duzen; } catch (e) { /* ignore */ } }
@@ -46,7 +46,7 @@ function pjAutoHints() {
   if (oz && oz.inverter) { const kw = oz.inv_kw || a.invKw; invSat = 'İNVERTER: ' + oz.inverter + ' × ' + fmtNum(kw, 0) + ' kW = ' + fmtNum(oz.inverter * kw, 0) + ' kW AC · ' + oz.tm + ' trafo (son yerleşim: ' + PJ.aktif.ad + ') · '; }
   else {
     const dc = pn('p-mwp') ? pn('p-mwp') * 1000 : (G.last && G.last.kwp) || null;
-    if (dc) { const nStr = Math.ceil(dc / a.strKwp), nInv = Math.max(Math.ceil(nStr / a.strInv), Math.ceil(dc / (a.ratio * a.invKw))), ac = nInv * a.invKw, nTr = Math.max(1, Math.ceil(Math.min(ac, dc / a.ratio) / (a.kva * 0.9)));
+    if (dc) { const nStr = Math.ceil(dc / a.strKwp), nInv = pn('p-invn') || Math.max(Math.ceil(nStr / a.strInv), Math.ceil(dc / (a.ratio * a.invKw))), ac = nInv * a.invKw, nTr = Math.max(1, Math.ceil(Math.min(ac, dc / a.ratio) / (a.kva * 0.9)));
       invSat = 'İNVERTER ≈ ' + nInv + ' × ' + fmtNum(a.invKw, 0) + ' kW = ' + fmtNum(ac, 0) + ' kW AC · DC ' + fmtNum(dc, 0) + ' kWp · ' + nTr + ' × ' + a.kva + ' kVA trafo (' + (pn('p-mwp') ? 'hedef güçten' : 'arazi doldurmadan') + ' tahmin; kesin adet yerleşimde) · '; }
     else invSat = 'İNVERTER: hedef güç girin ya da araziyi doldurun, adet × güç burada çıkar · ';
   }
@@ -67,7 +67,7 @@ function buildParam0() {
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
     masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, parca_carpani: statikVar ? undefined : pc },
     yol: { ic_yol: (pv('p-icyol') || '1') === '1', ic_genislik_m: pn('p-icw') ?? 5, ic_aralik_m: pn('p-icar') },
-    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
+    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), inverter_adet: pn('p-invn'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
   };
 }
 function pjWorker() {

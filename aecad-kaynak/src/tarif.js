@@ -4,7 +4,7 @@ const TF = {
   sec: [
     { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
     { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur. Önizlemede bir kenara tıklayarak cephesini seçin (genel → yol → komşu parsel → diğer); her tip kendi çekme mesafesini alır.', arazi: true, f: ['g-lat', 'p-cekme', 'p-cyol', 'p-cpar', 'p-cdig'] },
-    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invm'] },
+    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invn', 'p-invm'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
     { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa'] },
     { n: '6', h: 'Elektrik detayı', d: 'İsteğe bağlı. Boş alanlar esaslardaki varsayılanlarla hesaplanır (gri değerler).', det: true, f: ['p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-sebeke', 'p-ogkv', 'p-trg', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-dcmax', 'p-taraf'] },

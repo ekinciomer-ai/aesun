@@ -718,6 +718,8 @@ class Model:
             inv_kw = min(band, key=lambda c: abs(dc_kwp / (_n_inv(c)[0] * c) - dcac))   # DC/AC'yi hedefe en yakın band gücü
             _, MX = _n_inv(inv_kw)
             self._sys = (volt, tger, inv_kw); self._band = band
+        if e.get("inverter_adet"):   # kullanıcı inverter adedi (ör. 10 × 100 kW = 1000 kW): string/inverter = ⌈toplam string / adet⌉
+            MX = max(1, math.ceil(len(self.masalar) * self.str_masa / int(e["inverter_adet"])))
         # (taraf, bant) içinde uç hizası sürekli sıra zincirleri — farklı segmentler karışmaz; her zincir MX'e göre bölünür
         bloklar = []
         for tb in sorted({(q["taraf"], q["band"]) for q in self.masalar}):
@@ -788,6 +790,7 @@ class Model:
                 c = b0 + 1 if i < r0 else b0; out.append(strs[i0:i0 + c]); i0 += c
             return out
         alt_sinir = math.ceil(sum(len(b) for b in bloklar) / MX)
+        if e.get("inverter_adet"): alt_sinir = max(alt_sinir, int(e["inverter_adet"]))   # kullanıcı adedinin altına inilmez
         for _ in range(200):
             if len(bloklar) <= alt_sinir: break
             kucuk = sorted([b for b in bloklar if len(b) < MX], key=len)
@@ -825,7 +828,15 @@ class Model:
             bloklar.sort(key=lambda bl: (yol_no(bl), -sum(q["y"] for q in bl) / len(bl)))
         else:
             bloklar.sort(key=lambda bl: (-sum(q["y"] for q in bl) / len(bl), sum(q["x"] for q in bl) / len(bl)))
+        if e.get("inverter_adet"):   # istenen adede tamamla: en büyük blok ikiye bölünür (eksik adet kalmaz)
+            while len(bloklar) < int(e["inverter_adet"]):
+                bl = max(bloklar, key=len)
+                if len(bl) < 2: break
+                bloklar.remove(bl); h = len(bl) // 2; bloklar += [bl[:h], bl[h:]]
         ni = len(bloklar)
+        if e.get("inverter_adet") and ni > int(e["inverter_adet"]) and not getattr(self, "_adet_uy", False):
+            self._adet_uy = True
+            self.uyari.append(f"İstenen {int(e['inverter_adet'])} inverter; A.1 DC sınırı (tek yön ≤ {self.dc_lim:.0f} m) yüzünden {ni} oldu — modül Vmp/Imp girin ya da iç yol aralığını daraltın.")
         # H.8: TR sayısı GÜÇTEN — tesis AC çıkışı = min(Σ inverter AC, DC / DC-AC hedefi). A.1 yüzünden inverter adedi
         #      artsa bile DC'den fazla AC çıkmaz; kullanıcı trafo gücü verdiyse TR = ⌈AC çıkış / (kVA × %yük)⌉.
         IT = e["inverter_tr"]
@@ -834,7 +845,15 @@ class Model:
         if _kw and _kva and guc:
             _dc = sum(len(b) for b in bloklar) * e["string_modul"] * guc / 1000.0
             _ac = min(ni * _kw, _dc / (e.get("dcac_hedef") or 1.25))
-            _nt = max(1, math.ceil(_ac / (_kva * (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0) - 1e-9))
+            _yk = (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0
+            _nt = max(1, math.ceil(_ac / (_kva * _yk) - 1e-9))
+            if _nt > 1 and _ac / _yk <= TRAFO_KVA_STD[-1]:
+                # H.9 (kullanıcı kuralı 19.10.2026): birden çok küçük trafo yerine tek, bir üst standart trafo (ör. 2 × 1250 → 1 × 1600)
+                yeni = _trafo_sec(_ac / _yk, 400)
+                if not getattr(self, "_tek_trafo", None):
+                    self._tek_trafo = (_kva, yeni)
+                    self.uyari.append(f"Trafo: {_nt} × {_kva} kVA yerine tek {yeni} kVA (çıkış {_ac:,.0f} kW, %{_yk*100:.0f} yük ≤ {yeni*_yk:,.0f} kW).")
+                e["trafo_kva"] = yeni; _nt = 1
             IT = max(1, math.ceil(ni / _nt))
         n_tot = max(1, math.ceil(ni / IT))
         if self.ic_yollar:   # A.7: her TR tek bir iç yolun blokları (TR yollar arası bölünmez); yol başına eşit dağıtım

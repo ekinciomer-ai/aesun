@@ -69,7 +69,7 @@ function tsKosk(tip, v) {
   const kva = +v.kva || 0, harici = tip === 'tm' && kva >= 2500;
   const wOG = Math.max(1.6, n * 0.5 + 0.6), wAG = tip === 'dm' ? 1.6 : 1.4;
   const wTR = tip === 'tm' && !harici ? (kva <= 630 ? 1.8 : kva <= 1250 ? 2.2 : 2.6) : 0;
-  const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', wAG]);
+  const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', tip === 'dm' ? wAG : Math.max(wAG, 1.7)]);
   const Lmin = t * (bol.length + 1) + bol.reduce((a, b) => a + b[1], 0);
   const Lb = +v.boy > 0 ? +v.boy : 0;   // kullanıcı boyu: fazla uzunluk OG ve AG/kumanda bölmelerine paylaştırılır (trafo bölmesi sabit)
   if (Lb > Lmin) { const ek = Lb - Lmin, ix = bol.map((b, k) => (b[0] === 'TRAFO' ? -1 : k)).filter((k) => k >= 0); for (const k of ix) bol[k][1] += ek / ix.length; }
@@ -89,9 +89,17 @@ function tsKosk(tip, v) {
       o.push(bT(x + w / 2, y0 + t + 0.25 + hT, hT * 0.85, 'TR ' + kva + ' kVA', 30), bT(x + w / 2, (y0 + y1) / 2 - 0.5, hT * 0.7, 'yağ çukuru', 8));
       bKapi(o, x + 0.15, Math.min(1.6, w - 0.3), y0 + t, 1);
     } else {
-      adp = [x + w / 2, y1 - t - hT * 2.4 - 0.6];   // AC kablo bağlantı noktası: ADP alt kenarı
-      o.push(bR(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3), bT(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, tip === 'dm' ? 'SCADA / AKÜ' : 'ADP', 3));
-      bKapi(o, x + 0.2, 0.9, y0 + t, 1);
+      if (tip === 'tm' && k === bol.length - 1) {
+        // AG pano (kullanıcı kuralı 19.10.2026): pano binanın enine dik durur, ara duvara dayalı; kapı KISA kenarda (uç duvar), pano kapıya bakar
+        const pd = 0.6, px0 = x + 0.1, yA = y0 + t + 0.25, yB = y1 - t - 0.25;
+        o.push(bR(px0, yA, px0 + pd, yB, 3), bT(px0 + pd / 2, (yA + yB) / 2, hT * 0.8, 'ADP', 3));
+        adp = [px0 + pd / 2, (yA + yB) / 2];   // AC kablo bağlantı noktası: ADP
+        const xw = x + w, dw = Math.min(0.9, W - 2 * t - 0.4), yk = (y0 + y1) / 2 - dw / 2;   // uç duvar kapısı
+        o.push(bL(xw, yk, xw - dw, yk, 7), bA(xw, yk, dw, Math.PI / 2, Math.PI, 8));
+      } else {
+        o.push(bR(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3), bT(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, tip === 'dm' ? 'SCADA / AKÜ' : 'ADP', 3));
+        bKapi(o, x + 0.2, 0.9, y0 + t, 1);
+      }
     }
     x += w + t;
   });

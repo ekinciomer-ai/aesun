@@ -441,6 +441,7 @@ details.tf-sec:not([open]) { gap: 0; }
             <label class="gf">DC/AC oranı<input id="p-ratio" type="number" step="0.01" value="1.25"></label>
             <label class="gf">Trafo gücü (kVA)<select id="p-trafo"><option value="">Oto (yüke göre)</option><option>630</option><option>800</option><option>1000</option><option>1250</option><option>1600</option><option>2000</option><option>2500</option><option>3000</option><option>4000</option><option>5000</option><option selected>5750</option><option>6250</option></select></label>
             <label class="gf">İnverter AC (kW)<input id="p-inv" type="number" step="5" value="300" placeholder="boş = oto"></label>
+            <label class="gf">İnverter adedi<input id="p-invn" type="number" step="1" min="1" placeholder="boş = oto"></label>
           </div>
           <p class="gi" id="p-auto"></p>
           <details class="det">
@@ -3150,7 +3151,7 @@ function gesInit() {
 // ---- GES project: AeCAD -> GES-ÇİZ (Pyodide worker) -> paftalar, kontrol, keşif, teklif ----
 const PJ = { worker: null, seq: 0, busy: false, again: false, res: null, files: null, srcDoc: null, dm: null, cur: null };
 const PKEY = 'aecad.proje.v1', FKEY = 'aecad.fiyat.v1';
-const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar', 'p-cyol', 'p-cpar', 'p-cdig'];
+const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar', 'p-cyol', 'p-cpar', 'p-cdig', 'p-invn'];
 
 function pjSave() { try { const o = {}; for (const id of PJ_IDS) { const el = gv(id); if (el) o[id] = el.type === 'checkbox' ? el.checked : el.value; } o.dm = PJ.dm; o.duzen = PJ.duzen; localStorage.setItem(PKEY, JSON.stringify(o)); } catch (e) { /* ignore */ } }
 function pjLoad() { try { const o = JSON.parse(localStorage.getItem(PKEY) || 'null'); if (!o) return; for (const id of PJ_IDS) { const el = gv(id); if (el && o[id] !== undefined) { if (el.type === 'checkbox') el.checked = o[id]; else el.value = o[id]; } } PJ.dm = o.dm || null; if (o.duzen) PJ.duzen = o.duzen; } catch (e) { /* ignore */ } }
@@ -3195,7 +3196,7 @@ function pjAutoHints() {
   if (oz && oz.inverter) { const kw = oz.inv_kw || a.invKw; invSat = 'İNVERTER: ' + oz.inverter + ' × ' + fmtNum(kw, 0) + ' kW = ' + fmtNum(oz.inverter * kw, 0) + ' kW AC · ' + oz.tm + ' trafo (son yerleşim: ' + PJ.aktif.ad + ') · '; }
   else {
     const dc = pn('p-mwp') ? pn('p-mwp') * 1000 : (G.last && G.last.kwp) || null;
-    if (dc) { const nStr = Math.ceil(dc / a.strKwp), nInv = Math.max(Math.ceil(nStr / a.strInv), Math.ceil(dc / (a.ratio * a.invKw))), ac = nInv * a.invKw, nTr = Math.max(1, Math.ceil(Math.min(ac, dc / a.ratio) / (a.kva * 0.9)));
+    if (dc) { const nStr = Math.ceil(dc / a.strKwp), nInv = pn('p-invn') || Math.max(Math.ceil(nStr / a.strInv), Math.ceil(dc / (a.ratio * a.invKw))), ac = nInv * a.invKw, nTr = Math.max(1, Math.ceil(Math.min(ac, dc / a.ratio) / (a.kva * 0.9)));
       invSat = 'İNVERTER ≈ ' + nInv + ' × ' + fmtNum(a.invKw, 0) + ' kW = ' + fmtNum(ac, 0) + ' kW AC · DC ' + fmtNum(dc, 0) + ' kWp · ' + nTr + ' × ' + a.kva + ' kVA trafo (' + (pn('p-mwp') ? 'hedef güçten' : 'arazi doldurmadan') + ' tahmin; kesin adet yerleşimde) · '; }
     else invSat = 'İNVERTER: hedef güç girin ya da araziyi doldurun, adet × güç burada çıkar · ';
   }
@@ -3216,12 +3217,12 @@ function buildParam0() {
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
     masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, parca_carpani: statikVar ? undefined : pc },
     yol: { ic_yol: (pv('p-icyol') || '1') === '1', ic_genislik_m: pn('p-icw') ?? 5, ic_aralik_m: pn('p-icar') },
-    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
+    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), inverter_adet: pn('p-invn'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
   };
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190215', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190222', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3880,7 +3881,7 @@ function tsKosk(tip, v) {
   const kva = +v.kva || 0, harici = tip === 'tm' && kva >= 2500;
   const wOG = Math.max(1.6, n * 0.5 + 0.6), wAG = tip === 'dm' ? 1.6 : 1.4;
   const wTR = tip === 'tm' && !harici ? (kva <= 630 ? 1.8 : kva <= 1250 ? 2.2 : 2.6) : 0;
-  const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', wAG]);
+  const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', tip === 'dm' ? wAG : Math.max(wAG, 1.7)]);
   const Lmin = t * (bol.length + 1) + bol.reduce((a, b) => a + b[1], 0);
   const Lb = +v.boy > 0 ? +v.boy : 0;   // kullanıcı boyu: fazla uzunluk OG ve AG/kumanda bölmelerine paylaştırılır (trafo bölmesi sabit)
   if (Lb > Lmin) { const ek = Lb - Lmin, ix = bol.map((b, k) => (b[0] === 'TRAFO' ? -1 : k)).filter((k) => k >= 0); for (const k of ix) bol[k][1] += ek / ix.length; }
@@ -3900,9 +3901,17 @@ function tsKosk(tip, v) {
       o.push(bT(x + w / 2, y0 + t + 0.25 + hT, hT * 0.85, 'TR ' + kva + ' kVA', 30), bT(x + w / 2, (y0 + y1) / 2 - 0.5, hT * 0.7, 'yağ çukuru', 8));
       bKapi(o, x + 0.15, Math.min(1.6, w - 0.3), y0 + t, 1);
     } else {
-      adp = [x + w / 2, y1 - t - hT * 2.4 - 0.6];   // AC kablo bağlantı noktası: ADP alt kenarı
-      o.push(bR(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3), bT(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, tip === 'dm' ? 'SCADA / AKÜ' : 'ADP', 3));
-      bKapi(o, x + 0.2, 0.9, y0 + t, 1);
+      if (tip === 'tm' && k === bol.length - 1) {
+        // AG pano (kullanıcı kuralı 19.10.2026): pano binanın enine dik durur, ara duvara dayalı; kapı KISA kenarda (uç duvar), pano kapıya bakar
+        const pd = 0.6, px0 = x + 0.1, yA = y0 + t + 0.25, yB = y1 - t - 0.25;
+        o.push(bR(px0, yA, px0 + pd, yB, 3), bT(px0 + pd / 2, (yA + yB) / 2, hT * 0.8, 'ADP', 3));
+        adp = [px0 + pd / 2, (yA + yB) / 2];   // AC kablo bağlantı noktası: ADP
+        const xw = x + w, dw = Math.min(0.9, W - 2 * t - 0.4), yk = (y0 + y1) / 2 - dw / 2;   // uç duvar kapısı
+        o.push(bL(xw, yk, xw - dw, yk, 7), bA(xw, yk, dw, Math.PI / 2, Math.PI, 8));
+      } else {
+        o.push(bR(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3), bT(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, tip === 'dm' ? 'SCADA / AKÜ' : 'ADP', 3));
+        bKapi(o, x + 0.2, 0.9, y0 + t, 1);
+      }
     }
     x += w + t;
   });
@@ -4109,7 +4118,7 @@ const TF = {
   sec: [
     { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
     { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur. Önizlemede bir kenara tıklayarak cephesini seçin (genel → yol → komşu parsel → diğer); her tip kendi çekme mesafesini alır.', arazi: true, f: ['g-lat', 'p-cekme', 'p-cyol', 'p-cpar', 'p-cdig'] },
-    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invm'] },
+    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invn', 'p-invm'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
     { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa'] },
     { n: '6', h: 'Elektrik detayı', d: 'İsteğe bağlı. Boş alanlar esaslardaki varsayılanlarla hesaplanır (gri değerler).', det: true, f: ['p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-sebeke', 'p-ogkv', 'p-trg', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-dcmax', 'p-taraf'] },

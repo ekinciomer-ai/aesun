@@ -118,6 +118,11 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .srow { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); }
 #curlayer { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
 #bside { display: none; }
+#qdlg { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 18px; max-width: 380px; width: calc(100vw - 48px); }
+#qdlg::backdrop { background: rgba(0,0,0,0.5); }
+#qdlg h3 { margin: 0 0 6px; font-size: 15px; }
+#qdlg p { margin: 0 0 14px; color: var(--muted); line-height: 1.45; }
+#qdlg .qb { display: flex; flex-direction: column; gap: 6px; }
 .pbadge { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .pbadge span { color: var(--fg); }
 .pbadge a { color: var(--red); text-decoration: none; }
@@ -185,6 +190,7 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
     <div class="hbtns">
       <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
       <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>
+      <button class="hb" id="bclose" title="Çizimi kapat"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor"/></svg><span class="k">Kapat</span></button>
       <button class="hb" id="bsave" title="DXF olarak kaydet (Ctrl+S)"><svg viewBox="0 0 16 16"><path d="M8 2v8m-3-3 3 3 3-3M2.5 11v2.5h11V11" fill="none" stroke="currentColor"/></svg><span class="k">Kaydet</span></button>
       <button class="hb" id="bundo" title="Geri al (Ctrl+Z)" aria-label="Geri al"><svg viewBox="0 0 16 16"><path d="M5 3 2 6l3 3M2.5 6H10a3.5 3.5 0 0 1 0 7H6" fill="none" stroke="currentColor"/></svg></button>
       <button class="hb" id="bredo" title="İleri al (Ctrl+Y)" aria-label="İleri al"><svg viewBox="0 0 16 16"><path d="m11 3 3 3-3 3m2.5-3H6a3.5 3.5 0 0 0 0 7h4" fill="none" stroke="currentColor"/></svg></button>
@@ -301,11 +307,12 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
     </div>
     <div class="status">
       <div id="coords">X 0.000   Y 0.000</div>
-      <div class="tog"><button id="bsnap" class="on" title="Nesne yakalama (F3)">YAKALA</button><button id="bortho" title="Orto (F8)">ORTO</button><button id="bgrid" title="Izgara (F7)">IZGARA</button></div>
+      <div class="tog"><button id="bsnap" class="on" title="Nesne yakalama (F3)">YAKALA</button><button id="bortho" title="Orto (F8)">ORTO</button><button id="bgrid" title="Izgara (F7)">IZGARA</button><button id="btrack" class="on" title="Nesne yakalama izi (F11)">İZ</button></div>
       <div class="srow"><span>Katman <span id="curlayer">0</span></span><span id="rinfo"></span></div>
     </div>
   </footer>
   <div id="palette" hidden></div>
+  <dialog id="qdlg"><h3></h3><p></p><div class="qb"></div></dialog>
 </div>
 <script>
 "use strict";
@@ -1562,7 +1569,7 @@ const CANCEL = { cancel: true };
 const S = {
   doc: null, view: null, cmd: null, pending: null, last: null, lastCmd: null, mouse: [0, 0], mw: [0, 0],
   osnap: true, ortho: false, snap: null, preview: null, ghost: null, curLayer: '0', textH: 2.5, offD: 1, filR: 0, dragging: null, hover: null,
-  layerFilter: '', extNote: '',
+  layerFilter: '', extNote: '', otrack: true, track: [], trk: null,
 };
 const V = () => S.view;
 
@@ -1719,15 +1726,42 @@ function computeSnap(X, Y, base) {
   if (!best) return null;
   const w = v.s2w(best.X, best.Y); return { x: w[0], y: w[1], t: best.t };
 }
+// object snap tracking: acquired points + base point give horizontal/vertical alignment paths
+function trackSnap(X, Y, base) {
+  const v = V(), tol = 12; const refs = S.track.map((p) => ({ p, s: v.w2s(p[0], p[1]) }));
+  if (base) refs.push({ p: base, s: v.w2s(base[0], base[1]), base: true });
+  const c = [];
+  for (const r of refs) {
+    if (Math.abs(X - r.s[0]) < tol && Math.abs(Y - r.s[1]) > 4) c.push({ k: 'v', w: r.p[0], p: r.p, d: Math.abs(X - r.s[0]), base: r.base });
+    if (Math.abs(Y - r.s[1]) < tol && Math.abs(X - r.s[0]) > 4) c.push({ k: 'h', w: r.p[1], p: r.p, d: Math.abs(Y - r.s[1]), base: r.base });
+  }
+  if (!c.length) return null;
+  let best = null;
+  for (const a of c) if (a.k === 'v') for (const b of c) if (b.k === 'h' && b.p !== a.p) { const sc = a.d + b.d; if (!best || sc < best.sc) best = { sc, x: a.w, y: b.w, lines: [[a.p, [a.w, b.w]], [b.p, [a.w, b.w]]] }; }
+  if (best) return best;
+  // single path: prefer acquired points over the base point
+  c.sort((p, q) => (p.base ? 1 : 0) - (q.base ? 1 : 0) || p.d - q.d); const h = c[0]; const w = v.s2w(X, Y);
+  const pt = h.k === 'v' ? [h.w, w[1]] : [w[0], h.w];
+  return { x: pt[0], y: pt[1], lines: [[h.p, pt]] };
+}
 function cursorWorld() {
   const v = V(); let [x, y] = v.s2w(S.mouse[0], S.mouse[1]);
   const base = S.pending && S.pending.opts && S.pending.opts.base;
-  S.snap = null;
+  S.snap = null; S.trk = null;
   if (S.osnap && S.pending && S.pending.kind === 'point') {
     const sn = computeSnap(S.mouse[0], S.mouse[1], base); if (sn) { S.snap = sn; return [sn.x, sn.y]; }
   }
+  if (S.otrack && S.pending && S.pending.kind === 'point' && !S.pending.opts.numeric) {
+    const t = trackSnap(S.mouse[0], S.mouse[1], S.ortho ? null : base);
+    if (t) { S.trk = t; return [t.x, t.y]; }
+  }
   if (S.ortho && base) { if (Math.abs(x - base[0]) > Math.abs(y - base[1])) y = base[1]; else x = base[0]; }
   return [x, y];
+}
+function acquireTrack(p) {
+  const i = S.track.findIndex((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < 1e-9);
+  if (i >= 0) S.track.splice(i, 1); else { S.track.push([p[0], p[1]]); if (S.track.length > 5) S.track.shift(); }
+  redrawOverlay();
 }
 
 // ---------- overlay ----------
@@ -1765,6 +1799,21 @@ function drawOverlay() {
     const cs = S.pending && S.pending.kind === 'point' ? 40 : 18;
     o.moveTo(X - cs, Y + 0.5); o.lineTo(X + cs, Y + 0.5); o.moveTo(X + 0.5, Y - cs); o.lineTo(X + 0.5, Y + cs); o.stroke();
     if (!S.pending || S.pending.kind !== 'point') o.strokeRect(X - 4.5, Y - 4.5, 9, 9);
+  }
+  // tracking
+  if (S.pending && S.pending.kind === 'point') {
+    o.strokeStyle = '#5fd38a'; o.lineWidth = 1;
+    for (const p of S.track) { const q = v.w2s(p[0], p[1]); o.beginPath(); o.moveTo(q[0] - 5, q[1]); o.lineTo(q[0] + 5, q[1]); o.moveTo(q[0], q[1] - 5); o.lineTo(q[0], q[1] + 5); o.stroke(); }
+    if (S.trk) {
+      o.setLineDash([6, 5]); o.beginPath();
+      for (const [p, q] of S.trk.lines) { const A = v.w2s(p[0], p[1]), B = v.w2s(q[0], q[1]); const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy) || 1; o.moveTo(A[0], A[1]); o.lineTo(B[0] + dx / L * 2000, B[1] + dy / L * 2000); }
+      o.stroke(); o.setLineDash([]);
+      const P = v.w2s(S.trk.x, S.trk.y); o.beginPath(); o.moveTo(P[0] - 6, P[1] - 6); o.lineTo(P[0] + 6, P[1] + 6); o.moveTo(P[0] + 6, P[1] - 6); o.lineTo(P[0] - 6, P[1] + 6); o.stroke();
+      const base = S.pending.opts && S.pending.opts.base; const from = base || S.trk.lines[0][0];
+      const dd = Math.hypot(S.trk.x - from[0], S.trk.y - from[1]), an = Math.atan2(S.trk.y - from[1], S.trk.x - from[0]) * 180 / Math.PI;
+      const lbl = (S.trk.lines.length > 1 ? 'Kesişim izi' : 'İz') + ': ' + fmtNum(dd, 3) + ' < ' + fmtNum((an + 360) % 360, 1) + '°';
+      o.font = '11px ' + FONT; const tw = o.measureText(lbl).width; o.fillStyle = 'rgba(21,24,28,0.88)'; o.fillRect(P[0] + 12, P[1] + 8, tw + 10, 18); o.fillStyle = '#5fd38a'; o.fillText(lbl, P[0] + 17, P[1] + 21);
+    }
   }
   // snap marker
   if (S.snap) {
@@ -1857,7 +1906,7 @@ async function runCommand(name) {
   document.querySelectorAll('.tool').forEach((b) => b.classList.toggle('on', b.dataset.cmd === key));
   try { await CMD[key](); }
   catch (e) { if (e !== CANCEL) { console.error(e); msg('Hata: ' + (e.message || e), 'err'); } else msg('*İptal*'); }
-  finally { S.cmd = null; S.pending = null; S.ghost = null; S.snap = null; setPrompt('Komut:'); document.querySelectorAll('.tool').forEach((b) => b.classList.remove('on')); redraw(); }
+  finally { S.cmd = null; S.pending = null; S.ghost = null; S.snap = null; S.track = []; S.trk = null; setPrompt('Komut:'); document.querySelectorAll('.tool').forEach((b) => b.classList.remove('on')); redraw(); }
 }
 function cancelCmd() { if (S.pending) { const p = S.pending; S.pending = null; p.rej(CANCEL); } }
 const LABEL = { LINE: 'ÇİZGİ', PLINE: 'POLYLINE', RECT: 'DİKDÖRTGEN', CIRCLE: 'DAİRE', ARC: 'YAY', TEXT: 'YAZI', DIMLIN: 'DOĞRUSAL ÖLÇÜ', DIMALI: 'HİZALI ÖLÇÜ', POINT: 'NOKTA', MOVE: 'TAŞI', COPY: 'KOPYALA', ROTATE: 'DÖNDÜR', SCALE: 'ÖLÇEKLE', MIRROR: 'AYNALA', OFFSET: 'OFSET', TRIM: 'BUDA', FILLET: 'KÖŞE', ERASE: 'SİL', EXPLODE: 'PATLAT', DIST: 'MESAFE', AREA: 'ALAN', ZOOM: 'ZOOM', UNDO: 'GERİ AL', REDO: 'İLERİ AL', TEXTH: 'YAZI YÜKSEKLİĞİ', LAYER: 'KATMAN', IDPT: 'KOORDİNAT', LIST: 'LİSTE' };
@@ -2270,7 +2319,7 @@ function updateProps() {
 function updateStatus() {
   const w = S.mw; $('#coords').textContent = 'X ' + fmtNum(w[0], 3) + '   Y ' + fmtNum(w[1], 3);
   $('#curlayer').textContent = S.curLayer;
-  $('#bsnap').classList.toggle('on', S.osnap); $('#bortho').classList.toggle('on', S.ortho); $('#bgrid').classList.toggle('on', !!V().gridOn);
+  $('#bsnap').classList.toggle('on', S.osnap); $('#bortho').classList.toggle('on', S.ortho); $('#bgrid').classList.toggle('on', !!V().gridOn); $('#btrack').classList.toggle('on', S.otrack);
   $('#rinfo').textContent = S.doc ? S.doc.items.size.toLocaleString('tr') + ' nesne · ' + Math.round(V().lastMs) + ' ms' : '';
 }
 
@@ -2826,6 +2875,8 @@ function init() {
     if (d && d.kind === 'maybe' && Math.hypot(X - d.x0, Y - d.y0) > 5) { d.kind = 'win'; }
     if (d && d.kind === 'win') { d.x1 = X; d.y1 = Y; }
     S.mw = S.pending && S.pending.kind === 'point' ? cursorWorld() : view.s2w(X, Y);
+    clearTimeout(init._acq);
+    if (S.otrack && S.snap && S.pending && S.pending.kind === 'point' && S.snap.t !== 'NEA' && S.snap.t !== 'PER') { const sp = [S.snap.x, S.snap.y]; init._acq = setTimeout(() => { if (S.snap && Math.hypot(S.snap.x - sp[0], S.snap.y - sp[1]) < 1e-9) acquireTrack(sp); }, 450); }
     if (!S.pending && !d) { clearTimeout(init._ht); init._ht = setTimeout(() => { const it = pickItem(S.mouse[0], S.mouse[1]); const h = it ? it.id : null; if (h !== S.hover) { S.hover = h; redrawOverlay(); } }, 40); }
     redrawOverlay(); updateStatus();
   });
@@ -2870,6 +2921,7 @@ function init() {
     if (e.target.closest('input, textarea, select') && e.target !== inp) return;
     if (e.key === 'F3') { e.preventDefault(); S.osnap = !S.osnap; msg('Nesne yakalama ' + (S.osnap ? 'açık' : 'kapalı')); updateStatus(); return; }
     if (e.key === 'F8') { e.preventDefault(); S.ortho = !S.ortho; msg('Orto ' + (S.ortho ? 'açık' : 'kapalı')); updateStatus(); return; }
+    if (e.key === 'F11') { e.preventDefault(); S.otrack = !S.otrack; S.track = []; msg('Nesne yakalama izi ' + (S.otrack ? 'açık' : 'kapalı')); updateStatus(); return; }
     if (e.key === 'F7') { e.preventDefault(); view.gridOn = !view.gridOn; redraw(); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); if (!S.cmd) runCommand(e.shiftKey ? 'REDO' : 'U'); return; }
     if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) { e.preventDefault(); if (!S.cmd) runCommand('REDO'); return; }
@@ -2889,7 +2941,7 @@ function init() {
   document.querySelectorAll('.tool').forEach((b) => b.addEventListener('click', () => { runCommand(b.dataset.cmd); inp.focus({ preventScroll: true }); }));
   $('#bopen').onclick = () => $('#file').click();
   $('#file').onchange = (e) => { const f = e.target.files[0]; if (f) openFile(f); e.target.value = ''; };
-  $('#bnew').onclick = () => { const d = new Doc(); d.ctx = { blocks: d.blocks, solids: d.solids }; setDoc(d, 'Yeni çizim'); S.textH = 2.5; V().cx = 50; V().cy = 30; V().s = Math.min(V().W, V().H) / 120; redraw(); msg('Yeni çizim. Birim: metre önerilir.'); };
+  $('#bnew').onclick = async () => { if (S.doc && S.doc.dirty && S.doc.undo.length) { const r = await askDlg('Yeni çizim', 'Açık çizimde kaydedilmemiş değişiklikler var.', [['Kaydet ve devam et', 'save', 'primary'], ['Kaydetmeden devam et', 'drop'], ['Vazgeç', null, 'ghost']]); if (!r) return; if (r === 'save') await saveDxf(); } blankDoc('Yeni çizim'); msg('Yeni çizim. Birim: metre önerilir.'); };
   $('#bsave').onclick = saveDxf;
   $('#bundo').onclick = () => !S.cmd && runCommand('U');
   $('#bredo').onclick = () => !S.cmd && runCommand('REDO');
@@ -2897,6 +2949,8 @@ function init() {
   $('#bsnap').onclick = () => { S.osnap = !S.osnap; updateStatus(); };
   $('#bortho').onclick = () => { S.ortho = !S.ortho; updateStatus(); };
   $('#bgrid').onclick = () => { view.gridOn = !view.gridOn; redraw(); };
+  $('#btrack').onclick = () => { S.otrack = !S.otrack; S.track = []; updateStatus(); };
+  $('#bclose').onclick = closeDoc;
   $('#bside').onclick = () => $('#side').classList.toggle('open');
   $('#layerq').oninput = (e) => { S.layerFilter = e.target.value; renderLayers(); };
   $('#lall').onclick = () => { for (const L of S.doc.layers.values()) { L.on = true; L.fz = false; } renderLayers(); redraw(); };
@@ -2911,13 +2965,31 @@ function init() {
   st.addEventListener('drop', (e) => { const f = e.dataTransfer.files[0]; if (f) openFile(f); });
   window.addEventListener('beforeunload', (e) => { if (S.doc && S.doc.dirty && S.doc.undo.length) { e.preventDefault(); e.returnValue = ''; } });
 }
+function blankDoc(name) { const d = new Doc(); d.ctx = { blocks: d.blocks, solids: d.solids }; setDoc(d, name); S.textH = 2.5; V().cx = 50; V().cy = 30; V().s = Math.min(V().W, V().H) / 120; S.fitPending = false; redraw(); }
+function askDlg(title, text, buttons) { // buttons: [[label, value, cls]] -> Promise(value)
+  return new Promise((res) => {
+    const d = $('#qdlg'); d.querySelector('h3').textContent = title; d.querySelector('p').textContent = text; const box = d.querySelector('.qb'); box.innerHTML = '';
+    for (const [l, v, c] of buttons) { const b = document.createElement('button'); b.className = 'gb' + (c ? ' ' + c : ''); b.textContent = l; b.onclick = () => { d.close(); res(v); }; box.appendChild(b); }
+    d.oncancel = () => res(null); d.showModal();
+  });
+}
+async function closeDoc() {
+  if (!S.doc) return; if (S.cmd) cancelCmd();
+  if (S.doc.dirty && S.doc.undo.length) {
+    const r = await askDlg('Çizimi kapat', '“' + S.doc.name + '” üzerinde kaydedilmemiş değişiklikler var.', [['Kaydet ve kapat', 'save', 'primary'], ['Kaydetmeden kapat', 'drop'], ['Vazgeç', null, 'ghost']]);
+    if (!r) return; if (r === 'save') await saveDxf();
+  }
+  const nm = S.doc.name; G.bound = null; if (typeof boundInfo === 'function') boundInfo();
+  blankDoc('Yeni çizim'); msg('“' + nm + '” kapatıldı.');
+}
 function showHelp() {
   const lines = [
     'ÇİZİM  L çizgi · PL polyline · REC dikdörtgen · C daire · A yay (3 nokta) · T yazı · DLI doğrusal ölçü · DAL hizalı ölçü · PO nokta',
     'DÜZENLE  M taşı · CO kopyala · RO döndür · SC ölçekle · MI aynala · O ofset · TR buda · F köşe · E sil · X patlat',
     'ÖLÇ  DI mesafe · AA alan · ID koordinat · LI liste    GÖRÜNÜM  Z zoom (K/T/P) · çift tık boş alana = kapsam',
     'KOORDİNAT  100,200 mutlak · @50,0 göreli · @25<45 kutupsal · sadece sayı = imleç yönünde mesafe',
-    'TUŞLAR  Enter/Boşluk/sağ tık = onay veya son komutu tekrar · Esc iptal · F3 yakalama · F8 orto · F7 ızgara · Del sil · Ctrl+Z/Y',
+    'İZ (F11)  imleci bir uç/orta/merkez noktasında yarım saniye bekletin (yeşil +), sonra yatay/dikey hizasında gezdirin: kesikli iz çıkar, tıklayınca o hizaya oturur',
+    'TUŞLAR  Enter/Boşluk/sağ tık = onay veya son komutu tekrar · Esc iptal · F3 yakalama · F8 orto · F7 ızgara · F11 iz · Del sil · Ctrl+Z/Y',
     'GEZİNME  tekerlek zoom · orta tuş veya Boşluk+sürükle kaydır · sol→sağ pencere: içindekiler · sağ→sol: değenler · Shift+tık seçimden çıkar',
   ];
   for (const l of lines) msg(l, 'help');

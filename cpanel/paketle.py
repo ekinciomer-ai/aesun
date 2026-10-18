@@ -55,7 +55,17 @@ kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.htm
 kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))
 yaz(os.path.join(P, "aecad", "index.html"), oku(os.path.join(DOCS, "aecad", "index.html")).replace("../portal/", "../"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
-shutil.copy(os.path.join(CP, ".htaccess"), P)
+# Portal alt alanı PHP 8.3 ister (str_contains, never, adlandırılmış argümanlar). cPanel sürümü .htaccess işleyicisiyle
+# seçer; bu blok olmadan üst alanın (aksarayenerji.net, PHP 7.2) işleyicisi devreye girer ve api/*.php 500 verir (18 Eki).
+yaz(os.path.join(P, ".htaccess"), oku(os.path.join(CP, ".htaccess")).rstrip() + """
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php83” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
+""")
 kopya(os.path.join(CP, "api"), os.path.join(P, "api"))   # anlık izleme deposu (canli.php)
 yaz(os.path.join(P, "robots.txt"), "User-agent: *\nDisallow: /\n")
 

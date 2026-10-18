@@ -3101,6 +3101,8 @@ CMD.GDM = async () => { const p = await getPoint('DM (dağıtım merkezi / ENH b
 Object.assign(ALIAS, { GDM: 'GDM', PROJE: 'GPROJ', GPROJ: 'GPROJ' }); Object.assign(LABEL, { GDM: 'DM KONUMU', GPROJ: 'GES PROJE' });
 CMD.GPROJ = async () => pjRun();
 function pjInit() {
+  fetch(new URL('py/pyodide-lock.json', document.baseURI).href, { method: 'HEAD', cache: 'no-store' }).then((r) => { if (!r.ok) throw 0; }).catch(() => {
+    gv('p-run').disabled = true; gv('p-stage').textContent = 'Proje üretimi (GES-ÇİZ) bu sayfada çalışmaz: portal.aksarayenerji.net/aecad adresinde ve yerel AeCAD paketinde çalışır.'; gv('p-stage').classList.add('sug'); });
   pjMasaList(); pjLoad(); pjMasaList(); pjAutoHints(); if (PJ.dm) gv('p-dmtxt').textContent = 'DM: ' + PJ.dm.join(', ');
   gv('p-run').onclick = pjRun; gv('p-open').onclick = () => pjDialog('paftalar'); gv('p-back').onclick = pjBack; gv('p-dm').onclick = () => runCommand('GDM');
   let t = null;

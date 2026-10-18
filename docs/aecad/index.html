@@ -3288,7 +3288,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190240', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190246', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4064,10 +4064,19 @@ function tsAcDuzelt(pts) {
   git(toL(A));
   const tem = [out[0]];   // tekrar ve doğrusal ara noktaları at
   for (let i = 1; i < out.length; i++) { const q = out[i], l = tem[tem.length - 1]; if (Math.hypot(q[0] - l[0], q[1] - l[1]) < 1e-3) continue; if (tem.length >= 2) { const k = tem[tem.length - 2]; if ((Math.abs(k[0] - l[0]) < 1e-3 && Math.abs(l[0] - q[0]) < 1e-3) || (Math.abs(k[1] - l[1]) < 1e-3 && Math.abs(l[1] - q[1]) < 1e-3)) { tem[tem.length - 1] = q; continue; } } tem.push(q); }
-  // engel kaçınma (esas A.2): kablo masa, panel ve inverter altından geçmez — sıra açıklıklarından dik açılı en kısa yol
-  const ak = tsAkilliYol(P0, A, tm, iv && iv.it, toL, toW);
-  const yol = ak || tem.map(toW);
-  return { pts: yol, not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP), dik açılı' + (ak ? ', masa/inverter altından geçmeden' : ' (engelsiz yol bulunamadı — elle kontrol edin)') };
+  // engel kaçınma (esas A.2): çizilen güzergâh korunur (eğik/düz fark etmez); yalnız masa, inverter ya da binanın içinden geçen
+  // parça, sıra açıklıklarından dik açılı en kısa yolla değiştirilir. Uçlar inverter ve ADP'ye bağlanır.
+  const eng = tsEngeller(tm, iv && iv.it).filter((e) => !(tsIcinde(P0, e.P) || tsKenarUzak(P0, e.P) < 0.9) && !(e.bina || tsIcinde(A, e.P)));
+  const U = [P0, ...pts.slice(1, -1), A];
+  const yol = [P0]; let dz = 0, bulunamadi = 0;
+  for (let i = 1; i < U.length; i++) {
+    const a = yol[yol.length - 1], b = U[i];
+    if (Math.hypot(b[0] - a[0], b[1] - a[1]) < 1e-3) continue;
+    if (!eng.some((e) => tsKesisir(a, b, e.P))) { yol.push(b); continue; }
+    const r = tsAkilliYol(a, b, tm, iv && iv.it, toL, toW, eng.concat(tsEngeller(tm, iv && iv.it).filter((e) => e.bina)));
+    if (r && r.length >= 2) { yol.push(...r.slice(1)); dz++; } else { yol.push(b); bulunamadi++; }
+  }
+  return { pts: yol, not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP)' + (dz ? ', masa/inverter içinden geçen ' + dz + ' parça sıra açıklığından dolaştırıldı' : ', çizdiğiniz güzergâh korundu') + (bulunamadi ? ' (' + bulunamadi + ' parçada engelsiz yol bulunamadı — elle kontrol edin)' : '') };
 }
 // Özellikler paneli: tasarım öğesi (ya da etiketi) seçiliyken verisi açılır listelerle değişir; etiket, blok ve özet/hesaplar güncellenir
 function tsOzellik(box, items) {
@@ -4105,16 +4114,32 @@ function tsBlokBB(ad) {
   const r = isFinite(x0) ? [x0, y0, x1, y1] : null; _bbC.set(ad, r); return r;
 }
 // Izgara üzerinde dik açılı yol (dönüş cezalı Dijkstra). Engeller: masalar (GES-MASA), inverterler (başlangıç hariç), trafo binası (ADP çevresi hariç).
-function tsAkilliYol(P0, A, tm, invIt, toL, toW) {
-  const engel = [];
+// Engeller (dünya çokgeni): masalar (GES-MASA blok/polyline, doldurma ya da proje paftası), inverterler, trafo/DM binası
+function tsEngeller(tm, invIt) {
+  const out = [];
   for (const it of S.doc.items.values()) {
-    if (it.t !== 'insert' || it === invIt) continue;
-    const masa = it.layer === 'GES-MASA', inv = it.ges && it.ges.tip === 'inv', bina = it === tm || (it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm'));
+    if (it === invIt) continue; const ly = String(it.layer || '').toUpperCase();
+    const masa = ly === 'GES-MASA', inv = (it.ges && it.ges.tip === 'inv') || /^GES-INV/.test(ly), bina = it === tm || (it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm'));
     if (!masa && !inv && !bina) continue;
-    const bb = tsBlokBB(it.block); if (!bb) continue; const M = it.M;
-    const W = [[bb[0], bb[1]], [bb[2], bb[1]], [bb[2], bb[3]], [bb[0], bb[3]]].map(([x, y]) => toL([M[0] * x + M[1] * y + M[3], M[4] * x + M[5] * y + M[7]]));
-    engel.push({ r: [Math.min(...W.map((q) => q[0])), Math.min(...W.map((q) => q[1])), Math.max(...W.map((q) => q[0])), Math.max(...W.map((q) => q[1]))], bina: it === tm });
+    let P = null;
+    if (it.t === 'insert') {
+      const bb = tsBlokBB(it.block), M = it.M;
+      if (bb) P = [[bb[0], bb[1]], [bb[2], bb[1]], [bb[2], bb[3]], [bb[0], bb[3]]].map(([x, y]) => [M[0] * x + M[1] * y + M[3], M[4] * x + M[5] * y + M[7]]);
+      else { const r = itemBB(S.doc, it); if (isFinite(r[0])) P = [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]]]; }
+    } else if (it.t === 'pline' && it.pts && it.pts.length >= 3) P = it.pts.map((q) => [q[0], q[1]]);
+    if (P) out.push({ P, bina: it === tm, it });
   }
+  return out;
+}
+function tsIcinde(p, P) { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { if ((P[i][1] > p[1]) !== (P[j][1] > p[1]) && p[0] < (P[j][0] - P[i][0]) * (p[1] - P[i][1]) / (P[j][1] - P[i][1]) + P[i][0]) c = !c; } return c; }
+function tsKesisir(a, b, P) {   // a–b doğru parçası çokgenin içinden geçiyor mu (kenara değme sayılmaz, ±5 cm)
+  const n = 24; for (let k = 1; k < n; k++) { const t = k / n, q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; if (tsIcinde(q, P) && tsKenarUzak(q, P) > 0.05) return true; }
+  for (let i = 0; i < P.length; i++) { const c = P[i], d = P[(i + 1) % P.length]; const x = segInt(a[0], a[1], b[0], b[1], c[0], c[1], d[0], d[1]); if (x && x.t > 1e-3 && x.t < 1 - 1e-3 && x.u > 1e-3 && x.u < 1 - 1e-3) return true; }
+  return false;
+}
+function tsKenarUzak(q, P) { let m = Infinity; for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length], dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((q[0] - a[0]) * dx + (q[1] - a[1]) * dy) / L2)) : 0; m = Math.min(m, Math.hypot(q[0] - a[0] - t * dx, q[1] - a[1] - t * dy)); } return m; }
+function tsAkilliYol(P0, A, tm, invIt, toL, toW, eng) {
+  const engel = (eng || tsEngeller(tm, invIt)).map((e) => { const W = e.P.map(toL); return { r: [Math.min(...W.map((q) => q[0])), Math.min(...W.map((q) => q[1])), Math.max(...W.map((q) => q[0])), Math.max(...W.map((q) => q[1]))], bina: e.bina }; });
   const a = toL(P0), b = toL(A);
   const xs = [a[0], b[0]], ys = [a[1], b[1]]; for (const e of engel) { xs.push(e.r[0], e.r[2]); ys.push(e.r[1], e.r[3]); }
   // arama alanı: iki uç + 60 m pay (çok büyük sahada tüm engeller değil, ilgili bölge)

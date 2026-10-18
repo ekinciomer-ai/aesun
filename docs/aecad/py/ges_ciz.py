@@ -17,6 +17,7 @@ SURUM = "1.0"
 
 # Standart ekipman güçleri (boyutlandırma için)
 TRAFO_KVA_STD = [1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 5750, 6300]
+TRAFO_KVA_KACINILAN = [1600]            # H.4: özel tasarım bina gerektirir (maliyet) → tek birim seçilmez
 INVERTER_KW_STD = [30, 36, 50, 60, 75, 100, 110, 125, 150, 175, 200, 215, 225, 250, 300, 330, 350]
 
 def _std_ust(x, liste):
@@ -26,6 +27,18 @@ def _std_ust(x, liste):
 def _std_alt(x, liste):
     """x'e eşit veya x'ten küçük en büyük standart (yoksa en küçük)."""
     return next((v for v in reversed(liste) if v <= x + 1e-6), liste[0])
+
+def _trafo_sec(gerek_kva, kacinilan=True):
+    """H.3/H.4: gereken kVA'nın üstü standart trafo; kaçınılan güçler (1600) atlanır."""
+    liste = [v for v in TRAFO_KVA_STD if not (kacinilan and v in TRAFO_KVA_KACINILAN)]
+    return _std_ust(gerek_kva, liste)
+
+def _sistem_sec(trafo_kva):
+    """H.5: trafo gücüne göre AG gerilimi ve uygun inverter güç bandı.
+    ≤ 2000 kVA → OG/0.4 kV çıkış → 100–125 kW inverter; > 2000 kVA → 0.8 kV → 300–350 kW inverter."""
+    if trafo_kva <= 2000:
+        return 400, "33/0,4 kV Dy11 ONAN", [100, 125]
+    return 800, "33/0,8 kV Dy11 ONAN", [300, 350]
 
 # ----------------------------------------------------------------- VARSAYILANLAR
 # Değer = SHAMS-1 TR-1 uygulamasından (statik 826-S04, tek hat R4, yerleşim).
@@ -57,7 +70,7 @@ VARSAYILAN = {
                "dm_bara": {"un_kv": 36, "in_a": 1250, "ik_ka": 25, "malzeme": "Cu"},
                "dm_konum": None, "tm_konumlari": None, "tm_taraf": "dogu",
                "mppt_sayisi": None, "mppt_akim_a": None, "voc_marj_min_pct": 2.0, "dc_tek_yon_max_m": 80.0,
-               "dcac_hedef": 1.25, "inverter_oto": True, "trafo_oto": True, "trafo_yuklenme_max_pct": 90.0,
+               "dcac_hedef": 1.25, "inverter_oto": True, "trafo_oto": True, "trafo_yuklenme_max_pct": 90.0, "trafo_1600_kacin": True,
                "inverter_derinlik_masa": 3, "sebeke_gerilim_kv": None, "dc_fire_pct": 3.0,
                "harici_trafo_min_kva": 2500, "og_gerilim_kv": 33.0, "og_kesit_mm2": 120, "og_kesit_dm_mm2": 240,
                "kappa_cu": 56.0, "kappa_al": 35.0, "og_dusum_max_pct": 7.0, "trafo_yag_l": None,
@@ -143,11 +156,21 @@ def geom_ciz(pf, kat, g, info=None):
 
 # ----------------------------------------------------------------- MODEL
 class Model:
-    """Esaslar (A–F) koda gömülü:
+    """Esaslar (A–H) koda gömülü:
     A.1 DC string tek yön ≤ 80 m · A.2 DC masa üstünden, zorunluysa masa altından; AG masa altından geçmez
     A.3 AG sıra açıklığından · A.4 inverter masa başında (ortasında değil) · A.5 inverter yol tarafında
     A.6 servis yolu/ana kanal parsel kenarında · A.7 masa alanında koridor yok
-    B  açıklık→eksen · çekme 5 m, sığmazsa 4/3/2 · F DC fire %3, kanal ortak hendekten ayrı"""
+    B  açıklık→eksen · çekme 5 m, sığmazsa 4/3/2 · F DC fire %3, kanal ortak hendekten ayrı
+    H  Elektriksel boyutlandırma (18.10.2026):
+    H.1 Saha tümüyle doldurulur → DC (kWp).
+    H.2 AC = DC / (DC/AC hedef); hedef varsayılan 1.25 (aksi belirtilmedikçe). AC verilirse o kullanılır.
+    H.3 Gereken trafo = AC / 0.90 (trafo en çok %90 yüklenir) → standart kVA'dan bir üst değer.
+    H.4 Trafo standardı 1600 kVA'dan kaçınır (özel tasarım bina = maliyet): 1000 → 1250 → 2000 → …;
+        1250 kVA üstü gerekiyorsa bölgeye göre 2×1000 / 2×1250 (tek 1600 yerine).
+    H.5 Gerilim + inverter trafoya göre: trafo ≤ 2000 kVA → AG 0.4 kV → inverter 100–125 kW;
+        trafo > 2000 kVA → AG 0.8 kV → inverter 300–350 kW.
+    H.6 İnverter tek tip (uniform); band içinde DC/AC'yi hedefe en yakın yapan güç. Blok ≈ inv_kW·hedef/string_kWp
+        string; bloklar dengeli (singleton inverter oluşturulmaz)."""
 
     def __init__(self, P):
         self.P = P

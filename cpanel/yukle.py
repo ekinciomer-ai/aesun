@@ -118,7 +118,7 @@ def main():
             paket, boy = [], 0
             for y in liste:
                 b = open(os.path.join(KAYNAK, y), "rb").read()
-                if paket and boy + len(b) > 20 * 1024 * 1024:
+                if paket and boy + len(b) > 8 * 1024 * 1024:   # cPanel tek istekte ~10 MB üstünü 500 ile reddediyor
                     yukle_dizine(hedef, paket); paket, boy = [], 0
                 paket.append((y.rsplit("/", 1)[-1], b)); boy += len(b)
             if paket:

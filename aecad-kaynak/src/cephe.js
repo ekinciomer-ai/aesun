@@ -20,6 +20,7 @@ function cepheKenarlar() {
   if (!G.bound) return []; const B = G.bound;
   return B.map((p, i) => { const q = B[(i + 1) % B.length]; return { i, a: p, b: q, tip: cepheTip(p, q), L: Math.hypot(q[0] - p[0], q[1] - p[1]) }; });
 }
+function segMin(p) { let m = Infinity; for (const k of cepheKenarlar()) m = Math.min(m, segDist(p, k.a, k.b)); return m; }
 function cepheVar() { return cepheKenarlar().some((k) => k.tip); }
 function cepheAta(i, tip) {
   const k = cepheKenarlar()[i]; if (!k) return;
@@ -59,9 +60,9 @@ function cepheCiz() {
   replaceItems([...eski.map((it) => [it, null]), ...yeni.map((n) => [null, n])], 'cephe'); renderLayers();
 }
 CMD.GCEPHE = async () => {
-  if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
   for (;;) {
-    const p = await getPoint('Cepheyi (sınır kenarını) tıklayın — bitirmek için Enter:', {}); if (!Array.isArray(p)) return;
+    const p = await getPoint(G.bound ? 'Cepheyi (sınır kenarını) tıklayın — bitirmek için Enter:' : 'Arazi sınırının bir kenarını tıklayın (kapalı polyline; sınır olarak da seçilir):', {}); if (!Array.isArray(p)) return;
+    if (!G.bound || segMin(p) > 20 / V().s) { const q = V().w2s(p[0], p[1]), it = pickItem(q[0], q[1]); if (it && (it.t === 'pline' || it.t === 'geo') && !sinirSec(p)) continue; if (!G.bound) continue; }
     const K = cepheKenarlar(); let best = null, bd = Infinity;
     for (const k of K) { const d = segDist(p, k.a, k.b); if (d < bd) { bd = d; best = k; } }
     if (!best || bd > 20 / V().s) { msg('Sınır kenarı bulunamadı; kenara daha yakın tıklayın.', 'err'); continue; }

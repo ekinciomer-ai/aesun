@@ -178,14 +178,20 @@ CMD.GSECTION = async () => {
 };
 CMD.GBOUND = async () => {
   const p = await getPoint('Arazi sınırı olan kapalı polyline\'ı tıklayın:', {}); if (!Array.isArray(p)) return;
+  sinirSec(p);
+};
+// tıklanan noktadaki kapalı polyline'ı arazi sınırı yapar (GBOUND ve CEPHE ortak)
+function sinirSec(p) {
   const q = V().w2s(p[0], p[1]); const it = pickItem(q[0], q[1]);
   let pts = null;
   if (it && it.t === 'pline') { const a = [it.pts[0][0], it.pts[0][1]]; const v = it.pts; for (let i = 1; i < v.length; i++) bulgeArcPts(v[i - 1][0], v[i - 1][1], v[i][0], v[i][1], v[i - 1][2], a); if (it.cl) bulgeArcPts(v[v.length - 1][0], v[v.length - 1][1], v[0][0], v[0][1], v[v.length - 1][2], a); pts = []; for (let i = 0; i < a.length; i += 2) pts.push([a[i], a[i + 1]]); }
   else if (it && it.t === 'geo') { const pr = it.prims.find((x) => x.k === 0 && x.p.length >= 9); if (pr) { const w = xfArr(pr.p, it.M); pts = []; for (let i = 0; i < w.length; i += 3) pts.push([w[i], w[i + 1]]); } }
-  if (!pts || pts.length < 3) { msg('Kapalı bir polyline seçin (en az 3 köşe).', 'err'); return; }
+  if (!pts || pts.length < 3) { msg('Kapalı bir polyline seçin (en az 3 köşe).', 'err'); return false; }
   if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
   G.parcels = []; G.parcelIds = []; G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
-};
+  if (typeof cepheCiz === 'function') cepheCiz();
+  return true;
+}
 CMD.GFILL = async () => {
   if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
   formToPanel();

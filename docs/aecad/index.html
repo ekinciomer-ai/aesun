@@ -3012,14 +3012,20 @@ CMD.GSECTION = async () => {
 };
 CMD.GBOUND = async () => {
   const p = await getPoint('Arazi sınırı olan kapalı polyline\'ı tıklayın:', {}); if (!Array.isArray(p)) return;
+  sinirSec(p);
+};
+// tıklanan noktadaki kapalı polyline'ı arazi sınırı yapar (GBOUND ve CEPHE ortak)
+function sinirSec(p) {
   const q = V().w2s(p[0], p[1]); const it = pickItem(q[0], q[1]);
   let pts = null;
   if (it && it.t === 'pline') { const a = [it.pts[0][0], it.pts[0][1]]; const v = it.pts; for (let i = 1; i < v.length; i++) bulgeArcPts(v[i - 1][0], v[i - 1][1], v[i][0], v[i][1], v[i - 1][2], a); if (it.cl) bulgeArcPts(v[v.length - 1][0], v[v.length - 1][1], v[0][0], v[0][1], v[v.length - 1][2], a); pts = []; for (let i = 0; i < a.length; i += 2) pts.push([a[i], a[i + 1]]); }
   else if (it && it.t === 'geo') { const pr = it.prims.find((x) => x.k === 0 && x.p.length >= 9); if (pr) { const w = xfArr(pr.p, it.M); pts = []; for (let i = 0; i < w.length; i += 3) pts.push([w[i], w[i + 1]]); } }
-  if (!pts || pts.length < 3) { msg('Kapalı bir polyline seçin (en az 3 köşe).', 'err'); return; }
+  if (!pts || pts.length < 3) { msg('Kapalı bir polyline seçin (en az 3 köşe).', 'err'); return false; }
   if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
   G.parcels = []; G.parcelIds = []; G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
-};
+  if (typeof cepheCiz === 'function') cepheCiz();
+  return true;
+}
 CMD.GFILL = async () => {
   if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
   formToPanel();
@@ -3145,7 +3151,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190140', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190142', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3643,6 +3649,7 @@ function cepheKenarlar() {
   if (!G.bound) return []; const B = G.bound;
   return B.map((p, i) => { const q = B[(i + 1) % B.length]; return { i, a: p, b: q, tip: cepheTip(p, q), L: Math.hypot(q[0] - p[0], q[1] - p[1]) }; });
 }
+function segMin(p) { let m = Infinity; for (const k of cepheKenarlar()) m = Math.min(m, segDist(p, k.a, k.b)); return m; }
 function cepheVar() { return cepheKenarlar().some((k) => k.tip); }
 function cepheAta(i, tip) {
   const k = cepheKenarlar()[i]; if (!k) return;
@@ -3682,9 +3689,9 @@ function cepheCiz() {
   replaceItems([...eski.map((it) => [it, null]), ...yeni.map((n) => [null, n])], 'cephe'); renderLayers();
 }
 CMD.GCEPHE = async () => {
-  if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
   for (;;) {
-    const p = await getPoint('Cepheyi (sınır kenarını) tıklayın — bitirmek için Enter:', {}); if (!Array.isArray(p)) return;
+    const p = await getPoint(G.bound ? 'Cepheyi (sınır kenarını) tıklayın — bitirmek için Enter:' : 'Arazi sınırının bir kenarını tıklayın (kapalı polyline; sınır olarak da seçilir):', {}); if (!Array.isArray(p)) return;
+    if (!G.bound || segMin(p) > 20 / V().s) { const q = V().w2s(p[0], p[1]), it = pickItem(q[0], q[1]); if (it && (it.t === 'pline' || it.t === 'geo') && !sinirSec(p)) continue; if (!G.bound) continue; }
     const K = cepheKenarlar(); let best = null, bd = Infinity;
     for (const k of K) { const d = segDist(p, k.a, k.b); if (d < bd) { bd = d; best = k; } }
     if (!best || bd > 20 / V().s) { msg('Sınır kenarı bulunamadı; kenara daha yakın tıklayın.', 'err'); continue; }

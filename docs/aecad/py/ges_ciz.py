@@ -520,14 +520,49 @@ class Model:
     def inverter_ata(self):
         """Saha geneli: önce A.1'e uyan inverter blokları, sonra kuzeyden güneye TR'lere eşit dağıtım."""
         e = self.P["elektrik"]
-        K, MX = (self.K_ic if self.ic_yollar and self.K_ic else e["inverter_derinlik_masa"]), e["string_inverter_max"]
+        K = (self.K_ic if self.ic_yollar and self.K_ic else e["inverter_derinlik_masa"])
         L2 = 2 * self.masa_L
         for ms in self.masalar:
             ms.pop("str", None)
             ms["band"] = ms["derinlik"] // K
             sg = self.segs[ms["seg"]]
             ms["cap"] = max(q["loc"].bounds[2] for q in sg) if ms["taraf"] == "E" else min(q["loc"].bounds[0] for q in sg)
-        # (taraf, bant) içinde uç hizası sürekli sıra zincirleri — farklı segmentler karışmaz
+        # H: trafo bandına göre AG gerilimi + uniform inverter gücü → blok hedefi MX (string/inverter).
+        #    Blok hedefi küçülür ama bloklar yine DC-kompakt zincirlerden kurulur (A.1 korunur).
+        self._sys = None
+        MX = e["string_inverter_max"]
+        guc = self.P["modul"]["guc_wp"]
+        if guc and e.get("inverter_oto", True):
+            str_kwp = e["string_modul"] * guc / 1000.0
+            dcac = e.get("dcac_hedef") or 1.25
+            yuk = (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0
+            dc_kwp = len(self.masalar) * self.str_masa * str_kwp
+            trafo_on = _trafo_sec(dc_kwp / dcac / yuk, e.get("trafo_1600_kacin", True))   # gerilim bandı için ön trafo
+            volt, tger, band = _sistem_sec(trafo_on)
+            # DC-kompakt zincirler (uç hizası) — blok hedefi B'ye göre bölünür; zincir < B ise tek blok
+            def _zincirler():
+                zs = []
+                for tb in sorted({(q["taraf"], q["band"]) for q in self.masalar}):
+                    lst = sorted([q for q in self.masalar if (q["taraf"], q["band"]) == tb], key=lambda q: (q["sira"], q["cap"], q["derinlik"]))
+                    zc = []
+                    for q in lst:
+                        ay = [z for z in zc if z["son"] == q["sira"] and z["seg"] == q["seg"]]
+                        if ay: z = ay[0]
+                        else:
+                            ad = [z for z in zc if z["son"] == q["sira"] - 1 and abs(z["cap"] - q["cap"]) <= L2]
+                            z = min(ad, key=lambda z: abs(z["cap"] - q["cap"])) if ad else None
+                            if z is None: z = {"liste": []}; zc.append(z)
+                        z["liste"].append(q); z["son"] = q["sira"]; z["seg"] = q["seg"]; z["cap"] = q["cap"]
+                    zs += [len(z["liste"]) * self.str_masa for z in zc]
+                return zs
+            zlen = _zincirler()
+            def _n_inv(c):
+                B = max(1, round(c * dcac / str_kwp))
+                return sum(math.ceil(n / B) for n in zlen), B
+            inv_kw = min(band, key=lambda c: abs(dc_kwp / (_n_inv(c)[0] * c) - dcac))   # DC/AC'yi hedefe en yakın band gücü
+            _, MX = _n_inv(inv_kw)
+            self._sys = (volt, tger, inv_kw)
+        # (taraf, bant) içinde uç hizası sürekli sıra zincirleri — farklı segmentler karışmaz; her zincir MX'e göre bölünür
         bloklar = []
         for tb in sorted({(q["taraf"], q["band"]) for q in self.masalar}):
             lst = sorted([q for q in self.masalar if (q["taraf"], q["band"]) == tb], key=lambda q: (q["sira"], q["cap"], q["derinlik"]))
@@ -628,52 +663,42 @@ class Model:
             self.tr_gruplari.append(grp)
 
     def _boyutlandir(self):
-        """İnverter ve trafo gücünü hedef DC/AC (vars. 1.25) ve trafo yüklenme sınırına (vars. %90) göre seç.
-        - İnverter sayısı yerleşimden (coğrafi) gelir; gücü hedef DC/AC'yi tutturacak en büyük standarda indirilir
-          (kullanıcının verdiği gücü aşmaz). inverter_oto=False → kullanıcı gücü korunur.
-        - Trafo: her TR için AC ≤ %(trafo_yuklenme_max) olacak şekilde gereken kVA = AC / (yük/100), bir üst standart.
-          Tüm TR'ler için tek tip (en büyük gerektiren) seçilir; metraj/tek hat tutarlı kalır. trafo_oto=False → kullanıcı değeri korunur."""
+        """H: trafo bandına göre UNIFORM inverter gücü + AG gerilimi (inverter_ata'da _sys'e konur);
+        trafo gücü her TR için AC/%yük → bir üst standart (1600'den kaçınılır), tüm TR'ler tek tip (en büyük gereken).
+        inverter_oto=False → kullanıcının inverter_ac_kw'si; trafo_oto=False → kullanıcının trafo_kva'sı korunur."""
         e = self.P["elektrik"]; guc = self.P["modul"]["guc_wp"]
         if not guc or not self.inverterler:
             return
         str_kwp = e["string_modul"] * guc / 1000.0
-        n_inv = len(self.inverterler)
+        dcac = e.get("dcac_hedef") or 1.25
         dc_kwp = len(self.stringler) * str_kwp
-        hedef = e.get("dcac_hedef") or 1.25
-        k_inv = e["inverter_ac_kw"]                              # kullanıcı değeri (varsa üst sınır)
-        # --- inverter gücü: HER inverter kendi bloğuna göre (blok DC/AC ≈ hedef) → tek tip olmaz, aşırı yük önlenir
-        for inv in self.inverterler:
-            blok_kwp = inv["n_str"] * str_kwp
-            if e.get("inverter_oto", True):
-                hedef_kw = blok_kwp / hedef                      # ≤ hedef_kw → blok DC/AC ≥ hedef (güvenli, aşırı yük yok)
-                ust = k_inv or INVERTER_KW_STD[-1]
-                inv["ac_kw"] = _std_alt(min(hedef_kw, ust), INVERTER_KW_STD)
-            else:
-                inv["ac_kw"] = k_inv
-        # geriye dönük: tek skaler okuyan yerler için temsilî güç = en büyük inverter
-        e["inverter_ac_kw"] = max((i["ac_kw"] for i in self.inverterler), default=k_inv)
-        ac_top = sum(i["ac_kw"] for i in self.inverterler)
-        if e.get("inverter_oto", True) and k_inv and ac_top:
-            guc_set = sorted({i["ac_kw"] for i in self.inverterler})
-            self._inv_oto = (k_inv, guc_set, round(dc_kwp / ac_top, 2))
-        # --- trafo gücü (TR başına AC ≤ %yük; bir üst standart; tüm TR'ler tek tip = en büyük gereken)
+        sys = getattr(self, "_sys", None)
+        if sys and e.get("inverter_oto", True):
+            volt, tger, inv_kw = sys
+            onceki = (e["inverter_ac_kw"], e["ag_gerilim_v"])
+            for inv in self.inverterler: inv["ac_kw"] = inv_kw
+            e["inverter_ac_kw"] = inv_kw; e["ag_gerilim_v"] = volt; e["trafo_gerilim"] = tger
+            self._inv_oto = (onceki[0], inv_kw, volt)
+        else:
+            for inv in self.inverterler: inv["ac_kw"] = e["inverter_ac_kw"]
+        ac_top = sum((i.get("ac_kw") or e["inverter_ac_kw"] or 0) for i in self.inverterler)
+        # trafo: TR başına AC ≤ %yük → üst standart (1600 kaçın); tüm TR'ler en büyük gereken
         if e.get("trafo_oto", True) and ac_top:
             yuk = (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0
-            ac_tr = [sum(i["ac_kw"] for i in self.inverterler if i["tr"] == t + 1) for t in range(self.n_tr)]
+            ac_tr = [sum((i.get("ac_kw") or e["inverter_ac_kw"]) for i in self.inverterler if i["tr"] == t + 1) for t in range(self.n_tr)]
             gerek = max((ac / yuk) for ac in ac_tr) if ac_tr else 0
-            sec = _std_ust(gerek, TRAFO_KVA_STD)
+            sec = _trafo_sec(gerek, e.get("trafo_1600_kacin", True))
             if sec != e["trafo_kva"]:
                 self._trafo_oto = (e["trafo_kva"], sec)
             e["trafo_kva"] = sec
         # bilgilendirme
-        if getattr(self, "_inv_oto", None):
-            gs = "/".join(str(x) for x in self._inv_oto[1])
-            self.uyari.append(f"İnverter gücü otomatik ayarlandı (DC/AC hedef {hedef:g}): {n_inv} inverter, "
-                              f"blok başına {gs} kW · toplam {ac_top:.0f} kW AC · plant DC/AC {self._inv_oto[2]} "
-                              f"(önceki giriş {self._inv_oto[0]} kW).")
+        if getattr(self, "_inv_oto", None) and ac_top:
+            self.uyari.append(f"H boyutlandırma: {len(self.inverterler)} × {self._inv_oto[1]} kW inverter @ {self._inv_oto[2]} V AG "
+                              f"= {ac_top:.0f} kW AC · DC {dc_kwp:.0f} kWp · plant DC/AC {dc_kwp/ac_top:.2f} "
+                              f"(hedef {dcac:g}; önceki giriş {self._inv_oto[0]} kW).")
         if getattr(self, "_trafo_oto", None):
             self.uyari.append(f"Trafo gücü {self._trafo_oto[0]}→{self._trafo_oto[1]} kVA otomatik seçildi "
-                              f"(TR başına AC ≤ %{(e.get('trafo_yuklenme_max_pct') or 90):g}).")
+                              f"(TR başına AC ≤ %{(e.get('trafo_yuklenme_max_pct') or 90):g}; 1600 kVA'dan kaçınıldı).")
 
     # ---------------------------------------------------------------- 5) güzergâh
     def _halka_yol(self, p, q):

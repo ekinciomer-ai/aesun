@@ -261,7 +261,7 @@ CMD.GFILL = async () => {
   const eski = (G.fillIds || []).map((id) => S.doc.items.get(id)).filter(Boolean);
   G.fillIds = items.map((it) => it.id);
   replaceItems([...eski.map((it) => [it, null]), ...items.map((n) => [null, n])], 'arazi doldur'); renderLayers();
-  G.last = { cnt, types, mods, kwp, rows: res.rows, area: res.area, pitch };
+  G.last = { cnt, types, mods, kwp, rows: res.rows, area: res.area, pitch }; if (typeof pjAutoHints === 'function') pjAutoHints();
   const lines = types.map((t, i) => (i === 0 ? 'Ana ' : 'Alternatif ') + t.tp.rows + t.tp.orient + t.tp.per + ': ' + cnt[i] + ' masa (' + cnt[i] * t.n + ' modül)');
   const sum = lines.join(' · ') + ' — Toplam ' + mods.toLocaleString('tr') + ' modül · ' + fmtNum(kwp / 1000, 3) + ' MWp DC · ' + res.rows + ' sıra · pitch ' + fmtNum(pitch, 2) + ' m · ' + fmtNum(kwp / (res.area / 10000), 0) + ' kWp/ha';
   const sum2 = sum + (hiza ? ' · ' + hiza : '') + (cepheVar() ? ' · cephe bazlı çekme' : '');

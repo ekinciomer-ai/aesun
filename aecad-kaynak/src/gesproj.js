@@ -40,7 +40,17 @@ function pjAutoHints() {
   set('p-strm', a.strMod); set('p-strinv', a.strInv); set('p-invtr', a.invTr); set('p-aks', a.aks); set('p-aksa', a.aksA);
   const P = G.panel; set('p-voc', P.voc || '—'); set('p-vmp', P.vmp || '—'); set('p-isc', P.isc || '—'); set('p-imp', P.imp || '—'); set('p-kvoc', P.kvoc || '—');
   const spm = Math.round(a.masaMod / a.strMod);
-  gv('p-auto').textContent = (spm > 1 ? '⚠ Seçili masada ' + spm + ' string var; GES-ÇİZ TİP-1 (1 masa = 1 string, 2V13) için kurgulanmıştır, inverter ve trafo sayısı şişebilir. · ' : '') + 'String ' + a.strMod + ' modül (' + fmtNum(a.strKwp, 2) + ' kWp) · inverter başına ≤ ' + a.strInv + ' string → DC/AC ≈ ' + fmtNum(a.strInv * a.strKwp / a.invKw, 2) + ' · trafo başına ≤ ' + a.invTr + ' inverter (' + fmtNum(a.invTr * a.invKw / a.kva * 100, 0) + ' % yük) · ' + (a.maxMasa ? 'hedef ' + a.maxMasa + ' masa' : 'arazinin tamamı') + ' · ayak ' + a.aks + ' aks × ' + fmtNum(a.aksA, 2) + ' m';
+  // inverter adedi: son proje sonucu varsa onun gerçek adedi; yoksa DC'den (hedef güç ya da arazi doldurma) tahmin
+  let invSat = '';
+  const oz = PJ.aktif && PJ.aktif.oz;
+  if (oz && oz.inverter) { const kw = oz.inv_kw || a.invKw; invSat = 'İNVERTER: ' + oz.inverter + ' × ' + fmtNum(kw, 0) + ' kW = ' + fmtNum(oz.inverter * kw, 0) + ' kW AC · ' + oz.tm + ' trafo (son yerleşim: ' + PJ.aktif.ad + ') · '; }
+  else {
+    const dc = pn('p-mwp') ? pn('p-mwp') * 1000 : (G.last && G.last.kwp) || null;
+    if (dc) { const nStr = Math.ceil(dc / a.strKwp), nInv = Math.max(Math.ceil(nStr / a.strInv), Math.ceil(dc / (a.ratio * a.invKw))), ac = nInv * a.invKw, nTr = Math.max(1, Math.ceil(Math.min(ac, dc / a.ratio) / (a.kva * 0.9)));
+      invSat = 'İNVERTER ≈ ' + nInv + ' × ' + fmtNum(a.invKw, 0) + ' kW = ' + fmtNum(ac, 0) + ' kW AC · DC ' + fmtNum(dc, 0) + ' kWp · ' + nTr + ' × ' + a.kva + ' kVA trafo (' + (pn('p-mwp') ? 'hedef güçten' : 'arazi doldurmadan') + ' tahmin; kesin adet yerleşimde) · '; }
+    else invSat = 'İNVERTER: hedef güç girin ya da araziyi doldurun, adet × güç burada çıkar · ';
+  }
+  gv('p-auto').textContent = invSat + (spm > 1 ? '⚠ Seçili masada ' + spm + ' string var; GES-ÇİZ TİP-1 (1 masa = 1 string, 2V13) için kurgulanmıştır, inverter ve trafo sayısı şişebilir. · ' : '') + 'String ' + a.strMod + ' modül (' + fmtNum(a.strKwp, 2) + ' kWp) · inverter başına ≤ ' + a.strInv + ' string → DC/AC ≈ ' + fmtNum(a.strInv * a.strKwp / a.invKw, 2) + ' · trafo başına ≤ ' + a.invTr + ' inverter (' + fmtNum(a.invTr * a.invKw / a.kva * 100, 0) + ' % yük) · ' + (a.maxMasa ? 'hedef ' + a.maxMasa + ' masa' : 'arazinin tamamı') + ' · ayak ' + a.aks + ' aks × ' + fmtNum(a.aksA, 2) + ' m';
 }
 function buildParam() { return pjDuzenUygula(buildParam0()); }
 function buildParam0() {

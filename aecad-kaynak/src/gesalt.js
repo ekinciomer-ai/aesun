@@ -39,7 +39,7 @@ function pjAltSonuc(m) {
       if (PJ.alt.filter((x) => x.durum === 'hazir').length === 1 || a.duzen) { const f = Object.keys(a.files).find((n) => /_01_GENEL_/.test(n)); if (f) { pjOpenPafta(f, true, a.files); PJ.aktif = a; pjDuzenBilgi(); } }
       if (a.duzen) { PJ.duzenBitti = true; msg(a.ad + ' hazır ve açıldı: ' + a.oz.masa + ' masa, ' + a.oz.inverter + ' inverter, ' + a.oz.tm + ' trafo. Kablo planı Yerleşim seçeneklerinde.', 'res'); } }
   }
-  pjAltCiz();
+  pjAltCiz(); pjAutoHints();
   if (PJ.again) { PJ.again = false; const p = PJ.onay; PJ.onay = null; pjRun(p || undefined); return; }
   pjAltSirada();
 }

@@ -19,6 +19,8 @@ function pjMasaList() {
   sel.value = cur !== '' && G.tpl[cur] ? cur : String(def >= 0 ? def : 0);
 }
 // derived (simple mode) values; detay fields override when filled
+// Hedef DC güç kWp girilir; eski kayıtlarda MWp (≤ 50) ise kWp'ye çevrilir
+function hedefKwp() { const v = pn('p-mwp'); if (v === null || !(v > 0)) return null; return v <= 50 ? v * 1000 : v; }
 function pjAuto() {
   const P = G.panel, tp = mainTpl(), d = tplDims(tp);
   const masaMod = tp.rows * tp.per;
@@ -31,8 +33,8 @@ function pjAuto() {
   const invTr = pn('p-invtr') || Math.max(1, Math.floor(kva * 0.9 / invKw));   // trafo marjı ≥ %10
   const span = Math.max(0, d.len + 0.16 - 2 * LEG_IN); const nsp = Math.max(1, Math.ceil(span / LEG_MAX - 1e-9));
   const aks = pn('p-aks') || nsp + 1, aksA = pn('p-aksa') || +(span / nsp).toFixed(3);
-  const mwp = pn('p-mwp'); const masaKwp = masaMod * P.p / 1000;
-  return { tp, d, masaMod, strMod, strKwp, invKw, ratio, kva, strInv, invTr, aks, aksA, maxMasa: mwp ? Math.ceil(mwp * 1000 / masaKwp) : null, masaKwp };
+  const hk = hedefKwp(); const masaKwp = masaMod * P.p / 1000;
+  return { tp, d, masaMod, strMod, strKwp, invKw, ratio, kva, strInv, invTr, aks, aksA, maxMasa: hk ? Math.max(1, Math.floor(hk / masaKwp + 1e-9)) : null, masaKwp };
 }
 function pjAutoHints() {
   if (!gv('p-strm')) return; const a = pjAuto();
@@ -45,12 +47,12 @@ function pjAutoHints() {
   const oz = PJ.aktif && PJ.aktif.oz;
   if (oz && oz.inverter) { const kw = oz.inv_kw || a.invKw; invSat = 'İNVERTER: ' + oz.inverter + ' × ' + fmtNum(kw, 0) + ' kW = ' + fmtNum(oz.inverter * kw, 0) + ' kW AC · ' + oz.tm + ' trafo (son yerleşim: ' + PJ.aktif.ad + ') · '; }
   else {
-    const dc = pn('p-mwp') ? pn('p-mwp') * 1000 : (G.last && G.last.kwp) || null;
+    const dc = hedefKwp() || (G.last && G.last.kwp) || null;
     if (dc) { const nStr = Math.ceil(dc / a.strKwp), nInv = pn('p-invn') || Math.max(Math.ceil(nStr / a.strInv), Math.ceil(dc / (a.ratio * a.invKw))), ac = nInv * a.invKw, nTr = Math.max(1, Math.ceil(Math.min(ac, dc / a.ratio) / (a.kva * 0.9)));
-      invSat = 'İNVERTER ≈ ' + nInv + ' × ' + fmtNum(a.invKw, 0) + ' kW = ' + fmtNum(ac, 0) + ' kW AC · DC ' + fmtNum(dc, 0) + ' kWp · ' + nTr + ' × ' + a.kva + ' kVA trafo (' + (pn('p-mwp') ? 'hedef güçten' : 'arazi doldurmadan') + ' tahmin; kesin adet yerleşimde) · '; }
+      invSat = 'İNVERTER ≈ ' + nInv + ' × ' + fmtNum(a.invKw, 0) + ' kW = ' + fmtNum(ac, 0) + ' kW AC · DC ' + fmtNum(dc, 0) + ' kWp · ' + nTr + ' × ' + a.kva + ' kVA trafo (' + (hedefKwp() ? 'hedef güçten' : 'arazi doldurmadan') + ' tahmin; kesin adet yerleşimde) · '; }
     else invSat = 'İNVERTER: hedef güç girin ya da araziyi doldurun, adet × güç burada çıkar · ';
   }
-  gv('p-auto').textContent = invSat + (spm > 1 ? '⚠ Seçili masada ' + spm + ' string var; GES-ÇİZ TİP-1 (1 masa = 1 string, 2V13) için kurgulanmıştır, inverter ve trafo sayısı şişebilir. · ' : '') + 'String ' + a.strMod + ' modül (' + fmtNum(a.strKwp, 2) + ' kWp) · inverter başına ≤ ' + a.strInv + ' string → DC/AC ≈ ' + fmtNum(a.strInv * a.strKwp / a.invKw, 2) + ' · trafo başına ≤ ' + a.invTr + ' inverter (' + fmtNum(a.invTr * a.invKw / a.kva * 100, 0) + ' % yük) · ' + (a.maxMasa ? 'hedef ' + a.maxMasa + ' masa' : 'arazinin tamamı') + ' · ayak ' + a.aks + ' aks × ' + fmtNum(a.aksA, 2) + ' m';
+  gv('p-auto').textContent = invSat + (spm > 1 ? '⚠ Seçili masada ' + spm + ' string var; GES-ÇİZ TİP-1 (1 masa = 1 string, 2V13) için kurgulanmıştır, inverter ve trafo sayısı şişebilir. · ' : '') + 'String ' + a.strMod + ' modül (' + fmtNum(a.strKwp, 2) + ' kWp) · inverter başına ≤ ' + a.strInv + ' string → DC/AC ≈ ' + fmtNum(a.strInv * a.strKwp / a.invKw, 2) + ' · trafo başına ≤ ' + a.invTr + ' inverter (' + fmtNum(a.invTr * a.invKw / a.kva * 100, 0) + ' % yük) · ' + (a.maxMasa ? 'hedef ' + fmtNum(hedefKwp(), 0) + ' kWp → en çok ' + a.maxMasa + ' masa (' + fmtNum(a.maxMasa * a.masaKwp, 0) + ' kWp)' : 'arazinin tamamı') + ' · ayak ' + a.aks + ' aks × ' + fmtNum(a.aksA, 2) + ' m';
 }
 function buildParam() { return pjDuzenUygula(buildParam0()); }
 function buildParam0() {

@@ -61,7 +61,8 @@ function pjRevizeCoz(txt) {
   if ((v = num(/eğim\D{0,12}(\d{1,2}(?:\.\d)?)/)) !== null) { set.push(() => { mainTpl().tilt = v; renderTpl(); gesSave(); pitchUpdate(); }); yap.push('eğim ' + v + '°'); }
   const cek = num(/çekme\D{0,12}(\d+(?:\.\d+)?)/); if (cek !== null) { set.push(() => { gv('p-cekme').value = cek; }); yap.push('çekme ' + cek + ' m'); }
   const ac = num(/(?:sıra açıklığı|açıklık|sıra arası)\D{0,10}(\d+(?:\.\d+)?)/); if (ac !== null) { set.push(() => { gv('p-acik').value = ac; }); yap.push('sıra açıklığı ' + ac + ' m'); }
-  const mw = num(/(\d+(?:\.\d+)?)\s*mw/); if (mw !== null) { set.push(() => { gv('p-mwp').value = mw; }); yap.push('hedef ' + mw + ' MWp'); }
+  const kwp = num(/(\d+(?:\.\d+)?)\s*kwp/), mw = kwp === null ? num(/(\d+(?:\.\d+)?)\s*mw/) : null; const hk = kwp !== null ? kwp : mw !== null ? mw * 1000 : null; if (hk !== null) { set.push(() => { gv('p-mwp').value = hk; }); yap.push('hedef ' + hk + ' kWp'); }
+  const ia = num(/(\d{1,4})\s*(?:adet\s*)?inverter(?!\D{0,6}kw)/); if (ia !== null) { set.push(() => { gv('p-invn').value = ia; }); yap.push(ia + ' inverter'); }
   if (/tüm arazi|arazinin tamamı|sınırsız/.test(T)) { set.push(() => { gv('p-mwp').value = ''; }); yap.push('arazinin tamamı'); }
   const r = num(/dc\s*\/?\s*ac\D{0,8}(\d\.\d+)/); if (r !== null) { set.push(() => { gv('p-ratio').value = r; }); yap.push('DC/AC ' + r); }
   const tr = num(/trafo\D{0,15}(\d{3,5})/); if (tr !== null) { set.push(() => { const s = gv('p-trafo'); if (![...s.options].some((o) => +o.value === tr)) s.add(new Option(tr + ' kVA', tr)); s.value = tr; }); yap.push('trafo ' + tr + ' kVA'); }

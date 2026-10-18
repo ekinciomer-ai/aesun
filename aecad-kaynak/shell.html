@@ -432,7 +432,7 @@ details.tf-sec:not([open]) { gap: 0; }
           <p class="gi">Arazi, panel ve ana masa şablonu yukarıdan alınır. Yerleşim, inverter, trafo, DC/AC/OG kablo, topraklama, tek hat ve metraj GES-ÇİZ ile, bağlayıcı esaslara göre üretilir.</p>
           <div class="grid2">
             <label class="gf">Proje masası<select id="p-masa"></select></label>
-            <label class="gf">Hedef DC güç (MWp)<input id="p-mwp" type="number" step="0.1" min="0" placeholder="boş = arazinin tamamı"></label>
+            <label class="gf">Hedef DC güç (kWp, üst sınır)<input id="p-mwp" type="number" step="10" min="0" placeholder="boş = arazinin tamamı"></label>
             <label class="gf">DC/AC oranı<input id="p-ratio" type="number" step="0.01" value="1.25"></label>
             <label class="gf">Trafo gücü (kVA)<select id="p-trafo"><option value="">Oto (yüke göre)</option><option>630</option><option>800</option><option>1000</option><option>1250</option><option>1600</option><option>2000</option><option>2500</option><option>3000</option><option>4000</option><option>5000</option><option selected>5750</option><option>6250</option></select></label>
             <label class="gf">İnverter AC (kW)<input id="p-inv" type="number" step="5" value="300" placeholder="boş = oto"></label>

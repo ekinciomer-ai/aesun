@@ -12,6 +12,9 @@ on:
     paths: ['docs/**', 'cpanel/**', '.github/workflows/cpanel_yukle.yml']
   schedule:
     - cron: '23 */3 * * *'   # saha uygulamasındaki değişiklikleri de taşımak için
+permissions:
+  contents: read
+  actions: read
 concurrency:
   group: cpanel
   cancel-in-progress: false
@@ -48,3 +51,30 @@ jobs:
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
           CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/saha/=<title;/aecad/=AeCAD;/api/canli.php=durum"
         run: python3 cpanel/yukle.py dist_portal
+      # Yüklemeden sonra TÜM uçlar denenir (izleme/uclar.json). Biri bozulduysa son başarılı sürüm geri yüklenir ve iş kırmızı biter.
+      - name: Duman testi
+        id: duman
+        if: env.ATLA != '1'
+        continue-on-error: true
+        run: |
+          sleep 10
+          python3 izleme/duman_testi.py ns1 || echo "::warning::ns1 uçlarında sorun var (bu yüklemeyle ilgisiz; geri alma yapılmaz)"
+          python3 izleme/duman_testi.py cpanel
+      - name: Geri al (duman testi kaldıysa)
+        if: env.ATLA != '1' && steps.duman.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CP_HOST: aksarayenerji.net
+          CP_USER: ${{ secrets.FTP_KULLANICI }}
+          CP_PASS: ${{ secrets.FTP_SIFRE }}
+          CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
+        run: |
+          SHA=$(gh api "repos/${{ github.repository }}/actions/workflows/cpanel_yukle.yml/runs?status=success&branch=main&per_page=20" --jq '[.workflow_runs[] | select(.head_sha != "${{ github.sha }}")][0].head_sha')
+          echo "::error::Duman testi kaldı → son başarılı sürüm ${SHA:0:7} geri yükleniyor"
+          git fetch -q origin "$SHA" && git checkout -q "$SHA"
+          rm -rf dist_site dist_portal && python3 cpanel/paketle.py _saha
+          CP_ALAN=aksarayenerji.net CP_KONTROL="/=<title" python3 cpanel/yukle.py dist_site || true
+          CP_ALAN=portal.aksarayenerji.net CP_KONTROL="/=<title" python3 cpanel/yukle.py dist_portal || true
+          git checkout -q ${{ github.sha }}
+          sleep 10; python3 izleme/duman_testi.py cpanel || echo "::error::Geri alma sonrası da sorun var — elle bakılmalı"
+          exit 1

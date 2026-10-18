@@ -1,0 +1,20 @@
+{
+  "aciklama": "Tek uç noktası kaydı: her yüklemeden sonra (duman testi) ve ns1 bekçisi tarafından 5 dk'da bir denenir. Yeni modül/uç eklenince BURAYA bir satır eklenir. beklenen: durum kodları listesi; icerir: yanıtta geçmesi gereken metin (isteğe bağlı). grup: cpanel | ns1 | demo",
+  "uclar": [
+    {"ad": "Site ana sayfa", "grup": "cpanel", "url": "https://aksarayenerji.net/", "beklenen": [200], "icerir": "<title"},
+    {"ad": "Site iletişim", "grup": "cpanel", "url": "https://aksarayenerji.net/iletisim.html", "beklenen": [200], "icerir": "<form"},
+    {"ad": "Portal", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/", "beklenen": [200], "icerir": "Kurumsal Portal"},
+    {"ad": "Portal PHP (giriş servisi)", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/api/portal.php", "beklenen": [400, 401, 403, 404, 405], "icerir": "hata"},
+    {"ad": "Veri köprüsü (n8n okur)", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/api/veri.php?a=oku&yol=n8n/pi_nabiz.json", "beklenen": [401], "icerir": "Oturum gerekli"},
+    {"ad": "Canlı izleme deposu", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/api/canli.php", "beklenen": [200], "icerir": "\"durum\""},
+    {"ad": "Monitoring", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/monitoring/", "beklenen": [200], "icerir": "<title"},
+    {"ad": "Saha uygulaması", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/saha/", "beklenen": [200], "icerir": "<title"},
+    {"ad": "AeCAD", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/aecad/", "beklenen": [200], "icerir": "AeCAD"},
+    {"ad": "Merkez API sağlık", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/saglik", "beklenen": [200], "icerir": "\"durum\":\"ok\""},
+    {"ad": "Merkez API portal verisi", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/acik/portal/veri.json", "beklenen": [200], "icerir": "kullanicilar"},
+    {"ad": "Merkez API yetkisiz okuma kapalı", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/dosya/antminer_panel.json", "beklenen": [401]},
+    {"ad": "Merkez API bekçi", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/bekci", "beklenen": [200], "icerir": "\"durum\""},
+    {"ad": "Fatura (SSO arkasında)", "grup": "ns1", "url": "https://fatura.aksarayenerji.net/", "beklenen": [200, 302, 303, 401]},
+    {"ad": "Demo (şifre ister)", "grup": "demo", "url": "https://185.22.184.51/", "beklenen": [401]}
+  ]
+}

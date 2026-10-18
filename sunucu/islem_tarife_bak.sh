@@ -1,8 +1,4 @@
 #!/bin/bash
-# Salt okuma: fatura sistemindeki (gesfin) satış faturası birim fiyatları — yalnız kalem adı + birim fiyat (tutar/kimlik yok).
-Q="select f.name || ' ' || to_char(i.invoice_date,'YYYY-MM') || ': ' || string_agg(distinct regexp_replace(k.description,' ?\(.*\)','') || '=' || k.unit_price, ', ')
-  from invoices i join invoice_items k on k.invoice_id=i.id left join facilities f on f.installation_number=i.installation_number
-  where i.duplicate_of_invoice_id is null and i.invoice_type='SATIS' and i.invoice_date >= date '2026-01-01' and f.name ilike 'Sera%'
-  group by f.name, to_char(i.invoice_date,'YYYY-MM') order by f.name, 1"
-docker exec gesfin-db psql -U gesfin -d gesfin -At -c "$Q" 2>&1 > /tmp/t.txt
-split -l 3 /tmp/t.txt /tmp/tp_; for f in $(ls /tmp/tp_* | head -9); do echo "NOT: $(tr '\n' ';' < $f | cut -c1-1000)"; done; rm -f /tmp/tp_* /tmp/t.txt
+echo "NOT: invoices sütunları: $(docker exec gesfin-db psql -U gesfin -d gesfin -At -c "select string_agg(column_name, ',') from information_schema.columns where table_name='invoices'" 2>&1 | cut -c1-900)"
+Q="select string_agg(f.name||' t='||i.invoice_date||' '||coalesce(to_char(i.period_start,'YYYY-MM-DD'),'?')||'..'||coalesce(to_char(i.period_end,'YYYY-MM-DD'),'?'), '; ' order by i.invoice_date) from invoices i left join facilities f on f.installation_number=i.installation_number where i.invoice_type='SATIS' and f.name ilike 'Sera2%' and i.duplicate_of_invoice_id is null"
+echo "NOT: dönemler: $(docker exec gesfin-db psql -U gesfin -d gesfin -At -c "$Q" 2>&1 | cut -c1-900)"

@@ -80,6 +80,15 @@ def roller(req: Request):
     h = hashlib.sha256(t.encode()).hexdigest()
     return {r for r, v in DURUM["ozet"].items() if hmac.compare_digest(v, h)}
 
+@app.get("/v1/bekci")
+def bekci_durum():
+    """ns1 sistem bekçisinin son turu (host zamanlayıcısı yazar). Yalnız iş/servis tazeliği; sır yok."""
+    p = Path("/veri/bekci_ns1.json")
+    if not p.is_file():
+        raise HTTPException(404, "bekçi henüz çalışmadı")
+    d = json.loads(p.read_text()); d["yas_sn"] = round(time.time() - p.stat().st_mtime)
+    return JSONResponse(d, headers={"Cache-Control": "no-store", "Access-Control-Allow-Origin": "*"})
+
 @app.get("/v1/saglik")
 def saglik():
     return {"durum": "ok" if not DURUM["hata"] and time.time() - DURUM["son"] < 5 * ARALIK else "sorun",

@@ -17,4 +17,4 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
         run: |
-          if [ "${{ inputs.tam }}" = "evet" ]; then python3 cpanel/kod_tam.py ${{ inputs.dosyalar }}; else python3 cpanel/kod_incele.py ${{ inputs.dosyalar }}; fi
+          if [ "${{ inputs.tam }}" = "hata" ]; then python3 cpanel/hata_kaydi.py ${{ inputs.dosyalar }}; elif [ "${{ inputs.tam }}" = "evet" ]; then python3 cpanel/kod_tam.py ${{ inputs.dosyalar }}; else python3 cpanel/kod_incele.py ${{ inputs.dosyalar }}; fi

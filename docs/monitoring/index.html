@@ -1495,7 +1495,7 @@ function planKare(H, ms) {   // ms: oynatma başından geçen süre → SVG metn
   const ara = k => Array.from({ length: Math.max(A.S[k].length, B.S[k].length) }, (_, j) => { const a = A.S[k][j], b = B.S[k][j];
     return a == null ? (e > .5 ? (b ?? null) : null) : b == null ? (e < .5 ? a : null) : a + (b - a) * e; });
   const D = e < .5 ? A : B;
-  return H.X.grafik(D.pl, { seri: { mv: ara('mv'), bv: ara('bv'), gmv: ara('gmv'), ggv: ara('ggv') }, ymax: H.ymax, baslik: planGunAd(D.g), altBaslik: D.alt });
+  return H.X.grafik(D.pl, { seri: { mv: ara('mv'), bv: ara('bv'), gmv: ara('gmv'), ggv: ara('ggv'), ggun: ara('ggun') }, ymax: H.ymax, baslik: planGunAd(D.g), altBaslik: D.alt });
 }
 function planOynat() {
   const btn = document.getElementById('anOynat'), kutu = document.getElementById('planGrafik'), dur = document.getElementById('anDurum');
@@ -1695,7 +1695,7 @@ async function cizYonetim() {
       const si_ = pl_.findIndex(q => q.t === simdiT), ei_ = pl_.findIndex(q => q.ertesi);
       const n = pl_.length || 24, W = 1000, cw = W / n, BH = o.baslik ? 34 : 0, SH = 30, HR = 16, PT = BH + SH + HR + 8, PH = 230, H = PT + PH + 22 + (o.baslik ? 22 : 0);
       const S = o.seri || planSeri(pl_);
-      const { mv, bv, gmv, ggv, gf } = S;
+      const { mv, bv, gmv, ggv, gf } = S, ggun = S.ggun || [];
       const ymax = o.ymax || Math.ceil(Math.max(1000, ...[...mv, ...bv, ...gmv, ...ggv].filter(v => v != null)) * 1.08 / 1000) * 1000;
       const yy = v => PT + PH - v / ymax * PH, x = i => i * cw + cw / 2;
       // kavisli çizgi: monoton kübik eğri (Fritsch–Carlson) — tepe/dip noktalarını aşmaz, sıfırın altına sarkmaz
@@ -1731,12 +1731,19 @@ async function cizYonetim() {
       }
       for (let k = 0; k <= 4; k++) { const v = ymax * k / 4; g += '<line x1="0" x2="' + W + '" y1="' + yy(v).toFixed(1) + '" y2="' + yy(v).toFixed(1) + '" stroke="#10233F" stroke-opacity=".08"/>' + (k && k < 4 ? '<text x="4" y="' + (yy(v) - 4).toFixed(1) + '" font-size="11" fill="#4A5A70">' + say(v) + '</text><text x="' + (W - 4) + '" y="' + (yy(v) - 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#6B3FA0">' + say(v * FKW / 1000) + ' ₺</text>' : ''); }
       g += '<text x="4" y="' + (PT + 12) + '" font-size="10" font-weight="700" fill="#4A5A70">₺/MWh</text><text x="' + (W - 4) + '" y="' + (PT + 12) + '" text-anchor="end" font-size="10" font-weight="700" fill="#6B3FA0">₺/saat · filo (' + NF + ' cihaz)</text>';
+      // güneş mahsuplaşması (alan): gerçekleşen maliyetin güneşle karşılanan kısmı (2,25 ₺/kWh, sarı) + şebekeden çekilen kısmı (PTF formülü, turuncu)
+      { const parca = (ust, alt) => { let d = '', A = [];
+          const kapat = () => { if (A.length) d += 'M' + A.map(([i, u]) => x(i).toFixed(1) + ' ' + yy(u).toFixed(1)).join(' L') + ' L' + A.slice().reverse().map(([i]) => x(i).toFixed(1) + ' ' + yy(alt(i)).toFixed(1)).join(' L') + 'Z'; A = []; };
+          ust.forEach((v, i) => { if (v == null) { kapat(); return; } A.push([i, v]); }); kapat(); return d; };
+        const gsn = gmv.map((v, i) => v == null ? null : Math.min(v, ggun[i] || 0));
+        if (gsn.some(v => v > 0)) g += '<path d="' + parca(gsn, () => 0) + '" fill="#F0B429" fill-opacity=".75"/>';
+        g += '<path d="' + parca(gmv, i => gsn[i] || 0) + '" fill="#D9480F" fill-opacity=".18"/>'; }
       g += yol(bv, '#1E7A3C', true) + yol(mv, '#F4A27C', true) + yol(gmv, '#D9480F') + yol(ggv, '#7C3AED');
       pl_.forEach((q, i) => { if (i % Math.max(1, Math.round(n / 12)) === 0 || i === n - 1) g += '<text x="' + x(i).toFixed(1) + '" y="' + (PT + PH + 16) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + q.t.slice(11, 13) + ':00</text>'; });
       if (o.baslik) { let lx = 4; [['#D9480F', 'Gerçekleşen enerji maliyeti', 0], ['#7C3AED', 'Gerçekleşen BTC geliri', 0], ['#F4A27C', 'Planlanan enerji maliyeti', 1], ['#1E7A3C', 'Başabaş', 1], ['#F0B429', 'Güneşle', 2], ['#2F9E55', 'Çalıştı', 2], ['#D64545', 'Uyudu', 2]].forEach(([r, t, k]) => {
           const yl = PT + PH + 36; g += k === 2 ? '<rect x="' + lx + '" y="' + (yl - 9) + '" width="10" height="10" rx="2" fill="' + r + '"/>' : '<line x1="' + lx + '" x2="' + (lx + 16) + '" y1="' + (yl - 4) + '" y2="' + (yl - 4) + '" stroke="' + r + '" stroke-width="3"' + (k ? ' stroke-dasharray="5 3"' : '') + '/>';
           g += '<text x="' + (lx + (k === 2 ? 14 : 20)) + '" y="' + yl + '" font-size="11" fill="#4A5A70">' + t + '</text>'; lx += (k === 2 ? 22 : 28) + t.length * 6.2; }); }
-      if (!o.baslik) pl_.forEach((q, i) => { g += '<rect x="' + (i * cw).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + (PT + PH) + '" fill="transparent" data-tip="' + esc(q.t.slice(8, 10) + '.' + q.t.slice(5, 7) + ' ' + q.t.slice(11) + (i === si_ ? ' (şu an)' : q.gecmis ? ' (geçti)' : '') + ' · ' + DUR(q).ad + (q.gerc && q.ncal != null ? ' (' + say(q.ncal) + ' cihaz)' : '') + '\nEnerji maliyeti ' + say(mv[i]) + ' ₺/MWh = ' + say(q.maliyet, 1) + ' ₺/cihaz·saat (filo tam yük ' + say(mv[i] * FKW / 1000) + ' ₺/saat)\n' + (q.gerc ? 'Gerçekleşen gelir ' : 'Tahmini gelir ') + say(q.gelir, 1) + ' ₺/cihaz·saat (başabaş ' + say(bv[i]) + ' ₺/MWh)' + (r => !r ? '' : '\n— Gerçekleşen (filo) —' + (r.sa ? '\nPi: ' + say(r.sa.calisan) + ' cihaz çalıştı' + (r.sa.isinan >= 0.5 ? ', ' + say(r.sa.isinan) + ' ısındı' : '') + (r.sa.uyuyan >= 0.5 ? ', ' + say(r.sa.uyuyan) + ' uyudu' : '') + ' · ' + r.sa.ilk + '–' + r.sa.son : '\n' + r.fn + ' cihaz (F2Pool)') + '\nEnerji ' + say(r.kw) + ' kW (' + r.kwk + ') → maliyet ' + say(r.maliyet) + ' ₺/saat\nBTC geliri ' + say(r.gelir) + ' ₺/saat (' + say(r.th) + ' TH/s, ' + r.gk + ')' + (r.net != null ? '\nNet ' + (r.net > 0 ? '+' : '') + say(r.net) + ' ₺/saat' : ''))(gf ? gf[i] : null)) + '"/>'; });
+      if (!o.baslik) pl_.forEach((q, i) => { g += '<rect x="' + (i * cw).toFixed(1) + '" y="0" width="' + cw.toFixed(1) + '" height="' + (PT + PH) + '" fill="transparent" data-tip="' + esc(q.t.slice(8, 10) + '.' + q.t.slice(5, 7) + ' ' + q.t.slice(11) + (i === si_ ? ' (şu an)' : q.gecmis ? ' (geçti)' : '') + ' · ' + DUR(q).ad + (q.gerc && q.ncal != null ? ' (' + say(q.ncal) + ' cihaz)' : '') + '\nEnerji maliyeti ' + say(mv[i]) + ' ₺/MWh = ' + say(q.maliyet, 1) + ' ₺/cihaz·saat (filo tam yük ' + say(mv[i] * FKW / 1000) + ' ₺/saat)\n' + (q.gerc ? 'Gerçekleşen gelir ' : 'Tahmini gelir ') + say(q.gelir, 1) + ' ₺/cihaz·saat (başabaş ' + say(bv[i]) + ' ₺/MWh)' + (r => !r ? '' : '\n— Gerçekleşen (filo) —' + (r.sa ? '\nPi: ' + say(r.sa.calisan) + ' cihaz çalıştı' + (r.sa.isinan >= 0.5 ? ', ' + say(r.sa.isinan) + ' ısındı' : '') + (r.sa.uyuyan >= 0.5 ? ', ' + say(r.sa.uyuyan) + ' uyudu' : '') + ' · ' + r.sa.ilk + '–' + r.sa.son : '\n' + r.fn + ' cihaz (F2Pool)') + '\nEnerji ' + say(r.kw) + ' kW (' + r.kwk + ') → maliyet ' + say(r.maliyet) + ' ₺/saat' + (r.oz > 0 ? '\n☀ Güneşten ' + say(r.oz) + ' kWh × ' + say(GUNES_B / 1000, 2) + ' ₺ = ' + say(r.oz * GUNES_B / 1000) + ' ₺ · ⚡ şebekeden ' + say(Math.max(0, r.kw - r.oz)) + ' kWh = ' + say(r.maliyet - r.oz * GUNES_B / 1000) + ' ₺' : '') + '\nBTC geliri ' + say(r.gelir) + ' ₺/saat (' + say(r.th) + ' TH/s, ' + r.gk + ')' + (r.net != null ? '\nNet ' + (r.net > 0 ? '+' : '') + say(r.net) + ' ₺/saat' : ''))(gf ? gf[i] : null)) + '"/>'; });
       return g + '</svg>'; };
     // Planlanan maliyet (tam yük): beklenen Sera-2 üretiminin karşıladığı kısım fırsat bedeliyle, aşanı şebeke birimiyle
     // 18 Eki: plan kaydında beklenen güneş yoksa (eski günler) gerçekleşen Sera-2 katkısı kullanılır — güneşli saatte PTF tek başına sayılmaz
@@ -1745,42 +1752,11 @@ async function cizYonetim() {
     const emalPlan = q => { const G = emal(q); if (G == null) return null; const P = Math.min(FKW, Math.max(0, gunesKw(q))); return (GUNES_B * P + G * (FKW - P)) / FKW; };
     const planSeri = pl_ => { const mv = pl_.map(emalPlan), bv = pl_.map(bas), gf = pl_.map(q => gerF(q, emal(q)));
       const sol = v => v == null ? null : v * 1000 / FKW;                                      // filo ₺/saat → sol eksen ₺/MWh
-      return { mv, bv, gf, gmv: gf.map(r => r && r.maliyet != null ? sol(r.maliyet) : null), ggv: gf.map(r => r && r.gelir != null ? sol(r.gelir) : null) }; };
-    // 18 Eki: güneş mahsuplaşması (alan grafiği) — tüketim = güneşin karşıladığı (2,25 ₺/kWh) + şebekeden çekilen (PTF formülü); altta satılan (veriş)
-    const mahsupGrafik = g => {
-      const m = (MADEN.mal || {})[g];
-      if (!m || !m.saat_kwh) return '<section class="panel" style="gap:8px"><div class="bas"><h2>☀ Güneş mahsuplaşması</h2><span class="k">' + tarihK(g) + '</span></div><div class="k">Gün bitince (sayaç ve inverter verisi gelince) gösterilir.</div></section>';
-      const H_ = [...Array(24).keys()], gk = H_.map(h => Number(m.saat_gunes_kwh?.[h]) || 0), sk = H_.map(h => Number(m.saat_kwh?.[h]) || 0);
-      const vk = H_.map(h => Number(m.saat_veris_kwh?.[h]) || 0), uk = H_.map(h => m.saat_uretim_kwh?.[h] == null ? null : Number(m.saat_uretim_kwh[h]));
-      const W = 1000, PL = 46, PR = 12, PT = 14, PH = 210, NH = 70, H = PT + PH + NH + 30, cw = (W - PL - PR) / 24;
-      const ust = Math.ceil(Math.max(50, ...H_.map(h => gk[h] + sk[h]), ...uk.filter(v => v != null)) * 1.1 / 100) * 100, alt = Math.ceil(Math.max(20, ...vk) * 1.15 / 25) * 25;
-      const x = h => PL + h * cw + cw / 2, yU = v => PT + PH - v / ust * PH, yA = v => PT + PH + v / alt * NH;
-      const alan = (ust_, alt_) => 'M' + H_.map(h => x(h).toFixed(1) + ' ' + ust_(h).toFixed(1)).join(' L') + ' L' + H_.slice().reverse().map(h => x(h).toFixed(1) + ' ' + alt_(h).toFixed(1)).join(' L') + 'Z';
-      let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block" font-family="inherit">';
-      for (let k = 0; k <= 4; k++) { const v = ust * k / 4, y = yU(v); svg += '<line x1="' + PL + '" x2="' + (W - PR) + '" y1="' + y + '" y2="' + y + '" stroke="#E5EAF0"/><text x="' + (PL - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="#4A5A70">' + say(v) + '</text>'; }
-      svg += '<text x="' + (PL - 6) + '" y="' + (yA(alt) + 4) + '" text-anchor="end" font-size="11" fill="#1E7A3C">−' + say(alt) + '</text>';
-      svg += '<path d="' + alan(h => yU(gk[h]), () => yU(0)) + '" fill="#F0B429" fill-opacity=".85"/>';
-      svg += '<path d="' + alan(h => yU(gk[h] + sk[h]), h => yU(gk[h])) + '" fill="#D9480F" fill-opacity=".55"/>';
-      svg += '<path d="' + alan(() => yA(0), h => yA(vk[h])) + '" fill="#2F9E55" fill-opacity=".6"/>';
-      svg += '<line x1="' + PL + '" x2="' + (W - PR) + '" y1="' + yU(0) + '" y2="' + yU(0) + '" stroke="#10233F"/>';
-      const uP = H_.filter(h => uk[h] != null); if (uP.length > 1) svg += '<path d="M' + uP.map(h => x(h).toFixed(1) + ' ' + yU(uk[h]).toFixed(1)).join(' L') + '" fill="none" stroke="#8A5A00" stroke-width="2.5" stroke-dasharray="6 4"/>';
-      H_.forEach(h => { if (h % 2 === 0) svg += '<text x="' + x(h) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + String(h).padStart(2, '0') + ':00</text>';
-        svg += '<rect x="' + (PL + h * cw) + '" y="' + PT + '" width="' + cw + '" height="' + (PH + NH) + '" fill="transparent" data-tip="' + esc(String(h).padStart(2, '0') + ':00 · tüketim ' + say(gk[h] + sk[h]) + ' kWh\n☀ Güneşten ' + say(gk[h]) + ' kWh × ' + say(GUNES_B / 1000, 2) + ' ₺ = ' + say(gk[h] * GUNES_B / 1000) + ' ₺\n⚡ Şebekeden ' + say(sk[h]) + ' kWh (PTF formülü)\n↓ Satılan (veriş) ' + say(vk[h]) + ' kWh' + (uk[h] != null ? '\nSera-2 üretimi ' + say(uk[h]) + ' kWh' : '')) + '"/>'; });
-      svg += '</svg>';
-      const tG = gk.reduce((a, b) => a + b, 0), tS = sk.reduce((a, b) => a + b, 0), tV = vk.reduce((a, b) => a + b, 0), tU = uk.reduce((a, b) => a + (b || 0), 0);
-      const kut = (ad, v, renk, alt_) => '<div style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;background:#F7F9FC;border-left:5px solid ' + renk + '"><div class="k">' + ad + '</div><div class="num" style="font-size:20px;font-weight:800;color:' + renk + '">' + v + '</div><div class="k">' + alt_ + '</div></div>';
-      const lj = [['#F0B429', 'Güneşin karşıladığı tüketim (2,25 ₺/kWh)'], ['#D9480F', 'Şebekeden çekilen (PTF formülü)'], ['#2F9E55', 'Satılan (veriş, eksenin altı)']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
-        + '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px dashed #8A5A00"></span>Sera-2 üretimi</span>';
-      return '<section class="panel" style="gap:12px"><div class="bas"><h2>☀ Güneş mahsuplaşması · ' + tarihK(g) + '</h2><span class="k">Tek Yıldız 2 · saatlik kWh</span></div>'
-        + '<div style="display:flex;gap:8px;flex-wrap:wrap">' + kut('Güneşten', say(tG) + ' kWh', '#B7791F', say(tG * GUNES_B / 1000) + ' ₺ · %' + say(tG / Math.max(1, tG + tS) * 100) + ' tüketim')
-        + kut('Şebekeden', say(tS) + ' kWh', '#D9480F', say(m.sebeke_tl) + ' ₺ (KDV dahil)') + kut('Satılan', say(tV) + ' kWh', '#1E7A3C', 'üretimin %' + say(tV / Math.max(1, tU) * 100) + '\'i') + kut('Sera-2 üretimi', say(tU) + ' kWh', '#8A5A00', 'güneşin %' + say(tG / Math.max(1, tU) * 100) + '\'i madencilikte') + '</div>'
-        + '<div style="overflow-x:auto">' + svg + '</div><div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + lj + '</div>'
-        + '<div class="k">Güneşin karşıladığı = Pi\'nin ölçtüğü madencilik + yardımcı yük − sayaç çekişi (en çok Sera-2 üretimi kadar). Üretimin yetmediği kısım şebekeden çekilir ve PTF formülüyle; fazlası satılır.</div></section>';
-    };
+      return { mv, bv, gf, gmv: gf.map(r => r && r.maliyet != null ? sol(r.maliyet) : null), ggv: gf.map(r => r && r.gelir != null ? sol(r.gelir) : null), ggun: gf.map(r => r && r.maliyet != null ? sol(r.oz * GUNES_B / 1000) : null) }; };
     window.PLANX = { gunPl, grafik, planSeri, gunToplam, DUR, bugun, ilkGun, tarihK };
     const lejant = '<div class="k" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' + [['linear-gradient(135deg,#F0B429 50%,#2F9E55 50%)', '☀ Güneşle çalış'], ['#2F9E55', '✓ Kârlı, çalış'], ['#D64545', '✕ Zararlı, uyut']].map(([r, t]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:' + r + '"></span>' + t + '</span>').join('')
       + [['#D9480F', 'Gerçekleşen enerji maliyeti (filo)', ''], ['#7C3AED', 'Gerçekleşen BTC geliri (filo)', ''], ['#F4A27C', 'Planlanan enerji maliyeti (tam yük)', 'dashed'], ['#1E7A3C', 'BTC geliri (başabaş)', 'dashed']].map(([r, t, k]) => '<span style="display:flex;align-items:center;gap:6px"><span style="width:18px;border-top:3px ' + (k || 'solid') + ' ' + r + '"></span>' + t + '</span>').join('')
-      + '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border:2px dashed #10233F;border-radius:3px"></span>Şu an</span><span>Soluk: geçmiş saat</span><span><b style="color:#6B3FA0">9,1</b> saat altındaki sayı: o saatin ortalama hash\'i (PH/s; F2Pool, eğik: Pi ölçümü)</span></div>';
+      + '<span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#F0B429;opacity:.75"></span>Maliyetin güneşle karşılanan kısmı (2,25 ₺/kWh)</span><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#D9480F;opacity:.25"></span>Şebekeden çekilen kısmı (PTF formülü)</span><span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border:2px dashed #10233F;border-radius:3px"></span>Şu an</span><span>Soluk: geçmiş saat</span><span><b style="color:#6B3FA0">9,1</b> saat altındaki sayı: o saatin ortalama hash\'i (PH/s; F2Pool, eğik: Pi ölçümü)</span></div>';
     const tg_ = gunToplam(pl), gecmisSec = gun < bugun;
     const anB = window.ANIM_ARALIK || { bas: gunEkle(bugun, -13) < ilkGun ? ilkGun : gunEkle(bugun, -13), bit: bugun };
     h += '<section class="panel" style="gap:12px"><div class="bas"><h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button type="button" onclick="anlikAc()" style="font:inherit;font-size:14px;font-weight:700;padding:6px 14px;border-radius:999px;border:0;background:#10233F;color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px"><span style="width:9px;height:9px;border-radius:50%;background:#2BD27A;box-shadow:0 0 0 3px rgba(43,210,122,.3)"></span>Anlık izleme</button>Saatlik plan · ' + gunAd(gun) + (gun === bugun || gun === yarin ? ' ' + tarihK(gun) : ' ' + gun.slice(0, 4)) + (gecmisSec ? ' · gerçekleşen' : '') + '</h2><span class="k" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">' + calisSaat + ' saat ' + (gecmisSec ? 'çalıştı · ' : 'çalış · ') + uyuSaat + ' saat ' + (gecmisSec ? 'uyudu' : 'uyut')
@@ -1799,7 +1775,6 @@ async function cizYonetim() {
           return '<div style="display:flex;gap:8px;flex-wrap:wrap">' + kut(gunAd(gun) + ' enerji maliyeti', say(tg_.m) + ' ₺', '#D9480F', say(tg_.saat, 1) + ' saat · ' + tg_.kaynak.join(', '))
             + kut('BTC geliri', say(tg_.g) + ' ₺', '#7C3AED', gecmisSec ? 'F2Pool günlük kazanç (gerçek)' : 'F2Pool gelene kadar Pi\'nin anlık hash\'i') + kut('Net', (tg_.net > 0 ? '+' : '') + say(tg_.net) + ' ₺', tg_.net < 0 ? '#B42318' : '#1E7A3C', 'Gelir − enerji') + '</div>'; })() : '')
       + '<div id="planGrafik">' + grafik(pl) + '</div>' + lejant
-      + mahsupGrafik(gun)
       + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;border-radius:10px;background:#F7F9FC"><b style="font-size:14px">Gün gün oynat</b>'
       + '<label class="k" style="display:flex;gap:6px;align-items:center">Başlangıç <input id="anBas" type="date" value="' + anB.bas + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'
       + '<label class="k" style="display:flex;gap:6px;align-items:center">Bitiş <input id="anBit" type="date" value="' + anB.bit + '" min="' + ilkGun + '" max="' + bugun + '" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'

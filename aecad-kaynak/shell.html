@@ -1,0 +1,517 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AeCAD</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-screen drafting workspace — top bar, tool rail, canvas, layer/properties panel, command line */
+:root {
+  --ink: #15181c;      /* workspace frame */
+  --panel: #1d2126;    /* panels */
+  --raise: #262b31;    /* controls */
+  --line: #333a42;     /* hairlines */
+  --fg: #e7e9eb;
+  --muted: #8d969f;
+  --red: #e2342b;      /* Aksaray Enerji red */
+  --red-soft: rgba(226, 52, 43, 0.16);
+  --ok: #5fd38a;
+  --warn: #ffd23f;
+  --ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--ink); color: var(--fg); font-family: var(--ui); font-size: 13px; overflow: hidden; }
+#app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 8px; gap: 8px; box-sizing: border-box; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+
+header { display: flex; align-items: center; gap: 12px; padding-block: 8px 0; min-width: 0; }
+.brand { display: flex; align-items: center; gap: 0; font-size: 15px; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+.brand b { color: var(--red); font-weight: 600; }
+.brand svg { width: 22px; height: 22px; flex: none; margin-right: 8px; }
+#fname { color: var(--muted); font-family: var(--mono); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1 1 auto; }
+.hbtns { display: flex; gap: 4px; flex: none; }
+.hb { display: inline-flex; align-items: center; gap: 6px; background: var(--raise); border: 1px solid var(--line); border-radius: 5px; padding: 5px 10px; }
+.hb:hover { border-color: #4a525b; }
+.hb.primary { background: var(--red); border-color: var(--red); color: #fff; }
+.hb.primary:hover { background: #c92a22; }
+.hb svg { width: 15px; height: 15px; }
+.hb .k { display: inline; }
+
+.main { display: grid; grid-template-columns: 64px minmax(0, 1fr) 312px; gap: 8px; min-height: 0; }
+nav.tools { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow-y: auto; padding: 6px 4px; display: flex; flex-direction: column; gap: 2px; scrollbar-width: thin; }
+.tg { font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-align: center; padding: 8px 0 3px; }
+.tg:first-child { padding-top: 2px; }
+.tool { display: flex; flex-direction: column; align-items: center; gap: 2px; background: transparent; border: 1px solid transparent; border-radius: 5px; padding: 5px 2px 4px; color: var(--fg); }
+.tool svg { width: 20px; height: 20px; }
+.tool span { font-size: 9.5px; color: var(--muted); line-height: 1; }
+.tool:hover { background: var(--raise); }
+.tool.on { background: var(--red-soft); border-color: var(--red); }
+.tool.on span { color: var(--fg); }
+
+#stage { position: relative; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; min-width: 0; min-height: 0; background: #1d2126; }
+#stage canvas { position: absolute; inset: 0; display: block; }
+#overlay { cursor: none; touch-action: none; }
+#stage.drop::after { content: "Dosyayı bırakın — DWG veya DXF"; position: absolute; inset: 12px; border: 2px dashed var(--red); border-radius: 8px; display: grid; place-items: center; font-size: 15px; background: rgba(21, 24, 28, 0.7); pointer-events: none; }
+#busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(21, 24, 28, 0.62); z-index: 5; }
+#busy div { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; display: flex; gap: 12px; align-items: center; }
+.spin { width: 18px; height: 18px; border: 2px solid var(--line); border-top-color: var(--red); border-radius: 50%; animation: sp 0.8s linear infinite; }
+@keyframes sp { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation-duration: 3s; } }
+#toast { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); background: var(--raise); border: 1px solid var(--line); padding: 6px 12px; border-radius: 5px; z-index: 6; }
+
+aside#side { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.ph { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px 6px; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.ph em { font-style: normal; font-family: var(--mono); letter-spacing: 0; }
+.lbar { display: flex; gap: 4px; padding: 0 8px 6px; }
+.lbar input { flex: 1; min-width: 0; background: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 4px 7px; }
+.lbar button { background: var(--raise); border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; }
+#layers { list-style: none; margin: 0; padding: 0 4px 6px; overflow-y: auto; flex: 1 1 55%; min-height: 80px; scrollbar-width: thin; }
+.lrow { display: grid; grid-template-columns: 22px 16px minmax(0, 1fr) auto 22px; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 4px; cursor: pointer; }
+.lrow:hover { background: var(--raise); }
+.lrow.cur { background: var(--red-soft); }
+.lrow.cur .lname { font-weight: 600; }
+.lrow.off .lname { color: var(--muted); }
+.lname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lct { font-family: var(--mono); font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.eye, .lk { background: none; border: 0; padding: 2px; color: var(--fg); display: grid; place-items: center; }
+.eye svg, .lk svg { width: 15px; height: 15px; }
+.lk { color: var(--muted); } .lk.on { color: var(--warn); }
+.sw { width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.25); padding: 0; }
+.sep { border-top: 1px solid var(--line); }
+#props { padding: 4px 10px 10px; overflow-y: auto; flex: 0 1 auto; max-height: 45%; display: flex; flex-direction: column; gap: 8px; }
+#props .muted { color: var(--muted); margin: 0; line-height: 1.45; }
+.psum b { font-family: var(--mono); color: var(--fg); }
+.prow { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; align-items: center; color: var(--muted); }
+.prow select, .prow input, .prow textarea { background: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; min-width: 0; width: 100%; box-sizing: border-box; }
+.pcw { display: flex; gap: 4px; min-width: 0; }
+.pcolor { flex: 1; display: flex; align-items: center; gap: 6px; background: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; text-align: left; min-width: 0; }
+.pcolor i { width: 12px; height: 12px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.3); flex: none; }
+.mini { background: var(--raise); border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; font-size: 11px; }
+.pinfo { display: grid; gap: 3px; font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.pinfo div { display: flex; justify-content: space-between; gap: 8px; } .pinfo span { color: var(--muted); }
+#palette { position: fixed; z-index: 20; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px; display: grid; grid-template-columns: repeat(10, 18px); gap: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.pc { width: 18px; height: 18px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.18); padding: 0; }
+
+footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; min-width: 0; }
+.cmdbox { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 12px; min-width: 0; display: flex; flex-direction: column; }
+#hist { height: 66px; overflow-y: auto; padding: 5px 10px 2px; color: #b8bfc6; scrollbar-width: thin; }
+#hist div { white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
+#hist .err { color: #ff8a80; } #hist .res { color: var(--ok); } #hist .note { color: var(--warn); } #hist .help { color: #9ec5ff; }
+.cline { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding: 4px 10px; }
+#prompt { color: var(--red); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; font-weight: 500; }
+#cmd { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: var(--fg); padding: 3px 0; }
+.status { display: flex; flex-direction: column; gap: 4px; justify-content: space-between; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-family: var(--mono); font-size: 11.5px; min-width: 250px; }
+#coords { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tog { display: flex; gap: 4px; flex-wrap: wrap; }
+.tog button { background: var(--raise); border: 1px solid var(--line); color: var(--muted); border-radius: 3px; padding: 1px 6px; font-size: 10.5px; letter-spacing: 0.06em; }
+.tog button.on { color: var(--fg); border-color: var(--red); background: var(--red-soft); }
+.srow { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); }
+#curlayer { color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
+#bside { display: none; }
+.det { border: 1px solid var(--line); border-radius: 5px; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; }
+.det summary { cursor: pointer; color: var(--fg); font-weight: 500; }
+.det[open] summary { margin-bottom: 4px; }
+.dh { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.gf.ck { flex-direction: row; align-items: center; gap: 6px; padding-top: 16px; }
+.gf.ck input { width: auto; accent-color: var(--red); }
+.gf input::placeholder { color: #66707a; }
+#pjdlg { position: fixed; inset: auto; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; z-index: 40; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 0; width: min(980px, calc(100vw - 32px)); height: min(720px, calc(100vh - 48px)); max-height: calc(100vh - 16px); max-width: calc(100vw - 16px); min-width: 320px; min-height: 180px; resize: both; overflow: hidden; box-shadow: 0 14px 40px rgba(0,0,0,.5); }
+#pjdlg #pj-body { flex: 1; min-height: 0; }
+.pen-tut { cursor: move; user-select: none; touch-action: none; }
+.pjh.pen-tut::before { content: "⠿"; color: var(--muted); margin-right: 6px; font-size: 14px; }
+#qdlg.tasindi, #pjdlg.tasindi { position: fixed; }
+#pjdlg[open] { display: flex; flex-direction: column; }
+#pjdlg::backdrop { background: rgba(0,0,0,0.55); }
+.pjh { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 6px 10px 0; position: sticky; top: 0; background: var(--panel); }
+.ptabs { display: flex; gap: 2px; overflow-x: auto; }
+.ptab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.ptab.on { color: var(--fg); border-bottom-color: var(--red); }
+#pj-body { padding: 12px 14px 16px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+.pf-list { display: flex; flex-direction: column; gap: 3px; }
+.pf-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 5px 8px; background: var(--ink); border-radius: 4px; font-family: var(--mono); font-size: 12px; }
+.pf-row span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-row.on { outline: 1px solid var(--red); }
+.pf-row small { color: var(--muted); }
+.pf-acts { display: flex; gap: 4px; }
+.tw { overflow-x: auto; }
+.kt { width: 100%; border-collapse: collapse; font-size: 12px; }
+.kt th, .kt td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.kt th { color: var(--muted); font-weight: 500; font-size: 11px; position: sticky; top: 0; background: var(--panel); }
+.kt .n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kt tr.bad td:first-child { color: #ff8a80; } .kt tr.ok td:first-child { color: var(--ok); } .kt tr.na td:first-child { color: var(--warn); }
+.kt tr.sub td { color: var(--muted); } .kt tr.tot td { font-weight: 600; border-top: 2px solid var(--fg); }
+.pin { width: 90px; background: var(--ink); border: 1px solid var(--line); border-radius: 4px; color: var(--fg); padding: 2px 5px; font-family: var(--mono); text-align: right; }
+.sug { color: var(--warn); }
+.sug .mini { margin-top: 4px; }
+.uy { margin: 0; padding-left: 18px; color: var(--warn); font-size: 12px; } #pj-body h4 { margin: 4px 0 0; font-size: 12px; }
+#qdlg { background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 18px; max-width: 380px; width: calc(100vw - 48px); }
+#qdlg::backdrop { background: rgba(0,0,0,0.5); }
+#qdlg h3 { margin: 0 0 6px; font-size: 15px; }
+#qdlg p { margin: 0 0 14px; color: var(--muted); line-height: 1.45; }
+#qdlg .qb { display: flex; flex-direction: column; gap: 6px; }
+.pbadge { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.pbadge span { color: var(--fg); }
+.pbadge a { color: var(--red); text-decoration: none; }
+.pbadge a:hover { text-decoration: underline; }
+@media (max-width: 860px) { .pbadge span { display: none; } }
+.stabs { display: flex; gap: 2px; padding: 6px 6px 0; border-bottom: 1px solid var(--line); }
+.stab { flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 4px 7px; color: var(--muted); font-weight: 500; }
+.stab.on { color: var(--fg); border-bottom-color: var(--red); }
+.tabpane { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.ges { overflow-y: auto; padding: 4px 10px 12px; gap: 4px; scrollbar-width: thin; }
+.ges section { display: flex; flex-direction: column; gap: 7px; padding: 8px 0 12px; border-bottom: 1px solid var(--line); }
+.ges section:last-child { border-bottom: 0; }
+.ges h3 { margin: 0; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 7px; letter-spacing: 0.02em; }
+.ges h3 span { width: 18px; height: 18px; border-radius: 50%; background: var(--red-soft); color: var(--red); display: grid; place-items: center; font-family: var(--mono); font-size: 11px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 6px; }
+.gf { display: flex; flex-direction: column; gap: 3px; color: var(--muted); font-size: 11px; min-width: 0; }
+.gf input, .gf select { background: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; color: var(--fg); font-family: var(--mono); font-size: 12px; min-width: 0; width: 100%; box-sizing: border-box; }
+.gf input:disabled { color: var(--muted); }
+.gf.wide input { font-family: var(--ui); }
+.brow { display: flex; gap: 6px; flex-wrap: wrap; }
+.brow .gb { flex: 1; }
+.gb { background: var(--raise); border: 1px solid var(--line); border-radius: 5px; padding: 6px 8px; text-align: center; }
+.gb:hover { border-color: #4a525b; }
+.gb.primary { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
+.gb.ghost { background: transparent; }
+.gi { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+.gres { margin: 0; color: var(--ok); font-size: 12px; line-height: 1.5; font-family: var(--mono); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 1px 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.chip.on { border-color: var(--red); color: var(--fg); }
+.ph.sub { padding: 4px 0 0; }
+.ph.sub em { font-size: 10px; text-transform: none; letter-spacing: 0; }
+.tlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.trow { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto; gap: 6px; align-items: center; padding: 4px 6px; background: var(--ink); border-radius: 4px; }
+.trow label { display: flex; flex-direction: column; min-width: 0; cursor: pointer; }
+.trow b { font-family: var(--mono); font-weight: 500; font-size: 12px; }
+.trow small { color: var(--muted); font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trow input { accent-color: var(--red); }
+
+
+@media (max-width: 860px) {
+  .main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  nav.tools { flex-direction: row; overflow-x: auto; overflow-y: hidden; padding: 4px; }
+  .tg { writing-mode: vertical-rl; transform: rotate(180deg); padding: 0 2px; }
+  .tool { min-width: 50px; }
+  aside#side { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); top: 52px; bottom: 140px; width: min(300px, calc(100vw - 32px)); z-index: 10; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  aside#side.open { display: flex; }
+  #bside { display: inline-flex; }
+  .hb .k { display: none; }
+  footer { grid-template-columns: minmax(0, 1fr); }
+  .status { min-width: 0; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  #hist { height: 46px; }
+}
+@media (max-width: 560px) {
+  #fname { display: none; }
+  header { justify-content: space-between; }
+  .hb { padding: 5px 7px; }
+}
+
+.kt.alt td small { display: block; color: var(--muted); font-size: 11px; max-width: 260px; }
+.kt.alt td.acts { white-space: nowrap; } .kt.alt td.acts .mini { margin: 2px; } .mini.ok { border-color: var(--ok); color: var(--ok); }
+.kt.alt tr.calisiyor td.st { color: var(--warn); } .kt.alt td.ok { color: var(--ok); } .kt.alt td.bad { color: var(--red); cursor: help; }
+.kt.alt tr.aktif td:first-child { box-shadow: inset 3px 0 0 var(--ok); }
+.revbox { display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: end; margin-top: 14px; } .revbox .gi { grid-column: 1 / -1; margin: 0; }
+/* ---- başlangıç + proje tarif ---- */
+.hb.files { border-color: var(--ok); color: var(--ok); }
+.st-son { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--ok); border-radius: 8px; padding: 12px 16px; }
+.st-son span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; } .st-son b { font-weight: 500; flex: 1 1 240px; }
+.tf-prev { margin: 0; display: grid; gap: 6px; }
+.tf-prev svg { width: 100%; height: auto; max-height: 320px; aspect-ratio: 640 / 300; background: var(--ink); border: 1px solid var(--line); border-radius: 6px; display: block; }
+.tf-prev.empty svg { aspect-ratio: 640 / 120; background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgba(255,255,255,.025) 10px 20px); }
+.tf-prev figcaption { color: var(--muted); font-size: 12.5px; }
+.tf-prev .pb { fill: rgba(95, 211, 138, .10); stroke: var(--ok); stroke-width: 1.6; stroke-linejoin: round; }
+.tf-prev .pb.draft { fill: rgba(255, 210, 63, .08); stroke: var(--warn); stroke-dasharray: 6 4; }
+.tf-plist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.tf-plist:empty { display: none; }
+.tf-plist li { display: flex; align-items: center; gap: 10px; background: var(--raise); border: 1px solid var(--line); border-radius: 5px; padding: 5px 6px 5px 10px; }
+.tf-plist li b { font-weight: 500; font-family: var(--mono); font-size: 12px; } .tf-plist li span { flex: 1; color: var(--muted); font-size: 12px; }
+.tf-plist li.out { border-color: var(--warn); } .tf-plist li.out span { color: var(--warn); }
+.tf-prev .pp { fill: none; stroke: var(--muted); stroke-width: .8; stroke-dasharray: 2 2; } .tf-prev .pp.out { stroke: var(--warn); stroke-dasharray: none; fill: rgba(255,210,63,.08); }
+.tf-prev .pn { fill: var(--muted); font: 10px var(--mono); text-anchor: middle; dominant-baseline: middle; }
+.tf-prev .pc { fill: none; stroke: var(--red); stroke-width: 1; stroke-dasharray: 4 3; }
+.tf-prev .pv { fill: var(--fg); } .tf-prev .pl { fill: var(--muted); font: 10px var(--mono); }
+.tf-prev .sc path { fill: none; stroke: var(--fg); stroke-width: 1.2; } .tf-prev .sc text, .tf-prev .na text { fill: var(--fg); font: 10px var(--mono); text-anchor: middle; }
+.tf-prev .na path { fill: var(--fg); }
+
+body.ovl #app { visibility: hidden; }
+.ovp { visibility: visible; position: fixed; inset: 0; z-index: 50; background: var(--ink); overflow-y: auto; padding: 24px max(16px, env(safe-area-inset-left, 0px)) 32px; box-sizing: border-box; }
+#start { display: grid; place-items: center; }
+.st-in { width: min(880px, 100%); display: grid; gap: 28px; }
+.st-brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 600; letter-spacing: .02em; }
+.st-brand svg { width: 34px; height: 34px; } .st-brand b { color: var(--red); font-weight: 600; }
+.st-in h1 { margin: 0; font-size: clamp(22px, 3.4vw, 32px); font-weight: 600; line-height: 1.2; text-wrap: balance; }
+.st-in > p { margin: -12px 0 0; color: var(--muted); font-size: 14px; max-width: 60ch; }
+.st-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.st-card { text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px 22px 20px; display: grid; gap: 10px; align-content: start; min-height: 190px; }
+.st-card:hover { border-color: #4a525b; background: var(--raise); }
+.st-card.primary { border-color: var(--red); }
+.st-card svg { width: 30px; height: 30px; color: var(--red); }
+.st-card b { font-size: 18px; font-weight: 600; } .st-card span { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.st-card em { font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--fg); opacity: .8; }
+.st-foot { color: var(--muted); font-size: 12px; font-family: var(--mono); }
+#tarif { padding-top: 0; }
+.tf-top { position: sticky; top: 0; z-index: 2; background: var(--ink); display: flex; align-items: center; gap: 12px; padding: 14px 0 12px; border-bottom: 1px solid var(--line); }
+.tf-top h1 { margin: 0; font-size: 18px; font-weight: 600; flex: 1; }
+.tf-wrap { width: min(920px, 100%); margin: 0 auto; }
+#tf-body { display: grid; gap: 14px; padding: 18px 0 110px; }
+.tf-sec { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px 18px; display: grid; gap: 14px; }
+.tf-h { display: flex; gap: 12px; align-items: flex-start; list-style: none; cursor: default; }
+details.tf-sec > summary { cursor: pointer; } details.tf-sec > summary::-webkit-details-marker { display: none; }
+details.tf-sec:not([open]) { gap: 0; }
+.tf-n { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--raise); border: 1px solid var(--line); display: grid; place-items: center; font-family: var(--mono); font-size: 12px; }
+.tf-h h2 { margin: 1px 0 2px; font-size: 15px; font-weight: 600; } .tf-h p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+.tf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px 12px; }
+.tf-row { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 12px; }
+.tf-arazi { display: grid; gap: 10px; }
+.tf-arazi textarea { width: 100%; box-sizing: border-box; font-family: var(--mono); font-size: 12px; background: var(--raise); border: 1px solid var(--line); border-radius: 5px; padding: 8px; resize: vertical; }
+.tf-wide { grid-column: 1 / -1; }
+.tf-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; background: var(--panel); border-top: 1px solid var(--line); padding: 12px max(16px, env(safe-area-inset-left, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)); }
+.tf-bar .tf-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+#tf-miss { flex: 1 1 260px; color: var(--muted); font-size: 12.5px; }
+@media (max-width: 640px) { .st-cards { grid-template-columns: 1fr; } .st-card { min-height: 0; } .tf-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+<div id="app">
+  <header>
+    <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0 0 20z" fill="#e2342b"/><path d="M12 2a10 10 0 0 1 0 20z" fill="#3b4148"/><path d="M13.6 4.5 8.4 13h3.4l-1.4 6.5 5.2-8.6h-3.4z" fill="#fff"/></svg><span class="bt">Ae</span><b>CAD</b></div>
+    <span id="fname">Örnek çizim</span>
+    <div class="hbtns">
+      <button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb files" id="bfiles" hidden title="Son üretilen proje dosyaları"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h5l1.5 1.5h4.5v9.5h-11zM5 8h6M5 10.5h4" fill="none" stroke="currentColor"/></svg><span class="k">Proje dosyaları</span></button>
+      <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
+      <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>
+      <button class="hb" id="bclose" title="Çizimi kapat"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor"/></svg><span class="k">Kapat</span></button>
+      <button class="hb" id="bsave" title="DXF olarak kaydet (Ctrl+S)"><svg viewBox="0 0 16 16"><path d="M8 2v8m-3-3 3 3 3-3M2.5 11v2.5h11V11" fill="none" stroke="currentColor"/></svg><span class="k">Kaydet</span></button>
+      <button class="hb" id="bundo" title="Geri al (Ctrl+Z)" aria-label="Geri al"><svg viewBox="0 0 16 16"><path d="M5 3 2 6l3 3M2.5 6H10a3.5 3.5 0 0 1 0 7H6" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb" id="bredo" title="İleri al (Ctrl+Y)" aria-label="İleri al"><svg viewBox="0 0 16 16"><path d="m11 3 3 3-3 3m2.5-3H6a3.5 3.5 0 0 0 0 7h4" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb" id="bext" title="Tümünü göster (çift tık boş alana)" aria-label="Tümünü göster"><svg viewBox="0 0 16 16"><path d="M1.5 5.5v-4h4m5 0h4v4m0 5v4h-4m-5 0h-4v-4" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb" id="bside" title="Katmanlar ve özellikler" aria-label="Katmanlar"><svg viewBox="0 0 16 16"><path d="m8 2 6 3-6 3-6-3zm-6 6 6 3 6-3M2 11l6 3 6-3" fill="none" stroke="currentColor"/></svg></button>
+      <input type="file" id="file" accept=".dwg,.dxf" hidden>
+    </div>
+  </header>
+  <div class="main">
+    <nav class="tools" aria-label="Çizim araçları">
+      <div class="tg">Çiz</div>
+      <button class="tool" data-cmd="L" title="Çizgi (L)"><svg viewBox="0 0 20 20"><path d="M3 16 17 4" stroke="currentColor" stroke-width="1.5"/><circle cx="3" cy="16" r="1.6" fill="currentColor"/><circle cx="17" cy="4" r="1.6" fill="currentColor"/></svg><span>Çizgi</span></button>
+      <button class="tool" data-cmd="PL" title="Polyline (PL)"><svg viewBox="0 0 20 20"><path d="M2.5 15 7 6l5 8 5.5-9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span>Polyline</span></button>
+      <button class="tool" data-cmd="REC" title="Dikdörtgen (REC)"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span>Dikdörtgen</span></button>
+      <button class="tool" data-cmd="C" title="Daire (C)"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="1.2" fill="currentColor"/></svg><span>Daire</span></button>
+      <button class="tool" data-cmd="A" title="Yay — 3 nokta (A)"><svg viewBox="0 0 20 20"><path d="M3 15A8 8 0 0 1 17 15" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span>Yay</span></button>
+      <button class="tool" data-cmd="T" title="Yazı (T)"><svg viewBox="0 0 20 20"><path d="M4 5h12M10 5v11" stroke="currentColor" stroke-width="1.6"/></svg><span>Yazı</span></button>
+      <button class="tool" data-cmd="DLI" title="Doğrusal ölçü (DLI)"><svg viewBox="0 0 20 20"><path d="M3 6v9M17 6v9M3 9h14" stroke="currentColor" stroke-width="1.3"/><path d="M2 10.5l2-3M16 10.5l2-3" stroke="currentColor"/></svg><span>Ölçü</span></button>
+      <button class="tool" data-cmd="DAL" title="Hizalı ölçü (DAL)"><svg viewBox="0 0 20 20"><path d="M3 15 15 3M5.5 17.5 17.5 5.5M3 15l2.5 2.5M15 3l2.5 2.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg><span>Hizalı</span></button>
+      <div class="tg">Düzenle</div>
+      <button class="tool" data-cmd="M" title="Taşı (M)"><svg viewBox="0 0 20 20"><path d="M10 2v16M2 10h16M10 2 8 4.5M10 2l2 2.5M10 18l-2-2.5M10 18l2-2.5M2 10l2.5-2M2 10l2.5 2M18 10l-2.5-2M18 10l-2.5 2" stroke="currentColor" stroke-width="1.3" fill="none"/></svg><span>Taşı</span></button>
+      <button class="tool" data-cmd="CO" title="Kopyala (CO)"><svg viewBox="0 0 20 20"><rect x="3" y="7" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="3" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.5"/></svg><span>Kopyala</span></button>
+      <button class="tool" data-cmd="RO" title="Döndür (RO)"><svg viewBox="0 0 20 20"><path d="M15.5 10A5.5 5.5 0 1 1 10 4.5h3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m11.5 2 2.5 2.5L11.5 7" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span>Döndür</span></button>
+      <button class="tool" data-cmd="SC" title="Ölçekle (SC)"><svg viewBox="0 0 20 20"><rect x="3" y="9" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 3h9v9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.5"/><path d="m10 10 6-6" stroke="currentColor" stroke-width="1.3"/></svg><span>Ölçekle</span></button>
+      <button class="tool" data-cmd="MI" title="Aynala (MI)"><svg viewBox="0 0 20 20"><path d="M10 2v16" stroke="currentColor" stroke-dasharray="2 2"/><path d="M8 5 3 15h5zM12 5l5 10h-5z" fill="none" stroke="currentColor" stroke-width="1.3"/></svg><span>Aynala</span></button>
+      <button class="tool" data-cmd="O" title="Ofset (O)"><svg viewBox="0 0 20 20"><path d="M3 14c3-8 11-8 14 0" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 15c2.2-5 5.8-5 8 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2 1.5"/></svg><span>Ofset</span></button>
+      <button class="tool" data-cmd="TR" title="Buda (TR)"><svg viewBox="0 0 20 20"><path d="M10 2v16" stroke="currentColor" stroke-width="1.4"/><path d="M2 10h8" stroke="currentColor" stroke-width="1.4"/><path d="M10 10h8" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2 2" opacity=".5"/><path d="m13 7 4 6m0-6-4 6" stroke="#e2342b" stroke-width="1.4"/></svg><span>Buda</span></button>
+      <button class="tool" data-cmd="F" title="Köşe birleştir (F)"><svg viewBox="0 0 20 20"><path d="M3 17V9a6 6 0 0 1 6-6h8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span>Köşe</span></button>
+      <button class="tool" data-cmd="X" title="Patlat (X)"><svg viewBox="0 0 20 20"><rect x="6" y="6" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3 3l2 2M17 3l-2 2M3 17l2-2M17 17l-2-2" stroke="currentColor" stroke-width="1.3"/></svg><span>Patlat</span></button>
+      <button class="tool" data-cmd="E" title="Sil (E / Del)"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V3.5h4V6M5.5 6l1 11h7l1-11" fill="none" stroke="currentColor" stroke-width="1.3"/></svg><span>Sil</span></button>
+      <div class="tg">GES</div>
+      <button class="tool" data-cmd="MASA" title="Masa planı çiz (MASA)"><svg viewBox="0 0 20 20"><path d="M2 6h16v8H2z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5 6v8M8 6v8M11 6v8M14 6v8M2 10h16" stroke="currentColor" stroke-width=".8"/></svg><span>Masa</span></button>
+      <button class="tool" data-cmd="KESIT" title="Masa kesiti çiz (KESIT)"><svg viewBox="0 0 20 20"><path d="M2 17h16M4 14 16 6" stroke="currentColor" stroke-width="1.4"/><path d="M6 13v4M14 7.5V17" stroke="currentColor" stroke-width="1"/></svg><span>Kesit</span></button>
+      <button class="tool" data-cmd="DOLDUR" title="Araziyi masalarla doldur (DOLDUR)"><svg viewBox="0 0 20 20"><path d="M3 4 16 2l2 14-15 2z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h10M5 10h11M5 13h11" stroke="#e2342b" stroke-width="1.6"/></svg><span>Doldur</span></button>
+      <button class="tool" data-cmd="GTMTASI" title="Trafo (TM) taşı — yerleşim yeniden hesaplanır"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="8" height="7" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M11 13l5 4M16 17v-3.5M16 17h-3.5" stroke="#e2342b" stroke-width="1.4" fill="none"/></svg><span>Trafo</span></button>
+      <button class="tool" data-cmd="GINVTASI" title="İnverter taşı (masa başına oturur)"><svg viewBox="0 0 20 20"><circle cx="7" cy="7" r="3.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M10 11l6 5M16 16v-3.5M16 16h-3.5" stroke="#e2342b" stroke-width="1.4" fill="none"/></svg><span>İnverter</span></button>
+      <button class="tool" data-cmd="GYOLCIZ" title="İç yol çiz (polyline, Enter ile bitir)"><svg viewBox="0 0 20 20"><path d="M4 18 9 2M11 2l5 16" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M10 4v3M10 10v3M10 16v2" stroke="#e2342b" stroke-width="1.3"/></svg><span>Yol</span></button>
+      <button class="tool" data-cmd="GDUZCIZ" title="Düzenlemelerle yerleşimi yeniden çiz"><svg viewBox="0 0 20 20"><path d="M16 9a6 6 0 1 1-2-4.5M16 3v4h-4" stroke="#e2342b" stroke-width="1.5" fill="none"/></svg><span>Yeniden</span></button>
+      <div class="tg">Ölç</div>
+      <button class="tool" data-cmd="DI" title="Mesafe (DI)"><svg viewBox="0 0 20 20"><path d="M2 13 13 2l5 5L7 18z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="m6 9 2 2M9 6l2 2M12 3l1.5 1.5" stroke="currentColor"/></svg><span>Mesafe</span></button>
+      <button class="tool" data-cmd="AA" title="Alan (AA)"><svg viewBox="0 0 20 20"><path d="M3 15 6 4l10 3-2 9z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.3"/></svg><span>Alan</span></button>
+    </nav>
+    <div id="stage">
+      <canvas id="scene"></canvas>
+      <canvas id="overlay" tabindex="-1" aria-label="Çizim alanı"></canvas>
+      <div id="busy" hidden><div><span class="spin"></span><span id="busyt">Yükleniyor…</span></div></div>
+      <div id="toast" hidden></div>
+    </div>
+    <aside id="side">
+      <div class="stabs" role="tablist"><button class="stab on" data-tab="layers" role="tab">Katmanlar</button><button class="stab" data-tab="ges" role="tab">GES Tasarım</button></div>
+      <div id="tab-layers" class="tabpane">
+        <div class="ph">Katmanlar <em id="lcount">0</em></div>
+        <div class="lbar"><input id="layerq" type="search" placeholder="Katman ara / yeni ad" aria-label="Katman ara"><button id="lnew" title="Yazılan adla yeni katman oluştur ve geçerli yap">+</button><button id="lall" title="Tüm katmanları göster">Hepsi</button></div>
+        <ul id="layers"></ul>
+        <div class="sep"></div>
+        <div class="ph">Özellikler</div>
+        <div id="props"></div>
+      </div>
+      <div id="tab-ges" class="tabpane ges" hidden>
+        <section>
+          <h3><span>1</span>Panel</h3>
+          <div class="brow"><button class="gb" id="g-bds">Datasheet yükle (PDF)</button><input type="file" id="g-ds" accept=".pdf,.txt" hidden></div>
+          <label class="gf wide">Model<input id="g-model"></label>
+          <div class="grid3">
+            <label class="gf">Güç (Wp)<input id="g-p" type="number" step="5"></label>
+            <label class="gf">Boy (mm)<input id="g-L" type="number"></label>
+            <label class="gf">En (mm)<input id="g-W" type="number"></label>
+            <label class="gf">Kalınlık<input id="g-T" type="number" step="0.5"></label>
+            <label class="gf">Hücre<input id="g-cells" type="number"></label>
+          </div>
+          <div id="g-plist" class="chips" hidden></div>
+          <p class="gi" id="g-pinfo"></p>
+          <button class="gb" id="g-bpanel">Panel detayını çiz</button>
+        </section>
+        <section>
+          <h3><span>2</span>Masa şablonu</h3>
+          <div class="grid3">
+            <label class="gf">Dizilim<select id="g-or"><option value="V">Dikey (V)</option><option value="H">Yatay (H)</option></select></label>
+            <label class="gf">Sıra<input id="g-rows" type="number" min="1" max="6" value="2"></label>
+            <label class="gf">Panel sayısı<input id="g-n" type="number" min="1" value="52"></label>
+            <label class="gf">Eğim (°)<input id="g-tilt" type="number" min="0" max="60" value="25"></label>
+            <label class="gf">Ön yük. (m)<input id="g-front" type="number" step="0.05" value="0.8"></label>
+            <label class="gf">Boşluk (cm)<input id="g-gx" type="number" step="0.5" value="2"></label>
+          </div>
+          <div class="pinfo" id="g-tinfo"></div>
+          <div class="brow"><button class="gb" id="g-btable">Masa planı çiz</button><button class="gb" id="g-bsec">Kesit çiz</button></div>
+          <button class="gb ghost" id="g-bsave">Şablonlara ekle</button>
+          <div class="ph sub">Hazır şablonlar <em>✓ = doldurmada kullan</em></div>
+          <ul id="g-tlist" class="tlist"></ul>
+        </section>
+        <section>
+          <h3><span>3</span>Arazi doldurma</h3>
+          <div class="brow"><button class="gb" id="g-bbound">Sınırı çizimden seç</button><button class="gb" id="g-bkml">KML / KMZ ekle</button><input type="file" id="g-kml" accept=".kml,.kmz" multiple hidden></div>
+          <p class="gi" id="g-binfo"></p>
+          <div class="grid3">
+            <label class="gf">Enlem (°)<input id="g-lat" type="number" step="0.001" value="39.2"></label>
+            <label class="gf">UTM dilimi<input id="g-zone" type="number" min="1" max="60" value="38"></label>
+            <label class="gf">Sıra açısı (°)<input id="g-ang" type="number" step="0.5" value="0"></label>
+            <label class="gf">Çekme (m)<input id="g-set" type="number" step="0.5" value="5"></label>
+            <label class="gf">Masa arası (m)<input id="g-gap" type="number" step="0.1" value="0.5"></label>
+            <label class="gf">Hizalama<select id="g-align"><option value="left">Batıya</option><option value="center">Ortala</option></select></label>
+          </div>
+          <div class="grid2">
+            <label class="gf">Sıra aralığı<select id="g-hrs"><option value="2">Gölgesiz 10:00–14:00</option><option value="3">Gölgesiz 09:00–15:00</option><option value="1">Gölgesiz 11:00–13:00</option><option value="manual">Elle gir</option></select></label>
+            <label class="gf">Pitch (m)<input id="g-pitch" type="number" step="0.05" disabled></label>
+          </div>
+          <p class="gi" id="g-pinfo2"></p>
+          <button class="gb primary" id="g-bfill">Araziyi doldur</button>
+          <p class="gres" id="g-result" hidden></p>
+        </section>
+        <section>
+          <h3><span>4</span>Proje · tek hat · keşif · teklif</h3>
+          <p class="gi">Arazi, panel ve ana masa şablonu yukarıdan alınır. Yerleşim, inverter, trafo, DC/AC/OG kablo, topraklama, tek hat ve metraj GES-ÇİZ ile, bağlayıcı esaslara göre üretilir.</p>
+          <div class="grid2">
+            <label class="gf">Proje masası<select id="p-masa"></select></label>
+            <label class="gf">Hedef DC güç (MWp)<input id="p-mwp" type="number" step="0.1" min="0" placeholder="boş = arazinin tamamı"></label>
+            <label class="gf">DC/AC oranı<input id="p-ratio" type="number" step="0.01" value="1.25"></label>
+            <label class="gf">Trafo gücü (kVA)<select id="p-trafo"><option value="">Oto (yüke göre)</option><option>630</option><option>800</option><option>1000</option><option>1250</option><option>1600</option><option>2000</option><option>2500</option><option>3000</option><option>4000</option><option>5000</option><option selected>5750</option><option>6250</option></select></label>
+            <label class="gf">İnverter AC (kW)<input id="p-inv" type="number" step="5" value="300" placeholder="boş = oto"></label>
+          </div>
+          <p class="gi" id="p-auto"></p>
+          <details class="det">
+            <summary>Detay</summary>
+            <div class="dh">Proje</div>
+            <div class="grid2">
+              <label class="gf">Proje kodu<input id="p-kod" placeholder="AECAD"></label>
+              <label class="gf">Revizyon<input id="p-rev" placeholder="R00"></label>
+              <label class="gf">İşin adı<input id="p-ad" placeholder="GES Projesi"></label>
+              <label class="gf">Yatırımcı<input id="p-yat"></label>
+              <label class="gf">İl / ilçe / ada / parsel<input id="p-yer"></label>
+              <label class="gf">Müellif<input id="p-mue"></label>
+              <label class="gf">Seviye<select id="p-sev"><option value="teklif">Teklif</option><option value="uygulama">Uygulama</option></select></label>
+              <label class="gf">Tesis tipi<select id="p-tip"><option value="lisanssiz">Lisanssız</option><option value="lisansli">Lisanslı</option><option value="iletim">İletim</option><option value="osb">OSB</option><option value="yurtdisi">Yurtdışı</option></select></label>
+            </div>
+            <div class="dh">Modül elektriksel (datasheet'ten)</div>
+            <div class="grid3">
+              <label class="gf">Voc (V)<input id="p-voc" type="number" step="0.01"></label>
+              <label class="gf">Vmp (V)<input id="p-vmp" type="number" step="0.01"></label>
+              <label class="gf">Isc (A)<input id="p-isc" type="number" step="0.01"></label>
+              <label class="gf">Imp (A)<input id="p-imp" type="number" step="0.01"></label>
+              <label class="gf">β Voc (%/°C)<input id="p-kvoc" type="number" step="0.01"></label>
+              <label class="gf">Tmin (°C)<input id="p-tmin" type="number" step="1" placeholder="-25"></label>
+            </div>
+            <div class="dh">İnverter ve trafo</div>
+            <div class="grid3">
+              <label class="gf">İnverter modeli<input id="p-invm" placeholder="ör. SUN2000-330KTL"></label>
+              <label class="gf">MPPT sayısı<input id="p-mppt" type="number"></label>
+              <label class="gf">MPPT akımı (A)<input id="p-mppta" type="number"></label>
+              <label class="gf">String modül<input id="p-strm" type="number"></label>
+              <label class="gf">String/inverter<input id="p-strinv" type="number"></label>
+              <label class="gf">İnverter/trafo<input id="p-invtr" type="number"></label>
+              <label class="gf">Trafo gerilimi<input id="p-trg" placeholder="33/0,8 kV Dy11 ONAN"></label>
+              <label class="gf">Şebeke (kV)<input id="p-sebeke" type="number" step="0.1" placeholder="TM'den"></label>
+              <label class="gf">OG (kV)<input id="p-ogkv" type="number" step="0.1" placeholder="33"></label>
+            </div>
+            <div class="dh">Kablolar</div>
+            <div class="grid2">
+              <label class="gf">DC kablo<input id="p-dck" placeholder="H1Z2Z2-K 1x6"></label>
+              <label class="gf">AC kablo<input id="p-ack" placeholder="3x300/150 NA2XY"></label>
+              <label class="gf">AC kesit (mm²)<input id="p-ackes" type="number" placeholder="300"></label>
+              <label class="gf">OG kablo<input id="p-ogk" placeholder="3x(1x120/16) NA2XSY 36 kV"></label>
+              <label class="gf">DC tek yön sınır (m)<input id="p-dcmax" type="number" placeholder="80"></label>
+            </div>
+            <div class="dh">Yerleşim ve statik</div>
+            <div class="grid3">
+              <label class="gf">Çitten çekme (m)<input id="p-cekme" type="number" step="0.5" placeholder="5"></label>
+              <label class="gf">Sıra açıklığı (m)<input id="p-acik" type="number" step="0.05" placeholder="pitch'ten"></label>
+              <label class="gf">TM tarafı<select id="p-taraf"><option value="dogu">Doğu</option><option value="bati">Batı</option></select></label>
+              <label class="gf">İç bakım yolu<select id="p-icyol"><option value="1">Açık (K-G, ΔU'ya göre)</option><option value="0">Kapalı (yalnız kenar yol)</option></select></label>
+              <label class="gf">İç yol genişliği (m)<input id="p-icw" type="number" step="0.5" placeholder="5"></label>
+              <label class="gf">İç yol aralığı (m)<input id="p-icar" type="number" step="1" placeholder="oto: DC ΔU %1"></label>
+              <label class="gf">Aks sayısı<input id="p-aks" type="number"></label>
+              <label class="gf">Aks aralığı (m)<input id="p-aksa" type="number" step="0.01"></label>
+              <label class="gf ck"><input id="p-pdf2" type="checkbox" checked> PDF pafta seti üret</label>
+            </div>
+            <div class="brow"><button class="gb" id="p-dm">DM konumunu çizimde göster</button></div>
+            <p class="gi" id="p-dmtxt">DM: otomatik (TM tarafı kuzey köşe)</p>
+            <p class="gi">Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır. Detayda bir değeri değiştirdiğinizde proje yeniden üretilir.</p>
+          </details>
+          <button class="gb primary" id="p-run">Yerleşimi çiz ve seçenekleri karşılaştır</button>
+          <p class="gres" id="p-stage"></p>
+          <p class="gi sug" id="p-sug" hidden></p>
+          <div class="brow"><button class="gb" id="p-open" disabled>Paftalar · kontrol · keşif · teklif</button><button class="gb ghost" id="p-back" hidden>Kaynak çizime dön</button></div>
+          <div class="dh">Çizimde düzenle</div>
+          <div class="brow"><button class="gb" id="p-tmtasi" type="button">Trafo taşı</button><button class="gb" id="p-invtasi" type="button">İnverter taşı</button></div>
+          <div class="brow"><button class="gb" id="p-yolciz" type="button">Yol çiz</button><button class="gb" id="p-yolsil" type="button">Yol sil</button></div>
+          <div class="brow"><button class="gb primary" id="p-duzcalis" type="button" disabled>Düzenlemeyle yeniden çiz</button><button class="gb ghost" id="p-duzsif" type="button">Sıfırla</button></div>
+          <p class="gi" id="p-duzinfo"></p>
+        </section>
+      </div>
+    </aside>
+  </div>
+  <footer>
+    <div class="cmdbox">
+      <div id="hist" aria-live="polite"></div>
+      <div class="cline"><span id="prompt">Komut:</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Komut satırı"></div>
+    </div>
+    <div class="status">
+      <div id="coords">X 0.000   Y 0.000</div>
+      <div class="tog"><button id="bsnap" class="on" title="Nesne yakalama (F3)">YAKALA</button><button id="bortho" title="Orto (F8)">ORTO</button><button id="bgrid" title="Izgara (F7)">IZGARA</button><button id="btrack" class="on" title="Nesne yakalama izi (F11)">İZ</button></div>
+      <div class="srow"><span>Katman <span id="curlayer">0</span></span><span id="rinfo"></span></div>
+    </div>
+  </footer>
+  <div id="palette" hidden></div>
+  <section id="start" class="ovp" hidden>
+    <div class="st-in">
+      <div class="st-brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0 0 20z" fill="#e2342b"/><path d="M12 2a10 10 0 0 1 0 20z" fill="#3b4148"/><path d="M13.6 4.5 8.4 13h3.4l-1.4 6.5 5.2-8.6h-3.4z" fill="#fff"/></svg><span>Ae<b>CAD</b></span></div>
+      <h1>Ne yapmak istiyorsunuz?</h1>
+      <p>Projeyi bilgileriyle tarif edin, AeCAD proje çizim esaslarına göre çizsin; ya da doğrudan çizim ekranına geçin.</p>
+      <div class="st-cards">
+        <button class="st-card primary" id="st-tarif" type="button"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 11h7M9 15h7M9 19h4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>Proje tarif et</b><span>Proje bilgileri, arazi (KML veya köşe koordinatı), hedef güç, trafo, inverter ve panel datasheet'i form üzerinden girilir. Yerleşim, tek hat, topraklama, kablo, metraj ve PDF otomatik üretilir.</span><em>Form → GES-ÇİZ → paftalar</em></button>
+        <button class="st-card" id="st-cad" type="button"><svg viewBox="0 0 24 24"><path d="M4 20 18 6l2 2L6 22H4zM14 4l6 6M3 3h6M3 3v6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>Çizime geç</b><span>DWG/DXF açın, 2B çizin, ölçün. GES sekmesinde panel, masa şablonu, arazi doldurma ve proje tanımı da bu ekrandan yapılır.</span><em>AeCAD çizim ekranı</em></button>
+      </div>
+      <div class="st-son" id="st-son" hidden><span>Son üretilen proje</span><b id="st-son-t"></b><button class="gb" id="st-son-b" type="button">Paftalar, PDF, keşif ve teklif</button></div>
+      <div class="st-foot">Aksaray Enerji · AeCAD</div>
+    </div>
+  </section>
+  <section id="tarif" class="ovp" hidden>
+    <div class="tf-wrap">
+      <div class="tf-top"><button class="hb" id="tf-back" type="button" aria-label="Başlangıca dön"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor"/></svg></button><h1>Proje tarifi</h1></div>
+      <div id="tf-body"></div>
+    </div>
+    <div class="tf-bar"><div class="tf-wrap"><span id="tf-miss"></span><button class="gb" id="tf-cad" type="button">Kaydet, çizime geç</button><button class="gb primary" id="tf-ok" type="button">Projeyi çiz</button></div></div>
+  </section>
+  <dialog id="pjdlg"><div class="pjh"><div class="ptabs"><button class="ptab" data-t="yerlesim">Yerleşim seçenekleri</button><button class="ptab" data-t="paftalar">Paftalar</button><button class="ptab" data-t="kontrol">Kontroller</button><button class="ptab" data-t="kesif">Keşif</button><button class="ptab" data-t="teklif">Teklif</button></div><button class="mini" id="pj-close" aria-label="Kapat">✕</button></div><div id="pj-body"></div></dialog>
+  <dialog id="qdlg"><h3></h3><p></p><div class="qb"></div></dialog>
+</div>

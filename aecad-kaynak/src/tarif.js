@@ -3,7 +3,7 @@
 const TF = {
   sec: [
     { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
-    { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur.', arazi: true, f: ['g-lat', 'p-cekme'] },
+    { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur. Önizlemede bir kenara tıklayarak cephesini seçin (genel → yol → komşu parsel → diğer); her tip kendi çekme mesafesini alır.', arazi: true, f: ['g-lat', 'p-cekme', 'p-cyol', 'p-cpar', 'p-cdig'] },
     { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invm'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
     { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa'] },
@@ -146,14 +146,18 @@ function tfPreview() {
   if (G.bound) s += '<polygon class="pb" points="' + G.bound.map(Pt).join(' ') + '"/>';
   if (P.length > 1) P.forEach((q) => { const out = (G.parcelOut || []).includes(q.ad); s += '<polygon class="pp' + (out ? ' out' : '') + '" points="' + q.pts.map(Pt).join(' ') + '"/>'; const c = centroidOf(q.pts); s += '<text class="pn" x="' + X(c).toFixed(1) + '" y="' + Y(c).toFixed(1) + '">' + q.ad.replace(/[<&>]/g, '') + '</text>'; });
   const sb = pn('p-cekme') ?? 5;
-  if (G.bound && sb > 0) { try { const o = offsetItem({ id: -1, t: 'pline', cl: true, pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o && o.pts) s += '<polygon class="pc" points="' + o.pts.map(Pt).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
+  const cv = G.bound && cepheVar();
+  if (cv) { try { for (const r of cepheIcHalkalar((p) => p, sb) || []) s += '<polygon class="pc" points="' + r.map(Pt).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
+  if (G.bound) for (const k of cepheKenarlar()) { const T = k.tip ? CEPHE_TIP[k.tip] : null; s += '<line class="ce" data-i="' + k.i + '" x1="' + X(k.a).toFixed(1) + '" y1="' + Y(k.a).toFixed(1) + '" x2="' + X(k.b).toFixed(1) + '" y2="' + Y(k.b).toFixed(1) + '" style="stroke:' + (T ? T.renk : 'transparent') + '"><title>Kenar ' + (k.i + 1) + ' · ' + fmtNum(k.L, 0) + ' m · ' + (T ? T.ad : 'genel') + ' — tıklayın: cephe değiştir</title></line>'; }
+  if (!cv && G.bound && sb > 0) { try { const o = offsetItem({ id: -1, t: 'pline', cl: true, pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o && o.pts) s += '<polygon class="pc" points="' + o.pts.map(Pt).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
   for (const r of draft) s += '<polygon class="pb draft" points="' + r.map(Pt).join(' ') + '"/>';
   const tgt = w * 0.25, e = Math.pow(10, Math.floor(Math.log10(tgt))), m = [1, 2, 5, 10].find((v) => v * e >= tgt * 0.6) * e, L = m * k;
   s += '<g class="sc" transform="translate(' + (W - pad - L) + ',' + (H - 10) + ')"><path d="M0 -4V0H' + L.toFixed(1) + 'V-4"/><text x="' + (L / 2).toFixed(1) + '" y="-7">' + (m >= 1000 ? m / 1000 + ' km' : m + ' m') + '</text></g>';
   s += '<g class="na" transform="translate(' + (W - 18) + ',22)"><path d="M0 -12 6 6 0 2 -6 6Z"/><text y="18">K</text></g>';
   svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = s;
+  svg.querySelectorAll('line.ce').forEach((el) => { el.onclick = () => { const i = +el.dataset.i, k = cepheKenarlar()[i], sira = [null, 'yol', 'parsel', 'diger']; cepheAta(i, sira[(sira.indexOf(k.tip) + 1) % sira.length]); }; });
   const parts = [];
-  if (G.bound) { const top = P.reduce((t, q) => t + Math.abs(polyArea(q.pts)), 0); parts.push((P.length > 1 ? P.length + ' parsel · parseller toplamı ' + fmtNum(top / 10000, 3) + ' ha · birleşik saha ' : 'Saha ') + fmtNum(Math.abs(polyArea(G.bound)) / 10000, 3) + ' ha · ' + fmtNum(w, 0) + ' × ' + fmtNum(h, 0) + ' m' + (sb > 0 ? ' · kırmızı kesikli: ' + fmtNum(sb, 1) + ' m çekme (yalnız dış sınır)' : '')); }
+  if (G.bound) { const top = P.reduce((t, q) => t + Math.abs(polyArea(q.pts)), 0); parts.push((P.length > 1 ? P.length + ' parsel · parseller toplamı ' + fmtNum(top / 10000, 3) + ' ha · birleşik saha ' : 'Saha ') + fmtNum(Math.abs(polyArea(G.bound)) / 10000, 3) + ' ha · ' + fmtNum(w, 0) + ' × ' + fmtNum(h, 0) + ' m' + (cv ? ' · ' + cepheOzet(sb) + ' (kırmızı kesikli: çekme sınırı)' : sb > 0 ? ' · kırmızı kesikli: ' + fmtNum(sb, 1) + ' m çekme (yalnız dış sınır)' : '') + ' · kenara tıklayın: cephe (yol / komşu parsel / diğer)'); }
   if ((G.parcelOut || []).length) parts.push('⚠ bitişik olmayan: ' + G.parcelOut.join(', ') + ' — proje en büyük birleşik alanda yapılır');
   if (draft.length) parts.push('sarı: yapıştırılan ' + draft.length + ' parsel, henüz eklenmedi — "Koordinatları parsel olarak ekle"');
   cap.textContent = parts.join(' · ');

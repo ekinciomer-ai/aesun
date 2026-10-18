@@ -13,7 +13,7 @@ for f in pyodide.js pyodide.asm.js pyodide.asm.wasm python_stdlib.zip pyodide-lo
 mkdir -p out/py/mpl && cp -u ../pyo/mplslim/matplotlib-3.5.2-cp312-cp312-pyodide_2024_0_wasm32.whl out/py/mpl/
 cp ../pyo/ges_ciz.py out/py/
 mkdir -p out/lib && cp ../lw/node_modules/pdfjs-dist/build/pdf.min.js ../lw/node_modules/pdfjs-dist/build/pdf.worker.min.js out/lib/
-{ cat shell.html; echo '<script>'; cat ../lw/node_modules/polygon-clipping/dist/polygon-clipping.umd.min.js; echo; echo '</script>'; echo '<script>'; echo '"use strict";'; for f in core acds sab doc items render dxf app ges gesui gesproj gesalt gesduzen tarif pencere main; do cat src/$f.js; echo; done; echo 'window.addEventListener("DOMContentLoaded", init);'; echo '</script>'; } > out/index.html
+{ cat shell.html; echo '<script>'; cat ../lw/node_modules/polygon-clipping/dist/polygon-clipping.umd.min.js; echo; echo '</script>'; echo '<script>'; echo '"use strict";'; for f in core acds sab doc items render dxf app ges gesui gesproj gesalt gesduzen cephe tarif pencere main; do cat src/$f.js; echo; done; echo 'window.addEventListener("DOMContentLoaded", init);'; echo '</script>'; } > out/index.html
 sed -i "s/__BUILD__/$(date +%y%m%d%H%M)/" out/index.html
 node -e "const s=require('fs').readFileSync('out/index.html','utf8');const i=s.lastIndexOf('<script>');const b=s.slice(i+8,s.lastIndexOf('</script>'));try{new Function(b);console.log('syntax ok',s.length)}catch(e){console.log('SYNTAX',e.message)}"
 

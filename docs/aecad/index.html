@@ -242,6 +242,8 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .tf-prev .pp { fill: none; stroke: var(--muted); stroke-width: .8; stroke-dasharray: 2 2; } .tf-prev .pp.out { stroke: var(--warn); stroke-dasharray: none; fill: rgba(255,210,63,.08); }
 .tf-prev .pn { fill: var(--muted); font: 10px var(--mono); text-anchor: middle; dominant-baseline: middle; }
 .tf-prev .pc { fill: none; stroke: var(--red); stroke-width: 1; stroke-dasharray: 4 3; }
+.tf-prev .ce { stroke-width: 4; stroke-linecap: round; cursor: pointer; pointer-events: stroke; }
+.tf-prev .ce:hover { stroke: var(--acc, #60a5fa) !important; stroke-width: 6; }
 .tf-prev .pv { fill: var(--fg); } .tf-prev .pl { fill: var(--muted); font: 10px var(--mono); }
 .tf-prev .sc path { fill: none; stroke: var(--fg); stroke-width: 1.2; } .tf-prev .sc text, .tf-prev .na text { fill: var(--fg); font: 10px var(--mono); text-anchor: middle; }
 .tf-prev .na path { fill: var(--fg); }
@@ -387,13 +389,21 @@ details.tf-sec:not([open]) { gap: 0; }
           <h3><span>3</span>Arazi doldurma</h3>
           <div class="brow"><button class="gb" id="g-bbound">Sınırı çizimden seç</button><button class="gb" id="g-bkml">KML / KMZ ekle</button><input type="file" id="g-kml" accept=".kml,.kmz" multiple hidden></div>
           <p class="gi" id="g-binfo"></p>
+          <div class="brow"><button class="gb" id="g-bcephe" type="button" title="Sınır kenarlarını yol / komşu parsel / diğer olarak işaretle">Cephe işaretle (yol / parsel)</button></div>
+          <div class="grid3">
+            <label class="gf">Yol cephesi çekme (m)<input id="p-cyol" type="number" step="0.5" placeholder="genel"></label>
+            <label class="gf">Komşu parsel çekme (m)<input id="p-cpar" type="number" step="0.5" placeholder="genel"></label>
+            <label class="gf">Diğer cephe çekme (m)<input id="p-cdig" type="number" step="0.5" placeholder="genel"></label>
+          </div>
+          <p class="gi" id="g-cinfo"></p>
           <div class="grid3">
             <label class="gf">Enlem (°)<input id="g-lat" type="number" step="0.001" value="39.2"></label>
             <label class="gf">UTM dilimi<input id="g-zone" type="number" min="1" max="60" value="38"></label>
             <label class="gf">Sıra açısı (°)<input id="g-ang" type="number" step="0.5" value="0"></label>
             <label class="gf">Çekme (m)<input id="g-set" type="number" step="0.5" value="5"></label>
             <label class="gf">Masa arası (m)<input id="g-gap" type="number" step="0.1" value="0.5"></label>
-            <label class="gf">Hizalama<select id="g-align"><option value="left">Batıya</option><option value="center">Ortala</option></select></label>
+            <label class="gf">Hizalama (D-B)<select id="g-align"><option value="left">Batıya</option><option value="right">Doğuya</option><option value="center">Ortala</option><option value="duz">En düz sınıra</option><option value="opt">Optimum (en çok masa)</option></select></label>
+            <label class="gf">Sıra başlangıcı (K-G)<select id="g-valign"><option value="south">Güneyden</option><option value="north">Kuzeyden</option><option value="center">Ortala</option></select></label>
           </div>
           <div class="grid2">
             <label class="gf">Sıra aralığı<select id="g-hrs"><option value="2">Gölgesiz 10:00–14:00</option><option value="3">Gölgesiz 09:00–15:00</option><option value="1">Gölgesiz 11:00–13:00</option><option value="manual">Elle gir</option></select></label>
@@ -2731,34 +2741,52 @@ function bestCombo(span, types, gap) {
   };
   rec(0, span, [], 0); return best;
 }
+// Hizalama: xm = left (batı) | right (doğu) | center; ym = south (güneyden) | north (kuzeyden) | center.
+// opts.ic: cephe bazlı iç alan halkaları (çekme zaten düşülmüş) — verilirse setback 0 ile taranır.
 function fillLand(opts) {
-  const { types, setback, pitch, rowGap, rowAng, align } = opts; // types: [{tp, name, len, depth, n}]
+  const { types, pitch, rowGap, rowAng } = opts; // types: [{tp, name, len, depth, n}]
+  const xm = opts.xm || (opts.align === 'center' ? 'center' : opts.align === 'right' ? 'right' : 'left'), ym = opts.ym || 'south';
   const th = rowAng * D2R, c = Math.cos(th), s = Math.sin(th);
   const toL = (p) => [p[0] * c + p[1] * s, -p[0] * s + p[1] * c], toW = (p) => [p[0] * c - p[1] * s, p[0] * s + p[1] * c];
+  const rings = opts.ic ? opts.ic(toL) : null; const setback = rings ? 0 : opts.setback;
   const poly = G.bound.map(toL);
-  const ys = poly.map((p) => p[1]); const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const ys = (rings ? rings.flat() : poly).map((p) => p[1]); const minY = Math.min(...ys), maxY = Math.max(...ys);
   const depth = Math.max(...types.map((t) => t.depth));
+  const scan = rings ? (yy) => scanXR(rings, yy) : (yy) => scanX(poly, yy);
+  const span = maxY - minY - 2 * setback - depth; if (span < -1e-9) return { placed: [], rows: 0, rowAng: th, area: Math.abs(polyArea(G.bound)), xm, ym };
+  const art = span - Math.floor(span / pitch + 1e-9) * pitch;
+  let yS = minY + setback + (ym === 'north' ? art : ym === 'center' ? art / 2 : 0);
   const placed = []; let rows = 0;
-  for (let y = minY + setback; y + depth <= maxY - setback + 1e-9; y += pitch) {
+  for (let y = yS; y + depth <= maxY - setback + 1e-9; y += pitch) {
     const y0 = y - setback, y1 = y + depth + setback; const n = Math.max(4, Math.ceil((y1 - y0) / 0.5));
     let iv = null;
     const samples = []; for (let k = 0; k <= n; k++) samples.push(y0 + (y1 - y0) * k / n);
-    for (const p of poly) if (p[1] > y0 && p[1] < y1) samples.push(p[1] - 1e-7, p[1] + 1e-7);
-    for (const yy of samples) { const cur = scanX(poly, yy); iv = iv === null ? cur : ivIntersect(iv, cur); if (!iv.length) break; }
+    for (const r of (rings || [poly])) for (const p of r) if (p[1] > y0 && p[1] < y1) samples.push(p[1] - 1e-7, p[1] + 1e-7);
+    for (const yy of samples) { const cur = scan(yy); iv = iv === null ? cur : ivIntersect(iv, cur); if (!iv.length) break; }
     if (!iv || !iv.length) continue;
     let any = false;
     for (const [a0, a1] of iv) {
       let x0 = a0 + setback, x1 = a1 - setback; if (x1 - x0 < types[types.length - 1].len) continue;
-      const span = x1 - x0; const bc = bestCombo(span, types, rowGap);
-      let x = align === 'center' ? x0 + bc.left / 2 : x0;
+      const bc = bestCombo(x1 - x0, types, rowGap);
+      let x = xm === 'center' ? x0 + bc.left / 2 : xm === 'right' ? x0 + bc.left : x0;
       for (let i = 0; i < types.length; i++) for (let k = 0; k < (bc.cnt[i] || 0); k++) {
         const w = toW([x, y]); placed.push({ type: i, x: w[0], y: w[1] }); x += types[i].len + rowGap; any = true;
       }
     }
     if (any) rows++;
   }
-  return { placed, rows, rowAng: th, area: Math.abs(polyArea(G.bound)) };
+  return { placed, rows, rowAng: th, area: Math.abs(polyArea(G.bound)), xm, ym };
 }
+// "En düz sınır": en uzun sınır kenarı; K-G'ye yakınsa o yana (batı/doğu) dayanır, D-B'ye yakınsa o yandan (güney/kuzey) başlar.
+function hizaDuz(rowAng) {
+  const th = rowAng * D2R, c = Math.cos(th), s = Math.sin(th), toL = (p) => [p[0] * c + p[1] * s, -p[0] * s + p[1] * c];
+  const B = G.bound.map(toL), cx = B.reduce((t, p) => t + p[0], 0) / B.length, cy = B.reduce((t, p) => t + p[1], 0) / B.length;
+  let best = null, bl = 0; for (let i = 0; i < B.length; i++) { const a = B[i], b = B[(i + 1) % B.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L > bl) { bl = L; best = [a, b]; } }
+  const [a, b] = best, mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+  if (Math.abs(b[1] - a[1]) >= Math.abs(b[0] - a[0])) return { xm: mx < cx ? 'left' : 'right', ym: 'south', L: bl };
+  return { xm: 'center', ym: my < cy ? 'south' : 'north', L: bl };
+}
+const HIZA_AD = { left: 'batıya', right: 'doğuya', center: 'ortalı', south: 'güneyden', north: 'kuzeyden' };
 
 // ---------- KML / KMZ ----------
 async function unzipFirstKml(buf) {
@@ -2813,7 +2841,7 @@ function gesLoad() {
 }
 const gv = (id) => document.getElementById(id);
 const gnum = (id, d = 0) => { const v = parseFloat(String(gv(id).value).replace(',', '.')); return isFinite(v) ? v : d; };
-function gesSettings() { const ids = ['g-lat', 'g-zone', 'g-set', 'g-gap', 'g-ang', 'g-hrs', 'g-pitch', 'g-align']; const o = {}; for (const i of ids) if (gv(i)) o[i] = gv(i).value; return o; }
+function gesSettings() { const ids = ['g-lat', 'g-zone', 'g-set', 'g-gap', 'g-ang', 'g-hrs', 'g-pitch', 'g-align', 'g-valign']; const o = {}; for (const i of ids) if (gv(i)) o[i] = gv(i).value; return o; }
 
 function panelToForm() {
   const P = G.panel; gv('g-model').value = P.model || ''; gv('g-p').value = P.p; gv('g-L').value = P.L; gv('g-W').value = P.W; gv('g-T').value = P.T || ''; gv('g-cells').value = P.cells || '';
@@ -2845,6 +2873,7 @@ function renderTpl() {
   });
 }
 function boundInfo() {
+  if (typeof cepheBilgi === 'function') cepheBilgi();
   const el = gv('g-binfo');
   if (!G.bound) { el.textContent = 'Sınır seçilmedi. Çizimdeki kapalı bir polyline\'ı seçin veya KML/KMZ yükleyin.'; return; }
   const a = Math.abs(polyArea(G.bound)); const np = (G.parcels || []).length;
@@ -2986,20 +3015,32 @@ CMD.GFILL = async () => {
   const sel = G.tpl.filter((t) => t.use !== false); if (!sel.length) { msg('Doldurma için en az bir masa şablonu işaretleyin.', 'err'); return; }
   const pitch = pitchUpdate(); if (!pitch) return;
   const types = sel.map((tp) => { const d = tplDims(tp); return { tp, name: makeTableBlock(tp), len: d.len, depth: d.depth, n: d.n, kwp: d.kwp }; }).sort((a, b) => b.len - a.len);
-  const res = fillLand({ types, setback: gnum('g-set', 5), pitch, rowGap: gnum('g-gap', 0.5), rowAng: gnum('g-ang', 0), align: gv('g-align').value });
+  const base = { types, setback: gnum('g-set', 5), pitch, rowGap: gnum('g-gap', 0.5), rowAng: gnum('g-ang', 0) };
+  if (cepheVar()) base.ic = (toL) => cepheIcHalkalar(toL, gnum('g-set', 5));
+  const am = gv('g-align').value, vm = (gv('g-valign') || {}).value || 'south'; let res, hiza = '';
+  const modOf = (r) => r.placed.reduce((t, p) => t + types[p.type].n, 0);
+  if (am === 'opt') {
+    const den = []; for (const xm of ['left', 'right', 'center']) for (const ym of ['south', 'north', 'center']) { const r = fillLand({ ...base, xm, ym }); den.push(r); if (!res || modOf(r) > modOf(res)) res = r; }
+    const kotu = Math.min(...den.map(modOf));
+    hiza = 'Optimum: ' + HIZA_AD[res.xm] + ' · ' + (res.ym === 'center' ? 'K-G ortalı' : HIZA_AD[res.ym]) + ' (9 seçenekten en çok modül; en kötüsünden +' + (modOf(res) - kotu).toLocaleString('tr') + ' modül)';
+  } else if (am === 'duz') {
+    const h = hizaDuz(base.rowAng); res = fillLand({ ...base, xm: h.xm, ym: h.ym });
+    hiza = 'En düz sınır (' + fmtNum(h.L, 0) + ' m kenar): ' + HIZA_AD[h.xm] + ' · ' + HIZA_AD[h.ym];
+  } else res = fillLand({ ...base, xm: am, ym: vm });
   if (!res.placed.length) { msg('Sınırın içine hiç masa sığmadı. Sınır mesafesini veya şablonu kontrol edin.', 'err'); return; }
   const items = []; const cnt = types.map(() => 0);
   S.doc.addLayer('GES-MASA', 5);
   for (const p of res.placed) { const t = types[p.type]; cnt[p.type]++; items.push({ id: newId(), t: 'insert', layer: 'GES-MASA', c: types.length > 1 && p.type > 0 ? 4 : 256, lt: '', block: t.name, M: mMul(mT(p.x, p.y), mRz(res.rowAng)), ap: [] }); }
   S.doc.addLayer('GES-CEKME', 1, 'DASHED'); S.doc.addLayer('GES-NOT', 7);
   // setback outline (approx: offset polygon via miter)
-  const sb = gnum('g-set', 5); if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } }
+  const sb = gnum('g-set', 5); if (cepheVar()) { for (const r of cepheIcHalkalar((p) => p, sb) || []) items.push({ id: newId(), t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: r.map((q) => [q[0], q[1], 0]) }); } else if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } }
   const mods = types.reduce((s, t, i) => s + cnt[i] * t.n, 0), kwp = mods * G.panel.p / 1000;
   addItems(items, 'arazi doldur'); renderLayers();
   G.last = { cnt, types, mods, kwp, rows: res.rows, area: res.area, pitch };
   const lines = types.map((t, i) => (i === 0 ? 'Ana ' : 'Alternatif ') + t.tp.rows + t.tp.orient + t.tp.per + ': ' + cnt[i] + ' masa (' + cnt[i] * t.n + ' modül)');
   const sum = lines.join(' · ') + ' — Toplam ' + mods.toLocaleString('tr') + ' modül · ' + fmtNum(kwp / 1000, 3) + ' MWp DC · ' + res.rows + ' sıra · pitch ' + fmtNum(pitch, 2) + ' m · ' + fmtNum(kwp / (res.area / 10000), 0) + ' kWp/ha';
-  msg(sum, 'res'); gv('g-result').textContent = sum; gv('g-result').hidden = false;
+  const sum2 = sum + (hiza ? ' · ' + hiza : '') + (cepheVar() ? ' · cephe bazlı çekme' : '');
+  msg(sum2, 'res'); gv('g-result').textContent = sum2; gv('g-result').hidden = false;
   // summary text near boundary
   const bb = G.bound.reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
   const th = Math.max(1, (bb[3] - bb[1]) / 120);
@@ -3015,7 +3056,7 @@ function gesInit() {
   panelToForm(); tplUpdate(); renderTpl(); boundInfo(); pitchUpdate();
   for (const id of ['g-model', 'g-p', 'g-L', 'g-W', 'g-T', 'g-cells']) gv(id).addEventListener('change', formToPanel);
   for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); });
-  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); });
+  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); });
   gv('g-ds').onchange = (e) => { const f = e.target.files[0]; if (f) gesDatasheet(f); e.target.value = ''; };
   gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };
   gv('g-bds').onclick = () => gv('g-ds').click();
@@ -3032,7 +3073,7 @@ function gesInit() {
 // ---- GES project: AeCAD -> GES-ÇİZ (Pyodide worker) -> paftalar, kontrol, keşif, teklif ----
 const PJ = { worker: null, seq: 0, busy: false, again: false, res: null, files: null, srcDoc: null, dm: null, cur: null };
 const PKEY = 'aecad.proje.v1', FKEY = 'aecad.fiyat.v1';
-const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar'];
+const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar', 'p-cyol', 'p-cpar', 'p-cdig'];
 
 function pjSave() { try { const o = {}; for (const id of PJ_IDS) { const el = gv(id); if (el) o[id] = el.type === 'checkbox' ? el.checked : el.value; } o.dm = PJ.dm; o.duzen = PJ.duzen; localStorage.setItem(PKEY, JSON.stringify(o)); } catch (e) { /* ignore */ } }
 function pjLoad() { try { const o = JSON.parse(localStorage.getItem(PKEY) || 'null'); if (!o) return; for (const id of PJ_IDS) { const el = gv(id); if (el && o[id] !== undefined) { if (el.type === 'checkbox') el.checked = o[id]; else el.value = o[id]; } } PJ.dm = o.dm || null; if (o.duzen) PJ.duzen = o.duzen; } catch (e) { /* ignore */ } }
@@ -3084,7 +3125,7 @@ function buildParam0() {
   const statikVar = pn('p-aks') !== null;
   return {
     proje: { kod: pv('p-kod') || 'AECAD', isin_adi: pv('p-ad') || 'GES Projesi', proje_sahibi: pv('p-yat') || '', yatirimci: pv('p-yat') || '', il_ilce_ada_parsel: pv('p-yer') || '', cizen: 'AeCAD · GES-ÇİZ', revizyon: pv('p-rev') || 'R00', seviye: pv('p-sev') || 'teklif', enlem: gnum('g-lat', 39), tesis_tipi: pv('p-tip') || 'lisanssiz', muellif: pv('p-mue') || '', muellif_unvan: 'Elektrik Mühendisi' },
-    parsel: { koordinat: (G.parcels && G.parcels.length > 1) ? G.parcels.map((q) => q.pts.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)])) : G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: G.boundCrs || (fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)'), cekme_mesafesi_m: pn('p-cekme') ?? 5, max_masa: a.maxMasa, hedef_masa: null },
+    parsel: { koordinat: (G.parcels && G.parcels.length > 1) ? G.parcels.map((q) => q.pts.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)])) : G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: G.boundCrs || (fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)'), cekme_mesafesi_m: pn('p-cekme') ?? 5, cepheler: cepheParam(), max_masa: a.maxMasa, hedef_masa: null },
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
     masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, parca_carpani: statikVar ? undefined : pc },
     yol: { ic_yol: (pv('p-icyol') || '1') === '1', ic_genislik_m: pn('p-icw') ?? 5, ic_aralik_m: pn('p-icar') },
@@ -3093,7 +3134,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190116', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190127', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3521,7 +3562,7 @@ function pjDuzenCiz(not) {
 function pjDuzenSifirla() { PJ.duzen = { tm: [], inv: [], ekYol: [], silYol: [] }; pjSave(); pjDuzenBilgi(); }
 // Projeyi sıfırla: çizimdeki tüm GES nesneleri (masa, çekme, özet, panel/kesit) + yerleşim seçenekleri, düzenlemeler ve hesap sonuçları silinir.
 // Arazi sınırı/parselleri ve form değerleri kalır. Çizim silmesi Geri al ile döner.
-const GES_KORU = new Set(['GES-PARSEL', 'GES-SINIR']);
+const GES_KORU = new Set(['GES-PARSEL', 'GES-SINIR', 'GES-CEPHE']);
 async function pjSifirla() {
   const r = await askDlg('Projeyi sıfırla', 'Çizimdeki tüm masalar ve GES nesneleri, yerleşim seçenekleri, düzenlemeler ve hesap sonuçları (paftalar, kontrol, keşif, teklif, kayıtlı son proje) silinecek. Arazi sınırı ve form değerleri kalır. Çizimdeki silme Geri al ile döner; hesap sonuçları dönmez.', [['Sıfırla', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
   if (r !== 'ok') return;
@@ -3569,12 +3610,112 @@ function pjDuzenInit() {
   gv('p-duzcalis').onclick = () => pjDuzenCiz(); gv('p-duzsif').onclick = pjSifirla; pjDuzenBilgi();
 }
 
+// ---- Cephe (komşuluk): arazi sınırının her kenarı yol / komşu parsel / diğer olarak işaretlenir; her tip kendi çekme mesafesini alır ----
+// Kayıt kenar uçlarıyla tutulur (sınır sırası değişse de eşleşir). İşaretsiz kenar genel çekmeyi alır.
+const CEPHE_TIP = {
+  yol: { ad: 'Yol', kisa: 'YOL', c: 1, renk: '#ef4444', id: 'p-cyol' },
+  parsel: { ad: 'Komşu parsel', kisa: 'PARSEL', c: 3, renk: '#22c55e', id: 'p-cpar' },
+  diger: { ad: 'Diğer', kisa: 'DİĞER', c: 5, renk: '#3b82f6', id: 'p-cdig' },
+};
+const CKEY = 'aecad.cephe.v1';
+G.cephe = [];
+function cepheYukle() { try { G.cephe = JSON.parse(localStorage.getItem(CKEY) || '[]') || []; } catch (e) { G.cephe = []; } }
+function cepheKaydet() { try { localStorage.setItem(CKEY, JSON.stringify(G.cephe)); } catch (e) { /* ignore */ } }
+function segDist(p, a, b) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+  const t = L2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2)) : 0;
+  return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+}
+function cepheTip(p, q) { for (const c of G.cephe) if (segDist(p, c.a, c.b) <= 0.5 && segDist(q, c.a, c.b) <= 0.5) return c.tip; return null; }
+function cepheD(tip, genel) { if (!tip || !CEPHE_TIP[tip]) return genel; const v = pn(CEPHE_TIP[tip].id); return v ?? genel; }
+function cepheKenarlar() {
+  if (!G.bound) return []; const B = G.bound;
+  return B.map((p, i) => { const q = B[(i + 1) % B.length]; return { i, a: p, b: q, tip: cepheTip(p, q), L: Math.hypot(q[0] - p[0], q[1] - p[1]) }; });
+}
+function cepheVar() { return cepheKenarlar().some((k) => k.tip); }
+function cepheAta(i, tip) {
+  const k = cepheKenarlar()[i]; if (!k) return;
+  G.cephe = G.cephe.filter((c) => !(segDist(k.a, c.a, c.b) <= 0.5 && segDist(k.b, c.a, c.b) <= 0.5));
+  if (tip) G.cephe.push({ a: [k.a[0], k.a[1]], b: [k.b[0], k.b[1]], tip });
+  cepheKaydet(); cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview();
+}
+// script parametresi: işaretli kenarlar + mesafe (genel = Çitten çekme)
+function cepheParam() {
+  const g = pn('p-cekme') ?? 5;
+  return cepheKenarlar().filter((k) => k.tip).map((k) => ({ a: [+k.a[0].toFixed(3), +k.a[1].toFixed(3)], b: [+k.b[0].toFixed(3), +k.b[1].toFixed(3)], tip: k.tip, cekme_m: cepheD(k.tip, g) }));
+}
+function cepheOzet(genel) {
+  const t = {}; for (const k of cepheKenarlar()) { const n = k.tip || 'genel'; t[n] = (t[n] || 0) + k.L; }
+  return Object.keys(t).map((n) => (n === 'genel' ? 'işaretsiz' : CEPHE_TIP[n].ad.toLowerCase()) + ' ' + fmtNum(t[n], 0) + ' m → ' + fmtNum(n === 'genel' ? genel : cepheD(n, genel), 1) + ' m çekme').join(' · ');
+}
+function cepheBilgi() { const el = gv('g-cinfo'); if (!el) return; el.textContent = G.bound ? (cepheVar() ? 'Cepheler: ' + cepheOzet(pn('p-cekme') ?? 5) : 'Cephe işaretlenmedi — tüm kenarlarda genel çekme.') : ''; }
+// çizimde işaret: GES-CEPHE katmanı (renkli kenar + etiket); her değişiklikte yeniden üretilir
+function cepheCiz() {
+  if (!S.doc || PJ.srcDoc) return;
+  const eski = [...S.doc.items.values()].filter((it) => it.layer === 'GES-CEPHE');
+  const yeni = []; const K = cepheKenarlar().filter((k) => k.tip);
+  if (K.length) {
+    S.doc.addLayer('GES-CEPHE', 1);
+    const bb = G.bound.reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
+    const th = Math.max(1, Math.max(bb[2] - bb[0], bb[3] - bb[1]) / 90), cen = centroidOf(G.bound), g = pn('p-cekme') ?? 5;
+    for (const k of K) {
+      const T = CEPHE_TIP[k.tip];
+      yeni.push({ id: newId(), t: 'line', layer: 'GES-CEPHE', c: T.c, lt: '', x1: k.a[0], y1: k.a[1], x2: k.b[0], y2: k.b[1] });
+      const mx = (k.a[0] + k.b[0]) / 2, my = (k.a[1] + k.b[1]) / 2; let nx = -(k.b[1] - k.a[1]) / (k.L || 1), ny = (k.b[0] - k.a[0]) / (k.L || 1);
+      if ((cen[0] - mx) * nx + (cen[1] - my) * ny < 0) { nx = -nx; ny = -ny; }
+      let ang = Math.atan2(k.b[1] - k.a[1], k.b[0] - k.a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
+      yeni.push({ id: newId(), t: 'text', layer: 'GES-CEPHE', c: T.c, lt: '', x: mx + nx * th * 1.6, y: my + ny * th * 1.6, h: th, rot: ang, s: T.kisa + ' · ' + fmtNum(cepheD(k.tip, g), 1) + ' m', ha: 1, va: 2 });
+    }
+  }
+  if (!eski.length && !yeni.length) return;
+  replaceItems([...eski.map((it) => [it, null]), ...yeni.map((n) => [null, n])], 'cephe'); renderLayers();
+}
+CMD.GCEPHE = async () => {
+  if (!G.bound) { msg('Önce arazi sınırını seçin.', 'err'); return; }
+  for (;;) {
+    const p = await getPoint('Cepheyi (sınır kenarını) tıklayın — bitirmek için Enter:', {}); if (!Array.isArray(p)) return;
+    const K = cepheKenarlar(); let best = null, bd = Infinity;
+    for (const k of K) { const d = segDist(p, k.a, k.b); if (d < bd) { bd = d; best = k; } }
+    if (!best || bd > 20 / V().s) { msg('Sınır kenarı bulunamadı; kenara daha yakın tıklayın.', 'err'); continue; }
+    const g = pn('p-cekme') ?? 5;
+    const r = await askDlg('Cephe ' + (best.i + 1) + ' · ' + fmtNum(best.L, 0) + ' m', 'Bu kenar neye komşu? Çekme mesafesi tipe göre uygulanır (GES → Arazi doldurma alanlarından değiştirilir).',
+      [['Yol · ' + fmtNum(cepheD('yol', g), 1) + ' m', 'yol', 'primary'], ['Komşu parsel · ' + fmtNum(cepheD('parsel', g), 1) + ' m', 'parsel'], ['Diğer · ' + fmtNum(cepheD('diger', g), 1) + ' m', 'diger'], ['Genel · ' + fmtNum(g, 1) + ' m', 'genel', 'ghost']]);
+    if (r === null) continue;
+    cepheAta(best.i, r === 'genel' ? null : r); msg('Cephe ' + (best.i + 1) + ': ' + (r === 'genel' ? 'genel çekme' : CEPHE_TIP[r].ad) + '.', 'res');
+  }
+};
+Object.assign(ALIAS, { GCEPHE: 'GCEPHE', CEPHE: 'GCEPHE' });
+Object.assign(LABEL, { GCEPHE: 'CEPHE İŞARETLE' });
+
+// fillLand için: cephe bazlı iç alan halkaları (yerel koordinatta); işaret yoksa null
+function cepheIcHalkalar(toL, genel) {
+  const K = cepheKenarlar(); if (!K.some((k) => k.tip)) return null;
+  const circ = (c, r) => { const o = []; for (let j = 0; j < 20; j++) { const t = j / 20 * 2 * Math.PI; o.push([c[0] + r * Math.cos(t), c[1] + r * Math.sin(t)]); } o.push(o[0]); return [o]; };
+  const parts = [];
+  for (const k of K) {
+    const d = k.tip ? cepheD(k.tip, genel) : genel; if (!(d > 0)) continue;
+    const a = toL(k.a), b = toL(k.b), L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, nx = -(b[1] - a[1]) / L * d, ny = (b[0] - a[0]) / L * d;
+    parts.push([[[a[0] + nx, a[1] + ny], [b[0] + nx, b[1] + ny], [b[0] - nx, b[1] - ny], [a[0] - nx, a[1] - ny], [a[0] + nx, a[1] + ny]]], circ(a, d));
+  }
+  const R = G.bound.map(toL); const res = polygonClipping.difference([[...R, R[0]]], ...parts);
+  return res.flatMap((pg) => pg.map((r) => r.slice(0, -1))).filter((r) => r.length >= 3);
+}
+function scanXR(rings, y) {
+  const xs = []; for (const poly of rings) { const n = poly.length; for (let i = 0; i < n; i++) { const a = poly[i], b = poly[(i + 1) % n]; if ((a[1] <= y && b[1] > y) || (b[1] <= y && a[1] > y)) xs.push(a[0] + (y - a[1]) / (b[1] - a[1]) * (b[0] - a[0])); } }
+  xs.sort((p, q) => p - q); const iv = []; for (let i = 0; i + 1 < xs.length; i += 2) iv.push([xs[i], xs[i + 1]]); return iv;
+}
+function cepheInit() {
+  cepheYukle(); cepheBilgi();
+  const b = gv('g-bcephe'); if (b) b.onclick = () => runCommand('GCEPHE');
+  for (const id of ['p-cyol', 'p-cpar', 'p-cdig', 'p-cekme']) { const el = gv(id); if (el) el.addEventListener('change', () => { cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview(); }); }
+}
+
 // ---- Başlangıç ekranı + Proje tarif sayfası ----
 // Tarif sayfası kendi verisini tutmaz: her alan AeCAD'deki GES/Proje alanına (data-to) bağlıdır, tek veri kaynağı odur.
 const TF = {
   sec: [
     { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
-    { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur.', arazi: true, f: ['g-lat', 'p-cekme'] },
+    { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur. Önizlemede bir kenara tıklayarak cephesini seçin (genel → yol → komşu parsel → diğer); her tip kendi çekme mesafesini alır.', arazi: true, f: ['g-lat', 'p-cekme', 'p-cyol', 'p-cpar', 'p-cdig'] },
     { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invm'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
     { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa'] },
@@ -3717,14 +3858,18 @@ function tfPreview() {
   if (G.bound) s += '<polygon class="pb" points="' + G.bound.map(Pt).join(' ') + '"/>';
   if (P.length > 1) P.forEach((q) => { const out = (G.parcelOut || []).includes(q.ad); s += '<polygon class="pp' + (out ? ' out' : '') + '" points="' + q.pts.map(Pt).join(' ') + '"/>'; const c = centroidOf(q.pts); s += '<text class="pn" x="' + X(c).toFixed(1) + '" y="' + Y(c).toFixed(1) + '">' + q.ad.replace(/[<&>]/g, '') + '</text>'; });
   const sb = pn('p-cekme') ?? 5;
-  if (G.bound && sb > 0) { try { const o = offsetItem({ id: -1, t: 'pline', cl: true, pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o && o.pts) s += '<polygon class="pc" points="' + o.pts.map(Pt).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
+  const cv = G.bound && cepheVar();
+  if (cv) { try { for (const r of cepheIcHalkalar((p) => p, sb) || []) s += '<polygon class="pc" points="' + r.map(Pt).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
+  if (G.bound) for (const k of cepheKenarlar()) { const T = k.tip ? CEPHE_TIP[k.tip] : null; s += '<line class="ce" data-i="' + k.i + '" x1="' + X(k.a).toFixed(1) + '" y1="' + Y(k.a).toFixed(1) + '" x2="' + X(k.b).toFixed(1) + '" y2="' + Y(k.b).toFixed(1) + '" style="stroke:' + (T ? T.renk : 'transparent') + '"><title>Kenar ' + (k.i + 1) + ' · ' + fmtNum(k.L, 0) + ' m · ' + (T ? T.ad : 'genel') + ' — tıklayın: cephe değiştir</title></line>'; }
+  if (!cv && G.bound && sb > 0) { try { const o = offsetItem({ id: -1, t: 'pline', cl: true, pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o && o.pts) s += '<polygon class="pc" points="' + o.pts.map(Pt).join(' ') + '"/>'; } catch (e) { /* ignore */ } }
   for (const r of draft) s += '<polygon class="pb draft" points="' + r.map(Pt).join(' ') + '"/>';
   const tgt = w * 0.25, e = Math.pow(10, Math.floor(Math.log10(tgt))), m = [1, 2, 5, 10].find((v) => v * e >= tgt * 0.6) * e, L = m * k;
   s += '<g class="sc" transform="translate(' + (W - pad - L) + ',' + (H - 10) + ')"><path d="M0 -4V0H' + L.toFixed(1) + 'V-4"/><text x="' + (L / 2).toFixed(1) + '" y="-7">' + (m >= 1000 ? m / 1000 + ' km' : m + ' m') + '</text></g>';
   s += '<g class="na" transform="translate(' + (W - 18) + ',22)"><path d="M0 -12 6 6 0 2 -6 6Z"/><text y="18">K</text></g>';
   svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = s;
+  svg.querySelectorAll('line.ce').forEach((el) => { el.onclick = () => { const i = +el.dataset.i, k = cepheKenarlar()[i], sira = [null, 'yol', 'parsel', 'diger']; cepheAta(i, sira[(sira.indexOf(k.tip) + 1) % sira.length]); }; });
   const parts = [];
-  if (G.bound) { const top = P.reduce((t, q) => t + Math.abs(polyArea(q.pts)), 0); parts.push((P.length > 1 ? P.length + ' parsel · parseller toplamı ' + fmtNum(top / 10000, 3) + ' ha · birleşik saha ' : 'Saha ') + fmtNum(Math.abs(polyArea(G.bound)) / 10000, 3) + ' ha · ' + fmtNum(w, 0) + ' × ' + fmtNum(h, 0) + ' m' + (sb > 0 ? ' · kırmızı kesikli: ' + fmtNum(sb, 1) + ' m çekme (yalnız dış sınır)' : '')); }
+  if (G.bound) { const top = P.reduce((t, q) => t + Math.abs(polyArea(q.pts)), 0); parts.push((P.length > 1 ? P.length + ' parsel · parseller toplamı ' + fmtNum(top / 10000, 3) + ' ha · birleşik saha ' : 'Saha ') + fmtNum(Math.abs(polyArea(G.bound)) / 10000, 3) + ' ha · ' + fmtNum(w, 0) + ' × ' + fmtNum(h, 0) + ' m' + (cv ? ' · ' + cepheOzet(sb) + ' (kırmızı kesikli: çekme sınırı)' : sb > 0 ? ' · kırmızı kesikli: ' + fmtNum(sb, 1) + ' m çekme (yalnız dış sınır)' : '') + ' · kenara tıklayın: cephe (yol / komşu parsel / diğer)'); }
   if ((G.parcelOut || []).length) parts.push('⚠ bitişik olmayan: ' + G.parcelOut.join(', ') + ' — proje en büyük birleşik alanda yapılır');
   if (draft.length) parts.push('sarı: yapıştırılan ' + draft.length + ' parsel, henüz eklenmedi — "Koordinatları parsel olarak ekle"');
   cap.textContent = parts.join(' · ');
@@ -3917,7 +4062,7 @@ function init() {
   const view = new View($('#scene'), $('#overlay')); S.view = view; view.gridOn = false;
   buildPalette();
   gesInit();
-  pjInit(); pjDuzenInit(); pencereInit();
+  pjInit(); pjDuzenInit(); cepheInit(); pencereInit();
   if (window.AE_PORTAL) { const P = window.AE_PORTAL; const box = document.createElement('div'); box.className = 'pbadge';
     const nm = document.createElement('span'); nm.textContent = P.ad || P.kul || ''; const a = document.createElement('a'); a.href = '../portal/'; a.textContent = 'Portal';
     const c = document.createElement('a'); c.href = '#'; c.textContent = 'Çıkış'; c.onclick = (e) => { e.preventDefault(); try { localStorage.removeItem('ae_portal'); } catch (x) { /* ignore */ } location.replace('../portal/'); };

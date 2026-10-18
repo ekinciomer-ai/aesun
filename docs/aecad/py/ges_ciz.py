@@ -230,10 +230,19 @@ class Model:
         self.az = P["masa"]["azimut_derece"]
         rot = lambda g: affinity.rotate(g, -self.az, origin=self.merkez) if self.az else g
         loc = rot(self.parsel)
-        self.cekme = cekme
         of = P["parsel"]["cit_ic_ofset_m"]
         self.cit = self.parsel.buffer(-of, join_style=2)
-        ic = loc.buffer(-cekme, join_style=2)
+        # Cephe bazlı çekme (parsel.cepheler): yol / komşu parsel / diğer cephelerde farklı mesafe. Verilmeyen kenar = genel çekme (kademeli).
+        kn = self._cephe_kenarlar(loc, rot, cekme)
+        self.cekme_cephe = kn
+        if kn and any(abs(d - cekme) > 1e-6 for _, d, _ in kn):
+            ofs = lambda f: loc.difference(unary_union([sg.buffer(f(d), cap_style=1) for sg, d, _ in kn if f(d) > 0])).buffer(0)
+            ic = ofs(lambda d: d)
+            self.cekme = min(d for _, d, _ in kn)
+        else:
+            ofs = None
+            ic = loc.buffer(-cekme, join_style=2)
+            self.cekme = cekme
         for ya in P["parsel"]["yasak_alanlar"]:
             ic = ic.difference(rot(Polygon(ya["koordinat"]).buffer(ya.get("tampon_m", 0))))
         for s in P["santiye"]["alanlar"]:
@@ -242,13 +251,32 @@ class Model:
             ic = unary_union([q for q in ic.geoms if q.area > 50])
         self.ic_loc = ic
         # A.6 servis yolu = çit ile masa alanı arasındaki kenar bandı; eksen bandın ortasında
-        self.yol_loc = loc.buffer(-of, join_style=2).difference(loc.buffer(-cekme, join_style=2))
-        h = loc.buffer(-(of + cekme) / 2, join_style=2)
+        if ofs:
+            self.yol_loc = loc.buffer(-of, join_style=2).difference(ofs(lambda d: d))
+            h = ofs(lambda d: (of + d) / 2)
+        else:
+            self.yol_loc = loc.buffer(-of, join_style=2).difference(loc.buffer(-cekme, join_style=2))
+            h = loc.buffer(-(of + cekme) / 2, join_style=2)
         if h.geom_type == "MultiPolygon": h = max(h.geoms, key=lambda q: q.area)
         self.halka = LineString(h.exterior.coords)
         self.alan_loc = ic
         self.koridor_loc = []
         self.ic_yollar = []
+
+    def _cephe_kenarlar(self, loc, rot, cekme):
+        """parsel.cepheler: [{"a":[x,y],"b":[x,y],"tip":"yol|parsel|diger","cekme_m":5}]. Dış sınırın her kenarı,
+        iki ucu bir cephe doğrusuna ≤ 0,5 m ise o cephenin mesafesini alır; eşleşmeyen kenar genel çekmeyi (kademe) alır."""
+        cs = self.P["parsel"].get("cepheler") or []
+        if not cs: return []
+        segs = [(rot(LineString([c["a"], c["b"]])), c) for c in cs if c.get("a") and c.get("b") and c.get("cekme_m") is not None]
+        k = list(loc.exterior.coords); out = []
+        for i in range(len(k) - 1):
+            e = LineString([k[i], k[i + 1]]); d, tip = cekme, None
+            for sg, c in segs:
+                if sg.distance(Point(k[i])) <= 0.5 and sg.distance(Point(k[i + 1])) <= 0.5:
+                    d, tip = float(c["cekme_m"]), c.get("tip"); break
+            out.append((e, d, tip))
+        return out
 
     def ic_yol_kur(self):
         """A.7: sıraları dik kesen K-G iç işletme-bakım yolları. Aralık, yol kenarındaki (masa başı) inverterden en uzak
@@ -1022,6 +1050,13 @@ class Model:
         ic = self.cit.buffer(-1.0, join_style=2).exterior
         self.direkler = [tuple(ic.interpolate(ic.project(Point(p))).coords[0]) for p in direk]
 
+    def cekme_ozet(self):
+        kn = [q for q in (getattr(self, "cekme_cephe", None) or []) if q[2]]
+        if not kn: return f"{self.cekme:g} m"
+        ad = {"yol": "yol", "parsel": "parsel", "diger": "diğer"}; v = {}
+        for _, d, t in kn: v[ad.get(t, t)] = d
+        return " · ".join(f"{t} {d:g} m" for t, d in v.items()) + f" · diğer {self.P['parsel']['cekme_mesafesi_m']:g} m"
+
     def W(self, g):
         return affinity.rotate(g, self.az, origin=self.merkez) if self.az else g
 
@@ -1078,12 +1113,22 @@ class Model:
         else:
             ekle("Parsel alanı EİGM ile uyumlu", None, f"çizim {self.parsel.area:,.0f} m², parsel.eigm_alan_m2 yok", "E: sapma ≤ %0,1")
         # B — yerleşim
-        ek = self.cekme != P["parsel"]["cekme_mesafesi_m"]
-        ekle("Çitten çekme mesafesi", "uyari" if ek else True, f"{self.cekme} m" + (" (kademeye düşüldü)" if ek else ""), "B: 5 m esas; sığmazsa 4/3/2")
+        kn = [q for q in (getattr(self, "cekme_cephe", None) or []) if q[2]]
+        if kn:
+            ad = {"yol": "yol", "parsel": "komşu parsel", "diger": "diğer"}; oz = {}
+            for sg, d, tip in kn: oz.setdefault((ad.get(tip, tip), d), 0); oz[(ad.get(tip, tip), d)] += sg.length
+            ekle("Çitten çekme (cephe bazlı)", True, " · ".join(f"{t} {d:g} m ({L:,.0f} m cephe)" for (t, d), L in oz.items()) + f" · diğer kenarlar {P['parsel']['cekme_mesafesi_m']:g} m", "B: kullanıcı cephe tanımı")
+        else:
+            ek = self.cekme != P["parsel"]["cekme_mesafesi_m"]
+            ekle("Çitten çekme mesafesi", "uyari" if ek else True, f"{self.cekme} m" + (" (kademeye düşüldü)" if ek else ""), "B: 5 m esas; sığmazsa 4/3/2")
         if P["parsel"]["hedef_masa"]:
             ekle("Hedef masa sayısı", len(self.masalar) >= P["parsel"]["hedef_masa"], f"{len(self.masalar)} / {P['parsel']['hedef_masa']}", "B")
         yb = self.cekme - P["parsel"]["cit_ic_ofset_m"]
-        ekle("Servis yolu kenar bandına sığıyor", yb >= P["yol"]["genislik_m"], f"band {yb:.1f} m / yol {P['yol']['genislik_m']} m", "A.6")
+        dar = [q for q in (getattr(self, "cekme_cephe", None) or []) if q[1] - P["parsel"]["cit_ic_ofset_m"] < P["yol"]["genislik_m"]]
+        if dar:
+            ekle("Servis yolu kenar bandına sığıyor", "uyari", f"{sum(q[0].length for q in dar):,.0f} m cephede band {min(q[1] for q in dar) - P['parsel']['cit_ic_ofset_m']:.1f} m < yol {P['yol']['genislik_m']} m — bu cephelerde kenar yolu yok, erişim iç yollardan", "A.6")
+        else:
+            ekle("Servis yolu kenar bandına sığıyor", yb >= P["yol"]["genislik_m"], f"band {yb:.1f} m / yol {P['yol']['genislik_m']} m", "A.6")
         if self.ic_yollar:
             ekle("İç işletme-bakım yolları (K-G, sıraları keser)", True, f"{len(self.ic_yollar)} yol × {P['yol']['ic_genislik_m']:g} m · blok yarı genişliği {self.K_ic} masa · DC sınırı {self.dc_lim_kaynak}", "A.7: aralık DC gerilim düşümüne göre")
         else:
@@ -1766,7 +1811,7 @@ def _inv_sigorta(e, kw=None):
     return e.get("ag_inv_cikis") or f"3 × {In} A DSYA {e['ag_gerilim_v']} V"
 
 
-def pafta_tekhat_tm(M, t, kod):
+def pafta_tekhat_tm(M, t, kod, tek=False):
     """TM t (0 tabanlı): OG hücreleri + trafo + AG ana dağıtım panosu + inverter çıkışları."""
     e = M.P["elektrik"]
     pf = Pafta(kod, f"TM-{t+1} OG/AG TEK HAT ŞEMASI", olcekli=False)
@@ -1865,9 +1910,9 @@ def pafta_tekhat_tm(M, t, kod):
         sy_inverter(C, TH_AG, x, yinv, 12)
         C.TL(TH_YZ, x - sp / 2 + 1.5, yinv - 15, 1.6, [f"INV-{inv['no']:02d}", f"{inv['n_str']} str × {e['string_modul']}", f"{ikw or '—'} kW · {_inv_sigorta(e, ikw)}"])
     C.T(TH_YZ, cx0 + 2 * sp - sp / 2 + 1.5, yinv - 26, 1.6, "Her inverter ayrı AG hattı · çıkış koruması inverter gücüne göre")
-    # sağ üst: veri + sembol tablosu
+    # sağ üst: veri + sembol tablosu (tek paftada sembol tablosu ve notlar bir kez, DM bölümünde)
     dx = X0 + len(hucreler) * HW + 110
-    sembol_tablosu(C, max(dx + 170, 640.0), YT + 6, 150)
+    if not tek: sembol_tablosu(C, max(dx + 170, 640.0), YT + 6, 150)
     if e["inverter_ac_kw"]:
         kws = [i.get("ac_kw") or e["inverter_ac_kw"] for i in invs]
         ac_sum = sum(kws)
@@ -1884,7 +1929,38 @@ def pafta_tekhat_tm(M, t, kod):
               "2. Röle açma süresi ≤ 0,5 s; dağıtım şirketi belirlemezse 0,3 s.", "3. OG hücre kumandası 24 V DC; akü-redresör iç ihtiyaçtan.",
               "4. Trafo koruma ve AG işletme topraklaması arası ≥ 20 m", "    veya yalıtılarak birleştirilir (Topraklama Yön.).",
               "5. AG pano tip testli (IEC 61439); kablo uzunlukları güzergâh + 10 m."]
-    C.TL(TH_YZ, dx, YT - 52, 1.75, notlar, 1.5)
+    if not tek: C.TL(TH_YZ, dx, YT - 52, 1.75, notlar, 1.5)
+    else: C.R(TH_KOSK, X0 - 12, YT + 22, 798.0, ytp - 162); C.T(TH_YZ, X0 - 10, YT + 16, 3.2, f"TM-{t+1} · TR-{t+1} {kva_t} kVA · {len(invs)} inverter")
+    return pf
+
+
+def pafta_tasi(dst, src, dx, dy):
+    for t, k, d, i in src.p:
+        if t in ("L", "P"): d = [(x + dx, y + dy) for x, y in d]
+        elif t == "T": d = (d[0] + dx, d[1] + dy) + tuple(d[2:])
+        elif t == "C": d = (d[0] + dx, d[1] + dy, d[2])
+        dst.p.append((t, k, d, i))
+
+
+def pafta_tekhat(M, kod="02"):
+    """Tek hat TEK paftada (kullanıcı kuralı 19.10.2026): üstte DM + OG dağıtım, altında her TM'nin OG hücreleri + trafo +
+    AG ana dağıtım panosu + tüm inverter çıkışları. Sembol tablosu ve notlar bir kez. Bloklar ızgarada, pafta A0'a
+    sığmazsa uzatılmış kağıt."""
+    pf = pafta_tekhat_dm(M, kod)
+    pf.ad = "TEK HAT ŞEMASI (DM · OG DAĞITIM · TM · AG PANO)"
+    tms = [pafta_tekhat_tm(M, t, kod, tek=True) for t in range(M.n_tr)]
+    if not tms: return pf
+    bb = pf.sinir(); tb = [q.sinir() for q in tms]
+    W = max(b[2] - b[0] for b in tb) + 30; H = max(b[3] - b[1] for b in tb) + 30
+    n = len(tms); en_iyi = None
+    for nc in range(1, n + 1):
+        nr = math.ceil(n / nc); w = max(bb[2] - bb[0], nc * W); h = (bb[3] - bb[1]) + 40 + nr * H
+        f = abs(w / h - math.sqrt(2))
+        if en_iyi is None or f < en_iyi[0]: en_iyi = (f, nc)
+    nc = en_iyi[1]
+    for j, (q, b) in enumerate(zip(tms, tb)):
+        r, c = divmod(j, nc)
+        pafta_tasi(pf, q, bb[0] + c * W - b[0], (bb[1] - 40 - r * H) - b[3])
     return pf
 
 
@@ -1936,7 +2012,7 @@ def pafta_tekhat_dm(M, kod):
         ek = hucre_dizisi(Ciz(pf, bx, byt, k, etiket=False), 0, 0, hs, "", "")
         invs = [i for i in M.inverterler if i["tr"] == tn]
         C.TL(TH_YZ, bx - 2, byt + 12, 2.2, [f"TM-{tn}  ·  TR-{tn} {(M.tr_kva[tn - 1] if getattr(M, 'tr_kva', None) else e['trafo_kva'])} kVA"])
-        C.TL(TH_YZ, bx - 2, byt + 8.6, 1.5, [f"{len(invs)} INV · {sum(i['n_str'] for i in invs)} str · detay pafta 02-{tn+1}"])
+        C.TL(TH_YZ, bx - 2, byt + 8.6, 1.5, [f"{len(invs)} INV · {sum(i['n_str'] for i in invs)} str · detay: aşağıda TM-{tn} bloğu"])
         P_ = lambda p: (bx + p[0] * k, byt + p[1] * k)
         g = {h["tip"]: P_(p) for p, h in zip(ek, hs) if p[1] is not None}
         if "trafo_koruma" in g:
@@ -1986,7 +2062,10 @@ def pafta_olcek(M, pf):
         for a in adaylar:
             pm = PAFTA_MM[a]
             if bb[2] - bb[0] + 10 <= pm[0] - KENAR[0] - KENAR[2] and bb[3] - bb[1] + 10 <= pm[1] - KENAR[1] - KENAR[3]: return pm, None
-        return PAFTA_MM[adaylar[-1]], None
+        pm = PAFTA_MM[adaylar[-1]]                      # sığmazsa uzatılmış kağıt (190 mm katlama katı)
+        w = max(pm[0], math.ceil((bb[2] - bb[0] + 10 + KENAR[0] + KENAR[2]) / 190) * 190)
+        h = max(pm[1], math.ceil((bb[3] - bb[1] + 10 + KENAR[1] + KENAR[3]) / 10) * 10)
+        return (w, h), None
     bb = pf.sinir(); w = bb[2] - bb[0]; h = bb[3] - bb[1]
     liste = DETAY_OLCEK if pf.kod == "05" else PLAN_OLCEK
     for s_ in liste:
@@ -2264,7 +2343,7 @@ def pdf_yaz(M, paftalar, yol, metraj, kontrol):
             if pf.kod == "01":
                 n = [f"Masa: {len(M.masalar)} × {M.P['masa']['tip']} · Modül: {len(M.masalar) * M.masa_modul} · String: {len(M.stringler)} · İnverter: {len(M.inverterler)} · TM: {M.n_tr}",
                      f"Pitch {M.P['masa']['pitch_m']} m · Eğim {M.P['masa']['egim_derece']}° · Alt kenar {M.P['masa']['alt_kenar_m']} m · GCR {M.masa_D / M.P['masa']['pitch_m']:.3f} · Azimut {M.az}°",
-                     f"Koordinat sistemi: {M.P['parsel']['koordinat_sistemi'] or '—'} · Çekme {M.cekme} m · Sıra açıklığı {M.acik:.2f} m"]
+                     f"Koordinat sistemi: {M.P['parsel']['koordinat_sistemi'] or '—'} · Çekme {M.cekme_ozet()} · Sıra açıklığı {M.acik:.2f} m"]
                 for i, s in enumerate(n): fx.text(120, 70 - i * 5, s, fontsize=6.5)
             pdf.savefig(fig); plt.close(fig)
         pm = PAFTA_MM["A1"]
@@ -2414,7 +2493,7 @@ def calistir(param_yol, cikti=None, seviye=None):
     os.makedirs(cikti, exist_ok=True)
     M = Model(P).kur()
     sv = P["proje"]["seviye"]
-    th = [pafta_tekhat_dm(M, "02-1")] + [pafta_tekhat_tm(M, t, f"02-{t+2}") for t in range(M.n_tr)]
+    th = [pafta_tekhat(M, "02")]
     paftalar = [pafta_yerlesim(M, sv)] + th + [pafta_topraklama(M), pafta_kablo(M), pafta_kanal(M)]
     toplam_pafta = len(paftalar)
     for pf in paftalar: pf.toplam = toplam_pafta

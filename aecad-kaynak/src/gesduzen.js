@@ -72,7 +72,7 @@ function pjDuzenCiz(not) {
 function pjDuzenSifirla() { PJ.duzen = { tm: [], inv: [], ekYol: [], silYol: [] }; pjSave(); pjDuzenBilgi(); }
 // Projeyi sıfırla: çizimdeki tüm GES nesneleri (masa, çekme, özet, panel/kesit) + yerleşim seçenekleri, düzenlemeler ve hesap sonuçları silinir.
 // Arazi sınırı/parselleri ve form değerleri kalır. Çizim silmesi Geri al ile döner.
-const GES_KORU = new Set(['GES-PARSEL', 'GES-SINIR']);
+const GES_KORU = new Set(['GES-PARSEL', 'GES-SINIR', 'GES-CEPHE']);
 async function pjSifirla() {
   const r = await askDlg('Projeyi sıfırla', 'Çizimdeki tüm masalar ve GES nesneleri, yerleşim seçenekleri, düzenlemeler ve hesap sonuçları (paftalar, kontrol, keşif, teklif, kayıtlı son proje) silinecek. Arazi sınırı ve form değerleri kalır. Çizimdeki silme Geri al ile döner; hesap sonuçları dönmez.', [['Sıfırla', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
   if (r !== 'ok') return;

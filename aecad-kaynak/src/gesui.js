@@ -15,7 +15,7 @@ function gesLoad() {
 }
 const gv = (id) => document.getElementById(id);
 const gnum = (id, d = 0) => { const v = parseFloat(String(gv(id).value).replace(',', '.')); return isFinite(v) ? v : d; };
-function gesSettings() { const ids = ['g-lat', 'g-zone', 'g-set', 'g-gap', 'g-ang', 'g-hrs', 'g-pitch', 'g-align']; const o = {}; for (const i of ids) if (gv(i)) o[i] = gv(i).value; return o; }
+function gesSettings() { const ids = ['g-lat', 'g-zone', 'g-set', 'g-gap', 'g-ang', 'g-hrs', 'g-pitch', 'g-align', 'g-valign']; const o = {}; for (const i of ids) if (gv(i)) o[i] = gv(i).value; return o; }
 
 function panelToForm() {
   const P = G.panel; gv('g-model').value = P.model || ''; gv('g-p').value = P.p; gv('g-L').value = P.L; gv('g-W').value = P.W; gv('g-T').value = P.T || ''; gv('g-cells').value = P.cells || '';
@@ -47,6 +47,7 @@ function renderTpl() {
   });
 }
 function boundInfo() {
+  if (typeof cepheBilgi === 'function') cepheBilgi();
   const el = gv('g-binfo');
   if (!G.bound) { el.textContent = 'Sınır seçilmedi. Çizimdeki kapalı bir polyline\'ı seçin veya KML/KMZ yükleyin.'; return; }
   const a = Math.abs(polyArea(G.bound)); const np = (G.parcels || []).length;
@@ -188,20 +189,32 @@ CMD.GFILL = async () => {
   const sel = G.tpl.filter((t) => t.use !== false); if (!sel.length) { msg('Doldurma için en az bir masa şablonu işaretleyin.', 'err'); return; }
   const pitch = pitchUpdate(); if (!pitch) return;
   const types = sel.map((tp) => { const d = tplDims(tp); return { tp, name: makeTableBlock(tp), len: d.len, depth: d.depth, n: d.n, kwp: d.kwp }; }).sort((a, b) => b.len - a.len);
-  const res = fillLand({ types, setback: gnum('g-set', 5), pitch, rowGap: gnum('g-gap', 0.5), rowAng: gnum('g-ang', 0), align: gv('g-align').value });
+  const base = { types, setback: gnum('g-set', 5), pitch, rowGap: gnum('g-gap', 0.5), rowAng: gnum('g-ang', 0) };
+  if (cepheVar()) base.ic = (toL) => cepheIcHalkalar(toL, gnum('g-set', 5));
+  const am = gv('g-align').value, vm = (gv('g-valign') || {}).value || 'south'; let res, hiza = '';
+  const modOf = (r) => r.placed.reduce((t, p) => t + types[p.type].n, 0);
+  if (am === 'opt') {
+    const den = []; for (const xm of ['left', 'right', 'center']) for (const ym of ['south', 'north', 'center']) { const r = fillLand({ ...base, xm, ym }); den.push(r); if (!res || modOf(r) > modOf(res)) res = r; }
+    const kotu = Math.min(...den.map(modOf));
+    hiza = 'Optimum: ' + HIZA_AD[res.xm] + ' · ' + (res.ym === 'center' ? 'K-G ortalı' : HIZA_AD[res.ym]) + ' (9 seçenekten en çok modül; en kötüsünden +' + (modOf(res) - kotu).toLocaleString('tr') + ' modül)';
+  } else if (am === 'duz') {
+    const h = hizaDuz(base.rowAng); res = fillLand({ ...base, xm: h.xm, ym: h.ym });
+    hiza = 'En düz sınır (' + fmtNum(h.L, 0) + ' m kenar): ' + HIZA_AD[h.xm] + ' · ' + HIZA_AD[h.ym];
+  } else res = fillLand({ ...base, xm: am, ym: vm });
   if (!res.placed.length) { msg('Sınırın içine hiç masa sığmadı. Sınır mesafesini veya şablonu kontrol edin.', 'err'); return; }
   const items = []; const cnt = types.map(() => 0);
   S.doc.addLayer('GES-MASA', 5);
   for (const p of res.placed) { const t = types[p.type]; cnt[p.type]++; items.push({ id: newId(), t: 'insert', layer: 'GES-MASA', c: types.length > 1 && p.type > 0 ? 4 : 256, lt: '', block: t.name, M: mMul(mT(p.x, p.y), mRz(res.rowAng)), ap: [] }); }
   S.doc.addLayer('GES-CEKME', 1, 'DASHED'); S.doc.addLayer('GES-NOT', 7);
   // setback outline (approx: offset polygon via miter)
-  const sb = gnum('g-set', 5); if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } }
+  const sb = gnum('g-set', 5); if (cepheVar()) { for (const r of cepheIcHalkalar((p) => p, sb) || []) items.push({ id: newId(), t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: r.map((q) => [q[0], q[1], 0]) }); } else if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } }
   const mods = types.reduce((s, t, i) => s + cnt[i] * t.n, 0), kwp = mods * G.panel.p / 1000;
   addItems(items, 'arazi doldur'); renderLayers();
   G.last = { cnt, types, mods, kwp, rows: res.rows, area: res.area, pitch };
   const lines = types.map((t, i) => (i === 0 ? 'Ana ' : 'Alternatif ') + t.tp.rows + t.tp.orient + t.tp.per + ': ' + cnt[i] + ' masa (' + cnt[i] * t.n + ' modül)');
   const sum = lines.join(' · ') + ' — Toplam ' + mods.toLocaleString('tr') + ' modül · ' + fmtNum(kwp / 1000, 3) + ' MWp DC · ' + res.rows + ' sıra · pitch ' + fmtNum(pitch, 2) + ' m · ' + fmtNum(kwp / (res.area / 10000), 0) + ' kWp/ha';
-  msg(sum, 'res'); gv('g-result').textContent = sum; gv('g-result').hidden = false;
+  const sum2 = sum + (hiza ? ' · ' + hiza : '') + (cepheVar() ? ' · cephe bazlı çekme' : '');
+  msg(sum2, 'res'); gv('g-result').textContent = sum2; gv('g-result').hidden = false;
   // summary text near boundary
   const bb = G.bound.reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
   const th = Math.max(1, (bb[3] - bb[1]) / 120);
@@ -217,7 +230,7 @@ function gesInit() {
   panelToForm(); tplUpdate(); renderTpl(); boundInfo(); pitchUpdate();
   for (const id of ['g-model', 'g-p', 'g-L', 'g-W', 'g-T', 'g-cells']) gv(id).addEventListener('change', formToPanel);
   for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); });
-  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); });
+  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); });
   gv('g-ds').onchange = (e) => { const f = e.target.files[0]; if (f) gesDatasheet(f); e.target.value = ''; };
   gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };
   gv('g-bds').onclick = () => gv('g-ds').click();

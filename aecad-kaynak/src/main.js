@@ -106,7 +106,7 @@ function init() {
   const view = new View($('#scene'), $('#overlay')); S.view = view; view.gridOn = false;
   buildPalette();
   gesInit();
-  pjInit(); pjDuzenInit(); pencereInit();
+  pjInit(); pjDuzenInit(); cepheInit(); pencereInit();
   if (window.AE_PORTAL) { const P = window.AE_PORTAL; const box = document.createElement('div'); box.className = 'pbadge';
     const nm = document.createElement('span'); nm.textContent = P.ad || P.kul || ''; const a = document.createElement('a'); a.href = '../portal/'; a.textContent = 'Portal';
     const c = document.createElement('a'); c.href = '#'; c.textContent = 'Çıkış'; c.onclick = (e) => { e.preventDefault(); try { localStorage.removeItem('ae_portal'); } catch (x) { /* ignore */ } location.replace('../portal/'); };

@@ -237,6 +237,8 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .tf-prev .pp { fill: none; stroke: var(--muted); stroke-width: .8; stroke-dasharray: 2 2; } .tf-prev .pp.out { stroke: var(--warn); stroke-dasharray: none; fill: rgba(255,210,63,.08); }
 .tf-prev .pn { fill: var(--muted); font: 10px var(--mono); text-anchor: middle; dominant-baseline: middle; }
 .tf-prev .pc { fill: none; stroke: var(--red); stroke-width: 1; stroke-dasharray: 4 3; }
+.tf-prev .ce { stroke-width: 4; stroke-linecap: round; cursor: pointer; pointer-events: stroke; }
+.tf-prev .ce:hover { stroke: var(--acc, #60a5fa) !important; stroke-width: 6; }
 .tf-prev .pv { fill: var(--fg); } .tf-prev .pl { fill: var(--muted); font: 10px var(--mono); }
 .tf-prev .sc path { fill: none; stroke: var(--fg); stroke-width: 1.2; } .tf-prev .sc text, .tf-prev .na text { fill: var(--fg); font: 10px var(--mono); text-anchor: middle; }
 .tf-prev .na path { fill: var(--fg); }
@@ -382,13 +384,21 @@ details.tf-sec:not([open]) { gap: 0; }
           <h3><span>3</span>Arazi doldurma</h3>
           <div class="brow"><button class="gb" id="g-bbound">Sınırı çizimden seç</button><button class="gb" id="g-bkml">KML / KMZ ekle</button><input type="file" id="g-kml" accept=".kml,.kmz" multiple hidden></div>
           <p class="gi" id="g-binfo"></p>
+          <div class="brow"><button class="gb" id="g-bcephe" type="button" title="Sınır kenarlarını yol / komşu parsel / diğer olarak işaretle">Cephe işaretle (yol / parsel)</button></div>
+          <div class="grid3">
+            <label class="gf">Yol cephesi çekme (m)<input id="p-cyol" type="number" step="0.5" placeholder="genel"></label>
+            <label class="gf">Komşu parsel çekme (m)<input id="p-cpar" type="number" step="0.5" placeholder="genel"></label>
+            <label class="gf">Diğer cephe çekme (m)<input id="p-cdig" type="number" step="0.5" placeholder="genel"></label>
+          </div>
+          <p class="gi" id="g-cinfo"></p>
           <div class="grid3">
             <label class="gf">Enlem (°)<input id="g-lat" type="number" step="0.001" value="39.2"></label>
             <label class="gf">UTM dilimi<input id="g-zone" type="number" min="1" max="60" value="38"></label>
             <label class="gf">Sıra açısı (°)<input id="g-ang" type="number" step="0.5" value="0"></label>
             <label class="gf">Çekme (m)<input id="g-set" type="number" step="0.5" value="5"></label>
             <label class="gf">Masa arası (m)<input id="g-gap" type="number" step="0.1" value="0.5"></label>
-            <label class="gf">Hizalama<select id="g-align"><option value="left">Batıya</option><option value="center">Ortala</option></select></label>
+            <label class="gf">Hizalama (D-B)<select id="g-align"><option value="left">Batıya</option><option value="right">Doğuya</option><option value="center">Ortala</option><option value="duz">En düz sınıra</option><option value="opt">Optimum (en çok masa)</option></select></label>
+            <label class="gf">Sıra başlangıcı (K-G)<select id="g-valign"><option value="south">Güneyden</option><option value="north">Kuzeyden</option><option value="center">Ortala</option></select></label>
           </div>
           <div class="grid2">
             <label class="gf">Sıra aralığı<select id="g-hrs"><option value="2">Gölgesiz 10:00–14:00</option><option value="3">Gölgesiz 09:00–15:00</option><option value="1">Gölgesiz 11:00–13:00</option><option value="manual">Elle gir</option></select></label>

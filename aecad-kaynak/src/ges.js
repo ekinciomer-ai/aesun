@@ -173,34 +173,52 @@ function bestCombo(span, types, gap) {
   };
   rec(0, span, [], 0); return best;
 }
+// Hizalama: xm = left (batı) | right (doğu) | center; ym = south (güneyden) | north (kuzeyden) | center.
+// opts.ic: cephe bazlı iç alan halkaları (çekme zaten düşülmüş) — verilirse setback 0 ile taranır.
 function fillLand(opts) {
-  const { types, setback, pitch, rowGap, rowAng, align } = opts; // types: [{tp, name, len, depth, n}]
+  const { types, pitch, rowGap, rowAng } = opts; // types: [{tp, name, len, depth, n}]
+  const xm = opts.xm || (opts.align === 'center' ? 'center' : opts.align === 'right' ? 'right' : 'left'), ym = opts.ym || 'south';
   const th = rowAng * D2R, c = Math.cos(th), s = Math.sin(th);
   const toL = (p) => [p[0] * c + p[1] * s, -p[0] * s + p[1] * c], toW = (p) => [p[0] * c - p[1] * s, p[0] * s + p[1] * c];
+  const rings = opts.ic ? opts.ic(toL) : null; const setback = rings ? 0 : opts.setback;
   const poly = G.bound.map(toL);
-  const ys = poly.map((p) => p[1]); const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const ys = (rings ? rings.flat() : poly).map((p) => p[1]); const minY = Math.min(...ys), maxY = Math.max(...ys);
   const depth = Math.max(...types.map((t) => t.depth));
+  const scan = rings ? (yy) => scanXR(rings, yy) : (yy) => scanX(poly, yy);
+  const span = maxY - minY - 2 * setback - depth; if (span < -1e-9) return { placed: [], rows: 0, rowAng: th, area: Math.abs(polyArea(G.bound)), xm, ym };
+  const art = span - Math.floor(span / pitch + 1e-9) * pitch;
+  let yS = minY + setback + (ym === 'north' ? art : ym === 'center' ? art / 2 : 0);
   const placed = []; let rows = 0;
-  for (let y = minY + setback; y + depth <= maxY - setback + 1e-9; y += pitch) {
+  for (let y = yS; y + depth <= maxY - setback + 1e-9; y += pitch) {
     const y0 = y - setback, y1 = y + depth + setback; const n = Math.max(4, Math.ceil((y1 - y0) / 0.5));
     let iv = null;
     const samples = []; for (let k = 0; k <= n; k++) samples.push(y0 + (y1 - y0) * k / n);
-    for (const p of poly) if (p[1] > y0 && p[1] < y1) samples.push(p[1] - 1e-7, p[1] + 1e-7);
-    for (const yy of samples) { const cur = scanX(poly, yy); iv = iv === null ? cur : ivIntersect(iv, cur); if (!iv.length) break; }
+    for (const r of (rings || [poly])) for (const p of r) if (p[1] > y0 && p[1] < y1) samples.push(p[1] - 1e-7, p[1] + 1e-7);
+    for (const yy of samples) { const cur = scan(yy); iv = iv === null ? cur : ivIntersect(iv, cur); if (!iv.length) break; }
     if (!iv || !iv.length) continue;
     let any = false;
     for (const [a0, a1] of iv) {
       let x0 = a0 + setback, x1 = a1 - setback; if (x1 - x0 < types[types.length - 1].len) continue;
-      const span = x1 - x0; const bc = bestCombo(span, types, rowGap);
-      let x = align === 'center' ? x0 + bc.left / 2 : x0;
+      const bc = bestCombo(x1 - x0, types, rowGap);
+      let x = xm === 'center' ? x0 + bc.left / 2 : xm === 'right' ? x0 + bc.left : x0;
       for (let i = 0; i < types.length; i++) for (let k = 0; k < (bc.cnt[i] || 0); k++) {
         const w = toW([x, y]); placed.push({ type: i, x: w[0], y: w[1] }); x += types[i].len + rowGap; any = true;
       }
     }
     if (any) rows++;
   }
-  return { placed, rows, rowAng: th, area: Math.abs(polyArea(G.bound)) };
+  return { placed, rows, rowAng: th, area: Math.abs(polyArea(G.bound)), xm, ym };
 }
+// "En düz sınır": en uzun sınır kenarı; K-G'ye yakınsa o yana (batı/doğu) dayanır, D-B'ye yakınsa o yandan (güney/kuzey) başlar.
+function hizaDuz(rowAng) {
+  const th = rowAng * D2R, c = Math.cos(th), s = Math.sin(th), toL = (p) => [p[0] * c + p[1] * s, -p[0] * s + p[1] * c];
+  const B = G.bound.map(toL), cx = B.reduce((t, p) => t + p[0], 0) / B.length, cy = B.reduce((t, p) => t + p[1], 0) / B.length;
+  let best = null, bl = 0; for (let i = 0; i < B.length; i++) { const a = B[i], b = B[(i + 1) % B.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L > bl) { bl = L; best = [a, b]; } }
+  const [a, b] = best, mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+  if (Math.abs(b[1] - a[1]) >= Math.abs(b[0] - a[0])) return { xm: mx < cx ? 'left' : 'right', ym: 'south', L: bl };
+  return { xm: 'center', ym: my < cy ? 'south' : 'north', L: bl };
+}
+const HIZA_AD = { left: 'batıya', right: 'doğuya', center: 'ortalı', south: 'güneyden', north: 'kuzeyden' };
 
 // ---------- KML / KMZ ----------
 async function unzipFirstKml(buf) {

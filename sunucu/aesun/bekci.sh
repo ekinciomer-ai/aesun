@@ -58,7 +58,7 @@ if ars:
 else: s.append('cihaz arşivi okunamadı')
 m=(mal or {}).get('gun',{})
 if tr.hour>=6 and dun not in m: s.append(f'{dun} enerji maliyeti hesaplanmadı')
-if tr.hour>=10 and dun not in (gel or {}): s.append(f'{dun} F2Pool günlük geliri arşive girmedi')
+if tr.hour>=5 and dun not in (gel or {}):   # F2Pool günü 03:00'te kapanır; arşiv 03:05/04:05'te alır s.append(f'{dun} F2Pool günlük geliri arşive girmedi')
 print(json.dumps({'sorun':'; '.join(s) or None},ensure_ascii=False))" 2>/dev/null || echo '{"sorun":"veri denetimi çalışmadı"}')
 
 # 3) onarım (30 dk'da en çok bir / kapsayıcı)

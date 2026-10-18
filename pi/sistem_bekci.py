@@ -66,6 +66,10 @@ def calis(simdi=None):
                 sorun["ns1_sorun"] = f"ns1 bekçisi sorun görüyor: {m[:120]}"
             if (b.get("veri") or {}).get("sorun"):
                 sorun["veri"] = f"Eksik veri: {b['veri']['sorun'][:160]}"
+            for g in ((b.get("tarama") or {}).get("geciken") or [])[:5]:      # öğrenen tarama: olağan düzenine göre geciken dosya
+                sorun["gec:" + g["dosya"]] = f"{g['dosya']} {g['yas_dk']} dk'dır güncellenmedi (olağanı ~{g['olagan_dk']:.0f} dk)"
+            for u in ((b.get("uclar") or {}).get("kalan") or [])[:5]:          # duman testi: yanıt vermeyen uç
+                sorun["uc:" + u["ad"]] = f"{u['ad']} çalışmıyor — {u['neden']}"
         if (b.get("onarim_24s") or 0) >= 3:
             sorun["ns1_onarim"] = f"ns1 son 24 saatte {b['onarim_24s']} kez kendini onardı — kalıcı bir arıza olabilir"
     except Exception as e:

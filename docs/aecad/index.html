@@ -2894,7 +2894,7 @@ function masaFormaYukle(t) {
 function masaSec(i) {
   const t = G.tpl[i]; if (!t) return;
   G.tpl.forEach((q) => { q.use = q === t; }); const pm = gv('p-masa'); if (pm) pm.value = String(i); const ts = gv('g-tsel'); if (ts) ts.value = String(i);
-  renderTpl(); if (pm) pm.value = String(i); if (ts) ts.value = String(i); masaFormaYukle(t); pitchUpdate(); gesSave(); if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function') tfSync();
+  renderTpl(); if (pm) pm.value = String(i); if (ts) ts.value = String(i); masaFormaYukle(t); pitchUpdate(); gesSave(); if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function') tfSync(); doldurYenile();
 }
 function masaFormdan() {
   // formdaki masa listede varsa o seçilir; yoksa yeni şablon olarak eklenip seçilir (mevcut şablonlar bozulmaz)
@@ -2902,7 +2902,7 @@ function masaFormdan() {
   let i = G.tpl.findIndex((t) => t.orient === f.orient && t.rows === f.rows && t.per === f.per && t.tilt === f.tilt);
   if (i < 0) { G.tpl.push({ ...f, use: true }); i = G.tpl.length - 1; } else { Object.assign(G.tpl[i], { front: f.front, gx: f.gx, gy: f.gy }); }
   G.tpl.forEach((q, j) => { q.use = j === i; }); renderTpl(); gv('p-masa').value = String(i); gv('g-tsel').value = String(i); gv('g-tuse').checked = true;
-  gesSave(); if (typeof pjSave === 'function') pjSave(); if (typeof pjAutoHints === 'function') pjAutoHints(); if (typeof tfSync === 'function') tfSync();
+  gesSave(); if (typeof pjSave === 'function') pjSave(); if (typeof pjAutoHints === 'function') pjAutoHints(); if (typeof tfSync === 'function') tfSync(); doldurYenile();
 }
 function tplSecInit() {
   const sel = gv('g-tsel'); const cur = () => G.tpl[+sel.value];
@@ -3075,7 +3075,7 @@ function sinirSec(p) {
 CMD.GFILL = async () => {
   if (!sinirOto()) { msg('Arazi sınırı yok: kapalı bir polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   // arazide masa varsa doldurma yapılmaz (çakışan masa): önce Sıfırla ya da sil
-  const mevcut = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.layer === 'GES-MASA' && pointInPoly([it.M[3], it.M[7]], G.bound));
+  const sonDol = new Set(G.fillIds || []); const mevcut = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.layer === 'GES-MASA' && !sonDol.has(it.id) && pointInPoly([it.M[3], it.M[7]], G.bound));
   if (mevcut.length) { await askDlg('Çakışan masa var', 'Arazide ' + mevcut.length + ' masa zaten çizili. Yeni doldurma bunlarla çakışır, bu yüzden yapılmadı. Önce mevcut masaları silin ya da "Sıfırla" ile temizleyin.', [['Tamam', 'ok', 'primary']]); msg('Doldurma yapılmadı: arazide ' + mevcut.length + ' masa var (çakışma).', 'err'); return; }
   formToPanel();
   const sel = G.tpl.filter((t) => t.use !== false); if (!sel.length) { msg('Doldurma için en az bir masa şablonu işaretleyin.', 'err'); return; }
@@ -3101,7 +3101,10 @@ CMD.GFILL = async () => {
   // setback outline (approx: offset polygon via miter)
   const sb = gnum('g-set', 5); if (cepheVar()) { for (const r of cepheIcHalkalar((p) => p, sb) || []) items.push({ id: newId(), t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: r.map((q) => [q[0], q[1], 0]) }); } else if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } }
   const mods = types.reduce((s, t, i) => s + cnt[i] * t.n, 0), kwp = mods * G.panel.p / 1000;
-  addItems(items, 'arazi doldur'); renderLayers();
+  // son doldurmanın nesneleri: hizalama / sıra / çekme değişince yerinde yeniden doldurulur (tek geri-al adımı)
+  const eski = (G.fillIds || []).map((id) => S.doc.items.get(id)).filter(Boolean);
+  G.fillIds = items.map((it) => it.id);
+  replaceItems([...eski.map((it) => [it, null]), ...items.map((n) => [null, n])], 'arazi doldur'); renderLayers();
   G.last = { cnt, types, mods, kwp, rows: res.rows, area: res.area, pitch };
   const lines = types.map((t, i) => (i === 0 ? 'Ana ' : 'Alternatif ') + t.tp.rows + t.tp.orient + t.tp.per + ': ' + cnt[i] + ' masa (' + cnt[i] * t.n + ' modül)');
   const sum = lines.join(' · ') + ' — Toplam ' + mods.toLocaleString('tr') + ' modül · ' + fmtNum(kwp / 1000, 3) + ' MWp DC · ' + res.rows + ' sıra · pitch ' + fmtNum(pitch, 2) + ' m · ' + fmtNum(kwp / (res.area / 10000), 0) + ' kWp/ha';
@@ -3110,8 +3113,14 @@ CMD.GFILL = async () => {
   // summary text near boundary
   const bb = G.bound.reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
   const th = Math.max(1, (bb[3] - bb[1]) / 120);
-  addItems([{ id: newId(), t: 'text', layer: 'GES-NOT', c: 7, lt: '', mt: true, x: bb[0], y: bb[1] - th * 2, h: th, rot: 0, s: 'GES YERLEŞİM ÖZETİ\n' + lines.join('\n') + '\nToplam: ' + mods.toLocaleString('tr') + ' modül × ' + G.panel.p + ' Wp = ' + fmtNum(kwp / 1000, 3) + ' MWp\nSıra aralığı ' + fmtNum(pitch, 2) + ' m · eğim ' + types[0].tp.tilt + '° · sınır mesafesi ' + fmtNum(sb, 1) + ' m', ha: 0, va: 3, ls: 1.6 }], 'özet');
+  const ozId = newId(); G.fillIds.push(ozId);
+  addItems([{ id: ozId, t: 'text', layer: 'GES-NOT', c: 7, lt: '', mt: true, x: bb[0], y: bb[1] - th * 2, h: th, rot: 0, s: 'GES YERLEŞİM ÖZETİ\n' + lines.join('\n') + '\nToplam: ' + mods.toLocaleString('tr') + ' modül × ' + G.panel.p + ' Wp = ' + fmtNum(kwp / 1000, 3) + ' MWp\nSıra aralığı ' + fmtNum(pitch, 2) + ' m · eğim ' + types[0].tp.tilt + '° · sınır mesafesi ' + fmtNum(sb, 1) + ' m', ha: 0, va: 3, ls: 1.6 }], 'özet');
 };
+// Son doldurma çizimde duruyorsa ayar değişince (hizalama, sıra başlangıcı, açı, çekme, masa arası, pitch) masalar yeniden yerleşir
+function doldurYenile() {
+  if (!G.bound || !(G.fillIds || []).some((id) => S.doc.items.has(id)) || S.cmd || PJ.srcDoc) return;
+  clearTimeout(doldurYenile.t); doldurYenile.t = setTimeout(() => CMD.GFILL(), 80);
+}
 function centroidOf(p) { return [p.reduce((s, q) => s + q[0], 0) / p.length, p.reduce((s, q) => s + q[1], 0) / p.length]; }
 Object.assign(ALIAS, { GTABLE: 'GTABLE', GSECTION: 'GSECTION', GBOUND: 'GBOUND', GFILL: 'GFILL', GPANEL: 'GPANEL', PANEL: 'GPANEL', GMASA: 'GTABLE', MASA: 'GTABLE', KESIT: 'GSECTION', SINIR: 'GBOUND', DOLDUR: 'GFILL' });
 Object.assign(LABEL, { GPANEL: 'PANEL ÇİZ', GTABLE: 'MASA ÇİZ', GSECTION: 'MASA KESİTİ', GBOUND: 'ARAZİ SINIRI', GFILL: 'ARAZİ DOLDUR' });
@@ -3123,7 +3132,7 @@ function gesInit() {
   for (const id of ['g-model', 'g-p', 'g-L', 'g-W', 'g-T', 'g-cells']) gv(id).addEventListener('change', formToPanel);
   for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) { gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); }); gv(id).addEventListener('change', masaFormdan); }
   { const pm = gv('p-masa'); if (pm) pm.addEventListener('change', () => masaSec(+pm.value)); }
-  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); });
+  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); doldurYenile(); });
   gv('g-ds').onchange = (e) => { const f = e.target.files[0]; if (f) gesDatasheet(f); e.target.value = ''; };
   gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };
   gv('g-bds').onclick = () => gv('g-ds').click();
@@ -3201,7 +3210,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190156', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190200', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3705,7 +3714,7 @@ function cepheAta(i, tip) {
   const k = cepheKenarlar()[i]; if (!k) return;
   G.cephe = G.cephe.filter((c) => !(segDist(k.a, c.a, c.b) <= 0.5 && segDist(k.b, c.a, c.b) <= 0.5));
   if (tip) G.cephe.push({ a: [k.a[0], k.a[1]], b: [k.b[0], k.b[1]], tip });
-  cepheKaydet(); cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview();
+  cepheKaydet(); cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview(); if (typeof doldurYenile === 'function') doldurYenile();
 }
 // script parametresi: işaretli kenarlar + mesafe (genel = Çitten çekme)
 function cepheParam() {
@@ -3786,7 +3795,7 @@ function scanXR(rings, y) {
 function cepheInit() {
   cepheYukle(); cepheBilgi();
   const b = gv('g-bcephe'); if (b) b.onclick = () => runCommand('GCEPHE');
-  for (const id of ['p-cyol', 'p-cpar', 'p-cdig', 'p-cekme']) { const el = gv(id); if (el) el.addEventListener('change', () => { cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview(); }); }
+  for (const id of ['p-cyol', 'p-cpar', 'p-cdig', 'p-cekme']) { const el = gv(id); if (el) el.addEventListener('change', () => { cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview(); doldurYenile(); }); }
 }
 
 // ---- Tasarım araçları: inverter, trafo (TM), DM, OG / AC / DC kablo — tıkla-ekle, veri yaz, kendi katmanında hesaba girsin ----

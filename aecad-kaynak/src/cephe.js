@@ -26,7 +26,7 @@ function cepheAta(i, tip) {
   const k = cepheKenarlar()[i]; if (!k) return;
   G.cephe = G.cephe.filter((c) => !(segDist(k.a, c.a, c.b) <= 0.5 && segDist(k.b, c.a, c.b) <= 0.5));
   if (tip) G.cephe.push({ a: [k.a[0], k.a[1]], b: [k.b[0], k.b[1]], tip });
-  cepheKaydet(); cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview();
+  cepheKaydet(); cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview(); if (typeof doldurYenile === 'function') doldurYenile();
 }
 // script parametresi: işaretli kenarlar + mesafe (genel = Çitten çekme)
 function cepheParam() {
@@ -107,5 +107,5 @@ function scanXR(rings, y) {
 function cepheInit() {
   cepheYukle(); cepheBilgi();
   const b = gv('g-bcephe'); if (b) b.onclick = () => runCommand('GCEPHE');
-  for (const id of ['p-cyol', 'p-cpar', 'p-cdig', 'p-cekme']) { const el = gv(id); if (el) el.addEventListener('change', () => { cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview(); }); }
+  for (const id of ['p-cyol', 'p-cpar', 'p-cdig', 'p-cekme']) { const el = gv(id); if (el) el.addEventListener('change', () => { cepheCiz(); cepheBilgi(); if (typeof tfPreview === 'function') tfPreview(); doldurYenile(); }); }
 }

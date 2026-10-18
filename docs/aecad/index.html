@@ -265,6 +265,9 @@ body.ovl #app { visibility: hidden; }
 .st-card em { font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--fg); opacity: .8; }
 .st-brand { display: flex; align-items: center; } .st-portal { margin-left: auto; font: 13px var(--mono); color: var(--muted); text-decoration: none; border: 1px solid var(--line, #333); border-radius: 6px; padding: 6px 12px; } .st-portal:hover { color: var(--fg); border-color: var(--red); }
 a.hb { display: inline-flex; align-items: center; justify-content: center; }
+#hosgeldin { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(10,12,15,.55); z-index: 30; cursor: pointer; }
+#hosgeldin .hg-in { max-width: 520px; margin: 16px; padding: 28px 30px; background: var(--panel, #1e2227); border: 1px solid var(--line, #333); border-left: 3px solid var(--red); border-radius: 10px; }
+#hosgeldin h2 { margin: 0 0 10px; font-size: 22px; } #hosgeldin p { margin: 0 0 14px; color: var(--muted); line-height: 1.5; } #hosgeldin small { font-family: var(--mono); color: var(--muted); }
 .st-foot { color: var(--muted); font-size: 12px; font-family: var(--mono); }
 #tarif { padding-top: 0; }
 .tf-top { position: sticky; top: 0; z-index: 2; background: var(--ink); display: flex; align-items: center; gap: 12px; padding: 14px 0 12px; border-bottom: 1px solid var(--line); }
@@ -293,7 +296,7 @@ details.tf-sec:not([open]) { gap: 0; }
     <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0 0 20z" fill="#e2342b"/><path d="M12 2a10 10 0 0 1 0 20z" fill="#3b4148"/><path d="M13.6 4.5 8.4 13h3.4l-1.4 6.5 5.2-8.6h-3.4z" fill="#fff"/></svg><span class="bt">Ae</span><b>CAD</b></div>
     <span id="fname">Örnek çizim</span>
     <div class="hbtns">
-      <a class="hb" id="bportal" href="../portal/" title="Portala git" aria-label="Portala git"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></a><button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
       <button class="hb files" id="bfiles" hidden title="Son üretilen proje dosyaları"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h5l1.5 1.5h4.5v9.5h-11zM5 8h6M5 10.5h4" fill="none" stroke="currentColor"/></svg><span class="k">Proje dosyaları</span></button>
       <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
       <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>
@@ -3142,7 +3145,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190138', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190140', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3913,6 +3916,16 @@ function tarifShow(on) {
 function toCad(ges) {
   startShow(false); tarifShow(false);
   if (ges) document.querySelector('.stab[data-tab="ges"]').click();
+  else hosgeldin();
+}
+// Çizim modülü karşılama yazısı: tıklayınca (ya da bir tuşa basınca) kapanır
+function hosgeldin() {
+  if (gv('hosgeldin') || hosgeldin.goster) return; hosgeldin.goster = true;
+  const d = document.createElement('div'); d.id = 'hosgeldin'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Hoş geldiniz');
+  d.innerHTML = '<div class="hg-in"><h2>Çizim modülüne hoş geldiniz</h2><p>DWG/DXF açmak için üstteki <b>Aç</b> düğmesini kullanın ya da dosyayı buraya sürükleyin. Komut satırına L, PL, C, M yazabilir; GES sekmesinden arazi, masa ve proje adımlarına geçebilirsiniz.</p><small>Kapatmak için tıklayın</small></div>';
+  const kapat = () => { d.remove(); document.removeEventListener('keydown', kapat, true); };
+  d.onclick = kapat; document.addEventListener('keydown', kapat, true);
+  (document.getElementById('stage') || document.body).appendChild(d);
 }
 function tarifInit() {
   tfBuild();
@@ -4088,7 +4101,7 @@ function init() {
     box.append(nm, a, c); document.querySelector('header').insertBefore(box, document.querySelector('.hbtns')); }
   const resize = () => { view.resize(); if (S.fitPending) zoomExtents(false); redraw(); };
   new ResizeObserver(resize).observe($('#stage')); resize();
-  setDoc(sampleDoc(), 'Örnek çizim'); S.doc.isSample = true; S.textH = 1; tarifInit();
+  blankDoc('Yeni çizim'); S.doc.isSample = true; tarifInit();
   msg('AeCAD hazır. Komut yazın (ör. L, PL, C, M) veya soldaki araçları kullanın. Kısayollar için ? yazın.', 'note');
   setPrompt('Komut:');
   setTimeout(() => { libre().then(() => { S.libOk = true; }).catch((e) => { console.error(e); msg('DWG okuyucu yüklenemedi (' + (e.message || e) + '). DXF dosyaları yine açılabilir.', 'err'); }); }, 1200);

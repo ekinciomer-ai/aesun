@@ -182,6 +182,16 @@ function tarifShow(on) {
 function toCad(ges) {
   startShow(false); tarifShow(false);
   if (ges) document.querySelector('.stab[data-tab="ges"]').click();
+  else hosgeldin();
+}
+// Çizim modülü karşılama yazısı: tıklayınca (ya da bir tuşa basınca) kapanır
+function hosgeldin() {
+  if (gv('hosgeldin') || hosgeldin.goster) return; hosgeldin.goster = true;
+  const d = document.createElement('div'); d.id = 'hosgeldin'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Hoş geldiniz');
+  d.innerHTML = '<div class="hg-in"><h2>Çizim modülüne hoş geldiniz</h2><p>DWG/DXF açmak için üstteki <b>Aç</b> düğmesini kullanın ya da dosyayı buraya sürükleyin. Komut satırına L, PL, C, M yazabilir; GES sekmesinden arazi, masa ve proje adımlarına geçebilirsiniz.</p><small>Kapatmak için tıklayın</small></div>';
+  const kapat = () => { d.remove(); document.removeEventListener('keydown', kapat, true); };
+  d.onclick = kapat; document.addEventListener('keydown', kapat, true);
+  (document.getElementById('stage') || document.body).appendChild(d);
 }
 function tarifInit() {
   tfBuild();

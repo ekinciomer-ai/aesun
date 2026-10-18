@@ -113,7 +113,7 @@ function init() {
     box.append(nm, a, c); document.querySelector('header').insertBefore(box, document.querySelector('.hbtns')); }
   const resize = () => { view.resize(); if (S.fitPending) zoomExtents(false); redraw(); };
   new ResizeObserver(resize).observe($('#stage')); resize();
-  setDoc(sampleDoc(), 'Örnek çizim'); S.doc.isSample = true; S.textH = 1; tarifInit();
+  blankDoc('Yeni çizim'); S.doc.isSample = true; tarifInit();
   msg('AeCAD hazır. Komut yazın (ör. L, PL, C, M) veya soldaki araçları kullanın. Kısayollar için ? yazın.', 'note');
   setPrompt('Komut:');
   setTimeout(() => { libre().then(() => { S.libOk = true; }).catch((e) => { console.error(e); msg('DWG okuyucu yüklenemedi (' + (e.message || e) + '). DXF dosyaları yine açılabilir.', 'err'); }); }, 1200);

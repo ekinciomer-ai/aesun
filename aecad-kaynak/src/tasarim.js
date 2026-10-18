@@ -1,35 +1,53 @@
 // ---- Tasarım araçları: inverter, trafo (TM), DM, OG / AC / DC kablo — tıkla-ekle, veri yaz, kendi katmanında hesaba girsin ----
 // Her öğe kendi GES katmanında durur ve verisini `ges` alanında taşır; etiketi (yazı) aynı veriyi gösterir.
 // DXF'ten geri açılınca veri etiketten okunur (TASARIM_ETIKET_RE). Özet (adet × güç, kablo boyları) çizim değiştikçe güncellenir.
+const SEC = {
+  kw: [50, 60, 100, 110, 125, 150, 175, 196, 200, 215, 250, 300, 320, 330, 350],
+  kva: [400, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 3500, 4000, 5000, 5750, 6250, 6300],
+  gerilim: ['33/0,4 kV', '33/0,8 kV', '34,5/0,4 kV', '34,5/0,8 kV', '31,5/0,4 kV', '31,5/0,8 kV', '15,8/0,4 kV'],
+  hucreTM: [2, 3, 4, 5, 6, 7, 8], hucreDM: [3, 4, 5, 6, 7, 8, 9, 10, 12], en: [2.2, 2.3, 2.4, 2.5, 2.6, 2.8, 3.0, 3.2, 3.5, 4.0, 4.5, 5.0, 6.0],
+  boy: ['oto', 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 11, 12, 13, 14, 15, 16, 18, 20],
+  og: ['3x(1x95/16) NA2XSY 36 kV', '3x(1x120/16) NA2XSY 36 kV', '3x(1x150/25) NA2XSY 36 kV', '3x(1x185/25) NA2XSY 36 kV', '3x(1x240/25) NA2XSY 36 kV', '3x(1x400/35) NA2XSY 36 kV'],
+  ac: ['3x95/50 NA2XY', '3x120/70 NA2XY', '3x150/70 NA2XY', '3x185/95 NA2XY', '3x240/120 NA2XY', '3x300/150 NA2XY', '2×(3x240/120) NA2XY', '2×(3x300/150) NA2XY', '3×(3x300/150) NA2XY', '4×(3x300/150) NA2XY'],
+  dc: ['H1Z2Z2-K 1x4', 'H1Z2Z2-K 1x6', 'H1Z2Z2-K 1x10'], pay: [0, 3, 5, 10, 15, 20, 30],
+};
 const TS = {
-  inv: { ad: 'İnverter', kat: 'GES-INV', renk: 6, alan: [['kw', 'Güç (kW)', () => pn('p-inv') ?? 100], ['model', 'Model', () => pv('p-invm') || '']] },
-  tm: { ad: 'Trafo (TM)', kat: 'GES-TM', renk: 30, alan: [['kva', 'Güç (kVA)', () => pn('p-trafo') ?? 1250], ['gerilim', 'Gerilim (boş = güce göre)', () => ''], ['hucre', 'OG hücre sayısı', () => 3], ['en', 'Bina eni (m) — imalatçı ölçüsü', () => 2.5]] },
-  dm: { ad: 'DM', kat: 'GES-TM', renk: 30, alan: [['hucre', 'OG hücre sayısı (giriş+ölçü+çıkışlar)', () => 5], ['en', 'Bina eni (m) — imalatçı ölçüsü', () => 2.5], ['not', 'Not', () => 'Dağıtım merkezi']] },
-  og: { ad: 'OG kablo', kat: 'GES-OG-KABLO', renk: 1, alan: [['kablo', 'Kablo', () => pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV'], ['pay', 'Uç payı (m)', () => 20]] },
-  ac: { ad: 'AC kablo', kat: 'GES-AC-KABLO', renk: 3, alan: [['kablo', 'Kablo', () => pv('p-ack') || '3x240/120 NA2XY'], ['pay', 'Uç payı (m)', () => 10]] },
-  dc: { ad: 'DC kablo', kat: 'GES-DC-KABLO', renk: 5, alan: [['kablo', 'Kablo', () => 'H1Z2Z2-K 1x6'], ['pay', 'Uç payı (m)', () => 3]] },
+  inv: { ad: 'İnverter', kat: 'GES-INV', renk: 6, alan: [['kw', 'Güç (kW)', () => pn('p-inv') ?? 100, SEC.kw], ['model', 'Model', () => pv('p-invm') || '—', () => ['—', ...(pv('p-invm') ? [pv('p-invm')] : [])]]] },
+  tm: { ad: 'Trafo (TM)', kat: 'GES-TM', renk: 30, alan: [['kva', 'Güç (kVA)', () => pn('p-trafo') ?? 1250, SEC.kva], ['gerilim', 'Gerilim', () => ((pn('p-trafo') ?? 1250) > 2000 ? '33/0,8 kV' : '33/0,4 kV'), SEC.gerilim], ['hucre', 'OG hücre sayısı', () => 3, SEC.hucreTM], ['boy', 'Bina boyu / uzun kenar (m)', () => 'oto', SEC.boy], ['en', 'Bina eni / kısa kenar (m)', () => 2.5, SEC.en]] },
+  dm: { ad: 'DM', kat: 'GES-TM', renk: 30, alan: [['hucre', 'OG hücre sayısı (giriş+ölçü+çıkışlar)', () => 5, SEC.hucreDM], ['boy', 'Bina boyu / uzun kenar (m)', () => 'oto', SEC.boy], ['en', 'Bina eni / kısa kenar (m)', () => 2.5, SEC.en]] },
+  og: { ad: 'OG kablo', kat: 'GES-OG-KABLO', renk: 1, alan: [['kablo', 'Kablo', () => pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', SEC.og], ['pay', 'Uç payı (m)', () => 20, SEC.pay]] },
+  ac: { ad: 'AC kablo', kat: 'GES-AC-KABLO', renk: 3, alan: [['kablo', 'Kablo', () => pv('p-ack') || '3x240/120 NA2XY', SEC.ac], ['pay', 'Uç payı (m)', () => 10, SEC.pay]] },
+  dc: { ad: 'DC kablo', kat: 'GES-DC-KABLO', renk: 5, alan: [['kablo', 'Kablo', () => 'H1Z2Z2-K 1x6', SEC.dc], ['pay', 'Uç payı (m)', () => 3, SEC.pay]] },
 };
 // Form diyaloğu (qdlg üzerinde): alanlar → Promise(nesne | null)
 function formDlg(baslik, alanlar, deger) {
   return new Promise((res) => {
     const d = gv('qdlg'); d.querySelector('h3').textContent = baslik; const p = d.querySelector('p'); p.innerHTML = '';
     const ins = {};
-    for (const [k, etiket, def] of alanlar) {
+    for (const [k, etiket, def, sec] of alanlar) {
       const l = document.createElement('label'); l.className = 'gf'; l.textContent = etiket;
-      const i = document.createElement('input'); i.value = deger && deger[k] !== undefined ? deger[k] : def(); l.appendChild(i); p.appendChild(l); ins[k] = i;
+      const v0 = deger && deger[k] !== undefined ? deger[k] : def(); let i;
+      if (sec) {   // açılır liste: yazı yazılmaz; mevcut değer listede yoksa eklenir
+        i = document.createElement('select'); const ls = typeof sec === 'function' ? sec() : sec.slice();
+        if (v0 !== '' && v0 !== null && !ls.some((o) => String(o) === String(v0))) ls.push(v0);
+        for (const o of ls) { const op = document.createElement('option'); op.value = String(o); op.textContent = typeof o === 'number' ? fmtNum(o, o % 1 ? 1 : 0) : o; i.appendChild(op); }
+        i.value = String(v0);
+      } else { i = document.createElement('input'); i.value = v0; }
+      l.appendChild(i); p.appendChild(l); ins[k] = i;
     }
     const box = d.querySelector('.qb'); box.innerHTML = '';
     const bitir = (ok) => { d.close(); p.innerHTML = ''; if (!ok) return res(null); const o = {}; for (const k in ins) { const v = ins[k].value.trim(); const n = parseFloat(v.replace(',', '.')); o[k] = /^-?\d+([.,]\d+)?$/.test(v) ? n : v; } res(o); };
     const b1 = document.createElement('button'); b1.className = 'gb primary'; b1.textContent = 'Tamam'; b1.onclick = () => bitir(true);
     const b2 = document.createElement('button'); b2.className = 'gb ghost'; b2.textContent = 'Vazgeç'; b2.onclick = () => bitir(false);
+    if (ins.kva && ins.gerilim) ins.kva.addEventListener('change', () => { const k = +ins.kva.value; const g = ins.gerilim.value; const yeni = g.replace(/0,[48] kV$/, k > 2000 ? '0,8 kV' : '0,4 kV'); if ([...ins.gerilim.options].some((o) => o.value === yeni)) ins.gerilim.value = yeni; });
     box.append(b1, b2); d.oncancel = () => { p.innerHTML = ''; res(null); };
     d.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); bitir(true); } };
-    d.showModal(); const f = p.querySelector('input'); if (f) f.select();
+    d.showModal(); const f = p.querySelector('input, select'); if (f) f.focus();
   });
 }
 function tsBoy(pts) { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); return L; }
 function tsEtiket(tip, v, L) {
-  if (tip === 'inv') return 'INV' + (v.no ? '-' + v.no : '') + ' · ' + fmtNum(v.kw, 0) + ' kW' + (v.model ? ' · ' + v.model : '');
+  if (tip === 'inv') return 'INV' + (v.no ? '-' + v.no : '') + ' · ' + fmtNum(v.kw, 0) + ' kW' + (v.model && v.model !== '—' ? ' · ' + v.model : '');
   if (tip === 'tm') return 'TM' + (v.no ? '-' + v.no : '') + ' · ' + fmtNum(v.kva, 0) + ' kVA · ' + v.gerilim;
   if (tip === 'dm') return 'DM' + (v.not ? ' · ' + v.not : '');
   return TS[tip].ad.split(' ')[0].toUpperCase() + ' · ' + v.kablo + ' · L=' + fmtNum((L || 0) + (+v.pay || 0), 0) + ' m';
@@ -52,7 +70,10 @@ function tsKosk(tip, v) {
   const wOG = Math.max(1.6, n * 0.5 + 0.6), wAG = tip === 'dm' ? 1.6 : 1.4;
   const wTR = tip === 'tm' && !harici ? (kva <= 630 ? 1.8 : kva <= 1250 ? 2.2 : 2.6) : 0;
   const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', wAG]);
-  const L = t * (bol.length + 1) + bol.reduce((a, b) => a + b[1], 0), x0 = -L / 2, y0 = -W / 2, y1 = W / 2;
+  const Lmin = t * (bol.length + 1) + bol.reduce((a, b) => a + b[1], 0);
+  const Lb = +v.boy > 0 ? +v.boy : 0;   // kullanıcı boyu: fazla uzunluk OG ve AG/kumanda bölmelerine paylaştırılır (trafo bölmesi sabit)
+  if (Lb > Lmin) { const ek = Lb - Lmin, ix = bol.map((b, k) => (b[0] === 'TRAFO' ? -1 : k)).filter((k) => k >= 0); for (const k of ix) bol[k][1] += ek / ix.length; }
+  const L = Math.max(Lmin, Lb), x0 = -L / 2, y0 = -W / 2, y1 = W / 2;
   o.push(bR(x0, y0, x0 + L, y1, 7), bR(x0 + t, y0 + t, x0 + L - t, y1 - t, 8));
   let x = x0 + t; const hT = Math.max(0.1, W * 0.055);
   bol.forEach(([ad, w], k) => {
@@ -81,11 +102,11 @@ function tsKosk(tip, v) {
   }
   const ad = tip === 'dm' ? 'DM' + (v.not ? ' · ' + v.not : '') : 'TM-' + v.no + ' · ' + fmtNum(kva, 0) + ' kVA · ' + v.gerilim;
   o.push(bT(0, y1 + hT * 2.2, hT * 1.6, ad, 30), bT(0, y0 - hT * 2.2, hT, fmtNum(L, 2) + ' × ' + fmtNum(W, 2) + ' m · ' + n + ' OG hücre', 8));
-  return { ents: o, L: L + (harici ? 4.8 : 0), W, adp };
+  return { ents: o, L: L + (harici ? 4.8 : 0), W, adp, kisa: Lb && Lb < Lmin ? Lmin : 0 };
 }
 function tsInvBlok(v) {
   const o = [], a = 0.6, b = 0.4;
-  o.push(bR(-a, -b, a, b, 6), bL(-a, -b, a, b, 6), bT(0, b + 0.35, 0.3, 'INV-' + v.no + ' · ' + fmtNum(+v.kw, 0) + ' kW', 6), bT(0, -b - 0.3, 0.22, v.model || '', 8));
+  o.push(bR(-a, -b, a, b, 6), bL(-a, -b, a, b, 6), bT(0, b + 0.35, 0.3, 'INV-' + v.no + ' · ' + fmtNum(+v.kw, 0) + ' kW', 6), bT(0, -b - 0.3, 0.22, v.model && v.model !== '—' ? v.model : '', 8));
   return { ents: o, L: 2 * a, W: 2 * b };
 }
 function tsBlok(tip, v, eski) {
@@ -109,6 +130,7 @@ async function tsNokta(tip) {
       if (!Array.isArray(q)) { S.doc.blocks.delete(B.ad); return; }
       ang = Math.atan2(q[1] - p[1], q[0] - p[0]);
     }
+    if (B.kisa) msg('Bina boyu ' + fmtNum(+v.boy, 1) + ' m bu hücre/trafo düzenine yetmiyor; en az ' + fmtNum(B.kisa, 2) + ' m alındı.', 'err');
     S.doc.addLayer(T.kat, T.renk);
     const it = { id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(p[0], p[1]), mRz(ang)), ap: [], ges: { ...v, tip } };
     addItems([it], T.ad.toLowerCase()); renderLayers(); msg(T.ad + ' eklendi (' + fmtNum(B.L, 2) + ' × ' + fmtNum(B.W, 2) + ' m). Taşı (M) / Döndür (RO) ile tek parça hareket eder; verisi için “Veri”.', 'res');

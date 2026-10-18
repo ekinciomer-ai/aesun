@@ -42,9 +42,27 @@ function renderTpl() {
   sel.value = String(Math.min(cur, Math.max(0, G.tpl.length - 1)));
   const t = G.tpl[+sel.value]; gv('g-tuse').checked = !!t && t.use !== false; gv('g-tuse').disabled = gv('g-tedit').disabled = gv('g-tdel').disabled = !t;
 }
+// TEK masa seçimi: "Proje masası" (p-masa), "Hazır şablonlar" listesi ve "Masa şablonu" formu aynı şablonu gösterir.
+// Birinde seçim/değişiklik olunca diğerleri onu izler; form değişikliği seçili şablonu günceller.
+function masaFormaYukle(t) {
+  if (!t) return; gv('g-or').value = t.orient; gv('g-rows').value = t.rows; gv('g-n').value = t.rows * t.per; gv('g-tilt').value = t.tilt; gv('g-front').value = t.front; gv('g-gx').value = Math.round(t.gx * 100); tplUpdate();
+}
+function masaSec(i) {
+  const t = G.tpl[i]; if (!t) return;
+  G.tpl.forEach((q) => { q.use = q === t; }); const pm = gv('p-masa'); if (pm) pm.value = String(i); const ts = gv('g-tsel'); if (ts) ts.value = String(i);
+  renderTpl(); if (pm) pm.value = String(i); if (ts) ts.value = String(i); masaFormaYukle(t); pitchUpdate(); gesSave(); if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function') tfSync();
+}
+function masaFormdan() {
+  // formdaki masa listede varsa o seçilir; yoksa yeni şablon olarak eklenip seçilir (mevcut şablonlar bozulmaz)
+  const f = tplFromForm();
+  let i = G.tpl.findIndex((t) => t.orient === f.orient && t.rows === f.rows && t.per === f.per && t.tilt === f.tilt);
+  if (i < 0) { G.tpl.push({ ...f, use: true }); i = G.tpl.length - 1; } else { Object.assign(G.tpl[i], { front: f.front, gx: f.gx, gy: f.gy }); }
+  G.tpl.forEach((q, j) => { q.use = j === i; }); renderTpl(); gv('p-masa').value = String(i); gv('g-tsel').value = String(i); gv('g-tuse').checked = true;
+  gesSave(); if (typeof pjSave === 'function') pjSave(); if (typeof pjAutoHints === 'function') pjAutoHints(); if (typeof tfSync === 'function') tfSync();
+}
 function tplSecInit() {
   const sel = gv('g-tsel'); const cur = () => G.tpl[+sel.value];
-  sel.onchange = () => { const t = cur(); gv('g-tuse').checked = !!t && t.use !== false; };
+  sel.onchange = () => masaSec(+sel.value);
   gv('g-tuse').onchange = () => { const t = cur(); if (!t) return; t.use = gv('g-tuse').checked; gesSave(); renderTpl(); };
   gv('g-tedit').onclick = () => { const t = cur(); if (!t) return; gv('g-or').value = t.orient; gv('g-rows').value = t.rows; gv('g-n').value = t.rows * t.per; gv('g-tilt').value = t.tilt; gv('g-front').value = t.front; gv('g-gx').value = Math.round(t.gx * 100); tplUpdate(); };
   gv('g-tdel').onclick = () => { const i = +sel.value; if (!G.tpl[i]) return; G.tpl.splice(i, 1); sel.value = String(Math.max(0, i - 1)); renderTpl(); gesSave(); };
@@ -256,7 +274,8 @@ function gesInit() {
   if (G._set) for (const [k, v] of Object.entries(G._set)) if (gv(k)) gv(k).value = v;
   panelToForm(); tplUpdate(); renderTpl(); boundInfo(); pitchUpdate();
   for (const id of ['g-model', 'g-p', 'g-L', 'g-W', 'g-T', 'g-cells']) gv(id).addEventListener('change', formToPanel);
-  for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); });
+  for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) { gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); }); gv(id).addEventListener('change', masaFormdan); }
+  { const pm = gv('p-masa'); if (pm) pm.addEventListener('change', () => masaSec(+pm.value)); }
   for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); });
   gv('g-ds').onchange = (e) => { const f = e.target.files[0]; if (f) gesDatasheet(f); e.target.value = ''; };
   gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };

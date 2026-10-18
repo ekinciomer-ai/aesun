@@ -283,7 +283,7 @@ CMD.GPROJ = async () => pjRun();
 function pjInit() {
   fetch(new URL('py/pyodide-lock.json', document.baseURI).href, { method: 'HEAD', cache: 'no-store' }).then((r) => { if (!r.ok) throw 0; }).catch(() => {
     gv('p-run').disabled = true; gv('p-stage').textContent = 'Proje üretimi (GES-ÇİZ) bu sayfada çalışmaz: portal.aksarayenerji.net/aecad adresinde ve yerel AeCAD paketinde çalışır.'; gv('p-stage').classList.add('sug'); });
-  pjMasaList(); pjLoad(); pjMasaList(); pjAutoHints(); if (PJ.dm) gv('p-dmtxt').textContent = 'DM: ' + PJ.dm.join(', ');
+  pjMasaList(); pjLoad(); pjMasaList(); { const i = +gv('p-masa').value; if (G.tpl[i]) { gv('g-tsel').value = String(i); masaFormaYukle(G.tpl[i]); } } pjAutoHints(); if (PJ.dm) gv('p-dmtxt').textContent = 'DM: ' + PJ.dm.join(', ');
   gv('p-run').onclick = pjYerlesim; gv('p-open').onclick = () => pjDialog('paftalar'); gv('p-back').onclick = pjBack; gv('p-dm').onclick = () => runCommand('GDM');
   let t = null;
   for (const id of PJ_IDS) { const el = gv(id); if (!el) continue; el.addEventListener('change', () => { pjAutoHints(); pjSave(); if (PJ.res && id !== 'p-pdf2' && gv('tarif').hidden) { clearTimeout(t); t = setTimeout(() => { gv('p-stage').textContent = 'Bilgiler değişti — "Yerleşimi çiz ve seçenekleri karşılaştır" ile yeniden hesaplayın.'; }, 300); } }); }

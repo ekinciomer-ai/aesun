@@ -216,6 +216,9 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 }
 
 /* ---- başlangıç + proje tarif ---- */
+.hb.files { border-color: var(--ok); color: var(--ok); }
+.st-son { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--ok); border-radius: 8px; padding: 12px 16px; }
+.st-son span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; } .st-son b { font-weight: 500; flex: 1 1 240px; }
 .tf-prev { margin: 0; display: grid; gap: 6px; }
 .tf-prev svg { width: 100%; height: auto; max-height: 320px; aspect-ratio: 640 / 300; background: var(--ink); border: 1px solid var(--line); border-radius: 6px; display: block; }
 .tf-prev.empty svg { aspect-ratio: 640 / 120; background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgba(255,255,255,.025) 10px 20px); }
@@ -270,6 +273,7 @@ details.tf-sec:not([open]) { gap: 0; }
     <span id="fname">Örnek çizim</span>
     <div class="hbtns">
       <button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb files" id="bfiles" hidden title="Son üretilen proje dosyaları"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h5l1.5 1.5h4.5v9.5h-11zM5 8h6M5 10.5h4" fill="none" stroke="currentColor"/></svg><span class="k">Proje dosyaları</span></button>
       <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
       <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>
       <button class="hb" id="bclose" title="Çizimi kapat"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor"/></svg><span class="k">Kapat</span></button>
@@ -474,6 +478,7 @@ details.tf-sec:not([open]) { gap: 0; }
         <button class="st-card primary" id="st-tarif" type="button"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 11h7M9 15h7M9 19h4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>Proje tarif et</b><span>Proje bilgileri, arazi (KML veya köşe koordinatı), hedef güç, trafo, inverter ve panel datasheet'i form üzerinden girilir. Yerleşim, tek hat, topraklama, kablo, metraj ve PDF otomatik üretilir.</span><em>Form → GES-ÇİZ → paftalar</em></button>
         <button class="st-card" id="st-cad" type="button"><svg viewBox="0 0 24 24"><path d="M4 20 18 6l2 2L6 22H4zM14 4l6 6M3 3h6M3 3v6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><b>Çizime geç</b><span>DWG/DXF açın, 2B çizin, ölçün. GES sekmesinde panel, masa şablonu, arazi doldurma ve proje tanımı da bu ekrandan yapılır.</span><em>AeCAD çizim ekranı</em></button>
       </div>
+      <div class="st-son" id="st-son" hidden><span>Son üretilen proje</span><b id="st-son-t"></b><button class="gb" id="st-son-b" type="button">Paftalar, PDF, keşif ve teklif</button></div>
       <div class="st-foot">Aksaray Enerji · AeCAD</div>
     </div>
   </section>
@@ -2964,7 +2969,9 @@ function pjAutoHints() {
 }
 function buildParam() {
   const a = pjAuto(), P = G.panel, tp = a.tp;
-  const pitch = parseFloat(gv('g-pitch').value) || pitchUpdate() || 8.7;
+  // sıra aralığı proje masasından (gölge hesabı); elle girildiyse o değer
+  let pitch; if (gv('g-hrs').value === 'manual') pitch = gnum('g-pitch', 0); else { const r = rowPitch(tp, gnum('g-lat', 39), parseFloat(gv('g-hrs').value), gnum('g-ang', 0)); pitch = isFinite(r.pitch) ? r.pitch : null; }
+  if (!pitch) pitch = parseFloat(gv('g-pitch').value) || 8.7;
   const fromKml = G.boundSrc === 'kml';
   const pc = { kolon: 2 * a.aks, kiris: a.aks, asik: 12, ruzgarlik: 12, payanda: a.aks, capraz: 12, orta_klemp: 2 * (tp.per - 1) * tp.rows, kenar_klemp: 4 * tp.rows, m12_civata: 140 };
   const statikVar = pn('p-aks') !== null;
@@ -2978,14 +2985,14 @@ function buildParam() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610181906', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
     PJ.busy = false; busy(null); gv('p-run').disabled = false;
     if (m.err) { gv('p-stage').textContent = 'Hata: ' + m.err; msg('GES-ÇİZ hata: ' + m.err, 'err'); return; }
     const sec = ((performance.now() - PJ.t0) / 1000).toFixed(1);
-    PJ.res = m.rapor; PJ.files = m.files; PJ.pdf = m.pdf;
+    PJ.res = m.rapor; PJ.files = m.files; PJ.pdf = m.pdf; PJ.t = Date.now(); pjArsivYaz(); pjLinkler();
     const oz = m.rapor.ozet; const dc = (m.rapor.metraj.find((r) => /DC kurulu güç/.test(r.kalem)) || {}).miktar, ac = (m.rapor.metraj.find((r) => /AC kurulu güç/.test(r.kalem)) || {}).miktar;
     const bad = m.rapor.kontrol.filter((k) => k.durum === '✖').length;
     const sum = oz.masa + ' masa · ' + oz.modul.toLocaleString('tr') + ' modül · ' + oz.string + ' string · ' + oz.inverter + ' inverter · ' + oz.tm + ' trafo · DC ' + fmtNum((dc || 0) / 1000, 3) + ' MWp / AC ' + fmtNum((ac || 0) / 1000, 3) + ' MW (' + fmtNum(dc / ac, 2) + ') · ' + sec + ' sn';
@@ -3071,6 +3078,23 @@ function teklifSatirlar(mod) {
 }
 
 // ---------- dialog ----------
+// ---- son üretilen proje: tarayıcıda (IndexedDB) saklanır, başlıktaki "Proje dosyaları" ve başlangıç ekranından açılır ----
+function pjIdb() { return new Promise((ok, no) => { try { const r = indexedDB.open('aecad', 1); r.onupgradeneeded = () => r.result.createObjectStore('proje'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); } catch (e) { no(e); } }); }
+async function pjArsivYaz() {
+  try { const db = await pjIdb(); const tx = db.transaction('proje', 'readwrite'); tx.objectStore('proje').put({ t: PJ.t, rapor: PJ.res, files: PJ.files, pdf: PJ.pdf, param: PJ.param }, 'son'); }
+  catch (e) { console.warn('arşiv', e); }
+}
+async function pjArsivOku() {
+  try { const db = await pjIdb(); const o = await new Promise((ok, no) => { const r = db.transaction('proje').objectStore('proje').get('son'); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); });
+    if (o && o.files && !PJ.res) { PJ.res = o.rapor; PJ.files = o.files; PJ.pdf = o.pdf; PJ.param = o.param; PJ.t = o.t; gv('p-open').disabled = false; pjLinkler(); } }
+  catch (e) { console.warn('arşiv', e); }
+}
+function pjLinkler() {
+  if (!PJ.files) return; const ad = (PJ.param && PJ.param.proje && PJ.param.proje.isin_adi) || 'GES Projesi';
+  const zm = new Date(PJ.t || Date.now()).toLocaleString('tr', { dateStyle: 'short', timeStyle: 'short' }); const n = Object.keys(PJ.files).length;
+  const b = gv('bfiles'); b.hidden = false; b.title = ad + ' · ' + zm + ' · ' + n + ' dosya';
+  const s = gv('st-son'); s.hidden = false; gv('st-son-t').textContent = ad + ' · ' + zm + ' · ' + n + ' dosya' + (Object.keys(PJ.files).some((f) => /\.pdf$/i.test(f)) ? ' (PDF dahil)' : '');
+}
 function pjDialog(tab) {
   if (!PJ.res) { msg('Önce projeyi üretin.'); return; }
   const d = gv('pjdlg'); if (!d.open) d.showModal();
@@ -3347,6 +3371,9 @@ function tarifInit() {
   tfBuild();
   gv('st-tarif').onclick = () => { startShow(false); tarifShow(true); };
   gv('st-cad').onclick = () => toCad(false);
+  const dosyalar = () => { startShow(false); tarifShow(false); pjDialog('paftalar'); };
+  gv('st-son-b').onclick = dosyalar; gv('bfiles').onclick = dosyalar;
+  pjArsivOku();
   gv('bhome').onclick = () => { tarifShow(false); startShow(true); };
   gv('tf-back').onclick = () => { tarifShow(false); startShow(true); };
   gv('tf-cad').onclick = () => { pjSave(); toCad(true); };

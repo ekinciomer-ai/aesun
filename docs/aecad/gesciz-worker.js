@@ -1,23 +1,32 @@
 // GES-ÇİZ runner (Pyodide). Messages: {id, base, json, pdf} -> {id, stage} | {id, ok, files:{name:Uint8Array}, rapor} | {id, err}
-let py = null, mpl = false;
+let py = null, mpl = false, mplP = null;
 const post = (m, tr) => self.postMessage(m, tr || []);
 async function init(base, id) {
   if (py) return;
   post({ id, stage: 'Python ortamı yükleniyor…' });
   importScripts(base + 'py/pyodide.js');
-  py = await loadPyodide({ indexURL: base + 'py/' });
+  py = await loadPyodide({ indexURL: base + 'py/', stdout: () => {} });
   post({ id, stage: 'Paketler yükleniyor (numpy, shapely, ezdxf)…' });
   await py.loadPackage(['numpy', 'shapely', 'pyparsing', 'typing-extensions', 'fonttools']);
   await py.loadPackage(base + 'py/ezdxf-1.3.5-py3-none-any.whl');
   const src = await (await fetch(base + 'py/ges_ciz.py', { cache: 'no-cache' })).text();
+  mplYukle(base);   // PDF modülü arka planda iner; yerleşim hesabıyla aynı anda
   py.FS.mkdirTree('/home/pyodide'); py.FS.writeFile('/home/pyodide/ges_ciz.py', src);
+}
+function mplYukle(base) {
+  if (!mplP) mplP = (async () => { await py.loadPackage(['cycler', 'kiwisolver', 'pillow', 'python-dateutil', 'pytz', 'six', 'packaging'], { messageCallback: () => {} }); await py.loadPackage(base + 'py/mpl/matplotlib-3.5.2-cp312-cp312-pyodide_2024_0_wasm32.whl', { messageCallback: () => {} }); await py.runPythonAsync("import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot; from matplotlib.backends.backend_pdf import PdfPages"); mpl = true; })();
+  return mplP;
 }
 self.onmessage = async (e) => {
   const { id, base, json, pdf } = e.data;
   try {
     await init(base, id);
     let usePdf = !!pdf;
-    if (usePdf && !mpl) { post({ id, stage: 'PDF için matplotlib yükleniyor…' }); try { await py.loadPackage(['cycler', 'kiwisolver', 'pillow', 'python-dateutil', 'pytz', 'six', 'packaging']); await py.loadPackage(base + 'py/mpl/matplotlib-3.5.2-cp312-cp312-pyodide_2024_0_wasm32.whl'); mpl = true; } catch (x) { usePdf = false; console.warn('mpl', x); post({ id, stage: 'PDF bu ortamda üretilemiyor; DXF ve metraj üretiliyor…' }); } }
+    if (usePdf && !mpl) {
+      post({ id, stage: 'PDF modülü hazırlanıyor (ilk seferde ~7 MB, sonra önbellekten)…' });
+      try { await Promise.race([mplYukle(base), new Promise((_, rj) => setTimeout(() => rj(new Error('zaman aşımı')), 120000))]); }
+      catch (x) { usePdf = false; console.warn('mpl', x); post({ id, stage: 'PDF modülü yüklenemedi (' + (x && x.message || x) + '); DXF ve metraj üretiliyor…' }); }
+    }
     py.FS.writeFile('/home/pyodide/p.json', new TextEncoder().encode(json));
     post({ id, stage: 'GES-ÇİZ çalışıyor: yerleşim, inverter, trafo, kablo, tek hat, metraj…' });
     const out = await py.runPythonAsync(`

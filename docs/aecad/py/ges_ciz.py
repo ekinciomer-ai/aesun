@@ -1571,20 +1571,35 @@ def dxf_yaz(M, pf, yol):
             x, y, h, s, rot, hz = d
             tx = msp.add_text(s, dxfattribs={"layer": kat, "height": h, "rotation": rot, "style": "OpenSans"})
             tx.set_placement((x, y), align=ezdxf.enums.TextEntityAlignment.MIDDLE_CENTER if hz == "C" else ezdxf.enums.TextEntityAlignment.LEFT)
-    # antet (model uzayında, ölçekli)
+    # pafta çerçevesi + antet (model uzayında, ölçekli). Yerleşim PDF ile aynı: çizim kullanım alanında ortalanır,
+    # antet kağıdın sağ-alt köşesinde alt antet bandındadır (KENAR alt 100 mm) — çizimin üstüne binmez.
     bb = pf.sinir()
     pm, olc = pafta_olcek(M, pf)
-    k = (olc / 1000.0) if olc else 1.0       # kağıt mm -> model birimi
-    x1, y0 = bb[2], bb[1]
+    L_, T_, R_, B_ = KENAR
+    if pf.olcekli:
+        k = olc / 1000.0                     # kağıt mm -> model birimi (m)
+        uw, uh = (pm[0] - L_ - R_) * k, (pm[1] - T_ - B_) * k
+        cx, cy = (bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2
+        X0, Y0 = cx - uw / 2 - L_ * k, cy - uh / 2 - B_ * k
+    else:
+        k = 1.0                              # tek hat / detay: model birimi mm
+        X0, Y0 = bb[0] - 5 - L_, bb[3] + 5 - (pm[1] - T_ - B_) - B_
+    P_ = lambda x, y: (X0 + x * k, Y0 + y * k)
+    msp.add_lwpolyline([P_(0, 0), P_(pm[0], 0), P_(pm[0], pm[1]), P_(0, pm[1])], close=True, dxfattribs={"layer": "GES-ANTET", "color": 8})   # kağıt kenarı
+    msp.add_lwpolyline([P_(20, 10), P_(pm[0] - 10, 10), P_(pm[0] - 10, pm[1] - 10), P_(20, pm[1] - 10)], close=True, dxfattribs={"layer": "GES-ANTET"})   # çerçeve, sol 20 mm cilt payı
+    x = pm[0] - 190
+    while x > 20:                            # 190 mm katlama işaretleri
+        msp.add_line(P_(x, 0), P_(x, 5), dxfattribs={"layer": "GES-ANTET"}); msp.add_line(P_(x, pm[1] - 5), P_(x, pm[1]), dxfattribs={"layer": "GES-ANTET"}); x -= 190
+    ox, oy = pm[0] - 10, 10                  # antet sağ-alt köşesi (kağıt mm)
     for typ, a, b in antet_geometri(M, pf, olc):     # kağıt mm, sağ-alt köşe orijinli
         if typ == "R":
             (xa, ya), (xb, yb) = a, b
-            msp.add_lwpolyline([(x1 + xa * k, y0 + ya * k), (x1 + xb * k, y0 + ya * k), (x1 + xb * k, y0 + yb * k), (x1 + xa * k, y0 + yb * k)], close=True, dxfattribs={"layer": "GES-ANTET"})
+            msp.add_lwpolyline([P_(ox + xa, oy + ya), P_(ox + xb, oy + ya), P_(ox + xb, oy + yb), P_(ox + xa, oy + yb)], close=True, dxfattribs={"layer": "GES-ANTET"})
         elif typ == "L":
-            msp.add_line((x1 + a[0] * k, y0 + a[1] * k), (x1 + b[0] * k, y0 + b[1] * k), dxfattribs={"layer": "GES-ANTET"})
+            msp.add_line(P_(ox + a[0], oy + a[1]), P_(ox + b[0], oy + b[1]), dxfattribs={"layer": "GES-ANTET"})
         else:
             (xx, yy, h) = a
-            msp.add_text(str(b), dxfattribs={"layer": "GES-ANTET", "height": h * k}).set_placement((x1 + xx * k, y0 + yy * k))
+            msp.add_text(str(b), dxfattribs={"layer": "GES-ANTET", "height": h * k}).set_placement(P_(ox + xx, oy + yy))
     doc.saveas(yol)
     return olc
 

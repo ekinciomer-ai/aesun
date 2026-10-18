@@ -17,7 +17,7 @@ self.onmessage = async (e) => {
   try {
     await init(base, id);
     let usePdf = !!pdf;
-    if (usePdf && !mpl) { post({ id, stage: 'PDF için matplotlib yükleniyor…' }); try { await py.loadPackage(['matplotlib']); mpl = true; } catch (x) { usePdf = false; post({ id, stage: 'PDF bu ortamda üretilemiyor; DXF ve metraj üretiliyor…' }); } }
+    if (usePdf && !mpl) { post({ id, stage: 'PDF için matplotlib yükleniyor…' }); try { await py.loadPackage(['cycler', 'kiwisolver', 'pillow', 'python-dateutil', 'pytz', 'six', 'packaging']); await py.loadPackage(base + 'py/mpl/matplotlib-3.5.2-cp312-cp312-pyodide_2024_0_wasm32.whl'); mpl = true; } catch (x) { usePdf = false; console.warn('mpl', x); post({ id, stage: 'PDF bu ortamda üretilemiyor; DXF ve metraj üretiliyor…' }); } }
     py.FS.writeFile('/home/pyodide/p.json', new TextEncoder().encode(json));
     post({ id, stage: 'GES-ÇİZ çalışıyor: yerleşim, inverter, trafo, kablo, tek hat, metraj…' });
     const out = await py.runPythonAsync(`

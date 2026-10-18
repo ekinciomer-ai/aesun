@@ -389,7 +389,7 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
               <label class="gf">TM tarafı<select id="p-taraf"><option value="dogu">Doğu</option><option value="bati">Batı</option></select></label>
               <label class="gf">Aks sayısı<input id="p-aks" type="number"></label>
               <label class="gf">Aks aralığı (m)<input id="p-aksa" type="number" step="0.01"></label>
-              <label class="gf ck" hidden><input id="p-pdf" type="checkbox"> PDF üret</label>
+              <label class="gf ck"><input id="p-pdf2" type="checkbox" checked> PDF pafta seti üret</label>
             </div>
             <div class="brow"><button class="gb" id="p-dm">DM konumunu çizimde göster</button></div>
             <p class="gi" id="p-dmtxt">DM: otomatik (TM tarafı kuzey köşe)</p>
@@ -2852,7 +2852,7 @@ function gesInit() {
 // ---- GES project: AeCAD -> GES-ÇİZ (Pyodide worker) -> paftalar, kontrol, keşif, teklif ----
 const PJ = { worker: null, seq: 0, busy: false, again: false, res: null, files: null, srcDoc: null, dm: null, cur: null };
 const PKEY = 'aecad.proje.v1', FKEY = 'aecad.fiyat.v1';
-const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf'];
+const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2'];
 
 function pjSave() { try { const o = {}; for (const id of PJ_IDS) { const el = gv(id); if (el) o[id] = el.type === 'checkbox' ? el.checked : el.value; } o.dm = PJ.dm; localStorage.setItem(PKEY, JSON.stringify(o)); } catch (e) { /* ignore */ } }
 function pjLoad() { try { const o = JSON.parse(localStorage.getItem(PKEY) || 'null'); if (!o) return; for (const id of PJ_IDS) { const el = gv(id); if (el && o[id] !== undefined) { if (el.type === 'checkbox') el.checked = o[id]; else el.value = o[id]; } } PJ.dm = o.dm || null; } catch (e) { /* ignore */ } }
@@ -2947,7 +2947,7 @@ function pjRun() {
   let param; try { param = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
   PJ.busy = true; PJ.t0 = performance.now(); PJ.seq++; gv('p-run').disabled = true;
   PJ.param = param;
-  pjWorker().postMessage({ id: PJ.seq, base: new URL('./', document.baseURI).href, json: JSON.stringify(param), pdf: gv('p-pdf').checked });
+  pjWorker().postMessage({ id: PJ.seq, base: new URL('./', document.baseURI).href, json: JSON.stringify(param), pdf: gv('p-pdf2').checked });
 }
 function pjOpenPafta(name, auto) {
   const f = PJ.files && PJ.files[name]; if (!f) return;
@@ -3021,7 +3021,10 @@ function pjDialog(tab) {
     }
     box.appendChild(list);
     const all = h('button', 'gb primary'); all.textContent = 'Tüm proje dosyaları (ZIP)'; all.onclick = () => pjSaveZip(); box.appendChild(all);
-    if (!PJ.pdf) { const n = h('p', 'gi'); n.textContent = 'Paftalar DXF ve etkileşimli HTML olarak üretildi; birleşik PDF tarayıcıda üretilmez (GES-ÇİZ scriptiyle alınır). DWG için DXF\'i AutoCAD\'de açıp DWG olarak kaydedin.'; box.appendChild(n); }
+    const pdfs = Object.keys(PJ.files).filter((n) => /\.pdf$/i.test(n));
+    for (const n of pdfs) { const b = h('button', 'gb primary'); b.textContent = 'PDF pafta seti indir (' + (PJ.files[n].length / 1048576).toFixed(1) + ' MB)'; b.onclick = () => pjSaveFile(n, PJ.files[n]); box.insertBefore(b, list); }
+    if (!pdfs.length) { const n = h('p', 'gi'); n.textContent = PJ.pdf === false && gv('p-pdf2').checked ? 'PDF bu ortamda üretilemedi (PDF modülü yüklenemedi); DXF ve HTML üretildi.' : 'PDF kapalı: "PDF pafta seti üret" kutusunu işaretleyip yeniden üretin.'; box.appendChild(n); }
+    { const n = h('p', 'gi'); n.textContent = 'DWG için DXF\'i AutoCAD\'de açıp DWG olarak kaydedin.'; box.appendChild(n); }
   }
   if (tab === 'kontrol') {
     const t = h('table', 'kt'); t.innerHTML = '<thead><tr><th>Durum</th><th>Kontrol</th><th>Değer</th><th>Esas</th></tr></thead>';
@@ -3108,7 +3111,7 @@ function pjInit() {
   pjMasaList(); pjLoad(); pjMasaList(); pjAutoHints(); if (PJ.dm) gv('p-dmtxt').textContent = 'DM: ' + PJ.dm.join(', ');
   gv('p-run').onclick = pjRun; gv('p-open').onclick = () => pjDialog('paftalar'); gv('p-back').onclick = pjBack; gv('p-dm').onclick = () => runCommand('GDM');
   let t = null;
-  for (const id of PJ_IDS) { const el = gv(id); if (!el) continue; el.addEventListener('change', () => { pjAutoHints(); pjSave(); if (PJ.res && id !== 'p-pdf') { clearTimeout(t); t = setTimeout(pjRun, 900); } }); }
+  for (const id of PJ_IDS) { const el = gv(id); if (!el) continue; el.addEventListener('change', () => { pjAutoHints(); pjSave(); if (PJ.res && id !== 'p-pdf2') { clearTimeout(t); t = setTimeout(pjRun, 900); } }); }
   document.querySelectorAll('.ptab').forEach((b) => b.onclick = () => pjDialog(b.dataset.t));
   gv('pj-close').onclick = () => gv('pjdlg').close();
 }

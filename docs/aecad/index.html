@@ -317,7 +317,7 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
             <label class="gf">Enlem (°)<input id="g-lat" type="number" step="0.001" value="39.2"></label>
             <label class="gf">UTM dilimi<input id="g-zone" type="number" min="1" max="60" value="38"></label>
             <label class="gf">Sıra açısı (°)<input id="g-ang" type="number" step="0.5" value="0"></label>
-            <label class="gf">Sınır mes. (m)<input id="g-set" type="number" step="0.5" value="10"></label>
+            <label class="gf">Çekme (m)<input id="g-set" type="number" step="0.5" value="5"></label>
             <label class="gf">Masa arası (m)<input id="g-gap" type="number" step="0.1" value="0.5"></label>
             <label class="gf">Hizalama<select id="g-align"><option value="left">Batıya</option><option value="center">Ortala</option></select></label>
           </div>
@@ -2435,6 +2435,7 @@ const G = {
   last: null, // last fill result
 };
 const D2R = Math.PI / 180;
+const UC_PAYI = 0.08;   // ges-proje-cizim §3: masa uç payı 2×80 mm
 
 // ---------- datasheet parsing ----------
 let _pdfjs = null;
@@ -2516,7 +2517,8 @@ function makePanelBlock() { // module in plan, flat, portrait (width along x, le
 // table template: {name, orient:'V'|'H', rows, per, tilt, gx, gy, front}
 function tplDims(tp) {
   const P = G.panel; const pw = (tp.orient === 'V' ? P.W : P.L) / 1000, pl = (tp.orient === 'V' ? P.L : P.W) / 1000;
-  const len = tp.per * pw + (tp.per - 1) * tp.gx; const slant = tp.rows * pl + (tp.rows - 1) * tp.gy;
+  const len = tp.per * pw + (tp.per - 1) * tp.gx + 2 * UC_PAYI;   // uç payı 2×80 mm (TİP-1 → 17,339 m)
+  const slant = tp.rows * pl + (tp.rows - 1) * tp.gy;
   const depth = slant * Math.cos(tp.tilt * D2R), rise = slant * Math.sin(tp.tilt * D2R);
   return { pw, pl, len, slant, depth, rise, back: tp.front + rise, n: tp.rows * tp.per, kwp: tp.rows * tp.per * P.p / 1000 };
 }
@@ -2530,7 +2532,7 @@ function tplName(tp) { return 'MASA_' + tp.rows + tp.orient + tp.per + '_' + tp.
 function makeTableBlock(tp) {
   const d = tplDims(tp), c = Math.cos(tp.tilt * D2R); const ents = [];
   for (let r = 0; r < tp.rows; r++) for (let k = 0; k < tp.per; k++) {
-    const x0 = k * (d.pw + tp.gx), y0 = r * (d.pl + tp.gy) * c; ents.push(rectEnt(x0, y0, x0 + d.pw, y0 + d.pl * c));
+    const x0 = UC_PAYI + k * (d.pw + tp.gx), y0 = r * (d.pl + tp.gy) * c; ents.push(rectEnt(x0, y0, x0 + d.pw, y0 + d.pl * c));
   }
   // legs (no static data): rows 0.40 m inside front/back panel edge (along slope), first/last 0.40 m inside table ends, spacing <= 2.40 m
   for (const L of legLayout(tp)) ents.push(rectEnt(L[0] - 0.05, L[1] - 0.05, L[0] + 0.05, L[1] + 0.05, 8));
@@ -2671,8 +2673,8 @@ function gesSave() { try { localStorage.setItem(GKEY, JSON.stringify({ panel: G.
 function gesLoad() {
   try { const s = JSON.parse(localStorage.getItem(GKEY) || 'null'); if (s && s.panel) { G.panel = s.panel; G.tpl = s.tpl || []; G._set = s.set || null; } } catch (e) { /* ignore */ }
   if (!G.tpl.length) G.tpl = [
-    { orient: 'V', rows: 2, per: 26, tilt: 25, gx: 0.02, gy: 0.02, front: 0.8, use: true },
-    { orient: 'V', rows: 2, per: 13, tilt: 25, gx: 0.02, gy: 0.02, front: 0.8, use: true },
+    { orient: 'V', rows: 2, per: 13, tilt: 25, gx: 0.02, gy: 0.02, front: 0.8, use: true },   // TİP-1 (esas §3)
+    { orient: 'V', rows: 2, per: 26, tilt: 25, gx: 0.02, gy: 0.02, front: 0.8, use: false },
   ];
 }
 const gv = (id) => document.getElementById(id);
@@ -2804,14 +2806,14 @@ CMD.GFILL = async () => {
   const sel = G.tpl.filter((t) => t.use !== false); if (!sel.length) { msg('Doldurma için en az bir masa şablonu işaretleyin.', 'err'); return; }
   const pitch = pitchUpdate(); if (!pitch) return;
   const types = sel.map((tp) => { const d = tplDims(tp); return { tp, name: makeTableBlock(tp), len: d.len, depth: d.depth, n: d.n, kwp: d.kwp }; }).sort((a, b) => b.len - a.len);
-  const res = fillLand({ types, setback: gnum('g-set', 10), pitch, rowGap: gnum('g-gap', 0.5), rowAng: gnum('g-ang', 0), align: gv('g-align').value });
+  const res = fillLand({ types, setback: gnum('g-set', 5), pitch, rowGap: gnum('g-gap', 0.5), rowAng: gnum('g-ang', 0), align: gv('g-align').value });
   if (!res.placed.length) { msg('Sınırın içine hiç masa sığmadı. Sınır mesafesini veya şablonu kontrol edin.', 'err'); return; }
   const items = []; const cnt = types.map(() => 0);
-  for (const t of types) S.doc.addLayer('GES-MASA-' + t.tp.rows + t.tp.orient + t.tp.per, t === types[0] ? 5 : 4);
-  for (const p of res.placed) { const t = types[p.type]; cnt[p.type]++; items.push({ id: newId(), t: 'insert', layer: 'GES-MASA-' + t.tp.rows + t.tp.orient + t.tp.per, c: 256, lt: '', block: t.name, M: mMul(mT(p.x, p.y), mRz(res.rowAng)), ap: [] }); }
-  S.doc.addLayer('GES-SINIR-CEKME', 1, 'DASHED');
+  S.doc.addLayer('GES-MASA', 5);
+  for (const p of res.placed) { const t = types[p.type]; cnt[p.type]++; items.push({ id: newId(), t: 'insert', layer: 'GES-MASA', c: types.length > 1 && p.type > 0 ? 4 : 256, lt: '', block: t.name, M: mMul(mT(p.x, p.y), mRz(res.rowAng)), ap: [] }); }
+  S.doc.addLayer('GES-CEKME', 1, 'DASHED'); S.doc.addLayer('GES-NOT', 7);
   // setback outline (approx: offset polygon via miter)
-  const sb = gnum('g-set', 10); if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-SINIR-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-SINIR-CEKME'; items.push(o); } }
+  const sb = gnum('g-set', 5); if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } }
   const mods = types.reduce((s, t, i) => s + cnt[i] * t.n, 0), kwp = mods * G.panel.p / 1000;
   addItems(items, 'arazi doldur'); renderLayers();
   G.last = { cnt, types, mods, kwp, rows: res.rows, area: res.area, pitch };
@@ -2821,7 +2823,7 @@ CMD.GFILL = async () => {
   // summary text near boundary
   const bb = G.bound.reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
   const th = Math.max(1, (bb[3] - bb[1]) / 120);
-  addItems([{ id: newId(), t: 'text', layer: 'GES-SINIR-CEKME', c: 7, lt: '', mt: true, x: bb[0], y: bb[1] - th * 2, h: th, rot: 0, s: 'GES YERLEŞİM ÖZETİ\n' + lines.join('\n') + '\nToplam: ' + mods.toLocaleString('tr') + ' modül × ' + G.panel.p + ' Wp = ' + fmtNum(kwp / 1000, 3) + ' MWp\nSıra aralığı ' + fmtNum(pitch, 2) + ' m · eğim ' + types[0].tp.tilt + '° · sınır mesafesi ' + fmtNum(sb, 1) + ' m', ha: 0, va: 3, ls: 1.6 }], 'özet');
+  addItems([{ id: newId(), t: 'text', layer: 'GES-NOT', c: 7, lt: '', mt: true, x: bb[0], y: bb[1] - th * 2, h: th, rot: 0, s: 'GES YERLEŞİM ÖZETİ\n' + lines.join('\n') + '\nToplam: ' + mods.toLocaleString('tr') + ' modül × ' + G.panel.p + ' Wp = ' + fmtNum(kwp / 1000, 3) + ' MWp\nSıra aralığı ' + fmtNum(pitch, 2) + ' m · eğim ' + types[0].tp.tilt + '° · sınır mesafesi ' + fmtNum(sb, 1) + ' m', ha: 0, va: 3, ls: 1.6 }], 'özet');
 };
 function centroidOf(p) { return [p.reduce((s, q) => s + q[0], 0) / p.length, p.reduce((s, q) => s + q[1], 0) / p.length]; }
 Object.assign(ALIAS, { GTABLE: 'GTABLE', GSECTION: 'GSECTION', GBOUND: 'GBOUND', GFILL: 'GFILL', GPANEL: 'GPANEL', PANEL: 'GPANEL', GMASA: 'GTABLE', MASA: 'GTABLE', KESIT: 'GSECTION', SINIR: 'GBOUND', DOLDUR: 'GFILL' });

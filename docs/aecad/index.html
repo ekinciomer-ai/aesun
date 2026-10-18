@@ -2578,6 +2578,7 @@ function updateProps() {
       row('Yükseklik', hi);
     }
   }
+  if (typeof tsOzellik === 'function') tsOzellik(box, items);
 }
 function updateStatus() {
   const w = S.mw; $('#coords').textContent = 'X ' + fmtNum(w[0], 3) + '   Y ' + fmtNum(w[1], 3);
@@ -3222,7 +3223,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190222', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190225', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3881,7 +3882,7 @@ function tsKosk(tip, v) {
   const kva = +v.kva || 0, harici = tip === 'tm' && kva >= 2500;
   const wOG = Math.max(1.6, n * 0.5 + 0.6), wAG = tip === 'dm' ? 1.6 : 1.4;
   const wTR = tip === 'tm' && !harici ? (kva <= 630 ? 1.8 : kva <= 1250 ? 2.2 : 2.6) : 0;
-  const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', tip === 'dm' ? wAG : Math.max(wAG, 1.7)]);
+  const bol = [['OG HÜCRE', wOG]]; if (wTR) bol.push(['TRAFO', wTR]); bol.push([tip === 'dm' ? 'KUMANDA / SCADA' : 'AG PANO', tip === 'dm' ? wAG : 0.8]);   // AG pano bölmesi net 80 cm (kullanıcı ölçüsü)
   const Lmin = t * (bol.length + 1) + bol.reduce((a, b) => a + b[1], 0);
   const Lb = +v.boy > 0 ? +v.boy : 0;   // kullanıcı boyu: fazla uzunluk OG ve AG/kumanda bölmelerine paylaştırılır (trafo bölmesi sabit)
   if (Lb > Lmin) { const ek = Lb - Lmin, ix = bol.map((b, k) => (b[0] === 'TRAFO' ? -1 : k)).filter((k) => k >= 0); for (const k of ix) bol[k][1] += ek / ix.length; }
@@ -3890,7 +3891,7 @@ function tsKosk(tip, v) {
   let x = x0 + t; const hT = Math.max(0.1, W * 0.055);
   bol.forEach(([ad, w], k) => {
     if (k) o.push(bR(x - t, y0 + t, x, y1 - t, 7));
-    o.push(bT(x + w / 2, y1 - t - hT * 1.2, hT, ad, 7));
+    o.push(bT(x + w / 2, y1 - t - hT * 1.2, w < 1.2 ? hT * 0.6 : hT, w < 1.2 && ad === 'AG PANO' ? 'AG' : ad, 7));
     if (ad === 'OG HÜCRE') {
       const cw = (w - 0.3) / n;
       for (let i = 0; i < n; i++) { const cx = x + 0.15 + i * cw; o.push(bR(cx + 0.02, y1 - t - 0.85 - hT * 2.4, cx + cw - 0.02, y1 - t - hT * 2.4, 1), bT(cx + cw / 2, y1 - t - hT * 2.4 - 0.45, hT * 0.8, 'H-' + String(i + 1).padStart(2, '0'), 1)); }
@@ -3903,11 +3904,11 @@ function tsKosk(tip, v) {
     } else {
       if (tip === 'tm' && k === bol.length - 1) {
         // AG pano (kullanıcı kuralı 19.10.2026): pano binanın enine dik durur, ara duvara dayalı; kapı KISA kenarda (uç duvar), pano kapıya bakar
-        const pd = 0.6, px0 = x + 0.1, yA = y0 + t + 0.25, yB = y1 - t - 0.25;
+        const pd = 0.7, px0 = x + 0.05, yA = y0 + t + 0.25, yB = y1 - t - 0.25;   // pano eni 70 cm, ara duvara dayalı
         o.push(bR(px0, yA, px0 + pd, yB, 3), bT(px0 + pd / 2, (yA + yB) / 2, hT * 0.8, 'ADP', 3));
         adp = [px0 + pd / 2, (yA + yB) / 2];   // AC kablo bağlantı noktası: ADP
-        const xw = x + w, dw = Math.min(0.9, W - 2 * t - 0.4), yk = (y0 + y1) / 2 - dw / 2;   // uç duvar kapısı
-        o.push(bL(xw, yk, xw - dw, yk, 7), bA(xw, yk, dw, Math.PI / 2, Math.PI, 8));
+        const xo = x + w + t, dw = Math.min(0.9, W - 2 * t - 0.4), yk = (y0 + y1) / 2 - dw / 2;   // uç (kısa kenar) duvar kapısı, dışa açılır
+        o.push(bL(xo, yk, xo + dw, yk, 7), bA(xo, yk, dw, 0, Math.PI / 2, 8));
       } else {
         o.push(bR(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3), bT(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, tip === 'dm' ? 'SCADA / AKÜ' : 'ADP', 3));
         bKapi(o, x + 0.2, 0.9, y0 + t, 1);
@@ -3996,7 +3997,98 @@ function tsAcDuzelt(pts) {
   git(toL(A));
   const tem = [out[0]];   // tekrar ve doğrusal ara noktaları at
   for (let i = 1; i < out.length; i++) { const q = out[i], l = tem[tem.length - 1]; if (Math.hypot(q[0] - l[0], q[1] - l[1]) < 1e-3) continue; if (tem.length >= 2) { const k = tem[tem.length - 2]; if ((Math.abs(k[0] - l[0]) < 1e-3 && Math.abs(l[0] - q[0]) < 1e-3) || (Math.abs(k[1] - l[1]) < 1e-3 && Math.abs(l[1] - q[1]) < 1e-3)) { tem[tem.length - 1] = q; continue; } } tem.push(q); }
-  return { pts: tem.map(toW), not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP), dik açılı' };
+  // engel kaçınma (esas A.2): kablo masa, panel ve inverter altından geçmez — sıra açıklıklarından dik açılı en kısa yol
+  const ak = tsAkilliYol(P0, A, tm, iv && iv.it, toL, toW);
+  const yol = ak || tem.map(toW);
+  return { pts: yol, not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP), dik açılı' + (ak ? ', masa/inverter altından geçmeden' : ' (engelsiz yol bulunamadı — elle kontrol edin)') };
+}
+// Özellikler paneli: tasarım öğesi (ya da etiketi) seçiliyken verisi açılır listelerle değişir; etiket, blok ve özet/hesaplar güncellenir
+function tsOzellik(box, items) {
+  if (items.length !== 1) return; let it = items[0]; if (!it.ges && it.gesEt) it = S.doc.items.get(it.gesEt); if (!it || !it.ges) return;
+  const g = it.ges, T = TS[g.tip]; if (!T) return;
+  const h = document.createElement('div'); h.className = 'ph sub'; h.textContent = T.ad + ' verisi (hesaba girer)'; box.appendChild(h);
+  for (const [k, etiket, def, sec] of T.alan) {
+    const l = document.createElement('label'); l.className = 'gf'; l.textContent = etiket; let el;
+    const v0 = g[k] !== undefined ? g[k] : def();
+    if (sec) { el = document.createElement('select'); const ls = typeof sec === 'function' ? sec() : sec.slice(); if (!ls.some((o) => String(o) === String(v0))) ls.push(v0); for (const o of ls) { const op = document.createElement('option'); op.value = String(o); op.textContent = typeof o === 'number' ? fmtNum(o, o % 1 ? 1 : 0) : o; el.appendChild(op); } el.value = String(v0); }
+    else { el = document.createElement('input'); el.value = v0; }
+    el.onchange = () => {
+      const cur = S.doc.items.get(it.id); if (!cur) return; const raw = el.value, n = parseFloat(String(raw).replace(',', '.'));
+      const ng = { ...cur.ges, [k]: /^-?\d+([.,]\d+)?$/.test(raw) ? n : raw };
+      if (ng.tip === 'tm' && k === 'kva' && /0,[48] kV$/.test(ng.gerilim || '')) ng.gerilim = ng.gerilim.replace(/0,[48] kV$/, n > 2000 ? '0,8 kV' : '0,4 kV');
+      const n2 = { ...cur, ges: ng }; if (cur.t === 'insert') n2.block = tsBlok(ng.tip, ng).ad;
+      const pairs = [[cur, n2]]; for (const e of S.doc.items.values()) if (e.gesEt === cur.id) pairs.push([e, { ...e, s: tsEtiket(ng.tip, ng, cur.t === 'pline' ? tsBoy(cur.pts) : 0) }]);
+      replaceItems(pairs, 'veri'); V().sel = new Set([cur.id]); updateProps(); msg(T.ad + ': ' + etiket + ' → ' + raw + ' (özet ve hesaplar güncellendi).', 'res');
+    };
+    l.appendChild(el); box.appendChild(l);
+  }
+  if (it.t === 'pline') { const L = tsBoy(it.pts); const p = document.createElement('p'); p.className = 'gi'; p.textContent = 'Boy ' + fmtNum(L, 1) + ' m + uç payı ' + fmtNum(+g.pay || 0, 0) + ' m = ' + fmtNum(L + (+g.pay || 0), 0) + ' m'; box.appendChild(p); }
+}
+// blok sınır kutusu (yerel), önbellekli
+const _bbC = new Map();
+function tsBlokBB(ad) {
+  if (_bbC.has(ad)) return _bbC.get(ad); const b = S.doc.blocks.get(ad); if (!b) return null;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; const ek = (x, y) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); };
+  for (const e of b.ents || []) {
+    if (e.vertices) for (const v of e.vertices) ek(v.x, v.y);
+    if (e.startPoint && e.type === 'LINE') { ek(e.startPoint.x, e.startPoint.y); ek(e.endPoint.x, e.endPoint.y); }
+    if (e.center && e.radius) { ek(e.center.x - e.radius, e.center.y - e.radius); ek(e.center.x + e.radius, e.center.y + e.radius); }
+    if (e.type === 'INSERT' && e.insertionPoint) ek(e.insertionPoint.x, e.insertionPoint.y);
+  }
+  const r = isFinite(x0) ? [x0, y0, x1, y1] : null; _bbC.set(ad, r); return r;
+}
+// Izgara üzerinde dik açılı yol (dönüş cezalı Dijkstra). Engeller: masalar (GES-MASA), inverterler (başlangıç hariç), trafo binası (ADP çevresi hariç).
+function tsAkilliYol(P0, A, tm, invIt, toL, toW) {
+  const engel = [];
+  for (const it of S.doc.items.values()) {
+    if (it.t !== 'insert' || it === invIt) continue;
+    const masa = it.layer === 'GES-MASA', inv = it.ges && it.ges.tip === 'inv', bina = it === tm || (it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm'));
+    if (!masa && !inv && !bina) continue;
+    const bb = tsBlokBB(it.block); if (!bb) continue; const M = it.M;
+    const W = [[bb[0], bb[1]], [bb[2], bb[1]], [bb[2], bb[3]], [bb[0], bb[3]]].map(([x, y]) => toL([M[0] * x + M[1] * y + M[3], M[4] * x + M[5] * y + M[7]]));
+    engel.push({ r: [Math.min(...W.map((q) => q[0])), Math.min(...W.map((q) => q[1])), Math.max(...W.map((q) => q[0])), Math.max(...W.map((q) => q[1]))], bina: it === tm });
+  }
+  const a = toL(P0), b = toL(A);
+  const xs = [a[0], b[0]], ys = [a[1], b[1]]; for (const e of engel) { xs.push(e.r[0], e.r[2]); ys.push(e.r[1], e.r[3]); }
+  // arama alanı: iki uç + 60 m pay (çok büyük sahada tüm engeller değil, ilgili bölge)
+  const X0 = Math.max(Math.min(...xs), Math.min(a[0], b[0]) - 60), X1 = Math.min(Math.max(...xs), Math.max(a[0], b[0]) + 60) + 3;
+  const Y0 = Math.max(Math.min(...ys), Math.min(a[1], b[1]) - 60), Y1 = Math.min(Math.max(...ys), Math.max(a[1], b[1]) + 60) + 3;
+  const h = Math.max(0.25, Math.max(X1 - X0, Y1 - Y0) / 600), nx = Math.ceil((X1 - X0 + 6) / h) + 1, ny = Math.ceil((Y1 - Y0 + 6) / h) + 1, ox = X0 - 3, oy = Y0 - 3;
+  if (nx * ny > 600000) return null;
+  const blk = new Uint8Array(nx * ny); const pay = 0.1;
+  for (const e of engel) {
+    const i0 = Math.max(0, Math.floor((e.r[0] - pay - ox) / h)), i1 = Math.min(nx - 1, Math.ceil((e.r[2] + pay - ox) / h)), j0 = Math.max(0, Math.floor((e.r[1] - pay - oy) / h)), j1 = Math.min(ny - 1, Math.ceil((e.r[3] + pay - oy) / h));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) blk[j * nx + i] = 1;
+  }
+  const ci = (p) => [Math.min(nx - 1, Math.max(0, Math.round((p[0] - ox) / h))), Math.min(ny - 1, Math.max(0, Math.round((p[1] - oy) / h)))];
+  const [si, sj] = ci(a), [gi, gj] = ci(b);
+  const ac = (i, j, r) => { for (let y = Math.max(0, j - r); y <= Math.min(ny - 1, j + r); y++) for (let x = Math.max(0, i - r); x <= Math.min(nx - 1, i + r); x++) blk[y * nx + x] = 0; };
+  ac(si, sj, Math.ceil(0.9 / h)); ac(gi, gj, Math.ceil(1.6 / h));   // inverter çıkışı ve ADP çevresi
+  const N = nx * ny, D = [[1, 0], [0, 1], [-1, 0], [0, -1]], INF = 1e18, dist = new Float64Array(N * 4).fill(INF), prev = new Int32Array(N * 4).fill(-1), turnC = 6;
+  const heap = []; const push = (k, d) => { heap.push([d, k]); let i = heap.length - 1; while (i) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+  const pop = () => { const t = heap[0], l = heap.pop(); if (heap.length) { heap[0] = l; let i = 0; for (;;) { const a1 = 2 * i + 1, b1 = a1 + 1; let m = i; if (a1 < heap.length && heap[a1][0] < heap[m][0]) m = a1; if (b1 < heap.length && heap[b1][0] < heap[m][0]) m = b1; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return t; };
+  const s0 = sj * nx + si; for (let d = 0; d < 4; d++) { dist[s0 * 4 + d] = 0; push(s0 * 4 + d, 0); }
+  const goal = gj * nx + gi; let son = -1, it2 = 0;
+  while (heap.length && it2++ < 3e6) {
+    const [dd, k] = pop(); if (dd > dist[k]) continue; const c = k >> 2, dir = k & 3; if (c === goal) { son = k; break; }
+    const ci2 = c % nx, cj = (c - ci2) / nx;
+    for (let nd = 0; nd < 4; nd++) {
+      if ((nd + 2) % 4 === dir) continue; const ni = ci2 + D[nd][0], nj = cj + D[nd][1]; if (ni < 0 || nj < 0 || ni >= nx || nj >= ny) continue;
+      const nc = nj * nx + ni; if (blk[nc]) continue; const nk = nc * 4 + nd, nd2 = dd + h + (nd !== dir ? turnC : 0);
+      if (nd2 < dist[nk]) { dist[nk] = nd2; prev[nk] = k; push(nk, nd2); }
+    }
+  }
+  if (son < 0) return null;
+  const hucre = []; for (let k = son; k >= 0; k = prev[k]) hucre.push(k >> 2); hucre.reverse();
+  const loc = hucre.map((c) => [ox + (c % nx) * h, oy + Math.floor(c / nx) * h]);
+  // köşeler: yön değişen noktalar; uçlar gerçek inverter ve ADP noktasına dik bağlanır
+  const kose = [a]; let l = a;
+  const ekle = (q) => { const dx = q[0] - l[0], dy = q[1] - l[1]; if (Math.abs(dx) > 1e-6 && Math.abs(dy) > 1e-6) kose.push(Math.abs(dx) < Math.abs(dy) ? [q[0], l[1]] : [l[0], q[1]]); kose.push(q); l = q; };
+  for (let i = 1; i < loc.length - 1; i++) { const p0 = loc[i - 1], p1 = loc[i], p2 = loc[i + 1]; if ((p1[0] - p0[0]) * (p2[1] - p1[1]) - (p1[1] - p0[1]) * (p2[0] - p1[0]) !== 0) ekle(p1); }
+  ekle(b);
+  const tem = [kose[0]];
+  for (let i = 1; i < kose.length; i++) { const q = kose[i], z = tem[tem.length - 1]; if (Math.hypot(q[0] - z[0], q[1] - z[1]) < 1e-3) continue; if (tem.length >= 2) { const k = tem[tem.length - 2]; if ((Math.abs(k[0] - z[0]) < 1e-3 && Math.abs(z[0] - q[0]) < 1e-3) || (Math.abs(k[1] - z[1]) < 1e-3 && Math.abs(z[1] - q[1]) < 1e-3)) { tem[tem.length - 1] = q; continue; } } tem.push(q); }
+  return tem.map(toW);
 }
 CMD.GKDUZ = async () => {   // mevcut tüm AC kabloları nizami güzergâha getir
   const pairs = []; let n = 0;
@@ -4061,7 +4153,7 @@ CMD.GVERI = async () => {
     if (it && !it.ges && it.gesEt) it = S.doc.items.get(it.gesEt);
     if (!it || !it.ges) { msg('Tasarım öğesi değil (İnverter, Trafo, DM ya da kablo seçin).', 'err'); continue; }
     const g = it.ges, T = TS[g.tip]; const v = await formDlg(T.ad + ' verisi', T.alan, g); if (!v) continue;
-    const ng = { ...g, ...v }; if (ng.tip === 'tm' && !ng.gerilim) ng.gerilim = (+ng.kva || 0) > 2000 ? '33/0,8 kV' : '33/0,4 kV'; const n2 = { ...it, ges: ng }; if (it.t === 'insert') { const B = tsBlok(g.tip, ng, it.id); n2.block = B.ad; } const pairs = [[it, n2]];
+    const ng = { ...g, ...v }; if (ng.tip === 'tm' && !ng.gerilim) ng.gerilim = (+ng.kva || 0) > 2000 ? '33/0,8 kV' : '33/0,4 kV'; const n2 = { ...it, ges: ng }; if (it.t === 'insert') { const B = tsBlok(g.tip, ng); n2.block = B.ad; } const pairs = [[it, n2]];
     for (const e of S.doc.items.values()) if (e.gesEt === it.id) pairs.push([e, { ...e, s: tsEtiket(g.tip, ng, it.t === 'pline' ? tsBoy(it.pts) : 0) }]);
     replaceItems(pairs, 'veri'); msg(tsEtiket(g.tip, ng, it.t === 'pline' ? tsBoy(it.pts) : 0) + ' güncellendi.', 'res');
   }

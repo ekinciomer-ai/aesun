@@ -750,6 +750,7 @@ function updateProps() {
       row('Yükseklik', hi);
     }
   }
+  if (typeof tsOzellik === 'function') tsOzellik(box, items);
 }
 function updateStatus() {
   const w = S.mw; $('#coords').textContent = 'X ' + fmtNum(w[0], 3) + '   Y ' + fmtNum(w[1], 3);

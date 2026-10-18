@@ -14,7 +14,7 @@ function mainTpl() {
 }
 function pjMasaList() {
   const sel = gv('p-masa'); if (!sel) return; const cur = sel.value; sel.innerHTML = '';
-  G.tpl.forEach((t, i) => { const o = document.createElement('option'); o.value = i; o.textContent = t.rows + t.orient + t.per + ' · ' + t.tilt + '°' + (t.rows * t.per === 26 ? ' (TİP-1)' : ''); sel.appendChild(o); });
+  G.tpl.forEach((t, i) => { const o = document.createElement('option'); o.value = i; o.textContent = t.rows + t.orient + t.per + ' · ' + t.tilt + '° · ' + t.rows * t.per + ' panel' + (t.orient === 'V' && t.rows === 2 && t.per === 13 && t.tilt === 25 ? ' (TİP-1)' : ''); sel.appendChild(o); });
   const def = G.tpl.findIndex((t) => t.rows === 2 && t.per === 13 && t.orient === 'V');
   sel.value = cur !== '' && G.tpl[cur] ? cur : String(def >= 0 ? def : 0);
 }

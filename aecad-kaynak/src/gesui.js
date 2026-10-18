@@ -1,12 +1,17 @@
 // ---- GES panel UI ----
 const GKEY = 'aksaraycad.ges.v1';
-function gesSave() { try { localStorage.setItem(GKEY, JSON.stringify({ panel: G.panel, tpl: G.tpl, set: gesSettings() })); } catch (e) { /* storage unavailable */ } }
+// Standart masa kütüphanesi (proje masası listesi). TİP-1 varsayılan; diğerleri listede seçilebilir, arazi doldurmada kapalı gelir.
+const TPL_STD = [['V', 2, 13, 25], ['V', 2, 13, 20], ['V', 2, 12, 25], ['V', 2, 14, 25], ['V', 2, 26, 25], ['V', 2, 28, 25], ['V', 1, 26, 25], ['V', 1, 28, 25], ['V', 3, 13, 25], ['H', 4, 13, 25], ['H', 3, 20, 25]];
+const TPL_STD_V = 1;
+function tplStdMerge() {
+  for (const [o, r, n, a] of TPL_STD) if (!G.tpl.some((t) => t.orient === o && t.rows === r && t.per === n && t.tilt === a)) G.tpl.push({ orient: o, rows: r, per: n, tilt: a, gx: 0.02, gy: 0.02, front: 0.8, use: G.tpl.length === 0 });
+  G._stdv = TPL_STD_V;
+}
+function gesSave() { try { localStorage.setItem(GKEY, JSON.stringify({ panel: G.panel, tpl: G.tpl, set: gesSettings(), stdv: G._stdv || 0 })); } catch (e) { /* storage unavailable */ } }
 function gesLoad() {
-  try { const s = JSON.parse(localStorage.getItem(GKEY) || 'null'); if (s && s.panel) { G.panel = s.panel; G.tpl = s.tpl || []; G._set = s.set || null; } } catch (e) { /* ignore */ }
-  if (!G.tpl.length) G.tpl = [
-    { orient: 'V', rows: 2, per: 13, tilt: 25, gx: 0.02, gy: 0.02, front: 0.8, use: true },   // TİP-1 (esas §3)
-    { orient: 'V', rows: 2, per: 26, tilt: 25, gx: 0.02, gy: 0.02, front: 0.8, use: false },
-  ];
+  let stdv = 0;
+  try { const s = JSON.parse(localStorage.getItem(GKEY) || 'null'); if (s && s.panel) { G.panel = s.panel; G.tpl = s.tpl || []; G._set = s.set || null; stdv = s.stdv || 0; } } catch (e) { /* ignore */ }
+  if (stdv < TPL_STD_V) tplStdMerge(); else G._stdv = stdv;   // bir kez eklenir; kullanıcının sildiği şablon geri gelmez
 }
 const gv = (id) => document.getElementById(id);
 const gnum = (id, d = 0) => { const v = parseFloat(String(gv(id).value).replace(',', '.')); return isFinite(v) ? v : d; };

@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ortak import AESUN, TR, gh, log                        # noqa: E402
+from ortak import AESUN, TR, gh, log, anlik_yaz, hash_duzelt  # noqa: E402
 import madenci as M                                          # noqa: E402
 
 AYAR_DIR = AESUN / "yedek/ayar"
@@ -106,7 +106,7 @@ def hash_kaydet(mad, kim, simdi):
             continue
         w = kimlik_bul(d, kim) or ip2w.get(d.get("ip"))
         if w:
-            deger[w] = 0 if d.get("sleeping") else round(float(d.get("hashrate_TH") or 0), 1)
+            deger[w] = 0 if d.get("sleeping") else round(float(hash_duzelt(w, d.get("hashrate_TH") or 0, simdi)), 1)
     if not deger:
         return
     gun, i = ts.strftime("%Y-%m-%d"), (ts.hour * 60 + ts.minute) // HASH_ADIM
@@ -281,6 +281,15 @@ def main():
             veri["bekci"] = bekci.calis([o for o in sonuc if o.get("ip") != hr_ip], mad, kim)
         except Exception as e:
             log("bekçi hatası:", e); veri["bekci"] = {"hata": str(e)[:200]}
+    hiz = {}
+    for o in sonuc:                     # anlık hız (TH/s): hash kayıtları ortalama yerine bununla düzeltilir
+        if not o.get("worker") or o.get("uyku"):
+            continue
+        kartlar = o.get("kart") or []
+        if o.get("hiz") is not None or kartlar:
+            v = max(float(o.get("hiz") or 0), sum(float(k.get("hiz") or 0) for k in kartlar))
+            hiz[o["worker"]] = round(v / (1000 if (o.get("birim") or "GH/s").upper().startswith("GH") else 1), 1)
+    anlik_yaz(hiz, simdi)
     _, sha = gh(DOSYA)
     gh(DOSYA, veri, sha, "Cihaz detay " + simdi.strftime("%H:%M"))
     try:

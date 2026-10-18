@@ -93,3 +93,30 @@ def bildirim_tetikle(aralik_dk=15):
     AESUN.mkdir(parents=True, exist_ok=True)
     durum.write_text(json.dumps({"t": simdi}))
     return True
+
+
+# 19 Eki: toplayıcının hashrate_TH'si açılıştan beri ORTALAMADIR; kartlar durunca saatlerce >0 kalır
+# (18 Eki 02:17 güç kaynağı hatası: 28 cihaz 6 saat hash 0 iken panel "çalışıyor" gösterdi).
+# cihaz_detay her 5 dk anlık hızı (rate_5s/kart) buraya yazar; hash kayıtları bununla düzeltilir.
+ANLIK = AESUN / "cihaz_anlik.json"
+
+
+def anlik_yaz(hizlar, simdi):
+    try:
+        ANLIK.write_text(json.dumps({"t": simdi.isoformat(timespec="seconds"), "c": hizlar}))
+    except Exception:
+        pass
+
+
+def hash_duzelt(worker, th, simdi=None):
+    """Anlık hız 15 dk içinde ölçülmüş ve 0 ise (kartlar durmuş) 0 döner; aksi halde toplayıcının değeri."""
+    if not worker or not th:
+        return th
+    try:
+        a = json.loads(ANLIK.read_text())
+        if abs(((simdi or datetime.now(TR)) - datetime.fromisoformat(a["t"])).total_seconds()) > 900:
+            return th
+        v = a["c"].get(str(worker))
+        return 0.0 if v is not None and v <= 0 else th
+    except Exception:
+        return th

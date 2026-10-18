@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ortak import AESUN, TOK, TR, gh, log, zaman  # noqa: E402
+from ortak import AESUN, TOK, TR, gh, log, zaman, hash_duzelt  # noqa: E402
 
 IZ = AESUN / "cihaz_iz"
 YEREL = AESUN / "cihaz_ogrenme_yerel.json"
@@ -48,7 +48,8 @@ def ornek_al():
         return False
     c = []
     for d in mad.get("devices") or []:
-        c.append([d.get("suffix"), 1 if d.get("online") else 0, 1 if d.get("sleeping") else 0, d.get("hashrate_TH"),
+        c.append([d.get("suffix"), 1 if d.get("online") else 0, 1 if d.get("sleeping") else 0,
+                  hash_duzelt(str(d.get("actual_worker") or d.get("f2pool_name") or "").split(".")[-1], d.get("hashrate_TH")),
                   d.get("temp_water"), d.get("temp_max"), d.get("elapsed_hours"), d.get("status"),
                   d.get("actual_worker") or d.get("f2pool_name"), d.get("target_hashrate_TH")])
     ts = zaman(mad["timestamp"])

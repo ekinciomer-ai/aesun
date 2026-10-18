@@ -93,11 +93,12 @@ function tplDims(tp) {
   const depth = slant * Math.cos(tp.tilt * D2R), rise = slant * Math.sin(tp.tilt * D2R);
   return { pw, pl, len, slant, depth, rise, back: tp.front + rise, n: tp.rows * tp.per, kwp: tp.rows * tp.per * P.p / 1000 };
 }
-const LEG_IN = 0.40, LEG_MAX = 2.40;
+const LEG_IN = 0.40, LEG_MAX = 2.40, KG_AYAK_MAX = 2.50;   // K-G ön–arka ayak arası en çok 2,50 m (kullanıcı kuralı)
+function kgAyak(tp) { const d = tplDims(tp), c = Math.cos(tp.tilt * D2R); return Math.max(0.5, Math.min(KG_AYAK_MAX, d.depth - 2 * LEG_IN * c)); }
 function legLayout(tp) {
   const d = tplDims(tp), c = Math.cos(tp.tilt * D2R); const span = Math.max(0, d.len - 2 * LEG_IN);
   const n = Math.max(1, Math.ceil(span / LEG_MAX - 1e-9)); const xs = []; for (let i = 0; i <= n; i++) xs.push(LEG_IN + span * i / n);
-  const ys = [LEG_IN * c, d.depth - LEG_IN * c]; const out = []; for (const y of ys) for (const x of xs) out.push([x, y]); return out;
+  const ks = kgAyak(tp), ys = [(d.depth - ks) / 2, (d.depth + ks) / 2]; const out = []; for (const y of ys) for (const x of xs) out.push([x, y]); return out;
 }
 function tplName(tp) { return 'MASA_' + tp.rows + tp.orient + tp.per + '_' + tp.tilt + 'D_' + G.panel.p + 'W'; }
 function makeTableBlock(tp) {
@@ -121,8 +122,9 @@ function sectionItems(tp, at) {
   it.push(mk('pline', { cl: true, pts: [[fx, fy, 0], [bx, by, 0], [bx + nx, by + ny, 0], [fx + nx, fy + ny, 0]], c: 5 }));
   // module joints
   for (let r = 1; r < tp.rows; r++) { const s = r * (d.pl + tp.gy) - tp.gy / 2; const px = fx + s * Math.cos(t), py = fy + s * Math.sin(t); it.push(mk('line', { x1: px, y1: py, x2: px + nx, y2: py + ny, c: 5 })); }
-  // posts at 18% and 82%
-  for (const f of [LEG_IN / d.slant, 1 - LEG_IN / d.slant]) { const px = fx + d.depth * f, py = fy + d.rise * f; it.push(mk('line', { x1: px, y1: y0 - 1.2, x2: px, y2: py, c: 2 })); it.push(mk('line', { x1: px - 0.12, y1: y0, x2: px + 0.12, y2: y0, c: 2 })); }
+  // ön–arka ayak: K-G arası kgAyak (≤ 2,50 m), masa ortasına göre simetrik
+  const ksf = kgAyak(tp) / d.depth / 2;
+  for (const f of [0.5 - ksf, 0.5 + ksf]) { const px = fx + d.depth * f, py = fy + d.rise * f; it.push(mk('line', { x1: px, y1: y0 - 1.2, x2: px, y2: py, c: 2 })); it.push(mk('line', { x1: px - 0.12, y1: y0, x2: px + 0.12, y2: y0, c: 2 })); }
   // dims
   const h = Math.max(0.12, d.slant / 18);
   it.push(mk('dim', { x1: fx, y1: y0, x2: fx, y2: fy, lx: fx - 0.9, ly: 0, ang: Math.PI / 2, h, txt: fmtNum(tp.front, 2) }));

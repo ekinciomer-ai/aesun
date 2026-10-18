@@ -59,7 +59,7 @@ VARSAYILAN = {
             "voc_sicaklik_katsayi_pct": None, "tmin_c": -25},
   "masa": {"tip": "2V13", "sira_sayisi": 2, "sira_modul": 13, "modul_boslugu_mm": 20, "uc_payi_mm": 80, "egim_derece": 25,
            "alt_kenar_m": 0.80, "masa_arasi_m": 0.50, "pitch_m": 8.70, "sira_acikligi_m": None, "azimut_derece": 0,
-           "aks_sayisi": 7, "aks_araligi_m": 2.60, "kolon_sira_araligi_m": 2.65,
+           "aks_sayisi": 7, "aks_araligi_m": 2.60, "kolon_sira_araligi_m": 2.50,
            "parca_carpani": {"kolon": 14, "kiris": 7, "asik": 12, "ruzgarlik": 12, "payanda": 7, "capraz": 12,
                               "orta_klemp": 48, "kenar_klemp": 8, "m12_civata": 140}},
   "elektrik": {"string_modul": 26, "inverter_tr": 19, "string_inverter_max": 20, "inverter_ac_kw": None,
@@ -133,6 +133,8 @@ def birlestir(a, b):
 
 
 # ----------------------------------------------------------------- PRIMITIVE KAYIT
+KG_AYAK_MAX = 2.50   # K-G ön–arka ayak arası üst sınırı (m), kullanıcı kuralı
+
 class Pafta:
     def __init__(self, kod, ad, olcekli=True):
         self.kod, self.ad, self.olcekli = kod, ad, olcekli
@@ -185,6 +187,10 @@ class Model:
         self.uyari = []
         self.kontrol = []
         m, e, mod = P["masa"], P["elektrik"], P["modul"]
+        # kullanıcı kuralı (19.10.2026): K-G ön–arka ayak (kolon sırası) arası en çok 2,50 m
+        if (m.get("kolon_sira_araligi_m") or 0) > KG_AYAK_MAX:
+            self.uyari.append(f"K-G ayak arası {m['kolon_sira_araligi_m']:.2f} m verildi; en çok {KG_AYAK_MAX:.2f} m olabilir, {KG_AYAK_MAX:.2f} m alındı.")
+            m["kolon_sira_araligi_m"] = KG_AYAK_MAX
         self.masa_L = (m["sira_modul"] * mod["en_mm"] + (m["sira_modul"] - 1) * m["modul_boslugu_mm"] + 2 * m.get("uc_payi_mm", 0)) / 1000.0
         self.masa_egik = (m["sira_sayisi"] * mod["boy_mm"] + (m["sira_sayisi"] - 1) * m["modul_boslugu_mm"]) / 1000.0
         a = math.radians(m["egim_derece"])
@@ -2624,7 +2630,7 @@ def aplikasyon_csv(M, yol):
             x0, y0, x1, y1 = ms["loc"].bounds
             for i in range(n):
                 x = x0 + kons + i * a
-                ks = m.get("kolon_sira_araligi_m", 2.65); yo = y0 + (y1 - y0 - ks) / 2
+                ks = min(m.get("kolon_sira_araligi_m") or KG_AYAK_MAX, KG_AYAK_MAX, y1 - y0); yo = y0 + (y1 - y0 - ks) / 2
                 for kn, yy in (("ON", yo), ("ARKA", yo + ks)):
                     X, Y = M.Wp(x, yy)
                     w.writerow([f"M{ms['no']}-A{i+1}-{kn}", ms["no"], "|".join(ms.get("str", [])), i + 1, kn, f"{X:.3f}", f"{Y:.3f}"])

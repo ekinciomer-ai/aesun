@@ -2729,11 +2729,12 @@ function tplDims(tp) {
   const depth = slant * Math.cos(tp.tilt * D2R), rise = slant * Math.sin(tp.tilt * D2R);
   return { pw, pl, len, slant, depth, rise, back: tp.front + rise, n: tp.rows * tp.per, kwp: tp.rows * tp.per * P.p / 1000 };
 }
-const LEG_IN = 0.40, LEG_MAX = 2.40;
+const LEG_IN = 0.40, LEG_MAX = 2.40, KG_AYAK_MAX = 2.50;   // K-G ön–arka ayak arası en çok 2,50 m (kullanıcı kuralı)
+function kgAyak(tp) { const d = tplDims(tp), c = Math.cos(tp.tilt * D2R); return Math.max(0.5, Math.min(KG_AYAK_MAX, d.depth - 2 * LEG_IN * c)); }
 function legLayout(tp) {
   const d = tplDims(tp), c = Math.cos(tp.tilt * D2R); const span = Math.max(0, d.len - 2 * LEG_IN);
   const n = Math.max(1, Math.ceil(span / LEG_MAX - 1e-9)); const xs = []; for (let i = 0; i <= n; i++) xs.push(LEG_IN + span * i / n);
-  const ys = [LEG_IN * c, d.depth - LEG_IN * c]; const out = []; for (const y of ys) for (const x of xs) out.push([x, y]); return out;
+  const ks = kgAyak(tp), ys = [(d.depth - ks) / 2, (d.depth + ks) / 2]; const out = []; for (const y of ys) for (const x of xs) out.push([x, y]); return out;
 }
 function tplName(tp) { return 'MASA_' + tp.rows + tp.orient + tp.per + '_' + tp.tilt + 'D_' + G.panel.p + 'W'; }
 function makeTableBlock(tp) {
@@ -2757,8 +2758,9 @@ function sectionItems(tp, at) {
   it.push(mk('pline', { cl: true, pts: [[fx, fy, 0], [bx, by, 0], [bx + nx, by + ny, 0], [fx + nx, fy + ny, 0]], c: 5 }));
   // module joints
   for (let r = 1; r < tp.rows; r++) { const s = r * (d.pl + tp.gy) - tp.gy / 2; const px = fx + s * Math.cos(t), py = fy + s * Math.sin(t); it.push(mk('line', { x1: px, y1: py, x2: px + nx, y2: py + ny, c: 5 })); }
-  // posts at 18% and 82%
-  for (const f of [LEG_IN / d.slant, 1 - LEG_IN / d.slant]) { const px = fx + d.depth * f, py = fy + d.rise * f; it.push(mk('line', { x1: px, y1: y0 - 1.2, x2: px, y2: py, c: 2 })); it.push(mk('line', { x1: px - 0.12, y1: y0, x2: px + 0.12, y2: y0, c: 2 })); }
+  // ön–arka ayak: K-G arası kgAyak (≤ 2,50 m), masa ortasına göre simetrik
+  const ksf = kgAyak(tp) / d.depth / 2;
+  for (const f of [0.5 - ksf, 0.5 + ksf]) { const px = fx + d.depth * f, py = fy + d.rise * f; it.push(mk('line', { x1: px, y1: y0 - 1.2, x2: px, y2: py, c: 2 })); it.push(mk('line', { x1: px - 0.12, y1: y0, x2: px + 0.12, y2: y0, c: 2 })); }
   // dims
   const h = Math.max(0.12, d.slant / 18);
   it.push(mk('dim', { x1: fx, y1: y0, x2: fx, y2: fy, lx: fx - 0.9, ly: 0, ang: Math.PI / 2, h, txt: fmtNum(tp.front, 2) }));
@@ -3266,7 +3268,7 @@ function pjAutoHints() {
       invSat = 'İNVERTER ≈ ' + nInv + ' × ' + fmtNum(a.invKw, 0) + ' kW = ' + fmtNum(ac, 0) + ' kW AC · DC ' + fmtNum(dc, 0) + ' kWp · ' + nTr + ' × ' + a.kva + ' kVA trafo (' + (hedefKwp() ? 'hedef güçten' : 'arazi doldurmadan') + ' tahmin; kesin adet yerleşimde) · '; }
     else invSat = 'İNVERTER: hedef güç girin ya da araziyi doldurun, adet × güç burada çıkar · ';
   }
-  gv('p-auto').textContent = invSat + (spm > 1 ? '⚠ Seçili masada ' + spm + ' string var; GES-ÇİZ TİP-1 (1 masa = 1 string, 2V13) için kurgulanmıştır, inverter ve trafo sayısı şişebilir. · ' : '') + 'String ' + a.strMod + ' modül (' + fmtNum(a.strKwp, 2) + ' kWp) · inverter başına ≤ ' + a.strInv + ' string → DC/AC ≈ ' + fmtNum(a.strInv * a.strKwp / a.invKw, 2) + ' · trafo başına ≤ ' + a.invTr + ' inverter (' + fmtNum(a.invTr * a.invKw / a.kva * 100, 0) + ' % yük) · ' + (a.maxMasa ? 'hedef ' + fmtNum(hedefKwp(), 0) + ' kWp → en çok ' + a.maxMasa + ' masa (' + fmtNum(a.maxMasa * a.masaKwp, 0) + ' kWp)' : 'arazinin tamamı') + ' · ayak ' + a.aks + ' aks × ' + fmtNum(a.aksA, 2) + ' m';
+  gv('p-auto').textContent = invSat + (spm > 1 ? '⚠ Seçili masada ' + spm + ' string var; GES-ÇİZ TİP-1 (1 masa = 1 string, 2V13) için kurgulanmıştır, inverter ve trafo sayısı şişebilir. · ' : '') + 'String ' + a.strMod + ' modül (' + fmtNum(a.strKwp, 2) + ' kWp) · inverter başına ≤ ' + a.strInv + ' string → DC/AC ≈ ' + fmtNum(a.strInv * a.strKwp / a.invKw, 2) + ' · trafo başına ≤ ' + a.invTr + ' inverter (' + fmtNum(a.invTr * a.invKw / a.kva * 100, 0) + ' % yük) · ' + (a.maxMasa ? 'hedef ' + fmtNum(hedefKwp(), 0) + ' kWp → en çok ' + a.maxMasa + ' masa (' + fmtNum(a.maxMasa * a.masaKwp, 0) + ' kWp)' : 'arazinin tamamı') + ' · ayak ' + a.aks + ' aks × ' + fmtNum(a.aksA, 2) + ' m, K-G ' + fmtNum(kgAyak(a.tp), 2) + ' m (≤ 2,50)';
 }
 function buildParam() { return pjDuzenUygula(buildParam0()); }
 function buildParam0() {
@@ -3281,14 +3283,14 @@ function buildParam0() {
     proje: { kod: pv('p-kod') || 'AECAD', isin_adi: pv('p-ad') || 'GES Projesi', proje_sahibi: pv('p-yat') || '', yatirimci: pv('p-yat') || '', il_ilce_ada_parsel: pv('p-yer') || '', cizen: 'AeCAD · GES-ÇİZ', revizyon: pv('p-rev') || 'R00', seviye: pv('p-sev') || 'teklif', enlem: gnum('g-lat', 39), tesis_tipi: pv('p-tip') || 'lisanssiz', muellif: pv('p-mue') || '', muellif_unvan: 'Elektrik Mühendisi' },
     parsel: { koordinat: (G.parcels && G.parcels.length > 1) ? G.parcels.map((q) => q.pts.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)])) : G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: G.boundCrs || (fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)'), cekme_mesafesi_m: pn('p-cekme') ?? 5, cepheler: cepheParam(), max_masa: a.maxMasa, hedef_masa: null },
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
-    masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, parca_carpani: statikVar ? undefined : pc },
+    masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, kolon_sira_araligi_m: +kgAyak(tp).toFixed(3), parca_carpani: statikVar ? undefined : pc },
     yol: { ic_yol: (pv('p-icyol') || '1') === '1', ic_genislik_m: pn('p-icw') ?? 5, ic_aralik_m: pn('p-icar') },
     elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), inverter_adet: pn('p-invn'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
   };
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190246', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190249', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }

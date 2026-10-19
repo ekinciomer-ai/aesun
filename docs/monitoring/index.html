@@ -3570,6 +3570,94 @@ function thFsInv(dn, v, ort) {
   satir.push((v.sicaklik_c != null ? say(v.sicaklik_c, 1) + ' °C' : '') + (dc > 0.1 ? ' · DC ' + say(dc, 1) + ' kW' : '') + (v.ia == null && !(v.durum) ? '' : (kapali ? ' · ' + esc(v.durum || '') : '')));
   return { tik: "invDetayAc('fusionsolar','" + esc(v.tesis) + "','" + esc(dn) + "')", ad: v.ad, kw, ust: say(kw, 1) + ' kW', satir, renk: kapali ? (kw > 0 ? TH_R.kirmizi : TH_R.gri) : ort > 2 && kw < ort * 0.8 ? TH_R.sari : TH_R.yesil, pv, bos };
 }
+// ===== Madencilik kabinleri (antrak): canlı SCADA görünümü. Kabin dağılımı 19 Eki saha notu; mavi soğuk su pompadan cihaza, kırmızı sıcak su dönüş
+const KABIN = { 1: [23, 2, 3], 2: [17, 5, 7, 8], 3: [29, 28, 26, 11], 4: [1, 12, 10, 9], 5: [], 6: [6, 14, 15, 16], 7: [21, 22, 24, 25], 8: [18, 19, 20], 9: [4, 27, 13] };
+const KABIN_NOT = { 5: 'pompa arızalı' };
+const KB_MODEL_W = { 'S21e Hyd': 5300, 'S19 XP+ Hyd': 5300, 'S19e XP Hyd': 5830 };
+function kabinCss() {
+  if (document.getElementById('kabinCss')) return;
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap'; document.head.appendChild(l);
+  const st = document.createElement('style'); st.id = 'kabinCss';
+  st.textContent = '.kb text{fill:#10233F}.kb .sm{font-size:11px;fill:#4A5A70}.kb .kt{font-size:15px;font-weight:700}.kb .cn{font-size:14px;font-weight:700}'
+    + '.kb .ip,.kb .el,.kb .ft,.kb .tmp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px}.kb .ip{fill:#4A5A70}.kb .el{font-weight:600}.kb .tmp{fill:#C62828;font-weight:600}.kb .ft{font-weight:600}'
+    + '.kb .ln{stroke:#10233F;stroke-width:1.6;fill:none}.kb .ln.bos{stroke:#A9B3BC;stroke-dasharray:5 4}.kb .bus{stroke:#B42318;stroke-width:5;stroke-linecap:round}'
+    + '.kb .brk{fill:#fff;stroke:#10233F;stroke-width:1.6}.kb .brk.bos{stroke:#A9B3BC}'
+    + '.kb .pmp circle{fill:#fff;stroke:#1E8FD6;stroke-width:1.8}.kb .pmp path{fill:none;stroke:#1E8FD6;stroke-width:1.8}.kb .pmp.bos circle,.kb .pmp.bos path{stroke:#B42318;stroke-dasharray:3 2}'
+    + '.kb .pmp.on .cark{transform-box:fill-box;transform-origin:50% 60%;animation:kbDon 1.2s linear infinite}'
+    + '.kb .kab{fill:#EEF3F7;stroke:#1E8FD6;stroke-width:1.4}.kb .kab.bos{fill:none;stroke:#A9B3BC;stroke-dasharray:6 4}'
+    + '.kb .cih{fill:#fff;stroke:#C3CDD8}.kb .cih.alt{fill:#FFF3DF}.kb .bostx{font-size:22px;font-weight:700;fill:#A9B3BC;letter-spacing:.2em}'
+    + '.kb .boru{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.kb .zemin{opacity:.28}.kb .sog{stroke:#1E8FD6}.kb .sic{stroke:#D62F2F}'
+    + '.kb .akis{stroke-width:2.6;stroke-dasharray:7 9;animation:kbAkis .9s linear infinite}.kb .dur .akis{animation:none;stroke-dasharray:none;opacity:.5}.kb .bosb{stroke:#A9B3BC;stroke-width:2;stroke-dasharray:3 5}'
+    + '.kb .led.on{fill:#1FA463;animation:kbYan 1.6s ease-in-out infinite}.kb .led.uy{fill:#2a78d6}.kb .led.off{fill:#D92D20}'
+    + '.kb .sc-dis{fill:#3A4248}.kb .sc-ic{fill:#0C1712}.kb .sc-ad{font-family:ui-monospace,monospace;font-size:9px;fill:#7F9A8A;letter-spacing:.08em}'
+    + '.kb .sc-p,.kb .sc-i,.kb .sc-u{font-family:"Share Tech Mono",ui-monospace,monospace}.kb .sc-p{font-size:19px;fill:#FFB02E;filter:drop-shadow(0 0 3px #FFB02E)}.kb .sc-i{font-size:19px;fill:#5CF08F;filter:drop-shadow(0 0 3px #5CF08F)}.kb .sc-u{font-size:11px;fill:#7F9A8A}'
+    + '.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
+    + '@keyframes kbAkis{to{stroke-dashoffset:-16}}@keyframes kbDon{to{transform:rotate(360deg)}}@keyframes kbYan{50%{opacity:.35}}'
+    + '@media (prefers-reduced-motion:reduce){.kb .akis,.kb .cark,.kb .led{animation:none!important}}';
+  document.head.appendChild(st);
+}
+async function kabinSema() {
+  kabinCss();
+  let det = null; try { det = await al('n8n/cihaz_detay.json'); } catch (e) {}
+  const DC = (det && det.cihaz) || {}, kim = D.kim || {}, md = {};
+  for (const d of (D.mad && D.mad.devices) || []) { const no = String(d.actual_worker || '').split('.').pop(); if (no) md[no.padStart(3, '0')] = d; }
+  const V = 400, PF = 0.99, r3 = Math.sqrt(3), f = (x, n) => Number(x).toFixed(n);
+  const CW = 164, GAP = 30, X0 = 40, DH = 60, BUSY = 150, TOP = 262, H = TOP + 60 + 4 * DH + 86, W = X0 * 2 + 9 * CW + 8 * GAP, cx = W / 2, bh = H - TOP - 24;
+  const T = (x, y, m, c, o) => '<text x="' + f(x, 1) + '" y="' + f(y, 1) + '"' + (c ? ' class="' + c + '"' : '') + (o || '') + '>' + m + '</text>';
+  const sayac = (x, y, w, ad, p, i) => '<g><rect class="sc-dis" x="' + x + '" y="' + y + '" width="' + w + '" height="50" rx="4"/><rect class="sc-ic" x="' + (x + 4) + '" y="' + (y + 4) + '" width="' + (w - 8) + '" height="42" rx="2"/>'
+    + T(x + 9, y + 15, ad, 'sc-ad') + T(x + w - 28, y + 23, p, 'sc-p', ' text-anchor="end"') + T(x + w - 24, y + 23, 'kW', 'sc-u') + T(x + w - 28, y + 41, i, 'sc-i', ' text-anchor="end"') + T(x + w - 24, y + 41, 'A', 'sc-u') + '</g>';
+  let s = '', topW = 0, topTH = 0, nCal = 0, nTop = 0;
+  s += '<path class="ln" d="M' + cx + ' 18V44"/><circle class="ln" cx="' + cx + '" cy="58" r="14"/><circle class="ln" cx="' + cx + '" cy="76" r="14"/><path class="ln" d="M' + cx + ' 90V' + BUSY + '"/>'
+    + T(cx + 26, 30, 'OG şebeke', '', ' font-size="13" font-weight="600"') + T(cx + 26, 72, 'Trafo (OG/AG)', '', ' font-size="13" font-weight="600"')
+    + '<rect class="brk" x="' + (cx - 7) + '" y="110" width="14" height="14"/>' + T(cx + 14, 121, 'AG ana şalter', 'sm');
+  const xs = [...Array(9).keys()].map(i => X0 + i * (CW + GAP) + CW / 2);
+  s += '<path class="bus" d="M' + (xs[0] - 20) + ' ' + BUSY + 'H' + (xs[8] + 20) + '"/>' + T(xs[0] - 20, BUSY - 10, 'AG dağıtım barası · 0,4 kV', '', ' font-size="13" font-weight="600"');
+  Object.keys(KABIN).forEach((k, i) => {
+    const L0 = KABIN[k], x = xs[i], bos = !L0.length, c = bos ? ' bos' : '', bx = x - CW / 2, py = BUSY + 72, L = bx + 12, R = bx + CW - 12;
+    const cih = L0.map(n => {
+      const kod = String(n).padStart(3, '0'), d = md[kod] || {}, o = DC[kod] || {}, wR = (o.diger || {}).watt;
+      const model = (o.model && o.model !== '?') ? o.model : ((kim[kod] || {}).model || d.model || '?');
+      const th = d.online && !d.sleeping ? Number(d.hashrate_TH) || 0 : 0, cal = th > 1, uy = !!d.sleeping;
+      const w = cal ? (wR || KB_MODEL_W[model] || 5300) : 0;
+      return { n, kod, d, model, th, cal, uy, w, tah: cal && !wR, ip: d.ip || o.ip || '' };
+    });
+    const kw = cih.reduce((t, z) => t + z.w, 0), th = cih.reduce((t, z) => t + z.th, 0), akar = cih.some(z => z.cal);
+    topW += kw; topTH += th; nCal += cih.filter(z => z.cal).length; nTop += cih.length;
+    s += '<path class="ln' + c + '" d="M' + x + ' ' + BUSY + 'V' + TOP + '"/><rect class="brk' + c + '" x="' + (x - 7) + '" y="' + (BUSY + 26) + '" width="14" height="14"/>' + T(x + 12, BUSY + 37, 'K' + k, 'sm');
+    s += '<g class="pmp' + c + (akar ? ' on' : '') + '"><circle cx="' + x + '" cy="' + py + '" r="11"/><g class="cark"><path d="M' + (x - 6) + ' ' + (py + 6) + 'L' + x + ' ' + (py - 8) + 'L' + (x + 6) + ' ' + (py + 6) + '"/></g></g>'
+      + T(x + 14, py - 14, KABIN_NOT[k] || 'pompa', 'sm', KABIN_NOT[k] ? ' style="fill:#B42318"' : '');
+    s += '<rect class="kab' + c + '" x="' + bx + '" y="' + TOP + '" width="' + CW + '" height="' + bh + '" rx="3"/>' + T(bx + 12, TOP + 24, 'Kabin ' + k, 'kt') + T(bx + CW - 12, TOP + 24, 'antrak', 'sm', ' text-anchor="end"');
+    if (bos) {
+      s += '<path class="boru bosb" d="M' + (x - 11) + ' ' + py + 'H' + (bx - 8) + 'V' + (TOP + 40) + '"/><path class="boru bosb" d="M' + (x + 11) + ' ' + py + 'H' + (bx + CW + 8) + 'V' + (TOP + 40) + '"/>'
+        + T(x, TOP + 110, 'BOŞ', 'bostx', ' text-anchor="middle"') + T(x, TOP + 132, 'cihaz yok · akış yok', 'sm', ' text-anchor="middle"');
+      return;
+    }
+    const ys = cih.map((z, j) => TOP + 40 + j * DH + (DH - 8) / 2), yl = ys[ys.length - 1];
+    const boru = (cl, d) => '<path class="boru ' + cl + ' zemin" d="' + d + '"/><path class="boru ' + cl + ' akis" d="' + d + '"/>';
+    let b = boru('sog', 'M' + (x - 11) + ' ' + py + 'H' + (bx - 8) + 'V' + yl + 'H' + L);
+    ys.slice(0, -1).forEach(yy => { b += boru('sog', 'M' + (bx - 8) + ' ' + yy + 'H' + L) + boru('sic', 'M' + R + ' ' + yy + 'H' + (bx + CW + 8)); });
+    b += boru('sic', 'M' + R + ' ' + yl + 'H' + (bx + CW + 8) + 'V' + py + 'H' + (x + 11));
+    s += '<g class="' + (akar ? '' : 'dur') + '">' + b + '</g>';
+    cih.forEach((z, j) => {
+      const y = TOP + 40 + j * DH, d = z.d, alt = /S21/.test(z.model) ? '' : ' alt', durum = z.cal ? 'çalışıyor' : z.uy ? 'uykuda' : d.online ? 'hash yok' : 'yanıtsız';
+      s += '<g class="tik" onclick="hashAc(\'' + z.kod + '\')"><title>#' + z.n + ' · ' + durum + (d.temp_water != null ? ' · ' + suEt(d) + ' ' + say(d.temp_water) + ' °C' : '') + ' · canlı hashrate için tıklayın</title>'
+        + '<rect class="cih' + alt + '" x="' + L + '" y="' + y + '" width="' + (CW - 24) + '" height="' + (DH - 8) + '" rx="2"/>'
+        + '<circle class="led ' + (z.cal ? 'on' : z.uy ? 'uy' : 'off') + '" cx="' + (L + 9) + '" cy="' + (y + 12) + '" r="3.5" style="animation-delay:' + (-(z.n % 7) * 0.31).toFixed(2) + 's"/>'
+        + T(L + 17, y + 17, '#' + z.n, 'cn') + (d.temp_max != null ? T(L + 56, y + 17, say(d.temp_max) + '°C', 'tmp') : '')
+        + T(R - 7, y + 17, esc(z.model.replace(' Hyd', '')), 'sm', ' text-anchor="end"')
+        + T(L + 7, y + 31, '.' + String(z.ip).split('.').pop(), 'ip') + T(R - 7, y + 31, z.cal ? say(z.th) + ' TH' : durum, 'ip', ' text-anchor="end"')
+        + T(L + 7, y + 45, (z.tah ? '~' : '') + say(z.w / 1000, 2) + ' kW', 'el') + T(R - 7, y + 45, say(z.w / (V * PF), 1) + ' A', 'el', ' text-anchor="end"') + '</g>';
+    });
+    s += sayac(bx + 12, TOP + bh - 80, CW - 24, 'K' + k, say(kw / 1000, 1), say(kw / (r3 * V * PF), 1))
+      + T(bx + 12, TOP + bh - 12, cih.filter(z => z.cal).length + '/' + cih.length + ' cihaz · ' + say(th / 1000, 2) + ' PH', 'ft');
+  });
+  s += sayac(cx + 150, 52, 150, 'Σ AG', say(topW / 1000, 1), say(topW / (r3 * V * PF), 0));
+  const ts = D.mad && D.mad.timestamp ? String(D.mad.timestamp).slice(11, 16) : '—';
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>Madencilik kabinleri · Sera-2</h2><span class="k">9 kabin (antrak) · ' + nCal + '/' + nTop + ' cihaz çalışıyor · ' + say(topTH / 1000, 2) + ' PH · saha verisi ' + esc(ts) + ', sayfa 3 dk\'da bir yenilenir</span></div>'
+    + '<div style="overflow-x:auto;border:1px solid #E3E8EE;border-radius:10px;background:#FBFCFD"><svg class="kb" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Madencilik kabinleri şeması" style="display:block;font-family:inherit;max-width:none">' + s + '</svg></div>'
+    + '<div class="k">Mavi soğuk su pompadan cihazlara, kırmızı sıcak su cihazlardan pompaya döner; kabinde çalışan cihaz yoksa akış durur. Işık: yeşil çalışıyor, mavi uykuda, kırmızı yanıtsız/hash yok. °C en yüksek çip sıcaklığı; su sıcaklığı cihazın üzerine gelince görünür. '
+    + 'Güç cihazın bildirdiği watt (~ işaretli: bildirmiyor, model değeri), akım I = P / (400 V × 0,99); kabin ve toplam akım I = ΣP / (√3 × 400 V × 0,99), fazlara dengeli dağıtım varsayımı. Sayaç kutuları hesaplanmış değerdir, pompa güçleri dahil değil. Krem kutu: S19 XP+ / S19e XP. Cihaza tıklayınca canlı hashrate açılır.</div></section>';
+}
 async function cizMiningPrensip() {
   await strYukle();
   const fs = D.fs || {}, mad = D.mad || {}, saha = D.saha;
@@ -3596,12 +3684,13 @@ async function cizMiningPrensip() {
   for (const k of ['Sera-1', 'Sera-2']) {
     const L = (gr[k] || []).sort((a, b) => thNo(a[1].ad) - thNo(b[1].ad)), top = L.reduce((t, [, v]) => t + (Number(v.guc_kw) || 0), 0), ort = L.length ? top / L.length : 0;
     const inv = L.map(([dn, v]) => thFsInv(dn, v, ort)), t = tes[k] || {}, ab = k === 'Sera-1' ? 'T1' : 'T2';
-    const yuk = k === 'Sera-2' ? { ad: '⛏ Madencilik panosu', kw: mkKw, alt: calisan.length + ' / ' + cihaz.length + ' cihaz çalışıyor', cihaz } : null;
+    const yuk = k === 'Sera-2' ? { ad: '⛏ Madencilik panosu', kw: mkKw, alt: calisan.length + ' / ' + cihaz.length + ' cihaz çalışıyor · kabinler aşağıda' } : null;
     const net = top - (yuk ? mkKw || 0 : 0);
     h += thBolum({ baslik: k + ' · ' + (t.ad || '') + (t.dc_kwp ? ' · ' + say(t.dc_kwp) + ' kWp' : ''), alt: 'FusionSolar ' + esc(String(fs.guncelleme || '').slice(11, 16)) + (k === 'Sera-2' ? ' · madencilik toplayıcı ' + esc(ts) : ''),
       sayac: { ab, net, osos: thOsos(k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2') },
       bloklar: [{ ad: 'Trafo', inv, yuk, baraNot: 'Σ inverter ' + say(top, 1) + ' kW' }],
       ust: akisGrafik(k, fs, saha, { uretim: top, yuk: yuk ? mkKw : null, net }) });
+    if (k === 'Sera-2') { try { h += await kabinSema(); } catch (e) { h += '<div class="panel hata">Kabin şeması çizilemedi: ' + esc(e.message || e) + '</div>'; } }
   }
   const pvVar = Object.values(fs.invertorler || {}).some(v => (v.pv || []).length);
   h += '<div class="k">Akış: OG baradan aşağı; sayaçtaki ok şebekeye (yeşil, veriş) ya da şebekeden (kırmızı, çekiş) yönü gösterir. Sayaç değeri anlık tahmindir (inverter AC çıkışı' + ' − madencilik yükü), iç tüketim hariç; altındaki satır OSOS\'un son saatlik ölçümüdür. '

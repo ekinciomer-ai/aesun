@@ -339,9 +339,10 @@ async function runCommand(name) {
   if (!S.doc) return;
   S.cmd = key; S.lastCmd = key; msg('Komut: ' + LABEL[key]);
   document.querySelectorAll('.tool').forEach((b) => b.classList.toggle('on', b.dataset.cmd === key));
+  const kb = S.sonBtn && Date.now() - S.sonBtn.t < 600 ? S.sonBtn.el : null; if (kb && kb.classList.contains('gb')) kb.classList.add('on');   // komutu başlatan panel düğmesi komut bitene kadar aktif renkte
   try { await CMD[key](); }
   catch (e) { if (e !== CANCEL) { console.error(e); msg('Hata: ' + (e.message || e), 'err'); } else msg('*İptal*'); }
-  finally { S.cmd = null; S.pending = null; S.ghost = null; S.snap = null; S.track = []; S.trk = null; setPrompt('Komut:'); document.querySelectorAll('.tool').forEach((b) => b.classList.remove('on')); redraw(); }
+  finally { S.cmd = null; S.pending = null; S.ghost = null; S.snap = null; S.track = []; S.trk = null; setPrompt('Komut:'); document.querySelectorAll('.tool, .gb').forEach((b) => b.classList.remove('on')); redraw(); }
 }
 function cancelCmd() { if (S.pending) { const p = S.pending; S.pending = null; p.rej(CANCEL); } }
 const LABEL = { LINE: 'ÇİZGİ', PLINE: 'POLYLINE', RECT: 'DİKDÖRTGEN', CIRCLE: 'DAİRE', ARC: 'YAY', TEXT: 'YAZI', DIMLIN: 'DOĞRUSAL ÖLÇÜ', DIMALI: 'HİZALI ÖLÇÜ', POINT: 'NOKTA', MOVE: 'TAŞI', COPY: 'KOPYALA', ROTATE: 'DÖNDÜR', SCALE: 'ÖLÇEKLE', MIRROR: 'AYNALA', OFFSET: 'OFSET', TRIM: 'BUDA', FILLET: 'KÖŞE', ERASE: 'SİL', EXPLODE: 'PATLAT', DIST: 'MESAFE', AREA: 'ALAN', ZOOM: 'ZOOM', UNDO: 'GERİ AL', REDO: 'İLERİ AL', TEXTH: 'YAZI YÜKSEKLİĞİ', LAYER: 'KATMAN', IDPT: 'KOORDİNAT', LIST: 'LİSTE' };
@@ -806,3 +807,6 @@ function updateStatus() {
   $('#bsnap').classList.toggle('on', S.osnap); $('#bortho').classList.toggle('on', S.ortho); $('#bgrid').classList.toggle('on', !!V().gridOn); $('#btrack').classList.toggle('on', S.otrack);
   $('#rinfo').textContent = S.doc ? S.doc.items.size.toLocaleString('tr') + ' nesne · ' + Math.round(V().lastMs) + ' ms' : '';
 }
+
+// her düğmeye basışta kısa renk geri bildirimi; komut başlatırsa runCommand onu komut süresince "on" tutar
+document.addEventListener('pointerdown', (e) => { const b = e.target.closest && e.target.closest('.gb, .tool, .st-card'); if (!b) return; S.sonBtn = { el: b, t: Date.now() }; b.classList.add('flash'); setTimeout(() => b.classList.remove('flash'), 450); }, true);

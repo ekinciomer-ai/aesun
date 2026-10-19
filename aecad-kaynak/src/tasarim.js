@@ -688,8 +688,71 @@ CMD.GDCK = async () => {
     }
   }
 };
+// ---- DC otomatik atama (kullanıcı kuralı 19.10.2026): A.1 — DC tek yön ≤ sınır (modül Vmp/Imp varsa ΔU %1 boyu, yoksa 80 m /
+// "DC tek yön sınır" alanı), inverter string girişi aşılmaz; en yakın uygun inverter. Sonra yanlış konumlu inverter için taşıma önerisi.
+function tsDcSinir() {
+  const el = pn('p-dcmax'); if (el) return { L: el, neden: 'girilen sınır' };
+  const P = G.panel, vmp = pn('p-vmp') ?? P.vmp, imp = pn('p-imp') ?? P.imp, sm = typeof pjAuto === 'function' ? pjAuto().strMod : null;
+  if (vmp && imp && sm) { const L = 0.01 * 6 * vmp * sm / (2 * imp * 0.0206) - 3; return { L: Math.round(L), neden: 'ΔU %1 (1×6 Cu, ' + sm + ' modül)' }; }
+  return { L: 80, neden: 'Vmp/Imp yok → 80 m ön sınır' };
+}
+function tsDcTek(m, ip, yon) {   // masanın çıkış ucundan invertere tek yön (dik mesafe + 3 m iniş)
+  const c = tsMasaCerceve(m); if (!c) return Infinity; const nok = (s_, t) => [c.o[0] + c.ux[0] * s_ + c.uy[0] * t, c.o[1] + c.ux[1] * s_ + c.uy[1] * t];
+  const bas = tsUcBas(c, nok, ip, yon), u = bas ? nok(-0.3, c.D / 2) : nok(c.L + 0.3, c.D / 2);
+  return Math.abs(u[0] - ip[0]) + Math.abs(u[1] - ip[1]) + 3;
+}
+function tsDcOtoAta(sadeceBos) {
+  const sin = tsDcSinir(), inv = tsInverterler().map((x) => ({ ...x, yon: tsDcYon(x.it), cap: +x.it.ges.str || 0, dolu: 0 }));
+  const masalar = [...S.doc.items.values()].filter((it) => String(it.layer).toUpperCase() === 'GES-MASA' && tsMasaCerceve(it));
+  const eski = tsAtamalar(); const yeni = new Map(sadeceBos ? eski : []);
+  for (const [mid, iid] of yeni) { const x = inv.find((y) => y.it.id === iid), m = S.doc.items.get(mid); if (x && m) x.dolu += tsMasaStr(m); }
+  const ciftler = [];
+  for (const m of masalar) { if (yeni.has(m.id)) continue; for (const x of inv) { const d = tsDcTek(m, x.p, x.yon); if (d <= sin.L) ciftler.push({ m, x, d }); } }
+  // önce tek seçeneği olan masalar, sonra en kısa mesafe
+  const secenek = new Map(); for (const c of ciftler) secenek.set(c.m.id, (secenek.get(c.m.id) || 0) + 1);
+  ciftler.sort((a, b) => (secenek.get(a.m.id) - secenek.get(b.m.id)) || (a.d - b.d));
+  for (const c of ciftler) { if (yeni.has(c.m.id)) continue; const n = tsMasaStr(c.m); if (c.x.cap && c.x.dolu + n > c.x.cap) continue; yeni.set(c.m.id, c.x.it.id); c.x.dolu += n; }
+  const kalan = masalar.filter((m) => !yeni.has(m.id));
+  return { yeni, kalan, sin, inv };
+}
+function tsDcAtaYaz(yeni) {   // atamaları kesikli çizgi olarak yaz (eski atama/çizim silinir)
+  const pairs = []; for (const it of S.doc.items.values()) if ((it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr')) || it.durumInv || (it.gesEt && S.doc.items.get(it.gesEt) && (S.doc.items.get(it.gesEt).ges || {}).tip === 'dcstr')) pairs.push([it, null]);
+  S.doc.addLayer(DC_ATA, 4, 'DASHED');
+  for (const [mid, iid] of yeni) { const m = S.doc.items.get(mid), inv = S.doc.items.get(iid); if (!m || !inv) continue; const ip = tsMerkez(inv), u = tsMasaIlkPanel(m, ip, tsDcYon(inv)); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[ip[0], ip[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: mid } }]); }
+  replaceItems(pairs, 'DC oto atama');
+  const dur = []; for (const iid of new Set(yeni.values())) dur.push(...tsInvDurumYazi(iid, DC_ATA)); if (dur.length) replaceItems(dur, 'DC durum'); renderLayers();
+}
+CMD.GDCOTO = async () => {
+  const inv = tsInverterler(); if (!inv.length) { msg('Önce inverter ekleyin.', 'err'); return; }
+  const eksik = inv.filter((x) => !x.it.ges || !x.it.ges.str);
+  if (eksik.length) { const v = await formDlg(eksik.length + ' inverterde string girişi yok — hepsine', [TS.inv.alan[2]]); if (!v) return; replaceItems(eksik.map((x) => [x.it, { ...x.it, ges: { ...x.it.ges, str: +v.str } }]), 'string girişi'); }
+  let sadeceBos = false; if (tsAtamalar().size) { const r = await askDlg('DC otomatik atama', 'Mevcut DC atamaları var. Ne yapılsın?', [['Hepsini yeniden ata', 'tum', 'primary'], ['Yalnız atanmamış masalar', 'bos', 'ghost'], ['Vazgeç', null, 'ghost']]); if (!r) return; sadeceBos = r === 'bos'; }
+  busy('DC atanıyor…'); await tick();
+  let R; try { R = tsDcOtoAta(sadeceBos); tsDcAtaYaz(R.yeni); } finally { busy(null); }
+  msg(R.yeni.size + ' masa ' + new Set(R.yeni.values()).size + ' invertere atandı (DC tek yön ≤ ' + R.sin.L + ' m: ' + R.sin.neden + '; string girişi aşılmadı)' + (R.kalan.length ? ' · ' + R.kalan.length + ' masa atanamadı (sınır dışında ya da inverterler dolu)' : '') + '.', R.kalan.length ? 'note' : 'res');
+  // konum önerisi: inverterin masalarına göre en uzun tek yönü en küçük yapan masa başı noktası
+  const oner = [];
+  for (const x of tsInverterler()) {
+    const ms = [...R.yeni].filter(([, iid]) => iid === x.it.id).map(([mid]) => S.doc.items.get(mid)).filter(Boolean); if (ms.length < 2) continue;
+    const yon = tsDcYon(x.it), enUzun = (p) => Math.max(...ms.map((m) => tsDcTek(m, p, yon)));
+    const simdi = enUzun(x.p); let best = null;
+    for (const m of ms) { const c = tsMasaCerceve(m); const nok = (s_, t) => [c.o[0] + c.ux[0] * s_ + c.uy[0] * t, c.o[1] + c.ux[1] * s_ + c.uy[1] * t]; for (const q of [nok(-0.8, -1.2), nok(c.L + 0.8, -1.2), nok(-0.8, c.D + 1.2), nok(c.L + 0.8, c.D + 1.2)]) { if (tsMasaAt(q)) continue; const v = enUzun(q); if (!best || v < best.v) best = { v, q }; } }
+    if (best && best.v < simdi * 0.85 && simdi - best.v > 5) oner.push({ x, simdi, best });
+  }
+  if (!oner.length && !R.kalan.length) return;
+  if (oner.length) {
+    const r = await askDlg('İnverter konum önerisi', oner.map((o) => 'INV-' + (o.x.it.ges.no || '') + ': en uzun DC ' + fmtNum(o.simdi, 0) + ' → ' + fmtNum(o.best.v, 0) + ' m (' + fmtNum(Math.hypot(o.best.q[0] - o.x.p[0], o.best.q[1] - o.x.p[1]), 0) + ' m taşıma, masa başına)').join('\n') + '\nTaşınsın mı? Masa atamaları yeniden yapılır; AC kabloyu sonra "AC oto" ile yeniden çizin.', [['Taşı (' + oner.length + ')', 'ok', 'primary'], ['Hayır', null, 'ghost']]);
+    if (r === 'ok') {
+      replaceItems(oner.map((o) => { const it = o.x.it, dx = o.best.q[0] - o.x.p[0], dy = o.best.q[1] - o.x.p[1]; return [it, xfItem(it, mT(dx, dy))]; }), 'inverter taşı');
+      const R2 = tsDcOtoAta(false); tsDcAtaYaz(R2.yeni);
+      msg(oner.length + ' inverter taşındı, atama yenilendi: ' + R2.yeni.size + ' masa' + (R2.kalan.length ? ', ' + R2.kalan.length + ' masa atanamadı' : '') + '. AC kabloları "AC oto" ile yeniden çizin.', 'res');
+    }
+  }
+};
+Object.assign(ALIAS, { GDCOTO: 'GDCOTO', DCOTO: 'GDCOTO' }); Object.assign(LABEL, { GDCOTO: 'DC OTOMATİK ATA' });
 CMD.GDCCIZ = async () => {
-  const at = tsAtamalar(); if (!at.size) { msg('Önce "DC ata" ile masaları invertere atayın.', 'err'); return; }
+  if (!tsAtamalar().size) { const r = await askDlg('DC çiz', 'DC ataması yok. Masalar invertere otomatik atansın mı (DC tek yön sınırı ve string girişine göre)?', [['Otomatik ata ve çiz', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]); if (r !== 'ok') return; await CMD.GDCOTO(); if (!tsAtamalar().size) return; }
+  const at = tsAtamalar();
   busy('DC stringler çiziliyor…'); await tick();
   try {
     const sil = []; for (const it of S.doc.items.values()) if ((it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr' || it.ges.tip === 'dcisaret')) || it.durumInv || (it.gesEt && S.doc.items.get(it.gesEt) && S.doc.items.get(it.gesEt).ges && S.doc.items.get(it.gesEt).ges.tip === 'dcstr')) sil.push([it, null]);

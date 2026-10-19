@@ -4035,10 +4035,14 @@ function sefOfis() {
   const den = D.den || {}, sb = D.sb || {}, sef = D.sef || {}, bek = D.bek || {}, mad = D.mad || {};
   const yasDk = t => t ? Math.round((Date.now() - Date.parse(t)) / 60000) : 9999;
   const gr = {}; (den.gruplar || []).forEach(g => { gr[g.grup] = g; });
-  const denTaze = yasDk(den.guncellendi) < 75, sor = sb.sorunlar || {}, anah = Object.keys(sor);
+  const sefOk = [...(sef.gecmis || []), ...(sef.eylemler || [])].filter(e => e.ok).map(e => Date.parse(e.t)).reduce((a, b) => Math.max(a, b), 0);
+  const denT = Date.parse(den.guncellendi || 0), sbT = Date.parse(sb.t || 0);
+  const denTaze = yasDk(den.guncellendi) < 75, sbGec = sefOk && sbT - sefOk < 20 * 60000;   // Pi bulgusu şef müdahalesinden sonraki ilk turlarda henüz eski taramayı taşıyor olabilir
+  const sor = sb.sorunlar || {}, anah = Object.keys(sor);
+  const teyit = { is: !!(sefOk && (denT <= sefOk || sbGec)), veri: !!(sefOk && (denT <= sefOk || sbGec)) };
   const sbYas = yasDk(sb.t), ns1 = (sb.bilgi || {}).ns1_bekci || {};
-  const kotuG = g => denTaze && gr[g] && gr[g].ok < gr[g].toplam;
-  const ilk = f => { const k = anah.find(f); return k ? sor[k] : null; };
+  const kotuG = g => denTaze && gr[g] && gr[g].ok < gr[g].toplam && !((g === 'is' || g === 'veri') && sefOk && denT <= sefOk);
+  const ilk = f => { const k = anah.find(f); return k && !(sbGec && /^(is:|gec:)/.test(k)) ? sor[k] : null; };
   const dev = mad.devices || [], kopuk = dev.filter(x => x.actual_worker && !x.online && !x.sleeping).length;
   const sonKurt = (bek.olaylar || []).slice(-1)[0];
   const M = [
@@ -4113,7 +4117,7 @@ function sefOfis() {
   const yurur = (x, y) => '<g><ellipse cx="' + x + '" cy="' + (y + 52) + '" rx="14" ry="4" fill="#000" opacity=".15"/><g class="of-bacak1" style="transform-origin:' + x + 'px ' + (y + 32) + 'px"><path d="M' + (x - 4) + ' ' + (y + 32) + 'V' + (y + 50) + '" stroke="#2F3A4A" stroke-width="6" stroke-linecap="round"/></g><g class="of-bacak2" style="transform-origin:' + x + 'px ' + (y + 32) + 'px"><path d="M' + (x + 4) + ' ' + (y + 32) + 'V' + (y + 50) + '" stroke="#2F3A4A" stroke-width="6" stroke-linecap="round"/></g>'
     + kisi(x, y, '#E09A00', true, false).replace('<g>', '<g class="of-adim">') + '<rect x="' + (x - 13) + '" y="' + (y + 18) + '" width="26" height="4" fill="#E8F04A" opacity=".85"/></g>';
   M.forEach((m, i) => {
-    const kotu = !!m.sorun, dx = 20 + (i % 4) * 275, ust = i < 4, dy = ust ? WALL + 14 : WALL + 290, DWm = 250;
+    const kotu = !!m.sorun, bek2 = !kotu && teyit[m.k] && (Date.now() - sefOk) < 90 * 60000, dx = 20 + (i % 4) * 275, ust = i < 4, dy = ust ? WALL + 14 : WALL + 290, DWm = 250;
     m.p = { x: dx + 125, y: ust ? dy + 158 : dy - 66 };
     // zemin işaret plakası
     s += '<g>' + '<rect x="' + (dx + 6) + '" y="' + (dy - 2) + '" width="' + (DWm - 12) + '" height="178" rx="12" fill="' + (kotu ? '#FCE3E0' : '#FFFFFF') + '" opacity="' + (kotu ? '.75' : '.35') + '"' + (kotu ? ' class="of-yan2"' : '') + '/>';
@@ -4144,8 +4148,8 @@ function sefOfis() {
     if (kotu) s += kisi(dx + 86, dy + 46, '#B42318', false, true);   // ayağa kalkmış, el sallıyor
     // isim plakası + değer
     s += '<rect x="' + (dx + 84) + '" y="' + (dy + 114) + '" width="' + (DWm - 96) + '" height="30" rx="4" fill="#F3EEE4" stroke="#B9A07E"/>' + T(dx + 92, dy + 126, esc(m.ad), ' font-size="10.5" font-weight="800" fill="#10233F"')
-      + T(dx + 92, dy + 139, esc(m.deger), ' font-size="9" font-weight="700" fill="' + (kotu ? '#B42318' : '#1E7A3C') + '" font-family="ui-monospace,monospace"')
-      + '<circle cx="' + (dx + DWm - 18) + '" cy="' + (dy + 128) + '" r="5" fill="' + (kotu ? '#D92D20' : '#1FA463') + '" class="' + (kotu ? 'of-yan' : '') + '"/>';
+      + T(dx + 92, dy + 139, esc(bek2 ? 'düzeldi · teyit bekleniyor' : m.deger), ' font-size="9" font-weight="700" fill="' + (kotu ? '#B42318' : bek2 ? '#9A5B00' : '#1E7A3C') + '" font-family="ui-monospace,monospace"')
+      + '<circle cx="' + (dx + DWm - 18) + '" cy="' + (dy + 128) + '" r="5" fill="' + (kotu ? '#D92D20' : bek2 ? '#E69A1B' : '#1FA463') + '" class="' + (kotu || bek2 ? 'of-yan' : '') + '"/>';
     // konuşma balonu
     if (kotu) s += '<g class="of-balon"><path d="M' + (dx + 8) + ' ' + (dy - 2) + 'h120a6 6 0 0 1 6 6v26a6 6 0 0 1 -6 6h-84l-8 8l-2 -8h-26a6 6 0 0 1 -6 -6v-26a6 6 0 0 1 6 -6z" fill="#fff" stroke="#D92D20" stroke-width="1.5"/>' + T(dx + 14, dy + 12, '⚠ ' + esc(String(m.sorun).slice(0, 24)), ' font-size="9.5" font-weight="800" fill="#B42318"') + T(dx + 14, dy + 25, esc(String(m.sorun).slice(24, 52)), ' font-size="9" fill="#B42318"') + '</g>';
     s += '</g>';
@@ -4157,7 +4161,7 @@ function sefOfis() {
   s += '<path d="M' + (sx - 80) + ' ' + (sy + 34) + 'h160l-10 -14h-140z" fill="url(#ofMasaUst)" stroke="#B9A07E"/><rect x="' + (sx - 80) + '" y="' + (sy + 34) + '" width="160" height="22" fill="url(#ofMasa)"/>'
     + '<rect x="' + (sx - 54) + '" y="' + (sy + 38) + '" width="108" height="14" rx="3" fill="#F5B300"/>' + T(sx, sy + 48, 'ŞEF', ' text-anchor="middle" font-size="10" font-weight="900" fill="#10233F" letter-spacing=".2em"')
     + '<rect x="' + (sx + 44) + '" y="' + (sy + 14) + '" width="22" height="8" rx="2" fill="#2B3236"/><path d="M' + (sx + 47) + ' ' + (sy + 14) + 'q8 -10 16 0" fill="none" stroke="#2B3236" stroke-width="3"/>'
-    + T(sx, sy + 70, sef.t ? 'son tur ' + yasDk(sef.t) + ' dk önce' : 'şef verisi yok', ' text-anchor="middle" font-size="9.5" fill="#fff"');
+    + T(sx, sy + 70, sef.t ? '5 dk\'da bir tur · son kayıt ' + yasDk(sef.t) + ' dk önce' : 'şef verisi yok', ' text-anchor="middle" font-size="9.5" fill="#fff"');
   const ssy = sy - 30;
   let sefG, durum;
   if (acik.length) { sefG = '<g>' + kisi(sx - 20, ssy, '#E09A00', true, false) + '<text class="of-zil" x="' + (sx + 40) + '" y="' + (sy + 6) + '" font-size="18">📞</text></g>'; durum = 'Çözemediği ' + acik.length + ' sorunu size bildirdi'; }
@@ -4185,7 +4189,7 @@ function sefKarti(d) {
   const yas = Math.round((Date.now() - Date.parse(d.t)) / 60000), acik = d.acik || [], son = (d.gecmis || []).slice(-6).reverse();
   const AD = { itme: 'GitHub gönderimini onardı', is_tetik: 'gecikmiş işi çalıştırdı', isler: 'zamanlayıcıyı yeniden başlattı', api: 'API\'yi yeniden başlattı' };
   const renk = acik.length ? '#B42318' : '#1E7A3C', zemin = acik.length ? '#FDECEA' : '#E6F4EA';
-  return '<section class="panel" style="gap:10px"><div class="bas"><h2>👷 Bekçi ofisi ve şef</h2><span class="k">bekçiler bulur, şef çözer · ' + (yas > 15 ? '<b style="color:#B42318">' + yas + ' dk önce (şef çalışmıyor olabilir)</b>' : yas + ' dk önce') + '</span></div>'
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>👷 Bekçi ofisi ve şef</h2><span class="k">bekçiler bulur, şef çözer · ' + (yas > 70 ? '<b style="color:#B42318">' + yas + ' dk önce (şef çalışmıyor olabilir)</b>' : 'son kayıt ' + yas + ' dk önce · 5 dk\'da bir tur') + '</span></div>'
     + sefOfis()
     + '<div style="border-radius:10px;background:' + zemin + ';padding:10px 12px;font-weight:700;color:' + renk + '">' + (acik.length ? '⚠ Çözemediği ' + acik.length + ' sorun var — müdahale gerekir' : (d.durum === 'mudahale' ? '✓ Bu tur müdahale etti, sorun giderildi' : '✓ Her şey yolunda, müdahale gerekmiyor')) + '</div>'
     + (acik.length ? '<div style="display:flex;flex-direction:column;gap:4px">' + acik.map(a => '<div style="font-size:13px"><b style="color:#B42318">✗</b> ' + esc(a.sorun) + ' <span class="k">· ' + esc(a.neden || '') + '</span></div>').join('') + '</div>' : '')

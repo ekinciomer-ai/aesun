@@ -130,6 +130,10 @@ def main():
             return ("API yeniden başlatıldı" if not k else "başlatılamadı: " + e[-120:]), not k
         yap("api", f"API eşitlemesi {round(es / 60)} dk eski", api_yeniden)
 
+    # müdahale başarılıysa öğrenen taramayı hemen yenile: bekçiler eski bulguyu göstermeye devam etmesin
+    if any(e["ok"] for e in eylemler):
+        sh("timeout", "600", "python3", D + "/bekci_tarama.py", t=650)
+        sh("bash", "-c", f"echo $(date +%s) > {D}/.tarama_son")
     # ---- 5) şefin çözemediği: Pi bekçisinin bulguları (Pi tarafı) + ns1 bekçisinin onarım sayısı
     k, o, _ = git("show", "origin/main:n8n/sistem_bekci.json")
     try: sb = json.loads(o)

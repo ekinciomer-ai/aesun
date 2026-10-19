@@ -3,10 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       islem:
-        description: "durum | duzelt | eski_imaj | sil"
+        description: "durum | duzelt | eski_imaj | sil | pg_yedek | pg_sil"
         default: durum
       filtre:
         description: "yalnız bu proje (boş = hepsi)"
+        default: ""
+      onay:
+        description: "pg_sil için: evet"
         default: ""
 jobs:
   r:
@@ -16,4 +19,24 @@ jobs:
       - env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           FILTRE: ${{ inputs.filtre }}
+          ONAY: ${{ inputs.onay }}
         run: python3 cpanel/railway.py "${{ inputs.islem }}"
+      - name: Postgres yedeği (pg_yedek)
+        if: inputs.islem == 'pg_yedek'
+        run: |
+          set -e
+          export PGURL="$(cat /tmp/pg_url)"; rm -f /tmp/pg_url
+          echo "::add-mask::$PGURL"
+          S="docker run --rm -e PGURL postgres:17"
+          echo "::notice::sunucu: $($S psql "$PGURL" -Atc 'select version()' | cut -c1-40)"
+          $S psql "$PGURL" -Atc "select relname||' '||n_live_tup from pg_stat_user_tables order by n_live_tup desc" > /tmp/tablolar.txt || true
+          echo "::notice::tablolar ($(wc -l < /tmp/tablolar.txt)): $(head -9 /tmp/tablolar.txt | tr '\n' ';')"
+          mkdir -p yedek && $S pg_dump --no-owner --no-privileges "$PGURL" | gzip > yedek/railway_postgres_$(date +%Y%m%d).sql.gz
+          cp /tmp/tablolar.txt yedek/
+          echo "::notice::döküm: $(du -h yedek/*.sql.gz | cut -f1)"
+      - if: inputs.islem == 'pg_yedek'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pg_yedek
+          path: yedek/
+          retention-days: 90

@@ -165,3 +165,37 @@ if ISLEM == "durdur":
                         not_(f"{p['name']}/{s['name']}: çalışan dağıtım durduruldu ({ld.get('status')})")
                     except Exception as e:
                         not_(f"durdurma hatası: {e}")
+
+def _pg_servis():
+    for pe in d["projects"]["edges"]:
+        p = pe["node"]
+        if p["name"] != (os.environ.get("FILTRE") or "striking-flexibility"):
+            continue
+        for se in p["services"]["edges"]:
+            s = se["node"]
+            if s["name"].lower().startswith("postgres"):
+                i = s["serviceInstances"]["edges"][0]["node"]
+                return p, s, i
+    return None, None, None
+
+if ISLEM == "pg_yedek":
+    # 19 Eki: kullanılmayan Postgres kapatılmadan önce: tablo/satır sayıları + tam döküm (Actions eseri, 90 gün). Bağlantı adresi yazdırılmaz.
+    p, s, i = _pg_servis()
+    if not s:
+        not_("Postgres servisi bulunamadı"); sys.exit(0)
+    v = gql("query($p:String!,$e:String!,$s:String!){ variables(projectId:$p, environmentId:$e, serviceId:$s) }",
+            {"p": p["id"], "e": i["environmentId"], "s": s["id"]})["variables"]
+    url = v.get("DATABASE_PUBLIC_URL") or ""
+    if not url:
+        not_("DATABASE_PUBLIC_URL yok; değişkenler: " + ", ".join(sorted(v))); sys.exit(1)
+    open("/tmp/pg_url", "w").write(url)
+    not_(f"Postgres bulundu: {p['name']}/{s['name']}")
+
+if ISLEM == "pg_sil":
+    p, s, i = _pg_servis()
+    if not s:
+        not_("Postgres servisi bulunamadı (zaten silinmiş olabilir)"); sys.exit(0)
+    if os.environ.get("ONAY") != "evet":
+        not_("ONAY=evet verilmeden silinmez"); sys.exit(1)
+    gql("mutation($id:String!){ serviceDelete(id:$id) }", {"id": s["id"]})
+    not_(f"silindi: {p['name']}/{s['name']} (yedek: Actions eseri pg_yedek)")

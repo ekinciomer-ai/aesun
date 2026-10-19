@@ -3360,7 +3360,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191359', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191404', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4596,6 +4596,12 @@ function tsMasaUc(it, p) {   // masanın p'ye yakın ucunun orta noktası (masa 
   const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
   const a = nok(-0.3, c.D / 2), b = nok(c.L + 0.3, c.D / 2); return Math.hypot(a[0] - p[0], a[1] - p[1]) <= Math.hypot(b[0] - p[0], b[1] - p[1]) ? a : b;
 }
+function tsMasaIlkPanel(it, p) {   // atama çizgisi masanın 1. paneline (inverter ucundaki üst sıra ilk modül) — çizgiler üst üste binmez
+  const c = tsMasaCerceve(it); if (!c) return tsMerkez(it);
+  const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
+  const bas = Math.hypot(nok(0, c.D / 2)[0] - p[0], nok(0, c.D / 2)[1] - p[1]) <= Math.hypot(nok(c.L, c.D / 2)[0] - p[0], nok(c.L, c.D / 2)[1] - p[1]);
+  const dx = c.L / c.P, dy = c.D / c.R; return nok(bas ? dx / 2 : c.L - dx / 2, c.D - dy / 2);
+}
 CMD.GDCK = async () => {
   S.doc.addLayer(DC_ATA, 4, 'DASHED');
   for (;;) {
@@ -4611,7 +4617,7 @@ CMD.GDCK = async () => {
       const pairs = []; let cikar = false;
       for (const it of S.doc.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.masa === m.id) { pairs.push([it, null]); if (it.ges.inv === iid) cikar = true; for (const t of S.doc.items.values()) if (t.gesEt === it.id) pairs.push([t, null]); }
       const eskiInv = [...new Set(pairs.filter((pr) => pr[0].ges && pr[0].ges.inv !== iid).map((pr) => pr[0].ges.inv))];
-      if (!cikar) { const u = tsMasaUc(m, x.p); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[x.p[0], x.p[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: m.id } }]); }
+      if (!cikar) { const u = tsMasaIlkPanel(m, x.p); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[x.p[0], x.p[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: m.id } }]); }
       replaceItems(pairs, 'DC atama');
       const dur = []; for (const id of [iid, ...eskiInv]) dur.push(...tsInvDurumYazi(id, DC_ATA)); if (dur.length) replaceItems(dur, 'DC durum');
       renderLayers(); const d2 = tsInvDurum(iid);

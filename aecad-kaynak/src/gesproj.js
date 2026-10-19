@@ -66,7 +66,15 @@ function pjCizimYerlesim() {
     else if (it.t === 'pline' && it.ges && it.ges.tip === 'ac' && it.pts.length >= 2) ac.push({ pts: it.pts.map((q) => [+q[0].toFixed(3), +q[1].toFixed(3)]), pay: +it.ges.pay || 10 });
     else if (it.t === 'insert' && it.ges) { const c = mrk(it); if (!c) continue; if (it.ges.tip === 'inv') inv.push(c); else if (it.ges.tip === 'tm') tm.push(c); else if (it.ges.tip === 'dm') dm = c; }
   }
-  return masa.length ? { masa, inv, tm, dm, ac } : null;
+  // DC ataması ve DC çiz boyları (masa → inverter; string başına L)
+  const dcm = new Map();
+  for (const it of D.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.masa && it.ges.inv) {
+    const m = D.items.get(it.ges.masa), iv = D.items.get(it.ges.inv); if (!m || !iv) continue;
+    let o = dcm.get(it.ges.masa); if (!o) { o = { m: mrk(m), i: mrk(iv), L: [] }; dcm.set(it.ges.masa, o); }
+    if (it.ges.tip === 'dcstr' && +it.ges.L) o.L.push({ pv: +it.ges.pv || o.L.length + 1, L: +(+it.ges.L).toFixed(1) });
+  }
+  const dc = [...dcm.values()].filter((o) => o.m && o.i).map((o) => ({ m: o.m, i: o.i, L: o.L.length ? o.L.sort((a, b) => a.pv - b.pv).map((x) => x.L) : null }));
+  return masa.length ? { masa, inv, tm, dm, ac, dc } : null;
 }
 function pjCizimUygula(p, Y) {
   if (!Y) return p;
@@ -75,6 +83,7 @@ function pjCizimUygula(p, Y) {
   if (Y.dm) p.elektrik.dm_konum = Y.dm;
   if (Y.inv.length) { p.elektrik.inv_konumlari = Y.inv; p.elektrik.inverter_adet = Y.inv.length; }
   if (Y.ac && Y.ac.length) p.elektrik.ac_hatlar = Y.ac;
+  if (Y.dc && Y.dc.length) p.elektrik.dc_atama = Y.dc;
   return p;
 }
 function buildParam0() {

@@ -940,6 +940,31 @@ class Model:
             if not getattr(self, "_adet_uy", False):
                 self._adet_uy = True
                 self.uyari.append(f"İnverter adedi kullanıcıdan: {int(e['inverter_adet'])} (A.1 DC sınırı tek yön ≤ {self.dc_lim:.0f} m için {int(e['inverter_adet']) + fazla} gerekirdi; aşan stringler kontrolde ✖). Modül Vmp/Imp girilirse sınır gerilim düşümünden hesaplanır.")
+        # çizimdeki DC ataması (AeCAD DC ata / DC oto, kullanıcı kuralı 19.10.2026): masa → inverter bloğu çizimdeki gibidir;
+        # çizimde atanmamış masa en yakın inverterin bloğuna eklenir. DC çiz boyları (string başına L) metraja aynen geçer.
+        da = e.get("dc_atama") or []
+        if da:
+            inv_pts, atm = [], {}
+            for d in da:
+                q = self._loc(d["m"]); iq = self._loc(d["i"])
+                k = next((j for j, p in enumerate(inv_pts) if math.dist(p, (iq.x, iq.y)) < 0.5), None)
+                if k is None: inv_pts.append((iq.x, iq.y)); k = len(inv_pts) - 1
+                atm.setdefault(k, []).append(((q.x, q.y), d.get("L")))
+            yeni, atanmamis = {k: [] for k in atm}, []
+            for ms in self.masalar:
+                ms.pop("dc_cizim_L", None); best = None
+                for k, lst in atm.items():
+                    for p, Ls in lst:
+                        dd = math.dist(p, (ms["x"], ms["y"]))
+                        if dd < 2.0 and (best is None or dd < best[0]): best = (dd, k, Ls)
+                if best: yeni[best[1]] += [ms] * self.str_masa; ms["dc_cizim_L"] = best[2]
+                else: atanmamis.append(ms)
+            for ms in atanmamis:
+                k = min(yeni, key=lambda k: math.dist(inv_pts[k], (ms["x"], ms["y"]))); yeni[k] += [ms] * self.str_masa
+            bloklar = [b for b in yeni.values() if b]
+            bloklar.sort(key=lambda bl: (-sum(q["y"] for q in bl) / len(bl), sum(q["x"] for q in bl) / len(bl)))
+            if atanmamis and not getattr(self, "_da_uy", False):
+                self._da_uy = True; self.uyari.append(f"DC ataması çizimden: {len(atanmamis)} masa çizimde atanmamıştı, en yakın invertere bağlandı.")
         ni = len(bloklar)
         # H.8: TR sayısı GÜÇTEN — tesis AC çıkışı = min(Σ inverter AC, DC / DC-AC hedefi). A.1 yüzünden inverter adedi
         #      artsa bile DC'den fazla AC çıkmaz; kullanıcı trafo gücü verdiyse TR = ⌈AC çıkış / (kVA × %yük)⌉.
@@ -1149,7 +1174,7 @@ class Model:
         self._ac_kul = set()
         e, m = self.P["elektrik"], self.P["masa"]
         self.dc_hat, self.dc_ust, self.ac_hat = [], [], []
-        dc_toplam = 0.0
+        dc_toplam = 0.0; sayac = {}
         for s in self.stringler:
             ms, inv = s["masa"], s["inv"]
             pts, _ = self.dc_yol(ms, inv)
@@ -1157,6 +1182,10 @@ class Model:
             L1 = ls.length + 3.0                                 # tek yön (A.1): güzergâh + iniş
             s["dc_tek_yon_m"] = L1
             s["dc_m"] = 2 * L1 + (self.masa_L if self.str_donus() else 0.0)   # (+)(−) ev dönüşü; masa içi dönüş yalnız string uçları masanın iki ucundaysa
+            Lc = ms.get("dc_cizim_L")                            # çizimdeki DC çiz boyu (AeCAD) esastır
+            if Lc:
+                j = sayac.get(id(ms), 0); sayac[id(ms)] = j + 1
+                if j < len(Lc) and Lc[j]: s["dc_m"] = float(Lc[j]); s["dc_cizim"] = True
             dc_toplam += s["dc_m"]
             s["dc_hat"] = ls
             self.dc_hat.append(ls)                               # açıklık + masa arası boşluk; masa altından geçmez

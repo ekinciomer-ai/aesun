@@ -3426,7 +3426,15 @@ function pjCizimYerlesim() {
     else if (it.t === 'pline' && it.ges && it.ges.tip === 'ac' && it.pts.length >= 2) ac.push({ pts: it.pts.map((q) => [+q[0].toFixed(3), +q[1].toFixed(3)]), pay: +it.ges.pay || 10 });
     else if (it.t === 'insert' && it.ges) { const c = mrk(it); if (!c) continue; if (it.ges.tip === 'inv') inv.push(c); else if (it.ges.tip === 'tm') tm.push(c); else if (it.ges.tip === 'dm') dm = c; }
   }
-  return masa.length ? { masa, inv, tm, dm, ac } : null;
+  // DC ataması ve DC çiz boyları (masa → inverter; string başına L)
+  const dcm = new Map();
+  for (const it of D.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.masa && it.ges.inv) {
+    const m = D.items.get(it.ges.masa), iv = D.items.get(it.ges.inv); if (!m || !iv) continue;
+    let o = dcm.get(it.ges.masa); if (!o) { o = { m: mrk(m), i: mrk(iv), L: [] }; dcm.set(it.ges.masa, o); }
+    if (it.ges.tip === 'dcstr' && +it.ges.L) o.L.push({ pv: +it.ges.pv || o.L.length + 1, L: +(+it.ges.L).toFixed(1) });
+  }
+  const dc = [...dcm.values()].filter((o) => o.m && o.i).map((o) => ({ m: o.m, i: o.i, L: o.L.length ? o.L.sort((a, b) => a.pv - b.pv).map((x) => x.L) : null }));
+  return masa.length ? { masa, inv, tm, dm, ac, dc } : null;
 }
 function pjCizimUygula(p, Y) {
   if (!Y) return p;
@@ -3435,6 +3443,7 @@ function pjCizimUygula(p, Y) {
   if (Y.dm) p.elektrik.dm_konum = Y.dm;
   if (Y.inv.length) { p.elektrik.inv_konumlari = Y.inv; p.elektrik.inverter_adet = Y.inv.length; }
   if (Y.ac && Y.ac.length) p.elektrik.ac_hatlar = Y.ac;
+  if (Y.dc && Y.dc.length) p.elektrik.dc_atama = Y.dc;
   return p;
 }
 function buildParam0() {
@@ -3458,7 +3467,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191620', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191632', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3767,7 +3776,7 @@ async function pjSecenekCizime(a) {
     if (r !== 'ok') return false;
   }
   const ang = (a.param.masa.azimut_derece || 0) * Math.PI / 180, yeni = [];
-  const yerlestir = (it, c) => { const b = itemBB(D, it); const ox = (b[0] + b[2]) / 2 - it.M[3], oy = (b[1] + b[3]) / 2 - it.M[7]; it.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(it); return it; };
+  const yerlestir = (it, c) => { const b = itemBB(D, it); const ox = (b[0] + b[2]) / 2 - it.M[3], oy = (b[1] + b[3]) / 2 - it.M[7]; it.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(it); _drCache.delete(it); return it; };
   D.addLayer('GES-MASA', 5); D.layers.get('GES-MASA').c = masaRenk();
   const mb = makeTableBlock(mainTpl());
   for (const c of N.masa) yeni.push(yerlestir({ id: newId(), t: 'insert', layer: 'GES-MASA', c: 256, lt: '', block: mb, M: mMul(mT(0, 0), mRz(ang)), ap: [] }, c));
@@ -4008,7 +4017,7 @@ function pjPaftaTani() {
   const ky = yaz.filter((t) => up(t) === 'GES-TM' && /^(TR-?\d+|TM-?\d+|DM)/i.test(String(t.s).trim()));
   if (!inv.length && !ky.length) return 0;
   const ang = gnum('g-ang', 0) * Math.PI / 180, oz = (PJ.aktif && PJ.aktif.oz) || (PJ.res && PJ.res.ozet) || {}, sil = new Set(), yeni = [];
-  const yerlestir = (o, c) => { const b = itemBB(D, o); const ox = (b[0] + b[2]) / 2 - o.M[3], oy = (b[1] + b[3]) / 2 - o.M[7]; o.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(o); return o; };
+  const yerlestir = (o, c) => { const b = itemBB(D, o); const ox = (b[0] + b[2]) / 2 - o.M[3], oy = (b[1] + b[3]) / 2 - o.M[7]; o.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(o); _drCache.delete(o); return o; };
   const ekle = (tip, c, g) => { const T = TS[tip]; const v = {}; for (const [k, , f] of T.alan) v[k] = f(); Object.assign(v, g, { tip }); D.addLayer(T.kat, T.renk);
     const B = tsBlok(tip, v); yeni.push(yerlestir({ id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(0, 0), mRz(ang)), ap: [], ges: v }, c)); };
   const etk = (c) => { let b = null, bd = 8; for (const t of yaz) if (up(t) === 'GES-INV') { const d = Math.hypot(t.x - c[0], t.y - c[1]); if (d < bd) { bd = d; b = t; } } return b; };

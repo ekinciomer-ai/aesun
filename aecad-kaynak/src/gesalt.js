@@ -65,7 +65,7 @@ async function pjSecenekCizime(a) {
     if (r !== 'ok') return false;
   }
   const ang = (a.param.masa.azimut_derece || 0) * Math.PI / 180, yeni = [];
-  const yerlestir = (it, c) => { const b = itemBB(D, it); const ox = (b[0] + b[2]) / 2 - it.M[3], oy = (b[1] + b[3]) / 2 - it.M[7]; it.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(it); return it; };
+  const yerlestir = (it, c) => { const b = itemBB(D, it); const ox = (b[0] + b[2]) / 2 - it.M[3], oy = (b[1] + b[3]) / 2 - it.M[7]; it.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(it); _drCache.delete(it); return it; };
   D.addLayer('GES-MASA', 5); D.layers.get('GES-MASA').c = masaRenk();
   const mb = makeTableBlock(mainTpl());
   for (const c of N.masa) yeni.push(yerlestir({ id: newId(), t: 'insert', layer: 'GES-MASA', c: 256, lt: '', block: mb, M: mMul(mT(0, 0), mRz(ang)), ap: [] }, c));

@@ -3257,7 +3257,7 @@ def detay_yol(C, M, x0, y0):
 
 def detaylar_yerlesim(M, pf):
     """01 paftasına detay şeridi. Ölçek pafta ölçeğine göre; detaylar kendi ölçeklerinde (kağıt mm)."""
-    fns = [detay_masa_kesit, detay_masa_on, detay_sira, detay_inverter, detay_cit, detay_yol]
+    fns = [detay_masa_kesit, detay_masa_on, detay_sira, detay_inverter, detay_cit]   # servis yolu kesiti kaldırıldı (kullanıcı 19.10.2026)
     # önce boyutları (kağıt mm) ölç
     boy = []
     for f in fns:

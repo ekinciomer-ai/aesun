@@ -3490,7 +3490,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192332', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192339', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
@@ -3851,7 +3851,7 @@ function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pj
 function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(6, c - 2, m >= 16 ? 6 : m >= 8 ? 4 : m >= 4 ? 2 : 1)); }   // 22 çekirdek / 32 GB → 6 seçenek aynı anda
 function pjYerIsci(k) {
   PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
-  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610192332', document.baseURI).href), alt: null };
+  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610192339', document.baseURI).href), alt: null };
   o.w.onmessage = (e) => {
     const m = e.data, a = o.alt; if (!a || m.id !== a.seq) return;
     if (m.stage) { a.asama = m.stage; pjAltCiz(); return; }
@@ -4688,12 +4688,13 @@ function tsAcAg(kalan, A, tm, tohum) {
   // 2) Hiçbiri bağlanamıyorsa en uzak inverterden ADP'ye ana hat (mevcut kanal ucuz → ağa girer), sonra 1'e dön.
   const out = new Map(), ag = [];
   for (const y of tohum || []) { const z = y.map((q) => [q[0], q[1]]); ag.push(z); K.agEkle(z); }
-  // ANA KANAL (kullanıcı kuralı 19.10.2026): trafo tarafındaki sıraların MASA UÇ NOKTALARINI hedef alan düz hat — uçların ~1,5 m
+  // AG HAT İSTİKAMETİ (kullanıcı kuralı 19.10.2026): trafo tarafındaki sıraların masa uç köşelerinden 3 m açıktan geçen, panel alanının
+  // kenarına paralel düz hat (dış zarf) — uçların 3 m
   // dışından, uçlara teğet doğru parçaları (dış zarf); trafodan en uzak inverterin sırasına kadar. İnverterler sıra açıklığından buna düz bağlanır.
   try {
     const ms = [...S.doc.items.values()].filter((it) => String(it.layer).toUpperCase() === 'GES-MASA');
     const f0 = ms.length && tsMasaCerceve(ms[0]);
-    if (f0 && kalan.length && self.AC_ZARF === true) {   // deneme: masa ucu zarfı (kapalı — ızgara + düzleştirme esas)
+    if (f0 && kalan.length && self.AC_ZARF !== false) {
       const ux = f0.ux, uy = [-ux[1], ux[0]], L_ = (p) => [p[0] * ux[0] + p[1] * ux[1], p[0] * uy[0] + p[1] * uy[1]], W_ = (q) => [q[0] * ux[0] + q[1] * uy[0], q[0] * ux[1] + q[1] * uy[1]];
       const Al = L_(A), invL = kalan.map((x) => L_(x.p)), cxI = invL.reduce((t, q) => t + q[0], 0) / invL.length;
       const dogu = Al[0] >= cxI;   // trafo inverterlerin hangi yanında
@@ -4702,27 +4703,31 @@ function tsAcAg(kalan, A, tm, tohum) {
       for (const it of ms) { const P = tsMasaIz(it); if (!P) continue; const Q = P.map(L_); const y0 = Math.min(...Q.map((q) => q[1])), y1 = Math.max(...Q.map((q) => q[1])), x0 = Math.min(...Q.map((q) => q[0])), x1 = Math.max(...Q.map((q) => q[0])); const yc = (y0 + y1) / 2;
         let r = sira.find((z) => Math.abs(z.yc - yc) < (y1 - y0) / 2); if (!r) { r = { yc, y0, y1, x0, x1 }; sira.push(r); } else { r.x0 = Math.min(r.x0, x0); r.x1 = Math.max(r.x1, x1); r.y0 = Math.min(r.y0, y0); r.y1 = Math.max(r.y1, y1); } }
       if (sira.length >= 2) {
-        const pay = 1.5, uc = sira.map((r) => [[dogu ? r.x1 + pay : r.x0 - pay, r.y0 - 0.3], [dogu ? r.x1 + pay : r.x0 - pay, r.y1 + 0.3]]).flat();
-        const zarf = (pts) => {   // dış zarf: doğuda en büyük x'e teğet dışbükey zincir (y sıralı)
-          const P = pts.slice().sort((p, q) => p[1] - q[1]), cr = (o, a_, b_) => (a_[0] - o[0]) * (b_[1] - o[1]) - (a_[1] - o[1]) * (b_[0] - o[0]), H = [];
-          for (const p of P) { while (H.length >= 2 && (dogu ? cr(H[H.length - 2], H[H.length - 1], p) >= 0 : cr(H[H.length - 2], H[H.length - 1], p) <= 0)) H.pop(); H.push(p); }
-          return H;
+        const pay = 3.0, uc = sira.map((r) => [[dogu ? r.x1 + pay : r.x0 - pay, r.y0 - 0.3], [dogu ? r.x1 + pay : r.x0 - pay, r.y1 + 0.3]]).flat();
+        const zarf = (pts) => {   // dış zarf: tam dışbükey zarfın TRAFO TARAFINDAKİ zinciri (en alt → en üst y)
+          const H = tsHull(pts); if (H.length < 3) return pts.slice().sort((p, q) => p[1] - q[1]);
+          let iLo = 0, iHi = 0; H.forEach((p, i) => { if (p[1] < H[iLo][1]) iLo = i; if (p[1] > H[iHi][1]) iHi = i; });
+          const zin = (a, b) => { const o = [H[a]]; for (let i = a; i !== b; i = (i + 1) % H.length) o.push(H[(i + 1) % H.length]); return o; };
+          const c1 = zin(iLo, iHi), c2 = zin(iHi, iLo).reverse(), ort = (c) => c.reduce((t, p) => t + p[0], 0) / c.length;
+          return (dogu ? ort(c1) >= ort(c2) : ort(c1) <= ort(c2)) ? c1 : c2;
         };
         for (const yon of [1, -1]) {   // trafonun kuzeyi ve güneyi ayrı kollar
           const ust = invL.filter((q) => (q[1] - Al[1]) * yon > 0); if (!ust.length) continue;
           const uzak = ust.reduce((m, q) => (Math.abs(q[1] - Al[1]) > Math.abs(m[1] - Al[1]) ? q : m));
           const ylim = uzak[1] + yon * 3;
           let pts = uc.filter((p) => (p[1] - Al[1]) * yon >= -2 && (ylim - p[1]) * yon >= 0);
-          if (pts.length < 2) { continue; }
+          if (pts.length < 2) continue;
           let H = zarf(pts); H.sort((p, q) => (p[1] - q[1]) * yon);   // trafodan uzağa
           const kol = [...H.slice().reverse()].map(W_);   // uzaktan trafoya
           // her parça engelsiz olmalı; değilse o kol atlanır (ızgara yedeği çalışır)
           // engelli parça (köşk, sınır köşesi) yalnız o parçada ızgara güzergâhıyla aşılır
-          const k2 = [kol[0]]; let ok = true;
-          for (let i = 1; i < kol.length; i++) { if (K.gorur(k2[k2.length - 1], kol[i])) { k2.push(kol[i]); continue; } const r_ = K.yol(k2[k2.length - 1], kol[i]); if (!r_) { ok = false; break; } k2.push(...r_.slice(1)); }
-          if (!ok) { continue; }
-          kol.length = 0; kol.push(...k2);
-          const son = kol[kol.length - 1], bag = K.gorur(son, A) ? [son, A] : K.yol(son, A);
+          // kullanıcı çizimi (19.10.2026): panellerin 3 m önünden, panel istikametine paralel DÜZ hat — yalnız masaya değmemesi ve
+          // arazi içinde kalması aranır (köşk/ızgara engeli bu hattı kırmaz)
+          const icinde = (p) => (typeof sinirIcinde === 'function' ? sinirIcinde(p) : true);
+          let ok = kol.every(icinde);
+          for (let i = 1; ok && i < kol.length; i++) if (!K.masaYok(kol[i - 1], kol[i])) ok = false;
+          if (!ok) continue;
+          const son = kol[kol.length - 1], bag = K.masaYok(son, A) ? [son, A] : K.yol(son, A, { duz: true });
           if (!bag) continue;
           const z = [...kol, ...bag.slice(1)]; ag.push(z); K.agEkle(z);
         }
@@ -4738,7 +4743,7 @@ function tsAcAg(kalan, A, tm, tohum) {
       for (const y of ag) { let kl = 0; const kal_ = new Array(y.length).fill(0); for (let k = y.length - 2; k >= 0; k--) kal_[k] = kal_[k + 1] + Math.hypot(y[k + 1][0] - y[k][0], y[k + 1][1] - y[k][1]);
         for (let k = 0; k < y.length - 1; k++) { const p = y[k], q = y[k + 1], dx = q[0] - p[0], dy = q[1] - p[1], L2 = dx * dx + dy * dy || 1; const t = Math.max(0, Math.min(1, ((x.p[0] - p[0]) * dx + (x.p[1] - p[1]) * dy) / L2)), z = [p[0] + t * dx, p[1] + t * dy];
           const d_ = Math.hypot(z[0] - x.p[0], z[1] - x.p[1]), c = d_ + 0.25 * (kal_[k + 1] + Math.sqrt(L2) * (1 - t));
-          if ((!r || c < r.c) && d_ <= 80 && K.duzOk(x.p, z)) r = { c, pts: [x.p, z, ...y.slice(k + 1)] }; } }
+          if ((!r || c < r.c) && d_ <= 80 && K.masaYok(x.p, z)) r = { c, pts: [x.p, z, ...y.slice(k + 1)] }; } }
       if (!r) r = K.dal(x.p, 150);
       if (r && (!en || r.c < en.r.c)) en = { x, r };
     }
@@ -4978,7 +4983,8 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
     return out.map(Wc);
   };
   const duzOk = (pW, qW) => { const p = Lc(pW), q = Lc(qW); return gorurL(p, q) && !masaKeser(p, q); };
-  return { dolu, gorur, dik, yol, agEkle, dal, duzOk };
+  const masaYok = (pW, qW) => !masaKeser(Lc(pW), Lc(qW));
+  return { dolu, gorur, dik, yol, agEkle, dal, duzOk, masaYok };
 }
 // Özellikler paneli: tasarım öğesi (ya da etiketi) seçiliyken verisi açılır listelerle değişir; etiket, blok ve özet/hesaplar güncellenir
 function tsOzellik(box, items) {

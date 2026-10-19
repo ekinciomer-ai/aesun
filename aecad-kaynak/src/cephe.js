@@ -47,13 +47,14 @@ function cepheCiz() {
     S.doc.addLayer('GES-CEPHE', 1);
     const bb = G.bound.reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
     const th = Math.max(1, Math.max(bb[2] - bb[0], bb[3] - bb[1]) / 90), cen = centroidOf(G.bound), g = pn('p-cekme') ?? 5;
+    const masaVar = [...S.doc.items.values()].some((it) => String(it.layer).toUpperCase() === 'GES-MASA');   // panel yerleşimi varsa yol/parsel yazıları gösterilmez (çizgiler kalır)
     for (const k of K) {
       const T = CEPHE_TIP[k.tip];
       yeni.push({ id: newId(), t: 'line', layer: 'GES-CEPHE', c: T.c, lt: '', x1: k.a[0], y1: k.a[1], x2: k.b[0], y2: k.b[1] });
       const mx = (k.a[0] + k.b[0]) / 2, my = (k.a[1] + k.b[1]) / 2; let nx = -(k.b[1] - k.a[1]) / (k.L || 1), ny = (k.b[0] - k.a[0]) / (k.L || 1);
       if ((cen[0] - mx) * nx + (cen[1] - my) * ny < 0) { nx = -nx; ny = -ny; }
       let ang = Math.atan2(k.b[1] - k.a[1], k.b[0] - k.a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
-      if (k.L >= th * 9) yeni.push({ id: newId(), t: 'text', layer: 'GES-CEPHE', c: T.c, lt: '', x: mx + nx * th * 1.6, y: my + ny * th * 1.6, h: th, rot: ang, s: T.kisa + ' · ' + fmtNum(cepheD(k.tip, g), 1) + ' m', ha: 1, va: 2 });
+      if (!masaVar && k.L >= th * 9) yeni.push({ id: newId(), t: 'text', layer: 'GES-CEPHE', c: T.c, lt: '', x: mx + nx * th * 1.6, y: my + ny * th * 1.6, h: th, rot: ang, s: T.kisa + ' · ' + fmtNum(cepheD(k.tip, g), 1) + ' m', ha: 1, va: 2 });
     }
   }
   if (!eski.length && !yeni.length) return;

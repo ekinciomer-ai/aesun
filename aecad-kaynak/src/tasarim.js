@@ -12,7 +12,7 @@ const SEC = {
   dc: ['H1Z2Z2-K 1x4', 'H1Z2Z2-K 1x6', 'H1Z2Z2-K 1x10'], pay: [0, 3, 5, 10, 15, 20, 30],
 };
 const TS = {
-  inv: { ad: 'İnverter', kat: 'GES-INV', renk: 6, alan: [['kw', 'Güç (kW)', () => pn('p-inv') ?? 100, SEC.kw], ['model', 'Model', () => pv('p-invm') || '—', () => ['—', ...(pv('p-invm') ? [pv('p-invm')] : [])]]] },
+  inv: { ad: 'İnverter', kat: 'GES-INV', renk: 6, alan: [['kw', 'Güç (kW)', () => pn('p-inv') ?? 100, SEC.kw], ['model', 'Model', () => pv('p-invm') || '—', () => ['—', ...(pv('p-invm') ? [pv('p-invm')] : [])]], ['str', 'String girişi (adet)', () => pn('p-strinv') || (typeof pjAuto === 'function' ? pjAuto().strInv : 20), () => Array.from({ length: 35 }, (_, i) => i + 6)]] },
   tm: { ad: 'Trafo (TM)', kat: 'GES-TM', renk: 30, alan: [['kva', 'Güç (kVA)', () => pn('p-trafo') ?? 1250, SEC.kva], ['gerilim', 'Gerilim', () => ((pn('p-trafo') ?? 1250) > 2000 ? '33/0,8 kV' : '33/0,4 kV'), SEC.gerilim], ['hucre', 'OG hücre sayısı', () => 3, SEC.hucreTM], ['boy', 'Bina boyu / uzun kenar (m)', () => 'oto', SEC.boy], ['en', 'Bina eni / kısa kenar (m)', () => 2.5, SEC.en]] },
   dm: { ad: 'DM', kat: 'GES-TM', renk: 30, alan: [['hucre', 'OG hücre sayısı (giriş+ölçü+çıkışlar)', () => 5, SEC.hucreDM], ['boy', 'Bina boyu / uzun kenar (m)', () => 'oto', SEC.boy], ['en', 'Bina eni / kısa kenar (m)', () => 2.5, SEC.en]] },
   og: { ad: 'OG kablo', kat: 'GES-OG-KABLO', renk: 1, alan: [['kablo', 'Kablo', () => pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', SEC.og], ['pay', 'Uç payı (m)', () => 20, SEC.pay]] },
@@ -600,7 +600,100 @@ CMD.GVERI = async () => {
   }
 };
 CMD.GINVEKLE = () => tsNokta('inv'); CMD.GTMEKLE = () => tsNokta('tm'); CMD.GDMEKLE = () => tsNokta('dm');
-CMD.GOGK = () => tsKablo('og'); CMD.GACK = () => tsKablo('ac'); CMD.GDCK = () => tsKablo('dc');
+CMD.GOGK = () => tsKablo('og'); CMD.GACK = () => tsKablo('ac');
+// ---- DC (kullanıcı kuralı 19.10.2026): önce ATAMA — inverter seç, masalarına tıkla; her atama inverterden masaya kesikli çizgi,
+// inverterde "dolu/giriş" string sayısı. Sonra "DC çiz": kesikliler kalkar, her string masa içinde 1. panelden son panele tek çizgi,
+// giriş (+) / çıkış (−) üçgeni, INV{i}.PV{s}.1 / .N kodu, ortada sıra*modül; DC boyu (ev dönüşü) metraja girer.
+const DC_ATA = 'GES-DC-ATAMA';
+function tsMasaAt(p) { for (const it of S.doc.items.values()) { if (String(it.layer).toUpperCase() !== 'GES-MASA') continue; const P = tsMasaIz(it); if (P && tsIcinde(p, P)) return it; } return null; }
+function tsMasaCerceve(it) {   // masa yerel çerçevesi: o (köşe), ux (boy yönü), uy (derinlik yönü), L, D, satır R, sütun P
+  let P, R, Pn; const m = /MASA_(\d+)([VH])(\d+)_/.exec(it.block || '');
+  if (m) { R = +m[1]; Pn = +m[3]; } else { const tp = typeof mainTpl === 'function' ? mainTpl() : { rows: 2, per: 13 }; R = tp.rows; Pn = tp.per; }
+  P = tsMasaIz(it); if (!P || P.length < 4) return null;
+  const e1 = [P[1][0] - P[0][0], P[1][1] - P[0][1]], e2 = [P[3][0] - P[0][0], P[3][1] - P[0][1]];
+  const l1 = Math.hypot(...e1), l2 = Math.hypot(...e2); const [ux, L, uy, D] = l1 >= l2 ? [e1, l1, e2, l2] : [e2, l2, e1, l1];
+  return { o: P[0], ux: [ux[0] / L, ux[1] / L], uy: [uy[0] / D, uy[1] / D], L, D, R, P: Pn };
+}
+function tsMasaStr(it) { const c = tsMasaCerceve(it); if (!c) return 1; const sm = typeof pjAuto === 'function' ? pjAuto().strMod : c.R * c.P; return Math.max(1, Math.round(c.R * c.P / sm)); }
+function tsAtamalar() { const o = new Map(); for (const it of S.doc.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.masa) o.set(it.ges.masa, it.ges.inv); return o; }
+function tsInvDurum(invId) {
+  const inv = S.doc.items.get(invId); if (!inv) return null; const at = tsAtamalar(); let dolu = 0;
+  for (const [mid, iid] of at) if (iid === invId) { const m = S.doc.items.get(mid); if (m) dolu += tsMasaStr(m); }
+  return { dolu, giris: +inv.ges.str || null };
+}
+function tsInvDurumYazi(invId, kat) {   // inverter yanında "dolu/giriş str" yazısı (tek)
+  const inv = S.doc.items.get(invId); const d = tsInvDurum(invId); const pairs = [];
+  for (const t of S.doc.items.values()) if (t.durumInv === invId) pairs.push([t, null]);
+  if (inv && d && d.dolu) { const c = tsMerkez(inv); pairs.push([null, { id: newId(), t: 'text', layer: kat, c: d.giris && d.dolu > d.giris ? 1 : 256, lt: '', x: c[0] + 1.2, y: c[1] - 1.0, h: KABLO_YZ, rot: 0, s: d.dolu + '/' + (d.giris || '?') + ' str', ha: 0, va: 0, durumInv: invId }]); }
+  return pairs;
+}
+function tsMasaUc(it, p) {   // masanın p'ye yakın ucunun orta noktası (masa dışında 0,3 m)
+  const c = tsMasaCerceve(it); if (!c) return tsMerkez(it);
+  const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
+  const a = nok(-0.3, c.D / 2), b = nok(c.L + 0.3, c.D / 2); return Math.hypot(a[0] - p[0], a[1] - p[1]) <= Math.hypot(b[0] - p[0], b[1] - p[1]) ? a : b;
+}
+CMD.GDCK = async () => {
+  S.doc.addLayer(DC_ATA, 4, 'DASHED');
+  for (;;) {
+    const p = await getPoint('DC atama: inverter seçin (tıklayın) — Enter: bitir'); if (!Array.isArray(p)) break;
+    const x = tsInverterler().reduce((a, b) => (!a || Math.hypot(b.p[0] - p[0], b.p[1] - p[1]) < Math.hypot(a.p[0] - p[0], a.p[1] - p[1]) ? b : a), null);
+    if (!x || Math.hypot(x.p[0] - p[0], x.p[1] - p[1]) > Math.max(6, 30 / V().s)) { msg('Yakında inverter yok; inverterin üstüne tıklayın.', 'err'); continue; }
+    if (!x.it.ges.str) { const v = await formDlg('INV-' + (x.it.ges.no || '') + ' string girişi', [TS.inv.alan[2]]); if (!v) continue; replaceItems([[x.it, { ...x.it, ges: { ...x.it.ges, str: +v.str } }]], 'string girişi'); x.it = S.doc.items.get(x.it.id); }
+    const iid = x.it.id, ad = 'INV-' + (x.it.ges.no || '');
+    for (;;) {
+      const d = tsInvDurum(iid);
+      const q = await getPoint(ad + ': masalarına tıklayın (tekrar tık = çıkar) · ' + d.dolu + '/' + (d.giris || '?') + ' string dolu — Enter: bu inverter bitti'); if (!Array.isArray(q)) break;
+      const m = tsMasaAt(q); if (!m) { msg('Masa bulunamadı; masanın içine tıklayın.', 'err'); continue; }
+      const pairs = []; let cikar = false;
+      for (const it of S.doc.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.masa === m.id) { pairs.push([it, null]); if (it.ges.inv === iid) cikar = true; for (const t of S.doc.items.values()) if (t.gesEt === it.id) pairs.push([t, null]); }
+      const eskiInv = [...new Set(pairs.filter((pr) => pr[0].ges && pr[0].ges.inv !== iid).map((pr) => pr[0].ges.inv))];
+      if (!cikar) { const u = tsMasaUc(m, x.p); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[x.p[0], x.p[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: m.id } }]); }
+      replaceItems(pairs, 'DC atama');
+      const dur = []; for (const id of [iid, ...eskiInv]) dur.push(...tsInvDurumYazi(id, DC_ATA)); if (dur.length) replaceItems(dur, 'DC durum');
+      renderLayers(); const d2 = tsInvDurum(iid);
+      msg(ad + ': ' + (cikar ? 'masa çıkarıldı' : 'masa atandı (' + tsMasaStr(m) + ' string)') + ' · ' + d2.dolu + '/' + (d2.giris || '?') + ' string dolu' + (d2.giris && d2.dolu > d2.giris ? ' — GİRİŞ SAYISI AŞILDI' : ''), d2.giris && d2.dolu > d2.giris ? 'err' : 'res');
+    }
+  }
+};
+CMD.GDCCIZ = async () => {
+  const at = tsAtamalar(); if (!at.size) { msg('Önce "DC ata" ile masaları invertere atayın.', 'err'); return; }
+  busy('DC stringler çiziliyor…'); await tick();
+  try {
+    const sil = []; for (const it of S.doc.items.values()) if ((it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr' || it.ges.tip === 'dcisaret')) || it.durumInv || (it.gesEt && S.doc.items.get(it.gesEt) && S.doc.items.get(it.gesEt).ges && S.doc.items.get(it.gesEt).ges.tip === 'dcstr')) sil.push([it, null]);
+    S.doc.addLayer('GES-DC-KABLO', 4); const yeni = []; const h = KABLO_YZ; let topL = 0, nStr = 0;
+    const byInv = new Map(); for (const [mid, iid] of at) { if (!S.doc.items.get(mid) || !S.doc.items.get(iid)) continue; if (!byInv.has(iid)) byInv.set(iid, []); byInv.get(iid).push(S.doc.items.get(mid)); }
+    const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+    for (const [iid, masalar] of byInv) {
+      const inv = S.doc.items.get(iid), ip = tsMerkez(inv), ino = inv.ges.no || '?';
+      const trNo = tms.length > 1 ? (tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]) < Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) ? b : a)).ges.no || '') : '';
+      masalar.sort((a, b) => Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) - Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]));
+      let pv = 0;
+      for (const m of masalar) {
+        const c = tsMasaCerceve(m); if (!c) continue; const k = tsMasaStr(m);
+        const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
+        const bas = Math.hypot(nok(0, c.D / 2)[0] - ip[0], nok(0, c.D / 2)[1] - ip[1]) <= Math.hypot(nok(c.L, c.D / 2)[0] - ip[0], nok(c.L, c.D / 2)[1] - ip[1]);   // inverter ucundan başla
+        const dx = c.L / c.P, dy = c.D / c.R, sira = [];
+        for (let r = 0; r < c.R; r++) { const t = c.D - (r + 0.5) * dy; const xs = Array.from({ length: c.P }, (_, i) => (i + 0.5) * dx); const ileri = (r % 2 === 0) === bas; for (const s_ of (ileri ? xs : xs.reverse())) sira.push(nok(s_, t)); }
+        const N = Math.floor(sira.length / k), uc = tsMasaUc(m, ip), tek = Math.abs(uc[0] - ip[0]) + Math.abs(uc[1] - ip[1]) + 3;   // tek yön ≈ masa ucu → inverter (dik) + iniş
+        for (let j = 0; j < k; j++) {
+          const iz = sira.slice(j * N, (j + 1) * N); if (iz.length < 2) continue; pv++; nStr++;
+          const rs = Math.max(1, Math.round(N / c.P)), donus = (rs % 2 === 1) ? c.L : 0, L = 2 * tek + donus; topL += L;
+          const kod = (trNo ? 'TR' + trNo + '.' : '') + 'INV' + ino + '.PV' + pv;
+          const pl = { id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: 256, lt: '', cl: false, pts: iz.map((q) => [q[0], q[1], 0]), ges: { tip: 'dcstr', inv: iid, masa: m.id, kablo: 'H1Z2Z2-K 1x6', pay: 0, L, pv, kod } };
+          yeni.push([null, pl]);
+          const tri = (q, renk) => ({ id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: renk, lt: '', cl: true, pts: [[q[0] - h * 0.6, q[1] - h * 0.5, 0], [q[0] + h * 0.6, q[1] - h * 0.5, 0], [q[0], q[1] + h * 0.5, 0]], gesEt: pl.id });
+          const yz = (q, s_, hh) => ({ id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 256, lt: '', x: q[0] - h * 0.6, y: q[1] + h * 0.7, h: hh, rot: 0, s: s_, ha: 0, va: 0, gesEt: pl.id });
+          const a = iz[0], b = iz[iz.length - 1], cx = iz.reduce((t, q) => t + q[0], 0) / iz.length, cy = iz.reduce((t, q) => t + q[1], 0) / iz.length;
+          yeni.push([null, tri(a, 5)], [null, tri(b, 1)], [null, yz(a, kod + '.1', h * 0.8)], [null, yz(b, kod + '.' + iz.length, h * 0.8)]);
+          yeni.push([null, { id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 1, lt: '', x: cx, y: cy, h: Math.min(c.D * 0.35, h * 3), rot: Math.atan2(c.ux[1], c.ux[0]), s: rs + '*' + Math.round(iz.length / rs), ha: 1, va: 2, gesEt: pl.id }]);
+        }
+      }
+      yeni.push(...tsInvDurumYazi(iid, 'GES-DC-KABLO').filter((pr) => pr[1]));
+    }
+    replaceItems([...sil, ...yeni], 'DC çiz'); renderLayers();
+    msg(nStr + ' string çizildi (' + byInv.size + ' inverter) · DC kablo ≈ ' + fmtNum(topL, 0) + ' m (ev dönüşü: 2 × masa ucu→inverter + 3 m iniş; uçlar masanın iki ucundaysa + masa boyu). Atama kesikli çizgileri kaldırıldı; değiştirmek için yeniden "DC ata".', 'res');
+  } finally { busy(null); }
+};
 // AC otomatik (kullanıcı kuralı 19.10.2026): tek tıkla tüm inverterlerden en yakın trafo binasının AG panosuna (ADP) kablo —
 // TM başına ortak kanal ağı (ana hat + branşman), 1 m kanal, arazi içi, masa/inverter/binaya ≥ 0,5 m; numara AC-n.
 CMD.GACOTO = async () => {
@@ -638,8 +731,9 @@ CMD.GACOTO = async () => {
   } finally { busy(null); }
 };
 Object.assign(ALIAS, { GACOTO: 'GACOTO', ACOTO: 'GACOTO' }); Object.assign(LABEL, { GACOTO: 'AC OTOMATİK' });
+Object.assign(ALIAS, { GDCCIZ: 'GDCCIZ', DCCIZ: 'GDCCIZ' }); Object.assign(LABEL, { GDCCIZ: 'DC ÇİZ' });
 Object.assign(ALIAS, { GINVEKLE: 'GINVEKLE', INVEKLE: 'GINVEKLE', GTMEKLE: 'GTMEKLE', TRAFOEKLE: 'GTMEKLE', GDMEKLE: 'GDMEKLE', DMEKLE: 'GDMEKLE', GOGK: 'GOGK', OGKABLO: 'GOGK', GACK: 'GACK', ACKABLO: 'GACK', GDCK: 'GDCK', DCKABLO: 'GDCK', GVERI: 'GVERI', VERI: 'GVERI' });
-Object.assign(LABEL, { GINVEKLE: 'İNVERTER EKLE', GTMEKLE: 'TRAFO EKLE', GDMEKLE: 'DM EKLE', GOGK: 'OG KABLO', GACK: 'AC KABLO', GDCK: 'DC KABLO', GVERI: 'VERİ DÜZENLE' });
+Object.assign(LABEL, { GINVEKLE: 'İNVERTER EKLE', GTMEKLE: 'TRAFO EKLE', GDMEKLE: 'DM EKLE', GOGK: 'OG KABLO', GACK: 'AC KABLO', GDCK: 'DC ATA', GVERI: 'VERİ DÜZENLE' });
 
 // DXF'ten açılan çizimde veri etiketlerden okunur
 const TASARIM_ETIKET_RE = /^(INV|TM|DM|OG|AC|DC)\b/;
@@ -660,6 +754,8 @@ function tasarimOzet() {
   for (const it of S.doc.items.values()) {
     const g = it.ges; if (!g) continue; veri.add(it.id);
     if (g.tip === 'inv') inv.push(+g.kw || 0); else if (g.tip === 'tm') tm.push(+g.kva || 0); else if (g.tip === 'dm') dm++;
+    else if (g.tip === 'dcata') continue;
+    else if (g.tip === 'dcstr') kabEkle('dc', g.kablo + ' (' + 'string)', +g.L || 0);
     else if (it.t === 'pline') kabEkle(g.tip, g.kablo, tsBoy(it.pts) + (+g.pay || 0));
   }
   for (const it of S.doc.items.values()) {                    // DXF'ten açılmış bloklar: blok adından (AE_TM_1250kVA_…, AE_INV_110kW_…)

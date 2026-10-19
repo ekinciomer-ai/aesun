@@ -147,6 +147,7 @@ async function tsNokta(tip) {
     S.doc.addLayer(T.kat, T.renk);
     const it = { id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(p[0], p[1]), mRz(ang)), ap: [], ges: { ...v, tip } };
     addItems([it], T.ad.toLowerCase()); renderLayers(); msg(T.ad + ' eklendi (' + fmtNum(B.L, 2) + ' × ' + fmtNum(B.W, 2) + ' m). Taşı (M) / Döndür (RO) ile tek parça hareket eder; verisi için “Veri”.', 'res');
+    if (tip !== 'inv') tsBinaMasaTemizle([it]);
     if (tip === 'dm') return; v.no++;
   }
 }
@@ -260,6 +261,64 @@ function tsOgDuzelt(pts) {
   const ad = (b) => (b ? (b.ges.tip === 'dm' ? 'DM' : 'TM-' + (b.ges.no || '')) : 'uç');
   return { pts: sad, not: ad(b0) + ' → ' + ad(b1) + ', 1 m kanal içinde (≥ 0,5 m), arazi içinde' + (dz ? ', ' + dz + ' parça en az kırıkla yönlendirildi' : ', çizdiğiniz güzergâh korundu') + (yok ? ' (' + yok + ' parçada engelsiz yol yok — elle kontrol edin)' : '') };
 }
+// Trafo/DM binası (kullanıcı kuralı 19.10.2026): binaya denk gelen ya da binanın gölgesinde kalan masalar yerleşimden kaldırılır.
+// Gölge: bina yüksekliği / tan(güneş yüksekliği), doldurmadaki gölgesiz saat aralığında (21 Aralık), bina izinin süpürdüğü alan.
+const BINA_H = 3.51, BINA_PAY = 1.0;   // m — referans köşk yüksekliği (Zorlu) ve binaya en az açıklık
+function tsBinaIz(it) {
+  const bb = tsBlokBB(it.block), M = it.M; if (!bb) return null;
+  return [[bb[0], bb[1]], [bb[2], bb[1]], [bb[2], bb[3]], [bb[0], bb[3]]].map(([x, y]) => [M[0] * x + M[1] * y + M[3], M[4] * x + M[5] * y + M[7]]);
+}
+function tsHull(P) {
+  const a = P.slice().sort((p, q) => p[0] - q[0] || p[1] - q[1]); if (a.length < 3) return a;
+  const cr = (o, p, q) => (p[0] - o[0]) * (q[1] - o[1]) - (p[1] - o[1]) * (q[0] - o[0]); const lo = [], up = [];
+  for (const p of a) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (const p of a.slice().reverse()) { while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); }
+  return lo.slice(0, -1).concat(up.slice(0, -1));
+}
+function tsGolge(iz, H) {
+  const lat = (typeof gnum === 'function' ? gnum('g-lat', 39) : 39) * D2R, del = -23.44 * D2R; const hv = gv('g-hrs') ? parseFloat(gv('g-hrs').value) : 3; const W = (isFinite(hv) ? hv : 3) * 15;
+  const pts = iz.slice();
+  for (let w = -W; w <= W + 1e-9; w += 5) {
+    const om = w * D2R, sa = Math.sin(lat) * Math.sin(del) + Math.cos(lat) * Math.cos(del) * Math.cos(om); if (sa <= 0.02) continue;
+    const al = Math.asin(sa), psi = Math.asin(Math.max(-1, Math.min(1, Math.cos(del) * Math.sin(om) / Math.cos(al)))), L = H / Math.tan(al);
+    for (const q of iz) pts.push([q[0] + Math.sin(psi) * L, q[1] + Math.cos(psi) * L]);   // gölge güneşin tersine: kuzey, öğleden sonra kuzeydoğu
+  }
+  return tsHull(pts);
+}
+function tsPolyKes(A, B) {   // iki çokgen kesişiyor mu (köşe içeride ya da kenar kesişimi)
+  if (A.some((p) => tsIcinde(p, B)) || B.some((p) => tsIcinde(p, A))) return true;
+  for (let i = 0; i < A.length; i++) for (let j = 0; j < B.length; j++) { const a = A[i], b = A[(i + 1) % A.length], c = B[j], d = B[(j + 1) % B.length]; if (segInt(a[0], a[1], b[0], b[1], c[0], c[1], d[0], d[1])) return true; }
+  return false;
+}
+function tsMasaIz(it) {
+  if (it.t === 'insert') { const r = itemBB(S.doc, it); const bb = tsBlokBB(it.block), M = it.M; if (bb) return [[bb[0], bb[1]], [bb[2], bb[1]], [bb[2], bb[3]], [bb[0], bb[3]]].map(([x, y]) => [M[0] * x + M[1] * y + M[3], M[4] * x + M[5] * y + M[7]]); return isFinite(r[0]) ? [[r[0], r[1]], [r[2], r[1]], [r[2], r[3]], [r[0], r[3]]] : null; }
+  if (it.t === 'pline' && it.pts && it.pts.length >= 3) return it.pts.map((q) => [q[0], q[1]]);
+  return null;
+}
+function tsBinaMasaTemizle(binalar) {
+  const sil = new Map(); let ust = 0, golge = 0;
+  for (const b of binalar) {
+    const iz = tsBinaIz(b); if (!iz) continue;
+    const c = iz.reduce((a, q) => [a[0] + q[0] / 4, a[1] + q[1] / 4], [0, 0]);
+    const pay = iz.map((q) => { const dx = q[0] - c[0], dy = q[1] - c[1], L = Math.hypot(dx, dy) || 1; return [q[0] + dx / L * BINA_PAY * 1.42, q[1] + dy / L * BINA_PAY * 1.42]; });
+    const gl = tsGolge(iz, BINA_H);
+    for (const it of S.doc.items.values()) {
+      if (String(it.layer).toUpperCase() !== 'GES-MASA' || sil.has(it.id)) continue; const P = tsMasaIz(it); if (!P) continue;
+      if (tsPolyKes(P, pay)) { sil.set(it.id, it); ust++; } else if (tsPolyKes(P, gl)) { sil.set(it.id, it); golge++; }
+    }
+  }
+  if (!sil.size) return 0;
+  replaceItems([...sil.values()].map((it) => [it, null]), 'bina masaları'); renderLayers();
+  if (G.fillIds) G.fillIds = G.fillIds.filter((id) => !sil.has(id));
+  msg('Trafo/DM binası: ' + sil.size + ' masa kaldırıldı (' + ust + ' binaya denk geliyordu, ' + golge + ' gölgede kalıyordu; bina h ' + fmtNum(BINA_H, 2) + ' m, gölgesiz saat aralığı). Geri al ile döner.', 'note');
+  return sil.size;
+}
+CMD.GBTEMIZ = () => {   // taşıma/döndürmeden sonra: tüm trafo/DM binaları için
+  const b = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm'));
+  if (!b.length) { msg('Trafo/DM binası yok.', 'err'); return; }
+  if (!tsBinaMasaTemizle(b)) msg('Binalara denk gelen ya da gölgesinde kalan masa yok.', 'res');
+};
+Object.assign(ALIAS, { GBTEMIZ: 'GBTEMIZ', BINAMASA: 'GBTEMIZ' }); Object.assign(LABEL, { GBTEMIZ: 'BİNA MASA TEMİZLE' });
 // 1 m kanal ızgarası: engeller 0,5 m şişirilir, arazi dışı ve sınıra 0,5 m'den yakın hücreler dolu; inverter çıkışı ve ADP çevresi açık
 function tsKanalIzgara(U, eng, P0, A, ekAc) {
   const c = 0.5, xs = U.map((q) => q[0]), ys = U.map((q) => q[1]);

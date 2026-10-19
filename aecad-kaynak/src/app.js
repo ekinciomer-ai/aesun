@@ -514,6 +514,7 @@ async function xformCmd(kind) {
     if (del) apply(M); else apply(M, true);
   }
   S.ghost = null;
+  if (kind !== 'scale' && typeof tsBinaMasaTemizle === 'function') { const b = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm') && (ids.includes(it.id) || kind === 'copy')); if (b.length) tsBinaMasaTemizle(b); }
 }
 CMD.MOVE = () => xformCmd('move');
 CMD.COPY = () => xformCmd('copy');

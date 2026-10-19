@@ -92,21 +92,43 @@ function pitchUpdate() {
 }
 
 async function gesDatasheet(file) {
+  // PDF/metin yüklenince türü (panel / inverter) içerikten anlaşılır, değerler hemen ilgili alanlara yazılır.
+  // Birden çok güç sınıfı (panel) ya da birden çok model/güç (inverter) varsa kullanıcıya sorulur.
+  let txt;
   try {
     busy('Datasheet okunuyor…'); await tick();
-    const buf = new Uint8Array(await file.arrayBuffer()); let txt;
-    if (/\.pdf$/i.test(file.name)) txt = await pdfText(buf); else txt = new TextDecoder().decode(buf);
-    const r = parseDatasheet(txt); const P = G.panel; const got = [];
-    if (r.L && r.W) { P.L = r.L; P.W = r.W; got.push('ölçü'); } if (r.T) P.T = r.T; if (r.cells) { P.cells = r.cells; got.push('hücre'); } if (r.kg) P.kg = r.kg;
-    if (r.p) { P.p = r.p; P.powers = r.powers; got.push('güç'); } if (r.model) P.model = r.model; P.bifacial = !!r.bifacial;
-    for (const k of ['voc', 'vmp', 'isc', 'imp', 'kvoc']) if (r[k] !== null && r[k] !== undefined) P[k] = r[k];
-    if (r.voc) got.push('Voc/Vmp/Isc/Imp');
-    panelToForm(); tplUpdate(); renderTpl(); gesSave();
-    if (!r.L) msg('Datasheet\'ten ölçü okunamadı; değerleri elle girin.', 'err');
-    if (typeof pjAutoHints === 'function') pjAutoHints();
-    msg('Datasheet: ' + file.name + ' → ' + (got.length ? got.join(', ') + ' okundu' : 'değer bulunamadı') + '. Model ' + P.model + ', ' + P.p + ' Wp, ' + P.L + '×' + P.W + '×' + P.T + ' mm' + (P.cells ? ', ' + P.cells + ' hücre' : '') + (P.voc ? ', Voc ' + P.voc + ' V, Vmp ' + P.vmp + ' V, Isc ' + P.isc + ' A, Imp ' + P.imp + ' A, β(Voc) ' + (P.kvoc ?? '—') + ' %/°C' : '') + (P.powers && P.powers.length > 1 ? '. Güç sınıfları: ' + P.powers.join(', ') : ''), 'res');
-  } catch (e) { console.error(e); msg('Datasheet okunamadı: ' + (e.message || e), 'err'); }
-  finally { busy(null); }
+    const buf = new Uint8Array(await file.arrayBuffer());
+    txt = /\.pdf$/i.test(file.name) ? await pdfText(buf) : new TextDecoder().decode(buf);
+  } catch (e) { console.error(e); msg('Datasheet okunamadı: ' + (e.message || e), 'err'); busy(null); return; }
+  busy(null);
+  if (datasheetTuru(txt) === 'inv') return invDatasheet(file, txt);
+  const r = parseDatasheet(txt); const P = G.panel; const got = [];
+  if (r.L && r.W) { P.L = r.L; P.W = r.W; got.push('ölçü'); } if (r.T) P.T = r.T; if (r.cells) { P.cells = r.cells; got.push('hücre'); } if (r.kg) P.kg = r.kg;
+  if (r.model) P.model = r.model; P.bifacial = !!r.bifacial; P.cls = r.cls || {};
+  for (const k of ['voc', 'vmp', 'isc', 'imp', 'kvoc']) if (r[k] !== null && r[k] !== undefined) P[k] = r[k];
+  if (r.p) { P.powers = r.powers; got.push('güç'); let w = r.p;
+    if (r.powers.length > 1) { const s_ = await askDlg('Panel gücü', file.name + ' içinde ' + r.powers.length + ' güç sınıfı var. Projede hangisi kullanılacak?', r.powers.slice().reverse().map((x, i) => [x + ' Wp', x, i ? 'ghost' : 'primary'])); if (s_) w = +s_; }
+    panelSinif(P, w); }
+  if (r.voc) got.push('Voc/Vmp/Isc/Imp');
+  panelToForm(); tplUpdate(); renderTpl(); pitchUpdate(); gesSave();
+  if (typeof pjAutoHints === 'function') pjAutoHints(); if (typeof tfSync === 'function') tfSync(); doldurYenile();
+  if (!r.L) msg('Datasheet\'ten ölçü okunamadı; değerleri elle girin.', 'err');
+  msg('Panel datasheet: ' + file.name + ' → ' + (got.length ? got.join(', ') + ' okundu' : 'değer bulunamadı') + '. Model ' + P.model + ', ' + P.p + ' Wp, ' + P.L + '×' + P.W + '×' + P.T + ' mm' + (P.cells ? ', ' + P.cells + ' hücre' : '') + (P.voc ? ', Voc ' + P.voc + ' V, Vmp ' + P.vmp + ' V, Isc ' + P.isc + ' A, Imp ' + P.imp + ' A, β(Voc) ' + (P.kvoc ?? '—') + ' %/°C' : '') + (P.powers && P.powers.length > 1 ? '. Seçilen sınıf ' + P.p + ' Wp (sınıflar: ' + P.powers.join(', ') + ')' : ''), 'res');
+}
+async function invDatasheet(file, txt) {
+  const r = parseInverter(txt); const yaz = (id, v) => { const el = gv(id); if (el && v !== null && v !== undefined && v !== '') { el.value = String(v); el.dispatchEvent(new Event('change')); } };
+  let kw = r.guclar.length ? r.guclar[0] : null, model = r.modeller.length === 1 ? r.modeller[0] : '';
+  if (r.guclar.length > 1 || r.modeller.length > 1) {
+    const es = r.guclar.length === r.modeller.length;
+    const sec = es ? r.modeller.map((m, i) => [m + ' · ' + fmtNum(r.guclar[i], 0) + ' kW', i]) : r.guclar.length > 1 ? r.guclar.map((g, i) => [fmtNum(g, 0) + ' kW', i]) : r.modeller.map((m, i) => [m, i]);
+    const s_ = await askDlg('İnverter', file.name + ' içinde birden çok ' + (es ? 'model / güç' : r.guclar.length > 1 ? 'AC güç değeri' : 'model') + ' var. Projede hangisi kullanılacak?', sec.slice(0, 8).map((x, j) => [x[0], String(x[1]), j ? 'ghost' : 'primary']));
+    if (s_ !== null && s_ !== undefined) { const i = +s_; if (es || r.guclar.length > 1) kw = r.guclar[i]; if (es || r.guclar.length <= 1) model = r.modeller[i] || model; }
+  }
+  const mppt = r.mppt.length ? r.mppt[0] : null, mppta = r.mppta.length ? Math.max(...r.mppta) : null;
+  yaz('p-inv', kw); yaz('p-invm', model); yaz('p-mppt', mppt); yaz('p-mppta', mppta);
+  if (typeof pjSave === 'function') pjSave(); if (typeof pjAutoHints === 'function') pjAutoHints(); if (typeof tfSync === 'function') tfSync();
+  const got = [kw && 'AC ' + fmtNum(kw, 0) + ' kW', model && 'model ' + model, mppt && mppt + ' MPPT', mppta && 'MPPT başına ' + mppta + ' A', r.vdc.length && 'maks. DC ' + Math.max(...r.vdc) + ' V', r.mpptv && 'MPPT ' + r.mpptv[0] + '–' + r.mpptv[1] + ' V'].filter(Boolean);
+  msg('İnverter datasheet: ' + file.name + ' → ' + (got.length ? got.join(' · ') + ' (proje alanlarına yazıldı)' : 'değer bulunamadı; elle girin') + '.', got.length ? 'res' : 'err');
 }
 // ---- Parseller: birden çok KML/KMZ ya da koordinat bloğu eklenir; bitişik parseller tek saha olarak birleştirilir.
 // Çekme yalnız birleşik dış sınırdan uygulanır (ortak parsel kenarlarında çekme yok). GES-ÇİZ'e parsel listesi gider (script de birleştirir).
@@ -305,7 +327,7 @@ function gesInit() {
   { const pm = gv('p-masa'); if (pm) pm.addEventListener('change', () => masaSec(+pm.value)); }
   if (gv('g-mrenk')) gv('g-mrenk').addEventListener('change', () => { gesSave(); masaRenkUygula(); });
   for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); doldurYenile(); });
-  gv('g-ds').onchange = (e) => { const f = e.target.files[0]; if (f) gesDatasheet(f); e.target.value = ''; };
+  gv('g-ds').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesDatasheet(f); };
   gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };
   gv('g-bds').onclick = () => gv('g-ds').click();
   gv('g-bkml').onclick = () => gv('g-kml').click();

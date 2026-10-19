@@ -4,7 +4,7 @@ const TF = {
   sec: [
     { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
     { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur. Önizlemede bir kenara tıklayarak cephesini seçin (genel → yol → komşu parsel → diğer); her tip kendi çekme mesafesini alır.', arazi: true, f: ['g-lat', 'p-cekme', 'p-cyol', 'p-cpar', 'p-cdig'] },
-    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invn', 'p-invm'] },
+    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur. İnverter datasheet PDF\'i 4. bölümdeki Datasheet düğmesiyle yüklenir; AC güç, model, MPPT sayısı ve akımı buraya yazılır.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invn', 'p-invm'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
     { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa'] },
     { n: '6', h: 'Elektrik detayı', d: 'İsteğe bağlı. Boş alanlar esaslardaki varsayılanlarla hesaplanır (gri değerler).', det: true, f: ['p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-sebeke', 'p-ogkv', 'p-trg', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-dcmax', 'p-taraf'] },
@@ -27,7 +27,7 @@ function tfBuild() {
         '<figure class="tf-prev" id="tf-prev"><svg id="tf-svg" role="img" aria-label="Arazi önizlemesi"></svg><figcaption id="tf-pcap"></figcaption></figure>';
       sec.appendChild(box);
     }
-    if (s.ds) { const r = document.createElement('div'); r.className = 'tf-row'; r.innerHTML = '<button class="gb" id="tf-ds" type="button">Datasheet yükle (PDF)</button><label class="gf" id="tf-pcl-w" hidden>Güç sınıfı (Wp)<select id="tf-pcl"></select></label><span class="gi" id="tf-pinfo"></span>'; sec.appendChild(r); }
+    if (s.ds) { const r = document.createElement('div'); r.className = 'tf-row'; r.innerHTML = '<button class="gb" id="tf-ds" type="button">Datasheet yükle (panel / inverter PDF)</button><label class="gf" id="tf-pcl-w" hidden>Güç sınıfı (Wp)<select id="tf-pcl"></select></label><span class="gi" id="tf-pinfo"></span>'; sec.appendChild(r); }
     if (s.masa) {
       const r = document.createElement('div'); r.className = 'tf-grid';
       r.innerHTML = '<label class="gf">Hazır tip<select id="tf-mpre"><option value="">— seçin —</option><option value="V,2,13">2V13 · 26 panel (TİP-1)</option><option value="V,2,14">2V14 · 28 panel</option><option value="V,2,12">2V12 · 24 panel</option><option value="V,2,26">2V26 · 52 panel</option><option value="V,2,28">2V28 · 56 panel</option><option value="V,1,26">1V26 · 26 panel</option><option value="V,1,28">1V28 · 28 panel</option><option value="V,3,13">3V13 · 39 panel</option><option value="H,4,13">4H13 · 52 panel</option><option value="H,3,20">3H20 · 60 panel</option></select></label>' +
@@ -60,7 +60,7 @@ function tfBuild() {
   gv('tf-koorok').onclick = tfKoor;
   for (const id of ['tf-mor', 'tf-mrows', 'tf-mper', 'tf-mtilt', 'tf-mfront']) gv(id).addEventListener('change', tfMasaSet);
   gv('tf-mpre').onchange = () => { const v = gv('tf-mpre').value; if (!v) return; const [o, r, n] = v.split(','); gv('tf-mor').value = o; gv('tf-mrows').value = r; gv('tf-mper').value = n; tfMasaSet(); };
-  gv('tf-pcl').onchange = () => { G.panel.p = +gv('tf-pcl').value; panelToForm(); tplUpdate(); renderTpl(); gesSave(); tfSync(); };
+  gv('tf-pcl').onchange = () => { panelSinif(G.panel, +gv('tf-pcl').value); panelToForm(); tplUpdate(); renderTpl(); gesSave(); tfSync(); };
   let pt = null; gv('tf-koor').addEventListener('input', () => { clearTimeout(pt); pt = setTimeout(tfPreview, 250); });
 }
 function tfSync() {

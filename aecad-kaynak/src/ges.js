@@ -57,17 +57,51 @@ function parseDatasheet(txt) {
   m = /\b([A-Z]{2,}[A-Z0-9\-\/()]*\d{2,}[A-Z0-9\-\/()]*)\b/.exec(t); if (m) r.model = m[1];
   r.bifacial = /bifacial|bi-facial|çift yüz/i.test(t);
   // electrical values: pick the column of the selected (highest) power class when the line lists one value per class
-  const col = (re, lo, hi) => {
+  // her güç sınıfı için ayrı sütun varsa değerler dizi olarak saklanır (r.cls); seçilen sınıfa göre panelSinif() atar
+  r.cls = {};
+  const col = (k, re, lo, hi) => {
     for (const ln of lines) { if (!re.test(ln)) continue;
       const nums = (ln.replace(re, ' ').match(/-?\d+[.,]\d+|\b\d{2,3}\b/g) || []).map((x) => parseFloat(x.replace(',', '.'))).filter((v) => v >= lo && v <= hi);
-      if (!nums.length) continue; if (r.powers && nums.length === r.powers.length) return nums[r.powers.indexOf(r.p)]; return nums[nums.length - 1]; }
+      if (!nums.length) continue;
+      if (r.powers && r.powers.length > 1 && nums.length === r.powers.length) { r.cls[k] = nums; return nums[r.powers.indexOf(r.p)]; }
+      return nums[nums.length - 1]; }
     return null; };
-  r.voc = col(/(Open[- ]Circuit Voltage|\bVoc\b|Açık devre gerilimi)/i, 20, 120);
-  r.vmp = col(/(Maximum Power Voltage|Voltage at Maximum Power|MPP Voltage|\bVmp+\b|\bVmpp\b)/i, 20, 120);
-  r.isc = col(/(Short[- ]Circuit Current|\bIsc\b|Kısa devre akımı)/i, 5, 30);
-  r.imp = col(/(Maximum Power Current|Current at Maximum Power|MPP Current|\bImp+\b|\bImpp\b)/i, 5, 30);
+  r.voc = col('voc', /(Open[- ]Circuit Voltage|\bVoc\b|Açık devre gerilimi)/i, 20, 120);
+  r.vmp = col('vmp', /(Maximum Power Voltage|Voltage at Maximum Power|MPP Voltage|\bVmp+\b|\bVmpp\b)/i, 20, 120);
+  r.isc = col('isc', /(Short[- ]Circuit Current|\bIsc\b|Kısa devre akımı)/i, 5, 30);
+  r.imp = col('imp', /(Maximum Power Current|Current at Maximum Power|MPP Current|\bImp+\b|\bImpp\b)/i, 5, 30);
   const k = /(Temperature Coefficient (?:of )?(?:Voc|Uoc)|(?:Voc|Uoc)[^\n]{0,25}(?:temperature|sıcaklık) (?:coefficient|katsayı))[^\n]*?(-?0[.,]\d+)\s*%/i.exec(t) || /\b(?:β|beta)\s*\(?(?:Voc|Uoc)\)?[^\n]*?(-?0[.,]\d+)\s*%/i.exec(t);
   if (k) { const v = parseFloat((k[2] || k[1]).replace(',', '.')); r.kvoc = v > 0 ? -v : v; }
+  return r;
+}
+
+// seçilen güç sınıfının elektrik değerleri (datasheet sütunu)
+function panelSinif(P, w) {
+  P.p = w; const i = (P.powers || []).indexOf(w); const c = P.cls || {};
+  if (i >= 0) for (const k of ['voc', 'vmp', 'isc', 'imp']) if (c[k] && c[k].length === P.powers.length) P[k] = c[k][i];
+}
+// datasheet türü: inverter (MPPT, AC çıkış) ya da panel (Voc/Isc, hücre)
+function datasheetTuru(t) {
+  const inv = (t.match(/MPPT|MPP tracker|AC output|Rated AC|Nominal AC|Max(?:imum)?\.? AC|Inverter|İnverter|Evirici|Grid (?:connection|voltage)/gi) || []).length;
+  const pan = (t.match(/\bVoc\b|\bIsc\b|Open[- ]Circuit|Short[- ]Circuit|cells|hücre|Module Efficiency|Modül verim/gi) || []).length;
+  return inv > pan ? 'inv' : 'pan';
+}
+// inverter datasheet: model(ler), AC güç(ler) (kW), MPPT sayısı, MPPT başına akım, maks. DC gerilim, MPPT aralığı
+function parseInverter(txt) {
+  const t = txt.replace(/ /g, ' '); const lines = t.split('\n'); const r = {};
+  const kw = (s) => { const out = []; const re = /(\d{1,3}(?:[.,\s]\d{3})+|\d+(?:[.,]\d+)?)\s*(kW|kVA|W|VA)\b/g; let m;
+    while ((m = re.exec(s))) { let v = m[1]; v = /[.,\s]\d{3}$/.test(v) && !/[.,]\d{1,2}$/.test(v) ? parseFloat(v.replace(/[.,\s]/g, '')) : parseFloat(v.replace(',', '.')); if (/^(W|VA)$/.test(m[2])) v /= 1000; if (v >= 1 && v <= 10000) out.push(+v.toFixed(2)); } return out; };
+  const al = (re) => { for (const ln of lines) if (re.test(ln)) { const v = kw(ln.replace(re, ' ')); if (v.length) return v; } return []; };
+  let pw = al(/(Rated|Nominal)\s*(AC)?\s*(Active)?\s*(Output)?\s*Power|Anma (AC )?güc|Nominal AC/i);
+  if (!pw.length) pw = al(/Max(?:imum)?\.?\s*(AC)?\s*(Active)?\s*(Output)?\s*Power|Maks(?:imum)? (AC )?güç/i);
+  r.guclar = [...new Set(pw)];
+  const mod = new Set(); for (const m of t.matchAll(/\b([A-Z]{2,}[A-Z0-9]*-?\s?\d{2,4}\s?K[A-Z0-9-]*|SG\d{2,4}[A-Z0-9-]*|SUN2000-\d+[A-Z0-9-]*)\b/g)) mod.add(m[1].replace(/\s+/g, ''));
+  r.modeller = [...mod].slice(0, 8);
+  const num = (re, lo, hi) => { for (const ln of lines) { if (!re.test(ln)) continue; const n = (ln.replace(re, ' ').match(/\d+(?:[.,]\d+)?/g) || []).map((x) => parseFloat(x.replace(',', '.'))).filter((v) => v >= lo && v <= hi); if (n.length) return n; } return []; };
+  r.mppt = num(/(Number of MPP(?:T)?\s*(?:trackers|inputs)?|MPPT\s*(?:number|quantity|sayısı)|Number of independent MPP)/i, 1, 30);
+  r.mppta = num(/(Max(?:imum)?\.?\s*(?:DC\s*)?input current\s*(?:per|\/)\s*MPPT|Max\.?\s*current per MPPT|MPPT başına (?:maks\.? )?akım)/i, 5, 200);
+  r.vdc = num(/(Max(?:imum)?\.?\s*(?:DC\s*)?input voltage|Maks(?:imum)?\.? DC giriş gerilimi)/i, 500, 2000);
+  r.mpptv = (() => { for (const ln of lines) if (/MPPT?\s*(operating\s*)?voltage range|MPP voltage range/i.test(ln)) { const m = ln.match(/(\d{3,4})\s*V?\s*[~\-–]\s*(\d{3,4})/); if (m) return [+m[1], +m[2]]; } return null; })();
   return r;
 }
 

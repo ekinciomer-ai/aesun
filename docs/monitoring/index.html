@@ -3669,9 +3669,10 @@ async function kabinSema(uretKw) {
   // net yön: anlık tahmin (inverter − cihaz yükü); fark tahmin hatası içinde kalırsa (±5 kW / %5) OSOS'un son saatindeki yön esas alınır
   const netHam = uret - ANT_KW, osV = (((D && D.osos) || {}).tekyildiz_2 || {}).veri || {}, osG = Object.keys(osV).sort().pop(), osS = osG ? Object.keys(osV[osG]).sort().pop() : null;
   const osNet = osS ? (Number(osV[osG][osS].veris) || 0) - (Number(osV[osG][osS].cekis) || 0) : null, belirsiz = Math.abs(netHam) < Math.max(5, uret * 0.05);
-  const VERIS = belirsiz && uret > 1 && osNet != null ? osNet >= 0 : netHam >= 0, netKw = VERIS ? Math.abs(netHam) : -Math.abs(netHam);
+  // güneş yokken (inverter < 1 kW) pompa, Pi ve iç tüketim şebekeden karşılanır: yön her zaman çekiş
+  const VERIS = uret < 1 ? false : belirsiz && osNet != null ? osNet >= 0 : netHam >= 0, netKw = VERIS ? Math.abs(netHam) : -Math.abs(netHam);
   KB_YON = VERIS;
-  s += '<g class="' + (Math.abs(netKw) < 0.5 && !belirsiz ? 'dur' : '') + '"><path class="ln" style="stroke-width:3;opacity:.3;stroke:' + (netKw >= 0 ? '#1E7A3C' : '#B42318') + '" d="M' + SX + ' ' + SB + 'V93"/><path class="' + (netKw >= 0 ? 'guc' : 'cek') + '" d="' + (netKw >= 0 ? 'M' + SX + ' ' + SB + 'V93' : 'M' + SX + ' 93V' + SB) + '"/></g>'
+  s += '<g class="' + (Math.abs(netKw) < 0.5 && !belirsiz && uret >= 1 ? 'dur' : '') + '"><path class="ln" style="stroke-width:3;opacity:.3;stroke:' + (netKw >= 0 ? '#1E7A3C' : '#B42318') + '" d="M' + SX + ' ' + SB + 'V93"/><path class="' + (netKw >= 0 ? 'guc' : 'cek') + '" d="' + (netKw >= 0 ? 'M' + SX + ' ' + SB + 'V93' : 'M' + SX + ' 93V' + SB) + '"/></g>'
     + '<circle class="ln" cx="' + SX + '" cy="80" r="13"/><circle class="ln" cx="' + SX + '" cy="62" r="13"/><path class="ln" d="M' + SX + ' 49V-12"/>'
     + T(SX + 20, 74, 'Trafo 31,5 / 0,4 kV', 'sm')
     + sayac(MX, 150, 170, belirsiz ? (VERIS ? 'DENGE → ŞEBEKE' : 'DENGE ← ŞEBEKE') : netKw >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', say(Math.abs(netKw), 1), say(Math.abs(netKw) * 1000 / (r3 * V * PF), 0), 'A', netKw >= 0 ? null : '#FF4D3D');

@@ -384,10 +384,10 @@ function sahaCiz() {
       + '<g class="' + (ur ? '' : 'dur') + '"><path d="M' + ic + ' ' + (IY + IH) + 'V' + SB + '" stroke="#2BD27A" stroke-width="3" opacity=".25"/><path class="gk" stroke="#2BD27A" d="M' + ic + ' ' + (IY + IH) + 'V' + SB + '"/></g>';
   });
   // kabin cihazları (durum: canlı ya da manuel simülasyon)
-  const kab = S.kabin, cihW = z => (DUR[z.no] === 'c' ? (z.kw || (z.m === 'S19e XP' ? 5.83 : 5.3)) : 0), ant = Object.values(kab).flat().reduce((t, z) => t + cihW(z), 0), net = gunes - ant;
+  const kab = S.kabin, cihW = z => (DUR[z.no] === 'c' ? (z.kw || (z.m === 'S19e XP' ? 5.83 : 5.3)) : 0), ant = Object.values(kab).flat().reduce((t, z) => t + cihW(z), 0), net = gunes < 1 ? -Math.max(ant, 0.0001) : gunes - ant;
   // sol grup: şebeke → trafo → Q0; ölçüler
   s += '<path class="ln" d="M' + SX + ' 14V' + 40 + '"/><circle class="ln" cx="' + SX + '" cy="54" r="13"/><circle class="ln" cx="' + SX + '" cy="72" r="13"/>' + T(SX + 8, 12, 'OG şebeke', 'sm') + T(SX + 20, 66, 'Trafo', 'sm')
-    + '<g class="' + (Math.abs(net) < 0.5 ? 'dur' : '') + '"><path d="M' + SX + ' 85V' + SB + '" stroke="' + (net >= 0 ? '#2BD27A' : '#F0525A') + '" stroke-width="3" opacity=".25"/><path class="gk" stroke="' + (net >= 0 ? '#2BD27A' : '#F0525A') + '" d="' + (net >= 0 ? 'M' + SX + ' ' + SB + 'V85' : 'M' + SX + ' 85V' + SB) + '"/></g>'
+    + '<g class="' + (Math.abs(net) < 0.5 && gunes >= 1 ? 'dur' : '') + '"><path d="M' + SX + ' 85V' + SB + '" stroke="' + (net >= 0 ? '#2BD27A' : '#F0525A') + '" stroke-width="3" opacity=".25"/><path class="gk" stroke="' + (net >= 0 ? '#2BD27A' : '#F0525A') + '" d="' + (net >= 0 ? 'M' + SX + ' ' + SB + 'V85' : 'M' + SX + ' 85V' + SB) + '"/></g>'
     + lcd(X0 + 64, 96, 170, 'Σ GÜNEŞ', sayi(gunes, 1), sayi(gunes * 1000 / (r3 * V4 * PF), 0))
     + lcd(X0 + 64, 176, 170, net >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', sayi(Math.abs(net), 1), sayi(Math.abs(net) * 1000 / (r3 * V4 * PF), 0), net >= 0 ? null : '#FF4D3D');
   // AG panosu

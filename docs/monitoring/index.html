@@ -3596,7 +3596,7 @@ function kabinCss() {
     + '@media (prefers-reduced-motion:reduce){.kb .akis,.kb .cark,.kb .led{animation:none!important}}';
   document.head.appendChild(st);
 }
-async function kabinSema() {
+async function kabinSema(uretKw) {
   kabinCss();
   let det = null; try { det = await al('n8n/cihaz_detay.json'); } catch (e) {}
   const DC = (det && det.cihaz) || {}, kim = D.kim || {}, md = {};
@@ -3607,11 +3607,16 @@ async function kabinSema() {
   const sayac = (x, y, w, ad, p, i) => '<g><rect class="sc-dis" x="' + x + '" y="' + y + '" width="' + w + '" height="50" rx="4"/><rect class="sc-ic" x="' + (x + 4) + '" y="' + (y + 4) + '" width="' + (w - 8) + '" height="42" rx="2"/>'
     + T(x + 9, y + 15, ad, 'sc-ad') + T(x + w - 28, y + 23, p, 'sc-p', ' text-anchor="end"') + T(x + w - 24, y + 23, 'kW', 'sc-u') + T(x + w - 28, y + 41, i, 'sc-i', ' text-anchor="end"') + T(x + w - 24, y + 41, 'A', 'sc-u') + '</g>';
   let s = '', topW = 0, topTH = 0, nCal = 0, nTop = 0;
-  s += '<path class="ln" d="M' + cx + ' 18V44"/><circle class="ln" cx="' + cx + '" cy="58" r="14"/><circle class="ln" cx="' + cx + '" cy="76" r="14"/><path class="ln" d="M' + cx + ' 90V' + BUSY + '"/>'
-    + T(cx + 26, 30, 'OG şebeke', '', ' font-size="13" font-weight="600"') + T(cx + 26, 72, 'Trafo (OG/AG)', '', ' font-size="13" font-weight="600"')
-    + '<rect class="brk" x="' + (cx - 7) + '" y="110" width="14" height="14"/>' + T(cx + 14, 121, 'AG ana şalter', 'sm');
+  // besleme: Sera-2 AG barası (inverterlerle ortak) → antrak panosu kablosu → ana şalter → kabin dağıtım barası
+  const s2x1 = cx - 330, s2x2 = cx + 330;
+  s += '<path class="ln" style="stroke-width:5;stroke-linecap:round" d="M' + s2x1 + ' 34H' + s2x2 + '"/>'
+    + T(s2x1 + 60, 22, 'Sera-2 AG barası · 0,4 kV (inverter üretimi ile ortak bara)', '', ' font-size="13" font-weight="600"')
+    + '<path class="ln" style="stroke:#1E7A3C;stroke-width:3" d="M' + (s2x1 + 40) + ' 34V8"/>' + T(s2x1 + 48, 50, '↑ Sera-2 inverterleri', 'sm', ' style="fill:#1E7A3C"')
+    + '<path class="ln" style="stroke:#7A8799;stroke-width:3" d="M' + (s2x2 - 40) + ' 34V8"/>' + T(s2x2 - 48, 50, 'sayaç / trafo ↑', 'sm', ' text-anchor="end"')
+    + '<path class="ln" style="stroke-width:2.4" d="M' + cx + ' 34V' + BUSY + '"/>' + T(cx - 10, 72, 'antrak besleme kablosu', 'sm', ' text-anchor="end"')
+    + '<rect class="brk" x="' + (cx - 7) + '" y="110" width="14" height="14"/>' + T(cx - 14, 121, 'Antrak panosu ana şalter', 'sm', ' text-anchor="end"');
   const xs = [...Array(9).keys()].map(i => X0 + i * (CW + GAP) + CW / 2);
-  s += '<path class="bus" d="M' + (xs[0] - 20) + ' ' + BUSY + 'H' + (xs[8] + 20) + '"/>' + T(xs[0] - 20, BUSY - 10, 'AG dağıtım barası · 0,4 kV', '', ' font-size="13" font-weight="600"');
+  s += '<path class="bus" d="M' + (xs[0] - 20) + ' ' + BUSY + 'H' + (xs[8] + 20) + '"/>' + T(xs[0] - 20, BUSY - 10, 'Antrak panosu dağıtım barası', '', ' font-size="13" font-weight="600"');
   Object.keys(KABIN).forEach((k, i) => {
     const L0 = KABIN[k], x = xs[i], bos = !L0.length, c = bos ? ' bos' : '', bx = x - CW / 2, py = BUSY + 72, L = bx + 12, R = bx + CW - 12;
     const cih = L0.map(n => {
@@ -3651,11 +3656,12 @@ async function kabinSema() {
     s += sayac(bx + 12, TOP + bh - 80, CW - 24, 'K' + k, say(kw / 1000, 1), say(kw / (r3 * V * PF), 1))
       + T(bx + 12, TOP + bh - 12, cih.filter(z => z.cal).length + '/' + cih.length + ' cihaz · ' + say(th / 1000, 2) + ' PH', 'ft');
   });
-  s += sayac(cx + 150, 52, 150, 'Σ AG', say(topW / 1000, 1), say(topW / (r3 * V * PF), 0));
+  s += sayac(cx + 20, 60, 150, 'ANTRAK', say(topW / 1000, 1), say(topW / (r3 * V * PF), 0));
+  if (uretKw != null) s += sayac(cx + 190, 60, 150, 'SERA-2 INV', say(uretKw, 1), say(uretKw * 1000 / (r3 * V * PF), 0));
   const ts = D.mad && D.mad.timestamp ? String(D.mad.timestamp).slice(11, 16) : '—';
-  return '<section class="panel" style="gap:10px"><div class="bas"><h2>Madencilik kabinleri · Sera-2</h2><span class="k">9 kabin (antrak) · ' + nCal + '/' + nTop + ' cihaz çalışıyor · ' + say(topTH / 1000, 2) + ' PH · saha verisi ' + esc(ts) + ', sayfa 3 dk\'da bir yenilenir</span></div>'
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>Antrak panosu ve kabinler · Sera-2 AG barasından</h2><span class="k">9 kabin (antrak) · ' + nCal + '/' + nTop + ' cihaz çalışıyor · ' + say(topTH / 1000, 2) + ' PH · saha verisi ' + esc(ts) + ', sayfa 3 dk\'da bir yenilenir</span></div>'
     + '<div style="overflow-x:auto;border:1px solid #E3E8EE;border-radius:10px;background:#FBFCFD"><svg class="kb" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Madencilik kabinleri şeması" style="display:block;font-family:inherit;max-width:none">' + s + '</svg></div>'
-    + '<div class="k">Mavi soğuk su pompadan cihazlara, kırmızı sıcak su cihazlardan pompaya döner; kabinde çalışan cihaz yoksa akış durur. Işık: yeşil çalışıyor, mavi uykuda, kırmızı yanıtsız/hash yok. °C en yüksek çip sıcaklığı; su sıcaklığı cihazın üzerine gelince görünür. '
+    + '<div class="k">Antrak panosu, Sera-2 inverterleriyle aynı AG barasından beslenir: üretim önce bu yükü karşılar, artan şebekeye verilir, eksik şebekeden çekilir (net sayaçta). Mavi soğuk su pompadan cihazlara, kırmızı sıcak su cihazlardan pompaya döner; kabinde çalışan cihaz yoksa akış durur. Işık: yeşil çalışıyor, mavi uykuda, kırmızı yanıtsız/hash yok. °C en yüksek çip sıcaklığı; su sıcaklığı cihazın üzerine gelince görünür. '
     + 'Güç cihazın bildirdiği watt (~ işaretli: bildirmiyor, model değeri), akım I = P / (400 V × 0,99); kabin ve toplam akım I = ΣP / (√3 × 400 V × 0,99), fazlara dengeli dağıtım varsayımı. Sayaç kutuları hesaplanmış değerdir, pompa güçleri dahil değil. Krem kutu: S19 XP+ / S19e XP. Cihaza tıklayınca canlı hashrate açılır.</div></section>';
 }
 async function cizMiningPrensip() {
@@ -3684,13 +3690,13 @@ async function cizMiningPrensip() {
   for (const k of ['Sera-1', 'Sera-2']) {
     const L = (gr[k] || []).sort((a, b) => thNo(a[1].ad) - thNo(b[1].ad)), top = L.reduce((t, [, v]) => t + (Number(v.guc_kw) || 0), 0), ort = L.length ? top / L.length : 0;
     const inv = L.map(([dn, v]) => thFsInv(dn, v, ort)), t = tes[k] || {}, ab = k === 'Sera-1' ? 'T1' : 'T2';
-    const yuk = k === 'Sera-2' ? { ad: '⛏ Madencilik panosu', kw: mkKw, alt: calisan.length + ' / ' + cihaz.length + ' cihaz çalışıyor · kabinler aşağıda' } : null;
+    const yuk = k === 'Sera-2' ? { ad: '⛏ Madencilik panosu', kw: mkKw, alt: calisan.length + ' / ' + cihaz.length + ' cihaz çalışıyor · antrak panosu, kabinler aşağıda' } : null;
     const net = top - (yuk ? mkKw || 0 : 0);
     h += thBolum({ baslik: k + ' · ' + (t.ad || '') + (t.dc_kwp ? ' · ' + say(t.dc_kwp) + ' kWp' : ''), alt: 'FusionSolar ' + esc(String(fs.guncelleme || '').slice(11, 16)) + (k === 'Sera-2' ? ' · madencilik toplayıcı ' + esc(ts) : ''),
       sayac: { ab, net, osos: thOsos(k === 'Sera-1' ? 'tekyildiz_1' : 'tekyildiz_2') },
       bloklar: [{ ad: 'Trafo', inv, yuk, baraNot: 'Σ inverter ' + say(top, 1) + ' kW' }],
       ust: akisGrafik(k, fs, saha, { uretim: top, yuk: yuk ? mkKw : null, net }) });
-    if (k === 'Sera-2') { try { h += await kabinSema(); } catch (e) { h += '<div class="panel hata">Kabin şeması çizilemedi: ' + esc(e.message || e) + '</div>'; } }
+    if (k === 'Sera-2') { try { h += await kabinSema(top); } catch (e) { h += '<div class="panel hata">Kabin şeması çizilemedi: ' + esc(e.message || e) + '</div>'; } }
   }
   const pvVar = Object.values(fs.invertorler || {}).some(v => (v.pv || []).length);
   h += '<div class="k">Akış: OG baradan aşağı; sayaçtaki ok şebekeye (yeşil, veriş) ya da şebekeden (kırmızı, çekiş) yönü gösterir. Sayaç değeri anlık tahmindir (inverter AC çıkışı' + ' − madencilik yükü), iç tüketim hariç; altındaki satır OSOS\'un son saatlik ölçümüdür. '

@@ -842,7 +842,7 @@ function tsInvNumarala() {
 // ortak güzergâhta tek kanal. Her AC çiziminde / inverter eklendikçe baştan güncellenir. Uzunluk = kazı metrajı.
 function tsKanalCiz() {
   try {
-    const KAT = 'GES-AG-KANAL', yarim = 0.5; S.doc.addLayer(KAT, 4);
+    const KAT = 'GES-AG-KANAL', yarim = 0.25; S.doc.addLayer(KAT, 8); { const L_ = S.doc.layers.get(KAT); if (L_) L_.c = 8; }   // kullanıcı 20.10.2026: 50 cm bant, soluk (gri) çizgi
     const sil = [...S.doc.items.values()].filter((it) => it.layer === KAT).map((it) => [it, null]);
     const parcalar = [], gor = new Set();
     for (const it of S.doc.items.values()) if (it.t === 'pline' && it.ges && it.ges.tip === 'ac') { const P = it.pts;
@@ -856,7 +856,7 @@ function tsKanalCiz() {
     const yeni = []; let alan = 0;
     if (parcalar.length) for (const pg of polygonClipping.union(...parcalar)) for (const ring of pg) { const pts = ring.slice(0, -1); alan += Math.abs(polyArea(pts)); yeni.push([null, { id: newId(), t: 'pline', layer: KAT, c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) }]); }
     if (sil.length || yeni.length) S.doc.commit([...sil, ...yeni].map(([o, n]) => ({ o, n })), 'AG kanal');
-    if (alan) msg('AG kablo kanalı (1 m bant, ortak): ≈ ' + fmtNum(alan / (2 * yarim), 0) + ' m kazı.', 'note');
+    if (alan) msg('AG kablo kanalı (50 cm bant, ortak): ≈ ' + fmtNum(alan / (2 * yarim), 0) + ' m kazı.', 'note');
   } catch (e) { console.warn('kanal', e); }
 }
 async function tsAcTekEkle(it) {

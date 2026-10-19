@@ -176,7 +176,7 @@ function init() {
   ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', (e) => { touches.delete(e.pointerId); S.dragging = null; redrawOverlay(); });
   ov.addEventListener('pointerleave', () => { S.inside = false; redrawOverlay(); });
   ov.addEventListener('contextmenu', (e) => { e.preventDefault(); enterKey(); });
-  ov.addEventListener('dblclick', (e) => { if (!S.pending) { const [X, Y] = pos(e); if (!pickItem(X, Y)) zoomExtents(false); } });
+  ov.addEventListener('dblclick', (e) => { if (S.pending) { if (S.pending.kind === 'point' && S.pending.opts && S.pending.opts.base) enterKey(); return; } const [X, Y] = pos(e); if (!pickItem(X, Y)) zoomExtents(false); });   // komut sürerken çift tık = Enter (çizimi bitir)
 
   // command line
   const inp = $('#cmd');

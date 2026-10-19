@@ -155,7 +155,7 @@ async function tsKablo(tip) {
   const T = TS[tip]; const v = await formDlg(T.ad + ' çiz', T.alan); if (!v) return;
   const p0 = await getPoint(T.ad + ' başlangıcı:'); if (!Array.isArray(p0)) return; const pts = [p0];
   for (;;) {
-    const r = await getPoint('Sonraki nokta [Geri al(G)] — Enter: bitir · L=' + fmtNum(tsBoy(pts), 1) + ' m', { base: pts[pts.length - 1], kw: ['G'], preview: (m) => [{ pts: [...pts, m] }] });
+    const r = await getPoint('Sonraki nokta [Geri al(G)] — bitir: Enter / sağ tık / çift tık (uç otomatik AG panoya bağlanır) · L=' + fmtNum(tsBoy(pts), 1) + ' m', { base: pts[pts.length - 1], kw: ['G'], preview: (m) => [{ pts: [...pts, m] }] });
     if (r === null || r === undefined) break; if (r.kw === 'G') { if (pts.length > 1) pts.pop(); continue; } if (!Array.isArray(r)) break; pts.push(r);
   }
   if (pts.length < 2) return;

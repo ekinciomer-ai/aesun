@@ -3348,7 +3348,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191327', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191329', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4094,7 +4094,7 @@ async function tsKablo(tip) {
   const T = TS[tip]; const v = await formDlg(T.ad + ' çiz', T.alan); if (!v) return;
   const p0 = await getPoint(T.ad + ' başlangıcı:'); if (!Array.isArray(p0)) return; const pts = [p0];
   for (;;) {
-    const r = await getPoint('Sonraki nokta [Geri al(G)] — Enter: bitir · L=' + fmtNum(tsBoy(pts), 1) + ' m', { base: pts[pts.length - 1], kw: ['G'], preview: (m) => [{ pts: [...pts, m] }] });
+    const r = await getPoint('Sonraki nokta [Geri al(G)] — bitir: Enter / sağ tık / çift tık (uç otomatik AG panoya bağlanır) · L=' + fmtNum(tsBoy(pts), 1) + ' m', { base: pts[pts.length - 1], kw: ['G'], preview: (m) => [{ pts: [...pts, m] }] });
     if (r === null || r === undefined) break; if (r.kw === 'G') { if (pts.length > 1) pts.pop(); continue; } if (!Array.isArray(r)) break; pts.push(r);
   }
   if (pts.length < 2) return;
@@ -5009,7 +5009,7 @@ function init() {
   ov.addEventListener('pointerup', up); ov.addEventListener('pointercancel', (e) => { touches.delete(e.pointerId); S.dragging = null; redrawOverlay(); });
   ov.addEventListener('pointerleave', () => { S.inside = false; redrawOverlay(); });
   ov.addEventListener('contextmenu', (e) => { e.preventDefault(); enterKey(); });
-  ov.addEventListener('dblclick', (e) => { if (!S.pending) { const [X, Y] = pos(e); if (!pickItem(X, Y)) zoomExtents(false); } });
+  ov.addEventListener('dblclick', (e) => { if (S.pending) { if (S.pending.kind === 'point' && S.pending.opts && S.pending.opts.base) enterKey(); return; } const [X, Y] = pos(e); if (!pickItem(X, Y)) zoomExtents(false); });   // komut sürerken çift tık = Enter (çizimi bitir)
 
   // command line
   const inp = $('#cmd');

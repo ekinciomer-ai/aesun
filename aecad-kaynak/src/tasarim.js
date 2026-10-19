@@ -230,7 +230,47 @@ function tsAcAg(kalan, A, tm, tohum) {
   // 2) Hiçbiri bağlanamıyorsa en uzak inverterden ADP'ye ana hat (mevcut kanal ucuz → ağa girer), sonra 1'e dön.
   const out = new Map(), ag = [];
   for (const y of tohum || []) { const z = y.map((q) => [q[0], q[1]]); ag.push(z); K.agEkle(z); }
-  // (kenar kanal tohumu kaldırıldı — kullanıcı: önce ADP'den en uzak inverterin yanına kadar EN KISA tek ana kanal, diğerleri ona düz bağlanır)
+  // ANA KANAL (kullanıcı kuralı 19.10.2026): trafo tarafındaki sıraların MASA UÇ NOKTALARINI hedef alan düz hat — uçların ~1,5 m
+  // dışından, uçlara teğet doğru parçaları (dış zarf); trafodan en uzak inverterin sırasına kadar. İnverterler sıra açıklığından buna düz bağlanır.
+  try {
+    const ms = [...S.doc.items.values()].filter((it) => String(it.layer).toUpperCase() === 'GES-MASA');
+    const f0 = ms.length && tsMasaCerceve(ms[0]);
+    if (f0 && kalan.length && self.AC_ZARF === true) {   // deneme: masa ucu zarfı (kapalı — ızgara + düzleştirme esas)
+      const ux = f0.ux, uy = [-ux[1], ux[0]], L_ = (p) => [p[0] * ux[0] + p[1] * ux[1], p[0] * uy[0] + p[1] * uy[1]], W_ = (q) => [q[0] * ux[0] + q[1] * uy[0], q[0] * ux[1] + q[1] * uy[1]];
+      const Al = L_(A), invL = kalan.map((x) => L_(x.p)), cxI = invL.reduce((t, q) => t + q[0], 0) / invL.length;
+      const dogu = Al[0] >= cxI;   // trafo inverterlerin hangi yanında
+      // sıra uçları (yerel): masa çokgenlerini y'ye göre sıralara ayır; trafo tarafındaki uç
+      const sira = [];
+      for (const it of ms) { const P = tsMasaIz(it); if (!P) continue; const Q = P.map(L_); const y0 = Math.min(...Q.map((q) => q[1])), y1 = Math.max(...Q.map((q) => q[1])), x0 = Math.min(...Q.map((q) => q[0])), x1 = Math.max(...Q.map((q) => q[0])); const yc = (y0 + y1) / 2;
+        let r = sira.find((z) => Math.abs(z.yc - yc) < (y1 - y0) / 2); if (!r) { r = { yc, y0, y1, x0, x1 }; sira.push(r); } else { r.x0 = Math.min(r.x0, x0); r.x1 = Math.max(r.x1, x1); r.y0 = Math.min(r.y0, y0); r.y1 = Math.max(r.y1, y1); } }
+      if (sira.length >= 2) {
+        const pay = 1.5, uc = sira.map((r) => [[dogu ? r.x1 + pay : r.x0 - pay, r.y0 - 0.3], [dogu ? r.x1 + pay : r.x0 - pay, r.y1 + 0.3]]).flat();
+        const zarf = (pts) => {   // dış zarf: doğuda en büyük x'e teğet dışbükey zincir (y sıralı)
+          const P = pts.slice().sort((p, q) => p[1] - q[1]), cr = (o, a_, b_) => (a_[0] - o[0]) * (b_[1] - o[1]) - (a_[1] - o[1]) * (b_[0] - o[0]), H = [];
+          for (const p of P) { while (H.length >= 2 && (dogu ? cr(H[H.length - 2], H[H.length - 1], p) >= 0 : cr(H[H.length - 2], H[H.length - 1], p) <= 0)) H.pop(); H.push(p); }
+          return H;
+        };
+        for (const yon of [1, -1]) {   // trafonun kuzeyi ve güneyi ayrı kollar
+          const ust = invL.filter((q) => (q[1] - Al[1]) * yon > 0); if (!ust.length) continue;
+          const uzak = ust.reduce((m, q) => (Math.abs(q[1] - Al[1]) > Math.abs(m[1] - Al[1]) ? q : m));
+          const ylim = uzak[1] + yon * 3;
+          let pts = uc.filter((p) => (p[1] - Al[1]) * yon >= -2 && (ylim - p[1]) * yon >= 0);
+          if (pts.length < 2) { continue; }
+          let H = zarf(pts); H.sort((p, q) => (p[1] - q[1]) * yon);   // trafodan uzağa
+          const kol = [...H.slice().reverse()].map(W_);   // uzaktan trafoya
+          // her parça engelsiz olmalı; değilse o kol atlanır (ızgara yedeği çalışır)
+          // engelli parça (köşk, sınır köşesi) yalnız o parçada ızgara güzergâhıyla aşılır
+          const k2 = [kol[0]]; let ok = true;
+          for (let i = 1; i < kol.length; i++) { if (K.gorur(k2[k2.length - 1], kol[i])) { k2.push(kol[i]); continue; } const r_ = K.yol(k2[k2.length - 1], kol[i]); if (!r_) { ok = false; break; } k2.push(...r_.slice(1)); }
+          if (!ok) { continue; }
+          kol.length = 0; kol.push(...k2);
+          const son = kol[kol.length - 1], bag = K.gorur(son, A) ? [son, A] : K.yol(son, A);
+          if (!bag) continue;
+          const z = [...kol, ...bag.slice(1)]; ag.push(z); K.agEkle(z);
+        }
+      }
+    }
+  } catch (e) { }
   const kal = kalan.slice(), d = (p) => Math.hypot(p[0] - A[0], p[1] - A[1]);
   while (kal.length) {
     let en = null;
@@ -407,6 +447,9 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   const dik = (a, b) => { const p = Lc(a), q = Lc(b); return Math.abs(p[0] - q[0]) < 0.05 || Math.abs(p[1] - q[1]) < 0.05; };
   // ana hat doğrultma (kullanıcı kuralı 19.10.2026): ana kanal merdiven olmaz — engelden ≥ 1 m açıkla görülebilen en uzak noktaya
   // tek düz çizgi (sınıra paralel / çapraz olabilir); uçlardaki 3 m'de açıklık şartı aranmaz
+  // masa çokgenleriyle gerçek kesişim testi (ızgaradan bağımsız; 0,5 m pay): düz hat hiçbir masaya değmez
+  const masaP = eng.filter((o) => o.it && String(o.it.layer).toUpperCase() === 'GES-MASA').map((o) => o.P);
+  const masaKeser = (p, q) => { for (const P of masaP) { let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; for (const v of P) { x0 = Math.min(x0, v[0]); y0 = Math.min(y0, v[1]); x1 = Math.max(x1, v[0]); y1 = Math.max(y1, v[1]); } if (Math.max(p[0], q[0]) < x0 - 0.5 || Math.min(p[0], q[0]) > x1 + 0.5 || Math.max(p[1], q[1]) < y0 - 0.5 || Math.min(p[1], q[1]) > y1 + 0.5) continue; const n = Math.max(2, Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 0.25)); for (let k = 0; k <= n; k++) { const t = k / n, z = [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]; if (tsIcinde(z, P)) return true; for (let e = 0; e < P.length; e++) if (dSeg(z[0], z[1], P[e], P[(e + 1) % P.length]) < 0.5) return true; } } return false; };
   const acikGorur = (a, b, uc0, uc1) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n, q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; const [i, j] = hc(q); if (i < 0 || j < 0 || i >= nx || j >= ny || blk[j * nx + i]) return false; if (Math.hypot(q[0] - uc0[0], q[1] - uc0[1]) > 3 && Math.hypot(q[0] - uc1[0], q[1] - uc1[1]) > 3 && ak[j * nx + i] * h < 1.0) return false; } return true; };
   const yol = (aW, bW, opt) => {
     const a = Lc(aW), b = Lc(bW);
@@ -446,7 +489,7 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
       // kırık sayısı öneki: çapraz düz hat yalnız MERDİVENİN (≥ 3 kırık) yerine geçer; tek/çift kırıklı dik güzergâh korunur
       const tp = [0]; for (let k = 1; k < D.length; k++) { let t = 0; if (k >= 2) { const u = [D[k - 1][0] - D[k - 2][0], D[k - 1][1] - D[k - 2][1]], v = [D[k][0] - D[k - 1][0], D[k][1] - D[k - 1][1]]; if (Math.abs(u[0] * v[1] - u[1] * v[0]) > 1e-6) t = 1; } tp.push(tp[k - 1] + t); }
       const kir = (i0, j0) => Math.max(0, tp[j0 - 1] - tp[Math.min(j0 - 1, i0 + 1)]);
-      const uygun = (i0, j0) => acikGorur(D[i0], D[j0], a, b);   // en kısa: engelden ≥ 1 m açıkla görülen en uzak noktaya düz
+      const uygun = (i0, j0) => { const t = kir(i0, j0); return (t === 0 || t >= 3) && acikGorur(D[i0], D[j0], a, b) && !masaKeser(D[i0], D[j0]); };   // çapraz yalnız merdiven yerine, masaya değmeden
       while (i < D.length - 1) {
         let j = Math.min(D.length - 1, i + 1200);
         while (j > i + 1 && !uygun(i, j)) j -= Math.max(1, Math.floor((j - i) / 40));

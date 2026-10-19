@@ -36,7 +36,7 @@ function pjYerlesim() {
 function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pjAltSirada(); }
 // Hız (kullanıcı 19.10.2026: büyük projelerde sistem çuvallamamalı): yerleşim seçenekleri paralel hesaplanır —
 // her seçenek kendi Python işçisinde (çekirdek ve belleğe göre 1–4 işçi; Python ortamı her işçide bir kez yüklenir).
-function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(4, c - 1, m >= 8 ? 4 : m >= 4 ? 2 : 1)); }
+function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(6, c - 2, m >= 16 ? 6 : m >= 8 ? 4 : m >= 4 ? 2 : 1)); }   // 22 çekirdek / 32 GB → 6 seçenek aynı anda
 function pjYerIsci(k) {
   PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
   o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=__BUILD__', document.baseURI).href), alt: null };

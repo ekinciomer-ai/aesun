@@ -81,7 +81,9 @@ VARSAYILAN = {
                "kappa_cu": 56.0, "kappa_al": 35.0, "og_dusum_max_pct": 7.0, "trafo_yag_l": None,
                "ag_pano_form": "Form 4b", "ag_pano_ip": "IP54", "ag_pano_icw_ka": 65, "ag_pano_in_a": 4000},
   "hendek": {"dc_derinlik_m": 0.70, "ag_derinlik_m": 0.80, "og_derinlik_m": 1.00, "genislik_m": 0.60,
-             "kum_cm": 10, "koruyucu_cm": 6, "uyari_ust_cm": 30, "kablo_aralik_cm": 7, "yol_gecis_boru_ust_m": 1.0},
+             "kum_cm": 10, "koruyucu_cm": 6, "uyari_ust_cm": 30, "kablo_aralik_cm": 7, "yol_gecis_boru_ust_m": 1.0,
+             # kademeli AG/OG kanal (Zorlu Tesis 1 GES onaylı kesitleri): b = taban + artış × (AC devre − 1) + OG eki (≥ 2 AC devrede)
+             "ac_kanal_taban_m": 0.60, "ac_devre_artis_m": 0.20, "og_ek_m": 0.10, "detay_min_m": 15.0},
   "yol": {"genislik_m": 4.0, "tm_alan_m": [12.0, 10.0],
           # A.7 (18.10.2026): sıraları kesen K-G iç işletme-bakım yolları; aralık DC gerilim düşümünden (A.1)
           "ic_yol": True, "ic_genislik_m": 5.0, "ic_kanal_m": 1.0, "ic_pay_m": 1.0, "ic_aralik_m": None,
@@ -1064,10 +1066,14 @@ class Model:
         for inv in self.inverterler:
             tm = self.tm_loc[inv["tr"] - 1].centroid
             ya = inv["masa"]["loc"].bounds[1] - self.acik / 2 + 0.6  # A.3: ön masa–arka masa açıklığı (DC'den ayrı hendek)
-            h = self._aga(inv["x"], ya, inv["taraf"])
             if getattr(self, "ag", None): tq = nearest_points(self.ag["U"], tm)[0]; tmh = Point(tq.x, tq.y)
             else: tmh = self.halka.interpolate(self.halka.project(tm))
-            arc = self.ag_yol(h, (tmh.x, tmh.y))
+            # A.9: sıra açıklığından kanala iki yönden hangisi ADP'ye daha kısa götürüyorsa o (uzun dolanma yok)
+            ady = []
+            for tf in ("E", "W"):
+                h_ = self._aga(inv["x"], ya, tf); a_ = self.ag_yol(h_, (tmh.x, tmh.y))
+                ady.append((abs(h_[0] - inv["x"]) + abs(h_[1] - ya) + a_.length, h_, a_))
+            _, h, arc = min(ady, key=lambda t: t[0])
             ls = LineString([(inv["x"], inv["y"]), (inv["x"], ya), h] + list(arc.coords) + [(tm.x, tm.y)])
             inv["ac_m"] = ls.length + 10.0
             inv["ac_hendek"] = [LineString([(inv["x"], ya), h]), arc]
@@ -1105,6 +1111,7 @@ class Model:
             self.og = min(z1, z2, key=lambda z: sum(o["m"] for o in z))
         self.hendek_dc = unary_union(self.dc_hat) if self.dc_hat else LineString()
         self.hendek_ac = unary_union([g for i in self.inverterler for g in i["ac_hendek"]] + [o["hat"] for o in self.og])
+        self.kanal_kademe()
         # ---- kablo geçişleri (EKAT md.58): AG kablonun iç yolu enine geçtiği yerler boru içinde; DC–AG hendek kesişimleri korumalı
         self.yol_gecis, self.kesisim = [], []
         for inv in self.inverterler:
@@ -1117,6 +1124,33 @@ class Model:
         pts = [] if k is None or k.is_empty else ([k] if k.geom_type == "Point" else [g for g in getattr(k, "geoms", []) if g.geom_type == "Point"])
         for q in pts:
             if all(math.dist((q.x, q.y), (o["x"], o["y"])) > 1.0 for o in self.kesisim): self.kesisim.append({"x": q.x, "y": q.y})
+
+    def kanal_kademe(self):
+        """Ortak AG/OG kanalı (kullanıcı kuralı 19.10.2026, A.9): kablolar tek kanalda; kanal genişliği o parçadan geçen
+        AC devre sayısıyla kademeli artar, kesit değiştiği yerde DETAY-n. Her parça için n (AC devre), og (OG var mı), b (m)."""
+        hd = self.P["hendek"]; tb, ar, oe = hd.get("ac_kanal_taban_m", 0.60), hd.get("ac_devre_artis_m", 0.20), hd.get("og_ek_m", 0.10)
+        ac_g = [unary_union(i["ac_hendek"]) for i in self.inverterler]
+        og_g = [o["hat"] for o in self.og if not o["hat"].is_empty]
+        U = self.hendek_ac; parcalar = [] if U.is_empty else (list(U.geoms) if hasattr(U, "geoms") else [U])
+        def gen(n, og): return hd["genislik_m"] if n == 0 else round(tb + ar * (n - 1) + (oe if og and n >= 2 else 0.0), 2)
+        kanal = []
+        for ls in parcalar:
+            if ls.geom_type != "LineString": continue
+            c = list(ls.coords); cur = None
+            for a, b in zip(c, c[1:]):
+                if math.dist(a, b) < 1e-3: continue
+                m = Point((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+                n = sum(1 for g in ac_g if g.distance(m) < 0.05); og = any(g.distance(m) < 0.05 for g in og_g)
+                if cur and cur["n"] == n and cur["og"] == og: cur["pts"].append(b)
+                else:
+                    cur = {"n": n, "og": og, "pts": [a, b]}; kanal.append(cur)
+        tipler = sorted({(k["n"], k["og"]) for k in kanal})
+        self.kanal_tip = []
+        for j, (n, og) in enumerate(tipler):
+            L = sum(LineString(k["pts"]).length for k in kanal if (k["n"], k["og"]) == (n, og))
+            self.kanal_tip.append({"detay": j + 1, "n": n, "og": og, "b": gen(n, og), "m": L})
+        no = {(t["n"], t["og"]): t for t in self.kanal_tip}
+        self.kanal = [{"geom": LineString(k["pts"]), "n": k["n"], "og": k["og"], "b": no[(k["n"], k["og"])]["b"], "detay": no[(k["n"], k["og"])]["detay"]} for k in kanal]
 
     # ---------------------------------------------------------------- 6) topraklama
     def topraklama(self):
@@ -1451,6 +1485,8 @@ class Model:
         r("Elektrik", "OG kablo başlığı", len(self.og) * 2 * 3, "adet", "02", "OG Başlık İşçiliği")
         r("Elektrik", "DC hendek (sıra geçişi, ortak hendek)", self.hendek_dc.length, "m", "04", "AG-OG Kablo Kanal")
         r("Elektrik", "AG/OG kanal (ortak hendek, güzergâh toplamı değil)", self.hendek_ac.length, "m", "04", "AG-OG Kablo Kanal")
+        for t_ in getattr(self, "kanal_tip", []):
+            r("Elektrik", f"  Kanal DETAY-{t_['detay']}: b={t_['b']:.2f} m · {t_['n']} AC devre" + (" + OG" if t_["og"] else ""), t_["m"], "m", "04/05", "AG-OG Kablo Kanal")
         t = P["topraklama"]
         r("Topraklama", t["serit"], self.toprak_serit.length, "m", "03", "Topraklama Sistemi")
         r("Topraklama", "Topraklama çubuğu", len(self.toprak_cubuk), "adet", "03", "Topraklama Sistemi")
@@ -1565,8 +1601,13 @@ def pafta_kablo(M):
         pf.yazi("GES-AC-KABLO", x + 2, y + 1, 1.4, f"YG{i+1}")
     for i, g in enumerate(M.kesisim):       # DC–AG kesişim: koruma
         x, y = M.Wp(g["x"], g["y"]); pf.daire("GES-DC-KABLO", x, y, 0.9, info=f"K{i+1} DC–AG kesişimi")
-    for r_ in M.ic_yollar:
-        for k in r_["kanal"]: geom_ciz(pf, "GES-HENDEK-AC", W(k), info=f"İç yol {r_['no']} kenar kanalı")
+    for k in getattr(M, "kanal", []):   # kademeli ortak kanal: genişlik gerçek ölçüde; kesit değiştiği parçada DETAY-n
+        g = k["geom"]
+        geom_ciz(pf, "GES-HENDEK-AC", W(g.buffer(k["b"] / 2, cap_style=2, join_style=2)), info=f"Kanal DETAY-{k['detay']} b={k['b']:.2f} m · {k['n']} AC" + (" + OG" if k["og"] else ""))
+        if g.length >= M.P["hendek"].get("detay_min_m", 15.0):
+            c = W(g).interpolate(0.5, normalized=True)
+            pf.poli("GES-HENDEK-AC", [(c.x - 1.0, c.y - 1.0), (c.x + 1.0, c.y - 1.0), (c.x + 1.0, c.y + 1.0), (c.x - 1.0, c.y + 1.0), (c.x - 1.0, c.y - 1.0)])
+            pf.yazi("GES-HENDEK-AC", c.x + 1.4, c.y - 0.5, 1.0, f"DETAY-{k['detay']}")
     return pf
 
 
@@ -1613,6 +1654,31 @@ def pafta_kanal(M):
               f"EKAT md.58-b/16: yol/su kanalı geçişleri çelik/HDPE boru veya beton kanal içinde; boru üstü yol yüzeyinden ≥ {h['yol_gecis_boru_ust_m']:.1f} m aşağıda.",
               "Çizelge-6: doğalgaz/petrol boru hattına paralel ≥ 0,6 m, kesişmede ≥ 0,4 m. Şartname: DC kablo AC ile aynı kanala konmaz."]
     for i, t in enumerate(notlar): pf.yazi(N, 0, -1.75 - i * 0.09, 0.03, t)
+    # kademeli ortak kanal kesitleri (04'teki DETAY-n): AC devre başına 3+1 tek damar demet, gruplar arası kablo aralığı, AC–OG 2 × aralık
+    x0, Y = 0.0, -2.6; ka = h["kablo_aralik_cm"] / 100; d = h["ag_derinlik_m"]; kum = h["kum_cm"] / 100; kor = h["koruyucu_cm"] / 100
+    for t in getattr(M, "kanal_tip", [])[:10]:
+        w = t["b"]
+        pf.cizgi(K, [(x0 - 0.2, Y), (x0 + w + 0.2, Y)])
+        pf.cizgi(K, [(x0, Y), (x0, Y - d - kum), (x0 + w, Y - d - kum), (x0 + w, Y)])
+        yk = Y - d; r = 0.018
+        grup = [("AG", 4)] * t["n"] + ([("OG", 3)] if t["og"] else [])
+        gen = sum(n * 2 * r for _, n in grup) + ka * max(0, len(grup) - 1) + (ka if t["og"] and t["n"] else 0)
+        x = x0 + max(0.03, (w - gen) / 2)
+        for j, (tip, n) in enumerate(grup):
+            if tip == "OG" and j: x += ka
+            for i in range(n): pf.daire("GES-OG-KABLO" if tip == "OG" else "GES-AC-KABLO", x + r + i * 2 * r, yk, r)
+            x += n * 2 * r + ka
+        ykum = yk + r + kum
+        pf.cizgi(N, [(x0, ykum), (x0 + w, ykum)])
+        pf.poli(K, [(x0, ykum), (x0 + w, ykum), (x0 + w, ykum + kor), (x0, ykum + kor), (x0, ykum)])
+        yb = ykum + kor + h["uyari_ust_cm"] / 100
+        if yb < Y - 0.05: pf.cizgi("GES-OG-KABLO", [(x0 + 0.05, yb), (x0 + w - 0.05, yb)])
+        pf.yazi(K, x0 + w / 2, Y - d - kum - 0.1, 0.03, f"b = {w:.2f} m", hiz="C")
+        pf.yazi(N, x0, Y + 0.14, 0.045, f"DETAY-{t['detay']}")
+        pf.yazi(N, x0, Y + 0.07, 0.025, f"{t['n']} AC devre" + (" + OG" if t["og"] else "") + f" · {t['m']:.0f} m")
+        x0 += w + 1.0
+    if getattr(M, "kanal_tip", None):
+        pf.yazi(N, 0, Y - d - 0.45, 0.03, "Kademeli ortak AG/OG kanal: genişlik geçen AC devre sayısıyla artar (b = taban + artış × (n − 1) + OG eki); 04 paftasında kesit değişen parçada DETAY-n.")
     return pf
 
 

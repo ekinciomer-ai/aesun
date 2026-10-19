@@ -265,20 +265,24 @@ function tsAcAg(kalan, A, tm, tohum) {
             let dv = [0, yon]; if (Es.length >= 2) { const a = Es[0], b = Es[Es.length - 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; dv = [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; }
             let nv = [dv[1], -dv[0]]; if (dot(Al, nv) < dot(Es[0], nv)) nv = [-nv[0], -nv[1]];   // normal TM'ye bakar
             const c0 = Math.max(...Es.map((p) => dot(p, nv))), tF = dot(Al, dv);
-            for (const pay of [3.0, 2.0, 1.5, 1.0]) {
-              const c = c0 + pay, N = (t) => [nv[0] * c + dv[0] * t, nv[1] * c + dv[1] * t], ayak = N(tF);
+            let neden = '';
+            for (const pay of [3.0, 2.0, 1.5, 1.0, 4.0, 5.0]) {
+              const c = c0 + pay, N = (t) => [nv[0] * c + dv[0] * t, nv[1] * c + dv[1] * t];
               // hat, her inverterin SIRA doğrultusundaki (yerel x) düz çizgisiyle kesişene kadar uzar (eğik hatta kesişim inverter izdüşümünden ötededir)
               const tKes = (q) => (Math.abs(nv[0]) > 0.05 ? dot(q, dv) + ((c - dot(q, nv)) / nv[0]) * dv[0] : dot(q, dv));
               const tB = Math.max(tF + 0.5, ...inv_.map((q) => tKes(q) + 3));
-              let tU = tB; while (tU > tF + 0.5 && !icinde(N(tU))) tU -= 1;   // uç sınır dışına taşıyorsa sınıra kadar kısalt
-              const uc = N(tU); if (!icinde(ayak) || !icinde(uc) || tU <= tF + 0.5) continue;
-              const ayakW = W_(ayak), ucW = W_(uc); if (!K.masaYok(ucW, ayakW)) continue;
-              const bag = K.masaYok(ayakW, A) ? [ayakW, A] : K.yol(ayakW, A, { duz: true }); if (!bag) continue;
+              let tA_ = tF; while (tA_ < tB - 0.5 && !icinde(N(tA_))) tA_ += 0.5;   // ayak (TM hizası) sınır dışındaysa hat boyunca içeri kaydır
+              let tU = tB; while (tU > tA_ + 0.5 && !icinde(N(tU))) tU -= 1;   // uç sınır dışına taşıyorsa sınıra kadar kısalt
+              const ayak = N(tA_), uc = N(tU);
+              if (!icinde(ayak) || !icinde(uc) || tU <= tA_ + 0.5) { neden = 'hat arazi dışında (pay ' + pay + ')'; continue; }
+              const ayakW = W_(ayak), ucW = W_(uc); if (!K.masaYok(ucW, ayakW)) { neden = 'hat masaya değiyor (pay ' + pay + ')'; continue; }
+              const bag = K.masaYok(ayakW, A) ? [ayakW, A] : (K.yol(ayakW, A, { duz: true }) || K.yol(ayakW, A)); if (!bag) { neden = 'ADP bağlantısı yok'; continue; }
               let bas = [ucW];   // hat sınırda kesildiyse ANA hatta tek kırıkla sınır içinden en uzak sıraya kadar devam (kırık yalnız ana hatta)
               if (tU < tB - 0.5) { let g = 0, u2 = null; while (g <= 12) { const q = N(tB); const q2 = [q[0] - nv[0] * g, q[1] - nv[1] * g]; if (icinde(q2)) { u2 = W_(q2); break; } g += 0.5; }
                 if (u2 && K.masaYok(u2, ucW)) bas = [u2, ucW]; }
-              const z = [...bas, ...bag]; ag.push(z); K.agEkle(z); istik.push(z); break;
+              const z = [...bas, ...bag]; ag.push(z); K.agEkle(z); istik.push(z); neden = ''; break;
             }
+            if (neden) { try { msg('AG hat istikameti ' + (yon > 0 ? '1. ' : '2. ') + 'kol kurulamadı: ' + neden + ' — o yanda ızgara güzergâhı kullanıldı.', 'note'); } catch (e_) { } }
           }
         }
       }

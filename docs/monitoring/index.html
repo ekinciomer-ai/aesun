@@ -3591,10 +3591,10 @@ function kabinCss() {
     + '.kb .led.on{fill:#1FA463;animation:kbYan 1.6s ease-in-out infinite}.kb .led.uy{fill:#2a78d6}.kb .led.off{fill:#D92D20}'
     + '.kb .sc-dis{fill:#3A4248}.kb .sc-ic{fill:#0C1712}.kb .sc-ad{font-family:ui-monospace,monospace;font-size:9px;fill:#7F9A8A;letter-spacing:.08em}'
     + '.kb .sc-p,.kb .sc-i,.kb .sc-u{font-family:"Share Tech Mono",ui-monospace,monospace}.kb .sc-p{font-size:19px;fill:#FFB02E;filter:drop-shadow(0 0 3px #FFB02E)}.kb .sc-i{font-size:19px;fill:#5CF08F;filter:drop-shadow(0 0 3px #5CF08F)}.kb .sc-u{font-size:11px;fill:#7F9A8A}'
-    + '.kb .disk{transform-box:fill-box;transform-origin:center;animation:kbDisk 2.4s linear infinite}.kb .disk.geri{animation-direction:reverse}@keyframes kbDisk{0%{transform:translateX(-64px) scaleX(.3)}25%{transform:translateX(-45px) scaleX(.8)}50%{transform:translateX(0) scaleX(1)}75%{transform:translateX(45px) scaleX(.8)}100%{transform:translateX(64px) scaleX(.3)}}.kb .pvt:hover rect{stroke:#FFB02E;stroke-width:1.6}.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
+    + '.kb .disk{transform-box:fill-box;transform-origin:center;animation:kbDisk 2.4s linear infinite}.kb .disk.geri{animation-direction:reverse}@keyframes kbDisk{0%{transform:translateX(-68px) scaleX(.15);opacity:0}8%{opacity:1}25%{transform:translateX(-48px) scaleX(.7)}50%{transform:translateX(0) scaleX(1)}75%{transform:translateX(48px) scaleX(.7)}92%{opacity:1}100%{transform:translateX(68px) scaleX(.15);opacity:0}}.kb .tb{animation:kbTb 1s cubic-bezier(.3,.1,.2,1) forwards}@keyframes kbTb{from{transform:translateY(0)}to{transform:translateY(var(--d))}}.kb .pvt:hover rect{stroke:#FFB02E;stroke-width:1.6}.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
     + '.kb .guc,.kb .yuk,.kb .cek{fill:none;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .guc{stroke:#1E7A3C}.kb .dc{fill:none;stroke:#1B4F8A;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .dur .dc{animation:none;opacity:.25}.kb .yuk{stroke:#E07B00}.kb .cek{stroke:#B42318}.kb .dur .guc,.kb .dur .yuk,.kb .dur .cek{animation:none;opacity:.25}.kb .led.kap{fill:#C3CDD8}'
     + '@keyframes kbAkis{to{stroke-dashoffset:-16}}@keyframes kbDon{to{transform:rotate(360deg)}}@keyframes kbYan{50%{opacity:.35}}'
-    + '@media (prefers-reduced-motion:reduce){.kb .akis,.kb .cark,.kb .led{animation:none!important}}';
+    + '@media (prefers-reduced-motion:reduce){.kb .tb{animation-duration:0s!important}.kb .akis,.kb .cark,.kb .led{animation:none!important}}';
   document.head.appendChild(st);
 }
 // String kutularında gösterilen değer: güç (varsayılan) → akım → gerilim; herhangi bir stringe dokununca hepsi değişir
@@ -3606,6 +3606,7 @@ function kbStrDegis() {
   document.querySelectorAll('svg.kb .pvd').forEach(e => { e.textContent = e.dataset[KB_STR]; });
   document.querySelectorAll('svg.kb .pvh').forEach(e => { e.textContent = KB_STR_AD[KB_STR]; });
 }
+const KB_SAYAC = {}; let KB_TB = 0;
 async function kabinSema(uretKw) {
   kabinCss();
   let det = null; try { det = await al('n8n/cihaz_detay.json'); } catch (e) {}
@@ -3706,11 +3707,16 @@ async function kabinSema(uretKw) {
   { const ov = (((D && D.osos) || {}).tekyildiz_2 || {}).veri || {}, gl = Object.keys(ov).sort(), g1 = gl[gl.length - 1], g0 = gl[gl.length - 2];
     const top = g => { const r = { v: 0, c: 0, s: null }; if (!g) return r; for (const [sa, x] of Object.entries(ov[g] || {})) { r.v += Number(x.veris) || 0; r.c += Number(x.cekis) || 0; if (r.s == null || sa > r.s) r.s = sa; } return r; };
     const b = top(g1), d = top(g0), bx = X0 - 24, by = 8, bw = LX - 6, bh2 = OY - 16;
-    const tambur = (x, y, val) => { const t = Math.round(val * 10), dz = String(Math.min(t, 9999999)).padStart(6, '0'); let g = '';
-      [...dz].forEach((c, k) => { const son = k === dz.length - 1, xx = x + k * 21;
-        g += '<rect x="' + xx + '" y="' + y + '" width="19" height="28" rx="2" fill="' + (son ? '#9E1B12' : '#15181B') + '"/><rect x="' + xx + '" y="' + y + '" width="19" height="7" rx="2" fill="rgba(255,255,255,.10)"/><rect x="' + xx + '" y="' + (y + 21) + '" width="19" height="7" rx="2" fill="rgba(0,0,0,.35)"/>'
-          + '<text x="' + (xx + 9.5) + '" y="' + (y + 21) + '" text-anchor="middle" style="font-family:\'Share Tech Mono\',ui-monospace,monospace;font-size:20px;fill:#F4F1E6">' + c + '</text>'; });
+    // tambur: her hane bir rakam şeridi; eski değerden yeni değere yukarıdan aşağı yuvarlanır (gerçek sayaç gibi). İlk açılışta sıfırdan döner.
+    const tambur = (x, y, val, kk) => { const t = Math.min(Math.round(val * 10), 999999), dz = String(t).padStart(6, '0'), eski = String(KB_SAYAC[kk] != null ? KB_SAYAC[kk] : 0).padStart(6, '0'); KB_SAYAC[kk] = t; let g = '';
+      [...dz].forEach((c, k) => { const son = k === dz.length - 1, xx = x + k * 21, e = +eski[k], n = +c, adim = (n - e + 10) % 10 + (k >= 4 && t !== +eski ? 10 : 0), id = 'kbTb' + (++KB_TB);
+        let serit = ''; for (let j = 0; j <= adim; j++) serit += '<text x="' + (xx + 9.5) + '" y="' + (y + 21 - j * 28) + '" text-anchor="middle" style="font-family:\'Share Tech Mono\',ui-monospace,monospace;font-size:20px;fill:#F4F1E6">' + ((e + j) % 10) + '</text>';
+        g += '<clipPath id="' + id + '"><rect x="' + xx + '" y="' + y + '" width="19" height="28" rx="2"/></clipPath><rect x="' + xx + '" y="' + y + '" width="19" height="28" rx="2" fill="' + (son ? '#9E1B12' : '#15181B') + '"/>'
+          + '<g clip-path="url(#' + id + ')"><g class="tb" style="--d:' + (adim * 28) + 'px;animation-duration:' + (0.8 + adim * 0.12).toFixed(2) + 's">' + serit + '</g></g>'
+          + '<rect x="' + xx + '" y="' + y + '" width="19" height="8" rx="2" fill="url(#kbTbG)"/><rect x="' + xx + '" y="' + (y + 20) + '" width="19" height="8" rx="2" fill="url(#kbTbG2)"/>'; });
       return g + '<circle cx="' + (x + 5 * 21 - 1.5) + '" cy="' + (y + 25) + '" r="1.6" fill="#F4F1E6"/>'; };
+    st += '<defs><linearGradient id="kbTbG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".7"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient><linearGradient id="kbTbG2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient>'
+      + '<linearGradient id="kbDiskG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8E8F92"/><stop offset=".5" stop-color="#E4E5E8"/><stop offset="1" stop-color="#8E8F92"/></linearGradient></defs>';
     const yon = b.v - b.c >= 0;
     st += '<g><title>OSOS T2 (Sera-2) · bugün ' + (g1 ? tarihK(g1) : '') + ': veriş ' + say(b.v) + ' kWh, çekiş ' + say(b.c) + ' kWh · dün: veriş ' + say(d.v) + ', çekiş ' + say(d.c) + ' kWh</title>'
       + '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh2 + '" rx="16" fill="#E7E3D4" stroke="#8F8A76" stroke-width="1.6"/>'
@@ -3718,11 +3724,12 @@ async function kabinSema(uretKw) {
       + T(bx + 26, by + 26, 'OSOS · T2 SERA-2', '', ' font-size="11" font-weight="700" fill="#3B3A33" letter-spacing=".06em"') + T(bx + bw - 26, by + 26, '3~ 400 V · kWh', '', ' text-anchor="end" font-size="9.5" fill="#5C5848"')
       + '<rect x="' + (bx + 18) + '" y="' + (by + 36) + '" width="' + (bw - 36) + '" height="122" rx="8" fill="#F6F5EE" stroke="#4E4B40" stroke-width="1.4"/>'
       + '<path d="M' + (bx + 24) + ' ' + (by + 42) + 'L' + (bx + 90) + ' ' + (by + 42) + 'L' + (bx + 50) + ' ' + (by + 152) + 'L' + (bx + 24) + ' ' + (by + 152) + 'Z" fill="rgba(255,255,255,.55)"/>'
-      + T(bx + 30, by + 58, '1.8.0 ÇEKİŞ', '', ' font-size="10" font-weight="700" fill="#B42318" letter-spacing=".04em"') + tambur(bx + 150, by + 42, b.c) + T(bx + 150 + 6 * 21 + 4, by + 62, 'kWh', '', ' font-size="10" fill="#3B3A33"')
-      + T(bx + 30, by + 100, '2.8.0 VERİŞ', '', ' font-size="10" font-weight="700" fill="#1E7A3C" letter-spacing=".04em"') + tambur(bx + 150, by + 84, b.v) + T(bx + 150 + 6 * 21 + 4, by + 104, 'kWh', '', ' font-size="10" fill="#3B3A33"')
+      + T(bx + 30, by + 58, '1.8.0 ÇEKİŞ', '', ' font-size="10" font-weight="700" fill="#B42318" letter-spacing=".04em"') + tambur(bx + 150, by + 42, b.c, 'c') + T(bx + 150 + 6 * 21 + 4, by + 62, 'kWh', '', ' font-size="10" fill="#3B3A33"')
+      + T(bx + 30, by + 100, '2.8.0 VERİŞ', '', ' font-size="10" font-weight="700" fill="#1E7A3C" letter-spacing=".04em"') + tambur(bx + 150, by + 84, b.v, 'v') + T(bx + 150 + 6 * 21 + 4, by + 104, 'kWh', '', ' font-size="10" fill="#3B3A33"')
       + T(bx + 30, by + 72, 'bugün', '', ' font-size="9" fill="#5C5848"') + T(bx + 30, by + 114, 'bugün', '', ' font-size="9" fill="#5C5848"')
       // Ferraris diski: kenardan görünüş, işaret net yöne doğru döner
-      + '<ellipse cx="' + (bx + bw / 2) + '" cy="' + (by + 136) + '" rx="70" ry="5" fill="#B8B3A0" stroke="#6F6A58"/><rect class="disk ' + (yon ? 'ileri' : 'geri') + '" x="' + (bx + bw / 2 - 3) + '" y="' + (by + 131) + '" width="6" height="10" fill="#B42318"/>'
+      + '<rect x="' + (bx + bw / 2 - 80) + '" y="' + (by + 124) + '" width="160" height="22" rx="3" fill="#2B2C2E"/><ellipse cx="' + (bx + bw / 2) + '" cy="' + (by + 135) + '" rx="74" ry="7" fill="url(#kbDiskG)" stroke="#55565A"/>'
+        + [0, 1, 2].map(q => '<rect class="disk ' + (yon ? 'ileri' : 'geri') + '" x="' + (bx + bw / 2 - 4) + '" y="' + (by + 129) + '" width="8" height="12" rx="1" fill="#C0261B" style="animation-delay:' + (-q * 0.8) + 's"/>').join('')
       + T(bx + bw / 2, by + 152, yon ? '→ şebekeye (veriş)' : '← şebekeden (çekiş)', '', ' text-anchor="middle" font-size="8.5" fill="' + (yon ? '#1E7A3C' : '#B42318') + '"')
       + T(bx + 26, by + 176, g1 ? tarihK(g1) + ' · son saat ' + (b.s || '—') + ':00 · net ' + (yon ? '+' : '') + say(b.v - b.c) + ' kWh' : 'OSOS verisi yok', '', ' font-size="10" font-weight="600" fill="#3B3A33"')
       + T(bx + 26, by + 192, g0 ? 'dün ' + tarihK(g0) + ': çekiş ' + say(d.c) + ' · veriş ' + say(d.v) + ' kWh' : '', '', ' font-size="10" fill="#5C5848"') + '</g>'; }

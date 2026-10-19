@@ -3592,6 +3592,7 @@ function kabinCss() {
     + '.kb .sc-dis{fill:#3A4248}.kb .sc-ic{fill:#0C1712}.kb .sc-ad{font-family:ui-monospace,monospace;font-size:9px;fill:#7F9A8A;letter-spacing:.08em}'
     + '.kb .sc-p,.kb .sc-i,.kb .sc-u{font-family:"Share Tech Mono",ui-monospace,monospace}.kb .sc-p{font-size:19px;fill:#FFB02E;filter:drop-shadow(0 0 3px #FFB02E)}.kb .sc-i{font-size:19px;fill:#5CF08F;filter:drop-shadow(0 0 3px #5CF08F)}.kb .sc-u{font-size:11px;fill:#7F9A8A}'
     + '.kb .disk{transform-box:fill-box;transform-origin:center;animation:kbDisk 2.4s linear infinite}.kb .disk.geri{animation-direction:reverse}@keyframes kbDisk{0%{transform:translateX(-68px) scaleX(.15);opacity:0}8%{opacity:1}25%{transform:translateX(-48px) scaleX(.7)}50%{transform:translateX(0) scaleX(1)}75%{transform:translateX(48px) scaleX(.7)}92%{opacity:1}100%{transform:translateX(68px) scaleX(.15);opacity:0}}.kb .tb{animation:kbTb 1s cubic-bezier(.3,.1,.2,1) forwards}@keyframes kbTb{from{transform:translateY(0)}to{transform:translateY(var(--d))}}.kb .pvt:hover rect{stroke:#FFB02E;stroke-width:1.6}.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
+    + '.kb .cih.stc{fill:#E8F7EE;stroke:#1FA463;stroke-width:1.3}.kb .cih.stu{fill:#E8F0FD;stroke:#2a78d6;stroke-width:1.3}.kb .cih.sti{fill:#FFF4DC;stroke:#E69A1B;stroke-width:1.3}.kb .cih.stx{fill:#FDECEC;stroke:#D92D20;stroke-width:1.5}.kb .ip.stu{fill:#2a78d6;font-weight:700}.kb .ip.sti{fill:#9A5B00;font-weight:700}.kb .ip.stx{fill:#D92D20;font-weight:700}.kb .led.is{fill:#E69A1B;animation:kbYan .6s ease-in-out infinite}.kb .anh{cursor:pointer}.kb .anh rect{fill:#C3CDD8;stroke:#7A8799}.kb .anh circle{fill:#fff;stroke:#7A8799}.kb .anh.acik rect{fill:#1FA463;stroke:#1E7A3C}.kb .anh:hover rect{stroke:#10233F;stroke-width:1.6}.kb .anh2{cursor:pointer}.kb .anh2:hover rect:first-child{stroke:#FFB02E;stroke-width:2}'
     + '.kb .guc,.kb .yuk,.kb .cek{fill:none;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .guc{stroke:#1E7A3C}.kb .dc{fill:none;stroke:#1B4F8A;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .dur .dc{animation:none;opacity:.25}.kb .yuk{stroke:#E07B00}.kb .cek{stroke:#B42318}.kb .dur .guc,.kb .dur .yuk,.kb .dur .cek{animation:none;opacity:.25}.kb .led.kap{fill:#C3CDD8}'
     + '@keyframes kbAkis{to{stroke-dashoffset:-16}}@keyframes kbDon{to{transform:rotate(360deg)}}@keyframes kbYan{50%{opacity:.35}}'
     + '@media (prefers-reduced-motion:reduce){.kb .tb{animation-duration:0s!important}.kb .akis,.kb .cark,.kb .led{animation:none!important}}';
@@ -3607,6 +3608,15 @@ function kbStrDegis() {
   document.querySelectorAll('svg.kb .pvh').forEach(e => { e.textContent = KB_STR_AD[KB_STR]; });
 }
 const KB_SAYAC = {}; let KB_TB = 0, KB_YON = true;
+// Kabin şemasında manuel komut: cihaz anahtarı / kabin şalteri → mevcut cihazKomut (Pi anahtarı + onay). Otomatik modda Pi bir sonraki turda kendi kararını uygulayabilir.
+function kbModRozet() { const m = (D.yon && D.yon.mod) || ''; const oto = !m || /oto/i.test(m);
+  return '<span style="display:inline-flex;gap:6px;align-items:center;border:1px solid ' + (oto ? '#1E7A3C' : '#C77700') + ';color:' + (oto ? '#1E7A3C' : '#9A5B00') + ';border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700"><span style="width:8px;height:8px;border-radius:50%;background:' + (oto ? '#1FA463' : '#E69A1B') + '"></span>' + (oto ? 'OTOMATİK kontrol' : 'MANUEL kontrol') + (D.yon && D.yon.karar ? ' · karar ' + (D.yon.karar === 'calis' ? 'ÇALIŞ' : 'UYUT') : '') + '</span>'; }
+async function kbKomut(act, ipler, ad) {
+  if (!document.getElementById('komutDurum')) return;
+  const m = (D.yon && D.yon.mod) || '';
+  if ((!m || /oto/i.test(m)) && !window.confirm('Sistem OTOMATİK modda: manuel komut uygulanır, ancak Pi bir sonraki karar turunda kendi planına göre değiştirebilir. Devam edilsin mi?')) return;
+  return cihazKomut(act, ipler, ad);
+}
 async function kabinSema(uretKw) {
   kabinCss();
   let det = null; try { det = await al('n8n/cihaz_detay.json'); } catch (e) {}
@@ -3623,7 +3633,7 @@ async function kabinSema(uretKw) {
       const model = (o.model && o.model !== '?') ? o.model : ((kim[kod] || {}).model || d.model || '?');
       const th = d.online && !d.sleeping ? Number(d.hashrate_TH) || 0 : 0, cal = th > 1, uy = !!d.sleeping;
       const w = cal ? (wR || KB_MODEL_W[model] || 5300) : 0;
-      return { n, kod, d, model, th, cal, uy, w, tah: cal && !wR, ip: d.ip || o.ip || '' };
+      return { n, kod, d, model, th, cal, uy, w, tah: cal && !wR, ip: d.ip || o.ip || '', st: cal ? 'c' : uy ? 'u' : d.online ? 'i' : 'x' };
     };
   const ANT_KW = Object.values(KABIN).flat().map(kbC).reduce((t, z) => t + z.w, 0) / 1000;
   // ---- Sera-2 inverterleri (gerçek görünüm) → Sera-2 AG barası; antrak panosu aynı baradan beslenir; sayaç/trafo barada
@@ -3693,13 +3703,14 @@ async function kabinSema(uretKw) {
     s += '<g class="' + (akar ? '' : 'dur') + '">' + b + '</g>';
     cih.forEach((z, j) => {
       const y = TOP + 40 + j * DH, d = z.d, alt = /S21/.test(z.model) ? '' : ' alt', durum = z.cal ? 'çalışıyor' : z.uy ? 'uykuda' : d.online ? 'hash yok' : 'yanıtsız';
-      s += '<g class="tik" onclick="hashAc(\'' + z.kod + '\')"><title>#' + z.n + ' · ' + durum + (d.temp_water != null ? ' · ' + suEt(d) + ' ' + say(d.temp_water) + ' °C' : '') + ' · canlı hashrate için tıklayın</title>'
-        + '<rect class="cih' + alt + '" x="' + L + '" y="' + y + '" width="' + (CW - 24) + '" height="' + (DH - 8) + '" rx="2"/>'
-        + '<circle class="led ' + (z.cal ? 'on' : z.uy ? 'uy' : 'off') + '" cx="' + (L + 9) + '" cy="' + (y + 12) + '" r="3.5" style="animation-delay:' + (-(z.n % 7) * 0.31).toFixed(2) + 's"/>'
-        + T(L + 17, y + 17, '#' + z.n, 'cn') + (d.temp_max != null ? T(L + 56, y + 17, say(d.temp_max) + '°C', 'tmp') : '')
-        + T(R - 7, y + 17, esc(z.model.replace(' Hyd', '')), 'sm', ' text-anchor="end"')
-        + T(L + 7, y + 31, '.' + String(z.ip).split('.').pop(), 'ip') + T(R - 7, y + 31, z.cal ? say(z.th) + ' TH' : durum, 'ip', ' text-anchor="end"')
-        + T(L + 7, y + 45, (z.tah ? '~' : '') + say(z.w / 1000, 2) + ' kW', 'el') + T(R - 7, y + 45, say(z.w / (V * PF), 1) + ' A', 'el', ' text-anchor="end"') + '</g>';
+      const ipS = String(z.ip).split('.').pop(), ac = z.st === 'c' || z.st === 'i';
+      s += '<g class="tik" onclick="hashAc(\'' + z.kod + '\')"><title>#' + z.n + ' · ' + durum + ' · ' + esc(z.model) + (z.ip ? ' · .' + ipS : '') + (d.temp_water != null ? ' · ' + suEt(d) + ' ' + say(d.temp_water) + ' °C' : '') + ' · canlı hashrate için tıklayın</title>'
+        + '<rect class="cih st' + z.st + '" x="' + L + '" y="' + y + '" width="' + (CW - 24) + '" height="' + (DH - 8) + '" rx="3"/>'
+        + '<circle class="led ' + (z.cal ? 'on' : z.uy ? 'uy' : z.st === 'i' ? 'is' : 'off') + '" cx="' + (L + 9) + '" cy="' + (y + 12) + '" r="3.5" style="animation-delay:' + (-(z.n % 7) * 0.31).toFixed(2) + 's"/>'
+        + T(L + 17, y + 17, '#' + z.n, 'cn') + (d.temp_max != null ? T(L + 52, y + 17, say(d.temp_max) + '°C', 'tmp') : '')
+        + T(L + 7, y + 31, esc(z.model.replace(' Hyd', '')), 'ip') + T(R - 7, y + 31, z.cal ? say(z.th) + ' TH' : durum, 'ip st' + z.st, ' text-anchor="end"')
+        + T(L + 7, y + 45, (z.tah ? '~' : '') + say(z.w / 1000, 2) + ' kW', 'el') + T(R - 7, y + 45, say(z.w / (V * PF), 1) + ' A', 'el', ' text-anchor="end"') + '</g>'
+        + (ipS ? '<g class="anh' + (ac ? ' acik' : '') + '" onclick="event.stopPropagation();kbKomut(\'' + (ac ? 'sleep' : 'wake') + '\',[' + ipS + '],\'Cihaz #' + z.n + '\')"><title>#' + z.n + ' · ' + (ac ? 'UYUT' : 'ÇALIŞTIR') + ' (manuel komut)</title><rect x="' + (R - 34) + '" y="' + (y + 5) + '" width="28" height="14" rx="7"/><circle cx="' + (ac ? R - 13 : R - 27) + '" cy="' + (y + 12) + '" r="5.2"/></g>' : '');
     });
     s += sayac(bx + 12, TOP + bh - 80, CW - 24, 'K' + k, say(kw / 1000, 1), say(kw / (r3 * V * PF), 1))
       + T(bx + 12, TOP + bh - 12, cih.filter(z => z.cal).length + '/' + cih.length + ' cihaz · ' + say(th / 1000, 2) + ' PH', 'ft');
@@ -3780,12 +3791,14 @@ async function kabinSema(uretKw) {
   pg += pano(ax1, ax2, BUSY, 40, 46, 'ANTRAK PANOSU · DAĞITIM');
   pg += '<path d="M' + FX + ' ' + (BUSY - 40) + 'V' + (BUSY - 6) + '" stroke="#10233F" stroke-width="2"/>' + mccb(FX, BUSY - 22, 'ana şalter', true, true);
   Object.keys(KABIN).forEach((k, i) => { const x = xs[i], bos = !KABIN[k].length;
-    pg += '<path d="M' + x + ' ' + (BUSY + 6) + 'V' + (BUSY + 46) + '" stroke="' + (bos ? '#A9B3BC' : '#10233F') + '" stroke-width="1.6"/>' + mccb(x, BUSY + 26, 'K' + k, !bos); });
+    const kc = KABIN[k].map(kbC), kip = kc.map(z => String(z.ip).split('.').pop()).filter(Boolean), kac = kc.some(z => z.st === 'c' || z.st === 'i');
+    pg += '<path d="M' + x + ' ' + (BUSY + 6) + 'V' + (BUSY + 46) + '" stroke="' + (bos ? '#A9B3BC' : '#10233F') + '" stroke-width="1.6"/>'
+      + (bos ? mccb(x, BUSY + 26, 'K' + k, false) : '<g class="anh2" onclick="kbKomut(\'' + (kac ? 'sleep' : 'wake') + '\',[' + kip.join(',') + '],\'Kabin ' + k + ' (' + kip.length + ' cihaz)\')"><title>Kabin ' + k + ' · ' + (kac ? 'tümünü UYUT' : 'tümünü ÇALIŞTIR') + ' (manuel komut)</title>' + mccb(x, BUSY + 26, 'K' + k, kac) + '</g>'); });
   s += pg;
   const ts = D.mad && D.mad.timestamp ? String(D.mad.timestamp).slice(11, 16) : '—';
-  return '<section class="panel" style="gap:10px"><div class="bas"><h2>Antrak panosu ve kabinler · Sera-2 AG barasından</h2><span class="k">9 kabin (antrak) · ' + nCal + '/' + nTop + ' cihaz çalışıyor · ' + say(topTH / 1000, 2) + ' PH · saha verisi ' + esc(ts) + ', sayfa 3 dk\'da bir yenilenir</span></div>'
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>Antrak panosu ve kabinler · Sera-2 AG barasından</h2>' + kbModRozet() + '<span class="k">9 kabin (antrak) · ' + nCal + '/' + nTop + ' cihaz çalışıyor · ' + say(topTH / 1000, 2) + ' PH · saha verisi ' + esc(ts) + ', sayfa 3 dk\'da bir yenilenir</span></div>'
     + '<div style="overflow-x:auto;border:1px solid #E3E8EE;border-radius:10px;background:#FBFCFD"><svg class="kb" viewBox="0 0 ' + W + ' ' + (H + OY) + '" width="' + W + '" height="' + (H + OY) + '" role="img" aria-label="Sera-2 inverter, pano ve madencilik kabinleri şeması" style="display:block;font-family:inherit;max-width:none">' + st + '<g transform="translate(0,' + OY + ')">' + s + '</g></svg></div>'
-    + '<div class="k">Antrak panosu, Sera-2 inverterleriyle aynı AG barasından beslenir: üretim önce bu yükü karşılar, artan şebekeye verilir, eksik şebekeden çekilir (net sayaçta). Mavi soğuk su pompadan cihazlara, kırmızı sıcak su cihazlardan pompaya döner; kabinde çalışan cihaz yoksa akış durur. Işık: yeşil çalışıyor, mavi uykuda, kırmızı yanıtsız/hash yok. °C en yüksek çip sıcaklığı; su sıcaklığı cihazın üzerine gelince görünür. '
+    + '<div id="komutDurum" class="k"></div><div class="k">Antrak panosu, Sera-2 inverterleriyle aynı AG barasından beslenir: üretim önce bu yükü karşılar, artan şebekeye verilir, eksik şebekeden çekilir (net sayaçta). Mavi soğuk su pompadan cihazlara, kırmızı sıcak su cihazlardan pompaya döner; kabinde çalışan cihaz yoksa akış durur. Işık: yeşil çalışıyor, mavi uykuda, kırmızı yanıtsız/hash yok. °C en yüksek çip sıcaklığı; su sıcaklığı cihazın üzerine gelince görünür. '
     + 'Güç cihazın bildirdiği watt (~ işaretli: bildirmiyor, model değeri), akım I = P / (400 V × 0,99); kabin ve toplam akım I = ΣP / (√3 × 400 V × 0,99), fazlara dengeli dağıtım varsayımı. Sayaç kutuları hesaplanmış değerdir, pompa güçleri dahil değil. Krem kutu: S19 XP+ / S19e XP. Cihaza tıklayınca canlı hashrate açılır.</div></section>';
 }
 async function cizMiningPrensip() {

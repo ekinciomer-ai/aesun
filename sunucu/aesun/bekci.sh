@@ -20,6 +20,7 @@ pidsA=$(docker stats --no-stream --format '{{.PIDs}}' aesun-api 2>/dev/null || e
 
 # 2) iş çalıştırıcı + işler
 dj=$(docker exec aesun-isler cat /veri/durum.json 2>/dev/null)
+echo "$dj" > $D/.isler_durum.json 2>/dev/null
 ij=$(docker exec aesun-isler cat /veri/epias-ptf/n8n/is_hatalari.json 2>/dev/null)
 nabiz=$(echo "$dj" | python3 -c "import json,sys;print(json.load(sys.stdin).get('nabiz',''))" 2>/dev/null)
 etkin=$(echo "$dj" | python3 -c "import json,sys;print(json.load(sys.stdin).get('etkin'))" 2>/dev/null)
@@ -115,12 +116,15 @@ def oku(f, v):
     try: return json.load(open(f))
     except Exception: return v
 tar = oku("/opt/aesun/tarama_durum.json", {})
+try: sure = {k: v.get("sn") for k, v in (json.loads(open("/opt/aesun/.isler_durum.json").read()).get("isler") or {}).items()}   # iş süreleri (hız bekçisi)
+except Exception: sure = {}
 ucl = [u for u in oku("/opt/aesun/uclar_durum.json", []) if not u.get("ok")]
 tarama = {"t": tar.get("t"), "izlenen": tar.get("izlenen"), "hata": tar.get("hata"), "geciken": tar.get("geciken") or []}
-uclar = {"kalan": ucl, "sorun": "; ".join(f"{u['ad']}: {u['neden']}" for u in ucl) or None}
+uclar = {"kalan": ucl, "sorun": "; ".join(f"{u['ad']}: {u['neden']}" for u in ucl) or None,
+         "hiz": [{"ad": u.get("ad"), "ok": u.get("ok"), "ms": u.get("ms")} for u in oku("/opt/aesun/uclar_durum.json", [])]}   # hız bekçisi
 d = {"t": iso, "durum": "sorun" if (sa or si or veri.get("sorun") or tarama["geciken"] or uclar["sorun"]) else "iyi",
      "api": {"sorun": sa or None, "esitleme_sn": int(es), "surec": int(pa or 0)},
-     "isler": {"sorun": si or None, "nabiz_sn": int(na), "surec": int(pi or 0), "is": json.loads(isler or "{}")},
+     "isler": {"sorun": si or None, "nabiz_sn": int(na), "surec": int(pi or 0), "is": json.loads(isler or "{}"), "sure_sn": sure},
      "veri": veri, "tarama": tarama, "uclar": uclar, "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
 open(p + ".tmp", "w").write(json.dumps(d, ensure_ascii=False)); import os; os.replace(p + ".tmp", p)
 PY

@@ -81,6 +81,9 @@ def main():
         "servisler": servisler(env),
         "not_": f"{socket.gethostname()} disk {disk}, CPU {isi}°C, {komut('uptime', '-p')}"[:300],
         "osos_son": son_satir(KOK / "osos.log"),
+        # sürüm bekçisi (n8n Denetçi): Pi'deki aesun kodunun sürümü ve zamanı
+        "kod_sha": komut("git", "-C", str(KOK), "rev-parse", "--short=10", "HEAD"),
+        "kod_zaman": komut("git", "-C", str(KOK), "log", "-1", "--format=%cI"),
     }
     icerik = base64.b64encode(json.dumps(govde, ensure_ascii=False, indent=1).encode()).decode()
     for deneme in range(0 if sunucu.yalniz_sunucu() else 2):

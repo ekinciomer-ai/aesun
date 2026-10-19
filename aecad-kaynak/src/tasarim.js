@@ -880,7 +880,7 @@ async function tsAcTekEkle(it) {
   const pl = { id: newId(), t: 'pline', layer: TS.ac.kat, c: TS.ac.renk, lt: '', cl: false, pts: yol.map((q) => [q[0], q[1], 0]), ges: g };
   const e = tsEtiketYeri(yol, tohum);
   addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); tsKanalCiz(); renderLayers();
-  msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Tasarım bitince "kabloları düzenle" ile tüm AC kablolar tek kanalda toparlanır.', 'res');
+  msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Tasarım bitince "AC kablo düzelt" ile tüm bağlantılar kurala göre baştan çizilir.', 'res');
 }
 function tsDcInvYenile(ids) {   // verilen inverterlerin stringleri atamaya göre yeniden çizilir (atama çizgisi yerine string)
   const at = tsAtamalar(); S.doc.addLayer('GES-DC-KABLO', 4); const pairs = [];
@@ -1151,14 +1151,15 @@ CMD.GACOTO = async (vHazir, zorla) => {
   } finally { busy(null); }
 };
 Object.assign(ALIAS, { GACOTO: 'GACOTO', ACOTO: 'GACOTO' }); Object.assign(LABEL, { GACOTO: 'AC OTOMATİK' });
-// KABLOLARI DÜZENLE (kullanıcı 20.10.2026): inverter tasarımı bitince tüm AC kablolar AG hat algoritmasıyla baştan, tek ortak kanalda
-// yeniden çizilir (eklerken oluşan karışıklık gider). Kablo tipi/payı mevcut AC kablodan alınır; soru sorulmaz.
+// AC KABLO DÜZELT (kullanıcı 20.10.2026): inverter tek tek eklendiğinde ya da yeri revize edildiğinde çağrılır; kurala uymayan ne varsa
+// (mevcut tüm AC kablolar, eski hendek/bant çizimleri) TAMAMEN kaldırılır ve TÜM inverter bağlantıları AG hat algoritmasıyla baştan,
+// tek ortak kanalda kurala uygun yeniden çizilir. Kablo tipi/payı mevcut AC kablodan alınır; soru sorulmaz.
 CMD.GKDUZEN = async () => {
   const ac = [...S.doc.items.values()].find((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
   const v = ac ? { kablo: ac.ges.kablo, pay: ac.ges.pay } : { kablo: pv('p-ack') || '3x240/120 NA2XY', pay: 10 };
   await CMD.GACOTO(v, true);
 };
-Object.assign(ALIAS, { GKDUZEN: 'GKDUZEN', KABLODUZENLE: 'GKDUZEN', KDUZENLE: 'GKDUZEN' }); Object.assign(LABEL, { GKDUZEN: 'KABLOLARI DÜZENLE' });
+Object.assign(ALIAS, { GKDUZEN: 'GKDUZEN', KABLODUZENLE: 'GKDUZEN', KDUZENLE: 'GKDUZEN', ACDUZELT: 'GKDUZEN', KABLODUZELT: 'GKDUZEN', ACKABLODUZELT: 'GKDUZEN' }); Object.assign(LABEL, { GKDUZEN: 'AC KABLO DÜZELT' });
 Object.assign(ALIAS, { GDCCIZ: 'GDCCIZ', DCCIZ: 'GDCCIZ' }); Object.assign(LABEL, { GDCCIZ: 'DC ÇİZ' });
 Object.assign(ALIAS, { GINVEKLE: 'GINVEKLE', INVEKLE: 'GINVEKLE', GTMEKLE: 'GTMEKLE', TRAFOEKLE: 'GTMEKLE', GDMEKLE: 'GDMEKLE', DMEKLE: 'GDMEKLE', GOGK: 'GOGK', OGKABLO: 'GOGK', GACK: 'GACK', ACKABLO: 'GACK', GDCK: 'GDCK', DCKABLO: 'GDCK', GVERI: 'GVERI', VERI: 'GVERI' });
 Object.assign(LABEL, { GINVEKLE: 'İNVERTER EKLE', GTMEKLE: 'TRAFO EKLE', GDMEKLE: 'DM EKLE', GOGK: 'OG KABLO', GACK: 'AC KABLO', GDCK: 'DC ATA', GVERI: 'VERİ DÜZENLE' });

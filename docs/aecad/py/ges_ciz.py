@@ -8,7 +8,7 @@ Tek JSON parametre dosyasından 4 pafta + metraj + kontrol üretir:
 Kullanım:  python3 ges_ciz.py proje.json [--cikti klasor] [--seviye teklif|uygulama]
 Gerekli:   pip install ezdxf shapely matplotlib   | DWG için: LibreDWG dxf2dwg
 """
-import json, math, sys, os, csv, copy, shutil, subprocess, argparse, datetime, bisect, heapq, html as _html
+import json, math, re, sys, os, csv, copy, shutil, subprocess, argparse, datetime, bisect, heapq, html as _html
 from shapely.geometry import Polygon, LineString, box, Point, MultiLineString
 from shapely.ops import unary_union, nearest_points
 from shapely import affinity
@@ -1057,7 +1057,7 @@ class Model:
             ls = LineString(pts)
             L1 = ls.length + 3.0                                 # tek yön (A.1): güzergâh + iniş
             s["dc_tek_yon_m"] = L1
-            s["dc_m"] = 2 * L1 + self.masa_L                    # (+)(−) + masa içi (konstrüksiyon) dönüş
+            s["dc_m"] = 2 * L1 + (self.masa_L if self.str_donus() else 0.0)   # (+)(−) ev dönüşü; masa içi dönüş yalnız string uçları masanın iki ucundaysa
             dc_toplam += s["dc_m"]
             s["dc_hat"] = ls
             self.dc_hat.append(ls)                               # açıklık + masa arası boşluk; masa altından geçmez
@@ -1239,6 +1239,27 @@ class Model:
         ad = {"yol": "yol", "parsel": "parsel", "diger": "diğer"}; v = {}
         for _, d, t in kn: v[ad.get(t, t)] = d
         return " · ".join(f"{t} {d:g} m" for t, d in v.items()) + f" · diğer {self.P['parsel']['cekme_mesafesi_m']:g} m"
+
+    def str_donus(self):
+        """String masada tek sayıda sıra kaplıyorsa (ör. her sıra ayrı string) uçlar masanın iki ucunda → masa boyu dönüş kablosu.
+        Çift sıra (ör. 2V13 tek string: üst sıra git, alt sıra dön) uçlar aynı (inverter) ucunda → dönüş yok, paneller kendi kablosuyla zincir."""
+        m = self.P["masa"]; R, k = m["sira_sayisi"], self.str_masa
+        return not (R % k == 0 and (R // k) % 2 == 0)
+
+    def string_izi(self, ms):
+        """Masa içinde her stringin modül sırası (yerel koordinat): inverter tarafındaki uçtan başlar, sıralar yılan gibi döner.
+        Döner: [(ad, [(x,y)…], sıra_sayısı)] — ilk nokta 1. panel (+), son nokta son panel (−)."""
+        m = self.P["masa"]; R, Pn = m["sira_sayisi"], m["sira_modul"]
+        x0, y0, x1, y1 = ms["loc"].bounds; dx, dy = (x1 - x0) / Pn, (y1 - y0) / R
+        sol = ms.get("taraf", "E") == "W"                       # inverter batıdaysa batı ucundan başla
+        sira = []
+        for r in range(R):
+            yy = y1 - (r + 0.5) * dy
+            xs = [x0 + (i + 0.5) * dx for i in range(Pn)]
+            ileri = (r % 2 == 0) == sol
+            sira += [(x, yy) for x in (xs if ileri else xs[::-1])]
+        adlar = ms.get("str", []); k = max(1, len(adlar)); N = len(sira) // k
+        return [(adlar[j], sira[j * N:(j + 1) * N], max(1, round(N / Pn))) for j in range(k)] if N else []
 
     def W(self, g):
         return affinity.rotate(g, self.az, origin=self.merkez) if self.az else g
@@ -1538,9 +1559,7 @@ def pafta_yerlesim(M, seviye):
         g = W(ms["loc"])
         pf.poli("GES-MASA", list(g.exterior.coords), info=f"Masa {ms['no']} | {ms.get('inv','')} | " + ", ".join(ms.get("str", [])),
                 dolgu=ms.get("tr", 0))
-        if seviye == "uygulama":
-            c = g.centroid
-            pf.yazi("GES-STRING-NO", c.x, c.y, 0.45, ms.get("str", [""])[0].replace("-ACB1", ""), rot=M.az, hiz="C")
+    if seviye == "uygulama": string_ciz(M, pf)
     for inv in M.inverterler:
         x, y = M.Wp(inv["x"], inv["y"])
         pf.daire("GES-INV", x, y, 0.9, info=f"{inv['ad']} | {inv['n_str']} string | AC {inv['ac_m']:.0f} m")
@@ -1578,12 +1597,32 @@ def pafta_topraklama(M):
     return pf
 
 
+def string_ciz(M, pf, h=0.35):
+    """DC gösterimi (kullanıcı kuralı 19.10.2026): DC güzergâh çizilmez; her string masa içinde 1. panelden son panele tek çizgi,
+    giriş (+) mavi üçgen ve çıkış (−) kırmızı üçgen, uçlarda `INV{i}.PV{s}.1` / `.N` kodu, ortada `sıra*modül`. Kod stringin hangi
+    invertere gittiğini söyler; boy metrajda gerçek güzergâhla hesaplanır."""
+    m = M.P["masa"]; Pn = m["sira_modul"]; tek_tr = getattr(M, "n_tr", 1) <= 1
+    for ms in M.masalar:
+        for ad, iz, rs in M.string_izi(ms):
+            if len(iz) < 2: continue
+            mt = re.match(r"TR(\d+)-ACB1-INV(\d+)-STR(\d+)", ad)
+            kod = (f"INV{mt.group(2)}.PV{mt.group(3)}" if tek_tr else f"TR{mt.group(1)}.INV{mt.group(2)}.PV{mt.group(3)}") if mt else ad
+            W_ = [M.Wp(x, y) for x, y in iz]
+            pf.cizgi("GES-DC-KABLO", W_, info=f"{ad} · {len(iz)} modül")
+            for (x, y), isim, kat in ((iz[0], f"{kod}.1", "GES-STRING-NO"), (iz[-1], f"{kod}.{len(iz)}", "GES-DC-KABLO")):
+                tri = [M.Wp(x - h * 0.6, y - h * 0.5), M.Wp(x + h * 0.6, y - h * 0.5), M.Wp(x, y + h * 0.5), M.Wp(x - h * 0.6, y - h * 0.5)]
+                pf.poli(kat, tri, info=isim)
+                tx, ty = M.Wp(x - h * 0.6, y + h * 0.7); pf.yazi("GES-STRING-NO", tx, ty, h * 0.8, isim, rot=M.az)
+            cx = sum(q[0] for q in iz) / len(iz); cy = sum(q[1] for q in iz) / len(iz); X, Y = M.Wp(cx, cy)
+            pf.yazi("GES-STRING-NO", X, Y, h * 2.2, f"{rs}*{len(iz) // rs}", rot=M.az, hiz="C")
+
+
 def pafta_kablo(M):
     pf = Pafta("04", "KABLO GÜZERGÂH PLANI")
     W = M.W
     geom_ciz(pf, "GES-SINIR", M.parsel); geom_ciz(pf, "GES-CIT", M.cit); geom_ciz(pf, "GES-YOL", W(M.yol_loc))
     for ms in M.masalar: geom_ciz(pf, "GES-MASA", W(ms["loc"]))
-    geom_ciz(pf, "GES-DC-KABLO", W(unary_union(M.dc_ust)) if M.dc_ust else None, info="DC kablo — konstrüksiyon üstü")
+    string_ciz(M, pf)   # DC: yalnız string izi + giriş/çıkış kodu (güzergâh çizgisi yok, karmaşa yok)
     geom_ciz(pf, "GES-HENDEK-DC", W(M.hendek_dc), info="DC hendek (sıra geçişi)")
     for inv, ls in zip(M.inverterler, M.ac_hat): geom_ciz(pf, "GES-AC-KABLO", W(ls), info=f"{inv['ad']} → TM{inv['tr']} {inv['ac_m']:.0f} m")
     for o in M.og: geom_ciz(pf, "GES-OG-KABLO", W(o["hat"]), info=f"OG {o['den']}→{o['ye']} {o['m']:.0f} m")

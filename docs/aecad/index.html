@@ -3290,7 +3290,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191307', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191311', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4040,6 +4040,7 @@ async function tsKablo(tip) {
   }
   if (pts.length < 2) return;
   if (tip === 'ac') { const d = tsAcDuzelt(pts); if (d) { pts.length = 0; pts.push(...d.pts); msg('AC kablo nizami güzergâha düzeltildi: ' + d.not + '.', 'note'); } }
+  if (tip === 'og') { const d = tsOgDuzelt(pts); if (d) { pts.length = 0; pts.push(...d.pts); msg('OG kablo nizami güzergâha düzeltildi: ' + d.not + '.', 'note'); } }
   const L = tsBoy(pts), g = { ...v, tip, no: tsKabloNo(tip, pts[0]) }; S.doc.addLayer(T.kat, T.renk);
   const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: pts.map((q) => [q[0], q[1], 0]), ges: g };
   const k = Math.floor(pts.length / 2), a = pts[k - 1], b = pts[k]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
@@ -4116,6 +4117,29 @@ function tsEtiketYeri(yol, ag) {
   let k = 0; for (let i = 0; i < yol.length - 1; i++) { const m = [(yol[i][0] + yol[i + 1][0]) / 2, (yol[i][1] + yol[i + 1][1]) / 2]; if (ag.some((y) => y !== yol && (tsYakin(y, m) || { d: 9 }).d < 0.05)) break; k = i; }
   const a = yol[k], b = yol[k + 1]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
   return { x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, rot: ang };
+}
+// OG kablo (kullanıcı kuralı 19.10.2026): AC ile aynı mantık — binadan (TM/DM) binaya, 1 m kanal içinde, arazi içinde,
+// masa/inverter/diğer binalara ≥ 0,5 m, en az kırıkla; çizilen güzergâhın uyan parçası korunur.
+function tsOgDuzelt(pts) {
+  if (!pts || pts.length < 2) return null;
+  const bin = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm'));
+  const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const yak = (p) => (bin.length ? bin.reduce((a, b) => (d(tsMerkez(b), p) < d(tsMerkez(a), p) ? b : a)) : null);
+  const b0 = yak(pts[0]), b1 = yak(pts[pts.length - 1]);
+  const P0 = b0 && d(tsMerkez(b0), pts[0]) <= 15 ? tsMerkez(b0) : pts[0], A = b1 && d(tsMerkez(b1), pts[pts.length - 1]) <= 15 ? tsMerkez(b1) : pts[pts.length - 1];
+  const eng = tsEngeller(null, null).filter((e) => e.it !== b0 && e.it !== b1);
+  const U0 = [P0, ...pts.slice(1, -1), A];
+  const K = tsKanalIzgara(U0, eng, P0, A); if (!K) return null;
+  const U = [P0, ...pts.slice(1, -1).filter((q) => !K.dolu(q)), A];
+  const yol = [P0]; let dz = 0, yok = 0;
+  for (let i = 1; i < U.length; i++) {
+    const a = yol[yol.length - 1], b = U[i]; if (d(a, b) < 1e-3) continue;
+    if (K.gorur(a, b)) { yol.push(b); continue; }
+    const r = K.yol(a, b); if (r && r.length >= 2) { yol.push(...r.slice(1)); dz++; } else { yol.push(b); yok++; }
+  }
+  const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (d(yol[i], sad[sad.length - 1]) > 0.05) sad.push(yol[i]);
+  const ad = (b) => (b ? (b.ges.tip === 'dm' ? 'DM' : 'TM-' + (b.ges.no || '')) : 'uç');
+  return { pts: sad, not: ad(b0) + ' → ' + ad(b1) + ', 1 m kanal içinde (≥ 0,5 m), arazi içinde' + (dz ? ', ' + dz + ' parça en az kırıkla yönlendirildi' : ', çizdiğiniz güzergâh korundu') + (yok ? ' (' + yok + ' parçada engelsiz yol yok — elle kontrol edin)' : '') };
 }
 // 1 m kanal ızgarası: engeller 0,5 m şişirilir, arazi dışı ve sınıra 0,5 m'den yakın hücreler dolu; inverter çıkışı ve ADP çevresi açık
 function tsKanalIzgara(U, eng, P0, A, ekAc) {
@@ -4288,7 +4312,8 @@ function tsAkilliYol(P0, A, tm, invIt, toL, toW, eng) {
 CMD.GKDUZ = async () => {   // tüm AC kablolar: ortak kanal ağı (ana hat + branşmanlar), hepsi AG panodan (ADP)
   const kab = [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
   const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
-  if (!kab.length || !tms.length) { msg('Düzeltilecek AC kablo yok (önce Trafo + ile trafo binası ekleyin).', 'err'); return; }
+  const ogVar = [...S.doc.items.values()].some((x) => x.t === 'pline' && x.ges && x.ges.tip === 'og');
+  if ((!kab.length || !tms.length) && !ogVar) { msg('Düzeltilecek AC/OG kablo yok (AC için önce Trafo + ile trafo binası ekleyin).', 'err'); return; }
   const inv = tsInverterler(), pairs = []; let n = 0;
   for (const tm of tms) {
     const A = tsAdp(tm), grp = kab.filter((it) => { const e = it.pts[it.pts.length - 1]; return tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - e[0], tsMerkez(b)[1] - e[1]) < Math.hypot(tsMerkez(a)[0] - e[0], tsMerkez(a)[1] - e[1]) ? b : a)) === tm; });
@@ -4306,8 +4331,14 @@ CMD.GKDUZ = async () => {   // tüm AC kablolar: ortak kanal ağı (ana hat + br
       for (const t of S.doc.items.values()) if (t.gesEt === b.it.id) pairs.push([t, { ...t, x: e.x, y: e.y, rot: e.rot, h: KABLO_YZ, s: tsEtiket('ac', ges, tsBoy(yol)) }]);
     });
   }
-  if (!n) { msg('Düzeltilecek AC kablo yok.', 'err'); return; }
-  replaceItems(pairs, 'kablo düzelt'); msg(n + ' AC kablo ortak kanala alındı: ana hat + her inverterden kanala branşman, hepsi AG panodan (ADP).', 'res');
+  for (const it of [...S.doc.items.values()].filter((x) => x.t === 'pline' && x.ges && x.ges.tip === 'og')) {   // OG: aynı kanal mantığı
+    const d = tsOgDuzelt(it.pts.map((q) => [q[0], q[1]])); if (!d) continue; n++;
+    pairs.push([it, { ...it, pts: d.pts.map((q) => [q[0], q[1], 0]) }]);
+    const e = tsEtiketYeri(d.pts, []);
+    for (const t of S.doc.items.values()) if (t.gesEt === it.id) pairs.push([t, { ...t, x: e.x, y: e.y, rot: e.rot, h: KABLO_YZ, s: tsEtiket('og', it.ges, tsBoy(d.pts)) }]);
+  }
+  if (!n) { msg('Düzeltilecek AC/OG kablo yok.', 'err'); return; }
+  replaceItems(pairs, 'kablo düzelt'); msg(n + ' kablo ortak kanala alındı: AC ana hat + inverter branşmanları (ADP\'den), OG binadan binaya aynı kanal kuralıyla.', 'res');
 };
 Object.assign(ALIAS, { GKDUZ: 'GKDUZ', KABLODUZELT: 'GKDUZ' }); Object.assign(LABEL, { GKDUZ: 'KABLO DÜZELT' });
 // ---- AC/DC kabloyu diğer inverterlere çoğalt: çizilen hat ana güzergâh (trunk) sayılır; her inverter en yakın noktadan ona bağlanır ----

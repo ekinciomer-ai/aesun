@@ -3490,7 +3490,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192339', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192342', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
@@ -3851,7 +3851,7 @@ function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pj
 function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(6, c - 2, m >= 16 ? 6 : m >= 8 ? 4 : m >= 4 ? 2 : 1)); }   // 22 çekirdek / 32 GB → 6 seçenek aynı anda
 function pjYerIsci(k) {
   PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
-  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610192339', document.baseURI).href), alt: null };
+  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610192342', document.baseURI).href), alt: null };
   o.w.onmessage = (e) => {
     const m = e.data, a = o.alt; if (!a || m.id !== a.seq) return;
     if (m.stage) { a.asama = m.stage; pjAltCiz(); return; }
@@ -5290,6 +5290,27 @@ function tsInvNumarala() {
   return pairs.length;
 }
 // Yeni inverter eklenince AC kablo otomatik: en yakın trafonun ADP'sine, mevcut AC kanal ağına katılarak (aynı kablo tipi)
+// AG KABLO KANALI (kullanıcı kuralı 19.10.2026): tüm AC kabloların geçtiği ortak kanal 1 m bant olarak çizilir (GES-AG-KANAL);
+// ortak güzergâhta tek kanal. Her AC çiziminde / inverter eklendikçe baştan güncellenir. Uzunluk = kazı metrajı.
+function tsKanalCiz() {
+  try {
+    const KAT = 'GES-AG-KANAL', yarim = 0.5; S.doc.addLayer(KAT, 4);
+    const sil = [...S.doc.items.values()].filter((it) => it.layer === KAT).map((it) => [it, null]);
+    const parcalar = [], gor = new Set();
+    for (const it of S.doc.items.values()) if (it.t === 'pline' && it.ges && it.ges.tip === 'ac') { const P = it.pts;
+      for (let i = 1; i < P.length; i++) {
+        const a_ = P[i - 1], b_ = P[i], L = Math.hypot(b_[0] - a_[0], b_[1] - a_[1]); if (L < 0.05) continue;
+        const k_ = [a_, b_].map((q) => Math.round(q[0] * 10) + ',' + Math.round(q[1] * 10)).sort().join('|'); if (gor.has(k_)) continue; gor.add(k_);
+        const ux = (b_[0] - a_[0]) / L, uy = (b_[1] - a_[1]) / L, nx = -uy * yarim, ny = ux * yarim, e = yarim;
+        const A0 = [a_[0] - ux * e, a_[1] - uy * e], B0 = [b_[0] + ux * e, b_[1] + uy * e];
+        parcalar.push([[[A0[0] + nx, A0[1] + ny], [B0[0] + nx, B0[1] + ny], [B0[0] - nx, B0[1] - ny], [A0[0] - nx, A0[1] - ny], [A0[0] + nx, A0[1] + ny]]]);
+      } }
+    const yeni = []; let alan = 0;
+    if (parcalar.length) for (const pg of polygonClipping.union(...parcalar)) for (const ring of pg) { const pts = ring.slice(0, -1); alan += Math.abs(polyArea(pts)); yeni.push([null, { id: newId(), t: 'pline', layer: KAT, c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) }]); }
+    if (sil.length || yeni.length) S.doc.commit([...sil, ...yeni].map(([o, n]) => ({ o, n })), 'AG kanal');
+    if (alan) msg('AG kablo kanalı (1 m bant, ortak): ≈ ' + fmtNum(alan / (2 * yarim), 0) + ' m kazı.', 'note');
+  } catch (e) { console.warn('kanal', e); }
+}
 async function tsAcTekEkle(it) {
   if (!it) return; const tms = [...S.doc.items.values()].filter((x) => x.t === 'insert' && x.ges && x.ges.tip === 'tm'); if (!tms.length) return;
   const p = tsMerkez(it), tm = tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - p[0], tsMerkez(b)[1] - p[1]) < Math.hypot(tsMerkez(a)[0] - p[0], tsMerkez(a)[1] - p[1]) ? b : a)), A = tsAdp(tm);
@@ -5300,7 +5321,7 @@ async function tsAcTekEkle(it) {
   const g = { kablo: ornek.kablo, pay: ornek.pay, tip: 'ac', no: it.ges.no }, L = tsBoy(yol); S.doc.addLayer(TS.ac.kat, TS.ac.renk);
   const pl = { id: newId(), t: 'pline', layer: TS.ac.kat, c: TS.ac.renk, lt: '', cl: false, pts: yol.map((q) => [q[0], q[1], 0]), ges: g };
   const e = tsEtiketYeri(yol, tohum);
-  addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); renderLayers();
+  addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); tsKanalCiz(); renderLayers();
   msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Geri al ile kaldırılır.', 'res');
 }
 function tsDcInvYenile(ids) {   // verilen inverterlerin stringleri atamaya göre yeniden çizilir (atama çizgisi yerine string)
@@ -5565,32 +5586,7 @@ CMD.GACOTO = async (vHazir) => {
     }
     const sil = []; for (const k of silinecek) { sil.push([k, null]); for (const t of S.doc.items.values()) if (t.gesEt === k.id) sil.push([t, null]); }
     if (!yeni.length && !sil.length) { msg('Kablo çizilemedi (saha çok büyük ya da engelsiz yol yok).', 'err'); return; }
-    // AG KABLO KANALI (kullanıcı kuralı 19.10.2026): kabloların geçtiği ortak kanal 1 m genişlikte bant olarak çizilir (GES-AG-KANAL);
-    // ortak güzergâhta tek kanal (bantlar birleştirilir). Uzunluk = kazı metrajı.
-    let kanalM = 0;
-    try {
-      const KAT = 'GES-AG-KANAL', yarim = 0.5; S.doc.addLayer(KAT, 4);
-      for (const it of S.doc.items.values()) if (it.layer === KAT && hepsi) sil.push([it, null]);
-      const parcalar = [];
-      const tumAc = [...yeni.filter(([, n]) => n.t === 'pline').map(([, n]) => n.pts), ...(hepsi ? [] : [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac').map((it) => it.pts))];
-      const gor = new Set();
-      for (const P of tumAc) for (let i = 1; i < P.length; i++) {
-        const a_ = P[i - 1], b_ = P[i], L = Math.hypot(b_[0] - a_[0], b_[1] - a_[1]); if (L < 0.05) continue;
-        const k_ = [a_, b_].map((q) => Math.round(q[0] * 10) + ',' + Math.round(q[1] * 10)).sort().join('|'); if (gor.has(k_)) continue; gor.add(k_);
-        const ux = (b_[0] - a_[0]) / L, uy = (b_[1] - a_[1]) / L, nx = -uy * yarim, ny = ux * yarim, e = yarim;
-        const A0 = [a_[0] - ux * e, a_[1] - uy * e], B0 = [b_[0] + ux * e, b_[1] + uy * e];
-        parcalar.push([[[A0[0] + nx, A0[1] + ny], [B0[0] + nx, B0[1] + ny], [B0[0] - nx, B0[1] - ny], [A0[0] - nx, A0[1] - ny], [A0[0] + nx, A0[1] + ny]]]);
-        kanalM += L;
-      }
-      if (parcalar.length) {
-        const U = polygonClipping.union(...parcalar);
-        let alan = 0;
-        for (const pg of U) for (const ring of pg) { const pts = ring.slice(0, -1); alan += Math.abs(polyArea(pts)); yeni.push([null, { id: newId(), t: 'pline', layer: KAT, c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) }]); }
-        kanalM = alan / (2 * yarim);   // birleşik bant alanı / 1 m = kanal (kazı) boyu
-      }
-    } catch (e) { console.warn('kanal', e); }
-    replaceItems([...sil, ...yeni], 'AC otomatik'); renderLayers();
-    if (kanalM) msg('AG kablo kanalı (1 m bant, ortak): ≈ ' + fmtNum(kanalM, 0) + ' m kazı.', 'note');
+    replaceItems([...sil, ...yeni], 'AC otomatik'); tsKanalCiz(); renderLayers();
     msg(n + ' inverterden AG panoya AC kablo çizildi (ortak kanal + branşman, ' + tms.length + ' trafo) · toplam ' + fmtNum(top, 0) + ' m' + (yok ? ' · ' + yok + ' inverterde yol bulunamadı — elle çizin' : '') + '. Geri al ile tek adımda kaldırılır.', yok ? 'note' : 'res');
   } finally { busy(null); }
 };

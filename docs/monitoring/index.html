@@ -4030,12 +4030,95 @@ function filoSuz(mad, kim) {
 }
 // 19 Eki: n8n Denetçi (saatlik) — iş · veri okuma · hız · sürüm · hata bekçileri (n8n/denetim.json)
 // 20 Eki: Şef (ns1 sef.py) — bekçilerin bulduğu sorunu çözer; son müdahaleler ve çözemedikleri (n8n/sef.json)
+// 20 Eki: Bekçi ofisi — her bekçi kendi masasında kendi işine uygun canlı gösterimle; şef devriye gezer, sorun varsa ilgili masaya gider
+function sefOfis() {
+  const den = D.den || {}, sb = D.sb || {}, sef = D.sef || {}, bek = D.bek || {}, mad = D.mad || {};
+  const yasDk = t => t ? Math.round((Date.now() - Date.parse(t)) / 60000) : 9999;
+  const gr = {}; (den.gruplar || []).forEach(g => { gr[g.grup] = g; });
+  const denTaze = yasDk(den.guncellendi) < 75, sor = sb.sorunlar || {}, anah = Object.keys(sor);
+  const sbYas = yasDk(sb.t), ns1 = (sb.bilgi || {}).ns1_bekci || {};
+  const kotuG = g => denTaze && gr[g] && gr[g].ok < gr[g].toplam;
+  const ilk = f => { const k = anah.find(f); return k ? sor[k] : null; };
+  const dev = mad.devices || [], kopuk = dev.filter(x => x.actual_worker && !x.online && !x.sleeping).length;
+  const sonKurt = (bek.olaylar || []).slice(-1)[0];
+  const M = [
+    { k: 'is', ad: 'İş bekçisi', alt: 'işler zamanında mı', sorun: ilk(a => a.startsWith('is:')) || (kotuG('is') ? 'denetçi: ' + (gr.is.toplam - gr.is.ok) + ' iş gecikti' : null), deger: gr.is ? gr.is.ok + '/' + gr.is.toplam + ' iş yolunda' : '—' },
+    { k: 'veri', ad: 'Veri okuma bekçisi', alt: 'kaynaklar taze mi', sorun: ilk(a => a.startsWith('gec:')) || (kotuG('veri') ? 'denetçi: eski kaynak var' : null), deger: gr.veri ? gr.veri.ok + '/' + gr.veri.toplam + ' kaynak taze' : '—' },
+    { k: 'hiz', ad: 'Hız bekçisi', alt: 'uçlar ve işler hızlı mı', sorun: ilk(a => a.startsWith('uc:')) || (kotuG('hiz') ? 'denetçi: yavaşlık var' : null), deger: gr.hiz ? gr.hiz.ok + '/' + gr.hiz.toplam + ' hızlı' : '—' },
+    { k: 'surum', ad: 'Sürüm bekçisi', alt: 'kod yayında, cihazlar güncel', sorun: kotuG('surum') ? 'denetçi: sürüm farkı' : null, deger: gr.surum ? gr.surum.ok + '/' + gr.surum.toplam + ' güncel' : '—' },
+    { k: 'hata', ad: 'Hata bekçisi', alt: 'son 24 saatte hata', sorun: kotuG('hata') ? 'denetçi: ' + (gr.hata.toplam - gr.hata.ok) + ' hata kaydı' : null, deger: gr.hata ? gr.hata.ok + '/' + gr.hata.toplam + ' temiz' : '—' },
+    { k: 'cihaz', ad: 'Cihaz bekçisi (Pi)', alt: 'takılan cihazı kurtarır', sorun: kopuk ? kopuk + ' cihaz yanıtsız' : null, deger: dev.length ? dev.filter(x => x.online || x.sleeping).length + ' cihaz izleniyor' + (sonKurt ? ' · son kurtarma ' + String(sonKurt.t).slice(5, 10).split('-').reverse().join('.') : '') : '—' },
+    { k: 'pi', ad: 'Sistem bekçisi (Pi)', alt: 'sahadan dışarıya bakar', sorun: sbYas > 40 ? 'Pi ' + sbYas + ' dk sessiz' : null, deger: sbYas < 9999 ? anah.length + ' bulgu · ' + sbYas + ' dk önce' : '—' },
+    { k: 'ns1', ad: 'Sunucu bekçisi (ns1)', alt: 'API, zamanlayıcı, tarama', sorun: ilk(a => /^(ns1|api)/.test(a)) || (ns1.durum === 'sorun' && (ns1.onarim_24s || 0) >= 3 ? 'sık onarım' : null), deger: 'onarım 24 sa: ' + (ns1.onarim_24s ?? '—') }];
+  const W = 1120, H = 470, DW = 250, DH = 150, pos = (i) => ({ x: 20 + (i % 4) * 275, y: i < 4 ? 14 : 300 });
+  const T = (x, y, m, o) => '<text x="' + x + '" y="' + y + '"' + (o || '') + '>' + m + '</text>';
+  const viz = (k, x, y, w, h, kotu) => {   // monitör içi canlı gösterim (x,y monitörün sol üstü)
+    const cx = x + w / 2, cy = y + h / 2, R = kotu ? '#FF5A4F' : '#5CF08F';
+    if (k === 'is') return '<g class="of-don" style="transform-origin:' + cx + 'px ' + cy + 'px"><circle cx="' + cx + '" cy="' + cy + '" r="17" fill="none" stroke="' + R + '" stroke-width="6" stroke-dasharray="6 5"/><circle cx="' + cx + '" cy="' + cy + '" r="7" fill="' + R + '"/></g>'
+      + '<g class="of-don2" style="transform-origin:' + (cx + 30) + 'px ' + (cy - 14) + 'px"><circle cx="' + (cx + 30) + '" cy="' + (cy - 14) + '" r="9" fill="none" stroke="' + R + '" stroke-width="4" stroke-dasharray="4 3"/></g>';
+    if (k === 'veri') return '<rect x="' + (x + w - 26) + '" y="' + (cy - 14) + '" width="18" height="28" rx="6" fill="none" stroke="' + R + '" stroke-width="2"/>' + [0, 1, 2, 3, 4].map(j => '<circle class="of-akis" cx="' + (x + 10) + '" cy="' + (cy - 8 + (j % 3) * 8) + '" r="3" fill="' + R + '" style="animation-delay:' + (-j * .45) + 's"/>').join('');
+    if (k === 'hiz') return '<path d="M' + (cx - 26) + ' ' + (cy + 14) + 'A26 26 0 0 1 ' + (cx + 26) + ' ' + (cy + 14) + '" fill="none" stroke="#3A4248" stroke-width="5"/><path d="M' + (cx - 26) + ' ' + (cy + 14) + 'A26 26 0 0 1 ' + (cx + 13) + ' ' + (cy - 8) + '" fill="none" stroke="' + R + '" stroke-width="5"/><g class="of-ibre" style="transform-origin:' + cx + 'px ' + (cy + 14) + 'px"><path d="M' + cx + ' ' + (cy + 14) + 'L' + cx + ' ' + (cy - 12) + '" stroke="#fff" stroke-width="2.5"/></g><circle cx="' + cx + '" cy="' + (cy + 14) + '" r="3" fill="#fff"/>';
+    if (k === 'surum') return '<path d="M' + (x + 12) + ' ' + cy + 'H' + (x + w - 12) + '" stroke="#3A4248" stroke-width="2"/>' + [0, 1, 2].map(j => '<circle class="of-commit" cx="' + (x + 20) + '" cy="' + cy + '" r="5" fill="' + R + '" style="animation-delay:' + (-j * 1.1) + 's"/>').join('') + T(x + 8, y + h - 6, (D.son && D.son.kaynak) ? 'yayında ✓' : 'yayında', ' font-size="9" fill="' + R + '" font-family="ui-monospace,monospace"');
+    if (k === 'hata') return '<path d="M' + (cx - 14) + ' ' + (cy + 12) + 'H' + (cx + 14) + 'L' + (cx + 10) + ' ' + (cy - 6) + 'A10 10 0 0 0 ' + (cx - 10) + ' ' + (cy - 6) + 'Z" fill="' + (kotu ? '#FF5A4F' : '#2A3A34') + '" stroke="' + R + '" stroke-width="2"' + (kotu ? ' class="of-yan"' : '') + '/>' + (kotu ? [0, 1, 2].map(j => '<path d="M' + (cx - 22 + j * 22) + ' ' + (cy - 16 - (j === 1 ? 4 : 0)) + 'l' + (j - 1) * 5 + ' -6" stroke="#FF5A4F" stroke-width="2" class="of-yan"/>').join('') : T(cx, cy + 4, '✓', ' text-anchor="middle" font-size="13" fill="#5CF08F"'));
+    if (k === 'cihaz') { const L = dev.filter(d => d.actual_worker || d.online || d.sleeping).slice(0, 30); return L.map((d, j) => '<rect x="' + (x + 8 + (j % 10) * 10) + '" y="' + (y + 10 + Math.floor(j / 10) * 11) + '" width="8" height="8" rx="1.5" fill="' + (d.sleeping ? '#5B8DEF' : d.online && (d.hashrate_TH || 0) > 1 ? '#2BD27A' : d.online ? '#F5B83D' : '#F0525A') + '"/>').join('') + '<rect class="of-tara" x="' + (x + 6) + '" y="' + (y + 6) + '" width="3" height="' + (h - 14) + '" fill="#fff" opacity=".55"/>'; }
+    if (k === 'pi') return '<circle cx="' + cx + '" cy="' + cy + '" r="24" fill="none" stroke="#2A4A3A"/><circle cx="' + cx + '" cy="' + cy + '" r="13" fill="none" stroke="#2A4A3A"/><g class="of-radar" style="transform-origin:' + cx + 'px ' + cy + 'px"><path d="M' + cx + ' ' + cy + 'L' + cx + ' ' + (cy - 24) + 'A24 24 0 0 1 ' + (cx + 17) + ' ' + (cy - 17) + 'Z" fill="' + R + '" opacity=".35"/><path d="M' + cx + ' ' + cy + 'L' + cx + ' ' + (cy - 24) + '" stroke="' + R + '" stroke-width="2"/></g>' + (kotu ? '<circle cx="' + (cx + 12) + '" cy="' + (cy + 8) + '" r="3" fill="#FF5A4F" class="of-yan"/>' : '<circle cx="' + (cx - 10) + '" cy="' + (cy + 9) + '" r="2.5" fill="#5CF08F" class="of-yan"/>');
+    if (k === 'ns1') return [0, 1, 2].map(j => '<rect x="' + (x + 8) + '" y="' + (y + 8 + j * 14) + '" width="' + (w / 2 - 6) + '" height="11" rx="2" fill="#1C262B" stroke="#3A4248"/>' + [0, 1, 2].map(q => '<circle cx="' + (x + 14 + q * 7) + '" cy="' + (y + 13.5 + j * 14) + '" r="2" fill="' + (q === 2 && kotu ? '#FF5A4F' : '#5CF08F') + '" class="of-yan" style="animation-delay:' + (-(j * 3 + q) * .23) + 's"/>').join('')).join('')
+      + '<path class="of-ekg" d="M' + (x + w / 2 + 6) + ' ' + cy + 'h8l4 -12l5 22l4 -10h8l4 -6l3 6h10" fill="none" stroke="' + R + '" stroke-width="2"/>';
+    return '';
+  };
+  let s = '<defs><pattern id="ofZemin" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#F4F6F9"/><path d="M40 0H0V40" fill="none" stroke="#E3E8EE"/></pattern></defs><rect width="' + W + '" height="' + H + '" rx="14" fill="url(#ofZemin)"/>'
+    + '<rect x="14" y="176" width="' + (W - 28) + '" height="112" rx="10" fill="#EEF2F6"/>';
+  const kisi = (x, y, renk, kask) => '<g><ellipse cx="' + x + '" cy="' + (y + 34) + '" rx="16" ry="4" fill="#000" opacity=".08"/><path d="M' + (x - 13) + ' ' + (y + 32) + 'Q' + x + ' ' + (y + 4) + ' ' + (x + 13) + ' ' + (y + 32) + 'Z" fill="' + renk + '"/><circle cx="' + x + '" cy="' + (y - 2) + '" r="9" fill="#F1C79B"/>'
+    + (kask ? '<path d="M' + (x - 11) + ' ' + (y - 3) + 'A11 11 0 0 1 ' + (x + 11) + ' ' + (y - 3) + 'Z" fill="#F5B300"/><rect x="' + (x - 13) + '" y="' + (y - 4) + '" width="26" height="3" rx="1.5" fill="#E09A00"/>' : '<path d="M' + (x - 9) + ' ' + (y - 4) + 'A9 9 0 0 1 ' + (x + 9) + ' ' + (y - 4) + '" fill="#4A3426"/>') + '</g>';
+  M.forEach((m, i) => {
+    const p = pos(i), kotu = !!m.sorun, dx = p.x, dy = p.y, mx = dx + 118, my = dy + 26, mw = 118, mh = 64;
+    m.p = { x: dx + 60, y: i < 4 ? dy + DH + 26 : dy - 22 };
+    s += '<g class="of-masa"><rect x="' + dx + '" y="' + dy + '" width="' + DW + '" height="' + DH + '" rx="12" fill="#fff" stroke="' + (kotu ? '#F0A39C' : '#D6DEE7') + '" stroke-width="' + (kotu ? 2 : 1.2) + '"/>'
+      + T(dx + 12, dy + 20, esc(m.ad), ' font-size="12.5" font-weight="700" fill="#10233F"') + T(dx + 12, dy + 34, esc(m.alt), ' font-size="10" fill="#7A8799"')
+      + '<circle cx="' + (dx + DW - 14) + '" cy="' + (dy + 15) + '" r="6" fill="' + (kotu ? '#D92D20' : '#1FA463') + '" class="' + (kotu ? 'of-yan' : '') + '"/>'
+      + '<rect x="' + (mx - 4) + '" y="' + (my - 4) + '" width="' + (mw + 8) + '" height="' + (mh + 8) + '" rx="5" fill="#2B3236"/><rect x="' + mx + '" y="' + my + '" width="' + mw + '" height="' + mh + '" rx="3" fill="#0C1712"/>' + viz(m.k, mx, my, mw, mh, kotu)
+      + '<rect x="' + (mx + mw / 2 - 5) + '" y="' + (my + mh + 4) + '" width="10" height="10" fill="#2B3236"/>'
+      + '<rect x="' + (dx + 14) + '" y="' + (dy + 106) + '" width="' + (DW - 28) + '" height="10" rx="3" fill="#C9A27A"/>'
+      + kisi(dx + 62, dy + 74, kotu ? '#B42318' : '#2a78d6', false)
+      + '<g class="of-yaz"><rect x="' + (dx + 52) + '" y="' + (dy + 100) + '" width="20" height="5" rx="2" fill="#7A8799"/></g>'
+      + T(dx + 12, dy + 136, esc(m.deger), ' font-size="11" font-weight="600" fill="' + (kotu ? '#B42318' : '#1E7A3C') + '" font-family="ui-monospace,monospace"')
+      + (kotu ? '<g class="of-balon"><rect x="' + (dx + 8) + '" y="' + (dy + 40) + '" width="104" height="30" rx="8" fill="#FDECEA" stroke="#D92D20"/>' + T(dx + 14, dy + 52, '⚠ ' + esc(String(m.sorun).slice(0, 18)), ' font-size="9.5" font-weight="700" fill="#B42318"') + T(dx + 14, dy + 64, esc(String(m.sorun).slice(18, 38)), ' font-size="9" fill="#B42318"') + '</g>' : '')
+      + '</g>';
+  });
+  // şef: masası ortada; sorun/müdahale varsa ilgili masaya gider, yoksa devriye gezer
+  const sx = W / 2, sy = 232, acik = sef.acik || [], son = (sef.eylemler || []).slice(-1)[0] || (sef.gecmis || []).slice(-1)[0];
+  const sonYeni = son && yasDk(son.t) < 30, kotuM = M.find(m => m.sorun);
+  const hedef = sonYeni ? M.find(m => m.k === ({ itme: 'ns1', isler: 'ns1', api: 'ns1', is_tetik: 'is' })[son.eylem]) : kotuM;
+  s += '<rect x="' + (sx - 70) + '" y="' + (sy - 30) + '" width="140" height="52" rx="10" fill="#FFF7E0" stroke="#F5B300" stroke-width="1.5"/><rect x="' + (sx - 50) + '" y="' + (sy + 6) + '" width="100" height="8" rx="3" fill="#C9A27A"/>' + T(sx, sy - 14, '👷 ŞEF MASASI', ' text-anchor="middle" font-size="10.5" font-weight="800" fill="#9A5B00" letter-spacing=".06em"')
+    + T(sx, sy + 34, sef.t ? 'son tur ' + yasDk(sef.t) + ' dk önce' : 'şef verisi yok', ' text-anchor="middle" font-size="9.5" fill="#7A8799"');
+  let sefG, durum;
+  if (acik.length) { sefG = '<g>' + kisi(sx, sy - 22, '#E09A00', true) + '<text class="of-yan" x="' + (sx + 18) + '" y="' + (sy - 30) + '" font-size="14">📞</text></g>'; durum = 'Çözemediği ' + acik.length + ' sorunu size bildirdi'; }
+  else if (hedef) { const p = hedef.p; sefG = '<g class="of-git" style="--x:' + (p.x - sx) + 'px;--y:' + (p.y - (sy - 22)) + 'px">' + kisi(sx, sy - 22, '#E09A00', true) + '<g class="of-anahtar" style="transform-origin:' + (sx + 16) + 'px ' + (sy - 12) + 'px"><text x="' + (sx + 10) + '" y="' + (sy - 6) + '" font-size="14">🔧</text></g></g>'; durum = sonYeni ? (son.ok ? 'Düzeltti: ' : 'Uğraşıyor: ') + (son.sonuc || son.eylem) : hedef.ad + ' masasında: ' + hedef.sorun; }
+  else { const yol = M.map(m => (m.p.x - sx) + 'px ' + (m.p.y - (sy - 22)) + 'px'); sefG = '<g class="of-devriye">' + kisi(sx, sy - 22, '#E09A00', true) + '</g>'; durum = 'Devriyede · her şey yolunda'; }
+  s += sefG + '<rect x="' + (W / 2 - 230) + '" y="' + (H - 4 - 0) + '" width="0" height="0"/>';
+  const css = '<style>.of-don{animation:ofDon 3s linear infinite}.of-don2{animation:ofDon 2s linear infinite reverse}@keyframes ofDon{to{transform:rotate(360deg)}}'
+    + '.of-akis{animation:ofAkis 2.2s linear infinite}@keyframes ofAkis{to{transform:translateX(78px);opacity:.2}}'
+    + '.of-ibre{animation:ofIbre 2.6s ease-in-out infinite alternate}@keyframes ofIbre{from{transform:rotate(-55deg)}to{transform:rotate(48deg)}}'
+    + '.of-commit{animation:ofCommit 3.3s linear infinite}@keyframes ofCommit{to{transform:translateX(78px)}}'
+    + '.of-yan{animation:ofYan 1.1s ease-in-out infinite}@keyframes ofYan{50%{opacity:.25}}'
+    + '.of-tara{animation:ofTara 2.4s linear infinite}@keyframes ofTara{to{transform:translateX(100px)}}'
+    + '.of-radar{animation:ofDon 2.6s linear infinite}.of-ekg{stroke-dasharray:90;animation:ofEkg 1.6s linear infinite}@keyframes ofEkg{from{stroke-dashoffset:90}to{stroke-dashoffset:-90}}'
+    + '.of-yaz{animation:ofYaz .5s ease-in-out infinite alternate}@keyframes ofYaz{to{transform:translateY(-2px)}}'
+    + '.of-balon{animation:ofBalon 2s ease-in-out infinite}@keyframes ofBalon{50%{transform:translateY(-3px)}}'
+    + '.of-git{animation:ofGit 2.5s ease-out forwards}@keyframes ofGit{to{transform:translate(var(--x),var(--y))}}.of-anahtar{animation:ofAnahtar .6s ease-in-out infinite alternate}@keyframes ofAnahtar{from{transform:rotate(-25deg)}to{transform:rotate(25deg)}}'
+    + '.of-devriye{animation:ofDevriye 40s ease-in-out infinite}@keyframes ofDevriye{'
+    + M.map((m, i) => (i * 12.5).toFixed(1) + '%{transform:translate(' + (m.p.x - sx) + 'px,' + (m.p.y - (sy - 22)) + 'px)}').join('') + '100%{transform:translate(' + (M[0].p.x - sx) + 'px,' + (M[0].p.y - (sy - 22)) + 'px)}}'
+    + '@media (prefers-reduced-motion:reduce){[class^="of-"]{animation:none!important}}</style>';
+  return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><b style="color:' + (acik.length ? '#B42318' : '#9A5B00') + '">👷 ' + esc(durum) + '</b><span class="k">canlı · sayfa 3 dk\'da bir yenilenir</span></div>'
+    + '<div style="overflow-x:auto"><svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;min-width:900px;height:auto;display:block;font-family:inherit" role="img" aria-label="Bekçi ofisi">' + css + s + '</svg></div>';
+}
 function sefKarti(d) {
   if (!d || !d.t) return '';
   const yas = Math.round((Date.now() - Date.parse(d.t)) / 60000), acik = d.acik || [], son = (d.gecmis || []).slice(-6).reverse();
   const AD = { itme: 'GitHub gönderimini onardı', is_tetik: 'gecikmiş işi çalıştırdı', isler: 'zamanlayıcıyı yeniden başlattı', api: 'API\'yi yeniden başlattı' };
   const renk = acik.length ? '#B42318' : '#1E7A3C', zemin = acik.length ? '#FDECEA' : '#E6F4EA';
-  return '<section class="panel" style="gap:10px"><div class="bas"><h2>👷 Şef</h2><span class="k">bekçilerin bulduğunu çözer · ' + (yas > 15 ? '<b style="color:#B42318">' + yas + ' dk önce (şef çalışmıyor olabilir)</b>' : yas + ' dk önce') + '</span></div>'
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>👷 Bekçi ofisi ve şef</h2><span class="k">bekçiler bulur, şef çözer · ' + (yas > 15 ? '<b style="color:#B42318">' + yas + ' dk önce (şef çalışmıyor olabilir)</b>' : yas + ' dk önce') + '</span></div>'
+    + sefOfis()
     + '<div style="border-radius:10px;background:' + zemin + ';padding:10px 12px;font-weight:700;color:' + renk + '">' + (acik.length ? '⚠ Çözemediği ' + acik.length + ' sorun var — müdahale gerekir' : (d.durum === 'mudahale' ? '✓ Bu tur müdahale etti, sorun giderildi' : '✓ Her şey yolunda, müdahale gerekmiyor')) + '</div>'
     + (acik.length ? '<div style="display:flex;flex-direction:column;gap:4px">' + acik.map(a => '<div style="font-size:13px"><b style="color:#B42318">✗</b> ' + esc(a.sorun) + ' <span class="k">· ' + esc(a.neden || '') + '</span></div>').join('') + '</div>' : '')
     + (son.length ? '<div class="k" style="font-weight:600">Son müdahaleler</div><div style="display:flex;flex-direction:column;gap:3px">' + son.map(e => '<div style="font-size:13px;display:flex;gap:8px"><span class="num" style="color:#4A5A70;min-width:86px">' + esc(String(e.t).slice(5, 16).replace('T', ' ')) + '</span><span style="color:' + (e.ok ? '#1E7A3C' : '#B42318') + ';font-weight:800">' + (e.ok ? '✓' : '✗') + '</span><span><b>' + esc(AD[e.eylem] || e.eylem) + '</b> — ' + esc(e.sorun) + ' <span class="k">(' + esc(e.sonuc) + ')</span></span></div>').join('') + '</div>' : '')
@@ -4059,7 +4142,7 @@ function denetimKarti(d) {
 }
 async function yukle(taze) {
   try {
-    const [son, osos, mad, fs, saha, sg, inav, sb, den, sef] = await Promise.all([
+    const [son, osos, mad, fs, saha, sg, inav, sb, den, sef, bek] = await Promise.all([
       al('n8n/aesun_son.json', taze).catch(() => null),
       al('2026_osos_endeks.json', taze),
       al('antminer_panel.json', taze).catch(() => null),
@@ -4069,10 +4152,11 @@ async function yukle(taze) {
       al('n8n/inavitas_son.json', taze).catch(() => null),
       al('n8n/sistem_bekci.json', taze).catch(() => null),
       al('n8n/denetim.json', taze).catch(() => null),
-      al('n8n/sef.json', taze).catch(() => null)
+      al('n8n/sef.json', taze).catch(() => null),
+      al('n8n/bekci.json', taze).catch(() => null)
     ]);
     const kim = await al('n8n/cihaz_kimlik.json').catch(() => null);
-    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad: filoSuz(mad, kim), fs, saha, sg, inav, kim, sb, den, sef };
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad: filoSuz(mad, kim), fs, saha, sg, inav, kim, sb, den, sef, bek };
     sistemBekciNot(sb);
     ciz();
   } catch (e) {

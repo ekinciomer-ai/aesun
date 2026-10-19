@@ -275,6 +275,38 @@ function kmlPolys(txt) {
   while ((m = re.exec(txt))) { const pts = m[1].trim().split(/\s+/).map((s) => s.split(',').map(Number)).filter((a) => a.length >= 2 && isFinite(a[0]) && isFinite(a[1])); if (pts.length >= 3) out.push(pts); }
   return out;
 }
+// Parsel KML'inden antet bilgisi (TKGM Parsel Sorgu ve benzerleri): il, ilçe, mahalle, ada, parsel, pafta
+function kmlBilgi(txt) {
+  const dec = (s) => String(s).replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+  const strip = (s) => dec(s).replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  const norm = (k) => k.toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z]/g, '');
+  const kv = []; let m;
+  const r1 = /<(Data|SimpleData)\s+name\s*=\s*"([^"]+)"[^>]*>([\s\S]*?)<\/\1>/gi;
+  while ((m = r1.exec(txt))) { const v = m[3].match(/<value>([\s\S]*?)<\/value>/i); kv.push([m[2], strip(v ? v[1] : m[3])]); }
+  const r2 = /<description>([\s\S]*?)<\/description>/gi;
+  while ((m = r2.exec(txt))) {
+    const d = dec(m[1]); let q; const r3 = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>\s*<td[^>]*>([\s\S]*?)<\/td>/gi;
+    while ((q = r3.exec(d))) kv.push([strip(q[1]), strip(q[2])]);
+    for (const line of d.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(tr|p|div|li)>/gi, '\n').replace(/<[^>]+>/g, ' ').split('\n')) { const z = line.match(/^\s*([^:=]{2,30}?)\s*[:=]\s*(.+?)\s*$/); if (z) kv.push([z[1], z[2].trim()]); }
+  }
+  const B = { il: '', ilce: '', mahalle: '', pafta: '', mevkii: '', ada: [], parsel: [] };
+  const ek = (k, v) => { v = String(v || '').trim(); if (!v || v === '-' ) return; const n = norm(k);
+    if (['il', 'ilad', 'iladi', 'ilismi', 'sehir', 'ilname'].includes(n)) B.il = B.il || v;
+    else if (['ilce', 'ilcead', 'ilceadi', 'ilceismi', 'ilcename'].includes(n)) B.ilce = B.ilce || v;
+    else if (/^(mahalle|koy|mahallekoy|mahalleadi|mahallead|mahallename)/.test(n)) B.mahalle = B.mahalle || v;
+    else if (['ada', 'adano', 'adanumarasi'].includes(n)) { if (!B.ada.includes(v)) B.ada.push(v); }
+    else if (['parsel', 'parselno', 'parselnumarasi'].includes(n)) { if (!B.parsel.includes(v)) B.parsel.push(v); }
+    else if (['pafta', 'paftano'].includes(n)) B.pafta = B.pafta || v;
+    else if (['mevki', 'mevkii', 'mevkiadi'].includes(n)) B.mevkii = B.mevkii || v; };
+  for (const [k, v] of kv) ek(k, v);
+  if (!B.ada.length || !B.parsel.length) {   // Placemark adı: "127/5", "127 ada 5 parsel" ya da "İl/İlçe/Mahalle/127/5"
+    const r4 = /<Placemark[\s\S]*?<name>([\s\S]*?)<\/name>/gi;
+    while ((m = r4.exec(txt))) { const s = strip(m[1]); let z;
+      if ((z = s.match(/(\d+)\s*ada\s*(\d+)\s*parsel/i)) || (z = s.match(/(?:^|\/|\s)(\d+)\s*\/\s*(\d+)\s*$/))) { if (!B.ada.includes(z[1])) B.ada.push(z[1]); if (!B.parsel.includes(z[2])) B.parsel.push(z[2]); }
+      const p = s.split('/').map((x) => x.trim()); if (p.length >= 5 && /^\d+$/.test(p[p.length - 1])) { B.il = B.il || p[0]; B.ilce = B.ilce || p[1]; B.mahalle = B.mahalle || p[2]; } }
+  }
+  return B;
+}
 function utmZoneOf(lon) { return Math.floor((lon + 180) / 6) + 1; }
 function ll2utm(lat, lon, zone) {
   const a = 6378137, f = 1 / 298.257223563, k0 = 0.9996, e2 = f * (2 - f), ep2 = e2 / (1 - e2);

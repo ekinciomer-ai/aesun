@@ -84,7 +84,7 @@ async function pjSifirla(sor = true) {
   PJ.alt = []; PJ.aktif = null; PJ.revNo = 0; PJ.revNot = null; PJ.duzNo = 0; G.last = null;
   pjDuzenSifirla();
   try { const db = await pjIdb(); db.transaction('proje', 'readwrite').objectStore('proje').delete('son'); } catch (e) { console.warn('arşiv', e); }
-  for (const id of ['g-result', 'bfiles', 'st-son', 'p-back']) { const el = gv(id); if (el) el.hidden = true; }
+  for (const id of ['g-result', 'st-son', 'p-back']) { const el = gv(id); if (el) el.hidden = true; }
   const po = gv('p-open'); if (po) po.disabled = true;
   const dl = gv('pjdlg'); if (dl && dl.open) dl.close();
   pjSave(); redraw();
@@ -118,4 +118,39 @@ function pjDuzenInit() {
   gv('p-tmtasi').onclick = () => runCommand('GTMTASI'); gv('p-invtasi').onclick = () => runCommand('GINVTASI');
   gv('p-yolciz').onclick = () => runCommand('GYOLCIZ'); gv('p-yolsil').onclick = () => runCommand('GYOLSIL');
   gv('p-duzcalis').onclick = () => pjDuzenCiz(); gv('p-duzsif').onclick = pjSifirla; pjDuzenBilgi();
+}
+
+// ---- Açılan yerleşim paftasındaki (01 GENEL) inverter ve köşkler tasarım nesnesine çevrilir: sol menüdeki tasarım
+// araçları (DC ata / DC oto / AC kablo / AC oto …) bunları tanır; köşk "Trafo ekle" aracının bloğuyla gösterilir.
+function pjPaftaTani() {
+  if (!S.doc) return 0; const D = S.doc, it = [...D.items.values()], up = (x) => String(x.layer).toUpperCase();
+  if (it.some((x) => x.ges && (x.ges.tip === 'inv' || x.ges.tip === 'tm'))) return 0;
+  const yaz = it.filter((x) => x.t === 'text' || x.t === 'mtext');
+  const inv = it.filter((x) => x.t === 'circle' && up(x) === 'GES-INV');
+  const ky = yaz.filter((t) => up(t) === 'GES-TM' && /^(TR-?\d+|TM-?\d+|DM)/i.test(String(t.s).trim()));
+  if (!inv.length && !ky.length) return 0;
+  const ang = gnum('g-ang', 0) * Math.PI / 180, oz = (PJ.aktif && PJ.aktif.oz) || (PJ.res && PJ.res.ozet) || {}, sil = new Set(), yeni = [];
+  const yerlestir = (o, c) => { const b = itemBB(D, o); const ox = (b[0] + b[2]) / 2 - o.M[3], oy = (b[1] + b[3]) / 2 - o.M[7]; o.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(o); return o; };
+  const ekle = (tip, c, g) => { const T = TS[tip]; const v = {}; for (const [k, , f] of T.alan) v[k] = f(); Object.assign(v, g, { tip }); D.addLayer(T.kat, T.renk);
+    const B = tsBlok(tip, v); yeni.push(yerlestir({ id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(0, 0), mRz(ang)), ap: [], ges: v }, c)); };
+  const etk = (c) => { let b = null, bd = 8; for (const t of yaz) if (up(t) === 'GES-INV') { const d = Math.hypot(t.x - c[0], t.y - c[1]); if (d < bd) { bd = d; b = t; } } return b; };
+  const L = inv.map((ci) => { const t = etk([ci.cx, ci.cy]); const m = t && String(t.s).match(/(?:TR(\d+)-)?(?:ACB\d+-)?INV(\d+)/i); return { ci, t, k: m ? [+(m[1] || 1), +m[2]] : [99, 0] }; }).sort((a, b) => a.k[0] - b.k[0] || a.k[1] - b.k[1]);
+  L.forEach((o, i) => { sil.add(o.ci); if (o.t) sil.add(o.t); ekle('inv', [o.ci.cx, o.ci.cy], { no: i + 1, kw: oz.inv_kw || pn('p-inv') || 100 }); });
+  const tmPl = it.filter((x) => x.t === 'pline' && up(x) === 'GES-TM').map((x) => ({ x, b: itemBB(D, x) })).filter((o) => o.b && isFinite(o.b[0]));
+  let tn = 0;
+  for (const t of ky) {
+    const yakin = tmPl.filter((o) => Math.hypot((o.b[0] + o.b[2]) / 2 - t.x, (o.b[1] + o.b[3]) / 2 - t.y) < 15);
+    if (!yakin.length) continue;
+    const dis = yakin.reduce((a, o) => ((o.b[2] - o.b[0]) * (o.b[3] - o.b[1]) > (a.b[2] - a.b[0]) * (a.b[3] - a.b[1]) ? o : a));
+    const bb = dis.b, c = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2];
+    for (const x of it) if (up(x) === 'GES-TM' && !sil.has(x)) { const b = x.t === 'text' || x.t === 'mtext' ? [x.x, x.y, x.x, x.y] : itemBB(D, x); if (b && b[0] >= bb[0] - 2 && b[2] <= bb[2] + 2 && b[1] >= bb[1] - 2.5 && b[3] <= bb[3] + 2.5) sil.add(x); }
+    sil.add(t);
+    const s = String(t.s).trim(); let nh = null;
+    for (const x of yaz) if (up(x) === 'GES-TM') { const m = String(x.s).match(/(\d+)\s*OG hücre/i); if (m && x.x >= bb[0] - 2 && x.x <= bb[2] + 2 && x.y >= bb[1] - 3 && x.y <= bb[3] + 3) nh = +m[1]; }
+    if (/^DM/i.test(s)) ekle('dm', c, nh ? { hucre: nh } : {});
+    else { tn++; const kva = +((s.match(/(\d{3,5})\s*kVA/i) || [])[1]) || (oz.tr_kva && oz.tr_kva[tn - 1]) || pn('p-trafo') || 1250; ekle('tm', c, { no: tn, kva, hucre: nh || (/\+\s*DM/i.test(s) ? 5 : 3) }); }
+  }
+  if (!yeni.length) return 0;
+  replaceItems([...[...sil].map((x) => [x, null]), ...yeni.map((n) => [null, n])], 'yerleşim nesneleri'); renderLayers();   // form alanlarına yazılmaz: seçenek, kullanıcı değeri değildir
+  return yeni.length;
 }

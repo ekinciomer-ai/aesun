@@ -302,7 +302,7 @@ details.tf-sec:not([open]) { gap: 0; }
     <span id="fname">Örnek çizim</span>
     <div class="hbtns">
       <button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
-      <button class="hb files" id="bfiles" hidden title="Son üretilen proje dosyaları"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h5l1.5 1.5h4.5v9.5h-11zM5 8h6M5 10.5h4" fill="none" stroke="currentColor"/></svg><span class="k">Proje dosyaları</span></button>
+      <button class="hb files" id="bfiles" title="Proje dosyaları: paftalar, yerleşim seçenekleri, keşif, PDF"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h5l1.5 1.5h4.5v9.5h-11zM5 8h6M5 10.5h4" fill="none" stroke="currentColor"/></svg><span class="k">Proje dosyaları</span></button>
       <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
       <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>
       <button class="hb" id="bclose" title="Çizimi kapat"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor"/></svg><span class="k">Kapat</span></button>
@@ -517,6 +517,7 @@ details.tf-sec:not([open]) { gap: 0; }
             <div class="grid3">
               <label class="gf">Çitten çekme (m)<input id="p-cekme" type="number" step="0.5" placeholder="5"></label>
               <label class="gf">Sıra açıklığı (m)<input id="p-acik" type="number" step="0.05" placeholder="pitch'ten"></label>
+              <label class="gf">İnverter hizalama<select id="p-invhiza"><option value="yol">Servis yoluna / çite yakın (masa başı)</option><option value="orta">Ortalı (bloğun ortası)</option><option value="optimum">Optimum (en kısa DC)</option></select></label>
               <label class="gf">TM tarafı<select id="p-taraf"><option value="dogu">Doğu</option><option value="bati">Batı</option></select></label>
               <label class="gf">İç bakım yolu<select id="p-icyol"><option value="1">Açık (K-G, ΔU'ya göre)</option><option value="0">Kapalı (yalnız kenar yol)</option></select></label>
               <label class="gf">İç yol genişliği (m)<input id="p-icw" type="number" step="0.5" placeholder="5"></label>
@@ -2953,6 +2954,38 @@ function kmlPolys(txt) {
   while ((m = re.exec(txt))) { const pts = m[1].trim().split(/\s+/).map((s) => s.split(',').map(Number)).filter((a) => a.length >= 2 && isFinite(a[0]) && isFinite(a[1])); if (pts.length >= 3) out.push(pts); }
   return out;
 }
+// Parsel KML'inden antet bilgisi (TKGM Parsel Sorgu ve benzerleri): il, ilçe, mahalle, ada, parsel, pafta
+function kmlBilgi(txt) {
+  const dec = (s) => String(s).replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+  const strip = (s) => dec(s).replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  const norm = (k) => k.toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/[^a-z]/g, '');
+  const kv = []; let m;
+  const r1 = /<(Data|SimpleData)\s+name\s*=\s*"([^"]+)"[^>]*>([\s\S]*?)<\/\1>/gi;
+  while ((m = r1.exec(txt))) { const v = m[3].match(/<value>([\s\S]*?)<\/value>/i); kv.push([m[2], strip(v ? v[1] : m[3])]); }
+  const r2 = /<description>([\s\S]*?)<\/description>/gi;
+  while ((m = r2.exec(txt))) {
+    const d = dec(m[1]); let q; const r3 = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>\s*<td[^>]*>([\s\S]*?)<\/td>/gi;
+    while ((q = r3.exec(d))) kv.push([strip(q[1]), strip(q[2])]);
+    for (const line of d.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(tr|p|div|li)>/gi, '\n').replace(/<[^>]+>/g, ' ').split('\n')) { const z = line.match(/^\s*([^:=]{2,30}?)\s*[:=]\s*(.+?)\s*$/); if (z) kv.push([z[1], z[2].trim()]); }
+  }
+  const B = { il: '', ilce: '', mahalle: '', pafta: '', mevkii: '', ada: [], parsel: [] };
+  const ek = (k, v) => { v = String(v || '').trim(); if (!v || v === '-' ) return; const n = norm(k);
+    if (['il', 'ilad', 'iladi', 'ilismi', 'sehir', 'ilname'].includes(n)) B.il = B.il || v;
+    else if (['ilce', 'ilcead', 'ilceadi', 'ilceismi', 'ilcename'].includes(n)) B.ilce = B.ilce || v;
+    else if (/^(mahalle|koy|mahallekoy|mahalleadi|mahallead|mahallename)/.test(n)) B.mahalle = B.mahalle || v;
+    else if (['ada', 'adano', 'adanumarasi'].includes(n)) { if (!B.ada.includes(v)) B.ada.push(v); }
+    else if (['parsel', 'parselno', 'parselnumarasi'].includes(n)) { if (!B.parsel.includes(v)) B.parsel.push(v); }
+    else if (['pafta', 'paftano'].includes(n)) B.pafta = B.pafta || v;
+    else if (['mevki', 'mevkii', 'mevkiadi'].includes(n)) B.mevkii = B.mevkii || v; };
+  for (const [k, v] of kv) ek(k, v);
+  if (!B.ada.length || !B.parsel.length) {   // Placemark adı: "127/5", "127 ada 5 parsel" ya da "İl/İlçe/Mahalle/127/5"
+    const r4 = /<Placemark[\s\S]*?<name>([\s\S]*?)<\/name>/gi;
+    while ((m = r4.exec(txt))) { const s = strip(m[1]); let z;
+      if ((z = s.match(/(\d+)\s*ada\s*(\d+)\s*parsel/i)) || (z = s.match(/(?:^|\/|\s)(\d+)\s*\/\s*(\d+)\s*$/))) { if (!B.ada.includes(z[1])) B.ada.push(z[1]); if (!B.parsel.includes(z[2])) B.parsel.push(z[2]); }
+      const p = s.split('/').map((x) => x.trim()); if (p.length >= 5 && /^\d+$/.test(p[p.length - 1])) { B.il = B.il || p[0]; B.ilce = B.ilce || p[1]; B.mahalle = B.mahalle || p[2]; } }
+  }
+  return B;
+}
 function utmZoneOf(lon) { return Math.floor((lon + 180) / 6) + 1; }
 function ll2utm(lat, lon, zone) {
   const a = 6378137, f = 1 / 298.257223563, k0 = 0.9996, e2 = f * (2 - f), ep2 = e2 / (1 - e2);
@@ -3146,6 +3179,17 @@ function parselBirlestir() {
   if (G.parcelOut.length) msg('⚠ Bitişik olmayan parsel: ' + G.parcelOut.join(', ') + '. Proje en büyük birleşik alanda yapılır; bu parseller ayrı proje olarak çizilmeli.', 'err');
 }
 function pointInPoly(p, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; }
+// KML'deki il / ilçe / mahalle / ada / parsel / pafta → proje (antet) alanları; birden çok parselde ada ve parseller birleşir
+function kmlAntet(B) {
+  if (!B) return; const K = G.kmlAntet = G.kmlAntet || { ada: [], parsel: [] };
+  for (const k of ['il', 'ilce', 'mahalle', 'pafta', 'mevkii']) if (B[k]) K[k] = K[k] || B[k];
+  for (const k of ['ada', 'parsel']) { for (const v of B[k]) if (!K[k].includes(v)) K[k].push(v); K[k].sort((x, y) => (parseFloat(x) || 0) - (parseFloat(y) || 0)); }
+  const yaz = (id, v) => { const el = gv(id); if (el && v && (!String(el.value).trim() || el.dataset.kml === '1')) { el.value = v; el.dataset.kml = '1'; } };
+  yaz('p-il', K.il); yaz('p-ilce', K.ilce); yaz('p-mah', K.mahalle); yaz('p-ada', K.ada.join('-')); yaz('p-parsel', K.parsel.join('-'));
+  if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function') tfSync();
+  const t = [K.il, K.ilce, K.mahalle, K.ada.length ? 'Ada ' + K.ada.join('-') : '', K.parsel.length ? 'Parsel ' + K.parsel.join('-') : ''].filter(Boolean).join(' / ');
+  msg(t ? 'KML antet bilgisi: ' + t + (K.pafta ? ' · Pafta ' + K.pafta : '') : 'KML\'de il/ilçe/ada/parsel bilgisi yok; antet alanlarını elle girin.', t ? 'res' : 'note');
+}
 async function gesKml(file) {
   try {
     const buf = await file.arrayBuffer(); const txt = /\.kmz$/i.test(file.name) ? await unzipFirstKml(buf) : new TextDecoder().decode(buf);
@@ -3159,6 +3203,7 @@ async function gesKml(file) {
     list.forEach((o, i) => { o.ad = list.length > 1 ? base + '-' + (i + 1) : base; });
     gv('g-zone').value = z; gv('g-lat').value = list[0].lat.toFixed(4);
     const n = parselEkle(list, 'kml', null);
+    kmlAntet(kmlBilgi(txt));
     msg('KML: ' + file.name + ' → ' + n + ' parsel eklendi (UTM ' + z + 'N, WGS84). Toplam ' + G.parcels.length + ' parsel.', 'res');
   } catch (e) { console.error(e); msg('KML/KMZ okunamadı (' + file.name + '): ' + (e.message || e), 'err'); }
 }
@@ -3316,7 +3361,7 @@ function gesInit() {
 // ---- GES project: AeCAD -> GES-ÇİZ (Pyodide worker) -> paftalar, kontrol, keşif, teklif ----
 const PJ = { worker: null, seq: 0, busy: false, again: false, res: null, files: null, srcDoc: null, dm: null, cur: null };
 const PKEY = 'aecad.proje.v1', FKEY = 'aecad.fiyat.v1';
-const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar', 'p-cyol', 'p-cpar', 'p-cdig', 'p-invn', 'p-yadr', 'p-il', 'p-ilce', 'p-mah', 'p-ada', 'p-parsel', 'p-firma', 'p-fadr', 'p-ftel', 'p-fmail', 'p-mueu', 'p-oda', 'p-smm', 'p-cizen', 'p-cizu', 'p-tarih', 'p-invsin'];
+const PJ_IDS = ['p-masa', 'p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-kod', 'p-ad', 'p-yat', 'p-yer', 'p-mue', 'p-rev', 'p-sev', 'p-tip', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin', 'p-invm', 'p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-trg', 'p-sebeke', 'p-ogkv', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-cekme', 'p-taraf', 'p-dcmax', 'p-acik', 'p-aks', 'p-aksa', 'p-pdf2', 'p-icyol', 'p-icw', 'p-icar', 'p-cyol', 'p-cpar', 'p-cdig', 'p-invn', 'p-yadr', 'p-il', 'p-ilce', 'p-mah', 'p-ada', 'p-parsel', 'p-firma', 'p-fadr', 'p-ftel', 'p-fmail', 'p-mueu', 'p-oda', 'p-smm', 'p-cizen', 'p-cizu', 'p-tarih', 'p-invsin', 'p-invhiza'];
 
 function pjSave() { try { const o = {}; for (const id of PJ_IDS) { const el = gv(id); if (el) o[id] = el.type === 'checkbox' ? el.checked : el.value; } o.dm = PJ.dm; o.duzen = PJ.duzen; localStorage.setItem(PKEY, JSON.stringify(o)); } catch (e) { /* ignore */ } }
 function pjLoad() { try { const o = JSON.parse(localStorage.getItem(PKEY) || 'null'); if (!o) return; for (const id of PJ_IDS) { const el = gv(id); if (el && o[id] !== undefined) { if (el.type === 'checkbox') el.checked = o[id]; else el.value = o[id]; } } PJ.dm = o.dm || null; if (o.duzen) PJ.duzen = o.duzen; } catch (e) { /* ignore */ } }
@@ -3369,7 +3414,29 @@ function pjAutoHints() {
   }
   gv('p-auto').textContent = invSat + (spm > 1 ? '⚠ Seçili masada ' + spm + ' string var; GES-ÇİZ TİP-1 (1 masa = 1 string, 2V13) için kurgulanmıştır, inverter ve trafo sayısı şişebilir. · ' : '') + 'String ' + a.strMod + ' modül (' + fmtNum(a.strKwp, 2) + ' kWp) · inverter başına ≤ ' + a.strInv + ' string → DC/AC ≈ ' + fmtNum(a.strInv * a.strKwp / a.invKw, 2) + ' · trafo başına ≤ ' + a.invTr + ' inverter (' + fmtNum(a.invTr * a.invKw / a.kva * 100, 0) + ' % yük) · ' + (a.maxMasa ? 'hedef ' + fmtNum(hedefKwp(), 0) + ' kWp → en çok ' + a.maxMasa + ' masa (' + fmtNum(a.maxMasa * a.masaKwp, 0) + ' kWp)' : 'arazinin tamamı') + ' · ayak ' + a.aks + ' aks × ' + fmtNum(a.aksA, 2) + ' m, K-G ' + fmtNum(kgAyak(a.tp), 2) + ' m (≤ 2,50)';
 }
-function buildParam() { return pjDuzenUygula(buildParam0()); }
+function buildParam() { return pjCizimUygula(pjDuzenUygula(buildParam0()), pjCizimYerlesim()); }
+// ---- Tek yerleşim (kullanıcı kuralı 19.10.2026): Arazi doldur, elle çizim ve onaylanan seçenek aynı çizimdedir;
+// proje paftaları her zaman çizimdeki yerleşimden üretilir (masa, inverter, trafo, DM konumları).
+function pjCizimYerlesim() {
+  const D = (PJ.cur && /_01_GENEL_/.test(PJ.cur)) ? S.doc : (PJ.srcDoc || S.doc); if (!D || !G.bound) return null;
+  const mrk = (it) => { const b = itemBB(D, it); return b && isFinite(b[0]) ? [+((b[0] + b[2]) / 2).toFixed(3), +((b[1] + b[3]) / 2).toFixed(3)] : null; };
+  const masa = [], inv = [], tm = [], ac = []; let dm = null;
+  for (const it of D.items.values()) {
+    if (String(it.layer).toUpperCase() === 'GES-MASA' && (it.t === 'insert' || (it.t === 'pline' && it.pts && it.pts.length >= 4))) { const c = mrk(it); if (c && pointInPoly(c, G.bound)) masa.push(c); }
+    else if (it.t === 'pline' && it.ges && it.ges.tip === 'ac' && it.pts.length >= 2) ac.push({ pts: it.pts.map((q) => [+q[0].toFixed(3), +q[1].toFixed(3)]), pay: +it.ges.pay || 10 });
+    else if (it.t === 'insert' && it.ges) { const c = mrk(it); if (!c) continue; if (it.ges.tip === 'inv') inv.push(c); else if (it.ges.tip === 'tm') tm.push(c); else if (it.ges.tip === 'dm') dm = c; }
+  }
+  return masa.length ? { masa, inv, tm, dm, ac } : null;
+}
+function pjCizimUygula(p, Y) {
+  if (!Y) return p;
+  p.masa.konumlar = Y.masa; p.parsel.max_masa = null; p.yol = p.yol || {}; p.yol.ic_yol = false;
+  if (Y.tm.length) p.elektrik.tm_konumlari = Y.tm;
+  if (Y.dm) p.elektrik.dm_konum = Y.dm;
+  if (Y.inv.length) { p.elektrik.inv_konumlari = Y.inv; p.elektrik.inverter_adet = Y.inv.length; }
+  if (Y.ac && Y.ac.length) p.elektrik.ac_hatlar = Y.ac;
+  return p;
+}
 function buildParam0() {
   const a = pjAuto(), P = G.panel, tp = a.tp;
   // sıra aralığı proje masasından (gölge hesabı); elle girildiyse o değer
@@ -3384,14 +3451,14 @@ function buildParam0() {
       firma: { ad: pv('p-firma') || '', adres: (pv('p-fadr') || '').split(';').map((s) => s.trim()).filter(Boolean), tel: pv('p-ftel') || '', eposta: pv('p-fmail') || '' } },
     parsel: { koordinat: (G.parcels && G.parcels.length > 1) ? G.parcels.map((q) => q.pts.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)])) : G.bound.map((p) => [+p[0].toFixed(3), +p[1].toFixed(3)]), koordinat_sistemi: G.boundCrs || (fromKml ? 'WGS84 / UTM ' + gnum('g-zone', 38) + 'N (KML)' : 'Çizim koordinatı (AeCAD)'), cekme_mesafesi_m: pn('p-cekme') ?? 5, cepheler: cepheParam(), max_masa: a.maxMasa, hedef_masa: null },
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
-    masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, kolon_sira_araligi_m: +kgAyak(tp).toFixed(3), parca_carpani: statikVar ? undefined : pc },
+    masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, golge_saat: gv('g-hrs').value === 'manual' ? 3 : parseFloat(gv('g-hrs').value), kolon_sira_araligi_m: +kgAyak(tp).toFixed(3), parca_carpani: statikVar ? undefined : pc },
     yol: { ic_yol: (pv('p-icyol') || '1') === '1', ic_genislik_m: pn('p-icw') ?? 5, ic_aralik_m: pn('p-icar') },
-    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), inverter_adet: pn('p-invn'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', inverter_sinir_kw: pn('p-invsin'), trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
+    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), inverter_adet: pn('p-invn'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', inverter_sinir_kw: pn('p-invsin'), inverter_hiza: pv('p-invhiza') || 'yol', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
   };
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191517', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191620', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3437,6 +3504,7 @@ function pjOpenPafta(name, auto, dosyalar) {
   if (!PJ.srcDoc) PJ.srcDoc = S.doc;
   const norm = parseDxf(decodeDxfBytes(f)); const doc = importNormalized(norm);
   const keep = G.bound; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
+  if (/_01_GENEL_/.test(name) && typeof pjPaftaTani === 'function') pjPaftaTani();
   if (!auto) msg('Pafta açıldı: ' + name, 'res');
   document.querySelectorAll('.pf-row').forEach((r) => r.classList.toggle('on', r.dataset.f === name));
 }
@@ -3507,7 +3575,19 @@ function pjLinkler() {
 }
 function pjDialog(tab) {
   if (tab === 'yerlesim') { const d = gv('pjdlg'); if (!d.open) d.showModal(); d.querySelectorAll('.ptab').forEach((b) => b.classList.toggle('on', b.dataset.t === tab)); PJ.tab = tab; pjAltCiz(); return; }
-  if (!PJ.res) { msg('Önce projeyi üretin.'); return; }
+  if (!PJ.res) {   // proje henüz üretilmedi: dosya penceresi yine açılır (yerleşim seçeneklerinin dosyaları + üret düğmeleri)
+    const d = gv('pjdlg'); if (!d.open) d.showModal(); d.querySelectorAll('.ptab').forEach((b) => b.classList.toggle('on', b.dataset.t === 'paftalar')); PJ.tab = 'paftalar';
+    const box = gv('pj-body'); box.innerHTML = ''; const h = (t, c, s) => { const e = document.createElement(t); if (c) e.className = c; if (s) e.textContent = s; return e; };
+    box.appendChild(h('p', 'gi', 'Proje paftaları henüz üretilmedi. Paftalar çizimdeki yerleşimden (Arazi doldur, elle çizim ya da onaylanan seçenek) üretilir.'));
+    const br = h('div', 'brow'); const b1 = h('button', 'gb primary', 'Proje paftalarını oluştur'); b1.onclick = () => { d.close(); pjRun(); };
+    const b2 = h('button', 'gb', 'Yerleşimi çiz ve seçenekleri karşılaştır'); b2.onclick = () => { pjYerlesim(); }; br.append(b1, b2); box.appendChild(br);
+    const alts = (PJ.alt || []).filter((a) => a.files);
+    if (alts.length) { const list = h('div', 'pf-list');
+      for (const a of alts) for (const name of Object.keys(a.files).sort()) { const r = h('div', 'pf-row'); const nm = h('span', '', a.ad + ' · ' + name); const sz = h('small', '', (a.files[name].length / 1024).toFixed(0) + ' kB'); const acts = h('span', 'pf-act');
+        const b = h('button', 'mini', 'AeCAD\'de aç'); b.onclick = () => { pjOpenPafta(name, false, a.files); PJ.aktif = a; d.close(); }; const dl = h('button', 'mini', 'İndir'); dl.onclick = () => pjSaveFile(name, a.files[name]); acts.append(b, dl); r.append(nm, sz, acts); list.appendChild(r); }
+      box.appendChild(list); }
+    return;
+  }
   const d = gv('pjdlg'); if (!d.open) d.showModal();
   d.querySelectorAll('.ptab').forEach((b) => b.classList.toggle('on', b.dataset.t === tab));
   const box = gv('pj-body'); box.innerHTML = ''; PJ.tab = tab;
@@ -3636,14 +3716,23 @@ function pjAltOner(base) {
   L.push(altEgim(base, t0 > 20 ? 20 : 25));
   if (base.yol.ic_yol) { const p = kopya(base); p.yol.ic_yol = false; L.push({ ad: 'İç yolsuz', acik: 'Karşılaştırma: yalnız kenar servis yolu (daha çok masa, uzun AG kablo)', param: p, uygula: () => { gv('p-icyol').value = '0'; pjSave(); } }); }
   else { const p = kopya(base); p.yol.ic_yol = true; L.push({ ad: 'İç yollu', acik: 'K-G iç bakım yolları, aralık DC ΔU %1', param: p, uygula: () => { gv('p-icyol').value = '1'; pjSave(); } }); }
+  const hz0 = (base.elektrik && base.elektrik.inverter_hiza) || 'yol';
+  for (const [k, ad, ac] of [['orta', 'İnverter ortalı', 'İnverterler bloğun ortasındaki sıranın masa başında'], ['optimum', 'İnverter optimum', 'İnverter her blokta en kısa DC\'yi veren masa başında'], ['yol', 'İnverter yol kenarı', 'İnverterler servis yoluna / çite yakın masa başında']]) {
+    if (k === hz0 || L.length >= 5) continue; const p = kopya(base); p.elektrik.inverter_hiza = k;
+    L.push({ ad, acik: ac, param: p, uygula: () => { gv('p-invhiza').value = k; pjSave(); } });
+  }
   return L.map((a) => ({ ...a, durum: 'bekliyor' }));
 }
 function pjYerlesim() {
   if (!sinirOto()) { msg('Önce arazi sınırını girin: kapalı polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   if (PJ.busy) { msg('GES-ÇİZ çalışıyor; bitince yeniden deneyin.'); return; }
   formToPanel(); pjSave();
-  let base; try { base = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
+  let base, Y; try { base = pjDuzenUygula(buildParam0()); Y = pjCizimYerlesim(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
   PJ.alt = pjAltOner(base); PJ.revNo = 0;
+  if (Y) {   // çizimdeki yerleşim (Arazi doldur / elle) ilk seçenek; diğerleri GES-ÇİZ önerisi, onaylanırsa çizime yazılır
+    PJ.alt[0].ad = 'Otomatik'; PJ.alt[0].acik = 'GES-ÇİZ yerleşimi, girilen bilgilerle (onaylanırsa çizimdeki yerleşimin yerine geçer)';
+    PJ.alt.unshift({ ad: 'Çizimdeki yerleşim', acik: Y.masa.length + ' masa' + (Y.inv.length ? ', ' + Y.inv.length + ' inverter' : '') + (Y.tm.length ? ', ' + Y.tm.length + ' trafo' : '') + ' (Arazi doldur / elle çizim)', param: pjCizimUygula(kopya(base), Y), uygula: () => {}, cizim: true, durum: 'bekliyor' });
+  }
   pjDialog('yerlesim'); pjAltSirada();
 }
 function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pjAltSirada(); }
@@ -3665,7 +3754,37 @@ function pjAltSonuc(m) {
   if (PJ.again) { PJ.again = false; const p = PJ.onay; PJ.onay = null; pjRun(p || undefined); return; }
   pjAltSirada();
 }
-function pjAltOnayla(a) {
+// Onaylanan GES-ÇİZ seçeneği çizime yazılır: masa, inverter, trafo, DM (eski GES yerleşimi geri alınabilir şekilde değişir)
+async function pjSecenekCizime(a) {
+  const N = a.nes; if (!N || !N.masa || !N.masa.length) return true;
+  if (PJ.srcDoc) pjBack();
+  const D = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
+  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], G.bound); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA');
+  const ids = new Set(eski.map((it) => it.id)); for (const it of D.items.values()) if (it.gesEt && ids.has(it.gesEt)) eski.push(it);
+  for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it)) eski.push(it); }
+  if (eski.length) {
+    const r = await askDlg('Çizimdeki yerleşim değişecek', 'Onaylanan "' + a.ad + '" seçeneği çizime yazılacak: ' + N.masa.length + ' masa, ' + N.inv.length + ' inverter, ' + N.tm.length + ' trafo. Çizimdeki mevcut GES yerleşimi (' + eski.length + ' nesne: masa, inverter, trafo, kablolar) kaldırılır; Geri al ile döner.', [['Çizime yaz ve proje paftalarını üret', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
+    if (r !== 'ok') return false;
+  }
+  const ang = (a.param.masa.azimut_derece || 0) * Math.PI / 180, yeni = [];
+  const yerlestir = (it, c) => { const b = itemBB(D, it); const ox = (b[0] + b[2]) / 2 - it.M[3], oy = (b[1] + b[3]) / 2 - it.M[7]; it.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(it); return it; };
+  D.addLayer('GES-MASA', 5); D.layers.get('GES-MASA').c = masaRenk();
+  const mb = makeTableBlock(mainTpl());
+  for (const c of N.masa) yeni.push(yerlestir({ id: newId(), t: 'insert', layer: 'GES-MASA', c: 256, lt: '', block: mb, M: mMul(mT(0, 0), mRz(ang)), ap: [] }, c));
+  const ekle = (tip, c, g) => { const T = TS[tip]; const v = {}; for (const [k, , f] of T.alan) v[k] = f(); Object.assign(v, g, { tip }); D.addLayer(T.kat, T.renk);
+    const B = tsBlok(tip, v); yeni.push(yerlestir({ id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(0, 0), mRz(ang)), ap: [], ges: v }, c)); };
+  N.inv.forEach((q, i) => ekle('inv', [q.x, q.y], { no: i + 1 }));
+  N.tm.forEach((q, i) => ekle('tm', [q.x, q.y], { no: i + 1, kva: (a.oz && a.oz.tr_kva && a.oz.tr_kva[i]) || pn('p-trafo') || 1250 }));
+  if (N.dm && !N.tm.some((q) => Math.hypot(q.x - N.dm.x, q.y - N.dm.y) < 15)) ekle('dm', [N.dm.x, N.dm.y], {});
+  G.fillIds = [];
+  replaceItems([...eski.map((it) => [it, null]), ...yeni.map((n) => [null, n])], 'yerleşim seçeneği çizime'); renderLayers();
+  if (typeof cepheCiz === 'function') cepheCiz();
+  if (typeof tsFormaYaz === 'function') tsFormaYaz();
+  msg('"' + a.ad + '" çizime yazıldı: ' + N.masa.length + ' masa, ' + N.inv.length + ' inverter, ' + N.tm.length + ' trafo. Bundan sonra proje paftaları bu çizimden üretilir.', 'res');
+  return true;
+}
+async function pjAltOnayla(a) {
+  if (!a.cizim && !(await pjSecenekCizime(a))) return;
   a.uygula(); pjSave(); PJ.onayAd = a.ad;
   msg('Onaylanan yerleşim: ' + a.ad + '. Tek hat, topraklama, kablo, kanal detayı, metraj, keşif, teklif ve PDF hazırlanıyor…', 'res');
   gv('pjdlg').close();
@@ -3728,7 +3847,8 @@ function pjAltCiz() {
       const kc = h('td', bad.length ? 'bad' : 'ok', bad.length ? bad.length + ' ✖' : '✔'); kc.title = bad.map((k) => k.kontrol + ': ' + k.deger).join('\n'); tr.appendChild(kc);
       const act = h('td', 'acts');
       const b1 = h('button', 'mini', 'Yerleşim'); b1.onclick = () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); msg('Açık yerleşim: ' + a.ad + '. Düzenlemek için GES sekmesi → Çizimde düzenle ya da soldaki Trafo / İnverter / Yol araçları.', 'note'); };
-      const b2 = h('button', 'mini', 'Kablo planı'); b2.onclick = () => { const f = Object.keys(a.files).find((n) => /_04_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); };
+      const b2 = h('button', 'mini', 'Kablo planı'); b2.title = 'Yerleşim açılır; DC atama, DC string ve AC kanal tasarım araçlarıyla (DC oto, DC çiz, AC oto) çizilir';
+      b2.onclick = async () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); await pjKabloOto(); };
       const b3 = h('button', 'mini ok', 'Onayla → projeyi tamamla'); b3.onclick = () => pjAltOnayla(a);
       act.append(b1, b2, b3); tr.appendChild(act);
     } else {
@@ -3744,6 +3864,16 @@ function pjAltCiz() {
   const not = PJ.revNot; if (not) gv('pj-revnot').textContent = not;
   gv('pj-revb').onclick = pjRevize; gv('pj-rev').onkeydown = (e) => { if (e.key === 'Enter') pjRevize(); };
   if (PJ.alt.some((a) => a.durum === 'calisiyor')) { clearTimeout(PJ.altT); PJ.altT = setTimeout(pjAltCiz, 1000); }
+}
+
+// Kablo planı: tasarım araçlarının kendisiyle (aynı kurallar: DC 80 m / ΔU ataması, string gösterimi, tek ortak AC kanalı)
+async function pjKabloOto() {
+  if (!tsInverterler().length) { msg('Yerleşimde inverter yok.', 'err'); return; }
+  busy('DC atanıyor…'); await tick();
+  let R; try { R = tsDcOtoAta(false); tsDcAtaYaz(R.yeni); } finally { busy(null); }
+  await CMD.GDCCIZ();
+  if ([...S.doc.items.values()].some((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm')) { const v = {}; for (const [k, , f] of TS.ac.alan) v[k] = f(); await CMD.GACOTO(v); }
+  msg('Kablo planı tasarım araçlarıyla çizildi: DC atama ' + R.yeni.size + ' masa' + (R.kalan.length ? ' (' + R.kalan.length + ' masa atanamadı)' : '') + ', DC stringler ve AC kanal. Proje paftaları bu çizimden üretilir.', 'res');
 }
 
 // ---- Çizimden ve yazıyla düzenleme: trafo taşı, inverter taşı, yol çiz, yol sil → yerleşim son duruma göre yeniden hesaplanır ----
@@ -3832,7 +3962,7 @@ async function pjSifirla(sor = true) {
   PJ.alt = []; PJ.aktif = null; PJ.revNo = 0; PJ.revNot = null; PJ.duzNo = 0; G.last = null;
   pjDuzenSifirla();
   try { const db = await pjIdb(); db.transaction('proje', 'readwrite').objectStore('proje').delete('son'); } catch (e) { console.warn('arşiv', e); }
-  for (const id of ['g-result', 'bfiles', 'st-son', 'p-back']) { const el = gv(id); if (el) el.hidden = true; }
+  for (const id of ['g-result', 'st-son', 'p-back']) { const el = gv(id); if (el) el.hidden = true; }
   const po = gv('p-open'); if (po) po.disabled = true;
   const dl = gv('pjdlg'); if (dl && dl.open) dl.close();
   pjSave(); redraw();
@@ -3866,6 +3996,41 @@ function pjDuzenInit() {
   gv('p-tmtasi').onclick = () => runCommand('GTMTASI'); gv('p-invtasi').onclick = () => runCommand('GINVTASI');
   gv('p-yolciz').onclick = () => runCommand('GYOLCIZ'); gv('p-yolsil').onclick = () => runCommand('GYOLSIL');
   gv('p-duzcalis').onclick = () => pjDuzenCiz(); gv('p-duzsif').onclick = pjSifirla; pjDuzenBilgi();
+}
+
+// ---- Açılan yerleşim paftasındaki (01 GENEL) inverter ve köşkler tasarım nesnesine çevrilir: sol menüdeki tasarım
+// araçları (DC ata / DC oto / AC kablo / AC oto …) bunları tanır; köşk "Trafo ekle" aracının bloğuyla gösterilir.
+function pjPaftaTani() {
+  if (!S.doc) return 0; const D = S.doc, it = [...D.items.values()], up = (x) => String(x.layer).toUpperCase();
+  if (it.some((x) => x.ges && (x.ges.tip === 'inv' || x.ges.tip === 'tm'))) return 0;
+  const yaz = it.filter((x) => x.t === 'text' || x.t === 'mtext');
+  const inv = it.filter((x) => x.t === 'circle' && up(x) === 'GES-INV');
+  const ky = yaz.filter((t) => up(t) === 'GES-TM' && /^(TR-?\d+|TM-?\d+|DM)/i.test(String(t.s).trim()));
+  if (!inv.length && !ky.length) return 0;
+  const ang = gnum('g-ang', 0) * Math.PI / 180, oz = (PJ.aktif && PJ.aktif.oz) || (PJ.res && PJ.res.ozet) || {}, sil = new Set(), yeni = [];
+  const yerlestir = (o, c) => { const b = itemBB(D, o); const ox = (b[0] + b[2]) / 2 - o.M[3], oy = (b[1] + b[3]) / 2 - o.M[7]; o.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(o); return o; };
+  const ekle = (tip, c, g) => { const T = TS[tip]; const v = {}; for (const [k, , f] of T.alan) v[k] = f(); Object.assign(v, g, { tip }); D.addLayer(T.kat, T.renk);
+    const B = tsBlok(tip, v); yeni.push(yerlestir({ id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(0, 0), mRz(ang)), ap: [], ges: v }, c)); };
+  const etk = (c) => { let b = null, bd = 8; for (const t of yaz) if (up(t) === 'GES-INV') { const d = Math.hypot(t.x - c[0], t.y - c[1]); if (d < bd) { bd = d; b = t; } } return b; };
+  const L = inv.map((ci) => { const t = etk([ci.cx, ci.cy]); const m = t && String(t.s).match(/(?:TR(\d+)-)?(?:ACB\d+-)?INV(\d+)/i); return { ci, t, k: m ? [+(m[1] || 1), +m[2]] : [99, 0] }; }).sort((a, b) => a.k[0] - b.k[0] || a.k[1] - b.k[1]);
+  L.forEach((o, i) => { sil.add(o.ci); if (o.t) sil.add(o.t); ekle('inv', [o.ci.cx, o.ci.cy], { no: i + 1, kw: oz.inv_kw || pn('p-inv') || 100 }); });
+  const tmPl = it.filter((x) => x.t === 'pline' && up(x) === 'GES-TM').map((x) => ({ x, b: itemBB(D, x) })).filter((o) => o.b && isFinite(o.b[0]));
+  let tn = 0;
+  for (const t of ky) {
+    const yakin = tmPl.filter((o) => Math.hypot((o.b[0] + o.b[2]) / 2 - t.x, (o.b[1] + o.b[3]) / 2 - t.y) < 15);
+    if (!yakin.length) continue;
+    const dis = yakin.reduce((a, o) => ((o.b[2] - o.b[0]) * (o.b[3] - o.b[1]) > (a.b[2] - a.b[0]) * (a.b[3] - a.b[1]) ? o : a));
+    const bb = dis.b, c = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2];
+    for (const x of it) if (up(x) === 'GES-TM' && !sil.has(x)) { const b = x.t === 'text' || x.t === 'mtext' ? [x.x, x.y, x.x, x.y] : itemBB(D, x); if (b && b[0] >= bb[0] - 2 && b[2] <= bb[2] + 2 && b[1] >= bb[1] - 2.5 && b[3] <= bb[3] + 2.5) sil.add(x); }
+    sil.add(t);
+    const s = String(t.s).trim(); let nh = null;
+    for (const x of yaz) if (up(x) === 'GES-TM') { const m = String(x.s).match(/(\d+)\s*OG hücre/i); if (m && x.x >= bb[0] - 2 && x.x <= bb[2] + 2 && x.y >= bb[1] - 3 && x.y <= bb[3] + 3) nh = +m[1]; }
+    if (/^DM/i.test(s)) ekle('dm', c, nh ? { hucre: nh } : {});
+    else { tn++; const kva = +((s.match(/(\d{3,5})\s*kVA/i) || [])[1]) || (oz.tr_kva && oz.tr_kva[tn - 1]) || pn('p-trafo') || 1250; ekle('tm', c, { no: tn, kva, hucre: nh || (/\+\s*DM/i.test(s) ? 5 : 3) }); }
+  }
+  if (!yeni.length) return 0;
+  replaceItems([...[...sil].map((x) => [x, null]), ...yeni.map((n) => [null, n])], 'yerleşim nesneleri'); renderLayers();   // form alanlarına yazılmaz: seçenek, kullanıcı değeri değildir
+  return yeni.length;
 }
 
 // ---- Cephe (komşuluk): arazi sınırının her kenarı yol / komşu parsel / diğer olarak işaretlenir; her tip kendi çekme mesafesini alır ----
@@ -4972,7 +5137,7 @@ const TF = {
     { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur. Önizlemede bir kenara tıklayarak cephesini seçin (genel → yol → komşu parsel → diğer); her tip kendi çekme mesafesini alır.', arazi: true, f: ['g-lat', 'p-cekme', 'p-cyol', 'p-cpar', 'p-cdig'] },
     { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur. İnverter datasheet PDF\'i 4. bölümdeki Datasheet düğmesiyle yüklenir; AC güç, model, MPPT sayısı ve akımı buraya yazılır.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invn', 'p-invm', 'p-invsin'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
-    { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'g-ang', 'g-gap', 'g-align', 'g-valign', 'g-hrs', 'g-pitch', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa', 'g-mrenk'] },
+    { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'g-ang', 'g-gap', 'g-align', 'g-valign', 'g-hrs', 'g-pitch', 'p-invhiza', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa', 'g-mrenk'] },
     { n: '6', h: 'Elektrik detayı', d: 'İsteğe bağlı. Boş alanlar esaslardaki varsayılanlarla hesaplanır (gri değerler).', det: true, f: ['p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-sebeke', 'p-ogkv', 'p-trg', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-dcmax', 'p-taraf'] },
     { n: '7', h: 'Çıktı', d: 'Paftalar DXF, etkileşimli HTML, metraj ve kontrol olarak üretilir.', f: ['p-pdf2'] },
   ],

@@ -174,6 +174,17 @@ function parselBirlestir() {
   if (G.parcelOut.length) msg('⚠ Bitişik olmayan parsel: ' + G.parcelOut.join(', ') + '. Proje en büyük birleşik alanda yapılır; bu parseller ayrı proje olarak çizilmeli.', 'err');
 }
 function pointInPoly(p, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; }
+// KML'deki il / ilçe / mahalle / ada / parsel / pafta → proje (antet) alanları; birden çok parselde ada ve parseller birleşir
+function kmlAntet(B) {
+  if (!B) return; const K = G.kmlAntet = G.kmlAntet || { ada: [], parsel: [] };
+  for (const k of ['il', 'ilce', 'mahalle', 'pafta', 'mevkii']) if (B[k]) K[k] = K[k] || B[k];
+  for (const k of ['ada', 'parsel']) { for (const v of B[k]) if (!K[k].includes(v)) K[k].push(v); K[k].sort((x, y) => (parseFloat(x) || 0) - (parseFloat(y) || 0)); }
+  const yaz = (id, v) => { const el = gv(id); if (el && v && (!String(el.value).trim() || el.dataset.kml === '1')) { el.value = v; el.dataset.kml = '1'; } };
+  yaz('p-il', K.il); yaz('p-ilce', K.ilce); yaz('p-mah', K.mahalle); yaz('p-ada', K.ada.join('-')); yaz('p-parsel', K.parsel.join('-'));
+  if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function') tfSync();
+  const t = [K.il, K.ilce, K.mahalle, K.ada.length ? 'Ada ' + K.ada.join('-') : '', K.parsel.length ? 'Parsel ' + K.parsel.join('-') : ''].filter(Boolean).join(' / ');
+  msg(t ? 'KML antet bilgisi: ' + t + (K.pafta ? ' · Pafta ' + K.pafta : '') : 'KML\'de il/ilçe/ada/parsel bilgisi yok; antet alanlarını elle girin.', t ? 'res' : 'note');
+}
 async function gesKml(file) {
   try {
     const buf = await file.arrayBuffer(); const txt = /\.kmz$/i.test(file.name) ? await unzipFirstKml(buf) : new TextDecoder().decode(buf);
@@ -187,6 +198,7 @@ async function gesKml(file) {
     list.forEach((o, i) => { o.ad = list.length > 1 ? base + '-' + (i + 1) : base; });
     gv('g-zone').value = z; gv('g-lat').value = list[0].lat.toFixed(4);
     const n = parselEkle(list, 'kml', null);
+    kmlAntet(kmlBilgi(txt));
     msg('KML: ' + file.name + ' → ' + n + ' parsel eklendi (UTM ' + z + 'N, WGS84). Toplam ' + G.parcels.length + ' parsel.', 'res');
   } catch (e) { console.error(e); msg('KML/KMZ okunamadı (' + file.name + '): ' + (e.message || e), 'err'); }
 }

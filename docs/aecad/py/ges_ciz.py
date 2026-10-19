@@ -85,7 +85,7 @@ VARSAYILAN = {
                "harici_trafo_min_kva": 2500, "og_gerilim_kv": 33.0, "og_kesit_mm2": 120, "og_kesit_dm_mm2": 240,
                "kappa_cu": 56.0, "kappa_al": 35.0, "og_dusum_max_pct": 7.0, "trafo_yag_l": None,
                "ag_pano_form": "Form 4b", "ag_pano_ip": "IP54", "ag_pano_icw_ka": 65, "ag_pano_in_a": 4000,
-               "inverter_sinir_kw": None, "inverter_giris": None, "ag_cikis_ka": 36, "kosk": {}},
+               "inverter_sinir_kw": None, "inverter_giris": None, "inverter_hiza": "yol", "ag_cikis_ka": 36, "kosk": {}},
   "hendek": {"dc_derinlik_m": 0.70, "ag_derinlik_m": 0.80, "og_derinlik_m": 1.00, "genislik_m": 0.60,
              "kum_cm": 10, "koruyucu_cm": 6, "uyari_ust_cm": 30, "kablo_aralik_cm": 7, "yol_gecis_boru_ust_m": 1.0,
              # kademeli AG/OG kanal (Zorlu Tesis 1 GES onaylı kesitleri): b = taban + artış × (AC devre − 1) + OG eki (≥ 2 AC devrede)
@@ -113,14 +113,14 @@ KATMANLAR = {  # ad: (ACI renk, açıklama)
   "GES-TOPRAK-SERIT": (32, "Topraklama şeridi"), "GES-TOPRAK-CUBUK": (32, "Topraklama çubuğu"),
   "GES-TOPRAK-BAGLANTI": (40, "Topraklama bağlantı noktası"), "GES-AYD-CCTV": (211, "Aydınlatma+CCTV direği"),
   "GES-SANTIYE": (8, "Şantiye alanı"), "GES-TEKHAT": (7, "Tek hat şeması"), "GES-TEKHAT-OG": (1, "Tek hat OG"),
-  "GES-OLCU": (8, "Ölçü"), "GES-NOT": (7, "Not / lejant"), "GES-ANTET": (7, "Antet / çerçeve"),
+  "GES-OLCU": (8, "Ölçü"), "GES-NOT": (7, "Not / lejant"), "GES-DETAY": (7, "Detay çizimi"), "GES-DETAY-TARAMA": (8, "Detay tarama / ölçü yardımcı"), "GES-ANTET": (7, "Antet / çerçeve"),
   "GES-TH-BARA": (1, "Bara"), "GES-TH-HUCRE": (7, "OG hücre gövdesi"), "GES-TH-KOSK": (8, "Köşk / pano sınırı"),
   "GES-TH-KUMANDA": (5, "Kumanda / ölçü bağlantısı"), "GES-TH-TOPRAK": (3, "Topraklama (tek hat)"), "GES-TH-YAZI": (7, "Tek hat yazı / etiket"),
 }
 KESIKLI = {"GES-TH-KOSK", "GES-TH-KUMANDA"}
 DASH_SVG = ' stroke-dasharray="1.8 1"'
 # PDF çizgi kalınlığı (pt)
-KAT_LW = {"GES-MASA": 0.25, "GES-TEKHAT-OG": 0.6, "GES-TEKHAT": 0.55, "GES-TH-HUCRE": 0.8, "GES-TH-KOSK": 0.7,
+KAT_LW = {"GES-DETAY": 0.45, "GES-DETAY-TARAMA": 0.18, "GES-MASA": 0.25, "GES-TEKHAT-OG": 0.6, "GES-TEKHAT": 0.55, "GES-TH-HUCRE": 0.8, "GES-TH-KOSK": 0.7,
           "GES-TH-KUMANDA": 0.35, "GES-TH-TOPRAK": 0.5, "GES-TH-YAZI": 0.4, "GES-TH-BARA": 0.4, "GES-CIT": 0.8, "GES-SINIR": 0.8}
 POB = {"lisanssiz": "TEDAŞ / yetkili EDAŞ", "lisansli": "ETKB / yetkili POB (TEİAŞ-TEDAŞ)",
        "iletim": "TEİAŞ", "osb": "OSB Müdürlüğü / EDAŞ", "yurtdisi": "İşveren / yerel mevzuat (TR yönetmelikleri referans)"}
@@ -474,6 +474,21 @@ class Model:
         pitch, D, L, g = m["pitch_m"], self.masa_D, self.masa_L, m["masa_arasi_m"]
         masalar, sira = [], 0
         y = maxy - D
+        kon = m.get("konumlar") or []
+        if kon:                                  # kullanıcı kuralı 19.10.2026: çizimdeki yerleşim (Arazi doldur / elle) esastır
+            pts = []
+            for c in kon:
+                q = self._loc(c)
+                mb = box(q.x - L / 2, q.y - D / 2, q.x + L / 2, q.y + D / 2)
+                if tm_alanlari and any(mb.intersects(t) for t in tm_alanlari): continue
+                pts.append((q.y, q.x, mb))
+            pts.sort(key=lambda t: (-t[0], t[1]))
+            ry = None
+            for yy, xx, mb in pts:
+                if ry is not None and abs(yy - ry) > D / 2: sira += 1
+                if ry is None or abs(yy - ry) > D / 2: ry = yy
+                masalar.append({"loc": mb, "sira": sira, "x": xx, "y": yy})
+            y = miny - 1                         # ızgara dizilimi atlanır
         while y >= miny:
             kes = alan.intersection(box(minx - 1, y, maxx + 1, y + D))
             parcalar = [kes] if kes.geom_type == "Polygon" else [q for q in getattr(kes, "geoms", []) if q.geom_type == "Polygon"]
@@ -488,7 +503,7 @@ class Model:
                         x += 0.5
             sira += 1
             y -= pitch
-        mx = self.P["parsel"].get("max_masa")
+        mx = None if kon else self.P["parsel"].get("max_masa")
         if mx and len(masalar) > mx:            # hedef güç üst sınırı: orta sıralar korunur (A.7), dış sıralardan kesilir
             sm = (min(q["sira"] for q in masalar) + max(q["sira"] for q in masalar)) / 2
             xm = sum(q["x"] for q in masalar) / len(masalar)
@@ -617,18 +632,34 @@ class Model:
                 cx = sum(q["x"] for q in grp) / len(grp)
                 r = min([r for r in self.ic_yollar if not r.get("elle")] or self.ic_yollar, key=lambda r: abs(r["xk"] - cx))
                 ys = sorted(q["y"] for q in grp); cy0 = ys[len(ys) // 2]
-                xc = r["x1"] + w / 2 + 0.5; c = None
+                xc = r["x1"] + w / 2 + 0.5; c = None; best = None
                 for xx in (xc, r["x0"] - w / 2 - 0.5):
-                    for dy in [0] + [s * k * 5 for k in range(1, 13) for s in (1, -1)]:   # grubun yanında (≤ 60 m); yoksa saha içi boş yer
+                    for dy in [0] + [s * k * 5 for k in range(1, 13) for s in (1, -1)]:   # grubun yanında (≤ 60 m); gölgeyle en az masa kaybı
                         bx = box(xx - w / 2, cy0 + dy - h / 2, xx + w / 2, cy0 + dy + h / 2)
-                        if self.ic_loc.contains(bx) and not any(bx.intersects(o) for o in self.tm_loc): c = Point(xx, cy0 + dy); break
-                    if c is not None: break
+                        if self.ic_loc.contains(bx) and not any(bx.intersects(o) for o in self.tm_loc):
+                            sk = self._tm_kayip(Point(xx, cy0 + dy), w, h) + abs(dy) / 20.0 + (0 if xx == xc else 0.5)
+                            if best is None or sk < best[0]: best = (sk, Point(xx, cy0 + dy))
+                if best: c = best[1]
                 if c is None: c = self._tm_bos_yer(grp, w, h)
             else:   # A.6: TM servis yolu kenarında, masa alanının kenar şeridinde
-                cy = sorted(q["y"] for q in grp)[len(grp) // 2]
-                xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf)) if taraf == "E" else \
-                     max(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf))
-                c = Point(xe - w / 2 if taraf == "E" else xe + w / 2, cy)
+                cy0 = sorted(q["y"] for q in grp)[len(grp) // 2]; best = None
+                for dy in [0] + [s_ * k * 5 for k in range(1, 9) for s_ in (1, -1)]:     # kenar şeridinde, gölgeyle en az masa kaybı
+                    cy = cy0 + dy
+                    try:
+                        xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf)) if taraf == "E" else \
+                             max(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf))
+                    except Exception: continue
+                    cc = Point(xe - w / 2 if taraf == "E" else xe + w / 2, cy)
+                    bx = box(cc.x - w / 2, cy - h / 2, cc.x + w / 2, cy + h / 2)
+                    if not self.ic_loc.buffer(0.5).contains(bx) or any(bx.intersects(o) for o in self.tm_loc): continue
+                    sk = self._tm_kayip(cc, w, h) + abs(dy) / 20.0
+                    if best is None or sk < best[0]: best = (sk, cc)
+                if best: c = best[1]
+                else:
+                    cy = cy0
+                    xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf)) if taraf == "E" else \
+                         max(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf))
+                    c = Point(xe - w / 2 if taraf == "E" else xe + w / 2, cy)
             self.tm_loc.append(box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2))
         self.dm_ortak = False
         if e["dm_konum"]:
@@ -651,6 +682,37 @@ class Model:
             if self.tm_loc[i].centroid.distance(f) <= 80:
                 self.tm_loc[i] = box(to.x - w / 2, to.y - h / 2, to.x + w / 2, to.y + h / 2)
 
+    # ---- köşk gölgesi (kullanıcı kuralı 19.10.2026): bina yüksekliğine göre 21 Aralık gölgesi; gölgedeki masalar kaldırılır,
+    # TM yeri gölgenin en az masa kaybettirdiği noktaya konur
+    def _gunes(self):
+        if getattr(self, "_gunes_v", None) is not None: return self._gunes_v
+        P = self.P; fi = math.radians(P["proje"].get("enlem") or 39.0); de = math.radians(-23.44)
+        hw = float(P["masa"].get("golge_saat") or 2.0)
+        Hb = ((P["elektrik"].get("kosk") or {}).get("H_mm") or KOSK_VARS["H_mm"]) / 1000.0
+        V = []
+        for k in (-1, -0.5, 0, 0.5, 1):
+            H = math.radians(15 * hw * k)
+            sa = math.sin(fi) * math.sin(de) + math.cos(fi) * math.cos(de) * math.cos(H)
+            if sa <= 0.05: continue
+            alt = math.asin(sa); az = math.atan2(math.sin(H), math.cos(H) * math.sin(fi) - math.tan(de) * math.cos(fi))
+            L = Hb / math.tan(alt); vx, vy = math.sin(az) * L, math.cos(az) * L          # gerçek koordinatta (kuzey +y)
+            if self.az:                                                                 # model eksenine
+                a = math.radians(-self.az); vx, vy = vx * math.cos(a) - vy * math.sin(a), vx * math.sin(a) + vy * math.cos(a)
+            V.append((vx, vy))
+        self._gunes_v = V; return V
+
+    def tm_golge(self, g):
+        V = self._gunes()
+        if not V: return g
+        return unary_union([g] + [affinity.translate(g, vx, vy) for vx, vy in V]).convex_hull
+
+    def tm_engel(self):
+        return [self.tm_golge(t).buffer(1.0) for t in self.tm_loc] + ([] if getattr(self, "dm_ortak", False) else [self.tm_golge(self.dm_loc).buffer(1.0)])
+
+    def _tm_kayip(self, c, w, h):
+        g = self.tm_golge(box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2)).buffer(1.0)
+        return sum(1 for q in getattr(self, "masalar", []) if q["loc"].intersects(g))
+
     def _tm_bos_yer(self, grp, w, h):
         """Yol kenarında yer yoksa: saha içinde (çekme bandının içinde), grubun ağırlık merkezine en yakın boş TM yeri.
         TM hiçbir durumda parsel/çit dışına konmaz; altında kalan masalar dizilimde kaldırılır."""
@@ -663,7 +725,7 @@ class Model:
             while xx <= mxx - w / 2:
                 bx = box(xx - w / 2, yy - h / 2, xx + w / 2, yy + h / 2)
                 if bx.distance(erisim) <= 3.0 and self.ic_loc.contains(bx) and not any(bx.intersects(o.buffer(2)) for o in self.tm_loc) and not any(bx.intersects(q["yol"]) for q in self.ic_yollar):
-                    d = math.hypot(xx - cx, yy - cy)
+                    d = math.hypot(xx - cx, yy - cy) + 8.0 * self._tm_kayip(Point(xx, yy), w, h)
                     if best is None or d < best[0]: best = (d, xx, yy)
                 xx += st
             yy += st
@@ -762,9 +824,19 @@ class Model:
             pts = self.dc_yol(q, inv)[0]
             return sum(math.dist(a, b) for a, b in zip(pts, pts[1:])) + 3.0
         def en_iyi(ms_):
-            """Gerçek (masa arası) DC güzergâhıyla en uzun tek yönü en küçük yapan masa başı."""
-            sig = min(q["derinlik"] for q in ms_)
-            aday = [h for h in ms_ if h["derinlik"] == sig]
+            """Gerçek (masa arası) DC güzergâhıyla en uzun tek yönü en küçük yapan masa başı.
+            elektrik.inverter_hiza: "yol" servis yoluna / çite yakın masa başı (varsayılan) · "orta" bloğun ortasındaki sıranın
+            masa başı · "optimum" bloktaki tüm masa başlarından en kısa DC'yi veren."""
+            hz = (self.P["elektrik"].get("inverter_hiza") or "yol")
+            if hz == "optimum":
+                aday = list(ms_)
+            elif hz == "orta":
+                sr = sorted({q["sira"] for q in ms_}); sm = sr[len(sr) // 2]
+                aday = [h for h in ms_ if h["sira"] == sm]
+                sig = min(q["derinlik"] for q in aday); aday = [h for h in aday if h["derinlik"] == sig]
+            else:
+                sig = min(q["derinlik"] for q in ms_)
+                aday = [h for h in ms_ if h["derinlik"] == sig]
             best = None
             for h in aday:
                 iv = gecici_inv(h); m_ = max(yol_boy(q, iv) for q in ms_)
@@ -944,6 +1016,26 @@ class Model:
                     if best is None or dd < best[0]: best = (dd, ms, tf, hx)
             _, ms, tf, hx = best
             inv["masa"], inv["taraf"], inv["x"], inv["y"] = ms, tf, hx, ms["y"]; inv["elle"] = True
+        # çizimdeki inverter konumları (kullanıcı kuralı 19.10.2026): her inverter en yakın çizim konumuna, kendi masalarının başında
+        ik = [self._loc(p) for p in (e.get("inv_konumlari") or [])]
+        if ik and self.inverterler:
+            ciftler = sorted(((math.dist((i["x"], i["y"]), (q.x, q.y)), a, b) for a, i in enumerate(self.inverterler) for b, q in enumerate(ik)))
+            ia, ib = set(), set()
+            for d_, a, b in ciftler:
+                if a in ia or b in ib: continue
+                ia.add(a); ib.add(b); inv = self.inverterler[a]; q = ik[b]
+                best = None
+                for ms in inv["masalar"]:
+                    for tf in ("E", "W"):
+                        hx = ms["loc"].bounds[2] + 0.4 if tf == "E" else ms["loc"].bounds[0] - 0.4
+                        dd = math.dist((hx, ms["y"]), (q.x, q.y))
+                        if best is None or dd < best[0]: best = (dd, ms, tf, hx)
+                if best:
+                    _, ms, tf, hx = best
+                    inv["masa"], inv["taraf"], inv["x"], inv["y"] = ms, tf, hx, ms["y"]; inv["elle"] = True
+            if len(ik) != len(self.inverterler) and not getattr(self, "_ik_uyari", False):
+                self._ik_uyari = True
+                self.uyari.append(f"Çizimde {len(ik)} inverter var, projede {len(self.inverterler)}; konumu olmayanlar otomatik yerleştirildi.")
 
     def tr_ac(self, t):
         """TR çıkış gücü (kW): min(Σ inverter AC, TR'nin DC'si / DC-AC hedefi) — DC'den fazla AC üretilemez."""
@@ -1054,6 +1146,7 @@ class Model:
         p = min(pts, key=lambda q: abs(q.x - x)); return (p.x, p.y)
 
     def guzergah(self):
+        self._ac_kul = set()
         e, m = self.P["elektrik"], self.P["masa"]
         self.dc_hat, self.dc_ust, self.ac_hat = [], [], []
         dc_toplam = 0.0
@@ -1083,6 +1176,9 @@ class Model:
             ls = LineString([(inv["x"], inv["y"]), (inv["x"], ya), h] + list(arc.coords) + [(tm.x, tm.y)])
             inv["ac_m"] = ls.length + 10.0
             inv["ac_hendek"] = [LineString([(inv["x"], ya), h]), arc]
+            ck = self._cizim_ac(inv)                 # çizimdeki AC kablo (AeCAD AC kablo / AC oto) esastır
+            if ck is not None:
+                ls, pay = ck; inv["ac_m"] = ls.length + pay; inv["ac_hendek"] = [ls]; inv["ac_cizim"] = True
             ac_toplam += inv["ac_m"]; self.ac_hat.append(ls)
         self.ac_toplam = ac_toplam
         # OG: DM'den halka boyunca, halka konumuna göre sıralı zincir
@@ -1130,6 +1226,20 @@ class Model:
         pts = [] if k is None or k.is_empty else ([k] if k.geom_type == "Point" else [g for g in getattr(k, "geoms", []) if g.geom_type == "Point"])
         for q in pts:
             if all(math.dist((q.x, q.y), (o["x"], o["y"])) > 1.0 for o in self.kesisim): self.kesisim.append({"x": q.x, "y": q.y})
+
+    def _cizim_ac(self, inv):
+        """elektrik.ac_hatlar = [{"pts": [[x,y],…], "pay": 10}] (gerçek koordinat): inverterden başlayan hat (≤ 6 m) o inverterin AC kablosu."""
+        L = self.P["elektrik"].get("ac_hatlar") or []
+        if not L: return None
+        kul = self.__dict__.setdefault("_ac_kul", set())
+        best = None
+        for k, h in enumerate(L):
+            if k in kul or len(h.get("pts") or []) < 2: continue
+            p0 = self._loc(h["pts"][0]); d = math.dist((p0.x, p0.y), (inv["x"], inv["y"]))
+            if d <= 6 and (best is None or d < best[0]): best = (d, k, h)
+        if not best: return None
+        kul.add(best[1]); h = best[2]
+        return LineString([(q.x, q.y) for q in (self._loc(p) for p in h["pts"])]), float(h.get("pay") or 10)
 
     def kanal_kademe(self):
         """Ortak AG/OG kanalı (kullanıcı kuralı 19.10.2026, A.9): kablolar tek kanalda; kanal genişliği o parçadan geçen
@@ -1280,9 +1390,9 @@ class Model:
         kademeler = [pr["cekme_mesafesi_m"]] + [c for c in pr["cekme_kademeleri_m"] if c < pr["cekme_mesafesi_m"]]
         for c in kademeler:                                    # B: 5 m esas, sığmazsa 4/3/2
             self.saha(c); self.ic_yol_kur(); self.dizilim()
-            if not pr["hedef_masa"] or len(self.masalar) >= pr["hedef_masa"]: break
+            if self.P["masa"].get("konumlar") or not pr["hedef_masa"] or len(self.masalar) >= pr["hedef_masa"]: break
         self.inverter_ata(); self.tm_yerlestir()
-        self.dizilim(tm_alanlari=[t.buffer(1.0) for t in self.tm_loc] + [self.dm_loc.buffer(1.0)])
+        self.dizilim(tm_alanlari=self.tm_engel())
         lim0 = self.P["elektrik"]["dc_tek_yon_max_m"]
         self._tr_yol = None
         for it in range(6):                      # TM yerleşimi masa dizilimini değiştirir: yakınsayana kadar
@@ -1292,12 +1402,12 @@ class Model:
             self.tm_yerlestir()
             yeni = [t.centroid.coords[0] for t in self.tm_loc]
             if len(eski) == len(yeni) and all(math.dist(a, b) < 0.5 for a, b in zip(eski, yeni)): break
-            self.dizilim(tm_alanlari=[t.buffer(1.0) for t in self.tm_loc] + [self.dm_loc.buffer(1.0)])
+            self.dizilim(tm_alanlari=self.tm_engel())
         else:
             self.inverter_ata()
         for _ in range(3):                       # TR sayısı ile TM sayısı her durumda eşit
             if self.n_tr == len(self.tm_loc): break
-            self.tm_yerlestir(); self.dizilim(tm_alanlari=[t.buffer(1.0) for t in self.tm_loc] + [self.dm_loc.buffer(1.0)]); self.inverter_ata()
+            self.tm_yerlestir(); self.dizilim(tm_alanlari=self.tm_engel()); self.inverter_ata()
         if self.n_tr != len(self.tm_loc): self.tm_yerlestir()
         self._boyutlandir()                      # DC/AC hedefi (1.25) → inverter gücü; TR AC/%90 → trafo kVA (üst standart)
         self.guzergah()
@@ -1575,10 +1685,12 @@ def pafta_yerlesim(M, seviye):
         pf.daire("GES-INV", x, y, 0.9, info=f"{inv['ad']} | {inv['n_str']} string | AC {inv['ac_m']:.0f} m")
         pf.yazi("GES-INV", x + 1.2, y + 0.3, 1.2 if seviye == "uygulama" else 1.8, inv["ad"].replace("-ACB1", "") if seviye == "uygulama" else f"INV{inv['no']}")
     ort = getattr(M, "dm_ortak", False)
-    for t, tm in enumerate(M.tm_loc):
-        g = W(tm); geom_ciz(pf, "GES-TM", g, info=f"TM{t+1}" + (" + DM (tek köşk)" if ort else "")); c = g.centroid
-        pf.yazi("GES-TM", c.x, c.y, 2.5, f"TM{t+1}+DM" if ort else f"TM{t+1}", hiz="C")
-    if not ort: g = W(M.dm_loc); geom_ciz(pf, "GES-TM", g, info="DM"); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, "DM", hiz="C")
+    e_ = M.P["elektrik"]
+    th = copy.deepcopy(e_.get("tm_hucreler") or TM_HUCRE_VARS); dh = copy.deepcopy(e_.get("dm_hucreler") or DM_HUCRE_VARS)
+    for t, tm in enumerate(M.tm_loc):          # köşk: AeCAD Trafo ekle aracının bloğu (OG hücreleri, trafo, AG pano)
+        c = W(tm).centroid; kosk_plan(pf, M, c.x, c.y, tm_kosk_tasarim(M, t, ort and t == 0))
+    if not ort:
+        c = W(M.dm_loc).centroid; kosk_plan(pf, M, c.x, c.y, kosk_tasarim("dm", 0, len(dh)))
     for p in M.direkler: pf.daire("GES-AYD-CCTV", p[0], p[1], 0.8, info="Aydınlatma+CCTV")
     if seviye == "uygulama":
         for i, (x, y) in enumerate(list(M.parsel.exterior.coords)[:-1]):
@@ -1588,6 +1700,7 @@ def pafta_yerlesim(M, seviye):
                  f"Eksen (pitch) {P['masa']['pitch_m']} m · eğim {P['masa']['egim_derece']}° · alt kenar {P['masa']['alt_kenar_m']} m · GCR {M.masa_D / P['masa']['pitch_m']:.3f} · azimut {M.az}° · sıra açıklığı {M.acik:.2f} m.",
                  f"Koordinat sistemi: {P['parsel']['koordinat_sistemi'] or '—'} · çekme {M.cekme_ozet()} · çit parselin {P['parsel']['cit_ic_ofset_m']:g} m içinde.",
                  "Kablolar masa altından geçmez; DC masa başından iner, sıra açıklığında ve masa arası boşlukta yürür.",
+                 f"Köşk gölgesi: bina h = {((P['elektrik'].get('kosk') or {}).get('H_mm') or KOSK_VARS['H_mm']) / 1000:.2f} m, 21 Aralık 12:00 ± {float(P['masa'].get('golge_saat') or 2):g} sa; TM/DM gölgesinde masa yok, TM yeri en az masa kaybına göre seçildi.",
                  "Detaylar ölçekli değil ise ölçü yazısı esastır; kesin kot ve ayak boyları halihazır haritaya göre uygulamada belirlenir."]
     try: detaylar_yerlesim(M, pf)
     except Exception as ex: M.uyari.append(f"Vaziyet planı detayları çizilemedi: {ex}")
@@ -2100,11 +2213,16 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
     giden = next((o for o in M.og if o["den"] == f"TM{t+1}"), None)
     hucreler = copy.deepcopy(e.get("tm_hucreler") or TM_HUCRE_VARS)
     ob = e.get("og_bara", {})
+    tek_kosk = bool(getattr(M, "dm_ortak", False) and t == 0)
+    if tek_kosk:   # tek trafolu tesis: DM hücreleri (giriş, ölçü, iç ihtiyaç) TM köşkünde, aynı barada; TM'ye ayrı giriş hücresi yok
+        dmh = [h for h in copy.deepcopy(e.get("dm_hucreler") or DM_HUCRE_VARS) if h["tip"] in ("giris_kesicili", "olcu", "ic_ihtiyac")]
+        hucreler = dmh + [h for h in hucreler if h["tip"] == "trafo_koruma"]
+        ob = e.get("dm_bara", ob)
     for h in hucreler:
         h.setdefault("un_kv", ob.get("un_kv", 36)); h.setdefault("in_a", ob.get("in_a", 630)); h.setdefault("ik_ka", ob.get("ik_ka", 16))
     YT = 470.0; X0 = 16.0
     bara_txt = f"OG BARA {ob.get('un_kv', 36)} kV · {ob.get('in_a', 630)} A · {ob.get('ik_ka', 16)} kA/1 s · {ob.get('malzeme', 'Cu')}"
-    eks = hucre_dizisi(C, X0, YT, hucreler, bara_txt, f"TM-{t+1}  OG HÜCRELERİ (IEC 62271-200)")
+    eks = hucre_dizisi(C, X0, YT, hucreler, bara_txt, f"TM-{t+1}" + (" + DM (tek köşk)" if tek_kosk else "") + "  OG HÜCRELERİ (IEC 62271-200)")
     yalt = YT - HH
     tr_x = None
     for h, (x, yb) in zip(hucreler, eks):
@@ -2113,6 +2231,14 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
             tr_x = X0 + len(hucreler) * HW + 46
             C.L(TH_OG, [(x, yb), (x, yb - 26), (tr_x, yb - 26), (tr_x, yb - 30)])
             C.TL(TH_YZ, x + 2, yb - 31, 1.6, ["→ TR-%d" % (t + 1), e.get("og_trafo_kablo", "3×(1×95/16 mm²) N2XSY · 10 m")])
+            continue
+        if h["tip"] == "giris_kesicili":
+            C.L(TH_OG, [(x, yb), (x, yb - 9)])
+            C.PL(TH_OG, [(x - 1.3, yb - 6.5), (x + 1.3, yb - 6.5), (x, yb - 3.5), (x - 1.3, yb - 6.5)], dolgu=True)
+            C.TL(TH_YZ, x - 20, yb - 13, 1.65, [f"↑ ŞEBEKE / ENH {e.get('sebeke_gerilim_kv') or e.get('og_gerilim_kv', 33)} kV", e.get("dm_giris_kablo", "Bağlantı noktasına (TM/ENH) — bağlantı anlaşmasına göre")])
+            continue
+        if h["tip"] == "ic_ihtiyac":
+            C.L(TH_OG, [(x, yb), (x, yb - 9)]); C.TL(TH_YZ, x - 20, yb - 13, 1.65, ["İç ihtiyaç trafosu / panosu"])
             continue
         if h["tip"] == "ya_giris": seg, ok = gelen, "←"
         else: seg, ok = giden, "→"
@@ -2137,7 +2263,8 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
          "Yağlı, HARİCİ tip · yağ çukuru · çit h ≥ 1,8 m" if harici else "Köşk içi (dahili) tip"])
     C.T(TH_YZ, tr_x + 20, c2 - 6, 1.5, "Nötr işletme topraklaması")
     # AG pano
-    agx0, agx1 = X0 - 6, 790.0
+    agx0 = X0 - 6
+    _sp = 24.0; agx1 = max(agx0 + 6 + (len(invs) + 2) * _sp + 16, tr_x + 80)   # pano çıkış sayısı kadar geniş (sabit genişlik yok)
     ytp = yt_alt - 14
     C.L(TH_AG, [(tr_x, yt_alt), (tr_x, ytp)])
     C.TL(TH_YZ, tr_x + 3, yt_alt - 2, 1.6, [e.get("trafo_ag_kablo", "7×(3×1×300 mm²) N2XH · 10 m")])
@@ -2158,7 +2285,7 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
     C.T(TH_YZ, agx0 + 10, yb + 1.8, 1.6, f"AG BARA {e.get('ag_bara', '3 × (120×10) mm Cu')} · {e['ag_gerilim_v']} V")
     # çıkışlar
     n_cik = len(invs) + 2
-    sp = max(24.0, min(36.0, (agx1 - agx0 - 24) / n_cik))
+    sp = _sp
     cx0 = agx0 + sp / 2 + 6
     # iç ihtiyaç çıkışı
     x = cx0
@@ -2213,7 +2340,7 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
     if not tek: C.TL(TH_YZ, dx, min(ya_, pr_y) - 8, 1.75, notlar, 1.5)
     else:
         bbt = pf.sinir()
-        C.R(TH_KOSK, X0 - 12, YT + 26, max(798.0, bbt[2] + 6), min(yalt_inv, bbt[1]) - 6)
+        C.R(TH_KOSK, X0 - 12, YT + 26, bbt[2] + 6, min(yalt_inv, bbt[1]) - 6)
         C.T(TH_YZ, X0 - 10, YT + 20, 3.2, f"{M.P['proje'].get('isin_adi') or ''} TR-{t+1} · {kva_t} kVA · {len(invs)} inverter".strip())
     return pf
 
@@ -2230,8 +2357,12 @@ def pafta_tekhat(M, kod="02"):
     """Tek hat TEK paftada (kullanıcı kuralı 19.10.2026): üstte DM + OG dağıtım, altında her TM'nin OG hücreleri + trafo +
     AG ana dağıtım panosu + tüm inverter çıkışları. Sembol tablosu ve notlar bir kez. Bloklar ızgarada, pafta A0'a
     sığmazsa uzatılmış kağıt."""
-    pf = pafta_tekhat_dm(M, kod)
-    pf.ad = "TEK HAT ŞEMASI (DM · OG DAĞITIM · TM · AG PANO)"
+    if getattr(M, "dm_ortak", False):      # tek köşk: ayrı DM / OG dağıtım bölümü yok (DM hücreleri TM-1 bloğunda)
+        pf = Pafta(kod, "TEK HAT ŞEMASI (TM + DM · AG PANO · İNVERTER · DC)", olcekli=False)
+        sembol_tablosu(Ciz(pf), 16.0, 470.0 + 6, 150)
+    else:
+        pf = pafta_tekhat_dm(M, kod)
+        pf.ad = "TEK HAT ŞEMASI (DM · OG DAĞITIM · TM · AG PANO)"
     tms = [pafta_tekhat_tm(M, t, kod, tek=True) for t in range(M.n_tr)]
     if not tms: return pf
     bb = pf.sinir(); tb = [q.sinir() for q in tms]
@@ -2623,249 +2754,395 @@ def pano_dolaplari(M, n_inv):
     return d
 
 
-def kosk_ciz(C, M, t, hucreler, x0, y0):
-    """Monoblok beton köşk: üst görünüş (hücre dizisi, akü-redresör, trafo, GES panosu), ön ve yan görünüş. 1/50
-    (1 mm kağıt = 50 mm). Dönüş: (genişlik, yükseklik) mm."""
+def kosk_olcu(M, t, hucreler, dm_hucre=None):
+    """Köşk iç düzeni (mm): OG odası (akü-redresör + hücreler), trafo odası (köşk içi trafoda), GES panosu odası."""
     e = M.P["elektrik"]; ks = dict(KOSK_VARS); ks.update(e.get("kosk") or {})
-    s = 1 / 50.0
+    dw, Wk = ks["duvar_mm"], ks["W_mm"]
+    if t is None:                                     # yalnız DM köşkü
+        og = ks["aku_mm"] + 100 + sum(HUCRE_GEN.get(h["tip"], 1000) for h in dm_hucre or []) + 300
+        return {"L": dw * 2 + og, "W": Wk, "dw": dw, "og": og, "tr": 0, "adp": 0, "kva": None, "harici": False, "pano_L": 0}
     kva = M.tr_kva[t] if getattr(M, "tr_kva", None) else e["trafo_kva"]
     harici = kva >= e["harici_trafo_min_kva"]
     n_inv = sum(1 for i in M.inverterler if i["tr"] == t + 1)
-    dw = ks["duvar_mm"]; Wk = ks["W_mm"]; Hk = ks["H_mm"]
-    og_ic = ks["aku_mm"] + 100 + sum(HUCRE_GEN.get(h["tip"], 1000) for h in hucreler) + 300
-    tr_oda = 0 if harici else (ks["trafo_oda_mm"] or (2450 if kva <= 1600 else 3000))
+    hs = list(hucreler) + list(dm_hucre or [])
+    og = ks["aku_mm"] + 100 + sum(HUCRE_GEN.get(h["tip"], 1000) for h in hs) + 300
+    tr = 0 if harici else (ks["trafo_oda_mm"] or (2450 if kva <= 1600 else 3000))
     pano_L = sum(w for _, w, _ in pano_dolaplari(M, n_inv))
-    adp_ic = 900 if pano_L <= Wk - 2 * dw - 300 else pano_L + 600
-    L = dw + og_ic + dw + (tr_oda + dw if tr_oda else 0) + adp_ic + dw
-    K, Y = TH_KOSK, TH_YZ
-    C.T(Y, x0, y0 + 6, 3.2, f"MONOBLOK BETON KÖŞK TR-{t+1} ({L:.0f} × {Wk} × {Hk} mm)  ·  1/50")
-    # üst görünüş
-    ox, oy = x0, y0 - 6
-    P = lambda a, b: (ox + a * s, oy - b * s)
-    def R(a0, b0, a1, b1, kat=TH_HUC): C.R(kat, *P(a0, b0), *P(a1, b1))
-    R(0, 0, L, Wk); R(dw, dw, L - dw, Wk - dw)
-    xa = dw
-    R(xa, dw, xa + og_ic, Wk - dw, K)
-    R(xa + 50, dw + 50, xa + 50 + ks["aku_mm"], dw + 650); C.T(Y, *P(xa + 70, dw + 420), 1.3, "AKÜ"); C.T(Y, *P(xa + 70, dw + 600), 1.3, "RED.")
-    hx = xa + 50 + ks["aku_mm"] + 100
-    for h in hucreler:
-        w = HUCRE_GEN.get(h["tip"], 1000)
-        R(hx, dw + 50, hx + w, dw + 1450)
-        C.T(Y, *P(hx + w / 2 + 120, dw + 1400), 1.2, sar(h["ad"].replace(" HÜCRESİ", ""), 18)[0], rot=90)
-        if len(sar(h["ad"].replace(" HÜCRESİ", ""), 18)) > 1: C.T(Y, *P(hx + w / 2 - 120, dw + 1400), 1.2, sar(h["ad"].replace(" HÜCRESİ", ""), 18)[1], rot=90)
-        C.T(Y, *P(hx + w / 2, dw + 1600), 1.2, f"{w}", hiz="C")
-        hx += w
-    C.T(Y, *P(hx - 600, dw + 1700), 1.2, "1400", hiz="C")
-    xa += og_ic + dw
-    if tr_oda:
-        R(xa, dw, xa + tr_oda, Wk - dw, K)
-        tw, tl = min(tr_oda - 600, 1500), 1300
-        R(xa + (tr_oda - tw) / 2, (Wk - tl) / 2, xa + (tr_oda + tw) / 2, (Wk + tl) / 2, TH_OG)
-        C.T(Y, *P(xa + tr_oda / 2, Wk / 2), 1.4, f"{kva} kVA TRAFO", hiz="C")
-        xa += tr_oda + dw
-    R(xa, dw, xa + adp_ic, Wk - dw, K)
-    if pano_L <= Wk - 2 * dw - 300:
-        R(xa + adp_ic - 100 - ks["adp_derinlik_mm"], (Wk - pano_L) / 2, xa + adp_ic - 100, (Wk + pano_L) / 2, TH_AG)
-        C.T(Y, *P(xa + adp_ic - 400, Wk / 2 + 600), 1.3, f"GES PANO-{t+1}", rot=90)
-    else:
-        R(xa + 300, Wk - dw - 100 - ks["adp_derinlik_mm"], xa + 300 + pano_L, Wk - dw - 100, TH_AG)
-        C.T(Y, *P(xa + 300 + pano_L / 2, Wk - dw - 400), 1.3, f"GES PANO-{t+1}", hiz="C")
-    # ölçü
-    C.L("GES-OLCU", [P(0, -250), P(L, -250)])
-    C.T(Y, *P(L / 2, -420), 1.4, f"{L:.0f}", hiz="C")
-    C.T(Y, *P(-350, Wk / 2), 1.4, f"{Wk}", hiz="C", rot=90)
-    C.T(Y, *P(L / 2, Wk + 450), 2.0, "ÜST GÖRÜNÜŞ", hiz="C")
-    if harici: C.T(Y, *P(0, Wk + 800), 1.4, f"Trafo {kva} kVA HARİCİ tip: köşk dışında yağ çukuru + çit (h ≥ 1,8 m) içinde.")
-    # ön görünüş
-    gy = y0 - 6 - Wk * s - 30
-    P2 = lambda a, b: (x0 + a * s, gy - (Hk - b) * s)
-    C.R(TH_HUC, *P2(0, 0), *P2(L, Hk - 30)); C.R(TH_HUC, *P2(-60, Hk - 30), *P2(L + 60, Hk))
-    def kapi(a, w, h, panjur=False):
-        C.R(TH_HUC, *P2(a, 300), *P2(a + w, 300 + h)); C.L(TH_HUC, [P2(a + w / 2, 300), P2(a + w / 2, 300 + h)])
-        if panjur:
-            for q in range(9): yy = 400 + q * 110; C.L(TH_HUC, [P2(a + 80, yy), P2(a + w / 2 - 80, yy)]); C.L(TH_HUC, [P2(a + w / 2 + 80, yy), P2(a + w - 80, yy)])
-    xa = dw
-    kapi(xa + og_ic / 2 - 750, 1500, 2300)
-    xa += og_ic + dw
-    if tr_oda: kapi(xa + tr_oda / 2 - 750, 1500, 2300, True); xa += tr_oda + dw
-    kapi(xa + adp_ic / 2 - min(600, adp_ic / 2 - 100), min(1200, adp_ic - 200), 2300)
-    for a in range(0, int(L), 2400):
-        C.R(TH_OG, *P2(a + 500, 0), *P2(a + 1300, 250))
-    C.T(Y, *P2(L / 2, -450), 2.0, "ÖN GÖRÜNÜŞ", hiz="C")
-    C.T(Y, *P2(-300, Hk / 2), 1.4, f"{Hk}", hiz="C", rot=90)
-    # yan görünüş
-    sx = x0 + L * s + 25
-    P3 = lambda a, b: (sx + a * s, gy - (Hk - b) * s)
-    C.R(TH_HUC, *P3(0, 0), *P3(Wk, Hk - 30)); C.R(TH_HUC, *P3(-60, Hk - 30), *P3(Wk + 60, Hk))
-    C.R(TH_HUC, *P3(Wk / 2 - 750, 300), *P3(Wk / 2 + 750, 2600)); C.L(TH_HUC, [P3(Wk / 2, 300), P3(Wk / 2, 2600)])
-    C.T(Y, *P3(Wk / 2, -450), 2.0, "YAN GÖRÜNÜŞ", hiz="C")
-    return max(L * s, L * s + 25 + Wk * s) + 10, 6 + Wk * s + 30 + Hk * s + 20
+    adp = 900 if pano_L <= Wk - 2 * dw - 300 else pano_L + 600
+    L = dw + og + dw + (tr + dw if tr else 0) + adp + dw
+    return {"L": L, "W": Wk, "dw": dw, "og": og, "tr": tr, "adp": adp, "kva": kva, "harici": harici, "pano_L": pano_L}
 
 
-def pano_on_ciz(C, M, t, x0, y0):
-    """GES panosu (ADP) ön görünüş, 1/25: dolap dizisi ve teçhizat yerleşimi. Dönüş: (w, h) mm."""
-    e = M.P["elektrik"]
-    s = 1 / 25.0; Hp = 2000; kaide = 100
-    n_inv = sum(1 for i in M.inverterler if i["tr"] == t + 1)
-    dol = pano_dolaplari(M, n_inv)
-    Lp = sum(w for _, w, _ in dol)
-    Y = TH_YZ
-    C.T(Y, x0, y0 + 6, 3.0, f"GES PANOSU-{t+1} ÖN GÖRÜNÜŞ ({Lp} × {Hp + kaide} × {(e.get('kosk') or {}).get('adp_derinlik_mm', 600)} mm) · {e['ag_pano_form']} · {e['ag_pano_ip']} · 1/25")
-    P = lambda a, b: (x0 + a * s, y0 - (Hp + kaide - b) * s)
-    C.R(TH_AG, *P(0, 0), *P(Lp, kaide))
-    xa = 0
-    for ad, w, ic in dol:
-        C.R(TH_AG, *P(xa, kaide), *P(xa + w, kaide + Hp))
-        C.R(TH_AG, *P(xa + 40, kaide + 40), *P(xa + w - 40, kaide + Hp - 40))
-        C.R(TH_AG, *P(xa + w - 90, kaide + 900), *P(xa + w - 60, kaide + 1100))
-        C.T(Y, *P(xa + w / 2, kaide + Hp - 130), 1.5, ad, hiz="C")
-        if ad == "GİRİŞ":
-            C.R(TH_AG, *P(xa + 150, kaide + 900), *P(xa + w - 150, kaide + 1400)); C.T(Y, *P(xa + w / 2, kaide + 1150), 1.3, "ACB", hiz="C")
-        elif ad == "ÖLÇÜ":
-            C.R(TH_AG, *P(xa + 120, kaide + 1300), *P(xa + w - 120, kaide + 1700)); C.T(Y, *P(xa + w / 2, kaide + 1500), 1.1, "SAYAÇ", hiz="C")
-            C.R(TH_AG, *P(xa + 120, kaide + 800), *P(xa + w - 120, kaide + 1100)); C.T(Y, *P(xa + w / 2, kaide + 950), 1.1, "ANALİZÖR", hiz="C")
-            C.R(TH_AG, *P(xa + 120, kaide + 400), *P(xa + w - 120, kaide + 650)); C.T(Y, *P(xa + w / 2, kaide + 525), 1.1, "PARAFUDR", hiz="C")
-        elif ad.startswith("ÇIKIŞ"):
-            k = int(ad.split("-")[1]) - 1
-            for q in range(5):
-                no = k * 5 + q + 1
-                if no > n_inv: break
-                yy = kaide + Hp - 350 - q * 330
-                C.R(TH_AG, *P(xa + 120, yy - 230), *P(xa + w - 120, yy)); C.T(Y, *P(xa + w / 2, yy - 115), 1.1, f"TMŞ-{no:02d}", hiz="C")
+def kosk_tasarim(tip, kva=0, hucre=None, en=2.5, boy=None, no=1, gerilim=""):
+    """AeCAD "Trafo ekle" (tsKosk) ile birebir aynı köşk: duvar 0,12 m, OG hücre bölmesi (n × 0,5 + 0,6, ≥ 1,6 m),
+    trafo bölmesi (≤ 630: 1,8 · ≤ 1250: 2,2 · üstü 2,6 m; ≥ 2500 kVA harici), AG pano bölmesi net 0,80 m (pano 0,70 m,
+    ara duvara dayalı, kapı uç duvarda) / DM'de kumanda-SCADA 1,6 m. Dönüş: {L, W, bol, o:[(tür, veri)]} — merkez orijinli, m."""
+    t = 0.12; W = float(en or 2.5); n = max(1, int(round(hucre or (5 if tip == "dm" else 3))))
+    kva = float(kva or 0); harici = tip == "tm" and kva >= 2500
+    wOG = max(1.6, n * 0.5 + 0.6); wAG = 1.6 if tip == "dm" else 1.4
+    wTR = (1.8 if kva <= 630 else 2.2 if kva <= 1250 else 2.6) if (tip == "tm" and not harici) else 0
+    bol = [["OG HÜCRE", wOG]] + ([["TRAFO", wTR]] if wTR else []) + [["KUMANDA / SCADA" if tip == "dm" else "AG PANO", wAG if tip == "dm" else 0.8]]
+    Lmin = t * (len(bol) + 1) + sum(b[1] for b in bol)
+    Lb = float(boy) if isinstance(boy, (int, float)) and boy > 0 else 0
+    if Lb > Lmin:
+        ix = [k for k, b in enumerate(bol) if b[0] != "TRAFO"]
+        for k in ix: bol[k][1] += (Lb - Lmin) / len(ix)
+    L = max(Lmin, Lb); x0, y0, y1 = -L / 2, -W / 2, W / 2
+    o = []; R = lambda a, b, c, d, r=7: o.append(("R", (a, b, c, d), r)); T = lambda x, y, h, s, r=7: o.append(("T", (x, y, h, s), r))
+    def kapi(xk, w, y):
+        o.append(("L", ((xk, y), (xk, y + w)), 7)); o.append(("A", (xk, y, w, 0, math.pi / 2), 8))
+    R(x0, y0, x0 + L, y1); R(x0 + t, y0 + t, x0 + L - t, y1 - t, 8)
+    x = x0 + t; hT = max(0.1, W * 0.055); bolum = []
+    for k, (ad, w) in enumerate(bol):
+        if k: R(x - t, y0 + t, x, y1 - t)
+        T(x + w / 2, y1 - t - hT * 1.2, hT * 0.6 if w < 1.2 else hT, "AG" if (w < 1.2 and ad == "AG PANO") else ad)
+        bolum.append((ad, x, w))
+        if ad == "OG HÜCRE":
+            cw = (w - 0.3) / n
+            for i in range(n):
+                cx = x + 0.15 + i * cw
+                R(cx + 0.02, y1 - t - 0.85 - hT * 2.4, cx + cw - 0.02, y1 - t - hT * 2.4, 1); T(cx + cw / 2, y1 - t - hT * 2.4 - 0.45, hT * 0.8, f"H-{i+1:02d}", 1)
+            kapi(x + 0.2, 0.9, y0 + t)
+        elif ad == "TRAFO":
+            m = 0.25; R(x + m - 0.1, y0 + t + 0.2, x + w - m + 0.1, y1 - t - hT * 2.6, 8)
+            R(x + m, y0 + t + 0.35, x + w - m, y1 - t - hT * 2.8, 30)
+            o.append(("C", (x + w / 2 - 0.22, 0, 0.32), 30)); o.append(("C", (x + w / 2 + 0.22, 0, 0.32), 30))
+            T(x + w / 2, y0 + t + 0.25 + hT, hT * 0.85, f"TR {kva:g} kVA", 30); T(x + w / 2, -0.5, hT * 0.7, "yağ çukuru", 8)
+            kapi(x + 0.15, min(1.6, w - 0.3), y0 + t)
+        elif tip == "tm" and k == len(bol) - 1:
+            pd, px0, yA, yB = 0.7, x + 0.05, y0 + t + 0.25, y1 - t - 0.25
+            R(px0, yA, px0 + pd, yB, 3); T(px0 + pd / 2, (yA + yB) / 2, hT * 0.8, "ADP", 3)
+            xo = x + w + t; dw = min(0.9, W - 2 * t - 0.4); yk = -dw / 2
+            o.append(("L", ((xo, yk), (xo + dw, yk)), 7)); o.append(("A", (xo, yk, dw, 0, math.pi / 2), 8))
         else:
-            C.R(TH_AG, *P(xa + 80, kaide + 900), *P(xa + w - 80, kaide + 1300)); C.T(Y, *P(xa + w / 2, kaide + 1100), 1.0, "KAKR", hiz="C")
-        C.T(Y, *P(xa + w / 2, -180), 1.2, f"{w}", hiz="C")
-        xa += w
-    C.T(Y, *P(-180, kaide + Hp / 2), 1.3, f"{Hp + kaide}", hiz="C", rot=90)
-    return Lp * s + 10, (Hp + kaide) * s + 22
+            R(x + 0.15, y1 - t - hT * 2.4 - 0.6, x + w - 0.15, y1 - t - hT * 2.4, 3); T(x + w / 2, y1 - t - hT * 2.4 - 0.3, hT * 0.8, "SCADA / AKÜ" if tip == "dm" else "ADP", 3)
+            kapi(x + 0.2, 0.9, y0 + t)
+        x += w + t
+    if harici:
+        ex, tw, th = x0 + L + 1.2, 2.6, 2.2
+        R(ex, -th / 2, ex + tw, th / 2, 30); o.append(("C", (ex + tw / 2 - 0.35, 0, 0.5), 30)); o.append(("C", (ex + tw / 2 + 0.35, 0, 0.5), 30))
+        R(ex - 0.4, -th / 2 - 0.4, ex + tw + 0.4, th / 2 + 0.4, 8); R(ex - 1.0, -th / 2 - 1.0, ex + tw + 1.0, th / 2 + 1.0, 3)
+        T(ex + tw / 2, th / 2 + 1.25, hT, f"TR {kva:g} kVA (harici) · yağ çukuru · çit", 30)
+    T(0, y1 + hT * 2.2, hT * 1.6, "DM" if tip == "dm" else f"TM-{no} · {kva:g} kVA · {gerilim}".strip(" ·"), 30)
+    T(0, y0 - hT * 2.2, hT, f"{L:.2f} × {W:.2f} m · {n} OG hücre", 8)
+    return {"L": L, "W": W, "o": o, "bol": bolum, "t": t, "harici": harici, "kva": kva}
+
+
+def kosk_cizimi(K, yaz, ciz, poli, daire):
+    """kosk_tasarim çıktısını verilen dönüşümle çizer (yaz/ciz/poli/daire: yerel m → hedef)."""
+    for tur, d, r in K["o"]:
+        if tur == "R": a, b, c, e = d; poli([(a, b), (c, b), (c, e), (a, e), (a, b)])
+        elif tur == "L": ciz(list(d))
+        elif tur == "C": daire(*d)
+        elif tur == "A":
+            x, y, rr, a0, a1 = d; ciz([(x + rr * math.cos(a0 + (a1 - a0) * k / 8), y + rr * math.sin(a0 + (a1 - a0) * k / 8)) for k in range(9)])
+        elif tur == "T": yaz(*d)
+
+
+def tm_kosk_tasarim(M, t, dm_ile=False):
+    e = M.P["elektrik"]
+    kva = M.tr_kva[t] if getattr(M, "tr_kva", None) else e["trafo_kva"]
+    n = len(e.get("tm_hucreler") or TM_HUCRE_VARS) + (len(e.get("dm_hucreler") or DM_HUCRE_VARS) if dm_ile else 0)
+    ger = (e.get("trafo_gerilim") or "").split(" Dy")[0]
+    return kosk_tasarim("tm", kva, n, (e.get("kosk") or {}).get("W_mm", 2500) / 1000, None, t + 1, ger)
+
+
+def kosk_plan(pf, M, cx, cy, K, etiket=None):
+    """Vaziyet planında köşk: AeCAD Trafo ekle aracının bloğu (kosk_tasarim), azimuta göre döndürülmüş, m."""
+    a = math.radians(M.az or 0); ca, sa = math.cos(a), math.sin(a)
+    P = lambda u, v: (cx + u * ca - v * sa, cy + u * sa + v * ca)
+    kosk_cizimi(K, lambda x, y, h, s_: pf.yazi("GES-TM", *P(x, y), h, s_, math.degrees(a), "C"),
+                lambda pts: pf.cizgi("GES-TM", [P(*q) for q in pts]), lambda pts: pf.poli("GES-TM", [P(*q) for q in pts]),
+                lambda x, y, r: pf.daire("GES-TM", *P(x, y), r))
+
+
+def kosk_ciz(C, M, t, x0, y0, dm_ile=False):
+    """Köşk görünüşleri, 1/50 — ölçü ve iç düzen AeCAD "Trafo ekle" aracının bloğundan (kosk_tasarim): üst görünüş birebir
+    blok; ön ve yan görünüş aynı bölme ve kapılardan. Yükseklik elektrik.kosk.H_mm (varsayılan 3510 mm)."""
+    e = M.P["elektrik"]; K = tm_kosk_tasarim(M, t, dm_ile) if t is not None else kosk_tasarim("dm", 0, len(e.get("dm_hucreler") or DM_HUCRE_VARS))
+    Hk = ((e.get("kosk") or {}).get("H_mm") or KOSK_VARS["H_mm"]) / 1000
+    s = 20.0; L, W = K["L"], K["W"]; Y = TH_YZ
+    ad = "DM" if t is None else f"TM-{t+1}" + (" + DM" if dm_ile else "")
+    C.T(Y, x0, y0 + 6, 3.0, f"{ad} KÖŞK ({L * 1000:.0f} × {W * 1000:.0f} × {Hk * 1000:.0f} mm)  ·  1/50  ·  Trafo ekle aracı düzeni")
+    cx, cy = x0 + L * s / 2 + 8, y0 - 10 - W * s / 2
+    P = lambda u, v: (cx + u * s, cy + v * s)
+    kosk_cizimi(K, lambda x, y, h, s_: C.T(Y, *P(x, y), max(1.2, h * s * 0.9), s_, hiz="C"), lambda pts: C.L(TH_HUC, [P(*q) for q in pts]),
+                lambda pts: C.PL(TH_HUC, [P(*q) for q in pts]), lambda x, y, r: C.C(TH_HUC, *P(x, y), r * s))
+    d_olcu(C, P(-L / 2, -W / 2 - 0.6), P(L / 2, -W / 2 - 0.6), -4, f"{L:.2f}")
+    d_olcu(C, P(-L / 2 - 0.4, -W / 2), P(-L / 2 - 0.4, W / 2), 4, f"{W:.2f}")
+    C.T(Y, cx, cy - W * s / 2 - 22, 2.0, "ÜST GÖRÜNÜŞ", hiz="C")
+    # ön görünüş (kapı cephesi, −y)
+    gy = cy - W * s / 2 - 34
+    Q = lambda u, h: (cx + u * s, gy - (Hk - h) * s)
+    C.R(TH_HUC, *Q(-L / 2, 0), *Q(L / 2, Hk - 0.03)); C.R(TH_HUC, *Q(-L / 2 - 0.05, Hk - 0.03), *Q(L / 2 + 0.05, Hk))
+    d_zemin(C, Q(-L / 2 - 0.4, 0)[0], Q(L / 2 + 0.4, 0)[0], Q(0, 0)[1])
+    for ad_, x, w in K["bol"]:
+        if ad_ == "OG HÜCRE": a_, b_ = x + 0.2, x + 1.1; pj = False
+        elif ad_ == "TRAFO": a_, b_ = x + 0.15, x + 0.15 + min(1.6, w - 0.3); pj = True
+        elif t is None: a_, b_ = x + 0.2, x + 1.1; pj = False
+        else: continue
+        C.R(TH_HUC, *Q(a_, 0.1), *Q(b_, 2.2))
+        if pj:
+            for q in range(10): yy = 0.35 + q * 0.18; C.L(TH_HUC, [Q(a_ + 0.1, yy), Q(b_ - 0.1, yy)])
+    d_olcu(C, Q(L / 2, 0), Q(L / 2, Hk), -5, f"{Hk:.2f}")
+    C.T(Y, cx, gy - 10, 2.0, "ÖN GÖRÜNÜŞ", hiz="C")
+    # yan görünüş (AG pano uç duvar kapısı)
+    sx = cx + L * s / 2 + 22 + W * s / 2
+    Z = lambda v, h: (sx + v * s, gy - (Hk - h) * s)
+    C.R(TH_HUC, *Z(-W / 2, 0), *Z(W / 2, Hk - 0.03)); C.R(TH_HUC, *Z(-W / 2 - 0.05, Hk - 0.03), *Z(W / 2 + 0.05, Hk))
+    d_zemin(C, Z(-W / 2 - 0.3, 0)[0], Z(W / 2 + 0.3, 0)[0], Z(0, 0)[1])
+    if t is not None:
+        dw = min(0.9, W - 2 * K["t"] - 0.4); C.R(TH_HUC, *Z(-dw / 2, 0.1), *Z(dw / 2, 2.2)); C.T(Y, *Z(0, 2.4), 1.4, "AG pano kapısı", hiz="C")
+    C.T(Y, sx, gy - 10, 2.0, "YAN GÖRÜNÜŞ", hiz="C")
+    return L * s + W * s + 50, 10 + W * s + 34 + Hk * s + 16
 
 
 def pafta_kosk(M, kod="02"):
-    """Her TM için köşk üst/ön/yan görünüş + GES panosu ön görünüşü (tek hat paftasında)."""
-    e = M.P["elektrik"]
-    pf = Pafta(kod, "KÖŞK VE PANO", olcekli=False); C = Ciz(pf)
-    hucreler = copy.deepcopy(e.get("tm_hucreler") or TM_HUCRE_VARS)
-    y = 0.0
+    """Her TM (ve ayrı DM) köşkü: üst / ön / yan görünüş, AeCAD Trafo ekle aracının düzeniyle."""
+    pf = Pafta(kod, "KÖŞK", olcekli=False); C = Ciz(pf)
+    y = 0.0; ort = getattr(M, "dm_ortak", False)
     for t in range(M.n_tr):
-        w1, h1 = kosk_ciz(C, M, t, hucreler, 0.0, y)
-        w2, h2 = pano_on_ciz(C, M, t, w1 + 20, y)
-        y -= max(h1, h2) + 26
+        w1, h1 = kosk_ciz(C, M, t, 0.0, y, ort and t == 0); y -= h1 + 20
+    if not ort:
+        w1, h1 = kosk_ciz(C, M, None, 0.0, y)
     return pf
 
 
-# ---------------------------------------------------------------- vaziyet planı detayları (01)
+# ---------------------------------------------------------------- vaziyet planı detayları (01) — çizim standardı:
+# siyah konstrüksiyon, gri tarama, mimari ölçü çizgisi (uzatma çizgisi + 45° tik), numaralı detay başlığı, etiket okları.
+DK, DT = "GES-DETAY", "GES-DETAY-TARAMA"
+
+
+def d_baslik(C, x, y, no, ad, olc):
+    C.C(DK, x + 4, y - 4, 4.0); C.T(DK, x + 4, y - 4, 3.2, str(no), hiz="C")
+    C.T(DK, x + 10, y - 3.2, 3.0, ad); C.L(DK, [(x + 10, y - 4.6), (x + 10 + 2.05 * len(ad) + 4, y - 4.6)])
+    C.T(DK, x + 10, y - 8.6, 2.0, f"ÖLÇEK 1/{olc}")
+
+
+def d_olcu(C, p1, p2, off, txt, h=1.7):
+    """Hizalı ölçü: uzatma çizgileri, ölçü çizgisi, 45° tikler, yazı çizgi üstünde."""
+    (x1, y1), (x2, y2) = p1, p2
+    L = math.hypot(x2 - x1, y2 - y1) or 1; ux, uy = (x2 - x1) / L, (y2 - y1) / L; nx, ny = -uy, ux
+    a1 = (x1 + nx * off, y1 + ny * off); a2 = (x2 + nx * off, y2 + ny * off)
+    sg = 1 if off >= 0 else -1
+    C.L(DT, [(x1 + nx * sg * 0.8, y1 + ny * sg * 0.8), (a1[0] + nx * sg * 1.2, a1[1] + ny * sg * 1.2)])
+    C.L(DT, [(x2 + nx * sg * 0.8, y2 + ny * sg * 0.8), (a2[0] + nx * sg * 1.2, a2[1] + ny * sg * 1.2)])
+    C.L(DK, [(a1[0] - ux * 1.2, a1[1] - uy * 1.2), (a2[0] + ux * 1.2, a2[1] + uy * 1.2)])
+    for q in (a1, a2):
+        C.L(DK, [(q[0] - (ux + nx) * 0.9, q[1] - (uy + ny) * 0.9), (q[0] + (ux + nx) * 0.9, q[1] + (uy + ny) * 0.9)])
+    ang = math.degrees(math.atan2(uy, ux))
+    if ang > 90.1 or ang < -89.9: ang += 180
+    m = ((a1[0] + a2[0]) / 2 + nx * sg * 1.6, (a1[1] + a2[1]) / 2 + ny * sg * 1.6)
+    C.T(DK, m[0], m[1], h, txt, hiz="C", rot=ang)
+
+
+def d_tara(C, x0, y0, x1, y1, ar=1.6, yon=1):
+    """Dikdörtgen içi 45° tarama."""
+    if x1 < x0: x0, x1 = x1, x0
+    if y1 < y0: y0, y1 = y1, y0
+    H = y1 - y0; k = x0 - H
+    while k < x1:
+        t0, t1 = max(0.0, x0 - k), min(H, x1 - k)
+        if t1 > t0:
+            if yon > 0: C.L(DT, [(k + t0, y0 + t0), (k + t1, y0 + t1)])
+            else: C.L(DT, [(k + t0, y1 - t0), (k + t1, y1 - t1)])
+        k += ar
+
+
+def d_zemin(C, x0, x1, y, kalin=2.2):
+    C.L(DK, [(x0, y), (x1, y)])
+    x = x0
+    while x < x1 - 1.2:
+        C.L(DT, [(x, y - kalin), (x + kalin * 0.8, y)]); x += 2.0
+
+
+def d_etiket(C, p, q, txt, h=1.6):
+    """Ok uçlu etiket: p hedef, q yazı noktası."""
+    C.L(DT, [p, q, (q[0] + (2.05 * h * len(txt) * 0.55 if q[0] >= p[0] else -2.05 * h * len(txt) * 0.55), q[1])])
+    C.C(DK, p[0], p[1], 0.45)
+    C.T(DK, q[0] + (0.6 if q[0] >= p[0] else -2.05 * h * len(txt) * 0.55), q[1] + 0.6, h, txt)
+
+
 def detay_masa_kesit(C, M, x0, y0):
-    """Masa yan kesit (K-G), 1/50. Dönüş: (w, h) mm."""
-    m = M.P["masa"]; s = 1000 / 50.0         # m → mm kağıt
+    """DETAY-1 masa yan kesit (K-G), 1/50: modüller, aşık, kiriş, ön/arka kolon, payanda, fore kazık, ölçüler."""
+    m = M.P["masa"]; ol = 50; s = 1000 / ol
     a = math.radians(m["egim_derece"]); D = M.masa_D; hk = m["alt_kenar_m"]
-    Lp = D / math.cos(a); H = hk + Lp * math.sin(a)
-    kg = m.get("kolon_sira_araligi_m") or 2.5
-    P = lambda x, y: (x0 + 8 + x * s, y0 - 10 - (H + 0.3 - y) * s)
-    C.T(TH_YZ, x0, y0, 2.6, f"DETAY-1  MASA YAN KESİT (K-G)  ·  1/50")
-    C.L("GES-MASA", [P(-0.3, 0), P(D + 1.0, 0)])
-    C.L("GES-MASA", [P(0, hk), P(D, H)]); C.L("GES-MASA", [P(0, hk - 0.05), P(D, H - 0.05)])
-    xf = (D - kg) / 2; xb = xf + kg
-    yf = hk + xf * math.tan(a); yb = hk + xb * math.tan(a)
+    Lp = D / math.cos(a); H = hk + D * math.tan(a)
+    kg = min(m.get("kolon_sira_araligi_m") or 2.5, 2.5)
     gf, gb = 1.10, 1.30
-    C.L("GES-MASA", [P(xf, 0), P(xf, yf)]); C.L("GES-MASA", [P(xb, 0), P(xb, yb)])
-    C.L("GES-MASA", [P(xf, yf * 0.35), P(xb, yb - 0.25)])
-    C.L("GES-OLCU", [P(xf, 0), P(xf, -gf)]); C.L("GES-OLCU", [P(xb, 0), P(xb, -gb)])
-    C.R("GES-OLCU", *P(xf - 0.1, -gf), *P(xf + 0.1, 0)); C.R("GES-OLCU", *P(xb - 0.1, -gb), *P(xb + 0.1, 0))
-    T = lambda x, y, t, r=0: C.T(TH_YZ, *P(x, y), 1.6, t, rot=r)
-    T(D / 2 - 0.6, (hk + H) / 2 + 0.35, f"Eğim {m['egim_derece']}°", math.degrees(a))
-    T(-0.25, hk / 2, f"{hk:.2f} m", 90); T(D + 0.15, H / 2, f"H={H:.2f} m", 90)
-    T(xf, -0.35, f"K-G ayak {kg:.2f} m (≤ 2,50)"); T(0, -gb - 0.35, f"Gömme ön {gf:.2f} m / arka {gb:.2f} m · Ø200 fore")
-    T(0, H + 0.1, f"İzdüşüm D = {D:.2f} m  ·  {m['sira_sayisi']} sıra × {m['sira_modul']} modül ({m['tip']})")
-    T(D + 0.35, 0.05, "KUZEY →")
-    return D * s + 30, (H + 1.7) * s + 14
+    ox, oy = x0 + 26, y0 - 18 - (H + 0.4) * s
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    d_baslik(C, x0, y0, 1, "MASA YAN KESİT (K-G)", ol)
+    d_zemin(C, ox - 12, ox + D * s + 22, oy)
+    ca, sa = math.cos(a), math.sin(a)
+    Q = lambda u, v: P(u * ca - v * sa, hk + u * sa + v * ca)          # u: eğim boyunca, v: yüzeye dik
+    nr = m["sira_sayisi"]; mb = (Lp - 0.02 * (nr - 1)) / nr; tp = 0.035
+    for r in range(nr):
+        u0 = r * (mb + 0.02)
+        C.PL(DK, [Q(u0, 0), Q(u0 + mb, 0), Q(u0 + mb, tp), Q(u0, tp), Q(u0, 0)])
+        for f in (0.22, 0.78):                                            # aşıklar (C profil)
+            u = u0 + f * mb
+            C.PL(DK, [Q(u - 0.04, -0.005), Q(u + 0.04, -0.005), Q(u + 0.04, -0.105), Q(u - 0.04, -0.105), Q(u - 0.04, -0.005)])
+    C.L(DK, [Q(0.05, -0.11), Q(Lp - 0.05, -0.11)]); C.L(DK, [Q(0.05, -0.23), Q(Lp - 0.05, -0.23)])   # kiriş
+    xf = (D - kg) / 2; xb = xf + kg
+    def u_at(x): return (x - (-0.23) * sa) / ca
+    yf = hk + xf * math.tan(a) - 0.23 / ca; yb = hk + xb * math.tan(a) - 0.23 / ca
+    for xx, yy, g in ((xf, yf, gf), (xb, yb, gb)):
+        C.L(DK, [P(xx - 0.05, -g + 0.05), P(xx - 0.05, yy)]); C.L(DK, [P(xx + 0.05, -g + 0.05), P(xx + 0.05, yy)])
+        C.R(DK, *P(xx - 0.1, -g), *P(xx + 0.1, 0)); d_tara(C, *P(xx - 0.1, -g), *P(xx + 0.1, 0), 1.2)
+    C.L(DK, [P(xb - 0.05, yb * 0.42), P(xb - (xb - xf) * 0.55, hk + (xb - (xb - xf) * 0.55) * math.tan(a) - 0.23 / ca)])   # payanda
+    # ölçüler
+    d_olcu(C, P(0, 0), P(D, 0), -(gb * s + 7), f"{D:.2f}")
+    d_olcu(C, P(xf, 0), P(xb, 0), -(gb * s + 2.5), f"{kg:.2f}")
+    d_olcu(C, P(0, 0), P(0, hk), 8, f"{hk:.2f}")
+    d_olcu(C, P(D, 0), P(D, H), -8, f"{H:.2f}")
+    d_olcu(C, P(xf, 0), P(xf, -gf), 6, f"{gf:.2f}", 1.4)
+    d_olcu(C, P(xb, 0), P(xb, -gb), -6, f"{gb:.2f}", 1.4)
+    ax, ay = P(0, hk)
+    for k in range(9):                                                    # eğim yayı
+        t0, t1 = a * k / 9, a * (k + 1) / 9; R_ = 14
+        C.L(DT, [(ax + R_ * math.cos(t0), ay + R_ * math.sin(t0)), (ax + R_ * math.cos(t1), ay + R_ * math.sin(t1))])
+    C.L(DT, [(ax, ay), (ax + 17, ay)]); C.T(DK, ax + 16, ay + 2.2, 1.8, f"{m['egim_derece']}°")
+    d_etiket(C, Q(Lp * 0.62, tp), (P(D * 0.62, H)[0] + 4, P(0, H + 0.35)[1]), f"PV modül {m['sira_sayisi']}×{M.P['modul']['boy_mm']}×{M.P['modul']['en_mm']}")
+    d_etiket(C, Q(0.22 * mb, -0.06), (P(-0.1, 0)[0] - 6, P(0, hk + 0.55)[1]), "Aşık")
+    d_etiket(C, Q(Lp * 0.33, -0.2), (P(D * 0.33, 0)[0] - 2, P(0, hk + 1.15)[1]), "Kiriş")
+    d_etiket(C, P(xf, yf * 0.7), (P(xf, 0)[0] - 15, P(0, yf * 0.7)[1]), "Ön kolon")
+    d_etiket(C, P(xb, yb * 0.75), (P(D, 0)[0] + 6, P(0, yb * 0.8)[1]), "Arka kolon")
+    d_etiket(C, P(xb - (xb - xf) * 0.3, yb * 0.6), (P(D, 0)[0] + 6, P(0, yb * 0.45)[1]), "Payanda")
+    d_etiket(C, P(xb, -gb * 0.6), (P(D, 0)[0] + 6, P(0, -gb * 0.6)[1]), "Fore kazık Ø200")
+    C.T(DK, ox - 12, oy + 1.2, 1.6, "GÜNEY"); C.T(DK, ox + D * s + 10, oy + 1.2, 1.6, "KUZEY")
+    return D * s + 70, 18 + (H + 0.4) * s + gb * s + 16
 
 
 def detay_masa_on(C, M, x0, y0):
-    """Masa ön görünüş (D-B), 1/100."""
+    """DETAY-2 masa ön görünüş (D-B): modüller, kolon aksları, ölçüler."""
     m = M.P["masa"]; L = M.masa_L
-    ol = next((o for o in [50, 100, 200, 250, 500] if L * 1000 / o <= 175), 500); s = 1000 / ol
+    ol = next((o for o in [50, 100, 200, 250, 500] if L * 1000 / o <= 170), 500); s = 1000 / ol
     nr, nm = m["sira_sayisi"], m["sira_modul"]
-    mw = (L - 2 * m["uc_payi_mm"] / 1000) / nm
-    hh = M.masa_D / math.cos(math.radians(m["egim_derece"])) * 0.55
-    P = lambda x, y: (x0 + 4 + x * s, y0 - 10 - (hh + 1.2 - y) * s)
-    C.T(TH_YZ, x0, y0, 2.6, f"DETAY-2  MASA ÖN GÖRÜNÜŞ (D-B)  ·  1/{ol}")
-    yb = 1.0
-    for r in range(nr):
-        for k in range(nm):
-            xa = m["uc_payi_mm"] / 1000 + k * mw
-            C.R("GES-MASA", *P(xa, yb + r * hh / nr), *P(xa + mw - 0.02, yb + (r + 1) * hh / nr - 0.02))
-    C.L("GES-MASA", [P(-0.3, 0), P(L + 0.3, 0)])
+    up = m["uc_payi_mm"] / 1000; gap = m["modul_boslugu_mm"] / 1000; mw = (L - 2 * up - gap * (nm - 1)) / nm
+    hh = M.masa_D / math.cos(math.radians(m["egim_derece"])) * math.sin(math.radians(90 - m["egim_derece"])) * 0.5 + 0.6
+    yb = m["alt_kenar_m"] + 0.25
+    ox, oy = x0 + 6, y0 - 18 - (yb + hh + 0.3) * s
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    d_baslik(C, x0, y0, 2, "MASA ÖN GÖRÜNÜŞ (D-B)", ol)
+    d_zemin(C, ox - 4, ox + L * s + 4, oy)
     n = m["aks_sayisi"]; ar = m["aks_araligi_m"]; x1 = (L - (n - 1) * ar) / 2
     for i in range(n):
-        C.L("GES-MASA", [P(x1 + i * ar, 0), P(x1 + i * ar, yb)])
-    C.T(TH_YZ, *P(0, -0.6), 1.6, f"Masa boyu {L:.3f} m  ·  {n} aks × {ar:.2f} m  ·  modül arası {m['modul_boslugu_mm']} mm")
-    return L * s + 12, (hh + 2.4) * s + 14
+        xx = x1 + i * ar; C.L(DK, [P(xx, 0), P(xx, yb)]); C.L(DT, [P(xx, -0.6), P(xx, -0.05)])
+    C.L(DK, [P(0, yb), P(L, yb)])
+    rh = hh / nr
+    for r in range(nr):
+        for k in range(nm):
+            xa = up + k * (mw + gap)
+            C.R(DK, *P(xa, yb + r * rh + 0.01), *P(xa + mw, yb + (r + 1) * rh - 0.01))
+            C.L(DT, [P(xa + mw * 0.5, yb + r * rh + 0.01), P(xa + mw * 0.5, yb + (r + 1) * rh - 0.01)])
+    d_olcu(C, P(0, yb + hh), P(L, yb + hh), 6, f"{L:.3f}")
+    d_olcu(C, P(x1, 0), P(x1 + ar, 0), -5, f"{ar:.2f}")
+    if n > 2: d_olcu(C, P(x1 + ar, 0), P(x1 + (n - 1) * ar, 0), -5, f"{n - 2}×{ar:.2f}={(n - 2) * ar:.2f}")
+    C.T(DK, ox, oy - 12, 1.6, f"{nr} sıra × {nm} modül ({m['tip']}) · modül arası {m['modul_boslugu_mm']} mm · uç payı {m['uc_payi_mm']} mm · {n} aks")
+    return L * s + 16, 18 + (yb + hh + 0.3) * s + 16
 
 
 def detay_sira(C, M, x0, y0):
-    """İki sıra arası kesit: eksen (pitch) ve açıklık, 1/200."""
-    m = M.P["masa"]; ol = 100 if (2 * m["pitch_m"] + M.masa_D) * 10 <= 175 else 200; s = 1000 / ol
-    a = math.radians(m["egim_derece"]); D = M.masa_D; hk = m["alt_kenar_m"]; H = hk + D * math.tan(a)
+    """DETAY-3 sıra aralığı: eksen (pitch), açıklık, 21 Aralık öğle güneş ışını."""
+    m = M.P["masa"]; a = math.radians(m["egim_derece"]); D = M.masa_D; hk = m["alt_kenar_m"]; H = hk + D * math.tan(a)
     pt = m["pitch_m"]; ac = M.acik
-    P = lambda x, y: (x0 + 4 + x * s, y0 - 10 - (H + 0.8 - y) * s)
-    C.T(TH_YZ, x0, y0, 2.6, f"DETAY-3  SIRA ARALIĞI  ·  1/{ol}")
-    C.L("GES-MASA", [P(-0.5, 0), P(2 * pt + D + 0.5, 0)])
+    ol = 100 if (2 * pt + D) * 10 <= 170 else 200; s = 1000 / ol
+    ox, oy = x0 + 6, y0 - 18 - (H + 0.6) * s
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    d_baslik(C, x0, y0, 3, "SIRA ARALIĞI VE GÖLGE", ol)
+    d_zemin(C, ox - 4, ox + (2 * pt + D) * s + 4, oy)
     for k in range(3):
         xo = k * pt
-        C.L("GES-MASA", [P(xo, hk), P(xo + D, H)])
-        C.L("GES-MASA", [P(xo + D * 0.25, 0), P(xo + D * 0.25, hk + D * 0.25 * math.tan(a))])
-        C.L("GES-MASA", [P(xo + D * 0.8, 0), P(xo + D * 0.8, hk + D * 0.8 * math.tan(a))])
-    C.L("GES-OLCU", [P(0, -0.4), P(pt, -0.4)]); C.T(TH_YZ, *P(pt / 2 - 1, -1.2), 1.6, f"Eksen {pt:.2f} m")
-    C.L("GES-OLCU", [P(D, H + 0.3), P(pt, H + 0.3)]); C.T(TH_YZ, *P(D, H + 0.5), 1.6, f"Açıklık {ac:.2f} m")
-    return (2 * pt + D + 1) * s + 10, (H + 2.4) * s + 14
-
-
-def detay_cit(C, M, x0, y0):
-    """Tel çit ve direk detayı, 1/50."""
-    g = M.P["guvenlik"]; s = 1000 / 50.0
-    ar = g["cit_direk_araligi_m"]; h = 2.0
-    P = lambda x, y: (x0 + 4 + x * s, y0 - 10 - (h + 0.3 - y) * s)
-    C.T(TH_YZ, x0, y0, 2.6, f"DETAY-4  TEL ÇİT  ·  1/50")
-    C.L("GES-CIT", [P(-0.2, 0), P(2 * ar + 0.2, 0)])
-    for k in range(3):
-        C.L("GES-CIT", [P(k * ar, -0.6), P(k * ar, h)]); C.R("GES-OLCU", *P(k * ar - 0.15, -0.6), *P(k * ar + 0.15, 0))
-    for q in range(1, 9):
-        C.L("GES-CIT", [P(0, q * h / 9), P(2 * ar, q * h / 9)])
-    for q in range(int(2 * ar / 0.25)):
-        C.L("GES-CIT", [P(q * 0.25, 0.05), P(q * 0.25 + 0.25, h - 0.05)])
-    C.T(TH_YZ, *P(0, -1.1), 1.6, f"Direk aralığı {ar:g} m · h = {h:g} m · beton temel 0,30×0,30×0,60 m · uyarı levhası her {g['levha_araligi_m']:g} m")
-    return 2 * ar * s + 16, (h + 1.8) * s + 14
-
-
-def detay_yol(C, M, x0, y0):
-    """Servis yolu tipik kesiti, 1/50."""
-    w = M.P["yol"]["genislik_m"]; s = 1000 / 50.0
-    P = lambda x, y: (x0 + 4 + x * s, y0 - 10 - (0.6 - y) * s)
-    C.T(TH_YZ, x0, y0, 2.6, "DETAY-5  SERVİS YOLU TİPİK KESİTİ  ·  1/50")
-    C.L("GES-YOL", [P(-0.6, 0), P(0, 0.2), P(w, 0.2), P(w + 0.6, 0)])
-    C.L("GES-YOL", [P(0, 0), P(w, 0)]); C.L("GES-YOL", [P(0, -0.2), P(w, -0.2)])
-    C.T(TH_YZ, *P(0.2, 0.3), 1.6, f"Genişlik {w:g} m · %2 yan eğim")
-    C.T(TH_YZ, *P(0.2, -0.65), 1.5, "20 cm stabilize (sıkıştırılmış) + 20 cm alt temel")
-    return (w + 1.4) * s + 10, 1.6 * s + 14
+        C.PL(DK, [P(xo, hk), P(xo + D, H), P(xo + D + 0.03, H - 0.06), P(xo + 0.03, hk - 0.06), P(xo, hk)])
+        for f in (0.25, 0.8):
+            C.L(DK, [P(xo + D * f, 0), P(xo + D * f, hk + D * f * math.tan(a) - 0.05)])
+    fi = math.radians(M.P["proje"].get("enlem") or 39.0); alt = math.pi / 2 - fi - math.radians(23.44)
+    if alt > 0.05:
+        L_ = (H) / math.tan(alt)
+        C.L(DT, [P(D, H), P(D + L_, 0)]); C.T(DK, *P(D + L_ * 0.55, H * 0.55), 1.5, f"21 Aralık öğle güneş açısı {math.degrees(alt):.1f}°")
+    d_olcu(C, P(0, 0), P(pt, 0), -5, f"Eksen {pt:.2f}")
+    d_olcu(C, P(D, H), P(pt, H), 4, f"Açıklık {ac:.2f}")
+    return (2 * pt + D) * s + 16, 18 + (H + 0.6) * s + 14
 
 
 def detay_inverter(C, M, x0, y0):
-    """İnverter montaj detayı (masa başı), 1/25."""
-    s = 1000 / 50.0
-    P = lambda x, y: (x0 + 4 + x * s, y0 - 10 - (2.0 - y) * s)
-    C.T(TH_YZ, x0, y0, 2.6, "DETAY-6  İNVERTER MONTAJI (MASA BAŞI)  ·  1/50")
-    C.L("GES-MASA", [P(-0.2, 0), P(1.6, 0)])
-    C.L("GES-MASA", [P(0.1, -0.8), P(0.1, 1.9)]); C.L("GES-MASA", [P(1.2, -0.8), P(1.2, 1.9)])
-    C.R("GES-INV", *P(0.2, 0.8), *P(1.1, 1.5)); C.T(TH_YZ, *P(0.35, 1.1), 1.6, "İNVERTER")
-    C.L("GES-INV", [P(0.1, 1.65), P(1.2, 1.65)])
-    C.L("GES-DC-KABLO", [P(0.4, 0.8), P(0.4, -0.7)]); C.L("GES-AC-KABLO", [P(0.9, 0.8), P(0.9, -0.8)])
-    C.T(TH_YZ, *P(1.3, 1.1), 1.4, "alt kenar ≥ 0,80 m, gölgelik, kilitli")
-    C.T(TH_YZ, *P(1.3, 0.4), 1.4, "DC ve AC çıkışlar spiral boru ile kanala")
-    return 4.2 * s + 10, 2.9 * s + 14
+    """DETAY-4 inverter montajı (masa başı, çelik taşıyıcı), 1/25."""
+    ol = 25; s = 1000 / ol
+    ox, oy = x0 + 10, y0 - 18 - 2.0 * s
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    d_baslik(C, x0, y0, 4, "İNVERTER MONTAJI (MASA BAŞI)", ol)
+    d_zemin(C, ox - 6, ox + 1.6 * s + 6, oy)
+    for xx in (0.1, 1.2):
+        C.L(DK, [P(xx - 0.03, -0.6), P(xx - 0.03, 1.85)]); C.L(DK, [P(xx + 0.03, -0.6), P(xx + 0.03, 1.85)])
+        C.R(DK, *P(xx - 0.15, -0.7), *P(xx + 0.15, 0)); d_tara(C, *P(xx - 0.15, -0.7), *P(xx + 0.15, 0), 1.4)
+    C.R(DK, *P(0.0, 1.85), *P(1.3, 1.92)); C.L(DK, [P(-0.1, 1.95), P(1.4, 1.98)])       # gölgelik
+    C.L(DK, [P(0.1, 1.55), P(1.2, 1.55)]); C.L(DK, [P(0.1, 0.75), P(1.2, 0.75)])          # yatay taşıyıcılar
+    C.R(DK, *P(0.22, 0.8), *P(1.08, 1.5))
+    for q in range(6): C.L(DT, [P(0.3 + q * 0.12, 1.42), P(0.3 + q * 0.12, 1.25)])
+    C.T(DK, *P(0.42, 1.05), 1.6, "İNVERTER")
+    C.L(DK, [P(0.4, 0.8), P(0.4, -0.75)]); C.L(DK, [P(0.46, 0.8), P(0.46, -0.75)])
+    C.L(DK, [P(0.85, 0.8), P(0.85, -0.85)]); C.L(DK, [P(0.93, 0.8), P(0.93, -0.85)])
+    C.R(DK, *P(0.25, -0.95), *P(1.05, -0.75)); d_tara(C, *P(0.25, -0.95), *P(1.05, -0.75), 1.2, -1)
+    d_olcu(C, P(1.2, 0), P(1.2, 0.8), -6, "≥0.80")
+    d_olcu(C, P(0.1, 0), P(0.1, 1.92), 7, "1.92")
+    d_etiket(C, P(0.43, 0.2), (P(1.5, 0)[0] + 4, P(0, 0.35)[1]), "DC kablolar (spiral boru)")
+    d_etiket(C, P(0.89, -0.3), (P(1.5, 0)[0] + 4, P(0, -0.25)[1]), "AC kablo (HDPE boru)")
+    d_etiket(C, P(0.65, -0.85), (P(1.5, 0)[0] + 4, P(0, -0.85)[1]), "Kablo kanalı")
+    d_etiket(C, P(0.6, 1.95), (P(1.5, 0)[0] + 4, P(0, 1.85)[1]), "Gölgelik, kilitli")
+    d_etiket(C, P(1.2, -0.4), (P(1.5, 0)[0] + 4, P(0, -0.55)[1]), "Galvaniz taşıyıcı, beton temel")
+    return 1.6 * s + 70, 18 + 2.0 * s + 1.0 * s + 12
+
+
+def detay_cit(C, M, x0, y0):
+    """DETAY-5 tel çit, 1/50: direk, panel tel, dikenli tel, beton temel."""
+    g = M.P["guvenlik"]; ol = 50; s = 1000 / ol
+    ar = g["cit_direk_araligi_m"]; h = 2.0
+    ox, oy = x0 + 10, y0 - 18 - (h + 0.4) * s
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    d_baslik(C, x0, y0, 5, "TEL ÇİT", ol)
+    d_zemin(C, ox - 6, ox + 2 * ar * s + 6, oy)
+    for k in range(3):
+        xx = k * ar
+        C.L(DK, [P(xx - 0.03, -0.55), P(xx - 0.03, h + 0.3)]); C.L(DK, [P(xx + 0.03, -0.55), P(xx + 0.03, h + 0.3)])
+        C.R(DK, *P(xx - 0.15, -0.6), *P(xx + 0.15, 0)); d_tara(C, *P(xx - 0.15, -0.6), *P(xx + 0.15, 0), 1.4)
+    C.R(DK, *P(0, 0.05), *P(2 * ar, h))
+    d_tara(C, *P(0, 0.05), *P(2 * ar, h), 3.2, 1); d_tara(C, *P(0, 0.05), *P(2 * ar, h), 3.2, -1)   # örgü tel (baklava)
+    for r in range(3):
+        yy = h + 0.1 + r * 0.1; C.L(DK, [P(0, yy), P(2 * ar, yy)])
+        for q in range(int(2 * ar / 0.3)): C.T(DT, *P(0.15 + q * 0.3, yy), 0.9, "×", hiz="C")
+    d_olcu(C, P(0, 0), P(ar, 0), -(0.6 * s + 4), f"{ar:.2f}")
+    d_olcu(C, P(2 * ar, 0), P(2 * ar, h), -6, f"{h:.2f}")
+    d_olcu(C, P(0, 0), P(0, -0.6), 6, "0.60", 1.4)
+    d_etiket(C, P(ar * 0.5, h * 0.5), (P(2 * ar, 0)[0] + 8, P(0, h * 0.6)[1]), "Panel örgü tel, galvaniz")
+    d_etiket(C, P(ar * 1.5, h + 0.2), (P(2 * ar, 0)[0] + 8, P(0, h + 0.25)[1]), "3 sıra dikenli tel")
+    d_etiket(C, P(ar, -0.3), (P(2 * ar, 0)[0] + 8, P(0, -0.3)[1]), "Beton temel 30×30×60")
+    C.T(DK, ox, oy - 0.6 * s - 12, 1.6, f"Uyarı levhası her {g['levha_araligi_m']:g} m · çit parsel sınırının içinde · topraklama her {M.P['topraklama']['cit_baglanti_m']:g} m")
+    return 2 * ar * s + 62, 18 + (h + 0.4) * s + 0.6 * s + 18
+
+
+def detay_yol(C, M, x0, y0):
+    """DETAY-6 servis yolu tipik kesiti, 1/50."""
+    w = M.P["yol"]["genislik_m"]; ol = 50; s = 1000 / ol
+    ox, oy = x0 + 14, y0 - 22 - 0.5 * s
+    P = lambda x, y: (ox + x * s, oy + y * s)
+    d_baslik(C, x0, y0, 6, "SERVİS YOLU TİPİK KESİTİ", ol)
+    C.L(DK, [P(-0.8, -0.05), P(0, 0.2), P(w / 2, 0.24), P(w, 0.2), P(w + 0.8, -0.05)])
+    C.L(DK, [P(0, 0), P(w, 0)]); C.L(DK, [P(0, -0.2), P(w, -0.2)])
+    d_tara(C, *P(0, -0.2), *P(w, 0), 1.4, -1)
+    for q in range(int(w / 0.12)):
+        C.C(DT, *P(0.06 + q * 0.12, 0.1), 0.25)
+    d_zemin(C, ox - 0.8 * s - 4, ox + (w + 0.8) * s + 4, oy - 0.2 * s, 1.6)
+    d_olcu(C, P(0, 0.24), P(w, 0.24), 6, f"{w:.2f}")
+    d_olcu(C, P(w, -0.2), P(w, 0.2), -6, "0.40", 1.4)
+    C.T(DK, *P(w * 0.25, 0.32), 1.4, "%2"); C.T(DK, *P(w * 0.68, 0.32), 1.4, "%2")
+    d_etiket(C, P(w * 0.8, 0.1), (P(w + 0.8, 0)[0] + 4, P(0, 0.3)[1]), "20 cm stabilize (sıkıştırılmış)")
+    d_etiket(C, P(w * 0.85, -0.1), (P(w + 0.8, 0)[0] + 4, P(0, -0.15)[1]), "20 cm alt temel")
+    return (w + 1.6) * s + 72, 22 + 0.5 * s + 0.5 * s + 14
 
 
 def detaylar_yerlesim(M, pf):
-    """01 paftasına detay şeridi: masa kesit/ön görünüş, sıra aralığı, çit, yol, inverter. Ölçek pafta ölçeğine göre."""
+    """01 paftasına detay şeridi. Ölçek pafta ölçeğine göre; detaylar kendi ölçeklerinde (kağıt mm)."""
     fns = [detay_masa_kesit, detay_masa_on, detay_sira, detay_inverter, detay_cit, detay_yol]
     # önce boyutları (kağıt mm) ölç
     boy = []
@@ -3027,7 +3304,7 @@ def antet_geometri(M, pf, olc, H=None):
         kats = []
         if not pf.kod.startswith("02") and pf.olcekli:
             for t_, kat, d, info in pf.p:
-                if kat not in kats and kat in KATMANLAR: kats.append(kat)
+                if kat not in kats and kat in KATMANLAR and kat not in ("GES-DETAY", "GES-DETAY-TARAMA", "GES-NOT", "GES-ANTET"): kats.append(kat)
         if kats:
             T(-W + 3, yy, 2.2, "LEJANT", "L", True); yy -= 4.5
             for i, kat in enumerate(kats[:24]):
@@ -3207,7 +3484,7 @@ KAT_RENK = {"GES-SINIR": "#222", "GES-CEKME": "#999", "GES-CIT": "#c00", "GES-YO
             "GES-MASA-NO": "#2b6cb0", "GES-STRING-NO": "#0a7", "GES-INV": "#a0a", "GES-TM": "#d97706", "GES-DC-KABLO": "#16a34a",
             "GES-AC-KABLO": "#ca8a04", "GES-OG-KABLO": "#dc2626", "GES-HENDEK-DC": "#16a34a", "GES-HENDEK-AC": "#ca8a04",
             "GES-TOPRAK-SERIT": "#b45309", "GES-TOPRAK-CUBUK": "#7c2d12", "GES-TOPRAK-BAGLANTI": "#ea580c", "GES-AYD-CCTV": "#7c3aed",
-            "GES-SANTIYE": "#666", "GES-TEKHAT": "#111", "GES-TEKHAT-OG": "#b91c1c", "GES-OLCU": "#666", "GES-NOT": "#111", "GES-ANTET": "#111",
+            "GES-SANTIYE": "#666", "GES-TEKHAT": "#111", "GES-TEKHAT-OG": "#b91c1c", "GES-OLCU": "#666", "GES-NOT": "#111", "GES-DETAY": "#111", "GES-DETAY-TARAMA": "#888", "GES-ANTET": "#111",
             "GES-TH-BARA": "#b91c1c", "GES-TH-HUCRE": "#111", "GES-TH-KOSK": "#555", "GES-TH-KUMANDA": "#1d4ed8",
             "GES-TH-TOPRAK": "#15803d", "GES-TH-YAZI": "#111"}
 

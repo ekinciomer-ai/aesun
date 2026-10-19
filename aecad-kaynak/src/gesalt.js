@@ -14,14 +14,23 @@ function pjAltOner(base) {
   L.push(altEgim(base, t0 > 20 ? 20 : 25));
   if (base.yol.ic_yol) { const p = kopya(base); p.yol.ic_yol = false; L.push({ ad: 'İç yolsuz', acik: 'Karşılaştırma: yalnız kenar servis yolu (daha çok masa, uzun AG kablo)', param: p, uygula: () => { gv('p-icyol').value = '0'; pjSave(); } }); }
   else { const p = kopya(base); p.yol.ic_yol = true; L.push({ ad: 'İç yollu', acik: 'K-G iç bakım yolları, aralık DC ΔU %1', param: p, uygula: () => { gv('p-icyol').value = '1'; pjSave(); } }); }
+  const hz0 = (base.elektrik && base.elektrik.inverter_hiza) || 'yol';
+  for (const [k, ad, ac] of [['orta', 'İnverter ortalı', 'İnverterler bloğun ortasındaki sıranın masa başında'], ['optimum', 'İnverter optimum', 'İnverter her blokta en kısa DC\'yi veren masa başında'], ['yol', 'İnverter yol kenarı', 'İnverterler servis yoluna / çite yakın masa başında']]) {
+    if (k === hz0 || L.length >= 5) continue; const p = kopya(base); p.elektrik.inverter_hiza = k;
+    L.push({ ad, acik: ac, param: p, uygula: () => { gv('p-invhiza').value = k; pjSave(); } });
+  }
   return L.map((a) => ({ ...a, durum: 'bekliyor' }));
 }
 function pjYerlesim() {
   if (!sinirOto()) { msg('Önce arazi sınırını girin: kapalı polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   if (PJ.busy) { msg('GES-ÇİZ çalışıyor; bitince yeniden deneyin.'); return; }
   formToPanel(); pjSave();
-  let base; try { base = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
+  let base, Y; try { base = pjDuzenUygula(buildParam0()); Y = pjCizimYerlesim(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
   PJ.alt = pjAltOner(base); PJ.revNo = 0;
+  if (Y) {   // çizimdeki yerleşim (Arazi doldur / elle) ilk seçenek; diğerleri GES-ÇİZ önerisi, onaylanırsa çizime yazılır
+    PJ.alt[0].ad = 'Otomatik'; PJ.alt[0].acik = 'GES-ÇİZ yerleşimi, girilen bilgilerle (onaylanırsa çizimdeki yerleşimin yerine geçer)';
+    PJ.alt.unshift({ ad: 'Çizimdeki yerleşim', acik: Y.masa.length + ' masa' + (Y.inv.length ? ', ' + Y.inv.length + ' inverter' : '') + (Y.tm.length ? ', ' + Y.tm.length + ' trafo' : '') + ' (Arazi doldur / elle çizim)', param: pjCizimUygula(kopya(base), Y), uygula: () => {}, cizim: true, durum: 'bekliyor' });
+  }
   pjDialog('yerlesim'); pjAltSirada();
 }
 function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pjAltSirada(); }
@@ -43,7 +52,37 @@ function pjAltSonuc(m) {
   if (PJ.again) { PJ.again = false; const p = PJ.onay; PJ.onay = null; pjRun(p || undefined); return; }
   pjAltSirada();
 }
-function pjAltOnayla(a) {
+// Onaylanan GES-ÇİZ seçeneği çizime yazılır: masa, inverter, trafo, DM (eski GES yerleşimi geri alınabilir şekilde değişir)
+async function pjSecenekCizime(a) {
+  const N = a.nes; if (!N || !N.masa || !N.masa.length) return true;
+  if (PJ.srcDoc) pjBack();
+  const D = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
+  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], G.bound); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA');
+  const ids = new Set(eski.map((it) => it.id)); for (const it of D.items.values()) if (it.gesEt && ids.has(it.gesEt)) eski.push(it);
+  for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it)) eski.push(it); }
+  if (eski.length) {
+    const r = await askDlg('Çizimdeki yerleşim değişecek', 'Onaylanan "' + a.ad + '" seçeneği çizime yazılacak: ' + N.masa.length + ' masa, ' + N.inv.length + ' inverter, ' + N.tm.length + ' trafo. Çizimdeki mevcut GES yerleşimi (' + eski.length + ' nesne: masa, inverter, trafo, kablolar) kaldırılır; Geri al ile döner.', [['Çizime yaz ve proje paftalarını üret', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
+    if (r !== 'ok') return false;
+  }
+  const ang = (a.param.masa.azimut_derece || 0) * Math.PI / 180, yeni = [];
+  const yerlestir = (it, c) => { const b = itemBB(D, it); const ox = (b[0] + b[2]) / 2 - it.M[3], oy = (b[1] + b[3]) / 2 - it.M[7]; it.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(it); return it; };
+  D.addLayer('GES-MASA', 5); D.layers.get('GES-MASA').c = masaRenk();
+  const mb = makeTableBlock(mainTpl());
+  for (const c of N.masa) yeni.push(yerlestir({ id: newId(), t: 'insert', layer: 'GES-MASA', c: 256, lt: '', block: mb, M: mMul(mT(0, 0), mRz(ang)), ap: [] }, c));
+  const ekle = (tip, c, g) => { const T = TS[tip]; const v = {}; for (const [k, , f] of T.alan) v[k] = f(); Object.assign(v, g, { tip }); D.addLayer(T.kat, T.renk);
+    const B = tsBlok(tip, v); yeni.push(yerlestir({ id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(0, 0), mRz(ang)), ap: [], ges: v }, c)); };
+  N.inv.forEach((q, i) => ekle('inv', [q.x, q.y], { no: i + 1 }));
+  N.tm.forEach((q, i) => ekle('tm', [q.x, q.y], { no: i + 1, kva: (a.oz && a.oz.tr_kva && a.oz.tr_kva[i]) || pn('p-trafo') || 1250 }));
+  if (N.dm && !N.tm.some((q) => Math.hypot(q.x - N.dm.x, q.y - N.dm.y) < 15)) ekle('dm', [N.dm.x, N.dm.y], {});
+  G.fillIds = [];
+  replaceItems([...eski.map((it) => [it, null]), ...yeni.map((n) => [null, n])], 'yerleşim seçeneği çizime'); renderLayers();
+  if (typeof cepheCiz === 'function') cepheCiz();
+  if (typeof tsFormaYaz === 'function') tsFormaYaz();
+  msg('"' + a.ad + '" çizime yazıldı: ' + N.masa.length + ' masa, ' + N.inv.length + ' inverter, ' + N.tm.length + ' trafo. Bundan sonra proje paftaları bu çizimden üretilir.', 'res');
+  return true;
+}
+async function pjAltOnayla(a) {
+  if (!a.cizim && !(await pjSecenekCizime(a))) return;
   a.uygula(); pjSave(); PJ.onayAd = a.ad;
   msg('Onaylanan yerleşim: ' + a.ad + '. Tek hat, topraklama, kablo, kanal detayı, metraj, keşif, teklif ve PDF hazırlanıyor…', 'res');
   gv('pjdlg').close();
@@ -106,7 +145,8 @@ function pjAltCiz() {
       const kc = h('td', bad.length ? 'bad' : 'ok', bad.length ? bad.length + ' ✖' : '✔'); kc.title = bad.map((k) => k.kontrol + ': ' + k.deger).join('\n'); tr.appendChild(kc);
       const act = h('td', 'acts');
       const b1 = h('button', 'mini', 'Yerleşim'); b1.onclick = () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); msg('Açık yerleşim: ' + a.ad + '. Düzenlemek için GES sekmesi → Çizimde düzenle ya da soldaki Trafo / İnverter / Yol araçları.', 'note'); };
-      const b2 = h('button', 'mini', 'Kablo planı'); b2.onclick = () => { const f = Object.keys(a.files).find((n) => /_04_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); };
+      const b2 = h('button', 'mini', 'Kablo planı'); b2.title = 'Yerleşim açılır; DC atama, DC string ve AC kanal tasarım araçlarıyla (DC oto, DC çiz, AC oto) çizilir';
+      b2.onclick = async () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); await pjKabloOto(); };
       const b3 = h('button', 'mini ok', 'Onayla → projeyi tamamla'); b3.onclick = () => pjAltOnayla(a);
       act.append(b1, b2, b3); tr.appendChild(act);
     } else {
@@ -122,4 +162,14 @@ function pjAltCiz() {
   const not = PJ.revNot; if (not) gv('pj-revnot').textContent = not;
   gv('pj-revb').onclick = pjRevize; gv('pj-rev').onkeydown = (e) => { if (e.key === 'Enter') pjRevize(); };
   if (PJ.alt.some((a) => a.durum === 'calisiyor')) { clearTimeout(PJ.altT); PJ.altT = setTimeout(pjAltCiz, 1000); }
+}
+
+// Kablo planı: tasarım araçlarının kendisiyle (aynı kurallar: DC 80 m / ΔU ataması, string gösterimi, tek ortak AC kanalı)
+async function pjKabloOto() {
+  if (!tsInverterler().length) { msg('Yerleşimde inverter yok.', 'err'); return; }
+  busy('DC atanıyor…'); await tick();
+  let R; try { R = tsDcOtoAta(false); tsDcAtaYaz(R.yeni); } finally { busy(null); }
+  await CMD.GDCCIZ();
+  if ([...S.doc.items.values()].some((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm')) { const v = {}; for (const [k, , f] of TS.ac.alan) v[k] = f(); await CMD.GACOTO(v); }
+  msg('Kablo planı tasarım araçlarıyla çizildi: DC atama ' + R.yeni.size + ' masa' + (R.kalan.length ? ' (' + R.kalan.length + ' masa atanamadı)' : '') + ', DC stringler ve AC kanal. Proje paftaları bu çizimden üretilir.', 'res');
 }

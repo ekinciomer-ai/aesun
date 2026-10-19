@@ -101,6 +101,7 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .cmdbox { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 12px; min-width: 0; display: flex; flex-direction: column; }
 #hist { height: 66px; overflow-y: auto; padding: 5px 10px 2px; color: #b8bfc6; scrollbar-width: thin; }
 #hist div { white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
+#hist .sen { color: #e6edf3; font-weight: 600; } #hist .cevap { color: #9ec5ff; } .sohbet { max-height: 220px; overflow: auto; display: flex; flex-direction: column; gap: 6px; margin: 8px 0; } .sohbet .sb { padding: 6px 10px; border-radius: 10px; max-width: 88%; font-size: 13px; line-height: 1.4; } .sohbet .sen { align-self: flex-end; background: #2b3a55; color: #fff; } .sohbet .cevap { align-self: flex-start; background: #23272e; color: #d6e2f0; border: 1px solid #333a44; }
 #hist .err { color: #ff8a80; } #hist .res { color: var(--ok); } #hist .note { color: var(--warn); } #hist .help { color: #9ec5ff; }
 .cline { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding: 4px 10px; }
 #prompt { color: var(--red); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; font-weight: 500; }
@@ -512,7 +513,7 @@ details.tf-sec:not([open]) { gap: 0; }
             <div class="grid3">
               <label class="gf">Çitten çekme (m)<input id="p-cekme" type="number" step="0.5" placeholder="5"></label>
               <label class="gf">Sıra açıklığı (m)<input id="p-acik" type="number" step="0.05" placeholder="pitch'ten"></label>
-              <label class="gf">İnverter hizalama<select id="p-invhiza"><option value="yol">Servis yoluna / çite yakın (masa başı)</option><option value="orta">Ortalı (bloğun ortası)</option><option value="optimum">Optimum (en kısa DC)</option></select></label>
+              <label class="gf">İnverter hizalama<select id="p-invhiza"><option value="trafo">Trafoya yakın (DC ≤ sınır, kısa AC)</option><option value="yol">Servis yoluna / çite yakın (masa başı)</option><option value="orta">Ortalı (bloğun ortası)</option><option value="optimum">Optimum (en kısa DC)</option></select></label>
               <label class="gf">TM tarafı<select id="p-taraf"><option value="dogu">Doğu</option><option value="bati">Batı</option></select></label>
               <label class="gf">İç bakım yolu<select id="p-icyol"><option value="1">Açık (K-G, ΔU'ya göre)</option><option value="0">Kapalı (yalnız kenar yol)</option></select></label>
               <label class="gf">İç yol genişliği (m)<input id="p-icw" type="number" step="0.5" placeholder="5"></label>
@@ -541,7 +542,7 @@ details.tf-sec:not([open]) { gap: 0; }
   <footer>
     <div class="cmdbox">
       <div id="hist" aria-live="polite"></div>
-      <div class="cline"><span id="prompt">Komut:</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Komut satırı"></div>
+      <div class="cline"><span id="prompt">Komut:</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Komut satırı" placeholder="Komut (L, PL, M…) ya da cümle: inverterleri trafoya yaklaştır"></div>
     </div>
     <div class="status">
       <div id="coords">X 0.000   Y 0.000</div>

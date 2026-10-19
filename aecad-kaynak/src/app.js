@@ -334,7 +334,7 @@ const ALIAS = {
 };
 async function runCommand(name) {
   const key = ALIAS[name.toUpperCase().replace(/İ/g, 'I').replace(/Ş/g, 'S').replace(/Ç/g, 'C').replace(/Ö/g, 'O').replace(/Ü/g, 'U').replace(/Ğ/g, 'G').replace(/^[_.\-]/, '')];
-  if (!key) { msg('Bilinmeyen komut: ' + name + '  (Yardım için ? yazın)', 'err'); return; }
+  if (!key) { if (typeof gesSohbet === 'function' && (/\s/.test(name.trim()) || /[a-zçğıöşü]{6,}/.test(name))) { gesSohbet(name); return; } msg('Bilinmeyen komut: ' + name + '  (Yardım için ? yazın; cümle de yazabilirsiniz: "inverterleri trafoya yaklaştır")', 'err'); return; }
   if (S.cmd) cancelCmd();
   if (!S.doc) return;
   S.cmd = key; S.lastCmd = key; msg('Komut: ' + LABEL[key]);

@@ -85,7 +85,7 @@ VARSAYILAN = {
                "harici_trafo_min_kva": 2500, "og_gerilim_kv": 33.0, "og_kesit_mm2": 120, "og_kesit_dm_mm2": 240,
                "kappa_cu": 56.0, "kappa_al": 35.0, "og_dusum_max_pct": 7.0, "trafo_yag_l": None,
                "ag_pano_form": "Form 4b", "ag_pano_ip": "IP54", "ag_pano_icw_ka": 65, "ag_pano_in_a": 4000,
-               "inverter_sinir_kw": None, "inverter_giris": None, "inverter_hiza": "yol", "ag_cikis_ka": 36, "kosk": {}},
+               "inverter_sinir_kw": None, "inverter_giris": None, "inverter_hiza": "trafo", "ag_cikis_ka": 36, "kosk": {}},
   "hendek": {"dc_derinlik_m": 0.70, "ag_derinlik_m": 0.80, "og_derinlik_m": 1.00, "genislik_m": 0.60,
              "kum_cm": 10, "koruyucu_cm": 6, "uyari_ust_cm": 30, "kablo_aralik_cm": 7, "yol_gecis_boru_ust_m": 1.0,
              # kademeli AG/OG kanal (Zorlu Tesis 1 GES onaylı kesitleri): b = taban + artış × (AC devre − 1) + OG eki (≥ 2 AC devrede)
@@ -853,16 +853,28 @@ class Model:
                     bloklar.append(strs[i0:i0 + c]); i0 += c
         # A.1 zorlaması: bloğun en iyi masa başı konumunda bile tek yön > sınır ise ikiye böl
         lim = self.dc_lim
-        def gecici_inv(h):
-            return {"masa": h, "taraf": h["taraf"], "x": h["uc_x"] + (0.4 if h["taraf"] == "E" else -0.4), "y": h["y"]}
+        def gecici_inv(h, tf=None):
+            tf = tf or h["taraf"]; ux = h["loc"].bounds[2] if tf == "E" else h["loc"].bounds[0]
+            return {"masa": h, "taraf": tf, "x": ux + (0.4 if tf == "E" else -0.4), "y": h["y"]}
         def yol_boy(q, inv):
             pts = self.dc_yol(q, inv)[0]
             return sum(math.dist(a, b) for a, b in zip(pts, pts[1:])) + 3.0
-        def en_iyi(ms_):
+        def en_iyi(ms_, hedef=None):
             """Gerçek (masa arası) DC güzergâhıyla en uzun tek yönü en küçük yapan masa başı.
             elektrik.inverter_hiza: "yol" servis yoluna / çite yakın masa başı (varsayılan) · "orta" bloğun ortasındaki sıranın
             masa başı · "optimum" bloktaki tüm masa başlarından en kısa DC'yi veren."""
-            hz = (self.P["elektrik"].get("inverter_hiza") or "yol")
+            hz = (self.P["elektrik"].get("inverter_hiza") or "trafo")
+            if hz == "trafo" and hedef is not None:
+                # kullanıcı kuralı 19.10.2026: DC tek yön sınırı (80 m / ΔU) içinde kalan en trafoya yakın masa başı — AC kısalır
+                uygun, yedek = None, None
+                for h in ms_:
+                    for tf in ("E", "W"):
+                        iv = gecici_inv(h, tf); m_ = max(yol_boy(q, iv) for q in ms_)
+                        d_ = abs(iv["x"] - hedef[0]) + abs(iv["y"] - hedef[1])
+                        if m_ <= lim and (uygun is None or d_ < uygun[3]): uygun = (m_, h, tf, d_)
+                        if yedek is None or m_ < yedek[0]: yedek = (m_, h, tf, d_)
+                b_ = uygun or yedek
+                return (b_[0], b_[1], b_[2])
             if hz == "optimum":
                 aday = list(ms_)
             elif hz == "orta":
@@ -875,7 +887,7 @@ class Model:
             best = None
             for h in aday:
                 iv = gecici_inv(h); m_ = max(yol_boy(q, iv) for q in ms_)
-                if best is None or m_ < best[0]: best = (m_, h)
+                if best is None or m_ < best[0]: best = (m_, h, h["taraf"])
             return best
         def enuzun(bl):
             return en_iyi(list({id(q): q for q in bl}.values()))[0]
@@ -1055,9 +1067,12 @@ class Model:
                     self.stringler.append({"ad": sad, "masa": ms, "inv": inv})
                     if ms not in inv["masalar"]: inv["masalar"].append(ms); grp.append(ms)
                 # A.4: masa başı; en uzun tek yön DC'yi küçülten sığ masa
-                hm = en_iyi(inv["masalar"])[1]
-                inv["masa"], inv["taraf"] = hm, hm["taraf"]
-                inv["x"] = hm["uc_x"] + (0.4 if hm["taraf"] == "E" else -0.4)
+                if getattr(self, "tm_loc", None) and t < len(self.tm_loc): _c = self.tm_loc[t].centroid; hd = (_c.x, _c.y)
+                else:
+                    _b = self.alan_loc.bounds; hd = (_b[2] if e["tm_taraf"] == "dogu" else _b[0], sum(q["y"] for q in inv["masalar"]) / len(inv["masalar"]))
+                _, hm, htf = en_iyi(inv["masalar"], hd)
+                inv["masa"], inv["taraf"] = hm, htf
+                inv["x"] = (hm["loc"].bounds[2] + 0.4) if htf == "E" else (hm["loc"].bounds[0] - 0.4)
                 inv["y"] = hm["y"]
                 inv["yol_tarafi"] = (hm["derinlik"] == 0)
                 self.inverterler.append(inv)

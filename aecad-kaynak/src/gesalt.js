@@ -14,8 +14,8 @@ function pjAltOner(base) {
   { const t1 = t0 > 20 ? 20 : 25; L.push({ ...altEgim(base, t1), fark: (b) => altEgim(b, t1).param }); }
   if (base.yol.ic_yol) { const p = kopya(base); p.yol.ic_yol = false; L.push({ ad: 'İç yolsuz', acik: 'Karşılaştırma: yalnız kenar servis yolu (daha çok masa, uzun AG kablo)', param: p, uygula: () => { gv('p-icyol').value = '0'; pjSave(); }, fark: (b) => { b.yol.ic_yol = false; return b; } }); }
   else { const p = kopya(base); p.yol.ic_yol = true; L.push({ ad: 'İç yollu', acik: 'K-G iç bakım yolları, aralık DC ΔU %1', param: p, uygula: () => { gv('p-icyol').value = '1'; pjSave(); }, fark: (b) => { b.yol.ic_yol = true; return b; } }); }
-  const hz0 = (base.elektrik && base.elektrik.inverter_hiza) || 'yol';
-  for (const [k, ad, ac] of [['orta', 'İnverter ortalı', 'İnverterler bloğun ortasındaki sıranın masa başında'], ['optimum', 'İnverter optimum', 'İnverter her blokta en kısa DC\'yi veren masa başında'], ['yol', 'İnverter yol kenarı', 'İnverterler servis yoluna / çite yakın masa başında']]) {
+  const hz0 = (base.elektrik && base.elektrik.inverter_hiza) || 'trafo';
+  for (const [k, ad, ac] of [['trafo', 'İnverter trafoya yakın', 'Her inverter DC sınırı içinde trafoya en yakın masa başında (AC kısa)'], ['orta', 'İnverter ortalı', 'İnverterler bloğun ortasındaki sıranın masa başında'], ['optimum', 'İnverter optimum', 'İnverter her blokta en kısa DC\'yi veren masa başında'], ['yol', 'İnverter yol kenarı', 'İnverterler servis yoluna / çite yakın masa başında']]) {
     if (k === hz0 || L.length >= 5) continue; const p = kopya(base); p.elektrik.inverter_hiza = k;
     L.push({ ad, acik: ac, param: p, uygula: () => { gv('p-invhiza').value = k; pjSave(); }, fark: (b) => { b.elektrik.inverter_hiza = k; return b; } });
   }
@@ -117,6 +117,7 @@ function pjRevizeCoz(txt) {
 }
 function pjRevize() {
   const inp = gv('pj-rev'); const txt = inp.value.trim(); if (!txt) return;
+  inp.value = ''; gesSohbet(txt); return;
   const r = pjRevizeCoz(txt);
   const dz = pjDuzenCoz(txt.toLocaleLowerCase('tr').replace(/,(\d)/g, '.$1'));
   if (dz.length && !r.yap.length) { inp.value = ''; PJ.revNot = 'Uygulandı: ' + dz.join(', ') + '. Yeniden çiziliyor.'; pjDuzenCiz(dz.join(', ')); return; }
@@ -157,9 +158,12 @@ function pjAltCiz() {
   }
   t.appendChild(tb); const w = h('div', 'tw'); w.appendChild(t); box.appendChild(w);
   const rv = h('div', 'revbox');
-  rv.innerHTML = '<label class="gf">Revizyon talimatı<input id="pj-rev" type="text" placeholder="ör. TM2 kuzeye 50 m, TR1 INV3 doğuya 20 m, 2. yolu kaldır, eğim 20, 25 MWp"></label><button class="gb" id="pj-revb" type="button">Revize et ve çiz</button><p class="gi" id="pj-revnot"></p>';
-  box.appendChild(rv);
-  const not = PJ.revNot; if (not) gv('pj-revnot').textContent = not;
+  const sh = h('div', 'sohbet'); for (const m of PJ.sohbet.slice(-14)) sh.appendChild(h('div', 'sb ' + (m.kim === 'sen' ? 'sen' : 'cevap'), m.metin));
+  if (!PJ.sohbet.length) sh.appendChild(h('div', 'sb cevap', 'Ne değiştirmek istediğinizi yazın; ör. "inverterleri trafoya yaklaştır", "eğim 20", "hizalama doğuya", "kabloları çiz". Neden sorusu da sorabilirsiniz: "inverter neden batıda?"'));
+  rv.appendChild(sh);
+  const sat = h('div', 'brow'); sat.innerHTML = '<input id="pj-rev" type="text" placeholder="Yazın: ör. inverterleri trafoya yaklaştır" style="flex:1"><button class="gb primary" id="pj-revb" type="button">Gönder</button>'; rv.appendChild(sat);
+  const cips = h('div', 'brow'); for (const o of SOHBET_ORNEK.slice(0, 8)) { const c = h('button', 'mini', o); c.onclick = () => gesSohbet(o); cips.appendChild(c); } rv.appendChild(cips);
+  box.appendChild(rv); requestAnimationFrame(() => { sh.scrollTop = sh.scrollHeight; });
   gv('pj-revb').onclick = pjRevize; gv('pj-rev').onkeydown = (e) => { if (e.key === 'Enter') pjRevize(); };
   if (PJ.alt.some((a) => a.durum === 'calisiyor')) { clearTimeout(PJ.altT); PJ.altT = setTimeout(pjAltCiz, 1000); }
 }
@@ -182,4 +186,66 @@ function pjAktifYenile() {
   pjAktifYenile.t = setTimeout(() => { let base; try { base = pjDuzenUygula(buildParam0()); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
     a.param = a.fark(kopya(base)); a.durum = 'bekliyor'; a.duzen = true; msg('"' + a.ad + '" yerleşimi yeni ayarlarla yeniden hesaplanıyor…', 'note'); pjAltSirada(); }, 350);
   return true;
+}
+// ---- Sohbet (kullanıcı kuralı 19.10.2026): komut satırına ya da revizyon kutusuna cümle yazılır; anlaşılan uygulanır,
+// anlaşılmayan için ne yapılabileceği söylenir. Tek kaynak form alanları; yerleşim açıksa o yerleşim yeniden hesaplanır.
+PJ.sohbet = PJ.sohbet || [];
+const SOHBET_ORNEK = ['inverterleri trafoya yaklaştır', 'inverterleri ortala', '10 inverter', 'eğim 20', 'çekme 4 m', 'hizalama doğuya', 'sıra başlangıcı kuzeyden',
+  'iç yolları kaldır', 'trafo 1600', 'TM batı', 'kabloları çiz', 'DC oto', 'AC oto', 'yerleşimi çiz', 'proje paftalarını oluştur'];
+function sohbetYaz(kim, metin) {
+  PJ.sohbet.push({ kim, metin, t: Date.now() }); if (PJ.sohbet.length > 80) PJ.sohbet.shift();
+  msg((kim === 'sen' ? '› ' : '◆ ') + metin, kim === 'sen' ? 'sen' : 'cevap');
+  if (PJ.tab === 'yerlesim' && gv('pjdlg') && gv('pjdlg').open) pjAltCiz();
+}
+function sohbetNiyet(T) {
+  const yap = [], set = [], is = [];
+  const hz = (k, ad) => { set.push(() => { gv('p-invhiza').value = k; }); yap.push('inverter yerleşimi: ' + ad); };
+  if (/inverter\D{0,40}(trafo|tm|köşk|kösk)\D{0,20}(yakın|yaklaş|tarafa|tarafına|doğru|yanına)|trafoya yaklaş|ac(?: kablo)?\D{0,10}(kısalt|kısa)/.test(T)) hz('trafo', 'trafoya yakın (DC ≤ sınır)');
+  else if (/inverter\D{0,30}(ortala|ortalı|ortaya|orta)/.test(T)) hz('orta', 'ortalı');
+  else if (/inverter\D{0,30}(yol|çit|kenar)/.test(T)) hz('yol', 'servis yolu / çit kenarı');
+  else if (/inverter\D{0,30}(optimum|en kısa dc)/.test(T)) hz('optimum', 'optimum (en kısa DC)');
+  const al = /hizala\S*\D{0,12}(doğu|batı|orta|opt)/.exec(T);
+  if (al) { const v = { doğu: 'right', batı: 'left', orta: 'center', opt: 'opt' }[al[1]]; set.push(() => { gv('g-align').value = v; }); yap.push('hizalama ' + al[1]); }
+  const va = /(sıra başlangıc\S*|sıralar)\D{0,12}(kuzey|güney|orta)/.exec(T);
+  if (va) { const v = { kuzey: 'north', güney: 'south', orta: 'center' }[va[2]]; set.push(() => { gv('g-valign').value = v; }); yap.push('sıra başlangıcı ' + va[2]); }
+  if (/kablo\S*\s*(çiz|planı)|kablo planı/.test(T)) is.push(['kablo planı', async () => { if (!tsInverterler().length) return 'Açık yerleşimde inverter yok; önce "yerleşimi çiz" deyin ve bir seçeneği açın.'; await pjKabloOto(); return null; }]);
+  else {
+    if (/\bdc\s*(oto|ata|otomatik)/.test(T)) is.push(['DC otomatik atama', async () => { await CMD.GDCOTO(); return null; }]);
+    if (/\bac\s*(oto|otomatik)|ac kablo\S*\s*çiz/.test(T)) is.push(['AC otomatik', async () => { await CMD.GACOTO(); return null; }]);
+  }
+  if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);
+  if (/yerleşim\S*\s*(çiz|seçenek|karşılaştır)|seçenekleri/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
+  if (/(proje|pafta)\S*\s*(oluştur|üret|çiz|hazırla)/.test(T)) is.push(['proje paftaları', async () => { pjRun(); return null; }]);
+  return { yap, set, is };
+}
+function sohbetNeden(T) {
+  if (!/neden|niye|niçin|mantığı|amacı/.test(T)) return null;
+  const hz = (gv('p-invhiza') || {}).value || 'trafo';
+  if (/inverter/.test(T)) return 'İnverter yeri "' + ({ trafo: 'trafoya yakın', yol: 'servis yolu / çit kenarı', orta: 'ortalı', optimum: 'optimum' }[hz] || hz) + '" kuralıyla seçiliyor. "Trafoya yakın"da her inverter, bloğundaki en uzun DC tek yön ' + (pn('p-dcmax') || 80) + ' m sınırını aşmayan en trafoya yakın masa başına konur; AC kısalır, DC payı kullanılır. Değiştirmek için: "inverterleri trafoya yaklaştır", "inverterleri ortala", "inverterleri yol kenarına al".';
+  if (/trafo|köşk|tm/.test(T)) return 'Trafo (köşk) yeri: servis yolu / iç yol kenarında, inverter grubunun ortasına yakın ve bina gölgesinin (21 Aralık) en az masa kaybettirdiği nokta. Taşımak için "TM1 kuzeye 30 m" yazın ya da Trafo + aracıyla çizin.';
+  if (/kablo|kanal/.test(T)) return 'AC kablolar tek ortak kanalda, en az kırıkla ve masa altından geçmeden ADP\'ye gider; kanal genişliği geçen devre sayısıyla kademeli artar. DC stringler masa içinde çizilir, atama 80 m / ΔU kuralına göre.';
+  return null;
+}
+async function gesSohbet(metin) {
+  const txt = String(metin || '').trim(); if (!txt) return;
+  sohbetYaz('sen', txt);
+  const T = txt.toLocaleLowerCase('tr').replace(/,(\d)/g, '.$1');
+  const ned = sohbetNeden(T);
+  const n = sohbetNiyet(T), r = pjRevizeCoz(txt), dz = pjDuzenCoz(T);
+  const ayar = [...n.yap, ...r.yap], hepsi = [...ayar, ...dz, ...n.is.map((x) => x[0])];
+  if (!hepsi.length) {
+    sohbetYaz('cevap', (ned ? ned + ' ' : 'Bunu bir işleme çeviremedim. ') + (ned ? '' : 'Yapabildiklerim: ayar değiştirmek (' + SOHBET_ORNEK.slice(0, 9).map((s) => '"' + s + '"').join(', ') + '), taşımak ("TM1 kuzeye 30 m", "TR1 INV3 doğuya 20 m"), işlem başlatmak ("kabloları çiz", "DC oto", "AC oto", "yerleşimi çiz", "proje paftalarını oluştur"). Cümlenizi bu örneklere yakın yazarsanız uygularım.'));
+    return;
+  }
+  if (ned) sohbetYaz('cevap', ned);
+  n.set.forEach((f) => f()); if (r.yap.length) r.uygula(); pjAutoHints(); pjSave(); if (typeof tfSync === 'function') tfSync();
+  if (ayar.length || dz.length) {
+    const a = PJ.aktif;
+    if (a && a.fark && !a.cizim && PJ.cur && /_01_/.test(PJ.cur)) { pjAktifYenile(); sohbetYaz('cevap', 'Uygulandı: ' + [...ayar, ...dz].join(', ') + '. Açık yerleşim "' + a.ad + '" yeni ayarlarla yeniden hesaplanıyor.'); }
+    else if (PJ.alt && PJ.alt.length) { let p; try { p = buildParam(); } catch (e) { sohbetYaz('cevap', 'Parametre hatası: ' + e.message); return; }
+      PJ.revNo = (PJ.revNo || 0) + 1; pjAltEkle({ ad: 'Revizyon ' + PJ.revNo, acik: '"' + txt + '" → ' + [...ayar, ...dz].join(', '), param: p, uygula: () => {}, fark: (b) => b });
+      sohbetYaz('cevap', 'Uygulandı: ' + [...ayar, ...dz].join(', ') + '. "Revizyon ' + PJ.revNo + '" seçenek olarak hesaplanıyor; bitince Yerleşim seçeneklerinde.'); }
+    else sohbetYaz('cevap', 'Ayarlandı: ' + [...ayar, ...dz].join(', ') + '. "yerleşimi çiz" ya da "proje paftalarını oluştur" dediğinizde bu ayarlarla çizilir.');
+  }
+  for (const [ad, f] of n.is) { sohbetYaz('cevap', ad + ' başlatıldı.'); try { const m = await f(); if (m) sohbetYaz('cevap', m); } catch (e) { sohbetYaz('cevap', ad + ' yapılamadı: ' + (e.message || e)); } }
 }

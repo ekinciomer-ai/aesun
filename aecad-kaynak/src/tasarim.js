@@ -720,6 +720,17 @@ async function tsAcTekEkle(it) {
   addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); renderLayers();
   msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Geri al ile kaldırılır.', 'res');
 }
+function tsDcInvYenile(ids) {   // verilen inverterlerin stringleri atamaya göre yeniden çizilir (atama çizgisi yerine string)
+  const at = tsAtamalar(); S.doc.addLayer('GES-DC-KABLO', 4); const pairs = [];
+  for (const iid of ids) {
+    if (!S.doc.items.get(iid)) continue; const eskiId = new Set();
+    for (const it of S.doc.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.inv === iid) { pairs.push([it, null]); eskiId.add(it.id); }
+    for (const it of S.doc.items.values()) if (it.gesEt && eskiId.has(it.gesEt)) pairs.push([it, null]);
+    const masalar = [...at].filter(([, v]) => v === iid).map(([mid]) => S.doc.items.get(mid)).filter(Boolean);
+    if (masalar.length) pairs.push(...tsDcInvCiz(iid, masalar).yeni);
+  }
+  if (pairs.length) replaceItems(pairs, 'DC string'); renderLayers();
+}
 CMD.GDCK = async () => {
   S.doc.addLayer(DC_ATA, 4, 'DASHED');
   for (;;) {
@@ -737,7 +748,8 @@ CMD.GDCK = async () => {
       const eskiInv = [...new Set(pairs.filter((pr) => pr[0].ges && pr[0].ges.inv !== iid).map((pr) => pr[0].ges.inv))];
       if (!cikar) { const u = tsMasaIlkPanel(m, x.p, tsDcYon(x.it)); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[x.p[0], x.p[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: m.id } }]); }
       replaceItems(pairs, 'DC atama');
-      const dur = []; for (const id of [iid, ...eskiInv]) dur.push(...tsInvDurumYazi(id, DC_ATA)); if (dur.length) replaceItems(dur, 'DC durum');
+      tsDcInvYenile([iid, ...eskiInv]);   // kullanıcı kuralı 19.10.2026: tıklanan masanın DC stringleri anında çizilir
+      const dur = []; for (const id of [iid, ...eskiInv]) dur.push(...tsInvDurumYazi(id, 'GES-DC-KABLO')); if (dur.length) replaceItems(dur, 'DC durum');
       renderLayers(); const d2 = tsInvDurum(iid);
       msg(ad + ': ' + (cikar ? 'masa çıkarıldı' : 'masa atandı (' + tsMasaStr(m) + ' string)') + ' · ' + d2.dolu + '/' + (d2.giris || '?') + ' string dolu' + (d2.giris && d2.dolu > d2.giris ? ' — GİRİŞ SAYISI AŞILDI' : ''), d2.giris && d2.dolu > d2.giris ? 'err' : 'res');
     }
@@ -856,6 +868,36 @@ async function tsInvOneri(R) {
   msg((r !== 'ilave' ? oner.length : 0) + ' inverter taşındı, ' + yeniler.length + ' inverter eklendi; ' + R2.yeni.size + ' masa atandı' + (R2.kalan.length ? ', ' + R2.kalan.length + ' masa açıkta' : '') + '.', R2.kalan.length ? 'note' : 'res');
 }
 Object.assign(ALIAS, { GDCOTO: 'GDCOTO', DCOTO: 'GDCOTO' }); Object.assign(LABEL, { GDCOTO: 'DC OTOMATİK ATA' });
+// Bir inverterin atanmış masalarındaki stringler (DC çiz ve DC ata'da tıklamayla anında): masa içi iz, + / − üçgenleri, kod, sıra*modül
+function tsDcInvCiz(iid, masalar, tms) {
+  const yeni = [], h = KABLO_YZ; let topL = 0, nStr = 0; tms = tms || [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+      const inv = S.doc.items.get(iid), ip = tsMerkez(inv), ino = inv.ges.no || '?', dcYon = tsDcYon(inv);
+  const trNo = tms.length > 1 ? (tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]) < Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) ? b : a)).ges.no || '') : '';
+  masalar.sort((a, b) => Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) - Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]));
+  let pv = 0;
+  for (const m of masalar) {
+    const c = tsMasaCerceve(m); if (!c) continue; const k = tsMasaStr(m);
+    const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
+    const bas = tsUcBas(c, nok, ip, dcYon);   // AC kanalı (çıkış) tarafındaki uçtan başla
+    const dx = c.L / c.P, dy = c.D / c.R, sira = [];
+    for (let r = 0; r < c.R; r++) { const t = c.D - (r + 0.5) * dy; const xs = Array.from({ length: c.P }, (_, i) => (i + 0.5) * dx); const ileri = (r % 2 === 0) === bas; for (const s_ of (ileri ? xs : xs.reverse())) sira.push(nok(s_, t)); }
+    const N = Math.floor(sira.length / k), uc = bas ? nok(-0.3, c.D / 2) : nok(c.L + 0.3, c.D / 2), tek = Math.abs(uc[0] - ip[0]) + Math.abs(uc[1] - ip[1]) + 3;   // tek yön ≈ masa ucu → inverter (dik) + iniş
+    for (let j = 0; j < k; j++) {
+      const iz = sira.slice(j * N, (j + 1) * N); if (iz.length < 2) continue; pv++; nStr++;
+      const rs = Math.max(1, Math.round(N / c.P)), donus = (rs % 2 === 1) ? c.L : 0, L = 2 * tek + donus; topL += L;
+      const kod = (trNo ? 'TR' + trNo + '.' : '') + 'INV' + ino + '.PV' + pv;
+      const pl = { id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: 256, lt: '', cl: false, pts: iz.map((q) => [q[0], q[1], 0]), ges: { tip: 'dcstr', inv: iid, masa: m.id, kablo: 'H1Z2Z2-K 1x6', pay: 0, L, pv, kod } };
+      yeni.push([null, pl]);
+      const tri = (q, renk) => ({ id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: renk, lt: '', cl: true, pts: [[q[0] - h * 0.6, q[1] - h * 0.5, 0], [q[0] + h * 0.6, q[1] - h * 0.5, 0], [q[0], q[1] + h * 0.5, 0]], gesEt: pl.id });
+      const ic = bas ? 1 : -1, rot = Math.atan2(c.ux[1], c.ux[0]), ry = Math.cos(rot) < 0 ? rot + Math.PI : rot, ters = ry !== rot;   // yazı masanın içine doğru (komşu masanın yazısıyla çakışmaz)
+      const yz = (q, s_, hh) => ({ id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 256, lt: '', x: q[0] + c.ux[0] * ic * h * 0.9 + c.uy[0] * h * 0.55, y: q[1] + c.ux[1] * ic * h * 0.9 + c.uy[1] * h * 0.55, h: hh, rot: ry, s: s_, ha: (ic > 0) !== ters ? 0 : 2, va: 0, gesEt: pl.id });
+      const a = iz[0], b = iz[iz.length - 1], cx = iz.reduce((t, q) => t + q[0], 0) / iz.length, cy = iz.reduce((t, q) => t + q[1], 0) / iz.length;
+      yeni.push([null, tri(a, 5)], [null, tri(b, 1)], [null, yz(a, kod + '.1', h * 0.8)], [null, yz(b, kod + '.' + iz.length, h * 0.8)]);
+      yeni.push([null, { id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 1, lt: '', x: cx, y: cy, h: Math.min(c.D * 0.35, h * 3), rot: Math.atan2(c.ux[1], c.ux[0]), s: rs + '*' + Math.round(iz.length / rs), ha: 1, va: 2, gesEt: pl.id }]);
+    }
+  }
+  return { yeni, topL, nStr };
+}
 CMD.GDCCIZ = async () => {
   if (!tsAtamalar().size) { const r = await askDlg('DC çiz', 'DC ataması yok. Masalar invertere otomatik atansın mı (DC tek yön sınırı ve string girişine göre)?', [['Otomatik ata ve çiz', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]); if (r !== 'ok') return; await CMD.GDCOTO(); if (!tsAtamalar().size) return; }
   const at = tsAtamalar();
@@ -865,34 +907,7 @@ CMD.GDCCIZ = async () => {
     S.doc.addLayer('GES-DC-KABLO', 4); const yeni = []; const h = KABLO_YZ; let topL = 0, nStr = 0;
     const byInv = new Map(); for (const [mid, iid] of at) { if (!S.doc.items.get(mid) || !S.doc.items.get(iid)) continue; if (!byInv.has(iid)) byInv.set(iid, []); byInv.get(iid).push(S.doc.items.get(mid)); }
     const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
-    for (const [iid, masalar] of byInv) {
-      const inv = S.doc.items.get(iid), ip = tsMerkez(inv), ino = inv.ges.no || '?', dcYon = tsDcYon(inv);
-      const trNo = tms.length > 1 ? (tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]) < Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) ? b : a)).ges.no || '') : '';
-      masalar.sort((a, b) => Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) - Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]));
-      let pv = 0;
-      for (const m of masalar) {
-        const c = tsMasaCerceve(m); if (!c) continue; const k = tsMasaStr(m);
-        const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
-        const bas = tsUcBas(c, nok, ip, dcYon);   // AC kanalı (çıkış) tarafındaki uçtan başla
-        const dx = c.L / c.P, dy = c.D / c.R, sira = [];
-        for (let r = 0; r < c.R; r++) { const t = c.D - (r + 0.5) * dy; const xs = Array.from({ length: c.P }, (_, i) => (i + 0.5) * dx); const ileri = (r % 2 === 0) === bas; for (const s_ of (ileri ? xs : xs.reverse())) sira.push(nok(s_, t)); }
-        const N = Math.floor(sira.length / k), uc = bas ? nok(-0.3, c.D / 2) : nok(c.L + 0.3, c.D / 2), tek = Math.abs(uc[0] - ip[0]) + Math.abs(uc[1] - ip[1]) + 3;   // tek yön ≈ masa ucu → inverter (dik) + iniş
-        for (let j = 0; j < k; j++) {
-          const iz = sira.slice(j * N, (j + 1) * N); if (iz.length < 2) continue; pv++; nStr++;
-          const rs = Math.max(1, Math.round(N / c.P)), donus = (rs % 2 === 1) ? c.L : 0, L = 2 * tek + donus; topL += L;
-          const kod = (trNo ? 'TR' + trNo + '.' : '') + 'INV' + ino + '.PV' + pv;
-          const pl = { id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: 256, lt: '', cl: false, pts: iz.map((q) => [q[0], q[1], 0]), ges: { tip: 'dcstr', inv: iid, masa: m.id, kablo: 'H1Z2Z2-K 1x6', pay: 0, L, pv, kod } };
-          yeni.push([null, pl]);
-          const tri = (q, renk) => ({ id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: renk, lt: '', cl: true, pts: [[q[0] - h * 0.6, q[1] - h * 0.5, 0], [q[0] + h * 0.6, q[1] - h * 0.5, 0], [q[0], q[1] + h * 0.5, 0]], gesEt: pl.id });
-          const ic = bas ? 1 : -1, rot = Math.atan2(c.ux[1], c.ux[0]), ry = Math.cos(rot) < 0 ? rot + Math.PI : rot, ters = ry !== rot;   // yazı masanın içine doğru (komşu masanın yazısıyla çakışmaz)
-          const yz = (q, s_, hh) => ({ id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 256, lt: '', x: q[0] + c.ux[0] * ic * h * 0.9 + c.uy[0] * h * 0.55, y: q[1] + c.ux[1] * ic * h * 0.9 + c.uy[1] * h * 0.55, h: hh, rot: ry, s: s_, ha: (ic > 0) !== ters ? 0 : 2, va: 0, gesEt: pl.id });
-          const a = iz[0], b = iz[iz.length - 1], cx = iz.reduce((t, q) => t + q[0], 0) / iz.length, cy = iz.reduce((t, q) => t + q[1], 0) / iz.length;
-          yeni.push([null, tri(a, 5)], [null, tri(b, 1)], [null, yz(a, kod + '.1', h * 0.8)], [null, yz(b, kod + '.' + iz.length, h * 0.8)]);
-          yeni.push([null, { id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 1, lt: '', x: cx, y: cy, h: Math.min(c.D * 0.35, h * 3), rot: Math.atan2(c.ux[1], c.ux[0]), s: rs + '*' + Math.round(iz.length / rs), ha: 1, va: 2, gesEt: pl.id }]);
-        }
-      }
-      yeni.push(...tsInvDurumYazi(iid, 'GES-DC-KABLO').filter((pr) => pr[1]));
-    }
+    for (const [iid, masalar] of byInv) { const R = tsDcInvCiz(iid, masalar, tms); yeni.push(...R.yeni); topL += R.topL; nStr += R.nStr; yeni.push(...tsInvDurumYazi(iid, 'GES-DC-KABLO').filter((pr) => pr[1])); }
     replaceItems([...sil, ...yeni], 'DC çiz'); renderLayers();
     msg(nStr + ' string çizildi (' + byInv.size + ' inverter) · DC kablo ≈ ' + fmtNum(topL, 0) + ' m (ev dönüşü: 2 × masa ucu→inverter + 3 m iniş; uçlar masanın iki ucundaysa + masa boyu). Atama kesikli çizgileri kaldırıldı; değiştirmek için yeniden "DC ata".', 'res');
   } finally { busy(null); }

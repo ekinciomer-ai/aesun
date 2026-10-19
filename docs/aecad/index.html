@@ -106,6 +106,7 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .cmdbox { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; font-family: var(--mono); font-size: 12px; min-width: 0; display: flex; flex-direction: column; }
 #hist { height: 66px; overflow-y: auto; padding: 5px 10px 2px; color: #b8bfc6; scrollbar-width: thin; }
 #hist div { white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
+#hist .sen { color: #e6edf3; font-weight: 600; } #hist .cevap { color: #9ec5ff; } .sohbet { max-height: 220px; overflow: auto; display: flex; flex-direction: column; gap: 6px; margin: 8px 0; } .sohbet .sb { padding: 6px 10px; border-radius: 10px; max-width: 88%; font-size: 13px; line-height: 1.4; } .sohbet .sen { align-self: flex-end; background: #2b3a55; color: #fff; } .sohbet .cevap { align-self: flex-start; background: #23272e; color: #d6e2f0; border: 1px solid #333a44; }
 #hist .err { color: #ff8a80; } #hist .res { color: var(--ok); } #hist .note { color: var(--warn); } #hist .help { color: #9ec5ff; }
 .cline { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding: 4px 10px; }
 #prompt { color: var(--red); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; font-weight: 500; }
@@ -517,7 +518,7 @@ details.tf-sec:not([open]) { gap: 0; }
             <div class="grid3">
               <label class="gf">Çitten çekme (m)<input id="p-cekme" type="number" step="0.5" placeholder="5"></label>
               <label class="gf">Sıra açıklığı (m)<input id="p-acik" type="number" step="0.05" placeholder="pitch'ten"></label>
-              <label class="gf">İnverter hizalama<select id="p-invhiza"><option value="yol">Servis yoluna / çite yakın (masa başı)</option><option value="orta">Ortalı (bloğun ortası)</option><option value="optimum">Optimum (en kısa DC)</option></select></label>
+              <label class="gf">İnverter hizalama<select id="p-invhiza"><option value="trafo">Trafoya yakın (DC ≤ sınır, kısa AC)</option><option value="yol">Servis yoluna / çite yakın (masa başı)</option><option value="orta">Ortalı (bloğun ortası)</option><option value="optimum">Optimum (en kısa DC)</option></select></label>
               <label class="gf">TM tarafı<select id="p-taraf"><option value="dogu">Doğu</option><option value="bati">Batı</option></select></label>
               <label class="gf">İç bakım yolu<select id="p-icyol"><option value="1">Açık (K-G, ΔU'ya göre)</option><option value="0">Kapalı (yalnız kenar yol)</option></select></label>
               <label class="gf">İç yol genişliği (m)<input id="p-icw" type="number" step="0.5" placeholder="5"></label>
@@ -546,7 +547,7 @@ details.tf-sec:not([open]) { gap: 0; }
   <footer>
     <div class="cmdbox">
       <div id="hist" aria-live="polite"></div>
-      <div class="cline"><span id="prompt">Komut:</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Komut satırı"></div>
+      <div class="cline"><span id="prompt">Komut:</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Komut satırı" placeholder="Komut (L, PL, M…) ya da cümle: inverterleri trafoya yaklaştır"></div>
     </div>
     <div class="status">
       <div id="coords">X 0.000   Y 0.000</div>
@@ -2190,7 +2191,7 @@ const ALIAS = {
 };
 async function runCommand(name) {
   const key = ALIAS[name.toUpperCase().replace(/İ/g, 'I').replace(/Ş/g, 'S').replace(/Ç/g, 'C').replace(/Ö/g, 'O').replace(/Ü/g, 'U').replace(/Ğ/g, 'G').replace(/^[_.\-]/, '')];
-  if (!key) { msg('Bilinmeyen komut: ' + name + '  (Yardım için ? yazın)', 'err'); return; }
+  if (!key) { if (typeof gesSohbet === 'function' && (/\s/.test(name.trim()) || /[a-zçğıöşü]{6,}/.test(name))) { gesSohbet(name); return; } msg('Bilinmeyen komut: ' + name + '  (Yardım için ? yazın; cümle de yazabilirsiniz: "inverterleri trafoya yaklaştır")', 'err'); return; }
   if (S.cmd) cancelCmd();
   if (!S.doc) return;
   S.cmd = key; S.lastCmd = key; msg('Komut: ' + LABEL[key]);
@@ -3462,12 +3463,12 @@ function buildParam0() {
     modul: { en_mm: tp.orient === 'H' ? P.L : P.W, boy_mm: tp.orient === 'H' ? P.W : P.L, guc_wp: P.p, voc_v: pn('p-voc') ?? P.voc ?? null, vmp_v: pn('p-vmp') ?? P.vmp ?? null, isc_a: pn('p-isc') ?? P.isc ?? null, imp_a: pn('p-imp') ?? P.imp ?? null, voc_sicaklik_katsayi_pct: pn('p-kvoc') ?? P.kvoc ?? null, tmin_c: pn('p-tmin') ?? -25 },
     masa: { tip: tp.rows + tp.orient + tp.per, sira_sayisi: tp.rows, sira_modul: tp.per, modul_boslugu_mm: Math.round(tp.gx * 1000), egim_derece: tp.tilt, alt_kenar_m: tp.front, masa_arasi_m: gnum('g-gap', 0.5), pitch_m: +pitch.toFixed(3), sira_acikligi_m: pn('p-acik'), azimut_derece: gnum('g-ang', 0), aks_sayisi: a.aks, aks_araligi_m: a.aksA, golge_saat: gv('g-hrs').value === 'manual' ? 3 : parseFloat(gv('g-hrs').value), hiza_x: gv('g-align').value, hiza_y: (gv('g-valign') || {}).value || 'south', kolon_sira_araligi_m: +kgAyak(tp).toFixed(3), parca_carpani: statikVar ? undefined : pc },
     yol: { ic_yol: (pv('p-icyol') || '1') === '1', ic_genislik_m: pn('p-icw') ?? 5, ic_aralik_m: pn('p-icar') },
-    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), inverter_adet: pn('p-invn'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', inverter_sinir_kw: pn('p-invsin'), inverter_hiza: pv('p-invhiza') || 'yol', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
+    elektrik: { string_modul: a.strMod, string_inverter_max: a.strInv, inverter_tr: a.invTr, inverter_ac_kw: pn('p-inv'), inverter_adet: pn('p-invn'), dcac_hedef: pn('p-ratio') ?? 1.25, inverter_model: pv('p-invm') || '', inverter_sinir_kw: pn('p-invsin'), inverter_hiza: pv('p-invhiza') || 'trafo', trafo_kva: pn('p-trafo'), trafo_gerilim: pv('p-trg') || '33/0,8 kV Dy11 ONAN', sebeke_gerilim_kv: pn('p-sebeke'), og_gerilim_kv: pn('p-ogkv') ?? 33, mppt_sayisi: pn('p-mppt'), mppt_akim_a: pn('p-mppta'), dc_kablo: pv('p-dck') || 'H1Z2Z2-K 1x6', ac_kablo: pv('p-ack') || '3x300/150 NA2XY', ac_kesit_mm2: pn('p-ackes') ?? 300, og_kablo: pv('p-ogk') || '3x(1x120/16) NA2XSY 36 kV', tm_taraf: pv('p-taraf') || 'dogu', dm_konum: PJ.dm, dc_tek_yon_max_m: pn('p-dcmax') ?? 80 },
   };
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191639', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191906', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3725,8 +3726,8 @@ function pjAltOner(base) {
   { const t1 = t0 > 20 ? 20 : 25; L.push({ ...altEgim(base, t1), fark: (b) => altEgim(b, t1).param }); }
   if (base.yol.ic_yol) { const p = kopya(base); p.yol.ic_yol = false; L.push({ ad: 'İç yolsuz', acik: 'Karşılaştırma: yalnız kenar servis yolu (daha çok masa, uzun AG kablo)', param: p, uygula: () => { gv('p-icyol').value = '0'; pjSave(); }, fark: (b) => { b.yol.ic_yol = false; return b; } }); }
   else { const p = kopya(base); p.yol.ic_yol = true; L.push({ ad: 'İç yollu', acik: 'K-G iç bakım yolları, aralık DC ΔU %1', param: p, uygula: () => { gv('p-icyol').value = '1'; pjSave(); }, fark: (b) => { b.yol.ic_yol = true; return b; } }); }
-  const hz0 = (base.elektrik && base.elektrik.inverter_hiza) || 'yol';
-  for (const [k, ad, ac] of [['orta', 'İnverter ortalı', 'İnverterler bloğun ortasındaki sıranın masa başında'], ['optimum', 'İnverter optimum', 'İnverter her blokta en kısa DC\'yi veren masa başında'], ['yol', 'İnverter yol kenarı', 'İnverterler servis yoluna / çite yakın masa başında']]) {
+  const hz0 = (base.elektrik && base.elektrik.inverter_hiza) || 'trafo';
+  for (const [k, ad, ac] of [['trafo', 'İnverter trafoya yakın', 'Her inverter DC sınırı içinde trafoya en yakın masa başında (AC kısa)'], ['orta', 'İnverter ortalı', 'İnverterler bloğun ortasındaki sıranın masa başında'], ['optimum', 'İnverter optimum', 'İnverter her blokta en kısa DC\'yi veren masa başında'], ['yol', 'İnverter yol kenarı', 'İnverterler servis yoluna / çite yakın masa başında']]) {
     if (k === hz0 || L.length >= 5) continue; const p = kopya(base); p.elektrik.inverter_hiza = k;
     L.push({ ad, acik: ac, param: p, uygula: () => { gv('p-invhiza').value = k; pjSave(); }, fark: (b) => { b.elektrik.inverter_hiza = k; return b; } });
   }
@@ -3828,6 +3829,7 @@ function pjRevizeCoz(txt) {
 }
 function pjRevize() {
   const inp = gv('pj-rev'); const txt = inp.value.trim(); if (!txt) return;
+  inp.value = ''; gesSohbet(txt); return;
   const r = pjRevizeCoz(txt);
   const dz = pjDuzenCoz(txt.toLocaleLowerCase('tr').replace(/,(\d)/g, '.$1'));
   if (dz.length && !r.yap.length) { inp.value = ''; PJ.revNot = 'Uygulandı: ' + dz.join(', ') + '. Yeniden çiziliyor.'; pjDuzenCiz(dz.join(', ')); return; }
@@ -3868,9 +3870,12 @@ function pjAltCiz() {
   }
   t.appendChild(tb); const w = h('div', 'tw'); w.appendChild(t); box.appendChild(w);
   const rv = h('div', 'revbox');
-  rv.innerHTML = '<label class="gf">Revizyon talimatı<input id="pj-rev" type="text" placeholder="ör. TM2 kuzeye 50 m, TR1 INV3 doğuya 20 m, 2. yolu kaldır, eğim 20, 25 MWp"></label><button class="gb" id="pj-revb" type="button">Revize et ve çiz</button><p class="gi" id="pj-revnot"></p>';
-  box.appendChild(rv);
-  const not = PJ.revNot; if (not) gv('pj-revnot').textContent = not;
+  const sh = h('div', 'sohbet'); for (const m of PJ.sohbet.slice(-14)) sh.appendChild(h('div', 'sb ' + (m.kim === 'sen' ? 'sen' : 'cevap'), m.metin));
+  if (!PJ.sohbet.length) sh.appendChild(h('div', 'sb cevap', 'Ne değiştirmek istediğinizi yazın; ör. "inverterleri trafoya yaklaştır", "eğim 20", "hizalama doğuya", "kabloları çiz". Neden sorusu da sorabilirsiniz: "inverter neden batıda?"'));
+  rv.appendChild(sh);
+  const sat = h('div', 'brow'); sat.innerHTML = '<input id="pj-rev" type="text" placeholder="Yazın: ör. inverterleri trafoya yaklaştır" style="flex:1"><button class="gb primary" id="pj-revb" type="button">Gönder</button>'; rv.appendChild(sat);
+  const cips = h('div', 'brow'); for (const o of SOHBET_ORNEK.slice(0, 8)) { const c = h('button', 'mini', o); c.onclick = () => gesSohbet(o); cips.appendChild(c); } rv.appendChild(cips);
+  box.appendChild(rv); requestAnimationFrame(() => { sh.scrollTop = sh.scrollHeight; });
   gv('pj-revb').onclick = pjRevize; gv('pj-rev').onkeydown = (e) => { if (e.key === 'Enter') pjRevize(); };
   if (PJ.alt.some((a) => a.durum === 'calisiyor')) { clearTimeout(PJ.altT); PJ.altT = setTimeout(pjAltCiz, 1000); }
 }
@@ -3893,6 +3898,68 @@ function pjAktifYenile() {
   pjAktifYenile.t = setTimeout(() => { let base; try { base = pjDuzenUygula(buildParam0()); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
     a.param = a.fark(kopya(base)); a.durum = 'bekliyor'; a.duzen = true; msg('"' + a.ad + '" yerleşimi yeni ayarlarla yeniden hesaplanıyor…', 'note'); pjAltSirada(); }, 350);
   return true;
+}
+// ---- Sohbet (kullanıcı kuralı 19.10.2026): komut satırına ya da revizyon kutusuna cümle yazılır; anlaşılan uygulanır,
+// anlaşılmayan için ne yapılabileceği söylenir. Tek kaynak form alanları; yerleşim açıksa o yerleşim yeniden hesaplanır.
+PJ.sohbet = PJ.sohbet || [];
+const SOHBET_ORNEK = ['inverterleri trafoya yaklaştır', 'inverterleri ortala', '10 inverter', 'eğim 20', 'çekme 4 m', 'hizalama doğuya', 'sıra başlangıcı kuzeyden',
+  'iç yolları kaldır', 'trafo 1600', 'TM batı', 'kabloları çiz', 'DC oto', 'AC oto', 'yerleşimi çiz', 'proje paftalarını oluştur'];
+function sohbetYaz(kim, metin) {
+  PJ.sohbet.push({ kim, metin, t: Date.now() }); if (PJ.sohbet.length > 80) PJ.sohbet.shift();
+  msg((kim === 'sen' ? '› ' : '◆ ') + metin, kim === 'sen' ? 'sen' : 'cevap');
+  if (PJ.tab === 'yerlesim' && gv('pjdlg') && gv('pjdlg').open) pjAltCiz();
+}
+function sohbetNiyet(T) {
+  const yap = [], set = [], is = [];
+  const hz = (k, ad) => { set.push(() => { gv('p-invhiza').value = k; }); yap.push('inverter yerleşimi: ' + ad); };
+  if (/inverter\D{0,40}(trafo|tm|köşk|kösk)\D{0,20}(yakın|yaklaş|tarafa|tarafına|doğru|yanına)|trafoya yaklaş|ac(?: kablo)?\D{0,10}(kısalt|kısa)/.test(T)) hz('trafo', 'trafoya yakın (DC ≤ sınır)');
+  else if (/inverter\D{0,30}(ortala|ortalı|ortaya|orta)/.test(T)) hz('orta', 'ortalı');
+  else if (/inverter\D{0,30}(yol|çit|kenar)/.test(T)) hz('yol', 'servis yolu / çit kenarı');
+  else if (/inverter\D{0,30}(optimum|en kısa dc)/.test(T)) hz('optimum', 'optimum (en kısa DC)');
+  const al = /hizala\S*\D{0,12}(doğu|batı|orta|opt)/.exec(T);
+  if (al) { const v = { doğu: 'right', batı: 'left', orta: 'center', opt: 'opt' }[al[1]]; set.push(() => { gv('g-align').value = v; }); yap.push('hizalama ' + al[1]); }
+  const va = /(sıra başlangıc\S*|sıralar)\D{0,12}(kuzey|güney|orta)/.exec(T);
+  if (va) { const v = { kuzey: 'north', güney: 'south', orta: 'center' }[va[2]]; set.push(() => { gv('g-valign').value = v; }); yap.push('sıra başlangıcı ' + va[2]); }
+  if (/kablo\S*\s*(çiz|planı)|kablo planı/.test(T)) is.push(['kablo planı', async () => { if (!tsInverterler().length) return 'Açık yerleşimde inverter yok; önce "yerleşimi çiz" deyin ve bir seçeneği açın.'; await pjKabloOto(); return null; }]);
+  else {
+    if (/\bdc\s*(oto|ata|otomatik)/.test(T)) is.push(['DC otomatik atama', async () => { await CMD.GDCOTO(); return null; }]);
+    if (/\bac\s*(oto|otomatik)|ac kablo\S*\s*çiz/.test(T)) is.push(['AC otomatik', async () => { await CMD.GACOTO(); return null; }]);
+  }
+  if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);
+  if (/yerleşim\S*\s*(çiz|seçenek|karşılaştır)|seçenekleri/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
+  if (/(proje|pafta)\S*\s*(oluştur|üret|çiz|hazırla)/.test(T)) is.push(['proje paftaları', async () => { pjRun(); return null; }]);
+  return { yap, set, is };
+}
+function sohbetNeden(T) {
+  if (!/neden|niye|niçin|mantığı|amacı/.test(T)) return null;
+  const hz = (gv('p-invhiza') || {}).value || 'trafo';
+  if (/inverter/.test(T)) return 'İnverter yeri "' + ({ trafo: 'trafoya yakın', yol: 'servis yolu / çit kenarı', orta: 'ortalı', optimum: 'optimum' }[hz] || hz) + '" kuralıyla seçiliyor. "Trafoya yakın"da her inverter, bloğundaki en uzun DC tek yön ' + (pn('p-dcmax') || 80) + ' m sınırını aşmayan en trafoya yakın masa başına konur; AC kısalır, DC payı kullanılır. Değiştirmek için: "inverterleri trafoya yaklaştır", "inverterleri ortala", "inverterleri yol kenarına al".';
+  if (/trafo|köşk|tm/.test(T)) return 'Trafo (köşk) yeri: servis yolu / iç yol kenarında, inverter grubunun ortasına yakın ve bina gölgesinin (21 Aralık) en az masa kaybettirdiği nokta. Taşımak için "TM1 kuzeye 30 m" yazın ya da Trafo + aracıyla çizin.';
+  if (/kablo|kanal/.test(T)) return 'AC kablolar tek ortak kanalda, en az kırıkla ve masa altından geçmeden ADP\'ye gider; kanal genişliği geçen devre sayısıyla kademeli artar. DC stringler masa içinde çizilir, atama 80 m / ΔU kuralına göre.';
+  return null;
+}
+async function gesSohbet(metin) {
+  const txt = String(metin || '').trim(); if (!txt) return;
+  sohbetYaz('sen', txt);
+  const T = txt.toLocaleLowerCase('tr').replace(/,(\d)/g, '.$1');
+  const ned = sohbetNeden(T);
+  const n = sohbetNiyet(T), r = pjRevizeCoz(txt), dz = pjDuzenCoz(T);
+  const ayar = [...n.yap, ...r.yap], hepsi = [...ayar, ...dz, ...n.is.map((x) => x[0])];
+  if (!hepsi.length) {
+    sohbetYaz('cevap', (ned ? ned + ' ' : 'Bunu bir işleme çeviremedim. ') + (ned ? '' : 'Yapabildiklerim: ayar değiştirmek (' + SOHBET_ORNEK.slice(0, 9).map((s) => '"' + s + '"').join(', ') + '), taşımak ("TM1 kuzeye 30 m", "TR1 INV3 doğuya 20 m"), işlem başlatmak ("kabloları çiz", "DC oto", "AC oto", "yerleşimi çiz", "proje paftalarını oluştur"). Cümlenizi bu örneklere yakın yazarsanız uygularım.'));
+    return;
+  }
+  if (ned) sohbetYaz('cevap', ned);
+  n.set.forEach((f) => f()); if (r.yap.length) r.uygula(); pjAutoHints(); pjSave(); if (typeof tfSync === 'function') tfSync();
+  if (ayar.length || dz.length) {
+    const a = PJ.aktif;
+    if (a && a.fark && !a.cizim && PJ.cur && /_01_/.test(PJ.cur)) { pjAktifYenile(); sohbetYaz('cevap', 'Uygulandı: ' + [...ayar, ...dz].join(', ') + '. Açık yerleşim "' + a.ad + '" yeni ayarlarla yeniden hesaplanıyor.'); }
+    else if (PJ.alt && PJ.alt.length) { let p; try { p = buildParam(); } catch (e) { sohbetYaz('cevap', 'Parametre hatası: ' + e.message); return; }
+      PJ.revNo = (PJ.revNo || 0) + 1; pjAltEkle({ ad: 'Revizyon ' + PJ.revNo, acik: '"' + txt + '" → ' + [...ayar, ...dz].join(', '), param: p, uygula: () => {}, fark: (b) => b });
+      sohbetYaz('cevap', 'Uygulandı: ' + [...ayar, ...dz].join(', ') + '. "Revizyon ' + PJ.revNo + '" seçenek olarak hesaplanıyor; bitince Yerleşim seçeneklerinde.'); }
+    else sohbetYaz('cevap', 'Ayarlandı: ' + [...ayar, ...dz].join(', ') + '. "yerleşimi çiz" ya da "proje paftalarını oluştur" dediğinizde bu ayarlarla çizilir.');
+  }
+  for (const [ad, f] of n.is) { sohbetYaz('cevap', ad + ' başlatıldı.'); try { const m = await f(); if (m) sohbetYaz('cevap', m); } catch (e) { sohbetYaz('cevap', ad + ' yapılamadı: ' + (e.message || e)); } }
 }
 
 // ---- Çizimden ve yazıyla düzenleme: trafo taşı, inverter taşı, yol çiz, yol sil → yerleşim son duruma göre yeniden hesaplanır ----
@@ -4890,6 +4957,17 @@ async function tsAcTekEkle(it) {
   addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); renderLayers();
   msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Geri al ile kaldırılır.', 'res');
 }
+function tsDcInvYenile(ids) {   // verilen inverterlerin stringleri atamaya göre yeniden çizilir (atama çizgisi yerine string)
+  const at = tsAtamalar(); S.doc.addLayer('GES-DC-KABLO', 4); const pairs = [];
+  for (const iid of ids) {
+    if (!S.doc.items.get(iid)) continue; const eskiId = new Set();
+    for (const it of S.doc.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.inv === iid) { pairs.push([it, null]); eskiId.add(it.id); }
+    for (const it of S.doc.items.values()) if (it.gesEt && eskiId.has(it.gesEt)) pairs.push([it, null]);
+    const masalar = [...at].filter(([, v]) => v === iid).map(([mid]) => S.doc.items.get(mid)).filter(Boolean);
+    if (masalar.length) pairs.push(...tsDcInvCiz(iid, masalar).yeni);
+  }
+  if (pairs.length) replaceItems(pairs, 'DC string'); renderLayers();
+}
 CMD.GDCK = async () => {
   S.doc.addLayer(DC_ATA, 4, 'DASHED');
   for (;;) {
@@ -4907,7 +4985,8 @@ CMD.GDCK = async () => {
       const eskiInv = [...new Set(pairs.filter((pr) => pr[0].ges && pr[0].ges.inv !== iid).map((pr) => pr[0].ges.inv))];
       if (!cikar) { const u = tsMasaIlkPanel(m, x.p, tsDcYon(x.it)); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[x.p[0], x.p[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: m.id } }]); }
       replaceItems(pairs, 'DC atama');
-      const dur = []; for (const id of [iid, ...eskiInv]) dur.push(...tsInvDurumYazi(id, DC_ATA)); if (dur.length) replaceItems(dur, 'DC durum');
+      tsDcInvYenile([iid, ...eskiInv]);   // kullanıcı kuralı 19.10.2026: tıklanan masanın DC stringleri anında çizilir
+      const dur = []; for (const id of [iid, ...eskiInv]) dur.push(...tsInvDurumYazi(id, 'GES-DC-KABLO')); if (dur.length) replaceItems(dur, 'DC durum');
       renderLayers(); const d2 = tsInvDurum(iid);
       msg(ad + ': ' + (cikar ? 'masa çıkarıldı' : 'masa atandı (' + tsMasaStr(m) + ' string)') + ' · ' + d2.dolu + '/' + (d2.giris || '?') + ' string dolu' + (d2.giris && d2.dolu > d2.giris ? ' — GİRİŞ SAYISI AŞILDI' : ''), d2.giris && d2.dolu > d2.giris ? 'err' : 'res');
     }
@@ -5026,6 +5105,36 @@ async function tsInvOneri(R) {
   msg((r !== 'ilave' ? oner.length : 0) + ' inverter taşındı, ' + yeniler.length + ' inverter eklendi; ' + R2.yeni.size + ' masa atandı' + (R2.kalan.length ? ', ' + R2.kalan.length + ' masa açıkta' : '') + '.', R2.kalan.length ? 'note' : 'res');
 }
 Object.assign(ALIAS, { GDCOTO: 'GDCOTO', DCOTO: 'GDCOTO' }); Object.assign(LABEL, { GDCOTO: 'DC OTOMATİK ATA' });
+// Bir inverterin atanmış masalarındaki stringler (DC çiz ve DC ata'da tıklamayla anında): masa içi iz, + / − üçgenleri, kod, sıra*modül
+function tsDcInvCiz(iid, masalar, tms) {
+  const yeni = [], h = KABLO_YZ; let topL = 0, nStr = 0; tms = tms || [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+      const inv = S.doc.items.get(iid), ip = tsMerkez(inv), ino = inv.ges.no || '?', dcYon = tsDcYon(inv);
+  const trNo = tms.length > 1 ? (tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]) < Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) ? b : a)).ges.no || '') : '';
+  masalar.sort((a, b) => Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) - Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]));
+  let pv = 0;
+  for (const m of masalar) {
+    const c = tsMasaCerceve(m); if (!c) continue; const k = tsMasaStr(m);
+    const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
+    const bas = tsUcBas(c, nok, ip, dcYon);   // AC kanalı (çıkış) tarafındaki uçtan başla
+    const dx = c.L / c.P, dy = c.D / c.R, sira = [];
+    for (let r = 0; r < c.R; r++) { const t = c.D - (r + 0.5) * dy; const xs = Array.from({ length: c.P }, (_, i) => (i + 0.5) * dx); const ileri = (r % 2 === 0) === bas; for (const s_ of (ileri ? xs : xs.reverse())) sira.push(nok(s_, t)); }
+    const N = Math.floor(sira.length / k), uc = bas ? nok(-0.3, c.D / 2) : nok(c.L + 0.3, c.D / 2), tek = Math.abs(uc[0] - ip[0]) + Math.abs(uc[1] - ip[1]) + 3;   // tek yön ≈ masa ucu → inverter (dik) + iniş
+    for (let j = 0; j < k; j++) {
+      const iz = sira.slice(j * N, (j + 1) * N); if (iz.length < 2) continue; pv++; nStr++;
+      const rs = Math.max(1, Math.round(N / c.P)), donus = (rs % 2 === 1) ? c.L : 0, L = 2 * tek + donus; topL += L;
+      const kod = (trNo ? 'TR' + trNo + '.' : '') + 'INV' + ino + '.PV' + pv;
+      const pl = { id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: 256, lt: '', cl: false, pts: iz.map((q) => [q[0], q[1], 0]), ges: { tip: 'dcstr', inv: iid, masa: m.id, kablo: 'H1Z2Z2-K 1x6', pay: 0, L, pv, kod } };
+      yeni.push([null, pl]);
+      const tri = (q, renk) => ({ id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: renk, lt: '', cl: true, pts: [[q[0] - h * 0.6, q[1] - h * 0.5, 0], [q[0] + h * 0.6, q[1] - h * 0.5, 0], [q[0], q[1] + h * 0.5, 0]], gesEt: pl.id });
+      const ic = bas ? 1 : -1, rot = Math.atan2(c.ux[1], c.ux[0]), ry = Math.cos(rot) < 0 ? rot + Math.PI : rot, ters = ry !== rot;   // yazı masanın içine doğru (komşu masanın yazısıyla çakışmaz)
+      const yz = (q, s_, hh) => ({ id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 256, lt: '', x: q[0] + c.ux[0] * ic * h * 0.9 + c.uy[0] * h * 0.55, y: q[1] + c.ux[1] * ic * h * 0.9 + c.uy[1] * h * 0.55, h: hh, rot: ry, s: s_, ha: (ic > 0) !== ters ? 0 : 2, va: 0, gesEt: pl.id });
+      const a = iz[0], b = iz[iz.length - 1], cx = iz.reduce((t, q) => t + q[0], 0) / iz.length, cy = iz.reduce((t, q) => t + q[1], 0) / iz.length;
+      yeni.push([null, tri(a, 5)], [null, tri(b, 1)], [null, yz(a, kod + '.1', h * 0.8)], [null, yz(b, kod + '.' + iz.length, h * 0.8)]);
+      yeni.push([null, { id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 1, lt: '', x: cx, y: cy, h: Math.min(c.D * 0.35, h * 3), rot: Math.atan2(c.ux[1], c.ux[0]), s: rs + '*' + Math.round(iz.length / rs), ha: 1, va: 2, gesEt: pl.id }]);
+    }
+  }
+  return { yeni, topL, nStr };
+}
 CMD.GDCCIZ = async () => {
   if (!tsAtamalar().size) { const r = await askDlg('DC çiz', 'DC ataması yok. Masalar invertere otomatik atansın mı (DC tek yön sınırı ve string girişine göre)?', [['Otomatik ata ve çiz', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]); if (r !== 'ok') return; await CMD.GDCOTO(); if (!tsAtamalar().size) return; }
   const at = tsAtamalar();
@@ -5035,34 +5144,7 @@ CMD.GDCCIZ = async () => {
     S.doc.addLayer('GES-DC-KABLO', 4); const yeni = []; const h = KABLO_YZ; let topL = 0, nStr = 0;
     const byInv = new Map(); for (const [mid, iid] of at) { if (!S.doc.items.get(mid) || !S.doc.items.get(iid)) continue; if (!byInv.has(iid)) byInv.set(iid, []); byInv.get(iid).push(S.doc.items.get(mid)); }
     const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
-    for (const [iid, masalar] of byInv) {
-      const inv = S.doc.items.get(iid), ip = tsMerkez(inv), ino = inv.ges.no || '?', dcYon = tsDcYon(inv);
-      const trNo = tms.length > 1 ? (tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]) < Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) ? b : a)).ges.no || '') : '';
-      masalar.sort((a, b) => Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) - Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]));
-      let pv = 0;
-      for (const m of masalar) {
-        const c = tsMasaCerceve(m); if (!c) continue; const k = tsMasaStr(m);
-        const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
-        const bas = tsUcBas(c, nok, ip, dcYon);   // AC kanalı (çıkış) tarafındaki uçtan başla
-        const dx = c.L / c.P, dy = c.D / c.R, sira = [];
-        for (let r = 0; r < c.R; r++) { const t = c.D - (r + 0.5) * dy; const xs = Array.from({ length: c.P }, (_, i) => (i + 0.5) * dx); const ileri = (r % 2 === 0) === bas; for (const s_ of (ileri ? xs : xs.reverse())) sira.push(nok(s_, t)); }
-        const N = Math.floor(sira.length / k), uc = bas ? nok(-0.3, c.D / 2) : nok(c.L + 0.3, c.D / 2), tek = Math.abs(uc[0] - ip[0]) + Math.abs(uc[1] - ip[1]) + 3;   // tek yön ≈ masa ucu → inverter (dik) + iniş
-        for (let j = 0; j < k; j++) {
-          const iz = sira.slice(j * N, (j + 1) * N); if (iz.length < 2) continue; pv++; nStr++;
-          const rs = Math.max(1, Math.round(N / c.P)), donus = (rs % 2 === 1) ? c.L : 0, L = 2 * tek + donus; topL += L;
-          const kod = (trNo ? 'TR' + trNo + '.' : '') + 'INV' + ino + '.PV' + pv;
-          const pl = { id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: 256, lt: '', cl: false, pts: iz.map((q) => [q[0], q[1], 0]), ges: { tip: 'dcstr', inv: iid, masa: m.id, kablo: 'H1Z2Z2-K 1x6', pay: 0, L, pv, kod } };
-          yeni.push([null, pl]);
-          const tri = (q, renk) => ({ id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: renk, lt: '', cl: true, pts: [[q[0] - h * 0.6, q[1] - h * 0.5, 0], [q[0] + h * 0.6, q[1] - h * 0.5, 0], [q[0], q[1] + h * 0.5, 0]], gesEt: pl.id });
-          const ic = bas ? 1 : -1, rot = Math.atan2(c.ux[1], c.ux[0]), ry = Math.cos(rot) < 0 ? rot + Math.PI : rot, ters = ry !== rot;   // yazı masanın içine doğru (komşu masanın yazısıyla çakışmaz)
-          const yz = (q, s_, hh) => ({ id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 256, lt: '', x: q[0] + c.ux[0] * ic * h * 0.9 + c.uy[0] * h * 0.55, y: q[1] + c.ux[1] * ic * h * 0.9 + c.uy[1] * h * 0.55, h: hh, rot: ry, s: s_, ha: (ic > 0) !== ters ? 0 : 2, va: 0, gesEt: pl.id });
-          const a = iz[0], b = iz[iz.length - 1], cx = iz.reduce((t, q) => t + q[0], 0) / iz.length, cy = iz.reduce((t, q) => t + q[1], 0) / iz.length;
-          yeni.push([null, tri(a, 5)], [null, tri(b, 1)], [null, yz(a, kod + '.1', h * 0.8)], [null, yz(b, kod + '.' + iz.length, h * 0.8)]);
-          yeni.push([null, { id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 1, lt: '', x: cx, y: cy, h: Math.min(c.D * 0.35, h * 3), rot: Math.atan2(c.ux[1], c.ux[0]), s: rs + '*' + Math.round(iz.length / rs), ha: 1, va: 2, gesEt: pl.id }]);
-        }
-      }
-      yeni.push(...tsInvDurumYazi(iid, 'GES-DC-KABLO').filter((pr) => pr[1]));
-    }
+    for (const [iid, masalar] of byInv) { const R = tsDcInvCiz(iid, masalar, tms); yeni.push(...R.yeni); topL += R.topL; nStr += R.nStr; yeni.push(...tsInvDurumYazi(iid, 'GES-DC-KABLO').filter((pr) => pr[1])); }
     replaceItems([...sil, ...yeni], 'DC çiz'); renderLayers();
     msg(nStr + ' string çizildi (' + byInv.size + ' inverter) · DC kablo ≈ ' + fmtNum(topL, 0) + ' m (ev dönüşü: 2 × masa ucu→inverter + 3 m iniş; uçlar masanın iki ucundaysa + masa boyu). Atama kesikli çizgileri kaldırıldı; değiştirmek için yeniden "DC ata".', 'res');
   } finally { busy(null); }

@@ -85,7 +85,7 @@ VARSAYILAN = {
                "harici_trafo_min_kva": 2500, "og_gerilim_kv": 33.0, "og_kesit_mm2": 120, "og_kesit_dm_mm2": 240,
                "kappa_cu": 56.0, "kappa_al": 35.0, "og_dusum_max_pct": 7.0, "trafo_yag_l": None,
                "ag_pano_form": "Form 4b", "ag_pano_ip": "IP54", "ag_pano_icw_ka": 65, "ag_pano_in_a": 4000,
-               "inverter_sinir_kw": None, "inverter_giris": None, "inverter_hiza": "trafo", "ag_cikis_ka": 36, "kosk": {}},
+               "inverter_sinir_kw": None, "inverter_giris": None, "inverter_hiza": "trafo", "inverter_konum": "arka", "ag_cikis_ka": 36, "kosk": {}},
   "hendek": {"dc_derinlik_m": 0.70, "ag_derinlik_m": 0.80, "og_derinlik_m": 1.00, "genislik_m": 0.60,
              "kum_cm": 10, "koruyucu_cm": 6, "uyari_ust_cm": 30, "kablo_aralik_cm": 7, "yol_gecis_boru_ust_m": 1.0,
              # kademeli AG/OG kanal (Zorlu Tesis 1 GES onaylı kesitleri): b = taban + artış × (AC devre − 1) + OG eki (≥ 2 AC devrede)
@@ -605,6 +605,14 @@ class Model:
         return r["y0"] - self.acik / 2 if alt else r["y1"] + self.acik / 2
 
     def dc_yol(self, ms, inv, ofset=-0.6):
+        """İnverter masanın arkasındaysa (kullanıcı kuralı 19.10.2026): string inverterin masa başına kadar olağan yoldan gelir,
+        masa arası boşluktan arka sıra açıklığına çıkar ve açıklıkta invertere ulaşır."""
+        if not inv.get("arka"): return self._dc_yol0(ms, inv, ofset)
+        im = inv["masa"]; gx = im["loc"].bounds[2] + 0.25 if inv["taraf"] == "E" else im["loc"].bounds[0] - 0.25
+        pts, _ = self._dc_yol0(ms, {"masa": im, "taraf": inv["taraf"], "x": gx, "y": im["y"]}, ofset)
+        return pts + [(gx, inv["y"]), (inv["x"], inv["y"])], 0.0
+
+    def _dc_yol0(self, ms, inv, ofset=-0.6):
         """String: masa başından iner, sıra açıklığında yürür, sıraları yalnız masa arası boşluktan keser.
         ofset: DC hendeği açıklık ekseninden kaydırılır (AC ile aynı kanala girmez)."""
         s0, s1 = ms["sira"], inv["masa"]["sira"]
@@ -1072,8 +1080,12 @@ class Model:
                     _b = self.alan_loc.bounds; hd = (_b[2] if e["tm_taraf"] == "dogu" else _b[0], sum(q["y"] for q in inv["masalar"]) / len(inv["masalar"]))
                 _, hm, htf = en_iyi(inv["masalar"], hd)
                 inv["masa"], inv["taraf"] = hm, htf
-                inv["x"] = (hm["loc"].bounds[2] + 0.4) if htf == "E" else (hm["loc"].bounds[0] - 0.4)
-                inv["y"] = hm["y"]
+                if (e.get("inverter_konum") or "arka") == "arka":   # kullanıcı kuralı 19.10.2026: inverter masanın arkasında (kuzey açıklık), masa ucuna yakın
+                    inv["x"] = (hm["loc"].bounds[2] - 1.0) if htf == "E" else (hm["loc"].bounds[0] + 1.0)
+                    inv["y"] = hm["loc"].bounds[3] + 0.5; inv["arka"] = True
+                else:
+                    inv["x"] = (hm["loc"].bounds[2] + 0.4) if htf == "E" else (hm["loc"].bounds[0] - 0.4)
+                    inv["y"] = hm["y"]
                 inv["yol_tarafi"] = (hm["derinlik"] == 0)
                 self.inverterler.append(inv)
             self.tr_gruplari.append(grp)
@@ -1243,7 +1255,7 @@ class Model:
         ac_toplam = 0.0
         for inv in self.inverterler:
             tm = self.tm_loc[inv["tr"] - 1].centroid
-            ya = inv["masa"]["loc"].bounds[1] - self.acik / 2 + 0.6  # A.3: ön masa–arka masa açıklığı (DC'den ayrı hendek)
+            ya = (inv["masa"]["loc"].bounds[3] + self.acik / 2 + 0.6) if inv.get("arka") else (inv["masa"]["loc"].bounds[1] - self.acik / 2 + 0.6)  # A.3: açıklık (DC'den ayrı hendek)
             if getattr(self, "ag", None): tq = nearest_points(self.ag["U"], tm)[0]; tmh = Point(tq.x, tq.y)
             else: tmh = self.halka.interpolate(self.halka.project(tm))
             # A.9: sıra açıklığından kanala iki yönden hangisi ADP'ye daha kısa götürüyorsa o (uzun dolanma yok)
@@ -2350,7 +2362,8 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
     C.T(TH_YZ, tr_x + 20, c2 - 6, 1.5, "Nötr işletme topraklaması")
     # AG pano
     agx0 = X0 - 6
-    _sp = 24.0; agx1 = max(agx0 + 6 + (len(invs) + 2) * _sp + 16, tr_x + 80)   # pano çıkış sayısı kadar geniş (sabit genişlik yok)
+    _sp = 24.0; _spi = (max(inv_kutu_w(i) for i in invs) + 10) if invs else _sp   # kullanıcı kuralı 19.10.2026: inverterler yan yana, her biri kendi TMŞ'sinin altında
+    agx1 = max(agx0 + 6 + 2 * _sp + len(invs) * _spi + 16, tr_x + 80)
     ytp = yt_alt - 14
     C.L(TH_AG, [(tr_x, yt_alt), (tr_x, ytp)])
     C.TL(TH_YZ, tr_x + 3, yt_alt - 2, 1.6, [e.get("trafo_ag_kablo", "7×(3×1×300 mm²) N2XH · 10 m")])
@@ -2377,11 +2390,15 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
     x = cx0
     C.L(TH_AG, [(x, yb), (x, yb - 2)]); C.C(TH_AG, x, yb, 0.6)
     yy = sy_dsya(C, TH_AG, x, yb - 2)
-    yy = sy_gt(C, TH_AG, x, yy - 1, 2, False)
+    izo = e["ag_gerilim_v"] > 400            # kullanıcı kuralı 19.10.2026: izolasyon (0,8/0,4 kV) trafosu yalnız 800 V AG çıkışlı trafoda
+    if izo: yy = sy_gt(C, TH_AG, x, yy - 1, 2, False)
     C.L(TH_AG, [(x, yy), (x, yy - 4)])
-    sy_kutu(C, TH_AG, x - sp / 2 + 1, yy - 4, sp - 2, 30, sar(e.get("ag_ic_ihtiyac", "İzolasyon trafosu 0,8/0,4 kV 20 kVA %uk 4,5 · 125 A gG · KAKR 4×40 A 300 mA · İç ihtiyaç: aydınlatma, priz, CCTV, OG kumanda, akü-redresör"), max(10, int(sp / 1.15))), 1.4)
+    ic_txt = e.get("ag_ic_ihtiyac") or ("İzolasyon trafosu 0,8/0,4 kV 20 kVA %uk 4,5 · 125 A gG · KAKR 4×40 A 300 mA · İç ihtiyaç: aydınlatma, priz, CCTV, OG kumanda, akü-redresör" if izo
+                                        else "İç ihtiyaç panosu 400/230 V · KAKR 4×40 A 300 mA · aydınlatma, priz, CCTV, OG kumanda, akü-redresör")
+    _sat = sar(ic_txt, max(10, int(sp / 1.15)))
+    sy_kutu(C, TH_AG, x - sp / 2 + 1, yy - 4, sp - 2, len(_sat) * 2.05 + 3, _sat, 1.4)
     C.T(TH_YZ, x + 3, yb - 8, 1.4, "İç ihtiyaç")
-    yic = yy - 38
+    yic = yy - 4 - len(_sat) * 2.05 - 7
     # parafudr + ölçü
     x = cx0 + sp
     C.L(TH_AG, [(x, yb), (x, yb - 4)]); C.C(TH_AG, x, yb, 0.6)
@@ -2395,15 +2412,15 @@ def pafta_tekhat_tm(M, t, kod, tek=False):
     xs_list = []
     for j, inv in enumerate(invs):
         ikw = inv.get("ac_kw") or e["inverter_ac_kw"]
-        x = cx0 + (j + 2) * sp; xs_list.append(x)
+        x = cx0 + 2 * sp + j * _spi + _spi / 2; xs_list.append(x)
         C.L(TH_AG, [(x, yb), (x, yb - 2)]); C.C(TH_AG, x, yb, 0.6)
         yy2 = sy_kesici(C, TH_AG, x, yb - 2)
         C.L(TH_AG, [(x, yy2), (x, ybot)])
         C.TL(TH_YZ, x + 2.4, yb - 5, 1.35, [f"TMŞ-{inv['gno']:02d}", "3 kutuplu", f"{e['ag_gerilim_v']} V", f"{_inv_tms_a(e, ikw) or '—'} A {e.get('ag_cikis_ka', 36)} kA"], 1.35)
-        C.T(TH_YZ, x + 1.8, ybot - 33, 1.45, f"INV-{inv['gno']:02d} {inv.get('ag_kablo', e['ac_kablo'])} {inv['ac_m']:.0f} m", rot=90)
+        C.T(TH_YZ, x + 1.8, ybot - 31, 1.45, f"INV-{inv['gno']:02d} {inv.get('ag_kablo', e['ac_kablo'])} {inv['ac_m']:.0f} m", rot=90)
     C.R(TH_KOSK, agx0, ytp, agx1, ybot)
     cxk = (xs_list[(len(invs) + 1) // 2 - 1] + xs_list[min((len(invs) + 1) // 2, len(invs) - 1)]) / 2 if len(invs) > 1 else (xs_list[0] if xs_list else cx0)
-    yalt_inv = adp_cikislar(C, M, invs, xs_list, ybot, cxk, e)
+    yalt_inv = adp_dikey(C, M, invs, xs_list, ybot)
     # sağ üst: veri + sembol tablosu (tek paftada sembol tablosu ve notlar bir kez, DM bölümünde)
     dx = X0 + len(hucreler) * HW + 110
     if not tek: sembol_tablosu(C, dx + 300, YT + 6, 150)
@@ -2445,7 +2462,6 @@ def pafta_tekhat(M, kod="02"):
     sığmazsa uzatılmış kağıt."""
     if getattr(M, "dm_ortak", False):      # tek köşk: ayrı DM / OG dağıtım bölümü yok (DM hücreleri TM-1 bloğunda)
         pf = Pafta(kod, "TEK HAT ŞEMASI (TM + DM · AG PANO · İNVERTER · DC)", olcekli=False)
-        sembol_tablosu(Ciz(pf), 16.0, 470.0 + 6, 150)
     else:
         pf = pafta_tekhat_dm(M, kod)
         pf.ad = "TEK HAT ŞEMASI (DM · OG DAĞITIM · TM · AG PANO)"
@@ -2699,9 +2715,20 @@ def inv_kutu(C, M, inv, x0, y0, sag_cikis=True):
         C.L("GES-DC-KABLO", [(xs, yy - 21), (xs, yy - 23)])
         sy_modul(C, K, xs, yy - 23, 3.0, 4.0)
         C.L("GES-DC-KABLO", [(xs - 0.9, yy - 27), (xs - 0.9, yy - 28)])
-        C.T(TH_YZ, xs + 1.7, yy - 35.5, 1.15, f"S{s['giris']} {s['dc_m']:.0f}m", rot=90)
-    C.T(TH_YZ, x0 + 1.5, yk - STR_H + 0.5, 1.35, f"DC: {e['dc_kablo']}  ·  dizi {e['string_modul']} modül  ·  S#: kablo no, m: DC kablo (+/−)")
+        C.T(TH_YZ, xs + 1.7, yy - 35.5, 1.1, f"S{s['giris']} {s['dc_m']:.0f}m (tek {s['dc_tek_yon_m']:.0f})", rot=90)
+    C.T(TH_YZ, x0 + 1.5, yk - STR_H + 0.5, 1.35, f"DC: {e['dc_kablo']} · dizi {e['string_modul']} modül · S#: kablo no · m = 2 × tek yön (+ ve −) [+ masa içi dönüş]")
     return tx + 4.8, yb, yk - STR_H - 2
+
+
+def adp_dikey(C, M, invs, xs_list, yalt):
+    """İnverter kutuları tek sırada yan yana; her TMŞ çıkışı kendi kutusuna düz iner (kağıt yana yayılır, iki sütun yok)."""
+    alt = yalt; yt = yalt - 36
+    for inv, x in zip(invs, xs_list):
+        W = inv_kutu_w(inv); x0 = x - (W - 20 + 4.8)
+        tx, yb, ya = inv_kutu(C, M, inv, x0, yt, True)
+        C.L(TH_AG, [(x, yalt), (x, yb)])
+        alt = min(alt, ya)
+    return alt
 
 
 def adp_cikislar(C, M, invs, xs_list, yalt, cx, e):
@@ -2800,6 +2827,7 @@ def pafta_tablolar(M, kod="02"):
           ("Toplam dizi sayısı", f"{len(M.stringler)} adet"), ("Toplam panel sayısı", f"{nmod} adet"),
           ("AC kurulu güç", (_tr_sayi(sum(kws), 0) + " kWe") if all(kws) and kws else "—")]
     yb = min(yb, tablo(C, x + 90, y0, [("PARAMETRE", 46, "L"), ("DEĞER", 40, "L")], ev, baslik="EVİRİCİ BİLGİLERİ", rh=4.4, th=1.7))
+    if getattr(M, "dm_ortak", False): yb = min(yb, sembol_tablosu(C, x + 185, y0, 150))   # tek köşkte sembol tablosu tablolarla yan yana
     yb -= 12
     # DC kablo kesit ve metraj listeleri (Zorlu Tesis 1 GES formu): her ADP, her inverterin tüm girişleri (boş giriş boş satır)
     kol = [("İNVERTÖR NO", 17, "C"), ("KABLO NO", 11, "C"), ("L (m)", 11, "C"), ("S (mm²)", 10, "C")]

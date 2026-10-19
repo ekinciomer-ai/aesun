@@ -229,7 +229,7 @@ function tsAcAg(kalan, A, tm, tohum) {
   const sirali = kalan.slice().sort((a, b) => Math.hypot(b.p[0] - A[0], b.p[1] - A[1]) - Math.hypot(a.p[0] - A[0], a.p[1] - A[1]));
   for (const x of sirali) {
     let yol;
-    if (!ag.length) { const r = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); yol = r || [x.p, A]; }
+    if (!ag.length) { yol = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); }   // güzergâh yoksa düz çizgi YOK (masa üstünden geçmez); bildirilir
     else {
       // bağlanma noktası: ağ üzerindeki tüm noktalar (≈ 4 m arayla) içinde branşman + 0,3 × kalan ortak kuyruk en küçük olan.
       // Ortak kanal ucuz sayılır (tek kanal kuralı), ama kablo kanala en kısa yerden girer; ADP'nin kendisi de aday.
@@ -241,14 +241,15 @@ function tsAcAg(kalan, A, tm, tohum) {
           for (let u = 0; u <= n; u++) { const t = u / n, q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; const c = Math.hypot(x.p[0] - q[0], x.p[1] - q[1]) + 0.3 * (kal[k + 1] + L * (1 - t)); if (c < best.c) best = { c, y, i: k, q }; }
         }
       }
-      if (!best.y) { const dog = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); yol = dog || [x.p, A]; }
+      if (!best.y) { yol = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); }
       else {
         const q = best.q, kuyruk = [q, ...best.y.slice(best.i + 1)];
         const br = K.gorur(x.p, q) ? [x.p, q] : K.yol(x.p, q);
         if (br) yol = [...br.slice(0, -1), ...kuyruk];
-        else { const dog = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); yol = dog || [x.p, q, ...kuyruk.slice(1)]; }
+        else { yol = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); }
       }
     }
+    if (!yol) continue;
     const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (Math.hypot(yol[i][0] - sad[sad.length - 1][0], yol[i][1] - sad[sad.length - 1][1]) > 0.05) sad.push(yol[i]);
     out.set(x.it.id, sad); ag.push(sad);
   }
@@ -819,7 +820,9 @@ function tsSiraUclari() {
   const uc = [], W = (s_, t) => [ux[0] * s_ + uy[0] * t, ux[1] * s_ + uy[1] * t];
   for (const r of siralar) {
     r.ms.sort((a, b) => a.s - b.s); let par = [r.ms[0]];
-    const bitir = () => { const a = par[0], b = par[par.length - 1]; uc.push({ p: W(a.s - a.c.L / 2 - 1.2, r.t), yan: -1, t: r.t }, { p: W(b.s + b.c.L / 2 + 1.2, r.t), yan: 1, t: r.t }); };
+    // kullanıcı kuralı 19.10.2026: inverter masanın ARKASINDA (kuzey açıklık), sıra ucundaki masanın ucuna yakın
+    const ag_ = gnum('g-ang', 0) * Math.PI / 180, kz = [-Math.sin(ag_), Math.cos(ag_)], sg = (uy[0] * kz[0] + uy[1] * kz[1]) >= 0 ? 1 : -1, arka = sg * (D / 2 + 0.5);
+    const bitir = () => { const a = par[0], b = par[par.length - 1]; uc.push({ p: W(a.s - a.c.L / 2 + 1.0, r.t + arka), yan: -1, t: r.t }, { p: W(b.s + b.c.L / 2 - 1.0, r.t + arka), yan: 1, t: r.t }); };
     for (let k = 1; k < r.ms.length; k++) { const a = r.ms[k - 1], b = r.ms[k]; if (b.s - b.c.L / 2 - (a.s + a.c.L / 2) > 3) { bitir(); par = [b]; } else par.push(b); }
     bitir();
   }

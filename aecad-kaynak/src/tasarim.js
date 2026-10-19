@@ -230,6 +230,28 @@ function tsAcAg(kalan, A, tm, tohum) {
   // 2) Hiçbiri bağlanamıyorsa en uzak inverterden ADP'ye ana hat (mevcut kanal ucuz → ağa girer), sonra 1'e dön.
   const out = new Map(), ag = [];
   for (const y of tohum || []) { const z = y.map((q) => [q[0], q[1]]); ag.push(z); K.agEkle(z); }
+  // Kenar kanal (kullanıcı kuralı 19.10.2026): çit içindeki çekme bandının ortasında, sınıra paralel DÜZ kanal. İnverter sıra
+  // açıklığı boyunca düz gider, kenar kanala girer, kanal boyunca köşke (ADP) ulaşır — merdiven/ızgara güzergâhı yok.
+  // Kanal ADP'ye en yakın noktada ikiye ayrılır (iki yönden gelen kablolar kısa taraftan); ADP bağlantısı tek kısa hat.
+  try {
+    const sb = (typeof gnum === 'function' ? gnum('g-set', 5) : 5) || 5;
+    const SB = (typeof sinirlar === 'function' ? sinirlar() : (G.bound ? [G.bound] : [])).filter((B) => B.length >= 3);
+    const B = SB.find((b_) => pointInPoly(A, b_)) || SB[0];
+    const o = B && offsetItem({ id: -1, t: 'pline', cl: true, layer: '0', pts: B.map((q) => [q[0], q[1], 0]) }, sb / 2, centroidOf(B));
+    const R = o && o.pts ? o.pts.map((q) => [q[0], q[1]]) : null;
+    if (R && R.length >= 3) {
+      let bi = 0, bt = 0, bd = Infinity;
+      for (let i = 0; i < R.length; i++) { const p = R[i], q = R[(i + 1) % R.length], dx = q[0] - p[0], dy = q[1] - p[1], L2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((A[0] - p[0]) * dx + (A[1] - p[1]) * dy) / L2)), d_ = Math.hypot(p[0] + t * dx - A[0], p[1] + t * dy - A[1]); if (d_ < bd) { bd = d_; bi = i; bt = t; } }
+      const R0 = [R[bi][0] + bt * (R[(bi + 1) % R.length][0] - R[bi][0]), R[bi][1] + bt * (R[(bi + 1) % R.length][1] - R[bi][1])];
+      const n = R.length, ileri = [R0], geri = [R0];
+      for (let k = 1; k <= n; k++) ileri.push(R[(bi + k) % n]);
+      for (let k = 0; k < n; k++) geri.push(R[(bi - k + n) % n]);
+      const Lp = (P) => P.reduce((t, q, i) => t + (i ? Math.hypot(q[0] - P[i - 1][0], q[1] - P[i - 1][1]) : 0), 0), yarim = Lp([...ileri, R0]) / 2;
+      const kes = (P) => { const o_ = [P[0]]; let t = 0; for (let i = 1; i < P.length; i++) { const d_ = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); if (t + d_ >= yarim) { const f = (yarim - t) / (d_ || 1); o_.push([P[i - 1][0] + f * (P[i][0] - P[i - 1][0]), P[i - 1][1] + f * (P[i][1] - P[i - 1][1])]); break; } o_.push(P[i]); t += d_; } return o_; };
+      const bag = K.gorur(R0, A) ? [R0, A] : (K.yol(R0, A, { duz: true }) || [R0, A]);
+      for (const yon of [ileri, geri]) { const z = [...kes(yon).reverse(), ...bag.slice(1)]; ag.push(z); K.agEkle(z); }
+    }
+  } catch (e) { console.warn('kenar kanal', e); }
   const kal = kalan.slice(), d = (p) => Math.hypot(p[0] - A[0], p[1] - A[1]);
   while (kal.length) {
     let en = null;
@@ -376,9 +398,10 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   for (let j = ny - 1; j >= 0; j--) for (let i = nx - 1; i >= 0; i--) { const k = j * nx + i; if (!ak[k]) continue; let v = ak[k]; if (i < nx - 1) v = Math.min(v, ak[k + 1] + 1); if (j < ny - 1) v = Math.min(v, ak[k + nx] + 1); ak[k] = v; }
   const ORTA = 1.6, KO = 1.5, TURN = 4.0, NETC = 0.15;   // m: bu açıklığın altında engele yaklaşmak cezalı; kırık başına ceza; mevcut kanalda adım ucuz (yeni kazı yok)
   // kanal ağı maskesi: hücre → (hat no + 1, parça no). En az kazı: yeni hat mevcut kanala girer, branşman kanala DÜZ (kırıksız) bağlanır.
-  const netL = new Int32Array(N), netS = new Int32Array(N), hatlar = [];
+  const netL = new Int32Array(N), netS = new Int32Array(N), hatlar = [], kalan_ = [];
   const agEkle = (yW) => {
     const li = hatlar.length; hatlar.push(yW); const y = yW.map(Lc);
+    const kl = new Array(yW.length).fill(0); for (let k = yW.length - 2; k >= 0; k--) kl[k] = kl[k + 1] + Math.hypot(yW[k + 1][0] - yW[k][0], yW[k + 1][1] - yW[k][1]); kalan_.push(kl);
     for (let k = 0; k < y.length - 1; k++) { const a = y[k], b = y[k + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.5))); for (let u = 0; u <= n; u++) { const [i, j] = hc([a[0] + (b[0] - a[0]) * u / n, a[1] + (b[1] - a[1]) * u / n]); if (i >= 0 && j >= 0 && i < nx && j < ny && !netL[j * nx + i]) { netL[j * nx + i] = li + 1; netS[j * nx + i] = k; } } }
   };
   // düz branşman: inverterden 4 yönde ışın; ya da inverter çıkışından açıklığa ≤ 2,5 m iniş + sıra boyunca tek düz hat. İlk kanal hücresinde durur.
@@ -389,7 +412,7 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
       const yon = o ? [[1, 0], [-1, 0]] : [[1, 0], [-1, 0], [0, 1], [0, -1]];
       for (const [dx, dy] of yon) for (let k = 0; k <= K2; k++) {
         const q = [sP[0] + dx * k * h, sP[1] + dy * k * h], [i, j] = hc(q); if (i < 0 || j < 0 || i >= nx || j >= ny) break; const cc = j * nx + i;
-        if (netL[cc]) { const ki = so + k * h + 0.3 * Math.max(0, ORTA - ak[hc(sP)[1] * nx + hc(sP)[0]] * h) / ORTA; if (!en || ki < en.c) en = { c: ki, sP, q, li: netL[cc] - 1, si: netS[cc], o }; break; }
+        if (netL[cc]) { const li_ = netL[cc] - 1, si_ = netS[cc]; const ki = so + k * h + 0.3 * Math.max(0, ORTA - ak[hc(sP)[1] * nx + hc(sP)[0]] * h) / ORTA + 0.25 * (kalan_[li_][si_] || 0); if (!en || ki < en.c) en = { c: ki, sP, q, li: li_, si: si_, o }; break; }
         if (blk[cc]) break;
       }
     }

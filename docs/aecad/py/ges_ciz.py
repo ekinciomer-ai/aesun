@@ -979,7 +979,10 @@ class Model:
             if hz == "trafo" and hedef is not None:
                 # kullanıcı kuralı 19.10.2026: DC tek yön sınırı (80 m / ΔU) içinde kalan en trafoya yakın masa başı — AC kısalır
                 # hız: adaylar trafoya yakınlık sırasıyla denenir; ilk uygun olan sonuçtur. En uzak masadan başlanır, sınır aşılınca bırakılır.
-                adaylar = sorted(((abs(gecici_inv(h, tf)["x"] - hedef[0]) + abs(h["y"] - hedef[1]), h, tf) for h in ms_ for tf in ("E", "W")), key=lambda t: t[0])
+                # kullanıcı kuralı 19.10.2026: inverter, AG kanalının / trafonun BULUNDUĞU taraftaki masa başında (kanal sağdaysa inverter sağda);
+                # karşı uç yalnız o tarafta DC sınırı tutmazsa
+                cx_ = sum(q["x"] for q in ms_) / len(ms_); tf_k = "E" if hedef[0] >= cx_ else "W"
+                adaylar = sorted(((abs(gecici_inv(h, tf)["x"] - hedef[0]) + abs(h["y"] - hedef[1]) + (0 if tf == tf_k else 1e5), h, tf) for h in ms_ for tf in ("E", "W")), key=lambda t: t[0])
                 for d_, h, tf in adaylar:
                     iv = gecici_inv(h, tf)
                     if any(math.hypot(q["x"] - iv["x"], q["y"] - iv["y"]) > lim + self.masa_L for q in ms_): continue
@@ -1003,9 +1006,16 @@ class Model:
                 sig = min(q["derinlik"] for q in ms_)
                 aday = [h for h in ms_ if h["derinlik"] == sig]
             best = None
+            tf_k = None
+            if hedef is not None: cx_ = sum(q["x"] for q in ms_) / len(ms_); tf_k = "E" if hedef[0] >= cx_ else "W"   # trafo/AG kanalı tarafı
             for h in aday:
-                iv = gecici_inv(h); m_ = max(yol_boy(q, iv) for q in ms_)
-                if best is None or m_ < best[0]: best = (m_, h, h["taraf"])
+                for tf in ([tf_k] if tf_k else [h["taraf"]]):
+                    iv = gecici_inv(h, tf); m_ = max(yol_boy(q, iv) for q in ms_)
+                    if best is None or m_ < best[0]: best = (m_, h, tf)
+            if tf_k and best and best[0] > lim:          # o tarafta DC sınırı tutmuyorsa eski kural (en yakın kenar)
+                for h in aday:
+                    iv = gecici_inv(h); m_ = max(yol_boy(q, iv) for q in ms_)
+                    if m_ < best[0]: best = (m_, h, h["taraf"])
             return best
         def enuzun(bl):
             return en_iyi(list({id(q): q for q in bl}.values()))[0]

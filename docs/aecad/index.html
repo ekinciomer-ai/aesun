@@ -3490,7 +3490,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610200019', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610200038', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
@@ -3851,7 +3851,7 @@ function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pj
 function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(6, c - 2, m >= 16 ? 6 : m >= 8 ? 4 : m >= 4 ? 2 : 1)); }   // 22 çekirdek / 32 GB → 6 seçenek aynı anda
 function pjYerIsci(k) {
   PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
-  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610200019', document.baseURI).href), alt: null };
+  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610200038', document.baseURI).href), alt: null };
   o.w.onmessage = (e) => {
     const m = e.data, a = o.alt; if (!a || m.id !== a.seq) return;
     if (m.stage) { a.asama = m.stage; pjAltCiz(); return; }
@@ -4687,7 +4687,7 @@ function tsAcAg(kalan, A, tm, tohum) {
   // Kullanıcı kuralı 19.10.2026: kanallar doğrusal; kırık yalnız ANA güzergâhta; en az kanal kazısı; dolandırma yok.
   // 1) Ağa düz (tek parça, gerekirse inverter çıkışından ≤ 2,5 m iniş) bağlanabilen inverterler: en kısa yeni kazılı olan önce.
   // 2) Hiçbiri bağlanamıyorsa en uzak inverterden ADP'ye ana hat (mevcut kanal ucuz → ağa girer), sonra 1'e dön.
-  const out = new Map(), ag = [], istik = [];   // istik: AG hat istikameti kolları — branşmanlar yalnız bunlara bağlanır
+  const out = new Map(), ag = [], istik = []; let eksen = null;   // istik: AG hat istikameti kolları — branşmanlar yalnız bunlara bağlanır; eksen: sıra doğrultusu
   for (const y of tohum || []) { const z = y.map((q) => [q[0], q[1]]); ag.push(z); K.agEkle(z); }
   // AG HAT İSTİKAMETİ (kullanıcı kuralı 19.10.2026): trafo tarafındaki sıraların masa uç köşelerinden 3 m açıktan geçen, panel alanının
   // kenarına paralel düz hat (dış zarf) — uçların 3 m
@@ -4696,7 +4696,7 @@ function tsAcAg(kalan, A, tm, tohum) {
     const ms = [...S.doc.items.values()].filter((it) => String(it.layer).toUpperCase() === 'GES-MASA');
     const f0 = ms.length && tsMasaCerceve(ms[0]);
     if (f0 && kalan.length && self.AC_ZARF !== false) {
-      const ux = f0.ux, uy = [-ux[1], ux[0]], L_ = (p) => [p[0] * ux[0] + p[1] * ux[1], p[0] * uy[0] + p[1] * uy[1]], W_ = (q) => [q[0] * ux[0] + q[1] * uy[0], q[0] * ux[1] + q[1] * uy[1]];
+      const ux = f0.ux, uy = [-ux[1], ux[0]]; eksen = ux; const L_ = (p) => [p[0] * ux[0] + p[1] * ux[1], p[0] * uy[0] + p[1] * uy[1]], W_ = (q) => [q[0] * ux[0] + q[1] * uy[0], q[0] * ux[1] + q[1] * uy[1]];
       // istikamet bu köşke bağlı TÜM inverterlere göre kurulur (tek tek eklense de aynı hat — ortak kanal tutarlı kalır)
       const tumInv = (typeof tsInverterler === 'function' ? tsInverterler() : []).filter((x) => { const tms_ = [...S.doc.items.values()].filter((y) => y.t === 'insert' && y.ges && y.ges.tip === 'tm'); const en_ = tms_.reduce((a_, b_) => (Math.hypot(tsMerkez(b_)[0] - x.p[0], tsMerkez(b_)[1] - x.p[1]) < Math.hypot(tsMerkez(a_)[0] - x.p[0], tsMerkez(a_)[1] - x.p[1]) ? b_ : a_), tms_[0]); return en_ === tm; });
       const refInv = tumInv.length >= kalan.length ? tumInv : kalan;
@@ -4706,37 +4706,39 @@ function tsAcAg(kalan, A, tm, tohum) {
       const sira = [];
       for (const it of ms) { const P = tsMasaIz(it); if (!P) continue; const Q = P.map(L_); const y0 = Math.min(...Q.map((q) => q[1])), y1 = Math.max(...Q.map((q) => q[1])), x0 = Math.min(...Q.map((q) => q[0])), x1 = Math.max(...Q.map((q) => q[0])); const yc = (y0 + y1) / 2;
         let r = sira.find((z) => Math.abs(z.yc - yc) < (y1 - y0) / 2); if (!r) { r = { yc, y0, y1, x0, x1 }; sira.push(r); } else { r.x0 = Math.min(r.x0, x0); r.x1 = Math.max(r.x1, x1); r.y0 = Math.min(r.y0, y0); r.y1 = Math.max(r.y1, y1); } }
-      if (sira.length >= 2) {
-        const pay = 3.0, uc = sira.map((r) => [[dogu ? r.x1 + pay : r.x0 - pay, r.y0 - 0.3], [dogu ? r.x1 + pay : r.x0 - pay, r.y1 + 0.3]]).flat();
-        const zarf = (pts) => {   // dış zarf: tam dışbükey zarfın TRAFO TARAFINDAKİ zinciri (en alt → en üst y)
-          const H = tsHull(pts); if (H.length < 3) return pts.slice().sort((p, q) => p[1] - q[1]);
-          let iLo = 0, iHi = 0; H.forEach((p, i) => { if (p[1] < H[iLo][1]) iLo = i; if (p[1] > H[iHi][1]) iHi = i; });
-          const zin = (a, b) => { const o = [H[a]]; for (let i = a; i !== b; i = (i + 1) % H.length) o.push(H[(i + 1) % H.length]); return o; };
-          const c1 = zin(iLo, iHi), c2 = zin(iHi, iLo).reverse(), ort = (c) => c.reduce((t, p) => t + p[0], 0) / c.length;
-          return (dogu ? ort(c1) >= ort(c2) : ort(c1) <= ort(c2)) ? c1 : c2;
-        };
-        for (const yon of [1, -1]) {   // trafonun kuzeyi ve güneyi ayrı kollar
-          const ust = invL.filter((q) => (q[1] - Al[1]) * yon > 0); if (!ust.length) continue;
-          const uzak = ust.reduce((m, q) => (Math.abs(q[1] - Al[1]) > Math.abs(m[1] - Al[1]) ? q : m));
-          const ylim = uzak[1] + yon * 3;   // en uzak inverterin sırasına kadar (tüm inverterler)
-          // geometri o yandaki TÜM sıraların zarfından (inverter eklendikçe hat değişmez), sonra en uzak inverterin sırasında kesilir
-          const icinde0 = (p) => (typeof sinirIcinde === 'function' ? sinirIcinde(W_(p)) : true);
-          const kes = (H_) => { const o = []; for (let i = 0; i < H_.length; i++) { const p = H_[i]; if ((ylim - p[1]) * yon >= 0) { o.push(p); continue; } const q = H_[i - 1]; if (q) { const t = (ylim - q[1]) / ((p[1] - q[1]) || 1); o.push([q[0] + t * (p[0] - q[0]), ylim]); } break; } return o; };
-          let H = null;
-          { const tum = uc.filter((p) => (p[1] - Al[1]) * yon >= -2); if (tum.length >= 2) { const Ht = zarf(tum).sort((p, q) => (p[1] - q[1]) * yon); if (Ht.every(icinde0)) H = kes(Ht); } }
-          if (!H || H.length < 2) { const pts = uc.filter((p) => (p[1] - Al[1]) * yon >= -2 && (ylim - p[1]) * yon >= 0); if (pts.length < 2) continue; H = zarf(pts).sort((p, q) => (p[1] - q[1]) * yon); }
-          const kol = [...H.slice().reverse()].map(W_);   // uzaktan trafoya
-          // her parça engelsiz olmalı; değilse o kol atlanır (ızgara yedeği çalışır)
-          // engelli parça (köşk, sınır köşesi) yalnız o parçada ızgara güzergâhıyla aşılır
-          // kullanıcı çizimi (19.10.2026): panellerin 3 m önünden, panel istikametine paralel DÜZ hat — yalnız masaya değmemesi ve
-          // arazi içinde kalması aranır (köşk/ızgara engeli bu hattı kırmaz)
-          const icinde = (p) => (typeof sinirIcinde === 'function' ? sinirIcinde(p) : true);
-          let ok = kol.every(icinde);
-          for (let i = 1; ok && i < kol.length; i++) if (!K.masaYok(kol[i - 1], kol[i])) ok = false;
-          if (!ok) continue;
-          const son = kol[kol.length - 1], bag = K.masaYok(son, A) ? [son, A] : K.yol(son, A, { duz: true });
-          if (!bag) continue;
-          const z = [...kol, ...bag.slice(1)]; ag.push(z); K.agEkle(z); istik.push(z);
+      if (sira.length >= 1) {
+        // Kullanıcı tarifi (20.10.2026, en yalın hâli): masa uç köşelerinin 3 m açığından, sıralara DİK tek DÜZ çizgi (AG hat istikameti).
+        // Çizgi, inverterlerin bulunduğu y aralığındaki TÜM sıraların en dıştaki ucundan 3 m dışarıdadır (kırık yok). Uzak inverter kendi
+        // sırasının açıklığından (masaların arkasından) düz gelip bu çizgiye en yakın noktadan bağlanır. Çizgi TM hizasından ADP'ye bağlanır.
+        // Hattın doğrultusu panel alanının TM tarafındaki kenarına paraleldir (uç köşeler eğik dizilmişse hat da eğik, yine tek düz çizgi).
+        const icinde = (p) => (typeof sinirIcinde === 'function' ? sinirIcinde(W_(p)) : true);
+        const ys = invL.map((q) => q[1]), yA = Math.min(...ys) - 0.5, yB = Math.max(...ys) + 0.5;
+        const ilgili = sira.filter((r) => r.y1 >= Math.min(yA, Al[1]) - 1 && r.y0 <= Math.max(yB, Al[1]) + 1).sort((a, b) => a.yc - b.yc);
+        if (ilgili.length) {
+          const dot = (p, v) => p[0] * v[0] + p[1] * v[1];
+          for (const yon of [1, -1]) {   // TM'nin iki yanı ayrı DÜZ kol (saha kenarı kırıksa her kol kendi kenarına paralel), ikisi de ADP'de biter
+            const inv_ = invL.filter((q) => (q[1] - Al[1]) * yon > 0); if (!inv_.length) continue;
+            const uzakY = inv_.reduce((m, q) => (Math.abs(q[1] - Al[1]) > Math.abs(m[1] - Al[1]) ? q : m))[1] + yon * 0.5;
+            const Es = ilgili.filter((r) => (r.yc - Al[1]) * yon > -1 && (uzakY - r.yc) * yon > -1).sort((a, b) => (a.yc - b.yc) * yon).map((r) => [dogu ? r.x1 : r.x0, r.yc]);
+            if (!Es.length) continue;
+            let dv = [0, yon]; if (Es.length >= 2) { const a = Es[0], b = Es[Es.length - 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; dv = [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; }
+            let nv = [dv[1], -dv[0]]; if (dot(Al, nv) < dot(Es[0], nv)) nv = [-nv[0], -nv[1]];   // normal TM'ye bakar
+            const c0 = Math.max(...Es.map((p) => dot(p, nv))), tF = dot(Al, dv);
+            for (const pay of [3.0, 2.0, 1.5, 1.0]) {
+              const c = c0 + pay, N = (t) => [nv[0] * c + dv[0] * t, nv[1] * c + dv[1] * t], ayak = N(tF);
+              // hat, her inverterin SIRA doğrultusundaki (yerel x) düz çizgisiyle kesişene kadar uzar (eğik hatta kesişim inverter izdüşümünden ötededir)
+              const tKes = (q) => (Math.abs(nv[0]) > 0.05 ? dot(q, dv) + ((c - dot(q, nv)) / nv[0]) * dv[0] : dot(q, dv));
+              const tB = Math.max(tF + 0.5, ...inv_.map((q) => tKes(q) + 3));
+              let tU = tB; while (tU > tF + 0.5 && !icinde(N(tU))) tU -= 1;   // uç sınır dışına taşıyorsa sınıra kadar kısalt
+              const uc = N(tU); if (!icinde(ayak) || !icinde(uc) || tU <= tF + 0.5) continue;
+              const ayakW = W_(ayak), ucW = W_(uc); if (!K.masaYok(ucW, ayakW)) continue;
+              const bag = K.masaYok(ayakW, A) ? [ayakW, A] : K.yol(ayakW, A, { duz: true }); if (!bag) continue;
+              let bas = [ucW];   // hat sınırda kesildiyse ANA hatta tek kırıkla sınır içinden en uzak sıraya kadar devam (kırık yalnız ana hatta)
+              if (tU < tB - 0.5) { let g = 0, u2 = null; while (g <= 12) { const q = N(tB); const q2 = [q[0] - nv[0] * g, q[1] - nv[1] * g]; if (icinde(q2)) { u2 = W_(q2); break; } g += 0.5; }
+                if (u2 && K.masaYok(u2, ucW)) bas = [u2, ucW]; }
+              const z = [...bas, ...bag]; ag.push(z); K.agEkle(z); istik.push(z); break;
+            }
+          }
         }
       }
     }
@@ -4750,7 +4752,15 @@ function tsAcAg(kalan, A, tm, tohum) {
       for (const y of (istik.length ? istik : ag)) { let kl = 0; const kal_ = new Array(y.length).fill(0); for (let k = y.length - 2; k >= 0; k--) kal_[k] = kal_[k + 1] + Math.hypot(y[k + 1][0] - y[k][0], y[k + 1][1] - y[k][1]);
         for (let k = 0; k < y.length - 1; k++) { const p = y[k], q = y[k + 1], dx = q[0] - p[0], dy = q[1] - p[1], L2 = dx * dx + dy * dy || 1; const t = Math.max(0, Math.min(1, ((x.p[0] - p[0]) * dx + (x.p[1] - p[1]) * dy) / L2)), z = [p[0] + t * dx, p[1] + t * dy];
           const d_ = Math.hypot(z[0] - x.p[0], z[1] - x.p[1]), c = d_ + 0.25 * (kal_[k + 1] + Math.sqrt(L2) * (1 - t));
-          if ((!r || c < r.c) && d_ <= 80 && K.masaYok(x.p, z)) r = { c, pts: [x.p, z, ...y.slice(k + 1)] }; } }
+          if ((!r || c < r.c) && d_ <= 80 && K.masaYok(x.p, z)) r = { c, pts: [x.p, z, ...y.slice(k + 1)] };
+          if (eksen && istik.length) {   // tercih: kendi sırasının açıklığından (sıra doğrultusunda) düz gidip hatta girmek — masaların arkasından;
+            // gerekirse inverter çıkışından açıklığa ≤ 2,5 m dik iniş (tek kırık)
+            const ey = [-eksen[1], eksen[0]];
+            for (const off of [0, 1, -1, 1.5, -1.5, 2, -2, 2.5, -2.5]) { const q0 = [x.p[0] + ey[0] * off, x.p[1] + ey[1] * off];
+              const den = eksen[0] * dy - eksen[1] * dx; if (Math.abs(den) < 1e-6) break; const wx = p[0] - q0[0], wy = p[1] - q0[1], s_ = (wx * dy - wy * dx) / den, t2 = (wx * eksen[1] - wy * eksen[0]) / den;
+              if (!(t2 >= 0 && t2 <= 1 && Math.abs(s_) <= 120)) continue; const z2 = [q0[0] + eksen[0] * s_, q0[1] + eksen[1] * s_], c2 = (Math.abs(s_) + Math.abs(off)) * 0.9 + 0.25 * (kal_[k + 1] + Math.sqrt(L2) * (1 - t2));
+              if ((r && c2 >= r.c) || (off && !K.masaYok(x.p, q0)) || !K.masaYok(q0, z2)) continue;
+              r = { c: c2, pts: off ? [x.p, q0, z2, ...y.slice(k + 1)] : [x.p, z2, ...y.slice(k + 1)] }; break; } } } }
       if (!r) r = K.dal(x.p, 150);
       if (r && (!en || r.c < en.r.c)) en = { x, r };
     }
@@ -5312,10 +5322,10 @@ function tsKanalCiz() {
         const A0 = [a_[0] - ux * e, a_[1] - uy * e], B0 = [b_[0] + ux * e, b_[1] + uy * e];
         parcalar.push([[[A0[0] + nx, A0[1] + ny], [B0[0] + nx, B0[1] + ny], [B0[0] - nx, B0[1] - ny], [A0[0] - nx, A0[1] - ny], [A0[0] + nx, A0[1] + ny]]]);
       } }
-    const yeni = []; let alan = 0;
-    if (parcalar.length) for (const pg of polygonClipping.union(...parcalar)) for (const ring of pg) { const pts = ring.slice(0, -1); alan += Math.abs(polyArea(pts)); yeni.push([null, { id: newId(), t: 'pline', layer: KAT, c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) }]); }
-    if (sil.length || yeni.length) S.doc.commit([...sil, ...yeni].map(([o, n]) => ({ o, n })), 'AG kanal');
-    if (alan) msg('AG kablo kanalı (50 cm bant, ortak): ≈ ' + fmtNum(alan / (2 * yarim), 0) + ' m kazı.', 'note');
+    // kullanıcı 20.10.2026: kanal bandı ÇİZİLMEZ (kaldırıldı); yalnız ortak kazı metrajı bildirilir, eski bant varsa silinir
+    let alan = 0; if (parcalar.length) for (const pg of polygonClipping.union(...parcalar)) for (const ring of pg) alan += Math.abs(polyArea(ring.slice(0, -1)));
+    if (sil.length) S.doc.commit(sil.map(([o, n]) => ({ o, n })), 'AG kanal bandı kaldırıldı');
+    if (alan) msg('AG ortak kanal kazısı: ≈ ' + fmtNum(alan / (2 * yarim), 0) + ' m.', 'note');
   } catch (e) { console.warn('kanal', e); }
 }
 async function tsAcTekEkle(it) {

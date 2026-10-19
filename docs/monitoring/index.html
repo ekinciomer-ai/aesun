@@ -3606,7 +3606,7 @@ function kbStrDegis() {
   document.querySelectorAll('svg.kb .pvd').forEach(e => { e.textContent = e.dataset[KB_STR]; });
   document.querySelectorAll('svg.kb .pvh').forEach(e => { e.textContent = KB_STR_AD[KB_STR]; });
 }
-const KB_SAYAC = {}; let KB_TB = 0;
+const KB_SAYAC = {}; let KB_TB = 0, KB_YON = true;
 async function kabinSema(uretKw) {
   kabinCss();
   let det = null; try { det = await al('n8n/cihaz_detay.json'); } catch (e) {}
@@ -3656,11 +3656,15 @@ async function kabinSema(uretKw) {
 
   if (fsI.length) s += sayac(MX, 58, 170, 'Σ INVERTER', say(uret, 1), say(uret * 1000 / (r3 * V * PF), 0));
   // sayaç / trafo → OG (net yön: inverter − antrak; pompa ve iç tüketim hariç, yaklaşık)
-  const netKw = uret - ANT_KW;
-  s += '<g class="' + (Math.abs(netKw) < 0.5 ? 'dur' : '') + '"><path class="ln" style="stroke-width:3;opacity:.3;stroke:' + (netKw >= 0 ? '#1E7A3C' : '#B42318') + '" d="M' + SX + ' ' + SB + 'V93"/><path class="' + (netKw >= 0 ? 'guc' : 'cek') + '" d="' + (netKw >= 0 ? 'M' + SX + ' ' + SB + 'V93' : 'M' + SX + ' 93V' + SB) + '"/></g>'
+  // net yön: anlık tahmin (inverter − cihaz yükü); fark tahmin hatası içinde kalırsa (±5 kW / %5) OSOS'un son saatindeki yön esas alınır
+  const netHam = uret - ANT_KW, osV = (((D && D.osos) || {}).tekyildiz_2 || {}).veri || {}, osG = Object.keys(osV).sort().pop(), osS = osG ? Object.keys(osV[osG]).sort().pop() : null;
+  const osNet = osS ? (Number(osV[osG][osS].veris) || 0) - (Number(osV[osG][osS].cekis) || 0) : null, belirsiz = Math.abs(netHam) < Math.max(5, uret * 0.05);
+  const VERIS = belirsiz && uret > 1 && osNet != null ? osNet >= 0 : netHam >= 0, netKw = VERIS ? Math.abs(netHam) : -Math.abs(netHam);
+  KB_YON = VERIS;
+  s += '<g class="' + (Math.abs(netKw) < 0.5 && !belirsiz ? 'dur' : '') + '"><path class="ln" style="stroke-width:3;opacity:.3;stroke:' + (netKw >= 0 ? '#1E7A3C' : '#B42318') + '" d="M' + SX + ' ' + SB + 'V93"/><path class="' + (netKw >= 0 ? 'guc' : 'cek') + '" d="' + (netKw >= 0 ? 'M' + SX + ' ' + SB + 'V93' : 'M' + SX + ' 93V' + SB) + '"/></g>'
     + '<circle class="ln" cx="' + SX + '" cy="80" r="13"/><circle class="ln" cx="' + SX + '" cy="62" r="13"/><path class="ln" d="M' + SX + ' 49V-12"/>'
     + T(SX + 20, 74, 'Trafo 31,5 / 0,4 kV', 'sm')
-    + sayac(MX, 150, 170, netKw >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', say(Math.abs(netKw), 1), say(Math.abs(netKw) * 1000 / (r3 * V * PF), 0), 'A', netKw >= 0 ? null : '#FF4D3D');
+    + sayac(MX, 150, 170, belirsiz ? (VERIS ? 'DENGE → ŞEBEKE' : 'DENGE ← ŞEBEKE') : netKw >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', say(Math.abs(netKw), 1), say(Math.abs(netKw) * 1000 / (r3 * V * PF), 0), 'A', netKw >= 0 ? null : '#FF4D3D');
   // antrak besleme kablosu → ana şalter → dağıtım barası
   s += '<g class="' + (ANT_KW > 0.5 ? '' : 'dur') + '"><path class="ln" style="stroke:#E07B00;stroke-width:3;opacity:.3" d="M' + FX + ' ' + SB + 'V' + BUSY + '"/><path class="yuk" d="M' + FX + ' ' + SB + 'V' + BUSY + '"/></g>'
     + T(FX - 10, SB + 74, 'antrak besleme kablosu', 'sm', ' text-anchor="end"')
@@ -3716,7 +3720,7 @@ async function kabinSema(uretKw) {
       return g + '<circle cx="' + (x + 5 * 21 - 1.5) + '" cy="' + (y + 25) + '" r="1.6" fill="#F4F1E6"/>'; };
     st += '<defs><linearGradient id="kbTbG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".7"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient><linearGradient id="kbTbG2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></linearGradient>'
       + '<linearGradient id="kbDiskG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8E8F92"/><stop offset=".5" stop-color="#E4E5E8"/><stop offset="1" stop-color="#8E8F92"/></linearGradient></defs>';
-    const yon = b.v - b.c >= 0;
+    const yon = KB_YON;
     st += '<g><title>OSOS T2 (Sera-2) · bugün ' + (g1 ? tarihK(g1) : '') + ': veriş ' + say(b.v) + ' kWh, çekiş ' + say(b.c) + ' kWh · dün: veriş ' + say(d.v) + ', çekiş ' + say(d.c) + ' kWh</title>'
       + '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh2 + '" rx="16" fill="#E7E3D4" stroke="#8F8A76" stroke-width="1.6"/>'
       + [[bx + 12, by + 12], [bx + bw - 12, by + 12], [bx + 12, by + bh2 - 12], [bx + bw - 12, by + bh2 - 12]].map(([q, w]) => '<circle cx="' + q + '" cy="' + w + '" r="4" fill="#CFCAB6" stroke="#8F8A76"/><path d="M' + (q - 2.5) + ' ' + w + 'H' + (q + 2.5) + '" stroke="#6F6A58"/>').join('')

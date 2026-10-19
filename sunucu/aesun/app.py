@@ -300,4 +300,47 @@ def demo_veri(request: Request):
         d = json.loads((VERI / "n8n/demo_durum.json").read_text())
     except Exception:
         raise HTTPException(503, "veri hazır değil")
-    return JSONResponse({k: d[k] for k in DEMO_ALAN if k in d}, headers=DEMO_BAS)
+    out = {k: d[k] for k in DEMO_ALAN if k in d}
+    try:
+        out["saha"] = demo_saha()
+    except Exception:
+        out["saha"] = None
+    return JSONResponse(out, headers=DEMO_BAS)
+
+# Demo saha şeması: kabin dağılımı (19 Eki saha notu), cihaz durumu (numara sırasıyla), cihaz gücü, Sera-2 inverterleri ve string güçleri.
+# IP, seri no, MAC, havuz adı, konum, fiyat paylaşılmaz.
+DEMO_KABIN = {"1": [23, 2, 3], "2": [17, 5, 7, 8], "3": [29, 28, 26, 11], "4": [1, 12, 10, 9], "5": [], "6": [6, 14, 15, 16],
+              "7": [21, 22, 24, 25], "8": [18, 19, 20], "9": [4, 27, 13]}
+DEMO_MODEL_W = {"S21e Hyd": 5300, "S19 XP+ Hyd": 5300, "S19e XP Hyd": 5830}
+
+def _oku(yol):
+    try:
+        return json.loads((VERI / yol).read_text())
+    except Exception:
+        return {}
+
+def demo_saha():
+    mad = _oku("antminer_panel.json"); det = (_oku("n8n/cihaz_detay.json").get("cihaz") or {}); kim = _oku("n8n/cihaz_kimlik.json")
+    md = {}
+    for c in mad.get("devices") or []:
+        no = str(c.get("actual_worker") or "").split(".")[-1]
+        if no.isdigit():
+            md[int(no)] = c
+    def cihaz(n):
+        c = md.get(n) or {}; o = det.get(f"{n:03d}") or {}
+        th = float(c.get("hashrate_TH") or 0) if c.get("online") and not c.get("sleeping") else 0.0
+        d = "u" if c.get("sleeping") else "c" if (c.get("online") and th > 1) else "i" if c.get("online") else "x"
+        model = o.get("model") if o.get("model") not in (None, "", "?") else (kim.get(f"{n:03d}") or {}).get("model", "?")
+        w = ((o.get("diger") or {}).get("watt") or DEMO_MODEL_W.get(model, 5300)) if d == "c" else 0
+        return {"no": n, "d": d, "kw": round(w / 1000, 2), "th": round(th), "m": str(model).replace(" Hyd", ""), "t": c.get("temp_max")}
+    kabin = {k: [cihaz(n) for n in v] for k, v in DEMO_KABIN.items()}
+    fs = _oku("n8n/fusionsolar_son.json"); inv = []
+    sera2 = [v for v in (fs.get("invertorler") or {}).values() if v.get("tesis") == "Sera-2"]
+    def sira(v):
+        m = re.search(r"(\d+)\s*$", str(v.get("ad") or "")); return int(m.group(1)) if m else 99
+    for v in sorted(sera2, key=sira):
+        pv = [[n, round((V or 0) * (A or 0) / 1000, 2)] for n, V, A in (v.get("pv") or [])]
+        inv.append({"ad": "INV-%02d" % sira(v), "kw": round(float(v.get("guc_kw") or 0), 1), "on": "ebeke" in str(v.get("durum") or ""),
+                    "nom": v.get("nominal_kw") or 100, "t": v.get("sicaklik_c"), "pv": pv})
+    durum_no = "".join(cihaz(n)["d"] for n in range(1, 30))
+    return {"kabin": kabin, "inv": inv, "durum_no": durum_no, "t": fs.get("guncelleme")}

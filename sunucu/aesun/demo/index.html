@@ -46,6 +46,23 @@ h1 em{font-style:normal;color:var(--kirmizi2)}
 .hat{stroke:#2F4664;stroke-width:2;fill:none}
 .akis{stroke-width:2.4;fill:none;stroke-dasharray:6 10;animation:akis 1.1s linear infinite}
 @keyframes akis{to{stroke-dashoffset:-16}}
+/* saha şeması */
+.saha{overflow-x:auto;border:1px solid var(--cizgi);border-radius:14px;background:#0A1422}
+.saha svg{display:block;font-family:Inter,system-ui,sans-serif}
+.mod{display:inline-flex;border:1px solid #33496A;border-radius:12px;overflow:hidden}.mod .btn{border:0;border-radius:0;background:#14243A}.mod .btn.on{background:var(--kirmizi)}
+.karar{font:600 12.5px 'JetBrains Mono',monospace;color:var(--soluk);border:1px solid var(--cizgi);border-radius:999px;padding:6px 12px}
+.sk text{fill:#C9D6E6}.sk .sm{font-size:11px;fill:#8FA2BC}.sk .b{font-weight:700;fill:#fff}.sk .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.sk .ln{stroke:#5C7392;stroke-width:1.6;fill:none}
+.sk .boru{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.sk .zemin{opacity:.25}.sk .sog{stroke:#3FA9F5}.sk .sic{stroke:#FF5A4F}
+.sk .akis2{stroke-width:2.6;stroke-dasharray:7 9;animation:akis .9s linear infinite}.sk .dur .akis2,.sk .dur .gk{animation:none;opacity:.25}
+.sk .gk{fill:none;stroke-width:3;stroke-dasharray:6 8;animation:akis .7s linear infinite}
+.sk .pmp.on .cark{transform-box:fill-box;transform-origin:50% 60%;animation:don 1.2s linear infinite}
+.sk .led{transition:fill .4s}.sk .led.c{fill:#2BD27A;animation:yan 1.6s ease-in-out infinite}.sk .led.u{fill:#5B8DEF}.sk .led.i{fill:#F5B83D;animation:yan .6s ease-in-out infinite}.sk .led.x{fill:#F0525A}
+@keyframes yan{50%{opacity:.35}}
+.sk .cb{transition:fill .5s,stroke .5s}.sk .cb.c{fill:rgba(43,210,122,.14);stroke:#2BD27A}.sk .cb.u{fill:rgba(91,141,239,.14);stroke:#5B8DEF}.sk .cb.i{fill:rgba(245,184,61,.16);stroke:#F5B83D}.sk .cb.x{fill:rgba(240,82,90,.16);stroke:#F0525A}
+.sk .sw{cursor:not-allowed;opacity:.55}.sk.man .sw{cursor:pointer;opacity:1}.sk.man .sw:hover rect:first-child{stroke:#fff}
+.sk .sw .tr{transition:transform .25s}.sk .sw.acik .tr{transform:translateX(14px)}
+.sk .lcd{font-family:'JetBrains Mono',ui-monospace,monospace}
 /* filo */
 .filo{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px}
 .cih{position:relative;border-radius:12px;border:1px solid var(--cizgi);background:#0F1D31;padding:10px 8px 8px;text-align:center;transition:background .5s,border-color .5s,transform .3s}
@@ -57,7 +74,7 @@ h1 em{font-style:normal;color:var(--kirmizi2)}
 .cih.i{border-color:rgba(245,184,61,.5);background:linear-gradient(180deg,rgba(245,184,61,.14),rgba(245,184,61,.02))}.cih.i .dr{color:var(--sari)}
 .cih.i .fan{animation:don 2.6s linear infinite;transform-origin:16px 16px}
 .cih.u .dr{color:var(--mavi)}.cih.u{border-color:rgba(91,141,239,.35)}
-.cih.x{opacity:.45}.cih.x .dr{color:var(--gri)}
+.cih.x{border-color:rgba(240,82,90,.5);background:linear-gradient(180deg,rgba(240,82,90,.16),rgba(240,82,90,.03))}.cih.x .dr{color:var(--kirmizi2)}
 .cih.vurgu{transform:scale(1.07);box-shadow:0 0 0 2px rgba(255,255,255,.25)}
 @keyframes don{to{transform:rotate(360deg)}}
 .lej{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--soluk);margin:14px 0 0}
@@ -125,6 +142,23 @@ footer{padding:30px 0 50px;color:var(--soluk);font-size:13px;border-top:1px soli
 </div></section>
 
 <section class="bolum"><div class="kap">
+  <h2>Saha şeması · güneş, pano ve kabinler</h2>
+  <p class="not">Güneş inverterleri ile madencilik kabinleri aynı AG barasında. Otomatik modda sistem karar verir; manuel modda operatör cihazları ve kabinleri tek tek açıp kapatabilir.</p>
+  <div class="panel">
+    <div class="sim">
+      <div class="mod" role="group" aria-label="Kontrol modu"><button class="btn mb on" id="mOto" onclick="modSec('oto')">⟳ Otomatik</button><button class="btn mb" id="mMan" onclick="modSec('man')">✋ Manuel</button></div>
+      <span class="karar" id="sKarar"></span>
+      <button class="btn" id="sTumAc" onclick="tumu('c')" disabled>⏻ Tümünü aç</button>
+      <button class="btn" id="sTumKap" onclick="tumu('u')" disabled>☾ Tümünü uyut</button>
+      <span class="simbant" id="sBant">Manuel mod (simülasyon) — gerçek cihazlara komut gönderilmez; operatör kontrolünün nasıl işlediğini gösterir.</span>
+    </div>
+    <div class="saha" id="saha"><p style="color:var(--soluk)">Saha verisi yükleniyor…</p></div>
+    <div class="lej"><span><i style="background:var(--yesil)"></i>Üretimde</span><span><i style="background:var(--sari)"></i>Isınıyor</span><span><i style="background:var(--mavi)"></i>Uykuda</span><span><i style="background:var(--kirmizi2)"></i>Arıza / ulaşılamıyor</span><span><i style="background:#3FA9F5"></i>Soğuk su</span><span><i style="background:#FF5A4F"></i>Sıcak su</span><span><i style="background:#FFB02E"></i>Güneş üretimi</span></div>
+    <div class="konsol" id="sKonsol" style="min-height:70px;max-height:140px;margin-top:12px"></div>
+  </div>
+</div></section>
+
+<section class="bolum"><div class="kap">
   <h2>Filo haritası</h2>
   <p class="not">Her kutu bir madencilik cihazı. Durumlar her dakika yenilenir.</p>
   <div class="panel">
@@ -135,7 +169,7 @@ footer{padding:30px 0 50px;color:var(--soluk);font-size:13px;border-top:1px soli
       <span class="simbant" id="simbant">Simülasyon — gerçek cihazlara komut gönderilmez; uzaktan komutun nasıl işlediğini gösterir.</span>
     </div>
     <div class="filo" id="filo"></div>
-    <div class="lej"><span><i style="background:var(--yesil)"></i>Çalışıyor</span><span><i style="background:var(--sari)"></i>Isınıyor / başlıyor</span><span><i style="background:var(--mavi)"></i>Uykuda</span><span><i style="background:var(--gri)"></i>Ulaşılamıyor</span></div>
+    <div class="lej"><span><i style="background:var(--yesil)"></i>Üretimde (hash)</span><span><i style="background:var(--sari)"></i>Isınıyor / başlıyor</span><span><i style="background:var(--mavi)"></i>Uykuda</span><span><i style="background:var(--kirmizi2)"></i>Arıza / ulaşılamıyor</span></div>
     <div class="konsol" id="konsol"></div>
   </div>
 </div></section>
@@ -165,7 +199,7 @@ footer{padding:30px 0 50px;color:var(--soluk);font-size:13px;border-top:1px soli
 </div></section>
 </main>
 
-<footer><div class="kap">Bu sayfa tanıtım amaçlıdır. Gösterilen durumlar gerçek filodan anonim olarak alınır; cihaz kimlikleri, ağ adresleri, konum, enerji ve finansal bilgiler paylaşılmaz.</div></footer>
+<footer><div class="kap">Bu sayfa tanıtım amaçlıdır. Gösterilen durumlar gerçek filodan anonim olarak alınır; cihaz kimlikleri, ağ adresleri, konum ve finansal bilgiler paylaşılmaz. Manuel mod yalnız tanıtım simülasyonudur, cihazlara komut gönderilmez.</div></footer>
 
 <script>
 const KAYNAK = 'veri.json';
@@ -177,8 +211,8 @@ let V = null, SIM = null, simZam = [];
 
 
 const FAN = '<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="6" fill="none" stroke="currentColor" stroke-opacity=".35"/><g class="fan" fill="currentColor" fill-opacity=".85"><path d="M16 16c0-5 2-8 5-8 2 0 2 3 0 5-1.5 1.5-3 2-5 3z"/><path d="M16 16c5 0 8 2 8 5 0 2-3 2-5 0-1.5-1.5-2-3-3-5z"/><path d="M16 16c0 5-2 8-5 8-2 0-2-3 0-5 1.5-1.5 3-2 5-3z"/><path d="M16 16c-5 0-8-2-8-5 0-2 3-2 5 0 1.5 1.5 2 3 3 5z"/></g><circle cx="16" cy="16" r="2.2" fill="#0F1D31" stroke="currentColor"/></svg>';
-const DR = { c: 'Çalışıyor', i: 'Isınıyor', u: 'Uykuda', x: 'Ulaşılamıyor' };
-const RENK = { c: 'var(--yesil)', i: 'var(--sari)', u: 'var(--mavi)', x: 'var(--gri)' };
+const DR = { c: 'Üretimde', i: 'Isınıyor', u: 'Uykuda', x: 'Arıza' };
+const RENK = { c: 'var(--yesil)', i: 'var(--sari)', u: 'var(--mavi)', x: 'var(--kirmizi2)' };
 
 function filoCiz(dur) {
   $('filo').innerHTML = [...dur].map((d, i) => '<div class="cih ' + d + '" id="c' + i + '" title="M-' + p2(i + 1) + ' · ' + DR[d] + '"><div class="no">M-' + p2(i + 1) + '</div><div style="color:' + RENK[d] + '">' + FAN + '</div><div class="dr">' + DR[d] + '</div></div>').join('');
@@ -199,7 +233,7 @@ function semaCiz() {
     + '<text x="' + (x + 18) + '" y="' + (y + 30) + '">' + bas + '</text><text class="k" x="' + (x + 18) + '" y="' + (y + 52) + '">' + a1 + '</text>'
     + (a2 ? '<text class="d" x="' + (x + 18) + '" y="' + (y + 76) + '" fill="' + (renk || '#fff') + '">' + a2 + '</text>' : '') + '</g>';
   const ok = (d, renk) => '<path class="hat" d="' + d + '"/><path class="akis" stroke="' + renk + '" d="' + d + '"/>';
-  const mini = [...dur].map((d, i) => '<rect x="' + (812 + (i % 8) * 17) + '" y="' + (128 + Math.floor(i / 8) * 17) + '" width="13" height="13" rx="3" fill="' + ({ c: '#2BD27A', i: '#F5B83D', u: '#5B8DEF', x: '#55657C' })[d] + '"/>').join('');
+  const mini = [...dur].map((d, i) => '<rect x="' + (812 + (i % 8) * 17) + '" y="' + (128 + Math.floor(i / 8) * 17) + '" width="13" height="13" rx="3" fill="' + ({ c: '#2BD27A', i: '#F5B83D', u: '#5B8DEF', x: '#F0525A' })[d] + '"/>').join('');
   $('sema').innerHTML = '<svg viewBox="0 0 1100 300" role="img" aria-label="Uzaktan kontrol akış şeması">'
     + ok('M200 150 H260', '#8FA2BC') + ok('M480 150 H540', '#F0525A') + ok('M740 150 H790', k ? '#2BD27A' : '#5B8DEF') + ok('M960 150 H1000', '#2BD27A')
     + kutu(20, 100, 180, 100, 'Enerji & piyasa', 'saatlik fiyat sinyali', 'izleniyor', '#8FA2BC')
@@ -243,7 +277,7 @@ $('yet').innerHTML = YET.map(([d, b, a]) => '<div><span class="ik"><svg width="2
 
 function log(m, s) { const k = $('konsol'), z = new Date(); k.insertAdjacentHTML('beforeend', '<div><span class="t">' + p2(z.getHours()) + ':' + p2(z.getMinutes()) + ':' + p2(z.getSeconds()) + '</span> ' + (s ? '<span class="' + s + '">' + m + '</span>' : m) + '</div>'); k.scrollTop = k.scrollHeight; }
 
-function hepsi() { if (!V) return; const dur = SIM ? SIM.dur : V.durum; filoCiz(dur); kpiCiz(dur); semaCiz(); }
+function hepsi() { if (!V) return; if (V.saha && V.saha.durum_no && V.saha.durum_no.length === V.durum.length) V.durum = V.saha.durum_no; const dur = SIM ? SIM.dur : V.durum; filoCiz(dur); kpiCiz(dur); semaCiz(); }
 
 async function yukle() {
   try {
@@ -251,7 +285,7 @@ async function yukle() {
     const ilk = !V; V = await r.json();
     const yas = (Date.now() - Date.parse(V.guncellendi)) / 60000;
     $('canli').classList.toggle('eski', yas > 20); $('canliY').textContent = yas > 20 ? 'SON VERİ ' + V.guncellendi.slice(11, 16) : 'CANLI · ' + V.guncellendi.slice(11, 16);
-    if (!SIM) hepsi(); planCiz(); olayCiz();
+    if (!SIM) hepsi(); planCiz(); olayCiz(); sahaCiz();
     if (ilk) { log('Bağlantı kuruldu · saha kontrolcüsü yanıt veriyor', 'ok'); log('Filo: ' + V.ozet.calisan + ' çalışıyor, ' + V.ozet.uyuyan + ' uykuda, ' + V.ozet.ulasilamayan + ' ulaşılamıyor'); }
   } catch (e) { $('canli').classList.add('eski'); $('canliY').textContent = 'BAĞLANTI YOK'; if (!V) $('filo').innerHTML = '<p style="color:var(--soluk)">Canlı veri alınamadı.</p>'; }
 }
@@ -279,6 +313,116 @@ function sim(t) {
 }
 function canliyaDon() { simTemizle(); SIM = null; $('simbant').style.display = 'none'; $('bCanli').disabled = true; log('Canlı görünüme dönüldü', 'ok'); hepsi(); }
 
+// ---- Saha şeması: inverterler (güneş) + AG panosu + antrak panosu + kabinler; otomatik / manuel kontrol (manuel = yerel simülasyon) ----
+let SMOD = 'oto', SDUR = null; const SZAM = [];
+const SDR = { c: 'üretimde', i: 'ısınıyor', u: 'uykuda', x: 'arıza' };
+function slog(m, s) { const k = $('sKonsol'); if (!k) return; const z = new Date(); k.insertAdjacentHTML('beforeend', '<div><span class="t">' + p2(z.getHours()) + ':' + p2(z.getMinutes()) + ':' + p2(z.getSeconds()) + '</span> ' + (s ? '<span class="' + s + '">' + m + '</span>' : m) + '</div>'); k.scrollTop = k.scrollHeight; }
+function sDurum() { const H = {}; const K = (V && V.saha && V.saha.kabin) || {}; for (const L of Object.values(K)) for (const z of L) H[z.no] = z.d; return SDUR || H; }
+function modSec(m) {
+  if (m === SMOD) return; SMOD = m; SZAM.forEach(clearTimeout); SZAM.length = 0;
+  $('mOto').classList.toggle('on', m === 'oto'); $('mMan').classList.toggle('on', m === 'man');
+  $('sTumAc').disabled = $('sTumKap').disabled = m === 'oto'; $('sBant').style.display = m === 'man' ? 'inline-block' : 'none';
+  if (m === 'man') { SDUR = Object.assign({}, sDurum()); slog('Manuel moda geçildi · otomatik kararlar askıya alındı (simülasyon)', 'bl'); }
+  else { SDUR = null; slog('Otomatik moda dönüldü · sistem kararı ve canlı durum geri yüklendi', 'ok'); }
+  sahaCiz();
+}
+function sKomut(no, hedef) {
+  const D = SDUR, d = D[no];
+  if (d === 'x') { slog('M-' + p2(no) + ': cihaz yanıt vermiyor (arıza) · komut iletilemedi', 'uy'); return false; }
+  if (hedef === 'u' && (d === 'c' || d === 'i')) { D[no] = 'u'; return true; }
+  if (hedef === 'c' && d === 'u') { D[no] = 'i'; SZAM.push(setTimeout(() => { if (SDUR && SDUR[no] === 'i') { SDUR[no] = 'c'; sahaCiz(); } }, 2500 + Math.random() * 1500)); return true; }
+  return false;
+}
+function sCihaz(no) {
+  if (SMOD !== 'man') { slog('Otomatik modda cihaz anahtarları kilitli · manuel moda geçin', 'bl'); return; }
+  const d = SDUR[no], h = d === 'u' ? 'c' : 'u';
+  if (sKomut(no, h)) slog('M-' + p2(no) + ' → ' + (h === 'c' ? 'UYANDIR (ısınma, ardından üretim)' : 'UYUT') + ' · operatör', h === 'c' ? 'ok' : 'uy');
+  sahaCiz();
+}
+function sKabin(k) {
+  if (SMOD !== 'man') { slog('Otomatik modda kabin şalterleri kilitli · manuel moda geçin', 'bl'); return; }
+  const L = V.saha.kabin[k] || []; if (!L.length) { slog('Kabin ' + k + ' boş · pompa arızalı', 'uy'); return; }
+  const acik = L.some(z => SDUR[z.no] === 'c' || SDUR[z.no] === 'i'), h = acik ? 'u' : 'c'; let n = 0;
+  L.forEach((z, j) => { SZAM.push(setTimeout(() => { if (sKomut(z.no, h)) { n++; sahaCiz(); } }, j * 350)); });
+  slog('Kabin ' + k + ' → ' + (h === 'c' ? 'kademeli UYANDIR' : 'UYUT') + ' · ' + L.length + ' cihaz · operatör', h === 'c' ? 'ok' : 'uy');
+}
+function tumu(h) {
+  if (SMOD !== 'man') return; let j = 0;
+  Object.keys(V.saha.kabin).forEach(k => V.saha.kabin[k].forEach(z => { SZAM.push(setTimeout(() => { if (sKomut(z.no, h)) sahaCiz(); }, (j++) * 180)); }));
+  slog('Tüm filo → ' + (h === 'c' ? 'kademeli UYANDIR' : 'UYUT') + ' · operatör', h === 'c' ? 'ok' : 'uy');
+}
+function sahaCiz() {
+  const S = V && V.saha; if (!S || !S.kabin) { $('saha').innerHTML = '<p style="color:var(--soluk);padding:16px">Saha verisi alınamadı.</p>'; return; }
+  const DUR = sDurum(), man = SMOD === 'man';
+  $('sKarar').textContent = man ? 'MANUEL · operatör kontrolünde' : 'OTOMATİK · sistem kararı: ' + (V.karar === 'calis' ? '▲ ÇALIŞ' : '▼ UYUT');
+  const T = (x, y, m, c, o) => '<text x="' + (+x).toFixed(1) + '" y="' + (+y).toFixed(1) + '"' + (c ? ' class="' + c + '"' : '') + (o || '') + '>' + m + '</text>';
+  const lcd = (x, y, w, ad, p, i, pr) => '<g><rect x="' + x + '" y="' + y + '" width="' + w + '" height="50" rx="4" fill="#3A4248"/><rect x="' + (x + 4) + '" y="' + (y + 4) + '" width="' + (w - 8) + '" height="42" rx="2" fill="#07100C"/>'
+    + T(x + 9, y + 15, ad, 'lcd', ' font-size="9" style="fill:#7F9A8A"') + T(x + w - 28, y + 24, p, 'lcd', ' text-anchor="end" font-size="19" style="fill:' + (pr || '#FFB02E') + ';filter:drop-shadow(0 0 3px ' + (pr || '#FFB02E') + ')"') + T(x + w - 24, y + 24, 'kW', 'lcd', ' font-size="10" style="fill:#7F9A8A"')
+    + T(x + w - 28, y + 42, i, 'lcd', ' text-anchor="end" font-size="16" style="fill:#5CF08F;filter:drop-shadow(0 0 3px #5CF08F)"') + T(x + w - 24, y + 42, 'A', 'lcd', ' font-size="10" style="fill:#7F9A8A"') + '</g>';
+  const mccb = (x, y, ad, acik, tik) => '<g' + (tik ? ' class="sw" onclick="' + tik + '"' : '') + '><rect x="' + (x - 10) + '" y="' + (y - 15) + '" width="20" height="30" rx="2.5" fill="#2F3A42" stroke="#1A2228"/><rect x="' + (x - 3.5) + '" y="' + (acik ? y - 8 : y - 1) + '" width="7" height="9" rx="1.5" fill="' + (acik ? '#E9EEF2' : '#F2B8B5') + '"/><rect x="' + (x - 7) + '" y="' + (y + 8) + '" width="14" height="4" rx="1" fill="' + (acik ? '#2BD27A' : '#F0525A') + '"/>' + (ad ? T(x + 14, y + 4, ad, 'b', ' font-size="10"') : '') + '</g>';
+  const V4 = 400, PF = 0.99, r3 = Math.sqrt(3);
+  const CW = 164, GAP = 30, X0 = 40, DH = 50, LX = 300, IS = 150, IW = 120, IY = 132, IH = 118, SB = 318, BUSY = 460, TOP = BUSY + 112, H = TOP + 4 * DH + 120, W = X0 * 2 + 9 * CW + 8 * GAP, FX = X0 + 210, SX = X0 + 20;
+  let s = '<defs><linearGradient id="dInvG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C9D0D7"/><stop offset=".45" stop-color="#F2F5F7"/><stop offset="1" stop-color="#BFC7CF"/></linearGradient></defs>';
+  // inverterler + stringler
+  const inv = S.inv || [], gunes = inv.reduce((t, v) => t + (v.kw || 0), 0);
+  inv.forEach((v, i) => {
+    const x0 = X0 + LX + i * IS, ic = x0 + IW / 2, ur = v.on && v.kw > 0.5, cols = 5, tw = 22, th = 19;
+    s += T(ic, 12, 'stringler · kW', 'sm', ' text-anchor="middle" font-size="9"');
+    (v.pv || []).forEach(([n, kw]) => { const j = n - 1, x = ic - (cols * tw + 8) / 2 + (j % cols) * (tw + 2), y = 18 + Math.floor(j / cols) * (th + 3), bos = kw < 0.05;
+      s += '<g><title>PV' + n + ' · ' + sayi(kw, 2) + ' kW</title><rect x="' + x + '" y="' + y + '" width="' + tw + '" height="' + th + '" rx="1.5" fill="' + (bos ? '#26364C' : kw < 1 ? '#7A2A2A' : '#1B4F8A') + '" stroke="#0A1A2C" stroke-width=".6"/>'
+        + '<path d="M' + (x + tw / 2) + ' ' + y + 'V' + (y + th) + 'M' + x + ' ' + (y + th / 2) + 'H' + (x + tw) + '" stroke="rgba(255,255,255,.12)" stroke-width=".6"/>'
+        + T(x + tw / 2, y + 13.5, bos ? '—' : sayi(kw, kw >= 10 ? 0 : 1), 'mono', ' text-anchor="middle" font-size="8.5" font-weight="700" style="fill:#fff"') + '</g>'; });
+    s += '<g class="' + (ur ? '' : 'dur') + '"><path d="M' + ic + ' 106V' + IY + '" stroke="#FFB02E" stroke-width="3" opacity=".25"/><path class="gk" stroke="#FFB02E" d="M' + ic + ' 106V' + IY + '"/></g>'
+      + T(ic, IY - 6, v.ad, 'b', ' text-anchor="middle" font-size="11.5"')
+      + '<rect x="' + x0 + '" y="' + IY + '" width="' + IW + '" height="' + IH + '" rx="10" fill="url(#dInvG)" stroke="#7A8799"/>'
+      + '<rect x="' + (x0 + 8) + '" y="' + (IY + 6) + '" width="' + (IW - 16) + '" height="11" rx="3" fill="#9AA5B1"/>' + [...Array(12).keys()].map(j => '<line x1="' + (x0 + 14 + j * 8) + '" y1="' + (IY + 7) + '" x2="' + (x0 + 14 + j * 8) + '" y2="' + (IY + 16) + '" stroke="#6E7A86"/>').join('')
+      + '<rect x="' + (x0 + 10) + '" y="' + (IY + 24) + '" width="' + (IW - 20) + '" height="40" rx="3" fill="#07100C" stroke="#3A4248" stroke-width="2"/>'
+      + T(x0 + IW - 32, IY + 49, sayi(v.kw, 1), 'lcd', ' text-anchor="end" font-size="19" style="fill:#FFB02E;filter:drop-shadow(0 0 3px #FFB02E)"') + T(x0 + IW - 28, IY + 49, 'kW', 'lcd', ' font-size="10" style="fill:#7F9A8A"')
+      + T(x0 + 16, IY + 60, (v.t != null ? sayi(v.t) + '°C · ' : '') + sayi(v.kw * 1000 / (r3 * V4 * PF), 0) + ' A', 'lcd', ' font-size="9.5" style="fill:#5CF08F"')
+      + ['PV', 'AC', 'COM', 'ALM'].map((l, j) => '<circle class="led ' + (j === 3 ? '' : (ur || j === 2) ? 'c' : 'u') + '" cx="' + (x0 + 20 + j * 27) + '" cy="' + (IY + 80) + '" r="4"' + (j === 3 ? ' fill="#4A5660"' : '') + '/>' + T(x0 + 20 + j * 27, IY + 93, l, '', ' text-anchor="middle" font-size="7.5" style="fill:#4A5A70"')).join('')
+      + T(ic, IY + 106, 'SUN2000 · ' + sayi(v.nom) + ' kW', '', ' text-anchor="middle" font-size="8.5" style="fill:#4A5A70"')
+      + '<g class="' + (ur ? '' : 'dur') + '"><path d="M' + ic + ' ' + (IY + IH) + 'V' + SB + '" stroke="#2BD27A" stroke-width="3" opacity=".25"/><path class="gk" stroke="#2BD27A" d="M' + ic + ' ' + (IY + IH) + 'V' + SB + '"/></g>';
+  });
+  // kabin cihazları (durum: canlı ya da manuel simülasyon)
+  const kab = S.kabin, cihW = z => (DUR[z.no] === 'c' ? (z.kw || (z.m === 'S19e XP' ? 5.83 : 5.3)) : 0), ant = Object.values(kab).flat().reduce((t, z) => t + cihW(z), 0), net = gunes - ant;
+  // sol grup: şebeke → trafo → Q0; ölçüler
+  s += '<path class="ln" d="M' + SX + ' 14V' + 40 + '"/><circle class="ln" cx="' + SX + '" cy="54" r="13"/><circle class="ln" cx="' + SX + '" cy="72" r="13"/>' + T(SX + 8, 12, 'OG şebeke', 'sm') + T(SX + 20, 66, 'Trafo', 'sm')
+    + '<g class="' + (Math.abs(net) < 0.5 ? 'dur' : '') + '"><path d="M' + SX + ' 85V' + SB + '" stroke="' + (net >= 0 ? '#2BD27A' : '#F0525A') + '" stroke-width="3" opacity=".25"/><path class="gk" stroke="' + (net >= 0 ? '#2BD27A' : '#F0525A') + '" d="' + (net >= 0 ? 'M' + SX + ' ' + SB + 'V85' : 'M' + SX + ' 85V' + SB) + '"/></g>'
+    + lcd(X0 + 64, 96, 170, 'Σ GÜNEŞ', sayi(gunes, 1), sayi(gunes * 1000 / (r3 * V4 * PF), 0))
+    + lcd(X0 + 64, 176, 170, net >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', sayi(Math.abs(net), 1), sayi(Math.abs(net) * 1000 / (r3 * V4 * PF), 0), net >= 0 ? null : '#FF4D3D');
+  // AG panosu
+  const pano = (x1, x2, yb, ad, tx) => { tx = tx || x1 + 10; return '<rect x="' + x1 + '" y="' + (yb - 36) + '" width="' + (x2 - x1) + '" height="70" rx="6" fill="#1A2738" stroke="#5C7392" stroke-width="1.4"/><rect x="' + tx + '" y="' + (yb - 46) + '" width="' + (ad.length * 7.4 + 18) + '" height="18" rx="3" fill="#D7262E"/>' + T(tx + 9, yb - 33, ad, 'b', ' font-size="10.5" letter-spacing=".05em"')
+    + [['#B07A45', -6], ['#0A0A0A', 0], ['#9AA3AB', 6]].map(([r, d]) => '<path d="M' + (x1 + 14) + ' ' + (yb + d) + 'H' + (x2 - 14) + '" stroke="' + r + '" stroke-width="3.2" stroke-linecap="round"/>').join(''); };
+  s += pano(X0 - 20, W - 30, SB, 'AG PANOSU · 0,4 kV · GÜNEŞ + MADENCİLİK ORTAK BARA', X0 + LX + inv.length * IS + 10);
+  inv.forEach((v, i) => { const ic = X0 + LX + i * IS + IW / 2; s += mccb(ic, SB - 20, 'Q' + (i + 1), true); });
+  s += mccb(SX, SB - 20, 'Q0', true) + '<g class="' + (ant > 0.5 ? '' : 'dur') + '"><path d="M' + FX + ' ' + SB + 'V' + BUSY + '" stroke="#E07B00" stroke-width="3" opacity=".25"/><path class="gk" stroke="#E07B00" d="M' + FX + ' ' + (SB + 30) + 'V' + (BUSY - 36) + '"/></g>' + mccb(FX, SB + 18, 'Q9 antrak', true)
+    + lcd(FX + 16, SB + 46, 160, 'ANTRAK YÜKÜ', sayi(ant, 1), sayi(ant * 1000 / (r3 * V4 * PF), 0), '#FF8A3D');
+  // antrak panosu + kabinler
+  const xs = [...Array(9).keys()].map(i => X0 + i * (CW + GAP) + CW / 2);
+  s += pano(xs[0] - CW / 2 + 10, xs[8] + CW / 2 - 10, BUSY, 'ANTRAK PANOSU · DAĞITIM') + mccb(FX, BUSY - 18, 'ana şalter', true);
+  Object.keys(kab).forEach((k, i) => {
+    const L = kab[k], x = xs[i], bos = !L.length, bx = x - CW / 2, py = BUSY + 72, Lx = bx + 12, R = bx + CW - 12, bh = H - TOP - 20;
+    const acik = L.some(z => DUR[z.no] === 'c' || DUR[z.no] === 'i'), akar = L.some(z => DUR[z.no] === 'c'), kw = L.reduce((t, z) => t + cihW(z), 0);
+    s += '<path class="ln" d="M' + x + ' ' + (BUSY + 6) + 'V' + TOP + '"' + (bos ? ' style="stroke-dasharray:5 4;opacity:.5"' : '') + '/>' + mccb(x, BUSY + 24, 'K' + k, !bos && acik, 'sKabin(\'' + k + '\')')
+      + '<g class="pmp' + (akar ? ' on' : '') + '"><circle cx="' + x + '" cy="' + py + '" r="11" fill="#0A1422" stroke="' + (bos ? '#F0525A' : '#3FA9F5') + '" stroke-width="1.8"' + (bos ? ' stroke-dasharray="3 2"' : '') + '/><g class="cark"><path d="M' + (x - 6) + ' ' + (py + 6) + 'L' + x + ' ' + (py - 8) + 'L' + (x + 6) + ' ' + (py + 6) + '" fill="none" stroke="' + (bos ? '#F0525A' : '#3FA9F5') + '" stroke-width="1.8"/></g></g>'
+      + T(x + 14, py - 14, bos ? 'pompa arızalı' : 'pompa', 'sm', bos ? ' style="fill:#F0525A"' : '')
+      + '<rect x="' + bx + '" y="' + TOP + '" width="' + CW + '" height="' + bh + '" rx="4" fill="' + (bos ? 'none' : '#0F1D31') + '" stroke="' + (bos ? '#3A4A60' : '#3FA9F5') + '" stroke-width="1.3"' + (bos ? ' stroke-dasharray="6 4"' : '') + '/>'
+      + T(bx + 12, TOP + 22, 'Kabin ' + k, 'b', ' font-size="14"') + T(R, TOP + 22, 'antrak', 'sm', ' text-anchor="end"');
+    if (bos) { s += T(x, TOP + 100, 'BOŞ', 'b', ' text-anchor="middle" font-size="20" style="fill:#3A4A60;letter-spacing:.2em"'); return; }
+    const ys = L.map((z, j) => TOP + 36 + j * DH + (DH - 8) / 2), yl = ys[ys.length - 1];
+    const boru = (cl, d) => '<path class="boru ' + cl + ' zemin" d="' + d + '"/><path class="boru ' + cl + ' akis2" d="' + d + '"/>';
+    let b = boru('sog', 'M' + (x - 11) + ' ' + py + 'H' + (bx - 8) + 'V' + yl + 'H' + Lx);
+    ys.slice(0, -1).forEach(yy => { b += boru('sog', 'M' + (bx - 8) + ' ' + yy + 'H' + Lx) + boru('sic', 'M' + R + ' ' + yy + 'H' + (bx + CW + 8)); });
+    s += '<g class="' + (akar ? '' : 'dur') + '">' + b + boru('sic', 'M' + R + ' ' + yl + 'H' + (bx + CW + 8) + 'V' + py + 'H' + (x + 11)) + '</g>';
+    L.forEach((z, j) => { const y = TOP + 36 + j * DH, d = DUR[z.no], ac = d === 'c' || d === 'i';
+      s += '<rect class="cb ' + d + '" x="' + Lx + '" y="' + y + '" width="' + (CW - 24) + '" height="' + (DH - 8) + '" rx="3"/>'
+        + '<circle class="led ' + d + '" cx="' + (Lx + 9) + '" cy="' + (y + 12) + '" r="3.5"/>' + T(Lx + 17, y + 16, 'M-' + p2(z.no), 'b mono', ' font-size="12"') + T(Lx + 60, y + 16, z.m, 'sm', ' font-size="9.5"')
+        + T(Lx + 9, y + 33, SDR[d] + (d === 'c' ? ' · ' + sayi(cihW(z), 2) + ' kW' : ''), 'mono', ' font-size="10" style="fill:' + ({ c: '#2BD27A', i: '#F5B83D', u: '#5B8DEF', x: '#F0525A' })[d] + '"')
+        + '<g class="sw' + (ac ? ' acik' : '') + '" onclick="sCihaz(' + z.no + ')"><title>M-' + p2(z.no) + ' · ' + (man ? (ac ? 'uyutmak' : 'uyandırmak') + ' için dokunun' : 'otomatik modda kilitli') + '</title><rect x="' + (R - 36) + '" y="' + (y + 4) + '" width="30" height="16" rx="8" fill="' + (ac ? '#1E7A3C' : '#33415A') + '" stroke="#5C7392"/><circle class="tr" cx="' + (R - 28) + '" cy="' + (y + 12) + '" r="6" fill="#fff"/></g>'; });
+    s += lcd(bx + 12, TOP + bh - 68, CW - 24, 'K' + k, sayi(kw, 1), sayi(kw * 1000 / (r3 * V4 * PF), 1));
+  });
+  $('saha').innerHTML = '<svg class="sk' + (man ? ' man' : '') + '" viewBox="0 -12 ' + W + ' ' + (H + 12) + '" width="' + W + '" height="' + (H + 12) + '" role="img" aria-label="Saha şeması">' + s + '</svg>';
+}
 yukle(); setInterval(() => { if (!document.hidden) yukle(); }, 60000);
 </script>
 </body>

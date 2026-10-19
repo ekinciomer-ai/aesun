@@ -110,8 +110,7 @@ function pjWorker() {
   PJ.worker = new Worker(new URL('gesciz-worker.js?v=__BUILD__', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
-    if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
-    if (PJ.altMod) { pjAltSonuc(m); return; }
+    if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
     PJ.busy = false; busy(null); gv('p-run').disabled = false;
     if (m.err) { gv('p-stage').textContent = 'Hata: ' + m.err; msg('GES-ÇİZ hata: ' + m.err, 'err'); return; }
     const sec = ((performance.now() - PJ.t0) / 1000).toFixed(1);
@@ -136,7 +135,7 @@ function pjWorker() {
     pjDialog('paftalar');
     if (PJ.again) { PJ.again = false; pjRun(); }
   };
-  PJ.worker.onerror = (e) => { if (PJ.altMod) { const a = PJ.alt.find((x) => x.durum === 'calisiyor'); if (a) { a.durum = 'hata'; a.hata = e.message || 'Python hatası'; } PJ.altMod = false; pjAltCiz(); } PJ.busy = false; busy(null); gv('p-run').disabled = false; const t = 'GES-ÇİZ çalışırken durdu: ' + (e.message || 'Python hatası'); gv('p-stage').textContent = t; msg(t, 'err'); try { PJ.worker.terminate(); } catch (x) { /* ignore */ } PJ.worker = null; };
+  PJ.worker.onerror = (e) => { PJ.busy = false; busy(null); gv('p-run').disabled = false; const t = 'GES-ÇİZ çalışırken durdu: ' + (e.message || 'Python hatası'); gv('p-stage').textContent = t; msg(t, 'err'); try { PJ.worker.terminate(); } catch (x) { /* ignore */ } PJ.worker = null; };
   return PJ.worker;
 }
 function pjRun(over) {

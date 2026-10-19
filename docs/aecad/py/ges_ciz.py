@@ -8,10 +8,13 @@ Tek JSON parametre dosyasından 4 pafta + metraj + kontrol üretir:
 Kullanım:  python3 ges_ciz.py proje.json [--cikti klasor] [--seviye teklif|uygulama]
 Gerekli:   pip install ezdxf shapely matplotlib   | DWG için: LibreDWG dxf2dwg
 """
-import json, math, re, sys, os, csv, copy, shutil, subprocess, argparse, datetime, bisect, heapq, html as _html
+import json, math, re, sys, os, time, csv, copy, shutil, subprocess, argparse, datetime, bisect, heapq, html as _html
 from shapely.geometry import Polygon, LineString, box, Point, MultiLineString
 from shapely.ops import unary_union, nearest_points
 from shapely import affinity
+import shapely
+import numpy as np
+from shapely import STRtree
 
 SURUM = "1.0"
 
@@ -163,6 +166,15 @@ class Pafta:
         return (min(xs), min(ys), max(xs), max(ys)) if xs else (0, 0, 1, 1)
 
 
+def asama(s):
+    """AeCAD (Pyodide) içinde ilerleme mesajı; komut satırında sessiz."""
+    try:
+        import js
+        js.aecadAsama(s)
+    except Exception:
+        if os.environ.get('GES_ASAMA'): print('[asama]', f"{time.time():.1f}", s)
+
+
 def dis_halkalar(g):
     """Polygon / MultiPolygon dış halkaları (çok parsel)."""
     if g is None or g.is_empty: return []
@@ -289,6 +301,7 @@ class Model:
         if ic.geom_type == "MultiPolygon":
             ic = unary_union([q for q in ic.geoms if q.area > 50])
         self.ic_loc = ic
+        shapely.prepare(self.ic_loc)                       # hız: TM aday kutusu içerme testleri
         # A.6 servis yolu = çit ile masa alanı arasındaki kenar bandı; eksen bandın ortasında
         if ofs:
             self.yol_loc = loc.buffer(-of, join_style=2).difference(ofs(lambda d: d))
@@ -450,7 +463,9 @@ class Model:
         self.ag = {"U": U, "xy": xy, "adj": adj, "agac": {}}
 
     def _ag_dugum(self, p):
-        xy = self.ag["xy"]; return min(range(len(xy)), key=lambda i: (xy[i][0] - p[0]) ** 2 + (xy[i][1] - p[1]) ** 2)
+        A = self.ag; xy = A["xy"]
+        if A.get("_np") is None or len(A["_np"]) != len(xy): A["_np"] = np.asarray(xy, dtype=float)
+        a = A["_np"]; return int(np.argmin((a[:, 0] - p[0]) ** 2 + (a[:, 1] - p[1]) ** 2))
 
     def _ag_agac(self, src):
         A = self.ag
@@ -504,24 +519,25 @@ class Model:
             parcalar = [kes] if kes.geom_type == "Polygon" else [q for q in getattr(kes, "geoms", []) if q.geom_type == "Polygon"]
             for pc in sorted(parcalar, key=lambda q: q.bounds[0]):
                 if pc.is_empty: continue
+                shapely.prepare(pc)                       # hız (Pyodide): hazırlanmış geometride içerme testi
                 x0, xe = pc.bounds[0], pc.bounds[2]; sat = []
                 if xm == "right":
                     x = xe
                     while x - L >= x0 - 1e-6:
                         mb = box(x - L, y, x, y + D)
-                        if alan.contains(mb.buffer(-0.01)): sat.append(mb); x -= L + g
+                        if pc.contains(box(x - L + 0.01, y + 0.01, x - 0.01, y + D - 0.01)): sat.append(mb); x -= L + g
                         else: x -= 0.5
                 else:
                     x = x0
                     while x + L <= xe + 1e-6:
                         mb = box(x, y, x + L, y + D)
-                        if alan.contains(mb.buffer(-0.01)): sat.append(mb); x += L + g
+                        if pc.contains(box(x + 0.01, y + 0.01, x + L - 0.01, y + D - 0.01)): sat.append(mb); x += L + g
                         else: x += 0.5
                     if xm == "center" and sat:
                         bos = xe - max(q.bounds[2] for q in sat)
                         if bos > 0.2:
                             kay = [affinity.translate(q, bos / 2, 0) for q in sat]
-                            if all(alan.contains(q.buffer(-0.01)) for q in kay): sat = kay
+                            if all(pc.contains(q.buffer(-0.01)) for q in kay): sat = kay
                 for mb in sat:
                     c = mb.centroid; out.append({"loc": mb, "sira": sira, "x": c.x, "y": c.y})
             sira += 1
@@ -780,9 +796,16 @@ class Model:
     def tm_engel(self):
         return [self.tm_golge(t).buffer(1.0) for t in self.tm_loc] + ([] if getattr(self, "dm_ortak", False) else [self.tm_golge(self.dm_loc).buffer(1.0)])
 
+    def _masa_agac(self):
+        ms = getattr(self, "masalar", []); k = (id(ms), len(ms))
+        if getattr(self, "_mag_k", None) != k:
+            self._mag_k = k; self._mag = STRtree([q["loc"] for q in ms]) if ms else None
+        return self._mag
+
     def _tm_kayip(self, c, w, h):
         g = self.tm_golge(box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2)).buffer(1.0)
-        return sum(1 for q in getattr(self, "masalar", []) if q["loc"].intersects(g))
+        T = self._masa_agac()                                   # hız: uzaysal indeks (masa başına tek tek kesişim yok)
+        return int(len(T.query(g, predicate="intersects"))) if T is not None else 0
 
     def _tm_bos_yer(self, grp, w, h):
         """Yol kenarında yer yoksa: saha içinde (çekme bandının içinde), grubun ağırlık merkezine en yakın boş TM yeri.
@@ -892,9 +915,14 @@ class Model:
         def gecici_inv(h, tf=None):
             tf = tf or h["taraf"]; ux = h["loc"].bounds[2] if tf == "E" else h["loc"].bounds[0]
             return {"masa": h, "taraf": tf, "x": ux + (0.4 if tf == "E" else -0.4), "y": h["y"]}
+        _yb = {}                                         # hız: aynı masa → aynı geçici inverter boyu bir kez hesaplanır
         def yol_boy(q, inv):
-            pts = self.dc_yol(q, inv)[0]
-            return sum(math.dist(a, b) for a, b in zip(pts, pts[1:])) + 3.0
+            k = (id(q), id(inv["masa"]), inv["taraf"])
+            v = _yb.get(k)
+            if v is None:
+                pts = self.dc_yol(q, inv)[0]
+                v = _yb[k] = sum(math.dist(a, b) for a, b in zip(pts, pts[1:])) + 3.0
+            return v
         def en_iyi(ms_, hedef=None):
             """Gerçek (masa arası) DC güzergâhıyla en uzun tek yönü en küçük yapan masa başı.
             elektrik.inverter_hiza: "yol" servis yoluna / çite yakın masa başı (varsayılan) · "orta" bloğun ortasındaki sıranın
@@ -902,15 +930,21 @@ class Model:
             hz = (self.P["elektrik"].get("inverter_hiza") or "trafo")
             if hz == "trafo" and hedef is not None:
                 # kullanıcı kuralı 19.10.2026: DC tek yön sınırı (80 m / ΔU) içinde kalan en trafoya yakın masa başı — AC kısalır
-                uygun, yedek = None, None
-                for h in ms_:
-                    for tf in ("E", "W"):
-                        iv = gecici_inv(h, tf); m_ = max(yol_boy(q, iv) for q in ms_)
-                        d_ = abs(iv["x"] - hedef[0]) + abs(iv["y"] - hedef[1])
-                        if m_ <= lim and (uygun is None or d_ < uygun[3]): uygun = (m_, h, tf, d_)
-                        if yedek is None or m_ < yedek[0]: yedek = (m_, h, tf, d_)
-                b_ = uygun or yedek
-                return (b_[0], b_[1], b_[2])
+                # hız: adaylar trafoya yakınlık sırasıyla denenir; ilk uygun olan sonuçtur. En uzak masadan başlanır, sınır aşılınca bırakılır.
+                adaylar = sorted(((abs(gecici_inv(h, tf)["x"] - hedef[0]) + abs(h["y"] - hedef[1]), h, tf) for h in ms_ for tf in ("E", "W")), key=lambda t: t[0])
+                for d_, h, tf in adaylar:
+                    iv = gecici_inv(h, tf)
+                    if any(math.hypot(q["x"] - iv["x"], q["y"] - iv["y"]) > lim + self.masa_L for q in ms_): continue
+                    m_ = 0.0
+                    for q in sorted(ms_, key=lambda q: -math.hypot(q["x"] - iv["x"], q["y"] - iv["y"])):
+                        m_ = max(m_, yol_boy(q, iv))
+                        if m_ > lim: break
+                    if m_ <= lim: return (m_, h, tf)
+                yedek = None
+                for d_, h, tf in adaylar:
+                    iv = gecici_inv(h, tf); m_ = max(yol_boy(q, iv) for q in ms_)
+                    if yedek is None or m_ < yedek[0]: yedek = (m_, h, tf)
+                return yedek
             if hz == "optimum":
                 aday = list(ms_)
             elif hz == "orta":
@@ -1512,19 +1546,27 @@ class Model:
         pr = self.P["parsel"]
         kademeler = [pr["cekme_mesafesi_m"]] + [c for c in pr["cekme_kademeleri_m"] if c < pr["cekme_mesafesi_m"]]
         for c in kademeler:                                    # B: 5 m esas, sığmazsa 4/3/2
+            asama(f"Saha ve masa dizilimi (çekme {c:g} m)…")
             self.saha(c); self.ic_yol_kur(); self.dizilim()
             if self.P["masa"].get("konumlar") or not pr["hedef_masa"] or len(self.masalar) >= pr["hedef_masa"]: break
-        self.inverter_ata(); self.tm_yerlestir()
-        self.dizilim(tm_alanlari=self.tm_engel())
+        asama(f"İnverter ataması ({len(self.masalar)} masa)…")
+        self.inverter_ata(); asama("Trafo yerleşimi ve gölge analizi…"); self.tm_yerlestir()
+        asama("Masa dizilimi (trafo çevresi)…"); self.dizilim(tm_alanlari=self.tm_engel())
         lim0 = self.P["elektrik"]["dc_tek_yon_max_m"]
         self._tr_yol = None
-        for it in range(6):                      # TM yerleşimi masa dizilimini değiştirir: yakınsayana kadar
+        for it in range(3):                      # TM yerleşimi masa dizilimini değiştirir: yakınsayana kadar (≤ 3 tur; < 1 eksen aralığı oynama yakınsamış sayılır)
+            asama(f"İnverter–trafo dengesi (tur {it + 1})…")
             self.inverter_ata()
             if getattr(self, "_tr_yol_son", None): self._tr_yol = dict(self._tr_yol_son)   # yol başına TR sayısı yalnız artar
             eski = [t.centroid.coords[0] for t in self.tm_loc]
+            yedek = (list(self.tm_loc), self.dm_loc, getattr(self, "dm_ortak", False), self.P["elektrik"].get("tm_taraf"))
             self.tm_yerlestir()
             yeni = [t.centroid.coords[0] for t in self.tm_loc]
-            if len(eski) == len(yeni) and all(math.dist(a, b) < 0.5 for a, b in zip(eski, yeni)): break
+            if len(eski) == len(yeni) and all(math.dist(a, b) < max(0.5, self.P["masa"]["pitch_m"] * 1.2) for a, b in zip(eski, yeni)):
+                # yakınsadı: küçük oynama (< 1 eksen aralığı) — masa dizilimi ve atama önceki TM konumuyla tutarlı, o konum korunur
+                if any(math.dist(a, b) >= 0.5 for a, b in zip(eski, yeni)):
+                    self.tm_loc, self.dm_loc, self.dm_ortak, self.P["elektrik"]["tm_taraf"] = yedek[0], yedek[1], yedek[2], yedek[3]
+                break
             self.dizilim(tm_alanlari=self.tm_engel())
         else:
             self.inverter_ata()
@@ -1533,10 +1575,10 @@ class Model:
             self.tm_yerlestir(); self.dizilim(tm_alanlari=self.tm_engel()); self.inverter_ata()
         if self.n_tr != len(self.tm_loc): self.tm_yerlestir()
         self._boyutlandir()                      # DC/AC hedefi (1.25) → inverter gücü; TR AC/%90 → trafo kVA (üst standart)
-        self.guzergah()
+        asama("DC/AC kablo güzergâhı…"); self.guzergah()
         self._ag_kesit_sec()                     # D/EKAT md.58: AG ΔU sınırı aşılırsa AG kesitini büyüt
         if self.max_kesilen: self.uyari.append(f"Hedef güç sınırı (parsel.max_masa = {pr['max_masa']}): {self.max_kesilen} masa yeri kullanılmadı; orta sıralar korundu.")
-        self.topraklama(); self.guvenlik()
+        asama("Topraklama, kontroller, metraj…"); self.topraklama(); self.guvenlik()
         self.kontroller(); self.metraj_hesapla()
         return self
 
@@ -1640,7 +1682,13 @@ class Model:
             ekle("AC düşüm / trafo marjı", None, "elektrik.inverter_ac_kw yok", "")
         # ---- A.2: hiçbir kablo/şerit masa altından geçmez
         ic_masa = self.masa_birlesik.buffer(-0.05)
-        def alt_m(geoms): return sum(g.intersection(ic_masa).length for g in geoms)
+        _ml = [q["loc"].buffer(-0.05) for q in self.masalar]; _mt = STRtree(_ml) if _ml else None
+        def alt_m(geoms):                         # hız: yalnız hattın değdiği masalarla kesişim (uzaysal indeks)
+            t = 0.0
+            for g in geoms:
+                if g is None or g.is_empty or _mt is None: continue
+                for i in _mt.query(g, predicate="intersects"): t += g.intersection(_ml[int(i)]).length
+            return t
         dc_a = alt_m(self.dc_hat); ac_a = alt_m(self.ac_hat); og_a = alt_m([o["hat"] for o in self.og])
         tp_a = self.toprak_serit.intersection(ic_masa).length if hasattr(self, "toprak_serit") else 0.0
         ekle("Masa altından geçen kablo/şerit yok", (dc_a + ac_a + og_a + tp_a) < 0.01,

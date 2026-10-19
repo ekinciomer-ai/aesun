@@ -10,7 +10,7 @@ async function init(base, id) {
   await py.loadPackage(['numpy', 'shapely', 'pyparsing', 'typing-extensions', 'fonttools']);
   await py.loadPackage(base + 'py/ezdxf-1.3.5-py3-none-any.whl');
   const src = await (await fetch(base + 'py/ges_ciz.py', { cache: 'no-cache' })).text();
-  mplYukle(base);   // PDF modülü arka planda iner; yerleşim hesabıyla aynı anda
+  // PDF modülü yalnız PDF istendiğinde iner (yerleşim seçeneklerinde indirme/CPU yarışı olmasın)
   py.FS.mkdirTree('/home/pyodide'); py.FS.writeFile('/home/pyodide/ges_ciz.py', src);
 }
 function mplYukle(base) {
@@ -27,7 +27,11 @@ sys.path.insert(0, '/home/pyodide'); sys.argv = ['ges_ciz']
 import shapely
 import ges_ciz as g
 importlib.reload(g)
-g.unary_union = lambda gs: shapely.union_all(list(getattr(gs, 'geoms', gs)), grid_size=0.001)
+def _uu(gs):
+    L = list(getattr(gs, 'geoms', gs))
+    try: return shapely.union_all(L)
+    except Exception: return shapely.union_all(L, grid_size=0.001)   # wasm GEOS topoloji hatasında hassasiyet ızgarası
+g.unary_union = _uu
 P = g.birlestir(g.VARSAYILAN, json.load(open('/home/pyodide/p.json', encoding='utf-8')))
 P["proje"]["tarih"] = P["proje"]["tarih"] or datetime.date.today().strftime("%d.%m.%Y")
 M = g.Model(P).kur()
@@ -54,7 +58,9 @@ json.dumps({'d': d, 'oz': oz, 'nes': nes, 'kontrol': M.kontrol, 'metraj': M.metr
 self.onmessage = async (e) => {
   const { id, base, json, pdf, mode } = e.data;
   try {
-    await init(base, id);
+    self.aecadAsama = (s) => post({ id, stage: String(s) });   // GES-ÇİZ ilerleme aşamaları (asama())
+    const t0 = performance.now(); await init(base, id); const tInit = (performance.now() - t0) / 1000;
+    if (tInit > 3) post({ id, stage: 'Python ortamı hazır (' + tInit.toFixed(0) + ' sn; sonraki hesaplarda yeniden yüklenmez)' });
     if (mode === 'yer') { await yerlesim(id, json); return; }
     let usePdf = !!pdf;
     if (usePdf && !mpl) {
@@ -70,7 +76,11 @@ sys.path.insert(0, '/home/pyodide'); sys.argv = ['ges_ciz']
 import shapely
 import ges_ciz as g
 importlib.reload(g)
-g.unary_union = lambda gs: shapely.union_all(list(getattr(gs, 'geoms', gs)), grid_size=0.001)
+def _uu(gs):
+    L = list(getattr(gs, 'geoms', gs))
+    try: return shapely.union_all(L)
+    except Exception: return shapely.union_all(L, grid_size=0.001)   # wasm GEOS topoloji hatasında hassasiyet ızgarası
+g.unary_union = _uu
 g.dwg_cevir = lambda p: None
 if ${usePdf ? 'True' : 'False'}:
     import matplotlib; matplotlib.use('Agg')

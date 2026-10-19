@@ -34,14 +34,35 @@ function pjYerlesim() {
   pjDialog('yerlesim'); pjAltSirada();
 }
 function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pjAltSirada(); }
+// Hız (kullanıcı 19.10.2026: büyük projelerde sistem çuvallamamalı): yerleşim seçenekleri paralel hesaplanır —
+// her seçenek kendi Python işçisinde (çekirdek ve belleğe göre 1–4 işçi; Python ortamı her işçide bir kez yüklenir).
+function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(4, c - 1, m >= 8 ? 4 : m >= 4 ? 2 : 1)); }
+function pjYerIsci(k) {
+  PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
+  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=__BUILD__', document.baseURI).href), alt: null };
+  o.w.onmessage = (e) => {
+    const m = e.data, a = o.alt; if (!a || m.id !== a.seq) return;
+    if (m.stage) { a.asama = m.stage; pjAltCiz(); return; }
+    o.alt = null; pjAltSonuc(m);
+  };
+  o.w.onerror = (e) => { const a = o.alt; o.alt = null; try { o.w.terminate(); } catch (x) { /* */ } o.w = null; if (a) pjAltSonuc({ id: a.seq, err: (e && e.message) || 'işçi hatası' }); };
+  return o;
+}
 function pjAltSirada() {
-  if (PJ.altMod || PJ.busy) return;
-  const a = PJ.alt.find((x) => x.durum === 'bekliyor'); if (!a) { gv('p-stage').textContent = 'Yerleşim seçenekleri hazır. Birini onaylayın ya da revizyon yazın.'; pjAltCiz(); return; }
-  a.durum = 'calisiyor'; a.t0 = performance.now(); PJ.altMod = true; PJ.seq++; a.seq = PJ.seq; pjAltCiz();
-  pjWorker().postMessage({ id: PJ.seq, base: new URL('./', document.baseURI).href, json: JSON.stringify(a.param), mode: 'yer' });
+  if (PJ.busy) return;
+  const N = pjYerHavuzN();
+  for (let k = 0; k < N; k++) {
+    const o = pjYerIsci(k); if (o.alt) continue;
+    const a = PJ.alt.find((x) => x.durum === 'bekliyor'); if (!a) break;
+    a.durum = 'calisiyor'; a.t0 = performance.now(); PJ.seq++; a.seq = PJ.seq; o.alt = a;
+    o.w.postMessage({ id: a.seq, base: new URL('./', document.baseURI).href, json: JSON.stringify(a.param), mode: 'yer' });
+  }
+  PJ.altMod = (PJ.yerHavuz || []).some((o) => o && o.alt);
+  if (!PJ.altMod && !PJ.alt.some((x) => x.durum === 'bekliyor')) gv('p-stage').textContent = 'Yerleşim seçenekleri hazır. Birini onaylayın ya da revizyon yazın.';
+  pjAltCiz();
 }
 function pjAltSonuc(m) {
-  const a = PJ.alt.find((x) => x.seq === m.id); PJ.altMod = false;
+  const a = PJ.alt.find((x) => x.seq === m.id); PJ.altMod = (PJ.yerHavuz || []).some((o) => o && o.alt);
   if (a) {
     if (m.err) { a.durum = 'hata'; a.hata = m.err; }
     else { a.durum = 'hazir'; a.oz = m.oz; a.kontrol = m.kontrol; a.metraj = m.metraj; a.uyari = m.uyari; a.files = m.files; a.nes = m.nes; a.sn = (performance.now() - a.t0) / 1000;
@@ -49,8 +70,8 @@ function pjAltSonuc(m) {
       if (a.duzen) { PJ.duzenBitti = true; msg(a.ad + ' hazır ve açıldı: ' + a.oz.masa + ' masa, ' + a.oz.inverter + ' inverter, ' + a.oz.tm + ' trafo. Kablo planı Yerleşim seçeneklerinde.', 'res'); } }
   }
   pjAltCiz(); pjAutoHints();
-  if (PJ.again) { PJ.again = false; const p = PJ.onay; PJ.onay = null; pjRun(p || undefined); return; }
-  pjAltSirada();
+  if (PJ.again && !PJ.altMod) { PJ.again = false; const p = PJ.onay; PJ.onay = null; pjRun(p || undefined); return; }
+  if (!PJ.again) pjAltSirada();
 }
 // Onaylanan GES-ÇİZ seçeneği çizime yazılır: masa, inverter, trafo, DM (eski GES yerleşimi geri alınabilir şekilde değişir)
 async function pjSecenekCizime(a) {
@@ -185,7 +206,7 @@ function pjAltCiz() {
       const b3 = h('button', 'mini ok', a === PJ.aktif && PJ.cur && /_0[14]_/.test(PJ.cur) ? 'Son hali onayla → projeyi tamamla' : 'Onayla → projeyi tamamla'); b3.title = 'Açıp düzenlediyseniz (taşıma, DC atama, kablo) düzenlenmiş son hal onaylanır ve proje bu halden üretilir'; b3.onclick = () => pjAltOnayla(a);
       act.append(b1, b2, b3); tr.appendChild(act);
     } else {
-      const td = h('td', 'st', a.durum === 'calisiyor' ? 'Hesaplanıyor… (' + fmtNum((performance.now() - a.t0) / 1000, 0) + ' sn)' : a.durum === 'bekliyor' ? 'Sırada' : a.durum === 'iptal' ? 'İptal (başka seçenek onaylandı)' : 'Hata: ' + (a.hata || ''));
+      const td = h('td', 'st', a.durum === 'calisiyor' ? 'Hesaplanıyor… (' + fmtNum((performance.now() - a.t0) / 1000, 0) + ' sn)' + (a.asama ? ' · ' + a.asama : '') : a.durum === 'bekliyor' ? 'Sırada' : a.durum === 'iptal' ? 'İptal (başka seçenek onaylandı)' : 'Hata: ' + (a.hata || ''));
       td.colSpan = 9; tr.appendChild(td);
     }
     tb.appendChild(tr);

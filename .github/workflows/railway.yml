@@ -3,13 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       islem:
-        description: "durum | duzelt | eski_imaj | sil | pg_yedek | pg_sil"
+        description: "durum | duzelt | eski_imaj | sil | pg_yedek | pg_sil | proje_sil"
         default: durum
       filtre:
         description: "yalnız bu proje (boş = hepsi)"
         default: ""
       onay:
-        description: "pg_sil için: evet"
+        description: "pg_sil/proje_sil için: evet"
         default: ""
 jobs:
   r:

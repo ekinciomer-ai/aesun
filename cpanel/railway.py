@@ -202,3 +202,23 @@ if ISLEM == "pg_sil":
     except Exception as h:
         not_("silme hatası: " + str(h)); sys.exit(1)
     not_(f"silindi: {p['name']}/{s['name']} (yedek: Actions eseri pg_yedek)")
+
+if ISLEM == "proje_sil":
+    # 19 Eki (onaylı): eski Railway paneli (striking-flexibility) tümüyle kaldırılır. Postgres önceden yedeklenip silindi.
+    hedef = os.environ.get("FILTRE") or ""
+    if os.environ.get("ONAY") != "evet" or not hedef:
+        not_("proje_sil için filtre=<proje adı> ve onay=evet gerekir"); sys.exit(1)
+    bulundu = False
+    for pe in d["projects"]["edges"]:
+        p = pe["node"]
+        if p["name"] != hedef:
+            continue
+        bulundu = True
+        servisler = [se["node"]["name"] for se in p["services"]["edges"]]
+        try:
+            gql("mutation($id:String!){ projectDelete(id:$id) }", {"id": p["id"]})
+            not_(f"proje silindi: {p['name']} ({', '.join(servisler)})")
+        except Exception as h:
+            not_(f"silinemedi: {p['name']}: {str(h)[:300]}"); sys.exit(1)
+    if not bulundu:
+        not_(f"proje yok: {hedef}")

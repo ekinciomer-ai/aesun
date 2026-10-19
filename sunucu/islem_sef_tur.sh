@@ -1,6 +1,6 @@
 #!/bin/bash
 # Şefi hemen bir tur çalıştırır (GitHub kolu dahil) ve sonucunu gösterir. Kurulum yapmaz.
-sleep 70   # isler yeni sır paketini çeksin (dakikada bir)
+sleep 5
 touch /opt/aesun/.sef_gh_simdi
 echo "NOT: şef turu: $(timeout 600 python3 /opt/aesun/sef.py 2>&1 | tail -1)"
 python3 -c "

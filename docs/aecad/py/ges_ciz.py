@@ -194,7 +194,7 @@ def geom_ciz(pf, kat, g, info=None):
 class Model:
     """Esaslar (A–H) koda gömülü:
     A.1 DC string tek yön ≤ 80 m · A.2 DC masa üstünden, zorunluysa masa altından; AG masa altından geçmez
-    A.3 AG sıra açıklığından · A.4 inverter masa başında (ortasında değil) · A.5 inverter yol tarafında
+    A.3 AG sıra açıklığından · A.4 inverter her zaman masanın KUZEYİNDE (arka açıklık; masa başında/sonunda değil) · A.5 inverter yol tarafında
     A.6 servis yolu/ana kanal parsel kenarında · A.7 masa alanında koridor yok
     B  açıklık→eksen · çekme 5 m, sığmazsa 4/3/2 · F DC fire %3, kanal ortak hendekten ayrı
     H  Elektriksel boyutlandırma (18.10.2026):
@@ -1209,8 +1209,8 @@ class Model:
                     _b = self.alan_loc.bounds; hd = (_b[2] if e["tm_taraf"] == "dogu" else _b[0], sum(q["y"] for q in inv["masalar"]) / len(inv["masalar"]))
                 _, hm, htf = en_iyi(inv["masalar"], hd)
                 inv["masa"], inv["taraf"] = hm, htf
-                if (e.get("inverter_konum") or "arka") == "arka":   # kullanıcı kuralı 19.10.2026: inverter masanın arkasında (kuzey açıklık), masa ucuna yakın
-                    inv["x"] = (hm["loc"].bounds[2] - 1.0) if htf == "E" else (hm["loc"].bounds[0] + 1.0)
+                if (e.get("inverter_konum") or "arka") == "arka":   # kullanıcı kuralı 20.10.2026: inverter HER ZAMAN masanın kuzeyinde (arka açıklık),
+                    inv["x"] = (hm["loc"].bounds[0] + hm["loc"].bounds[2]) / 2          # masa sonunda/başında değil: masanın kuzey orta noktası
                     inv["y"] = hm["loc"].bounds[3] + 0.5; inv["arka"] = True
                 else:
                     inv["x"] = (hm["loc"].bounds[2] + 0.4) if htf == "E" else (hm["loc"].bounds[0] - 0.4)
@@ -1224,14 +1224,8 @@ class Model:
             f, to = self._loc(t["den"]), self._loc(t["ye"])
             inv = min(self.inverterler, key=lambda i: math.dist((i["x"], i["y"]), (f.x, f.y)))
             if math.dist((inv["x"], inv["y"]), (f.x, f.y)) > 40: continue
-            best = None
-            for ms in inv["masalar"]:
-                for tf in ("E", "W"):
-                    hx = ms["loc"].bounds[2] + 0.4 if tf == "E" else ms["loc"].bounds[0] - 0.4
-                    dd = math.dist((hx, ms["y"]), (to.x, to.y))
-                    if best is None or dd < best[0]: best = (dd, ms, tf, hx)
-            _, ms, tf, hx = best
-            inv["masa"], inv["taraf"], inv["x"], inv["y"] = ms, tf, hx, ms["y"]; inv["elle"] = True
+            ms = min(inv["masalar"], key=lambda m: math.dist(((m["loc"].bounds[0] + m["loc"].bounds[2]) / 2, m["loc"].bounds[3] + 0.5), (to.x, to.y)))
+            inv["masa"], inv["x"], inv["y"], inv["arka"] = ms, (ms["loc"].bounds[0] + ms["loc"].bounds[2]) / 2, ms["loc"].bounds[3] + 0.5, True; inv["elle"] = True
         # çizimdeki inverter konumları (kullanıcı kuralı 19.10.2026): her inverter en yakın çizim konumuna, kendi masalarının başında
         ik = [self._loc(p) for p in (e.get("inv_konumlari") or [])]
         if ik and self.inverterler:
@@ -1240,15 +1234,9 @@ class Model:
             for d_, a, b in ciftler:
                 if a in ia or b in ib: continue
                 ia.add(a); ib.add(b); inv = self.inverterler[a]; q = ik[b]
-                best = None
-                for ms in inv["masalar"]:
-                    for tf in ("E", "W"):
-                        hx = ms["loc"].bounds[2] + 0.4 if tf == "E" else ms["loc"].bounds[0] - 0.4
-                        dd = math.dist((hx, ms["y"]), (q.x, q.y))
-                        if best is None or dd < best[0]: best = (dd, ms, tf, hx)
-                if best:
-                    _, ms, tf, hx = best
-                    inv["masa"], inv["taraf"], inv["x"], inv["y"] = ms, tf, hx, ms["y"]; inv["elle"] = True
+                if inv["masalar"]:   # kuzey açıklıkta, hedefe en yakın masanın kuzey ortası
+                    ms = min(inv["masalar"], key=lambda m: math.dist(((m["loc"].bounds[0] + m["loc"].bounds[2]) / 2, m["loc"].bounds[3] + 0.5), (q.x, q.y)))
+                    inv["masa"], inv["x"], inv["y"], inv["arka"] = ms, (ms["loc"].bounds[0] + ms["loc"].bounds[2]) / 2, ms["loc"].bounds[3] + 0.5, True; inv["elle"] = True
             if len(ik) != len(self.inverterler) and not getattr(self, "_ik_uyari", False):
                 self._ik_uyari = True
                 self.uyari.append(f"Çizimde {len(ik)} inverter var, projede {len(self.inverterler)}; konumu olmayanlar otomatik yerleştirildi.")

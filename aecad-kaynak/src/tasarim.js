@@ -228,7 +228,7 @@ function tsAcAg(kalan, A, tm, tohum) {
   // Kullanıcı kuralı 19.10.2026: kanallar doğrusal; kırık yalnız ANA güzergâhta; en az kanal kazısı; dolandırma yok.
   // 1) Ağa düz (tek parça, gerekirse inverter çıkışından ≤ 2,5 m iniş) bağlanabilen inverterler: en kısa yeni kazılı olan önce.
   // 2) Hiçbiri bağlanamıyorsa en uzak inverterden ADP'ye ana hat (mevcut kanal ucuz → ağa girer), sonra 1'e dön.
-  const out = new Map(), ag = [];
+  const out = new Map(), ag = [], istik = [];   // istik: AG hat istikameti kolları — branşmanlar yalnız bunlara bağlanır
   for (const y of tohum || []) { const z = y.map((q) => [q[0], q[1]]); ag.push(z); K.agEkle(z); }
   // AG HAT İSTİKAMETİ (kullanıcı kuralı 19.10.2026): trafo tarafındaki sıraların masa uç köşelerinden 3 m açıktan geçen, panel alanının
   // kenarına paralel düz hat (dış zarf) — uçların 3 m
@@ -277,7 +277,7 @@ function tsAcAg(kalan, A, tm, tohum) {
           if (!ok) continue;
           const son = kol[kol.length - 1], bag = K.masaYok(son, A) ? [son, A] : K.yol(son, A, { duz: true });
           if (!bag) continue;
-          const z = [...kol, ...bag.slice(1)]; ag.push(z); K.agEkle(z);
+          const z = [...kol, ...bag.slice(1)]; ag.push(z); K.agEkle(z); istik.push(z);
         }
       }
     }
@@ -288,7 +288,7 @@ function tsAcAg(kalan, A, tm, tohum) {
     // branşman (kullanıcı çizimi 19.10.2026): inverterden kanalın EN YAKIN noktasına tek düz çizgi (masaya değmeden); olmazsa sıra boyunca düz ışın
     if (ag.length) for (const x of kal) {
       let r = null;
-      for (const y of ag) { let kl = 0; const kal_ = new Array(y.length).fill(0); for (let k = y.length - 2; k >= 0; k--) kal_[k] = kal_[k + 1] + Math.hypot(y[k + 1][0] - y[k][0], y[k + 1][1] - y[k][1]);
+      for (const y of (istik.length ? istik : ag)) { let kl = 0; const kal_ = new Array(y.length).fill(0); for (let k = y.length - 2; k >= 0; k--) kal_[k] = kal_[k + 1] + Math.hypot(y[k + 1][0] - y[k][0], y[k + 1][1] - y[k][1]);
         for (let k = 0; k < y.length - 1; k++) { const p = y[k], q = y[k + 1], dx = q[0] - p[0], dy = q[1] - p[1], L2 = dx * dx + dy * dy || 1; const t = Math.max(0, Math.min(1, ((x.p[0] - p[0]) * dx + (x.p[1] - p[1]) * dy) / L2)), z = [p[0] + t * dx, p[1] + t * dy];
           const d_ = Math.hypot(z[0] - x.p[0], z[1] - x.p[1]), c = d_ + 0.25 * (kal_[k + 1] + Math.sqrt(L2) * (1 - t));
           if ((!r || c < r.c) && d_ <= 80 && K.masaYok(x.p, z)) r = { c, pts: [x.p, z, ...y.slice(k + 1)] }; } }

@@ -4,6 +4,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends git openssh-cli
  && useradd -m -u 1001 aesun && mkdir -p /veri && chown aesun:aesun /veri
 ENV TZ=Europe/Istanbul
 WORKDIR /app
-COPY zamanlayici.py .
+COPY zamanlayici.py sef_github.py ./
 USER aesun
 CMD ["python", "-u", "zamanlayici.py"]

@@ -20,7 +20,8 @@ D = "/opt/aesun"; TR = timezone(timedelta(hours=3))
 DURUM = D + "/sef_durum.json"; LOG = D + "/sef.log"
 REPO = "/veri/epias-ptf"
 ISLER = {"Bildirimler": 15, "Veri arşivi": 60, "Durum analizi": 60, "İzleme özeti": 30}   # olağan aralık (dk)
-BEKLE = {"itme": 600, "is_tetik": 1800, "isler": 1800, "api": 1800}                         # aynı eylem en erken (sn)
+BEKLE = {"itme": 600, "is_tetik": 1800, "isler": 1800, "api": 1800}
+AD_GH = ("gh_yeniden", "gh_kapat")                         # aynı eylem en erken (sn)
 
 
 def sh(*a, t=180, girdi=None):
@@ -130,6 +131,26 @@ def main():
             return ("API yeniden başlatıldı" if not k else "başlatılamadı: " + e[-120:]), not k
         yap("api", f"API eşitlemesi {round(es / 60)} dk eski", api_yeniden)
 
+    # ---- 4b) başarısız GitHub işleri (hata bekçisinin bulgusu): geçmişte kalanı kapat, güvenliyi yeniden çalıştır (30 dk'da bir)
+    gh = st.get("github") or {}
+    if ts - gh.get("_t", 0) > 1800:
+        k, o, e = dx("python", "sef_github.py", t=240)
+        try:
+            g = json.loads(o.strip().splitlines()[-1])
+        except Exception:
+            g = {"hata": (e or o)[-160:]}
+        g["_t"] = ts; gh = g
+        for x in g.get("yeniden") or []:
+            eylemler.append({"t": simdi.isoformat(timespec="seconds"), "sorun": f"GitHub işi başarısız: {x['ad']} ({x['depo']})", "eylem": "gh_yeniden",
+                             "sonuc": "yeniden çalıştırıldı" if x.get("ok") else f"yeniden çalıştırılamadı (HTTP {x.get('kod')})", "ok": bool(x.get("ok"))})
+        if g.get("kapanan"):
+            eylemler.append({"t": simdi.isoformat(timespec="seconds"), "sorun": "eski GitHub hataları: " + ", ".join(sorted({x['ad'] for x in g['kapanan']})),
+                             "eylem": "gh_kapat", "sonuc": f"{len(g['kapanan'])} hata sonraki başarılı çalışmayla kapatıldı", "ok": True}) if any(x["id"] not in {y["id"] for y in (st.get("github") or {}).get("kapanan") or []} for x in g["kapanan"]) else None
+    gozlem["github"] = {k2: len(v) if isinstance(v, list) else v for k2, v in gh.items() if not k2.startswith("_")}
+    for x in gh.get("acik") or []:
+        acik.append({"sorun": f"GitHub işi başarısız: {x.get('ad')} ({x.get('depo')})", "neden": x.get("neden", "") + " — elle bakılmalı"})
+    st["github"] = gh
+
     # müdahale başarılıysa öğrenen taramayı hemen yenile: bekçiler eski bulguyu göstermeye devam etmesin
     if any(e["ok"] for e in eylemler):
         sh("timeout", "600", "python3", D + "/bekci_tarama.py", t=650)
@@ -156,9 +177,10 @@ def main():
     gecmis = (st.get("gecmis") or []) + eylemler
     cikti = {"t": simdi.isoformat(timespec="seconds"), "durum": "mudahale" if eylemler else ("acik" if acik else "sakin"),
              "eylemler": eylemler, "acik": acik[:12], "gozlem": gozlem, "gecmis": gecmis[-40:],
+             "kapanan_hatalar": [x["id"] for x in (gh.get("kapanan") or [])] + [x["id"] for x in (gh.get("yeniden") or []) if x.get("ok")],
              "aciklama": "Şef: bekçilerin bulduğu sorunları çözer (rebase/gönderim, gecikmiş işi tetikleme, kapsayıcı yeniden başlatma); çözemediğini 'acik' olarak bildirir."}
     st.update({"son_eylem": son, "gecmis": gecmis[-40:]})
-    open(DURUM + ".tmp", "w").write(json.dumps({**cikti, "son_eylem": son, "_son_ozet": st.get("_son_ozet"), "_son_yazim": st.get("_son_yazim", 0)}, ensure_ascii=False)); os.replace(DURUM + ".tmp", DURUM)
+    open(DURUM + ".tmp", "w").write(json.dumps({**cikti, "son_eylem": son, "_son_ozet": st.get("_son_ozet"), "_son_yazim": st.get("_son_yazim", 0), "github": gh}, ensure_ascii=False)); os.replace(DURUM + ".tmp", DURUM)
 
     # depoya yaz (değişince ya da saatte bir) — panel ve denetçi n8n/sef.json'u okur
     ozet = json.dumps({k: cikti[k] for k in ("durum", "eylemler", "acik")}, ensure_ascii=False, sort_keys=True)
@@ -170,7 +192,7 @@ def main():
             for _ in range(3):
                 if not git("pull", "--rebase", "--autostash", "-q")[0] and not git("push", "-q")[0]: break
                 git("rebase", "--abort"); time.sleep(5)
-        st2 = oku(DURUM, {}); st2.update({"_son_ozet": ozet, "_son_yazim": ts, "gecmis": gecmis[-40:]})
+        st2 = oku(DURUM, {}); st2.update({"_son_ozet": ozet, "_son_yazim": ts, "gecmis": gecmis[-40:], "github": gh})
         open(DURUM + ".tmp", "w").write(json.dumps(st2, ensure_ascii=False)); os.replace(DURUM + ".tmp", DURUM)
     print(cikti["durum"], len(eylemler), "eylem,", len(acik), "açık")
 

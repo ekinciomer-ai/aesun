@@ -3469,7 +3469,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191950', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191953', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4465,37 +4465,22 @@ function tsAcAg(kalan, A, tm, tohum) {
     serit.push([x.p, [x.p[0] + c.uy[0] * Lr, x.p[1] + c.uy[1] * Lr]], [x.p, [x.p[0] - c.uy[0] * Lr, x.p[1] - c.uy[1] * Lr]]);
   }
   const K = tsKanalIzgara(tum, eng, kalan.length ? kalan[0].p : A, A, kalan.map((x) => x.p), serit); if (!K) return null;
-  const ag = (tohum || []).map((y) => y.map((q) => [q[0], q[1]])), out = new Map();
-  const sirali = kalan.slice().sort((a, b) => Math.hypot(b.p[0] - A[0], b.p[1] - A[1]) - Math.hypot(a.p[0] - A[0], a.p[1] - A[1]));
-  for (const x of sirali) {
-    let yol;
-    if (!ag.length) { yol = K.gorur(x.p, A) && K.dik(x.p, A) ? [x.p, A] : K.yol(x.p, A); }   // güzergâh yoksa düz çizgi YOK (masa üstünden geçmez); bildirilir
-    else {
-      // bağlanma noktası: ağ üzerindeki tüm noktalar (≈ 4 m arayla) içinde branşman + 0,3 × kalan ortak kuyruk en küçük olan.
-      // Ortak kanal ucuz sayılır (tek kanal kuralı), ama kablo kanala en kısa yerden girer; ADP'nin kendisi de aday.
-      // adaylar kuş uçuşu ölçüyle sıralanır, en iyi 6'sı GERÇEK (dik, açıklık ortasından) yol boyuyla karşılaştırılır; doğrudan ADP'ye gitmek de aday
-      const Ly = (P) => { let t = 0; for (let k = 1; k < P.length; k++) t += Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]); return t; };
-      const ad = [];
-      for (const y of ag) {
-        const kal = new Array(y.length).fill(0); for (let k = y.length - 2; k >= 0; k--) kal[k] = kal[k + 1] + Math.hypot(y[k + 1][0] - y[k][0], y[k + 1][1] - y[k][1]);
-        for (let k = 0; k < y.length - 1; k++) {
-          const a = y[k], b = y[k + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / 4));
-          for (let u = 0; u <= n; u++) { const t = u / n, q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], ku = kal[k + 1] + L * (1 - t); ad.push({ e: Math.abs(x.p[0] - q[0]) + Math.abs(x.p[1] - q[1]) + 0.3 * ku, ku, y, i: k, q }); }
-        }
-      }
-      ad.sort((p, q) => p.e - q.e);
-      const dog = K.gorur(x.p, A) && K.dik(x.p, A) ? [x.p, A] : K.yol(x.p, A);
-      let enI = dog ? { c: Ly(dog), yol: dog } : null;
-      for (const z of ad.slice(0, 6)) {
-        if (enI && z.e >= enI.c) break;
-        const br = K.gorur(x.p, z.q) && K.dik(x.p, z.q) ? [x.p, z.q] : K.yol(x.p, z.q); if (!br) continue;
-        const c = Ly(br) + 0.3 * z.ku; if (!enI || c < enI.c) enI = { c, yol: [...br.slice(0, -1), z.q, ...z.y.slice(z.i + 1)] };
-      }
-      yol = enI ? enI.yol : null;
-    }
-    if (!yol) continue;
+  // Kullanıcı kuralı 19.10.2026: kanallar doğrusal; kırık yalnız ANA güzergâhta; en az kanal kazısı; dolandırma yok.
+  // 1) Ağa düz (tek parça, gerekirse inverter çıkışından ≤ 2,5 m iniş) bağlanabilen inverterler: en kısa yeni kazılı olan önce.
+  // 2) Hiçbiri bağlanamıyorsa en uzak inverterden ADP'ye ana hat (mevcut kanal ucuz → ağa girer), sonra 1'e dön.
+  const out = new Map(), ag = [];
+  for (const y of tohum || []) { const z = y.map((q) => [q[0], q[1]]); ag.push(z); K.agEkle(z); }
+  const kal = kalan.slice(), d = (p) => Math.hypot(p[0] - A[0], p[1] - A[1]);
+  while (kal.length) {
+    let en = null;
+    if (ag.length) for (const x of kal) { const r = K.dal(x.p, 150); if (r && (!en || r.c < en.r.c)) en = { x, r }; }
+    let x, yol;
+    if (en) { x = en.x; yol = en.r.pts; }
+    else { x = kal.reduce((a, b) => (d(b.p) > d(a.p) ? b : a)); yol = K.gorur(x.p, A) && K.dik(x.p, A) ? [x.p, A] : K.yol(x.p, A); }
+    kal.splice(kal.indexOf(x), 1);
+    if (!yol) continue;   // güzergâh yoksa düz çizgi YOK (masa üstünden geçmez); bildirilir
     const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (Math.hypot(yol[i][0] - sad[sad.length - 1][0], yol[i][1] - sad[sad.length - 1][1]) > 0.05) sad.push(yol[i]);
-    out.set(x.it.id, sad); ag.push(sad);
+    out.set(x.it.id, sad); ag.push(sad); K.agEkle(sad);
   }
   return out;
 }
@@ -4628,7 +4613,30 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   const ak = new Float32Array(N); for (let k = 0; k < N; k++) ak[k] = blk[k] ? 0 : 1e9;
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const k = j * nx + i; if (!ak[k]) continue; let v = ak[k]; if (i) v = Math.min(v, ak[k - 1] + 1); if (j) v = Math.min(v, ak[k - nx] + 1); ak[k] = v; }
   for (let j = ny - 1; j >= 0; j--) for (let i = nx - 1; i >= 0; i--) { const k = j * nx + i; if (!ak[k]) continue; let v = ak[k]; if (i < nx - 1) v = Math.min(v, ak[k + 1] + 1); if (j < ny - 1) v = Math.min(v, ak[k + nx] + 1); ak[k] = v; }
-  const ORTA = 1.6, KO = 1.5, TURN = 4.0;   // m: bu açıklığın altında engele yaklaşmak cezalı; kırık başına ceza
+  const ORTA = 1.6, KO = 1.5, TURN = 4.0, NETC = 0.15;   // m: bu açıklığın altında engele yaklaşmak cezalı; kırık başına ceza; mevcut kanalda adım ucuz (yeni kazı yok)
+  // kanal ağı maskesi: hücre → (hat no + 1, parça no). En az kazı: yeni hat mevcut kanala girer, branşman kanala DÜZ (kırıksız) bağlanır.
+  const netL = new Int32Array(N), netS = new Int32Array(N), hatlar = [];
+  const agEkle = (yW) => {
+    const li = hatlar.length; hatlar.push(yW); const y = yW.map(Lc);
+    for (let k = 0; k < y.length - 1; k++) { const a = y[k], b = y[k + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.5))); for (let u = 0; u <= n; u++) { const [i, j] = hc([a[0] + (b[0] - a[0]) * u / n, a[1] + (b[1] - a[1]) * u / n]); if (i >= 0 && j >= 0 && i < nx && j < ny && !netL[j * nx + i]) { netL[j * nx + i] = li + 1; netS[j * nx + i] = k; } } }
+  };
+  // düz branşman: inverterden 4 yönde ışın; ya da inverter çıkışından açıklığa ≤ 2,5 m iniş + sıra boyunca tek düz hat. İlk kanal hücresinde durur.
+  const dal = (pW, maxL) => {
+    const p = Lc(pW); let en = null; const R = Math.round(2.5 / h), K2 = Math.round((maxL || 150) / h);
+    for (let o = -R; o <= R; o++) {
+      const sP = [p[0], p[1] + o * h], so = Math.abs(o) * h; if (o && !gorurL(p, sP)) continue;
+      const yon = o ? [[1, 0], [-1, 0]] : [[1, 0], [-1, 0], [0, 1], [0, -1]];
+      for (const [dx, dy] of yon) for (let k = 0; k <= K2; k++) {
+        const q = [sP[0] + dx * k * h, sP[1] + dy * k * h], [i, j] = hc(q); if (i < 0 || j < 0 || i >= nx || j >= ny) break; const cc = j * nx + i;
+        if (netL[cc]) { const ki = so + k * h + 0.3 * Math.max(0, ORTA - ak[hc(sP)[1] * nx + hc(sP)[0]] * h) / ORTA; if (!en || ki < en.c) en = { c: ki, sP, q, li: netL[cc] - 1, si: netS[cc], o }; break; }
+        if (blk[cc]) break;
+      }
+    }
+    if (!en) return null;
+    const y = hatlar[en.li], a = y[en.si], b = y[en.si + 1], qW = Wc(en.q), dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((qW[0] - a[0]) * dx + (qW[1] - a[1]) * dy) / L2)) : 0, qq = [a[0] + dx * t, a[1] + dy * t];
+    const pts = [pW]; if (en.o) pts.push(Wc(en.sP)); pts.push(qq, ...y.slice(en.si + 1));
+    return { c: en.c, pts };
+  };
   const hc = (p) => [Math.round((p[0] - X0) / h), Math.round((p[1] - Y0) / h)];
   const doluL = (p) => { const [i, j] = hc(p); return i < 0 || j < 0 || i >= nx || j >= ny || blk[j * nx + i] === 1; };
   const gorurL = (a, b) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n; if (doluL([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])) return false; } return true; };
@@ -4639,7 +4647,7 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
     const [si, sj] = hc(a), [gi, gj] = hc(b); if (si < 0 || sj < 0 || si >= nx || sj >= ny || gi < 0 || gj < 0 || gi >= nx || gj >= ny) return null;
     const D4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
     const dist = new Float32Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1), gy = new Uint8Array(N).fill(255), kapali = new Uint8Array(N);
-    const hh = (i, j) => h * (Math.abs(i - gi) + Math.abs(j - gj));
+    const hh = (i, j) => h * NETC * (Math.abs(i - gi) + Math.abs(j - gj));
     const hk = [], hf = [];
     const push = (k, f) => { hk.push(k); hf.push(f); let x = hk.length - 1; while (x) { const p = (x - 1) >> 1; if (hf[p] <= hf[x]) break; [hk[p], hk[x]] = [hk[x], hk[p]]; [hf[p], hf[x]] = [hf[x], hf[p]]; x = p; } };
     const pop = () => { const k = hk[0], lk = hk.pop(), lf = hf.pop(); if (hk.length) { hk[0] = lk; hf[0] = lf; let x = 0; for (;;) { const a1 = 2 * x + 1, b1 = a1 + 1; let m = x; if (a1 < hk.length && hf[a1] < hf[m]) m = a1; if (b1 < hk.length && hf[b1] < hf[m]) m = b1; if (m === x) break; [hk[m], hk[x]] = [hk[x], hk[m]]; [hf[m], hf[x]] = [hf[x], hf[m]]; x = m; } } return k; };
@@ -4652,7 +4660,7 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
       for (let nd = 0; nd < 4; nd++) {
         if (dir !== 255 && nd === ((dir + 2) & 3)) continue;
         const ni = ci + D4[nd][0], nj = cj + D4[nd][1]; if (ni < 0 || nj < 0 || ni >= nx || nj >= ny) continue; const nc = nj * nx + ni; if (blk[nc] || kapali[nc]) continue;
-        const g = dist[c0] + h * (1 + KO * Math.max(0, ORTA - ak[nc] * h) / ORTA) + (dir !== 255 && nd !== dir ? TURN : 0);
+        const g = dist[c0] + (netL[nc] ? h * NETC : h * (1 + KO * Math.max(0, ORTA - ak[nc] * h) / ORTA)) + (dir !== 255 && nd !== dir ? TURN : 0);
         if (g < dist[nc]) { dist[nc] = g; prev[nc] = c0; gy[nc] = nd; push(nc, g + hh(ni, nj)); }
       }
     }
@@ -4669,7 +4677,7 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
     for (let i = 1; i < P.length; i++) { const q = P[i], z = out[out.length - 1]; if (Math.hypot(q[0] - z[0], q[1] - z[1]) < 1e-4) continue; if (out.length >= 2) { const k = out[out.length - 2], cr = (z[0] - k[0]) * (q[1] - z[1]) - (z[1] - k[1]) * (q[0] - z[0]); if (Math.abs(cr) < 1e-6 && (z[0] - k[0]) * (q[0] - z[0]) + (z[1] - k[1]) * (q[1] - z[1]) >= 0) { out[out.length - 1] = q; continue; } } out.push(q); }
     return out.map(Wc);
   };
-  return { dolu, gorur, dik, yol };
+  return { dolu, gorur, dik, yol, agEkle, dal };
 }
 // Özellikler paneli: tasarım öğesi (ya da etiketi) seçiliyken verisi açılır listelerle değişir; etiket, blok ve özet/hesaplar güncellenir
 function tsOzellik(box, items) {

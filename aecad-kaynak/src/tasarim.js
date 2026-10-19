@@ -1040,7 +1040,32 @@ CMD.GACOTO = async (vHazir) => {
     }
     const sil = []; for (const k of silinecek) { sil.push([k, null]); for (const t of S.doc.items.values()) if (t.gesEt === k.id) sil.push([t, null]); }
     if (!yeni.length && !sil.length) { msg('Kablo çizilemedi (saha çok büyük ya da engelsiz yol yok).', 'err'); return; }
+    // AG KABLO KANALI (kullanıcı kuralı 19.10.2026): kabloların geçtiği ortak kanal 1 m genişlikte bant olarak çizilir (GES-AG-KANAL);
+    // ortak güzergâhta tek kanal (bantlar birleştirilir). Uzunluk = kazı metrajı.
+    let kanalM = 0;
+    try {
+      const KAT = 'GES-AG-KANAL', yarim = 0.5; S.doc.addLayer(KAT, 4);
+      for (const it of S.doc.items.values()) if (it.layer === KAT && hepsi) sil.push([it, null]);
+      const parcalar = [];
+      const tumAc = [...yeni.filter(([, n]) => n.t === 'pline').map(([, n]) => n.pts), ...(hepsi ? [] : [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac').map((it) => it.pts))];
+      const gor = new Set();
+      for (const P of tumAc) for (let i = 1; i < P.length; i++) {
+        const a_ = P[i - 1], b_ = P[i], L = Math.hypot(b_[0] - a_[0], b_[1] - a_[1]); if (L < 0.05) continue;
+        const k_ = [a_, b_].map((q) => Math.round(q[0] * 10) + ',' + Math.round(q[1] * 10)).sort().join('|'); if (gor.has(k_)) continue; gor.add(k_);
+        const ux = (b_[0] - a_[0]) / L, uy = (b_[1] - a_[1]) / L, nx = -uy * yarim, ny = ux * yarim, e = yarim;
+        const A0 = [a_[0] - ux * e, a_[1] - uy * e], B0 = [b_[0] + ux * e, b_[1] + uy * e];
+        parcalar.push([[[A0[0] + nx, A0[1] + ny], [B0[0] + nx, B0[1] + ny], [B0[0] - nx, B0[1] - ny], [A0[0] - nx, A0[1] - ny], [A0[0] + nx, A0[1] + ny]]]);
+        kanalM += L;
+      }
+      if (parcalar.length) {
+        const U = polygonClipping.union(...parcalar);
+        let alan = 0;
+        for (const pg of U) for (const ring of pg) { const pts = ring.slice(0, -1); alan += Math.abs(polyArea(pts)); yeni.push([null, { id: newId(), t: 'pline', layer: KAT, c: 256, lt: '', cl: true, pts: pts.map((q) => [q[0], q[1], 0]) }]); }
+        kanalM = alan / (2 * yarim);   // birleşik bant alanı / 1 m = kanal (kazı) boyu
+      }
+    } catch (e) { console.warn('kanal', e); }
     replaceItems([...sil, ...yeni], 'AC otomatik'); renderLayers();
+    if (kanalM) msg('AG kablo kanalı (1 m bant, ortak): ≈ ' + fmtNum(kanalM, 0) + ' m kazı.', 'note');
     msg(n + ' inverterden AG panoya AC kablo çizildi (ortak kanal + branşman, ' + tms.length + ' trafo) · toplam ' + fmtNum(top, 0) + ' m' + (yok ? ' · ' + yok + ' inverterde yol bulunamadı — elle çizin' : '') + '. Geri al ile tek adımda kaldırılır.', yok ? 'note' : 'res');
   } finally { busy(null); }
 };

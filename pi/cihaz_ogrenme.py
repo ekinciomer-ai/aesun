@@ -389,7 +389,13 @@ def analiz(zorla=False):
         "aciklama": "t95 = a + b × max(0, 45 − su0) dk; su0 = uyandırma anındaki su sıcaklığı. "
                     "Öncü süre = t95 + sıralı komut yayılımı + emniyet payı (isabete göre kendini ayarlar).",
     }
-    if {k: v for k, v in cikti.items() if k != "guncellendi"} != {k: v for k, v in eski.items() if k != "guncellendi"}:
+    # içerik değişince yazılır; değişmese de en geç ~55 dk'da bir yazılır (gece filo uyurken model sabit kalır,
+    # bekçinin öğrenen taraması dosyayı "geciken" saymasın: guncellendi = analizin son çalıştığı an)
+    try:
+        es_yas = time.time() - datetime.fromisoformat(eski.get("guncellendi")).timestamp()
+    except Exception:
+        es_yas = 1e9
+    if es_yas > 3300 or {k: v for k, v in cikti.items() if k != "guncellendi"} != {k: v for k, v in eski.items() if k != "guncellendi"}:
         gh(DOSYA, cikti, sha, f"ısınma öğrenmesi: {len(olaylar)} olay, emniyet {m['emniyet_dk']} dk")
     yerel["son_analiz"] = time.time()
     YEREL.parent.mkdir(parents=True, exist_ok=True)

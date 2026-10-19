@@ -238,7 +238,10 @@ function tsAcAg(kalan, A, tm, tohum) {
     const f0 = ms.length && tsMasaCerceve(ms[0]);
     if (f0 && kalan.length && self.AC_ZARF !== false) {
       const ux = f0.ux, uy = [-ux[1], ux[0]], L_ = (p) => [p[0] * ux[0] + p[1] * ux[1], p[0] * uy[0] + p[1] * uy[1]], W_ = (q) => [q[0] * ux[0] + q[1] * uy[0], q[0] * ux[1] + q[1] * uy[1]];
-      const Al = L_(A), invL = kalan.map((x) => L_(x.p)), cxI = invL.reduce((t, q) => t + q[0], 0) / invL.length;
+      // istikamet bu köşke bağlı TÜM inverterlere göre kurulur (tek tek eklense de aynı hat — ortak kanal tutarlı kalır)
+      const tumInv = (typeof tsInverterler === 'function' ? tsInverterler() : []).filter((x) => { const tms_ = [...S.doc.items.values()].filter((y) => y.t === 'insert' && y.ges && y.ges.tip === 'tm'); const en_ = tms_.reduce((a_, b_) => (Math.hypot(tsMerkez(b_)[0] - x.p[0], tsMerkez(b_)[1] - x.p[1]) < Math.hypot(tsMerkez(a_)[0] - x.p[0], tsMerkez(a_)[1] - x.p[1]) ? b_ : a_), tms_[0]); return en_ === tm; });
+      const refInv = tumInv.length >= kalan.length ? tumInv : kalan;
+      const Al = L_(A), invL = refInv.map((x) => L_(x.p)), cxI = invL.reduce((t, q) => t + q[0], 0) / invL.length;
       const dogu = Al[0] >= cxI;   // trafo inverterlerin hangi yanında
       // sıra uçları (yerel): masa çokgenlerini y'ye göre sıralara ayır; trafo tarafındaki uç
       const sira = [];
@@ -256,10 +259,13 @@ function tsAcAg(kalan, A, tm, tohum) {
         for (const yon of [1, -1]) {   // trafonun kuzeyi ve güneyi ayrı kollar
           const ust = invL.filter((q) => (q[1] - Al[1]) * yon > 0); if (!ust.length) continue;
           const uzak = ust.reduce((m, q) => (Math.abs(q[1] - Al[1]) > Math.abs(m[1] - Al[1]) ? q : m));
-          const ylim = uzak[1] + yon * 3;
-          let pts = uc.filter((p) => (p[1] - Al[1]) * yon >= -2 && (ylim - p[1]) * yon >= 0);
-          if (pts.length < 2) continue;
-          let H = zarf(pts); H.sort((p, q) => (p[1] - q[1]) * yon);   // trafodan uzağa
+          const ylim = uzak[1] + yon * 3;   // en uzak inverterin sırasına kadar (tüm inverterler)
+          // geometri o yandaki TÜM sıraların zarfından (inverter eklendikçe hat değişmez), sonra en uzak inverterin sırasında kesilir
+          const icinde0 = (p) => (typeof sinirIcinde === 'function' ? sinirIcinde(W_(p)) : true);
+          const kes = (H_) => { const o = []; for (let i = 0; i < H_.length; i++) { const p = H_[i]; if ((ylim - p[1]) * yon >= 0) { o.push(p); continue; } const q = H_[i - 1]; if (q) { const t = (ylim - q[1]) / ((p[1] - q[1]) || 1); o.push([q[0] + t * (p[0] - q[0]), ylim]); } break; } return o; };
+          let H = null;
+          { const tum = uc.filter((p) => (p[1] - Al[1]) * yon >= -2); if (tum.length >= 2) { const Ht = zarf(tum).sort((p, q) => (p[1] - q[1]) * yon); if (Ht.every(icinde0)) H = kes(Ht); } }
+          if (!H || H.length < 2) { const pts = uc.filter((p) => (p[1] - Al[1]) * yon >= -2 && (ylim - p[1]) * yon >= 0); if (pts.length < 2) continue; H = zarf(pts).sort((p, q) => (p[1] - q[1]) * yon); }
           const kol = [...H.slice().reverse()].map(W_);   // uzaktan trafoya
           // her parça engelsiz olmalı; değilse o kol atlanır (ızgara yedeği çalışır)
           // engelli parça (köşk, sınır köşesi) yalnız o parçada ızgara güzergâhıyla aşılır

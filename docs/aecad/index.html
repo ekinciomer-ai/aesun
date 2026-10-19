@@ -3490,7 +3490,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610200017', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610200019', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
@@ -3851,7 +3851,7 @@ function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pj
 function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(6, c - 2, m >= 16 ? 6 : m >= 8 ? 4 : m >= 4 ? 2 : 1)); }   // 22 çekirdek / 32 GB → 6 seçenek aynı anda
 function pjYerIsci(k) {
   PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
-  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610200017', document.baseURI).href), alt: null };
+  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610200019', document.baseURI).href), alt: null };
   o.w.onmessage = (e) => {
     const m = e.data, a = o.alt; if (!a || m.id !== a.seq) return;
     if (m.stage) { a.asama = m.stage; pjAltCiz(); return; }
@@ -5592,6 +5592,8 @@ CMD.GACOTO = async (vHazir, zorla) => {
       }
     }
     const sil = []; for (const k of silinecek) { sil.push([k, null]); for (const t of S.doc.items.values()) if (t.gesEt === k.id) sil.push([t, null]); }
+    // paftadan (GES-ÇİZ) gelen eski AC hat/hendek çizimleri kalkar: kanal ve kablo tek kaynaktan (bu algoritma) görünür
+    if (hepsi) for (const it of S.doc.items.values()) { const ly = String(it.layer).toUpperCase(); if ((ly === 'GES-HENDEK-AC' || ly === 'GES-AC-KABLO') && !(it.ges && it.ges.tip === 'ac') && !it.gesEt && !sil.some(([o]) => o === it)) sil.push([it, null]); }
     if (!yeni.length && !sil.length) { msg('Kablo çizilemedi (saha çok büyük ya da engelsiz yol yok).', 'err'); return; }
     replaceItems([...sil, ...yeni], 'AC otomatik'); tsKanalCiz(); renderLayers();
     msg(n + ' inverterden AG panoya AC kablo çizildi (ortak kanal + branşman, ' + tms.length + ' trafo) · toplam ' + fmtNum(top, 0) + ' m' + (yok ? ' · ' + yok + ' inverterde yol bulunamadı — elle çizin' : '') + '. Geri al ile tek adımda kaldırılır.', yok ? 'note' : 'res');

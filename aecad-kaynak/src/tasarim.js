@@ -1133,6 +1133,8 @@ CMD.GACOTO = async (vHazir, zorla) => {
       }
     }
     const sil = []; for (const k of silinecek) { sil.push([k, null]); for (const t of S.doc.items.values()) if (t.gesEt === k.id) sil.push([t, null]); }
+    // paftadan (GES-ÇİZ) gelen eski AC hat/hendek çizimleri kalkar: kanal ve kablo tek kaynaktan (bu algoritma) görünür
+    if (hepsi) for (const it of S.doc.items.values()) { const ly = String(it.layer).toUpperCase(); if ((ly === 'GES-HENDEK-AC' || ly === 'GES-AC-KABLO') && !(it.ges && it.ges.tip === 'ac') && !it.gesEt && !sil.some(([o]) => o === it)) sil.push([it, null]); }
     if (!yeni.length && !sil.length) { msg('Kablo çizilemedi (saha çok büyük ya da engelsiz yol yok).', 'err'); return; }
     replaceItems([...sil, ...yeni], 'AC otomatik'); tsKanalCiz(); renderLayers();
     msg(n + ' inverterden AG panoya AC kablo çizildi (ortak kanal + branşman, ' + tms.length + ' trafo) · toplam ' + fmtNum(top, 0) + ' m' + (yok ? ' · ' + yok + ' inverterde yol bulunamadı — elle çizin' : '') + '. Geri al ile tek adımda kaldırılır.', yok ? 'note' : 'res');

@@ -340,11 +340,12 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   U = U.map(Lc); eng = eng.map((o) => ({ ...o, P: o.P.map(Lc) })); P0 = Lc(P0); A = Lc(A); ekAc = (ekAc || []).map(Lc); serit = (serit || []).map(([a, b]) => [Lc(a), Lc(b)]);
   const c = 0.5, xs = U.map((q) => q[0]), ys = U.map((q) => q[1]);
   let X0 = Math.min(...xs) - 40, X1 = Math.max(...xs) + 40, Y0 = Math.min(...ys) - 40, Y1 = Math.max(...ys) + 40;
-  const B = G.bound && G.bound.length >= 3 ? G.bound.map(Lc) : null;
+  // ayrık parseller: dış alan dolu değil ama pahalı (parseller arası kablo geçişi); tek parselde dış alan ve sınır bandı dolu
+  const BS = (typeof sinirlar === 'function' ? sinirlar() : (G.bound ? [G.bound] : [])).filter((b) => b.length >= 3).map((b) => b.map(Lc)), B = BS.length ? BS.flat() : null, coklu = BS.length > 1;
   if (B) { X0 = Math.max(X0, Math.min(...B.map((q) => q[0])) - 1); X1 = Math.min(X1, Math.max(...B.map((q) => q[0])) + 1); Y0 = Math.max(Y0, Math.min(...B.map((q) => q[1])) - 1); Y1 = Math.min(Y1, Math.max(...B.map((q) => q[1])) + 1); }
   let h = 0.25; while (((X1 - X0) / h + 1) * ((Y1 - Y0) / h + 1) > 4e6) h *= 1.15;
   if (h > 1.0) return null;
-  const nx = Math.ceil((X1 - X0) / h) + 1, ny = Math.ceil((Y1 - Y0) / h) + 1, N = nx * ny, blk = new Uint8Array(N);
+  const nx = Math.ceil((X1 - X0) / h) + 1, ny = Math.ceil((Y1 - Y0) / h) + 1, N = nx * ny, blk = new Uint8Array(N), dis = new Uint8Array(N);
   const cx = (i) => X0 + i * h, cy = (j) => Y0 + j * h;
   const dSeg = (px, py, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((px - a[0]) * dx + (py - a[1]) * dy) / L2)) : 0; return Math.hypot(px - a[0] - t * dx, py - a[1] - t * dy); };
   const isar = (P, r) => {
@@ -359,14 +360,14 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   if (B) {
     for (let j = 0; j < ny; j++) {
       const y = cy(j), kes = [];
-      for (let e = 0; e < B.length; e++) { const a = B[e], b = B[(e + 1) % B.length]; if ((a[1] > y) !== (b[1] > y)) kes.push(a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])); }
+      for (const R of BS) for (let e = 0; e < R.length; e++) { const a = R[e], b = R[(e + 1) % R.length]; if ((a[1] > y) !== (b[1] > y)) kes.push(a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])); }
       kes.sort((p, q) => p - q); let k = 0;
-      for (let i = 0; i < nx; i++) { const x = cx(i); while (k < kes.length && kes[k] < x) k++; if (k % 2 === 0) blk[j * nx + i] = 1; }
+      for (let i = 0; i < nx; i++) { const x = cx(i); while (k < kes.length && kes[k] < x) k++; if (k % 2 === 0) { if (coklu) dis[j * nx + i] = 1; else blk[j * nx + i] = 1; } }
     }
-    for (let e = 0; e < B.length; e++) { const a = B[e], b = B[(e + 1) % B.length]; isar([a, b], c); }
+    if (!coklu) for (const R of BS) for (let e = 0; e < R.length; e++) { const a = R[e], b = R[(e + 1) % R.length]; isar([a, b], c); }
   }
   for (const o of eng) isar(o.P, c);
-  const ac = (p, r) => { const i0 = Math.round((p[0] - X0) / h), j0 = Math.round((p[1] - Y0) / h), R = Math.ceil(r / h); for (let j = j0 - R; j <= j0 + R; j++) for (let i = i0 - R; i <= i0 + R; i++) if (i >= 0 && j >= 0 && i < nx && j < ny && Math.hypot(i - i0, j - j0) * h <= r && (!B || tsIcinde([cx(i), cy(j)], B))) blk[j * nx + i] = 0; };
+  const ac = (p, r) => { const i0 = Math.round((p[0] - X0) / h), j0 = Math.round((p[1] - Y0) / h), R = Math.ceil(r / h); for (let j = j0 - R; j <= j0 + R; j++) for (let i = i0 - R; i <= i0 + R; i++) if (i >= 0 && j >= 0 && i < nx && j < ny && Math.hypot(i - i0, j - j0) * h <= r && (!B || coklu || BS.some((R) => tsIcinde([cx(i), cy(j)], R)))) blk[j * nx + i] = 0; };
   ac(P0, 1.2); ac(A, 2.2); for (const q of ekAc) ac(q, 1.2);
   for (const [a, b] of serit) { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.ceil(L / (h * 0.5)); for (let k = 0; k <= n; k++) { const t = k / n, px = a[0] + (b[0] - a[0]) * t, py = a[1] + (b[1] - a[1]) * t, i = Math.round((px - X0) / h), j = Math.round((py - Y0) / h); if (i >= 0 && j >= 0 && i < nx && j < ny && !eng.some((o) => o.it && String(o.it.layer).toUpperCase() === 'GES-MASA' && tsIcinde([px, py], o.P))) blk[j * nx + i] = 0; } }
   // engele uzaklık (hücre, 4 komşu): açıklığın ortası tercih edilir
@@ -420,7 +421,7 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
       for (let nd = 0; nd < 4; nd++) {
         if (dir !== 255 && nd === ((dir + 2) & 3)) continue;
         const ni = ci + D4[nd][0], nj = cj + D4[nd][1]; if (ni < 0 || nj < 0 || ni >= nx || nj >= ny) continue; const nc = nj * nx + ni; if (blk[nc] || kapali[nc]) continue;
-        const g = dist[c0] + (netL[nc] ? h * NETC : h * (1 + KO * Math.max(0, ORTA - ak[nc] * h) / ORTA)) + (dir !== 255 && nd !== dir ? TURN : 0);
+        const g = dist[c0] + (netL[nc] ? h * NETC : h * (1 + KO * Math.max(0, ORTA - ak[nc] * h) / ORTA) * (dis[nc] ? 3 : 1)) + (dir !== 255 && nd !== dir ? TURN : 0);
         if (g < dist[nc]) { dist[nc] = g; prev[nc] = c0; gy[nc] = nd; push(nc, g + hh(ni, nj)); }
       }
     }
@@ -853,7 +854,7 @@ function tsSiraUclari() {
     for (let k = 1; k < r.ms.length; k++) { const a = r.ms[k - 1], b = r.ms[k]; if (b.s - b.c.L / 2 - (a.s + a.c.L / 2) > 3) { bitir(); par = [b]; } else par.push(b); }
     bitir();
   }
-  const ok = (q) => (!G.bound || tsIcinde(q, G.bound)) && !tsMasaAt(q) && ![...S.doc.items.values()].some((it) => it.t === 'insert' && it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm') && tsIcinde(q, tsBinaIz(it) || []));
+  const ok = (q) => (!G.bound || sinirlar().some((b) => tsIcinde(q, b))) && !tsMasaAt(q) && ![...S.doc.items.values()].some((it) => it.t === 'insert' && it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm') && tsIcinde(q, tsBinaIz(it) || []));
   return uc.filter((u) => ok(u.p)).map((u) => ({ ...u, ux }));
 }
 async function tsInvOneri(R) {

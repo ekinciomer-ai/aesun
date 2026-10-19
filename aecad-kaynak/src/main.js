@@ -259,7 +259,7 @@ async function closeDoc() {
     const r = await askDlg('Çizimi kapat', '“' + S.doc.name + '” üzerinde kaydedilmemiş değişiklikler var.', [['Kaydet ve kapat', 'save', 'primary'], ['Kaydetmeden kapat', 'drop'], ['Vazgeç', null, 'ghost']]);
     if (!r) return; if (r === 'save') await saveDxf();
   }
-  const nm = S.doc.name; G.bound = null; if (typeof boundInfo === 'function') boundInfo();
+  const nm = S.doc.name; G.bound = null; G.bounds = null; if (typeof boundInfo === 'function') boundInfo();
   blankDoc('Yeni çizim'); msg('“' + nm + '” kapatıldı.');
 }
 function showHelp() {

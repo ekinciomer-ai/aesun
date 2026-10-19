@@ -211,7 +211,14 @@ function bestCombo(span, types, gap) {
 }
 // Hizalama: xm = left (batı) | right (doğu) | center; ym = south (güneyden) | north (kuzeyden) | center.
 // opts.ic: cephe bazlı iç alan halkaları (çekme zaten düşülmüş) — verilirse setback 0 ile taranır.
-function fillLand(opts) {
+function fillLand(opts) {   // ayrık parsellerde her parsel ayrı doldurulur, sonuçlar birleşir
+  if (!(G.bounds && G.bounds.length > 1)) return fillLand1(opts);
+  const keep = G.bound, out = { placed: [], rows: 0, area: 0 };
+  try { for (const b of G.bounds) { G.bound = b; const r = fillLand1({ ...opts, ic: null }); out.placed.push(...r.placed); out.rows += r.rows; out.area += r.area; Object.assign(out, { rowAng: r.rowAng, xm: r.xm, ym: r.ym }); } }
+  finally { G.bound = keep; }
+  return out;
+}
+function fillLand1(opts) {
   const { types, pitch, rowGap, rowAng } = opts; // types: [{tp, name, len, depth, n}]
   const xm = opts.xm || (opts.align === 'center' ? 'center' : opts.align === 'right' ? 'right' : 'left'), ym = opts.ym || 'south';
   const th = rowAng * D2R, c = Math.cos(th), s = Math.sin(th);

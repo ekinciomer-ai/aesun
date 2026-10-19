@@ -57,7 +57,7 @@ async function pjSecenekCizime(a) {
   const N = a.nes; if (!N || !N.masa || !N.masa.length) return true;
   if (PJ.srcDoc) pjBack();
   const D = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
-  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], G.bound); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA');
+  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && sinirIcinde([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA');
   const ids = new Set(eski.map((it) => it.id)); for (const it of D.items.values()) if (it.gesEt && ids.has(it.gesEt)) eski.push(it);
   for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it)) eski.push(it); }
   if (eski.length) {
@@ -85,7 +85,7 @@ async function pjSecenekCizime(a) {
 // DC atama, DC string, AC/OG kanal) düzenlenmiş hal kaynak çizime aktarılır ve proje paftaları bu son halden üretilir; hesaplanan ilk hal değil.
 async function pjPaftaDuzenAktar(a) {
   const P = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
-  const gesMi = (D, it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && isFinite(b[0]) && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], G.bound); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA';
+  const gesMi = (D, it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && isFinite(b[0]) && sinirIcinde([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA';
   const sec = [...P.items.values()].filter((it) => gesMi(P, it)); const sid = new Set(sec.map((it) => it.id));
   for (const it of P.items.values()) if (it.gesEt && sid.has(it.gesEt) && !sid.has(it.id)) { sec.push(it); sid.add(it.id); }
   const nMasa = sec.filter((it) => String(it.layer).toUpperCase() === 'GES-MASA').length; if (!nMasa) return pjSecenekCizime(a);
@@ -249,11 +249,18 @@ function sohbetNiyet(T) {
   if (/\bdc\s*(oto|ata|otomatik)/.test(T)) is.push(['DC otomatik atama', async () => { await CMD.GDCOTO(); return null; }]);
     if (/\bac\s*(oto|otomatik)|ac kablo\S*\s*çiz/.test(T)) is.push(['AC otomatik', async () => { await CMD.GACOTO(); return null; }]);
   }
+  // sabit komut (kullanıcı 19.10.2026): "toplam trafo gücünü 1600 kVA'nın katları yap, yerleşimi tekrar yap"
+  const kat = /(\d{3,5})\s*kva\S*\s*(?:'?n[ıi]n\s*)?katlar/.exec(T);
+  let ozel = false;
+  if (kat) { ozel = true; const kva = +kat[1];
+    is.push(['trafo ' + kva + ' kVA katları + yerleşim', async () => { const s_ = gv('p-trafo'); if (![...s_.options].some((o) => +o.value === kva)) s_.add(new Option(kva + ' kVA', kva)); s_.value = kva; const it = gv('p-invtr'); if (it) it.value = ''; pjAutoHints(); pjSave(); if (typeof tfSync === 'function') tfSync();
+      const a_ = pjAuto(); pjYerlesim(); return 'Trafo birimi ' + kva + ' kVA: TR başına en çok ' + a_.invTr + ' inverter (' + fmtNum(a_.invTr * a_.invKw, 0) + ' kW, %10 marj); trafo adedi inverter sayısından çıkar, toplam trafo gücü ' + kva + ' kVA\'nın katı. Yerleşim seçenekleri yeniden hesaplanıyor.'; }]); }
+  else if (/yerleşim\S*\s*(tekrar|yeniden)/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
   if (/son\s*hal|onayla|onay ver|projeyi (yeniden )?üret|yeniden hesapla/.test(T)) is.push(['son hali onayla', async () => { await pjSonHalOnayla(); return null; }]);
   if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);
   if (/yerleşim\S*\s*(çiz|seçenek|karşılaştır)|seçenekleri/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
   if (/(proje|pafta)\S*\s*(oluştur|üret|çiz|hazırla)/.test(T)) is.push(['proje paftaları', async () => { pjRun(); return null; }]);
-  return { yap, set, is };
+  return { yap, set, is, ozel };
 }
 function sohbetNeden(T) {
   if (!/neden|niye|niçin|mantığı|amacı/.test(T)) return null;
@@ -269,6 +276,7 @@ async function gesSohbet(metin) {
   const T = txt.toLocaleLowerCase('tr').replace(/,(\d)/g, '.$1');
   const ned = sohbetNeden(T);
   const n = sohbetNiyet(T), r = pjRevizeCoz(txt), dz = pjDuzenCoz(T);
+  if (n.ozel) { r.yap.length = 0; n.is = n.is.filter((x) => x[0] !== 'yerleşim seçenekleri'); }
   const ayar = [...n.yap, ...r.yap], hepsi = [...ayar, ...dz, ...n.is.map((x) => x[0])];
   if (!hepsi.length) {
     sohbetYaz('cevap', (ned ? ned + ' ' : 'Bunu bir işleme çeviremedim. ') + (ned ? '' : 'Yapabildiklerim: ayar değiştirmek (' + SOHBET_ORNEK.slice(0, 9).map((s) => '"' + s + '"').join(', ') + '), taşımak ("TM1 kuzeye 30 m", "TR1 INV3 doğuya 20 m"), işlem başlatmak ("kabloları çiz", "DC oto", "AC oto", "yerleşimi çiz", "proje paftalarını oluştur"). Tüm kalıplar komut satırındaki ☰ Komutlar listesinde; tıklayarak seçebilirsiniz.'));
@@ -292,7 +300,7 @@ async function gesSohbet(metin) {
 const KOMUT_LISTE = [
   ['İşlem', ['arazi doldur', 'yerleşimi çiz ve seçenekleri karşılaştır', 'kabloları çiz', 'DC oto', 'AC oto', 'son hali onayla', 'proje paftalarını oluştur']],
   ['İnverter', ['inverterleri trafoya yaklaştır', 'inverterleri ortala', 'inverterleri yol kenarına al', 'inverter optimum', '{10} inverter', 'inverter {125} kW', 'TR{1} INV{3} doğuya {20} m', 'TR{1} INV{3} batıya {20} m', 'TR{1} INV{3} kuzeye {20} m', 'TR{1} INV{3} güneye {20} m']],
-  ['Trafo / DM', ['trafo {1600}', 'TM{1} kuzeye {30} m', 'TM{1} güneye {30} m', 'TM{1} doğuya {30} m', 'TM{1} batıya {30} m', 'TM batı', 'TM doğu']],
+  ['Trafo / DM', ['toplam trafo gücünü 1600 kVA\'nın katları yap, yerleşimi tekrar yap', 'toplam trafo gücünü 2000 kVA\'nın katları yap, yerleşimi tekrar yap', 'trafo {1600}', 'TM{1} kuzeye {30} m', 'TM{1} güneye {30} m', 'TM{1} doğuya {30} m', 'TM{1} batıya {30} m', 'TM batı', 'TM doğu']],
   ['Masa ve yerleşim', ['eğim {20}', '{2}V{13} masa', 'çekme {4} m', 'sıra açıklığı {4}', 'azimut {10}', '{25} MWp', 'arazinin tamamı', 'DC/AC {1.25}', 'hizalama doğu', 'hizalama batı', 'hizalama orta', 'hizalama opt', 'sıra başlangıcı kuzey', 'sıra başlangıcı güney', 'sıra başlangıcı orta']],
   ['Yollar', ['iç yolları kaldır', 'iç yol aç', 'yol genişliği {6}', 'yol aralığı {150}', '{2}. yolu kaldır']],
   ['String', ['alt/üst string', 'tek masa tek string']],

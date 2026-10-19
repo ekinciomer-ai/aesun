@@ -2904,7 +2904,14 @@ function bestCombo(span, types, gap) {
 }
 // Hizalama: xm = left (batı) | right (doğu) | center; ym = south (güneyden) | north (kuzeyden) | center.
 // opts.ic: cephe bazlı iç alan halkaları (çekme zaten düşülmüş) — verilirse setback 0 ile taranır.
-function fillLand(opts) {
+function fillLand(opts) {   // ayrık parsellerde her parsel ayrı doldurulur, sonuçlar birleşir
+  if (!(G.bounds && G.bounds.length > 1)) return fillLand1(opts);
+  const keep = G.bound, out = { placed: [], rows: 0, area: 0 };
+  try { for (const b of G.bounds) { G.bound = b; const r = fillLand1({ ...opts, ic: null }); out.placed.push(...r.placed); out.rows += r.rows; out.area += r.area; Object.assign(out, { rowAng: r.rowAng, xm: r.xm, ym: r.ym }); } }
+  finally { G.bound = keep; }
+  return out;
+}
+function fillLand1(opts) {
   const { types, pitch, rowGap, rowAng } = opts; // types: [{tp, name, len, depth, n}]
   const xm = opts.xm || (opts.align === 'center' ? 'center' : opts.align === 'right' ? 'right' : 'left'), ym = opts.ym || 'south';
   const th = rowAng * D2R, c = Math.cos(th), s = Math.sin(th);
@@ -3090,8 +3097,8 @@ function boundInfo() {
   if (typeof cepheBilgi === 'function') cepheBilgi();
   const el = gv('g-binfo');
   if (!G.bound) { el.textContent = 'Sınır seçilmedi. Kapalı bir polyline çizin (Araziyi doldur onu otomatik alır), çizimden seçin ya da KML/KMZ yükleyin.'; return; }
-  const a = Math.abs(polyArea(G.bound)); const np = (G.parcels || []).length;
-  el.textContent = (np > 1 ? np + ' parsel birleşik' + ((G.parcelOut || []).length ? ' (' + G.parcelOut.length + ' bitişik değil)' : '') + ' · ' : '') + 'Sınır: ' + G.bound.length + ' köşe · ' + fmtNum(a, 0) + ' m² · ' + fmtNum(a / 10000, 3) + ' ha · ' + fmtNum(a / 1000, 2) + ' dönüm';
+  const a = sinirlar().reduce((t, b) => t + Math.abs(polyArea(b)), 0); const np = (G.parcels || []).length;
+  el.textContent = (np > 1 ? np + ' parsel' + (G.bounds ? ' (' + G.bounds.length + ' ayrık alan, hepsi kullanılır)' : ' birleşik') + ' · ' : '') + 'Sınır: ' + sinirlar().reduce((t, b) => t + b.length, 0) + ' köşe · ' + fmtNum(a, 0) + ' m² · ' + fmtNum(a / 10000, 3) + ' ha · ' + fmtNum(a / 1000, 2) + ' dönüm';
 }
 function autoLat() {
   if (!G.bound) return; const cx = G.bound.reduce((s, p) => s + p[0], 0) / G.bound.length, cy = G.bound.reduce((s, p) => s + p[1], 0) / G.bound.length;
@@ -3178,20 +3185,22 @@ function parselBirlestir() {
   let parts;
   try { parts = polygonClipping.union(...snapped.map((r) => [[...r, r[0]]])); } catch (e) { console.warn(e); parts = snapped.map((r) => [[...r, r[0]]]); }
   parts = parts.map((pg) => pg[0].slice(0, -1)).sort((a, b) => Math.abs(polyArea(b)) - Math.abs(polyArea(a)));
-  G.bound = parts[0]; G.parcelOut = [];
-  if (parts.length > 1) P.forEach((q, k) => { const c = centroidOf(snapped[k]); if (!pointInPoly(c, parts[0])) G.parcelOut.push(q.ad); });
+  G.bound = parts[0]; G.bounds = parts.length > 1 ? parts : null; G.parcelOut = [];   // kullanıcı kuralı 19.10.2026: ayrık parsellerin TÜMÜ kullanılır
   const crs = P.find((q) => q.crs); G.boundSrc = P.every((q) => q.src === 'kml') ? 'kml' : 'koordinat'; G.boundCrs = crs ? crs.crs : null;
   if (S.doc) {
     S.doc.addLayer('GES-PARSEL', 8); S.doc.addLayer('GES-SINIR', 3);
     const its = [];
     if (P.length > 1) P.forEach((q) => { its.push({ id: newId(), t: 'pline', layer: 'GES-PARSEL', c: 256, lt: '', cl: true, pts: q.pts.map((v) => [v[0], v[1], 0]) }); const c = centroidOf(q.pts); its.push({ id: newId(), t: 'text', layer: 'GES-PARSEL', c: 256, lt: '', x: c[0], y: c[1], h: Math.max(2, Math.sqrt(Math.abs(polyArea(q.pts))) / 25), rot: 0, s: q.ad, ha: 1, va: 2 }); });
-    its.push({ id: newId(), t: 'pline', layer: 'GES-SINIR', c: 256, lt: '', cl: true, pts: G.bound.map((v) => [v[0], v[1], 0]) });
+    for (const b of sinirlar()) its.push({ id: newId(), t: 'pline', layer: 'GES-SINIR', c: 256, lt: '', cl: true, pts: b.map((v) => [v[0], v[1], 0]) });
     S.doc.commit(its.map((n) => ({ o: null, n })), 'parsel'); G.parcelIds = its.map((x) => x.id);
-    renderLayers(); zoomTo(itemBB(S.doc, its[its.length - 1])); redraw();
+    renderLayers(); { const bb = its.filter((x) => x.layer === 'GES-SINIR').map((x) => itemBB(S.doc, x)).reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]); zoomTo(bb); } redraw();
   }
   boundInfo(); autoLat(); pitchUpdate();
-  if (G.parcelOut.length) msg('⚠ Bitişik olmayan parsel: ' + G.parcelOut.join(', ') + '. Proje en büyük birleşik alanda yapılır; bu parseller ayrı proje olarak çizilmeli.', 'err');
+  if (G.bounds) msg(G.bounds.length + ' ayrık parsel alanı: doldurma, yerleşim, kablo ve proje hepsinde yapılır; parseller arası kablo geçişi koridor olarak alınır.', 'note');
 }
+// Arazi sınırları: ayrık parseller (G.bounds) ya da tek sınır (G.bound)
+function sinirlar() { return G.bounds && G.bounds.length > 1 ? G.bounds : (G.bound ? [G.bound] : []); }
+function sinirIcinde(p) { return sinirlar().some((b) => pointInPoly(p, b)); }
 function pointInPoly(p, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const a = poly[i], b = poly[j]; if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < (b[0] - a[0]) * (p[1] - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; }
 // KML'deki il / ilçe / mahalle / ada / parsel / pafta → proje (antet) alanları; birden çok parselde ada ve parseller birleşir
 function kmlAntet(B) {
@@ -3264,7 +3273,7 @@ function sinirOto() {
   bulgeArcPts(v[v.length - 1][0], v[v.length - 1][1], v[0][0], v[0][1], v[v.length - 1][2], a);
   const pts = []; for (let i = 0; i < a.length; i += 2) pts.push([a[i], a[i + 1]]);
   if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
-  G.parcels = []; G.parcelIds = []; G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; boundInfo(); autoLat(); pitchUpdate();
+  G.parcels = []; G.parcelIds = []; G.bound = pts; G.bounds = null; G.boundSrc = 'draw'; G.boundCrs = null; boundInfo(); autoLat(); pitchUpdate();
   if (typeof cepheCiz === 'function') cepheCiz();
   msg('Çizimdeki kapalı polyline arazi sınırı olarak alındı: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha' + (aday.length > 1 && !sec.length ? ' (en büyüğü; başka sınır için “Sınırı çizimden seç”)' : '') + '.', 'res');
   return true;
@@ -3277,7 +3286,7 @@ function sinirSec(p) {
   else if (it && it.t === 'geo') { const pr = it.prims.find((x) => x.k === 0 && x.p.length >= 9); if (pr) { const w = xfArr(pr.p, it.M); pts = []; for (let i = 0; i < w.length; i += 3) pts.push([w[i], w[i + 1]]); } }
   if (!pts || pts.length < 3) { msg('Kapalı bir polyline seçin (en az 3 köşe).', 'err'); return false; }
   if (Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]) < 1e-6) pts.pop();
-  G.parcels = []; G.parcelIds = []; G.bound = pts; G.boundSrc = 'draw'; G.boundCrs = null; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
+  G.parcels = []; G.parcelIds = []; G.bound = pts; G.bounds = null; G.boundSrc = 'draw'; G.boundCrs = null; setSel([it.id]); boundInfo(); autoLat(); pitchUpdate(); msg('Arazi sınırı seçildi: ' + fmtNum(Math.abs(polyArea(pts)) / 10000, 3) + ' ha.', 'res');
   if (typeof cepheCiz === 'function') cepheCiz();
   return true;
 }
@@ -3294,7 +3303,7 @@ CMD.GFILL = async () => {
   // arazide masa varsa doldurma yapılmaz (çakışan masa): önce Sıfırla ya da sil
   const sonDol = new Set(G.fillIds || []);
   const mrk = (it) => it.t === 'insert' ? [it.M[3], it.M[7]] : it.pts && it.pts.length ? [it.pts.reduce((a, q) => a + q[0], 0) / it.pts.length, it.pts.reduce((a, q) => a + q[1], 0) / it.pts.length] : null;
-  const mevcut = [...S.doc.items.values()].filter((it) => String(it.layer).toUpperCase() === 'GES-MASA' && !sonDol.has(it.id) && (it.t === 'insert' || it.t === 'pline') && (() => { const c = mrk(it); return c && pointInPoly(c, G.bound); })());
+  const mevcut = [...S.doc.items.values()].filter((it) => String(it.layer).toUpperCase() === 'GES-MASA' && !sonDol.has(it.id) && (it.t === 'insert' || it.t === 'pline') && (() => { const c = mrk(it); return c && sinirIcinde(c); })());
   if (mevcut.length) {
     const proje = mevcut.some((it) => it.t === 'pline') || !!(PJ && (PJ.res || PJ.aktif));
     const r = await askDlg('Çakışan masa var', 'Arazide ' + mevcut.length + ' masa zaten çizili' + (proje ? ' (proje yerleşimi: masalar, inverter, trafo, kablolar)' : '') + '. Üstüne doldurulursa masalar üst üste biner. Mevcut GES çizimi silinip yeniden doldurulsun mu? (Geri al ile döner; proje hesapları yeniden çizilmeli.)', [['Sil ve yeniden doldur', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
@@ -3306,7 +3315,7 @@ CMD.GFILL = async () => {
   const pitch = pitchUpdate(); if (!pitch) return;
   const types = sel.map((tp) => { const d = tplDims(tp); return { tp, name: makeTableBlock(tp), len: d.len, depth: d.depth, n: d.n, kwp: d.kwp }; }).sort((a, b) => b.len - a.len);
   const base = { types, setback: gnum('g-set', 5), pitch, rowGap: gnum('g-gap', 0.5), rowAng: gnum('g-ang', 0) };
-  if (cepheVar()) base.ic = (toL) => cepheIcHalkalar(toL, gnum('g-set', 5));
+  if (cepheVar() && !G.bounds) base.ic = (toL) => cepheIcHalkalar(toL, gnum('g-set', 5));
   const am = gv('g-align').value, vm = (gv('g-valign') || {}).value || 'south'; let res, hiza = '';
   const modOf = (r) => r.placed.reduce((t, p) => t + types[p.type].n, 0);
   if (am === 'opt') {
@@ -3323,7 +3332,7 @@ CMD.GFILL = async () => {
   for (const p of res.placed) { const t = types[p.type]; cnt[p.type]++; items.push({ id: newId(), t: 'insert', layer: 'GES-MASA', c: types.length > 1 && p.type > 0 ? 4 : 256, lt: '', block: t.name, M: mMul(mT(p.x, p.y), mRz(res.rowAng)), ap: [] }); }
   S.doc.addLayer('GES-CEKME', 1, 'DASHED'); S.doc.addLayer('GES-NOT', 7);
   // setback outline (approx: offset polygon via miter)
-  const sb = gnum('g-set', 5); if (cepheVar()) { for (const r of cepheIcHalkalar((p) => p, sb) || []) items.push({ id: newId(), t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: r.map((q) => [q[0], q[1], 0]) }); } else if (sb > 0) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: G.bound.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(G.bound)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } }
+  const sb = gnum('g-set', 5); if (cepheVar()) { for (const r of cepheIcHalkalar((p) => p, sb) || []) items.push({ id: newId(), t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: r.map((q) => [q[0], q[1], 0]) }); } else if (sb > 0) { for (const B of sinirlar()) { const o = offsetItem({ id: -1, t: 'pline', cl: true, layer: 'GES-CEKME', c: 256, lt: '', pts: B.map((q) => [q[0], q[1], 0]) }, sb, centroidOf(B)); if (o) { o.layer = 'GES-CEKME'; items.push(o); } } }
   const mods = types.reduce((s, t, i) => s + cnt[i] * t.n, 0), kwp = mods * G.panel.p / 1000;
   // son doldurmanın nesneleri: hizalama / sıra / çekme değişince yerinde yeniden doldurulur (tek geri-al adımı)
   const eski = (G.fillIds || []).map((id) => S.doc.items.get(id)).filter(Boolean);
@@ -3336,7 +3345,7 @@ CMD.GFILL = async () => {
   const sum2 = sum + (hiza ? ' · ' + hiza : '') + (cepheVar() ? ' · cephe bazlı çekme' : '');
   msg(sum2, 'res'); gv('g-result').textContent = sum2; gv('g-result').hidden = false;
   // summary text near boundary
-  const bb = G.bound.reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
+  const bb = sinirlar().flat().reduce((a, p) => [Math.min(a[0], p[0]), Math.min(a[1], p[1]), Math.max(a[2], p[0]), Math.max(a[3], p[1])], [Infinity, Infinity, -Infinity, -Infinity]);
   const th = Math.max(1, (bb[3] - bb[1]) / 120);
   const ozId = newId(); G.fillIds.push(ozId);
   addItems([{ id: ozId, t: 'text', layer: 'GES-NOT', c: 7, lt: '', mt: true, x: bb[0], y: bb[1] - th * 2, h: th, rot: 0, s: 'GES YERLEŞİM ÖZETİ\n' + lines.join('\n') + '\nToplam: ' + mods.toLocaleString('tr') + ' modül × ' + G.panel.p + ' Wp = ' + fmtNum(kwp / 1000, 3) + ' MWp\nSıra aralığı ' + fmtNum(pitch, 2) + ' m · eğim ' + types[0].tp.tilt + '° · sınır mesafesi ' + fmtNum(sb, 1) + ' m', ha: 0, va: 3, ls: 1.6 }], 'özet');
@@ -3436,7 +3445,7 @@ function pjCizimYerlesim() {
   const mrk = (it) => { const b = itemBB(D, it); return b && isFinite(b[0]) ? [+((b[0] + b[2]) / 2).toFixed(3), +((b[1] + b[3]) / 2).toFixed(3)] : null; };
   const masa = [], inv = [], tm = [], ac = []; let dm = null;
   for (const it of D.items.values()) {
-    if (String(it.layer).toUpperCase() === 'GES-MASA' && (it.t === 'insert' || (it.t === 'pline' && it.pts && it.pts.length >= 4))) { const c = mrk(it); if (c && pointInPoly(c, G.bound)) masa.push(c); }
+    if (String(it.layer).toUpperCase() === 'GES-MASA' && (it.t === 'insert' || (it.t === 'pline' && it.pts && it.pts.length >= 4))) { const c = mrk(it); if (c && sinirIcinde(c)) masa.push(c); }
     else if (it.t === 'pline' && it.ges && it.ges.tip === 'ac' && it.pts.length >= 2) ac.push({ pts: it.pts.map((q) => [+q[0].toFixed(3), +q[1].toFixed(3)]), pay: +it.ges.pay || 10 });
     else if (it.t === 'insert' && it.ges) { const c = mrk(it); if (!c) continue; if (it.ges.tip === 'inv') inv.push(c); else if (it.ges.tip === 'tm') tm.push(c); else if (it.ges.tip === 'dm') dm = c; }
   }
@@ -3481,7 +3490,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192023', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192051', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3526,7 +3535,7 @@ function pjOpenPafta(name, auto, dosyalar) {
   const f = (dosyalar || PJ.files || {})[name]; if (!f) return;
   if (!PJ.srcDoc) PJ.srcDoc = S.doc;
   const norm = parseDxf(decodeDxfBytes(f)); const doc = importNormalized(norm);
-  const keep = G.bound; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
+  const keep = G.bound, keepS = G.bounds; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; G.bounds = keepS; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
   if (/_0[14]_/.test(name) && typeof pjPaftaTani === 'function') pjPaftaTani();
   PJ.imzaAc = /_0[14]_/.test(name) ? pjImza(S.doc) : null;
   if (!auto) msg('Pafta açıldı: ' + name, 'res');
@@ -3817,7 +3826,7 @@ async function pjSecenekCizime(a) {
   const N = a.nes; if (!N || !N.masa || !N.masa.length) return true;
   if (PJ.srcDoc) pjBack();
   const D = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
-  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], G.bound); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA');
+  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && sinirIcinde([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA');
   const ids = new Set(eski.map((it) => it.id)); for (const it of D.items.values()) if (it.gesEt && ids.has(it.gesEt)) eski.push(it);
   for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it)) eski.push(it); }
   if (eski.length) {
@@ -3845,7 +3854,7 @@ async function pjSecenekCizime(a) {
 // DC atama, DC string, AC/OG kanal) düzenlenmiş hal kaynak çizime aktarılır ve proje paftaları bu son halden üretilir; hesaplanan ilk hal değil.
 async function pjPaftaDuzenAktar(a) {
   const P = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
-  const gesMi = (D, it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && isFinite(b[0]) && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], G.bound); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA';
+  const gesMi = (D, it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && isFinite(b[0]) && sinirIcinde([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA';
   const sec = [...P.items.values()].filter((it) => gesMi(P, it)); const sid = new Set(sec.map((it) => it.id));
   for (const it of P.items.values()) if (it.gesEt && sid.has(it.gesEt) && !sid.has(it.id)) { sec.push(it); sid.add(it.id); }
   const nMasa = sec.filter((it) => String(it.layer).toUpperCase() === 'GES-MASA').length; if (!nMasa) return pjSecenekCizime(a);
@@ -4009,11 +4018,18 @@ function sohbetNiyet(T) {
   if (/\bdc\s*(oto|ata|otomatik)/.test(T)) is.push(['DC otomatik atama', async () => { await CMD.GDCOTO(); return null; }]);
     if (/\bac\s*(oto|otomatik)|ac kablo\S*\s*çiz/.test(T)) is.push(['AC otomatik', async () => { await CMD.GACOTO(); return null; }]);
   }
+  // sabit komut (kullanıcı 19.10.2026): "toplam trafo gücünü 1600 kVA'nın katları yap, yerleşimi tekrar yap"
+  const kat = /(\d{3,5})\s*kva\S*\s*(?:'?n[ıi]n\s*)?katlar/.exec(T);
+  let ozel = false;
+  if (kat) { ozel = true; const kva = +kat[1];
+    is.push(['trafo ' + kva + ' kVA katları + yerleşim', async () => { const s_ = gv('p-trafo'); if (![...s_.options].some((o) => +o.value === kva)) s_.add(new Option(kva + ' kVA', kva)); s_.value = kva; const it = gv('p-invtr'); if (it) it.value = ''; pjAutoHints(); pjSave(); if (typeof tfSync === 'function') tfSync();
+      const a_ = pjAuto(); pjYerlesim(); return 'Trafo birimi ' + kva + ' kVA: TR başına en çok ' + a_.invTr + ' inverter (' + fmtNum(a_.invTr * a_.invKw, 0) + ' kW, %10 marj); trafo adedi inverter sayısından çıkar, toplam trafo gücü ' + kva + ' kVA\'nın katı. Yerleşim seçenekleri yeniden hesaplanıyor.'; }]); }
+  else if (/yerleşim\S*\s*(tekrar|yeniden)/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
   if (/son\s*hal|onayla|onay ver|projeyi (yeniden )?üret|yeniden hesapla/.test(T)) is.push(['son hali onayla', async () => { await pjSonHalOnayla(); return null; }]);
   if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);
   if (/yerleşim\S*\s*(çiz|seçenek|karşılaştır)|seçenekleri/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
   if (/(proje|pafta)\S*\s*(oluştur|üret|çiz|hazırla)/.test(T)) is.push(['proje paftaları', async () => { pjRun(); return null; }]);
-  return { yap, set, is };
+  return { yap, set, is, ozel };
 }
 function sohbetNeden(T) {
   if (!/neden|niye|niçin|mantığı|amacı/.test(T)) return null;
@@ -4029,6 +4045,7 @@ async function gesSohbet(metin) {
   const T = txt.toLocaleLowerCase('tr').replace(/,(\d)/g, '.$1');
   const ned = sohbetNeden(T);
   const n = sohbetNiyet(T), r = pjRevizeCoz(txt), dz = pjDuzenCoz(T);
+  if (n.ozel) { r.yap.length = 0; n.is = n.is.filter((x) => x[0] !== 'yerleşim seçenekleri'); }
   const ayar = [...n.yap, ...r.yap], hepsi = [...ayar, ...dz, ...n.is.map((x) => x[0])];
   if (!hepsi.length) {
     sohbetYaz('cevap', (ned ? ned + ' ' : 'Bunu bir işleme çeviremedim. ') + (ned ? '' : 'Yapabildiklerim: ayar değiştirmek (' + SOHBET_ORNEK.slice(0, 9).map((s) => '"' + s + '"').join(', ') + '), taşımak ("TM1 kuzeye 30 m", "TR1 INV3 doğuya 20 m"), işlem başlatmak ("kabloları çiz", "DC oto", "AC oto", "yerleşimi çiz", "proje paftalarını oluştur"). Tüm kalıplar komut satırındaki ☰ Komutlar listesinde; tıklayarak seçebilirsiniz.'));
@@ -4052,7 +4069,7 @@ async function gesSohbet(metin) {
 const KOMUT_LISTE = [
   ['İşlem', ['arazi doldur', 'yerleşimi çiz ve seçenekleri karşılaştır', 'kabloları çiz', 'DC oto', 'AC oto', 'son hali onayla', 'proje paftalarını oluştur']],
   ['İnverter', ['inverterleri trafoya yaklaştır', 'inverterleri ortala', 'inverterleri yol kenarına al', 'inverter optimum', '{10} inverter', 'inverter {125} kW', 'TR{1} INV{3} doğuya {20} m', 'TR{1} INV{3} batıya {20} m', 'TR{1} INV{3} kuzeye {20} m', 'TR{1} INV{3} güneye {20} m']],
-  ['Trafo / DM', ['trafo {1600}', 'TM{1} kuzeye {30} m', 'TM{1} güneye {30} m', 'TM{1} doğuya {30} m', 'TM{1} batıya {30} m', 'TM batı', 'TM doğu']],
+  ['Trafo / DM', ['toplam trafo gücünü 1600 kVA\'nın katları yap, yerleşimi tekrar yap', 'toplam trafo gücünü 2000 kVA\'nın katları yap, yerleşimi tekrar yap', 'trafo {1600}', 'TM{1} kuzeye {30} m', 'TM{1} güneye {30} m', 'TM{1} doğuya {30} m', 'TM{1} batıya {30} m', 'TM batı', 'TM doğu']],
   ['Masa ve yerleşim', ['eğim {20}', '{2}V{13} masa', 'çekme {4} m', 'sıra açıklığı {4}', 'azimut {10}', '{25} MWp', 'arazinin tamamı', 'DC/AC {1.25}', 'hizalama doğu', 'hizalama batı', 'hizalama orta', 'hizalama opt', 'sıra başlangıcı kuzey', 'sıra başlangıcı güney', 'sıra başlangıcı orta']],
   ['Yollar', ['iç yolları kaldır', 'iç yol aç', 'yol genişliği {6}', 'yol aralığı {150}', '{2}. yolu kaldır']],
   ['String', ['alt/üst string', 'tek masa tek string']],
@@ -4705,11 +4722,12 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   U = U.map(Lc); eng = eng.map((o) => ({ ...o, P: o.P.map(Lc) })); P0 = Lc(P0); A = Lc(A); ekAc = (ekAc || []).map(Lc); serit = (serit || []).map(([a, b]) => [Lc(a), Lc(b)]);
   const c = 0.5, xs = U.map((q) => q[0]), ys = U.map((q) => q[1]);
   let X0 = Math.min(...xs) - 40, X1 = Math.max(...xs) + 40, Y0 = Math.min(...ys) - 40, Y1 = Math.max(...ys) + 40;
-  const B = G.bound && G.bound.length >= 3 ? G.bound.map(Lc) : null;
+  // ayrık parseller: dış alan dolu değil ama pahalı (parseller arası kablo geçişi); tek parselde dış alan ve sınır bandı dolu
+  const BS = (typeof sinirlar === 'function' ? sinirlar() : (G.bound ? [G.bound] : [])).filter((b) => b.length >= 3).map((b) => b.map(Lc)), B = BS.length ? BS.flat() : null, coklu = BS.length > 1;
   if (B) { X0 = Math.max(X0, Math.min(...B.map((q) => q[0])) - 1); X1 = Math.min(X1, Math.max(...B.map((q) => q[0])) + 1); Y0 = Math.max(Y0, Math.min(...B.map((q) => q[1])) - 1); Y1 = Math.min(Y1, Math.max(...B.map((q) => q[1])) + 1); }
   let h = 0.25; while (((X1 - X0) / h + 1) * ((Y1 - Y0) / h + 1) > 4e6) h *= 1.15;
   if (h > 1.0) return null;
-  const nx = Math.ceil((X1 - X0) / h) + 1, ny = Math.ceil((Y1 - Y0) / h) + 1, N = nx * ny, blk = new Uint8Array(N);
+  const nx = Math.ceil((X1 - X0) / h) + 1, ny = Math.ceil((Y1 - Y0) / h) + 1, N = nx * ny, blk = new Uint8Array(N), dis = new Uint8Array(N);
   const cx = (i) => X0 + i * h, cy = (j) => Y0 + j * h;
   const dSeg = (px, py, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((px - a[0]) * dx + (py - a[1]) * dy) / L2)) : 0; return Math.hypot(px - a[0] - t * dx, py - a[1] - t * dy); };
   const isar = (P, r) => {
@@ -4724,14 +4742,14 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   if (B) {
     for (let j = 0; j < ny; j++) {
       const y = cy(j), kes = [];
-      for (let e = 0; e < B.length; e++) { const a = B[e], b = B[(e + 1) % B.length]; if ((a[1] > y) !== (b[1] > y)) kes.push(a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])); }
+      for (const R of BS) for (let e = 0; e < R.length; e++) { const a = R[e], b = R[(e + 1) % R.length]; if ((a[1] > y) !== (b[1] > y)) kes.push(a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])); }
       kes.sort((p, q) => p - q); let k = 0;
-      for (let i = 0; i < nx; i++) { const x = cx(i); while (k < kes.length && kes[k] < x) k++; if (k % 2 === 0) blk[j * nx + i] = 1; }
+      for (let i = 0; i < nx; i++) { const x = cx(i); while (k < kes.length && kes[k] < x) k++; if (k % 2 === 0) { if (coklu) dis[j * nx + i] = 1; else blk[j * nx + i] = 1; } }
     }
-    for (let e = 0; e < B.length; e++) { const a = B[e], b = B[(e + 1) % B.length]; isar([a, b], c); }
+    if (!coklu) for (const R of BS) for (let e = 0; e < R.length; e++) { const a = R[e], b = R[(e + 1) % R.length]; isar([a, b], c); }
   }
   for (const o of eng) isar(o.P, c);
-  const ac = (p, r) => { const i0 = Math.round((p[0] - X0) / h), j0 = Math.round((p[1] - Y0) / h), R = Math.ceil(r / h); for (let j = j0 - R; j <= j0 + R; j++) for (let i = i0 - R; i <= i0 + R; i++) if (i >= 0 && j >= 0 && i < nx && j < ny && Math.hypot(i - i0, j - j0) * h <= r && (!B || tsIcinde([cx(i), cy(j)], B))) blk[j * nx + i] = 0; };
+  const ac = (p, r) => { const i0 = Math.round((p[0] - X0) / h), j0 = Math.round((p[1] - Y0) / h), R = Math.ceil(r / h); for (let j = j0 - R; j <= j0 + R; j++) for (let i = i0 - R; i <= i0 + R; i++) if (i >= 0 && j >= 0 && i < nx && j < ny && Math.hypot(i - i0, j - j0) * h <= r && (!B || coklu || BS.some((R) => tsIcinde([cx(i), cy(j)], R)))) blk[j * nx + i] = 0; };
   ac(P0, 1.2); ac(A, 2.2); for (const q of ekAc) ac(q, 1.2);
   for (const [a, b] of serit) { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.ceil(L / (h * 0.5)); for (let k = 0; k <= n; k++) { const t = k / n, px = a[0] + (b[0] - a[0]) * t, py = a[1] + (b[1] - a[1]) * t, i = Math.round((px - X0) / h), j = Math.round((py - Y0) / h); if (i >= 0 && j >= 0 && i < nx && j < ny && !eng.some((o) => o.it && String(o.it.layer).toUpperCase() === 'GES-MASA' && tsIcinde([px, py], o.P))) blk[j * nx + i] = 0; } }
   // engele uzaklık (hücre, 4 komşu): açıklığın ortası tercih edilir
@@ -4785,7 +4803,7 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
       for (let nd = 0; nd < 4; nd++) {
         if (dir !== 255 && nd === ((dir + 2) & 3)) continue;
         const ni = ci + D4[nd][0], nj = cj + D4[nd][1]; if (ni < 0 || nj < 0 || ni >= nx || nj >= ny) continue; const nc = nj * nx + ni; if (blk[nc] || kapali[nc]) continue;
-        const g = dist[c0] + (netL[nc] ? h * NETC : h * (1 + KO * Math.max(0, ORTA - ak[nc] * h) / ORTA)) + (dir !== 255 && nd !== dir ? TURN : 0);
+        const g = dist[c0] + (netL[nc] ? h * NETC : h * (1 + KO * Math.max(0, ORTA - ak[nc] * h) / ORTA) * (dis[nc] ? 3 : 1)) + (dir !== 255 && nd !== dir ? TURN : 0);
         if (g < dist[nc]) { dist[nc] = g; prev[nc] = c0; gy[nc] = nd; push(nc, g + hh(ni, nj)); }
       }
     }
@@ -5218,7 +5236,7 @@ function tsSiraUclari() {
     for (let k = 1; k < r.ms.length; k++) { const a = r.ms[k - 1], b = r.ms[k]; if (b.s - b.c.L / 2 - (a.s + a.c.L / 2) > 3) { bitir(); par = [b]; } else par.push(b); }
     bitir();
   }
-  const ok = (q) => (!G.bound || tsIcinde(q, G.bound)) && !tsMasaAt(q) && ![...S.doc.items.values()].some((it) => it.t === 'insert' && it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm') && tsIcinde(q, tsBinaIz(it) || []));
+  const ok = (q) => (!G.bound || sinirlar().some((b) => tsIcinde(q, b))) && !tsMasaAt(q) && ![...S.doc.items.values()].some((it) => it.t === 'insert' && it.ges && (it.ges.tip === 'tm' || it.ges.tip === 'dm') && tsIcinde(q, tsBinaIz(it) || []));
   return uc.filter((u) => ok(u.p)).map((u) => ({ ...u, ux }));
 }
 async function tsInvOneri(R) {
@@ -5969,7 +5987,7 @@ async function closeDoc() {
     const r = await askDlg('Çizimi kapat', '“' + S.doc.name + '” üzerinde kaydedilmemiş değişiklikler var.', [['Kaydet ve kapat', 'save', 'primary'], ['Kaydetmeden kapat', 'drop'], ['Vazgeç', null, 'ghost']]);
     if (!r) return; if (r === 'save') await saveDxf();
   }
-  const nm = S.doc.name; G.bound = null; if (typeof boundInfo === 'function') boundInfo();
+  const nm = S.doc.name; G.bound = null; G.bounds = null; if (typeof boundInfo === 'function') boundInfo();
   blankDoc('Yeni çizim'); msg('“' + nm + '” kapatıldı.');
 }
 function showHelp() {

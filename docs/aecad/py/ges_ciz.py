@@ -163,6 +163,13 @@ class Pafta:
         return (min(xs), min(ys), max(xs), max(ys)) if xs else (0, 0, 1, 1)
 
 
+def dis_halkalar(g):
+    """Polygon / MultiPolygon dış halkaları (çok parsel)."""
+    if g is None or g.is_empty: return []
+    if g.geom_type == "Polygon": return [g.exterior]
+    return [q.exterior for q in getattr(g, "geoms", []) if q.geom_type == "Polygon"]
+
+
 def geom_ciz(pf, kat, g, info=None):
     if g is None or g.is_empty: return
     if g.geom_type == "Polygon": pf.poli(kat, list(g.exterior.coords), info)
@@ -224,18 +231,34 @@ class Model:
 
     # ---------------------------------------------------------------- 1) saha
     def parsel_geom(self):
+        """Parsel(ler). Kullanıcı kuralı 19.10.2026: dosyadaki ayrık parsellerin TÜMÜNDE işlem yapılır.
+        self.parsel_sinir = parsellerin birleşimi (çizim, alan, çit, masa alanı); dönen geometri = parseller + aralarındaki
+        geçiş koridorları (kablo/servis yolu geçişi; en kısa bağlantı ağacı) — güzergâh tek ağ kalır, koridora masa ve çit konmaz."""
         k = self.P["parsel"]["koordinat"]
         if not k: raise SystemExit("HATA: parsel.koordinat yok")
         coklu = isinstance(k[0][0], (list, tuple))
         polys = [Polygon(q).buffer(0) for q in (k if coklu else [k])]
         g = unary_union(polys)
+        self.kopruler = []
         if g.geom_type != "Polygon":
             g2 = unary_union([p.buffer(0.5) for p in polys]).buffer(-0.5)
             if g2.geom_type == "Polygon": g = g2
-            else:
-                g = max(g.geoms, key=lambda q: q.area)
-                self.uyari.append("Parseller bitişik değil — en büyük parça kullanıldı; diğerleri ayrı proje olarak çalıştırılmalı.")
-        return g
+        self.parsel_sinir = g
+        if g.geom_type == "Polygon": return g
+        par = sorted([q for q in g.geoms if q.area > 1], key=lambda q: -q.area)
+        bag, kalan = [par[0]], par[1:]
+        while kalan:                                   # Prim: ağa en yakın parça en kısa koridorla bağlanır
+            en = min(((a.distance(b), a, b) for a in bag for b in kalan), key=lambda t: t[0])
+            _, a, b = en; p, q = nearest_points(a, b); L = p.distance(q)
+            ux, uy = ((q.x - p.x) / L, (q.y - p.y) / L) if L > 1e-6 else (1.0, 0.0)
+            hat = LineString([(p.x - ux * 2, p.y - uy * 2), (q.x + ux * 2, q.y + uy * 2)])
+            self.kopruler.append({"hat": hat, "L": L}); bag.append(b); kalan.remove(b)
+        b_ = unary_union(par + [o["hat"].buffer(6.0, cap_style=2, join_style=2) for o in self.kopruler])
+        _u = (f"{len(par)} ayrık parsel tek projede: parseller arası {len(self.kopruler)} geçiş koridoru (toplam {sum(o['L'] for o in self.kopruler):.0f} m; kablo geçişi/yol — izin ve boru geçişi ayrıca kontrol edilir).")
+        if _u not in self.uyari: self.uyari.append(_u)
+        if b_.geom_type != "Polygon":
+            b_ = max(b_.geoms, key=lambda q: q.area); self.uyari.append("Parsel koridorları birleşemedi — en büyük parça kullanıldı.")
+        return b_
 
     def saha(self, cekme):
         P = self.P
@@ -245,9 +268,11 @@ class Model:
         rot = lambda g: affinity.rotate(g, -self.az, origin=self.merkez) if self.az else g
         loc = rot(self.parsel)
         of = P["parsel"]["cit_ic_ofset_m"]
-        self.cit = self.parsel.buffer(-of, join_style=2)
+        self.cit = self.parsel_sinir.buffer(-of, join_style=2)   # çit her parselin kendi sınırında (koridorda çit yok)
+        coklu_p = self.parsel_sinir.geom_type != "Polygon"
+        loc_p = rot(self.parsel_sinir)
         # Cephe bazlı çekme (parsel.cepheler): yol / komşu parsel / diğer cephelerde farklı mesafe. Verilmeyen kenar = genel çekme (kademeli).
-        kn = self._cephe_kenarlar(loc, rot, cekme)
+        kn = [] if coklu_p else self._cephe_kenarlar(loc, rot, cekme)
         self.cekme_cephe = kn
         if kn and any(abs(d - cekme) > 1e-6 for _, d, _ in kn):
             ofs = lambda f: self._duz_ofset(loc, kn, f)
@@ -255,7 +280,7 @@ class Model:
             self.cekme = min(d for _, d, _ in kn)
         else:
             ofs = None
-            ic = loc.buffer(-cekme, join_style=2)
+            ic = loc_p.buffer(-cekme, join_style=2)          # masa alanı yalnız parsellerde (koridorda masa yok)
             self.cekme = cekme
         for ya in P["parsel"]["yasak_alanlar"]:
             ic = ic.difference(rot(Polygon(ya["koordinat"]).buffer(ya.get("tampon_m", 0))))
@@ -601,7 +626,10 @@ class Model:
 
     def acik_y(self, sira, alt=True):
         """sira'nın altındaki (güney) / üstündeki (kuzey) sıra açıklığının ekseni."""
-        r = self.siralar[sira]
+        r = self.siralar.get(sira)
+        if r is None:                                  # boş sıra (ayrık parseller arası / boşluk): en yakın sıradan eksen aralığıyla
+            ref = min(self.siralar, key=lambda q: abs(q - sira)); r0 = self.siralar[ref]; dy = (sira - ref) * self.P["masa"]["pitch_m"]
+            r = {"y0": r0["y0"] + dy, "y1": r0["y1"] + dy}
         return r["y0"] - self.acik / 2 if alt else r["y1"] + self.acik / 2
 
     def dc_yol(self, ms, inv, ofset=-0.6):
@@ -1405,8 +1433,9 @@ class Model:
                 for ms in kesen: baglanti.append((ms["x"], ms["loc"].bounds[1] + 0.3))
                 kopru += len(lst) - 1
         cit_loc = affinity.rotate(self.cit, -self.az, origin=self.merkez) if self.az else self.cit
-        halka = cit_loc.buffer(-1.0, join_style=2).exterior
-        ser.append(LineString(halka.coords))
+        halkalar = [LineString(r.coords) for r in dis_halkalar(cit_loc.buffer(-1.0, join_style=2))]
+        ser += halkalar
+        halka = unary_union(halkalar) if len(halkalar) > 1 else halkalar[0]
         yol_ser = [k for r_ in self.ic_yollar for k in r_["kanal"]]     # A.7: iç yol kanalı boyunca şerit (sıra şeritlerini ve çevre halkasını bağlar)
         ser += yol_ser
         cubuk = []
@@ -1414,31 +1443,34 @@ class Model:
             r = tm.buffer(1.0, join_style=2).exterior
             ser.append(LineString(r.coords)); cubuk += list(r.coords)[:t["tm_cubuk"]]
             c = tm.centroid
-            hedef = unary_union(yol_ser + [LineString(halka.coords)]) if yol_ser else LineString(halka.coords)
+            hedef = unary_union(yol_ser + halkalar) if yol_ser else halka
             q = nearest_points(hedef, c)[0]; p_ = nearest_points(r, q)[0]
             ser.append(LineString([(p_.x, p_.y), (q.x, q.y)]))
         d = 0.0
-        while d < halka.length: cubuk.append(tuple(halka.interpolate(d).coords[0])); d += t["cubuk_araligi_m"]
-        cit_bag, d = [], 0.0
-        while d < cit_loc.exterior.length: cit_bag.append(tuple(cit_loc.exterior.interpolate(d).coords[0])); d += t["cit_baglanti_m"]
+        for hl in halkalar:
+            d = 0.0
+            while d < hl.length: cubuk.append(tuple(hl.interpolate(d).coords[0])); d += t["cubuk_araligi_m"]
+        cit_bag = []
+        for cr in dis_halkalar(cit_loc):
+            d = 0.0
+            while d < cr.length: cit_bag.append(tuple(cr.interpolate(d).coords[0])); d += t["cit_baglanti_m"]
         self.toprak_serit = unary_union(ser)
         self.toprak_baglanti, self.toprak_kopru, self.toprak_cubuk, self.cit_bag = baglanti, kopru, cubuk, cit_bag
 
     def guvenlik(self):
-        g = self.P["guvenlik"]
-        ring = self.cit.exterior
-        coords = list(ring.coords)[:-1]; n = len(coords); direk = []
-        for i in range(n):
-            a, b, c = coords[i - 1], coords[i], coords[(i + 1) % n]
-            v1 = math.atan2(b[1] - a[1], b[0] - a[0]); v2 = math.atan2(c[1] - b[1], c[0] - b[0])
-            if abs((v2 - v1 + math.pi) % (2 * math.pi) - math.pi) > math.radians(15): direk.append(b)
-        d = 0.0
-        while d < ring.length:
-            p = ring.interpolate(d).coords[0]
-            if all(math.dist(p, q) > g["direk_araligi_m"] * 0.5 for q in direk): direk.append(p)
-            d += g["direk_araligi_m"]
-        ic = self.cit.buffer(-1.0, join_style=2).exterior
-        self.direkler = [tuple(ic.interpolate(ic.project(Point(p))).coords[0]) for p in direk]
+        g = self.P["guvenlik"]; self.direkler = []
+        for ring, ic in zip(dis_halkalar(self.cit), dis_halkalar(self.cit.buffer(-1.0, join_style=2)) or dis_halkalar(self.cit)):
+            coords = list(ring.coords)[:-1]; n = len(coords); direk = []
+            for i in range(n):
+                a, b, c = coords[i - 1], coords[i], coords[(i + 1) % n]
+                v1 = math.atan2(b[1] - a[1], b[0] - a[0]); v2 = math.atan2(c[1] - b[1], c[0] - b[0])
+                if abs((v2 - v1 + math.pi) % (2 * math.pi) - math.pi) > math.radians(15): direk.append(b)
+            d = 0.0
+            while d < ring.length:
+                p = ring.interpolate(d).coords[0]
+                if all(math.dist(p, q) > g["direk_araligi_m"] * 0.5 for q in direk): direk.append(p)
+                d += g["direk_araligi_m"]
+            self.direkler += [tuple(ic.interpolate(ic.project(Point(p))).coords[0]) for p in direk]
 
     def cekme_ozet(self):
         kn = [q for q in (getattr(self, "cekme_cephe", None) or []) if q[2]]
@@ -1519,10 +1551,10 @@ class Model:
         ekle("Koordinat sistemi tanımlı", bool(P["parsel"]["koordinat_sistemi"]) or None, P["parsel"]["koordinat_sistemi"] or "boş",
              "E: ED50/UTM 6° ↔ ITRF/GK 3° karışırsa ~90 m hata")
         if P["parsel"]["eigm_alan_m2"]:
-            sap = abs(self.parsel.area - P["parsel"]["eigm_alan_m2"]) / P["parsel"]["eigm_alan_m2"] * 100
-            ekle("Parsel alanı EİGM ile uyumlu", sap <= 0.1, f"çizim {self.parsel.area:,.0f} / EİGM {P['parsel']['eigm_alan_m2']:,.0f} m² → %{sap:.3f}", "E: sapma ≤ %0,1")
+            sap = abs(self.parsel_sinir.area - P["parsel"]["eigm_alan_m2"]) / P["parsel"]["eigm_alan_m2"] * 100
+            ekle("Parsel alanı EİGM ile uyumlu", sap <= 0.1, f"çizim {self.parsel_sinir.area:,.0f} / EİGM {P['parsel']['eigm_alan_m2']:,.0f} m² → %{sap:.3f}", "E: sapma ≤ %0,1")
         else:
-            ekle("Parsel alanı EİGM ile uyumlu", None, f"çizim {self.parsel.area:,.0f} m², parsel.eigm_alan_m2 yok", "E: sapma ≤ %0,1")
+            ekle("Parsel alanı EİGM ile uyumlu", None, f"çizim {self.parsel_sinir.area:,.0f} m², parsel.eigm_alan_m2 yok", "E: sapma ≤ %0,1")
         # B — yerleşim
         kn = [q for q in (getattr(self, "cekme_cephe", None) or []) if q[2]]
         if kn:
@@ -1671,7 +1703,7 @@ class Model:
     def metraj_hesapla(self):
         P, e, m = self.P, self.P["elektrik"], self.P["masa"]
         nm = len(self.masalar); pc = m["parca_carpani"]; guc = P["modul"]["guc_wp"]
-        nmod = nm * self.masa_modul; cit_L = self.cit.exterior.length
+        nmod = nm * self.masa_modul; cit_L = sum(r.length for r in dis_halkalar(self.cit))
         M = []
         def r(grup, kalem, mik, birim, kaynak, hakedis=""):
             M.append({"grup": grup, "kalem": kalem, "miktar": round(mik, 2) if isinstance(mik, float) else mik, "birim": birim, "kaynak": kaynak, "hakedis": hakedis})
@@ -1755,7 +1787,7 @@ class Model:
 def pafta_yerlesim(M, seviye):
     pf = Pafta("01", "GENEL YERLEŞİM PLANI")
     W = M.W
-    geom_ciz(pf, "GES-SINIR", M.parsel)
+    geom_ciz(pf, "GES-SINIR", M.parsel_sinir)
     geom_ciz(pf, "GES-CEKME", W(M.ic_loc))
     geom_ciz(pf, "GES-CIT", M.cit)
     geom_ciz(pf, "GES-YOL", W(M.yol_loc))
@@ -1787,8 +1819,10 @@ def pafta_yerlesim(M, seviye):
         c = W(M.dm_loc).centroid; kosk_plan(pf, M, c.x, c.y, kosk_tasarim("dm", 0, len(dh)))
     for p in M.direkler: pf.daire("GES-AYD-CCTV", p[0], p[1], 0.8, info="Aydınlatma+CCTV")
     if seviye == "uygulama":
-        for i, (x, y) in enumerate(list(M.parsel.exterior.coords)[:-1]):
-            pf.yazi("GES-OLCU", x, y, 1.5, f"K{i+1}")
+        kn_ = 0
+        for r_ in dis_halkalar(M.parsel_sinir):
+            for (x, y) in list(r_.coords)[:-1]:
+                kn_ += 1; pf.yazi("GES-OLCU", x, y, 1.5, f"K{kn_}")
     P = M.P
     pf.notlar = [f"Masa: {len(M.masalar)} × {P['masa']['tip']} · modül: {len(M.masalar) * M.masa_modul} · string: {len(M.stringler)} · inverter: {len(M.inverterler)} · TM: {M.n_tr}.",
                  f"Eksen (pitch) {P['masa']['pitch_m']} m · eğim {P['masa']['egim_derece']}° · alt kenar {P['masa']['alt_kenar_m']} m · GCR {M.masa_D / P['masa']['pitch_m']:.3f} · azimut {M.az}° · sıra açıklığı {M.acik:.2f} m.",
@@ -1804,7 +1838,7 @@ def pafta_yerlesim(M, seviye):
 def pafta_topraklama(M):
     pf = Pafta("03", "TOPRAKLAMA PLANI")
     W = M.W
-    geom_ciz(pf, "GES-SINIR", M.parsel); geom_ciz(pf, "GES-CIT", M.cit); geom_ciz(pf, "GES-YOL", W(M.yol_loc))
+    geom_ciz(pf, "GES-SINIR", M.parsel_sinir); geom_ciz(pf, "GES-CIT", M.cit); geom_ciz(pf, "GES-YOL", W(M.yol_loc))
     for ms in M.masalar: geom_ciz(pf, "GES-MASA", W(ms["loc"]))
     for t, tm in enumerate(M.tm_loc):
         c = W(tm).centroid; kosk_plan(pf, M, c.x, c.y, tm_kosk_tasarim(M, t, getattr(M, "dm_ortak", False) and t == 0))
@@ -1847,7 +1881,7 @@ def string_ciz(M, pf, h=0.35):
 def pafta_kablo(M):
     pf = Pafta("04", "KABLO GÜZERGÂH PLANI")
     W = M.W
-    geom_ciz(pf, "GES-SINIR", M.parsel); geom_ciz(pf, "GES-CIT", M.cit); geom_ciz(pf, "GES-YOL", W(M.yol_loc))
+    geom_ciz(pf, "GES-SINIR", M.parsel_sinir); geom_ciz(pf, "GES-CIT", M.cit); geom_ciz(pf, "GES-YOL", W(M.yol_loc))
     for ms in M.masalar: geom_ciz(pf, "GES-MASA", W(ms["loc"]))
     string_ciz(M, pf)   # DC: yalnız string izi + giriş/çıkış kodu (güzergâh çizgisi yok, karmaşa yok)
     geom_ciz(pf, "GES-HENDEK-DC", W(M.hendek_dc), info="DC hendek (sıra geçişi)")

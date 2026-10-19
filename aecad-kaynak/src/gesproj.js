@@ -62,7 +62,7 @@ function pjCizimYerlesim() {
   const mrk = (it) => { const b = itemBB(D, it); return b && isFinite(b[0]) ? [+((b[0] + b[2]) / 2).toFixed(3), +((b[1] + b[3]) / 2).toFixed(3)] : null; };
   const masa = [], inv = [], tm = [], ac = []; let dm = null;
   for (const it of D.items.values()) {
-    if (String(it.layer).toUpperCase() === 'GES-MASA' && (it.t === 'insert' || (it.t === 'pline' && it.pts && it.pts.length >= 4))) { const c = mrk(it); if (c && pointInPoly(c, G.bound)) masa.push(c); }
+    if (String(it.layer).toUpperCase() === 'GES-MASA' && (it.t === 'insert' || (it.t === 'pline' && it.pts && it.pts.length >= 4))) { const c = mrk(it); if (c && sinirIcinde(c)) masa.push(c); }
     else if (it.t === 'pline' && it.ges && it.ges.tip === 'ac' && it.pts.length >= 2) ac.push({ pts: it.pts.map((q) => [+q[0].toFixed(3), +q[1].toFixed(3)]), pay: +it.ges.pay || 10 });
     else if (it.t === 'insert' && it.ges) { const c = mrk(it); if (!c) continue; if (it.ges.tip === 'inv') inv.push(c); else if (it.ges.tip === 'tm') tm.push(c); else if (it.ges.tip === 'dm') dm = c; }
   }
@@ -152,7 +152,7 @@ function pjOpenPafta(name, auto, dosyalar) {
   const f = (dosyalar || PJ.files || {})[name]; if (!f) return;
   if (!PJ.srcDoc) PJ.srcDoc = S.doc;
   const norm = parseDxf(decodeDxfBytes(f)); const doc = importNormalized(norm);
-  const keep = G.bound; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
+  const keep = G.bound, keepS = G.bounds; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; G.bounds = keepS; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
   if (/_0[14]_/.test(name) && typeof pjPaftaTani === 'function') pjPaftaTani();
   PJ.imzaAc = /_0[14]_/.test(name) ? pjImza(S.doc) : null;
   if (!auto) msg('Pafta açıldı: ' + name, 'res');

@@ -523,7 +523,8 @@ CMD.SCALE = () => xformCmd('scale');
 CMD.MIRROR = () => xformCmd('mirror');
 CMD.ERASE = async () => {
   const ids = editableIds(await getSelection('Silinecek nesneleri seçin')); if (!ids.length) return;
-  replaceItems(ids.map((id) => [S.doc.items.get(id), null]), 'sil'); V().sel.clear(); updateProps(); msg(ids.length + ' nesne silindi.');
+  const set = new Set(ids); for (const it of S.doc.items.values()) if (it.gesEt && set.has(it.gesEt)) set.add(it.id);   // kablo silinince adı/etiketi de silinir
+  replaceItems([...set].map((id) => [S.doc.items.get(id), null]), 'sil'); V().sel.clear(); updateProps(); msg(ids.length + ' nesne silindi' + (set.size > ids.length ? ' (+' + (set.size - ids.length) + ' kablo etiketi)' : '') + '.');
 };
 function primsToNative(prims, M, it) {
   const out = [];

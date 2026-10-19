@@ -346,6 +346,7 @@ details.tf-sec:not([open]) { gap: 0; }
       <button class="tool" data-cmd="GOGK" title="OG kablo çiz — tip yazılır, boy ölçülür"><svg viewBox="0 0 20 20"><path d="M2 15 8 6l5 6 5-8" fill="none" stroke="#e2342b" stroke-width="1.8"/></svg><span>OG kablo</span></button>
       <button class="tool" data-cmd="GACK" title="AC (AG) kablo çiz"><svg viewBox="0 0 20 20"><path d="M2 15 8 6l5 6 5-8" fill="none" stroke="#22c55e" stroke-width="1.6"/></svg><span>AC kablo</span></button>
       <button class="tool" data-cmd="GDCK" title="DC kablo çiz"><svg viewBox="0 0 20 20"><path d="M2 15 8 6l5 6 5-8" fill="none" stroke="#3b82f6" stroke-width="1.4" stroke-dasharray="3 2"/></svg><span>DC kablo</span></button>
+      <button class="tool" data-cmd="GACOTO" title="Tüm inverterlerden AG panoya (ADP) AC kabloyu otomatik çiz: ortak kanal + branşman"><svg viewBox="0 0 20 20"><path d="M3 15h6l5-8h3" fill="none" stroke="#22c55e" stroke-width="1.6"/><circle cx="3" cy="15" r="1.6" fill="#a0a"/><rect x="15" y="5" width="3" height="4" fill="none" stroke="#f59e0b" stroke-width="1.3"/></svg><span>AC oto</span></button>
       <button class="tool" data-cmd="GBTEMIZ" title="Trafo/DM binasına denk gelen ve gölgesinde kalan masaları kaldır"><svg viewBox="0 0 20 20"><rect x="3" y="11" width="8" height="5" fill="none" stroke="#f59e0b" stroke-width="1.5"/><path d="M12 4l5 5M17 4l-5 5" stroke="#e2342b" stroke-width="1.5"/></svg><span>Bina–masa</span></button>
       <button class="tool" data-cmd="GKDUZ" title="Tüm AC kabloları nizami güzergâha getir: inverterden AG panoya (ADP), dik açılı"><svg viewBox="0 0 20 20"><path d="M3 16V8h7V4h7" fill="none" stroke="#22c55e" stroke-width="1.6"/><path d="M2 4l4 4" stroke="#e2342b" stroke-width="1.3"/></svg><span>Düzelt</span></button>
       <button class="tool" data-cmd="GVERI" title="Tasarım öğesinin verisini düzenle (tıkla)"><svg viewBox="0 0 20 20"><path d="M4 16l1-4 8-8 3 3-8 8z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M11 6l3 3" stroke="#e2342b" stroke-width="1.3"/></svg><span>Veri</span></button>
@@ -2353,7 +2354,8 @@ CMD.SCALE = () => xformCmd('scale');
 CMD.MIRROR = () => xformCmd('mirror');
 CMD.ERASE = async () => {
   const ids = editableIds(await getSelection('Silinecek nesneleri seçin')); if (!ids.length) return;
-  replaceItems(ids.map((id) => [S.doc.items.get(id), null]), 'sil'); V().sel.clear(); updateProps(); msg(ids.length + ' nesne silindi.');
+  const set = new Set(ids); for (const it of S.doc.items.values()) if (it.gesEt && set.has(it.gesEt)) set.add(it.id);   // kablo silinince adı/etiketi de silinir
+  replaceItems([...set].map((id) => [S.doc.items.get(id), null]), 'sil'); V().sel.clear(); updateProps(); msg(ids.length + ' nesne silindi' + (set.size > ids.length ? ' (+' + (set.size - ids.length) + ' kablo etiketi)' : '') + '.');
 };
 function primsToNative(prims, M, it) {
   const out = [];
@@ -3348,7 +3350,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191329', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191333', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4264,7 +4266,8 @@ function tsKanalIzgara(U, eng, P0, A, ekAc) {
   let X0 = Math.min(...xs) - 40, X1 = Math.max(...xs) + 40, Y0 = Math.min(...ys) - 40, Y1 = Math.max(...ys) + 40;
   const B = G.bound && G.bound.length >= 3 ? G.bound : null;
   if (B) { X0 = Math.max(X0, Math.min(...B.map((q) => q[0])) - 1); X1 = Math.min(X1, Math.max(...B.map((q) => q[0])) + 1); Y0 = Math.max(Y0, Math.min(...B.map((q) => q[1])) - 1); Y1 = Math.min(Y1, Math.max(...B.map((q) => q[1])) + 1); }
-  let h = 0.25; while (((X1 - X0) / h + 1) * ((Y1 - Y0) / h + 1) > 1.2e6) h *= 1.25;
+  // ızgara: 0,25 m'den başlar; büyük sahada en çok ~4 milyon hücre için büyür (≤ 1,0 m: 4,36 m sıra açıklığı 0,5 m şişirmeyle yine geçilir)
+  let h = 0.25; while (((X1 - X0) / h + 1) * ((Y1 - Y0) / h + 1) > 4e6) h *= 1.15;
   if (h > 1.0) return null;
   const nx = Math.ceil((X1 - X0) / h) + 1, ny = Math.ceil((Y1 - Y0) / h) + 1, blk = new Uint8Array(nx * ny);
   const cx = (i) => X0 + i * h, cy = (j) => Y0 + j * h;
@@ -4295,26 +4298,29 @@ function tsKanalIzgara(U, eng, P0, A, ekAc) {
   const gorur = (a, b) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n; if (dolu([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])) return false; } return true; };
   const yol = (a, b) => {
     const [si, sj] = hc(a), [gi, gj] = hc(b); if (si < 0 || sj < 0 || si >= nx || sj >= ny || gi < 0 || gj < 0 || gi >= nx || gj >= ny) return null;
-    const D8 = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]], N = nx * ny, INF = 1e18, TURN = 2.5;
-    const dist = new Float64Array(N * 8).fill(INF), prev = new Int32Array(N * 8).fill(-1), heap = [];
+    // hücre başına durum (bellek: N × 9 bayt); dönüş cezası hücreye en iyi geliş yönüne göre
+    const D8 = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]], N = nx * ny, TURN = 2.5;
+    const dist = new Float32Array(N).fill(Infinity), prev = new Int32Array(N).fill(-1), gy = new Uint8Array(N).fill(255), kapali = new Uint8Array(N);
     const hh = (i, j) => { const dx = Math.abs(i - gi), dy = Math.abs(j - gj); return h * (Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy)); };
-    const push = (k, d) => { heap.push([d, k]); let x = heap.length - 1; while (x) { const p = (x - 1) >> 1; if (heap[p][0] <= heap[x][0]) break; [heap[p], heap[x]] = [heap[x], heap[p]]; x = p; } };
-    const pop = () => { const t = heap[0], l = heap.pop(); if (heap.length) { heap[0] = l; let x = 0; for (;;) { const a1 = 2 * x + 1, b1 = a1 + 1; let m = x; if (a1 < heap.length && heap[a1][0] < heap[m][0]) m = a1; if (b1 < heap.length && heap[b1][0] < heap[m][0]) m = b1; if (m === x) break; [heap[m], heap[x]] = [heap[x], heap[m]]; x = m; } } return t; };
-    const s0 = sj * nx + si; for (let d = 0; d < 8; d++) { dist[s0 * 8 + d] = 0; push(s0 * 8 + d, hh(si, sj)); }
-    const goal = gj * nx + gi; let son = -1, it = 0;
-    while (heap.length && it++ < 4e6) {
-      const [f, k] = pop(); const c0 = k >> 3, dir = k & 7, ci = c0 % nx, cj = (c0 - ci) / nx; if (f - hh(ci, cj) > dist[k] + 1e-9) continue;
-      if (c0 === goal) { son = k; break; }
+    const hk = [], hf = [];   // ikili yığın (anahtar, öncelik)
+    const push = (k, f) => { hk.push(k); hf.push(f); let x = hk.length - 1; while (x) { const p = (x - 1) >> 1; if (hf[p] <= hf[x]) break; [hk[p], hk[x]] = [hk[x], hk[p]]; [hf[p], hf[x]] = [hf[x], hf[p]]; x = p; } };
+    const pop = () => { const k = hk[0], lk = hk.pop(), lf = hf.pop(); if (hk.length) { hk[0] = lk; hf[0] = lf; let x = 0; for (;;) { const a1 = 2 * x + 1, b1 = a1 + 1; let m = x; if (a1 < hk.length && hf[a1] < hf[m]) m = a1; if (b1 < hk.length && hf[b1] < hf[m]) m = b1; if (m === x) break; [hk[m], hk[x]] = [hk[x], hk[m]]; [hf[m], hf[x]] = [hf[x], hf[m]]; x = m; } } return k; };
+    const s0 = sj * nx + si, goal = gj * nx + gi; dist[s0] = 0; push(s0, hh(si, sj));
+    let son = -1, it = 0;
+    while (hk.length && it++ < 6e6) {
+      const c0 = pop(); if (kapali[c0]) continue; kapali[c0] = 1;
+      if (c0 === goal) { son = c0; break; }
+      const ci = c0 % nx, cj = (c0 - ci) / nx, dir = gy[c0];
       for (let nd = 0; nd < 8; nd++) {
-        const dd = Math.min((nd - dir + 8) % 8, (dir - nd + 8) % 8); if (dd > 2) continue;
-        const ni = ci + D8[nd][0], nj = cj + D8[nd][1]; if (ni < 0 || nj < 0 || ni >= nx || nj >= ny) continue; const nc = nj * nx + ni; if (blk[nc]) continue;
+        const dd = dir === 255 ? 0 : Math.min((nd - dir + 8) % 8, (dir - nd + 8) % 8); if (dd > 2) continue;
+        const ni = ci + D8[nd][0], nj = cj + D8[nd][1]; if (ni < 0 || nj < 0 || ni >= nx || nj >= ny) continue; const nc = nj * nx + ni; if (blk[nc] || kapali[nc]) continue;
         if (nd & 1 && (blk[cj * nx + ni] || blk[nj * nx + ci])) continue;   // köşeden sıyırma yok
-        const g = dist[k] + h * (nd & 1 ? Math.SQRT2 : 1) + dd * TURN, nk = nc * 8 + nd;
-        if (g < dist[nk]) { dist[nk] = g; prev[nk] = k; push(nk, g + hh(ni, nj)); }
+        const g = dist[c0] + h * (nd & 1 ? Math.SQRT2 : 1) + dd * TURN;
+        if (g < dist[nc]) { dist[nc] = g; prev[nc] = c0; gy[nc] = nd; push(nc, g + hh(ni, nj)); }
       }
     }
     if (son < 0) return null;
-    const hcr = []; for (let k = son; k >= 0; k = prev[k]) hcr.push(k >> 3); hcr.reverse();
+    const hcr = []; for (let k = son; k >= 0; k = prev[k]) hcr.push(k); hcr.reverse();
     const P = hcr.map((c1) => [cx(c1 % nx), cy(Math.floor(c1 / nx))]); P[0] = a; P[P.length - 1] = b;
     const out = [P[0]]; let i = 0;   // doğrultma: görebildiği en uzak noktaya düz git (en az kırık)
     while (i < P.length - 1) { let j = P.length - 1; while (j > i + 1 && !gorur(P[i], P[j])) j--; out.push(P[j]); i = j; }
@@ -4533,6 +4539,43 @@ CMD.GVERI = async () => {
 };
 CMD.GINVEKLE = () => tsNokta('inv'); CMD.GTMEKLE = () => tsNokta('tm'); CMD.GDMEKLE = () => tsNokta('dm');
 CMD.GOGK = () => tsKablo('og'); CMD.GACK = () => tsKablo('ac'); CMD.GDCK = () => tsKablo('dc');
+// AC otomatik (kullanıcı kuralı 19.10.2026): tek tıkla tüm inverterlerden en yakın trafo binasının AG panosuna (ADP) kablo —
+// TM başına ortak kanal ağı (ana hat + branşman), 1 m kanal, arazi içi, masa/inverter/binaya ≥ 0,5 m; numara AC-n.
+CMD.GACOTO = async () => {
+  const inv = tsInverterler(), tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+  if (!inv.length || !tms.length) { msg('Önce inverter (İnverter +) ve trafo binası (Trafo +) ekleyin.', 'err'); return; }
+  const tol = 6, eski = [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
+  const bagli = new Set(); for (const k of eski) { const x = inv.find((y) => Math.hypot(y.p[0] - k.pts[0][0], y.p[1] - k.pts[0][1]) <= tol); if (x) bagli.add(x.it.id); }
+  let hepsi = true;
+  if (eski.length) { const r = await askDlg('AC kablo otomatik', eski.length + ' AC kablo zaten var (' + bagli.size + ' inverter bağlı). Ne yapılsın?', [['Hepsini yeniden çiz', 'tum', 'primary'], ['Yalnız kablosuz ' + (inv.length - bagli.size) + ' inverter', 'eksik', 'ghost'], ['Vazgeç', null, 'ghost']]); if (!r) return; hepsi = r === 'tum'; }
+  const v = await formDlg('AC kablo (otomatik)', TS.ac.alan); if (!v) return;
+  const hedef = hepsi ? inv : inv.filter((x) => !bagli.has(x.it.id)); if (!hedef.length) { msg('Kablosuz inverter yok.', 'res'); return; }
+  busy('AC kablolar çiziliyor…'); await tick();
+  try {
+    const T = TS.ac, yeni = [], silinecek = hepsi ? eski : []; let top = 0, n = 0, yok = 0;
+    S.doc.addLayer(T.kat, T.renk);
+    for (const tm of tms) {
+      const A = tsAdp(tm);
+      const grp = hedef.filter((x) => tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - x.p[0], tsMerkez(b)[1] - x.p[1]) < Math.hypot(tsMerkez(a)[0] - x.p[0], tsMerkez(a)[1] - x.p[1]) ? b : a)) === tm);
+      if (!grp.length) continue;
+      const tohum = hepsi ? [] : eski.filter((k) => { const e = k.pts[k.pts.length - 1]; return Math.hypot(e[0] - A[0], e[1] - A[1]) < 3; }).map((k) => k.pts.map((q) => [q[0], q[1]]));
+      const M = tsAcAg(grp, A, tm, tohum); if (!M) { yok += grp.length; continue; }
+      const tumYol = [...tohum, ...M.values()];
+      for (const x of grp) {
+        const yol = M.get(x.it.id); if (!yol || yol.length < 2) { yok++; continue; }
+        const g = { ...v, tip: 'ac', no: (x.it.ges && x.it.ges.no) || tsSonNo('ac') }, L = tsBoy(yol); top += L + (+g.pay || 0); n++;
+        const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: yol.map((q) => [q[0], q[1], 0]), ges: g };
+        const e = tsEtiketYeri(yol, tumYol);
+        yeni.push([null, pl], [null, { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }]);
+      }
+    }
+    const sil = []; for (const k of silinecek) { sil.push([k, null]); for (const t of S.doc.items.values()) if (t.gesEt === k.id) sil.push([t, null]); }
+    if (!yeni.length && !sil.length) { msg('Kablo çizilemedi (saha çok büyük ya da engelsiz yol yok).', 'err'); return; }
+    replaceItems([...sil, ...yeni], 'AC otomatik'); renderLayers();
+    msg(n + ' inverterden AG panoya AC kablo çizildi (ortak kanal + branşman, ' + tms.length + ' trafo) · toplam ' + fmtNum(top, 0) + ' m' + (yok ? ' · ' + yok + ' inverterde yol bulunamadı — elle çizin' : '') + '. Geri al ile tek adımda kaldırılır.', yok ? 'note' : 'res');
+  } finally { busy(null); }
+};
+Object.assign(ALIAS, { GACOTO: 'GACOTO', ACOTO: 'GACOTO' }); Object.assign(LABEL, { GACOTO: 'AC OTOMATİK' });
 Object.assign(ALIAS, { GINVEKLE: 'GINVEKLE', INVEKLE: 'GINVEKLE', GTMEKLE: 'GTMEKLE', TRAFOEKLE: 'GTMEKLE', GDMEKLE: 'GDMEKLE', DMEKLE: 'GDMEKLE', GOGK: 'GOGK', OGKABLO: 'GOGK', GACK: 'GACK', ACKABLO: 'GACK', GDCK: 'GDCK', DCKABLO: 'GDCK', GVERI: 'GVERI', VERI: 'GVERI' });
 Object.assign(LABEL, { GINVEKLE: 'İNVERTER EKLE', GTMEKLE: 'TRAFO EKLE', GDMEKLE: 'DM EKLE', GOGK: 'OG KABLO', GACK: 'AC KABLO', GDCK: 'DC KABLO', GVERI: 'VERİ DÜZENLE' });
 

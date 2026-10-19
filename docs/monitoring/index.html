@@ -2845,7 +2845,9 @@ let MAL_P = { komisyon: 1.025, btv: 0.01, dagitim_tl_mwh: 1182.457 }, malKatYukl
 const birimMal = (ptf, yk, a) => { const q = Object.assign({}, MAL_P, a || {}); return (ptf + yk) * q.komisyon * (1 + q.btv) + q.dagitim_tl_mwh; };
 const MAL_ACIK = () => '(PTF + YEKDEM) × ' + say(MAL_P.komisyon, 3) + ' × ' + say(1 + MAL_P.btv, 2) + ' + dağıtım ' + say(MAL_P.dagitim_tl_mwh, 2) + ' (KDV hariç)';
 async function malKatYukle() { if (malKatYuklendi) return; malKatYuklendi = true; try { const a = await al('cihaz_yonetimi.json'); for (const k of ['komisyon', 'btv', 'dagitim_tl_mwh']) if (a && a[k] != null) MAL_P[k] = Number(a[k]); } catch (e) {} }
-const epMal = (ptf, yk) => ptf != null && yk != null ? birimMal(ptf, yk) : null;
+// EPİAŞ sayfası GÖSTERİMİ (Ömer 19.10): (PTF + YEKDEM) × komisyon + dağıtım — BTV yok. Hesaplar (birimMal, cihaz yönetimi, maliyet) değişmez.
+const epMal = (ptf, yk) => ptf != null && yk != null ? (ptf + yk) * MAL_P.komisyon + MAL_P.dagitim_tl_mwh : null;
+const MAL_GOSTER = () => '(PTF + YEKDEM) × ' + say(MAL_P.komisyon, 3) + ' + dağıtım ' + say(MAL_P.dagitim_tl_mwh, 2) + ' (gösterim; BTV ve KDV hariç)';
 function epYukle() {
   if (EP) return Promise.resolve(EP);
   if (!epYukleniyor) epYukleniyor = al('n8n/epias_gecmis.json').then(d => (EP = d)).finally(() => { epYukleniyor = null; });
@@ -2891,7 +2893,7 @@ async function cizEpias() {
   document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Yıl <select onchange="epSec.yil=Number(this.value);epSec.ay=\'yil\';cizEpias()">' + yillar.map(y => '<option' + (y === epSec.yil ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></label>'
     + '<label class="k" style="display:flex;align-items:center;gap:8px">Dönem <select onchange="epSec.ay=this.value;cizEpias()"><option value="yil">Tüm yıl</option>' + aylar.slice().reverse().map(m => '<option value="' + m + '"' + (m === epSec.ay ? ' selected' : '') + '>' + AYLAR[Number(m.slice(5)) - 1] + '</option>').join('') + '</select></label>'
     + '<button class="btn" type="button" onclick="epCsv()">CSV indir</button>';
-  document.getElementById('altBaslik').textContent = 'PTF (GÖP), YEKDEM ve şebeke maliyeti = ' + MAL_ACIK() + ', TL/MWh. Veri ' + tarihK(gunler[0]) + ' ' + gunler[0].slice(0, 4) + ' – ' + tarihK(gunler[gunler.length - 1]) + ' ' + gunler[gunler.length - 1].slice(0, 4) + ' · güncelleme ' + saatTR(EP.guncellendi);
+  document.getElementById('altBaslik').textContent = 'PTF (GÖP), YEKDEM ve şebeke maliyeti = ' + MAL_GOSTER() + ', TL/MWh. Veri ' + tarihK(gunler[0]) + ' ' + gunler[0].slice(0, 4) + ' – ' + tarihK(gunler[gunler.length - 1]) + ' ' + gunler[gunler.length - 1].slice(0, 4) + ' · güncelleme ' + saatTR(EP.guncellendi);
 
   // Özet kartları
   const pAll = donemGun.flatMap(g => epDolu(EP.ptf[g]));
@@ -2920,13 +2922,13 @@ async function cizEpias() {
   h += '<section class="panel"><div class="bas"><h2>Saatlik profil</h2><span class="k">dönem ortalaması, TL/MWh</span></div><div style="display:grid;grid-template-columns:repeat(24,1fr);gap:4px;align-items:end;height:160px">'
     + pp.map((v, s) => '<div title="' + String(s).padStart(2, '0') + ':00 · PTF ' + say(v) + ' · enerji maliyeti ' + say(sp[s]) + '" style="display:flex;gap:1px;align-items:end;height:100%"><div style="flex:1;background:' + EP_RENK.ptf + ';height:' + ((v || 0) / pmx * 100).toFixed(1) + '%;border-radius:2px 2px 0 0"></div><div style="flex:1;background:' + EP_RENK.mal + ';opacity:.8;height:' + ((sp[s] || 0) / pmx * 100).toFixed(1) + '%;border-radius:2px 2px 0 0"></div></div>').join('')
     + '</div><div style="display:grid;grid-template-columns:repeat(24,1fr);gap:4px" class="k">' + pp.map((_, s) => '<div style="text-align:center;font-size:11px">' + (s % 3 === 0 ? s : '') + '</div>').join('') + '</div>'
-    + '<div class="k"><span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.ptf + ';margin-right:6px"></span>PTF <span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.mal + ';margin:0 6px 0 14px"></span>Şebeke maliyeti = ' + MAL_ACIK() + '. Madencilik kararı bu maliyetle BTC geliri karşılaştırılarak verilir.</div></section>';
+    + '<div class="k"><span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.ptf + ';margin-right:6px"></span>PTF <span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.mal + ';margin:0 6px 0 14px"></span>Şebeke maliyeti = ' + MAL_GOSTER() + '. Madencilik kararı bu maliyetle BTC geliri karşılaştırılarak verilir.</div></section>';
 
   // Aylık tablo
   const ykHucre = yk => yk ? '<span title="' + esc(yk.ad + (yk.ongoru != null ? ' · öngörü ' + say(yk.ongoru, 2) : '') + (yk.kat ? ' · önceki ay katsayısı ' + yk.kat.toFixed(4) : '') + (yk.not ? ' · ' + yk.not : '')) + '">' + say(yk.deger, 2) + ' <span style="font-size:11px;font-weight:700;color:' + (yk.durum === 'kesin' ? '#1E7A3C' : yk.durum === 'tahmin' ? '#9A5B00' : '#B54708') + '">' + yk.ad + '</span></span>' : '—';
   h += '<section class="panel"><div class="bas"><h2>Aylık özet</h2><span class="k">TL/MWh</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th>Gün</th><th>PTF ort.</th><th>PTF min</th><th>PTF max</th><th>≈0 TL saat</th><th class="ayr">YEKDEM</th><th>PTF + YEKDEM</th><th class="ayr">Enerji maliyeti</th><th>TL/kWh</th></tr></thead><tbody>'
     + aylar.slice().reverse().map(epAyOzet).map(o => '<tr' + (o.ay === epSec.ay ? ' style="background:#EEF5FD"' : '') + '><td class="sol"><a href="#epias" onclick="epSec.ay=\'' + o.ay + '\';cizEpias();return false">' + AYLAR[Number(o.ay.slice(5)) - 1] + '</a></td><td>' + o.gun + '</td><td><b>' + say(o.pOrt, 2) + '</b></td><td>' + say(o.pMin) + '</td><td>' + say(o.pMax) + '</td><td' + (o.sifir ? '' : ' class="sifir"') + '>' + o.sifir + '</td><td class="ayr">' + ykHucre(o.yk) + '</td><td>' + say(o.toplam, 2) + '</td><td class="ayr"><b>' + say(o.mal, 2) + '</b></td><td>' + (o.mal != null ? say(o.mal / 1000, 3) : '—') + '</td></tr>').join('')
-    + '</tbody></table></div><div class="k">≈0 TL saat: PTF ≤ 1 TL/MWh olan saat sayısı. Şebeke maliyeti = ' + MAL_ACIK() + ' (cihaz yönetimiyle ortak: cihaz_yonetimi.json → komisyon, btv, dagitim_tl_mwh).</div></section>';
+    + '</tbody></table></div><div class="k">≈0 TL saat: PTF ≤ 1 TL/MWh olan saat sayısı. Şebeke maliyeti = ' + MAL_GOSTER() + ' (cihaz_yonetimi.json → komisyon, dagitim_tl_mwh; cihaz yönetimi kararında ayrıca BTV %1 eklenir).</div></section>';
 
   // YEKDEM kartları
   const ykAylar = Object.keys(EP.yekdem || {}).sort();
@@ -2946,7 +2948,7 @@ async function cizEpias() {
     + Array.from({ length: 24 }, (_, s) => { const p = pd[s], top = p != null && ykG ? p + ykG.deger : null, ml = top != null ? birimMal(p, ykG.deger) : null;
         return '<tr><td class="saat">' + String(s).padStart(2, '0') + ':00</td><td' + (p != null && p <= 1 ? ' class="sifir"' : '') + '>' + say(p, 2) + '</td><td>' + say(ud[s], 2) + '</td><td class="ayr">' + say(top, 2) + '</td><td><b>' + say(ml, 2) + '</b></td><td>' + (ml != null ? say(ml / 1000, 3) : '—') + '</td></tr>'; }).join('')
     + '<tr class="top"><td class="sol">Ortalama</td><td>' + say(epOrt(pd), 2) + '</td><td>' + say(epOrt(ud), 2) + '</td><td class="ayr">' + say(epOrt(pd) != null && ykG ? epOrt(pd) + ykG.deger : null, 2) + '</td><td><b>' + say(epOrt(pd) != null && ykG ? epMal(epOrt(pd), ykG.deger) : null, 2) + '</b></td><td>' + (epOrt(pd) != null && ykG ? say(epMal(epOrt(pd), ykG.deger) / 1000, 3) : '—') + '</td></tr></tbody></table></div>'
-    + '<div class="k">Şebeke maliyeti = ' + MAL_ACIK() + '.' + (ykG ? ' YEKDEM: ' + say(ykG.deger, 2) + ' (' + ykG.ad.toLowerCase() + ').' : '') + '</div></section>';
+    + '<div class="k">Şebeke maliyeti = ' + MAL_GOSTER() + '.' + (ykG ? ' YEKDEM: ' + say(ykG.deger, 2) + ' (' + ykG.ad.toLowerCase() + ').' : '') + '</div></section>';
 
   ic.innerHTML = h;
 }

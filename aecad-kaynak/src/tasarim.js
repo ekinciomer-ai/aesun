@@ -236,7 +236,7 @@ function tsAcAg(kalan, A, tm, tohum) {
     if (ag.length) for (const x of kal) { const r = K.dal(x.p, 150); if (r && (!en || r.c < en.r.c)) en = { x, r }; }
     let x, yol;
     if (en) { x = en.x; yol = en.r.pts; }
-    else { x = kal.reduce((a, b) => (d(b.p) > d(a.p) ? b : a)); yol = K.gorur(x.p, A) && K.dik(x.p, A) ? [x.p, A] : K.yol(x.p, A); }
+    else { x = kal.reduce((a, b) => (d(b.p) > d(a.p) ? b : a)); yol = K.gorur(x.p, A) && K.dik(x.p, A) ? [x.p, A] : K.yol(x.p, A, { duz: true }); }
     kal.splice(kal.indexOf(x), 1);
     if (!yol) continue;   // güzergâh yoksa düz çizgi YOK (masa üstünden geçmez); bildirilir
     const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (Math.hypot(yol[i][0] - sad[sad.length - 1][0], yol[i][1] - sad[sad.length - 1][1]) > 0.05) sad.push(yol[i]);
@@ -403,7 +403,10 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   const gorurL = (a, b) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n; if (doluL([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])) return false; } return true; };
   const dolu = (p) => doluL(Lc(p)), gorur = (a, b) => gorurL(Lc(a), Lc(b));
   const dik = (a, b) => { const p = Lc(a), q = Lc(b); return Math.abs(p[0] - q[0]) < 0.05 || Math.abs(p[1] - q[1]) < 0.05; };
-  const yol = (aW, bW) => {
+  // ana hat doğrultma (kullanıcı kuralı 19.10.2026): ana kanal merdiven olmaz — engelden ≥ 1 m açıkla görülebilen en uzak noktaya
+  // tek düz çizgi (sınıra paralel / çapraz olabilir); uçlardaki 3 m'de açıklık şartı aranmaz
+  const acikGorur = (a, b, uc0, uc1) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n, q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; const [i, j] = hc(q); if (i < 0 || j < 0 || i >= nx || j >= ny || blk[j * nx + i]) return false; if (Math.hypot(q[0] - uc0[0], q[1] - uc0[1]) > 3 && Math.hypot(q[0] - uc1[0], q[1] - uc1[1]) > 3 && ak[j * nx + i] * h < 1.0) return false; } return true; };
+  const yol = (aW, bW, opt) => {
     const a = Lc(aW), b = Lc(bW);
     const [si, sj] = hc(a), [gi, gj] = hc(b); if (si < 0 || sj < 0 || si >= nx || sj >= ny || gi < 0 || gj < 0 || gi >= nx || gj >= ny) return null;
     const D4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
@@ -436,6 +439,22 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
     P.push(b);
     const out = [P[0]];   // aynı doğrultudaki ara noktaları at
     for (let i = 1; i < P.length; i++) { const q = P[i], z = out[out.length - 1]; if (Math.hypot(q[0] - z[0], q[1] - z[1]) < 1e-4) continue; if (out.length >= 2) { const k = out[out.length - 2], cr = (z[0] - k[0]) * (q[1] - z[1]) - (z[1] - k[1]) * (q[0] - z[0]); if (Math.abs(cr) < 1e-6 && (z[0] - k[0]) * (q[0] - z[0]) + (z[1] - k[1]) * (q[1] - z[1]) >= 0) { out[out.length - 1] = q; continue; } } out.push(q); }
+    if (opt && opt.duz && out.length > 2 && self.AC_DUZ !== false) {   // yoğun hücre dizisi üzerinde: görülebilen en uzak hücreye tek düz çizgi
+      const D = P.filter((q, k) => k === 0 || k === P.length - 1 || k % 2 === 0); const o2 = [D[0]]; let i = 0;
+      // kırık sayısı öneki: çapraz düz hat yalnız MERDİVENİN (≥ 3 kırık) yerine geçer; tek/çift kırıklı dik güzergâh korunur
+      const tp = [0]; for (let k = 1; k < D.length; k++) { let t = 0; if (k >= 2) { const u = [D[k - 1][0] - D[k - 2][0], D[k - 1][1] - D[k - 2][1]], v = [D[k][0] - D[k - 1][0], D[k][1] - D[k - 1][1]]; if (Math.abs(u[0] * v[1] - u[1] * v[0]) > 1e-6) t = 1; } tp.push(tp[k - 1] + t); }
+      const kir = (i0, j0) => Math.max(0, tp[j0 - 1] - tp[Math.min(j0 - 1, i0 + 1)]);
+      const uygun = (i0, j0) => { const t = kir(i0, j0); return (t === 0 || t >= 3) && acikGorur(D[i0], D[j0], a, b); };
+      while (i < D.length - 1) {
+        let j = Math.min(D.length - 1, i + 1200);
+        while (j > i + 1 && !uygun(i, j)) j -= Math.max(1, Math.floor((j - i) / 40));
+        if (j <= i + 1) j = i + 1;
+        o2.push(D[j]); i = j;
+      }
+      const o3 = [o2[0]];   // aynı doğrultudakileri birleştir
+      for (let k = 1; k < o2.length; k++) { const q = o2[k], z = o3[o3.length - 1]; if (o3.length >= 2) { const kk = o3[o3.length - 2], cr = (z[0] - kk[0]) * (q[1] - z[1]) - (z[1] - kk[1]) * (q[0] - z[0]); if (Math.abs(cr) < 0.02 * Math.hypot(q[0] - kk[0], q[1] - kk[1])) { o3[o3.length - 1] = q; continue; } } o3.push(q); }
+      return o3.map(Wc);
+    }
     return out.map(Wc);
   };
   return { dolu, gorur, dik, yol, agEkle, dal };

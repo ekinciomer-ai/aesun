@@ -21,12 +21,56 @@ function pjAltOner(base) {
   }
   return L.map((a) => ({ ...a, durum: 'bekliyor' }));
 }
-function pjYerlesim() {
+// Kullanıcı kuralı 19.10.2026: 200 masanın üzerinde 4–5 varyasyon hesaplanmaz — başlamadan sorulur: optimum ya da girilen
+// bilgilerle TEK hesap. Ayrık (parçalı) arazide parsel parsel yerleşim: her parsel gösterilir, onaylandıkça sonrakine geçilir.
+const YER_ESIK = 200;
+function pjMasaTahmin(Y) {
+  if (Y && Y.masa.length) return Y.masa.length;
+  if (G.last && G.last.cnt) return G.last.cnt.reduce((a, b) => a + b, 0);
+  try { const a = pjAuto(), pitch = pitchUpdate() || 8, sb = gnum('g-set', 5), L = a.d.len + gnum('g-gap', 0.5);
+    let n = 0; for (const B of sinirlar()) { let per = 0; for (let i = 0; i < B.length; i++) per += Math.hypot(B[(i + 1) % B.length][0] - B[i][0], B[(i + 1) % B.length][1] - B[i][1]); n += Math.max(0, Math.abs(polyArea(B)) - per * sb) * 0.85 / (L * pitch); }
+    return Math.round(n); } catch (e) { return 0; }
+}
+function pjYParsel(Y, B) {   // çizimdeki yerleşimin bir parsele düşen kısmı
+  if (!Y) return null; const ic = (c) => c && pointInPoly(c, B);
+  const o = { masa: Y.masa.filter(ic), inv: Y.inv.filter(ic), tm: Y.tm.filter(ic), dm: ic(Y.dm) ? Y.dm : null, ac: (Y.ac || []).filter((h) => ic(h.pts[0])), dc: (Y.dc || []).filter((d) => ic(d.m)) };
+  return o.masa.length ? o : null;
+}
+function pjParselAlt(base, Y, mod, B, i, n) {
+  const p = kopya(base); const Yp = n > 1 ? pjYParsel(Y, B) : Y;
+  if (n > 1) {
+    p.parsel.koordinat = B.map((q) => [+q[0].toFixed(3), +q[1].toFixed(3)]);
+    const top = sinirlar().reduce((t, b) => t + Math.abs(polyArea(b)), 0); if (p.parsel.max_masa) p.parsel.max_masa = Math.max(1, Math.round(p.parsel.max_masa * Math.abs(polyArea(B)) / top));
+    if (p.elektrik.inverter_adet) p.elektrik.inverter_adet = Math.max(1, Math.round(p.elektrik.inverter_adet * Math.abs(polyArea(B)) / top));   // toplam inverter adedi parsellere alanla bölünür
+  }
+  if (mod === 'opt') { p.masa.hiza_x = 'opt'; p.elektrik.inverter_hiza = 'trafo'; }
+  const kul = mod !== 'opt' && Yp;
+  const q = kul ? pjCizimUygula(p, Yp) : p;
+  const ad = (n > 1 ? 'Parsel ' + (i + 1) + '/' + n + ' · ' : '') + (mod === 'opt' ? 'Optimum' : kul ? 'Çizimdeki yerleşim' : 'Girilen bilgilerle');
+  const acik = mod === 'opt' ? 'En çok masa veren hizalama (9 bileşim), inverter DC sınırı içinde trafoya en yakın masa başında' : kul ? Yp.masa.length + ' masa (Arazi doldur / elle çizim)' : 'Proje tarif et / sağ paneldeki bilgilerle';
+  return { ad, acik, param: q, uygula: () => {}, fark: (b) => b, durum: 'bekliyor', parsel: n > 1 ? { i, n, B, mod } : null, cizim: kul && n === 1 };
+}
+async function pjYerlesim() {
   if (!sinirOto()) { msg('Önce arazi sınırını girin: kapalı polyline çizin ya da KML/KMZ ekleyin.', 'err'); return; }
   if (PJ.busy) { msg('GES-ÇİZ çalışıyor; bitince yeniden deneyin.'); return; }
   formToPanel(); pjSave();
   let base, Y; try { base = pjDuzenUygula(buildParam0()); Y = pjCizimYerlesim(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
-  PJ.alt = pjAltOner(base); PJ.revNo = 0;
+  const parcalar = sinirlar(), N = pjMasaTahmin(Y);
+  PJ.revNo = 0;
+  if (N > YER_ESIK || parcalar.length > 1) {
+    const mod = await askDlg('Yerleşim nasıl hesaplansın?', 'Tahmini ' + N.toLocaleString('tr') + ' masa' + (parcalar.length > 1 ? ', ' + parcalar.length + ' ayrık parsel' : '') + '. ' + (N > YER_ESIK ? YER_ESIK + ' masanın üzerinde 4–5 varyasyon yerine tek hesap yapılır.' : '') + (Y ? ' Çizimde yerleşim var (' + Y.masa.length + ' masa).' : ''),
+      [['Optimum (sistem en iyisini seçer)', 'opt', 'primary'], [Y ? 'Girdiğim bilgilerle / çizimdeki yerleşim' : 'Girdiğim bilgilerle', 'kul'], ...(N <= YER_ESIK ? [['Seçenekleri karşılaştır (5–6 varyasyon)', 'alt']] : []), ['Vazgeç', null, 'ghost']]);
+    if (!mod) return;
+    if (mod !== 'alt') {
+      let sirali = parcalar.length > 1;
+      if (sirali) { const r = await askDlg('Parçalı arazi', parcalar.length + ' ayrık parsel var. Parsel parsel yerleşim yapılsın mı? Her parsel hesaplanıp gösterilir; onayladıkça sonrakine geçilir, sonunda tüm parsellerle proje üretilir.', [['Parsel parsel (onayla → sonraki)', 'tek', 'primary'], ['Hepsi birlikte tek hesap', 'hep'], ['Vazgeç', null, 'ghost']]); if (!r) return; sirali = r === 'tek'; }
+      if (sirali) { const sr = parcalar.map((B, i) => ({ B, i })).sort((a, b) => Math.abs(polyArea(b.B)) - Math.abs(polyArea(a.B))); PJ.parselSira = { mod, base, Y, liste: sr.map((x) => x.B) }; PJ.alt = [pjParselAlt(base, Y, mod, PJ.parselSira.liste[0], 0, parcalar.length)]; }
+      else { PJ.parselSira = null; PJ.alt = [pjParselAlt(base, Y, mod, null, 0, 1)]; }
+      pjDialog('yerlesim'); pjAltSirada(); return;
+    }
+  }
+  PJ.parselSira = null;
+  PJ.alt = pjAltOner(base);
   if (Y) {   // çizimdeki yerleşim (Arazi doldur / elle) ilk seçenek; diğerleri GES-ÇİZ önerisi, onaylanırsa çizime yazılır
     PJ.alt[0].ad = 'Otomatik'; PJ.alt[0].acik = 'GES-ÇİZ yerleşimi, girilen bilgilerle (onaylanırsa çizimdeki yerleşimin yerine geçer)';
     PJ.alt.unshift({ ad: 'Çizimdeki yerleşim', acik: Y.masa.length + ' masa' + (Y.inv.length ? ', ' + Y.inv.length + ' inverter' : '') + (Y.tm.length ? ', ' + Y.tm.length + ' trafo' : '') + ' (Arazi doldur / elle çizim)', param: pjCizimUygula(kopya(base), Y), uygula: () => {}, cizim: true, durum: 'bekliyor' });
@@ -78,10 +122,11 @@ async function pjSecenekCizime(a) {
   const N = a.nes; if (!N || !N.masa || !N.masa.length) return true;
   if (PJ.srcDoc) pjBack();
   const D = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
-  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && sinirIcinde([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA');
+  const bolge = (it) => { const b = itemBB(D, it); if (!b || !isFinite(b[0])) return false; const c = [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]; if (a.parsel) { if (it.t === 'pline' && it.pts && it.pts.length) return pointInPoly(it.pts[0], a.parsel.B); return pointInPoly(c, a.parsel.B); } return sinirIcinde(c); };
+  const eski = [...D.items.values()].filter((it) => (String(it.layer).toUpperCase() === 'GES-MASA' && bolge(it)) || (it.ges && tipler.has(it.ges.tip) && (!a.parsel || bolge(it))) || (String(it.layer).toUpperCase() === 'GES-DC-ATAMA' && (!a.parsel || bolge(it))));
   const ids = new Set(eski.map((it) => it.id)); for (const it of D.items.values()) if (it.gesEt && ids.has(it.gesEt)) eski.push(it);
-  for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it)) eski.push(it); }
-  if (eski.length) {
+  for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it) && (!a.parsel || bolge(it))) eski.push(it); }
+  if (eski.length && !a.parsel) {
     const r = await askDlg('Çizimdeki yerleşim değişecek', 'Onaylanan "' + a.ad + '" seçeneği çizime yazılacak: ' + N.masa.length + ' masa, ' + N.inv.length + ' inverter, ' + N.tm.length + ' trafo. Çizimdeki mevcut GES yerleşimi (' + eski.length + ' nesne: masa, inverter, trafo, kablolar) kaldırılır; Geri al ile döner.', [['Çizime yaz ve proje paftalarını üret', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
     if (r !== 'ok') return false;
   }
@@ -92,10 +137,11 @@ async function pjSecenekCizime(a) {
   for (const c of N.masa) yeni.push(yerlestir({ id: newId(), t: 'insert', layer: 'GES-MASA', c: 256, lt: '', block: mb, M: mMul(mT(0, 0), mRz(ang)), ap: [] }, c));
   const ekle = (tip, c, g) => { const T = TS[tip]; const v = {}; for (const [k, , f] of T.alan) v[k] = f(); Object.assign(v, g, { tip }); D.addLayer(T.kat, T.renk);
     const B = tsBlok(tip, v); yeni.push(yerlestir({ id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(0, 0), mRz(ang)), ap: [], ges: v }, c)); };
-  N.inv.forEach((q, i) => ekle('inv', [q.x, q.y], { no: i + 1 }));
-  N.tm.forEach((q, i) => ekle('tm', [q.x, q.y], { no: i + 1, kva: (a.oz && a.oz.tr_kva && a.oz.tr_kva[i]) || pn('p-trafo') || 1250 }));
+  const no0 = (tip) => a.parsel ? [...D.items.values()].filter((it) => it.ges && it.ges.tip === tip && !eski.includes(it)).length : 0; const i0 = no0('inv'), t0_ = no0('tm');
+  N.inv.forEach((q, i) => ekle('inv', [q.x, q.y], { no: i0 + i + 1 }));
+  N.tm.forEach((q, i) => ekle('tm', [q.x, q.y], { no: t0_ + i + 1, kva: (a.oz && a.oz.tr_kva && a.oz.tr_kva[i]) || pn('p-trafo') || 1250 }));
   if (N.dm && !N.tm.some((q) => Math.hypot(q.x - N.dm.x, q.y - N.dm.y) < 15)) ekle('dm', [N.dm.x, N.dm.y], {});
-  G.fillIds = [];
+  G.fillIds = a.parsel ? (G.fillIds || []).filter((id) => !eski.some((it) => it.id === id)) : [];
   replaceItems([...eski.map((it) => [it, null]), ...yeni.map((n) => [null, n])], 'yerleşim seçeneği çizime'); renderLayers();
   if (typeof cepheCiz === 'function') cepheCiz();
   if (typeof tsFormaYaz === 'function') tsFormaYaz();
@@ -115,9 +161,10 @@ async function pjPaftaDuzenAktar(a) {
   const blokTopla = (ad) => { if (!ad || bl.has(ad) || !P.blocks.has(ad)) return; const b = P.blocks.get(ad); bl.set(ad, structuredClone(b)); for (const e of b.ents || []) if (e.type === 'INSERT' && e.name) blokTopla(e.name); };
   for (const it of kopya) if (it.t === 'insert') blokTopla(it.block);
   pjBack(); const D = S.doc;
-  const eski = [...D.items.values()].filter((it) => gesMi(D, it)); const eid = new Set(eski.map((it) => it.id));
+  const bolgeP = (it) => { if (!a.parsel) return true; if (it.t === 'pline' && it.pts && it.pts.length) return pointInPoly(it.pts[0], a.parsel.B); const b = itemBB(D, it); return b && isFinite(b[0]) && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], a.parsel.B); };
+  const eski = [...D.items.values()].filter((it) => gesMi(D, it) && bolgeP(it)); const eid = new Set(eski.map((it) => it.id));
   for (const it of D.items.values()) if (it.gesEt && eid.has(it.gesEt) && !eid.has(it.id)) eski.push(it);
-  for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it)) eski.push(it); }
+  for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it) && bolgeP(it)) eski.push(it); }
   const r = await askDlg('Son hali onayla', '"' + a.ad + '" seçeneğinin düzenlenmiş son hali kaynak çizime yazılacak: ' + nMasa + ' masa, ' + say('inv') + ' inverter, ' + (say('tm') + say('dm')) + ' bina, ' + (say('dcata') + say('dcstr')) + ' DC atama/string, ' + say('ac') + ' AC, ' + say('og') + ' OG hattı.' + (eski.length ? ' Çizimdeki eski GES yerleşimi (' + eski.length + ' nesne) kaldırılır; Geri al ile döner.' : '') + ' Proje paftaları, metraj ve keşif bu son halden üretilir.', [['Son hali onayla ve projeyi üret', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
   if (r !== 'ok') return false;
   for (const [ad, b] of bl) if (!D.blocks.has(ad)) D.blocks.set(ad, b);
@@ -137,7 +184,16 @@ async function pjAltOnayla(a) {
   const duzenli = PJ.aktif === a && PJ.cur && /_0[14]_/.test(PJ.cur);
   if (duzenli) { if (!(await pjPaftaDuzenAktar(a))) return; }
   else if (!a.cizim && !(await pjSecenekCizime(a))) return;
-  a.uygula(); pjSave(); PJ.onayAd = a.ad;
+  a.uygula(); pjSave();
+  if (a.parsel) {   // parsel parsel: bu parsel çizime yazıldı → sonraki parsel; sonuncusunda tüm parsellerle proje
+    a.durum = 'onaylandi'; const S_ = PJ.parselSira, k = a.parsel.i + 1;
+    if (S_ && k < S_.liste.length) {
+      msg('Parsel ' + k + '/' + S_.liste.length + ' onaylandı ve çizime yazıldı. Parsel ' + (k + 1) + ' hesaplanıyor…', 'res');
+      PJ.alt.push(pjParselAlt(S_.base, S_.Y, S_.mod, S_.liste[k], k, S_.liste.length)); pjAltCiz(); pjAltSirada(); return;
+    }
+    msg('Tüm parseller onaylandı (' + a.parsel.n + '). Proje paftaları tüm parsellerle hazırlanıyor…', 'res'); PJ.parselSira = null;
+  }
+  PJ.onayAd = a.ad;
   let p; try { p = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }   // son hal: kaynak çizimden okunur
   msg('Son hal onaylandı: ' + a.ad + (duzenli ? ' (düzenlemelerinizle)' : '') + '. Tek hat, topraklama, kablo, kanal detayı, metraj, keşif, teklif ve PDF bu çizimden hazırlanıyor…', 'res');
   gv('pjdlg').close();
@@ -203,10 +259,10 @@ function pjAltCiz() {
       const b1 = h('button', 'mini', 'Yerleşim'); b1.onclick = () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); msg('Açık yerleşim: ' + a.ad + '. Düzenlemek için GES sekmesi → Çizimde düzenle ya da soldaki Trafo / İnverter / Yol araçları.', 'note'); };
       const b2 = h('button', 'mini', 'Kablo planı'); b2.title = 'Yerleşim açılır; DC atama, DC string ve AC kanal tasarım araçlarıyla (DC oto, DC çiz, AC oto) çizilir';
       b2.onclick = async () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); await pjKabloOto(); };
-      const b3 = h('button', 'mini ok', a === PJ.aktif && PJ.cur && /_0[14]_/.test(PJ.cur) ? 'Son hali onayla → projeyi tamamla' : 'Onayla → projeyi tamamla'); b3.title = 'Açıp düzenlediyseniz (taşıma, DC atama, kablo) düzenlenmiş son hal onaylanır ve proje bu halden üretilir'; b3.onclick = () => pjAltOnayla(a);
+      const b3 = h('button', 'mini ok', a.parsel ? (a.parsel.i + 1 < a.parsel.n ? 'Onayla → parsel ' + (a.parsel.i + 2) + '/' + a.parsel.n : 'Onayla → tüm parsellerle projeyi tamamla') : a === PJ.aktif && PJ.cur && /_0[14]_/.test(PJ.cur) ? 'Son hali onayla → projeyi tamamla' : 'Onayla → projeyi tamamla'); b3.title = 'Açıp düzenlediyseniz (taşıma, DC atama, kablo) düzenlenmiş son hal onaylanır ve proje bu halden üretilir'; b3.onclick = () => pjAltOnayla(a);
       act.append(b1, b2, b3); tr.appendChild(act);
     } else {
-      const td = h('td', 'st', a.durum === 'calisiyor' ? 'Hesaplanıyor… (' + fmtNum((performance.now() - a.t0) / 1000, 0) + ' sn)' + (a.asama ? ' · ' + a.asama : '') : a.durum === 'bekliyor' ? 'Sırada' : a.durum === 'iptal' ? 'İptal (başka seçenek onaylandı)' : 'Hata: ' + (a.hata || ''));
+      const td = h('td', 'st', a.durum === 'calisiyor' ? 'Hesaplanıyor… (' + fmtNum((performance.now() - a.t0) / 1000, 0) + ' sn)' + (a.asama ? ' · ' + a.asama : '') : a.durum === 'bekliyor' ? 'Sırada' : a.durum === 'iptal' ? 'İptal (başka seçenek onaylandı)' : a.durum === 'onaylandi' ? 'Onaylandı ✓ — çizime yazıldı' : 'Hata: ' + (a.hata || ''));
       td.colSpan = 9; tr.appendChild(td);
     }
     tb.appendChild(tr);

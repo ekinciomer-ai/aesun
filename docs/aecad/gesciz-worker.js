@@ -29,8 +29,7 @@ import ges_ciz as g
 importlib.reload(g)
 def _uu(gs):
     L = list(getattr(gs, 'geoms', gs))
-    try: return shapely.union_all(L)
-    except Exception: return shapely.union_all(L, grid_size=0.001)   # wasm GEOS topoloji hatasında hassasiyet ızgarası
+    return shapely.union_all(L, grid_size=0.001)   # wasm GEOS: hassasiyet ızgarası (non-noded topoloji hatalarını önler)
 g.unary_union = _uu
 P = g.birlestir(g.VARSAYILAN, json.load(open('/home/pyodide/p.json', encoding='utf-8')))
 P["proje"]["tarih"] = P["proje"]["tarih"] or datetime.date.today().strftime("%d.%m.%Y")
@@ -78,8 +77,7 @@ import ges_ciz as g
 importlib.reload(g)
 def _uu(gs):
     L = list(getattr(gs, 'geoms', gs))
-    try: return shapely.union_all(L)
-    except Exception: return shapely.union_all(L, grid_size=0.001)   # wasm GEOS topoloji hatasında hassasiyet ızgarası
+    return shapely.union_all(L, grid_size=0.001)   # wasm GEOS: hassasiyet ızgarası (non-noded topoloji hatalarını önler)
 g.unary_union = _uu
 g.dwg_cevir = lambda p: None
 if ${usePdf ? 'True' : 'False'}:

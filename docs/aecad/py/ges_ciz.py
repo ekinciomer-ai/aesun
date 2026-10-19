@@ -283,6 +283,7 @@ class Model:
         self.cit = self.parsel_sinir.buffer(-of, join_style=2)   # çit her parselin kendi sınırında (koridorda çit yok)
         coklu_p = self.parsel_sinir.geom_type != "Polygon"
         loc_p = rot(self.parsel_sinir)
+        self.parca_loc = [q for q in loc_p.geoms if q.area > 1] if coklu_p else None   # ayrık parseller (model ekseninde)
         # Cephe bazlı çekme (parsel.cepheler): yol / komşu parsel / diğer cephelerde farklı mesafe. Verilmeyen kenar = genel çekme (kademeli).
         kn = [] if coklu_p else self._cephe_kenarlar(loc, rot, cekme)
         self.cekme_cephe = kn
@@ -364,6 +365,15 @@ class Model:
         oto = y.get("ic_yol", True)
         if not oto and not y.get("ek_yollar"): return
         Lg = self.masa_L + m["masa_arasi_m"]; MX = e["string_inverter_max"]; s_ = self.str_masa; pitch = m["pitch_m"]
+        # kullanıcı kuralı 19.10.2026: küçük sahada (≤ 200 masa) otomatik iç yol açılmaz — masa alanında koridor yok (A.7);
+        # inverter masa arkasında olduğundan DC için iç yola gerek kalmaz. Elle çizilen yollar (ek_yollar) korunur.
+        tahmin = self.alan_loc.area * 0.9 / (pitch * Lg)
+        if tahmin <= 200 and not y.get("ic_aralik_m"):
+            if y.get("ek_yollar"): oto = False
+            else:
+                _u = f"İç yol açılmadı: küçük saha (~{tahmin:.0f} masa ≤ 200); inverterler masa arkasında, AG kenar servis yolundan."
+                if _u not in self.uyari: self.uyari.append(_u)
+                return
         K = 1
         for k in range(1, 60):
             rows = math.ceil(MX / (k * s_))
@@ -521,7 +531,17 @@ class Model:
                 if pc.is_empty: continue
                 shapely.prepare(pc)                       # hız (Pyodide): hazırlanmış geometride içerme testi
                 x0, xe = pc.bounds[0], pc.bounds[2]; sat = []
-                if xm == "right":
+                # kullanıcı kuralı 19.10.2026: iç yol açıldıysa yolun iki yanındaki masalar YOLA hizalı (dağınık uç yok):
+                # parçanın sağında yol → sağa (yola) yasla, solunda yol → sola (yola) yasla
+                xm_ = xm
+                if self.ic_yollar:
+                    ys_ = [r["serit"] for r in self.ic_yollar if r.get("serit") is not None]
+                    yE = any(s_.intersects(box(xe, y, xe + 2.0, y + D)) for s_ in ys_)
+                    yW = any(s_.intersects(box(x0 - 2.0, y, x0, y + D)) for s_ in ys_)
+                    if yE and not yW: xm_ = "right"
+                    elif yW and not yE: xm_ = "left"
+                    elif yE and yW: xm_ = "center" if xm == "center" else xm
+                if xm_ == "right":
                     x = xe
                     while x - L >= x0 - 1e-6:
                         mb = box(x - L, y, x, y + D)
@@ -533,7 +553,7 @@ class Model:
                         mb = box(x, y, x + L, y + D)
                         if pc.contains(box(x + 0.01, y + 0.01, x + L - 0.01, y + D - 0.01)): sat.append(mb); x += L + g
                         else: x += 0.5
-                    if xm == "center" and sat:
+                    if xm_ == "center" and sat:
                         bos = xe - max(q.bounds[2] for q in sat)
                         if bos > 0.2:
                             kay = [affinity.translate(q, bos / 2, 0) for q in sat]
@@ -697,9 +717,10 @@ class Model:
         sn = [round(i * n / self.n_tr) for i in range(self.n_tr + 1)]
         self.tr_gruplari = [sirali[sn[t]:sn[t + 1]] for t in range(self.n_tr)]
 
-    def _kenar_x(self, y, taraf):
-        mnx, _, mxx, _ = self.ic_loc.bounds
-        k = LineString([(mnx - 50, y), (mxx + 50, y)]).intersection(self.ic_loc)
+    def _kenar_x(self, y, taraf, g=None):
+        g = self.ic_loc if g is None else g
+        mnx, _, mxx, _ = g.bounds
+        k = LineString([(mnx - 50, y), (mxx + 50, y)]).intersection(g)
         if k.is_empty: return mxx if taraf == "E" else mnx
         xs = [c[0] for gg in (k.geoms if hasattr(k, "geoms") else [k]) for c in gg.coords]
         return max(xs) if taraf == "E" else min(xs)
@@ -711,6 +732,14 @@ class Model:
         rot = lambda p: affinity.rotate(Point(p), -self.az, origin=self.merkez) if self.az else Point(p)
         self.tm_loc = []
         for t, grp in enumerate(self.tr_gruplari):
+            # ayrık parsel: TM grubun kendi parselinde (kenar ve içerme testleri o parselin alanıyla)
+            kg = None
+            if getattr(self, "parca_loc", None) and grp:
+                sy = {}
+                for q in grp: k_ = self._parca_no(q); sy[k_] = sy.get(k_, 0) + 1
+                kg = self.ic_loc.intersection(self.parca_loc[max(sy, key=sy.get)])
+                if kg.is_empty: kg = None
+            icg = kg if kg is not None else self.ic_loc
             if e["tm_konumlari"] and t < len(e["tm_konumlari"]):
                 c = rot(e["tm_konumlari"][t])
             elif self.ic_yollar and self._tm_elle_yol(grp, w, h) is not None:
@@ -723,7 +752,7 @@ class Model:
                 for xx in (xc, r["x0"] - w / 2 - 0.5):
                     for dy in [0] + [s * k * 5 for k in range(1, 13) for s in (1, -1)]:   # grubun yanında (≤ 60 m); gölgeyle en az masa kaybı
                         bx = box(xx - w / 2, cy0 + dy - h / 2, xx + w / 2, cy0 + dy + h / 2)
-                        if self.ic_loc.contains(bx) and not any(bx.intersects(o) for o in self.tm_loc):
+                        if icg.contains(bx) and not any(bx.intersects(o) for o in self.tm_loc):
                             sk = self._tm_kayip(Point(xx, cy0 + dy), w, h) + abs(dy) / 20.0 + (0 if xx == xc else 0.5)
                             if best is None or sk < best[0]: best = (sk, Point(xx, cy0 + dy))
                 if best: c = best[1]
@@ -733,19 +762,19 @@ class Model:
                 for dy in [0] + [s_ * k * 5 for k in range(1, 9) for s_ in (1, -1)]:     # kenar şeridinde, gölgeyle en az masa kaybı
                     cy = cy0 + dy
                     try:
-                        xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf)) if taraf == "E" else \
-                             max(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf))
+                        xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf, kg), self._kenar_x(cy + h / 2 - 0.1, taraf, kg)) if taraf == "E" else \
+                             max(self._kenar_x(cy - h / 2 + 0.1, taraf, kg), self._kenar_x(cy + h / 2 - 0.1, taraf, kg))
                     except Exception: continue
                     cc = Point(xe - w / 2 if taraf == "E" else xe + w / 2, cy)
                     bx = box(cc.x - w / 2, cy - h / 2, cc.x + w / 2, cy + h / 2)
-                    if not self.ic_loc.buffer(0.5).contains(bx) or any(bx.intersects(o) for o in self.tm_loc): continue
+                    if not icg.buffer(0.5).contains(bx) or any(bx.intersects(o) for o in self.tm_loc): continue
                     sk = self._tm_kayip(cc, w, h) + abs(dy) / 20.0
                     if best is None or sk < best[0]: best = (sk, cc)
                 if best: c = best[1]
                 else:
                     cy = cy0
-                    xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf)) if taraf == "E" else \
-                         max(self._kenar_x(cy - h / 2 + 0.1, taraf), self._kenar_x(cy + h / 2 - 0.1, taraf))
+                    xe = min(self._kenar_x(cy - h / 2 + 0.1, taraf, kg), self._kenar_x(cy + h / 2 - 0.1, taraf, kg)) if taraf == "E" else \
+                         max(self._kenar_x(cy - h / 2 + 0.1, taraf, kg), self._kenar_x(cy + h / 2 - 0.1, taraf, kg))
                     c = Point(xe - w / 2 if taraf == "E" else xe + w / 2, cy)
             self.tm_loc.append(box(c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2))
         self.dm_ortak = False
@@ -795,6 +824,15 @@ class Model:
 
     def tm_engel(self):
         return [self.tm_golge(t).buffer(1.0) for t in self.tm_loc] + ([] if getattr(self, "dm_ortak", False) else [self.tm_golge(self.dm_loc).buffer(1.0)])
+
+    def _parca_no(self, q):
+        """Masanın (ya da noktanın) bulunduğu ayrık parsel no (model ekseninde); tek parselde 0."""
+        P_ = getattr(self, "parca_loc", None)
+        if not P_: return 0
+        p = Point(q["x"], q["y"]) if isinstance(q, dict) else Point(q)
+        for k, g_ in enumerate(P_):
+            if g_.contains(p): return k
+        return min(range(len(P_)), key=lambda k: P_[k].distance(p))
 
     def _masa_agac(self):
         ms = getattr(self, "masalar", []); k = (id(ms), len(ms))
@@ -864,6 +902,16 @@ class Model:
             yuk = (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0
             dc_kwp = len(self.masalar) * self.str_masa * str_kwp
             trafo_on = _trafo_sec(dc_kwp / dcac / yuk) if self._oto_trafo else e["trafo_kva"]   # gerilim bandı için (verilen trafo esas)
+            if getattr(self, "parca_loc", None):
+                # kullanıcı kuralı 19.10.2026: ayrık parsellerde her parselin kendi trafosu — gerilim/trafo parsel gücüne göre (toplama göre değil)
+                gp = [_trafo_sec(sum(1 for q in self.masalar if self._parca_no(q) == k) * self.str_masa * str_kwp / dcac / yuk) for k in range(len(self.parca_loc))]
+                gp = [g_ for g_ in gp if g_]
+                if gp and self._oto_trafo:
+                    trafo_on = max(gp)
+                if gp:
+                    if any(g_ <= TRAFO_KVA_STD[-1] for g_ in gp) and any(g_ > TRAFO_KVA_STD[-1] for g_ in gp) and not getattr(self, "_karisik_v", False):
+                        self._karisik_v = True
+                        self.uyari.append("Parsellerde farklı AG gerilimi gerekir (" + ", ".join(f"P{k+1} {g_} kVA → {'0,8' if g_ > TRAFO_KVA_STD[-1] else '0,4'} kV" for k, g_ in enumerate(gp)) + "): tek inverter tipi için en büyük parsele göre seçildi; parselleri AeCAD'de parsel parsel hesaplayın.")
             volt, tger, band = _sistem_sec(trafo_on)
             # DC-kompakt zincirler (uç hizası) — blok hedefi B'ye göre bölünür; zincir < B ise tek blok
             def _zincirler():
@@ -1102,7 +1150,16 @@ class Model:
                 e["trafo_kva"] = yeni; _nt = 1
             IT = max(1, math.ceil(ni / _nt))
         n_tot = max(1, math.ceil(ni / IT))
-        if self.ic_yollar:   # A.7: her TR tek bir iç yolun blokları (TR yollar arası bölünmez); yol başına eşit dağıtım
+        if getattr(self, "parca_loc", None):
+            # kullanıcı kuralı 19.10.2026: ayrık parselde her parsel kendi trafosuna bağlanır — AG kablo parseller arası taşınmaz
+            pg = {}
+            for bl in bloklar: pg.setdefault(self._parca_no(bl[0]), []).append(bl)
+            tr_bl = []
+            for k_ in sorted(pg):
+                lst = sorted(pg[k_], key=lambda bl: (-sum(q["y"] for q in bl) / len(bl), sum(q["x"] for q in bl) / len(bl)))
+                nt = max(1, math.ceil(len(lst) / IT)); s_ = [round(i * len(lst) / nt) for i in range(nt + 1)]
+                tr_bl += [lst[s_[t]:s_[t + 1]] for t in range(nt)]
+        elif self.ic_yollar:   # A.7: her TR tek bir iç yolun blokları (TR yollar arası bölünmez); yol başına eşit dağıtım
             yollar = {}
             for bl in bloklar: yollar.setdefault(yol_no(bl), []).append(bl)
             tr_bl = []
@@ -1225,12 +1282,14 @@ class Model:
         yuk = (e.get("trafo_yuklenme_max_pct") or 90.0) / 100.0
         ac_tr = [self.tr_ac(t) for t in range(self.n_tr)]
         if self._oto_trafo and ac_top:
-            volt0 = _sistem_sec(_trafo_sec(sum(ac_tr) / yuk))[0] if not sys else sys[0]
+            volt0 = _sistem_sec(_trafo_sec((max(ac_tr) if getattr(self, "parca_loc", None) else sum(ac_tr)) / yuk))[0] if not sys else sys[0]
             self.tr_kva = [_trafo_sec(ac / yuk, volt0) for ac in ac_tr]          # H.4: her TR kendi yüküne göre
             self._trafo_oto = (e["trafo_kva"], self.tr_kva)
             e["trafo_kva"] = max(self.tr_kva)
         else:
             self.tr_kva = [e["trafo_kva"]] * self.n_tr
+            if getattr(self, "parca_loc", None) and ac_top:   # ayrık parsel: küçük parselin trafosu kendi gücüne göre (verilen güç üst sınır)
+                self.tr_kva = [min(e["trafo_kva"], _trafo_sec(ac / yuk, e.get("ag_gerilim_v"))) if ac else e["trafo_kva"] for ac in ac_tr]
         if not sys:   # H.5: AG gerilimi trafo gücüne göre (inverter elle verildiyse de)
             volt, tger, _ = _sistem_sec(max(self.tr_kva))
             if e.get("ag_gerilim_oto", True): e["ag_gerilim_v"] = volt; e["trafo_gerilim"] = tger

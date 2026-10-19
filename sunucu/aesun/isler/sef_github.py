@@ -16,9 +16,12 @@ GUVENLI = {"cpanel_yukle.yml", "izleme_ozet.yml", "cpanel_tani.yml", "sunucu_tan
 
 def main():
     tok = z.sirlar().get("GH_TOKEN")
-    if not tok:
-        print(json.dumps({"hata": "GH_TOKEN yok"})); return
+    tok = tok or ""
     H = {"Authorization": "Bearer " + tok, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}
+    yazabilir = True
+    if requests.get("https://api.github.com/rate_limit", headers=H, timeout=20).status_code == 401:
+        # anahtar geçersiz: depolar açık olduğundan okuma anahtarsız sürer; yeniden çalıştırma yapılamaz
+        H = {k: v for k, v in H.items() if k != "Authorization"}; yazabilir = False
     simdi = dt.datetime.now(dt.timezone.utc); out = {"kapanan": [], "yeniden": [], "acik": []}
     for depo in DEPOLAR:
         r = requests.get(f"https://api.github.com/repos/{depo}/actions/runs", headers=H, params={"status": "failure", "per_page": 50}, timeout=30)
@@ -35,10 +38,11 @@ def main():
                      if y["created_at"] > x["created_at"] and y.get("conclusion") == "success"]
             if sonra:
                 out["kapanan"].append({**kayit, "neden": "sonraki çalışma başarılı (" + sonra[-1]["created_at"][11:16] + " UTC)"}); continue
-            if dosya in GUVENLI and x.get("run_attempt", 1) == 1 and (simdi - t).total_seconds() > 600:
+            if dosya in GUVENLI and yazabilir and x.get("run_attempt", 1) == 1 and (simdi - t).total_seconds() > 600:
                 k = requests.post(f"https://api.github.com/repos/{depo}/actions/runs/{x['id']}/rerun-failed-jobs", headers=H, timeout=30)
                 out["yeniden"].append({**kayit, "ok": k.status_code in (201, 204), "kod": k.status_code}); continue
-            out["acik"].append({**kayit, "neden": "güvenli tekrar listesinde değil" if dosya not in GUVENLI else "yeniden çalıştırıldı, yine başarısız"})
+            out["acik"].append({**kayit, "neden": "güvenli tekrar listesinde değil" if dosya not in GUVENLI else ("yeniden çalıştırmak için GitHub anahtarı (PAT_TOKEN) geçersiz" if not yazabilir else "yeniden çalıştırıldı, yine başarısız")})
+    out["anahtar"] = "geçerli" if yazabilir else "geçersiz (yalnız okuma)"
     print(json.dumps(out, ensure_ascii=False))
 
 

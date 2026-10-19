@@ -133,13 +133,15 @@ def main():
 
     # ---- 4b) başarısız GitHub işleri (hata bekçisinin bulgusu): geçmişte kalanı kapat, güvenliyi yeniden çalıştır (30 dk'da bir)
     gh = st.get("github") or {}
-    if ts - gh.get("_t", 0) > 1800:
+    if ts - gh.get("_t", 0) > 1800 or os.path.exists(D + "/.sef_gh_simdi"):
         k, o, e = dx("python", "sef_github.py", t=240)
         try:
             g = json.loads(o.strip().splitlines()[-1])
         except Exception:
             g = {"hata": (e or o)[-160:]}
         g["_t"] = ts; gh = g
+        try: os.remove(D + "/.sef_gh_simdi")
+        except OSError: pass
         for x in g.get("yeniden") or []:
             eylemler.append({"t": simdi.isoformat(timespec="seconds"), "sorun": f"GitHub işi başarısız: {x['ad']} ({x['depo']})", "eylem": "gh_yeniden",
                              "sonuc": "yeniden çalıştırıldı" if x.get("ok") else f"yeniden çalıştırılamadı (HTTP {x.get('kod')})", "ok": bool(x.get("ok"))})
@@ -147,6 +149,8 @@ def main():
             eylemler.append({"t": simdi.isoformat(timespec="seconds"), "sorun": "eski GitHub hataları: " + ", ".join(sorted({x['ad'] for x in g['kapanan']})),
                              "eylem": "gh_kapat", "sonuc": f"{len(g['kapanan'])} hata sonraki başarılı çalışmayla kapatıldı", "ok": True}) if any(x["id"] not in {y["id"] for y in (st.get("github") or {}).get("kapanan") or []} for x in g["kapanan"]) else None
     gozlem["github"] = {k2: len(v) if isinstance(v, list) else v for k2, v in gh.items() if not k2.startswith("_")}
+    if gh.get("anahtar", "").startswith("geçersiz"):
+        acik.append({"sorun": "ns1'deki GitHub anahtarı (PAT_TOKEN) geçersiz", "neden": "şef başarısız işleri yeniden çalıştıramaz; GitHub'da yeni anahtar oluşturup epias-ptf sırlarında PAT_TOKEN'ı güncelleyin, sonra 'Sunucuya sır' işini çalıştırın"})
     for x in gh.get("acik") or []:
         acik.append({"sorun": f"GitHub işi başarısız: {x.get('ad')} ({x.get('depo')})", "neden": x.get("neden", "") + " — elle bakılmalı"})
     st["github"] = gh

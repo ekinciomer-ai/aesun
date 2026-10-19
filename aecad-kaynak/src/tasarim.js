@@ -224,13 +224,23 @@ function tsAcAg(kalan, A, tm, tohum) {
     let yol;
     if (!ag.length) { const r = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); yol = r || [x.p, A]; }
     else {
-      let best = null; for (const y of ag) { const t = tsYakin(y, x.p); if (t && (!best || t.d < best.t.d)) best = { y, t }; }
-      const q = best.t.q, kuyruk = [q, ...best.y.slice(best.t.i)];
-      const br = K.gorur(x.p, q) ? [x.p, q] : (K.yol(x.p, q) || null);
-      const ortak = br ? [...br.slice(0, -1), ...kuyruk] : null;
-      // doğrudan ADP'ye yol ortak kanaldan belirgin kısaysa (> %15) doğrudan git — kabloyu boşuna dolaştırma
-      const dog = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A);
-      yol = !ortak ? (dog || [x.p, q, ...kuyruk.slice(1)]) : (dog && tsBoy(dog) * 1.15 < tsBoy(ortak) ? dog : ortak);
+      // bağlanma noktası: ağ üzerindeki tüm noktalar (≈ 4 m arayla) içinde branşman + 0,3 × kalan ortak kuyruk en küçük olan.
+      // Ortak kanal ucuz sayılır (tek kanal kuralı), ama kablo kanala en kısa yerden girer; ADP'nin kendisi de aday.
+      let best = { c: Math.hypot(x.p[0] - A[0], x.p[1] - A[1]), y: null, i: 0, q: A };
+      for (const y of ag) {
+        const kal = new Array(y.length).fill(0); for (let k = y.length - 2; k >= 0; k--) kal[k] = kal[k + 1] + Math.hypot(y[k + 1][0] - y[k][0], y[k + 1][1] - y[k][1]);
+        for (let k = 0; k < y.length - 1; k++) {
+          const a = y[k], b = y[k + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / 4));
+          for (let u = 0; u <= n; u++) { const t = u / n, q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; const c = Math.hypot(x.p[0] - q[0], x.p[1] - q[1]) + 0.3 * (kal[k + 1] + L * (1 - t)); if (c < best.c) best = { c, y, i: k, q }; }
+        }
+      }
+      if (!best.y) { const dog = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); yol = dog || [x.p, A]; }
+      else {
+        const q = best.q, kuyruk = [q, ...best.y.slice(best.i + 1)];
+        const br = K.gorur(x.p, q) ? [x.p, q] : K.yol(x.p, q);
+        if (br) yol = [...br.slice(0, -1), ...kuyruk];
+        else { const dog = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); yol = dog || [x.p, q, ...kuyruk.slice(1)]; }
+      }
     }
     const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (Math.hypot(yol[i][0] - sad[sad.length - 1][0], yol[i][1] - sad[sad.length - 1][1]) > 0.05) sad.push(yol[i]);
     out.set(x.it.id, sad); ag.push(sad);

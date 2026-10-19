@@ -26,6 +26,8 @@ def main():
     for depo in DEPOLAR:
         r = requests.get(f"https://api.github.com/repos/{depo}/actions/runs", headers=H, params={"status": "failure", "per_page": 50}, timeout=30)
         if r.status_code != 200:
+            if not yazabilir:   # anahtarsız okumada gizli depo görünmez; o depoyu denetçi (n8n) kendi anahtarıyla süzer
+                out.setdefault("atlanan", []).append(depo.split("/")[1]); continue
             out["acik"].append({"depo": depo, "ad": "GitHub API", "neden": f"okunamadı HTTP {r.status_code}"}); continue
         for x in r.json().get("workflow_runs", []):
             t = dt.datetime.fromisoformat(x["created_at"].replace("Z", "+00:00"))

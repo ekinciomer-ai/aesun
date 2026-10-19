@@ -20,8 +20,10 @@ ISLER = {  # iş adı: (sınır dk, yedek olay türü)
     "Bildirimler": (45, "yedek_bildirim"),
     "Veri arşivi": (150, "yedek_arsiv"),
     "Durum analizi": (150, "yedek_analiz"),
+    "İzleme özeti": (80, "yedek_izleme"),
 }
 ARALIK_DK = 10
+OLAGAN = {"Bildirimler": "15 dk", "İzleme özeti": "30 dk"}
 
 
 def _get(yol, sure=20):
@@ -86,7 +88,7 @@ def calis(simdi=None):
             dk = round((simdi - zaman(son)).total_seconds() / 60) if son else None
             bilgi.setdefault("isler", {})[ad] = dk
             if dk is None or dk > sinir:
-                sorun["is:" + ad] = f"{ad} {('hiç' if dk is None else str(dk) + ' dk')}'dır çalışmadı (olağan: {'15 dk' if ad == 'Bildirimler' else '1 saat'})"
+                sorun["is:" + ad] = f"{ad} {('hiç' if dk is None else str(dk) + ' dk')}'dır çalışmadı (olağan: {OLAGAN.get(ad, '1 saat')})"
             if dk is not None and dk > 2 * sinir:
                 ys = yedek_son.get(tur)
                 if not ys or (simdi - zaman(ys)).total_seconds() > 3600:

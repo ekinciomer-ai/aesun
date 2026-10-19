@@ -28,7 +28,7 @@ na=$(python3 -c "import sys,datetime as d;a,b=sys.argv[1:];print(int((d.datetime
 [ "$na" -gt 300 ] && sorun_isler="nabız ${na} sn önce"
 isler_json=$(echo "$ij" | python3 -c "
 import json,sys,datetime as dt
-LIM={'Bildirimler':40,'Veri arşivi':130,'Durum analizi':130}   # iki tur kaçırınca
+LIM={'Bildirimler':40,'Veri arşivi':130,'Durum analizi':130,'İzleme özeti':70}   # iki tur kaçırınca
 try: d=json.load(sys.stdin).get('isler',{})
 except Exception: d={}
 now=dt.datetime.now(dt.timezone.utc); out={}

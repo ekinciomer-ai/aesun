@@ -28,6 +28,8 @@ ISLER = [  # ad, dakikalar, komut, ek olarak yazılacak yollar
     ("Bildirimler", {7, 22, 37, 52}, ["python", "bildirim_isler.py"], ["n8n/bildirim_*.json", "n8n/maden_maliyet.json"], "Bildirim durumu"),
     ("Veri arşivi", {5}, ["python", "arsiv_kaydet.py"], ["-A"], "Veri arşivi"),
     ("Durum analizi", {41}, ["python", "durum_analizi.py"], ["n8n/analiz/"], "Durum analizi"),
+    # 19 Eki: n8n "Ana döngü" + alt akışlar + Uyarı motoru yerine (n8n kotası) — panel özeti n8n/aesun_son.json
+    ("İzleme özeti", {2, 32}, ["python", "izleme_ozet.py"], ["n8n/aesun_son.json", "n8n/izleme_durum.json"], "İzleme özeti"),
 ]
 
 def sh(*a, **k):

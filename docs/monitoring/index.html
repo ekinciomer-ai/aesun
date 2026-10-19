@@ -3671,11 +3671,11 @@ async function kabinSema(uretKw) {
   const osNet = osS ? (Number(osV[osG][osS].veris) || 0) - (Number(osV[osG][osS].cekis) || 0) : null, belirsiz = Math.abs(netHam) < Math.max(5, uret * 0.05);
   // güneş yokken (inverter < 1 kW) pompa, Pi ve iç tüketim şebekeden karşılanır: yön her zaman çekiş
   const VERIS = uret < 1 ? false : belirsiz && osNet != null ? osNet >= 0 : netHam >= 0, netKw = VERIS ? Math.abs(netHam) : -Math.abs(netHam);
-  KB_YON = VERIS;
-  s += '<g class="' + (Math.abs(netKw) < 0.5 && !belirsiz && uret >= 1 ? 'dur' : '') + '"><path class="ln" style="stroke-width:3;opacity:.3;stroke:' + (netKw >= 0 ? '#1E7A3C' : '#B42318') + '" d="M' + SX + ' ' + SB + 'V93"/><path class="' + (netKw >= 0 ? 'guc' : 'cek') + '" d="' + (netKw >= 0 ? 'M' + SX + ' ' + SB + 'V93' : 'M' + SX + ' 93V' + SB) + '"/></g>'
+  KB_YON = VERIS;   // yön her yerde VERIS'ten: uret=0 ve yük=0'da netKw = -0 olur ve (-0 >= 0) true → hat veriş gösteriyordu (19 Eki)
+  s += '<g class="' + (Math.abs(netKw) < 0.5 && !belirsiz && uret >= 1 ? 'dur' : '') + '"><path class="ln" style="stroke-width:3;opacity:.3;stroke:' + (VERIS ? '#1E7A3C' : '#B42318') + '" d="M' + SX + ' ' + SB + 'V93"/><path class="' + (VERIS ? 'guc' : 'cek') + '" d="' + (VERIS ? 'M' + SX + ' ' + SB + 'V93' : 'M' + SX + ' 93V' + SB) + '"/></g>'
     + '<circle class="ln" cx="' + SX + '" cy="80" r="13"/><circle class="ln" cx="' + SX + '" cy="62" r="13"/><path class="ln" d="M' + SX + ' 49V-12"/>'
     + T(SX + 20, 74, 'Trafo 31,5 / 0,4 kV', 'sm')
-    + sayac(MX, 150, 170, belirsiz ? (VERIS ? 'DENGE → ŞEBEKE' : 'DENGE ← ŞEBEKE') : netKw >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', say(Math.abs(netKw), 1), say(Math.abs(netKw) * 1000 / (r3 * V * PF), 0), 'A', netKw >= 0 ? null : '#FF4D3D');
+    + sayac(MX, 150, 170, belirsiz ? (VERIS ? 'DENGE → ŞEBEKE' : 'DENGE ← ŞEBEKE') : VERIS ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', say(Math.abs(netKw), 1), say(Math.abs(netKw) * 1000 / (r3 * V * PF), 0), 'A', VERIS ? null : '#FF4D3D');
   // antrak besleme kablosu → ana şalter → dağıtım barası
   s += '<g class="' + (ANT_KW > 0.5 ? '' : 'dur') + '"><path class="ln" style="stroke:#E07B00;stroke-width:3;opacity:.3" d="M' + FX + ' ' + SB + 'V' + BUSY + '"/><path class="yuk" d="M' + FX + ' ' + SB + 'V' + BUSY + '"/></g>'
     + T(FX - 10, SB + 74, 'antrak besleme kablosu', 'sm', ' text-anchor="end"')
@@ -3746,7 +3746,7 @@ async function kabinSema(uretKw) {
       + '<rect x="' + (bx + bw / 2 - 80) + '" y="' + (by + 124) + '" width="160" height="22" rx="3" fill="#2B2C2E"/><ellipse cx="' + (bx + bw / 2) + '" cy="' + (by + 135) + '" rx="74" ry="7" fill="url(#kbDiskG)" stroke="#55565A"/>'
         + [0, 1, 2].map(q => '<rect class="disk ' + (yon ? 'ileri' : 'geri') + '" x="' + (bx + bw / 2 - 4) + '" y="' + (by + 129) + '" width="8" height="12" rx="1" fill="#C0261B" style="animation-delay:' + (-q * 0.8) + 's"/>').join('')
       + T(bx + bw / 2, by + 152, yon ? '→ şebekeye (veriş)' : '← şebekeden (çekiş)', '', ' text-anchor="middle" font-size="8.5" fill="' + (yon ? '#1E7A3C' : '#B42318') + '"')
-      + T(bx + 26, by + 176, g1 ? tarihK(g1) + ' · son saat ' + (b.s || '—') + ':00 · net ' + (yon ? '+' : '') + say(b.v - b.c) + ' kWh' : 'OSOS verisi yok', '', ' font-size="10" font-weight="600" fill="#3B3A33"')
+      + T(bx + 26, by + 176, g1 ? tarihK(g1) + ' · son saat ' + (b.s || '—') + ':00 · net ' + (b.v - b.c > 0 ? '+' : '') + say(b.v - b.c) + ' kWh' : 'OSOS verisi yok', '', ' font-size="10" font-weight="600" fill="#3B3A33"')
       + T(bx + 26, by + 192, g0 ? 'dün ' + tarihK(g0) + ': çekiş ' + say(d.c) + ' · veriş ' + say(d.v) + ' kWh' : '', '', ' font-size="10" fill="#5C5848"') + '</g>'
       + '<path class="ln" d="M' + SX + ' 8V' + by + '"/>' + T(SX + 8, 14, 'OG · MEDAŞ 31,5 kV → OSOS sayaç → trafo', 'sm') + '<rect x="' + (SX - 9) + '" y="' + (by - 3) + '" width="18" height="7" rx="1.5" fill="#3B3A33"/><rect x="' + (SX - 9) + '" y="' + (by + bh2 - 4) + '" width="18" height="7" rx="1.5" fill="#3B3A33"/>'; }
   const ortI = fsI.length ? invKw / fsI.length : 0;

@@ -9,15 +9,15 @@ function altEgim(base, t) {
     uygula: () => { mainTpl().tilt = t; renderTpl(); gesSave(); pitchUpdate(); } };
 }
 function pjAltOner(base) {
-  const L = [{ ad: 'Mevcut', acik: 'Girilen bilgilerle (esaslar: iç yol ΔU %1, 5 m çekme)', param: kopya(base), uygula: () => {} }];
+  const L = [{ ad: 'Mevcut', acik: 'Girilen bilgilerle (esaslar: iç yol ΔU %1, 5 m çekme)', param: kopya(base), uygula: () => {}, fark: (b) => b }];
   const t0 = base.masa.egim_derece;
-  L.push(altEgim(base, t0 > 20 ? 20 : 25));
-  if (base.yol.ic_yol) { const p = kopya(base); p.yol.ic_yol = false; L.push({ ad: 'İç yolsuz', acik: 'Karşılaştırma: yalnız kenar servis yolu (daha çok masa, uzun AG kablo)', param: p, uygula: () => { gv('p-icyol').value = '0'; pjSave(); } }); }
-  else { const p = kopya(base); p.yol.ic_yol = true; L.push({ ad: 'İç yollu', acik: 'K-G iç bakım yolları, aralık DC ΔU %1', param: p, uygula: () => { gv('p-icyol').value = '1'; pjSave(); } }); }
+  { const t1 = t0 > 20 ? 20 : 25; L.push({ ...altEgim(base, t1), fark: (b) => altEgim(b, t1).param }); }
+  if (base.yol.ic_yol) { const p = kopya(base); p.yol.ic_yol = false; L.push({ ad: 'İç yolsuz', acik: 'Karşılaştırma: yalnız kenar servis yolu (daha çok masa, uzun AG kablo)', param: p, uygula: () => { gv('p-icyol').value = '0'; pjSave(); }, fark: (b) => { b.yol.ic_yol = false; return b; } }); }
+  else { const p = kopya(base); p.yol.ic_yol = true; L.push({ ad: 'İç yollu', acik: 'K-G iç bakım yolları, aralık DC ΔU %1', param: p, uygula: () => { gv('p-icyol').value = '1'; pjSave(); }, fark: (b) => { b.yol.ic_yol = true; return b; } }); }
   const hz0 = (base.elektrik && base.elektrik.inverter_hiza) || 'yol';
   for (const [k, ad, ac] of [['orta', 'İnverter ortalı', 'İnverterler bloğun ortasındaki sıranın masa başında'], ['optimum', 'İnverter optimum', 'İnverter her blokta en kısa DC\'yi veren masa başında'], ['yol', 'İnverter yol kenarı', 'İnverterler servis yoluna / çite yakın masa başında']]) {
     if (k === hz0 || L.length >= 5) continue; const p = kopya(base); p.elektrik.inverter_hiza = k;
-    L.push({ ad, acik: ac, param: p, uygula: () => { gv('p-invhiza').value = k; pjSave(); } });
+    L.push({ ad, acik: ac, param: p, uygula: () => { gv('p-invhiza').value = k; pjSave(); }, fark: (b) => { b.elektrik.inverter_hiza = k; return b; } });
   }
   return L.map((a) => ({ ...a, durum: 'bekliyor' }));
 }
@@ -172,4 +172,14 @@ async function pjKabloOto() {
   await CMD.GDCCIZ();
   if ([...S.doc.items.values()].some((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm')) { const v = {}; for (const [k, , f] of TS.ac.alan) v[k] = f(); await CMD.GACOTO(v); }
   msg('Kablo planı tasarım araçlarıyla çizildi: DC atama ' + R.yeni.size + ' masa' + (R.kalan.length ? ' (' + R.kalan.length + ' masa atanamadı)' : '') + ', DC stringler ve AC kanal. Proje paftaları bu çizimden üretilir.', 'res');
+}
+
+// Açık yerleşim sağ paneldeki ayarlarla (hizalama, sıra başlangıcı, sıra açısı, masa arası, çekme, sıra aralığı) yeniden hesaplanır
+function pjAktifYenile() {
+  const a = PJ.aktif; if (!a || !PJ.cur || !/_01_/.test(PJ.cur)) return false;
+  if (a.cizim || !a.fark) { pjBack(); return false; }   // çizimdeki yerleşim: kaynak çizime dönülür, Arazi doldur yeniden yerleştirir
+  clearTimeout(pjAktifYenile.t);
+  pjAktifYenile.t = setTimeout(() => { let base; try { base = pjDuzenUygula(buildParam0()); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
+    a.param = a.fark(kopya(base)); a.durum = 'bekliyor'; a.duzen = true; msg('"' + a.ad + '" yerleşimi yeni ayarlarla yeniden hesaplanıyor…', 'note'); pjAltSirada(); }, 350);
+  return true;
 }

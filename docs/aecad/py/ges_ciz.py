@@ -466,6 +466,43 @@ class Model:
         p = min(pts, key=lambda q: abs(q.x - x)); return (p.x, p.y)
 
     # ---------------------------------------------------------------- 2) dizilim
+    def _dizi(self, alan, xm, ym):
+        """Izgara dizilimi: sıralar kuzey/güney/orta başlangıçlı, sıra içinde masalar batı/doğu/orta hizalı."""
+        m = self.P["masa"]; minx, miny, maxx, maxy = alan.bounds
+        pitch, D, L, g = m["pitch_m"], self.masa_D, self.masa_L, m["masa_arasi_m"]
+        n = max(1, int((maxy - D - miny) // pitch) + 1)
+        artik = (maxy - D - miny) - (n - 1) * pitch
+        y = maxy - D - (artik if ym == "south" else artik / 2 if ym == "center" else 0.0)
+        out, sira = [], 0
+        while y >= miny - 1e-6:
+            kes = alan.intersection(box(minx - 1, y, maxx + 1, y + D))
+            parcalar = [kes] if kes.geom_type == "Polygon" else [q for q in getattr(kes, "geoms", []) if q.geom_type == "Polygon"]
+            for pc in sorted(parcalar, key=lambda q: q.bounds[0]):
+                if pc.is_empty: continue
+                x0, xe = pc.bounds[0], pc.bounds[2]; sat = []
+                if xm == "right":
+                    x = xe
+                    while x - L >= x0 - 1e-6:
+                        mb = box(x - L, y, x, y + D)
+                        if alan.contains(mb.buffer(-0.01)): sat.append(mb); x -= L + g
+                        else: x -= 0.5
+                else:
+                    x = x0
+                    while x + L <= xe + 1e-6:
+                        mb = box(x, y, x + L, y + D)
+                        if alan.contains(mb.buffer(-0.01)): sat.append(mb); x += L + g
+                        else: x += 0.5
+                    if xm == "center" and sat:
+                        bos = xe - max(q.bounds[2] for q in sat)
+                        if bos > 0.2:
+                            kay = [affinity.translate(q, bos / 2, 0) for q in sat]
+                            if all(alan.contains(q.buffer(-0.01)) for q in kay): sat = kay
+                for mb in sat:
+                    c = mb.centroid; out.append({"loc": mb, "sira": sira, "x": c.x, "y": c.y})
+            sira += 1
+            y -= pitch
+        return out
+
     def dizilim(self, tm_alanlari=None):
         m = self.P["masa"]
         alan = self.alan_loc
@@ -489,20 +526,18 @@ class Model:
                 if ry is None or abs(yy - ry) > D / 2: ry = yy
                 masalar.append({"loc": mb, "sira": sira, "x": xx, "y": yy})
             y = miny - 1                         # ızgara dizilimi atlanır
-        while y >= miny:
-            kes = alan.intersection(box(minx - 1, y, maxx + 1, y + D))
-            parcalar = [kes] if kes.geom_type == "Polygon" else [q for q in getattr(kes, "geoms", []) if q.geom_type == "Polygon"]
-            for pc in sorted(parcalar, key=lambda q: q.bounds[0]):
-                if pc.is_empty: continue
-                x, xe = pc.bounds[0], pc.bounds[2]
-                while x + L <= xe + 1e-6:
-                    mb = box(x, y, x + L, y + D)
-                    if alan.contains(mb.buffer(-0.01)):
-                        masalar.append({"loc": mb, "sira": sira, "x": x + L / 2, "y": y + D / 2}); x += L + g
-                    else:
-                        x += 0.5
-            sira += 1
-            y -= pitch
+        if not kon:
+            # hizalama (AeCAD Arazi doldur ile aynı ayar, kullanıcı kuralı 19.10.2026): masa.hiza_x left/right/center/opt,
+            # masa.hiza_y south/north/center; "opt" 9 bileşimden en çok masayı veren
+            hx = m.get("hiza_x") or "left"; hy = m.get("hiza_y") or "north"
+            xs_ = ["left", "right", "center"] if hx in ("opt", "duz") else [hx]
+            ys_ = ["south", "north", "center"] if hx in ("opt", "duz") else [hy]
+            best = None
+            for xm_ in xs_:
+                for ym_ in ys_:
+                    r_ = self._dizi(alan, xm_, ym_)
+                    if best is None or len(r_) > len(best): best = r_
+            masalar = best or []
         mx = None if kon else self.P["parsel"].get("max_masa")
         if mx and len(masalar) > mx:            # hedef güç üst sınırı: orta sıralar korunur (A.7), dış sıralardan kesilir
             sm = (min(q["sira"] for q in masalar) + max(q["sira"] for q in masalar)) / 2
@@ -1709,10 +1744,13 @@ def pafta_yerlesim(M, seviye):
         pf.poli("GES-MASA", list(g.exterior.coords), info=f"Masa {ms['no']} | {ms.get('inv','')} | " + ", ".join(ms.get("str", [])),
                 dolgu=ms.get("tr", 0))
     if seviye == "uygulama": string_ciz(M, pf)
-    for inv in M.inverterler:
-        x, y = M.Wp(inv["x"], inv["y"])
-        pf.daire("GES-INV", x, y, 0.9, info=f"{inv['ad']} | {inv['n_str']} string | AC {inv['ac_m']:.0f} m")
-        pf.yazi("GES-INV", x + 1.2, y + 0.3, 1.2 if seviye == "uygulama" else 1.8, inv["ad"].replace("-ACB1", "") if seviye == "uygulama" else f"INV{inv['no']}")
+    _gno(M); ia = math.radians(M.az or 0); ca, sa = math.cos(ia), math.sin(ia)
+    for inv in M.inverterler:                  # AeCAD "İnverter ekle" simgesi: 1,20 × 0,80 m kutu + köşegen, üstte INV-n · kW
+        x, y = M.Wp(inv["x"], inv["y"]); P = lambda u, v: (x + u * ca - v * sa, y + u * sa + v * ca)
+        kw = inv.get("ac_kw") or M.P["elektrik"]["inverter_ac_kw"]
+        pf.poli("GES-INV", [P(-0.6, -0.4), P(0.6, -0.4), P(0.6, 0.4), P(-0.6, 0.4)], info=f"{inv['ad']} | {inv['n_str']} string | AC {inv['ac_m']:.0f} m")
+        pf.cizgi("GES-INV", [P(-0.6, -0.4), P(0.6, 0.4)])
+        pf.yazi("GES-INV", *P(0, 1.3), 1.0 if seviye == "uygulama" else 1.4, f"INV-{inv['gno']}" + (f" · {kw:g} kW" if kw else ""), math.degrees(ia), "C")
     ort = getattr(M, "dm_ortak", False)
     e_ = M.P["elektrik"]
     th = copy.deepcopy(e_.get("tm_hucreler") or TM_HUCRE_VARS); dh = copy.deepcopy(e_.get("dm_hucreler") or DM_HUCRE_VARS)
@@ -1741,8 +1779,10 @@ def pafta_topraklama(M):
     W = M.W
     geom_ciz(pf, "GES-SINIR", M.parsel); geom_ciz(pf, "GES-CIT", M.cit); geom_ciz(pf, "GES-YOL", W(M.yol_loc))
     for ms in M.masalar: geom_ciz(pf, "GES-MASA", W(ms["loc"]))
-    for t, tm in enumerate(M.tm_loc): geom_ciz(pf, "GES-TM", W(tm))
-    geom_ciz(pf, "GES-TM", W(M.dm_loc))
+    for t, tm in enumerate(M.tm_loc):
+        c = W(tm).centroid; kosk_plan(pf, M, c.x, c.y, tm_kosk_tasarim(M, t, getattr(M, "dm_ortak", False) and t == 0))
+    if not getattr(M, "dm_ortak", False):
+        c = W(M.dm_loc).centroid; kosk_plan(pf, M, c.x, c.y, kosk_tasarim("dm", 0, len(M.P["elektrik"].get("dm_hucreler") or DM_HUCRE_VARS)))
     geom_ciz(pf, "GES-TOPRAK-SERIT", W(M.toprak_serit))
     for p in M.toprak_cubuk: x, y = M.Wp(*p); pf.daire("GES-TOPRAK-CUBUK", x, y, 0.8, info="Topraklama çubuğu")
     for p in M.toprak_baglanti: x, y = M.Wp(*p); pf.daire("GES-TOPRAK-BAGLANTI", x, y, 0.35, info="DETAY-G konstrüksiyon bağlantısı")
@@ -1787,10 +1827,12 @@ def pafta_kablo(M):
     for inv, ls in zip(M.inverterler, M.ac_hat): geom_ciz(pf, "GES-AC-KABLO", W(ls), info=f"{inv['ad']} → TM{inv['tr']} {inv['ac_m']:.0f} m")
     for o in M.og: geom_ciz(pf, "GES-OG-KABLO", W(o["hat"]), info=f"OG {o['den']}→{o['ye']} {o['m']:.0f} m")
     for inv in M.inverterler:
-        x, y = M.Wp(inv["x"], inv["y"]); pf.daire("GES-INV", x, y, 0.9, info=inv["ad"])
+        x, y = M.Wp(inv["x"], inv["y"]); _a = math.radians(M.az or 0); P = lambda u, v: (x + u * math.cos(_a) - v * math.sin(_a), y + u * math.sin(_a) + v * math.cos(_a))
+        pf.poli("GES-INV", [P(-0.6, -0.4), P(0.6, -0.4), P(0.6, 0.4), P(-0.6, 0.4)], info=inv["ad"]); pf.cizgi("GES-INV", [P(-0.6, -0.4), P(0.6, 0.4)])
     for t, tm in enumerate(M.tm_loc):
-        g = W(tm); geom_ciz(pf, "GES-TM", g); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, f"TM{t+1}", hiz="C")
-    if not getattr(M, "dm_ortak", False): g = W(M.dm_loc); geom_ciz(pf, "GES-TM", g); pf.yazi("GES-TM", g.centroid.x, g.centroid.y, 2.5, "DM", hiz="C")
+        c = W(tm).centroid; kosk_plan(pf, M, c.x, c.y, tm_kosk_tasarim(M, t, getattr(M, "dm_ortak", False) and t == 0))
+    if not getattr(M, "dm_ortak", False):
+        c = W(M.dm_loc).centroid; kosk_plan(pf, M, c.x, c.y, kosk_tasarim("dm", 0, len(M.P["elektrik"].get("dm_hucreler") or DM_HUCRE_VARS)))
     for o in M.og:
         if o["hat"].is_empty: continue
         c = W(o["hat"]).interpolate(0.5, normalized=True)

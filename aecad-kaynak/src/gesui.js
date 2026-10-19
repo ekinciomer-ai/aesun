@@ -339,7 +339,7 @@ function gesInit() {
   for (const id of ['g-or', 'g-rows', 'g-n', 'g-tilt', 'g-front', 'g-gx']) { gv(id).addEventListener('input', () => { tplUpdate(); pitchUpdate(); }); gv(id).addEventListener('change', masaFormdan); }
   { const pm = gv('p-masa'); if (pm) pm.addEventListener('change', () => masaSec(+pm.value)); }
   if (gv('g-mrenk')) gv('g-mrenk').addEventListener('change', () => { gesSave(); masaRenkUygula(); });
-  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); doldurYenile(); });
+  for (const id of ['g-lat', 'g-zone', 'g-hrs', 'g-ang', 'g-pitch', 'g-set', 'g-gap', 'g-align', 'g-valign']) gv(id).addEventListener('change', () => { if (id === 'g-zone') autoLat(); pitchUpdate(); gesSave(); if (!(typeof pjAktifYenile === 'function' && pjAktifYenile())) doldurYenile(); });
   gv('g-ds').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesDatasheet(f); };
   gv('g-kml').onchange = async (e) => { const fs = [...e.target.files]; e.target.value = ''; for (const f of fs) await gesKml(f); gv('g-kml').dispatchEvent(new Event('yuklendi')); };
   gv('g-bds').onclick = () => gv('g-ds').click();

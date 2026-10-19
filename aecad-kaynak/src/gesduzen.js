@@ -126,16 +126,19 @@ function pjPaftaTani() {
   if (!S.doc) return 0; const D = S.doc, it = [...D.items.values()], up = (x) => String(x.layer).toUpperCase();
   if (it.some((x) => x.ges && (x.ges.tip === 'inv' || x.ges.tip === 'tm'))) return 0;
   const yaz = it.filter((x) => x.t === 'text' || x.t === 'mtext');
-  const inv = it.filter((x) => x.t === 'circle' && up(x) === 'GES-INV');
+  // inverter simgesi: eski çıktılarda daire, yeni çıktılarda Trafo/İnverter ekle simgesi (1,2 × 0,8 m kutu + köşegen)
+  const ivPl = it.filter((x) => x.t === 'pline' && up(x) === 'GES-INV').map((x) => ({ x, b: itemBB(D, x) })).filter((o) => o.b && isFinite(o.b[0]) && o.b[2] - o.b[0] < 2 && o.b[3] - o.b[1] < 2);
+  const kutu = ivPl.filter((o) => o.x.pts.length >= 4);
+  const inv = [...it.filter((x) => x.t === 'circle' && up(x) === 'GES-INV'), ...kutu.map((o) => ({ cx: (o.b[0] + o.b[2]) / 2, cy: (o.b[1] + o.b[3]) / 2, _pl: o.x }))];
   const ky = yaz.filter((t) => up(t) === 'GES-TM' && /^(TR-?\d+|TM-?\d+|DM)/i.test(String(t.s).trim()));
   if (!inv.length && !ky.length) return 0;
   const ang = gnum('g-ang', 0) * Math.PI / 180, oz = (PJ.aktif && PJ.aktif.oz) || (PJ.res && PJ.res.ozet) || {}, sil = new Set(), yeni = [];
   const yerlestir = (o, c) => { const b = itemBB(D, o); const ox = (b[0] + b[2]) / 2 - o.M[3], oy = (b[1] + b[3]) / 2 - o.M[7]; o.M = mMul(mT(c[0] - ox, c[1] - oy), mRz(ang)); _bbCache.delete(o); _drCache.delete(o); return o; };
   const ekle = (tip, c, g) => { const T = TS[tip]; const v = {}; for (const [k, , f] of T.alan) v[k] = f(); Object.assign(v, g, { tip }); D.addLayer(T.kat, T.renk);
     const B = tsBlok(tip, v); yeni.push(yerlestir({ id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(0, 0), mRz(ang)), ap: [], ges: v }, c)); };
-  const etk = (c) => { let b = null, bd = 8; for (const t of yaz) if (up(t) === 'GES-INV') { const d = Math.hypot(t.x - c[0], t.y - c[1]); if (d < bd) { bd = d; b = t; } } return b; };
-  const L = inv.map((ci) => { const t = etk([ci.cx, ci.cy]); const m = t && String(t.s).match(/(?:TR(\d+)-)?(?:ACB\d+-)?INV(\d+)/i); return { ci, t, k: m ? [+(m[1] || 1), +m[2]] : [99, 0] }; }).sort((a, b) => a.k[0] - b.k[0] || a.k[1] - b.k[1]);
-  L.forEach((o, i) => { sil.add(o.ci); if (o.t) sil.add(o.t); ekle('inv', [o.ci.cx, o.ci.cy], { no: i + 1, kw: oz.inv_kw || pn('p-inv') || 100 }); });
+  const etk = (c) => { let b = null, bd = 4; for (const t of yaz) if (up(t) === 'GES-INV') { const d = Math.hypot(t.x - c[0], t.y - c[1]); if (d < bd) { bd = d; b = t; } } return b; };
+  const L = inv.map((ci) => { const t = etk([ci.cx, ci.cy]); const m = t && String(t.s).match(/(?:TR(\d+)-)?(?:ACB\d+-)?INV-?(\d+)/i); return { ci, t, k: m ? [+(m[1] || 1), +m[2]] : [99, 0] }; }).sort((a, b) => a.k[0] - b.k[0] || a.k[1] - b.k[1]);
+  L.forEach((o, i) => { sil.add(o.ci._pl || o.ci); if (o.t) sil.add(o.t); for (const q of ivPl) if (q.x.pts.length < 4 && Math.hypot((q.b[0] + q.b[2]) / 2 - o.ci.cx, (q.b[1] + q.b[3]) / 2 - o.ci.cy) < 1) sil.add(q.x); ekle('inv', [o.ci.cx, o.ci.cy], { no: i + 1, kw: oz.inv_kw || pn('p-inv') || 100 }); });
   const tmPl = it.filter((x) => x.t === 'pline' && up(x) === 'GES-TM').map((x) => ({ x, b: itemBB(D, x) })).filter((o) => o.b && isFinite(o.b[0]));
   let tn = 0;
   for (const t of ky) {

@@ -3290,7 +3290,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610190249', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191227', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4066,19 +4066,88 @@ function tsAcDuzelt(pts) {
   git(toL(A));
   const tem = [out[0]];   // tekrar ve doğrusal ara noktaları at
   for (let i = 1; i < out.length; i++) { const q = out[i], l = tem[tem.length - 1]; if (Math.hypot(q[0] - l[0], q[1] - l[1]) < 1e-3) continue; if (tem.length >= 2) { const k = tem[tem.length - 2]; if ((Math.abs(k[0] - l[0]) < 1e-3 && Math.abs(l[0] - q[0]) < 1e-3) || (Math.abs(k[1] - l[1]) < 1e-3 && Math.abs(l[1] - q[1]) < 1e-3)) { tem[tem.length - 1] = q; continue; } } tem.push(q); }
-  // engel kaçınma (esas A.2): çizilen güzergâh korunur (eğik/düz fark etmez); yalnız masa, inverter ya da binanın içinden geçen
-  // parça, sıra açıklıklarından dik açılı en kısa yolla değiştirilir. Uçlar inverter ve ADP'ye bağlanır.
-  const eng = tsEngeller(tm, iv && iv.it).filter((e) => !(tsIcinde(P0, e.P) || tsKenarUzak(P0, e.P) < 0.9) && !(e.bina || tsIcinde(A, e.P)));
-  const U = [P0, ...pts.slice(1, -1), A];
+  // Güzergâh (esas A.2 + kullanıcı kuralı 19.10.2026): kablo 1 m genişlikte bir kanal içinde gider — masa, inverter ve binaya
+  // en az 0,5 m, arazi sınırına en az 0,5 m; arazi dışına çıkmaz. Çizilen güzergâh (eğik/düz) uygunsa aynen korunur;
+  // uygun olmayan parça engelsiz, en az kırıklı yolla (8 yönlü arama + dönüş cezası + doğrultma) değiştirilir.
+  const eng = tsEngeller(tm, iv && iv.it);
+  const U0 = [P0, ...pts.slice(1, -1), A];
+  const K = tsKanalIzgara(U0, eng, P0, A); if (!K) return { pts: U0, not: 'güzergâh alanı çok büyük, elle kontrol edin' };
+  const U = [P0, ...pts.slice(1, -1).filter((q) => !K.dolu(q)), A];
   const yol = [P0]; let dz = 0, bulunamadi = 0;
   for (let i = 1; i < U.length; i++) {
     const a = yol[yol.length - 1], b = U[i];
     if (Math.hypot(b[0] - a[0], b[1] - a[1]) < 1e-3) continue;
-    if (!eng.some((e) => tsKesisir(a, b, e.P))) { yol.push(b); continue; }
-    const r = tsAkilliYol(a, b, tm, iv && iv.it, toL, toW, eng.concat(tsEngeller(tm, iv && iv.it).filter((e) => e.bina)));
+    if (K.gorur(a, b)) { yol.push(b); continue; }
+    const r = K.yol(a, b);
     if (r && r.length >= 2) { yol.push(...r.slice(1)); dz++; } else { yol.push(b); bulunamadi++; }
   }
-  return { pts: yol, not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP)' + (dz ? ', masa/inverter içinden geçen ' + dz + ' parça sıra açıklığından dolaştırıldı' : ', çizdiğiniz güzergâh korundu') + (bulunamadi ? ' (' + bulunamadi + ' parçada engelsiz yol bulunamadı — elle kontrol edin)' : '') };
+  const sad = [yol[0]];
+  for (let i = 1; i < yol.length; i++) { const q = yol[i], z = sad[sad.length - 1]; if (Math.hypot(q[0] - z[0], q[1] - z[1]) < 0.05) continue; if (sad.length >= 2) { const k = sad[sad.length - 2], cr = (z[0] - k[0]) * (q[1] - z[1]) - (z[1] - k[1]) * (q[0] - z[0]); if (Math.abs(cr) < 1e-3 * Math.hypot(q[0] - k[0], q[1] - k[1])) { sad[sad.length - 1] = q; continue; } } sad.push(q); }
+  return { pts: sad, not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP), 1 m kanal içinde (masa/inverter/sınıra ≥ 0,5 m)' + (dz ? ', ' + dz + ' parça en az kırıkla yeniden yönlendirildi' : ', çizdiğiniz güzergâh korundu') + (bulunamadi ? ' (' + bulunamadi + ' parçada engelsiz yol bulunamadı — elle kontrol edin)' : '') };
+}
+// 1 m kanal ızgarası: engeller 0,5 m şişirilir, arazi dışı ve sınıra 0,5 m'den yakın hücreler dolu; inverter çıkışı ve ADP çevresi açık
+function tsKanalIzgara(U, eng, P0, A) {
+  const c = 0.5, xs = U.map((q) => q[0]), ys = U.map((q) => q[1]);
+  let X0 = Math.min(...xs) - 40, X1 = Math.max(...xs) + 40, Y0 = Math.min(...ys) - 40, Y1 = Math.max(...ys) + 40;
+  const B = G.bound && G.bound.length >= 3 ? G.bound : null;
+  if (B) { X0 = Math.max(X0, Math.min(...B.map((q) => q[0])) - 1); X1 = Math.min(X1, Math.max(...B.map((q) => q[0])) + 1); Y0 = Math.max(Y0, Math.min(...B.map((q) => q[1])) - 1); Y1 = Math.min(Y1, Math.max(...B.map((q) => q[1])) + 1); }
+  let h = 0.25; while (((X1 - X0) / h + 1) * ((Y1 - Y0) / h + 1) > 1.2e6) h *= 1.25;
+  if (h > 1.0) return null;
+  const nx = Math.ceil((X1 - X0) / h) + 1, ny = Math.ceil((Y1 - Y0) / h) + 1, blk = new Uint8Array(nx * ny);
+  const cx = (i) => X0 + i * h, cy = (j) => Y0 + j * h;
+  const dSeg = (px, py, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((px - a[0]) * dx + (py - a[1]) * dy) / L2)) : 0; return Math.hypot(px - a[0] - t * dx, py - a[1] - t * dy); };
+  const isar = (P, r) => {   // çokgen içi + r bandı dolu
+    const bx0 = Math.max(0, Math.floor((Math.min(...P.map((q) => q[0])) - r - X0) / h)), bx1 = Math.min(nx - 1, Math.ceil((Math.max(...P.map((q) => q[0])) + r - X0) / h));
+    const by0 = Math.max(0, Math.floor((Math.min(...P.map((q) => q[1])) - r - Y0) / h)), by1 = Math.min(ny - 1, Math.ceil((Math.max(...P.map((q) => q[1])) + r - Y0) / h));
+    for (let j = by0; j <= by1; j++) for (let i = bx0; i <= bx1; i++) {
+      const k = j * nx + i; if (blk[k]) continue; const px = cx(i), py = cy(j);
+      if (tsIcinde([px, py], P)) { blk[k] = 1; continue; }
+      for (let e = 0; e < P.length; e++) if (dSeg(px, py, P[e], P[(e + 1) % P.length]) < r) { blk[k] = 1; break; }
+    }
+  };
+  if (B) {   // arazi dışı dolu (tarama), sınır kenarına < c bandı dolu
+    for (let j = 0; j < ny; j++) {
+      const y = cy(j), kes = [];
+      for (let e = 0; e < B.length; e++) { const a = B[e], b = B[(e + 1) % B.length]; if ((a[1] > y) !== (b[1] > y)) kes.push(a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])); }
+      kes.sort((p, q) => p - q); let k = 0;
+      for (let i = 0; i < nx; i++) { const x = cx(i); while (k < kes.length && kes[k] < x) k++; if (k % 2 === 0) blk[j * nx + i] = 1; }
+    }
+    for (let e = 0; e < B.length; e++) { const a = B[e], b = B[(e + 1) % B.length]; isar([a, b], c); }
+  }
+  for (const o of eng) isar(o.P, c);
+  const ac = (p, r) => { const i0 = Math.round((p[0] - X0) / h), j0 = Math.round((p[1] - Y0) / h), R = Math.ceil(r / h); for (let j = j0 - R; j <= j0 + R; j++) for (let i = i0 - R; i <= i0 + R; i++) if (i >= 0 && j >= 0 && i < nx && j < ny && Math.hypot(i - i0, j - j0) * h <= r && (!B || tsIcinde([cx(i), cy(j)], B))) blk[j * nx + i] = 0; };
+  ac(P0, 1.2); ac(A, 2.2);
+  const hc = (p) => [Math.round((p[0] - X0) / h), Math.round((p[1] - Y0) / h)];
+  const dolu = (p) => { const [i, j] = hc(p); return i < 0 || j < 0 || i >= nx || j >= ny || blk[j * nx + i] === 1; };
+  const gorur = (a, b) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n; if (dolu([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])) return false; } return true; };
+  const yol = (a, b) => {
+    const [si, sj] = hc(a), [gi, gj] = hc(b); if (si < 0 || sj < 0 || si >= nx || sj >= ny || gi < 0 || gj < 0 || gi >= nx || gj >= ny) return null;
+    const D8 = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]], N = nx * ny, INF = 1e18, TURN = 2.5;
+    const dist = new Float64Array(N * 8).fill(INF), prev = new Int32Array(N * 8).fill(-1), heap = [];
+    const hh = (i, j) => { const dx = Math.abs(i - gi), dy = Math.abs(j - gj); return h * (Math.max(dx, dy) + (Math.SQRT2 - 1) * Math.min(dx, dy)); };
+    const push = (k, d) => { heap.push([d, k]); let x = heap.length - 1; while (x) { const p = (x - 1) >> 1; if (heap[p][0] <= heap[x][0]) break; [heap[p], heap[x]] = [heap[x], heap[p]]; x = p; } };
+    const pop = () => { const t = heap[0], l = heap.pop(); if (heap.length) { heap[0] = l; let x = 0; for (;;) { const a1 = 2 * x + 1, b1 = a1 + 1; let m = x; if (a1 < heap.length && heap[a1][0] < heap[m][0]) m = a1; if (b1 < heap.length && heap[b1][0] < heap[m][0]) m = b1; if (m === x) break; [heap[m], heap[x]] = [heap[x], heap[m]]; x = m; } } return t; };
+    const s0 = sj * nx + si; for (let d = 0; d < 8; d++) { dist[s0 * 8 + d] = 0; push(s0 * 8 + d, hh(si, sj)); }
+    const goal = gj * nx + gi; let son = -1, it = 0;
+    while (heap.length && it++ < 4e6) {
+      const [f, k] = pop(); const c0 = k >> 3, dir = k & 7, ci = c0 % nx, cj = (c0 - ci) / nx; if (f - hh(ci, cj) > dist[k] + 1e-9) continue;
+      if (c0 === goal) { son = k; break; }
+      for (let nd = 0; nd < 8; nd++) {
+        const dd = Math.min((nd - dir + 8) % 8, (dir - nd + 8) % 8); if (dd > 2) continue;
+        const ni = ci + D8[nd][0], nj = cj + D8[nd][1]; if (ni < 0 || nj < 0 || ni >= nx || nj >= ny) continue; const nc = nj * nx + ni; if (blk[nc]) continue;
+        if (nd & 1 && (blk[cj * nx + ni] || blk[nj * nx + ci])) continue;   // köşeden sıyırma yok
+        const g = dist[k] + h * (nd & 1 ? Math.SQRT2 : 1) + dd * TURN, nk = nc * 8 + nd;
+        if (g < dist[nk]) { dist[nk] = g; prev[nk] = k; push(nk, g + hh(ni, nj)); }
+      }
+    }
+    if (son < 0) return null;
+    const hcr = []; for (let k = son; k >= 0; k = prev[k]) hcr.push(k >> 3); hcr.reverse();
+    const P = hcr.map((c1) => [cx(c1 % nx), cy(Math.floor(c1 / nx))]); P[0] = a; P[P.length - 1] = b;
+    const out = [P[0]]; let i = 0;   // doğrultma: görebildiği en uzak noktaya düz git (en az kırık)
+    while (i < P.length - 1) { let j = P.length - 1; while (j > i + 1 && !gorur(P[i], P[j])) j--; out.push(P[j]); i = j; }
+    return out;
+  };
+  return { dolu, gorur, yol };
 }
 // Özellikler paneli: tasarım öğesi (ya da etiketi) seçiliyken verisi açılır listelerle değişir; etiket, blok ve özet/hesaplar güncellenir
 function tsOzellik(box, items) {

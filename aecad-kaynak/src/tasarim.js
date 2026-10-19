@@ -218,7 +218,13 @@ function tsAcDuzelt(pts) {
 function tsAcAg(kalan, A, tm, tohum) {
   const eng = tsEngeller(tm, null).filter((e) => !(e.it.ges && e.it.ges.tip === 'inv') || !kalan.some((x) => x.it === e.it));
   const tum = [...kalan.map((x) => x.p), A, ...(tohum || []).flat()];
-  const K = tsKanalIzgara(tum, eng, kalan.length ? kalan[0].p : A, A, kalan.map((x) => x.p)); if (!K) return null;
+  const serit = [];
+  for (const x of kalan) {   // inverterin bağlı olduğu masa sırasına dik (derinlik yönü) iki yöne şerit
+    let best = null; for (const it of S.doc.items.values()) { if (String(it.layer).toUpperCase() !== 'GES-MASA') continue; const q = tsMerkez(it); if (!q) continue; const d = Math.hypot(q[0] - x.p[0], q[1] - x.p[1]); if (d < 25 && (!best || d < best.d)) best = { d, it }; }
+    const c = best && tsMasaCerceve(best.it); if (!c) continue; const Lr = c.D + 2.0;
+    serit.push([x.p, [x.p[0] + c.uy[0] * Lr, x.p[1] + c.uy[1] * Lr]], [x.p, [x.p[0] - c.uy[0] * Lr, x.p[1] - c.uy[1] * Lr]]);
+  }
+  const K = tsKanalIzgara(tum, eng, kalan.length ? kalan[0].p : A, A, kalan.map((x) => x.p), serit); if (!K) return null;
   const ag = (tohum || []).map((y) => y.map((q) => [q[0], q[1]])), out = new Map();
   const sirali = kalan.slice().sort((a, b) => Math.hypot(b.p[0] - A[0], b.p[1] - A[1]) - Math.hypot(a.p[0] - A[0], a.p[1] - A[1]));
   for (const x of sirali) {
@@ -336,7 +342,7 @@ CMD.GBTEMIZ = () => {   // taşıma/döndürmeden sonra: tüm trafo/DM binaları
 };
 Object.assign(ALIAS, { GBTEMIZ: 'GBTEMIZ', BINAMASA: 'GBTEMIZ' }); Object.assign(LABEL, { GBTEMIZ: 'BİNA MASA TEMİZLE' });
 // 1 m kanal ızgarası: engeller 0,5 m şişirilir, arazi dışı ve sınıra 0,5 m'den yakın hücreler dolu; inverter çıkışı ve ADP çevresi açık
-function tsKanalIzgara(U, eng, P0, A, ekAc) {
+function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   const c = 0.5, xs = U.map((q) => q[0]), ys = U.map((q) => q[1]);
   let X0 = Math.min(...xs) - 40, X1 = Math.max(...xs) + 40, Y0 = Math.min(...ys) - 40, Y1 = Math.max(...ys) + 40;
   const B = G.bound && G.bound.length >= 3 ? G.bound : null;
@@ -368,6 +374,8 @@ function tsKanalIzgara(U, eng, P0, A, ekAc) {
   for (const o of eng) isar(o.P, c);
   const ac = (p, r) => { const i0 = Math.round((p[0] - X0) / h), j0 = Math.round((p[1] - Y0) / h), R = Math.ceil(r / h); for (let j = j0 - R; j <= j0 + R; j++) for (let i = i0 - R; i <= i0 + R; i++) if (i >= 0 && j >= 0 && i < nx && j < ny && Math.hypot(i - i0, j - j0) * h <= r && (!B || tsIcinde([cx(i), cy(j)], B))) blk[j * nx + i] = 0; };
   ac(P0, 1.2); ac(A, 2.2); for (const q of ekAc || []) ac(q, 1.2);
+  // masa arası boşluk (A.2): masa başındaki inverterden sıra açıklığına dar şerit açılır (iki masa arasındaki 0,5 m boşluk)
+  for (const [a, b] of serit || []) { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.ceil(L / (h * 0.5)); for (let k = 0; k <= n; k++) { const t = k / n, px = a[0] + (b[0] - a[0]) * t, py = a[1] + (b[1] - a[1]) * t, i = Math.round((px - X0) / h), j = Math.round((py - Y0) / h); if (i >= 0 && j >= 0 && i < nx && j < ny && !eng.some((o) => o.it && String(o.it.layer).toUpperCase() === 'GES-MASA' && tsIcinde([px, py], o.P))) blk[j * nx + i] = 0; } }
   const hc = (p) => [Math.round((p[0] - X0) / h), Math.round((p[1] - Y0) / h)];
   const dolu = (p) => { const [i, j] = hc(p); return i < 0 || j < 0 || i >= nx || j >= ny || blk[j * nx + i] === 1; };
   const gorur = (a, b) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n; if (dolu([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])) return false; } return true; };

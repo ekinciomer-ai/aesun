@@ -525,7 +525,17 @@ CMD.MIRROR = () => xformCmd('mirror');
 CMD.ERASE = async () => {
   const ids = editableIds(await getSelection('Silinecek nesneleri seçin')); if (!ids.length) return;
   const set = new Set(ids); for (const it of S.doc.items.values()) if (it.gesEt && set.has(it.gesEt)) set.add(it.id);   // kablo silinince adı/etiketi de silinir
-  replaceItems([...set].map((id) => [S.doc.items.get(id), null]), 'sil'); V().sel.clear(); updateProps(); msg(ids.length + ' nesne silindi' + (set.size > ids.length ? ' (+' + (set.size - ids.length) + ' kablo etiketi)' : '') + '.');
+  const invSil = [...set].some((id) => { const it = S.doc.items.get(id); return it && it.ges && it.ges.tip === 'inv'; });
+  if (invSil) {   // silinen inverterin AC kablosu, DC atamaları/stringleri ve durum yazısı da gider
+    const iv = [...set].map((id) => S.doc.items.get(id)).filter((it) => it && it.ges && it.ges.tip === 'inv'), ivId = new Set(iv.map((it) => it.id)), ivP = iv.map((it) => [it.M[3], it.M[7]]);
+    for (const it of S.doc.items.values()) {
+      if (it.t === 'pline' && it.ges && it.ges.tip === 'ac' && ivP.some((p) => Math.hypot(it.pts[0][0] - p[0], it.pts[0][1] - p[1]) < 6)) set.add(it.id);
+      if ((it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && ivId.has(it.ges.inv)) || (it.durumInv && ivId.has(it.durumInv))) set.add(it.id);
+    }
+    for (const it of S.doc.items.values()) if (it.gesEt && set.has(it.gesEt)) set.add(it.id);
+  }
+  replaceItems([...set].map((id) => [S.doc.items.get(id), null]), 'sil'); V().sel.clear(); updateProps();
+  if (invSil && typeof tsInvNumarala === 'function') tsInvNumarala(); msg(ids.length + ' nesne silindi' + (set.size > ids.length ? ' (+' + (set.size - ids.length) + ' kablo etiketi)' : '') + '.');
 };
 function primsToNative(prims, M, it) {
   const out = [];

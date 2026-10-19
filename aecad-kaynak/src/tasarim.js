@@ -149,6 +149,7 @@ async function tsNokta(tip) {
     const it = { id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(p[0], p[1]), mRz(ang)), ap: [], ges: { ...v, tip } };
     addItems([it], T.ad.toLowerCase()); renderLayers(); msg(T.ad + ' eklendi (' + fmtNum(B.L, 2) + ' × ' + fmtNum(B.W, 2) + ' m). Taşı (M) / Döndür (RO) ile tek parça hareket eder; verisi için “Veri”.', 'res');
     if (tip !== 'inv') tsBinaMasaTemizle([it]);
+    else { tsInvNumarala(); await tsAcTekEkle(S.doc.items.get(it.id)); }
     if (tip === 'dm') return; v.no++;
   }
 }
@@ -664,6 +665,44 @@ function tsMasaIlkPanel(it, p, yon) {   // atama çizgisi masanın 1. paneline (
   const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
   const bas = tsUcBas(c, nok, p, yon);
   const dx = c.L / c.P, dy = c.D / c.R; return nok(bas ? dx / 2 : c.L - dx / 2, c.D - dy / 2);
+}
+// İnverter numaraları her zaman 1…n sıralı (kullanıcı kuralı 19.10.2026): silinince boşluk kapanır, eklenince sıraya girer.
+// Blok yazısı, AC kablo no/etiketi ve DC string kodları birlikte güncellenir.
+function tsInvNumarala() {
+  if (!S.doc) return 0;
+  const inv = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'inv').sort((a, b) => (+a.ges.no || 1e9) - (+b.ges.no || 1e9));
+  const pairs = []; const eskiNo = new Map();
+  inv.forEach((it, i) => { const n = i + 1; if (+it.ges.no === n) return; eskiNo.set(it.id, it.ges.no); const g = { ...it.ges, no: n }; pairs.push([it, { ...it, ges: g, block: tsBlok('inv', g).ad }]); });
+  if (!pairs.length) return 0;
+  const yeniNo = new Map(pairs.map(([o, n]) => [o.id, n.ges.no])), konum = new Map(inv.map((it) => [it.id, tsMerkez(it)]));
+  for (const k of S.doc.items.values()) {
+    if (k.t === 'pline' && k.ges && k.ges.tip === 'ac') {   // AC kablo: başladığı inverterin yeni numarası
+      const id = [...yeniNo.keys()].find((iid) => { const p = konum.get(iid); return Math.hypot(k.pts[0][0] - p[0], k.pts[0][1] - p[1]) < 6; }); if (!id) continue;
+      const g = { ...k.ges, no: yeniNo.get(id) }; pairs.push([k, { ...k, ges: g }]);
+      for (const t of S.doc.items.values()) if (t.gesEt === k.id) pairs.push([t, { ...t, s: tsEtiket('ac', g, tsBoy(k.pts)) }]);
+    }
+    if (k.ges && k.ges.tip === 'dcstr' && yeniNo.has(k.ges.inv)) {   // DC string kodu INVn.PVs
+      const kod = k.ges.kod.replace(/INV[^.]*\./, 'INV' + yeniNo.get(k.ges.inv) + '.'); pairs.push([k, { ...k, ges: { ...k.ges, kod } }]);
+      for (const t of S.doc.items.values()) if (t.gesEt === k.id && t.t === 'text' && t.s.startsWith(k.ges.kod)) pairs.push([t, { ...t, s: kod + t.s.slice(k.ges.kod.length) }]);
+    }
+  }
+  replaceItems(pairs, 'inverter numarala'); renderLayers();
+  msg('İnverter numaraları güncellendi: ' + [...eskiNo].map(([id, o]) => 'INV-' + o + ' → INV-' + yeniNo.get(id)).join(', ') + '.', 'note');
+  return pairs.length;
+}
+// Yeni inverter eklenince AC kablo otomatik: en yakın trafonun ADP'sine, mevcut AC kanal ağına katılarak (aynı kablo tipi)
+async function tsAcTekEkle(it) {
+  if (!it) return; const tms = [...S.doc.items.values()].filter((x) => x.t === 'insert' && x.ges && x.ges.tip === 'tm'); if (!tms.length) return;
+  const p = tsMerkez(it), tm = tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - p[0], tsMerkez(b)[1] - p[1]) < Math.hypot(tsMerkez(a)[0] - p[0], tsMerkez(a)[1] - p[1]) ? b : a)), A = tsAdp(tm);
+  const acs = [...S.doc.items.values()].filter((k) => k.t === 'pline' && k.ges && k.ges.tip === 'ac');
+  const tohum = acs.filter((k) => { const e = k.pts[k.pts.length - 1]; return Math.hypot(e[0] - A[0], e[1] - A[1]) < 3; }).map((k) => k.pts.map((q) => [q[0], q[1]]));
+  const ornek = acs[0] ? acs[0].ges : { kablo: pv('p-ack') || '3x240/120 NA2XY', pay: 10 };
+  const M = tsAcAg([{ it, p }], A, tm, tohum); const yol = M && M.get(it.id); if (!yol || yol.length < 2) { msg('Yeni inverter için AC kablo yolu bulunamadı — elle çizin.', 'note'); return; }
+  const g = { kablo: ornek.kablo, pay: ornek.pay, tip: 'ac', no: it.ges.no }, L = tsBoy(yol); S.doc.addLayer(TS.ac.kat, TS.ac.renk);
+  const pl = { id: newId(), t: 'pline', layer: TS.ac.kat, c: TS.ac.renk, lt: '', cl: false, pts: yol.map((q) => [q[0], q[1], 0]), ges: g };
+  const e = tsEtiketYeri(yol, tohum);
+  addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); renderLayers();
+  msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Geri al ile kaldırılır.', 'res');
 }
 CMD.GDCK = async () => {
   S.doc.addLayer(DC_ATA, 4, 'DASHED');

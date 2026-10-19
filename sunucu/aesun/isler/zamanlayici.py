@@ -8,6 +8,7 @@ import json, os, subprocess, time, datetime
 REPO = os.environ.get("AESUN_ISLER_REPO", "git@github.com:ekinciomer-ai/epias-ptf.git")
 D = "/veri/epias-ptf"
 DURUM = "/veri/durum.json"
+TETIK = "/veri/tetik"   # şef (ns1 sef.py) gecikmiş işi buraya dosya bırakarak tetikler
 SIFRELI = "n8n/ns1_isler.sifreli.json"   # epias-ptf iş akışı sırları ns1 açık anahtarıyla şifreleyip buraya yazar
 
 def sirlar():
@@ -89,8 +90,13 @@ def main():
             try:
                 if etkin:
                     for ad, dakikalar, komut, yollar, mesaj in ISLER:
-                        if simdi.minute in dakikalar:
+                        tetik = os.path.join(TETIK, ad.replace(" ", "_"))      # şef: gecikmiş işi hemen çalıştır
+                        elle = os.path.exists(tetik)
+                        if elle:
+                            os.remove(tetik)
+                        if simdi.minute in dakikalar or elle:
                             durum["isler"][ad] = calistir(ad, komut, yollar, mesaj)
+                            if elle: durum["isler"][ad]["sef"] = True
             except Exception as e:
                 durum["hata"] = str(e)[:300]
             with open(DURUM + ".tmp", "w") as f: json.dump(durum, f, ensure_ascii=False)

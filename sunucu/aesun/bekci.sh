@@ -130,4 +130,6 @@ open(p + ".tmp", "w").write(json.dumps(d, ensure_ascii=False)); import os; os.re
 PY
 docker cp $DURUM aesun-api:/veri/bekci_ns1.json >/dev/null 2>&1 || true
 [ -n "$sorun_api$sorun_isler" ] && log "sorun: api=[$sorun_api] isler=[$sorun_isler]"
+# 5) şef: bekçilerin bulduğunu çözer (sef.py), sonucu n8n/sef.json'a yazar
+[ -f $D/sef.py ] && timeout 600 python3 $D/sef.py >> /var/log/aesun-sef.log 2>&1 || true
 exit 0

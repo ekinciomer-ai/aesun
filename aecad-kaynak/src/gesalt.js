@@ -333,6 +333,7 @@ function sohbetNiyet(T) {
     is.push(['trafo ' + kva + ' kVA katları + yerleşim', async () => { const s_ = gv('p-trafo'); if (![...s_.options].some((o) => +o.value === kva)) s_.add(new Option(kva + ' kVA', kva)); s_.value = kva; const it = gv('p-invtr'); if (it) it.value = ''; pjAutoHints(); pjSave(); if (typeof tfSync === 'function') tfSync();
       const a_ = pjAuto(); pjYerlesim(); return 'Trafo birimi ' + kva + ' kVA: TR başına en çok ' + a_.invTr + ' inverter (' + fmtNum(a_.invTr * a_.invKw, 0) + ' kW, %10 marj); trafo adedi inverter sayısından çıkar, toplam trafo gücü ' + kva + ' kVA\'nın katı. Yerleşim seçenekleri yeniden hesaplanıyor.'; }]); }
   else if (/yerleşim\S*\s*(tekrar|yeniden)/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
+  if (/(dwg|dxf|proje)\S*\s*(analiz|dönüştür|donustur|çevir|tanı)/.test(T)) is.push(['DWG projesini analiz et ve dönüştür', async () => { await CMD.GDWGTANI(); return null; }]);
   if (/kablo\S*\s*düzenle|kablo\S*\s*düzelt|kablo\S*\s*toparla/.test(T)) is.push(['AC kablo düzelt', async () => { await CMD.GKDUZEN(); return null; }]);
   if (/son\s*hal|onayla|onay ver|projeyi (yeniden )?üret|yeniden hesapla/.test(T)) is.push(['son hali onayla', async () => { await pjSonHalOnayla(); return null; }]);
   if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);
@@ -376,7 +377,7 @@ async function gesSohbet(metin) {
 // ---- Komut listesi (kullanıcı kuralı 19.10.2026): tanınan kalıplar tıklanabilir listede. Sayılı kalıp tıklanınca komut satırına
 // yazılır ve sayı seçili gelir (değiştirip Enter); sayısız kalıp tıklanınca hemen uygulanır.
 const KOMUT_LISTE = [
-  ['İşlem', ['arazi doldur', 'yerleşimi çiz ve seçenekleri karşılaştır', 'kabloları çiz', 'AC kablo düzelt', 'DC oto', 'AC oto', 'son hali onayla', 'proje paftalarını oluştur']],
+  ['İşlem', ['arazi doldur', 'yerleşimi çiz ve seçenekleri karşılaştır', 'kabloları çiz', 'AC kablo düzelt', 'DC oto', 'AC oto', 'son hali onayla', 'proje paftalarını oluştur', 'DWG projesini analiz et ve dönüştür']],
   ['İnverter', ['inverterleri trafoya yaklaştır', 'inverterleri ortala', 'inverterleri yol kenarına al', 'inverter optimum', '{10} inverter', 'inverter {125} kW', 'TR{1} INV{3} doğuya {20} m', 'TR{1} INV{3} batıya {20} m', 'TR{1} INV{3} kuzeye {20} m', 'TR{1} INV{3} güneye {20} m']],
   ['Trafo / DM', ['toplam trafo gücünü 1600 kVA\'nın katları yap, yerleşimi tekrar yap', 'toplam trafo gücünü 2000 kVA\'nın katları yap, yerleşimi tekrar yap', 'trafo {1600}', 'TM{1} kuzeye {30} m', 'TM{1} güneye {30} m', 'TM{1} doğuya {30} m', 'TM{1} batıya {30} m', 'TM batı', 'TM doğu']],
   ['Masa ve yerleşim', ['eğim {20}', '{2}V{13} masa', 'çekme {4} m', 'sıra açıklığı {4}', 'azimut {10}', '{25} MWp', 'arazinin tamamı', 'DC/AC {1.25}', 'hizalama doğu', 'hizalama batı', 'hizalama orta', 'hizalama opt', 'sıra başlangıcı kuzey', 'sıra başlangıcı güney', 'sıra başlangıcı orta']],

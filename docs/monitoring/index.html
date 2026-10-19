@@ -822,7 +822,7 @@ function cizGenel() {
   document.getElementById('icerik').innerHTML =
     '<div style="display:flex;flex-direction:column;gap:24px">'
     + '<div class="iki"><section class="panel" aria-labelledby="h-uyari"><div class="bas"><h2 id="h-uyari">Dikkat isteyenler</h2><span class="k">' + uy.length + ' etkin</span></div>' + uyHtml + '</section>' + denge + '</div>'
-    + denetimKarti(D.den)
+    + sefKarti(D.sef) + denetimKarti(D.den)
     + anlikUretimBolum(D.fs, D.saha, mad)
     + '<section class="panel" id="sayaclar" aria-labelledby="h-abone" style="gap:16px"><div class="bas"><h2 id="h-abone">Sayaçlar</h2><span class="k">' + tarihK(sonOsosGun) + ' 00:00–' + String(sonSaatNo).padStart(2, '0') + ':00, son 30 gün çizgisi</span></div><div class="sayaclar">' + sayaclar + '</div></section>'
     + trend
@@ -4029,6 +4029,18 @@ function filoSuz(mad, kim) {
   return Object.assign({}, mad, { devices: dv, summary: s, bos_ip: mad.devices.filter(d => bosYuva(d, ipler)).map(d => d.ip) });
 }
 // 19 Eki: n8n Denetçi (saatlik) — iş · veri okuma · hız · sürüm · hata bekçileri (n8n/denetim.json)
+// 20 Eki: Şef (ns1 sef.py) — bekçilerin bulduğu sorunu çözer; son müdahaleler ve çözemedikleri (n8n/sef.json)
+function sefKarti(d) {
+  if (!d || !d.t) return '';
+  const yas = Math.round((Date.now() - Date.parse(d.t)) / 60000), acik = d.acik || [], son = (d.gecmis || []).slice(-6).reverse();
+  const AD = { itme: 'GitHub gönderimini onardı', is_tetik: 'gecikmiş işi çalıştırdı', isler: 'zamanlayıcıyı yeniden başlattı', api: 'API\'yi yeniden başlattı' };
+  const renk = acik.length ? '#B42318' : '#1E7A3C', zemin = acik.length ? '#FDECEA' : '#E6F4EA';
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>👷 Şef</h2><span class="k">bekçilerin bulduğunu çözer · ' + (yas > 15 ? '<b style="color:#B42318">' + yas + ' dk önce (şef çalışmıyor olabilir)</b>' : yas + ' dk önce') + '</span></div>'
+    + '<div style="border-radius:10px;background:' + zemin + ';padding:10px 12px;font-weight:700;color:' + renk + '">' + (acik.length ? '⚠ Çözemediği ' + acik.length + ' sorun var — müdahale gerekir' : (d.durum === 'mudahale' ? '✓ Bu tur müdahale etti, sorun giderildi' : '✓ Her şey yolunda, müdahale gerekmiyor')) + '</div>'
+    + (acik.length ? '<div style="display:flex;flex-direction:column;gap:4px">' + acik.map(a => '<div style="font-size:13px"><b style="color:#B42318">✗</b> ' + esc(a.sorun) + ' <span class="k">· ' + esc(a.neden || '') + '</span></div>').join('') + '</div>' : '')
+    + (son.length ? '<div class="k" style="font-weight:600">Son müdahaleler</div><div style="display:flex;flex-direction:column;gap:3px">' + son.map(e => '<div style="font-size:13px;display:flex;gap:8px"><span class="num" style="color:#4A5A70;min-width:86px">' + esc(String(e.t).slice(5, 16).replace('T', ' ')) + '</span><span style="color:' + (e.ok ? '#1E7A3C' : '#B42318') + ';font-weight:800">' + (e.ok ? '✓' : '✗') + '</span><span><b>' + esc(AD[e.eylem] || e.eylem) + '</b> — ' + esc(e.sorun) + ' <span class="k">(' + esc(e.sonuc) + ')</span></span></div>').join('') + '</div>' : '')
+    + '</section>';
+}
 function denetimKarti(d) {
   if (!d || !Array.isArray(d.kontroller) || !d.kontroller.length) return '';
   const yas = Math.round((Date.now() - Date.parse(d.guncellendi)) / 60000), bayat = yas > 90;
@@ -4047,7 +4059,7 @@ function denetimKarti(d) {
 }
 async function yukle(taze) {
   try {
-    const [son, osos, mad, fs, saha, sg, inav, sb, den] = await Promise.all([
+    const [son, osos, mad, fs, saha, sg, inav, sb, den, sef] = await Promise.all([
       al('n8n/aesun_son.json', taze).catch(() => null),
       al('2026_osos_endeks.json', taze),
       al('antminer_panel.json', taze).catch(() => null),
@@ -4056,10 +4068,11 @@ async function yukle(taze) {
       al('n8n/sungrow_son.json', taze).catch(() => null),
       al('n8n/inavitas_son.json', taze).catch(() => null),
       al('n8n/sistem_bekci.json', taze).catch(() => null),
-      al('n8n/denetim.json', taze).catch(() => null)
+      al('n8n/denetim.json', taze).catch(() => null),
+      al('n8n/sef.json', taze).catch(() => null)
     ]);
     const kim = await al('n8n/cihaz_kimlik.json').catch(() => null);
-    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad: filoSuz(mad, kim), fs, saha, sg, inav, kim, sb, den };
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad: filoSuz(mad, kim), fs, saha, sg, inav, kim, sb, den, sef };
     sistemBekciNot(sb);
     ciz();
   } catch (e) {

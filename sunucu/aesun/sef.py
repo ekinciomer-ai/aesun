@@ -137,12 +137,15 @@ def main():
     sbz = zaman(sb.get("t")); sb_dk = (simdi - sbz).total_seconds() / 60 if sbz else 999
     if sb_dk > 40:
         acik.append({"sorun": f"Pi sistem bekçisi {round(sb_dk)} dk'dır sessiz", "neden": "Pi/ağ/elektrik — sahada kontrol gerekir"})
-    cozulen_tur = {e["eylem"] for e in eylemler if e["ok"]}
+    yakin = any(ts - son.get(x, 0) < 2400 for x in BEKLE)          # son 40 dk içinde şef müdahale etti mi
     for anahtar, mesaj in (sb.get("sorunlar") or {}).items():
-        isle = anahtar.startswith(("is:", "gec:", "ns1", "api", "veri"))
-        if isle and ("itme" in cozulen_tur or "is_tetik" in cozulen_tur or not geciken and not ileri):
-            continue   # ns1 tarafı: şef bu tur çözdü ya da dışarıdan bakınca sorun kalmadı (Pi bir sonraki turda temizler)
-        acik.append({"sorun": mesaj, "neden": "Pi tarafı ya da dış servis" if not isle else "ns1 — izleniyor"})
+        ns1 = anahtar.startswith(("is:", "gec:", "ns1", "api", "veri"))
+        if ns1:
+            if yakin or not (geciken or ileri):
+                continue   # şef üzerinde çalışıyor ya da dışarıdan bakınca düzelmiş (Pi bekçisi bir sonraki turda temizler)
+            acik.append({"sorun": mesaj, "neden": "ns1 — şef müdahale etti, 40 dk'da düzelmedi"})
+        else:
+            acik.append({"sorun": mesaj, "neden": "Pi tarafı ya da dış servis — şefin çözüm yolu yok"})
     if (bk.get("onarim_24s") or 0) >= 3:
         acik.append({"sorun": f"ns1 son 24 saatte {bk['onarim_24s']} kez kendini onardı", "neden": "kalıcı arıza olabilir"})
 

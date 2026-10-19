@@ -4047,10 +4047,10 @@ function sefOfis() {
     { k: 'hiz', ad: 'Hız bekçisi', alt: 'uçlar ve işler hızlı mı', sorun: ilk(a => a.startsWith('uc:')) || (kotuG('hiz') ? 'denetçi: yavaşlık var' : null), deger: gr.hiz ? gr.hiz.ok + '/' + gr.hiz.toplam + ' hızlı' : '—' },
     { k: 'surum', ad: 'Sürüm bekçisi', alt: 'kod yayında, cihazlar güncel', sorun: kotuG('surum') ? 'denetçi: sürüm farkı' : null, deger: gr.surum ? gr.surum.ok + '/' + gr.surum.toplam + ' güncel' : '—' },
     { k: 'hata', ad: 'Hata bekçisi', alt: 'son 24 saatte hata', sorun: kotuG('hata') ? 'denetçi: ' + (gr.hata.toplam - gr.hata.ok) + ' hata kaydı' : null, deger: gr.hata ? gr.hata.ok + '/' + gr.hata.toplam + ' temiz' : '—' },
-    { k: 'cihaz', ad: 'Cihaz bekçisi (Pi)', alt: 'takılan cihazı kurtarır', sorun: kopuk ? kopuk + ' cihaz yanıtsız' : null, deger: dev.length ? dev.filter(x => x.online || x.sleeping).length + ' cihaz izleniyor' + (sonKurt ? ' · son kurtarma ' + String(sonKurt.t).slice(5, 10).split('-').reverse().join('.') : '') : '—' },
+    { k: 'cihaz', ad: 'Cihaz bekçisi (Pi)', alt: 'takılan cihazı kurtarır', sorun: kopuk ? kopuk + ' cihaz yanıtsız' : null, deger: dev.length ? dev.filter(x => x.online || x.sleeping).length + ' cihaz izleniyor' : '—' },
     { k: 'pi', ad: 'Sistem bekçisi (Pi)', alt: 'sahadan dışarıya bakar', sorun: sbYas > 40 ? 'Pi ' + sbYas + ' dk sessiz' : null, deger: sbYas < 9999 ? anah.length + ' bulgu · ' + sbYas + ' dk önce' : '—' },
     { k: 'ns1', ad: 'Sunucu bekçisi (ns1)', alt: 'API, zamanlayıcı, tarama', sorun: ilk(a => /^(ns1|api)/.test(a)) || (ns1.durum === 'sorun' && (ns1.onarim_24s || 0) >= 3 ? 'sık onarım' : null), deger: 'onarım 24 sa: ' + (ns1.onarim_24s ?? '—') }];
-  const W = 1120, H = 470, DW = 250, DH = 150, pos = (i) => ({ x: 20 + (i % 4) * 275, y: i < 4 ? 14 : 300 });
+  const W = 1120, H = 572;
   const T = (x, y, m, o) => '<text x="' + x + '" y="' + y + '"' + (o || '') + '>' + m + '</text>';
   const viz = (k, x, y, w, h, kotu) => {   // monitör içi canlı gösterim (x,y monitörün sol üstü)
     const cx = x + w / 2, cy = y + h / 2, R = kotu ? '#FF5A4F' : '#5CF08F';
@@ -4066,36 +4066,104 @@ function sefOfis() {
       + '<path class="of-ekg" d="M' + (x + w / 2 + 6) + ' ' + cy + 'h8l4 -12l5 22l4 -10h8l4 -6l3 6h10" fill="none" stroke="' + R + '" stroke-width="2"/>';
     return '';
   };
-  let s = '<defs><pattern id="ofZemin" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#F4F6F9"/><path d="M40 0H0V40" fill="none" stroke="#E3E8EE"/></pattern></defs><rect width="' + W + '" height="' + H + '" rx="14" fill="url(#ofZemin)"/>'
-    + '<rect x="14" y="176" width="' + (W - 28) + '" height="112" rx="10" fill="#EEF2F6"/>';
-  const kisi = (x, y, renk, kask) => '<g><ellipse cx="' + x + '" cy="' + (y + 34) + '" rx="16" ry="4" fill="#000" opacity=".08"/><path d="M' + (x - 13) + ' ' + (y + 32) + 'Q' + x + ' ' + (y + 4) + ' ' + (x + 13) + ' ' + (y + 32) + 'Z" fill="' + renk + '"/><circle cx="' + x + '" cy="' + (y - 2) + '" r="9" fill="#F1C79B"/>'
-    + (kask ? '<path d="M' + (x - 11) + ' ' + (y - 3) + 'A11 11 0 0 1 ' + (x + 11) + ' ' + (y - 3) + 'Z" fill="#F5B300"/><rect x="' + (x - 13) + '" y="' + (y - 4) + '" width="26" height="3" rx="1.5" fill="#E09A00"/>' : '<path d="M' + (x - 9) + ' ' + (y - 4) + 'A9 9 0 0 1 ' + (x + 9) + ' ' + (y - 4) + '" fill="#4A3426"/>') + '</g>';
-  M.forEach((m, i) => {
-    const p = pos(i), kotu = !!m.sorun, dx = p.x, dy = p.y, mx = dx + 118, my = dy + 26, mw = 118, mh = 64;
-    m.p = { x: dx + 60, y: i < 4 ? dy + DH + 26 : dy - 22 };
-    s += '<g class="of-masa"><rect x="' + dx + '" y="' + dy + '" width="' + DW + '" height="' + DH + '" rx="12" fill="#fff" stroke="' + (kotu ? '#F0A39C' : '#D6DEE7') + '" stroke-width="' + (kotu ? 2 : 1.2) + '"/>'
-      + T(dx + 12, dy + 20, esc(m.ad), ' font-size="12.5" font-weight="700" fill="#10233F"') + T(dx + 12, dy + 34, esc(m.alt), ' font-size="10" fill="#7A8799"')
-      + '<circle cx="' + (dx + DW - 14) + '" cy="' + (dy + 15) + '" r="6" fill="' + (kotu ? '#D92D20' : '#1FA463') + '" class="' + (kotu ? 'of-yan' : '') + '"/>'
-      + '<rect x="' + (mx - 4) + '" y="' + (my - 4) + '" width="' + (mw + 8) + '" height="' + (mh + 8) + '" rx="5" fill="#2B3236"/><rect x="' + mx + '" y="' + my + '" width="' + mw + '" height="' + mh + '" rx="3" fill="#0C1712"/>' + viz(m.k, mx, my, mw, mh, kotu)
-      + '<rect x="' + (mx + mw / 2 - 5) + '" y="' + (my + mh + 4) + '" width="10" height="10" fill="#2B3236"/>'
-      + '<rect x="' + (dx + 14) + '" y="' + (dy + 106) + '" width="' + (DW - 28) + '" height="10" rx="3" fill="#C9A27A"/>'
-      + kisi(dx + 62, dy + 74, kotu ? '#B42318' : '#2a78d6', false)
-      + '<g class="of-yaz"><rect x="' + (dx + 52) + '" y="' + (dy + 100) + '" width="20" height="5" rx="2" fill="#7A8799"/></g>'
-      + T(dx + 12, dy + 136, esc(m.deger), ' font-size="11" font-weight="600" fill="' + (kotu ? '#B42318' : '#1E7A3C') + '" font-family="ui-monospace,monospace"')
-      + (kotu ? '<g class="of-balon"><rect x="' + (dx + 8) + '" y="' + (dy + 40) + '" width="104" height="30" rx="8" fill="#FDECEA" stroke="#D92D20"/>' + T(dx + 14, dy + 52, '⚠ ' + esc(String(m.sorun).slice(0, 18)), ' font-size="9.5" font-weight="700" fill="#B42318"') + T(dx + 14, dy + 64, esc(String(m.sorun).slice(18, 38)), ' font-size="9" fill="#B42318"') + '</g>' : '')
-      + '</g>';
+  // ---- sahne: duvar (pencere gün/gece, saat, tabela), ahşap zemin, masalar (sandalye, çift monitör, klavye, kupa), bitkiler, sunucu dolabı
+  const now = new Date(), sa = now.getHours(), gece = sa < 7 || sa >= 19, dk = now.getMinutes();
+  const WALL = 96;
+  let s = '<defs>'
+    + '<linearGradient id="ofDuvar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9EDF2"/><stop offset="1" stop-color="#DCE2E9"/></linearGradient>'
+    + '<linearGradient id="ofGok" x1="0" y1="0" x2="0" y2="1">' + (gece ? '<stop offset="0" stop-color="#0B1630"/><stop offset="1" stop-color="#22355E"/>' : '<stop offset="0" stop-color="#7EC3F2"/><stop offset="1" stop-color="#CFE9FB"/>') + '</linearGradient>'
+    + '<pattern id="ofParke" width="120" height="24" patternUnits="userSpaceOnUse"><rect width="120" height="24" fill="#C9A47C"/><rect width="120" height="12" fill="#C29C72"/><path d="M0 0H120M0 12H120M40 0V12M100 12V24" stroke="#A9835A" stroke-width=".8"/></pattern>'
+    + '<linearGradient id="ofMasa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A6A4E"/><stop offset="1" stop-color="#6E523B"/></linearGradient>'
+    + '<linearGradient id="ofMasaUst" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9DCC8"/><stop offset="1" stop-color="#D8C6AA"/></linearGradient>'
+    + '<linearGradient id="ofEkran" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0E1B16"/><stop offset="1" stop-color="#07100C"/></linearGradient>'
+    + '<radialGradient id="ofIsik" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#FFF6D8" stop-opacity=".55"/><stop offset="1" stop-color="#FFF6D8" stop-opacity="0"/></radialGradient>'
+    + '</defs>'
+    + '<rect width="' + W + '" height="' + H + '" rx="14" fill="url(#ofParke)"/>'
+    + '<rect width="' + W + '" height="' + WALL + '" rx="14" fill="url(#ofDuvar)"/><rect y="' + (WALL - 8) + '" width="' + W + '" height="8" fill="#B8C2CD"/>';
+  [90, 330, 790, 1030].forEach((wx, j) => {   // pencereler
+    s += '<rect x="' + (wx - 70) + '" y="12" width="140" height="64" rx="4" fill="#F7F9FB" stroke="#AEB8C3"/><rect x="' + (wx - 64) + '" y="18" width="128" height="52" fill="url(#ofGok)"/>'
+      + (gece ? [0, 1, 2, 3, 4].map(q => '<circle class="of-yan" cx="' + (wx - 54 + q * 26) + '" cy="' + (26 + (q * 13) % 30) + '" r="1.2" fill="#fff" style="animation-delay:' + (-q * .4) + 's"/>').join('') + (j === 1 ? '<circle cx="' + (wx + 30) + '" cy="32" r="7" fill="#F4F1DE"/>' : '')
+        : '<g class="of-bulut" style="animation-delay:' + (-j * 6) + 's"><ellipse cx="' + (wx - 30) + '" cy="36" rx="16" ry="6" fill="#fff"/><ellipse cx="' + (wx - 18) + '" cy="32" rx="10" ry="6" fill="#fff"/></g>' + (j === 2 ? '<circle cx="' + (wx + 34) + '" cy="30" r="8" fill="#FFD54A"/>' : ''))
+      + '<path d="M' + wx + ' 18V70M' + (wx - 64) + ' 44H' + (wx + 64) + '" stroke="#F7F9FB" stroke-width="4"/>';
   });
-  // şef: masası ortada; sorun/müdahale varsa ilgili masaya gider, yoksa devriye gezer
-  const sx = W / 2, sy = 232, acik = sef.acik || [], son = (sef.eylemler || []).slice(-1)[0] || (sef.gecmis || []).slice(-1)[0];
+  // duvar saati (gerçek saat) + tabela
+  const ck = 560, cy0 = 44, ah = (sa % 12 + dk / 60) * 30, am = dk * 6;
+  s += '<rect x="' + (ck - 150) + '" y="22" width="110" height="40" rx="6" fill="#10233F"/>' + T(ck - 95, 40, 'AEMonitoring', ' text-anchor="middle" font-size="12" font-weight="800" fill="#fff" letter-spacing=".04em"') + T(ck - 95, 54, 'bekçi ofisi', ' text-anchor="middle" font-size="9" fill="#9FB3CC"')
+    + '<circle cx="' + ck + '" cy="' + cy0 + '" r="24" fill="#fff" stroke="#10233F" stroke-width="3"/>' + [...Array(12).keys()].map(q => '<path d="M' + ck + ' ' + (cy0 - 20) + 'V' + (cy0 - 17) + '" stroke="#10233F" stroke-width="1.5" transform="rotate(' + q * 30 + ' ' + ck + ' ' + cy0 + ')"/>').join('')
+    + '<path d="M' + ck + ' ' + cy0 + 'V' + (cy0 - 12) + '" stroke="#10233F" stroke-width="3" stroke-linecap="round" transform="rotate(' + ah + ' ' + ck + ' ' + cy0 + ')"/><path d="M' + ck + ' ' + cy0 + 'V' + (cy0 - 18) + '" stroke="#10233F" stroke-width="2" stroke-linecap="round" transform="rotate(' + am + ' ' + ck + ' ' + cy0 + ')"/>'
+    + '<g class="of-saniye" style="transform-origin:' + ck + 'px ' + cy0 + 'px"><path d="M' + ck + ' ' + (cy0 + 4) + 'V' + (cy0 - 19) + '" stroke="#D92D20" stroke-width="1"/></g><circle cx="' + ck + '" cy="' + cy0 + '" r="2" fill="#D92D20"/>'
+    + '<rect x="' + (ck + 50) + '" y="22" width="120" height="40" rx="4" fill="#fff" stroke="#AEB8C3"/>' + T(ck + 58, 36, 'NÖBET ÇİZELGESİ', ' font-size="8" font-weight="800" fill="#10233F"') + T(ck + 58, 48, '8 bekçi · 7/24', ' font-size="8" fill="#4A5A70"') + T(ck + 58, 58, 'şef: ns1 · 5 dk tur', ' font-size="8" fill="#4A5A70"');
+  // tavan lambaları ışık halkası
+  [140, 415, 690, 965].forEach(lx => { s += '<ellipse cx="' + lx + '" cy="' + (WALL + 6) + '" rx="120" ry="60" fill="url(#ofIsik)"/>'; });
+  // koridor halısı
+  s += '<rect x="20" y="' + (WALL + 182) + '" width="' + (W - 40) + '" height="96" rx="10" fill="#5C6B7A" opacity=".22"/><rect x="28" y="' + (WALL + 188) + '" width="' + (W - 56) + '" height="84" rx="8" fill="none" stroke="#fff" stroke-opacity=".35" stroke-dasharray="10 8"/>';
+  // bitkiler
+  const bitki = (x, y) => '<g><path d="M' + (x - 12) + ' ' + y + 'h24l-4 22h-16z" fill="#B4532A"/><g class="of-yaprak" style="transform-origin:' + x + 'px ' + y + 'px"><ellipse cx="' + (x - 9) + '" cy="' + (y - 12) + '" rx="6" ry="14" fill="#2E8B57" transform="rotate(-25 ' + (x - 9) + ' ' + (y - 12) + ')"/><ellipse cx="' + (x + 9) + '" cy="' + (y - 12) + '" rx="6" ry="14" fill="#3CA36A" transform="rotate(25 ' + (x + 9) + ' ' + (y - 12) + ')"/><ellipse cx="' + x + '" cy="' + (y - 18) + '" rx="6" ry="16" fill="#2E8B57"/></g></g>';
+  s += bitki(22, WALL + 230) + bitki(W - 22, WALL + 230);
+  // kişi: oturan (klavyede) ya da ayakta el sallayan (sorun var)
+  const kisi = (x, y, renk, kask, ayakta) => {
+    const sac = kask ? '<path d="M' + (x - 11) + ' ' + (y - 3) + 'A11 11 0 0 1 ' + (x + 11) + ' ' + (y - 3) + 'Z" fill="#F5B300"/><rect x="' + (x - 13) + '" y="' + (y - 4) + '" width="26" height="3" rx="1.5" fill="#E09A00"/>' : '<path d="M' + (x - 9.5) + ' ' + (y - 2) + 'Q' + (x - 10) + ' ' + (y - 13) + ' ' + x + ' ' + (y - 12) + 'Q' + (x + 10) + ' ' + (y - 13) + ' ' + (x + 9.5) + ' ' + (y - 2) + 'Q' + x + ' ' + (y - 8) + ' ' + (x - 9.5) + ' ' + (y - 2) + 'Z" fill="#3B2A20"/>';
+    const govde = '<path d="M' + (x - 14) + ' ' + (y + 34) + 'Q' + (x - 15) + ' ' + (y + 10) + ' ' + x + ' ' + (y + 9) + 'Q' + (x + 15) + ' ' + (y + 10) + ' ' + (x + 14) + ' ' + (y + 34) + 'Z" fill="' + renk + '"/><path d="M' + (x - 4) + ' ' + (y + 9) + 'L' + x + ' ' + (y + 16) + 'L' + (x + 4) + ' ' + (y + 9) + '" fill="#fff"/>';
+    const kafa = '<rect x="' + (x - 3) + '" y="' + (y + 5) + '" width="6" height="5" fill="#E5B48A"/><ellipse cx="' + x + '" cy="' + (y - 1) + '" rx="9" ry="10" fill="#F1C79B"/><circle cx="' + (x - 3) + '" cy="' + y + '" r="1" fill="#3B2A20"/><circle cx="' + (x + 3) + '" cy="' + y + '" r="1" fill="#3B2A20"/>' + sac;
+    if (ayakta) return '<g class="of-salla-k">' + govde + kafa + '<g class="of-el" style="transform-origin:' + (x + 12) + 'px ' + (y + 14) + 'px"><path d="M' + (x + 12) + ' ' + (y + 14) + 'L' + (x + 22) + ' ' + (y - 6) + '" stroke="' + renk + '" stroke-width="6" stroke-linecap="round"/><circle cx="' + (x + 23) + '" cy="' + (y - 8) + '" r="3.5" fill="#F1C79B"/></g><path d="M' + (x - 12) + ' ' + (y + 14) + 'L' + (x - 16) + ' ' + (y + 30) + '" stroke="' + renk + '" stroke-width="6" stroke-linecap="round"/></g>';
+    return '<g>' + govde + '<g class="of-kafa" style="transform-origin:' + x + 'px ' + (y + 8) + 'px">' + kafa + '</g>'
+      + '<g class="of-kol1"><path d="M' + (x - 11) + ' ' + (y + 16) + 'Q' + (x - 8) + ' ' + (y + 30) + ' ' + (x + 4) + ' ' + (y + 31) + '" stroke="' + renk + '" stroke-width="6" fill="none" stroke-linecap="round"/></g>'
+      + '<g class="of-kol2"><path d="M' + (x + 11) + ' ' + (y + 16) + 'Q' + (x + 14) + ' ' + (y + 30) + ' ' + (x + 24) + ' ' + (y + 31) + '" stroke="' + renk + '" stroke-width="6" fill="none" stroke-linecap="round"/></g></g>';
+  };
+  const yurur = (x, y) => '<g><ellipse cx="' + x + '" cy="' + (y + 52) + '" rx="14" ry="4" fill="#000" opacity=".15"/><g class="of-bacak1" style="transform-origin:' + x + 'px ' + (y + 32) + 'px"><path d="M' + (x - 4) + ' ' + (y + 32) + 'V' + (y + 50) + '" stroke="#2F3A4A" stroke-width="6" stroke-linecap="round"/></g><g class="of-bacak2" style="transform-origin:' + x + 'px ' + (y + 32) + 'px"><path d="M' + (x + 4) + ' ' + (y + 32) + 'V' + (y + 50) + '" stroke="#2F3A4A" stroke-width="6" stroke-linecap="round"/></g>'
+    + kisi(x, y, '#E09A00', true, false).replace('<g>', '<g class="of-adim">') + '<rect x="' + (x - 13) + '" y="' + (y + 18) + '" width="26" height="4" fill="#E8F04A" opacity=".85"/></g>';
+  M.forEach((m, i) => {
+    const kotu = !!m.sorun, dx = 20 + (i % 4) * 275, ust = i < 4, dy = ust ? WALL + 14 : WALL + 290, DWm = 250;
+    m.p = { x: dx + 125, y: ust ? dy + 158 : dy - 66 };
+    // zemin işaret plakası
+    s += '<g>' + '<rect x="' + (dx + 6) + '" y="' + (dy - 2) + '" width="' + (DWm - 12) + '" height="178" rx="12" fill="' + (kotu ? '#FCE3E0' : '#FFFFFF') + '" opacity="' + (kotu ? '.75' : '.35') + '"' + (kotu ? ' class="of-yan2"' : '') + '/>';
+    // sandalye (masanın arkasında, kişinin arkası)
+    const px = dx + 70, py = dy + 52;
+    s += '<rect x="' + (px - 17) + '" y="' + (py - 4) + '" width="34" height="40" rx="8" fill="#2F3A4A"/><rect x="' + (px - 3) + '" y="' + (py + 36) + '" width="6" height="16" fill="#555"/><path d="M' + (px - 16) + ' ' + (py + 56) + 'h32" stroke="#444" stroke-width="3" stroke-linecap="round"/>';
+    // kişi
+    if (!kotu) s += kisi(px, py, '#2a78d6', false, false);
+    // masa: üst yüzey + ön panel + ayaklar
+    s += '<path d="M' + (dx + 14) + ' ' + (dy + 88) + 'L' + (dx + DWm - 14) + ' ' + (dy + 88) + 'L' + (dx + DWm - 4) + ' ' + (dy + 104) + 'L' + (dx + 4) + ' ' + (dy + 104) + 'Z" fill="url(#ofMasaUst)" stroke="#B9A07E"/>'
+      + '<rect x="' + (dx + 4) + '" y="' + (dy + 104) + '" width="' + (DWm - 8) + '" height="44" rx="2" fill="url(#ofMasa)"/><rect x="' + (dx + 10) + '" y="' + (dy + 110) + '" width="70" height="32" rx="2" fill="none" stroke="#5A4230"/><circle cx="' + (dx + 45) + '" cy="' + (dy + 126) + '" r="2" fill="#D8C6AA"/>'
+      + '<rect x="' + (dx + 4) + '" y="' + (dy + 148) + '" width="8" height="10" fill="#5A4230"/><rect x="' + (dx + DWm - 12) + '" y="' + (dy + 148) + '" width="8" height="10" fill="#5A4230"/>';
+    // monitörler: ana (canlı gösterim) + yan (değer)
+    const mx = dx + 112, my = dy + 6, mw = 118, mh = 66;
+    s += '<rect x="' + (mx - 5) + '" y="' + (my - 5) + '" width="' + (mw + 10) + '" height="' + (mh + 10) + '" rx="5" fill="#1F2427"/><rect x="' + mx + '" y="' + my + '" width="' + mw + '" height="' + mh + '" rx="2" fill="url(#ofEkran)"/>' + viz(m.k, mx, my, mw, mh, kotu)
+      + '<path d="M' + (mx + 4) + ' ' + (my + 2) + 'L' + (mx + 40) + ' ' + (my + 2) + 'L' + (mx + 14) + ' ' + (my + mh - 2) + 'L' + (mx + 4) + ' ' + (my + mh - 2) + 'Z" fill="#fff" opacity=".04"/>'
+      + '<path d="M' + (mx + mw / 2 - 6) + ' ' + (my + mh + 5) + 'h12l3 14h-18z" fill="#2B3236"/><rect x="' + (mx + mw / 2 - 18) + '" y="' + (my + mh + 18) + '" width="36" height="4" rx="2" fill="#2B3236"/>'
+      + '<rect x="' + (dx + 10) + '" y="' + (dy + 30) + '" width="52" height="40" rx="3" fill="#1F2427"/><rect x="' + (dx + 13) + '" y="' + (dy + 33) + '" width="46" height="34" fill="#13202B"/>'
+      + T(dx + 16, dy + 44, m.k.toUpperCase(), ' font-size="7" fill="#7FA6C9" font-family="ui-monospace,monospace"') + [0, 1, 2].map(q => '<rect class="of-satir" x="' + (dx + 16) + '" y="' + (dy + 49 + q * 5) + '" width="' + (20 + (q * 11 + i * 7) % 22) + '" height="2" fill="' + (kotu && q === 1 ? '#FF5A4F' : '#4FA3E0') + '" style="animation-delay:' + (-(q + i) * .5) + 's"/>').join('')
+      + '<path d="M' + (dx + 34) + ' ' + (dy + 70) + 'v8" stroke="#1F2427" stroke-width="3"/>';
+    // klavye, fare, kupa (buharlı)
+    s += '<path d="M' + (px - 18) + ' ' + (dy + 92) + 'h40l3 8h-46z" fill="#3A4248"/>' + [0, 1, 2, 3, 4, 5].map(q => '<rect x="' + (px - 15 + q * 6.5) + '" y="' + (dy + 94) + '" width="4.5" height="2" fill="#7A8799"/>').join('')
+      + '<ellipse cx="' + (px + 34) + '" cy="' + (dy + 97) + '" rx="4" ry="3" fill="#3A4248"/>'
+      + '<rect x="' + (dx + DWm - 34) + '" y="' + (dy + 84) + '" width="12" height="13" rx="2" fill="' + (i % 2 ? '#D92D20' : '#F7F9FB') + '" stroke="#7A8799"/><path d="M' + (dx + DWm - 22) + ' ' + (dy + 87) + 'q6 3 0 7" fill="none" stroke="#7A8799"/>'
+      + [0, 1].map(q => '<path class="of-buhar" d="M' + (dx + DWm - 30 + q * 5) + ' ' + (dy + 82) + 'q-3 -5 0 -9q3 -4 0 -8" fill="none" stroke="#B0BCC8" stroke-width="1.4" style="animation-delay:' + (-q * .9 - i * .3) + 's"/>').join('');
+    // ns1 masasının yanında sunucu dolabı, Pi masasının yanında saha kutusu
+    if (m.k === 'ns1') s += '<rect x="' + (dx + DWm - 6) + '" y="' + (dy + 4) + '" width="26" height="154" rx="3" fill="#1C262B" stroke="#3A4248"/>' + [...Array(9).keys()].map(q => '<rect x="' + (dx + DWm - 2) + '" y="' + (dy + 10 + q * 16) + '" width="18" height="12" rx="1" fill="#26323A"/><circle class="of-yan" cx="' + (dx + DWm + 2) + '" cy="' + (dy + 16 + q * 16) + '" r="1.6" fill="' + (kotu && q === 4 ? '#FF5A4F' : '#5CF08F') + '" style="animation-delay:' + (-q * .37) + 's"/>').join('');
+    if (kotu) s += kisi(dx + 86, dy + 46, '#B42318', false, true);   // ayağa kalkmış, el sallıyor
+    // isim plakası + değer
+    s += '<rect x="' + (dx + 84) + '" y="' + (dy + 114) + '" width="' + (DWm - 96) + '" height="30" rx="4" fill="#F3EEE4" stroke="#B9A07E"/>' + T(dx + 92, dy + 126, esc(m.ad), ' font-size="10.5" font-weight="800" fill="#10233F"')
+      + T(dx + 92, dy + 139, esc(m.deger), ' font-size="9" font-weight="700" fill="' + (kotu ? '#B42318' : '#1E7A3C') + '" font-family="ui-monospace,monospace"')
+      + '<circle cx="' + (dx + DWm - 18) + '" cy="' + (dy + 128) + '" r="5" fill="' + (kotu ? '#D92D20' : '#1FA463') + '" class="' + (kotu ? 'of-yan' : '') + '"/>';
+    // konuşma balonu
+    if (kotu) s += '<g class="of-balon"><path d="M' + (dx + 8) + ' ' + (dy - 2) + 'h120a6 6 0 0 1 6 6v26a6 6 0 0 1 -6 6h-84l-8 8l-2 -8h-26a6 6 0 0 1 -6 -6v-26a6 6 0 0 1 6 -6z" fill="#fff" stroke="#D92D20" stroke-width="1.5"/>' + T(dx + 14, dy + 12, '⚠ ' + esc(String(m.sorun).slice(0, 24)), ' font-size="9.5" font-weight="800" fill="#B42318"') + T(dx + 14, dy + 25, esc(String(m.sorun).slice(24, 52)), ' font-size="9" fill="#B42318"') + '</g>';
+    s += '</g>';
+  });
+  // şef: koridorda masası; devriye, müdahale ya da telefonla bildirim
+  const sx = W / 2, sy = WALL + 205, acik = sef.acik || [], son = (sef.eylemler || []).slice(-1)[0] || (sef.gecmis || []).slice(-1)[0];
   const sonYeni = son && yasDk(son.t) < 30, kotuM = M.find(m => m.sorun);
   const hedef = sonYeni ? M.find(m => m.k === ({ itme: 'ns1', isler: 'ns1', api: 'ns1', is_tetik: 'is' })[son.eylem]) : kotuM;
-  s += '<rect x="' + (sx - 70) + '" y="' + (sy - 30) + '" width="140" height="52" rx="10" fill="#FFF7E0" stroke="#F5B300" stroke-width="1.5"/><rect x="' + (sx - 50) + '" y="' + (sy + 6) + '" width="100" height="8" rx="3" fill="#C9A27A"/>' + T(sx, sy - 14, '👷 ŞEF MASASI', ' text-anchor="middle" font-size="10.5" font-weight="800" fill="#9A5B00" letter-spacing=".06em"')
-    + T(sx, sy + 34, sef.t ? 'son tur ' + yasDk(sef.t) + ' dk önce' : 'şef verisi yok', ' text-anchor="middle" font-size="9.5" fill="#7A8799"');
+  s += '<path d="M' + (sx - 80) + ' ' + (sy + 34) + 'h160l-10 -14h-140z" fill="url(#ofMasaUst)" stroke="#B9A07E"/><rect x="' + (sx - 80) + '" y="' + (sy + 34) + '" width="160" height="22" fill="url(#ofMasa)"/>'
+    + '<rect x="' + (sx - 54) + '" y="' + (sy + 38) + '" width="108" height="14" rx="3" fill="#F5B300"/>' + T(sx, sy + 48, 'ŞEF', ' text-anchor="middle" font-size="10" font-weight="900" fill="#10233F" letter-spacing=".2em"')
+    + '<rect x="' + (sx + 44) + '" y="' + (sy + 14) + '" width="22" height="8" rx="2" fill="#2B3236"/><path d="M' + (sx + 47) + ' ' + (sy + 14) + 'q8 -10 16 0" fill="none" stroke="#2B3236" stroke-width="3"/>'
+    + T(sx, sy + 70, sef.t ? 'son tur ' + yasDk(sef.t) + ' dk önce' : 'şef verisi yok', ' text-anchor="middle" font-size="9.5" fill="#fff"');
+  const ssy = sy - 30;
   let sefG, durum;
-  if (acik.length) { sefG = '<g>' + kisi(sx, sy - 22, '#E09A00', true) + '<text class="of-yan" x="' + (sx + 18) + '" y="' + (sy - 30) + '" font-size="14">📞</text></g>'; durum = 'Çözemediği ' + acik.length + ' sorunu size bildirdi'; }
-  else if (hedef) { const p = hedef.p; sefG = '<g class="of-git" style="--x:' + (p.x - sx) + 'px;--y:' + (p.y - (sy - 22)) + 'px">' + kisi(sx, sy - 22, '#E09A00', true) + '<g class="of-anahtar" style="transform-origin:' + (sx + 16) + 'px ' + (sy - 12) + 'px"><text x="' + (sx + 10) + '" y="' + (sy - 6) + '" font-size="14">🔧</text></g></g>'; durum = sonYeni ? (son.ok ? 'Düzeltti: ' : 'Uğraşıyor: ') + (son.sonuc || son.eylem) : hedef.ad + ' masasında: ' + hedef.sorun; }
-  else { const yol = M.map(m => (m.p.x - sx) + 'px ' + (m.p.y - (sy - 22)) + 'px'); sefG = '<g class="of-devriye">' + kisi(sx, sy - 22, '#E09A00', true) + '</g>'; durum = 'Devriyede · her şey yolunda'; }
-  s += sefG + '<rect x="' + (W / 2 - 230) + '" y="' + (H - 4 - 0) + '" width="0" height="0"/>';
+  if (acik.length) { sefG = '<g>' + kisi(sx - 20, ssy, '#E09A00', true, false) + '<text class="of-zil" x="' + (sx + 40) + '" y="' + (sy + 6) + '" font-size="18">📞</text></g>'; durum = 'Çözemediği ' + acik.length + ' sorunu size bildirdi'; }
+  else if (hedef) { const p = hedef.p; sefG = '<g class="of-git" style="--x:' + (p.x - sx) + 'px;--y:' + (p.y - ssy) + 'px">' + yurur(sx, ssy) + '<g class="of-anahtar" style="transform-origin:' + (sx + 18) + 'px ' + (ssy + 24) + 'px"><text x="' + (sx + 12) + '" y="' + (ssy + 30) + '" font-size="15">🔧</text></g></g>'; durum = sonYeni ? (son.ok ? 'Düzeltti: ' : 'Uğraşıyor: ') + (son.sonuc || son.eylem) : hedef.ad + ' masasında: ' + hedef.sorun; }
+  else { sefG = '<g class="of-devriye">' + yurur(sx, ssy) + '<text x="' + (sx + 14) + '" y="' + (ssy + 30) + '" font-size="13">📋</text></g>'; durum = 'Devriyede · her şey yolunda'; }
+  s += sefG;
   const css = '<style>.of-don{animation:ofDon 3s linear infinite}.of-don2{animation:ofDon 2s linear infinite reverse}@keyframes ofDon{to{transform:rotate(360deg)}}'
     + '.of-akis{animation:ofAkis 2.2s linear infinite}@keyframes ofAkis{to{transform:translateX(78px);opacity:.2}}'
     + '.of-ibre{animation:ofIbre 2.6s ease-in-out infinite alternate}@keyframes ofIbre{from{transform:rotate(-55deg)}to{transform:rotate(48deg)}}'
@@ -4106,7 +4174,7 @@ function sefOfis() {
     + '.of-yaz{animation:ofYaz .5s ease-in-out infinite alternate}@keyframes ofYaz{to{transform:translateY(-2px)}}'
     + '.of-balon{animation:ofBalon 2s ease-in-out infinite}@keyframes ofBalon{50%{transform:translateY(-3px)}}'
     + '.of-git{animation:ofGit 2.5s ease-out forwards}@keyframes ofGit{to{transform:translate(var(--x),var(--y))}}.of-anahtar{animation:ofAnahtar .6s ease-in-out infinite alternate}@keyframes ofAnahtar{from{transform:rotate(-25deg)}to{transform:rotate(25deg)}}'
-    + '.of-devriye{animation:ofDevriye 40s ease-in-out infinite}@keyframes ofDevriye{'
+    + '.of-devriye{animation:ofDevriye 48s ease-in-out infinite}.of-bacak1{animation:ofBacak .5s ease-in-out infinite alternate}.of-bacak2{animation:ofBacak .5s ease-in-out infinite alternate-reverse}@keyframes ofBacak{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}.of-adim{animation:ofAdim .25s ease-in-out infinite alternate}@keyframes ofAdim{to{transform:translateY(-2px)}}.of-kafa{animation:ofKafa 4s ease-in-out infinite}@keyframes ofKafa{30%{transform:rotate(4deg)}60%{transform:rotate(-3deg)}}.of-kol1{animation:ofYaz .28s ease-in-out infinite alternate}.of-kol2{animation:ofYaz .28s ease-in-out infinite alternate-reverse}.of-el{animation:ofEl .45s ease-in-out infinite alternate}@keyframes ofEl{from{transform:rotate(-20deg)}to{transform:rotate(25deg)}}.of-buhar{animation:ofBuhar 2.4s ease-out infinite}@keyframes ofBuhar{from{transform:translateY(0);opacity:.9}to{transform:translateY(-10px);opacity:0}}.of-saniye{animation:ofDon 60s steps(60) infinite}.of-bulut{animation:ofBulut 30s linear infinite}@keyframes ofBulut{from{transform:translateX(-40px)}to{transform:translateX(70px)}}.of-yaprak{animation:ofYaprak 5s ease-in-out infinite}@keyframes ofYaprak{50%{transform:rotate(3deg)}}.of-satir{animation:ofSatir 1.8s steps(4) infinite}@keyframes ofSatir{50%{opacity:.3}}.of-yan2{animation:ofYan 2s ease-in-out infinite}.of-zil{animation:ofAnahtar .15s linear infinite alternate}.of-salla-k{}@keyframes ofDevriye{'
     + M.map((m, i) => (i * 12.5).toFixed(1) + '%{transform:translate(' + (m.p.x - sx) + 'px,' + (m.p.y - (sy - 22)) + 'px)}').join('') + '100%{transform:translate(' + (M[0].p.x - sx) + 'px,' + (M[0].p.y - (sy - 22)) + 'px)}}'
     + '@media (prefers-reduced-motion:reduce){[class^="of-"]{animation:none!important}}</style>';
   return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><b style="color:' + (acik.length ? '#B42318' : '#9A5B00') + '">👷 ' + esc(durum) + '</b><span class="k">canlı · sayfa 3 dk\'da bir yenilenir</span></div>'

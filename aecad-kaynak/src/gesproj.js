@@ -145,7 +145,7 @@ function pjRun(over) {
   if (PJ.busy || PJ.altMod) { PJ.again = true; return; }
   let param; try { param = over || buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
   PJ.busy = true; PJ.t0 = performance.now(); PJ.seq++; gv('p-run').disabled = true;
-  PJ.param = param;
+  PJ.param = param; PJ.imza = pjImza(PJ.srcDoc || S.doc); PJ.imzaAc = null; pjOnayDurum();
   pjWorker().postMessage({ id: PJ.seq, base: new URL('./', document.baseURI).href, json: JSON.stringify(param), pdf: gv('p-pdf2').checked });
 }
 function pjOpenPafta(name, auto, dosyalar) {
@@ -154,9 +154,44 @@ function pjOpenPafta(name, auto, dosyalar) {
   const norm = parseDxf(decodeDxfBytes(f)); const doc = importNormalized(norm);
   const keep = G.bound; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
   if (/_0[14]_/.test(name) && typeof pjPaftaTani === 'function') pjPaftaTani();
+  PJ.imzaAc = /_0[14]_/.test(name) ? pjImza(S.doc) : null;
   if (!auto) msg('Pafta açıldı: ' + name, 'res');
   document.querySelectorAll('.pf-row').forEach((r) => r.classList.toggle('on', r.dataset.f === name));
 }
+// Son hal imzası: masa/inverter/bina konumları, DC atama/string ve AC/OG hatları. Değişince "Son hali onayla" uyarır.
+function pjImza(D) {
+  if (!D || !D.items) return ''; let n = 0, sx = 0, sy = 0, k = 0;
+  for (const it of D.items.values()) {
+    const masa = String(it.layer).toUpperCase() === 'GES-MASA', g = it.ges && it.ges.tip; if (!masa && !g) continue;
+    k++; if (it.t === 'pline' && it.pts) { for (const q of it.pts) { sx += q[0]; sy += q[1]; n++; } } else { const b = itemBB(D, it); if (b && isFinite(b[0])) { sx += (b[0] + b[2]) / 2; sy += (b[1] + b[3]) / 2; n++; } }
+    if (g === 'dcata' || g === 'dcstr') sx += String(it.ges.inv || '').length + (+it.ges.L || 0);
+  }
+  return k + ':' + n + ':' + sx.toFixed(1) + ':' + sy.toFixed(1);
+}
+function pjOnayDegisti() {
+  if (!PJ.res) return false;
+  if (PJ.cur && /_0[14]_/.test(PJ.cur)) return PJ.imzaAc !== null && pjImza(S.doc) !== PJ.imzaAc;
+  if (PJ.cur) return false; return PJ.imza !== undefined && pjImza(S.doc) !== PJ.imza;
+}
+function pjOnayDurum() { const b = gv('bonay'); if (!b) return; const d = pjOnayDegisti(); b.classList.toggle('dikkat', d); b.title = d ? 'Çizim son üretimden sonra değişti: son hali onaylayıp projeyi yeniden üretin' : 'Son hali onayla: çizimdeki son durumla (taşıma, DC atama, kablo) proje paftaları, metraj ve keşif yeniden üretilir'; }
+setInterval(() => { try { pjOnayDurum(); } catch (e) { /* sessiz */ } }, 3000);
+// Kullanıcı kuralı 19.10.2026: ne olursa olsun (onaylanmış olsa bile) son değişikliklerle onay alınır, hesap son hale göre yapılır.
+async function pjSonHalOnayla() {
+  if (PJ.busy) { msg('Proje hesaplanıyor; bitince yeniden onaylayın.', 'note'); return; }
+  const a = PJ.aktif && PJ.cur && /_0[14]_/.test(PJ.cur) && PJ.alt && PJ.alt.includes(PJ.aktif) ? PJ.aktif : null;
+  if (a) return pjAltOnayla(a);
+  if (PJ.cur && /_0[14]_/.test(PJ.cur)) { if (!(await pjPaftaDuzenAktar({ ad: PJ.onayAd || 'Proje' }))) return; }
+  else {
+    if (PJ.cur) pjBack();
+    const Y = pjCizimYerlesim(); if (!Y) { msg('Çizimde masa yok: önce yerleşim yapın (Arazi doldur, elle ya da seçenek onayı).', 'err'); return; }
+    const sor = await askDlg('Son hali onayla', 'Çizimin son hali onaylanacak: ' + Y.masa.length + ' masa, ' + Y.inv.length + ' inverter, ' + Y.tm.length + ' trafo, ' + Y.dc.length + ' masada DC ataması' + (Y.masa.length > Y.dc.length && Y.dc.length ? ' (' + (Y.masa.length - Y.dc.length) + ' masa atanmamış: en yakın invertere bağlanır ve raporda uyarılır)' : '') + ', ' + Y.ac.length + ' AC hattı. Proje paftaları, metraj, keşif ve PDF bu son halden yeniden üretilir.', [['Son hali onayla ve projeyi üret', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
+    if (sor !== 'ok') return;
+  }
+  let p; try { p = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
+  PJ.onayAd = PJ.onayAd || 'Proje'; msg('Son hal onaylandı. Proje paftaları, metraj ve keşif çizimdeki son durumdan yeniden üretiliyor…', 'res');
+  const d = gv('pjdlg'); if (d && d.open) d.close(); pjRun(p);
+}
+CMD.ONAYLA = () => pjSonHalOnayla(); Object.assign(ALIAS, { ONAYLA: 'ONAYLA', SONHAL: 'ONAYLA' }); Object.assign(LABEL, { ONAYLA: 'SON HALİ ONAYLA' });
 function pjBack() { if (!PJ.srcDoc) return; const d = PJ.srcDoc; PJ.srcDoc = null; PJ.cur = null; setDoc(d, d.name); gv('p-back').hidden = true; msg('Kaynak çizime dönüldü.'); }
 
 // ---------- price list (reference: Gömce 3. tur ortalaması, USD, KDV hariç, 2026 — ges-proje-cizim §9) ----------

@@ -227,6 +227,9 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .revbox { display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: end; margin-top: 14px; } .revbox .gi { grid-column: 1 / -1; margin: 0; }
 /* ---- başlangıç + proje tarif ---- */
 .hb.files { border-color: var(--ok); color: var(--ok); }
+.hb.onay { border-color: var(--ok); color: var(--ok); }
+.hb.onay.dikkat { background: var(--ok); color: #000; animation: onayNab 1.6s ease-in-out infinite; }
+@keyframes onayNab { 50% { opacity: .6; } }
 .st-son { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--ok); border-radius: 8px; padding: 12px 16px; }
 .st-son span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; } .st-son b { font-weight: 500; flex: 1 1 240px; }
 .tf-prev { margin: 0; display: grid; gap: 6px; }
@@ -298,6 +301,7 @@ details.tf-sec:not([open]) { gap: 0; }
     <span id="fname">Örnek çizim</span>
     <div class="hbtns">
       <button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb onay" id="bonay" title="Son hali onayla"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="k">Son hali onayla</span></button>
       <button class="hb files" id="bfiles" title="Proje dosyaları: paftalar, yerleşim seçenekleri, keşif, PDF"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h5l1.5 1.5h4.5v9.5h-11zM5 8h6M5 10.5h4" fill="none" stroke="currentColor"/></svg><span class="k">Proje dosyaları</span></button>
       <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
       <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>

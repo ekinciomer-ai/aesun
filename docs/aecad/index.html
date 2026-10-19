@@ -232,6 +232,9 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 .revbox { display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: end; margin-top: 14px; } .revbox .gi { grid-column: 1 / -1; margin: 0; }
 /* ---- başlangıç + proje tarif ---- */
 .hb.files { border-color: var(--ok); color: var(--ok); }
+.hb.onay { border-color: var(--ok); color: var(--ok); }
+.hb.onay.dikkat { background: var(--ok); color: #000; animation: onayNab 1.6s ease-in-out infinite; }
+@keyframes onayNab { 50% { opacity: .6; } }
 .st-son { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--ok); border-radius: 8px; padding: 12px 16px; }
 .st-son span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; } .st-son b { font-weight: 500; flex: 1 1 240px; }
 .tf-prev { margin: 0; display: grid; gap: 6px; }
@@ -303,6 +306,7 @@ details.tf-sec:not([open]) { gap: 0; }
     <span id="fname">Örnek çizim</span>
     <div class="hbtns">
       <button class="hb" id="bhome" title="Başlangıç ekranı" aria-label="Başlangıç"><svg viewBox="0 0 16 16"><path d="M2 7.5 8 2.5l6 5M3.5 6.5v7h9v-7" fill="none" stroke="currentColor"/></svg></button>
+      <button class="hb onay" id="bonay" title="Son hali onayla"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span class="k">Son hali onayla</span></button>
       <button class="hb files" id="bfiles" title="Proje dosyaları: paftalar, yerleşim seçenekleri, keşif, PDF"><svg viewBox="0 0 16 16"><path d="M2.5 2.5h5l1.5 1.5h4.5v9.5h-11zM5 8h6M5 10.5h4" fill="none" stroke="currentColor"/></svg><span class="k">Proje dosyaları</span></button>
       <button class="hb primary" id="bopen" title="DWG veya DXF aç (Ctrl+O)"><svg viewBox="0 0 16 16"><path d="M1.5 3.5h4l1.5 1.5h7.5v8h-13z" fill="none" stroke="currentColor"/></svg><span class="k">Aç</span></button>
       <button class="hb" id="bnew" title="Yeni boş çizim"><svg viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9z M9.5 1.5v3h3" fill="none" stroke="currentColor"/></svg><span class="k">Yeni</span></button>
@@ -3469,7 +3473,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191953', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192000', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -3507,7 +3511,7 @@ function pjRun(over) {
   if (PJ.busy || PJ.altMod) { PJ.again = true; return; }
   let param; try { param = over || buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
   PJ.busy = true; PJ.t0 = performance.now(); PJ.seq++; gv('p-run').disabled = true;
-  PJ.param = param;
+  PJ.param = param; PJ.imza = pjImza(PJ.srcDoc || S.doc); PJ.imzaAc = null; pjOnayDurum();
   pjWorker().postMessage({ id: PJ.seq, base: new URL('./', document.baseURI).href, json: JSON.stringify(param), pdf: gv('p-pdf2').checked });
 }
 function pjOpenPafta(name, auto, dosyalar) {
@@ -3516,9 +3520,44 @@ function pjOpenPafta(name, auto, dosyalar) {
   const norm = parseDxf(decodeDxfBytes(f)); const doc = importNormalized(norm);
   const keep = G.bound; setDoc(doc, name.replace(/\.dxf$/i, '')); G.bound = keep; PJ.cur = name; gv('p-back').hidden = false; if (typeof masaRenkUygula === 'function') masaRenkUygula();
   if (/_0[14]_/.test(name) && typeof pjPaftaTani === 'function') pjPaftaTani();
+  PJ.imzaAc = /_0[14]_/.test(name) ? pjImza(S.doc) : null;
   if (!auto) msg('Pafta açıldı: ' + name, 'res');
   document.querySelectorAll('.pf-row').forEach((r) => r.classList.toggle('on', r.dataset.f === name));
 }
+// Son hal imzası: masa/inverter/bina konumları, DC atama/string ve AC/OG hatları. Değişince "Son hali onayla" uyarır.
+function pjImza(D) {
+  if (!D || !D.items) return ''; let n = 0, sx = 0, sy = 0, k = 0;
+  for (const it of D.items.values()) {
+    const masa = String(it.layer).toUpperCase() === 'GES-MASA', g = it.ges && it.ges.tip; if (!masa && !g) continue;
+    k++; if (it.t === 'pline' && it.pts) { for (const q of it.pts) { sx += q[0]; sy += q[1]; n++; } } else { const b = itemBB(D, it); if (b && isFinite(b[0])) { sx += (b[0] + b[2]) / 2; sy += (b[1] + b[3]) / 2; n++; } }
+    if (g === 'dcata' || g === 'dcstr') sx += String(it.ges.inv || '').length + (+it.ges.L || 0);
+  }
+  return k + ':' + n + ':' + sx.toFixed(1) + ':' + sy.toFixed(1);
+}
+function pjOnayDegisti() {
+  if (!PJ.res) return false;
+  if (PJ.cur && /_0[14]_/.test(PJ.cur)) return PJ.imzaAc !== null && pjImza(S.doc) !== PJ.imzaAc;
+  if (PJ.cur) return false; return PJ.imza !== undefined && pjImza(S.doc) !== PJ.imza;
+}
+function pjOnayDurum() { const b = gv('bonay'); if (!b) return; const d = pjOnayDegisti(); b.classList.toggle('dikkat', d); b.title = d ? 'Çizim son üretimden sonra değişti: son hali onaylayıp projeyi yeniden üretin' : 'Son hali onayla: çizimdeki son durumla (taşıma, DC atama, kablo) proje paftaları, metraj ve keşif yeniden üretilir'; }
+setInterval(() => { try { pjOnayDurum(); } catch (e) { /* sessiz */ } }, 3000);
+// Kullanıcı kuralı 19.10.2026: ne olursa olsun (onaylanmış olsa bile) son değişikliklerle onay alınır, hesap son hale göre yapılır.
+async function pjSonHalOnayla() {
+  if (PJ.busy) { msg('Proje hesaplanıyor; bitince yeniden onaylayın.', 'note'); return; }
+  const a = PJ.aktif && PJ.cur && /_0[14]_/.test(PJ.cur) && PJ.alt && PJ.alt.includes(PJ.aktif) ? PJ.aktif : null;
+  if (a) return pjAltOnayla(a);
+  if (PJ.cur && /_0[14]_/.test(PJ.cur)) { if (!(await pjPaftaDuzenAktar({ ad: PJ.onayAd || 'Proje' }))) return; }
+  else {
+    if (PJ.cur) pjBack();
+    const Y = pjCizimYerlesim(); if (!Y) { msg('Çizimde masa yok: önce yerleşim yapın (Arazi doldur, elle ya da seçenek onayı).', 'err'); return; }
+    const sor = await askDlg('Son hali onayla', 'Çizimin son hali onaylanacak: ' + Y.masa.length + ' masa, ' + Y.inv.length + ' inverter, ' + Y.tm.length + ' trafo, ' + Y.dc.length + ' masada DC ataması' + (Y.masa.length > Y.dc.length && Y.dc.length ? ' (' + (Y.masa.length - Y.dc.length) + ' masa atanmamış: en yakın invertere bağlanır ve raporda uyarılır)' : '') + ', ' + Y.ac.length + ' AC hattı. Proje paftaları, metraj, keşif ve PDF bu son halden yeniden üretilir.', [['Son hali onayla ve projeyi üret', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
+    if (sor !== 'ok') return;
+  }
+  let p; try { p = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }
+  PJ.onayAd = PJ.onayAd || 'Proje'; msg('Son hal onaylandı. Proje paftaları, metraj ve keşif çizimdeki son durumdan yeniden üretiliyor…', 'res');
+  const d = gv('pjdlg'); if (d && d.open) d.close(); pjRun(p);
+}
+CMD.ONAYLA = () => pjSonHalOnayla(); Object.assign(ALIAS, { ONAYLA: 'ONAYLA', SONHAL: 'ONAYLA' }); Object.assign(LABEL, { ONAYLA: 'SON HALİ ONAYLA' });
 function pjBack() { if (!PJ.srcDoc) return; const d = PJ.srcDoc; PJ.srcDoc = null; PJ.cur = null; setDoc(d, d.name); gv('p-back').hidden = true; msg('Kaynak çizime dönüldü.'); }
 
 // ---------- price list (reference: Gömce 3. tur ortalaması, USD, KDV hariç, 2026 — ges-proje-cizim §9) ----------
@@ -3794,14 +3833,48 @@ async function pjSecenekCizime(a) {
   msg('"' + a.ad + '" çizime yazıldı: ' + N.masa.length + ' masa, ' + N.inv.length + ' inverter, ' + N.tm.length + ' trafo. Bundan sonra proje paftaları bu çizimden üretilir.', 'res');
   return true;
 }
+// Kullanıcı kuralı 19.10.2026: onay SON HALİ onaylar. Seçeneğin yerleşimi/kablo planı açılıp düzenlendiyse (masa, inverter, trafo taşıma,
+// DC atama, DC string, AC/OG kanal) düzenlenmiş hal kaynak çizime aktarılır ve proje paftaları bu son halden üretilir; hesaplanan ilk hal değil.
+async function pjPaftaDuzenAktar(a) {
+  const P = S.doc, tipler = new Set(['inv', 'tm', 'dm', 'ac', 'og', 'dc', 'dcata', 'dcstr']);
+  const gesMi = (D, it) => (String(it.layer).toUpperCase() === 'GES-MASA' && (() => { const b = itemBB(D, it); return b && isFinite(b[0]) && pointInPoly([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2], G.bound); })()) || (it.ges && tipler.has(it.ges.tip)) || String(it.layer).toUpperCase() === 'GES-DC-ATAMA';
+  const sec = [...P.items.values()].filter((it) => gesMi(P, it)); const sid = new Set(sec.map((it) => it.id));
+  for (const it of P.items.values()) if (it.gesEt && sid.has(it.gesEt) && !sid.has(it.id)) { sec.push(it); sid.add(it.id); }
+  const nMasa = sec.filter((it) => String(it.layer).toUpperCase() === 'GES-MASA').length; if (!nMasa) return pjSecenekCizime(a);
+  const say = (t) => sec.filter((it) => it.ges && it.ges.tip === t).length;
+  const kopya = sec.map((it) => structuredClone(it)), bl = new Map();
+  const blokTopla = (ad) => { if (!ad || bl.has(ad) || !P.blocks.has(ad)) return; const b = P.blocks.get(ad); bl.set(ad, structuredClone(b)); for (const e of b.ents || []) if (e.type === 'INSERT' && e.name) blokTopla(e.name); };
+  for (const it of kopya) if (it.t === 'insert') blokTopla(it.block);
+  pjBack(); const D = S.doc;
+  const eski = [...D.items.values()].filter((it) => gesMi(D, it)); const eid = new Set(eski.map((it) => it.id));
+  for (const it of D.items.values()) if (it.gesEt && eid.has(it.gesEt) && !eid.has(it.id)) eski.push(it);
+  for (const id of G.fillIds || []) { const it = D.items.get(id); if (it && !eski.includes(it)) eski.push(it); }
+  const r = await askDlg('Son hali onayla', '"' + a.ad + '" seçeneğinin düzenlenmiş son hali kaynak çizime yazılacak: ' + nMasa + ' masa, ' + say('inv') + ' inverter, ' + (say('tm') + say('dm')) + ' bina, ' + (say('dcata') + say('dcstr')) + ' DC atama/string, ' + say('ac') + ' AC, ' + say('og') + ' OG hattı.' + (eski.length ? ' Çizimdeki eski GES yerleşimi (' + eski.length + ' nesne) kaldırılır; Geri al ile döner.' : '') + ' Proje paftaları, metraj ve keşif bu son halden üretilir.', [['Son hali onayla ve projeyi üret', 'ok', 'primary'], ['Vazgeç', null, 'ghost']]);
+  if (r !== 'ok') return false;
+  for (const [ad, b] of bl) if (!D.blocks.has(ad)) D.blocks.set(ad, b);
+  const m = new Map(); for (const it of kopya) { const n = newId(); m.set(it.id, n); m.set(String(it.id), n); it.id = n; }
+  for (const it of kopya) {
+    if (it.gesEt !== undefined && m.has(it.gesEt)) it.gesEt = m.get(it.gesEt);
+    if (it.ges) for (const k of Object.keys(it.ges)) { const v = it.ges[k]; if ((typeof v === 'string' || typeof v === 'number') && k !== 'no' && m.has(v)) it.ges[k] = m.get(v); }
+    if (!D.layers.has(it.layer)) D.addLayer(it.layer, P.layers.get(it.layer) ? P.layers.get(it.layer).c : 7);
+  }
+  G.fillIds = [];
+  replaceItems([...eski.map((it) => [it, null]), ...kopya.map((n) => [null, n])], 'son hal onayı'); renderLayers();
+  if (typeof cepheCiz === 'function') cepheCiz();
+  if (typeof tsFormaYaz === 'function') tsFormaYaz();
+  return true;
+}
 async function pjAltOnayla(a) {
-  if (!a.cizim && !(await pjSecenekCizime(a))) return;
+  const duzenli = PJ.aktif === a && PJ.cur && /_0[14]_/.test(PJ.cur);
+  if (duzenli) { if (!(await pjPaftaDuzenAktar(a))) return; }
+  else if (!a.cizim && !(await pjSecenekCizime(a))) return;
   a.uygula(); pjSave(); PJ.onayAd = a.ad;
-  msg('Onaylanan yerleşim: ' + a.ad + '. Tek hat, topraklama, kablo, kanal detayı, metraj, keşif, teklif ve PDF hazırlanıyor…', 'res');
+  let p; try { p = buildParam(); } catch (e) { msg('Parametre hatası: ' + e.message, 'err'); return; }   // son hal: kaynak çizimden okunur
+  msg('Son hal onaylandı: ' + a.ad + (duzenli ? ' (düzenlemelerinizle)' : '') + '. Tek hat, topraklama, kablo, kanal detayı, metraj, keşif, teklif ve PDF bu çizimden hazırlanıyor…', 'res');
   gv('pjdlg').close();
-  if (PJ.altMod) { PJ.onay = a.param; PJ.again = true; PJ.alt.forEach((x) => { if (x.durum === 'bekliyor') x.durum = 'iptal'; }); return; }
+  if (PJ.altMod) { PJ.onay = p; PJ.again = true; PJ.alt.forEach((x) => { if (x.durum === 'bekliyor') x.durum = 'iptal'; }); return; }
   PJ.alt.forEach((x) => { if (x.durum === 'bekliyor') x.durum = 'iptal'; });
-  pjRun(a.param);
+  pjRun(p);
 }
 // Kullanıcı talimatı → form alanları (anlaşılan her madde uygulanır, anlaşılmayan bildirilir)
 function pjRevizeCoz(txt) {
@@ -3846,7 +3919,7 @@ function pjAltCiz() {
   const box = gv('pj-body'); const h = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
   box.innerHTML = '';
   if (PJ.aktif) box.appendChild(h('p', 'gi', 'Çizimde düzenlemek için bir satırda "Yerleşim"i açın; soldaki Trafo / İnverter / Yol araçlarıyla taşıyın ya da yol çizin, "Yeniden" ile son duruma göre masa, inverter, trafo ve kablolar yeniden yerleşir. Yazarak da düzenleyebilirsiniz (aşağıdaki kutu).'));
-  box.appendChild(h('p', 'gi', 'Önce yerleşim çizilir ve alternatiflerle karşılaştırılır. Uygun olanı onaylayın ya da talimat yazarak revize edin; onaydan sonra tek hat, topraklama, kablo planı, kanal detayı, kablo cetveli, metraj, keşif, teklif ve PDF hazırlanır.'));
+  box.appendChild(h('p', 'gi', 'Önce yerleşim çizilir ve alternatiflerle karşılaştırılır. Uygun olanı açıp düzenleyin, son halini onaylayın ya da talimat yazarak revize edin; onaydan sonra tek hat, topraklama, kablo planı, kanal detayı, kablo cetveli, metraj, keşif, teklif ve PDF hazırlanır.'));
   const t = h('table', 'kt alt'); t.innerHTML = '<thead><tr><th>Seçenek</th><th>Masa</th><th>DC MWp</th><th>İnverter adet × güç = toplam · trafo</th><th>İç yol</th><th>En uzun DC</th><th>En uzun AG</th><th>Yol geçişi</th><th>Kontrol</th><th></th></tr></thead>';
   const tb = h('tbody'); const P = G.panel;
   const hz = PJ.alt.filter((a) => a.durum === 'hazir'); const enIyi = hz.length ? hz.reduce((x, y) => (y.oz.masa > x.oz.masa ? y : x)) : null;
@@ -3861,7 +3934,7 @@ function pjAltCiz() {
       const b1 = h('button', 'mini', 'Yerleşim'); b1.onclick = () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); msg('Açık yerleşim: ' + a.ad + '. Düzenlemek için GES sekmesi → Çizimde düzenle ya da soldaki Trafo / İnverter / Yol araçları.', 'note'); };
       const b2 = h('button', 'mini', 'Kablo planı'); b2.title = 'Yerleşim açılır; DC atama, DC string ve AC kanal tasarım araçlarıyla (DC oto, DC çiz, AC oto) çizilir';
       b2.onclick = async () => { const f = Object.keys(a.files).find((n) => /_01_/.test(n)); pjOpenPafta(f, false, a.files); PJ.aktif = a; pjDuzenBilgi(); gv('pjdlg').close(); await pjKabloOto(); };
-      const b3 = h('button', 'mini ok', 'Onayla → projeyi tamamla'); b3.onclick = () => pjAltOnayla(a);
+      const b3 = h('button', 'mini ok', a === PJ.aktif && PJ.cur && /_0[14]_/.test(PJ.cur) ? 'Son hali onayla → projeyi tamamla' : 'Onayla → projeyi tamamla'); b3.title = 'Açıp düzenlediyseniz (taşıma, DC atama, kablo) düzenlenmiş son hal onaylanır ve proje bu halden üretilir'; b3.onclick = () => pjAltOnayla(a);
       act.append(b1, b2, b3); tr.appendChild(act);
     } else {
       const td = h('td', 'st', a.durum === 'calisiyor' ? 'Hesaplanıyor… (' + fmtNum((performance.now() - a.t0) / 1000, 0) + ' sn)' : a.durum === 'bekliyor' ? 'Sırada' : a.durum === 'iptal' ? 'İptal (başka seçenek onaylandı)' : 'Hata: ' + (a.hata || ''));
@@ -3928,6 +4001,7 @@ function sohbetNiyet(T) {
   if (/\bdc\s*(oto|ata|otomatik)/.test(T)) is.push(['DC otomatik atama', async () => { await CMD.GDCOTO(); return null; }]);
     if (/\bac\s*(oto|otomatik)|ac kablo\S*\s*çiz/.test(T)) is.push(['AC otomatik', async () => { await CMD.GACOTO(); return null; }]);
   }
+  if (/son\s*hal|onayla|onay ver|projeyi (yeniden )?üret|yeniden hesapla/.test(T)) is.push(['son hali onayla', async () => { await pjSonHalOnayla(); return null; }]);
   if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);
   if (/yerleşim\S*\s*(çiz|seçenek|karşılaştır)|seçenekleri/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
   if (/(proje|pafta)\S*\s*(oluştur|üret|çiz|hazırla)/.test(T)) is.push(['proje paftaları', async () => { pjRun(); return null; }]);
@@ -5529,7 +5603,7 @@ function tarifInit() {
   gv('st-tarif').onclick = () => { startShow(false); tarifShow(true); };
   gv('st-cad').onclick = () => toCad(false);
   const dosyalar = () => { startShow(false); tarifShow(false); pjDialog('paftalar'); };
-  gv('st-son-b').onclick = dosyalar; gv('bfiles').onclick = dosyalar;
+  gv('st-son-b').onclick = dosyalar; gv('bfiles').onclick = dosyalar; gv('bonay').onclick = () => pjSonHalOnayla();
   pjArsivOku();
   gv('bhome').onclick = () => { tarifShow(false); startShow(true); };
   gv('tf-back').onclick = () => { tarifShow(false); startShow(true); };

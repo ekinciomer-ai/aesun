@@ -199,7 +199,7 @@ function tarifInit() {
   gv('st-tarif').onclick = () => { startShow(false); tarifShow(true); };
   gv('st-cad').onclick = () => toCad(false);
   const dosyalar = () => { startShow(false); tarifShow(false); pjDialog('paftalar'); };
-  gv('st-son-b').onclick = dosyalar; gv('bfiles').onclick = dosyalar;
+  gv('st-son-b').onclick = dosyalar; gv('bfiles').onclick = dosyalar; gv('bonay').onclick = () => pjSonHalOnayla();
   pjArsivOku();
   gv('bhome').onclick = () => { tarifShow(false); startShow(true); };
   gv('tf-back').onclick = () => { tarifShow(false); startShow(true); };

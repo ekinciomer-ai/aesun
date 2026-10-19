@@ -3490,7 +3490,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610200124', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610200133', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
@@ -3851,7 +3851,7 @@ function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pj
 function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(6, c - 2, m >= 16 ? 6 : m >= 8 ? 4 : m >= 4 ? 2 : 1)); }   // 22 çekirdek / 32 GB → 6 seçenek aynı anda
 function pjYerIsci(k) {
   PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
-  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610200124', document.baseURI).href), alt: null };
+  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610200133', document.baseURI).href), alt: null };
   o.w.onmessage = (e) => {
     const m = e.data, a = o.alt; if (!a || m.id !== a.seq) return;
     if (m.stage) { a.asama = m.stage; pjAltCiz(); return; }
@@ -6258,6 +6258,12 @@ function init() {
     else if (e.key === 'Escape') { e.preventDefault(); inp.value = ''; if (S.cmd) cancelCmd(); else setSel([]); }
   });
   document.addEventListener('keydown', (e) => {
+    // Ctrl+Z / Ctrl+Y her yerde çizim geri al / yinele (kullanıcı 20.10.2026): panel alanında, komut sırasında da çalışır;
+    // yalnız yazı alanında (textarea) ya da iletişim kutusu açıkken metin geri alma işler. Komut sürüyorsa önce iptal edilir.
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyZ' || e.code === 'KeyY') && !e.target.closest('textarea') && !document.querySelector('dialog[open]')) {
+      e.preventDefault(); if (S.cmd && typeof cancelCmd === 'function') cancelCmd();
+      runCommand(e.code === 'KeyY' || e.shiftKey ? 'REDO' : 'U'); return;
+    }
     if (e.target.closest('input, textarea, select') && e.target !== inp) return;
     if (document.body.classList.contains('ovl')) return;
     if (e.key === 'F3') { e.preventDefault(); S.osnap = !S.osnap; msg('Nesne yakalama ' + (S.osnap ? 'açık' : 'kapalı')); updateStatus(); return; }

@@ -197,6 +197,12 @@ function init() {
     else if (e.key === 'Escape') { e.preventDefault(); inp.value = ''; if (S.cmd) cancelCmd(); else setSel([]); }
   });
   document.addEventListener('keydown', (e) => {
+    // Ctrl+Z / Ctrl+Y her yerde çizim geri al / yinele (kullanıcı 20.10.2026): panel alanında, komut sırasında da çalışır;
+    // yalnız yazı alanında (textarea) ya da iletişim kutusu açıkken metin geri alma işler. Komut sürüyorsa önce iptal edilir.
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyZ' || e.code === 'KeyY') && !e.target.closest('textarea') && !document.querySelector('dialog[open]')) {
+      e.preventDefault(); if (S.cmd && typeof cancelCmd === 'function') cancelCmd();
+      runCommand(e.code === 'KeyY' || e.shiftKey ? 'REDO' : 'U'); return;
+    }
     if (e.target.closest('input, textarea, select') && e.target !== inp) return;
     if (document.body.classList.contains('ovl')) return;
     if (e.key === 'F3') { e.preventDefault(); S.osnap = !S.osnap; msg('Nesne yakalama ' + (S.osnap ? 'açık' : 'kapalı')); updateStatus(); return; }

@@ -20,7 +20,7 @@ const TS = {
   dc: { ad: 'DC kablo', kat: 'GES-DC-KABLO', renk: 5, alan: [['kablo', 'Kablo', () => 'H1Z2Z2-K 1x6', SEC.dc], ['pay', 'Uç payı (m)', () => 3, SEC.pay]] },
 };
 // Form diyaloğu (qdlg üzerinde): alanlar → Promise(nesne | null)
-function formDlg(baslik, alanlar, deger) {
+function formDlg(baslik, alanlar, deger, ekler) {   // ekler: [[etiket, anahtar]] → ek düğme; sonuç o._ek = anahtar
   return new Promise((res) => {
     const d = gv('qdlg'); d.querySelector('h3').textContent = baslik; const p = d.querySelector('p'); p.innerHTML = '';
     const ins = {};
@@ -36,11 +36,12 @@ function formDlg(baslik, alanlar, deger) {
       l.appendChild(i); p.appendChild(l); ins[k] = i;
     }
     const box = d.querySelector('.qb'); box.innerHTML = '';
-    const bitir = (ok) => { d.close(); p.innerHTML = ''; if (!ok) return res(null); const o = {}; for (const k in ins) { const v = ins[k].value.trim(); const n = parseFloat(v.replace(',', '.')); o[k] = /^-?\d+([.,]\d+)?$/.test(v) ? n : v; } res(o); };
+    const bitir = (ok, ek) => { d.close(); p.innerHTML = ''; if (!ok) return res(null); const o = {}; if (ek) o._ek = ek; for (const k in ins) { const v = ins[k].value.trim(); const n = parseFloat(v.replace(',', '.')); o[k] = /^-?\d+([.,]\d+)?$/.test(v) ? n : v; } res(o); };
     const b1 = document.createElement('button'); b1.className = 'gb primary'; b1.textContent = 'Tamam'; b1.onclick = () => bitir(true);
     const b2 = document.createElement('button'); b2.className = 'gb ghost'; b2.textContent = 'Vazgeç'; b2.onclick = () => bitir(false);
     if (ins.kva && ins.gerilim) ins.kva.addEventListener('change', () => { const k = +ins.kva.value; const g = ins.gerilim.value; const yeni = g.replace(/0,[48] kV$/, k > 2000 ? '0,8 kV' : '0,4 kV'); if ([...ins.gerilim.options].some((o) => o.value === yeni)) ins.gerilim.value = yeni; });
-    box.append(b1, b2); d.oncancel = () => { p.innerHTML = ''; res(null); };
+    const bx = (ekler || []).map(([et, an]) => { const b = document.createElement('button'); b.className = 'gb'; b.textContent = et; b.onclick = () => bitir(true, an); return b; });
+    box.append(b1, ...bx, b2); d.oncancel = () => { p.innerHTML = ''; res(null); };
     d.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); bitir(true); } };
     d.showModal(); const f = p.querySelector('input, select'); if (f) f.focus();
   });
@@ -152,7 +153,8 @@ async function tsNokta(tip) {
   }
 }
 async function tsKablo(tip) {
-  const T = TS[tip]; const v = await formDlg(T.ad + ' çiz', T.alan); if (!v) return;
+  const T = TS[tip]; const v = await formDlg(T.ad + ' çiz', T.alan, null, tip === 'ac' ? [['Projedeki tüm inverterleri AG panoya bağla (otomatik)', 'oto']] : null); if (!v) return;
+  if (v._ek === 'oto') { delete v._ek; return CMD.GACOTO(v); }
   const p0 = await getPoint(T.ad + ' başlangıcı:'); if (!Array.isArray(p0)) return; const pts = [p0];
   for (;;) {
     const r = await getPoint('Sonraki nokta [Geri al(G)] — bitir: Enter / sağ tık / çift tık (uç otomatik AG panoya bağlanır) · L=' + fmtNum(tsBoy(pts), 1) + ' m', { base: pts[pts.length - 1], kw: ['G'], preview: (m) => [{ pts: [...pts, m] }] });
@@ -696,14 +698,14 @@ CMD.GDCCIZ = async () => {
 };
 // AC otomatik (kullanıcı kuralı 19.10.2026): tek tıkla tüm inverterlerden en yakın trafo binasının AG panosuna (ADP) kablo —
 // TM başına ortak kanal ağı (ana hat + branşman), 1 m kanal, arazi içi, masa/inverter/binaya ≥ 0,5 m; numara AC-n.
-CMD.GACOTO = async () => {
+CMD.GACOTO = async (vHazir) => {
   const inv = tsInverterler(), tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
   if (!inv.length || !tms.length) { msg('Önce inverter (İnverter +) ve trafo binası (Trafo +) ekleyin.', 'err'); return; }
   const tol = 6, eski = [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
   const bagli = new Set(); for (const k of eski) { const x = inv.find((y) => Math.hypot(y.p[0] - k.pts[0][0], y.p[1] - k.pts[0][1]) <= tol); if (x) bagli.add(x.it.id); }
   let hepsi = true;
   if (eski.length) { const r = await askDlg('AC kablo otomatik', eski.length + ' AC kablo zaten var (' + bagli.size + ' inverter bağlı). Ne yapılsın?', [['Hepsini yeniden çiz', 'tum', 'primary'], ['Yalnız kablosuz ' + (inv.length - bagli.size) + ' inverter', 'eksik', 'ghost'], ['Vazgeç', null, 'ghost']]); if (!r) return; hepsi = r === 'tum'; }
-  const v = await formDlg('AC kablo (otomatik)', TS.ac.alan); if (!v) return;
+  const v = vHazir && vHazir.kablo ? vHazir : await formDlg('AC kablo (otomatik)', TS.ac.alan); if (!v) return;
   const hedef = hepsi ? inv : inv.filter((x) => !bagli.has(x.it.id)); if (!hedef.length) { msg('Kablosuz inverter yok.', 'res'); return; }
   busy('AC kablolar çiziliyor…'); await tick();
   try {

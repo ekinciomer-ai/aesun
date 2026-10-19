@@ -50,8 +50,12 @@ function tsEtiket(tip, v, L) {
   if (tip === 'inv') return 'INV' + (v.no ? '-' + v.no : '') + ' · ' + fmtNum(v.kw, 0) + ' kW' + (v.model && v.model !== '—' ? ' · ' + v.model : '');
   if (tip === 'tm') return 'TM' + (v.no ? '-' + v.no : '') + ' · ' + fmtNum(v.kva, 0) + ' kVA · ' + v.gerilim;
   if (tip === 'dm') return 'DM' + (v.not ? ' · ' + v.not : '');
-  return TS[tip].ad.split(' ')[0].toUpperCase() + ' · ' + v.kablo + ' · L=' + fmtNum((L || 0) + (+v.pay || 0), 0) + ' m';
+  // kablo: kısa numara (görsel bütünlük); kesit, boy ve pay özellikler panelinde, özette ve metrajda
+  return TS[tip].ad.split(' ')[0].toUpperCase() + '-' + (v.no || '?');
 }
+const KABLO_YZ = 0.45;   // kablo numarası yazı yüksekliği (m, gerçek ölçü — zoomdan bağımsız)
+// kablonun başladığı inverterin numarası (yoksa sıradaki kablo numarası)
+function tsKabloNo(tip, p0) { const x = tsInverterler().find((y) => Math.hypot(y.p[0] - p0[0], y.p[1] - p0[1]) <= 6); return (x && x.it.ges && x.it.ges.no) || tsSonNo(tip); }
 function tsSonNo(tip) { let n = 0; for (const it of S.doc.items.values()) if (it.ges && it.ges.tip === tip && it.ges.no) n = Math.max(n, it.ges.no); return n + 1; }
 function tsOlcek() { return Math.max(0.6, 12 / V().s); }   // ekranda ~12 px
 // ---- blok varlıkları (yerel koordinat, m) ----
@@ -155,11 +159,11 @@ async function tsKablo(tip) {
   }
   if (pts.length < 2) return;
   if (tip === 'ac') { const d = tsAcDuzelt(pts); if (d) { pts.length = 0; pts.push(...d.pts); msg('AC kablo nizami güzergâha düzeltildi: ' + d.not + '.', 'note'); } }
-  const L = tsBoy(pts), g = { ...v, tip }; S.doc.addLayer(T.kat, T.renk);
+  const L = tsBoy(pts), g = { ...v, tip, no: tsKabloNo(tip, pts[0]) }; S.doc.addLayer(T.kat, T.renk);
   const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: pts.map((q) => [q[0], q[1], 0]), ges: g };
   const k = Math.floor(pts.length / 2), a = pts[k - 1], b = pts[k]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
-  const yz = { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, h: Math.max(0.6, tsOlcek() * 0.8), rot: ang, s: tsEtiket(tip, g, L), ha: 1, va: 0, gesEt: pl.id };
-  addItems([pl, yz], T.ad.toLowerCase()); renderLayers(); msg(tsEtiket(tip, g, L) + ' eklendi.', 'res');
+  const yz = { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, h: KABLO_YZ, rot: ang, s: tsEtiket(tip, g, L), ha: 1, va: 0, gesEt: pl.id };
+  addItems([pl, yz], T.ad.toLowerCase()); renderLayers(); msg(tsEtiket(tip, g, L) + ' eklendi · ' + g.kablo + ' · L=' + fmtNum(L + (+g.pay || 0), 0) + ' m.', 'res');
   if (tip === 'ac' || tip === 'dc') await tsKabloCogalt(tip, g, pts);
 }
 // ---- AC kablo nizami güzergâh: inverterden başlar, MUTLAKA trafo binasındaki AG panodan (ADP) çıkar/biter;
@@ -415,9 +419,10 @@ CMD.GKDUZ = async () => {   // tüm AC kablolar: ortak kanal ağı (ana hat + br
     const tumYol = [ana.pts, ...M.values()];
     bas.forEach((b, k) => {
       const yol = k === 0 ? ana.pts : M.get(b.x.it.id); if (!yol) return; n++;
-      const np = { ...b.it, pts: yol.map((q) => [q[0], q[1], 0]) }; pairs.push([b.it, np]);
+      const ges = { ...b.it.ges, no: (b.x.it.ges && b.x.it.ges.no) || b.it.ges.no || k + 1 };
+      const np = { ...b.it, pts: yol.map((q) => [q[0], q[1], 0]), ges }; pairs.push([b.it, np]);
       const e = tsEtiketYeri(yol, tumYol);
-      for (const t of S.doc.items.values()) if (t.gesEt === b.it.id) pairs.push([t, { ...t, x: e.x, y: e.y, rot: e.rot, s: tsEtiket('ac', b.it.ges, tsBoy(yol)) }]);
+      for (const t of S.doc.items.values()) if (t.gesEt === b.it.id) pairs.push([t, { ...t, x: e.x, y: e.y, rot: e.rot, h: KABLO_YZ, s: tsEtiket('ac', ges, tsBoy(yol)) }]);
     });
   }
   if (!n) { msg('Düzeltilecek AC kablo yok.', 'err'); return; }
@@ -464,9 +469,9 @@ async function tsKabloCogalt(tip, g, pts) {
       for (const x of kalan) {
         const temiz = M.get(x.it.id); if (!temiz || temiz.length < 2) continue;
         const Lx = tsBoy(temiz); top += Lx + (+g.pay || 0);
-        const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: temiz.map((q) => [q[0], q[1], 0]), ges: { ...g } };
+        const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: temiz.map((q) => [q[0], q[1], 0]), ges: { ...g, no: (x.it.ges && x.it.ges.no) || tsSonNo(tip) } };
         const e = tsEtiketYeri(temiz, tumYol);
-        yeni.push(pl, { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: e.x, y: e.y, h: Math.max(0.5, tsOlcek() * 0.7), rot: e.rot, s: tsEtiket(tip, g, Lx), ha: 1, va: 0, gesEt: pl.id });
+        yeni.push(pl, { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket(tip, pl.ges, Lx), ha: 1, va: 0, gesEt: pl.id });
       }
       if (yeni.length) { addItems(yeni, T.ad.toLowerCase() + ' çoğalt'); renderLayers(); msg(yeni.length / 2 + ' invertere ' + T.ad + ' eklendi: ortak kanal, her inverter kanala branşmanla girer · toplam ' + fmtNum(top, 0) + ' m kablo (her hat ayrı kablo).', 'res'); }
       return;
@@ -476,9 +481,9 @@ async function tsKabloCogalt(tip, g, pts) {
     const y = tsYakin(yol, x.p); let p2 = [x.p, y.q, ...yol.slice(y.i)]; if (tip === 'ac') { const d = tsAcDuzelt(p2); if (d) p2 = d.pts; }
     const temiz = p2.filter((q, k) => !k || Math.hypot(q[0] - p2[k - 1][0], q[1] - p2[k - 1][1]) > 1e-3); if (temiz.length < 2) continue;
     const Lx = tsBoy(temiz); top += Lx + (+g.pay || 0);
-    const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: temiz.map((q) => [q[0], q[1], 0]), ges: { ...g } };
+    const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: temiz.map((q) => [q[0], q[1], 0]), ges: { ...g, no: (x.it.ges && x.it.ges.no) || tsSonNo(tip) } };
     const a = temiz[0], b = temiz[1]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
-    yeni.push(pl, { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, h: Math.max(0.5, tsOlcek() * 0.7), rot: ang, s: tsEtiket(tip, g, Lx), ha: 1, va: 0, gesEt: pl.id });
+    yeni.push(pl, { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, h: KABLO_YZ, rot: ang, s: tsEtiket(tip, pl.ges, Lx), ha: 1, va: 0, gesEt: pl.id });
   }
   if (!yeni.length) return;
   addItems(yeni, T.ad.toLowerCase() + ' çoğalt'); renderLayers();

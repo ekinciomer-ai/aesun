@@ -3591,7 +3591,7 @@ function kabinCss() {
     + '.kb .led.on{fill:#1FA463;animation:kbYan 1.6s ease-in-out infinite}.kb .led.uy{fill:#2a78d6}.kb .led.off{fill:#D92D20}'
     + '.kb .sc-dis{fill:#3A4248}.kb .sc-ic{fill:#0C1712}.kb .sc-ad{font-family:ui-monospace,monospace;font-size:9px;fill:#7F9A8A;letter-spacing:.08em}'
     + '.kb .sc-p,.kb .sc-i,.kb .sc-u{font-family:"Share Tech Mono",ui-monospace,monospace}.kb .sc-p{font-size:19px;fill:#FFB02E;filter:drop-shadow(0 0 3px #FFB02E)}.kb .sc-i{font-size:19px;fill:#5CF08F;filter:drop-shadow(0 0 3px #5CF08F)}.kb .sc-u{font-size:11px;fill:#7F9A8A}'
-    + '.kb .pvt:hover rect{stroke:#FFB02E;stroke-width:1.6}.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
+    + '.kb .disk{transform-box:fill-box;transform-origin:center;animation:kbDisk 2.4s linear infinite}.kb .disk.geri{animation-direction:reverse}@keyframes kbDisk{0%{transform:translateX(-64px) scaleX(.3)}25%{transform:translateX(-45px) scaleX(.8)}50%{transform:translateX(0) scaleX(1)}75%{transform:translateX(45px) scaleX(.8)}100%{transform:translateX(64px) scaleX(.3)}}.kb .pvt:hover rect{stroke:#FFB02E;stroke-width:1.6}.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
     + '.kb .guc,.kb .yuk,.kb .cek{fill:none;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .guc{stroke:#1E7A3C}.kb .dc{fill:none;stroke:#1B4F8A;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .dur .dc{animation:none;opacity:.25}.kb .yuk{stroke:#E07B00}.kb .cek{stroke:#B42318}.kb .dur .guc,.kb .dur .yuk,.kb .dur .cek{animation:none;opacity:.25}.kb .led.kap{fill:#C3CDD8}'
     + '@keyframes kbAkis{to{stroke-dashoffset:-16}}@keyframes kbDon{to{transform:rotate(360deg)}}@keyframes kbYan{50%{opacity:.35}}'
     + '@media (prefers-reduced-motion:reduce){.kb .akis,.kb .cark,.kb .led{animation:none!important}}';
@@ -3628,11 +3628,11 @@ async function kabinSema(uretKw) {
   // ---- Sera-2 inverterleri (gerçek görünüm) → Sera-2 AG barası; antrak panosu aynı baradan beslenir; sayaç/trafo barada
   const fsI = Object.entries(((D.fs || {}).invertorler) || {}).filter(([, v]) => v.tesis === 'Sera-2').sort((p1, p2) => thNo(p1[1].ad) - thNo(p2[1].ad));
   const invKw = fsI.reduce((t, [, v]) => t + (Number(v.guc_kw) || 0), 0), uret = uretKw != null ? uretKw : invKw;
-  const IW = 126, IS = 150, IY = 44, IH = 146, FX = 1450, SX = 1640;
+  const IW = 126, IS = 150, IY = 44, IH = 146, LX = 360, FX = X0 + 240, SX = X0 + 20, MX = X0 + 160;
   s += '<defs><linearGradient id="kbInvG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D5DBE1"/><stop offset=".45" stop-color="#F8FAFB"/><stop offset="1" stop-color="#CCD3DA"/></linearGradient>'
     + '<linearGradient id="kbFin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9AA5B1"/><stop offset="1" stop-color="#C4CCD4"/></linearGradient></defs>';
   fsI.forEach(([dn, v], i) => {
-    const x0 = X0 + i * IS, ic = x0 + IW / 2, kw = Number(v.guc_kw) || 0, sebekede = /şebekede/i.test(String(FS_DURUM[String(v.durum)] || v.durum || '')), uret1 = sebekede && kw > 0.5;
+    const x0 = X0 + LX + i * IS, ic = x0 + IW / 2, kw = Number(v.guc_kw) || 0, sebekede = /şebekede/i.test(String(FS_DURUM[String(v.durum)] || v.durum || '')), uret1 = sebekede && kw > 0.5;
     const ia = [v.ia, v.ib, v.ic].filter(z => z != null), iOrt = ia.length ? ia.reduce((t, z) => t + z, 0) / ia.length : null;
     const led = sebekede ? (uret1 ? 'on' : 'uy') : 'off';
     s += '<g class="tik" onclick="invDetayAc(\'fusionsolar\',\'Sera-2\',\'' + esc(dn) + '\')"><title>' + esc(v.ad) + ' · ' + esc(String(FS_DURUM[String(v.durum)] || v.durum || '')) + (v.uab != null ? ' · U ' + say(v.uab) + '/' + say(v.ubc) + '/' + say(v.uca) + ' V' : '') + (v.gunluk_kwh != null ? ' · bugün ' + say(v.gunluk_kwh) + ' kWh' : '') + ' · ayrıntı için tıklayın</title>'
@@ -3653,14 +3653,14 @@ async function kabinSema(uretKw) {
   });
   const bx1 = X0 - 10, bx2 = W - 30;
 
-  if (fsI.length) s += sayac(X0 + fsI.length * IS - 6, IY + 40, 180, 'Σ INVERTER', say(uret, 1), say(uret * 1000 / (r3 * V * PF), 0));
+  if (fsI.length) s += sayac(MX, 58, 170, 'Σ INVERTER', say(uret, 1), say(uret * 1000 / (r3 * V * PF), 0));
   // sayaç / trafo → OG (net yön: inverter − antrak; pompa ve iç tüketim hariç, yaklaşık)
   const netKw = uret - ANT_KW;
   s += '<g class="' + (Math.abs(netKw) < 0.5 ? 'dur' : '') + '"><path class="ln" style="stroke-width:3;opacity:.3;stroke:' + (netKw >= 0 ? '#1E7A3C' : '#B42318') + '" d="M' + SX + ' ' + SB + 'V150"/><path class="' + (netKw >= 0 ? 'guc' : 'cek') + '" d="' + (netKw >= 0 ? 'M' + SX + ' ' + SB + 'V150' : 'M' + SX + ' 150V' + SB) + '"/></g>'
     + '<rect x="' + (SX - 28) + '" y="104" width="56" height="46" rx="5" fill="#F4F4EE" stroke="#10233F" stroke-width="1.4"/><rect x="' + (SX - 20) + '" y="112" width="40" height="14" rx="2" fill="#0C1712"/>' + T(SX, 123, 'kWh', 'sc-u', ' text-anchor="middle" style="fill:#5CF08F"') + T(SX, 142, 'OSOS', '', ' text-anchor="middle" font-size="9" fill="#4A5A70"')
     + '<path class="ln" d="M' + SX + ' 104V94"/><circle class="ln" cx="' + SX + '" cy="80" r="13"/><circle class="ln" cx="' + SX + '" cy="62" r="13"/><path class="ln" d="M' + SX + ' 49V24"/>'
-    + T(SX - 20, 74, 'Trafo', 'sm', ' text-anchor="end"') + T(SX - 8, 20, 'OG · MEDAŞ 31,5 kV', 'sm', ' text-anchor="end"') + T(SX - 34, 130, 'sayaç', 'sm', ' text-anchor="end"')
-    + sayac(SX - 196, 150, 170, netKw >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', say(Math.abs(netKw), 1), say(Math.abs(netKw) * 1000 / (r3 * V * PF), 0));
+    + T(SX + 20, 74, 'Trafo', 'sm') + T(SX + 8, 20, 'OG · MEDAŞ 31,5 kV', 'sm') + T(SX + 34, 130, 'sayaç', 'sm')
+    + sayac(MX, 150, 170, netKw >= 0 ? 'ŞEBEKEYE ≈' : 'ŞEBEKEDEN ≈', say(Math.abs(netKw), 1), say(Math.abs(netKw) * 1000 / (r3 * V * PF), 0));
   // antrak besleme kablosu → ana şalter → dağıtım barası
   s += '<g class="' + (ANT_KW > 0.5 ? '' : 'dur') + '"><path class="ln" style="stroke:#E07B00;stroke-width:3;opacity:.3" d="M' + FX + ' ' + SB + 'V' + BUSY + '"/><path class="yuk" d="M' + FX + ' ' + SB + 'V' + BUSY + '"/></g>'
     + T(FX - 10, SB + 74, 'antrak besleme kablosu', 'sm', ' text-anchor="end"')
@@ -3701,12 +3701,36 @@ async function kabinSema(uretKw) {
       + T(bx + 12, TOP + bh - 12, cih.filter(z => z.cal).length + '/' + cih.length + ' cihaz · ' + say(th / 1000, 2) + ' PH', 'ft');
   });
   // ---- PV string girişleri (FusionSolar canlı V/A): her inverterin üstünde 20 giriş, MPPT çiftleri aynı gerilim
-  const OY = 150; let st = '';
+  const OY = 220; let st = '';
+  // ---- OSOS sayaç (T2) günlük veriş / çekiş: sol üstte mekanik (tamburlu) elektrik sayacı görünümü
+  { const ov = (((D && D.osos) || {}).tekyildiz_2 || {}).veri || {}, gl = Object.keys(ov).sort(), g1 = gl[gl.length - 1], g0 = gl[gl.length - 2];
+    const top = g => { const r = { v: 0, c: 0, s: null }; if (!g) return r; for (const [sa, x] of Object.entries(ov[g] || {})) { r.v += Number(x.veris) || 0; r.c += Number(x.cekis) || 0; if (r.s == null || sa > r.s) r.s = sa; } return r; };
+    const b = top(g1), d = top(g0), bx = X0 - 24, by = 8, bw = LX - 6, bh2 = OY - 16;
+    const tambur = (x, y, val) => { const t = Math.round(val * 10), dz = String(Math.min(t, 9999999)).padStart(6, '0'); let g = '';
+      [...dz].forEach((c, k) => { const son = k === dz.length - 1, xx = x + k * 21;
+        g += '<rect x="' + xx + '" y="' + y + '" width="19" height="28" rx="2" fill="' + (son ? '#9E1B12' : '#15181B') + '"/><rect x="' + xx + '" y="' + y + '" width="19" height="7" rx="2" fill="rgba(255,255,255,.10)"/><rect x="' + xx + '" y="' + (y + 21) + '" width="19" height="7" rx="2" fill="rgba(0,0,0,.35)"/>'
+          + '<text x="' + (xx + 9.5) + '" y="' + (y + 21) + '" text-anchor="middle" style="font-family:\'Share Tech Mono\',ui-monospace,monospace;font-size:20px;fill:#F4F1E6">' + c + '</text>'; });
+      return g + '<circle cx="' + (x + 5 * 21 - 1.5) + '" cy="' + (y + 25) + '" r="1.6" fill="#F4F1E6"/>'; };
+    const yon = b.v - b.c >= 0;
+    st += '<g><title>OSOS T2 (Sera-2) · bugün ' + (g1 ? tarihK(g1) : '') + ': veriş ' + say(b.v) + ' kWh, çekiş ' + say(b.c) + ' kWh · dün: veriş ' + say(d.v) + ', çekiş ' + say(d.c) + ' kWh</title>'
+      + '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh2 + '" rx="16" fill="#E7E3D4" stroke="#8F8A76" stroke-width="1.6"/>'
+      + [[bx + 12, by + 12], [bx + bw - 12, by + 12], [bx + 12, by + bh2 - 12], [bx + bw - 12, by + bh2 - 12]].map(([q, w]) => '<circle cx="' + q + '" cy="' + w + '" r="4" fill="#CFCAB6" stroke="#8F8A76"/><path d="M' + (q - 2.5) + ' ' + w + 'H' + (q + 2.5) + '" stroke="#6F6A58"/>').join('')
+      + T(bx + 26, by + 26, 'OSOS · T2 SERA-2', '', ' font-size="11" font-weight="700" fill="#3B3A33" letter-spacing=".06em"') + T(bx + bw - 26, by + 26, '3~ 400 V · kWh', '', ' text-anchor="end" font-size="9.5" fill="#5C5848"')
+      + '<rect x="' + (bx + 18) + '" y="' + (by + 36) + '" width="' + (bw - 36) + '" height="122" rx="8" fill="#F6F5EE" stroke="#4E4B40" stroke-width="1.4"/>'
+      + '<path d="M' + (bx + 24) + ' ' + (by + 42) + 'L' + (bx + 90) + ' ' + (by + 42) + 'L' + (bx + 50) + ' ' + (by + 152) + 'L' + (bx + 24) + ' ' + (by + 152) + 'Z" fill="rgba(255,255,255,.55)"/>'
+      + T(bx + 30, by + 58, '1.8.0 ÇEKİŞ', '', ' font-size="10" font-weight="700" fill="#B42318" letter-spacing=".04em"') + tambur(bx + 150, by + 42, b.c) + T(bx + 150 + 6 * 21 + 4, by + 62, 'kWh', '', ' font-size="10" fill="#3B3A33"')
+      + T(bx + 30, by + 100, '2.8.0 VERİŞ', '', ' font-size="10" font-weight="700" fill="#1E7A3C" letter-spacing=".04em"') + tambur(bx + 150, by + 84, b.v) + T(bx + 150 + 6 * 21 + 4, by + 104, 'kWh', '', ' font-size="10" fill="#3B3A33"')
+      + T(bx + 30, by + 72, 'bugün', '', ' font-size="9" fill="#5C5848"') + T(bx + 30, by + 114, 'bugün', '', ' font-size="9" fill="#5C5848"')
+      // Ferraris diski: kenardan görünüş, işaret net yöne doğru döner
+      + '<ellipse cx="' + (bx + bw / 2) + '" cy="' + (by + 136) + '" rx="70" ry="5" fill="#B8B3A0" stroke="#6F6A58"/><rect class="disk ' + (yon ? 'ileri' : 'geri') + '" x="' + (bx + bw / 2 - 3) + '" y="' + (by + 131) + '" width="6" height="10" fill="#B42318"/>'
+      + T(bx + bw / 2, by + 152, yon ? '→ şebekeye (veriş)' : '← şebekeden (çekiş)', '', ' text-anchor="middle" font-size="8.5" fill="' + (yon ? '#1E7A3C' : '#B42318') + '"')
+      + T(bx + 26, by + 176, g1 ? tarihK(g1) + ' · son saat ' + (b.s || '—') + ':00 · net ' + (yon ? '+' : '') + say(b.v - b.c) + ' kWh' : 'OSOS verisi yok', '', ' font-size="10" font-weight="600" fill="#3B3A33"')
+      + T(bx + 26, by + 192, g0 ? 'dün ' + tarihK(g0) + ': çekiş ' + say(d.c) + ' · veriş ' + say(d.v) + ' kWh' : '', '', ' font-size="10" fill="#5C5848"') + '</g>'; }
   const ortI = fsI.length ? invKw / fsI.length : 0;
   fsI.forEach(([dn, v], i) => {
-    const x0 = X0 + i * IS, ic = x0 + IW / 2, iv = thFsInv(dn, v, ortI), bosS = new Set(iv.bos || []), rk = {}; (iv.pv || []).forEach(q => { rk[q.n] = q.renk; });
+    const x0 = X0 + LX + i * IS, ic = x0 + IW / 2, iv = thFsInv(dn, v, ortI), bosS = new Set(iv.bos || []), rk = {}; (iv.pv || []).forEach(q => { rk[q.n] = q.renk; });
     const taze = !v.pv_ts || Date.parse(v.pv_ts) > Date.now() - 40 * 60e3, pv = taze ? (v.pv || []) : [];
-    const tw = 23, th = 22, gx = 2, gy = 4, cols = 5, gw = cols * tw + (cols - 1) * gx, sx0 = ic - gw / 2, sy0 = 16;
+    const tw = 23, th = 22, gx = 2, gy = 4, cols = 5, gw = cols * tw + (cols - 1) * gx, sx0 = ic - gw / 2, sy0 = OY - 134;
     let dcW = 0, vS = [];
     pv.forEach(([n, Vv, Aa]) => {
       const j = n - 1, cx0 = sx0 + (j % cols) * (tw + gx), cy0 = sy0 + Math.floor(j / cols) * (th + gy), bos = bosS.has(n), P = (Vv || 0) * (Aa || 0);
@@ -3720,7 +3744,7 @@ async function kabinSema(uretKw) {
           : '<text class="pvd" x="' + f(cx0 + tw / 2, 1) + '" y="' + f(cy0 + 19, 1) + '" text-anchor="middle" font-size="8.5" font-weight="700" style="fill:#fff;font-family:ui-monospace,monospace" data-g="' + say(P / 1000, P >= 9950 ? 1 : 2) + '" data-a="' + say(Aa, 1) + '" data-v="' + say(Vv) + '">' + kbStrDeger(P, Aa, Vv) + '</text>') + '</g>';
     });
     const vOrt = vS.length ? vS.reduce((t, z) => t + z, 0) / vS.length : null, ny = sy0 + 4 * (th + gy) + 2;
-    st += (pv.length ? '<text class="pvh" x="' + f(ic, 1) + '" y="10" text-anchor="middle" font-size="9" fill="#4A5A70" style="cursor:pointer" onclick="kbStrDegis()">' + KB_STR_AD[KB_STR] + '</text>' : T(ic, 10, 'string verisi yok', '', ' text-anchor="middle" font-size="9" fill="#4A5A70"'))
+    st += (pv.length ? '<text class="pvh" x="' + f(ic, 1) + '" y="' + (OY - 140) + '" text-anchor="middle" font-size="9" fill="#4A5A70" style="cursor:pointer" onclick="kbStrDegis()">' + KB_STR_AD[KB_STR] + '</text>' : T(ic, OY - 140, 'string verisi yok', '', ' text-anchor="middle" font-size="9" fill="#4A5A70"'))
       + T(ic, ny + 10, (vOrt != null ? say(vOrt) + ' V · ' : '') + 'DC ' + say(dcW / 1000, 1) + ' kW', '', ' text-anchor="middle" font-size="10" font-weight="600" style="font-family:ui-monospace,monospace" fill="#1B4F8A"')
       + '<g class="' + (dcW > 500 ? '' : 'dur') + '"><path d="M' + ic + ' ' + (ny + 16) + 'V' + (OY + IY - 24) + '" stroke="#1B4F8A" stroke-width="3" opacity=".25"/><path class="dc" d="M' + ic + ' ' + (ny + 16) + 'V' + (OY + IY - 24) + '"/></g>';
   });
@@ -3736,12 +3760,11 @@ async function kabinSema(uretKw) {
       + '<rect x="' + tx + '" y="' + (yb - ust - 11) + '" width="' + (ad.length * 6.9 + 18) + '" height="18" rx="3" fill="#10233F"/>' + T(tx + 9, yb - ust + 2, ad, '', ' font-size="11" font-weight="700" style="fill:#fff" letter-spacing=".04em"');
     [['#8B5A2B', -6], ['#1A1A1A', 0], ['#8C939A', 6]].forEach(([r, d]) => { g += '<path d="M' + (x1 + 14) + ' ' + (yb + d) + 'H' + (x2 - 14) + '" stroke="' + r + '" stroke-width="3.2" stroke-linecap="round"/>'; });
     return g; };
-  const icX = fsI.map((_, i) => X0 + i * IS + IW / 2);
-  let pg = pano(bx1, bx2, SB, 38, 34, 'SERA-2 AG PANOSU · 0,4 kV', X0 + fsI.length * IS + 4);
+  const icX = fsI.map((_, i) => X0 + LX + i * IS + IW / 2);
+  let pg = pano(bx1, bx2, SB, 38, 34, 'SERA-2 AG PANOSU · 0,4 kV', X0 + LX + fsI.length * IS + 4);
   icX.forEach((xx, i) => { pg += '<path d="M' + xx + ' ' + (SB - 38) + 'V' + (SB - 6) + '" stroke="#10233F" stroke-width="1.6"/>' + mccb(xx, SB - 22, 'Q' + (i + 1), true); });
   pg += '<path d="M' + SX + ' ' + (SB - 38) + 'V' + (SB - 6) + '" stroke="#10233F" stroke-width="2"/>' + mccb(SX, SB - 22, 'Q0 · trafo', true, true);
   pg += '<path d="M' + FX + ' ' + (SB + 6) + 'V' + (SB + 34) + '" stroke="#10233F" stroke-width="2"/>' + mccb(FX, SB + 18, 'Q9 · antrak', ANT_KW > 0.1 || true, true);
-  pg += T(bx1 + 14, SB + 50, 'Inverter üretimi ve antrak yükü aynı barada; Q1–Q8 inverter girişleri, Q0 trafo/sayaç, Q9 antrak çıkışı', 'sm');
   const ax1 = xs[0] - CW / 2 + 10, ax2 = xs[8] + CW / 2 - 10;
   pg += pano(ax1, ax2, BUSY, 40, 46, 'ANTRAK PANOSU · DAĞITIM');
   pg += '<path d="M' + FX + ' ' + (BUSY - 40) + 'V' + (BUSY - 6) + '" stroke="#10233F" stroke-width="2"/>' + mccb(FX, BUSY - 22, 'ana şalter', true, true);

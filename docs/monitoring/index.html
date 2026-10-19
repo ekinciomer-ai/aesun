@@ -3591,11 +3591,20 @@ function kabinCss() {
     + '.kb .led.on{fill:#1FA463;animation:kbYan 1.6s ease-in-out infinite}.kb .led.uy{fill:#2a78d6}.kb .led.off{fill:#D92D20}'
     + '.kb .sc-dis{fill:#3A4248}.kb .sc-ic{fill:#0C1712}.kb .sc-ad{font-family:ui-monospace,monospace;font-size:9px;fill:#7F9A8A;letter-spacing:.08em}'
     + '.kb .sc-p,.kb .sc-i,.kb .sc-u{font-family:"Share Tech Mono",ui-monospace,monospace}.kb .sc-p{font-size:19px;fill:#FFB02E;filter:drop-shadow(0 0 3px #FFB02E)}.kb .sc-i{font-size:19px;fill:#5CF08F;filter:drop-shadow(0 0 3px #5CF08F)}.kb .sc-u{font-size:11px;fill:#7F9A8A}'
-    + '.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
+    + '.kb .pvt:hover rect{stroke:#FFB02E;stroke-width:1.6}.kb .tik{cursor:pointer}.kb .tik:hover .cih{stroke:#10233F;stroke-width:2}'
     + '.kb .guc,.kb .yuk,.kb .cek{fill:none;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .guc{stroke:#1E7A3C}.kb .dc{fill:none;stroke:#1B4F8A;stroke-width:3;stroke-dasharray:6 8;animation:kbAkis .7s linear infinite}.kb .dur .dc{animation:none;opacity:.25}.kb .yuk{stroke:#E07B00}.kb .cek{stroke:#B42318}.kb .dur .guc,.kb .dur .yuk,.kb .dur .cek{animation:none;opacity:.25}.kb .led.kap{fill:#C3CDD8}'
     + '@keyframes kbAkis{to{stroke-dashoffset:-16}}@keyframes kbDon{to{transform:rotate(360deg)}}@keyframes kbYan{50%{opacity:.35}}'
     + '@media (prefers-reduced-motion:reduce){.kb .akis,.kb .cark,.kb .led{animation:none!important}}';
   document.head.appendChild(st);
+}
+// String kutularında gösterilen değer: güç (varsayılan) → akım → gerilim; herhangi bir stringe dokununca hepsi değişir
+let KB_STR = 'g';
+const KB_STR_AD = { g: 'stringler · kW (dokun: A)', a: 'stringler · A (dokun: V)', v: 'stringler · V (dokun: kW)' };
+const kbStrDeger = (P, A, V) => KB_STR === 'a' ? say(A, 1) : KB_STR === 'v' ? say(V) : say(P / 1000, P >= 9950 ? 1 : 2);
+function kbStrDegis() {
+  KB_STR = KB_STR === 'g' ? 'a' : KB_STR === 'a' ? 'v' : 'g';
+  document.querySelectorAll('svg.kb .pvd').forEach(e => { e.textContent = e.dataset[KB_STR]; });
+  document.querySelectorAll('svg.kb .pvh').forEach(e => { e.textContent = KB_STR_AD[KB_STR]; });
 }
 async function kabinSema(uretKw) {
   kabinCss();
@@ -3703,14 +3712,15 @@ async function kabinSema(uretKw) {
       const j = n - 1, cx0 = sx0 + (j % cols) * (tw + gx), cy0 = sy0 + Math.floor(j / cols) * (th + gy), bos = bosS.has(n), P = (Vv || 0) * (Aa || 0);
       if (!bos) { dcW += P; if (Vv > 50) vS.push(Vv); }
       const renk = bos ? '#C3CDD8' : rk[n] === TH_R.kirmizi ? '#B42318' : rk[n] === TH_R.sari ? '#C77700' : Aa > 0.2 ? '#1B4F8A' : '#5B6B7C';
-      st += '<g><title>PV' + n + (bos ? ' · boş giriş' : '') + ' · ' + say(Vv, 1) + ' V × ' + say(Aa, 2) + ' A = ' + say(P / 1000, 2) + ' kW</title>'
+      st += '<g class="pvt" style="cursor:pointer" onclick="kbStrDegis()"><title>PV' + n + (bos ? ' · boş giriş' : '') + ' · ' + say(Vv, 1) + ' V × ' + say(Aa, 2) + ' A = ' + say(P / 1000, 2) + ' kW</title>'
         + '<rect x="' + cx0 + '" y="' + cy0 + '" width="' + tw + '" height="' + th + '" rx="1.5" fill="' + renk + '" stroke="#0E2A47" stroke-width=".6"/>'
         + (bos ? '' : '<path d="M' + (cx0 + tw / 2) + ' ' + cy0 + 'V' + (cy0 + th) + 'M' + cx0 + ' ' + (cy0 + th / 2) + 'H' + (cx0 + tw) + '" stroke="rgba(255,255,255,.18)" stroke-width=".6"/>')
         + T(cx0 + tw / 2, cy0 + 9, n, '', ' text-anchor="middle" font-size="7" style="fill:rgba(255,255,255,.75)"')
-        + T(cx0 + tw / 2, cy0 + 19, bos ? '—' : say(Aa, 1), '', ' text-anchor="middle" font-size="8.5" font-weight="700" style="fill:#fff;font-family:ui-monospace,monospace"') + '</g>';
+        + (bos ? T(cx0 + tw / 2, cy0 + 19, '—', '', ' text-anchor="middle" font-size="8.5" font-weight="700" style="fill:#fff;font-family:ui-monospace,monospace"')
+          : '<text class="pvd" x="' + f(cx0 + tw / 2, 1) + '" y="' + f(cy0 + 19, 1) + '" text-anchor="middle" font-size="8.5" font-weight="700" style="fill:#fff;font-family:ui-monospace,monospace" data-g="' + say(P / 1000, P >= 9950 ? 1 : 2) + '" data-a="' + say(Aa, 1) + '" data-v="' + say(Vv) + '">' + kbStrDeger(P, Aa, Vv) + '</text>') + '</g>';
     });
     const vOrt = vS.length ? vS.reduce((t, z) => t + z, 0) / vS.length : null, ny = sy0 + 4 * (th + gy) + 2;
-    st += T(ic, 10, pv.length ? 'stringler · A' : 'string verisi yok', '', ' text-anchor="middle" font-size="9" fill="#4A5A70"')
+    st += (pv.length ? '<text class="pvh" x="' + f(ic, 1) + '" y="10" text-anchor="middle" font-size="9" fill="#4A5A70" style="cursor:pointer" onclick="kbStrDegis()">' + KB_STR_AD[KB_STR] + '</text>' : T(ic, 10, 'string verisi yok', '', ' text-anchor="middle" font-size="9" fill="#4A5A70"'))
       + T(ic, ny + 10, (vOrt != null ? say(vOrt) + ' V · ' : '') + 'DC ' + say(dcW / 1000, 1) + ' kW', '', ' text-anchor="middle" font-size="10" font-weight="600" style="font-family:ui-monospace,monospace" fill="#1B4F8A"')
       + '<g class="' + (dcW > 500 ? '' : 'dur') + '"><path d="M' + ic + ' ' + (ny + 16) + 'V' + (OY + IY - 24) + '" stroke="#1B4F8A" stroke-width="3" opacity=".25"/><path class="dc" d="M' + ic + ' ' + (ny + 16) + 'V' + (OY + IY - 24) + '"/></g>';
   });

@@ -1,5 +1,6 @@
 #!/bin/bash
 # Bağımsız demo (Mining Takip Sistemi): http://185.22.184.51  · kullanıcı/şifre demo/demo (Caddy basic_auth).
+# NOT (19 Eki): demo artık https://IP üzerinde (islem_demo_https). Güncelleme için islem_demo_guncelle kullanın; bu betik port 80 bloğu ekler.
 # Yalnız aesun-api yeniden derlenir ve Caddy'ye IP bloğu eklenir; diğer uygulamalara dokunulmaz. Güvenlik bölümü yalnız okur.
 set -euo pipefail
 IP=185.22.184.51

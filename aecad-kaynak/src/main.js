@@ -190,7 +190,10 @@ function init() {
   }
   window.enterKey = enterKey;
   inp.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || (e.key === ' ' && !(S.pending && S.pending.kind === 'text'))) { e.preventDefault(); enterKey(); }
+    // boşluk = Enter yalnız komut beklerken (nokta/sayı girişi) ya da yazılan tek kelime bilinen bir komutsa; aksi halde cümle yazılır
+    const komutMu = (v) => { const k = v.trim().toUpperCase().replace(/İ/g, 'I').replace(/Ş/g, 'S').replace(/Ç/g, 'C').replace(/Ö/g, 'O').replace(/Ü/g, 'U').replace(/Ğ/g, 'G').replace(/^[_.\-]/, ''); return !k || !!ALIAS[k]; };
+    const bosluk = e.key === ' ' && (S.pending ? S.pending.kind !== 'text' : komutMu(inp.value));
+    if (e.key === 'Enter' || bosluk) { e.preventDefault(); enterKey(); }
     else if (e.key === 'Escape') { e.preventDefault(); inp.value = ''; if (S.cmd) cancelCmd(); else setSel([]); }
   });
   document.addEventListener('keydown', (e) => {

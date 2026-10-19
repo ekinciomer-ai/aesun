@@ -210,7 +210,9 @@ function sohbetNiyet(T) {
   if (va) { const v = { kuzey: 'north', güney: 'south', orta: 'center' }[va[2]]; set.push(() => { gv('g-valign').value = v; }); yap.push('sıra başlangıcı ' + va[2]); }
   if (/kablo\S*\s*(çiz|planı)|kablo planı/.test(T)) is.push(['kablo planı', async () => { if (!tsInverterler().length) return 'Açık yerleşimde inverter yok; önce "yerleşimi çiz" deyin ve bir seçeneği açın.'; await pjKabloOto(); return null; }]);
   else {
-    if (/\bdc\s*(oto|ata|otomatik)/.test(T)) is.push(['DC otomatik atama', async () => { await CMD.GDCOTO(); return null; }]);
+    if (/alt\s*\/?\s*üst string|üst\s*\/?\s*alt string/.test(T)) { set.push(() => { gv('p-strtip').value = 'altust'; }); yap.push('string düzeni alt/üst'); }
+  else if (/tek masa tek string/.test(T)) { set.push(() => { gv('p-strtip').value = 'tek'; }); yap.push('string düzeni tek masa'); }
+  if (/\bdc\s*(oto|ata|otomatik)/.test(T)) is.push(['DC otomatik atama', async () => { await CMD.GDCOTO(); return null; }]);
     if (/\bac\s*(oto|otomatik)|ac kablo\S*\s*çiz/.test(T)) is.push(['AC otomatik', async () => { await CMD.GACOTO(); return null; }]);
   }
   if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);

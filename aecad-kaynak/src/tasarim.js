@@ -870,7 +870,7 @@ async function tsAcTekEkle(it) {
   const pl = { id: newId(), t: 'pline', layer: TS.ac.kat, c: TS.ac.renk, lt: '', cl: false, pts: yol.map((q) => [q[0], q[1], 0]), ges: g };
   const e = tsEtiketYeri(yol, tohum);
   addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); tsKanalCiz(); renderLayers();
-  msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Geri al ile kaldırılır.', 'res');
+  msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Tasarım bitince "kabloları düzenle" ile tüm AC kablolar tek kanalda toparlanır.', 'res');
 }
 function tsDcInvYenile(ids) {   // verilen inverterlerin stringleri atamaya göre yeniden çizilir (atama çizgisi yerine string)
   const at = tsAtamalar(); S.doc.addLayer('GES-DC-KABLO', 4); const pairs = [];
@@ -1104,13 +1104,13 @@ CMD.GDCCIZ = async () => {
 };
 // AC otomatik (kullanıcı kuralı 19.10.2026): tek tıkla tüm inverterlerden en yakın trafo binasının AG panosuna (ADP) kablo —
 // TM başına ortak kanal ağı (ana hat + branşman), 1 m kanal, arazi içi, masa/inverter/binaya ≥ 0,5 m; numara AC-n.
-CMD.GACOTO = async (vHazir) => {
+CMD.GACOTO = async (vHazir, zorla) => {
   const inv = tsInverterler(), tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
   if (!inv.length || !tms.length) { msg('Önce inverter (İnverter +) ve trafo binası (Trafo +) ekleyin.', 'err'); return; }
   const tol = 6, eski = [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
   const bagli = new Set(); for (const k of eski) { const x = inv.find((y) => Math.hypot(y.p[0] - k.pts[0][0], y.p[1] - k.pts[0][1]) <= tol); if (x) bagli.add(x.it.id); }
   let hepsi = true;
-  if (eski.length) { const r = await askDlg('AC kablo otomatik', eski.length + ' AC kablo zaten var (' + bagli.size + ' inverter bağlı). Ne yapılsın?', [['Hepsini yeniden çiz', 'tum', 'primary'], ['Yalnız kablosuz ' + (inv.length - bagli.size) + ' inverter', 'eksik', 'ghost'], ['Vazgeç', null, 'ghost']]); if (!r) return; hepsi = r === 'tum'; }
+  if (eski.length && !zorla) { const r = await askDlg('AC kablo otomatik', eski.length + ' AC kablo zaten var (' + bagli.size + ' inverter bağlı). Ne yapılsın?', [['Hepsini yeniden çiz', 'tum', 'primary'], ['Yalnız kablosuz ' + (inv.length - bagli.size) + ' inverter', 'eksik', 'ghost'], ['Vazgeç', null, 'ghost']]); if (!r) return; hepsi = r === 'tum'; }
   const v = vHazir && vHazir.kablo ? vHazir : await formDlg('AC kablo (otomatik)', TS.ac.alan); if (!v) return;
   const hedef = hepsi ? inv : inv.filter((x) => !bagli.has(x.it.id)); if (!hedef.length) { msg('Kablosuz inverter yok.', 'res'); return; }
   busy('AC kablolar çiziliyor…'); await tick();
@@ -1139,6 +1139,14 @@ CMD.GACOTO = async (vHazir) => {
   } finally { busy(null); }
 };
 Object.assign(ALIAS, { GACOTO: 'GACOTO', ACOTO: 'GACOTO' }); Object.assign(LABEL, { GACOTO: 'AC OTOMATİK' });
+// KABLOLARI DÜZENLE (kullanıcı 20.10.2026): inverter tasarımı bitince tüm AC kablolar AG hat algoritmasıyla baştan, tek ortak kanalda
+// yeniden çizilir (eklerken oluşan karışıklık gider). Kablo tipi/payı mevcut AC kablodan alınır; soru sorulmaz.
+CMD.GKDUZEN = async () => {
+  const ac = [...S.doc.items.values()].find((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
+  const v = ac ? { kablo: ac.ges.kablo, pay: ac.ges.pay } : { kablo: pv('p-ack') || '3x240/120 NA2XY', pay: 10 };
+  await CMD.GACOTO(v, true);
+};
+Object.assign(ALIAS, { GKDUZEN: 'GKDUZEN', KABLODUZENLE: 'GKDUZEN', KDUZENLE: 'GKDUZEN' }); Object.assign(LABEL, { GKDUZEN: 'KABLOLARI DÜZENLE' });
 Object.assign(ALIAS, { GDCCIZ: 'GDCCIZ', DCCIZ: 'GDCCIZ' }); Object.assign(LABEL, { GDCCIZ: 'DC ÇİZ' });
 Object.assign(ALIAS, { GINVEKLE: 'GINVEKLE', INVEKLE: 'GINVEKLE', GTMEKLE: 'GTMEKLE', TRAFOEKLE: 'GTMEKLE', GDMEKLE: 'GDMEKLE', DMEKLE: 'GDMEKLE', GOGK: 'GOGK', OGKABLO: 'GOGK', GACK: 'GACK', ACKABLO: 'GACK', GDCK: 'GDCK', DCKABLO: 'GDCK', GVERI: 'GVERI', VERI: 'GVERI' });
 Object.assign(LABEL, { GINVEKLE: 'İNVERTER EKLE', GTMEKLE: 'TRAFO EKLE', GDMEKLE: 'DM EKLE', GOGK: 'OG KABLO', GACK: 'AC KABLO', GDCK: 'DC ATA', GVERI: 'VERİ DÜZENLE' });

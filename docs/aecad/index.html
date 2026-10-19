@@ -3490,7 +3490,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610192350', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610200003', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; busy(m.stage); return; }
@@ -3851,7 +3851,7 @@ function pjAltEkle(a) { PJ.alt.push({ ...a, durum: 'bekliyor' }); pjAltCiz(); pj
 function pjYerHavuzN() { const c = navigator.hardwareConcurrency || 2, m = navigator.deviceMemory || 8; return Math.max(1, Math.min(6, c - 2, m >= 16 ? 6 : m >= 8 ? 4 : m >= 4 ? 2 : 1)); }   // 22 çekirdek / 32 GB → 6 seçenek aynı anda
 function pjYerIsci(k) {
   PJ.yerHavuz = PJ.yerHavuz || []; let o = PJ.yerHavuz[k]; if (o && o.w) return o;
-  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610192350', document.baseURI).href), alt: null };
+  o = PJ.yerHavuz[k] = { w: new Worker(new URL('gesciz-worker.js?v=2610200003', document.baseURI).href), alt: null };
   o.w.onmessage = (e) => {
     const m = e.data, a = o.alt; if (!a || m.id !== a.seq) return;
     if (m.stage) { a.asama = m.stage; pjAltCiz(); return; }
@@ -4101,6 +4101,7 @@ function sohbetNiyet(T) {
     is.push(['trafo ' + kva + ' kVA katları + yerleşim', async () => { const s_ = gv('p-trafo'); if (![...s_.options].some((o) => +o.value === kva)) s_.add(new Option(kva + ' kVA', kva)); s_.value = kva; const it = gv('p-invtr'); if (it) it.value = ''; pjAutoHints(); pjSave(); if (typeof tfSync === 'function') tfSync();
       const a_ = pjAuto(); pjYerlesim(); return 'Trafo birimi ' + kva + ' kVA: TR başına en çok ' + a_.invTr + ' inverter (' + fmtNum(a_.invTr * a_.invKw, 0) + ' kW, %10 marj); trafo adedi inverter sayısından çıkar, toplam trafo gücü ' + kva + ' kVA\'nın katı. Yerleşim seçenekleri yeniden hesaplanıyor.'; }]); }
   else if (/yerleşim\S*\s*(tekrar|yeniden)/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
+  if (/kablo\S*\s*düzenle|kablo\S*\s*toparla/.test(T)) is.push(['kabloları düzenle', async () => { await CMD.GKDUZEN(); return null; }]);
   if (/son\s*hal|onayla|onay ver|projeyi (yeniden )?üret|yeniden hesapla/.test(T)) is.push(['son hali onayla', async () => { await pjSonHalOnayla(); return null; }]);
   if (/arazi\S*\s*doldur/.test(T)) is.push(['arazi doldur', async () => { if (PJ.srcDoc) pjBack(); await CMD.GFILL(); return null; }]);
   if (/yerleşim\S*\s*(çiz|seçenek|karşılaştır)|seçenekleri/.test(T)) is.push(['yerleşim seçenekleri', async () => { pjYerlesim(); return null; }]);
@@ -4143,7 +4144,7 @@ async function gesSohbet(metin) {
 // ---- Komut listesi (kullanıcı kuralı 19.10.2026): tanınan kalıplar tıklanabilir listede. Sayılı kalıp tıklanınca komut satırına
 // yazılır ve sayı seçili gelir (değiştirip Enter); sayısız kalıp tıklanınca hemen uygulanır.
 const KOMUT_LISTE = [
-  ['İşlem', ['arazi doldur', 'yerleşimi çiz ve seçenekleri karşılaştır', 'kabloları çiz', 'DC oto', 'AC oto', 'son hali onayla', 'proje paftalarını oluştur']],
+  ['İşlem', ['arazi doldur', 'yerleşimi çiz ve seçenekleri karşılaştır', 'kabloları çiz', 'kabloları düzenle', 'DC oto', 'AC oto', 'son hali onayla', 'proje paftalarını oluştur']],
   ['İnverter', ['inverterleri trafoya yaklaştır', 'inverterleri ortala', 'inverterleri yol kenarına al', 'inverter optimum', '{10} inverter', 'inverter {125} kW', 'TR{1} INV{3} doğuya {20} m', 'TR{1} INV{3} batıya {20} m', 'TR{1} INV{3} kuzeye {20} m', 'TR{1} INV{3} güneye {20} m']],
   ['Trafo / DM', ['toplam trafo gücünü 1600 kVA\'nın katları yap, yerleşimi tekrar yap', 'toplam trafo gücünü 2000 kVA\'nın katları yap, yerleşimi tekrar yap', 'trafo {1600}', 'TM{1} kuzeye {30} m', 'TM{1} güneye {30} m', 'TM{1} doğuya {30} m', 'TM{1} batıya {30} m', 'TM batı', 'TM doğu']],
   ['Masa ve yerleşim', ['eğim {20}', '{2}V{13} masa', 'çekme {4} m', 'sıra açıklığı {4}', 'azimut {10}', '{25} MWp', 'arazinin tamamı', 'DC/AC {1.25}', 'hizalama doğu', 'hizalama batı', 'hizalama orta', 'hizalama opt', 'sıra başlangıcı kuzey', 'sıra başlangıcı güney', 'sıra başlangıcı orta']],
@@ -5328,7 +5329,7 @@ async function tsAcTekEkle(it) {
   const pl = { id: newId(), t: 'pline', layer: TS.ac.kat, c: TS.ac.renk, lt: '', cl: false, pts: yol.map((q) => [q[0], q[1], 0]), ges: g };
   const e = tsEtiketYeri(yol, tohum);
   addItems([pl, { id: newId(), t: 'text', layer: TS.ac.kat, c: TS.ac.renk, lt: '', x: e.x, y: e.y, h: KABLO_YZ, rot: e.rot, s: tsEtiket('ac', g, L), ha: 1, va: 0, gesEt: pl.id }], 'AC otomatik'); tsKanalCiz(); renderLayers();
-  msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Geri al ile kaldırılır.', 'res');
+  msg('INV-' + it.ges.no + ' için AC kablo AG panoya bağlandı (' + g.kablo + ', ' + fmtNum(L + (+g.pay || 0), 0) + ' m, ortak kanal). Tasarım bitince "kabloları düzenle" ile tüm AC kablolar tek kanalda toparlanır.', 'res');
 }
 function tsDcInvYenile(ids) {   // verilen inverterlerin stringleri atamaya göre yeniden çizilir (atama çizgisi yerine string)
   const at = tsAtamalar(); S.doc.addLayer('GES-DC-KABLO', 4); const pairs = [];
@@ -5562,13 +5563,13 @@ CMD.GDCCIZ = async () => {
 };
 // AC otomatik (kullanıcı kuralı 19.10.2026): tek tıkla tüm inverterlerden en yakın trafo binasının AG panosuna (ADP) kablo —
 // TM başına ortak kanal ağı (ana hat + branşman), 1 m kanal, arazi içi, masa/inverter/binaya ≥ 0,5 m; numara AC-n.
-CMD.GACOTO = async (vHazir) => {
+CMD.GACOTO = async (vHazir, zorla) => {
   const inv = tsInverterler(), tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
   if (!inv.length || !tms.length) { msg('Önce inverter (İnverter +) ve trafo binası (Trafo +) ekleyin.', 'err'); return; }
   const tol = 6, eski = [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
   const bagli = new Set(); for (const k of eski) { const x = inv.find((y) => Math.hypot(y.p[0] - k.pts[0][0], y.p[1] - k.pts[0][1]) <= tol); if (x) bagli.add(x.it.id); }
   let hepsi = true;
-  if (eski.length) { const r = await askDlg('AC kablo otomatik', eski.length + ' AC kablo zaten var (' + bagli.size + ' inverter bağlı). Ne yapılsın?', [['Hepsini yeniden çiz', 'tum', 'primary'], ['Yalnız kablosuz ' + (inv.length - bagli.size) + ' inverter', 'eksik', 'ghost'], ['Vazgeç', null, 'ghost']]); if (!r) return; hepsi = r === 'tum'; }
+  if (eski.length && !zorla) { const r = await askDlg('AC kablo otomatik', eski.length + ' AC kablo zaten var (' + bagli.size + ' inverter bağlı). Ne yapılsın?', [['Hepsini yeniden çiz', 'tum', 'primary'], ['Yalnız kablosuz ' + (inv.length - bagli.size) + ' inverter', 'eksik', 'ghost'], ['Vazgeç', null, 'ghost']]); if (!r) return; hepsi = r === 'tum'; }
   const v = vHazir && vHazir.kablo ? vHazir : await formDlg('AC kablo (otomatik)', TS.ac.alan); if (!v) return;
   const hedef = hepsi ? inv : inv.filter((x) => !bagli.has(x.it.id)); if (!hedef.length) { msg('Kablosuz inverter yok.', 'res'); return; }
   busy('AC kablolar çiziliyor…'); await tick();
@@ -5597,6 +5598,14 @@ CMD.GACOTO = async (vHazir) => {
   } finally { busy(null); }
 };
 Object.assign(ALIAS, { GACOTO: 'GACOTO', ACOTO: 'GACOTO' }); Object.assign(LABEL, { GACOTO: 'AC OTOMATİK' });
+// KABLOLARI DÜZENLE (kullanıcı 20.10.2026): inverter tasarımı bitince tüm AC kablolar AG hat algoritmasıyla baştan, tek ortak kanalda
+// yeniden çizilir (eklerken oluşan karışıklık gider). Kablo tipi/payı mevcut AC kablodan alınır; soru sorulmaz.
+CMD.GKDUZEN = async () => {
+  const ac = [...S.doc.items.values()].find((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
+  const v = ac ? { kablo: ac.ges.kablo, pay: ac.ges.pay } : { kablo: pv('p-ack') || '3x240/120 NA2XY', pay: 10 };
+  await CMD.GACOTO(v, true);
+};
+Object.assign(ALIAS, { GKDUZEN: 'GKDUZEN', KABLODUZENLE: 'GKDUZEN', KDUZENLE: 'GKDUZEN' }); Object.assign(LABEL, { GKDUZEN: 'KABLOLARI DÜZENLE' });
 Object.assign(ALIAS, { GDCCIZ: 'GDCCIZ', DCCIZ: 'GDCCIZ' }); Object.assign(LABEL, { GDCCIZ: 'DC ÇİZ' });
 Object.assign(ALIAS, { GINVEKLE: 'GINVEKLE', INVEKLE: 'GINVEKLE', GTMEKLE: 'GTMEKLE', TRAFOEKLE: 'GTMEKLE', GDMEKLE: 'GDMEKLE', DMEKLE: 'GDMEKLE', GOGK: 'GOGK', OGKABLO: 'GOGK', GACK: 'GACK', ACKABLO: 'GACK', GDCK: 'GDCK', DCKABLO: 'GDCK', GVERI: 'GVERI', VERI: 'GVERI' });
 Object.assign(LABEL, { GINVEKLE: 'İNVERTER EKLE', GTMEKLE: 'TRAFO EKLE', GDMEKLE: 'DM EKLE', GOGK: 'OG KABLO', GACK: 'AC KABLO', GDCK: 'DC ATA', GVERI: 'VERİ DÜZENLE' });

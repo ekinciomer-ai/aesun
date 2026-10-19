@@ -262,9 +262,16 @@ function tsAcAg(kalan, A, tm, tohum) {
             const uzakY = inv_.reduce((m, q) => (Math.abs(q[1] - Al[1]) > Math.abs(m[1] - Al[1]) ? q : m))[1] + yon * 0.5;
             const Es = ilgili.filter((r) => (r.yc - Al[1]) * yon > -1 && (uzakY - r.yc) * yon > -1).sort((a, b) => (a.yc - b.yc) * yon).map((r) => [dogu ? r.x1 : r.x0, r.yc]);
             if (!Es.length) continue;
-            let dv = [0, yon]; if (Es.length >= 2) { const a = Es[0], b = Es[Es.length - 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; dv = [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; }
-            let nv = [dv[1], -dv[0]]; if (dot(Al, nv) < dot(Es[0], nv)) nv = [-nv[0], -nv[1]];   // normal TM'ye bakar
-            const c0 = Math.max(...Es.map((p) => dot(p, nv))), tF = dot(Al, dv);
+            // Doğrultu: uç köşelere EN YAKIN oturan tek düz çizgi — aday doğrultular köşe çiftlerinden; en yakın köşeden 3 m, toplam açıklık en az,
+            // çizgi arazi içinde kalmalı. (Uçlar kırık dizilmişse bile tek düz çizgi; hull zinciri gibi kırık yapılmaz.)
+            const adaylar = [[0, yon]]; for (let i = 0; i < Es.length; i++) for (let j = i + 1; j < Es.length; j++) { const L = Math.hypot(Es[j][0] - Es[i][0], Es[j][1] - Es[i][1]); if (L > 1) adaylar.push([(Es[j][0] - Es[i][0]) / L * yon * Math.sign(Es[j][1] - Es[i][1] || 1), (Es[j][1] - Es[i][1]) / L * yon * Math.sign(Es[j][1] - Es[i][1] || 1)]); }
+            let dv = null, nv = null, c0 = 0, enIyi = Infinity;
+            for (const d_ of adaylar) { let n_ = [d_[1], -d_[0]]; if (dot(Al, n_) < dot(Es[0], n_)) n_ = [-n_[0], -n_[1]];
+              const cc = Math.max(...Es.map((p) => dot(p, n_))) + 3, bosluk = Es.reduce((t, p) => t + (cc - dot(p, n_)), 0);
+              const tF_ = dot(Al, d_), tB_ = Math.max(tF_ + 0.5, ...inv_.map((q) => dot(q, d_) + 3)), N_ = (t) => [n_[0] * cc + d_[0] * t, n_[1] * cc + d_[1] * t];
+              let dis = 0; for (let t = tF_; t <= tB_; t += 2) if (!icinde(N_(t))) dis += 2;
+              const sk = bosluk + dis * 50; if (sk < enIyi) { enIyi = sk; dv = d_; nv = n_; } }
+            c0 = Math.max(...Es.map((p) => dot(p, nv))); const tF = dot(Al, dv);
             let neden = '';
             for (const pay of [3.0, 2.0, 1.5, 1.0, 4.0, 5.0]) {
               const c = c0 + pay, N = (t) => [nv[0] * c + dv[0] * t, nv[1] * c + dv[1] * t];

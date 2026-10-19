@@ -3290,7 +3290,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191227', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191250', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4085,8 +4085,36 @@ function tsAcDuzelt(pts) {
   for (let i = 1; i < yol.length; i++) { const q = yol[i], z = sad[sad.length - 1]; if (Math.hypot(q[0] - z[0], q[1] - z[1]) < 0.05) continue; if (sad.length >= 2) { const k = sad[sad.length - 2], cr = (z[0] - k[0]) * (q[1] - z[1]) - (z[1] - k[1]) * (q[0] - z[0]); if (Math.abs(cr) < 1e-3 * Math.hypot(q[0] - k[0], q[1] - k[1])) { sad[sad.length - 1] = q; continue; } } sad.push(q); }
   return { pts: sad, not: (iv && P0 === iv.p ? 'inverterden' : 'başlangıçtan') + ' TM-' + (tm.ges.no || '') + ' AG panosuna (ADP), 1 m kanal içinde (masa/inverter/sınıra ≥ 0,5 m)' + (dz ? ', ' + dz + ' parça en az kırıkla yeniden yönlendirildi' : ', çizdiğiniz güzergâh korundu') + (bulunamadi ? ' (' + bulunamadi + ' parçada engelsiz yol bulunamadı — elle kontrol edin)' : '') };
 }
+// AC kanal ağı (kullanıcı kuralı 19.10.2026): kablolar dal budak ayrı gitmez. Ana hat (en uzak inverterden ADP'ye) tek kanal;
+// diğer her inverter kanala en kısa (dik) branşmanla girer, oradan ana hatla aynı güzergâhta ADP'ye gider. Hatlar üst üste tek kanal görünür.
+function tsAcAg(kalan, A, tm, tohum) {
+  const eng = tsEngeller(tm, null).filter((e) => !(e.it.ges && e.it.ges.tip === 'inv') || !kalan.some((x) => x.it === e.it));
+  const tum = [...kalan.map((x) => x.p), A, ...(tohum || []).flat()];
+  const K = tsKanalIzgara(tum, eng, kalan.length ? kalan[0].p : A, A, kalan.map((x) => x.p)); if (!K) return null;
+  const ag = (tohum || []).map((y) => y.map((q) => [q[0], q[1]])), out = new Map();
+  const sirali = kalan.slice().sort((a, b) => Math.hypot(b.p[0] - A[0], b.p[1] - A[1]) - Math.hypot(a.p[0] - A[0], a.p[1] - A[1]));
+  for (const x of sirali) {
+    let yol;
+    if (!ag.length) { const r = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A); yol = r || [x.p, A]; }
+    else {
+      let best = null; for (const y of ag) { const t = tsYakin(y, x.p); if (t && (!best || t.d < best.t.d)) best = { y, t }; }
+      const q = best.t.q, kuyruk = [q, ...best.y.slice(best.t.i)];
+      const br = K.gorur(x.p, q) ? [x.p, q] : (K.yol(x.p, q) || [x.p, q]);
+      yol = [...br.slice(0, -1), ...kuyruk];
+    }
+    const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (Math.hypot(yol[i][0] - sad[sad.length - 1][0], yol[i][1] - sad[sad.length - 1][1]) > 0.05) sad.push(yol[i]);
+    out.set(x.it.id, sad); ag.push(sad);
+  }
+  return out;
+}
+// AC kablo etiketi: hattın kendine ait (kanala girmeden önceki) parçasına
+function tsEtiketYeri(yol, ag) {
+  let k = 0; for (let i = 0; i < yol.length - 1; i++) { const m = [(yol[i][0] + yol[i + 1][0]) / 2, (yol[i][1] + yol[i + 1][1]) / 2]; if (ag.some((y) => y !== yol && (tsYakin(y, m) || { d: 9 }).d < 0.05)) break; k = i; }
+  const a = yol[k], b = yol[k + 1]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
+  return { x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, rot: ang };
+}
 // 1 m kanal ızgarası: engeller 0,5 m şişirilir, arazi dışı ve sınıra 0,5 m'den yakın hücreler dolu; inverter çıkışı ve ADP çevresi açık
-function tsKanalIzgara(U, eng, P0, A) {
+function tsKanalIzgara(U, eng, P0, A, ekAc) {
   const c = 0.5, xs = U.map((q) => q[0]), ys = U.map((q) => q[1]);
   let X0 = Math.min(...xs) - 40, X1 = Math.max(...xs) + 40, Y0 = Math.min(...ys) - 40, Y1 = Math.max(...ys) + 40;
   const B = G.bound && G.bound.length >= 3 ? G.bound : null;
@@ -4116,7 +4144,7 @@ function tsKanalIzgara(U, eng, P0, A) {
   }
   for (const o of eng) isar(o.P, c);
   const ac = (p, r) => { const i0 = Math.round((p[0] - X0) / h), j0 = Math.round((p[1] - Y0) / h), R = Math.ceil(r / h); for (let j = j0 - R; j <= j0 + R; j++) for (let i = i0 - R; i <= i0 + R; i++) if (i >= 0 && j >= 0 && i < nx && j < ny && Math.hypot(i - i0, j - j0) * h <= r && (!B || tsIcinde([cx(i), cy(j)], B))) blk[j * nx + i] = 0; };
-  ac(P0, 1.2); ac(A, 2.2);
+  ac(P0, 1.2); ac(A, 2.2); for (const q of ekAc || []) ac(q, 1.2);
   const hc = (p) => [Math.round((p[0] - X0) / h), Math.round((p[1] - Y0) / h)];
   const dolu = (p) => { const [i, j] = hc(p); return i < 0 || j < 0 || i >= nx || j >= ny || blk[j * nx + i] === 1; };
   const gorur = (a, b) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n; if (dolu([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t])) return false; } return true; };
@@ -4253,16 +4281,28 @@ function tsAkilliYol(P0, A, tm, invIt, toL, toW, eng) {
   for (let i = 1; i < kose.length; i++) { const q = kose[i], z = tem[tem.length - 1]; if (Math.hypot(q[0] - z[0], q[1] - z[1]) < 1e-3) continue; if (tem.length >= 2) { const k = tem[tem.length - 2]; if ((Math.abs(k[0] - z[0]) < 1e-3 && Math.abs(z[0] - q[0]) < 1e-3) || (Math.abs(k[1] - z[1]) < 1e-3 && Math.abs(z[1] - q[1]) < 1e-3)) { tem[tem.length - 1] = q; continue; } } tem.push(q); }
   return tem.map(toW);
 }
-CMD.GKDUZ = async () => {   // mevcut tüm AC kabloları nizami güzergâha getir
-  const pairs = []; let n = 0;
-  for (const it of [...S.doc.items.values()]) {
-    if (!(it.t === 'pline' && it.ges && it.ges.tip === 'ac')) continue;
-    const d = tsAcDuzelt(it.pts.map((q) => [q[0], q[1]])); if (!d) continue; n++;
-    const np = { ...it, pts: d.pts.map((q) => [q[0], q[1], 0]) }; pairs.push([it, np]);
-    for (const e of S.doc.items.values()) if (e.gesEt === it.id) pairs.push([e, { ...e, s: tsEtiket('ac', it.ges, tsBoy(d.pts)) }]);
+CMD.GKDUZ = async () => {   // tüm AC kablolar: ortak kanal ağı (ana hat + branşmanlar), hepsi AG panodan (ADP)
+  const kab = [...S.doc.items.values()].filter((it) => it.t === 'pline' && it.ges && it.ges.tip === 'ac');
+  const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+  if (!kab.length || !tms.length) { msg('Düzeltilecek AC kablo yok (önce Trafo + ile trafo binası ekleyin).', 'err'); return; }
+  const inv = tsInverterler(), pairs = []; let n = 0;
+  for (const tm of tms) {
+    const A = tsAdp(tm), grp = kab.filter((it) => { const e = it.pts[it.pts.length - 1]; return tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - e[0], tsMerkez(b)[1] - e[1]) < Math.hypot(tsMerkez(a)[0] - e[0], tsMerkez(a)[1] - e[1]) ? b : a)) === tm; });
+    if (!grp.length) continue;
+    const bas = grp.map((it) => { const p0 = it.pts[0]; const x = inv.length ? inv.reduce((a, b) => (Math.hypot(b.p[0] - p0[0], b.p[1] - p0[1]) < Math.hypot(a.p[0] - p0[0], a.p[1] - p0[1]) ? b : a)) : null; return { it, x: x && Math.hypot(x.p[0] - p0[0], x.p[1] - p0[1]) < 6 ? x : { it: { id: 'k' + it.id }, p: [p0[0], p0[1]] } }; });
+    bas.sort((a, b) => Math.hypot(b.x.p[0] - A[0], b.x.p[1] - A[1]) - Math.hypot(a.x.p[0] - A[0], a.x.p[1] - A[1]));
+    const ana = tsAcDuzelt(bas[0].it.pts.map((q) => [q[0], q[1]])); if (!ana) continue;   // en uzaktaki hat ana güzergâh (çizilen yol korunur)
+    const M = tsAcAg(bas.slice(1).map((b) => b.x), A, tm, [ana.pts]) || new Map();
+    const tumYol = [ana.pts, ...M.values()];
+    bas.forEach((b, k) => {
+      const yol = k === 0 ? ana.pts : M.get(b.x.it.id); if (!yol) return; n++;
+      const np = { ...b.it, pts: yol.map((q) => [q[0], q[1], 0]) }; pairs.push([b.it, np]);
+      const e = tsEtiketYeri(yol, tumYol);
+      for (const t of S.doc.items.values()) if (t.gesEt === b.it.id) pairs.push([t, { ...t, x: e.x, y: e.y, rot: e.rot, s: tsEtiket('ac', b.it.ges, tsBoy(yol)) }]);
+    });
   }
-  if (!n) { msg('Düzeltilecek AC kablo yok (önce Trafo + ile trafo binası ekleyin).', 'err'); return; }
-  replaceItems(pairs, 'kablo düzelt'); msg(n + ' AC kablo nizami güzergâha getirildi; hepsi AG panodan (ADP) çıkıyor.', 'res');
+  if (!n) { msg('Düzeltilecek AC kablo yok.', 'err'); return; }
+  replaceItems(pairs, 'kablo düzelt'); msg(n + ' AC kablo ortak kanala alındı: ana hat + her inverterden kanala branşman, hepsi AG panodan (ADP).', 'res');
 };
 Object.assign(ALIAS, { GKDUZ: 'GKDUZ', KABLODUZELT: 'GKDUZ' }); Object.assign(LABEL, { GKDUZ: 'KABLO DÜZELT' });
 // ---- AC/DC kabloyu diğer inverterlere çoğalt: çizilen hat ana güzergâh (trunk) sayılır; her inverter en yakın noktadan ona bağlanır ----
@@ -4296,6 +4336,23 @@ async function tsKabloCogalt(tip, g, pts) {
   const r = await askDlg(T.ad + ' — diğer inverterler', 'Çizdiğiniz hat ana güzergâh sayılsın mı? Kablosu olmayan ' + kalan.length + ' invertere de ' + T.ad + ' (' + g.kablo + ') eklenir: her inverter ana hatta en kısa yoldan bağlanır, oradan sizin güzergâhınızla aynı uca gider. Her hat ayrı kablo, boyu ayrı hesaplanır.', [['Evet, ' + kalan.length + ' invertere ekle', 'ok', 'primary'], ['Hayır', null, 'ghost']]);
   if (r !== 'ok') return;
   const yeni = []; let top = 0;
+  if (tip === 'ac') {
+    const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+    const son = yol[yol.length - 1], tm = tms.length ? tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - son[0], tsMerkez(b)[1] - son[1]) < Math.hypot(tsMerkez(a)[0] - son[0], tsMerkez(a)[1] - son[1]) ? b : a)) : null;
+    const M = tm ? tsAcAg(kalan, tsAdp(tm), tm, [yol]) : null;
+    if (M) {
+      const tumYol = [yol, ...M.values()];
+      for (const x of kalan) {
+        const temiz = M.get(x.it.id); if (!temiz || temiz.length < 2) continue;
+        const Lx = tsBoy(temiz); top += Lx + (+g.pay || 0);
+        const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: temiz.map((q) => [q[0], q[1], 0]), ges: { ...g } };
+        const e = tsEtiketYeri(temiz, tumYol);
+        yeni.push(pl, { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: e.x, y: e.y, h: Math.max(0.5, tsOlcek() * 0.7), rot: e.rot, s: tsEtiket(tip, g, Lx), ha: 1, va: 0, gesEt: pl.id });
+      }
+      if (yeni.length) { addItems(yeni, T.ad.toLowerCase() + ' çoğalt'); renderLayers(); msg(yeni.length / 2 + ' invertere ' + T.ad + ' eklendi: ortak kanal, her inverter kanala branşmanla girer · toplam ' + fmtNum(top, 0) + ' m kablo (her hat ayrı kablo).', 'res'); }
+      return;
+    }
+  }
   for (const x of kalan) {
     const y = tsYakin(yol, x.p); let p2 = [x.p, y.q, ...yol.slice(y.i)]; if (tip === 'ac') { const d = tsAcDuzelt(p2); if (d) p2 = d.pts; }
     const temiz = p2.filter((q, k) => !k || Math.hypot(q[0] - p2[k - 1][0], q[1] - p2[k - 1][1]) > 1e-3); if (temiz.length < 2) continue;

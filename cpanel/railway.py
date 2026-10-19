@@ -197,5 +197,8 @@ if ISLEM == "pg_sil":
         not_("Postgres servisi bulunamadı (zaten silinmiş olabilir)"); sys.exit(0)
     if os.environ.get("ONAY") != "evet":
         not_("ONAY=evet verilmeden silinmez"); sys.exit(1)
-    gql("mutation($id:String!){ serviceDelete(id:$id) }", {"id": s["id"]})
+    try:
+        gql("mutation($id:String!,$e:String){ serviceDelete(id:$id, environmentId:$e) }", {"id": s["id"], "e": i["environmentId"]})
+    except Exception as h:
+        not_("silme hatası: " + str(h)); sys.exit(1)
     not_(f"silindi: {p['name']}/{s['name']} (yedek: Actions eseri pg_yedek)")

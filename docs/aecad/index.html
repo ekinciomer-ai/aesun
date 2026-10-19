@@ -3358,7 +3358,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191335', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191338', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4173,8 +4173,11 @@ function tsAcAg(kalan, A, tm, tohum) {
     else {
       let best = null; for (const y of ag) { const t = tsYakin(y, x.p); if (t && (!best || t.d < best.t.d)) best = { y, t }; }
       const q = best.t.q, kuyruk = [q, ...best.y.slice(best.t.i)];
-      const br = K.gorur(x.p, q) ? [x.p, q] : (K.yol(x.p, q) || [x.p, q]);
-      yol = [...br.slice(0, -1), ...kuyruk];
+      const br = K.gorur(x.p, q) ? [x.p, q] : (K.yol(x.p, q) || null);
+      const ortak = br ? [...br.slice(0, -1), ...kuyruk] : null;
+      // doğrudan ADP'ye yol ortak kanaldan belirgin kısaysa (> %15) doğrudan git — kabloyu boşuna dolaştırma
+      const dog = K.gorur(x.p, A) ? [x.p, A] : K.yol(x.p, A);
+      yol = !ortak ? (dog || [x.p, q, ...kuyruk.slice(1)]) : (dog && tsBoy(dog) * 1.15 < tsBoy(ortak) ? dog : ortak);
     }
     const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (Math.hypot(yol[i][0] - sad[sad.length - 1][0], yol[i][1] - sad[sad.length - 1][1]) > 0.05) sad.push(yol[i]);
     out.set(x.it.id, sad); ag.push(sad);

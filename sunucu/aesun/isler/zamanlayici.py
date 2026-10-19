@@ -41,8 +41,20 @@ def hazirla():
         if r.returncode: raise RuntimeError(r.stderr[-300:])
     sh("git", "config", "user.name", "aesun-bot"); sh("git", "config", "user.email", "aesun-bot@users.noreply.github.com")
 
-def calistir(ad, komut, yollar, mesaj):
+def git_esitle():
+    """pull --rebase; yarıda kalmış rebase'i (çakışma, kesinti) temizler, çakışmada yerel iş çıktısını korur (-X theirs = yeniden uygulanan yerel commit)."""
+    if os.path.isdir(D + "/.git/rebase-merge") or os.path.isdir(D + "/.git/rebase-apply"):
+        sh("git", "rebase", "--abort")
     r = sh("git", "pull", "--rebase", "--autostash", "-q")
+    if r.returncode:
+        sh("git", "rebase", "--abort")
+        r = sh("git", "pull", "--rebase", "--autostash", "-X", "theirs", "-q")
+        if r.returncode:
+            sh("git", "rebase", "--abort")
+    return r
+
+def calistir(ad, komut, yollar, mesaj):
+    git_esitle()
     t0 = time.time()
     r = subprocess.run(["bash", "is_calistir.sh", ad, *komut], cwd=D, capture_output=True, text=True, timeout=900, env={**os.environ, **SIR, "YEREL_GIT": "1"})
     if yollar:
@@ -50,7 +62,7 @@ def calistir(ad, komut, yollar, mesaj):
         if sh("git", "diff", "--cached", "--quiet").returncode:
             sh("git", "commit", "-qm", mesaj)
             for _ in range(4):
-                if not sh("git", "pull", "--rebase", "--autostash", "-q").returncode and not sh("git", "push", "-q").returncode: break
+                if not git_esitle().returncode and not sh("git", "push", "-q").returncode: break
                 time.sleep(5)
     return {"son": datetime.datetime.now().isoformat(timespec="seconds"), "sn": round(time.time() - t0), "cikti": (r.stdout or "")[-300:]}
 
@@ -66,7 +78,7 @@ def main():
             son_dk = dk
             global SIR
             try:
-                hazirla(); sh("git", "pull", "--rebase", "--autostash", "-q"); SIR = sirlar()
+                hazirla(); git_esitle(); SIR = sirlar()
             except Exception as e:
                 SIR = {}; durum["hata"] = "sır: " + str(e)[:200]
             else:

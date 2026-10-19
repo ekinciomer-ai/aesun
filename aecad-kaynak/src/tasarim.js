@@ -286,7 +286,14 @@ function tsAcAg(kalan, A, tm, tohum) {
     }
     let x, yol;
     if (en) { x = en.x; yol = en.r.pts; }
-    else { x = kal.reduce((a, b) => (d(b.p) > d(a.p) ? b : a)); yol = K.gorur(x.p, A) && K.dik(x.p, A) ? [x.p, A] : K.yol(x.p, A, { duz: true }); }
+    else {
+      x = kal.reduce((a, b) => (d(b.p) > d(a.p) ? b : a));
+      // ağ varsa ağın en yakın noktasına (ayrı ana hat açılmaz); yoksa ADP'ye ana hat
+      let hd = null;
+      for (const y of ag) for (let k = 0; k < y.length - 1; k++) { const p = y[k], q = y[k + 1], dx = q[0] - p[0], dy = q[1] - p[1], L2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x.p[0] - p[0]) * dx + (x.p[1] - p[1]) * dy) / L2)), z = [p[0] + t * dx, p[1] + t * dy], dd = Math.hypot(z[0] - x.p[0], z[1] - x.p[1]); if (!hd || dd < hd.dd) hd = { dd, z, kuyruk: y.slice(k + 1) }; }
+      if (hd && hd.dd > 0.5) { const r_ = K.yol(x.p, hd.z, { duz: true }); yol = r_ ? [...r_, ...hd.kuyruk] : null; }
+      if (!yol) yol = K.gorur(x.p, A) && K.dik(x.p, A) ? [x.p, A] : K.yol(x.p, A, { duz: true });
+    }
     kal.splice(kal.indexOf(x), 1);
     if (!yol) continue;   // güzergâh yoksa düz çizgi YOK (masa üstünden geçmez); bildirilir
     const sad = [yol[0]]; for (let i = 1; i < yol.length; i++) if (Math.hypot(yol[i][0] - sad[sad.length - 1][0], yol[i][1] - sad[sad.length - 1][1]) > 0.05) sad.push(yol[i]);
@@ -458,7 +465,8 @@ function tsKanalIzgara(U, eng, P0, A, ekAc, serit) {
   // tek düz çizgi (sınıra paralel / çapraz olabilir); uçlardaki 3 m'de açıklık şartı aranmaz
   // masa çokgenleriyle gerçek kesişim testi (ızgaradan bağımsız; 0,5 m pay): düz hat hiçbir masaya değmez
   const masaP = eng.filter((o) => o.it && String(o.it.layer).toUpperCase() === 'GES-MASA').map((o) => o.P);
-  const masaKeser = (p, q) => { for (const P of masaP) { let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; for (const v of P) { x0 = Math.min(x0, v[0]); y0 = Math.min(y0, v[1]); x1 = Math.max(x1, v[0]); y1 = Math.max(y1, v[1]); } if (Math.max(p[0], q[0]) < x0 - 0.5 || Math.min(p[0], q[0]) > x1 + 0.5 || Math.max(p[1], q[1]) < y0 - 0.5 || Math.min(p[1], q[1]) > y1 + 0.5) continue; const n = Math.max(2, Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 0.25)); for (let k = 0; k <= n; k++) { const t = k / n, z = [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]; if (tsIcinde(z, P)) return true; for (let e = 0; e < P.length; e++) if (dSeg(z[0], z[1], P[e], P[(e + 1) % P.length]) < 0.5) return true; } } return false; };
+  const masaKeser = (p, q) => { const Lpq = Math.hypot(q[0] - p[0], q[1] - p[1]); for (const P of masaP) { let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity; for (const v of P) { x0 = Math.min(x0, v[0]); y0 = Math.min(y0, v[1]); x1 = Math.max(x1, v[0]); y1 = Math.max(y1, v[1]); } if (Math.max(p[0], q[0]) < x0 - 0.5 || Math.min(p[0], q[0]) > x1 + 0.5 || Math.max(p[1], q[1]) < y0 - 0.5 || Math.min(p[1], q[1]) > y1 + 0.5) continue; const n = Math.max(2, Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) / 0.25)); for (let k = 0; k <= n; k++) { const t = k / n, z = [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]; if (t * Lpq < 1.5 || (1 - t) * Lpq < 1.5) continue;   // uçlar (inverter masa arkasında, ADP) muaf
+        if (tsIcinde(z, P)) return true; for (let e = 0; e < P.length; e++) if (dSeg(z[0], z[1], P[e], P[(e + 1) % P.length]) < 0.5) return true; } } return false; };
   const acikGorur = (a, b, uc0, uc1) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / (h * 0.4))); for (let k = 0; k <= n; k++) { const t = k / n, q = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]; const [i, j] = hc(q); if (i < 0 || j < 0 || i >= nx || j >= ny || blk[j * nx + i]) return false; if (Math.hypot(q[0] - uc0[0], q[1] - uc0[1]) > 3 && Math.hypot(q[0] - uc1[0], q[1] - uc1[1]) > 3 && ak[j * nx + i] * h < 1.0) return false; } return true; };
   const yol = (aW, bW, opt) => {
     const a = Lc(aW), b = Lc(bW);

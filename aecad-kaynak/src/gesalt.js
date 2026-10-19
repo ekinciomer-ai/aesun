@@ -196,7 +196,7 @@ function pjAltCiz() {
   if (!PJ.sohbet.length) sh.appendChild(h('div', 'sb cevap', 'Ne değiştirmek istediğinizi yazın; ör. "inverterleri trafoya yaklaştır", "eğim 20", "hizalama doğuya", "kabloları çiz". Neden sorusu da sorabilirsiniz: "inverter neden batıda?"'));
   rv.appendChild(sh);
   const sat = h('div', 'brow'); sat.innerHTML = '<input id="pj-rev" type="text" placeholder="Yazın: ör. inverterleri trafoya yaklaştır" style="flex:1"><button class="gb primary" id="pj-revb" type="button">Gönder</button>'; rv.appendChild(sat);
-  const cips = h('div', 'brow'); for (const o of SOHBET_ORNEK.slice(0, 8)) { const c = h('button', 'mini', o); c.onclick = () => gesSohbet(o); cips.appendChild(c); } rv.appendChild(cips);
+  const cips = h('div', 'brow'); for (const o of SOHBET_ORNEK.slice(0, 8)) { const c = h('button', 'mini', o); c.onclick = () => gesSohbet(o); cips.appendChild(c); } { const c = h('button', 'mini ok', '☰ Tüm komutlar'); c.onclick = (e) => { gv('pjdlg').close(); komutListe(e); }; cips.appendChild(c); } rv.appendChild(cips);
   box.appendChild(rv); requestAnimationFrame(() => { sh.scrollTop = sh.scrollHeight; });
   gv('pj-revb').onclick = pjRevize; gv('pj-rev').onkeydown = (e) => { if (e.key === 'Enter') pjRevize(); };
   if (PJ.alt.some((a) => a.durum === 'calisiyor')) { clearTimeout(PJ.altT); PJ.altT = setTimeout(pjAltCiz, 1000); }
@@ -271,7 +271,7 @@ async function gesSohbet(metin) {
   const n = sohbetNiyet(T), r = pjRevizeCoz(txt), dz = pjDuzenCoz(T);
   const ayar = [...n.yap, ...r.yap], hepsi = [...ayar, ...dz, ...n.is.map((x) => x[0])];
   if (!hepsi.length) {
-    sohbetYaz('cevap', (ned ? ned + ' ' : 'Bunu bir işleme çeviremedim. ') + (ned ? '' : 'Yapabildiklerim: ayar değiştirmek (' + SOHBET_ORNEK.slice(0, 9).map((s) => '"' + s + '"').join(', ') + '), taşımak ("TM1 kuzeye 30 m", "TR1 INV3 doğuya 20 m"), işlem başlatmak ("kabloları çiz", "DC oto", "AC oto", "yerleşimi çiz", "proje paftalarını oluştur"). Cümlenizi bu örneklere yakın yazarsanız uygularım.'));
+    sohbetYaz('cevap', (ned ? ned + ' ' : 'Bunu bir işleme çeviremedim. ') + (ned ? '' : 'Yapabildiklerim: ayar değiştirmek (' + SOHBET_ORNEK.slice(0, 9).map((s) => '"' + s + '"').join(', ') + '), taşımak ("TM1 kuzeye 30 m", "TR1 INV3 doğuya 20 m"), işlem başlatmak ("kabloları çiz", "DC oto", "AC oto", "yerleşimi çiz", "proje paftalarını oluştur"). Tüm kalıplar komut satırındaki ☰ Komutlar listesinde; tıklayarak seçebilirsiniz.'));
     return;
   }
   if (ned) sohbetYaz('cevap', ned);
@@ -286,3 +286,46 @@ async function gesSohbet(metin) {
   }
   for (const [ad, f] of n.is) { sohbetYaz('cevap', ad + ' başlatıldı.'); try { const m = await f(); if (m) sohbetYaz('cevap', m); } catch (e) { sohbetYaz('cevap', ad + ' yapılamadı: ' + (e.message || e)); } }
 }
+
+// ---- Komut listesi (kullanıcı kuralı 19.10.2026): tanınan kalıplar tıklanabilir listede. Sayılı kalıp tıklanınca komut satırına
+// yazılır ve sayı seçili gelir (değiştirip Enter); sayısız kalıp tıklanınca hemen uygulanır.
+const KOMUT_LISTE = [
+  ['İşlem', ['arazi doldur', 'yerleşimi çiz ve seçenekleri karşılaştır', 'kabloları çiz', 'DC oto', 'AC oto', 'son hali onayla', 'proje paftalarını oluştur']],
+  ['İnverter', ['inverterleri trafoya yaklaştır', 'inverterleri ortala', 'inverterleri yol kenarına al', 'inverter optimum', '{10} inverter', 'inverter {125} kW', 'TR{1} INV{3} doğuya {20} m', 'TR{1} INV{3} batıya {20} m', 'TR{1} INV{3} kuzeye {20} m', 'TR{1} INV{3} güneye {20} m']],
+  ['Trafo / DM', ['trafo {1600}', 'TM{1} kuzeye {30} m', 'TM{1} güneye {30} m', 'TM{1} doğuya {30} m', 'TM{1} batıya {30} m', 'TM batı', 'TM doğu']],
+  ['Masa ve yerleşim', ['eğim {20}', '{2}V{13} masa', 'çekme {4} m', 'sıra açıklığı {4}', 'azimut {10}', '{25} MWp', 'arazinin tamamı', 'DC/AC {1.25}', 'hizalama doğu', 'hizalama batı', 'hizalama orta', 'hizalama opt', 'sıra başlangıcı kuzey', 'sıra başlangıcı güney', 'sıra başlangıcı orta']],
+  ['Yollar', ['iç yolları kaldır', 'iç yol aç', 'yol genişliği {6}', 'yol aralığı {150}', '{2}. yolu kaldır']],
+  ['String', ['alt/üst string', 'tek masa tek string']],
+  ['Soru', ['inverter neden burada', 'trafo neden burada', 'kablo neden böyle']],
+];
+function komutListe(ev) {
+  if (ev) ev.stopPropagation();
+  let p = gv('komutpop'); if (p) { p.remove(); return; }
+  p = document.createElement('div'); p.id = 'komutpop'; p.className = 'komutpop';
+  const ara = document.createElement('input'); ara.placeholder = 'Ara…'; ara.className = 'kara'; p.appendChild(ara);
+  const govde = document.createElement('div'); p.appendChild(govde);
+  const kapat = () => { p.remove(); document.removeEventListener('mousedown', dis, true); };
+  const dis = (e) => { if (!p.contains(e.target) && e.target.id !== 'bkomut') kapat(); };
+  const ciz = () => {
+    govde.innerHTML = ''; const q = ara.value.toLocaleLowerCase('tr').trim();
+    for (const [baslik, ls] of KOMUT_LISTE) {
+      const uy = ls.filter((k) => !q || k.replace(/[{}]/g, '').toLocaleLowerCase('tr').includes(q) || baslik.toLocaleLowerCase('tr').includes(q)); if (!uy.length) continue;
+      const hd = document.createElement('div'); hd.className = 'khd'; hd.textContent = baslik; govde.appendChild(hd);
+      for (const k of uy) {
+        const b = document.createElement('button'); b.className = 'kit'; const duz = k.replace(/[{}]/g, '');
+        b.innerHTML = k.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(/\{([^}]*)\}/g, '<i>$1</i>');
+        b.title = /\{/.test(k) ? 'Komut satırına yazılır; sayıyı değiştirip Enter' : 'Hemen uygulanır';
+        b.onclick = () => {
+          kapat();
+          if (!/\{/.test(k)) { gesSohbet(duz); return; }
+          const inp = gv('cmd'); inp.value = duz; inp.focus(); const i0 = k.indexOf('{'), i1 = k.indexOf('}'); inp.setSelectionRange(i0, i1 - 1);
+        };
+        govde.appendChild(b);
+      }
+    }
+  };
+  ara.oninput = ciz; ara.onkeydown = (e) => { if (e.key === 'Escape') kapat(); if (e.key === 'Enter') { const b = govde.querySelector('.kit'); if (b) b.click(); } };
+  ciz(); (gv('bkomut').closest('.cmdbox') || document.body).appendChild(p); ara.focus();
+  document.addEventListener('mousedown', dis, true);
+}
+(function () { const bag = () => { const b = gv('bkomut'); if (b) b.onclick = komutListe; }; if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bag); else bag(); })();

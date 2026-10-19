@@ -103,6 +103,14 @@ footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; mi
 #hist div { white-space: pre-wrap; word-break: break-word; line-height: 1.45; }
 #hist .sen { color: #e6edf3; font-weight: 600; } #hist .cevap { color: #9ec5ff; } .sohbet { max-height: 220px; overflow: auto; display: flex; flex-direction: column; gap: 6px; margin: 8px 0; } .sohbet .sb { padding: 6px 10px; border-radius: 10px; max-width: 88%; font-size: 13px; line-height: 1.4; } .sohbet .sen { align-self: flex-end; background: #2b3a55; color: #fff; } .sohbet .cevap { align-self: flex-start; background: #23272e; color: #d6e2f0; border: 1px solid #333a44; }
 #hist .err { color: #ff8a80; } #hist .res { color: var(--ok); } #hist .note { color: var(--warn); } #hist .help { color: #9ec5ff; }
+.cmdbox { position: relative; }
+.kbtn { background: none; border: 1px solid var(--ok); color: var(--ok); border-radius: 4px; font: inherit; padding: 1px 8px; cursor: pointer; white-space: nowrap; }
+.komutpop { position: absolute; left: 8px; bottom: 100%; margin-bottom: 4px; width: min(420px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 8px 24px #0008; padding: 6px; z-index: 50; }
+.komutpop .kara { width: 100%; box-sizing: border-box; margin-bottom: 6px; background: var(--bg, #111); color: inherit; border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; }
+.komutpop .khd { font-weight: 600; opacity: .7; margin: 6px 2px 2px; }
+.komutpop .kit { display: block; width: 100%; text-align: left; background: none; border: 0; color: inherit; font: inherit; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
+.komutpop .kit:hover { background: var(--line); }
+.komutpop .kit i { font-style: normal; color: var(--ok); border-bottom: 1px dotted; }
 .cline { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding: 4px 10px; }
 #prompt { color: var(--red); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; font-weight: 500; }
 #cmd { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: var(--fg); padding: 3px 0; }
@@ -547,7 +555,7 @@ details.tf-sec:not([open]) { gap: 0; }
   <footer>
     <div class="cmdbox">
       <div id="hist" aria-live="polite"></div>
-      <div class="cline"><span id="prompt">Komut:</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Komut satırı" placeholder="Komut (L, PL, M…) ya da cümle: inverterleri trafoya yaklaştır"></div>
+      <div class="cline"><button id="bkomut" class="kbtn" title="Komut listesi: tıklayarak seçin">☰ Komutlar</button><span id="prompt">Komut:</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Komut satırı" placeholder="Komut (L, PL, M…) ya da cümle: inverterleri trafoya yaklaştır"></div>
     </div>
     <div class="status">
       <div id="coords">X 0.000   Y 0.000</div>

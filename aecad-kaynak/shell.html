@@ -457,8 +457,24 @@ details.tf-sec:not([open]) { gap: 0; }
               <label class="gf">Revizyon<input id="p-rev" placeholder="R00"></label>
               <label class="gf">İşin adı<input id="p-ad" placeholder="GES Projesi"></label>
               <label class="gf">Yatırımcı<input id="p-yat"></label>
-              <label class="gf">İl / ilçe / ada / parsel<input id="p-yer"></label>
-              <label class="gf">Müellif<input id="p-mue"></label>
+              <label class="gf">Proje sahibi adresi<input id="p-yadr"></label>
+              <label class="gf">İl<input id="p-il"></label>
+              <label class="gf">İlçe<input id="p-ilce"></label>
+              <label class="gf">Mahalle<input id="p-mah"></label>
+              <label class="gf">Ada<input id="p-ada"></label>
+              <label class="gf">Parsel<input id="p-parsel"></label>
+              <label class="gf">İl / ilçe / ada / parsel (serbest)<input id="p-yer"></label>
+              <label class="gf">Proje sorumlusu firma<input id="p-firma"></label>
+              <label class="gf">Firma adresi<input id="p-fadr" placeholder="satırları ; ile ayırın"></label>
+              <label class="gf">Firma tel<input id="p-ftel"></label>
+              <label class="gf">Firma e-posta<input id="p-fmail"></label>
+              <label class="gf">Proje sorumlusu (müellif)<input id="p-mue"></label>
+              <label class="gf">Müellif ünvanı<input id="p-mueu" placeholder="Elektrik Mühendisi"></label>
+              <label class="gf">Oda no / büro tescil no<input id="p-oda"></label>
+              <label class="gf">SMM no<input id="p-smm"></label>
+              <label class="gf">Çizen<input id="p-cizen"></label>
+              <label class="gf">Çizen ünvanı<input id="p-cizu"></label>
+              <label class="gf">Tarih<input id="p-tarih" placeholder="boş = bugün"></label>
               <label class="gf">Seviye<select id="p-sev"><option value="teklif">Teklif</option><option value="uygulama">Uygulama</option></select></label>
               <label class="gf">Tesis tipi<select id="p-tip"><option value="lisanssiz">Lisanssız</option><option value="lisansli">Lisanslı</option><option value="iletim">İletim</option><option value="osb">OSB</option><option value="yurtdisi">Yurtdışı</option></select></label>
             </div>
@@ -474,6 +490,7 @@ details.tf-sec:not([open]) { gap: 0; }
             <div class="dh">İnverter ve trafo</div>
             <div class="grid3">
               <label class="gf">İnverter modeli<input id="p-invm" placeholder="ör. SUN2000-330KTL"></label>
+              <label class="gf">Sınırlandırma (kWe)<input id="p-invsin" type="number" step="1" placeholder="yok"></label>
               <label class="gf">MPPT sayısı<input id="p-mppt" type="number"></label>
               <label class="gf">MPPT akımı (A)<input id="p-mppta" type="number"></label>
               <label class="gf">String modül<input id="p-strm" type="number"></label>

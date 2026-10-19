@@ -148,7 +148,7 @@ async function tsNokta(tip) {
     S.doc.addLayer(T.kat, T.renk);
     const it = { id: newId(), t: 'insert', layer: T.kat, c: 256, lt: '', block: B.ad, M: mMul(mT(p[0], p[1]), mRz(ang)), ap: [], ges: { ...v, tip } };
     addItems([it], T.ad.toLowerCase()); renderLayers(); msg(T.ad + ' eklendi (' + fmtNum(B.L, 2) + ' × ' + fmtNum(B.W, 2) + ' m). Taşı (M) / Döndür (RO) ile tek parça hareket eder; verisi için “Veri”.', 'res');
-    if (tip !== 'inv') tsBinaMasaTemizle([it]);
+    if (tip !== 'inv') { tsBinaMasaTemizle([it]); tsFormaYaz(); }
     else { tsInvNumarala(); await tsAcTekEkle(S.doc.items.get(it.id)); }
     if (tip === 'dm') return; v.no++;
   }
@@ -168,7 +168,7 @@ async function tsKablo(tip) {
   const pl = { id: newId(), t: 'pline', layer: T.kat, c: T.renk, lt: '', cl: false, pts: pts.map((q) => [q[0], q[1], 0]), ges: g };
   const k = Math.floor(pts.length / 2), a = pts[k - 1], b = pts[k]; let ang = Math.atan2(b[1] - a[1], b[0] - a[0]); if (ang > Math.PI / 2) ang -= Math.PI; if (ang < -Math.PI / 2) ang += Math.PI;
   const yz = { id: newId(), t: 'text', layer: T.kat, c: T.renk, lt: '', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, h: KABLO_YZ, rot: ang, s: tsEtiket(tip, g, L), ha: 1, va: 0, gesEt: pl.id };
-  addItems([pl, yz], T.ad.toLowerCase()); renderLayers(); msg(tsEtiket(tip, g, L) + ' eklendi · ' + g.kablo + ' · L=' + fmtNum(L + (+g.pay || 0), 0) + ' m.', 'res');
+  addItems([pl, yz], T.ad.toLowerCase()); renderLayers(); tsFormaYaz(); msg(tsEtiket(tip, g, L) + ' eklendi · ' + g.kablo + ' · L=' + fmtNum(L + (+g.pay || 0), 0) + ' m.', 'res');
   if (tip === 'ac' || tip === 'dc') await tsKabloCogalt(tip, g, pts);
 }
 // ---- AC kablo nizami güzergâh: inverterden başlar, MUTLAKA trafo binasındaki AG panodan (ADP) çıkar/biter;
@@ -668,8 +668,24 @@ function tsMasaIlkPanel(it, p, yon) {   // atama çizgisi masanın 1. paneline (
 }
 // İnverter numaraları her zaman 1…n sıralı (kullanıcı kuralı 19.10.2026): silinince boşluk kapanır, eklenince sıraya girer.
 // Blok yazısı, AC kablo no/etiketi ve DC string kodları birlikte güncellenir.
+// Çizimdeki GES nesneleri proje alanlarına (ve Proje tarif sayfasına) yansır: tek veri kaynağı form alanlarıdır.
+function tsFormaYaz() {
+  if (!S.doc || typeof gv !== 'function') return;
+  const it = [...S.doc.items.values()].filter((x) => x.ges);
+  const tek = (arr) => { const u = [...new Set(arr.filter((v) => v !== undefined && v !== null && v !== '' && v !== '—' && v !== 'oto'))]; return u.length === 1 ? u[0] : null; };
+  const set = (id, v) => { const el = gv(id); if (!el || v === null || v === undefined || String(el.value) === String(v)) return false; el.value = v; return true; };
+  const inv = it.filter((x) => x.t === 'insert' && x.ges.tip === 'inv'), tm = it.filter((x) => x.t === 'insert' && x.ges.tip === 'tm');
+  let d = false;
+  if (inv.length) { d = set('p-invn', inv.length) || d; d = set('p-inv', tek(inv.map((x) => +x.ges.kw))) || d; d = set('p-invm', tek(inv.map((x) => x.ges.model))) || d; const sv = tek(inv.map((x) => +x.ges.str)); if (sv !== null && (pv('p-strinv') !== null || typeof pjAuto !== 'function' || sv !== pjAuto().strInv)) d = set('p-strinv', sv) || d; }
+  if (tm.length) d = set('p-trafo', tek(tm.map((x) => +x.ges.kva))) || d;
+  const ac = it.filter((x) => x.ges.tip === 'ac'), og = it.filter((x) => x.ges.tip === 'og');
+  if (ac.length) d = set('p-ack', tek(ac.map((x) => x.ges.kablo))) || d;
+  if (og.length) d = set('p-ogk', tek(og.map((x) => x.ges.kablo))) || d;
+  if (d) { if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function' && gv('tarif') && !gv('tarif').hidden) tfSync(); if (typeof pjAutoHints === 'function') pjAutoHints(); }
+}
 function tsInvNumarala() {
   if (!S.doc) return 0;
+  setTimeout(tsFormaYaz, 0);
   const inv = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'inv').sort((a, b) => (+a.ges.no || 1e9) - (+b.ges.no || 1e9));
   const pairs = []; const eskiNo = new Map();
   inv.forEach((it, i) => { const n = i + 1; if (+it.ges.no === n) return; eskiNo.set(it.id, it.ges.no); const g = { ...it.ges, no: n }; pairs.push([it, { ...it, ges: g, block: tsBlok('inv', g).ad }]); });

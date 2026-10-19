@@ -2,11 +2,11 @@
 // Tarif sayfası kendi verisini tutmaz: her alan AeCAD'deki GES/Proje alanına (data-to) bağlıdır, tek veri kaynağı odur.
 const TF = {
   sec: [
-    { n: '1', h: 'Proje bilgileri', d: 'Antet ve rapor başlığına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-yat', 'p-yer', 'p-mue', 'p-sev', 'p-tip'] },
+    { n: '1', h: 'Proje bilgileri', d: 'Tüm paftaların antedine (onaylı form: işin adı, pafta, proje sorumlusu firma, proje sahibi ve adresi, il/ilçe/mahalle/ada/parsel, güçler, çizen ve proje sorumlusu) ve proje kapağına yazılır.', f: ['p-ad', 'p-kod', 'p-rev', 'p-tarih', 'p-yat', 'p-yadr', 'p-il', 'p-ilce', 'p-mah', 'p-ada', 'p-parsel', 'p-firma', 'p-fadr', 'p-ftel', 'p-fmail', 'p-mue', 'p-mueu', 'p-oda', 'p-smm', 'p-cizen', 'p-cizu', 'p-sev', 'p-tip'] },
     { n: '2', h: 'Arazi', d: 'Bir ya da birden çok parsel ekleyin (KML/KMZ ya da köşe koordinatı). Bitişik parseller tek saha olarak birleştirilir; çitten çekme yalnız birleşik dış sınırda uygulanır, parseller arası ortak kenarda çekme yoktur. Önizlemede bir kenara tıklayarak cephesini seçin (genel → yol → komşu parsel → diğer); her tip kendi çekme mesafesini alır.', arazi: true, f: ['g-lat', 'p-cekme', 'p-cyol', 'p-cpar', 'p-cdig'] },
-    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur. İnverter datasheet PDF\'i 4. bölümdeki Datasheet düğmesiyle yüklenir; AC güç, model, MPPT sayısı ve akımı buraya yazılır.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invn', 'p-invm'] },
+    { n: '3', h: 'Güç ve trafo', d: 'Boş bırakılan hedef güçte arazinin tamamı doldurulur. İnverter datasheet PDF\'i 4. bölümdeki Datasheet düğmesiyle yüklenir; AC güç, model, MPPT sayısı ve akımı buraya yazılır.', f: ['p-mwp', 'p-ratio', 'p-trafo', 'p-inv', 'p-invn', 'p-invm', 'p-invsin'] },
     { n: '4', h: 'Panel', d: 'Datasheet PDF yüklerseniz ölçü ve elektrik değerleri okunur. Boş alan datasheet değerini (gri) kullanır.', ds: true, f: ['g-model', 'g-p', 'g-L', 'g-W', 'p-voc', 'p-vmp', 'p-isc', 'p-imp', 'p-kvoc', 'p-tmin'] },
-    { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa'] },
+    { n: '5', h: 'Masa ve statik', d: 'Masa tipini seçin ya da sıra, sıra başına panel ve eğim açısını değiştirin. Statik proje verisi yoksa ayaklar panel kenarından 40 cm içeride, aks aralığı en fazla 2,40 m alınır.', masa: true, f: ['p-masa', 'g-ang', 'g-gap', 'g-align', 'g-valign', 'g-hrs', 'g-pitch', 'p-acik', 'p-icyol', 'p-icw', 'p-icar', 'p-aks', 'p-aksa', 'g-mrenk'] },
     { n: '6', h: 'Elektrik detayı', d: 'İsteğe bağlı. Boş alanlar esaslardaki varsayılanlarla hesaplanır (gri değerler).', det: true, f: ['p-mppt', 'p-mppta', 'p-strm', 'p-strinv', 'p-invtr', 'p-sebeke', 'p-ogkv', 'p-trg', 'p-dck', 'p-ack', 'p-ackes', 'p-ogk', 'p-dcmax', 'p-taraf'] },
     { n: '7', h: 'Çıktı', d: 'Paftalar DXF, etkileşimli HTML, metraj ve kontrol olarak üretilir.', f: ['p-pdf2'] },
   ],
@@ -70,6 +70,7 @@ function tfSync() {
     if (t.tagName === 'SELECT') { if (el.options.length !== t.options.length || [...el.options].some((o, i) => o.textContent !== t.options[i].textContent)) el.innerHTML = t.innerHTML; el.value = t.value; }
     else if (t.type === 'checkbox') el.checked = t.checked;
     else { if (document.activeElement !== el) el.value = t.value; el.placeholder = t.placeholder || ''; }
+    el.disabled = !!t.disabled;
   }
   const bi = gv('tf-binfo'); if (bi) bi.textContent = G.bound ? gv('g-binfo').textContent + (G.boundCrs ? ' · ' + G.boundCrs : G.boundSrc === 'kml' ? ' · KML (WGS84/UTM ' + gv('g-zone').value + 'N)' : '') : 'Sınır yok.';
   const pi = gv('tf-pinfo'); if (pi) { const P = G.panel; pi.textContent = (P.model || '') + ' · ' + P.p + ' Wp · ' + P.L + '×' + P.W + ' mm' + (P.voc ? ' · Voc ' + P.voc + ' V' : ' · Voc/Isc yok'); }

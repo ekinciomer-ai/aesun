@@ -3360,7 +3360,7 @@ function buildParam0() {
 }
 function pjWorker() {
   if (PJ.worker) return PJ.worker;
-  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191404', document.baseURI).href);
+  PJ.worker = new Worker(new URL('gesciz-worker.js?v=2610191408', document.baseURI).href);
   PJ.worker.onmessage = (e) => {
     const m = e.data; if (m.id !== PJ.seq) return;
     if (m.stage) { gv('p-stage').textContent = m.stage; if (!PJ.altMod) busy(m.stage); else pjAltCiz(); return; }
@@ -4596,10 +4596,25 @@ function tsMasaUc(it, p) {   // masanın p'ye yakın ucunun orta noktası (masa 
   const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
   const a = nok(-0.3, c.D / 2), b = nok(c.L + 0.3, c.D / 2); return Math.hypot(a[0] - p[0], a[1] - p[1]) <= Math.hypot(b[0] - p[0], b[1] - p[1]) ? a : b;
 }
-function tsMasaIlkPanel(it, p) {   // atama çizgisi masanın 1. paneline (inverter ucundaki üst sıra ilk modül) — çizgiler üst üste binmez
+// DC çıkış yönü (kullanıcı kuralı 19.10.2026): string uçları masanın AC kanalı tarafındaki ucunda toplanır — arkadan gelen DC
+// kablolar ilk masayla birlikte kanala yakın yerden boruyla invertere iner. Yön: inverterin AC kablosunun ilk ~5 m'si; kablo yoksa en yakın TM.
+function tsDcYon(invIt) {
+  const ip = tsMerkez(invIt);
+  for (const it of S.doc.items.values()) if (it.t === 'pline' && it.ges && it.ges.tip === 'ac' && Math.hypot(it.pts[0][0] - ip[0], it.pts[0][1] - ip[1]) < 6) {
+    let L = 0; for (let i = 1; i < it.pts.length; i++) { L += Math.hypot(it.pts[i][0] - it.pts[i - 1][0], it.pts[i][1] - it.pts[i - 1][1]); if (L >= 5 || i === it.pts.length - 1) { const q = it.pts[i]; const d = [q[0] - ip[0], q[1] - ip[1]], n = Math.hypot(...d) || 1; return [d[0] / n, d[1] / n]; } }
+  }
+  const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
+  if (tms.length) { const t = tsMerkez(tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]) < Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) ? b : a))); const d = [t[0] - ip[0], t[1] - ip[1]], n = Math.hypot(...d) || 1; return [d[0] / n, d[1] / n]; }
+  return null;
+}
+function tsUcBas(c, nok, ip, yon) {   // true: string 0 ucundan başlar. Çıkış yönü masa boyuna belirgin paralelse onu kullan, değilse inverterin yakın ucu.
+  if (yon) { const d = yon[0] * c.ux[0] + yon[1] * c.ux[1]; if (Math.abs(d) > 0.25) return d < 0; }
+  return Math.hypot(nok(0, c.D / 2)[0] - ip[0], nok(0, c.D / 2)[1] - ip[1]) <= Math.hypot(nok(c.L, c.D / 2)[0] - ip[0], nok(c.L, c.D / 2)[1] - ip[1]);
+}
+function tsMasaIlkPanel(it, p, yon) {   // atama çizgisi masanın 1. paneline (inverter ucundaki üst sıra ilk modül) — çizgiler üst üste binmez
   const c = tsMasaCerceve(it); if (!c) return tsMerkez(it);
   const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
-  const bas = Math.hypot(nok(0, c.D / 2)[0] - p[0], nok(0, c.D / 2)[1] - p[1]) <= Math.hypot(nok(c.L, c.D / 2)[0] - p[0], nok(c.L, c.D / 2)[1] - p[1]);
+  const bas = tsUcBas(c, nok, p, yon);
   const dx = c.L / c.P, dy = c.D / c.R; return nok(bas ? dx / 2 : c.L - dx / 2, c.D - dy / 2);
 }
 CMD.GDCK = async () => {
@@ -4617,7 +4632,7 @@ CMD.GDCK = async () => {
       const pairs = []; let cikar = false;
       for (const it of S.doc.items.values()) if (it.ges && (it.ges.tip === 'dcata' || it.ges.tip === 'dcstr') && it.ges.masa === m.id) { pairs.push([it, null]); if (it.ges.inv === iid) cikar = true; for (const t of S.doc.items.values()) if (t.gesEt === it.id) pairs.push([t, null]); }
       const eskiInv = [...new Set(pairs.filter((pr) => pr[0].ges && pr[0].ges.inv !== iid).map((pr) => pr[0].ges.inv))];
-      if (!cikar) { const u = tsMasaIlkPanel(m, x.p); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[x.p[0], x.p[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: m.id } }]); }
+      if (!cikar) { const u = tsMasaIlkPanel(m, x.p, tsDcYon(x.it)); pairs.push([null, { id: newId(), t: 'pline', layer: DC_ATA, c: 256, lt: '', cl: false, pts: [[x.p[0], x.p[1], 0], [u[0], u[1], 0]], ges: { tip: 'dcata', inv: iid, masa: m.id } }]); }
       replaceItems(pairs, 'DC atama');
       const dur = []; for (const id of [iid, ...eskiInv]) dur.push(...tsInvDurumYazi(id, DC_ATA)); if (dur.length) replaceItems(dur, 'DC durum');
       renderLayers(); const d2 = tsInvDurum(iid);
@@ -4634,17 +4649,17 @@ CMD.GDCCIZ = async () => {
     const byInv = new Map(); for (const [mid, iid] of at) { if (!S.doc.items.get(mid) || !S.doc.items.get(iid)) continue; if (!byInv.has(iid)) byInv.set(iid, []); byInv.get(iid).push(S.doc.items.get(mid)); }
     const tms = [...S.doc.items.values()].filter((it) => it.t === 'insert' && it.ges && it.ges.tip === 'tm');
     for (const [iid, masalar] of byInv) {
-      const inv = S.doc.items.get(iid), ip = tsMerkez(inv), ino = inv.ges.no || '?';
+      const inv = S.doc.items.get(iid), ip = tsMerkez(inv), ino = inv.ges.no || '?', dcYon = tsDcYon(inv);
       const trNo = tms.length > 1 ? (tms.reduce((a, b) => (Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]) < Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) ? b : a)).ges.no || '') : '';
       masalar.sort((a, b) => Math.hypot(tsMerkez(a)[0] - ip[0], tsMerkez(a)[1] - ip[1]) - Math.hypot(tsMerkez(b)[0] - ip[0], tsMerkez(b)[1] - ip[1]));
       let pv = 0;
       for (const m of masalar) {
         const c = tsMasaCerceve(m); if (!c) continue; const k = tsMasaStr(m);
         const nok = (s, t) => [c.o[0] + c.ux[0] * s + c.uy[0] * t, c.o[1] + c.ux[1] * s + c.uy[1] * t];
-        const bas = Math.hypot(nok(0, c.D / 2)[0] - ip[0], nok(0, c.D / 2)[1] - ip[1]) <= Math.hypot(nok(c.L, c.D / 2)[0] - ip[0], nok(c.L, c.D / 2)[1] - ip[1]);   // inverter ucundan başla
+        const bas = tsUcBas(c, nok, ip, dcYon);   // AC kanalı (çıkış) tarafındaki uçtan başla
         const dx = c.L / c.P, dy = c.D / c.R, sira = [];
         for (let r = 0; r < c.R; r++) { const t = c.D - (r + 0.5) * dy; const xs = Array.from({ length: c.P }, (_, i) => (i + 0.5) * dx); const ileri = (r % 2 === 0) === bas; for (const s_ of (ileri ? xs : xs.reverse())) sira.push(nok(s_, t)); }
-        const N = Math.floor(sira.length / k), uc = tsMasaUc(m, ip), tek = Math.abs(uc[0] - ip[0]) + Math.abs(uc[1] - ip[1]) + 3;   // tek yön ≈ masa ucu → inverter (dik) + iniş
+        const N = Math.floor(sira.length / k), uc = bas ? nok(-0.3, c.D / 2) : nok(c.L + 0.3, c.D / 2), tek = Math.abs(uc[0] - ip[0]) + Math.abs(uc[1] - ip[1]) + 3;   // tek yön ≈ masa ucu → inverter (dik) + iniş
         for (let j = 0; j < k; j++) {
           const iz = sira.slice(j * N, (j + 1) * N); if (iz.length < 2) continue; pv++; nStr++;
           const rs = Math.max(1, Math.round(N / c.P)), donus = (rs % 2 === 1) ? c.L : 0, L = 2 * tek + donus; topL += L;
@@ -4652,7 +4667,8 @@ CMD.GDCCIZ = async () => {
           const pl = { id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: 256, lt: '', cl: false, pts: iz.map((q) => [q[0], q[1], 0]), ges: { tip: 'dcstr', inv: iid, masa: m.id, kablo: 'H1Z2Z2-K 1x6', pay: 0, L, pv, kod } };
           yeni.push([null, pl]);
           const tri = (q, renk) => ({ id: newId(), t: 'pline', layer: 'GES-DC-KABLO', c: renk, lt: '', cl: true, pts: [[q[0] - h * 0.6, q[1] - h * 0.5, 0], [q[0] + h * 0.6, q[1] - h * 0.5, 0], [q[0], q[1] + h * 0.5, 0]], gesEt: pl.id });
-          const yz = (q, s_, hh) => ({ id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 256, lt: '', x: q[0] - h * 0.6, y: q[1] + h * 0.7, h: hh, rot: 0, s: s_, ha: 0, va: 0, gesEt: pl.id });
+          const ic = bas ? 1 : -1, rot = Math.atan2(c.ux[1], c.ux[0]), ry = Math.cos(rot) < 0 ? rot + Math.PI : rot, ters = ry !== rot;   // yazı masanın içine doğru (komşu masanın yazısıyla çakışmaz)
+          const yz = (q, s_, hh) => ({ id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 256, lt: '', x: q[0] + c.ux[0] * ic * h * 0.9 + c.uy[0] * h * 0.55, y: q[1] + c.ux[1] * ic * h * 0.9 + c.uy[1] * h * 0.55, h: hh, rot: ry, s: s_, ha: (ic > 0) !== ters ? 0 : 2, va: 0, gesEt: pl.id });
           const a = iz[0], b = iz[iz.length - 1], cx = iz.reduce((t, q) => t + q[0], 0) / iz.length, cy = iz.reduce((t, q) => t + q[1], 0) / iz.length;
           yeni.push([null, tri(a, 5)], [null, tri(b, 1)], [null, yz(a, kod + '.1', h * 0.8)], [null, yz(b, kod + '.' + iz.length, h * 0.8)]);
           yeni.push([null, { id: newId(), t: 'text', layer: 'GES-DC-KABLO', c: 1, lt: '', x: cx, y: cy, h: Math.min(c.D * 0.35, h * 3), rot: Math.atan2(c.ux[1], c.ux[0]), s: rs + '*' + Math.round(iz.length / rs), ha: 1, va: 2, gesEt: pl.id }]);

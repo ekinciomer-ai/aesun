@@ -20,7 +20,7 @@ D = "/opt/aesun"; TR = timezone(timedelta(hours=3))
 DURUM = D + "/sef_durum.json"; LOG = D + "/sef.log"
 REPO = "/veri/epias-ptf"
 ISLER = {"Bildirimler": 15, "Veri arşivi": 60, "Durum analizi": 60, "İzleme özeti": 30}   # olağan aralık (dk)
-BEKLE = {"itme": 600, "is_tetik": 1800, "isler": 1800, "api": 1800}
+BEKLE = {"itme": 600, "is_tetik": 1800, "isler": 1800, "api": 1800, "etkin": 1200}
 AD_GH = ("gh_yeniden", "gh_kapat")                         # aynı eylem en erken (sn)
 
 
@@ -104,6 +104,18 @@ def main():
             return ("kapsayıcı yeniden başlatıldı" if not k else "başlatılamadı: " + e[-120:]), not k
         yap("isler", f"zamanlayıcı nabzı {round(nab_dk)} dk eski", isler_yeniden)
 
+    # ---- 2b) işler kapalı mı? (ETKIN=0 — ör. sır paketi etkin=0 ile yenilendi). Bakım işareti (/opt/aesun/BAKIM) yoksa şef açar.
+    if dj and dj.get("etkin") is False:
+        if os.path.exists(D + "/BAKIM"):
+            acik.append({"sorun": "ns1 işleri kapalı (bakım modu)", "neden": "/opt/aesun/BAKIM var — bilinçli kapatma"})
+        else:
+            def ac():
+                k, o, e = dx("python", "sef_github.py", "ac", t=240)
+                try: a = json.loads(o.strip().splitlines()[-1]).get("ac") or {}
+                except Exception: a = {}
+                return ("sır paketi etkin=1 ile yeniden üretildi; işler 2–3 dk içinde başlar" if a.get("ok") else f"açılamadı ({a.get('kod') or (e or o)[-100:]})"), bool(a.get("ok"))
+            if yap("etkin", "ns1 işleri kapalı (ETKIN=0) — hiçbir iş çalışmıyor", ac) is None and not any(e["eylem"] == "etkin" for e in eylemler):
+                pass
     # ---- 3) işler GitHub'da görünüyor mu? (dışarıdan gerçek)
     k, o, _ = git("show", "origin/main:n8n/is_hatalari.json")
     ih = {}
@@ -172,7 +184,7 @@ def main():
         if ns1:
             if yakin or not (geciken or ileri):
                 continue   # şef üzerinde çalışıyor ya da dışarıdan bakınca düzelmiş (Pi bekçisi bir sonraki turda temizler)
-            acik.append({"sorun": mesaj, "neden": "ns1 — şef müdahale etti, 40 dk'da düzelmedi"})
+            acik.append({"sorun": mesaj, "neden": "ns1 — " + ("işler kapalı (ETKIN=0)" if dj.get("etkin") is False else "şef müdahale etti, 40 dk'da düzelmedi")})
         else:
             acik.append({"sorun": mesaj, "neden": "Pi tarafı ya da dış servis — şefin çözüm yolu yok"})
     if (bk.get("onarim_24s") or 0) >= 3:

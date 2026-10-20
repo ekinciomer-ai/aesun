@@ -45,6 +45,11 @@ def main():
                 out["yeniden"].append({**kayit, "ok": k.status_code in (201, 204), "kod": k.status_code}); continue
             out["acik"].append({**kayit, "neden": "güvenli tekrar listesinde değil" if dosya not in GUVENLI else ("yeniden çalıştırmak için GitHub anahtarı (PAT_TOKEN) geçersiz" if not yazabilir else "yeniden çalıştırıldı, yine başarısız")})
     out["anahtar"] = "geçerli" if yazabilir else "geçersiz (yalnız okuma)"
+    # işler kapalıysa (ETKIN=0) ve bakım işareti yoksa: sır paketini etkin=1 ile yeniden üret (şef açar)
+    if len(sys.argv) > 1 and sys.argv[1] == "ac" and yazabilir:
+        k = requests.post("https://api.github.com/repos/ekinciomer-ai/epias-ptf/actions/workflows/sunucuya_sir.yml/dispatches",
+                          headers=H, json={"ref": "main", "inputs": {"etkin": "1"}}, timeout=30)
+        out["ac"] = {"ok": k.status_code == 204, "kod": k.status_code}
     print(json.dumps(out, ensure_ascii=False))
 
 

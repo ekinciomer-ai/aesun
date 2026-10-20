@@ -48,6 +48,42 @@
   .mrg{font-size:12px;color:var(--mut2);font-weight:600}
   .kart .kaynaklar{margin-top:8px;font-size:12px;color:var(--mut2)}
   .kart .kaynaklar a{color:var(--red-d);text-decoration:none;font-weight:600}.kart .kaynaklar a:hover{text-decoration:underline}
+  /* şematik: akış + zaman çizelgesi */
+  .semaBaslik{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut2);margin:16px 0 10px}
+  .semaBaslik .shint{text-transform:none;letter-spacing:0;font-weight:500;color:var(--mut2)}
+  .akis{display:flex;flex-wrap:wrap;align-items:stretch}
+  .akis .adim{flex:1;min-width:165px;background:#fff;border:1px solid var(--line);border-top:3px solid var(--mut2);border-radius:12px;padding:12px 14px}
+  .akis .adim.lis{border-top-color:var(--red)}
+  .akis .adim .t{font-size:12px;color:var(--mut2);font-weight:700}
+  .akis .adim b{display:block;font-family:Archivo,sans-serif;font-size:14px;margin:3px 0 7px;line-height:1.25;color:var(--ink)}
+  .akis .adim .mini{display:flex;flex-wrap:wrap;gap:4px}
+  .akis .adim .mini span{font-size:11px;background:var(--soft);color:var(--ink2);border-radius:5px;padding:1px 6px}
+  .akis .ok{display:flex;align-items:center;color:var(--red);font-size:22px;font-weight:700;padding:0 7px;align-self:center}
+  @media(max-width:720px){.akis{flex-direction:column}.akis .ok{transform:rotate(90deg);padding:4px 0}}
+  .tl{display:flex;flex-direction:column}
+  .tl-item{display:grid;grid-template-columns:70px 26px 1fr;align-items:start}
+  .tl-date{text-align:right;padding:16px 10px 0 0;font-size:14px;font-weight:800;color:var(--ink2);font-variant-numeric:tabular-nums;font-family:Archivo,sans-serif}
+  .tl-date small{display:block;font-size:11px;color:var(--mut2);font-weight:600}
+  .tl-rail{position:relative;display:flex;justify-content:center}
+  .tl-rail::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--line)}
+  .tl-item:first-child .tl-rail::before{top:18px}
+  .tl-item:last-child .tl-rail::before{height:20px}
+  .tl-dot{position:relative;z-index:1;width:13px;height:13px;border-radius:50%;background:var(--mut2);margin-top:17px;border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+  .tl-dot.lis{background:var(--red);width:17px;height:17px;margin-top:15px}
+  .tl-c{background:#fff;border:1px solid var(--line);border-left:4px solid var(--mut2);border-radius:12px;padding:12px 14px;margin:8px 0}
+  .tl-c.lis{border-left-color:var(--red)}
+  .tl-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer}
+  .tl-tip{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--red-d);background:var(--soft);border-radius:99px;padding:2px 9px;white-space:nowrap}
+  .tl-c h4{margin:0;font-family:Archivo,sans-serif;font-size:15px;font-weight:700;flex:1;min-width:150px;line-height:1.3;color:var(--ink)}
+  .tl-c .exp{color:var(--mut2);font-size:13px;font-weight:700}
+  .tl-mad{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .tl-mad span{font-size:11px;font-weight:600;background:#F3F4F6;color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+  .tl-det{margin-top:10px;display:none}.tl-c.open .tl-det{display:block}
+  .tl-det .oz{font-size:14px;color:var(--mut);line-height:1.55;margin:0 0 8px}
+  .tl-det .an{font-size:13px;color:var(--ink2);line-height:1.6;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px}
+  .tl-det .an b{color:var(--red-d)}
+  .tl-det .lnk a{color:var(--red-d);font-weight:600;text-decoration:none;font-size:13px}.tl-det .lnk a:hover{text-decoration:underline}
+  @media(max-width:560px){.tl-item{grid-template-columns:56px 22px 1fr}.tl-date{font-size:12px}}
 </style>
 </head>
 <body>
@@ -84,9 +120,11 @@
 </div>
 <div class="wrap gnd" id="view-mevzuat" hidden>
   <div class="meta2" id="mevMeta">Yükleniyor…</div>
-  <div class="flabel">Süzgeç</div>
-  <div class="chips" id="mevFilt" role="group" aria-label="Mevzuat süzgeci"></div>
-  <div class="liste" id="mevListe"></div>
+  <div class="semaBaslik">Lisanssız yönetmeliği · 2026 değişim zinciri</div>
+  <div class="akis" id="mevAkis"></div>
+  <div class="semaBaslik">2026 zaman çizelgesi · güneş &amp; lisanssız mevzuat <span class="shint">(karta tıkla → detay)</span></div>
+  <div class="chips" id="mevFilt" role="group" aria-label="Mevzuat süzgeci" style="margin-bottom:4px"></div>
+  <div class="tl" id="mevTL"></div>
   <div class="gdurum" id="mevDurum" hidden></div>
 </div>
 </main>
@@ -184,49 +222,57 @@
   function el(id){ return document.getElementById(id); }
   var KATAD={ "lisanssız":"Lisanssız", "depolama":"Depolama", "yek-g":"YEK-G", "yeka":"YEKA", "imar":"İmar/Ruhsat", "bedel":"Bedel" };
 
-  function kart(r){
-    var on=r.onem||0, oc=on>=4?"o5":(on===3?"o4":"o3");
-    var link=r.url?('<a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.baslik)+'</a>'):esc(r.baslik);
-    var analiz=r.analiz?('<p class="kanaliz"><b>Analiz:</b> '+esc(r.analiz)+'</p>'):'';
-    var etk=''; if(r.etiketler&&r.etiketler.length){ etk='<div class="etk">'+r.etiketler.map(function(e){return '<span>'+esc(e)+'</span>';}).join("")+'</div>'; }
-    var rozet=r.lisanssiz?'<span class="onc">Öncelik · Lisanssız</span>':('<span class="kat">'+esc(KATAD[r.kategori]||r.kategori||"enerji")+'</span>');
-    return '<article class="kart '+oc+'">'
-      +'<div class="kust">'+rozet+'<span class="mrg">'+esc(r.rg||"")+'</span><span class="on">'+esc(r.tip||"")+' · Önem '+on+'</span></div>'
-      +'<h3>'+link+'</h3>'
-      +'<p class="kozet">'+esc(r.ozet||"")+'</p>'
-      +analiz+etk
-      +'</article>';
+  function gun(d){ var p=String(d||"").split("-"); return p.length===3?(p[2]+"."+p[1]):""; }
+  function yil(d){ var p=String(d||"").split("-"); return p.length===3?p[0]:""; }
+  // değişim zinciri (akış): temel yönetmelik + lisanssız değişiklikler (eski→yeni)
+  function akisCiz(){
+    var zinc=veri.items.filter(function(r){return r.lisanssiz;}).slice()
+      .sort(function(a,b){return String(a.tarih).localeCompare(String(b.tarih));});
+    var html='<div class="adim"><span class="t">12.05.2019</span><b>Temel Yönetmelik</b><div class="mini"><span>Lisanssız Elektrik Üretim Yön.</span></div></div>';
+    zinc.forEach(function(r){
+      var mini=(r.degisen||r.etiketler||[]).slice(0,4).map(function(m){return '<span>'+esc(m)+'</span>';}).join("");
+      html+='<div class="ok">→</div><div class="adim lis"><span class="t">'+esc(gun(r.tarih)+"."+yil(r.tarih))+'</span><b>'+esc(r.baslik.split("(")[0].replace("Lisanssız Elektrik Üretim Yönetmeliğinde Değişiklik","Değişiklik").trim())+'</b><div class="mini">'+mini+'</div></div>';
+    });
+    el("mevAkis").innerHTML=html;
   }
   function suz(){
     return veri.items.filter(function(r){
       if(kf==="lisanssiz") return !!r.lisanssiz;
       if(kf!=="hepsi") return (r.kategori||"")===kf;
       return true;
-    }).sort(function(a,b){
-      if(!!b.lisanssiz-!!a.lisanssiz) return (!!b.lisanssiz)-(!!a.lisanssiz);
-      return String(b.tarih).localeCompare(String(a.tarih));
-    });
+    }).sort(function(a,b){ return String(b.tarih).localeCompare(String(a.tarih)); });
   }
-  function ciz(){
+  function tlCiz(){
     var d=suz();
-    el("mevListe").innerHTML=d.map(kart).join("");
+    el("mevTL").innerHTML=d.map(function(r,i){
+      var mad=(r.degisen||r.etiketler||[]).map(function(m){return '<span>'+esc(m)+'</span>';}).join("");
+      var yur=r.yururluk?('<div class="tl-mad" style="margin-top:6px"><span style="background:#FBE9EA;border-color:#F3C9CB;color:var(--red-d)">yürürlük '+esc(gun(r.yururluk)+"."+yil(r.yururluk))+'</span></div>'):'';
+      var lnk=r.url?('<div class="lnk"><a href="'+esc(r.url)+'" target="_blank" rel="noopener">Resmî metin / kaynak →</a></div>'):'';
+      return '<div class="tl-item"><div class="tl-date">'+esc(gun(r.tarih))+'<small>'+esc(yil(r.tarih))+'</small></div>'
+        +'<div class="tl-rail"><div class="tl-dot'+(r.lisanssiz?" lis":"")+'"></div></div>'
+        +'<div class="tl-c'+(r.lisanssiz?" lis":"")+'" data-i="'+i+'">'
+        +'<div class="tl-head"><span class="tl-tip">'+esc(r.lisanssiz?"Lisanssız":(KATAD[r.kategori]||r.kategori||"enerji"))+'</span><h4>'+esc(r.baslik.split("(")[0].trim())+'</h4><span class="exp">+ detay</span></div>'
+        +'<div class="tl-mad">'+mad+'</div>'+yur
+        +'<div class="tl-det"><p class="oz">'+esc(r.ozet||"")+'</p>'+(r.analiz?('<p class="an"><b>Analiz:</b> '+esc(r.analiz)+'</p>'):'')+lnk+'</div>'
+        +'</div></div>';
+    }).join("");
     el("mevDurum").hidden=d.length>0;
     if(!d.length) el("mevDurum").textContent="Eşleşen mevzuat yok.";
   }
   function filtrele(){
     var kats={}; veri.items.forEach(function(r){ var k=r.kategori||"enerji"; kats[k]=(kats[k]||0)+1; });
     var lis=veri.items.filter(function(r){return r.lisanssiz;}).length;
-    var html='<button type="button" data-v="hepsi" aria-pressed="true">Tümü <span>('+veri.items.length+')</span></button>'
-      +'<button type="button" data-v="lisanssiz" aria-pressed="false">Yalnız lisanssız <span>('+lis+')</span></button>';
+    var html='<button type="button" data-v="hepsi" aria-pressed="'+(kf==="hepsi")+'">Tümü <span>('+veri.items.length+')</span></button>'
+      +'<button type="button" data-v="lisanssiz" aria-pressed="'+(kf==="lisanssiz")+'">Yalnız lisanssız <span>('+lis+')</span></button>';
     Object.keys(kats).sort(function(a,b){return kats[b]-kats[a];}).forEach(function(k){
-      html+='<button type="button" data-v="'+esc(k)+'" aria-pressed="false">'+esc(KATAD[k]||k)+' <span>('+kats[k]+')</span></button>';
+      html+='<button type="button" data-v="'+esc(k)+'" aria-pressed="'+(kf===k)+'">'+esc(KATAD[k]||k)+' <span>('+kats[k]+')</span></button>';
     });
     el("mevFilt").innerHTML=html;
     el("mevFilt").querySelectorAll("button").forEach(function(b){
       b.addEventListener("click",function(){
         kf=b.getAttribute("data-v");
         el("mevFilt").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed","false");});
-        b.setAttribute("aria-pressed","true"); ciz();
+        b.setAttribute("aria-pressed","true"); tlCiz();
       });
     });
   }
@@ -238,8 +284,9 @@
         var lis=d.items.filter(function(x){return x.lisanssiz;}).length;
         el("mevSay").textContent="("+d.items.length+")";
         var t=d.guncelleme?(" · güncelleme "+d.guncelleme.split("-").reverse().join(".")):"";
-        el("mevMeta").textContent=d.items.length+" mevzuat kaydı · "+lis+" lisanssız (öncelikli) · en yeni üstte"+t;
-        filtrele(); ciz();
+        el("mevMeta").textContent=d.items.length+" mevzuat kaydı · "+lis+" lisanssız (öncelik) · 2026 · en yeni üstte"+t;
+        akisCiz(); filtrele(); tlCiz();
+        el("mevTL").addEventListener("click",function(e){ var c=e.target.closest&&e.target.closest(".tl-c"); if(c){ c.classList.toggle("open"); var ex=c.querySelector(".exp"); if(ex) ex.textContent=c.classList.contains("open")?"– kapat":"+ detay"; } });
       })
       .catch(function(){ el("mevMeta").textContent="Mevzuat yüklenemedi."; el("mevDurum").hidden=false; el("mevDurum").textContent="Mevzuat şu an yüklenemedi."; });
   }

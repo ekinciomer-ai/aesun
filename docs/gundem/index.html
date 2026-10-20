@@ -40,6 +40,14 @@
   .etk span{font-size:12px;color:var(--mut2);background:var(--soft);border-radius:99px;padding:2px 9px}
   .gdurum{padding:48px 0;text-align:center;color:var(--mut2)}
   .band .meta2{margin-top:10px;font-size:14px;color:var(--mut2)}
+  .tabs{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .tabs button{min-height:42px;padding:0 18px;border:0;background:transparent;color:var(--ink2);border-radius:9px;font:inherit;font-weight:600;font-size:15px;cursor:pointer}
+  .tabs button[aria-pressed=true]{background:var(--red);color:#fff}
+  .tabs .sy{opacity:.7;font-weight:500;font-size:13px}.tabs button[aria-pressed=true] .sy{color:#fff;opacity:.9}
+  .onc{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--red);padding:2px 9px;border-radius:99px}
+  .mrg{font-size:12px;color:var(--mut2);font-weight:600}
+  .kart .kaynaklar{margin-top:8px;font-size:12px;color:var(--mut2)}
+  .kart .kaynaklar a{color:var(--red-d);text-decoration:none;font-weight:600}.kart .kaynaklar a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -61,7 +69,11 @@
   <p>EPDK, TEİAŞ, dağıtım şirketleri ve sektör kaynaklarından her gün derlenir; mevzuat bağlantılı analizle.</p>
   <div class="meta2" id="meta2">Yükleniyor…</div>
 </div></section>
-<div class="wrap gnd">
+<div class="wrap" style="padding-top:22px"><div class="tabs" id="tabs" role="tablist">
+  <button type="button" data-v="gundem" aria-pressed="true">Gündem akışı</button>
+  <button type="button" data-v="mevzuat" aria-pressed="false">Lisanssız Mevzuat <span class="sy" id="mevSay"></span></button>
+</div></div>
+<div class="wrap gnd" id="view-gundem">
   <div class="ara"><input type="search" id="ara" placeholder="Başlık, kaynak, etiket, analiz ara…" autocomplete="off"></div>
   <div class="flabel">Kategori</div>
   <div class="chips" id="fkat" role="group" aria-label="Kategori"></div>
@@ -69,6 +81,13 @@
   <div class="chips kayn" id="fkayn" role="group" aria-label="Kaynak"></div>
   <div class="liste" id="liste"></div>
   <div class="gdurum" id="durum" hidden></div>
+</div>
+<div class="wrap gnd" id="view-mevzuat" hidden>
+  <div class="meta2" id="mevMeta">Yükleniyor…</div>
+  <div class="flabel">Süzgeç</div>
+  <div class="chips" id="mevFilt" role="group" aria-label="Mevzuat süzgeci"></div>
+  <div class="liste" id="mevListe"></div>
+  <div class="gdurum" id="mevDurum" hidden></div>
 </div>
 </main>
 <footer class="foot"><div class="wrap">
@@ -156,6 +175,83 @@
       meta2.textContent = "Gündem yüklenemedi.";
       durum.hidden = false; durum.textContent = "Gündem şu an yüklenemedi. Lütfen birazdan tekrar deneyin.";
     });
+})();
+</script>
+<script>
+(function(){
+  var MEV="lisanssiz_mevzuat.json", veri=null, yuklendi=false, kf="hepsi";
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function el(id){ return document.getElementById(id); }
+  var KATAD={ "lisanssız":"Lisanssız", "depolama":"Depolama", "yek-g":"YEK-G", "yeka":"YEKA", "imar":"İmar/Ruhsat", "bedel":"Bedel" };
+
+  function kart(r){
+    var on=r.onem||0, oc=on>=4?"o5":(on===3?"o4":"o3");
+    var link=r.url?('<a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.baslik)+'</a>'):esc(r.baslik);
+    var analiz=r.analiz?('<p class="kanaliz"><b>Analiz:</b> '+esc(r.analiz)+'</p>'):'';
+    var etk=''; if(r.etiketler&&r.etiketler.length){ etk='<div class="etk">'+r.etiketler.map(function(e){return '<span>'+esc(e)+'</span>';}).join("")+'</div>'; }
+    var rozet=r.lisanssiz?'<span class="onc">Öncelik · Lisanssız</span>':('<span class="kat">'+esc(KATAD[r.kategori]||r.kategori||"enerji")+'</span>');
+    return '<article class="kart '+oc+'">'
+      +'<div class="kust">'+rozet+'<span class="mrg">'+esc(r.rg||"")+'</span><span class="on">'+esc(r.tip||"")+' · Önem '+on+'</span></div>'
+      +'<h3>'+link+'</h3>'
+      +'<p class="kozet">'+esc(r.ozet||"")+'</p>'
+      +analiz+etk
+      +'</article>';
+  }
+  function suz(){
+    return veri.items.filter(function(r){
+      if(kf==="lisanssiz") return !!r.lisanssiz;
+      if(kf!=="hepsi") return (r.kategori||"")===kf;
+      return true;
+    }).sort(function(a,b){
+      if(!!b.lisanssiz-!!a.lisanssiz) return (!!b.lisanssiz)-(!!a.lisanssiz);
+      return String(b.tarih).localeCompare(String(a.tarih));
+    });
+  }
+  function ciz(){
+    var d=suz();
+    el("mevListe").innerHTML=d.map(kart).join("");
+    el("mevDurum").hidden=d.length>0;
+    if(!d.length) el("mevDurum").textContent="Eşleşen mevzuat yok.";
+  }
+  function filtrele(){
+    var kats={}; veri.items.forEach(function(r){ var k=r.kategori||"enerji"; kats[k]=(kats[k]||0)+1; });
+    var lis=veri.items.filter(function(r){return r.lisanssiz;}).length;
+    var html='<button type="button" data-v="hepsi" aria-pressed="true">Tümü <span>('+veri.items.length+')</span></button>'
+      +'<button type="button" data-v="lisanssiz" aria-pressed="false">Yalnız lisanssız <span>('+lis+')</span></button>';
+    Object.keys(kats).sort(function(a,b){return kats[b]-kats[a];}).forEach(function(k){
+      html+='<button type="button" data-v="'+esc(k)+'" aria-pressed="false">'+esc(KATAD[k]||k)+' <span>('+kats[k]+')</span></button>';
+    });
+    el("mevFilt").innerHTML=html;
+    el("mevFilt").querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click",function(){
+        kf=b.getAttribute("data-v");
+        el("mevFilt").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed","false");});
+        b.setAttribute("aria-pressed","true"); ciz();
+      });
+    });
+  }
+  function yukle(){
+    if(yuklendi) return; yuklendi=true;
+    fetch(MEV,{cache:"no-store"}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(d){
+        veri=d;
+        var lis=d.items.filter(function(x){return x.lisanssiz;}).length;
+        el("mevSay").textContent="("+d.items.length+")";
+        var t=d.guncelleme?(" · güncelleme "+d.guncelleme.split("-").reverse().join(".")):"";
+        el("mevMeta").textContent=d.items.length+" mevzuat kaydı · "+lis+" lisanssız (öncelikli) · en yeni üstte"+t;
+        filtrele(); ciz();
+      })
+      .catch(function(){ el("mevMeta").textContent="Mevzuat yüklenemedi."; el("mevDurum").hidden=false; el("mevDurum").textContent="Mevzuat şu an yüklenemedi."; });
+  }
+  el("tabs").querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var v=b.getAttribute("data-v");
+      el("tabs").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed", x===b?"true":"false");});
+      var mev=(v==="mevzuat");
+      el("view-gundem").hidden=mev; el("view-mevzuat").hidden=!mev;
+      if(mev) yukle();
+    });
+  });
 })();
 </script>
 </body>

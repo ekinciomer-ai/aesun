@@ -1,0 +1,19 @@
+name: n8n işlemi
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: "hata_yakalayici | listele"
+        default: "hata_yakalayici"
+        required: false
+permissions:
+  contents: read
+jobs:
+  n8n:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: n8n işlemini çalıştır
+        env:
+          N8N_ANAHTAR: ${{ secrets.N8N_ANAHTAR }}
+        run: python3 cpanel/n8n_hy.py "${{ inputs.islem || 'hata_yakalayici' }}"

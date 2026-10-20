@@ -39,7 +39,7 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_KONTROL: "/=<title;/referanslar.html=<title;/iletisim.html=<form"
+          CP_KONTROL: "/=<title;/referanslar.html=<title;/gundem.html=<title;/iletisim.html=<form"
         run: python3 cpanel/yukle.py dist_site
       - name: Portal → portal.aksarayenerji.net
         if: env.ATLA != '1'
@@ -49,7 +49,7 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/saha/=<title;/aecad/=AeCAD;/api/canli.php=durum"
+          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/saha/=<title;/aecad/=AeCAD;/gundem/=<title;/kapasite/=<title;/api/canli.php=durum"
         run: python3 cpanel/yukle.py dist_portal
       # Yüklemeden sonra TÜM uçlar denenir (izleme/uclar.json). Biri bozulduysa son başarılı sürüm geri yüklenir ve iş kırmızı biter.
       - name: Duman testi

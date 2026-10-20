@@ -53,6 +53,10 @@ def main():
             continue                                   # yalnız python sürecinin kendisi (kabuk sarmalayıcısı ikinci kez sayılmasın)
         for betik, lim in SINIR.items():
             if betik in kom and "python" in kom and sure > lim:
+                if betik == "fusionsolar_toplayici.py":
+                    son_veri = KOK / "toplayicilar/fusionsolar/data/latest.json"
+                    if son_veri.exists() and ts - son_veri.stat().st_mtime < 1800:
+                        break  # sürekli (forever) modda çalışıyor ve son 30 dk içinde veri üretti; takılı değil
                 try:
                     os.kill(pid, signal.SIGTERM); time.sleep(5)
                     try: os.kill(pid, 0); os.kill(pid, signal.SIGKILL); ek = " (zorla)"

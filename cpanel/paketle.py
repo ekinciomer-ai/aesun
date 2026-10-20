@@ -52,8 +52,10 @@ for app in ("monitoring", "demo"):
     yaz(os.path.join(P, app, "index.html"), s)
 # Enerji Gündemi (portal içi derin sürüm; token'lı /portal ucunu çeker)
 kopya(os.path.join(DOCS, "gundem"), os.path.join(P, "gundem"))
+yaz(os.path.join(P, "gundem", "index.html"), oku(os.path.join(DOCS, "gundem", "index.html")).replace("../portal/", "../"))
 # Kapasite Paneli (portal içi; TEİAŞ TM kapasite JSON'u yerel)
 kopya(os.path.join(DOCS, "kapasite"), os.path.join(P, "kapasite"))
+yaz(os.path.join(P, "kapasite", "index.html"), oku(os.path.join(DOCS, "kapasite", "index.html")).replace("../portal/", "../"))
 kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
 # CAD (portal oturumuyla açılır; DWG okuyucu wasm + pdf.js yerel)
 kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))
@@ -76,6 +78,6 @@ yaz(os.path.join(P, "robots.txt"), "User-agent: *\nDisallow: /\n")
 for d in (S, P):
     n = sum(len(f) for _, _, f in os.walk(d))
     print(d, n, "dosya")
-kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html")) + oku(os.path.join(P, "aecad", "index.html"))]
+kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html")) + oku(os.path.join(P, "aecad", "index.html")) + oku(os.path.join(P, "gundem", "index.html")) + oku(os.path.join(P, "kapasite", "index.html"))]
 if kalan or 'href="portal/"' in oku(os.path.join(S, "index.html")):
     sys.exit("bağlantı dönüşümü eksik")

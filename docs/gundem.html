@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Enerji Gündemi · Aksaray Enerji</title>
-<meta name="description" content="Lisanssız GES, EPDK, TEİAŞ ve enerji mevzuatı güncel gündemi — Aksaray Enerji tarafından her gün otomatik derlenir.">
+<title>Enerji Gündemi &amp; Mevzuat Şeması · Aksaray Enerji</title>
+<meta name="description" content="Lisanssız GES, Resmî Gazete enerji mevzuatı, EPDK kurul kararları ve TEİAŞ duyuruları — tek hat şeması ve karşılaştırma tablolarıyla Aksaray Enerji tarafından derlenir.">
 <link rel="canonical" href="https://www.aksarayenerji.net/gundem.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aksaray Enerji">
-<meta property="og:title" content="Enerji Gündemi · Aksaray Enerji">
-<meta property="og:description" content="Lisanssız GES, EPDK, TEİAŞ ve enerji mevzuatı güncel gündemi.">
+<meta property="og:title" content="Enerji Gündemi &amp; Mevzuat Şeması · Aksaray Enerji">
+<meta property="og:description" content="Lisanssız GES, EPDK, TEİAŞ ve Resmî Gazete enerji mevzuatı şematik analizi.">
 <meta property="og:url" content="https://www.aksarayenerji.net/gundem.html">
 <meta property="og:image" content="https://www.aksarayenerji.net/assets/ges-drone.jpg">
 <meta name="theme-color" content="#2B2E33">
@@ -17,28 +17,35 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css?v=3">
 <style>
-  .gnd{padding-top:40px;padding-bottom:80px;display:flex;flex-direction:column;gap:20px}
-  .gnd .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .gnd .chips button{min-height:40px;padding:0 16px;border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:99px;font:inherit;font-size:14px;font-weight:500;cursor:pointer}
-  .gnd .chips button[aria-pressed=true]{background:var(--char);color:#fff;border-color:var(--char)}
-  .gnd .chips button span{opacity:.6}
+  .gnd{padding-top:32px;padding-bottom:80px;display:flex;flex-direction:column;gap:22px}
+  .band .meta2{margin-top:10px;font-size:14px;color:var(--mut2)}
+  .sema-kutu{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+  .sema-kutu h2{margin:0 0 6px;font-family:Archivo,sans-serif;font-weight:800;font-size:18px;color:var(--ink)}
+  .sema-kutu p{margin:0 0 12px;font-size:13.5px;color:var(--mut)}
+  .svg-wrap{width:100%;overflow-x:auto;background:#FAFBFD;border:1px solid var(--line);border-radius:12px;padding:10px}
+  .svg-wrap svg{display:block;width:100%;min-width:780px;height:auto}
+  .flt-bar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips button{min-height:38px;padding:0 14px;border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:99px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+  .chips button[aria-pressed=true]{background:var(--char);color:#fff;border-color:var(--char)}
+  .chips button span{opacity:.65;font-weight:500}
   .liste{display:grid;gap:12px}
   .kart{background:#fff;border:1px solid var(--line);border-left:4px solid var(--mut2);border-radius:14px;padding:18px 20px}
   .kart.o5{border-left-color:var(--red)}
   .kart.o4{border-left-color:#E07B1E}
-  .kart.o3{border-left-color:#2E7D57}
-  .kart .ust{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-  .kart .kat{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--red-d);background:var(--soft);padding:3px 10px;border-radius:99px}
-  .kart .on{font-size:12px;color:var(--mut2);font-weight:500}
-  .kart h3{margin:0 0 8px;font-family:Archivo,sans-serif;font-weight:700;font-size:18px;line-height:1.3}
+  .kart.o3{border-left-color:#1E9E5A}
+  .kart .ust{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .kart .ust-sol{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .kart .kat{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--red-d);background:#FBE9EA;padding:3px 10px;border-radius:99px}
+  .kart .src-b{font-size:12px;font-weight:700;color:var(--ink);background:var(--soft);border:1px solid var(--line);padding:2px 9px;border-radius:6px}
+  .kart .on{font-size:12px;color:var(--mut2);font-weight:600}
+  .kart h3{margin:0 0 8px;font-family:Archivo,sans-serif;font-weight:700;font-size:17.5px;line-height:1.35}
   .kart h3 a{color:var(--ink);text-decoration:none}
   .kart h3 a:hover{color:var(--red-d)}
-  .kart p{margin:0 0 10px;font-size:15px;color:var(--mut);line-height:1.55}
+  .kart p{margin:0 0 10px;font-size:14.5px;color:var(--mut);line-height:1.55}
   .kart .alt{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-  .kart .src{font-size:13px;color:var(--mut2)}
-  .kart .etkt{font-size:12px;color:#2E7D57}
+  .kart .etkt{font-size:12px;color:#1E9E5A;font-weight:600}
   .gdurum{padding:48px 0;text-align:center;color:var(--mut2)}
-  .band .meta2{margin-top:10px;font-size:14px;color:var(--mut2)}
 </style>
 </head>
 <body>
@@ -51,13 +58,47 @@
 </div></header>
 <main>
 <section class="band"><div class="wrap">
-  <div class="eyebrow">ENERJİ GÜNDEMİ</div>
+  <div class="eyebrow">ENERJİ GÜNDEMİ &amp; MEVZUAT ÖZETİ</div>
   <h1>Lisanssız GES ve enerji mevzuatı gündemi</h1>
-  <p>EPDK, TEİAŞ, dağıtım şirketleri ve sektör kaynaklarından her gün otomatik derlenir.</p>
+  <p>Resmî Gazete, EPDK, TEİAŞ ve dağıtım şirketleri duyuruları her gün otomatik derlenir ve mükerrer kayıtlar temizlenerek sunulur.</p>
   <div class="meta2" id="meta2">Gündem yükleniyor…</div>
 </div></section>
 <div class="wrap gnd">
-  <div class="chips" id="filtre" role="group" aria-label="Kategori filtresi"></div>
+  <div class="sema-kutu">
+    <h2>2026 Lisanssız GES Mevzuat &amp; İşletme Özeti Şeması</h2>
+    <p>Resmî Gazete'de yayımlanan 2026 değişikliklerinin güneş enerjisi santrallerine 4 ana noktadaki etkisi:</p>
+    <div class="svg-wrap">
+      <svg viewBox="0 0 960 135" role="img" aria-label="2026 Lisanssız GES Mevzuat Özeti">
+        <rect x="10" y="12" width="220" height="110" rx="10" fill="#FFF" stroke="#1E9E5A" stroke-width="2"/>
+        <text x="120" y="34" text-anchor="middle" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#1E9E5A">1 · SAATLİK MAHSUP (01.05.2026)</text>
+        <text x="120" y="56" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">Üretim ve tüketim saatlik eşleşir</text>
+        <text x="120" y="74" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#5A6270">Satış sınırı ≤ 2 × Yıllık Tüketim</text>
+        <text x="120" y="94" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#1E9E5A">EPDK 14671: 10 Yılı Dolana Muafiyet</text>
+
+        <rect x="250" y="12" width="220" height="110" rx="10" fill="#FFF" stroke="#2F6DB5" stroke-width="2"/>
+        <text x="360" y="34" text-anchor="middle" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#1F508B">2 · SINIRSIZ DEPOLAMA (BESS)</text>
+        <text x="360" y="56" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">Lisanssız Yön. Ek-3 BESS imkânı</text>
+        <text x="360" y="74" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#5A6270">Md.14 Otomatik Güç Kesme şartı</text>
+        <text x="360" y="94" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#1F508B">10 İş Gününde Fazla Teminat İadesi</text>
+
+        <rect x="490" y="12" width="220" height="110" rx="10" fill="#FFF8F8" stroke="#D32027" stroke-width="2"/>
+        <text x="600" y="34" text-anchor="middle" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#D32027">3 · UZAKTAN KONTROL (19.10.2026)</text>
+        <text x="600" y="56" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">EDAŞ &amp; OSB DGP acil yük atma</text>
+        <text x="600" y="74" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#5A6270">Bitişten ≤15 dk içinde bildirim</text>
+        <text x="600" y="94" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#D32027">18.12.2026: 60 Gün Anlaşma Revizyonu</text>
+
+        <rect x="730" y="12" width="220" height="110" rx="10" fill="#FFF" stroke="#3C4047" stroke-width="2"/>
+        <text x="840" y="34" text-anchor="middle" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#2B2E33">4 · PİYASA &amp; ŞEFFAFLIK (20.10.2026)</text>
+        <text x="840" y="56" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">Karar 14911: Vt,u = 100 TL/MWh</text>
+        <text x="840" y="74" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#5A6270">Karar 14967: 1 Saat Arıza Bildirimi</text>
+        <text x="840" y="94" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#2B2E33">Karar 14968: 151 Şeffaflık Veri Seti</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="flt-bar">
+    <div class="chips" id="filtre" role="group" aria-label="Kategori filtresi"></div>
+  </div>
   <div class="liste" id="liste"></div>
   <div class="gdurum" id="durum" hidden></div>
 </div>
@@ -96,14 +137,55 @@
 
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
+  function normKaynak(k){
+    var s = String(k||"").trim();
+    if(/resm[iî]\s*gazete/i.test(s)) return "Resmî Gazete";
+    if(/^epdk/i.test(s)) return "EPDK";
+    if(/^te[iİ]a[sŞ]/i.test(s)) return "TEİAŞ";
+    if(/^ep[iİ]a[sŞ]/i.test(s)) return "EPİAŞ";
+    if(/enerji\s*g[uü]nl[uü][gğ][uü]/i.test(s)) return "Enerji Günlüğü";
+    if(/ye[sş]il\s*ekonomi/i.test(s)) return "Yeşil Ekonomi";
+    if(/ekonomim/i.test(s)) return "Ekonomim";
+    if(/aa\s*enerji|anadolu/i.test(s)) return "AA Enerji";
+    return s || "Sektör Kaynağı";
+  }
+
+  function cikarTarih(r){
+    if(r.yayin_tarih && String(r.yayin_tarih).length>=10) return String(r.yayin_tarih).slice(0,10);
+    var u = String(r.url||"");
+    var m = u.match(/\/(202\d)(\d{2})(\d{2})(?:-\d+)?\.(?:htm|pdf)/i);
+    if(m) return m[3]+"."+m[2]+"."+m[1];
+    return "";
+  }
+
+  function tekillestir(ham){
+    var mapUrl = {}, mapBas = {}, out = [];
+    ham.forEach(function(h){
+      var r = Object.assign({}, h);
+      r.kaynak = normKaynak(h.kaynak);
+      r.tarih_goster = cikarTarih(h);
+      var nu = String(r.url||"").trim().replace(/^https?:\/\/(www\.)?/i,"").replace(/\/+$/,"").toLowerCase();
+      var nb = String(r.baslik||"").toLocaleLowerCase("tr").replace(/[^a-z0-9çğıöşü]/g,"").slice(0,75);
+      var m = (nu && mapUrl[nu]) || (nb && mapBas[nb]);
+      if(m){
+        if((r.onem||0) > (m.onem||0)) m.onem = r.onem;
+        return;
+      }
+      if(nu) mapUrl[nu] = r;
+      if(nb) mapBas[nb] = r;
+      out.push(r);
+    });
+    return out.sort(function(a,b){ return (b.onem||0)-(a.onem||0); });
+  }
+
   function kart(r){
-    var on = r.onem || 0;
+    var on = r.onem || 3;
     var link = r.url ? ('<a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.baslik)+'</a>') : esc(r.baslik);
     var etkt = r.etiketler ? ('<span class="etkt">'+esc(r.etiketler)+'</span>') : '';
     return '<article class="kart o'+on+'">'
-      + '<div class="ust"><span class="kat">'+esc(r.kategori||"genel")+'</span><span class="on">Önem '+on+'</span></div>'
+      + '<div class="ust"><div class="ust-sol"><span class="kat">'+esc(r.kategori||"genel")+'</span><span class="src-b">'+esc(r.kaynak)+'</span><span class="on">Önem '+on+'/5</span></div>'+(r.tarih_goster?('<span class="on">'+esc(r.tarih_goster)+'</span>'):'')+'</div>'
       + '<h3>'+link+'</h3><p>'+esc(r.ozet)+'</p>'
-      + '<div class="alt"><span class="src">'+esc(r.kaynak)+'</span>'+etkt+'</div></article>';
+      + '<div class="alt"><span></span>'+etkt+'</div></article>';
   }
 
   function ciz(){
@@ -134,12 +216,12 @@
   fetch(API, {cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
     .then(function(d){
-      tumu = (d.haberler||[]).slice().sort(function(a,b){ return (b.onem||0)-(a.onem||0); });
+      tumu = tekillestir(d.haberler||[]);
       var t = d.guncelleme ? new Date(d.guncelleme) : null;
-      meta2.textContent = tumu.length + " başlık" + (t ? (" · son güncelleme " + t.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})) : "");
+      meta2.textContent = tumu.length + " tekil başlık" + (t ? (" · son güncelleme " + t.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})) : "");
       filtreCiz(); ciz();
     })
-    .catch(function(e){
+    .catch(function(){
       meta2.textContent = "Gündem şu an yüklenemedi.";
       durum.hidden = false; durum.textContent = "Gündem şu an yüklenemedi. Lütfen birazdan tekrar deneyin.";
     });

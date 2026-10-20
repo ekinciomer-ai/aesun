@@ -17,7 +17,8 @@ KOK = Path(__file__).resolve().parent.parent
 YEREL = AESUN / "sef_pi.json"
 SINIR = {  # betik: en uzun olağan süre (sn) — aşarsa takılmış sayılır
     "canli.py": 240, "cihaz_detay.py": 900, "cihaz_yonetimi.py": 1200, "cihaz_ogrenme.py": 1500, "ag_tara.py": 1200,
-    "osos_toplayici.py": 2400, "nabiz.py": 600, "yedek.py": 5400, "firmware.py": 7200, "kompanzasyon.py": 900, "saha_inverter.py": 900, "fusionsolar_toplayici.py": 900,
+    "osos_toplayici.py": 2400, "nabiz.py": 600, "yedek.py": 5400, "firmware.py": 7200, "kompanzasyon.py": 900, "saha_inverter.py": 900, "fusionsolar_toplayici.py": 2700,   # 20 Eki: olağan turu ~20 dk sürüyor (30 dk'da bir yayın); yalnız gerçekten takılanı (ör. 3,6 gün) durdur
+
 }
 
 
@@ -47,8 +48,9 @@ def main():
         if len(p) < 3 or not p[0].isdigit() or int(p[0]) == benim:
             continue
         pid, sure, kom = int(p[0]), int(p[1]), p[2]
-        if "flock" in kom.split()[0]:
-            continue
+        ilk = os.path.basename(kom.split()[0])
+        if ilk in ("flock", "sh", "bash", "dash") or not ilk.startswith("python"):
+            continue                                   # yalnız python sürecinin kendisi (kabuk sarmalayıcısı ikinci kez sayılmasın)
         for betik, lim in SINIR.items():
             if betik in kom and "python" in kom and sure > lim:
                 try:

@@ -37,13 +37,14 @@ def sh(*a, **k):
     return subprocess.run(list(a), cwd=k.get("cwd", D), capture_output=True, text=True, timeout=k.get("t", 600))
 
 def hazirla():
+    os.environ.setdefault("GIT_SSH_COMMAND", "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no")
     if not os.path.isdir(D + "/.git"):
         r = sh("git", "clone", "--depth", "50", REPO, D, cwd="/veri")
         if r.returncode: raise RuntimeError(r.stderr[-300:])
     sh("git", "config", "user.name", "aesun-bot"); sh("git", "config", "user.email", "aesun-bot@users.noreply.github.com")
 
 def git_esitle():
-    """pull --rebase; yarıda kalmış rebase'i (çakışma, kesinti) temizler, çakışmada yerel iş çıktısını korur (-X theirs = yeniden uygulanan yerel commit)."""
+    """pull --rebase; yarıda kalmış rebase'i veya index'te sıkışmış autostash kalıntılarını temizler."""
     if os.path.isdir(D + "/.git/rebase-merge") or os.path.isdir(D + "/.git/rebase-apply"):
         sh("git", "rebase", "--abort")
     r = sh("git", "pull", "--rebase", "--autostash", "-q")
@@ -52,6 +53,10 @@ def git_esitle():
         r = sh("git", "pull", "--rebase", "--autostash", "-X", "theirs", "-q")
         if r.returncode:
             sh("git", "rebase", "--abort")
+            sh("git", "fetch", "--depth", "50", "origin", "main")
+            sh("git", "reset", "--hard", "origin/main")
+            sh("git", "stash", "clear")
+            r = sh("git", "status", "--porcelain")
     return r
 
 def calistir(ad, komut, yollar, mesaj):

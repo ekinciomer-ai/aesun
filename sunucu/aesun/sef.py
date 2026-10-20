@@ -37,7 +37,7 @@ def dx(*a, t=180, girdi=None):
 
 
 def git(*a, t=180):
-    return dx("git", "-C", REPO, *a, t=t)
+    return dx("env", "GIT_SSH_COMMAND=ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no", "git", "-C", REPO, *a, t=t)
 
 
 def oku(p, v):
@@ -73,22 +73,26 @@ def main():
     git("fetch", "-q", "origin", "main", t=120)
     _, rb, _ = dx("sh", "-c", f"ls -d {REPO}/.git/rebase-merge {REPO}/.git/rebase-apply 2>/dev/null")
     _, ileri, _ = git("rev-list", "--count", "origin/main..HEAD")
+    _, geri, _ = git("rev-list", "--count", "HEAD..origin/main")
     _, en_eski, _ = git("log", "origin/main..HEAD", "--reverse", "--format=%ct", "-1")
-    ileri = int(ileri or 0); yas = (ts - int(en_eski)) / 60 if en_eski.isdigit() else 0
-    gozlem["itme"] = {"rebase_yarida": bool(rb), "gonderilmemis": ileri, "en_eski_dk": round(yas)}
-    if rb or (ileri and yas > 10):
+    ileri = int(ileri or 0); geri = int(geri or 0); yas = (ts - int(en_eski)) / 60 if en_eski.isdigit() else 0
+    gozlem["itme"] = {"rebase_yarida": bool(rb), "gonderilmemis": ileri, "geride": geri, "en_eski_dk": round(yas)}
+    if rb or (ileri and yas > 10) or geri > 20:
         def itme():
             git("rebase", "--abort")
             k, _, e = git("pull", "--rebase", "--autostash", "-q")
             if k:
                 git("rebase", "--abort"); k, _, e = git("pull", "--rebase", "--autostash", "-X", "theirs", "-q")
-            if not k:
+            if k:
+                git("rebase", "--abort"); git("reset", "--hard", "origin/main"); git("stash", "clear"); k = 0
+            if not k and ileri:
                 k, _, e = git("push", "-q")
             git("fetch", "-q", "origin", "main")
             _, kalan, _ = git("rev-list", "--count", "origin/main..HEAD")
-            ok = (kalan or "0") == "0"
-            return (f"{ileri} bekleyen commit gönderildi" if ok else f"gönderilemedi: {e[-160:]}"), ok
-        if yap("itme", ("yarıda kalmış rebase · " if rb else "") + f"{ileri} commit {round(yas)} dk'dır GitHub'a gidemiyor", itme) is False:
+            _, kalan_geri, _ = git("rev-list", "--count", "HEAD..origin/main")
+            ok = (kalan or "0") == "0" and int(kalan_geri or 0) <= 5
+            return (f"depo eşitlendi (ileri:{ileri}, geri:{geri} -> 0)" if ok else f"gönderilemedi: {e[-160:]}"), ok
+        if yap("itme", ("yarıda kalmış rebase · " if rb else "") + f"depo uyumsuz (ileri:{ileri}, geri:{geri})", itme) is False:
             acik.append({"sorun": "ns1 iş çıktıları GitHub'a gönderilemiyor", "neden": "itme denemesi başarısız"})
 
     # ---- 2) zamanlayıcı canlı mı?

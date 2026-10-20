@@ -66,7 +66,10 @@ def mod_yaz(ip, mod, timeout=30):
 
 KALIP = re.compile(r'http_query\(\s*ip\s*,\s*"set_miner_conf\.cgi"\s*,\s*method="POST"\s*,\s*(?:timeout=\d+\s*,\s*)?'
                    r'body=\{\s*"bitmain-work-mode"\s*:\s*([^}]+?)\s*\}\s*(?:,\s*timeout=\d+\s*)?\)', re.S)
-ESKI_BLOK = re.compile(r'\n?# --- aesun yama: mod_yaz ---\ndef mod_yaz\(ip, mod, timeout=30\):.*?return r\n+', re.S)
+ESKI_BLOK = re.compile(
+    r'\n?# --- aesun yama: mod_yaz ---\ndef mod_yaz\(ip, mod, timeout=30\):.*?(?=\ndef )',
+    re.S,
+)
 
 
 def main():

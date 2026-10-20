@@ -822,7 +822,6 @@ function cizGenel() {
   document.getElementById('icerik').innerHTML =
     '<div style="display:flex;flex-direction:column;gap:24px">'
     + '<div class="iki"><section class="panel" aria-labelledby="h-uyari"><div class="bas"><h2 id="h-uyari">Dikkat isteyenler</h2><span class="k">' + uy.length + ' etkin</span></div>' + uyHtml + '</section>' + denge + '</div>'
-    + sefKarti(D.sef) + denetimKarti(D.den)
     + anlikUretimBolum(D.fs, D.saha, mad)
     + '<section class="panel" id="sayaclar" aria-labelledby="h-abone" style="gap:16px"><div class="bas"><h2 id="h-abone">Sayaçlar</h2><span class="k">' + tarihK(sonOsosGun) + ' 00:00–' + String(sonSaatNo).padStart(2, '0') + ':00, son 30 gün çizgisi</span></div><div class="sayaclar">' + sayaclar + '</div></section>'
     + trend
@@ -3129,12 +3128,13 @@ const ghAnahtar = () => { try { return localStorage.getItem('aesun_gh_anahtar') 
 function ghAnahtarKaydet(v) { try { localStorage.setItem('aesun_gh_anahtar', v); } catch (e) {} }
 async function cizBildirim(zorla) {
   document.getElementById('baslik').textContent = 'Panel Yönetimi';
-  document.getElementById('altBaslik').textContent = 'WhatsApp bildirimleri: kim hangi konuyu alır';
-  document.getElementById('kontrol').innerHTML = '';
+  document.getElementById('altBaslik').textContent = 'Bekçi ofisi ve şef, sistem sağlığı, WhatsApp bildirim ayarları';
+  document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle(true);cizBildirim(true)">Yenile</button>';
   const ic = document.getElementById('icerik');
+  const ustBolum = (D ? (sefKarti(D.sef) + denetimKarti(D.den)) : '');
   if (!BILD || zorla) {
-    ic.innerHTML = '<div class="panel"><p class="k">Yükleniyor…</p></div>';
-    try { BILD = await al('n8n/bildirim_ayar.json', zorla); BILD_DEGISTI = false; } catch (e) { ic.innerHTML = '<div class="panel hata">Bildirim ayarı okunamadı: ' + esc(e.message || e) + '</div>'; return; }
+    ic.innerHTML = ustBolum + '<div class="panel"><p class="k">Yükleniyor…</p></div>';
+    try { BILD = await al('n8n/bildirim_ayar.json', zorla); BILD_DEGISTI = false; } catch (e) { ic.innerHTML = ustBolum + '<div class="panel hata">Bildirim ayarı okunamadı: ' + esc(e.message || e) + '</div>'; return; }
     try { BILD_KAYIT = await al('n8n/bildirim_kayit.json', zorla); } catch (e) { BILD_KAYIT = { kayit: [] }; }
   }
   if (location.hash !== '#bildirim') return;
@@ -3142,7 +3142,8 @@ async function cizBildirim(zorla) {
   const sonu = a => kay.filter(x => x.anahtar === a).slice(-1)[0];
   const kutu = 'width:22px;height:22px;cursor:pointer;flex:none';
   const inp = 'padding:7px 9px;border:1px solid #D5DCE5;border-radius:6px;font:inherit';
-  let h = '<section class="panel" style="gap:12px"><div class="bas"><h2>WhatsApp bildirimleri: kim neyi alsın</h2><span class="k">Kutucukları işaretleyip <b>Kaydet</b>\'e basın</span></div>'
+  let h = (D ? (sefKarti(D.sef) + denetimKarti(D.den)) : '')
+    + '<section class="panel" style="gap:12px"><div class="bas"><h2>WhatsApp bildirimleri: kim neyi alsın</h2><span class="k">Kutucukları işaretleyip <b>Kaydet</b>\'e basın</span></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
   P.forEach((p, i) => {
     const s = sonu(p.anahtar), kapali = p.aktif === false;

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enerji Gündemi · Aksaray Enerji</title>
+<meta name="description" content="Lisanssız GES, EPDK, TEİAŞ ve enerji mevzuatı güncel gündemi — Aksaray Enerji tarafından her gün otomatik derlenir.">
+<link rel="canonical" href="https://www.aksarayenerji.net/gundem.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Aksaray Enerji">
+<meta property="og:title" content="Enerji Gündemi · Aksaray Enerji">
+<meta property="og:description" content="Lisanssız GES, EPDK, TEİAŞ ve enerji mevzuatı güncel gündemi.">
+<meta property="og:url" content="https://www.aksarayenerji.net/gundem.html">
+<meta property="og:image" content="https://www.aksarayenerji.net/assets/ges-drone.jpg">
+<meta name="theme-color" content="#2B2E33">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=3">
+<style>
+  .gnd{padding-top:40px;padding-bottom:80px;display:flex;flex-direction:column;gap:20px}
+  .gnd .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .gnd .chips button{min-height:40px;padding:0 16px;border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:99px;font:inherit;font-size:14px;font-weight:500;cursor:pointer}
+  .gnd .chips button[aria-pressed=true]{background:var(--char);color:#fff;border-color:var(--char)}
+  .gnd .chips button span{opacity:.6}
+  .liste{display:grid;gap:12px}
+  .kart{background:#fff;border:1px solid var(--line);border-left:4px solid var(--mut2);border-radius:14px;padding:18px 20px}
+  .kart.o5{border-left-color:var(--red)}
+  .kart.o4{border-left-color:#E07B1E}
+  .kart.o3{border-left-color:#2E7D57}
+  .kart .ust{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .kart .kat{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--red-d);background:var(--soft);padding:3px 10px;border-radius:99px}
+  .kart .on{font-size:12px;color:var(--mut2);font-weight:500}
+  .kart h3{margin:0 0 8px;font-family:Archivo,sans-serif;font-weight:700;font-size:18px;line-height:1.3}
+  .kart h3 a{color:var(--ink);text-decoration:none}
+  .kart h3 a:hover{color:var(--red-d)}
+  .kart p{margin:0 0 10px;font-size:15px;color:var(--mut);line-height:1.55}
+  .kart .alt{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .kart .src{font-size:13px;color:var(--mut2)}
+  .kart .etkt{font-size:12px;color:#2E7D57}
+  .gdurum{padding:48px 0;text-align:center;color:var(--mut2)}
+  .band .meta2{margin-top:10px;font-size:14px;color:var(--mut2)}
+</style>
+</head>
+<body>
+<header class="on-light"><div class="wrap top">
+  <div class="brand">
+    <a class="emblem" href="portal/" aria-label="Personel girişi" tabindex="-1"><svg width="40" height="40" viewBox="0 0 56 56" aria-hidden="true"><path d="M28 2a26 26 0 0 0 0 52z" fill="#D32027"/><path d="M28 2a26 26 0 0 1 0 52z" fill="#3C4047"/><path d="M31 9 L19 31 H27 L23 47 L37 23 H29 Z" fill="#FFFFFF"/></svg></a>
+    <a class="word" href="index.html"><b>AKSARAY</b>&nbsp;<b>ENERJİ</b></a>
+  </div>
+  <nav class="nav" aria-label="Ana menü"><a href="index.html#biz" class="opt">Biz kimiz</a><a href="index.html#hizmetler" class="opt">Hizmetler</a><a href="referanslar.html">Referanslar</a><a href="gundem.html" aria-current="page">Gündem</a><a href="iletisim.html" class="cta">Teklif isteyin</a><a href="portal/" class="kgiris"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Kurumsal giriş</a></nav>
+</div></header>
+<main>
+<section class="band"><div class="wrap">
+  <div class="eyebrow">ENERJİ GÜNDEMİ</div>
+  <h1>Lisanssız GES ve enerji mevzuatı gündemi</h1>
+  <p>EPDK, TEİAŞ, dağıtım şirketleri ve sektör kaynaklarından her gün otomatik derlenir.</p>
+  <div class="meta2" id="meta2">Gündem yükleniyor…</div>
+</div></section>
+<div class="wrap gnd">
+  <div class="chips" id="filtre" role="group" aria-label="Kategori filtresi"></div>
+  <div class="liste" id="liste"></div>
+  <div class="gdurum" id="durum" hidden></div>
+</div>
+</main>
+<footer class="foot"><div class="wrap">
+  <div class="cols">
+    <div class="c1">
+      <span class="word" style="min-height:0"><b style="color:#fff">AKSARAY</b>&nbsp;<b style="color:#FF5A60">ENERJİ</b></span>
+      <p>Aksaray Enerji Ürt. Elk. Proje Taah. İnş. San. Tic. Ltd. Şti.</p>
+    </div>
+    <div class="c2">
+      <span class="t">İletişim</span>
+      <span>Ereğlikapı Mah. İpekyol İş Merkezi K:4 D:26, Merkez / Aksaray</span>
+      <a href="tel:+903822132595">0 (382) 213 25 95</a>
+      <a href="mailto:bilgi@aksarayenerji.com.tr">bilgi@aksarayenerji.com.tr</a>
+    </div>
+    <nav aria-label="Alt menü">
+      <span class="t" style="padding-bottom:4px">Site</span>
+      <a href="index.html#biz">Biz kimiz</a>
+      <a href="index.html#hizmetler">Hizmetler</a>
+      <a href="referanslar.html">Referanslar</a>
+      <a href="gundem.html">Gündem</a>
+      <a href="iletisim.html">İletişim</a>
+    </nav>
+  </div>
+  <div class="legal"><span>© 2012–2026 Aksaray Enerji. Tüm hakları saklıdır.</span><span>Gündem otomatik derlenir; resmî kaynak için ilgili kurum sitesi esastır.</span></div>
+</div></footer>
+<script>
+(function(){
+  var API = "https://xbay.app.n8n.cloud/webhook/aegundem/public.json";
+  var liste = document.getElementById("liste");
+  var durum = document.getElementById("durum");
+  var filtreEl = document.getElementById("filtre");
+  var meta2 = document.getElementById("meta2");
+  var tumu = [], aktifKat = "hepsi";
+
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  function kart(r){
+    var on = r.onem || 0;
+    var link = r.url ? ('<a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.baslik)+'</a>') : esc(r.baslik);
+    var etkt = r.etiketler ? ('<span class="etkt">'+esc(r.etiketler)+'</span>') : '';
+    return '<article class="kart o'+on+'">'
+      + '<div class="ust"><span class="kat">'+esc(r.kategori||"genel")+'</span><span class="on">Önem '+on+'</span></div>'
+      + '<h3>'+link+'</h3><p>'+esc(r.ozet)+'</p>'
+      + '<div class="alt"><span class="src">'+esc(r.kaynak)+'</span>'+etkt+'</div></article>';
+  }
+
+  function ciz(){
+    var veri = aktifKat==="hepsi" ? tumu : tumu.filter(function(r){ return (r.kategori||"genel")===aktifKat; });
+    liste.innerHTML = veri.map(kart).join("");
+    durum.hidden = veri.length>0;
+    if(!veri.length){ durum.textContent = "Bu kategoride kayıt yok."; }
+  }
+
+  function filtreCiz(){
+    var katlar = {};
+    tumu.forEach(function(r){ var k=r.kategori||"genel"; katlar[k]=(katlar[k]||0)+1; });
+    var html = '<button type="button" data-k="hepsi" aria-pressed="true">Tümü <span>('+tumu.length+')</span></button>';
+    Object.keys(katlar).sort(function(a,b){ return katlar[b]-katlar[a]; }).forEach(function(k){
+      html += '<button type="button" data-k="'+esc(k)+'" aria-pressed="false">'+esc(k)+' <span>('+katlar[k]+')</span></button>';
+    });
+    filtreEl.innerHTML = html;
+    filtreEl.querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        aktifKat = b.getAttribute("data-k");
+        filtreEl.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        b.setAttribute("aria-pressed","true");
+        ciz();
+      });
+    });
+  }
+
+  fetch(API, {cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(d){
+      tumu = (d.haberler||[]).slice().sort(function(a,b){ return (b.onem||0)-(a.onem||0); });
+      var t = d.guncelleme ? new Date(d.guncelleme) : null;
+      meta2.textContent = tumu.length + " başlık" + (t ? (" · son güncelleme " + t.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})) : "");
+      filtreCiz(); ciz();
+    })
+    .catch(function(e){
+      meta2.textContent = "Gündem şu an yüklenemedi.";
+      durum.hidden = false; durum.textContent = "Gündem şu an yüklenemedi. Lütfen birazdan tekrar deneyin.";
+    });
+})();
+</script>
+</body>
+</html>

@@ -29,7 +29,7 @@ for d in ("dist_site", "dist_portal"):
 S, P = os.path.join(KOK, "dist_site"), os.path.join(KOK, "dist_portal")
 
 # ---- site ----
-for f in ("index.html", "referanslar.html", "iletisim.html", "kvkk.html", "favicon.svg"):
+for f in ("index.html", "referanslar.html", "gundem.html", "iletisim.html", "kvkk.html", "favicon.svg"):
     s = oku(os.path.join(DOCS, f)) if f.endswith(".html") else None
     if s is None:
         os.makedirs(S, exist_ok=True); shutil.copy(os.path.join(DOCS, f), S); continue

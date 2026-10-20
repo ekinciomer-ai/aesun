@@ -125,7 +125,21 @@ def main():
     for ad, ara in ISLER.items():
         z = zaman((ih.get(ad) or {}).get("son")); dk = (simdi - z).total_seconds() / 60 if z else 9999
         if dk > 2 * ara + 5: geciken.append((ad, round(dk)))
+    # bekçilerin "geciken dosya" ve "eksik veri" bulgularını üreten işe çevir (ns1 işleri); Pi dosyaları Pi şefinin işi
+    URETICI = (("n8n/bildirim_", "Bildirimler"), ("n8n/maden_maliyet", "Bildirimler"), ("n8n/analiz/", "Durum analizi"),
+               ("n8n/aesun_son", "İzleme özeti"), ("n8n/izleme_durum", "İzleme özeti"), ("arsiv_", "Veri arşivi"), ("n8n/is_hatalari", None))
+    tar = oku(D + "/tarama_durum.json", {})
+    ek = set()
+    for g in tar.get("geciken") or []:
+        for on, ad in URETICI:
+            if g["dosya"].startswith(on) and ad: ek.add(ad)
+    vs = str(((oku(D + "/bekci_durum.json", {}).get("veri") or {}).get("sorun")) or "")
+    if "maliyet" in vs: ek.add("Bildirimler")
+    if "F2Pool" in vs or "arşiv" in vs: ek.add("Veri arşivi")
+    for ad in sorted(ek):
+        if ad not in [a for a, _ in geciken]: geciken.append((ad, 0))
     gozlem["isler_github"] = {ad: dk for ad, dk in geciken}
+    gozlem["uretici_tetik"] = sorted(ek)
     if geciken and nab_dk <= 5 and dj.get("etkin"):
         def tetik():
             for ad, _ in geciken:
@@ -171,6 +185,16 @@ def main():
     if any(e["ok"] for e in eylemler):
         sh("timeout", "600", "python3", D + "/bekci_tarama.py", t=650)
         sh("bash", "-c", f"echo $(date +%s) > {D}/.tarama_son")
+    # ---- 4c) Pi şefi (Pi'de, nabız ile 10 dk'da bir): takılan toplayıcıyı durdurur, kod güncellemesini onarır, diski temizler
+    k, o, _ = git("show", "origin/main:n8n/sef_pi.json")
+    try: sp = json.loads(o)
+    except Exception: sp = {}
+    gozlem["pi_sef"] = {"t": sp.get("t"), "durum": sp.get("durum"), "eylem": len(sp.get("eylemler") or [])}
+    for e in sp.get("eylemler") or []:
+        if not any(x.get("t") == e.get("t") and x.get("eylem") == e.get("eylem") for x in (st.get("gecmis") or [])):
+            eylemler.append({**e, "eylem": "pi_" + e.get("eylem", "")})
+    for a in sp.get("acik") or []:
+        acik.append({"sorun": "Pi: " + a.get("sorun", ""), "neden": a.get("neden", "")})
     # ---- 5) şefin çözemediği: Pi bekçisinin bulguları (Pi tarafı) + ns1 bekçisinin onarım sayısı
     k, o, _ = git("show", "origin/main:n8n/sistem_bekci.json")
     try: sb = json.loads(o)

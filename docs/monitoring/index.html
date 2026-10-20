@@ -4157,7 +4157,7 @@ function sefOfis() {
   // şef: koridorda masası; devriye, müdahale ya da telefonla bildirim
   const sx = W / 2, sy = WALL + 205, acik = sef.acik || [], son = (sef.eylemler || []).slice(-1)[0] || (sef.gecmis || []).slice(-1)[0];
   const sonYeni = son && yasDk(son.t) < 30, kotuM = M.find(m => m.sorun);
-  const hedef = sonYeni ? M.find(m => m.k === ({ itme: 'ns1', isler: 'ns1', api: 'ns1', is_tetik: 'is', gh_yeniden: 'hata', gh_kapat: 'hata', etkin: 'ns1' })[son.eylem]) : kotuM;
+  const hedef = sonYeni ? M.find(m => m.k === ({ itme: 'ns1', isler: 'ns1', api: 'ns1', is_tetik: 'is', gh_yeniden: 'hata', gh_kapat: 'hata', etkin: 'ns1', pi_takili: 'cihaz', pi_kod: 'surum', pi_disk: 'pi' })[son.eylem]) : kotuM;
   s += '<path d="M' + (sx - 80) + ' ' + (sy + 34) + 'h160l-10 -14h-140z" fill="url(#ofMasaUst)" stroke="#B9A07E"/><rect x="' + (sx - 80) + '" y="' + (sy + 34) + '" width="160" height="22" fill="url(#ofMasa)"/>'
     + '<rect x="' + (sx - 54) + '" y="' + (sy + 38) + '" width="108" height="14" rx="3" fill="#F5B300"/>' + T(sx, sy + 48, 'ŞEF', ' text-anchor="middle" font-size="10" font-weight="900" fill="#10233F" letter-spacing=".2em"')
     + '<rect x="' + (sx + 44) + '" y="' + (sy + 14) + '" width="22" height="8" rx="2" fill="#2B3236"/><path d="M' + (sx + 47) + ' ' + (sy + 14) + 'q8 -10 16 0" fill="none" stroke="#2B3236" stroke-width="3"/>'
@@ -4187,7 +4187,7 @@ function sefOfis() {
 function sefKarti(d) {
   if (!d || !d.t) return '';
   const yas = Math.round((Date.now() - Date.parse(d.t)) / 60000), acik = d.acik || [], son = (d.gecmis || []).slice(-6).reverse();
-  const AD = { itme: 'GitHub gönderimini onardı', is_tetik: 'gecikmiş işi çalıştırdı', isler: 'zamanlayıcıyı yeniden başlattı', api: 'API\'yi yeniden başlattı', gh_yeniden: 'başarısız GitHub işini yeniden çalıştırdı', gh_kapat: 'eski GitHub hatalarını kapattı', etkin: 'kapalı işleri yeniden açtı' };
+  const AD = { itme: 'GitHub gönderimini onardı', is_tetik: 'gecikmiş işi çalıştırdı', isler: 'zamanlayıcıyı yeniden başlattı', api: 'API\'yi yeniden başlattı', gh_yeniden: 'başarısız GitHub işini yeniden çalıştırdı', gh_kapat: 'eski GitHub hatalarını kapattı', etkin: 'kapalı işleri yeniden açtı', pi_takili: 'Pi\'de takılan toplayıcıyı durdurdu', pi_kod: 'Pi kodunu güncelledi', pi_disk: 'Pi diskini temizledi' };
   const renk = acik.length ? '#B42318' : '#1E7A3C', zemin = acik.length ? '#FDECEA' : '#E6F4EA';
   return '<section class="panel" style="gap:10px"><div class="bas"><h2>👷 Bekçi ofisi ve şef</h2><span class="k">bekçiler bulur, şef çözer · ' + (yas > 70 ? '<b style="color:#B42318">' + yas + ' dk önce (şef çalışmıyor olabilir)</b>' : 'son kayıt ' + yas + ' dk önce · 5 dk\'da bir tur') + '</span></div>'
     + sefOfis()

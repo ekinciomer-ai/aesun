@@ -7,10 +7,10 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
-<title>Kapasite Paneli &amp; Şematik TM Analizi · Aksaray Enerji Portal</title>
+<title>Kapasite Paneli · Görsel Veri Şema Haritası &amp; TM Analizi · Aksaray Enerji</title>
 <script>(function(){var S=null;try{var o=JSON.parse(localStorage.getItem('ae_portal')||'null');if(o&&o.S&&Date.now()<(o.son||0))S=o.S;}catch(e){}if(!S||!(S.ka||(S.anahtarlar&&S.anahtarlar.kapasite))){location.replace('../portal/?git=kapasite');return;}window.AE_PORTAL=S;})();</script>
 <link rel="icon" href="https://aksarayenerji.net/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://aksarayenerji.net/assets/site.css?v=3">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -20,15 +20,15 @@
   .pbar a{color:#D9DDE3;text-decoration:none;font-weight:500}.pbar a:hover{color:#fff}
   .pbar .sag{display:flex;gap:18px;align-items:center}
   .band .meta2{margin-top:10px;font-size:14px;color:var(--mut2)}
-  .kap{padding-top:26px;padding-bottom:80px;display:flex;flex-direction:column;gap:20px}
+  .kap{padding-top:24px;padding-bottom:80px;display:flex;flex-direction:column;gap:20px}
 
-  /* Şematik Mimari & Erime Kutusu */
+  /* Şematik Paneller */
   .sema-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:0 4px 18px rgba(20,24,31,.04)}
-  .sema-ust{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .sema-ust{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
   .sema-ust h2{margin:0;font-family:Archivo,sans-serif;font-weight:800;font-size:18px;color:var(--ink)}
   .sema-ust .kay{font-size:12px;color:var(--mut2)}.sema-ust .kay a{color:var(--red-d);font-weight:600;text-decoration:none}.sema-ust .kay a:hover{text-decoration:underline}
   .svg-wrap{width:100%;overflow-x:auto;background:linear-gradient(180deg,#FAFBFD 0%,#F2F4F8 100%);border:1px solid var(--line);border-radius:12px;padding:12px}
-  .svg-wrap svg{display:block;width:100%;min-width:860px;height:auto}
+  .svg-wrap svg{display:block;width:100%;min-width:920px;height:auto}
 
   /* Dönem seçici + Hızlı Bölge Kısayolları */
   .ust-bar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px}
@@ -40,26 +40,50 @@
   .seg button[aria-pressed=true]{background:var(--char);color:#fff}
   .seg button[aria-pressed=true] small{color:#D5D9E0}
   .hizli-bolge{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .hizli-bolge button{min-height:34px;padding:0 12px;border:1px solid var(--line);background:#FAFBFD;color:var(--ink2);border-radius:99px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .hizli-bolge button{min-height:34px;padding:0 12px;border:1px solid var(--line);background:#FAFBFD;color:var(--ink2);border-radius:99px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s}
   .hizli-bolge button:hover,.hizli-bolge button.on{background:var(--red);color:#fff;border-color:var(--red)}
 
-  /* MEDAŞ Bölgesel Şematik Kartı + Seçili TM Tek Hat Kartı */
-  .ikili-mimari{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}
-  @media(max-width:920px){.ikili-mimari{grid-template-columns:1fr}}
+  /* Harita & Alternatif Katman Kontrol Paneli */
+  .harita-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:0 6px 22px rgba(20,24,31,.05)}
+  .katman-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#F6F8FB;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}
+  .katman-grup{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .katman-grup .k-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mut2);margin-right:4px}
+  .k-btn{min-height:32px;padding:0 11px;border:1px solid #D0D7E2;background:#fff;color:var(--ink2);border-radius:8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+  .k-btn:hover{border-color:var(--char);color:var(--ink)}
+  .k-btn.on{background:#182232;color:#fff;border-color:#182232}
+  .k-btn.on.red{background:var(--red);border-color:var(--red);color:#fff}
+  #harita{height:510px;border-radius:12px;border:1px solid var(--line);overflow:hidden;z-index:0;position:relative}
+  @media(max-width:760px){#harita{height:380px}}
+  .leaflet-popup-content{font:inherit;font-size:13px;line-height:1.5;margin:10px 12px}
+  .leaflet-popup-content b{color:var(--ink)}
+  .lej{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut2);margin-top:12px;align-items:center}
+  .lej-sol{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .lej-sag{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .lej i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
+  .lej .chk2{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink2);font-weight:600;background:#F6F8FB;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
+  .lej .chk2 input{width:15px;height:15px;accent-color:var(--red)}
+  .edas-tip{font:inherit;font-size:12px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.12)}
+  .il-rozet{background:rgba(16,35,63,.88);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:6px;padding:2px 6px;font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);pointer-events:none;text-align:center}
+  .il-rozet b{color:#5CF08F}
+  .il-rozet.dolu b{color:#9AA6B5}
+
+  /* İkili Mimari: MEDAŞ + Seçili TM Tek Hat */
+  .ikili-mimari{display:grid;grid-template-columns:1.1fr 1.1fr;gap:16px}
+  @media(max-width:960px){.ikili-mimari{grid-template-columns:1fr}}
   .medas-kutu{background:#fff;border:1px solid var(--line);border-top:4px solid var(--red);border-radius:16px;padding:16px 18px}
-  .medas-kutu h3{margin:0 0 4px;font-family:Archivo,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between;align-items:center}
+  .medas-kutu h3{margin:0 0 4px;font-family:Archivo,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
   .medas-kutu p{margin:0 0 12px;font-size:12.5px;color:var(--mut)}
   .medas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   @media(max-width:560px){.medas-grid{grid-template-columns:repeat(2,1fr)}}
-  .m-il{background:#FAFBFD;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:border-color .15s,background .15s}
-  .m-il:hover,.m-il.secili{border-color:var(--red);background:#FFF8F8}
+  .m-il{background:#FAFBFD;border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s}
+  .m-il:hover,.m-il.secili{border-color:var(--red);background:#FFF8F8;transform:translateY(-1px);box-shadow:0 4px 10px rgba(211,32,39,.08)}
   .m-il .il-ad{font-family:Archivo,sans-serif;font-weight:800;font-size:13px;color:var(--ink);display:flex;justify-content:space-between}
   .m-il .il-mwe{font-family:Archivo,sans-serif;font-weight:800;font-size:18px;color:var(--red-d);margin:3px 0}
   .m-il .il-mwe.sifir{color:var(--mut2)}
   .m-il .il-det{font-size:11px;color:var(--mut2);line-height:1.35}
 
-  .tm-sema-kutu{background:#fff;border:1px solid var(--line);border-top:4px solid #2B2E33;border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between}
-  .tm-sema-kutu h3{margin:0 0 4px;font-family:Archivo,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink)}
+  .tm-sema-kutu{background:#fff;border:1px solid var(--line);border-top:4px solid #182232;border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between}
+  .tm-sema-kutu h3{margin:0 0 4px;font-family:Archivo,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
   .tm-sema-kutu p{margin:0 0 10px;font-size:12.5px;color:var(--mut)}
 
   /* Filtre */
@@ -88,17 +112,6 @@
   .bar.ed .fl{background:linear-gradient(90deg,#1A97B5,#4FB9D1)}
   .bar .v{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);white-space:nowrap}
   @media(max-width:760px){.bar{grid-template-columns:110px 1fr auto}}
-
-  /* Harita */
-  #harita{height:450px;border-radius:12px;border:1px solid var(--line);overflow:hidden;z-index:0}
-  @media(max-width:760px){#harita{height:350px}}
-  .leaflet-popup-content{font:inherit;font-size:13px;line-height:1.5;margin:10px 12px}
-  .leaflet-popup-content b{color:var(--ink)}
-  .lej{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut2);margin-top:10px;align-items:center}
-  .lej i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
-  .lej .chk2{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink2);font-weight:500}
-  .lej .chk2 input{width:16px;height:16px;accent-color:var(--red)}
-  .edas-tip{font:inherit;font-size:12px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.1)}
 
   /* Tablo + Görsel Mini Bar */
   .tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
@@ -147,22 +160,13 @@
 </div></header>
 <main>
 <section class="band"><div class="wrap">
-  <div class="eyebrow">KAPASİTE PANELİ · TEİAŞ &amp; EDAŞ ŞEMATİK ANALİZ</div>
-  <h1>TM bazlı lisanssız GES kapasitesi ve erime mimarisi</h1>
-  <p>TEİAŞ 154/380 kV trafo merkezlerinden 34,5 kV OG dağıtım ve OSB baralarına tahsis edilen lisanssız GES kapasitesinin üç dönemlik (Mart → Temmuz → Ekim 2026) şematik erime analizi.</p>
+  <div class="eyebrow">KAPASİTE PANELİ · TEİAŞ &amp; 21 EDAŞ GÖRSEL VERİ ŞEMA HARİTASI</div>
+  <h1>Trafo merkezi kapasite haritası, şematik şebeke topolojisi ve erime analizi</h1>
+  <p>TEİAŞ 154/380 kV trafo merkezlerinden 34,5 kV OG dağıtım ve OSB baralarına tahsis edilen lisanssız GES kapasitesinin çok katmanlı coğrafi haritası, 21 EDAŞ veri şema haritası ve tek hat bara analizi.</p>
   <div class="meta2" id="meta2">Yükleniyor…</div>
 </div></section>
 
 <div class="wrap kap">
-
-  <!-- 1. TÜRKİYE GENELİ TEİAŞ → EDAŞ/OSB KAPASİTE TAHSİS & ERİME MİMARİSİ (SVG ŞEMA) -->
-  <div class="sema-panel">
-    <div class="sema-ust">
-      <h2>TEİAŞ Trafo Merkezi → OG Dağıtım &amp; OSB Lisanssız Kapasite Erime Şeması (2026)</h2>
-      <span class="kay">Veri: TEİAŞ 02.03 / 16.07 / 01.10.2026 · derleme <a href="https://kaangokay.com/wp-content/uploads/ges/Lisanssiz_Analiz_Platformu_2026.html#s-kapasite" target="_blank" rel="noopener">kaangokay.com</a></span>
-    </div>
-    <div class="svg-wrap" id="ulusalSema"></div>
-  </div>
 
   <!-- DÖNEM SEÇİCİ VE HIZLI BÖLGE FİLTRESİ -->
   <div class="ust-bar">
@@ -176,31 +180,109 @@
       <button type="button" data-il="AKSARAY">Aksaray</button>
       <button type="button" data-il="KONYA">Konya</button>
       <button type="button" data-il="KARAMAN">Karaman</button>
+      <button type="button" data-il="NİĞDE">Niğde</button>
+      <button type="button" data-il="NEVŞEHİR">Nevşehir</button>
       <button type="button" data-il="ANKARA">Ankara</button>
     </div>
   </div>
 
-  <!-- 2. İKİLİ ŞEMATİK PANEL: (SOL) MERAM EDAŞ 6 İL MİMARİSİ, (SAĞ) SEÇİLİ TM TEK HAT ŞEMASI -->
+  <!-- 1. ULUSAL / FİLTRELİ TEİAŞ → EDAŞ/OSB KAPASİTE TAHSİS & ERİME MİMARİSİ (SVG ŞEMA) -->
+  <div class="sema-panel">
+    <div class="sema-ust">
+      <h2>1. TEİAŞ Trafo Merkezi → 34,5 kV OG Dağıtım &amp; OSB Kapasite Akış ve Erime Şeması</h2>
+      <span class="kay">Veri: TEİAŞ 02.03 / 16.07 / 01.10.2026 · derleme <a href="https://kaangokay.com/wp-content/uploads/ges/Lisanssiz_Analiz_Platformu_2026.html#s-kapasite" target="_blank" rel="noopener">kaangokay.com</a></span>
+    </div>
+    <div class="svg-wrap" id="ulusalSema"></div>
+  </div>
+
+  <!-- 2. GÖRSEL VERİ ŞEMA HARİTASI (21 EDAŞ KARTOGRAM HARİTASI + SEÇİLİ BÖLGE TM TOPOLOJİ ŞEMASI) -->
+  <div class="sema-panel">
+    <div class="sema-ust">
+      <div>
+        <h2>2. Türkiye 21 EDAŞ Bölgesi Görsel Veri Şema Haritası &amp; Bara Topolojisi</h2>
+        <div style="font-size:12.5px;color:var(--mut);margin-top:2px">Bölge kutusuna tıklayarak o EDAŞ bölgesine süzebilir; sağdan görünüm modunu değiştirebilirsiniz.</div>
+      </div>
+      <div class="katman-grup" id="semaModGrup">
+        <button type="button" class="k-btn on" data-smod="kartogram">🗺️ 21 EDAŞ Veri Şema Haritası</button>
+        <button type="button" class="k-btn" data-smod="agac">⚡ Bölge TM &amp; Bara Topoloji Şeması</button>
+      </div>
+    </div>
+    <div class="svg-wrap" id="veriSemaHarita"></div>
+  </div>
+
+  <!-- 3. COĞRAFİ HARİTA + ALTERNATİFLİ HARİTA VE VERİ KATMANLARI -->
+  <div class="harita-panel" id="haritaBolum">
+    <div class="sema-ust" style="margin-bottom:10px">
+      <div>
+        <h2>3. Çok Katmanlı Coğrafi Trafo Merkezi &amp; Kapasite Yoğunluk Haritası</h2>
+        <small id="hsay" style="font-size:12.5px;color:var(--mut2)"></small>
+      </div>
+      <button type="button" class="k-btn" id="btnTurkiyeOdak">🔍 Haritayı Sığdır</button>
+    </div>
+
+    <!-- Alternatifli Katman Seçici Çubuğu -->
+    <div class="katman-bar">
+      <div class="katman-grup" id="altlikGrup">
+        <span class="k-lbl">Altlık Katmanı:</span>
+        <button type="button" class="k-btn on" data-base="osm">🗺️ Standart (OSM)</button>
+        <button type="button" class="k-btn" data-base="uydu">🛰️ Uydu (Esri Imagery)</button>
+        <button type="button" class="k-btn" data-base="topo">⛰️ Topoğrafik Arazi</button>
+        <button type="button" class="k-btn" data-base="koyu">🌑 Koyu SCADA</button>
+        <button type="button" class="k-btn" data-base="acik">📐 Açık Teknik</button>
+      </div>
+      <div class="katman-grup" id="veriKatmanGrup">
+        <span class="k-lbl">Veri Şema Katmanı:</span>
+        <button type="button" class="k-btn on red" data-vmod="kapasite">⚡ Kapasite Balonu (MWe)</button>
+        <button type="button" class="k-btn red" data-vmod="isi">🔥 İl Kapasite Isı Katmanı</button>
+        <button type="button" class="k-btn red" data-vmod="erime">📉 Dönemsel Erime (Δ MWe)</button>
+        <button type="button" class="k-btn red" data-vmod="topoloji">🕸️ 154 kV Şebeke Ağı</button>
+      </div>
+    </div>
+
+    <div id="harita"></div>
+
+    <div class="lej">
+      <div class="lej-sol" id="haritaLejant">
+        <span><i style="background:#1E9E5A"></i>Yüksek Kapasite (≥ 5 MWe)</span>
+        <span><i style="background:#F08A24"></i>Sınırlı Kapasite (0,1 – 5 MWe)</span>
+        <span><i style="background:#D32027"></i>Seçili TM</span>
+        <span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>
+      </div>
+      <div class="lej-sag">
+        <label class="chk2"><input type="checkbox" id="tglSadeceAcik"> Yalnız açık TM'ler</label>
+        <label class="chk2"><input type="checkbox" id="tglIlEtiket" checked> İl MWe rozetleri</label>
+        <label class="chk2"><input type="checkbox" id="tglIl" checked> İl sınırları</label>
+        <label class="chk2"><input type="checkbox" id="tglBolge" checked> EDAŞ bölge sınırları</label>
+        <label class="chk2"><input type="checkbox" id="tglDolgu"> EDAŞ bölge dolgusu</label>
+        <span id="sinirDurum" style="color:var(--mut2)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. İKİLİ ŞEMATİK PANEL: (SOL) MERAM EDAŞ 6 İL MİMARİSİ, (SAĞ) SEÇİLİ TM TEK HAT ŞEMASI -->
   <div class="ikili-mimari">
     <div class="medas-kutu">
       <h3>
         <span>Meram EDAŞ (MEDAŞ) Bölgesi · 6 İl Kapasite Matrisi</span>
         <small style="font-size:12px;color:var(--red-d);font-weight:700" id="medasToplamLbl"></small>
       </h3>
-      <p>İle tıklayarak tabloyu ve haritayı o ile süzebilirsiniz (Aksaray, Konya, Karaman, Niğde, Nevşehir, Kırşehir):</p>
+      <p>İle tıklayarak tabloyu, veri şemasını ve haritayı o ile süzebilirsiniz (Aksaray, Konya, Karaman, Niğde, Nevşehir, Kırşehir):</p>
       <div class="medas-grid" id="medasGrid"></div>
     </div>
 
     <div class="tm-sema-kutu">
       <div>
-        <h3>Seçili Trafo Merkezi · Teknik Tek Hat &amp; Bara Şeması</h3>
-        <p>Tablodan veya haritadan herhangi bir TM'ye tıkladığınızda bara yapısı ve 3 dönem erimesi burada çizilir:</p>
+        <h3>
+          <span>Seçili Trafo Merkezi · Teknik Tek Hat &amp; Bara Şeması</span>
+          <button type="button" class="k-btn" id="btnTmUydu" style="min-height:28px;font-size:11.5px">🛰️ Uyduda Göster</button>
+        </h3>
+        <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi ve GES potansiyeli burada çizilir:</p>
       </div>
       <div id="tmTekHatSvg"></div>
     </div>
   </div>
 
-  <!-- 3. DETAYLI FİLTRE ÇUBUĞU -->
+  <!-- 5. DETAYLI FİLTRE ÇUBUĞU -->
   <div class="flt">
     <label>İl<select id="fil"><option value="">Tümü (81 İl)</option></select></label>
     <label>Dağıtım Bölgesi (EDAŞ)<select id="fed"><option value="">Tümü (21 Bölge)</option></select></label>
@@ -209,7 +291,7 @@
     <button type="button" class="sifirla" id="fsifir">Filtreyi sıfırla</button>
   </div>
 
-  <!-- 4. İL VE EDAŞ SIRALAMA GRAFİKLERİ -->
+  <!-- 6. İL VE EDAŞ SIRALAMA GRAFİKLERİ -->
   <div class="graf">
     <div class="panel">
       <div class="ph"><h2 id="g1b">İl sıralaması (Top 12)</h2><small id="g1n"></small></div>
@@ -221,21 +303,7 @@
     </div>
   </div>
 
-  <!-- 5. HARİTA -->
-  <div class="panel">
-    <div class="ph"><h2>Trafo merkezi coğrafi dağılım haritası</h2><small id="hsay"></small></div>
-    <div id="harita"></div>
-    <div class="lej">
-      <span><i style="background:#D32027"></i>Kapasitesi açık TM (daire çapı ≈ MWe)</span>
-      <span><i style="background:#9AA2AD"></i>Kapasite 0,00 MWe (Dolu)</span>
-      <label class="chk2"><input type="checkbox" id="tglIl" checked> İl sınırları</label>
-      <label class="chk2"><input type="checkbox" id="tglBolge" checked> Bölge (EDAŞ) sınırları</label>
-      <label class="chk2"><input type="checkbox" id="tglDolgu"> EDAŞ renk dolgusu</label>
-      <span id="sinirDurum" style="color:var(--mut2)"></span>
-    </div>
-  </div>
-
-  <!-- 6. TRAFO MERKEZİ KARŞILAŞTIRMA TABLOSU -->
+  <!-- 7. TRAFO MERKEZİ KARŞILAŞTIRMA TABLOSU -->
   <div class="tbl-wrap">
     <div class="tbl-top"><h2>Trafo merkezi bara detayı · Üç dönem karşılaştırma tablosu</h2><span class="say" id="tsay"></span></div>
     <div class="tscroll">
@@ -289,12 +357,24 @@
     "Dicle EDAŞ":["DİYARBAKIR","ŞANLIURFA","MARDİN","BATMAN","SİİRT","ŞIRNAK"],
     "AKEDAŞ":["KAHRAMANMARAŞ","ADIYAMAN"]
   };
+  // 21 EDAŞ Coğrafi Şema Izgarası (Batı → Doğu, Kuzey → Güney: 7 sütun × 3 satır Türkiye kartogram yerleşimi)
+  var EDAS_GRID=[
+    ["Trakya EDAŞ",      "Boğaziçi EDAŞ",    "AYEDAŞ (Anadolu)", "Sakarya EDAŞ",   "Başkent EDAŞ",    "Yeşilırmak EDAŞ", "Çoruh EDAŞ"],
+    ["Uludağ EDAŞ",      "Osmangazi EDAŞ",   "Meram EDAŞ",       "KCETAŞ",         "Çamlıbel EDAŞ",   "Fırat EDAŞ",      "Aras EDAŞ"],
+    ["GDZ EDAŞ",         "ADM EDAŞ",         "Akdeniz EDAŞ",     "Toroslar EDAŞ",  "AKEDAŞ",          "Dicle EDAŞ",      "Vangölü EDAŞ"]
+  ];
   var IL2EDAS={}; (function(){ for(var e in EDAS_IL){ EDAS_IL[e].forEach(function(il){ (IL2EDAS[il]=IL2EDAS[il]||[]).push(e); }); } })();
   var A=["il","tm","bara","edas","m0203","m1607","m0110","lat","lon"];
   var PKEY=["m0203","m1607","m0110"];
   var tumu=[], donemler=[], aktif=2;
   var gorunen=[], siraK="akt", siraYon=-1, seciliRow=null;
-  var MAP=null, KAT=null, geoYok=false;
+  var semaMod="kartogram"; // kartogram | agac
+  var veriKatmanMod="kapasite"; // kapasite | isi | erime | topoloji
+  var aktifAltlik="osm";
+  var MAP=null, KAT=null, TOPO_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, geoYok=false;
+  var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null;
+  var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
+
   var el=function(id){return document.getElementById(id);};
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   function fmt(n){return (Math.round(n*100)/100).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -322,7 +402,6 @@
         +'<marker id="okK" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="#D32027"/></marker>'
         +'<marker id="okY" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="#1E9E5A"/></marker>'
       +'</defs>'
-      // Kutu 1: 02.03.2026 Mart
       +'<rect x="12" y="18" width="190" height="105" rx="12" fill="#FFF" stroke="'+(aktif===0?'#D32027':'#CFD5DE')+'" stroke-width="'+(aktif===0?3:1.8)+'"/>'
       +'<rect x="12" y="18" width="190" height="26" rx="12" fill="#3C4047"/>'
       +'<text x="107" y="35" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="#FFF">1. DÖNEM · 02.03.2026</text>'
@@ -333,7 +412,6 @@
       +'<line x1="202" y1="70" x2="248" y2="70" stroke="#D32027" stroke-width="3" marker-end="url(#okK)"/>'
       +'<text x="225" y="58" text-anchor="middle" font-family="Archivo,sans-serif" font-size="10" font-weight="700" fill="#D32027">'+fmt(m1-m0)+'</text>'
 
-      // Kutu 2: 16.07.2026 Temmuz
       +'<rect x="252" y="18" width="190" height="105" rx="12" fill="#FFF" stroke="'+(aktif===1?'#D32027':'#CFD5DE')+'" stroke-width="'+(aktif===1?3:1.8)+'"/>'
       +'<rect x="252" y="18" width="190" height="26" rx="12" fill="#E07B1E"/>'
       +'<text x="347" y="35" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="#FFF">2. DÖNEM · 16.07.2026</text>'
@@ -344,7 +422,6 @@
       +'<line x1="442" y1="70" x2="488" y2="70" stroke="#D32027" stroke-width="3" marker-end="url(#okK)"/>'
       +'<text x="465" y="58" text-anchor="middle" font-family="Archivo,sans-serif" font-size="10" font-weight="700" fill="#D32027">'+fmt(m2-m1)+'</text>'
 
-      // Kutu 3: 01.10.2026 Ekim (Güncel)
       +'<rect x="492" y="18" width="200" height="105" rx="12" fill="#FFF8F8" stroke="'+(aktif===2?'#D32027':'#CFD5DE')+'" stroke-width="'+(aktif===2?3:1.8)+'"/>'
       +'<rect x="492" y="18" width="200" height="26" rx="12" fill="#D32027"/>'
       +'<text x="592" y="35" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="#FFF">3. DÖNEM · 01.10.2026 (GÜNCEL)</text>'
@@ -354,7 +431,6 @@
 
       +'<line x1="692" y1="70" x2="735" y2="70" stroke="#1E9E5A" stroke-width="3" marker-end="url(#okY)"/>'
 
-      // Kutu 4: OG Bara Dağılımı (EDAŞ vs OSB)
       +'<rect x="740" y="18" width="288" height="105" rx="12" fill="#FFF" stroke="#1E9E5A" stroke-width="2"/>'
       +'<rect x="740" y="18" width="288" height="26" rx="12" fill="#1E9E5A"/>'
       +'<text x="884" y="35" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="#FFF">34,5 kV OG ŞEBEKE KIRILIMI ('+donemler[aktif].kisa+')</text>'
@@ -363,9 +439,8 @@
       +'<line x1="884" y1="50" x2="884" y2="112" stroke="#E2E6EC" stroke-width="1.5"/>'
       +'<text x="956" y="68" text-anchor="middle" font-family="Archivo,sans-serif" font-size="18" font-weight="800" fill="#1F508B">'+fmt(osbMwe)+' MWe</text>'
       +'<text x="956" y="85" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">OSB Dağıtım Baraları</text>'
-      +'<text x="884" y="110" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" font-weight="600" fill="#1E9E5A">Çağrı Mektubu Başvurusuna Açık</text>'
+      +'<text x="884" y="110" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" font-weight="600" fill="#1E9E5A">Yaklaşık '+fmt( (edasMwe+osbMwe)*1.25 )+' MWp DC Kurulum Potansiyeli</text>'
 
-      // Alt Erime Termometresi Çubuğu
       +'<rect x="12" y="142" width="1016" height="40" rx="10" fill="#FFF" stroke="#E2E6EC"/>'
       +'<text x="28" y="166" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#181B20">MART → EKİM KAPASİTE ERİME ORANI: %'+(Math.round(oran*10)/10).toLocaleString("tr-TR")+'</text>'
       +'<rect x="330" y="153" width="340" height="18" rx="9" fill="#E8ECEF"/>'
@@ -375,7 +450,131 @@
       +'</svg>';
   }
 
-  /* 2. MERAM EDAŞ (MEDAŞ) 6 İL ŞEMATİK MATRİSİ */
+  /* 2. TÜRKİYE 21 EDAŞ GÖRSEL VERİ ŞEMA HARİTASI (KARTOGRAM) & TM AĞAÇ ŞEMASI */
+  function veriSemaHaritaCiz(){
+    var kutu = el("veriSemaHarita");
+    var secEd = el("fed").value, secIl = el("fil").value;
+
+    if(semaMod === "kartogram"){
+      // 21 EDAŞ Coğrafi Kartogram Haritası (7x3 Grid + 154kV Omurga Hatları)
+      var W = 1060, H = 356;
+      var cw = 140, ch = 92, gx = 10, gy = 12, x0 = 14, y0 = 36;
+      var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Türkiye 21 EDAŞ Veri Şema Haritası">'
+        +'<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="10" fill="#0F1B2D"/>'
+        +'<text x="20" y="24" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#E2E8F0" letter-spacing=".04em">TÜRKİYE 21 DAĞITIM BÖLGESİ (EDAŞ) COĞRAFİ VERİ ŞEMA HARİTASI · '+donemler[aktif].etiket.toUpperCase()+'</text>'
+        +'<text x="'+(W-20)+'" y="24" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#94A3B8">Yeşil: ≥50 MWe · Kehribar: 1–50 MWe · Gri: 0 MWe (Kutuya tıklayarak bölgeyi süzün)</text>';
+
+      // Komşu bölgeler arası 154/380 kV şematik iletim çizgileri
+      for(var r=0;r<3;r++){
+        for(var c=0;c<7;c++){
+          var cx = x0 + c*(cw+gx) + cw/2, cy = y0 + r*(ch+gy) + ch/2;
+          if(c<6) svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+cw+gx)+'" y2="'+cy+'" stroke="#1E3A5F" stroke-width="2" stroke-dasharray="4 3"/>';
+          if(r<2) svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+cx+'" y2="'+(cy+ch+gy)+'" stroke="#1E3A5F" stroke-width="2" stroke-dasharray="4 3"/>';
+        }
+      }
+
+      EDAS_GRID.forEach(function(satir, r){
+        satir.forEach(function(edAd, c){
+          var x = x0 + c*(cw+gx), y = y0 + r*(ch+gy);
+          var iller = EDAS_IL[edAd] || [];
+          var rowsEd = tumu.filter(function(row){ return iller.indexOf(row.il)>=0; });
+          var mAkt = rowsEd.reduce(function(s,row){ return s+av(row); }, 0);
+          var m0 = rowsEd.reduce(function(s,row){ return s+pv(row,0); }, 0);
+          var acikSay = rowsEd.filter(function(row){ return av(row)>0; }).length;
+          var erimePct = m0 > 0 ? Math.min(100, Math.max(0, Math.round((m0 - mAkt)/m0*100))) : (mAkt>0 ? 0 : 100);
+          var secili = (secEd === edAd) || (secIl && iller.indexOf(secIl)>=0);
+          var isMedas = (edAd === "Meram EDAŞ");
+
+          var renk = mAkt >= 50 ? "#10B981" : (mAkt > 0 ? "#F59E0B" : "#475569");
+          var zemin = secili ? "#1E293B" : (isMedas ? "#1A2436" : "#132032");
+          var kenar = secili ? "#EF4444" : (isMedas ? "#F59E0B" : renk);
+          var kalin = (secili || isMedas) ? 2.5 : 1.4;
+          var barW = Math.round((cw - 20) * (100 - erimePct) / 100);
+
+          svg += '<g class="sema-ed-kutu" data-ed="'+esc(edAd)+'" style="cursor:pointer">'
+            +'<rect x="'+x+'" y="'+y+'" width="'+cw+'" height="'+ch+'" rx="9" fill="'+zemin+'" stroke="'+kenar+'" stroke-width="'+kalin+'"/>'
+            +'<rect x="'+x+'" y="'+y+'" width="'+cw+'" height="22" rx="9" fill="'+renk+'" fill-opacity=".22"/>'
+            +'<circle cx="'+(x+11)+'" cy="'+(y+11)+'" r="4" fill="'+renk+'"/>'
+            +'<text x="'+(x+20)+'" y="'+(y+15)+'" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#F8FAFC">'+esc(edAd.replace(" (Anadolu)",""))+'</text>'
+            +'<text x="'+(x+cw-8)+'" y="'+(y+15)+'" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#94A3B8">'+iller.length+' il</text>'
+            +'<text x="'+(x+10)+'" y="'+(y+45)+'" font-family="Archivo,sans-serif" font-size="17" font-weight="800" fill="'+(mAkt>0?'#FFFFFF':'#64748B')+'">'+fmt(mAkt)+' <tspan font-size="10" font-weight="600" fill="#94A3B8">MWe</tspan></text>'
+            +'<text x="'+(x+10)+'" y="'+(y+61)+'" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#94A3B8">Açık: <tspan fill="'+(acikSay>0?'#34D399':'#94A3B8')+'" font-weight="700">'+acikSay+'</tspan> / '+rowsEd.length+' bara</text>'
+            +'<rect x="'+(x+10)+'" y="'+(y+70)+'" width="'+(cw-20)+'" height="6" rx="3" fill="#334155"/>'
+            +'<rect x="'+(x+10)+'" y="'+(y+70)+'" width="'+Math.max(0,barW)+'" height="6" rx="3" fill="'+renk+'"/>'
+            +'<text x="'+(x+10)+'" y="'+(y+85)+'" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#64748B">'+esc(iller.slice(0,3).join(", "))+(iller.length>3?'…':'')+'</text>'
+          +'</g>';
+        });
+      });
+      svg += '</svg>';
+      kutu.innerHTML = svg;
+      kutu.querySelectorAll(".sema-ed-kutu").forEach(function(g){
+        g.addEventListener("click", function(){
+          var ed = g.getAttribute("data-ed");
+          el("fil").value = "";
+          el("fed").value = (el("fed").value === ed ? "" : ed);
+          ciz();
+        });
+      });
+    } else {
+      // Görünüm 2: Bölge / İl TM & Bara Topoloji Ağaç Şeması
+      var kaynakRows = gorunen.length ? gorunen : tumu;
+      // TM bazında grupla, en yüksek kapasiteli veya ilk 12 TM'yi göster
+      var tmMap = {};
+      kaynakRows.forEach(function(r){
+        var k = r.il + "|" + r.tm;
+        if(!tmMap[k]) tmMap[k] = { il: r.il, tm: r.tm, edas: r.edas, baralar: [], topAkt: 0, top0: 0 };
+        tmMap[k].baralar.push(r);
+        tmMap[k].topAkt += av(r);
+        tmMap[k].top0 += pv(r,0);
+      });
+      var tmList = Object.keys(tmMap).map(function(k){ return tmMap[k]; }).sort(function(a,b){ return b.topAkt - a.topAkt || b.top0 - a.top0; }).slice(0, 12);
+      var baslik = secIl ? (secIl + " İli") : (secEd ? secEd : "Türkiye Geneli (En Yüksek Kapasiteli 12 TM)");
+
+      var cols = 4, rowsN = Math.ceil(Math.max(1, tmList.length) / cols);
+      var W2 = 1060, H2 = 58 + rowsN * 112;
+      var bw = 248, bh = 96, gx2 = 14, gy2 = 14, x02 = 14, y02 = 46;
+
+      var s2 = '<svg viewBox="0 0 '+W2+' '+H2+'" role="img" aria-label="Bölge TM ve Bara Topoloji Şeması">'
+        +'<rect x="0" y="0" width="'+W2+'" height="'+H2+'" rx="10" fill="#0F1B2D"/>'
+        +'<text x="20" y="27" font-family="Archivo,sans-serif" font-size="12.5" font-weight="800" fill="#F8FAFC">⚡ 154 / 34,5 kV TRAFO MERKEZİ VE BARA TOPOLOJİ ŞEMASI · '+esc(baslik.toUpperCase())+'</text>'
+        +'<text x="'+(W2-20)+'" y="27" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#94A3B8">TM kutusuna tıklayarak tek hat detayına ve harita konumuna gidin</text>';
+
+      tmList.forEach(function(t, idx){
+        var c = idx % cols, r = Math.floor(idx / cols);
+        var x = x02 + c*(bw+gx2), y = y02 + r*(bh+gy2);
+        var acik = t.topAkt > 0;
+        var renk = acik ? "#10B981" : "#64748B";
+        var bHtml = t.baralar.slice(0,3).map(function(b, bi){
+          var bx = x + 10 + bi*78, by = y + 58;
+          var bv = av(b);
+          var bRenk = bv > 0 ? "#10B981" : "#475569";
+          return '<rect x="'+bx+'" y="'+by+'" width="72" height="28" rx="5" fill="#0B1320" stroke="'+bRenk+'" stroke-width="1.3"/>'
+            +'<text x="'+(bx+36)+'" y="'+(by+12)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.8" font-weight="700" fill="#CBD5E1">'+esc((b.bara||"Tek").slice(0,10))+'</text>'
+            +'<text x="'+(bx+36)+'" y="'+(by+23)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="'+(bv>0?'#34D399':'#64748B')+'">'+fmt(bv)+'</text>';
+        }).join("");
+
+        s2 += '<g class="sema-tm-kutu" data-tm="'+esc(t.tm)+'" style="cursor:pointer">'
+          +'<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="9" fill="#162438" stroke="'+renk+'" stroke-width="1.8"/>'
+          +'<circle cx="'+(x+16)+'" cy="'+(y+20)+'" r="7" fill="none" stroke="#F59E0B" stroke-width="1.8"/>'
+          +'<circle cx="'+(x+25)+'" cy="'+(y+20)+'" r="7" fill="none" stroke="'+renk+'" stroke-width="1.8"/>'
+          +'<text x="'+(x+38)+'" y="'+(y+18)+'" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="#F8FAFC">'+esc(t.tm.slice(0,20))+'</text>'
+          +'<text x="'+(x+38)+'" y="'+(y+31)+'" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#94A3B8">'+esc(t.il)+' · '+esc((t.edas||"").slice(0,18))+'</text>'
+          +'<text x="'+(x+bw-10)+'" y="'+(y+22)+'" text-anchor="end" font-family="Archivo,sans-serif" font-size="13" font-weight="800" fill="'+(acik?'#34D399':'#94A3B8')+'">'+fmt(t.topAkt)+' MWe</text>'
+          +'<line x1="'+(x+10)+'" y1="'+(y+46)+'" x2="'+(x+bw-10)+'" y2="'+(y+46)+'" stroke="'+renk+'" stroke-width="2.2"/>'
+          + bHtml
+        +'</g>';
+      });
+      s2 += '</svg>';
+      kutu.innerHTML = s2;
+      kutu.querySelectorAll(".sema-tm-kutu").forEach(function(g){
+        g.addEventListener("click", function(){
+          haritaGit(g.getAttribute("data-tm"));
+        });
+      });
+    }
+  }
+
+  /* 3. MERAM EDAŞ (MEDAŞ) 6 İL ŞEMATİK MATRİSİ */
   function medasCiz(){
     var iller = ["AKSARAY","KONYA","KARAMAN","NİĞDE","NEVŞEHİR","KIRŞEHİR"];
     var secIl = el("fil").value;
@@ -404,70 +603,70 @@
     });
   }
 
-  /* 3. SEÇİLİ TRAFO MERKEZİ TEKNİK TEK HAT & 3 DÖNEM BARA ŞEMASI (SVG) */
+  /* 4. SEÇİLİ TRAFO MERKEZİ TEKNİK TEK HAT & 3 DÖNEM BARA ŞEMASI (SVG) */
   function tmTekHatCiz(r){
     if(!r){
-      // Varsayılan olarak Aksaray Ortaköy TM veya ilk kapasiteli TM'yi göster
       r = tumu.find(function(x){ return x.il==="AKSARAY" && av(x)>0; }) || tumu.find(function(x){ return av(x)>0; }) || tumu[0];
     }
     if(!r) return;
     seciliRow = r;
-    // Aynı trafo merkezinin tüm baralarını bul
     var baralar = tumu.filter(function(x){ return x.il===r.il && x.tm===r.tm; });
     var top0 = baralar.reduce(function(s,x){return s+pv(x,0);},0);
     var top1 = baralar.reduce(function(s,x){return s+pv(x,1);},0);
     var top2 = baralar.reduce(function(s,x){return s+pv(x,2);},0);
+    var topAkt = baralar.reduce(function(s,x){return s+av(x);},0);
     var maxD = Math.max(1, top0, top1, top2);
 
-    var b0 = Math.round(top0/maxD*90);
-    var b1 = Math.round(top1/maxD*90);
-    var b2 = Math.round(top2/maxD*90);
+    var b0 = Math.round(top0/maxD*82);
+    var b1 = Math.round(top1/maxD*82);
+    var b2 = Math.round(top2/maxD*82);
 
     var baraText = baralar.slice(0,3).map(function(b,idx){
       var v = av(b);
-      var y = 52 + idx*38;
+      var y = 48 + idx*38;
       var renk = v>0 ? "#1E9E5A" : "#9AA2AD";
       return '<g>'
-        +'<line x1="195" y1="'+y+'" x2="230" y2="'+y+'" stroke="'+renk+'" stroke-width="2.5"/>'
-        +'<rect x="230" y="'+(y-14)+'" width="155" height="28" rx="6" fill="'+(v>0?'#EAF7F0':'#F3F4F6')+'" stroke="'+renk+'" stroke-width="1.5"/>'
-        +'<text x="238" y="'+(y+4)+'" font-family="Archivo,sans-serif" font-size="10.5" font-weight="700" fill="#181B20">'+esc(b.bara||'Tek')+': '+fmt(v)+' MWe</text>'
+        +'<line x1="192" y1="'+y+'" x2="225" y2="'+y+'" stroke="'+renk+'" stroke-width="2.5"/>'
+        +'<rect x="210" y="'+(y-4)+'" width="8" height="8" fill="'+renk+'"/>'
+        +'<rect x="225" y="'+(y-14)+'" width="162" height="28" rx="6" fill="'+(v>0?'#EAF7F0':'#F3F4F6')+'" stroke="'+renk+'" stroke-width="1.5"/>'
+        +'<text x="233" y="'+(y+4)+'" font-family="Archivo,sans-serif" font-size="10.5" font-weight="700" fill="#181B20">'+esc(b.bara||'Tek')+': '+fmt(v)+' MWe</text>'
       +'</g>';
     }).join("");
 
-    el("tmTekHatSvg").innerHTML =
-      '<svg viewBox="0 0 540 165" style="width:100%;height:auto;background:#FAFBFD;border:1px solid var(--line);border-radius:10px;padding:6px">'
-        // Sol: 154 kV / 380 kV İndirici TM Sembolü
-        +'<rect x="10" y="14" width="165" height="136" rx="10" fill="#FFF" stroke="#2B2E33" stroke-width="2"/>'
-        +'<rect x="10" y="14" width="165" height="24" rx="10" fill="#2B2E33"/>'
-        +'<text x="92" y="30" text-anchor="middle" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#FFF">'+esc(r.il)+' · TEİAŞ TM</text>'
-        +'<text x="92" y="54" text-anchor="middle" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#D32027">'+esc(r.tm)+'</text>'
-        // İki Sargılı Trafo Sembolü
-        +'<circle cx="78" cy="86" r="14" fill="none" stroke="#2B2E33" stroke-width="2"/>'
-        +'<circle cx="104" cy="86" r="14" fill="none" stroke="#D32027" stroke-width="2"/>'
-        +'<text x="92" y="118" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#5A6270">154/34,5 kV · '+esc(r.edas||"EDAŞ")+'</text>'
-        +'<text x="92" y="136" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" font-weight="700" fill="'+(top2>0?'#1E9E5A':'#D32027')+'">'+(top2>0?'BAŞVURUYA AÇIK':'KAPASİTE DOLU')+'</text>'
+    var mwp = fmt(topAkt * 1.25);
+    var gwh = fmt(topAkt * 1.25 * 1.68);
 
-        // Orta: 34,5 kV Ana Bara Dikey Çizgisi
-        +'<line x1="175" y1="86" x2="195" y2="86" stroke="#D32027" stroke-width="3"/>'
-        +'<line x1="195" y1="35" x2="195" y2="140" stroke="#2B2E33" stroke-width="4"/>'
-        +'<text x="195" y="26" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="#2B2E33">34,5kV BARA</text>'
+    el("tmTekHatSvg").innerHTML =
+      '<svg viewBox="0 0 540 190" style="width:100%;height:auto;background:#FAFBFD;border:1px solid var(--line);border-radius:10px;padding:6px">'
+        +'<rect x="10" y="12" width="162" height="134" rx="10" fill="#FFF" stroke="#182232" stroke-width="2"/>'
+        +'<rect x="10" y="12" width="162" height="24" rx="10" fill="#182232"/>'
+        +'<text x="91" y="28" text-anchor="middle" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#FFF">'+esc(r.il)+' · TEİAŞ TM</text>'
+        +'<text x="91" y="52" text-anchor="middle" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#D32027">'+esc(r.tm)+'</text>'
+        +'<circle cx="77" cy="84" r="14" fill="none" stroke="#182232" stroke-width="2.2"/>'
+        +'<circle cx="103" cy="84" r="14" fill="none" stroke="#D32027" stroke-width="2.2"/>'
+        +'<text x="91" y="115" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#5A6270">154/34,5 kV · '+esc(r.edas||"EDAŞ")+'</text>'
+        +'<text x="91" y="133" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" font-weight="700" fill="'+(topAkt>0?'#1E9E5A':'#D32027')+'">'+(topAkt>0?'BAŞVURUYA AÇIK':'KAPASİTE DOLU')+'</text>'
+
+        +'<line x1="172" y1="84" x2="192" y2="84" stroke="#D32027" stroke-width="3"/>'
+        +'<line x1="192" y1="32" x2="192" y2="138" stroke="#182232" stroke-width="4.5"/>'
+        +'<text x="192" y="24" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="#182232">34,5kV BARA</text>'
         + baraText
 
-        // Sağ: 3 Dönem Kapasite Sütun Grafiği
-        +'<rect x="398" y="14" width="132" height="136" rx="10" fill="#FFF" stroke="#CFD5DE"/>'
-        +'<text x="464" y="30" text-anchor="middle" font-family="Archivo,sans-serif" font-size="10" font-weight="800" fill="#5A6270">3 DÖNEM (MWe)</text>'
-        // Mart Sütunu
-        +'<rect x="412" y="'+(126-b0)+'" width="24" height="'+Math.max(3,b0)+'" rx="3" fill="#6B727B"/>'
-        +'<text x="424" y="'+(122-b0)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="700" fill="#181B20">'+fmt(top0)+'</text>'
-        +'<text x="424" y="140" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#5A6270">02.03</text>'
-        // Temmuz Sütunu
-        +'<rect x="452" y="'+(126-b1)+'" width="24" height="'+Math.max(3,b1)+'" rx="3" fill="#E07B1E"/>'
-        +'<text x="464" y="'+(122-b1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="700" fill="#B85D0C">'+fmt(top1)+'</text>'
-        +'<text x="464" y="140" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#5A6270">16.07</text>'
-        // Ekim Sütunu
-        +'<rect x="492" y="'+(126-b2)+'" width="24" height="'+Math.max(3,b2)+'" rx="3" fill="'+(top2>0?'#1E9E5A':'#D32027')+'"/>'
-        +'<text x="504" y="'+(122-b2)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="'+(top2>0?'#1E9E5A':'#D32027')+'">'+fmt(top2)+'</text>'
-        +'<text x="504" y="140" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" font-weight="700" fill="#181B20">01.10</text>'
+        +'<rect x="398" y="12" width="132" height="134" rx="10" fill="#FFF" stroke="#CFD5DE"/>'
+        +'<text x="464" y="28" text-anchor="middle" font-family="Archivo,sans-serif" font-size="10" font-weight="800" fill="#5A6270">3 DÖNEM (MWe)</text>'
+        +'<rect x="412" y="'+(122-b0)+'" width="24" height="'+Math.max(3,b0)+'" rx="3" fill="#6B727B"/>'
+        +'<text x="424" y="'+(118-b0)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="700" fill="#181B20">'+fmt(top0)+'</text>'
+        +'<text x="424" y="136" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#5A6270">02.03</text>'
+        +'<rect x="452" y="'+(122-b1)+'" width="24" height="'+Math.max(3,b1)+'" rx="3" fill="#E07B1E"/>'
+        +'<text x="464" y="'+(118-b1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="700" fill="#B85D0C">'+fmt(top1)+'</text>'
+        +'<text x="464" y="136" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#5A6270">16.07</text>'
+        +'<rect x="492" y="'+(122-b2)+'" width="24" height="'+Math.max(3,b2)+'" rx="3" fill="'+(top2>0?'#1E9E5A':'#D32027')+'"/>'
+        +'<text x="504" y="'+(118-b2)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="'+(top2>0?'#1E9E5A':'#D32027')+'">'+fmt(top2)+'</text>'
+        +'<text x="504" y="136" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" font-weight="700" fill="#181B20">01.10</text>'
+
+        // Alt Mühendislik Özeti Bandı
+        +'<rect x="10" y="154" width="520" height="28" rx="7" fill="#182232"/>'
+        +'<text x="22" y="172" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="600" fill="#E2E8F0">GES Potansiyeli: <tspan fill="#5CF08F" font-weight="700">~'+mwp+' MWp DC</tspan> · Tahmini Üretim: <tspan fill="#FBBF24" font-weight="700">~'+gwh+' GWh/yıl</tspan> · Konum: '+(r.lat!=null?(r.lat.toFixed(3)+'°K, '+r.lon.toFixed(3)+'°D'):'KMZ dışı')+'</text>'
       +'</svg>';
   }
 
@@ -541,25 +740,169 @@
     });
   }
 
-  // Harita
-  function geoSuz(){ return suz().filter(function(r){return r.lat!=null;}); }
-  function rCap(m){ return m>0 ? Math.max(5, Math.min(26, 5+Math.sqrt(m)*3.4)) : 4; }
-  function haritaCiz(){
+  /* 5. COĞRAFİ HARİTA VE ALTERNATİF KATMAN MOTORU */
+  function geoSuz(){
+    var sAcik = el("tglSadeceAcik") && el("tglSadeceAcik").checked;
+    return suz().filter(function(r){ return r.lat!=null && (!sAcik || av(r)>0); });
+  }
+  function rCap(m){ return m>0 ? Math.max(6, Math.min(26, 5+Math.sqrt(m)*3.4)) : 4; }
+
+  function isiRenk(mwe){
+    if(mwe >= 80) return "#059669";
+    if(mwe >= 30) return "#10B981";
+    if(mwe >= 10) return "#F59E0B";
+    if(mwe > 0)   return "#EA580C";
+    return "#64748B";
+  }
+
+  function dolguUygula(){
+    if(!ILL) return;
+    var edOn = el("tglDolgu").checked;
+    var isiMod = (veriKatmanMod === "isi");
+    // İl bazlı toplam kapasite
+    var ilTop = {};
+    tumu.forEach(function(r){ ilTop[r.il] = (ilTop[r.il] || 0) + av(r); });
+
+    ILL.eachLayer(function(gj){
+      gj.eachLayer && gj.eachLayer(function(ly){
+        var prop = ly.feature.properties || {};
+        var ilAd = (prop.il || "").toLocaleUpperCase("tr");
+        var ed = prop.edas;
+        if(isiMod){
+          var m = ilTop[ilAd] || 0;
+          ly.setStyle({ fillOpacity: m>0 ? 0.48 : 0.18, fillColor: isiRenk(m), color: "#1E293B", weight: 1.2 });
+        } else {
+          ly.setStyle({ fillOpacity: edOn ? 0.18 : 0, fillColor: EDAS_RENK[ed] || "#ccc", color: "#9AA2AD", weight: 0.8 });
+        }
+      });
+    });
+  }
+
+  function lejantGuncelle(){
+    var box = el("haritaLejant");
+    if(!box) return;
+    if(veriKatmanMod === "isi"){
+      box.innerHTML = '<span><i style="background:#059669"></i>İl ≥ 80 MWe</span>'
+        +'<span><i style="background:#10B981"></i>30–80 MWe</span>'
+        +'<span><i style="background:#F59E0B"></i>10–30 MWe</span>'
+        +'<span><i style="background:#EA580C"></i>0,1–10 MWe</span>'
+        +'<span><i style="background:#64748B"></i>0 MWe (Dolu)</span>';
+    } else if(veriKatmanMod === "erime"){
+      box.innerHTML = '<span><i style="background:#DC2626"></i>Hızlı Erime (Δ &lt; −5 MWe)</span>'
+        +'<span><i style="background:#F59E0B"></i>Kısmi Erime (−5..0 MWe)</span>'
+        +'<span><i style="background:#10B981"></i>Kapasitesi Korunan / Açık</span>'
+        +'<span><i style="background:#9AA2AD"></i>0 MWe (Dolu)</span>';
+    } else if(veriKatmanMod === "topoloji"){
+      box.innerHTML = '<span><i style="background:#38BDF8"></i>154 kV Bölgesel İletim Omurgası</span>'
+        +'<span><i style="background:#1E9E5A"></i>Açık TM Barası</span>'
+        +'<span><i style="background:#9AA2AD"></i>Dolu TM Barası</span>';
+    } else {
+      box.innerHTML = '<span><i style="background:#1E9E5A"></i>Yüksek Kapasite (≥ 5 MWe)</span>'
+        +'<span><i style="background:#F08A24"></i>Sınırlı Kapasite (0,1 – 5 MWe)</span>'
+        +'<span><i style="background:#D32027"></i>Seçili TM</span>'
+        +'<span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>';
+    }
+  }
+
+  function haritaCiz(fitYap){
     if(geoYok||!MAP) return;
     try{ MAP.invalidateSize(false); }catch(e){}
-    var rows=geoSuz(); KAT.clearLayers(); var pts=[];
+    var rows = geoSuz();
+    KAT.clearLayers(); TOPO_KAT.clearLayers(); ETIKET_KAT.clearLayers();
+    var pts = [];
+
+    // 154 kV Şebeke Topoloji Ağı Katmanı (aynı ildeki TM'leri omurga olarak bağlar)
+    if(veriKatmanMod === "topoloji"){
+      var ilGrup = {};
+      rows.forEach(function(r){ (ilGrup[r.il] = ilGrup[r.il] || []).push(r); });
+      Object.keys(ilGrup).forEach(function(il){
+        var l = ilGrup[il];
+        for(var i=0;i<l.length-1;i++){
+          L.polyline([[l[i].lat,l[i].lon],[l[i+1].lat,l[i+1].lon]], {
+            color: "#0284C7", weight: 2.2, opacity: 0.75, dashArray: "6 5"
+          }).addTo(TOPO_KAT);
+        }
+      });
+    }
+
+    // TM Noktaları
     rows.forEach(function(r){
-      var v=av(r);
-      var m=L.circleMarker([r.lat,r.lon],{radius:rCap(v),color:v>0?"#A81B22":"#6B727B",weight:1,fillColor:v>0?"#D32027":"#9AA2AD",fillOpacity:v>0?.72:.5});
-      m.bindPopup('<b>'+r.tm+' ('+(r.bara||"Tek")+')</b><br>'+r.il+' · '+(r.edas||"—")+'<br>02.03: '+fmt(pv(r,0))+' → 16.07: '+fmt(pv(r,1))+' → <b>01.10: '+fmt(pv(r,2))+' MWe</b>');
-      m.on("click", function(){ tmTekHatCiz(r); });
-      m.addTo(KAT); pts.push([r.lat,r.lon]);
+      var v = av(r);
+      var d = pv(r,2) - pv(r,0);
+      var isSec = (seciliRow && seciliRow.tm === r.tm);
+      var fRenk, sRenk, rad;
+
+      if(veriKatmanMod === "erime"){
+        rad = rCap(Math.max(v, Math.abs(d)));
+        fRenk = d < -5 ? "#DC2626" : (d < 0 ? "#F59E0B" : (v > 0 ? "#10B981" : "#9AA2AD"));
+        sRenk = "#1E293B";
+      } else {
+        rad = rCap(v);
+        fRenk = isSec ? "#D32027" : (v >= 5 ? "#1E9E5A" : (v > 0 ? "#F08A24" : "#9AA2AD"));
+        sRenk = isSec ? "#7F1D1D" : (v > 0 ? "#0F5132" : "#6B727B");
+      }
+
+      var m = L.circleMarker([r.lat,r.lon],{
+        radius: isSec ? rad+3 : rad,
+        color: sRenk,
+        weight: isSec ? 2.5 : 1.2,
+        fillColor: fRenk,
+        fillOpacity: v>0 || veriKatmanMod==="erime" ? 0.82 : 0.48
+      });
+      var popHtml = '<b>'+esc(r.tm)+' ('+esc(r.bara||"Tek")+')</b><br>'
+        +esc(r.il)+' · '+esc(r.edas||"—")+'<br>'
+        +'02.03: <b>'+fmt(pv(r,0))+'</b> → 16.07: <b>'+fmt(pv(r,1))+'</b> → 01.10: <b style="color:'+(pv(r,2)>0?'#1E9E5A':'#D32027')+'">'+fmt(pv(r,2))+' MWe</b><br>'
+        +'<small>Δ Değişim: '+fmt(d)+' MWe · ~'+fmt(v*1.25)+' MWp DC</small>';
+      m.bindPopup(popHtml);
+      m.on("click", function(){ tmTekHatCiz(r); tablo(gorunen); });
+      m.addTo(KAT);
+      pts.push([r.lat,r.lon]);
     });
-    var kapasiteli=rows.filter(function(r){return av(r)>0;}).length;
-    el("hsay").textContent=rows.length+" konumlu bara · "+kapasiteli+" kapasiteli ("+donemler[aktif].kisa+")";
-    if(pts.length){ try{ MAP.fitBounds(pts,{padding:[30,30],maxZoom:9}); }catch(e){} }
+
+    // İl Merkezlerinde Canlı MWe Rozet Katmanı
+    if(el("tglIlEtiket") && el("tglIlEtiket").checked){
+      var ilMerkez = {};
+      suz().forEach(function(r){
+        if(!ilMerkez[r.il]) ilMerkez[r.il] = { top:0, latSum:0, lonSum:0, n:0 };
+        ilMerkez[r.il].top += av(r);
+        if(r.lat!=null){ ilMerkez[r.il].latSum += r.lat; ilMerkez[r.il].lonSum += r.lon; ilMerkez[r.il].n++; }
+      });
+      Object.keys(ilMerkez).forEach(function(il){
+        var o = ilMerkez[il];
+        if(!o.n) return;
+        if(o.top <= 0 && !el("fil").value && !el("fed").value && veriKatmanMod !== "isi") return;
+        var lat = o.latSum / o.n, lon = o.lonSum / o.n;
+        var ic = L.divIcon({
+          className: "",
+          html: '<div class="il-rozet'+(o.top>0?'':' dolu')+'">'+esc(il)+' <b>'+fmt(o.top)+'</b></div>',
+          iconSize: [96, 20],
+          iconAnchor: [48, -6]
+        });
+        L.marker([lat, lon], { icon: ic, interactive: false }).addTo(ETIKET_KAT);
+      });
+    }
+
+    dolguUygula();
+    lejantGuncelle();
+
+    var kapasiteli = rows.filter(function(r){return av(r)>0;}).length;
+    el("hsay").textContent = rows.length+" konumlu bara · "+kapasiteli+" kapasiteli ("+donemler[aktif].kisa+") · Katman: "+veriKatmanMod.toUpperCase();
+    if(fitYap && pts.length){ try{ MAP.fitBounds(pts,{padding:[32,32],maxZoom:9}); }catch(e){} }
   }
-  function haritaGit(tm, bara){
+
+  function altlikDegistir(kod){
+    if(!MAP || !ALTLIKLAR[kod]) return;
+    Object.keys(ALTLIKLAR).forEach(function(k){
+      if(MAP.hasLayer(ALTLIKLAR[k])) MAP.removeLayer(ALTLIKLAR[k]);
+    });
+    ALTLIKLAR[kod].addTo(MAP);
+    aktifAltlik = kod;
+    el("altlikGrup").querySelectorAll("button").forEach(function(b){
+      b.classList.toggle("on", b.getAttribute("data-base") === kod);
+    });
+  }
+
+  function haritaGit(tm, bara, uyduyaGec){
     var g=null;
     for(var i=0;i<tumu.length;i++){
       if(tumu[i].tm===tm && (!bara || tumu[i].bara===bara)){ g=tumu[i]; break; }
@@ -569,27 +912,38 @@
     tablo(gorunen);
     if(!g || g.lat==null){ el("hsay").textContent="“"+tm+"” tek hat şemasına yüklendi (KMZ coğrafi koordinatı bulunmuyor)."; return; }
     if(geoYok||!MAP) return;
-    setTimeout(function(){ try{MAP.invalidateSize();}catch(e){} MAP.setView([g.lat,g.lon],11,{animate:true});
-      L.popup().setLatLng([g.lat,g.lon]).setContent('<b>'+g.tm+' ('+(g.bara||"Tek")+')</b><br>'+g.il+' · '+(g.edas||"—")+'<br>02.03: '+fmt(pv(g,0))+' → 16.07: '+fmt(pv(g,1))+' → <b>01.10: '+fmt(pv(g,2))+' MWe</b>').openOn(MAP);
-    },200);
+    if(uyduyaGec) altlikDegistir("uydu");
+    haritaCiz(false);
+    el("haritaBolum").scrollIntoView({behavior:"smooth",block:"center"});
+    setTimeout(function(){
+      try{MAP.invalidateSize();}catch(e){}
+      MAP.setView([g.lat,g.lon], uyduyaGec ? 15 : 11, {animate:true});
+      L.popup().setLatLng([g.lat,g.lon]).setContent('<b>'+esc(g.tm)+' ('+esc(g.bara||"Tek")+')</b><br>'+esc(g.il)+' · '+esc(g.edas||"—")+'<br>02.03: '+fmt(pv(g,0))+' → 16.07: '+fmt(pv(g,1))+' → <b>01.10: '+fmt(pv(g,2))+' MWe</b>').openOn(MAP);
+    },250);
   }
+
   function haritaKur(){
     try{
       if(typeof L==="undefined"){ geoYok=true; el("hsay").textContent="Harita kütüphanesi yüklenemedi."; return; }
-      MAP=L.map("harita",{scrollWheelZoom:false}).setView([39.1,35.2],6);
-      var osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap katkıcıları"});
-      var esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:16,attribution:"Tiles © Esri"});
-      osm.addTo(MAP);
-      L.control.layers({"OpenStreetMap":osm,"Açık gri (Esri)":esri},null,{position:"topright",collapsed:true}).addTo(MAP);
+      MAP=L.map("harita",{scrollWheelZoom:false}).setView([39.0,35.2],6);
+      ALTLIKLAR = {
+        osm: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}),
+        uydu: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"© Esri World Imagery"}),
+        topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"© OpenTopoMap"}),
+        koyu: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"© CARTO"}),
+        acik: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:16,attribution:"© Esri"})
+      };
+      ALTLIKLAR.osm.addTo(MAP);
       MAP.on("click",function(){ MAP.scrollWheelZoom.enable(); });
-      ILL=L.layerGroup(); BOLGE=L.layerGroup();
-      ILL.addTo(MAP); BOLGE.addTo(MAP);
+      ILL=L.layerGroup().addTo(MAP);
+      BOLGE=L.layerGroup().addTo(MAP);
+      TOPO_KAT=L.layerGroup().addTo(MAP);
       KAT=L.layerGroup().addTo(MAP);
+      ETIKET_KAT=L.layerGroup().addTo(MAP);
       sinirYukle();
     }catch(e){ geoYok=true; el("hsay").textContent="Harita başlatılamadı."; }
   }
-  var ILL=null, BOLGE=null, EDAS_RENK={};
-  var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
+
   function sinirYukle(){
     Promise.all([
       fetch("iller_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
@@ -597,13 +951,22 @@
     ]).then(function(a){
       var il=a[0], bo=a[1];
       if(!il||!bo){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; return; }
+      IL_GEO = il;
       var adlar=bo.features.map(function(f){return f.properties.edas;}).sort(function(x,y){return x.localeCompare(y,"tr");});
       adlar.forEach(function(e,i){ EDAS_RENK[e]=PAL[i%PAL.length]; });
       L.geoJSON(il,{
         style:function(f){ return {color:"#9AA2AD",weight:.8,fillColor:EDAS_RENK[f.properties.edas]||"#ccc",fillOpacity:0}; },
         onEachFeature:function(f,ly){
-          ly.bindTooltip(f.properties.il+" · "+(f.properties.edas||"—"),{sticky:true,className:"edas-tip"});
-          ly.on("click",function(){ el("fil").value=(el("fil").value===(f.properties.il||"").toLocaleUpperCase("tr")?"":(f.properties.il||"").toLocaleUpperCase("tr")); ciz(); });
+          ly.bindTooltip(function(){
+            var ilAd = (f.properties.il||"").toLocaleUpperCase("tr");
+            var m = tumu.filter(function(r){return r.il===ilAd;}).reduce(function(s,r){return s+av(r);},0);
+            return "<b>"+f.properties.il+"</b> · "+(f.properties.edas||"—")+"<br>Aktif Kapasite: <b>"+fmt(m)+" MWe</b>";
+          },{sticky:true,className:"edas-tip"});
+          ly.on("click",function(){
+            var sec = (f.properties.il||"").toLocaleUpperCase("tr");
+            el("fil").value=(el("fil").value===sec?"":sec);
+            ciz();
+          });
         }
       }).addTo(ILL);
       L.geoJSON(bo,{
@@ -613,16 +976,10 @@
       dolguUygula();
     }).catch(function(){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; });
   }
-  function dolguUygula(){
-    if(!ILL) return;
-    var on=el("tglDolgu").checked;
-    ILL.eachLayer(function(gj){ gj.eachLayer&&gj.eachLayer(function(ly){ var e=ly.feature.properties.edas; ly.setStyle({fillOpacity:on?.16:0,fillColor:EDAS_RENK[e]||"#ccc"}); }); });
-  }
 
   function ciz(){
     gorunen=suz();
     var il=el("fil").value, ed=el("fed").value;
-    // Hızlı bölge butonlarının aktiflik durumu
     el("hizliBolge").querySelectorAll("button").forEach(function(b){
       var bil=b.getAttribute("data-il"), bed=b.getAttribute("data-ed");
       var on = (bil ? (il===bil) : (bed!==null ? (ed===bed && !il) : false));
@@ -632,14 +989,17 @@
     else { el("g1b").textContent="İl Sıralaması (Top 12)"; barlar("g1", topla(gorunen,"il"),12,"il"); el("g1n").textContent="MWe · "+donemler[aktif].kisa; }
     barlar("g2", topla(gorunen,"edas"),12,"ed"); el("g2n").textContent="MWe · "+donemler[aktif].kisa;
     ulusalSemaCiz(gorunen);
+    veriSemaHaritaCiz();
     medasCiz();
     if(gorunen.length && (!seciliRow || gorunen.indexOf(seciliRow)<0)){
       tmTekHatCiz(gorunen.find(function(x){return av(x)>0;}) || gorunen[0]);
     } else {
       tmTekHatCiz(seciliRow);
     }
-    tablo(gorunen); haritaCiz();
+    tablo(gorunen);
+    haritaCiz(true);
   }
+
   function segCiz(){
     el("seg").innerHTML=donemler.map(function(d,i){
       return '<button type="button" data-i="'+i+'" aria-pressed="'+(i===aktif)+'">'+d.etiket.split(" ")[0]+' <small>'+d.kisa+'.2026</small></button>';
@@ -652,6 +1012,7 @@
     });
   }
 
+  // Olay Dinleyicileri
   el("hizliBolge").querySelectorAll("button").forEach(function(b){
     b.addEventListener("click", function(){
       var bil = b.getAttribute("data-il"), bed = b.getAttribute("data-ed");
@@ -661,17 +1022,45 @@
     });
   });
 
+  el("semaModGrup").querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){
+      semaMod = b.getAttribute("data-smod");
+      el("semaModGrup").querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x===b); });
+      veriSemaHaritaCiz();
+    });
+  });
+
+  el("altlikGrup").querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){ altlikDegistir(b.getAttribute("data-base")); });
+  });
+
+  el("veriKatmanGrup").querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){
+      veriKatmanMod = b.getAttribute("data-vmod");
+      el("veriKatmanGrup").querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x===b); });
+      if(veriKatmanMod === "topoloji" && aktifAltlik === "osm") altlikDegistir("koyu");
+      haritaCiz(false);
+    });
+  });
+
+  el("btnTurkiyeOdak").addEventListener("click", function(){ haritaCiz(true); });
+  el("btnTmUydu").addEventListener("click", function(){
+    if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, true);
+  });
+
   el("fil").addEventListener("change",ciz);
   el("fed").addEventListener("change",ciz);
   el("fara").addEventListener("input",ciz);
   el("fpoz").addEventListener("change",ciz);
   el("fsifir").addEventListener("click",function(){ el("fil").value="";el("fed").value="";el("fara").value="";el("fpoz").checked=false; ciz(); });
+  el("tglSadeceAcik").addEventListener("change",function(){ haritaCiz(false); });
+  el("tglIlEtiket").addEventListener("change",function(){ haritaCiz(false); });
   el("tglIl").addEventListener("change",function(){ if(!MAP||!ILL)return; if(this.checked)ILL.addTo(MAP); else MAP.removeLayer(ILL); });
   el("tglBolge").addEventListener("change",function(){ if(!MAP||!BOLGE)return; if(this.checked)BOLGE.addTo(MAP); else MAP.removeLayer(BOLGE); });
   el("tglDolgu").addEventListener("change",dolguUygula);
   el("tbody").addEventListener("click",function(e){
     var a=e.target.closest&&e.target.closest(".tmlink");
-    if(a){ e.preventDefault(); haritaGit(a.getAttribute("data-tm"), a.getAttribute("data-bara")); }
+    if(a){ e.preventDefault(); haritaGit(a.getAttribute("data-tm"), a.getAttribute("data-bara"), false); }
   });
   el("tbl").querySelectorAll("thead th[data-k]").forEach(function(th){
     th.addEventListener("click",function(){
@@ -696,8 +1085,8 @@
       el("fil").insertAdjacentHTML("beforeend", filHtml);
       el("fed").insertAdjacentHTML("beforeend", Object.keys(EDAS_IL).map(function(e){return '<option value="'+esc(e)+'">'+esc(e)+' ('+EDAS_IL[e].length+' il)</option>';}).join(""));
       var konumlu=tumu.filter(function(r){return r.lat!=null;}).length;
-      el("meta2").textContent=d.tm_sayi+" trafo merkezi barası · 3 dönem (02.03 → 16.07 → 01.10.2026) · "+konumlu+" coğrafi konumlu · TEİAŞ & MEDAŞ şematik analiz";
-      el("not").innerHTML="<b>Mühendislik Notu:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezi barasında dağıtım seviyesinden (34,5 kV) tahsis edilebilecek güncel MWe gücüdür; 0,00 MWe olan baralar yeni lisanssız çağrı mektubu başvurusuna kapalıdır. Tablodaki herhangi bir trafo merkezine tıklayarak sağ üstteki <b>Teknik Tek Hat &amp; Bara Şemasını</b> ve harita konumunu inceleyebilirsiniz.";
+      el("meta2").textContent=d.tm_sayi+" trafo merkezi barası · 3 dönem (02.03 → 16.07 → 01.10.2026) · "+konumlu+" coğrafi konumlu · 5 Altlık + 4 Veri Şema Katmanı";
+      el("not").innerHTML="<b>Mühendislik Notu:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezi barasında dağıtım seviyesinden (34,5 kV) tahsis edilebilecek güncel MWe gücüdür; 0,00 MWe olan baralar yeni lisanssız çağrı mektubu başvurusuna kapalıdır. Harita üzerindeki katman seçiciden <b>Uydu / Topoğrafik / Koyu SCADA</b> altlıklarına ve <b>İl Kapasite Isı / 154 kV Şebeke Ağı / Erime</b> katmanlarına geçiş yapabilirsiniz.";
       haritaKur(); segCiz(); ciz();
     })
     .catch(function(){

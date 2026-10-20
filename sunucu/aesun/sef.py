@@ -61,7 +61,7 @@ def main():
     eylemler, acik, gozlem = [], [], {}
 
     def yap(ad, sorun, fn):
-        if ts - son.get(ad, 0) < BEKLE[ad]:
+        if ts - son.get(ad, 0) < BEKLE[ad] and not os.path.exists(D + "/.sef_gh_simdi"):
             gozlem[ad] = f"bekleniyor ({round((ts - son.get(ad, 0)) / 60)} dk önce denendi)"; return None
         son[ad] = ts
         sonuc, ok = fn()
@@ -170,8 +170,6 @@ def main():
         except Exception:
             g = {"hata": (e or o)[-160:]}
         g["_t"] = ts; gh = g
-        try: os.remove(D + "/.sef_gh_simdi")
-        except OSError: pass
         for x in g.get("yeniden") or []:
             eylemler.append({"t": simdi.isoformat(timespec="seconds"), "sorun": f"GitHub işi başarısız: {x['ad']} ({x['depo']})", "eylem": "gh_yeniden",
                              "sonuc": "yeniden çalıştırıldı" if x.get("ok") else f"yeniden çalıştırılamadı (HTTP {x.get('kod')})", "ok": bool(x.get("ok"))})
@@ -238,6 +236,8 @@ def main():
                 git("rebase", "--abort"); time.sleep(5)
         st2 = oku(DURUM, {}); st2.update({"_son_ozet": ozet, "_son_yazim": ts, "gecmis": gecmis[-40:], "github": gh})
         open(DURUM + ".tmp", "w").write(json.dumps(st2, ensure_ascii=False)); os.replace(DURUM + ".tmp", DURUM)
+    try: os.remove(D + "/.sef_gh_simdi")
+    except OSError: pass
     print(cikti["durum"], len(eylemler), "eylem,", len(acik), "açık")
 
 

@@ -37,7 +37,7 @@ def dx(*a, t=180, girdi=None):
 
 
 def git(*a, t=180):
-    return dx("env", "GIT_SSH_COMMAND=ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no", "git", "-C", REPO, *a, t=t)
+    return dx("env", "GIT_SSH_COMMAND=ssh -i /home/aesun/.ssh/id_ed25519 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no", "git", "-C", REPO, *a, t=t)
 
 
 def oku(p, v):
@@ -70,7 +70,7 @@ def main():
         return ok
 
     # ---- 1) iş deposu GitHub'a yazabiliyor mu?
-    git("fetch", "--depth", "50", "-q", "origin", "main", t=120)
+    git("fetch", "--depth", "50", "-q", "origin", "+refs/heads/main:refs/remotes/origin/main", t=120)
     _, rb, _ = dx("sh", "-c", f"ls -d {REPO}/.git/rebase-merge {REPO}/.git/rebase-apply 2>/dev/null")
     _, ileri, _ = git("rev-list", "--count", "origin/main..HEAD")
     _, geri, _ = git("rev-list", "--count", "HEAD..origin/main")
@@ -79,14 +79,19 @@ def main():
     gozlem["itme"] = {"rebase_yarida": bool(rb), "gonderilmemis": ileri, "geride": geri, "en_eski_dk": round(yas)}
     if rb or (ileri and yas > 10) or geri > 15 or ileri > 50:
         def itme():
-            dx("rm", "-rf", f"{REPO}/.git/rebase-merge", f"{REPO}/.git/rebase-apply", f"{REPO}/.git/MERGE_HEAD", f"{REPO}/.git/index.lock")
-            git("fetch", "--depth", "50", "-q", "origin", "main")
-            git("checkout", "-B", "main", "origin/main")
-            git("reset", "--hard", "origin/main")
+            dx("sh", "-c", f"rm -rf {REPO}/.git/rebase-merge {REPO}/.git/rebase-apply {REPO}/.git/MERGE_HEAD && find {REPO}/.git -name '*.lock' -delete 2>/dev/null; true")
+            git("fetch", "--depth", "50", "-q", "origin", "+refs/heads/main:refs/remotes/origin/main")
+            git("checkout", "-f", "-B", "main", "refs/remotes/origin/main")
+            git("reset", "--hard", "refs/remotes/origin/main")
             git("clean", "-fd")
             git("stash", "clear")
             _, kalan, _ = git("rev-list", "--count", "origin/main..HEAD")
             _, kalan_geri, _ = git("rev-list", "--count", "HEAD..origin/main")
+            if int(kalan or 0) > 2 or int(kalan_geri or 0) > 5:
+                dx("env", "GIT_SSH_COMMAND=ssh -i /home/aesun/.ssh/id_ed25519 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no",
+                   "sh", "-c", f"find {REPO} -mindepth 1 -maxdepth 1 -exec rm -rf {{}} + && git clone --depth 50 git@github.com:ekinciomer-ai/epias-ptf.git {REPO} && git -C {REPO} config user.name aesun-bot && git -C {REPO} config user.email aesun-bot@users.noreply.github.com", t=180)
+                _, kalan, _ = git("rev-list", "--count", "origin/main..HEAD")
+                _, kalan_geri, _ = git("rev-list", "--count", "HEAD..origin/main")
             ok = int(kalan or 0) <= 2 and int(kalan_geri or 0) <= 5
             return (f"depo main dalına sıfırlandı (ileri:{ileri}->{kalan}, geri:{geri}->{kalan_geri})" if ok else f"sıfırlanamadı (ileri:{kalan}, geri:{kalan_geri})"), ok
         if yap("itme", ("yarıda kalmış rebase · " if rb else "") + f"sığ klon koptu (ileri:{ileri}, geri:{geri})", itme) is False:
@@ -225,9 +230,10 @@ def main():
     ozet = json.dumps({k: cikti[k] for k in ("durum", "eylemler", "acik")}, ensure_ascii=False, sort_keys=True)
     if ozet != st.get("_son_ozet") or ts - st.get("_son_yazim", 0) > 3600:
         for _ in range(3):
-            dx("rm", "-rf", f"{REPO}/.git/rebase-merge", f"{REPO}/.git/rebase-apply", f"{REPO}/.git/MERGE_HEAD", f"{REPO}/.git/index.lock")
-            git("fetch", "--depth", "50", "-q", "origin", "main")
-            git("checkout", "-B", "main", "origin/main")
+            dx("sh", "-c", f"rm -rf {REPO}/.git/rebase-merge {REPO}/.git/rebase-apply {REPO}/.git/MERGE_HEAD && find {REPO}/.git -name '*.lock' -delete 2>/dev/null; true")
+            git("fetch", "--depth", "50", "-q", "origin", "+refs/heads/main:refs/remotes/origin/main")
+            git("checkout", "-f", "-B", "main", "refs/remotes/origin/main")
+            git("reset", "--hard", "refs/remotes/origin/main")
             dx("sh", "-c", f"cat > {REPO}/n8n/sef.json", girdi=json.dumps(cikti, ensure_ascii=False, indent=1))
             git("add", "n8n/sef.json")
             if not git("diff", "--cached", "--quiet")[0]:

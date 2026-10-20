@@ -37,20 +37,25 @@ def sh(*a, **k):
     return subprocess.run(list(a), cwd=k.get("cwd", D), capture_output=True, text=True, timeout=k.get("t", 600))
 
 def hazirla():
-    os.environ.setdefault("GIT_SSH_COMMAND", "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no")
+    os.environ.setdefault("GIT_SSH_COMMAND", "ssh -i /home/aesun/.ssh/id_ed25519 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no")
     if not os.path.isdir(D + "/.git"):
         r = sh("git", "clone", "--depth", "50", REPO, D, cwd="/veri")
         if r.returncode: raise RuntimeError(r.stderr[-300:])
     sh("git", "config", "user.name", "aesun-bot"); sh("git", "config", "user.email", "aesun-bot@users.noreply.github.com")
 
 def git_esitle():
-    """Sığ klonda (depth=50) graft kopmasını ve yarım rebase'i temizleyip main dalını origin/main'e oturtur."""
-    sh("rm", "-rf", D + "/.git/rebase-merge", D + "/.git/rebase-apply", D + "/.git/MERGE_HEAD", D + "/.git/index.lock", t=15)
-    sh("git", "fetch", "--depth", "50", "origin", "main", t=90)
-    r = sh("git", "checkout", "-B", "main", "origin/main", t=30)
-    sh("git", "reset", "--hard", "origin/main", t=30)
+    """Sığ klonda (depth=50) kilitleri, graft kopmasını ve yarım rebase'i temizleyip main dalını origin/main'e oturtur; bozuksa yeniden klonlar."""
+    sh("bash", "-c", f"rm -rf {D}/.git/rebase-merge {D}/.git/rebase-apply {D}/.git/MERGE_HEAD && find {D}/.git -name '*.lock' -delete 2>/dev/null; true", t=15)
+    sh("git", "fetch", "--depth", "50", "origin", "+refs/heads/main:refs/remotes/origin/main", t=90)
+    sh("git", "checkout", "-f", "-B", "main", "refs/remotes/origin/main", t=30)
+    r = sh("git", "reset", "--hard", "refs/remotes/origin/main", t=30)
     sh("git", "clean", "-fd", t=15)
     sh("git", "stash", "clear", t=15)
+    ileri = sh("git", "rev-list", "--count", "origin/main..HEAD", t=15).stdout.strip()
+    geri = sh("git", "rev-list", "--count", "HEAD..origin/main", t=15).stdout.strip()
+    if r.returncode or ileri != "0" or geri != "0":
+        sh("bash", "-c", f"find {D} -mindepth 1 -maxdepth 1 -exec rm -rf {{}} + && git clone --depth 50 {REPO} {D}", cwd="/veri", t=180)
+        sh("git", "config", "user.name", "aesun-bot"); sh("git", "config", "user.email", "aesun-bot@users.noreply.github.com")
     return r
 
 def calistir(ad, komut, yollar, mesaj):

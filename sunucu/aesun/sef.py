@@ -81,14 +81,7 @@ def main():
         def itme():
             git("rebase", "--abort")
             git("fetch", "--depth", "50", "-q", "origin", "main")
-            if ileri > 50 or geri > 15:
-                git("reset", "--hard", "origin/main"); git("stash", "clear"); k, e = 0, ""
-            else:
-                k, _, e = git("rebase", "--autostash", "-X", "theirs", "origin/main")
-                if k:
-                    git("rebase", "--abort"); git("reset", "--hard", "origin/main"); git("stash", "clear"); k = 0
-                elif ileri:
-                    k, _, e = git("push", "-q")
+            git("reset", "--hard", "origin/main"); git("stash", "clear"); k, e = 0, ""
             git("fetch", "--depth", "50", "-q", "origin", "main")
             _, kalan, _ = git("rev-list", "--count", "origin/main..HEAD")
             _, kalan_geri, _ = git("rev-list", "--count", "HEAD..origin/main")
@@ -229,13 +222,17 @@ def main():
     # depoya yaz (değişince ya da saatte bir) — panel ve denetçi n8n/sef.json'u okur
     ozet = json.dumps({k: cikti[k] for k in ("durum", "eylemler", "acik")}, ensure_ascii=False, sort_keys=True)
     if ozet != st.get("_son_ozet") or ts - st.get("_son_yazim", 0) > 3600:
-        dx("sh", "-c", f"cat > {REPO}/n8n/sef.json", girdi=json.dumps(cikti, ensure_ascii=False, indent=1))
-        git("add", "n8n/sef.json")
-        if git("diff", "--cached", "--quiet")[0]:
+        for _ in range(3):
+            git("fetch", "--depth", "50", "-q", "origin", "main")
+            git("reset", "--hard", "origin/main")
+            dx("sh", "-c", f"cat > {REPO}/n8n/sef.json", girdi=json.dumps(cikti, ensure_ascii=False, indent=1))
+            git("add", "n8n/sef.json")
+            if not git("diff", "--cached", "--quiet")[0]:
+                break
             git("commit", "-qm", "Şef: " + ("; ".join(e["eylem"] + (" ✓" if e["ok"] else " ✗") for e in eylemler) or cikti["durum"]))
-            for _ in range(3):
-                if not git("fetch", "--depth", "50", "-q", "origin", "main")[0] and not git("rebase", "--autostash", "-X", "theirs", "origin/main")[0] and not git("push", "-q")[0]: break
-                git("rebase", "--abort"); time.sleep(5)
+            if not git("push", "-q")[0]:
+                break
+            time.sleep(3)
         st2 = oku(DURUM, {}); st2.update({"_son_ozet": ozet, "_son_yazim": ts, "gecmis": gecmis[-40:], "github": gh})
         open(DURUM + ".tmp", "w").write(json.dumps(st2, ensure_ascii=False)); os.replace(DURUM + ".tmp", DURUM)
     try: os.remove(D + "/.sef_gh_simdi")

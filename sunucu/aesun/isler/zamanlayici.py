@@ -44,16 +44,12 @@ def hazirla():
     sh("git", "config", "user.name", "aesun-bot"); sh("git", "config", "user.email", "aesun-bot@users.noreply.github.com")
 
 def git_esitle():
-    """Sığ klonda (depth=50) hızlı commit akışı sonrası graft kopmasını önlemek için fetch --depth 50 + rebase/reset."""
+    """Sığ klonda (depth=50) graft kopmasında rebase tüm geçmişi tarayıp kilitlenmesin diye doğrudan origin/main'e sıfırla."""
     if os.path.isdir(D + "/.git/rebase-merge") or os.path.isdir(D + "/.git/rebase-apply"):
-        sh("git", "rebase", "--abort")
-    sh("git", "fetch", "--depth", "50", "origin", "main")
-    r = sh("git", "rebase", "--autostash", "-X", "theirs", "origin/main")
-    if r.returncode:
-        sh("git", "rebase", "--abort")
-        sh("git", "reset", "--hard", "origin/main")
-        sh("git", "stash", "clear")
-        r = sh("git", "status", "--porcelain")
+        sh("git", "rebase", "--abort", t=30)
+    sh("git", "fetch", "--depth", "50", "origin", "main", t=90)
+    r = sh("git", "reset", "--hard", "origin/main", t=30)
+    sh("git", "stash", "clear", t=15)
     return r
 
 def calistir(ad, komut, yollar, mesaj):
@@ -61,12 +57,20 @@ def calistir(ad, komut, yollar, mesaj):
     t0 = time.time()
     r = subprocess.run(["bash", "is_calistir.sh", ad, *komut], cwd=D, capture_output=True, text=True, timeout=900, env={**os.environ, **SIR, "YEREL_GIT": "1"})
     if yollar:
-        sh("bash", "-c", "git add " + " ".join(yollar) + " 2>/dev/null; true")
-        if sh("git", "diff", "--cached", "--quiet").returncode:
+        for _ in range(4):
+            sh("git", "fetch", "--depth", "50", "origin", "main", t=90)
+            sh("bash", "-c", "git add " + " ".join(yollar) + " 2>/dev/null; true")
+            if not sh("git", "diff", "--cached", "--quiet").returncode:
+                break
             sh("git", "commit", "-qm", mesaj)
-            for _ in range(4):
-                if not git_esitle().returncode and not sh("git", "push", "-q").returncode: break
-                time.sleep(5)
+            if not sh("git", "push", "-q", t=90).returncode:
+                break
+            # Push reddedildiyse (Pi yeni commit attıysa) son iş çıktısını koruyarak origin/main üstüne koy
+            sh("git", "reset", "--soft", "HEAD~1", t=15)
+            sh("git", "stash", "push", "-u", "-q", t=30)
+            sh("git", "reset", "--hard", "origin/main", t=30)
+            sh("git", "stash", "pop", "-q", t=30)
+            time.sleep(3)
     return {"son": datetime.datetime.now().isoformat(timespec="seconds"), "sn": round(time.time() - t0), "cikti": (r.stdout or "")[-300:]}
 
 SIR = {}

@@ -54,6 +54,8 @@
   .k-btn.on.red{background:var(--red);border-color:var(--red);color:#fff}
   #harita{height:510px;border-radius:12px;border:1px solid var(--line);overflow:hidden;z-index:0;position:relative}
   @media(max-width:760px){#harita{height:380px}}
+  /* Leaflet poligon tıklamalarında tarayıcının dikdörtgen odak kutusu (bounding-box outline) çizmesini tamamen engelle */
+  .leaflet-interactive:focus,path.leaflet-interactive:focus,.leaflet-container :focus,svg path:focus,svg g:focus{outline:none!important}
   .leaflet-popup-content{font:inherit;font-size:13px;line-height:1.5;margin:10px 12px}
   .leaflet-popup-content b{color:var(--ink)}
   .lej{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut2);margin-top:12px;align-items:center}
@@ -62,10 +64,14 @@
   .lej i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
   .lej .chk2{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink2);font-weight:600;background:#F6F8FB;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
   .lej .chk2 input{width:15px;height:15px;accent-color:var(--red)}
-  .edas-tip{font:inherit;font-size:12px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.12)}
-  .il-rozet{background:rgba(16,35,63,.88);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:6px;padding:2px 6px;font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);pointer-events:none;text-align:center}
+  .edas-tip{font:inherit;font-size:12px;font-weight:600;background:rgba(15,27,45,.94);border:1px solid rgba(255,255,255,.22);border-radius:99px;padding:4px 11px;color:#F8FAFC;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+  .il-rozet{background:rgba(15,27,45,.88);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:2px 8px;font-family:Archivo,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.28);pointer-events:none;text-align:center;display:inline-block}
   .il-rozet b{color:#5CF08F}
   .il-rozet.dolu b{color:#9AA6B5}
+  .il-rozet.secili{background:#D32027;border-color:#FFE4E6;transform:scale(1.08)}
+  .il-rozet.secili b{color:#FFF}
+  .svg-il-path{transition:fill-opacity .15s,stroke-width .15s,stroke .15s;cursor:pointer}
+  .svg-il-path:hover{fill-opacity:.92!important;stroke:#FBBF24!important;stroke-width:2.2px!important}
 
   /* İkili Mimari: MEDAŞ + Seçili TM Tek Hat */
   .ikili-mimari{display:grid;grid-template-columns:1.1fr 1.1fr;gap:16px}
@@ -195,15 +201,15 @@
     <div class="svg-wrap" id="ulusalSema"></div>
   </div>
 
-  <!-- 2. GÖRSEL VERİ ŞEMA HARİTASI (21 EDAŞ KARTOGRAM HARİTASI + SEÇİLİ BÖLGE TM TOPOLOJİ ŞEMASI) -->
+  <!-- 2. GÖRSEL VERİ ŞEMA HARİTASI (81 İL & 21 EDAŞ GERÇEK COĞRAFİ SINIR VEKTÖR HARİTASI + SEÇİLİ BÖLGE/İL SINIR TOPOLOJİSİ) -->
   <div class="sema-panel">
     <div class="sema-ust">
       <div>
-        <h2>2. Türkiye 21 EDAŞ Bölgesi Görsel Veri Şema Haritası &amp; Bara Topolojisi</h2>
-        <div style="font-size:12.5px;color:var(--mut);margin-top:2px">Bölge kutusuna tıklayarak o EDAŞ bölgesine süzebilir; sağdan görünüm modunu değiştirebilirsiniz.</div>
+        <h2>2. Türkiye 81 İl &amp; 21 EDAŞ Gerçek Coğrafi Sınır Vektör Haritası ve Bara Topolojisi</h2>
+        <div style="font-size:12.5px;color:var(--mut);margin-top:2px">İllerin ve dağıtım bölgelerinin gerçek coğrafi sınır çizimleri üzerine tıklayarak süzebilir; sağdan yakınlaştırılmış sınır çizimini ve topolojiyi inceleyebilirsiniz.</div>
       </div>
       <div class="katman-grup" id="semaModGrup">
-        <button type="button" class="k-btn on" data-smod="kartogram">🗺️ 21 EDAŞ Veri Şema Haritası</button>
+        <button type="button" class="k-btn on" data-smod="kartogram">🗺️ 81 İl &amp; 21 EDAŞ Sınır Şema Haritası</button>
         <button type="button" class="k-btn" data-smod="agac">⚡ Bölge TM &amp; Bara Topoloji Şeması</button>
       </div>
     </div>
@@ -259,15 +265,15 @@
     </div>
   </div>
 
-  <!-- 4. İKİLİ ŞEMATİK PANEL: (SOL) MERAM EDAŞ 6 İL MİMARİSİ, (SAĞ) SEÇİLİ TM TEK HAT ŞEMASI -->
+  <!-- 4. İKİLİ ŞEMATİK PANEL: (SOL) MERAM EDAŞ 6 İL COĞRAFİ SINIR HARİTASI, (SAĞ) SEÇİLİ TM TEK HAT ŞEMASI -->
   <div class="ikili-mimari">
     <div class="medas-kutu">
       <h3>
-        <span>Meram EDAŞ (MEDAŞ) Bölgesi · 6 İl Kapasite Matrisi</span>
+        <span>Meram EDAŞ (MEDAŞ) Bölgesi · 6 İl Coğrafi Sınır &amp; Kapasite Haritası</span>
         <small style="font-size:12px;color:var(--red-d);font-weight:700" id="medasToplamLbl"></small>
       </h3>
-      <p>İle tıklayarak tabloyu, veri şemasını ve haritayı o ile süzebilirsiniz (Aksaray, Konya, Karaman, Niğde, Nevşehir, Kırşehir):</p>
-      <div class="medas-grid" id="medasGrid"></div>
+      <p>İl sınır çizimi üzerine tıklayarak tabloyu, veri şemasını ve haritayı o ilin gerçek sınırlarına süzebilirsiniz (Aksaray, Konya, Karaman, Niğde, Nevşehir, Kırşehir):</p>
+      <div id="medasGrid"></div>
     </div>
 
     <div class="tm-sema-kutu">
@@ -372,7 +378,7 @@
   var veriKatmanMod="kapasite"; // kapasite | isi | erime | topoloji
   var aktifAltlik="osm";
   var MAP=null, KAT=null, TOPO_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, geoYok=false;
-  var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null;
+  var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null, BOLGE_GEO=null;
   var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
 
   var el=function(id){return document.getElementById(id);};
@@ -381,6 +387,63 @@
   function fmt0(n){return n.toLocaleString("tr-TR");}
   function pv(r,p){ return +r[PKEY[p]]||0; }
   function av(r){ return pv(r,aktif); }
+
+  /* COĞRAFİ SINIR (GEOJSON POLİGON) → SVG VEKTÖR PROJEKSİYON MOTORU */
+  function geoHalkalar(geom){
+    var h=[];
+    if(!geom) return h;
+    if(geom.type==="Polygon"){
+      geom.coordinates.forEach(function(r){ h.push(r); });
+    } else if(geom.type==="MultiPolygon"){
+      geom.coordinates.forEach(function(p){ p.forEach(function(r){ h.push(r); }); });
+    }
+    return h;
+  }
+  function geoProjKur(feats, x0, y0, w, h, pad){
+    var minX=180, maxX=-180, minY=90, maxY=-90;
+    feats.forEach(function(f){
+      geoHalkalar(f.geometry).forEach(function(ring){
+        ring.forEach(function(pt){
+          var lon=pt[0], lat=pt[1];
+          if(lon<minX) minX=lon; if(lon>maxX) maxX=lon;
+          if(lat<minY) minY=lat; if(lat>maxY) maxY=lat;
+        });
+      });
+    });
+    if(minX>maxX){ minX=26; maxX=45; minY=36; maxY=42; }
+    var cosLat = Math.cos(((minY+maxY)/2)*Math.PI/180);
+    var dLon = Math.max(0.05, (maxX-minX)*cosLat);
+    var dLat = Math.max(0.05, maxY-minY);
+    var iw = w - 2*pad, ih = h - 2*pad;
+    var sc = Math.min(iw/dLon, ih/dLat);
+    var ox = x0 + pad + (iw - dLon*sc)/2;
+    var oy = y0 + pad + (ih - dLat*sc)/2;
+    function xy(lon, lat){
+      return [ox + (lon-minX)*cosLat*sc, oy + (maxY-lat)*sc];
+    }
+    function pathD(geom){
+      var rings = geoHalkalar(geom);
+      var d = "";
+      rings.forEach(function(r){
+        for(var i=0;i<r.length;i++){
+          var p = xy(r[i][0], r[i][1]);
+          d += (i===0?"M":"L")+p[0].toFixed(1)+","+p[1].toFixed(1);
+        }
+        if(r.length) d += "Z";
+      });
+      return d;
+    }
+    function merkez(geom){
+      var rings = geoHalkalar(geom);
+      if(!rings.length) return [x0+w/2, y0+h/2];
+      var best = rings[0];
+      rings.forEach(function(r){ if(r.length > best.length) best = r; });
+      var sx=0, sy=0, n=best.length||1;
+      best.forEach(function(pt){ sx+=pt[0]; sy+=pt[1]; });
+      return xy(sx/n, sy/n);
+    }
+    return { xy: xy, pathD: pathD, merkez: merkez, bounds: [[minY,minX],[maxY,maxX]] };
+  }
 
   /* 1. ULUSAL / FİLTRELİ KAPASİTE TAHSİS & ERİME ŞEMASI (SVG) */
   function ulusalSemaCiz(rows){
@@ -450,75 +513,160 @@
       +'</svg>';
   }
 
-  /* 2. TÜRKİYE 21 EDAŞ GÖRSEL VERİ ŞEMA HARİTASI (KARTOGRAM) & TM AĞAÇ ŞEMASI */
+  /* 2. TÜRKİYE 81 İL & 21 EDAŞ GERÇEK COĞRAFİ SINIR VEKTÖR HARİTASI & TM TOPOLOJİ ŞEMASI */
   function veriSemaHaritaCiz(){
     var kutu = el("veriSemaHarita");
     var secEd = el("fed").value, secIl = el("fil").value;
 
     if(semaMod === "kartogram"){
-      // 21 EDAŞ Coğrafi Kartogram Haritası (7x3 Grid + 154kV Omurga Hatları)
-      var W = 1060, H = 356;
-      var cw = 140, ch = 92, gx = 10, gy = 12, x0 = 14, y0 = 36;
-      var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Türkiye 21 EDAŞ Veri Şema Haritası">'
-        +'<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="10" fill="#0F1B2D"/>'
-        +'<text x="20" y="24" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#E2E8F0" letter-spacing=".04em">TÜRKİYE 21 DAĞITIM BÖLGESİ (EDAŞ) COĞRAFİ VERİ ŞEMA HARİTASI · '+donemler[aktif].etiket.toUpperCase()+'</text>'
-        +'<text x="'+(W-20)+'" y="24" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#94A3B8">Yeşil: ≥50 MWe · Kehribar: 1–50 MWe · Gri: 0 MWe (Kutuya tıklayarak bölgeyi süzün)</text>';
+      if(!IL_GEO || !IL_GEO.features){
+        kutu.innerHTML = '<div style="padding:36px;text-align:center;color:var(--mut2)">Coğrafi il ve bölge sınır vektörleri yükleniyor…</div>';
+        return;
+      }
+      var W = 1060, H = 390;
+      var ilMwe = {}, ilSay = {}, edMwe = {};
+      tumu.forEach(function(r){
+        var v = av(r);
+        ilMwe[r.il] = (ilMwe[r.il] || 0) + v;
+        if(v > 0) ilSay[r.il] = (ilSay[r.il] || 0) + 1;
+      });
+      Object.keys(EDAS_IL).forEach(function(ed){
+        edMwe[ed] = (EDAS_IL[ed]||[]).reduce(function(s,il){ return s + (ilMwe[il]||0); }, 0);
+      });
 
-      // Komşu bölgeler arası 154/380 kV şematik iletim çizgileri
-      for(var r=0;r<3;r++){
-        for(var c=0;c<7;c++){
-          var cx = x0 + c*(cw+gx) + cw/2, cy = y0 + r*(ch+gy) + ch/2;
-          if(c<6) svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+cw+gx)+'" y2="'+cy+'" stroke="#1E3A5F" stroke-width="2" stroke-dasharray="4 3"/>';
-          if(r<2) svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+cx+'" y2="'+(cy+ch+gy)+'" stroke="#1E3A5F" stroke-width="2" stroke-dasharray="4 3"/>';
+      var trProj = geoProjKur(IL_GEO.features, 12, 38, 668, 336, 14);
+
+      var odakFeats = [];
+      var odakBaslik = "MERAM EDAŞ (6 İL) SINIR TOPOLOJİSİ";
+      if(secIl){
+        odakFeats = IL_GEO.features.filter(function(f){ return (f.properties.il||"").toLocaleUpperCase("tr") === secIl; });
+        odakBaslik = secIl + " İL SINIRI & TM KONUMLARI";
+      } else if(secEd){
+        var edIller = EDAS_IL[secEd] || [];
+        odakFeats = IL_GEO.features.filter(function(f){ return edIller.indexOf((f.properties.il||"").toLocaleUpperCase("tr")) >= 0; });
+        odakBaslik = secEd.toUpperCase() + " BÖLGE SINIRI";
+      } else {
+        var medIller = EDAS_IL["Meram EDAŞ"] || [];
+        odakFeats = IL_GEO.features.filter(function(f){ return medIller.indexOf((f.properties.il||"").toLocaleUpperCase("tr")) >= 0; });
+      }
+      if(!odakFeats.length) odakFeats = IL_GEO.features;
+      var odakProj = geoProjKur(odakFeats, 694, 46, 354, 300, 18);
+
+      var svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Türkiye 81 İl ve 21 EDAŞ Gerçek Coğrafi Sınır Haritası">'
+        +'<defs>'
+          +'<filter id="secGlow" x="-20%" y="-20%" width="140%" height="140%">'
+            +'<feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#EF4444" flood-opacity="0.85"/>'
+          +'</filter>'
+        +'</defs>'
+        +'<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="12" fill="#0B1524"/>'
+        +'<text x="18" y="24" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#F8FAFC" letter-spacing=".04em">TÜRKİYE 81 İL &amp; 21 EDAŞ GERÇEK COĞRAFİ SINIR ŞEMA HARİTASI · '+donemler[aktif].etiket.toUpperCase()+'</text>'
+        +'<text x="676" y="24" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#94A3B8">İl sınırına tıklayarak süzün · Koyu Yeşil ≥50 · Yeşil 10–50 · Kehribar 0,1–10 · Lacivert 0 MWe</text>';
+
+      var seciliPaths = "";
+      var ilEtiketler = "";
+      IL_GEO.features.forEach(function(f){
+        var p = f.properties || {};
+        var ilAd = (p.il || "").toLocaleUpperCase("tr");
+        var edAd = p.edas || "";
+        var m = ilMwe[ilAd] || 0;
+        var isIlSec = (secIl && secIl === ilAd);
+        var isEdSec = (!secIl && secEd && (EDAS_IL[secEd]||[]).indexOf(ilAd) >= 0);
+        var aktifSec = isIlSec || isEdSec;
+
+        var fill = m >= 50 ? "#059669" : (m >= 10 ? "#10B981" : (m > 0 ? "#D97706" : "#1E293B"));
+        var fOp = (secIl || secEd) ? (aktifSec ? 0.88 : 0.28) : (m > 0 ? 0.78 : 0.45);
+        var strk = aktifSec ? "#FBBF24" : "#334155";
+        var sW = aktifSec ? 2.2 : 0.75;
+        var dStr = trProj.pathD(f.geometry);
+
+        var pathTag = '<path class="svg-il-path" data-il="'+esc(ilAd)+'" data-ed="'+esc(edAd)+'" d="'+dStr+'" fill="'+fill+'" fill-opacity="'+fOp+'" stroke="'+strk+'" stroke-width="'+sW+'" stroke-linejoin="round">'
+          +'<title>'+esc(ilAd)+' ('+esc(edAd)+') · Aktif Kapasite: '+fmt(m)+' MWe · Açık Bara: '+(ilSay[ilAd]||0)+'</title>'
+        +'</path>';
+
+        if(aktifSec){
+          seciliPaths += '<path class="svg-il-path" data-il="'+esc(ilAd)+'" data-ed="'+esc(edAd)+'" d="'+dStr+'" fill="'+(isIlSec?'#DC2626':fill)+'" fill-opacity="0.88" stroke="#FBBF24" stroke-width="2.5" stroke-linejoin="round" filter="url(#secGlow)">'
+            +'<title>'+esc(ilAd)+' ('+esc(edAd)+') · '+fmt(m)+' MWe</title></path>';
+        } else {
+          svg += pathTag;
         }
+
+        if(aktifSec || (!secIl && !secEd && (m >= 22 || ilAd==="AKSARAY" || ilAd==="KONYA" || ilAd==="ANKARA"))){
+          var c = trProj.merkez(f.geometry);
+          ilEtiketler += '<g pointer-events="none">'
+            +'<text x="'+c[0].toFixed(1)+'" y="'+(c[1]-1).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="'+(aktifSec?'9':'7.5')+'" font-weight="800" fill="#FFFFFF" stroke="#0B1524" stroke-width="2.2" paint-order="stroke">'+esc(ilAd.slice(0,9))+'</text>'
+            +(m>0 ? '<text x="'+c[0].toFixed(1)+'" y="'+(c[1]+8).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="7.5" font-weight="800" fill="#6EE7B7" stroke="#0B1524" stroke-width="2" paint-order="stroke">'+fmt(m)+'</text>' : '')
+          +'</g>';
+        }
+      });
+
+      if(BOLGE_GEO && BOLGE_GEO.features){
+        BOLGE_GEO.features.forEach(function(bf){
+          var bed = (bf.properties && bf.properties.edas) || "";
+          var bSec = (secEd === bed);
+          svg += '<path d="'+trProj.pathD(bf.geometry)+'" fill="none" stroke="'+(bSec?'#F43F5E':'#64748B')+'" stroke-width="'+(bSec?2.4:1.25)+'" stroke-opacity="'+(bSec?1:0.7)+'" stroke-linejoin="round" pointer-events="none"/>';
+        });
       }
 
-      EDAS_GRID.forEach(function(satir, r){
-        satir.forEach(function(edAd, c){
-          var x = x0 + c*(cw+gx), y = y0 + r*(ch+gy);
-          var iller = EDAS_IL[edAd] || [];
-          var rowsEd = tumu.filter(function(row){ return iller.indexOf(row.il)>=0; });
-          var mAkt = rowsEd.reduce(function(s,row){ return s+av(row); }, 0);
-          var m0 = rowsEd.reduce(function(s,row){ return s+pv(row,0); }, 0);
-          var acikSay = rowsEd.filter(function(row){ return av(row)>0; }).length;
-          var erimePct = m0 > 0 ? Math.min(100, Math.max(0, Math.round((m0 - mAkt)/m0*100))) : (mAkt>0 ? 0 : 100);
-          var secili = (secEd === edAd) || (secIl && iller.indexOf(secIl)>=0);
-          var isMedas = (edAd === "Meram EDAŞ");
+      svg += seciliPaths + ilEtiketler;
 
-          var renk = mAkt >= 50 ? "#10B981" : (mAkt > 0 ? "#F59E0B" : "#475569");
-          var zemin = secili ? "#1E293B" : (isMedas ? "#1A2436" : "#132032");
-          var kenar = secili ? "#EF4444" : (isMedas ? "#F59E0B" : renk);
-          var kalin = (secili || isMedas) ? 2.5 : 1.4;
-          var barW = Math.round((cw - 20) * (100 - erimePct) / 100);
+      svg += '<line x1="686" y1="14" x2="686" y2="'+(H-14)+'" stroke="#1E293B" stroke-width="1.5"/>'
+        +'<rect x="694" y="12" width="354" height="'+(H-24)+'" rx="10" fill="#0F1D31" stroke="#1E3A5F" stroke-width="1.2"/>'
+        +'<text x="708" y="31" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="#38BDF8">🔍 '+esc(odakBaslik)+'</text>'
+        +'<text x="1036" y="31" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#94A3B8">Gerçek İl Sınırı &amp; TM</text>';
 
-          svg += '<g class="sema-ed-kutu" data-ed="'+esc(edAd)+'" style="cursor:pointer">'
-            +'<rect x="'+x+'" y="'+y+'" width="'+cw+'" height="'+ch+'" rx="9" fill="'+zemin+'" stroke="'+kenar+'" stroke-width="'+kalin+'"/>'
-            +'<rect x="'+x+'" y="'+y+'" width="'+cw+'" height="22" rx="9" fill="'+renk+'" fill-opacity=".22"/>'
-            +'<circle cx="'+(x+11)+'" cy="'+(y+11)+'" r="4" fill="'+renk+'"/>'
-            +'<text x="'+(x+20)+'" y="'+(y+15)+'" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#F8FAFC">'+esc(edAd.replace(" (Anadolu)",""))+'</text>'
-            +'<text x="'+(x+cw-8)+'" y="'+(y+15)+'" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#94A3B8">'+iller.length+' il</text>'
-            +'<text x="'+(x+10)+'" y="'+(y+45)+'" font-family="Archivo,sans-serif" font-size="17" font-weight="800" fill="'+(mAkt>0?'#FFFFFF':'#64748B')+'">'+fmt(mAkt)+' <tspan font-size="10" font-weight="600" fill="#94A3B8">MWe</tspan></text>'
-            +'<text x="'+(x+10)+'" y="'+(y+61)+'" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#94A3B8">Açık: <tspan fill="'+(acikSay>0?'#34D399':'#94A3B8')+'" font-weight="700">'+acikSay+'</tspan> / '+rowsEd.length+' bara</text>'
-            +'<rect x="'+(x+10)+'" y="'+(y+70)+'" width="'+(cw-20)+'" height="6" rx="3" fill="#334155"/>'
-            +'<rect x="'+(x+10)+'" y="'+(y+70)+'" width="'+Math.max(0,barW)+'" height="6" rx="3" fill="'+renk+'"/>'
-            +'<text x="'+(x+10)+'" y="'+(y+85)+'" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#64748B">'+esc(iller.slice(0,3).join(", "))+(iller.length>3?'…':'')+'</text>'
-          +'</g>';
-        });
+      var odakIller = {};
+      odakFeats.forEach(function(f){
+        var ilAd = ((f.properties && f.properties.il) || "").toLocaleUpperCase("tr");
+        odakIller[ilAd] = 1;
+        var m = ilMwe[ilAd] || 0;
+        var isSec = (secIl === ilAd) || (!secIl && ilAd === "AKSARAY" && !secEd);
+        var fill = isSec ? "#991B1B" : (m > 0 ? "#065F46" : "#1E293B");
+        var strk = isSec ? "#F87171" : (m > 0 ? "#34D399" : "#475569");
+        var dO = odakProj.pathD(f.geometry);
+        var cO = odakProj.merkez(f.geometry);
+        svg += '<path class="svg-il-path" data-il="'+esc(ilAd)+'" d="'+dO+'" fill="'+fill+'" fill-opacity="0.72" stroke="'+strk+'" stroke-width="'+(isSec?2.2:1.5)+'" stroke-linejoin="round">'
+          +'<title>'+esc(ilAd)+' · '+fmt(m)+' MWe</title></path>'
+          +'<text x="'+cO[0].toFixed(1)+'" y="'+cO[1].toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="#F8FAFC" stroke="#0B1524" stroke-width="2.5" paint-order="stroke" pointer-events="none">'+esc(ilAd)+' ('+fmt(m)+')</text>';
       });
-      svg += '</svg>';
+
+      var odakTms = tumu.filter(function(r){ return odakIller[r.il] && r.lat!=null && r.lon!=null; });
+      for(var i=0;i<odakTms.length-1;i++){
+        if(odakTms[i].il === odakTms[i+1].il){
+          var p1 = odakProj.xy(odakTms[i].lon, odakTms[i].lat);
+          var p2 = odakProj.xy(odakTms[i+1].lon, odakTms[i+1].lat);
+          svg += '<line x1="'+p1[0].toFixed(1)+'" y1="'+p1[1].toFixed(1)+'" x2="'+p2[0].toFixed(1)+'" y2="'+p2[1].toFixed(1)+'" stroke="#38BDF8" stroke-width="1.3" stroke-dasharray="3 3" stroke-opacity="0.65" pointer-events="none"/>';
+        }
+      }
+      odakTms.forEach(function(r){
+        var pt = odakProj.xy(r.lon, r.lat);
+        var v = av(r);
+        var rC = v > 0 ? "#10B981" : "#94A3B8";
+        var isTmSec = (seciliRow && seciliRow.tm === r.tm);
+        svg += '<circle class="svg-tm-nokta" data-tm="'+esc(r.tm)+'" cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="'+(isTmSec?6:(v>0?4.5:3))+'" fill="'+(isTmSec?'#EF4444':rC)+'" stroke="#0B1524" stroke-width="1.3" style="cursor:pointer">'
+          +'<title>'+esc(r.tm)+' ('+esc(r.bara||"Tek")+') · '+fmt(v)+' MWe</title></circle>';
+      });
+
+      var odakTopMwe = Object.keys(odakIller).reduce(function(s,k){ return s + (ilMwe[k]||0); }, 0);
+      svg += '<rect x="704" y="'+(H-38)+'" width="334" height="20" rx="6" fill="#0B1524"/>'
+        +'<text x="871" y="'+(H-24)+'" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10" font-weight="600" fill="#CBD5E1">Seçili Sınır Toplamı: <tspan fill="#34D399" font-weight="700">'+fmt(odakTopMwe)+' MWe</tspan> · Sınıra veya TM noktasına tıklayın</text>'
+      +'</svg>';
+
       kutu.innerHTML = svg;
-      kutu.querySelectorAll(".sema-ed-kutu").forEach(function(g){
-        g.addEventListener("click", function(){
-          var ed = g.getAttribute("data-ed");
-          el("fil").value = "";
-          el("fed").value = (el("fed").value === ed ? "" : ed);
+      kutu.querySelectorAll(".svg-il-path").forEach(function(p){
+        p.addEventListener("click", function(){
+          var il = p.getAttribute("data-il");
+          el("fil").value = (el("fil").value === il ? "" : il);
           ciz();
         });
       });
+      kutu.querySelectorAll(".svg-tm-nokta").forEach(function(c){
+        c.addEventListener("click", function(ev){
+          ev.stopPropagation();
+          haritaGit(c.getAttribute("data-tm"));
+        });
+      });
     } else {
-      // Görünüm 2: Bölge / İl TM & Bara Topoloji Ağaç Şeması
       var kaynakRows = gorunen.length ? gorunen : tumu;
-      // TM bazında grupla, en yüksek kapasiteli veya ilk 12 TM'yi göster
       var tmMap = {};
       kaynakRows.forEach(function(r){
         var k = r.il + "|" + r.tm;
@@ -537,7 +685,7 @@
       var s2 = '<svg viewBox="0 0 '+W2+' '+H2+'" role="img" aria-label="Bölge TM ve Bara Topoloji Şeması">'
         +'<rect x="0" y="0" width="'+W2+'" height="'+H2+'" rx="10" fill="#0F1B2D"/>'
         +'<text x="20" y="27" font-family="Archivo,sans-serif" font-size="12.5" font-weight="800" fill="#F8FAFC">⚡ 154 / 34,5 kV TRAFO MERKEZİ VE BARA TOPOLOJİ ŞEMASI · '+esc(baslik.toUpperCase())+'</text>'
-        +'<text x="'+(W2-20)+'" y="27" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#94A3B8">TM kutusuna tıklayarak tek hat detayına ve harita konumuna gidin</text>';
+        +'<text x="'+(W2-20)+'" y="27" text-anchor="end" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#94A3B8">TM düğümüne tıklayarak tek hat detayına ve harita konumuna gidin</text>';
 
       tmList.forEach(function(t, idx){
         var c = idx % cols, r = Math.floor(idx / cols);
@@ -574,29 +722,85 @@
     }
   }
 
-  /* 3. MERAM EDAŞ (MEDAŞ) 6 İL ŞEMATİK MATRİSİ */
+  /* 3. MERAM EDAŞ (MEDAŞ) 6 İL GERÇEK COĞRAFİ SINIR HARİTASI (DİKDÖRTGEN KUTULAR YERİNE GERÇEK İL SINIRLARI) */
   function medasCiz(){
     var iller = ["AKSARAY","KONYA","KARAMAN","NİĞDE","NEVŞEHİR","KIRŞEHİR"];
     var secIl = el("fil").value;
     var topMedas = 0;
-    var html = iller.map(function(il){
+    var ilVeri = {};
+    iller.forEach(function(il){
       var rIl = tumu.filter(function(r){ return r.il===il; });
       var mAkt = rIl.reduce(function(s,r){ return s+av(r); }, 0);
       var mMart = rIl.reduce(function(s,r){ return s+pv(r,0); }, 0);
-      topMedas += mAkt;
       var pozBara = rIl.filter(function(r){ return av(r)>0; });
-      var ornek = pozBara.slice(0,2).map(function(x){ return x.tm.replace(" TM","")+" ("+fmt(av(x))+")"; }).join(", ");
-      return '<div class="m-il'+(secIl===il?' secili':'')+'" data-il="'+il+'">'
-        +'<div class="il-ad"><span>'+il+'</span><small style="color:var(--mut2)">'+rIl.length+' bara</small></div>'
-        +'<div class="il-mwe'+(mAkt>0?'':' sifir')+'">'+fmt(mAkt)+' <small style="font-size:11px">MWe</small></div>'
-        +'<div class="il-det">Mart: '+fmt(mMart)+' MWe · Açık: '+pozBara.length+'<br>'+(ornek ? ('<b>Açık:</b> '+esc(ornek)) : 'Kapasite dolu (0,00)')+'</div>'
-      +'</div>';
-    }).join("");
-    el("medasGrid").innerHTML = html;
+      topMedas += mAkt;
+      ilVeri[il] = { rIl: rIl, mAkt: mAkt, mMart: mMart, poz: pozBara };
+    });
     el("medasToplamLbl").textContent = "Toplam " + fmt(topMedas) + " MWe (" + donemler[aktif].kisa + ")";
-    el("medasGrid").querySelectorAll(".m-il").forEach(function(k){
-      k.addEventListener("click", function(){
-        var il = k.getAttribute("data-il");
+
+    if(!IL_GEO || !IL_GEO.features){
+      el("medasGrid").innerHTML = '<div style="padding:24px;text-align:center;color:var(--mut2)">MEDAŞ 6 il sınır çizimi yükleniyor…</div>';
+      return;
+    }
+
+    var medFeats = IL_GEO.features.filter(function(f){
+      return iller.indexOf(((f.properties&&f.properties.il)||"").toLocaleUpperCase("tr")) >= 0;
+    });
+    var W = 520, H = 250;
+    var proj = geoProjKur(medFeats, 0, 0, 325, H, 14);
+
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#0F1B2D;border-radius:12px;border:1px solid var(--line);display:block" role="img" aria-label="Meram EDAŞ 6 İl Gerçek Sınır Haritası">';
+
+    var secPath = "";
+    var etiketHtml = "";
+    medFeats.forEach(function(f){
+      var ilAd = ((f.properties&&f.properties.il)||"").toLocaleUpperCase("tr");
+      var iv = ilVeri[ilAd] || { mAkt:0, rIl:[], poz:[] };
+      var isSec = (secIl === ilAd);
+      var d = proj.pathD(f.geometry);
+      var c = proj.merkez(f.geometry);
+      var fill = isSec ? "#D32027" : (iv.mAkt > 0 ? "#10B981" : "#1E293B");
+      var strk = isSec ? "#FBBF24" : (iv.mAkt > 0 ? "#6EE7B7" : "#64748B");
+      var pHtml = '<path class="med-il-path svg-il-path" data-il="'+esc(ilAd)+'" d="'+d+'" fill="'+fill+'" fill-opacity="'+(isSec?0.88:(iv.mAkt>0?0.68:0.55))+'" stroke="'+strk+'" stroke-width="'+(isSec?2.6:1.5)+'" stroke-linejoin="round">'
+        +'<title>'+esc(ilAd)+' · Aktif: '+fmt(iv.mAkt)+' MWe · Mart: '+fmt(iv.mMart)+' MWe ('+iv.rIl.length+' bara)</title></path>';
+      if(isSec) secPath += pHtml; else svg += pHtml;
+
+      etiketHtml += '<g pointer-events="none">'
+        +'<text x="'+c[0].toFixed(1)+'" y="'+(c[1]-2).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5" paint-order="stroke">'+esc(ilAd)+'</text>'
+        +'<text x="'+c[0].toFixed(1)+'" y="'+(c[1]+9).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.5" font-weight="800" fill="'+(iv.mAkt>0?'#A7F3D0':'#94A3B8')+'" stroke="#0F1B2D" stroke-width="2.2" paint-order="stroke">'+fmt(iv.mAkt)+' MWe</text>'
+      +'</g>';
+    });
+    svg += secPath;
+
+    tumu.filter(function(r){ return iller.indexOf(r.il)>=0 && r.lat!=null; }).forEach(function(r){
+      var pt = proj.xy(r.lon, r.lat);
+      var v = av(r);
+      svg += '<circle cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="'+(v>0?3.8:2.4)+'" fill="'+(v>0?'#FBBF24':'#64748B')+'" stroke="#0F1B2D" stroke-width="1" pointer-events="none"/>';
+    });
+    svg += etiketHtml;
+
+    svg += '<line x1="324" y1="12" x2="324" y2="'+(H-12)+'" stroke="#1E293B" stroke-width="1.2"/>';
+    iller.forEach(function(il, idx){
+      var iv = ilVeri[il];
+      var isSec = (secIl === il);
+      var y = 10 + idx * 39;
+      var fIl = medFeats.find(function(f){ return ((f.properties&&f.properties.il)||"").toLocaleUpperCase("tr") === il; });
+      var miniP = fIl ? geoProjKur([fIl], 332, y+3, 28, 28, 2).pathD(fIl.geometry) : "";
+      var sRenk = isSec ? "#FBBF24" : (iv.mAkt > 0 ? "#10B981" : "#64748B");
+      svg += '<g class="med-il-path" data-il="'+esc(il)+'" style="cursor:pointer">'
+        +'<rect x="330" y="'+y+'" width="180" height="34" rx="17" fill="'+(isSec?'#7F1D1D':'#162438')+'" stroke="'+(isSec?'#F87171':'#263852')+'" stroke-width="'+(isSec?1.8:1)+'"/>'
+        +(miniP ? '<path d="'+miniP+'" fill="'+sRenk+'" fill-opacity="0.75" stroke="#FFF" stroke-width="0.8" stroke-linejoin="round"/>' : '')
+        +'<text x="365" y="'+(y+15)+'" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#F8FAFC">'+esc(il)+'</text>'
+        +'<text x="365" y="'+(y+27)+'" font-family="IBM Plex Sans,sans-serif" font-size="8.8" fill="#94A3B8">Mart: '+fmt(iv.mMart)+' · '+iv.rIl.length+' bara</text>'
+        +'<text x="500" y="'+(y+21)+'" text-anchor="end" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="'+(iv.mAkt>0?'#34D399':'#94A3B8')+'">'+fmt(iv.mAkt)+'</text>'
+      +'</g>';
+    });
+
+    svg += '</svg>';
+    el("medasGrid").innerHTML = svg;
+    el("medasGrid").querySelectorAll(".med-il-path").forEach(function(node){
+      node.addEventListener("click", function(){
+        var il = node.getAttribute("data-il");
         el("fil").value = (el("fil").value===il ? "" : il);
         ciz();
       });

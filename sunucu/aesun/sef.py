@@ -79,14 +79,16 @@ def main():
     gozlem["itme"] = {"rebase_yarida": bool(rb), "gonderilmemis": ileri, "geride": geri, "en_eski_dk": round(yas)}
     if rb or (ileri and yas > 10) or geri > 15 or ileri > 50:
         def itme():
-            git("rebase", "--abort")
+            dx("rm", "-rf", f"{REPO}/.git/rebase-merge", f"{REPO}/.git/rebase-apply", f"{REPO}/.git/MERGE_HEAD", f"{REPO}/.git/index.lock")
             git("fetch", "--depth", "50", "-q", "origin", "main")
-            git("reset", "--hard", "origin/main"); git("stash", "clear"); k, e = 0, ""
-            git("fetch", "--depth", "50", "-q", "origin", "main")
+            git("checkout", "-B", "main", "origin/main")
+            git("reset", "--hard", "origin/main")
+            git("clean", "-fd")
+            git("stash", "clear")
             _, kalan, _ = git("rev-list", "--count", "origin/main..HEAD")
             _, kalan_geri, _ = git("rev-list", "--count", "HEAD..origin/main")
             ok = int(kalan or 0) <= 2 and int(kalan_geri or 0) <= 5
-            return (f"depo eşitlendi (ileri:{ileri}->{kalan}, geri:{geri}->{kalan_geri})" if ok else f"gönderilemedi: {e[-160:]}"), ok
+            return (f"depo main dalına sıfırlandı (ileri:{ileri}->{kalan}, geri:{geri}->{kalan_geri})" if ok else f"sıfırlanamadı (ileri:{kalan}, geri:{kalan_geri})"), ok
         if yap("itme", ("yarıda kalmış rebase · " if rb else "") + f"sığ klon koptu (ileri:{ileri}, geri:{geri})", itme) is False:
             acik.append({"sorun": "ns1 iş çıktıları GitHub'a gönderilemiyor", "neden": "itme denemesi başarısız"})
 
@@ -223,14 +225,15 @@ def main():
     ozet = json.dumps({k: cikti[k] for k in ("durum", "eylemler", "acik")}, ensure_ascii=False, sort_keys=True)
     if ozet != st.get("_son_ozet") or ts - st.get("_son_yazim", 0) > 3600:
         for _ in range(3):
+            dx("rm", "-rf", f"{REPO}/.git/rebase-merge", f"{REPO}/.git/rebase-apply", f"{REPO}/.git/MERGE_HEAD", f"{REPO}/.git/index.lock")
             git("fetch", "--depth", "50", "-q", "origin", "main")
-            git("reset", "--hard", "origin/main")
+            git("checkout", "-B", "main", "origin/main")
             dx("sh", "-c", f"cat > {REPO}/n8n/sef.json", girdi=json.dumps(cikti, ensure_ascii=False, indent=1))
             git("add", "n8n/sef.json")
             if not git("diff", "--cached", "--quiet")[0]:
                 break
             git("commit", "-qm", "Şef: " + ("; ".join(e["eylem"] + (" ✓" if e["ok"] else " ✗") for e in eylemler) or cikti["durum"]))
-            if not git("push", "-q")[0]:
+            if not git("push", "-q", "origin", "HEAD:main")[0]:
                 break
             time.sleep(3)
         st2 = oku(DURUM, {}); st2.update({"_son_ozet": ozet, "_son_yazim": ts, "gecmis": gecmis[-40:], "github": gh})

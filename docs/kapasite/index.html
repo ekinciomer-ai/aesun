@@ -759,7 +759,7 @@
     if(!ILL) return;
     var edOn = el("tglDolgu").checked;
     var isiMod = (veriKatmanMod === "isi");
-    // İl bazlı toplam kapasite
+    var secIl = el("fil").value, secEd = el("fed").value;
     var ilTop = {};
     tumu.forEach(function(r){ ilTop[r.il] = (ilTop[r.il] || 0) + av(r); });
 
@@ -768,14 +768,37 @@
         var prop = ly.feature.properties || {};
         var ilAd = (prop.il || "").toLocaleUpperCase("tr");
         var ed = prop.edas;
-        if(isiMod){
+        var isIlSec = (secIl && secIl === ilAd);
+        var isEdSec = (!secIl && secEd && (EDAS_IL[secEd]||[]).indexOf(ilAd) >= 0);
+        if(isIlSec){
+          ly.setStyle({ fillOpacity: 0.26, fillColor: "#D32027", color: "#D32027", weight: 3.5, dashArray: "" });
+          if(ly.bringToFront) try{ ly.bringToFront(); }catch(e){}
+        } else if(isEdSec){
+          ly.setStyle({ fillOpacity: 0.20, fillColor: EDAS_RENK[ed] || "#D32027", color: "#D32027", weight: 2.2, dashArray: "" });
+          if(ly.bringToFront) try{ ly.bringToFront(); }catch(e){}
+        } else if(isiMod){
           var m = ilTop[ilAd] || 0;
-          ly.setStyle({ fillOpacity: m>0 ? 0.48 : 0.18, fillColor: isiRenk(m), color: "#1E293B", weight: 1.2 });
+          ly.setStyle({ fillOpacity: (secIl||secEd) ? 0.12 : (m>0 ? 0.48 : 0.18), fillColor: isiRenk(m), color: "#1E293B", weight: 1.1 });
         } else {
-          ly.setStyle({ fillOpacity: edOn ? 0.18 : 0, fillColor: EDAS_RENK[ed] || "#ccc", color: "#9AA2AD", weight: 0.8 });
+          ly.setStyle({ fillOpacity: edOn ? 0.18 : 0, fillColor: EDAS_RENK[ed] || "#ccc", color: "#9AA2AD", weight: 0.9 });
         }
       });
     });
+    if(BOLGE){
+      BOLGE.eachLayer(function(gj){
+        gj.eachLayer && gj.eachLayer(function(ly){
+          var bed = (ly.feature && ly.feature.properties && ly.feature.properties.edas) || "";
+          var bSec = (secEd && secEd === bed);
+          ly.setStyle({
+            color: bSec ? "#D32027" : (EDAS_RENK[bed] || "#777"),
+            weight: bSec ? 3.8 : 2.2,
+            opacity: bSec ? 1 : 0.85,
+            fill: false
+          });
+          if(bSec && ly.bringToFront) try{ ly.bringToFront(); }catch(e){}
+        });
+      });
+    }
   }
 
   function lejantGuncelle(){
@@ -870,11 +893,12 @@
       Object.keys(ilMerkez).forEach(function(il){
         var o = ilMerkez[il];
         if(!o.n) return;
-        if(o.top <= 0 && !el("fil").value && !el("fed").value && veriKatmanMod !== "isi") return;
+        var secIl = el("fil").value;
+        if(o.top <= 0 && !secIl && !el("fed").value && veriKatmanMod !== "isi") return;
         var lat = o.latSum / o.n, lon = o.lonSum / o.n;
         var ic = L.divIcon({
           className: "",
-          html: '<div class="il-rozet'+(o.top>0?'':' dolu')+'">'+esc(il)+' <b>'+fmt(o.top)+'</b></div>',
+          html: '<div class="il-rozet'+(o.top>0?'':' dolu')+(secIl===il?' secili':'')+'">'+esc(il)+' <b>'+fmt(o.top)+'</b></div>',
           iconSize: [96, 20],
           iconAnchor: [48, -6]
         });
@@ -887,7 +911,21 @@
 
     var kapasiteli = rows.filter(function(r){return av(r)>0;}).length;
     el("hsay").textContent = rows.length+" konumlu bara · "+kapasiteli+" kapasiteli ("+donemler[aktif].kisa+") · Katman: "+veriKatmanMod.toUpperCase();
-    if(fitYap && pts.length){ try{ MAP.fitBounds(pts,{padding:[32,32],maxZoom:9}); }catch(e){} }
+    if(fitYap){
+      var sIl = el("fil").value, sEd = el("fed").value;
+      if((sIl || sEd) && IL_GEO && IL_GEO.features){
+        var sFeats = IL_GEO.features.filter(function(f){
+          var fIl = ((f.properties&&f.properties.il)||"").toLocaleUpperCase("tr");
+          if(sIl) return fIl === sIl;
+          return (EDAS_IL[sEd]||[]).indexOf(fIl) >= 0;
+        });
+        if(sFeats.length){
+          var bnd = geoProjKur(sFeats, 0, 0, 100, 100, 0).bounds;
+          try{ MAP.fitBounds(bnd, {padding:[28,28], maxZoom:9}); return; }catch(e){}
+        }
+      }
+      if(pts.length){ try{ MAP.fitBounds(pts,{padding:[32,32],maxZoom:9}); }catch(e){} }
+    }
   }
 
   function altlikDegistir(kod){
@@ -952,8 +990,26 @@
       var il=a[0], bo=a[1];
       if(!il||!bo){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; return; }
       IL_GEO = il;
+      BOLGE_GEO = bo;
       var adlar=bo.features.map(function(f){return f.properties.edas;}).sort(function(x,y){return x.localeCompare(y,"tr");});
       adlar.forEach(function(e,i){ EDAS_RENK[e]=PAL[i%PAL.length]; });
+      // Hızlı bölge butonlarına gerçek il/bölge sınır silüeti ekle
+      el("hizliBolge").querySelectorAll("button").forEach(function(btn){
+        var bIl = btn.getAttribute("data-il"), bEd = btn.getAttribute("data-ed");
+        var fList = [];
+        if(bIl){
+          fList = il.features.filter(function(f){ return ((f.properties&&f.properties.il)||"").toLocaleUpperCase("tr") === bIl; });
+        } else if(bEd){
+          fList = bo.features.filter(function(f){ return (f.properties&&f.properties.edas) === bEd; });
+        } else {
+          fList = bo.features;
+        }
+        if(fList.length && !btn.querySelector("svg")){
+          var pr = geoProjKur(fList, 0, 0, 20, 14, 1);
+          var dP = fList.map(function(f){ return pr.pathD(f.geometry); }).join(" ");
+          btn.insertAdjacentHTML("afterbegin", '<svg width="20" height="14" viewBox="0 0 20 14" style="vertical-align:-2px;margin-right:5px"><path d="'+dP+'" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>');
+        }
+      });
       L.geoJSON(il,{
         style:function(f){ return {color:"#9AA2AD",weight:.8,fillColor:EDAS_RENK[f.properties.edas]||"#ccc",fillOpacity:0}; },
         onEachFeature:function(f,ly){
@@ -974,6 +1030,8 @@
       }).addTo(BOLGE);
       el("sinirDurum").textContent="";
       dolguUygula();
+      veriSemaHaritaCiz();
+      medasCiz();
     }).catch(function(){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; });
   }
 

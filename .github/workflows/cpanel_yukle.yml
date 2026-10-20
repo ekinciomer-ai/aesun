@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['docs/**', 'cpanel/**', '.github/workflows/cpanel_yukle.yml']
+    paths: ['docs/**', 'cpanel/**', 'pi/**', '.github/workflows/cpanel_yukle.yml']
   schedule:
     - cron: '23 */3 * * *'   # saha uygulamasındaki değişiklikleri de taşımak için
 permissions:
@@ -50,7 +50,9 @@ jobs:
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
           CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/saha/=<title;/aecad/=AeCAD;/gundem/=<title;/kapasite/=<title;/api/canli.php=durum"
-        run: python3 cpanel/yukle.py dist_portal
+        run: |
+          python3 cpanel/yukle.py dist_portal
+          curl -fsSL "https://portal.aksarayenerji.net/api/canli.php?hedef_kod=${GITHUB_SHA:0:12}" >/dev/null || true
       # Yüklemeden sonra TÜM uçlar denenir (izleme/uclar.json). Biri bozulduysa son başarılı sürüm geri yüklenir ve iş kırmızı biter.
       - name: Duman testi
         id: duman

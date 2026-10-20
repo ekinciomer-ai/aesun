@@ -9,7 +9,7 @@ Kimlik: ~/.aesun/canli_anahtar (ilk çalıştırmada üretilir, yalnız Pi'de du
 Sunucuya yalnız anahtarın SHA-256 özeti, GitHub'daki epias-ptf/n8n/canli_anahtar.json ile bildirilir;
 sunucu gelen anahtarın özetini bununla karşılaştırır. Koda, sohbete ya da GitHub'a anahtarın kendisi yazılmaz.
 """
-import hashlib, json, os, secrets, sys, time, urllib.request
+import hashlib, json, os, secrets, subprocess, sys, time, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import madenci as M                     # noqa: E402
 from ortak import gh, log                # noqa: E402
 
+KOK = Path(__file__).resolve().parent.parent
 ADRES = os.environ.get("AE_CANLI_ADRES", "https://portal.aksarayenerji.net/api/canli.php")
 ARALIK, SURE = 10, 55
 ANAHTAR_DOSYA = Path.home() / ".aesun" / "canli_anahtar"
@@ -73,12 +74,23 @@ def oku(c):
     return no, [round(hiz, 1) if hiz is not None else None, tc]
 
 
+def yerel_kod():
+    try:
+        return subprocess.run(["git", "-C", str(KOK), "rev-parse", "--short=12", "HEAD"],
+                              capture_output=True, text=True, timeout=5).stdout.strip()
+    except Exception:
+        return ""
+
+
 def gonder(a, veri):
     r = urllib.request.Request(ADRES, data=json.dumps(veri, separators=(",", ":")).encode(),
                                headers={"Content-Type": "application/json", "X-AE-Canli": a, "User-Agent": "aesun-pi-canli"},
                                method="POST")
     with urllib.request.urlopen(r, timeout=8) as y:
-        return y.status
+        try:
+            return json.loads(y.read().decode("utf-8") or "{}")
+        except Exception:
+            return {}
 
 
 def main():
@@ -89,13 +101,27 @@ def main():
         log("canlı: cihaz listesi boş"); return
     M.filo_auth()
     hata = 0
+    kod = yerel_kod()
+    son_cek = 0.0
+    son_komut_t = 0
     with ThreadPoolExecutor(max_workers=12) as h:
         while time.time() - bas < SURE:
             t0 = time.time()
             c = dict(h.map(oku, liste))
             top = sum(v[0] or 0 for v in c.values() if v)
             try:
-                gonder(a, {"t": int(t0), "top": round(top, 1), "n": sum(1 for v in c.values() if v and (v[0] or 0) > 1), "c": c})
+                yan = gonder(a, {"t": int(t0), "top": round(top, 1), "n": sum(1 for v in c.values() if v and (v[0] or 0) > 1), "c": c, "kod": kod})
+                hedef_kod = str((yan or {}).get("kod") or "")
+                if hedef_kod and kod and not kod.startswith(hedef_kod[:7]) and time.time() - son_cek > 20:
+                    son_cek = time.time()
+                    r = subprocess.run(["git", "-C", str(KOK), "pull", "-q", "--ff-only"], capture_output=True, text=True, timeout=30)
+                    if r.returncode == 0:
+                        kod = yerel_kod()
+                        log("canlı: hızlı kod güncellemesi tamam ->", kod)
+                komut_t = int((yan or {}).get("komut_t") or 0)
+                if komut_t > son_komut_t and time.time() - komut_t < 120:
+                    son_komut_t = komut_t
+                    subprocess.Popen(["flock", "-n", "/tmp/aesun_cy.lock", "python3", str(KOK / "pi/cihaz_yonetimi.py"), "--tetik"])
             except Exception as e:
                 hata += 1
                 if hata <= 2:

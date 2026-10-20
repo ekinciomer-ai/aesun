@@ -16,6 +16,7 @@ if (strpos($dizin, '/_veri') !== false && !file_exists($dizin . '/.htaccess')) {
 $SON = $dizin . '/son.json';
 $SERI = $dizin . '/seri.json';
 $OZET = $dizin . '/ozet.json';
+$TETIK = $dizin . '/tetik.json';
 $OZET_URLLER = ['https://api.aksarayenerji.net/v1/acik/n8n/canli_anahtar.json', 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/canli_anahtar.json'];
 $SAKLA = 6 * 3600;
 
@@ -51,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $t = (int)$v['t'];
   if (abs($t - time()) > 600) $t = time();
   $son = ['t' => $t, 'top' => (float)$v['top'], 'n' => (int)($v['n'] ?? 0), 'c' => $v['c']];
+  if (!empty($v['kod']) && is_string($v['kod'])) $son['pi_kod'] = substr(preg_replace('/[^0-9a-f]/', '', strtolower($v['kod'])), 0, 12);
   file_put_contents($SON, json_encode($son), LOCK_EX);
   $f = fopen($SERI, 'c+');
   if ($f && flock($f, LOCK_EX)) {
@@ -60,12 +62,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ftruncate($f, 0); rewind($f); fwrite($f, json_encode($s)); fflush($f); flock($f, LOCK_UN);
   }
   if ($f) fclose($f);
-  cevap(200, ['durum' => 'ok']);
+  $tetik = @json_decode(@file_get_contents($TETIK), true) ?: [];
+  cevap(200, ['durum' => 'ok', 'kod' => $tetik['kod'] ?? null, 'komut_t' => $tetik['komut_t'] ?? null]);
+}
+
+// GET: hedef_kod veya komut_tetik bildirimi (CI / yönetim hızlı tetikleme)
+if (!empty($_GET['hedef_kod']) && preg_match('/^[0-9a-f]{7,40}$/i', $_GET['hedef_kod'])) {
+  $tetik = @json_decode(@file_get_contents($TETIK), true) ?: [];
+  $tetik['kod'] = substr(strtolower($_GET['hedef_kod']), 0, 12);
+  $tetik['t'] = time();
+  @file_put_contents($TETIK, json_encode($tetik), LOCK_EX);
+}
+if (!empty($_GET['komut_tetik'])) {
+  $tetik = @json_decode(@file_get_contents($TETIK), true) ?: [];
+  $tetik['komut_t'] = time();
+  @file_put_contents($TETIK, json_encode($tetik), LOCK_EX);
 }
 
 // GET: son okuma + seri (?s=epoch → yalnız sonrası)
 $son = @json_decode(@file_get_contents($SON), true);
 $s = @json_decode(@file_get_contents($SERI), true) ?: [];
+$tetik = @json_decode(@file_get_contents($TETIK), true) ?: [];
 $den = isset($_GET['s']) ? (int)$_GET['s'] : 0;
 if ($den) $s = array_values(array_filter($s, function ($p) use ($den) { return $p[0] > $den; }));
-cevap(200, ['durum' => $son ? 'ok' : 'bos', 'simdi' => time(), 'son' => $son, 'seri' => $s]);
+cevap(200, ['durum' => $son ? 'ok' : 'bos', 'simdi' => time(), 'hedef_kod' => $tetik['kod'] ?? null, 'son' => $son, 'seri' => $s]);

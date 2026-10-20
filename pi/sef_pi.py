@@ -83,6 +83,19 @@ def main():
     else:
         acik.append({"sorun": "Pi GitHub'a ulaşamıyor (kod güncellemesi)", "neden": e[-120:]})
 
+    # 2b) altminer mod_yaz v2 yaması (S19 XP+ .112 uyandırma düzeltmesi)
+    panel_py = Path.home() / "SAHA/antminer/antminer_panel.py"
+    yama_py = KOK / "pi/altminer_yama.py"
+    if panel_py.exists() and yama_py.exists():
+        try:
+            if "# --- aesun yama: mod_yaz v2 ---" not in panel_py.read_text():
+                yk, yo, ye = sh("python3", str(yama_py), t=30)
+                if not yk:
+                    sh("pkill", "-f", "antminer_panel.py", t=15)
+                kayit("yama", "antminer_panel.py mod_yaz v1 -> v2 yükseltmesi", yo or ye[-120:], not yk)
+        except Exception as e:
+            log("yama kontrol hatası:", e)
+
     # 3) disk
     du = shutil.disk_usage("/")
     if du.used / du.total > 0.90:

@@ -210,6 +210,7 @@ const VARSAYILAN = [
   { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha', renk: 'kirmizi' },
   { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/monitoring/', ikon: 'monitoring', renk: 'mavi' },
   { id: 'gundem', ad: 'Enerji Gündemi', aciklama: 'Lisanssız GES, EPDK, TEİAŞ haber ve mevzuat · derin analiz', url: 'https://ekinciomer-ai.github.io/aesun/gundem/', ikon: 'belge', renk: 'turuncu' },
+  { id: 'kapasite', ad: 'Kapasite Paneli', aciklama: 'TEİAŞ TM bazlı tahsis edilebilir lisanssız kapasite · il/EDAŞ çapraz', url: 'https://ekinciomer-ai.github.io/aesun/kapasite/', ikon: 'monitoring', renk: 'turkuaz' },
   { id: 'mining-demo', ad: 'Mining Demo', aciklama: 'Uzaktan madencilik kontrolü · tanıtım', url: '', ikon: 'maden', renk: 'lacivert', gizli: true },
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
   { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' },
@@ -359,7 +360,7 @@ async function apiOzet() {
 // Sonradan eklenen hazır uygulamalar: yönetici girişinde eksikse portala eklenir (bir kez)
 async function ekModulEkle() {
   await rehber(); let degisti = false;
-  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura' || x.id === 'cad' || x.id === 'gundem')) {
+  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura' || x.id === 'cad' || x.id === 'gundem' || x.id === 'kapasite')) {
     if (R.anahtarlar[m.id]) continue;
     R.anahtarlar[m.id] = b64(rnd(32));
     V.moduller[m.id] = await sifrele(await hamAnahtar(R.anahtarlar[m.id]), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: !m.gizli, yeni_sekme: true, sira: Object.keys(R.anahtarlar).length });

@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="same-origin">
+<title>Kapasite Paneli · Aksaray Enerji Portal</title>
+<link rel="icon" href="https://aksarayenerji.net/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://aksarayenerji.net/assets/site.css?v=3">
+<style>
+  .pbar{background:var(--darker);color:#fff}
+  .pbar .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;min-height:48px;font-size:14px}
+  .pbar a{color:#D9DDE3;text-decoration:none;font-weight:500}.pbar a:hover{color:#fff}
+  .pbar .sag{display:flex;gap:18px;align-items:center}
+  .band .meta2{margin-top:10px;font-size:14px;color:var(--mut2)}
+  .kap{padding-top:28px;padding-bottom:80px;display:flex;flex-direction:column;gap:20px}
+  /* KPI */
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi .t{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .kpi .t b{display:block;font-family:Archivo,sans-serif;font-weight:800;font-size:26px;color:var(--ink);line-height:1.1}
+  .kpi .t b small{font-size:14px;font-weight:600;color:var(--mut2)}
+  .kpi .t span{font-size:13px;color:var(--mut2);font-weight:500}
+  /* filtre çubuğu */
+  .flt{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .flt label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut2);display:flex;flex-direction:column;gap:5px}
+  .flt select,.flt input[type=search]{min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;color:var(--ink);background:#fff}
+  .flt input[type=search]{min-width:220px}
+  .flt .chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink2);font-weight:500;cursor:pointer;align-self:flex-end;min-height:42px}
+  .flt .chk input{width:18px;height:18px;accent-color:var(--red)}
+  .flt .sifirla{align-self:flex-end;min-height:42px;padding:0 14px;border:1px solid var(--line);background:var(--soft);color:var(--ink2);border-radius:10px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+  .flt .sifirla:hover{border-color:var(--red);color:var(--red-d)}
+  /* iki sütun grafik */
+  .graf{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.graf{grid-template-columns:1fr}}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .panel h2{margin:0 0 4px;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
+  .panel .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:14px}
+  .panel .ph small{font-size:13px;color:var(--mut2);font-weight:500}
+  .bars{display:flex;flex-direction:column;gap:9px}
+  .bar{display:grid;grid-template-columns:140px 1fr auto;align-items:center;gap:10px;font-size:13px}
+  .bar .ad{color:var(--ink2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+  .bar .ad:hover{color:var(--red-d);text-decoration:underline}
+  .bar .tr{background:var(--soft);border-radius:6px;height:20px;overflow:hidden}
+  .bar .fl{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--red),#F0574E);min-width:2px}
+  .bar.ed .fl{background:linear-gradient(90deg,#1A97B5,#4FB9D1)}
+  .bar .v{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);white-space:nowrap}
+  @media(max-width:760px){.bar{grid-template-columns:110px 1fr auto}}
+  /* tablo */
+  .tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .tbl-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tbl-top h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
+  .tbl-top .say{font-size:13px;color:var(--mut2)}
+  .tscroll{overflow-x:auto;max-height:620px;overflow-y:auto}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  thead th{position:sticky;top:0;background:#fff;text-align:left;padding:10px 14px;border-bottom:2px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut2);cursor:pointer;white-space:nowrap;user-select:none}
+  thead th:hover{color:var(--red-d)}
+  thead th.num{text-align:right}
+  thead th .ok{opacity:.4;font-size:11px}
+  thead th[aria-sort] .ok{opacity:1;color:var(--red)}
+  tbody td{padding:9px 14px;border-bottom:1px solid var(--soft);color:var(--ink2);vertical-align:top}
+  tbody td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+  tbody td.tm{font-weight:600;color:var(--ink)}
+  tbody tr:hover{background:var(--soft)}
+  tbody td .edb{font-size:12px;color:var(--mut2)}
+  .sifir td{opacity:.5}
+  .gdurum{padding:40px 0;text-align:center;color:var(--mut2)}
+  .note{font-size:13px;color:var(--mut2);line-height:1.6}
+  .note b{color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="pbar"><div class="wrap">
+  <a href="../">← Portal</a>
+  <span class="sag"><a href="../gundem/">Enerji Gündemi</a><a href="https://aksarayenerji.net/">Web sitesi</a></span>
+</div></div>
+<header class="on-light"><div class="wrap top">
+  <div class="brand">
+    <a class="emblem" href="../" aria-label="Portal" tabindex="-1"><svg width="40" height="40" viewBox="0 0 56 56" aria-hidden="true"><path d="M28 2a26 26 0 0 0 0 52z" fill="#D32027"/><path d="M28 2a26 26 0 0 1 0 52z" fill="#3C4047"/><path d="M31 9 L19 31 H27 L23 47 L37 23 H29 Z" fill="#FFFFFF"/></svg></a>
+    <a class="word" href="../"><b>AKSARAY</b>&nbsp;<b>ENERJİ</b></a>
+  </div>
+  <nav class="nav" aria-label="Menü"><a href="../">Portal ana</a><a href="./" aria-current="page">Kapasite</a></nav>
+</div></header>
+<main>
+<section class="band"><div class="wrap">
+  <div class="eyebrow">KAPASİTE PANELİ · TEİAŞ DAĞITIM SEVİYESİ</div>
+  <h1>TM bazlı tahsis edilebilir lisanssız kapasite</h1>
+  <p>Trafo merkezi bazında, dağıtım seviyesinden güneş ve rüzgâr kaynaklı lisanssız üretime tahsis edilebilecek güncel kapasite. İl ve EDAŞ kırılımında çapraz süzülür.</p>
+  <div class="meta2" id="meta2">Yükleniyor…</div>
+</div></section>
+<div class="wrap kap">
+  <div class="kpi" id="kpi"></div>
+
+  <div class="flt">
+    <label>İl
+      <select id="fil"><option value="">Tümü</option></select>
+    </label>
+    <label>EDAŞ
+      <select id="fed"><option value="">Tümü</option></select>
+    </label>
+    <label>Ara
+      <input type="search" id="fara" placeholder="TM adı, il, EDAŞ…" autocomplete="off">
+    </label>
+    <label class="chk"><input type="checkbox" id="fpoz"> Yalnız kapasitesi olan (&gt;0)</label>
+    <button type="button" class="sifirla" id="fsifir">Filtreyi sıfırla</button>
+  </div>
+
+  <div class="graf">
+    <div class="panel">
+      <div class="ph"><h2 id="g1b">İl sıralaması</h2><small id="g1n"></small></div>
+      <div class="bars" id="g1"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>EDAŞ sıralaması</h2><small id="g2n"></small></div>
+      <div class="bars" id="g2"></div>
+    </div>
+  </div>
+
+  <div class="tbl-wrap">
+    <div class="tbl-top">
+      <h2>Trafo merkezi detayı</h2>
+      <span class="say" id="tsay"></span>
+    </div>
+    <div class="tscroll">
+      <table id="tbl">
+        <thead><tr>
+          <th data-k="il">İl <span class="ok">↕</span></th>
+          <th data-k="tm">Trafo Merkezi <span class="ok">↕</span></th>
+          <th data-k="bara">Bara <span class="ok">↕</span></th>
+          <th data-k="edas">EDAŞ / OSB <span class="ok">↕</span></th>
+          <th data-k="mwe" class="num">MWe <span class="ok">↕</span></th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="gdurum" id="durum" hidden></div>
+  </div>
+
+  <p class="note" id="not"></p>
+</div>
+</main>
+<footer class="foot"><div class="wrap">
+  <div class="legal"><span>© 2012–2026 Aksaray Enerji · Portal</span><span>Kaynak: TEİAŞ dağıtım seviyesi kapasite yayını. Resmî başvuru için TEİAŞ / ilgili EDAŞ esastır.</span></div>
+</div></footer>
+<script>
+(function(){
+  var DATA = "kapasite.2026-03-02.json";
+  var tumu=[], gorunen=[];
+  var siraK="mwe", siraYon=-1;
+  var el=function(id){return document.getElementById(id);};
+  function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  function fmt(n){return (Math.round(n*100)/100).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function fmt0(n){return n.toLocaleString("tr-TR");}
+  function donemTR(d){var p=String(d).split("-");return p.length===3?(p[2]+"."+p[1]+"."+p[0]):d;}
+
+  function suz(){
+    var il=el("fil").value, ed=el("fed").value, q=el("fara").value.trim().toLocaleLowerCase("tr"), poz=el("fpoz").checked;
+    return tumu.filter(function(r){
+      if(il && r.il!==il) return false;
+      if(ed && r.edas!==ed) return false;
+      if(poz && !(r.mwe>0)) return false;
+      if(q){ var h=(r.il+" "+r.tm+" "+r.bara+" "+r.edas).toLocaleLowerCase("tr"); if(h.indexOf(q)<0) return false; }
+      return true;
+    });
+  }
+
+  function topla(rows, alan){
+    var m={}; rows.forEach(function(r){ var k=r[alan]||"—"; m[k]=(m[k]||0)+r.mwe; });
+    return Object.keys(m).map(function(k){return {ad:k,v:m[k]};}).sort(function(a,b){return b.v-a.v;});
+  }
+
+  function barlar(hedef, dizi, limit, tip, tiklaAlan){
+    var ust = dizi.slice(0,limit);
+    var max = ust.length?ust[0].v:1; if(max<=0)max=1;
+    var box=el(hedef);
+    box.innerHTML = ust.map(function(x){
+      var w=Math.max(2,Math.round(x.v/max*100));
+      return '<div class="bar '+(tip==="ed"?"ed":"")+'">'
+        +'<span class="ad" data-alan="'+tip+'" data-v="'+esc(x.ad)+'" title="'+esc(x.ad)+'">'+esc(x.ad)+'</span>'
+        +'<span class="tr"><span class="fl" style="width:'+w+'%"></span></span>'
+        +'<span class="v">'+fmt(x.v)+'</span></div>';
+    }).join("") || '<div class="note">Kayıt yok.</div>';
+    box.querySelectorAll(".ad").forEach(function(a){
+      a.addEventListener("click",function(){
+        var alan=a.getAttribute("data-alan"), v=a.getAttribute("data-v");
+        if(alan==="il"){ el("fil").value=(el("fil").value===v?"":v); }
+        else { el("fed").value=(el("fed").value===v?"":v); }
+        ciz();
+      });
+    });
+  }
+
+  function tablo(rows){
+    rows=rows.slice().sort(function(a,b){
+      var x=a[siraK], y=b[siraK];
+      if(siraK==="mwe"){ return (x-y)*siraYon; }
+      return String(x).localeCompare(String(y),"tr")*siraYon;
+    });
+    var tb=el("tbody");
+    var MAX=800;
+    tb.innerHTML = rows.slice(0,MAX).map(function(r){
+      return '<tr'+(r.mwe>0?"":' class="sifir"')+'>'
+        +'<td>'+esc(r.il)+'</td>'
+        +'<td class="tm">'+esc(r.tm)+'</td>'
+        +'<td>'+esc(r.bara||"")+'</td>'
+        +'<td>'+esc(r.edas||"")+'</td>'
+        +'<td class="num">'+fmt(r.mwe)+'</td></tr>';
+    }).join("");
+    el("durum").hidden = rows.length>0;
+    if(!rows.length) el("durum").textContent="Filtreyle eşleşen trafo merkezi yok.";
+    var not = rows.length>MAX ? (" · ilk "+MAX+" gösteriliyor") : "";
+    el("tsay").textContent = fmt0(rows.length)+" TM · toplam "+fmt(rows.reduce(function(s,r){return s+r.mwe;},0))+" MWe"+not;
+    // başlık ok
+    el("tbl").querySelectorAll("thead th").forEach(function(th){
+      th.removeAttribute("aria-sort");
+      var sp=th.querySelector(".ok"); sp.textContent="↕";
+      if(th.getAttribute("data-k")===siraK){ th.setAttribute("aria-sort",siraYon>0?"ascending":"descending"); sp.textContent=siraYon>0?"↑":"↓"; }
+    });
+  }
+
+  function ciz(){
+    gorunen=suz();
+    var il=el("fil").value;
+    // grafikler filtreye göre
+    if(il){ el("g1b").textContent="İl içi TM sıralaması"; barlar("g1", topla(gorunen,"tm"), 12, "tm"); el("g1n").textContent=il; }
+    else { el("g1b").textContent="İl sıralaması"; barlar("g1", topla(gorunen,"il"), 12, "il"); el("g1n").textContent="MWe"; }
+    barlar("g2", topla(gorunen,"edas"), 12, "ed");
+    el("g2n").textContent="MWe";
+    tablo(gorunen);
+  }
+
+  function kpiCiz(rows, donem){
+    var tot=rows.reduce(function(s,r){return s+r.mwe;},0);
+    var ils={}, eds={}, poz=0;
+    rows.forEach(function(r){ ils[r.il]=1; if(r.edas)eds[r.edas]=1; if(r.mwe>0)poz++; });
+    el("kpi").innerHTML =
+       tile(fmt(tot),"MWe","Tahsis edilebilir toplam")
+      +tile(fmt0(rows.length),"","Trafo merkezi")
+      +tile(fmt0(poz),"","Kapasitesi olan TM")
+      +tile(fmt0(Object.keys(ils).length),"","İl")
+      +tile(fmt0(Object.keys(eds).length),"","EDAŞ / OSB");
+  }
+  function tile(b,sm,s){ return '<div class="t"><b>'+b+(sm?' <small>'+sm+'</small>':'')+'</b><span>'+s+'</span></div>'; }
+
+  el("fil").addEventListener("change",ciz);
+  el("fed").addEventListener("change",ciz);
+  el("fara").addEventListener("input",ciz);
+  el("fpoz").addEventListener("change",ciz);
+  el("fsifir").addEventListener("click",function(){ el("fil").value="";el("fed").value="";el("fara").value="";el("fpoz").checked=false; ciz(); });
+  el("tbl").querySelectorAll("thead th").forEach(function(th){
+    th.addEventListener("click",function(){
+      var k=th.getAttribute("data-k");
+      if(siraK===k){ siraYon=-siraYon; } else { siraK=k; siraYon=(k==="mwe"?-1:1); }
+      tablo(gorunen);
+    });
+  });
+
+  fetch(DATA,{cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(d){
+      var A=d.alan||["il","tm","bara","edas","mwe"];
+      tumu=(d.satir||[]).map(function(a){ var o={}; A.forEach(function(k,i){o[k]=a[i];}); o.mwe=+o.mwe||0; return o; });
+      // il & edas seçenekleri
+      var ils=Array.from(new Set(tumu.map(function(r){return r.il;}))).sort(function(a,b){return a.localeCompare(b,"tr");});
+      var eds=Array.from(new Set(tumu.map(function(r){return r.edas;}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"tr");});
+      el("fil").insertAdjacentHTML("beforeend", ils.map(function(v){return '<option>'+esc(v)+'</option>';}).join(""));
+      el("fed").insertAdjacentHTML("beforeend", eds.map(function(v){return '<option>'+esc(v)+'</option>';}).join(""));
+      el("meta2").textContent = (d.baslik||"TEİAŞ kapasite") + " · " + donemTR(d.donem) + " · kaynak " + (d.kaynak||"TEİAŞ");
+      el("not").innerHTML = "<b>Not:</b> Veriler "+donemTR(d.donem)+" tarihli TEİAŞ dağıtım seviyesi kapasite yayınından alınmıştır; tek dönemin anlık görüntüsüdür. “MWe” o trafo merkezinde o tarih için tahsis edilebilecek güncel kapasitedir; 0,00 başvuruya kapalı demektir. Dönemler arası erozyon karşılaştırması için sonraki yayınlar (16.07, 01.10) eklenecektir.";
+      kpiCiz(tumu, d.donem);
+      ciz();
+    })
+    .catch(function(e){
+      el("meta2").textContent="Kapasite verisi yüklenemedi.";
+      el("durum").hidden=false; el("durum").textContent="Veri şu an yüklenemedi. Lütfen birazdan tekrar deneyin.";
+    });
+})();
+</script>
+</body>
+</html>

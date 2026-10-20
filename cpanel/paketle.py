@@ -52,6 +52,8 @@ for app in ("monitoring", "demo"):
     yaz(os.path.join(P, app, "index.html"), s)
 # Enerji Gündemi (portal içi derin sürüm; token'lı /portal ucunu çeker)
 kopya(os.path.join(DOCS, "gundem"), os.path.join(P, "gundem"))
+# Kapasite Paneli (portal içi; TEİAŞ TM kapasite JSON'u yerel)
+kopya(os.path.join(DOCS, "kapasite"), os.path.join(P, "kapasite"))
 kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
 # CAD (portal oturumuyla açılır; DWG okuyucu wasm + pdf.js yerel)
 kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))

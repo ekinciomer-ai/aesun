@@ -18,7 +18,9 @@ TOKEN = os.environ.get("AESUN_GH_OKU", "")          # depo gizli olunca: yalnız
 ARALIK = int(os.environ.get("AESUN_ESITLE_SN", "30"))
 PARA = re.compile(r"(^|/)(fatura/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat|pay_|gelir)")
 ACIK = {"portal/veri.json", "n8n/canli_anahtar.json"}   # zaten şifreli/özet ya da herkese açık içerik
+ACIK_DESEN = re.compile(r"^n8n/wp/plan_\d{4}-\d{2}-\d{2}\.png$")
 IZINLI = re.compile(r"^[A-Za-z0-9_\-./]+\.(json|csv)$")
+GIT_KILIT = threading.Lock()
 DURUM = {"sha": None, "son": 0.0, "hata": None, "ozet": {}, "basla": time.time(), "istek": 0, "red": 0}
 
 def _git(*a, cwd=None):
@@ -29,20 +31,24 @@ def _git(*a, cwd=None):
         raise RuntimeError((r.stderr or r.stdout).replace(TOKEN, "***")[-300:] if TOKEN else (r.stderr or r.stdout)[-300:])
     return r.stdout.strip()
 
-def esitle():
-    if not (VERI / ".git").exists():
-        VERI.parent.mkdir(parents=True, exist_ok=True)
-        _git("clone", "--depth", "1", "--single-branch", "--branch", "main", "{URL}", str(VERI))
-    else:
-        _git("fetch", "--depth", "1", "{URL}", "main", cwd=VERI)
-        _git("reset", "--hard", "FETCH_HEAD", cwd=VERI)
-    _git("reflog", "expire", "--expire=now", "--all", cwd=VERI)
-    DURUM["sha"] = _git("rev-parse", "--short", "HEAD", cwd=VERI)
+def _ozet_yukle():
     try:
         DURUM["ozet"] = {k: str(v).lower() for k, v in (json.loads((VERI / "portal/veri.json").read_text()).get("api_ozet") or {}).items() if isinstance(v, str) and len(v) == 64}
     except Exception as e:
         DURUM["hata"] = "veri.json: " + str(e)[:100]
-    DURUM["son"] = time.time()
+
+def esitle():
+    with GIT_KILIT:
+        if not (VERI / ".git").exists():
+            VERI.parent.mkdir(parents=True, exist_ok=True)
+            _git("clone", "--depth", "1", "--single-branch", "--branch", "main", "{URL}", str(VERI))
+        else:
+            _git("fetch", "--depth", "1", "{URL}", "main", cwd=VERI)
+            _git("reset", "--hard", "FETCH_HEAD", cwd=VERI)
+        _git("reflog", "expire", "--expire=now", "--all", cwd=VERI)
+        DURUM["sha"] = _git("rev-parse", "--short", "HEAD", cwd=VERI)
+        _ozet_yukle()
+        DURUM["son"] = time.time()
 
 def dongu():
     sayac = 0
@@ -51,23 +57,64 @@ def dongu():
             esitle(); DURUM["hata"] = None
             sayac += 1
             if sayac % 120 == 0:
-                subprocess.run(["git", "gc", "--prune=now", "-q"], cwd=VERI, timeout=300)
+                with GIT_KILIT:
+                    subprocess.run(["git", "gc", "--prune=now", "-q"], cwd=VERI, timeout=300)
         except Exception as e:
             DURUM["hata"] = str(e)[:300]
         time.sleep(ARALIK)
 
 app = FastAPI(title="aesun-api", docs_url=None, redoc_url=None, openapi_url=None)
-app.add_middleware(CORSMiddleware, allow_origins=["https://portal.aksarayenerji.net", "https://aksarayenerji.net"],
-                   allow_methods=["GET"], allow_headers=["X-AE-Anahtar"], max_age=3600)
+app.add_middleware(CORSMiddleware, allow_origins=["https://portal.aksarayenerji.net", "https://aksarayenerji.net", "https://ekinciomer-ai.github.io"],
+                   allow_methods=["GET", "POST"], allow_headers=["X-AE-Anahtar", "Content-Type"], max_age=3600)
 
 @app.get("/v1/acik/{yol:path}")
 def acik(yol: str, request: Request):
-    if yol not in ACIK:
+    if yol not in ACIK and not ACIK_DESEN.match(yol):
         raise HTTPException(404, "yok")
-    p = VERI / yol
-    if not p.is_file():
+    p = (VERI / yol).resolve()
+    if not str(p).startswith(str(VERI.resolve()) + "/") or not p.is_file():
         raise HTTPException(404, "yok")
-    return Response(p.read_bytes(), media_type="application/json", headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*", "X-Veri-Sha": DURUM["sha"] or ""})
+    mt = "image/png" if yol.endswith(".png") else "application/json"
+    return Response(p.read_bytes(), media_type=mt, headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*", "X-Veri-Sha": DURUM["sha"] or ""})
+
+@app.post("/v1/portal/veri")
+async def portal_veri_yaz(request: Request, mesaj: str = "güncelleme"):
+    DURUM["istek"] += 1
+    r = roller(request)
+    if "yonetici" not in r:
+        DURUM["red"] += 1
+        raise HTTPException(401 if not r else 403, "yönetici yetkisi gerekli")
+    g = await request.body()
+    if len(g) > 2 * 1024 * 1024:
+        raise HTTPException(413, "çok büyük")
+    try:
+        v = json.loads(g)
+        if not isinstance(v, dict) or not all(k in v for k in ("kullanicilar", "moduller", "rehber", "kul_tuz")):
+            raise ValueError("eksik alan")
+    except Exception:
+        raise HTTPException(400, "geçersiz portal verisi")
+    icerik = json.dumps(v, ensure_ascii=False, indent=1).encode("utf-8")
+    temiz_mesaj = re.sub(r"[\r\n]+", " ", str(mesaj or "güncelleme")).strip()[:80] or "güncelleme"
+    try:
+        with GIT_KILIT:
+            if (VERI / ".git").exists():
+                _git("fetch", "--depth", "1", "{URL}", "main", cwd=VERI)
+                _git("reset", "--hard", "FETCH_HEAD", cwd=VERI)
+            hedef = VERI / "portal/veri.json"
+            hedef.parent.mkdir(parents=True, exist_ok=True)
+            hedef.write_bytes(icerik)
+            _ozet_yukle()
+            _git("config", "user.name", "aesun-bot", cwd=VERI)
+            _git("config", "user.email", "aesun-bot@users.noreply.github.com", cwd=VERI)
+            _git("add", "portal/veri.json", cwd=VERI)
+            if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=VERI).returncode != 0:
+                _git("commit", "-m", "portal: " + temiz_mesaj, cwd=VERI)
+                _git("push", "{URL}", "HEAD:main", cwd=VERI)
+                DURUM["sha"] = _git("rev-parse", "--short", "HEAD", cwd=VERI)
+            DURUM["son"] = time.time()
+    except Exception as e:
+        raise HTTPException(502, "git yazılamadı: " + str(e)[:180])
+    return {"tamam": True, "sha": DURUM["sha"]}
 
 @app.on_event("startup")
 def basla():

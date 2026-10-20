@@ -160,10 +160,23 @@ async function vitrinGuncelle() {
 }
 async function veriKaydet(mesaj) {
   await vitrinGuncelle();
-  const t = ghAnahtar(); if (!t) throw new Error('Kaydetmek için GitHub anahtarı gerekli (Yönetim → Ayar).');
+  V.guncellendi = new Date().toISOString();
+  if (S && S.ka) {
+    try {
+      const k = await apiBelirtec('yonetici', S.ka);
+      const r0 = await fetch('https://api.aksarayenerji.net/v1/portal/veri?mesaj=' + encodeURIComponent(mesaj || 'güncelleme'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-AE-Anahtar': k },
+        body: JSON.stringify(V, null, 1)
+      });
+      if (r0.ok) { const j0 = await r0.json().catch(() => ({})); if (j0.sha) VSHA = j0.sha; return; }
+      const hj = await r0.json().catch(() => ({}));
+      if (!ghAnahtar()) throw new Error('Merkez sunucu (' + r0.status + '): ' + (hj.detail || hj.hata || 'kaydedilemedi'));
+    } catch (e) { if (!ghAnahtar()) throw e; }
+  }
+  const t = ghAnahtar(); if (!t) throw new Error('Kaydetmek için yönetici oturumu veya GitHub anahtarı gerekli (Yönetim → Ayar).');
   const hd = { Authorization: 'Bearer ' + t, Accept: 'application/vnd.github+json' };
   if (!VSHA) { const r0 = await fetch(API + '?t=' + Date.now(), { headers: hd, cache: 'no-store' }); if (r0.ok) VSHA = (await r0.json()).sha; }
-  V.guncellendi = new Date().toISOString();
   const icerik = b64(te.encode(JSON.stringify(V, null, 1)));
   const r = await fetch(API, { method: 'PUT', headers: hd, body: JSON.stringify({ message: 'portal: ' + mesaj, content: icerik, ...(VSHA ? { sha: VSHA } : {}) }) });
   if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error('GitHub ' + r.status + ': ' + (j.message || '') + (r.status === 409 ? ' — başka bir yerden değişmiş; sayfayı yenileyin.' : r.status === 401 || r.status === 403 ? ' — anahtar geçersiz ya da yetkisi yok (epias-ptf, Contents: Read and write).' : '')); }
@@ -307,9 +320,9 @@ async function giris(kul, sifre) {
   }
   if (!ok) { await new Promise(r => setTimeout(r, 600)); throw new Error(e ? 'Şifre hatalı.' : 'Bu kullanıcı adı bulunamadı.'); }
   R = null; oturumKaydet(); await modOnbellek(); ust();
-  if (ESKI && S.ka && ghAnahtar()) { try { await rehber(); const x = R.kullanicilar[ESKI.kul]; if (x) { await kullaniciYaz(ESKI.kul, ESKI.sifre, yukHazirla(ESKI.kul, x)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); await veriKaydet('kayıt biçimi güncellendi'); } } catch (x) {} }
+  if (ESKI && S.ka) { try { await rehber(); const x = R.kullanicilar[ESKI.kul]; if (x) { await kullaniciYaz(ESKI.kul, ESKI.sifre, yukHazirla(ESKI.kul, x)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); await veriKaydet('kayıt biçimi güncellendi'); } } catch (x) {} }
   ESKI = null;
-  if (S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (x) {} }
+  if (S.ka) { try { await ekModulEkle(); } catch (x) {} }
   if (S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (x) { console.warn('parasal anahtar', x); } }
   git(SAYFA);
 }
@@ -330,7 +343,7 @@ async function oturumYenile() {
 const parasalMi = x => !!(x.yonetici || ((x.izinler || {}).monitoring || []).includes('parasal'));
 async function parasalAnahtar() {
   await rehber();
-  if (!R.parasal && ghAnahtar()) {
+  if (!R.parasal && S.ka) {
     const kp = await crypto.subtle.generateKey({ name: 'RSA-OAEP', modulusLength: 3072, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, true, ['encrypt', 'decrypt']);
     const ozel = await crypto.subtle.exportKey('jwk', kp.privateKey), acik = await crypto.subtle.exportKey('jwk', kp.publicKey);
     const ol = new Date().toISOString();
@@ -354,7 +367,7 @@ async function apiOzet() {
   if (R.anahtarlar.saha) oz.saha = await sha(await apiBelirtec('saha', R.anahtarlar.saha));
   if (R.anahtarlar.fatura) oz.fatura = await sha(await apiBelirtec('fatura', R.anahtarlar.fatura));
   if (R.parasal && R.parasal.ozel && R.parasal.ozel.d) oz.parasal = await sha(await apiBelirtec('parasal', R.parasal.ozel.d));
-  if (JSON.stringify(V.api_ozet || {}) === JSON.stringify(oz) || !ghAnahtar()) return;
+  if (JSON.stringify(V.api_ozet || {}) === JSON.stringify(oz) || !S.ka) return;
   V.api_ozet = oz; await veriKaydet('merkez API yetki özetleri');
 }
 // Sonradan eklenen hazır uygulamalar: yönetici girişinde eksikse portala eklenir (bir kez)
@@ -563,8 +576,7 @@ async function yonetimCiz() {
     }
     h += '</div>';
   } else {
-    h += '<section class="kart blok" style="max-width:640px"><h2>GitHub anahtarı</h2><p class="ince" style="margin-top:0">Değişiklikleri kaydetmek için gerekir; yalnız bu tarayıcıda saklanır (epias-ptf, Contents: Read and write).</p><div class="satir"><input id="tok" type="password" autocomplete="off" value="' + esc(ghAnahtar()) + '"><div style="flex:0 0 auto"><button class="btn kc" onclick="ghKaydet($(\'tok\').value.trim());MESAJ=[1,\'Anahtar kaydedildi.\'];yonetimCiz()">Kaydet</button></div></div>'
-      + '<p class="ince">Anahtar almak için: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></p></section>';
+    h += '<section class="kart blok" style="max-width:640px"><h2>Kayıt ve Yedek Anahtar</h2><p class="ok" style="margin-top:0">Yönetici oturumunuz açıkken kullanıcı ve uygulama değişiklikleri doğrudan merkez sunucu (<code>api.aksarayenerji.net</code>) üzerinden kaydedilir; tarayıcıya GitHub anahtarı girmeniz gerekmez.</p><p class="ince">Yalnız merkez sunucuya ulaşılamadığı durumlarda yedek olarak kullanılacak GitHub anahtarı (isteğe bağlı, yalnız bu tarayıcıda saklanır):</p><div class="satir"><input id="tok" type="password" autocomplete="off" value="' + esc(ghAnahtar()) + '" placeholder="İsteğe bağlı yedek GitHub anahtarı"><div style="flex:0 0 auto"><button class="btn kc" onclick="ghKaydet($(\'tok\').value.trim());MESAJ=[1,\'Yedek anahtar güncellendi.\'];yonetimCiz()">Kaydet</button></div></div></section>';
   }
   $('ana').innerHTML = h;
 }
@@ -680,7 +692,7 @@ function modSil(id) {
   if (!V) return kurulumCiz();
   if (S) await oturumYenile();
   if (S) { try { await modOnbellek(); } catch (e) { S = null; ls.sil('ae_portal'); ust(); } }
-  if (S && S.ka && ghAnahtar()) { try { await ekModulEkle(); } catch (e) {} }
+  if (S && S.ka) { try { await ekModulEkle(); } catch (e) {} }
   if (S && S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (e) { console.warn('parasal anahtar', e); } }
   if (HEDEF) {
     if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { const u = await ssoUrl(HEDEF); if (u) { location.replace(u); return; } git('ana'); return ssoYokDlg(HEDEF); }

@@ -116,7 +116,7 @@ const YONETICI = !!(PORTAL && PORTAL.ka);
 const IZIN = YONETICI ? null : new Set((((PORTAL || {}).izinler || {}).monitoring) || []);
 const yetkili = k => k === 'bildirim' ? YONETICI : k === 'kompanzasyon' ? yetkili('inverter') : k === 'fatura' ? yetkili('parasal') : (!IZIN || IZIN.has(k));
 const PARA = yetkili('parasal');
-const PARA_DOSYA = /(^|\/)(fatura\/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat)/;
+const PARA_DOSYA = /(^|\/)(fatura\/|maden_maliyet|maden_odeme|arsiv_f2pool_gelir|arsiv_btc_fiyat)/;
 (function () {
   const nav = document.querySelector('.nav'); if (!nav) return;
 
@@ -1011,6 +1011,7 @@ async function madenYukle(zorla) {
   const [g1, b1] = await Promise.all([al('arsiv_f2pool_gelir.json', zorla).catch(() => MADEN.gelir || {}), al('arsiv_btc_fiyat.json', zorla).then(d => d.gun || {}).catch(() => MADEN.btc || {})]);
   MADEN.gelir = g1; MADEN.btc = b1;
   await al('n8n/maden_maliyet.json', zorla).then(d => { MADEN.mal = d.gun || {}; MADEN.malPay = d.maliyet_payi || null; }).catch(() => { MADEN.mal = MADEN.mal || {}; });
+  await al('n8n/maden_odeme.json', zorla).then(d => { MADEN.odeme = d.odemeler || []; }).catch(() => { MADEN.odeme = MADEN.odeme || []; });
   const H = {}, HE = {};   // HE: o saatte F2Pool kaydı yarım ('u'/'k') olan cihaz sayısı
   for (const d of Object.values(MADEN.aylar)) for (const [k, v] of Object.entries(d)) {
     const t = Date.parse(k.replace(' ', 'T').slice(0, 13) + ':00:00Z'); if (isNaN(t)) continue;
@@ -1068,6 +1069,74 @@ function madenGunAc(g, kaydir) {
 let DAGV = null;
 // maliyet payı: 14.09.2026–13.09.2027 arası 16 cihaza düşenin yarısı 13'e (8/29 · 21/29); sonra 16/29 · 13/29
 const malOran = g => { const p = MADEN.malPay, a = 16 / 29; if (p && g && g >= p.bas && g <= p.bit) { const x = a * (p.oran16 ?? 1); return [x, 1 - x]; } return [a, 1 - a]; };
+// ===== 16 cihaz ödemeleri (n8n/maden_odeme.json): yapılan ödeme 16 cihazın hak edişinden düşülür. Kaydetmek için GitHub anahtarı (yalnız bu tarayıcıda) =====
+const ODM = { form: { tarih: '', birim: 'TL', tutar: '', aciklama: '' }, durum: '' };
+const odmFiyat = g => { const b = (MADEN.btc || {})[g]; if (b && b.try) return b.try; const k = Object.keys(MADEN.btc || {}).filter(x => x <= g).sort().pop(); return k ? MADEN.btc[k].try : null; };
+const odmTl = o => o.birim === 'BTC' ? (odmFiyat(o.tarih) ? o.tutar * odmFiyat(o.tarih) : null) : o.tutar;
+const odmBtc = o => o.birim === 'BTC' ? o.tutar : (odmFiyat(o.tarih) ? o.tutar / odmFiyat(o.tarih) : null);
+function odemeBolum(topl) {
+  if (!PARA) return '';
+  const L = (MADEN.odeme || []).slice().sort((a, b) => a.tarih < b.tarih ? 1 : -1);
+  const oTl = L.reduce((t, o) => t + (odmTl(o) || 0), 0), oBtc = L.reduce((t, o) => t + (odmBtc(o) || 0), 0);
+  const hakNet = topl.mG ? topl.aTl - topl.ma : null, hakBtc = topl.a;
+  const kalanTl = hakNet != null ? hakNet - oTl : null, kalanBtc = hakBtc - oBtc;
+  const kart = (ad, ana, alt, renk) => '<div style="background:#F5F7FA;border-radius:8px;padding:10px 12px"><div class="k" style="font-size:12px">' + ad + '</div><div class="num" style="font-size:18px;font-weight:700' + (renk ? ';color:' + renk : '') + '">' + ana + '</div><div class="k" style="font-size:12px">' + alt + '</div></div>';
+  const inp = 'padding:7px 9px;border:1px solid #D5DCE5;border-radius:6px;font:inherit', f = ODM.form;
+  const bugun = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+  let h = '<div style="border:1px solid #D5DCE5;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px">'
+    + '<div class="bas" style="margin:0"><h3 style="margin:0;font-size:15px">16 cihaz ödemeleri</h3><span class="k">Yapılan ödeme 16 cihazın hak edişinden düşülür</span></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px">'
+    + kart('Hak ediş (net, maliyet sonrası)', hakNet != null ? say(hakNet) + ' ₺' : '—', btcY(hakBtc) + ' BTC brüt pay')
+    + kart('Ödenen', say(oTl) + ' ₺', btcY(oBtc) + ' BTC · ' + L.length + ' ödeme', '#2a78d6')
+    + kart('Kalan (16 cihaza borç)', kalanTl != null ? say(kalanTl) + ' ₺' : '—', btcY(kalanBtc) + ' BTC (brüt paydan)', kalanTl != null && kalanTl < 0 ? '#B42318' : '#1E7A3C')
+    + '</div>';
+  if (L.length) h += '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">Tarih</th><th>Tutar</th><th>₺ karşılığı</th><th>BTC karşılığı</th><th class="sol">Açıklama</th><th></th></tr></thead><tbody>'
+    + L.map(o => '<tr><td class="sol">' + tarihK(o.tarih) + ' ' + o.tarih.slice(0, 4) + '</td><td>' + (o.birim === 'BTC' ? btcY(o.tutar) + ' BTC' : say(o.tutar) + ' ₺') + '</td><td>' + (odmTl(o) != null ? say(odmTl(o)) : '—') + '</td><td>' + (odmBtc(o) != null ? btcY(odmBtc(o)) : '—') + '</td><td class="sol">' + esc(o.aciklama || '') + '</td><td><button class="btn" type="button" style="min-height:28px;padding:2px 8px" onclick="odemeSil(\'' + o.id + '\')">Sil</button></td></tr>').join('')
+    + '</tbody></table></div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">'
+    + '<label class="k" style="display:flex;flex-direction:column;gap:4px">Tarih<input type="date" max="' + bugun + '" value="' + esc(f.tarih || bugun) + '" onchange="ODM.form.tarih=this.value" style="' + inp + '"></label>'
+    + '<label class="k" style="display:flex;flex-direction:column;gap:4px">Tutar<input type="text" inputmode="decimal" placeholder="0" value="' + esc(f.tutar) + '" onchange="ODM.form.tutar=this.value" style="' + inp + ';width:130px"></label>'
+    + '<label class="k" style="display:flex;flex-direction:column;gap:4px">Birim<select onchange="ODM.form.birim=this.value" style="' + inp + '"><option value="TL"' + (f.birim === 'TL' ? ' selected' : '') + '>₺</option><option value="BTC"' + (f.birim === 'BTC' ? ' selected' : '') + '>BTC</option></select></label>'
+    + '<label class="k" style="display:flex;flex-direction:column;gap:4px;flex:1 1 180px">Açıklama<input type="text" maxlength="120" placeholder="ör. Eylül payı, havale" value="' + esc(f.aciklama) + '" onchange="ODM.form.aciklama=this.value" style="' + inp + '"></label>'
+    + '<button class="btn" type="button" style="background:#10233F;color:#fff;border-color:#10233F" onclick="odemeEkle()">Ödemeyi kaydet</button>'
+    + '<label class="k" style="display:flex;align-items:center;gap:6px">GitHub anahtarı <input type="password" autocomplete="off" placeholder="github_pat_…" value="' + (ghAnahtar() ? '••••••••' : '') + '" onchange="if(this.value&&!/^•+$/.test(this.value)){ghAnahtarKaydet(this.value.trim());this.value=\'••••••••\'}" style="' + inp + ';width:140px"></label></div>'
+    + '<div id="odmDurum" class="k">' + ODM.durum + '</div>'
+    + '<div class="k">₺ ödeme, BTC karşılığına o günün BTC kapanış fiyatıyla çevrilir (BTC ödeme de tersine). Kalan ₺ net hak edişten (gelir − maliyet), kalan BTC brüt BTC payından hesaplanır.</div></div>';
+  return h;
+}
+async function odemeYaz(fn, mesaj) {
+  const d = document.getElementById('odmDurum'), t = ghAnahtar();
+  if (!t) { d.innerHTML = '<span style="color:#B42318">Önce GitHub anahtarını girin.</span>'; return false; }
+  const url = 'https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/n8n/maden_odeme.json', hd = { Authorization: 'Bearer ' + t, Accept: 'application/vnd.github+json' };
+  d.innerHTML = '<span class="k">Kaydediliyor…</span>';
+  try {
+    const g = await fetch(url + '?t=' + Date.now(), { headers: hd, cache: 'no-store' });
+    if (!g.ok && g.status !== 404) throw new Error('okuma HTTP ' + g.status + (g.status === 401 || g.status === 403 ? ' (anahtar geçersiz ya da yetkisi yok)' : ''));
+    const j = g.ok ? await g.json() : null;
+    const eski = j ? JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, ''))))) : { aciklama: '16 cihaz ödemeleri (panel)', odemeler: [] };
+    eski.odemeler = fn(eski.odemeler || []); eski.guncellendi = new Date().toISOString();
+    const icerik = btoa(unescape(encodeURIComponent(JSON.stringify(eski, null, 1) + '\n')));
+    const r = await fetch(url, { method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, hd), body: JSON.stringify(Object.assign({ message: mesaj, content: icerik }, j ? { sha: j.sha } : {})) });
+    if (!r.ok) throw new Error('yazma HTTP ' + r.status + (r.status === 409 ? ' (dosya bu arada değişti, tekrar deneyin)' : ''));
+    MADEN.odeme = eski.odemeler; if (AL['n8n/maden_odeme.json']) AL['n8n/maden_odeme.json'].txt = JSON.stringify(eski);
+    return true;
+  } catch (e) { d.innerHTML = '<span style="color:#B42318">Kaydedilemedi: ' + esc(e.message || e) + '</span>'; return false; }
+}
+async function odemeEkle() {
+  const f = ODM.form, d = document.getElementById('odmDurum');
+  const tarih = f.tarih || new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+  const tutar = Number(String(f.tutar).replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
+  if (!(tutar > 0)) { d.innerHTML = '<span style="color:#B42318">Geçerli bir tutar girin.</span>'; return; }
+  const ad = f.birim === 'BTC' ? btcY(tutar) + ' BTC' : say(tutar) + ' ₺';
+  if (!window.confirm('16 cihaz ödemesi: ' + ad + ' · ' + tarih + (f.aciklama ? ' · ' + f.aciklama : '') + '\nKaydedilsin mi?')) return;
+  const o = { id: Date.now().toString(36), tarih, birim: f.birim, tutar, aciklama: (f.aciklama || '').trim(), kayit: new Date().toISOString(), kim: (PORTAL && (PORTAL.ad || PORTAL.kul)) || '' };
+  if (await odemeYaz(L => L.concat([o]), 'Ödeme 16 cihaz: ' + ad + ' (' + tarih + ')')) { ODM.form = { tarih: '', birim: f.birim, tutar: '', aciklama: '' }; ODM.durum = '<span style="color:#1E7A3C">Kaydedildi: ' + esc(ad) + '</span>'; cizMaden(); }
+}
+async function odemeSil(id) {
+  const o = (MADEN.odeme || []).find(x => x.id === id); if (!o) return;
+  if (!window.confirm('Bu ödeme silinsin mi?\n' + o.tarih + ' · ' + (o.birim === 'BTC' ? o.tutar + ' BTC' : say(o.tutar) + ' ₺'))) return;
+  if (await odemeYaz(L => L.filter(x => x.id !== id), 'Ödeme silindi: ' + o.tarih)) { ODM.durum = '<span style="color:#1E7A3C">Silindi.</span>'; cizMaden(); }
+}
 const dagPay = (b, t, m) => '<td class="ayr">' + btcY(b) + '</td><td>' + say(t) + '</td><td>' + (m != null ? say(m) : '—') + '</td><td style="font-weight:600' + (m != null && t != null && t - m < 0 ? ';color:#B42318' : '') + '">' + (m != null && t != null ? say(t - m) : '—') + '</td>';
 function dagSatir(key, ust, sev, etk, o, nEff, cb, acilir, cihazTh) {
   const r = DAGV ? DAGV.oran : [16 / 29, 13 / 29];
@@ -1879,6 +1948,7 @@ async function cizMaden() {
       + grafikX({ id: 'mdagilim', ad: 'Gelir dağılımı', etiket: dg.map(x => tarihK(x.g)), etiketAd: 'Gün', turler: ['yigin', 'cubuk', 'cizgi', 'tablo'], birim: 'BTC', toplam: 'top', fmt: v => say(v, 6) + ' BTC', eksen: v => say(v, 4),
           seriler: [{ ad: '16 cihaz', renk: '#2a78d6', grup: 'g', v: dg.map(x => pay(x, 0)) }, { ad: '13 cihaz', renk: '#1baf7a', grup: 'g', v: dg.map(x => pay(x, 1)) }] })
       + '<div class="tablo-kutu" style="max-height:640px;overflow:auto"><table class="tb sirasiz" id="dagTablo">' + bas2('Ay / gün / saat / cihaz') + '<tbody>' + at + '</tbody></table></div>'
+      + odemeBolum(topl)
       + '<div class="k">Aya tıklayınca günler, güne tıklayınca saatler, saate tıklayınca o saatte çalışan cihazlar açılır. Saatte maliyet o saatin şebeke çekişinin fatura bedelidir (güneş varken genelde 0); cihaza, gelir gibi o saatteki hash payına göre bölünür. Günün geliri saatlere o saatteki toplam hash oranında, saatin geliri cihazlara kendi hash payı oranında dağıtılır.</div>'
       + '<div class="k">Maliyet: madencilik sahasının (Tek Yıldız 2) güneşin olmadığı / yetmediği saatlerde şebekeden çektiği elektriğin fatura bedeli (KDV dahil). Fatura gelen ayda faturanın saatlik tüketim ve PTF\'si, gelmeyen ayda OSOS sayacı + EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025; dağıtım 1.182,457 TL/MWh; BTV %1; KDV %20. Gelir 16/29 · 13/29; maliyet 14.09.2026–13.09.2027 arası 8/29 · 21/29 (16 cihaza düşenin yarısı 13\'e), sonra 16/29 · 13/29.</div>'
       + '<div class="k">Hangi cihazın hangi gruba ait olduğu bilinmediği için her günün geliri 16/29 ve 13/29 oranında bölünür. "Çalışan cihaz", her cihazın o gün sahanın çalıştığı saatlerin ne kadarında çalıştığına göre eşdeğer sayıdır; "cihaz başı" günlük gelirin bu sayıya bölümüdür. ₺ ve $ o günün BTC kapanış fiyatıyla.</div></section>';

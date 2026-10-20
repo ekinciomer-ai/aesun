@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<meta name="referrer" content="same-origin">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <title>Kapasite Paneli · Aksaray Enerji Portal</title>
@@ -81,6 +81,9 @@
   .leaflet-popup-content b{color:var(--ink)}
   .lej{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut2);margin-top:10px;align-items:center}
   .lej i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
+  .lej .chk2{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink2);font-weight:500}
+  .lej .chk2 input{width:16px;height:16px;accent-color:var(--red)}
+  .edas-tip{font:inherit;font-size:12px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.1)}
   .tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .tbl-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
   .tbl-top h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
@@ -170,7 +173,10 @@
     <div class="lej">
       <span><i style="background:#D32027"></i>Kapasitesi olan TM (daire ≈ MWe, aktif dönem)</span>
       <span><i style="background:#9AA2AD"></i>Kapasite 0</span>
-      <span>Filtre haritayı süzer · tabloda TM'ye tıkla → haritada göster</span>
+      <label class="chk2"><input type="checkbox" id="tglIl" checked> İl sınırları</label>
+      <label class="chk2"><input type="checkbox" id="tglBolge" checked> Bölge (EDAŞ) sınırları</label>
+      <label class="chk2"><input type="checkbox" id="tglDolgu"> EDAŞ renk dolgusu</label>
+      <span id="sinirDurum" style="color:var(--mut2)"></span>
     </div>
   </div>
 
@@ -352,10 +358,49 @@
     try{
       if(typeof L==="undefined"){ geoYok=true; el("hsay").textContent="Harita kütüphanesi yüklenemedi."; return; }
       MAP=L.map("harita",{scrollWheelZoom:false}).setView([39.1,35.2],6);
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:16,attribution:"Tiles © Esri"}).addTo(MAP);
+      var osm=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap katkıcıları"});
+      var esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:16,attribution:"Tiles © Esri"});
+      osm.addTo(MAP);
+      L.control.layers({"OpenStreetMap":osm,"Açık gri (Esri)":esri},null,{position:"topright",collapsed:true}).addTo(MAP);
       MAP.on("click",function(){ MAP.scrollWheelZoom.enable(); });
+      ILL=L.layerGroup(); BOLGE=L.layerGroup();       // sınır katmanları (markerların altında)
+      ILL.addTo(MAP); BOLGE.addTo(MAP);
       KAT=L.layerGroup().addTo(MAP);
+      sinirYukle();
     }catch(e){ geoYok=true; el("hsay").textContent="Harita başlatılamadı."; }
+  }
+  var ILL=null, BOLGE=null, EDAS_RENK={};
+  var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
+  function sinirYukle(){
+    Promise.all([
+      fetch("iller_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
+      fetch("bolge_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;})
+    ]).then(function(a){
+      var il=a[0], bo=a[1];
+      if(!il||!bo){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; return; }
+      // renk ata (bölge adına göre, kararlı)
+      var adlar=bo.features.map(function(f){return f.properties.edas;}).sort(function(x,y){return x.localeCompare(y,"tr");});
+      adlar.forEach(function(e,i){ EDAS_RENK[e]=PAL[i%PAL.length]; });
+      // il katmanı: ince kontur + (opsiyonel) EDAŞ dolgusu
+      L.geoJSON(il,{
+        style:function(f){ return {color:"#9AA2AD",weight:.8,fillColor:EDAS_RENK[f.properties.edas]||"#ccc",fillOpacity:0}; },
+        onEachFeature:function(f,ly){
+          ly.bindTooltip(f.properties.il+" · "+(f.properties.edas||"—"),{sticky:true,className:"edas-tip"});
+          ly.on("click",function(){ el("fil").value=(el("fil").value===(f.properties.il||"").toLocaleUpperCase("tr")?"":(f.properties.il||"").toLocaleUpperCase("tr")); ciz(); });
+        }
+      }).addTo(ILL);
+      // bölge katmanı: kalın EDAŞ renkli sınır
+      L.geoJSON(bo,{
+        style:function(f){ return {color:EDAS_RENK[f.properties.edas]||"#777",weight:2.4,opacity:.9,fill:false}; }
+      }).addTo(BOLGE);
+      el("sinirDurum").textContent="";
+      dolguUygula();
+    }).catch(function(){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; });
+  }
+  function dolguUygula(){
+    if(!ILL) return;
+    var on=el("tglDolgu").checked;
+    ILL.eachLayer(function(gj){ gj.eachLayer&&gj.eachLayer(function(ly){ var e=ly.feature.properties.edas; ly.setStyle({fillOpacity:on?.16:0,fillColor:EDAS_RENK[e]||"#ccc"}); }); });
   }
 
   function ciz(){
@@ -383,6 +428,9 @@
   el("fara").addEventListener("input",ciz);
   el("fpoz").addEventListener("change",ciz);
   el("fsifir").addEventListener("click",function(){ el("fil").value="";el("fed").value="";el("fara").value="";el("fpoz").checked=false; ciz(); });
+  el("tglIl").addEventListener("change",function(){ if(!MAP||!ILL)return; if(this.checked)ILL.addTo(MAP); else MAP.removeLayer(ILL); });
+  el("tglBolge").addEventListener("change",function(){ if(!MAP||!BOLGE)return; if(this.checked)BOLGE.addTo(MAP); else MAP.removeLayer(BOLGE); });
+  el("tglDolgu").addEventListener("change",dolguUygula);
   el("tbody").addEventListener("click",function(e){ var a=e.target.closest&&e.target.closest(".tmlink"); if(a){ e.preventDefault(); haritaGit(a.getAttribute("data-tm")); } });
   el("tbl").querySelectorAll("thead th").forEach(function(th){
     th.addEventListener("click",function(){

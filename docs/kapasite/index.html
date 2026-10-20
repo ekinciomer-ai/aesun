@@ -9,6 +9,8 @@
 <link rel="icon" href="https://aksarayenerji.net/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://aksarayenerji.net/assets/site.css?v=3">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
   .pbar{background:var(--darker);color:#fff}
   .pbar .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;min-height:48px;font-size:14px}
@@ -68,6 +70,29 @@
   .gdurum{padding:40px 0;text-align:center;color:var(--mut2)}
   .note{font-size:13px;color:var(--mut2);line-height:1.6}
   .note b{color:var(--ink2)}
+  /* erozyon şeridi */
+  .eroz{background:linear-gradient(180deg,#fff,var(--soft));border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+  .eroz .eh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .eroz h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
+  .eroz .kay{font-size:12px;color:var(--mut2)}.eroz .kay a{color:var(--red-d);font-weight:600;text-decoration:none}.eroz .kay a:hover{text-decoration:underline}
+  .eroz .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .eroz .st{flex:1;min-width:120px;text-align:center;padding:6px 8px}
+  .eroz .st b{display:block;font-family:Archivo,sans-serif;font-weight:800;font-size:22px;color:var(--ink);line-height:1.15}
+  .eroz .st b small{font-size:12px;font-weight:600;color:var(--mut2)}
+  .eroz .st span{font-size:12px;color:var(--mut2);font-weight:500}
+  .eroz .ar{display:flex;align-items:center;color:var(--red);font-weight:700;font-size:18px;padding:0 2px}
+  .eroz .bar2{margin-top:12px;height:14px;border-radius:7px;background:var(--soft);overflow:hidden;display:flex}
+  .eroz .bar2 .kul{height:100%;background:linear-gradient(90deg,var(--red),#F0574E)}
+  .eroz .bar2 .kal{height:100%;background:#1E9E5A}
+  .eroz .bl{display:flex;justify-content:space-between;font-size:12px;color:var(--mut2);margin-top:6px;font-weight:500}
+  /* harita */
+  .hpanel .ph small{font-size:13px;color:var(--mut2);font-weight:500}
+  #harita{height:460px;border-radius:12px;border:1px solid var(--line);overflow:hidden;z-index:0}
+  @media(max-width:760px){#harita{height:360px}}
+  .leaflet-popup-content{font:inherit;font-size:13px;line-height:1.5;margin:10px 12px}
+  .leaflet-popup-content b{color:var(--ink)}
+  .lej{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut2);margin-top:10px;align-items:center}
+  .lej i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
 </style>
 </head>
 <body>
@@ -92,6 +117,24 @@
 <div class="wrap kap">
   <div class="kpi" id="kpi"></div>
 
+  <div class="eroz">
+    <div class="eh">
+      <h2>Dönemler arası kapasite erimesi</h2>
+      <span class="kay">Kaynak: TEİAŞ 02.03 / 16.07 / 01.10.2026 · derleme <a href="https://kaangokay.com/wp-content/uploads/ges/Lisanssiz_Analiz_Platformu_2026.html#s-kapasite" target="_blank" rel="noopener">kaangokay.com</a></span>
+    </div>
+    <div class="flow">
+      <div class="st"><b>2.000 <small>MWe</small></b><span>İlan edilen toplam</span></div>
+      <div class="ar">→</div>
+      <div class="st"><b>1.337 <small>MWe</small></b><span>02.03.2026 kalan</span></div>
+      <div class="ar">→</div>
+      <div class="st"><b>625,1 <small>MWe</small></b><span>01.10.2026 kalan</span></div>
+      <div class="ar">·</div>
+      <div class="st"><b>%68,7</b><span>kullanıldı (1.374,9 MWe)</span></div>
+    </div>
+    <div class="bar2"><div class="kul" style="width:68.7%"></div><div class="kal" style="width:31.3%"></div></div>
+    <div class="bl"><span>Kullanılan 1.374,9 MWe</span><span>Kalan 625,1 MWe</span></div>
+  </div>
+
   <div class="flt">
     <label>İl
       <select id="fil"><option value="">Tümü</option></select>
@@ -114,6 +157,16 @@
     <div class="panel">
       <div class="ph"><h2>EDAŞ sıralaması</h2><small id="g2n"></small></div>
       <div class="bars" id="g2"></div>
+    </div>
+  </div>
+
+  <div class="panel hpanel">
+    <div class="ph"><h2>Trafo merkezi haritası</h2><small id="hsay"></small></div>
+    <div id="harita"></div>
+    <div class="lej">
+      <span><i style="background:#D32027"></i>Kapasitesi olan TM (daire boyutu ≈ MWe)</span>
+      <span><i style="background:#9AA2AD"></i>Kapasite 0 (başvuruya kapalı)</span>
+      <span>Filtre haritayı da süzer · işarete tıkla</span>
     </div>
   </div>
 
@@ -228,6 +281,7 @@
     barlar("g2", topla(gorunen,"edas"), 12, "ed");
     el("g2n").textContent="MWe";
     tablo(gorunen);
+    haritaCiz();
   }
 
   function kpiCiz(rows, donem){
@@ -242,6 +296,48 @@
       +tile(fmt0(Object.keys(eds).length),"","EDAŞ / OSB");
   }
   function tile(b,sm,s){ return '<div class="t"><b>'+b+(sm?' <small>'+sm+'</small>':'')+'</b><span>'+s+'</span></div>'; }
+
+  // --- harita ---
+  var GEO=[], MAP=null, KAT=null, geoYok=false;
+  function geoSuz(){
+    var il=el("fil").value, ed=el("fed").value, q=el("fara").value.trim().toLocaleLowerCase("tr"), poz=el("fpoz").checked;
+    return GEO.filter(function(r){
+      if(il && r.il!==il) return false;
+      if(ed && r.edas!==ed) return false;
+      if(poz && !(r.mwe>0)) return false;
+      if(q){ var h=(r.il+" "+r.tm+" "+r.edas).toLocaleLowerCase("tr"); if(h.indexOf(q)<0) return false; }
+      return true;
+    });
+  }
+  function rCap(m){ return m>0 ? Math.max(5, Math.min(26, 5+Math.sqrt(m)*3.4)) : 4; }
+  function haritaCiz(){
+    if(geoYok || !MAP) return;
+    var rows=geoSuz();
+    KAT.clearLayers();
+    var pts=[];
+    rows.forEach(function(r){
+      var m=L.circleMarker([r.lat,r.lon],{
+        radius:rCap(r.mwe),
+        color:r.mwe>0?"#A81B22":"#6B727B",
+        weight:1, fillColor:r.mwe>0?"#D32027":"#9AA2AD",
+        fillOpacity:r.mwe>0?.72:.5
+      });
+      m.bindPopup('<b>'+r.tm+'</b><br>'+r.il+' · '+(r.edas||"—")+'<br><b>'+fmt(r.mwe)+' MWe</b> tahsis edilebilir');
+      m.addTo(KAT); pts.push([r.lat,r.lon]);
+    });
+    var konumlu=rows.length, kapasiteli=rows.filter(function(r){return r.mwe>0;}).length;
+    el("hsay").textContent = konumlu+" konumlu TM · "+kapasiteli+" kapasiteli";
+    if(pts.length){ try{ MAP.fitBounds(pts,{padding:[30,30],maxZoom:9}); }catch(e){} }
+  }
+  function haritaKur(){
+    try{
+      if(typeof L==="undefined"){ geoYok=true; el("hsay").textContent="Harita kütüphanesi yüklenemedi."; return; }
+      MAP=L.map("harita",{scrollWheelZoom:false}).setView([39.1,35.2],6);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:14,attribution:"© OpenStreetMap"}).addTo(MAP);
+      MAP.on("click",function(){ MAP.scrollWheelZoom.enable(); });
+      KAT=L.layerGroup().addTo(MAP);
+    }catch(e){ geoYok=true; el("hsay").textContent="Harita başlatılamadı."; }
+  }
 
   el("fil").addEventListener("change",ciz);
   el("fed").addEventListener("change",ciz);
@@ -267,9 +363,15 @@
       el("fil").insertAdjacentHTML("beforeend", ils.map(function(v){return '<option>'+esc(v)+'</option>';}).join(""));
       el("fed").insertAdjacentHTML("beforeend", eds.map(function(v){return '<option>'+esc(v)+'</option>';}).join(""));
       el("meta2").textContent = (d.baslik||"TEİAŞ kapasite") + " · " + donemTR(d.donem) + " · kaynak " + (d.kaynak||"TEİAŞ");
-      el("not").innerHTML = "<b>Not:</b> Veriler "+donemTR(d.donem)+" tarihli TEİAŞ dağıtım seviyesi kapasite yayınından alınmıştır; tek dönemin anlık görüntüsüdür. “MWe” o trafo merkezinde o tarih için tahsis edilebilecek güncel kapasitedir; 0,00 başvuruya kapalı demektir. Dönemler arası erozyon karşılaştırması için sonraki yayınlar (16.07, 01.10) eklenecektir.";
+      el("not").innerHTML = "<b>Not:</b> Veriler "+donemTR(d.donem)+" tarihli TEİAŞ dağıtım seviyesi kapasite yayınından alınmıştır; tek dönemin anlık görüntüsüdür. “MWe” o trafo merkezinde o tarih için tahsis edilebilecek güncel kapasitedir; 0,00 başvuruya kapalı demektir. Haritadaki konumlar TEİAŞ trafo merkezi KMZ'sinden eşleştirilmiştir; adı birebir eşleşmeyen veya KMZ'de bulunmayan bazı TM'ler haritada görünmeyebilir (tablo tam listedir). Dönem erimesi özeti TEİAŞ'ın 02.03/16.07/01.10.2026 yayınlarından kaangokay.com derlemesine dayanır.";
       kpiCiz(tumu, d.donem);
+      haritaKur();
       ciz();
+      // geo (konumlar) ayrı dosyadan
+      fetch("kapasite_geo."+(d.donem)+".json",{cache:"no-store"})
+        .then(function(r){ return r.ok?r.json():[]; })
+        .then(function(g){ GEO=g||[]; haritaCiz(); })
+        .catch(function(){ el("hsay").textContent="Konum verisi yüklenemedi."; });
     })
     .catch(function(e){
       el("meta2").textContent="Kapasite verisi yüklenemedi.";

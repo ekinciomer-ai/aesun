@@ -840,7 +840,15 @@ def calistir():
     neden_eylem = (gecerli or {}).get("neden") or neden
     if eylem and a["mod"] == "otomatik":
         hedefler = takip or "all"
-        if hedefler == "all" and fw_haric:          # firmware'i yükseltilen cihaz "tümü" komutuna girmez (uyandırılmışken uyutulmasın)
+        if hedefler == "all" and gecerli is None:
+            # Planlı geçiş dışı durum düzeltmesi (ör. saat içinde 1 cihaz uyanmadı): yalnız durumu farklı cihazlara gönder.
+            # 20 Eki 03–05: .112 uyanmadığı için 20 dk'da bir "tümü" uyandırması gitti; her biri altminer kuyruğunu
+            # ~13 dk meşgul etti, 04:55 uyutma 05:04'te başlayıp 05:15'te bitti (05:00 saatinde ~25 kW şebeke).
+            farkli = sorted(d["suffix"] for d in cihazlar if d.get("suffix") is not None and (
+                d.get("sleeping") if eylem == "wake" else (d.get("online") and not d.get("sleeping"))))
+            if farkli:
+                hedefler = farkli
+        if hedefler == "all" and fw_haric:         # firmware'i yükseltilen cihaz "tümü" komutuna girmez (uyandırılmışken uyutulmasın)
             hedefler = sorted({d.get("suffix") for d in (mad or {}).get("devices") or [] if d.get("suffix") and d.get("suffix") != fw_haric})
         cid = komut_gonder(eylem, a, neden_eylem + (" (tekrar: " + ",".join(map(str, takip)) + ")" if takip else ""), hedefler)
         son_komut_kaydet(eylem, cid)

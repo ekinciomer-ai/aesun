@@ -64,6 +64,9 @@
   tbody td{padding:9px 14px;border-bottom:1px solid var(--soft);color:var(--ink2);vertical-align:top}
   tbody td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
   tbody td.tm{font-weight:600;color:var(--ink)}
+  tbody td.tm a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--mut2);cursor:pointer}
+  tbody td.tm a:hover{color:var(--red-d);border-color:var(--red)}
+  tbody td.tm a::after{content:" ⌖";color:var(--mut2);font-size:12px}
   tbody tr:hover{background:var(--soft)}
   tbody td .edb{font-size:12px;color:var(--mut2)}
   .sifir td{opacity:.5}
@@ -255,7 +258,7 @@
     tb.innerHTML = rows.slice(0,MAX).map(function(r){
       return '<tr'+(r.mwe>0?"":' class="sifir"')+'>'
         +'<td>'+esc(r.il)+'</td>'
-        +'<td class="tm">'+esc(r.tm)+'</td>'
+        +'<td class="tm"><a href="#" class="tmlink" data-tm="'+esc(r.tm)+'">'+esc(r.tm)+'</a></td>'
         +'<td>'+esc(r.bara||"")+'</td>'
         +'<td>'+esc(r.edas||"")+'</td>'
         +'<td class="num">'+fmt(r.mwe)+'</td></tr>';
@@ -329,11 +332,25 @@
     el("hsay").textContent = konumlu+" konumlu TM · "+kapasiteli+" kapasiteli";
     if(pts.length){ try{ MAP.fitBounds(pts,{padding:[30,30],maxZoom:9}); }catch(e){} }
   }
+  function haritaGit(tm){
+    if(geoYok){ el("hsay").textContent="Harita yüklenemedi."; return; }
+    var g=null; for(var i=0;i<GEO.length;i++){ if(GEO[i].tm===tm){ g=GEO[i]; break; } }
+    try{ el("harita").scrollIntoView({behavior:"smooth",block:"center"}); }catch(e){}
+    if(!g){ el("hsay").textContent="“"+tm+"” için konum eşleşmesi yok (KMZ'de bulunamadı)."; return; }
+    if(!MAP) return;
+    setTimeout(function(){
+      try{ MAP.invalidateSize(); }catch(e){}
+      MAP.setView([g.lat,g.lon], 12, {animate:true});
+      L.popup().setLatLng([g.lat,g.lon])
+        .setContent('<b>'+g.tm+'</b><br>'+g.il+' · '+(g.edas||"—")+'<br><b>'+fmt(g.mwe)+' MWe</b> tahsis edilebilir')
+        .openOn(MAP);
+    }, 380);
+  }
   function haritaKur(){
     try{
       if(typeof L==="undefined"){ geoYok=true; el("hsay").textContent="Harita kütüphanesi yüklenemedi."; return; }
       MAP=L.map("harita",{scrollWheelZoom:false}).setView([39.1,35.2],6);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:14,attribution:"© OpenStreetMap"}).addTo(MAP);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{maxZoom:16,subdomains:"abcd",attribution:"© OpenStreetMap © CARTO"}).addTo(MAP);
       MAP.on("click",function(){ MAP.scrollWheelZoom.enable(); });
       KAT=L.layerGroup().addTo(MAP);
     }catch(e){ geoYok=true; el("hsay").textContent="Harita başlatılamadı."; }

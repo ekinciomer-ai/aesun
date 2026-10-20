@@ -185,10 +185,10 @@ def main():
         acik.append({"sorun": f"GitHub işi başarısız: {x.get('ad')} ({x.get('depo')})", "neden": x.get("neden", "") + " — elle bakılmalı"})
     st["github"] = gh
 
-    # müdahale başarılıysa öğrenen taramayı hemen yenile: bekçiler eski bulguyu göstermeye devam etmesin
+    # müdahale başarılıysa öğrenen tarama kilidini kaldır ki iş tamamlandıktan sonraki ilk bekçi turunda tarama yenilensin
     if any(e["ok"] for e in eylemler):
-        sh("timeout", "600", "python3", D + "/bekci_tarama.py", t=650)
-        sh("bash", "-c", f"echo $(date +%s) > {D}/.tarama_son")
+        try: os.remove(D + "/.tarama_son")
+        except OSError: pass
     # ---- 4c) Pi şefi (Pi'de, nabız ile 10 dk'da bir): takılan toplayıcıyı durdurur, kod güncellemesini onarır, diski temizler
     k, o, _ = git("show", "origin/main:n8n/sef_pi.json")
     try: sp = json.loads(o)
@@ -203,6 +203,15 @@ def main():
     k, o, _ = git("show", "origin/main:n8n/sistem_bekci.json")
     try: sb = json.loads(o)
     except Exception: sb = {}
+    sb_degisti = False
+    tar_gec = {g["dosya"] for g in (oku(D + "/tarama_durum.json", {}).get("geciken") or [])}
+    is_gec = {a for a, _ in geciken}
+    for k_sb in list((sb.get("sorunlar") or {}).keys()):
+        if (k_sb.startswith("gec:") and k_sb[4:] not in tar_gec) or (k_sb.startswith("is:") and k_sb[3:] not in is_gec):
+            sb["sorunlar"].pop(k_sb, None)
+            sb_degisti = True
+    if sb_degisti:
+        sb["durum"] = "sorun" if sb.get("sorunlar") else "iyi"
     sbz = zaman(sb.get("t")); sb_dk = (simdi - sbz).total_seconds() / 60 if sbz else 999
     if sb_dk > 40:
         acik.append({"sorun": f"Pi sistem bekçisi {round(sb_dk)} dk'dır sessiz", "neden": "Pi/ağ/elektrik — sahada kontrol gerekir"})
@@ -228,14 +237,18 @@ def main():
 
     # depoya yaz (değişince ya da saatte bir) — panel ve denetçi n8n/sef.json'u okur
     ozet = json.dumps({k: cikti[k] for k in ("durum", "eylemler", "acik")}, ensure_ascii=False, sort_keys=True)
-    if ozet != st.get("_son_ozet") or ts - st.get("_son_yazim", 0) > 3600:
+    if ozet != st.get("_son_ozet") or ts - st.get("_son_yazim", 0) > 3600 or sb_degisti:
         for _ in range(3):
             dx("sh", "-c", f"rm -rf {REPO}/.git/rebase-merge {REPO}/.git/rebase-apply {REPO}/.git/MERGE_HEAD && find {REPO}/.git -name '*.lock' -delete 2>/dev/null; true")
             git("fetch", "--depth", "50", "-q", "origin", "+refs/heads/main:refs/remotes/origin/main")
             git("checkout", "-f", "-B", "main", "refs/remotes/origin/main")
             git("reset", "--hard", "refs/remotes/origin/main")
             dx("sh", "-c", f"cat > {REPO}/n8n/sef.json", girdi=json.dumps(cikti, ensure_ascii=False, indent=1))
-            git("add", "n8n/sef.json")
+            if sb_degisti:
+                dx("sh", "-c", f"cat > {REPO}/n8n/sistem_bekci.json", girdi=json.dumps(sb, ensure_ascii=False, indent=1))
+                git("add", "n8n/sef.json", "n8n/sistem_bekci.json")
+            else:
+                git("add", "n8n/sef.json")
             if not git("diff", "--cached", "--quiet")[0]:
                 break
             git("commit", "-qm", "Şef: " + ("; ".join(e["eylem"] + (" ✓" if e["ok"] else " ✗") for e in eylemler) or cikti["durum"]))

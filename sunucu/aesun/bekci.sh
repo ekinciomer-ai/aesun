@@ -101,8 +101,9 @@ if [ -n "$sorun_isler" ] && yeni aesun-isler; then ayrinti+=("aesun-isler yeni b
 [ -n "$sorun_api" ] && onar aesun-api "$sorun_api"
 [ -n "$sorun_isler" ] && onar aesun-isler "$sorun_isler"
 
-# 4) öğrenen tarama (15 dk) + tüm uçların duman testi (10 dk): sabit liste yerine geçmişten öğrenilen düzen ve tek uç kaydı
-tt=$D/.tarama_son; if [ $(( simdi - $(cat $tt 2>/dev/null || echo 0) )) -gt 840 ]; then echo $simdi > $tt; timeout 600 python3 $D/bekci_tarama.py >/dev/null 2>&1 || true; fi
+# 4) öğrenen tarama (normalde 15 dk; geciken dosya varsa her turda yenile) + tüm uçların duman testi (10 dk)
+tt=$D/.tarama_son; tg=$(python3 -c "import json;print(len(json.load(open('$D/tarama_durum.json')).get('geciken') or []))" 2>/dev/null || echo 1)
+if [ "$tg" -gt 0 ] || [ $(( simdi - $(cat $tt 2>/dev/null || echo 0) )) -gt 840 ]; then echo $simdi > $tt; timeout 600 python3 $D/bekci_tarama.py >/dev/null 2>&1 || true; fi
 ut=$D/.uclar_son; if [ $(( simdi - $(cat $ut 2>/dev/null || echo 0) )) -gt 540 ] && [ -f $D/izleme/duman_testi.py ]; then echo $simdi > $ut
   timeout 300 python3 $D/izleme/duman_testi.py --json > $D/uclar_durum.json.tmp 2>/dev/null; mv -f $D/uclar_durum.json.tmp $D/uclar_durum.json; fi
 

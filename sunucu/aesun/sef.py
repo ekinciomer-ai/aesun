@@ -70,29 +70,31 @@ def main():
         return ok
 
     # ---- 1) iş deposu GitHub'a yazabiliyor mu?
-    git("fetch", "-q", "origin", "main", t=120)
+    git("fetch", "--depth", "50", "-q", "origin", "main", t=120)
     _, rb, _ = dx("sh", "-c", f"ls -d {REPO}/.git/rebase-merge {REPO}/.git/rebase-apply 2>/dev/null")
     _, ileri, _ = git("rev-list", "--count", "origin/main..HEAD")
     _, geri, _ = git("rev-list", "--count", "HEAD..origin/main")
     _, en_eski, _ = git("log", "origin/main..HEAD", "--reverse", "--format=%ct", "-1")
     ileri = int(ileri or 0); geri = int(geri or 0); yas = (ts - int(en_eski)) / 60 if en_eski.isdigit() else 0
     gozlem["itme"] = {"rebase_yarida": bool(rb), "gonderilmemis": ileri, "geride": geri, "en_eski_dk": round(yas)}
-    if rb or (ileri and yas > 10) or geri > 20:
+    if rb or (ileri and yas > 10) or geri > 15 or ileri > 50:
         def itme():
             git("rebase", "--abort")
-            k, _, e = git("pull", "--rebase", "--autostash", "-q")
-            if k:
-                git("rebase", "--abort"); k, _, e = git("pull", "--rebase", "--autostash", "-X", "theirs", "-q")
-            if k:
-                git("rebase", "--abort"); git("reset", "--hard", "origin/main"); git("stash", "clear"); k = 0
-            if not k and ileri:
-                k, _, e = git("push", "-q")
-            git("fetch", "-q", "origin", "main")
+            git("fetch", "--depth", "50", "-q", "origin", "main")
+            if ileri > 50 or geri > 15:
+                git("reset", "--hard", "origin/main"); git("stash", "clear"); k, e = 0, ""
+            else:
+                k, _, e = git("rebase", "--autostash", "-X", "theirs", "origin/main")
+                if k:
+                    git("rebase", "--abort"); git("reset", "--hard", "origin/main"); git("stash", "clear"); k = 0
+                elif ileri:
+                    k, _, e = git("push", "-q")
+            git("fetch", "--depth", "50", "-q", "origin", "main")
             _, kalan, _ = git("rev-list", "--count", "origin/main..HEAD")
             _, kalan_geri, _ = git("rev-list", "--count", "HEAD..origin/main")
-            ok = (kalan or "0") == "0" and int(kalan_geri or 0) <= 5
-            return (f"depo eşitlendi (ileri:{ileri}, geri:{geri} -> 0)" if ok else f"gönderilemedi: {e[-160:]}"), ok
-        if yap("itme", ("yarıda kalmış rebase · " if rb else "") + f"depo uyumsuz (ileri:{ileri}, geri:{geri})", itme) is False:
+            ok = int(kalan or 0) <= 2 and int(kalan_geri or 0) <= 5
+            return (f"depo eşitlendi (ileri:{ileri}->{kalan}, geri:{geri}->{kalan_geri})" if ok else f"gönderilemedi: {e[-160:]}"), ok
+        if yap("itme", ("yarıda kalmış rebase · " if rb else "") + f"sığ klon koptu (ileri:{ileri}, geri:{geri})", itme) is False:
             acik.append({"sorun": "ns1 iş çıktıları GitHub'a gönderilemiyor", "neden": "itme denemesi başarısız"})
 
     # ---- 2) zamanlayıcı canlı mı?
@@ -232,7 +234,7 @@ def main():
         if git("diff", "--cached", "--quiet")[0]:
             git("commit", "-qm", "Şef: " + ("; ".join(e["eylem"] + (" ✓" if e["ok"] else " ✗") for e in eylemler) or cikti["durum"]))
             for _ in range(3):
-                if not git("pull", "--rebase", "--autostash", "-q")[0] and not git("push", "-q")[0]: break
+                if not git("fetch", "--depth", "50", "-q", "origin", "main")[0] and not git("rebase", "--autostash", "-X", "theirs", "origin/main")[0] and not git("push", "-q")[0]: break
                 git("rebase", "--abort"); time.sleep(5)
         st2 = oku(DURUM, {}); st2.update({"_son_ozet": ozet, "_son_yazim": ts, "gecmis": gecmis[-40:], "github": gh})
         open(DURUM + ".tmp", "w").write(json.dumps(st2, ensure_ascii=False)); os.replace(DURUM + ".tmp", DURUM)

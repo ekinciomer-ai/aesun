@@ -44,19 +44,16 @@ def hazirla():
     sh("git", "config", "user.name", "aesun-bot"); sh("git", "config", "user.email", "aesun-bot@users.noreply.github.com")
 
 def git_esitle():
-    """pull --rebase; yarıda kalmış rebase'i veya index'te sıkışmış autostash kalıntılarını temizler."""
+    """Sığ klonda (depth=50) hızlı commit akışı sonrası graft kopmasını önlemek için fetch --depth 50 + rebase/reset."""
     if os.path.isdir(D + "/.git/rebase-merge") or os.path.isdir(D + "/.git/rebase-apply"):
         sh("git", "rebase", "--abort")
-    r = sh("git", "pull", "--rebase", "--autostash", "-q")
+    sh("git", "fetch", "--depth", "50", "origin", "main")
+    r = sh("git", "rebase", "--autostash", "-X", "theirs", "origin/main")
     if r.returncode:
         sh("git", "rebase", "--abort")
-        r = sh("git", "pull", "--rebase", "--autostash", "-X", "theirs", "-q")
-        if r.returncode:
-            sh("git", "rebase", "--abort")
-            sh("git", "fetch", "--depth", "50", "origin", "main")
-            sh("git", "reset", "--hard", "origin/main")
-            sh("git", "stash", "clear")
-            r = sh("git", "status", "--porcelain")
+        sh("git", "reset", "--hard", "origin/main")
+        sh("git", "stash", "clear")
+        r = sh("git", "status", "--porcelain")
     return r
 
 def calistir(ad, komut, yollar, mesaj):

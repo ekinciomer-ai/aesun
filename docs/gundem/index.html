@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="same-origin">
+<title>Enerji Gündemi · Aksaray Enerji Portal</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4a28 28 0 0 0 0 56z' fill='%23D7262E'/%3E%3Cpath d='M32 4a28 28 0 0 1 0 56z' fill='%232B2F35'/%3E%3Cpath d='M36 10 20 36h11l-4 18 18-28H34z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{--k:#D7262E;--kk:#A8131B;--s:#2B2F35;--y:#5B6470;--z:#F4F5F7;--c:#E2E5EA;--b:#fff}
+*{box-sizing:border-box}html,body{margin:0}
+body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--s);background:var(--z);min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--kk)}
+.ust{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--b);border-bottom:1px solid var(--c)}
+.ust nav{display:flex;gap:16px;align-items:center}
+.bag{color:var(--s);text-decoration:none;font:inherit;background:none;border:0;cursor:pointer;padding:0}.bag:hover{color:var(--k)}
+.marka{display:inline-flex;align-items:center;gap:10px;color:var(--s);text-decoration:none}.marka b{letter-spacing:.06em;font-size:17px}.m2{color:var(--k)}
+main{flex:1;width:100%;max-width:1000px;margin:0 auto;padding:24px 16px}
+footer{text-align:center;color:var(--y);font-size:12px;padding:18px}
+.bas{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+h1{font-size:23px;margin:0}
+.ozet{color:var(--y);font-size:13px;margin:2px 0 16px}
+.ara{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.ara input{flex:1 1 240px;padding:10px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;background:#fff;color:var(--s)}
+.ara input:focus{outline:2px solid #F3B4B7;border-color:var(--k)}
+.filt{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.filt button{min-height:36px;padding:0 14px;border:1px solid var(--c);background:#fff;color:var(--y);border-radius:99px;font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.filt button[aria-pressed=true]{background:var(--s);color:#fff;border-color:var(--s)}
+.filt button span{opacity:.6}
+.filt.kayn button[aria-pressed=true]{background:var(--k);border-color:var(--k)}
+.liste{display:grid;gap:12px;margin-top:14px}
+.kart{background:var(--b);border:1px solid var(--c);border-left:4px solid #B9BFC8;border-radius:14px;padding:18px 20px}
+.kart.o5{border-left-color:var(--k)}.kart.o4{border-left-color:#F08A24}.kart.o3{border-left-color:#1E9E5A}
+.kust{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.kat{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--kk);background:#FBE9EA;padding:3px 10px;border-radius:99px}
+.on{font-size:12px;color:var(--y);font-weight:600}
+.on b{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--k);margin-right:4px;vertical-align:middle}
+.kart h3{margin:0 0 7px;font-size:17px;line-height:1.32}
+.kart h3 a{color:var(--s);text-decoration:none}.kart h3 a:hover{color:var(--kk)}
+.kozet{margin:0 0 10px;font-size:14.5px;color:var(--s);line-height:1.55}
+.kanaliz{margin:0 0 10px;font-size:14px;color:var(--y);line-height:1.6;background:#F7F8FA;border:1px solid var(--c);border-radius:10px;padding:11px 13px}
+.kanaliz b{color:var(--s)}
+.kalt{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.src{font-size:13px;color:var(--y)}
+.etk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.etk span{font-size:12px;color:var(--y);background:#EEF0F3;border-radius:99px;padding:2px 9px}
+.gdurum{padding:48px 0;text-align:center;color:var(--y)}
+</style>
+</head>
+<body>
+<div id="ust"></div>
+<main>
+  <div class="bas">
+    <div>
+      <h1>Enerji Gündemi</h1>
+      <p class="ozet" id="ozet">Yükleniyor…</p>
+    </div>
+  </div>
+  <div class="ara"><input type="search" id="ara" placeholder="Başlık, kaynak, etiket ara…" autocomplete="off"></div>
+  <div class="filt" id="fkat" role="group" aria-label="Kategori"></div>
+  <div class="filt kayn" id="fkayn" role="group" aria-label="Kaynak"></div>
+  <div class="liste" id="liste"></div>
+  <div class="gdurum" id="durum" hidden></div>
+</main>
+<footer>Aksaray Enerji · Enerji Gündemi · otomatik derlenir, derin analiz portal içidir</footer>
+<script>
+(function(){
+  var API = "https://xbay.app.n8n.cloud/webhook/aegundem/portal?token=aeg-2026-x7k9q";
+  var MARKA = '<a href="../" class="marka"><b>AKSARAY</b> <b class="m2">ENERJİ</b></a>';
+  document.getElementById("ust").innerHTML =
+    '<header class="ust">' + MARKA + '<nav><a class="bag" href="../">← Portal</a><a class="bag" href="https://aksarayenerji.net/">Web sitesi</a></nav></header>';
+
+  var liste = document.getElementById("liste");
+  var durum = document.getElementById("durum");
+  var ozet = document.getElementById("ozet");
+  var fkat = document.getElementById("fkat");
+  var fkayn = document.getElementById("fkayn");
+  var arael = document.getElementById("ara");
+  var tumu = [], kat = "hepsi", kayn = "hepsi", q = "";
+
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  function kart(r){
+    var on = r.onem || 0;
+    var link = r.url ? ('<a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.baslik)+'</a>') : esc(r.baslik);
+    var analiz = r.analiz ? ('<p class="kanaliz"><b>Analiz:</b> '+esc(r.analiz)+'</p>') : '';
+    var etk = '';
+    if(r.etiketler){ etk = '<div class="etk">' + String(r.etiketler).split(",").map(function(e){ e=e.trim(); return e?('<span>'+esc(e)+'</span>'):''; }).join("") + '</div>'; }
+    return '<article class="kart o'+on+'">'
+      + '<div class="kust"><span class="kat">'+esc(r.kategori||"genel")+'</span><span class="on"><b></b>Önem '+on+'</span></div>'
+      + '<h3>'+link+'</h3>'
+      + '<p class="kozet">'+esc(r.ozet)+'</p>'
+      + analiz
+      + '<div class="kalt"><span class="src">'+esc(r.kaynak)+(r.yayin_tarih?(' · '+esc(String(r.yayin_tarih).slice(0,10))):'')+'</span></div>'
+      + etk
+      + '</article>';
+  }
+
+  function suz(){
+    return tumu.filter(function(r){
+      if(kat!=="hepsi" && (r.kategori||"genel")!==kat) return false;
+      if(kayn!=="hepsi" && (r.kaynak||"")!==kayn) return false;
+      if(q){
+        var h = ((r.baslik||"")+" "+(r.ozet||"")+" "+(r.analiz||"")+" "+(r.kaynak||"")+" "+(r.etiketler||"")).toLocaleLowerCase("tr");
+        if(h.indexOf(q)<0) return false;
+      }
+      return true;
+    });
+  }
+
+  function ciz(){
+    var veri = suz();
+    liste.innerHTML = veri.map(kart).join("");
+    durum.hidden = veri.length>0;
+    if(!veri.length){ durum.textContent = "Eşleşen kayıt yok."; }
+  }
+
+  function butonlar(el, alan, secili, setter){
+    var say = {};
+    tumu.forEach(function(r){ var v=(r[alan]||(alan==="kategori"?"genel":"")); if(v) say[v]=(say[v]||0)+1; });
+    var html = '<button type="button" data-v="hepsi" aria-pressed="'+(secili()==="hepsi")+'">Tümü <span>('+tumu.length+')</span></button>';
+    Object.keys(say).sort(function(a,b){ return say[b]-say[a]; }).forEach(function(v){
+      html += '<button type="button" data-v="'+esc(v)+'" aria-pressed="false">'+esc(v)+' <span>('+say[v]+')</span></button>';
+    });
+    el.innerHTML = html;
+    el.querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        setter(b.getAttribute("data-v"));
+        el.querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        b.setAttribute("aria-pressed","true");
+        ciz();
+      });
+    });
+  }
+
+  arael.addEventListener("input", function(){ q = arael.value.trim().toLocaleLowerCase("tr"); ciz(); });
+
+  fetch(API, {cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(d){
+      tumu = (d.haberler||[]).slice().sort(function(a,b){ return (b.onem||0)-(a.onem||0); });
+      var t = d.guncelleme ? new Date(d.guncelleme) : null;
+      ozet.textContent = tumu.length + " başlık · derin analiz" + (t ? (" · güncelleme " + t.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})) : "");
+      butonlar(fkat, "kategori", function(){return kat;}, function(v){kat=v;});
+      butonlar(fkayn, "kaynak", function(){return kayn;}, function(v){kayn=v;});
+      ciz();
+    })
+    .catch(function(e){
+      ozet.textContent = "Gündem yüklenemedi.";
+      durum.hidden = false; durum.textContent = "Gündem şu an yüklenemedi. Lütfen birazdan tekrar deneyin.";
+    });
+})();
+</script>
+</body>
+</html>

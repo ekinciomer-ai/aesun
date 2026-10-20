@@ -50,6 +50,8 @@ for app in ("monitoring", "demo"):
     s = oku(os.path.join(DOCS, app, "index.html"))
     s = s.replace("../portal/", "../")
     yaz(os.path.join(P, app, "index.html"), s)
+# Enerji Gündemi (portal içi derin sürüm; token'lı /portal ucunu çeker)
+kopya(os.path.join(DOCS, "gundem"), os.path.join(P, "gundem"))
 kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
 # CAD (portal oturumuyla açılır; DWG okuyucu wasm + pdf.js yerel)
 kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))

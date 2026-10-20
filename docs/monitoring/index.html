@@ -1070,7 +1070,7 @@ let DAGV = null;
 // maliyet payı: 14.09.2026–13.09.2027 arası 16 cihaza düşenin yarısı 13'e (8/29 · 21/29); sonra 16/29 · 13/29
 const malOran = g => { const p = MADEN.malPay, a = 16 / 29; if (p && g && g >= p.bas && g <= p.bit) { const x = a * (p.oran16 ?? 1); return [x, 1 - x]; } return [a, 1 - a]; };
 // ===== 16 cihaz ödemeleri (n8n/maden_odeme.json): yapılan ödeme 16 cihazın hak edişinden düşülür. Kaydetmek için GitHub anahtarı (yalnız bu tarayıcıda) =====
-const ODM = { form: { tarih: '', birim: 'TL', tutar: '', aciklama: '' }, durum: '' };
+const ODM = { form: { tarih: '', birim: 'TL', tutar: '', aciklama: '' }, durum: '', belge: null };
 const odmFiyat = g => { const b = (MADEN.btc || {})[g]; if (b && b.try) return b.try; const k = Object.keys(MADEN.btc || {}).filter(x => x <= g).sort().pop(); return k ? MADEN.btc[k].try : null; };
 const odmTl = o => o.birim === 'BTC' ? (odmFiyat(o.tarih) ? o.tutar * odmFiyat(o.tarih) : null) : o.tutar;
 const odmBtc = o => o.birim === 'BTC' ? o.tutar : (odmFiyat(o.tarih) ? o.tutar / odmFiyat(o.tarih) : null);
@@ -1091,9 +1091,12 @@ function odemeBolum(topl) {
     + kart('Kalan (16 cihaza borç)', kalanTl != null ? say(kalanTl) + ' ₺' : '—', btcY(kalanBtc) + ' BTC (brüt paydan)', kalanTl != null && kalanTl < 0 ? '#B42318' : '#1E7A3C')
     + '</div>';
   if (L.length) h += '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol">Tarih</th><th>Tutar</th><th>₺ karşılığı</th><th>BTC karşılığı</th><th class="sol">Açıklama</th><th></th></tr></thead><tbody>'
-    + L.map(o => '<tr><td class="sol">' + tarihK(o.tarih) + ' ' + o.tarih.slice(0, 4) + '</td><td>' + (o.birim === 'BTC' ? btcY(o.tutar) + ' BTC' : say(o.tutar) + ' ₺') + '</td><td>' + (odmTl(o) != null ? say(odmTl(o)) : '—') + '</td><td>' + (odmBtc(o) != null ? btcY(odmBtc(o)) : '—') + '</td><td class="sol">' + esc(o.aciklama || '') + '</td><td><button class="btn" type="button" style="min-height:28px;padding:2px 8px" onclick="odemeSil(\'' + o.id + '\')">Sil</button></td></tr>').join('')
+    + L.map(o => '<tr><td class="sol">' + tarihK(o.tarih) + ' ' + o.tarih.slice(0, 4) + '</td><td>' + (o.birim === 'BTC' ? btcY(o.tutar) + ' BTC' : say(o.tutar) + ' ₺') + '</td><td>' + (odmTl(o) != null ? say(odmTl(o)) : '—') + '</td><td>' + (odmBtc(o) != null ? btcY(odmBtc(o)) : '—') + '</td><td class="sol">' + esc(o.aciklama || '') + (o.belge ? ' <button class="btn" type="button" style="min-height:26px;padding:2px 8px" onclick="odemeBelgeAc(\'' + o.belge + '\')">📄 Evrak</button>' : '') + '</td><td><button class="btn" type="button" style="min-height:28px;padding:2px 8px" onclick="odemeSil(\'' + o.id + '\')">Sil</button></td></tr>').join('')
     + '</tbody></table></div>';
-  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">'
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#F5F7FA;border-radius:8px;padding:10px 12px">'
+    + '<label class="btn" style="cursor:pointer;margin:0">📄 Evrak tara (dekont / makbuz)<input type="file" accept="image/*,application/pdf" capture="environment" style="display:none" onchange="odemeBelge(this.files[0]);this.value=\'\'"></label>'
+    + '<span class="k" id="odmBelgeDurum">' + (ODM.belge ? 'Ekli: <b>' + esc(ODM.belge.ad) + '</b> · alanları kontrol edip kaydedin <button class="btn" type="button" style="min-height:26px;padding:2px 8px" onclick="ODM.belge=null;cizMaden()">Kaldır</button>' : 'Fotoğraf ya da PDF yükleyin; tarih, tutar ve açıklama okunup forma yazılır.') + '</span></div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end">'
     + '<label class="k" style="display:flex;flex-direction:column;gap:4px">Tarih<input type="date" max="' + bugun + '" value="' + esc(f.tarih || bugun) + '" onchange="ODM.form.tarih=this.value" style="' + inp + '"></label>'
     + '<label class="k" style="display:flex;flex-direction:column;gap:4px">Tutar<input type="text" inputmode="decimal" placeholder="0" value="' + esc(f.tutar) + '" onchange="ODM.form.tutar=this.value" style="' + inp + ';width:130px"></label>'
     + '<label class="k" style="display:flex;flex-direction:column;gap:4px">Birim<select onchange="ODM.form.birim=this.value" style="' + inp + '"><option value="TL"' + (f.birim === 'TL' ? ' selected' : '') + '>₺</option><option value="BTC"' + (f.birim === 'BTC' ? ' selected' : '') + '>BTC</option></select></label>'
@@ -1130,7 +1133,93 @@ async function odemeEkle() {
   const ad = f.birim === 'BTC' ? btcY(tutar) + ' BTC' : say(tutar) + ' ₺';
   if (!window.confirm('16 cihaz ödemesi: ' + ad + ' · ' + tarih + (f.aciklama ? ' · ' + f.aciklama : '') + '\nKaydedilsin mi?')) return;
   const o = { id: Date.now().toString(36), tarih, birim: f.birim, tutar, aciklama: (f.aciklama || '').trim(), kayit: new Date().toISOString(), kim: (PORTAL && (PORTAL.ad || PORTAL.kul)) || '' };
-  if (await odemeYaz(L => L.concat([o]), 'Ödeme 16 cihaz: ' + ad + ' (' + tarih + ')')) { ODM.form = { tarih: '', birim: f.birim, tutar: '', aciklama: '' }; ODM.durum = '<span style="color:#1E7A3C">Kaydedildi: ' + esc(ad) + '</span>'; cizMaden(); }
+  if (ODM.belge) {
+    const yol = 'n8n/odeme_belge/' + tarih + '_' + o.id + '.' + ODM.belge.uzanti;
+    d.innerHTML = '<span class="k">Evrak yükleniyor…</span>';
+    try {
+      const r = await fetch('https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/' + yol, { method: 'PUT', headers: { Authorization: 'Bearer ' + ghAnahtar(), Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Ödeme evrakı ' + tarih, content: ODM.belge.b64 }) });
+      if (!r.ok) throw new Error('HTTP ' + r.status + (r.status === 401 || r.status === 403 ? ' (GitHub anahtarı geçersiz ya da yok)' : ''));
+      o.belge = yol;
+    } catch (e) { d.innerHTML = '<span style="color:#B42318">Evrak yüklenemedi: ' + esc(e.message || e) + '</span>'; return; }
+  }
+  if (await odemeYaz(L => L.concat([o]), 'Ödeme 16 cihaz: ' + ad + ' (' + tarih + ')')) { ODM.form = { tarih: '', birim: f.birim, tutar: '', aciklama: '' }; ODM.belge = null; ODM.durum = '<span style="color:#1E7A3C">Kaydedildi: ' + esc(ad) + '</span>'; cizMaden(); }
+}
+// ----- Evrak tarama: PDF metni (pdf.js) ya da görüntü OCR (Tesseract, Türkçe) → tarih / tutar / açıklama
+const odmBetik = (src, ad) => window[ad] ? Promise.resolve(window[ad]) : new Promise((ok, red) => { const sc = document.createElement('script'); sc.src = src; sc.onload = () => ok(window[ad]); sc.onerror = () => red(new Error('kütüphane yüklenemedi')); document.head.appendChild(sc); });
+async function odmPdfMetin(buf) {
+  const pdfjs = await odmBetik('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'pdfjsLib');
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const doc = await pdfjs.getDocument({ data: buf }).promise; let metin = '';
+  for (let i = 1; i <= Math.min(doc.numPages, 3); i++) {
+    const tc = await (await doc.getPage(i)).getTextContent(); let sonY = null;
+    for (const it of tc.items) { const y = Math.round(it.transform[5]); metin += (sonY !== null && Math.abs(y - sonY) > 3 ? '\n' : ' ') + it.str; sonY = y; }
+    metin += '\n';
+  }
+  if (metin.replace(/\s/g, '').length > 30) return metin;
+  const pg = await doc.getPage(1), vp = pg.getViewport({ scale: 2.5 }), cv = document.createElement('canvas');   // taranmış PDF: görüntüye çevir, OCR
+  cv.width = vp.width; cv.height = vp.height; await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+  return odmOcr(cv);
+}
+async function odmOcr(kaynak) {
+  const T = await odmBetik('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js', 'Tesseract');
+  const r = await T.recognize(kaynak, 'tur+eng', { logger: m => { const e = document.getElementById('odmBelgeDurum'); if (e && m.status === 'recognizing text') e.textContent = 'Okunuyor… %' + Math.round(m.progress * 100); } });
+  return r.data.text || '';
+}
+function odmCozumle(metin) {
+  const t = metin.replace(/\u00a0/g, ' '), satirlar = t.split(/\n/).map(x => x.trim()).filter(Boolean), sonuc = {};
+  // tarih: önce "tarih" geçen satır, yoksa ilk geçerli tarih
+  const tarihBul = x => { let m = x.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})/); if (m) return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'); m = x.match(/(\d{4})-(\d{2})-(\d{2})/); return m ? m[0] : null; };
+  const ts = satirlar.filter(x => /tarih/i.test(x)).map(tarihBul).concat(satirlar.map(tarihBul)).filter(g => g && g >= '2020-01-01' && g <= '2099-12-31');
+  if (ts.length) sonuc.tarih = ts[0];
+  // BTC tutarı
+  const btc = t.match(/(\d+[.,]\d{3,8})\s*BTC/i);
+  if (btc) { sonuc.birim = 'BTC'; sonuc.tutar = btc[1].replace(',', '.'); }
+  else {
+    const sayi = v => Number(v.replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'));
+    const kalip = /(\d{1,3}(?:[.\s]\d{3})+(?:,\d{2})?|\d+,\d{2})(?!\d)/g;
+    const aday = [];
+    satirlar.forEach((x, i) => { let m; while ((m = kalip.exec(x))) { const v = sayi(m[1]); if (!(v > 0)) continue;
+      const cevre = x + ' ' + (satirlar[i - 1] || ''); let puan = 0;
+      if (/tutar|toplam|g[öo]nderilen|[öo]deme|havale|eft|amount/i.test(cevre)) puan += 3;
+      if (/TL|TRY|₺/.test(x)) puan += 2;
+      if (/bakiye|komisyon|masraf|ücret|bsmv|vergi|iban|hesap no/i.test(cevre)) puan -= 4;
+      aday.push({ v, puan }); } });
+    aday.sort((a, b) => b.puan - a.puan || b.v - a.v);
+    if (aday.length) { sonuc.birim = 'TL'; sonuc.tutar = String(aday[0].v).replace('.', ','); }
+  }
+  // açıklama: "açıklama" satırı, yoksa alıcı adı
+  const ac = satirlar.find(x => /a[çc][ıi]klama/i.test(x)), al_ = satirlar.find(x => /al[ıi]c[ıi]|lehdar/i.test(x));
+  const temiz = x => x.replace(/^.*?(a[çc][ıi]klama|al[ıi]c[ıi]( ad[ıi])?( unvan[ıi])?|lehdar)\s*[:\-]?\s*/i, '').slice(0, 120).trim();
+  if (ac && temiz(ac)) sonuc.aciklama = temiz(ac);
+  else if (al_ && temiz(al_)) sonuc.aciklama = 'Alıcı: ' + temiz(al_);
+  return sonuc;
+}
+async function odemeBelge(dosya) {
+  if (!dosya) return;
+  const e = () => document.getElementById('odmBelgeDurum');
+  if (dosya.size > 8 * 1024 * 1024) { e().innerHTML = '<span style="color:#B42318">Dosya 8 MB\'tan büyük.</span>'; return; }
+  e().textContent = 'Evrak okunuyor…';
+  try {
+    const buf = await dosya.arrayBuffer(), pdf = /pdf/i.test(dosya.type) || /\.pdf$/i.test(dosya.name);
+    const metin = pdf ? await odmPdfMetin(buf.slice(0)) : await odmOcr(dosya);
+    const r = odmCozumle(metin);
+    let b64 = '', u8 = new Uint8Array(buf); for (let i = 0; i < u8.length; i += 32768) b64 += String.fromCharCode.apply(null, u8.subarray(i, i + 32768));
+    ODM.belge = { ad: dosya.name, uzanti: (dosya.name.split('.').pop() || (pdf ? 'pdf' : 'jpg')).toLowerCase().slice(0, 5), b64: btoa(b64) };
+    ODM.form = { tarih: r.tarih || ODM.form.tarih, birim: r.birim || ODM.form.birim, tutar: r.tutar || '', aciklama: r.aciklama || ODM.form.aciklama };
+    const bulunan = ['tarih', 'tutar', 'aciklama'].filter(k => r[k]).map(k => ({ tarih: 'tarih', tutar: 'tutar', aciklama: 'açıklama' })[k]);
+    ODM.durum = bulunan.length ? '<span style="color:#1E7A3C">Evraktan okundu: ' + bulunan.join(', ') + '. Değerleri kontrol edip "Ödemeyi kaydet"e basın.</span>' : '<span style="color:#9A5B00">Evrak eklendi ama tarih/tutar okunamadı; elle girin.</span>';
+    cizMaden();
+  } catch (x) { e().innerHTML = '<span style="color:#B42318">Evrak okunamadı: ' + esc(x.message || x) + '</span>'; }
+}
+async function odemeBelgeAc(yol) {
+  const t = ghAnahtar(); if (!t) { alert('Evrakı açmak için GitHub anahtarı gerekli.'); return; }
+  const w = window.open('', '_blank');
+  try {
+    const r = await fetch('https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/' + yol, { headers: { Authorization: 'Bearer ' + t, Accept: 'application/vnd.github.raw' } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const b = await r.blob(), tip = /\.pdf$/i.test(yol) ? 'application/pdf' : /\.png$/i.test(yol) ? 'image/png' : 'image/jpeg';
+    w.location = URL.createObjectURL(new Blob([b], { type: tip }));
+  } catch (x) { if (w) w.close(); alert('Evrak açılamadı: ' + (x.message || x)); }
 }
 async function odemeSil(id) {
   const o = (MADEN.odeme || []).find(x => x.id === id); if (!o) return;

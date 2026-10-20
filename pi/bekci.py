@@ -101,11 +101,18 @@ def calis(sonuc, mad, kim):
             hash_yok = not (o.get("hash_th") or 0) > 0
         takili = (not o.get("uyku") and o.get("durum") in ("ONLINE", "ONLINE_HTTP") and hash_yok
                   and istenen == "calis" and simdi - son_wake > timedelta(minutes=30))
-        sorun = "ayar_bozuk" if ayar_bozuk else "takili" if takili else None
+        # uykuda takılı: çalış isteniyor, son 60 dk'da en az 3 uyandırma komutu bu cihaza gitti ama hâlâ uykuda
+        # (20 Eki: .112 / #24 dünden beri her komutu "ok" diye kabul edip uyanmadı) → yalnız YENİDEN BAŞLAT, onarım yok
+        sfx = int(str(ip).split(".")[-1] or 0)
+        n_wake = sum(1 for c in (kom or {}).get("commands") or [] if c.get("action") == "wake"
+                     and (c.get("targets") == "all" or sfx in (c.get("targets") or []))
+                     and simdi - zaman(c["issued_at"]) < timedelta(minutes=60))
+        uyku_takili = bool(o.get("uyku")) and istenen == "calis" and n_wake >= 3
+        sorun = "ayar_bozuk" if ayar_bozuk else "takili" if takili else "uyku_takili" if uyku_takili else None
         if not sorun:
             if d.get("sorun"):
                 _yaz_olay(olaylar, w, ip, "düzeldi", "ok", d["sorun"])
-            d.pop("sorun", None); d.pop("ilk", None); d["sayac"] = 0
+            d.pop("sorun", None); d.pop("ilk", None); d.pop("uyarildi", None); d["sayac"] = 0
             continue
         if d.get("sorun") != sorun:
             d.update(sorun=sorun, ilk=simdi.isoformat(), sayac=0)
@@ -126,6 +133,15 @@ def calis(sonuc, mad, kim):
                 _yaz_olay(olaylar, w, ip, "onarım (fabrika ayarı + ayar yükleme)", "ok" if ok else "BAŞARISIZ", ayr)
             elif not d.get("uyarildi"):
                 _yaz_olay(olaylar, w, ip, "onarım hakkı doldu", "BAŞARISIZ", "6 saat içinde ikinci onarım yapılmaz; sahada bakılmalı")
+                d["uyarildi"] = True
+        elif sorun == "uyku_takili":
+            if not son_reboot or simdi - son_reboot > timedelta(hours=2):
+                k, r = M.cgi(ip, "reboot.cgi", timeout=15)
+                d["son_reboot"] = simdi.isoformat()
+                _yaz_olay(olaylar, w, ip, "yeniden başlatma (uyandırmaya uymuyor)", "ok" if k in (200, -1) else f"hata {k}",
+                          "%d uyandırma komutu / 60 dk, hâlâ uykuda" % n_wake)
+            elif not d.get("uyarildi") and simdi - son_reboot > timedelta(minutes=40):
+                _yaz_olay(olaylar, w, ip, "yeniden başlatma işe yaramadı", "BAŞARISIZ", "uyandırmaya hâlâ uymuyor; sahada bakılmalı")
                 d["uyarildi"] = True
         elif sorun == "takili" and sure > timedelta(minutes=30) and (not son_reboot or simdi - son_reboot > timedelta(hours=2)):
             k, r = M.cgi(ip, "reboot.cgi", timeout=15)

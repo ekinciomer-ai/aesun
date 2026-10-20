@@ -18,26 +18,50 @@
   .pbar .sag{display:flex;gap:18px;align-items:center}
   .band .meta2{margin-top:10px;font-size:14px;color:var(--mut2)}
   .kap{padding-top:28px;padding-bottom:80px;display:flex;flex-direction:column;gap:20px}
-  /* KPI */
   .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
   .kpi .t{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
   .kpi .t b{display:block;font-family:Archivo,sans-serif;font-weight:800;font-size:26px;color:var(--ink);line-height:1.1}
   .kpi .t b small{font-size:14px;font-weight:600;color:var(--mut2)}
   .kpi .t span{font-size:13px;color:var(--mut2);font-weight:500}
-  /* filtre çubuğu */
-  .flt{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .kpi .t .d{font-size:12px;font-weight:600;margin-top:3px}
+  .dn{color:var(--red-d)}.up{color:#1E9E5A}
+  /* dönem seçici */
+  .donemsec{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .donemsec .lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut2)}
+  .seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .seg button{min-height:40px;padding:0 16px;border:0;background:transparent;color:var(--ink2);border-radius:9px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+  .seg button small{display:block;font-size:11px;font-weight:500;color:var(--mut2)}
+  .seg button[aria-pressed=true]{background:var(--char);color:#fff}
+  .seg button[aria-pressed=true] small{color:#C9CDD3}
+  /* erozyon */
+  .eroz{background:linear-gradient(180deg,#fff,var(--soft));border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+  .eroz .eh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .eroz h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
+  .eroz .kay{font-size:12px;color:var(--mut2)}.eroz .kay a{color:var(--red-d);font-weight:600;text-decoration:none}.eroz .kay a:hover{text-decoration:underline}
+  .eroz .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .eroz .st{flex:1;min-width:110px;text-align:center;padding:6px 8px;border-radius:10px}
+  .eroz .st.on{background:#fff;box-shadow:0 0 0 2px var(--red) inset}
+  .eroz .st b{display:block;font-family:Archivo,sans-serif;font-weight:800;font-size:22px;color:var(--ink);line-height:1.15}
+  .eroz .st b small{font-size:12px;font-weight:600;color:var(--mut2)}
+  .eroz .st span{font-size:12px;color:var(--mut2);font-weight:500}
+  .eroz .ar{display:flex;align-items:center;color:var(--red);font-weight:700;font-size:18px;padding:0 2px}
+  .eroz .bar2{margin-top:12px;height:14px;border-radius:7px;background:var(--soft);overflow:hidden;display:flex}
+  .eroz .bar2 .kul{height:100%;background:linear-gradient(90deg,var(--red),#F0574E)}
+  .eroz .bar2 .kal{height:100%;background:#1E9E5A}
+  .eroz .bl{display:flex;justify-content:space-between;font-size:12px;color:var(--mut2);margin-top:6px;font-weight:500}
+  /* filtre */
+  .flt{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
   .flt label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut2);display:flex;flex-direction:column;gap:5px}
   .flt select,.flt input[type=search]{min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:15px;color:var(--ink);background:#fff}
-  .flt input[type=search]{min-width:220px}
-  .flt .chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink2);font-weight:500;cursor:pointer;align-self:flex-end;min-height:42px}
+  .flt input[type=search]{min-width:200px}
+  .flt .chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink2);font-weight:500;cursor:pointer;min-height:42px}
   .flt .chk input{width:18px;height:18px;accent-color:var(--red)}
-  .flt .sifirla{align-self:flex-end;min-height:42px;padding:0 14px;border:1px solid var(--line);background:var(--soft);color:var(--ink2);border-radius:10px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+  .flt .sifirla{min-height:42px;padding:0 14px;border:1px solid var(--line);background:var(--soft);color:var(--ink2);border-radius:10px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
   .flt .sifirla:hover{border-color:var(--red);color:var(--red-d)}
-  /* iki sütun grafik */
   .graf{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media(max-width:760px){.graf{grid-template-columns:1fr}}
   .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px}
-  .panel h2{margin:0 0 4px;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
+  .panel h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
   .panel .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:14px}
   .panel .ph small{font-size:13px;color:var(--mut2);font-weight:500}
   .bars{display:flex;flex-direction:column;gap:9px}
@@ -49,53 +73,36 @@
   .bar.ed .fl{background:linear-gradient(90deg,#1A97B5,#4FB9D1)}
   .bar .v{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);white-space:nowrap}
   @media(max-width:760px){.bar{grid-template-columns:110px 1fr auto}}
-  /* tablo */
-  .tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .tbl-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-  .tbl-top h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
-  .tbl-top .say{font-size:13px;color:var(--mut2)}
-  .tscroll{overflow-x:auto;max-height:620px;overflow-y:auto}
-  table{border-collapse:collapse;width:100%;font-size:14px}
-  thead th{position:sticky;top:0;background:#fff;text-align:left;padding:10px 14px;border-bottom:2px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut2);cursor:pointer;white-space:nowrap;user-select:none}
-  thead th:hover{color:var(--red-d)}
-  thead th.num{text-align:right}
-  thead th .ok{opacity:.4;font-size:11px}
-  thead th[aria-sort] .ok{opacity:1;color:var(--red)}
-  tbody td{padding:9px 14px;border-bottom:1px solid var(--soft);color:var(--ink2);vertical-align:top}
-  tbody td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
-  tbody td.tm{font-weight:600;color:var(--ink)}
-  tbody td.tm a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--mut2);cursor:pointer}
-  tbody td.tm a:hover{color:var(--red-d);border-color:var(--red)}
-  tbody td.tm a::after{content:" ⌖";color:var(--mut2);font-size:12px}
-  tbody tr:hover{background:var(--soft)}
-  tbody td .edb{font-size:12px;color:var(--mut2)}
-  .sifir td{opacity:.5}
-  .gdurum{padding:40px 0;text-align:center;color:var(--mut2)}
-  .note{font-size:13px;color:var(--mut2);line-height:1.6}
-  .note b{color:var(--ink2)}
-  /* erozyon şeridi */
-  .eroz{background:linear-gradient(180deg,#fff,var(--soft));border:1px solid var(--line);border-radius:14px;padding:16px 20px}
-  .eroz .eh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-  .eroz h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
-  .eroz .kay{font-size:12px;color:var(--mut2)}.eroz .kay a{color:var(--red-d);font-weight:600;text-decoration:none}.eroz .kay a:hover{text-decoration:underline}
-  .eroz .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
-  .eroz .st{flex:1;min-width:120px;text-align:center;padding:6px 8px}
-  .eroz .st b{display:block;font-family:Archivo,sans-serif;font-weight:800;font-size:22px;color:var(--ink);line-height:1.15}
-  .eroz .st b small{font-size:12px;font-weight:600;color:var(--mut2)}
-  .eroz .st span{font-size:12px;color:var(--mut2);font-weight:500}
-  .eroz .ar{display:flex;align-items:center;color:var(--red);font-weight:700;font-size:18px;padding:0 2px}
-  .eroz .bar2{margin-top:12px;height:14px;border-radius:7px;background:var(--soft);overflow:hidden;display:flex}
-  .eroz .bar2 .kul{height:100%;background:linear-gradient(90deg,var(--red),#F0574E)}
-  .eroz .bar2 .kal{height:100%;background:#1E9E5A}
-  .eroz .bl{display:flex;justify-content:space-between;font-size:12px;color:var(--mut2);margin-top:6px;font-weight:500}
-  /* harita */
-  .hpanel .ph small{font-size:13px;color:var(--mut2);font-weight:500}
   #harita{height:460px;border-radius:12px;border:1px solid var(--line);overflow:hidden;z-index:0}
   @media(max-width:760px){#harita{height:360px}}
   .leaflet-popup-content{font:inherit;font-size:13px;line-height:1.5;margin:10px 12px}
   .leaflet-popup-content b{color:var(--ink)}
   .lej{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut2);margin-top:10px;align-items:center}
   .lej i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
+  .tbl-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .tbl-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tbl-top h2{margin:0;font-family:Archivo,sans-serif;font-weight:700;font-size:17px}
+  .tbl-top .say{font-size:13px;color:var(--mut2)}
+  .tscroll{overflow-x:auto;max-height:640px;overflow-y:auto}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  thead th{position:sticky;top:0;background:#fff;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut2);cursor:pointer;white-space:nowrap;user-select:none}
+  thead th:hover{color:var(--red-d)}
+  thead th.num{text-align:right}
+  thead th.act{color:var(--red-d)}
+  thead th .ok{opacity:.4;font-size:11px}
+  thead th[aria-sort] .ok{opacity:1;color:var(--red)}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--soft);color:var(--ink2);vertical-align:top}
+  tbody td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+  tbody td.num.z{color:var(--mut2);font-weight:500}
+  tbody td.num.act{background:var(--soft)}
+  tbody td.tm{font-weight:600;color:var(--ink)}
+  tbody td.tm a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--mut2);cursor:pointer}
+  tbody td.tm a:hover{color:var(--red-d);border-color:var(--red)}
+  tbody td.tm a::after{content:" ⌖";color:var(--mut2);font-size:12px}
+  tbody tr:hover{background:#FCFCFD}
+  .gdurum{padding:40px 0;text-align:center;color:var(--mut2)}
+  .note{font-size:13px;color:var(--mut2);line-height:1.6}
+  .note b{color:var(--ink2)}
 </style>
 </head>
 <body>
@@ -113,42 +120,34 @@
 <main>
 <section class="band"><div class="wrap">
   <div class="eyebrow">KAPASİTE PANELİ · TEİAŞ DAĞITIM SEVİYESİ</div>
-  <h1>TM bazlı tahsis edilebilir lisanssız kapasite</h1>
-  <p>Trafo merkezi bazında, dağıtım seviyesinden güneş ve rüzgâr kaynaklı lisanssız üretime tahsis edilebilecek güncel kapasite. İl ve EDAŞ kırılımında çapraz süzülür.</p>
+  <h1>TM bazlı lisanssız kapasite ve dönem erimesi</h1>
+  <p>Trafo merkezi bazında dağıtım seviyesinden güneş/rüzgâr lisanssız üretime tahsis edilebilecek kalan kapasite; üç dönem (Mart → Temmuz → Ekim 2026), il ve EDAŞ kırılımında çapraz süzülür.</p>
   <div class="meta2" id="meta2">Yükleniyor…</div>
 </div></section>
 <div class="wrap kap">
-  <div class="kpi" id="kpi"></div>
 
   <div class="eroz">
     <div class="eh">
       <h2>Dönemler arası kapasite erimesi</h2>
       <span class="kay">Kaynak: TEİAŞ 02.03 / 16.07 / 01.10.2026 · derleme <a href="https://kaangokay.com/wp-content/uploads/ges/Lisanssiz_Analiz_Platformu_2026.html#s-kapasite" target="_blank" rel="noopener">kaangokay.com</a></span>
     </div>
-    <div class="flow">
-      <div class="st"><b>2.000 <small>MWe</small></b><span>İlan edilen toplam</span></div>
-      <div class="ar">→</div>
-      <div class="st"><b>1.337 <small>MWe</small></b><span>02.03.2026 kalan</span></div>
-      <div class="ar">→</div>
-      <div class="st"><b>625,1 <small>MWe</small></b><span>01.10.2026 kalan</span></div>
-      <div class="ar">·</div>
-      <div class="st"><b>%68,7</b><span>kullanıldı (1.374,9 MWe)</span></div>
-    </div>
-    <div class="bar2"><div class="kul" style="width:68.7%"></div><div class="kal" style="width:31.3%"></div></div>
-    <div class="bl"><span>Kullanılan 1.374,9 MWe</span><span>Kalan 625,1 MWe</span></div>
+    <div class="flow" id="eflow"></div>
+    <div class="bar2"><div class="kul" id="ekul"></div><div class="kal" id="ekal"></div></div>
+    <div class="bl"><span id="ekulL"></span><span id="ekalL"></span></div>
   </div>
 
+  <div class="donemsec">
+    <span class="lbl">Aktif dönem</span>
+    <div class="seg" id="seg" role="group" aria-label="Dönem"></div>
+  </div>
+
+  <div class="kpi" id="kpi"></div>
+
   <div class="flt">
-    <label>İl
-      <select id="fil"><option value="">Tümü</option></select>
-    </label>
-    <label>EDAŞ
-      <select id="fed"><option value="">Tümü</option></select>
-    </label>
-    <label>Ara
-      <input type="search" id="fara" placeholder="TM adı, il, EDAŞ…" autocomplete="off">
-    </label>
-    <label class="chk"><input type="checkbox" id="fpoz"> Yalnız kapasitesi olan (&gt;0)</label>
+    <label>İl<select id="fil"><option value="">Tümü</option></select></label>
+    <label>EDAŞ<select id="fed"><option value="">Tümü</option></select></label>
+    <label>Ara<input type="search" id="fara" placeholder="TM adı, il, EDAŞ…" autocomplete="off"></label>
+    <label class="chk"><input type="checkbox" id="fpoz"> Aktif dönemde kapasitesi olan</label>
     <button type="button" class="sifirla" id="fsifir">Filtreyi sıfırla</button>
   </div>
 
@@ -163,29 +162,28 @@
     </div>
   </div>
 
-  <div class="panel hpanel">
+  <div class="panel">
     <div class="ph"><h2>Trafo merkezi haritası</h2><small id="hsay"></small></div>
     <div id="harita"></div>
     <div class="lej">
-      <span><i style="background:#D32027"></i>Kapasitesi olan TM (daire boyutu ≈ MWe)</span>
-      <span><i style="background:#9AA2AD"></i>Kapasite 0 (başvuruya kapalı)</span>
-      <span>Filtre haritayı da süzer · işarete tıkla</span>
+      <span><i style="background:#D32027"></i>Kapasitesi olan TM (daire ≈ MWe, aktif dönem)</span>
+      <span><i style="background:#9AA2AD"></i>Kapasite 0</span>
+      <span>Filtre haritayı süzer · tabloda TM'ye tıkla → haritada göster</span>
     </div>
   </div>
 
   <div class="tbl-wrap">
-    <div class="tbl-top">
-      <h2>Trafo merkezi detayı</h2>
-      <span class="say" id="tsay"></span>
-    </div>
+    <div class="tbl-top"><h2>Trafo merkezi detayı · üç dönem</h2><span class="say" id="tsay"></span></div>
     <div class="tscroll">
       <table id="tbl">
         <thead><tr>
           <th data-k="il">İl <span class="ok">↕</span></th>
           <th data-k="tm">Trafo Merkezi <span class="ok">↕</span></th>
-          <th data-k="bara">Bara <span class="ok">↕</span></th>
           <th data-k="edas">EDAŞ / OSB <span class="ok">↕</span></th>
-          <th data-k="mwe" class="num">MWe <span class="ok">↕</span></th>
+          <th data-k="m0203" class="num">02.03 <span class="ok">↕</span></th>
+          <th data-k="m1607" class="num">16.07 <span class="ok">↕</span></th>
+          <th data-k="m0110" class="num">01.10 <span class="ok">↕</span></th>
+          <th data-k="delta" class="num">Δ Mart→Eki <span class="ok">↕</span></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -197,154 +195,130 @@
 </div>
 </main>
 <footer class="foot"><div class="wrap">
-  <div class="legal"><span>© 2012–2026 Aksaray Enerji · Portal</span><span>Kaynak: TEİAŞ dağıtım seviyesi kapasite yayını. Resmî başvuru için TEİAŞ / ilgili EDAŞ esastır.</span></div>
+  <div class="legal"><span>© 2012–2026 Aksaray Enerji · Portal</span><span>Kaynak: TEİAŞ dağıtım seviyesi kapasite yayınları. Resmî başvuru için TEİAŞ / ilgili EDAŞ esastır.</span></div>
 </div></footer>
 <script>
 (function(){
-  var DATA = "kapasite.2026-03-02.json";
-  var tumu=[], gorunen=[];
-  var siraK="mwe", siraYon=-1;
+  var DATA="kapasite3.json";
+  var A=["il","tm","bara","edas","m0203","m1607","m0110","lat","lon"];
+  var PKEY=["m0203","m1607","m0110"];
+  var tumu=[], donemler=[], aktif=2;            // 0=02.03 1=16.07 2=01.10 (varsayılan güncel)
+  var gorunen=[], siraK="akt", siraYon=-1;
+  var MAP=null, KAT=null, geoYok=false;
   var el=function(id){return document.getElementById(id);};
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   function fmt(n){return (Math.round(n*100)/100).toLocaleString("tr-TR",{minimumFractionDigits:2,maximumFractionDigits:2});}
   function fmt0(n){return n.toLocaleString("tr-TR");}
-  function donemTR(d){var p=String(d).split("-");return p.length===3?(p[2]+"."+p[1]+"."+p[0]):d;}
+  function pv(r,p){ return +r[PKEY[p]]||0; }            // dönem değeri
+  function av(r){ return pv(r,aktif); }                 // aktif dönem
 
   function suz(){
     var il=el("fil").value, ed=el("fed").value, q=el("fara").value.trim().toLocaleLowerCase("tr"), poz=el("fpoz").checked;
     return tumu.filter(function(r){
       if(il && r.il!==il) return false;
       if(ed && r.edas!==ed) return false;
-      if(poz && !(r.mwe>0)) return false;
-      if(q){ var h=(r.il+" "+r.tm+" "+r.bara+" "+r.edas).toLocaleLowerCase("tr"); if(h.indexOf(q)<0) return false; }
-      return true;
-    });
-  }
-
-  function topla(rows, alan){
-    var m={}; rows.forEach(function(r){ var k=r[alan]||"—"; m[k]=(m[k]||0)+r.mwe; });
-    return Object.keys(m).map(function(k){return {ad:k,v:m[k]};}).sort(function(a,b){return b.v-a.v;});
-  }
-
-  function barlar(hedef, dizi, limit, tip, tiklaAlan){
-    var ust = dizi.slice(0,limit);
-    var max = ust.length?ust[0].v:1; if(max<=0)max=1;
-    var box=el(hedef);
-    box.innerHTML = ust.map(function(x){
-      var w=Math.max(2,Math.round(x.v/max*100));
-      return '<div class="bar '+(tip==="ed"?"ed":"")+'">'
-        +'<span class="ad" data-alan="'+tip+'" data-v="'+esc(x.ad)+'" title="'+esc(x.ad)+'">'+esc(x.ad)+'</span>'
-        +'<span class="tr"><span class="fl" style="width:'+w+'%"></span></span>'
-        +'<span class="v">'+fmt(x.v)+'</span></div>';
-    }).join("") || '<div class="note">Kayıt yok.</div>';
-    box.querySelectorAll(".ad").forEach(function(a){
-      a.addEventListener("click",function(){
-        var alan=a.getAttribute("data-alan"), v=a.getAttribute("data-v");
-        if(alan==="il"){ el("fil").value=(el("fil").value===v?"":v); }
-        else { el("fed").value=(el("fed").value===v?"":v); }
-        ciz();
-      });
-    });
-  }
-
-  function tablo(rows){
-    rows=rows.slice().sort(function(a,b){
-      var x=a[siraK], y=b[siraK];
-      if(siraK==="mwe"){ return (x-y)*siraYon; }
-      return String(x).localeCompare(String(y),"tr")*siraYon;
-    });
-    var tb=el("tbody");
-    var MAX=800;
-    tb.innerHTML = rows.slice(0,MAX).map(function(r){
-      return '<tr'+(r.mwe>0?"":' class="sifir"')+'>'
-        +'<td>'+esc(r.il)+'</td>'
-        +'<td class="tm"><a href="#" class="tmlink" data-tm="'+esc(r.tm)+'">'+esc(r.tm)+'</a></td>'
-        +'<td>'+esc(r.bara||"")+'</td>'
-        +'<td>'+esc(r.edas||"")+'</td>'
-        +'<td class="num">'+fmt(r.mwe)+'</td></tr>';
-    }).join("");
-    el("durum").hidden = rows.length>0;
-    if(!rows.length) el("durum").textContent="Filtreyle eşleşen trafo merkezi yok.";
-    var not = rows.length>MAX ? (" · ilk "+MAX+" gösteriliyor") : "";
-    el("tsay").textContent = fmt0(rows.length)+" TM · toplam "+fmt(rows.reduce(function(s,r){return s+r.mwe;},0))+" MWe"+not;
-    // başlık ok
-    el("tbl").querySelectorAll("thead th").forEach(function(th){
-      th.removeAttribute("aria-sort");
-      var sp=th.querySelector(".ok"); sp.textContent="↕";
-      if(th.getAttribute("data-k")===siraK){ th.setAttribute("aria-sort",siraYon>0?"ascending":"descending"); sp.textContent=siraYon>0?"↑":"↓"; }
-    });
-  }
-
-  function ciz(){
-    gorunen=suz();
-    var il=el("fil").value;
-    // grafikler filtreye göre
-    if(il){ el("g1b").textContent="İl içi TM sıralaması"; barlar("g1", topla(gorunen,"tm"), 12, "tm"); el("g1n").textContent=il; }
-    else { el("g1b").textContent="İl sıralaması"; barlar("g1", topla(gorunen,"il"), 12, "il"); el("g1n").textContent="MWe"; }
-    barlar("g2", topla(gorunen,"edas"), 12, "ed");
-    el("g2n").textContent="MWe";
-    tablo(gorunen);
-    haritaCiz();
-  }
-
-  function kpiCiz(rows, donem){
-    var tot=rows.reduce(function(s,r){return s+r.mwe;},0);
-    var ils={}, eds={}, poz=0;
-    rows.forEach(function(r){ ils[r.il]=1; if(r.edas)eds[r.edas]=1; if(r.mwe>0)poz++; });
-    el("kpi").innerHTML =
-       tile(fmt(tot),"MWe","Tahsis edilebilir toplam")
-      +tile(fmt0(rows.length),"","Trafo merkezi")
-      +tile(fmt0(poz),"","Kapasitesi olan TM")
-      +tile(fmt0(Object.keys(ils).length),"","İl")
-      +tile(fmt0(Object.keys(eds).length),"","EDAŞ / OSB");
-  }
-  function tile(b,sm,s){ return '<div class="t"><b>'+b+(sm?' <small>'+sm+'</small>':'')+'</b><span>'+s+'</span></div>'; }
-
-  // --- harita ---
-  var GEO=[], MAP=null, KAT=null, geoYok=false;
-  function geoSuz(){
-    var il=el("fil").value, ed=el("fed").value, q=el("fara").value.trim().toLocaleLowerCase("tr"), poz=el("fpoz").checked;
-    return GEO.filter(function(r){
-      if(il && r.il!==il) return false;
-      if(ed && r.edas!==ed) return false;
-      if(poz && !(r.mwe>0)) return false;
+      if(poz && !(av(r)>0)) return false;
       if(q){ var h=(r.il+" "+r.tm+" "+r.edas).toLocaleLowerCase("tr"); if(h.indexOf(q)<0) return false; }
       return true;
     });
   }
+  function topla(rows, alan){
+    var m={}; rows.forEach(function(r){ var k=r[alan]||"—"; m[k]=(m[k]||0)+av(r); });
+    return Object.keys(m).map(function(k){return {ad:k,v:m[k]};}).sort(function(a,b){return b.v-a.v;});
+  }
+  function barlar(hedef, dizi, limit, tip){
+    var ust=dizi.filter(function(x){return x.v>0;}).slice(0,limit);
+    var max=ust.length?ust[0].v:1; if(max<=0)max=1;
+    var box=el(hedef);
+    box.innerHTML=ust.map(function(x){
+      var w=Math.max(2,Math.round(x.v/max*100));
+      return '<div class="bar '+(tip==="ed"?"ed":"")+'"><span class="ad" data-alan="'+tip+'" data-v="'+esc(x.ad)+'" title="'+esc(x.ad)+'">'+esc(x.ad)+'</span><span class="tr"><span class="fl" style="width:'+w+'%"></span></span><span class="v">'+fmt(x.v)+'</span></div>';
+    }).join("") || '<div class="note">Bu dönemde kapasiteli kayıt yok.</div>';
+    box.querySelectorAll(".ad").forEach(function(a){
+      a.addEventListener("click",function(){
+        var alan=a.getAttribute("data-alan"), v=a.getAttribute("data-v");
+        if(alan==="il"){ el("fil").value=(el("fil").value===v?"":v); } else { el("fed").value=(el("fed").value===v?"":v); }
+        ciz();
+      });
+    });
+  }
+  function tablo(rows){
+    var key=siraK;
+    rows=rows.slice().sort(function(a,b){
+      var x,y;
+      if(key==="akt"){x=av(a);y=av(b);return (x-y)*siraYon;}
+      if(key==="delta"){x=pv(a,2)-pv(a,0);y=pv(b,2)-pv(b,0);return (x-y)*siraYon;}
+      if(key==="m0203"||key==="m1607"||key==="m0110"){x=+a[key]||0;y=+b[key]||0;return (x-y)*siraYon;}
+      return String(a[key]).localeCompare(String(b[key]),"tr")*siraYon;
+    });
+    var MAXN=1200, tb=el("tbody");
+    tb.innerHTML=rows.slice(0,MAXN).map(function(r){
+      var d=pv(r,2)-pv(r,0);
+      function c(p){var v=pv(r,p);return '<td class="num'+(v>0?"":" z")+(p===aktif?" act":"")+'">'+fmt(v)+'</td>';}
+      var ds=d<0?'<td class="num" style="color:var(--red-d)">'+fmt(d)+'</td>':(d>0?'<td class="num" style="color:#1E9E5A">+'+fmt(d)+'</td>':'<td class="num z">0,00</td>');
+      return '<tr><td>'+esc(r.il)+'</td><td class="tm"><a href="#" class="tmlink" data-tm="'+esc(r.tm)+'">'+esc(r.tm)+'</a></td><td>'+esc(r.edas||"")+'</td>'+c(0)+c(1)+c(2)+ds+'</tr>';
+    }).join("");
+    el("durum").hidden=rows.length>0;
+    if(!rows.length) el("durum").textContent="Filtreyle eşleşen trafo merkezi yok.";
+    var not=rows.length>MAXN?(" · ilk "+MAXN):"";
+    el("tsay").textContent=fmt0(rows.length)+" TM · aktif dönem ("+donemler[aktif].kisa+") toplam "+fmt(rows.reduce(function(s,r){return s+av(r);},0))+" MWe"+not;
+    el("tbl").querySelectorAll("thead th").forEach(function(th){
+      th.removeAttribute("aria-sort"); var sp=th.querySelector(".ok"); sp.textContent="↕";
+      var k=th.getAttribute("data-k"); th.classList.toggle("act", k===PKEY[aktif]);
+      var sk=(siraK==="akt")?PKEY[aktif]:siraK;
+      if(k===sk){ th.setAttribute("aria-sort",siraYon>0?"ascending":"descending"); sp.textContent=siraYon>0?"↑":"↓"; }
+    });
+  }
+  function kpiCiz(rows){
+    var tot=rows.reduce(function(s,r){return s+av(r);},0);
+    var ils={}, eds={}, poz=0;
+    rows.forEach(function(r){ ils[r.il]=1; if(r.edas)eds[r.edas]=1; if(av(r)>0)poz++; });
+    var ilk=donemler[0].toplam, fark=tot-ilk, yuzde=ilk?Math.round((ilk-tot)/ilk*1000)/10:0;
+    el("kpi").innerHTML=
+       tile(fmt(tot),"MWe","Kalan ("+donemler[aktif].kisa+")", aktif>0?('<span class="d dn">Mart\'a göre '+fmt(fark)+' MWe ('+yuzde+'% erime)</span>'):'<span class="d">başlangıç dönemi</span>')
+      +tile(fmt0(rows.length),"","Trafo merkezi","")
+      +tile(fmt0(poz),"","Kapasitesi olan TM","")
+      +tile(fmt0(Object.keys(ils).length),"","İl","")
+      +tile(fmt0(Object.keys(eds).length),"","EDAŞ / OSB","");
+  }
+  function tile(b,sm,s,d){ return '<div class="t"><b>'+b+(sm?' <small>'+sm+'</small>':'')+'</b><span>'+s+'</span>'+(d||'')+'</div>'; }
+
+  function erozCiz(){
+    var toplam=donemler.map(function(d){return d.toplam;});
+    var ilk=toplam[0], son=toplam[toplam.length-1], kul=ilk-son, oran=ilk?kul/ilk*100:0;
+    el("eflow").innerHTML=donemler.map(function(d,i){
+      var cell='<div class="st'+(i===aktif?' on':'')+'"><b>'+fmt0(Math.round(d.toplam*10)/10).replace(/,0$/,'')+' <small>MWe</small></b><span>'+d.tarih.split("-").reverse().join(".")+' kalan</span></div>';
+      return cell+(i<donemler.length-1?'<div class="ar">→</div>':'');
+    }).join("")+'<div class="ar">·</div><div class="st"><b>%'+(Math.round(oran*10)/10).toLocaleString("tr-TR")+'</b><span>kullanıldı ('+fmt0(Math.round(kul*10)/10)+' MWe)</span></div>';
+    el("ekul").style.width=oran.toFixed(1)+"%"; el("ekal").style.width=(100-oran).toFixed(1)+"%";
+    el("ekulL").textContent="Kullanılan "+fmt0(Math.round(kul*10)/10)+" MWe";
+    el("ekalL").textContent="Kalan "+fmt0(Math.round(son*10)/10)+" MWe";
+  }
+
+  // harita
+  function geoSuz(){ return suz().filter(function(r){return r.lat!=null;}); }
   function rCap(m){ return m>0 ? Math.max(5, Math.min(26, 5+Math.sqrt(m)*3.4)) : 4; }
   function haritaCiz(){
-    if(geoYok || !MAP) return;
-    var rows=geoSuz();
-    KAT.clearLayers();
-    var pts=[];
+    if(geoYok||!MAP) return;
+    var rows=geoSuz(); KAT.clearLayers(); var pts=[];
     rows.forEach(function(r){
-      var m=L.circleMarker([r.lat,r.lon],{
-        radius:rCap(r.mwe),
-        color:r.mwe>0?"#A81B22":"#6B727B",
-        weight:1, fillColor:r.mwe>0?"#D32027":"#9AA2AD",
-        fillOpacity:r.mwe>0?.72:.5
-      });
-      m.bindPopup('<b>'+r.tm+'</b><br>'+r.il+' · '+(r.edas||"—")+'<br><b>'+fmt(r.mwe)+' MWe</b> tahsis edilebilir');
+      var v=av(r);
+      var m=L.circleMarker([r.lat,r.lon],{radius:rCap(v),color:v>0?"#A81B22":"#6B727B",weight:1,fillColor:v>0?"#D32027":"#9AA2AD",fillOpacity:v>0?.72:.5});
+      m.bindPopup('<b>'+r.tm+'</b><br>'+r.il+' · '+(r.edas||"—")+'<br>02.03 '+fmt(pv(r,0))+' → 16.07 '+fmt(pv(r,1))+' → <b>01.10 '+fmt(pv(r,2))+'</b> MWe');
       m.addTo(KAT); pts.push([r.lat,r.lon]);
     });
-    var konumlu=rows.length, kapasiteli=rows.filter(function(r){return r.mwe>0;}).length;
-    el("hsay").textContent = konumlu+" konumlu TM · "+kapasiteli+" kapasiteli";
+    var kapasiteli=rows.filter(function(r){return av(r)>0;}).length;
+    el("hsay").textContent=rows.length+" konumlu TM · "+kapasiteli+" kapasiteli ("+donemler[aktif].kisa+")";
     if(pts.length){ try{ MAP.fitBounds(pts,{padding:[30,30],maxZoom:9}); }catch(e){} }
   }
   function haritaGit(tm){
-    if(geoYok){ el("hsay").textContent="Harita yüklenemedi."; return; }
-    var g=null; for(var i=0;i<GEO.length;i++){ if(GEO[i].tm===tm){ g=GEO[i]; break; } }
+    var g=null; for(var i=0;i<tumu.length;i++){ if(tumu[i].tm===tm){ g=tumu[i]; break; } }
     try{ el("harita").scrollIntoView({behavior:"smooth",block:"center"}); }catch(e){}
-    if(!g){ el("hsay").textContent="“"+tm+"” için konum eşleşmesi yok (KMZ'de bulunamadı)."; return; }
-    if(!MAP) return;
-    setTimeout(function(){
-      try{ MAP.invalidateSize(); }catch(e){}
-      MAP.setView([g.lat,g.lon], 12, {animate:true});
-      L.popup().setLatLng([g.lat,g.lon])
-        .setContent('<b>'+g.tm+'</b><br>'+g.il+' · '+(g.edas||"—")+'<br><b>'+fmt(g.mwe)+' MWe</b> tahsis edilebilir')
-        .openOn(MAP);
-    }, 380);
+    if(!g || g.lat==null){ el("hsay").textContent="“"+tm+"” için konum eşleşmesi yok (KMZ'de bulunamadı)."; return; }
+    if(geoYok||!MAP) return;
+    setTimeout(function(){ try{MAP.invalidateSize();}catch(e){} MAP.setView([g.lat,g.lon],12,{animate:true});
+      L.popup().setLatLng([g.lat,g.lon]).setContent('<b>'+g.tm+'</b><br>'+g.il+' · '+(g.edas||"—")+'<br>02.03 '+fmt(pv(g,0))+' → 16.07 '+fmt(pv(g,1))+' → <b>01.10 '+fmt(pv(g,2))+'</b> MWe').openOn(MAP);
+    },380);
   }
   function haritaKur(){
     try{
@@ -356,15 +330,36 @@
     }catch(e){ geoYok=true; el("hsay").textContent="Harita başlatılamadı."; }
   }
 
+  function ciz(){
+    gorunen=suz();
+    var il=el("fil").value;
+    if(il){ el("g1b").textContent="İl içi TM sıralaması"; barlar("g1", topla(gorunen,"tm"),12,"tm"); el("g1n").textContent=il+" · "+donemler[aktif].kisa; }
+    else { el("g1b").textContent="İl sıralaması"; barlar("g1", topla(gorunen,"il"),12,"il"); el("g1n").textContent="MWe · "+donemler[aktif].kisa; }
+    barlar("g2", topla(gorunen,"edas"),12,"ed"); el("g2n").textContent="MWe · "+donemler[aktif].kisa;
+    kpiCiz(gorunen); erozCiz(); tablo(gorunen); haritaCiz();
+  }
+  function segCiz(){
+    el("seg").innerHTML=donemler.map(function(d,i){
+      return '<button type="button" data-i="'+i+'" aria-pressed="'+(i===aktif)+'">'+d.etiket.split(" ")[0]+' <small>'+d.kisa+'</small></button>';
+    }).join("");
+    el("seg").querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click",function(){ aktif=+b.getAttribute("data-i");
+        el("seg").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed","false");});
+        b.setAttribute("aria-pressed","true"); ciz();
+      });
+    });
+  }
+
   el("fil").addEventListener("change",ciz);
   el("fed").addEventListener("change",ciz);
   el("fara").addEventListener("input",ciz);
   el("fpoz").addEventListener("change",ciz);
   el("fsifir").addEventListener("click",function(){ el("fil").value="";el("fed").value="";el("fara").value="";el("fpoz").checked=false; ciz(); });
+  el("tbody").addEventListener("click",function(e){ var a=e.target.closest&&e.target.closest(".tmlink"); if(a){ e.preventDefault(); haritaGit(a.getAttribute("data-tm")); } });
   el("tbl").querySelectorAll("thead th").forEach(function(th){
     th.addEventListener("click",function(){
       var k=th.getAttribute("data-k");
-      if(siraK===k){ siraYon=-siraYon; } else { siraK=k; siraYon=(k==="mwe"?-1:1); }
+      if(siraK===k){ siraYon=-siraYon; } else { siraK=k; siraYon=(/^m0|delta/.test(k)?-1:1); }
       tablo(gorunen);
     });
   });
@@ -372,23 +367,16 @@
   fetch(DATA,{cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
     .then(function(d){
-      var A=d.alan||["il","tm","bara","edas","mwe"];
-      tumu=(d.satir||[]).map(function(a){ var o={}; A.forEach(function(k,i){o[k]=a[i];}); o.mwe=+o.mwe||0; return o; });
-      // il & edas seçenekleri
+      donemler=d.donemler; aktif=donemler.length-1;
+      tumu=(d.rows||[]).map(function(a){ var o={}; A.forEach(function(k,i){o[k]=a[i];}); return o; });
       var ils=Array.from(new Set(tumu.map(function(r){return r.il;}))).sort(function(a,b){return a.localeCompare(b,"tr");});
       var eds=Array.from(new Set(tumu.map(function(r){return r.edas;}).filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"tr");});
       el("fil").insertAdjacentHTML("beforeend", ils.map(function(v){return '<option>'+esc(v)+'</option>';}).join(""));
       el("fed").insertAdjacentHTML("beforeend", eds.map(function(v){return '<option>'+esc(v)+'</option>';}).join(""));
-      el("meta2").textContent = (d.baslik||"TEİAŞ kapasite") + " · " + donemTR(d.donem) + " · kaynak " + (d.kaynak||"TEİAŞ");
-      el("not").innerHTML = "<b>Not:</b> Veriler "+donemTR(d.donem)+" tarihli TEİAŞ dağıtım seviyesi kapasite yayınından alınmıştır; tek dönemin anlık görüntüsüdür. “MWe” o trafo merkezinde o tarih için tahsis edilebilecek güncel kapasitedir; 0,00 başvuruya kapalı demektir. Haritadaki konumlar TEİAŞ trafo merkezi KMZ'sinden eşleştirilmiştir; adı birebir eşleşmeyen veya KMZ'de bulunmayan bazı TM'ler haritada görünmeyebilir (tablo tam listedir). Dönem erimesi özeti TEİAŞ'ın 02.03/16.07/01.10.2026 yayınlarından kaangokay.com derlemesine dayanır.";
-      kpiCiz(tumu, d.donem);
-      haritaKur();
-      ciz();
-      // geo (konumlar) ayrı dosyadan
-      fetch("kapasite_geo."+(d.donem)+".json",{cache:"no-store"})
-        .then(function(r){ return r.ok?r.json():[]; })
-        .then(function(g){ GEO=g||[]; haritaCiz(); })
-        .catch(function(){ el("hsay").textContent="Konum verisi yüklenemedi."; });
+      var konumlu=tumu.filter(function(r){return r.lat!=null;}).length;
+      el("meta2").textContent=d.tm_sayi+" trafo merkezi · 3 dönem (Mart/Temmuz/Ekim 2026) · "+konumlu+" haritada · kaynak TEİAŞ/kaangokay";
+      el("not").innerHTML="<b>Not:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezinde o tarih için tahsis edilebilecek güncel MWe'dir; 0,00 başvuruya kapalıdır. Üç dönem: 02.03 → 16.07 → 01.10.2026. Haritadaki konumlar TEİAŞ trafo merkezi KMZ'sinden eşleştirildi; adı birebir eşleşmeyen bazı TM'ler haritada görünmeyebilir (tablo tam listedir). Veri derlemesi: TEİAŞ resmî yayınları + kaangokay.com.";
+      haritaKur(); segCiz(); ciz();
     })
     .catch(function(e){
       el("meta2").textContent="Kapasite verisi yüklenemedi.";

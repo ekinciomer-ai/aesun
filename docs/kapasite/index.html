@@ -2141,7 +2141,10 @@
   function tmAraziSeciciDoldur(){
     var sel = el("araziTmSec");
     if(!sel) return;
-    var kaynak = (gorunen && gorunen.length) ? gorunen : tumu;
+    var ilFiltre = el("fil") ? el("fil").value : "";
+    var edFiltre = el("fed") ? el("fed").value : "";
+    var araFiltre = el("fara") ? el("fara").value.trim() : "";
+    var kaynak = ((ilFiltre || edFiltre || araFiltre) && gorunen && gorunen.length) ? gorunen : tumu;
     var tms = {}, liste = [];
     kaynak.forEach(function(r){
       var key = r.il + "|" + r.tm;
@@ -2155,13 +2158,28 @@
       var sk = seciliRow.il + "|" + seciliRow.tm;
       if(!tms[sk]){
         var sTop = tumu.filter(function(x){return x.il===seciliRow.il && x.tm===seciliRow.tm;}).reduce(function(s,x){return s+av(x);},0);
-        liste.unshift({ il: seciliRow.il, tm: seciliRow.tm, row: seciliRow, top: sTop });
+        tms[sk] = { il: seciliRow.il, tm: seciliRow.tm, row: seciliRow, top: sTop };
+        liste.push(tms[sk]);
       }
     }
-    sel.innerHTML = liste.slice(0, 300).map(function(o){
-      var sec = (seciliRow && seciliRow.il === o.il && seciliRow.tm === o.tm) ? " selected" : "";
-      return '<option value="'+esc(o.il+'|'+o.tm)+'"'+sec+'>'+esc(o.il)+' · '+esc(o.tm)+' ('+fmt(o.top)+' MWe)</option>';
-    }).join("");
+    liste.sort(function(a,b){
+      return a.il.localeCompare(b.il, "tr") || a.tm.localeCompare(b.tm, "tr");
+    });
+    var ilGrup = {};
+    liste.forEach(function(o){
+      (ilGrup[o.il] = ilGrup[o.il] || []).push(o);
+    });
+    var html = "";
+    Object.keys(ilGrup).sort(function(a,b){ return a.localeCompare(b, "tr"); }).forEach(function(ilAd){
+      var gr = ilGrup[ilAd];
+      html += '<optgroup label="'+esc(ilAd)+' ('+gr.length+' TM)">';
+      gr.forEach(function(o){
+        var sec = (seciliRow && seciliRow.il === o.il && seciliRow.tm === o.tm) ? " selected" : "";
+        html += '<option value="'+esc(o.il+'|'+o.tm)+'"'+sec+'>'+esc(o.il)+' · '+esc(o.tm)+' ('+fmt(o.top)+' MWe)</option>';
+      });
+      html += '</optgroup>';
+    });
+    sel.innerHTML = html;
     if(seciliRow) sel.value = seciliRow.il + "|" + seciliRow.tm;
   }
 

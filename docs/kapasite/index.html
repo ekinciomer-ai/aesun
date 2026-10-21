@@ -126,7 +126,8 @@
   .lej .chk2{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink2);font-weight:600;background:#F6F8FB;padding:4px 10px;border-radius:7px;border:1px solid var(--line)}
   .lej .chk2 input{width:15px;height:15px;accent-color:var(--red)}
   .edas-tip{font:inherit;font-size:12px;font-weight:600;background:rgba(15,27,45,.94);border:1px solid rgba(255,255,255,.22);border-radius:99px;padding:4px 11px;color:#F8FAFC;box-shadow:0 4px 12px rgba(0,0,0,.25)}
-  .il-rozet{background:rgba(15,27,45,.88);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:2px 8px;font-family:Archivo,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.28);pointer-events:none;text-align:center;display:inline-block}
+  .il-rozet{background:rgba(15,27,45,.88);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:2px 8px;font-family:Archivo,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.28);pointer-events:none!important;text-align:center;display:inline-block}
+  .il-rozet-wrap,.leaflet-etiket-pane,.leaflet-etiket-pane *{pointer-events:none!important}
   .il-rozet b{color:#5CF08F}
   .il-rozet.dolu b{color:#9AA6B5}
   .il-rozet.secili{background:#D32027;border-color:#FFE4E6;transform:scale(1.08)}
@@ -547,7 +548,8 @@
         <button type="button" class="k-btn" id="btnPresetSebeke" title="Şebeke, İletim Ağı ve TM Kapasite Görünümü">⚡ Şebeke Modu</button>
         <button type="button" class="k-btn" id="btnPresetKisit" style="border-color:#9333EA;color:#6B21A8;background:#FAF5FF" title="Doğal Sit, Çevre Koruma, Orman ve Büyük Ova Kısıtlılık Katmanlarını Aç">🛡️ GES Arazi Kısıtlılık Modu</button>
         <button type="button" class="k-btn" id="btnTucbsKatalogAc" style="border-color:#0284C7;color:#075985;background:#F0F9FF">📚 TUCBS Katalog (375 Katman)</button>
-        <button type="button" class="k-btn" id="btnUstParselGesAc" style="border-color:#0F766E;color:#065F46;background:#ECFDF5;font-weight:800" title="Parsel Sorgula, KML/KMZ Ekle, CAD GES Yerleşimi, Aplikasyon Krokisi (ED50 3°/6°), Tek Hat ve Başvuru Formlarını Hazırla">📐 Parsel Sorgula · KML/KMZ &amp; CAD GES Paketi</button>
+        <button type="button" class="k-btn" id="btnUstParselGesAc" style="border-color:#0F766E;color:#065F46;background:#ECFDF5;font-weight:800" title="Parsel Sorgula, KML/KMZ Ekle, CAD GES Yerleşimi, Aplikasyon Krokisi (ED50 3°/6°), Tek Hat ve Başvuru Formlarını Hazırla">📐 Parsel Sorgula · KML/KMZ &amp; CAD GES Paketi</button>
+
         <button type="button" class="k-btn" id="btnTurkiyeOdak">🔍 Haritayı Sığdır</button>
       </div>
     </div>
@@ -711,13 +713,15 @@
       <div>
         <h3>
           <span>Seçili Trafo Merkezi · Teknik Tek Hat &amp; Bara Şeması</span>
-          <span style="display:inline-flex;gap:6px;flex-wrap:wrap">
-            <button type="button" class="k-btn" id="btnTmKisitHarita" style="min-height:28px;font-size:11.5px;border-color:#9333EA;color:#6B21A8;background:#FAF5FF">🛡️ Sit &amp; Orman Katmanı</button>
-            <button type="button" class="shb-link-btn" id="btnTmSahibinden" style="min-height:28px;font-size:11.5px;padding:3px 9px">🟡 Sahibinden Arazi Katmanı</button>
-            <button type="button" class="k-btn" id="btnTmUydu" style="min-height:28px;font-size:11.5px">🛰️ Uyduda Göster</button>
+          <span style="display:inline-flex;gap:5px;flex-wrap:wrap">
+            <button type="button" class="k-btn on" id="btnTmGorunumBara" style="min-height:28px;font-size:11px;padding:0 8px" title="TEİAŞ 154/34,5 kV Bara ve 3 Dönem Kapasite Şeması">⚡ TM Bara Özeti</button>
+            <button type="button" class="k-btn" id="btnTmGorunumTekyildiz" style="min-height:28px;font-size:11px;padding:0 8px;border-color:#0F766E;color:#065F46;background:#ECFDF5" title="TEKYILDIZ TEK HAT ŞEMASI 2MW.dwg Örnek OG GES Tek Hat Şeması">📐 2 MW Örnek Tek Hat (Tekyıldız DWG)</button>
+            <button type="button" class="k-btn" id="btnTmKisitHarita" style="min-height:28px;font-size:11px;padding:0 8px;border-color:#9333EA;color:#6B21A8;background:#FAF5FF">🛡️ Sit &amp; Orman</button>
+            <button type="button" class="shb-link-btn" id="btnTmSahibinden" style="min-height:28px;font-size:11px;padding:3px 8px">🟡 Arazi Katmanı</button>
+            <button type="button" class="k-btn" id="btnTmUydu" style="min-height:28px;font-size:11px;padding:0 8px">🛰️ Uydu</button>
           </span>
         </h3>
-        <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi, harita arazi katmanı ve uygun satılık ilanlar güncellenir:</p>
+        <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi, <b>TEKYILDIZ 2 MW örnek OG GES tek hat şeması</b>, harita arazi katmanı ve uygun satılık ilanlar güncellenir:</p>
       </div>
       <div id="tmTekHatSvg"></div>
       <div id="tmKisitMatris" class="tm-kisit-matris"></div>
@@ -824,21 +828,22 @@
           <input type="file" id="pgesKmlInput" accept=".kml,.kmz,.xml" hidden>
         </div>
         <div class="pges-form-grid uclu">
-          <label class="tam">Hazır Referans Parsel veya Seçili TM Çevresi Parseli Yükle
+          <label class="tam">Hazır Referans Parsel / Örnek Tek Hat Projesi veya Seçili TM Çevresi Yükle
             <select id="pgesOrnekSec">
-              <option value="aksaray_232_19">📍 Aksaray / Merkez / Akçakent — Ada 232 / Parsel 19 (38.075,67 m² · TKGM KML)</option>
-              <option value="bilecik_104_86">📍 Bilecik / Söğüt / Çaltı — Ada 104 / Parsel 86 (8.556,42 m² · Teknik Değerlendirme Örneği)</option>
-              <option value="kirklareli_104_84">📍 Kırklareli / Merkez / Karakoç — Ada 104 / Parsel 84 (16.471,59 m² · Aplikasyon Krokisi Örneği)</option>
+              <option value="tekyildiz_155_19" selected>📍 Van / İpekyolu / Yatıksırt — Ada 155 / Parsel 19 (22.312,56 m² · TEKYILDIZ GES 2 MW Tek Hat DWG &amp; Teknik Değerlendirme)</option>
+              <option value="bilecik_104_86">📍 Bilecik / Söğüt / Çaltı — Ada 104 / Parsel 86 (8.556,42 m² · Tuğral Döküm GES 1 MW Tek Hat &amp; Teknik Değerlendirme)</option>
+              <option value="aksaray_232_19">📍 Aksaray / Merkez / Akçakent — Ada 232 / Parsel 19 (38.075,67 m² · TKGM KML Örneği)</option>
+              <option value="kirklareli_104_84">📍 Kırklareli / Merkez / Karakoç — Ada 104 / Parsel 84 (16.471,59 m² · Aplikasyon Krokisi ED50 3°/6° Örneği)</option>
               <option value="secili_tm_parsel">⚡ Seçili Trafo Merkezi Çevresinde Parsel Oluştur &amp; Sorgula</option>
             </select>
           </label>
-          <label>İli<input type="text" id="pgesIl" value="Aksaray"></label>
-          <label>İlçesi<input type="text" id="pgesIlce" value="Merkez"></label>
-          <label>Mahalle / Köy<input type="text" id="pgesMahalle" value="Akçakent"></label>
-          <label>Ada No<input type="text" id="pgesAda" value="232"></label>
+          <label>İli<input type="text" id="pgesIl" value="Van"></label>
+          <label>İlçesi<input type="text" id="pgesIlce" value="İpekyolu"></label>
+          <label>Mahalle / Köy<input type="text" id="pgesMahalle" value="Yatıksırt"></label>
+          <label>Ada No<input type="text" id="pgesAda" value="155"></label>
           <label>Parsel No<input type="text" id="pgesParsel" value="19"></label>
-          <label>Pafta No<input type="text" id="pgesPafta" value="K31-B-21-B-4"></label>
-          <label>Tapu Alanı (m²)<input type="number" id="pgesTapuAlan" value="38075.67" step="0.01"></label>
+          <label>Pafta No<input type="text" id="pgesPafta" value="L50-C-09-D"></label>
+          <label>Tapu Alanı (m²)<input type="number" id="pgesTapuAlan" value="22312.56" step="0.01"></label>
           <label>Nitelik<input type="text" id="pgesNitelik" value="Tarla"></label>
           <label>Mevkii<input type="text" id="pgesMevkii" value="Köycivarı"></label>
           <label class="tam">Köşe Koordinatları Yapıştır (İsteğe Bağlı: Y X veya Enlem Boylam)
@@ -855,9 +860,9 @@
 
       <!-- KUTU 2: CAD GES YERLEŞİM & ELEKTRİK TASARIM PARAMETRELERİ -->
       <div class="pges-kutu">
-        <h3><span>2. CAD GES Yerleşim &amp; Tek Hat Parametreleri</span><small>AeCAD / GES-ÇİZ</small></h3>
+        <h3><span>2. CAD GES Yerleşim &amp; Tek Hat Parametreleri</span><small>TEKYILDIZ 2MW / AeCAD</small></h3>
         <div class="pges-form-grid uclu">
-          <label>Modül Gücü (Wp)<input type="number" id="pgesPanelWp" value="595" min="300" max="850" step="5"></label>
+          <label>Modül Gücü (Wp)<input type="number" id="pgesPanelWp" value="625" min="300" max="850" step="5"></label>
           <label>Modül Tipi
             <select id="pgesModulTip">
               <option value="mono">Tek Kristalli (Monokristal)</option>
@@ -867,15 +872,15 @@
           </label>
           <label>Modül Ölçüsü (mm)
             <select id="pgesPanelBoyut">
-              <option value="2278x1134">2278 × 1134 mm</option>
-              <option value="2384x1303">2384 × 1303 mm</option>
+              <option value="2384x1303" selected>2384 × 1303 mm (625 Wp)</option>
+              <option value="2278x1134">2278 × 1134 mm (595 Wp)</option>
               <option value="2465x1134">2465 × 1134 mm</option>
             </select>
           </label>
           <label>Masa Şablonu
             <select id="pgesMasaTip">
-              <option value="2V13">2V13 (26 Modül · Dik)</option>
-              <option value="2V14" selected>2V14 (28 Modül · Dik)</option>
+              <option value="2V13" selected>2V13 (26 Modül · D1P01..D1P26)</option>
+              <option value="2V14">2V14 (28 Modül · Dik)</option>
               <option value="2V26">2V26 (52 Modül · Dik)</option>
               <option value="2V28">2V28 (56 Modül · Dik)</option>
               <option value="3V13">3V13 (39 Modül · Dik)</option>
@@ -886,38 +891,38 @@
           <label>Çekme Mesafesi (m)<input type="number" id="pgesCekme" value="5" min="1" max="25" step="0.5"></label>
           <label>Evirici Gücü (kW)<input type="number" id="pgesInvKw" value="250" min="20" max="500" step="5"></label>
           <label>Evirici Set (kWe)<input type="number" id="pgesInvSetKw" value="240" min="20" max="500" step="5" title="Tek hat ve teknik değerlendirme formunda evirici set gücü (örn: 250.00(240))"></label>
-          <label>Evirici Sayısı (Adet)<input type="number" id="pgesInvAdet" value="4" min="1" max="100" step="1"></label>
+          <label>Evirici Sayısı (Adet)<input type="number" id="pgesInvAdet" value="8" min="1" max="100" step="1"></label>
           <label>Yerleşim Modu
             <select id="pgesYerlesimMod">
-              <option value="hedef" selected>Evirici Gücüne Göre (Örn: 4×240=960 kWe)</option>
+              <option value="hedef" selected>Evirici Gücüne Göre (Örn: 8×240=1920 kWe)</option>
               <option value="tam">Parselin Tamamını Doldur (Maks. Kapasite)</option>
             </select>
           </label>
-          <label>DC / AC Oranı<input type="number" id="pgesDcAcOran" value="1.2338" min="1.0" max="1.6" step="0.01"></label>
-          <label>GüneşModül Sayısı<input type="number" id="pgesModulSayisi" value="1990" min="10" max="250000" step="1" title="Otomatik hesaplanır veya elle girilebilir"></label>
+          <label>DC / AC Oranı<input type="number" id="pgesDcAcOran" value="1.4049" min="1.0" max="1.6" step="0.01"></label>
+          <label>GüneşModül Sayısı<input type="number" id="pgesModulSayisi" value="4316" min="10" max="250000" step="1" title="Otomatik hesaplanır veya elle girilebilir"></label>
           <label>OG Trafo Gücü (kVA)
             <select id="pgesTrafoKva">
               <option value="oto">Otomatik Seç</option>
               <option value="630">630 kVA</option>
               <option value="800">800 kVA</option>
               <option value="1000">1000 kVA</option>
-              <option value="1250" selected>1250 kVA</option>
+              <option value="1250">1250 kVA</option>
               <option value="1600">1600 kVA</option>
               <option value="2000">2000 kVA</option>
-              <option value="2500">2500 kVA</option>
+              <option value="2500" selected>2×1250 / 2500 kVA (2 MW Tek Hat)</option>
             </select>
           </label>
           <label>OG Şebeke Gerilimi
             <select id="pgesOgKv">
-              <option value="31.5" selected>31.5 / 0.8 kV (DYN11 %Uk=6)</option>
-              <option value="34.5">34.5 / 0.8 kV (DYN11 %Uk=6)</option>
+              <option value="31.5" selected>31.5 / 0.8 kV (DYN11 %Uk=6 · 36 kV Hücre)</option>
+              <option value="34.5">34.5 / 0.8 kV (DYN11 %Uk=6 · 36 kV Hücre)</option>
             </select>
           </label>
           <label>Projeksiyon Sistemi
             <select id="pgesProjSec">
-              <option value="UTM 6° ED 50" selected>UTM 6° ED 50 (ve ED50 3°)</option>
+              <option value="ITRF96 3°" selected>GK Central Meridian 45 (ITRF-3) + ED50 3°/6°</option>
+              <option value="UTM 6° ED 50">UTM 6° ED 50 (ve ED50 3°)</option>
               <option value="UTM 3° ED 50">UTM 3° ED 50 (ve ED50 6°)</option>
-              <option value="ITRF96 3°">ITRF 96 3° (ve ED50 3°/6°)</option>
             </select>
           </label>
         </div>
@@ -932,19 +937,19 @@
         <h3><span>3. Başvuru Sahibi &amp; Trafo Merkezi (TM) Bilgileri</span><small>İmza Boş Bırakılır</small></h3>
         <div class="pges-form-grid">
           <label class="tam">Başvuru Sahibi Adı-Soyadı / Ticaret Unvanı
-            <input type="text" id="pgesUnvan" value="Tuğral Döküm Metal Plastik San. ve Tic. Ltd. Şti.">
+            <input type="text" id="pgesUnvan" value="TEKYILDIZ SAĞLIK HİZMETLERİ VE İNŞAAT SANAYİ TİCARET LİMİTED ŞİRKETİ">
           </label>
           <label>Tesis / Santral Kısa Adı
-            <input type="text" id="pgesTesisAdi" value="TUĞRAL DÖKÜM GES">
+            <input type="text" id="pgesTesisAdi" value="TEKYILDIZ GES">
           </label>
           <label>Tercih Edilen Trafo Merkezi (TM)
-            <input type="text" id="pgesTmAdi" value="SÖĞÜT TM">
+            <input type="text" id="pgesTmAdi" value="ÖZALP TM">
           </label>
           <label>Vergi / T.C. Kimlik No
-            <input type="text" id="pgesVergiNo" value="8600547107">
+            <input type="text" id="pgesVergiNo" value="8360491820">
           </label>
           <label>Tüketim Tesisi Tekil Kodları
-            <input type="text" id="pgesTekilKod" value="4048509407">
+            <input type="text" id="pgesTekilKod" value="4065192830">
           </label>
           <label>Telefon Numarası
             <input type="text" id="pgesTel" value="05327636044">
@@ -956,7 +961,7 @@
             <input type="text" id="pgesIban" value="TR25 0001 0019 4664 4675 9350 01">
           </label>
           <label>Başvuru Sahibi Adresi
-            <input type="text" id="pgesAdres" value="OSB 2. Cad. No:12 Merkez">
+            <input type="text" id="pgesAdres" value="İpekyolu / VAN">
           </label>
           <label>Yönetmelik Maddesi &amp; Bağlantı
             <select id="pgesMadde">
@@ -967,7 +972,7 @@
           </label>
         </div>
         <div style="font-size:11px;color:#065F46;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:7px;padding:6px 9px;margin-top:auto">
-          ✅ <b>İmza Kuralı Aktif:</b> Aplikasyon Krokisi, GES Tek Hat Şeması, Teknik Değerlendirme Formu ve Ek-1 Başvuru Formunun imza / onay kısımlarında hiçbir isim yazılmaz; ıslak imza ve kaşe için tamamen boş bırakılır.
+          ✅ <b>İmza Kuralı Aktif:</b> Aplikasyon Krokisi, GES Tek Hat Şeması (<b>TEKYILDIZ TEK HAT ŞEMASI 2MW.dwg</b> &amp; <b>Tuğral Döküm DWG</b>), Teknik Değerlendirme Formu ve Ek-1 Başvuru Formunun imza / onay kısımları ıslak imza ve kaşe için tamamen boş bırakılır.
         </div>
       </div>
     </div>
@@ -980,7 +985,7 @@
       <div class="pges-sekmeler" id="pgesSekmeler" role="tablist">
         <button type="button" class="pges-sekme on" data-psekme="cad">☀️ 1. CAD GES Yerleşim Planı</button>
         <button type="button" class="pges-sekme" data-psekme="aplikasyon">📐 2. Aplikasyon Krokisi (ED50 3° &amp; 6° + ITRF96)</button>
-        <button type="button" class="pges-sekme" data-psekme="tekhat">⚡ 3. GES Tek Hat Şeması (Tuğral Döküm Şablonu)</button>
+        <button type="button" class="pges-sekme" data-psekme="tekhat">⚡ 3. GES Tek Hat Şeması (Tekyıldız 2 MW DWG &amp; Tuğral Döküm Şablonu)</button>
         <button type="button" class="pges-sekme" data-psekme="teknik">📋 4. Teknik Değerlendirme Formu (2 Sayfa)</button>
         <button type="button" class="pges-sekme" data-psekme="basvuru">📄 5. Ek-1 Lisanssız Başvuru Formu</button>
       </div>
@@ -1104,9 +1109,9 @@
     sinirlar: true      // 🗺️ İl & EDAŞ Sınır Çizgileri
   };
   var MAP=null, KAT=null, SECILI_TM_KAT=null, TOPO_KAT=null, OVA_KAT=null, KORUMA_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, WMS_KATMANLAR={};
-  var OVA_GEO=null, TUCBS_KORUMA_GEO=null, TEIAS_HAT_VERI=null, ANA_CANVAS=null, HAT_RENDERER=null, OVA_RENDERER=null, KORUMA_RENDERER=null;
+  var OVA_GEO=null, TUCBS_KORUMA_GEO=null, TEIAS_HAT_VERI=null, ANA_CANVAS=null, SINIR_CANVAS=null, TM_CANVAS=null, HAT_RENDERER=null, OVA_RENDERER=null, KORUMA_RENDERER=null;
   var SON_CIZIM_ANAHTAR={ topo:"", ova:"", koruma:"", tm:"" };
-  var seciliOvaSno=null, seciliKorumaId=null, korumaGezginZorla=false, cbsOpaklikOran=0.78, geoYok=false;
+  var seciliOvaSno=null, seciliKorumaId=null, korumaGezginZorla=false, cbsOpaklikOran=0.78, geoYok=false, tmTekHatMod="bara";
   var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null, BOLGE_GEO=null;
   var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
 
@@ -1404,7 +1409,7 @@
       kutu.querySelectorAll(".svg-il-path").forEach(function(p){
         p.addEventListener("click", function(){
           var il = p.getAttribute("data-il");
-          el("fil").value = (el("fil").value === il ? "" : il);
+          ilSecildigindeSenkronla(el("fil").value === il ? "" : il);
           ciz();
         });
       });
@@ -2766,6 +2771,28 @@
     return (IL2EDAS[r.il]||[]).indexOf(ed) >= 0;
   }
 
+  // İl (#fil) ve Dağıtım Bölgesi (#fed) filtrelerinin birbirine takılmadan senkron çalışmasını sağlar
+  function ilSecildigindeSenkronla(secIl, bolgeyiKoru){
+    var il = secIl || "";
+    if(el("fil")) el("fil").value = il;
+    if(il){
+      var mevcutEd = el("fed") ? el("fed").value : "";
+      var ilEdaslar = IL2EDAS[il] || [];
+      var yeniEd = (mevcutEd && ilEdaslar.indexOf(mevcutEd) >= 0) ? mevcutEd : (ilEdaslar[0] || "");
+      if(el("fed")) el("fed").value = yeniEd;
+      if(yeniEd && el("bolgeKutuSec")) el("bolgeKutuSec").value = yeniEd;
+    } else if(!bolgeyiKoru){
+      if(el("fed")) el("fed").value = "";
+    }
+  }
+
+  function edasSecildigindeSenkronla(secEd){
+    var ed = secEd || "";
+    if(el("fed")) el("fed").value = ed;
+    if(el("fil")) el("fil").value = "";
+    if(ed && el("bolgeKutuSec")) el("bolgeKutuSec").value = ed;
+  }
+
   function hizliBarGuncelle(){
     var secIl = el("fil") ? el("fil").value : "";
     var secEd = el("fed") ? el("fed").value : "";
@@ -2832,9 +2859,15 @@
       b.addEventListener("click", function(){
         var bil = b.getAttribute("data-il");
         if(!bil){
+          if(aktifEd) el("fed").value = aktifEd;
           el("fil").value = "";
         } else {
-          el("fil").value = (el("fil").value === bil ? "" : bil);
+          if(el("fil").value === bil){
+            if(aktifEd) el("fed").value = aktifEd;
+            el("fil").value = "";
+          } else {
+            ilSecildigindeSenkronla(bil);
+          }
         }
         ciz();
       });
@@ -2844,8 +2877,12 @@
   function suz(){
     var il=el("fil").value, ed=el("fed").value, q=el("fara").value.trim().toLocaleLowerCase("tr"), poz=el("fpoz").checked;
     return tumu.filter(function(r){
-      if(il && r.il!==il) return false;
-      if(ed && !edasEslesirMi(r, ed)) return false;
+      if(il){
+        if(r.il!==il) return false;
+        if(il==="İSTANBUL" && (ed==="Boğaziçi EDAŞ" || ed==="AYEDAŞ (Anadolu)") && !edasEslesirMi(r, ed)) return false;
+      } else if(ed && !edasEslesirMi(r, ed)){
+        return false;
+      }
       if(poz && !(av(r)>0)) return false;
       if(q){ var h=(r.il+" "+r.tm+" "+(r.bara||"")+" "+r.edas).toLocaleLowerCase("tr"); if(h.indexOf(q)<0) return false; }
       return true;
@@ -2866,14 +2903,14 @@
     box.querySelectorAll(".ad").forEach(function(a){
       a.addEventListener("click",function(){
         var alan=a.getAttribute("data-alan"), v=a.getAttribute("data-v");
-        if(alan==="il"){ el("fil").value=(el("fil").value===v?"":v); }
+        if(alan==="il"){ ilSecildigindeSenkronla(el("fil").value===v?"":v); }
         else if(alan==="tm"){ haritaGit(v); return; }
         else {
           var esEd = v;
           if(v === "AYEDAŞ" || v === "Anadolu Yakası EDAŞ") esEd = "AYEDAŞ (Anadolu)";
           else if(v === "OEDAŞ") esEd = "Osmangazi EDAŞ";
           if(EDAS_IL[esEd]){
-            el("fed").value = (el("fed").value === esEd ? "" : esEd);
+            edasSecildigindeSenkronla(el("fed").value === esEd ? "" : esEd);
           } else {
             el("fara").value = (el("fara").value === v ? "" : v);
           }
@@ -3003,10 +3040,8 @@
         var isEdSec = (!secIl && secEd && (EDAS_IL[secEd]||[]).indexOf(ilAd) >= 0);
         if(isIlSec){
           ly.setStyle({ fillOpacity: 0.26, fillColor: "#D32027", color: "#D32027", weight: 3.5, dashArray: "" });
-          if(ly.bringToFront) try{ ly.bringToFront(); }catch(e){}
         } else if(isEdSec){
           ly.setStyle({ fillOpacity: 0.20, fillColor: EDAS_RENK[ed] || "#D32027", color: "#D32027", weight: 2.2, dashArray: "" });
-          if(ly.bringToFront) try{ ly.bringToFront(); }catch(e){}
         } else if(isiMod){
           var m = ilTop[ilAd] || 0;
           ly.setStyle({ fillOpacity: (secIl||secEd) ? 0.14 : (m>0 ? 0.48 : 0.18), fillColor: isiRenk(m), color: sinirAcik ? "#1E293B" : "transparent", weight: sinirAcik ? 1.1 : 0 });
@@ -3026,7 +3061,6 @@
             opacity: bSec ? 1 : 0.85,
             fill: false
           });
-          if(bSec && ly.bringToFront) try{ ly.bringToFront(); }catch(e){}
         });
       });
     }
@@ -3180,9 +3214,10 @@
     var ayniTm = tumu.filter(function(x){ return x.tm === r.tm && x.il === r.il; });
     var topSonMwe = ayniTm.reduce(function(s, x){ return s + pv(x, 2); }, 0);
 
-    // Seçili TM vurgu halkası
+    // Seçili TM vurgu halkası (TM_CANVAS / tmPane üzerinde, sınır poligonlarının üstünde)
     L.circleMarker([r.lat, r.lon], {
-      renderer: ANA_CANVAS || undefined,
+      pane: "tmPane",
+      renderer: TM_CANVAS || ANA_CANVAS || undefined,
       radius: rCap(av(r)) + 5,
       color: "#DC2626",
       weight: 3,
@@ -3354,7 +3389,8 @@
           }
 
           var m = L.circleMarker([r.lat,r.lon],{
-            renderer: ANA_CANVAS || undefined,
+            pane: "tmPane",
+            renderer: TM_CANVAS || ANA_CANVAS || undefined,
             radius: rad,
             color: sRenk,
             weight: 1.2,
@@ -3378,7 +3414,7 @@
     // Seçili TM'nin harita üzerindeki "Son Kapasite" rozetini güncelle
     seciliTmHaritaVurgula(seciliRow, false);
 
-    // 4. İL MERKEZLERİNDE CANLI MWe ROZET KATMANI
+    // 4. İL MERKEZLERİNDE CANLI MWe ROZET KATMANI (etiketPane üzerinde pointer-events:none — TM seçimini asla engellemez)
     ETIKET_KAT.clearLayers();
     if(KATMAN_ACIK.ilEtiket){
       var ilMerkez = {};
@@ -3394,12 +3430,12 @@
         if(o.top <= 0 && !secIl && !el("fed").value && !KATMAN_ACIK.isi) return;
         var lat = o.latSum / o.n, lon = o.lonSum / o.n;
         var ic = L.divIcon({
-          className: "",
+          className: "il-rozet-wrap",
           html: '<div class="il-rozet'+(o.top>0?'':' dolu')+(secIl===il?' secili':'')+'">'+esc(il)+' <b>'+fmt(o.top)+'</b></div>',
           iconSize: [96, 20],
           iconAnchor: [48, -6]
         });
-        L.marker([lat, lon], { icon: ic, interactive: false }).addTo(ETIKET_KAT);
+        L.marker([lat, lon], { pane: "etiketPane", icon: ic, interactive: false, keyboard: false }).addTo(ETIKET_KAT);
       });
     }
 
@@ -3521,7 +3557,16 @@
         })
       };
       ALTLIKLAR.osm.addTo(MAP);
-      MAP.on("click",function(){ MAP.scrollWheelZoom.enable(); });
+      MAP.on("click",function(ev){
+        MAP.scrollWheelZoom.enable();
+        if(typeof PGES_CIZIM_MODU !== "undefined" && PGES_CIZIM_MODU && ev && ev.latlng){
+          PGES_CIZIM_NOKTALAR.push([ev.latlng.lat, ev.latlng.lng]);
+          if(PGES_CIZIM_NOKTALAR.length >= 3){
+            PGES_STATE.coords = PGES_CIZIM_NOKTALAR.slice();
+            pgesCadYerlesimHesapla(false);
+          }
+        }
+      });
       ILL=L.layerGroup().addTo(MAP);
       BOLGE=L.layerGroup().addTo(MAP);
       OVA_KAT=L.layerGroup().addTo(MAP);
@@ -3944,6 +3989,1646 @@
     });
   });
 
+  /* ============================================================================
+     4C. PARSEL SORGULA & KML/KMZ → AeCAD GES YERLEŞİMİ · APLİKASYON KROKİSİ (ED50 3°/6° + ITRF96)
+         GES TEK HAT ŞEMASI (TUĞRAL DÖKÜM ŞABLONU) · TEKNİK DEĞERLENDİRME & EK-1 BAŞVURU FORMU
+     ============================================================================ */
+  var PGES_AKTIF_SEKME = "cad";
+  var PGES_HARITA_KAT = null;
+  var PGES_CIZIM_MODU = false;
+  var PGES_CIZIM_NOKTALAR = [];
+
+  var PGES_ORNEKLER = {
+    aksaray_232_19: {
+      il: "Aksaray", ilce: "Merkez", mahalle: "Akçakent", ada: "232", parsel: "19",
+      pafta: "K31-B-21-B-4", tapuAlan: 38075.67, nitelik: "Tarla", mevkii: "Köycivarı",
+      unvan: "Tuğral Döküm Metal Plastik San. ve Tic. Ltd. Şti.",
+      tesisAdi: "TUĞRAL DÖKÜM GES", tmAdi: "AKSARAY TM",
+      invKw: 250, invSetKw: 240, invAdet: 4, panelWp: 595, modulSayisi: 1990,
+      coords: [
+        [38.545349, 34.095657],[38.545367, 34.095852],[38.545351, 34.095999],
+        [38.544638, 34.095861],[38.544089, 34.095946],[38.543898, 34.095971],
+        [38.543652, 34.095965],[38.543255, 34.095932],[38.542979, 34.095979],
+        [38.542886, 34.094270],[38.543419, 34.094218],[38.543640, 34.094127],
+        [38.543912, 34.094129],[38.544171, 34.094187],[38.544432, 34.094202],
+        [38.544542, 34.094173],[38.544667, 34.094158],[38.544985, 34.094235],
+        [38.545491, 34.094265],[38.545403, 34.094872],[38.545354, 34.095367]
+      ]
+    },
+    bilecik_104_86: {
+      il: "Bilecik", ilce: "Söğüt", mahalle: "Çaltı", ada: "104", parsel: "86",
+      pafta: "H24-C-14-A", tapuAlan: 8556.42, nitelik: "Tarla", mevkii: "Kovalıca",
+      unvan: "Tuğral Döküm Metal Plastik San. ve Tic. Ltd. Şti.",
+      tesisAdi: "TUĞRAL DÖKÜM GES", tmAdi: "SÖĞÜT TM",
+      invKw: 250, invSetKw: 240, invAdet: 4, panelWp: 595, modulSayisi: 1990,
+      ed50_6_dom: 33,
+      ed50_6_yx: [
+        [262078.7950, 4432350.5620],[262076.9688, 4432354.5681],[262067.7916, 4432387.9267],
+        [262063.3688, 4432404.0033],[262055.8994, 4432433.0472],[262049.6873, 4432456.8271],
+        [261986.1014, 4432445.6673],[261992.2016, 4432425.1079],[261999.2102, 4432400.9036],
+        [262005.2397, 4432380.1743],[262018.8926, 4432333.6626],[262039.8832, 4432329.8842],
+        [262048.6227, 4432335.6946],[262061.7879, 4432342.4959],[262074.5144, 4432348.5504]
+      ]
+    },
+    kirklareli_104_84: {
+      il: "Kırklareli", ilce: "Merkez", mahalle: "Karakoç", ada: "104", parsel: "84",
+      pafta: "E19-D-06-C", tapuAlan: 16471.59, nitelik: "Tarla", mevkii: "Köycivarı",
+      unvan: "Tuğral Döküm Metal Plastik San. ve Tic. Ltd. Şti.",
+      tesisAdi: "KARAKOÇ GES", tmAdi: "KIRKLARELİ TM",
+      invKw: 250, invSetKw: 240, invAdet: 4, panelWp: 595, modulSayisi: 1990,
+      itrf_3_dom: 27,
+      itrf_3_yx: [
+        [525279.64, 4620073.50],[525343.24, 4620089.30],[525372.52, 4620116.59],
+        [525420.55, 4620066.33],[525370.40, 4620017.85],[525329.26, 4619968.26],
+        [525311.35, 4619946.97],[525293.03, 4619925.20],[525251.99, 4619991.50],
+        [525229.84, 4620030.72],[525249.68, 4620061.50],[525259.17, 4620068.29]
+      ]
+    }
+  };
+
+  var PGES_STATE = {
+    coords: [],       // [[lat, lon], ...] WGS84
+    vertices: [],     // [{no, lat, lon, itrf3:{y,x,dom}, ed50_3:{y,x,dom}, ed50_6:{y,x,dom}}, ...]
+    edges: [],        // [{from, to, len, midX, midY, ang}, ...]
+    hesapAlan: 0,
+    tapuAlan: 38075.67,
+    tecviz: 0,
+    localPts: [],     // [[x, y], ...] meters relative to origin
+    masalar: [],      // [{x, y, w, h, ang}, ...]
+    inverterler: [],  // [{no, x, y}, ...]
+    trafoMerkez: null,// {x, y}
+    cekmePts: [],     // [[x, y], ...]
+    masaSayisi: 0,
+    modulPerMasa: 28,
+    yerlesimModul: 0,
+    formModul: 1990,
+    pitch: 7.5,
+    masaW: 15.88,
+    masaD: 4.13
+  };
+
+  var D2R_P = Math.PI / 180;
+  var R2D_P = 180 / Math.PI;
+
+  // Jeodezik Dönüşümler: WGS84/ITRF96 <-> ED50 (Türkiye 7-Parametreli Helmert / Molodensky) & Gauss-Krüger TM (3° ve 6°)
+  function wgs84ToEd50LL(lat, lon){
+    // Türkiye ortalama Molodensky farkı (WGS84 -> ED50): dLat ≈ +0.000845°, dLon ≈ +0.001265° (~95m Kuzey, ~110m Doğu)
+    return [lat + 0.000845, lon + 0.001265];
+  }
+  function ed50ToWgs84LL(lat, lon){
+    return [lat - 0.000845, lon - 0.001265];
+  }
+  function dom3Bul(lon){
+    var cands = [27, 30, 33, 36, 39, 42, 45];
+    var best = 33, minD = 999;
+    for(var i=0;i<cands.length;i++){
+      var d = Math.abs(lon - cands[i]);
+      if(d < minD){ minD = d; best = cands[i]; }
+    }
+    return best;
+  }
+  function dom6Bul(lon){
+    var zone = Math.floor((lon + 180) / 6) + 1;
+    return (zone - 1) * 6 - 180 + 3; // 27, 33, 39, 45
+  }
+  function llToTmProj(lat, lon, lon0, k0, ellipsoid){
+    // ellipsoid: 'grs80' (ITRF96/WGS84) or 'intl24' (ED50 Hayford 1924)
+    var a = ellipsoid === "intl24" ? 6378388.0 : 6378137.0;
+    var f = ellipsoid === "intl24" ? (1.0 / 297.0) : (1.0 / 298.257222101);
+    var e2 = f * (2 - f), ep2 = e2 / (1 - e2);
+    var phi = lat * D2R_P, lam = lon * D2R_P, lam0 = lon0 * D2R_P;
+    var sinP = Math.sin(phi), cosP = Math.cos(phi), tanP = Math.tan(phi);
+    var N = a / Math.sqrt(1 - e2 * sinP * sinP);
+    var T = tanP * tanP;
+    var C = ep2 * cosP * cosP;
+    var A = cosP * (lam - lam0);
+    var e4 = e2 * e2, e6 = e4 * e2;
+    var M = a * ((1 - e2/4 - 3*e4/64 - 5*e6/256)*phi
+               - (3*e2/8 + 3*e4/32 + 45*e6/1024)*Math.sin(2*phi)
+               + (15*e4/256 + 45*e6/1024)*Math.sin(4*phi)
+               - (35*e6/3072)*Math.sin(6*phi));
+    var y = k0 * N * (A + (1 - T + C)*Math.pow(A,3)/6 + (5 - 18*T + T*T + 72*C - 58*ep2)*Math.pow(A,5)/120) + 500000.0;
+    var x = k0 * (M + N * tanP * (A*A/2 + (5 - T + 9*C + 4*C*C)*Math.pow(A,4)/24 + (61 - 58*T + T*T + 600*C - 330*ep2)*Math.pow(A,6)/720));
+    return { y: y, x: x, dom: lon0 };
+  }
+  function tmProjToLl(y, x, lon0, k0, ellipsoid){
+    var a = ellipsoid === "intl24" ? 6378388.0 : 6378137.0;
+    var f = ellipsoid === "intl24" ? (1.0 / 297.0) : (1.0 / 298.257222101);
+    var e2 = f * (2 - f), ep2 = e2 / (1 - e2);
+    var e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+    var M = x / k0;
+    var e4 = e2 * e2, e6 = e4 * e2;
+    var mu = M / (a * (1 - e2/4 - 3*e4/64 - 5*e6/256));
+    var phi1 = mu + (3*e1/2 - 27*Math.pow(e1,3)/32)*Math.sin(2*mu)
+                  + (21*e1*e1/16 - 55*Math.pow(e1,4)/32)*Math.sin(4*mu)
+                  + (151*Math.pow(e1,3)/96)*Math.sin(6*mu);
+    var sin1 = Math.sin(phi1), cos1 = Math.cos(phi1), tan1 = Math.tan(phi1);
+    var N1 = a / Math.sqrt(1 - e2 * sin1 * sin1);
+    var T1 = tan1 * tan1;
+    var C1 = ep2 * cos1 * cos1;
+    var R1 = a * (1 - e2) / Math.pow(1 - e2 * sin1 * sin1, 1.5);
+    var D = (y - 500000.0) / (N1 * k0);
+    var lat = (phi1 - (N1 * tan1 / R1) * (D*D/2 - (5 + 3*T1 + 10*C1 - 4*C1*C1 - 9*ep2)*Math.pow(D,4)/24)) * R2D_P;
+    var lon = lon0 + ((D - (1 + 2*T1 + C1)*Math.pow(D,3)/6 + (5 - 2*C1 + 28*T1 - 3*C1*C1 + 8*ep2 + 24*T1*T1)*Math.pow(D,5)/120) / cos1) * R2D_P;
+    return [lat, lon];
+  }
+
+  function pgesSayiFmt(v, dec){
+    if(v == null || !isFinite(v)) return "0.00";
+    return Number(v).toFixed(dec != null ? dec : 2);
+  }
+  function pgesTrFmt(v, dec){
+    if(v == null || !isFinite(v)) return "0,00";
+    return Number(v).toLocaleString("tr-TR", {minimumFractionDigits: dec!=null?dec:2, maximumFractionDigits: dec!=null?dec:2});
+  }
+
+  // KML / KMZ Dosya Çözümleyici (TKGM ExtendedData + Polygon Coordinates)
+  function pgesUnzipKmz(buf){
+    return new Promise(function(resolve, reject){
+      try {
+        var u8 = new Uint8Array(buf), dv = new DataView(u8.buffer), p = 0;
+        while(p + 30 < u8.length && dv.getUint32(p, true) === 0x04034b50){
+          var method = dv.getUint16(p + 8, true);
+          var csz = dv.getUint32(p + 18, true);
+          var nl = dv.getUint16(p + 26, true);
+          var elen = dv.getUint16(p + 28, true);
+          var name = new TextDecoder().decode(u8.subarray(p + 30, p + 30 + nl));
+          var st = p + 30 + nl + elen;
+          var data = u8.subarray(st, st + csz);
+          if(/\.kml$/i.test(name)){
+            if(method === 0){ resolve(new TextDecoder().decode(data)); return; }
+            if(typeof DecompressionStream !== "undefined"){
+              var ds = new DecompressionStream("deflate-raw");
+              new Response(new Blob([data]).stream().pipeThrough(ds)).arrayBuffer().then(function(out){
+                resolve(new TextDecoder().decode(out));
+              }).catch(reject);
+              return;
+            }
+          }
+          p = st + csz;
+        }
+        reject(new Error("KMZ içinde KML bulunamadı."));
+      } catch(err){ reject(err); }
+    });
+  }
+
+  function pgesParseKmlText(txt){
+    var coords = [];
+    var re = /<coordinates>([\s\S]*?)<\/coordinates>/gi, m;
+    while((m = re.exec(txt))){
+      var pts = m[1].trim().split(/\s+/).map(function(s){
+        var p = s.split(",").map(Number);
+        return (p.length >= 2 && isFinite(p[0]) && isFinite(p[1])) ? [p[1], p[0]] : null; // [lat, lon]
+      }).filter(Boolean);
+      if(pts.length >= 3 && pts.length > coords.length) coords = pts;
+    }
+    if(coords.length > 3 && Math.hypot(coords[0][0]-coords[coords.length-1][0], coords[0][1]-coords[coords.length-1][1]) < 1e-6){
+      coords.pop();
+    }
+    var meta = {};
+    var rData = /<(?:Data|SimpleData)\s+name\s*=\s*"([^"]+)"[^>]*>([\s\S]*?)<\/(?:Data|SimpleData)>/gi;
+    while((m = rData.exec(txt))){
+      var k = m[1].trim();
+      var vMatch = m[2].match(/<value>([\s\S]*?)<\/value>/i);
+      var val = (vMatch ? vMatch[1] : m[2]).replace(/<[^>]+>/g, "").trim();
+      meta[k] = val;
+    }
+    return { coords: coords, meta: meta };
+  }
+
+  function pgesAlanVeKoseHesapla(){
+    var pts = PGES_STATE.coords || [];
+    if(pts.length < 3) return;
+    var lat0 = pts.reduce(function(s,p){return s+p[0];},0) / pts.length;
+    var lon0 = pts.reduce(function(s,p){return s+p[1];},0) / pts.length;
+    var dom3 = dom3Bul(lon0);
+    var dom6 = dom6Bul(lon0);
+
+    var verts = [];
+    for(var i=0;i<pts.length;i++){
+      var lat = pts[i][0], lon = pts[i][1];
+      var itrf3 = llToTmProj(lat, lon, dom3, 1.0, "grs80");
+      var edLL = wgs84ToEd50LL(lat, lon);
+      var ed3 = llToTmProj(edLL[0], edLL[1], dom3, 1.0, "intl24");
+      var ed6 = llToTmProj(edLL[0], edLL[1], dom6, 0.9996, "intl24");
+      verts.push({
+        no: i + 1,
+        kod: "K" + (i + 1),
+        lat: lat,
+        lon: lon,
+        itrf3: itrf3,
+        ed50_3: ed3,
+        ed50_6: ed6
+      });
+    }
+    PGES_STATE.vertices = verts;
+
+    // Lokal metre koordinatları (ITRF96 3° üzerinden gerçek ölçekli)
+    var minY = Infinity, minX = Infinity;
+    verts.forEach(function(v){
+      if(v.itrf3.y < minY) minY = v.itrf3.y;
+      if(v.itrf3.x < minX) minX = v.itrf3.x;
+    });
+    var local = verts.map(function(v){
+      return [v.itrf3.y - minY, v.itrf3.x - minX];
+    });
+    PGES_STATE.localPts = local;
+
+    // Shoelace (Gauss) Alan Hesabı ve Kenar Uzunlukları
+    var area2 = 0;
+    var edges = [];
+    for(var j=0;j<local.length;j++){
+      var a = local[j], b = local[(j+1)%local.length];
+      area2 += (a[0]*b[1] - b[0]*a[1]);
+      var dx = b[0] - a[0], dy = b[1] - a[1];
+      edges.push({
+        from: j + 1,
+        to: ((j + 1) % local.length) + 1,
+        len: Math.hypot(dx, dy),
+        midX: (a[0] + b[0]) / 2,
+        midY: (a[1] + b[1]) / 2,
+        ang: Math.atan2(dy, dx) * R2D_P
+      });
+    }
+    PGES_STATE.hesapAlan = Math.abs(area2) / 2.0;
+    PGES_STATE.edges = edges;
+
+    var tapu = parseFloat(el("pgesTapuAlan") ? el("pgesTapuAlan").value : 0) || PGES_STATE.hesapAlan;
+    PGES_STATE.tapuAlan = tapu;
+    // Resmi Kadastro Yanılma Sınırı (Tecviz) 1/1000 - 1/2000 ölçek: dF = 0.00042 * M * sqrt(F) + 0.00007 * F (M=2000)
+    PGES_STATE.tecviz = 0.84 * Math.sqrt(tapu) + 0.00007 * tapu;
+  }
+
+  // Poligon İçinde Nokta ve Çekme (Setback) & AeCAD GES Masa Dizilim Motoru
+  function pgesPointInPoly(pt, poly){
+    var x = pt[0], y = pt[1], inside = false;
+    for(var i=0, j=poly.length-1; i<poly.length; j=i++){
+      var xi = poly[i][0], yi = poly[i][1];
+      var xj = poly[j][0], yj = poly[j][1];
+      var intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-9) + xi);
+      if(intersect) inside = !inside;
+    }
+    return inside;
+  }
+  function pgesDistToSeg(px, py, x1, y1, x2, y2){
+    var dx = x2 - x1, dy = y2 - y1;
+    var l2 = dx*dx + dy*dy;
+    if(l2 === 0) return Math.hypot(px - x1, py - y1);
+    var t = Math.max(0, Math.min(1, ((px - x1)*dx + (py - y1)*dy) / l2));
+    return Math.hypot(px - (x1 + t*dx), py - (y1 + t*dy));
+  }
+  function pgesMinBoundaryDist(px, py, poly){
+    var minD = Infinity;
+    for(var i=0;i<poly.length;i++){
+      var a = poly[i], b = poly[(i+1)%poly.length];
+      var d = pgesDistToSeg(px, py, a[0], a[1], b[0], b[1]);
+      if(d < minD) minD = d;
+    }
+    return minD;
+  }
+  function pgesShrinkPoly(poly, setback){
+    var cx = poly.reduce(function(s,p){return s+p[0];},0) / poly.length;
+    var cy = poly.reduce(function(s,p){return s+p[1];},0) / poly.length;
+    return poly.map(function(p){
+      var dx = p[0] - cx, dy = p[1] - cy;
+      var L = Math.hypot(dx, dy) || 1;
+      var r = Math.max(0.2, (L - setback * 1.15) / L);
+      return [cx + dx * r, cy + dy * r];
+    });
+  }
+
+  function pgesCadYerlesimHesapla(otoBoyutla){
+    pgesAlanVeKoseHesapla();
+    var poly = PGES_STATE.localPts;
+    if(!poly || poly.length < 3) return;
+
+    var wp = parseFloat(el("pgesPanelWp").value) || 595;
+    var boyStr = (el("pgesPanelBoyut").value || "2278x1134").split("x");
+    var pL = (parseFloat(boyStr[0]) || 2278) / 1000.0;
+    var pW = (parseFloat(boyStr[1]) || 1134) / 1000.0;
+
+    var mTip = el("pgesMasaTip").value || "2V14";
+    var mMatch = mTip.match(/(\d+)([VH])(\d+)/i) || [0, "2", "V", "14"];
+    var nRows = parseInt(mMatch[1], 10) || 2;
+    var orient = mMatch[2].toUpperCase();
+    var nPer = parseInt(mMatch[3], 10) || 14;
+    var modPerMasa = nRows * nPer;
+
+    var tilt = (parseFloat(el("pgesTilt").value) || 25) * D2R_P;
+    var cekme = parseFloat(el("pgesCekme").value) || 5;
+
+    var unitW = (orient === "V" ? pW : pL) + 0.02;
+    var unitL = (orient === "V" ? pL : pW) + 0.02;
+    var masaW = nPer * unitW;
+    var slant = nRows * unitL;
+    var masaD = slant * Math.cos(tilt);
+    var masaH = slant * Math.sin(tilt);
+
+    // 21 Aralık kış gündönümü gölge boyu (enlem ~38.5° -> güneş yüksekliği ~21.5°)
+    var latAvg = PGES_STATE.coords.length ? PGES_STATE.coords[0][0] : 38.5;
+    var sunAlt = Math.max(16, 90 - latAvg - 23.45 - 6.0) * D2R_P;
+    var pitch = Math.max(masaD + 1.8, masaD + masaH / Math.tan(sunAlt));
+
+    PGES_STATE.masaW = masaW;
+    PGES_STATE.masaD = masaD;
+    PGES_STATE.pitch = pitch;
+    PGES_STATE.modulPerMasa = modPerMasa;
+    PGES_STATE.cekmePts = pgesShrinkPoly(poly, cekme);
+
+    var xs = poly.map(function(p){return p[0];}), ys = poly.map(function(p){return p[1];});
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+
+    var tumMasalar = [];
+    var rowGap = 0.50;
+    for(var y = minY + cekme; y + masaD <= maxY - cekme; y += pitch){
+      for(var x = minX + cekme; x + masaW <= maxX - cekme; x += (masaW + rowGap)){
+        var c1 = [x, y], c2 = [x + masaW, y], c3 = [x + masaW, y + masaD], c4 = [x, y + masaD];
+        if(pgesPointInPoly(c1, poly) && pgesPointInPoly(c2, poly) && pgesPointInPoly(c3, poly) && pgesPointInPoly(c4, poly)){
+          if(pgesMinBoundaryDist(x + masaW/2, y + masaD/2, poly) >= Math.max(1.5, cekme * 0.65)){
+            tumMasalar.push({ x: x, y: y, w: masaW, h: masaD });
+          }
+        }
+      }
+    }
+
+    var invKw = parseFloat(el("pgesInvKw").value) || 250;
+    var invSetKw = parseFloat(el("pgesInvSetKw").value) || 240;
+    var invAdet = parseInt(el("pgesInvAdet").value, 10) || 4;
+    var yerMod = el("pgesYerlesimMod").value || "hedef";
+
+    if(otoBoyutla || yerMod === "tam"){
+      var maxMod = Math.max(modPerMasa * 4, tumMasalar.length * modPerMasa);
+      el("pgesModulSayisi").value = maxMod;
+      var maxDcKwp = maxMod * wp / 1000.0;
+      var yeniInvAdet = Math.max(1, Math.round((maxDcKwp / 1.24) / invSetKw));
+      el("pgesInvAdet").value = yeniInvAdet;
+      invAdet = yeniInvAdet;
+    }
+
+    var hedefMod = parseInt(el("pgesModulSayisi").value, 10) || 1990;
+    var hedefMasaSayisi = Math.max(1, Math.ceil(hedefMod / modPerMasa));
+    var secilenMasalar = (yerMod === "hedef" && tumMasalar.length > hedefMasaSayisi)
+      ? tumMasalar.slice(0, hedefMasaSayisi)
+      : tumMasalar;
+
+    PGES_STATE.masalar = secilenMasalar;
+    PGES_STATE.masaSayisi = secilenMasalar.length;
+    PGES_STATE.yerlesimModul = secilenMasalar.length * modPerMasa;
+    PGES_STATE.formModul = (yerMod === "hedef") ? hedefMod : (PGES_STATE.yerlesimModul || hedefMod);
+
+    // Trafo & OG Köşk Yeri (Güney-Batı veya en yakın giriş kenarı)
+    var trPt = poly[0] ? [poly[0][0] + cekme * 1.2, poly[0][1] + cekme * 1.2] : [minX + 10, minY + 10];
+    PGES_STATE.trafoMerkez = { x: trPt[0], y: trPt[1] };
+
+    // Evirici (Inverter) Konumları (Masalar arasında dengeli küme merkezleri)
+    var invList = [];
+    for(var k=0; k<invAdet; k++){
+      if(secilenMasalar.length){
+        var idx = Math.min(secilenMasalar.length - 1, Math.floor((k + 0.5) * secilenMasalar.length / invAdet));
+        var m = secilenMasalar[idx];
+        invList.push({ no: k + 1, kod: "E" + (k + 1), x: m.x + m.w / 2, y: m.y - 0.9 });
+      } else {
+        invList.push({ no: k + 1, kod: "E" + (k + 1), x: trPt[0] + (k + 1)*6, y: trPt[1] + 5 });
+      }
+    }
+    PGES_STATE.inverterler = invList;
+
+    // En yakın TEİAŞ TM eşleştirmesi
+    if(PGES_STATE.coords.length && tumu && tumu.length){
+      var cLat = PGES_STATE.coords.reduce(function(s,p){return s+p[0];},0) / PGES_STATE.coords.length;
+      var cLon = PGES_STATE.coords.reduce(function(s,p){return s+p[1];},0) / PGES_STATE.coords.length;
+      var yBilgi = parselYakinTmBul(cLat, cLon, seciliRow);
+      PGES_STATE.yakinTmBilgi = yBilgi;
+    }
+
+    pgesHaritadaGoster(false);
+    pgesKpiGuncelle();
+    pgesPaftaCiz();
+  }
+
+  function pgesHaritadaGoster(odakla){
+    if(!MAP || !PGES_STATE.coords || PGES_STATE.coords.length < 3) return;
+    if(!PGES_HARITA_KAT){
+      PGES_HARITA_KAT = L.layerGroup().addTo(MAP);
+    }
+    PGES_HARITA_KAT.clearLayers();
+
+    var latlngs = PGES_STATE.coords.map(function(p){ return [p[0], p[1]]; });
+    var poly = L.polygon(latlngs, {
+      color: "#0F766E",
+      weight: 3.2,
+      fillColor: "#14B8A6",
+      fillOpacity: 0.32
+    }).addTo(PGES_HARITA_KAT);
+
+    var il = el("pgesIl").value || "—", ilce = el("pgesIlce").value || "—", mah = el("pgesMahalle").value || "—";
+    var ada = el("pgesAda").value || "—", prs = el("pgesParsel").value || "—";
+    var wp = parseFloat(el("pgesPanelWp").value) || 595;
+    var modSay = PGES_STATE.formModul || 1990;
+    var dcKwp = (modSay * wp / 1000.0);
+    var acKwe = (parseInt(el("pgesInvAdet").value,10)||4) * (parseFloat(el("pgesInvSetKw").value)||240);
+
+    poly.bindPopup(
+      '<div style="min-width:240px">'
+      +'<div style="background:#0F766E;color:#fff;font-weight:800;font-size:10.5px;padding:3px 8px;border-radius:4px;margin-bottom:5px;display:inline-block">📐 SORGULANAN GES PARSELİ (CAD + KML)</div><br>'
+      +'<b>'+esc(il)+' / '+esc(ilce)+' / '+esc(mah)+' · Ada '+esc(ada)+' / Parsel '+esc(prs)+'</b><br>'
+      +'Tapu Alanı: <b>'+pgesTrFmt(PGES_STATE.tapuAlan, 2)+' m²</b> · Hesap: <b>'+pgesTrFmt(PGES_STATE.hesapAlan, 2)+' m²</b><br>'
+      +'CAD GES Kurulumu: <b>'+pgesTrFmt(dcKwp, 2)+' kWp DC / '+pgesTrFmt(acKwe, 2)+' kWe AC</b> ('+PGES_STATE.masaSayisi+' Masa · '+modSay+' Modül)'
+      +'</div>'
+    );
+
+    // Köşe Noktaları K1..Kn
+    PGES_STATE.vertices.forEach(function(v){
+      var ic = L.divIcon({
+        className: "",
+        html: '<div style="background:#0F172A;color:#34D399;border:1.5px solid #14B8A6;border-radius:99px;font:800 9.5px Archivo,sans-serif;padding:1px 5px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.4)">'+v.kod+'</div>',
+        iconSize: [26, 16],
+        iconAnchor: [13, 8]
+      });
+      L.marker([v.lat, v.lon], { icon: ic })
+        .bindTooltip('<b>'+v.kod+'</b> · ED50 6° Y:'+pgesSayiFmt(v.ed50_6.y,2)+' X:'+pgesSayiFmt(v.ed50_6.x,2)+' · ED50 3° Y:'+pgesSayiFmt(v.ed50_3.y,2)+' X:'+pgesSayiFmt(v.ed50_3.x,2), {className:"edas-tip"})
+        .addTo(PGES_HARITA_KAT);
+    });
+
+    // En yakın TM bağlantı çizgisi
+    var yb = PGES_STATE.yakinTmBilgi;
+    if(yb && yb.yakin && yb.yakin.lat != null){
+      var cLat = latlngs.reduce(function(s,p){return s+p[0];},0)/latlngs.length;
+      var cLon = latlngs.reduce(function(s,p){return s+p[1];},0)/latlngs.length;
+      L.polyline([[cLat, cLon], [yb.yakin.lat, yb.yakin.lon]], {
+        color: "#D32027", weight: 2.5, dashArray: "6 5"
+      }).bindTooltip('⚡ Bağlantı: '+yb.yakin.tm+' ('+(yb.km!=null?pgesTrFmt(yb.km,1)+' km':'')+')', {sticky:true, className:"edas-tip"}).addTo(PGES_HARITA_KAT);
+    }
+
+    if(odakla){
+      try{ MAP.fitBounds(poly.getBounds(), {padding:[45,45], maxZoom:17}); }catch(e){}
+    }
+  }
+
+  function pgesKpiGuncelle(){
+    var kutu = el("pgesKpiSerit");
+    if(!kutu) return;
+    var wp = parseFloat(el("pgesPanelWp").value) || 595;
+    var modSay = PGES_STATE.formModul || 1990;
+    var dcKwp = modSay * wp / 1000.0;
+    var invKw = parseFloat(el("pgesInvKw").value) || 250;
+    var invSet = parseFloat(el("pgesInvSetKw").value) || 240;
+    var invAdet = parseInt(el("pgesInvAdet").value, 10) || 4;
+    var acKwe = invAdet * invSet;
+    var oran = acKwe > 0 ? (dcKwp / acKwe) : 1.23;
+
+    var trSec = el("pgesTrafoKva").value;
+    var trKva = trSec === "oto" ? (acKwe <= 600 ? 630 : acKwe <= 950 ? 1000 : acKwe <= 1200 ? 1250 : acKwe <= 1550 ? 1600 : 2000) : (parseInt(trSec,10)||1250);
+    var v0 = PGES_STATE.vertices[0] || { itrf3:{dom:33}, ed50_3:{dom:33}, ed50_6:{dom:33} };
+    var yb = PGES_STATE.yakinTmBilgi;
+    var tmAd = el("pgesTmAdi").value || (yb && yb.yakin ? yb.yakin.tm : "SÖĞÜT TM");
+    var tmAlt = (yb && yb.yakin) ? ((yb.km!=null ? pgesTrFmt(yb.km, 1)+" km · " : "") + "Kalan: " + pgesTrFmt(yb.yakin.topMwe, 2) + " MWe") : "TEİAŞ OG Bağlantı Noktası";
+
+    kutu.innerHTML =
+      '<div class="pges-kpi">'
+        +'<div class="etiket">1. Parsel &amp; Yüzölçümü</div>'
+        +'<div class="deger">'+pgesTrFmt(PGES_STATE.tapuAlan, 2)+' m²</div>'
+        +'<div class="alt">Hesap: '+pgesTrFmt(PGES_STATE.hesapAlan, 2)+' m² · '+PGES_STATE.vertices.length+' Köşe (K1..K'+PGES_STATE.vertices.length+')</div>'
+      +'</div>'
+      +'<div class="pges-kpi">'
+        +'<div class="etiket">2. AeCAD GES Yerleşimi</div>'
+        +'<div class="deger">'+PGES_STATE.masaSayisi+' Masa · '+modSay.toLocaleString("tr-TR")+' Modül</div>'
+        +'<div class="alt">Şablon: '+esc(el("pgesMasaTip").value)+' · Pitch: '+pgesTrFmt(PGES_STATE.pitch, 2)+' m · Çekme: '+esc(el("pgesCekme").value)+' m</div>'
+      +'</div>'
+      +'<div class="pges-kpi">'
+        +'<div class="etiket">3. Tesis Kurulu Gücü (DC / AC)</div>'
+        +'<div class="deger">'+pgesTrFmt(dcKwp, 2)+' kWp / '+pgesTrFmt(acKwe, 2)+' kWe</div>'
+        +'<div class="alt">Modül: '+wp+' Wp · DC/AC Oranı: '+pgesTrFmt(oran, 4)+'</div>'
+      +'</div>'
+      +'<div class="pges-kpi">'
+        +'<div class="etiket">4. Evirici &amp; OG Trafo</div>'
+        +'<div class="deger">'+invAdet+' × '+pgesSayiFmt(invKw,0)+'('+pgesSayiFmt(invSet,0)+') kW</div>'
+        +'<div class="alt">Trafo: '+trKva+' kVA ('+esc(el("pgesOgKv").value)+'/0.8 kV DYN11)</div>'
+      +'</div>'
+      +'<div class="pges-kpi">'
+        +'<div class="etiket">5. Tercih Edilen TM &amp; Mesafe</div>'
+        +'<div class="deger" style="color:#FBBF24">'+esc(tmAd)+'</div>'
+        +'<div class="alt">'+esc(tmAlt)+'</div>'
+      +'</div>'
+      +'<div class="pges-kpi">'
+        +'<div class="etiket">6. Koordinat &amp; Dilim (DOM)</div>'
+        +'<div class="deger" style="color:#38BDF8">ED50 3° ('+v0.ed50_3.dom+'°) &amp; 6° ('+v0.ed50_6.dom+'°)</div>'
+        +'<div class="alt">ITRF96 3° (DOM '+v0.itrf3.dom+'°) · İmza Alanları Boş</div>'
+      +'</div>';
+  }
+
+  /* ----------------------------------------------------------------------------
+     PAFTA 1: AeCAD GES YERLEŞİM PLANI (CAD GÖRÜNÜMÜ)
+     ---------------------------------------------------------------------------- */
+  function pgesCizCadPafta(){
+    var poly = PGES_STATE.localPts || [];
+    if(poly.length < 3) return '<div class="gdurum">Parsel verisi bulunamadı.</div>';
+    var xs = poly.map(function(p){return p[0];}), ys = poly.map(function(p){return p[1];});
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var spanX = Math.max(10, maxX - minX), spanY = Math.max(10, maxY - minY);
+
+    var W = 1080, H = 620, pad = 64;
+    var drawW = W - 310 - pad*2, drawH = H - pad*2;
+    var sc = Math.min(drawW / spanX, drawH / spanY);
+    var ox = pad + (drawW - spanX * sc) / 2;
+    var oy = pad + (drawH - spanY * sc) / 2;
+    function tx(x){ return ox + (x - minX) * sc; }
+    function ty(y){ return H - (oy + (y - minY) * sc); }
+
+    var polyPts = poly.map(function(p){ return tx(p[0]).toFixed(1)+","+ty(p[1]).toFixed(1); }).join(" ");
+    var cekPts = (PGES_STATE.cekmePts||[]).map(function(p){ return tx(p[0]).toFixed(1)+","+ty(p[1]).toFixed(1); }).join(" ");
+
+    var masaSvg = PGES_STATE.masalar.map(function(m){
+      var rx = tx(m.x), ry = ty(m.y + m.h);
+      var rw = Math.max(2, m.w * sc), rh = Math.max(2, m.h * sc);
+      return '<rect x="'+rx.toFixed(1)+'" y="'+ry.toFixed(1)+'" width="'+rw.toFixed(1)+'" height="'+rh.toFixed(1)+'" fill="#1D4ED8" fill-opacity="0.78" stroke="#60A5FA" stroke-width="0.9"/>'
+        +'<line x1="'+rx.toFixed(1)+'" y1="'+(ry+rh/2).toFixed(1)+'" x2="'+(rx+rw).toFixed(1)+'" y2="'+(ry+rh/2).toFixed(1)+'" stroke="#93C5FD" stroke-width="0.5"/>';
+    }).join("");
+
+    var trM = PGES_STATE.trafoMerkez || {x:minX+5, y:minY+5};
+    var trx = tx(trM.x), try_ = ty(trM.y);
+
+    var kabloVeInvSvg = PGES_STATE.inverterler.map(function(inv){
+      var ix = tx(inv.x), iy = ty(inv.y);
+      return '<polyline points="'+ix.toFixed(1)+','+iy.toFixed(1)+' '+ix.toFixed(1)+','+try_.toFixed(1)+' '+trx.toFixed(1)+','+try_.toFixed(1)+'" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 2"/>'
+        +'<rect x="'+(ix-7).toFixed(1)+'" y="'+(iy-7).toFixed(1)+'" width="14" height="14" rx="2" fill="#DC2626" stroke="#FEF08A" stroke-width="1.3"/>'
+        +'<text x="'+ix.toFixed(1)+'" y="'+(iy+3).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8" font-weight="800" fill="#FFF">'+inv.kod+'</text>';
+    }).join("");
+
+    var kenarSvg = PGES_STATE.edges.map(function(e){
+      var mx = tx(e.midX), my = ty(e.midY);
+      return '<text x="'+mx.toFixed(1)+'" y="'+(my-4).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="700" fill="#A7F3D0" stroke="#09131C" stroke-width="2.5" paint-order="stroke">'+pgesSayiFmt(e.len, 2)+'m</text>';
+    }).join("");
+
+    var koseSvg = PGES_STATE.vertices.map(function(v, i){
+      var p = poly[i];
+      var kx = tx(p[0]), ky = ty(p[1]);
+      return '<circle cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="4.5" fill="#10B981" stroke="#09131C" stroke-width="1.4"/>'
+        +'<text x="'+(kx+7).toFixed(1)+'" y="'+(ky-5).toFixed(1)+'" font-family="Archivo,sans-serif" font-size="10" font-weight="800" fill="#FDE047" stroke="#09131C" stroke-width="2.5" paint-order="stroke">'+v.kod+'</text>';
+    }).join("");
+
+    var wp = parseFloat(el("pgesPanelWp").value) || 595;
+    var modSay = PGES_STATE.formModul || 1990;
+    var dcKwp = modSay * wp / 1000.0;
+    var invKw = parseFloat(el("pgesInvKw").value) || 250;
+    var invSet = parseFloat(el("pgesInvSetKw").value) || 240;
+    var invAdet = parseInt(el("pgesInvAdet").value, 10) || 4;
+    var acKwe = invAdet * invSet;
+    var trSec = el("pgesTrafoKva").value;
+    var trKva = trSec === "oto" ? 1250 : (parseInt(trSec,10)||1250);
+
+    var il = el("pgesIl").value, ilce = el("pgesIlce").value, mah = el("pgesMahalle").value;
+    var ada = el("pgesAda").value, prs = el("pgesParsel").value, unvan = el("pgesUnvan").value;
+    var tmAdi = el("pgesTmAdi").value;
+
+    return '<div class="resmi-sayfa" style="padding:12px;border-color:#0F172A">'
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#09131C;border-radius:8px;display:block">'
+        +'<defs><pattern id="cadGrid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 30" fill="none" stroke="#162638" stroke-width="0.7"/></pattern></defs>'
+        +'<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="url(#cadGrid)"/>'
+        +'<rect x="10" y="10" width="'+(W-20)+'" height="'+(H-20)+'" fill="none" stroke="#334155" stroke-width="1.5"/>'
+        // Kuzey oku
+        +'<g transform="translate(46,52)">'
+          +'<circle cx="0" cy="0" r="20" fill="#0F172A" stroke="#38BDF8" stroke-width="1.5"/>'
+          +'<polygon points="0,-15 -6,8 0,3 6,8" fill="#38BDF8"/>'
+          +'<text x="0" y="-23" text-anchor="middle" font-family="Archivo,sans-serif" font-size="10" font-weight="800" fill="#38BDF8">KUZEY (N)</text>'
+        +'</g>'
+        // Parsel ve Çekme Sınırı
+        +'<polygon points="'+polyPts+'" fill="#064E3B" fill-opacity="0.22" stroke="#10B981" stroke-width="2.4"/>'
+        +'<polygon points="'+cekPts+'" fill="none" stroke="#EF4444" stroke-width="1.3" stroke-dasharray="6 4"/>'
+        + masaSvg
+        + kabloVeInvSvg
+        // Trafo & OG Köşk
+        +'<rect x="'+(trx-18).toFixed(1)+'" y="'+(try_-12).toFixed(1)+'" width="36" height="24" rx="3" fill="#F59E0B" stroke="#FFF" stroke-width="1.6"/>'
+        +'<text x="'+trx.toFixed(1)+'" y="'+(try_+3).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.5" font-weight="800" fill="#09131C">TR/DM</text>'
+        + kenarSvg
+        + koseSvg
+        // Sağ CAD Antet ve Lejant Bloğu
+        +'<g transform="translate('+(W-305)+', 18)">'
+          +'<rect x="0" y="0" width="286" height="'+(H-36)+'" rx="6" fill="#0F172A" stroke="#334155" stroke-width="1.5"/>'
+          +'<rect x="0" y="0" width="286" height="32" rx="6" fill="#0F766E"/>'
+          +'<text x="143" y="20" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" font-weight="800" fill="#FFF">AeCAD · GES SAHA YERLEŞİM PAFTASI</text>'
+          +'<text x="14" y="52" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#38BDF8">1. PARSEL &amp; TAPU BİLGİLERİ</text>'
+          +'<text x="14" y="69" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">İl / İlçe / Mah.: <tspan font-weight="700" fill="#FFF">'+esc(il)+' / '+esc(ilce)+' / '+esc(mah)+'</tspan></text>'
+          +'<text x="14" y="85" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Ada / Parsel / Pafta: <tspan font-weight="700" fill="#FBBF24">'+esc(ada)+' / '+esc(prs)+' ('+esc(el("pgesPafta").value)+')</tspan></text>'
+          +'<text x="14" y="101" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Tapu / Hesap Alanı: <tspan font-weight="700" fill="#34D399">'+pgesTrFmt(PGES_STATE.tapuAlan,2)+' m²</tspan></text>'
+          +'<line x1="12" y1="114" x2="274" y2="114" stroke="#1E293B"/>'
+
+          +'<text x="14" y="132" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#38BDF8">2. PV MODÜL &amp; MASA DİZİLİMİ</text>'
+          +'<text x="14" y="149" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Modül Gücü &amp; Tipi: <tspan font-weight="700" fill="#FFF">'+wp+' Wp Monokristal</tspan></text>'
+          +'<text x="14" y="165" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Masa Şablonu &amp; Eğim: <tspan font-weight="700" fill="#FFF">'+esc(el("pgesMasaTip").value)+' · '+esc(el("pgesTilt").value)+'° Güney</tspan></text>'
+          +'<text x="14" y="181" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Sıra Aralığı (Pitch): <tspan font-weight="700" fill="#FFF">'+pgesTrFmt(PGES_STATE.pitch,2)+' m · Çekme: '+esc(el("pgesCekme").value)+' m</tspan></text>'
+          +'<text x="14" y="197" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Toplam Modül Sayısı: <tspan font-weight="700" fill="#34D399">'+modSay.toLocaleString("tr-TR")+' Adet ('+PGES_STATE.masaSayisi+' Masa)</tspan></text>'
+          +'<line x1="12" y1="210" x2="274" y2="210" stroke="#1E293B"/>'
+
+          +'<text x="14" y="228" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#38BDF8">3. ELEKTRİKSEL GÜÇ &amp; TM BAĞLANTISI</text>'
+          +'<text x="14" y="245" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Kurulu Güç (DC): <tspan font-weight="700" fill="#34D399">'+pgesTrFmt(dcKwp,2)+' kWp</tspan></text>'
+          +'<text x="14" y="261" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Kurulu Güç (AC): <tspan font-weight="700" fill="#34D399">'+pgesTrFmt(acKwe,2)+' kWe</tspan></text>'
+          +'<text x="14" y="277" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Evirici: <tspan font-weight="700" fill="#FFF">'+invAdet+' Adet × '+pgesSayiFmt(invKw,0)+'('+pgesSayiFmt(invSet,0)+') kW</tspan></text>'
+          +'<text x="14" y="293" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">OG Trafo: <tspan font-weight="700" fill="#FFF">'+trKva+' kVA ('+esc(el("pgesOgKv").value)+'/0.8 kV)</tspan></text>'
+          +'<text x="14" y="309" font-family="IBM Plex Sans,sans-serif" font-size="10" fill="#E2E8F0">Tercih Edilen TM: <tspan font-weight="700" fill="#FBBF24">'+esc(tmAdi)+'</tspan></text>'
+          +'<line x1="12" y1="322" x2="274" y2="322" stroke="#1E293B"/>'
+
+          // Lejant
+          +'<text x="14" y="340" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800" fill="#38BDF8">4. CAD KATMAN LEJANTI</text>'
+          +'<rect x="14" y="350" width="16" height="9" fill="#064E3B" stroke="#10B981" stroke-width="1.5"/><text x="36" y="358" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#CBD5E1">GES-PARSEL (Kadastro Parsel Sınırı &amp; K1..Kn)</text>'
+          +'<line x1="14" y1="372" x2="30" y2="372" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4 2"/><text x="36" y="375" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#CBD5E1">GES-CEKME (İmar Çekme Sınırı: '+esc(el("pgesCekme").value)+' m)</text>'
+          +'<rect x="14" y="384" width="16" height="9" fill="#1D4ED8" stroke="#60A5FA"/><text x="36" y="392" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#CBD5E1">GES-MASA (PV Modül Sehpaları)</text>'
+          +'<rect x="16" y="401" width="11" height="11" rx="2" fill="#DC2626" stroke="#FEF08A"/><text x="36" y="410" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#CBD5E1">GES-INVERTER (E1..E'+invAdet+' String Eviriciler)</text>'
+          +'<rect x="14" y="419" width="16" height="10" rx="2" fill="#F59E0B" stroke="#FFF"/><text x="36" y="427" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#CBD5E1">GES-TRAFO ('+trKva+' kVA OG/AG TR &amp; DM Köşkü)</text>'
+
+          // Antet & Boş İmza Kutusu
+          +'<rect x="12" y="444" width="262" height="126" rx="4" fill="#09131C" stroke="#475569" stroke-width="1.2"/>'
+          +'<text x="20" y="461" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="#94A3B8">YATIRIMCI / BAŞVURU SAHİBİ:</text>'
+          +'<text x="20" y="476" font-family="IBM Plex Sans,sans-serif" font-size="9.5" font-weight="700" fill="#F8FAFC">'+esc(unvan.slice(0,40))+'</text>'
+          +'<line x1="12" y1="486" x2="274" y2="486" stroke="#334155"/>'
+          +'<text x="20" y="502" font-family="Archivo,sans-serif" font-size="9" font-weight="700" fill="#94A3B8">ÇİZEN / KONTROL / ONAY (İMZA):</text>'
+          +'<text x="143" y="555" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#64748B">(İmza ve Kaşe Alanı Boş Bırakılmıştır)</text>'
+        +'</g>'
+      +'</svg>'
+    +'</div>';
+  }
+
+  /* ----------------------------------------------------------------------------
+     PAFTA 2: APLİKASYON KROKİSİ (ED50 3° + ED50 6° + ITRF96 3° KOORDİNAT ÖZETLERİ + BOŞ İMZA TABLOSU)
+     ---------------------------------------------------------------------------- */
+  function pgesCizAplikasyonKrokisi(){
+    var poly = PGES_STATE.localPts || [];
+    var verts = PGES_STATE.vertices || [];
+    if(poly.length < 3 || !verts.length) return '<div class="gdurum">Aplikasyon krokisi için parsel verisi bekleniyor.</div>';
+
+    var il = el("pgesIl").value || "—", ilce = el("pgesIlce").value || "—", mah = el("pgesMahalle").value || "—";
+    var ada = el("pgesAda").value || "—", prs = el("pgesParsel").value || "—", pafta = el("pgesPafta").value || "—";
+    var tapu = PGES_STATE.tapuAlan, hesap = PGES_STATE.hesapAlan;
+    var fark = Math.abs(tapu - hesap);
+    var tecviz = PGES_STATE.tecviz;
+
+    var xs = poly.map(function(p){return p[0];}), ys = poly.map(function(p){return p[1];});
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var spanX = Math.max(10, maxX - minX), spanY = Math.max(10, maxY - minY);
+
+    var W = 960, H = 400, pad = 54;
+    var drawW = W - pad*2, drawH = H - pad*2;
+    var sc = Math.min(drawW / spanX, drawH / spanY);
+    var ox = pad + (drawW - spanX * sc) / 2;
+    var oy = pad + (drawH - spanY * sc) / 2;
+    function tx(x){ return ox + (x - minX) * sc; }
+    function ty(y){ return H - (oy + (y - minY) * sc); }
+
+    var polyPts = poly.map(function(p){ return tx(p[0]).toFixed(1)+","+ty(p[1]).toFixed(1); }).join(" ");
+    var cx = tx(poly.reduce(function(s,p){return s+p[0];},0)/poly.length);
+    var cy = ty(poly.reduce(function(s,p){return s+p[1];},0)/poly.length);
+
+    var kenarYazilar = PGES_STATE.edges.map(function(e){
+      var mx = tx(e.midX), my = ty(e.midY);
+      var rot = -e.ang;
+      if(rot > 90) rot -= 180;
+      if(rot < -90) rot += 180;
+      return '<g transform="translate('+mx.toFixed(1)+','+my.toFixed(1)+') rotate('+rot.toFixed(1)+')">'
+        +'<rect x="-24" y="-14" width="48" height="12" fill="#FFF" fill-opacity="0.88"/>'
+        +'<text x="0" y="-5" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#000">-'+pgesSayiFmt(e.len,2)+'-</text>'
+      +'</g>';
+    }).join("");
+
+    var koseNoktalar = verts.map(function(v, i){
+      var p = poly[i];
+      var kx = tx(p[0]), ky = ty(p[1]);
+      return '<circle cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="4" fill="#FFF" stroke="#000" stroke-width="1.6"/>'
+        +'<circle cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="1.2" fill="#000"/>'
+        +'<text x="'+(kx+7).toFixed(1)+'" y="'+(ky-5).toFixed(1)+'" font-family="Archivo,Arial,sans-serif" font-size="10" font-weight="800" fill="#000">'+v.kod+' ('+v.no+')</text>';
+    }).join("");
+
+    var ed3Satirlar = verts.map(function(v){
+      return '<tr><td class="ort"><b>'+v.kod+'</b> ('+v.no+')</td><td class="num">'+pgesSayiFmt(v.ed50_3.y, 2)+'</td><td class="num">'+pgesSayiFmt(v.ed50_3.x, 2)+'</td><td class="ort">'+v.ed50_3.dom+'°</td></tr>';
+    }).join("");
+    var ed6Satirlar = verts.map(function(v){
+      return '<tr><td class="ort"><b>'+v.kod+'</b> ('+v.no+')</td><td class="num">'+pgesSayiFmt(v.ed50_6.y, 4)+'</td><td class="num">'+pgesSayiFmt(v.ed50_6.x, 4)+'</td><td class="ort">'+v.ed50_6.dom+'°</td></tr>';
+    }).join("");
+    var itrfSatirlar = verts.map(function(v){
+      return '<tr><td class="ort"><b>'+v.kod+'</b> ('+v.no+')</td><td class="num">'+pgesSayiFmt(v.itrf3.y, 2)+'</td><td class="num">'+pgesSayiFmt(v.itrf3.x, 2)+'</td><td class="ort">'+v.itrf3.dom+'°</td></tr>';
+    }).join("");
+
+    return '<div class="resmi-sayfa" id="paftaAplikasyon">'
+      // Üst Kadastro / LİHKAB Başlık Tablosu
+      +'<table class="resmi-tbl">'
+        +'<tr>'
+          +'<td style="width:12%"><b>İli</b></td><td style="width:20%">'+esc(il)+'</td>'
+          +'<td rowspan="4" class="ort" style="width:38%;font-size:13px"><b>'+esc(il.toLocaleUpperCase("tr"))+' KADASTRO MÜDÜRLÜĞÜ<br>LİSANSLI HARİTA KADASTRO MÜHENDİSLİK BÜROSU<br><span style="font-size:15px;text-decoration:underline">APLİKASYON KROKİSİ</span></b></td>'
+          +'<th colspan="2" class="ort">Fen Kayıt Defteri</th>'
+        +'</tr>'
+        +'<tr><td><b>İlçesi</b></td><td>'+esc(ilce)+'</td><td style="width:15%"><b>Tarih</b></td><td style="width:15%"></td></tr>'
+        +'<tr><td><b>Mah/Köy</b></td><td>'+esc(mah)+'</td><td><b>No</b></td><td></td></tr>'
+        +'<tr><td><b>Pafta No</b></td><td>'+esc(pafta)+'</td><th colspan="2" class="ort">Ücret Alındısı / Döner Sermaye</th></tr>'
+        +'<tr>'
+          +'<td><b>Ada / Parsel</b></td><td><b>'+esc(ada)+' / '+esc(prs)+'</b></td>'
+          +'<td class="ort"><b>YÜZÖLÇÜMÜ VE YANILMA SINIRI (TECVİZ) HESABI</b></td>'
+          +'<td><b>Tarih / No</b></td><td></td>'
+        +'</tr>'
+      +'</table>'
+
+      // Yüzölçümü Tablosu
+      +'<table class="resmi-tbl">'
+        +'<tr>'
+          +'<th class="ort">Ada No</th><th class="ort">Parsel No</th>'
+          +'<th class="ort">Tapu Alanı (m²)</th><th class="ort">Yeni Hesap (m²)</th>'
+          +'<th class="ort">Fark (m²)</th><th class="ort">Yanılma Sınırı (±m²)</th><th class="ort">Nitelik / Mevkii</th>'
+        +'</tr>'
+        +'<tr>'
+          +'<td class="ort"><b>'+esc(ada)+'</b></td><td class="ort"><b>'+esc(prs)+'</b></td>'
+          +'<td class="ort"><b>'+pgesTrFmt(tapu, 2)+'</b></td><td class="ort"><b>'+pgesTrFmt(hesap, 2)+'</b></td>'
+          +'<td class="ort">'+pgesTrFmt(fark, 2)+'</td><td class="ort">'+pgesTrFmt(tecviz, 2)+'</td>'
+          +'<td class="ort">'+esc(el("pgesNitelik").value||"Tarla")+' / '+esc(el("pgesMevkii").value||"—")+'</td>'
+        +'</tr>'
+      +'</table>'
+
+      // 3 Sütunlu Koordinat Özet Tabloları: ED50 (3°), ED50 (6°) ve ITRF96 (3°)
+      +'<div class="koord-iki-kolon">'
+        +'<div>'
+          +'<table class="resmi-tbl">'
+            +'<thead><tr><th colspan="4" class="ort" style="background:#E2E8F0">ED50 KOORDİNE ÖZET (3° GAUSS-KRÜGER)</th></tr>'
+            +'<tr><th class="ort">NoktaNo</th><th class="num">Y (Sağa Değer)</th><th class="num">X (Yukarı Değer)</th><th class="ort">DOM</th></tr></thead>'
+            +'<tbody>'+ed3Satirlar+'</tbody>'
+          +'</table>'
+        +'</div>'
+        +'<div>'
+          +'<table class="resmi-tbl">'
+            +'<thead><tr><th colspan="4" class="ort" style="background:#E2E8F0">ED50 KOORDİNE ÖZET (6° UTM)</th></tr>'
+            +'<tr><th class="ort">NoktaNo</th><th class="num">Doğu (Sağa Y)</th><th class="num">Kuzey (Yukarı X)</th><th class="ort">DOM</th></tr></thead>'
+            +'<tbody>'+ed6Satirlar+'</tbody>'
+          +'</table>'
+        +'</div>'
+        +'<div>'
+          +'<table class="resmi-tbl">'
+            +'<thead><tr><th colspan="4" class="ort" style="background:#E2E8F0">ITRF 96 KOORDİNE ÖZET (3° TM)</th></tr>'
+            +'<tr><th class="ort">NoktaNo</th><th class="num">Y (Sağa Değer)</th><th class="num">X (Yukarı Değer)</th><th class="ort">MK</th></tr></thead>'
+            +'<tbody>'+itrfSatirlar+'</tbody>'
+          +'</table>'
+        +'</div>'
+      +'</div>'
+
+      // KROKİ Çizim Alanı
+      +'<div style="border:1.5px solid #000;margin-bottom:10px;position:relative;background:#fff">'
+        +'<div style="text-align:center;font-family:Archivo,Arial,sans-serif;font-weight:800;font-size:13px;padding:5px 0;border-bottom:1px solid #000;letter-spacing:.18em">K R O K İ</div>'
+        +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;background:#fff">'
+          // Kuzey Oku
+          +'<g transform="translate(885, 58)">'
+            +'<line x1="0" y1="30" x2="0" y2="-22" stroke="#000" stroke-width="1.8"/>'
+            +'<polygon points="0,-26 -6,-10 0,-14 6,-10" fill="#000"/>'
+            +'<text x="0" y="-31" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="11" font-weight="800" fill="#000">KUZEY</text>'
+          +'</g>'
+          +'<polygon points="'+polyPts+'" fill="#F8FAFC" stroke="#000" stroke-width="2.2"/>'
+          + kenarYazilar
+          + koseNoktalar
+          +'<text x="'+cx.toFixed(1)+'" y="'+cy.toFixed(1)+'" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="15" font-weight="800" fill="#000">'+esc(ada)+' / '+esc(prs)+'</text>'
+          +'<text x="'+cx.toFixed(1)+'" y="'+(cy+16).toFixed(1)+'" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#334155">('+pgesTrFmt(tapu,2)+' m²)</text>'
+          +'<text x="16" y="'+(H-14)+'" font-family="IBM Plex Sans,Arial,sans-serif" font-size="10.5" fill="#000">Röper alınacak sabit nokta bulunamamıştır.</text>'
+          +'<text x="'+(W-16)+'" y="'+(H-14)+'" text-anchor="end" font-family="IBM Plex Sans,Arial,sans-serif" font-size="10.5" font-weight="700" fill="#000">ÖLÇEK: 1 / 2000</text>'
+        +'</svg>'
+      +'</div>'
+
+      // Alt İmza Tablosu (Kullanıcı Kuralı: İsim ve İmzalar Tamamen BOŞ)
+      +'<table class="resmi-tbl" style="margin-bottom:0">'
+        +'<tr>'
+          +'<th style="width:10%"></th>'
+          +'<th class="ort" style="width:18%">Ölçü huzurumda yapılmıştır</th>'
+          +'<th colspan="2" class="ort" style="width:30%">Aplikasyonu Yapan</th>'
+          +'<th colspan="2" class="ort" style="width:26%">Kontrol Eden</th>'
+          +'<th class="ort" style="width:16%">Tasdik Olunur</th>'
+        +'</tr>'
+        +'<tr>'
+          +'<td><b>Ünvanı</b></td>'
+          +'<td class="ort">Taşınmaz Maliki</td>'
+          +'<td class="ort">Teknisyen / Tekniker</td>'
+          +'<td class="ort">Teknisyen / Tekniker</td>'
+          +'<td class="ort">Kontrol Mühendisi</td>'
+          +'<td class="ort">Kontrol Mühendisi</td>'
+          +'<td class="ort">Lisanslı Mühendis</td>'
+        +'</tr>'
+        +'<tr><td><b>Adı Soyadı</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'
+        +'<tr><td><b>Tarih</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'
+        +'<tr><td><b>İmza</b></td><td class="resmi-imza-bos"></td><td class="resmi-imza-bos"></td><td class="resmi-imza-bos"></td><td class="resmi-imza-bos"></td><td class="resmi-imza-bos"></td><td class="resmi-imza-bos"></td></tr>'
+      +'</table>'
+    +'</div>';
+  }
+
+  /* ----------------------------------------------------------------------------
+     PAFTA 3: GES TEK HAT ŞEMASI (TUĞRAL DÖKÜM METAL PLASTİK SAN. VE TİC. LTD. ŞTİ. ŞABLONU)
+     ---------------------------------------------------------------------------- */
+  function pgesCizTekHatSemasi(){
+    var unvan = el("pgesUnvan").value || "Tuğral Döküm Metal Plastik San. ve Tic. Ltd. Şti.";
+    var tesisAdi = (el("pgesTesisAdi").value || "TUĞRAL DÖKÜM").replace(/\s+GES$/i, "").trim();
+    var tmAdi = (el("pgesTmAdi").value || "SÖĞÜT TM").replace(/\s+TM$/i, "").trim() + " TM";
+    var wp = parseFloat(el("pgesPanelWp").value) || 595;
+    var modSay = PGES_STATE.formModul || 1990;
+    var dcKwp = modSay * wp / 1000.0;
+    var invKw = parseFloat(el("pgesInvKw").value) || 250;
+    var invSet = parseFloat(el("pgesInvSetKw").value) || 240;
+    var invAdet = Math.max(1, parseInt(el("pgesInvAdet").value, 10) || 4);
+    var acKwe = invAdet * invSet;
+    var ogKv = el("pgesOgKv").value || "31.5";
+    var trSec = el("pgesTrafoKva").value;
+    var trKva = trSec === "oto" ? (acKwe <= 600 ? 630 : acKwe <= 950 ? 1000 : acKwe <= 1200 ? 1250 : acKwe <= 1550 ? 1600 : 2000) : (parseInt(trSec,10)||1250);
+
+    // 800V AG veya 400V AG maksimum çıkış akımı ve TMŞ hesabı
+    var maksAkim = Math.round(acKwe * 1.443); // örn: 960 kWe -> ~1385 A / 4x360.8=1443.2A
+    var maksAkimExact = (invAdet * 360.8).toFixed(1);
+    var tmsAkim = acKwe <= 500 ? 800 : acKwe <= 800 ? 1250 : acKwe <= 1100 ? 1600 : 2500;
+    var ctAkim = tmsAkim <= 1000 ? 1000 : tmsAkim <= 1600 ? 1500 : 2500;
+
+    // Her eviriciye düşen modül ve DC güç dağılımı (Tuğral Döküm şablonundaki gibi E1..EN)
+    var bazMod = Math.floor(modSay / invAdet);
+    var kalanMod = modSay - bazMod * invAdet;
+
+    var gosterilenInv = Math.min(invAdet, 8);
+    var invBlokYuk = 148;
+    var H = Math.max(760, 120 + gosterilenInv * invBlokYuk);
+    var W = 1140;
+
+    var invSvg = "";
+    for(var i=0; i<gosterilenInv; i++){
+      var k = i + 1;
+      var buMod = bazMod + (i === gosterilenInv - 1 ? kalanMod : 0);
+      var buDcKwp = (buMod * wp / 1000.0);
+      var y0 = 76 + i * invBlokYuk;
+      var ym = y0 + 62;
+
+      invSvg += '<g transform="translate(650, '+y0+')">'
+        // Sol PV Dizi (String) Kutuları (MPPT1..MPPT12)
+        +'<rect x="0" y="6" width="118" height="24" fill="#FFF" stroke="#000" stroke-width="1"/>'
+        +'<text x="59" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000">1.DİZİ = 21x'+wp+'Wp / MPPT1</text>'
+        +'<text x="59" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#334155">2.DİZİ = 21x'+wp+'Wp / MPPT2</text>'
+        +'<text x="59" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">⋮ ('+buMod+' Modül)</text>'
+        +'<rect x="0" y="56" width="118" height="24" fill="#FFF" stroke="#000" stroke-width="1"/>'
+        +'<text x="59" y="66" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000">11.DİZİ = 20x'+wp+'Wp / MPPT11</text>'
+        +'<text x="59" y="76" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#334155">12.DİZİ = 20x'+wp+'Wp / MPPT12</text>'
+
+        // DC Bağlantı ve DC Anahtar + Parafudr
+        +'<line x1="118" y1="18" x2="148" y2="18" stroke="#000" stroke-width="1.1"/>'
+        +'<line x1="118" y1="68" x2="148" y2="68" stroke="#000" stroke-width="1.1"/>'
+        +'<line x1="148" y1="18" x2="148" y2="68" stroke="#000" stroke-width="1.3"/>'
+        +'<line x1="148" y1="44" x2="195" y2="44" stroke="#000" stroke-width="1.5"/>'
+        +'<rect x="156" y="38" width="14" height="12" fill="#FFF" stroke="#000" stroke-width="1"/>'
+        +'<text x="163" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">DC</text>'
+        +'<text x="163" y="62" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">Tip1+2 SPD</text>'
+
+        // Evirici (E1..EN) Sembolü (= / ~)
+        +'<rect x="195" y="18" width="56" height="52" fill="#FFF" stroke="#000" stroke-width="1.6"/>'
+        +'<line x1="195" y1="70" x2="251" y2="18" stroke="#000" stroke-width="1.2"/>'
+        +'<text x="208" y="35" font-family="Arial,sans-serif" font-size="12" font-weight="800" fill="#000">=</text>'
+        +'<text x="232" y="62" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#000">~</text>'
+        +'<text x="223" y="13" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="10" font-weight="800" fill="#000">E'+k+'</text>'
+        +'<text x="223" y="82" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">4x1x120 mm² N2XH</text>'
+
+        // Sağ Evirici Güç Özeti Tablosu (Tuğral Döküm Şablonu Birebir)
+        +'<rect x="266" y="14" width="208" height="60" fill="#FFF" stroke="#000" stroke-width="1.3"/>'
+        +'<line x1="266" y1="34" x2="474" y2="34" stroke="#000" stroke-width="1"/>'
+        +'<line x1="266" y1="54" x2="474" y2="54" stroke="#000" stroke-width="1"/>'
+        +'<line x1="412" y1="14" x2="412" y2="54" stroke="#000" stroke-width="1"/>'
+        +'<text x="272" y="27" font-family="Arial,sans-serif" font-size="8.2" font-weight="700" fill="#000">EVİRİCİ-'+k+' DC GÜÇ (kWp)</text>'
+        +'<text x="443" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">'+pgesSayiFmt(buDcKwp, 3)+'</text>'
+        +'<text x="272" y="47" font-family="Arial,sans-serif" font-size="8.2" font-weight="700" fill="#000">EVİRİCİ-'+k+' AC GÜÇ (kWe)</text>'
+        +'<text x="443" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">'+pgesSayiFmt(invSet, 1)+'</text>'
+        +'<text x="370" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.2" font-weight="800" fill="#000">EVİRİCİ-'+k+' '+pgesSayiFmt(invSet, 0)+' kWe Set Edilecektir.</text>'
+      +'</g>'
+      // Evirici AC çıkışından AG Pano İn-k Fiderine Bağlantı Hattı
+      +'<polyline points="873,'+(y0+70)+' 873,'+(y0+96)+' 618,'+(y0+96)+' 618,545" fill="none" stroke="#000" stroke-width="1.1" stroke-dasharray="3 2"/>';
+    }
+
+    var fiderSvg = "";
+    var fiderSay = Math.min(invAdet, 6);
+    for(var f=0; f<fiderSay; f++){
+      var fx = 428 + f * 36;
+      fiderSvg += '<line x1="'+fx+'" y1="520" x2="'+fx+'" y2="575" stroke="#000" stroke-width="1.4"/>'
+        +'<line x1="'+(fx-4)+'" y1="542" x2="'+(fx+4)+'" y2="550" stroke="#000" stroke-width="1.4"/>'
+        +'<line x1="'+(fx+4)+'" y1="542" x2="'+(fx-4)+'" y2="550" stroke="#000" stroke-width="1.4"/>'
+        +'<text x="'+fx+'" y="588" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000">İn-'+(f+1)+'</text>'
+        +'<text x="'+fx+'" y="598" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">3x350A</text>';
+    }
+
+    return '<div class="resmi-sayfa" id="paftaTekHat" style="padding:14px">'
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#fff;display:block">'
+        // Dış Çerçeve
+        +'<rect x="6" y="6" width="'+(W-12)+'" height="'+(H-12)+'" fill="none" stroke="#000" stroke-width="2"/>'
+        +'<rect x="10" y="10" width="'+(W-20)+'" height="36" fill="#F8FAFC" stroke="#000" stroke-width="1.2"/>'
+        +'<text x="'+(W/2)+'" y="33" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="14.5" font-weight="800" fill="#000">'+esc(unvan)+'  GES Tek Hat Şeması</text>'
+
+        // ==================== SOL SÜTUN: TR BİNASI (3 OG HÜCRE) + TM + GES ADP TABLOSU + BOŞ İMZA ====================
+        +'<rect x="22" y="62" width="320" height="275" fill="none" stroke="#000" stroke-width="1.4" stroke-dasharray="6 4"/>'
+        +'<text x="30" y="78" font-family="Archivo,Arial,sans-serif" font-size="10.5" font-weight="800" fill="#000">'+esc(tesisAdi)+' TR BİNASI (36 kV OG HÜCRELER)</text>'
+        // OG Anabara
+        +'<line x1="36" y1="92" x2="328" y2="92" stroke="#000" stroke-width="3"/>'
+        +'<text x="326" y="87" text-anchor="end" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#000">36kV 630A 16kA OG BARA</text>'
+
+        // Hücre 1: Yük Ayırıcılı Giriş Hücresi
+        +'<rect x="34" y="100" width="92" height="190" fill="none" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="80" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">YÜK AYIRICILI</text>'
+        +'<text x="80" y="122" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">GİRİŞ HÜCRESİ</text>'
+        +'<text x="80" y="132" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">36kV 630A 16kA</text>'
+        +'<line x1="80" y1="92" x2="80" y2="145" stroke="#000" stroke-width="1.4"/>'
+        +'<line x1="80" y1="145" x2="68" y2="168" stroke="#000" stroke-width="1.6"/>'
+        +'<circle cx="80" cy="145" r="2.5" fill="#000"/>'
+        +'<line x1="80" y1="170" x2="80" y2="290" stroke="#000" stroke-width="1.4"/>'
+        +'<text x="80" y="245" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">Kapasitif Gerilim</text>'
+        +'<text x="80" y="254" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">Bölücü + Topraklı Ay.</text>'
+
+        // Hücre 2: Yük Ayırıcılı Akım Gerilim Ölçü Hücresi
+        +'<rect x="136" y="100" width="92" height="190" fill="none" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="182" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#000">YÜK AYIRICILI AKIM</text>'
+        +'<text x="182" y="122" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#000">GERİLİM ÖLÇÜ HÜCRESİ</text>'
+        +'<text x="182" y="132" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">36kV 630A 16kA</text>'
+        +'<line x1="182" y1="92" x2="182" y2="145" stroke="#000" stroke-width="1.4"/>'
+        +'<rect x="176" y="150" width="12" height="22" fill="#FFF" stroke="#000" stroke-width="1.2"/>'
+        +'<text x="182" y="184" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">36kV 6.3A Sigorta</text>'
+        +'<circle cx="175" cy="204" r="7" fill="none" stroke="#000" stroke-width="1.2"/>'
+        +'<circle cx="189" cy="204" r="7" fill="none" stroke="#000" stroke-width="1.2"/>'
+        +'<text x="182" y="222" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">3x(34.5/√3)/(0.1/√3)kV</text>'
+        +'<text x="182" y="232" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">3x(30/5A) 15VA 0.5S</text>'
+        +'<rect x="148" y="244" width="68" height="28" fill="#F8FAFC" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="182" y="256" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">ÇİFT YÖNLÜ SAYAÇ</text>'
+        +'<text x="182" y="266" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">(Kombi Ölçü)</text>'
+
+        // Hücre 3: Kesicili Trafo Koruma Hücresi
+        +'<rect x="238" y="100" width="92" height="190" fill="none" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="284" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">KESİCİLİ TRAFO</text>'
+        +'<text x="284" y="122" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">KORUMA HÜCRESİ</text>'
+        +'<text x="284" y="132" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">36kV 630A 16kA</text>'
+        +'<line x1="284" y1="92" x2="284" y2="150" stroke="#000" stroke-width="1.4"/>'
+        +'<rect x="275" y="150" width="18" height="18" fill="#FFF" stroke="#000" stroke-width="1.4"/>'
+        +'<line x1="275" y1="150" x2="293" y2="168" stroke="#000" stroke-width="1.2"/>'
+        +'<line x1="293" y1="150" x2="275" y2="168" stroke="#000" stroke-width="1.2"/>'
+        +'<text x="284" y="180" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="700" fill="#000">SF6/Vakum Kesici</text>'
+        +'<line x1="284" y1="184" x2="284" y2="290" stroke="#000" stroke-width="1.4"/>'
+        +'<text x="284" y="218" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">Aşırı Akım &amp; Toprak</text>'
+        +'<text x="284" y="227" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">Koruma Rölesi</text>'
+
+        // Giriş Hücresinden Tercih Edilen TM'ye OG Hat
+        +'<line x1="80" y1="290" x2="80" y2="410" stroke="#000" stroke-width="1.8"/>'
+        +'<rect x="26" y="410" width="128" height="36" fill="#F8FAFC" stroke="#000" stroke-width="1.6"/>'
+        +'<text x="90" y="432" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="11" font-weight="800" fill="#000">'+esc(tmAdi)+'</text>'
+
+        // Kesicili Hücreden Orta Sütun Trafoya OG Kablo Hattı
+        +'<polyline points="284,290 284,322 356,322 356,74 495,74 495,98" fill="none" stroke="#000" stroke-width="1.8"/>'
+        +'<text x="318" y="315" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000">3x(1x95/16)mm² N2XSY-36kV 10 mt.</text>'
+
+        // Sol Alt: GES ADP Özet Tablosu (Tuğral Döküm Şablonu Birebir)
+        +'<g transform="translate(26, 466)">'
+          +'<rect x="0" y="0" width="310" height="122" fill="#FFF" stroke="#000" stroke-width="1.6"/>'
+          +'<rect x="0" y="0" width="310" height="24" fill="#F1F5F9" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="155" y="16" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="10.5" font-weight="800" fill="#000">GES ADP</text>'
+          +'<line x1="0" y1="48" x2="310" y2="48" stroke="#000" stroke-width="1"/>'
+          +'<line x1="0" y1="72" x2="310" y2="72" stroke="#000" stroke-width="1"/>'
+          +'<line x1="0" y1="96" x2="310" y2="96" stroke="#000" stroke-width="1"/>'
+          +'<line x1="196" y1="24" x2="196" y2="122" stroke="#000" stroke-width="1"/>'
+          +'<text x="10" y="40" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">BAĞLI İNVERTÖR SAYISI</text>'
+          +'<text x="253" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+invAdet+' Adet</text>'
+          +'<text x="10" y="64" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">TOPLAM GÜÇ (kWe)</text>'
+          +'<text x="253" y="64" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+pgesSayiFmt(acKwe, 1)+' kWe</text>'
+          +'<text x="10" y="88" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">TOPLAM GÜÇ (kWp)</text>'
+          +'<text x="253" y="88" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+pgesSayiFmt(dcKwp, 2)+' kWp</text>'
+          +'<text x="10" y="112" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">MAKS ÇIKIŞ AKIMI (A)</text>'
+          +'<text x="253" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+maksAkimExact+' A</text>'
+        +'</g>'
+
+        // Sol En Alt: Boş İmza & Onay Kutusu (İsim Yazılmaz)
+        +'<g transform="translate(26, 604)">'
+          +'<rect x="0" y="0" width="310" height="118" fill="#FFF" stroke="#000" stroke-width="1.3"/>'
+          +'<line x1="0" y1="24" x2="310" y2="24" stroke="#000" stroke-width="1"/>'
+          +'<text x="155" y="16" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">BAŞVURU SAHİBİ / ONAY (İMZA &amp; KAŞE)</text>'
+        +'</g>'
+
+        // ==================== ORTA SÜTUN: "TR" TRAFO KUTUSU + AG DAĞITIM PANOSU (GES ADP) ====================
+        +'<rect x="374" y="62" width="256" height="186" fill="none" stroke="#000" stroke-width="1.4" stroke-dasharray="6 4"/>'
+        +'<text x="384" y="80" font-family="Archivo,Arial,sans-serif" font-size="12" font-weight="800" fill="#000">"TR"</text>'
+        +'<text x="384" y="96" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">'+esc(ogKv)+' / 0.8 kV</text>'
+        +'<text x="384" y="110" font-family="Arial,sans-serif" font-size="9" font-weight="800" fill="#000">'+trKva+' kVA Trafo</text>'
+        +'<text x="384" y="124" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">DYN11</text>'
+        +'<text x="384" y="138" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">%UK= % 6</text>'
+        // Trafo Sembolü (İki Çember Δ / Y)
+        +'<circle cx="495" cy="116" r="18" fill="none" stroke="#000" stroke-width="1.8"/>'
+        +'<circle cx="495" cy="142" r="18" fill="none" stroke="#000" stroke-width="1.8"/>'
+        +'<text x="495" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">Δ</text>'
+        +'<text x="495" y="147" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">Y</text>'
+        +'<text x="524" y="132" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">8A1</text>'
+        // İşletme Topraklaması
+        +'<line x1="513" y1="142" x2="565" y2="142" stroke="#000" stroke-width="1.2"/>'
+        +'<line x1="565" y1="142" x2="565" y2="162" stroke="#000" stroke-width="1.2"/>'
+        +'<line x1="555" y1="162" x2="575" y2="162" stroke="#000" stroke-width="1.5"/>'
+        +'<line x1="559" y1="166" x2="571" y2="166" stroke="#000" stroke-width="1.5"/>'
+        +'<line x1="562" y1="170" x2="568" y2="170" stroke="#000" stroke-width="1.5"/>'
+        +'<text x="495" y="218" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="800" fill="#000">İŞLETME TOPRAKLAMASI</text>'
+        +'<text x="495" y="230" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#000">1x240 mm² NYY 20m · Ø20 2 mt (3 ad.)</text>'
+
+        // Trafo AG Çıkışı -> AG Dağıtım Panosu
+        +'<line x1="495" y1="160" x2="495" y2="335" stroke="#000" stroke-width="2"/>'
+        +'<text x="502" y="275" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#000">4x(4x1x240)mm² N2XH 5 mt.</text>'
+
+        // AG Dağıtım Panosu (GES ADP)
+        +'<rect x="374" y="295" width="256" height="325" fill="none" stroke="#000" stroke-width="1.4" stroke-dasharray="6 4"/>'
+        // Acil Durdurma + Koruma Rölesi VDE 0126-1-1
+        +'<rect x="382" y="308" width="88" height="34" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="426" y="322" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#000">Acil Durdurma Butonu</text>'
+        +'<text x="426" y="334" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">2x2,5mm² DC 50 mt.</text>'
+        +'<rect x="382" y="352" width="88" height="36" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="426" y="366" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">(DETAY-A) Koruma Rölesi</text>'
+        +'<text x="426" y="378" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#000">VDE 0126-1-1</text>'
+
+        // Ana Motorlu TMŞ + Tripcoil + Multimetre + Sayaç + Parafudr
+        +'<rect x="484" y="335" width="22" height="26" fill="#FFF" stroke="#000" stroke-width="1.4"/>'
+        +'<text x="512" y="346" font-family="Arial,sans-serif" font-size="7.5" font-weight="800" fill="#000">3x'+tmsAkim+' A MOTORLU TMŞ 50 kA</text>'
+        +'<text x="512" y="358" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">A.G.S TRİPCOİL</text>'
+        +'<line x1="495" y1="361" x2="495" y2="520" stroke="#000" stroke-width="2"/>'
+        +'<text x="512" y="388" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">3x'+ctAkim+'/5A CL 0.5 · MULTİMETRE</text>'
+        +'<text x="512" y="416" font-family="Arial,sans-serif" font-size="7.2" fill="#000">3 Kutup 800 V Tip 1+Tip 2 Parafudr (125 AgG)</text>'
+        +'<rect x="510" y="432" width="112" height="26" fill="#F8FAFC" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="566" y="448" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">ÇİFT YÖNLÜ ÜRETİM SAYACI</text>'
+
+        // (100x10) mm² Cu Bara ve Evirici Şalter Fiderleri
+        +'<line x1="392" y1="520" x2="618" y2="520" stroke="#000" stroke-width="3.5"/>'
+        +'<text x="505" y="512" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">(100x10) mm² Cu Bara (0.8 kV AG)</text>'
+        + fiderSvg
+
+        // ==================== SAĞ SÜTUN: EVİRİCİ BLOKLARI (E1 .. EN) ====================
+        + invSvg
+      +'</svg>'
+    +'</div>';
+  }
+
+  /* ----------------------------------------------------------------------------
+     PAFTA 4: FOTOVOLTAİK GÜNEŞ ENERJİSİNE DAYALI ÜRETİM TESİSİNE İLİŞKİN TEKNİK DEĞERLENDİRME FORMU (2 SAYFA)
+     ---------------------------------------------------------------------------- */
+  function pgesCizTeknikDegerlendirmeFormu(){
+    var unvan = el("pgesUnvan").value || "Tuğral Döküm Metal Plastik San. ve Tic. Ltd. Şti.";
+    var il = el("pgesIl").value || "—", ilce = el("pgesIlce").value || "—", mah = el("pgesMahalle").value || "—";
+    var ada = el("pgesAda").value || "—", prs = el("pgesParsel").value || "—";
+    var wp = parseFloat(el("pgesPanelWp").value) || 595;
+    var modSay = PGES_STATE.formModul || 1990;
+    var dcKwp = modSay * wp / 1000.0;
+    var invKw = parseFloat(el("pgesInvKw").value) || 250;
+    var invSet = parseFloat(el("pgesInvSetKw").value) || 240;
+    var invAdet = parseInt(el("pgesInvAdet").value, 10) || 4;
+    var acKwe = invAdet * invSet;
+    var tmAdi = (el("pgesTmAdi").value || "SÖĞÜT TM").replace(/\s+TM$/i, "").trim();
+    var alan = PGES_STATE.tapuAlan || PGES_STATE.hesapAlan || 8556.42;
+    var projSis = el("pgesProjSec").value || "UTM 6° ED 50";
+    var modTip = el("pgesModulTip").value || "mono";
+
+    var verts = PGES_STATE.vertices || [];
+    var koseRows = verts.map(function(v){
+      return '<tr>'
+        +'<td class="ort"><b>'+v.kod+'</b></td>'
+        +'<td class="num">'+pgesSayiFmt(v.ed50_6.y, 4)+'</td>'
+        +'<td class="num">'+pgesSayiFmt(v.ed50_6.x, 4)+'</td>'
+        +'<td class="ort">'+v.ed50_6.dom+'</td>'
+        +'<td class="num">'+pgesSayiFmt(v.ed50_3.y, 2)+'</td>'
+        +'<td class="num">'+pgesSayiFmt(v.ed50_3.x, 2)+'</td>'
+        +'<td class="ort">'+v.ed50_3.dom+'</td>'
+      +'</tr>';
+    }).join("");
+
+    return '<div class="resmi-sayfa" id="paftaTeknik1">'
+      +'<h4>FOTOVOLTAİK GÜNEŞ ENERJİSİNE DAYALI ÜRETİM TESİSİNE İLİŞKİN TEKNİK DEĞERLENDİRME FORMU</h4>'
+      +'<table class="resmi-tbl">'
+        +'<tr>'
+          +'<th style="width:44%">Başvuru Sahibinin Bilgileri</th>'
+          +'<td><b>Adı-Soyadı / Ticaret Unvanı:</b> '+esc(unvan)+'</td>'
+        +'</tr>'
+        +'<tr><th>İli</th><td>'+esc(il)+'</td></tr>'
+        +'<tr><th>İlçesi</th><td>'+esc(ilce)+'</td></tr>'
+        +'<tr><th>Mahallesi / Köyü</th><td>'+esc(mah)+'</td></tr>'
+        +'<tr><th>Ada</th><td>'+esc(ada)+'</td></tr>'
+        +'<tr><th>Parsel</th><td>'+esc(prs)+'</td></tr>'
+        +'<tr>'
+          +'<th>Tesisin Kurulacağı Yerin Bilgileri (Taşıyıcı Sistem)</th>'
+          +'<td>'
+            +'☐ Sabit (çatı, cephe vb.)<br>'
+            +'☒ <b>Optimum açıda sabitlenmiş taşıyıcı sistemler</b> ('+esc(el("pgesTilt").value)+'° Güney)<br>'
+            +'☐ Tek eksende güneş takibi yapılan sistemler<br>'
+            +'☐ Çift eksende güneş takibi yapılan sistemler'
+          +'</td>'
+        +'</tr>'
+        +'<tr>'
+          +'<th>Kurulum Yeri</th>'
+          +'<td>☐ Çatı &nbsp;&nbsp;&nbsp; ☐ Cephe &nbsp;&nbsp;&nbsp; ☒ <b>Arazi</b> &nbsp;&nbsp;&nbsp; ☐ Diğer</td>'
+        +'</tr>'
+        +'<tr>'
+          +'<th>Kullanılacak güneş modülü tipi</th>'
+          +'<td>'
+            +(modTip==="mono"?"☒":"☐")+' <b>Tek Kristalli yapı</b> &nbsp;&nbsp;&nbsp; '
+            +(modTip==="poly"?"☒":"☐")+' Çok kristalli yapı &nbsp;&nbsp;&nbsp; '
+            +(modTip==="thin"?"☒":"☐")+' İnce film &nbsp;&nbsp;&nbsp; ☐ Diğer'
+          +'</td>'
+        +'</tr>'
+        +'<tr><th>Güneş modülü gücü (Wp)</th><td><b>'+pgesSayiFmt(wp, 2)+'</b></td></tr>'
+        +'<tr><th>Güneş modülü sayısı (adet)</th><td><b>'+modSay+'</b></td></tr>'
+        +'<tr><th>Evirici gücü (kW)</th><td><b>'+pgesSayiFmt(invKw, 2)+'('+pgesSayiFmt(invSet, 0)+')</b></td></tr>'
+        +'<tr><th>Evirici sayısı (adet)</th><td><b>'+invAdet+'</b></td></tr>'
+        +'<tr>'
+          +'<th>Tesis toplam kurulu gücü (kWp / kWe)</th>'
+          +'<td>'
+            +'<table class="resmi-tbl" style="margin:0">'
+              +'<tr><th class="ort" style="width:50%">DC (kWp)</th><th class="ort" style="width:50%">AC (kWe)</th></tr>'
+              +'<tr><td class="ort"><b>'+pgesSayiFmt(dcKwp, 2)+'</b></td><td class="ort"><b>'+pgesSayiFmt(acKwe, 2)+'</b></td></tr>'
+            +'</table>'
+          +'</td>'
+        +'</tr>'
+        +'<tr><th>Tercih edilen trafo merkezinin (bağlantı noktası) adı</th><td><b>'+esc(tmAdi)+'</b></td></tr>'
+        +'<tr><th>Santral Sahası Alanı (m²)</th><td><b>'+pgesSayiFmt(alan, 2)+'</b></td></tr>'
+        +'<tr><th>Projeksiyon Sistemi</th><td><b>'+esc(projSis)+'</b> (Aplikasyon Krokisi ED50 6° &amp; ED50 3° Uyumlu)</td></tr>'
+      +'</table>'
+    +'</div>'
+
+    // Sayfa 2: Köşe Koordinat Tablosu (Aplikasyon Krokisinden ED50 6° ve ED50 3°) + Boş İmza Alanı
+    +'<div class="resmi-sayfa" id="paftaTeknik2">'
+      +'<h4>TEKNİK DEĞERLENDİRME FORMU EKİ · SANTRAL SAHASI KÖŞE KOORDİNATLARI (APLİKASYON KROKİSİNDEN)</h4>'
+      +'<table class="resmi-tbl">'
+        +'<thead>'
+          +'<tr>'
+            +'<th rowspan="2" class="ort">Tesisin Kurulacağı Arazinin<br>Köşe Numarası</th>'
+            +'<th colspan="3" class="ort" style="background:#E2E8F0">UTM 6° ED 50 KOORDİNATLARI</th>'
+            +'<th colspan="3" class="ort" style="background:#F1F5F9">GAUSS-KRÜGER 3° ED 50 KOORDİNATLARI</th>'
+          +'</tr>'
+          +'<tr>'
+            +'<th class="num">Doğu (Sağa Değer)</th>'
+            +'<th class="num">Kuzey (Yukarı Değer)</th>'
+            +'<th class="ort">Dilim Orta Boylamı</th>'
+            +'<th class="num">Doğu (Sağa Değer Y)</th>'
+            +'<th class="num">Kuzey (Yukarı Değer X)</th>'
+            +'<th class="ort">Dilim Orta Boylamı</th>'
+          +'</tr>'
+        +'</thead>'
+        +'<tbody>'+koseRows+'</tbody>'
+      +'</table>'
+      +'<table class="resmi-tbl" style="margin-top:16px;margin-bottom:0">'
+        +'<tr>'
+          +'<th class="ort" style="width:40%">Adı-Soyadı / Unvanı</th>'
+          +'<th class="ort" style="width:35%">İmza / Kaşe</th>'
+          +'<th class="ort" style="width:25%">Tarih (Gün/Ay/Yıl)</th>'
+        +'</tr>'
+        +'<tr>'
+          +'<td class="resmi-imza-bos"></td>'
+          +'<td class="resmi-imza-bos"></td>'
+          +'<td class="resmi-imza-bos"></td>'
+        +'</tr>'
+      +'</table>'
+    +'</div>';
+  }
+
+  /* ----------------------------------------------------------------------------
+     PAFTA 5: EK-1 LİSANSSIZ ÜRETİM BAŞVURU FORMU (1 SAYFA · İMZA KISMI BOŞ)
+     ---------------------------------------------------------------------------- */
+  function pgesCizBasvuruFormu(){
+    var unvan = el("pgesUnvan").value || "Tuğral Döküm Metal Plastik San. ve Tic. Ltd. Şti.";
+    var adres = el("pgesAdres").value || "—";
+    var tel = el("pgesTel").value || "—";
+    var eposta = el("pgesEposta").value || "—";
+    var vergi = el("pgesVergiNo").value || "—";
+    var iban = el("pgesIban").value || "—";
+    var tmAdi = (el("pgesTmAdi").value || "SÖĞÜT TM").replace(/\s+TM$/i, "").trim();
+    var il = el("pgesIl").value || "—", ilce = el("pgesIlce").value || "—", mah = el("pgesMahalle").value || "—";
+    var ada = el("pgesAda").value || "—", prs = el("pgesParsel").value || "—";
+    var wp = parseFloat(el("pgesPanelWp").value) || 595;
+    var modSay = PGES_STATE.formModul || 1990;
+    var dcKwp = modSay * wp / 1000.0;
+    var invSet = parseFloat(el("pgesInvSetKw").value) || 240;
+    var invAdet = parseInt(el("pgesInvAdet").value, 10) || 4;
+    var acKwe = invAdet * invSet;
+    var tekil = el("pgesTekilKod").value || "—";
+    var madde = el("pgesMadde").value || "5.1.h";
+
+    return '<div class="resmi-sayfa" id="paftaBasvuru">'
+      +'<div style="text-align:right;font-weight:800;font-size:13px;margin-bottom:2px">Ek-1</div>'
+      +'<h4>LİSANSSIZ ÜRETİM BAŞVURU FORMU</h4>'
+      +'<table class="resmi-tbl">'
+        +'<tr><th colspan="2" class="ort" style="background:#E2E8F0;font-size:12px">BAŞVURU SAHİBİNİN BİLGİLERİ</th></tr>'
+        +'<tr><th style="width:42%">Adı-Soyadı / Unvanı</th><td><b>'+esc(unvan)+'</b></td></tr>'
+        +'<tr><th>Adresi</th><td>'+esc(adres)+'</td></tr>'
+        +'<tr><th>Telefonu</th><td>'+esc(tel)+'</td></tr>'
+        +'<tr><th>Faks Numarası</th><td>---</td></tr>'
+        +'<tr><th>E-Posta Adresi</th><td>'+esc(eposta)+'</td></tr>'
+        +'<tr><th>T.C. Vergi / T.C. Kimlik Numarası</th><td><b>'+esc(vergi)+'</b></td></tr>'
+        +'<tr><th>Banka Hesap Numarası (IBAN)</th><td><b>'+esc(iban)+'</b></td></tr>'
+        +'<tr><th colspan="2" class="ort" style="background:#E2E8F0;font-size:12px">ÜRETİM TESİSİNİN BİLGİLERİ</th></tr>'
+        +'<tr><th>Bağlantı İçin Tercih Edilen İletim Trafo Merkezi</th><td><b>'+esc(tmAdi)+'</b></td></tr>'
+        +'<tr><th>Kurulacağı Yerin Adresi</th><td><b>'+esc(il)+' İli '+esc(ilce)+' İlçesi '+esc(mah)+' Mah./Köyü '+esc(ada)+' Ada '+esc(prs)+' Parsel</b></td></tr>'
+        +'<tr><th>Gücü</th><td><b>'+pgesSayiFmt(dcKwp, 2)+' kWp / '+pgesSayiFmt(acKwe, 0)+' kWe</b></td></tr>'
+        +'<tr><th>Tesis Türü</th><td><b>Güneş Enerjisine Dayalı Üretim Tesisi (GES)</b></td></tr>'
+        +'<tr><th>Üretim Tesisi İle İlişkilendirilecek Tüketim Tesisinin Tekil Kodları</th><td><b>'+esc(tekil)+'</b></td></tr>'
+        +'<tr><th>Var İse Aynı Ölçüm Noktasında Daha Önce Çağrı Mektubu Alınan Üretim Tesislerinin Güçleri</th><td><b>YOK</b></td></tr>'
+        +'<tr><th>Kurulacak Üretim Tesisinin Bağlantı Şekli ve Seviyesi</th><td><b>OG Tek Yönlü</b></td></tr>'
+        +'<tr><th>Yönetmelik Kapsamında İlgili Maddesi</th><td><b>'+esc(madde)+'</b></td></tr>'
+      +'</table>'
+
+      +'<div style="border:1px solid #000;padding:10px 12px;font-size:11.5px;line-height:1.5;margin-bottom:14px;text-align:justify">'
+        +'Yukarıda bilgileri verilen üretim tesisinin Elektrik Piyasasında Lisanssız Elektrik Üretim Yönetmeliği kapsamında şebekeye bağlantısının yapılması için gereğini arz ederim. Başvuru ekinde sunulan bilgi ve belgelerin doğru olduğunu, yanlış veya eksik bilgi verilmesi halinde başvurumun geçersiz sayılacağını kabul ve taahhüt ederim.'
+      +'</div>'
+
+      // Alt İmza Tablosu (Kullanıcı Kuralı: İsim ve İmza Boş)
+      +'<table class="resmi-tbl" style="margin-bottom:0">'
+        +'<tr>'
+          +'<th class="ort" style="width:40%">Adı-Soyadı / Unvanı</th>'
+          +'<th class="ort" style="width:35%">İmza</th>'
+          +'<th class="ort" style="width:25%">Tarih (Gün/Ay/Yıl)</th>'
+        +'</tr>'
+        +'<tr>'
+          +'<td class="resmi-imza-bos"></td>'
+          +'<td class="resmi-imza-bos"></td>'
+          +'<td class="resmi-imza-bos"></td>'
+        +'</tr>'
+      +'</table>'
+    +'</div>';
+  }
+
+  function pgesPaftaCiz(){
+    var kapsul = el("pgesPaftaKapsul");
+    if(!kapsul) return;
+    if(PGES_AKTIF_SEKME === "cad") kapsul.innerHTML = pgesCizCadPafta();
+    else if(PGES_AKTIF_SEKME === "aplikasyon") kapsul.innerHTML = pgesCizAplikasyonKrokisi();
+    else if(PGES_AKTIF_SEKME === "tekhat") kapsul.innerHTML = pgesCizTekHatSemasi();
+    else if(PGES_AKTIF_SEKME === "teknik") kapsul.innerHTML = pgesCizTeknikDegerlendirmeFormu();
+    else if(PGES_AKTIF_SEKME === "basvuru") kapsul.innerHTML = pgesCizBasvuruFormu();
+  }
+
+  function pgesOrnekYukle(kod, haritaOdakla){
+    if(kod === "secili_tm_parsel"){
+      var r = seciliRow || (tumu && tumu[0]);
+      var lat0 = (r && r.lat != null) ? (r.lat + 0.008) : 38.425;
+      var lon0 = (r && r.lon != null) ? (r.lon + 0.009) : 34.055;
+      var b = tmIlceCozumle(r);
+      el("pgesIl").value = r ? basharfBuyut(r.il) : "Aksaray";
+      el("pgesIlce").value = (b && b.ilce) ? b.ilce : "Merkez";
+      el("pgesMahalle").value = (b && b.mahalle) ? b.mahalle : "Merkez";
+      el("pgesAda").value = "118";
+      el("pgesParsel").value = "14";
+      el("pgesPafta").value = "K31-A-12-B";
+      el("pgesTapuAlan").value = "21450.00";
+      if(r && r.tm) el("pgesTmAdi").value = r.tm;
+      PGES_STATE.coords = [
+        [lat0, lon0], [lat0, lon0 + 0.0021], [lat0 - 0.0005, lon0 + 0.0022],
+        [lat0 - 0.0012, lon0 + 0.0020], [lat0 - 0.0012, lon0], [lat0 - 0.0006, lon0 - 0.0001]
+      ];
+      pgesCadYerlesimHesapla(false);
+      if(haritaOdakla) pgesHaritadaGoster(true);
+      return;
+    }
+
+    var o = PGES_ORNEKLER[kod] || PGES_ORNEKLER.aksaray_232_19;
+    el("pgesIl").value = o.il;
+    el("pgesIlce").value = o.ilce;
+    el("pgesMahalle").value = o.mahalle;
+    el("pgesAda").value = o.ada;
+    el("pgesParsel").value = o.parsel;
+    el("pgesPafta").value = o.pafta;
+    el("pgesTapuAlan").value = o.tapuAlan;
+    el("pgesNitelik").value = o.nitelik || "Tarla";
+    el("pgesMevkii").value = o.mevkii || "";
+    el("pgesUnvan").value = o.unvan;
+    el("pgesTesisAdi").value = o.tesisAdi;
+    el("pgesTmAdi").value = o.tmAdi;
+    el("pgesInvKw").value = o.invKw;
+    el("pgesInvSetKw").value = o.invSetKw;
+    el("pgesInvAdet").value = o.invAdet;
+    el("pgesPanelWp").value = o.panelWp;
+    el("pgesModulSayisi").value = o.modulSayisi;
+
+    if(o.coords && o.coords.length){
+      PGES_STATE.coords = o.coords.map(function(c){ return [c[0], c[1]]; });
+    } else if(o.ed50_6_yx && o.ed50_6_yx.length){
+      var dom6 = o.ed50_6_dom || 33;
+      PGES_STATE.coords = o.ed50_6_yx.map(function(yx){
+        var edLL = tmProjToLl(yx[0], yx[1], dom6, 0.9996, "intl24");
+        return ed50ToWgs84LL(edLL[0], edLL[1]);
+      });
+    } else if(o.itrf_3_yx && o.itrf_3_yx.length){
+      var dom3 = o.itrf_3_dom || 27;
+      PGES_STATE.coords = o.itrf_3_yx.map(function(yx){
+        return tmProjToLl(yx[0], yx[1], dom3, 1.0, "grs80");
+      });
+    }
+    pgesCadYerlesimHesapla(false);
+    if(haritaOdakla) pgesHaritadaGoster(true);
+  }
+
+  function pgesKmlMetinUret(){
+    var il = el("pgesIl").value || "Aksaray", ilce = el("pgesIlce").value || "Merkez", mah = el("pgesMahalle").value || "Akçakent";
+    var ada = el("pgesAda").value || "232", prs = el("pgesParsel").value || "19", pafta = el("pgesPafta").value || "";
+    var pts = (PGES_STATE.coords || []).slice();
+    if(pts.length >= 3) pts.push(pts[0]);
+    var coordStr = pts.map(function(p){ return p[1].toFixed(6)+","+p[0].toFixed(6)+",0"; }).join(" ");
+    return '<?xml version="1.0" encoding="UTF-8"?>\n'
+      +'<kml xmlns="http://www.opengis.net/kml/2.2"><Document><Placemark><name>'+ada+'/'+prs+'</name>'
+      +'<ExtendedData>'
+      +'<Data name="İl"><value>'+il+'</value></Data>'
+      +'<Data name="İlçe"><value>'+ilce+'</value></Data>'
+      +'<Data name="Mahalle"><value>'+mah+'</value></Data>'
+      +'<Data name="Ada"><value>'+ada+'</value></Data>'
+      +'<Data name="ParselNo"><value>'+prs+'</value></Data>'
+      +'<Data name="Pafta"><value>'+pafta+'</value></Data>'
+      +'<Data name="Alan"><value>'+PGES_STATE.tapuAlan+'</value></Data>'
+      +'</ExtendedData>'
+      +'<Polygon><outerBoundaryIs><LinearRing><coordinates>'+coordStr+'</coordinates></LinearRing></outerBoundaryIs></Polygon>'
+      +'</Placemark></Document></kml>';
+  }
+
+  function pgesAecadAc(){
+    try {
+      var kmlText = pgesKmlMetinUret();
+      var paket = {
+        kmlText: kmlText,
+        dosyaAdi: (el("pgesIl").value||"parsel") + "_" + (el("pgesAda").value||"ada") + "_" + (el("pgesParsel").value||"parsel"),
+        autoProje: false,
+        antet: {
+          il: el("pgesIl").value,
+          ilce: el("pgesIlce").value,
+          mahalle: el("pgesMahalle").value,
+          ada: el("pgesAda").value,
+          parsel: el("pgesParsel").value,
+          unvan: el("pgesUnvan").value,
+          adres: el("pgesAdres").value,
+          tesisAdi: el("pgesTesisAdi").value,
+          invKw: el("pgesInvSetKw").value,
+          invAdet: el("pgesInvAdet").value,
+          trafoKva: el("pgesTrafoKva").value === "oto" ? 1250 : el("pgesTrafoKva").value,
+          panelWp: el("pgesPanelWp").value,
+          cekme: el("pgesCekme").value
+        }
+      };
+      localStorage.setItem("ae_kapasite_parsel", JSON.stringify(paket));
+    } catch(e){}
+    window.open("../aecad/", "_blank");
+  }
+
+  function pgesDxfIndir(){
+    var poly = PGES_STATE.localPts || [];
+    if(poly.length < 3) return;
+    var out = ["0","SECTION","2","ENTITIES"];
+    function addPline(layer, pts, closed){
+      out.push("0","LWPOLYLINE","8",layer,"90",String(pts.length),"70",closed?"1":"0");
+      pts.forEach(function(p){
+        out.push("10",p[0].toFixed(3),"20",p[1].toFixed(3));
+      });
+    }
+    function addText(layer, x, y, h, txt){
+      out.push("0","TEXT","8",layer,"10",x.toFixed(3),"20",y.toFixed(3),"40",h.toFixed(2),"1",String(txt));
+    }
+    addPline("GES-PARSEL", poly, true);
+    if(PGES_STATE.cekmePts && PGES_STATE.cekmePts.length >= 3){
+      addPline("GES-CEKME", PGES_STATE.cekmePts, true);
+    }
+    PGES_STATE.vertices.forEach(function(v, i){
+      var p = poly[i];
+      addText("GES-KOSE", p[0]+0.6, p[1]+0.6, 1.8, v.kod + " (ED50-6 Y:" + v.ed50_6.y.toFixed(2) + " X:" + v.ed50_6.x.toFixed(2) + ")");
+    });
+    PGES_STATE.edges.forEach(function(e){
+      addText("GES-OLCU", e.midX, e.midY, 1.5, e.len.toFixed(2) + "m");
+    });
+    PGES_STATE.masalar.forEach(function(m){
+      addPline("GES-MASA", [[m.x, m.y],[m.x+m.w, m.y],[m.x+m.w, m.y+m.h],[m.x, m.y+m.h]], true);
+    });
+    PGES_STATE.inverterler.forEach(function(inv){
+      addPline("GES-INVERTER", [[inv.x-0.6, inv.y-0.6],[inv.x+0.6, inv.y-0.6],[inv.x+0.6, inv.y+0.6],[inv.x-0.6, inv.y+0.6]], true);
+      addText("GES-INVERTER", inv.x, inv.y, 1.2, inv.kod);
+    });
+    if(PGES_STATE.trafoMerkez){
+      var tm = PGES_STATE.trafoMerkez;
+      addPline("GES-TRAFO", [[tm.x-3, tm.y-2],[tm.x+3, tm.y-2],[tm.x+3, tm.y+2],[tm.x-3, tm.y+2]], true);
+      addText("GES-TRAFO", tm.x-2, tm.y, 1.6, "TR VE OG BINASI");
+    }
+    out.push("0","ENDSEC","0","EOF");
+    var blob = new Blob([out.join("\r\n")], {type: "application/dxf;charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "GES_Yerlesim_ve_Aplikasyon_" + (el("pgesAda").value||"Ada") + "_" + (el("pgesParsel").value||"Parsel") + ".dxf";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function pgesKoordCsvIndir(){
+    var verts = PGES_STATE.vertices || [];
+    if(!verts.length) return;
+    var rows = ["Kose_No;ED50_6_Dogu_Y;ED50_6_Kuzey_X;ED50_6_DOM;ED50_3_Dogu_Y;ED50_3_Kuzey_X;ED50_3_DOM;ITRF96_3_Y;ITRF96_3_X;ITRF96_DOM;WGS84_Enlem;WGS84_Boylam"];
+    verts.forEach(function(v){
+      rows.push([
+        v.kod,
+        v.ed50_6.y.toFixed(4), v.ed50_6.x.toFixed(4), v.ed50_6.dom,
+        v.ed50_3.y.toFixed(2), v.ed50_3.x.toFixed(2), v.ed50_3.dom,
+        v.itrf3.y.toFixed(2), v.itrf3.x.toFixed(2), v.itrf3.dom,
+        v.lat.toFixed(6), v.lon.toFixed(6)
+      ].join(";"));
+    });
+    var blob = new Blob(["\uFEFF" + rows.join("\r\n")], {type: "text/csv;charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Aplikasyon_Kose_Koordinatlari_ED50_3d_6d_" + (el("pgesAda").value||"Ada") + "_" + (el("pgesParsel").value||"Parsel") + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  function pgesYazdir(tumunuMu){
+    var icerik = "";
+    if(tumunuMu){
+      icerik = pgesCizAplikasyonKrokisi()
+        + '<div style="page-break-before:always"></div>' + pgesCizCadPafta()
+        + '<div style="page-break-before:always"></div>' + pgesCizTekHatSemasi()
+        + '<div style="page-break-before:always"></div>' + pgesCizTeknikDegerlendirmeFormu()
+        + '<div style="page-break-before:always"></div>' + pgesCizBasvuruFormu();
+    } else {
+      icerik = el("pgesPaftaKapsul") ? el("pgesPaftaKapsul").innerHTML : "";
+    }
+    var w = window.open("", "_blank");
+    if(!w) return;
+    w.document.write(
+      '<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>GES Başvuru Paketi · '+esc(el("pgesUnvan").value)+'</title>'
+      +'<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">'
+      +'<style>'
+      +'body{margin:0;padding:12mm;font-family:"IBM Plex Sans",Arial,sans-serif;color:#000;background:#fff}'
+      +'.resmi-sayfa{border:2px solid #000;padding:14px 16px;margin-bottom:14px;page-break-inside:avoid}'
+      +'.resmi-sayfa h4{margin:0 0 10px;text-align:center;font-family:Archivo,Arial,sans-serif;font-size:14px;font-weight:800;text-transform:uppercase}'
+      +'.resmi-tbl{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:11px}'
+      +'.resmi-tbl th,.resmi-tbl td{border:1px solid #000;padding:4px 6px;vertical-align:middle}'
+      +'.resmi-tbl th{background:#F1F5F9;font-weight:700;text-align:left}'
+      +'.resmi-tbl td.num,.resmi-tbl th.num{text-align:right;font-variant-numeric:tabular-nums}'
+      +'.resmi-tbl td.ort,.resmi-tbl th.ort{text-align:center}'
+      +'.resmi-imza-bos{height:54px}'
+      +'.koord-iki-kolon{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}'
+      +'@media print{body{padding:0}.resmi-sayfa{box-shadow:none}}'
+      +'</style></head><body>' + icerik
+      +'<script>setTimeout(function(){window.print();},450);<\/script></body></html>'
+    );
+    w.document.close();
+  }
+
+  function pgesDosyaIsle(file){
+    if(!file) return;
+    var isKmz = /\.kmz$/i.test(file.name);
+    file.arrayBuffer().then(function(buf){
+      return isKmz ? pgesUnzipKmz(buf) : Promise.resolve(new TextDecoder().decode(buf));
+    }).then(function(txt){
+      var res = pgesParseKmlText(txt);
+      if(!res.coords || res.coords.length < 3){
+        alert("Yüklenen KML/KMZ dosyasında geçerli parsel poligonu bulunamadı.");
+        return;
+      }
+      PGES_STATE.coords = res.coords;
+      var m = res.meta || {};
+      if(m["İl"] || m["Il"] || m["il"]) el("pgesIl").value = m["İl"] || m["Il"] || m["il"];
+      if(m["İlçe"] || m["Ilce"] || m["ilce"]) el("pgesIlce").value = m["İlçe"] || m["Ilce"] || m["ilce"];
+      if(m["Mahalle"] || m["mahalle"]) el("pgesMahalle").value = m["Mahalle"] || m["mahalle"];
+      if(m["Ada"] || m["ada"]) el("pgesAda").value = m["Ada"] || m["ada"];
+      if(m["ParselNo"] || m["Parsel"] || m["parsel"]) el("pgesParsel").value = m["ParselNo"] || m["Parsel"] || m["parsel"];
+      if(m["Pafta"] || m["pafta"]) el("pgesPafta").value = m["Pafta"] || m["pafta"];
+      if(m["Nitelik"]) el("pgesNitelik").value = m["Nitelik"];
+      if(m["Mevkii"]) el("pgesMevkii").value = m["Mevkii"];
+      if(m["Alan"]){
+        var alVal = parseFloat(String(m["Alan"]).replace(/\./g, "").replace(",", "."));
+        if(isFinite(alVal) && alVal > 0) el("pgesTapuAlan").value = alVal.toFixed(2);
+      }
+      // En yakın TEİAŞ TM adını otomatik ata
+      var cLat = res.coords.reduce(function(s,p){return s+p[0];},0)/res.coords.length;
+      var cLon = res.coords.reduce(function(s,p){return s+p[1];},0)/res.coords.length;
+      var yb = parselYakinTmBul(cLat, cLon, seciliRow);
+      if(yb && yb.yakin && yb.yakin.tm){
+        el("pgesTmAdi").value = yb.yakin.tm;
+      }
+      if(el("pgesDurumRozet")){
+        el("pgesDurumRozet").textContent = "KML Yüklendi: " + file.name + " (" + res.coords.length + " Köşe)";
+      }
+      pgesCadYerlesimHesapla(false);
+      pgesHaritadaGoster(true);
+    }).catch(function(err){
+      alert("KML/KMZ okuma hatası: " + (err && err.message ? err.message : err));
+    });
+  }
+
+  function pgesHamKoordUygula(){
+    var txt = (el("pgesHamKoord").value || "").trim();
+    if(!txt) return;
+    var lines = txt.split(/[\r\n]+/).map(function(s){return s.trim();}).filter(Boolean);
+    var parsed = [];
+    lines.forEach(function(l){
+      var nums = l.replace(/,/g, ".").match(/-?\d+(?:\.\d+)?/g);
+      if(nums && nums.length >= 2){
+        var a = parseFloat(nums[nums.length >= 3 && nums[0].length <= 2 ? 1 : 0]);
+        var b = parseFloat(nums[nums.length >= 3 && nums[0].length <= 2 ? 2 : 1]);
+        if(isFinite(a) && isFinite(b)) parsed.push([a, b]);
+      }
+    });
+    if(parsed.length < 3){
+      alert("En az 3 köşe koordinatı girmelisiniz.");
+      return;
+    }
+    // Koordinat türü algılama (WGS84 Enlem/Boylam mı yoksa Y/X Metre mi)
+    if(parsed[0][0] > 25 && parsed[0][0] < 45 && parsed[0][1] > 25 && parsed[0][1] < 46){
+      PGES_STATE.coords = parsed.map(function(p){ return [p[0], p[1]]; });
+    } else {
+      var projS = el("pgesProjSec").value || "UTM 6° ED 50";
+      PGES_STATE.coords = parsed.map(function(yx){
+        if(/6°/.test(projS)){
+          var edLL = tmProjToLl(yx[0], yx[1], 33, 0.9996, "intl24");
+          return ed50ToWgs84LL(edLL[0], edLL[1]);
+        } else if(/ED 50/i.test(projS)){
+          var ed3LL = tmProjToLl(yx[0], yx[1], 33, 1.0, "intl24");
+          return ed50ToWgs84LL(ed3LL[0], ed3LL[1]);
+        } else {
+          return tmProjToLl(yx[0], yx[1], 33, 1.0, "grs80");
+        }
+      });
+    }
+    pgesCadYerlesimHesapla(false);
+    pgesHaritadaGoster(true);
+  }
+
+  function pgesInit(){
+    if(!el("parselGesBolum")) return;
+    if(el("btnUstParselGesAc")){
+      el("btnUstParselGesAc").addEventListener("click", function(){
+        el("parselGesBolum").scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    }
+    var drop = el("pgesDropArea"), fInp = el("pgesKmlInput");
+    if(drop && fInp){
+      drop.addEventListener("click", function(){ fInp.click(); });
+      fInp.addEventListener("change", function(){
+        if(fInp.files && fInp.files[0]) pgesDosyaIsle(fInp.files[0]);
+      });
+      ["dragenter","dragover"].forEach(function(ev){
+        drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("drag"); });
+      });
+      ["dragleave","drop"].forEach(function(ev){
+        drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("drag"); });
+      });
+      drop.addEventListener("drop", function(e){
+        if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]){
+          pgesDosyaIsle(e.dataTransfer.files[0]);
+        }
+      });
+    }
+    if(el("pgesOrnekSec")){
+      el("pgesOrnekSec").addEventListener("change", function(){
+        pgesOrnekYukle(el("pgesOrnekSec").value, true);
+      });
+    }
+    if(el("btnPgesSorgula")){
+      el("btnPgesSorgula").addEventListener("click", function(){
+        pgesCadYerlesimHesapla(false);
+        pgesHaritadaGoster(true);
+        el("haritaBolum").scrollIntoView({behavior:"smooth", block:"center"});
+      });
+    }
+    if(el("btnPgesKoordUygula")){
+      el("btnPgesKoordUygula").addEventListener("click", pgesHamKoordUygula);
+    }
+    if(el("btnPgesHaritaCiz")){
+      el("btnPgesHaritaCiz").addEventListener("click", function(){
+        if(!MAP) return;
+        PGES_CIZIM_MODU = !PGES_CIZIM_MODU;
+        PGES_CIZIM_NOKTALAR = [];
+        el("btnPgesHaritaCiz").textContent = PGES_CIZIM_MODU ? "✅ Çizimi Bitir (En az 3 Köşe)" : "✏️ Haritadan Parsel Çiz";
+        if(PGES_CIZIM_MODU){
+          el("haritaBolum").scrollIntoView({behavior:"smooth", block:"center"});
+          el("hsay").textContent = "✏️ PARSEL ÇİZİM MODU AKTİF: Harita üzerinde parsel köşelerine sırayla tıklayın (en az 3 köşe).";
+        }
+      });
+    }
+    if(el("btnPgesHesapla")){
+      el("btnPgesHesapla").addEventListener("click", function(){ pgesCadYerlesimHesapla(false); });
+    }
+    if(el("btnPgesOtoBoyutla")){
+      el("btnPgesOtoBoyutla").addEventListener("click", function(){ pgesCadYerlesimHesapla(true); });
+    }
+    if(el("btnPgesAecadAc")) el("btnPgesAecadAc").addEventListener("click", pgesAecadAc);
+    if(el("btnPgesDxfIndir")) el("btnPgesDxfIndir").addEventListener("click", pgesDxfIndir);
+    if(el("btnPgesKoordCsv")) el("btnPgesKoordCsv").addEventListener("click", pgesKoordCsvIndir);
+    if(el("btnPgesAktifYazdir")) el("btnPgesAktifYazdir").addEventListener("click", function(){ pgesYazdir(false); });
+    if(el("btnPgesTumunuYazdir")) el("btnPgesTumunuYazdir").addEventListener("click", function(){ pgesYazdir(true); });
+
+    if(el("pgesSekmeler")){
+      el("pgesSekmeler").querySelectorAll("button[data-psekme]").forEach(function(b){
+        b.addEventListener("click", function(){
+          PGES_AKTIF_SEKME = b.getAttribute("data-psekme");
+          el("pgesSekmeler").querySelectorAll("button[data-psekme]").forEach(function(x){
+            x.classList.toggle("on", x === b);
+          });
+          pgesPaftaCiz();
+        });
+      });
+    }
+
+    // Input değişikliklerinde anında güncelle
+    ["pgesIl","pgesIlce","pgesMahalle","pgesAda","pgesParsel","pgesPafta","pgesTapuAlan","pgesNitelik","pgesMevkii",
+     "pgesPanelWp","pgesModulTip","pgesPanelBoyut","pgesMasaTip","pgesTilt","pgesCekme","pgesInvKw","pgesInvSetKw",
+     "pgesInvAdet","pgesYerlesimMod","pgesModulSayisi","pgesTrafoKva","pgesOgKv","pgesProjSec",
+     "pgesUnvan","pgesTesisAdi","pgesTmAdi","pgesVergiNo","pgesTekilKod","pgesTel","pgesEposta","pgesIban","pgesAdres","pgesMadde"
+    ].forEach(function(id){
+      if(el(id)){
+        el(id).addEventListener("change", function(){ pgesCadYerlesimHesapla(false); });
+      }
+    });
+
+    // Varsayılan olarak Aksaray 232 Ada 19 Parsel (veya Bilecik 104/86) hazır yüklenir
+    pgesOrnekYukle("aksaray_232_19", false);
+  }
+
+
   fetch(DATA,{cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
     .then(function(d){
@@ -3966,7 +5651,7 @@
       var konumlu=tumu.filter(function(r){return r.lat!=null;}).length;
       el("meta2").textContent=d.tm_sayi+" trafo merkezi barası · 3 dönem (02.03 → 16.07 → 01.10.2026) · "+konumlu+" coğrafi konumlu · 5 Harita Altlığı + 16 Bağımsız CBS Katmanı (Sit, Çevre Koruma, OGM Orman, 286 Ova, TEİAŞ Şebeke, TUCBS 375 Katman)";
       el("not").innerHTML="<b>Mühendislik &amp; CBS Notu:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezi barasında dağıtım seviyesinden (34,5 kV) tahsis edilebilecek güncel MWe gücüdür; 0,00 MWe olan baralar yeni lisanssız çağrı mektubu başvurusuna kapalıdır. Sol <b>CBS Katman Matrisi</b> üzerinden <b>154/380 kV TEİAŞ Şebeke Ağı (KMZ)</b>, <b>Doğal Sit Alanları (TVKGM)</b>, <b>ÖÇKB / Milli Park / Tabiat Parkları (DKMP)</b>, <b>OGM Orman Alanları &amp; 10m Orman Örtüsü</b>, <b>286 Büyük Ova Koruma Alanı</b>, <b>CORINE Arazi Örtüsü</b>, <b>MTA Diri Fay &amp; SYGM Taşkın Risk (Q100)</b> ve <b>Sahibinden Uygun Arazi İlanları</b> katmanlarını bağımsız olarak <b>Aktif / Pasif</b> edebilir; <b>TUCBS Katalog (375 Katman)</b> çekmecesinden tüm ulusal CBS katmanlarını inceleyebilirsiniz.";
-      haritaKur(); segCiz(); ciz();
+      haritaKur(); segCiz(); ciz(); pgesInit();
     })
     .catch(function(){
       el("meta2").textContent="Kapasite verisi yüklenemedi.";

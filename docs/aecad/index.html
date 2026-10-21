@@ -6175,6 +6175,35 @@ function init() {
   const resize = () => { view.resize(); if (S.fitPending) zoomExtents(false); redraw(); };
   new ResizeObserver(resize).observe($('#stage')); resize();
   blankDoc('Yeni çizim'); S.doc.isSample = true; tarifInit();
+  try {
+    const kpRaw = localStorage.getItem('ae_kapasite_parsel');
+    if (kpRaw) {
+      localStorage.removeItem('ae_kapasite_parsel');
+      const kp = JSON.parse(kpRaw);
+      if (kp && kp.kmlText) {
+        setTimeout(async () => {
+          try {
+            toCad(true);
+            G.parcels = []; G.parcelIds = []; G.kmlAntet = { ada: [], parsel: [] };
+            const f = new File([kp.kmlText], (kp.dosyaAdi || 'kapasite_parsel') + '.kml', { type: 'application/vnd.google-earth.kml+xml' });
+            await gesKml(f);
+            const yaz = (id, v) => { const e = gv(id); if (e && v !== undefined && v !== null && v !== '') e.value = String(v); };
+            if (kp.antet) {
+              yaz('p-il', kp.antet.il); yaz('p-ilce', kp.antet.ilce); yaz('p-mah', kp.antet.mahalle);
+              yaz('p-ada', kp.antet.ada); yaz('p-parsel', kp.antet.parsel);
+              yaz('p-yat', kp.antet.unvan); yaz('p-yadr', kp.antet.adres);
+              yaz('p-ad', kp.antet.tesisAdi); yaz('p-inv', kp.antet.invKw);
+              yaz('p-invn', kp.antet.invAdet); yaz('p-trafo', kp.antet.trafoKva);
+              yaz('g-p', kp.antet.panelWp); yaz('g-set', kp.antet.cekme);
+            }
+            formToPanel(); if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function') tfSync();
+            await CMD.GFILL();
+            if (kp.autoProje && typeof pjYerlesim === 'function') setTimeout(pjYerlesim, 250);
+          } catch (err) { console.error(err); }
+        }, 220);
+      }
+    }
+  } catch (e) { console.warn(e); }
   msg('AeCAD hazır. Komut yazın (ör. L, PL, C, M) veya soldaki araçları kullanın. Kısayollar için ? yazın.', 'note');
   setPrompt('Komut:');
   setTimeout(() => { libre().then(() => { S.libOk = true; }).catch((e) => { console.error(e); msg('DWG okuyucu yüklenemedi (' + (e.message || e) + '). DXF dosyaları yine açılabilir.', 'err'); }); }, 1200);

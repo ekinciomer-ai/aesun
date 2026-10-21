@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 (function(){
   var HASH="db058f55fd48ed9f649dc3a895fefab5dc4b0fe289a0c8d0fc9c62ad4f54bc35";
@@ -17,59 +18,73 @@
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#020617;color:#e2e8f0;min-height:100vh;line-height:1.45}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F4F7FB;color:#1E293B;min-height:100vh;line-height:1.48}
 a{color:inherit;text-decoration:none}
-.ust-nav{position:sticky;top:0;z-index:1000;background:rgba(15,23,42,.96);backdrop-filter:blur(10px);border-bottom:1px solid #1e293b;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ust-nav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid #DCE4F0;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(15,23,42,.05)}
 .ust-nav-sol{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.ust-logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:.96rem;color:#f8fafc}
-.ust-logo-ikon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#059669,#10b981);display:flex;align-items:center;justify-content:center;font-size:1.05rem;box-shadow:0 2px 10px rgba(16,185,129,.35)}
+.ust-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:.98rem;color:#0F172A}
+.ust-logo-ikon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0D9488,#10B981);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 3px 10px rgba(13,148,136,.25)}
 .ana-sekmeler{display:flex;gap:8px;flex-wrap:wrap}
-.ana-sekme-btn{padding:8px 15px;border-radius:9px;border:1px solid #334155;background:#0f172a;color:#cbd5e1;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s}
-.ana-sekme-btn:hover{border-color:#38bdf8;color:#f8fafc}
-.ana-sekme-btn.aktif{background:linear-gradient(135deg,#059669,#10b981);border-color:#34d399;color:#fff;box-shadow:0 3px 12px rgba(16,185,129,.3)}
-.ana-sekme-btn.kayit-sekme.aktif{background:linear-gradient(135deg,#1d4ed8,#2563eb);border-color:#60a5fa;color:#fff;box-shadow:0 3px 12px rgba(37,99,235,.3)}
+.ana-sekme-btn{padding:8px 15px;border-radius:9px;border:1px solid #CBD5E1;background:#F8FAFC;color:#334155;font-size:.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s}
+.ana-sekme-btn:hover{border-color:#0D9488;color:#0F172A;background:#F0FDFA}
+.ana-sekme-btn.aktif{background:linear-gradient(135deg,#0D9488,#059669);border-color:#059669;color:#fff;box-shadow:0 3px 10px rgba(5,150,105,.22)}
+.ana-sekme-btn.kayit-sekme.aktif{background:linear-gradient(135deg,#2563EB,#1D4ED8);border-color:#1D4ED8;color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.22)}
 .ust-nav-sag{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.btn{padding:7px 13px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
-.btn:hover{border-color:#38bdf8;color:#fff}
-.btn-yesil{background:linear-gradient(135deg,#059669,#10b981);border-color:#34d399;color:#fff}
-.btn-mavi{background:linear-gradient(135deg,#0284c7,#2563eb);border-color:#38bdf8;color:#fff}
-.btn-turuncu{background:linear-gradient(135deg,#d97706,#ea580c);border-color:#fbbf24;color:#fff}
-.btn-mor{background:linear-gradient(135deg,#7c3aed,#6d28d9);border-color:#a78bfa;color:#fff}
+.btn{padding:7px 13px;border-radius:8px;border:1px solid #CBD5E1;background:#FFFFFF;color:#334155;font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.btn:hover{border-color:#2563EB;color:#1D4ED8;background:#F8FAFC}
+.btn-yesil{background:linear-gradient(135deg,#0D9488,#059669);border-color:#059669;color:#fff}
+.btn-yesil:hover{background:linear-gradient(135deg,#0F766E,#047857);color:#fff;border-color:#047857}
+.btn-mavi{background:linear-gradient(135deg,#2563EB,#1D4ED8);border-color:#1D4ED8;color:#fff}
+.btn-mavi:hover{background:linear-gradient(135deg,#1D4ED8,#1E40AF);color:#fff;border-color:#1E40AF}
+.btn-turuncu{background:linear-gradient(135deg,#EA580C,#D97706);border-color:#D97706;color:#fff}
+.btn-turuncu:hover{background:linear-gradient(135deg,#C2410C,#B45309);color:#fff;border-color:#B45309}
+.btn-mor{background:linear-gradient(135deg,#4F46E5,#4338CA);border-color:#4338CA;color:#fff}
+.btn-mor:hover{background:linear-gradient(135deg,#4338CA,#3730A3);color:#fff;border-color:#3730A3}
 .kapsayici{max-width:1680px;margin:0 auto;padding:16px}
-.kart{background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.kart-baslik{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e293b}
-.kart-baslik h2{font-size:.98rem;font-weight:800;color:#f8fafc;display:flex;align-items:center;gap:8px}
-.rozet{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:.7rem;font-weight:700;background:#1e293b;color:#38bdf8;border:1px solid #334155}
+.kart{background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 18px rgba(15,23,42,.04)}
+.kart-baslik{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #E2E8F0}
+.kart-baslik h2{font-size:.98rem;font-weight:800;color:#0F172A;display:flex;align-items:center;gap:8px}
+.rozet{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
 .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
-.grid-2{display:grid;grid-template-columns:1.08fr .92fr;gap:14px}
+.grid-2{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
 @media(max-width:1100px){.grid-2{grid-template-columns:1fr}}
 .alan{display:flex;flex-direction:column;gap:4px}
-.alan label{font-size:.71rem;font-weight:700;color:#94a3b8;display:flex;align-items:center;justify-content:space-between}
-.alan input,.alan select,.alan textarea{background:#020617;border:1px solid #334155;border-radius:7px;padding:7px 10px;color:#f8fafc;font-size:.8rem;outline:none;width:100%}
-.alan input:focus,.alan select:focus,.alan textarea:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.18)}
-.tm-ozet-kutu{background:linear-gradient(135deg,rgba(15,23,42,.95),rgba(30,41,59,.9));border:1px solid #334155;border-radius:10px;padding:12px;margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.tm-metrik{background:#020617;border:1px solid #1e293b;border-radius:8px;padding:8px 10px}
-.tm-metrik .k{font-size:.67rem;color:#64748b;text-transform:uppercase;font-weight:700}
-.tm-metrik .v{font-size:.95rem;font-weight:800;color:#f8fafc;margin-top:2px}
+.alan label{font-size:.72rem;font-weight:700;color:#475569;display:flex;align-items:center;justify-content:space-between}
+.alan input,.alan select,.alan textarea{background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:7px 10px;color:#0F172A;font-size:.81rem;font-weight:500;outline:none;width:100%;transition:all .15s}
+.alan input:focus,.alan select:focus,.alan textarea:focus{background:#FFFFFF;border-color:#0D9488;box-shadow:0 0 0 3px rgba(13,148,136,.14)}
+.tm-ozet-kutu{background:linear-gradient(135deg,#F0FDF4 0%,#EFF6FF 100%);border:1px solid #BBF7D0;border-radius:12px;padding:12px;margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tm-metrik{background:#FFFFFF;border:1px solid #DCE4F0;border-radius:9px;padding:9px 11px;box-shadow:0 1px 3px rgba(15,23,42,.03)}
+.tm-metrik .k{font-size:.67rem;color:#64748B;text-transform:uppercase;font-weight:700;letter-spacing:.02em}
+.tm-metrik .v{font-size:.94rem;font-weight:800;color:#0F172A;margin-top:2px}
 .evrak-adim-liste{display:flex;flex-direction:column;gap:10px}
-.evrak-adim{background:#091020;border:1px solid #1e293b;border-radius:10px;overflow:hidden;transition:border-color .15s}
-.evrak-adim.aktif-adim{border-color:#10b981}
-.evrak-adim-baslik{padding:10px 14px;background:#0f172a;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none}
-.evrak-adim-sol{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.83rem;color:#f8fafc}
-.sira-no{width:26px;height:26px;border-radius:7px;background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;font-size:.74rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.evrak-adim-icerik{padding:12px 14px;border-top:1px solid #1e293b;display:none;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.evrak-adim{background:#FFFFFF;border:1px solid #DCE4F0;border-radius:11px;overflow:hidden;transition:all .18s;box-shadow:0 1px 4px rgba(15,23,42,.03)}
+.evrak-adim:hover{border-color:#94A3B8}
+.evrak-adim.aktif-adim{border-color:#0D9488;box-shadow:0 4px 14px rgba(13,148,136,.10)}
+.evrak-adim-baslik{padding:11px 14px;background:#F8FAFC;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none;transition:background .15s}
+.evrak-adim-baslik:hover{background:#F1F5F9}
+.evrak-adim.aktif-adim .evrak-adim-baslik{background:linear-gradient(90deg,#ECFDF5 0%,#F0FDFA 100%);border-bottom:1px solid #CCFBF1}
+.evrak-adim-sol{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.83rem;color:#1E293B}
+.evrak-adim.aktif-adim .evrak-adim-sol{color:#065F46}
+.sira-no{width:27px;height:27px;border-radius:8px;background:#EFF6FF;border:1px solid #93C5FD;color:#1D4ED8;font-size:.75rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.evrak-adim.aktif-adim .sira-no{background:#0D9488;border-color:#0D9488;color:#FFFFFF}
+.adim-ok{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:#E2E8F0;color:#475569;font-size:.75rem;font-weight:800;transition:transform .2s,background .15s}
+.evrak-adim.aktif-adim .adim-ok{transform:rotate(180deg);background:#CCFBF1;color:#0F766E}
+.evrak-adim-icerik{padding:14px;background:#FFFFFF;display:none;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:10px}
 .evrak-adim.aktif-adim .evrak-adim-icerik{display:grid}
-.evrak-yukle-bar{grid-column:1/-1;background:#020617;border:1px dashed #334155;border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.75rem}
+.evrak-yukle-bar{grid-column:1/-1;background:#F8FAFC;border:1px dashed #94A3B8;border-radius:9px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.75rem;color:#334155}
+.havuz-kutu{grid-column:1/-1;background:linear-gradient(90deg,#F0FDF4,#EFF6FF);border:1px solid #86EFAC;border-radius:9px;padding:9px 12px}
+.havuz-kutu.inv-havuz{background:linear-gradient(90deg,#EFF6FF,#F5F3FF);border-color:#93C5FD}
 .pafta-sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.pafta-sekme{padding:8px 13px;border-radius:8px;border:1px solid #334155;background:#020617;color:#94a3b8;font-size:.77rem;font-weight:700;cursor:pointer;transition:all .15s}
-.pafta-sekme.aktif{background:#0284c7;color:#fff;border-color:#38bdf8}
-.pafta-cerceve{background:#fff;color:#0f172a;border-radius:8px;border:2px solid #334155;overflow:auto;min-height:620px;padding:10px}
-#basvuruMap{width:100%;height:260px;border-radius:8px;border:1px solid #334155;margin-top:6px}
-.kayit-tablo{width:100%;border-collapse:collapse;font-size:.79rem}
-.kayit-tablo th,.kayit-tablo td{padding:9px 10px;border-bottom:1px solid #1e293b;text-align:left}
-.kayit-tablo th{background:#020617;color:#94a3b8;font-size:.71rem;text-transform:uppercase;letter-spacing:.04em}
-.kayit-tablo tr:hover td{background:rgba(30,41,59,.5)}
+.pafta-sekme{padding:8px 13px;border-radius:8px;border:1px solid #CBD5E1;background:#F8FAFC;color:#475569;font-size:.77rem;font-weight:700;cursor:pointer;transition:all .15s}
+.pafta-sekme:hover{border-color:#2563EB;color:#1D4ED8;background:#EFF6FF}
+.pafta-sekme.aktif{background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;border-color:#1D4ED8;box-shadow:0 2px 8px rgba(37,99,235,.22)}
+.pafta-cerceve{background:#FFFFFF;color:#0F172A;border-radius:10px;border:1px solid #CBD5E1;overflow:auto;min-height:620px;padding:12px;box-shadow:inset 0 1px 3px rgba(15,23,42,.04)}
+#basvuruMap{width:100%;height:260px;border-radius:9px;border:1px solid #CBD5E1;margin-top:6px}
+.kayit-tablo{width:100%;border-collapse:collapse;font-size:.8rem}
+.kayit-tablo th,.kayit-tablo td{padding:10px 12px;border-bottom:1px solid #E2E8F0;text-align:left}
+.kayit-tablo th{background:#F8FAFC;color:#475569;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
+.kayit-tablo tr:hover td{background:#F1F5F9}
 @media print{
   body{background:#fff;color:#000}
   .ust-nav,.no-print{display:none!important}
@@ -88,7 +103,7 @@ a{color:inherit;text-decoration:none}
       <div class="ust-logo-ikon">☀️</div>
       <div>
         <div>GES Başvuru & Mühendislik Dosyası Merkezi</div>
-        <div style="font-size:.68rem;color:#94a3b8;font-weight:500">EDAŞ Sıralı Evrak Girişi · CAD Yerleşim & AC Kablo · Aplikasyon · Onaylı Tek Hat · Kayıtlı Başvurular</div>
+        <div style="font-size:.69rem;color:#64748B;font-weight:600">EDAŞ Sıralı Seçmeli Evrak Girişi · Panel & İnverter Havuzu · Yerleşim · Aplikasyon · Sabit Şablonlu Tek Hat</div>
       </div>
     </div>
   </div>
@@ -112,7 +127,7 @@ a{color:inherit;text-decoration:none}
       <div class="kart-baslik">
         <h2>⚡ 1. Aşama: Dağıtım Bölgesi (EDAŞ), İl ve Trafo Merkezi (TM) Seçimi <span class="rozet">Kapasite Sayfasından Canlı Veri</span></h2>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          <span style="font-size:.73rem;color:#94a3b8">Hazır Referans Projeler:</span>
+          <span style="font-size:.74rem;color:#64748B;font-weight:700">Hazır Referans Projeler:</span>
           <button type="button" class="btn" onclick="hazirProjeYukle('tekyildiz')">⭐ Tekyıldız 2 MW GES (Aksaray)</button>
           <button type="button" class="btn" onclick="hazirProjeYukle('tugral')">🏭 Tuğral Döküm 1 MW GES</button>
           <button type="button" class="btn" onclick="hazirProjeYukle('akcakent')">🌾 Akçakent 1.65 MW GES</button>
@@ -169,9 +184,9 @@ a{color:inherit;text-decoration:none}
         <div class="tm-metrik"><div class="k">Seçili Trafo Merkezi</div><div class="v" id="tmKartAd">AKSARAY TM (31.5 kV)</div></div>
         <div class="tm-metrik"><div class="k">Dağıtım Şirketi / İl</div><div class="v" id="tmKartEdas">MERAM EDAŞ / AKSARAY</div></div>
         <div class="tm-metrik"><div class="k">02.03 / 16.07 Kapasite</div><div class="v" id="tmKartEski">18.50 / 16.20 MWe</div></div>
-        <div class="tm-metrik"><div class="k">Güncel Kalan Kapasite</div><div class="v" style="color:#34d399" id="tmKartGuncel">14.80 MWe</div></div>
-        <div class="tm-metrik"><div class="k">Talep Edilen AC Güç</div><div class="v" style="color:#38bdf8" id="tmKartTalep">1.920 MWe (1920 kWe)</div></div>
-        <div class="tm-metrik"><div class="k">Kapasite Uygunluk Durumu</div><div class="v" style="color:#10b981" id="tmKartUygunluk">✅ TAHSİSE UYGUN</div></div>
+        <div class="tm-metrik"><div class="k">Güncel Kalan Kapasite</div><div class="v" style="color:#059669" id="tmKartGuncel">14.80 MWe</div></div>
+        <div class="tm-metrik"><div class="k">Talep Edilen AC Güç</div><div class="v" style="color:#2563EB" id="tmKartTalep">1.920 MWe (1920 kWe)</div></div>
+        <div class="tm-metrik"><div class="k">Kapasite Uygunluk Durumu</div><div class="v" style="color:#059669" id="tmKartUygunluk">✅ TAHSİSE UYGUN</div></div>
       </div>
     </div>
 
@@ -179,16 +194,59 @@ a{color:inherit;text-decoration:none}
       <!-- SOL SÜTUN: DAĞITIM ŞİRKETLERİ (EDAŞ) RESMİ BAŞVURU EVRAK SIRASINA GÖRE VERİ GİRİŞİ -->
       <div class="kart no-print">
         <div class="kart-baslik">
-          <h2>📋 2. Aşama: EDAŞ Resmi Başvuru Evrak Listesi Sırasına Göre Bilgi & Evrak Girişi</h2>
-          <span class="rozet" id="evrakTamamRozet">11 Resmi Evrak Kalemi</span>
+          <h2>📋 2. Aşama: EDAŞ Resmi Başvuru Evrak Listesi Sırasına Göre Seçmeli Bilgi & Evrak Girişi</h2>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <button type="button" class="btn btn-mavi" onclick="el('metinYapistirKutu').style.display=el('metinYapistirKutu').style.display==='none'?'block':'none'">📋 Metinden Bilgi Çek</button>
+            <button type="button" class="btn" onclick="tumEvrakAdimlariAcKapat()" id="btnTumAdimlar">📂 Tüm Adımları Aç / Kapat</button>
+            <span class="rozet" id="evrakTamamRozet">11 Seçmeli Evrak</span>
+          </div>
+        </div>
+
+        <!-- AKILLI EVRAK YÜKLE & YÜKLENMİŞ EVRAKTAN OTOMATİK BİLGİ ÇEKME MERKEZİ -->
+        <div id="akilliEvrakPaneli" style="background:linear-gradient(135deg,#F0FDF4 0%,#EFF6FF 100%);border:1.5px dashed #0D9488;border-radius:12px;padding:12px 14px;margin-bottom:12px"
+             ondragover="event.preventDefault();this.style.borderColor='#2563EB';this.style.background='#EFF6FF';"
+             ondragleave="this.style.borderColor='#0D9488';this.style.background='linear-gradient(135deg,#F0FDF4 0%,#EFF6FF 100%)';"
+             ondrop="event.preventDefault();this.style.borderColor='#0D9488';if(event.dataTransfer&&event.dataTransfer.files)topluEvrakAnalizEt(event.dataTransfer.files,0);">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div>
+              <div style="font-size:.86rem;font-weight:800;color:#065F46;display:flex;align-items:center;gap:6px">
+                <span>🤖 Akıllı Evrak Yükleyici & Otomatik Bilgi Çıkarıcı (PDF · KML/KMZ · TXT · CSV · Görsel)</span>
+              </div>
+              <div style="font-size:.73rem;color:#334155;margin-top:2px">
+                Vergi Levhası, Ticaret Sicil, Tapu Senedi, LİHKAB Aplikasyon, Elektrik Faturası, Banka Dekontu veya Teknik Form yükleyin; <b>Unvan, VKN, Ada/Parsel, Alan, Koordinat, Tekil Kod, Sözleşme Gücü ve IBAN</b> otomatik çekilir.
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <label class="btn btn-yesil" style="cursor:pointer;margin:0">
+                📤 Evrak Yükle &amp; Bilgileri Çek
+                <input type="file" id="topluEvrakInput" multiple accept=".pdf,.kml,.kmz,.geojson,.json,.txt,.csv,.dxf,.xml,.html,.png,.jpg,.jpeg" style="display:none" onchange="if(this.files)topluEvrakAnalizEt(this.files,0)">
+              </label>
+            </div>
+          </div>
+
+          <!-- Metin Yapıştırarak Bilgi Çekme Kutusu -->
+          <div id="metinYapistirKutu" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #94A3B8">
+            <div style="font-size:.74rem;font-weight:700;color:#1E293B;margin-bottom:4px">📋 e-Devlet / TAKBİS / Vergi Levhası / Elektrik Faturası / Dekont Metnini Buraya Yapıştırın:</div>
+            <textarea id="fEvrakHamMetin" rows="3" placeholder="Örn: Vergi Kimlik No: 8360941258, Unvan: ... A.Ş., Ada: 155 Parsel: 19 Yüzölçümü: 28.191,47 m2, Tekil Kod: 401829384710, Sözleşme Gücü: 2000 kW, IBAN: TR48..." style="width:100%;padding:8px;border:1px solid #CBD5E1;border-radius:8px;font-size:.77rem;background:#FFFFFF;color:#0F172A"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px">
+              <button type="button" class="btn btn-yesil" onclick="hamMetindenBilgiCek()">⚡ Metindeki Bilgileri Otomatik Çek ve Forma Doldur</button>
+            </div>
+          </div>
+
+          <!-- Çıkarılan Bilgiler & Yüklenen Evraklar Özeti -->
+          <div id="cikarilanBilgiOzetKutu" style="display:none;margin-top:10px;padding:9px 11px;background:#FFFFFF;border:1px solid #A7F3D0;border-radius:9px;font-size:.75rem;color:#0F172A"></div>
         </div>
 
         <div class="evrak-adim-liste">
           <!-- SIRA 1 -->
           <div class="evrak-adim aktif-adim">
-            <div class="evrak-adim-baslik">
-              <div class="evrak-adim-sol"><span class="sira-no">1</span><span>Sıra 1 — Lisanssız Üretim Bağlantı Başvuru Formu (Ek-1) & Başvuru Sahibi Şirket Bilgileri</span></div>
-              <span class="rozet">Zorunlu Evrak #1</span>
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
+              <div class="evrak-adim-sol"><span class="sira-no">1</span><span>Sıra 1 — Lisanssız Üretim Bağlantı Başvuru Formu (Ek-1) & Şirket Bilgileri</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="1" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #1</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
               <div class="alan" style="grid-column:span 2"><label>Başvuru Sahibi Tüzel / Gerçek Kişi Unvanı</label><input type="text" id="fUnvan" value="TEKYILDIZ ENERJİ SANAYİ VE TİCARET A.Ş." oninput="hesaplaVeCiz()"></div>
@@ -204,31 +262,52 @@ a{color:inherit;text-decoration:none}
               <div class="alan"><label>Yetkili Temsilci / Proje Müellifi</label><input type="text" id="fYetkili" value="Muhammed — Elektrik Mühendisi" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Telefon & E-Posta</label><input type="text" id="fIletisim" value="0532 000 00 00 · proje@aesun.com.tr" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Tebligat Adresi</label><input type="text" id="fAdres" value="OSB Mah. 12. Cad. No:8 Merkez / AKSARAY" oninput="hesaplaVeCiz()"></div>
+              <div class="evrak-yukle-bar">
+                <span>📎 <b>Ek-1 Formu veya Vergi Levhası Yükle (PDF/TXT):</b> Şirket Unvanı, VKN, Vergi Dairesi ve Adresi otomatik çeker. <span id="evrakDurum_1" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.txt,.json,.xml,.png,.jpg" onchange="evrakDosyaSecildi(1,this)" style="max-width:250px;font-size:.72rem">
+              </div>
             </div>
           </div>
 
           <!-- SIRA 2 -->
           <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
-              <div class="evrak-adim-sol"><span class="sira-no">2</span><span>Sıra 2 — Tüzel Kişilik Yetki Belgeleri (Ticaret Sicil, İmza Sirküleri, Vekaletname, Vergi Levhası)</span></div>
-              <span class="rozet">Zorunlu Evrak #2</span>
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
+              <div class="evrak-adim-sol"><span class="sira-no">2</span><span>Sıra 2 — Tüzel Kişilik Yetki Belgeleri (Ticaret Sicil, İmza Sirküleri, Vekaletname)</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="2" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #2</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
+              <div class="alan" style="grid-column:1/-1">
+                <label>📄 Yetki Belgesi Paketi Seçimi (Hazır Şablon Seç)</label>
+                <select onchange="if(this.value){el('fNoter').value=this.value;hesaplaVeCiz();}">
+                  <option value="">— Yetki Belgesi Türü Seçiniz —</option>
+                  <option value="Noter Onaylı İmza Sirküleri + Ticaret Sicil Gazetesi + Oda Faaliyet Belgesi (Tam Paket)" selected>Tam Paket: İmza Sirküleri + Ticaret Sicil Gazetesi + Oda Faaliyet + Vergi Levhası</option>
+                  <option value="Noter Onaylı Vekaletname + İmza Sirküleri + Ticaret Sicil Gazetesi">Vekaletnameli Başvuru: Noter Vekaletnamesi + İmza Sirküleri + Sicil Gazetesi</option>
+                  <option value="Gerçek Kişi Noter Onaylı İmza Beyannamesi + Kimlik Sureti">Gerçek Kişi: Noter Onaylı İmza Beyannamesi + Kimlik Fotokopisi</option>
+                </select>
+              </div>
               <div class="alan"><label>Ticaret Sicil No / MERSİS No</label><input type="text" id="fSicilNo" value="0836094125800001" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>İmza Sirküleri / Vekaletname Noter & Tarih</label><input type="text" id="fNoter" value="Aksaray 3. Noterliği — 14.08.2026 / Yev: 12450" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Faaliyet Belgesi Oda Kaydı</label><input type="text" id="fOda" value="Aksaray Ticaret ve Sanayi Odası" oninput="hesaplaVeCiz()"></div>
               <div class="evrak-yukle-bar">
-                <span>📎 İstenen Evraklar: <b>Ticaret Sicil Gazetesi, Noter Onaylı İmza Sirküleri, Vergi Levhası, Oda Faaliyet Belgesi (PDF)</b></span>
-                <input type="file" multiple onchange="evrakDosyaSecildi(2,this)" style="max-width:250px;font-size:.72rem">
+                <span>📎 <b>Sicil Gazetesi / İmza Sirküleri / Vergi Levhası Yükle (PDF):</b> MERSİS No, Noter, Yevmiye ve Oda kaydını otomatik çeker. <span id="evrakDurum_2" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.txt,.png,.jpg" onchange="evrakDosyaSecildi(2,this)" style="max-width:250px;font-size:.72rem">
               </div>
             </div>
           </div>
 
           <!-- SIRA 3 -->
           <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
-              <div class="evrak-adim-sol"><span class="sira-no">3</span><span>Sıra 3 — Üretim Tesisi Tapu Kaydı / Kira Sözleşmesi & LİHKAB Aplikasyon Krokisi (KML/KMZ)</span></div>
-              <span class="rozet">Zorunlu Evrak #3</span>
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
+              <div class="evrak-adim-sol"><span class="sira-no">3</span><span>Sıra 3 — Üretim Tesisi Tapu Kaydı / Kira Sözleşmesi & LİHKAB Aplikasyon Krokisi</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="3" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #3</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
               <div class="alan"><label>Üretim İli</label><input type="text" id="fParselIl" value="AKSARAY" oninput="hesaplaVeCiz()"></div>
@@ -241,20 +320,31 @@ a{color:inherit;text-decoration:none}
                   <input type="text" id="fPafta" value="K31-B-24-A" placeholder="Pafta" oninput="hesaplaVeCiz()">
                 </div>
               </div>
-              <div class="alan"><label>Tapu Alanı (m²) & Mülkiyet Türü</label>
+              <div class="alan"><label>Tapu Alanı (m²) & Mülkiyet Türü (Seçmeli)</label>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
                   <input type="number" id="fTapuAlan" value="28191.47" step="0.01" oninput="hesaplaVeCiz()">
                   <select id="fMulkiyet" onchange="hesaplaVeCiz()">
                     <option value="Tam Mülkiyet (Tapu)">Tam Mülkiyet (Tapu)</option>
-                    <option value="Noter Onaylı Kira Sözleşmesi">Kira Sözleşmesi</option>
-                    <option value="Hazine / İrtifak Hakkı">Hazine İrtifak</option>
+                    <option value="Noter Onaylı Kira Sözleşmesi">Noter Kira Sözleşmesi</option>
+                    <option value="Hazine / İrtifak Hakkı">Hazine İrtifak Hakkı</option>
+                    <option value="Tahsis Yazısı (OSB / Kamu)">OSB / Kamu Tahsis</option>
                   </select>
                 </div>
               </div>
-              <div class="alan"><label>Tapu Nitelik & Mevkii</label><input type="text" id="fMevkii" value="Tarla (Marjinal Tarım) — Köyiçi Mevkii" oninput="hesaplaVeCiz()"></div>
+              <div class="alan"><label>Tapu Nitelik & Mevkii (Seçmeli / Düzenlenebilir)</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                  <select onchange="if(this.value){el('fMevkii').value=this.value;hesaplaVeCiz();}">
+                    <option value="Tarla (Marjinal Tarım) — Köyiçi Mevkii">Tarla (Marjinal Tarım)</option>
+                    <option value="Ham Toprak / Kıraç Arazi">Ham Toprak / Kıraç</option>
+                    <option value="Sanayi İmarlı Arsa (OSB)">Sanayi İmarlı Arsa</option>
+                    <option value="Fabrika Çatısı / Endüstriyel Tesis">Endüstriyel Çatı</option>
+                  </select>
+                  <input type="text" id="fMevkii" value="Tarla (Marjinal Tarım) — Köyiçi Mevkii" oninput="hesaplaVeCiz()">
+                </div>
+              </div>
               <div class="evrak-yukle-bar">
-                <span>🗺️ <b>KML / KMZ / GeoJSON Parsel Yükle:</b> Parsel köşe koordinatlarını otomatik çıkarır ve yerleşimi parsel içine kurar.</span>
-                <input type="file" accept=".kml,.kmz,.geojson,.json" onchange="kmlDosyaYukle(this)" style="max-width:250px;font-size:.72rem">
+                <span>🗺️ <b>Tapu Senedi / LİHKAB Aplikasyon PDF veya KML / KMZ Yükle:</b> İl, İlçe, Mahalle, Ada/Parsel, Alan (m²) ve Köşe Koordinatlarını otomatik çeker. <span id="evrakDurum_3" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.kml,.kmz,.geojson,.json,.csv,.txt,.dxf" onchange="evrakDosyaSecildi(3,this)" style="max-width:250px;font-size:.72rem">
               </div>
               <div style="grid-column:1/-1"><div id="basvuruMap"></div></div>
             </div>
@@ -262,50 +352,91 @@ a{color:inherit;text-decoration:none}
 
           <!-- SIRA 4 -->
           <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
-              <div class="evrak-adim-sol"><span class="sira-no">4</span><span>Sıra 4 — Tüketim Tesisi Tekil Kodu (Abone/Tesisat No), Elektrik Faturası ve Sözleşme Gücü</span></div>
-              <span class="rozet">Zorunlu Evrak #4</span>
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
+              <div class="evrak-adim-sol"><span class="sira-no">4</span><span>Sıra 4 — Tüketim Tesisi Tekil Kodu (Abone No), Elektrik Faturası ve Sözleşme Gücü</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="4" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #4</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
               <div class="alan"><label>Tüketim Tesisi Tekil Kod / Tesisat No</label><input type="text" id="fTekilKod" value="401829384710" oninput="hesaplaVeCiz()"></div>
-              <div class="alan"><label>Abone Grubu & Terim</label><input type="text" id="fAboneGrup" value="Sanayi OG — Çift Terimli" oninput="hesaplaVeCiz()"></div>
+              <div class="alan"><label>Abone Grubu & Terim (Seçmeli)</label>
+                <select onchange="el('fAboneGrup').value=this.value;hesaplaVeCiz();">
+                  <option value="Sanayi OG — Çift Terimli" selected>Sanayi OG — Çift Terimli</option>
+                  <option value="Sanayi OG — Tek Terimli">Sanayi OG — Tek Terimli</option>
+                  <option value="Ticarethane OG — Çift Terimli">Ticarethane OG — Çift Terimli</option>
+                  <option value="Ticarethane AG — Tek Terimli">Ticarethane AG — Tek Terimli</option>
+                  <option value="Tarımsal Sulama OG/AG">Tarımsal Sulama OG/AG</option>
+                  <option value="OSB Katılımcı Abonesi (OG)">OSB Katılımcı Abonesi (OG)</option>
+                </select>
+                <input type="hidden" id="fAboneGrup" value="Sanayi OG — Çift Terimli">
+              </div>
               <div class="alan"><label>Tüketim Sözleşme Gücü (kW)</label><input type="number" id="fSozlesmeGucu" value="2000" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Yıllık Tüketim (kWh/yıl)</label><input type="number" id="fYillikTuketim" value="4250000" oninput="hesaplaVeCiz()"></div>
               <div class="evrak-yukle-bar">
-                <span>📎 İstenen Evrak: <b>Son Dönem Onaylı Elektrik Faturası ve Bağlantı Anlaşması Sureti</b></span>
-                <input type="file" onchange="evrakDosyaSecildi(4,this)" style="max-width:250px;font-size:.72rem">
+                <span>📎 <b>Elektrik Faturası / Bağlantı Anlaşması Yükle (PDF):</b> Tekil Kod (Tesisat No), Sözleşme Gücü (kW) ve Tüketim (kWh) bilgisini otomatik çeker. <span id="evrakDurum_4" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.txt,.xml,.html,.png,.jpg" onchange="evrakDosyaSecildi(4,this)" style="max-width:250px;font-size:.72rem">
               </div>
             </div>
           </div>
 
           <!-- SIRA 5 -->
           <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
               <div class="evrak-adim-sol"><span class="sira-no">5</span><span>Sıra 5 — Başvuru Ücreti Banka Dekontu ve İade IBAN Bilgisi</span></div>
-              <span class="rozet">Zorunlu Evrak #5</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="5" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #5</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
+              <div class="alan"><label>Banka Seçimi</label>
+                <select onchange="if(this.value){el('fDekontNo').value=this.value+' — '+new Date().toLocaleDateString('tr-TR')+' / Başvuru Harcı Dekontu';hesaplaVeCiz();}">
+                  <option value="Ziraat Bankası" selected>T.C. Ziraat Bankası</option>
+                  <option value="Vakıfbank">Vakıfbank</option>
+                  <option value="Halkbank">Halkbank</option>
+                  <option value="İş Bankası">Türkiye İş Bankası</option>
+                  <option value="Garanti BBVA">Garanti BBVA</option>
+                  <option value="Yapı Kredi">Yapı Kredi</option>
+                  <option value="Akbank">Akbank</option>
+                </select>
+              </div>
               <div class="alan"><label>Yatırılan Banka & Dekont No / Tarih</label><input type="text" id="fDekontNo" value="Ziraat Bankası — 21.10.2026 / Dekont #98412" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Başvuru Sahibine Ait İade IBAN No</label><input type="text" id="fIban" value="TR48 0001 0001 2345 6789 0050 01" oninput="hesaplaVeCiz()"></div>
               <div class="evrak-yukle-bar">
-                <span>📎 İstenen Evrak: <b>EPDK Lisanssız Başvuru Bedeli Banka Dekontu (PDF)</b></span>
-                <input type="file" onchange="evrakDosyaSecildi(5,this)" style="max-width:250px;font-size:.72rem">
+                <span>📎 <b>Banka Dekontu Yükle (PDF):</b> Banka adı, işlem tarihi, dekont numarası ve TR IBAN numarasını otomatik çeker. <span id="evrakDurum_5" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.txt,.png,.jpg" onchange="evrakDosyaSecildi(5,this)" style="max-width:250px;font-size:.72rem">
               </div>
             </div>
           </div>
 
-          <!-- SIRA 6 -->
-          <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
-              <div class="evrak-adim-sol"><span class="sira-no">6</span><span>Sıra 6 — Fotovoltaik GES Teknik Değerlendirme Formu (YEGM Formatı — Modül & Evirici)</span></div>
-              <span class="rozet">Zorunlu Evrak #6</span>
+          <!-- SIRA 6: PV PANEL HAVUZU & İNVERTER HAVUZU -->
+          <div class="evrak-adim aktif-adim">
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
+              <div class="evrak-adim-sol"><span class="sira-no">6</span><span>Sıra 6 — Fotovoltaik GES Teknik Değerlendirme Formu (Seçmeli Panel & İnverter Havuzu)</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="6" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Panel & İnverter Havuzu</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
+              <div class="alan havuz-kutu">
+                <label style="color:#065F46;font-size:.76rem">☀️ PV Panel Havuzundan Seç (Onaylı Modül Kütüphanesi) <button type="button" class="btn btn-yesil" style="padding:3px 9px;font-size:.69rem" onclick="yeniPanelHavuzaEkle()">➕ Havuza Yeni Panel Ekle</button></label>
+                <select id="fModulHavuzSec" onchange="modulHavuzSecildi()"></select>
+              </div>
+              <div class="alan havuz-kutu inv-havuz">
+                <label style="color:#1E40AF;font-size:.76rem">⚡ Evirici / İnverter Havuzundan Seç (Onaylı İnverter Kütüphanesi) <button type="button" class="btn btn-mavi" style="padding:3px 9px;font-size:.69rem" onclick="yeniInverterHavuzaEkle()">➕ Havuza Yeni İnverter Ekle</button></label>
+                <select id="fInvHavuzSec" onchange="invHavuzSecildi()"></select>
+              </div>
               <div class="alan"><label>PV Modül Marka / Tip</label><input type="text" id="fModulMarka" value="CW Enerji / TOPCon Bifacial N-Type" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Modül Gücü (Wp) & Modül Adedi</label>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
                   <input type="number" id="fModulWp" value="625" step="5" oninput="hesaplaVeCiz()">
-                  <input type="number" id="fModulAdet" value="3744" step="26" oninput="hesaplaVeCiz()">
+                  <input type="number" id="fModulAdet" value="3484" step="26" oninput="hesaplaVeCiz()">
                 </div>
               </div>
               <div class="alan"><label>Modül Boyutu (mm) & Dizi Modül Sayısı</label>
@@ -317,33 +448,72 @@ a{color:inherit;text-decoration:none}
               <div class="alan"><label>Evirici (Inverter) Marka / Model</label><input type="text" id="fInvMarka" value="HUAWEI SUN2000-250KTL-H1 (800V AC)" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Birim Evirici Gücü (kWe) & Evirici Sayısı</label>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-                  <input type="number" id="fInvKw" value="240" step="10" oninput="hesaplaVeCiz()">
+                  <input type="number" id="fInvKw" value="200" step="10" oninput="hesaplaVeCiz()">
                   <input type="number" id="fInvAdet" value="8" min="1" max="40" oninput="hesaplaVeCiz()">
                 </div>
               </div>
-              <div class="alan"><label>Hesaplanan Kurulu Güç (DC kWp / AC kWe)</label><input type="text" id="fKuruluGucOzet" readonly style="color:#34d399;font-weight:800"></div>
+              <div class="alan"><label>Hesaplanan Kurulu Güç (DC kWp / AC kWe)</label><input type="text" id="fKuruluGucOzet" readonly style="color:#059669;font-weight:800;background:#ECFDF5;border-color:#6EE7B7"></div>
+              <div class="evrak-yukle-bar">
+                <span>📎 <b>Teknik Değerlendirme Formu veya Panel/İnverter Katalog PDF Yükle:</b> Modül Wp, Adet, Evirici kWe bilgilerini otomatik çeker. <span id="evrakDurum_6" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.txt,.csv,.json" onchange="evrakDosyaSecildi(6,this)" style="max-width:250px;font-size:.72rem">
+              </div>
             </div>
           </div>
 
           <!-- SIRA 7 -->
           <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
-              <div class="evrak-adim-sol"><span class="sira-no">7</span><span>Sıra 7 — Onaylı Formatta OG / AG Tek Hat Şeması Parametreleri</span></div>
-              <span class="rozet">Zorunlu Evrak #7</span>
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
+              <div class="evrak-adim-sol"><span class="sira-no">7</span><span>Sıra 7 — Onaylı Sabit Şablonlu OG / AG Tek Hat Şeması Parametreleri</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="7" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #7</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
-              <div class="alan"><label>OG Şebeke Gerilimi & Hücre Tipi</label><input type="text" id="fOgBilgi" value="31,5 kV (36 kV 630 A 16 kA Metal Enclosed)" oninput="hesaplaVeCiz()"></div>
-              <div class="alan"><label>Güç Trafosu (TR-1) Gücü & Grubu</label><input type="text" id="fTrafoBilgi" value="2000 kVA — 31,5/0,8 kV Dyn11 ONAN %Uk=6" oninput="hesaplaVeCiz()"></div>
-              <div class="alan"><label>AG Ana Pano (ADP) & Ana Kesici</label><input type="text" id="fAdpBilgi" value="IEC 61439-1/2 · 3×2000 A 50 kA Motorlu ACB" oninput="hesaplaVeCiz()"></div>
+              <div class="alan"><label>OG Şebeke Gerilimi & Hücre Tipi (Seçmeli)</label>
+                <select onchange="el('fOgBilgi').value=this.value;hesaplaVeCiz();">
+                  <option value="31,5 kV (36 kV 630 A 16 kA Metal Enclosed)" selected>31,5 kV (36 kV 630 A 16 kA Metal Enclosed)</option>
+                  <option value="34,5 kV (36 kV 630 A 16 kA Metal Enclosed)">34,5 kV (36 kV 630 A 16 kA Metal Enclosed)</option>
+                  <option value="15,8 kV (24 kV 630 A 16 kA Metal Enclosed)">15,8 kV (24 kV 630 A 16 kA Metal Enclosed)</option>
+                </select>
+                <input type="text" id="fOgBilgi" value="31,5 kV (36 kV 630 A 16 kA Metal Enclosed)" oninput="hesaplaVeCiz()" style="margin-top:4px">
+              </div>
+              <div class="alan"><label>Güç Trafosu (TR-1) Gücü & Grubu (Seçmeli)</label>
+                <select onchange="el('fTrafoBilgi').value=this.value;hesaplaVeCiz();">
+                  <option value="2000 kVA — 31,5/0,8 kV Dyn11 ONAN %Uk=6" selected>2000 kVA — 31,5/0,8 kV Dyn11 (%Uk=6)</option>
+                  <option value="1600 kVA — 31,5/0,8 kV Dyn11 ONAN %Uk=6">1600 kVA — 31,5/0,8 kV Dyn11 (%Uk=6)</option>
+                  <option value="1250 kVA — 31,5/0,8 kV Dyn11 ONAN %Uk=6">1250 kVA — 31,5/0,8 kV Dyn11 (%Uk=6)</option>
+                  <option value="1000 kVA — 31,5/0,4 kV Dyn11 ONAN %Uk=6">1000 kVA — 31,5/0,4 kV Dyn11 (%Uk=6)</option>
+                  <option value="2500 kVA — 34,5/0,8 kV Dyn11 ONAN %Uk=6">2500 kVA — 34,5/0,8 kV Dyn11 (%Uk=6)</option>
+                </select>
+                <input type="text" id="fTrafoBilgi" value="2000 kVA — 31,5/0,8 kV Dyn11 ONAN %Uk=6" oninput="hesaplaVeCiz()" style="margin-top:4px">
+              </div>
+              <div class="alan"><label>AG Ana Pano (ADP) & Ana Kesici (Seçmeli)</label>
+                <select onchange="el('fAdpBilgi').value=this.value;hesaplaVeCiz();">
+                  <option value="IEC 61439-1/2 · 3×2000 A 50 kA Motorlu ACB" selected>3×2000 A 50 kA Motorlu ACB (0,8 kV)</option>
+                  <option value="IEC 61439-1/2 · 3×2500 A 50 kA Motorlu ACB">3×2500 A 50 kA Motorlu ACB (0,8 kV)</option>
+                  <option value="IEC 61439-1/2 · 3×1600 A 50 kA Motorlu TMŞ">3×1600 A 50 kA Motorlu TMŞ</option>
+                </select>
+                <input type="text" id="fAdpBilgi" value="IEC 61439-1/2 · 3×2000 A 50 kA Motorlu ACB" oninput="hesaplaVeCiz()" style="margin-top:4px">
+              </div>
               <div class="alan"><label>OG Ölçü Akım / Gerilim Trafosu</label><input type="text" id="fOlcuBilgi" value="3×(40-80/5-5 A) AT · 3×(31,5/√3 / 0,1/√3 kV) GT" oninput="hesaplaVeCiz()"></div>
+              <div class="evrak-yukle-bar">
+                <span>📎 <b>Mevcut Tek Hat PDF / DXF Yükle:</b> Trafo kVA, OG gerilim ve kesici bilgilerini otomatik çeker. <span id="evrakDurum_7" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.dxf,.txt" onchange="evrakDosyaSecildi(7,this)" style="max-width:250px;font-size:.72rem">
+              </div>
             </div>
           </div>
 
           <!-- SIRA 8 -->
           <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
               <div class="evrak-adim-sol"><span class="sira-no">8</span><span>Sıra 8 — Saha Yerleşim Planı & AC Kablo Toplama Kanalı Parametreleri</span></div>
-              <span class="rozet">Zorunlu Evrak #8</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="8" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #8</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
               <div class="alan"><label>Masa Düzeni & Eğim Açısı</label>
@@ -369,20 +539,58 @@ a{color:inherit;text-decoration:none}
                   <option value="guney">Güney Kenarı</option>
                 </select>
               </div>
-              <div class="alan"><label>AC Güç Kablosu & DC Solar Kablo</label><input type="text" id="fKabloTip" value="AC: 3×240/120 mm² NA2XY · DC: 1×6 mm² H1Z2Z2-K" oninput="hesaplaVeCiz()"></div>
+              <div class="alan"><label>AC Güç Kablosu & DC Solar Kablo (Seçmeli)</label>
+                <select onchange="el('fKabloTip').value=this.value;hesaplaVeCiz();">
+                  <option value="AC: 4×1×120 mm² N2XH · DC: 1×6 mm² H1Z2Z2-K" selected>AC: 4×1×120 mm² N2XH · DC: 1×6 mm² H1Z2Z2-K</option>
+                  <option value="AC: 3×240/120 mm² NA2XY · DC: 1×6 mm² H1Z2Z2-K">AC: 3×240/120 mm² NA2XY · DC: 1×6 mm² H1Z2Z2-K</option>
+                  <option value="AC: 3×185/95 mm² NA2XY · DC: 1×6 mm² H1Z2Z2-K">AC: 3×185/95 mm² NA2XY · DC: 1×6 mm² H1Z2Z2-K</option>
+                </select>
+                <input type="text" id="fKabloTip" value="AC: 4×1×120 mm² N2XH · DC: 1×6 mm² H1Z2Z2-K" oninput="hesaplaVeCiz()" style="margin-top:4px">
+              </div>
             </div>
           </div>
 
           <!-- SIRA 9, 10, 11 -->
           <div class="evrak-adim">
-            <div class="evrak-adim-baslik">
-              <div class="evrak-adim-sol"><span class="sira-no">9</span><span>Sıra 9–11 — Tarım Dışı Kullanım İzni, ÇED Görüş Yazısı ve Yasaklama/Çağrı Mektubu Beyanları</span></div>
-              <span class="rozet">Zorunlu Evrak #9-#11</span>
+            <div class="evrak-adim-baslik" onclick="evrakAdimToggle(this, event)">
+              <div class="evrak-adim-sol"><span class="sira-no">9</span><span>Sıra 9–11 — Tarım Dışı Kullanım İzni, ÇED Görüş Yazısı ve EPDK Beyanları (Seçmeli)</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <label onclick="event.stopPropagation()" style="font-size:.72rem;color:#059669;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="evrak-sec-chk" data-sira="9" checked onchange="hesaplaVeCiz()"> Dahil</label>
+                <span class="rozet">Zorunlu Evrak #9-#11</span>
+                <span class="adim-ok">▾</span>
+              </div>
             </div>
             <div class="evrak-adim-icerik">
-              <div class="alan"><label>9. Tarım İl/İlçe Müdürlüğü Marjinal Arazi Yazısı</label><input type="text" id="fTarimYazi" value="Aksaray İl Tarım Md. — 04.09.2026 / E-7482910 (Mutlak Tarım Dışı)" oninput="hesaplaVeCiz()"></div>
-              <div class="alan"><label>10. ÇED Görüş Yazısı (Çevre, Şehircilik ve İklim Md.)</label><input type="text" id="fCedYazi" value="ÇED Yönetmeliği Kapsam Dışı / Muafiyet Yazısı Mevcut" oninput="hesaplaVeCiz()"></div>
-              <div class="alan"><label>11. EPDK Yasaklama Beyanı & Taahhütname</label><input type="text" id="fBeyan" value="5.1.h İmzalı Yasaklama Beyanı ve Evrak Teslim Taahhütnamesi Hazır" oninput="hesaplaVeCiz()"></div>
+              <div class="alan">
+                <label>9. Tarım İl/İlçe Md. Marjinal Arazi Yazısı (Seçmeli)</label>
+                <select onchange="el('fTarimYazi').value=this.value;hesaplaVeCiz();">
+                  <option value="İl Tarım ve Orman Md. — 5403 Sayılı Kanun Kapsamında Mutlak Tarım Dışı / Marjinal Tarım Arazisi Uygunluk Yazısı Mevcut" selected>Marjinal Tarım Arazisi Uygunluk Yazısı Mevcut</option>
+                  <option value="OSB / Sanayi İmarlı Parsel — Tarım Dışı Kullanım İzninden Muaf">OSB / Sanayi İmarlı Parsel (Muaf)</option>
+                  <option value="Çatı GES Uygulaması — Tarım Görüşünden Muaf">Çatı GES Uygulaması (Muaf)</option>
+                </select>
+                <input type="text" id="fTarimYazi" value="Aksaray İl Tarım Md. — 04.09.2026 / E-7482910 (Mutlak Tarım Dışı)" oninput="hesaplaVeCiz()" style="margin-top:4px">
+              </div>
+              <div class="alan">
+                <label>10. ÇED Görüş Yazısı (Seçmeli)</label>
+                <select onchange="el('fCedYazi').value=this.value;hesaplaVeCiz();">
+                  <option value="ÇED Yönetmeliği Kapsam Dışı / Muafiyet Yazısı Mevcut" selected>ÇED Kapsam Dışı / Muafiyet Yazısı Mevcut</option>
+                  <option value="ÇED Gerekli Değildir Kararı Mevcut">ÇED Gerekli Değildir Kararı Mevcut</option>
+                  <option value="ÇED Olumlu Kararı Mevcut">ÇED Olumlu Kararı Mevcut</option>
+                </select>
+                <input type="text" id="fCedYazi" value="ÇED Yönetmeliği Kapsam Dışı / Muafiyet Yazısı Mevcut" oninput="hesaplaVeCiz()" style="margin-top:4px">
+              </div>
+              <div class="alan">
+                <label>11. EPDK Yasaklama Beyanı & Taahhütname (Seçmeli)</label>
+                <select onchange="el('fBeyan').value=this.value;hesaplaVeCiz();">
+                  <option value="5.1.h İmzalı Yasaklama Beyanı ve Evrak Teslim Taahhütnamesi Hazır" selected>5.1.h İmzalı Yasaklama Beyanı ve Taahhütname Hazır</option>
+                  <option value="5.1.c Çatı GES Beyanı ve Taahhütnamesi Hazır">5.1.c Çatı GES Beyanı ve Taahhütnamesi Hazır</option>
+                </select>
+                <input type="text" id="fBeyan" value="5.1.h İmzalı Yasaklama Beyanı ve Evrak Teslim Taahhütnamesi Hazır" oninput="hesaplaVeCiz()" style="margin-top:4px">
+              </div>
+              <div class="evrak-yukle-bar">
+                <span>📎 <b>Tarım İl Md. Yazısı / ÇED Muafiyet Yazısı Yükle (PDF):</b> Evrak sayı numarası ve tarih bilgisini otomatik çeker. <span id="evrakDurum_9" style="color:#059669;font-weight:700"></span></span>
+                <input type="file" multiple accept=".pdf,.txt,.png,.jpg" onchange="evrakDosyaSecildi(9,this)" style="max-width:250px;font-size:.72rem">
+              </div>
             </div>
           </div>
         </div>
@@ -410,14 +618,14 @@ a{color:inherit;text-decoration:none}
 
         <div class="pafta-cerceve" id="paftaCerceveAlani"></div>
 
-        <!-- PAFTA VE SAYFA ALTI BAŞVURUYU KAYDET ÇUBUĞU -->
-        <div class="no-print" style="margin-top:14px;padding:14px 16px;border-radius:10px;background:linear-gradient(135deg,#064e3b,#0f172a);border:1px solid #10b981;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <!-- PAFTA VE SAYFA ALTI BAŞVURUYU KAYDET ÇUBUĞU (AÇIK TEMA) -->
+        <div class="no-print" style="margin-top:14px;padding:14px 18px;border-radius:12px;background:linear-gradient(135deg,#ECFDF5 0%,#EFF6FF 100%);border:1.5px solid #10B981;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
           <div>
-            <div style="font-size:.95rem;font-weight:800;color:#fff">💾 Başvuru Dosyasını Kaydet ve Tamamla</div>
-            <div style="font-size:.76rem;color:#cbd5e1">Tüm şirket, TM, parsel ve pafta bilgilerini <b>Kayıtlı Başvurularım</b> listesine kaydeder.</div>
+            <div style="font-size:.96rem;font-weight:800;color:#065F46">💾 Başvuru Dosyasını Kaydet ve Tamamla</div>
+            <div style="font-size:.77rem;color:#334155">Tüm şirket, TM, parsel, seçilen panel/inverter ve pafta bilgilerini <b>Kayıtlı Başvurularım</b> listesine kaydeder.</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <button type="button" class="btn btn-yesil" style="padding:11px 22px;font-size:.9rem;font-weight:900;box-shadow:0 4px 14px rgba(16,185,129,.4)" onclick="basvuruyuKaydet()">💾 BAŞVURUYU KAYDET</button>
+            <button type="button" class="btn btn-yesil" style="padding:11px 22px;font-size:.9rem;font-weight:900;box-shadow:0 4px 12px rgba(5,150,105,.25)" onclick="basvuruyuKaydet()">💾 BAŞVURUYU KAYDET</button>
             <button type="button" class="btn btn-mavi" style="padding:10px 15px;font-size:.82rem" onclick="anaSekmeDegistir('kayitlar')">🗂️ Kayıtlı Başvurularım</button>
             <button type="button" class="btn btn-mor" style="padding:10px 15px;font-size:.82rem" onclick="tumBasvuruDosyasiYazdir()">🖨️ Tüm Dosyayı Yazdır / PDF</button>
           </div>
@@ -455,14 +663,14 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
   </section>
-  <!-- SAYFA ALTI SABİT BAŞVURUYU KAYDET BARI -->
-  <div class="kart no-print" style="margin-top:16px;padding:16px 20px;background:linear-gradient(135deg,#065f46,#0f172a);border:2px solid #10b981;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+  <!-- SAYFA ALTI SABİT BAŞVURUYU KAYDET BARI (AÇIK TEMA) -->
+  <div class="kart no-print" style="margin-top:16px;padding:16px 20px;background:linear-gradient(135deg,#F0FDF4 0%,#EFF6FF 100%);border:2px solid #10B981;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
     <div>
-      <div style="font-size:1.02rem;font-weight:900;color:#fff">💾 Başvuru Bilgilerini ve Mühendislik Paftalarını Kaydet</div>
-      <div style="font-size:.8rem;color:#d1fae5;margin-top:3px">Hazırladığınız başvuruyu kaydettiğinizde <b>Kayıtlı Başvurularım</b> sekmesinde saklanır; dilediğiniz zaman tekrar açıp düzenleyebilirsiniz.</div>
+      <div style="font-size:1.02rem;font-weight:900;color:#065F46">💾 Başvuru Bilgilerini ve Mühendislik Paftalarını Kaydet</div>
+      <div style="font-size:.8rem;color:#334155;margin-top:3px">Hazırladığınız başvuruyu kaydettiğinizde <b>Kayıtlı Başvurularım</b> sekmesinde saklanır; dilediğiniz zaman tekrar açıp düzenleyebilirsiniz.</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <button type="button" class="btn btn-yesil" style="padding:13px 28px;font-size:.98rem;font-weight:900;box-shadow:0 4px 16px rgba(16,185,129,.45)" onclick="basvuruyuKaydet()">💾 BAŞVURUYU KAYDET</button>
+      <button type="button" class="btn btn-yesil" style="padding:13px 28px;font-size:.98rem;font-weight:900;box-shadow:0 4px 14px rgba(5,150,105,.28)" onclick="basvuruyuKaydet()">💾 BAŞVURUYU KAYDET</button>
       <button type="button" class="btn btn-mavi" style="padding:12px 18px;font-size:.86rem" onclick="anaSekmeDegistir('kayitlar')">🗂️ Kayıtlı Başvurularımı Gör</button>
     </div>
   </div>
@@ -920,7 +1128,9 @@ a{color:inherit;text-decoration:none}
     STATE.masalar = secilen;
     STATE.masaSayisi = secilen.length;
 
-    // TR / DM Binası Konumu ve Ana AC Kablo Toplama Kanalı (Masaları ASLA kesmeyen ortogonal kanal)
+    // GES-Proje-Cizim-Esaslari (A.4 & A.11):
+    // A.4: İnverter her zaman masanın KUZEYİNDE (arka sıra açıklığında, masanın kuzey orta noktasında: m.x + m.w/2, m.y + m.h + 0.5) durur; masa başında/sonunda ya da önünde olmaz.
+    // A.11: AG hat istikameti masaların sıra uçlarının 3 m dışından tek düz çizgi olarak geçer; her inverterden önce kuzey sıra açıklığına ≤2.5 m dik adım atılır, açıklık boyunca DÜZ ilerleyip AG hat istikametine bağlanır ve TM hizasından binaya girer. Kanal bandı çizilmez.
     var dmYon = el("fDmKonum") ? el("fDmKonum").value : "bati";
     var mXs = secilen.length ? secilen.map(function(m){return m.x;}) : [lxMin + cekme + 4];
     var mXMaxs = secilen.length ? secilen.map(function(m){return m.x + m.w;}) : [lxMax - cekme - 4];
@@ -929,38 +1139,61 @@ a{color:inherit;text-decoration:none}
     var maxMasaX = Math.max.apply(null, mXMaxs);
     var minMasaY = Math.min.apply(null, mYs);
 
-    var corridorX = (dmYon === "dogu") ? (maxMasaX + 2.8) : (minMasaX - 2.8);
-    var trX = (dmYon === "dogu") ? (corridorX + 2.0) : (corridorX - 2.0);
-    var trY = minMasaY - 2.0;
+    var corridorX = (dmYon === "dogu") ? (maxMasaX + 3.0) : (minMasaX - 3.0);
+    var trX = (dmYon === "dogu") ? (corridorX + 2.2) : (corridorX - 2.2);
+    var trY = minMasaY - 1.5;
     STATE.corridorX = corridorX;
     STATE.trafoMerkez = { x: trX, y: trY };
 
-    // Eviricileri (E1..EN) sıra başlarındaki koridor hattına (corridorX) yerleştir — AC kablolar hiçbir masanın üstünden geçmez
     var invAdet = Math.max(1, parseInt(el("fInvAdet") ? el("fInvAdet").value : 8, 10) || 8);
-    // Benzersiz sıra Y koordinatlarını bul
-    var rowYs = [];
+    var rowMap = {};
     secilen.forEach(function(m){
-      var KorY = m.y - 0.65; // Masa sırasının hemen güneyindeki yürüme/kablo koridoru
-      if(rowYs.every(function(ry){ return Math.abs(ry - KorY) > 1.0; })){
-        rowYs.push(KorY);
-      }
+      var rk = Math.round(m.y * 10);
+      if(!rowMap[rk]) rowMap[rk] = [];
+      rowMap[rk].push(m);
     });
-    if(!rowYs.length) rowYs = [trY + 4, trY + 12, trY + 20, trY + 28];
+    var rowKeys = Object.keys(rowMap).map(Number).sort(function(a,b){ return a - b; });
+    rowKeys.forEach(function(rk){
+      rowMap[rk].sort(function(a,b){ return (dmYon === "dogu") ? (b.x - a.x) : (a.x - b.x); });
+    });
+
+    var adayMasalar = [];
+    var maxCol = 0;
+    rowKeys.forEach(function(rk){ if(rowMap[rk].length > maxCol) maxCol = rowMap[rk].length; });
+    for(var cIdx = 0; cIdx < maxCol; cIdx++){
+      for(var rI = 0; rI < rowKeys.length; rI++){
+        var rMasalar = rowMap[rowKeys[rI]];
+        if(cIdx < rMasalar.length) adayMasalar.push(rMasalar[cIdx]);
+      }
+    }
 
     var invList = [];
     for(var k=0; k<invAdet; k++){
-      var rIdx = Math.min(rowYs.length - 1, Math.floor(k * rowYs.length / invAdet));
-      var ry = rowYs[rIdx];
-      // Aynı sıraya birden fazla evirici düşerse sıra koridoru boyunca 2.2m arayla diz (yine masaların dışındaki koridorda)
-      var offsetInRow = (k % Math.max(1, Math.ceil(invAdet / rowYs.length))) * 2.2;
-      var ix = (dmYon === "dogu") ? (maxMasaX + 0.9 - offsetInRow) : (minMasaX - 0.9 + offsetInRow);
-      invList.push({
-        no: k + 1,
-        kod: "E" + (k + 1),
-        x: ix,
-        y: ry,
-        corridorX: corridorX
-      });
+      if(adayMasalar.length){
+        var m = adayMasalar[Math.min(adayMasalar.length - 1, Math.floor(k * Math.min(adayMasalar.length, Math.max(invAdet, rowKeys.length)) / invAdet))];
+        if(k < adayMasalar.length) m = adayMasalar[k];
+        var ix = m.x + m.w / 2.0;        // Kural A.4: Masanın kuzey orta noktası
+        var iy = m.y + m.h + 0.50;       // Kural A.4: Masanın kuzeyinde 0.50 m
+        var stepY = iy + Math.min(1.5, Math.max(0.6, (pitch - m.h) * 0.45)); // Kural A.11: Kuzey sıra açıklığına ≤ 2.5 m dik adım
+        invList.push({
+          no: k + 1,
+          kod: "E" + (k + 1),
+          x: ix,
+          y: iy,
+          stepY: stepY,
+          corridorX: corridorX
+        });
+      } else {
+        var fy = trY + 4 + k * 6;
+        invList.push({
+          no: k + 1,
+          kod: "E" + (k + 1),
+          x: (dmYon === "dogu") ? (corridorX - 4) : (corridorX + 4),
+          y: fy,
+          stepY: fy + 1.0,
+          corridorX: corridorX
+        });
+      }
     }
     STATE.inverterler = invList;
   }
@@ -1031,20 +1264,20 @@ a{color:inherit;text-decoration:none}
     var trx = tx(trM.x), try_ = ty(trM.y);
     var cxScreen = tx(STATE.corridorX);
 
-    // Ana AC Kablo Toplama Hendek Kanalı (Koridor Hattı)
-    var invYs = STATE.inverterler.map(function(inv){ return ty(inv.y); });
-    var minInvYScreen = invYs.length ? Math.min.apply(null, invYs.concat([try_])) : try_;
-    var maxInvYScreen = invYs.length ? Math.max.apply(null, invYs.concat([try_])) : try_;
+    // Ana AG Hat İstikameti (Kural A.11: Sıra uçlarının 3 m dışından geçen tek düz hat, kanal bandı poligonu yok)
+    var invStepYs = STATE.inverterler.map(function(inv){ return ty(inv.stepY != null ? inv.stepY : inv.y); });
+    var minInvYScreen = invStepYs.length ? Math.min.apply(null, invStepYs.concat([try_])) : try_;
+    var maxInvYScreen = invStepYs.length ? Math.max.apply(null, invStepYs.concat([try_])) : try_;
 
-    var anaKanalSvg = '<polyline points="'+cxScreen.toFixed(1)+','+minInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+maxInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+try_.toFixed(1)+' '+trx.toFixed(1)+','+try_.toFixed(1)+'" fill="none" stroke="#F59E0B" stroke-width="2.6"/>';
+    var anaKanalSvg = '<polyline points="'+cxScreen.toFixed(1)+','+minInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+maxInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+try_.toFixed(1)+' '+trx.toFixed(1)+','+try_.toFixed(1)+'" fill="none" stroke="#EF4444" stroke-width="2.2"/>';
 
     var kabloVeInvSvg = STATE.inverterler.map(function(inv){
-      var ix = tx(inv.x), iy = ty(inv.y);
-      // Ortogonal AC kablo: Eviriciden yatay sıra koridoru boyunca ana kanala (cxScreen, iy), oradan ana kanal üzerinden TR/DM'ye! Masaları kesinlikle kesmez.
-      return '<polyline points="'+ix.toFixed(1)+','+iy.toFixed(1)+' '+cxScreen.toFixed(1)+','+iy.toFixed(1)+'" fill="none" stroke="#FBBF24" stroke-width="1.6" stroke-dasharray="4 2"/>'
-        +'<circle cx="'+cxScreen.toFixed(1)+'" cy="'+iy.toFixed(1)+'" r="2.6" fill="#F59E0B"/>'
-        +'<rect x="'+(ix-7).toFixed(1)+'" y="'+(iy-7).toFixed(1)+'" width="14" height="14" rx="2" fill="#DC2626" stroke="#FEF08A" stroke-width="1.3"/>'
-        +'<text x="'+ix.toFixed(1)+'" y="'+(iy+3).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="7.5" font-weight="800" fill="#FFF">'+inv.kod+'</text>';
+      var ix = tx(inv.x), iy = ty(inv.y), sy = ty(inv.stepY != null ? inv.stepY : inv.y);
+      // Kural A.4 & A.11: Masanın kuzey orta noktasındaki inverterden kuzey sıra açıklığına dik adım (≤2.5m), açıklık boyunca DÜZ ilerleyip 3m dış AG hat istikametine bağlantı
+      return '<polyline points="'+ix.toFixed(1)+','+iy.toFixed(1)+' '+ix.toFixed(1)+','+sy.toFixed(1)+' '+cxScreen.toFixed(1)+','+sy.toFixed(1)+'" fill="none" stroke="#EF4444" stroke-width="1.5"/>'
+        +'<circle cx="'+cxScreen.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="2.4" fill="#EF4444"/>'
+        +'<rect x="'+(ix-7).toFixed(1)+'" y="'+(iy-5).toFixed(1)+'" width="14" height="10" rx="1.5" fill="#DC2626" stroke="#FEF08A" stroke-width="1.2"/>'
+        +'<text x="'+ix.toFixed(1)+'" y="'+(iy+2.5).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="7" font-weight="800" fill="#FFF">'+inv.kod+'</text>';
     }).join("");
 
     var kenarSvg = STATE.edges.map(function(e){
@@ -1921,7 +2154,7 @@ a{color:inherit;text-decoration:none}
       var paket = {
         kmlText: kmlText,
         dosyaAdi: (el("fParselIl").value||"parsel") + "_" + (el("fAda").value||"ada") + "_" + (el("fParsel").value||"parsel"),
-        autoProje: false,
+        autoProje: true,
         antet: {
           il: el("fParselIl").value, ilce: el("fParselIlce").value, mahalle: el("fParselMahalle").value,
           ada: el("fAda").value, parsel: el("fParsel").value, unvan: el("fUnvan").value, adres: el("fAdres").value,
@@ -1951,8 +2184,9 @@ a{color:inherit;text-decoration:none}
     });
     var tr = STATE.trafoMerkez || {x:10,y:10};
     STATE.inverterler.forEach(function(inv){
-      addPline("GES-INVERTER", [[inv.x-0.6, inv.y-0.6],[inv.x+0.6, inv.y-0.6],[inv.x+0.6, inv.y+0.6],[inv.x-0.6, inv.y+0.6]], true);
-      addPline("GES-AC-KABLO", [[inv.x, inv.y],[STATE.corridorX, inv.y],[STATE.corridorX, tr.y],[tr.x, tr.y]], false);
+      var sy = inv.stepY != null ? inv.stepY : (inv.y + 1.2);
+      addPline("GES-INVERTER", [[inv.x-0.55, inv.y-0.35],[inv.x+0.55, inv.y-0.35],[inv.x+0.55, inv.y+0.35],[inv.x-0.55, inv.y+0.35]], true);
+      addPline("GES-AC-KABLO", [[inv.x, inv.y],[inv.x, sy],[STATE.corridorX, sy],[STATE.corridorX, tr.y],[tr.x, tr.y]], false);
       addText("GES-INVERTER", inv.x, inv.y, 1.1, inv.kod);
     });
     out.push("0","ENDSEC","0","EOF");

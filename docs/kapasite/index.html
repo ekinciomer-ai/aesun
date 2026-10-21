@@ -4414,19 +4414,49 @@
     PGES_STATE.yerlesimModul = secilenMasalar.length * modPerMasa;
     PGES_STATE.formModul = (yerMod === "hedef") ? hedefMod : (PGES_STATE.yerlesimModul || hedefMod);
 
-    // Trafo & OG Köşk Yeri (Güney-Batı veya en yakın giriş kenarı)
-    var trPt = poly[0] ? [poly[0][0] + cekme * 1.2, poly[0][1] + cekme * 1.2] : [minX + 10, minY + 10];
-    PGES_STATE.trafoMerkez = { x: trPt[0], y: trPt[1] };
+    // GES-Proje-Cizim-Esaslari (A.4 & A.11):
+    // A.4: İnverter her zaman masanın KUZEYİNDE (arka sıra açıklığında, masanın kuzey orta noktasında: m.x + m.w/2, m.y + m.h + 0.5) durur
+    // A.11: AG hat istikameti sıra uçlarının 3 m dışından geçen tek düz çizgidir; her inverterden kuzey sıra açıklığına ≤2.5m dik adım atılıp DÜZ ilerleyerek AG hat istikametine ve TM hizasından binaya girilir
+    var mXs = secilenMasalar.length ? secilenMasalar.map(function(m){return m.x;}) : [minX + cekme + 4];
+    var mYs = secilenMasalar.length ? secilenMasalar.map(function(m){return m.y;}) : [minY + cekme + 4];
+    var minMasaX = Math.min.apply(null, mXs);
+    var minMasaY = Math.min.apply(null, mYs);
+    var corridorX = minMasaX - 3.0;
+    PGES_STATE.corridorX = corridorX;
+    PGES_STATE.trafoMerkez = { x: corridorX - 2.2, y: minMasaY - 1.5 };
 
-    // Evirici (Inverter) Konumları (Masalar arasında dengeli küme merkezleri)
+    var rowMap = {};
+    secilenMasalar.forEach(function(m){
+      var rk = Math.round(m.y * 10);
+      if(!rowMap[rk]) rowMap[rk] = [];
+      rowMap[rk].push(m);
+    });
+    var rowKeys = Object.keys(rowMap).map(Number).sort(function(a,b){ return a - b; });
+    rowKeys.forEach(function(rk){
+      rowMap[rk].sort(function(a,b){ return a.x - b.x; });
+    });
+    var adayMasalar = [];
+    var maxCol = 0;
+    rowKeys.forEach(function(rk){ if(rowMap[rk].length > maxCol) maxCol = rowMap[rk].length; });
+    for(var cIdx = 0; cIdx < maxCol; cIdx++){
+      for(var rI = 0; rI < rowKeys.length; rI++){
+        var rMasalar = rowMap[rowKeys[rI]];
+        if(cIdx < rMasalar.length) adayMasalar.push(rMasalar[cIdx]);
+      }
+    }
+
     var invList = [];
     for(var k=0; k<invAdet; k++){
-      if(secilenMasalar.length){
-        var idx = Math.min(secilenMasalar.length - 1, Math.floor((k + 0.5) * secilenMasalar.length / invAdet));
-        var m = secilenMasalar[idx];
-        invList.push({ no: k + 1, kod: "E" + (k + 1), x: m.x + m.w / 2, y: m.y - 0.9 });
+      if(adayMasalar.length){
+        var m = adayMasalar[Math.min(adayMasalar.length - 1, Math.floor(k * Math.min(adayMasalar.length, Math.max(invAdet, rowKeys.length)) / invAdet))];
+        if(k < adayMasalar.length) m = adayMasalar[k];
+        var ix = m.x + m.w / 2;
+        var iy = m.y + m.h + 0.5;
+        var stepY = iy + Math.min(1.5, Math.max(0.6, (pitch - m.h) * 0.45));
+        invList.push({ no: k + 1, kod: "E" + (k + 1), x: ix, y: iy, stepY: stepY, corridorX: corridorX });
       } else {
-        invList.push({ no: k + 1, kod: "E" + (k + 1), x: trPt[0] + (k + 1)*6, y: trPt[1] + 5 });
+        var fy = minMasaY + (k + 1)*6;
+        invList.push({ no: k + 1, kod: "E" + (k + 1), x: corridorX + 4, y: fy, stepY: fy + 1.0, corridorX: corridorX });
       }
     }
     PGES_STATE.inverterler = invList;
@@ -4586,12 +4616,18 @@
 
     var trM = PGES_STATE.trafoMerkez || {x:minX+5, y:minY+5};
     var trx = tx(trM.x), try_ = ty(trM.y);
+    var cxScreen = tx(PGES_STATE.corridorX != null ? PGES_STATE.corridorX : (trM.x + 2.2));
+    var invStepYs = PGES_STATE.inverterler.map(function(inv){ return ty(inv.stepY != null ? inv.stepY : inv.y); });
+    var minInvYScreen = invStepYs.length ? Math.min.apply(null, invStepYs.concat([try_])) : try_;
+    var maxInvYScreen = invStepYs.length ? Math.max.apply(null, invStepYs.concat([try_])) : try_;
+    var anaAgHatSvg = '<polyline points="'+cxScreen.toFixed(1)+','+minInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+maxInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+try_.toFixed(1)+' '+trx.toFixed(1)+','+try_.toFixed(1)+'" fill="none" stroke="#EF4444" stroke-width="2.2"/>';
 
-    var kabloVeInvSvg = PGES_STATE.inverterler.map(function(inv){
-      var ix = tx(inv.x), iy = ty(inv.y);
-      return '<polyline points="'+ix.toFixed(1)+','+iy.toFixed(1)+' '+ix.toFixed(1)+','+try_.toFixed(1)+' '+trx.toFixed(1)+','+try_.toFixed(1)+'" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 2"/>'
-        +'<rect x="'+(ix-7).toFixed(1)+'" y="'+(iy-7).toFixed(1)+'" width="14" height="14" rx="2" fill="#DC2626" stroke="#FEF08A" stroke-width="1.3"/>'
-        +'<text x="'+ix.toFixed(1)+'" y="'+(iy+3).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8" font-weight="800" fill="#FFF">'+inv.kod+'</text>';
+    var kabloVeInvSvg = anaAgHatSvg + PGES_STATE.inverterler.map(function(inv){
+      var ix = tx(inv.x), iy = ty(inv.y), sy = ty(inv.stepY != null ? inv.stepY : inv.y);
+      return '<polyline points="'+ix.toFixed(1)+','+iy.toFixed(1)+' '+ix.toFixed(1)+','+sy.toFixed(1)+' '+cxScreen.toFixed(1)+','+sy.toFixed(1)+'" fill="none" stroke="#EF4444" stroke-width="1.5"/>'
+        +'<circle cx="'+cxScreen.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="2.4" fill="#EF4444"/>'
+        +'<rect x="'+(ix-7).toFixed(1)+'" y="'+(iy-5).toFixed(1)+'" width="14" height="10" rx="1.5" fill="#DC2626" stroke="#FEF08A" stroke-width="1.2"/>'
+        +'<text x="'+ix.toFixed(1)+'" y="'+(iy+2.5).toFixed(1)+'" text-anchor="middle" font-family="Archivo,sans-serif" font-size="7.5" font-weight="800" fill="#FFF">'+inv.kod+'</text>';
     }).join("");
 
     var kenarSvg = PGES_STATE.edges.map(function(e){
@@ -5364,7 +5400,7 @@
       var paket = {
         kmlText: kmlText,
         dosyaAdi: (el("pgesIl").value||"parsel") + "_" + (el("pgesAda").value||"ada") + "_" + (el("pgesParsel").value||"parsel"),
-        autoProje: false,
+        autoProje: true,
         antet: {
           il: el("pgesIl").value,
           ilce: el("pgesIlce").value,

@@ -1351,6 +1351,128 @@ class Model:
             p = self.halka.interpolate(self.halka.project(Point(x, y))); return (p.x, p.y)
         p = min(pts, key=lambda q: abs(q.x - x)); return (p.x, p.y)
 
+    def _ag_istikamet(self):
+        """A.11 AG (AC) HAT ALGORİTMASI (kullanıcı kuralı 19–20.10.2026):
+        Trafo (köşk) tarafında, masa sıralarının uç köşelerinin 3 m açığından geçen, sıralara dik TEK DÜZ çizgi (saha kenarı eğikse
+        kenara paralel eğik, kırıksız). Köşkün iki yanı ayrı kol; her kol o yöndeki en uzak inverterin sırasına kadar gider ve TM
+        hizasından ADP'ye düz bağlanır. Her inverter çıkışında ≤ 2,5 m inişle kendi sırasının kuzey açıklığından DÜZ gidip istikamet
+        hattına girer."""
+        out = {}
+        if not getattr(self, "inverterler", None) or not getattr(self, "tm_loc", None) or not getattr(self, "siralar", None):
+            return out
+        cit_loc = (affinity.rotate(self.cit, -self.az, origin=self.merkez) if self.az else self.cit).buffer(0.4)
+        ic_masa = self.masa_birlesik.buffer(0.05) if getattr(self, "masa_birlesik", None) else Polygon()
+        for inv in self.inverterler:
+            inv["_ya"] = (inv["masa"]["loc"].bounds[3] + min(2.0, self.acik / 2 + 0.6)) if inv.get("arka") else (inv["masa"]["loc"].bounds[1] - self.acik / 2 + 0.6)
+        for t in range(self.n_tr):
+            if t >= len(self.tm_loc):
+                continue
+            invs = [i for i in self.inverterler if i["tr"] == t + 1]
+            if not invs:
+                continue
+            tm = self.tm_loc[t].centroid
+            cx_i = sum(i["x"] for i in invs) / len(invs)
+            dogu = (tm.x >= cx_i)
+            tr_set = set(id(m) for m in (self.tr_gruplari[t] if t < len(self.tr_gruplari) else []))
+            for yon in (1, -1):
+                kol = [i for i in invs if ((i["_ya"] - tm.y) >= 0 if yon == 1 else (i["_ya"] - tm.y) < 0)]
+                if not kol:
+                    continue
+                y_lo = min(tm.y, min(i["_ya"] for i in kol)) - 1.0
+                y_hi = max(tm.y, max(i["_ya"] for i in kol)) + 1.0
+                Es = []
+                for s_, r in self.siralar.items():
+                    if r["y1"] < y_lo or r["y0"] > y_hi:
+                        continue
+                    ms_r = [q for q in r["m"] if id(q) in tr_set] if (self.ic_yollar and tr_set) else r["m"]
+                    if not ms_r:
+                        ms_r = r["m"]
+                    ux = max(q["loc"].bounds[2] for q in ms_r) if dogu else min(q["loc"].bounds[0] for q in ms_r)
+                    Es.append((ux, (r["y0"] + r["y1"]) / 2))
+                if not Es:
+                    continue
+                Es.sort(key=lambda p: (p[1] - tm.y) * yon)
+                adaylar = [(0.0, float(yon))]
+                for i_ in range(len(Es)):
+                    for j_ in range(i_ + 1, len(Es)):
+                        dx, dy = Es[j_][0] - Es[i_][0], Es[j_][1] - Es[i_][1]
+                        L = math.hypot(dx, dy)
+                        if L > 1.0:
+                            sg = 1.0 if dy * yon >= 0 else -1.0
+                            adaylar.append((dx / L * sg, dy / L * sg))
+                best_dir = None
+                for d_ in adaylar:
+                    if abs(d_[1]) < 0.25:
+                        continue
+                    n_ = (d_[1], -d_[0])
+                    if (1.0 if dogu else -1.0) * n_[0] < 0:
+                        n_ = (-n_[0], -n_[1])
+                    if abs(n_[0]) < 0.25:
+                        continue
+                    c0_ = max(p[0] * n_[0] + p[1] * n_[1] for p in Es)
+                    cc_ = c0_ + 3.0
+                    bosluk = sum(cc_ - (p[0] * n_[0] + p[1] * n_[1]) for p in Es)
+                    y_uzak = max(kol, key=lambda q: abs(q["_ya"] - tm.y))["_ya"]
+                    dis = 0
+                    for k_ in range(11):
+                        yy = tm.y + (y_uzak - tm.y) * k_ / 10.0
+                        xx = (cc_ - yy * n_[1]) / n_[0]
+                        if not cit_loc.contains(Point(xx, yy)):
+                            dis += 2
+                    sk = bosluk + dis * 50.0
+                    if best_dir is None or sk < best_dir[0]:
+                        best_dir = (sk, d_, n_, c0_)
+                if best_dir is None:
+                    continue
+                _, dv, nv, c0 = best_dir
+                y_uzak = max(kol, key=lambda q: abs(q["_ya"] - tm.y))["_ya"]
+                for pay in (3.0, 2.5, 2.0, 1.5, 4.0, 5.0):
+                    c = c0 + pay
+                    x_at = lambda yy: (c - yy * nv[1]) / nv[0]
+                    y_ayak = tm.y
+                    while abs(y_uzak - y_ayak) > 0.5 and not cit_loc.contains(Point(x_at(y_ayak), y_ayak)):
+                        y_ayak += 0.5 * yon
+                    y_uc = y_uzak
+                    while abs(y_uc - y_ayak) > 0.5 and not cit_loc.contains(Point(x_at(y_uc), y_uc)):
+                        y_uc -= 0.5 * yon
+                    ayak = (x_at(y_ayak), y_ayak)
+                    uc = (x_at(y_uc), y_uc)
+                    if not cit_loc.contains(Point(ayak)) or not cit_loc.contains(Point(uc)):
+                        continue
+                    ana_seg = LineString([uc, ayak]) if math.dist(uc, ayak) > 1e-3 else Point(ayak)
+                    if not ic_masa.is_empty and ana_seg.intersects(ic_masa):
+                        continue
+                    bag_seg = LineString([ayak, (tm.x, tm.y)])
+                    if not ic_masa.is_empty and bag_seg.intersects(ic_masa):
+                        continue
+                    gecerli = True
+                    kol_out = {}
+                    for inv in kol:
+                        ya = inv["_ya"]
+                        if (ya - y_uc) * yon <= 0.1:
+                            h_pt = (x_at(ya), ya)
+                            arc = LineString([h_pt, ayak]) if math.dist(h_pt, ayak) > 1e-3 else LineString([ayak, (tm.x, tm.y)])
+                        else:
+                            h_pt = None
+                            for g_ in [k_ * 0.5 for k_ in range(30)]:
+                                x_try = x_at(ya) - (1.0 if dogu else -1.0) * g_
+                                if cit_loc.contains(Point(x_try, ya)) and (ic_masa.is_empty or not LineString([(x_try, ya), uc]).intersects(ic_masa)):
+                                    h_pt = (x_try, ya)
+                                    break
+                            if h_pt is None:
+                                gecerli = False
+                                break
+                            arc = LineString([h_pt, uc, ayak])
+                        br = LineString([(inv["x"], inv["y"]), (inv["x"], ya), h_pt])
+                        if not ic_masa.is_empty and br.intersects(ic_masa):
+                            gecerli = False
+                            break
+                        kol_out[id(inv)] = (ya, h_pt, arc)
+                    if gecerli and len(kol_out) == len(kol):
+                        out.update(kol_out)
+                        break
+        return out
+
     def guzergah(self):
         self._ac_kul = set()
         e, m = self.P["elektrik"], self.P["masa"]
@@ -1372,17 +1494,21 @@ class Model:
             self.dc_hat.append(ls)                               # açıklık + masa arası boşluk; masa altından geçmez
         self.dc_toplam = dc_toplam
         ac_toplam = 0.0
+        istik_map = self._ag_istikamet()
         for inv in self.inverterler:
             tm = self.tm_loc[inv["tr"] - 1].centroid
-            ya = (inv["masa"]["loc"].bounds[3] + self.acik / 2 + 0.6) if inv.get("arka") else (inv["masa"]["loc"].bounds[1] - self.acik / 2 + 0.6)  # A.3: açıklık (DC'den ayrı hendek)
-            if getattr(self, "ag", None): tq = nearest_points(self.ag["U"], tm)[0]; tmh = Point(tq.x, tq.y)
-            else: tmh = self.halka.interpolate(self.halka.project(tm))
-            # A.9: sıra açıklığından kanala iki yönden hangisi ADP'ye daha kısa götürüyorsa o (uzun dolanma yok)
-            ady = []
-            for tf in ("E", "W"):
-                h_ = self._aga(inv["x"], ya, tf); a_ = self.ag_yol(h_, (tmh.x, tmh.y))
-                ady.append((abs(h_[0] - inv["x"]) + abs(h_[1] - ya) + a_.length, h_, a_))
-            _, h, arc = min(ady, key=lambda t: t[0])
+            if id(inv) in istik_map:
+                ya, h, arc = istik_map[id(inv)]
+            else:
+                ya = (inv["masa"]["loc"].bounds[3] + min(2.0, self.acik / 2 + 0.6)) if inv.get("arka") else (inv["masa"]["loc"].bounds[1] - self.acik / 2 + 0.6)  # A.3: açıklık (DC'den ayrı hendek)
+                if getattr(self, "ag", None): tq = nearest_points(self.ag["U"], tm)[0]; tmh = Point(tq.x, tq.y)
+                else: tmh = self.halka.interpolate(self.halka.project(tm))
+                # A.9: sıra açıklığından kanala iki yönden hangisi ADP'ye daha kısa götürüyorsa o (uzun dolanma yok)
+                ady = []
+                for tf in ("E", "W"):
+                    h_ = self._aga(inv["x"], ya, tf); a_ = self.ag_yol(h_, (tmh.x, tmh.y))
+                    ady.append((abs(h_[0] - inv["x"]) + abs(h_[1] - ya) + a_.length, h_, a_))
+                _, h, arc = min(ady, key=lambda t: t[0])
             ls = LineString([(inv["x"], inv["y"]), (inv["x"], ya), h] + list(arc.coords) + [(tm.x, tm.y)])
             inv["ac_m"] = ls.length + 10.0
             inv["ac_hendek"] = [LineString([(inv["x"], ya), h]), arc]
@@ -2008,9 +2134,8 @@ def pafta_kablo(M):
         pf.yazi("GES-AC-KABLO", x + 2, y + 1, 1.4, f"YG{i+1}")
     for i, g in enumerate(M.kesisim):       # DC–AG kesişim: koruma
         x, y = M.Wp(g["x"], g["y"]); pf.daire("GES-DC-KABLO", x, y, 0.9, info=f"K{i+1} DC–AG kesişimi")
-    for k in getattr(M, "kanal", []):   # kademeli ortak kanal: genişlik gerçek ölçüde; kesit değiştiği parçada DETAY-n
+    for k in getattr(M, "kanal", []):   # kademeli ortak kanal (A.11.2: kanal bandı çizilmez; yalnız DETAY-n işareti ve kazı metrajı)
         g = k["geom"]
-        geom_ciz(pf, "GES-HENDEK-AC", W(g.buffer(k["b"] / 2, cap_style=2, join_style=2)), info=f"Kanal DETAY-{k['detay']} b={k['b']:.2f} m · {k['n']} AC" + (" + OG" if k["og"] else ""))
         if g.length >= M.P["hendek"].get("detay_min_m", 15.0):
             c = W(g).interpolate(0.5, normalized=True)
             pf.poli("GES-HENDEK-AC", [(c.x - 1.0, c.y - 1.0), (c.x + 1.0, c.y - 1.0), (c.x + 1.0, c.y + 1.0), (c.x - 1.0, c.y + 1.0), (c.x - 1.0, c.y - 1.0)])

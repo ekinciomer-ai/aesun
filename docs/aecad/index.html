@@ -5552,9 +5552,9 @@ function tsSiraUclari() {
   const uc = [], W = (s_, t) => [ux[0] * s_ + uy[0] * t, ux[1] * s_ + uy[1] * t];
   for (const r of siralar) {
     r.ms.sort((a, b) => a.s - b.s); let par = [r.ms[0]];
-    // kullanıcı kuralı 19.10.2026: inverter masanın ARKASINDA (kuzey açıklık), sıra ucundaki masanın ucuna yakın
+    // kullanıcı kuralı 20.10.2026 (GES-Proje-Cizim-Esaslari A.4): inverter her zaman masanın KUZEYİNDE (arka sıra açıklığında, masanın kuzey orta noktasında) durur
     const ag_ = gnum('g-ang', 0) * Math.PI / 180, kz = [-Math.sin(ag_), Math.cos(ag_)], sg = (uy[0] * kz[0] + uy[1] * kz[1]) >= 0 ? 1 : -1, arka = sg * (D / 2 + 0.5);
-    const bitir = () => { const a = par[0], b = par[par.length - 1]; uc.push({ p: W(a.s - a.c.L / 2 + 1.0, r.t + arka), yan: -1, t: r.t }, { p: W(b.s + b.c.L / 2 - 1.0, r.t + arka), yan: 1, t: r.t }); };
+    const bitir = () => { const a = par[0], b = par[par.length - 1]; uc.push({ p: W(a.s, r.t + arka), yan: -1, t: r.t }, { p: W(b.s, r.t + arka), yan: 1, t: r.t }); };
     for (let k = 1; k < r.ms.length; k++) { const a = r.ms[k - 1], b = r.ms[k]; if (b.s - b.c.L / 2 - (a.s + a.c.L / 2) > 3) { bitir(); par = [b]; } else par.push(b); }
     bitir();
   }
@@ -6133,11 +6133,11 @@ async function saveDxf() {
   } finally { busy(null); }
 }
 
-// sample drawing: small GES block layout (example)
+// sample drawing: GES project layout conforming to GES-Proje-Cizim-Esaslari (A.4 north midpoint inverters & A.11 AG hat istikameti)
 function sampleDoc() {
   const doc = new Doc(); doc.ctx = { blocks: doc.blocks, solids: doc.solids };
-  doc.addLayer('ORNEK-PANEL', 5); doc.addLayer('ORNEK-CIT', 3, 'DASHED'); doc.addLayer('ORNEK-YOL', 8); doc.addLayer('ORNEK-YAZI', 7); doc.addLayer('ORNEK-OLCU', 2); doc.addLayer('ORNEK-TRAFO', 1);
-  // block: table 2x13 modules (2.384 x 1.303), portrait
+  doc.addLayer('GES-PANEL', 5); doc.addLayer('GES-CIT', 3, 'DASHED'); doc.addLayer('GES-YOL', 8); doc.addLayer('GES-YAZI', 7); doc.addLayer('GES-OLCU', 2); doc.addLayer('GES-TRAFO', 30); doc.addLayer('GES-INVERTER', 1); doc.addLayer('GES-AC-KABLO', 1);
+  // block: table 2x13 modules (2.384 x 1.134), portrait
   const ents = []; const mw = 1.134, mh = 2.384, gap = 0.02;
   for (let r = 0; r < 2; r++) for (let c = 0; c < 13; c++) { const x = c * (mw + gap), y = r * (mh + gap); ents.push({ type: 'LWPOLYLINE', layer: '0', colorIndex: 256, flag: 1, vertices: [{ x, y }, { x: x + mw, y }, { x: x + mw, y: y + mh }, { x, y: y + mh }] }); }
   const W = 13 * (mw + gap) - gap, H = 2 * (mh + gap) - gap;
@@ -6146,19 +6146,34 @@ function sampleDoc() {
   const items = [];
   const add = (o) => { const it = { id: newId(), lt: '', c: 256, ...o }; items.push(it); };
   const ox = 0, oy = 0, pitch = 9.5;
-  for (let row = 0; row < 6; row++) for (let col = 0; col < 3; col++) add({ t: 'insert', layer: 'ORNEK-PANEL', block: 'MASA_2x13', M: mT(ox + col * (W + 4), oy + row * pitch), ap: [] });
-  const fx0 = -6, fy0 = -8, fx1 = 3 * (W + 4) + 2, fy1 = 6 * pitch + 3;
-  add({ t: 'pline', layer: 'ORNEK-CIT', cl: true, pts: [[fx0, fy0, 0], [fx1, fy0, 0], [fx1, fy1, 0], [fx0, fy1, 0]] });
-  add({ t: 'pline', layer: 'ORNEK-YOL', cl: false, pts: [[fx0 + 2, fy0 + 2.5, 0], [fx1 - 2, fy0 + 2.5, 0]] });
-  add({ t: 'pline', layer: 'ORNEK-YOL', cl: false, pts: [[fx0 + 2, fy0 + 6.5, 0], [fx1 - 14, fy0 + 6.5, 0], [fx1 - 10, fy0 + 2.5, 0.0]] });
-  add({ t: 'pline', layer: 'ORNEK-TRAFO', cl: true, pts: [[fx1 - 9, fy0 + 3.5, 0], [fx1 - 3, fy0 + 3.5, 0], [fx1 - 3, fy0 + 6.5, 0], [fx1 - 9, fy0 + 6.5, 0]] });
-  add({ t: 'text', layer: 'ORNEK-TRAFO', x: fx1 - 6, y: fy0 + 5, h: 0.8, rot: 0, s: 'TRAFO', ha: 1, va: 2 });
-  add({ t: 'circle', layer: 'ORNEK-TRAFO', cx: fx1 - 12, cy: fy0 + 5, r: 0.9 });
-  add({ t: 'text', layer: 'ORNEK-YAZI', x: fx0, y: fy1 + 3, h: 2, rot: 0, s: 'ÖRNEK ÇİZİM · GES Blok A (18 masa · 468 modül)', ha: 0, va: 0 });
-  add({ t: 'text', layer: 'ORNEK-YAZI', x: fx0, y: fy1 + 1, h: 0.9, rot: 0, s: 'Kendi DWG/DXF dosyanızı açmak için üstteki “Aç” düğmesini kullanın veya dosyayı buraya sürükleyin.', ha: 0, va: 0 });
-  add({ t: 'dim', layer: 'ORNEK-OLCU', x1: fx0, y1: fy0, x2: fx1, y2: fy0, lx: 0, ly: fy0 - 4, ang: 0, h: 1.2 });
-  add({ t: 'dim', layer: 'ORNEK-OLCU', x1: fx1, y1: fy0, x2: fx1, y2: fy1, lx: fx1 + 4, ly: 0, ang: Math.PI / 2, h: 1.2 });
-  add({ t: 'dim', layer: 'ORNEK-OLCU', x1: 0, y1: pitch, x2: 0, y2: 2 * pitch, lx: -3, ly: 0, ang: Math.PI / 2, h: 0.8 });
+  for (let row = 0; row < 6; row++) for (let col = 0; col < 3; col++) add({ t: 'insert', layer: 'GES-PANEL', block: 'MASA_2x13', M: mT(ox + col * (W + 4), oy + row * pitch), ap: [] });
+  const maxMasaX = 2 * (W + 4) + W;
+  const agHatX = maxMasaX + 3.0; // Kural A.11: Masa sıra uçlarının 3 m dışından geçen tek düz AG hat istikameti
+  const tmX0 = agHatX + 1.5, tmY0 = oy + 1.0, tmW = 6.0, tmH = 3.0, tmMidY = tmY0 + tmH / 2;
+  const fx0 = -5, fy0 = -6, fx1 = tmX0 + tmW + 3, fy1 = 6 * pitch + 4;
+  add({ t: 'pline', layer: 'GES-CIT', cl: true, pts: [[fx0, fy0, 0], [fx1, fy0, 0], [fx1, fy1, 0], [fx0, fy1, 0]] });
+  add({ t: 'pline', layer: 'GES-YOL', cl: false, pts: [[fx0 + 2, fy0 + 2.5, 0], [fx1 - 2, fy0 + 2.5, 0]] });
+  // Kural A.4 & A.11: İnverterler her zaman masanın KUZEY ORTA NOKTASINDA (y = row*pitch + H + 0.5), kuzey açıklığına ≤2.5m adım atıp DÜZ ilerleyerek 3m dış AG hat istikametinden TM/ADP'ye girer
+  const invRows = [1, 3, 5];
+  let maxBrY = tmMidY;
+  invRows.forEach((rIdx, idx) => {
+    const mX = ox + 2 * (W + 4);
+    const invX = mX + W / 2; // Masanın kuzey orta noktası (A.4)
+    const invY = oy + rIdx * pitch + H + 0.5;
+    const brY = invY + 1.2;  // Kuzey sıra açıklığına dik adım (≤ 2.5 m)
+    if (brY > maxBrY) maxBrY = brY;
+    add({ t: 'pline', layer: 'GES-INVERTER', cl: true, pts: [[invX - 0.55, invY - 0.35, 0], [invX + 0.55, invY - 0.35, 0], [invX + 0.55, invY + 0.35, 0], [invX - 0.55, invY + 0.35, 0]] });
+    add({ t: 'text', layer: 'GES-INVERTER', x: invX, y: invY + 0.9, h: 0.7, rot: 0, s: 'INV-' + (idx + 1), ha: 1, va: 0 });
+    add({ t: 'pline', layer: 'GES-AC-KABLO', cl: false, pts: [[invX, invY, 0], [invX, brY, 0], [agHatX, brY, 0]] });
+  });
+  add({ t: 'pline', layer: 'GES-AC-KABLO', cl: false, pts: [[agHatX, maxBrY, 0], [agHatX, tmMidY, 0], [tmX0, tmMidY, 0]] });
+  add({ t: 'pline', layer: 'GES-TRAFO', cl: true, pts: [[tmX0, tmY0, 0], [tmX0 + tmW, tmY0, 0], [tmX0 + tmW, tmY0 + tmH, 0], [tmX0, tmY0 + tmH, 0]] });
+  add({ t: 'text', layer: 'GES-TRAFO', x: tmX0 + tmW / 2, y: tmMidY, h: 0.75, rot: 0, s: 'TM / ADP', ha: 1, va: 2 });
+  add({ t: 'text', layer: 'GES-YAZI', x: fx0, y: fy1 + 3, h: 1.8, rot: 0, s: 'GES PROJE ÇİZİM ESASLARI · ÖRNEK BLOK (18 masa · 468 modül · Kuzey Orta INV + 3m Düz AG Hat)', ha: 0, va: 0 });
+  add({ t: 'text', layer: 'GES-YAZI', x: fx0, y: fy1 + 1, h: 0.9, rot: 0, s: 'KML/KMZ parselinizi yükleyip “Tam Proje Çiz (GES-ÇİZ)” ile 5 resmi TEDAŞ/EDAŞ paftasını otomatik üretebilirsiniz.', ha: 0, va: 0 });
+  add({ t: 'dim', layer: 'GES-OLCU', x1: fx0, y1: fy0, x2: fx1, y2: fy0, lx: 0, ly: fy0 - 4, ang: 0, h: 1.2 });
+  add({ t: 'dim', layer: 'GES-OLCU', x1: fx1, y1: fy0, x2: fx1, y2: fy1, lx: fx1 + 4, ly: 0, ang: Math.PI / 2, h: 1.2 });
+  add({ t: 'dim', layer: 'GES-OLCU', x1: 0, y1: pitch, x2: 0, y2: 2 * pitch, lx: -3, ly: 0, ang: Math.PI / 2, h: 0.8 });
   for (const it of items) doc.items.set(it.id, it);
   return doc;
 }
@@ -6198,7 +6213,7 @@ function init() {
             }
             formToPanel(); if (typeof pjSave === 'function') pjSave(); if (typeof tfSync === 'function') tfSync();
             await CMD.GFILL();
-            if (kp.autoProje && typeof pjYerlesim === 'function') setTimeout(pjYerlesim, 250);
+            if (kp.autoProje !== false && typeof pjYerlesim === 'function') setTimeout(pjYerlesim, 250);
           } catch (err) { console.error(err); }
         }, 220);
       }

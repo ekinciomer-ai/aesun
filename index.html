@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AEMonitoring</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20120%20120%22%3E%3Cpath%20d%3D%22M60%208%20A52%2052%200%200%200%2060%20112%20Z%22%20fill%3D%22%23D7262E%22/%3E%3Cpath%20d%3D%22M60%208%20A52%2052%200%200%201%2060%20112%20Z%22%20fill%3D%22%232B2D31%22/%3E%3Cpath%20d%3D%22M20%2063%20H44%20L66%2030%20L76%2063%20H100%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%2214%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..750&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#E9EDF2;font-family:'Archivo',system-ui,sans-serif;color:#10233F}
+a{color:#10233F}a:hover{color:#2a78d6}
+.num{font-variant-numeric:tabular-nums;font-stretch:88%}
+.kab{display:flex;flex-wrap:wrap;min-height:100vh}
+.nav{flex:1 1 232px;max-width:260px;background:#10233F;padding:24px 16px;display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:#C9D3E0;font-size:14px;min-height:24px}
+.nav a:hover{background:#1B3254;color:#fff}
+.nav a.aktif{background:#fff;color:#10233F;font-weight:600}
+.nav a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid #86b6ef;outline-offset:2px}
+.rozet{margin-left:auto;font-size:12px;font-weight:700;border-radius:10px;padding:1px 8px}
+.rozet.k{background:#B42318;color:#fff}.rozet.u{background:#C98500;color:#10233F}
+main{flex:999 1 560px;min-width:0;padding:28px 32px 48px;display:flex;flex-direction:column;gap:24px;max-width:1240px}
+.panel{background:#fff;border-radius:14px;border:1px solid #D5DCE5;padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.k{font-size:13px;color:#4A5A70}
+h1{margin:0;font-size:34px;line-height:1.1;font-weight:700;font-stretch:105%}
+h2{margin:0;font-size:20px;font-weight:700}
+.bas{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px}
+.btn{font:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:40px;background:#fff;color:#10233F;border:1px solid #B9C4D2}
+.btn.koyu{background:#10233F;color:#fff;border-color:#10233F}
+.btn.sec{background:#10233F;color:#fff;border-color:#10233F}
+select{font:inherit;font-size:13px;border:1px solid #B9C4D2;border-radius:8px;padding:8px 10px;min-height:40px;background:#fff;color:#10233F}
+.iki{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+.uc{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+ul.uy{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+ul.uy li{display:flex;gap:12px;padding:10px 12px;border-radius:10px}
+ul.uy li.kritik{background:#FDECEA}ul.uy li.uyari{background:#FFF4DC}
+.sayaclar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px 0}
+.sayac{padding:4px 18px;border-left:1px solid #E3E8EE;display:flex;flex-direction:column;gap:10px}
+.cubuk{display:flex;gap:2px;height:26px}
+.cubuk div:first-child{border-radius:4px 0 0 4px}.cubuk div:last-child{border-radius:0 4px 4px 0}
+.cubuk div:only-child{border-radius:4px}
+.kutular{display:flex;gap:3px;flex-wrap:wrap}.kutular span{width:14px;height:14px;border-radius:3px}
+.durum-ok{font-size:13px;color:#1E7A3C;display:flex;align-items:center;gap:6px}
+.durum-k{font-size:13px;color:#B42318;font-weight:600;display:flex;align-items:center;gap:6px}
+.durum-u{font-size:13px;color:#9A5B00;font-weight:600;display:flex;align-items:center;gap:6px}
+.hata{padding:20px;color:#B42318}
+.sekmeler{display:flex;gap:4px;border-bottom:1px solid #D5DCE5}
+.sekmeler button{font:inherit;font-size:16px;font-weight:600;background:none;border:0;border-bottom:3px solid transparent;padding:10px 18px;color:#4A5A70;cursor:pointer;min-height:44px}
+.sekmeler button[aria-selected=true]{color:#10233F;border-bottom-color:#2a78d6}
+.tablo-kutu{overflow-x:auto;background:#fff;border:1px solid #D5DCE5;border-radius:14px}
+table.tb{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+table.tb th{font-weight:600;color:#4A5A70;font-size:13px;padding:8px 10px;background:#F5F7FA;text-align:right;white-space:nowrap}
+table.tb th.sol,table.tb td.sol{text-align:left}
+table.tb td{padding:6px 10px;text-align:right;border-top:1px solid #EEF1F5;white-space:nowrap}
+table.tb td.sifir{color:#9AA6B5}
+table.tb tr.top td{font-weight:700;border-top:2px solid #D5DCE5;background:#F5F7FA}
+table.tb .ayr{border-left:1px solid #E3E8EE}
+table.tb td.saat{font-weight:600;text-align:left}
+input[type=date]{font:inherit;font-size:15px;border:1px solid #B9C4D2;border-radius:8px;padding:8px 10px;min-height:40px;color:#10233F;background:#fff}
+.kartlar5{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+@media (max-width:700px){main{padding:20px 16px 40px}.nav{max-width:none;flex-basis:100%;flex-direction:row;flex-wrap:wrap;padding:14px}.nav .bosluk{display:none}.sayac{border-left:0;padding:4px 0}}
+</style>
+</head>
+<body>
+<div class="kab">
+<nav class="nav" aria-label="Ana menü">
+  <div style="display:flex;align-items:center;gap:10px;padding:4px 12px 24px 12px">
+    <svg width="32" height="32" viewBox="0 0 120 120" aria-hidden="true"><path d="M60 8 A52 52 0 0 0 60 112 Z" fill="#E0353C"/><path d="M60 8 A52 52 0 0 1 60 112 Z" fill="#3A3D43"/><path d="M16 63 H38 L46 50 L56 82 L65 28 L74 63 H104" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><div style="font-size:18px;color:#fff;font-stretch:110%"><b style="font-weight:800">AE</b><span style="font-weight:600;color:#F2555B">Monitoring</span></div>
+    <div style="font-size:12px;color:#9FB0C6">Aksaray Enerji · GES izleme</div></div>
+  </div>
+  <a href="#genel" data-sayfa="genel" class="aktif"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Genel bakış</a>
+  <a href="#sayac" data-sayfa="sayac"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Sayaçlar ve mahsup</a>
+  <a href="#inverterler"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>İnverterler<span id="r-inv"></span></a>
+  <a href="#inverter" data-sayfa="inverter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 20h18M6 16V10M10 16V6M14 16v-4M18 16V8"/></svg>İnverter analizi</a>
+  <a href="#madencilik"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h2M15 10v4"/></svg>Madencilik<span id="r-mad"></span></a>
+  <a href="#epias" data-sayfa="epias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 6"/></svg>EPİAŞ</a>
+  <a href="#genel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>Uyarılar<span id="r-uy"></span></a>
+  <div class="bosluk" style="flex:1 1 auto;min-height:24px"></div>
+  <div class="k" style="color:#9FB0C6;padding:0 12px;font-size:12px" id="kaynakNot"></div>
+</nav>
+
+<main id="genel">
+  <header class="bas" style="align-items:flex-end">
+    <div><h1 id="baslik">Genel bakış</h1><p style="margin:6px 0 0;font-size:15px;color:#4A5A70" id="altBaslik">Yükleniyor…</p></div>
+    <div id="kontrol" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"></div>
+  </header>
+  <div id="icerik"></div>
+</main>
+</div>
+
+<script>
+const KOK = 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/';
+const LIMIT_2026 = 2905914;
+const ESLE = { T1: 'fusionsolar:NE=59224704', T2: 'fusionsolar:NE=73686040', YD: 'sungrow:5064453', Anka: 'sungrow:5038906', AE: 'inavitas:189' }, ESLE_KISA = { T1: 'Sera-1', T2: 'Sera-2' };
+const SAYAC = [
+  { key: 'tekyildiz_1', kod: 'T1', ad: 'Tekyıldız 1', renk: '#2a78d6', mahsup: true, uretir: true },
+  { key: 'tekyildiz_2', kod: 'T2', ad: 'Tekyıldız 2', renk: '#eb6834', mahsup: true, uretir: true },
+  { key: 'aksaray_3', kod: 'A3', ad: 'Aksaray 3', renk: '#1baf7a', mahsup: true, uretir: false },
+  { key: 'yilmaz_darilmaz', kod: 'YD', ad: 'Yılmaz Darılmaz', renk: '#C98500', mahsup: false, uretir: true },
+  { key: 'anka_mineral', kod: 'Anka', ad: 'Anka Mineral', renk: '#d55181', mahsup: false, uretir: true },
+  { key: 'aksaray_enerji', kod: 'AE', ad: 'Aksaray Enerji Üretim', renk: '#6b5bd6', mahsup: false, uretir: true }
+];
+const AYLAR = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+const AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+const GUNLER = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+let D = null, gunSayisi = 30, secAy = null;
+
+const esc = v => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const say = (v, h = 0) => (v == null || isNaN(v)) ? '—' : Number(v).toLocaleString('tr-TR', { minimumFractionDigits: h, maximumFractionDigits: h });
+const trSimdi = () => new Date(Date.now() + 3 * 3600000);
+const bugunTR = () => trSimdi().toISOString().slice(0, 10);
+const gunEkle = (g, n) => new Date(Date.parse(g + 'T00:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+const saatTR = iso => { if (!iso) return '—'; const d = new Date(new Date(iso).getTime() + 3 * 3600000); return String(d.getUTCHours()).padStart(2,'0') + ':' + String(d.getUTCMinutes()).padStart(2,'0'); };
+const tarihK = g => { const [y, a, d] = g.split('-').map(Number); return d + ' ' + AYK[a - 1]; };
+const ICON_K = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>';
+const ICON_U = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A5B00" stroke-width="2.2" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M12 3l10 18H2z"/><path d="M12 10v4.5M12 17.5v.5"/></svg>';
+const TIK = c => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2.5" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>';
+const UNL = c => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>';
+
+async function al(yol) {
+  const r = await fetch(KOK + yol + '?t=' + Date.now(), { cache: 'no-store' });
+  if (!r.ok) throw new Error(yol + ' okunamadı (HTTP ' + r.status + ')');
+  return r.json();
+}
+
+// OSOS: gün → { veris, cekis } toplamları ve saatlik mahsup
+function gunluk(osos, key, gun) {
+  const v = ((osos[key] || {}).veri || {})[gun];
+  if (!v) return null;
+  let veris = 0, cekis = 0, saat = 0;
+  for (const [s, x] of Object.entries(v)) { veris += Number(x.veris) || 0; cekis += Number(x.cekis) || 0; saat = Math.max(saat, parseInt(s, 10) + 1); }
+  return { veris, cekis, saat };
+}
+const MAN_A3 = { '2026-01': 29373.75, '2026-02': 63949.58, '2026-03': 89689.95, '2026-04': 191206.98 };
+const AB = { T1: 'tekyildiz_1', T2: 'tekyildiz_2', A3: 'aksaray_3' };
+function saatVeri(osos, gun, s) {
+  const v = k => ((((osos[AB[k]] || {}).veri || {})[gun] || {})[s]) || null;
+  const x1 = v('T1'), x2 = v('T2'), x3 = v('A3');
+  return { var: !!(x1 || x2 || x3), u: { T1: x1 ? +x1.veris || 0 : 0, T2: x2 ? +x2.veris || 0 : 0 }, t: { T1: x1 ? +x1.cekis || 0 : 0, T2: x2 ? +x2.cekis || 0 : 0, A3: x3 ? +x3.cekis || 0 : 0 } };
+}
+// Ofis paneli "kaynak takipli havuz": üreticiler büyükten küçüğe; her üreticiden önce T2, sonra A3, en son T1; artan bedelli
+function havuz(u, t) {
+  const tuk = { ...t }, mahsup = { T1: 0, T2: 0, A3: 0 }, kaynak = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };
+  for (const [ges, mik] of Object.entries(u).sort((a, b) => b[1] - a[1])) {
+    let kal = mik;
+    for (const ab of ['T2', 'A3', 'T1']) { if (kal <= 0 || tuk[ab] <= 0) continue; const m = Math.min(kal, tuk[ab]); kaynak[ges][ab] += m; mahsup[ab] += m; kal -= m; tuk[ab] -= m; }
+    if (kal > 0) kaynak[ges].bedelli += kal;
+  }
+  return { mahsup, kaynak, sonra: tuk, bedelli: kaynak.T1.bedelli + kaynak.T2.bedelli, mTop: mahsup.T1 + mahsup.T2 + mahsup.A3 };
+}
+function mahsupGun(osos, gun) {
+  const r = { uretim: 0, tuketim: 0, mahsup: 0, bedelli: 0, sebeke: 0, saatler: [] };
+  for (let h = 0; h < 24; h++) {
+    const s = String(h).padStart(2, '0');
+    const v = saatVeri(osos, gun, s);
+    const hv = havuz(v.u, v.t);
+    const U = v.u.T1 + v.u.T2, T = v.t.T1 + v.t.T2 + v.t.A3;
+    r.saatler.push({ saat: s, var: v.var, u: v.u, t: v.t, U, T, ...hv });
+    r.uretim += U; r.tuketim += T; r.mahsup += hv.mTop; r.bedelli += hv.bedelli; r.sebeke += T - hv.mTop;
+  }
+  return r;
+}
+// Ay sonucu: 2026 Mayıs öncesi aylık (Ocak–Nisan A3 manuel mahsup), sonrası saatlik
+function aySonuc(osos, ay) {
+  const gunler = Object.keys((osos.tekyildiz_1 || {}).veri || {}).filter(g => g.startsWith(ay)).sort();
+  const t = { uretim: 0, tuketim: 0, mahsup: 0, bedelli: 0, sebeke: 0, gunler, aylik: false, ab: { T1: 0, T2: 0, A3: 0 }, tAb: { T1: 0, T2: 0, A3: 0 }, uAb: { T1: 0, T2: 0 }, kaynak: { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } } };
+  for (const g of gunler) {
+    const m = mahsupGun(osos, g);
+    t.uretim += m.uretim; t.tuketim += m.tuketim;
+    for (const sa of m.saatler) {
+      for (const k of ['T1', 'T2', 'A3']) { t.tAb[k] += sa.t[k]; }
+      t.uAb.T1 += sa.u.T1; t.uAb.T2 += sa.u.T2;
+      for (const k of ['T1', 'T2', 'A3']) t.ab[k] += sa.mahsup[k];
+      for (const ges of ['T1', 'T2']) for (const k of ['T1', 'T2', 'A3', 'bedelli']) t.kaynak[ges][k] += sa.kaynak[ges][k];
+    }
+    t.mahsup += m.mahsup; t.bedelli += m.bedelli;
+  }
+  if (ay < '2026-05') {
+    t.aylik = true;
+    let kal = t.uretim; const ab = { T1: 0, T2: 0, A3: 0 };
+    if (MAN_A3[ay] !== undefined) {
+      ab.A3 = Math.min(MAN_A3[ay], t.tAb.A3); kal -= ab.A3;
+      for (const k of ['T2', 'T1']) if (kal > 0 && t.tAb[k] > 0) { ab[k] = Math.min(kal, t.tAb[k]); kal -= ab[k]; }
+    } else {
+      for (const k of ['T1', 'T2', 'A3'].sort((a, b) => t.tAb[b] - t.tAb[a])) { const m = Math.min(Math.max(kal, 0), t.tAb[k]); ab[k] = m; kal -= m; }
+    }
+    t.ab = ab; t.mahsup = ab.T1 + ab.T2 + ab.A3; t.bedelli = Math.max(0, kal); t.kaynak = null;
+  }
+  t.sebeke = t.tuketim - t.mahsup;
+  return t;
+}
+function sonOsosSaati(osos) {
+  let enSon = null;
+  for (const sc of SAYAC) {
+    const v = (osos[sc.key] || {}).veri || {};
+    const g = Object.keys(v).sort().pop(); if (!g) continue;
+    const s = Object.keys(v[g]).sort().pop();
+    const t = g + ' ' + s; if (!enSon || t > enSon) enSon = t;
+  }
+  return enSon;
+}
+
+function spark(degerler, renk, etiket) {
+  const max = Math.max(1, ...degerler);
+  const n = degerler.length;
+  const pts = degerler.map((v, i) => (n > 1 ? (i * 174 / (n - 1)) : 0).toFixed(1) + ',' + (38 - v / max * 36).toFixed(1)).join(' ');
+  return '<svg width="100%" height="40" viewBox="0 0 174 40" preserveAspectRatio="none" role="img" aria-label="' + esc(etiket) + '" style="max-width:174px"><polyline fill="none" stroke="' + renk + '" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke" points="' + pts + '"/></svg>';
+}
+
+function grafik(gunler, seriler) {
+  const W = 840, H = 180;
+  const max0 = Math.max(1, ...seriler.flatMap(s => s.v));
+  const adim = Math.pow(10, Math.floor(Math.log10(max0)));
+  const tavan = Math.ceil(max0 / adim) * adim;
+  const n = gunler.length;
+  const x = i => n > 1 ? i * W / (n - 1) : 0;
+  const y = v => H - v / tavan * H;
+  let s = '<svg viewBox="0 0 900 222" width="100%" style="min-width:640px;display:block" role="img" aria-label="Günlük üretim ve tüketim"><g font-family="Archivo, sans-serif" font-size="11" fill="#4A5A70">';
+  for (let k = 0; k <= 3; k++) { const v = tavan * k / 3, yy = 10 + y(v); s += '<line x1="48" y1="' + yy + '" x2="900" y2="' + yy + '" stroke="' + (k ? '#E3E8EE' : '#B9C4D2') + '"/><text x="40" y="' + (yy + 4) + '" text-anchor="end">' + say(v) + '</text>'; }
+  const et = [0, Math.round((n - 1) / 3), Math.round(2 * (n - 1) / 3), n - 1];
+  et.forEach((i, j) => { s += '<text x="' + (52 + x(i)) + '" y="212"' + (j === 3 ? ' text-anchor="end"' : '') + '>' + tarihK(gunler[i]) + '</text>'; });
+  s += '</g><g transform="translate(52,10)">';
+  for (const sr of seriler) {
+    s += '<polyline fill="none" stroke="' + sr.renk + '" stroke-width="' + (sr.kalin ? 2.5 : 2) + '" stroke-linejoin="round" points="' + sr.v.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ') + '"><title>' + esc(sr.ad) + '</title></polyline>';
+    s += '<circle cx="' + x(n - 1) + '" cy="' + y(sr.v[n - 1]) + '" r="4" fill="' + sr.renk + '" stroke="#fff" stroke-width="2"/>';
+  }
+  for (let i = 0; i < n; i++) s += '<rect x="' + (x(i) - W / n / 2) + '" y="0" width="' + (W / n) + '" height="' + H + '" fill="transparent"><title>' + tarihK(gunler[i]) + ' · ' + seriler.map(sr => sr.ad + ' ' + say(sr.v[i]) + ' kWh').join(' · ') + '</title></rect>';
+  return s + '</g></svg>';
+}
+
+function cizGenel() {
+  const { son, osos, mad } = D;
+  document.getElementById('baslik').textContent = 'Genel bakış';
+  document.getElementById('kontrol').innerHTML = '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
+  const bugun = bugunTR();
+  const simdiTR = trSimdi();
+  const sonSaat = sonOsosSaati(osos);
+  const sonOsosGun = sonSaat ? sonSaat.slice(0, 10) : bugun;
+  const sonSaatNo = sonSaat ? parseInt(sonSaat.slice(11), 10) + 1 : 0;
+
+  // ---- Uyarılar
+  const uy = (son && son.uyarilar || []).filter(u => u.seviye === 'kritik' || u.seviye === 'uyari').map(u => ({ seviye: u.seviye, baslik: u.baslik, detay: u.detay || '' }));
+  if (mad && mad.summary && mad.summary.offline > 0) {
+    const off = (mad.devices || []).filter(d => !d.online && !d.sleeping).map(d => d.name);
+    uy.push({ seviye: 'uyari', baslik: mad.summary.offline + ' madenci yanıt vermiyor', detay: off.join(', ') });
+  }
+  if (mad && mad.timestamp && (Date.now() - new Date(mad.timestamp + '+03:00').getTime()) / 60000 > 60) uy.push({ seviye: 'uyari', baslik: 'Saha madencilik verisi güncel değil', detay: 'Son kayıt ' + mad.timestamp.slice(0, 16).replace('T', ' ') });
+  const fs = D.fs && D.fs.tesisler && Object.keys(D.fs.tesisler).length ? D.fs : null;
+  const fsDk = fs ? (Date.now() - new Date(fs.guncelleme + '+03:00').getTime()) / 60000 : 0;
+  if (fs && fsDk > 30) uy.push({ seviye: 'uyari', baslik: 'FusionSolar verisi güncel değil', detay: 'Son kayıt ' + String(fs.guncelleme).slice(0, 16).replace('T', ' ') + '. Bilgisayardaki toplayıcı çalışıyor mu?' });
+  if (fs && fsDk <= 30) (fs.alarmlar || []).filter(a => /kritik|major|önemli|critical/i.test(a.seviye || '')).forEach(a => uy.push({ seviye: /kritik|critical/i.test(a.seviye) ? 'kritik' : 'uyari', baslik: 'FusionSolar: ' + (a.alarm || 'alarm'), detay: [a.tesis, a.cihaz, a.zaman].filter(Boolean).join(' · ') }));
+  uy.sort((a, b) => (a.seviye === 'kritik' ? 0 : 1) - (b.seviye === 'kritik' ? 0 : 1));
+  const kritikN = uy.filter(u => u.seviye === 'kritik').length;
+  document.getElementById('r-uy').outerHTML = '<span id="r-uy" class="rozet ' + (kritikN ? 'k' : 'u') + '"' + (uy.length ? '' : ' hidden') + '>' + uy.length + '</span>';
+
+  // ---- Başlık
+  const g = simdiTR;
+  document.getElementById('altBaslik').textContent = GUNLER[g.getUTCDay()] + ', ' + g.getUTCDate() + ' ' + AYLAR[g.getUTCMonth()] + ' ' + g.getUTCFullYear() + '. Sayaç verisi ' + tarihK(sonOsosGun) + ' ' + String(sonSaatNo).padStart(2, '0') + ':00\'e kadar, inverter verisi ' + saatTR(son && son.guncellendi) + ', saha ' + (mad && mad.timestamp ? mad.timestamp.slice(11, 16) : '—') + ' itibarıyla.';
+
+  // ---- Ay seçimi ve enerji dengesi
+  const ayList = [...new Set(Object.keys((osos.tekyildiz_1 || {}).veri || {}).map(x => x.slice(0, 7)))].sort().reverse();
+  if (!secAy || !ayList.includes(secAy)) secAy = sonOsosGun.slice(0, 7);
+  const ay = aySonuc(osos, secAy);
+  const ayGunleri = ay.gunler;
+  let yilBedelli = 0;
+  for (const m of ayList.filter(m => m.startsWith(sonOsosGun.slice(0, 4)))) yilBedelli += aySonuc(osos, m).bedelli;
+  // 2027 bedelli satış kotası = 2026'da mahsuptaki abonelerin (T1, T2, A3) toplam tüketimi × 2
+  const kotaYil = sonOsosGun.slice(0, 4), kotaAb = { T1: 0, T2: 0, A3: 0 };
+  const kotaGunler = Object.keys((osos.tekyildiz_1 || {}).veri || {}).filter(x => x.startsWith(kotaYil)).sort();
+  for (const k of Object.keys(kotaAb)) for (const x of Object.keys((osos[AB[k]] || {}).veri || {})) if (x.startsWith(kotaYil)) kotaAb[k] += (gunluk(osos, AB[k], x) || {}).cekis || 0;
+  const kotaTuk = kotaAb.T1 + kotaAb.T2 + kotaAb.A3;
+  const kotaSon = gunEkle(sonOsosGun, -1), son28 = []; for (let i = 27; i >= 0; i--) son28.push(gunEkle(kotaSon, -i));
+  const gunOrt = son28.reduce((t, x) => t + Object.keys(kotaAb).reduce((u, k) => u + ((gunluk(osos, AB[k], x) || {}).cekis || 0), 0), 0) / 28;
+  const kalanGun = Math.max(0, Math.round((Date.parse((Number(kotaYil) + 1) + '-01-01T00:00:00Z') - Date.parse(kotaSon + "T00:00:00Z")) / 86400000) - 1);
+  const kotaTahmin = (kotaTuk + gunOrt * kalanGun) * 2;
+  // T1/T2 sayaç arkası iç tüketim (inverter − sayaç verişi), tam günler — tahmini
+  const kYil = Number(kotaYil);
+  if (!INV_CACHE[kYil] && !invYukleniyor) { invYukleniyor = true; invYilYukle(kYil).then(() => { invYukleniyor = false; if (!location.hash.startsWith('#sayac') && !location.hash.startsWith('#inverter')) cizGenel(); }).catch(() => { invYukleniyor = false; }); }
+  const kInv = INV_CACHE[kYil] ? invBirlestir(INV_CACHE[kYil]) : null;
+  let icTuk = null, icSon28 = 0;
+  if (kInv) {
+    icTuk = { T1: 0, T2: 0 };
+    for (const k of ['T1', 'T2']) { const iv = kInv[ESLE[k]]; if (!iv) continue;
+      for (const [g, v] of Object.entries(iv.gun)) { if (!g.startsWith(kotaYil)) continue; const gg = gunluk(osos, AB[k], g); if (!gg || gg.saat < 24) continue; const f = Math.max(0, +v - gg.veris); icTuk[k] += f; if (son28.includes(g)) icSon28 += f / 28; } }
+  }
+  const icTop = icTuk ? icTuk.T1 + icTuk.T2 : 0;
+  const kotaIcTahmin = (kotaTuk + icTop + (gunOrt + icSon28) * kalanGun) * 2;
+  const enBuyuk = Math.max(ay.uretim, ay.tuketim, 1);
+  const limitPct = yilBedelli / LIMIT_2026 * 100;
+  const [yy, aa] = secAy.split('-').map(Number);
+  const aralik = ayGunleri.length ? Number(ayGunleri[0].slice(8)) + '–' + Number(ayGunleri[ayGunleri.length - 1].slice(8)) + ' ' + AYLAR[aa - 1] : '';
+
+  const uyHtml = uy.length ? '<ul class="uy">' + uy.slice(0, 8).map(u => '<li class="' + u.seviye + '">' + (u.seviye === 'kritik' ? ICON_K : ICON_U) + '<div><div style="font-size:15px;font-weight:650;color:' + (u.seviye === 'kritik' ? '#7A1A12' : '#5E3800') + '">' + esc(u.baslik) + '</div>' + (u.detay ? '<div style="font-size:13px;color:' + (u.seviye === 'kritik' ? '#5B2A24' : '#5E3800') + ';margin-top:2px">' + esc(u.detay) + '</div>' : '') + '</div><span style="margin-left:auto;font-size:12px;font-weight:700;color:' + (u.seviye === 'kritik' ? '#B42318' : '#9A5B00') + ';flex:none">' + (u.seviye === 'kritik' ? 'Kritik' : 'Uyarı') + '</span></li>').join('') + '</ul>' + (uy.length > 8 ? '<div class="k">+' + (uy.length - 8) + ' uyarı daha</div>' : '') : '<p class="k" style="margin:0">Şu an dikkat isteyen bir durum yok.</p>';
+
+  const denge = '<section class="panel" aria-labelledby="h-denge" style="gap:18px">'
+    + '<div class="bas"><h2 id="h-denge">' + AYLAR[aa - 1] + ' enerji dengesi</h2><label class="k" style="display:flex;align-items:center;gap:8px">Ay <select id="aySec" onchange="secAy=this.value;ciz()">' + ayList.map(m => '<option value="' + m + '"' + (m === secAy ? ' selected' : '') + '>' + AYLAR[Number(m.slice(5)) - 1] + ' ' + m.slice(0, 4) + '</option>').join('') + '</select></label></div>'
+    + '<div class="k" style="margin-top:-10px">' + (ay.aylik ? 'Aylık mahsup' : 'Saatlik mahsup') + ', ' + aralik + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Üretim (T1 + T2)</span><span class="num" style="font-size:22px;font-weight:700">' + say(ay.uretim) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></span></div>'
+    + '<div class="cubuk" style="width:' + (ay.uretim / enBuyuk * 100).toFixed(1) + '%">' + (ay.mahsup ? '<div style="flex:' + ay.mahsup + ' 1 0;background:#1baf7a"></div>' : '') + (ay.bedelli ? '<div style="flex:' + ay.bedelli + ' 1 0;background:#eda100"></div>' : '') + '</div></div>'
+    + '<div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Tüketim (T1 + T2 + A3)</span><span class="num" style="font-size:22px;font-weight:700">' + say(ay.tuketim) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></span></div>'
+    + '<div class="cubuk" style="width:' + (ay.tuketim / enBuyuk * 100).toFixed(1) + '%">' + (ay.mahsup ? '<div style="flex:' + ay.mahsup + ' 1 0;background:#1baf7a"></div>' : '') + (ay.sebeke ? '<div style="flex:' + ay.sebeke + ' 1 0;background:#eb6834"></div>' : '') + '</div></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding-top:4px">'
+    + [['Mahsuplaşan', '#1baf7a', ay.mahsup], ['Bedelli satış', '#eda100', ay.bedelli], ['Şebekeden alınan', '#eb6834', ay.sebeke]].map(([ad, r, v]) => '<div><div class="k" style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:2px;background:' + r + '"></span>' + ad + '</div><div class="num" style="font-size:20px;font-weight:700;margin-top:2px">' + say(v) + '</div></div>').join('') + '</div>'
+    + '<div style="border-top:1px solid #E3E8EE;padding-top:14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:600">' + sonOsosGun.slice(0, 4) + ' bedelli satış limiti</span><span class="num" style="font-size:14px"><strong>' + say(yilBedelli) + '</strong> / ' + say(LIMIT_2026) + ' kWh</span></div>'
+    + '<div role="meter" aria-label="Bedelli satış limiti kullanımı" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(limitPct) + '" style="height:10px;background:#E3E8EE;border-radius:5px;overflow:hidden"><div style="width:' + Math.min(100, limitPct).toFixed(1) + '%;height:100%;background:' + (limitPct >= 80 ? '#B42318' : '#1E7A3C') + ';border-radius:5px"></div></div>'
+    + '<div class="k">Yüzde ' + say(limitPct, 1) + ' kullanıldı. Yüzde 80\'de uyarı verilecek. (OSOS kayıtlarından, ' + sonOsosGun.slice(0, 4) + ' başından bugüne)</div></div>'
+    + '<div style="border-top:1px solid #E3E8EE;padding-top:14px;display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:600">' + (Number(kotaYil) + 1) + ' bedelli satış kotası (tahmini)</span><span class="num" style="font-size:14px">' + (icTuk ? '<strong>' + say((kotaTuk + icTop) * 2) + '</strong> kWh' : 'yükleniyor…') + '</span></div>'
+    + '<div class="k">' + kotaYil + ' tüketimi, iç tüketim dahil: ' + (icTuk ? '<b style="color:#10233F">' + say(kotaTuk + icTop) + ' kWh</b> × 2' : '…') + ' (T1 + T2 + A3, 1 Oca–' + tarihK(sonOsosGun) + ')</div></div></section>';
+
+  // ---- Sayaçlar
+  const otuz = []; for (let i = 29; i >= 0; i--) otuz.push(gunEkle(sonOsosGun, -i));
+  const uyAnahtar = new Set((son && son.uyarilar || []).map(u => u.anahtar));
+  const sayaclar = SAYAC.map((sc, i) => {
+    const o = osos[sc.key] || {};
+    const bg = gunluk(osos, sc.key, sonOsosGun) || { veris: 0, cekis: 0, saat: 0 };
+    const seri = otuz.map(gg => { const x = gunluk(osos, sc.key, gg); return x ? (sc.uretir ? x.veris : x.cekis) : 0; });
+    const sonG = Object.keys(o.veri || {}).sort().pop();
+    const yasSaat = sonG ? (Date.now() - Date.parse(sonG + 'T00:00:00Z') + 3 * 3600000 - (gunluk(osos, sc.key, sonG).saat) * 3600000) / 3600000 : 999;
+    const durdu = uyAnahtar.has('osos:uretim_durdu:' + o.tesisat_no);
+    const durum = durdu ? '<div class="durum-k">' + UNL('#B42318') + 'Üretim durdu</div>' : (yasSaat > 30 ? '<div class="durum-u">' + UNL('#9A5B00') + 'Veri gecikti</div>' : '<div class="durum-ok">' + TIK('#1E7A3C') + 'Veri güncel</div>');
+    return '<div class="sayac"' + (i === 0 ? ' style="border-left:0;padding-left:0"' : '') + '>'
+      + '<div style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:' + sc.renk + '"></span><span style="font-size:17px;font-weight:700">' + sc.kod + '</span><span class="k">' + esc(sc.ad) + '</span></div>'
+      + '<div class="k">' + esc(o.tesisat_no || '') + (sc.mahsup ? ' · mahsupta' : ' · sadece izleme') + '</div>'
+      + (sc.uretir
+        ? '<div><div class="k">Üretim</div><div class="num" style="font-size:24px;font-weight:700' + (durdu ? ';color:#B42318' : '') + '">' + say(bg.veris) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></div></div><div class="k">Tüketim <span class="num" style="color:#10233F;font-weight:600">' + say(bg.cekis) + ' kWh</span></div>'
+        : '<div><div class="k">Tüketim</div><div class="num" style="font-size:24px;font-weight:700">' + say(bg.cekis) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></div></div><div class="k">Üretim yok</div>')
+      + spark(seri, sc.renk, sc.kod + ' son 30 gün ' + (sc.uretir ? 'üretimi' : 'tüketimi')) + durum + '</div>';
+  }).join('');
+
+  // ---- Mahsup havuzu grafiği
+  const tamSon = sonSaatNo >= 24 ? sonOsosGun : gunEkle(sonOsosGun, -1);
+  const gunler = []; for (let i = gunSayisi - 1; i >= 0; i--) gunler.push(gunEkle(tamSon, -i));
+  const mg = gunler.map(gg => mahsupGun(osos, gg));
+  const trend = '<section class="panel" aria-labelledby="h-trend" style="gap:12px"><div class="bas"><h2 id="h-trend">Mahsup havuzu, son ' + gunSayisi + ' gün</h2>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + [30, 90, 180].map(n => '<button type="button" class="btn' + (n === gunSayisi ? ' sec' : '') + '" onclick="gunSayisi=' + n + ';ciz()">' + n + ' gün</button>').join('') + '</div></div>'
+    + '<div style="display:flex;gap:18px;font-size:13px;color:#4A5A70"><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;border-radius:2px;background:#2a78d6"></span>Üretim (T1 + T2)</span><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;border-radius:2px;background:#eb6834"></span>Tüketim (T1 + T2 + A3)</span><span style="display:flex;align-items:center;gap:6px"><span style="width:16px;height:3px;border-radius:2px;background:#1baf7a"></span>Mahsuplaşan</span></div>'
+    + '<div style="overflow-x:auto">' + grafik(gunler, [{ ad: 'Tüketim', renk: '#eb6834', v: mg.map(m => Math.round(m.tuketim)) }, { ad: 'Mahsuplaşan', renk: '#1baf7a', v: mg.map(m => Math.round(m.mahsup)) }, { ad: 'Üretim', renk: '#2a78d6', kalin: true, v: mg.map(m => Math.round(m.uretim)) }]) + '</div>'
+    + '<div class="k">Tamamlanmış günler (' + tarihK(gunler[0]) + '–' + tarihK(tamSon) + '). Toplam: üretim ' + say(mg.reduce((t, m) => t + m.uretim, 0)) + ' kWh · tüketim ' + say(mg.reduce((t, m) => t + m.tuketim, 0)) + ' kWh · mahsuplaşan ' + say(mg.reduce((t, m) => t + m.mahsup, 0)) + ' kWh</div></section>';
+
+  // ---- İnverterler
+  const santraller = (son && son.son || []).filter(r => ['sungrow', 'fusion', 'inavitas'].includes(r.kaynak));
+  const invUy = uy.filter(u => /inverter|şebeke|üretim saatinde|Sungrow|Inavitas|FusionSolar/i.test(u.baslik)).length;
+  document.getElementById('r-inv').outerHTML = '<span id="r-inv" class="rozet k"' + (invUy ? '' : ' hidden') + '>' + invUy + '</span>';
+  const fusionSatir = () => {
+    const ts = Object.values(fs.tesisler).sort((a, b) => String(a.kisa).localeCompare(String(b.kisa)));
+    const iv = Object.values(fs.invertorler || {});
+    const bayat = fsDk > 30, alarmN = (fs.alarmlar || []).length;
+    const top = ts.reduce((t, r) => t + (Number(r.anlik_guc_kw) || 0), 0), gun = ts.reduce((t, r) => t + (Number(r.bugun_kwh) || 0), 0);
+    const uretiyor = iv.filter(v => Number(v.guc_kw) > 0).length;
+    const gunler = []; for (let i = 30; i >= 1; i--) gunler.push(gunEkle(bugunTR(), -i));
+    return '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">FusionSolar</span><span style="font-size:12px;font-weight:700;color:' + (bayat ? '#B42318' : '#1E7A3C') + '">' + (bayat ? 'Bayat · ' : 'Bağlı · ') + saatTR(fs.guncelleme + '+03:00') + '</span></div>'
+      + '<div class="k">' + ts.length + ' santral' + (iv.length ? ', ' + iv.length + ' inverter' : '') + '. Anlık ' + say(top, 1) + ' kW, bugün ' + say(gun) + ' kWh' + (iv.length ? ', ' + uretiyor + '/' + iv.length + ' üretiyor' : '') + (alarmN ? ', ' + alarmN + ' aktif alarm' : '') + '.</div>'
+      + ts.map(r => {
+        const g = (fs.gunluk || {})[r.kisa] || {};
+        const sp = gunler.some(x => g[x] != null) ? '<div title="Son 30 gün günlük üretim">' + spark(gunler.map(x => Number(g[x]) || 0), '#2a78d6', r.kisa + ' son 30 gün üretim') + '</div>' : '';
+        const ivT = iv.filter(v => v.tesis === r.kisa), ivU = ivT.filter(v => Number(v.guc_kw) > 0).length;
+        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;white-space:nowrap"><span>' + esc(r.kisa) + (ivT.length ? ' <span class="k">(' + ivU + '/' + ivT.length + ')</span>' : '') + '</span><span class="num">' + say(r.anlik_guc_kw, 1) + ' kW · ' + say(r.bugun_kwh) + ' kWh</span></div>' + sp;
+      }).join('');
+  };
+  const kaynakSatir = (ad, k) => {
+    if (k === 'fusion' && fs) return fusionSatir();
+    const rs = santraller.filter(r => r.kaynak === k);
+    const ozet = son && son.ozet ? son.ozet[k] : null;
+    if (ozet === 'kapali') return '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">' + ad + '</span><span style="font-size:12px;font-weight:700;color:#3B5878">Bağlı değil</span></div><div class="k">Kimlik bilgisi eklenince santraller burada görünecek.</div>';
+    if (!rs.length) return '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">' + ad + '</span><span style="font-size:12px;font-weight:700;color:#3B5878">Veri yok</span></div>';
+    const hatali = rs.find(r => r.durum !== 'ok');
+    const top = rs.reduce((t, r) => t + (Number(r.guc_kw) || 0), 0), gun = rs.reduce((t, r) => t + (Number(r.gunluk_kwh) || 0), 0);
+    const invT = rs.reduce((t, r) => t + ((r.ek || {}).inv_toplam || 0), 0), invU = rs.reduce((t, r) => t + ((r.ek || {}).inv_uretmeyen || 0), 0);
+    const plant = rs.filter(r => r.plant_id !== '*');
+    return '<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:650">' + ad + '</span><span style="font-size:12px;font-weight:700;color:' + (hatali ? '#B42318' : '#1E7A3C') + '">' + (hatali ? (hatali.durum === 'bayat' ? 'Bayat' : 'Hata') : 'Bağlı · ' + saatTR(rs[0].son_ok_ts)) + '</span></div>'
+      + (plant.length ? '<div class="k">' + plant.length + ' santral' + (invT ? ', ' + invT + ' inverter' : '') + '. Anlık ' + say(top, 1) + ' kW, bugün ' + say(gun) + ' kWh' + (invT ? ', ' + (invT - invU) + '/' + invT + ' üretiyor' : '') + '.</div>' : '')
+      + plant.map(r => '<div style="display:flex;justify-content:space-between;font-size:13px"><span>' + esc(r.ad) + '</span><span class="num">' + say(r.guc_kw, 1) + ' kW · ' + say(r.gunluk_kwh) + ' kWh</span></div>').join('')
+      + (hatali ? '<div class="k" style="color:#7A1A12">' + esc(String(hatali.hata_mesaji || '').replace(/^(GIRIS|OTURUM|LIMIT): /, '').slice(0, 160)) + '</div>' : '');
+  };
+  const inv = '<section class="panel" id="inverterler" aria-labelledby="h-inv"><h2 id="h-inv">İnverterler</h2>'
+    + '<div style="display:flex;flex-direction:column;gap:6px">' + kaynakSatir('Sungrow', 'sungrow') + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid #E3E8EE;padding-top:12px">' + kaynakSatir('FusionSolar', 'fusion') + '</div>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid #E3E8EE;padding-top:12px">' + kaynakSatir('Inavitas', 'inavitas') + '</div>'
+    + '<div class="k" style="margin-top:auto">Saha Pi: ' + (son && son.pi && son.pi.son_ts ? 'nabız ' + saatTR(son.pi.son_ts) : 'henüz nabız yok') + '</div></section>';
+
+  // ---- Madencilik
+  let madH = '<section class="panel" id="madencilik"><h2>Madencilik</h2><p class="k">Saha verisi okunamadı.</p></section>', gelirH = '';
+  if (mad && mad.summary) {
+    const s = mad.summary;
+    const offN = s.offline || 0;
+    document.getElementById('r-mad').outerHTML = '<span id="r-mad" class="rozet u"' + (offN ? '' : ' hidden') + '>' + offN + '</span>';
+    madH = '<section class="panel" id="madencilik" aria-labelledby="h-mine"><div class="bas"><h2 id="h-mine">Madencilik</h2><span class="k">Saha PC ' + esc((mad.timestamp || '').slice(11, 16)) + '</span></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">'
+      + '<div><div class="k">Çalışan cihaz</div><div class="num" style="font-size:24px;font-weight:700">' + s.online + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">/ ' + s.total + '</span></div></div>'
+      + '<div><div class="k">Toplam hash</div><div class="num" style="font-size:24px;font-weight:700">' + say(s.total_hashrate_TH) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s</span></div></div>'
+      + '<div><div class="k">Hedefe göre</div><div class="num" style="font-size:24px;font-weight:700">%' + say(s.efficiency_pct) + '</div></div>'
+      + '<div><div class="k">Ortalama sıcaklık</div><div class="num" style="font-size:24px;font-weight:700">' + say(s.avg_temp_C) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">°C</span></div></div></div>'
+      + '<div class="kutular" role="img" aria-label="' + s.total + ' cihaz: ' + s.online + ' çalışıyor, ' + offN + ' yanıt vermiyor">' + (mad.devices || []).map(d => '<span title="' + esc(d.name + ' · ' + (d.online ? say(d.hashrate_TH, 1) + ' TH/s · ' + (d.temp_max ?? '—') + '°C' : d.status)) + '" style="background:' + (d.online ? (d.health_issues && d.health_issues.some(h => h.severity === 'high') ? '#C98500' : '#1E7A3C') : (d.sleeping ? '#9AA6B5' : '#B42318')) + '"></span>').join('') + '</div>'
+      + '<div class="k" style="display:flex;gap:14px;flex-wrap:wrap"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1E7A3C"></span> çalışıyor</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#C98500"></span> sıcaklık uyarısı</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#B42318"></span> yanıt yok</span></div></section>';
+    const ay6 = (mad.monthly_history || []).slice().sort((a, b) => a.month.localeCompare(b.month)).slice(-6);
+    const btcVar = ay6.some(m => m.earn_btc > 0);
+    const deger = m => btcVar ? m.earn_btc : m.avg_hash_TH;
+    const mx = Math.max(1, ...ay6.map(deger));
+    const bw = 280 / Math.max(ay6.length, 1);
+    const sonAy = ay6[ay6.length - 1];
+    gelirH = '<section class="panel" aria-labelledby="h-gelir"><div class="bas"><h2 id="h-gelir">' + (btcVar ? 'Mining geliri' : 'Hash geçmişi') + '</h2><span class="k">' + (btcVar ? 'F2Pool, aylık BTC' : 'Aylık ortalama TH/s') + '</span></div>'
+      + (sonAy ? '<div><div class="k">' + AYLAR[Number(sonAy.month.slice(5)) - 1] + (sonAy.days ? ' (' + sonAy.days + ' gün)' : '') + '</div><div class="num" style="font-size:24px;font-weight:700">' + (btcVar ? say(sonAy.earn_btc, 5) + ' BTC' : say(sonAy.avg_hash_TH) + ' <span style="font-size:15px;font-weight:500;color:#4A5A70">TH/s</span>') + '</div></div>' : '')
+      + '<svg viewBox="0 0 280 110" width="100%" role="img" aria-label="Aylık geçmiş"><g font-family="Archivo, sans-serif" font-size="11" fill="#4A5A70" text-anchor="middle">'
+      + ay6.map((m, i) => { const h = deger(m) / mx * 79; return '<rect x="' + (i * bw + 8) + '" y="' + (89 - h) + '" width="' + (bw - 14) + '" height="' + h + '" rx="4" fill="' + (i === ay6.length - 1 ? '#86b6ef' : '#2a78d6') + '"><title>' + m.month + ': ' + (btcVar ? say(m.earn_btc, 5) + ' BTC' : say(m.avg_hash_TH) + ' TH/s') + '</title></rect><text x="' + (i * bw + bw / 2 + 1) + '" y="104">' + AYK[Number(m.month.slice(5)) - 1] + '</text>'; }).join('')
+      + '<line x1="0" y1="89" x2="280" y2="89" stroke="#B9C4D2"/></g></svg>'
+      + (btcVar ? '' : '<div class="k" style="border-top:1px solid #E3E8EE;padding-top:12px">BTC kazanç verisi şu an gelmiyor: F2Pool eşleşmesi ' + ((s.f2pool || {}).matched_devices || 0) + '/' + s.total + ' cihaz.</div>') + '</section>';
+  }
+
+  // ---- PTF
+  const ep = (son && son.son || []).find(r => r.kaynak === 'epias');
+  let ptfH = '<section class="panel" id="piyasa"><h2>PTF bugün</h2><p class="k" style="margin:0">EPİAŞ verisi henüz alınmadı.</p></section>';
+  if (ep && ep.ek && Array.isArray(ep.ek.bugun_ptf)) {
+    const e = ep.ek;
+    const dizi = e.bugun === bugun ? e.bugun_ptf : (e.yarin === bugun ? e.yarin_ptf : e.bugun_ptf);
+    const oz = e.bugun === bugun ? e.bugun_ozet : (e.yarin === bugun ? e.yarin_ozet : e.bugun_ozet);
+    const mx = Math.max(1, ...dizi.filter(v => v != null));
+    const sa = simdiTR.getUTCHours();
+    ptfH = '<section class="panel" id="piyasa" aria-labelledby="h-ptf"><div class="bas"><h2 id="h-ptf">PTF bugün</h2><span class="k">TL/MWh · yarın ' + (e.yarin_var ? 'alındı' : 'henüz yok') + '</span></div>'
+      + '<div><div class="k">Şu an (' + String(sa).padStart(2, '0') + ':00)</div><div class="num" style="font-size:24px;font-weight:700">' + say(dizi[sa], 2) + '</div></div>'
+      + '<div style="display:flex;align-items:flex-end;gap:2px;height:90px">' + dizi.map((v, i) => '<span title="' + String(i).padStart(2, '0') + ':00 · ' + say(v, 2) + '" style="flex:1;border-radius:2px 2px 0 0;height:' + (v == null ? 2 : Math.max(2, Math.round(v / mx * 88))) + 'px;background:' + (v == null ? '#E3E8EE' : (i === sa ? '#10233F' : '#2a78d6')) + '"></span>').join('') + '</div>'
+      + '<div class="k num" style="display:flex;justify-content:space-between"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>'
+      + (oz ? '<div class="k">Ortalama ' + say(oz.ort, 2) + ' · en düşük ' + say(oz.min, 2) + ' · en yüksek ' + say(oz.max, 2) + '</div>' : '') + '</section>';
+  }
+
+  document.getElementById('icerik').innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:24px">'
+    + '<div class="iki"><section class="panel" aria-labelledby="h-uyari"><div class="bas"><h2 id="h-uyari">Dikkat isteyenler</h2><span class="k">' + uy.length + ' etkin</span></div>' + uyHtml + '</section>' + denge + '</div>'
+    + '<section class="panel" id="sayaclar" aria-labelledby="h-abone" style="gap:16px"><div class="bas"><h2 id="h-abone">Sayaçlar</h2><span class="k">' + tarihK(sonOsosGun) + ' 00:00–' + String(sonSaatNo).padStart(2, '0') + ':00, son 30 gün çizgisi</span></div><div class="sayaclar">' + sayaclar + '</div></section>'
+    + trend
+    + '<div class="uc">' + inv + madH + gelirH + ptfH + '</div>'
+    + '</div>';
+  document.getElementById('kaynakNot').textContent = 'Veri: n8n · OSOS · saha PC';
+}
+
+
+let secGun = null, sekme = 'sayac';
+function hucre(v, var_) { if (!var_) return '<td class="sifir"></td>'; const r = Math.round(v); return '<td' + (r === 0 ? ' class="sifir"' : '') + '>' + say(v) + '</td>'; }
+function cizSayac() {
+  const { osos } = D;
+  const tumGunler = [...new Set(SAYAC.flatMap(sc => Object.keys((osos[sc.key] || {}).veri || {})))].sort();
+  const sonG = tumGunler[tumGunler.length - 1];
+  if (!secGun || !tumGunler.includes(secGun)) secGun = sonG;
+  const ix = tumGunler.indexOf(secGun);
+  const [y, a, d] = secGun.split('-').map(Number);
+  const gunAdi = GUNLER[new Date(Date.UTC(y, a - 1, d)).getUTCDay()];
+  document.getElementById('baslik').textContent = 'Sayaçlar ve mahsup';
+  document.getElementById('altBaslik').textContent = d + ' ' + AYLAR[a - 1] + ' ' + y + ', ' + gunAdi + '. Saatlik değerler, kWh.';
+  document.getElementById('kontrol').innerHTML = '<button class="btn" type="button"' + (ix <= 0 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix - 1] || '') + '\';cizSayac()">Önceki gün</button>'
+    + '<label class="k" style="display:flex;align-items:center;gap:8px">Gün <input type="date" value="' + secGun + '" min="' + tumGunler[0] + '" max="' + sonG + '" onchange="if(this.value){secGun=this.value;cizSayac()}"></label>'
+    + '<button class="btn" type="button"' + (ix >= tumGunler.length - 1 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix + 1] || '') + '\';cizSayac()">Sonraki gün</button>'
+    + '<button class="btn koyu" type="button" onclick="yukle()">Yenile</button>';
+  const sekmeHtml = '<div class="sekmeler" role="tablist">' + [['sayac', 'Sayaçlar'], ['mahsup', 'Mahsup']].map(([k, ad]) => '<button role="tab" type="button" aria-selected="' + (sekme === k) + '" onclick="sekme=\'' + k + '\';cizSayac()">' + ad + '</button>').join('') + '</div>';
+  let govde = '';
+  if (sekme === 'sayac') {
+    const veri = sc => ((osos[sc.key] || {}).veri || {})[secGun] || {};
+    const yilS = Number(secGun.slice(0, 4));
+    if (!INV_CACHE[yilS] && !invYukleniyor) { invYukleniyor = true; invYilYukle(yilS).then(() => { invYukleniyor = false; if (location.hash.startsWith('#sayac')) cizSayac(); }).catch(() => { invYukleniyor = false; }); }
+    const invS = INV_CACHE[yilS] ? invBirlestir(INV_CACHE[yilS]) : {};
+    const bugunMu = secGun === bugunTR();
+    const invSaat = kod => { const k = ESLE[kod]; if (!k || !k.startsWith('fusionsolar')) return null; if (bugunMu) return (D.fs && D.fs.saatlik_bugun || {})[ESLE_KISA[kod]] || null; const x = invS[k]; return x && x.saat && x.saat[secGun] || null; };
+    const invGun = (kod, g) => { const k = ESLE[kod]; if (!k) return null; if (g === bugunTR()) { if (!k.startsWith('fusionsolar') || !D.fs) return null; const t = Object.values(D.fs.tesisler || {}).find(x => x.kisa === ESLE_KISA[kod]); return t ? t.bugun_kwh : null; } const x = invS[k]; return x && x.gun[g] != null ? +x.gun[g] : null; };
+    const saatInv = {}; for (const sc of SAYAC) saatInv[sc.kod] = invSaat(sc.kod);
+    let th1 = '<th class="sol" rowspan="2">Saat</th>', th2 = '';
+    for (const sc of SAYAC) {
+      const iv = sc.uretir && saatInv[sc.kod];
+      th1 += '<th class="ayr" style="text-align:center" colspan="' + (sc.uretir ? (iv ? 4 : 2) : 1) + '"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + sc.renk + ';margin-right:6px"></span><b style="color:#10233F">' + sc.kod + '</b> ' + esc(sc.ad) + '</th>';
+      th2 += (sc.uretir ? '<th class="ayr">Üretim</th>' + (iv ? '<th title="İnverter üretimi (FusionSolar)">İnverter</th><th title="İnverter üretimi − sayaç verişi">İç tük.</th>' : '') + '<th>Tüketim</th>' : '<th class="ayr">Tüketim</th>');
+    }
+    const top = SAYAC.map(() => ({ u: 0, t: 0, i: 0, f: 0, ei: 0, eu: 0 }));
+    const sonSaat = sc => bugunMu ? Object.keys(veri(sc)).sort().pop() : null;
+    let satir = '';
+    for (let h = 0; h < 24; h++) {
+      const s = String(h).padStart(2, '0');
+      satir += '<tr><td class="saat">' + s + ':00</td>';
+      SAYAC.forEach((sc, i) => {
+        const x = veri(sc)[s];
+        if (x) { top[i].u += +x.veris || 0; top[i].t += +x.cekis || 0; }
+        const iv = sc.uretir && saatInv[sc.kod];
+        let ek = '';
+        if (iv) { const v = iv[s]; const tam = x && s !== sonSaat(sc); const fark = v != null && tam ? Math.max(0, v - (+x.veris || 0)) : null; if (v != null) top[i].i += +v; if (fark != null) { top[i].f += fark; top[i].ei += +v; top[i].eu += +x.veris || 0; } ek = hucre(v || 0, v != null) + hucre(fark || 0, fark != null); }
+        if (sc.uretir) satir += hucre(x ? x.veris : 0, !!x).replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"') + ek + hucre(x ? x.cekis : 0, !!x);
+        else satir += hucre(x ? x.cekis : 0, !!x).replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"');
+      });
+      satir += '</tr>';
+    }
+    satir += '<tr class="top"><td class="sol">Toplam</td>' + SAYAC.map((sc, i) => sc.uretir ? '<td class="ayr">' + say(top[i].u) + '</td>' + (saatInv[sc.kod] ? '<td>' + say(top[i].i) + '</td><td>' + say(top[i].f) + '</td>' : '') + '<td>' + say(top[i].t) + '</td>' : '<td class="ayr">' + say(top[i].t) + '</td>').join('') + '</tr>';
+    govde = '<h2>OSOS sayaç verisi</h2><div class="tablo-kutu"><table class="tb"><thead><tr>' + th1 + '</tr><tr>' + th2 + '</tr></thead><tbody>' + satir + '</tbody></table></div>'
+      + '<div class="k">Boş hücre o saatin verisi henüz gelmedi demek. Saat 13:00 satırı 13:00–14:00 arasını gösterir. İnverter: FusionSolar saatlik üretimi (5 dk güç ortalamasından, yaklaşık). İç tük.: inverter üretiminin sayaca veriş olarak düşmeyen kısmı (sayaç arkası tüketim ve kayıplar).</div>';
+    // Günlük ve yıllık karşılaştırma
+    const kar = ['T1', 'T2', 'YD', 'Anka', 'AE'].map(kod => {
+      const sc = SAYAC.find(x => x.kod === kod), o = (osos[sc.key] || {}).veri || {};
+      let gv = gunluk(osos, sc.key, secGun), ig = invGun(kod, secGun);
+      const ti = SAYAC.indexOf(sc);
+      if (bugunMu) { if (saatInv[kod]) { gv = { veris: top[ti].eu }; ig = top[ti].ei; } else ig = null; }
+      let yI = 0, yV = 0, yC = 0, n = 0;
+      for (const g of Object.keys(o)) if (g.startsWith(secGun.slice(0, 4)) && g <= secGun) { const iv = invGun(kod, g), gg = gunluk(osos, sc.key, g); if (iv != null && gg && gg.saat >= 24) { yI += iv; yV += gg.veris; yC += gg.cekis; n++; } }
+      return { kod, sc, gv, ig, yI, yV, yC, n };
+    });
+    const pc = (a, b) => b > 0 ? say((a - b) / b * 100, 1) + '%' : '—';
+    govde += '<h2 style="margin-top:8px">İnverter ve sayaç karşılaştırması</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol" rowspan="2">Abone</th><th class="ayr" colspan="4" style="text-align:center">' + tarihK(secGun) + '</th><th class="ayr" colspan="4" style="text-align:center">' + secGun.slice(0, 4) + ' başından (tam günler)</th></tr><tr><th class="ayr">İnverter</th><th>Sayaç veriş</th><th>İç tüketim</th><th>Oran</th><th class="ayr">İnverter</th><th>Sayaç veriş</th><th>İç tüketim</th><th>Gün</th></tr></thead><tbody>'
+      + kar.map(r => '<tr><td class="sol"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + r.sc.renk + ';margin-right:6px"></span><b>' + r.kod + '</b> ' + esc(r.sc.ad) + '</td>'
+        + '<td class="ayr">' + (r.ig == null ? '—' : say(r.ig)) + '</td><td>' + (r.gv ? say(r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? say(r.ig - r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? pc(r.ig, r.gv.veris) : '—') + '</td>'
+        + '<td class="ayr">' + (r.n ? say(r.yI) : '—') + '</td><td>' + (r.n ? say(r.yV) : '—') + '</td><td><b>' + (r.n ? say(r.yI - r.yV) : '—') + '</b></td><td>' + r.n + '</td></tr>').join('')
+      + '</tbody></table></div><div class="k">İç tüketim = inverter üretimi − sayaç verişi; üretim saatlerinde sayaç arkasında tüketilen enerji ile trafo/kablo kayıplarını içerir. Oran, inverterin sayaçtan ne kadar fazla gösterdiğidir. Bugün için yalnız iki tarafın da verisi tamamlanmış saatler karşılaştırılır. T1/T2 FusionSolar (Sera-1/Sera-2), YD Sungrow Darılmaz, Anka Sungrow HG YATIRIM AŞ, AE Inavitas Aksaray_GES verisidir; YD, Anka ve AE için saatlik inverter verisi yok, günlük kıyaslanır. ' + (INV_CACHE[yilS] ? '' : 'İnverter verisi yükleniyor…') + '</div>';
+  } else {
+    const m = mahsupGun(osos, secGun);
+    const ab = { T1: 0, T2: 0, A3: 0 }, tAb = { T1: 0, T2: 0, A3: 0 }, uAb = { T1: 0, T2: 0 }, kay = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };
+    for (const sa of m.saatler) { for (const k of ['T1', 'T2', 'A3']) { ab[k] += sa.mahsup[k]; tAb[k] += sa.t[k]; } uAb.T1 += sa.u.T1; uAb.T2 += sa.u.T2; for (const g of ['T1', 'T2']) for (const k in kay[g]) kay[g][k] += sa.kaynak[g][k]; }
+    const kart = (ad, v, r) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k" style="display:flex;align-items:center;gap:6px">' + (r ? '<span style="width:10px;height:10px;border-radius:2px;background:' + r + '"></span>' : '') + ad + '</div><div class="num" style="font-size:24px;font-weight:700">' + say(v) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh</span></div></div>';
+    const aylikNot = secGun < '2026-05' ? '<div class="panel" style="background:#FFF4DC;border-color:#F0D9A8;padding:12px 16px"><div style="font-size:14px;color:#5E3800">Mayıs 2026 öncesi aylar ofis panelinde <b>aylık</b> mahsupla hesaplanıyor. Bu günün saatlik dökümü yalnız bilgi içindir; ay toplamı Genel bakıştaki enerji dengesindedir.</div></div>' : '';
+    const tukSatir = ['T2', 'A3', 'T1'].map(k => { const sc = SAYAC.find(x => x.kod === k); const pct = tAb[k] ? ab[k] / tAb[k] * 100 : 0; return '<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;gap:8px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:' + sc.renk + ';margin-right:6px"></span><b>' + k + '</b> <span class="k">' + esc(sc.ad) + '</span></span><span class="num"><b>' + say(ab[k]) + '</b> / ' + say(tAb[k]) + ' kWh</span></div><div style="height:8px;background:#F3D9CB;border-radius:4px"><div style="width:' + pct.toFixed(1) + '%;height:100%;background:#1baf7a;border-radius:4px"></div></div></div>'; }).join('');
+    const kaySatir = ['T1', 'T2'].map(g => { const sc = SAYAC.find(x => x.kod === g); const top = uAb[g] || 1; const parca = [['T2', '#eb6834'], ['A3', '#1baf7a'], ['T1', '#2a78d6'], ['bedelli', '#eda100']].filter(([k]) => kay[g][k] > 0.5); return '<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between"><span><b>' + g + '</b> <span class="k">' + esc(sc.ad) + ' üretimi</span></span><span class="num"><b>' + say(uAb[g]) + '</b> kWh</span></div><div class="cubuk" style="height:14px">' + (parca.length ? parca.map(([k, r]) => '<div title="' + (k === 'bedelli' ? 'Bedelli' : k + ' mahsubu') + ': ' + say(kay[g][k]) + ' kWh" style="flex:' + kay[g][k] + ' 1 0;background:' + r + '"></div>').join('') : '<div style="flex:1;background:#E3E8EE"></div>') + '</div><div class="k">' + (parca.length ? parca.map(([k]) => (k === 'bedelli' ? 'bedelli ' : k + ' ') + say(kay[g][k])).join(' · ') : 'üretim yok') + '</div></div>'; }).join('');
+    let satir = '';
+    const tp = { u1: 0, u2: 0, U: 0, t1: 0, t2: 0, t3: 0, T: 0, m2: 0, m3: 0, m1: 0, M: 0, B: 0, S: 0 };
+    for (const sa of m.saatler) {
+      const M = sa.mTop, S = sa.T - M;
+      const d = [sa.u.T1, sa.u.T2, sa.U, sa.t.T1, sa.t.T2, sa.t.A3, sa.T, sa.mahsup.T2, sa.mahsup.A3, sa.mahsup.T1, M, sa.bedelli, S];
+      Object.keys(tp).forEach((k, i) => tp[k] += d[i]);
+      const ayr = [0, 3, 7, 11];
+      satir += '<tr><td class="saat">' + sa.saat + ':00</td>' + d.map((v, i) => { const h = hucre(v, sa.var); return ayr.includes(i) ? h.replace('<td', '<td class="ayr"').replace('class="ayr" class="sifir"', 'class="ayr sifir"') : h; }).join('') + '</tr>';
+    }
+    satir += '<tr class="top"><td class="sol">Toplam</td>' + Object.values(tp).map((v, i) => '<td' + ([0, 3, 7, 11].includes(i) ? ' class="ayr"' : '') + '>' + say(v) + '</td>').join('') + '</tr>';
+    govde = aylikNot
+      + '<div class="kartlar5">' + kart('Üretim (T1 + T2)', m.uretim) + kart('Tüketim (T1 + T2 + A3)', m.tuketim) + kart('Mahsuplaşan', m.mahsup, '#1baf7a') + kart('Bedelli satış', m.bedelli, '#eda100') + kart('Şebekeden alınan', m.sebeke, '#eb6834') + '</div>'
+      + '<div class="iki"><section class="panel"><h2>Tüketiciler, mahsup / tüketim</h2>' + tukSatir + '<div class="k">Her üreticiden önce T2, sonra A3, en son T1 karşılanır.</div></section>'
+      + '<section class="panel"><h2>Üretim nereye gitti</h2>' + kaySatir + '<div class="k">Büyük üretici önce işlenir; kalan üretim bedelli satılır.</div></section></div>'
+      + '<h2>Saatlik mahsup</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol" rowspan="2">Saat</th><th class="ayr" colspan="3" style="text-align:center">Üretim</th><th class="ayr" colspan="4" style="text-align:center">Tüketim</th><th class="ayr" colspan="4" style="text-align:center">Mahsuplaşan</th><th class="ayr" colspan="2" style="text-align:center">Kalan</th></tr>'
+      + '<tr><th class="ayr">T1</th><th>T2</th><th>Toplam</th><th class="ayr">T1</th><th>T2</th><th>A3</th><th>Toplam</th><th class="ayr">T2</th><th>A3</th><th>T1</th><th>Toplam</th><th class="ayr">Bedelli</th><th>Şebekeden</th></tr></thead><tbody>' + satir + '</tbody></table></div>';
+  }
+  document.getElementById('icerik').innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeHtml + govde + '</div>';
+}
+// ===== İnverter analizi =====
+const INV_KAYNAK = { sungrow: 'Sungrow', inavitas: 'Inavitas', fusionsolar: 'FusionSolar' };
+const INV_CACHE = {};
+let invSec = { santral: 'hepsi', yil: null, donem: 'son30' }, invYukleniyor = false;
+async function invYilYukle(yil) {
+  if (INV_CACHE[yil]) return INV_CACHE[yil];
+  const r = await Promise.all(Object.keys(INV_KAYNAK).map(k => al('inverter/' + k + '_' + yil + '.json').catch(() => null)));
+  return (INV_CACHE[yil] = r.filter(Boolean));
+}
+function invBirlestir(dosyalar) {
+  const S = {};
+  for (const f of dosyalar) for (const [id, s] of Object.entries(f.santraller || {})) {
+    const key = f.kaynak + ':' + id;
+    const t = S[key] || (S[key] = { key, kaynak: f.kaynak, id, ad: s.ad, kwp: s.kwp, gun: {}, ay: {}, inv: {} });
+    if (s.kwp) t.kwp = s.kwp;
+    Object.assign(t.gun, s.gun || {}); Object.assign(t.ay, s.ay || {});
+    if (s.saat) t.saat = Object.assign(t.saat || {}, s.saat);
+    for (const [ik, iv] of Object.entries(s.inv || {})) {
+      const ti = t.inv[ik] || (t.inv[ik] = { key: ik, ad: iv.ad, kwp: iv.kwp, gun: {}, ay: {} });
+      if (iv.kwp) ti.kwp = iv.kwp;
+      Object.assign(ti.gun, iv.gun || {}); Object.assign(ti.ay, iv.ay || {});
+    }
+  }
+  return S;
+}
+const ayGunSay = m => { const [y, a] = m.split('-').map(Number); return new Date(Date.UTC(y, a, 0)).getUTCDate(); };
+// Ay toplamı: günlük veri ayın tamamını (ya da dünü) kapsıyorsa günlerden, yoksa aylık tablodan
+function ayToplam(o, m) {
+  const gs = Object.keys(o.gun).filter(g => g.startsWith(m));
+  const dun = gunEkle(bugunTR(), -1);
+  const beklenen = m === dun.slice(0, 7) ? Number(dun.slice(8)) : ayGunSay(m);
+  if (gs.length >= beklenen || o.ay[m] == null) return gs.length ? gs.reduce((t, g) => t + (+o.gun[g] || 0), 0) : null;
+  return +o.ay[m];
+}
+function invDonem(yil, donem) {
+  const dun = gunEkle(bugunTR(), -1);
+  if (donem === 'son30') return { tip: 'gun', gunler: Array.from({ length: 30 }, (_, i) => gunEkle(dun, i - 29)), ad: 'Son 30 gün' };
+  if (donem === 'yil') { const aylar = []; for (let a = 1; a <= 12; a++) { const m = yil + '-' + String(a).padStart(2, '0'); if (m <= dun.slice(0, 7)) aylar.push(m); } return { tip: 'ay', aylar, ad: yil + ' yılı' }; }
+  const n = ayGunSay(donem), gunler = [];
+  for (let d = 1; d <= n; d++) { const g = donem + '-' + String(d).padStart(2, '0'); if (g <= dun) gunler.push(g); }
+  return { tip: 'gun', gunler, ad: AYLAR[Number(donem.slice(5)) - 1] + ' ' + donem.slice(0, 4) };
+}
+const birimKaydir = (gunler, n) => gunler.map(g => (Number(g.slice(0, 4)) + n) + g.slice(4)).filter(g => !g.endsWith('02-29'));
+function seriTopla(o, D_) { return D_.tip === 'gun' ? D_.gunler.map(g => o.gun[g] == null ? null : +o.gun[g]) : D_.aylar.map(m => ayToplam(o, m)); }
+const toplamN = a => a.reduce((t, v) => t + (v || 0), 0);
+const medyan = a => { const b = a.filter(v => v != null && !isNaN(v)).sort((x, y) => x - y); if (!b.length) return null; const k = b.length >> 1; return b.length % 2 ? b[k] : (b[k - 1] + b[k]) / 2; };
+const enerji = v => v == null ? '—' : Math.abs(v) >= 1e6 ? say(v / 1e6, 2) + ' GWh' : Math.abs(v) >= 1e4 ? say(v / 1e3, 1) + ' MWh' : say(v) + ' kWh';
+const invSirala = (a, b) => String(a.ad).localeCompare(String(b.ad), 'tr', { numeric: true });
+
+// İnverter bazında günlük kıyas: inverterin (kWp başına) değeri / santralin o günkü medyanı, sonra inverterin kendi normaline bölünür
+function invAnaliz(S, gunler) {
+  const iv = Object.values(S.inv).sort(invSirala);
+  const kwpVar = iv.length && iv.every(x => x.kwp);
+  const norm = x => (v => v == null ? null : kwpVar ? v / x.kwp : v);
+  const gunMed = {};
+  for (const g of gunler) gunMed[g] = medyan(iv.map(x => norm(x)(x.gun[g])));
+  return iv.map(x => {
+    const n = norm(x);
+    const oran = gunler.map(g => { const v = n(x.gun[g]), m = gunMed[g]; return v == null || !m ? null : v / m; });
+    const normal = medyan(oran) || 1;
+    const durma = gunler.filter((g, i) => gunMed[g] > 0 && x.gun[g] != null && oran[i] != null && oran[i] < 0.05).length;
+    const top = toplamN(gunler.map(g => x.gun[g]));
+    return { x, oran, normal, durma, top, veriGun: gunler.filter(g => x.gun[g] != null).length, hucre: oran.map(o => o == null ? null : o / normal) };
+  });
+}
+
+function cubukGrafik(etiket, bu, onceki, adBu, adOnceki, birim) {
+  const W = 852, H = 170, n = etiket.length;
+  const max0 = Math.max(1, ...bu.filter(v => v != null), ...onceki.filter(v => v != null));
+  const adim = Math.pow(10, Math.floor(Math.log10(max0))); const tavan = Math.ceil(max0 / adim) * adim;
+  const y = v => H - v / tavan * H, gen = W / n, bw = Math.max(2, Math.min(28, gen * 0.62));
+  let s = '<svg viewBox="0 0 900 214" width="100%" style="min-width:600px;display:block" role="img" aria-label="' + esc(adBu) + ' üretimi"><g font-family="Archivo, sans-serif" font-size="11" fill="#4A5A70">';
+  for (let k = 0; k <= 3; k++) { const v = tavan * k / 3, yy = 8 + y(v); s += '<line x1="48" y1="' + yy + '" x2="900" y2="' + yy + '" stroke="' + (k ? '#E3E8EE' : '#B9C4D2') + '"/><text x="40" y="' + (yy + 4) + '" text-anchor="end">' + (birim === 'MWh' ? say(v / 1000) : say(v)) + '</text>'; }
+  const adimE = Math.max(1, Math.ceil(n / 12));
+  etiket.forEach((e, i) => { if (i % adimE === 0 || i === n - 1) s += '<text x="' + (48 + gen * i + gen / 2) + '" y="206" text-anchor="middle">' + esc(e) + '</text>'; });
+  s += '</g><g transform="translate(48,8)">';
+  for (let i = 0; i < n; i++) {
+    const cx = gen * i + gen / 2;
+    if (onceki[i] != null && onceki[i] > 0) s += '<line x1="' + (cx - bw / 2 - 1) + '" x2="' + (cx + bw / 2 + 1) + '" y1="' + y(onceki[i]) + '" y2="' + y(onceki[i]) + '" stroke="#10233F" stroke-width="2" stroke-linecap="round"/>';
+    if (bu[i] != null && bu[i] > 0) { const h = H - y(bu[i]); s += '<path d="M' + (cx - bw / 2) + ',' + H + 'V' + (y(bu[i]) + Math.min(4, h)) + 'q0,-' + Math.min(4, h) + ' ' + Math.min(4, bw / 2) + ',-' + Math.min(4, h) + 'H' + (cx + bw / 2 - Math.min(4, bw / 2)) + 'q' + Math.min(4, bw / 2) + ',0 ' + Math.min(4, bw / 2) + ',' + Math.min(4, h) + 'V' + H + 'Z" fill="#2a78d6"/>'; }
+    s += '<rect x="' + (gen * i) + '" y="0" width="' + gen + '" height="' + H + '" fill="transparent"><title>' + esc(etiket[i]) + ' · ' + adBu + ': ' + enerji(bu[i]) + (onceki.length ? ' · ' + adOnceki + ': ' + enerji(onceki[i]) : '') + '</title></rect>';
+  }
+  return s + '</g></svg>';
+}
+const lejant = (ogeler) => '<div style="display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:#4A5A70">' + ogeler.map(([ad, tip]) => '<span style="display:flex;align-items:center;gap:6px">' + (tip === 'cizgi' ? '<span style="width:14px;height:2px;background:#10233F"></span>' : '<span style="width:10px;height:10px;border-radius:2px;background:#2a78d6"></span>') + ad + '</span>').join('') + '</div>';
+function isiRenk(h) {
+  if (h == null) return '#F1F3F6';
+  if (h < 0.05) return '#7A1A12';
+  if (h < 0.6) return '#C4320A';
+  if (h < 0.8) return '#EC7B3A';
+  if (h < 0.9) return '#F6C27A';
+  if (h < 0.97) return '#FBE6C2';
+  return '#D9E6F5';
+}
+
+async function cizInverter() {
+  const dun = gunEkle(bugunTR(), -1);
+  if (!invSec.yil) invSec.yil = Number(dun.slice(0, 4));
+  document.getElementById('baslik').textContent = 'İnverter analizi';
+  document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…';
+  const ic = document.getElementById('icerik');
+  if (!INV_CACHE[invSec.yil]) ic.innerHTML = '<div class="panel"><p class="k">Geçmiş veri yükleniyor…</p></div>';
+  const ilkYil = invSec.donem === 'son30' ? Number(gunEkle(dun, -29).slice(0, 4)) : invSec.yil;
+  const yillar = [...new Set([ilkYil, invSec.yil])];
+  const [buD, oncD] = await Promise.all([Promise.all(yillar.map(invYilYukle)).then(a => a.flat()), Promise.all(yillar.map(y => invYilYukle(y - 1))).then(a => a.flat())]);
+  if (!location.hash.startsWith('#inverter')) return;
+  const S = invBirlestir(buD), SO = invBirlestir(oncD);
+  const liste = Object.values(S).sort((a, b) => a.kaynak.localeCompare(b.kaynak) || String(a.ad).localeCompare(String(b.ad), 'tr'));
+  if (invSec.santral !== 'hepsi' && !S[invSec.santral]) invSec.santral = 'hepsi';
+  const Dn = invDonem(invSec.yil, invSec.donem);
+  const Do = Dn.tip === 'gun' ? { tip: 'gun', gunler: birimKaydir(Dn.gunler, -1) } : { tip: 'ay', aylar: Dn.aylar.map(m => (Number(m.slice(0, 4)) - 1) + m.slice(4)) };
+  const etiket = Dn.tip === 'gun' ? Dn.gunler.map(tarihK) : Dn.aylar.map(m => AYK[Number(m.slice(5)) - 1]);
+  const secili = invSec.santral === 'hepsi' ? liste : [S[invSec.santral]];
+
+  // Kontroller
+  const ilk = 2022, yilOps = []; for (let y = Number(dun.slice(0, 4)); y >= ilk; y--) yilOps.push('<option' + (y === invSec.yil ? ' selected' : '') + '>' + y + '</option>');
+  const donOps = ['<option value="son30"' + (invSec.donem === 'son30' ? ' selected' : '') + '>Son 30 gün</option>', '<option value="yil"' + (invSec.donem === 'yil' ? ' selected' : '') + '>Tüm yıl</option>'];
+  for (let a = 12; a >= 1; a--) { const m = invSec.yil + '-' + String(a).padStart(2, '0'); if (m <= dun.slice(0, 7)) donOps.push('<option value="' + m + '"' + (invSec.donem === m ? ' selected' : '') + '>' + AYLAR[a - 1] + '</option>'); }
+  document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Santral <select onchange="invSec.santral=this.value;cizInverter()"><option value="hepsi">Tümü</option>' + liste.map(s => '<option value="' + esc(s.key) + '"' + (s.key === invSec.santral ? ' selected' : '') + '>' + esc(s.ad) + ' (' + INV_KAYNAK[s.kaynak] + ')</option>').join('') + '</select></label>'
+    + '<label class="k" style="display:flex;align-items:center;gap:8px">Yıl <select onchange="invSec.yil=Number(this.value);invSec.donem=\'yil\';cizInverter()">' + yilOps.join('') + '</select></label>'
+    + '<label class="k" style="display:flex;align-items:center;gap:8px">Dönem <select onchange="invSec.donem=this.value;cizInverter()">' + donOps.join('') + '</select></label>'
+    + '<button class="btn" type="button" onclick="invCsv()">CSV indir</button>';
+  document.getElementById('altBaslik').textContent = Dn.ad + (Dn.tip === 'gun' && Dn.gunler.length ? ' (' + tarihK(Dn.gunler[0]) + '–' + tarihK(Dn.gunler[Dn.gunler.length - 1]) + ')' : '') + '. Günlük üretim platformların geçmiş kayıtlarından, kWh.';
+
+  if (!liste.length) { ic.innerHTML = '<div class="panel"><p class="k">Bu yıl için geçmiş veri yok.</p></div>'; return; }
+  const seri = secili.map(s => seriTopla(s, Dn));
+  const bu = etiket.map((_, i) => seri.some(sr => sr[i] != null) ? toplamN(seri.map(sr => sr[i])) : null);
+  const seriO = secili.map(s => SO[s.key] ? seriTopla(SO[s.key], Do) : Do[Do.tip === 'gun' ? 'gunler' : 'aylar'].map(() => null));
+  const onceki = etiket.map((_, i) => seriO.some(sr => sr[i] != null) ? toplamN(seriO.map(sr => sr[i])) : null);
+  const top = toplamN(bu), topO = toplamN(onceki), kwp = toplamN(secili.map(s => s.kwp));
+  const enIyi = bu.reduce((b, v, i) => v != null && (b < 0 || v > bu[b]) ? i : b, -1);
+  // geçen yılla kıyas yalnız her iki yılda da verisi olan birimler üzerinden
+  const ortak = bu.map((v, i) => v != null && onceki[i] != null);
+  const buOrt = toplamN(bu.filter((_, i) => ortak[i])), oncOrt = toplamN(onceki.filter((_, i) => ortak[i]));
+  const fark = oncOrt > 0 ? (buOrt / oncOrt - 1) * 100 : null;
+
+  // İnverter analizleri (günlük dönemlerde)
+  const gunlerAn = Dn.tip === 'gun' ? Dn.gunler : (() => { const a = []; for (const m of Dn.aylar) for (let d = 1; d <= ayGunSay(m); d++) { const g = m + '-' + String(d).padStart(2, '0'); if (g <= dun) a.push(g); } return a; })();
+  const analiz = {}; let sorunlu = 0;
+  for (const s of secili) { analiz[s.key] = invAnaliz(s, gunlerAn); sorunlu += analiz[s.key].filter(a => a.durma > 0 || (a.hucre.slice(-7).filter(h => h != null).length >= 3 && medyan(a.hucre.slice(-7)) < 0.9)).length; }
+
+  const kart = (ad, deger, alt) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:24px;font-weight:700">' + deger + '</div>' + (alt ? '<div class="k">' + alt + '</div>' : '') + '</div>';
+  const kartlar = '<div class="kartlar5">'
+    + kart('Dönem üretimi', enerji(top), secili.length > 1 ? secili.length + ' santral' : esc(secili[0].ad))
+    + kart('Özgül verim', kwp ? say(top / kwp, 1) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">kWh/kWp</span>' : '—', kwp ? say(kwp) + ' kWp kurulu' : 'Kurulu güç bilinmiyor')
+    + kart('Geçen yıla göre', fark == null ? '—' : (fark >= 0 ? '+' : '') + say(fark, 1) + '%', fark == null ? 'Geçen yıl verisi yok' : 'Aynı ' + (Dn.tip === 'gun' ? 'günler' : 'aylar') + ': ' + enerji(oncOrt))
+    + kart('En iyi ' + (Dn.tip === 'gun' ? 'gün' : 'ay'), enIyi < 0 ? '—' : enerji(bu[enIyi]), enIyi < 0 ? '' : etiket[enIyi])
+    + kart('Dikkat isteyen inverter', String(sorunlu), 'Duran ya da son 7 günde normalinin %10 altında')
+    + '</div>';
+  const grafikH = '<section class="panel"><div class="bas"><h2>' + (Dn.tip === 'gun' ? 'Günlük' : 'Aylık') + ' üretim</h2>' + lejant([[Dn.tip === 'gun' ? Dn.ad : String(invSec.yil), 'cubuk'], ['Geçen yıl aynı ' + (Dn.tip === 'gun' ? 'gün' : 'ay'), 'cizgi']]) + '</div><div style="overflow-x:auto">' + cubukGrafik(etiket, bu, onceki, Dn.tip === 'gun' ? 'Bu dönem' : String(invSec.yil), 'Geçen yıl', Dn.tip === 'ay' ? 'MWh' : 'kWh') + '</div><div class="k">Eksen ' + (Dn.tip === 'ay' ? 'MWh' : 'kWh') + '. Çubuğun üstüne gelince değerler görünür.</div></section>';
+
+  let govde = '';
+  if (invSec.santral === 'hepsi') {
+    const satir = liste.map((s, i) => {
+      const t = toplamN(seri[i]), o = SO[s.key] ? toplamN(seriO[i].filter((_, j) => seri[i][j] != null)) : 0, tt = toplamN(seri[i].filter((_, j) => seriO[i][j] != null));
+      const f = o > 0 ? (tt / o - 1) * 100 : null, an = analiz[s.key], ds = an.filter(a => a.durma > 0).length;
+      return '<tr style="cursor:pointer" onclick="invSec.santral=\'' + esc(s.key) + '\';cizInverter()"><td class="sol"><a href="javascript:void 0">' + esc(s.ad) + '</a></td><td class="sol">' + INV_KAYNAK[s.kaynak] + '</td><td>' + (s.kwp ? say(s.kwp) : '—') + '</td><td>' + say(t) + '</td><td>' + (s.kwp ? say(t / s.kwp, 1) : '—') + '</td><td>' + (f == null ? '—' : (f >= 0 ? '+' : '') + say(f, 1) + '%') + '</td><td>' + an.length + '</td><td' + (ds ? ' style="color:#B42318;font-weight:600"' : '') + '>' + ds + '</td></tr>';
+    }).join('');
+    govde += '<section class="panel"><h2>Santraller</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Santral</th><th class="sol">Platform</th><th>kWp</th><th>Üretim (kWh)</th><th>kWh/kWp</th><th>Geçen yıla göre</th><th>İnverter</th><th>Duran inverter</th></tr></thead><tbody>' + satir + '<tr class="top"><td class="sol">Toplam</td><td></td><td>' + say(kwp) + '</td><td>' + say(top) + '</td><td>' + (kwp ? say(top / kwp, 1) : '—') + '</td><td>' + (fark == null ? '—' : (fark >= 0 ? '+' : '') + say(fark, 1) + '%') + '</td><td>' + toplamN(liste.map(s => analiz[s.key].length)) + '</td><td></td></tr></tbody></table></div><div class="k">Santral adına tıklayınca inverter ayrıntısı açılır.</div></section>';
+    // Yıllık rapor matrisi
+    const aylar = invDonem(invSec.yil, 'yil').aylar;
+    const mat = liste.map(s => aylar.map(m => ayToplam(s, m)));
+    govde += '<section class="panel"><div class="bas"><h2>' + invSec.yil + ' aylık üretim raporu</h2><span class="k">kWh</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th>' + liste.map(s => '<th>' + esc(s.ad) + '</th>').join('') + '<th>Toplam</th></tr></thead><tbody>'
+      + aylar.map((m, j) => '<tr><td class="sol">' + AYLAR[Number(m.slice(5)) - 1] + '</td>' + mat.map(r => '<td' + (r[j] == null ? ' class="sifir"' : '') + '>' + (r[j] == null ? '' : say(r[j])) + '</td>').join('') + '<td><b>' + say(toplamN(mat.map(r => r[j]))) + '</b></td></tr>').join('')
+      + '<tr class="top"><td class="sol">Toplam</td>' + mat.map(r => '<td>' + say(toplamN(r)) + '</td>').join('') + '<td>' + say(toplamN(mat.flat())) + '</td></tr></tbody></table></div><div class="k">Boş hücre: o ayın verisi yok (santral henüz kurulmamış ya da geçmiş henüz çekilmedi).</div></section>';
+  } else {
+    const s = secili[0], an = analiz[s.key], kwpVar = an.length && an.every(a => a.x.kwp);
+    const medTop = medyan(an.map(a => kwpVar ? a.top / a.x.kwp : a.top));
+    const son = gunlerAn.slice(-30);
+    const satir = an.map(a => {
+      const deger = kwpVar ? a.top / a.x.kwp : a.top, kiyas = medTop ? (deger / medTop - 1) * 100 : null;
+      const son7 = medyan(a.hucre.slice(-7));
+      const durum = a.veriGun === 0 ? ['Veri yok', '#4A5A70'] : a.durma > 0 && a.hucre[a.hucre.length - 1] != null && a.hucre[a.hucre.length - 1] < 0.05 ? ['Duruyor', '#B42318'] : a.durma > 0 ? ['Durma yaşadı', '#9A5B00'] : son7 != null && son7 < 0.9 ? ['Düşük', '#9A5B00'] : ['Normal', '#1E7A3C'];
+      const sp = son.some(g => a.x.gun[g] != null) ? spark(son.map(g => +a.x.gun[g] || 0), '#2a78d6', a.x.ad + ' günlük üretim').replace('height="40"', 'height="22"') : '';
+      return '<tr><td class="sol"><b>' + esc(a.x.ad) + '</b></td>' + (kwpVar ? '<td>' + say(a.x.kwp, 1) + '</td>' : '') + '<td>' + say(a.top) + '</td>' + (kwpVar ? '<td>' + say(deger, 1) + '</td>' : '') + '<td>' + (kiyas == null ? '—' : (kiyas >= 0 ? '+' : '') + say(kiyas, 1) + '%') + '</td><td>' + a.durma + '</td><td class="sol" style="color:' + durum[1] + ';font-weight:600">' + durum[0] + '</td><td style="width:140px">' + sp + '</td></tr>';
+    }).join('');
+    govde += '<section class="panel"><div class="bas"><h2>İnverterler · ' + esc(s.ad) + '</h2><span class="k">' + an.length + ' inverter</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">İnverter</th>' + (kwpVar ? '<th>DC kWp</th>' : '') + '<th>Üretim (kWh)</th>' + (kwpVar ? '<th>kWh/kWp</th>' : '') + '<th>Medyana göre</th><th>Durma günü</th><th class="sol">Durum</th><th class="sol">Son 30 gün</th></tr></thead><tbody>' + satir + '</tbody></table></div><div class="k">' + (kwpVar ? 'Kıyas kWp başına üretimle yapılır.' : 'Platform inverter gücünü vermediği için kıyas, santralin medyan inverterine göre üretimdir; farklı güçteki inverterler kalıcı olarak farklı görünebilir.') + ' Durma günü: santral üretirken inverterin neredeyse hiç üretmediği gün.</div></section>';
+    // Isı haritası
+    const hg = Dn.tip === 'gun' ? Dn.gunler : gunlerAn.slice(-62);
+    const ix = hg.map(g => gunlerAn.indexOf(g));
+    const hw = Math.max(8, Math.min(26, Math.floor(820 / Math.max(1, hg.length))));
+    let isi = '<div style="overflow-x:auto"><table style="border-collapse:separate;border-spacing:2px;font-size:12px"><thead><tr><th></th>' + hg.map((g, i) => '<th style="font-weight:500;color:#4A5A70;width:' + hw + 'px;text-align:center">' + (i % Math.max(1, Math.ceil(hg.length / 16)) === 0 ? Number(g.slice(8)) : '') + '</th>').join('') + '</tr></thead><tbody>';
+    for (const a of an) isi += '<tr><th style="text-align:right;padding-right:8px;font-weight:600;white-space:nowrap">' + esc(a.x.ad) + '</th>' + ix.map((k, j) => { const h = a.hucre[k], v = a.x.gun[hg[j]]; return '<td style="width:' + hw + 'px;height:18px;border-radius:3px;background:' + isiRenk(h) + '" title="' + esc(a.x.ad) + ' · ' + tarihK(hg[j]) + ': ' + (v == null ? 'veri yok' : say(v) + ' kWh · normalinin %' + say((h || 0) * 100)) + '"></td>'; }).join('') + '</tr>';
+    isi += '</tbody></table></div>';
+    const lej = [['#D9E6F5', 'Normal (≥ %97)'], ['#FBE6C2', '%90–97'], ['#F6C27A', '%80–90'], ['#EC7B3A', '%60–80'], ['#C4320A', '< %60'], ['#7A1A12', 'Durdu'], ['#F1F3F6', 'Veri yok']];
+    govde += '<section class="panel"><div class="bas"><h2>Günlük performans haritası</h2><span class="k">' + (Dn.tip === 'gun' ? Dn.ad : 'Son ' + hg.length + ' gün') + '</span></div>' + isi + '<div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:#4A5A70">' + lej.map(([r, ad]) => '<span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:' + r + '"></span>' + ad + '</span>').join('') + '</div><div class="k">Her hücre, inverterin o günkü üretiminin santraldeki medyan invertere oranının, inverterin dönem içindeki olağan oranına bölünmesidir. Bulutlu günler bütün inverterleri birlikte etkilediği için haritayı bozmaz; tek bir inverterdeki düşüş öne çıkar.</div></section>';
+    // Aylık inverter raporu
+    const aylar = invDonem(invSec.yil, 'yil').aylar;
+    govde += '<section class="panel"><div class="bas"><h2>' + invSec.yil + ' aylık inverter raporu</h2><span class="k">kWh</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">İnverter</th>' + aylar.map(m => '<th>' + AYK[Number(m.slice(5)) - 1] + '</th>').join('') + '<th>Toplam</th></tr></thead><tbody>'
+      + an.map(a => { const r = aylar.map(m => ayToplam(a.x, m)); return '<tr><td class="sol"><b>' + esc(a.x.ad) + '</b></td>' + r.map(v => '<td' + (v == null ? ' class="sifir"' : '') + '>' + (v == null ? '' : say(v)) + '</td>').join('') + '<td><b>' + say(toplamN(r)) + '</b></td></tr>'; }).join('')
+      + '<tr class="top"><td class="sol">Santral</td>' + aylar.map(m => '<td>' + say(ayToplam(s, m)) + '</td>').join('') + '<td>' + say(toplamN(aylar.map(m => ayToplam(s, m)))) + '</td></tr></tbody></table></div></section>';
+  }
+  const kapsam = liste.map(s => { const g = Object.keys(s.gun).filter(k => s.gun[k] > 0).sort(); return esc(s.ad) + ': ' + (g.length ? tarihK(g[0]) + ' ' + g[0].slice(0, 4) + '–' + tarihK(g[g.length - 1]) : 'günlük veri yok'); }).join(' · ');
+  ic.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + kartlar + grafikH + govde + '<div class="k">Bu yıldaki günlük veri kapsamı: ' + kapsam + '. Sungrow ve Inavitas geçmişi n8n tarafından her gece güncellenir; FusionSolar inverter günlükleri 5 Ekim 2026\'dan itibaren toplanıyor.</div></div>';
+  document.getElementById('kaynakNot').textContent = 'Veri: Sungrow · Inavitas · FusionSolar geçmişi';
+}
+function invCsv() {
+  const dun = gunEkle(bugunTR(), -1);
+  const Dn = invDonem(invSec.yil, invSec.donem);
+  const gunler = Dn.tip === 'gun' ? Dn.gunler : (() => { const a = []; for (const m of Dn.aylar) for (let d = 1; d <= ayGunSay(m); d++) { const g = m + '-' + String(d).padStart(2, '0'); if (g <= dun) a.push(g); } return a; })();
+  const yillar = [...new Set(gunler.map(g => Number(g.slice(0, 4))))];
+  const S = invBirlestir(yillar.flatMap(y => INV_CACHE[y] || []));
+  const secili = invSec.santral === 'hepsi' ? Object.values(S) : [S[invSec.santral]].filter(Boolean);
+  const satir = ['tarih;platform;santral;inverter;kwh'];
+  for (const s of secili) for (const g of gunler) { if (s.gun[g] != null) satir.push([g, INV_KAYNAK[s.kaynak], s.ad, 'SANTRAL', String(s.gun[g]).replace('.', ',')].join(';')); for (const iv of Object.values(s.inv).sort(invSirala)) if (iv.gun[g] != null) satir.push([g, INV_KAYNAK[s.kaynak], s.ad, iv.ad, String(iv.gun[g]).replace('.', ',')].join(';')); }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + satir.join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'inverter_' + (invSec.santral === 'hepsi' ? 'tum' : invSec.santral.replace(/[^\w]+/g, '_')) + '_' + invSec.donem + '.csv';
+  a.click();
+}
+
+// ===== EPİAŞ: PTF / SMF / YEKDEM geçmişi (n8n/epias_gecmis.json) =====
+let EP = null, epYukleniyor = null;
+const epSec = { yil: null, ay: 'yil', gun: null };
+const EP_RENK = { ptf: '#2a78d6', smf: '#eb6834', yek: '#1baf7a', top: '#6b5bd6' };
+function epYukle() {
+  if (EP) return Promise.resolve(EP);
+  if (!epYukleniyor) epYukleniyor = al('n8n/epias_gecmis.json').then(d => (EP = d)).finally(() => { epYukleniyor = null; });
+  return epYukleniyor;
+}
+const epDolu = a => (a || []).filter(x => x != null);
+const epOrt = a => { const v = epDolu(a); return v.length ? v.reduce((t, x) => t + x, 0) / v.length : null; };
+// Eski paneldeki kural: gerçekleşme varsa kesin; yoksa önceki ayın gerçekleşme/öngörü oranıyla düzeltilmiş tahmin; o da yoksa resmi öngörü
+function yekdemAy(ay) {
+  const Y = (EP && EP.yekdem) || {}, v = Y[ay];
+  if (!v) return null;
+  if (v.gercek != null) return { deger: v.gercek, durum: 'kesin', ad: 'Gerçekleşen', ongoru: v.ongoru, gercek: v.gercek, not: v.not };
+  const [y, a] = ay.split('-').map(Number), onc = (a === 1 ? (y - 1) + '-12' : y + '-' + String(a - 1).padStart(2, '0')), o = Y[onc];
+  if (v.ongoru != null && o && o.gercek != null && o.ongoru) { const kat = o.gercek / o.ongoru; return { deger: v.ongoru * kat, durum: 'tahmin', ad: 'Tahmin', ongoru: v.ongoru, kat, oncAy: onc, not: v.not }; }
+  if (v.ongoru != null) return { deger: v.ongoru, durum: 'ongoru', ad: 'Öngörü', ongoru: v.ongoru, not: v.not };
+  return null;
+}
+function epAyOzet(ay) {
+  const gunler = Object.keys(EP.ptf).filter(g => g.startsWith(ay));
+  const p = gunler.flatMap(g => epDolu(EP.ptf[g])), s = gunler.flatMap(g => epDolu((EP.smf || {})[g]));
+  const yk = yekdemAy(ay), pOrt = p.length ? p.reduce((t, x) => t + x, 0) / p.length : null;
+  return { ay, gun: gunler.length, pOrt, pMin: p.length ? Math.min(...p) : null, pMax: p.length ? Math.max(...p) : null, sOrt: s.length ? s.reduce((t, x) => t + x, 0) / s.length : null,
+    sifir: p.filter(x => x <= 1).length, yk, toplam: pOrt != null && yk ? pOrt + yk.deger : null };
+}
+function epCizgi(seriler, etiket, birim) {
+  const W = 900, H = 260, L = 56, R = 12, T = 12, B = 30, n = etiket.length;
+  const tum = seriler.flatMap(s => epDolu(s.v)); if (!tum.length || n < 2) return '<p class="k">Grafik için yeterli veri yok.</p>';
+  const max = Math.max(...tum) * 1.05 || 1, min = Math.min(0, ...tum);
+  const x = i => L + (W - L - R) * i / (n - 1), y = v => T + (H - T - B) * (1 - (v - min) / (max - min));
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = min + (max - min) * k / 4; g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="#EEF1F5"/><text x="' + (L - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#4A5A70">' + say(v) + '</text>'; }
+  const adim = Math.max(1, Math.ceil(n / 12));
+  etiket.forEach((e, i) => { if (i % adim === 0 || i === n - 1) g += '<text x="' + x(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#4A5A70">' + esc(e) + '</text>'; });
+  for (const s of seriler) {
+    let d = '', ac = false;
+    s.v.forEach((v, i) => { if (v == null) { ac = false; return; } d += (ac ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; ac = true; });
+    g += '<path d="' + d + '" fill="none" stroke="' + s.renk + '" stroke-width="2" stroke-linejoin="round"' + (s.kesik ? ' stroke-dasharray="5 4"' : '') + '/>';
+  }
+  const lej = seriler.map(s => '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:16px"><span style="width:14px;height:3px;background:' + s.renk + ';display:inline-block"></span>' + esc(s.ad) + '</span>').join('');
+  return '<div class="k">' + lej + '<span style="float:right">' + esc(birim) + '</span></div><svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Fiyat grafiği" style="display:block">' + g + '</svg>';
+}
+async function cizEpias() {
+  document.getElementById('baslik').textContent = 'EPİAŞ';
+  const ic = document.getElementById('icerik');
+  if (!EP) { document.getElementById('altBaslik').textContent = 'Geçmiş veri yükleniyor…'; document.getElementById('kontrol').innerHTML = ''; ic.innerHTML = '<div class="panel"><p class="k">EPİAŞ geçmişi yükleniyor…</p></div>'; }
+  try { await epYukle(); } catch (e) { ic.innerHTML = '<div class="panel hata">EPİAŞ geçmişi okunamadı: ' + esc(e.message || e) + '</div>'; return; }
+  if (!location.hash.startsWith('#epias')) return;
+  const gunler = Object.keys(EP.ptf).sort(), bugun = bugunTR(), yarin = gunEkle(bugun, 1);
+  const yillar = [...new Set(gunler.map(g => Number(g.slice(0, 4))))].sort((a, b) => b - a);
+  if (!epSec.yil || !yillar.includes(epSec.yil)) epSec.yil = Number(bugun.slice(0, 4));
+  if (!epSec.gun || !EP.ptf[epSec.gun]) epSec.gun = EP.ptf[yarin] ? yarin : (EP.ptf[bugun] ? bugun : gunler[gunler.length - 1]);
+  const ylS = String(epSec.yil), aylar = [...new Set(gunler.filter(g => g.startsWith(ylS)).map(g => g.slice(0, 7)))].sort();
+  if (epSec.ay !== 'yil' && !aylar.includes(epSec.ay)) epSec.ay = 'yil';
+  const donemGun = gunler.filter(g => epSec.ay === 'yil' ? g.startsWith(ylS) : g.startsWith(epSec.ay)).filter(g => g <= yarin);
+
+  document.getElementById('kontrol').innerHTML = '<label class="k" style="display:flex;align-items:center;gap:8px">Yıl <select onchange="epSec.yil=Number(this.value);epSec.ay=\'yil\';cizEpias()">' + yillar.map(y => '<option' + (y === epSec.yil ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></label>'
+    + '<label class="k" style="display:flex;align-items:center;gap:8px">Dönem <select onchange="epSec.ay=this.value;cizEpias()"><option value="yil">Tüm yıl</option>' + aylar.slice().reverse().map(m => '<option value="' + m + '"' + (m === epSec.ay ? ' selected' : '') + '>' + AYLAR[Number(m.slice(5)) - 1] + '</option>').join('') + '</select></label>'
+    + '<button class="btn" type="button" onclick="epCsv()">CSV indir</button>';
+  document.getElementById('altBaslik').textContent = 'PTF (GÖP), SMF (DGP) ve YEKDEM birim bedeli, TL/MWh. Veri ' + tarihK(gunler[0]) + ' ' + gunler[0].slice(0, 4) + ' – ' + tarihK(gunler[gunler.length - 1]) + ' ' + gunler[gunler.length - 1].slice(0, 4) + ' · güncelleme ' + saatTR(EP.guncellendi);
+
+  // Özet kartları
+  const pAll = donemGun.flatMap(g => epDolu(EP.ptf[g])), sAll = donemGun.flatMap(g => epDolu((EP.smf || {})[g]));
+  const ayOz = (epSec.ay === 'yil' ? aylar : [epSec.ay]).map(epAyOzet);
+  const ykAgir = (() => { let t = 0, n = 0; for (const o of ayOz) if (o.yk && o.pOrt != null) { t += o.yk.deger * o.gun; n += o.gun; } return n ? t / n : null; })();
+  const pOrt = epOrt(pAll), yp = EP.ptf[yarin] ? epOrt(EP.ptf[yarin]) : null, bp = EP.ptf[bugun] ? epOrt(EP.ptf[bugun]) : null;
+  const kart = (ad, v, alt, renk) => '<div class="panel" style="gap:6px;padding:18px 20px"><div class="k">' + ad + '</div><div class="num" style="font-size:28px;font-weight:700;color:' + (renk || '#10233F') + '">' + say(v, 0) + '</div><div class="k">' + alt + '</div></div>';
+  let h = '<div class="kartlar5">'
+    + kart('Bugün PTF ort.', bp, tarihK(bugun), EP_RENK.ptf)
+    + kart('Yarın PTF ort.', yp, yp == null ? 'henüz yayınlanmadı' : tarihK(yarin), EP_RENK.ptf)
+    + kart('Dönem PTF ort.', pOrt, pAll.length ? 'min ' + say(Math.min(...pAll)) + ' · max ' + say(Math.max(...pAll)) : '—', EP_RENK.ptf)
+    + kart('Dönem SMF ort.', epOrt(sAll), sAll.length + ' saat', EP_RENK.smf)
+    + kart('PTF + YEKDEM', pOrt != null && ykAgir != null ? pOrt + ykAgir : null, 'YEKDEM ' + (ykAgir == null ? 'yok' : say(ykAgir, 2)), EP_RENK.top)
+    + '</div>';
+
+  // Günlük ortalama grafiği
+  const gEt = donemGun.map(tarihK);
+  h += '<section class="panel"><div class="bas"><h2>Günlük ortalama fiyat</h2><span class="k">' + (epSec.ay === 'yil' ? ylS : AYLAR[Number(epSec.ay.slice(5)) - 1] + ' ' + ylS) + '</span></div>'
+    + epCizgi([{ ad: 'PTF', renk: EP_RENK.ptf, v: donemGun.map(g => epOrt(EP.ptf[g])) }, { ad: 'SMF', renk: EP_RENK.smf, v: donemGun.map(g => epOrt((EP.smf || {})[g])) }], gEt, 'TL/MWh') + '</section>';
+
+  // Saatlik profil (dönem ortalaması)
+  const prof = k => Array.from({ length: 24 }, (_, s) => epOrt(donemGun.map(g => ((EP[k] || {})[g] || [])[s])));
+  const pp = prof('ptf'), sp = prof('smf'), pmx = Math.max(1, ...epDolu(pp), ...epDolu(sp));
+  h += '<section class="panel"><div class="bas"><h2>Saatlik profil</h2><span class="k">dönem ortalaması, TL/MWh</span></div><div style="display:grid;grid-template-columns:repeat(24,1fr);gap:4px;align-items:end;height:160px">'
+    + pp.map((v, s) => '<div title="' + String(s).padStart(2, '0') + ':00 · PTF ' + say(v) + ' · SMF ' + say(sp[s]) + '" style="display:flex;gap:1px;align-items:end;height:100%"><div style="flex:1;background:' + EP_RENK.ptf + ';height:' + ((v || 0) / pmx * 100).toFixed(1) + '%;border-radius:2px 2px 0 0"></div><div style="flex:1;background:' + EP_RENK.smf + ';opacity:.8;height:' + ((sp[s] || 0) / pmx * 100).toFixed(1) + '%;border-radius:2px 2px 0 0"></div></div>').join('')
+    + '</div><div style="display:grid;grid-template-columns:repeat(24,1fr);gap:4px" class="k">' + pp.map((_, s) => '<div style="text-align:center;font-size:11px">' + (s % 3 === 0 ? s : '') + '</div>').join('') + '</div>'
+    + '<div class="k"><span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.ptf + ';margin-right:6px"></span>PTF <span style="display:inline-block;width:10px;height:10px;background:' + EP_RENK.smf + ';margin:0 6px 0 14px"></span>SMF. Öğle saatlerindeki düşük fiyatlar mahsuplaşma dışı satışın değerini gösterir.</div></section>';
+
+  // Aylık tablo
+  const ykHucre = yk => yk ? '<span title="' + esc(yk.ad + (yk.ongoru != null ? ' · öngörü ' + say(yk.ongoru, 2) : '') + (yk.kat ? ' · önceki ay katsayısı ' + yk.kat.toFixed(4) : '') + (yk.not ? ' · ' + yk.not : '')) + '">' + say(yk.deger, 2) + ' <span style="font-size:11px;font-weight:700;color:' + (yk.durum === 'kesin' ? '#1E7A3C' : yk.durum === 'tahmin' ? '#9A5B00' : '#B54708') + '">' + yk.ad + '</span></span>' : '—';
+  h += '<section class="panel"><div class="bas"><h2>Aylık özet</h2><span class="k">TL/MWh</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th>Gün</th><th>PTF ort.</th><th>PTF min</th><th>PTF max</th><th>≈0 TL saat</th><th class="ayr">SMF ort.</th><th class="ayr">YEKDEM</th><th>PTF + YEKDEM</th></tr></thead><tbody>'
+    + aylar.slice().reverse().map(epAyOzet).map(o => '<tr' + (o.ay === epSec.ay ? ' style="background:#EEF5FD"' : '') + '><td class="sol"><a href="#epias" onclick="epSec.ay=\'' + o.ay + '\';cizEpias();return false">' + AYLAR[Number(o.ay.slice(5)) - 1] + '</a></td><td>' + o.gun + '</td><td><b>' + say(o.pOrt, 2) + '</b></td><td>' + say(o.pMin) + '</td><td>' + say(o.pMax) + '</td><td' + (o.sifir ? '' : ' class="sifir"') + '>' + o.sifir + '</td><td class="ayr">' + say(o.sOrt, 2) + '</td><td class="ayr">' + ykHucre(o.yk) + '</td><td><b>' + say(o.toplam, 2) + '</b></td></tr>').join('')
+    + '</tbody></table></div><div class="k">≈0 TL saat: PTF ≤ 1 TL/MWh olan saat sayısı. Enerji maliyeti eski paneldeki gibi (PTF + YEKDEM) × 1,035 / 1000 TL/kWh olarak hesaplanır.</div></section>';
+
+  // YEKDEM kartları
+  const ykAylar = Object.keys(EP.yekdem || {}).sort();
+  if (ykAylar.length) {
+    const renk = { kesin: ['#E7F6EC', '#1E7A3C'], tahmin: ['#FFF4DC', '#9A5B00'], ongoru: ['#FEF0E6', '#B54708'] };
+    h += '<section class="panel"><div class="bas"><h2>YEKDEM birim bedelleri</h2><span class="k">TL/MWh · yeşil gerçekleşen, sarı önceki ay sapmasıyla tahmin, turuncu resmi öngörü</span></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">'
+      + ykAylar.map(ay => { const yk = yekdemAy(ay); if (!yk) return ''; const [bg, fg] = renk[yk.durum];
+        const alt = yk.durum === 'kesin' && yk.ongoru ? 'Öngörü ' + say(yk.ongoru, 2) + ' (' + ((yk.gercek / yk.ongoru - 1) * 100 >= 0 ? '+' : '') + say((yk.gercek / yk.ongoru - 1) * 100, 1) + '%)' : yk.durum === 'tahmin' ? 'Öngörü ' + say(yk.ongoru, 2) + ' × ' + yk.kat.toFixed(3) : 'Ay sonu kesinleşir';
+        return '<div style="background:' + bg + ';border-radius:10px;padding:12px 14px" title="' + esc(yk.not || '') + '"><div class="k" style="font-weight:700;text-transform:uppercase;font-size:11px">' + AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4) + '</div><div class="num" style="font-size:22px;font-weight:700;color:' + fg + '">' + say(yk.deger, 2) + '</div><div style="font-size:12px;color:' + fg + ';font-weight:600">' + yk.ad + '</div><div class="k" style="font-size:11px;margin-top:4px">' + alt + '</div></div>'; }).join('')
+      + '</div></section>';
+  }
+
+  // Gün detayı
+  const gg = epSec.gun, pd = EP.ptf[gg] || [], sd = (EP.smf || {})[gg] || [], ud = (EP.ptf_usd || {})[gg] || [], ykG = yekdemAy(gg.slice(0, 7));
+  h += '<section class="panel"><div class="bas"><h2>Saatlik fiyatlar · ' + tarihK(gg) + ' ' + gg.slice(0, 4) + ' ' + GUNLER[new Date(gg + 'T12:00:00Z').getUTCDay()] + '</h2><label class="k" style="display:flex;align-items:center;gap:8px">Gün <input type="date" value="' + gg + '" min="' + gunler[0] + '" max="' + gunler[gunler.length - 1] + '" onchange="if(this.value){epSec.gun=this.value;cizEpias()}"></label></div>'
+    + '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Saat</th><th>PTF</th><th>PTF ($)</th><th>SMF</th><th>SMF − PTF</th><th class="ayr">PTF + YEKDEM</th><th>Maliyet TL/kWh</th></tr></thead><tbody>'
+    + Array.from({ length: 24 }, (_, s) => { const p = pd[s], sm = sd[s], top = p != null && ykG ? p + ykG.deger : null;
+        return '<tr><td class="saat">' + String(s).padStart(2, '0') + ':00</td><td' + (p != null && p <= 1 ? ' class="sifir"' : '') + '>' + say(p, 2) + '</td><td>' + say(ud[s], 2) + '</td><td>' + say(sm, 2) + '</td><td>' + (p != null && sm != null ? say(sm - p, 2) : '—') + '</td><td class="ayr">' + say(top, 2) + '</td><td>' + (top != null ? say(top * 1.035 / 1000, 3) : '—') + '</td></tr>'; }).join('')
+    + '<tr class="top"><td class="sol">Ortalama</td><td>' + say(epOrt(pd), 2) + '</td><td>' + say(epOrt(ud), 2) + '</td><td>' + say(epOrt(sd), 2) + '</td><td></td><td class="ayr">' + say(epOrt(pd) != null && ykG ? epOrt(pd) + ykG.deger : null, 2) + '</td><td></td></tr></tbody></table></div>'
+    + '<div class="k">SMF gün içinde saatlik kesinleşir; boş saatler henüz yayınlanmamış demektir.' + (ykG ? ' YEKDEM: ' + say(ykG.deger, 2) + ' (' + ykG.ad.toLowerCase() + ').' : '') + '</div></section>';
+
+  ic.innerHTML = h;
+}
+function epCsv() {
+  if (!EP) return;
+  const ylS = String(epSec.yil), gunler = Object.keys(EP.ptf).filter(g => epSec.ay === 'yil' ? g.startsWith(ylS) : g.startsWith(epSec.ay)).sort();
+  const sat = ['Tarih;Saat;PTF (TL/MWh);PTF ($/MWh);SMF (TL/MWh);YEKDEM (TL/MWh)'];
+  const f = v => v == null ? '' : String(v).replace('.', ',');
+  for (const g of gunler) { const yk = yekdemAy(g.slice(0, 7)); for (let s = 0; s < 24; s++) sat.push([g, String(s).padStart(2, '0') + ':00', f((EP.ptf[g] || [])[s]), f(((EP.ptf_usd || {})[g] || [])[s]), f(((EP.smf || {})[g] || [])[s]), f(yk ? Math.round(yk.deger * 1000) / 1000 : null)].join(';')); }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + sat.join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'epias_' + (epSec.ay === 'yil' ? ylS : epSec.ay) + '.csv';
+  a.click();
+}
+
+function ciz() {
+  const h0 = location.hash || '#genel';
+  const sayfa = h0.startsWith('#epias') ? 'epias' : h0.startsWith('#sayac') ? 'sayac' : h0.startsWith('#inverter') && !h0.startsWith('#inverterler') ? 'inverter' : 'genel';
+  document.querySelectorAll('.nav a[data-sayfa]').forEach(a => a.classList.toggle('aktif', a.dataset.sayfa === sayfa));
+  if (sayfa === 'epias') cizEpias(); else if (sayfa === 'inverter') cizInverter(); else if (sayfa === 'sayac') cizSayac(); else { cizGenel(); const h = location.hash.slice(1); if (h && h !== 'genel') { const el = document.getElementById(h); if (el) el.scrollIntoView(); } }
+}
+window.addEventListener('hashchange', () => { if (D) { ciz(); if (location.hash.startsWith('#sayac') || location.hash === '#inverter' || location.hash === '#epias') window.scrollTo(0, 0); } });
+
+async function yukle() {
+  try {
+    const [son, osos, mad, fs] = await Promise.all([
+      al('n8n/aesun_son.json').catch(() => null),
+      al('2026_osos_endeks.json'),
+      al('antminer_panel.json').catch(() => null),
+      al('n8n/fusionsolar_son.json').catch(() => null)
+    ]);
+    D = { son: son && Array.isArray(son.son) ? son : null, osos, mad, fs };
+    ciz();
+  } catch (e) {
+    if (!D) document.getElementById('icerik').innerHTML = '<div class="panel hata">Veri okunamadı: ' + esc(e.message || e) + '</div>';
+  }
+}
+yukle();
+setInterval(yukle, 180000);
+</script>
+</body>
+</html>

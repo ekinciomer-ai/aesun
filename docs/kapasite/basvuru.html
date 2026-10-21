@@ -58,7 +58,8 @@ a{color:inherit;text-decoration:none}
 .evrak-adim-baslik{padding:10px 14px;background:#0f172a;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none}
 .evrak-adim-sol{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.83rem;color:#f8fafc}
 .sira-no{width:26px;height:26px;border-radius:7px;background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;font-size:.74rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.evrak-adim-icerik{padding:12px 14px;border-top:1px solid #1e293b;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.evrak-adim-icerik{padding:12px 14px;border-top:1px solid #1e293b;display:none;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.evrak-adim.aktif-adim .evrak-adim-icerik{display:grid}
 .evrak-yukle-bar{grid-column:1/-1;background:#020617;border:1px dashed #334155;border-radius:8px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.75rem}
 .pafta-sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .pafta-sekme{padding:8px 13px;border-radius:8px;border:1px solid #334155;background:#020617;color:#94a3b8;font-size:.77rem;font-weight:700;cursor:pointer;transition:all .15s}
@@ -1884,7 +1885,19 @@ function pgesAcAecad(){
   window.open("../aecad/index.html", "_blank");
 }
 
-window.addEventListener("DOMContentLoaded", kapasiteVerisiYukle);
+window.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".evrak-adim-baslik").forEach(baslik => {
+    baslik.addEventListener("click", () => {
+      const adim = baslik.closest(".evrak-adim");
+      if(!adim) return;
+      const acikMi = adim.classList.contains("aktif-adim");
+      document.querySelectorAll(".evrak-adim").forEach(a => a.classList.remove("aktif-adim"));
+      if(!acikMi) adim.classList.add("aktif-adim");
+      if(bsvHarita) setTimeout(() => { bsvHarita.invalidateSize(); haritaParselGuncelle(); }, 120);
+    });
+  });
+  kapasiteVerisiYukle();
+});
 </script>
 </body>
 </html>

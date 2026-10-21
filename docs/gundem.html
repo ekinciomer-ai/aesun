@@ -96,6 +96,42 @@
     </div>
   </div>
 
+  <div class="sema-kutu" style="border-top:4px solid #1E9E5A">
+    <h2>Yeni · Türkiye Emisyon Ticaret Sistemi (TR ETS) Piyasası Şeması (21.10.2026 · RG 33407)</h2>
+    <p>EPDK tarafından yayımlanan TR ETS Piyasasının İşletilmesine İlişkin Yönetmelik ile EPİAŞ ve Takasbank nezdinde karbon piyasası kuralları ve GES/Sanayi etkileri:</p>
+    <div class="svg-wrap">
+      <svg viewBox="0 0 960 145" role="img" aria-label="21 Ekim 2026 TR ETS Piyasası Şeması">
+        <rect x="10" y="10" width="225" height="124" rx="10" fill="#FFF" stroke="#2B2E33" stroke-width="2"/>
+        <text x="122" y="32" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" font-weight="800" fill="#2B2E33">1 · EPİAŞ ETSPYS &amp; İKS (MD. 6–8)</text>
+        <text x="122" y="54" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">1 Lot = 100 tCO₂e · Adım: 0,50 TL</text>
+        <text x="122" y="72" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">Zorunlu İKS hesabı (10 iş günü onay)</text>
+        <text x="122" y="90" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">Bankalama &amp; ödünç alma imkânı</text>
+        <text x="122" y="112" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#D32027">Md.4/8: Rapor sunmayana İKS blokesi</text>
+
+        <rect x="250" y="10" width="225" height="124" rx="10" fill="#FFF" stroke="#1E9E5A" stroke-width="2"/>
+        <text x="362" y="32" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" font-weight="800" fill="#1E9E5A">2 · BİRİNCİL İHALE &amp; EK REZERV</text>
+        <text x="362" y="54" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">Tek Fiyat (TRF) ile ihale satışı</text>
+        <text x="362" y="72" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#B85D0C" font-weight="700">Ek Rezerv (Md.19): 3 Ay Ort. +%50 Taban</text>
+        <text x="362" y="90" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">Geçici Md.2: 2026 Tamamlayıcı Fiyat</text>
+        <text x="362" y="112" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#1E9E5A">İhale gelirinin %100'ü İDB bütçesine</text>
+
+        <rect x="490" y="10" width="225" height="124" rx="10" fill="#FFF" stroke="#2F6DB5" stroke-width="2"/>
+        <text x="602" y="32" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" font-weight="800" fill="#1F508B">3 · SPOT PİYASA &amp; TAKASBANK</text>
+        <text x="602" y="54" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">Ayda ≥4 iş günü 10:00–15:00 seans</text>
+        <text x="602" y="72" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">İkili anlaşma (OTC): 17:05 transfer</text>
+        <text x="602" y="90" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">TL, Döviz, e-Teminat, Sukuk, Eurobond</text>
+        <text x="602" y="112" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#1F508B">Fatura: T+2 Ödeme · T+3 Tahsilat</text>
+
+        <rect x="730" y="10" width="220" height="124" rx="10" fill="#FFF8F8" stroke="#D32027" stroke-width="2"/>
+        <text x="840" y="32" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11.5" font-weight="800" fill="#D32027">4 · GES, SANAYİ &amp; PTF ETKİSİ</text>
+        <text x="840" y="54" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="11" fill="#181B20">Termik karbon maliyeti → PTF artışı</text>
+        <text x="840" y="72" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">Sanayide GES + BESS + YEK-G ihtiyacı</text>
+        <text x="840" y="90" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" fill="#5A6270">GES ile artan ücretsiz tahsisat satışı</text>
+        <text x="840" y="112" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="700" fill="#D32027">+%50 Ek Rezerv cezasından korunma</text>
+      </svg>
+    </div>
+  </div>
+
   <div class="flt-bar">
     <div class="chips" id="filtre" role="group" aria-label="Kategori filtresi"></div>
   </div>
@@ -216,7 +252,17 @@
   fetch(API, {cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
     .then(function(d){
-      tumu = tekillestir(d.haberler||[]);
+      var etsKayit = {
+        baslik: "Türkiye Emisyon Ticaret Sistemi (TR ETS) Piyasasının İşletilmesine İlişkin Yönetmelik (21.10.2026 · RG 33407)",
+        ozet: "EPDK tarafından yayımlanan 55 maddelik yönetmelikle EPİAŞ (ETSPYS & İKS) ve Takasbank işletiminde karbon tahsisat piyasası kuruldu: 1 Lot = 100 tCO2e (0,50 TL fiyat adımı), Birincil İhale (TRF), ayda en az 4 iş günü 10:00–15:00 Spot Tahsisat Piyasası, 17:05 İkili Anlaşma transferi, açık kapatmak için +%50 taban fiyatlı Ek Rezerv İhalesi (Md.19) ve 2026 Tamamlayıcı Tahsisat Fiyatı (Geçici Md.2) yürürlüğe girdi. Termik santral karbon maliyeti üzerinden EPİAŞ PTF'yi yukarı yönlü desteklerken, sanayi tesisleri için öz tüketim GES + BESS + YEK-G yatırımını ve artan ücretsiz tahsisatların Spot Piyasada satışını doğrudan teşvik etmektedir.",
+        kategori: "mevzuat",
+        kaynak: "Resmî Gazete",
+        onem: 5,
+        yayin_tarih: "21.10.2026",
+        etiketler: "TR ETS, Karbon Piyasası, EPİAŞ, RG 33407, GES, YEK-G, CBAM",
+        url: "https://www.resmigazete.gov.tr/eskiler/2026/10/20261021.htm"
+      };
+      tumu = tekillestir([etsKayit].concat(d.haberler||[]));
       var t = d.guncelleme ? new Date(d.guncelleme) : null;
       meta2.textContent = tumu.length + " tekil başlık" + (t ? (" · son güncelleme " + t.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})) : "");
       filtreCiz(); ciz();

@@ -8,12 +8,32 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <script>
 (function(){
   var HASH="db058f55fd48ed9f649dc3a895fefab5dc4b0fe289a0c8d0fc9c62ad4f54bc35";
   if(localStorage.getItem("aesun_portal_auth_v1")!==HASH){
     try{localStorage.setItem("aesun_portal_auth_v1",HASH);}catch(e){}
   }
+  window.evrakAdimToggle = function(baslikEl, ev){
+    if(ev && ev.target && (ev.target.tagName === "INPUT" || ev.target.tagName === "SELECT" || ev.target.tagName === "LABEL" || ev.target.tagName === "BUTTON")){
+      return;
+    }
+    var kart = baslikEl ? baslikEl.closest(".evrak-adim") : null;
+    if(!kart) return;
+    kart.classList.toggle("aktif-adim");
+  };
+  window.tumEvrakAdimlariAcKapat = function(){
+    var adimlar = document.querySelectorAll(".evrak-adim");
+    var hepsiAcik = true;
+    adimlar.forEach(function(a){ if(!a.classList.contains("aktif-adim")) hepsiAcik = false; });
+    adimlar.forEach(function(a){
+      if(hepsiAcik) a.classList.remove("aktif-adim");
+      else a.classList.add("aktif-adim");
+    });
+  };
 })();
 </script>
 <style>

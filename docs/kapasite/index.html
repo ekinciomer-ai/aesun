@@ -417,21 +417,24 @@
   .koord-iki-kolon{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
   @media(max-width:960px){.koord-iki-kolon{grid-template-columns:1fr}}
 
-  /* TM Konum Ekleme & Eksik Konumlu TM Eşleştirme Paneli */
-  .tm-ekle-panel{background:linear-gradient(180deg,#0F172A 0%,#1E293B 100%);color:#F8FAFC;border:1.5px solid #F59E0B;border-radius:12px;padding:12px 15px;margin-bottom:10px;box-shadow:0 8px 24px rgba(15,23,42,.25)}
+  /* Sade & Kompakt TM Konum Ekleme / Silme Çubuğu (Sayfa dışına taşmaz) */
+  .tm-ekle-panel{background:#0F172A;color:#F8FAFC;border:1.5px solid #F59E0B;border-radius:10px;padding:9px 12px;margin-bottom:8px;box-sizing:border-box;width:100%;max-width:100%;overflow:hidden}
   .tm-ekle-panel[hidden]{display:none!important}
-  .tm-ekle-ust{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:9px;margin-bottom:10px;border-bottom:1px solid #334155}
-  .tm-ekle-ust h3{margin:0;font-family:Archivo,sans-serif;font-size:14px;font-weight:800;color:#FDE047;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .tm-ekle-badge{background:#F59E0B;color:#0F172A;font-size:10.5px;padding:2px 8px;border-radius:99px;font-weight:800}
-  .tm-ekle-grid{display:grid;grid-template-columns:1.1fr 1.6fr 1fr auto;gap:9px;align-items:flex-end}
-  @media(max-width:980px){.tm-ekle-grid{grid-template-columns:1fr 1fr}}
-  @media(max-width:580px){.tm-ekle-grid{grid-template-columns:1fr}}
-  .tm-ekle-grid label{display:flex;flex-direction:column;gap:4px;font-size:10.5px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:.03em}
-  .tm-ekle-grid select,.tm-ekle-grid input{height:34px;padding:0 10px;border-radius:8px;border:1px solid #475569;background:#0F172A;color:#F8FAFC;font:700 12.5px "IBM Plex Sans",sans-serif}
-  .tm-ekle-grid select:focus,.tm-ekle-grid input:focus{outline:none;border-color:#F59E0B;box-shadow:0 0 0 2px rgba(245,158,11,.25)}
-  .tm-ekle-yeni-satir{display:grid;grid-template-columns:1.4fr .8fr 1fr .8fr;gap:8px;margin-top:9px;padding-top:9px;border-top:1px dashed #334155}
+  .tm-ekle-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;box-sizing:border-box}
+  .tm-ekle-etiket{background:#F59E0B;color:#0F172A;font-family:Archivo,sans-serif;font-size:11px;font-weight:800;padding:4px 9px;border-radius:6px;white-space:nowrap}
+  .tm-ekle-bar select,.tm-ekle-bar input{height:32px;padding:0 8px;border-radius:7px;border:1px solid #475569;background:#1E293B;color:#F8FAFC;font:700 12px "IBM Plex Sans",sans-serif;box-sizing:border-box;min-width:0}
+  .tm-ekle-bar select#tmEkleIlSec{flex:1 1 170px;max-width:240px}
+  .tm-ekle-bar select#tmEkleTmSec{flex:2 1 240px;max-width:380px}
+  .tm-ekle-bar select:focus,.tm-ekle-bar input:focus{outline:none;border-color:#F59E0B}
+  .tm-ekle-btn{height:32px;padding:0 11px;border-radius:7px;font-family:Archivo,sans-serif;font-size:11.5px;font-weight:800;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
+  .tm-ekle-btn.sil{background:#7F1D1D;color:#FECACA;border-color:#EF4444}
+  .tm-ekle-btn.sil:hover{background:#DC2626;color:#fff}
+  .tm-ekle-btn.filtre{background:#1E293B;color:#E2E8F0;border-color:#475569}
+  .tm-ekle-btn.kapat{background:#334155;color:#F8FAFC;margin-left:auto}
+  .tm-ekle-yeni-satir{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed #334155}
   .tm-ekle-yeni-satir[hidden]{display:none!important}
-  .tm-ekle-alt{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px;padding-top:8px;border-top:1px solid #1E293B;font-size:11.5px;color:#CBD5E1}
+  .tm-ekle-yeni-satir input{height:30px;padding:0 8px;border-radius:6px;border:1px solid #475569;background:#1E293B;color:#fff;font-size:12px;flex:1 1 130px;min-width:0}
+  .tm-ekle-alt{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:#94A3B8}
   .tm-ekle-durum{color:#34D399;font-weight:700}
   .harita-imlec-tm{cursor:crosshair!important}
   .harita-imlec-tm .leaflet-interactive{cursor:crosshair!important}
@@ -692,53 +695,28 @@
           </div>
         </div>
 
-        <!-- 📍 Konumu Olmayan TM'leri Listeleme & Haritadan Kalıcı TM Konumu Ekleme Paneli -->
+        <!-- 📍 Sade & Kompakt TM Konum Ekleme / Silme Çubuğu -->
         <div class="tm-ekle-panel" id="tmKonumEklePanel" hidden>
-          <div class="tm-ekle-ust">
-            <h3>
-              <span>📍 TRAFO MERKEZİ (TM) KONUM BELİRLEME &amp; KALICI EKLEME ARACI</span>
-              <span class="tm-ekle-badge" id="tmEkleIlBadge">Bakılan İl Konumsuz TM Listesi</span>
-            </h3>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
-              <button type="button" class="k-btn" id="btnTmEkleTumuGoster" style="min-height:28px;font-size:11px;background:#1E293B;color:#E2E8F0;border-color:#475569" title="Listedeki tüm TM'leri (konumu olanlar dahil) göster / yalnız konumu olmayanları göster">🔎 Yalnız Konumsuz TM'ler</button>
-              <button type="button" class="k-btn" id="btnTmEkleKapat" style="min-height:28px;font-size:11px;background:#450A0A;color:#FECACA;border-color:#EF4444">✕ Kapat</button>
-            </div>
+          <div class="tm-ekle-bar">
+            <span class="tm-ekle-etiket" id="tmEkleIlBadge">📍 TM EKLE / DÜZENLE</span>
+            <select id="tmEkleIlSec" aria-label="İl Seçimi" title="İl Seçin"></select>
+            <select id="tmEkleTmSec" aria-label="TM Seçimi" title="Konumu eklenecek veya silinecek TM'yi seçin"></select>
+            <button type="button" class="tm-ekle-btn filtre" id="btnTmEkleTumuGoster" title="Konumu olan TM'leri de listede göster / gizle">📋 Tüm TM'leri Göster</button>
+            <button type="button" class="tm-ekle-btn sil" id="btnTmKonumSil" title="Seçili TM'nin hatalı konumunu sil (Konumsuz yap)">🗑️ Konumu Sil</button>
+            <button type="button" class="tm-ekle-btn kapat" id="btnTmEkleKapat">✕ Kapat</button>
           </div>
 
-          <div class="tm-ekle-grid">
-            <label>1. Bakılan İl Seçimi
-              <select id="tmEkleIlSec" aria-label="TM Eklenecek İl Seçimi"></select>
-            </label>
-            <label>2. İldeki Konumu Olmayan TM'ler (Veya Yeni TM)
-              <select id="tmEkleTmSec" aria-label="Konumu Olmayan Trafo Merkezi Seçimi"></select>
-            </label>
-            <label>3. Haritadan Tıklanan Koordinat (Enlem, Boylam)
-              <input type="text" id="tmEkleKoordInput" placeholder="Haritada TM yerine tıklayın…" autocomplete="off">
-            </label>
-            <div style="display:flex;gap:6px;flex-wrap:wrap">
-              <button type="button" class="pges-btn yesil" id="btnTmKonumKaydet" style="height:34px;padding:0 14px;font-size:12px;background:#F59E0B;border-color:#D97706;color:#0F172A">💾 TM Konumunu Kalıcı Kaydet</button>
-            </div>
-          </div>
-
-          <!-- Listede olmayan yepyeni bir TM eklenmek istendiğinde açılan satır -->
+          <!-- Yalnızca "+ Yeni TM Ekle" seçildiğinde açılan mini satır -->
           <div class="tm-ekle-yeni-satir" id="tmEkleYeniSatir" hidden>
-            <label>Yeni Trafo Merkezi Adı (Örn: ŞABANÖZÜ OSB TM)
-              <input type="text" id="tmEkleYeniAd" placeholder="Örn: ŞABANÖZÜ OSB TM">
-            </label>
-            <label>Bara Adı
-              <input type="text" id="tmEkleYeniBara" value="Tek" placeholder="Tek / TR-A">
-            </label>
-            <label>Şebeke (EDAŞ / OSB)
-              <input type="text" id="tmEkleYeniEdas" placeholder="Örn: Başkent EDAŞ / OSB">
-            </label>
-            <label>Kalan Kapasite (MWe)
-              <input type="number" id="tmEkleYeniMwe" step="0.01" value="1.00" placeholder="1.00">
-            </label>
+            <input type="text" id="tmEkleYeniAd" placeholder="Yeni TM Adı (Örn: ŞABANÖZÜ OSB TM)">
+            <input type="text" id="tmEkleYeniBara" value="Tek" placeholder="Bara (Tek)" style="max-width:95px">
+            <input type="text" id="tmEkleYeniEdas" placeholder="EDAŞ / OSB">
+            <input type="number" id="tmEkleYeniMwe" step="0.01" value="1.00" placeholder="MWe" style="max-width:95px">
           </div>
 
           <div class="tm-ekle-alt">
-            <span>💡 <b>Kullanım:</b> Yukarıdan ili ve <b>konumu olmayan TM'yi</b> seçin, ardından <b>harita üzerinde TM'nin bulunduğu yere (örn. <i>Şabanözü OSB TM</i>) tıklayın</b>. İşaretçi yerleşince otomatik/kalıcı olarak sisteme kaydedilir.</span>
-            <span class="tm-ekle-durum" id="tmEkleDurumMesaj">Haritadan konum seçmeye hazır.</span>
+            <span>👉 Listeden <b>TM'yi seçin</b> ve <b>haritada TM'nin olduğu yere tıklayın</b> (tıklar tıklamaz ekran uzaklaşmadan kalıcı kaydedilir).</span>
+            <span class="tm-ekle-durum" id="tmEkleDurumMesaj">Haritadan tıklamaya hazır.</span>
           </div>
         </div>
 
@@ -3155,8 +3133,10 @@
         +'02.03: <b>'+fmt(pv(r,0))+'</b> → 16.07: <b>'+fmt(pv(r,1))+'</b> → 01.10: <b>'+fmt(pv(r,2))+' MWe</b>'
         +'<br><small style="color:#64748B">6 Aylık Δ Değişim: '+fmt(d)+' MWe</small>'
       +'</div>'
-      +'<div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap">'
-        +'<a href="'+esc(rShbUrl)+'" target="_blank" rel="noopener" style="background:#FFE800;color:#111;font-weight:800;font-size:11px;padding:4px 9px;border-radius:5px;text-decoration:none;border:1px solid #D6C200">🟡 Sahibinden Uygun Araziler ↗</a>'
+      +'<div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;align-items:center">'
+        +'<a href="'+esc(rShbUrl)+'" target="_blank" rel="noopener" style="background:#FFE800;color:#111;font-weight:800;font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;border:1px solid #D6C200">🟡 Uygun Araziler ↗</a>'
+        +'<button type="button" onclick="window.tmPopupKonumDuzenle(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#0F172A;color:#FDE047;font-weight:800;font-size:10.5px;padding:4px 7px;border-radius:5px;border:1px solid #475569;cursor:pointer">📍 Konumu Taşı</button>'
+        +'<button type="button" onclick="window.tmPopupKonumSil(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#FEE2E2;color:#991B1B;font-weight:800;font-size:10.5px;padding:4px 7px;border-radius:5px;border:1px solid #FCA5A5;cursor:pointer">🗑️ Konumu Sil</button>'
       +'</div>'
     +'</div>';
   }
@@ -3662,7 +3642,8 @@
     }).catch(function(){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; });
   }
 
-  function ciz(){
+  function ciz(haritaFitYap){
+    var fit = (haritaFitYap === undefined) ? true : !!haritaFitYap;
     gorunen=suz();
     var il=el("fil").value, ed=el("fed").value;
     // Üst Kurumsal CBS KPI Şeridi Güncellemesi
@@ -3686,7 +3667,7 @@
       tmTekHatCiz(seciliRow);
     }
     tablo(gorunen);
-    haritaCiz(true);
+    haritaCiz(fit);
     if(typeof tmEksikSayacGuncelle === "function") tmEksikSayacGuncelle();
   }
 
@@ -5794,31 +5775,31 @@
     if(el("btnTmEkleTumuGoster")){
       el("btnTmEkleTumuGoster").addEventListener("click", function(){
         TM_EKLE_TUMU_GOSTER = !TM_EKLE_TUMU_GOSTER;
-        this.textContent = TM_EKLE_TUMU_GOSTER ? "🔎 Tüm TM'ler Gösteriliyor" : "🔎 Yalnız Konumsuz TM'ler";
+        this.textContent = TM_EKLE_TUMU_GOSTER ? "📋 Yalnız Konumsuzlar" : "📋 Tüm TM'leri Göster";
         tmEkleSelectleriDoldur(el("tmEkleIlSec") ? el("tmEkleIlSec").value : "");
       });
     }
     if(el("tmEkleIlSec")){
       el("tmEkleIlSec").addEventListener("change", function(){
         var secIl = this.value || "";
-        if(secIl){
-          ilSecildigindeSenkronla(secIl);
-          ciz();
-        }
         tmEkleSelectleriDoldur(secIl);
       });
     }
     if(el("tmEkleTmSec")){
       el("tmEkleTmSec").addEventListener("change", tmEkleSecimDegisti);
     }
-    if(el("btnTmKonumKaydet")){
-      el("btnTmKonumKaydet").addEventListener("click", tmKonumKaliciKaydet);
+    if(el("btnTmKonumSil")){
+      el("btnTmKonumSil").addEventListener("click", function(){
+        var tmSel = el("tmEkleTmSec");
+        if(!tmSel || !tmSel.value || tmSel.value === "__YENI__") return;
+        var par = tmSel.value.split("|");
+        tmKonumKaliciSil(par[0], par[1]);
+      });
     }
   }
 
-
   /* ============================================================================
-     📍 TM KONUM EKLEME & KONUMU OLMAYAN TM'LERİ HARİTADAN KALICI EŞLEŞTİRME MOTORU
+     📍 TM KONUM EKLEME, TAŞIMA VE HATALI KONUMU SİLME MOTORU (SADE & UZAKLAŞMASIZ)
      ============================================================================ */
   var TM_OZEL_DEPO_KEY = "ae_ozel_tm_konumlar_v1";
   var TM_EKLE_MODU = false;
@@ -5833,11 +5814,12 @@
         if(d && typeof d === "object"){
           d.konumlar = d.konumlar || {};
           d.eklenenler = Array.isArray(d.eklenenler) ? d.eklenenler : [];
+          d.silinenler = d.silinenler || {};
           return d;
         }
       }
     } catch(e){}
-    return { konumlar: {}, eklenenler: [] };
+    return { konumlar: {}, eklenenler: [], silinenler: {} };
   }
 
   function ozelTmDepoYaz(depo){
@@ -5846,16 +5828,23 @@
     } catch(e){}
   }
 
-  // Hem localStorage hem de sunucu (../api/tm_konum.php) üzerindeki kalıcı TM konumlarını tumu dizisine uygular
   function ozelTmKonumlariUygula(depo){
     if(!depo || !tumu || !tumu.length) return false;
     var konumlar = depo.konumlar || {};
     var eklenenler = depo.eklenenler || [];
+    var silinenler = depo.silinenler || {};
     var degisti = false;
 
     tumu.forEach(function(r){
       var k = String(r.il||"").toLocaleUpperCase("tr").trim() + "|" + String(r.tm||"").toLocaleUpperCase("tr").trim();
-      if(konumlar[k] && konumlar[k].lat != null && konumlar[k].lon != null){
+      if(silinenler[k]){
+        if(r.lat !== null || r.lon !== null){
+          r.lat = null;
+          r.lon = null;
+          r.ozelKonum = false;
+          degisti = true;
+        }
+      } else if(konumlar[k] && konumlar[k].lat != null && konumlar[k].lon != null){
         var yLat = Number(konumlar[k].lat), yLon = Number(konumlar[k].lon);
         if(isFinite(yLat) && isFinite(yLon) && (r.lat !== yLat || r.lon !== yLon)){
           r.lat = yLat;
@@ -5888,7 +5877,8 @@
           m0110: mwe,
           lat: ek.lat != null ? Number(ek.lat) : null,
           lon: ek.lon != null ? Number(ek.lon) : null,
-          ozelKonum: true
+          ozelKonum: true,
+          kullaniciEkledi: true
         });
         degisti = true;
       }
@@ -5910,11 +5900,15 @@
           var birlesik = ozelTmDepoOku();
           if(d.konumlar){
             Object.keys(d.konumlar).forEach(function(k){
-              birlesik.konumlar[k] = d.konumlar[k];
+              if(!birlesik.silinenler || !birlesik.silinenler[k]){
+                birlesik.konumlar[k] = d.konumlar[k];
+              }
             });
           }
           if(Array.isArray(d.eklenenler)){
             d.eklenenler.forEach(function(ek){
+              var k = String(ek.il||"").toLocaleUpperCase("tr") + "|" + String(ek.tm||"").toLocaleUpperCase("tr");
+              if(birlesik.silinenler && birlesik.silinenler[k]) return;
               var varMi = birlesik.eklenenler.some(function(x){
                 return x.il === ek.il && x.tm === ek.tm && (x.bara||"Tek") === (ek.bara||"Tek");
               });
@@ -5923,20 +5917,16 @@
           }
           ozelTmDepoYaz(birlesik);
           if(ozelTmKonumlariUygula(birlesik)){
-            ciz();
+            ciz(false);
           }
         }
       }).catch(function(){});
   }
 
-  // Haritanın o an baktığı (veya filtrelenen) ili tespit eder
   function haritaBakilanIlBul(){
-    var filIl = el("fil") ? el("fil").value : "";
-    if(filIl) return filIl;
-    if(seciliRow && seciliRow.il) return seciliRow.il;
     if(MAP && IL_GEO && IL_GEO.features){
       var c = MAP.getCenter();
-      var pt = [c.lng, c.lat]; // GeoJSON [lon, lat]
+      var pt = [c.lng, c.lat];
       for(var i=0; i<IL_GEO.features.length; i++){
         var f = IL_GEO.features[i];
         var halkalar = geoHalkalar(f.geometry);
@@ -5947,17 +5937,19 @@
         }
       }
     }
+    var filIl = el("fil") ? el("fil").value : "";
+    if(filIl) return filIl;
+    if(seciliRow && seciliRow.il) return seciliRow.il;
     return "ÇANKIRI";
   }
 
-  // Benzersiz TM listesini döndürür: [{il, tm, edas, topMwe, baralar, lat, lon}]
   function benzersizTmListesi(ilFiltre, sadeceKonumsuz){
     var m = {}, list = [];
     tumu.forEach(function(r){
       if(ilFiltre && r.il !== ilFiltre) return;
       var k = r.il + "|" + r.tm;
       if(!m[k]){
-        m[k] = { il: r.il, tm: r.tm, edas: r.edas, topMwe: 0, baralar: [], lat: r.lat, lon: r.lon, row: r };
+        m[k] = { il: r.il, tm: r.tm, edas: r.edas, topMwe: 0, baralar: [], lat: r.lat, lon: r.lon, ozelKonum: !!r.ozelKonum, row: r };
         list.push(m[k]);
       }
       m[k].topMwe += av(r);
@@ -5966,11 +5958,16 @@
         m[k].lat = r.lat;
         m[k].lon = r.lon;
       }
+      if(r.ozelKonum) m[k].ozelKonum = true;
     });
     if(sadeceKonumsuz){
       list = list.filter(function(x){ return x.lat == null || x.lon == null; });
     }
     list.sort(function(a,b){
+      // Önce konumsuzlar, sonra alfabetik
+      var aKon = a.lat != null ? 1 : 0;
+      var bKon = b.lat != null ? 1 : 0;
+      if(aKon !== bKon) return aKon - bKon;
       return a.il.localeCompare(b.il, "tr") || a.tm.localeCompare(b.tm, "tr");
     });
     return list;
@@ -5991,8 +5988,7 @@
     var ilSel = el("tmEkleIlSec"), tmSel = el("tmEkleTmSec");
     if(!ilSel || !tmSel) return;
 
-    var aktifIl = tercihIl || el("fil").value || haritaBakilanIlBul() || "";
-    // İl başına konumsuz TM sayılarını hesapla
+    var aktifIl = (tercihIl !== undefined && tercihIl !== null) ? tercihIl : (el("fil").value || haritaBakilanIlBul() || "");
     var ilEksikSay = {}, ilToplamSay = {}, iller = {};
     benzersizTmListesi("", false).forEach(function(o){
       iller[o.il] = 1;
@@ -6003,44 +5999,35 @@
     var ilList = Object.keys(iller).sort(function(a,b){ return a.localeCompare(b, "tr"); });
     var topEksik = Object.keys(ilEksikSay).reduce(function(s,k){ return s + ilEksikSay[k]; }, 0);
 
-    var ilHtml = '<option value="">🇹🇷 Tüm İller (' + topEksik + ' Konumsuz TM)</option>';
+    var ilHtml = '<option value="">🇹🇷 Tüm İller (' + topEksik + ' Konumsuz)</option>';
     ilList.forEach(function(ilAd){
       var ekSay = ilEksikSay[ilAd] || 0;
-      var etiket = ilAd + (ekSay > 0 ? (" — ⚠️ " + ekSay + " Konumsuz TM") : (" (Tüm " + (ilToplamSay[ilAd]||0) + " TM Konumlu)"));
+      var etiket = ilAd + (ekSay > 0 ? (" (" + ekSay + " Konumsuz)") : " (Tam)");
       ilHtml += '<option value="' + esc(ilAd) + '"' + (ilAd === aktifIl ? ' selected' : '') + '>' + esc(etiket) + '</option>';
     });
     ilSel.innerHTML = ilHtml;
     ilSel.value = aktifIl;
 
-    // Seçili ildeki konumu olmayan TM'leri listele
-    var tmAdaylar = benzersizTmListesi(aktifIl, !TM_EKLE_TUMU_GOSTER);
+    var konumsuzlar = benzersizTmListesi(aktifIl, true);
     var tumIlTmler = benzersizTmListesi(aktifIl, false);
+    var gosterilecekler = (!TM_EKLE_TUMU_GOSTER && konumsuzlar.length > 0 && !tercihTm) ? konumsuzlar : tumIlTmler;
 
     if(el("tmEkleIlBadge")){
-      var konumsuzSay = benzersizTmListesi(aktifIl, true).length;
-      el("tmEkleIlBadge").textContent = (aktifIl || "Türkiye Geneli") + " · " + konumsuzSay + " Konumsuz TM";
+      el("tmEkleIlBadge").textContent = "📍 " + (aktifIl || "TÜRKİYE") + " (" + konumsuzlar.length + " Eksik)";
     }
 
     var tmHtml = "";
-    if(tmAdaylar.length){
-      tmHtml += '<optgroup label="📍 ' + esc(aktifIl || 'Türkiye') + ' — ' + (TM_EKLE_TUMU_GOSTER ? "Tüm TM&#39;ler" : "Konumu Olmayan TM&#39;ler") + ' (' + tmAdaylar.length + ' Adet)">';
-      tmAdaylar.forEach(function(o){
+    if(gosterilecekler.length){
+      tmHtml += '<optgroup label="' + esc(aktifIl || 'Türkiye') + ' TM Listesi (' + gosterilecekler.length + ' TM)">';
+      gosterilecekler.forEach(function(o){
         var k = o.il + "|" + o.tm;
-        var durumStr = (o.lat == null) ? "⚠️ Konumsuz" : ("✅ " + o.lat.toFixed(4) + ", " + o.lon.toFixed(4));
+        var durumStr = (o.lat == null) ? "⚠️ KONUMSUZ" : "📌 Konumlu";
         var sec = (tercihTm && o.tm === tercihTm) ? " selected" : "";
-        tmHtml += '<option value="' + esc(k) + '"' + sec + '>' + esc(o.il + " · " + o.tm) + ' (' + fmt(o.topMwe) + ' MWe · ' + esc(o.edas) + ' · ' + durumStr + ')</option>';
-      });
-      tmHtml += '</optgroup>';
-    } else if(tumIlTmler.length){
-      tmHtml += '<optgroup label="✅ ' + esc(aktifIl) + " İlindeki Tüm TM&#39;ler Konumlu — Düzenlemek İçin Seçin";
-      tumIlTmler.forEach(function(o){
-        var k = o.il + "|" + o.tm;
-        var sec = (tercihTm && o.tm === tercihTm) ? " selected" : "";
-        tmHtml += '<option value="' + esc(k) + '"' + sec + '>' + esc(o.il + " · " + o.tm) + ' (' + fmt(o.topMwe) + ' MWe · ✅ Konumlu)</option>';
+        tmHtml += '<option value="' + esc(k) + '"' + sec + '>' + durumStr + ' · ' + esc(o.tm) + ' (' + fmt(o.topMwe) + ' MWe)</option>';
       });
       tmHtml += '</optgroup>';
     }
-    tmHtml += '<option value="__YENI__">➕ Listede Olmayan Yeni TM Ekle (' + esc(aktifIl || 'Seçili İl') + ')…</option>';
+    tmHtml += '<option value="__YENI__">➕ Yeni TM Oluştur (' + esc(aktifIl || 'Seçili İl') + ')…</option>';
     tmSel.innerHTML = tmHtml;
 
     if(tercihTm){
@@ -6055,20 +6042,23 @@
   function tmEkleSecimDegisti(){
     var tmSel = el("tmEkleTmSec");
     var yeniSatir = el("tmEkleYeniSatir");
+    var silBtn = el("btnTmKonumSil");
     if(!tmSel || !yeniSatir) return;
     var isYeni = (tmSel.value === "__YENI__");
     yeniSatir.hidden = !isYeni;
     if(isYeni){
+      if(silBtn) silBtn.hidden = true;
       var ilAd = (el("tmEkleIlSec") && el("tmEkleIlSec").value) || haritaBakilanIlBul() || "AKSARAY";
       var ed = (IL2EDAS[ilAd] && IL2EDAS[ilAd][0]) || "";
       if(el("tmEkleYeniEdas") && !el("tmEkleYeniEdas").value) el("tmEkleYeniEdas").value = ed;
     } else if(tmSel.value){
       var par = tmSel.value.split("|");
-      var r = tumu.find(function(x){ return x.il === par[0] && x.tm === par[1]; });
-      if(r && r.lat != null && r.lon != null && el("tmEkleKoordInput")){
-        el("tmEkleKoordInput").value = r.lat.toFixed(5) + ", " + r.lon.toFixed(5);
-      } else if(el("tmEkleKoordInput")){
-        el("tmEkleKoordInput").value = "";
+      var r = tumu.find(function(x){ return x.il === par[0] && x.tm === par[1] && x.lat != null; });
+      if(silBtn) silBtn.hidden = !r;
+      if(el("tmEkleDurumMesaj")){
+        el("tmEkleDurumMesaj").textContent = r
+          ? ("📌 " + par[1] + " konumlu — taşımak için haritaya tıklayın veya '🗑️ Konumu Sil'e basın.")
+          : ("🎯 " + par[1] + " seçili — haritada TM'nin olduğu yere tıklayın.");
       }
     }
   }
@@ -6081,16 +6071,9 @@
     if(el("harita")) el("harita").classList.add("harita-imlec-tm");
     if(el("btnTmKonumEkleAc")) el("btnTmKonumEkleAc").classList.add("on");
 
-    var hedefIl = zorlaIl || el("fil").value || haritaBakilanIlBul();
+    var hedefIl = zorlaIl || haritaBakilanIlBul();
+    if(zorlaTm) TM_EKLE_TUMU_GOSTER = true;
     tmEkleSelectleriDoldur(hedefIl, zorlaTm);
-
-    if(el("tmEkleDurumMesaj")){
-      var secMetin = el("tmEkleTmSec") && el("tmEkleTmSec").selectedOptions[0] ? el("tmEkleTmSec").selectedOptions[0].text : "";
-      el("tmEkleDurumMesaj").textContent = "🎯 Harita üzerinde TM'nin bulunduğu noktaya tıklayın: " + (zorlaTm || secMetin.split("(")[0]);
-    }
-    if(el("haritaBolum")){
-      try{ el("haritaBolum").scrollIntoView({ behavior: "smooth", block: "center" }); }catch(e){}
-    }
   }
 
   function tmKonumEkleModuKapat(){
@@ -6104,70 +6087,26 @@
     }
   }
 
-  // Haritaya tıklandığında koordinatı alır, geçici işaretçiyi koyar ve doğrudan kalıcı olarak kaydeder
+  // Haritaya tıklandığında mevcut yakınlaştırmayı (zoom) ASLA bozmadan doğrudan o noktaya TM'yi kaydeder
   function tmHaritaTiklandi(lat, lon, tiklananIl){
     if(!TM_EKLE_MODU) return;
-    var kInput = el("tmEkleKoordInput");
-    if(kInput) kInput.value = lat.toFixed(6) + ", " + lon.toFixed(6);
-
-    // Eğer "Tüm İller" seçiliyse ve tıklanan yerde bir il varsa ve henüz özel bir TM seçilmemişse o ilin TM'lerini getir
     var ilSel = el("tmEkleIlSec"), tmSel = el("tmEkleTmSec");
-    if(tiklananIl && ilSel && !ilSel.value){
-      ilSel.value = tiklananIl;
-      tmEkleSelectleriDoldur(tiklananIl);
-    }
-
-    if(MAP){
-      if(TM_GECICI_MARKER){
-        try{ MAP.removeLayer(TM_GECICI_MARKER); }catch(e){}
-      }
-      TM_GECICI_MARKER = L.circleMarker([lat, lon], {
-        pane: "tmPane",
-        radius: 11,
-        color: "#FDE047",
-        weight: 3,
-        fillColor: "#DC2626",
-        fillOpacity: 0.95
-      }).addTo(MAP);
-    }
-
-    // Seçili TM varsa (veya yeni TM adı yazılmışsa) anında kalıcı kaydet
-    if(tmSel && tmSel.value === "__YENI__"){
-      var yeniAd = el("tmEkleYeniAd") ? el("tmEkleYeniAd").value.trim() : "";
-      if(!yeniAd){
-        if(el("tmEkleDurumMesaj")){
-          el("tmEkleDurumMesaj").textContent = "📍 Koordinat alındı (" + lat.toFixed(5) + ", " + lon.toFixed(5) + ") — Yeni TM adını yazıp 'Kalıcı Kaydet'e basın.";
-        }
-        if(el("tmEkleYeniAd")) el("tmEkleYeniAd").focus();
-        return;
-      }
-    }
-    tmKonumKaliciKaydet();
-  }
-
-  function tmKonumKaliciKaydet(){
-    var ilSel = el("tmEkleIlSec"), tmSel = el("tmEkleTmSec"), kInput = el("tmEkleKoordInput");
-    if(!tmSel || !kInput) return;
-
-    var kStr = (kInput.value || "").trim();
-    var nums = kStr.replace(/,/g, " ").trim().split(/\s+/);
-    var lat = parseFloat(nums[0]), lon = parseFloat(nums[1]);
-    if(!isFinite(lat) || !isFinite(lon) || lat < 34 || lat > 43.5 || lon < 25 || lon > 45.5){
-      alert("Lütfen önce harita üzerinde Trafo Merkezinin bulunduğu yere tıklayın veya geçerli bir Türkiye koordinatı (Örn: 40.4812, 33.2765) girin.");
-      return;
-    }
+    if(!tmSel) return;
 
     var hedefIl = "", hedefTm = "", isYeni = (tmSel.value === "__YENI__");
     var yeniBara = "Tek", yeniEdas = "", yeniMwe = 0;
 
     if(isYeni){
-      hedefIl = (ilSel && ilSel.value) || haritaBakilanIlBul() || "AKSARAY";
+      hedefIl = (ilSel && ilSel.value) || tiklananIl || haritaBakilanIlBul() || "AKSARAY";
       hedefTm = (el("tmEkleYeniAd") ? el("tmEkleYeniAd").value.trim() : "").toLocaleUpperCase("tr");
       if(!hedefTm){
-        alert("Lütfen eklenecek yeni Trafo Merkezinin adını girin (Örn: ŞABANÖZÜ OSB TM).");
+        if(el("tmEkleDurumMesaj")){
+          el("tmEkleDurumMesaj").textContent = "⚠️ Önce kutuya Yeni TM Adını yazın, sonra haritaya tıklayın.";
+        }
+        if(el("tmEkleYeniAd")) el("tmEkleYeniAd").focus();
         return;
       }
-      if(!/TM$/i.test(hedefTm)) hedefTm += " TM";
+      if(!/\bTM$/i.test(hedefTm)) hedefTm += " TM";
       yeniBara = (el("tmEkleYeniBara") ? el("tmEkleYeniBara").value.trim() : "Tek") || "Tek";
       yeniEdas = (el("tmEkleYeniEdas") ? el("tmEkleYeniEdas").value.trim() : "") || (IL2EDAS[hedefIl] && IL2EDAS[hedefIl][0]) || "EDAŞ";
       yeniMwe = parseFloat(el("tmEkleYeniMwe") ? el("tmEkleYeniMwe").value : 0) || 0;
@@ -6175,15 +6114,12 @@
       var par = (tmSel.value || "").split("|");
       hedefIl = (par[0] || "").toLocaleUpperCase("tr").trim();
       hedefTm = (par[1] || "").toLocaleUpperCase("tr").trim();
-      if(!hedefIl || !hedefTm){
-        alert("Lütfen listeden konumu belirlenecek Trafo Merkezini seçin.");
-        return;
-      }
+      if(!hedefIl || !hedefTm) return;
     }
 
-    // 1. Yerel kalıcı depoya (localStorage) kaydet
     var depo = ozelTmDepoOku();
     var anahtar = hedefIl + "|" + hedefTm;
+    if(depo.silinenler) delete depo.silinenler[anahtar];
     depo.konumlar[anahtar] = {
       il: hedefIl,
       tm: hedefTm,
@@ -6206,11 +6142,8 @@
       });
     }
     ozelTmDepoYaz(depo);
-
-    // 2. Bellekteki tumu dizisine anında uygula
     ozelTmKonumlariUygula(depo);
 
-    // 3. Sunucu API'sine (../api/tm_konum.php) POST ederek sunucuda ve kapasite3.json'da da kalıcı hale getir
     fetch("../api/tm_konum.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -6227,25 +6160,89 @@
       })
     }).catch(function(){});
 
-    // 4. Haritayı, tabloyu ve tek hat şemasını yeni eklenen TM seçili olacak şekilde güncelle
     var eklenenRow = tumu.find(function(x){ return x.il === hedefIl && x.tm === hedefTm && av(x) > 0; })
                   || tumu.find(function(x){ return x.il === hedefIl && x.tm === hedefTm; });
     if(eklenenRow){
       seciliRow = eklenenRow;
-    }
-    KATMAN_ACIK.kapasite = true;
-    SON_CIZIM_ANAHTAR.tm = "";
-    ciz();
-    if(eklenenRow){
-      seciliTmHaritaVurgula(eklenenRow, true);
+      tmTekHatCiz(eklenenRow);
     }
 
-    // Sonraki konumsuz TM'yi otomatik seçmeye hazırla
+    // Harita zoom'unu ve konumunu ASLA değiştirmeden (fitYap=false, autoPan=false) sadece balonları yenile!
+    KATMAN_ACIK.kapasite = true;
+    SON_CIZIM_ANAHTAR.tm = "";
+    gorunen = suz();
+    tablo(gorunen);
+    haritaCiz(false);
+    seciliTmHaritaVurgula(eklenenRow, false);
+
+    tmEksikSayacGuncelle();
     tmEkleSelectleriDoldur(hedefIl);
     if(el("tmEkleDurumMesaj")){
-      el("tmEkleDurumMesaj").innerHTML = "✅ <b>" + esc(hedefIl + " · " + hedefTm) + "</b> (" + lat.toFixed(5) + ", " + lon.toFixed(5) + ") kalıcı olarak sisteme eklendi!";
+      el("tmEkleDurumMesaj").innerHTML = "✅ <b>" + esc(hedefTm) + "</b> buraya kaydedildi! (Hatalıysa <b>🗑️ Konumu Sil</b> ile silebilirsiniz)";
     }
   }
+
+  // Hatalı eklenen veya yanlış yerde olan TM konumunu kalıcı olarak siler (veya özel eklenen TM ise tamamen kaldırır)
+  function tmKonumKaliciSil(il, tm){
+    var hedefIl = String(il || "").toLocaleUpperCase("tr").trim();
+    var hedefTm = String(tm || "").toLocaleUpperCase("tr").trim();
+    if(!hedefIl || !hedefTm) return;
+
+    var depo = ozelTmDepoOku();
+    var anahtar = hedefIl + "|" + hedefTm;
+    delete depo.konumlar[anahtar];
+    depo.silinenler = depo.silinenler || {};
+    depo.silinenler[anahtar] = true;
+    depo.eklenenler = (depo.eklenenler || []).filter(function(x){
+      return !(String(x.il||"").toLocaleUpperCase("tr").trim() === hedefIl && String(x.tm||"").toLocaleUpperCase("tr").trim() === hedefTm);
+    });
+    ozelTmDepoYaz(depo);
+
+    // Bellekteki tumu dizisinden koordinatı sıfırla (kullanıcı sonradan eklediyse diziden çıkar)
+    for(var i = tumu.length - 1; i >= 0; i--){
+      if(tumu[i].il === hedefIl && tumu[i].tm === hedefTm){
+        if(tumu[i].kullaniciEkledi){
+          tumu.splice(i, 1);
+        } else {
+          tumu[i].lat = null;
+          tumu[i].lon = null;
+          tumu[i].ozelKonum = false;
+        }
+      }
+    }
+
+    fetch("../api/tm_konum.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        islem: "sil",
+        il: hedefIl,
+        tm: hedefTm
+      })
+    }).catch(function(){});
+
+    if(MAP) try{ MAP.closePopup(); }catch(e){}
+    if(SECILI_TM_KAT) SECILI_TM_KAT.clearLayers();
+    SON_CIZIM_ANAHTAR.tm = "";
+    gorunen = suz();
+    tablo(gorunen);
+    haritaCiz(false);
+
+    tmEksikSayacGuncelle();
+    tmEkleSelectleriDoldur(hedefIl, hedefTm);
+    if(el("tmEkleDurumMesaj")){
+      el("tmEkleDurumMesaj").innerHTML = "🗑️ <b>" + esc(hedefTm) + "</b> konumu silindi. Haritadan yeni yerine tıklayabilirsiniz.";
+    }
+  }
+
+  window.tmPopupKonumDuzenle = function(il, tm){
+    if(MAP) try{ MAP.closePopup(); }catch(e){}
+    tmKonumEkleModuAc(il, tm);
+  };
+
+  window.tmPopupKonumSil = function(il, tm){
+    tmKonumKaliciSil(il, tm);
+  };
 
   pgesInit();
 

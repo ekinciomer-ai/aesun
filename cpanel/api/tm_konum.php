@@ -1,7 +1,7 @@
 <?php
-// Trafo Merkezi (TM) Özel Konum (Koordinat) ve Yeni TM Ekleme Kalıcı Depo Servisi
+// Trafo Merkezi (TM) Özel Konum (Koordinat) ve Yeni TM Ekleme / Silme Kalıcı Depo Servisi
 // Kapasite sayfasında harita üzerinden konumu belirlenen TM'leri hem sunucu deposuna (~/ae_canli/tm_ozel_konumlar.json)
-// hem de (yazılabilirse) kapasite/kapasite3.json içine kalıcı olarak yazar.
+// hem de (yazılabilirse) kapasite/kapasite3.json içine kalıcı olarak yazar veya siler.
 ini_set('serialize_precision', '-1');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -39,7 +39,7 @@ function yaz_depo(string $dosya, array $veri): bool {
 }
 
 // kapasite3.json dosyasını da yerinde günceller (sunucuda statik JSON okuyan tüm istemciler için anında kalıcı olur)
-function kapasite_json_guncelle(string $kapDosya, array $depo): bool {
+function kapasite_json_guncelle(string $kapDosya, array $depo, ?string $silAnahtar = null): bool {
   if (!is_file($kapDosya) || !is_writable($kapDosya)) return false;
   $raw = @file_get_contents($kapDosya);
   if (!$raw) return false;
@@ -52,6 +52,14 @@ function kapasite_json_guncelle(string $kapDosya, array $depo): bool {
   foreach ($d['rows'] as &$r) {
     if (!is_array($r) || count($r) < 9) continue;
     $anahtar = mb_strtoupper(trim((string)$r[0]), 'UTF-8') . '|' . mb_strtoupper(trim((string)$r[1]), 'UTF-8');
+    if ($silAnahtar !== null && $anahtar === $silAnahtar) {
+      if ($r[7] !== null || $r[8] !== null) {
+        $r[7] = null;
+        $r[8] = null;
+        $degisti = true;
+      }
+      continue;
+    }
     if (isset($konumlar[$anahtar])) {
       $k = $konumlar[$anahtar];
       $yLat = round((float)$k['lat'], 6);
@@ -128,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       return !(mb_strtoupper(trim((string)($x['il'] ?? '')), 'UTF-8') === $il && mb_strtoupper(trim((string)($x['tm'] ?? '')), 'UTF-8') === $tm);
     }));
     yaz_depo($DEPO_DOSYA, $depo);
+    kapasite_json_guncelle($KAPASITE_JSON, $depo, $anahtar);
     echo json_encode(['durum' => 'ok', 'depo' => $depo], JSON_UNESCAPED_UNICODE);
     exit;
   }
@@ -157,7 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bara = trim((string)($girdi['bara'] ?? 'Tek')) ?: 'Tek';
     $edas = trim((string)($girdi['edas'] ?? ''));
     $mwe  = isset($girdi['mwe']) && is_numeric($girdi['mwe']) ? round((float)$girdi['mwe'], 2) : 0.0;
-    // Varsa güncelle, yoksa ekle
     $bulundu = false;
     foreach ($depo['eklenenler'] as &$ek) {
       if (mb_strtoupper(trim((string)($ek['il'] ?? '')), 'UTF-8') === $il && mb_strtoupper(trim((string)($ek['tm'] ?? '')), 'UTF-8') === $tm) {

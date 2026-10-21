@@ -565,32 +565,38 @@ async function kapasiteVerisiYukle(){
   try {
     const r = await fetch("kapasite3.json");
     const j = await r.json();
-    const C = j.cols || {};
+    // kapasite3.json formatı: [0:il, 1:tm_adi, 2:bara, 3:edas_veya_osb, 4:kap_0203, 5:kap_1607, 6:kap_0110, 7:lat, 8:lng]
     TUM_TMLER = (j.rows || []).map((row, idx) => {
-      const il = row[C.il ?? 4] || "";
-      const edas = row[C.edas ?? 3] || ilEdasBul(il);
+      const il = String(row[0] || "").trim();
+      const ad = String(row[1] || "").trim();
+      const bara = String(row[2] || "Tek").trim();
+      const hamEdas = String(row[3] || "").trim();
+      const bolgeEdas = ilEdasBul(il) || hamEdas;
       return {
         idx,
-        kod: row[C.kod ?? 1] || "",
-        ad: row[C.ad ?? 2] || "",
-        edas: edas,
+        kod: `${il}-${idx+1}`,
+        ad: ad,
+        edas: hamEdas || bolgeEdas,
+        bolgeEdas: bolgeEdas,
         il: il,
-        bara: row[C.bara ?? 5] || "",
-        gerilim: row[C.gerilim ?? 6] || "31,5",
-        k_0203: row[C.k_0203 ?? 7],
-        k_1607: row[C.k_1607 ?? 8],
-        k_guncel: row[C.k_0110 ?? 9] ?? row[C.k_1607 ?? 8] ?? row[C.k_0203 ?? 7] ?? 0
+        bara: bara,
+        gerilim: "31,5",
+        k_0203: Number(row[4] ?? 0),
+        k_1607: Number(row[5] ?? 0),
+        k_guncel: Number(row[6] ?? row[5] ?? row[4] ?? 0),
+        lat: Number(row[7] ?? 0),
+        lng: Number(row[8] ?? 0)
       };
     });
   } catch(e) {
     TUM_TMLER = [
-      {idx:0, kod:"50-01", ad:"AKSARAY TM", edas:"MERAM EDAŞ", il:"AKSARAY", bara:"B1-B2", gerilim:"31,5", k_0203:18.5, k_1607:16.2, k_guncel:14.8},
-      {idx:1, kod:"42-03", ad:"KONYA 3 TM", edas:"MERAM EDAŞ", il:"KONYA", bara:"B1", gerilim:"31,5", k_0203:24.0, k_1607:19.4, k_guncel:15.6},
-      {idx:2, kod:"06-01", ad:"BAŞKENT OSB TM", edas:"BAŞKENT EDAŞ", il:"ANKARA", bara:"B1", gerilim:"34,5", k_0203:30.0, k_1607:25.0, k_guncel:21.2}
+      {idx:0, kod:"68-01", ad:"AKSARAY TM", edas:"Meram EDAŞ", bolgeEdas:"MERAM EDAŞ", il:"AKSARAY", bara:"TR-A", gerilim:"31,5", k_0203:0, k_1607:0, k_guncel:0},
+      {idx:1, kod:"68-02", ad:"ORTAKÖY TM", edas:"Meram EDAŞ", bolgeEdas:"MERAM EDAŞ", il:"AKSARAY", bara:"Tek", gerilim:"31,5", k_0203:0, k_1607:0, k_guncel:0.5},
+      {idx:2, kod:"42-03", ad:"KONYA 3 TM", edas:"Meram EDAŞ", bolgeEdas:"MERAM EDAŞ", il:"KONYA", bara:"TR-A", gerilim:"31,5", k_0203:24.0, k_1607:19.4, k_guncel:15.6}
     ];
   }
   ilSecenekleriniDoldur("");
-  tmSecenekleriniDoldur();
+  tmSecenekleriniDoldur(true);
   baslangicParametreleriniUygula();
 }
 
@@ -614,41 +620,64 @@ function bsvEdasDegisti(){
   const edas = document.getElementById("bsvEdas").value;
   ilSecenekleriniDoldur(edas);
   document.getElementById("bsvIl").value = "";
-  tmSecenekleriniDoldur();
+  tmSecenekleriniDoldur(true);
 }
 
 function bsvIlDegisti(){
   const il = document.getElementById("bsvIl").value;
   if(il){
     const edas = ilEdasBul(il);
-    if(edas) document.getElementById("bsvEdas").value = edas;
+    if(edas){
+      document.getElementById("bsvEdas").value = edas;
+      ilSecenekleriniDoldur(edas);
+      document.getElementById("bsvIl").value = il;
+    }
   }
-  tmSecenekleriniDoldur();
+  tmSecenekleriniDoldur(true);
 }
 
-function tmSecenekleriniDoldur(){
+function tmSecenekleriniDoldur(otoSec){
   const edas = document.getElementById("bsvEdas").value;
   const il = document.getElementById("bsvIl").value;
   const sel = document.getElementById("bsvTmSec");
+  const oncekiVal = sel.value;
   const filtreli = TUM_TMLER.filter(t => {
-    if(edas && trNorm(t.edas) !== trNorm(edas) && !trNorm(t.edas).includes(trNorm(edas.replace(" EDAŞ","")))) return false;
-    if(il && trNorm(t.il) !== trNorm(il)) return false;
+    if(il){
+      return trNorm(t.il) === trNorm(il);
+    }
+    if(edas){
+      const bolgeIller = EDAS_ILLER[edas] || [];
+      if(bolgeIller.some(x => trNorm(x) === trNorm(t.il))) return true;
+      if(trNorm(t.bolgeEdas) === trNorm(edas) || trNorm(t.edas) === trNorm(edas)) return true;
+      return false;
+    }
     return true;
   });
   document.getElementById("tmSayacEtiket").textContent = filtreli.length + " TM / Bara";
   sel.innerHTML = '<option value="">— Trafo Merkezi Seçiniz (' + filtreli.length + ' kayıt) —</option>' +
-    filtreli.slice(0, 600).map(t => {
+    filtreli.map(t => {
       const kap = (t.k_guncel != null ? Number(t.k_guncel).toFixed(2) : "0.00") + " MWe";
-      return `<option value="${t.idx}">${t.il} · ${t.ad} (${t.bara || 'OG'}) — Kalan: ${kap}</option>`;
+      const dagitimEtiket = t.edas && trNorm(t.edas) !== trNorm(t.bolgeEdas) ? ` [${t.edas}]` : "";
+      return `<option value="${t.idx}">${t.il} · ${t.ad} (${t.bara || 'Tek'})${dagitimEtiket} — Kalan: ${kap}</option>`;
     }).join("");
-  if(filtreli.length > 0 && !sel.value){
-    sel.value = String(filtreli[0].idx);
+
+  if(filtreli.length > 0){
+    const halaVar = !otoSec && filtreli.some(t => String(t.idx) === String(oncekiVal));
+    if(halaVar){
+      sel.value = oncekiVal;
+    } else {
+      // Varsa kalan kapasitesi > 0 olan ilk TM'yi, yoksa listedeki ilk TM'yi otomatik seç
+      const pozitif = filtreli.find(t => Number(t.k_guncel) > 0) || filtreli[0];
+      sel.value = String(pozitif.idx);
+    }
     bsvTmSecildi();
   }
 }
 
 function bsvTmSecildi(){
-  const idx = Number(document.getElementById("bsvTmSec").value);
+  const val = document.getElementById("bsvTmSec").value;
+  if(val === "") return;
+  const idx = Number(val);
   const t = TUM_TMLER.find(x => x.idx === idx);
   if(!t) return;
   SECILI_TM_OBJ = t;
@@ -668,12 +697,15 @@ function baslangicParametreleriniUygula(){
 
   const hedefEdas = p.get("edas") || (aktarilan && aktarilan.edas) || "MERAM EDAŞ";
   const hedefIl = p.get("il") || (aktarilan && aktarilan.il) || "AKSARAY";
-  const hedefTm = p.get("tm") || (aktarilan && aktarilan.ad) || "AKSARAY TM";
+  const hedefTm = p.get("tm") || (aktarilan && (aktarilan.tm || aktarilan.ad)) || "AKSARAY TM";
+  const hedefBara = p.get("bara") || (aktarilan && aktarilan.bara) || "";
 
   if(hedefEdas){
     const edSel = document.getElementById("bsvEdas");
+    const ilBazliEdas = hedefIl ? ilEdasBul(hedefIl) : "";
+    const arananEdas = ilBazliEdas || hedefEdas;
     for(const opt of edSel.options){
-      if(trNorm(opt.value) === trNorm(hedefEdas) || (opt.value && trNorm(hedefEdas).includes(trNorm(opt.value.replace(" EDAŞ",""))))) {
+      if(trNorm(opt.value) === trNorm(arananEdas) || (opt.value && trNorm(arananEdas).includes(trNorm(opt.value.replace(" EDAŞ",""))))) {
         edSel.value = opt.value; break;
       }
     }
@@ -685,18 +717,25 @@ function baslangicParametreleriniUygula(){
       if(trNorm(opt.value) === trNorm(hedefIl)){ ilSel.value = opt.value; break; }
     }
   }
-  tmSecenekleriniDoldur();
+  tmSecenekleriniDoldur(true);
   if(hedefTm){
-    const eslesen = TUM_TMLER.find(x => trNorm(x.ad).includes(trNorm(hedefTm)));
+    const eslesen = TUM_TMLER.find(x =>
+      (!hedefIl || trNorm(x.il) === trNorm(hedefIl)) &&
+      trNorm(x.ad).includes(trNorm(hedefTm)) &&
+      (!hedefBara || trNorm(x.bara) === trNorm(hedefBara))
+    ) || TUM_TMLER.find(x =>
+      (!hedefIl || trNorm(x.il) === trNorm(hedefIl)) &&
+      trNorm(x.ad).includes(trNorm(hedefTm))
+    );
     if(eslesen){
       document.getElementById("bsvTmSec").value = String(eslesen.idx);
-      SECILI_TM_OBJ = eslesen;
+      bsvTmSecildi();
     }
   }
   haritaBaslat();
   kayitliBasvurulariYukleVeListele();
   hesaplaVeCiz();
-  if(sekme === "kayitlar") anaSekmeDegistir("kayitlar");
+  if(sekme === "kayitlar" || sekme === "kayitli") anaSekmeDegistir("kayitlar");
 }
 
 function haritaBaslat(){
@@ -774,11 +813,12 @@ function hazirProjeYukle(anahtar){
   document.getElementById("bsvEdas").value = p.edas;
   ilSecenekleriniDoldur(p.edas);
   document.getElementById("bsvIl").value = p.il;
-  tmSecenekleriniDoldur();
-  const tmBul = TUM_TMLER.find(x => trNorm(x.ad).includes(trNorm(p.tmAd)));
+  tmSecenekleriniDoldur(true);
+  const tmBul = TUM_TMLER.find(x => trNorm(x.il) === trNorm(p.il) && trNorm(x.ad).includes(trNorm(p.tmAd))) || TUM_TMLER.find(x => trNorm(x.ad).includes(trNorm(p.tmAd)));
   if(tmBul){
     document.getElementById("bsvTmSec").value = String(tmBul.idx);
     SECILI_TM_OBJ = tmBul;
+    document.getElementById("bsvBaglantiMetni").value = `${tmBul.ad} (${tmBul.bara || 'OG Bara'}) — ${tmBul.gerilim || '31,5'} kV OG Fider`;
   }
   document.getElementById("fParselIl").value = p.parselIl;
   document.getElementById("fParselIlce").value = p.parselIlce;

@@ -428,7 +428,12 @@
     <a class="emblem" href="../" aria-label="Portal" tabindex="-1"><svg width="40" height="40" viewBox="0 0 56 56" aria-hidden="true"><path d="M28 2a26 26 0 0 0 0 52z" fill="#D32027"/><path d="M28 2a26 26 0 0 1 0 52z" fill="#3C4047"/><path d="M31 9 L19 31 H27 L23 47 L37 23 H29 Z" fill="#FFFFFF"/></svg></a>
     <a class="word" href="../"><b>AKSARAY</b>&nbsp;<b>ENERJİ</b></a>
   </div>
-  <nav class="nav" aria-label="Menü"><a href="../">Portal ana</a><a href="../gundem/">Gündem</a><a href="./" aria-current="page">Kapasite</a></nav>
+  <nav class="nav" aria-label="Menü">
+    <a href="../">Portal ana</a>
+    <a href="../gundem/">Gündem</a>
+    <a href="./" aria-current="page">Kapasite</a>
+    <a href="basvuru.html" target="_blank" rel="noopener" id="navYeniBasvuruBtn" style="background:#0F766E;color:#fff;padding:6px 12px;border-radius:8px;font-weight:800">➕ Yeni Başvuru Yap &amp; Dosya Hazırla ↗</a>
+  </nav>
 </div></header>
 <main>
 <section class="band"><div class="wrap">
@@ -478,9 +483,9 @@
       </div>
       <div class="ust-secim-grup" id="hizliBolge">
         <label class="ust-select-kutu" id="ustEdasKutu" for="ustEdasSec">
-          <span class="ust-sel-lbl">⚡ 21 Dağıtım Bölgesi (EDAŞ):</span>
-          <select id="ustEdasSec" class="ust-select" aria-label="21 Dağıtım Bölgesi (EDAŞ) Seçimi">
-            <option value="">🇹🇷 Türkiye Geneli (Tüm 21 EDAŞ Bölgesi)</option>
+          <span class="ust-sel-lbl">⚡ Dağıtım Bölgesi (22 Seçenek):</span>
+          <select id="ustEdasSec" class="ust-select" aria-label="21 Dağıtım Bölgesi (EDAŞ) ve Tüm İller Seçimi">
+            <option value="">🇹🇷 Tüm İller (21 Dağıtım Bölgesi)</option>
           </select>
         </label>
         <label class="ust-select-kutu" id="ustIlKutu" for="ustIlSec">
@@ -490,7 +495,8 @@
           </select>
         </label>
         <span class="ust-mwe-rozet" id="ustSecimMweRozet" title="Seçili Bölge / İl Güncel Kapasite Toplamı">— MWe</span>
-        <button type="button" class="k-btn" id="btnUstSifirla" style="min-height:38px;padding:0 12px;font-size:12px">🇹🇷 Tüm Türkiye'yi Göster</button>
+        <button type="button" class="k-btn" id="btnUstSifirla" style="min-height:38px;padding:0 12px;font-size:12px">🇹🇷 Tüm İller</button>
+        <button type="button" class="k-btn" id="btnUstYeniBasvuru" style="min-height:38px;padding:0 13px;font-size:12px;background:#0F766E;color:#fff;border-color:#0F766E;font-weight:800">➕ Yeni Başvuru Yap ↗</button>
       </div>
     </div>
   </div>
@@ -787,211 +793,28 @@
     </div>
   </div>
 
-  <!-- 4C. PARSEL SORGULA & KML/KMZ YÜKLE → CAD GES YERLEŞİMİ · APLİKASYON KROKİSİ (ED50 3°/6°) · TEK HAT ŞEMASI · TEKNİK DEĞERLENDİRME & EK-1 BAŞVURU FORMU -->
+  <!-- 4C. YENİ SAYFA / SEKME BAŞVURU MERKEZİ YÖNLENDİRME KARTI (AYNI SAYFADA KARIŞMAMASI İÇİN AYRI SEKMEDE AÇILIR) -->
   <div class="pges-panel" id="parselGesBolum">
-    <div class="pges-ust">
+    <div class="pges-ust" style="border-bottom:none;padding-bottom:0">
       <div class="pges-ust-sol">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <span class="pges-rozet">📐 TKGM PARSEL &amp; KML/KMZ → AeCAD GES MÜHENDİSLİK PAKETİ</span>
-          <span class="durum-pill acik" id="pgesDurumRozet">Hazır · İmza Alanları Boş Şablon</span>
+          <span class="pges-rozet">📄 LİSANSSIZ GES BAŞVURU &amp; MÜHENDİSLİK DOSYASI MERKEZİ (AYRI SEKME)</span>
+          <span class="durum-pill acik" id="pgesDurumRozet">Seçili TM Kapasite Bilgisi Otomatik Aktarılır</span>
         </div>
-        <h2>4C. Parsel Sorgulama, KML/KMZ Yükleme, CAD GES Yerleşimi, Aplikasyon Krokisi (ED50 3°/6°), Tek Hat &amp; Başvuru Formları</h2>
-        <p>Parsel sorgulayın veya TKGM / Google Earth <b>.KML / .KMZ</b> dosyasını ekleyin: <b>AeCAD</b> motoruyla parsel içine otomatik GES yerleşimi yapılır; <b>Aplikasyon Krokisi</b> (ED50 3°, ED50 6° ve ITRF96 3° köşe koordinatlarıyla), <b>GES Tek Hat Şeması</b> (Tuğral Döküm GES şablonunda), <b>Teknik Değerlendirme Formu</b> ve <b>Ek-1 Lisanssız Başvuru Formu</b> (imza kısımları boş bırakılarak) anında üretilir.</p>
+        <h2>4C. Yeni GES Başvurusu Yap, Resmi EDAŞ Evrak Sırasıyla Dosya Hazırla &amp; Kayıtlı Başvuruları Yönet</h2>
+        <p>Harita ve kapasite ekranıyla karışmaması için <b>GES Başvuru &amp; Mühendislik Paketi</b> ayrı bir sekmede çalışır. Seçtiğiniz <b>Trafo Merkezi (TM)</b>, <b>Dağıtım Bölgesi (EDAŞ)</b> ve <b>MWe Kapasite</b> bilgileri otomatik aktarılır; <b>Dağıtım Şirketlerinin Resmi Başvuru Evrak Sırasına</b> göre şirket/arazi/teknik bilgiler girilir, <b>düzeltilmiş AC Kablo Planlı Yerleşim Paftası</b>, <b>Aplikasyon Krokisi (altı boş)</b>, <b>Onaylı Tek Hat Şeması</b>, <b>Teknik Değerlendirme</b> ve <b>Ek-1 Başvuru Formu</b> üretilerek tüm başvurular kayıtlı tutulur.</p>
       </div>
       <div class="pges-ust-sag">
-        <button type="button" class="pges-btn yesil" id="btnPgesAecadAc" title="Parseli ve GES yerleşimini AeCAD tam ekran CAD uygulamasında aç">🚀 AeCAD Uygulamasında Aç &amp; Düzenle ↗</button>
-        <button type="button" class="pges-btn koyu" id="btnPgesDxfIndir" title="Parsel sınırı, GES masaları, inverter, trafo ve koordinat tablolarını AutoCAD DXF olarak indir">💾 AutoCAD (.DXF) İndir</button>
-        <button type="button" class="pges-btn kirmizi" id="btnPgesTumunuYazdir" title="Aplikasyon Krokisi, Tek Hat Şeması, Teknik Değerlendirme ve Ek-1 Başvuru Formunu tek seferde yazdır / PDF kaydet">🖨️ Tüm Başvuru Paketini Yazdır / PDF</button>
+        <button type="button" class="pges-btn yesil" id="btnAcYeniBasvuruSekme" style="padding:11px 18px;font-size:13.5px">➕ Seçili TM İçin Yeni Başvuru Yap (Yeni Sekmede Aç) ↗</button>
+        <button type="button" class="pges-btn koyu" id="btnAcKayitliBasvurularSekme" style="padding:11px 16px;font-size:13px">🗂️ Kayıtlı Başvurularım (<span id="anaKayitliBasvuruSayi">3</span>) ↗</button>
       </div>
-    </div>
-
-    <div class="pges-grid-ust">
-      <!-- KUTU 1: PARSEL SORGULA & KML/KMZ YÜKLE -->
-      <div class="pges-kutu">
-        <h3><span>1. Parsel Sorgula &amp; KML / KMZ Dosyası Ekle</span><small>TKGM / CBS</small></h3>
-        <label class="pges-drop" id="pgesDropArea" for="pgesKmlInput">
-          <b id="pgesDropBaslik">📂 KML, KMZ veya GeoJSON Dosyasını Buraya Sürükleyin ya da Tıklayın</b>
-          <span id="pgesDropAlt">TKGM Parsel Sorgu (.kml / .json) ve Google Earth (.kmz) dosyalarından İl, İlçe, Mahalle, Ada, Parsel, Tapu Alanı ve köşe koordinatları otomatik okunur</span>
-          <input type="file" id="pgesKmlInput" accept=".kml,.kmz,.xml,.json,.geojson,.txt,.csv">
-        </label>
-        <div class="pges-form-grid uclu">
-          <label class="tam">Hazır Referans Parsel / Örnek Tek Hat Projesi veya Seçili TM Çevresi Yükle
-            <select id="pgesOrnekSec">
-              <option value="tekyildiz_155_19" selected>📍 Van / İpekyolu / Yatıksırt — Ada 155 / Parsel 19 (22.312,56 m² · TEKYILDIZ GES 2 MW Tek Hat DWG &amp; Teknik Değerlendirme)</option>
-              <option value="bilecik_104_86">📍 Bilecik / Söğüt / Çaltı — Ada 104 / Parsel 86 (8.556,42 m² · Tuğral Döküm GES 1 MW Tek Hat &amp; Teknik Değerlendirme)</option>
-              <option value="aksaray_232_19">📍 Aksaray / Merkez / Akçakent — Ada 232 / Parsel 19 (38.075,67 m² · TKGM KML Örneği)</option>
-              <option value="kirklareli_104_84">📍 Kırklareli / Merkez / Karakoç — Ada 104 / Parsel 84 (16.471,59 m² · Aplikasyon Krokisi ED50 3°/6° Örneği)</option>
-              <option value="secili_tm_parsel">⚡ Seçili Trafo Merkezi Çevresinde Parsel Oluştur &amp; Sorgula</option>
-            </select>
-          </label>
-          <label>İli<input type="text" id="pgesIl" value="Van"></label>
-          <label>İlçesi<input type="text" id="pgesIlce" value="İpekyolu"></label>
-          <label>Mahalle / Köy<input type="text" id="pgesMahalle" value="Yatıksırt"></label>
-          <label>Ada No<input type="text" id="pgesAda" value="155"></label>
-          <label>Parsel No<input type="text" id="pgesParsel" value="19"></label>
-          <label>Pafta No<input type="text" id="pgesPafta" value="L50-C-09-D"></label>
-          <label>Tapu Alanı (m²)<input type="number" id="pgesTapuAlan" value="22312.56" step="0.01"></label>
-          <label>Nitelik<input type="text" id="pgesNitelik" value="Tarla"></label>
-          <label>Mevkii<input type="text" id="pgesMevkii" value="Köycivarı"></label>
-          <label class="tam">Köşe Koordinatları Yapıştır (İsteğe Bağlı: Y X veya Enlem Boylam)
-            <textarea id="pgesHamKoord" placeholder="Her satıra bir köşe: Y(Sağa) X(Yukarı) veya Enlem Boylam yazıp 'Koordinatları Uygula' butonuna basabilirsiniz…"></textarea>
-          </label>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
-          <button type="button" class="pges-btn yesil" id="btnPgesSorgula" style="flex:1;justify-content:center">🔍 Parseli Sorgula &amp; Haritada Odakla</button>
-          <button type="button" class="pges-btn" id="btnPgesHaritaCiz" title="Üstteki CBS haritası üzerinde tıklayarak parsel köşelerini çizin">✏️ Haritadan Parsel Çiz</button>
-          <button type="button" class="pges-btn" id="btnPgesKoordUygula" title="Metin kutusuna yapıştırılan köşe koordinatlarını uygula">📥 Koordinat Uygula</button>
-          <a href="https://parselsorgu.tkgm.gov.tr/" target="_blank" rel="noopener" class="pges-btn" title="TKGM Parsel Sorgu sayfasından KML indir">📐 TKGM ↗</a>
-        </div>
-      </div>
-
-      <!-- KUTU 2: CAD GES YERLEŞİM & ELEKTRİK TASARIM PARAMETRELERİ -->
-      <div class="pges-kutu">
-        <h3><span>2. CAD GES Yerleşim &amp; Tek Hat Parametreleri</span><small>TEKYILDIZ 2MW / AeCAD</small></h3>
-        <div class="pges-form-grid uclu">
-          <label>Modül Gücü (Wp)<input type="number" id="pgesPanelWp" value="625" min="300" max="850" step="5"></label>
-          <label>Modül Tipi
-            <select id="pgesModulTip">
-              <option value="mono">Tek Kristalli (Monokristal)</option>
-              <option value="poly">Çok Kristalli</option>
-              <option value="thin">İnce Film</option>
-            </select>
-          </label>
-          <label>Modül Ölçüsü (mm)
-            <select id="pgesPanelBoyut">
-              <option value="2384x1303" selected>2384 × 1303 mm (625 Wp)</option>
-              <option value="2278x1134">2278 × 1134 mm (595 Wp)</option>
-              <option value="2465x1134">2465 × 1134 mm</option>
-            </select>
-          </label>
-          <label>Masa Şablonu
-            <select id="pgesMasaTip">
-              <option value="2V13" selected>2V13 (26 Modül · D1P01..D1P26)</option>
-              <option value="2V14">2V14 (28 Modül · Dik)</option>
-              <option value="2V26">2V26 (52 Modül · Dik)</option>
-              <option value="2V28">2V28 (56 Modül · Dik)</option>
-              <option value="3V13">3V13 (39 Modül · Dik)</option>
-              <option value="4H13">4H13 (52 Modül · Yatay)</option>
-            </select>
-          </label>
-          <label>Masa Eğimi (°)<input type="number" id="pgesTilt" value="25" min="5" max="45"></label>
-          <label>Çekme Mesafesi (m)<input type="number" id="pgesCekme" value="5" min="1" max="25" step="0.5"></label>
-          <label>Evirici Gücü (kW)<input type="number" id="pgesInvKw" value="250" min="20" max="500" step="5"></label>
-          <label>Evirici Set (kWe)<input type="number" id="pgesInvSetKw" value="240" min="20" max="500" step="5" title="Tek hat ve teknik değerlendirme formunda evirici set gücü (örn: 250.00(240))"></label>
-          <label>Evirici Sayısı (Adet)<input type="number" id="pgesInvAdet" value="8" min="1" max="100" step="1"></label>
-          <label>Yerleşim Modu
-            <select id="pgesYerlesimMod">
-              <option value="hedef" selected>Evirici Gücüne Göre (Örn: 8×240=1920 kWe)</option>
-              <option value="tam">Parselin Tamamını Doldur (Maks. Kapasite)</option>
-            </select>
-          </label>
-          <label>DC / AC Oranı<input type="number" id="pgesDcAcOran" value="1.4049" min="1.0" max="1.6" step="0.01"></label>
-          <label>GüneşModül Sayısı<input type="number" id="pgesModulSayisi" value="4316" min="10" max="250000" step="1" title="Otomatik hesaplanır veya elle girilebilir"></label>
-          <label>OG Trafo Gücü (kVA)
-            <select id="pgesTrafoKva">
-              <option value="oto">Otomatik Seç</option>
-              <option value="630">630 kVA</option>
-              <option value="800">800 kVA</option>
-              <option value="1000">1000 kVA</option>
-              <option value="1250">1250 kVA</option>
-              <option value="1600">1600 kVA</option>
-              <option value="2000">2000 kVA</option>
-              <option value="2500" selected>2×1250 / 2500 kVA (2 MW Tek Hat)</option>
-            </select>
-          </label>
-          <label>OG Şebeke Gerilimi
-            <select id="pgesOgKv">
-              <option value="31.5" selected>31.5 / 0.8 kV (DYN11 %Uk=6 · 36 kV Hücre)</option>
-              <option value="34.5">34.5 / 0.8 kV (DYN11 %Uk=6 · 36 kV Hücre)</option>
-            </select>
-          </label>
-          <label>Projeksiyon Sistemi
-            <select id="pgesProjSec">
-              <option value="ITRF96 3°" selected>GK Central Meridian 45 (ITRF-3) + ED50 3°/6°</option>
-              <option value="UTM 6° ED 50">UTM 6° ED 50 (ve ED50 3°)</option>
-              <option value="UTM 3° ED 50">UTM 3° ED 50 (ve ED50 6°)</option>
-            </select>
-          </label>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto">
-          <button type="button" class="pges-btn yesil" id="btnPgesHesapla" style="flex:1;justify-content:center">⚡ CAD GES Yerleşimi &amp; Şablonları Güncelle</button>
-          <button type="button" class="pges-btn kehribar" id="btnPgesOtoBoyutla" title="Parsel alanına göre maksimum masa, modül, inverter ve trafo gücünü otomatik boyutlandır">🎯 Arazinin Tamamına Göre Boyutlandır</button>
-        </div>
-      </div>
-
-      <!-- KUTU 3: BAŞVURU SAHİBİ & TRAFO MERKEZİ BİLGİLERİ -->
-      <div class="pges-kutu">
-        <h3><span>3. Başvuru Sahibi &amp; Trafo Merkezi (TM) Bilgileri</span><small>İmza Boş Bırakılır</small></h3>
-        <div class="pges-form-grid">
-          <label class="tam">Başvuru Sahibi Adı-Soyadı / Ticaret Unvanı
-            <input type="text" id="pgesUnvan" value="TEKYILDIZ SAĞLIK HİZMETLERİ VE İNŞAAT SANAYİ TİCARET LİMİTED ŞİRKETİ">
-          </label>
-          <label>Tesis / Santral Kısa Adı
-            <input type="text" id="pgesTesisAdi" value="TEKYILDIZ GES">
-          </label>
-          <label>Tercih Edilen Trafo Merkezi (TM)
-            <input type="text" id="pgesTmAdi" value="ÖZALP TM">
-          </label>
-          <label>Vergi / T.C. Kimlik No
-            <input type="text" id="pgesVergiNo" value="8360491820">
-          </label>
-          <label>Tüketim Tesisi Tekil Kodları
-            <input type="text" id="pgesTekilKod" value="4065192830">
-          </label>
-          <label>Telefon Numarası
-            <input type="text" id="pgesTel" value="05327636044">
-          </label>
-          <label>E-Posta Adresi
-            <input type="text" id="pgesEposta" value="info@aksarayenerji.net">
-          </label>
-          <label class="tam">Banka Hesap Numarası (IBAN)
-            <input type="text" id="pgesIban" value="TR25 0001 0019 4664 4675 9350 01">
-          </label>
-          <label>Başvuru Sahibi Adresi
-            <input type="text" id="pgesAdres" value="İpekyolu / VAN">
-          </label>
-          <label>Yönetmelik Maddesi &amp; Bağlantı
-            <select id="pgesMadde">
-              <option value="5.1.h" selected>Madde 5.1.h · OG Tek Yönlü</option>
-              <option value="5.1.c">Madde 5.1.c · OG Çift Yönlü</option>
-              <option value="5.1.i">Madde 5.1.i · Kamu / Tarım GES</option>
-            </select>
-          </label>
-        </div>
-        <div style="font-size:11px;color:#065F46;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:7px;padding:6px 9px;margin-top:auto">
-          ✅ <b>İmza Kuralı Aktif:</b> Aplikasyon Krokisi, GES Tek Hat Şeması (<b>TEKYILDIZ TEK HAT ŞEMASI 2MW.dwg</b> &amp; <b>Tuğral Döküm DWG</b>), Teknik Değerlendirme Formu ve Ek-1 Başvuru Formunun imza / onay kısımları ıslak imza ve kaşe için tamamen boş bırakılır.
-        </div>
-      </div>
-    </div>
-
-    <!-- ÖZET MÜHENDİSLİK KPI ŞERİDİ -->
-    <div class="pges-kpi-serit" id="pgesKpiSerit"></div>
-
-    <!-- 5 MÜHENDİSLİK PAFTASI & RESMİ EVRAK SEKMESİ -->
-    <div class="pges-sekme-bar">
-      <div class="pges-sekmeler" id="pgesSekmeler" role="tablist">
-        <button type="button" class="pges-sekme on" data-psekme="cad">☀️ 1. CAD GES Yerleşim Planı</button>
-        <button type="button" class="pges-sekme" data-psekme="aplikasyon">📐 2. Aplikasyon Krokisi (ED50 3° &amp; 6° + ITRF96)</button>
-        <button type="button" class="pges-sekme" data-psekme="tekhat">⚡ 3. GES Tek Hat Şeması (Tekyıldız 2 MW DWG &amp; Tuğral Döküm Şablonu)</button>
-        <button type="button" class="pges-sekme" data-psekme="teknik">📋 4. Teknik Değerlendirme Formu (2 Sayfa)</button>
-        <button type="button" class="pges-sekme" data-psekme="basvuru">📄 5. Ek-1 Lisanssız Başvuru Formu</button>
-      </div>
-      <div class="pges-sekme-sag">
-        <button type="button" class="pges-btn" id="btnPgesKoordCsv" style="padding:5px 10px;font-size:11.5px">📊 Koordinatları CSV İndir</button>
-        <button type="button" class="pges-btn yesil" id="btnPgesAktifYazdir" style="padding:5px 11px;font-size:11.5px">🖨️ Açık Paftayı Yazdır / PDF</button>
-      </div>
-    </div>
-
-    <!-- PAFTA & BELGE ÇİZİM TUVALİ -->
-    <div class="pges-icerik-kutu">
-      <div class="pges-pafta-kapsul" id="pgesPaftaKapsul"></div>
     </div>
   </div>
 
   <!-- 5. DETAYLI FİLTRE ÇUBUĞU -->
   <div class="flt">
-    <label>İl<select id="fil"><option value="">Tümü (81 İl)</option></select></label>
-    <label>Dağıtım Bölgesi (EDAŞ)<select id="fed"><option value="">Tümü (21 Bölge)</option></select></label>
+    <label>İl<select id="fil"><option value="">Tüm İller (81 İl)</option></select></label>
+    <label>Dağıtım Bölgesi (EDAŞ)<select id="fed"><option value="">Tüm İller (21 Dağıtım Bölgesi)</option></select></label>
     <label>TM / OSB Ara<input type="search" id="fara" placeholder="TM adı, TR-A/B, OSB…" autocomplete="off"></label>
     <label class="chk"><input type="checkbox" id="fpoz"> Yalnız kapasitesi &gt; 0 olanlar</label>
     <button type="button" class="sifirla" id="fsifir">Filtreyi sıfırla</button>
@@ -2868,7 +2691,7 @@
       "Meram EDAŞ","Başkent EDAŞ","Toroslar EDAŞ","Osmangazi EDAŞ","Uludağ EDAŞ",
       "Sakarya EDAŞ","GDZ EDAŞ","ADM EDAŞ","Akdeniz EDAŞ","KCETAŞ",
       "Çamlıbel EDAŞ","Yeşilırmak EDAŞ","Çoruh EDAŞ","Aras EDAŞ","Fırat EDAŞ",
-      "Vangölü EDAŞ","Dicle EDAŞ","AKEDAŞ","Boğaziçi EDAŞ","AYEDAŞ (Anadolu)","Trakya (TREDAŞ)"
+      "Vangölü EDAŞ","Dicle EDAŞ","AKEDAŞ","Boğaziçi EDAŞ","AYEDAŞ (Anadolu)","Trakya EDAŞ"
     ];
     Object.keys(EDAS_IL).forEach(function(ed){
       if(edSirali.indexOf(ed) < 0) edSirali.push(ed);
@@ -2877,10 +2700,10 @@
 
     var aktifEd = secEd || (secIl && IL2EDAS[secIl] && IL2EDAS[secIl][0]) || "";
 
-    // 1. Üst 21 Dağıtım Bölgesi (EDAŞ) Dropdown Seçicisini Güncelle
+    // 1. Üst 21 Dağıtım Bölgesi (EDAŞ) + Tüm İller = 22 Elemanlı Dropdown Seçicisini Güncelle
     var edSel = el("ustEdasSec");
     if(edSel){
-      var edHtml = '<option value=""'+(!aktifEd?' selected':'')+'>🇹🇷 Türkiye Geneli (21 EDAŞ) — '+fmt(trTop)+' MWe</option>';
+      var edHtml = '<option value=""'+(!aktifEd?' selected':'')+'>🇹🇷 Tüm İller (21 Dağıtım Bölgesi) — '+fmt(trTop)+' MWe</option>';
       edSirali.forEach(function(ed){
         if(!EDAS_IL[ed]) return;
         var m = edMwe[ed] || 0;
@@ -5805,127 +5628,53 @@
     pgesHaritadaGoster(true);
   }
 
+  window.yeniBasvuruSekmesiAc = function(sekmeMod){
+    try {
+      var r = seciliRow || (gorunen && gorunen[0]) || (tumu && tumu[0]) || null;
+      if(r){
+        localStorage.setItem("ae_secili_tm_basvuru", JSON.stringify(r));
+      }
+    } catch(e){}
+    var q = [];
+    if(seciliRow && seciliRow.tm){
+      q.push("tm=" + encodeURIComponent(seciliRow.tm));
+      if(seciliRow.bara) q.push("bara=" + encodeURIComponent(seciliRow.bara));
+      if(seciliRow.il) q.push("il=" + encodeURIComponent(seciliRow.il));
+      if(seciliRow.edas) q.push("edas=" + encodeURIComponent(seciliRow.edas));
+    }
+    if(sekmeMod) q.push("sekme=" + encodeURIComponent(sekmeMod));
+    var url = "basvuru.html" + (q.length ? ("?" + q.join("&")) : "");
+    window.open(url, "_blank");
+  };
+
+  window.pgesTamTekHatAc = function(){
+    window.yeniBasvuruSekmesiAc("tekhat");
+  };
+
   var PGES_KURULDU = false;
   function pgesInit(){
-    if(!el("parselGesBolum")) return;
-    if(PGES_KURULDU){
-      pgesCadYerlesimHesapla(false);
-      return;
-    }
+    try {
+      var kayitli = JSON.parse(localStorage.getItem("ae_ges_basvurular_v2") || "null");
+      if(Array.isArray(kayitli) && el("anaKayitliBasvuruSayi")){
+        el("anaKayitliBasvuruSayi").textContent = String(kayitli.length);
+      }
+    } catch(e){}
+    if(PGES_KURULDU) return;
     PGES_KURULDU = true;
-    if(el("btnUstParselGesAc")){
-      el("btnUstParselGesAc").addEventListener("click", function(){
-        el("parselGesBolum").scrollIntoView({behavior:"smooth", block:"start"});
-      });
-    }
-    var drop = el("pgesDropArea"), fInp = el("pgesKmlInput");
-    if(drop && fInp){
-      fInp.addEventListener("click", function(){ fInp.value = ""; });
-      fInp.addEventListener("change", function(){
-        if(fInp.files && fInp.files[0]) pgesDosyaIsle(fInp.files[0]);
-      });
-      ["dragenter","dragover"].forEach(function(ev){
-        drop.addEventListener(ev, function(e){
-          e.preventDefault();
-          e.stopPropagation();
-          drop.classList.add("drag");
-        });
-      });
-      ["dragleave","dragend"].forEach(function(ev){
-        drop.addEventListener(ev, function(e){
-          e.preventDefault();
-          e.stopPropagation();
-          drop.classList.remove("drag");
-        });
-      });
-      drop.addEventListener("drop", function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        drop.classList.remove("drag");
-        var dt = e.dataTransfer;
-        if(dt && dt.files && dt.files[0]){
-          pgesDosyaIsle(dt.files[0]);
-        }
-      });
-    }
-    if(el("pgesOrnekSec")){
-      el("pgesOrnekSec").addEventListener("change", function(){
-        pgesOrnekYukle(el("pgesOrnekSec").value, true);
-      });
-    }
-    if(el("btnPgesSorgula")){
-      el("btnPgesSorgula").addEventListener("click", function(){
-        pgesCadYerlesimHesapla(false);
-        pgesHaritadaGoster(true);
-        el("haritaBolum").scrollIntoView({behavior:"smooth", block:"center"});
-      });
-    }
-    if(el("btnPgesKoordUygula")){
-      el("btnPgesKoordUygula").addEventListener("click", pgesHamKoordUygula);
-    }
-    if(el("btnPgesHaritaCiz")){
-      el("btnPgesHaritaCiz").addEventListener("click", function(){
-        if(!MAP) return;
-        PGES_CIZIM_MODU = !PGES_CIZIM_MODU;
-        PGES_CIZIM_NOKTALAR = [];
-        el("btnPgesHaritaCiz").textContent = PGES_CIZIM_MODU ? "✅ Çizimi Bitir (En az 3 Köşe)" : "✏️ Haritadan Parsel Çiz";
-        if(PGES_CIZIM_MODU){
-          el("haritaBolum").scrollIntoView({behavior:"smooth", block:"center"});
-          el("hsay").textContent = "✏️ PARSEL ÇİZİM MODU AKTİF: Harita üzerinde parsel köşelerine sırayla tıklayın (en az 3 köşe).";
-        }
-      });
-    }
-    if(el("btnPgesHesapla")){
-      el("btnPgesHesapla").addEventListener("click", function(){ pgesCadYerlesimHesapla(false); });
-    }
-    if(el("btnPgesOtoBoyutla")){
-      el("btnPgesOtoBoyutla").addEventListener("click", function(){ pgesCadYerlesimHesapla(true); });
-    }
-    if(el("btnPgesAecadAc")) el("btnPgesAecadAc").addEventListener("click", pgesAecadAc);
-    if(el("btnPgesDxfIndir")) el("btnPgesDxfIndir").addEventListener("click", pgesDxfIndir);
-    if(el("btnPgesKoordCsv")) el("btnPgesKoordCsv").addEventListener("click", pgesKoordCsvIndir);
-    if(el("btnPgesAktifYazdir")) el("btnPgesAktifYazdir").addEventListener("click", function(){ pgesYazdir(false); });
-    if(el("btnPgesTumunuYazdir")) el("btnPgesTumunuYazdir").addEventListener("click", function(){ pgesYazdir(true); });
-
-    if(el("pgesSekmeler")){
-      el("pgesSekmeler").querySelectorAll("button[data-psekme]").forEach(function(b){
-        b.addEventListener("click", function(){
-          PGES_AKTIF_SEKME = b.getAttribute("data-psekme");
-          el("pgesSekmeler").querySelectorAll("button[data-psekme]").forEach(function(x){
-            x.classList.toggle("on", x === b);
-          });
-          pgesPaftaCiz();
-        });
-      });
-    }
-
-    // Input değişikliklerinde anında güncelle
-    ["pgesIl","pgesIlce","pgesMahalle","pgesAda","pgesParsel","pgesPafta","pgesTapuAlan","pgesNitelik","pgesMevkii",
-     "pgesPanelWp","pgesModulTip","pgesPanelBoyut","pgesMasaTip","pgesTilt","pgesCekme","pgesInvKw","pgesInvSetKw",
-     "pgesInvAdet","pgesYerlesimMod","pgesModulSayisi","pgesTrafoKva","pgesOgKv","pgesProjSec",
-     "pgesUnvan","pgesTesisAdi","pgesTmAdi","pgesVergiNo","pgesTekilKod","pgesTel","pgesEposta","pgesIban","pgesAdres","pgesMadde"
-    ].forEach(function(id){
+    ["btnUstParselGesAc","btnUstYeniBasvuru","btnAcYeniBasvuruSekme"].forEach(function(id){
       if(el(id)){
-        el(id).addEventListener("change", function(){ pgesCadYerlesimHesapla(false); });
+        el(id).addEventListener("click", function(){ window.yeniBasvuruSekmesiAc("yeni"); });
       }
     });
-
-    window.pgesTamTekHatAc = function(){
-      if(el("pgesOrnekSec")) el("pgesOrnekSec").value = "tekyildiz_155_19";
-      pgesOrnekYukle("tekyildiz_155_19", false);
-      PGES_AKTIF_SEKME = "tekhat";
-      if(el("pgesSekmeler")){
-        el("pgesSekmeler").querySelectorAll("button[data-psekme]").forEach(function(x){
-          x.classList.toggle("on", x.getAttribute("data-psekme") === "tekhat");
-        });
-      }
-      pgesPaftaCiz();
-      var b = el("parselGesBolum");
-      if(b && b.scrollIntoView) b.scrollIntoView({behavior:"smooth", block:"start"});
-    };
-
-    // Varsayılan olarak Tekyıldız 2 MW (Van / İpekyolu / Yatıksırt Ada 155 Parsel 19) hazır yüklenir
-    pgesOrnekYukle("tekyildiz_155_19", false);
+    if(el("btnAcKayitliBasvurularSekme")){
+      el("btnAcKayitliBasvurularSekme").addEventListener("click", function(){ window.yeniBasvuruSekmesiAc("kayitli"); });
+    }
+    if(el("navYeniBasvuruBtn")){
+      el("navYeniBasvuruBtn").addEventListener("click", function(ev){
+        ev.preventDefault();
+        window.yeniBasvuruSekmesiAc("yeni");
+      });
+    }
   }
 
   pgesInit();
@@ -5946,7 +5695,7 @@
       var edOptHtml = Object.keys(EDAS_IL).map(function(e){return '<option value="'+esc(e)+'">'+esc(e)+' ('+EDAS_IL[e].length+' il)</option>';}).join("");
       el("fed").insertAdjacentHTML("beforeend", edOptHtml);
       if(el("bolgeKutuSec")){
-        el("bolgeKutuSec").innerHTML = edOptHtml;
+        el("bolgeKutuSec").innerHTML = '<option value="">🇹🇷 Tüm İller (21 Dağıtım Bölgesi)</option>' + edOptHtml;
         el("bolgeKutuSec").value = "Meram EDAŞ";
       }
       var konumlu=tumu.filter(function(r){return r.lat!=null;}).length;

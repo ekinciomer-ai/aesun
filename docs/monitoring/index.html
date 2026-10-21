@@ -1286,13 +1286,13 @@ function maliyetCiz() {
   const payEtiket16 = Math.round(p16 * 29) + '/29 (%' + say(p16 * 100, 2) + ')';
   const payEtiket13 = Math.round(p13 * 29) + '/29 (%' + say(p13 * 100, 2) + ')';
   const pd = (EP && EP.ptf && EP.ptf[g]) || [], ykObj = EP ? yekdemAy(g.slice(0, 7)) : null, yk = ykObj ? ykObj.deger : 0;
-  const kom = MAL_P.komisyon || 1.025, btvOran = MAL_P.btv || 0.01, dagBirimMwh = MAL_P.dagitim_tl_mwh || 1182.457, kdvOran = 0.20;
+  const kom = MAL_P.komisyon || 1.025, btvOran = MAL_P.btv || 0.01, dagBirimMwh = MAL_P.dagitim_tl_mwh || 1182.457;
   const gBirim = (m && m.gunes_birim) || 2.253679;
 
   const gunBaslik = tarihK(g) + ' ' + g.slice(0, 4) + ' ' + GUNLER[new Date(g + 'T12:00:00Z').getUTCDay()];
   let h = '<div class="bas" style="align-items:center;border-bottom:1px solid #EEF1F5;padding-bottom:10px">'
     + '<div><h2 style="margin:0;font-size:18px">⚡ Saatlik Enerji Maliyeti Hesap Dökümü · ' + gunBaslik + (MS.saat != null ? ' · Saat ' + String(MS.saat).padStart(2, '0') + ':00' : '') + '</h2>'
-    + '<div class="k" style="margin-top:2px">Tek Yıldız 2 (Madencilik Sahası) · Şebeke çekişi (KDV dahil) + ☀ Güneşin karşıladığı tüketim (fırsat bedeli) ve 16 / 13 cihaz pay dağılımı</div></div>'
+    + '<div class="k" style="margin-top:2px">Tek Yıldız 2 (Madencilik Sahası) · Şebeke çekişi (KDV hariç) + ☀ Güneşin karşıladığı tüketim (fırsat bedeli) ve 16 / 13 cihaz pay dağılımı</div></div>'
     + '<button type="button" class="btn" onclick="maliyetKapat()" aria-label="Kapat" style="min-height:34px;padding:4px 12px;font-weight:700">✕ Kapat</button></div>';
 
   // Gün seçici ve kısayollar
@@ -1316,11 +1316,11 @@ function maliyetCiz() {
   // Formül açıklaması kutusu
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">'
     + '<div style="background:#FAFBFD;border:1px solid #D5DCE5;border-left:4px solid #2563EB;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5">'
-    + '<b style="color:#1E3A8A;display:block;margin-bottom:3px">1. Şebeke Çekiş Maliyeti Formülü (KDV Dahil)</b>'
+    + '<b style="color:#1E3A8A;display:block;margin-bottom:3px">1. Şebeke Çekiş Maliyeti Formülü (KDV Hariç)</b>'
     + '• <b>Enerji (₺):</b> <code>Çekiş (kWh) × [(PTF + YEKDEM) ÷ 1000] × ' + say(kom, 3) + '</code><br>'
     + '• <b>Dağıtım (₺):</b> <code>Çekiş (kWh) × ' + say(dagBirimMwh / 1000, 6) + ' ₺/kWh</code><br>'
     + '• <b>BTV (%1):</b> <code>Enerji (₺) × 0,01</code><br>'
-    + '• <b>KDV (%20):</b> <code>(Enerji + Dağıtım + BTV) × 0,20</code>'
+    + '• <b>Şebeke Tutarı:</b> <code>Enerji + Dağıtım + BTV</code> (KDV eklenmez)'
     + '</div>'
     + '<div style="background:#FFFBF5;border:1px solid #F3D9B1;border-left:4px solid #D97706;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5">'
     + '<b style="color:#9A5B00;display:block;margin-bottom:3px">2. ☀ Güneşin Karşıladığı Tüketim (Fırsat Bedeli)</b>'
@@ -1353,10 +1353,9 @@ function maliyetCiz() {
     const gTl = gkwh * gBirim;
     const sebTl = Math.max(0, topSaatTl - gTl);
     const ptf = pd[s] != null ? Number(pd[s]) : null;
-    const enTl = kwh > 0 && ptf != null ? (kwh / 1000) * (ptf + yk) * kom : (sebTl > 0 ? sebTl / 1.2 - kwh * (dagBirimMwh / 1000) : 0);
     const dagTl = kwh * (dagBirimMwh / 1000);
+    const enTl = kwh > 0 && ptf != null ? (kwh / 1000) * (ptf + yk) * kom : (sebTl > 0 ? Math.max(0, (sebTl - dagTl) / (1 + btvOran)) : 0);
     const btvTl = Math.max(0, enTl * btvOran);
-    const kdvTl = Math.max(0, sebTl - (sebTl / 1.2));
     const pay16 = topSaatTl * p16, pay13 = topSaatTl * p13;
     const saHash = mg && mg.saat && mg.saat[s] ? mg.saat[s] : null;
 
@@ -1373,9 +1372,9 @@ function maliyetCiz() {
       + '<span class="k">' + (saHash ? 'Toplam Hash: <b>' + say(saHash.t) + ' TH/s</b> (' + saHash.n + ' cihaz çalıştı)' : '') + '</span></div>'
       + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;font-size:13px">'
       + '<div style="background:#fff;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px">'
-      + '<div class="k" style="font-size:11.5px;font-weight:700;color:#1E3A8A">A. ŞEBEKE ÇEKİŞ HESABI</div>'
+      + '<div class="k" style="font-size:11.5px;font-weight:700;color:#1E3A8A">A. ŞEBEKE ÇEKİŞ HESABI (KDV HARİÇ)</div>'
       + '<div>Çekiş: <b>' + say(kwh, 2) + ' kWh</b>' + (ptf != null ? ' · PTF: <b>' + say(ptf, 2) + '</b> + YEKDEM: <b>' + say(yk, 2) + ' ₺/MWh</b>' : '') + '</div>'
-      + '<div class="k" style="font-size:12px;margin-top:3px">Enerji: ' + say(enTl, 2) + ' ₺ + Dağıtım: ' + say(dagTl, 2) + ' ₺ + BTV: ' + say(btvTl, 2) + ' ₺ + KDV (%20): ' + say(kdvTl, 2) + ' ₺</div>'
+      + '<div class="k" style="font-size:12px;margin-top:3px">Enerji: ' + say(enTl, 2) + ' ₺ + Dağıtım: ' + say(dagTl, 2) + ' ₺ + BTV (%1): ' + say(btvTl, 2) + ' ₺</div>'
       + '<div style="margin-top:4px;font-weight:700;font-size:14px">Şebeke Tutarı = ' + say(sebTl, 2) + ' ₺</div>'
       + '</div>'
       + '<div style="background:#fff;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px">'
@@ -1470,7 +1469,7 @@ function maliyetCiz() {
     + '<td class="sol">GÜN TOPLAMI</td>'
     + '<td class="ayr">' + (mg && mg.ort24 ? 'ort. ' + say(mg.ort24) + ' TH/s' : '') + '</td>'
     + '<td class="ayr">' + say(m.kwh, 2) + ' kWh</td>'
-    + '<td colspan="2" class="k">Enerji ' + say(m.enerji_tl, 0) + ' + Dağ. ' + say(m.dagitim_tl, 0) + ' + BTV ' + say(m.btv_tl, 0) + ' + KDV ' + say(m.kdv_tl, 0) + ' ₺</td>'
+    + '<td colspan="2" class="k">Enerji ' + say(m.enerji_tl, 0) + ' + Dağ. ' + say(m.dagitim_tl, 0) + ' + BTV ' + say(m.btv_tl, 0) + ' ₺ (KDV hariç)</td>'
     + '<td><b>' + say(m.sebeke_tl, 2) + ' ₺</b></td>'
     + '<td class="ayr" style="color:#9A5B00">' + say(m.gunes_kwh, 2) + ' kWh</td>'
     + '<td style="color:#9A5B00"><b>' + say(m.gunes_tl, 2) + ' ₺</b></td>'
@@ -1560,7 +1559,7 @@ function aylikMaliyetBolum(dg, DAG, DAG_TOP, DAG_BAS) {
   let kart = '', sat = '';
   for (const [ay, a] of liste) {
     a.gun.sort(); const ad = AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4), aralik = Number(a.gun[0].slice(8)) + '–' + Number(a.gun[a.gun.length - 1].slice(8)) + ' ' + AYK[Number(ay.slice(5)) - 1];
-    sat += '<tr><td class="sol"><b>' + ad + '</b> <span class="k">' + aralik + '</span><br>' + rozet(a) + '</td><td class="ayr">' + say(a.kwh) + '</td><td>' + say(a.en) + '</td><td>' + say(a.dag) + '</td><td>' + say(a.btv) + '</td><td>' + say(a.kdv) + '</td><td>' + say(a.seb) + '</td><td class="ayr" style="color:#9A5B00">' + say(a.gk) + '</td><td style="color:#9A5B00">' + say(a.gt) + '</td><td style="font-weight:700">' + say(a.top) + '</td>'
+    sat += '<tr><td class="sol"><b>' + ad + '</b> <span class="k">' + aralik + '</span><br>' + rozet(a) + '</td><td class="ayr">' + say(a.kwh) + '</td><td>' + say(a.en) + '</td><td>' + say(a.dag) + '</td><td>' + say(a.btv) + '</td><td>' + say(a.seb) + '</td><td class="ayr" style="color:#9A5B00">' + say(a.gk) + '</td><td style="color:#9A5B00">' + say(a.gt) + '</td><td style="font-weight:700">' + say(a.top) + '</td>'
       + '<td class="ayr">' + say(a.tl) + '</td>' + netH(a.tl - a.top)
       + (a.pGun ? '<td class="ayr">' + say(a.pTl * r0) + '</td><td>' + say(a.ma) + '</td>' + netH(a.pTl * r0 - a.ma) + '<td class="ayr">' + say(a.pTl * r1) + '</td><td>' + say(a.mb) + '</td>' + netH(a.pTl * r1 - a.mb)
         : '<td class="ayr k" colspan="6" style="text-align:center">pay dağılımı 14 Eylül 2026\'da başladı</td>') + '</tr>';
@@ -1569,7 +1568,7 @@ function aylikMaliyetBolum(dg, DAG, DAG_TOP, DAG_BAS) {
   const fat = (ust, a, ad) => {
     const satir = (k, v, kalin) => '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0' + (kalin ? ';border-top:1px solid #D5DCE5;margin-top:4px;padding-top:7px;font-weight:700;font-size:15px' : '') + '"><span' + (kalin ? '' : ' class="k"') + '>' + k + '</span><span class="num">' + v + '</span></div>';
     return '<div class="panel" style="padding:16px 18px;gap:2px;min-width:0"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px"><b>' + ust + '</b>' + rozet(a) + '</div>'
-      + satir('Şebekeden çekiş', say(a.kwh) + ' kWh') + satir('Enerji (PTF + YEKDEM, %2,5 kom.)', say(a.en) + ' ₺') + satir('Dağıtım', say(a.dag) + ' ₺') + satir('BTV (%1)', say(a.btv) + ' ₺') + satir('KDV (%20)', say(a.kdv) + ' ₺') + satir('<b>Şebeke toplamı</b>', say(a.seb) + ' ₺')
+      + satir('Şebekeden çekiş', say(a.kwh) + ' kWh') + satir('Enerji (PTF + YEKDEM, %2,5 kom.)', say(a.en) + ' ₺') + satir('Dağıtım', say(a.dag) + ' ₺') + satir('BTV (%1)', say(a.btv) + ' ₺') + satir('<b>Şebeke toplamı (KDV hariç)</b>', say(a.seb) + ' ₺')
       + satir('☀ Güneşin karşıladığı ' + say(a.gk) + ' kWh × ' + (a.gb ? say(a.gb, 4) : '—') + ' ₺', say(a.gt) + ' ₺')
       + satir('Toplam maliyet', say(a.top) + ' ₺', true)
       + satir('Madencilik geliri', say(a.tl) + ' ₺') + satir('Net (gelir − maliyet)', '<b style="color:' + (a.tl - a.top < 0 ? '#B42318' : '#1E7A3C') + '">' + say(a.tl - a.top) + ' ₺</b>')
@@ -1577,11 +1576,11 @@ function aylikMaliyetBolum(dg, DAG, DAG_TOP, DAG_BAS) {
       + [['16 cihaz', r0, a.ma], ['13 cihaz', r1, a.mb]].map(([n, r, m]) => '<div style="background:#F5F7FA;border-radius:8px;padding:8px 10px"><div class="k" style="font-size:12px">' + n + '</div><div style="font-size:12.5px">Gelir ' + say(a.pTl * r) + ' ₺</div><div style="font-size:12.5px">Maliyet ' + say(m) + ' ₺</div><div style="font-weight:700;color:' + (a.pTl * r - m < 0 ? '#B42318' : '#1E7A3C') + '">Net ' + say(a.pTl * r - m) + ' ₺</div></div>').join('') + '</div>' : '') + '</div>';
   };
   kart = fat(AYLAR[Number(ay0.slice(5)) - 1] + ' ' + ay0.slice(0, 4), a0) + (s0[0] !== ay0 ? fat(AYLAR[Number(s0[0].slice(5)) - 1] + ' ' + s0[0].slice(0, 4), s0[1]) : '');
-  return '<section class="panel" id="aylikMaliyet" style="gap:12px"><div class="bas"><h2>Aylık enerji maliyeti ve pay</h2><span class="k">Tek Yıldız 2 · şebeke çekişi (fatura esası, KDV dahil) + güneşin karşıladığı tüketim (fırsat bedeli)</span></div>'
+  return '<section class="panel" id="aylikMaliyet" style="gap:12px"><div class="bas"><h2>Aylık enerji maliyeti ve pay</h2><span class="k">Tek Yıldız 2 · şebeke çekişi (fatura esası, KDV hariç) + güneşin karşıladığı tüketim (fırsat bedeli)</span></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px">' + kart + '</div>'
-    + '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol" rowspan="2">Ay</th><th class="ayr" colspan="6" style="text-align:center">Şebeke (₺)</th><th class="ayr" colspan="2" style="text-align:center" title="Güneşin karşıladığı tüketim: satılabilecek enerjinin fırsat bedeli">☀ Güneş</th><th rowspan="2">Toplam ₺</th><th class="ayr" rowspan="2">Gelir ₺</th><th rowspan="2">Net ₺</th><th class="ayr" colspan="3" style="text-align:center">16 cihaz (16/29)</th><th class="ayr" colspan="3" style="text-align:center">13 cihaz (13/29)</th></tr>'
-    + '<tr><th class="ayr">kWh</th><th>Enerji</th><th>Dağıtım</th><th>BTV</th><th>KDV</th><th>Toplam</th><th class="ayr">kWh</th><th>₺</th><th class="ayr">Gelir</th><th>Maliyet</th><th>Net</th><th class="ayr">Gelir</th><th>Maliyet</th><th>Net</th></tr></thead><tbody>' + sat + '</tbody></table></div>'
-    + '<div class="k">Fatura gelen ayda faturanın saatlik tüketimi ve PTF\'si kullanılır (kesin); gelmeyen ayda OSOS sayacı ve EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025 · dağıtım 1.182,457 TL/MWh · BTV enerjinin %1\'i · KDV %20. Eylül 2026 öncesi tedarikçi MEDAŞ idi; o aylar aynı formülle hesaplanmış tahmindir (OSOS + EPİAŞ). Pay dağılımı 14.09.2026\'da başladı: gelir 16/29 · 13/29; maliyet 14.09.2026–13.09.2027 arası 8/29 · 21/29 (16 cihaza düşenin yarısı 13\'e yazılır), sonra 16/29 · 13/29. Ay bitince özet WhatsApp\'a da gider. ☀ Güneş: tüketimi güneş karşıladığında o enerji satılabilirdi; maliyeti güneşin karşıladığı tüketim (Pi\'nin ölçtüğü madencilik + yardımcı yük − sayaç çekişi; en çok Sera-2 üretimi kadar) × (elektrik üretim bedeli − sistem kullanım bedeli). Birimler fatura sisteminden (Sera2 satış faturası); dağıtım bedeli ve KDV eklenmez (üretim ve tüketim aynı noktada). Tüketim üretimi aşarsa aşan kısım şebeke formülüyle.</div></section>';
+    + '<div class="tablo-kutu"><table class="tb sirasiz"><thead><tr><th class="sol" rowspan="2">Ay</th><th class="ayr" colspan="5" style="text-align:center">Şebeke (₺ · KDV hariç)</th><th class="ayr" colspan="2" style="text-align:center" title="Güneşin karşıladığı tüketim: satılabilecek enerjinin fırsat bedeli">☀ Güneş</th><th rowspan="2">Toplam ₺</th><th class="ayr" rowspan="2">Gelir ₺</th><th rowspan="2">Net ₺</th><th class="ayr" colspan="3" style="text-align:center">16 cihaz (16/29)</th><th class="ayr" colspan="3" style="text-align:center">13 cihaz (13/29)</th></tr>'
+    + '<tr><th class="ayr">kWh</th><th>Enerji</th><th>Dağıtım</th><th>BTV</th><th>Toplam</th><th class="ayr">kWh</th><th>₺</th><th class="ayr">Gelir</th><th>Maliyet</th><th>Net</th><th class="ayr">Gelir</th><th>Maliyet</th><th>Net</th></tr></thead><tbody>' + sat + '</tbody></table></div>'
+    + '<div class="k">Fatura gelen ayda faturanın saatlik tüketimi ve PTF\'si kullanılır (kesin); gelmeyen ayda OSOS sayacı ve EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025 · dağıtım 1.182,457 TL/MWh · BTV enerjinin %1\'i (KDV hariç). Eylül 2026 öncesi tedarikçi MEDAŞ idi; o aylar aynı formülle hesaplanmış tahmindir (OSOS + EPİAŞ). Pay dağılımı 14.09.2026\'da başladı: gelir 16/29 · 13/29; maliyet 14.09.2026–13.09.2027 arası 8/29 · 21/29 (16 cihaza düşenin yarısı 13\'e yazılır), sonra 16/29 · 13/29. Ay bitince özet WhatsApp\'a da gider. ☀ Güneş: tüketimi güneş karşıladığında o enerji satılabilirdi; maliyeti güneşin karşıladığı tüketim (Pi\'nin ölçtüğü madencilik + yardımcı yük − sayaç çekişi; en çok Sera-2 üretimi kadar) × (elektrik üretim bedeli − sistem kullanım bedeli). Birimler fatura sisteminden (Sera2 satış faturası); dağıtım bedeli ve KDV eklenmez (üretim ve tüketim aynı noktada). Tüketim üretimi aşarsa aşan kısım şebeke formülüyle.</div></section>';
 }
 // ===== Madencilik > Cihazlar: cihaz kartları (F2Pool + son bilinen donanım + sahadaki canlı durum) ve elle uyut/çalıştır
 const KOMUT_URL = 'https://xbay.app.n8n.cloud/webhook/aesun-komut';
@@ -2257,7 +2256,7 @@ async function cizMaden() {
     + kart('Şu an (F2Pool)', f2 ? say(fe.hashrate_th) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">TH/s</span>' : '—', f2 ? (fe.worker_online ?? '—') + ' / ' + (fe.worker_toplam ?? '—') + ' işçi · bugün ~' + btcY(fe.bugun_tahmini) + ' BTC' : '')
     + '</div>';
   // aylar tablosu
-  h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Aylar</h2><span class="k">Aya tıklayınca günleri açılır</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th class="ayr">Gelir (BTC)</th><th>Gelir (₺)</th><th title="Tek Yıldız 2 şebeke maliyeti (güneş yokken çekilen elektrik, KDV dahil); turuncu = tahmini">Maliyet (₺)</th><th>Net (₺)</th><th>Gelir ($)</th><th>Ort. BTC ($)</th><th>Verim (mBTC/PH·gün)</th><th class="ayr">Ort. hash (TH/s)</th><th>Çalışırken (TH/s)</th><th class="ayr">Çalışma</th><th>Gün</th></tr></thead><tbody>'
+  h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Aylar</h2><span class="k">Aya tıklayınca günleri açılır</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th class="ayr">Gelir (BTC)</th><th>Gelir (₺)</th><th title="Tek Yıldız 2 şebeke maliyeti (güneş yokken çekilen elektrik, KDV hariç); turuncu = tahmini">Maliyet (₺)</th><th>Net (₺)</th><th>Gelir ($)</th><th>Ort. BTC ($)</th><th>Verim (mBTC/PH·gün)</th><th class="ayr">Ort. hash (TH/s)</th><th>Çalışırken (TH/s)</th><th class="ayr">Çalışma</th><th>Gün</th></tr></thead><tbody>'
     + oz.slice().reverse().map(x => '<tr' + (x.a === ay ? ' style="background:#EEF3FA;font-weight:600"' : '') + '><td class="sol" data-s="' + x.a + '"><a href="#maden" onclick="madenSec.ay=\'' + x.a + '\';cizMaden();return false">' + AYLAR[Number(x.a.slice(5)) - 1] + ' ' + x.a.slice(0, 4) + '</a></td><td class="ayr">' + btcY(x.btc) + '</td><td>' + say(x.tl) + '</td>' + malH(x.mal, x.malTah, 'A:' + x.a) + netH2(x.tl, x.mal) + '<td>' + say(x.usd) + '</td><td>' + say(x.fiyat) + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td><td class="ayr">' + say(x.ort) + '</td><td>' + say(x.ortCal) + '</td><td class="ayr">' + (x.sa ? '%' + say(x.cal / x.sa * 100) : '—') + '</td><td>' + x.gun + '</td></tr>').join('')
     + '</tbody></table></div></section>';
   // BTC fiyatı
@@ -2300,9 +2299,9 @@ async function cizMaden() {
     let at = '';
     for (const [ay, t] of Object.entries(aylik).sort()) { const n = t.nG ? t.nEff / t.nG : null; at += dagSatir('A:' + ay, '', 0, AYLAR[Number(ay.slice(5)) - 1] + ' ' + ay.slice(0, 4) + ' <span class="k">(' + t.gun + ' gün)</span>', { ...t, m: t.mG ? t.m : null, ma: t.mG ? t.ma : null, mb: t.mG ? t.mb : null }, n, n ? t.btc / t.gun / n : null, true); }
     at += satir('Genel toplam <span class="k">(' + dg.length + ' gün)</span>', topl, 'top');
-    const bas2 = (ilk) => '<thead><tr><th class="sol" rowspan="2">' + ilk + '</th><th class="ayr" rowspan="2">Gelir (BTC)</th><th rowspan="2" title="Çalışma saatine göre eşdeğer çalışan cihaz sayısı (ayda: günlük ortalama)">Çalışan cihaz</th><th rowspan="2" title="Günlük gelir ÷ çalışan cihaz (ayda: günlük ortalama)">Cihaz başı / gün (BTC)</th><th class="ayr" colspan="4" style="text-align:center">16 cihaz</th><th class="ayr" colspan="4" style="text-align:center">13 cihaz</th></tr><tr><th class="ayr">BTC</th><th>Gelir ₺</th><th title="Tek Yıldız 2 şebeke maliyeti payı (güneş yokken çekilen elektrik, fatura esası, KDV dahil)">Maliyet ₺</th><th>Net ₺</th><th class="ayr">BTC</th><th>Gelir ₺</th><th>Maliyet ₺</th><th>Net ₺</th></tr></thead>';
+    const bas2 = (ilk) => '<thead><tr><th class="sol" rowspan="2">' + ilk + '</th><th class="ayr" rowspan="2">Gelir (BTC)</th><th rowspan="2" title="Çalışma saatine göre eşdeğer çalışan cihaz sayısı (ayda: günlük ortalama)">Çalışan cihaz</th><th rowspan="2" title="Günlük gelir ÷ çalışan cihaz (ayda: günlük ortalama)">Cihaz başı / gün (BTC)</th><th class="ayr" colspan="4" style="text-align:center">16 cihaz</th><th class="ayr" colspan="4" style="text-align:center">13 cihaz</th></tr><tr><th class="ayr">BTC</th><th>Gelir ₺</th><th title="Tek Yıldız 2 şebeke maliyeti payı (güneş yokken çekilen elektrik, fatura esası, KDV hariç)">Maliyet ₺</th><th>Net ₺</th><th class="ayr">BTC</th><th>Gelir ₺</th><th>Maliyet ₺</th><th>Net ₺</th></tr></thead>';
     const kartD = (ad, btc, tl, usd, net) => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">' + ad + '</div><div class="num" style="font-size:22px;font-weight:700">' + btcY(btc) + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">BTC</span></div><div class="k">' + say(tl) + ' ₺ · $' + say(usd) + '</div>' + (net != null ? '<div style="font-size:13px;font-weight:700;color:' + (net < 0 ? '#B42318' : '#1E7A3C') + '">Net ' + say(net) + ' ₺ <span class="k" style="font-weight:500">(maliyet sonrası)</span></div>' : '') + '</div>';
-    const kartM = t => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Şebeke maliyeti (T2)</div><div class="num" style="font-size:22px;font-weight:700">' + (t.mG ? say(t.m) : '—') + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">₺</span></div><div class="k">' + t.mG + ' gün · fatura esası, KDV dahil</div></div>';
+    const kartM = t => '<div class="panel" style="padding:16px 18px;gap:4px"><div class="k">Şebeke maliyeti (T2)</div><div class="num" style="font-size:22px;font-weight:700">' + (t.mG ? say(t.m) : '—') + ' <span style="font-size:13px;font-weight:500;color:#4A5A70">₺</span></div><div class="k">' + t.mG + ' gün · fatura esası, KDV hariç</div></div>';
     h += '<section class="panel" id="dagilim" style="gap:12px"><div class="bas"><h2>Gelir dağılımı</h2><span class="k">' + tarihK(DAG_BAS) + ' ' + DAG_BAS.slice(0, 4) + ' – ' + tarihK(dg[dg.length - 1].g) + ', ' + dg.length + ' gün</span></div>'
       + '<div class="kartlar5" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">' + kartD('Toplam gelir', topl.btc, topl.tl, topl.usd) + kartM(topl) + kartD('16 cihaz payı (16/29)', topl.a, topl.aTl, topl.aUsd, topl.mG ? topl.aTl - topl.ma : null) + kartD('13 cihaz payı (13/29)', topl.b, topl.bTl, topl.bUsd, topl.mG ? topl.bTl - topl.mb : null) + '</div>'
       + grafikX({ id: 'mdagilim', ad: 'Gelir dağılımı', etiket: dg.map(x => tarihK(x.g)), etiketAd: 'Gün', turler: ['yigin', 'cubuk', 'cizgi', 'tablo'], birim: 'BTC', toplam: 'top', fmt: v => say(v, 6) + ' BTC', eksen: v => say(v, 4),
@@ -2310,7 +2309,7 @@ async function cizMaden() {
       + '<div class="tablo-kutu" style="max-height:640px;overflow:auto"><table class="tb sirasiz" id="dagTablo">' + bas2('Ay / gün / saat / cihaz') + '<tbody>' + at + '</tbody></table></div>'
       + odemeBolum(topl)
       + '<div class="k">Aya tıklayınca günler, güne tıklayınca saatler, saate tıklayınca o saatte çalışan cihazlar açılır. Saatte maliyet o saatin şebeke çekişinin fatura bedelidir (güneş varken genelde 0); cihaza, gelir gibi o saatteki hash payına göre bölünür. Günün geliri saatlere o saatteki toplam hash oranında, saatin geliri cihazlara kendi hash payı oranında dağıtılır.</div>'
-      + '<div class="k">Maliyet: madencilik sahasının (Tek Yıldız 2) güneşin olmadığı / yetmediği saatlerde şebekeden çektiği elektriğin fatura bedeli (KDV dahil). Fatura gelen ayda faturanın saatlik tüketim ve PTF\'si, gelmeyen ayda OSOS sayacı + EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025; dağıtım 1.182,457 TL/MWh; BTV %1; KDV %20. Gelir 16/29 · 13/29; maliyet 14.09.2026–13.09.2027 arası 8/29 · 21/29 (16 cihaza düşenin yarısı 13\'e), sonra 16/29 · 13/29.</div>'
+      + '<div class="k">Maliyet: madencilik sahasının (Tek Yıldız 2) güneşin olmadığı / yetmediği saatlerde şebekeden çektiği elektriğin fatura bedeli (KDV hariç). Fatura gelen ayda faturanın saatlik tüketim ve PTF\'si, gelmeyen ayda OSOS sayacı + EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025; dağıtım 1.182,457 TL/MWh; BTV %1 (KDV hariç). Gelir 16/29 · 13/29; maliyet 14.09.2026–13.09.2027 arası 8/29 · 21/29 (16 cihaza düşenin yarısı 13\'e), sonra 16/29 · 13/29.</div>'
       + '<div class="k">Hangi cihazın hangi gruba ait olduğu bilinmediği için her günün geliri 16/29 ve 13/29 oranında bölünür. "Çalışan cihaz", her cihazın o gün sahanın çalıştığı saatlerin ne kadarında çalıştığına göre eşdeğer sayıdır; "cihaz başı" günlük gelirin bu sayıya bölümüdür. ₺ ve $ o günün BTC kapanış fiyatıyla.</div></section>';
     h += aylikMaliyetBolum(dg, DAG, DAG_TOP, DAG_BAS);
   }
@@ -2325,9 +2324,9 @@ async function cizMaden() {
     + grafikX({ id: 'mbtc', ad: 'Günlük gelir', etiket: et, etiketAd: 'Gün', turler: ['cubuk', 'cizgi', 'tablo'], birim: 'BTC', toplam: 'top', fmt: v => say(v, 6) + ' BTC', eksen: v => say(v, 4),
       tik: i => "madenGunAc('" + gunler[i].g + "',true)", seriler: [{ ad: 'Gelir', renk: '#eda100', v: gunler.map(x => x.btc) }] }) + '</section>';
   // günlük tablo
-  h += '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Gün</th><th class="ayr">Ort. hash (24 sa)</th><th>Çalışırken</th><th>En yüksek</th><th class="ayr">Çalışma (saat)</th><th>Ort. cihaz</th><th class="ayr">Gelir (BTC)</th><th>Gelir (₺)</th><th title="Tek Yıldız 2: şebeke (KDV dahil) + güneş fırsat bedeli; turuncu = tahmini">Maliyet (₺)</th><th>Net (₺)</th><th>Gelir ($)</th><th>BTC ($)</th><th>Verim</th></tr></thead><tbody>'
+  h += '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Gün</th><th class="ayr">Ort. hash (24 sa)</th><th>Çalışırken</th><th>En yüksek</th><th class="ayr">Çalışma (saat)</th><th>Ort. cihaz</th><th class="ayr">Gelir (BTC)</th><th>Gelir (₺)</th><th title="Tek Yıldız 2: şebeke (KDV hariç) + güneş fırsat bedeli; turuncu = tahmini">Maliyet (₺)</th><th>Net (₺)</th><th>Gelir ($)</th><th>BTC ($)</th><th>Verim</th></tr></thead><tbody>'
     + gunler.map(x => '<tr data-mg="' + x.g + '"><td class="sol" data-s="' + x.g + '"><a href="#maden" onclick="madenGunAc(\'' + x.g + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + tarihK(x.g) + '</a>' + (x.havuzdan ? ' <span class="k">(F2Pool günlük)</span>' : x.veri < 24 ? ' <span class="k">(' + x.veri + ' sa)</span>' : '') + '</td><td class="ayr">' + say(x.ort24) + '</td><td>' + say(x.ortCalisma) + '</td><td>' + say(x.tepe) + '</td><td class="ayr">' + x.calisan + '</td><td>' + say(x.aktifOrt, 1) + '</td><td class="ayr">' + btcY(x.btc) + '</td><td>' + say(x.tl) + '</td>' + (m => malH(m ? m.toplam_tl : null, m && m.kaynak !== 'fatura', 'G:' + x.g) + netH2(x.tl, m ? m.toplam_tl : null))((MADEN.mal || {})[x.g]) + '<td>' + say(x.usd) + '</td><td>' + (x.fiyat && x.fiyat.usd ? say(x.fiyat.usd) : '—') + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td></tr>').join('')
-    + '<tr class="top"><td class="sol">' + ayAd + '</td><td class="ayr">' + say(bu.ort) + '</td><td>' + say(bu.ortCal) + '</td><td></td><td class="ayr">' + say(bu.cal) + '</td><td></td><td class="ayr">' + btcY(bu.btc) + '</td><td>' + say(bu.tl) + '</td>' + malH(bu.mal, bu.malTah, 'A:' + ay) + netH2(bu.tl, bu.mal) + '<td>' + say(bu.usd) + '</td><td>' + say(bu.fiyat) + '</td><td>' + (bu.verim != null ? say(bu.verim * 1e3, 3) : '—') + '</td></tr></tbody></table></div><div class="k">Verim: mBTC / PH·gün (gelir ÷ günlük ortalama hash). F2Pool günü UTC\'ye göre kapandığı için gelir ile hash arasında 3 saatlik kayma vardır. Maliyet: Tek Yıldız 2\'nin şebekeden çektiği elektriğin bedeli (KDV dahil; fatura gelen ayda fatura, gelmeyende OSOS + EPİAŞ ile tahmini, turuncu) + güneşin karşıladığı tüketimin fırsat bedeli (öz tüketim × (üretim bedeli − sistem kullanım bedeli), fatura sisteminden). Net = gelir ₺ − maliyet.</div>';
+    + '<tr class="top"><td class="sol">' + ayAd + '</td><td class="ayr">' + say(bu.ort) + '</td><td>' + say(bu.ortCal) + '</td><td></td><td class="ayr">' + say(bu.cal) + '</td><td></td><td class="ayr">' + btcY(bu.btc) + '</td><td>' + say(bu.tl) + '</td>' + malH(bu.mal, bu.malTah, 'A:' + ay) + netH2(bu.tl, bu.mal) + '<td>' + say(bu.usd) + '</td><td>' + say(bu.fiyat) + '</td><td>' + (bu.verim != null ? say(bu.verim * 1e3, 3) : '—') + '</td></tr></tbody></table></div><div class="k">Verim: mBTC / PH·gün (gelir ÷ günlük ortalama hash). F2Pool günü UTC\'ye göre kapandığı için gelir ile hash arasında 3 saatlik kayma vardır. Maliyet: Tek Yıldız 2\'nin şebekeden çektiği elektriğin bedeli (KDV hariç; fatura gelen ayda fatura, gelmeyende OSOS + EPİAŞ ile tahmini, turuncu) + güneşin karşıladığı tüketimin fırsat bedeli (öz tüketim × (üretim bedeli − sistem kullanım bedeli), fatura sisteminden). Net = gelir ₺ − maliyet.</div>';
   // cihaz tablosu + ısı haritası
   const cih = {};
   for (const x of gunler) for (const [c, z] of Object.entries(x.cihaz)) { const o = cih[c] || (cih[c] = { ths: 0, s: 0, gun: {} }); o.ths += z.ths; o.s += z.s; o.gun[x.g] = z; }

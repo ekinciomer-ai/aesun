@@ -20,15 +20,17 @@ EK = [133]                                  # 016 (MAC A2:ED:87:03:64:F4)
 SATIR = re.compile(r"^IP_RANGE\s*=\s*list\(range\(100,\s*130\)\)(?:\s*\+\s*\[([\d,\s]*)\])?(.*)$", re.M)
 
 
-def tarama_ekleri(log=print):
+def tarama_ekleri(log=print, veri=None):
     """ag_tarama.json'daki liste dışı madencilerin son ekleri (yalnız 192.168.0.x, taze tarama, worker'ı bilinen)."""
-    try:
-        sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from ortak import gh
-        t, _ = gh("n8n/ag_tarama.json")
-    except Exception as e:
-        log("altminer IP ekleme: ağ taraması okunamadı:", e)
-        return []
+    t = veri
+    if not t:
+        try:
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            from ortak import gh
+            t, _ = gh("n8n/ag_tarama.json")
+        except Exception as e:
+            log("altminer IP ekleme: ağ taraması okunamadı:", e)
+            return []
     if not t:
         return []
     try:
@@ -50,6 +52,16 @@ def tarama_ekleri(log=print):
             continue
         if 2 <= s <= 254 and not 100 <= s < 130:
             ek.add(s)
+    for m in t.get("madenciler") or []:
+        ip = m.get("ip") or ""
+        if m.get("toplayici_listesinde") or not m.get("worker") or not ip.startswith("192.168.0.") or ip == pi:
+            continue
+        try:
+            s = int(ip.rsplit(".", 1)[1])
+        except ValueError:
+            continue
+        if 2 <= s <= 254 and not 100 <= s < 130:
+            ek.add(s)
     return sorted(ek) if len(ek) <= 40 else []
 
 
@@ -57,18 +69,18 @@ def calisiyor():
     return subprocess.run(["pgrep", "-f", "antminer_panel.py"], capture_output=True).returncode == 0
 
 
-def uygula(log=print):
+def uygula(log=print, veri=None):
     if not DOSYA.exists():
-        return False
+        return []
     s = DOSYA.read_text()
     m = SATIR.search(s)
     if not m:
         log("altminer IP_RANGE satırı beklenen biçimde değil; değişiklik yapılmadı")
-        return False
+        return []
     mevcut = [int(x) for x in (m.group(1) or "").replace(" ", "").split(",") if x]
-    eksik = sorted({x for x in EK + tarama_ekleri(log) if x not in mevcut and not 100 <= x < 130})
+    eksik = sorted({x for x in EK + tarama_ekleri(log, veri) if x not in mevcut and not 100 <= x < 130})
     if not eksik:
-        return False
+        return []
     yeni_liste = sorted(set(mevcut + eksik))
     yeni = s[:m.start()] + f"IP_RANGE = list(range(100, 130)) + {yeni_liste}  # aesun: aralık dışı cihazlar" + s[m.end():]
     yedek = DOSYA.with_name(DOSYA.name + ".yedek-ip-" + time.strftime("%Y%m%d-%H%M%S"))
@@ -80,7 +92,7 @@ def uygula(log=print):
     except Exception as e:
         gecici.unlink(missing_ok=True)
         log("altminer IP ekleme: derleme hatası, değişiklik yapılmadı:", e)
-        return False
+        return []
     shutil.copymode(DOSYA, gecici)
     gecici.replace(DOSYA)
     log(f"altminer IP listesine eklendi: {eksik} (yedek {yedek.name}); toplayıcı yeniden başlatılıyor")
@@ -89,11 +101,11 @@ def uygula(log=print):
         time.sleep(2)
         if calisiyor():
             log("toplayıcı yeniden başladı")
-            return True
+            return eksik
     subprocess.Popen([str(PY if PY.exists() else sys.executable), str(DOSYA)], cwd=str(DOSYA.parent),
                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     log("toplayıcı servis tarafından başlatılmadı; elle başlatıldı")
-    return True
+    return eksik
 
 
 if __name__ == "__main__":

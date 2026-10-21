@@ -192,6 +192,11 @@ def main():
     eski, sha = gh("n8n/ag_tarama.json")
     gh("n8n/ag_tarama.json", veri, sha, "Pi ağ taraması " + simdi.strftime("%H:%M"))
     gh("n8n/cihaz_kimlik.json", kimlik, ksha, "Cihaz kimlikleri " + simdi.strftime("%H:%M"))
+    try:
+        import altminer_ip_ekle
+        altminer_ip_ekle.uygula(log, veri)
+    except Exception as e:
+        log("otomatik IP_RANGE eşitleme hatası:", e)
     log(f"ağ {ag}: {len(acik)} açık adres, {len(madenci)} madenci; eksik: " +
         (", ".join(f"{e['worker']}→{e['yeni_ip'] or 'yok'}" for e in eksik) or "yok"))
 

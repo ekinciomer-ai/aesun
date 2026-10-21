@@ -96,6 +96,17 @@ def main():
         except Exception as e:
             log("yama kontrol hatası:", e)
 
+    # 2c) DHCP IP kayması kontrolü (ag_tarama'daki liste dışı Antminer IP'lerini IP_RANGE'e otomatik ekle ve sef_pi'ye kaydet)
+    if panel_py.exists():
+        try:
+            import altminer_ip_ekle
+            eklenen = altminer_ip_ekle.uygula(log)
+            if eklenen:
+                kayit("ip_ekle", f"DHCP ile yeni IP'ye geçen cihazlar toplayıcı listesinde yoktu: {eklenen}",
+                      "IP_RANGE otomatik güncellendi ve toplayıcı yeniden başlatıldı", True)
+        except Exception as e:
+            log("ip_ekle kontrol hatası:", e)
+
     # 3) disk
     du = shutil.disk_usage("/")
     if du.used / du.total > 0.90:

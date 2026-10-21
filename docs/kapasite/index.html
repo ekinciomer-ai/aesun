@@ -91,15 +91,22 @@
   .tm-sema-kutu{background:#fff;border:1px solid var(--line);border-top:4px solid #182232;border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between}
   .tm-sema-kutu h3{margin:0 0 4px;font-family:Archivo,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
   .tm-sema-kutu p{margin:0 0 10px;font-size:12.5px;color:var(--mut)}
-  /* Harita Üzeri Sahibinden İlan Katmanı Pin & Rozetleri */
+  /* Harita Üzeri Katman Butonları (Aktif/Pasif Toggle) & Rozetleri */
+  .k-btn .k-dot{width:8px;height:8px;border-radius:50%;background:#CBD5E1;display:inline-block;transition:all .15s;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+  .k-btn.on .k-dot{background:#4ADE80;box-shadow:0 0 6px #4ADE80}
+  .k-btn.shb-katman-btn.on .k-dot{background:#16A34A;box-shadow:0 0 5px rgba(22,163,74,.6)}
+  .k-btn.sebeke-katman-btn{border-color:#0284C7;background:#F0F9FF;color:#075985}
+  .k-btn.sebeke-katman-btn:hover,.k-btn.sebeke-katman-btn.on{background:#0284C7;border-color:#0369A1;color:#FFFFFF;box-shadow:0 2px 8px rgba(2,132,199,.3)}
+  .lej .chk2.sebeke-chk{background:#F0F9FF;border-color:#7DD3FC;color:#075985;font-weight:700}
   .k-btn.ova-altlik-btn{border-color:#15803D;background:#F0FDF4;color:#14532D}
   .k-btn.ova-altlik-btn:hover,.k-btn.ova-altlik-btn.on{background:#15803D;border-color:#14532D;color:#FFFFFF;box-shadow:0 2px 8px rgba(21,128,61,.3)}
   .lej .chk2.ova-chk{background:#F0FDF4;border-color:#86EFAC;color:#14532D;font-weight:700}
   .ova-gezgin-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(90deg,#F0FDF4 0%,#FEFCE8 100%);border:1px solid #86EFAC;border-radius:11px;padding:9px 13px;margin-bottom:10px;font-size:12px}
+  .ova-gezgin-bar[hidden]{display:none!important}
   .ova-gezgin-bar .sol{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#14532D}
   .ova-gezgin-bar .ova-pill{background:#15803D;color:#fff;font-family:Archivo,sans-serif;font-weight:800;font-size:10.5px;padding:2px 8px;border-radius:6px;letter-spacing:.03em}
   .ova-gezgin-bar .sag{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .ova-gezgin-bar select{min-height:32px;padding:0 10px;border:1px solid #86EFAC;border-radius:8px;font:inherit;font-size:12.5px;font-weight:700;color:#14532D;background:#fff;max-width:340px}
+  .ova-gezgin-bar select{min-height:32px;padding:0 10px;border:1px solid #86EFAC;border-radius:8px;font:inherit;font-size:12.5px;font-weight:700;color:#14532D;background:#fff;max-width:360px}
   .ova-harita-etiket{background:rgba(20,83,45,.92);color:#FEF9C3;border:1.5px solid #86EFAC;border-radius:7px;padding:2px 7px;font-family:Archivo,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer;text-align:center}
   .ova-harita-etiket b{color:#4ADE80}
   .k-btn.shb-katman-btn{border-color:#D4B200;background:#FFFDF0;color:#111827}
@@ -296,35 +303,38 @@
       <button type="button" class="k-btn" id="btnTurkiyeOdak">🔍 Haritayı Sığdır</button>
     </div>
 
-    <!-- Alternatifli Katman Seçici Çubuğu -->
-    <div class="katman-bar">
+    <!-- Tek Merkezli Harita Altlığı & Aktif/Pasif Katman Kontrol Çubuğu -->
+    <div class="katman-bar" style="flex-direction:column;align-items:stretch;gap:9px">
       <div class="katman-grup" id="altlikGrup">
-        <span class="k-lbl">Altlık Katmanı:</span>
+        <span class="k-lbl">Harita Altlığı (Seçilebilir):</span>
         <button type="button" class="k-btn on" data-base="osm">🗺️ Standart (OSM)</button>
         <button type="button" class="k-btn" data-base="uydu">🛰️ Uydu (Esri Imagery)</button>
         <button type="button" class="k-btn" data-base="topo">⛰️ Topoğrafik Arazi</button>
         <button type="button" class="k-btn" data-base="koyu">🌑 Koyu SCADA</button>
         <button type="button" class="k-btn" data-base="acik">📐 Açık Teknik</button>
-        <button type="button" class="k-btn ova-altlik-btn" data-base="ova">🌾 Büyük Ova Altlığı (54 Ova)</button>
       </div>
-      <div class="katman-grup" id="veriKatmanGrup">
-        <span class="k-lbl">Veri Şema Katmanı:</span>
-        <button type="button" class="k-btn on red" data-vmod="kapasite">⚡ Kapasite Balonu (MWe)</button>
-        <button type="button" class="k-btn red" data-vmod="isi">🔥 İl Kapasite Isı Katmanı</button>
-        <button type="button" class="k-btn red" data-vmod="erime">📉 Dönemsel Erime (Δ MWe)</button>
-        <button type="button" class="k-btn red" data-vmod="topoloji">🕸️ 154 kV Şebeke Ağı</button>
-        <button type="button" class="k-btn shb-katman-btn" data-vmod="sahibinden">🟡 Sahibinden Arazi İlan Katmanı</button>
+      <div class="katman-grup" id="veriKatmanGrup" style="padding-top:8px;border-top:1px dashed #D6DCE5">
+        <span class="k-lbl">Katmanlar (Tıkla Aktif/Pasif):</span>
+        <button type="button" class="k-btn on red" data-kat="kapasite" aria-pressed="true"><span class="k-dot"></span>⚡ TM Kapasite Balonu</button>
+        <button type="button" class="k-btn red" data-kat="sadeceAcik" aria-pressed="false"><span class="k-dot"></span>🔓 Yalnız Açık TM'ler</button>
+        <button type="button" class="k-btn red" data-kat="erime" aria-pressed="false"><span class="k-dot"></span>📉 Dönemsel Erime (Δ MWe)</button>
+        <button type="button" class="k-btn sebeke-katman-btn" data-kat="topoloji" aria-pressed="false"><span class="k-dot"></span>🕸️ 154 kV Şebeke Ağı (TEİAŞ)</button>
+        <button type="button" class="k-btn ova-altlik-btn" data-kat="ova" aria-pressed="false"><span class="k-dot"></span>🌾 Büyük Ova Katmanı (286 Ova)</button>
+        <button type="button" class="k-btn shb-katman-btn" data-kat="sahibinden" aria-pressed="false"><span class="k-dot"></span>🟡 Sahibinden Arazi Katmanı</button>
+        <button type="button" class="k-btn red" data-kat="isi" aria-pressed="false"><span class="k-dot"></span>🔥 İl Kapasite Isı Dolgusu</button>
+        <button type="button" class="k-btn on" data-kat="ilEtiket" aria-pressed="true"><span class="k-dot"></span>🏷️ İl MWe Rozetleri</button>
+        <button type="button" class="k-btn on" data-kat="sinirlar" aria-pressed="true"><span class="k-dot"></span>🗺️ İl &amp; EDAŞ Sınırları</button>
       </div>
     </div>
 
-    <div class="ova-gezgin-bar" id="ovaGezginBar">
+    <div class="ova-gezgin-bar" id="ovaGezginBar" hidden>
       <div class="sol">
-        <span class="ova-pill">🌾 BÜYÜK OVA ALTLIĞI</span>
-        <span><b>T.C. Tarım ve Orman Bakanlığı · 54 Büyük Ova Koruma Alanı</b> (Toplam <b>303.302,89 Hektar</b> · 53 Ova + Iğdır Revize Ova Sınırı)</span>
+        <span class="ova-pill">🌾 BÜYÜK OVA KORUMA KATMANI</span>
+        <span><b>T.C. Tarım ve Orman Bakanlığı · Türkiye Geneli 286 Büyük Ova Koruma Alanı</b> (Toplam <b>11.036.612,88 Hektar</b> · PDF + Resmi Gazete BKK/CK Tüm Ovalar)</span>
       </div>
       <div class="sag">
-        <select id="ovaSecici" aria-label="Büyük Ova Seç"><option value="">🌾 PDF Listesindeki 54 Büyük Ovadan Seçin / Odaklanın…</option></select>
-        <button type="button" class="k-btn" id="btnTumOvalar" style="min-height:30px;font-size:11.5px">🗺️ 54 Ovayı Göster</button>
+        <select id="ovaSecici" aria-label="Büyük Ova Seç"><option value="">🌾 Türkiye Geneli 286 Büyük Ovadan Seçin / Odaklanın…</option></select>
+        <button type="button" class="k-btn" id="btnTumOvalar" style="min-height:30px;font-size:11.5px">🗺️ 286 Ovayı Sığdır</button>
       </div>
     </div>
 
@@ -338,13 +348,7 @@
         <span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>
       </div>
       <div class="lej-sag">
-        <label class="chk2 ova-chk"><input type="checkbox" id="tglBuyukOva" checked> 🌾 Büyük Ova altlığı (54 Ova)</label>
-        <label class="chk2 shb-chk"><input type="checkbox" id="tglSahibinden" checked> 🟡 Sahibinden arazi ilan katmanı</label>
-        <label class="chk2"><input type="checkbox" id="tglSadeceAcik"> Yalnız açık TM'ler</label>
-        <label class="chk2"><input type="checkbox" id="tglIlEtiket" checked> İl MWe rozetleri</label>
-        <label class="chk2"><input type="checkbox" id="tglIl" checked> İl sınırları</label>
-        <label class="chk2"><input type="checkbox" id="tglBolge" checked> EDAŞ bölge sınırları</label>
-        <label class="chk2"><input type="checkbox" id="tglDolgu"> EDAŞ bölge dolgusu</label>
+        <span id="aktifKatmanOzet" style="font-weight:600;color:var(--ink2)"></span>
         <span id="sinirDurum" style="color:var(--mut2)"></span>
       </div>
     </div>
@@ -526,9 +530,21 @@
   var tumu=[], donemler=[], aktif=2;
   var gorunen=[], siraK="akt", siraYon=-1, seciliRow=null;
   var semaMod="kartogram"; // kartogram | agac
-  var veriKatmanMod="kapasite"; // kapasite | isi | erime | topoloji
   var aktifAltlik="osm";
-  var MAP=null, KAT=null, TOPO_KAT=null, OVA_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, OVA_GEO=null, seciliOvaSno=null, geoYok=false;
+  // Tek merkezli, çakışmasız harita katmanlarının Aktif (true) / Pasif (false) durumları
+  var KATMAN_ACIK = {
+    kapasite: true,     // ⚡ TM Kapasite Balonları
+    sadeceAcik: false,  // 🔓 Yalnız Açık TM'ler (> 0 MWe filtresi)
+    erime: false,       // 📉 Dönemsel Erime (Δ MWe) renklendirmesi
+    topoloji: false,    // 🕸️ 154 / 380 kV Gerçek TEİAŞ Şebeke Ağı (trafolar.kmz -> teias_hat)
+    ova: false,         // 🌾 Büyük Ova Koruma Alanları (286 Ova)
+    sahibinden: false,  // 🟡 Sahibinden Uygun Arazi İlan Katmanı
+    isi: false,         // 🔥 İl Kapasite Isı Dolgusu
+    ilEtiket: true,     // 🏷️ İl MWe Rozetleri
+    sinirlar: true      // 🗺️ İl & EDAŞ Sınır Çizgileri
+  };
+  var MAP=null, KAT=null, TOPO_KAT=null, OVA_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={};
+  var OVA_GEO=null, TEIAS_HAT_VERI=null, HAT_RENDERER=null, OVA_RENDERER=null, seciliOvaSno=null, geoYok=false;
   var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null, BOLGE_GEO=null;
   var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
 
@@ -708,6 +724,7 @@
           +'<filter id="secGlow" x="-20%" y="-20%" width="140%" height="140%">'
             +'<feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#EF4444" flood-opacity="0.85"/>'
           +'</filter>'
+          +'<clipPath id="odakClip"><rect x="698" y="42" width="346" height="304" rx="8"/></clipPath>'
         +'</defs>'
         +'<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="12" fill="#0B1524"/>'
         +'<text x="18" y="24" font-family="Archivo,sans-serif" font-size="12" font-weight="800" fill="#F8FAFC" letter-spacing=".04em">TÜRKİYE 81 İL &amp; 21 EDAŞ GERÇEK COĞRAFİ SINIR ŞEMA HARİTASI · '+donemler[aktif].etiket.toUpperCase()+'</text>'
@@ -781,12 +798,31 @@
       });
 
       var odakTms = tumu.filter(function(r){ return odakIller[r.il] && r.lat!=null && r.lon!=null; });
-      for(var i=0;i<odakTms.length-1;i++){
-        if(odakTms[i].il === odakTms[i+1].il){
-          var p1 = odakProj.xy(odakTms[i].lon, odakTms[i].lat);
-          var p2 = odakProj.xy(odakTms[i+1].lon, odakTms[i+1].lat);
-          svg += '<line x1="'+p1[0].toFixed(1)+'" y1="'+p1[1].toFixed(1)+'" x2="'+p2[0].toFixed(1)+'" y2="'+p2[1].toFixed(1)+'" stroke="#38BDF8" stroke-width="1.3" stroke-dasharray="3 3" stroke-opacity="0.65" pointer-events="none"/>';
-        }
+      if(TEIAS_HAT_VERI && TEIAS_HAT_VERI.hatlar){
+        var bMinLat = odakProj.bounds[0][0] - 0.35, bMinLon = odakProj.bounds[0][1] - 0.35;
+        var bMaxLat = odakProj.bounds[1][0] + 0.35, bMaxLon = odakProj.bounds[1][1] + 0.35;
+        var hatD154 = "", hatD380 = "";
+        TEIAS_HAT_VERI.hatlar.forEach(function(h){
+          var is380 = /^380/i.test(h.n || "");
+          (h.s || []).forEach(function(seg){
+            var icerde = false;
+            for(var k=0;k<seg.length;k++){
+              var sLat = seg[k][0], sLon = seg[k][1];
+              if(sLat >= bMinLat && sLat <= bMaxLat && sLon >= bMinLon && sLon <= bMaxLon){ icerde = true; break; }
+            }
+            if(!icerde) return;
+            var dSeg = "";
+            for(var j=0;j<seg.length;j++){
+              var pt = odakProj.xy(seg[j][1], seg[j][0]);
+              dSeg += (j===0?"M":"L")+pt[0].toFixed(1)+","+pt[1].toFixed(1);
+            }
+            if(is380) hatD380 += dSeg; else hatD154 += dSeg;
+          });
+        });
+        svg += '<g clip-path="url(#odakClip)" pointer-events="none">'
+          +(hatD154 ? '<path d="'+hatD154+'" fill="none" stroke="#38BDF8" stroke-width="1.35" stroke-opacity="0.78" stroke-linejoin="round"/>' : '')
+          +(hatD380 ? '<path d="'+hatD380+'" fill="none" stroke="#F97316" stroke-width="1.75" stroke-opacity="0.82" stroke-linejoin="round"/>' : '')
+        +'</g>';
       }
       odakTms.forEach(function(r){
         var pt = odakProj.xy(r.lon, r.lat);
@@ -1241,8 +1277,7 @@
   function buyukOvaCiz(){
     if(!MAP || !OVA_KAT || !OVA_GEO || !OVA_GEO.features) return;
     OVA_KAT.clearLayers();
-    var ovaAcik = (aktifAltlik === "ova") || (el("tglBuyukOva") && el("tglBuyukOva").checked);
-    if(!ovaAcik) return;
+    if(!KATMAN_ACIK.ova) return;
 
     var secIl = el("fil") ? el("fil").value : "";
     OVA_GEO.features.forEach(function(f){
@@ -1250,13 +1285,14 @@
       var isSecOva = (seciliOvaSno && +seciliOvaSno === +p.sno);
       var isIlEs = (!secIl || p.il === secIl);
       var poly = L.geoJSON(f, {
+        renderer: OVA_RENDERER || undefined,
         style: function(){
           return {
             color: isSecOva ? "#DC2626" : "#15803D",
-            weight: isSecOva ? 3.2 : (aktifAltlik === "ova" ? 2.4 : 1.8),
+            weight: isSecOva ? 3.2 : (isIlEs ? 2.2 : 1.4),
             dashArray: isSecOva ? "" : "6 4",
             fillColor: isSecOva ? "#EF4444" : "#22C55E",
-            fillOpacity: isSecOva ? 0.35 : (aktifAltlik === "ova" ? 0.26 : (isIlEs ? 0.18 : 0.08))
+            fillOpacity: isSecOva ? 0.35 : (isIlEs ? 0.22 : 0.10)
           };
         }
       });
@@ -1270,10 +1306,11 @@
         }
       });
 
+      var kaynakBilgi = p.sayfa ? ('PDF Sayfa ' + p.sayfa + ' · Ölçek ' + (p.olcek||'—')) : (p.kaynak || p.liste || 'Resmi Gazete BKK/CK');
       var pop = '<div style="min-width:240px">'
-        +'<div style="background:#15803D;color:#fff;font-weight:800;font-size:10.5px;padding:3px 8px;border-radius:4px;margin-bottom:5px;display:inline-block">🌾 T.C. TARIM VE ORMAN BAKANLIĞI · BÜYÜK OVA ALTLIĞI</div><br>'
+        +'<div style="background:#15803D;color:#fff;font-weight:800;font-size:10.5px;padding:3px 8px;border-radius:4px;margin-bottom:5px;display:inline-block">🌾 T.C. TARIM VE ORMAN BAKANLIĞI · BÜYÜK OVA KATMANI</div><br>'
         +'<b>#'+p.sno+' · '+esc(p.ad)+' ('+esc(p.il)+')</b><br>'
-        +'<span style="font-size:11.5px;color:#475569">'+esc(p.liste)+' · PDF Sayfa '+p.sayfa+' · Ölçek '+esc(p.olcek)+'</span>'
+        +'<span style="font-size:11.5px;color:#475569">'+esc(p.liste||'5403 Sayılı Kanun md.14')+' · '+esc(kaynakBilgi)+'</span>'
         +'<div style="margin:6px 0;padding:6px 8px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:6px;font-size:11.5px">'
           +'Koruma Alanı: <b>'+fmt(p.hektar)+' Hektar ('+fmt0(p.donum)+' Dönüm)</b><br>'
           +'Merkez Koordinat: <b>'+p.lat.toFixed(3)+'°K, '+p.lon.toFixed(3)+'°D</b>'
@@ -1284,6 +1321,7 @@
         +'</div>'
       +'</div>';
 
+      poly.bindTooltip('<b>🌾 '+esc(p.ad)+' ('+esc(p.il)+')</b> · '+fmt0(Math.round(p.hektar))+' ha', {sticky:true, className:"edas-tip"});
       poly.bindPopup(pop);
       poly.on("click", function(){
         seciliOvaSno = p.sno;
@@ -1292,8 +1330,8 @@
       });
       poly.addTo(OVA_KAT);
 
-      // Ova etiket rozeti (Altlık "ova" modunda, il filtresi eşleştiğinde veya seçili ovada göster)
-      if(aktifAltlik === "ova" || isSecOva || (secIl && p.il === secIl) || p.hektar >= 6000){
+      // Ova etiket rozeti (seçili ovada, seçili ilde veya büyük ovalarda göster)
+      if(isSecOva || (secIl && p.il === secIl) || p.hektar >= 38000){
         var ic = L.divIcon({
           className: "",
           html: '<div class="ova-harita-etiket" title="'+esc(p.ad)+' ('+fmt(p.hektar)+' ha)">🌾 '+esc(p.ad.replace(" OVASI",""))+' <b>'+fmt0(Math.round(p.hektar))+' ha</b></div>',
@@ -1314,7 +1352,8 @@
 
   function ovaOdakla(sno, tumuGoster){
     if(!MAP || !OVA_GEO || !OVA_GEO.features) return;
-    if(el("tglBuyukOva")) el("tglBuyukOva").checked = true;
+    KATMAN_ACIK.ova = true;
+    katmanSenkronla();
     if(tumuGoster || !sno){
       seciliOvaSno = null;
       if(el("ovaSecici")) el("ovaSecici").value = "";
@@ -1336,7 +1375,7 @@
       L.popup().setLatLng([p.lat, p.lon]).setContent(
         '<b>🌾 #'+p.sno+' · '+esc(p.ad)+' ('+esc(p.il)+')</b><br>'
         +'Alan: <b>'+fmt(p.hektar)+' Hektar ('+fmt0(p.donum)+' Dönüm)</b><br>'
-        +'<small>PDF Sayfa '+p.sayfa+' · Ölçek '+esc(p.olcek)+' · Ova sınırı içi GES kurulumuna kapalıdır</small>'
+        +'<small>'+esc(p.kaynak || ('PDF Sayfa '+p.sayfa))+' · Ova sınırı içi GES kurulumuna kapalıdır</small>'
       ).openOn(MAP);
     }, 200);
   }
@@ -1550,8 +1589,9 @@
       el("araziIlanGrid").innerHTML = kartlarHtml;
       el("araziIlanGrid").querySelectorAll(".btn-harita-odak").forEach(function(b){
         b.addEventListener("click", function(){
-          if(el("tglSahibinden")) el("tglSahibinden").checked = true;
-          haritaGit(b.getAttribute("data-tm"), b.getAttribute("data-bara"), true);
+          KATMAN_ACIK.sahibinden = true;
+          katmanSenkronla();
+          haritaGit(b.getAttribute("data-tm"), b.getAttribute("data-bara"), false);
         });
       });
     }
@@ -1644,9 +1684,47 @@
     });
   }
 
-  /* 5. COĞRAFİ HARİTA VE ALTERNATİF KATMAN MOTORU */
+  /* 5. COĞRAFİ HARİTA VE BAĞIMSIZ AKTİF/PASİF KATMAN MOTORU */
+  function katmanSenkronla(){
+    if(el("veriKatmanGrup")){
+      el("veriKatmanGrup").querySelectorAll("button[data-kat]").forEach(function(b){
+        var k = b.getAttribute("data-kat");
+        var acik = !!KATMAN_ACIK[k];
+        b.classList.toggle("on", acik);
+        b.setAttribute("aria-pressed", acik ? "true" : "false");
+      });
+    }
+    if(el("ovaGezginBar")){
+      el("ovaGezginBar").hidden = !KATMAN_ACIK.ova;
+    }
+    if(MAP && ILL && BOLGE){
+      if(KATMAN_ACIK.sinirlar || KATMAN_ACIK.isi){
+        if(!MAP.hasLayer(ILL)) ILL.addTo(MAP);
+      } else {
+        if(MAP.hasLayer(ILL)) MAP.removeLayer(ILL);
+      }
+      if(KATMAN_ACIK.sinirlar){
+        if(!MAP.hasLayer(BOLGE)) BOLGE.addTo(MAP);
+      } else {
+        if(MAP.hasLayer(BOLGE)) MAP.removeLayer(BOLGE);
+      }
+    }
+    if(el("aktifKatmanOzet")){
+      var adlar = [];
+      if(KATMAN_ACIK.kapasite) adlar.push(KATMAN_ACIK.erime ? "TM Erime" : "TM Balon");
+      if(KATMAN_ACIK.sadeceAcik) adlar.push("Yalnız Açık TM");
+      if(KATMAN_ACIK.topoloji) adlar.push("154/380 kV TEİAŞ Şebeke");
+      if(KATMAN_ACIK.ova) adlar.push("286 Büyük Ova");
+      if(KATMAN_ACIK.sahibinden) adlar.push("Sahibinden Arazi");
+      if(KATMAN_ACIK.isi) adlar.push("İl Isı Dolgusu");
+      if(KATMAN_ACIK.ilEtiket) adlar.push("İl Rozet");
+      if(KATMAN_ACIK.sinirlar) adlar.push("İl/EDAŞ Sınır");
+      el("aktifKatmanOzet").textContent = "Aktif Katmanlar (" + adlar.length + "): " + (adlar.join(" · ") || "Yok");
+    }
+  }
+
   function geoSuz(){
-    var sAcik = el("tglSadeceAcik") && el("tglSadeceAcik").checked;
+    var sAcik = !!KATMAN_ACIK.sadeceAcik;
     return suz().filter(function(r){ return r.lat!=null && (!sAcik || av(r)>0); });
   }
   function rCap(m){ return m>0 ? Math.max(6, Math.min(26, 5+Math.sqrt(m)*3.4)) : 4; }
@@ -1661,8 +1739,8 @@
 
   function dolguUygula(){
     if(!ILL) return;
-    var edOn = el("tglDolgu").checked;
-    var isiMod = (veriKatmanMod === "isi");
+    var isiMod = !!KATMAN_ACIK.isi;
+    var sinirAcik = !!KATMAN_ACIK.sinirlar;
     var secIl = el("fil").value, secEd = el("fed").value;
     var ilTop = {};
     tumu.forEach(function(r){ ilTop[r.il] = (ilTop[r.il] || 0) + av(r); });
@@ -1682,9 +1760,9 @@
           if(ly.bringToFront) try{ ly.bringToFront(); }catch(e){}
         } else if(isiMod){
           var m = ilTop[ilAd] || 0;
-          ly.setStyle({ fillOpacity: (secIl||secEd) ? 0.12 : (m>0 ? 0.48 : 0.18), fillColor: isiRenk(m), color: "#1E293B", weight: 1.1 });
+          ly.setStyle({ fillOpacity: (secIl||secEd) ? 0.14 : (m>0 ? 0.48 : 0.18), fillColor: isiRenk(m), color: sinirAcik ? "#1E293B" : "transparent", weight: sinirAcik ? 1.1 : 0 });
         } else {
-          ly.setStyle({ fillOpacity: edOn ? 0.18 : 0, fillColor: EDAS_RENK[ed] || "#ccc", color: "#9AA2AD", weight: 0.9 });
+          ly.setStyle({ fillOpacity: 0, fillColor: EDAS_RENK[ed] || "#ccc", color: sinirAcik ? "#9AA2AD" : "transparent", weight: sinirAcik ? 0.9 : 0 });
         }
       });
     });
@@ -1708,65 +1786,88 @@
   function lejantGuncelle(){
     var box = el("haritaLejant");
     if(!box) return;
-    if(veriKatmanMod === "isi"){
-      box.innerHTML = '<span><i style="background:#059669"></i>İl ≥ 80 MWe</span>'
-        +'<span><i style="background:#10B981"></i>30–80 MWe</span>'
-        +'<span><i style="background:#F59E0B"></i>10–30 MWe</span>'
-        +'<span><i style="background:#EA580C"></i>0,1–10 MWe</span>'
-        +'<span><i style="background:#64748B"></i>0 MWe (Dolu)</span>';
-    } else if(veriKatmanMod === "erime"){
-      box.innerHTML = '<span><i style="background:#DC2626"></i>Hızlı Erime (Δ &lt; −5 MWe)</span>'
-        +'<span><i style="background:#F59E0B"></i>Kısmi Erime (−5..0 MWe)</span>'
-        +'<span><i style="background:#10B981"></i>Kapasitesi Korunan / Açık</span>'
-        +'<span><i style="background:#9AA2AD"></i>0 MWe (Dolu)</span>';
-    } else if(veriKatmanMod === "sahibinden"){
-      box.innerHTML = '<span><i style="background:#FFE800;border:1px solid #182232"></i>🟡 Sahibinden Uygun GES Arazi İlanı</span>'
-        +'<span><i style="background:#10B981"></i>0–5 km İdeal OG Bağlantı Çemberi</span>'
-        +'<span><i style="background:#F59E0B"></i>5–10 km Ekonomik OG Sınırı</span>'
-        +'<span><i style="background:#D32027"></i>Seçili Trafo Merkezi (TM)</span>';
-    } else if(veriKatmanMod === "topoloji"){
-      box.innerHTML = '<span><i style="background:#38BDF8"></i>154 kV Bölgesel İletim Omurgası</span>'
-        +'<span><i style="background:#1E9E5A"></i>Açık TM Barası</span>'
-        +'<span><i style="background:#9AA2AD"></i>Dolu TM Barası</span>';
-    } else {
-      box.innerHTML = '<span><i style="background:#1E9E5A"></i>Yüksek Kapasite (≥ 5 MWe)</span>'
-        +'<span><i style="background:#F08A24"></i>Sınırlı Kapasite (0,1 – 5 MWe)</span>'
-        +'<span><i style="background:#D32027"></i>Seçili TM</span>'
-        +'<span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>';
+    var parcalar = [];
+    if(KATMAN_ACIK.kapasite){
+      if(KATMAN_ACIK.erime){
+        parcalar.push('<span><i style="background:#DC2626"></i>Hızlı Erime (Δ &lt; −5 MWe)</span>');
+        parcalar.push('<span><i style="background:#F59E0B"></i>Kısmi Erime (−5..0 MWe)</span>');
+        parcalar.push('<span><i style="background:#10B981"></i>Kapasitesi Korunan</span>');
+      } else {
+        parcalar.push('<span><i style="background:#1E9E5A"></i>Yüksek Kapasite (≥ 5 MWe)</span>');
+        parcalar.push('<span><i style="background:#F08A24"></i>Sınırlı (0,1 – 5 MWe)</span>');
+        parcalar.push('<span><i style="background:#D32027"></i>Seçili TM</span>');
+        if(!KATMAN_ACIK.sadeceAcik) parcalar.push('<span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>');
+      }
     }
+    if(KATMAN_ACIK.topoloji){
+      parcalar.push('<span><i style="background:#0284C7;border-radius:2px;height:4px;vertical-align:middle"></i>154 kV TEİAŞ İletim Hattı</span>');
+      parcalar.push('<span><i style="background:#EF4444;border-radius:2px;height:4px;vertical-align:middle"></i>380 kV Ulusal İletim Hattı</span>');
+    }
+    if(KATMAN_ACIK.ova){
+      parcalar.push('<span><i style="background:#22C55E;border:1.5px dashed #15803D"></i>🌾 Büyük Ova Koruma Alanı (286 Ova)</span>');
+    }
+    if(KATMAN_ACIK.sahibinden){
+      parcalar.push('<span><i style="background:#FFE800;border:1px solid #182232"></i>🟡 Sahibinden GES Arazi İlanı (≤5–10 km)</span>');
+    }
+    if(KATMAN_ACIK.isi){
+      parcalar.push('<span><i style="background:#059669"></i>İl Isı ≥ 80 MWe</span>');
+      parcalar.push('<span><i style="background:#F59E0B"></i>İl Isı 10–30 MWe</span>');
+    }
+    box.innerHTML = parcalar.join("") || '<span>Üstteki çubuktan görmek istediğiniz harita katmanlarına tıklayarak aktif edebilirsiniz.</span>';
+  }
+
+  // trafolar.kmz -> teias_hat içindeki gerçek 1.531 TEİAŞ 154 kV & 380 kV iletim şebekesi çizimi
+  function teiasHatCiz(){
+    if(!MAP || !TOPO_KAT) return;
+    TOPO_KAT.clearLayers();
+    if(!KATMAN_ACIK.topoloji || !TEIAS_HAT_VERI || !TEIAS_HAT_VERI.hatlar) return;
+
+    var koyuAltlik = (aktifAltlik === "koyu" || aktifAltlik === "uydu");
+    var renk154 = koyuAltlik ? "#38BDF8" : "#0284C7";
+    var renk380 = koyuAltlik ? "#FB923C" : "#DC2626";
+
+    TEIAS_HAT_VERI.hatlar.forEach(function(h){
+      var hatAd = h.n || "154kV İletim Hattı";
+      var is380 = /^380/i.test(hatAd);
+      var bolgeStr = h.r ? ("TEİAŞ " + h.r + ". Bölge Müdürlüğü") : "TEİAŞ İletim Şebekesi";
+      var pop = '<div style="min-width:210px">'
+        +'<div style="background:'+(is380?'#DC2626':'#0284C7')+';color:#fff;font-weight:800;font-size:10.5px;padding:2px 8px;border-radius:4px;margin-bottom:5px;display:inline-block">⚡ '+esc(is380 ? '380 kV ULUSAL İLETİM HATTI' : '154 kV BÖLGESEL İLETİM HATTI')+'</div><br>'
+        +'<b>'+esc(hatAd)+'</b><br>'
+        +'<span style="font-size:11.5px;color:#475569">'+esc(bolgeStr)+' · Kaynak: TEİAŞ KMZ (teias_hat)</span>'
+      +'</div>';
+
+      (h.s || []).forEach(function(seg){
+        var pl = L.polyline(seg, {
+          renderer: HAT_RENDERER || undefined,
+          color: is380 ? renk380 : renk154,
+          weight: is380 ? 2.6 : 2.0,
+          opacity: is380 ? 0.88 : 0.82
+        });
+        pl.bindTooltip('⚡ <b>'+esc(hatAd)+'</b>'+(h.r ? ' ('+esc(h.r)+'. Bölge)' : ''), {sticky:true, className:"edas-tip"});
+        pl.bindPopup(pop);
+        pl.addTo(TOPO_KAT);
+      });
+    });
   }
 
   function haritaCiz(fitYap){
     if(geoYok||!MAP) return;
     try{ MAP.invalidateSize(false); }catch(e){}
+    katmanSenkronla();
     var rows = geoSuz();
-    KAT.clearLayers(); TOPO_KAT.clearLayers(); if(ARAZI_KAT) ARAZI_KAT.clearLayers(); ETIKET_KAT.clearLayers();
+    KAT.clearLayers(); if(ARAZI_KAT) ARAZI_KAT.clearLayers(); ETIKET_KAT.clearLayers();
     var pts = [];
 
-    // 154 kV Şebeke Topoloji Ağı Katmanı (aynı ildeki TM'leri omurga olarak bağlar)
-    if(veriKatmanMod === "topoloji"){
-      var ilGrup = {};
-      rows.forEach(function(r){ (ilGrup[r.il] = ilGrup[r.il] || []).push(r); });
-      Object.keys(ilGrup).forEach(function(il){
-        var l = ilGrup[il];
-        for(var i=0;i<l.length-1;i++){
-          L.polyline([[l[i].lat,l[i].lon],[l[i+1].lat,l[i+1].lon]], {
-            color: "#0284C7", weight: 2.2, opacity: 0.75, dashArray: "6 5"
-          }).addTo(TOPO_KAT);
-        }
-      });
-    }
+    // 1. GERÇEK 154 / 380 kV TEİAŞ ŞEBEKE AĞI KATMANI (trafolar.kmz -> teias_hat)
+    teiasHatCiz();
 
-    // SAHİBİNDEN SATILIK UYGUN ARAZİ KATMANI (Seçili TM etrafında 5/10 km halkalar, OG bağlantı hatları, parsel poligonları ve ilan pinleri)
-    var shbKatmanAcik = (veriKatmanMod === "sahibinden") || (el("tglSahibinden") && el("tglSahibinden").checked);
-    if(shbKatmanAcik && ARAZI_KAT){
+    // 2. SAHİBİNDEN SATILIK UYGUN ARAZİ KATMANI (Seçili TM etrafında 5/10 km halkalar, OG bağlantı hatları, parsel poligonları ve ilan pinleri)
+    if(KATMAN_ACIK.sahibinden && ARAZI_KAT){
       if(seciliRow && seciliRow.lat != null && seciliRow.lon != null){
         var sLat = seciliRow.lat, sLon = seciliRow.lon;
-        // 10 km Ekonomik OG Bağlantı Sınırı
         L.circle([sLat, sLon], {
           radius: 10000, color: "#F59E0B", weight: 1.6, dashArray: "6 5", fillColor: "#FEF3C7", fillOpacity: 0.05, interactive: false
         }).addTo(ARAZI_KAT);
-        // 5 km İdeal GES Arazi Çemberi
         L.circle([sLat, sLon], {
           radius: 5000, color: "#10B981", weight: 2.0, dashArray: "5 4", fillColor: "#DCFCE7", fillOpacity: 0.09, interactive: false
         }).addTo(ARAZI_KAT);
@@ -1774,12 +1875,10 @@
         var paketler = tmPaketleriUret(seciliRow);
         paketler.forEach(function(pk){
           var pLat = sLat + pk.dLat, pLon = sLon + pk.dLon;
-          // TM -> Arazi Parseli 34,5 kV OG Bağlantı Hattı
           L.polyline([[sLat, sLon], [pLat, pLon]], {
             color: pk.oneCikan ? "#10B981" : "#EAB308", weight: 2.2, opacity: 0.85, dashArray: "4 4", interactive: false
           }).addTo(ARAZI_KAT);
 
-          // Uydu görünümünde parsel sınır kutusu
           var dB = 0.0022;
           L.polygon([
             [pLat - dB, pLon - dB*1.4],
@@ -1801,7 +1900,6 @@
             +'</div>'
           ).addTo(ARAZI_KAT);
 
-          // Sahibinden Sarı İlan Pin Rozeti
           var pinIc = L.divIcon({
             className: "",
             html: '<div class="shb-harita-pin" title="'+esc(pk.baslik)+'">🟡 '+esc(pk.kisa)+' <span class="p-mwe">'+esc(pk.mwpKisa)+'</span></div>',
@@ -1823,40 +1921,38 @@
         });
       }
 
-      // Eğer üst katman seçiciden "🟡 Sahibinden Arazi İlan Katmanı" seçildiyse, görünür açık kapasiteli TM'lerde de ilçe tarla rozeti göster
-      if(veriKatmanMod === "sahibinden"){
-        var gosterilenTm = {};
-        rows.filter(function(x){ return av(x) > 0; }).slice(0, 35).forEach(function(r){
-          if(seciliRow && seciliRow.tm === r.tm) return;
-          if(gosterilenTm[r.tm]) return;
-          gosterilenTm[r.tm] = 1;
-          var rIlce = tmIlceCozumle(r).ilce;
-          var rUrl = shbUrlUret(r.il, rIlce, "tarla", "price_asc", "");
-          var bIc = L.divIcon({
-            className: "",
-            html: '<div class="shb-bolge-etiket">🟡 '+esc(rIlce)+' Tarla ('+fmt(av(r))+' MW)</div>',
-            iconSize: [130, 20],
-            iconAnchor: [65, -8]
-          });
-          var mk = L.marker([r.lat, r.lon], { icon: bIc });
-          mk.on("click", function(){
-            tmTekHatCiz(r);
-            tablo(gorunen);
-            haritaCiz(false);
-          });
-          mk.addTo(ARAZI_KAT);
+      var gosterilenTm = {};
+      rows.filter(function(x){ return av(x) > 0; }).slice(0, 35).forEach(function(r){
+        if(seciliRow && seciliRow.tm === r.tm) return;
+        if(gosterilenTm[r.tm]) return;
+        gosterilenTm[r.tm] = 1;
+        var rIlce = tmIlceCozumle(r).ilce;
+        var bIc = L.divIcon({
+          className: "",
+          html: '<div class="shb-bolge-etiket">🟡 '+esc(rIlce)+' Tarla ('+fmt(av(r))+' MW)</div>',
+          iconSize: [130, 20],
+          iconAnchor: [65, -8]
         });
-      }
+        var mk = L.marker([r.lat, r.lon], { icon: bIc });
+        mk.on("click", function(){
+          tmTekHatCiz(r);
+          tablo(gorunen);
+          haritaCiz(false);
+        });
+        mk.addTo(ARAZI_KAT);
+      });
     }
 
-    // TM Noktaları
+    // 3. TRAFO MERKEZİ KAPASİTE BALONLARI KATMANI
     rows.forEach(function(r){
+      pts.push([r.lat,r.lon]);
+      if(!KATMAN_ACIK.kapasite) return;
       var v = av(r);
       var d = pv(r,2) - pv(r,0);
       var isSec = (seciliRow && seciliRow.tm === r.tm);
       var fRenk, sRenk, rad;
 
-      if(veriKatmanMod === "erime"){
+      if(KATMAN_ACIK.erime){
         rad = rCap(Math.max(v, Math.abs(d)));
         fRenk = d < -5 ? "#DC2626" : (d < 0 ? "#F59E0B" : (v > 0 ? "#10B981" : "#9AA2AD"));
         sRenk = "#1E293B";
@@ -1871,7 +1967,7 @@
         color: sRenk,
         weight: isSec ? 2.5 : 1.2,
         fillColor: fRenk,
-        fillOpacity: v>0 || veriKatmanMod==="erime" ? 0.82 : 0.48
+        fillOpacity: v>0 || KATMAN_ACIK.erime ? 0.82 : 0.48
       });
       var rIlce = tmIlceCozumle(r).ilce;
       var rShbUrl = shbUrlUret(r.il, rIlce, "tarla", "price_asc", "");
@@ -1885,11 +1981,10 @@
       m.bindPopup(popHtml);
       m.on("click", function(){ tmTekHatCiz(r); tablo(gorunen); haritaCiz(false); });
       m.addTo(KAT);
-      pts.push([r.lat,r.lon]);
     });
 
-    // İl Merkezlerinde Canlı MWe Rozet Katmanı
-    if(el("tglIlEtiket") && el("tglIlEtiket").checked){
+    // 4. İL MERKEZLERİNDE CANLI MWe ROZET KATMANI
+    if(KATMAN_ACIK.ilEtiket){
       var ilMerkez = {};
       suz().forEach(function(r){
         if(!ilMerkez[r.il]) ilMerkez[r.il] = { top:0, latSum:0, lonSum:0, n:0 };
@@ -1900,7 +1995,7 @@
         var o = ilMerkez[il];
         if(!o.n) return;
         var secIl = el("fil").value;
-        if(o.top <= 0 && !secIl && !el("fed").value && veriKatmanMod !== "isi") return;
+        if(o.top <= 0 && !secIl && !el("fed").value && !KATMAN_ACIK.isi) return;
         var lat = o.latSum / o.n, lon = o.lonSum / o.n;
         var ic = L.divIcon({
           className: "",
@@ -1912,12 +2007,13 @@
       });
     }
 
+    // 5. BÜYÜK OVA KORUMA ALANLARI KATMANI (286 OVA)
     buyukOvaCiz();
     dolguUygula();
     lejantGuncelle();
 
     var kapasiteli = rows.filter(function(r){return av(r)>0;}).length;
-    el("hsay").textContent = rows.length+" konumlu bara · "+kapasiteli+" kapasiteli ("+donemler[aktif].kisa+") · Katman: "+veriKatmanMod.toUpperCase();
+    el("hsay").textContent = rows.length+" konumlu bara · "+kapasiteli+" kapasiteli ("+donemler[aktif].kisa+") · Altlık: "+aktifAltlik.toUpperCase();
     if(fitYap){
       var sIl = el("fil").value, sEd = el("fed").value;
       if((sIl || sEd) && IL_GEO && IL_GEO.features){
@@ -1935,25 +2031,19 @@
     }
   }
 
+  // Harita altlığı (OSM, Uydu, Topoğrafik, Koyu SCADA, Açık Teknik) yalnızca kullanıcı seçtiğinde değişir
   function altlikDegistir(kod){
-    if(!MAP) return;
-    var tileKod = (kod === "ova") ? "topo" : kod;
-    if(!ALTLIKLAR[tileKod]) return;
+    if(!MAP || !ALTLIKLAR[kod]) return;
     Object.keys(ALTLIKLAR).forEach(function(k){
       if(MAP.hasLayer(ALTLIKLAR[k])) MAP.removeLayer(ALTLIKLAR[k]);
     });
-    ALTLIKLAR[tileKod].addTo(MAP);
+    ALTLIKLAR[kod].addTo(MAP);
     aktifAltlik = kod;
     el("altlikGrup").querySelectorAll("button").forEach(function(b){
       b.classList.toggle("on", b.getAttribute("data-base") === kod);
     });
-    if(kod === "ova"){
-      if(el("tglBuyukOva")) el("tglBuyukOva").checked = true;
-      buyukOvaCiz();
-      if(el("ovaGezginBar")) el("ovaGezginBar").scrollIntoView({behavior:"smooth", block:"nearest"});
-    } else {
-      buyukOvaCiz();
-    }
+    if(KATMAN_ACIK.topoloji) teiasHatCiz();
+    el("hsay").textContent = el("hsay").textContent.replace(/Altlık:\s*\S+/, "Altlık: " + aktifAltlik.toUpperCase());
   }
 
   function haritaGit(tm, bara, uyduyaGec){
@@ -1981,7 +2071,9 @@
   function haritaKur(){
     try{
       if(typeof L==="undefined"){ geoYok=true; el("hsay").textContent="Harita kütüphanesi yüklenemedi."; return; }
-      MAP=L.map("harita",{scrollWheelZoom:false}).setView([39.0,35.2],6);
+      MAP=L.map("harita",{scrollWheelZoom:false, preferCanvas:true}).setView([39.0,35.2],6);
+      HAT_RENDERER = L.canvas({ padding: 0.5 });
+      OVA_RENDERER = L.canvas({ padding: 0.5 });
       ALTLIKLAR = {
         osm: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}),
         uydu: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"© Esri World Imagery"}),
@@ -2006,9 +2098,14 @@
     Promise.all([
       fetch("iller_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
       fetch("bolge_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
-      fetch("buyuk_ovalar.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;})
+      fetch("buyuk_ovalar.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
+      fetch("teias_hat.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;})
     ]).then(function(a){
-      var il=a[0], bo=a[1], ov=a[2];
+      var il=a[0], bo=a[1], ov=a[2], th=a[3];
+      if(th && th.hatlar){
+        TEIAS_HAT_VERI = th;
+        if(KATMAN_ACIK.topoloji) teiasHatCiz();
+      }
       if(ov && ov.features){
         OVA_GEO = ov;
         if(el("ovaSecici")){
@@ -2017,11 +2114,12 @@
             var p = f.properties;
             (ilGrup[p.il] = ilGrup[p.il] || []).push(p);
           });
-          var optHtml = '<option value="">🌾 PDF Listesindeki 54 Büyük Ovadan Seçin / Haritada Odaklanın (303.303 ha)…</option>';
+          var optHtml = '<option value="">🌾 Türkiye Geneli '+ov.features.length+' Büyük Ovadan Seçin / Odaklanın (11,04 Milyon ha)…</option>';
           Object.keys(ilGrup).sort(function(x,y){return x.localeCompare(y,"tr");}).forEach(function(ilAd){
             optHtml += '<optgroup label="'+esc(ilAd)+' ('+ilGrup[ilAd].length+' Ova)">';
             ilGrup[ilAd].forEach(function(p){
-              optHtml += '<option value="'+p.sno+'">#'+p.sno+' · '+esc(p.ad)+' — '+fmt(p.hektar)+' ha (PDF S.'+p.sayfa+')</option>';
+              var kNot = p.sayfa ? ('PDF S.'+p.sayfa) : 'Resmi Gazete';
+              optHtml += '<option value="'+p.sno+'">#'+p.sno+' · '+esc(p.ad)+' — '+fmt(p.hektar)+' ha ('+kNot+')</option>';
             });
             optHtml += '</optgroup>';
           });
@@ -2134,21 +2232,20 @@
     b.addEventListener("click", function(){ altlikDegistir(b.getAttribute("data-base")); });
   });
 
-  el("veriKatmanGrup").querySelectorAll("button").forEach(function(b){
+  // Tüm katman butonları bağımsız Aktif / Pasif (Toggle) olarak çalışır ve harita altlığını asla otomatik değiştirmez
+  el("veriKatmanGrup").querySelectorAll("button[data-kat]").forEach(function(b){
     b.addEventListener("click", function(){
-      veriKatmanMod = b.getAttribute("data-vmod");
-      el("veriKatmanGrup").querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x===b); });
-      if(veriKatmanMod === "topoloji" && aktifAltlik === "osm") altlikDegistir("koyu");
-      if(veriKatmanMod === "sahibinden"){
-        if(el("tglSahibinden")) el("tglSahibinden").checked = true;
-        if(aktifAltlik === "osm") altlikDegistir("uydu");
-        haritaCiz(false);
-        if(seciliRow && seciliRow.lat != null && MAP){
-          try{ MAP.setView([seciliRow.lat, seciliRow.lon], 12, {animate:true}); }catch(e){}
-        }
-        return;
+      var k = b.getAttribute("data-kat");
+      KATMAN_ACIK[k] = !KATMAN_ACIK[k];
+      // Eğer Dönemsel Erime veya Yalnız Açık TM açıldıysa TM Kapasite Balonunun da görünür olduğundan emin ol
+      if((k === "erime" || k === "sadeceAcik") && KATMAN_ACIK[k] && !KATMAN_ACIK.kapasite){
+        KATMAN_ACIK.kapasite = true;
       }
+      katmanSenkronla();
       haritaCiz(false);
+      if(k === "sahibinden" && KATMAN_ACIK.sahibinden && seciliRow && seciliRow.lat != null && MAP){
+        try{ MAP.setView([seciliRow.lat, seciliRow.lon], 12, {animate:true}); }catch(e){}
+      }
     });
   });
 
@@ -2158,23 +2255,19 @@
   });
   if(el("btnTmSahibinden")){
     el("btnTmSahibinden").addEventListener("click", function(){
-      if(el("tglSahibinden")) el("tglSahibinden").checked = true;
-      if(seciliRow && seciliRow.lat != null){
-        haritaGit(seciliRow.tm, seciliRow.bara, true);
-      } else if(el("araziBolum")){
-        el("araziBolum").scrollIntoView({behavior:"smooth", block:"start"});
+      KATMAN_ACIK.sahibinden = !KATMAN_ACIK.sahibinden;
+      katmanSenkronla();
+      haritaCiz(false);
+      if(KATMAN_ACIK.sahibinden && seciliRow && seciliRow.lat != null){
+        haritaGit(seciliRow.tm, seciliRow.bara, false);
       }
     });
   }
   if(el("btnHaritaAraziKatman")){
     el("btnHaritaAraziKatman").addEventListener("click", function(){
-      if(el("tglSahibinden")) el("tglSahibinden").checked = true;
-      if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, true);
-    });
-  }
-  if(el("tglBuyukOva")){
-    el("tglBuyukOva").addEventListener("change", function(){
-      buyukOvaCiz();
+      KATMAN_ACIK.sahibinden = true;
+      katmanSenkronla();
+      if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, false);
     });
   }
   if(el("ovaSecici")){
@@ -2185,13 +2278,7 @@
   }
   if(el("btnTumOvalar")){
     el("btnTumOvalar").addEventListener("click", function(){
-      altlikDegistir("ova");
       ovaOdakla(null, true);
-    });
-  }
-  if(el("tglSahibinden")){
-    el("tglSahibinden").addEventListener("change", function(){
-      haritaCiz(false);
     });
   }
   if(el("araziTmSec")){
@@ -2226,11 +2313,6 @@
   el("fara").addEventListener("input",ciz);
   el("fpoz").addEventListener("change",ciz);
   el("fsifir").addEventListener("click",function(){ el("fil").value="";el("fed").value="";el("fara").value="";el("fpoz").checked=false; ciz(); });
-  el("tglSadeceAcik").addEventListener("change",function(){ haritaCiz(false); });
-  el("tglIlEtiket").addEventListener("change",function(){ haritaCiz(false); });
-  el("tglIl").addEventListener("change",function(){ if(!MAP||!ILL)return; if(this.checked)ILL.addTo(MAP); else MAP.removeLayer(ILL); });
-  el("tglBolge").addEventListener("change",function(){ if(!MAP||!BOLGE)return; if(this.checked)BOLGE.addTo(MAP); else MAP.removeLayer(BOLGE); });
-  el("tglDolgu").addEventListener("change",dolguUygula);
   el("tbody").addEventListener("click",function(e){
     var a=e.target.closest&&e.target.closest(".tmlink");
     if(a){ e.preventDefault(); haritaGit(a.getAttribute("data-tm"), a.getAttribute("data-bara"), false); }
@@ -2258,8 +2340,8 @@
       el("fil").insertAdjacentHTML("beforeend", filHtml);
       el("fed").insertAdjacentHTML("beforeend", Object.keys(EDAS_IL).map(function(e){return '<option value="'+esc(e)+'">'+esc(e)+' ('+EDAS_IL[e].length+' il)</option>';}).join(""));
       var konumlu=tumu.filter(function(r){return r.lat!=null;}).length;
-      el("meta2").textContent=d.tm_sayi+" trafo merkezi barası · 3 dönem (02.03 → 16.07 → 01.10.2026) · "+konumlu+" coğrafi konumlu · 5 Altlık + 4 Veri Şema Katmanı";
-      el("not").innerHTML="<b>Mühendislik Notu:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezi barasında dağıtım seviyesinden (34,5 kV) tahsis edilebilecek güncel MWe gücüdür; 0,00 MWe olan baralar yeni lisanssız çağrı mektubu başvurusuna kapalıdır. Harita üzerindeki katman seçiciden <b>Uydu / Topoğrafik / Koyu SCADA</b> altlıklarına ve <b>İl Kapasite Isı / 154 kV Şebeke Ağı / Erime</b> katmanlarına geçiş yapabilirsiniz.";
+      el("meta2").textContent=d.tm_sayi+" trafo merkezi barası · 3 dönem (02.03 → 16.07 → 01.10.2026) · "+konumlu+" coğrafi konumlu · 5 Harita Altlığı + 9 Bağımsız Aktif/Pasif Katman";
+      el("not").innerHTML="<b>Mühendislik Notu:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezi barasında dağıtım seviyesinden (34,5 kV) tahsis edilebilecek güncel MWe gücüdür; 0,00 MWe olan baralar yeni lisanssız çağrı mektubu başvurusuna kapalıdır. Harita üzerindeki <b>Harita Altlığı</b> satırından zemin haritasını (Standart, Uydu, Topoğrafik, Koyu SCADA, Açık Teknik) değiştirebilir; <b>Katmanlar</b> satırından ise <b>154/380 kV TEİAŞ Şebeke Ağı (KMZ)</b>, <b>286 Büyük Ova Koruma Alanı</b>, <b>Sahibinden Uygun Arazi İlanları</b> ve diğer katmanları bağımsız olarak <b>Aktif / Pasif</b> edebilirsiniz.";
       haritaKur(); segCiz(); ciz();
     })
     .catch(function(){

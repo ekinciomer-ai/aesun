@@ -21,11 +21,12 @@ $DEPO_DOSYA = $dizin . '/tm_ozel_konumlar.json';
 $KAPASITE_JSON = dirname(__DIR__) . '/kapasite/kapasite3.json';
 
 function oku_depo(string $dosya): array {
-  if (!is_file($dosya)) return ['konumlar' => [], 'eklenenler' => [], 'guncelleme' => 0];
+  if (!is_file($dosya)) return ['konumlar' => [], 'eklenenler' => [], 'onaylananlar' => [], 'guncelleme' => 0];
   $j = @json_decode((string)@file_get_contents($dosya), true);
-  if (!is_array($j)) return ['konumlar' => [], 'eklenenler' => [], 'guncelleme' => 0];
+  if (!is_array($j)) return ['konumlar' => [], 'eklenenler' => [], 'onaylananlar' => [], 'guncelleme' => 0];
   if (!isset($j['konumlar']) || !is_array($j['konumlar'])) $j['konumlar'] = [];
   if (!isset($j['eklenenler']) || !is_array($j['eklenenler'])) $j['eklenenler'] = [];
+  if (!isset($j['onaylananlar']) || !is_array($j['onaylananlar'])) $j['onaylananlar'] = [];
   return $j;
 }
 
@@ -136,11 +137,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $islem = (string)($girdi['islem'] ?? 'kaydet');
   $depo = oku_depo($DEPO_DOSYA);
 
+  if ($islem === 'onayla') {
+    $il = mb_strtoupper(trim((string)($girdi['il'] ?? '')), 'UTF-8');
+    $tm = mb_strtoupper(trim((string)($girdi['tm'] ?? '')), 'UTF-8');
+    $anahtar = $il . '|' . $tm;
+    $depo['onaylananlar'][$anahtar] = true;
+    yaz_depo($DEPO_DOSYA, $depo);
+    echo json_encode(['durum' => 'ok', 'onaylananlar' => $depo['onaylananlar']], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
   if ($islem === 'sil') {
     $il = mb_strtoupper(trim((string)($girdi['il'] ?? '')), 'UTF-8');
     $tm = mb_strtoupper(trim((string)($girdi['tm'] ?? '')), 'UTF-8');
     $anahtar = $il . '|' . $tm;
     unset($depo['konumlar'][$anahtar]);
+    unset($depo['onaylananlar'][$anahtar]);
     $depo['eklenenler'] = array_values(array_filter($depo['eklenenler'], function($x) use ($il, $tm) {
       return !(mb_strtoupper(trim((string)($x['il'] ?? '')), 'UTF-8') === $il && mb_strtoupper(trim((string)($x['tm'] ?? '')), 'UTF-8') === $tm);
     }));
@@ -224,5 +236,6 @@ echo json_encode([
   'durum' => 'ok',
   'konumlar' => $depo['konumlar'],
   'eklenenler' => $depo['eklenenler'],
+  'onaylananlar' => $depo['onaylananlar'] ?? [],
   'guncelleme' => $depo['guncelleme']
 ], JSON_UNESCAPED_UNICODE);

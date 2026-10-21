@@ -1567,7 +1567,17 @@
       +'</g>';
     }).join("");
 
-    el("tmTekHatSvg").innerHTML =
+    var soruHtml = tmKonumSoruGerekliMi(r)
+      ? '<div style="margin-bottom:8px;padding:8px 11px;border-radius:8px;background:#FFFBEB;border:1.5px solid #F59E0B;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">'
+          +'<span style="font-size:12px;font-weight:800;color:#92400E">❓ Yeni eklenen <b>'+esc(r.tm)+'</b> konumu doğru mu?</span>'
+          +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+            +'<button type="button" onclick="window.tmKonumDogruOnayla(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#16A34A;color:#fff;font-weight:800;font-size:11.5px;padding:5px 10px;border-radius:6px;border:1px solid #15803D;cursor:pointer">✅ Evet, Doğru</button>'
+            +'<button type="button" onclick="window.tmPopupKonumDuzenle(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#0F172A;color:#FDE047;font-weight:800;font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid #475569;cursor:pointer">📍 Hayır, Konumu Taşı</button>'
+            +'<button type="button" onclick="window.tmPopupKonumSil(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#FEE2E2;color:#991B1B;font-weight:800;font-size:11px;padding:5px 9px;border-radius:6px;border:1px solid #FCA5A5;cursor:pointer">🗑️ Sil</button>'
+          +'</div>'
+        +'</div>'
+      : '';
+    el("tmTekHatSvg").innerHTML = soruHtml +
       '<svg viewBox="0 0 540 190" style="width:100%;height:auto;background:#FAFBFD;border:1px solid var(--line);border-radius:10px;padding:6px">'
         +'<rect x="10" y="12" width="162" height="134" rx="10" fill="#FFF" stroke="#182232" stroke-width="2"/>'
         +'<rect x="10" y="12" width="162" height="24" rx="10" fill="#182232"/>'
@@ -3155,6 +3165,15 @@
         +'02.03: <b>'+fmt(pv(r,0))+'</b> → 16.07: <b>'+fmt(pv(r,1))+'</b> → 01.10: <b>'+fmt(pv(r,2))+' MWe</b>'
         +'<br><small style="color:#64748B">6 Aylık Δ Değişim: '+fmt(d)+' MWe</small>'
       +'</div>'
+      +(tmKonumSoruGerekliMi(r)
+        ? '<div style="margin-top:7px;padding:7px 9px;border-radius:7px;background:#FFFBEB;border:1.5px solid #F59E0B;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">'
+            +'<span style="font-size:11px;font-weight:800;color:#92400E">❓ Bu TM konumu doğru mu?</span>'
+            +'<div style="display:flex;gap:4px">'
+              +'<button type="button" onclick="window.tmKonumDogruOnayla(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#16A34A;color:#fff;font-weight:800;font-size:10.5px;padding:4px 8px;border-radius:5px;border:1px solid #15803D;cursor:pointer">✅ Evet, Doğru</button>'
+              +'<button type="button" onclick="window.tmPopupKonumDuzenle(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#FEF2F2;color:#B91C1C;font-weight:800;font-size:10.5px;padding:4px 7px;border-radius:5px;border:1px solid #FCA5A5;cursor:pointer">❌ Hayır, Düzenle</button>'
+            +'</div>'
+          +'</div>'
+        : '')
       +'<div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;align-items:center">'
         +'<a href="'+esc(rShbUrl)+'" target="_blank" rel="noopener" style="background:#FFE800;color:#111;font-weight:800;font-size:11px;padding:4px 8px;border-radius:5px;text-decoration:none;border:1px solid #D6C200">🟡 Uygun Araziler ↗</a>'
         +'<button type="button" onclick="window.tmPopupKonumDuzenle(\''+esc(r.il)+'\',\''+esc(r.tm)+'\')" style="background:#0F172A;color:#FDE047;font-weight:800;font-size:10.5px;padding:4px 7px;border-radius:5px;border:1px solid #475569;cursor:pointer">📍 Konumu Taşı</button>'
@@ -5925,7 +5944,7 @@
     var kmTxt = parselObj.yakinKm != null ? (pgesTrFmt(parselObj.yakinKm, 2) + " km") : "—";
 
     var popupHtml =
-      '<div style="min-width:255px;font-family:'IBM Plex Sans',sans-serif">'
+      '<div style="min-width:255px;font-family:IBM Plex Sans,sans-serif">'
       +'<div style="background:#0F766E;color:#fff;font-weight:800;font-size:10.5px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">📐 SORGULANAN PARSEL (ÖN İNCELEME)</div>'
       +'<div style="font-size:12.5px;font-weight:800;color:#0F172A;margin-bottom:4px">'
         +esc(parselObj.il || "—")+' / '+esc(parselObj.ilce || "Merkez")+' / '+esc(parselObj.mahalle || "—")
@@ -6103,6 +6122,8 @@
   var TM_EKLE_TUMU_GOSTER = false;
   var TM_GECICI_MARKER = null;
 
+  var YENI_KONUMLANAN_TM_SET = {"ADANA|KUZEY ADANA TM": 1, "ADIYAMAN|ADIYAMAN GÖLBAŞI TM": 1, "ADIYAMAN|BESNİ OSB TM": 1, "AFYONKARAHİSAR|ÇAY-SEKA TM": 1, "ANKARA|AKYURT TM": 1, "ANKARA|BAĞLUM (HİSAR) TM": 1, "ANKARA|KIZILCAHAMAM TM": 1, "ANKARA|KIZILIRMAK TM (KIRŞEHIR)": 1, "ANKARA|ÇİĞDEM TM": 1, "ANTALYA|ALANYA-2 TM": 1, "ANTALYA|LARA-2 (KUNDU) TM": 1, "ARTVİN|ALANBAŞI HAVZA TM": 1, "AĞRI|ELEŞKİRT TM": 1, "BALIKESİR|ALTINOLUK (AKÇAY) TM": 1, "BALIKESİR|BALIKESİR SEKA TM": 1, "BALIKESİR|ERDEK (NARLIKÖY) TM": 1, "BALIKESİR|KÖYLÜKÖY (BALIKESİR-2) TM": 1, "BALIKESİR|MANYAS (BANDIRMA-3) TM": 1, "BARTIN|BARTIN OSB TM": 1, "BARTIN|BARTIN TM": 1, "BATMAN|BATMAN-1 TM": 1, "BATMAN|GERCÜŞ TM": 1, "BATMAN|KOZLUK TM": 1, "BURSA|HASANAĞA TM": 1, "BURSA|MUSTAFAKEMALPAŞA TM": 1, "BURSA|ULUDAĞ GIS (BURSA DOĞU) TM": 1, "BURSA|YILDIRIM (BURSA-3) TM": 1, "BURSA|İZNİK TM": 1, "BİLECİK|GÖLPAZARI TM": 1, "BİLECİK|PAZARYERİ OSB TM": 1, "BİNGÖL|GENÇ TM": 1, "BİTLİS|AHLAT TM": 1, "DENİZLİ|PAMUKKALE TM": 1, "DÜZCE|DÜZCE OSB TM": 1, "EDİRNE|EDİRNE-2 (ESTERGON) TM": 1, "ELAZIĞ|ELAZIĞ TM": 1, "ELAZIĞ|KARAKOÇAN 380 TM": 1, "ERZURUM|PASİNLER HAVZA TM": 1, "ERZİNCAN|BAĞIŞTAŞ 380 TM": 1, "GAZİANTEP|BAŞPINAR OSB (GAZİANTEP-2) TM": 1, "GAZİANTEP|BEYKENT OSB (GAZİANTEP-5 ) TM": 1, "GAZİANTEP|KUZEYŞEHİR TM": 1, "GAZİANTEP|YEŞİLVADİ (GAZIANTEP-4) TM": 1, "GAZİANTEP|İBRAHİMLİ (GAZİANTEP-3) TM": 1, "GÜMÜŞHANE|KÖSE TM": 1, "GİRESUN|KOTANA HAVZA TM": 1, "HAKKARİ|YÜKSEKOVA TM": 1, "IĞDIR|ARALIK TM": 1, "KARS|KARAKURT HAVZA TM": 1, "KAYSERİ|ERKİLET TM": 1, "KAYSERİ|KAYSERİ KAPASİTÖR TM": 1, "KIRKLARELİ|BÜYÜKKARIŞTIRAN TM": 1, "KIRKLARELİ|DEMİRKÖY TM": 1, "KIRKLARELİ|VİZE HAVZA TM": 1, "KIRŞEHİR|KIZILIRMAK TM": 1, "KOCAELİ|KÖSEKÖY TM": 1, "KOCAELİ|TEPEÖREN TM (İSTANBUL)": 1, "KONYA|ALTINOVA TM": 1, "KONYA|BÜSAN TM": 1, "KONYA|ERENKÖY TM": 1, "KONYA|HADİM TM": 1, "KONYA|HOTAMIŞ TM": 1, "KONYA|KOLUKISA TM": 1, "KONYA|KONYA KUZEY TM": 1, "KONYA|KONYA OSB TM": 1, "KONYA|SELÇUKLU TM": 1, "KİLİS|ELBEYLİ TM": 1, "MANİSA|MORSAN TM": 1, "MARDİN|BOTAŞ PS-4 (MİDYAT) TM": 1, "MUĞLA|MUĞLA GÜNEY TM": 1, "NEVŞEHİR|NEVŞEHİR TM": 1, "RİZE|İKİZDERE HAVZA TM": 1, "SAKARYA|SAPANCA TM": 1, "TEKİRDAĞ|HAYRABOLU TM": 1, "TEKİRDAĞ|VELİMEŞE TM": 1, "TEKİRDAĞ|ÇERKEZKÖY ENERJİ TM": 1, "TEKİRDAĞ|ŞARKÖY TM": 1, "TRABZON|AKYAZI TM": 1, "UŞAK|BANAZ TM": 1, "UŞAK|KARAHALLI TM": 1, "UŞAK|KARMA OSB TM": 1, "YOZGAT|BOZOK TM": 1, "YOZGAT|ÇEKEREK HAVZA TM": 1, "ZONGULDAK|BÖLÜCEK TM": 1, "ZONGULDAK|KOZLU TM": 1, "ÇANAKKALE|ONSEKİZ MART TM": 1, "ÇANAKKALE|ÇANAKKALE ÇİM TM": 1, "ÇANKIRI|YAKINKENT TM": 1, "ÇANKIRI|ŞABANÖZÜ OSB TM": 1, "İSTANBUL|ATAŞEHİR TM": 1, "İSTANBUL|BÜYÜKBAKKALKÖY TM": 1, "İSTANBUL|BÜYÜKÇEKMECE TM": 1, "İSTANBUL|DELİKLİKAYA TM": 1, "İSTANBUL|DUDULLU METRO TM": 1, "İSTANBUL|DUDULLU TM": 1, "İSTANBUL|GÖZTEPE TM": 1, "İSTANBUL|HALKALI TM": 1, "İSTANBUL|KADIKÖY TM": 1, "İSTANBUL|KAVACIK TM": 1, "İSTANBUL|SELİMİYE TM": 1, "İSTANBUL|TEPEÖREN TM": 1, "İSTANBUL|YENİKAPI TM": 1, "İSTANBUL|ÇATALCA TM": 1, "İZMİR|RAFİNERİ TM": 1, "İZMİR|İZMİR HAVZA TM": 1};
+
   function ozelTmDepoOku(){
     try {
       var raw = localStorage.getItem(TM_OZEL_DEPO_KEY);
@@ -6112,12 +6133,50 @@
           d.konumlar = d.konumlar || {};
           d.eklenenler = Array.isArray(d.eklenenler) ? d.eklenenler : [];
           d.silinenler = d.silinenler || {};
+          d.onaylananlar = d.onaylananlar || {};
           return d;
         }
       }
     } catch(e){}
-    return { konumlar: {}, eklenenler: [], silinenler: {} };
+    return { konumlar: {}, eklenenler: [], silinenler: {}, onaylananlar: {} };
   }
+
+  function tmKonumSoruGerekliMi(r){
+    if(!r || r.lat == null || r.lon == null) return false;
+    var k = String(r.il||"").toLocaleUpperCase("tr").trim() + "|" + String(r.tm||"").toLocaleUpperCase("tr").trim();
+    var depo = ozelTmDepoOku();
+    if(depo.onaylananlar && depo.onaylananlar[k]) return false;
+    return !!(YENI_KONUMLANAN_TM_SET[k] || r.ozelKonum || r.kullaniciEkledi);
+  }
+
+  window.tmKonumDogruOnayla = function(il, tm){
+    var hedefIl = String(il || "").toLocaleUpperCase("tr").trim();
+    var hedefTm = String(tm || "").toLocaleUpperCase("tr").trim();
+    if(!hedefIl || !hedefTm) return;
+    var k = hedefIl + "|" + hedefTm;
+    var depo = ozelTmDepoOku();
+    depo.onaylananlar = depo.onaylananlar || {};
+    depo.onaylananlar[k] = true;
+    ozelTmDepoYaz(depo);
+
+    fetch("../api/tm_konum.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        islem: "onayla",
+        il: hedefIl,
+        tm: hedefTm
+      })
+    }).catch(function(){});
+
+    // Açık olan TM kartını ve harita popup'ını sorusuz olarak anında yenile
+    if(seciliRow && seciliRow.il === hedefIl && seciliRow.tm === hedefTm){
+      tmTekHatCiz(seciliRow);
+      seciliTmHaritaVurgula(seciliRow, false);
+    }
+    SON_CIZIM_ANAHTAR.tm = "";
+    haritaCiz(false);
+  };
 
   function ozelTmDepoYaz(depo){
     try {
@@ -6217,6 +6276,12 @@
       .then(function(d){
         if(d && d.durum === "ok"){
           var birlesik = ozelTmDepoOku();
+          if(d.onaylananlar){
+            birlesik.onaylananlar = birlesik.onaylananlar || {};
+            Object.keys(d.onaylananlar).forEach(function(k){
+              if(d.onaylananlar[k]) birlesik.onaylananlar[k] = true;
+            });
+          }
           if(d.konumlar){
             Object.keys(d.konumlar).forEach(function(k){
               if(!birlesik.silinenler || !birlesik.silinenler[k]){

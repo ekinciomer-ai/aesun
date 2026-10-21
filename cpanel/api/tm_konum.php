@@ -73,12 +73,12 @@ function kapasite_json_guncelle(string $kapDosya, array $depo, ?string $silAnaht
   }
   unset($r);
 
-  // Yeni eklenen özel TM baraları varsa ve rows içinde yoksa ekle
-  $mevcutAnahtarlar = [];
-  foreach ($d['rows'] as $r) {
+  // Yeni eklenen özel TM baraları varsa ekle, zaten varsa kapasitesini ve koordinatını güncelle
+  $mevcutIndeksler = [];
+  foreach ($d['rows'] as $idx => $r) {
     if (is_array($r) && count($r) >= 4) {
-      $k = mb_strtoupper(trim((string)$r[0]), 'UTF-8') . '|' . mb_strtoupper(trim((string)$r[1]), 'UTF-8') . '|' . mb_strtoupper(trim((string)$r[2]), 'UTF-8') . '|' . mb_strtoupper(trim((string)$r[3]), 'UTF-8');
-      $mevcutAnahtarlar[$k] = true;
+      $k = mb_strtoupper(trim((string)$r[0]), 'UTF-8') . '|' . mb_strtoupper(trim((string)$r[1]), 'UTF-8') . '|' . mb_strtoupper(trim((string)$r[2]), 'UTF-8');
+      $mevcutIndeksler[$k] = $idx;
     }
   }
   foreach (($depo['eklenenler'] ?? []) as $ek) {
@@ -87,21 +87,30 @@ function kapasite_json_guncelle(string $kapDosya, array $depo, ?string $silAnaht
     $bara = trim((string)($ek['bara'] ?? 'Tek')) ?: 'Tek';
     $edas = trim((string)($ek['edas'] ?? ''));
     if (!$il || !$tm) continue;
-    $k = $il . '|' . $tm . '|' . mb_strtoupper($bara, 'UTF-8') . '|' . mb_strtoupper($edas, 'UTF-8');
-    if (!isset($mevcutAnahtarlar[$k])) {
+    $k = $il . '|' . $tm . '|' . mb_strtoupper($bara, 'UTF-8');
+    $mweVal = round((float)($ek['m0110'] ?? $ek['mwe'] ?? 0), 2);
+    if (!isset($mevcutIndeksler[$k])) {
       $d['rows'][] = [
         $il,
         $tm,
         $bara,
         $edas,
-        round((float)($ek['m0203'] ?? $ek['mwe'] ?? 0), 2),
-        round((float)($ek['m1607'] ?? $ek['mwe'] ?? 0), 2),
-        round((float)($ek['m0110'] ?? $ek['mwe'] ?? 0), 2),
+        round((float)($ek['m0203'] ?? $mweVal), 2),
+        round((float)($ek['m1607'] ?? $mweVal), 2),
+        $mweVal,
         isset($ek['lat']) ? round((float)$ek['lat'], 6) : null,
         isset($ek['lon']) ? round((float)$ek['lon'], 6) : null
       ];
-      $mevcutAnahtarlar[$k] = true;
+      $mevcutIndeksler[$k] = count($d['rows']) - 1;
       $degisti = true;
+    } else {
+      $rIdx = $mevcutIndeksler[$k];
+      if ($d['rows'][$rIdx][6] !== $mweVal) {
+        $d['rows'][$rIdx][4] = $mweVal;
+        $d['rows'][$rIdx][5] = $mweVal;
+        $d['rows'][$rIdx][6] = $mweVal;
+        $degisti = true;
+      }
     }
   }
 

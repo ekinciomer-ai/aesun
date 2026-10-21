@@ -711,7 +711,7 @@
             <input type="text" id="tmEkleYeniAd" placeholder="Yeni TM Adı (Örn: ŞABANÖZÜ OSB TM)">
             <input type="text" id="tmEkleYeniBara" value="Tek" placeholder="Bara (Tek)" style="max-width:95px">
             <input type="text" id="tmEkleYeniEdas" placeholder="EDAŞ / OSB">
-            <input type="number" id="tmEkleYeniMwe" step="0.01" value="1.00" placeholder="MWe" style="max-width:95px">
+            <input type="number" id="tmEkleYeniMwe" step="0.01" min="0" value="0" placeholder="Kapasite (MWe)" title="Kalan Kapasite (MWe) — yoksa 0 bırakın" style="max-width:110px">
           </div>
 
           <div class="tm-ekle-alt">
@@ -5855,25 +5855,36 @@
       }
     });
 
+    var depoGuncellendi = false;
     eklenenler.forEach(function(ek){
       if(!ek || !ek.il || !ek.tm) return;
       var ilUp = String(ek.il).toLocaleUpperCase("tr").trim();
       var tmUp = String(ek.tm).toLocaleUpperCase("tr").trim();
       var bara = String(ek.bara || "Tek").trim() || "Tek";
-      var varMi = tumu.some(function(r){
-        return String(r.il).toLocaleUpperCase("tr").trim() === ilUp &&
-               String(r.tm).toLocaleUpperCase("tr").trim() === tmUp &&
-               String(r.bara || "Tek").trim() === bara;
-      });
-      if(!varMi){
-        var mwe = Number(ek.m0110 != null ? ek.m0110 : (ek.mwe != null ? ek.mwe : 0)) || 0;
+      if(tmUp.indexOf("EMİRGAZİ") >= 0 && !ek.mweDuzeltildi && Number(ek.m0110) === 1){
+        ek.m0203 = 0; ek.m1607 = 0; ek.m0110 = 0; ek.mwe = 0;
+        ek.mweDuzeltildi = true;
+        depoGuncellendi = true;
+      }
+      var mweHam = (ek.m0110 !== undefined && ek.m0110 !== null && ek.m0110 !== "") ? Number(ek.m0110) : ((ek.mwe !== undefined && ek.mwe !== null && ek.mwe !== "") ? Number(ek.mwe) : 0);
+      var mwe = isFinite(mweHam) ? mweHam : 0;
+      var mevcutRow = null;
+      for(var ti = 0; ti < tumu.length; ti++){
+        if(String(tumu[ti].il).toLocaleUpperCase("tr").trim() === ilUp &&
+           String(tumu[ti].tm).toLocaleUpperCase("tr").trim() === tmUp &&
+           String(tumu[ti].bara || "Tek").trim() === bara){
+          mevcutRow = tumu[ti];
+          break;
+        }
+      }
+      if(!mevcutRow){
         tumu.push({
           il: ilUp,
           tm: tmUp,
           bara: bara,
           edas: ek.edas || (IL2EDAS[ilUp] && IL2EDAS[ilUp][0]) || "EDAŞ / OSB",
-          m0203: Number(ek.m0203 != null ? ek.m0203 : mwe),
-          m1607: Number(ek.m1607 != null ? ek.m1607 : mwe),
+          m0203: isFinite(Number(ek.m0203)) ? Number(ek.m0203) : mwe,
+          m1607: isFinite(Number(ek.m1607)) ? Number(ek.m1607) : mwe,
           m0110: mwe,
           lat: ek.lat != null ? Number(ek.lat) : null,
           lon: ek.lon != null ? Number(ek.lon) : null,
@@ -5881,8 +5892,19 @@
           kullaniciEkledi: true
         });
         degisti = true;
+      } else if(mevcutRow.kullaniciEkledi){
+        if(mevcutRow.m0110 !== mwe || mevcutRow.lat !== Number(ek.lat) || mevcutRow.lon !== Number(ek.lon)){
+          mevcutRow.m0203 = isFinite(Number(ek.m0203)) ? Number(ek.m0203) : mwe;
+          mevcutRow.m1607 = isFinite(Number(ek.m1607)) ? Number(ek.m1607) : mwe;
+          mevcutRow.m0110 = mwe;
+          if(ek.edas) mevcutRow.edas = ek.edas;
+          if(ek.lat != null) mevcutRow.lat = Number(ek.lat);
+          if(ek.lon != null) mevcutRow.lon = Number(ek.lon);
+          degisti = true;
+        }
       }
     });
+    if(depoGuncellendi) ozelTmDepoYaz(depo);
 
     if(degisti){
       SON_CIZIM_ANAHTAR.tm = "";
@@ -5909,10 +5931,12 @@
             d.eklenenler.forEach(function(ek){
               var k = String(ek.il||"").toLocaleUpperCase("tr") + "|" + String(ek.tm||"").toLocaleUpperCase("tr");
               if(birlesik.silinenler && birlesik.silinenler[k]) return;
-              var varMi = birlesik.eklenenler.some(function(x){
+              var mevcutEk = birlesik.eklenenler.find(function(x){
                 return x.il === ek.il && x.tm === ek.tm && (x.bara||"Tek") === (ek.bara||"Tek");
               });
-              if(!varMi) birlesik.eklenenler.push(ek);
+              if(!mevcutEk){
+                birlesik.eklenenler.push(ek);
+              }
             });
           }
           ozelTmDepoYaz(birlesik);
@@ -6109,7 +6133,8 @@
       if(!/\bTM$/i.test(hedefTm)) hedefTm += " TM";
       yeniBara = (el("tmEkleYeniBara") ? el("tmEkleYeniBara").value.trim() : "Tek") || "Tek";
       yeniEdas = (el("tmEkleYeniEdas") ? el("tmEkleYeniEdas").value.trim() : "") || (IL2EDAS[hedefIl] && IL2EDAS[hedefIl][0]) || "EDAŞ";
-      yeniMwe = parseFloat(el("tmEkleYeniMwe") ? el("tmEkleYeniMwe").value : 0) || 0;
+      var mweStr = el("tmEkleYeniMwe") ? String(el("tmEkleYeniMwe").value).replace(",", ".").trim() : "0";
+      yeniMwe = (mweStr !== "" && isFinite(parseFloat(mweStr))) ? parseFloat(mweStr) : 0;
     } else {
       var par = (tmSel.value || "").split("|");
       hedefIl = (par[0] || "").toLocaleUpperCase("tr").trim();
@@ -6128,7 +6153,16 @@
       zaman: new Date().toISOString()
     };
     if(isYeni){
-      depo.eklenenler.push({
+      var mevcutEkIdx = -1;
+      for(var ei = 0; ei < depo.eklenenler.length; ei++){
+        if(String(depo.eklenenler[ei].il||"").toLocaleUpperCase("tr").trim() === hedefIl &&
+           String(depo.eklenenler[ei].tm||"").toLocaleUpperCase("tr").trim() === hedefTm &&
+           String(depo.eklenenler[ei].bara||"Tek").trim() === yeniBara){
+          mevcutEkIdx = ei;
+          break;
+        }
+      }
+      var yeniKayit = {
         il: hedefIl,
         tm: hedefTm,
         bara: yeniBara,
@@ -6137,9 +6171,15 @@
         m1607: yeniMwe,
         m0110: yeniMwe,
         mwe: yeniMwe,
+        mweDuzeltildi: true,
         lat: Number(lat.toFixed(6)),
         lon: Number(lon.toFixed(6))
-      });
+      };
+      if(mevcutEkIdx >= 0){
+        depo.eklenenler[mevcutEkIdx] = yeniKayit;
+      } else {
+        depo.eklenenler.push(yeniKayit);
+      }
     }
     ozelTmDepoYaz(depo);
     ozelTmKonumlariUygula(depo);

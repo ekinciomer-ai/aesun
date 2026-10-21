@@ -30,8 +30,8 @@
   .svg-wrap{width:100%;overflow-x:auto;background:linear-gradient(180deg,#FAFBFD 0%,#F2F4F8 100%);border:1px solid var(--line);border-radius:12px;padding:12px}
   .svg-wrap svg{display:block;width:100%;min-width:920px;height:auto}
 
-  /* Dönem seçici + 21 EDAŞ Dağıtım Bölgesi & İl Hızlı Kısayolları */
-  .ust-bar{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+  /* Dönem seçici + 21 EDAŞ Dağıtım Bölgesi & 81 İl Kompakt Dropdown Barı */
+  .ust-bar{display:flex;flex-direction:column;gap:8px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 16px;box-shadow:0 2px 10px rgba(15,23,42,.03)}
   .ust-bar-satir{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
   .donemsec{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .donemsec .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut2)}
@@ -40,18 +40,15 @@
   .seg button small{display:block;font-size:10.5px;font-weight:500;color:var(--mut2)}
   .seg button[aria-pressed=true]{background:var(--char);color:#fff}
   .seg button[aria-pressed=true] small{color:#D5D9E0}
-  .hizli-bolge-etiket{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--mut2);margin-right:2px;white-space:nowrap}
-  .hizli-bolge{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-  .hizli-bolge button{min-height:32px;padding:0 10px;border:1px solid var(--line);background:#FAFBFD;color:var(--ink2);border-radius:99px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
-  .hizli-bolge button .hb-mwe{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:800;color:#15803D;background:#DCFCE7;padding:1px 6px;border-radius:99px;margin-left:2px}
-  .hizli-bolge button .hb-mwe.sifir{color:#64748B;background:#E2E8F0}
-  .hizli-bolge button:hover,.hizli-bolge button.on{background:var(--red);color:#fff;border-color:var(--red)}
-  .hizli-bolge button:hover .hb-mwe,.hizli-bolge button.on .hb-mwe{background:rgba(255,255,255,.22);color:#fff}
-  .hizli-il-bar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-top:8px;border-top:1px dashed var(--line)}
-  .hizli-il-bar button{min-height:30px;padding:0 10px;border:1px solid #CBD5E1;background:#F8FAFC;color:#1E293B;border-radius:99px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
-  .hizli-il-bar button:hover,.hizli-il-bar button.on{background:#0F172A;color:#fff;border-color:#0F172A}
-  .hizli-il-bar button .hb-mwe{font-family:Archivo,sans-serif;font-size:10px;font-weight:800;color:#047857}
-  .hizli-il-bar button:hover .hb-mwe,.hizli-il-bar button.on .hb-mwe{color:#6EE7B7}
+  .ust-secim-grup{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;justify-content:flex-end}
+  .ust-select-kutu{display:inline-flex;align-items:center;gap:6px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:3px 8px 3px 10px;min-height:38px;transition:all .15s}
+  .ust-select-kutu:focus-within{border-color:var(--red);background:#fff;box-shadow:0 0 0 3px rgba(211,32,39,.08)}
+  .ust-select-kutu.aktif-filtre{border-color:#0F172A;background:#F1F5F9}
+  .ust-sel-lbl{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#475569;white-space:nowrap}
+  .ust-select{border:0;background:transparent;font:700 12.5px "IBM Plex Sans",sans-serif;color:#0F172A;cursor:pointer;padding:2px 4px;min-width:210px;max-width:290px;outline:none}
+  .ust-mwe-rozet{display:inline-flex;align-items:center;gap:4px;font-family:Archivo,sans-serif;font-size:12px;font-weight:800;color:#15803D;background:#DCFCE7;border:1px solid #86EFAC;padding:6px 11px;border-radius:9px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .ust-mwe-rozet.sifir{color:#64748B;background:#F1F5F9;border-color:#CBD5E1}
+  @media(max-width:900px){.ust-secim-grup{justify-content:flex-start;width:100%}.ust-select-kutu{flex:1;min-width:220px}.ust-select{width:100%;max-width:none}}
 
   /* Harita & Profesyonel CBS (GIS/SCADA) Komuta Merkezi */
   .cbs-kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
@@ -374,10 +371,12 @@
   .pges-kutu{background:#fff;border:1px solid #CBD5E1;border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:9px}
   .pges-kutu h3{margin:0;font-family:Archivo,sans-serif;font-size:13.5px;font-weight:800;color:#0F172A;display:flex;justify-content:space-between;align-items:center;gap:6px;padding-bottom:7px;border-bottom:1px solid #E2E8F0}
   .pges-kutu h3 small{font-size:10.5px;color:#0F766E;font-weight:700;background:#F0FDFA;padding:2px 7px;border-radius:99px;border:1px solid #99F6E4}
-  .pges-drop{border:2px dashed #0F766E;background:linear-gradient(180deg,#F0FDFA 0%,#FFFFFF 100%);border-radius:10px;padding:10px 12px;text-align:center;cursor:pointer;transition:all .15s}
-  .pges-drop:hover,.pges-drop.drag{background:#CCFBF1;border-color:#047857}
-  .pges-drop b{display:block;font-family:Archivo,sans-serif;font-size:12.5px;color:#0F766E;margin-bottom:2px}
-  .pges-drop span{font-size:11px;color:#475569}
+  .pges-drop{position:relative;display:block;border:2px dashed #0F766E;background:linear-gradient(180deg,#F0FDFA 0%,#FFFFFF 100%);border-radius:10px;padding:11px 12px;text-align:center;cursor:pointer;transition:all .15s;overflow:hidden}
+  .pges-drop:hover,.pges-drop.drag{background:#CCFBF1;border-color:#047857;box-shadow:0 0 0 3px rgba(15,118,110,.12)}
+  .pges-drop.yuklendi{background:#ECFDF5;border-style:solid;border-color:#059669}
+  .pges-drop b{display:block;font-family:Archivo,sans-serif;font-size:12.5px;color:#0F766E;margin-bottom:2px;pointer-events:none}
+  .pges-drop span{display:block;font-size:11px;color:#475569;pointer-events:none}
+  .pges-drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:3;margin:0;padding:0}
 
   .pges-form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
   .pges-form-grid.uclu{grid-template-columns:repeat(3,1fr)}
@@ -1571,13 +1570,13 @@
     el("medasGrid").querySelectorAll(".med-il-path").forEach(function(node){
       node.addEventListener("click", function(){
         var il = node.getAttribute("data-il");
-        el("fil").value = (el("fil").value===il ? "" : il);
+        ilSecildigindeSenkronla(el("fil").value===il ? "" : il);
         ciz();
       });
     });
   }
 
-  /* 4. SEÇİLİ TRAFO MERKEZİ TEKNİK TEK HAT & 3 DÖNEM BARA ŞEMASI (SVG) */
+  /* 4. SEÇİLİ TRAFO MERKEZİ TEKNİK TEK HAT & 3 DÖNEM BARA ŞEMASI + TEKYILDIZ 2MW DWG ÖRNEK TEK HAT (SVG) */
   function tmTekHatCiz(r){
     if(!r){
       r = tumu.find(function(x){ return x.il==="AKSARAY" && av(x)>0; }) || tumu.find(function(x){ return av(x)>0; }) || tumu[0];
@@ -1595,6 +1594,84 @@
     var b1 = Math.round(top1/maxD*82);
     var b2 = Math.round(top2/maxD*82);
 
+    var mwp = fmt(topAkt * 1.25);
+    var gwh = fmt(topAkt * 1.25 * 1.68);
+
+    if(el("btnTmGorunumBara")) el("btnTmGorunumBara").classList.toggle("on", tmTekHatMod === "bara");
+    if(el("btnTmGorunumTekyildiz")) el("btnTmGorunumTekyildiz").classList.toggle("on", tmTekHatMod === "tekyildiz");
+
+    if(tmTekHatMod === "tekyildiz"){
+      el("tmTekHatSvg").innerHTML =
+        '<svg viewBox="0 0 580 250" style="width:100%;height:auto;background:#0B1320;border:1.5px solid #0F766E;border-radius:10px;padding:6px" role="img" aria-label="TEKYILDIZ TEK HAT ŞEMASI 2MW.dwg Örnek Tek Hat">'
+          +'<rect x="6" y="6" width="568" height="24" rx="6" fill="#0F766E"/>'
+          +'<text x="14" y="22" font-family="Archivo,sans-serif" font-size="10" font-weight="800" fill="#FFF">📐 ÖRNEK TEK HAT: TEKYILDIZ TEK HAT ŞEMASI 2MW.dwg · 2.697,50 kWp DC / 1.920 kWe AC → '+esc(r.tm)+'</text>'
+          +'<rect x="10" y="36" width="134" height="172" rx="7" fill="#111C2D" stroke="#38BDF8" stroke-width="1.3"/>'
+          +'<text x="77" y="50" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9" font-weight="800" fill="#38BDF8">PV DİZİ &amp; EVİRİCİLER</text>'
+          +'<text x="77" y="63" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8.2" fill="#E2E8F0">4.316 Adet × 625 Wp Mono</text>'
+          +'<text x="77" y="74" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9" font-weight="800" fill="#34D399">2.697,50 kWp DC</text>'
+          +'<rect x="18" y="81" width="118" height="24" rx="4" fill="#0B1320" stroke="#475569"/>'
+          +'<text x="77" y="92" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8" fill="#CBD5E1">166 Dizi × 26 Modül (D1P01..26)</text>'
+          +'<text x="77" y="101" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.5" fill="#94A3B8">1x6 mm² Solar Kablo · MPPT A..J</text>'
+          +'<rect x="18" y="111" width="118" height="46" rx="5" fill="#1E293B" stroke="#F59E0B" stroke-width="1.3"/>'
+          +'<text x="77" y="124" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9" font-weight="800" fill="#FBBF24">8 × 250 kW (240 kWe)</text>'
+          +'<text x="77" y="136" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8" fill="#F8FAFC">INV-1 .. INV-8 (3 Faz 0,8 kV)</text>'
+          +'<text x="77" y="149" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9" font-weight="800" fill="#34D399">Toplam AC: 1.920 kWe</text>'
+          +'<text x="77" y="172" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8" fill="#CBD5E1">AG Pano: 8×400A +</text>'
+          +'<text x="77" y="184" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.5" font-weight="700" fill="#F8FAFC">TMŞ 3×2000A 50kA</text>'
+          +'<text x="77" y="198" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.8" fill="#94A3B8">3 ad. 1×240mm² NYY</text>'
+          +'<line x1="144" y1="122" x2="168" y2="122" stroke="#F59E0B" stroke-width="2.5"/>'
+          +'<rect x="168" y="36" width="122" height="172" rx="7" fill="#111C2D" stroke="#F59E0B" stroke-width="1.3"/>'
+          +'<text x="229" y="50" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9" font-weight="800" fill="#FBBF24">OG/AG GÜÇ TRAFOSU</text>'
+          +'<circle cx="217" cy="96" r="17" fill="none" stroke="#F59E0B" stroke-width="2.2"/>'
+          +'<circle cx="241" cy="96" r="17" fill="none" stroke="#EF4444" stroke-width="2.2"/>'
+          +'<text x="229" y="128" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="#FFF">2×1250 / 2500 kVA</text>'
+          +'<text x="229" y="141" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8.2" fill="#CBD5E1">31,5 / 0,8 kV · Dyn11</text>'
+          +'<text x="229" y="153" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8" fill="#94A3B8">%Uk = 6 · HERMETİK</text>'
+          +'<text x="229" y="172" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.8" fill="#6EE7B7">⏚ Q20 2mt İşletme &amp; Koruma</text>'
+          +'<text x="229" y="184" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.8" fill="#6EE7B7">Topraklaması (1×95mm² NYY)</text>'
+          +'<text x="229" y="198" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.5" fill="#94A3B8">3×(1×95mm²) NA2XSY</text>'
+          +'<line x1="290" y1="122" x2="310" y2="122" stroke="#EF4444" stroke-width="2.5"/>'
+          +'<rect x="310" y="36" width="154" height="172" rx="7" fill="#111C2D" stroke="#EF4444" stroke-width="1.3"/>'
+          +'<text x="387" y="50" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9" font-weight="800" fill="#F87171">36 kV MODÜLER HÜCRELER</text>'
+          +'<rect x="317" y="57" width="140" height="44" rx="4" fill="#1E293B" stroke="#EF4444"/>'
+          +'<text x="387" y="69" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.2" font-weight="800" fill="#FCA5A5">1. KESİCİLİ TRAFO KORUMA</text>'
+          +'<text x="387" y="80" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.6" fill="#E2E8F0">SF6 36kV 630A 16kA · CT 30/5A 5P10</text>'
+          +'<text x="387" y="91" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.4" fill="#94A3B8">Röle: 50/51, 50N/51N, 67N, 27/59, 81</text>'
+          +'<rect x="317" y="106" width="140" height="44" rx="4" fill="#1E293B" stroke="#38BDF8"/>'
+          +'<text x="387" y="118" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.2" font-weight="800" fill="#7DD3FC">2. AKIM &amp; GERİLİM ÖLÇÜ HÜCRESİ</text>'
+          +'<text x="387" y="129" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.6" fill="#E2E8F0">36kV 630A 16kA · CT 30/5-5A 0,5Fs5</text>'
+          +'<text x="387" y="140" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.4" fill="#94A3B8">VT: (31,5/√3)/(0,1/√3)kV · Sayaç</text>'
+          +'<rect x="317" y="155" width="140" height="45" rx="4" fill="#1E293B" stroke="#10B981"/>'
+          +'<text x="387" y="167" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.2" font-weight="800" fill="#6EE7B7">3. YÜK AYIRICILI HAT GİRİŞ/ÇIKIŞ</text>'
+          +'<text x="387" y="178" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.6" fill="#E2E8F0">36kV 630A 16kA Yük Ayırıcı + Topr.</text>'
+          +'<text x="387" y="189" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.4" fill="#94A3B8">3×36kV Parafudr · 3/0 AWG ENH</text>'
+          +'<line x1="464" y1="122" x2="482" y2="122" stroke="#10B981" stroke-width="2.5"/>'
+          +'<rect x="482" y="36" width="92" height="172" rx="7" fill="#111C2D" stroke="#10B981" stroke-width="1.5"/>'
+          +'<text x="528" y="52" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8.8" font-weight="800" fill="#34D399">TEİAŞ / EDAŞ</text>'
+          +'<text x="528" y="68" text-anchor="middle" font-family="Archivo,sans-serif" font-size="9.5" font-weight="800" fill="#FFF">'+esc(r.tm.slice(0,13))+'</text>'
+          +'<text x="528" y="82" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="8" fill="#94A3B8">'+esc(r.il)+'</text>'
+          +'<rect x="490" y="92" width="76" height="44" rx="5" fill="#064E3B" stroke="#34D399"/>'
+          +'<text x="528" y="106" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.5" fill="#A7F3D0">Kalan Kapasite</text>'
+          +'<text x="528" y="122" text-anchor="middle" font-family="Archivo,sans-serif" font-size="11" font-weight="800" fill="#FFF">'+fmt(topAkt)+' MWe</text>'
+          +'<text x="528" y="154" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.8" fill="#CBD5E1">31,5 / 34,5 kV</text>'
+          +'<text x="528" y="166" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="7.8" fill="#CBD5E1">OG Dağıtım Bara</text>'
+          +'<g id="btnSvgTamTekHatAc" style="cursor:pointer">'
+            +'<rect x="488" y="176" width="80" height="24" rx="5" fill="#0F766E" stroke="#34D399"/>'
+            +'<text x="528" y="191" text-anchor="middle" font-family="Archivo,sans-serif" font-size="8" font-weight="800" fill="#FFF">TAM PAFTA AÇ ▾</text>'
+          +'</g>'
+          +'<rect x="10" y="214" width="564" height="28" rx="6" fill="#1E293B"/>'
+          +'<text x="20" y="232" font-family="IBM Plex Sans,sans-serif" font-size="9.5" font-weight="600" fill="#E2E8F0">Kaynak: <tspan fill="#34D399" font-weight="700">TEKYILDIZ TEK HAT ŞEMASI 2MW.dwg</tspan> · Van/İpekyolu Yatıksırt Ada 155 Parsel 19 (Özalp TM) · İmza Alanı Boş</text>'
+        +'</svg>';
+      var bAc = el("btnSvgTamTekHatAc");
+      if(bAc){
+        bAc.addEventListener("click", function(){
+          if(typeof window.pgesTamTekHatAc === "function") window.pgesTamTekHatAc("tekyildiz_2mw");
+        });
+      }
+      tmAraziCiz(r, topAkt, baralar);
+      return;
+    }
+
     var baraText = baralar.slice(0,3).map(function(b,idx){
       var v = av(b);
       var y = 48 + idx*38;
@@ -1606,9 +1683,6 @@
         +'<text x="233" y="'+(y+4)+'" font-family="Archivo,sans-serif" font-size="10.5" font-weight="700" fill="#181B20">'+esc(b.bara||'Tek')+': '+fmt(v)+' MWe</text>'
       +'</g>';
     }).join("");
-
-    var mwp = fmt(topAkt * 1.25);
-    var gwh = fmt(topAkt * 1.25 * 1.68);
 
     el("tmTekHatSvg").innerHTML =
       '<svg viewBox="0 0 540 190" style="width:100%;height:auto;background:#FAFBFD;border:1px solid var(--line);border-radius:10px;padding:6px">'
@@ -3532,6 +3606,17 @@
       OVA_RENDERER = ANA_CANVAS;
       KORUMA_RENDERER = ANA_CANVAS;
       MAP=L.map("harita",{scrollWheelZoom:false, preferCanvas:true, renderer:ANA_CANVAS}).setView([39.0,35.2],6);
+      // İl/EDAŞ sınırları, İl MWe rozetleri ve TM kapasite noktaları için ayrı Z-Index katman panelleri oluştur
+      // Böylece İl sınırı ve EDAŞ sınırı / etiketi açıkken Trafo Merkezi seçimi asla engellenmez
+      var sPane = MAP.createPane("sinirPane");
+      sPane.style.zIndex = 380;
+      SINIR_CANVAS = L.canvas({ pane: "sinirPane", padding: 0.35 });
+      var ePane = MAP.createPane("etiketPane");
+      ePane.style.zIndex = 620;
+      ePane.style.pointerEvents = "none";
+      var tPane = MAP.createPane("tmPane");
+      tPane.style.zIndex = 650;
+      TM_CANVAS = L.canvas({ pane: "tmPane", padding: 0.35 });
       ALTLIKLAR = {
         osm: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}),
         uydu: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"© Esri World Imagery"}),
@@ -3655,7 +3740,8 @@
         }
       });
       L.geoJSON(il,{
-        renderer: ANA_CANVAS || undefined,
+        pane: "sinirPane",
+        renderer: SINIR_CANVAS || ANA_CANVAS || undefined,
         style:function(f){ return {color:"#9AA2AD",weight:.8,fillColor:EDAS_RENK[f.properties.edas]||"#ccc",fillOpacity:0}; },
         onEachFeature:function(f,ly){
           ly.bindTooltip(function(){
@@ -3663,15 +3749,34 @@
             var m = tumu.filter(function(r){return r.il===ilAd;}).reduce(function(s,r){return s+av(r);},0);
             return "<b>"+f.properties.il+"</b> · "+(f.properties.edas||"—")+"<br>Aktif Kapasite: <b>"+fmt(m)+" MWe</b>";
           },{sticky:true,className:"edas-tip"});
-          ly.on("click",function(){
+          ly.on("click",function(ev){
+            if(ev && ev.latlng && MAP && KATMAN_ACIK.kapasite){
+              var ptClick = MAP.latLngToLayerPoint(ev.latlng);
+              var yakinTm = null, minPx = 9999;
+              geoSuz().forEach(function(r){
+                var ptTm = MAP.latLngToLayerPoint([r.lat, r.lon]);
+                var dx = ptClick.x - ptTm.x, dy = ptClick.y - ptTm.y;
+                var dist = Math.sqrt(dx*dx + dy*dy);
+                var tol = rCap(av(r)) + 6;
+                if(dist <= tol && dist < minPx){ minPx = dist; yakinTm = r; }
+              });
+              if(yakinTm){
+                tmTekHatCiz(yakinTm);
+                tablo(gorunen);
+                seciliTmHaritaVurgula(yakinTm, true);
+                if(KATMAN_ACIK.sahibinden) sahibindenCiz();
+                return;
+              }
+            }
             var sec = (f.properties.il||"").toLocaleUpperCase("tr");
-            el("fil").value=(el("fil").value===sec?"":sec);
+            ilSecildigindeSenkronla(el("fil").value===sec ? "" : sec);
             ciz();
           });
         }
       }).addTo(ILL);
       L.geoJSON(bo,{
-        renderer: ANA_CANVAS || undefined,
+        pane: "sinirPane",
+        renderer: SINIR_CANVAS || ANA_CANVAS || undefined,
         style:function(f){ return {color:EDAS_RENK[f.properties.edas]||"#777",weight:2.4,opacity:.9,fill:false,interactive:false}; }
       }).addTo(BOLGE);
       el("sinirDurum").textContent="";
@@ -3728,14 +3833,25 @@
   }
 
   // Olay Dinleyicileri
+  if(el("btnTmGorunumBara")){
+    el("btnTmGorunumBara").addEventListener("click", function(){
+      tmTekHatMod = "bara";
+      tmTekHatCiz(seciliRow);
+    });
+  }
+  if(el("btnTmGorunumTekyildiz")){
+    el("btnTmGorunumTekyildiz").addEventListener("click", function(){
+      tmTekHatMod = "tekyildiz";
+      tmTekHatCiz(seciliRow);
+    });
+  }
   el("hizliBolge").querySelectorAll("button").forEach(function(b){
     b.addEventListener("click", function(){
       var bil = b.getAttribute("data-il"), bed = b.getAttribute("data-ed");
-      if(bil){ el("fil").value = (el("fil").value===bil ? "" : bil); el("fed").value = ""; }
-      else {
-        el("fil").value = "";
-        el("fed").value = (bed && el("fed").value === bed) ? "" : (bed || "");
-        if(bed && el("bolgeKutuSec")) el("bolgeKutuSec").value = bed;
+      if(bil){
+        ilSecildigindeSenkronla(el("fil").value===bil ? "" : bil);
+      } else {
+        edasSecildigindeSenkronla((bed && el("fed").value === bed) ? "" : (bed || ""));
       }
       ciz();
     });
@@ -3751,9 +3867,7 @@
   }
   if(el("bolgeKutuSec")){
     el("bolgeKutuSec").addEventListener("change", function(){
-      var sec = this.value;
-      el("fil").value = "";
-      el("fed").value = sec || "";
+      edasSecildigindeSenkronla(this.value || "");
       ciz();
     });
   }
@@ -3951,6 +4065,13 @@
       var r = tumu.find(function(x){ return x.il===secIl && x.tm===secTm && av(x)>0; })
            || tumu.find(function(x){ return x.il===secIl && x.tm===secTm; });
       if(r){
+        if(el("fil").value && el("fil").value !== r.il){
+          ilSecildigindeSenkronla(r.il);
+          gorunen = suz();
+        } else if(!el("fil").value && el("fed").value && !edasEslesirMi(r, el("fed").value)){
+          ilSecildigindeSenkronla(r.il);
+          gorunen = suz();
+        }
         tmTekHatCiz(r);
         tablo(gorunen);
         if(KATMAN_ACIK.sahibinden) sahibindenCiz();
@@ -3972,8 +4093,14 @@
     });
   }
 
-  el("fil").addEventListener("change",ciz);
-  el("fed").addEventListener("change",ciz);
+  el("fil").addEventListener("change",function(){
+    ilSecildigindeSenkronla(this.value);
+    ciz();
+  });
+  el("fed").addEventListener("change",function(){
+    edasSecildigindeSenkronla(this.value);
+    ciz();
+  });
   el("fara").addEventListener("input",ciz);
   el("fpoz").addEventListener("change",ciz);
   el("fsifir").addEventListener("click",function(){ el("fil").value="";el("fed").value="";el("fara").value="";el("fpoz").checked=false; ciz(); });
@@ -3999,6 +4126,20 @@
   var PGES_CIZIM_NOKTALAR = [];
 
   var PGES_ORNEKLER = {
+    tekyildiz_155_19: {
+      il: "Van", ilce: "İpekyolu", mahalle: "Yatıksırt", ada: "155", parsel: "19",
+      pafta: "L50-C-09-D", tapuAlan: 22312.56, nitelik: "Tarla", mevkii: "Yatıksırt",
+      unvan: "TEKYILDIZ SAĞLIK HİZMETLERİ VE İNŞAAT SANAYİ TİCARET LİMİTED ŞİRKETİ",
+      tesisAdi: "TEKYILDIZ GES", tmAdi: "ÖZALP TM",
+      invKw: 250, invSetKw: 240, invAdet: 8, panelWp: 625, modulSayisi: 4316,
+      masaTip: "2V13", panelBoyut: "2384x1303", trafoKva: "2500", projSec: "ITRF96 3°",
+      itrf_3_dom: 45,
+      itrf_3_yx: [
+        [472219.99, 4277145.65],[472185.64, 4277029.66],[472156.92, 4276931.02],
+        [472053.17, 4276961.90],[472066.52, 4277008.76],[472084.56, 4277072.81],
+        [472112.14, 4277166.93],[472157.82, 4277158.31],[472191.08, 4277151.49]
+      ]
+    },
     aksaray_232_19: {
       il: "Aksaray", ilce: "Merkez", mahalle: "Akçakent", ada: "232", parsel: "19",
       pafta: "K31-B-21-B-4", tapuAlan: 38075.67, nitelik: "Tarla", mevkii: "Köycivarı",
@@ -4834,8 +4975,9 @@
     // 800V AG veya 400V AG maksimum çıkış akımı ve TMŞ hesabı
     var maksAkim = Math.round(acKwe * 1.443); // örn: 960 kWe -> ~1385 A / 4x360.8=1443.2A
     var maksAkimExact = (invAdet * 360.8).toFixed(1);
-    var tmsAkim = acKwe <= 500 ? 800 : acKwe <= 800 ? 1250 : acKwe <= 1100 ? 1600 : 2500;
-    var ctAkim = tmsAkim <= 1000 ? 1000 : tmsAkim <= 1600 ? 1500 : 2500;
+    var tmsAkim = acKwe <= 500 ? 800 : acKwe <= 800 ? 1250 : acKwe <= 1100 ? 1600 : 2000;
+    var ctAkim = tmsAkim <= 1000 ? 1000 : tmsAkim <= 1600 ? 1500 : 2000;
+    var isTekyildiz = (Math.round(wp) === 625 || invAdet === 8);
 
     // Her eviriciye düşen modül ve DC güç dağılımı (Tuğral Döküm şablonundaki gibi E1..EN)
     var bazMod = Math.floor(modSay / invAdet);
@@ -4849,20 +4991,25 @@
     var invSvg = "";
     for(var i=0; i<gosterilenInv; i++){
       var k = i + 1;
-      var buMod = bazMod + (i === gosterilenInv - 1 ? kalanMod : 0);
+      var buMod = isTekyildiz ? (i < 6 ? 546 : 520) : (bazMod + (i === gosterilenInv - 1 ? kalanMod : 0));
       var buDcKwp = (buMod * wp / 1000.0);
       var y0 = 76 + i * invBlokYuk;
       var ym = y0 + 62;
+      var diziSay = Math.round(buMod / 26) || 21;
+      var dizi1Txt = isTekyildiz ? ('1.DİZİ = 26x'+wp+'Wp (D1P01..26)') : ('1.DİZİ = 21x'+wp+'Wp / MPPT1');
+      var dizi2Txt = isTekyildiz ? ('2.DİZİ = 26x'+wp+'Wp / MPPT-A..B') : ('2.DİZİ = 21x'+wp+'Wp / MPPT2');
+      var diziSon1 = isTekyildiz ? ((diziSay-1)+'.DİZİ = 26x'+wp+'Wp / MPPT-I') : ('11.DİZİ = 20x'+wp+'Wp / MPPT11');
+      var diziSon2 = isTekyildiz ? (diziSay+'.DİZİ = 26x'+wp+'Wp / MPPT-J') : ('12.DİZİ = 20x'+wp+'Wp / MPPT12');
 
       invSvg += '<g transform="translate(650, '+y0+')">'
-        // Sol PV Dizi (String) Kutuları (MPPT1..MPPT12)
+        // Sol PV Dizi (String) Kutuları (MPPT-A..MPPT-J / MPPT1..MPPT12)
         +'<rect x="0" y="6" width="118" height="24" fill="#FFF" stroke="#000" stroke-width="1"/>'
-        +'<text x="59" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000">1.DİZİ = 21x'+wp+'Wp / MPPT1</text>'
-        +'<text x="59" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#334155">2.DİZİ = 21x'+wp+'Wp / MPPT2</text>'
-        +'<text x="59" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">⋮ ('+buMod+' Modül)</text>'
+        +'<text x="59" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">'+dizi1Txt+'</text>'
+        +'<text x="59" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#334155">'+dizi2Txt+'</text>'
+        +'<text x="59" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">⋮ ('+buMod+' Modül · '+pgesSayiFmt(buDcKwp,2)+' kWp)</text>'
         +'<rect x="0" y="56" width="118" height="24" fill="#FFF" stroke="#000" stroke-width="1"/>'
-        +'<text x="59" y="66" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000">11.DİZİ = 20x'+wp+'Wp / MPPT11</text>'
-        +'<text x="59" y="76" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#334155">12.DİZİ = 20x'+wp+'Wp / MPPT12</text>'
+        +'<text x="59" y="66" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">'+diziSon1+'</text>'
+        +'<text x="59" y="76" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#334155">'+diziSon2+'</text>'
 
         // DC Bağlantı ve DC Anahtar + Parafudr
         +'<line x1="118" y1="18" x2="148" y2="18" stroke="#000" stroke-width="1.1"/>'
@@ -5273,7 +5420,7 @@
       return;
     }
 
-    var o = PGES_ORNEKLER[kod] || PGES_ORNEKLER.aksaray_232_19;
+    var o = PGES_ORNEKLER[kod] || PGES_ORNEKLER.tekyildiz_155_19 || PGES_ORNEKLER.aksaray_232_19;
     el("pgesIl").value = o.il;
     el("pgesIlce").value = o.ilce;
     el("pgesMahalle").value = o.mahalle;
@@ -5291,6 +5438,10 @@
     el("pgesInvAdet").value = o.invAdet;
     el("pgesPanelWp").value = o.panelWp;
     el("pgesModulSayisi").value = o.modulSayisi;
+    if(o.masaTip && el("pgesMasaTip")) el("pgesMasaTip").value = o.masaTip;
+    if(o.panelBoyut && el("pgesPanelBoyut")) el("pgesPanelBoyut").value = o.panelBoyut;
+    if(o.trafoKva && el("pgesTrafoKva")) el("pgesTrafoKva").value = o.trafoKva;
+    if(o.projSec && el("pgesProjSec")) el("pgesProjSec").value = o.projSec;
 
     if(o.coords && o.coords.length){
       PGES_STATE.coords = o.coords.map(function(c){ return [c[0], c[1]]; });
@@ -5624,8 +5775,22 @@
       }
     });
 
-    // Varsayılan olarak Aksaray 232 Ada 19 Parsel (veya Bilecik 104/86) hazır yüklenir
-    pgesOrnekYukle("aksaray_232_19", false);
+    window.pgesTamTekHatAc = function(){
+      if(el("pgesOrnekSec")) el("pgesOrnekSec").value = "tekyildiz_155_19";
+      pgesOrnekYukle("tekyildiz_155_19", false);
+      PGES_AKTIF_SEKME = "tekhat";
+      if(el("pgesSekmeler")){
+        el("pgesSekmeler").querySelectorAll("button[data-psekme]").forEach(function(x){
+          x.classList.toggle("on", x.getAttribute("data-psekme") === "tekhat");
+        });
+      }
+      pgesPaftaCiz();
+      var b = el("parselGesBolum");
+      if(b && b.scrollIntoView) b.scrollIntoView({behavior:"smooth", block:"start"});
+    };
+
+    // Varsayılan olarak Tekyıldız 2 MW (Van / İpekyolu / Yatıksırt Ada 155 Parsel 19) hazır yüklenir
+    pgesOrnekYukle("tekyildiz_155_19", false);
   }
 
 

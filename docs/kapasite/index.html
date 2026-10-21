@@ -92,6 +92,16 @@
   .tm-sema-kutu h3{margin:0 0 4px;font-family:Archivo,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
   .tm-sema-kutu p{margin:0 0 10px;font-size:12.5px;color:var(--mut)}
   /* Harita Üzeri Sahibinden İlan Katmanı Pin & Rozetleri */
+  .k-btn.ova-altlik-btn{border-color:#15803D;background:#F0FDF4;color:#14532D}
+  .k-btn.ova-altlik-btn:hover,.k-btn.ova-altlik-btn.on{background:#15803D;border-color:#14532D;color:#FFFFFF;box-shadow:0 2px 8px rgba(21,128,61,.3)}
+  .lej .chk2.ova-chk{background:#F0FDF4;border-color:#86EFAC;color:#14532D;font-weight:700}
+  .ova-gezgin-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(90deg,#F0FDF4 0%,#FEFCE8 100%);border:1px solid #86EFAC;border-radius:11px;padding:9px 13px;margin-bottom:10px;font-size:12px}
+  .ova-gezgin-bar .sol{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#14532D}
+  .ova-gezgin-bar .ova-pill{background:#15803D;color:#fff;font-family:Archivo,sans-serif;font-weight:800;font-size:10.5px;padding:2px 8px;border-radius:6px;letter-spacing:.03em}
+  .ova-gezgin-bar .sag{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ova-gezgin-bar select{min-height:32px;padding:0 10px;border:1px solid #86EFAC;border-radius:8px;font:inherit;font-size:12.5px;font-weight:700;color:#14532D;background:#fff;max-width:340px}
+  .ova-harita-etiket{background:rgba(20,83,45,.92);color:#FEF9C3;border:1.5px solid #86EFAC;border-radius:7px;padding:2px 7px;font-family:Archivo,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer;text-align:center}
+  .ova-harita-etiket b{color:#4ADE80}
   .k-btn.shb-katman-btn{border-color:#D4B200;background:#FFFDF0;color:#111827}
   .k-btn.shb-katman-btn:hover,.k-btn.shb-katman-btn.on{background:#FFE800;border-color:#B89B00;color:#111827;box-shadow:0 2px 8px rgba(234,179,8,.35)}
   .lej .chk2.shb-chk{background:#FFFBEB;border-color:#FACC15;color:#111827;font-weight:700}
@@ -295,6 +305,7 @@
         <button type="button" class="k-btn" data-base="topo">⛰️ Topoğrafik Arazi</button>
         <button type="button" class="k-btn" data-base="koyu">🌑 Koyu SCADA</button>
         <button type="button" class="k-btn" data-base="acik">📐 Açık Teknik</button>
+        <button type="button" class="k-btn ova-altlik-btn" data-base="ova">🌾 Büyük Ova Altlığı (54 Ova)</button>
       </div>
       <div class="katman-grup" id="veriKatmanGrup">
         <span class="k-lbl">Veri Şema Katmanı:</span>
@@ -303,6 +314,17 @@
         <button type="button" class="k-btn red" data-vmod="erime">📉 Dönemsel Erime (Δ MWe)</button>
         <button type="button" class="k-btn red" data-vmod="topoloji">🕸️ 154 kV Şebeke Ağı</button>
         <button type="button" class="k-btn shb-katman-btn" data-vmod="sahibinden">🟡 Sahibinden Arazi İlan Katmanı</button>
+      </div>
+    </div>
+
+    <div class="ova-gezgin-bar" id="ovaGezginBar">
+      <div class="sol">
+        <span class="ova-pill">🌾 BÜYÜK OVA ALTLIĞI</span>
+        <span><b>T.C. Tarım ve Orman Bakanlığı · 54 Büyük Ova Koruma Alanı</b> (Toplam <b>303.302,89 Hektar</b> · 53 Ova + Iğdır Revize Ova Sınırı)</span>
+      </div>
+      <div class="sag">
+        <select id="ovaSecici" aria-label="Büyük Ova Seç"><option value="">🌾 PDF Listesindeki 54 Büyük Ovadan Seçin / Odaklanın…</option></select>
+        <button type="button" class="k-btn" id="btnTumOvalar" style="min-height:30px;font-size:11.5px">🗺️ 54 Ovayı Göster</button>
       </div>
     </div>
 
@@ -316,6 +338,7 @@
         <span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>
       </div>
       <div class="lej-sag">
+        <label class="chk2 ova-chk"><input type="checkbox" id="tglBuyukOva" checked> 🌾 Büyük Ova altlığı (54 Ova)</label>
         <label class="chk2 shb-chk"><input type="checkbox" id="tglSahibinden" checked> 🟡 Sahibinden arazi ilan katmanı</label>
         <label class="chk2"><input type="checkbox" id="tglSadeceAcik"> Yalnız açık TM'ler</label>
         <label class="chk2"><input type="checkbox" id="tglIlEtiket" checked> İl MWe rozetleri</label>
@@ -505,7 +528,7 @@
   var semaMod="kartogram"; // kartogram | agac
   var veriKatmanMod="kapasite"; // kapasite | isi | erime | topoloji
   var aktifAltlik="osm";
-  var MAP=null, KAT=null, TOPO_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, geoYok=false;
+  var MAP=null, KAT=null, TOPO_KAT=null, OVA_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, OVA_GEO=null, seciliOvaSno=null, geoYok=false;
   var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null, BOLGE_GEO=null;
   var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
 
@@ -1191,6 +1214,133 @@
     ];
   }
 
+  function mesafeKm(lat1, lon1, lat2, lon2){
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function enYakinOvaBul(r){
+    if(!OVA_GEO || !OVA_GEO.features || !r) return null;
+    var ilOvalar = OVA_GEO.features.filter(function(f){ return f.properties.il === r.il; });
+    var adaylar = ilOvalar.length ? ilOvalar : OVA_GEO.features;
+    if(r.lat == null || r.lon == null){
+      return ilOvalar.length ? { ova: ilOvalar[0].properties, km: null } : null;
+    }
+    var enIyi = null, minKm = 99999;
+    adaylar.forEach(function(f){
+      var p = f.properties;
+      var d = mesafeKm(r.lat, r.lon, p.lat, p.lon);
+      if(d < minKm){ minKm = d; enIyi = p; }
+    });
+    return enIyi ? { ova: enIyi, km: minKm } : null;
+  }
+
+  function buyukOvaCiz(){
+    if(!MAP || !OVA_KAT || !OVA_GEO || !OVA_GEO.features) return;
+    OVA_KAT.clearLayers();
+    var ovaAcik = (aktifAltlik === "ova") || (el("tglBuyukOva") && el("tglBuyukOva").checked);
+    if(!ovaAcik) return;
+
+    var secIl = el("fil") ? el("fil").value : "";
+    OVA_GEO.features.forEach(function(f){
+      var p = f.properties;
+      var isSecOva = (seciliOvaSno && +seciliOvaSno === +p.sno);
+      var isIlEs = (!secIl || p.il === secIl);
+      var poly = L.geoJSON(f, {
+        style: function(){
+          return {
+            color: isSecOva ? "#DC2626" : "#15803D",
+            weight: isSecOva ? 3.2 : (aktifAltlik === "ova" ? 2.4 : 1.8),
+            dashArray: isSecOva ? "" : "6 4",
+            fillColor: isSecOva ? "#EF4444" : "#22C55E",
+            fillOpacity: isSecOva ? 0.35 : (aktifAltlik === "ova" ? 0.26 : (isIlEs ? 0.18 : 0.08))
+          };
+        }
+      });
+
+      // Bu ovaya en yakın TM'yi bul
+      var yTm = null, yKm = 99999;
+      tumu.forEach(function(r){
+        if(r.lat != null && r.lon != null){
+          var d = mesafeKm( p.lat, p.lon, r.lat, r.lon );
+          if(d < yKm){ yKm = d; yTm = r; }
+        }
+      });
+
+      var pop = '<div style="min-width:240px">'
+        +'<div style="background:#15803D;color:#fff;font-weight:800;font-size:10.5px;padding:3px 8px;border-radius:4px;margin-bottom:5px;display:inline-block">🌾 T.C. TARIM VE ORMAN BAKANLIĞI · BÜYÜK OVA ALTLIĞI</div><br>'
+        +'<b>#'+p.sno+' · '+esc(p.ad)+' ('+esc(p.il)+')</b><br>'
+        +'<span style="font-size:11.5px;color:#475569">'+esc(p.liste)+' · PDF Sayfa '+p.sayfa+' · Ölçek '+esc(p.olcek)+'</span>'
+        +'<div style="margin:6px 0;padding:6px 8px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:6px;font-size:11.5px">'
+          +'Koruma Alanı: <b>'+fmt(p.hektar)+' Hektar ('+fmt0(p.donum)+' Dönüm)</b><br>'
+          +'Merkez Koordinat: <b>'+p.lat.toFixed(3)+'°K, '+p.lon.toFixed(3)+'°D</b>'
+          +(yTm ? '<br>En Yakın TM: <b>'+esc(yTm.tm)+'</b> (~'+fmt(yKm)+' km · '+fmt(av(yTm))+' MWe)' : '')
+        +'</div>'
+        +'<div style="font-size:11px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:5px;padding:4px 6px;line-height:1.35">'
+          +'⚠️ <b>GES Mevzuat Notu:</b> Ova sınırı içindeki mutlak tarım alanlarında GES tarım dışı kullanım izni verilmez; ova sınırı dışındaki marjinal arazileri tercih ediniz.'
+        +'</div>'
+      +'</div>';
+
+      poly.bindPopup(pop);
+      poly.on("click", function(){
+        seciliOvaSno = p.sno;
+        if(el("ovaSecici")) el("ovaSecici").value = String(p.sno);
+        if(yTm){ tmTekHatCiz(yTm); tablo(gorunen); }
+      });
+      poly.addTo(OVA_KAT);
+
+      // Ova etiket rozeti (Altlık "ova" modunda, il filtresi eşleştiğinde veya seçili ovada göster)
+      if(aktifAltlik === "ova" || isSecOva || (secIl && p.il === secIl) || p.hektar >= 6000){
+        var ic = L.divIcon({
+          className: "",
+          html: '<div class="ova-harita-etiket" title="'+esc(p.ad)+' ('+fmt(p.hektar)+' ha)">🌾 '+esc(p.ad.replace(" OVASI",""))+' <b>'+fmt0(Math.round(p.hektar))+' ha</b></div>',
+          iconSize: [140, 20],
+          iconAnchor: [70, 10]
+        });
+        var mk = L.marker([p.lat, p.lon], { icon: ic });
+        mk.bindPopup(pop);
+        mk.on("click", function(){
+          seciliOvaSno = p.sno;
+          if(el("ovaSecici")) el("ovaSecici").value = String(p.sno);
+          if(yTm){ tmTekHatCiz(yTm); tablo(gorunen); }
+        });
+        mk.addTo(OVA_KAT);
+      }
+    });
+  }
+
+  function ovaOdakla(sno, tumuGoster){
+    if(!MAP || !OVA_GEO || !OVA_GEO.features) return;
+    if(el("tglBuyukOva")) el("tglBuyukOva").checked = true;
+    if(tumuGoster || !sno){
+      seciliOvaSno = null;
+      if(el("ovaSecici")) el("ovaSecici").value = "";
+      buyukOvaCiz();
+      var bnd = geoProjKur(OVA_GEO.features, 0, 0, 100, 100, 0).bounds;
+      try{ MAP.fitBounds(bnd, {padding:[28,28], maxZoom:7}); }catch(e){}
+      return;
+    }
+    var f = OVA_GEO.features.find(function(x){ return +x.properties.sno === +sno; });
+    if(!f) return;
+    seciliOvaSno = f.properties.sno;
+    buyukOvaCiz();
+    var p = f.properties;
+    el("haritaBolum").scrollIntoView({behavior:"smooth", block:"center"});
+    setTimeout(function(){
+      try{ MAP.invalidateSize(); }catch(e){}
+      var bnd = geoProjKur([f], 0, 0, 100, 100, 0).bounds;
+      try{ MAP.fitBounds(bnd, {padding:[45,45], maxZoom:12}); }catch(e){ MAP.setView([p.lat, p.lon], 11); }
+      L.popup().setLatLng([p.lat, p.lon]).setContent(
+        '<b>🌾 #'+p.sno+' · '+esc(p.ad)+' ('+esc(p.il)+')</b><br>'
+        +'Alan: <b>'+fmt(p.hektar)+' Hektar ('+fmt0(p.donum)+' Dönüm)</b><br>'
+        +'<small>PDF Sayfa '+p.sayfa+' · Ölçek '+esc(p.olcek)+' · Ova sınırı içi GES kurulumuna kapalıdır</small>'
+      ).openOn(MAP);
+    }, 200);
+  }
+
   function tmAraziSeciciDoldur(){
     var sel = el("araziTmSec");
     if(!sel) return;
@@ -1329,11 +1479,22 @@
           +'<div class="k-deger">'+esc(il)+' / '+esc(ilce)+'</div>'
           +'<div class="k-alt">'+(mahalle ? ('Köy/Mahalle: <b>'+esc(mahalle)+'</b>'+(yol?' · '+esc(yol):'')) : (r.lat!=null ? (r.lat.toFixed(4)+'°K, '+r.lon.toFixed(4)+'°D koordinat çevresi') : 'İlçe merkezi ve çevre köyler'))+'</div>'
         +'</div>'
-        +'<div class="arazi-kpi">'
-          +'<div class="k-etiket">Harita Arazi Katmanı &amp; ENH</div>'
-          +'<div class="k-deger" style="color:#1E9E5A">0 – 5 km İdeal · ≤ 10 km</div>'
-          +'<div class="k-alt">Haritada 6 adet uygun parsel bölgesi ve OG hat bağlantısı çizilir</div>'
-        +'</div>';
+        +(function(){
+          var yo = enYakinOvaBul(r);
+          if(yo && yo.ova && (yo.km == null || yo.km < 45)){
+            var uyari = (yo.km != null && yo.km < 8);
+            return '<div class="arazi-kpi" style="background:'+(uyari?'#FEF2F2':'#F0FDF4')+';border-color:'+(uyari?'#FCA5A5':'#86EFAC')+'">'
+              +'<div class="k-etiket">🌾 Büyük Ova Koruma Altlığı</div>'
+              +'<div class="k-deger" style="color:'+(uyari?'#DC2626':'#15803D')+'">'+esc(yo.ova.ad)+'</div>'
+              +'<div class="k-alt">'+fmt(yo.ova.hektar)+' ha (S.'+yo.ova.sayfa+')'+(yo.km!=null ? ' · TM mesafesi: <b>'+fmt(yo.km)+' km</b>' : '')+' · Ova dışı parsel seçiniz</div>'
+            +'</div>';
+          }
+          return '<div class="arazi-kpi">'
+            +'<div class="k-etiket">Harita Arazi Katmanı &amp; ENH</div>'
+            +'<div class="k-deger" style="color:#1E9E5A">0 – 5 km İdeal · ≤ 10 km</div>'
+            +'<div class="k-alt">Büyük Ova koruma sınırı dışında · 6 uygun parsel bölgesi çizilir</div>'
+          +'</div>';
+        })();
     }
 
     var kartlarHtml = "";
@@ -1751,6 +1912,7 @@
       });
     }
 
+    buyukOvaCiz();
     dolguUygula();
     lejantGuncelle();
 
@@ -1774,15 +1936,24 @@
   }
 
   function altlikDegistir(kod){
-    if(!MAP || !ALTLIKLAR[kod]) return;
+    if(!MAP) return;
+    var tileKod = (kod === "ova") ? "topo" : kod;
+    if(!ALTLIKLAR[tileKod]) return;
     Object.keys(ALTLIKLAR).forEach(function(k){
       if(MAP.hasLayer(ALTLIKLAR[k])) MAP.removeLayer(ALTLIKLAR[k]);
     });
-    ALTLIKLAR[kod].addTo(MAP);
+    ALTLIKLAR[tileKod].addTo(MAP);
     aktifAltlik = kod;
     el("altlikGrup").querySelectorAll("button").forEach(function(b){
       b.classList.toggle("on", b.getAttribute("data-base") === kod);
     });
+    if(kod === "ova"){
+      if(el("tglBuyukOva")) el("tglBuyukOva").checked = true;
+      buyukOvaCiz();
+      if(el("ovaGezginBar")) el("ovaGezginBar").scrollIntoView({behavior:"smooth", block:"nearest"});
+    } else {
+      buyukOvaCiz();
+    }
   }
 
   function haritaGit(tm, bara, uyduyaGec){
@@ -1822,6 +1993,7 @@
       MAP.on("click",function(){ MAP.scrollWheelZoom.enable(); });
       ILL=L.layerGroup().addTo(MAP);
       BOLGE=L.layerGroup().addTo(MAP);
+      OVA_KAT=L.layerGroup().addTo(MAP);
       TOPO_KAT=L.layerGroup().addTo(MAP);
       ARAZI_KAT=L.layerGroup().addTo(MAP);
       KAT=L.layerGroup().addTo(MAP);
@@ -1833,9 +2005,31 @@
   function sinirYukle(){
     Promise.all([
       fetch("iller_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
-      fetch("bolge_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;})
+      fetch("bolge_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
+      fetch("buyuk_ovalar.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;})
     ]).then(function(a){
-      var il=a[0], bo=a[1];
+      var il=a[0], bo=a[1], ov=a[2];
+      if(ov && ov.features){
+        OVA_GEO = ov;
+        if(el("ovaSecici")){
+          var ilGrup = {};
+          ov.features.forEach(function(f){
+            var p = f.properties;
+            (ilGrup[p.il] = ilGrup[p.il] || []).push(p);
+          });
+          var optHtml = '<option value="">🌾 PDF Listesindeki 54 Büyük Ovadan Seçin / Haritada Odaklanın (303.303 ha)…</option>';
+          Object.keys(ilGrup).sort(function(x,y){return x.localeCompare(y,"tr");}).forEach(function(ilAd){
+            optHtml += '<optgroup label="'+esc(ilAd)+' ('+ilGrup[ilAd].length+' Ova)">';
+            ilGrup[ilAd].forEach(function(p){
+              optHtml += '<option value="'+p.sno+'">#'+p.sno+' · '+esc(p.ad)+' — '+fmt(p.hektar)+' ha (PDF S.'+p.sayfa+')</option>';
+            });
+            optHtml += '</optgroup>';
+          });
+          el("ovaSecici").innerHTML = optHtml;
+        }
+        buyukOvaCiz();
+        if(seciliRow) tmAraziCiz(seciliRow);
+      }
       if(!il||!bo){ el("sinirDurum").textContent="sınır verisi yüklenemedi"; return; }
       IL_GEO = il;
       BOLGE_GEO = bo;
@@ -1976,6 +2170,23 @@
     el("btnHaritaAraziKatman").addEventListener("click", function(){
       if(el("tglSahibinden")) el("tglSahibinden").checked = true;
       if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, true);
+    });
+  }
+  if(el("tglBuyukOva")){
+    el("tglBuyukOva").addEventListener("change", function(){
+      buyukOvaCiz();
+    });
+  }
+  if(el("ovaSecici")){
+    el("ovaSecici").addEventListener("change", function(){
+      if(this.value) ovaOdakla(+this.value, false);
+      else ovaOdakla(null, true);
+    });
+  }
+  if(el("btnTumOvalar")){
+    el("btnTumOvalar").addEventListener("click", function(){
+      altlikDegistir("ova");
+      ovaOdakla(null, true);
     });
   }
   if(el("tglSahibinden")){

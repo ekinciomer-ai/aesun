@@ -72,7 +72,14 @@ a{color:inherit;text-decoration:none}
 .evrak-adim.aktif-adim .adim-ok{transform:rotate(180deg);background:#CCFBF1;color:#0F766E}
 .evrak-adim-icerik{padding:14px;background:#FFFFFF;display:none;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:10px}
 .evrak-adim.aktif-adim .evrak-adim-icerik{display:grid}
-.evrak-yukle-bar{grid-column:1/-1;background:#F8FAFC;border:1px dashed #94A3B8;border-radius:9px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.75rem;color:#334155}
+.evrak-yukle-bar{grid-column:1/-1;background:linear-gradient(135deg,#F0FDF4 0%,#EFF6FF 100%);border:1.5px dashed #0D9488;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;font-size:.75rem;color:#1E293B;transition:all .15s}
+.evrak-yukle-bar.yuklendi{background:linear-gradient(135deg,#ECFDF5 0%,#F0FDF4 100%);border:1.5px solid #10B981}
+.evrak-yukle-ust{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.rozet-var{background:#DCFCE7;color:#15803D;border:1px solid #86EFAC;padding:3px 9px;border-radius:999px;font-size:.71rem;font-weight:800;display:inline-flex;align-items:center;gap:4px}
+.rozet-yok{background:#FEF2F2;color:#B91C1C;border:1px solid #FCA5A5;padding:3px 9px;border-radius:999px;font-size:.71rem;font-weight:800;display:inline-flex;align-items:center;gap:4px}
+.var-yok-pill{padding:5px 9px;border-radius:8px;font-size:.71rem;font-weight:800;cursor:pointer;border:1px solid #CBD5E1;display:inline-flex;align-items:center;gap:4px;transition:all .15s;background:#FFF}
+.var-yok-pill.var{background:#DCFCE7;color:#15803D;border-color:#86EFAC}
+.var-yok-pill.yok{background:#FEF2F2;color:#B91C1C;border-color:#FCA5A5}
 .havuz-kutu{grid-column:1/-1;background:linear-gradient(90deg,#F0FDF4,#EFF6FF);border:1px solid #86EFAC;border-radius:9px;padding:9px 12px}
 .havuz-kutu.inv-havuz{background:linear-gradient(90deg,#EFF6FF,#F5F3FF);border-color:#93C5FD}
 .pafta-sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -1256,40 +1263,39 @@ a{color:inherit;text-decoration:none}
     var masaSvg = STATE.masalar.map(function(m){
       var rx = tx(m.x), ry = ty(m.y + m.h);
       var rw = Math.max(2, m.w * sc), rh = Math.max(2, m.h * sc);
-      return '<rect x="'+rx.toFixed(1)+'" y="'+ry.toFixed(1)+'" width="'+rw.toFixed(1)+'" height="'+rh.toFixed(1)+'" fill="#1D4ED8" fill-opacity="0.80" stroke="#60A5FA" stroke-width="0.9"/>'
-        +'<line x1="'+rx.toFixed(1)+'" y1="'+(ry+rh/2).toFixed(1)+'" x2="'+(rx+rw).toFixed(1)+'" y2="'+(ry+rh/2).toFixed(1)+'" stroke="#93C5FD" stroke-width="0.5"/>';
+      return '<rect x="'+rx.toFixed(1)+'" y="'+ry.toFixed(1)+'" width="'+rw.toFixed(1)+'" height="'+rh.toFixed(1)+'" fill="#2563EB" fill-opacity="0.82" stroke="#1D4ED8" stroke-width="0.9"/>'
+        +'<line x1="'+rx.toFixed(1)+'" y1="'+(ry+rh/2).toFixed(1)+'" x2="'+(rx+rw).toFixed(1)+'" y2="'+(ry+rh/2).toFixed(1)+'" stroke="#93C5FD" stroke-width="0.6"/>';
     }).join("");
 
     var trM = STATE.trafoMerkez || {x:minX+5, y:minY+5};
     var trx = tx(trM.x), try_ = ty(trM.y);
     var cxScreen = tx(STATE.corridorX);
 
-    // Ana AG Hat İstikameti (Kural A.11: Sıra uçlarının 3 m dışından geçen tek düz hat, kanal bandı poligonu yok)
+    // Ana AG Hat İstikameti (Kural A.11: Sıra uçlarının 3 m dışından geçen tek düz hat)
     var invStepYs = STATE.inverterler.map(function(inv){ return ty(inv.stepY != null ? inv.stepY : inv.y); });
     var minInvYScreen = invStepYs.length ? Math.min.apply(null, invStepYs.concat([try_])) : try_;
     var maxInvYScreen = invStepYs.length ? Math.max.apply(null, invStepYs.concat([try_])) : try_;
 
-    var anaKanalSvg = '<polyline points="'+cxScreen.toFixed(1)+','+minInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+maxInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+try_.toFixed(1)+' '+trx.toFixed(1)+','+try_.toFixed(1)+'" fill="none" stroke="#EF4444" stroke-width="2.2"/>';
+    var anaKanalSvg = '<polyline points="'+cxScreen.toFixed(1)+','+minInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+maxInvYScreen.toFixed(1)+' '+cxScreen.toFixed(1)+','+try_.toFixed(1)+' '+trx.toFixed(1)+','+try_.toFixed(1)+'" fill="none" stroke="#DC2626" stroke-width="2.4"/>';
 
     var kabloVeInvSvg = STATE.inverterler.map(function(inv){
       var ix = tx(inv.x), iy = ty(inv.y), sy = ty(inv.stepY != null ? inv.stepY : inv.y);
-      // Kural A.4 & A.11: Masanın kuzey orta noktasındaki inverterden kuzey sıra açıklığına dik adım (≤2.5m), açıklık boyunca DÜZ ilerleyip 3m dış AG hat istikametine bağlantı
-      return '<polyline points="'+ix.toFixed(1)+','+iy.toFixed(1)+' '+ix.toFixed(1)+','+sy.toFixed(1)+' '+cxScreen.toFixed(1)+','+sy.toFixed(1)+'" fill="none" stroke="#EF4444" stroke-width="1.5"/>'
-        +'<circle cx="'+cxScreen.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="2.4" fill="#EF4444"/>'
-        +'<rect x="'+(ix-7).toFixed(1)+'" y="'+(iy-5).toFixed(1)+'" width="14" height="10" rx="1.5" fill="#DC2626" stroke="#FEF08A" stroke-width="1.2"/>'
-        +'<text x="'+ix.toFixed(1)+'" y="'+(iy+2.5).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="7" font-weight="800" fill="#FFF">'+inv.kod+'</text>';
+      return '<polyline points="'+ix.toFixed(1)+','+iy.toFixed(1)+' '+ix.toFixed(1)+','+sy.toFixed(1)+' '+cxScreen.toFixed(1)+','+sy.toFixed(1)+'" fill="none" stroke="#DC2626" stroke-width="1.6"/>'
+        +'<circle cx="'+cxScreen.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="2.6" fill="#DC2626"/>'
+        +'<rect x="'+(ix-8).toFixed(1)+'" y="'+(iy-5.5).toFixed(1)+'" width="16" height="11" rx="2" fill="#EA580C" stroke="#FFF" stroke-width="1.2"/>'
+        +'<text x="'+ix.toFixed(1)+'" y="'+(iy+2.6).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="7.2" font-weight="800" fill="#FFF">'+inv.kod+'</text>';
     }).join("");
 
     var kenarSvg = STATE.edges.map(function(e){
       var mx = tx(e.midX), my = ty(e.midY);
-      return '<text x="'+mx.toFixed(1)+'" y="'+(my-4).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#A7F3D0" stroke="#09131C" stroke-width="2.5" paint-order="stroke">'+numFmt(e.len, 2)+'m</text>';
+      return '<text x="'+mx.toFixed(1)+'" y="'+(my-4).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#065F46" stroke="#FFFFFF" stroke-width="3" paint-order="stroke">'+numFmt(e.len, 2)+'m</text>';
     }).join("");
 
     var koseSvg = STATE.vertices.map(function(v, i){
       var p = poly[i];
       var kx = tx(p[0]), ky = ty(p[1]);
-      return '<circle cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="4.5" fill="#10B981" stroke="#09131C" stroke-width="1.4"/>'
-        +'<text x="'+(kx+7).toFixed(1)+'" y="'+(ky-5).toFixed(1)+'" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#FDE047" stroke="#09131C" stroke-width="2.5" paint-order="stroke">'+v.kod+'</text>';
+      return '<circle cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="4.5" fill="#0D9488" stroke="#FFFFFF" stroke-width="1.6"/>'
+        +'<text x="'+(kx+7).toFixed(1)+'" y="'+(ky-5).toFixed(1)+'" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#0F172A" stroke="#FFFFFF" stroke-width="3" paint-order="stroke">'+v.kod+'</text>';
     }).join("");
 
     var wp = parseFloat(el("fModulWp").value) || 625;
@@ -1302,57 +1308,57 @@ a{color:inherit;text-decoration:none}
     var ada = el("fAda").value, prs = el("fParsel").value, unvan = el("fUnvan").value;
     var tmAdi = SECILI_TM_OBJ ? SECILI_TM_OBJ.tm : (el("bsvTmSec").value || "AKSARAY TM");
 
-    return '<div style="padding:8px;background:#fff;border:2px solid #0f172a">'
-      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#09131C;border-radius:6px;display:block">'
-        +'<defs><pattern id="cadGridBsv" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 30" fill="none" stroke="#162638" stroke-width="0.7"/></pattern></defs>'
+    return '<div style="padding:8px;background:#fff;border:1.5px solid #cbd5e1;border-radius:8px">'
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#F8FAFC;border-radius:6px;display:block">'
+        +'<defs><pattern id="cadGridBsv" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 30" fill="none" stroke="#E2E8F0" stroke-width="0.8"/></pattern></defs>'
         +'<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="url(#cadGridBsv)"/>'
-        +'<rect x="10" y="10" width="'+(W-20)+'" height="'+(H-20)+'" fill="none" stroke="#334155" stroke-width="1.5"/>'
+        +'<rect x="10" y="10" width="'+(W-20)+'" height="'+(H-20)+'" fill="none" stroke="#94A3B8" stroke-width="1.5"/>'
         +'<g transform="translate(46,52)">'
-          +'<circle cx="0" cy="0" r="20" fill="#0F172A" stroke="#38BDF8" stroke-width="1.5"/>'
-          +'<polygon points="0,-15 -6,8 0,3 6,8" fill="#38BDF8"/>'
-          +'<text x="0" y="-23" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#38BDF8">KUZEY (N)</text>'
+          +'<circle cx="0" cy="0" r="20" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.6"/>'
+          +'<polygon points="0,-15 -6,8 0,3 6,8" fill="#0284C7"/>'
+          +'<text x="0" y="-24" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#0369A1">KUZEY (N)</text>'
         +'</g>'
-        +'<polygon points="'+polyPts+'" fill="#064E3B" fill-opacity="0.22" stroke="#10B981" stroke-width="2.4"/>'
-        +'<polygon points="'+cekPts+'" fill="none" stroke="#EF4444" stroke-width="1.3" stroke-dasharray="6 4"/>'
+        +'<polygon points="'+polyPts+'" fill="#CCFBF1" fill-opacity="0.48" stroke="#0D9488" stroke-width="2.4"/>'
+        +'<polygon points="'+cekPts+'" fill="none" stroke="#EF4444" stroke-width="1.4" stroke-dasharray="6 4"/>'
         + masaSvg
         + anaKanalSvg
         + kabloVeInvSvg
-        +'<rect x="'+(trx-20).toFixed(1)+'" y="'+(try_-13).toFixed(1)+'" width="40" height="26" rx="3" fill="#F59E0B" stroke="#FFF" stroke-width="1.6"/>'
-        +'<text x="'+trx.toFixed(1)+'" y="'+(try_+3).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" font-weight="800" fill="#09131C">TR/ADP</text>'
+        +'<rect x="'+(trx-22).toFixed(1)+'" y="'+(try_-14).toFixed(1)+'" width="44" height="28" rx="4" fill="#D97706" stroke="#FFFFFF" stroke-width="1.8"/>'
+        +'<text x="'+trx.toFixed(1)+'" y="'+(try_+3).toFixed(1)+'" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="8.5" font-weight="800" fill="#FFFFFF">TR/ADP</text>'
         + kenarSvg
         + koseSvg
         +'<g transform="translate('+(W-310)+', 18)">'
-          +'<rect x="0" y="0" width="292" height="'+(H-36)+'" rx="6" fill="#0F172A" stroke="#334155" stroke-width="1.5"/>'
-          +'<rect x="0" y="0" width="292" height="32" rx="6" fill="#0F766E"/>'
-          +'<text x="146" y="20" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="800" fill="#FFF">AeCAD · GES YERLEŞİM &amp; AC KABLO PLANI</text>'
-          +'<text x="14" y="52" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#38BDF8">1. PARSEL &amp; TAPU BİLGİLERİ</text>'
-          +'<text x="14" y="69" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">İl / İlçe / Mah.: <tspan font-weight="700" fill="#FFF">'+esc(il)+' / '+esc(ilce)+' / '+esc(mah)+'</tspan></text>'
-          +'<text x="14" y="85" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Ada / Parsel / Pafta: <tspan font-weight="700" fill="#FBBF24">'+esc(ada)+' / '+esc(prs)+' ('+esc(el("fPafta").value)+')</tspan></text>'
-          +'<text x="14" y="101" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Tapu Alanı: <tspan font-weight="700" fill="#34D399">'+trFmt(STATE.tapuAlan,2)+' m²</tspan></text>'
-          +'<line x1="12" y1="114" x2="280" y2="114" stroke="#1E293B"/>'
-          +'<text x="14" y="132" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#38BDF8">2. PV MODÜL &amp; MASA DİZİLİMİ</text>'
-          +'<text x="14" y="149" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Modül: <tspan font-weight="700" fill="#FFF">'+wp+' Wp · '+modSay.toLocaleString("tr-TR")+' Adet</tspan></text>'
-          +'<text x="14" y="165" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Masa Düzeni: <tspan font-weight="700" fill="#FFF">'+esc(el("fMasaTip").value)+' · '+STATE.masaSayisi+' Masa</tspan></text>'
-          +'<text x="14" y="181" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Pitch / Çekme: <tspan font-weight="700" fill="#FFF">'+trFmt(STATE.pitch,1)+' m / '+esc(el("fCekme").value)+' m</tspan></text>'
-          +'<line x1="12" y1="196" x2="280" y2="196" stroke="#1E293B"/>'
-          +'<text x="14" y="214" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#38BDF8">3. GÜÇ &amp; ORTOGONAL AC KABLO PLANI</text>'
-          +'<text x="14" y="231" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Kurulu Güç: <tspan font-weight="700" fill="#34D399">'+trFmt(dcKwp,2)+' kWp / '+trFmt(acKwe,1)+' kWe</tspan></text>'
-          +'<text x="14" y="247" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Evirici: <tspan font-weight="700" fill="#FFF">'+invAdet+' × '+numFmt(invKw,0)+' kWe (Sıra Başı Koridor)</tspan></text>'
-          +'<text x="14" y="263" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">AC Kablo: <tspan font-weight="700" fill="#FBBF24">Sıra Koridoru + Hendek → TR/ADP</tspan></text>'
-          +'<text x="14" y="279" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#E2E8F0">Bağlantı TM: <tspan font-weight="700" fill="#38BDF8">'+esc(tmAdi)+'</tspan></text>'
-          +'<line x1="12" y1="294" x2="280" y2="294" stroke="#1E293B"/>'
-          +'<text x="14" y="312" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#38BDF8">4. CAD KATMAN LEJANTI</text>'
-          +'<rect x="14" y="322" width="16" height="9" fill="#064E3B" stroke="#10B981" stroke-width="1.5"/><text x="36" y="330" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#CBD5E1">GES-PARSEL (Kadastro Parsel Sınırı)</text>'
-          +'<line x1="14" y1="344" x2="30" y2="344" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4 2"/><text x="36" y="347" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#CBD5E1">GES-CEKME (Çekme Mesafesi Sınırı)</text>'
-          +'<rect x="14" y="356" width="16" height="9" fill="#1D4ED8" stroke="#60A5FA"/><text x="36" y="364" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#CBD5E1">GES-MASA (PV Modül Masaları)</text>'
-          +'<rect x="16" y="372" width="11" height="11" rx="2" fill="#DC2626" stroke="#FEF08A"/><text x="36" y="381" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#CBD5E1">GES-INVERTER (E1..E'+invAdet+' Koridor Dizilimi)</text>'
-          +'<line x1="14" y1="395" x2="30" y2="395" stroke="#F59E0B" stroke-width="2.4"/><text x="36" y="398" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#FDE047">GES-AC-KABLO (Ortogonal Kablo Kanalı)</text>'
-          +'<rect x="14" y="407" width="16" height="10" rx="2" fill="#F59E0B" stroke="#FFF"/><text x="36" y="415" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#CBD5E1">GES-TRAFO (TR &amp; GES ADP Binası)</text>'
-          +'<rect x="12" y="435" width="268" height="160" rx="4" fill="#09131C" stroke="#475569" stroke-width="1.2"/>'
-          +'<text x="20" y="454" font-family="Segoe UI,Arial,sans-serif" font-size="9" font-weight="800" fill="#94A3B8">BAŞVURU SAHİBİ:</text>'
-          +'<text x="20" y="470" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#F8FAFC">'+esc(unvan.slice(0,42))+'</text>'
-          +'<line x1="12" y1="482" x2="280" y2="482" stroke="#334155"/>'
-          +'<text x="20" y="500" font-family="Segoe UI,Arial,sans-serif" font-size="9" font-weight="700" fill="#94A3B8">ONAY / İMZA ALANI:</text>'
+          +'<rect x="0" y="0" width="292" height="'+(H-36)+'" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>'
+          +'<rect x="0" y="0" width="292" height="32" rx="6" fill="#0D9488"/>'
+          +'<text x="146" y="20" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="11" font-weight="800" fill="#FFFFFF">AeCAD · GES YERLEŞİM &amp; AC KABLO PLANI</text>'
+          +'<text x="14" y="52" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#0369A1">1. PARSEL &amp; TAPU BİLGİLERİ</text>'
+          +'<text x="14" y="69" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">İl / İlçe / Mah.: <tspan font-weight="700" fill="#0F172A">'+esc(il)+' / '+esc(ilce)+' / '+esc(mah)+'</tspan></text>'
+          +'<text x="14" y="85" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Ada / Parsel / Pafta: <tspan font-weight="700" fill="#B45309">'+esc(ada)+' / '+esc(prs)+' ('+esc(el("fPafta").value)+')</tspan></text>'
+          +'<text x="14" y="101" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Tapu Alanı: <tspan font-weight="700" fill="#059669">'+trFmt(STATE.tapuAlan,2)+' m²</tspan></text>'
+          +'<line x1="12" y1="114" x2="280" y2="114" stroke="#E2E8F0"/>'
+          +'<text x="14" y="132" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#0369A1">2. PV MODÜL &amp; MASA DİZİLİMİ</text>'
+          +'<text x="14" y="149" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Modül: <tspan font-weight="700" fill="#0F172A">'+wp+' Wp · '+modSay.toLocaleString("tr-TR")+' Adet</tspan></text>'
+          +'<text x="14" y="165" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Masa Düzeni: <tspan font-weight="700" fill="#0F172A">'+esc(el("fMasaTip").value)+' · '+STATE.masaSayisi+' Masa</tspan></text>'
+          +'<text x="14" y="181" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Pitch / Çekme: <tspan font-weight="700" fill="#0F172A">'+trFmt(STATE.pitch,1)+' m / '+esc(el("fCekme").value)+' m</tspan></text>'
+          +'<line x1="12" y1="196" x2="280" y2="196" stroke="#E2E8F0"/>'
+          +'<text x="14" y="214" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#0369A1">3. GÜÇ &amp; ORTOGONAL AC KABLO PLANI</text>'
+          +'<text x="14" y="231" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Kurulu Güç: <tspan font-weight="700" fill="#059669">'+trFmt(dcKwp,2)+' kWp / '+trFmt(acKwe,1)+' kWe</tspan></text>'
+          +'<text x="14" y="247" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Evirici: <tspan font-weight="700" fill="#0F172A">'+invAdet+' × '+numFmt(invKw,0)+' kWe (Sıra Başı Koridor)</tspan></text>'
+          +'<text x="14" y="263" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">AC Kablo: <tspan font-weight="700" fill="#DC2626">Sıra Koridoru + Hendek → TR/ADP</tspan></text>'
+          +'<text x="14" y="279" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" fill="#475569">Bağlantı TM: <tspan font-weight="700" fill="#0284C7">'+esc(tmAdi)+'</tspan></text>'
+          +'<line x1="12" y1="294" x2="280" y2="294" stroke="#E2E8F0"/>'
+          +'<text x="14" y="312" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="800" fill="#0369A1">4. CAD KATMAN LEJANTI</text>'
+          +'<rect x="14" y="322" width="16" height="9" fill="#CCFBF1" stroke="#0D9488" stroke-width="1.5"/><text x="36" y="330" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#334155">GES-PARSEL (Kadastro Parsel Sınırı)</text>'
+          +'<line x1="14" y1="344" x2="30" y2="344" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="4 2"/><text x="36" y="347" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#334155">GES-CEKME (Çekme Mesafesi Sınırı)</text>'
+          +'<rect x="14" y="356" width="16" height="9" fill="#2563EB" stroke="#1D4ED8"/><text x="36" y="364" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#334155">GES-MASA (PV Modül Masaları)</text>'
+          +'<rect x="16" y="372" width="11" height="11" rx="2" fill="#EA580C" stroke="#FFF"/><text x="36" y="381" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#334155">GES-INVERTER (E1..E'+invAdet+' Koridor Dizilimi)</text>'
+          +'<line x1="14" y1="395" x2="30" y2="395" stroke="#DC2626" stroke-width="2.4"/><text x="36" y="398" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#DC2626" font-weight="700">GES-AC-KABLO (Ortogonal AG Hat)</text>'
+          +'<rect x="14" y="407" width="16" height="10" rx="2" fill="#D97706" stroke="#FFF"/><text x="36" y="415" font-family="Segoe UI,Arial,sans-serif" font-size="9" fill="#334155">GES-TRAFO (TR &amp; GES ADP Binası)</text>'
+          +'<rect x="12" y="435" width="268" height="160" rx="4" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2"/>'
+          +'<text x="20" y="454" font-family="Segoe UI,Arial,sans-serif" font-size="9" font-weight="800" fill="#64748B">BAŞVURU SAHİBİ:</text>'
+          +'<text x="20" y="470" font-family="Segoe UI,Arial,sans-serif" font-size="9.5" font-weight="700" fill="#0F172A">'+esc(unvan.slice(0,42))+'</text>'
+          +'<line x1="12" y1="482" x2="280" y2="482" stroke="#CBD5E1"/>'
+          +'<text x="20" y="500" font-family="Segoe UI,Arial,sans-serif" font-size="9" font-weight="700" fill="#64748B">ONAY / İMZA ALANI:</text>'
         +'</g>'
       +'</svg>'
     +'</div>';
@@ -1474,9 +1480,10 @@ a{color:inherit;text-decoration:none}
     +'</div>';
   }
 
-  // PAFTA 3: ONAYLI GES TEK HAT ŞEMASI (Tuğral Döküm 1 MW & Tekyıldız 2 MW Şablonu Birebir)
+  // PAFTA 3: ONAYLI GES TEK HAT ŞEMASI (Kullanıcının Gönderdiği Tuğral Döküm / Tekyıldız Şablonu Birebir Sabit — İç Değerler Dinamik)
   function cizPaftaTekHat(){
-    var unvan = el("fUnvan").value || "TEKYILDIZ ENERJİ SANAYİ VE TİCARET A.Ş.";
+    var unvan = el("fUnvan").value || "TUĞRAL DÖKÜM METAL PLASTİK SAN. VE TİC. LTD. ŞTİ.";
+    var kisaUnvan = unvan.split(" ").slice(0, 2).join(" ").toLocaleUpperCase("tr");
     var tmAdi = SECILI_TM_OBJ ? SECILI_TM_OBJ.tm : (el("bsvTmSec").value || "AKSARAY TM");
     var wp = parseFloat(el("fModulWp").value) || 625;
     var modSay = parseInt(el("fModulAdet").value, 10) || 3484;
@@ -1485,158 +1492,362 @@ a{color:inherit;text-decoration:none}
     var invAdet = Math.max(1, parseInt(el("fInvAdet").value, 10) || 8);
     var acKwe = invAdet * invKw;
     var trKva = acKwe <= 600 ? 630 : acKwe <= 950 ? 1000 : acKwe <= 1200 ? 1250 : acKwe <= 1550 ? 1600 : 2000;
-    var maksAkimExact = (invAdet * (invKw * 1.443)).toFixed(1);
+    var maksAkimPerInv = invKw <= 130 ? 185 : invKw <= 186 ? 267.1 : 288.6;
+    var maksAkimExact = (invAdet * maksAkimPerInv).toFixed(1).replace(/\.0$/, "");
     var tmsAkim = acKwe <= 1100 ? 1600 : 2500;
     var ctAkim = tmsAkim <= 1600 ? 1500 : 2500;
-    var isTekyildiz = (Math.round(wp) === 625 && invAdet === 8);
+    var fiderAkim = invKw <= 130 ? "3x250A" : "3x350A";
+    var strSay = parseInt(el("fStringModul").value, 10) || 26;
+    var isTekyildiz = (Math.round(wp) === 625 && invAdet === 8 && modSay === 3484);
+    var isTugral = (Math.round(wp) === 550 && invAdet === 8 && modSay === 2008);
 
     var bazMod = Math.floor(modSay / invAdet);
     var kalanMod = modSay - bazMod * invAdet;
-    var gosterilenInv = Math.min(invAdet, 8);
-    var invBlokYuk = 142;
-    var H = Math.max(760, 100 + gosterilenInv * invBlokYuk);
-    var W = 1140;
+    var gosterilenInv = Math.min(invAdet, 10);
+    var invBlokYuk = 192;
+    var H = Math.max(1060, 48 + gosterilenInv * invBlokYuk);
+    var W = 1280;
 
+    // SAĞ SÜTUN: İNVERTER BLOKLARI (Yukarıdan aşağıya E_N ... E_1 — Gönderilen Tuğral Döküm Şablonu Birebir)
     var invSvg = "";
-    for(var i=0; i<gosterilenInv; i++){
-      var k = i + 1;
-      var buMod = isTekyildiz ? (i < 6 ? 442 : 416) : (bazMod + (i === gosterilenInv - 1 ? kalanMod : 0));
+    var kabloRotalarSvg = "";
+    var fiderSay = gosterilenInv;
+    var fiderBasX = 398;
+    var fiderAralik = Math.min(28, Math.floor(225 / Math.max(1, fiderSay)));
+
+    for(var idx = 0; idx < gosterilenInv; idx++){
+      // Şablonda en üstte E_N (örn. E8), en altta E_1 yer alır
+      var k = gosterilenInv - idx;
+      var i = k - 1;
+      var buMod = isTekyildiz ? (i < 6 ? 442 : 416) : isTugral ? (i < 7 ? 252 : 244) : (bazMod + (i === gosterilenInv - 1 ? kalanMod : 0));
       var buDcKwp = (buMod * wp / 1000.0);
-      var y0 = 64 + i * invBlokYuk;
-      var strSay = parseInt(el("fStringModul").value, 10) || 26;
-      var diziSay = Math.max(1, Math.round(buMod / strSay));
+      var y0 = 26 + idx * invBlokYuk;
 
-      invSvg += '<g transform="translate(650, '+y0+')">'
-        +'<rect x="0" y="6" width="118" height="24" fill="#FFF" stroke="#000" stroke-width="1"/>'
-        +'<text x="59" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">1.DİZİ = '+strSay+'x'+wp+'Wp / MPPT-1</text>'
-        +'<text x="59" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#334155">2.DİZİ = '+strSay+'x'+wp+'Wp / MPPT-2</text>'
-        +'<text x="59" y="46" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="800" fill="#000">⋮ ('+buMod+' Modül · '+numFmt(buDcKwp,2)+' kWp)</text>'
-        +'<rect x="0" y="54" width="118" height="24" fill="#FFF" stroke="#000" stroke-width="1"/>'
-        +'<text x="59" y="64" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">'+(diziSay-1)+'.DİZİ = '+strSay+'x'+wp+'Wp</text>'
-        +'<text x="59" y="74" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#334155">'+diziSay+'.DİZİ = '+strSay+'x'+wp+'Wp</text>'
-        +'<line x1="118" y1="18" x2="148" y2="18" stroke="#000" stroke-width="1.1"/>'
-        +'<line x1="118" y1="66" x2="148" y2="66" stroke="#000" stroke-width="1.1"/>'
-        +'<line x1="148" y1="18" x2="148" y2="66" stroke="#000" stroke-width="1.3"/>'
-        +'<line x1="148" y1="42" x2="195" y2="42" stroke="#000" stroke-width="1.5"/>'
-        +'<rect x="156" y="36" width="14" height="12" fill="#FFF" stroke="#000" stroke-width="1"/>'
-        +'<text x="163" y="32" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">DC</text>'
-        +'<rect x="195" y="16" width="56" height="52" fill="#FFF" stroke="#000" stroke-width="1.6"/>'
-        +'<line x1="195" y1="68" x2="251" y2="16" stroke="#000" stroke-width="1.2"/>'
-        +'<text x="208" y="33" font-family="Arial,sans-serif" font-size="12" font-weight="800" fill="#000">=</text>'
-        +'<text x="232" y="60" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#000">~</text>'
-        +'<text x="223" y="12" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">E'+k+'</text>'
-        +'<text x="223" y="80" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">4x1x120 mm² N2XH</text>'
-        +'<rect x="266" y="12" width="208" height="60" fill="#FFF" stroke="#000" stroke-width="1.3"/>'
-        +'<line x1="266" y1="32" x2="474" y2="32" stroke="#000" stroke-width="1"/>'
-        +'<line x1="266" y1="52" x2="474" y2="52" stroke="#000" stroke-width="1"/>'
-        +'<line x1="412" y1="12" x2="412" y2="52" stroke="#000" stroke-width="1"/>'
-        +'<text x="272" y="25" font-family="Arial,sans-serif" font-size="8.2" font-weight="700" fill="#000">EVİRİCİ-'+k+' DC GÜÇ (kWp)</text>'
-        +'<text x="443" y="25" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">'+numFmt(buDcKwp, 3)+'</text>'
-        +'<text x="272" y="45" font-family="Arial,sans-serif" font-size="8.2" font-weight="700" fill="#000">EVİRİCİ-'+k+' AC GÜÇ (kWe)</text>'
-        +'<text x="443" y="45" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">'+numFmt(invKw, 1)+'</text>'
-        +'<text x="370" y="66" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.2" font-weight="800" fill="#000">EVİRİCİ-'+k+' '+numFmt(invKw, 0)+' kWe Set Edilecektir.</text>'
-      +'</g>'
-      +'<polyline points="873,'+(y0+68)+' 873,'+(y0+90)+' 618,'+(y0+90)+' 618,545" fill="none" stroke="#000" stroke-width="1.1" stroke-dasharray="3 2"/>';
+      // 12 adet dikey PV Dizi sütunu (1.DİZİ .. 12.DİZİ) yan yana, altında MPPT-1..MPPT-6/12 barası ve altında yatay E_k inverter barası
+      var sutunSay = 12;
+      var sutunGen = 26;
+      var topGen = sutunSay * sutunGen; // 312 px
+      var bazStr = Math.floor(buMod / sutunSay);
+      var ekstraStr = buMod - bazStr * sutunSay;
+
+      var dizilerSvg = "";
+      for(var s = 0; s < sutunSay; s++){
+        var sx = s * sutunGen;
+        var cx = sx + sutunGen / 2;
+        var buStrMod = bazStr + (s < ekstraStr ? 1 : 0);
+        if(buStrMod < 1) buStrMod = strSay;
+
+        // Üst üste dizili küçük PV modül kutucukları + dikey dizi hattı + diyot/sigorta sembolü (Şablondaki birebir görünüm)
+        dizilerSvg += '<g transform="translate('+sx+', 0)">'
+          // Dikey dizi başlığı (döndürülmüş)
+          +'<text x="5" y="42" transform="rotate(-90, 5, 42)" font-family="Arial,sans-serif" font-size="5.2" font-weight="700" fill="#000">'+(s+1)+'.DİZİ='+buStrMod+'x'+wp+'Wp</text>'
+          // Üst 3 PV modül kutucuğu
+          +'<rect x="8" y="2" width="12" height="7" fill="#FFF" stroke="#000" stroke-width="0.9"/>'
+          +'<line x1="14" y1="9" x2="14" y2="12" stroke="#000" stroke-width="0.9"/>'
+          +'<rect x="8" y="12" width="12" height="7" fill="#FFF" stroke="#000" stroke-width="0.9"/>'
+          +'<line x1="14" y1="19" x2="14" y2="22" stroke="#000" stroke-width="0.9"/>'
+          +'<rect x="8" y="22" width="12" height="7" fill="#FFF" stroke="#000" stroke-width="0.9"/>'
+          // Kesikli nokta (⋮)
+          +'<line x1="14" y1="30" x2="14" y2="41" stroke="#000" stroke-width="0.9" stroke-dasharray="1.8 1.8"/>'
+          // Alt PV modül kutucuğu
+          +'<rect x="8" y="42" width="12" height="7" fill="#FFF" stroke="#000" stroke-width="0.9"/>'
+          // String dikey iniş hattı ve koruma/diyot sembolü
+          +'<line x1="14" y1="49" x2="14" y2="82" stroke="#000" stroke-width="1"/>'
+          +'<polygon points="11,60 17,60 14,65" fill="#000"/>'
+          +'<line x1="10.5" y1="65" x2="17.5" y2="65" stroke="#000" stroke-width="1"/>'
+          +'<rect x="11.5" y="70" width="5" height="8" fill="#FFF" stroke="#000" stroke-width="0.8"/>'
+          // MPPT Hücresi
+          +'<rect x="0" y="82" width="'+sutunGen+'" height="15" fill="#FFF" stroke="#000" stroke-width="1"/>'
+          +'<text x="'+(sutunGen/2)+'" y="91.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.3" font-weight="700" fill="#000">MPPT-'+(Math.floor(s/2)+1)+'</text>'
+          +'<line x1="'+(sutunGen/2)+'" y1="97" x2="'+(sutunGen/2)+'" y2="104" stroke="#000" stroke-width="1"/>'
+        +'</g>';
+      }
+
+      var kabloMetraj = 35 + i * 25;
+      invSvg += '<g transform="translate(680, '+y0+')">'
+        + dizilerSvg
+        // Yatay İnverter Gövde Barası (MPPT barasının hemen altında boydan boya uzanan E_k kutusu)
+        +'<rect x="0" y="104" width="'+topGen+'" height="28" fill="#FFF" stroke="#000" stroke-width="1.5"/>'
+        +'<text x="16" y="122" font-family="Arial,sans-serif" font-size="14" font-weight="800" fill="#000">=</text>'
+        +'<circle cx="'+(topGen/2)+'" cy="118" r="11" fill="#FFF" stroke="#000" stroke-width="1.3"/>'
+        +'<text x="'+(topGen/2)+'" y="121.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">E'+k+'</text>'
+        +'<text x="'+(topGen-22)+'" y="122" font-family="Arial,sans-serif" font-size="15" font-weight="800" fill="#000">~</text>'
+        // İnverter çıkışından aşağı inen AC hat ve Kablo Etiket Kutusu
+        +'<line x1="'+(topGen/2)+'" y1="132" x2="'+(topGen/2)+'" y2="144" stroke="#000" stroke-width="1.4"/>'
+        +'<rect x="'+(topGen/2 - 58)+'" y="144" width="116" height="22" fill="#FFF" stroke="#000" stroke-width="1"/>'
+        +'<text x="'+(topGen/2)+'" y="153.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="700" fill="#000">4x1x120 mm² NAYY-J /</text>'
+        +'<text x="'+(topGen/2)+'" y="162.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="700" fill="#000">'+kabloMetraj+' mt</text>'
+        // Sağdaki 3 Satırlı EVİRİCİ-k Güç Tablosu (Şablondaki birebir kutu)
+        +'<g transform="translate('+(topGen + 18)+', 82)">'
+          +'<rect x="0" y="0" width="242" height="62" fill="#FFF" stroke="#000" stroke-width="1.4"/>'
+          +'<line x1="0" y1="20" x2="242" y2="20" stroke="#000" stroke-width="1"/>'
+          +'<line x1="0" y1="40" x2="242" y2="40" stroke="#000" stroke-width="1"/>'
+          +'<line x1="168" y1="0" x2="168" y2="40" stroke="#000" stroke-width="1"/>'
+          +'<text x="8" y="13.5" font-family="Arial,sans-serif" font-size="8.2" font-weight="700" fill="#000">EVİRİCİ-'+k+' DC GÜÇ (kWp)</text>'
+          +'<text x="205" y="13.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">'+numFmt(buDcKwp, 2)+'</text>'
+          +'<text x="8" y="33.5" font-family="Arial,sans-serif" font-size="8.2" font-weight="700" fill="#000">EVİRİCİ-'+k+' AC GÜÇ (kWe)</text>'
+          +'<text x="205" y="33.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">'+numFmt(invKw, 0)+'</text>'
+          +'<text x="121" y="54.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.2" font-weight="800" fill="#000">EVİRİCİ-'+k+' '+numFmt(invKw, 0)+' kWe Set Edilecektir.</text>'
+        +'</g>'
+      +'</g>';
+
+      // İnverter AC çıkışından AG Pano İn-k şalterine giden ortogonal bağlantı hattı
+      var cikisX = 680 + topGen / 2;
+      var cikisY = y0 + 166;
+      var kanalX = 638 + idx * 3.5;
+      var fiderX = fiderBasX + i * fiderAralik;
+      var fiderAltY = 748 + idx * 4.5;
+      kabloRotalarSvg += '<polyline points="'+cikisX+','+cikisY+' '+cikisX+','+(cikisY+8)+' '+kanalX+','+(cikisY+8)+' '+kanalX+','+fiderAltY+' '+fiderX+','+fiderAltY+' '+fiderX+',724" fill="none" stroke="#000" stroke-width="1.1"/>';
     }
 
+    // ORTA-ALT SÜTUN: AG PANO İÇİ İNVERTER FİDERLERİ (İn-1 .. İn-N)
     var fiderSvg = "";
-    var fiderSay = Math.min(invAdet, 8);
-    for(var f=0; f<fiderSay; f++){
-      var fx = 396 + f * 28;
-      fiderSvg += '<line x1="'+fx+'" y1="520" x2="'+fx+'" y2="575" stroke="#000" stroke-width="1.4"/>'
-        +'<line x1="'+(fx-4)+'" y1="542" x2="'+(fx+4)+'" y2="550" stroke="#000" stroke-width="1.4"/>'
-        +'<line x1="'+(fx+4)+'" y1="542" x2="'+(fx-4)+'" y2="550" stroke="#000" stroke-width="1.4"/>'
-        +'<text x="'+fx+'" y="588" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#000">İn-'+(f+1)+'</text>'
-        +'<text x="'+fx+'" y="598" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" fill="#000">3x350A</text>';
+    for(var f = 0; f < fiderSay; f++){
+      var fx = fiderBasX + f * fiderAralik;
+      fiderSvg += '<line x1="'+fx+'" y1="640" x2="'+fx+'" y2="668" stroke="#000" stroke-width="1.4"/>'
+        // Termik-manyetik kesici / kontak sembolü
+        +'<circle cx="'+fx+'" cy="668" r="2" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<line x1="'+fx+'" y1="670" x2="'+(fx-5)+'" y2="686" stroke="#000" stroke-width="1.4"/>'
+        +'<circle cx="'+fx+'" cy="688" r="2" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<line x1="'+fx+'" y1="690" x2="'+fx+'" y2="724" stroke="#000" stroke-width="1.4"/>'
+        +'<text x="'+(fx-3)+'" y="658" text-anchor="end" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">İn-'+(f+1)+'</text>'
+        +'<text x="'+(fx+3)+'" y="704" font-family="Arial,sans-serif" font-size="5.5" font-weight="700" fill="#000">'+fiderAkim+'</text>'
+        +'<text x="'+(fx+3)+'" y="712" font-family="Arial,sans-serif" font-size="5.5" fill="#000">36kA</text>';
     }
 
-    return '<div style="border:2px solid #000;padding:12px;background:#fff">'
+    return '<div style="border:2px solid #000;padding:10px;background:#fff">'
       +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#fff;display:block">'
-        +'<rect x="6" y="6" width="'+(W-12)+'" height="'+(H-12)+'" fill="none" stroke="#000" stroke-width="2"/>'
-        +'<rect x="10" y="10" width="'+(W-20)+'" height="36" fill="#F8FAFC" stroke="#000" stroke-width="1.2"/>'
-        +'<text x="'+(W/2)+'" y="33" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" font-weight="800" fill="#000">'+esc(unvan)+' — GES TEK HAT ŞEMASI ('+trFmt(dcKwp,2)+' kWp / '+trFmt(acKwe,0)+' kWe)</text>'
-        +'<rect x="22" y="62" width="320" height="275" fill="none" stroke="#000" stroke-width="1.4" stroke-dasharray="6 4"/>'
-        +'<text x="30" y="78" font-family="Arial,sans-serif" font-size="10.5" font-weight="800" fill="#000">GES TR &amp; DM BİNASI (36 kV OG HÜCRELER)</text>'
-        +'<line x1="36" y1="92" x2="328" y2="92" stroke="#000" stroke-width="3"/>'
-        +'<text x="326" y="87" text-anchor="end" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#000">36kV 630A 16kA OG BARA</text>'
-        +'<rect x="34" y="100" width="92" height="190" fill="none" stroke="#000" stroke-width="1.1"/>'
-        +'<text x="80" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">YÜK AYIRICILI</text>'
-        +'<text x="80" y="122" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">GİRİŞ HÜCRESİ</text>'
-        +'<text x="80" y="132" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" fill="#000">36kV 630A 16kA</text>'
-        +'<line x1="80" y1="92" x2="80" y2="145" stroke="#000" stroke-width="1.4"/>'
-        +'<line x1="80" y1="145" x2="68" y2="168" stroke="#000" stroke-width="1.6"/>'
-        +'<circle cx="80" cy="145" r="2.5" fill="#000"/>'
-        +'<line x1="80" y1="170" x2="80" y2="290" stroke="#000" stroke-width="1.4"/>'
-        +'<rect x="136" y="100" width="92" height="190" fill="none" stroke="#000" stroke-width="1.1"/>'
-        +'<text x="182" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#000">YÜK AYIRICILI AKIM</text>'
-        +'<text x="182" y="122" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#000">GERİLİM ÖLÇÜ HÜCRESİ</text>'
-        +'<line x1="182" y1="92" x2="182" y2="145" stroke="#000" stroke-width="1.4"/>'
-        +'<rect x="176" y="150" width="12" height="22" fill="#FFF" stroke="#000" stroke-width="1.2"/>'
-        +'<circle cx="175" cy="204" r="7" fill="none" stroke="#000" stroke-width="1.2"/>'
-        +'<circle cx="189" cy="204" r="7" fill="none" stroke="#000" stroke-width="1.2"/>'
-        +'<rect x="148" y="244" width="68" height="28" fill="#F8FAFC" stroke="#000" stroke-width="1.1"/>'
-        +'<text x="182" y="258" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">ÇİFT YÖNLÜ SAYAÇ</text>'
-        +'<rect x="238" y="100" width="92" height="190" fill="none" stroke="#000" stroke-width="1.1"/>'
-        +'<text x="284" y="113" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">KESİCİLİ TRAFO</text>'
-        +'<text x="284" y="122" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">KORUMA HÜCRESİ</text>'
-        +'<line x1="284" y1="92" x2="284" y2="150" stroke="#000" stroke-width="1.4"/>'
-        +'<rect x="275" y="150" width="18" height="18" fill="#FFF" stroke="#000" stroke-width="1.4"/>'
-        +'<line x1="275" y1="150" x2="293" y2="168" stroke="#000" stroke-width="1.2"/>'
-        +'<line x1="293" y1="150" x2="275" y2="168" stroke="#000" stroke-width="1.2"/>'
-        +'<line x1="284" y1="168" x2="284" y2="290" stroke="#000" stroke-width="1.4"/>'
-        +'<line x1="80" y1="290" x2="80" y2="410" stroke="#000" stroke-width="1.8"/>'
-        +'<rect x="26" y="410" width="145" height="36" fill="#F8FAFC" stroke="#000" stroke-width="1.6"/>'
-        +'<text x="98" y="432" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" font-weight="800" fill="#000">'+esc(tmAdi)+'</text>'
-        +'<polyline points="284,290 284,322 356,322 356,74 495,74 495,98" fill="none" stroke="#000" stroke-width="1.8"/>'
-        +'<text x="318" y="315" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="700" fill="#000">3x(1x95/16)mm² N2XSY-36kV</text>'
-        +'<g transform="translate(26, 466)">'
-          +'<rect x="0" y="0" width="310" height="122" fill="#FFF" stroke="#000" stroke-width="1.6"/>'
-          +'<rect x="0" y="0" width="310" height="24" fill="#F1F5F9" stroke="#000" stroke-width="1.2"/>'
-          +'<text x="155" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" font-weight="800" fill="#000">GES ADP</text>'
-          +'<line x1="0" y1="48" x2="310" y2="48" stroke="#000" stroke-width="1"/>'
-          +'<line x1="0" y1="72" x2="310" y2="72" stroke="#000" stroke-width="1"/>'
-          +'<line x1="0" y1="96" x2="310" y2="96" stroke="#000" stroke-width="1"/>'
-          +'<line x1="196" y1="24" x2="196" y2="122" stroke="#000" stroke-width="1"/>'
+        // Dış Pafta Çerçevesi
+        +'<rect x="6" y="6" width="'+(W-12)+'" height="'+(H-12)+'" fill="none" stroke="#000" stroke-width="1.8"/>'
+
+        // ==================== SOL SÜTUN: GES TR BİNASI (3 OG HÜCRE + AKÜ REDRESÖR) ====================
+        +'<g transform="translate(18, 28)">'
+          // Dış TR Binası Kutusu
+          +'<rect x="0" y="0" width="328" height="390" fill="#FFF" stroke="#000" stroke-width="1.6"/>'
+          +'<line x1="0" y1="24" x2="262" y2="24" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="131" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">'+esc(kisaUnvan)+' GES TR BİNASI</text>'
+          // 3 Hücre Başlık Satırı
+          +'<line x1="0" y1="60" x2="262" y2="60" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="86" y1="24" x2="86" y2="390" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="174" y1="24" x2="174" y2="390" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="262" y1="0" x2="262" y2="390" stroke="#000" stroke-width="1.2"/>'
+
+          // Hücre 1 Başlık
+          +'<text x="43" y="36" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="800" fill="#000">YÜK AYIRICILI</text>'
+          +'<text x="43" y="45" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="800" fill="#000">GİRİŞ HÜCRESİ</text>'
+          // Hücre 2 Başlık
+          +'<text x="130" y="34" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="800" fill="#000">YÜK AYIRICILI</text>'
+          +'<text x="130" y="43" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="800" fill="#000">AKIM GERİLİM</text>'
+          +'<text x="130" y="52" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="800" fill="#000">ÖLÇÜ HÜCRESİ</text>'
+          // Hücre 3 Başlık
+          +'<text x="218" y="36" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="800" fill="#000">KESİCİLİ TRAFO</text>'
+          +'<text x="218" y="45" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="800" fill="#000">KORUMA HÜCRESİ</text>'
+
+          // Sağ Yan Sütun: 220V AC -> ~/= Akü Redresör Grubu
+          +'<text x="295" y="18" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#000">220V AC</text>'
+          +'<line x1="295" y1="22" x2="295" y2="54" stroke="#000" stroke-width="1.2"/>'
+          +'<line x1="295" y1="54" x2="289" y2="66" stroke="#000" stroke-width="1.3"/>'
+          +'<line x1="295" y1="66" x2="295" y2="88" stroke="#000" stroke-width="1.2"/>'
+          +'<rect x="275" y="88" width="40" height="32" fill="#FFF" stroke="#000" stroke-width="1.2"/>'
+          +'<line x1="275" y1="120" x2="315" y2="88" stroke="#000" stroke-width="1.1"/>'
+          +'<text x="283" y="101" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">~</text>'
+          +'<text x="301" y="116" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">=</text>'
+          +'<line x1="295" y1="120" x2="295" y2="152" stroke="#000" stroke-width="1.2"/>'
+          +'<line x1="295" y1="152" x2="289" y2="164" stroke="#000" stroke-width="1.3"/>'
+          +'<line x1="295" y1="164" x2="295" y2="210" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="295" y="232" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="700" fill="#000">24V DC AKÜ</text>'
+          +'<text x="295" y="242" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="700" fill="#000">REDRESÖR</text>'
+          +'<text x="295" y="252" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="700" fill="#000">GRUBU</text>'
+
+          // 36kV 630A 16kA OG Bara
+          +'<line x1="20" y1="88" x2="245" y2="88" stroke="#000" stroke-width="2.6"/>'
+          +'<line x1="38" y1="83" x2="46" y2="93" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="43" y="78" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="700" fill="#000">36kV</text>'
+          +'<text x="130" y="75" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="700" fill="#000">36kV 630A</text>'
+          +'<text x="130" y="83" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="700" fill="#000">16kA</text>'
+          +'<text x="218" y="75" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="700" fill="#000">36kV 630A</text>'
+          +'<text x="218" y="83" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="700" fill="#000">16kA</text>'
+
+          // HÜCRE 1 İÇ DETAYI (Yük Ayırıcılı Giriş Hücresi)
+          +'<line x1="43" y1="88" x2="43" y2="145" stroke="#000" stroke-width="1.4"/>'
+          +'<circle cx="43" cy="145" r="2.5" fill="#FFF" stroke="#000" stroke-width="1.2"/>'
+          +'<line x1="43" y1="145" x2="31" y2="172" stroke="#000" stroke-width="1.6"/>'
+          +'<circle cx="43" cy="174" r="2.5" fill="#FFF" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="52" y="152" font-family="Arial,sans-serif" font-size="6" font-weight="700" fill="#000">36kV</text>'
+          +'<text x="52" y="160" font-family="Arial,sans-serif" font-size="6" font-weight="700" fill="#000">630A</text>'
+          +'<text x="52" y="168" font-family="Arial,sans-serif" font-size="6" font-weight="700" fill="#000">16kA</text>'
+          +'<line x1="43" y1="176" x2="43" y2="390" stroke="#000" stroke-width="1.4"/>'
+          // Topraklama bıçağı & EPI
+          +'<line x1="43" y1="215" x2="24" y2="215" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="20" y1="211" x2="20" y2="219" stroke="#000" stroke-width="1.3"/>'
+          +'<line x1="17" y1="213" x2="17" y2="217" stroke="#000" stroke-width="1.1"/>'
+          +'<circle cx="62" cy="272" r="8" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+          +'<text x="62" y="274.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="800" fill="#000">EPI</text>'
+          +'<line x1="37" y1="312" x2="49" y2="322" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="37" y1="316" x2="49" y2="326" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="37" y1="320" x2="49" y2="330" stroke="#000" stroke-width="1.1"/>'
+
+          // HÜCRE 2 İÇ DETAYI (Yük Ayırıcılı Akım Gerilim Ölçü Hücresi)
+          +'<line x1="130" y1="88" x2="130" y2="128" stroke="#000" stroke-width="1.4"/>'
+          +'<circle cx="130" cy="128" r="2.2" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="130" y1="128" x2="119" y2="152" stroke="#000" stroke-width="1.5"/>'
+          +'<text x="139" y="135" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">36kV</text>'
+          +'<text x="139" y="143" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">630A</text>'
+          +'<text x="139" y="151" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">16kA</text>'
+          // OG Sigorta
+          +'<rect x="125" y="156" width="10" height="22" fill="#FFF" stroke="#000" stroke-width="1.2"/>'
+          +'<line x1="130" y1="152" x2="130" y2="198" stroke="#000" stroke-width="1.3"/>'
+          +'<text x="139" y="168" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">36kV</text>'
+          +'<text x="139" y="176" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">6.3A</text>'
+          // Gerilim Trafoları (2 halkalı sembol)
+          +'<circle cx="122" cy="218" r="7.5" fill="none" stroke="#000" stroke-width="1.2"/>'
+          +'<circle cx="122" cy="227" r="7.5" fill="none" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="90" y="250" font-family="Arial,sans-serif" font-size="5.5" font-weight="700" fill="#000">3 Ad. (34,5/√3)/(0,1/√3)kV</text>'
+          +'<text x="90" y="258" font-family="Arial,sans-serif" font-size="5.5" fill="#000">30VA CL.0,5 G.T.</text>'
+          // Akım Trafoları & Geçiş
+          +'<line x1="130" y1="274" x2="130" y2="352" stroke="#000" stroke-width="1.4"/>'
+          +'<circle cx="130" cy="306" r="7" fill="none" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="92" y="330" font-family="Arial,sans-serif" font-size="5.6" font-weight="700" fill="#000">3 Ad. 30-60/5-5A</text>'
+          +'<text x="92" y="338" font-family="Arial,sans-serif" font-size="5.5" fill="#000">15VA CL05S 5P10</text>'
+          // Hücre 2 -> Hücre 3 alt bağlantı
+          +'<polyline points="130,352 178,352 178,108 218,108" fill="none" stroke="#000" stroke-width="1.3"/>'
+
+          // HÜCRE 3 İÇ DETAYI (Kesicili Trafo Koruma Hücresi)
+          +'<line x1="218" y1="108" x2="218" y2="142" stroke="#000" stroke-width="1.4"/>'
+          +'<line x1="218" y1="142" x2="207" y2="164" stroke="#000" stroke-width="1.5"/>'
+          +'<text x="228" y="148" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">36kV</text>'
+          +'<text x="228" y="156" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">630A</text>'
+          +'<text x="228" y="164" font-family="Arial,sans-serif" font-size="5.8" font-weight="700" fill="#000">16kA</text>'
+          // Kesici kutusu + 36kV / 30A / 16kA / 50/51 daireleri
+          +'<rect x="211" y="175" width="14" height="22" fill="#FFF" stroke="#000" stroke-width="1.3"/>'
+          +'<line x1="218" y1="164" x2="218" y2="390" stroke="#000" stroke-width="1.4"/>'
+          +'<circle cx="242" cy="176" r="8" fill="#FFF" stroke="#000" stroke-width="1"/>'
+          +'<text x="242" y="178.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.5" font-weight="700" fill="#000">36kV</text>'
+          +'<circle cx="242" cy="194" r="8" fill="#FFF" stroke="#000" stroke-width="1"/>'
+          +'<text x="242" y="196.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.5" font-weight="700" fill="#000">30A</text>'
+          +'<circle cx="242" cy="212" r="8" fill="#FFF" stroke="#000" stroke-width="1"/>'
+          +'<text x="242" y="214.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.5" font-weight="700" fill="#000">16kA</text>'
+          +'<circle cx="242" cy="252" r="9.5" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+          +'<text x="242" y="250.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5" font-weight="800" fill="#000">50/51</text>'
+          +'<text x="242" y="257" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.8" font-weight="700" fill="#000">50N/51N</text>'
+          +'<circle cx="242" cy="285" r="8.5" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+          +'<text x="242" y="287.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="800" fill="#000">EPI</text>'
+          +'<line x1="212" y1="312" x2="224" y2="322" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="212" y1="316" x2="224" y2="326" stroke="#000" stroke-width="1.1"/>'
+          +'<line x1="212" y1="320" x2="224" y2="330" stroke="#000" stroke-width="1.1"/>'
+        +'</g>'
+
+        // HÜCRE 1'DEN AŞAĞI İNEN TM BAĞLANTI HATTI VE OKU (Şablondaki İبik / Aksaray TM İnişi)
+        +'<line x1="61" y1="418" x2="61" y2="495" stroke="#000" stroke-width="1.8"/>'
+        +'<polygon points="56,492 66,492 61,503" fill="#000"/>'
+        +'<text x="72" y="502" font-family="Arial,sans-serif" font-size="11.5" font-weight="800" fill="#000">'+esc(tmAdi)+'</text>'
+
+        // HÜCRE 3'TEN TRAFOYA GİDEN OG KABLO HATTI
+        +'<polyline points="236,418 236,435 362,435 362,42 502,42 502,118" fill="none" stroke="#000" stroke-width="1.5"/>'
+        +'<text x="300" y="429" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">3x(1x95/16)mm² N2XSY-36kV</text>'
+
+        // SOL-ALT: GES ADP ÖZET TABLOSU (Şablondaki 4 Satırlı Birebir Tablo)
+        +'<g transform="translate(18, 565)">'
+          +'<rect x="0" y="0" width="328" height="122" fill="#FFF" stroke="#000" stroke-width="1.6"/>'
+          +'<line x1="0" y1="24" x2="328" y2="24" stroke="#000" stroke-width="1.2"/>'
+          +'<text x="164" y="16.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" font-weight="800" fill="#000">GES ADP</text>'
+          +'<line x1="0" y1="48" x2="328" y2="48" stroke="#000" stroke-width="1"/>'
+          +'<line x1="0" y1="72" x2="328" y2="72" stroke="#000" stroke-width="1"/>'
+          +'<line x1="0" y1="96" x2="328" y2="96" stroke="#000" stroke-width="1"/>'
+          +'<line x1="210" y1="24" x2="210" y2="122" stroke="#000" stroke-width="1"/>'
           +'<text x="10" y="40" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">BAĞLI İNVERTÖR SAYISI</text>'
-          +'<text x="253" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+invAdet+' Adet</text>'
+          +'<text x="269" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+invAdet+' Adet</text>'
           +'<text x="10" y="64" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">TOPLAM GÜÇ (kWe)</text>'
-          +'<text x="253" y="64" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+numFmt(acKwe, 1)+' kWe</text>'
+          +'<text x="269" y="64" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+numFmt(acKwe, 0)+' kWe</text>'
           +'<text x="10" y="88" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">TOPLAM GÜÇ (kWp)</text>'
-          +'<text x="253" y="88" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+numFmt(dcKwp, 2)+' kWp</text>'
+          +'<text x="269" y="88" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+numFmt(dcKwp, 2)+' kWp</text>'
           +'<text x="10" y="112" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#000">MAKS ÇIKIŞ AKIMI (A)</text>'
-          +'<text x="253" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+maksAkimExact+' A</text>'
+          +'<text x="269" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">'+maksAkimExact+' A</text>'
         +'</g>'
-        +'<g transform="translate(26, 604)">'
-          +'<rect x="0" y="0" width="310" height="118" fill="#FFF" stroke="#000" stroke-width="1.3"/>'
-          +'<line x1="0" y1="24" x2="310" y2="24" stroke="#000" stroke-width="1"/>'
-          +'<text x="155" y="16" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">BAŞVURU SAHİBİ / ONAY (İMZA &amp; KAŞE)</text>'
-        +'</g>'
-        +'<rect x="374" y="62" width="256" height="186" fill="none" stroke="#000" stroke-width="1.4" stroke-dasharray="6 4"/>'
-        +'<text x="384" y="80" font-family="Arial,sans-serif" font-size="12" font-weight="800" fill="#000">"TR"</text>'
-        +'<text x="384" y="96" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">31.5 / 0.8 kV</text>'
-        +'<text x="384" y="110" font-family="Arial,sans-serif" font-size="9" font-weight="800" fill="#000">'+trKva+' kVA Trafo</text>'
-        +'<text x="384" y="124" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">DYN11 · %Uk=6</text>'
-        +'<circle cx="495" cy="116" r="18" fill="none" stroke="#000" stroke-width="1.8"/>'
-        +'<circle cx="495" cy="142" r="18" fill="none" stroke="#000" stroke-width="1.8"/>'
-        +'<text x="495" y="118" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">Δ</text>'
-        +'<text x="495" y="147" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="800" fill="#000">Y</text>'
-        +'<line x1="495" y1="160" x2="495" y2="335" stroke="#000" stroke-width="2"/>'
-        +'<rect x="374" y="295" width="256" height="325" fill="none" stroke="#000" stroke-width="1.4" stroke-dasharray="6 4"/>'
-        +'<rect x="382" y="308" width="88" height="34" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
-        +'<text x="426" y="324" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="800" fill="#000">Acil Durdurma Butonu</text>'
-        +'<rect x="382" y="352" width="88" height="36" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
-        +'<text x="426" y="366" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">(DETAY-A) Koruma Rölesi</text>'
-        +'<text x="426" y="378" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#000">VDE 0126-1-1</text>'
-        +'<rect x="484" y="335" width="22" height="26" fill="#FFF" stroke="#000" stroke-width="1.4"/>'
-        +'<text x="512" y="346" font-family="Arial,sans-serif" font-size="7.5" font-weight="800" fill="#000">3x'+tmsAkim+' A MOTORLU TMŞ 50 kA</text>'
-        +'<text x="512" y="358" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">A.G.S TRİPCOİL</text>'
-        +'<line x1="495" y1="361" x2="495" y2="520" stroke="#000" stroke-width="2"/>'
-        +'<text x="512" y="388" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#000">3x'+ctAkim+'/5A CL 0.5 · MULTİMETRE</text>'
-        +'<rect x="510" y="432" width="112" height="26" fill="#F8FAFC" stroke="#000" stroke-width="1.1"/>'
-        +'<text x="566" y="448" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="800" fill="#000">ÇİFT YÖNLÜ ÜRETİM SAYACI</text>'
-        +'<line x1="386" y1="520" x2="622" y2="520" stroke="#000" stroke-width="3.5"/>'
-        +'<text x="505" y="512" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="800" fill="#000">(100x10) mm² Cu Bara (0.8 kV AG)</text>'
+
+        // ==================== ORTA SÜTUN: "TR" KUTUSU + AG PANO KUTUSU ====================
+        // Üst Kesikli Kutu: "TR" (31.5 / 0.8 kV Trafo + İşletme Topraklaması + 8A1)
+        +'<rect x="380" y="64" width="244" height="190" fill="none" stroke="#000" stroke-width="1.3" stroke-dasharray="6 4"/>'
+        +'<text x="392" y="92" font-family="Arial,sans-serif" font-size="14" font-weight="800" fill="#000">"TR"</text>'
+        +'<text x="392" y="110" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">31.5 / 0.8 kV</text>'
+        +'<text x="392" y="124" font-family="Arial,sans-serif" font-size="8.8" font-weight="800" fill="#000">'+trKva+' kVA Trafo</text>'
+        +'<text x="392" y="138" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="#000">DYN11 %UK=% 6</text>'
+        // Üst üste geçen iki trafo sargı halkası + 8A1
+        +'<circle cx="502" cy="136" r="18" fill="none" stroke="#000" stroke-width="1.6"/>'
+        +'<circle cx="502" cy="160" r="18" fill="none" stroke="#000" stroke-width="1.6"/>'
+        +'<text x="502" y="137" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">Δ</text>'
+        +'<text x="502" y="166" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" font-weight="800" fill="#000">Y</text>'
+        +'<circle cx="536" cy="148" r="9.5" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="536" y="151" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="800" fill="#000">8A1</text>'
+        // İşletme Topraklaması
+        +'<line x1="518" y1="168" x2="555" y2="168" stroke="#000" stroke-width="1.1"/>'
+        +'<line x1="555" y1="162" x2="555" y2="174" stroke="#000" stroke-width="1.3"/>'
+        +'<line x1="559" y1="165" x2="559" y2="171" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="515" y="184" font-family="Arial,sans-serif" font-size="6" font-weight="700" fill="#000">1x240 mm² NYY 20m</text>'
+        +'<text x="515" y="193" font-family="Arial,sans-serif" font-size="6" fill="#000">Ø20 2 mt 3 ad.</text>'
+        +'<text x="515" y="202" font-family="Arial,sans-serif" font-size="6" font-weight="700" fill="#000">İŞLETME TOPRAKLAMASI</text>'
+
+        // Trafo AG çıkışından AG Panoya iniş + kablo yazısı
+        +'<line x1="502" y1="178" x2="502" y2="412" stroke="#000" stroke-width="1.8"/>'
+        +'<line x1="496" y1="224" x2="508" y2="234" stroke="#000" stroke-width="1.2"/>'
+        +'<line x1="496" y1="228" x2="508" y2="238" stroke="#000" stroke-width="1.2"/>'
+        +'<line x1="496" y1="232" x2="508" y2="242" stroke="#000" stroke-width="1.2"/>'
+        +'<text x="498" y="340" transform="rotate(-90, 498, 340)" font-family="Arial,sans-serif" font-size="7" font-weight="700" fill="#000">4x(4x1x240)mm² N2XH 5 mt.</text>'
+
+        // Alt Kesikli Kutu: AG Pano (Acil Durdurma + DETAY-A + TMŞ + Multimetre + Parafudr + Sayaç + Cu Bara + İn-1..İn-N)
+        +'<rect x="380" y="365" width="244" height="365" fill="none" stroke="#000" stroke-width="1.3" stroke-dasharray="6 4"/>'
+        // Acil Durdurma Butonu
+        +'<rect x="388" y="378" width="78" height="34" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="427" y="393" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">Acil Durdurma</text>'
+        +'<text x="427" y="403" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">Butonu</text>'
+        +'<polyline points="427,412 427,424 494,424" fill="none" stroke="#000" stroke-width="1" stroke-dasharray="2 2"/>'
+        // DETAY-A Koruma Rölesi VDE 0126-1-1
+        +'<rect x="388" y="435" width="78" height="38" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="427" y="448" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">(DETAY-A)</text>'
+        +'<text x="427" y="458" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">Koruma Rölesi</text>'
+        +'<text x="427" y="468" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#000">VDE 0126-1-1</text>'
+        +'<line x1="466" y1="454" x2="494" y2="454" stroke="#000" stroke-width="1" stroke-dasharray="2 2"/>'
+
+        // Ana Motorlu TMŞ Sembolü
+        +'<rect x="494" y="412" width="16" height="26" fill="#FFF" stroke="#000" stroke-width="1.3"/>'
+        +'<line x1="502" y1="438" x2="493" y2="462" stroke="#000" stroke-width="1.6"/>'
+        +'<text x="515" y="422" font-family="Arial,sans-serif" font-size="6.8" font-weight="800" fill="#000">3x'+tmsAkim+' A</text>'
+        +'<text x="515" y="431" font-family="Arial,sans-serif" font-size="6.5" font-weight="700" fill="#000">MOTORLU TMŞ</text>'
+        +'<text x="515" y="440" font-family="Arial,sans-serif" font-size="6.5" font-weight="700" fill="#000">50 kA</text>'
+        +'<text x="515" y="449" font-family="Arial,sans-serif" font-size="6.2" font-weight="700" fill="#000">A.G.S TRİPCOİL</text>'
+
+        // R S T Faz Lambaları
+        +'<line x1="502" y1="472" x2="548" y2="472" stroke="#000" stroke-width="1"/>'
+        +'<circle cx="560" cy="466" r="4.5" fill="#FFF" stroke="#000" stroke-width="1"/><text x="560" y="468.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.5" font-weight="800" fill="#000">R</text>'
+        +'<circle cx="572" cy="466" r="4.5" fill="#FFF" stroke="#000" stroke-width="1"/><text x="572" y="468.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.5" font-weight="800" fill="#000">S</text>'
+        +'<circle cx="584" cy="466" r="4.5" fill="#FFF" stroke="#000" stroke-width="1"/><text x="584" y="468.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.5" font-weight="800" fill="#000">T</text>'
+
+        // Ana AG Bara dikey hat devamı + Akım trafosu + Multimetre + Parafudr + Çift Yönlü Üretim Sayacı
+        +'<line x1="502" y1="462" x2="502" y2="640" stroke="#000" stroke-width="1.8"/>'
+        +'<circle cx="502" cy="495" r="6" fill="none" stroke="#000" stroke-width="1.2"/>'
+        +'<text x="515" y="492" font-family="Arial,sans-serif" font-size="6.2" font-weight="700" fill="#000">3x'+ctAkim+'/5A</text>'
+        +'<text x="515" y="500" font-family="Arial,sans-serif" font-size="6" fill="#000">15VA CL 0.5</text>'
+        +'<rect x="562" y="484" width="54" height="18" fill="#FFF" stroke="#000" stroke-width="1"/>'
+        +'<text x="589" y="495.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="800" fill="#000">MULTİMETRE</text>'
+
+        // Tip 1 + Tip 2 Parafudr
+        +'<text x="440" y="528" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="700" fill="#000">3 Kutup 800 V</text>'
+        +'<text x="440" y="536" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#000">Tip 1+Tip 2 Sınıfı</text>'
+        +'<text x="440" y="544" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="700" fill="#000">Parafudr 125 AgG</text>'
+
+        // Çift Yönlü Üretim Sayacı
+        +'<circle cx="502" cy="566" r="6" fill="none" stroke="#000" stroke-width="1.2"/>'
+        +'<rect x="534" y="554" width="84" height="24" fill="#FFF" stroke="#000" stroke-width="1.1"/>'
+        +'<text x="576" y="564" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="800" fill="#000">ÇİFT YÖNLÜ</text>'
+        +'<text x="576" y="573" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.2" font-weight="800" fill="#000">ÜRETİM SAYACI</text>'
+
+        // (100x10) mm² Cu Bara
+        +'<line x1="388" y1="640" x2="618" y2="640" stroke="#000" stroke-width="3.2"/>'
+        +'<text x="442" y="633" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="800" fill="#000">(100x10) mm² Cu Bara</text>'
+
+        // İn-1 .. İn-N Fiderleri + Sağ Sütun İnverter Blokları + Kablo Rotaları
         + fiderSvg
+        + kabloRotalarSvg
         + invSvg
       +'</svg>'
     +'</div>';

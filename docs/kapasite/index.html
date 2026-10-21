@@ -469,42 +469,30 @@
     </div>
   </div>
 
-  <!-- DÖNEM SEÇİCİ VE 21 DAĞITIM BÖLGESİ (EDAŞ) + İL HIZLI FİLTRESİ -->
+  <!-- DÖNEM SEÇİCİ VE 21 DAĞITIM BÖLGESİ (EDAŞ) + 81 İL SEÇMELİ AÇILIR MENÜ (DROPDOWN) FİLTRESİ -->
   <div class="ust-bar">
     <div class="ust-bar-satir">
       <div class="donemsec">
         <span class="lbl">Aktif Dönem:</span>
         <div class="seg" id="seg" role="group" aria-label="Dönem"></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="hizli-bolge-etiket">21 Dağıtım Bölgesi (EDAŞ) &amp; 81 İl Seçimi</span>
-        <button type="button" class="k-btn" id="btnUstSifirla" style="min-height:30px;font-size:11.5px">🇹🇷 Tüm Türkiye'yi Göster</button>
+      <div class="ust-secim-grup" id="hizliBolge">
+        <label class="ust-select-kutu" id="ustEdasKutu" for="ustEdasSec">
+          <span class="ust-sel-lbl">⚡ 21 Dağıtım Bölgesi (EDAŞ):</span>
+          <select id="ustEdasSec" class="ust-select" aria-label="21 Dağıtım Bölgesi (EDAŞ) Seçimi">
+            <option value="">🇹🇷 Türkiye Geneli (Tüm 21 EDAŞ Bölgesi)</option>
+          </select>
+        </label>
+        <label class="ust-select-kutu" id="ustIlKutu" for="ustIlSec">
+          <span class="ust-sel-lbl">📍 81 İl Seçimi:</span>
+          <select id="ustIlSec" class="ust-select" aria-label="81 İl Seçimi">
+            <option value="">Tüm İller (81 İl)</option>
+          </select>
+        </label>
+        <span class="ust-mwe-rozet" id="ustSecimMweRozet" title="Seçili Bölge / İl Güncel Kapasite Toplamı">— MWe</span>
+        <button type="button" class="k-btn" id="btnUstSifirla" style="min-height:38px;padding:0 12px;font-size:12px">🇹🇷 Tüm Türkiye'yi Göster</button>
       </div>
     </div>
-    <div class="hizli-bolge" id="hizliBolge">
-      <button type="button" data-ed="" class="on">Türkiye Geneli</button>
-      <button type="button" data-ed="Meram EDAŞ">Meram EDAŞ (6 İl)</button>
-      <button type="button" data-ed="Başkent EDAŞ">Başkent EDAŞ (7 İl)</button>
-      <button type="button" data-ed="Toroslar EDAŞ">Toroslar EDAŞ (6 İl)</button>
-      <button type="button" data-ed="Osmangazi EDAŞ">Osmangazi EDAŞ (5 İl)</button>
-      <button type="button" data-ed="Uludağ EDAŞ">Uludağ EDAŞ (4 İl)</button>
-      <button type="button" data-ed="Sakarya EDAŞ">Sakarya EDAŞ (4 İl)</button>
-      <button type="button" data-ed="GDZ EDAŞ">GDZ EDAŞ (2 İl)</button>
-      <button type="button" data-ed="ADM EDAŞ">ADM EDAŞ (3 İl)</button>
-      <button type="button" data-ed="Akdeniz EDAŞ">Akdeniz EDAŞ (3 İl)</button>
-      <button type="button" data-ed="KCETAŞ">KCETAŞ (Kayseri)</button>
-      <button type="button" data-ed="Çamlıbel EDAŞ">Çamlıbel EDAŞ (3 İl)</button>
-      <button type="button" data-ed="Yeşilırmak EDAŞ">Yeşilırmak EDAŞ (5 İl)</button>
-      <button type="button" data-ed="Çoruh EDAŞ">Çoruh EDAŞ (6 İl)</button>
-      <button type="button" data-ed="Aras EDAŞ">Aras EDAŞ (6 İl)</button>
-      <button type="button" data-ed="Fırat EDAŞ">Fırat EDAŞ (4 İl)</button>
-      <button type="button" data-ed="Vangölü EDAŞ">Vangölü EDAŞ (4 İl)</button>
-      <button type="button" data-ed="Dicle EDAŞ">Dicle EDAŞ (6 İl)</button>
-      <button type="button" data-ed="AKEDAŞ">AKEDAŞ (2 İl)</button>
-      <button type="button" data-ed="Boğaziçi EDAŞ">Boğaziçi EDAŞ (İst. Avr.)</button>
-      <button type="button" data-ed="AYEDAŞ (Anadolu)">AYEDAŞ (İst. And.)</button>
-    </div>
-    <div class="hizli-il-bar" id="hizliIlBar"></div>
   </div>
 
   <!-- 1. ULUSAL / FİLTRELİ TEİAŞ → EDAŞ/OSB KAPASİTE TAHSİS & ERİME MİMARİSİ (SVG ŞEMA) -->
@@ -821,11 +809,11 @@
       <!-- KUTU 1: PARSEL SORGULA & KML/KMZ YÜKLE -->
       <div class="pges-kutu">
         <h3><span>1. Parsel Sorgula &amp; KML / KMZ Dosyası Ekle</span><small>TKGM / CBS</small></h3>
-        <div class="pges-drop" id="pgesDropArea" role="button" tabindex="0">
-          <b>📂 KML veya KMZ Dosyasını Buraya Sürükleyin ya da Tıklayın</b>
-          <span>TKGM Parsel Sorgu (.kml) ve Google Earth (.kmz) dosyalarından İl, İlçe, Mahalle, Ada, Parsel, Tapu Alanı ve köşe koordinatları otomatik okunur</span>
-          <input type="file" id="pgesKmlInput" accept=".kml,.kmz,.xml" hidden>
-        </div>
+        <label class="pges-drop" id="pgesDropArea" for="pgesKmlInput">
+          <b id="pgesDropBaslik">📂 KML, KMZ veya GeoJSON Dosyasını Buraya Sürükleyin ya da Tıklayın</b>
+          <span id="pgesDropAlt">TKGM Parsel Sorgu (.kml / .json) ve Google Earth (.kmz) dosyalarından İl, İlçe, Mahalle, Ada, Parsel, Tapu Alanı ve köşe koordinatları otomatik okunur</span>
+          <input type="file" id="pgesKmlInput" accept=".kml,.kmz,.xml,.json,.geojson,.txt,.csv">
+        </label>
         <div class="pges-form-grid uclu">
           <label class="tam">Hazır Referans Parsel / Örnek Tek Hat Projesi veya Seçili TM Çevresi Yükle
             <select id="pgesOrnekSec">
@@ -2876,76 +2864,76 @@
       ilMwe[r.il] = (ilMwe[r.il] || 0) + v;
     });
     var trTop = tumu.reduce(function(s,r){ return s + av(r); }, 0);
+    var edSirali = [
+      "Meram EDAŞ","Başkent EDAŞ","Toroslar EDAŞ","Osmangazi EDAŞ","Uludağ EDAŞ",
+      "Sakarya EDAŞ","GDZ EDAŞ","ADM EDAŞ","Akdeniz EDAŞ","KCETAŞ",
+      "Çamlıbel EDAŞ","Yeşilırmak EDAŞ","Çoruh EDAŞ","Aras EDAŞ","Fırat EDAŞ",
+      "Vangölü EDAŞ","Dicle EDAŞ","AKEDAŞ","Boğaziçi EDAŞ","AYEDAŞ (Anadolu)","Trakya (TREDAŞ)"
+    ];
     Object.keys(EDAS_IL).forEach(function(ed){
+      if(edSirali.indexOf(ed) < 0) edSirali.push(ed);
       edMwe[ed] = tumu.filter(function(r){ return edasEslesirMi(r, ed); }).reduce(function(s,r){ return s + av(r); }, 0);
     });
 
-    if(el("hizliBolge")){
-      el("hizliBolge").querySelectorAll("button").forEach(function(btn){
-        var bed = btn.getAttribute("data-ed");
-        var m = bed ? (edMwe[bed] || 0) : trTop;
-        var mSp = btn.querySelector(".hb-mwe");
-        if(!mSp){
-          btn.insertAdjacentHTML("beforeend", '<span class="hb-mwe"></span>');
-          mSp = btn.querySelector(".hb-mwe");
-        }
-        if(mSp){
-          mSp.textContent = fmt(m) + " MW";
-          mSp.classList.toggle("sifir", m <= 0);
-        }
-      });
-    }
-
-    var ilBar = el("hizliIlBar");
-    if(!ilBar) return;
     var aktifEd = secEd || (secIl && IL2EDAS[secIl] && IL2EDAS[secIl][0]) || "";
-    var gosterIller = aktifEd && EDAS_IL[aktifEd]
-      ? EDAS_IL[aktifEd].slice()
-      : ["AKSARAY","KONYA","KARAMAN","NİĞDE","NEVŞEHİR","KIRŞEHİR","ANKARA","KAYSERİ","ANTALYA","İZMİR","BURSA","ADANA","MERSİN","GAZİANTEP"];
-    if(aktifEd === "Meram EDAŞ"){
-      gosterIller = ["AKSARAY","KONYA","KARAMAN","NİĞDE","NEVŞEHİR","KIRŞEHİR"];
+
+    // 1. Üst 21 Dağıtım Bölgesi (EDAŞ) Dropdown Seçicisini Güncelle
+    var edSel = el("ustEdasSec");
+    if(edSel){
+      var edHtml = '<option value=""'+(!aktifEd?' selected':'')+'>🇹🇷 Türkiye Geneli (21 EDAŞ) — '+fmt(trTop)+' MWe</option>';
+      edSirali.forEach(function(ed){
+        if(!EDAS_IL[ed]) return;
+        var m = edMwe[ed] || 0;
+        var ilSay = (EDAS_IL[ed] || []).length;
+        var sec = (aktifEd === ed) ? " selected" : "";
+        edHtml += '<option value="'+esc(ed)+'"'+sec+'>⚡ '+esc(ed)+' ('+ilSay+' İl) — '+fmt(m)+' MWe</option>';
+      });
+      edSel.innerHTML = edHtml;
+      edSel.value = aktifEd;
+      if(el("ustEdasKutu")) el("ustEdasKutu").classList.toggle("aktif-filtre", !!aktifEd);
     }
 
-    var baslik = aktifEd ? (aktifEd + " İlleri:") : "Hızlı İl Seçimi:";
-    var html = '<span class="hizli-bolge-etiket">📍 '+esc(baslik)+'</span>';
-    if(aktifEd){
-      html += '<button type="button" data-il="" class="'+(!secIl?'on':'')+'">Tüm '+esc(aktifEd)+' ('+gosterIller.length+' İl)</button>';
-    }
-    gosterIller.forEach(function(ilAd){
-      var m = ilMwe[ilAd] || 0;
-      var svgStr = "";
-      if(IL_GEO && IL_GEO.features){
-        var fList = IL_GEO.features.filter(function(f){ return ((f.properties&&f.properties.il)||"").toLocaleUpperCase("tr") === ilAd; });
-        if(fList.length){
-          var pr = geoProjKur(fList, 0, 0, 18, 13, 1);
-          var dP = fList.map(function(f){ return pr.pathD(f.geometry); }).join(" ");
-          svgStr = '<svg width="18" height="13" viewBox="0 0 18 13" style="vertical-align:-2px"><path d="'+dP+'" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>';
-        }
+    // 2. Üst 81 İl Dropdown Seçicisini Güncelle
+    var ilSel = el("ustIlSec");
+    if(ilSel){
+      var ilHtml = '';
+      if(aktifEd && EDAS_IL[aktifEd]){
+        var bolgeIller = EDAS_IL[aktifEd].slice();
+        var bolgeMwe = edMwe[aktifEd] || 0;
+        ilHtml += '<option value=""'+(!secIl?' selected':'')+'>📍 Tüm '+esc(aktifEd)+' İlleri ('+bolgeIller.length+' İl) — '+fmt(bolgeMwe)+' MWe</option>';
+        ilHtml += '<optgroup label="⚡ '+esc(aktifEd)+' Bölgesi İlleri">';
+        bolgeIller.forEach(function(ilAd){
+          var m = ilMwe[ilAd] || 0;
+          ilHtml += '<option value="'+esc(ilAd)+'"'+(secIl===ilAd?' selected':'')+'>'+esc(ilAd)+' — '+fmt(m)+' MWe</option>';
+        });
+        ilHtml += '</optgroup>';
+      } else {
+        ilHtml += '<option value=""'+(!secIl?' selected':'')+'>📍 Tüm İller (81 İl) — '+fmt(trTop)+' MWe</option>';
       }
-      html += '<button type="button" data-il="'+esc(ilAd)+'" class="'+(secIl===ilAd?'on':'')+'">'
-        + svgStr
-        + '<span>'+esc(basharfBuyut(ilAd))+'</span>'
-        + '<span class="hb-mwe">'+fmt(m)+' MW</span>'
-      + '</button>';
-    });
-    ilBar.innerHTML = html;
-    ilBar.querySelectorAll("button").forEach(function(b){
-      b.addEventListener("click", function(){
-        var bil = b.getAttribute("data-il");
-        if(!bil){
-          if(aktifEd) el("fed").value = aktifEd;
-          el("fil").value = "";
-        } else {
-          if(el("fil").value === bil){
-            if(aktifEd) el("fed").value = aktifEd;
-            el("fil").value = "";
-          } else {
-            ilSecildigindeSenkronla(bil);
-          }
-        }
-        ciz();
+      edSirali.forEach(function(ed){
+        if(!EDAS_IL[ed] || ed === aktifEd) return;
+        var liste = EDAS_IL[ed].slice().sort(function(a,b){return a.localeCompare(b,"tr");});
+        ilHtml += '<optgroup label="'+esc(ed)+' ('+fmt(edMwe[ed]||0)+' MWe)">';
+        liste.forEach(function(ilAd){
+          var m = ilMwe[ilAd] || 0;
+          var sec = (!aktifEd && secIl===ilAd) ? " selected" : "";
+          ilHtml += '<option value="'+esc(ilAd)+'"'+sec+'>'+esc(ilAd)+' — '+fmt(m)+' MWe</option>';
+        });
+        ilHtml += '</optgroup>';
       });
-    });
+      ilSel.innerHTML = ilHtml;
+      ilSel.value = secIl || "";
+      if(el("ustIlKutu")) el("ustIlKutu").classList.toggle("aktif-filtre", !!secIl);
+    }
+
+    // 3. Seçili Bölge / İl Canlı MWe Rozeti
+    var rozet = el("ustSecimMweRozet");
+    if(rozet){
+      var secMwe = secIl ? (ilMwe[secIl] || 0) : (aktifEd ? (edMwe[aktifEd] || 0) : trTop);
+      var secAd = secIl ? secIl : (aktifEd ? aktifEd : "Türkiye");
+      rozet.textContent = "⚡ " + secAd + ": " + fmt(secMwe) + " MWe";
+      rozet.classList.toggle("sifir", secMwe <= 0);
+    }
   }
 
   function suz(){
@@ -3719,26 +3707,6 @@
       BOLGE_GEO = bo;
       var adlar=bo.features.map(function(f){return f.properties.edas;}).sort(function(x,y){return x.localeCompare(y,"tr");});
       adlar.forEach(function(e,i){ EDAS_RENK[e]=PAL[i%PAL.length]; });
-      // Hızlı bölge butonlarına gerçek il/bölge sınır silüeti ekle
-      el("hizliBolge").querySelectorAll("button").forEach(function(btn){
-        var bIl = btn.getAttribute("data-il"), bEd = btn.getAttribute("data-ed");
-        var fList = [];
-        if(bIl){
-          fList = il.features.filter(function(f){ return ((f.properties&&f.properties.il)||"").toLocaleUpperCase("tr") === bIl; });
-        } else if(bEd){
-          fList = bo.features.filter(function(f){
-            var pEd = (f.properties&&f.properties.edas)||"";
-            return pEd === bEd || ((bEd==="Boğaziçi EDAŞ"||bEd==="AYEDAŞ (Anadolu)") && /İstanbul/i.test(pEd));
-          });
-        } else {
-          fList = bo.features;
-        }
-        if(fList.length && !btn.querySelector("svg")){
-          var pr = geoProjKur(fList, 0, 0, 20, 14, 1);
-          var dP = fList.map(function(f){ return pr.pathD(f.geometry); }).join(" ");
-          btn.insertAdjacentHTML("afterbegin", '<svg width="20" height="14" viewBox="0 0 20 14" style="vertical-align:-2px;margin-right:3px"><path d="'+dP+'" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>');
-        }
-      });
       L.geoJSON(il,{
         pane: "sinirPane",
         renderer: SINIR_CANVAS || ANA_CANVAS || undefined,
@@ -3798,12 +3766,6 @@
     if(el("kpiAcikBara")) el("kpiAcikBara").textContent = fmt0(acikBaraSay) + " / " + fmt0(gorunen.length);
     if(el("kpiAcikAlt")) el("kpiAcikAlt").textContent = (il ? il : (ed ? ed : "Türkiye Geneli")) + " · 34,5 kV OG/OSB";
 
-    var aktifEdHedef = ed || (il && IL2EDAS[il] && IL2EDAS[il][0]) || "";
-    el("hizliBolge").querySelectorAll("button").forEach(function(b){
-      var bil=b.getAttribute("data-il"), bed=b.getAttribute("data-ed");
-      var on = (bil ? (il===bil) : (bed!==null ? (bed === "" ? (!ed && !il) : (ed===bed || (!ed && il && aktifEdHedef===bed))) : false));
-      b.classList.toggle("on", on);
-    });
     hizliBarGuncelle();
     if(il){ el("g1b").textContent=il+" İçi Trafo Merkezi Sıralaması"; barlar("g1", topla(gorunen,"tm"),12,"tm"); el("g1n").textContent=il+" · "+donemler[aktif].kisa; }
     else { el("g1b").textContent="İl Sıralaması (Top 12)"; barlar("g1", topla(gorunen,"il"),12,"il"); el("g1n").textContent="MWe · "+donemler[aktif].kisa; }
@@ -3845,17 +3807,25 @@
       tmTekHatCiz(seciliRow);
     });
   }
-  el("hizliBolge").querySelectorAll("button").forEach(function(b){
-    b.addEventListener("click", function(){
-      var bil = b.getAttribute("data-il"), bed = b.getAttribute("data-ed");
-      if(bil){
-        ilSecildigindeSenkronla(el("fil").value===bil ? "" : bil);
+  if(el("ustEdasSec")){
+    el("ustEdasSec").addEventListener("change", function(){
+      edasSecildigindeSenkronla(this.value || "");
+      ciz();
+    });
+  }
+  if(el("ustIlSec")){
+    el("ustIlSec").addEventListener("change", function(){
+      var val = this.value || "";
+      if(val){
+        ilSecildigindeSenkronla(val);
       } else {
-        edasSecildigindeSenkronla((bed && el("fed").value === bed) ? "" : (bed || ""));
+        var mevcutEd = el("ustEdasSec") ? el("ustEdasSec").value : "";
+        if(mevcutEd) el("fed").value = mevcutEd;
+        el("fil").value = "";
       }
       ciz();
     });
-  });
+  }
   if(el("btnUstSifirla")){
     el("btnUstSifirla").addEventListener("click", function(){
       el("fil").value = "";
@@ -4283,56 +4253,159 @@
     return Number(v).toLocaleString("tr-TR", {minimumFractionDigits: dec!=null?dec:2, maximumFractionDigits: dec!=null?dec:2});
   }
 
-  // KML / KMZ Dosya Çözümleyici (TKGM ExtendedData + Polygon Coordinates)
+  // KML / KMZ / GeoJSON / CSV Dosya Çözümleyici (TKGM ExtendedData + Central Directory KMZ + GeoJSON)
   function pgesUnzipKmz(buf){
     return new Promise(function(resolve, reject){
       try {
-        var u8 = new Uint8Array(buf), dv = new DataView(u8.buffer), p = 0;
+        var u8 = new Uint8Array(buf), dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+        function cikartVeCoz(method, data){
+          if(method === 0){
+            resolve(new TextDecoder("utf-8").decode(data));
+            return true;
+          }
+          if(typeof DecompressionStream !== "undefined"){
+            var ds = new DecompressionStream("deflate-raw");
+            new Response(new Blob([data]).stream().pipeThrough(ds)).arrayBuffer().then(function(out){
+              resolve(new TextDecoder("utf-8").decode(out));
+            }).catch(reject);
+            return true;
+          }
+          return false;
+        }
+        // 1. Önce ZIP Central Directory (0x02014b50) üzerinden KML kaydını ara (Data Descriptor / csz=0 olan KMZ'ler için en güvenilir yöntem)
+        for(var i = u8.length - 22; i >= 0 && i >= u8.length - 65557; i--){
+          if(dv.getUint32(i, true) === 0x06054b50){
+            var cdOffset = dv.getUint32(i + 16, true);
+            var cdEntries = dv.getUint16(i + 10, true);
+            var cp = cdOffset;
+            for(var e = 0; e < cdEntries && cp + 46 <= u8.length; e++){
+              if(dv.getUint32(cp, true) !== 0x02014b50) break;
+              var mth = dv.getUint16(cp + 10, true);
+              var cSize = dv.getUint32(cp + 20, true);
+              var nLen = dv.getUint16(cp + 28, true);
+              var exLen = dv.getUint16(cp + 30, true);
+              var cmLen = dv.getUint16(cp + 32, true);
+              var locOff = dv.getUint32(cp + 42, true);
+              var fName = new TextDecoder("utf-8").decode(u8.subarray(cp + 46, cp + 46 + nLen));
+              if(/\.(kml|xml|json|geojson)$/i.test(fName) && locOff + 30 <= u8.length){
+                var lNameLen = dv.getUint16(locOff + 26, true);
+                var lExLen = dv.getUint16(locOff + 28, true);
+                var dataStart = locOff + 30 + lNameLen + lExLen;
+                var dataSlice = u8.subarray(dataStart, dataStart + cSize);
+                if(cikartVeCoz(mth, dataSlice)) return;
+              }
+              cp += 46 + nLen + exLen + cmLen;
+            }
+            break;
+          }
+        }
+        // 2. Yedek: Local File Header (0x04034b50) taraması
+        var p = 0;
         while(p + 30 < u8.length && dv.getUint32(p, true) === 0x04034b50){
           var method = dv.getUint16(p + 8, true);
           var csz = dv.getUint32(p + 18, true);
           var nl = dv.getUint16(p + 26, true);
           var elen = dv.getUint16(p + 28, true);
-          var name = new TextDecoder().decode(u8.subarray(p + 30, p + 30 + nl));
+          var name = new TextDecoder("utf-8").decode(u8.subarray(p + 30, p + 30 + nl));
           var st = p + 30 + nl + elen;
-          var data = u8.subarray(st, st + csz);
-          if(/\.kml$/i.test(name)){
-            if(method === 0){ resolve(new TextDecoder().decode(data)); return; }
-            if(typeof DecompressionStream !== "undefined"){
-              var ds = new DecompressionStream("deflate-raw");
-              new Response(new Blob([data]).stream().pipeThrough(ds)).arrayBuffer().then(function(out){
-                resolve(new TextDecoder().decode(out));
-              }).catch(reject);
-              return;
-            }
+          var data = csz > 0 ? u8.subarray(st, st + csz) : u8.subarray(st);
+          if(/\.(kml|xml|json|geojson)$/i.test(name) || p === 0){
+            if(cikartVeCoz(method, data)) return;
           }
+          if(csz <= 0) break;
           p = st + csz;
         }
-        reject(new Error("KMZ içinde KML bulunamadı."));
+        reject(new Error("KMZ arşivinde KML verisi bulunamadı."));
       } catch(err){ reject(err); }
     });
   }
 
   function pgesParseKmlText(txt){
     var coords = [];
-    var re = /<coordinates>([\s\S]*?)<\/coordinates>/gi, m;
-    while((m = re.exec(txt))){
-      var pts = m[1].trim().split(/\s+/).map(function(s){
-        var p = s.split(",").map(Number);
-        return (p.length >= 2 && isFinite(p[0]) && isFinite(p[1])) ? [p[1], p[0]] : null; // [lat, lon]
-      }).filter(Boolean);
-      if(pts.length >= 3 && pts.length > coords.length) coords = pts;
+    var meta = {};
+    var cleanTxt = String(txt || "").trim();
+
+    // 1. Eğer TKGM GeoJSON (.json / .geojson) formatındaysa
+    if(cleanTxt.charAt(0) === "{"){
+      try {
+        var gj = JSON.parse(cleanTxt);
+        var feat = (gj.features && gj.features[0]) ? gj.features[0] : (gj.geometry ? gj : null);
+        if(feat){
+          var props = feat.properties || {};
+          Object.keys(props).forEach(function(k){
+            if(props[k] != null) meta[k] = String(props[k]);
+          });
+          var geom = feat.geometry || {};
+          var ring = null;
+          if(geom.type === "Polygon" && geom.coordinates && geom.coordinates[0]){
+            ring = geom.coordinates[0];
+          } else if(geom.type === "MultiPolygon" && geom.coordinates && geom.coordinates[0] && geom.coordinates[0][0]){
+            ring = geom.coordinates[0][0];
+          }
+          if(ring && ring.length >= 3){
+            coords = ring.map(function(pt){ return [Number(pt[1]), Number(pt[0])]; }).filter(function(pt){ return isFinite(pt[0]) && isFinite(pt[1]); });
+          }
+        }
+      } catch(e){}
     }
+
+    // 2. KML / XML <coordinates> veya <kml:coordinates> etiketlerini çözümle
+    if(coords.length < 3){
+      var re = /<(?:[\w-]+:)?coordinates[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?coordinates>/gi, m;
+      while((m = re.exec(cleanTxt))){
+        var rawBlock = m[1].trim().replace(/,\s+/g, ",");
+        var pts = rawBlock.split(/\s+/).map(function(s){
+          var p = s.split(",").map(Number);
+          return (p.length >= 2 && isFinite(p[0]) && isFinite(p[1])) ? [p[1], p[0]] : null; // [lat, lon]
+        }).filter(Boolean);
+        if(pts.length >= 3 && pts.length > coords.length) coords = pts;
+      }
+    }
+
+    // 3. KML metadata (<Data>, <SimpleData> ve <description> HTML tablosu)
+    var rData = /<(?:[\w-]+:)?(?:Data|SimpleData)\s+name\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/(?:[\w-]+:)?(?:Data|SimpleData)>/gi, md;
+    while((md = rData.exec(cleanTxt))){
+      var k = md[1].trim();
+      var vMatch = md[2].match(/<(?:[\w-]+:)?value[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?value>/i);
+      var val = (vMatch ? vMatch[1] : md[2]).replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/<[^>]+>/g, "").trim();
+      if(val) meta[k] = val;
+    }
+    var rTr = /<tr[^>]*>\s*<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>\s*<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>\s*<\/tr>/gi, mTr;
+    while((mTr = rTr.exec(cleanTxt))){
+      var tk = mTr[1].replace(/<[^>]+>/g, "").trim();
+      var tv = mTr[2].replace(/<[^>]+>/g, "").trim();
+      if(tk && tv && !meta[tk]) meta[tk] = tv;
+    }
+    var nameMatch = cleanTxt.match(/<Placemark[\s\S]*?<(?:[\w-]+:)?name[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?name>/i);
+    if(nameMatch && !meta.Ada && !meta.adaNo){
+      var nm = nameMatch[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1").replace(/<[^>]+>/g, "").trim();
+      var ap = nm.match(/(\d+)\s*[\/\-]\s*(\d+)/);
+      if(ap){ meta.Ada = ap[1]; meta.ParselNo = ap[2]; }
+    }
+
+    // 4. Eğer düz metin / CSV koordinat dosyasıysa
+    if(coords.length < 3 && !/</.test(cleanTxt)){
+      var lines = cleanTxt.split(/[\r\n]+/).map(function(s){return s.trim();}).filter(Boolean);
+      var parsed = [];
+      lines.forEach(function(l){
+        var nums = l.replace(/,/g, ".").match(/-?\d+(?:\.\d+)?/g);
+        if(nums && nums.length >= 2){
+          var a = parseFloat(nums[nums.length >= 3 && nums[0].length <= 2 ? 1 : 0]);
+          var b = parseFloat(nums[nums.length >= 3 && nums[0].length <= 2 ? 2 : 1]);
+          if(isFinite(a) && isFinite(b)) parsed.push([a, b]);
+        }
+      });
+      if(parsed.length >= 3){
+        if(parsed[0][0] > 25 && parsed[0][0] < 45 && parsed[0][1] > 25 && parsed[0][1] < 46){
+          coords = parsed.map(function(p){ return [p[0], p[1]]; });
+        } else {
+          coords = parsed.map(function(yx){ return tmProjToLl(yx[0], yx[1], 33, 1.0, "grs80"); });
+        }
+      }
+    }
+
     if(coords.length > 3 && Math.hypot(coords[0][0]-coords[coords.length-1][0], coords[0][1]-coords[coords.length-1][1]) < 1e-6){
       coords.pop();
-    }
-    var meta = {};
-    var rData = /<(?:Data|SimpleData)\s+name\s*=\s*"([^"]+)"[^>]*>([\s\S]*?)<\/(?:Data|SimpleData)>/gi;
-    while((m = rData.exec(txt))){
-      var k = m[1].trim();
-      var vMatch = m[2].match(/<value>([\s\S]*?)<\/value>/i);
-      var val = (vMatch ? vMatch[1] : m[2]).replace(/<[^>]+>/g, "").trim();
-      meta[k] = val;
     }
     return { coords: coords, meta: meta };
   }
@@ -5610,42 +5683,86 @@
 
   function pgesDosyaIsle(file){
     if(!file) return;
-    var isKmz = /\.kmz$/i.test(file.name);
+    if(el("pgesDropBaslik")) el("pgesDropBaslik").textContent = "⏳ " + file.name + " okunuyor…";
     file.arrayBuffer().then(function(buf){
-      return isKmz ? pgesUnzipKmz(buf) : Promise.resolve(new TextDecoder().decode(buf));
+      var u8 = new Uint8Array(buf);
+      var isZip = (u8.length >= 4 && u8[0] === 0x50 && u8[1] === 0x4B) || /\.kmz$/i.test(file.name);
+      return isZip ? pgesUnzipKmz(buf) : Promise.resolve(new TextDecoder("utf-8").decode(buf));
     }).then(function(txt){
       var res = pgesParseKmlText(txt);
       if(!res.coords || res.coords.length < 3){
-        alert("Yüklenen KML/KMZ dosyasında geçerli parsel poligonu bulunamadı.");
+        if(el("pgesDropBaslik")) el("pgesDropBaslik").textContent = "⚠️ Dosyada parsel poligonu bulunamadı — tekrar seçin";
+        alert("Yüklenen dosyada (" + file.name + ") en az 3 köşeli geçerli parsel koordinatı bulunamadı.");
         return;
       }
       PGES_STATE.coords = res.coords;
       var m = res.meta || {};
-      if(m["İl"] || m["Il"] || m["il"]) el("pgesIl").value = m["İl"] || m["Il"] || m["il"];
-      if(m["İlçe"] || m["Ilce"] || m["ilce"]) el("pgesIlce").value = m["İlçe"] || m["Ilce"] || m["ilce"];
-      if(m["Mahalle"] || m["mahalle"]) el("pgesMahalle").value = m["Mahalle"] || m["mahalle"];
-      if(m["Ada"] || m["ada"]) el("pgesAda").value = m["Ada"] || m["ada"];
-      if(m["ParselNo"] || m["Parsel"] || m["parsel"]) el("pgesParsel").value = m["ParselNo"] || m["Parsel"] || m["parsel"];
-      if(m["Pafta"] || m["pafta"]) el("pgesPafta").value = m["Pafta"] || m["pafta"];
-      if(m["Nitelik"]) el("pgesNitelik").value = m["Nitelik"];
-      if(m["Mevkii"]) el("pgesMevkii").value = m["Mevkii"];
-      if(m["Alan"]){
-        var alVal = parseFloat(String(m["Alan"]).replace(/\./g, "").replace(",", "."));
-        if(isFinite(alVal) && alVal > 0) el("pgesTapuAlan").value = alVal.toFixed(2);
+      var mIl = m["İl"] || m["Il"] || m["il"] || m["ilAd"] || m["IL"] || "";
+      var mIlce = m["İlçe"] || m["Ilce"] || m["ilce"] || m["ilceAd"] || m["ILCE"] || "";
+      var mMah = m["Mahalle"] || m["mahalle"] || m["mahalleAd"] || m["MAHALLE"] || m["Köy"] || "";
+      var mAda = m["Ada"] || m["ada"] || m["adaNo"] || m["ADA"] || "";
+      var mPrs = m["ParselNo"] || m["Parsel"] || m["parsel"] || m["parselNo"] || m["PARSEL"] || "";
+      var mPaf = m["Pafta"] || m["pafta"] || m["paftaNo"] || "";
+      var mNit = m["Nitelik"] || m["nitelik"] || "";
+      var mMev = m["Mevkii"] || m["mevkii"] || "";
+      var mAlan = m["Alan"] || m["alan"] || m["tapuAlan"] || "";
+
+      if(mIl) el("pgesIl").value = mIl;
+      if(mIlce) el("pgesIlce").value = mIlce;
+      if(mMah) el("pgesMahalle").value = mMah;
+      if(mAda) el("pgesAda").value = mAda;
+      if(mPrs) el("pgesParsel").value = mPrs;
+      if(mPaf) el("pgesPafta").value = mPaf;
+      if(mNit) el("pgesNitelik").value = mNit;
+      if(mMev) el("pgesMevkii").value = mMev;
+
+      var alVal = 0;
+      if(mAlan){
+        var sAl = String(mAlan).trim();
+        if(sAl.indexOf(",") >= 0 && sAl.indexOf(".") >= 0){
+          sAl = sAl.replace(/\./g, "").replace(",", ".");
+        } else if(sAl.indexOf(",") >= 0){
+          sAl = sAl.replace(",", ".");
+        }
+        alVal = parseFloat(sAl);
       }
+
       // En yakın TEİAŞ TM adını otomatik ata
       var cLat = res.coords.reduce(function(s,p){return s+p[0];},0)/res.coords.length;
       var cLon = res.coords.reduce(function(s,p){return s+p[1];},0)/res.coords.length;
       var yb = parselYakinTmBul(cLat, cLon, seciliRow);
       if(yb && yb.yakin && yb.yakin.tm){
         el("pgesTmAdi").value = yb.yakin.tm;
+        if(!mIl && yb.yakin.il) el("pgesIl").value = basharfBuyut(yb.yakin.il);
       }
-      if(el("pgesDurumRozet")){
-        el("pgesDurumRozet").textContent = "KML Yüklendi: " + file.name + " (" + res.coords.length + " Köşe)";
+
+      pgesAlanVeKoseHesapla();
+      if(!(isFinite(alVal) && alVal > 0) && PGES_STATE.hesapAlan > 0){
+        alVal = PGES_STATE.hesapAlan;
       }
+      if(isFinite(alVal) && alVal > 0){
+        el("pgesTapuAlan").value = alVal.toFixed(2);
+      }
+
       pgesCadYerlesimHesapla(false);
       pgesHaritadaGoster(true);
+
+      var drop = el("pgesDropArea");
+      if(drop) drop.classList.add("yuklendi");
+      if(el("pgesDropBaslik")){
+        el("pgesDropBaslik").textContent = "✅ " + file.name + " Yüklendi (" + res.coords.length + " Köşe · " + pgesTrFmt(PGES_STATE.tapuAlan, 2) + " m²)";
+      }
+      if(el("pgesDropAlt")){
+        el("pgesDropAlt").textContent = (el("pgesIl").value || "") + " / " + (el("pgesIlce").value || "") + " · Ada " + (el("pgesAda").value || "—") + " / Parsel " + (el("pgesParsel").value || "—") + " · Yeni dosya seçmek için tıklayın veya sürükleyin";
+      }
+      if(el("pgesDurumRozet")){
+        el("pgesDurumRozet").textContent = "✅ KML/KMZ Yüklendi: " + file.name + " (" + res.coords.length + " Köşe)";
+      }
+      if(el("pgesKpiSerit")){
+        try{ el("pgesKpiSerit").scrollIntoView({behavior:"smooth", block:"nearest"}); }catch(e){}
+      }
     }).catch(function(err){
+      if(el("pgesDropBaslik")) el("pgesDropBaslik").textContent = "❌ Dosya okunamadı — tekrar deneyin";
       alert("KML/KMZ okuma hatası: " + (err && err.message ? err.message : err));
     });
   }
@@ -5688,8 +5805,14 @@
     pgesHaritadaGoster(true);
   }
 
+  var PGES_KURULDU = false;
   function pgesInit(){
     if(!el("parselGesBolum")) return;
+    if(PGES_KURULDU){
+      pgesCadYerlesimHesapla(false);
+      return;
+    }
+    PGES_KURULDU = true;
     if(el("btnUstParselGesAc")){
       el("btnUstParselGesAc").addEventListener("click", function(){
         el("parselGesBolum").scrollIntoView({behavior:"smooth", block:"start"});
@@ -5697,19 +5820,31 @@
     }
     var drop = el("pgesDropArea"), fInp = el("pgesKmlInput");
     if(drop && fInp){
-      drop.addEventListener("click", function(){ fInp.click(); });
+      fInp.addEventListener("click", function(){ fInp.value = ""; });
       fInp.addEventListener("change", function(){
         if(fInp.files && fInp.files[0]) pgesDosyaIsle(fInp.files[0]);
       });
       ["dragenter","dragover"].forEach(function(ev){
-        drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("drag"); });
+        drop.addEventListener(ev, function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          drop.classList.add("drag");
+        });
       });
-      ["dragleave","drop"].forEach(function(ev){
-        drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("drag"); });
+      ["dragleave","dragend"].forEach(function(ev){
+        drop.addEventListener(ev, function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          drop.classList.remove("drag");
+        });
       });
       drop.addEventListener("drop", function(e){
-        if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]){
-          pgesDosyaIsle(e.dataTransfer.files[0]);
+        e.preventDefault();
+        e.stopPropagation();
+        drop.classList.remove("drag");
+        var dt = e.dataTransfer;
+        if(dt && dt.files && dt.files[0]){
+          pgesDosyaIsle(dt.files[0]);
         }
       });
     }
@@ -5793,6 +5928,7 @@
     pgesOrnekYukle("tekyildiz_155_19", false);
   }
 
+  pgesInit();
 
   fetch(DATA,{cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })

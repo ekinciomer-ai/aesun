@@ -155,7 +155,6 @@ a{color:inherit;text-decoration:none}
         <h2>⚡ 1. Aşama: Dağıtım Bölgesi (EDAŞ), İl ve Trafo Merkezi (TM) Seçimi <span class="rozet">Kapasite Sayfasından Canlı Veri</span></h2>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           <span style="font-size:.74rem;color:#64748B;font-weight:700">Hazır Referans Projeler:</span>
-          <button type="button" class="btn" onclick="hazirProjeYukle('tekyildiz')">⭐ Tekyıldız 2 MW GES (Aksaray)</button>
           <button type="button" class="btn" onclick="hazirProjeYukle('tugral')">🏭 Tuğral Döküm 1 MW GES</button>
           <button type="button" class="btn" onclick="hazirProjeYukle('akcakent')">🌾 Akçakent 1.65 MW GES</button>
         </div>
@@ -266,7 +265,7 @@ a{color:inherit;text-decoration:none}
                 </div>
                 <div id="evrakDurum_1" style="font-size:.73rem;color:#64748B">Durum: <b>❌ Henüz evrak yüklenmedi</b> (Dosya seçebilir veya buraya sürükleyebilirsiniz)</div>
               </div>
-              <div class="alan" style="grid-column:span 2"><label>Başvuru Sahibi Tüzel / Gerçek Kişi Unvanı</label><input type="text" id="fUnvan" value="TEKYILDIZ ENERJİ SANAYİ VE TİCARET A.Ş." oninput="hesaplaVeCiz()"></div>
+              <div class="alan" style="grid-column:span 2"><label>Başvuru Sahibi Tüzel / Gerçek Kişi Unvanı</label><input type="text" id="fUnvan" value="TUĞRAL DÖKÜM METAL PLASTİK SAN. VE TİC. LTD. ŞTİ." oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Vergi Kimlik No / T.C. Kimlik No</label><input type="text" id="fVkn" value="8360941258" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Vergi Dairesi</label><input type="text" id="fVd" value="Aksaray Vergi Dairesi" oninput="hesaplaVeCiz()"></div>
               <div class="alan"><label>Yönetmelik Kapsamı (Madde)</label>
@@ -857,7 +856,7 @@ a{color:inherit;text-decoration:none}
       il: "AKSARAY",
       tm: "AKSARAY TM",
       baglantiMetni: "31,5 kV OG Fider / Dağıtım Merkezi",
-      unvan: "TEKYILDIZ ENERJİ SANAYİ VE TİCARET A.Ş.",
+      unvan: "TUĞRAL DÖKÜM METAL PLASTİK SAN. VE TİC. LTD. ŞTİ.",
       vkn: "8360941258",
       vd: "Aksaray Vergi Dairesi",
       madde: "5.1.h",
@@ -3191,6 +3190,25 @@ a{color:inherit;text-decoration:none}
             if(el("bsvTmSec")) el("bsvTmSec").value = sec.tm;
             SECILI_TM_OBJ = sec;
             bsvTmSecildi(false);
+          }
+        }
+      } catch(e){}
+
+      try {
+        var rawPrs = localStorage.getItem("ae_secili_parsel_basvuru");
+        if(rawPrs){
+          var prs = JSON.parse(rawPrs);
+          if(prs && Array.isArray(prs.coords) && prs.coords.length >= 3){
+            if(prs.il && el("fParselIl")) el("fParselIl").value = String(prs.il).toLocaleUpperCase("tr");
+            if(prs.ilce && el("fParselIlce")) el("fParselIlce").value = String(prs.ilce).toLocaleUpperCase("tr");
+            if(prs.mahalle && el("fParselMahalle")) el("fParselMahalle").value = String(prs.mahalle).toLocaleUpperCase("tr");
+            if(prs.ada && el("fAda")) el("fAda").value = String(prs.ada);
+            if(prs.parsel && el("fParsel")) el("fParsel").value = String(prs.parsel);
+            if(prs.pafta && el("fPafta")) el("fPafta").value = String(prs.pafta);
+            if(prs.tapuAlan && el("fTapuAlan")) el("fTapuAlan").value = Number(prs.tapuAlan).toFixed(2);
+            STATE.coords = prs.coords.map(function(c){ return [Number(c[0]), Number(c[1])]; });
+            hesaplaVeCiz();
+            haritaGuncelle(true);
           }
         }
       } catch(e){}

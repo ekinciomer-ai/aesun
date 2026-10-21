@@ -565,7 +565,7 @@
         <button type="button" class="k-btn" id="btnPresetSebeke" title="Şebeke, İletim Ağı ve TM Kapasite Görünümü">⚡ Şebeke Modu</button>
         <button type="button" class="k-btn" id="btnPresetKisit" style="border-color:#9333EA;color:#6B21A8;background:#FAF5FF" title="Doğal Sit, Çevre Koruma, Orman ve Büyük Ova Kısıtlılık Katmanlarını Aç">🛡️ GES Arazi Kısıtlılık Modu</button>
         <button type="button" class="k-btn" id="btnTucbsKatalogAc" style="border-color:#0284C7;color:#075985;background:#F0F9FF">📚 TUCBS Katalog (375 Katman)</button>
-        <button type="button" class="k-btn" id="btnUstParselGesAc" style="border-color:#0F766E;color:#065F46;background:#ECFDF5;font-weight:800" title="Parsel Sorgula, KML/KMZ Ekle, CAD GES Yerleşimi, Aplikasyon Krokisi (ED50 3°/6°), Tek Hat ve Başvuru Formlarını Hazırla">📐 Parsel Sorgula · KML/KMZ &amp; CAD GES Paketi</button>
+        <button type="button" class="k-btn" id="btnUstParselGesAc" style="border-color:#0F766E;color:#065F46;background:#ECFDF5;font-weight:800" title="Harita Üzerinde Sorgu İçin Parsel Ekle (KML/KMZ Yükle veya Ada/Parsel Sorgula) ve Parsele Tıklayarak GES Başvurusu Yap">📐 Parsel Sorgula / Ekle (KML · KMZ)</button>
 
         <button type="button" class="k-btn" id="btnTmKonumEkleAc" style="border-color:#D97706;color:#92400E;background:#FFFBEB;font-weight:800" title="Haritada konum işareti olmayan TM'leri listele, haritadan yerini tıklayarak kalıcı olarak sisteme kaydet">📍 TM Konumu Ekle (<span id="eksikTmSayac">0</span>)</button>
         <button type="button" class="k-btn" id="btnTurkiyeOdak">🔍 Haritayı Sığdır</button>
@@ -720,6 +720,30 @@
           </div>
         </div>
 
+        <!-- 📐 Sorgu İçin Parsel Ekleme Çubuğu (Kayıt Yapmaz — Parsele Tıklayınca GES Başvurusu Yap'a Gider) -->
+        <div class="tm-ekle-panel" id="parselSorguPanel" style="background:linear-gradient(135deg,#F0FDFA,#ECFDF5);border-color:#14B8A6" hidden>
+          <div class="tm-ekle-bar">
+            <span class="tm-ekle-etiket" style="background:#0F766E">📐 PARSEL SORGULA / EKLE</span>
+            <label class="tm-ekle-btn" style="background:#0D9488;color:#fff;border-color:#0F766E;cursor:pointer;margin:0" title="TKGM KML, KMZ veya GeoJSON parsel dosyasını haritaya ekle">
+              📤 KML / KMZ Dosyası Ekle
+              <input type="file" id="haritaParselDosyaInput" accept=".kml,.kmz,.geojson,.json,.csv,.txt" style="display:none">
+            </label>
+            <input type="text" id="psIl" placeholder="İl (Örn: Aksaray)" style="min-height:28px;padding:0 7px;border:1px solid #5EEAD4;border-radius:6px;font:600 11.5px 'IBM Plex Sans',sans-serif;width:110px;background:#fff">
+            <input type="text" id="psIlce" placeholder="İlçe" style="min-height:28px;padding:0 7px;border:1px solid #5EEAD4;border-radius:6px;font:600 11.5px 'IBM Plex Sans',sans-serif;width:95px;background:#fff">
+            <input type="text" id="psMahalle" placeholder="Mahalle / Köy" style="min-height:28px;padding:0 7px;border:1px solid #5EEAD4;border-radius:6px;font:600 11.5px 'IBM Plex Sans',sans-serif;width:105px;background:#fff">
+            <input type="text" id="psAda" placeholder="Ada" style="min-height:28px;padding:0 7px;border:1px solid #5EEAD4;border-radius:6px;font:600 11.5px 'IBM Plex Sans',sans-serif;width:62px;background:#fff">
+            <input type="text" id="psParsel" placeholder="Parsel" style="min-height:28px;padding:0 7px;border:1px solid #5EEAD4;border-radius:6px;font:600 11.5px 'IBM Plex Sans',sans-serif;width:62px;background:#fff">
+            <button type="button" class="tm-ekle-btn" id="btnPsHaritadanSec" style="background:#EFF6FF;color:#1D4ED8;border-color:#93C5FD" title="Haritada parselin bulunduğu noktaya tıklayarak parsel ekle">🎯 Haritadan Yeri Tıkla</button>
+            <button type="button" class="tm-ekle-btn" id="btnPsGesBasvuruYap" style="background:#059669;color:#fff;border-color:#047857" hidden>⚡ GES Başvurusu Yap →</button>
+            <button type="button" class="tm-ekle-btn sil" id="btnPsTemizle" hidden>🗑️ Kaldır</button>
+            <button type="button" class="tm-ekle-btn kapat" id="btnPsKapat">✕ Kapat</button>
+          </div>
+          <div class="tm-ekle-alt" style="color:#065F46">
+            <span>👉 Sorgu için <b>📤 KML / KMZ Dosyası Ekle</b>'ye basın veya ada/parsel yazıp <b>haritaya tıklayın</b>. Haritadaki parsele tıklayınca açılan <b>⚡ GES Başvurusu Yap</b> butonuyla başvuru sayfasına geçebilirsiniz.</span>
+            <span class="tm-ekle-durum" id="psDurumMesaj" style="color:#0F766E">KML/KMZ yükleyin veya haritaya tıklayın.</span>
+          </div>
+        </div>
+
         <div id="harita"></div>
 
         <div class="lej">
@@ -757,14 +781,12 @@
         <h3>
           <span>Seçili Trafo Merkezi · Teknik Tek Hat &amp; Bara Şeması</span>
           <span style="display:inline-flex;gap:5px;flex-wrap:wrap">
-            <button type="button" class="k-btn on" id="btnTmGorunumBara" style="min-height:28px;font-size:11px;padding:0 8px" title="TEİAŞ 154/34,5 kV Bara ve 3 Dönem Kapasite Şeması">⚡ TM Bara Özeti</button>
-            <button type="button" class="k-btn" id="btnTmGorunumTekyildiz" style="min-height:28px;font-size:11px;padding:0 8px;border-color:#0F766E;color:#065F46;background:#ECFDF5" title="TEKYILDIZ TEK HAT ŞEMASI 2MW.dwg Örnek OG GES Tek Hat Şeması">📐 2 MW Örnek Tek Hat (Tekyıldız DWG)</button>
             <button type="button" class="k-btn" id="btnTmKisitHarita" style="min-height:28px;font-size:11px;padding:0 8px;border-color:#9333EA;color:#6B21A8;background:#FAF5FF">🛡️ Sit &amp; Orman</button>
-            <button type="button" class="shb-link-btn" id="btnTmSahibinden" style="min-height:28px;font-size:11px;padding:3px 8px">🟡 Arazi Katmanı</button>
+            <button type="button" class="shb-link-btn" id="btnTmSahibinden" style="min-height:28px;font-size:11px;padding:3px 8px">🟡 İlan Katmanı</button>
             <button type="button" class="k-btn" id="btnTmUydu" style="min-height:28px;font-size:11px;padding:0 8px">🛰️ Uydu</button>
           </span>
         </h3>
-        <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi, <b>TEKYILDIZ 2 MW örnek OG GES tek hat şeması</b>, harita arazi katmanı ve uygun satılık ilanlar güncellenir:</p>
+        <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi, kısıtlılık analizi, harita ilan katmanı ve uygun satılık ilanlar güncellenir:</p>
       </div>
       <div id="tmTekHatSvg"></div>
       <div id="tmKisitMatris" class="tm-kisit-matris"></div>
@@ -2585,7 +2607,7 @@
             +'</div>';
           }
           return '<div class="arazi-kpi">'
-            +'<div class="k-etiket">Harita Arazi Katmanı &amp; ENH</div>'
+            +'<div class="k-etiket">Harita İlan Katmanı &amp; ENH</div>'
             +'<div class="k-deger" style="color:#1E9E5A">0 – 5 km İdeal · ≤ 10 km</div>'
             +'<div class="k-alt">Büyük Ova koruma sınırı dışında · 6 uygun parsel bölgesi çizilir</div>'
           +'</div>';
@@ -3515,6 +3537,10 @@
           tmHaritaTiklandi(ev.latlng.lat, ev.latlng.lng, null);
           return;
         }
+        if(typeof PARSEL_SORGU_MODU !== "undefined" && PARSEL_SORGU_MODU && ev && ev.latlng){
+          parselSorguHaritaTiklandi(ev.latlng.lat, ev.latlng.lng, null);
+          return;
+        }
         if(typeof PGES_CIZIM_MODU !== "undefined" && PGES_CIZIM_MODU && ev && ev.latlng){
           PGES_CIZIM_NOKTALAR.push([ev.latlng.lat, ev.latlng.lng]);
           if(PGES_CIZIM_NOKTALAR.length >= 3){
@@ -3603,6 +3629,10 @@
           ly.on("click",function(ev){
             if(typeof TM_EKLE_MODU !== "undefined" && TM_EKLE_MODU && ev && ev.latlng){
               tmHaritaTiklandi(ev.latlng.lat, ev.latlng.lng, (f.properties.il||"").toLocaleUpperCase("tr"));
+              return;
+            }
+            if(typeof PARSEL_SORGU_MODU !== "undefined" && PARSEL_SORGU_MODU && ev && ev.latlng){
+              parselSorguHaritaTiklandi(ev.latlng.lat, ev.latlng.lng, (f.properties.il||"").toLocaleUpperCase("tr"));
               return;
             }
             if(ev && ev.latlng && MAP && KATMAN_ACIK.kapasite){
@@ -5749,11 +5779,50 @@
     } catch(e){}
     if(PGES_KURULDU) return;
     PGES_KURULDU = true;
-    ["btnUstParselGesAc","btnUstYeniBasvuru","btnAcYeniBasvuruSekme"].forEach(function(id){
+    ["btnUstYeniBasvuru","btnAcYeniBasvuruSekme"].forEach(function(id){
       if(el(id)){
         el(id).addEventListener("click", function(){ window.yeniBasvuruSekmesiAc("yeni"); });
       }
     });
+    if(el("btnUstParselGesAc")){
+      el("btnUstParselGesAc").addEventListener("click", function(){
+        if(PARSEL_SORGU_ACIK) parselSorguPanelKapat();
+        else parselSorguPanelAc();
+      });
+    }
+    if(el("btnPsKapat")){
+      el("btnPsKapat").addEventListener("click", parselSorguPanelKapat);
+    }
+    if(el("btnPsHaritadanSec")){
+      el("btnPsHaritadanSec").addEventListener("click", function(){
+        PARSEL_SORGU_MODU = !PARSEL_SORGU_MODU;
+        this.classList.toggle("on", PARSEL_SORGU_MODU);
+        if(el("harita")) el("harita").classList.toggle("harita-imlec-tm", PARSEL_SORGU_MODU);
+        if(el("psDurumMesaj")){
+          el("psDurumMesaj").textContent = PARSEL_SORGU_MODU
+            ? "🎯 Haritada parselin bulunduğu noktaya tıklayın."
+            : "KML/KMZ yükleyin veya 🎯 Haritadan Yeri Tıkla'yı seçin.";
+        }
+      });
+    }
+    if(el("haritaParselDosyaInput")){
+      el("haritaParselDosyaInput").addEventListener("change", function(){
+        if(this.files && this.files[0]){
+          haritaSorguDosyaIsle(this.files[0]);
+          this.value = "";
+        }
+      });
+    }
+    if(el("btnPsTemizle")){
+      el("btnPsTemizle").addEventListener("click", function(){
+        window.haritaSorguParselTemizle();
+      });
+    }
+    if(el("btnPsGesBasvuruYap")){
+      el("btnPsGesBasvuruYap").addEventListener("click", function(){
+        window.parseldenGesBasvurusuYap();
+      });
+    }
     if(el("btnAcKayitliBasvurularSekme")){
       el("btnAcKayitliBasvurularSekme").addEventListener("click", function(){ window.yeniBasvuruSekmesiAc("kayitli"); });
     }
@@ -5801,6 +5870,234 @@
   /* ============================================================================
      📍 TM KONUM EKLEME, TAŞIMA VE HATALI KONUMU SİLME MOTORU (SADE & UZAKLAŞMASIZ)
      ============================================================================ */
+  /* ============================================================================
+     📐 SORGU İÇİN PARSEL EKLEME MOTORU (KAYIT YAPMAZ, PARSELE TIKLAYINCA BAŞVURUYA GİDER)
+     ============================================================================ */
+  var PARSEL_SORGU_ACIK = false;
+  var PARSEL_SORGU_MODU = false;
+  var AKTIF_SORGU_PARSEL = null;
+
+  function parselSorguPanelAc(){
+    if(TM_EKLE_MODU) tmKonumEkleModuKapat();
+    PARSEL_SORGU_ACIK = true;
+    PARSEL_SORGU_MODU = true;
+    if(el("parselSorguPanel")) el("parselSorguPanel").hidden = false;
+    if(el("btnUstParselGesAc")) el("btnUstParselGesAc").classList.add("on");
+    if(el("btnPsHaritadanSec")) el("btnPsHaritadanSec").classList.add("on");
+    if(el("harita")) el("harita").classList.add("harita-imlec-tm");
+    var bakIl = haritaBakilanIlBul();
+    if(el("psIl") && !el("psIl").value && bakIl) el("psIl").value = basharfBuyut(bakIl);
+  }
+
+  function parselSorguPanelKapat(){
+    PARSEL_SORGU_ACIK = false;
+    PARSEL_SORGU_MODU = false;
+    if(el("parselSorguPanel")) el("parselSorguPanel").hidden = true;
+    if(el("btnUstParselGesAc")) el("btnUstParselGesAc").classList.remove("on");
+    if(el("btnPsHaritadanSec")) el("btnPsHaritadanSec").classList.remove("on");
+    if(el("harita")) el("harita").classList.remove("harita-imlec-tm");
+  }
+
+  function haritaSorguParselCiz(parselObj, odakla){
+    if(!MAP || !parselObj || !parselObj.coords || parselObj.coords.length < 3) return;
+    AKTIF_SORGU_PARSEL = parselObj;
+    if(!PGES_HARITA_KAT){
+      PGES_HARITA_KAT = L.layerGroup().addTo(MAP);
+    }
+    PGES_HARITA_KAT.clearLayers();
+
+    var latlngs = parselObj.coords.map(function(p){ return [p[0], p[1]]; });
+    var poly = L.polygon(latlngs, {
+      color: "#0F766E",
+      weight: 3.5,
+      fillColor: "#14B8A6",
+      fillOpacity: 0.36
+    }).addTo(PGES_HARITA_KAT);
+
+    var cLat = latlngs.reduce(function(s,p){return s+p[0];},0)/latlngs.length;
+    var cLon = latlngs.reduce(function(s,p){return s+p[1];},0)/latlngs.length;
+    var yb = parselYakinTmBul(cLat, cLon, seciliRow);
+    parselObj.yakinTm = (yb && yb.yakin) ? yb.yakin : (seciliRow || null);
+    parselObj.yakinKm = (yb && yb.km != null) ? yb.km : null;
+
+    var tmAd = parselObj.yakinTm ? parselObj.yakinTm.tm : "—";
+    var tmMwe = parselObj.yakinTm ? av(parselObj.yakinTm) : 0;
+    var kmTxt = parselObj.yakinKm != null ? (pgesTrFmt(parselObj.yakinKm, 2) + " km") : "—";
+
+    var popupHtml =
+      '<div style="min-width:255px;font-family:'IBM Plex Sans',sans-serif">'
+      +'<div style="background:#0F766E;color:#fff;font-weight:800;font-size:10.5px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">📐 SORGULANAN PARSEL (ÖN İNCELEME)</div>'
+      +'<div style="font-size:12.5px;font-weight:800;color:#0F172A;margin-bottom:4px">'
+        +esc(parselObj.il || "—")+' / '+esc(parselObj.ilce || "Merkez")+' / '+esc(parselObj.mahalle || "—")
+        +' · Ada '+esc(parselObj.ada || "—")+' / Parsel '+esc(parselObj.parsel || "—")
+      +'</div>'
+      +'<div style="font-size:11.5px;color:#334155;line-height:1.48;margin-bottom:8px">'
+        +'Tapu / Hesap Alanı: <b>'+pgesTrFmt(parselObj.tapuAlan || 0, 2)+' m²</b> ('+latlngs.length+' Köşe)<br>'
+        +'En Yakın TM: <b>'+esc(tmAd)+'</b> ('+kmTxt+')<br>'
+        +'TM Kalan Kapasite: <b style="color:'+(tmMwe > 0 ? '#059669' : '#D97706')+'">'+pgesTrFmt(tmMwe, 2)+' MWe</b>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;padding-top:6px;border-top:1px solid #E2E8F0">'
+        +'<button type="button" onclick="window.parseldenGesBasvurusuYap()" style="flex:1;padding:8px 12px;border-radius:7px;border:1px solid #047857;background:linear-gradient(135deg,#0D9488,#059669);color:#fff;font:800 12px Archivo,sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(5,150,105,.25)">⚡ GES Başvurusu Yap →</button>'
+        +'<button type="button" onclick="window.haritaSorguParselTemizle()" style="padding:8px 10px;border-radius:7px;border:1px solid #FCA5A5;background:#FEF2F2;color:#B91C1C;font:800 11.5px Archivo,sans-serif;cursor:pointer" title="Parseli Haritadan Kaldır">🗑️</button>'
+      +'</div>'
+      +'</div>';
+
+    poly.bindPopup(popupHtml, { maxWidth: 320, autoPan: false });
+
+    if(parselObj.yakinTm && parselObj.yakinTm.lat != null){
+      L.polyline([[cLat, cLon], [parselObj.yakinTm.lat, parselObj.yakinTm.lon]], {
+        color: "#0F766E", weight: 2.5, dashArray: "6 5"
+      }).bindTooltip('⚡ En Yakın TM: '+parselObj.yakinTm.tm+' ('+kmTxt+')', {sticky:true, className:"edas-tip"}).addTo(PGES_HARITA_KAT);
+    }
+
+    if(odakla){
+      try{ MAP.fitBounds(poly.getBounds(), {padding:[55,55], maxZoom:16}); }catch(e){}
+    }
+    try{ poly.openPopup(); }catch(e){}
+
+    if(el("btnPsGesBasvuruYap")) el("btnPsGesBasvuruYap").hidden = false;
+    if(el("btnPsTemizle")) el("btnPsTemizle").hidden = false;
+    if(el("psDurumMesaj")){
+      el("psDurumMesaj").innerHTML = "✅ <b>" + esc(parselObj.ada || "—") + "/" + esc(parselObj.parsel || "—") + "</b> (" + pgesTrFmt(parselObj.tapuAlan || 0, 0) + " m²) eklendi — parsele tıklayıp <b>⚡ GES Başvurusu Yap</b>'a basın.";
+    }
+  }
+
+  function parselSorguHaritaTiklandi(lat, lon, tiklananIl){
+    var ilAd = (el("psIl") && el("psIl").value.trim()) || (tiklananIl ? basharfBuyut(tiklananIl) : basharfBuyut(haritaBakilanIlBul() || "Aksaray"));
+    var ilceAd = (el("psIlce") && el("psIlce").value.trim()) || "Merkez";
+    var mahAd = (el("psMahalle") && el("psMahalle").value.trim()) || "Merkez";
+    var adaNo = (el("psAda") && el("psAda").value.trim()) || "101";
+    var prsNo = (el("psParsel") && el("psParsel").value.trim()) || "1";
+
+    if(el("psIl")) el("psIl").value = ilAd;
+    if(el("psAda") && !el("psAda").value) el("psAda").value = adaNo;
+    if(el("psParsel") && !el("psParsel").value) el("psParsel").value = prsNo;
+
+    // Tıklanan noktada ~20.000 m² (160m x 125m) parsel poligonu oluştur (zoom bozulmadan)
+    var dLat = 0.00056, dLon = 0.00090;
+    var coords = [
+      [lat + dLat, lon - dLon],
+      [lat + dLat, lon + dLon],
+      [lat - dLat, lon + dLon],
+      [lat - dLat, lon - dLon]
+    ];
+    PGES_STATE.coords = coords;
+    pgesAlanVeKoseHesapla();
+
+    haritaSorguParselCiz({
+      il: ilAd.toLocaleUpperCase("tr"),
+      ilce: ilceAd.toLocaleUpperCase("tr"),
+      mahalle: mahAd.toLocaleUpperCase("tr"),
+      ada: adaNo,
+      parsel: prsNo,
+      tapuAlan: Math.round(PGES_STATE.hesapAlan || 20000),
+      coords: coords
+    }, false);
+  }
+
+  function haritaSorguDosyaIsle(file){
+    if(!file) return;
+    if(el("psDurumMesaj")) el("psDurumMesaj").textContent = "⏳ " + file.name + " okunuyor…";
+    file.arrayBuffer().then(function(buf){
+      var u8 = new Uint8Array(buf);
+      var isZip = (u8.length >= 4 && u8[0] === 0x50 && u8[1] === 0x4B) || /\.kmz$/i.test(file.name);
+      return isZip ? pgesUnzipKmz(buf) : Promise.resolve(new TextDecoder("utf-8").decode(buf));
+    }).then(function(txt){
+      var res = pgesParseKmlText(txt);
+      if(!res.coords || res.coords.length < 3){
+        alert("Yüklenen dosyada (" + file.name + ") geçerli parsel poligon koordinatı bulunamadı.");
+        return;
+      }
+      PGES_STATE.coords = res.coords;
+      pgesAlanVeKoseHesapla();
+
+      var m = res.meta || {};
+      var mIl = m["İl"] || m["Il"] || m["il"] || m["ilAd"] || m["IL"] || (el("psIl") ? el("psIl").value : "") || "";
+      var mIlce = m["İlçe"] || m["Ilce"] || m["ilce"] || m["ilceAd"] || m["ILCE"] || (el("psIlce") ? el("psIlce").value : "") || "Merkez";
+      var mMah = m["Mahalle"] || m["mahalle"] || m["mahalleAd"] || m["MAHALLE"] || m["Köy"] || (el("psMahalle") ? el("psMahalle").value : "") || "";
+      var mAda = m["Ada"] || m["ada"] || m["adaNo"] || m["ADA"] || (el("psAda") ? el("psAda").value : "") || "101";
+      var mPrs = m["ParselNo"] || m["Parsel"] || m["parsel"] || m["parselNo"] || m["PARSEL"] || (el("psParsel") ? el("psParsel").value : "") || "1";
+      var mPaf = m["Pafta"] || m["pafta"] || m["paftaNo"] || "";
+      var mAlan = m["Alan"] || m["alan"] || m["tapuAlan"] || "";
+
+      var cLat = res.coords.reduce(function(s,p){return s+p[0];},0)/res.coords.length;
+      var cLon = res.coords.reduce(function(s,p){return s+p[1];},0)/res.coords.length;
+      var yb = parselYakinTmBul(cLat, cLon, seciliRow);
+      if(!mIl && yb && yb.yakin && yb.yakin.il) mIl = yb.yakin.il;
+
+      if(el("psIl")) el("psIl").value = mIl;
+      if(el("psIlce")) el("psIlce").value = mIlce;
+      if(el("psMahalle")) el("psMahalle").value = mMah;
+      if(el("psAda")) el("psAda").value = mAda;
+      if(el("psParsel")) el("psParsel").value = mPrs;
+
+      var alVal = 0;
+      if(mAlan){
+        var sAl = String(mAlan).trim();
+        if(sAl.indexOf(",") >= 0 && sAl.indexOf(".") >= 0) sAl = sAl.replace(/\./g, "").replace(",", ".");
+        else if(sAl.indexOf(",") >= 0) sAl = sAl.replace(",", ".");
+        alVal = parseFloat(sAl);
+      }
+      if(!(isFinite(alVal) && alVal > 0)) alVal = PGES_STATE.hesapAlan || 20000;
+
+      haritaSorguParselCiz({
+        il: String(mIl || "AKSARAY").toLocaleUpperCase("tr"),
+        ilce: String(mIlce || "MERKEZ").toLocaleUpperCase("tr"),
+        mahalle: String(mMah || "MERKEZ").toLocaleUpperCase("tr"),
+        ada: String(mAda || "101"),
+        parsel: String(mPrs || "1"),
+        pafta: String(mPaf || ""),
+        tapuAlan: alVal,
+        coords: res.coords
+      }, true);
+    }).catch(function(err){
+      alert("KML/KMZ okuma hatası: " + (err && err.message ? err.message : err));
+    });
+  }
+
+  window.haritaSorguParselTemizle = function(){
+    AKTIF_SORGU_PARSEL = null;
+    if(PGES_HARITA_KAT) PGES_HARITA_KAT.clearLayers();
+    if(el("btnPsGesBasvuruYap")) el("btnPsGesBasvuruYap").hidden = true;
+    if(el("btnPsTemizle")) el("btnPsTemizle").hidden = true;
+    if(el("psDurumMesaj")) el("psDurumMesaj").textContent = "Parsel haritadan kaldırıldı.";
+  };
+
+  window.parseldenGesBasvurusuYap = function(){
+    if(!AKTIF_SORGU_PARSEL){
+      window.yeniBasvuruSekmesiAc("yeni");
+      return;
+    }
+    var p = AKTIF_SORGU_PARSEL;
+    var r = p.yakinTm || seciliRow || (tumu && tumu[0]) || null;
+    try {
+      if(r){
+        localStorage.setItem("ae_secili_tm_basvuru", JSON.stringify(r));
+      }
+      localStorage.setItem("ae_secili_parsel_basvuru", JSON.stringify({
+        il: p.il || (r && r.il) || "AKSARAY",
+        ilce: p.ilce || "MERKEZ",
+        mahalle: p.mahalle || "MERKEZ",
+        ada: p.ada || "101",
+        parsel: p.parsel || "1",
+        pafta: p.pafta || "",
+        tapuAlan: p.tapuAlan || 20000,
+        coords: p.coords,
+        tm: r ? r.tm : "",
+        bara: r ? r.bara : "Tek",
+        edas: r ? r.edas : "",
+        topMwe: r ? av(r) : 0,
+        zaman: Date.now()
+      }));
+    } catch(e){}
+    var q = ["kaynak=parsel"];
+    if(r && r.tm){
+      q.push("tm=" + encodeURIComponent(r.tm));
+      if(r.il) q.push("il=" + encodeURIComponent(r.il));
+    }
+    window.open("basvuru.html?" + q.join("&"), "_blank");
+  };
+
   var TM_OZEL_DEPO_KEY = "ae_ozel_tm_konumlar_v1";
   var TM_EKLE_MODU = false;
   var TM_EKLE_TUMU_GOSTER = false;

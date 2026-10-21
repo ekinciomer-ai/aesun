@@ -1345,14 +1345,104 @@
     "DARAN HAVZA TM": { ilce: "Sarıveliler", mahalle: "Daran" },
     "KEPEZKAYA HAVZA TM": { ilce: "Ermenek", mahalle: "Kepezkaya" },
     "MİSLİOVA TM": { ilce: "Merkez", mahalle: "Misli (Konaklı)" },
-    "KALABA TM": { ilce: "Avanos", mahalle: "Kalaba" },
+    "KALABA TM": { il: "NEVŞEHİR", ilce: "Avanos", mahalle: "Kalaba" },
     "PETLAS TM": { ilce: "Merkez", mahalle: "Özbağ" }
+  };
+
+  var GECERLI_ILCELER = {
+    "adana": ["aladag","ceyhan","cukurova","feke","imamoglu","karaisali","karatas","kozan","pozanti","saimbeyli","saricam","seyhan","tufanbeyli","yumurtalik","yuregir"],
+    "adiyaman": ["besni","celikhan","gerger","golbasi","kahta","samsat","sincik","tut"],
+    "afyonkarahisar": ["basmakci","bayat","bolvadin","cay","cobanlar","dazkiri","dinar","emirdag","evciler","hocalar","ihsaniye","iscehisar","kiziloren","sandikli","sinanpasa","sultandagi","suhut"],
+    "agri": ["diyadin","dogubayazit","eleskirt","hamur","patnos","taslicay","tutak"],
+    "aksaray": ["agacoren","eskil","gulagac","guzelyurt","ortakoy","sariyahsi","sultanhani"],
+    "amasya": ["goynucek","gumushacikoy","hamamozu","merzifon","suluova","tasova"],
+    "ankara": ["akyurt","altindag","ayas","bala","beypazari","camlidere","cankaya","cubuk","elmadag","etimesgut","evren","golbasi","gudul","haymana","kahramankazan","kalecik","kecioren","kizilcahamam","mamak","nallihan","polatli","pursaklar","sincan","sereflikochisar","yenimahalle"],
+    "antalya": ["akseki","aksu","alanya","demre","dosemealti","elmali","finike","gazipasa","gundogmus","ibradi","kas","kemer","kepez","konyaalti","korkuteli","kumluca","manavgat","muratpasa","serik"],
+    "ardahan": ["cildir","damal","gole","hanak","posof"],
+    "artvin": ["ardanuc","arhavi","borcka","hopa","kemalpasa","murgul","savsat","yusufeli"],
+    "aydin": ["bozdogan","buharkent","cine","didim","efeler","germencik","incirliova","karacasu","karpuzlu","kocarli","kosk","kusadasi","kuyucak","nazilli","soke","sultanhisar","yenipazar"],
+    "balikesir": ["altieylul","ayvalik","balya","bandirma","bigadic","burhaniye","dursunbey","edremit","erdek","gomec","gonen","havran","ivrindi","karesi","kepsut","manyas","marmara","savastepe","sindirgi","susurluk"],
+    "bartin": ["amasra","kurucasile","ulus"],
+    "batman": ["besiri","gercus","hasankeyf","kozluk","sason"],
+    "bayburt": ["aydintepe","demirozu"],
+    "bilecik": ["bozuyuk","golpazari","inhisar","osmaneli","pazaryeri","sogut","yenipazar"],
+    "bingol": ["adakli","genc","karliova","kigi","solhan","yayladere","yedisu"],
+    "bitlis": ["adilcevaz","ahlat","guroymak","hizan","mutki","tatvan"],
+    "bolu": ["dortdivan","gerede","goynuk","kibriscik","mengen","mudurnu","seben","yenicaga"],
+    "burdur": ["aglasun","altinyayla","bucak","cavdir","celtikci","golhisar","karamanli","kemer","tefenni","yesilova"],
+    "bursa": ["buyukorhan","gemlik","gursu","harmancik","inegol","iznik","karacabey","keles","kestel","mudanya","mustafakemalpasa","nilufer","orhaneli","orhangazi","osmangazi","yenisehir","yildirim"],
+    "canakkale": ["ayvacik","bayramic","biga","bozcaada","can","eceabat","ezine","gelibolu","gokceada","lapseki","yenice"],
+    "cankiri": ["atkaracalar","bayramoren","cerkes","eldivan","ilgaz","kizilirmak","korgun","kursunlu","orta","sabanozu","yaprakli"],
+    "corum": ["alaca","bayat","bogazkale","dodurga","iskilip","kargi","lacin","mecitozu","oguzlar","ortakoy","osmancik","sungurlu","ugurludag"],
+    "denizli": ["acipayam","babadag","baklan","bekilli","beyagac","bozkurt","buldan","cal","cameli","cardak","civril","guney","honaz","kale","merkezefendi","pamukkale","saraykoy","serinhisar","tavas"],
+    "diyarbakir": ["baglar","bismil","cermik","cinar","cungus","dicle","egil","ergani","hani","hazro","kayapinar","kocakoy","kulp","lice","silvan","sur","yenisehir"],
+    "duzce": ["akcakoca","cumayeri","cilimli","golyaka","gumusova","kaynasli","yigilca"],
+    "edirne": ["enez","havsa","ipsala","kesan","lalapasa","meric","suloglu","uzunkopru"],
+    "elazig": ["agin","alacakaya","aricak","baskil","karakocan","keban","kovancilar","maden","palu","sivrice"],
+    "erzincan": ["cayirli","ilic","kemah","kemaliye","otlukbeli","refahiye","tercan","uzumlu"],
+    "erzurum": ["askale","aziziye","cat","hinis","horasan","ispir","karacoban","karayazi","koprukoy","narman","oltu","olur","palandoken","pasinler","pazaryolu","senkaya","tekman","tortum","uzundere","yakutiye"],
+    "eskisehir": ["alpu","beylikova","cifteler","gunyuzu","han","inonu","mahmudiye","mihalgazi","mihaliccik","odunpazari","saricakaya","seyitgazi","sivrihisar","tepebasi"],
+    "gaziantep": ["araban","islahiye","karkamis","nizip","nurdagi","oguzeli","sahinbey","sehitkamil","yavuzeli"],
+    "giresun": ["alucra","bulancak","camoluk","canakci","dereli","dogankent","espiye","eynesil","gorele","guce","kesap","piraziz","sebinkarahisar","tirebolu","yaglidere"],
+    "gumushane": ["kelkit","kose","kurtun","siran","torul"],
+    "hakkari": ["cukurca","derecik","semdinli","yuksekova"],
+    "hatay": ["altinozu","antakya","arsuz","belen","defne","dortyol","erzin","hassa","iskenderun","kirikhan","kumlu","payas","reyhanli","samandag","yayladagi"],
+    "igdir": ["aralik","karakoyunlu","tuzluca"],
+    "isparta": ["aksu","atabey","egirdir","gelendost","gonen","keciborlu","senirkent","sutculer","sarkikaraagac","uluborlu","yalvac","yenisarbademli"],
+    "istanbul": ["adalar","arnavutkoy","atasehir","avcilar","bagcilar","bahcelievler","bakirkoy","basaksehir","bayrampasa","besiktas","beykoz","beylikduzu","beyoglu","buyukcekmece","catalca","cekmekoy","esenler","esenyurt","eyupsultan","fatih","gaziosmanpasa","gungoren","kadikoy","kagithane","kartal","kucukcekmece","maltepe","pendik","sancaktepe","sariyer","silivri","sultanbeyli","sultangazi","sile","sisli","tuzla","umraniye","uskudar","zeytinburnu"],
+    "izmir": ["aliaga","balcova","bayindir","bayrakli","bergama","beydag","bornova","buca","cesme","cigli","dikili","foca","gaziemir","guzelbahce","karabaglar","karaburun","karsiyaka","kemalpasa","kinik","kiraz","konak","menderes","menemen","narlidere","odemis","seferihisar","selcuk","tire","torbali","urla"],
+    "kahramanmaras": ["afsin","andirin","caglayancerit","dulkadiroglu","ekinozu","elbistan","goksun","nurhak","onikisubat","pazarcik","turkoglu"],
+    "karabuk": ["eflani","eskipazar","ovacik","safranbolu","yenice"],
+    "karaman": ["ayranci","basyayla","ermenek","kazimkarabekir","sariveliler"],
+    "kars": ["akyaka","arpacay","digor","kagizman","sarikamis","selim","susuz"],
+    "kastamonu": ["abana","agli","arac","azdavay","bozkurt","cide","catalzeytin","daday","devrekani","doganyurt","hanonu","ihsangazi","inebolu","kure","pinarbasi","seydiler","senpazar","taskopru","tosya"],
+    "kayseri": ["akkisla","bunyan","develi","felahiye","hacilar","incesu","kocasinan","melikgazi","ozvatan","pinarbasi","sarioglan","sariz","talas","tomarza","yahyali","yesilhisar"],
+    "kirikkale": ["bahsili","baliseyh","celebi","delice","karakecili","keskin","sulakyurt","yahsihan"],
+    "kirklareli": ["babaeski","demirkoy","kofcaz","luleburgaz","pehlivankoy","pinarhisar","vize"],
+    "kirsehir": ["akcakent","akpinar","boztepe","cicekdagi","kaman","mucur"],
+    "kilis": ["elbeyli","musabeyli","polateli"],
+    "kocaeli": ["basiskele","cayirova","darica","derince","dilovasi","gebze","golcuk","izmit","kandira","karamursel","kartepe","korfez"],
+    "konya": ["ahirli","akoren","aksehir","altinekin","beysehir","bozkir","cihanbeyli","celtik","cumra","derbent","derebucak","doganhisar","emirgazi","eregli","guneysinir","hadim","halkapinar","huyuk","ilgin","kadinhani","karapinar","karatay","kulu","meram","sarayonu","selcuklu","seydisehir","taskent","tuzlukcu","yalihuyuk","yunak"],
+    "kutahya": ["altintas","aslanapa","cavdarhisar","domanic","dumlupinar","emet","gediz","hisarcik","pazarlar","simav","saphane","tavsanli"],
+    "malatya": ["akcadag","arapgir","arguvan","battalgazi","darende","dogansehir","doganyol","hekimhan","kale","kuluncak","puturge","yazihan","yesilyurt"],
+    "manisa": ["ahmetli","akhisar","alasehir","demirci","golmarmara","gordes","kirkagac","koprubasi","kula","salihli","sarigol","saruhanli","selendi","soma","sehzadeler","turgutlu","yunusemre"],
+    "mardin": ["artuklu","dargecit","derik","kiziltepe","mazidagi","midyat","nusaybin","omerli","savur","yesilli"],
+    "mersin": ["akdeniz","anamur","aydincik","bozyazi","camliyayla","erdemli","gulnar","mezitli","mut","silifke","tarsus","toroslar","yenisehir"],
+    "mugla": ["bodrum","dalaman","datca","fethiye","kavaklidere","koycegiz","marmaris","mentese","milas","ortaca","seydikemer","ula","yatagan"],
+    "mus": ["bulanik","haskoy","korkut","malazgirt","varto"],
+    "nevsehir": ["acigol","avanos","derinkuyu","gulsehir","hacibektas","kozakli","urgup"],
+    "nigde": ["altunhisar","bor","camardi","ciftlik","ulukisla"],
+    "ordu": ["akkus","altinordu","aybasti","camas","catalpinar","caybasi","fatsa","golkoy","gulyali","gurgentepe","ikizce","kabaduz","kabatas","korgan","kumru","mesudiye","persembe","ulubey","unye"],
+    "osmaniye": ["bahce","duzici","hasanbeyli","kadirli","sumbas","toprakkale"],
+    "rize": ["ardesen","camlihemsin","cayeli","derepazari","findikli","guneysu","hemsin","ikizdere","iyidere","kalkandere","pazar"],
+    "sakarya": ["adapazari","akyazi","arifiye","erenler","ferizli","geyve","hendek","karapurcek","karasu","kaynarca","kocaali","pamukova","sapanca","serdivan","sogutlu","tarakli"],
+    "samsun": ["19-mayis","alacam","asarcik","atakum","ayvacik","bafra","canik","carsamba","havza","ilkadim","kavak","ladik","salipazari","tekkekoy","terme","vezirkopru","yakakent"],
+    "siirt": ["baykan","eruh","kurtalan","pervari","sirvan","tillo"],
+    "sinop": ["ayancik","boyabat","dikmen","duragan","erfelek","gerze","sarayduzu","turkeli"],
+    "sivas": ["akincilar","altinyayla","divrigi","dogansar","gemerek","golova","gurun","hafik","imranli","kangal","koyulhisar","sarkisla","susehri","ulas","yildizeli","zara"],
+    "sanliurfa": ["akcakale","birecik","bozova","ceylanpinar","eyyubiye","halfeti","haliliye","harran","hilvan","karakopru","siverek","suruc","viransehir"],
+    "sirnak": ["beytussebap","cizre","guclukonak","idil","silopi","uludere"],
+    "tekirdag": ["cerkezkoy","corlu","ergene","hayrabolu","kapakli","malkara","marmaraereglisi","muratli","saray","suleymanpasa","sarkoy"],
+    "tokat": ["almus","artova","basciftlik","erbaa","niksar","pazar","resadiye","sulusaray","turhal","yesilyurt","zile"],
+    "trabzon": ["akcaabat","arakli","arsin","besikduzu","carsibasi","caykara","dernekpazari","duzkoy","hayrat","koprubasi","macka","of","ortahisar","surmene","salpazari","tonya","vakfikebir","yomra"],
+    "tunceli": ["cemisgezek","hozat","mazgirt","nazimiye","ovacik","pertek","pulumur"],
+    "usak": ["banaz","esme","karahalli","sivasli","ulubey"],
+    "van": ["bahcesaray","baskale","caldiran","catak","edremit","ercis","gevas","gurpinar","ipekyolu","muradiye","ozalp","saray","tusba"],
+    "yalova": ["altinova","armutlu","cinarcik","ciftlikkoy","termal"],
+    "yozgat": ["akdagmadeni","aydincik","bogazliyan","candir","cayiralan","cekerek","kadisehri","saraykent","sarikaya","sorgun","sefaatli","yenifakili","yerkoy"],
+    "zonguldak": ["alapli","caycuma","devrek","eregli","gokcebey","kilimli","kozlu"]
   };
 
   function trSlug(s){
     var m = {"Ç":"c","ç":"c","Ğ":"g","ğ":"g","İ":"i","I":"i","ı":"i","Ö":"o","ö":"o","Ş":"s","ş":"s","Ü":"u","ü":"u","â":"a","î":"i","û":"u"};
     return String(s||"").replace(/[ÇçĞğİIıÖöŞşÜüâîû]/g, function(ch){ return m[ch]||ch; })
       .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  function gecerliIlceMi(ilS, ilceS){
+    if(!ilS || !ilceS || ilceS === "merkez" || ilceS === ilS) return false;
+    var liste = GECERLI_ILCELER[ilS];
+    return !!(liste && liste.indexOf(ilceS) >= 0);
   }
 
   function basharfBuyut(s){
@@ -1366,7 +1456,7 @@
       return ARAZI_ONBELLEK[k];
     }
     if(TM_ILCE_HARITA[r.tm]){
-      return { ilce: TM_ILCE_HARITA[r.tm].ilce, mahalle: TM_ILCE_HARITA[r.tm].mahalle, yol: "" };
+      return { il: TM_ILCE_HARITA[r.tm].il || r.il, ilce: TM_ILCE_HARITA[r.tm].ilce, mahalle: TM_ILCE_HARITA[r.tm].mahalle, yol: "" };
     }
     var ad = String(r.tm||"")
       .replace(/\s*\(.*?\)\s*/g, " ")
@@ -1377,33 +1467,48 @@
     if(!ad || ad.toLocaleUpperCase("tr") === ilUp || /^(KUZEY|GÜNEY|DOĞU|BATI)\s+/i.test(ad)){
       return { ilce: "Merkez", mahalle: "", yol: "" };
     }
-    return { ilce: basharfBuyut(ad), mahalle: "", yol: "" };
+    var adayIlce = basharfBuyut(ad);
+    if(gecerliIlceMi(trSlug(r.il), trSlug(adayIlce))){
+      return { ilce: adayIlce, mahalle: "", yol: "" };
+    }
+    return { ilce: "Merkez", mahalle: adayIlce, yol: "" };
   }
 
   function shbUrlUret(il, ilce, kat, sira, ekKelime){
     var ilS = trSlug(il);
-    var ilceS = (ilce && trSlug(ilce) !== "merkez" && trSlug(ilce) !== ilS) ? trSlug(ilce) : "";
+    var hamIlceS = trSlug(ilce);
+    var ilceS = gecerliIlceMi(ilS, hamIlceS) ? hamIlceS : "";
     var konum = ilceS ? (ilS + "-" + ilceS) : ilS;
-    var base = "https://www.sahibinden.com/satilik-arsa";
-    var q = String(ekKelime||"").trim();
-    if(kat === "tarla"){
-      base = "https://www.sahibinden.com/satilik-arsa-tarla/" + konum;
-    } else if(kat === "sanayi"){
-      base = "https://www.sahibinden.com/satilik-arsa-sanayi-imarli/" + ilS;
-    } else if(kat === "bag"){
-      base = "https://www.sahibinden.com/satilik-arsa-bag-bahce/" + konum;
-    } else if(kat === "ges"){
+    var base = "https://www.sahibinden.com/satilik-arsa/" + konum;
+    var params = [];
+    var kullanSira = sira || "price_asc";
+
+    if(kat === "il_geneli"){
       base = "https://www.sahibinden.com/satilik-arsa/" + ilS;
-      q = (ilceS ? ilce + " " : "") + (q ? q + " ges" : "ges");
+      params.push("pagingSize=50");
+    } else if(kat === "ges"){
+      base = "https://www.sahibinden.com/satilik-arsa/" + konum;
+      kullanSira = "date_desc";
+      params.push("pagingSize=50");
     } else if(kat === "trafo"){
       base = "https://www.sahibinden.com/satilik-arsa/" + konum;
-      q = q ? q + " trafo" : "trafo";
+      kullanSira = "price_desc";
+    } else if(kat === "arsa"){
+      base = "https://www.sahibinden.com/satilik-arsa/" + konum;
+      params.push("pagingSize=50");
+    } else if(kat === "sanayi"){
+      base = "https://www.sahibinden.com/satilik-arsa/" + ilS;
+      kullanSira = "date_desc";
     } else {
       base = "https://www.sahibinden.com/satilik-arsa/" + konum;
     }
-    var params = [];
-    if(sira) params.push("sorting=" + encodeURIComponent(sira));
-    if(q) params.push("query_text=" + encodeURIComponent(q));
+
+    if(kullanSira) params.push("sorting=" + encodeURIComponent(kullanSira));
+    var q = String(ekKelime||"").trim();
+    if(q){
+      var tamSorgu = il + (ilceS ? " " + ilce : "") + " " + q;
+      params.push("query_text=" + encodeURIComponent(tamSorgu));
+    }
     return base + (params.length ? ("?" + params.join("&")) : "");
   }
 
@@ -1411,7 +1516,7 @@
     var baralar = tumu.filter(function(x){ return x.il===r.il && x.tm===r.tm; });
     var topAkt = baralar.reduce(function(s,x){return s+av(x);},0);
     var bilgi = tmIlceCozumle(r);
-    var il = r.il;
+    var il = (bilgi && bilgi.il) ? bilgi.il : r.il;
     var ilce = (bilgi && bilgi.ilce) ? bilgi.ilce : "Merkez";
     var mahalle = (bilgi && bilgi.mahalle) ? bilgi.mahalle : "";
     var sira = el("shbSira") ? el("shbSira").value : "price_asc";
@@ -1433,7 +1538,7 @@
         tip: "🌾 EN UYGUN GES TARLA PAKETİ",
         tipS: "yesil",
         mesafe: "📍 TM Çevresi 0 – 5 km İdeal Halka (1,9 km)",
-        baslik: il + " / " + ilce + (mahalle ? " (" + mahalle + " ve Çevresi)" : "") + " · GES Uygun Satılık Tarla İlanları",
+        baslik: il + " / " + ilce + (mahalle ? " (" + mahalle + " ve Çevresi)" : "") + " · GES Uygun Satılık Tarla & Arazi İlanları",
         aciklama: r.tm + " trafo merkezine kuş uçuşu 0–5 km mesafede, 34,5 kV OG enerji nakil hattı maliyeti en düşük satılık kuru tarım / marjinal tarla ilanları.",
         alan: "≥ " + fmt0(minDonum * 1000) + " m² (" + fmt0(minDonum) + "+ Dönüm)",
         guc: "~" + fmt(minDonum / 16) + " – " + fmt(Math.max(1, refMwe)) + " MWe AC",
@@ -1441,17 +1546,17 @@
       },
       {
         oneCikan: true,
-        kisa: "20 Dönüm · GES İlanı",
+        kisa: "20 Dönüm · Yeni İlanlar",
         mwpKisa: "1,50 MWp",
         dLat: -0.016, dLon: 0.021, km: "2,4 km GD",
-        tip: "☀️ DOĞRUDAN GES İBARELİ İLANLAR",
+        tip: "☀️ YENİ EKLENEN GES ARAZİLERİ",
         tipS: "",
         mesafe: "⚡ Çağrı Mektubu & Yatırım Uygun (2,4 km)",
-        baslik: il + " (" + ilce + ") · Açıklamasında \"GES / Güneş Enerjisi\" Geçen Satılık Araziler",
-        aciklama: "Sahibinden.com üzerinde ilan başlığında veya açıklamasında doğrudan 'GES'e uygun', 'Güneş Enerjisi', 'Marjinal Raporlu' ibaresi yer alan yatırımlık araziler.",
+        baslik: il + " (" + ilce + ") · Güncel Eklenen Yatırımlık Satılık Araziler",
+        aciklama: il + " / " + ilce + " bölgesinde Sahibinden.com üzerine en son eklenen, GES yatırımına ve marjinal tarım değerlendirmesine uygun güncel satılık araziler.",
         alan: "15.000 – 100.000+ m²",
         guc: "1,00 – 6,00+ MWe GES",
-        url: shbUrlUret(il, ilce, "ges", sira, ekKelime)
+        url: shbUrlUret(il, ilce, "ges", "date_desc", ekKelime)
       },
       {
         oneCikan: false,
@@ -1461,53 +1566,53 @@
         tip: "🔌 TRAFO & OG HAT YAKINI",
         tipS: "mavi",
         mesafe: "📐 Kadastral Yol & ENH Yakını (1,8 km)",
-        baslik: il + " / " + ilce + " · \"Trafo Yakını / Elektrik Hattı İçinde\" Satılık Araziler",
-        aciklama: r.tm + " (" + (r.bara || "Tek") + ") barası ve 34,5 kV dağıtım fiderleri güzergahında, ilan açıklamasında 'trafo' geçen satılık tarla ve arsalar.",
+        baslik: il + " / " + ilce + " · Trafo Merkezi ve Dağıtım Hattı Çevresi Satılık Araziler",
+        aciklama: r.tm + " (" + (r.bara || "Tek") + ") barası ve 34,5 kV dağıtım fiderleri güzergahındaki yüksek metrekareli satılık tarla ve arsalar.",
         alan: "10.000 – 50.000 m² (10–50 Dönüm)",
         guc: "~0,60 – 3,00 MWe AC",
-        url: shbUrlUret(il, ilce, "trafo", sira, ekKelime)
+        url: shbUrlUret(il, ilce, "trafo", "price_desc", ekKelime)
       },
       {
         oneCikan: false,
         kisa: "18 Dönüm · " + (mahalle || ilce).slice(0,12),
         mwpKisa: "1,35 MWp",
         dLat: -0.022, dLon: -0.019, km: "3,1 km GB",
-        tip: "🎯 KÖY / MAHALLE NOKTA ARAMA",
+        tip: "🎯 İLÇE & KÖY GENİŞ LİSTE",
         tipS: "yesil",
         mesafe: mahalle ? ("📍 " + mahalle + " Mevkii (3,1 km)") : ("📍 " + ilce + " Kırsalı (3,1 km)"),
-        baslik: (mahalle ? (ilce + " / " + mahalle + " Köyü") : (ilce + " Merkez & Köyleri")) + " · Müstakil Tapulu Tarla İlanları",
-        aciklama: "Trafo merkezinin coğrafi koordinatına en yakın yerleşim olan " + (mahalle || ilce) + " mevkiindeki satılık tarla, ham toprak ve bağ/bahçe ilanları.",
+        baslik: (mahalle ? (ilce + " / " + mahalle + " Mevkii") : (ilce + " Merkez & Köyleri")) + " · Müstakil Tapulu Tarla İlanları",
+        aciklama: "Trafo merkezinin coğrafi koordinatına en yakın yerleşim olan " + (mahalle || ilce) + " ve " + ilce + " ilçesindeki tüm satılık tarla ve araziler.",
         alan: "≥ 15.000 m² (1 MWe Standart)",
         guc: "~1,25 MWp DC (~2,1 GWh/yıl)",
-        url: shbUrlUret(il, ilce, "arsa", sira, mahalle || ekKelime || "tarla")
+        url: shbUrlUret(il, ilce, "arsa", sira, ekKelime)
       },
       {
         oneCikan: false,
         kisa: tamDonum + " Dönüm · Büyük GES",
         mwpKisa: mwp + " MWp",
         dLat: 0.036, dLon: -0.032, km: "5,2 km KB",
-        tip: "📐 BÜYÜK ÖLÇEKLİ GES PARSELLERİ",
+        tip: "📐 İL GENELİ BÜYÜK GES PARSELLERİ",
         tipS: "",
         mesafe: "🚜 5 – 10 km Ekonomik Çember (5,2 km)",
-        baslik: il + " / " + ilce + " · Tam Kapasite (" + fmt0(tamDonum) + "+ Dönüm) Büyük Ölçekli Satılık Tarlalar",
-        aciklama: r.tm + " trafo merkezinin toplam kapasitesini veya çoklu lisanssız / depolamalı GES yatırımlarını karşılayacak büyük yüzölçümlü araziler.",
+        baslik: il + " Geneli · Tam Kapasite (" + fmt0(tamDonum) + "+ Dönüm) Büyük Ölçekli Satılık Araziler",
+        aciklama: r.tm + " trafo merkezinin toplam kapasitesini veya çoklu lisanssız / depolamalı GES yatırımlarını karşılayacak " + il + " genelindeki tüm satılık araziler.",
         alan: "≥ " + fmt0(tamDonum * 1000) + " m² (" + fmt0(tamDonum) + " Dönüm)",
         guc: "~" + mwp + " MWp DC Potansiyel",
-        url: shbUrlUret(il, "", "tarla", sira, ilce !== "Merkez" ? ilce : ekKelime)
+        url: shbUrlUret(il, "", "il_geneli", sira, ekKelime)
       },
       {
         oneCikan: false,
         kisa: "12 Dönüm · Sanayi/OSB",
         mwpKisa: "1,00 MWp",
         dLat: -0.005, dLon: 0.031, km: "2,6 km D",
-        tip: "🏭 OSB & SANAYİ İMARLI ARSALAR",
+        tip: "🏭 OSB & SANAYİ YATIRIM ARSALARI",
         tipS: "mavi",
         mesafe: "🏢 " + (r.edas || "EDAŞ / OSB Şebekesi") + " (2,6 km)",
-        baslik: il + " (" + ilce + ") · Sanayi, Depolama ve Ticari İmarlı Satılık Yatırım Arsaları",
-        aciklama: "Üretim tesisi + bütünleşik GES (5/1.c – 5/1.h tüketim birleştirme) veya OSB içi yatırım kurulumuna uygun sanayi/depolama imarlı arsalar.",
+        baslik: il + " (" + ilce + ") · Sanayi, Depolama ve Ticari Yatırım Arsaları",
+        aciklama: "Üretim tesisi + bütünleşik GES (5/1.c – 5/1.h tüketim birleştirme) veya OSB içi yatırım kurulumuna uygun " + il + " bölgesi satılık arsalar.",
         alan: "5.000 – 40.000 m² Sanayi Parseli",
         guc: "Çatı + Arazi Öz Tüketim GES",
-        url: shbUrlUret(il, ilce, "sanayi", sira, ekKelime)
+        url: shbUrlUret(il, ilce, "sanayi", "date_desc", ekKelime)
       }
     ];
   }
@@ -2072,16 +2177,20 @@
 
     var cacheKey = r.il + "|" + r.tm;
     if(!ARAZI_ONBELLEK[cacheKey]){
-      ARAZI_ONBELLEK[cacheKey] = { ilce: bilgi.ilce, mahalle: bilgi.mahalle, yol: "", canli: [], yuklendi: false };
-      var apiUrl = "../api/arazi.php?il=" + encodeURIComponent(r.il)
+      var hedefIl = (bilgi && bilgi.il) ? bilgi.il : r.il;
+      var sablonVar = !!TM_ILCE_HARITA[r.tm];
+      ARAZI_ONBELLEK[cacheKey] = { il: hedefIl, ilce: bilgi.ilce, mahalle: bilgi.mahalle, yol: "", canli: [], yuklendi: false };
+      var apiUrl = "../api/arazi.php?il=" + encodeURIComponent(hedefIl)
         + "&ilce=" + encodeURIComponent(bilgi.ilce||"")
         + "&tm=" + encodeURIComponent(r.tm)
         + "&mwe=" + encodeURIComponent(topAkt)
         + (r.lat!=null ? "&lat=" + encodeURIComponent(r.lat) + "&lon=" + encodeURIComponent(r.lon) : "");
       fetch(apiUrl).then(function(res){ return res.ok ? res.json() : null; }).then(function(d){
         if(d && d.durum === "ok"){
-          ARAZI_ONBELLEK[cacheKey].ilce = d.ilce || bilgi.ilce;
-          ARAZI_ONBELLEK[cacheKey].mahalle = d.mahalle || bilgi.mahalle;
+          if(!sablonVar && d.ilce && gecerliIlceMi(trSlug(hedefIl), trSlug(d.ilce))){
+            ARAZI_ONBELLEK[cacheKey].ilce = d.ilce;
+          }
+          if(!ARAZI_ONBELLEK[cacheKey].mahalle && d.mahalle) ARAZI_ONBELLEK[cacheKey].mahalle = d.mahalle;
           ARAZI_ONBELLEK[cacheKey].yol = d.yol || "";
           ARAZI_ONBELLEK[cacheKey].canli = d.canli_ilanlar || [];
           ARAZI_ONBELLEK[cacheKey].yuklendi = true;
@@ -2098,10 +2207,19 @@
           .then(function(nd){
             if(nd && nd.address){
               var adr = nd.address;
-              var bIlce = adr.town || adr.county || adr.city_district || adr.municipality || "";
-              var bMah = adr.village || adr.suburb || adr.neighbourhood || adr.quarter || adr.hamlet || "";
-              if(bIlce) ARAZI_ONBELLEK[cacheKey].ilce = bIlce;
-              if(bMah) ARAZI_ONBELLEK[cacheKey].mahalle = bMah;
+              var adaylar = [adr.county, adr.town, adr.city_district, adr.municipality];
+              if(!sablonVar){
+                for(var i=0; i<adaylar.length; i++){
+                  if(adaylar[i] && gecerliIlceMi(trSlug(hedefIl), trSlug(adaylar[i]))){
+                    ARAZI_ONBELLEK[cacheKey].ilce = adaylar[i];
+                    break;
+                  }
+                }
+              }
+              var bMah = adr.village || adr.suburb || adr.neighbourhood || adr.quarter || adr.hamlet || adr.town || "";
+              if(bMah && trSlug(bMah) !== trSlug(ARAZI_ONBELLEK[cacheKey].ilce) && !ARAZI_ONBELLEK[cacheKey].mahalle){
+                ARAZI_ONBELLEK[cacheKey].mahalle = bMah;
+              }
               if(adr.road) ARAZI_ONBELLEK[cacheKey].yol = adr.road;
               if(seciliRow && seciliRow.tm === r.tm && seciliRow.il === r.il){
                 tmAraziRender(r, topAkt, ARAZI_ONBELLEK[cacheKey]);
@@ -2114,7 +2232,7 @@
   }
 
   function tmAraziRender(r, topAkt, bilgi){
-    var il = r.il;
+    var il = (bilgi && bilgi.il) ? bilgi.il : r.il;
     var ilce = (bilgi && bilgi.ilce) ? bilgi.ilce : "Merkez";
     var mahalle = (bilgi && bilgi.mahalle) ? bilgi.mahalle : "";
     var yol = (bilgi && bilgi.yol) ? bilgi.yol : "";
@@ -2131,7 +2249,7 @@
     var tamDonum = Math.max(16, Math.round(refMwe * 16));
     var anaShbUrl = shbUrlUret(il, ilce, kat, sira, ekKelime);
     var tarlaUrl = shbUrlUret(il, ilce, "tarla", sira, "");
-    var gesUrl = shbUrlUret(il, ilce, "ges", sira, "");
+    var gesUrl = shbUrlUret(il, ilce, "ges", "date_desc", "");
 
     if(el("btnShbAna")) el("btnShbAna").href = anaShbUrl;
     if(el("btnShbHizliBar")) el("btnShbHizliBar").href = tarlaUrl;
@@ -2241,7 +2359,7 @@
             +'<div><b>Fiyat</b><span>'+esc(ci.fiyat || 'İlanda Gör')+'</span></div>'
           +'</div>'
           +'<div class="ik-alt">'
-            +'<a href="'+esc(ci.sahibinden_url || tarlaUrl)+'" target="_blank" rel="noopener" class="shb-link-btn">🟡 Sahibinden İlanları ↗</a>'
+            +'<a href="'+esc(tarlaUrl)+'" target="_blank" rel="noopener" class="shb-link-btn">🟡 Sahibinden İlanları ↗</a>'
             +'<a href="'+esc(ci.url)+'" target="_blank" rel="noopener" class="k-btn">İlan Detayı ↗</a>'
           +'</div>'
         +'</div>';
@@ -2286,16 +2404,16 @@
     }
 
     if(el("araziYerlesimler")){
-      var ilTms = tumu.filter(function(x){ return x.il === il; });
+      var ilS = trSlug(il);
+      var ilTms = tumu.filter(function(x){ return x.il === r.il; });
       var ilceler = {};
-      if(ilce) ilceler[ilce] = 1;
-      if(mahalle) ilceler[mahalle] = 1;
+      if(ilce && gecerliIlceMi(ilS, trSlug(ilce))) ilceler[ilce] = 1;
       ilTms.forEach(function(x){
         var c = tmIlceCozumle(x).ilce;
-        if(c && c !== "Merkez") ilceler[c] = 1;
+        if(c && gecerliIlceMi(ilS, trSlug(c))) ilceler[c] = 1;
       });
       var chipHtml = '<b style="color:var(--ink2)">📍 '+esc(il)+' Bölgesi Hızlı Sahibinden Tarla Kısayolları:</b> '
-        +'<a class="yerlesim-chip" href="'+esc(shbUrlUret(il, "", "tarla", sira, ""))+'" target="_blank" rel="noopener">🟡 '+esc(il)+' Geneli Tüm Tarlalar ↗</a>';
+        +'<a class="yerlesim-chip" href="'+esc(shbUrlUret(il, "", "il_geneli", sira, ""))+'" target="_blank" rel="noopener">🟡 '+esc(il)+' Geneli Tüm Araziler ↗</a>';
       Object.keys(ilceler).slice(0, 10).forEach(function(ad){
         chipHtml += '<a class="yerlesim-chip" href="'+esc(shbUrlUret(il, ad, "tarla", sira, ""))+'" target="_blank" rel="noopener">🌾 '+esc(il)+' / '+esc(ad)+' Satılık Tarla ↗</a>';
       });

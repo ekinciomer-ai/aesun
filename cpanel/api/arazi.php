@@ -59,7 +59,7 @@ $mwe  = max(0.0, (float)($_GET['mwe'] ?? 1.0));
 $lat  = isset($_GET['lat']) && $_GET['lat'] !== '' ? (float)$_GET['lat'] : null;
 $lon  = isset($_GET['lon']) && $_GET['lon'] !== '' ? (float)$_GET['lon'] : null;
 
-$anahtar = md5(strtolower($il . '|' . $ilce . '|' . $tm . '|' . ($lat ? round($lat, 3) : '') . '|' . ($lon ? round($lon, 3) : '')));
+$anahtar = md5(strtolower('v2|' . $il . '|' . $ilce . '|' . $tm . '|' . ($lat ? round($lat, 3) : '') . '|' . ($lon ? round($lon, 3) : '')));
 $cache_dosya = $dizin . '/arazi_' . $anahtar . '.json';
 
 if (is_file($cache_dosya) && (time() - filemtime($cache_dosya) < 1800)) {
@@ -80,7 +80,7 @@ if ($lat !== null && $lon !== null && $lat > 35 && $lat < 43 && $lon > 25 && $lo
     $nom = @json_decode($nom_raw, true);
     if (is_array($nom) && !empty($nom['address'])) {
       $adr = $nom['address'];
-      $bul_ilce = $adr['town'] ?? $adr['county'] ?? $adr['city_district'] ?? $adr['municipality'] ?? '';
+      $bul_ilce = $adr['county'] ?? $adr['town'] ?? $adr['city_district'] ?? $adr['municipality'] ?? '';
       if ($bul_ilce && !$ilce) {
         $ilce = $bul_ilce;
       }
@@ -91,7 +91,7 @@ if ($lat !== null && $lon !== null && $lat > 35 && $lat < 43 && $lon > 25 && $lo
 }
 
 $il_slug = tr_slug($il);
-$ilce_slug = ($ilce && strtolower($ilce) !== 'merkez') ? tr_slug($ilce) : '';
+$ilce_slug = ($ilce && strtolower($ilce) !== 'merkez' && tr_slug($ilce) !== $il_slug) ? tr_slug($ilce) : '';
 $konum_slug = $ilce_slug ? ($il_slug . '-' . $ilce_slug) : $il_slug;
 
 // Canlı ilan keşfi (Emlak / Arama indekslerinden uygun m2 satılık tarla/arsa ilanları)
@@ -132,7 +132,7 @@ if ($html) {
           'm2'     => $m2,
           'fiyat'  => $fiyat,
           'url'    => $u,
-          'sahibinden_url' => 'https://www.sahibinden.com/satilik-arsa-tarla/' . $konum_slug . '?sorting=price_asc'
+          'sahibinden_url' => 'https://www.sahibinden.com/satilik-arsa/' . $konum_slug . '?sorting=price_asc'
         ];
         if (count($canli_ilanlar) >= 6) break 2;
       }
@@ -153,12 +153,12 @@ $sonuc = [
   'konum_slug' => $konum_slug,
   'onerilen_m2'=> $min_m2,
   'sahibinden' => [
-    'tarla'   => 'https://www.sahibinden.com/satilik-arsa-tarla/' . $konum_slug . '?sorting=price_asc',
-    'arsa'    => 'https://www.sahibinden.com/satilik-arsa/' . $konum_slug . '?sorting=price_asc',
-    'ges'     => 'https://www.sahibinden.com/satilik-arsa/' . $il_slug . '?query_text=' . rawurlencode(($ilce ? $ilce . ' ' : '') . 'ges'),
-    'trafo'   => 'https://www.sahibinden.com/satilik-arsa/' . $il_slug . '?query_text=' . rawurlencode(($ilce ? $ilce . ' ' : '') . 'trafo'),
-    'mahalle' => 'https://www.sahibinden.com/satilik-arsa/' . $il_slug . '?query_text=' . rawurlencode($mahalle ?: ($ilce ?: $il)),
-    'sanayi'  => 'https://www.sahibinden.com/satilik-arsa-sanayi-imarli/' . $il_slug,
+    'tarla'   => 'https://www.sahibinden.com/satilik-arsa/' . $konum_slug . '?sorting=price_asc',
+    'arsa'    => 'https://www.sahibinden.com/satilik-arsa/' . $konum_slug . '?pagingSize=50&sorting=price_asc',
+    'ges'     => 'https://www.sahibinden.com/satilik-arsa/' . $konum_slug . '?pagingSize=50&sorting=date_desc',
+    'trafo'   => 'https://www.sahibinden.com/satilik-arsa/' . $konum_slug . '?sorting=price_desc',
+    'mahalle' => 'https://www.sahibinden.com/satilik-arsa/' . $konum_slug . '?sorting=date_desc',
+    'sanayi'  => 'https://www.sahibinden.com/satilik-arsa/' . $il_slug . '?sorting=date_desc',
     'harita'  => 'https://www.sahibinden.com/haritada-emlak-arama'
   ],
   'canli_ilanlar' => $canli_ilanlar,

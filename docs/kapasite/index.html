@@ -43,17 +43,68 @@
   .hizli-bolge button{min-height:34px;padding:0 12px;border:1px solid var(--line);background:#FAFBFD;color:var(--ink2);border-radius:99px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s}
   .hizli-bolge button:hover,.hizli-bolge button.on{background:var(--red);color:#fff;border-color:var(--red)}
 
-  /* Harita & Alternatif Katman Kontrol Paneli */
-  .harita-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:0 6px 22px rgba(20,24,31,.05)}
-  .katman-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#F6F8FB;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}
-  .katman-grup{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .katman-grup .k-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--mut2);margin-right:4px}
-  .k-btn{min-height:32px;padding:0 11px;border:1px solid #D0D7E2;background:#fff;color:var(--ink2);border-radius:8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
-  .k-btn:hover{border-color:var(--char);color:var(--ink)}
-  .k-btn.on{background:#182232;color:#fff;border-color:#182232}
+  /* Harita & Profesyonel CBS (GIS/SCADA) Komuta Merkezi */
+  .cbs-kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  @media(max-width:1060px){.cbs-kpi-strip{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:640px){.cbs-kpi-strip{grid-template-columns:1fr 1fr}}
+  .cbs-kpi-card{background:linear-gradient(180deg,#111C2D 0%,#0B1320 100%);color:#F8FAFC;border:1px solid #1E293B;border-radius:13px;padding:11px 14px;display:flex;flex-direction:column;justify-content:space-between;gap:4px;box-shadow:0 4px 14px rgba(11,19,32,.12)}
+  .cbs-kpi-card .ck-ust{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#94A3B8}
+  .cbs-kpi-card .ck-ust span.ck-ikon{font-size:13px}
+  .cbs-kpi-card .ck-val{font-family:Archivo,sans-serif;font-size:19px;font-weight:800;color:#FFFFFF;line-height:1.15;font-variant-numeric:tabular-nums}
+  .cbs-kpi-card .ck-val.yesil{color:#34D399}
+  .cbs-kpi-card .ck-val.mavi{color:#38BDF8}
+  .cbs-kpi-card .ck-val.kehribar{color:#FBBF24}
+  .cbs-kpi-card .ck-alt{font-size:11px;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .harita-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:0 8px 28px rgba(15,23,42,.06)}
+  .cbs-ust-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+  .cbs-ust-sol h2{margin:0;font-family:Archivo,sans-serif;font-weight:800;font-size:18.5px;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .cbs-ust-sol .cbs-pro-badge{background:linear-gradient(90deg,#0F172A,#1E3A8A);color:#38BDF8;border:1px solid #1D4ED8;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:.04em;text-transform:uppercase}
+  .cbs-ust-sag{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+
+  .cbs-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:12px;padding:8px 12px;margin-bottom:12px}
+  .katman-grup{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .katman-grup .k-lbl{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#475569;margin-right:3px}
+  .k-btn{min-height:31px;padding:0 10px;border:1px solid #CBD5E1;background:#fff;color:var(--ink2);border-radius:8px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+  .k-btn:hover{border-color:var(--char);color:var(--ink);transform:translateY(-1px)}
+  .k-btn.on{background:#0F172A;color:#fff;border-color:#0F172A}
   .k-btn.on.red{background:var(--red);border-color:var(--red);color:#fff}
-  #harita{height:510px;border-radius:12px;border:1px solid var(--line);overflow:hidden;z-index:0;position:relative}
-  @media(max-width:760px){#harita{height:380px}}
+  .cbs-preset-grup{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .cbs-opaklik-kutu{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:3px 9px;font-size:11px;font-weight:700;color:#334155}
+  .cbs-opaklik-kutu input[type=range]{width:74px;accent-color:#0284C7;cursor:pointer}
+
+  /* 2 Sütunlu CBS Çalışma Alanı: Sol Katman Matrisi + Sağ Harita Tuvali */
+  .cbs-workspace{display:grid;grid-template-columns:310px 1fr;gap:12px;align-items:stretch}
+  .cbs-workspace.dock-kapali{grid-template-columns:1fr}
+  .cbs-workspace.dock-kapali .cbs-dock{display:none}
+  @media(max-width:1024px){.cbs-workspace{grid-template-columns:1fr}}
+  .cbs-dock{background:#0F172A;color:#F8FAFC;border:1px solid #1E293B;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;max-height:610px;overflow-y:auto}
+  .cbs-dock::-webkit-scrollbar{width:6px}
+  .cbs-dock::-webkit-scrollbar-thumb{background:#334155;border-radius:99px}
+  .cbs-dock-baslik{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 6px;border-bottom:1px solid #1E293B;font-family:Archivo,sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.04em;color:#94A3B8;text-transform:uppercase}
+  .cbs-dock-baslik .aktif-sayac{background:#1E293B;color:#38BDF8;padding:2px 7px;border-radius:99px;font-size:10.5px}
+
+  .cbs-kat-kategori{background:#162033;border:1px solid #26354D;border-radius:10px;padding:8px 9px;display:flex;flex-direction:column;gap:5px}
+  .cbs-kat-kategori .kat-baslik{display:flex;justify-content:space-between;align-items:center;font-family:Archivo,sans-serif;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#CBD5E1;margin-bottom:2px}
+  .cbs-kat-kategori .kat-baslik small{font-size:9.5px;color:#64748B;font-weight:600;text-transform:none}
+  .cbs-kat-liste{display:flex;flex-direction:column;gap:4px}
+  .cbs-dock .k-btn{width:100%;justify-content:flex-start;min-height:32px;padding:4px 9px;background:#0F172A;border:1px solid #26354D;color:#CBD5E1;border-radius:7px;font-size:11.5px;font-weight:600;text-align:left;position:relative}
+  .cbs-dock .k-btn:hover{background:#1E293B;border-color:#475569;color:#FFF;transform:none}
+  .cbs-dock .k-btn .k-etiket-metin{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cbs-dock .k-btn .k-kaynak-pill{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:4px;background:#1E293B;color:#94A3B8;border:1px solid #334155;margin-left:auto}
+  .cbs-dock .k-btn.on{background:#1E293B;color:#FFFFFF;border-color:#38BDF8;font-weight:700;box-shadow:inset 3px 0 0 #38BDF8}
+  .cbs-dock .k-btn.on.red{background:#2A1215;border-color:#EF4444;box-shadow:inset 3px 0 0 #EF4444}
+  .cbs-dock .k-btn.on.sit-katman-btn{background:#2E1035;border-color:#D946EF;box-shadow:inset 3px 0 0 #D946EF}
+  .cbs-dock .k-btn.on.koruma-katman-btn{background:#0D2818;border-color:#10B981;box-shadow:inset 3px 0 0 #10B981}
+  .cbs-dock .k-btn.on.orman-katman-btn{background:#092617;border-color:#22C55E;box-shadow:inset 3px 0 0 #22C55E}
+  .cbs-dock .k-btn.on.ova-altlik-btn{background:#142E1B;border-color:#4ADE80;box-shadow:inset 3px 0 0 #4ADE80}
+  .cbs-dock .k-btn.on.risk-katman-btn{background:#2B1908;border-color:#F97316;box-shadow:inset 3px 0 0 #F97316}
+  .cbs-dock .k-btn.on.shb-katman-btn{background:#2B2608;border-color:#FACC15;color:#FEF08A;box-shadow:inset 3px 0 0 #FACC15}
+  .cbs-dock .k-btn.on .k-kaynak-pill{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)}
+
+  .cbs-harita-kolon{display:flex;flex-direction:column;gap:8px;min-width:0}
+  #harita{height:610px;border-radius:12px;border:1px solid var(--line);overflow:hidden;z-index:0;position:relative}
+  @media(max-width:760px){#harita{height:420px}}
   /* Leaflet poligon tıklamalarında tarayıcının dikdörtgen odak kutusu (bounding-box outline) çizmesini tamamen engelle */
   .leaflet-interactive:focus,path.leaflet-interactive:focus,.leaflet-container :focus,svg path:focus,svg g:focus{outline:none!important}
   .leaflet-popup-content{font:inherit;font-size:13px;line-height:1.5;margin:10px 12px}
@@ -109,6 +160,51 @@
   .ova-gezgin-bar select{min-height:32px;padding:0 10px;border:1px solid #86EFAC;border-radius:8px;font:inherit;font-size:12.5px;font-weight:700;color:#14532D;background:#fff;max-width:360px}
   .ova-harita-etiket{background:rgba(20,83,45,.92);color:#FEF9C3;border:1.5px solid #86EFAC;border-radius:7px;padding:2px 7px;font-family:Archivo,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer;text-align:center}
   .ova-harita-etiket b{color:#4ADE80}
+
+  /* TUCBS Sit, Çevre Koruma & Orman Gezgini Çubuğu */
+  .koruma-gezgin-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(90deg,#FDF4FF 0%,#ECFEFF 50%,#F0FDF4 100%);border:1px solid #C084FC;border-radius:11px;padding:9px 13px;margin-bottom:10px;font-size:12px}
+  .koruma-gezgin-bar[hidden]{display:none!important}
+  .koruma-gezgin-bar .sol{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#3B0764}
+  .koruma-gezgin-bar .koruma-pill{background:#9333EA;color:#fff;font-family:Archivo,sans-serif;font-weight:800;font-size:10.5px;padding:2px 8px;border-radius:6px;letter-spacing:.03em}
+  .koruma-gezgin-bar .sag{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .koruma-gezgin-bar select{min-height:32px;padding:0 9px;border:1px solid #C084FC;border-radius:8px;font:inherit;font-size:12px;font-weight:700;color:#1E1B4B;background:#fff;max-width:310px}
+  .koruma-harita-etiket{background:rgba(15,23,42,.92);color:#F8FAFC;border:1.5px solid #38BDF8;border-radius:7px;padding:2px 7px;font-family:Archivo,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:pointer;text-align:center}
+  .koruma-harita-etiket.sit{border-color:#E879F9;background:rgba(74,4,78,.92)}
+  .koruma-harita-etiket.sit b{color:#F0ABFC}
+  .koruma-harita-etiket.cevre{border-color:#2DD4BF;background:rgba(19,78,74,.92)}
+  .koruma-harita-etiket.cevre b{color:#5EEAD4}
+  .koruma-harita-etiket.orman{border-color:#4ADE80;background:rgba(6,78,59,.92)}
+  .koruma-harita-etiket.orman b{color:#86EFAC}
+
+  /* TUCBS 375 Katmanlı Ulusal Coğrafi Bilgi Platformu Katalog Çekmecesi */
+  .tucbs-katalog-panel{background:#0F172A;color:#F8FAFC;border:1px solid #1E293B;border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:0 10px 28px rgba(15,23,42,.22)}
+  .tucbs-katalog-panel[hidden]{display:none!important}
+  .tucbs-kat-ust{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #1E293B}
+  .tucbs-kat-ust h3{margin:0;font-family:Archivo,sans-serif;font-size:15px;font-weight:800;color:#F8FAFC;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tucbs-kat-ust .tucbs-badge{background:#0284C7;color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:800}
+  .tucbs-kat-filtre{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+  .tucbs-kat-filtre select,.tucbs-kat-filtre input{min-height:34px;padding:0 10px;background:#1E293B;border:1px solid #334155;border-radius:8px;color:#F8FAFC;font:inherit;font-size:12.5px}
+  .tucbs-kat-filtre input{min-width:220px;flex:1}
+  .tucbs-kat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:290px;overflow-y:auto;padding-right:4px}
+  @media(max-width:920px){.tucbs-kat-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:600px){.tucbs-kat-grid{grid-template-columns:1fr}}
+  .tucbs-kat-kart{background:#162033;border:1px solid #26354D;border-radius:9px;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;gap:6px;font-size:11.5px}
+  .tucbs-kat-kart:hover{border-color:#38BDF8}
+  .tucbs-kat-kart .tk-tema{font-size:9.5px;font-weight:800;text-transform:uppercase;color:#38BDF8;letter-spacing:.04em}
+  .tucbs-kat-kart .tk-ad{font-family:Archivo,sans-serif;font-weight:700;font-size:12px;color:#FFFFFF;line-height:1.3}
+  .tucbs-kat-kart .tk-alt{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:10.5px;color:#94A3B8}
+
+  /* Seçili TM Çevresi Arazi Kısıtlılık (Sit / Çevre Koruma / Orman / Büyük Ova) Matrisi */
+  .tm-kisit-matris{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+  @media(max-width:920px){.tm-kisit-matris{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.tm-kisit-matris{grid-template-columns:1fr}}
+  .kisit-kart{background:#F8FAFC;border:1px solid #CBD5E1;border-radius:9px;padding:8px 10px;font-size:11.5px;display:flex;flex-direction:column;justify-content:space-between;gap:4px}
+  .kisit-kart.uyari{background:#FEF2F2;border-color:#FCA5A5}
+  .kisit-kart.dikkat{background:#FFFBEB;border-color:#FCD34D}
+  .kisit-kart.uygun{background:#F0FDF4;border-color:#86EFAC}
+  .kisit-kart .kk-ust{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:10px;font-weight:800;text-transform:uppercase;color:#475569}
+  .kisit-kart .kk-ad{font-family:Archivo,sans-serif;font-weight:800;font-size:12.5px;color:#0F172A;line-height:1.25}
+  .kisit-kart .kk-det{font-size:10.5px;color:#475569;line-height:1.35}
   .k-btn.shb-katman-btn{border-color:#D4B200;background:#FFFDF0;color:#111827}
   .k-btn.shb-katman-btn:hover,.k-btn.shb-katman-btn.on{background:#FFE800;border-color:#B89B00;color:#111827;box-shadow:0 2px 8px rgba(234,179,8,.35)}
   .lej .chk2.shb-chk{background:#FFFBEB;border-color:#FACC15;color:#111827;font-weight:700}
@@ -262,6 +358,35 @@
 
 <div class="wrap kap">
 
+  <!-- KURUMSAL CBS & ŞEBEKE KOMUTA ÖZET ŞERİDİ -->
+  <div class="cbs-kpi-strip" id="cbsKpiBar">
+    <div class="cbs-kpi-card">
+      <div class="ck-ust"><span>Aktif Tahsis Gücü</span><span class="ck-ikon">⚡</span></div>
+      <div class="ck-val yesil" id="kpiAktifMwe">— MWe</div>
+      <div class="ck-alt" id="kpiAktifAlt">~— MWp DC Kurulum Potansiyeli</div>
+    </div>
+    <div class="cbs-kpi-card">
+      <div class="ck-ust"><span>Açık TM &amp; Bara</span><span class="ck-ikon">🔓</span></div>
+      <div class="ck-val" id="kpiAcikBara">— / —</div>
+      <div class="ck-alt" id="kpiAcikAlt">34,5 kV OG &amp; OSB Tahsis Noktası</div>
+    </div>
+    <div class="cbs-kpi-card">
+      <div class="ck-ust"><span>TEİAŞ İletim Şebekesi</span><span class="ck-ikon">🕸️</span></div>
+      <div class="ck-val mavi">1.531 Hat</div>
+      <div class="ck-alt">154 kV Bölgesel &amp; 380 kV Ulusal Ağ</div>
+    </div>
+    <div class="cbs-kpi-card">
+      <div class="ck-ust"><span>Sit, Koruma &amp; Orman</span><span class="ck-ikon">🛡️</span></div>
+      <div class="ck-val kehribar" id="kpiKorumaSayi">594 Poligon + WMS</div>
+      <div class="ck-alt">Doğal Sit · ÖÇKB · Milli Park · OGM Orman · 286 Ova</div>
+    </div>
+    <div class="cbs-kpi-card">
+      <div class="ck-ust"><span>Ulusal CBS Kataloğu</span><span class="ck-ikon">🌍</span></div>
+      <div class="ck-val mavi" id="kpiTucbsSayi">25 Tema · 375 Katman</div>
+      <div class="ck-alt">TUCBS / ÇŞİDB / OGM / MTA / Copernicus</div>
+    </div>
+  </div>
+
   <!-- DÖNEM SEÇİCİ VE HIZLI BÖLGE FİLTRESİ -->
   <div class="ust-bar">
     <div class="donemsec">
@@ -304,63 +429,161 @@
     <div class="svg-wrap" id="veriSemaHarita"></div>
   </div>
 
-  <!-- 3. COĞRAFİ HARİTA + ALTERNATİFLİ HARİTA VE VERİ KATMANLARI -->
+  <!-- 3. KURUMSAL CBS (GIS / SCADA) KOMUTA MERKEZİ · ÇOK KATMANLI COĞRAFİ HARİTA & SİT / KORUMA / ORMAN ALTLIKLARI -->
   <div class="harita-panel" id="haritaBolum">
-    <div class="sema-ust" style="margin-bottom:10px">
-      <div>
-        <h2>3. Çok Katmanlı Coğrafi Trafo Merkezi &amp; Kapasite Yoğunluk Haritası</h2>
-        <small id="hsay" style="font-size:12.5px;color:var(--mut2)"></small>
+    <div class="cbs-ust-bar">
+      <div class="cbs-ust-sol">
+        <h2>
+          <span>3. Çok Katmanlı Coğrafi Şebeke, Sit, Çevre Koruma &amp; Orman Analiz Haritası</span>
+          <span class="cbs-pro-badge">CBS KOMUTA MERKEZİ · TUCBS + TEİAŞ</span>
+        </h2>
+        <small id="hsay" style="font-size:12.5px;color:var(--mut2);display:block;margin-top:3px"></small>
       </div>
-      <button type="button" class="k-btn" id="btnTurkiyeOdak">🔍 Haritayı Sığdır</button>
+      <div class="cbs-ust-sag">
+        <button type="button" class="k-btn" id="btnDockToggle" title="Sol Katman Matrisini Daralt / Genişlet">🎛️ Katman Paneli</button>
+        <button type="button" class="k-btn" id="btnPresetSebeke" title="Şebeke, İletim Ağı ve TM Kapasite Görünümü">⚡ Şebeke Modu</button>
+        <button type="button" class="k-btn" id="btnPresetKisit" style="border-color:#9333EA;color:#6B21A8;background:#FAF5FF" title="Doğal Sit, Çevre Koruma, Orman ve Büyük Ova Kısıtlılık Katmanlarını Aç">🛡️ GES Arazi Kısıtlılık Modu</button>
+        <button type="button" class="k-btn" id="btnTucbsKatalogAc" style="border-color:#0284C7;color:#075985;background:#F0F9FF">📚 TUCBS Katalog (375 Katman)</button>
+        <button type="button" class="k-btn" id="btnTurkiyeOdak">🔍 Haritayı Sığdır</button>
+      </div>
     </div>
 
-    <!-- Tek Merkezli Harita Altlığı & Aktif/Pasif Katman Kontrol Çubuğu -->
-    <div class="katman-bar" style="flex-direction:column;align-items:stretch;gap:9px">
+    <!-- Üst CBS Araç Çubuğu: Harita Altlığı + Opaklık Sürgüsü + Hızlı Gezgin Tetikleyicileri -->
+    <div class="cbs-toolbar">
       <div class="katman-grup" id="altlikGrup">
-        <span class="k-lbl">Harita Altlığı (Seçilebilir):</span>
+        <span class="k-lbl">Harita Altlığı:</span>
         <button type="button" class="k-btn on" data-base="osm">🗺️ Standart (OSM)</button>
         <button type="button" class="k-btn" data-base="uydu">🛰️ Uydu (Esri Imagery)</button>
         <button type="button" class="k-btn" data-base="topo">⛰️ Topoğrafik Arazi</button>
         <button type="button" class="k-btn" data-base="koyu">🌑 Koyu SCADA</button>
         <button type="button" class="k-btn" data-base="acik">📐 Açık Teknik</button>
       </div>
-      <div class="katman-grup" id="veriKatmanGrup" style="padding-top:8px;border-top:1px dashed #D6DCE5">
-        <span class="k-lbl">Katmanlar (Tıkla Aktif/Pasif):</span>
-        <button type="button" class="k-btn on red" data-kat="kapasite" aria-pressed="true"><span class="k-dot"></span>⚡ TM Kapasite Balonu</button>
-        <button type="button" class="k-btn red" data-kat="sadeceAcik" aria-pressed="false"><span class="k-dot"></span>🔓 Yalnız Açık TM'ler</button>
-        <button type="button" class="k-btn red" data-kat="erime" aria-pressed="false"><span class="k-dot"></span>📉 Dönemsel Erime (Δ MWe)</button>
-        <button type="button" class="k-btn sebeke-katman-btn" data-kat="topoloji" aria-pressed="false"><span class="k-dot"></span>🕸️ 154 kV Şebeke Ağı (TEİAŞ)</button>
-        <button type="button" class="k-btn ova-altlik-btn" data-kat="ova" aria-pressed="false"><span class="k-dot"></span>🌾 Büyük Ova Katmanı (286 Ova)</button>
-        <button type="button" class="k-btn shb-katman-btn" data-kat="sahibinden" aria-pressed="false"><span class="k-dot"></span>🟡 Sahibinden Arazi Katmanı</button>
-        <button type="button" class="k-btn red" data-kat="isi" aria-pressed="false"><span class="k-dot"></span>🔥 İl Kapasite Isı Dolgusu</button>
-        <button type="button" class="k-btn on" data-kat="ilEtiket" aria-pressed="true"><span class="k-dot"></span>🏷️ İl MWe Rozetleri</button>
-        <button type="button" class="k-btn on" data-kat="sinirlar" aria-pressed="true"><span class="k-dot"></span>🗺️ İl &amp; EDAŞ Sınırları</button>
+      <div class="cbs-preset-grup">
+        <label class="cbs-opaklik-kutu" title="Poligon ve WMS Katman Saydamlığı">
+          <span>Katman Opaklığı:</span>
+          <input type="range" id="cbsOpaklik" min="25" max="100" value="78">
+          <span id="cbsOpaklikVal">%78</span>
+        </label>
+        <button type="button" class="k-btn" id="btnKorumaGezginToggle" style="border-color:#C084FC;color:#581C87;background:#FDF4FF">🏛️ Sit / Koruma / Orman Gezgini</button>
       </div>
     </div>
 
-    <div class="ova-gezgin-bar" id="ovaGezginBar" hidden>
-      <div class="sol">
-        <span class="ova-pill">🌾 BÜYÜK OVA KORUMA KATMANI</span>
-        <span><b>T.C. Tarım ve Orman Bakanlığı · Türkiye Geneli 286 Büyük Ova Koruma Alanı</b> (Toplam <b>11.036.612,88 Hektar</b> · PDF + Resmi Gazete BKK/CK Tüm Ovalar)</span>
+    <!-- TUCBS 375 Katmanlı Ulusal Coğrafi Bilgi Platformu Katalog Çekmecesi -->
+    <div class="tucbs-katalog-panel" id="tucbsKatalogPanel" hidden>
+      <div class="tucbs-kat-ust">
+        <h3>
+          <span>🌐 T.C. Çevre, Şehircilik ve İklim Değişikliği Bakanlığı · TUCBS Ulusal CBS Katalog Gezgini</span>
+          <span class="tucbs-badge" id="tucbsKatalogSayac">25 Tema · 375 Kurumsal Katman</span>
+        </h3>
+        <button type="button" class="k-btn" id="btnTucbsKatalogKapat" style="background:#1E293B;color:#F8FAFC;border-color:#475569">✕ Kataloğu Kapat</button>
       </div>
-      <div class="sag">
-        <select id="ovaSecici" aria-label="Büyük Ova Seç"><option value="">🌾 Türkiye Geneli 286 Büyük Ovadan Seçin / Odaklanın…</option></select>
-        <button type="button" class="k-btn" id="btnTumOvalar" style="min-height:30px;font-size:11.5px">🗺️ 286 Ovayı Sığdır</button>
+      <div class="tucbs-kat-filtre">
+        <select id="tucbsTemaSec" aria-label="TUCBS Tema Filtresi"><option value="">Tüm TUCBS Veri Temaları (25 Tema)</option></select>
+        <input type="search" id="tucbsKatAra" placeholder="Katman adı ara (örn: Doğal Sit, Orman, Milli Park, Özel Çevre, Jeoloji, Fay, Taşkın, İmar, Kadastro…)" autocomplete="off">
       </div>
+      <div class="tucbs-kat-grid" id="tucbsKatalogGrid"></div>
     </div>
 
-    <div id="harita"></div>
+    <!-- 2 Sütunlu CBS Çalışma Alanı: Sol Kategorik Katman Matrisi + Sağ Harita Tuvali -->
+    <div class="cbs-workspace" id="cbsWorkspace">
+      <!-- SOL: KATEGORİK CBS KATMAN MATRİSİ -->
+      <aside class="cbs-dock" id="veriKatmanGrup" aria-label="CBS Veri Katmanları Kontrol Paneli">
+        <div class="cbs-dock-baslik">
+          <span>🎛️ CBS KATMAN MATRİSİ</span>
+          <span class="aktif-sayac" id="dockAktifSayac">3 Aktif</span>
+        </div>
 
-    <div class="lej">
-      <div class="lej-sol" id="haritaLejant">
-        <span><i style="background:#1E9E5A"></i>Yüksek Kapasite (≥ 5 MWe)</span>
-        <span><i style="background:#F08A24"></i>Sınırlı Kapasite (0,1 – 5 MWe)</span>
-        <span><i style="background:#D32027"></i>Seçili TM</span>
-        <span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>
-      </div>
-      <div class="lej-sag">
-        <span id="aktifKatmanOzet" style="font-weight:600;color:var(--ink2)"></span>
-        <span id="sinirDurum" style="color:var(--mut2)"></span>
+        <!-- Grup 1: Şebeke & Kapasite -->
+        <div class="cbs-kat-kategori">
+          <div class="kat-baslik"><span>⚡ 1. Şebeke &amp; Kapasite</span><small>TEİAŞ / EDAŞ</small></div>
+          <div class="cbs-kat-liste">
+            <button type="button" class="k-btn on red" data-kat="kapasite" aria-pressed="true"><span class="k-dot"></span><span class="k-etiket-metin">⚡ TM Kapasite Balonları</span><span class="k-kaynak-pill">1.351</span></button>
+            <button type="button" class="k-btn red" data-kat="sadeceAcik" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🔓 Yalnız Açık TM'ler (&gt;0)</span><span class="k-kaynak-pill">Filtre</span></button>
+            <button type="button" class="k-btn red" data-kat="erime" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">📉 Dönemsel Erime (Δ MWe)</span><span class="k-kaynak-pill">3 Dönem</span></button>
+            <button type="button" class="k-btn sebeke-katman-btn" data-kat="topoloji" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🕸️ 154/380 kV TEİAŞ Şebeke</span><span class="k-kaynak-pill">KMZ</span></button>
+            <button type="button" class="k-btn red" data-kat="isi" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🔥 İl Kapasite Isı Dolgusu</span><span class="k-kaynak-pill">81 İl</span></button>
+            <button type="button" class="k-btn on" data-kat="ilEtiket" aria-pressed="true"><span class="k-dot"></span><span class="k-etiket-metin">🏷️ İl MWe Rozetleri</span><span class="k-kaynak-pill">Canlı</span></button>
+            <button type="button" class="k-btn on" data-kat="sinirlar" aria-pressed="true"><span class="k-dot"></span><span class="k-etiket-metin">🗺️ İl &amp; 21 EDAŞ Sınırları</span><span class="k-kaynak-pill">Vektör</span></button>
+          </div>
+        </div>
+
+        <!-- Grup 2: Sit & Çevre Koruma (TUCBS / TVKGM / DKMP) -->
+        <div class="cbs-kat-kategori">
+          <div class="kat-baslik"><span>🏛️ 2. Sit &amp; Çevre Koruma</span><small>TUCBS / ÇŞİDB</small></div>
+          <div class="cbs-kat-liste">
+            <button type="button" class="k-btn sit-katman-btn" data-kat="sit" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🏛️ Doğal Sit Alanları</span><span class="k-kaynak-pill">TVKGM</span></button>
+            <button type="button" class="k-btn koruma-katman-btn" data-kat="cevreKoruma" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🛡️ ÖÇKB · Milli &amp; Tabiat Parkı</span><span class="k-kaynak-pill">DKMP</span></button>
+            <button type="button" class="k-btn koruma-katman-btn" data-kat="tucbsWms" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🌐 TUCBS Doğal Değerler WMS</span><span class="k-kaynak-pill">Canlı WMS</span></button>
+          </div>
+        </div>
+
+        <!-- Grup 3: Orman, Tarım & Arazi Örtüsü -->
+        <div class="cbs-kat-kategori">
+          <div class="kat-baslik"><span>🌲 3. Orman &amp; Arazi Örtüsü</span><small>OGM / Tarım</small></div>
+          <div class="cbs-kat-liste">
+            <button type="button" class="k-btn orman-katman-btn" data-kat="orman" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🌲 Orman Alanları (OGM+WMS)</span><span class="k-kaynak-pill">OGM 10m</span></button>
+            <button type="button" class="k-btn ova-altlik-btn" data-kat="ova" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🌾 Büyük Ova Koruma (286)</span><span class="k-kaynak-pill">11M ha</span></button>
+            <button type="button" class="k-btn orman-katman-btn" data-kat="corineWms" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🌍 CORINE Arazi Örtüsü WMS</span><span class="k-kaynak-pill">CLC2018</span></button>
+          </div>
+        </div>
+
+        <!-- Grup 4: Doğal Risk, Jeoloji & Emlak Radarı -->
+        <div class="cbs-kat-kategori">
+          <div class="kat-baslik"><span>⚠️ 4. Jeoloji, Risk &amp; Emlak</span><small>MTA / AFAD / İlan</small></div>
+          <div class="cbs-kat-liste">
+            <button type="button" class="k-btn risk-katman-btn" data-kat="fayWms" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">⚠️ MTA Diri Fay Hatları</span><span class="k-kaynak-pill">TUCBS WMS</span></button>
+            <button type="button" class="k-btn risk-katman-btn" data-kat="taskinWms" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🌊 Taşkın Risk Haritası (Q100)</span><span class="k-kaynak-pill">SYGM WMS</span></button>
+            <button type="button" class="k-btn shb-katman-btn" data-kat="sahibinden" aria-pressed="false"><span class="k-dot"></span><span class="k-etiket-metin">🟡 Sahibinden GES Arazi Radarı</span><span class="k-kaynak-pill">Parsel</span></button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- SAĞ: HARİTA TUVALİ & GEZGİN ÇUBUKLARI -->
+      <div class="cbs-harita-kolon">
+        <!-- TUCBS Doğal Sit, Çevre Koruma & Orman Gezgini Çubuğu -->
+        <div class="koruma-gezgin-bar" id="korumaGezginBar" hidden>
+          <div class="sol">
+            <span class="koruma-pill">🛡️ TUCBS SİT · KORUMA · ORMAN GEZGİNİ</span>
+            <span id="korumaGezginOzet"><b>TVKGM Doğal Sit + ÖÇKB + DKMP Milli/Tabiat Parkları + OGM Orman Alanları</b></span>
+          </div>
+          <div class="sag">
+            <select id="korumaTipFiltre" aria-label="Koruma Kategorisi Filtresi">
+              <option value="">Tüm Kategoriler (Sit + Çevre Koruma + Orman)</option>
+              <option value="sit">🏛️ Doğal Sit Alanları (Kesin / Nitelikli / Sürdürülebilir)</option>
+              <option value="cevre_koruma">🛡️ Çevre Koruma (ÖÇKB / Milli Park / Tabiat Parkı / YHGS)</option>
+              <option value="orman">🌲 OGM Muhafaza &amp; Devlet Orman Alanları</option>
+            </select>
+            <select id="korumaSecici" aria-label="Koruma veya Orman Alanı Seç"><option value="">🛡️ Koruma / Sit / Orman Alanı Seçin ve Odaklanın…</option></select>
+            <button type="button" class="k-btn" id="btnTumKoruma" style="min-height:30px;font-size:11.5px">🗺️ Tümünü Sığdır</button>
+          </div>
+        </div>
+
+        <!-- Tarım ve Orman Bakanlığı 286 Büyük Ova Gezgini Çubuğu -->
+        <div class="ova-gezgin-bar" id="ovaGezginBar" hidden>
+          <div class="sol">
+            <span class="ova-pill">🌾 BÜYÜK OVA KORUMA KATMANI</span>
+            <span><b>T.C. Tarım ve Orman Bakanlığı · Türkiye Geneli 286 Büyük Ova Koruma Alanı</b> (Toplam <b>11.036.612,88 Hektar</b> · PDF + Resmi Gazete BKK/CK Tüm Ovalar)</span>
+          </div>
+          <div class="sag">
+            <select id="ovaSecici" aria-label="Büyük Ova Seç"><option value="">🌾 Türkiye Geneli 286 Büyük Ovadan Seçin / Odaklanın…</option></select>
+            <button type="button" class="k-btn" id="btnTumOvalar" style="min-height:30px;font-size:11.5px">🗺️ 286 Ovayı Sığdır</button>
+          </div>
+        </div>
+
+        <div id="harita"></div>
+
+        <div class="lej">
+          <div class="lej-sol" id="haritaLejant">
+            <span><i style="background:#1E9E5A"></i>Yüksek Kapasite (≥ 5 MWe)</span>
+            <span><i style="background:#F08A24"></i>Sınırlı Kapasite (0,1 – 5 MWe)</span>
+            <span><i style="background:#D32027"></i>Seçili TM</span>
+            <span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>
+          </div>
+          <div class="lej-sag">
+            <span id="aktifKatmanOzet" style="font-weight:600;color:var(--ink2)"></span>
+            <span id="sinirDurum" style="color:var(--mut2)"></span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -381,6 +604,7 @@
         <h3>
           <span>Seçili Trafo Merkezi · Teknik Tek Hat &amp; Bara Şeması</span>
           <span style="display:inline-flex;gap:6px;flex-wrap:wrap">
+            <button type="button" class="k-btn" id="btnTmKisitHarita" style="min-height:28px;font-size:11.5px;border-color:#9333EA;color:#6B21A8;background:#FAF5FF">🛡️ Sit &amp; Orman Katmanı</button>
             <button type="button" class="shb-link-btn" id="btnTmSahibinden" style="min-height:28px;font-size:11.5px;padding:3px 9px">🟡 Sahibinden Arazi Katmanı</button>
             <button type="button" class="k-btn" id="btnTmUydu" style="min-height:28px;font-size:11.5px">🛰️ Uyduda Göster</button>
           </span>
@@ -388,6 +612,7 @@
         <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi, harita arazi katmanı ve uygun satılık ilanlar güncellenir:</p>
       </div>
       <div id="tmTekHatSvg"></div>
+      <div id="tmKisitMatris" class="tm-kisit-matris"></div>
       <div id="tmAraziMini" class="tm-arazi-mini"></div>
     </div>
   </div>
@@ -557,14 +782,22 @@
     sadeceAcik: false,  // 🔓 Yalnız Açık TM'ler (> 0 MWe filtresi)
     erime: false,       // 📉 Dönemsel Erime (Δ MWe) renklendirmesi
     topoloji: false,    // 🕸️ 154 / 380 kV Gerçek TEİAŞ Şebeke Ağı (trafolar.kmz -> teias_hat)
+    sit: false,         // 🏛️ TUCBS / TVKGM Doğal Sit Alanları (Kesin / Nitelikli / Sürdürülebilir)
+    cevreKoruma: false, // 🛡️ ÖÇKB, Milli Park, Tabiat Parkı, YHGS, Tabiatı Koruma Alanları
+    tucbsWms: false,    // 🌐 Canlı TUCBS Doğal Değerler WMS Katmanı (tucbs:dogaldegerlerharitasi)
+    orman: false,       // 🌲 OGM Orman Alanları Poligon + Copernicus 10m Orman Örtüsü WMS
     ova: false,         // 🌾 Büyük Ova Koruma Alanları (286 Ova)
+    corineWms: false,   // 🌍 CORINE Arazi Örtüsü & Kullanımı WMS (CLC2018)
+    fayWms: false,      // ⚠️ MTA Diri Fay Hatları WMS (tucbs:diri_fay)
+    taskinWms: false,   // 🌊 SYGM Taşkın Risk Haritası Q100 WMS (tucbs:taskin_risk_haritasi_q100)
     sahibinden: false,  // 🟡 Sahibinden Uygun Arazi İlan Katmanı
     isi: false,         // 🔥 İl Kapasite Isı Dolgusu
     ilEtiket: true,     // 🏷️ İl MWe Rozetleri
     sinirlar: true      // 🗺️ İl & EDAŞ Sınır Çizgileri
   };
-  var MAP=null, KAT=null, TOPO_KAT=null, OVA_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={};
-  var OVA_GEO=null, TEIAS_HAT_VERI=null, HAT_RENDERER=null, OVA_RENDERER=null, seciliOvaSno=null, geoYok=false;
+  var MAP=null, KAT=null, TOPO_KAT=null, OVA_KAT=null, KORUMA_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, WMS_KATMANLAR={};
+  var OVA_GEO=null, TUCBS_KORUMA_GEO=null, TEIAS_HAT_VERI=null, HAT_RENDERER=null, OVA_RENDERER=null, KORUMA_RENDERER=null;
+  var seciliOvaSno=null, seciliKorumaId=null, korumaGezginZorla=false, cbsOpaklikOran=0.78, geoYok=false;
   var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null, BOLGE_GEO=null;
   var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
 
@@ -1400,6 +1633,344 @@
     }, 200);
   }
 
+  /* TUCBS DOĞAL SİT, ÇEVRE KORUMA (ÖÇKB / MİLLİ PARK / TABİAT PARKI) & OGM ORMAN KATMAN MOTORU */
+  function enYakinKisitBul(r, tipKod){
+    if(!TUCBS_KORUMA_GEO || !TUCBS_KORUMA_GEO.features || !r) return null;
+    var havuz = TUCBS_KORUMA_GEO.features.filter(function(f){
+      var p = f.properties;
+      return p && (!tipKod || p.tip === tipKod || p.kat === tipKod);
+    });
+    if(!havuz.length) return null;
+    var ilHavuz = havuz.filter(function(f){ return f.properties.il === r.il; });
+    var adaylar = ilHavuz.length ? ilHavuz : havuz;
+    if(r.lat == null || r.lon == null){
+      return ilHavuz.length ? { kayit: ilHavuz[0].properties, km: null } : null;
+    }
+    var enIyi = null, minKm = 99999;
+    adaylar.forEach(function(f){
+      var p = f.properties;
+      if(p.lat != null && p.lon != null){
+        var d = mesafeKm(r.lat, r.lon, p.lat, p.lon);
+        if(d < minKm){ minKm = d; enIyi = p; }
+      }
+    });
+    return enIyi ? { kayit: enIyi, km: minKm } : null;
+  }
+
+  function tmKisitMatrisCiz(r){
+    var kutu = el("tmKisitMatris");
+    if(!kutu || !r) return;
+    var ySit = enYakinKisitBul(r, "sit");
+    var yCev = enYakinKisitBul(r, "cevre_koruma");
+    var yOrm = enYakinKisitBul(r, "orman");
+    var yOva = enYakinOvaBul(r);
+
+    function kartHtml(ikon, baslik, katAnahtar, ad, altMetin, km){
+      var sinif = "uygun", durumEtiket = "🟢 Kısıt Dışı";
+      if(km != null){
+        if(km < 4.5){ sinif = "uyari"; durumEtiket = "🔴 " + fmt(km) + " km (Yakın)"; }
+        else if(km < 12){ sinif = "dikkat"; durumEtiket = "🟡 " + fmt(km) + " km"; }
+        else { sinif = "uygun"; durumEtiket = "🟢 " + fmt(km) + " km"; }
+      }
+      return '<div class="kisit-kart '+sinif+'" style="cursor:pointer" data-kisit-kat="'+esc(katAnahtar)+'" title="Haritada '+esc(baslik)+' katmanını açmak için tıklayın">'
+        +'<div class="kk-ust"><span>'+ikon+' '+esc(baslik)+'</span><span>'+durumEtiket+'</span></div>'
+        +'<div class="kk-ad">'+esc(ad || "Bölgede Kayıt Yok")+'</div>'
+        +'<div class="kk-det">'+altMetin+'</div>'
+      +'</div>';
+    }
+
+    var html = "";
+    if(ySit && ySit.kayit){
+      html += kartHtml("🏛️", "Doğal Sit (TVKGM)", "sit", ySit.kayit.ad, esc(ySit.kayit.statu) + " · " + fmt0(Math.round(ySit.kayit.hektar||0)) + " ha", ySit.km);
+    } else {
+      html += kartHtml("🏛️", "Doğal Sit (TVKGM)", "sit", "Yakın Doğal Sit Yok", "TVKGM Doğal Sit katmanı kontrol edildi", null);
+    }
+    if(yCev && yCev.kayit){
+      html += kartHtml("🛡️", "Çevre Koruma / MP", "cevreKoruma", yCev.kayit.ad, esc(yCev.kayit.statu) + " · " + fmt0(Math.round(yCev.kayit.hektar||0)) + " ha", yCev.km);
+    } else {
+      html += kartHtml("🛡️", "Çevre Koruma / MP", "cevreKoruma", "ÖÇKB / Milli Park Dışı", "DKMP & TVKGM koruma sınırları dışında", null);
+    }
+    if(yOrm && yOrm.kayit){
+      html += kartHtml("🌲", "Orman Alanı (OGM)", "orman", yOrm.kayit.ad, esc(yOrm.kayit.statu) + " · " + fmt0(Math.round(yOrm.kayit.hektar||0)) + " ha", yOrm.km);
+    } else {
+      html += kartHtml("🌲", "Orman Alanı (OGM)", "orman", "Orman Sınırı Dışı", "6831 S.K. orman tahdit sınırı dışında", null);
+    }
+    if(yOva && yOva.ova){
+      html += kartHtml("🌾", "Büyük Ova (5403)", "ova", yOva.ova.ad, fmt0(Math.round(yOva.ova.hektar||0)) + " ha · Tarım Dışı İzin Gerekli", yOva.km);
+    } else {
+      html += kartHtml("🌾", "Büyük Ova (5403)", "ova", "Büyük Ova Sınırı Dışı", "5403 S.K. md.14 ova koruma alanı dışında", null);
+    }
+
+    kutu.innerHTML = html;
+    kutu.querySelectorAll("[data-kisit-kat]").forEach(function(kart){
+      kart.addEventListener("click", function(){
+        var k = kart.getAttribute("data-kisit-kat");
+        if(k){
+          KATMAN_ACIK[k] = true;
+          katmanSenkronla();
+          haritaCiz(false);
+          if(seciliRow && seciliRow.lat != null && MAP){
+            el("haritaBolum").scrollIntoView({behavior:"smooth", block:"center"});
+            setTimeout(function(){ try{ MAP.setView([seciliRow.lat, seciliRow.lon], 10, {animate:true}); }catch(e){} }, 200);
+          }
+        }
+      });
+    });
+  }
+
+  function korumaSeciciDoldur(){
+    var sel = el("korumaSecici");
+    if(!sel || !TUCBS_KORUMA_GEO || !TUCBS_KORUMA_GEO.features) return;
+    var tipF = el("korumaTipFiltre") ? el("korumaTipFiltre").value : "";
+    var feats = TUCBS_KORUMA_GEO.features.filter(function(f){
+      var p = f.properties || {};
+      return !tipF || p.tip === tipF || p.kat === tipF;
+    });
+    var ilGrup = {};
+    feats.forEach(function(f){
+      var p = f.properties;
+      var ilAd = p.il || "TÜRKİYE GENELİ";
+      (ilGrup[ilAd] = ilGrup[ilAd] || []).push(p);
+    });
+    var optHtml = '<option value="">🛡️ '+feats.length+' Sit / Koruma / Orman Alanından Seçin ve Odaklanın…</option>';
+    Object.keys(ilGrup).sort(function(x,y){return x.localeCompare(y,"tr");}).forEach(function(ilAd){
+      optHtml += '<optgroup label="'+esc(ilAd)+' ('+ilGrup[ilAd].length+' Alan)">';
+      ilGrup[ilAd].forEach(function(p){
+        var kayitId = p.sno || p.id;
+        var ikon = p.tip === "sit" ? "🏛️" : (p.tip === "orman" ? "🌲" : "🛡️");
+        optHtml += '<option value="'+esc(kayitId)+'">#'+esc(kayitId)+' · '+ikon+' '+esc(p.ad)+' — '+esc(p.statu)+' ('+fmt0(Math.round(p.hektar||0))+' ha)</option>';
+      });
+      optHtml += '</optgroup>';
+    });
+    sel.innerHTML = optHtml;
+    if(seciliKorumaId) sel.value = String(seciliKorumaId);
+  }
+
+  function tucbsKorumaCiz(){
+    if(!MAP || !KORUMA_KAT) return;
+    KORUMA_KAT.clearLayers();
+
+    // Canlı WMS Katmanlarını Senkronla (TUCBS Doğal Değerler, Copernicus 10m Orman, CORINE, MTA Diri Fay, SYGM Taşkın)
+    var wmsHarita = {
+      tucbsWms: WMS_KATMANLAR.tucbsDogal,
+      orman: WMS_KATMANLAR.copernicusOrman,
+      corineWms: WMS_KATMANLAR.corineArazi,
+      fayWms: WMS_KATMANLAR.mtaDiriFay,
+      taskinWms: WMS_KATMANLAR.sygmTaskin
+    };
+    Object.keys(wmsHarita).forEach(function(k){
+      var lyr = wmsHarita[k];
+      if(!lyr) return;
+      try{ lyr.setOpacity(Math.min(0.92, cbsOpaklikOran)); }catch(e){}
+      if(KATMAN_ACIK[k]){
+        if(!MAP.hasLayer(lyr)) lyr.addTo(MAP);
+      } else {
+        if(MAP.hasLayer(lyr)) MAP.removeLayer(lyr);
+      }
+    });
+
+    if(!TUCBS_KORUMA_GEO || !TUCBS_KORUMA_GEO.features) return;
+    if(!KATMAN_ACIK.sit && !KATMAN_ACIK.cevreKoruma && !KATMAN_ACIK.orman) return;
+
+    var secIl = el("fil") ? el("fil").value : "";
+    var opMult = cbsOpaklikOran || 0.78;
+
+    TUCBS_KORUMA_GEO.features.forEach(function(f){
+      var p = f.properties || {};
+      var pTip = p.tip || p.kat;
+      if(pTip === "sit" && !KATMAN_ACIK.sit) return;
+      if(pTip === "cevre_koruma" && !KATMAN_ACIK.cevreKoruma) return;
+      if(pTip === "orman" && !KATMAN_ACIK.orman) return;
+
+      var kayitId = p.sno || p.id;
+      var isSec = (seciliKorumaId && String(seciliKorumaId) === String(kayitId));
+      var isIlEs = (!secIl || p.il === secIl);
+
+      var sRenk = "#9333EA", fRenk = "#C084FC", dash = "";
+      if(pTip === "sit"){
+        if(p.kat === "sit_kesin" || /Kesin|1\.Derece/i.test(p.statu||"")){ sRenk = "#BE185D"; fRenk = "#F43F5E"; }
+        else if(p.kat === "sit_nitelikli" || /Nitelikli|2\.Derece/i.test(p.statu||"")){ sRenk = "#9333EA"; fRenk = "#A855F7"; }
+        else { sRenk = "#7E22CE"; fRenk = "#C084FC"; dash = "4 3"; }
+      } else if(pTip === "cevre_koruma"){
+        if(p.kat === "ockb" || /Özel Çevre|ÖÇK/i.test(p.statu||"")){ sRenk = "#0D9488"; fRenk = "#14B8A6"; }
+        else if(p.kat === "milli_park" || /Milli Park/i.test(p.statu||"")){ sRenk = "#047857"; fRenk = "#10B981"; }
+        else { sRenk = "#0284C7"; fRenk = "#38BDF8"; dash = "5 3"; }
+      } else if(pTip === "orman"){
+        sRenk = "#14532D"; fRenk = "#16A34A"; dash = "3 3";
+      }
+
+      var poly = L.geoJSON(f, {
+        renderer: KORUMA_RENDERER || undefined,
+        style: function(){
+          return {
+            color: isSec ? "#FACC15" : sRenk,
+            weight: isSec ? 3.4 : (isIlEs ? 2.1 : 1.3),
+            dashArray: isSec ? "" : dash,
+            fillColor: isSec ? "#FDE047" : fRenk,
+            fillOpacity: (isSec ? 0.45 : (isIlEs ? 0.28 : 0.16)) * opMult
+          };
+        }
+      });
+
+      var yTm = null, yKm = 99999;
+      if(p.lat != null && p.lon != null){
+        tumu.forEach(function(r){
+          if(r.lat != null && r.lon != null){
+            var d = mesafeKm(p.lat, p.lon, r.lat, r.lon);
+            if(d < yKm){ yKm = d; yTm = r; }
+          }
+        });
+      }
+
+      var ustEtiket = pTip === "sit"
+        ? "🏛️ TUCBS / TVKGM · DOĞAL SİT ALANI"
+        : (pTip === "orman" ? "🌲 T.C. ORMAN GENEL MÜDÜRLÜĞÜ (OGM) · ORMAN ALANI" : "🛡️ TUCBS / DKMP & TVKGM · ÇEVRE KORUMA ALANI");
+
+      var pop = '<div style="min-width:250px">'
+        +'<div style="background:'+sRenk+';color:#fff;font-weight:800;font-size:10px;padding:3px 8px;border-radius:4px;margin-bottom:5px;display:inline-block">'+ustEtiket+'</div><br>'
+        +'<b>#'+esc(kayitId)+' · '+esc(p.ad)+' ('+esc(p.il||"Türkiye")+')</b><br>'
+        +'<span style="font-size:11.5px;color:#475569">Statü: <b>'+esc(p.statu||"—")+'</b> · Kurum: '+esc(p.kurum||"TUCBS")+'</span>'
+        +'<div style="margin:6px 0;padding:6px 8px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:6px;font-size:11.5px">'
+          +'Yüzölçümü: <b>'+fmt(p.hektar||0)+' Hektar ('+fmt0(Math.round((p.hektar||0)*10))+' Dönüm)</b><br>'
+          +(p.karar ? 'Tescil / Karar: <b>'+esc(p.karar)+'</b><br>' : '')
+          +'Merkez Koordinat: <b>'+(p.lat!=null?(p.lat.toFixed(3)+'°K, '+p.lon.toFixed(3)+'°D'):'—')+'</b>'
+          +(yTm ? '<br>En Yakın TM: <b>'+esc(yTm.tm)+'</b> (~'+fmt(yKm)+' km · '+fmt(av(yTm))+' MWe)' : '')
+        +'</div>'
+        +'<div style="font-size:11px;color:#7C2D12;background:#FFF7ED;border:1px solid #FED7AA;border-radius:5px;padding:4px 6px;line-height:1.35">'
+          +'⚖️ <b>GES Mevzuat &amp; İzin Notu:</b> '+esc(p.ges_durum || p.kisit || "İlgili koruma/orman mevzuatı kapsamında ön izin ve ÇED görüşüne tabidir.")
+        +'</div>'
+      +'</div>';
+
+      poly.bindTooltip('<b>'+esc(p.ad)+' ('+esc(p.il)+')</b> · '+esc(p.statu)+' · '+fmt0(Math.round(p.hektar||0))+' ha', {sticky:true, className:"edas-tip"});
+      poly.bindPopup(pop);
+      poly.on("click", function(){
+        seciliKorumaId = kayitId;
+        if(el("korumaSecici")) el("korumaSecici").value = String(kayitId);
+        if(yTm){ tmTekHatCiz(yTm); tablo(gorunen); }
+      });
+      poly.addTo(KORUMA_KAT);
+
+      // Önemli alanlarda veya seçili ilde etiket rozeti göster
+      if(isSec || (secIl && p.il === secIl) || (p.hektar || 0) >= 18000){
+        var etSinif = pTip === "sit" ? "sit" : (pTip === "orman" ? "orman" : "cevre");
+        var ikonKisa = pTip === "sit" ? "🏛️" : (pTip === "orman" ? "🌲" : "🛡️");
+        var ic = L.divIcon({
+          className: "",
+          html: '<div class="koruma-harita-etiket '+etSinif+'" title="'+esc(p.ad+' · '+p.statu)+'">'+ikonKisa+' '+esc(p.ad.slice(0,22))+' <b>'+fmt0(Math.round(p.hektar||0))+' ha</b></div>',
+          iconSize: [165, 20],
+          iconAnchor: [82, 10]
+        });
+        var mk = L.marker([p.lat, p.lon], { icon: ic });
+        mk.bindPopup(pop);
+        mk.on("click", function(){
+          seciliKorumaId = kayitId;
+          if(el("korumaSecici")) el("korumaSecici").value = String(kayitId);
+          if(yTm){ tmTekHatCiz(yTm); tablo(gorunen); }
+        });
+        mk.addTo(KORUMA_KAT);
+      }
+    });
+  }
+
+  function korumaOdakla(id, tumuGoster){
+    if(!MAP || !TUCBS_KORUMA_GEO || !TUCBS_KORUMA_GEO.features) return;
+    if(tumuGoster || !id){
+      if(!KATMAN_ACIK.sit && !KATMAN_ACIK.cevreKoruma && !KATMAN_ACIK.orman){
+        KATMAN_ACIK.sit = true; KATMAN_ACIK.cevreKoruma = true; KATMAN_ACIK.orman = true;
+      }
+      seciliKorumaId = null;
+      if(el("korumaSecici")) el("korumaSecici").value = "";
+      katmanSenkronla();
+      tucbsKorumaCiz();
+      var bnd = geoProjKur(TUCBS_KORUMA_GEO.features, 0, 0, 100, 100, 0).bounds;
+      try{ MAP.fitBounds(bnd, {padding:[28,28], maxZoom:7}); }catch(e){}
+      return;
+    }
+    var f = TUCBS_KORUMA_GEO.features.find(function(x){
+      var xp = x.properties || {};
+      return String(xp.sno || xp.id) === String(id);
+    });
+    if(!f) return;
+    var p = f.properties;
+    var pTip = p.tip || p.kat;
+    if(pTip === "sit") KATMAN_ACIK.sit = true;
+    else if(pTip === "cevre_koruma") KATMAN_ACIK.cevreKoruma = true;
+    else if(pTip === "orman") KATMAN_ACIK.orman = true;
+    seciliKorumaId = p.sno || p.id;
+    katmanSenkronla();
+    tucbsKorumaCiz();
+    el("haritaBolum").scrollIntoView({behavior:"smooth", block:"center"});
+    setTimeout(function(){
+      try{ MAP.invalidateSize(); }catch(e){}
+      var bnd = geoProjKur([f], 0, 0, 100, 100, 0).bounds;
+      try{ MAP.fitBounds(bnd, {padding:[45,45], maxZoom:12}); }catch(e){ MAP.setView([p.lat, p.lon], 11); }
+      L.popup().setLatLng([p.lat, p.lon]).setContent(
+        '<b>#'+esc(p.sno||p.id)+' · '+esc(p.ad)+' ('+esc(p.il)+')</b><br>'
+        +'Statü: <b>'+esc(p.statu)+'</b> · Alan: <b>'+fmt(p.hektar||0)+' ha</b><br>'
+        +'<small>'+esc(p.ges_durum||p.kisit||"")+'</small>'
+      ).openOn(MAP);
+    }, 200);
+  }
+
+  function tucbsKatalogCiz(){
+    var grid = el("tucbsKatalogGrid");
+    var katalogList = (TUCBS_KORUMA_GEO && (TUCBS_KORUMA_GEO.tucbs_katalog || TUCBS_KORUMA_GEO.katalog_temalar)) || [];
+    if(!grid || !katalogList.length) return;
+    var secTema = el("tucbsTemaSec") ? el("tucbsTemaSec").value : "";
+    var q = el("tucbsKatAra") ? el("tucbsKatAra").value.trim().toLocaleLowerCase("tr") : "";
+
+    var kartlar = [];
+    var topSay = 0;
+    katalogList.forEach(function(t){
+      if(secTema && t.tema !== secTema) return;
+      (t.katmanlar || []).forEach(function(kItem){
+        topSay++;
+        var kAd = (typeof kItem === "string") ? kItem : (kItem.ad || "");
+        var kKurum = (typeof kItem === "object" && kItem.kurum) ? kItem.kurum : "TUCBS Ulusal Katalog";
+        var kTur = (typeof kItem === "object" && kItem.tur) ? kItem.tur : "WMS";
+        if(q && (t.tema + " " + kAd + " " + kKurum).toLocaleLowerCase("tr").indexOf(q) < 0) return;
+        var hedefKat = "tucbsWms";
+        var bEtiket = "🌐 TUCBS WMS Aç";
+        if(/doğal sit|arkeolojik|kentsel sit|sit alan/i.test(kAd)){ hedefKat = "sit"; bEtiket = "🏛️ Sit Katmanını Aç"; }
+        else if(/özel çevre|milli park|tabiat|yaban|koruma alan|sulak/i.test(kAd)){ hedefKat = "cevreKoruma"; bEtiket = "🛡️ Koruma Katmanını Aç"; }
+        else if(/orman|ağaç|meşcere|ogm/i.test(kAd)){ hedefKat = "orman"; bEtiket = "🌲 Orman Katmanını Aç"; }
+        else if(/ova|tarım|toprak|mera/i.test(kAd)){ hedefKat = "ova"; bEtiket = "🌾 Ova Katmanını Aç"; }
+        else if(/arazi örtüsü|corine/i.test(kAd)){ hedefKat = "corineWms"; bEtiket = "🌍 CORINE WMS Aç"; }
+        else if(/fay|deprem|jeoloji|heyelan/i.test(kAd)){ hedefKat = "fayWms"; bEtiket = "⚠️ Fay/Jeoloji WMS Aç"; }
+        else if(/taşkın|hidrografya|havza|su/i.test(kAd)){ hedefKat = "taskinWms"; bEtiket = "🌊 Taşkın WMS Aç"; }
+        else if(/enerji|iletim|trafo|boru/i.test(kAd)){ hedefKat = "topoloji"; bEtiket = "⚡ Şebeke Ağı Aç"; }
+
+        kartlar.push(
+          '<div class="tucbs-kat-kart">'
+            +'<div>'
+              +'<div class="tk-tema">'+esc(t.tema)+' · '+esc(kTur)+'</div>'
+              +'<div class="tk-ad">'+esc(kAd)+'</div>'
+            +'</div>'
+            +'<div class="tk-alt">'
+              +'<span title="'+esc(kKurum)+'">'+esc(kKurum.slice(0,32))+'</span>'
+              +'<button type="button" class="k-btn btn-katalog-katman" data-hedef="'+hedefKat+'" style="min-height:24px;padding:0 8px;font-size:10.5px;background:#0284C7;color:#fff;border-color:#0369A1">'+bEtiket+'</button>'
+            +'</div>'
+          +'</div>'
+        );
+      });
+    });
+
+    if(el("tucbsKatalogSayac")){
+      el("tucbsKatalogSayac").textContent = kartlar.length + " / 375 Kurumsal Katman";
+    }
+    grid.innerHTML = kartlar.slice(0, 120).join("") || '<div style="grid-column:1/-1;padding:18px;text-align:center;color:#94A3B8">Arama kriteriyle eşleşen TUCBS katmanı bulunamadı.</div>';
+    grid.querySelectorAll(".btn-katalog-katman").forEach(function(b){
+      b.addEventListener("click", function(){
+        var h = b.getAttribute("data-hedef");
+        if(h){
+          KATMAN_ACIK[h] = true;
+          katmanSenkronla();
+          haritaCiz(false);
+        }
+      });
+    });
+  }
+
   var araziMenuAcik = false;
   function araziMenuToggle(zorlaAcik){
     araziMenuAcik = (typeof zorlaAcik === "boolean") ? zorlaAcik : !araziMenuAcik;
@@ -1551,6 +2122,7 @@
 
     if(el("btnShbAna")) el("btnShbAna").href = anaShbUrl;
     if(el("btnShbHizliBar")) el("btnShbHizliBar").href = tarlaUrl;
+    tmKisitMatrisCiz(r);
 
     if(el("tmAraziMini")){
       el("tmAraziMini").innerHTML =
@@ -1801,6 +2373,9 @@
     if(el("ovaGezginBar")){
       el("ovaGezginBar").hidden = !KATMAN_ACIK.ova;
     }
+    if(el("korumaGezginBar")){
+      el("korumaGezginBar").hidden = !(korumaGezginZorla || KATMAN_ACIK.sit || KATMAN_ACIK.cevreKoruma || KATMAN_ACIK.orman);
+    }
     if(MAP && ILL && BOLGE){
       if(KATMAN_ACIK.sinirlar || KATMAN_ACIK.isi){
         if(!MAP.hasLayer(ILL)) ILL.addTo(MAP);
@@ -1813,16 +2388,26 @@
         if(MAP.hasLayer(BOLGE)) MAP.removeLayer(BOLGE);
       }
     }
+    var adlar = [];
+    if(KATMAN_ACIK.kapasite) adlar.push(KATMAN_ACIK.erime ? "TM Erime" : "TM Balon");
+    if(KATMAN_ACIK.sadeceAcik) adlar.push("Yalnız Açık TM");
+    if(KATMAN_ACIK.topoloji) adlar.push("154/380 kV TEİAŞ Şebeke");
+    if(KATMAN_ACIK.sit) adlar.push("Doğal Sit (TVKGM)");
+    if(KATMAN_ACIK.cevreKoruma) adlar.push("ÖÇKB/Milli Park");
+    if(KATMAN_ACIK.tucbsWms) adlar.push("TUCBS Doğal WMS");
+    if(KATMAN_ACIK.orman) adlar.push("OGM Orman");
+    if(KATMAN_ACIK.ova) adlar.push("286 Büyük Ova");
+    if(KATMAN_ACIK.corineWms) adlar.push("CORINE Arazi");
+    if(KATMAN_ACIK.fayWms) adlar.push("MTA Diri Fay");
+    if(KATMAN_ACIK.taskinWms) adlar.push("Taşkın Q100");
+    if(KATMAN_ACIK.sahibinden) adlar.push("Sahibinden Arazi");
+    if(KATMAN_ACIK.isi) adlar.push("İl Isı Dolgusu");
+    if(KATMAN_ACIK.ilEtiket) adlar.push("İl Rozet");
+    if(KATMAN_ACIK.sinirlar) adlar.push("İl/EDAŞ Sınır");
+    if(el("dockAktifSayac")){
+      el("dockAktifSayac").textContent = adlar.length + " Aktif";
+    }
     if(el("aktifKatmanOzet")){
-      var adlar = [];
-      if(KATMAN_ACIK.kapasite) adlar.push(KATMAN_ACIK.erime ? "TM Erime" : "TM Balon");
-      if(KATMAN_ACIK.sadeceAcik) adlar.push("Yalnız Açık TM");
-      if(KATMAN_ACIK.topoloji) adlar.push("154/380 kV TEİAŞ Şebeke");
-      if(KATMAN_ACIK.ova) adlar.push("286 Büyük Ova");
-      if(KATMAN_ACIK.sahibinden) adlar.push("Sahibinden Arazi");
-      if(KATMAN_ACIK.isi) adlar.push("İl Isı Dolgusu");
-      if(KATMAN_ACIK.ilEtiket) adlar.push("İl Rozet");
-      if(KATMAN_ACIK.sinirlar) adlar.push("İl/EDAŞ Sınır");
       el("aktifKatmanOzet").textContent = "Aktif Katmanlar (" + adlar.length + "): " + (adlar.join(" · ") || "Yok");
     }
   }
@@ -1907,8 +2492,26 @@
       parcalar.push('<span><i style="background:#0284C7;border-radius:2px;height:4px;vertical-align:middle"></i>154 kV TEİAŞ İletim Hattı</span>');
       parcalar.push('<span><i style="background:#EF4444;border-radius:2px;height:4px;vertical-align:middle"></i>380 kV Ulusal İletim Hattı</span>');
     }
+    if(KATMAN_ACIK.sit){
+      parcalar.push('<span><i style="background:#F43F5E;border:1.5px solid #BE185D"></i>🏛️ Doğal Sit (Kesin / Nitelikli)</span>');
+    }
+    if(KATMAN_ACIK.cevreKoruma || KATMAN_ACIK.tucbsWms){
+      parcalar.push('<span><i style="background:#14B8A6;border:1.5px solid #0D9488"></i>🛡️ ÖÇKB · Milli &amp; Tabiat Parkı</span>');
+    }
+    if(KATMAN_ACIK.orman){
+      parcalar.push('<span><i style="background:#16A34A;border:1.5px dashed #14532D"></i>🌲 OGM Orman Alanları &amp; 10m Orman Örtüsü</span>');
+    }
     if(KATMAN_ACIK.ova){
       parcalar.push('<span><i style="background:#22C55E;border:1.5px dashed #15803D"></i>🌾 Büyük Ova Koruma Alanı (286 Ova)</span>');
+    }
+    if(KATMAN_ACIK.corineWms){
+      parcalar.push('<span><i style="background:#84CC16;border:1px solid #365314"></i>🌍 CORINE Arazi Örtüsü (CLC2018)</span>');
+    }
+    if(KATMAN_ACIK.fayWms){
+      parcalar.push('<span><i style="background:#DC2626;border-radius:2px;height:3px;vertical-align:middle"></i>⚠️ MTA Diri Fay Hatları</span>');
+    }
+    if(KATMAN_ACIK.taskinWms){
+      parcalar.push('<span><i style="background:#0EA5E9;border:1px solid #0369A1"></i>🌊 SYGM Taşkın Risk (Q100)</span>');
     }
     if(KATMAN_ACIK.sahibinden){
       parcalar.push('<span><i style="background:#FFE800;border:1px solid #182232"></i>🟡 Sahibinden GES Arazi İlanı (≤5–10 km)</span>');
@@ -1917,7 +2520,7 @@
       parcalar.push('<span><i style="background:#059669"></i>İl Isı ≥ 80 MWe</span>');
       parcalar.push('<span><i style="background:#F59E0B"></i>İl Isı 10–30 MWe</span>');
     }
-    box.innerHTML = parcalar.join("") || '<span>Üstteki çubuktan görmek istediğiniz harita katmanlarına tıklayarak aktif edebilirsiniz.</span>';
+    box.innerHTML = parcalar.join("") || '<span>Sol katman matrisinden görmek istediğiniz CBS katmanlarına tıklayarak aktif edebilirsiniz.</span>';
   }
 
   // trafolar.kmz -> teias_hat içindeki gerçek 1.531 TEİAŞ 154 kV & 380 kV iletim şebekesi çizimi
@@ -2113,8 +2716,9 @@
       });
     }
 
-    // 5. BÜYÜK OVA KORUMA ALANLARI KATMANI (286 OVA)
+    // 5. BÜYÜK OVA, DOĞAL SİT, ÇEVRE KORUMA VE ORMAN KATMANLARI
     buyukOvaCiz();
+    tucbsKorumaCiz();
     dolguUygula();
     lejantGuncelle();
 
@@ -2180,6 +2784,7 @@
       MAP=L.map("harita",{scrollWheelZoom:false, preferCanvas:true}).setView([39.0,35.2],6);
       HAT_RENDERER = L.canvas({ padding: 0.5 });
       OVA_RENDERER = L.canvas({ padding: 0.5 });
+      KORUMA_RENDERER = L.canvas({ padding: 0.5 });
       ALTLIKLAR = {
         osm: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}),
         uydu: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:18,attribution:"© Esri World Imagery"}),
@@ -2187,11 +2792,29 @@
         koyu: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"© CARTO"}),
         acik: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",{maxZoom:16,attribution:"© Esri"})
       };
+      WMS_KATMANLAR = {
+        tucbsDogal: L.tileLayer.wms("https://ucbp-app8.tucbs.gov.tr/geoserver/tucbs/wms", {
+          layers: "tucbs:dogaldegerlerharitasi", format: "image/png", transparent: true, opacity: 0.72, attribution: "© TUCBS ÇŞİDB Doğal Değerler"
+        }),
+        copernicusOrman: L.tileLayer.wms("https://image.discomap.eea.europa.eu/arcgis/services/GioLandPublic/HRL_ForestType_2018/ImageServer/WMSServer", {
+          layers: "HRL_ForestType_2018:FTY_MosaicSymbology", format: "image/png", transparent: true, opacity: 0.65, attribution: "© Copernicus / OGM Orman Örtüsü"
+        }),
+        corineArazi: L.tileLayer.wms("https://image.discomap.eea.europa.eu/arcgis/services/Corine/CLC2018_WM/MapServer/WMSServer", {
+          layers: "12,13", format: "image/png", transparent: true, opacity: 0.62, attribution: "© EEA CORINE Land Cover"
+        }),
+        mtaDiriFay: L.tileLayer.wms("https://ucbp-app8.tucbs.gov.tr/geoserver/tucbs/wms", {
+          layers: "tucbs:diri_fay", format: "image/png", transparent: true, opacity: 0.85, attribution: "© TUCBS / MTA Diri Fay"
+        }),
+        sygmTaskin: L.tileLayer.wms("https://ucbp-app8.tucbs.gov.tr/geoserver/tucbs/wms", {
+          layers: "tucbs:taskin_risk_haritasi_q100", format: "image/png", transparent: true, opacity: 0.78, attribution: "© TUCBS / SYGM Taşkın Q100"
+        })
+      };
       ALTLIKLAR.osm.addTo(MAP);
       MAP.on("click",function(){ MAP.scrollWheelZoom.enable(); });
       ILL=L.layerGroup().addTo(MAP);
       BOLGE=L.layerGroup().addTo(MAP);
       OVA_KAT=L.layerGroup().addTo(MAP);
+      KORUMA_KAT=L.layerGroup().addTo(MAP);
       TOPO_KAT=L.layerGroup().addTo(MAP);
       ARAZI_KAT=L.layerGroup().addTo(MAP);
       KAT=L.layerGroup().addTo(MAP);
@@ -2205,12 +2828,27 @@
       fetch("iller_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
       fetch("bolge_edas.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
       fetch("buyuk_ovalar.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
-      fetch("teias_hat.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;})
+      fetch("teias_hat.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}),
+      fetch("tucbs_koruma.json",{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
     ]).then(function(a){
-      var il=a[0], bo=a[1], ov=a[2], th=a[3];
+      var il=a[0], bo=a[1], ov=a[2], th=a[3], tk=a[4];
       if(th && th.hatlar){
         TEIAS_HAT_VERI = th;
         if(KATMAN_ACIK.topoloji) teiasHatCiz();
+      }
+      if(tk && tk.features){
+        TUCBS_KORUMA_GEO = tk;
+        var katTemalar = tk.tucbs_katalog || tk.katalog_temalar || [];
+        if(el("tucbsTemaSec") && katTemalar.length){
+          el("tucbsTemaSec").innerHTML = '<option value="">Tüm TUCBS Veri Temaları ('+katTemalar.length+' Tema · 375 Katman)</option>'
+            + katTemalar.map(function(t){
+              return '<option value="'+esc(t.tema)+'">'+esc(t.tema)+'</option>';
+            }).join("");
+        }
+        korumaSeciciDoldur();
+        tucbsKatalogCiz();
+        tucbsKorumaCiz();
+        if(seciliRow) tmAraziCiz(seciliRow);
       }
       if(ov && ov.features){
         OVA_GEO = ov;
@@ -2284,6 +2922,14 @@
   function ciz(){
     gorunen=suz();
     var il=el("fil").value, ed=el("fed").value;
+    // Üst Kurumsal CBS KPI Şeridi Güncellemesi
+    var topAktMwe = gorunen.reduce(function(s,r){return s+av(r);},0);
+    var acikBaraSay = gorunen.filter(function(r){return av(r)>0;}).length;
+    if(el("kpiAktifMwe")) el("kpiAktifMwe").textContent = fmt(topAktMwe) + " MWe";
+    if(el("kpiAktifAlt")) el("kpiAktifAlt").textContent = "~" + fmt(topAktMwe*1.25) + " MWp DC (" + donemler[aktif].kisa + ")";
+    if(el("kpiAcikBara")) el("kpiAcikBara").textContent = fmt0(acikBaraSay) + " / " + fmt0(gorunen.length);
+    if(el("kpiAcikAlt")) el("kpiAcikAlt").textContent = (il ? il : (ed ? ed : "Türkiye Geneli")) + " · 34,5 kV OG/OSB";
+
     el("hizliBolge").querySelectorAll("button").forEach(function(b){
       var bil=b.getAttribute("data-il"), bed=b.getAttribute("data-ed");
       var on = (bil ? (il===bil) : (bed!==null ? (ed===bed && !il) : false));
@@ -2359,6 +3005,111 @@
   el("btnTmUydu").addEventListener("click", function(){
     if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, true);
   });
+  if(el("btnDockToggle")){
+    el("btnDockToggle").addEventListener("click", function(){
+      var ws = el("cbsWorkspace");
+      if(ws){
+        ws.classList.toggle("dock-kapali");
+        setTimeout(function(){ if(MAP) try{ MAP.invalidateSize(); }catch(e){} }, 180);
+      }
+    });
+  }
+  if(el("btnPresetSebeke")){
+    el("btnPresetSebeke").addEventListener("click", function(){
+      KATMAN_ACIK.kapasite = true;
+      KATMAN_ACIK.topoloji = true;
+      KATMAN_ACIK.ilEtiket = true;
+      KATMAN_ACIK.sinirlar = true;
+      KATMAN_ACIK.sit = false;
+      KATMAN_ACIK.cevreKoruma = false;
+      KATMAN_ACIK.tucbsWms = false;
+      KATMAN_ACIK.orman = false;
+      KATMAN_ACIK.ova = false;
+      KATMAN_ACIK.corineWms = false;
+      KATMAN_ACIK.fayWms = false;
+      KATMAN_ACIK.taskinWms = false;
+      katmanSenkronla();
+      haritaCiz(false);
+    });
+  }
+  if(el("btnPresetKisit")){
+    el("btnPresetKisit").addEventListener("click", function(){
+      KATMAN_ACIK.sit = true;
+      KATMAN_ACIK.cevreKoruma = true;
+      KATMAN_ACIK.orman = true;
+      KATMAN_ACIK.ova = true;
+      KATMAN_ACIK.kapasite = true;
+      katmanSenkronla();
+      haritaCiz(false);
+    });
+  }
+  if(el("btnTmKisitHarita")){
+    el("btnTmKisitHarita").addEventListener("click", function(){
+      KATMAN_ACIK.sit = true;
+      KATMAN_ACIK.cevreKoruma = true;
+      KATMAN_ACIK.orman = true;
+      KATMAN_ACIK.ova = true;
+      katmanSenkronla();
+      if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, false);
+    });
+  }
+  if(el("btnTucbsKatalogAc")){
+    el("btnTucbsKatalogAc").addEventListener("click", function(){
+      var p = el("tucbsKatalogPanel");
+      if(p){
+        p.hidden = !p.hidden;
+        tucbsKatalogCiz();
+      }
+    });
+  }
+  if(el("btnTucbsKatalogKapat")){
+    el("btnTucbsKatalogKapat").addEventListener("click", function(){
+      if(el("tucbsKatalogPanel")) el("tucbsKatalogPanel").hidden = true;
+    });
+  }
+  if(el("tucbsTemaSec")){
+    el("tucbsTemaSec").addEventListener("change", tucbsKatalogCiz);
+  }
+  if(el("tucbsKatAra")){
+    el("tucbsKatAra").addEventListener("input", tucbsKatalogCiz);
+  }
+  if(el("cbsOpaklik")){
+    el("cbsOpaklik").addEventListener("input", function(){
+      var v = +this.value || 78;
+      cbsOpaklikOran = v / 100;
+      if(el("cbsOpaklikVal")) el("cbsOpaklikVal").textContent = "%" + v;
+      tucbsKorumaCiz();
+      buyukOvaCiz();
+    });
+  }
+  if(el("btnKorumaGezginToggle")){
+    el("btnKorumaGezginToggle").addEventListener("click", function(){
+      korumaGezginZorla = !korumaGezginZorla;
+      if(korumaGezginZorla && !KATMAN_ACIK.sit && !KATMAN_ACIK.cevreKoruma && !KATMAN_ACIK.orman){
+        KATMAN_ACIK.sit = true;
+        KATMAN_ACIK.cevreKoruma = true;
+        KATMAN_ACIK.orman = true;
+      }
+      katmanSenkronla();
+      haritaCiz(false);
+    });
+  }
+  if(el("korumaTipFiltre")){
+    el("korumaTipFiltre").addEventListener("change", function(){
+      korumaSeciciDoldur();
+    });
+  }
+  if(el("korumaSecici")){
+    el("korumaSecici").addEventListener("change", function(){
+      if(this.value) korumaOdakla(this.value, false);
+      else korumaOdakla(null, true);
+    });
+  }
+  if(el("btnTumKoruma")){
+    el("btnTumKoruma").addEventListener("click", function(){
+      korumaOdakla(null, true);
+    });
+  }
   if(el("araziAcilirBar")){
     el("araziAcilirBar").addEventListener("click", function(e){
       if(e.target && e.target.closest && e.target.closest("a")) return;
@@ -2458,8 +3209,8 @@
       el("fil").insertAdjacentHTML("beforeend", filHtml);
       el("fed").insertAdjacentHTML("beforeend", Object.keys(EDAS_IL).map(function(e){return '<option value="'+esc(e)+'">'+esc(e)+' ('+EDAS_IL[e].length+' il)</option>';}).join(""));
       var konumlu=tumu.filter(function(r){return r.lat!=null;}).length;
-      el("meta2").textContent=d.tm_sayi+" trafo merkezi barası · 3 dönem (02.03 → 16.07 → 01.10.2026) · "+konumlu+" coğrafi konumlu · 5 Harita Altlığı + 9 Bağımsız Aktif/Pasif Katman";
-      el("not").innerHTML="<b>Mühendislik Notu:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezi barasında dağıtım seviyesinden (34,5 kV) tahsis edilebilecek güncel MWe gücüdür; 0,00 MWe olan baralar yeni lisanssız çağrı mektubu başvurusuna kapalıdır. Harita üzerindeki <b>Harita Altlığı</b> satırından zemin haritasını (Standart, Uydu, Topoğrafik, Koyu SCADA, Açık Teknik) değiştirebilir; <b>Katmanlar</b> satırından ise <b>154/380 kV TEİAŞ Şebeke Ağı (KMZ)</b>, <b>286 Büyük Ova Koruma Alanı</b>, <b>Sahibinden Uygun Arazi İlanları</b> ve diğer katmanları bağımsız olarak <b>Aktif / Pasif</b> edebilirsiniz.";
+      el("meta2").textContent=d.tm_sayi+" trafo merkezi barası · 3 dönem (02.03 → 16.07 → 01.10.2026) · "+konumlu+" coğrafi konumlu · 5 Harita Altlığı + 16 Bağımsız CBS Katmanı (Sit, Çevre Koruma, OGM Orman, 286 Ova, TEİAŞ Şebeke, TUCBS 375 Katman)";
+      el("not").innerHTML="<b>Mühendislik &amp; CBS Notu:</b> “Kalan kapasite”, ilgili TEİAŞ yayınında o trafo merkezi barasında dağıtım seviyesinden (34,5 kV) tahsis edilebilecek güncel MWe gücüdür; 0,00 MWe olan baralar yeni lisanssız çağrı mektubu başvurusuna kapalıdır. Sol <b>CBS Katman Matrisi</b> üzerinden <b>154/380 kV TEİAŞ Şebeke Ağı (KMZ)</b>, <b>Doğal Sit Alanları (TVKGM)</b>, <b>ÖÇKB / Milli Park / Tabiat Parkları (DKMP)</b>, <b>OGM Orman Alanları &amp; 10m Orman Örtüsü</b>, <b>286 Büyük Ova Koruma Alanı</b>, <b>CORINE Arazi Örtüsü</b>, <b>MTA Diri Fay &amp; SYGM Taşkın Risk (Q100)</b> ve <b>Sahibinden Uygun Arazi İlanları</b> katmanlarını bağımsız olarak <b>Aktif / Pasif</b> edebilir; <b>TUCBS Katalog (375 Katman)</b> çekmecesinden tüm ulusal CBS katmanlarını inceleyebilirsiniz.";
       haritaKur(); segCiz(); ciz();
     })
     .catch(function(){

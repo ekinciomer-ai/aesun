@@ -91,6 +91,66 @@
   .tm-sema-kutu{background:#fff;border:1px solid var(--line);border-top:4px solid #182232;border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between}
   .tm-sema-kutu h3{margin:0 0 4px;font-family:Archivo,sans-serif;font-size:16.5px;font-weight:800;color:var(--ink);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
   .tm-sema-kutu p{margin:0 0 10px;font-size:12.5px;color:var(--mut)}
+  /* Harita Üzeri Sahibinden İlan Katmanı Pin & Rozetleri */
+  .k-btn.shb-katman-btn{border-color:#D4B200;background:#FFFDF0;color:#111827}
+  .k-btn.shb-katman-btn:hover,.k-btn.shb-katman-btn.on{background:#FFE800;border-color:#B89B00;color:#111827;box-shadow:0 2px 8px rgba(234,179,8,.35)}
+  .lej .chk2.shb-chk{background:#FFFBEB;border-color:#FACC15;color:#111827;font-weight:700}
+  .shb-harita-pin{background:#FFE800;color:#111827;border:2px solid #182232;border-radius:8px;padding:3px 7px;font-family:Archivo,sans-serif;font-size:10.5px;font-weight:800;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.35);display:inline-flex;align-items:center;gap:4px;cursor:pointer;transition:transform .15s}
+  .shb-harita-pin:hover{transform:scale(1.08);background:#FFF04D;z-index:999!important}
+  .shb-harita-pin .p-mwe{background:#182232;color:#FFE800;border-radius:4px;padding:1px 4px;font-size:9.5px}
+  .shb-bolge-etiket{background:rgba(255,232,0,.94);color:#111827;border:1.5px solid #182232;border-radius:99px;padding:2px 8px;font-family:Archivo,sans-serif;font-size:10px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.28);cursor:pointer}
+
+  .tm-arazi-mini{margin-top:10px;background:#FFFDF4;border:1px solid #F3D978;border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px}
+  .tm-arazi-mini .sol{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#182232}
+  .tm-arazi-mini .shb-rozet{background:#FFE800;color:#111;font-family:Archivo,sans-serif;font-weight:800;font-size:10.5px;padding:2px 7px;border-radius:5px;border:1px solid #D6C200;letter-spacing:.02em}
+  .tm-arazi-mini .sag-btn{display:flex;gap:6px;flex-wrap:wrap}
+  .shb-link-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;font-family:Archivo,sans-serif;font-size:12px;font-weight:800;text-decoration:none;cursor:pointer;border:1px solid #D6C200;background:#FFE800;color:#111827;transition:all .15s;white-space:nowrap}
+  .shb-link-btn:hover{background:#F5DC00;transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.1)}
+  .shb-link-btn.koyu{background:#182232;color:#FFE800;border-color:#182232}
+  .shb-link-btn.koyu:hover{background:#0F172A;color:#FFF}
+
+  /* Seçili TM Sahibinden.com Uygun Arazi Satış İlanları Paneli */
+  .arazi-panel{background:#fff;border:1px solid var(--line);border-top:4px solid #EAB308;border-radius:16px;padding:18px 20px;box-shadow:0 6px 22px rgba(20,24,31,.05)}
+  .arazi-ust{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .arazi-baslik-grup{display:flex;flex-direction:column;gap:4px}
+  .arazi-ust-rozetler{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .shb-marka{background:#FFE800;color:#111827;font-family:Archivo,sans-serif;font-weight:800;font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #D4B200;letter-spacing:.03em;display:inline-flex;align-items:center;gap:5px}
+  .arazi-ust h2{margin:0;font-family:Archivo,sans-serif;font-weight:800;font-size:18px;color:var(--ink)}
+  .arazi-ust p{margin:0;font-size:12.5px;color:var(--mut)}
+  .arazi-tm-secici{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#FAFBFD;border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+  .arazi-tm-secici label{font-size:11px;font-weight:800;text-transform:uppercase;color:var(--mut2)}
+  .arazi-tm-secici select{min-height:34px;padding:0 10px;border:1px solid #D0D7E2;border-radius:8px;font:inherit;font-size:13px;font-weight:700;color:#182232;background:#fff;max-width:310px}
+  .arazi-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  @media(max-width:920px){.arazi-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.arazi-kpi-grid{grid-template-columns:1fr}}
+  .arazi-kpi{background:#FAFBFD;border:1px solid var(--line);border-radius:11px;padding:10px 13px}
+  .arazi-kpi .k-etiket{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mut2)}
+  .arazi-kpi .k-deger{font-family:Archivo,sans-serif;font-size:15.5px;font-weight:800;color:var(--ink);margin:3px 0 2px}
+  .arazi-kpi .k-alt{font-size:11.5px;color:var(--mut)}
+  .arazi-filtre-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:#FFFDF5;border:1px solid #F1DF8B;border-radius:12px;padding:12px 14px;margin-bottom:14px}
+  .arazi-filtre-bar label{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#5A6270;display:flex;flex-direction:column;gap:4px}
+  .arazi-filtre-bar select,.arazi-filtre-bar input{min-height:36px;padding:0 10px;border:1px solid #D6DCE5;border-radius:8px;font:inherit;font-size:13px;color:var(--ink);background:#fff}
+  .arazi-filtre-bar .aksiyonlar{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;align-items:center}
+  .arazi-ilan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:980px){.arazi-ilan-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){.arazi-ilan-grid{grid-template-columns:1fr}}
+  .ilan-kart{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:all .15s;position:relative;overflow:hidden}
+  .ilan-kart:hover{border-color:#EAB308;box-shadow:0 6px 18px rgba(234,179,8,.14);transform:translateY(-2px)}
+  .ilan-kart.one-cikan{border-color:#EAB308;background:linear-gradient(180deg,#FFFDF5 0%,#FFFFFF 55%)}
+  .ilan-kart .ik-ust{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+  .ilan-kart .ik-tip{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:99px;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+  .ilan-kart .ik-tip.yesil{background:#DCFCE7;color:#166534;border-color:#BBF7D0}
+  .ilan-kart .ik-tip.mavi{background:#E0F2FE;color:#075985;border-color:#BAE6FD}
+  .ilan-kart .ik-mesafe{font-size:11px;font-weight:700;color:#1E9E5A}
+  .ilan-kart h4{margin:2px 0;font-family:Archivo,sans-serif;font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.35}
+  .ilan-kart .ik-aciklama{font-size:12px;color:var(--mut);line-height:1.45;margin:0}
+  .ilan-kart .ik-teknik{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;font-size:11.5px}
+  .ilan-kart .ik-teknik div b{display:block;font-size:10px;text-transform:uppercase;color:var(--mut2)}
+  .ilan-kart .ik-teknik div span{font-family:Archivo,sans-serif;font-weight:700;color:#182232}
+  .ilan-kart .ik-alt{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding-top:6px;border-top:1px dashed var(--line)}
+  .yerlesim-etiketler{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:12px}
+  .yerlesim-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;background:#F6F8FB;border:1px solid var(--line);color:var(--ink2);font-weight:600;text-decoration:none;font-size:11.5px;transition:all .15s}
+  .yerlesim-chip:hover{background:#FFE800;color:#111;border-color:#D6C200}
 
   /* Filtre */
   .flt{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
@@ -242,6 +302,7 @@
         <button type="button" class="k-btn red" data-vmod="isi">🔥 İl Kapasite Isı Katmanı</button>
         <button type="button" class="k-btn red" data-vmod="erime">📉 Dönemsel Erime (Δ MWe)</button>
         <button type="button" class="k-btn red" data-vmod="topoloji">🕸️ 154 kV Şebeke Ağı</button>
+        <button type="button" class="k-btn shb-katman-btn" data-vmod="sahibinden">🟡 Sahibinden Arazi İlan Katmanı</button>
       </div>
     </div>
 
@@ -255,6 +316,7 @@
         <span><i style="background:#9AA2AD"></i>Dolu (0,00 MWe)</span>
       </div>
       <div class="lej-sag">
+        <label class="chk2 shb-chk"><input type="checkbox" id="tglSahibinden" checked> 🟡 Sahibinden arazi ilan katmanı</label>
         <label class="chk2"><input type="checkbox" id="tglSadeceAcik"> Yalnız açık TM'ler</label>
         <label class="chk2"><input type="checkbox" id="tglIlEtiket" checked> İl MWe rozetleri</label>
         <label class="chk2"><input type="checkbox" id="tglIl" checked> İl sınırları</label>
@@ -280,12 +342,78 @@
       <div>
         <h3>
           <span>Seçili Trafo Merkezi · Teknik Tek Hat &amp; Bara Şeması</span>
-          <button type="button" class="k-btn" id="btnTmUydu" style="min-height:28px;font-size:11.5px">🛰️ Uyduda Göster</button>
+          <span style="display:inline-flex;gap:6px;flex-wrap:wrap">
+            <button type="button" class="shb-link-btn" id="btnTmSahibinden" style="min-height:28px;font-size:11.5px;padding:3px 9px">🟡 Sahibinden Arazi Katmanı</button>
+            <button type="button" class="k-btn" id="btnTmUydu" style="min-height:28px;font-size:11.5px">🛰️ Uyduda Göster</button>
+          </span>
         </h3>
-        <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi ve GES potansiyeli burada çizilir:</p>
+        <p>Tablodan, veri şemasından veya haritadan herhangi bir TM'ye tıkladığınızda bara mimarisi, harita arazi katmanı ve uygun satılık ilanlar güncellenir:</p>
       </div>
       <div id="tmTekHatSvg"></div>
+      <div id="tmAraziMini" class="tm-arazi-mini"></div>
     </div>
+  </div>
+
+  <!-- 4B. SEÇİLİ TRAFO MERKEZİ ÇEVRESİ · SAHİBİNDEN.COM UYGUN SATILIK ARAZİ & GES PARSEL İLANLARI -->
+  <div class="arazi-panel" id="araziBolum">
+    <div class="arazi-ust">
+      <div class="arazi-baslik-grup">
+        <div class="arazi-ust-rozetler">
+          <span class="shb-marka">🟡 sahibinden.com · GES ARAZİ KATMANI &amp; RADARI</span>
+          <span class="durum-pill acik" id="araziTmRozet">Seçili TM Analizi</span>
+        </div>
+        <h2 id="araziBaslik">Seçili Trafo Merkezi Çevresi · GES Uygun Satılık Arazi Satış İlanları</h2>
+        <p id="araziAltBaslik">Haritadan, tablodan veya sağdaki kutudan bir Trafo Merkezi (TM) seçildiğinde; harita üzerinde 0–5 km / 5–10 km GES arazi katmanı çizilir ve o trafo merkezine uygun satılık arazi ilanları listelenir.</p>
+      </div>
+      <div class="arazi-tm-secici">
+        <label for="araziTmSec">Trafo Merkezi Seç:</label>
+        <select id="araziTmSec" aria-label="Trafo Merkezi Seç"></select>
+      </div>
+    </div>
+
+    <div class="arazi-kpi-grid" id="araziKpiGrid"></div>
+
+    <div class="arazi-filtre-bar">
+      <label>Arazi Kategorisi
+        <select id="shbKat">
+          <option value="tarla">🌾 Satılık Tarla (Marjinal / GES'e En Uygun)</option>
+          <option value="arsa">📐 Tüm Satılık Arsa &amp; Araziler</option>
+          <option value="ges">☀️ "GES / Güneş Enerjisi" İbareli İlanlar</option>
+          <option value="trafo">⚡ "Trafo Yakını / Yola Cephe" İlanlar</option>
+          <option value="sanayi">🏭 Sanayi &amp; Depolama İmarlı Arsalar</option>
+          <option value="bag">🌿 Bağ &amp; Bahçe Arazileri</option>
+        </select>
+      </label>
+      <label>Minimum Arazi Büyüklüğü
+        <select id="shbM2">
+          <option value="oto">🎯 Otomatik (TM Kapasitesine Göre Uygun m²)</option>
+          <option value="5000">≥ 5.000 m² (5 Dönüm · ~0,3 MWe)</option>
+          <option value="15000">≥ 15.000 m² (15 Dönüm · 1 MWe GES Standart)</option>
+          <option value="30000">≥ 30.000 m² (30 Dönüm · 2 MWe GES)</option>
+          <option value="50000">≥ 50.000 m² (50 Dönüm · 3,5 MWe GES)</option>
+          <option value="100000">≥ 100.000 m² (100+ Dönüm · Büyük GES)</option>
+        </select>
+      </label>
+      <label>Sıralama Ölçütü
+        <select id="shbSira">
+          <option value="price_asc">Fiyata Göre (Önce En Düşük)</option>
+          <option value="date_desc">İlan Tarihine Göre (En Yeni İlanlar)</option>
+          <option value="price_desc">Fiyata Göre (Önce En Yüksek)</option>
+        </select>
+      </label>
+      <label>Köy / Mahalle / Ek Kelime
+        <input type="search" id="shbKelime" placeholder="Köy adı, müstakil tapu, ges…" autocomplete="off">
+      </label>
+      <div class="aksiyonlar">
+        <button type="button" class="k-btn shb-katman-btn" id="btnHaritaAraziKatman">🗺️ Harita Katmanında Göster</button>
+        <a id="btnShbAna" href="https://www.sahibinden.com/satilik-arsa-tarla" target="_blank" rel="noopener" class="shb-link-btn">🟡 Sahibinden.com'da İlanları Aç ↗</a>
+        <a id="btnShbHarita" href="https://www.sahibinden.com/haritada-emlak-arama" target="_blank" rel="noopener" class="shb-link-btn koyu">📍 Sahibinden Haritada Ara ↗</a>
+        <a id="btnTkgm" href="https://parselsorgu.tkgm.gov.tr/" target="_blank" rel="noopener" class="k-btn">📐 TKGM Parsel Sorgu ↗</a>
+      </div>
+    </div>
+
+    <div class="arazi-ilan-grid" id="araziIlanGrid"></div>
+    <div class="yerlesim-etiketler" id="araziYerlesimler"></div>
   </div>
 
   <!-- 5. DETAYLI FİLTRE ÇUBUĞU -->
@@ -377,7 +505,7 @@
   var semaMod="kartogram"; // kartogram | agac
   var veriKatmanMod="kapasite"; // kapasite | isi | erime | topoloji
   var aktifAltlik="osm";
-  var MAP=null, KAT=null, TOPO_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, geoYok=false;
+  var MAP=null, KAT=null, TOPO_KAT=null, ARAZI_KAT=null, ETIKET_KAT=null, ALTLIKLAR={}, geoYok=false;
   var ILL=null, BOLGE=null, EDAS_RENK={}, IL_GEO=null, BOLGE_GEO=null;
   var PAL=['#D32027','#2F6DB5','#1E9E5A','#F08A24','#8E44AD','#1A97B5','#C0392B','#27AE60','#2980B9','#E67E22','#16A085','#9B59B6','#E74C3C','#3498DB','#C99A00','#11999E','#34495E','#B5651D','#6C7A89','#2C3E50'];
 
@@ -872,6 +1000,417 @@
         +'<rect x="10" y="154" width="520" height="28" rx="7" fill="#182232"/>'
         +'<text x="22" y="172" font-family="IBM Plex Sans,sans-serif" font-size="10.5" font-weight="600" fill="#E2E8F0">GES Potansiyeli: <tspan fill="#5CF08F" font-weight="700">~'+mwp+' MWp DC</tspan> · Tahmini Üretim: <tspan fill="#FBBF24" font-weight="700">~'+gwh+' GWh/yıl</tspan> · Konum: '+(r.lat!=null?(r.lat.toFixed(3)+'°K, '+r.lon.toFixed(3)+'°D'):'KMZ dışı')+'</text>'
       +'</svg>';
+    tmAraziCiz(r, topAkt, baralar);
+  }
+
+  /* 4B. SEÇİLİ TRAFO MERKEZİ → SAHİBİNDEN.COM UYGUN SATILIK ARAZİ VE HARİTA KATMAN MOTORU */
+  var ARAZI_ONBELLEK = {};
+  var TM_ILCE_HARITA = {
+    "ORTAKÖY TM": { ilce: "Ortaköy", mahalle: "Balcı" },
+    "EŞMEKAYA TM": { ilce: "Eskil", mahalle: "Eşmekaya" },
+    "TÜMOSAN TM": { ilce: "Merkez", mahalle: "Organize Sanayi" },
+    "AKSARAY TM": { ilce: "Merkez", mahalle: "Taşpazar / OSB" },
+    "KONYA-1 (MERAM) TM": { ilce: "Meram", mahalle: "" },
+    "ALAKOVA TM": { ilce: "Meram", mahalle: "Alakova" },
+    "KONYA-2 (YAZIR) TM": { ilce: "Selçuklu", mahalle: "Yazır" },
+    "KONYA-3 (KAYACIK) TM": { ilce: "Selçuklu", mahalle: "Kayacık" },
+    "KONYA OSB TM": { ilce: "Selçuklu", mahalle: "Büyükkayacık OSB" },
+    "BİSAN TM": { ilce: "Selçuklu", mahalle: "Horozluhan" },
+    "LADİK TM": { ilce: "Sarayönü", mahalle: "Ladik" },
+    "KONYA-4 (KARATAY) TM": { ilce: "Karatay", mahalle: "Fevziçakmak" },
+    "KIZÖREN TM": { ilce: "Karatay", mahalle: "Kızören" },
+    "ALİBEYHÜYÜĞÜ TM": { ilce: "Çumra", mahalle: "Alibeyhüyüğü" },
+    "HOTAMIŞ TM": { ilce: "Karapınar", mahalle: "Hotamış" },
+    "DARAN HAVZA TM": { ilce: "Sarıveliler", mahalle: "Daran" },
+    "KEPEZKAYA HAVZA TM": { ilce: "Ermenek", mahalle: "Kepezkaya" },
+    "MİSLİOVA TM": { ilce: "Merkez", mahalle: "Misli (Konaklı)" },
+    "KALABA TM": { ilce: "Avanos", mahalle: "Kalaba" },
+    "PETLAS TM": { ilce: "Merkez", mahalle: "Özbağ" }
+  };
+
+  function trSlug(s){
+    var m = {"Ç":"c","ç":"c","Ğ":"g","ğ":"g","İ":"i","I":"i","ı":"i","Ö":"o","ö":"o","Ş":"s","ş":"s","Ü":"u","ü":"u","â":"a","î":"i","û":"u"};
+    return String(s||"").replace(/[ÇçĞğİIıÖöŞşÜüâîû]/g, function(ch){ return m[ch]||ch; })
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  function basharfBuyut(s){
+    return String(s||"").toLocaleLowerCase("tr").replace(/(^|\s)\S/g, function(a){ return a.toLocaleUpperCase("tr"); });
+  }
+
+  function tmIlceCozumle(r){
+    if(!r) return { ilce: "Merkez", mahalle: "", yol: "" };
+    var k = r.il + "|" + r.tm;
+    if(ARAZI_ONBELLEK[k] && ARAZI_ONBELLEK[k].ilce){
+      return ARAZI_ONBELLEK[k];
+    }
+    if(TM_ILCE_HARITA[r.tm]){
+      return { ilce: TM_ILCE_HARITA[r.tm].ilce, mahalle: TM_ILCE_HARITA[r.tm].mahalle, yol: "" };
+    }
+    var ad = String(r.tm||"")
+      .replace(/\s*\(.*?\)\s*/g, " ")
+      .replace(/\b(380|154|GİS|GIS|HAVZA|OSB|HES|RES|ÇİM|ÇİMENTO|SEKA|SANAYİ|METRO|TOKİ|TM)\b/gi, " ")
+      .replace(/-[0-9A-Z]+/gi, " ")
+      .replace(/\s+/g, " ").trim();
+    var ilUp = String(r.il||"").toLocaleUpperCase("tr");
+    if(!ad || ad.toLocaleUpperCase("tr") === ilUp || /^(KUZEY|GÜNEY|DOĞU|BATI)\s+/i.test(ad)){
+      return { ilce: "Merkez", mahalle: "", yol: "" };
+    }
+    return { ilce: basharfBuyut(ad), mahalle: "", yol: "" };
+  }
+
+  function shbUrlUret(il, ilce, kat, sira, ekKelime){
+    var ilS = trSlug(il);
+    var ilceS = (ilce && trSlug(ilce) !== "merkez" && trSlug(ilce) !== ilS) ? trSlug(ilce) : "";
+    var konum = ilceS ? (ilS + "-" + ilceS) : ilS;
+    var base = "https://www.sahibinden.com/satilik-arsa";
+    var q = String(ekKelime||"").trim();
+    if(kat === "tarla"){
+      base = "https://www.sahibinden.com/satilik-arsa-tarla/" + konum;
+    } else if(kat === "sanayi"){
+      base = "https://www.sahibinden.com/satilik-arsa-sanayi-imarli/" + ilS;
+    } else if(kat === "bag"){
+      base = "https://www.sahibinden.com/satilik-arsa-bag-bahce/" + konum;
+    } else if(kat === "ges"){
+      base = "https://www.sahibinden.com/satilik-arsa/" + ilS;
+      q = (ilceS ? ilce + " " : "") + (q ? q + " ges" : "ges");
+    } else if(kat === "trafo"){
+      base = "https://www.sahibinden.com/satilik-arsa/" + konum;
+      q = q ? q + " trafo" : "trafo";
+    } else {
+      base = "https://www.sahibinden.com/satilik-arsa/" + konum;
+    }
+    var params = [];
+    if(sira) params.push("sorting=" + encodeURIComponent(sira));
+    if(q) params.push("query_text=" + encodeURIComponent(q));
+    return base + (params.length ? ("?" + params.join("&")) : "");
+  }
+
+  function tmPaketleriUret(r){
+    var baralar = tumu.filter(function(x){ return x.il===r.il && x.tm===r.tm; });
+    var topAkt = baralar.reduce(function(s,x){return s+av(x);},0);
+    var bilgi = tmIlceCozumle(r);
+    var il = r.il;
+    var ilce = (bilgi && bilgi.ilce) ? bilgi.ilce : "Merkez";
+    var mahalle = (bilgi && bilgi.mahalle) ? bilgi.mahalle : "";
+    var sira = el("shbSira") ? el("shbSira").value : "price_asc";
+    var m2Sec = el("shbM2") ? el("shbM2").value : "oto";
+    var ekKelime = el("shbKelime") ? el("shbKelime").value.trim() : "";
+
+    var refMwe = topAkt > 0 ? topAkt : 1.0;
+    var mwp = fmt(refMwe * 1.25);
+    var minDonum = m2Sec === "oto" ? Math.max(10, Math.round(Math.min(refMwe, 3) * 16)) : Math.round((+m2Sec||15000)/1000);
+    var tamDonum = Math.max(16, Math.round(refMwe * 16));
+
+    // Harita üzerinde TM etrafına yerleştirilecek 6 coğrafi uygun arazi ilan noktası (dLat, dLon, km, yön)
+    return [
+      {
+        oneCikan: true,
+        kisa: minDonum + " Dönüm · Tarla",
+        mwpKisa: fmt(minDonum/16*1.25) + " MWp",
+        dLat: 0.013, dLon: 0.018, km: "1,9 km KD",
+        tip: "🌾 EN UYGUN GES TARLA PAKETİ",
+        tipS: "yesil",
+        mesafe: "📍 TM Çevresi 0 – 5 km İdeal Halka (1,9 km)",
+        baslik: il + " / " + ilce + (mahalle ? " (" + mahalle + " ve Çevresi)" : "") + " · GES Uygun Satılık Tarla İlanları",
+        aciklama: r.tm + " trafo merkezine kuş uçuşu 0–5 km mesafede, 34,5 kV OG enerji nakil hattı maliyeti en düşük satılık kuru tarım / marjinal tarla ilanları.",
+        alan: "≥ " + fmt0(minDonum * 1000) + " m² (" + fmt0(minDonum) + "+ Dönüm)",
+        guc: "~" + fmt(minDonum / 16) + " – " + fmt(Math.max(1, refMwe)) + " MWe AC",
+        url: shbUrlUret(il, ilce, "tarla", sira, ekKelime)
+      },
+      {
+        oneCikan: true,
+        kisa: "20 Dönüm · GES İlanı",
+        mwpKisa: "1,50 MWp",
+        dLat: -0.016, dLon: 0.021, km: "2,4 km GD",
+        tip: "☀️ DOĞRUDAN GES İBARELİ İLANLAR",
+        tipS: "",
+        mesafe: "⚡ Çağrı Mektubu & Yatırım Uygun (2,4 km)",
+        baslik: il + " (" + ilce + ") · Açıklamasında \"GES / Güneş Enerjisi\" Geçen Satılık Araziler",
+        aciklama: "Sahibinden.com üzerinde ilan başlığında veya açıklamasında doğrudan 'GES'e uygun', 'Güneş Enerjisi', 'Marjinal Raporlu' ibaresi yer alan yatırımlık araziler.",
+        alan: "15.000 – 100.000+ m²",
+        guc: "1,00 – 6,00+ MWe GES",
+        url: shbUrlUret(il, ilce, "ges", sira, ekKelime)
+      },
+      {
+        oneCikan: false,
+        kisa: "16 Dönüm · Trafo Yakını",
+        mwpKisa: "1,25 MWp",
+        dLat: 0.008, dLon: -0.022, km: "1,8 km KB",
+        tip: "🔌 TRAFO & OG HAT YAKINI",
+        tipS: "mavi",
+        mesafe: "📐 Kadastral Yol & ENH Yakını (1,8 km)",
+        baslik: il + " / " + ilce + " · \"Trafo Yakını / Elektrik Hattı İçinde\" Satılık Araziler",
+        aciklama: r.tm + " (" + (r.bara || "Tek") + ") barası ve 34,5 kV dağıtım fiderleri güzergahında, ilan açıklamasında 'trafo' geçen satılık tarla ve arsalar.",
+        alan: "10.000 – 50.000 m² (10–50 Dönüm)",
+        guc: "~0,60 – 3,00 MWe AC",
+        url: shbUrlUret(il, ilce, "trafo", sira, ekKelime)
+      },
+      {
+        oneCikan: false,
+        kisa: "18 Dönüm · " + (mahalle || ilce).slice(0,12),
+        mwpKisa: "1,35 MWp",
+        dLat: -0.022, dLon: -0.019, km: "3,1 km GB",
+        tip: "🎯 KÖY / MAHALLE NOKTA ARAMA",
+        tipS: "yesil",
+        mesafe: mahalle ? ("📍 " + mahalle + " Mevkii (3,1 km)") : ("📍 " + ilce + " Kırsalı (3,1 km)"),
+        baslik: (mahalle ? (ilce + " / " + mahalle + " Köyü") : (ilce + " Merkez & Köyleri")) + " · Müstakil Tapulu Tarla İlanları",
+        aciklama: "Trafo merkezinin coğrafi koordinatına en yakın yerleşim olan " + (mahalle || ilce) + " mevkiindeki satılık tarla, ham toprak ve bağ/bahçe ilanları.",
+        alan: "≥ 15.000 m² (1 MWe Standart)",
+        guc: "~1,25 MWp DC (~2,1 GWh/yıl)",
+        url: shbUrlUret(il, ilce, "arsa", sira, mahalle || ekKelime || "tarla")
+      },
+      {
+        oneCikan: false,
+        kisa: tamDonum + " Dönüm · Büyük GES",
+        mwpKisa: mwp + " MWp",
+        dLat: 0.036, dLon: -0.032, km: "5,2 km KB",
+        tip: "📐 BÜYÜK ÖLÇEKLİ GES PARSELLERİ",
+        tipS: "",
+        mesafe: "🚜 5 – 10 km Ekonomik Çember (5,2 km)",
+        baslik: il + " / " + ilce + " · Tam Kapasite (" + fmt0(tamDonum) + "+ Dönüm) Büyük Ölçekli Satılık Tarlalar",
+        aciklama: r.tm + " trafo merkezinin toplam kapasitesini veya çoklu lisanssız / depolamalı GES yatırımlarını karşılayacak büyük yüzölçümlü araziler.",
+        alan: "≥ " + fmt0(tamDonum * 1000) + " m² (" + fmt0(tamDonum) + " Dönüm)",
+        guc: "~" + mwp + " MWp DC Potansiyel",
+        url: shbUrlUret(il, "", "tarla", sira, ilce !== "Merkez" ? ilce : ekKelime)
+      },
+      {
+        oneCikan: false,
+        kisa: "12 Dönüm · Sanayi/OSB",
+        mwpKisa: "1,00 MWp",
+        dLat: -0.005, dLon: 0.031, km: "2,6 km D",
+        tip: "🏭 OSB & SANAYİ İMARLI ARSALAR",
+        tipS: "mavi",
+        mesafe: "🏢 " + (r.edas || "EDAŞ / OSB Şebekesi") + " (2,6 km)",
+        baslik: il + " (" + ilce + ") · Sanayi, Depolama ve Ticari İmarlı Satılık Yatırım Arsaları",
+        aciklama: "Üretim tesisi + bütünleşik GES (5/1.c – 5/1.h tüketim birleştirme) veya OSB içi yatırım kurulumuna uygun sanayi/depolama imarlı arsalar.",
+        alan: "5.000 – 40.000 m² Sanayi Parseli",
+        guc: "Çatı + Arazi Öz Tüketim GES",
+        url: shbUrlUret(il, ilce, "sanayi", sira, ekKelime)
+      }
+    ];
+  }
+
+  function tmAraziSeciciDoldur(){
+    var sel = el("araziTmSec");
+    if(!sel) return;
+    var kaynak = gorunen.length ? gorunen : tumu;
+    var tms = {}, liste = [];
+    kaynak.forEach(function(r){
+      var key = r.il + "|" + r.tm;
+      if(!tms[key]){
+        tms[key] = { il: r.il, tm: r.tm, row: r, top: 0 };
+        liste.push(tms[key]);
+      }
+      tms[key].top += av(r);
+    });
+    if(seciliRow){
+      var sk = seciliRow.il + "|" + seciliRow.tm;
+      if(!tms[sk]){
+        var sTop = tumu.filter(function(x){return x.il===seciliRow.il && x.tm===seciliRow.tm;}).reduce(function(s,x){return s+av(x);},0);
+        liste.unshift({ il: seciliRow.il, tm: seciliRow.tm, row: seciliRow, top: sTop });
+      }
+    }
+    sel.innerHTML = liste.slice(0, 250).map(function(o){
+      var sec = (seciliRow && seciliRow.il === o.il && seciliRow.tm === o.tm) ? " selected" : "";
+      return '<option value="'+esc(o.il+'|'+o.tm)+'"'+sec+'>'+esc(o.il)+' · '+esc(o.tm)+' ('+fmt(o.top)+' MWe)</option>';
+    }).join("");
+  }
+
+  function tmAraziCiz(r, topAkt, baralar){
+    if(!r) return;
+    if(topAkt == null){
+      baralar = tumu.filter(function(x){ return x.il===r.il && x.tm===r.tm; });
+      topAkt = baralar.reduce(function(s,x){return s+av(x);},0);
+    }
+    tmAraziSeciciDoldur();
+    var bilgi = tmIlceCozumle(r);
+    tmAraziRender(r, topAkt, bilgi);
+
+    var cacheKey = r.il + "|" + r.tm;
+    if(!ARAZI_ONBELLEK[cacheKey]){
+      ARAZI_ONBELLEK[cacheKey] = { ilce: bilgi.ilce, mahalle: bilgi.mahalle, yol: "", canli: [], yuklendi: false };
+      var apiUrl = "../api/arazi.php?il=" + encodeURIComponent(r.il)
+        + "&ilce=" + encodeURIComponent(bilgi.ilce||"")
+        + "&tm=" + encodeURIComponent(r.tm)
+        + "&mwe=" + encodeURIComponent(topAkt)
+        + (r.lat!=null ? "&lat=" + encodeURIComponent(r.lat) + "&lon=" + encodeURIComponent(r.lon) : "");
+      fetch(apiUrl).then(function(res){ return res.ok ? res.json() : null; }).then(function(d){
+        if(d && d.durum === "ok"){
+          ARAZI_ONBELLEK[cacheKey].ilce = d.ilce || bilgi.ilce;
+          ARAZI_ONBELLEK[cacheKey].mahalle = d.mahalle || bilgi.mahalle;
+          ARAZI_ONBELLEK[cacheKey].yol = d.yol || "";
+          ARAZI_ONBELLEK[cacheKey].canli = d.canli_ilanlar || [];
+          ARAZI_ONBELLEK[cacheKey].yuklendi = true;
+          if(seciliRow && seciliRow.tm === r.tm && seciliRow.il === r.il){
+            tmAraziRender(r, topAkt, ARAZI_ONBELLEK[cacheKey]);
+            haritaCiz(false);
+          }
+        }
+      }).catch(function(){});
+
+      if(r.lat != null && r.lon != null){
+        fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat="+encodeURIComponent(r.lat)+"&lon="+encodeURIComponent(r.lon)+"&accept-language=tr")
+          .then(function(res){ return res.ok ? res.json() : null; })
+          .then(function(nd){
+            if(nd && nd.address){
+              var adr = nd.address;
+              var bIlce = adr.town || adr.county || adr.city_district || adr.municipality || "";
+              var bMah = adr.village || adr.suburb || adr.neighbourhood || adr.quarter || adr.hamlet || "";
+              if(bIlce) ARAZI_ONBELLEK[cacheKey].ilce = bIlce;
+              if(bMah) ARAZI_ONBELLEK[cacheKey].mahalle = bMah;
+              if(adr.road) ARAZI_ONBELLEK[cacheKey].yol = adr.road;
+              if(seciliRow && seciliRow.tm === r.tm && seciliRow.il === r.il){
+                tmAraziRender(r, topAkt, ARAZI_ONBELLEK[cacheKey]);
+                haritaCiz(false);
+              }
+            }
+          }).catch(function(){});
+      }
+    }
+  }
+
+  function tmAraziRender(r, topAkt, bilgi){
+    var il = r.il;
+    var ilce = (bilgi && bilgi.ilce) ? bilgi.ilce : "Merkez";
+    var mahalle = (bilgi && bilgi.mahalle) ? bilgi.mahalle : "";
+    var yol = (bilgi && bilgi.yol) ? bilgi.yol : "";
+    var canliIlanlar = (bilgi && bilgi.canli) ? bilgi.canli : [];
+
+    var kat = el("shbKat") ? el("shbKat").value : "tarla";
+    var m2Sec = el("shbM2") ? el("shbM2").value : "oto";
+    var sira = el("shbSira") ? el("shbSira").value : "price_asc";
+    var ekKelime = el("shbKelime") ? el("shbKelime").value.trim() : "";
+
+    var refMwe = topAkt > 0 ? topAkt : 1.0;
+    var mwp = fmt(refMwe * 1.25);
+    var minDonum = m2Sec === "oto" ? Math.max(10, Math.round(Math.min(refMwe, 3) * 16)) : Math.round((+m2Sec||15000)/1000);
+    var tamDonum = Math.max(16, Math.round(refMwe * 16));
+    var anaShbUrl = shbUrlUret(il, ilce, kat, sira, ekKelime);
+    var tarlaUrl = shbUrlUret(il, ilce, "tarla", sira, "");
+    var gesUrl = shbUrlUret(il, ilce, "ges", sira, "");
+
+    if(el("btnShbAna")) el("btnShbAna").href = anaShbUrl;
+
+    if(el("tmAraziMini")){
+      el("tmAraziMini").innerHTML =
+        '<div class="sol">'
+          +'<span class="shb-rozet">sahibinden.com</span>'
+          +'<span><b>'+esc(il)+' / '+esc(ilce)+(mahalle ? ' ('+esc(mahalle)+')' : '')+'</b> · GES Uygun Arazi: <b>≥ '+fmt0(minDonum)+' Dönüm ('+fmt0(minDonum*1000)+' m²)</b></span>'
+        +'</div>'
+        +'<div class="sag-btn">'
+          +'<a href="'+esc(tarlaUrl)+'" target="_blank" rel="noopener" class="shb-link-btn">🌾 Satılık Tarla İlanları ↗</a>'
+          +'<a href="'+esc(gesUrl)+'" target="_blank" rel="noopener" class="shb-link-btn koyu">☀️ GES Arazileri ↗</a>'
+        +'</div>';
+    }
+
+    if(el("araziTmRozet")){
+      el("araziTmRozet").className = "durum-pill " + (topAkt > 0 ? "acik" : "kritik");
+      el("araziTmRozet").textContent = r.tm + " · " + (topAkt > 0 ? (fmt(topAkt) + " MWe Açık Kapasite") : "0,00 MWe (Yatırım / Devir Takibi)");
+    }
+    if(el("araziBaslik")){
+      el("araziBaslik").textContent = r.tm + " (" + il + " / " + ilce + ") · Sahibinden.com Uygun Satılık Arazi Satış İlanları";
+    }
+
+    if(el("araziKpiGrid")){
+      el("araziKpiGrid").innerHTML =
+        '<div class="arazi-kpi">'
+          +'<div class="k-etiket">Seçili Trafo Merkezi &amp; Güç</div>'
+          +'<div class="k-deger">'+esc(r.tm)+' · '+fmt(topAkt)+' MWe</div>'
+          +'<div class="k-alt">'+(topAkt>0 ? ('~'+mwp+' MWp DC kurulum potansiyeli ('+esc(r.edas||'EDAŞ')+')') : ('Kapasite dolu · 1,00 MWe (~1,25 MWp) referans hesabı'))+'</div>'
+        +'</div>'
+        +'<div class="arazi-kpi">'
+          +'<div class="k-etiket">Gerekli GES Arazi Büyüklüğü</div>'
+          +'<div class="k-deger">15 – 20 Dönüm / 1 MWe</div>'
+          +'<div class="k-alt">Önerilen filtre: <b>≥ '+fmt0(minDonum*1000)+' m²</b> · Tam kapasite: ~'+fmt0(tamDonum)+' Dönüm</div>'
+        +'</div>'
+        +'<div class="arazi-kpi">'
+          +'<div class="k-etiket">Tespit Edilen TM Havzası</div>'
+          +'<div class="k-deger">'+esc(il)+' / '+esc(ilce)+'</div>'
+          +'<div class="k-alt">'+(mahalle ? ('Köy/Mahalle: <b>'+esc(mahalle)+'</b>'+(yol?' · '+esc(yol):'')) : (r.lat!=null ? (r.lat.toFixed(4)+'°K, '+r.lon.toFixed(4)+'°D koordinat çevresi') : 'İlçe merkezi ve çevre köyler'))+'</div>'
+        +'</div>'
+        +'<div class="arazi-kpi">'
+          +'<div class="k-etiket">Harita Arazi Katmanı &amp; ENH</div>'
+          +'<div class="k-deger" style="color:#1E9E5A">0 – 5 km İdeal · ≤ 10 km</div>'
+          +'<div class="k-alt">Haritada 6 adet uygun parsel bölgesi ve OG hat bağlantısı çizilir</div>'
+        +'</div>';
+    }
+
+    var kartlarHtml = "";
+
+    canliIlanlar.forEach(function(ci){
+      var cm2 = ci.m2 || (minDonum * 1000);
+      var cMwp = fmt((cm2 / 16000) * 1.25);
+      kartlarHtml +=
+        '<div class="ilan-kart one-cikan">'
+          +'<div>'
+            +'<div class="ik-ust">'
+              +'<span class="ik-tip yesil">🟢 CANLI EMLAK İLANI</span>'
+              +'<span class="ik-mesafe">⚡ ~'+cMwp+' MWp GES Sığar</span>'
+            +'</div>'
+            +'<h4>'+esc(ci.baslik)+'</h4>'
+            +'<p class="ik-aciklama">'+esc(ci.konum)+' bölgesinde tespit edilen satılık arsa/tarla ilanı.</p>'
+          +'</div>'
+          +'<div class="ik-teknik">'
+            +'<div><b>Büyüklük</b><span>'+(ci.m2 ? fmt0(ci.m2)+' m² ('+fmt(ci.m2/1000)+' Dönüm)' : 'İlanda Belirtiliyor')+'</span></div>'
+            +'<div><b>Fiyat</b><span>'+esc(ci.fiyat || 'İlanda Gör')+'</span></div>'
+          +'</div>'
+          +'<div class="ik-alt">'
+            +'<a href="'+esc(ci.sahibinden_url || tarlaUrl)+'" target="_blank" rel="noopener" class="shb-link-btn">🟡 Sahibinden İlanları ↗</a>'
+            +'<a href="'+esc(ci.url)+'" target="_blank" rel="noopener" class="k-btn">İlan Detayı ↗</a>'
+          +'</div>'
+        +'</div>';
+    });
+
+    var paketler = tmPaketleriUret(r);
+    paketler.forEach(function(p, idx){
+      kartlarHtml +=
+        '<div class="ilan-kart'+(p.oneCikan?' one-cikan':'')+'">'
+          +'<div>'
+            +'<div class="ik-ust">'
+              +'<span class="ik-tip '+p.tipS+'">'+esc(p.tip)+'</span>'
+              +'<span class="ik-mesafe">'+esc(p.mesafe)+'</span>'
+            +'</div>'
+            +'<h4>'+esc(p.baslik)+'</h4>'
+            +'<p class="ik-aciklama">'+esc(p.aciklama)+'</p>'
+          +'</div>'
+          +'<div class="ik-teknik">'
+            +'<div><b>Hedef Arazi Büyüklüğü</b><span>'+esc(p.alan)+'</span></div>'
+            +'<div><b>Kurulabilir GES Gücü</b><span>'+esc(p.guc)+'</span></div>'
+          +'</div>'
+          +'<div class="ik-alt">'
+            +'<a href="'+esc(p.url)+'" target="_blank" rel="noopener" class="shb-link-btn">🟡 Sahibinden.com İlanlarını Gör ↗</a>'
+            +'<button type="button" class="k-btn btn-harita-odak" data-idx="'+idx+'" data-tm="'+esc(r.tm)+'" data-bara="'+esc(r.bara||"")+'">🗺️ Katmanda Göster</button>'
+          +'</div>'
+        +'</div>';
+    });
+
+    if(el("araziIlanGrid")){
+      el("araziIlanGrid").innerHTML = kartlarHtml;
+      el("araziIlanGrid").querySelectorAll(".btn-harita-odak").forEach(function(b){
+        b.addEventListener("click", function(){
+          if(el("tglSahibinden")) el("tglSahibinden").checked = true;
+          haritaGit(b.getAttribute("data-tm"), b.getAttribute("data-bara"), true);
+        });
+      });
+    }
+
+    if(el("araziYerlesimler")){
+      var ilTms = tumu.filter(function(x){ return x.il === il; });
+      var ilceler = {};
+      if(ilce) ilceler[ilce] = 1;
+      if(mahalle) ilceler[mahalle] = 1;
+      ilTms.forEach(function(x){
+        var c = tmIlceCozumle(x).ilce;
+        if(c && c !== "Merkez") ilceler[c] = 1;
+      });
+      var chipHtml = '<b style="color:var(--ink2)">📍 '+esc(il)+' Bölgesi Hızlı Sahibinden Tarla Kısayolları:</b> '
+        +'<a class="yerlesim-chip" href="'+esc(shbUrlUret(il, "", "tarla", sira, ""))+'" target="_blank" rel="noopener">🟡 '+esc(il)+' Geneli Tüm Tarlalar ↗</a>';
+      Object.keys(ilceler).slice(0, 10).forEach(function(ad){
+        chipHtml += '<a class="yerlesim-chip" href="'+esc(shbUrlUret(il, ad, "tarla", sira, ""))+'" target="_blank" rel="noopener">🌾 '+esc(il)+' / '+esc(ad)+' Satılık Tarla ↗</a>';
+      });
+      el("araziYerlesimler").innerHTML = chipHtml;
+    }
   }
 
   function suz(){
@@ -1019,6 +1558,11 @@
         +'<span><i style="background:#F59E0B"></i>Kısmi Erime (−5..0 MWe)</span>'
         +'<span><i style="background:#10B981"></i>Kapasitesi Korunan / Açık</span>'
         +'<span><i style="background:#9AA2AD"></i>0 MWe (Dolu)</span>';
+    } else if(veriKatmanMod === "sahibinden"){
+      box.innerHTML = '<span><i style="background:#FFE800;border:1px solid #182232"></i>🟡 Sahibinden Uygun GES Arazi İlanı</span>'
+        +'<span><i style="background:#10B981"></i>0–5 km İdeal OG Bağlantı Çemberi</span>'
+        +'<span><i style="background:#F59E0B"></i>5–10 km Ekonomik OG Sınırı</span>'
+        +'<span><i style="background:#D32027"></i>Seçili Trafo Merkezi (TM)</span>';
     } else if(veriKatmanMod === "topoloji"){
       box.innerHTML = '<span><i style="background:#38BDF8"></i>154 kV Bölgesel İletim Omurgası</span>'
         +'<span><i style="background:#1E9E5A"></i>Açık TM Barası</span>'
@@ -1035,7 +1579,7 @@
     if(geoYok||!MAP) return;
     try{ MAP.invalidateSize(false); }catch(e){}
     var rows = geoSuz();
-    KAT.clearLayers(); TOPO_KAT.clearLayers(); ETIKET_KAT.clearLayers();
+    KAT.clearLayers(); TOPO_KAT.clearLayers(); if(ARAZI_KAT) ARAZI_KAT.clearLayers(); ETIKET_KAT.clearLayers();
     var pts = [];
 
     // 154 kV Şebeke Topoloji Ağı Katmanı (aynı ildeki TM'leri omurga olarak bağlar)
@@ -1050,6 +1594,98 @@
           }).addTo(TOPO_KAT);
         }
       });
+    }
+
+    // SAHİBİNDEN SATILIK UYGUN ARAZİ KATMANI (Seçili TM etrafında 5/10 km halkalar, OG bağlantı hatları, parsel poligonları ve ilan pinleri)
+    var shbKatmanAcik = (veriKatmanMod === "sahibinden") || (el("tglSahibinden") && el("tglSahibinden").checked);
+    if(shbKatmanAcik && ARAZI_KAT){
+      if(seciliRow && seciliRow.lat != null && seciliRow.lon != null){
+        var sLat = seciliRow.lat, sLon = seciliRow.lon;
+        // 10 km Ekonomik OG Bağlantı Sınırı
+        L.circle([sLat, sLon], {
+          radius: 10000, color: "#F59E0B", weight: 1.6, dashArray: "6 5", fillColor: "#FEF3C7", fillOpacity: 0.05, interactive: false
+        }).addTo(ARAZI_KAT);
+        // 5 km İdeal GES Arazi Çemberi
+        L.circle([sLat, sLon], {
+          radius: 5000, color: "#10B981", weight: 2.0, dashArray: "5 4", fillColor: "#DCFCE7", fillOpacity: 0.09, interactive: false
+        }).addTo(ARAZI_KAT);
+
+        var paketler = tmPaketleriUret(seciliRow);
+        paketler.forEach(function(pk){
+          var pLat = sLat + pk.dLat, pLon = sLon + pk.dLon;
+          // TM -> Arazi Parseli 34,5 kV OG Bağlantı Hattı
+          L.polyline([[sLat, sLon], [pLat, pLon]], {
+            color: pk.oneCikan ? "#10B981" : "#EAB308", weight: 2.2, opacity: 0.85, dashArray: "4 4", interactive: false
+          }).addTo(ARAZI_KAT);
+
+          // Uydu görünümünde parsel sınır kutusu
+          var dB = 0.0022;
+          L.polygon([
+            [pLat - dB, pLon - dB*1.4],
+            [pLat - dB, pLon + dB*1.4],
+            [pLat + dB, pLon + dB*1.4],
+            [pLat + dB, pLon - dB*1.4]
+          ], {
+            color: "#FFE800", weight: 2, fillColor: pk.oneCikan ? "#10B981" : "#FFE800", fillOpacity: 0.28
+          }).bindPopup(
+            '<div style="min-width:230px">'
+              +'<div style="background:#FFE800;color:#111;font-weight:800;font-size:10.5px;padding:3px 7px;border-radius:4px;margin-bottom:5px;display:inline-block">🟡 sahibinden.com · GES ARAZİ KATMANI</div><br>'
+              +'<b>'+esc(pk.baslik)+'</b><br>'
+              +'<span style="font-size:11.5px;color:#475569">'+esc(pk.mesafe)+' · '+esc(seciliRow.tm)+'</span><br>'
+              +'<div style="margin:6px 0;padding:5px 7px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;font-size:11.5px">'
+                +'Hedef Alan: <b>'+esc(pk.alan)+'</b><br>'
+                +'GES Potansiyeli: <b style="color:#1E9E5A">'+esc(pk.guc)+'</b>'
+              +'</div>'
+              +'<a href="'+esc(pk.url)+'" target="_blank" rel="noopener" style="display:inline-block;background:#FFE800;color:#111;font-weight:800;font-size:11.5px;padding:5px 10px;border-radius:6px;text-decoration:none;border:1px solid #D4B200">🟡 Sahibinden.com İlanlarını Aç ↗</a>'
+            +'</div>'
+          ).addTo(ARAZI_KAT);
+
+          // Sahibinden Sarı İlan Pin Rozeti
+          var pinIc = L.divIcon({
+            className: "",
+            html: '<div class="shb-harita-pin" title="'+esc(pk.baslik)+'">🟡 '+esc(pk.kisa)+' <span class="p-mwe">'+esc(pk.mwpKisa)+'</span></div>',
+            iconSize: [148, 24],
+            iconAnchor: [74, 12]
+          });
+          L.marker([pLat, pLon], { icon: pinIc }).bindPopup(
+            '<div style="min-width:230px">'
+              +'<div style="background:#FFE800;color:#111;font-weight:800;font-size:10.5px;padding:3px 7px;border-radius:4px;margin-bottom:5px;display:inline-block">🟡 sahibinden.com · GES ARAZİ KATMANI</div><br>'
+              +'<b>'+esc(pk.baslik)+'</b><br>'
+              +'<span style="font-size:11.5px;color:#475569">'+esc(pk.mesafe)+' · '+esc(seciliRow.tm)+'</span><br>'
+              +'<div style="margin:6px 0;padding:5px 7px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;font-size:11.5px">'
+                +'Hedef Alan: <b>'+esc(pk.alan)+'</b><br>'
+                +'GES Potansiyeli: <b style="color:#1E9E5A">'+esc(pk.guc)+'</b>'
+              +'</div>'
+              +'<a href="'+esc(pk.url)+'" target="_blank" rel="noopener" style="display:inline-block;background:#FFE800;color:#111;font-weight:800;font-size:11.5px;padding:5px 10px;border-radius:6px;text-decoration:none;border:1px solid #D4B200">🟡 Sahibinden.com İlanlarını Aç ↗</a>'
+            +'</div>'
+          ).addTo(ARAZI_KAT);
+        });
+      }
+
+      // Eğer üst katman seçiciden "🟡 Sahibinden Arazi İlan Katmanı" seçildiyse, görünür açık kapasiteli TM'lerde de ilçe tarla rozeti göster
+      if(veriKatmanMod === "sahibinden"){
+        var gosterilenTm = {};
+        rows.filter(function(x){ return av(x) > 0; }).slice(0, 35).forEach(function(r){
+          if(seciliRow && seciliRow.tm === r.tm) return;
+          if(gosterilenTm[r.tm]) return;
+          gosterilenTm[r.tm] = 1;
+          var rIlce = tmIlceCozumle(r).ilce;
+          var rUrl = shbUrlUret(r.il, rIlce, "tarla", "price_asc", "");
+          var bIc = L.divIcon({
+            className: "",
+            html: '<div class="shb-bolge-etiket">🟡 '+esc(rIlce)+' Tarla ('+fmt(av(r))+' MW)</div>',
+            iconSize: [130, 20],
+            iconAnchor: [65, -8]
+          });
+          var mk = L.marker([r.lat, r.lon], { icon: bIc });
+          mk.on("click", function(){
+            tmTekHatCiz(r);
+            tablo(gorunen);
+            haritaCiz(false);
+          });
+          mk.addTo(ARAZI_KAT);
+        });
+      }
     }
 
     // TM Noktaları
@@ -1076,12 +1712,17 @@
         fillColor: fRenk,
         fillOpacity: v>0 || veriKatmanMod==="erime" ? 0.82 : 0.48
       });
+      var rIlce = tmIlceCozumle(r).ilce;
+      var rShbUrl = shbUrlUret(r.il, rIlce, "tarla", "price_asc", "");
       var popHtml = '<b>'+esc(r.tm)+' ('+esc(r.bara||"Tek")+')</b><br>'
-        +esc(r.il)+' · '+esc(r.edas||"—")+'<br>'
+        +esc(r.il)+' / '+esc(rIlce)+' · '+esc(r.edas||"—")+'<br>'
         +'02.03: <b>'+fmt(pv(r,0))+'</b> → 16.07: <b>'+fmt(pv(r,1))+'</b> → 01.10: <b style="color:'+(pv(r,2)>0?'#1E9E5A':'#D32027')+'">'+fmt(pv(r,2))+' MWe</b><br>'
-        +'<small>Δ Değişim: '+fmt(d)+' MWe · ~'+fmt(v*1.25)+' MWp DC</small>';
+        +'<small>Δ Değişim: '+fmt(d)+' MWe · ~'+fmt(v*1.25)+' MWp DC</small><br>'
+        +'<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">'
+          +'<a href="'+esc(rShbUrl)+'" target="_blank" rel="noopener" style="background:#FFE800;color:#111;font-weight:800;font-size:11px;padding:3px 8px;border-radius:5px;text-decoration:none;border:1px solid #D6C200">🟡 Sahibinden Uygun Araziler ↗</a>'
+        +'</div>';
       m.bindPopup(popHtml);
-      m.on("click", function(){ tmTekHatCiz(r); tablo(gorunen); });
+      m.on("click", function(){ tmTekHatCiz(r); tablo(gorunen); haritaCiz(false); });
       m.addTo(KAT);
       pts.push([r.lat,r.lon]);
     });
@@ -1160,7 +1801,9 @@
     setTimeout(function(){
       try{MAP.invalidateSize();}catch(e){}
       MAP.setView([g.lat,g.lon], uyduyaGec ? 15 : 11, {animate:true});
-      L.popup().setLatLng([g.lat,g.lon]).setContent('<b>'+esc(g.tm)+' ('+esc(g.bara||"Tek")+')</b><br>'+esc(g.il)+' · '+esc(g.edas||"—")+'<br>02.03: '+fmt(pv(g,0))+' → 16.07: '+fmt(pv(g,1))+' → <b>01.10: '+fmt(pv(g,2))+' MWe</b>').openOn(MAP);
+      var gIlce = tmIlceCozumle(g).ilce;
+      var gShbUrl = shbUrlUret(g.il, gIlce, "tarla", "price_asc", "");
+      L.popup().setLatLng([g.lat,g.lon]).setContent('<b>'+esc(g.tm)+' ('+esc(g.bara||"Tek")+')</b><br>'+esc(g.il)+' / '+esc(gIlce)+' · '+esc(g.edas||"—")+'<br>02.03: '+fmt(pv(g,0))+' → 16.07: '+fmt(pv(g,1))+' → <b>01.10: '+fmt(pv(g,2))+' MWe</b><br><div style="margin-top:6px"><a href="'+esc(gShbUrl)+'" target="_blank" rel="noopener" style="background:#FFE800;color:#111;font-weight:800;font-size:11px;padding:3px 8px;border-radius:5px;text-decoration:none;border:1px solid #D6C200">🟡 Sahibinden Uygun Araziler (≤5-10 km) ↗</a></div>').openOn(MAP);
     },250);
   }
 
@@ -1180,6 +1823,7 @@
       ILL=L.layerGroup().addTo(MAP);
       BOLGE=L.layerGroup().addTo(MAP);
       TOPO_KAT=L.layerGroup().addTo(MAP);
+      ARAZI_KAT=L.layerGroup().addTo(MAP);
       KAT=L.layerGroup().addTo(MAP);
       ETIKET_KAT=L.layerGroup().addTo(MAP);
       sinirYukle();
@@ -1301,6 +1945,15 @@
       veriKatmanMod = b.getAttribute("data-vmod");
       el("veriKatmanGrup").querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x===b); });
       if(veriKatmanMod === "topoloji" && aktifAltlik === "osm") altlikDegistir("koyu");
+      if(veriKatmanMod === "sahibinden"){
+        if(el("tglSahibinden")) el("tglSahibinden").checked = true;
+        if(aktifAltlik === "osm") altlikDegistir("uydu");
+        haritaCiz(false);
+        if(seciliRow && seciliRow.lat != null && MAP){
+          try{ MAP.setView([seciliRow.lat, seciliRow.lon], 12, {animate:true}); }catch(e){}
+        }
+        return;
+      }
       haritaCiz(false);
     });
   });
@@ -1309,6 +1962,53 @@
   el("btnTmUydu").addEventListener("click", function(){
     if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, true);
   });
+  if(el("btnTmSahibinden")){
+    el("btnTmSahibinden").addEventListener("click", function(){
+      if(el("tglSahibinden")) el("tglSahibinden").checked = true;
+      if(seciliRow && seciliRow.lat != null){
+        haritaGit(seciliRow.tm, seciliRow.bara, true);
+      } else if(el("araziBolum")){
+        el("araziBolum").scrollIntoView({behavior:"smooth", block:"start"});
+      }
+    });
+  }
+  if(el("btnHaritaAraziKatman")){
+    el("btnHaritaAraziKatman").addEventListener("click", function(){
+      if(el("tglSahibinden")) el("tglSahibinden").checked = true;
+      if(seciliRow) haritaGit(seciliRow.tm, seciliRow.bara, true);
+    });
+  }
+  if(el("tglSahibinden")){
+    el("tglSahibinden").addEventListener("change", function(){
+      haritaCiz(false);
+    });
+  }
+  if(el("araziTmSec")){
+    el("araziTmSec").addEventListener("change", function(){
+      var val = this.value.split("|");
+      var secIl = val[0], secTm = val[1];
+      var r = tumu.find(function(x){ return x.il===secIl && x.tm===secTm && av(x)>0; })
+           || tumu.find(function(x){ return x.il===secIl && x.tm===secTm; });
+      if(r){
+        tmTekHatCiz(r);
+        tablo(gorunen);
+        haritaCiz(false);
+        if(r.lat != null && MAP){
+          try{ MAP.setView([r.lat, r.lon], 12, {animate:true}); }catch(e){}
+        }
+      }
+    });
+  }
+  ["shbKat","shbM2","shbSira"].forEach(function(id){
+    if(el(id)) el(id).addEventListener("change", function(){
+      if(seciliRow){ tmAraziCiz(seciliRow); haritaCiz(false); }
+    });
+  });
+  if(el("shbKelime")){
+    el("shbKelime").addEventListener("input", function(){
+      if(seciliRow){ tmAraziCiz(seciliRow); haritaCiz(false); }
+    });
+  }
 
   el("fil").addEventListener("change",ciz);
   el("fed").addEventListener("change",ciz);

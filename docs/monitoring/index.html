@@ -1225,14 +1225,286 @@ async function odemeSil(id) {
   if (!window.confirm('Bu ödeme silinsin mi?\n' + o.tarih + ' · ' + (o.birim === 'BTC' ? o.tutar + ' BTC' : say(o.tutar) + ' ₺'))) return;
   if (await odemeYaz(L => L.filter(x => x.id !== id), 'Ödeme silindi: ' + o.tarih)) { ODM.durum = '<span style="color:#1E7A3C">Silindi.</span>'; cizMaden(); }
 }
-const dagPay = (b, t, m) => '<td class="ayr">' + btcY(b) + '</td><td>' + say(t) + '</td><td>' + (m != null ? say(m) : '—') + '</td><td style="font-weight:600' + (m != null && t != null && t - m < 0 ? ';color:#B42318' : '') + '">' + (m != null && t != null ? say(t - m) : '—') + '</td>';
+const malLink = (m, key, grp, tah) => m == null ? '—' : '<a href="#maden" onclick="maliyetAc(\'' + esc(key || '') + '\',' + (grp || 0) + ');return false" style="color:' + (tah ? '#9A5B00' : 'inherit') + ';text-decoration:underline dotted #64748B;text-underline-offset:3px;cursor:pointer;font-weight:600" title="Saat saat enerji maliyeti hesabını görmek için tıklayın">' + say(m) + '</a>';
+const dagPay = (b, t, m, key, grp) => '<td class="ayr">' + btcY(b) + '</td><td>' + say(t) + '</td><td>' + malLink(m, key, grp) + '</td><td style="font-weight:600' + (m != null && t != null && t - m < 0 ? ';color:#B42318' : '') + '">' + (m != null && t != null ? say(t - m) : '—') + '</td>';
 function dagSatir(key, ust, sev, etk, o, nEff, cb, acilir, cihazTh) {
   const r = DAGV ? DAGV.oran : [16 / 29, 13 / 29];
   const g16 = o.a != null ? o.a : o.btc * r[0], g13 = o.b != null ? o.b : o.btc * r[1];
   const tl = (v, k) => o[k] != null && o.btc ? o[k] * v / o.btc : null;
   const ic = '<span style="display:inline-block;width:' + (sev * 18) + 'px"></span>' + (acilir ? '<a href="#maden" onclick="dagAc(\'' + key + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + etk + '</a>' : '<span style="display:inline-block;width:14px"></span>' + etk);
   return '<tr data-k="' + key + '" data-u="' + ust + '"' + (sev ? ' style="background:' + ['', '#FAFBFD', '#F4F7FB', '#EEF3FA'][sev] + '"' : '') + '><td class="sol">' + ic + '</td><td class="ayr">' + btcY(o.btc) + '</td><td>' + (cihazTh != null ? say(cihazTh) + ' TH/s' : nEff != null ? say(nEff, 1) : '') + '</td><td>' + (cb != null ? btcY(cb) : '') + '</td>'
-    + (cihazTh != null ? '<td class="ayr" colspan="8" style="text-align:left">Gelir ' + say(o.tl) + ' ₺ · Maliyet ' + (o.m != null ? say(o.m) : '—') + ' ₺' + (o.m != null && o.tl != null ? ' · <b style="color:' + (o.tl - o.m < 0 ? '#B42318' : '#1E7A3C') + '">Net ' + say(o.tl - o.m) + ' ₺</b>' : '') + ' <span class="k">(saatin maliyeti hash payına göre)</span></td>' : dagPay(g16, tl(g16, 'tl'), o.ma != null ? o.ma : o.m != null ? o.m * malOran(o.g)[0] : null) + dagPay(g13, tl(g13, 'tl'), o.mb != null ? o.mb : o.m != null ? o.m * malOran(o.g)[1] : null)) + '</tr>';
+    + (cihazTh != null ? '<td class="ayr" colspan="8" style="text-align:left">Gelir ' + say(o.tl) + ' ₺ · Maliyet ' + malLink(o.m, key, 0) + ' ₺' + (o.m != null && o.tl != null ? ' · <b style="color:' + (o.tl - o.m < 0 ? '#B42318' : '#1E7A3C') + '">Net ' + say(o.tl - o.m) + ' ₺</b>' : '') + ' <span class="k">(saatin maliyeti hash payına göre · hesabı görmek için maliyete tıklayın)</span></td>' : dagPay(g16, tl(g16, 'tl'), o.ma != null ? o.ma : o.m != null ? o.m * malOran(o.g)[0] : null, key, 16) + dagPay(g13, tl(g13, 'tl'), o.mb != null ? o.mb : o.m != null ? o.m * malOran(o.g)[1] : null, key, 13)) + '</tr>';
+}
+
+// ===== Enerji Maliyeti Hesaplama Pop-up Penceresi (Saat Saat Detaylı Döküm) =====
+const MS = { key: null, gun: null, saat: null, cihaz: null, ay: null, grp: 0 };
+function maliyetTus(e) { if (e.key === 'Escape') maliyetKapat(); }
+function maliyetKapat() { const m = document.getElementById('maliyetModal'); if (m) m.remove(); document.removeEventListener('keydown', maliyetTus); }
+async function maliyetAc(key, grp) {
+  MS.key = key || ''; MS.grp = grp || 0; MS.saat = null; MS.cihaz = null;
+  const k = String(key || '');
+  if (k.startsWith('S:')) {
+    MS.gun = k.slice(2, 12); MS.saat = Number(k.slice(13, 15)); MS.ay = MS.gun.slice(0, 7);
+  } else if (k.startsWith('C:')) {
+    MS.gun = k.slice(2, 12); MS.saat = Number(k.slice(13, 15)); MS.cihaz = k.slice(16); MS.ay = MS.gun.slice(0, 7);
+  } else if (k.startsWith('G:')) {
+    MS.gun = k.slice(2, 12); MS.ay = MS.gun.slice(0, 7);
+  } else if (k.startsWith('A:')) {
+    MS.ay = k.slice(2, 9);
+    const gs = Object.keys(MADEN.mal || {}).filter(x => x.startsWith(MS.ay)).sort();
+    MS.gun = gs.length ? gs[gs.length - 1] : (MS.ay + '-01');
+  } else {
+    const gs = Object.keys(MADEN.mal || {}).sort();
+    MS.gun = gs.length ? gs[gs.length - 1] : bugunTR();
+    MS.ay = MS.gun.slice(0, 7);
+  }
+  let m = document.getElementById('maliyetModal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'maliyetModal';
+    m.setAttribute('style', 'position:fixed;inset:0;z-index:55;background:rgba(16,35,63,.5);display:flex;align-items:flex-start;justify-content:center;padding:3vh 12px;overflow:auto');
+    m.onclick = e => { if (e.target === m) maliyetKapat(); };
+    document.body.appendChild(m); document.addEventListener('keydown', maliyetTus);
+  }
+  m.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Enerji maliyeti hesabı" style="width:min(1120px,100%);gap:12px"><p class="k" style="margin:0">Enerji maliyeti ve saatlik PTF/OSOS verileri yükleniyor…</p></div>';
+  await Promise.all([madenYukle().catch(() => {}), epYukle().catch(() => {}), malKatYukle().catch(() => {})]);
+  maliyetCiz();
+}
+function maliyetGunSec(g, st) {
+  if (!g) return;
+  MS.gun = g; MS.ay = g.slice(0, 7);
+  MS.saat = st !== undefined ? st : null;
+  MS.cihaz = null;
+  maliyetCiz();
+}
+function maliyetCiz() {
+  const modal = document.getElementById('maliyetModal'); if (!modal) return;
+  const g = MS.gun, m = (MADEN.mal || {})[g], mg = madenGun(g);
+  const tumGunler = Object.keys(MADEN.mal || {}).sort();
+  const ilkG = tumGunler[0] || '2026-03-09', sonG = tumGunler[tumGunler.length - 1] || bugunTR();
+  const idx = tumGunler.indexOf(g), oncG = idx > 0 ? tumGunler[idx - 1] : null, sonrakG = idx >= 0 && idx < tumGunler.length - 1 ? tumGunler[idx + 1] : null;
+  const qPay = malOran(g), p16 = qPay[0], p13 = qPay[1];
+  const payEtiket16 = Math.round(p16 * 29) + '/29 (%' + say(p16 * 100, 2) + ')';
+  const payEtiket13 = Math.round(p13 * 29) + '/29 (%' + say(p13 * 100, 2) + ')';
+  const pd = (EP && EP.ptf && EP.ptf[g]) || [], ykObj = EP ? yekdemAy(g.slice(0, 7)) : null, yk = ykObj ? ykObj.deger : 0;
+  const kom = MAL_P.komisyon || 1.025, btvOran = MAL_P.btv || 0.01, dagBirimMwh = MAL_P.dagitim_tl_mwh || 1182.457, kdvOran = 0.20;
+  const gBirim = (m && m.gunes_birim) || 2.253679;
+
+  const gunBaslik = tarihK(g) + ' ' + g.slice(0, 4) + ' ' + GUNLER[new Date(g + 'T12:00:00Z').getUTCDay()];
+  let h = '<div class="bas" style="align-items:center;border-bottom:1px solid #EEF1F5;padding-bottom:10px">'
+    + '<div><h2 style="margin:0;font-size:18px">⚡ Saatlik Enerji Maliyeti Hesap Dökümü · ' + gunBaslik + (MS.saat != null ? ' · Saat ' + String(MS.saat).padStart(2, '0') + ':00' : '') + '</h2>'
+    + '<div class="k" style="margin-top:2px">Tek Yıldız 2 (Madencilik Sahası) · Şebeke çekişi (KDV dahil) + ☀ Güneşin karşıladığı tüketim (fırsat bedeli) ve 16 / 13 cihaz pay dağılımı</div></div>'
+    + '<button type="button" class="btn" onclick="maliyetKapat()" aria-label="Kapat" style="min-height:34px;padding:4px 12px;font-weight:700">✕ Kapat</button></div>';
+
+  // Gün seçici ve kısayollar
+  const ayGunleri = tumGunler.filter(x => x.startsWith(MS.ay || g.slice(0, 7)));
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px 12px">'
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">'
+    + '<span class="tursec"><button type="button"' + (!oncG ? ' disabled' : '') + ' onclick="maliyetGunSec(\'' + (oncG || '') + '\')">◀ Önceki gün</button>'
+    + '<button type="button"' + (!sonrakG ? ' disabled' : '') + ' onclick="maliyetGunSec(\'' + (sonrakG || '') + '\')">Sonraki gün ▶</button></span>'
+    + '<label class="k" style="display:flex;align-items:center;gap:6px">Tarih <input type="date" value="' + g + '" min="' + ilkG + '" max="' + sonG + '" onchange="if(this.value)maliyetGunSec(this.value)" style="padding:5px 8px;border:1px solid #D5DCE5;border-radius:6px;font:inherit"></label>'
+    + (MS.saat != null ? '<button type="button" class="btn" style="min-height:30px;padding:3px 10px" onclick="maliyetGunSec(\'' + g + '\',null)">Tüm gün özetini göster</button>' : '')
+    + '</div>'
+    + '<div class="k" style="font-size:12.5px">Kaynak: <b>' + (m && m.kaynak === 'fatura' ? 'Fatura (Kesin)' : 'OSOS Sayaç + EPİAŞ (Tahmini)') + '</b> · Maliyet Payı: <b>16 cihaz ' + payEtiket16 + '</b> · <b>13 cihaz ' + payEtiket13 + '</b></div>'
+    + '</div>';
+
+  if (!m) {
+    h += '<div class="panel hata">Bu gün (' + esc(g) + ') için maliyet verisi bulunamadı.</div>';
+    modal.firstElementChild.innerHTML = h;
+    return;
+  }
+
+  // Formül açıklaması kutusu
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">'
+    + '<div style="background:#FAFBFD;border:1px solid #D5DCE5;border-left:4px solid #2563EB;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5">'
+    + '<b style="color:#1E3A8A;display:block;margin-bottom:3px">1. Şebeke Çekiş Maliyeti Formülü (KDV Dahil)</b>'
+    + '• <b>Enerji (₺):</b> <code>Çekiş (kWh) × [(PTF + YEKDEM) ÷ 1000] × ' + say(kom, 3) + '</code><br>'
+    + '• <b>Dağıtım (₺):</b> <code>Çekiş (kWh) × ' + say(dagBirimMwh / 1000, 6) + ' ₺/kWh</code><br>'
+    + '• <b>BTV (%1):</b> <code>Enerji (₺) × 0,01</code><br>'
+    + '• <b>KDV (%20):</b> <code>(Enerji + Dağıtım + BTV) × 0,20</code>'
+    + '</div>'
+    + '<div style="background:#FFFBF5;border:1px solid #F3D9B1;border-left:4px solid #D97706;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5">'
+    + '<b style="color:#9A5B00;display:block;margin-bottom:3px">2. ☀ Güneşin Karşıladığı Tüketim (Fırsat Bedeli)</b>'
+    + '• <b>Yöntem:</b> <code>' + esc(m.gunes_yontem || 'Öz tüketim') + '</code><br>'
+    + '• <b>Birim Fiyat:</b> <code>' + say(gBirim, 4) + ' ₺/kWh</code> (Üretim satış bedeli − sistem kullanım)<br>'
+    + '• <b>Güneş Maliyeti (₺):</b> <code>Güneş Öz Tüketim (kWh) × ' + say(gBirim, 4) + ' ₺</code> (KDV ve dağıtım yok)'
+    + '</div>'
+    + '<div style="background:#F6FBF8;border:1px solid #BFE5D0;border-left:4px solid #1E7A3C;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.5">'
+    + '<b style="color:#1E7A3C;display:block;margin-bottom:3px">3. Ortaklık Maliyet Paylaşımı (16 vs 13 Cihaz)</b>'
+    + '• <b>16 Cihaz Payı:</b> <code>Saat/Gün Maliyeti × ' + payEtiket16 + '</code><br>'
+    + '• <b>13 Cihaz Payı:</b> <code>Saat/Gün Maliyeti × ' + payEtiket13 + '</code><br>'
+    + '• <span class="k">(14.09.2026–13.09.2027 arası 16 cihaza düşen 16/29 payın yarısı 13 cihaza yazılır)</span>'
+    + '</div>'
+    + '</div>';
+
+  // Saatlik verileri hazırla
+  const saatKwh = m.saat_kwh || Array(24).fill(0);
+  const saatGunes = m.saat_gunes_kwh || Array(24).fill(null);
+  const saatTl = m.saat_tl || Array(24).fill(0);
+  const saatUretim = m.saat_uretim_kwh || Array(24).fill(null);
+  const saatVeris = m.saat_veris_kwh || Array(24).fill(null);
+  const saatlikGunesVar = saatGunes.some(x => x != null && x > 0);
+
+  // Eğer belirli bir saat seçiliyse o saatin adım adım hesabını en üstte vurgulu göster
+  if (MS.saat != null && MS.saat >= 0 && MS.saat < 24) {
+    const s = MS.saat, sStr = String(s).padStart(2, '0') + ':00';
+    const kwh = Number(saatKwh[s] || 0);
+    const gkwh = saatGunes[s] != null ? Number(saatGunes[s]) : 0;
+    const topSaatTl = Number(saatTl[s] || 0);
+    const gTl = gkwh * gBirim;
+    const sebTl = Math.max(0, topSaatTl - gTl);
+    const ptf = pd[s] != null ? Number(pd[s]) : null;
+    const enTl = kwh > 0 && ptf != null ? (kwh / 1000) * (ptf + yk) * kom : (sebTl > 0 ? sebTl / 1.2 - kwh * (dagBirimMwh / 1000) : 0);
+    const dagTl = kwh * (dagBirimMwh / 1000);
+    const btvTl = Math.max(0, enTl * btvOran);
+    const kdvTl = Math.max(0, sebTl - (sebTl / 1.2));
+    const pay16 = topSaatTl * p16, pay13 = topSaatTl * p13;
+    const saHash = mg && mg.saat && mg.saat[s] ? mg.saat[s] : null;
+
+    let cihazBilgi = '';
+    if (MS.cihaz && saHash && saHash.o && saHash.t > 0) {
+      const cTh = Number(saHash.o[MS.cihaz] || 0), cOran = cTh / saHash.t, cMal = topSaatTl * cOran;
+      cihazBilgi = '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #CBD5E1;color:#10233F">'
+        + '<b>Cihaz ' + esc(MS.cihaz) + ' Payı:</b> <code>' + say(cTh, 1) + ' TH/s ÷ ' + say(saHash.t, 0) + ' TH/s (%' + say(cOran * 100, 2) + ') × ' + say(topSaatTl, 2) + ' ₺ = <b>' + say(cMal, 2) + ' ₺</b> (Tabloda: <b>' + say(cMal, 0) + ' ₺</b>)</code></div>';
+    }
+
+    h += '<div style="background:#EFF6FF;border:2px solid #2563EB;border-radius:12px;padding:14px 16px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">'
+      + '<b style="font-size:15px;color:#1E3A8A">🔍 Seçili Saat (' + sStr + ') Adım Adım Hesaplama Detayı</b>'
+      + '<span class="k">' + (saHash ? 'Toplam Hash: <b>' + say(saHash.t) + ' TH/s</b> (' + saHash.n + ' cihaz çalıştı)' : '') + '</span></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;font-size:13px">'
+      + '<div style="background:#fff;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px">'
+      + '<div class="k" style="font-size:11.5px;font-weight:700;color:#1E3A8A">A. ŞEBEKE ÇEKİŞ HESABI</div>'
+      + '<div>Çekiş: <b>' + say(kwh, 2) + ' kWh</b>' + (ptf != null ? ' · PTF: <b>' + say(ptf, 2) + '</b> + YEKDEM: <b>' + say(yk, 2) + ' ₺/MWh</b>' : '') + '</div>'
+      + '<div class="k" style="font-size:12px;margin-top:3px">Enerji: ' + say(enTl, 2) + ' ₺ + Dağıtım: ' + say(dagTl, 2) + ' ₺ + BTV: ' + say(btvTl, 2) + ' ₺ + KDV (%20): ' + say(kdvTl, 2) + ' ₺</div>'
+      + '<div style="margin-top:4px;font-weight:700;font-size:14px">Şebeke Tutarı = ' + say(sebTl, 2) + ' ₺</div>'
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px">'
+      + '<div class="k" style="font-size:11.5px;font-weight:700;color:#9A5B00">B. ☀ GÜNEŞ ÖZ TÜKETİM HESABI</div>'
+      + (saatGunes[s] != null
+          ? '<div>Güneş Öz Tüketim: <b>' + say(gkwh, 2) + ' kWh</b> × <b>' + say(gBirim, 4) + ' ₺/kWh</b></div>'
+            + '<div class="k" style="font-size:12px;margin-top:3px">Sera-2 Üretim: ' + (saatUretim[s] != null ? say(saatUretim[s], 2) + ' kWh' : '—') + ' · Şebekeye Veriş: ' + (saatVeris[s] != null ? say(saatVeris[s], 2) + ' kWh' : '—') + '</div>'
+            + '<div style="margin-top:4px;font-weight:700;font-size:14px;color:#9A5B00">Güneş Tutarı = ' + say(gTl, 2) + ' ₺</div>'
+          : '<div class="k" style="margin-top:4px">Bu tarihte saatlik güneş öz tüketim ölçümü olmadığı için saatlik satırda yalnız şebeke çekişi yer alır; günlük güneş öz tüketimi (<b>' + say(m.gunes_kwh, 2) + ' kWh = ' + say(m.gunes_tl, 2) + ' ₺</b>) gün toplamına eklenmiştir.</div>')
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px">'
+      + '<div class="k" style="font-size:11.5px;font-weight:700;color:#1E7A3C">C. SAAT TOPLAMI VE ORTAKLIK PAYLARI</div>'
+      + '<div style="font-weight:700;font-size:14px;margin-bottom:4px">Saat Toplamı = ' + say(topSaatTl, 2) + ' ₺</div>'
+      + '<div style="' + (MS.grp === 16 ? 'background:#DCFCE7;padding:2px 6px;border-radius:4px;font-weight:700' : '') + '">• <b>16 Cihaz (' + Math.round(p16 * 29) + '/29):</b> ' + say(topSaatTl, 2) + ' × ' + Math.round(p16 * 29) + '/29 = <b>' + say(pay16, 2) + ' ₺</b> → Tabloda: <b>' + say(pay16, 0) + ' ₺</b></div>'
+      + '<div style="' + (MS.grp === 13 ? 'background:#DCFCE7;padding:2px 6px;border-radius:4px;font-weight:700' : '') + '">• <b>13 Cihaz (' + Math.round(p13 * 29) + '/29):</b> ' + say(topSaatTl, 2) + ' × ' + Math.round(p13 * 29) + '/29 = <b>' + say(pay13, 2) + ' ₺</b> → Tabloda: <b>' + say(pay13, 0) + ' ₺</b></div>'
+      + '</div>'
+      + '</div>' + cihazBilgi + '</div>';
+  }
+
+  // 24 Saatlik Tablo
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px">'
+    + '<b style="font-size:14.5px">🕒 24 Saatlik Maliyet Hesap Tablosu (' + gunBaslik + ')</b>'
+    + '<span class="k" style="font-size:12px">Herhangi bir saatin üzerine tıklayarak yukarıdaki kutuda adım adım formül hesabını inceleyebilirsiniz</span></div>';
+
+  h += '<div class="tablo-kutu" style="max-height:460px;overflow:auto"><table class="tb sirasiz">'
+    + '<thead><tr>'
+    + '<th class="sol">Saat</th>'
+    + '<th class="ayr">Hash · Cihaz</th>'
+    + '<th class="ayr">Şebeke (kWh)</th>'
+    + '<th>PTF + YEKDEM</th>'
+    + '<th>Şebeke Birim (₺/kWh)</th>'
+    + '<th>Şebeke Tutarı (₺)</th>'
+    + '<th class="ayr">☀ Güneş (kWh)</th>'
+    + '<th>☀ Güneş (₺)</th>'
+    + '<th class="ayr">Saat Toplamı (₺)</th>'
+    + '<th class="ayr" style="background:#EFF6FF">16 Cihaz (' + Math.round(p16 * 29) + '/29)</th>'
+    + '<th style="background:#F0FDF4">13 Cihaz (' + Math.round(p13 * 29) + '/29)</th>'
+    + '</tr></thead><tbody>';
+
+  let sumSebKwh = 0, sumSebTl = 0, sumGunKwh = 0, sumGunTl = 0, sumSaatTl = 0;
+  for (let s = 0; s < 24; s++) {
+    const sStr = String(s).padStart(2, '0') + ':00';
+    const kwh = Number(saatKwh[s] || 0);
+    const gkwh = saatGunes[s] != null ? Number(saatGunes[s]) : null;
+    const topSaat = Number(saatTl[s] || 0);
+    const gTl = gkwh != null ? gkwh * gBirim : 0;
+    const sebTl = Math.max(0, topSaat - gTl);
+    const birimKwh = kwh > 0 ? sebTl / kwh : null;
+    const ptf = pd[s] != null ? Number(pd[s]) : null;
+    const pay16 = topSaat * p16, pay13 = topSaat * p13;
+    const saHash = mg && mg.saat && mg.saat[s] ? mg.saat[s] : null;
+    const secili = MS.saat === s;
+
+    sumSebKwh += kwh; sumSebTl += sebTl;
+    if (gkwh != null) { sumGunKwh += gkwh; sumGunTl += gTl; }
+    sumSaatTl += topSaat;
+
+    const urVerBilgi = (saatUretim[s] != null || saatVeris[s] != null)
+      ? ' title="Sera-2 Üretim: ' + (saatUretim[s] != null ? say(saatUretim[s], 2) : '—') + ' kWh · Şebekeye Veriş: ' + (saatVeris[s] != null ? say(saatVeris[s], 2) : '—') + ' kWh"'
+      : '';
+
+    h += '<tr onclick="maliyetGunSec(\'' + g + '\',' + s + ')" style="cursor:pointer' + (secili ? ';background:#DBEAFE;font-weight:600' : (topSaat > 0 ? '' : ';opacity:.65')) + '">'
+      + '<td class="sol"><b>' + sStr + '</b></td>'
+      + '<td class="ayr">' + (saHash && saHash.t > 0 ? say(saHash.t) + ' TH/s <span class="k">(' + saHash.n + ')</span>' : '<span class="k">0 TH/s</span>') + '</td>'
+      + '<td class="ayr">' + (kwh > 0 ? say(kwh, 2) : '<span class="k">0</span>') + '</td>'
+      + '<td class="k">' + (ptf != null ? say(ptf, 0) + ' + ' + say(yk, 0) : '—') + '</td>'
+      + '<td class="k">' + (birimKwh != null ? say(birimKwh, 3) + ' ₺' : '—') + '</td>'
+      + '<td>' + (sebTl > 0 ? say(sebTl, 2) + ' ₺' : '<span class="k">0</span>') + '</td>'
+      + '<td class="ayr" style="color:#9A5B00"' + urVerBilgi + '>' + (gkwh != null ? (gkwh > 0 ? say(gkwh, 2) : '<span class="k">0</span>') : '<span class="k" title="Saatlik güneş ölçümü yok; gün toplamında">gün top.</span>') + '</td>'
+      + '<td style="color:#9A5B00">' + (gkwh != null ? (gTl > 0 ? say(gTl, 2) + ' ₺' : '<span class="k">0</span>') : '<span class="k">—</span>') + '</td>'
+      + '<td class="ayr"><b>' + (topSaat > 0 ? say(topSaat, 2) + ' ₺' : '0') + '</b></td>'
+      + '<td class="ayr" style="background:' + (secili ? '#BFDBFE' : '#F8FAFC') + '">' + (topSaat > 0 ? '<b>' + say(pay16, 0) + ' ₺</b> <span class="k" style="font-size:11px">(' + say(pay16, 2) + ')</span>' : '0') + '</td>'
+      + '<td style="background:' + (secili ? '#BBF7D0' : '#F8FAFC') + '">' + (topSaat > 0 ? '<b>' + say(pay13, 0) + ' ₺</b> <span class="k" style="font-size:11px">(' + say(pay13, 2) + ')</span>' : '0') + '</td>'
+      + '</tr>';
+  }
+
+  // Eğer saatlik güneş ölçümü yoksa (örn. 1 Ekim 2026), güneş maliyeti gün toplamına eklendiği için ayrı satırda göster
+  if (!saatlikGunesVar && (m.gunes_tl || 0) > 0) {
+    const gTop = m.gunes_tl || 0, gp16 = gTop * p16, gp13 = gTop * p13;
+    h += '<tr style="background:#FFFBEB;font-weight:600">'
+      + '<td class="sol" colspan="6">☀ Günlük Güneş Öz Tüketim Fırsat Bedeli (' + esc(m.gunes_yontem || 'gün üretimi − günlük veriş') + ': <b>' + say(m.gunes_kwh, 2) + ' kWh × ' + say(gBirim, 4) + ' ₺/kWh</b>)</td>'
+      + '<td class="ayr" style="color:#9A5B00">' + say(m.gunes_kwh, 2) + '</td>'
+      + '<td style="color:#9A5B00">' + say(gTop, 2) + ' ₺</td>'
+      + '<td class="ayr"><b>' + say(gTop, 2) + ' ₺</b></td>'
+      + '<td class="ayr"><b>' + say(gp16, 0) + ' ₺</b> <span class="k" style="font-size:11px">(' + say(gp16, 2) + ')</span></td>'
+      + '<td><b>' + say(gp13, 0) + ' ₺</b> <span class="k" style="font-size:11px">(' + say(gp13, 2) + ')</span></td>'
+      + '</tr>';
+  }
+
+  const gunTopTl = m.toplam_tl || sumSaatTl, gunPay16 = gunTopTl * p16, gunPay13 = gunTopTl * p13;
+  h += '<tr class="top">'
+    + '<td class="sol">GÜN TOPLAMI</td>'
+    + '<td class="ayr">' + (mg && mg.ort24 ? 'ort. ' + say(mg.ort24) + ' TH/s' : '') + '</td>'
+    + '<td class="ayr">' + say(m.kwh, 2) + ' kWh</td>'
+    + '<td colspan="2" class="k">Enerji ' + say(m.enerji_tl, 0) + ' + Dağ. ' + say(m.dagitim_tl, 0) + ' + BTV ' + say(m.btv_tl, 0) + ' + KDV ' + say(m.kdv_tl, 0) + ' ₺</td>'
+    + '<td><b>' + say(m.sebeke_tl, 2) + ' ₺</b></td>'
+    + '<td class="ayr" style="color:#9A5B00">' + say(m.gunes_kwh, 2) + ' kWh</td>'
+    + '<td style="color:#9A5B00"><b>' + say(m.gunes_tl, 2) + ' ₺</b></td>'
+    + '<td class="ayr"><b>' + say(gunTopTl, 2) + ' ₺</b></td>'
+    + '<td class="ayr"><b>' + say(gunPay16, 0) + ' ₺</b> <span class="k" style="font-size:11px">(' + say(gunPay16, 2) + ')</span></td>'
+    + '<td><b>' + say(gunPay13, 0) + ' ₺</b> <span class="k" style="font-size:11px">(' + say(gunPay13, 2) + ')</span></td>'
+    + '</tr></tbody></table></div>';
+
+  // Ayın diğer günlerine hızlı geçiş (Ay özeti açılır tablosu)
+  if (ayGunleri.length > 1) {
+    let aySeb = 0, ayGun = 0, ayTop = 0, ayP16 = 0, ayP13 = 0;
+    const aySatirlar = ayGunleri.map(x => {
+      const mx = MADEN.mal[x] || {}, qx = malOran(x), t = mx.toplam_tl || 0;
+      aySeb += mx.sebeke_tl || 0; ayGun += mx.gunes_tl || 0; ayTop += t; ayP16 += t * qx[0]; ayP13 += t * qx[1];
+      return '<tr onclick="maliyetGunSec(\'' + x + '\')" style="cursor:pointer' + (x === g ? ';background:#DBEAFE;font-weight:700' : '') + '">'
+        + '<td class="sol">' + tarihK(x) + ' ' + x.slice(0, 4) + '</td>'
+        + '<td class="ayr">' + say(mx.kwh, 2) + ' kWh</td>'
+        + '<td>' + say(mx.sebeke_tl, 0) + ' ₺</td>'
+        + '<td class="ayr" style="color:#9A5B00">' + say(mx.gunes_kwh, 2) + ' kWh</td>'
+        + '<td style="color:#9A5B00">' + say(mx.gunes_tl, 0) + ' ₺</td>'
+        + '<td class="ayr"><b>' + say(t, 0) + ' ₺</b></td>'
+        + '<td class="ayr"><b>' + say(t * qx[0], 0) + ' ₺</b></td>'
+        + '<td><b>' + say(t * qx[1], 0) + ' ₺</b></td>'
+        + '</tr>';
+    }).join('');
+    const ayAd = AYLAR[Number(g.slice(5, 7)) - 1] + ' ' + g.slice(0, 4);
+    h += '<details' + (String(MS.key || '').startsWith('A:') ? ' open' : '') + ' style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px">'
+      + '<summary style="cursor:pointer;font-weight:700;font-size:13.5px">📅 ' + ayAd + ' Günlük Maliyet Özeti (' + ayGunleri.length + ' gün · Toplam: ' + say(ayTop, 0) + ' ₺ · 16 Cihaz: ' + say(ayP16, 0) + ' ₺ · 13 Cihaz: ' + say(ayP13, 0) + ' ₺) — Güne tıklayıp 24 saatlik hesabına geçin</summary>'
+      + '<div class="tablo-kutu" style="max-height:260px;overflow:auto;margin-top:8px"><table class="tb sirasiz">'
+      + '<thead><tr><th class="sol">Gün</th><th class="ayr">Şebeke (kWh)</th><th>Şebeke (₺)</th><th class="ayr">☀ Güneş (kWh)</th><th>☀ Güneş (₺)</th><th class="ayr">Toplam (₺)</th><th class="ayr">16 Cihaz (₺)</th><th>13 Cihaz (₺)</th></tr></thead>'
+      + '<tbody>' + aySatirlar + '<tr class="top"><td class="sol">AY TOPLAMI</td><td class="ayr"></td><td>' + say(aySeb, 0) + ' ₺</td><td class="ayr"></td><td style="color:#9A5B00">' + say(ayGun, 0) + ' ₺</td><td class="ayr"><b>' + say(ayTop, 0) + ' ₺</b></td><td class="ayr"><b>' + say(ayP16, 0) + ' ₺</b></td><td><b>' + say(ayP13, 0) + ' ₺</b></td></tr></tbody></table></div></details>';
+  }
+
+  modal.firstElementChild.innerHTML = h;
 }
 function dagAc(key) {
   const tr = document.querySelector('#dagTablo tr[data-k="' + key + '"]'); if (!tr) return;
@@ -1970,7 +2242,7 @@ async function cizMaden() {
   const gunler = madenGunleri(ay);
   // ay özetleri
   const malAy = a => { let m = 0, g = 0, t = 0; for (const [k, v] of Object.entries(MADEN.mal || {})) if (k.startsWith(a)) { m += v.toplam_tl || 0; g++; if (v.kaynak !== 'fatura') t++; } return { mal: g ? m : null, malG: g, malTah: t }; };
-  const malH = (m, tah) => '<td' + (tah ? ' style="color:#9A5B00" title="Tahmini (OSOS + EPİAŞ)"' : '') + '>' + (m == null ? '—' : say(m)) + '</td>';
+  const malH = (m, tah, key) => '<td' + (tah ? ' style="color:#9A5B00" title="Tahmini (OSOS + EPİAŞ)"' : '') + '>' + malLink(m, key, 0, tah) + '</td>';
   const netH2 = (t, m) => m == null || t == null ? '<td>—</td>' : '<td style="font-weight:600;color:' + (t - m < 0 ? '#B42318' : '#1E7A3C') + '">' + say(t - m) + '</td>';
   const ayOzet = a => { const gs = madenGunleri(a); const ths = gs.reduce((t, x) => t + x.top, 0), saT = gs.reduce((t, x) => t + (x.havuzdan ? 24 : x.veri), 0), sa = gs.reduce((t, x) => t + x.veri, 0), cal = gs.reduce((t, x) => t + x.calisan, 0), btc = gs.reduce((t, x) => t + (x.btc || 0), 0), btcG = gs.filter(x => x.btc != null).length, usd = gs.reduce((t, x) => t + (x.usd || 0), 0), tl = gs.reduce((t, x) => t + (x.tl || 0), 0), fy = gs.filter(x => x.fiyat && x.fiyat.usd);
     return { a, ...malAy(a), gun: gs.length, ort: saT ? ths / saT : null, ortCal: cal ? gs.filter(x => !x.havuzdan).reduce((t, x) => t + x.top, 0) / cal : null, cal, sa, btc: btcG ? btc : null, btcG, usd: btcG ? usd : null, tl: btcG ? tl : null, fiyat: fy.length ? fy.reduce((t, x) => t + x.fiyat.usd, 0) / fy.length : null, verim: btcG && ths ? btc / (gs.filter(x => x.btc != null).reduce((t, x) => t + x.top, 0) / 24 / 1000) : null }; };
@@ -1986,7 +2258,7 @@ async function cizMaden() {
     + '</div>';
   // aylar tablosu
   h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Aylar</h2><span class="k">Aya tıklayınca günleri açılır</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th class="ayr">Gelir (BTC)</th><th>Gelir (₺)</th><th title="Tek Yıldız 2 şebeke maliyeti (güneş yokken çekilen elektrik, KDV dahil); turuncu = tahmini">Maliyet (₺)</th><th>Net (₺)</th><th>Gelir ($)</th><th>Ort. BTC ($)</th><th>Verim (mBTC/PH·gün)</th><th class="ayr">Ort. hash (TH/s)</th><th>Çalışırken (TH/s)</th><th class="ayr">Çalışma</th><th>Gün</th></tr></thead><tbody>'
-    + oz.slice().reverse().map(x => '<tr' + (x.a === ay ? ' style="background:#EEF3FA;font-weight:600"' : '') + '><td class="sol" data-s="' + x.a + '"><a href="#maden" onclick="madenSec.ay=\'' + x.a + '\';cizMaden();return false">' + AYLAR[Number(x.a.slice(5)) - 1] + ' ' + x.a.slice(0, 4) + '</a></td><td class="ayr">' + btcY(x.btc) + '</td><td>' + say(x.tl) + '</td>' + malH(x.mal, x.malTah) + netH2(x.tl, x.mal) + '<td>' + say(x.usd) + '</td><td>' + say(x.fiyat) + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td><td class="ayr">' + say(x.ort) + '</td><td>' + say(x.ortCal) + '</td><td class="ayr">' + (x.sa ? '%' + say(x.cal / x.sa * 100) : '—') + '</td><td>' + x.gun + '</td></tr>').join('')
+    + oz.slice().reverse().map(x => '<tr' + (x.a === ay ? ' style="background:#EEF3FA;font-weight:600"' : '') + '><td class="sol" data-s="' + x.a + '"><a href="#maden" onclick="madenSec.ay=\'' + x.a + '\';cizMaden();return false">' + AYLAR[Number(x.a.slice(5)) - 1] + ' ' + x.a.slice(0, 4) + '</a></td><td class="ayr">' + btcY(x.btc) + '</td><td>' + say(x.tl) + '</td>' + malH(x.mal, x.malTah, 'A:' + x.a) + netH2(x.tl, x.mal) + '<td>' + say(x.usd) + '</td><td>' + say(x.fiyat) + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td><td class="ayr">' + say(x.ort) + '</td><td>' + say(x.ortCal) + '</td><td class="ayr">' + (x.sa ? '%' + say(x.cal / x.sa * 100) : '—') + '</td><td>' + x.gun + '</td></tr>').join('')
     + '</tbody></table></div></section>';
   // BTC fiyatı
   const fg = Object.keys(MADEN.btc || {}).sort();
@@ -2013,7 +2285,7 @@ async function cizMaden() {
     for (const x of dg) { const sh = x.calisan || 0; x.nEff = sh ? Object.values(x.cihaz).reduce((t, z) => t + z.s, 0) / sh : null; x.cihazBasi = x.nEff ? x.btc / x.nEff : null; }
     const pay = (x, i) => x.btc * DAG[i] / DAG_TOP, payP = (v, x, k) => v != null && x[k] != null && x.btc ? x[k] * v / x.btc : null;
     let dt = '', topl = { btc: 0, tl: 0, usd: 0, a: 0, b: 0, aTl: 0, bTl: 0, aUsd: 0, bUsd: 0, m: 0, mG: 0 };
-    const satir = (etk, o, cls, nEff, cb, ds) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="sol"' + (ds ? ' data-s="' + ds + '"' : '') + '>' + etk + '</td><td class="ayr">' + btcY(o.btc) + '</td><td>' + (nEff != null ? say(nEff, 1) : '') + '</td><td>' + (cb != null ? btcY(cb) : '') + '</td>' + dagPay(o.a, o.aTl, o.mG ? o.ma : null) + dagPay(o.b, o.bTl, o.mG ? o.mb : null) + '</tr>';
+    const satir = (etk, o, cls, nEff, cb, ds) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="sol"' + (ds ? ' data-s="' + ds + '"' : '') + '>' + etk + '</td><td class="ayr">' + btcY(o.btc) + '</td><td>' + (nEff != null ? say(nEff, 1) : '') + '</td><td>' + (cb != null ? btcY(cb) : '') + '</td>' + dagPay(o.a, o.aTl, o.mG ? o.ma : null, ds ? 'G:' + ds : '', 16) + dagPay(o.b, o.bTl, o.mG ? o.mb : null, ds ? 'G:' + ds : '', 13) + '</tr>';
     const yeniT = () => ({ btc: 0, tl: 0, usd: 0, a: 0, b: 0, aTl: 0, bTl: 0, aUsd: 0, bUsd: 0, m: 0, mG: 0, gun: 0, nEff: 0, nG: 0 });
     const ekle = (t, o) => { for (const k of ['btc', 'tl', 'usd', 'a', 'b', 'aTl', 'bTl', 'aUsd', 'bUsd']) t[k] += o[k] || 0; if (o.m != null) { const q = malOran(o.g); t.m += o.m; t.ma = (t.ma || 0) + o.m * q[0]; t.mb = (t.mb || 0) + o.m * q[1]; t.mG++; } };
     const aylik = {};
@@ -2054,8 +2326,8 @@ async function cizMaden() {
       tik: i => "madenGunAc('" + gunler[i].g + "',true)", seriler: [{ ad: 'Gelir', renk: '#eda100', v: gunler.map(x => x.btc) }] }) + '</section>';
   // günlük tablo
   h += '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Gün</th><th class="ayr">Ort. hash (24 sa)</th><th>Çalışırken</th><th>En yüksek</th><th class="ayr">Çalışma (saat)</th><th>Ort. cihaz</th><th class="ayr">Gelir (BTC)</th><th>Gelir (₺)</th><th title="Tek Yıldız 2: şebeke (KDV dahil) + güneş fırsat bedeli; turuncu = tahmini">Maliyet (₺)</th><th>Net (₺)</th><th>Gelir ($)</th><th>BTC ($)</th><th>Verim</th></tr></thead><tbody>'
-    + gunler.map(x => '<tr data-mg="' + x.g + '"><td class="sol" data-s="' + x.g + '"><a href="#maden" onclick="madenGunAc(\'' + x.g + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + tarihK(x.g) + '</a>' + (x.havuzdan ? ' <span class="k">(F2Pool günlük)</span>' : x.veri < 24 ? ' <span class="k">(' + x.veri + ' sa)</span>' : '') + '</td><td class="ayr">' + say(x.ort24) + '</td><td>' + say(x.ortCalisma) + '</td><td>' + say(x.tepe) + '</td><td class="ayr">' + x.calisan + '</td><td>' + say(x.aktifOrt, 1) + '</td><td class="ayr">' + btcY(x.btc) + '</td><td>' + say(x.tl) + '</td>' + (m => malH(m ? m.toplam_tl : null, m && m.kaynak !== 'fatura') + netH2(x.tl, m ? m.toplam_tl : null))((MADEN.mal || {})[x.g]) + '<td>' + say(x.usd) + '</td><td>' + (x.fiyat && x.fiyat.usd ? say(x.fiyat.usd) : '—') + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td></tr>').join('')
-    + '<tr class="top"><td class="sol">' + ayAd + '</td><td class="ayr">' + say(bu.ort) + '</td><td>' + say(bu.ortCal) + '</td><td></td><td class="ayr">' + say(bu.cal) + '</td><td></td><td class="ayr">' + btcY(bu.btc) + '</td><td>' + say(bu.tl) + '</td>' + malH(bu.mal, bu.malTah) + netH2(bu.tl, bu.mal) + '<td>' + say(bu.usd) + '</td><td>' + say(bu.fiyat) + '</td><td>' + (bu.verim != null ? say(bu.verim * 1e3, 3) : '—') + '</td></tr></tbody></table></div><div class="k">Verim: mBTC / PH·gün (gelir ÷ günlük ortalama hash). F2Pool günü UTC\'ye göre kapandığı için gelir ile hash arasında 3 saatlik kayma vardır. Maliyet: Tek Yıldız 2\'nin şebekeden çektiği elektriğin bedeli (KDV dahil; fatura gelen ayda fatura, gelmeyende OSOS + EPİAŞ ile tahmini, turuncu) + güneşin karşıladığı tüketimin fırsat bedeli (öz tüketim × (üretim bedeli − sistem kullanım bedeli), fatura sisteminden). Net = gelir ₺ − maliyet.</div>';
+    + gunler.map(x => '<tr data-mg="' + x.g + '"><td class="sol" data-s="' + x.g + '"><a href="#maden" onclick="madenGunAc(\'' + x.g + '\');return false"><span class="ok" aria-hidden="true">▸</span> ' + tarihK(x.g) + '</a>' + (x.havuzdan ? ' <span class="k">(F2Pool günlük)</span>' : x.veri < 24 ? ' <span class="k">(' + x.veri + ' sa)</span>' : '') + '</td><td class="ayr">' + say(x.ort24) + '</td><td>' + say(x.ortCalisma) + '</td><td>' + say(x.tepe) + '</td><td class="ayr">' + x.calisan + '</td><td>' + say(x.aktifOrt, 1) + '</td><td class="ayr">' + btcY(x.btc) + '</td><td>' + say(x.tl) + '</td>' + (m => malH(m ? m.toplam_tl : null, m && m.kaynak !== 'fatura', 'G:' + x.g) + netH2(x.tl, m ? m.toplam_tl : null))((MADEN.mal || {})[x.g]) + '<td>' + say(x.usd) + '</td><td>' + (x.fiyat && x.fiyat.usd ? say(x.fiyat.usd) : '—') + '</td><td>' + (x.verim != null ? say(x.verim * 1e3, 3) : '—') + '</td></tr>').join('')
+    + '<tr class="top"><td class="sol">' + ayAd + '</td><td class="ayr">' + say(bu.ort) + '</td><td>' + say(bu.ortCal) + '</td><td></td><td class="ayr">' + say(bu.cal) + '</td><td></td><td class="ayr">' + btcY(bu.btc) + '</td><td>' + say(bu.tl) + '</td>' + malH(bu.mal, bu.malTah, 'A:' + ay) + netH2(bu.tl, bu.mal) + '<td>' + say(bu.usd) + '</td><td>' + say(bu.fiyat) + '</td><td>' + (bu.verim != null ? say(bu.verim * 1e3, 3) : '—') + '</td></tr></tbody></table></div><div class="k">Verim: mBTC / PH·gün (gelir ÷ günlük ortalama hash). F2Pool günü UTC\'ye göre kapandığı için gelir ile hash arasında 3 saatlik kayma vardır. Maliyet: Tek Yıldız 2\'nin şebekeden çektiği elektriğin bedeli (KDV dahil; fatura gelen ayda fatura, gelmeyende OSOS + EPİAŞ ile tahmini, turuncu) + güneşin karşıladığı tüketimin fırsat bedeli (öz tüketim × (üretim bedeli − sistem kullanım bedeli), fatura sisteminden). Net = gelir ₺ − maliyet.</div>';
   // cihaz tablosu + ısı haritası
   const cih = {};
   for (const x of gunler) for (const [c, z] of Object.entries(x.cihaz)) { const o = cih[c] || (cih[c] = { ths: 0, s: 0, gun: {} }); o.ths += z.ths; o.s += z.s; o.gun[x.g] = z; }
@@ -3123,7 +3395,7 @@ function epCsv() {
 }
 
 // ===== Bildirimler: kim hangi WhatsApp konusunu alır (n8n/bildirim_ayar.json). Kaydetmek için GitHub anahtarı (yalnız bu tarayıcıda) =====
-let BILD = null, BILD_KAYIT = null, BILD_SHA = null, BILD_DEGISTI = false;
+let BILD = null, BILD_KAYIT = null, BILD_SHA = null, BILD_DEGISTI = false, BILD_ACIK = false, BILD_KONU_ACIK = false, BILD_EKLE_ACIK = false;
 const ghAnahtar = () => { try { return localStorage.getItem('aesun_gh_anahtar') || ''; } catch (e) { return ''; } };
 function ghAnahtarKaydet(v) { try { localStorage.setItem('aesun_gh_anahtar', v); } catch (e) {} }
 async function cizBildirim(zorla) {
@@ -3139,11 +3411,17 @@ async function cizBildirim(zorla) {
   }
   if (location.hash !== '#bildirim') return;
   const K = BILD.konular || [], P = BILD.kisiler || [], kay = (BILD_KAYIT && BILD_KAYIT.kayit) || [];
+  const aktifSay = P.filter(p => p.aktif !== false).length;
   const sonu = a => kay.filter(x => x.anahtar === a).slice(-1)[0];
   const kutu = 'width:22px;height:22px;cursor:pointer;flex:none';
   const inp = 'padding:7px 9px;border:1px solid #D5DCE5;border-radius:6px;font:inherit';
   let h = (D ? (sefKarti(D.sef) + denetimKarti(D.den)) : '')
-    + '<section class="panel" style="gap:12px"><div class="bas"><h2>WhatsApp bildirimleri: kim neyi alsın</h2><span class="k">Kutucukları işaretleyip <b>Kaydet</b>\'e basın</span></div>'
+    + '<details class="panel" style="gap:12px"' + (BILD_ACIK ? ' open' : '') + ' ontoggle="BILD_ACIK=this.open">'
+    + '<summary style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-weight:700;font-size:16px">'
+    + '<span>WhatsApp bildirimleri: kim neyi alsın <span class="k" style="font-weight:500;font-size:13px">(' + aktifSay + '/' + P.length + ' kişi aktif)</span></span>'
+    + '<span class="k" style="font-weight:400;font-size:13px">' + (BILD_DEGISTI ? '<b style="color:#9A5B00">Kaydedilmemiş değişiklik var · </b>' : '') + 'Kutucukları işaretleyip <b>Kaydet</b>\'e basın</span>'
+    + '</summary>'
+    + '<div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
   P.forEach((p, i) => {
     const s = sonu(p.anahtar), kapali = p.aktif === false;
@@ -3164,17 +3442,18 @@ async function cizBildirim(zorla) {
     + '<button class="btn" type="button" style="background:#10233F;color:#fff;border-color:#10233F" onclick="bildKaydet()">Kaydet</button>'
     + '<label class="k" style="display:flex;align-items:center;gap:6px">GitHub anahtarı <input type="password" autocomplete="off" placeholder="github_pat_…" value="' + (ghAnahtar() ? '••••••••' : '') + '" onchange="if(this.value&&!/^•+$/.test(this.value)){ghAnahtarKaydet(this.value.trim());this.value=\'••••••••\';document.getElementById(\'bildDurum\').textContent=\'Anahtar bu tarayıcıya kaydedildi.\'}" style="padding:6px 8px;border:1px solid #D5DCE5;border-radius:6px;width:170px"></label>'
     + '<span id="bildDurum" class="k">' + (BILD_DEGISTI ? '<span style="color:#9A5B00">Kaydedilmemiş değişiklik var</span>' : '') + '</span></div>'
-    + '<div class="k">Değişiklik en geç 15 dakikada geçerli olur. Numaralar bu sayfada ve depoda tutulmaz (yalnız son 4 hane görünür).</div></section>';
+    + '<div class="k">Değişiklik en geç 15 dakikada geçerli olur. Numaralar bu sayfada ve depoda tutulmaz (yalnız son 4 hane görünür).</div>'
+    + '</div></details>';
   // konu açıklamaları
-  h += '<section class="panel" style="gap:8px"><h2>Konular</h2><ul style="margin:0;padding-left:20px;line-height:1.7">' + K.map(k => '<li><b>' + esc(k.ad) + '</b> <span class="k">— ' + esc(k.aciklama) + '</span></li>').join('') + '</ul>'
-    + '<div class="k">Anlık uyarılar sorun başlayınca bir kez, düzelince bir kez gelir. Günlük raporlar 08:00–22:00 arasında gönderilir.</div></section>';
+  h += '<details class="panel" style="gap:8px"' + (BILD_KONU_ACIK ? ' open' : '') + ' ontoggle="BILD_KONU_ACIK=this.open"><summary style="cursor:pointer;font-weight:700;font-size:16px">Konular <span class="k" style="font-weight:400;font-size:13px">(' + K.length + ' bildirim başlığı açıklaması)</span></summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:10px"><ul style="margin:0;padding-left:20px;line-height:1.7">' + K.map(k => '<li><b>' + esc(k.ad) + '</b> <span class="k">— ' + esc(k.aciklama) + '</span></li>').join('') + '</ul>'
+    + '<div class="k">Anlık uyarılar sorun başlayınca bir kez, düzelince bir kez gelir. Günlük raporlar 08:00–22:00 arasında gönderilir.</div></div></details>';
   // yeni numara nasıl eklenir
-  h += '<section class="panel" style="gap:8px"><h2>Yeni numara eklemek</h2><ol style="margin:0;padding-left:20px;line-height:1.8">'
+  h += '<details class="panel" style="gap:8px"' + (BILD_EKLE_ACIK ? ' open' : '') + ' ontoggle="BILD_EKLE_ACIK=this.open"><summary style="cursor:pointer;font-weight:700;font-size:16px">Yeni numara eklemek <span class="k" style="font-weight:400;font-size:13px">(Adım adım kurulum rehberi)</span></summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:10px"><ol style="margin:0;padding-left:20px;line-height:1.8">'
     + '<li>Yukarıda <b>+ Kişi ekle</b>, adını ve numaranın son 4 hanesini yazın, konularını işaretleyin, <b>Test</b>\'i işaretleyip <b>Kaydet</b>.</li>'
     + '<li>Numarayı GitHub\'a gizli değişken olarak ekleyin: <a href="https://github.com/ekinciomer-ai/epias-ptf/settings/secrets/actions/new" target="_blank" rel="noopener">epias-ptf → Settings → Secrets → Actions → New secret</a>. Ad: <code>BILDIRIM_K5</code> (tablodaki yeni kişinin anahtarı; K1–K8), değer: <code>+905xxxxxxxxx</code>.</li>'
     + '<li>Bildirimler sunucuda (ns1) çalıştığı için numarayı sunucuya aktarın: <a href="https://github.com/ekinciomer-ai/epias-ptf/actions/workflows/sunucuya_sir.yml" target="_blank" rel="noopener">epias-ptf → Actions → Sırları ns1\'e aktar (işler)</a> → <b>Run workflow</b>, <b>etkin = 1</b> yazın (0 bırakılırsa sunucudaki işler durur).</li>'
     + '<li>Yeni kişi WhatsApp\'tan <b>+1 743 433 6868</b> (AEMonitoring) numarasına herhangi bir mesaj göndermeli (ör. “merhaba”). WhatsApp kuralı: kişi son 24 saatte bu numaraya yazmadıysa mesaj teslim edilmez (“24 saat penceresi dışında”). Onaylı mesaj şablonu tanımlanana kadar uyarı almak isteyen kişi numaraya günde bir kez yazmalı. Teslim olmazsa "Son mesaj" sütununda nedeni yazar.</li></ol>'
-    + '<div class="k">Kaydetmek için GitHub anahtarı: github.com → Settings → Developer settings → Fine-grained tokens → yalnız <b>epias-ptf</b> deposu, <b>Contents: Read and write</b>. Anahtar yalnız bu tarayıcıda saklanır.</div></section>';
+    + '<div class="k">Kaydetmek için GitHub anahtarı: github.com → Settings → Developer settings → Fine-grained tokens → yalnız <b>epias-ptf</b> deposu, <b>Contents: Read and write</b>. Anahtar yalnız bu tarayıcıda saklanır.</div></div></details>';
   const son = kay.slice(-40).reverse();
   h += '<section class="panel" style="gap:8px"><div class="bas"><h2>Son gönderilenler</h2><span class="k">' + kay.length + ' kayıt</span></div>' + (son.length ? '<div class="tablo-kutu" style="max-height:420px;overflow:auto"><table class="tb"><thead><tr><th class="sol">Zaman</th><th class="sol">Konu</th><th class="sol">Kişi</th><th class="sol">Mesaj</th><th class="sol">Sonuç</th></tr></thead><tbody>'
     + son.map(x => '<tr><td class="sol">' + esc(String(x.t).slice(5, 16).replace('T', ' ')) + '</td><td class="sol">' + esc(x.konu) + '</td><td class="sol">' + esc(x.kisi) + ' <span class="k">…' + esc(x.son4 || '') + '</span></td><td class="sol" style="white-space:normal;max-width:280px">' + esc(x.ozet || '') + '</td><td class="sol" style="white-space:normal;max-width:260px">' + (x.ok ? '<span style="color:#1E7A3C">✓ ' + esc(x.durum || 'gönderildi') + '</span>' : '<span style="color:#B42318">✗ ' + esc(x.hata || '') + '</span>') + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="k" style="margin:0">Henüz kayıt yok.</p>') + '</section>';

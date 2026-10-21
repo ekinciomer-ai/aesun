@@ -3112,6 +3112,20 @@ a{color:inherit;text-decoration:none}
       var liste = Array.isArray(data) ? data : (data.rows || data.data || []);
       TUM_TM_VERI = liste.map(function(d){
         if(Array.isArray(d)){
+          // kapasite3.json formatı: [il, tm, bara, edas, m0203, m1607, m0110, lat, lon]
+          if(d.length === 9 && typeof d[0] === "string" && typeof d[1] === "string"){
+            return {
+              il: String(d[0] || "").toLocaleUpperCase("tr").trim(),
+              tm: String(d[1] || "").trim() + (d[2] && d[2] !== "Tek" ? " (" + d[2] + ")" : ""),
+              bara: d[2] || "Tek",
+              edas: d[3] || "",
+              m0203: Number(d[4] || 0),
+              m1607: Number(d[5] || 0),
+              topMwe: Number(d[6] || 0),
+              lat: d[7],
+              lon: d[8]
+            };
+          }
           var k0203 = Number(d[9] != null ? d[9] : 0);
           var k1607 = Number(d[14] != null ? d[14] : 0);
           var guncel = Number(d[19] != null ? d[19] : (d[16] != null ? d[16] : 0));
@@ -3128,9 +3142,38 @@ a{color:inherit;text-decoration:none}
           il: String(d.il || "").toLocaleUpperCase("tr").trim(),
           topMwe: Number(d.topMwe != null ? d.topMwe : (d.guncel_kapasite != null ? d.guncel_kapasite : (d.kapasite != null ? d.kapasite : 0))),
           m0203: Number(d.m0203 != null ? d.m0203 : 0),
-          m1607: Number(d.m1607 != null ? d.m1607 : 0)
+          m1607: Number(d.m1607 != null ? d.m1607 : 0),
+          lat: d.lat != null ? d.lat : null,
+          lon: d.lon != null ? d.lon : null
         };
       }).filter(function(x){ return x.tm && x.il; });
+
+      // Kapasite sayfasında kalıcı olarak eklenen özel TM konumlarını ve yeni TM'leri birleştir
+      try {
+        var ozelDepo = JSON.parse(localStorage.getItem("ae_ozel_tm_konumlar_v1") || "null");
+        if(ozelDepo){
+          var kon = ozelDepo.konumlar || {};
+          TUM_TM_VERI.forEach(function(r){
+            var k = r.il + "|" + r.tm.replace(/\s*\([^)]*\)\s*$/, "").toLocaleUpperCase("tr").trim();
+            if(kon[k]){ r.lat = kon[k].lat; r.lon = kon[k].lon; }
+          });
+          (ozelDepo.eklenenler || []).forEach(function(ek){
+            if(ek && ek.il && ek.tm){
+              TUM_TM_VERI.push({
+                il: String(ek.il).toLocaleUpperCase("tr").trim(),
+                tm: String(ek.tm).trim(),
+                bara: ek.bara || "Tek",
+                edas: ek.edas || "",
+                m0203: Number(ek.m0203 || ek.mwe || 0),
+                m1607: Number(ek.m1607 || ek.mwe || 0),
+                topMwe: Number(ek.m0110 || ek.mwe || 0),
+                lat: ek.lat,
+                lon: ek.lon
+              });
+            }
+          });
+        }
+      } catch(e){}
 
       bsvIlDegisti(true);
 

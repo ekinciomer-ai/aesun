@@ -57,6 +57,8 @@ yaz(os.path.join(P, "gundem", "index.html"), oku(os.path.join(DOCS, "gundem", "i
 kopya(os.path.join(DOCS, "kapasite"), os.path.join(P, "kapasite"))
 yaz(os.path.join(P, "kapasite", "index.html"), oku(os.path.join(DOCS, "kapasite", "index.html")).replace("../portal/", "../"))
 kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
+# Müşteri Monitoring (portal oturumuyla açılır; veri ns1 /v1/musteri — AEMonitoring'den ayrı)
+yaz(os.path.join(P, "musteri", "index.html"), oku(os.path.join(DOCS, "musteri", "index.html")))
 # CAD (portal oturumuyla açılır; DWG okuyucu wasm + pdf.js yerel)
 kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))
 yaz(os.path.join(P, "aecad", "index.html"), oku(os.path.join(DOCS, "aecad", "index.html")).replace("../portal/", "../"))

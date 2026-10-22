@@ -1,0 +1,24 @@
+name: Müşteri Monitoring kimliği (ns1)
+# SOLARMAN web hesabını ns1'e yazar: /opt/aesun/musteri.env (root, 600) → aesun-musteri yeniden başlar.
+# Değerler yalnız aesun → Settings → Secrets → SOLARMAN_KULLANICI, SOLARMAN_SIFRE'de durur; loga basılmaz.
+on: workflow_dispatch
+concurrency: { group: sunucu-islem, cancel-in-progress: false }
+jobs:
+  yaz:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Yaz
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          SK: ${{ secrets.SOLARMAN_KULLANICI }}
+          SS: ${{ secrets.SOLARMAN_SIFRE }}
+        run: |
+          set -euo pipefail
+          [ -n "$SK" ] && [ -n "$SS" ] || { echo "::error::SOLARMAN_KULLANICI / SOLARMAN_SIFRE sırları eksik"; exit 1; }
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          printf 'SOLARMAN_KULLANICI=%s\nSOLARMAN_SIFRE=%s\n' "$SK" "$SS" | ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@"$ADRES" \
+            'umask 077; cat > /opt/aesun/musteri.env.yeni && mv /opt/aesun/musteri.env.yeni /opt/aesun/musteri.env && cd /opt/aesun && docker compose up -d --force-recreate --no-deps musteri >/dev/null 2>&1 && echo "musteri yenilendi"'
+          rm -f ~/.ssh/k

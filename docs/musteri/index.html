@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="same-origin">
+<title>Müşteri Panel · Aksaray Enerji</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4a28 28 0 0 0 0 56z' fill='%23D7262E'/%3E%3Cpath d='M32 4a28 28 0 0 1 0 56z' fill='%232B2F35'/%3E%3Cpath d='M36 10 20 36h11l-4 18 18-28H34z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{--k:#D7262E;--kk:#A8131B;--s:#2B2F35;--y:#5B6470;--z:#F4F5F7;--c:#E2E5EA;--b:#fff;--g:#F08A24;--ok:#1E9E5A}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--s);background:var(--z);min-height:100vh}
+.ust{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--b);border-bottom:1px solid var(--c)}
+.ust a,.ust button{color:var(--s);text-decoration:none;font:inherit;background:none;border:0;cursor:pointer;padding:0}.ust a:hover,.ust button:hover{color:var(--k)}
+.marka b{letter-spacing:.06em}.marka .m2{color:var(--k)}
+main{max-width:1100px;margin:0 auto;padding:20px 16px}
+h1{font-size:22px;margin:0}.alt{color:var(--y);font-size:13px;margin:2px 0 0}
+.bas{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+select{padding:9px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;background:#fff;color:var(--s);max-width:100%}
+.kart{background:var(--b);border:1px solid var(--c);border-radius:14px;padding:18px;margin-bottom:14px}
+.kart h2{font-size:15px;margin:0 0 10px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.kpi div{background:var(--b);border:1px solid var(--c);border-radius:12px;padding:12px 14px}
+.kpi small{display:block;color:var(--y);font-size:12px}.kpi b{font-size:20px}.kpi i{font-style:normal;color:var(--y);font-size:12px;margin-left:3px}
+.et{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:#EEF0F3}.et.ok{background:#E8F5EC;color:#1D6B36}.et.k{background:#FDECEC;color:#8E1117}
+.sek{display:flex;gap:4px;background:#E9ECF0;padding:4px;border-radius:10px;width:max-content;max-width:100%;margin-bottom:10px}.sek button{border:0;background:none;font:inherit;font-weight:600;color:var(--y);padding:6px 12px;border-radius:7px;cursor:pointer}.sek button.on{background:#fff;color:var(--s)}
+svg{display:block;width:100%;height:auto}
+.hata{background:#FDECEC;color:#8E1117;border-radius:9px;padding:12px}
+.bos{color:var(--y);padding:24px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--c)}th{color:var(--y);font-size:12px}
+.tip{position:fixed;pointer-events:none;background:var(--s);color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;display:none;z-index:9}
+</style>
+</head>
+<body>
+<div class="ust"><a class="marka" href="../"><b>AKSARAY <span class="m2">ENERJİ</span></b> · Müşteri Panel</a><nav style="display:flex;gap:16px"><span id="kim"></span><a href="../">← Portal</a></nav></div>
+<main id="ana"><div class="bos">Yükleniyor…</div></main>
+<div class="tip" id="tip"></div>
+<script>
+// Müşteri Monitoring — AEMonitoring'den ayrı veri (ns1 /v1/musteri). Oturum portaldan (localStorage.ae_portal) gelir.
+// Yönetici tüm santralleri, müşteri kullanıcısı yalnız kendi santral anahtarlarının (S.musteri) açtığı santralleri görür.
+const API = 'https://api.aksarayenerji.net/v1/musteri', te = new TextEncoder(), $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(t)))].map(x => x.toString(16).padStart(2, '0')).join('');
+const nf = (v, d = 0) => v == null || isNaN(v) ? '—' : Number(v).toLocaleString('tr-TR', { maximumFractionDigits: d, minimumFractionDigits: d });
+const AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+let S = null, BEL = {}, SANT = [], SEC = null, GRAF = 'gun';
+
+function oturum() { try { const o = JSON.parse(localStorage.getItem('ae_portal') || 'null'); return o && o.S && Date.now() < (o.son || 0) ? o.S : null; } catch (e) { return null; } }
+async function belirtecler() {   // sid → belirteç ('*' = yönetici)
+  if (S.ka) return { '*': await sha('aesun-api|yonetici|' + S.ka) };
+  const b = {}; for (const [sid, m] of Object.entries(S.musteri || {})) b[sid] = await sha('aesun-api|ms_' + sid + '|' + m.k); return b;
+}
+const bel = sid => BEL['*'] || BEL[sid];
+async function al(url, b) { const r = await fetch(url, { headers: { 'X-AE-Anahtar': b }, cache: 'no-store' }); if (r.status === 404) return null; if (!r.ok) throw new Error('Sunucu yanıtı: ' + r.status); return r.json(); }
+async function liste() {
+  const out = {}, ek = {};
+  for (const b of new Set(Object.values(BEL))) { const d = await al(API + '/liste', b); (d && d.santraller || []).forEach(s => out[s.sid] = s); if (d && d.toplayici) ek.toplayici = d.toplayici; }
+  return [Object.values(out).sort((a, b) => String(a.ad).localeCompare(String(b.ad), 'tr')), ek.toplayici];
+}
+const durumEt = s => s.iletisim === 'ALL_OFFLINE' ? '<span class="et k">Çevrimdışı</span>' : s.iletisim === 'PARTIAL_OFFLINE' ? '<span class="et">Kısmen çevrimdışı</span>' : '<span class="et ok">İletişim normal</span>';
+const zaman = t => t ? new Date(t * 1000).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+
+function cizgi(noktalar, kap) {   // gün içi güç eğrisi (kW)
+  if (!noktalar || !noktalar.length) return '<div class="bos">Bugün için veri yok.</div>';
+  const W = 900, H = 260, P = 36, gun = new Date(noktalar[0].t * 1000); gun.setHours(0, 0, 0, 0); const t0 = gun.getTime() / 1000 + 5 * 3600, t1 = t0 + 15 * 3600;
+  const mx = Math.max(kap || 0, ...noktalar.map(n => (n.w || 0) / 1000)) * 1.05 || 1;
+  const x = t => P + (Math.min(Math.max(t, t0), t1) - t0) / (t1 - t0) * (W - P - 8), y = v => H - 24 - v / mx * (H - 40);
+  const yol = noktalar.map((n, i) => (i ? 'L' : 'M') + x(n.t).toFixed(1) + ' ' + y((n.w || 0) / 1000).toFixed(1)).join('');
+  let g = ''; for (let h = 6; h <= 18; h += 2) { const xx = x(t0 + (h - 5) * 3600); g += `<line x1="${xx}" x2="${xx}" y1="10" y2="${H - 24}" stroke="#E2E5EA"/><text x="${xx}" y="${H - 6}" font-size="11" fill="#5B6470" text-anchor="middle">${String(h).padStart(2, '0')}:00</text>`; }
+  for (let i = 0; i <= 4; i++) { const v = mx / 4 * i, yy = y(v); g += `<text x="${P - 6}" y="${yy + 4}" font-size="11" fill="#5B6470" text-anchor="end">${nf(v)}</text>`; }
+  const son = noktalar[noktalar.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gün içi güç eğrisi">${g}<path d="${yol}L${x(son.t)} ${H - 24}L${x(noktalar[0].t)} ${H - 24}Z" fill="#F08A24" opacity=".14"/><path d="${yol}" fill="none" stroke="#F08A24" stroke-width="2.2" stroke-linejoin="round"/><text x="${P}" y="12" font-size="11" fill="#5B6470">kW</text></svg>`;
+}
+function cubuk(veri, etiket) {   // [{e, v}] kWh
+  if (!veri || !veri.length) return '<div class="bos">Veri yok.</div>';
+  const W = 900, H = 260, P = 44, mx = Math.max(...veri.map(d => d.v || 0)) * 1.1 || 1, bw = (W - P - 8) / veri.length;
+  let g = ''; for (let i = 0; i <= 4; i++) { const v = mx / 4 * i, yy = H - 24 - v / mx * (H - 40); g += `<line x1="${P}" x2="${W - 8}" y1="${yy}" y2="${yy}" stroke="#E2E5EA"/><text x="${P - 6}" y="${yy + 4}" font-size="11" fill="#5B6470" text-anchor="end">${nf(v)}</text>`; }
+  veri.forEach((d, i) => { const h = (d.v || 0) / mx * (H - 40), xx = P + i * bw + bw * .15; g += `<rect x="${xx.toFixed(1)}" y="${(H - 24 - h).toFixed(1)}" width="${(bw * .7).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="#F08A24" data-t="${esc(d.e)}: ${nf(d.v)} kWh"/>`; if (veri.length <= 12 || i % 2 === 0) g += `<text x="${(xx + bw * .35).toFixed(1)}" y="${H - 6}" font-size="11" fill="#5B6470" text-anchor="middle">${esc(d.k || d.e)}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(etiket)}">${g}<text x="${P}" y="12" font-size="11" fill="#5B6470">kWh</text></svg>`;
+}
+async function grafik(s) {
+  const n = new Date(), y = n.getFullYear(), a = String(n.getMonth() + 1).padStart(2, '0'), g = String(n.getDate()).padStart(2, '0'), b = bel(s.sid), el = $('graf');
+  el.innerHTML = '<div class="bos">Yükleniyor…</div>';
+  try {
+    if (GRAF === 'gun') el.innerHTML = cizgi(await al(`${API}/${s.sid}/gun_${y}${a}${g}.json`, b), s.kapasite_kwp);
+    else if (GRAF === 'ay') el.innerHTML = cubuk((await al(`${API}/${s.sid}/ay_${y}${a}.json`, b) || []).map(d => ({ e: d.g + ' ' + AYLAR[n.getMonth()], k: d.g, v: d.kwh })), 'Bu ay günlük üretim');
+    else el.innerHTML = cubuk((await al(`${API}/${s.sid}/yil_${y}.json`, b) || []).map(d => ({ e: AYLAR[d.ay - 1] + ' ' + y, k: AYLAR[d.ay - 1], v: d.kwh })), 'Bu yıl aylık üretim');
+  } catch (e) { el.innerHTML = '<div class="hata">' + esc(e.message) + '</div>'; }
+}
+function ciz(toplayici = TOP) {
+  if (!SANT.length) { $('ana').innerHTML = '<div class="kart bos">Görüntülenecek santral yok.' + (S.ka ? ' Toplayıcı henüz veri yazmadı' + (toplayici && toplayici.hata ? ': ' + esc(toplayici.hata) : '.') : ' Yetki için yöneticinize başvurun.') + '</div>'; return; }
+  const s = SANT.find(x => x.sid === SEC) || SANT[0]; SEC = s.sid;
+  const ns = s.kapasite_kwp ? (s.guc_w || 0) / 1000 / s.kapasite_kwp * 100 : null;
+  let h = `<div class="bas"><div><h1>${esc(s.ad)}</h1><p class="alt">${esc(s.adres || '')} · ${nf(s.kapasite_kwp, 1)} kWp · ${durumEt(s)} · son veri ${zaman(s.son_veri)}</p></div>`
+    + (SANT.length > 1 ? `<select onchange="SEC=this.value;ciz()">${SANT.map(x => `<option value="${esc(x.sid)}"${x.sid === SEC ? ' selected' : ''}>${esc(x.ad)}</option>`).join('')}</select>` : '') + '</div>';
+  h += `<div class="kpi"><div><small>Anlık güç</small><b>${nf((s.guc_w || 0) / 1000, 2)}</b><i>kW</i>${ns != null ? `<small>%${nf(ns, 1)} kapasite</small>` : ''}</div>`
+    + `<div><small>Bugün</small><b>${nf(s.gunluk_kwh)}</b><i>kWh</i><small>${nf(s.tam_guc_saat, 2)} tam güç saati</small></div>`
+    + `<div><small>Bu ay</small><b>${nf(s.aylik_kwh)}</b><i>kWh</i></div><div><small>Bu yıl</small><b>${nf((s.yillik_kwh || 0) / 1000, 1)}</b><i>MWh</i></div>`
+    + `<div><small>Toplam</small><b>${nf((s.toplam_kwh || 0) / 1000, 1)}</b><i>MWh</i></div></div>`;
+  h += `<div class="kart"><div class="sek">${[['gun', 'Bugün'], ['ay', 'Bu ay'], ['yil', 'Bu yıl']].map(([k, a]) => `<button class="${GRAF === k ? 'on' : ''}" onclick="GRAF='${k}';ciz()">${a}</button>`).join('')}</div><div id="graf"></div></div>`;
+  const al_ = s.alarmlar || [];
+  h += `<div class="kart"><h2>Alarmlar</h2>${al_.length ? '<table><tr><th>Zaman</th><th>Alarm</th><th>Cihaz</th></tr>' + al_.map(x => `<tr><td>${zaman(x.alertTime)}</td><td>${esc(x.alertName || x.content || '')}</td><td>${esc(x.deviceSn || '')}</td></tr>`).join('') + '</table>' : '<div class="alt">Aktif alarm yok.</div>'}</div>`;
+  if (S.ka && toplayici) h += `<p class="alt">Toplayıcı (yalnız yönetici): ${toplayici.tamam ? 'çalışıyor' : 'HATA — ' + esc(toplayici.hata || '')} · son tur ${zaman(toplayici.zaman)}</p>`;
+  $('ana').innerHTML = h; grafik(s);
+}
+document.addEventListener('mousemove', e => { const t = e.target.closest && e.target.closest('[data-t]'), tip = $('tip'); if (!t) { tip.style.display = 'none'; return; } tip.textContent = t.dataset.t; tip.style.display = 'block'; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 28) + 'px'; });
+let TOP = null;
+async function yukle() { try { [SANT, TOP] = await liste(); ciz(TOP); } catch (e) { $('ana').innerHTML = '<div class="hata">' + esc(e.message) + '</div>'; } }
+(async () => {
+  S = oturum();
+  if (!S || !(S.ka || (S.musteri && Object.keys(S.musteri).length))) { location.replace('../?git=musteri'); return; }
+  $('kim').textContent = S.ad || S.kul;
+  BEL = await belirtecler(); await yukle();
+  setInterval(yukle, 5 * 60 * 1000);
+})();
+</script>
+</body>
+</html>

@@ -223,6 +223,7 @@ const VARSAYILAN = [
   { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha', renk: 'kirmizi' },
   { id: 'monitoring', ad: 'Monitoring', aciklama: 'GES üretimi, sayaçlar, cihazlar', url: 'https://ekinciomer-ai.github.io/aesun/monitoring/', ikon: 'monitoring', renk: 'mavi' },
   { id: 'gundem', ad: 'Enerji Gündemi', aciklama: 'Lisanssız GES, EPDK, TEİAŞ haber ve mevzuat · derin analiz', url: 'https://ekinciomer-ai.github.io/aesun/gundem/', ikon: 'belge', renk: 'turuncu' },
+  { id: 'musteri', ad: 'Müşteri Panel', aciklama: 'Müşteri santralleri · SOLARMAN (AEMonitoring\'den ayrı)', url: 'https://portal.aksarayenerji.net/musteri/', ikon: 'gunes', renk: 'turuncu' },
   { id: 'kapasite', ad: 'Kapasite Paneli', aciklama: 'TEİAŞ TM bazlı tahsis edilebilir lisanssız kapasite · il/EDAŞ çapraz', url: 'https://ekinciomer-ai.github.io/aesun/kapasite/', ikon: 'monitoring', renk: 'turkuaz' },
   { id: 'mining-demo', ad: 'Mining Demo', aciklama: 'Uzaktan madencilik kontrolü · tanıtım', url: '', ikon: 'maden', renk: 'lacivert', gizli: true },
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
@@ -359,21 +360,26 @@ async function parasalAnahtar() {
 const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
 const sha = async t => hex(await crypto.subtle.digest('SHA-256', te.encode(t)));
 const apiBelirtec = async (rol, anahtar) => sha('aesun-api|' + rol + '|' + anahtar);
-async function apiOzet() {
-  await rehber();
+// Müşteri Monitoring: her santralin kendi anahtarı (R.musteri[sid].k) → API rolü ms_<sid>. Müşteri kullanıcısı yalnız kendi santralinin anahtarını taşır.
+const MUSTERI_API = 'https://api.aksarayenerji.net/v1/musteri';
+async function musteriSantraller() {
+  try { const r = await fetch(MUSTERI_API + '/liste', { headers: { 'X-AE-Anahtar': await apiBelirtec('yonetici', S.ka) }, cache: 'no-store' }); if (!r.ok) return []; return ((await r.json()).santraller || []).map(s => ({ sid: String(s.sid), ad: s.ad, adres: s.adres })); } catch (e) { return []; }
+}
+async function apiOzet() { await rehber(); const oz = await apiOzetHesapla(); if (JSON.stringify(V.api_ozet || {}) === JSON.stringify(oz) || !S.ka) return; V.api_ozet = oz; await veriKaydet('merkez API yetki özetleri'); }
+async function apiOzetHesapla() {
   const oz = {};
   if (S.ka) oz.yonetici = await sha(await apiBelirtec('yonetici', S.ka));
   if (R.anahtarlar.monitoring) oz.monitoring = await sha(await apiBelirtec('monitoring', R.anahtarlar.monitoring));
   if (R.anahtarlar.saha) oz.saha = await sha(await apiBelirtec('saha', R.anahtarlar.saha));
   if (R.anahtarlar.fatura) oz.fatura = await sha(await apiBelirtec('fatura', R.anahtarlar.fatura));
   if (R.parasal && R.parasal.ozel && R.parasal.ozel.d) oz.parasal = await sha(await apiBelirtec('parasal', R.parasal.ozel.d));
-  if (JSON.stringify(V.api_ozet || {}) === JSON.stringify(oz) || !S.ka) return;
-  V.api_ozet = oz; await veriKaydet('merkez API yetki özetleri');
+  for (const [sid, m] of Object.entries(R.musteri || {})) oz['ms_' + sid] = await sha(await apiBelirtec('ms_' + sid, m.k));
+  return oz;
 }
 // Sonradan eklenen hazır uygulamalar: yönetici girişinde eksikse portala eklenir (bir kez)
 async function ekModulEkle() {
   await rehber(); let degisti = false;
-  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura' || x.id === 'cad' || x.id === 'gundem' || x.id === 'kapasite')) {
+  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura' || x.id === 'cad' || x.id === 'gundem' || x.id === 'kapasite' || x.id === 'musteri')) {
     if (R.anahtarlar[m.id]) continue;
     R.anahtarlar[m.id] = b64(rnd(32));
     V.moduller[m.id] = await sifrele(await hamAnahtar(R.anahtarlar[m.id]), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: !m.gizli, yeni_sekme: true, sira: Object.keys(R.anahtarlar).length });
@@ -392,6 +398,10 @@ async function ekModulEkle() {
   // CAD → AeCAD (ad ve /aecad/ adresi; bir kez)
   if (R.anahtarlar.cad && MOD.cad && !MOD.cad.ae1) {
     const m = MOD.cad, v = VARSAYILAN.find(x => x.id === 'cad'); V.moduller.cad = await sifrele(await hamAnahtar(R.anahtarlar.cad), { ad: v.ad, aciklama: v.aciklama, url: v.url, ikon: v.ikon, renk: m.renk || v.renk, aktif: m.aktif !== false, yeni_sekme: true, sira: m.sira || 0, ae1: true });
+    degisti = true;
+  }
+  if (R.anahtarlar.musteri && MOD.musteri && MOD.musteri.ad !== 'Müşteri Panel') {
+    const m = MOD.musteri, v = VARSAYILAN.find(x => x.id === 'musteri'); V.moduller.musteri = await sifrele(await hamAnahtar(R.anahtarlar.musteri), { ad: 'Müşteri Panel', aciklama: m.aciklama || v.aciklama, url: m.url || v.url, ikon: m.ikon || v.ikon, renk: m.renk || v.renk, aktif: m.aktif !== false, yeni_sekme: true, sira: m.sira || 0 });
     degisti = true;
   }
   if (!degisti) return;
@@ -538,7 +548,8 @@ async function kullaniciYaz(kul, sifre, yuk) {
 const simdiTR = () => new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
 const yukHazirla = (kul, x) => ({ ...(x.yonetici ? { kul, ad: x.ad, ka: S.ka, yonetici: true }
   : { kul, ad: x.ad, izinler: x.izinler || {}, projeler: x.projeler || [], anahtarlar: Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) }),
-  ...(R.parasal && parasalMi(x) ? { parasal: R.parasal.ozel } : {}) });
+  ...(R.parasal && parasalMi(x) ? { parasal: R.parasal.ozel } : {}),
+  ...(!x.yonetici && (x.moduller || []).includes('musteri') && (x.santraller || []).length ? { musteri: Object.fromEntries(x.santraller.filter(s => (R.musteri || {})[s]).map(s => [s, { k: R.musteri[s].k, ad: R.musteri[s].ad }])) } : {}) });
 const sifreUret = () => { const h = 'abcdefghjkmnpqrstuvwxyz', r = '23456789', a = rnd(8); let s = ''; for (let i = 0; i < 8; i++) s += (i % 3 === 2 ? r : h)[a[i] % (i % 3 === 2 ? r.length : h.length)]; return s; };
 const basHarf = a => String(a || '?').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toLocaleUpperCase('tr');
 
@@ -596,6 +607,7 @@ function kulDlg(kul) {
       const var_ = (x.moduller || []).includes(m.id), kn = KONULAR[m.id] || [], iz = (x.izinler || {})[m.id];
       f += '<div class="yt' + (var_ ? ' on' : '') + '"><label class="ytm"><span class="hd" style="--r:' + renkHex(m.renk) + ';width:30px;height:30px;box-shadow:none">' + ikon(m.ikon) + '</span><span style="flex:1">' + esc(m.ad) + '</span><span class="anah"><input type="checkbox" name="m" value="' + esc(m.id) + '"' + (var_ ? ' checked' : '') + ' onchange="ytMod(this)"><i></i></span></label>';
       if (kn.length) f += '<div class="ytk">' + kn.map(([k, a]) => '<label class="cip' + (KAPALI.has(k) ? ' para' : '') + '"><input type="checkbox" name="k_' + esc(m.id) + '" value="' + k + '"' + (var_ && (iz ? iz.includes(k) : !KAPALI.has(k)) ? ' checked' : '') + ' onchange="ytKonu(this)"><span>' + esc(a) + '</span></label>').join('') + '</div>';
+      if (m.id === 'musteri') { const us = x.santraller || []; f += '<div class="ytk" id="msbox" style="margin-top:4px"><div style="width:100%;font-size:12px;color:#8a9099;margin:2px 0 4px">☀ Santraller — kullanıcı yalnız seçili santralleri görür</div>' + Object.entries(R.musteri || {}).map(([sid, q]) => '<label class="cip"><input type="checkbox" name="ms" value="' + esc(sid) + '"' + (us.includes(sid) ? ' checked' : '') + '><span>' + esc(q.ad || sid) + '</span></label>').join('') + '<span class="ince" id="msyuk">yükleniyor…</span></div>'; }
       if (m.id === 'saha') { const prj = sahaProjeListesi(), ua = (x.projeler || []); f += '<div class="ytk" id="prjbox" style="margin-top:4px"><div style="width:100%;font-size:12px;color:#8a9099;margin:2px 0 4px">📁 Projeler (erişim) — hiçbiri ya da tümü seçili = tüm projeler</div>' + prj.map(p => '<label class="cip"><input type="checkbox" name="prj" value="' + esc(p.id) + '"' + ((!ua.length || ua.includes(p.id)) ? ' checked' : '') + '><span>' + esc(p.ad || p.id) + '</span></label>').join('') + '</div>'; }
       f += '</div>';
     }
@@ -603,6 +615,7 @@ function kulDlg(kul) {
   }
   f += '<div class="ydalt"><button type="button" class="btn ik" onclick="$(\'ydlg\').close()">Vazgeç</button><button class="btn" id="kf2b">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></div></form>';
   d.innerHTML = f; if (!d.open) d.showModal();
+  if ($('msbox')) musteriSantraller().then(l => { const box = $('msbox'); if (!box) return; const var_ = new Set([...box.querySelectorAll('input[name=ms]')].map(i => i.value)); l.filter(s => !var_.has(s.sid)).forEach(s => box.insertAdjacentHTML('beforeend', '<label class="cip"><input type="checkbox" name="ms" value="' + esc(s.sid) + '" data-ad="' + esc(s.ad || '') + '"><span>' + esc(s.ad || s.sid) + '</span></label>')); const y = $('msyuk'); if (y) y.textContent = l.length || var_.size ? '' : 'Henüz santral yok (toplayıcı çalışınca gelir).'; });
   $('kf2').onsubmit = e => { e.preventDefault(); kulKaydet($('kf2'), kul); };
 }
 function ytMod(c) { const yt = c.closest('.yt'); yt.classList.toggle('on', c.checked); yt.querySelectorAll('.ytk input').forEach(x => { x.checked = c.checked ? (KAPALI.has(x.value) ? x.checked : true) : false; }); }
@@ -623,12 +636,18 @@ function kulKaydet(f, kul0) {
     for (const id of mods) if (KONULAR[id]) izinler[id] = [...f.querySelectorAll('input[name="k_' + id + '"]:checked')].map(x => x.value);
     let projeler = [];
     if (mods.includes('saha')) { const allP = sahaProjeListesi().map(p => p.id), sel = [...f.querySelectorAll('input[name="prj"]:checked')].map(x => x.value); projeler = (sel.length && sel.length < allP.length) ? sel : []; } /* kısmi seçim = kısıt; tümü/hiçbiri = tüm projeler */
+    let santraller = [];
+    if (mods.includes('musteri')) {
+      R.musteri = R.musteri || {};
+      for (const c of f.querySelectorAll('input[name="ms"]:checked')) { santraller.push(c.value); if (!R.musteri[c.value]) R.musteri[c.value] = { k: b64(rnd(32)), ad: c.dataset.ad || c.value }; }
+    }
     const x = R.kullanicilar[kul] || { olusturma: simdiTR() };
-    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, projeler, degisiklik: simdiTR() });
+    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, projeler, santraller, degisiklik: simdiTR() });
     R.kullanicilar[kul] = x;
     const yuk = yukHazirla(kul, x);
     await kullaniciYaz(kul, sifre || null, yuk);
     V.rehber = await sifrele(await hamAnahtar(S.ka), R);
+    if (santraller.length) V.api_ozet = await apiOzetHesapla();
     await veriKaydet((yeni ? 'kullanıcı eklendi' : 'kullanıcı güncellendi'));
     if (kul === S.kul) { S = yuk; oturumKaydet(); }
   });

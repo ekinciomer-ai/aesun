@@ -127,6 +127,54 @@ def roller(req: Request):
     h = hashlib.sha256(t.encode()).hexdigest()
     return {r for r, v in DURUM["ozet"].items() if hmac.compare_digest(v, h)}
 
+# ---- Müşteri Monitoring (AEMonitoring'den ayrı veri: /musteri, aesun-musteri kapsayıcısı yazar) ----
+MUSTERI = Path(os.environ.get("MUSTERI_VERI", "/musteri"))
+MUSTERI_DOSYA = re.compile(r"^(son|gun_\d{8}|ay_\d{6}|yil_\d{4})\.json$")
+
+def musteri_sidler(req: Request):
+    """Yönetici: tüm santraller. Müşteri kullanıcısı: yalnız rolündeki santraller (ms_<sid>)."""
+    r = roller(req)
+    if "yonetici" in r:
+        try:
+            return set(json.loads((MUSTERI / "santraller.json").read_text()).keys()), True
+        except Exception:
+            return set(), True
+    return {x[3:] for x in r if x.startswith("ms_")}, False
+
+@app.get("/v1/musteri/liste")
+def musteri_liste(request: Request):
+    DURUM["istek"] += 1
+    sidler, yon = musteri_sidler(request)
+    if not sidler and not yon:
+        DURUM["red"] += 1
+        raise HTTPException(401, "yetki yok")
+    out = []
+    for sid in sorted(sidler):
+        p = MUSTERI / sid / "son.json"
+        if p.is_file():
+            out.append(json.loads(p.read_text()))
+    d = {"santraller": out}
+    if yon:
+        try:
+            d["toplayici"] = json.loads((MUSTERI / "durum.json").read_text())
+        except Exception:
+            d["toplayici"] = None
+    return JSONResponse(d, headers={"Cache-Control": "no-store"})
+
+@app.get("/v1/musteri/{sid}/{dosya}")
+def musteri_dosya(sid: str, dosya: str, request: Request):
+    DURUM["istek"] += 1
+    if not sid.isdigit() or not MUSTERI_DOSYA.match(dosya):
+        raise HTTPException(404, "yok")
+    sidler, _ = musteri_sidler(request)
+    if sid not in sidler:
+        DURUM["red"] += 1
+        raise HTTPException(403, "bu santrale yetki yok")
+    p = MUSTERI / sid / dosya
+    if not p.is_file():
+        raise HTTPException(404, "yok")
+    return Response(p.read_bytes(), media_type="application/json", headers={"Cache-Control": "no-store"})
+
 @app.get("/v1/bekci")
 def bekci_durum():
     """ns1 sistem bekçisinin son turu (host zamanlayıcısı yazar). Yalnız iş/servis tazeliği; sır yok."""

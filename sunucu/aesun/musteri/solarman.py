@@ -1,0 +1,107 @@
+"""Müşteri Monitoring · SOLARMAN Business toplayıcısı (ns1, aesun-musteri kapsayıcısı).
+
+AEMonitoring'den AYRIDIR: veri yalnız bu kapsayıcının birimine (/musteri) yazılır; epias-ptf'e, GitHub'a,
+n8n'e yazılmaz. Kimlik bilgisi /opt/aesun/musteri.env'den ortam değişkeni olarak gelir; hiçbir dosyaya/loga yazılmaz.
+
+Dosyalar (santral başına /musteri/<sid>/):
+  son.json          anlık özet (güç, günlük/aylık/yıllık/toplam üretim, durum, alarmlar)
+  gun_YYYYMMDD.json gün içi güç eğrisi (5 dk)
+  ay_YYYYMM.json    günlük üretimler
+  yil_YYYY.json     aylık üretimler
+/musteri/santraller.json  {sid: {ad, adres, kapasite_kwp, ...}}  ·  /musteri/durum.json  toplayıcı sağlığı
+"""
+import hashlib, json, os, time, traceback
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+import requests
+
+KOK = Path(os.environ.get("MUSTERI_VERI", "/musteri"))
+TABAN = os.environ.get("SOLARMAN_TABAN", "https://globalpro.solarmanpv.com")
+KUL = os.environ.get("SOLARMAN_KULLANICI", "")
+SIFRE = os.environ.get("SOLARMAN_SIFRE", "")
+ARALIK = int(os.environ.get("MUSTERI_ARALIK_SN", "300"))
+TR = timezone(timedelta(hours=3))
+S = requests.Session(); S.headers.update({"User-Agent": "aesun-musteri/1", "Accept": "application/json"})
+JETON = {"t": None, "son": 0}
+
+def yaz(p: Path, v):
+    p.parent.mkdir(parents=True, exist_ok=True)
+    g = p.with_suffix(".tmp"); g.write_text(json.dumps(v, ensure_ascii=False, separators=(",", ":"))); g.replace(p)
+
+def giris():
+    """Web hesabıyla oturum. Şifre SHA-256 özetiyle gönderilir; jeton yalnız bellekte tutulur."""
+    if not KUL or not SIFRE:
+        raise RuntimeError("SOLARMAN_KULLANICI / SOLARMAN_SIFRE tanımlı değil")
+    r = S.post(TABAN + "/oauth-s/oauth/token", timeout=30, data={
+        "grant_type": "mdc_password", "username": KUL, "clear_text_pwd": "",
+        "password": hashlib.sha256(SIFRE.encode()).hexdigest(), "identity_type": 2,
+        "client_id": "test", "system": "SOLARMAN"})
+    if r.status_code != 200 or "access_token" not in r.text:
+        raise RuntimeError(f"giriş başarısız (HTTP {r.status_code})")
+    j = r.json(); JETON["t"] = j["access_token"]; JETON["son"] = time.time() + int(j.get("expires_in", 3600)) - 300
+
+def istek(yol, govde=None):
+    if not JETON["t"] or time.time() > JETON["son"]:
+        giris()
+    for deneme in (1, 2):
+        h = {"Authorization": "bearer " + JETON["t"]}
+        r = S.post(TABAN + yol, json=govde, headers=h, timeout=30) if govde is not None else S.get(TABAN + yol, headers=h, timeout=30)
+        if r.status_code == 401 and deneme == 1:
+            giris(); continue
+        r.raise_for_status(); return r.json()
+
+def tur():
+    simdi = datetime.now(TR); y, a, g = simdi.year, simdi.month, simdi.day
+    liste = istek("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}})
+    santraller = {}
+    for kay in liste.get("data", []):
+        s = kay.get("station") or {}; sid = str(s.get("id"))
+        if not sid or sid == "None":
+            continue
+        santraller[sid] = {"ad": s.get("name"), "adres": s.get("locationAddress"), "kapasite_kwp": s.get("installedCapacity"),
+                           "isletme_baslangic": s.get("startOperatingTime"), "tip": s.get("type")}
+        d = KOK / sid
+        try:
+            alarm = istek("/maintain-s/operating/station/alert/lastest/list", {"stationIds": [int(sid)], "lan": "tr"}) or []
+        except Exception:
+            alarm = []
+        gun = istek(f"/maintain-s/history/power/{sid}/record?year={y}&month={a}&day={g}")
+        ay = istek(f"/maintain-s/history/power/{sid}/stats/month?year={y}&month={a}")
+        yil = istek(f"/maintain-s/history/power/{sid}/stats/year?year={y}")
+        yaz(d / f"gun_{y}{a:02d}{g:02d}.json", [{"t": int(r.get("dateTime") or 0), "w": r.get("generationPower")} for r in gun.get("records", [])])
+        yaz(d / f"ay_{y}{a:02d}.json", [{"g": r.get("day"), "kwh": r.get("generationValue"), "saat": r.get("fullPowerHoursDay")} for r in ay.get("records", [])])
+        yaz(d / f"yil_{y}.json", [{"ay": r.get("month"), "kwh": r.get("generationValue")} for r in yil.get("records", [])])
+        yaz(d / "son.json", {
+            "sid": sid, "ad": s.get("name"), "adres": s.get("locationAddress"), "kapasite_kwp": s.get("installedCapacity"),
+            "guc_w": s.get("generationPower"), "gunluk_kwh": s.get("generationValue"), "aylik_kwh": s.get("generationMonth"),
+            "yillik_kwh": s.get("generationYear"), "toplam_kwh": s.get("generationTotal"), "tam_guc_saat": s.get("fullPowerHoursDay"),
+            "iletisim": s.get("networkStatus"), "uyari": s.get("businessWarningStatus"), "son_veri": s.get("lastUpdateTime"),
+            "alarmlar": [{k: x.get(k) for k in ("alertName", "level", "deviceSn", "alertTime", "content") if k in x} for x in alarm][:20],
+            "toplandi": int(time.time())})
+    # geçen yılın/ayın kapanışını bir kez tamamla
+    if g <= 2:
+        o = simdi - timedelta(days=g + 1)
+        for sid in santraller:
+            try:
+                ay = istek(f"/maintain-s/history/power/{sid}/stats/month?year={o.year}&month={o.month}")
+                yaz(KOK / sid / f"ay_{o.year}{o.month:02d}.json", [{"g": r.get("day"), "kwh": r.get("generationValue"), "saat": r.get("fullPowerHoursDay")} for r in ay.get("records", [])])
+            except Exception:
+                pass
+    yaz(KOK / "santraller.json", santraller)
+    return len(santraller)
+
+def main():
+    KOK.mkdir(parents=True, exist_ok=True)
+    while True:
+        bas = time.time(); durum = {"zaman": int(bas), "kaynak": "solarman"}
+        try:
+            durum.update(tamam=True, santral=tur())
+        except Exception as e:
+            durum.update(tamam=False, hata=str(e)[:200]); traceback.print_exc(limit=1)
+            JETON["t"] = None
+        durum["sure_sn"] = round(time.time() - bas, 1)
+        yaz(KOK / "durum.json", durum)
+        time.sleep(max(30, ARALIK - (time.time() - bas)))
+
+if __name__ == "__main__":
+    main()

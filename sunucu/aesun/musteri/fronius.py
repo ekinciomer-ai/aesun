@@ -148,134 +148,111 @@ def _form_inputs_coz(html_text: str) -> dict[str, str]:
     return out
 
 
-def _tr_ascii(s: str) -> str:
-    return (
-        s.replace("İ", "i").replace("ı", "i")
-        .replace("Ğ", "G").replace("ğ", "g")
-        .replace("Ü", "U").replace("ü", "u")
-        .replace("Ş", "S").replace("ş", "s")
-        .replace("Ö", "O").replace("ö", "o")
-        .replace("Ç", "C").replace("ç", "c")
-    )
-
-
-def _aday_ciftler(kul: str, sifre: str) -> list[tuple[str, str]]:
-    k_norm = _tr_ascii(kul).lower()
-    kul_list = list(dict.fromkeys([kul, k_norm]))
-    sf_norm_i = sifre.replace("İ", "i").replace("ı", "i")
-    sf_norm_I = sifre.replace("İ", "I").replace("ı", "i")
-    sf_ascii = _tr_ascii(sifre)
-    sf_list = list(dict.fromkeys([
-        sifre,
-        sf_norm_i,
-        sf_norm_I,
-        sf_ascii,
-        sifre.swapcase(),
-        sf_norm_i.swapcase(),
-        sf_ascii.swapcase(),
-        sifre.lower(),
-        sf_norm_i.lower(),
-        sifre.capitalize(),
-        sf_norm_i.capitalize(),
-    ]))
-    out = []
-    for k in kul_list:
-        for sf in sf_list:
-            if (k, sf) not in out:
-                out.append((k, sf))
-    return out[:10]
-
-
 def _otomatik_giris(kok: Path) -> requests.Session:
-    """Fronius Solar.web (login.fronius.com WSO2 OIDC) üzerinden kullanıcı adı ve şifreyle otomatik oturum açar."""
+    """Headless Chromium (Playwright) ile Fronius Solar.web (login.fronius.com + FriendlyCaptcha) oturumu açar."""
     kul, sifre, cerez = _kimlik()
+    s = requests.Session()
+    s.headers.update({
+        "User-Agent": UA,
+        "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+    })
     if not (kul and sifre):
-        s = requests.Session()
-        s.headers.update({"User-Agent": UA, "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"})
         if _cerez_yukle(s, kok):
             return s
         raise RuntimeError("Fronius kullanıcı/şifre veya çerez tanımlı değil")
 
-    son_hata = ""
-    for k_try, sf_try in _aday_ciftler(kul, sifre):
-        s = requests.Session()
-        s.headers.update({
-            "User-Agent": UA,
-            "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
-        })
-        r0 = s.get("https://www.solarweb.com/Account/ExternalLogin", timeout=30, allow_redirects=True)
-        r0.raise_for_status()
+    from playwright.sync_api import sync_playwright
 
-        if "login.fronius.com" in r0.url or "loginForm" in r0.text:
-            lf_m = re.search(r'<form[^>]+id=["\']loginForm["\'][^>]*>(.*?)</form>', r0.text, re.I | re.S)
-            form_html = lf_m.group(1) if lf_m else r0.text
-            inputs = _form_inputs_coz(form_html)
-            act_m = re.search(r'<form[^>]+action=["\']([^"\']*commonauth[^"\']*)["\']', r0.text, re.I)
-            post_url = urljoin(r0.url, _html.unescape(act_m.group(1) if act_m else "../commonauth"))
-            sdk = inputs.get("sessionDataKey", "")
-
-            form_data = {
-                "authenticators": inputs.get("authenticators", "SAMLSSOAuthenticator:Fronius Login;FroniusBasicAuthenticator:LOCAL"),
-                "tenantDomain": inputs.get("tenantDomain", "carbon.super"),
-                "allLoginParams": inputs.get("allLoginParams", ""),
-                "usernameUserInput": k_try,
-                "username": k_try,
-                "password": sf_try,
-                "sessionDataKey": sdk,
-            }
-
-            r1 = s.post(
-                post_url,
-                data=form_data,
-                headers={"Referer": r0.url, "Origin": "https://login.fronius.com"},
-                timeout=35,
-                allow_redirects=True,
-            )
-            r1.raise_for_status()
-
-            cur_r = r1
-            basarisiz = False
-            for _ in range(4):
-                if "authFail" in cur_r.url or "authFailure=true" in cur_r.url or "retry.do" in cur_r.url:
-                    from urllib.parse import parse_qs, urlparse
-                    qs = parse_qs(urlparse(cur_r.url).query)
-                    f_msg = (qs.get("authFailureMsg") or qs.get("errorCode") or ["retry" if "retry.do" in cur_r.url else ""])[0]
-                    son_hata = f_msg
-                    basarisiz = True
-                    break
-                fm = re.search(r'<form[^>]+action=["\']([^"\']+)["\'][^>]*>(.*?)</form>', cur_r.text, re.I | re.S)
-                if not fm:
-                    break
-                f_action = _html.unescape(fm.group(1))
-                if "loginForm" in fm.group(0) or "commonauth" in f_action:
-                    basarisiz = True
-                    son_hata = "loginForm_dondu"
-                    break
-                f_url = urljoin(cur_r.url, f_action)
-                f_inputs = _form_inputs_coz(fm.group(2))
-                if not f_inputs:
-                    break
-                cur_r = s.post(f_url, data=f_inputs, headers={"Referer": cur_r.url}, timeout=35, allow_redirects=True)
-                cur_r.raise_for_status()
-
-            if basarisiz:
-                continue
-
-        # Analiz grafik sayfasını ziyaret ederek Solar.web çerezlerini pekiştir
+    iz_not = []
+    with sync_playwright() as p:
+        exec_path = "/usr/bin/chromium" if Path("/usr/bin/chromium").exists() else None
+        browser = p.chromium.launch(
+            executable_path=exec_path,
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"],
+        )
         try:
-            s.get(f"https://www.solarweb.com/Chart/AnalysisChart?pvSystemId={PV_SYSTEM_ID}", timeout=25)
-        except Exception:
-            pass
-        _cerez_kaydet(s, kok)
-        return s
+            ctx = browser.new_context(
+                user_agent=UA,
+                locale="tr-TR",
+                viewport={"width": 1280, "height": 800},
+            )
+            ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
+            page = ctx.new_page()
+            page.goto("https://www.solarweb.com/Account/ExternalLogin", wait_until="domcontentloaded", timeout=45000)
+            page.wait_for_timeout(1500)
 
-    tr_harfler = set("İıĞğÜüŞşÖöÇç")
-    ipucu = (
-        f"kul(len={len(kul)},up={sum(c.isupper() for c in kul)},tr={any(c in tr_harfler for c in kul)}) "
-        f"sf(len={len(sifre)},up={sum(c.isupper() for c in sifre)},lo={sum(c.islower() for c in sifre)},"
-        f"dg={sum(c.isdigit() for c in sifre)},tr={any(c in tr_harfler for c in sifre)}) msg={son_hata}"
-    )
-    raise RuntimeError(f"Fronius girişi reddedildi: {ipucu}")
+            for tur_no in (1, 2, 3):
+                if "solarweb.com" in page.url and "login.fronius.com" not in page.url and "ExternalLogin" not in page.url:
+                    break
+                if page.locator("#usernameUserInput").count() == 0:
+                    page.wait_for_timeout(2000)
+                    if "solarweb.com" in page.url and "login.fronius.com" not in page.url and "ExternalLogin" not in page.url:
+                        break
+                    if page.locator("#usernameUserInput").count() == 0:
+                        break
+
+                # Focus tetikle (FriendlyCaptcha data-start="focus" için)
+                page.click("#usernameUserInput")
+                page.fill("#usernameUserInput", kul)
+                page.fill("#password", sifre)
+
+                frc_var = page.locator(".frc-captcha").count() > 0
+                frc_cozuldu = False
+                if frc_var:
+                    try:
+                        page.evaluate("() => { if (window.frcaptcha) window.frcaptcha.getAllWidgets().forEach(w => w.start()); }")
+                    except Exception:
+                        pass
+                    for _ in range(50):
+                        val = page.evaluate("() => { const el = document.querySelector(\"[name='frc-captcha-response']\"); return el ? el.value : ''; }")
+                        if val and not str(val).startswith("."):
+                            frc_cozuldu = True
+                            break
+                        page.wait_for_timeout(500)
+                iz_not.append(f"t{tur_no}:frc={int(frc_var)}/{int(frc_cozuldu)}")
+
+                with page.expect_navigation(wait_until="domcontentloaded", timeout=40000):
+                    page.click("#login-button")
+                page.wait_for_timeout(2500)
+
+                # OIDC form_post sayfasıysa yönlenmenin tamamlanmasını bekle
+                for _ in range(12):
+                    if "login.fronius.com" not in page.url and "ExternalLoginCallback" not in page.url:
+                        break
+                    if page.locator("#usernameUserInput").count() > 0:
+                        break
+                    page.wait_for_timeout(1000)
+
+            if "login.fronius.com" in page.url or "ExternalLogin" in page.url:
+                from urllib.parse import parse_qs, urlparse
+                qs = parse_qs(urlparse(page.url).query)
+                f_msg = (qs.get("authFailureMsg") or qs.get("errorCode") or [""])[0]
+                alert_txt = ""
+                try:
+                    if page.locator(".fro-alert__content").count() > 0:
+                        alert_txt = page.locator(".fro-alert__content").inner_text().strip().replace("\n", " ")[:80]
+                except Exception:
+                    pass
+                raise RuntimeError(f"Fronius girişi reddedildi ({','.join(iz_not)} msg={f_msg} alert={alert_txt})")
+
+            try:
+                page.goto(f"https://www.solarweb.com/Chart/AnalysisChart?pvSystemId={PV_SYSTEM_ID}", wait_until="domcontentloaded", timeout=30000)
+                page.wait_for_timeout(1500)
+            except Exception:
+                pass
+
+            cerez_listesi = []
+            for c in ctx.cookies():
+                s.cookies.set(c["name"], c["value"], domain=c.get("domain", "www.solarweb.com"), path=c.get("path", "/"))
+                cerez_listesi.append({"name": c["name"], "value": c["value"], "domain": c.get("domain", "www.solarweb.com"), "path": c.get("path", "/")})
+            cf = _cerez_dosya(kok)
+            tmp = cf.with_suffix(".tmp")
+            tmp.write_text(json.dumps(cerez_listesi, ensure_ascii=False), encoding="utf-8")
+            tmp.replace(cf)
+            return s
+        finally:
+            browser.close()
 
 
 def _oturum_al(kok: Path, yenile: bool = False) -> requests.Session:

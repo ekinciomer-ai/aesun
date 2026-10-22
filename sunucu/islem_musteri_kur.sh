@@ -9,7 +9,7 @@ cd /opt/aesun && docker compose build -q api musteri && docker compose up -d --f
 sleep 8
 echo "NOT: api: $(docker inspect -f '{{.State.Status}}' aesun-api) · musteri: $(docker inspect -f '{{.State.Status}}' aesun-musteri)"
 echo "NOT: hesap: solarman=$(grep -c "^SOLARMAN_KULLANICI[A-Z0-9_]*=." /opt/aesun/musteri.env || true) · fronius=$(grep -c "^FRONIUS_GIRIS[A-Z0-9_]*=." /opt/aesun/musteri.env || true) · osb=$(grep -c "^OSB_KULLANICI[A-Z0-9_]*=." /opt/aesun/musteri.env || true) tanımlı"
-sleep 48
+sleep 65
 docker logs --tail 20 aesun-musteri 2>&1 | sed 's/^/NOT: log: /' || true
 docker exec aesun-musteri sh -c 'cat /musteri/durum.json 2>/dev/null || echo "durum yok"' | sed 's/^/NOT: toplayıcı: /' || true
 docker exec aesun-musteri python3 -c "

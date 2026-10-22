@@ -17,114 +17,81 @@ import requests
 
 KOK = Path(os.environ.get("MUSTERI_VERI", "/musteri"))
 TABAN = os.environ.get("SOLARMAN_TABAN", "https://globalpro.solarmanpv.com")
-KUL = os.environ.get("SOLARMAN_KULLANICI", "")
-SIFRE = os.environ.get("SOLARMAN_SIFRE", "")
+# Birden çok müşteri hesabı: SOLARMAN_KULLANICI/SOLARMAN_SIFRE, SOLARMAN_KULLANICI_2/SOLARMAN_SIFRE_2, … (_9'a kadar)
+HESAPLAR = [(e, os.environ.get("SOLARMAN_KULLANICI" + e, ""), os.environ.get("SOLARMAN_SIFRE" + e, ""))
+            for e in [""] + [f"_{i}" for i in range(2, 10)] if os.environ.get("SOLARMAN_KULLANICI" + e)]
 ARALIK = int(os.environ.get("MUSTERI_ARALIK_SN", "300"))
 TR = timezone(timedelta(hours=3))
-S = requests.Session(); S.headers.update({"User-Agent": "aesun-musteri/1", "Accept": "application/json"})
-JETON = {"t": None, "son": 0}
+
+class Hesap:
+    def __init__(self, ad, kul, sifre):
+        self.ad, self.kul, self.sifre, self.t, self.son, self.taban = ad or "_1", kul, sifre, None, 0, TABAN
+        self.s = requests.Session(); self.s.headers.update({"User-Agent": "aesun-musteri/1", "Accept": "application/json"})
 
 def yaz(p: Path, v):
     p.parent.mkdir(parents=True, exist_ok=True)
     g = p.with_suffix(".tmp"); g.write_text(json.dumps(v, ensure_ascii=False, separators=(",", ":"))); g.replace(p)
 
-def giris(taban=None, sys_ad="SOLARMAN"):
+def giris(H, taban=None):
     """Web hesabıyla oturum. Şifre SHA-256 özetiyle gönderilir; jeton yalnız bellekte tutulur."""
-    if not KUL or not SIFRE:
-        raise RuntimeError("SOLARMAN_KULLANICI / SOLARMAN_SIFRE tanımlı değil")
-    tb = taban or JETON.get("taban") or TABAN
-    pw = hashlib.sha256(SIFRE.encode()).hexdigest()
-    r = S.post(tb + "/oauth2-s/oauth/token", timeout=30, data={
-        "grant_type": "mdc_password", "username": KUL, "clear_text_pwd": "",
-        "password": pw, "identity_type": 2, "client_id": "test", "system": sys_ad})
+    if not H.kul or not H.sifre:
+        raise RuntimeError(f"hesap {H.ad}: kullanıcı/şifre tanımlı değil")
+    tb = taban or H.taban or TABAN
+    pw = hashlib.sha256(H.sifre.encode()).hexdigest()
+    r = H.s.post(tb + "/oauth-s/oauth/token", timeout=30, data={
+        "grant_type": "mdc_password", "username": H.kul, "clear_text_pwd": "",
+        "password": pw, "identity_type": 2, "client_id": "test", "system": "SOLARMAN"})
     if r.status_code != 200 or "access_token" not in r.text:
-        r = S.post(tb + "/oauth-s/oauth/token", timeout=30, data={
-            "grant_type": "mdc_password", "username": KUL, "clear_text_pwd": "",
-            "password": pw, "identity_type": 2, "client_id": "test", "system": sys_ad})
-    if r.status_code != 200 or "access_token" not in r.text:
-        raise RuntimeError(f"giriş başarısız ({tb}, HTTP {r.status_code})")
-    j = r.json()
-    t = j["access_token"]
-    rt = j.get("refresh_token")
-    # SOLARMAN Business (globalpro): /user-s/acc/org/my ile organizasyon listesini alıp org_id jetonuna geç
-    if not j.get("org_id"):
-        for org_yol, met in (("/user-s/acc/org/my?language=en", "GET"), ("/user-s/acc/org/my/v2", "POST"), ("/user-s/acc/org?language=en&version=1.0", "GET")):
-            try:
-                ro = S.get(tb + org_yol, headers={"Authorization": "bearer " + t}, timeout=15) if met == "GET" else S.post(tb + org_yol, json={}, headers={"Authorization": "bearer " + t}, timeout=15)
-                if ro.status_code == 200:
-                    oj = ro.json()
-                    ol = oj if isinstance(oj, list) else (oj.get("data") or oj.get("orgList") or oj.get("orgInfoList") or oj.get("records") or [])
-                    if isinstance(oj, dict) and not ol and (oj.get("orgId") or oj.get("id")):
-                        ol = [oj]
-                    if ol and isinstance(ol, list):
-                        ilk_t = t
-                        for org in ol:
-                            oid = org.get("orgId") or org.get("id") or org.get("companyId")
-                            if not oid:
-                                continue
-                            for d_veri in (
-                                {"grant_type": "refresh_token", "refresh_token": rt, "org_id": oid, "client_id": "test", "system": sys_ad},
-                                {"grant_type": "password", "username": KUL, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": sys_ad},
-                                {"grant_type": "mdc_password", "username": KUL, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": sys_ad},
-                            ):
-                                r2 = S.post(tb + "/oauth2-s/oauth/token", timeout=20, data=d_veri)
-                                if r2.status_code == 200 and "access_token" in r2.text:
-                                    j = r2.json(); t = j["access_token"]
-                                    break
-                            if t != ilk_t:
-                                break
-                        break
-            except Exception:
-                pass
-    JETON.update(t=t, taban=tb, son=time.time() + int(j.get("expires_in", 3600)) - 300)
+        raise RuntimeError(f"hesap {H.ad}: giriş başarısız (HTTP {r.status_code})")
+    j = r.json(); t = j["access_token"]
+    # Business hesabında organizasyon listesi varsa org_id ile jetonu yenile
+    try:
+        ro = H.s.get(tb + "/user-s/acc/org/my?language=en", headers={"Authorization": "bearer " + t}, timeout=15)
+        if ro.status_code == 200:
+            oj = ro.json()
+            ol = oj if isinstance(oj, list) else (oj.get("data") or oj.get("orgList") or oj.get("orgInfoList") or [])
+            if ol and isinstance(ol, list):
+                oid = ol[0].get("orgId") or ol[0].get("id") or ol[0].get("companyId")
+                if oid:
+                    r2 = H.s.post(tb + "/oauth-s/oauth/token", timeout=20, data={
+                        "grant_type": "mdc_password", "username": H.kul, "clear_text_pwd": "",
+                        "password": pw, "identity_type": 2, "access_token": t, "org_id": oid,
+                        "client_id": "test", "system": "SOLARMAN"})
+                    if r2.status_code == 200 and "access_token" in r2.text:
+                        j = r2.json(); t = j["access_token"]
+    except Exception:
+        pass
+    H.taban = tb; H.t = t; H.son = time.time() + int(j.get("expires_in", 3600)) - 300
 
-def istek(yol, govde=None):
-    if not JETON["t"] or time.time() > JETON["son"]:
-        giris()
-    for deneme in (1, 2):
-        tb = JETON.get("taban") or TABAN
-        h = {"Authorization": "bearer " + JETON["t"]}
-        r = S.post(tb + yol, json=govde, headers=h, timeout=30) if govde is not None else S.get(tb + yol, headers=h, timeout=30)
-        if r.status_code == 401 and deneme == 1:
-            giris(tb); continue
-        r.raise_for_status(); return r.json()
+def tur(H):
+    def istek(yol, govde=None):
+        if not H.t or time.time() > H.son:
+            giris(H)
+        for deneme in (1, 2):
+            h = {"Authorization": "bearer " + H.t}
+            r = H.s.post(H.taban + yol, json=govde, headers=h, timeout=30) if govde is not None else H.s.get(H.taban + yol, headers=h, timeout=30)
+            if r.status_code == 401 and deneme == 1:
+                giris(H); continue
+            r.raise_for_status(); return r.json()
 
-def istasyon_ara():
-    """Hem Business (globalpro) hem Smart (globalhome) uçlarını ve filtreli/filtresiz aramayı dener."""
-    adaylar = [
-        (TABAN, "SOLARMAN", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}}),
-        (TABAN, "SOLARMAN", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-        (TABAN, "SOLARMAN", "/maintain-s/operating/station/stationView/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-        (TABAN, "SOLARMANPRO", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-        (TABAN, "SOLARMAN", "/maintain-s/operating/station/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-        ("https://globalhome.solarmanpv.com", "SOLARMAN", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-        ("https://globalhome.solarmanpv.com", "SOLARMAN", "/maintain-s/operating/station/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-    ]
-    for tb, sys_ad, yol, govde in adaylar:
-        try:
-            if JETON.get("taban") != tb or not JETON.get("t"):
-                giris(tb, sys_ad)
-            res = istek(yol, govde)
-            veri = (res or {}).get("data") if isinstance(res, dict) else (res if isinstance(res, list) else None)
-            if not veri and isinstance(res, dict):
-                veri = res.get("records") or res.get("stationList") or []
-            if veri:
-                return veri
-        except Exception:
-            continue
-    return []
-
-def tur():
     simdi = datetime.now(TR); y, a, g = simdi.year, simdi.month, simdi.day
-    kayitlar = istasyon_ara()
+    liste = istek("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}})
+    if not (liste or {}).get("data"):
+        liste = istek("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {})
+    if not (liste or {}).get("data") and H.taban != "https://globalhome.solarmanpv.com":
+        try:
+            giris(H, "https://globalhome.solarmanpv.com")
+            liste = istek("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {})
+        except Exception:
+            giris(H, TABAN)
     santraller = {}
-    for kay in kayitlar:
+    for kay in (liste or {}).get("data", []):
         s = (kay.get("station") if isinstance(kay, dict) and "station" in kay else kay) or {}
-        sid = str(s.get("id") or kay.get("id"))
+        sid = str(s.get("id"))
         if not sid or sid == "None":
             continue
         santraller[sid] = {"ad": s.get("name"), "adres": s.get("locationAddress"), "kapasite_kwp": s.get("installedCapacity"),
-                           "isletme_baslangic": s.get("startOperatingTime"), "tip": s.get("type")}
+                           "isletme_baslangic": s.get("startOperatingTime"), "tip": s.get("type"), "hesap": H.ad}
         d = KOK / sid
         try:
             alarm = istek("/maintain-s/operating/station/alert/lastest/list", {"stationIds": [int(sid)], "lan": "tr"}) or []
@@ -152,18 +119,29 @@ def tur():
                 yaz(KOK / sid / f"ay_{o.year}{o.month:02d}.json", [{"g": r.get("day"), "kwh": r.get("generationValue"), "saat": r.get("fullPowerHoursDay")} for r in ay.get("records", [])])
             except Exception:
                 pass
-    yaz(KOK / "santraller.json", santraller)
-    return len(santraller)
+    return santraller
 
 def main():
     KOK.mkdir(parents=True, exist_ok=True)
+    hesaplar = [Hesap(*h) for h in HESAPLAR]
+    eski = {}
+    try:
+        eski = json.loads((KOK / "santraller.json").read_text())
+    except Exception:
+        pass
     while True:
-        bas = time.time(); durum = {"zaman": int(bas), "kaynak": "solarman"}
-        try:
-            durum.update(tamam=True, santral=tur())
-        except Exception as e:
-            durum.update(tamam=False, hata=str(e)[:200]); traceback.print_exc(limit=1)
-            JETON["t"] = None
+        bas = time.time(); durum = {"zaman": int(bas), "kaynak": "solarman", "hesaplar": {}}
+        hepsi = dict(eski)   # hata veren hesabın santralleri listeden düşmesin
+        for H in hesaplar:
+            try:
+                s = tur(H); hepsi.update(s); durum["hesaplar"][H.ad] = {"tamam": True, "santral": len(s)}
+            except Exception as e:
+                durum["hesaplar"][H.ad] = {"tamam": False, "hata": str(e)[:200]}; traceback.print_exc(limit=1); H.t = None
+        yaz(KOK / "santraller.json", hepsi); eski = hepsi
+        hatalar = [f"{k}: {v['hata']}" for k, v in durum["hesaplar"].items() if not v["tamam"]]
+        durum.update(tamam=not hatalar and bool(hesaplar), santral=len(hepsi))
+        if hatalar or not hesaplar:
+            durum["hata"] = "; ".join(hatalar)[:300] or "hesap tanımlı değil"
         durum["sure_sn"] = round(time.time() - bas, 1)
         yaz(KOK / "durum.json", durum)
         time.sleep(max(30, ARALIK - (time.time() - bas)))

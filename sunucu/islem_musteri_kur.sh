@@ -8,23 +8,17 @@ chmod 600 /opt/aesun/musteri.env
 cd /opt/aesun && docker compose build -q api musteri && docker compose up -d --force-recreate --no-deps api musteri >/dev/null 2>&1
 sleep 8
 echo "NOT: api: $(docker inspect -f '{{.State.Status}}' aesun-api) · musteri: $(docker inspect -f '{{.State.Status}}' aesun-musteri)"
-echo "NOT: kimlik: $(grep -c '^SOLARMAN_[A-Z]*=.' /opt/aesun/musteri.env || true)/2 dolu"
-sleep 22
+echo "NOT: hesap: $(grep -c "^SOLARMAN_KULLANICI[_0-9]*=." /opt/aesun/musteri.env || true) tanımlı"
+sleep 20
 docker exec aesun-musteri sh -c 'cat /musteri/durum.json 2>/dev/null || echo "durum yok"' | sed 's/^/NOT: toplayıcı: /'
 docker exec aesun-musteri python3 -c "
-import json, pathlib, os, hashlib, requests
-p = pathlib.Path('/musteri/santraller.json')
-if p.is_file():
-    d = json.loads(p.read_text())
-    print('NOT: santraller (' + str(len(d)) + '): ' + ', '.join(f'{k}:{v.get(\"ad\")}' for k,v in list(d.items())[:10]))
+import os, hashlib, requests
 tb = 'https://globalpro.solarmanpv.com'
 kul, sifre = os.environ.get('SOLARMAN_KULLANICI',''), os.environ.get('SOLARMAN_SIFRE','')
-r = requests.post(tb + '/oauth2-s/oauth/token', timeout=15, data={'grant_type':'mdc_password','username':kul,'clear_text_pwd':'','password':hashlib.sha256(sifre.encode()).hexdigest(),'identity_type':2,'client_id':'test','system':'SOLARMAN'})
+r = requests.post(tb + '/oauth-s/oauth/token', timeout=15, data={'grant_type':'mdc_password','username':kul,'clear_text_pwd':'','password':hashlib.sha256(sifre.encode()).hexdigest(),'identity_type':2,'client_id':'test','system':'SOLARMAN'})
 j = r.json() if r.status_code == 200 else {}
-print('NOT: mdc=' + str(j.get('mdc')) + ' scope=' + str(j.get('scope')))
 if 'access_token' in j:
     h = {'Authorization': 'bearer ' + j['access_token']}
-    for u in ('/user-s/acc/org/my?language=en', '/user-s/acc/org?language=en&version=1.0'):
-        r2 = requests.get(tb + u, headers=h, timeout=15)
-        print(f'NOT: {u}: HTTP {r2.status_code} {r2.text[:220]}')
+    ro = requests.get(tb + '/user-s/acc/org/my?language=en', headers=h, timeout=15)
+    print('NOT: org/my HTTP ' + str(ro.status_code) + ' ' + ro.text[:200])
 " 2>/dev/null || true

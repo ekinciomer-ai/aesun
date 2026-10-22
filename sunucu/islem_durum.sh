@@ -8,3 +8,6 @@ echo "NOT: monitoring: $(curl -s -o /dev/null -w "%{http_code}" https://portal.a
 echo "NOT: bellek: $(free -m | awk '/Mem/{print "kullanılabilir "$7" MB / "$2" MB"}') · disk $(df -h / | tail -1 | awk '{print $5}')"
 echo "NOT: ns1 depo yazımları (son 8): $(docker exec aesun-api tail -8 /veri/depo_yazim.log 2>/dev/null | awk -F'\t' '{print substr($1,12,8)" "$2" "$3}' | tr '\n' ';')"
 echo "NOT: depo dosya: $(docker exec aesun-api find /veri/depo -name '*.json' | wc -l)"
+echo "NOT: musteri durum: $(docker exec aesun-musteri cat /musteri/durum.json 2>/dev/null | tr '\n' ' ')"
+echo "NOT: musteri log: $(docker logs --tail 8 aesun-musteri 2>&1 | tr '\n' ' ')"
+echo "NOT: has45387414: $(docker exec aesun-musteri ls -1 /musteri/45387414 2>/dev/null | tr '\n' ' ')"

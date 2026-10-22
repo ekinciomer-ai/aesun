@@ -1,5 +1,5 @@
 {
-  "guncelleme": "2026-10-21",
+  "guncelleme": "2026-10-22",
   "kaynak": "Resmî Gazete 2026 derin taraması (RG 33407, RG 33406, RG 33405, RG 33244 ve 2026 EPDK Kurul Kararları) · ETKB / EPDK / EPİAŞ / TEİAŞ / İDB",
   "kapsam": "2026 yılında Resmî Gazete'de yayımlanan tüm elektrik ve emisyon piyasası yönetmelik değişiklikleri ile EPDK Kurul Kararlarının lisanssız GES, depolama, OSB, bağlantı, dengeleme, şeffaflık ve TR ETS karbon piyasası açısından teknik/hukuki analizi.",
   "analiz_kaynaklari": [
@@ -594,6 +594,567 @@
         "1 Mayıs 2026"
       ],
       "url": "https://www.resmigazete.gov.tr/eskiler/2026/04/20260402-4.htm"
+    }
+  ],
+  "yonetmelik_agaci": [
+    {
+      "grup_id": "lisanssiz-yonetmelik",
+      "ana_baslik": "Elektrik Piyasasında Lisanssız Elektrik Üretim Yönetmeliği",
+      "kok_rg": "12.05.2019 · RG 30772 (İlk Yürürlük: 02.10.2013 · RG 28783)",
+      "dayanak": "6446 Sayılı Elektrik Piyasası Kanunu Madde 14",
+      "kurum": "EPDK / ETKB",
+      "bagli_teblig_ozet": "Lisanssız Elektrik Üretimine İlişkin Yönetmeliğin Uygulanmasına Dair Tebliğ · Saatlik Mahsuplaşma Usul ve Esasları (EPDK 14531) · Bağlantı Anlaşması ve Uzaktan Kontrol Usul/Esasları (EPDK 14909) · 10 Yılı Dolan Tesisler Kararı (EPDK 14671)",
+      "aciklama": "Çatı ve arazi tipi lisanssız GES/RES santrallerinin çağrı mektubu, bağlantı anlaşması, kabul, saatlik mahsuplaşma, ihtiyaç fazlası satış sınırı, saha içi tüketim, bütünleşik depolama (BESS) ve DGP acil durum uzaktan kontrol/yük atma kurallarını belirleyen ana yönetmelik ve buna bağlı tebliğ/karar zinciri.",
+      "kayitlar": [
+        {
+          "id": "lis-2026-10-19-yon",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği (Md. 21/8, Md. 26, Md. 28/4, Ek Md. 4, Geçici Md. 14, Ek-3)",
+          "baslik": "Lisanssız Elektrik Üretim Yönetmeliğinde Değişiklik Yapılmasına Dair Yönetmelik (Uzaktan Kontrol/Yük Atma, Saha İçi Tüketim & Sınırsız BESS)",
+          "onceki": "Dağıtım şirketleri ve OSB'lerin lisanssız GES'leri DGP acil durumlarında uzaktan kısma/açma yetkisi ve yaptırımı açık değildi; saha içi yardımcı tüketim mahsubu tartışmalıydı; Ek-3 bütünleşik depolama kapasitesi sınırlı yorumlanıyordu.",
+          "yeni": "1) Md.21/8: EDAŞ/OSB/EB acil durumda lisanssız tesisi uzaktan kontrol edebilir ve yük atabilir; acil durum bitiminden en geç 15 dk içinde bildirim yapılır, tekrar devreye alma üretici sorumluluğundadır. 2) Ek Md.4: Yük atma talimatına uymayana o dönem ödeme yapılmaz + YEK/tarife cezası kesilir. 3) Md.26: Saha içi tüketim mahsuplaşmaya dahildir; aynı bölgede tüketim tesisi yoksa en yüksek perakende tek zamanlı tarifeden faturalanır. 4) Ek-3: Aynı ölçüm noktasında kapasite sınırlaması olmaksızın BESS kurulabilir. 5) Geçici Md.14: Mevcut bağlantı anlaşmaları 60 gün içinde (18.12.2026'ya kadar) revize edilir; 16/f-g cezai şartları 30.04.2027'ye ertelendi.",
+          "analiz": "Tüm arazi ve çatı GES'lerde SCADA/RTU uzaktan açma-kapama entegrasyonu ve kesinti bittiğinde santrali anında devreye alacak izleme (AEMonitoring) altyapısı zorunlu hale geldi. Tüketim tesisi olmayan arazi GES'lerde gece trafo/iç tüketim faturası en yüksek tarifeden yazılacağı için gece yükleri düşürülmeli.",
+          "aksiyon": "18.12.2026'ya kadar (60 gün) dağıtım bağlantı anlaşması revizyon başvurusu yapılmalı; SCADA sinyal testi tamamlanmalı.",
+          "maddeler": [
+            "MADDE 21/8",
+            "MADDE 26",
+            "MADDE 28/4 & EK-3",
+            "EK MADDE 4",
+            "GEÇİCİ MADDE 14"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-6.htm"
+        },
+        {
+          "id": "lis-2026-10-19-14909",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405 · EPDK Karar No: 14909",
+          "tur": "Bağlı Tebliğ / Kurul Kararı",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği Md. 21/8, Ek Md. 4 ve Geçici Md. 14 Uygulama Esasları",
+          "baslik": "EPDK 24.09.2026 Tarihli ve 14909 Sayılı Kararı — Lisanssız Üreticiler İçin Dağıtım Bağlantı Anlaşması, Uzaktan Kontrol ve Sistem Kullanım Yaptırımları",
+          "onceki": "Tip bağlantı anlaşmalarında DGP acil durum yük atma ve uzaktan kontrol ihlallerine ilişkin standart yaptırım maddeleri bulunmuyordu.",
+          "yeni": "Lisanssız elektrik üreticileri için dağıtım sistemine bağlantı anlaşması hükümleri revize edildi; uzaktan izleme ve kontrol sistemini kurmayan veya müdahale eden tesislere uygulanacak sistem kullanım ve şebeke yaptırımları netleştirildi.",
+          "analiz": "19.10.2026 tarihli yönetmelik değişikliğinin doğrudan uygulama tebliği/kararı niteliğindedir. EDAŞ ve OSB'lerin 60 gün içinde imzalatacağı revize bağlantı anlaşmalarının metin dayanağı bu karardır.",
+          "aksiyon": "EDAŞ/OSB tarafından sunulacak revize bağlantı anlaşması metni 14909 sayılı karara uygun olarak imzalanmalı.",
+          "maddeler": [
+            "EPDK Karar 14909",
+            "Tip Bağlantı Anlaşması Md.16/f-g",
+            "Uzaktan Kontrol Yaptırımı"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-9.pdf"
+        },
+        {
+          "id": "lis-2026-06-20-14671",
+          "tarih": "2026-06-20",
+          "yil": "2026",
+          "rg": "20.06.2026 · RG 33295 · EPDK Karar No: 14671",
+          "tur": "Bağlı Tebliğ / Kurul Kararı",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği Md. 28 & 51/h İhtiyaç Fazlası Enerji Satış Esasları",
+          "baslik": "EPDK 18.06.2026 Tarihli ve 14671 Sayılı Kararı — 10 Yılını Dolduran Lisanssız GES'lerde 2026 Yılı İhtiyaç Fazlası Satış Kısıtının Kaldırılması",
+          "onceki": "10 yıllık YEKDEM süresi dolan ve üretim ile tüketimi farklı ölçüm noktasında olan lisanssız GES'lerin ihtiyaç fazlası satışına tüketim bağımlı kısıt uygulanması riski vardı.",
+          "yeni": "YEKDEM kapsamında 10 yıllık destek süresini tamamlayan ve tüketim tesisi farklı ölçüm noktasında bulunan lisanssız üretim tesislerinin 2026 yılı boyunca ihtiyaç fazlası enerjisinin tamamını satabilmesine (üst sınır uygulanmamasına) ve veriş yönünde LÜ-2 dağıtım bedeli uygulanmasına karar verildi.",
+          "analiz": "2014–2016'da devreye giren ilk nesil arazi GES'lerin 2026 yılında üretiminin bedelsiz YEKDEM'e gitmesi önlendi; ancak 2027 yılı için toplayıcı (aggregator) portföyüne geçiş hazırlığı yapılmalı.",
+          "aksiyon": "10 yılı dolan santrallerde LÜ-2 dağıtım bedeli mahsup faturaları kontrol edilmeli; 2027 için toplayıcı sözleşmeleri değerlendirilmeli.",
+          "maddeler": [
+            "EPDK Karar 14671",
+            "10 Yıl Sonrası Satış Muafiyeti",
+            "LÜ-2 Dağıtım Tarifesi"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/06/20260620.htm"
+        },
+        {
+          "id": "lis-2026-04-30-14531",
+          "tarih": "2026-04-30",
+          "yil": "2026",
+          "rg": "30.04.2026 · RG 33244 · EPDK Karar No: 14531",
+          "tur": "Bağlı Tebliğ / Usul ve Esaslar",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği Md. 4 ve Md. 26 (Saatlik Mahsuplaşma Usul ve Esasları)",
+          "baslik": "EPDK 30.04.2026 Tarihli ve 14531 Sayılı Kararı — Lisanssız Üretim ve Tüketim Tesislerinin Saatlik Mahsuplaşma Usul ve Esasları",
+          "onceki": "Aylık mahsuplaşma usul ve esasları geçerliydi; gündüz şebekeye verilen üretim aynı ay içindeki gece tüketiminden düşülüyordu.",
+          "yeni": "1 Mayıs 2026'dan itibaren üretim ve tüketim her uzlaştırma dönemi (saat) için ayrı ayrı mahsuplaştırılır. Farklı ölçüm noktalarındaki tesislerin satabileceği ihtiyaç fazlası miktar hesabı ve 'Lisanssız Üretici-2 (LÜ-2)' veriş yönü dağıtım bedeli yürürlüğe girdi.",
+          "analiz": "02.04.2026 tarihli yönetmelik değişikliğinin uygulama tebliği niteliğindedir. Gündüz güneş üretimiyle gece tüketimi (madencilik, vardiyalı sanayi, sulama) artık birbirini kapatmadığı için yüklerin gündüz saatlerine (08:00–17:00) çekilmesi veya BESS kurulması şart oldu.",
+          "aksiyon": "OSOS saatlik endeks takibi ve gündüz-gece yük kaydırma otomasyonu (saat_kontrol.py / anti_main.py) bu usul ve esaslara göre işletilmeli.",
+          "maddeler": [
+            "EPDK Karar 14531",
+            "Saatlik Uzlaştırma Dönemi Mahsubu",
+            "LÜ-2 Veriş Dağıtım Bedeli"
+          ],
+          "url": "https://www.lexpera.com.tr/resmi-gazete/metin/enerji-piyasasi-duzenleme-kurulunun-30-04-2026-tarihli-ve-14531-sayili-karari-33244"
+        },
+        {
+          "id": "lis-2026-04-02-yon",
+          "tarih": "2026-04-02",
+          "yil": "2026",
+          "rg": "02.04.2026 · RG 33216 (Yürürlük: 01.05.2026)",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği (Md. 4 Tanımlar, Mahsuplaşma & İhtiyaç Fazlası Satış Sınırı)",
+          "baslik": "Lisanssız Elektrik Üretim Yönetmeliğinde Değişiklik Yapılmasına Dair Yönetmelik (Aylık Mahsuplaşmadan Saatlik Mahsuplaşmaya Geçiş)",
+          "onceki": "Mahsuplaşma 'aylık fatura dönemi içinde gerçekleşen üretim ve tüketimin birbirinden düşülmesi' olarak tanımlıydı; şebeke ücretsiz aylık batarya gibi kullanılıyordu.",
+          "yeni": "Mahsuplaşma tanımı 'saatlik zaman dilimi içinde gerçekleşen üretim ve tüketimin birbirinden düşülmesi' olarak değiştirildi (Yürürlük: 01.05.2026). Yıllık ihtiyaç fazlası enerji satışı, ilişkili tüketim tesisinin yıllık toplam tüketiminin en fazla 2 katı ile sınırlandı.",
+          "analiz": "2026 yılının en köklü yapısal kırılmasıdır. Yüksek DC/AC oranlı veya düşük tüketimli arazi GES'lerde fazla üretimin bedelsiz YEKDEM'e gitmemesi için öz tüketim + BESS + esnek yük (madencilik/soğutma) entegrasyonu zorunlu hale geldi.",
+          "aksiyon": "Tüm yeni GES fizibilitelerinde müşterinin saatlik yük profili ve 'Yıllık Satış ≤ 2 × Yıllık Tüketim' sınırı dikkate alınmalı.",
+          "maddeler": [
+            "MADDE 4 (Saatlik Mahsuplaşma)",
+            "Yıllık Satış ≤ 2 × Tüketim",
+            "Endüstri Bölgesi Tanımı"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/04/20260402-4.htm"
+        },
+        {
+          "id": "lis-2024-05-14-yon",
+          "tarih": "2024-05-14",
+          "yil": "2024",
+          "rg": "14.05.2024 · RG 32546",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği (Md. 17, Md. 18, Çağrı Mektubu & Bağlantı Anlaşması Süreleri)",
+          "baslik": "Lisanssız Elektrik Üretim Yönetmeliğinde Değişiklik Yapılmasına Dair Yönetmelik (Çağrı Mektubu, ÇED ve Bağlantı Anlaşması Süreleri)",
+          "onceki": "Çağrı mektubu tebliğinden sonra proje onayı ve bağlantı anlaşması başvurusunda parçalı süreler uygulanıyordu.",
+          "yeni": "Çağrı mektubu sonrası proje onayı, ÇED ve bağlantı anlaşması başvuru süreleri yeniden düzenlendi; kabul öncesi hisse/tesis devir kısıtları ve kapasite tahsis disiplini sıkılaştırıldı.",
+          "analiz": "Atıl kapasite tahsislerini (çantacı projeleri) temizlemek ve gerçekten yatırım yapacak EPC/yatırımcılara trafo kapasitesi açmak amacıyla süre uzatım şartları daraltıldı.",
+          "aksiyon": "Çağrı mektubu alınan projelerde 90/180 günlük proje onay ve ÇED takvimi hak düşürücü süre olarak takip edilmeli.",
+          "maddeler": [
+            "MADDE 17–18 (Başvuru & Süreler)",
+            "Kabul Öncesi Devir Kısıtı"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2024/05/20240514.htm"
+        },
+        {
+          "id": "lis-2022-08-11-yon",
+          "tarih": "2022-08-11",
+          "yil": "2022",
+          "rg": "11.08.2022 · RG 31920 (ve EPDK 11098 Sayılı Karar)",
+          "tur": "Değişiklik Yönetmeliği + Kurul Kararı",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği (Md. 5/1-h Farklı Dağıtım Bölgesi & Tüketim Kadar Satış Kısıtı)",
+          "baslik": "Lisanssız Elektrik Üretim Yönetmeliğinde Değişiklik (5.1.h Farklı Dağıtım Bölgesi Hakkı ve Önceki Yıl Tüketimi Kadar Satış Kısıtı)",
+          "onceki": "Üretim ve tüketim tesisinin aynı dağıtım bölgesinde olması zorunluydu; sözleşme gücüne (2 katına) kadar sınırsız ihtiyaç fazlası satış yapılabiliyordu.",
+          "yeni": "5.1.h kapsamında üretim ve tüketim tesislerinin farklı dağıtım bölgelerinde (Türkiye genelinde) kurulabilmesinin önü açıldı; buna karşılık ihtiyaç fazlası ücretli satış miktarı ilişkili tüketim tesisinin bir önceki yıl toplam tüketimi ile sınırlandırıldı (sonradan 2023/2026 kararlarıyla revize edildi).",
+          "analiz": "Aksaray, Konya, Karaman, Niğde gibi yüksek güneşlenme ve uygun arazi bulunan illerde, İstanbul/Kocaeli/Bursa'daki sanayi tesislerinin tüketimine mahsuben 5.1.h arazi GES kurulmasını başlatan tarihi düzenlemedir.",
+          "aksiyon": "Farklı dağıtım bölgesi (5.1.h) projelerinde tüketim tesisi aboneliği ve yıllık kWh tüketim doğrulaması temel kriter olarak yerleşti.",
+          "maddeler": [
+            "MADDE 5/1-h (Ülke Geneli Mahsup)",
+            "MADDE 26 & GEÇİCİ MD. (Tüketim Kısıtı)",
+            "EPDK Karar 11098"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2022/08/20220811-12.htm"
+        },
+        {
+          "id": "lis-2021-05-09-yon",
+          "tarih": "2021-05-09",
+          "yil": "2021",
+          "rg": "09.05.2021 · RG 31479",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Lisanssız Elektrik Üretim Yönetmeliği (Md. 5/1-h Maddesinin Eklenmesi)",
+          "baslik": "Lisanssız Elektrik Üretim Yönetmeliğinde Değişiklik (5.1.h Kapsamında Aynı Ölçüm Noktası Şartı Aranmaksızın GES Kurulumu)",
+          "onceki": "2019 yönetmeliğinde 5.1.c ile sadece çatı/cephe ve aynı ölçüm noktasında aylık mahsuplaşmalı GES kurulabiliyordu; arazi GES'ler neredeyse durmuştu.",
+          "yeni": "Yönetmeliğe 5.1.h bendi eklendi: Tüketim tesisi ile aynı ölçüm noktasında olma şartı aranmaksızın (farklı parselde/arazide) sözleşme gücüne bağlı lisanssız GES kurulumu ve aylık mahsuplaşma imkânı getirildi.",
+          "analiz": "Türkiye'de 2021–2026 dönemindeki büyük 5.1.h arazi GES yatırım dalgasını başlatan yönetmelik değişikliğidir.",
+          "aksiyon": "Çatısı yetersiz sanayi, ticarethane ve tarımsal sulama abonelerinin arazi GES kurabilmesinin hukuki dayanağı oluşturuldu.",
+          "maddeler": [
+            "MADDE 5/1-h (Farklı Ölçüm Noktasında GES)",
+            "Sözleşme Gücü & Mahsuplaşma"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2021/05/20210509-2.htm"
+        },
+        {
+          "id": "lis-2019-05-12-kok",
+          "tarih": "2019-05-12",
+          "yil": "2019",
+          "rg": "12.05.2019 · RG 30772",
+          "tur": "Ana Yönetmelik + Uygulama Tebliği",
+          "bagli_oldugu": "Kök Yönetmelik (02.10.2013 · RG 28783 Yönetmeliğini Yürürlükten Kaldıran Ana Metin)",
+          "baslik": "Elektrik Piyasasında Lisanssız Elektrik Üretim Yönetmeliği ve Uygulama Tebliği (YEKDEM Döviz Alım Garantisinden Mahsuplaşma Modeline Geçiş)",
+          "onceki": "02.10.2013 tarihli ve 28783 sayılı ilk Lisanssız Yönetmeliği ve Tebliği kapsamında 1 MW altı arazi GES'lere 10 yıl boyunca 13,3 USD cent/kWh doğrudan YEKDEM satış garantisi uygulanıyordu.",
+          "yeni": "2013 yönetmeliği yürürlükten kaldırılarak öz tüketim ve mahsuplaşma esaslı yeni Lisanssız Elektrik Üretim Yönetmeliği yürürlüğe girdi; ihtiyaç fazlası enerjinin kendi abone grubunun perakende tek zamanlı aktif enerji bedelinden YEKDEM'e satılması esas alındı.",
+          "analiz": "2013–2019 dönemindeki döviz bazlı (13,3 USD cent/kWh) yatırımcı modelinden, sanayici ve tüketicinin kendi elektrik faturasını sıfırlamasına dayalı TL mahsuplaşma modeline geçişin kök yönetmeliğidir.",
+          "aksiyon": "Bugünkü tüm 5.1.c ve 5.1.h GES projelerinin yürürlükteki ana yönetmelik metnidir.",
+          "maddeler": [
+            "KÖK YÖNETMELİK (RG 30772)",
+            "5.1.c & 5.1.h Çerçevesi",
+            "10 Yıllık YEKDEM/Tedarikçi Alımı"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2019/05/20190512-1.htm"
+        }
+      ]
+    },
+    {
+      "grup_id": "baglanti-ekat-yonetmelik",
+      "ana_baslik": "Elektrik Piyasası Bağlantı ve Sistem Kullanım Yönetmeliği & EKAT Yönetmeliği",
+      "kok_rg": "28.01.2014 · RG 28896 (Bağlantı Yön.) · 30.11.2000 · RG 24246 (EKAT)",
+      "dayanak": "6446 Sayılı Kanun Md. 8, 9, 15 ve 3154 Sayılı ETKB Kanunu",
+      "kurum": "EPDK / ETKB / TEİAŞ / EDAŞ",
+      "bagli_teblig_ozet": "Kullanıcı Tarafından Yapılan Şebeke Yatırımları Metodolojisi · EKAT Md.58 Kablo Kanalı ve Emniyet Mesafeleri (21.05.2023 RG 32197) · Bölgesel Kapasite Tahsis Kararları (EPDK 14353 & 12415)",
+      "aciklama": "GES ve depolama tesislerinin OG/İletim şebekesine bağlantı görüşü, mesafe/güç sınırları, 30 gün içinde Tesis Yapım Sözleşmesi, otomatik güç kesme rölesi, teminat iadesi ve EKAT saha kablo/topraklama mühendislik kurallarını belirleyen mevzuat grubu.",
+      "kayitlar": [
+        {
+          "id": "bag-2026-10-19-yon",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Elektrik Piyasası Bağlantı ve Sistem Kullanım Yönetmeliği (Md. 10/A, Md. 14, Teminat & Tesis Sözleşmesi Maddeleri)",
+          "baslik": "Elektrik Piyasası Bağlantı ve Sistem Kullanım Yönetmeliğinde Değişiklik (Otomatik Güç Kontrol/Kesme, 30 Gün Tesis Sözleşmesi, 10 İş Gününde Fazla Teminat İadesi)",
+          "onceki": "Anlaşma gücü üstü depolamada otomatik enerji kesme şartı açık değildi; şebeke yatırımı (ENH/DM) sözleşme süresi esnekti; düzenli ödeyen abonelerin fazla teminat iadesinde kesin süre yoktu.",
+          "yeni": "1) Md.10/A & Md.14: Anlaşma gücünden yüksek depolama kuran tüketicilere şebekeye kontrolsüz enerji verişini önleyen Otomatik Güç Kontrol Ünitesi ve Enerji Kesme Sistemi zorunluluğu. 2) Bağlantı anlaşmasından itibaren en geç 30 gün içinde Tesis Yapım Sözleşmesi imzalama şartı. 3) Son 24 ay düzenli ödeyenlere teminatta 1 kat üst sınır ve fazla teminatların talep üzerine 10 iş gününde iadesi.",
+          "analiz": "Hem mevcut işletmeler (fazla teminatların 10 iş gününde nakde çevrilmesi) hem de yeni GES+BESS projeleri (AeCAD tek hat şemasına otomatik güç kontrol ve kesme rölesi eklenmesi ve 30 gün Tesis Yapım Sözleşmesi takibi) için doğrudan bağlayıcıdır.",
+          "aksiyon": "Son 24 ayda gecikmesi olmayan tesisler için EDAŞ'a fazla teminat iade dilekçesi verilmeli; yeni bağlantı anlaşmalarında 30 gün içinde Tesis Yapım Sözleşmesi imzalanmalı.",
+          "maddeler": [
+            "MADDE 10/A & 14 (Otomatik Kesme)",
+            "30 Gün Tesis Yapım Sözleşmesi",
+            "10 İş Günü Teminat İadesi"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-1.htm"
+        },
+        {
+          "id": "bag-2026-07-24-imar",
+          "tarih": "2026-07-24",
+          "yil": "2026",
+          "rg": "24.07.2026 · RG",
+          "tur": "Bağlı Yönetmelik / Tebliğ",
+          "bagli_oldugu": "Planlı Alanlar / Plansız Alanlar İmar Yönetmeliği & GES/RES Yapı Ruhsatı Süreçleri",
+          "baslik": "Güneş ve Rüzgâr Enerjisi Santralleri (GES ve RES) İmar Planı ve Yapı Ruhsatı Süreçleri Düzenlemesi",
+          "onceki": "Arazi ve çatı GES projelerinde belediyeler ve il özel idareleri arasında imar planı, yapı ruhsatı ve uygunluk yazısı uygulamalarında ciddi farklılıklar vardı.",
+          "yeni": "GES ve RES yatırımlarında imar planı, yapı ruhsatı/muafiyeti ve izin süreçlerine ilişkin standart teknik ve idari esaslar yürürlüğe konuldu.",
+          "analiz": "Çağrı mektubu süresinde en büyük zaman kaybına yol açan İl Özel İdaresi / Belediye imar ve ruhsat süreçlerini standartlaştırarak bağlantı anlaşmasına geçişi hızlandırır.",
+          "aksiyon": "Devam eden arazi GES dosyalarında imar ve ruhsat başvuruları yeni standart tebliğ hükümlerine göre yürütülmeli.",
+          "maddeler": [
+            "GES/RES İmar Planı Esasları",
+            "Yapı Ruhsatı / Muafiyet Standartları"
+          ],
+          "url": "https://www.alomaliye.com/2026/07/24/res-ve-ges-imar-ve-ruhsat-surecleri-duzenlendi/"
+        },
+        {
+          "id": "bag-2026-02-26-14353",
+          "tarih": "2026-02-26",
+          "yil": "2026",
+          "rg": "02.03.2026 · EPDK Karar No: 14353 (Önceki: 08.02.2024 · Karar No: 12415)",
+          "tur": "Bağlı Kurul Kararı",
+          "bagli_oldugu": "Bağlantı ve Sistem Kullanım Yönetmeliği & Lisanssız Yön. Md. 13 (TEİAŞ ve EDAŞ Trafo Merkezi Kapasite Tahsisleri)",
+          "baslik": "EPDK 26.02.2026 Tarihli ve 14353 Sayılı Kurul Kararı — 2026 Yılı İletim ve Dağıtım Seviyesi Bölgesel Lisanssız GES/RES Kapasite Tahsisleri",
+          "onceki": "08.02.2024 tarihli ve 12415 sayılı Kurul Kararı kapsamındaki bölgesel trafo merkezi kapasite tabloları uygulanıyordu.",
+          "yeni": "2026 yılı için TEİAŞ 154 kV trafo merkezleri ve 21 dağıtım bölgesi (MEDAŞ dahil) bazında tahsis edilebilir lisanssız üretim kapasiteleri güncellendi ve ilan edildi.",
+          "analiz": "Aksaray Enerji Kapasite Panelinde (kapasite/index.html) 81 il ve 21 EDAŞ bazında gösterilen MWe boş/dolu trafo merkezi kapasitelerinin doğrudan resmî dayanağıdır.",
+          "aksiyon": "Yeni çağrı mektubu başvurularında 14353 sayılı karar ve aylık TEİAŞ/MEDAŞ boş kapasite tabloları kontrol edilmeli.",
+          "maddeler": [
+            "EPDK Karar 14353 (2026 Kapasiteleri)",
+            "EPDK Karar 12415 (2024 Kapasiteleri)",
+            "154 kV TM Tahsis Tablosu"
+          ],
+          "url": "https://www.epdk.gov.tr"
+        },
+        {
+          "id": "bag-2023-05-21-ekat",
+          "tarih": "2023-05-21",
+          "yil": "2023",
+          "rg": "21.05.2023 · RG 32197 (Kök EKAT: 30.11.2000 · RG 24246)",
+          "tur": "Değişiklik Yönetmeliği + Teknik Tebliğ",
+          "bagli_oldugu": "Elektrik Kuvvetli Akım Tesisleri (EKAT) Yönetmeliği Madde 58 & GES Proje Çizim Esasları",
+          "baslik": "Elektrik Kuvvetli Akım Tesisleri (EKAT) Yönetmeliğinde Değişiklik — Kablo Kanalları (Md.58), GES Saha Emniyet Mesafeleri ve Topraklama",
+          "onceki": "Eski EKAT metninde modern GES sahalarındaki DC/AC/OG yeraltı kablo kanalı kesitleri, koruma boruları ve trafo/hücre mesafeleri güncel standartları tam karşılamıyordu.",
+          "yeni": "EKAT Md.58 ve ilgili maddeler güncellenerek yeraltı AG/OG/DC kablo kanalı derinlikleri (0,60 m – 0,80 m), kum yataklama, tuğla/briket koruma, ikaz şeridi, haberleşme (FO/Cat6) ayrımı ve topraklama ağ kuralları bağlayıcı hale getirildi.",
+          "analiz": "AeCAD / GES-ÇİZ (ges_ciz.py) modülümüzde çizilen DC/AC/OG kablo kanal kesit detaylarının ve TEDAŞ/MEDAŞ proje onay kriterlerinin temel mühendislik yönetmeliğidir.",
+          "aksiyon": "Tüm GES uygulama projelerinde EKAT Md.58 kanal kesitleri ve topraklama hesapları birebir uygulanmalı.",
+          "maddeler": [
+            "EKAT MADDE 58 (Kablo Kanal Detayları)",
+            "Topraklama & Emniyet Mesafeleri"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2023/05/20230521-4.htm"
+        }
+      ]
+    },
+    {
+      "grup_id": "duy-yanhizmet-toplayici",
+      "ana_baslik": "Elektrik Piyasası Dengeleme ve Uzlaştırma Yönetmeliği (DUY), Yan Hizmetler & Toplayıcılık Yönetmeliği",
+      "kok_rg": "14.04.2009 · RG 27200 (DUY) · 26.11.2017 · RG 30252 (Yan Hizmetler) · 29.11.2024 · RG 32737 (Toplayıcılık)",
+      "dayanak": "6446 Sayılı Elektrik Piyasası Kanunu Md. 11 ve Md. 12/A (Toplayıcılık)",
+      "kurum": "EPDK / EPİAŞ / TEİAŞ",
+      "bagli_teblig_ozet": "Dâhilî Bilgi Platformu Usul ve Esasları (EPDK 14967) · Yeni Şeffaflık Platformu 151 Veri Seti Kararı (EPDK 14968) · Dengesizlik Vt,u = 100 TL/MWh Kararı (EPDK 14911) · Sapma ve Reaktif Güç Kararları (14907, 14908, 14910, 14913)",
+      "aciklama": "EPİAŞ Gün Öncesi (GÖP), Gün İçi (GİP), Dengeleme Güç Piyasası (DGP), enerji dengesizlik hesapları (Vt,u), lisanssız santrallerin toplayıcı (aggregator) portföyüne girişi, esnek yüklerin Talep Tarafı Katılımı (TTK) gelirleri ve 151 veri setli Şeffaflık Platformu kurallarını düzenleyen mevzuat kümesi.",
+      "kayitlar": [
+        {
+          "id": "duy-2026-10-20-14967-14968",
+          "tarih": "2026-10-20",
+          "yil": "2026",
+          "rg": "20.10.2026 · RG 33406 · EPDK Karar No: 14967 & 14968",
+          "tur": "Bağlı Tebliğ / Kurul Kararı",
+          "bagli_oldugu": "Dengeleme ve Uzlaştırma Yönetmeliği (DUY) & EPİAŞ Şeffaflık / Dâhilî Bilgi Platformu Usul ve Esasları",
+          "baslik": "EPDK 15.10.2026 Tarihli ve 14967–14968 Sayılı Kararlar (Dâhilî Bilgi 1 Saat Arıza Bildirimi & 151 Veri Setli Yeni Şeffaflık Platformu)",
+          "onceki": "2022 tarihli Şeffaflık Platformu kararı geçerliydi; veri setleri daha dardı ve dâhilî bilgi bildirim süreleri eski şablona dayanıyordu.",
+          "yeni": "14967 sayılı kararla Dâhilî Bilgi Platformu'nda 19 veri kalemi zorunlu oldu; arıza/bakım/emre amade kapasite değişimleri en geç 1 saat içinde duyurulacak. 14968 sayılı kararla EPİAŞ/TEİAŞ/BOTAŞ/DSİ/EİGM kaynaklı 151 veri setini kapsayan yeni Şeffaflık Platformu 01.01.2027'den itibaren yürürlüğe konuldu.",
+          "analiz": "PTF tahmini, YEKDEM birim maliyet hesabı ve bölgesel üretim/tüketim analizi yapan yazılımlarımız (anti_main.py & AEMonitoring) için veri derinliği 151 sete çıkıyor.",
+          "aksiyon": "14967 kapsamındaki 1 saatlik arıza bildirimi hemen yürürlükte; 14968 kapsamındaki yeni EPİAŞ API uçları 1 Ocak 2027'de devreye girecek.",
+          "maddeler": [
+            "EPDK Karar 14967 (1 Saat Kuralı)",
+            "EPDK Karar 14968 (151 Veri Seti)"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261020-11.pdf"
+        },
+        {
+          "id": "duy-2026-10-19-yon",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Elektrik Piyasası Dengeleme ve Uzlaştırma Yönetmeliği (DUY — Toplayıcı Kaydı & Uzlaştırma Sayaçları)",
+          "baslik": "Elektrik Piyasası Dengeleme ve Uzlaştırma Yönetmeliğinde Değişiklik (Toplayıcı Portföyüne Girişte Bakanlık Kabul Şartı & Tüketim Sayaç Kaydı)",
+          "onceki": "Lisanssız tesislerin toplayıcı portföyüne kaydında Bakanlık kabul şartı ve ilişkili tüketim sayacının uzlaştırma kaydı açık değildi.",
+          "yeni": "Lisanssız üretim tesislerinin toplayıcı (aggregator) portföyüne kaydedilebilmesi için Bakanlık kabulünün tamamlanmış olması şartı getirildi; ilişkili tüketim noktası sayaçları EPİAŞ uzlaştırma kayıt altına alındı; 'saatlik' ibareleri 'uzlaştırma dönemi' yapısına uyarlandı.",
+          "analiz": "10 yılını dolduran veya ihtiyaç fazlası enerjisini toplayıcı üzerinden satacak lisanssız GES'ler için geçici/kesin kabul tutanağı zorunlu ön şart haline geldi.",
+          "aksiyon": "Toplayıcı anlaşması yapılacak santrallerin Bakanlık kabul tutanakları ve OSOS/PMUM sayaç kayıtları doğrulanmalı.",
+          "maddeler": [
+            "DUY Toplayıcı Kabul Şartı",
+            "İlişkili Tüketim Sayaç Kaydı",
+            "Uzlaştırma Dönemi Uyarlaması"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-2.pdf"
+        },
+        {
+          "id": "duy-2026-10-19-yanhizmet",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Elektrik Piyasası Yan Hizmetler Yönetmeliği (Talep Tarafı Katılımı — TTK & Esnek Yük Ödemeleri)",
+          "baslik": "Elektrik Piyasası Yan Hizmetler Yönetmeliğinde Değişiklik (Talep Tarafı Katılımı Ödemeleri ve ≤%10 Sapma Eşiği)",
+          "onceki": "Talep Tarafı Katılımı (TTK) hizmetinde toplayıcılara yapılacak kapasite ve aktivasyon ödemeleri ile sapma tolerans eşikleri eski yapıdaydı.",
+          "yeni": "TTK kapsamında toplayıcılara yapılacak kapasite + aktivasyon ödemeleri ve performans sapma eşikleri (≤%10 tam sağladı, %10–25 kısmi kesinti, ≥%25 katılmadı) yeniden düzenlendi.",
+          "analiz": "Aksaray Enerji gibi esnek madencilik yükü (174 kW+) ve BESS yöneten işletmeler için şebekenin puant saatlerinde yük düşürme talimatına ≤%10 sapmayla uyarak ek yan hizmet geliri elde etme fırsatı sunar.",
+          "aksiyon": "Esnek yük ve BESS tesislerinde toplayıcı üzerinden TTK yan hizmet katılım modeli değerlendirilmeli.",
+          "maddeler": [
+            "Yan Hizmetler TTK Ödeme Formülü",
+            "≤%10 Sapma Performans Eşiği"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-4.htm"
+        },
+        {
+          "id": "duy-2026-10-19-14907-14913",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405 · EPDK Karar No: 14907, 14908, 14910, 14911, 14913",
+          "tur": "Bağlı Tebliğ / Kurul Kararları Paketi",
+          "bagli_oldugu": "DUY ve Yan Hizmetler Yönetmeliği Uygulama Parametreleri (Vt,u = 100 TL/MWh, Sapma Katsayıları, DGP Limitleri, Reaktif Güç)",
+          "baslik": "EPDK 24.09.2026 Tarihli ve 14907, 14908, 14910, 14911, 14913 Sayılı Kurul Kararları (Vt,u = 100 TL/MWh, Sapma Toleransı & Reaktif Güç)",
+          "onceki": "Dengesizlik hesabındaki Vt,u parametresi, üretim planı sapma katsayıları ve reaktif güç yan hizmet anlaşma şartları eski tutarlara dayanıyordu.",
+          "yeni": "14907: Güneş/rüzgâr/depolama üretim planı sapma tolerans katsayıları yenilendi. 14908: DGP yük alma/atma raporlama istisnaları belirlendi. 14910: HES hariç DGP teklif fiyat sınırları güncellendi. 14911: Enerji dengesizlik tutarı hesabındaki Vt,u parametresi 100 TL/MWh oldu. 14913: Reaktif güç kontrolü yan hizmet anlaşma şartları düzenlendi.",
+          "analiz": "Toplayıcı portföyündeki GES'lerin ve piyasa katılımcılarının dengesizlik birim maliyetini (Vt,u = 100 TL/MWh) ve üretim tahmini sapma cezalarını doğrudan belirleyen parametre paketidir.",
+          "aksiyon": "Toplayıcı ve enerji satış sözleşmelerinde Vt,u = 100 TL/MWh dengesizlik maliyeti dikkate alınmalı.",
+          "maddeler": [
+            "Karar 14907 (Sapma)",
+            "Karar 14908 & 14910 (DGP)",
+            "Karar 14911 (Vt,u = 100 TL/MWh)",
+            "Karar 14913 (Reaktif)"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-9.pdf"
+        },
+        {
+          "id": "duy-2024-11-29-toplayici",
+          "tarih": "2024-11-29",
+          "yil": "2024",
+          "rg": "29.11.2024 · RG 32737 (Yürürlük: 01.01.2025)",
+          "tur": "Ana Yönetmelik",
+          "bagli_oldugu": "Elektrik Piyasasında Toplayıcılık Faaliyeti Yönetmeliği & DUY Entegrasyonu",
+          "baslik": "Elektrik Piyasasında Toplayıcılık Faaliyeti Yönetmeliği (Lisanssız GES ve Tüketim Tesislerinin Toplayıcı Portföyünde Birleştirilmesi)",
+          "onceki": "Türkiye elektrik piyasasında toplayıcılık (aggregation) kanunda tanımlanmış ancak bağımsız yönetmeliği ve lisanssız santral kabul şartları yayımlanmamıştı.",
+          "yeni": "Toplayıcı lisansı veya tedarik lisansı sahibi tüzel kişilerin; lisanslı/lisanssız üretim tesisleri, depolama tesisleri ve tüketim tesislerini (최대 2.000 MW portföy sınırına kadar) birleştirerek GÖP, GİP, DGP ve Yan Hizmetler piyasalarında yönetebilmesi sağlandı.",
+          "analiz": "10 yıllık YEKDEM süresi dolan lisanssız GES'lerin ve esnek yüklerin (madencilik/soğutma) piyasada en yüksek fiyattan değerlendirilmesini sağlayan ana yönetmeliktir.",
+          "aksiyon": "10 yılı dolan GES'ler ve esnek tüketim tesisleri için lisanslı toplayıcı teklifleri karşılaştırılmalı.",
+          "maddeler": [
+            "KÖK YÖNETMELİK (RG 32737)",
+            "2.000 MW Portföy Sınırı",
+            "Lisanssız GES & Esnek Yük Birleştirme"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2024/11/20241129-3.htm"
+        }
+      ]
+    },
+    {
+      "grup_id": "depolama-lisans-yonetmelik",
+      "ana_baslik": "Elektrik Piyasasında Depolama Faaliyetleri Yönetmeliği & Lisans Yönetmeliği",
+      "kok_rg": "09.05.2021 · RG 31479 (Depolama Yön.) · 02.11.2013 · RG 28809 (Lisans Yön.)",
+      "dayanak": "6446 Sayılı Elektrik Piyasası Kanunu Md. 5, Md. 7 ve Md. 14",
+      "kurum": "EPDK",
+      "bagli_teblig_ozet": "Müstakil Depolama Sermaye ve Teminat Kararı (EPDK 14912) · Depolamalı Elektrik Üretim Başvuruları Metodolojisi · Bütünleşik ve Tüketici BESS Kurulum Esasları",
+      "aciklama": "Gerek lisanssız GES/tüketim tesislerine bütünleşik batarya (BESS) kurulumunu gerekse lisanslı/müstakil depolama yatırımlarını, teminat/sermaye şartlarını ve mücbir sebep sınırlarını belirleyen mevzuat grubu.",
+      "kayitlar": [
+        {
+          "id": "dep-2026-10-19-yon",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Elektrik Piyasasında Depolama Faaliyetleri Yönetmeliği & Bağlantı Yön. Md. 14",
+          "baslik": "Elektrik Piyasasında Depolama Faaliyetleri Yönetmeliğinde Değişiklik (Aynı Ölçüm Noktasında Tüketici BESS Kurulumu & Otomatik Kesme)",
+          "onceki": "Tüketicilerin kendi tesislerinde anlaşma gücünün üzerinde batarya (BESS) kurulumunda teknik koruma şartları Bağlantı Yönetmeliği ile tam uyumlu değildi.",
+          "yeni": "Tüketiciler uygun bağlantı görüşü ve aynı ölçüm noktası şartıyla elektrik depolama tesisi kurabilir. Anlaşma gücünden yüksek kurulu güçte depolama kurmak isteyenler Bağlantı Yön. Md.14 kapsamındaki otomatik güç kontrol ve enerji kesme sistemini kurmakla yükümlüdür.",
+          "analiz": "Saatlik mahsuplaşma sonrası gündüz fazla GES üretimini bataryaya depolayıp akşam/gece puant saatlerde kullanmak isteyen sanayi, soğuk hava deposu ve tarımsal sulama tesisleri için BESS kurulum yolu tamamen açıldı.",
+          "aksiyon": "GES + BESS tek hat projelerinde Bağlantı Yön. Md.14 uyumlu otomatik güç kontrol ünitesi ve enerji kesme rölesi zorunlu olarak projelendirilmeli.",
+          "maddeler": [
+            "Aynı Ölçüm Noktasında Tüketici BESS",
+            "Anlaşma Gücü Üstü Md.14 Otomatik Kesme"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-5.htm"
+        },
+        {
+          "id": "dep-2026-10-19-lisans-14912",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405 (ve EPDK Karar No: 14912)",
+          "tur": "Değişiklik Yönetmeliği + Kurul Kararı",
+          "bagli_oldugu": "Elektrik Piyasası Lisans Yönetmeliği & EPDK 14912 Sayılı Müstakil Depolama Sermaye/Teminat Kararı",
+          "baslik": "Lisans Yönetmeliğinde Değişiklik ve EPDK 14912 Sayılı Karar (Depolamada 'Güç' Esası, Mücbir Sebep Sınırı ve Teminat İadesi Şartı)",
+          "onceki": "Depolamalı tesis lisans ve teminat hesaplarında 'kapasite (MWh)' ifadesi belirsizlik yaratıyordu; kısmi kabullerde teminat iadesi talep edilebiliyordu; uzayan idari engeller mücbir sebep sayılıyordu.",
+          "yeni": "1) Lisans Yön.: Depolama tesislerinde 'kapasite' yerine 'güç (MWm/MWe)' kavramı esas alındı. 2) Üretim tesisinin tamamı işletmeye geçmeden teminat iadesi yapılmaz. 3) Süreklilik kazanan engeller mücbir sebep sayılmaz. 4) Karar 14912: Müstakil elektrik depolama tesisleri için asgari sermaye ve teminat tutarları revize edildi.",
+          "analiz": "Hem lisanslı hem lisanssız projelerde 'süreklilik kazanan idari/saha engellerinin mücbir sebep sayılmaması' ilkesi kritik bir emsal oluşturmaktadır; proje izin takvimi geciktirilmemelidir.",
+          "aksiyon": "Kabul tamamlanmadan teminat iadesi planlanmamalı; ÇED/imar izinleri mücbir sebebe güvenilmeden süresi içinde bitirilmeli.",
+          "maddeler": [
+            "Depolamada Güç (MW) Esası",
+            "Tam Kabul Öncesi Teminat İadesi Yok",
+            "Sürekli Engel ≠ Mücbir Sebep",
+            "EPDK Karar 14912"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-3.htm"
+        },
+        {
+          "id": "dep-2022-11-19-yon",
+          "tarih": "2022-11-19",
+          "yil": "2022",
+          "rg": "19.11.2022 · RG 32018",
+          "tur": "Değişiklik Yönetmeliği + Metodoloji Tebliği",
+          "bagli_oldugu": "Depolama Faaliyetleri Yönetmeliği & Lisans Yönetmeliği (Yarışmasız Depolamalı GES/RES Başvuruları)",
+          "baslik": "Depolamalı Elektrik Üretim Yatırımlarına İlişkin Yönetmelik Değişiklikleri (Yarışmasız Depolamalı GES/RES Ön Lisans Süreci)",
+          "onceki": "Yeni GES/RES lisans başvuruları sadece YEKA veya ölçüm/yarışma yöntemiyle yapılabiliyordu.",
+          "yeni": "Taahhüt edilen depolama gücü kadar yarışmasız ve ölçüm şartı aranmaksızın depolamalı GES/RES ön lisans başvurusu yapılabilmesi ve YEKDEM alım garantisi sağlandı.",
+          "analiz": "Türkiye genelinde trafo merkezi kapasitelerinin büyük bölümünün depolamalı GES/RES projelerine tahsis edilmesine yol açan düzenlemedir.",
+          "aksiyon": "İletim seviyesi (154 kV) trafo merkezi kapasite analizlerinde depolamalı ön lisans tahsisleri dikkate alınmalı.",
+          "maddeler": [
+            "Yarışmasız Depolamalı GES/RES",
+            "1:1 Depolama Güç Şartı",
+            "YEKDEM Alım Garantisi"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2022/11/20221119-6.htm"
+        }
+      ]
+    },
+    {
+      "grup_id": "osb-endustri-yonetmelik",
+      "ana_baslik": "Organize Sanayi Bölgeleri (OSB) ve Endüstri Bölgelerinin Elektrik Piyasası Faaliyetlerine İlişkin Yönetmelik",
+      "kok_rg": "24.04.2024 · RG 32526 (İlk Yönetmelik: 14.03.2014 · RG 28941)",
+      "dayanak": "6446 Sayılı Elektrik Piyasası Kanunu Md. 13 ve 4562 Sayılı OSB Kanunu",
+      "kurum": "EPDK / OSBÜK / TEİAŞ",
+      "bagli_teblig_ozet": "OSB İçi Lisanssız GES Bağlantı ve Dağıtım Bedeli Usul/Esasları · 19.10.2026 DGP Acil Durum Yük Atma ve TEİAŞ Veri Paylaşım Yükümlülüğü",
+      "aciklama": "OSB ve Endüstri Bölgeleri içindeki sanayi tesislerinin çatı ve arazi lisanssız GES başvuruları, OSB dağıtım lisansı yetkileri, SCADA uzaktan yük atma zorunluluğu ve TEİAŞ veri paylaşım kurallarını düzenleyen yönetmelik.",
+      "kayitlar": [
+        {
+          "id": "osb-2026-10-19-yon",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "OSB ve Endüstri Bölgelerinin Elektrik Piyasası Faaliyetlerine İlişkin Yönetmelik (Acil Durum Yük Atma & 6446 Md.16 Ceza)",
+          "baslik": "OSB ve Endüstri Bölgelerinin Elektrik Piyasası Faaliyetlerine İlişkin Yönetmelikte Değişiklik (OSB İçi Lisanssız GES Yük Atma Zorunluluğu)",
+          "onceki": "OSB dağıtım şebekesi içindeki lisanssız çatı GES'lere TEİAŞ/tedarikçi kaynaklı acil durum yük atma talimatlarının uygulanmasında yetki ve yaptırım boşluğu vardı.",
+          "yeni": "OSB ve Endüstri Bölgeleri, kendi şebekelerindeki lisanssız GES'ler için iletilen acil durum yük atma talimatlarını eksiksiz uygulamak ve sonuçlarını görevli tedarik şirketi ile TEİAŞ'a bildirmek zorundadır; aksi halde OSB tüzel kişiliğine 6446 sayılı Kanun Md.16 uyarınca idari para cezası uygulanır.",
+          "analiz": "OSB yönetimleri 6446 Md.16 idari para cezası yememek için kendi bölgelerindeki tüm fabrika çatı GES'lerine uzaktan izleme/kesme (SCADA/RTU) şartını ve bağlantı anlaşması revizyonunu zorunlu tutacaktır.",
+          "aksiyon": "OSB içindeki çatı GES müşterilerimizin OSB Elektrik Müdürlüğü ile SCADA kesici kontrol sinyali ve 60 günlük anlaşma revizyonu takip edilmeli.",
+          "maddeler": [
+            "OSB İçi Lisanssız GES Yük Atma",
+            "TEİAŞ Veri Paylaşım Zorunluluğu",
+            "6446 Md.16 İdari Para Cezası"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-7.htm"
+        },
+        {
+          "id": "osb-2024-04-24-kok",
+          "tarih": "2024-04-24",
+          "yil": "2024",
+          "rg": "24.04.2024 · RG 32526",
+          "tur": "Ana Yönetmelik",
+          "bagli_oldugu": "Kök Yönetmelik (14.03.2014 · RG 28941 Yönetmeliğini Yenileyen Metin)",
+          "baslik": "Organize Sanayi Bölgeleri ve Endüstri Bölgelerinin Elektrik Piyasası Faaliyetlerine İlişkin Yönetmelik",
+          "onceki": "2014 tarihli yönetmelik sadece OSB'leri kapsıyordu; Endüstri Bölgeleri ve OSB içi lisanssız GES kapasite/onay süreçleri güncel değildi.",
+          "yeni": "Endüstri bölgeleri de yönetmelik kapsamına alındı; OSB içi katılımcıların lisanssız üretim tesisi bağlantı görüşü, çağrı mektubu ve dağıtım sistem kullanım bedeli esasları yeniden belirlendi.",
+          "analiz": "Aksaray OSB ve çevre OSB'lerdeki sanayi çatı GES projelerinde bağlantı görüşü ve kabul süreçlerinin yürütüldüğü ana yönetmeliktir.",
+          "aksiyon": "OSB içi GES projelerinde trafo kapasitesi ve AG/OG bağlantı onayı bu yönetmelik hükümlerine göre alınır.",
+          "maddeler": [
+            "KÖK YÖNETMELİK (RG 32526)",
+            "OSB & Endüstri Bölgesi Dağıtım Lisansı",
+            "Katılımcı Lisanssız GES Esasları"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2024/04/20240424-2.htm"
+        }
+      ]
+    },
+    {
+      "grup_id": "trets-yekg-iklim",
+      "ana_baslik": "Türkiye Emisyon Ticaret Sistemi (TR ETS) Piyasası & YEK-G Yönetmelikleri",
+      "kok_rg": "21.10.2026 · RG 33407 (TR ETS Piyasa) · 27.08.2026 · RG 33353 (TR ETS İDB) · 14.11.2020 · RG 31304 (YEK-G)",
+      "dayanak": "7552 Sayılı İklim Kanunu Md. 10 (02.07.2025 · RG 32944) ve 6446 Sayılı Kanun Md. 11",
+      "kurum": "EPDK / İklim Değişikliği Başkanlığı (İDB) / EPİAŞ / Takasbank",
+      "bagli_teblig_ozet": "Sera Gazı Emisyonlarının Takibi Hakkında Yönetmelik & Doğrulama Tebliğleri · EPİAŞ ETSPYS & İKS Piyasa Usul ve Esasları · YEK-G Piyasası Usul ve Esasları",
+      "aciklama": "EPİAŞ ve Takasbank işletiminde kurulan Türkiye Karbon Piyasası (TR ETS), Birincil İhale (TRF), Spot Tahsisat Piyasası, +%50 Ek Rezerv İhalesi, 2026 Tamamlayıcı Fiyat Mekanizması ve ihracatçı sanayinin CBAM/YEK-G yeşil enerji belgelendirme kurallarını kapsayan mevzuat grubu.",
+      "kayitlar": [
+        {
+          "id": "ets-2026-10-21-piyasa",
+          "tarih": "2026-10-21",
+          "yil": "2026",
+          "rg": "21.10.2026 · RG 33407",
+          "tur": "Ana Yönetmelik (55 Madde)",
+          "bagli_oldugu": "7552 Sayılı İklim Kanunu Md. 10 & TR ETS Yönetmeliği (RG 33353) Piyasa İşletim Yönetmeliği",
+          "baslik": "Türkiye Emisyon Ticaret Sistemi (TR ETS) Piyasasının İşletilmesine İlişkin Yönetmelik (EPİAŞ ETSPYS, İKS, Birincil İhale, Spot Piyasa & +%50 Ek Rezerv)",
+          "onceki": "7552 sayılı İklim Kanunu ve 27.08.2026 tarihli TR ETS Yönetmeliği yayımlanmış ancak EPİAŞ ve Takasbank nezdinde karbon tahsisatlarının ihale, spot ticaret, teminat formülleri ve uzlaştırma kuralları belirlenmemişti.",
+          "yeni": "1) 1 Tahsisat = 1 tCO2e, 1 Lot = 100 tahsisat (0,50 TL fiyat adımı). 2) Birincil piyasada tek fiyat (TRF) ihalesi; İkincil piyasada ayda en az 4 iş günü (10:00–15:00) Spot Tahsisat Piyasası ve 10:00–17:00 İkili Anlaşma (17:05 transfer). 3) Md.19: Açığı olan tesislere son 3 ay ortalamasının +%50 fazlası taban fiyatla Ek Rezerv İhalesi. 4) Md.20 & Geçici Md.2: 2026 emisyonları için Tamamlayıcı Tahsisat Fiyatı. 5) Md.35–44: Takasbank teminat formülleri (TT = ∑TİHT + ∑TİPT) ve T+2 iş günü fatura ödemesi.",
+          "analiz": "Termik santrallerin karbon maliyeti üzerinden EPİAŞ PTF taban ve puant fiyatlarını yukarı taşır; sanayi tesisleri için öz tüketim GES + BESS + YEK-G yatırımını ve boşa çıkan ücretsiz tahsisatların (Md.11) EPİAŞ Spot Piyasasında satışını doğrudan gelir kalemine dönüştürür.",
+          "aksiyon": "Sanayi müşterilerine sunulan GES tekliflerine TR ETS ücretsiz tahsisat satışı ve +%50 Ek Rezerv cezasından korunma fizibilitesi eklenmeli.",
+          "maddeler": [
+            "MADDE 6–8 (ETSPYS & İKS)",
+            "MADDE 12–18 (Birincil İhale TRF)",
+            "MADDE 19 (+%50 Ek Rezerv)",
+            "MADDE 20 & GEÇİCİ MD.2",
+            "MADDE 21–31 (Spot & OTC)",
+            "MADDE 35–44 (Teminat & T+2 Fatura)"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261021.htm"
+        },
+        {
+          "id": "ets-2026-10-19-yekg",
+          "tarih": "2026-10-19",
+          "yil": "2026",
+          "rg": "19.10.2026 · RG 33405",
+          "tur": "Değişiklik Yönetmeliği",
+          "bagli_oldugu": "Yenilenebilir Enerji Kaynaklarının Belgelendirilmesi ve Desteklenmesine İlişkin (YEK-G) Yönetmelik",
+          "baslik": "YEK-G Yönetmeliğinde Değişiklik Yapılmasına Dair Yönetmelik (Uzlaştırma Dönemi Uyumu & Şeffaflık Entegrasyonu)",
+          "onceki": "29.12.2025 tarihli YEK-G düzenlemesi çerçevesinde yürütülüyordu.",
+          "yeni": "19 Ekim 2026 mevzuat paketiyle uyumlu olarak YEK-G belgelendirme, uzlaştırma dönemi yapısı ve EPİAŞ Şeffaflık Platformu (Karar 14968) entegrasyonu güncellendi.",
+          "analiz": "İhracatçı sanayicilerin AB Sınırda Karbon Düzenleme Mekanizması (CBAM) ve TR ETS kapsamında Dolaylı Emisyon (Kapsam-2) sıfırlaması için YEK-G sertifikası ve öz tüketim GES talebini güçlendirir.",
+          "aksiyon": "GES yatırımcılarının EPİAŞ YEK-G sistemi kayıtları ve sertifika ihraç süreçleri aktif tutulmalı.",
+          "maddeler": [
+            "YEK-G Uzlaştırma Dönemi Uyumu",
+            "EPİAŞ Şeffaflık Entegrasyonu"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/10/20261019-8.pdf"
+        },
+        {
+          "id": "ets-2026-08-27-idb",
+          "tarih": "2026-08-27",
+          "yil": "2026",
+          "rg": "27.08.2026 · RG 33353",
+          "tur": "Ana Yönetmelik + İDB Tebliğleri",
+          "bagli_oldugu": "7552 Sayılı İklim Kanunu & Sera Gazı Emisyonlarının Takibi Yönetmeliği (MRV Tebliğleri)",
+          "baslik": "Türkiye Emisyon Ticaret Sistemi (TR ETS) Yönetmeliği — İklim Değişikliği Başkanlığı (Sera Gazı İzni, Ücretsiz Tahsisat ve Teslim Yükümlülüğü)",
+          "onceki": "17.05.2014 tarihli ve 29003 sayılı Sera Gazı Emisyonlarının Takibi Hakkında Yönetmelik ve bağlı İoka/Doğrulama Tebliğleri kapsamında sadece izleme ve raporlama (MRV) yapılıyordu; tahsisat teslim zorunluluğu yoktu.",
+          "yeni": "Kapsama giren sanayi ve enerji tesisleri için sera gazı emisyon izni alma, doğrulanmış yıllık emisyon raporu sunma, ücretsiz tahsisat dağıtımı ve her yıl tahsisat teslim (itfa) yükümlülüğü getirildi.",
+          "analiz": "21.10.2026 tarihli EPİAŞ TR ETS Piyasa Yönetmeliğinin (RG 33407) idari üst yönetmeliğidir; doğrulanmış emisyon raporunu sunmayan tesisin İKS hesabının bloke edilmesi (RG 33407 Md.4/8) doğrudan bu yönetmeliğe bağlıdır.",
+          "aksiyon": "ETS kapsamındaki sanayi müşterilerinin MRV doğrulama takvimi ve İKS hesap açılışı birlikte takip edilmeli.",
+          "maddeler": [
+            "TR ETS İdari Yönetmeliği (RG 33353)",
+            "Sera Gazı Emisyon İzni",
+            "Ücretsiz Tahsisat & Teslim (İtfa)"
+          ],
+          "url": "https://www.resmigazete.gov.tr/eskiler/2026/08/20260827.htm"
+        }
+      ]
     }
   ]
 }

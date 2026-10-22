@@ -148,95 +148,134 @@ def _form_inputs_coz(html_text: str) -> dict[str, str]:
     return out
 
 
+def _tr_ascii(s: str) -> str:
+    return (
+        s.replace("İ", "i").replace("ı", "i")
+        .replace("Ğ", "G").replace("ğ", "g")
+        .replace("Ü", "U").replace("ü", "u")
+        .replace("Ş", "S").replace("ş", "s")
+        .replace("Ö", "O").replace("ö", "o")
+        .replace("Ç", "C").replace("ç", "c")
+    )
+
+
+def _aday_ciftler(kul: str, sifre: str) -> list[tuple[str, str]]:
+    k_norm = _tr_ascii(kul).lower()
+    kul_list = list(dict.fromkeys([kul, k_norm]))
+    sf_norm_i = sifre.replace("İ", "i").replace("ı", "i")
+    sf_norm_I = sifre.replace("İ", "I").replace("ı", "i")
+    sf_ascii = _tr_ascii(sifre)
+    sf_list = list(dict.fromkeys([
+        sifre,
+        sf_norm_i,
+        sf_norm_I,
+        sf_ascii,
+        sifre.swapcase(),
+        sf_norm_i.swapcase(),
+        sf_ascii.swapcase(),
+        sifre.lower(),
+        sf_norm_i.lower(),
+        sifre.capitalize(),
+        sf_norm_i.capitalize(),
+    ]))
+    out = []
+    for k in kul_list:
+        for sf in sf_list:
+            if (k, sf) not in out:
+                out.append((k, sf))
+    return out[:10]
+
+
 def _otomatik_giris(kok: Path) -> requests.Session:
     """Fronius Solar.web (login.fronius.com WSO2 OIDC) üzerinden kullanıcı adı ve şifreyle otomatik oturum açar."""
     kul, sifre, cerez = _kimlik()
-    s = requests.Session()
-    s.headers.update({
-        "User-Agent": UA,
-        "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
-    })
     if not (kul and sifre):
+        s = requests.Session()
+        s.headers.update({"User-Agent": UA, "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"})
         if _cerez_yukle(s, kok):
             return s
         raise RuntimeError("Fronius kullanıcı/şifre veya çerez tanımlı değil")
 
-    # 1. Önce ana sayfayı ziyaret et (SolarWeb_BrowserId vb. çerezler oluşsun), ardından ExternalLogin sayfasını aç
-    s.get("https://www.solarweb.com/", timeout=20)
-    r0 = s.get("https://www.solarweb.com/Account/ExternalLogin", timeout=30, allow_redirects=True)
-    r0.raise_for_status()
+    son_hata = ""
+    for k_try, sf_try in _aday_ciftler(kul, sifre):
+        s = requests.Session()
+        s.headers.update({
+            "User-Agent": UA,
+            "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+        })
+        r0 = s.get("https://www.solarweb.com/Account/ExternalLogin", timeout=30, allow_redirects=True)
+        r0.raise_for_status()
 
-    if "login.fronius.com" in r0.url or "loginForm" in r0.text:
-        lf_m = re.search(r'<form[^>]+id=["\']loginForm["\'][^>]*>(.*?)</form>', r0.text, re.I | re.S)
-        form_html = lf_m.group(1) if lf_m else r0.text
-        inputs = _form_inputs_coz(form_html)
-        act_m = re.search(r'<form[^>]+action=["\']([^"\']*commonauth[^"\']*)["\']', r0.text, re.I)
-        post_url = urljoin(r0.url, _html.unescape(act_m.group(1) if act_m else "../commonauth"))
+        if "login.fronius.com" in r0.url or "loginForm" in r0.text:
+            lf_m = re.search(r'<form[^>]+id=["\']loginForm["\'][^>]*>(.*?)</form>', r0.text, re.I | re.S)
+            form_html = lf_m.group(1) if lf_m else r0.text
+            inputs = _form_inputs_coz(form_html)
+            act_m = re.search(r'<form[^>]+action=["\']([^"\']*commonauth[^"\']*)["\']', r0.text, re.I)
+            post_url = urljoin(r0.url, _html.unescape(act_m.group(1) if act_m else "../commonauth"))
+            sdk = inputs.get("sessionDataKey", "")
 
-        # WSO2 logincontext kontrolü
-        sdk = inputs.get("sessionDataKey", "")
-        if sdk:
-            try:
-                s.get(
-                    "https://login.fronius.com/logincontext",
-                    params={"sessionDataKey": sdk, "relyingParty": "mf_o9iTAyKemNLQTa6Sp6HYonCIa", "tenantDomain": inputs.get("tenantDomain", "carbon.super")},
-                    headers={"X-Requested-With": "XMLHttpRequest", "Referer": r0.url},
-                    timeout=15,
-                )
-            except Exception:
-                pass
+            form_data = {
+                "authenticators": inputs.get("authenticators", "SAMLSSOAuthenticator:Fronius Login;FroniusBasicAuthenticator:LOCAL"),
+                "tenantDomain": inputs.get("tenantDomain", "carbon.super"),
+                "allLoginParams": inputs.get("allLoginParams", ""),
+                "usernameUserInput": k_try,
+                "username": k_try,
+                "password": sf_try,
+                "sessionDataKey": sdk,
+            }
 
-        form_data = {
-            "authenticators": inputs.get("authenticators", "SAMLSSOAuthenticator:Fronius Login;FroniusBasicAuthenticator:LOCAL"),
-            "tenantDomain": inputs.get("tenantDomain", "carbon.super"),
-            "allLoginParams": inputs.get("allLoginParams", ""),
-            "usernameUserInput": kul,
-            "username": kul,
-            "password": sifre,
-            "sessionDataKey": sdk,
-        }
+            r1 = s.post(
+                post_url,
+                data=form_data,
+                headers={"Referer": r0.url, "Origin": "https://login.fronius.com"},
+                timeout=35,
+                allow_redirects=True,
+            )
+            r1.raise_for_status()
 
-        r1 = s.post(
-            post_url,
-            data=form_data,
-            headers={"Referer": r0.url, "Origin": "https://login.fronius.com"},
-            timeout=35,
-            allow_redirects=True,
-        )
-        r1.raise_for_status()
+            cur_r = r1
+            basarisiz = False
+            for _ in range(4):
+                if "authFail" in cur_r.url or "authFailure=true" in cur_r.url or "retry.do" in cur_r.url:
+                    from urllib.parse import parse_qs, urlparse
+                    qs = parse_qs(urlparse(cur_r.url).query)
+                    f_msg = (qs.get("authFailureMsg") or qs.get("errorCode") or ["retry" if "retry.do" in cur_r.url else ""])[0]
+                    son_hata = f_msg
+                    basarisiz = True
+                    break
+                fm = re.search(r'<form[^>]+action=["\']([^"\']+)["\'][^>]*>(.*?)</form>', cur_r.text, re.I | re.S)
+                if not fm:
+                    break
+                f_action = _html.unescape(fm.group(1))
+                if "loginForm" in fm.group(0) or "commonauth" in f_action:
+                    basarisiz = True
+                    son_hata = "loginForm_dondu"
+                    break
+                f_url = urljoin(cur_r.url, f_action)
+                f_inputs = _form_inputs_coz(fm.group(2))
+                if not f_inputs:
+                    break
+                cur_r = s.post(f_url, data=f_inputs, headers={"Referer": cur_r.url}, timeout=35, allow_redirects=True)
+                cur_r.raise_for_status()
 
-        # OIDC form_post veya ara onay formlarını (ExternalLoginCallback vb.) takip et
-        cur_r = r1
-        for _ in range(4):
-            if "authFail" in cur_r.url or "authFailure=true" in cur_r.url:
-                from urllib.parse import parse_qs, urlparse
-                qs = parse_qs(urlparse(cur_r.url).query)
-                f_msg = (qs.get("authFailureMsg") or qs.get("errorCode") or [""])[0]
-                err_div = re.search(r'id=["\']error-msg["\'][^>]*>(.*?)</div>', cur_r.text, re.I | re.S)
-                err_txt = re.sub(r"<[^>]+>", " ", err_div.group(1)).strip() if err_div else ""
-                ipucu = f"kul_len={len(kul)},at={'@' in kul},sf_len={len(sifre)},msg={f_msg},err={err_txt[:60]}"
-                raise RuntimeError(f"Fronius girişi reddedildi ({ipucu})")
-            fm = re.search(r'<form[^>]+action=["\']([^"\']+)["\'][^>]*>(.*?)</form>', cur_r.text, re.I | re.S)
-            if not fm:
-                break
-            f_action = _html.unescape(fm.group(1))
-            if "loginForm" in fm.group(0) or "commonauth" in f_action:
-                raise RuntimeError(f"Fronius girişi tamamlanamadı (url={cur_r.url[:80]})")
-            f_url = urljoin(cur_r.url, f_action)
-            f_inputs = _form_inputs_coz(fm.group(2))
-            if not f_inputs:
-                break
-            cur_r = s.post(f_url, data=f_inputs, headers={"Referer": cur_r.url}, timeout=35, allow_redirects=True)
-            cur_r.raise_for_status()
+            if basarisiz:
+                continue
 
-    # Analiz grafik sayfasını bir kez ziyaret ederek Solar.web çerezlerini pekiştir
-    try:
-        s.get(f"https://www.solarweb.com/Chart/AnalysisChart?pvSystemId={PV_SYSTEM_ID}", timeout=25)
-    except Exception:
-        pass
+        # Analiz grafik sayfasını ziyaret ederek Solar.web çerezlerini pekiştir
+        try:
+            s.get(f"https://www.solarweb.com/Chart/AnalysisChart?pvSystemId={PV_SYSTEM_ID}", timeout=25)
+        except Exception:
+            pass
+        _cerez_kaydet(s, kok)
+        return s
 
-    _cerez_kaydet(s, kok)
-    return s
+    tr_harfler = set("İıĞğÜüŞşÖöÇç")
+    ipucu = (
+        f"kul(len={len(kul)},up={sum(c.isupper() for c in kul)},tr={any(c in tr_harfler for c in kul)}) "
+        f"sf(len={len(sifre)},up={sum(c.isupper() for c in sifre)},lo={sum(c.islower() for c in sifre)},"
+        f"dg={sum(c.isdigit() for c in sifre)},tr={any(c in tr_harfler for c in sifre)}) msg={son_hata}"
+    )
+    raise RuntimeError(f"Fronius girişi reddedildi: {ipucu}")
 
 
 def _oturum_al(kok: Path, yenile: bool = False) -> requests.Session:

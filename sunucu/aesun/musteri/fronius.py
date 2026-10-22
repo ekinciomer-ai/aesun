@@ -169,7 +169,13 @@ def _otomatik_giris(kok: Path) -> requests.Session:
         browser = p.chromium.launch(
             executable_path=exec_path,
             headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-blink-features=AutomationControlled"],
+            args=[
+                "--headless=new",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-blink-features=AutomationControlled",
+                "--window-size=1280,800",
+            ],
         )
         try:
             ctx = browser.new_context(
@@ -177,7 +183,6 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                 locale="tr-TR",
                 viewport={"width": 1280, "height": 800},
             )
-            ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
             page = ctx.new_page()
             page.goto("https://www.solarweb.com/Account/ExternalLogin", wait_until="networkidle", timeout=45000)
             page.wait_for_timeout(1000)
@@ -188,7 +193,7 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                 page.goto(page.url + f"{sep}reCaptcha=true", wait_until="networkidle", timeout=45000)
                 page.wait_for_timeout(1500)
 
-            for tur_no in (1, 2):
+            for tur_no in (1,):
                 if "solarweb.com" in page.url and "login.fronius.com" not in page.url and "ExternalLogin" not in page.url:
                     break
                 if page.locator("#usernameUserInput").count() == 0:
@@ -213,16 +218,19 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                             break
                         page.wait_for_timeout(500)
 
-                # Kullanıcı adı ve şifreyi doldur (focusin tetikler)
-                page.mouse.move(300, 300)
+                # İnsan benzeri fare hareketi + kullanıcı adı ve şifre doldurma (trusted focusin tetikler)
+                page.mouse.move(240, 260, steps=8)
+                page.mouse.move(480, 340, steps=8)
                 page.click("#usernameUserInput")
                 page.fill("#usernameUserInput", kul)
+                page.wait_for_timeout(300)
                 page.click("#password")
                 page.fill("#password", sifre)
 
                 if frc_var:
-                    son_tik = -5
-                    for adim in range(70):
+                    son_tik = -10
+                    son_prog = ""
+                    for adim in range(240):  # en çok 120 sn bekle
                         bilgi = page.evaluate("""() => {
                             const el = document.querySelector("[name='frc-captcha-response']");
                             const val = el ? el.value : '';
@@ -237,30 +245,32 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                         val = bilgi.get("val", "")
                         if not durum_iz or durum_iz[-1] != st:
                             durum_iz.append(st)
+                        if st == "solving" and adim % 10 == 0:
+                            try:
+                                for fr in page.frames:
+                                    if "frcapi.com" in fr.url and "agent" in fr.url:
+                                        pi = fr.evaluate("() => window.agent && window.agent.power ? window.agent.power.info() : null")
+                                        if pi and pi.get("requests"):
+                                            rq = pi["requests"][0]
+                                            son_prog = f"{round(rq.get('value',0)/1e6,1)}/{round(rq.get('request',0)/1e6,1)}M(w={pi.get('numSolvers',{}).get('active')})"
+                                        elif pi and pi.get("errors"):
+                                            son_prog = f"err:{pi['errors']}"
+                            except Exception:
+                                pass
                         if st == "completed" or (val and not str(val).startswith(".")):
                             frc_cozuldu = True
                             break
-                        if st in ("unactivated", "activated", "expired", "error") and (adim - son_tik) >= 6:
+                        # Yalnız 3 sn boyunca hala unactivated/activated/expired/error ise gerçek fare tıklaması yap
+                        if st in ("unactivated", "activated", "expired", "error") and adim >= 6 and (adim - son_tik) >= 12:
                             son_tik = adim
                             try:
-                                page.evaluate("""() => {
-                                    if (window.frcaptcha && window.frcaptcha.widgets) {
-                                        Array.from(window.frcaptcha.widgets.values()).forEach(w => {
-                                            if (w.trigger) w.trigger('programmatic');
-                                        });
-                                    }
-                                }""")
-                            except Exception:
-                                pass
-                            try:
-                                btn = page.frame_locator("iframe.frc-i-widget").locator("button.button, .main").first
-                                if btn.count() > 0:
-                                    btn.click(timeout=2000, force=True)
+                                btn = page.frame_locator("iframe.frc-i-widget").locator("button.button").first
+                                btn.click(timeout=2000)
                             except Exception:
                                 pass
                         page.wait_for_timeout(500)
 
-                iz_not.append(f"t{tur_no}:frc={int(frc_var)}/{int(frc_cozuldu)}({'-'.join(durum_iz)})")
+                iz_not.append(f"t{tur_no}:frc={int(frc_var)}/{int(frc_cozuldu)}({'-'.join(durum_iz)}{' ' + son_prog if son_prog else ''})")
 
                 with page.expect_navigation(wait_until="domcontentloaded", timeout=40000):
                     page.click("#login-button")

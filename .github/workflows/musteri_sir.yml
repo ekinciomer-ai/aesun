@@ -15,7 +15,7 @@ jobs:
           SIRLAR: ${{ toJSON(secrets) }}
         run: |
           set -euo pipefail
-          ENV=$(printf '%s' "$SIRLAR" | python3 -c "import sys,json; s=json.load(sys.stdin); e=['']+['_%d'%i for i in range(2,10)]; print(''.join('SOLARMAN_KULLANICI%s=%s\nSOLARMAN_SIFRE%s=%s\n'%(x,s['SOLARMAN_KULLANICI'+x],x,s['SOLARMAN_SIFRE'+x]) for x in e if s.get('SOLARMAN_KULLANICI'+x) and s.get('SOLARMAN_SIFRE'+x)),end='')")
+          ENV=$(printf '%s' "$SIRLAR" | python3 -c "import sys,json; s=json.load(sys.stdin); e=sorted({k[18:] for k in s if k.startswith('SOLARMAN_KULLANICI')}); print(''.join('SOLARMAN_KULLANICI%s=%s\nSOLARMAN_SIFRE%s=%s\n'%(x,s['SOLARMAN_KULLANICI'+x],x,s['SOLARMAN_SIFRE'+x]) for x in e if s.get('SOLARMAN_KULLANICI'+x) and s.get('SOLARMAN_SIFRE'+x)),end='')")
           [ -n "$ENV" ] || { echo "::error::SOLARMAN_KULLANICI / SOLARMAN_SIFRE sırları eksik"; exit 1; }
           echo "::notice::hesap sayısı: $(printf '%s' "$ENV" | grep -c '^SOLARMAN_KULLANICI')"
           mkdir -p ~/.ssh

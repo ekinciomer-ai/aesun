@@ -17,9 +17,9 @@ import requests
 
 KOK = Path(os.environ.get("MUSTERI_VERI", "/musteri"))
 TABAN = os.environ.get("SOLARMAN_TABAN", "https://globalpro.solarmanpv.com")
-# Birden çok müşteri hesabı: SOLARMAN_KULLANICI/SOLARMAN_SIFRE, SOLARMAN_KULLANICI_2/SOLARMAN_SIFRE_2, … (_9'a kadar)
-HESAPLAR = [(e, os.environ.get("SOLARMAN_KULLANICI" + e, ""), os.environ.get("SOLARMAN_SIFRE" + e, ""))
-            for e in [""] + [f"_{i}" for i in range(2, 10)] if os.environ.get("SOLARMAN_KULLANICI" + e)]
+# Birden çok müşteri hesabı: SOLARMAN_KULLANICI/SOLARMAN_SIFRE, SOLARMAN_KULLANICI_TATMAK/SOLARMAN_SIFRE_TATMAK, _2.._9 vb. tüm sonekler
+HESAPLAR = [(k[18:], v, os.environ.get("SOLARMAN_SIFRE" + k[18:], ""))
+            for k, v in sorted(os.environ.items()) if k.startswith("SOLARMAN_KULLANICI") and v]
 ARALIK = int(os.environ.get("MUSTERI_ARALIK_SN", "300"))
 TR = timezone(timedelta(hours=3))
 

@@ -113,6 +113,24 @@ async function grafikSayac(s) {
       const r0 = await al(`${API}/${s.sid}/yil_${y - 1}.json`, b) || [], r1 = await al(`${API}/${s.sid}/yil_${y}.json`, b) || [];
       const r = [...r0.filter(d => d.ay > n.getMonth() + 1).map(d => ({ ...d, y: y - 1 })), ...r1.map(d => ({ ...d, y }))];
       el.innerHTML = cubukN(r.map(d => ({ e: AYLAR[d.ay - 1] + ' ' + d.y, k: AYLAR[d.ay - 1] })), ser(r), 'Son 12 ay üretim ve tüketim');
+    } else if (GRAF === 'osf07') {
+      const r = await al(`${API}/${s.sid}/osf07_${y}${a}.json`, b);
+      if (!r || !r.saatler || !r.saatler.length) { el.innerHTML = '<div class="bos">OSF-07 saatlik tablo verisi henüz oluşmadı.</div>'; return; }
+      window._SON_OSF07 = { s, r };
+      const gunBaslik = Array.from({ length: 31 }, (_, i) => `<th>${i + 1}</th>`).join('');
+      const satirlar = r.saatler.map(st => `<tr><td style="white-space:nowrap;font-weight:600">${esc(st.saat)}</td><td>${esc(st.yon)}</td>`
+        + (st.gunler || []).map(v => `<td>${v ? nf(v, 2) : '0'}</td>`).join('')
+        + `<td style="font-weight:600">${nf(st.toplam, 2)}</td></tr>`).join('');
+      const topV = (r.gun_toplam_veris || []).map(v => `<td><b>${v ? nf(v, 2) : '0'}</b></td>`).join('');
+      const topC = (r.gun_toplam_cekis || []).map(v => `<td><b>${v ? nf(v, 2) : '0'}</b></td>`).join('');
+      el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">`
+        + `<span class="alt"><b>FORM NO: OSF.07.02</b> · Dengeleme Birimi Sayaç Değerleri Formu (${esc(r.donem || a + '/' + y)})</span>`
+        + `<button onclick="osf07CsvIndir()" style="padding:6px 12px;border-radius:7px;border:1px solid #CCD2DA;background:#fff;cursor:pointer;font-weight:600">⬇ OSF.07.02 CSV İndir</button></div>`
+        + `<div style="overflow-x:auto"><table style="font-size:12px"><tr><th>Saat/Gün</th><th>Yön</th>${gunBaslik}<th>Toplam</th></tr>`
+        + satirlar
+        + `<tr><td><b>Toplam</b></td><td><b>Veriş</b></td>${topV}<td><b>${nf(r.toplam_veris_kwh, 2)}</b></td></tr>`
+        + `<tr><td><b>Toplam</b></td><td><b>Çekiş</b></td>${topC}<td><b>${nf(r.toplam_cekis_kwh, 2)}</b></td></tr>`
+        + `</table></div>`;
     } else {
       const r = await al(`${API}/${s.sid}/reaktif.json`, b); if (!r) { el.innerHTML = '<div class="bos">Reaktif verisi yok.</div>'; return; }
       const si = r.sinir || { ind: 20, kap: 15 }, hc = (v, l) => v == null ? '—' : `<span class="et ${v > l ? 'k' : 'ok'}">%${nf(v, 2)}</span>`;
@@ -123,15 +141,37 @@ async function grafikSayac(s) {
     }
   } catch (e) { el.innerHTML = '<div class="hata">' + esc(e.message) + '</div>'; }
 }
+function osf07CsvIndir() {
+  const paket = window._SON_OSF07; if (!paket) return;
+  const { s, r } = paket, pad = a => { const x = [...a]; while (x.length < 34) x.push(''); return x.slice(0, 34).join(','); };
+  const sat = [
+    pad([]), pad(Array(8).fill('FORM NO: OSF.07.02')), pad(Array(8).fill('DENGELEME BİRİMİ SAYAÇ DEĞERLERİ FORMU')), pad(Array(8).fill('DENGELEME BİRİMİ SAYAÇ DEĞERLERİ FORMU')),
+    pad([]), Array(34).fill('Ölçüm Sistemi Bilgileri').join(','),
+    pad(['Sayaç Kodu:', 'Sayaç Kodu:', 'Sayaç Kodu:', '', '', '', 'ETSO Kodu:', 'ETSO Kodu:']), pad([]),
+    pad(['Sayaç Seri No:', 'Sayaç Seri No:', 'Sayaç Seri No:', s.sid, s.sid, s.sid]), pad([]),
+    pad(['Sayaçlardan', '', 'İletim Şirketi', '', 'Aksaray OSB']), pad([]),
+    pad(['Sorumlu Kurum:', '', 'Dağıtım Şirketi', '', 'Aksaray OSB', '', 'Adı:', s.ad, s.ad, s.ad, s.ad, s.ad]), pad([]),
+    pad(['UEVÇB Kodu', 'UEVÇB Kodu', 'UEVÇB Kodu']), pad([]),
+    pad(['Uzlaştırma Dönemi:', 'Uzlaştırma Dönemi:', 'Uzlaştırma Dönemi:', r.donem || '', '', '', 'Abone No:', 'Abone No:', 'ELK-5210', 'ELK-5210']), pad([]),
+    Array(34).fill('Aktif Enerji Değerleri (kWh)').join(','), pad([]), pad([]),
+    ['Saat/Gün', '', ...Array.from({ length: 31 }, (_, i) => i + 1), 'Toplam'].join(','),
+    ...(r.saatler || []).map(st => [st.saat, st.yon, ...(st.gunler || []), st.toplam ?? ''].join(',')),
+    ['Toplam', 'Veriş', ...(r.gun_toplam_veris || []), r.toplam_veris_kwh ?? ''].join(','),
+    ['Toplam', 'Çekiş', ...(r.gun_toplam_cekis || []), r.toplam_cekis_kwh ?? ''].join(','),
+    pad([]), pad(['Yetkili Adı', 'Yetkili Adı', ':']), pad([]), pad(['İmza', 'İmza', ':']), pad([]), pad(['Tarih', 'Tarih', ':'])
+  ];
+  const blob = new Blob(['\uFEFF' + sat.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `OSF_07_02_${s.sid}.csv`; a.click();
+}
 function cizSayac(s, toplayici) {
   const sy = s.sayac || {}, ts = sy.tuketim_sn || [], aytop = ts.reduce((t, sn) => t + ((sy.ay_tuketim || {})[sn] || 0), 0);
-  if (!['ay', 'yil', 'reaktif'].includes(GRAF)) GRAF = 'ay';
+  if (!['ay', 'yil', 'reaktif', 'osf07'].includes(GRAF)) GRAF = 'ay';
   let h = `<div class="bas"><div><h1>${esc(s.ad)}</h1><p class="alt">${s.adres ? esc(s.adres) + ' · ' : ''}OSB sayaç verisi · üretim sayacı ${esc(sy.uretim_sn || s.sid)}${ts.length ? ' · tüketim ' + ts.map(esc).join(', ') : ''} · son okuma ${zaman(s.son_veri)}</p></div>`
     + (SANT.length > 1 ? `<select onchange="SEC=this.value;ciz()">${SANT.map(x => `<option value="${esc(x.sid)}"${x.sid === SEC ? ' selected' : ''}>${esc(x.ad)}</option>`).join('')}</select>` : '') + '</div>';
   h += `<div class="kpi"><div><small>Bugün üretim</small><b>${nf(s.gunluk_kwh)}</b><i>kWh</i></div><div><small>Dün üretim</small><b>${nf(sy.dun_uretim_kwh)}</b><i>kWh</i></div>`
     + `<div><small>Bu ay üretim</small><b>${nf(s.aylik_kwh)}</b><i>kWh</i></div><div><small>Bu yıl üretim</small><b>${nf((s.yillik_kwh || 0) / 1000, 1)}</b><i>MWh</i></div>`
     + `<div><small>Bu ay tüketim</small><b>${nf(aytop)}</b><i>kWh</i>${ts.length > 1 ? `<small>${ts.map(sn => esc(sn) + ': ' + nf((sy.ay_tuketim || {})[sn])).join(' · ')}</small>` : ''}</div></div>`;
-  h += `<div class="kart"><div class="sek">${[['ay', 'Bu ay'], ['yil', 'Son 12 ay'], ['reaktif', 'Reaktif']].map(([k, a]) => `<button class="${GRAF === k ? 'on' : ''}" onclick="GRAF='${k}';ciz()">${a}</button>`).join('')}</div><div id="graf"></div></div>`;
+  h += `<div class="kart"><div class="sek">${[['ay', 'Bu ay'], ['yil', 'Son 12 ay'], ['reaktif', 'Reaktif'], ['osf07', 'OSF-07 Saatlik']].map(([k, a]) => `<button class="${GRAF === k ? 'on' : ''}" onclick="GRAF='${k}';ciz()">${a}</button>`).join('')}</div><div id="graf"></div></div>`;
   const al_ = s.alarmlar || [];
   h += `<div class="kart"><h2>Uyarılar</h2>${al_.length ? '<table><tr><th>Zaman</th><th>Uyarı</th></tr>' + al_.map(x => `<tr><td>${zaman(x.alertTime)}</td><td>${esc(x.alertName || '')}</td></tr>`).join('') + '</table>' : '<div class="alt">Bu ay reaktif sınır aşımı yok.</div>'}</div>`;
   const ah = toplayici && toplayici.hesaplar && toplayici.hesaplar.ace;

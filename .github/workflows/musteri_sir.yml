@@ -23,14 +23,18 @@ jobs:
           SS_4: ${{ secrets.SOLARMAN_SIFRE_4 }}
           SK_5: ${{ secrets.SOLARMAN_KULLANICI_5 }}
           SS_5: ${{ secrets.SOLARMAN_SIFRE_5 }}
+          OSB_K_HAS: ${{ secrets.OSB_KULLANICI_HASGERIDONUSUM }}
+          OSB_S_HAS: ${{ secrets.OSB_SIFRE_HASGERIDONUSUM }}
           ACE_OTURUM: ${{ secrets.ACE_OTURUM }}
         run: |
           set -euo pipefail
           ENV=$(python3 -c "import os; e=['','_TATMAK','_2','_3','_4','_5']; print(''.join(f'SOLARMAN_KULLANICI{x}={os.environ[\"SK\"+x]}\nSOLARMAN_SIFRE{x}={os.environ[\"SS\"+x]}\n' for x in e if os.environ.get('SK'+x) and os.environ.get('SS'+x)),end='')")
-          # OSB sayaçları (Ace Center): oturum çerezi tek satır; Ömer tarayıcıdan girip Secrets'a kendisi koyar
+          OSB=$(python3 -c "import os; k=os.environ.get('OSB_K_HAS','').strip(); s=os.environ.get('OSB_S_HAS','').strip(); print(f'OSB_KULLANICI_HASGERIDONUSUM={k}\nOSB_SIFRE_HASGERIDONUSUM={s}' if k and s else '', end='')")
+          [ -n "$OSB" ] && ENV="${ENV:+${ENV}$'\n'}${OSB}" && echo "::notice::OSB Ace Center kullanıcı/şifre tanımlı (otomatik captcha girişi)"
+          # İsteğe bağlı yedek: oturum çerezi
           ACE=$(python3 -c "import os; v=os.environ.get('ACE_OTURUM','').replace(chr(13),' ').replace(chr(10),' ').strip(); v=v[7:].strip() if v.lower().startswith('cookie:') else v; print(f'ACE_OTURUM={v}' if v else '')")
           [ -n "$ACE" ] && ENV="${ENV:+${ENV}$'\n'}${ACE}" && echo "::notice::Ace Center oturumu tanımlı"
-          [ -n "$ENV" ] || { echo "::error::SOLARMAN_KULLANICI / SOLARMAN_SIFRE sırları eksik"; exit 1; }
+          [ -n "$ENV" ] || { echo "::error::SOLARMAN veya OSB sırları eksik"; exit 1; }
           echo "::notice::hesap sayısı: $(printf '%s' "$ENV" | grep -c '^SOLARMAN_KULLANICI')"
           mkdir -p ~/.ssh
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k

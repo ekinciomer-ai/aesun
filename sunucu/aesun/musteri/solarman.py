@@ -33,32 +33,47 @@ def giris(taban=None, sys_ad="SOLARMAN"):
     if not KUL or not SIFRE:
         raise RuntimeError("SOLARMAN_KULLANICI / SOLARMAN_SIFRE tanımlı değil")
     tb = taban or JETON.get("taban") or TABAN
-    r = S.post(tb + "/oauth-s/oauth/token", timeout=30, data={
+    pw = hashlib.sha256(SIFRE.encode()).hexdigest()
+    r = S.post(tb + "/oauth2-s/oauth/token", timeout=30, data={
         "grant_type": "mdc_password", "username": KUL, "clear_text_pwd": "",
-        "password": hashlib.sha256(SIFRE.encode()).hexdigest(), "identity_type": 2,
-        "client_id": "test", "system": sys_ad})
+        "password": pw, "identity_type": 2, "client_id": "test", "system": sys_ad})
+    if r.status_code != 200 or "access_token" not in r.text:
+        r = S.post(tb + "/oauth-s/oauth/token", timeout=30, data={
+            "grant_type": "mdc_password", "username": KUL, "clear_text_pwd": "",
+            "password": pw, "identity_type": 2, "client_id": "test", "system": sys_ad})
     if r.status_code != 200 or "access_token" not in r.text:
         raise RuntimeError(f"giriş başarısız ({tb}, HTTP {r.status_code})")
     j = r.json()
     t = j["access_token"]
     rt = j.get("refresh_token")
-    # SOLARMAN Business (globalpro): org seçimi gerekiyorsa ilk organizasyonla jetonu yenile
-    if rt and not j.get("org_id"):
-        for org_yol in ("/business-s/acc/org/list", "/account-s/acc/org/list", "/maintain-s/acc/org/list"):
+    # SOLARMAN Business (globalpro): /user-s/acc/org/my ile organizasyon listesini alıp org_id jetonuna geç
+    if not j.get("org_id"):
+        for org_yol, met in (("/user-s/acc/org/my?language=en", "GET"), ("/user-s/acc/org/my/v2", "POST"), ("/user-s/acc/org?language=en&version=1.0", "GET")):
             try:
-                ro = S.get(tb + org_yol, headers={"Authorization": "bearer " + t}, timeout=15)
+                ro = S.get(tb + org_yol, headers={"Authorization": "bearer " + t}, timeout=15) if met == "GET" else S.post(tb + org_yol, json={}, headers={"Authorization": "bearer " + t}, timeout=15)
                 if ro.status_code == 200:
                     oj = ro.json()
-                    ol = oj if isinstance(oj, list) else (oj.get("data") or oj.get("orgList") or oj.get("records") or [])
+                    ol = oj if isinstance(oj, list) else (oj.get("data") or oj.get("orgList") or oj.get("orgInfoList") or oj.get("records") or [])
+                    if isinstance(oj, dict) and not ol and (oj.get("orgId") or oj.get("id")):
+                        ol = [oj]
                     if ol and isinstance(ol, list):
-                        oid = ol[0].get("orgId") or ol[0].get("id") or ol[0].get("companyId")
-                        if oid:
-                            r2 = S.post(tb + "/oauth-s/oauth/token", timeout=20, data={
-                                "grant_type": "refresh_token", "refresh_token": rt,
-                                "org_id": oid, "client_id": "test", "system": sys_ad})
-                            if r2.status_code == 200 and "access_token" in r2.text:
-                                j = r2.json(); t = j["access_token"]
+                        ilk_t = t
+                        for org in ol:
+                            oid = org.get("orgId") or org.get("id") or org.get("companyId")
+                            if not oid:
+                                continue
+                            for d_veri in (
+                                {"grant_type": "refresh_token", "refresh_token": rt, "org_id": oid, "client_id": "test", "system": sys_ad},
+                                {"grant_type": "password", "username": KUL, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": sys_ad},
+                                {"grant_type": "mdc_password", "username": KUL, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": sys_ad},
+                            ):
+                                r2 = S.post(tb + "/oauth2-s/oauth/token", timeout=20, data=d_veri)
+                                if r2.status_code == 200 and "access_token" in r2.text:
+                                    j = r2.json(); t = j["access_token"]
+                                    break
+                            if t != ilk_t:
                                 break
+                        break
             except Exception:
                 pass
     JETON.update(t=t, taban=tb, son=time.time() + int(j.get("expires_in", 3600)) - 300)
@@ -77,8 +92,9 @@ def istek(yol, govde=None):
 def istasyon_ara():
     """Hem Business (globalpro) hem Smart (globalhome) uçlarını ve filtreli/filtresiz aramayı dener."""
     adaylar = [
+        (TABAN, "SOLARMAN", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}}),
         (TABAN, "SOLARMAN", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-        (TABAN, "SOLARMAN", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {}}),
+        (TABAN, "SOLARMAN", "/maintain-s/operating/station/stationView/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
         (TABAN, "SOLARMANPRO", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
         (TABAN, "SOLARMAN", "/maintain-s/operating/station/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
         ("https://globalhome.solarmanpv.com", "SOLARMAN", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),

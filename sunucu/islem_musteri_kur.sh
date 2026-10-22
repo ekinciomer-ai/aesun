@@ -12,18 +12,19 @@ echo "NOT: kimlik: $(grep -c '^SOLARMAN_[A-Z]*=.' /opt/aesun/musteri.env || true
 sleep 22
 docker exec aesun-musteri sh -c 'cat /musteri/durum.json 2>/dev/null || echo "durum yok"' | sed 's/^/NOT: toplayıcı: /'
 docker exec aesun-musteri python3 -c "
-import os, hashlib, requests
+import json, pathlib, os, hashlib, requests
+p = pathlib.Path('/musteri/santraller.json')
+if p.is_file():
+    d = json.loads(p.read_text())
+    print('NOT: santraller (' + str(len(d)) + '): ' + ', '.join(f'{k}:{v.get(\"ad\")}' for k,v in list(d.items())[:10]))
 tb = 'https://globalpro.solarmanpv.com'
 kul, sifre = os.environ.get('SOLARMAN_KULLANICI',''), os.environ.get('SOLARMAN_SIFRE','')
-for sys_ad in ('SOLARMAN', 'SOLARMANPRO'):
-    for id_t in (2, 1, 0):
-        r = requests.post(tb + '/oauth-s/oauth/token', timeout=15, data={'grant_type':'mdc_password','username':kul,'clear_text_pwd':'','password':hashlib.sha256(sifre.encode()).hexdigest(),'identity_type':id_t,'client_id':'test','system':sys_ad})
-        j = r.json() if ' {' in ' '+r.text else {}
-        print(f'NOT: login({sys_ad},id={id_t}): HTTP {r.status_code} keys={list(j.keys())} err={j.get(\"error\") or j.get(\"msg\")}')
-        if 'access_token' in j:
-            h = {'Authorization': 'bearer ' + j['access_token']}
-            for u in ('/business-s/acc/org/list', '/business-s/acc/org/info', '/account-s/acc/info', '/maintain-s/operating/station/v2/search?page=1&size=10'):
-                r2 = requests.post(tb + u, json={}, headers=h, timeout=15) if 'search' in u else requests.get(tb + u, headers=h, timeout=15)
-                print(f'NOT:   {u}: HTTP {r2.status_code} {r2.text[:140]}')
-            break
+r = requests.post(tb + '/oauth2-s/oauth/token', timeout=15, data={'grant_type':'mdc_password','username':kul,'clear_text_pwd':'','password':hashlib.sha256(sifre.encode()).hexdigest(),'identity_type':2,'client_id':'test','system':'SOLARMAN'})
+j = r.json() if r.status_code == 200 else {}
+print('NOT: mdc=' + str(j.get('mdc')) + ' scope=' + str(j.get('scope')))
+if 'access_token' in j:
+    h = {'Authorization': 'bearer ' + j['access_token']}
+    for u in ('/user-s/acc/org/my?language=en', '/user-s/acc/org?language=en&version=1.0'):
+        r2 = requests.get(tb + u, headers=h, timeout=15)
+        print(f'NOT: {u}: HTTP {r2.status_code} {r2.text[:220]}')
 " 2>/dev/null || true

@@ -54,11 +54,9 @@ def giris(H, taban=None):
             break
     if not t:
         raise RuntimeError(f"hesap {H.ad}: giriş başarısız")
-    eski_ara = H.iz.get("ara", [])
-    H.iz = {"tb": tb.split("//")[-1].split(".")[0], "tip": secilen_tip, "mdc": j.get("mdc")}
-    if eski_ara:
-        H.iz["ara"] = eski_ara
-    # Business hesabında organizasyon listesi varsa (/user-s/acc/org/my → [{"org":{"id":...}}]) grant_type=switch_org ile jetonu organizasyona geçir
+    eski_ara = list(H.iz.get("ara", []))
+    H.iz = {"tb": tb.split("//")[-1].split(".")[0], "tip": secilen_tip, "mdc": j.get("mdc"), "ara": eski_ara}
+    # Business hesabında organizasyon listesi varsa (/user-s/acc/org/my → [{"org":{"id":...}}]) jetonu organizasyona geçir
     try:
         ro = H.s.get(tb + "/user-s/acc/org/my?language=en", headers={"Authorization": "Bearer " + t}, timeout=15)
         H.iz["org_st"] = ro.status_code
@@ -68,22 +66,26 @@ def giris(H, taban=None):
             if ol and isinstance(ol, list):
                 ilk_t = t
                 H.iz["orgs"] = []
+                H.iz["sw"] = []
                 for item in ol:
                     org = (item.get("org") if isinstance(item, dict) and isinstance(item.get("org"), dict) else item) or {}
                     oid = org.get("id") or org.get("orgId") or org.get("companyId")
                     H.iz["orgs"].append(f"{oid}:{org.get('name')}")
                     if not oid:
                         continue
-                    r2 = H.s.post(tb + oauth_yol, timeout=20, headers={"Authorization": "Bearer " + ilk_t}, data={
-                        "grant_type": "switch_org", "identity_type": secilen_tip, "username": H.kul,
-                        "password": pw, "access_token": ilk_t, "client_id": "test", "org_id": oid, "system": "SOLARMAN"})
-                    H.iz["sw_st"] = r2.status_code
-                    if r2.status_code == 200 and "access_token" in r2.text:
-                        j2 = r2.json()
-                        if j2.get("access_token"):
-                            j = j2; t = j2["access_token"]; H.iz["sw_ok"] = oid; break
-                    else:
-                        H.iz["sw_err"] = r2.text[:120]
+                    for sw_ad, sw_yol, sw_veri in (
+                        ("v2_sw", "/oauth2-s/oauth/token", {"grant_type": "switch_org", "identity_type": secilen_tip, "username": H.kul, "password": pw, "access_token": ilk_t, "client_id": "test", "org_id": oid, "system": "SOLARMAN", "origin_id": "0123456789abcdef0123456789abcdef"}),
+                        ("v1_mdc", "/oauth-s/oauth/token", {"grant_type": "mdc_password", "identity_type": secilen_tip, "username": H.kul, "clear_text_pwd": "", "password": pw, "access_token": ilk_t, "client_id": "test", "org_id": oid, "system": "SOLARMAN"}),
+                        ("v1_pw", "/oauth-s/oauth/token", {"grant_type": "password", "identity_type": secilen_tip, "username": H.kul, "clear_text_pwd": "", "password": pw, "access_token": ilk_t, "client_id": "test", "org_id": oid, "system": "SOLARMAN"}),
+                    ):
+                        r2 = H.s.post(tb + sw_yol, timeout=20, headers={"Authorization": "Bearer " + ilk_t}, data=sw_veri)
+                        H.iz["sw"].append(f"{sw_ad}:{r2.status_code}")
+                        if r2.status_code == 200 and "access_token" in r2.text:
+                            j2 = r2.json()
+                            if j2.get("access_token"):
+                                j = j2; t = j2["access_token"]; H.iz["sw_ok"] = f"{sw_ad}:{oid}"; break
+                    if H.iz.get("sw_ok"):
+                        break
     except Exception as ex:
         H.iz["org_ex"] = str(ex)[:100]
     H.taban = tb; H.t = t; H.son = time.time() + int(j.get("expires_in", 3600)) - 300
@@ -100,7 +102,6 @@ def tur(H):
             r.raise_for_status(); return r.json()
 
     def santral_ara():
-        H.iz.setdefault("ara", [])
         for kisa, yol, govde in (
             ("v2_pv", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}}),
             ("v2", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
@@ -111,11 +112,11 @@ def tur(H):
             try:
                 res = istek(yol, govde)
                 d = (res or {}).get("data") if isinstance(res, dict) else (res if isinstance(res, list) else None)
-                H.iz["ara"].append(f"{H.iz.get('tb')}:{kisa}:{len(d) if isinstance(d, list) else type(res).__name__}:{(res or {}).get('total') if isinstance(res, dict) else ''}")
+                H.iz.setdefault("ara", []).append(f"{H.iz.get('tb')}:{kisa}:{len(d) if isinstance(d, list) else type(res).__name__}:{(res or {}).get('total') if isinstance(res, dict) else ''}")
                 if isinstance(d, list) and d:
                     return {"data": d}
             except Exception as ex:
-                H.iz["ara"].append(f"{H.iz.get('tb')}:{kisa}:err:{str(ex)[:60]}")
+                H.iz.setdefault("ara", []).append(f"{H.iz.get('tb')}:{kisa}:err:{str(ex)[:60]}")
         return {}
 
     simdi = datetime.now(TR); y, a, g = simdi.year, simdi.month, simdi.day
@@ -131,10 +132,11 @@ def tur(H):
     santraller = {}
     for kay in (liste or {}).get("data", []):
         s = (kay.get("station") if isinstance(kay, dict) and "station" in kay else kay) or {}
-        sid = str(s.get("id"))
+        sid = str(s.get("id") or s.get("stationId") or s.get("powerStationId") or "")
         if not sid or sid == "None":
             continue
-        santraller[sid] = {"ad": s.get("name"), "adres": s.get("locationAddress"), "kapasite_kwp": s.get("installedCapacity"),
+        ad_str = s.get("name") or s.get("stationName")
+        santraller[sid] = {"ad": ad_str, "adres": s.get("locationAddress"), "kapasite_kwp": s.get("installedCapacity"),
                            "isletme_baslangic": s.get("startOperatingTime"), "tip": s.get("type"), "hesap": H.ad}
         d = KOK / sid
         try:

@@ -26,6 +26,7 @@ TR = timezone(timedelta(hours=3))
 class Hesap:
     def __init__(self, ad, kul, sifre):
         self.ad, self.kul, self.sifre, self.t, self.son, self.taban = ad or "_1", kul, sifre, None, 0, TABAN
+        self.iz = {}
         self.s = requests.Session(); self.s.headers.update({"User-Agent": "aesun-musteri/1", "Accept": "application/json"})
 
 def yaz(p: Path, v):
@@ -53,30 +54,38 @@ def giris(H, taban=None):
             break
     if not t:
         raise RuntimeError(f"hesap {H.ad}: giriş başarısız")
+    eski_ara = H.iz.get("ara", [])
+    H.iz = {"tb": tb.split("//")[-1].split(".")[0], "tip": secilen_tip, "mdc": j.get("mdc")}
+    if eski_ara:
+        H.iz["ara"] = eski_ara
     # Business hesabında organizasyon listesi varsa (/user-s/acc/org/my → [{"org":{"id":...}}]) grant_type=switch_org ile jetonu organizasyona geçir
-    H.org_sayisi = 0
     try:
         ro = H.s.get(tb + "/user-s/acc/org/my?language=en", headers={"Authorization": "Bearer " + t}, timeout=15)
+        H.iz["org_st"] = ro.status_code
         if ro.status_code == 200:
             oj = ro.json()
             ol = oj if isinstance(oj, list) else (oj.get("data") or oj.get("orgList") or oj.get("orgInfoList") or [])
             if ol and isinstance(ol, list):
-                H.org_sayisi = len(ol)
                 ilk_t = t
+                H.iz["orgs"] = []
                 for item in ol:
                     org = (item.get("org") if isinstance(item, dict) and isinstance(item.get("org"), dict) else item) or {}
                     oid = org.get("id") or org.get("orgId") or org.get("companyId")
+                    H.iz["orgs"].append(f"{oid}:{org.get('name')}")
                     if not oid:
                         continue
                     r2 = H.s.post(tb + oauth_yol, timeout=20, headers={"Authorization": "Bearer " + ilk_t}, data={
                         "grant_type": "switch_org", "identity_type": secilen_tip, "username": H.kul,
                         "password": pw, "access_token": ilk_t, "client_id": "test", "org_id": oid, "system": "SOLARMAN"})
+                    H.iz["sw_st"] = r2.status_code
                     if r2.status_code == 200 and "access_token" in r2.text:
                         j2 = r2.json()
                         if j2.get("access_token"):
-                            j = j2; t = j2["access_token"]; break
-    except Exception:
-        pass
+                            j = j2; t = j2["access_token"]; H.iz["sw_ok"] = oid; break
+                    else:
+                        H.iz["sw_err"] = r2.text[:120]
+    except Exception as ex:
+        H.iz["org_ex"] = str(ex)[:100]
     H.taban = tb; H.t = t; H.son = time.time() + int(j.get("expires_in", 3600)) - 300
 
 def tur(H):
@@ -91,17 +100,22 @@ def tur(H):
             r.raise_for_status(); return r.json()
 
     def santral_ara():
-        for yol, govde in (
-            ("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}}),
-            ("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
-            ("/maintain-s/operating/station/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
+        H.iz.setdefault("ara", [])
+        for kisa, yol, govde in (
+            ("v2_pv", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}}),
+            ("v2", "/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
+            ("view_v2", "/maintain-s/operating/station/stationView/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
+            ("s1", "/maintain-s/operating/station/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
+            ("scr", "/maintain-s/operating/station/screen/search?page=1&size=100&order.direction=ASC&order.property=name", None),
         ):
             try:
                 res = istek(yol, govde)
-                if (res or {}).get("data"):
-                    return res
-            except Exception:
-                continue
+                d = (res or {}).get("data") if isinstance(res, dict) else (res if isinstance(res, list) else None)
+                H.iz["ara"].append(f"{H.iz.get('tb')}:{kisa}:{len(d) if isinstance(d, list) else type(res).__name__}:{(res or {}).get('total') if isinstance(res, dict) else ''}")
+                if isinstance(d, list) and d:
+                    return {"data": d}
+            except Exception as ex:
+                H.iz["ara"].append(f"{H.iz.get('tb')}:{kisa}:err:{str(ex)[:60]}")
         return {}
 
     simdi = datetime.now(TR); y, a, g = simdi.year, simdi.month, simdi.day
@@ -110,8 +124,8 @@ def tur(H):
         try:
             giris(H, "https://globalhome.solarmanpv.com")
             liste = santral_ara()
-        except Exception:
-            pass
+        except Exception as ex:
+            H.iz.setdefault("ara", []).append(f"home_err:{str(ex)[:60]}")
         if not (liste or {}).get("data"):
             giris(H, TABAN)
     santraller = {}
@@ -164,9 +178,10 @@ def main():
         hepsi = dict(eski)   # hata veren hesabın santralleri listeden düşmesin
         for H in hesaplar:
             try:
-                s = tur(H); hepsi.update(s); durum["hesaplar"][H.ad] = {"tamam": True, "santral": len(s)}
+                H.iz = {}
+                s = tur(H); hepsi.update(s); durum["hesaplar"][H.ad] = {"tamam": True, "santral": len(s), "iz": H.iz}
             except Exception as e:
-                durum["hesaplar"][H.ad] = {"tamam": False, "hata": str(e)[:200]}; traceback.print_exc(limit=1); H.t = None
+                durum["hesaplar"][H.ad] = {"tamam": False, "hata": str(e)[:200], "iz": H.iz}; traceback.print_exc(limit=1); H.t = None
         yaz(KOK / "santraller.json", hepsi); eski = hepsi
         hatalar = [f"{k}: {v['hata']}" for k, v in durum["hesaplar"].items() if not v["tamam"]]
         durum.update(tamam=not hatalar and bool(hesaplar), santral=len(hepsi))

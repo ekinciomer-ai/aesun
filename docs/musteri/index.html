@@ -13,18 +13,19 @@
 .ust{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--b);border-bottom:1px solid var(--c)}
 .ust a,.ust button{color:var(--s);text-decoration:none;font:inherit;background:none;border:0;cursor:pointer;padding:0}.ust a:hover,.ust button:hover{color:var(--k)}
 .marka b{letter-spacing:.06em}.marka .m2{color:var(--k)}
-main{max-width:1200px;margin:0 auto;padding:20px 16px}
+main{max-width:1220px;margin:0 auto;padding:20px 16px}
 h1{font-size:22px;margin:0}h2{font-size:16px;margin:0 0 10px}.alt{color:var(--y);font-size:13px;margin:2px 0 0}
 .bas{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 select,input[type=date]{padding:8px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;background:#fff;color:var(--s);max-width:100%}
 .btn{padding:7px 12px;border:1px solid #CCD2DA;border-radius:8px;background:#fff;color:var(--s);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .btn:hover:not(:disabled){border-color:var(--s)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.aktif{background:var(--s);color:#fff;border-color:var(--s)}
 .kart{background:var(--b);border:1px solid var(--c);border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.03)}
 .kpi{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;margin-bottom:14px}
 .kpi div{background:var(--b);border:1px solid var(--c);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden}
 .kpi div::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kp-r,#CCD2DA)}
 .kpi small{display:block;color:var(--y);font-size:12px}.kpi b{font-size:20px;font-variant-numeric:tabular-nums}.kpi i{font-style:normal;color:var(--y);font-size:12px;margin-left:3px}
-.et{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:#EEF0F3;font-weight:600}.et.ok{background:#E8F5EC;color:#1D6B36}.et.k{background:#FDECEC;color:#8E1117}.et.u{background:#FFF4DC;color:#9A5B00}.et.m{background:#EAF2FD;color:#1956A8}
+.et{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:#EEF0F3;font-weight:600}.et.ok{background:#E8F5EC;color:#1D6B36}.et.k{background:#FDECEC;color:#8E1117}.et.u{background:#FFF4DC;color:#9A5B00}.et.m{background:#EAF2FD;color:#1956A8}.et.mor{background:#F3E8FF;color:#6D28D9}
 .sek{display:flex;gap:4px;background:#E9ECF0;padding:4px;border-radius:10px;width:max-content;max-width:100%;margin-bottom:14px;flex-wrap:wrap}.sek button{border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--y);padding:6px 12px;border-radius:7px;cursor:pointer}.sek button.on{background:#fff;color:var(--s);box-shadow:0 1px 2px rgba(0,0,0,.06)}
 svg{display:block;width:100%;height:auto}
 .hata{background:#FDECEC;color:#8E1117;border-radius:9px;padding:12px}
@@ -37,9 +38,9 @@ th.sol,td.sol{text-align:left}
 td.sifir{color:#9AA6B5}
 tr.top td{font-weight:700;border-top:2px solid #CCD2DA;background:#F5F7FA}
 .ayr{border-left:1px solid var(--c)}
-.tip{position:fixed;pointer-events:none;background:var(--s);color:#fff;font-size:12px;padding:5px 9px;border-radius:6px;display:none;z-index:99;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.tip{position:fixed;pointer-events:none;background:var(--s);color:#fff;font-size:12px;padding:6px 10px;border-radius:6px;display:none;z-index:99;box-shadow:0 4px 12px rgba(0,0,0,.18);max-width:340px}
 
-/* Şematik Enerji Akışı & Anlaşılır Göstergeler */
+/* Şematik Enerji Akışı & Proje Günlük Grafik Kartları */
 @keyframes akis{to{stroke-dashoffset:-28}}
 .akis-hat{stroke-dasharray:8 6;animation:akis 1.1s linear infinite}
 .sema-izgara{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:12px;margin-top:12px}
@@ -51,6 +52,16 @@ tr.top td{font-weight:700;border-top:2px solid #CCD2DA;background:#F5F7FA}
 .inv-kart{background:#F8F9FB;border:1px solid var(--c);border-radius:11px;padding:11px 13px;transition:border-color .15s}
 .inv-kart:hover{border-color:#9AA6B5}
 .reak-izgara{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:16px}
+.proje-sekmeler{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.proje-sekme{padding:8px 14px;border:1px solid var(--c);border-radius:10px;background:#fff;color:var(--s);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s}
+.proje-sekme:hover{border-color:#9AA6B5}
+.proje-sekme.on{background:var(--s);color:#fff;border-color:var(--s);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.proje-grafik-kutu{background:#F8FAFC;border:1px solid var(--c);border-radius:13px;padding:14px 16px;margin-bottom:14px}
+.proje-grafik-kutu.secili{border-color:#2a78d6;box-shadow:0 0 0 2px rgba(42,120,214,.12)}
+.proje-ozet-serit{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px;margin:10px 0 12px}
+.proje-ozet-huc{background:#fff;border:1px solid var(--c);border-radius:9px;padding:8px 11px}
+.proje-ozet-huc small{display:block;font-size:11.5px;color:var(--y)}
+.proje-ozet-huc b{font-size:15.5px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -58,7 +69,7 @@ tr.top td{font-weight:700;border-top:2px solid #CCD2DA;background:#F5F7FA}
 <main id="ana"><div class="bos">Yükleniyor…</div></main>
 <div class="tip" id="tip"></div>
 <script>
-// Müşteri Monitoring — İnverter (SOLARMAN / Fronius) + OSB Sayaç (Ace Center OSOS / OSF-07) birleşik grafiksel & şematik müşteri paneli.
+// Müşteri Monitoring — Her Proje İçin Günlük Üretim & Tüketim Grafiği + Şematik Enerji Akışı + Saatlik OSOS & İnverter Paneli.
 const API = 'https://api.aksarayenerji.net/v1/musteri', te = new TextEncoder(), $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(t)))].map(x => x.toString(16).padStart(2, '0')).join('');
@@ -67,7 +78,7 @@ const AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 
 const AYLAR_UZUN = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 const GUNLER = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
 const RENK = ['#2a78d6', '#F08A24', '#1E9E5A', '#7C3AED', '#2B2F35'];
-let S = null, BEL = {}, SANT = [], SEC = null, GRAF = null, SEC_GUN = null;
+let S = null, BEL = {}, SANT = [], SEC = null, GRAF = null, SEC_GUN = null, TUM_ACIK = true, GUNLUK_BELLEK = {};
 
 function oturum() { try { const o = JSON.parse(localStorage.getItem('ae_portal') || 'null'); return o && o.S && Date.now() < (o.son || 0) ? o.S : null; } catch (e) { return null; } }
 async function belirtecler() {
@@ -86,6 +97,7 @@ const sayacVar = s => !!(s && (s.sayac_var || s.kaynak === 'ace' || s.sayac));
 const durumEt = s => !invVar(s) ? '<span class="et u">İnverter bekleniyor</span>' : s.iletisim === 'ALL_OFFLINE' ? '<span class="et k">İnverter çevrimdışı</span>' : s.iletisim === 'PARTIAL_OFFLINE' ? '<span class="et u">Kısmen çevrimdışı</span>' : '<span class="et ok">İnverter normal</span>';
 const zaman = t => t ? new Date(t * 1000).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 const tarihK = g => { if (!g) return '—'; const [y, a, d] = g.split('-').map(Number); return d + ' ' + AYLAR[a - 1]; };
+const tk = (x, sn) => (((x || {}).tuk || {})[sn] || {}).kwh;
 
 function hucreBar(v, var_, mx, renk, h = 2, ekSinif = '') {
   if (!var_ || v == null) return `<td class="sifir${ekSinif ? ' ' + ekSinif : ''}">—</td>`;
@@ -96,9 +108,268 @@ function hucreBar(v, var_, mx, renk, h = 2, ekSinif = '') {
   return `<td${cls ? ` class="${cls}"` : ''}${st}>${nf(v, h)}</td>`;
 }
 
+// ---- HER PROJE İÇİN GÜNLÜK ÜRETİM VE TÜKETİM VERİSİNİ BİRLEŞTİREN TOPLAYICI ----
+async function projeGunlukVeriAl(s) {
+  const n = new Date(), y = n.getFullYear(), a = String(n.getMonth() + 1).padStart(2, '0'), b = bel(s.sid), sy = s.sayac || {};
+  const ts = sy.tuketim_sn || [];
+  const [invAy, sayacAy, osf] = await Promise.all([
+    invVar(s) ? al(`${API}/${s.sid}/ay_${y}${a}.json`, b).catch(() => null) : Promise.resolve(null),
+    sayacVar(s) ? al(`${API}/${s.sid}/${invVar(s) ? 'sayac_ay_' : 'ay_'}${y}${a}.json`, b).catch(() => null) : Promise.resolve(null),
+    sayacVar(s) ? al(`${API}/${s.sid}/osf07_${y}${a}.json`, b).catch(() => null) : Promise.resolve(null)
+  ]);
+
+  const invMap = Object.fromEntries((invAy || []).map(x => [Number(x.g), Number(x.kwh) || 0]));
+  const sayMap = Object.fromEntries((sayacAy || []).map(x => [Number(x.g), x]));
+
+  // OSF-07 saatlik rapordan günlük toplamları da çıkar (eksik gün varsa tamamlar)
+  const osfGunUretim = {}, osfGunTuk = {}, osfGunVeris = {}, osfSayacTuk = {};
+  const sayacMap = (osf && osf.sayaclar) ? osf.sayaclar : (osf && osf.saatler ? { [osf.sayac_seri_no || s.sid]: osf } : {});
+  const snList = Object.keys(sayacMap);
+  const gesVarMi = snList.some(sn => {
+    const sm = sayacMap[sn];
+    const ad = sm.abone_adi || sm.santral_adi || '';
+    return !!sm.ges_cekiste || (/GES/i.test(ad) && (sm.toplam_veris_kwh || 0) === 0 && (sm.toplam_cekis_kwh || 0) > 0);
+  });
+
+  for (const sn of snList) {
+    const sm = sayacMap[sn];
+    const ad = sm.abone_adi || sm.santral_adi || '';
+    const gesMi = !!sm.ges_cekiste || (/GES/i.test(ad) && (sm.toplam_veris_kwh || 0) === 0 && (sm.toplam_cekis_kwh || 0) > 0);
+    const gs = sm.gun_saat || {};
+    for (const [gStr, saatler] of Object.entries(gs)) {
+      if (!gStr.startsWith(`${y}-${a}-`)) continue;
+      const gNo = Number(gStr.slice(8));
+      let u = 0, v = 0, c = 0;
+      for (const st of Object.values(saatler || {})) {
+        if (gesMi) u += (st.cekis || st.veris || 0);
+        else { v += (st.veris || 0); c += (st.cekis || 0); }
+      }
+      if (gesMi) osfGunUretim[gNo] = (osfGunUretim[gNo] || 0) + u;
+      else {
+        osfGunVeris[gNo] = (osfGunVeris[gNo] || 0) + v;
+        osfGunTuk[gNo] = (osfGunTuk[gNo] || 0) + c;
+        (osfSayacTuk[sn] = osfSayacTuk[sn] || {})[gNo] = c;
+        if (!gesVarMi) osfGunUretim[gNo] = (osfGunUretim[gNo] || 0) + v;
+      }
+    }
+  }
+
+  const gunSet = [...new Set([
+    ...Object.keys(invMap).map(Number),
+    ...Object.keys(sayMap).map(Number),
+    ...Object.keys(osfGunUretim).map(Number),
+    ...Object.keys(osfGunTuk).map(Number)
+  ])].filter(g => g >= 1 && g <= 31).sort((p, q) => p - q);
+
+  const satirlar = gunSet.map(g => {
+    const sm = sayMap[g] || {};
+    const invKwh = invMap[g] != null ? invMap[g] : null;
+    const sayUretim = sm.kwh != null ? Number(sm.kwh) : (osfGunUretim[g] != null ? osfGunUretim[g] : null);
+    let topTuk = 0;
+    const tukDetay = {};
+    if (ts.length) {
+      ts.forEach(sn => {
+        const v = tk(sm, sn) != null ? Number(tk(sm, sn)) : ((osfSayacTuk[sn] || {})[g] || 0);
+        tukDetay[sn] = v;
+        topTuk += v;
+      });
+    } else if (osfGunTuk[g] != null) {
+      topTuk = osfGunTuk[g];
+    }
+    const verisKwh = sm.veris ? Object.values(sm.veris).reduce((a, b) => a + (Number(b) || 0), 0) : (osfGunVeris[g] || 0);
+    const uretimAna = sayacVar(s) && sayUretim != null ? sayUretim : (invKwh || 0);
+    return {
+      g,
+      tarih: `${y}-${a}-${String(g).padStart(2, '0')}`,
+      etiket: `${g} ${AYLAR[n.getMonth()]}`,
+      inv_kwh: invKwh,
+      sayac_uretim_kwh: sayUretim,
+      uretim_kwh: uretimAna,
+      tuketim_kwh: topTuk,
+      veris_kwh: verisKwh,
+      tuk_detay: tukDetay
+    };
+  });
+
+  return { y, a: Number(a), aKod: a, satirlar, ts, uretimSn: sy.uretim_sn || s.sid };
+}
+
+function projeGunSec(sid, tarih) {
+  SEC = sid;
+  SEC_GUN = tarih;
+  GRAF = 'saatlik';
+  ciz();
+  const el = $('graf');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ---- PROJE BAZLI GÜNLÜK ÜRETİM VE TÜKETİM GRAFİĞİ ÇİZİCİ ----
+function cizProjeGunlukGrafikKart(s, veri, kompakt = false) {
+  const satirlar = (veri && veri.satirlar) || [];
+  const sy = s.sayac || {}, ts = (veri && veri.ts) || sy.tuketim_sn || [];
+  const uretimSn = (veri && veri.uretimSn) || sy.uretim_sn || s.sid;
+  const ayAd = AYLAR_UZUN[((veri && veri.a) || (new Date().getMonth() + 1)) - 1];
+  const yil = (veri && veri.y) || new Date().getFullYear();
+
+  const topInv = satirlar.reduce((t, r) => t + (r.inv_kwh || 0), 0);
+  const topSayUretim = satirlar.reduce((t, r) => t + (r.sayac_uretim_kwh || 0), 0);
+  const topUretim = sayacVar(s) && topSayUretim > 0 ? topSayUretim : (topInv || topSayUretim);
+  const topTuk = satirlar.reduce((t, r) => t + (r.tuketim_kwh || 0), 0);
+  const topVeris = satirlar.reduce((t, r) => t + (r.veris_kwh || 0), 0);
+  const gunSayisi = Math.max(1, satirlar.length);
+  const ortUretim = topUretim / gunSayisi;
+  const ortTuk = topTuk / gunSayisi;
+  const karsilama = topTuk > 0 ? (topUretim / topTuk) * 100 : (topUretim > 0 ? 100 : 0);
+  const netFark = topUretim - topTuk;
+
+  // Serileri oluştur
+  const seriler = [];
+  if (invVar(s) && satirlar.some(r => (r.inv_kwh || 0) > 0)) {
+    seriler.push({ ad: '☀️ İnverter Günlük Üretim', kisa: 'İnverter Üretim', renk: '#F08A24', v: satirlar.map(r => r.inv_kwh || 0) });
+  }
+  if (sayacVar(s)) {
+    seriler.push({ ad: `📟 GES Sayaç Günlük Üretim (#${uretimSn})`, kisa: 'GES Sayaç Üretim', renk: '#1E9E5A', v: satirlar.map(r => r.sayac_uretim_kwh || 0) });
+    if (ts.length > 1) {
+      ts.forEach((sn, idx) => {
+        seriler.push({ ad: `🏭 Fabrika Günlük Tüketim (#${sn})`, kisa: `Tüketim #${sn}`, renk: idx === 0 ? '#2a78d6' : '#2B2F35', v: satirlar.map(r => (r.tuk_detay || {})[sn] || 0) });
+      });
+    } else {
+      seriler.push({ ad: `🏭 Fabrika Günlük Tüketim${ts[0] ? ' (#' + ts[0] + ')' : ''}`, kisa: 'Fabrika Tüketim', renk: '#2a78d6', v: satirlar.map(r => r.tuketim_kwh || 0) });
+    }
+    if (satirlar.some(r => (r.veris_kwh || 0) > 0) && topVeris !== topSayUretim) {
+      seriler.push({ ad: '⚡ Şebekeye Günlük Veriş', kisa: 'Şebekeye Veriş', renk: '#7C3AED', v: satirlar.map(r => r.veris_kwh || 0) });
+    }
+  }
+
+  let svgHtml = '<div class="bos">Bu ay için günlük üretim/tüketim verisi henüz oluşmadı.</div>';
+  if (satirlar.length && seriler.length) {
+    const W = 920, H = kompakt ? 235 : 275, P = 56;
+    const aktifSeriler = seriler.filter(sr => sr.v.some(v => v > 0));
+    const cizSeriler = aktifSeriler.length ? aktifSeriler : seriler;
+    const n = Math.max(cizSeriler.length, 1);
+    const mx = Math.max(1, ...cizSeriler.flatMap(sr => sr.v.map(v => v || 0))) * 1.12;
+    const bw = (W - P - 12) / satirlar.length;
+    const cizH = H - 58;
+    const altY = H - 42;
+
+    let g = '';
+    for (let i = 0; i <= 4; i++) {
+      const v = (mx / 4) * i;
+      const yy = altY - (v / mx) * cizH;
+      g += `<line x1="${P}" x2="${W - 10}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="#E2E5EA"/>`
+        + `<text x="${P - 6}" y="${(yy + 4).toFixed(1)}" font-size="11" fill="#5B6470" text-anchor="end">${nf(v, 0)}</text>`;
+    }
+
+    // Günlük ortalama üretim kesikli referans çizgisi
+    if (ortUretim > 0) {
+      const ortY = altY - (ortUretim / mx) * cizH;
+      g += `<line x1="${P}" x2="${W - 10}" y1="${ortY.toFixed(1)}" y2="${ortY.toFixed(1)}" stroke="#1E9E5A" stroke-width="1.2" stroke-dasharray="5 4" opacity=".75"/>`
+        + `<text x="${W - 12}" y="${Math.max(14, ortY - 4).toFixed(1)}" font-size="10" fill="#1D6B36" font-weight="600" text-anchor="end">Ort. Üretim: ${nf(ortUretim, 0)} kWh/gün</text>`;
+    }
+
+    satirlar.forEach((r, i) => {
+      const gw = (bw * 0.82) / n;
+      const gunOran = r.tuketim_kwh > 0 ? `%${nf((r.uretim_kwh / r.tuketim_kwh) * 100, 0)} karşılama` : '';
+      const ortBilgi = `${r.etiket} ${yil} · Üretim: ${nf(r.uretim_kwh, 1)} kWh`
+        + (sayacVar(s) ? ` · Tüketim: ${nf(r.tuketim_kwh, 1)} kWh` : '')
+        + (gunOran ? ` (${gunOran})` : '');
+
+      // Arka plan seçim şeridi (tıklanabilir)
+      g += `<rect x="${(P + i * bw).toFixed(1)}" y="14" width="${bw.toFixed(1)}" height="${cizH}" fill="transparent" style="cursor:pointer" data-t="${esc(ortBilgi)}" onclick="projeGunSec('${esc(s.sid)}','${r.tarih}')"/>`;
+
+      cizSeriler.forEach((sr, j) => {
+        const v = sr.v[i] || 0;
+        const h = (v / mx) * cizH;
+        const xx = P + i * bw + bw * 0.09 + j * gw;
+        const yy = altY - h;
+        const tipMetin = `${r.etiket} ${yil} · ${sr.kisa}: ${nf(v, 2)} kWh`
+          + (sayacVar(s) ? ` (Üretim: ${nf(r.uretim_kwh, 1)} / Tüketim: ${nf(r.tuketim_kwh, 1)} kWh)` : '');
+        g += `<rect x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" width="${Math.max(gw - 1.2, 1.5).toFixed(1)}" height="${Math.max(h, v > 0 ? 2 : 0).toFixed(1)}" rx="2" fill="${sr.renk}" style="cursor:pointer" data-t="${esc(tipMetin)}" onclick="projeGunSec('${esc(s.sid)}','${r.tarih}')"/>`;
+      });
+
+      g += `<text x="${(P + i * bw + bw / 2).toFixed(1)}" y="${H - 25}" font-size="${satirlar.length > 22 ? '10' : '11'}" fill="#2B2F35" font-weight="600" text-anchor="middle">${r.g}</text>`;
+    });
+
+    let lx = P;
+    cizSeriler.forEach(sr => {
+      g += `<rect x="${lx}" y="${H - 13}" width="11" height="11" rx="2.5" fill="${sr.renk}"/>`
+        + `<text x="${lx + 15}" y="${H - 4}" font-size="11.5" font-weight="600" fill="#2B2F35">${esc(sr.ad)}</text>`;
+      lx += 30 + sr.ad.length * 6.6;
+    });
+
+    svgHtml = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.ad)} günlük üretim ve tüketim grafiği">${g}<text x="${P}" y="12" font-size="11" font-weight="600" fill="#5B6470">Günlük Enerji (kWh) — ${esc(ayAd)} ${yil}</text></svg>`;
+  }
+
+  return `<div class="proje-grafik-kutu${s.sid === SEC && kompakt ? ' secili' : ''}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <h2 style="margin:0;font-size:17px">📊 ${esc(s.ad)} · Günlük Üretim ve Tüketim Grafiği (${esc(ayAd)} ${yil})</h2>
+          ${s.kapasite_kwp ? `<span class="et u">${nf(s.kapasite_kwp, 0)} kWp</span>` : ''}
+          ${sayacVar(s) ? `<span class="et ok">Üretim #${esc(uretimSn)}</span>` : ''}
+          ${ts.length ? `<span class="et m">Tüketim #${ts.map(esc).join(', #')}</span>` : ''}
+        </div>
+        <p class="alt">${sayacVar(s) ? 'Her gün için GES üretimi (yeşil/turuncu) ve fabrika tüketiminin (mavi) karşılaştırması. Çubuğa tıklayarak o günün 24 saatlik detayını açabilirsiniz.' : 'Her gün için GES inverter günlük üretim değerleri (kWh).'}</p>
+      </div>
+      ${kompakt && SANT.length > 1 ? `<button class="btn${s.sid === SEC ? ' aktif' : ''}" type="button" onclick="SEC='${esc(s.sid)}';ciz()">${s.sid === SEC ? '✓ Seçili Proje' : 'Projeyi Aç ▸'}</button>` : ''}
+    </div>
+
+    <div class="proje-ozet-serit">
+      <div class="proje-ozet-huc" style="border-left:4px solid #1E9E5A">
+        <small>🟢 Bu Ay Toplam Üretim</small>
+        <b>${nf(topUretim, 0)} kWh</b> <small style="display:inline">(${nf(topUretim / 1000, 2)} MWh)</small>
+        <small>Günlük Ort: <b>${nf(ortUretim, 0)} kWh/gün</b></small>
+      </div>
+      ${sayacVar(s) ? `<div class="proje-ozet-huc" style="border-left:4px solid #2a78d6">
+        <small>🔵 Bu Ay Toplam Tüketim</small>
+        <b>${nf(topTuk, 0)} kWh</b> <small style="display:inline">(${nf(topTuk / 1000, 2)} MWh)</small>
+        <small>Günlük Ort: <b>${nf(ortTuk, 0)} kWh/gün</b></small>
+      </div>
+      <div class="proje-ozet-huc" style="border-left:4px solid #F08A24">
+        <small>🎯 GES Karşılama Oranı</small>
+        <b>%${nf(karsilama, 1)}</b>
+        <small>${karsilama >= 100 ? 'Üretim tüketimi fazlasıyla karşıladı' : 'Tüketimin GES ile karşılanan payı'}</small>
+      </div>
+      <div class="proje-ozet-huc" style="border-left:4px solid #7C3AED">
+        <small>⚖️ Net Enerji Dengesi</small>
+        <b style="color:${netFark >= 0 ? '#1D6B36' : '#1956A8'}">${netFark >= 0 ? '+' : ''}${nf(netFark, 0)} kWh</b>
+        <small>${topVeris > 0 ? 'Şebekeye Veriş: ' + nf(topVeris, 0) + ' kWh' : 'Üretim − Tüketim farkı'}</small>
+      </div>` : `<div class="proje-ozet-huc" style="border-left:4px solid #F08A24">
+        <small>☀️ En Yüksek Günlük Üretim</small>
+        <b>${nf(Math.max(0, ...satirlar.map(r => r.uretim_kwh || 0)), 1)} kWh</b>
+        <small>${satirlar.length} aktif üretim günü</small>
+      </div>
+      <div class="proje-ozet-huc" style="border-left:4px solid #7C3AED">
+        <small>📅 Bu Yıl Toplam Üretim</small>
+        <b>${nf((s.yillik_kwh || 0) / 1000, 1)} MWh</b>
+        <small>${nf(s.yillik_kwh || 0, 0)} kWh</small>
+      </div>`}
+    </div>
+
+    <div style="background:#fff;border:1px solid var(--c);border-radius:10px;padding:10px 12px">
+      ${svgHtml}
+    </div>
+  </div>`;
+}
+
+// Tüm projelerin günlük üretim & tüketim grafiklerini yükleyip çizen pano
+async function tumProjelerGunlukCiz() {
+  const kutu = $('tum_projeler_grafik');
+  if (!kutu) return;
+  try {
+    const sonuclar = await Promise.all(SANT.map(async s => {
+      if (!GUNLUK_BELLEK[s.sid]) GUNLUK_BELLEK[s.sid] = await projeGunlukVeriAl(s);
+      return [s, GUNLUK_BELLEK[s.sid]];
+    }));
+    kutu.innerHTML = sonuclar.map(([s, v]) => cizProjeGunlukGrafikKart(s, v, true)).join('');
+  } catch (e) {
+    kutu.innerHTML = '<div class="hata">' + esc(e.message) + '</div>';
+  }
+}
+
 // ---- ŞEMATİK ENERJİ AKIŞ DİYAGRAMI (TEK HAT ŞEMASI) VE ANLAŞILIR ÖZET KARTI ----
 function cizSemaKart(s) {
-  const sy = s.sayac || {}, ts = sy.tuketim_sn || [], adlar = sy.adlar || {};
+  const sy = s.sayac || {}, ts = sy.tuketim_sn || [];
   const uretimSn = sy.uretim_sn || s.sid;
   const tukSn = ts[0] || '';
   const invGucKw = invVar(s) && s.guc_w != null ? (s.guc_w || 0) / 1000 : null;
@@ -112,7 +383,6 @@ function cizSemaKart(s) {
   const dunTuk = ts.reduce((t, sn) => t + ((sy.dun_tuketim || {})[sn] || 0), 0);
   const ayVeris = Object.values(sy.ay_veris || {}).reduce((a, b) => a + (b || 0), 0);
 
-  // Karşılama oranı ve mahsuplaşma dengesi
   const karsilama = ayTuk > 0 ? (ayUretim / ayTuk) * 100 : (ayUretim > 0 ? 100 : 0);
   const netDenge = (ayUretim || 0) - (ayTuk || 0);
   const toplamHacim = Math.max(1, (ayUretim || 0) + (ayTuk || 0));
@@ -145,7 +415,6 @@ function cizSemaKart(s) {
     </defs>
     <rect x="2" y="2" width="956" height="206" rx="14" fill="url(#bgSema)" stroke="#DCE3EC"/>
 
-    <!-- Bağlantı Hatları (Animasyonlu Enerji Akışı) -->
     <line x1="218" y1="105" x2="268" y2="105" stroke="#CBD5E1" stroke-width="5"/>
     <line x1="218" y1="105" x2="268" y2="105" stroke="#F08A24" stroke-width="3" class="akis-hat"/>
     <polygon points="266,99 276,105 266,111" fill="#F08A24"/>
@@ -162,7 +431,6 @@ function cizSemaKart(s) {
     <polygon points="722,99 712,105 722,111" fill="#2a78d6"/>
     <text x="741" y="92" font-size="10.5" fill="${sebRenk}" font-weight="600" text-anchor="middle">Çift Yön</text>
 
-    <!-- DÜĞÜM 1: GES Paneller & İnverterler -->
     <g transform="translate(18,22)">
       <rect width="200" height="166" rx="12" fill="#fff" stroke="#F08A24" stroke-width="2"/>
       <rect x="0" y="0" width="200" height="34" rx="12" fill="#FFF4E5"/>
@@ -175,7 +443,6 @@ function cizSemaKart(s) {
       <text x="100" y="142" font-size="11.5" font-weight="600" fill="#2B2F35" text-anchor="middle">${s.kapasite_kwp ? nf(s.kapasite_kwp, 1) + ' kWp Kurulu Güç' : 'GES Üretim Kaynağı'}</text>
     </g>
 
-    <!-- DÜĞÜM 2: GES Üretim Sayacı (OSOS) -->
     <g transform="translate(268,22)">
       <rect width="200" height="166" rx="12" fill="#fff" stroke="#1E9E5A" stroke-width="2"/>
       <rect x="0" y="0" width="200" height="34" rx="12" fill="#E8F5EC"/>
@@ -188,7 +455,6 @@ function cizSemaKart(s) {
       <text x="100" y="142" font-size="11" font-weight="600" fill="#1D6B36" text-anchor="middle">OSOS Resmi Üretim Ölçümü</text>
     </g>
 
-    <!-- DÜĞÜM 3: Fabrika / Tesis Tüketim Sayacı -->
     <g transform="translate(518,22)">
       <rect width="200" height="166" rx="12" fill="#fff" stroke="#2a78d6" stroke-width="2"/>
       <rect x="0" y="0" width="200" height="34" rx="12" fill="#EAF2FD"/>
@@ -201,7 +467,6 @@ function cizSemaKart(s) {
       <text x="100" y="142" font-size="11" font-weight="600" fill="#1956A8" text-anchor="middle">${sayacVar(s) ? 'GES Karşılama: %' + nf(karsilama, 1) : 'Tesis İç Tüketimi'}</text>
     </g>
 
-    <!-- DÜĞÜM 4: OSB Şebeke & Mahsuplaşma -->
     <g transform="translate(764,22)">
       <rect width="178" height="166" rx="12" fill="#fff" stroke="${sebRenk}" stroke-width="2"/>
       <rect x="0" y="0" width="178" height="34" rx="12" fill="${netDenge >= 0 ? '#E8F5EC' : '#EAF2FD'}"/>
@@ -310,8 +575,6 @@ function invSaatlikHesapla(noktalar) {
   return Object.keys(out).length ? out : null;
 }
 
-const tk = (x, sn) => (((x || {}).tuk || {})[sn] || {}).kwh;
-
 async function cizSaatlikOsos(s, el, b) {
   const simdi = new Date(), y = simdi.getFullYear(), a = String(simdi.getMonth() + 1).padStart(2, '0');
   const [osf, invAy, sayacAy] = await Promise.all([
@@ -327,7 +590,6 @@ async function cizSaatlikOsos(s, el, b) {
     return;
   }
 
-  // Tüm sayaçlardaki gün listesini topla
   const tumGunler = [...new Set(snList.flatMap(sn => Object.keys(sayacMap[sn].gun_saat || {})))].sort();
   if (!tumGunler.length) {
     const sonOkumaGun = (osf.son_okuma && osf.son_okuma.gun) || simdi.getDate();
@@ -353,12 +615,10 @@ async function cizSaatlikOsos(s, el, b) {
   const [gy, ga, gd] = SEC_GUN.split('-').map(Number);
   const gunAdi = GUNLER[new Date(Date.UTC(gy, ga - 1, gd)).getUTCDay()];
 
-  // Seçili gün için inverterin 5 dk verisini çekip saatliğe dönüştür
   const gunDosya = SEC_GUN.replace(/-/g, '');
   const invGunNoktalar = invVar(s) ? await al(`${API}/${s.sid}/gun_${gunDosya}.json`, b) : null;
   const invSaat = invSaatlikHesapla(invGunNoktalar);
 
-  // Sayaçları sınıflandır: GES üretim sayacı vs Tüketim/Çift yönlü sayaç
   let th1 = '<th class="sol" rowspan="2">Saat</th>';
   let th2 = '';
   th1 += `<th class="ayr" style="text-align:center" rowspan="2" title="İnverter saatlik üretimi">${invVar(s) ? '☀️ İnverter<br><small>(kWh)</small>' : '☀️ İnverter<br><small>(Bekleniyor)</small>'}</th>`;
@@ -378,7 +638,6 @@ async function cizSaatlikOsos(s, el, b) {
   }
   th1 += `<th class="ayr" style="text-align:center" rowspan="2" title="İnverter üretimi − Sayaç üretimi">İç Tük. / Fark<br><small>(kWh)</small></th>`;
 
-  // Önce 24 saatin verilerini dizi olarak hazırla (hem grafik hem tablo bar ölçeklemesi için)
   const saatEti = [];
   const seriInv = [], seriSayacU = [], seriTuk = [], seriVeris = [];
   let mxSaatDeger = 1;
@@ -466,7 +725,6 @@ async function cizSaatlikOsos(s, el, b) {
   }
   satirlar += `<tr class="top"><td class="sol">Toplam (24 Saat)</td><td class="ayr">${invSaat ? nf(topInv, 2) : '—'}</td>${topHucreler}<td class="ayr">${invSaat ? nf(topFark, 2) : '—'}</td></tr>`;
 
-  // Seçili gün için 24 saatlik görsel grafik serileri
   const saatlikGrafSeriler = [];
   if (invSaat) saatlikGrafSeriler.push({ ad: 'İnverter Üretimi', renk: '#F08A24', v: seriInv });
   saatlikGrafSeriler.push({ ad: 'GES Sayaç Üretimi', renk: '#1E9E5A', v: seriSayacU });
@@ -474,7 +732,6 @@ async function cizSaatlikOsos(s, el, b) {
   if (seriVeris.some(v => v > 0) && snList.some(k => sayacMap[k]._gesMi)) saatlikGrafSeriler.push({ ad: 'Şebekeye Veriş', renk: '#7C3AED', v: seriVeris });
   const saatlikGrafikHtml = cubukN(saatEti, saatlikGrafSeriler, `${gd} ${AYLAR_UZUN[ga - 1]} 24 saatlik üretim ve tüketim profili`);
 
-  // Ayın günleri için Günlük İnverter & Sayaç Karşılaştırma Tablosu
   const invGunMap = Object.fromEntries((invAy || []).map(x => [x.g, x.kwh]));
   const buAyKod = `${y}-${a}`;
   const buAyGunler = tumGunler.filter(g => g.startsWith(buAyKod));
@@ -533,7 +790,7 @@ async function cizSaatlikOsos(s, el, b) {
     + saatlikGrafikHtml
     + `</div>`
     + `<div class="tablo-kutu" style="margin-bottom:18px"><table><thead><tr>${th1}</tr><tr>${th2}</tr></thead><tbody>${satirlar}</tbody></table></div>`
-    + `<h2 style="margin-top:16px">📅 Günlük İnverter ve Sayaç Karşılaştırması (${AYLAR_UZUN[Number(a) - 1]} ${y})</h2>`
+    + `<h2 style="margin-top:16px">📅 Günlük İnverter ve Sayaç Karşılaştırma Tablosu (${AYLAR_UZUN[Number(a) - 1]} ${y})</h2>`
     + `<p class="alt" style="margin-bottom:8px">Tablodaki herhangi bir güne tıklayarak o günün 24 saatlik grafiğini ve sayaç dökümünü yukarıda açabilirsiniz.</p>`
     + `<div class="tablo-kutu"><table><thead><tr><th class="sol">Gün</th><th class="ayr">☀️ İnverter Üretimi (kWh)</th><th>📟 GES Sayaç Üretimi (kWh)</th><th>⚡ Şebekeye Veriş (kWh)</th><th>🏭 Fabrika Tüketimi (kWh)</th><th class="ayr">🎯 Karşılama</th><th class="ayr">İç Tüketim / Fark (kWh)</th></tr></thead><tbody>${gunSatirlar}</tbody></table></div>`;
 }
@@ -601,6 +858,17 @@ function cizInverterTablo(invDetay) {
     + `</tbody></table></div>`;
 }
 
+async function seciliProjeGunlukCiz(s) {
+  const el = $('secili_proje_gunluk');
+  if (!el) return;
+  try {
+    if (!GUNLUK_BELLEK[s.sid]) GUNLUK_BELLEK[s.sid] = await projeGunlukVeriAl(s);
+    el.innerHTML = cizProjeGunlukGrafikKart(s, GUNLUK_BELLEK[s.sid], false);
+  } catch (e) {
+    el.innerHTML = '<div class="hata">' + esc(e.message) + '</div>';
+  }
+}
+
 async function icerikCiz(s) {
   const n = new Date(), y = n.getFullYear(), a = String(n.getMonth() + 1).padStart(2, '0'), g = String(n.getDate()).padStart(2, '0'), b = bel(s.sid), el = $('graf'), sy = s.sayac || {};
   const ts = sy.tuketim_sn || [];
@@ -636,20 +904,25 @@ async function icerikCiz(s) {
       return;
     }
     if (GRAF === 'ay') {
-      const [invAy, sayacAy] = await Promise.all([
-        invVar(s) ? al(`${API}/${s.sid}/ay_${y}${a}.json`, b) : Promise.resolve([]),
-        sayacVar(s) ? al(`${API}/${s.sid}/${invVar(s) ? 'sayac_ay_' : 'ay_'}${y}${a}.json`, b) : Promise.resolve([])
-      ]);
-      const gunSet = [...new Set([...(invAy || []).map(x => x.g), ...(sayacAy || []).map(x => x.g)])].sort((p, q) => p - q);
-      const invMap = Object.fromEntries((invAy || []).map(x => [x.g, x.kwh]));
-      const sayMap = Object.fromEntries((sayacAy || []).map(x => [x.g, x]));
-      const seriler = [];
-      if (invVar(s)) seriler.push({ ad: 'İnverter Üretim', renk: '#F08A24', v: gunSet.map(d => invMap[d] || 0) });
-      if (sayacVar(s)) {
-        seriler.push({ ad: 'Sayaç Üretim (#' + (sy.uretim_sn || s.sid) + ')', renk: '#1E9E5A', v: gunSet.map(d => (sayMap[d] || {}).kwh || 0) });
-        ts.forEach((sn, idx) => seriler.push({ ad: 'Fabrika Tüketim (#' + sn + ')', renk: idx === 0 ? '#2a78d6' : '#2B2F35', v: gunSet.map(d => tk(sayMap[d], sn) || 0) }));
+      if (!GUNLUK_BELLEK[s.sid]) GUNLUK_BELLEK[s.sid] = await projeGunlukVeriAl(s);
+      const v = GUNLUK_BELLEK[s.sid];
+      let tabloSat = '';
+      for (const r of v.satirlar) {
+        const oran = r.tuketim_kwh > 0 ? (r.uretim_kwh / r.tuketim_kwh) * 100 : (r.uretim_kwh > 0 ? 100 : 0);
+        tabloSat += `<tr style="cursor:pointer" onclick="projeGunSec('${esc(s.sid)}','${r.tarih}')">`
+          + `<td class="sol"><b>${r.etiket} ${v.y}</b></td>`
+          + (invVar(s) ? `<td class="ayr">${r.inv_kwh != null ? nf(r.inv_kwh, 2) : '—'}</td>` : '')
+          + `<td class="ayr" style="color:#1D6B36;font-weight:600">${nf(r.uretim_kwh, 2)}</td>`
+          + (sayacVar(s) ? `<td style="color:#1956A8;font-weight:600">${nf(r.tuketim_kwh, 2)}</td><td>${nf(r.veris_kwh, 2)}</td><td class="ayr"><span class="et ${oran >= 100 ? 'ok' : (oran >= 50 ? 'm' : 'u')}">%${nf(oran, 0)}</span></td>` : '')
+          + `</tr>`;
       }
-      el.innerHTML = `<h2>📊 Bu Ay Günlük Üretim ve Tüketim Grafiği (${AYLAR_UZUN[n.getMonth()]} ${y})</h2><p class="alt" style="margin-bottom:8px">Her gün için GES üretimi (yeşil/turuncu) ve fabrika tüketiminin (mavi) karşılaştırması</p>` + cubukN(gunSet.map(d => ({ e: d + ' ' + AYLAR[n.getMonth()], k: d })), seriler, 'Bu ay günlük inverter ve sayaç verileri');
+      el.innerHTML = cizProjeGunlukGrafikKart(s, v, false)
+        + `<h2 style="margin-top:14px">📋 Günlük Üretim ve Tüketim Tablosu (${AYLAR_UZUN[v.a - 1]} ${v.y})</h2>`
+        + `<div class="tablo-kutu"><table><thead><tr><th class="sol">Tarih</th>`
+        + (invVar(s) ? `<th class="ayr">☀️ İnverter Üretimi (kWh)</th>` : '')
+        + `<th class="ayr">🟢 Günlük Üretim (kWh)</th>`
+        + (sayacVar(s) ? `<th>🔵 Günlük Tüketim (kWh)</th><th>🟣 Şebekeye Veriş (kWh)</th><th class="ayr">🎯 Karşılama</th>` : '')
+        + `</tr></thead><tbody>${tabloSat}</tbody></table></div>`;
       return;
     }
     if (GRAF === 'yil') {
@@ -681,7 +954,6 @@ async function icerikCiz(s) {
       const anah = [...new Set(sat.flatMap(([, v]) => v.map(z => z.yil * 100 + z.ay)))].sort((p, q) => q - p);
       const sonAyAnah = anah[0];
 
-      // Bu ay için görsel reaktif sınır barları
       const reaktifKartlar = sat.map(([ad, v]) => {
         const z = v.find(q => q.yil * 100 + q.ay === sonAyAnah) || {};
         const ind = z.ind || 0, kap = z.kap || 0;
@@ -717,7 +989,7 @@ function ciz(toplayici = TOP) {
   const sekmeler = [];
   if (sayacVar(s)) sekmeler.push(['saatlik', '⏱️ Saatlik (Sayaç & İnverter)']);
   if (s.inverter_sayisi || s.kaynak === 'fronius') sekmeler.push(['inverterler', `🔌 İnverterler (${s.inverter_sayisi || 11} Cihaz)`]);
-  sekmeler.push(['ay', '📊 Bu Ay (Günlük)'], ['yil', '📅 Son 12 Ay'], ['gun', '📈 Gün İçi Güç']);
+  sekmeler.push(['ay', '📊 Bu Ay (Günlük Tablo)'], ['yil', '📅 Son 12 Ay'], ['gun', '📈 Gün İçi Güç']);
   if (sayacVar(s)) sekmeler.push(['reaktif', '🛡️ Reaktif']);
   if (!GRAF || !sekmeler.some(([k]) => k === GRAF)) GRAF = sayacVar(s) ? 'saatlik' : 'gun';
 
@@ -730,7 +1002,30 @@ function ciz(toplayici = TOP) {
     'son okuma ' + zaman(s.son_veri)
   ].filter(Boolean).join(' · ');
 
-  let h = `<div class="bas"><div><h1>${esc(s.ad)}</h1><p class="alt">${altBilgi}</p></div>`
+  let h = '';
+
+  // Birden fazla proje varsa: Hızlı Proje Sekmeleri + Her Proje İçin Günlük Üretim & Tüketim Grafikleri Panosu
+  if (SANT.length > 1) {
+    h += `<div class="proje-sekmeler">`
+      + SANT.map(x => `<button type="button" class="proje-sekme${x.sid === SEC ? ' on' : ''}" onclick="SEC='${esc(x.sid)}';SEC_GUN=null;GRAF=null;ciz()"><span>${sayacVar(x) ? '🏭' : '☀️'}</span><span>${esc(x.ad)}</span></button>`).join('')
+      + `<button type="button" class="btn" style="margin-left:auto" onclick="TUM_ACIK=!TUM_ACIK;ciz()">${TUM_ACIK ? '▲ Tüm Projelerin Günlük Grafiklerini Gizle' : '📊 Tüm Projelerin Günlük Üretim/Tüketim Grafiklerini Göster'}</button>`
+      + `</div>`;
+
+    if (TUM_ACIK) {
+      h += `<div class="kart" style="background:#EFF4FA;border-color:#CBD5E1">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <div>
+            <h2 style="margin:0;font-size:18px">📊 Tüm Projeler · Günlük Üretim ve Tüketim Grafikleri (${SANT.length} Proje)</h2>
+            <p class="alt">Her proje için bu ayın günlük GES üretimi (yeşil/turuncu) ve fabrika tüketimi (mavi) karşılaştırma grafikleri</p>
+          </div>
+          <span class="et m">Her Proje İçin Günlük Grafik</span>
+        </div>
+        <div id="tum_projeler_grafik"><div class="bos">Projelerin günlük üretim ve tüketim grafikleri yükleniyor…</div></div>
+      </div>`;
+    }
+  }
+
+  h += `<div class="bas"><div><h1>${esc(s.ad)}</h1><p class="alt">${altBilgi}</p></div>`
     + (SANT.length > 1 ? `<select onchange="SEC=this.value;SEC_GUN=null;GRAF=null;ciz()">${SANT.map(x => `<option value="${esc(x.sid)}"${x.sid === SEC ? ' selected' : ''}>${esc(x.ad)}</option>`).join('')}</select>` : '') + '</div>';
 
   h += `<div class="kpi">`
@@ -746,6 +1041,11 @@ function ciz(toplayici = TOP) {
   // Şematik Tek Hat ve Enerji Dengesi Kartı
   h += cizSemaKart(s);
 
+  // Tek proje görünümündeyken (veya tüm projeler kapalıyken) seçili projenin Günlük Üretim & Tüketim Grafiği her zaman doğrudan görünür
+  if (SANT.length === 1 || !TUM_ACIK) {
+    h += `<div id="secili_proje_gunluk"></div>`;
+  }
+
   h += `<div class="kart"><div class="sek">${sekmeler.map(([k, a]) => `<button class="${GRAF === k ? 'on' : ''}" onclick="GRAF='${k}';ciz()">${a}</button>`).join('')}</div><div id="graf"></div></div>`;
 
   const al_ = s.alarmlar || [];
@@ -753,12 +1053,16 @@ function ciz(toplayici = TOP) {
 
   if (S.ka && toplayici) h += `<p class="alt">Toplayıcı (yalnız yönetici): ${toplayici.tamam ? 'çalışıyor' : 'HATA — ' + esc(toplayici.hata || '')} · son tur ${zaman(toplayici.zaman)}</p>`;
   $('ana').innerHTML = h;
+
+  if (SANT.length > 1 && TUM_ACIK) tumProjelerGunlukCiz();
+  else seciliProjeGunlukCiz(s);
+
   icerikCiz(s);
 }
 
-document.addEventListener('mousemove', e => { const t = e.target.closest && e.target.closest('[data-t]'), tip = $('tip'); if (!t) { tip.style.display = 'none'; return; } tip.textContent = t.dataset.t; tip.style.display = 'block'; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 28) + 'px'; });
+document.addEventListener('mousemove', e => { const t = e.target.closest && e.target.closest('[data-t]'), tip = $('tip'); if (!t) { tip.style.display = 'none'; return; } tip.textContent = t.dataset.t; tip.style.display = 'block'; tip.style.left = Math.min(window.innerWidth - 350, e.clientX + 12) + 'px'; tip.style.top = Math.max(8, e.clientY - 34) + 'px'; });
 let TOP = null;
-async function yukle() { try { [SANT, TOP] = await liste(); ciz(TOP); } catch (e) { $('ana').innerHTML = '<div class="hata">' + esc(e.message) + '</div>'; } }
+async function yukle() { try { GUNLUK_BELLEK = {}; [SANT, TOP] = await liste(); ciz(TOP); } catch (e) { $('ana').innerHTML = '<div class="hata">' + esc(e.message) + '</div>'; } }
 (async () => {
   S = oturum();
   if (!S || !(S.ka || (S.musteri && Object.keys(S.musteri).length))) { location.replace('../?git=musteri'); return; }

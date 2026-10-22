@@ -300,18 +300,70 @@ async function cizSaatlikOsos(s, el, b) {
     + `<div class="tablo-kutu"><table><thead><tr><th class="sol">Gün</th><th class="ayr">İnverter Üretimi (kWh)</th><th>GES Sayaç Üretimi (kWh)</th><th>Şebekeye Veriş (kWh)</th><th>Fabrika Tüketimi / Çekiş (kWh)</th><th class="ayr">İç Tüketim / Fark (kWh)</th></tr></thead><tbody>${gunSatirlar}</tbody></table></div>`;
 }
 
+function cizInverterTablo(invDetay) {
+  if (!invDetay || !invDetay.cihazlar || !invDetay.cihazlar.length) return '';
+  const ch = (c, k, carpan = 1, h = 1) => {
+    const o = (c.kanallar || {})[k];
+    return o && o.deger != null ? nf(o.deger * carpan, h) : '—';
+  };
+  let topGuc = 0, topGun = 0, topAy = 0;
+  const satirlar = invDetay.cihazlar.map(c => {
+    const kw = (c.guc_w || 0) / 1000;
+    const gun = c.gunluk_kwh || 0;
+    const ay = c.aylik_kwh || 0;
+    topGuc += kw; topGun += gun; topAy += ay;
+    return `<tr>`
+      + `<td class="sol"><b>${esc(c.ad)}</b></td>`
+      + `<td class="ayr">${nf(kw, 2)}</td>`
+      + `<td><b>${nf(gun, 2)}</b></td>`
+      + `<td>${ay ? nf(ay, 1) : '—'}</td>`
+      + `<td class="ayr">${ch(c, 'udcmean', 1, 0)} V / ${ch(c, 'idcmean', 1, 1)} A</td>`
+      + `<td class="ayr">${ch(c, 'uacmeanl1', 1, 0)} / ${ch(c, 'uacmeanl2', 1, 0)} / ${ch(c, 'uacmeanl3', 1, 0)}</td>`
+      + `<td>${ch(c, 'iacmeanl1', 1, 1)} / ${ch(c, 'iacmeanl2', 1, 1)} / ${ch(c, 'iacmeanl3', 1, 1)}</td>`
+      + `<td class="ayr">${ch(c, 'powerreactive', 0.001, 2)} kVAr</td>`
+      + `<td>${ch(c, 'cosphi', 1, 2)}</td>`
+      + `</tr>`;
+  }).join('');
+  return `<h2 style="margin-top:18px">Fronius Solar.web · İnverter Okumaları (${invDetay.cihazlar.length} Cihaz)</h2>`
+    + `<p class="alt" style="margin-bottom:8px">Her bir Tauro inverterin anlık gücü, günlük/aylık üretimi ve son DC/AC elektriksel ölçümleri</p>`
+    + `<div class="tablo-kutu"><table><thead><tr>`
+    + `<th class="sol">İnverter</th><th class="ayr">Anlık Güç (kW)</th><th>Bugün Üretim (kWh)</th><th>Bu Ay Üretim (kWh)</th>`
+    + `<th class="ayr">DC MPP1 (V / A)</th><th class="ayr">AC Gerilim L1/L2/L3 (V)</th><th>AC Akım L1/L2/L3 (A)</th>`
+    + `<th class="ayr">Reaktif Güç</th><th>CosPhi</th>`
+    + `</tr></thead><tbody>${satirlar}`
+    + `<tr class="top"><td class="sol">Toplam (${invDetay.cihazlar.length} İnverter)</td><td class="ayr">${nf(topGuc, 2)}</td><td>${nf(topGun, 2)}</td><td>${topAy ? nf(topAy, 1) : '—'}</td><td class="ayr" colspan="5"></td></tr>`
+    + `</tbody></table></div>`;
+}
+
 async function icerikCiz(s) {
   const n = new Date(), y = n.getFullYear(), a = String(n.getMonth() + 1).padStart(2, '0'), g = String(n.getDate()).padStart(2, '0'), b = bel(s.sid), el = $('graf'), sy = s.sayac || {};
   const ts = sy.tuketim_sn || [];
   el.innerHTML = '<div class="bos">Yükleniyor…</div>';
   try {
     if (GRAF === 'saatlik') {
-      return await cizSaatlikOsos(s, el, b);
+      await cizSaatlikOsos(s, el, b);
+      if (invVar(s)) {
+        const invDetay = await al(`${API}/${s.sid}/inverterler.json`, b);
+        if (invDetay) el.insertAdjacentHTML('beforeend', cizInverterTablo(invDetay));
+      }
+      return;
+    }
+    if (GRAF === 'inverterler') {
+      const [noktalar, invDetay] = await Promise.all([
+        invVar(s) ? al(`${API}/${s.sid}/gun_${y}${a}${g}.json`, b) : Promise.resolve(null),
+        al(`${API}/${s.sid}/inverterler.json`, b)
+      ]);
+      el.innerHTML = (invDetay ? cizInverterTablo(invDetay) : '<div class="bos">İnverter detay verisi bulunamadı.</div>')
+        + (noktalar && noktalar.length ? `<h2 style="margin-top:18px">Bugün 5 Dakikalık Toplam İnverter Güç Eğrisi (kW)</h2>` + cizgi(noktalar, s.kapasite_kwp) : '');
+      return;
     }
     if (GRAF === 'gun') {
       if (invVar(s)) {
-        const noktalar = await al(`${API}/${s.sid}/gun_${y}${a}${g}.json`, b);
-        el.innerHTML = cizgi(noktalar, s.kapasite_kwp);
+        const [noktalar, invDetay] = await Promise.all([
+          al(`${API}/${s.sid}/gun_${y}${a}${g}.json`, b),
+          al(`${API}/${s.sid}/inverterler.json`, b)
+        ]);
+        el.innerHTML = cizgi(noktalar, s.kapasite_kwp) + (invDetay ? cizInverterTablo(invDetay) : '');
       } else {
         el.innerHTML = '<div class="bos">Bu tesis için inverter bağlantısı eklendiğinde 5 dakikalık anlık güç eğrisi burada görüntülenecektir. Saatlik üretim ve tüketim dökümü için <b>Saatlik (Sayaç & İnverter)</b> sekmesini kullanabilirsiniz.</div>';
       }
@@ -375,6 +427,7 @@ function ciz(toplayici = TOP) {
   const bugunTuk = ts.reduce((t, sn) => t + ((sy.bugun_tuketim || {})[sn] || 0), 0);
   const sekmeler = [];
   if (sayacVar(s)) sekmeler.push(['saatlik', 'Saatlik (Sayaç & İnverter)']);
+  if (s.inverter_sayisi || s.kaynak === 'fronius') sekmeler.push(['inverterler', `İnverterler (${s.inverter_sayisi || 11} Cihaz)`]);
   sekmeler.push(['ay', 'Bu Ay (Günlük)'], ['yil', 'Son 12 Ay'], ['gun', 'Gün İçi Güç (İnverter)']);
   if (sayacVar(s)) sekmeler.push(['reaktif', 'Reaktif']);
   if (!GRAF || !sekmeler.some(([k]) => k === GRAF)) GRAF = sayacVar(s) ? 'saatlik' : 'gun';

@@ -35,12 +35,18 @@ jobs:
           OSB_S_2: ${{ secrets.OSB_SIFRE_2 }}
           OSB_K_3: ${{ secrets.OSB_KULLANICI_3 }}
           OSB_S_3: ${{ secrets.OSB_SIFRE_3 }}
+          FR_K_HAS: ${{ secrets.FRONIUS_GIRIS_HASGERIDONUSUM }}
+          FR_S_HAS1: ${{ secrets.FRONIUS_SIFRE_HASGERIDUNUS }}
+          FR_S_HAS2: ${{ secrets.FRONIUS_SIFRE_HASGERIDONUSUM }}
+          SW_COOKIE: ${{ secrets.SOLARWEB_COOKIE }}
           ACE_OTURUM: ${{ secrets.ACE_OTURUM }}
         run: |
           set -euo pipefail
           ENV=$(python3 -c "import os; e=['','_TATMAK','_HASGERIDONUSUM','_2','_3','_4','_5']; print(''.join(f'SOLARMAN_KULLANICI{x}={os.environ[\"SK\"+x]}\nSOLARMAN_SIFRE{x}={os.environ[\"SS\"+x]}\n' for x in e if os.environ.get('SK'+x) and os.environ.get('SS'+x)),end='')")
           OSB=$(python3 -c "import os; e=['','_HASGERIDONUSUM','_TATMAK','_2','_3']; print('\n'.join(f'OSB_KULLANICI{x}={os.environ[\"OSB_K\"+x].strip()}\nOSB_SIFRE{x}={os.environ[\"OSB_S\"+x].strip()}' for x in e if os.environ.get('OSB_K'+x,'').strip() and os.environ.get('OSB_S'+x,'').strip()), end='')")
           [ -n "$OSB" ] && ENV="${ENV:+${ENV}$'\n'}${OSB}" && echo "::notice::OSB Ace Center hesap sayısı: $(printf '%s\n' "$OSB" | grep -c '^OSB_KULLANICI')"
+          FR=$(python3 -c "import os; k=os.environ.get('FR_K_HAS','').strip(); s=(os.environ.get('FR_S_HAS1','') or os.environ.get('FR_S_HAS2','')).strip(); c=os.environ.get('SW_COOKIE','').replace(chr(13),' ').replace(chr(10),' ').strip(); out=[]; k and s and out.append(f'FRONIUS_GIRIS_HASGERIDONUSUM={k}\nFRONIUS_SIFRE_HASGERIDUNUS={s}'); c and out.append(f'SOLARWEB_COOKIE={c}'); print('\n'.join(out), end='')")
+          [ -n "$FR" ] && ENV="${ENV:+${ENV}$'\n'}${FR}" && echo "::notice::Fronius Solar.web (HAS Geri Dönüşüm) tanımlı"
           # İsteğe bağlı yedek: oturum çerezi
           ACE=$(python3 -c "import os; v=os.environ.get('ACE_OTURUM','').replace(chr(13),' ').replace(chr(10),' ').strip(); v=v[7:].strip() if v.lower().startswith('cookie:') else v; print(f'ACE_OTURUM={v}' if v else '')")
           [ -n "$ACE" ] && ENV="${ENV:+${ENV}$'\n'}${ACE}" && echo "::notice::Ace Center oturumu tanımlı"

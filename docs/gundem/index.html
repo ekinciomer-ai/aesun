@@ -126,6 +126,40 @@
   .etk{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
   .etk span{font-size:11.5px;color:var(--ink2);background:var(--soft);border:1px solid var(--line);border-radius:99px;padding:2px 9px;font-weight:500}
   .gdurum{padding:48px 0;text-align:center;color:var(--mut2)}
+
+  /* GÖRÜNÜM 3: GERİYE DÖNÜK RESMÎ GAZETE YÖNETMELİK & BAĞLI TEBLİĞ ARŞİVİ */
+  .rg-agac-liste{display:flex;flex-direction:column;gap:22px}
+  .rg-ana-kart{background:#fff;border:1px solid var(--line);border-top:5px solid var(--red);border-radius:16px;padding:20px 22px;box-shadow:0 4px 18px rgba(20,24,31,.04)}
+  .rg-ana-ust{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .rg-ana-baslik{font-family:Archivo,sans-serif;font-weight:800;font-size:19px;color:var(--ink);margin:4px 0 6px}
+  .rg-ana-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px;color:var(--mut)}
+  .rg-kok-badge{background:#2B2E33;color:#fff;font-family:Archivo,sans-serif;font-weight:700;font-size:11.5px;padding:3px 10px;border-radius:6px}
+  .rg-dayanak-badge{background:#EEF4FB;color:#1F508B;font-weight:700;font-size:11.5px;padding:3px 10px;border-radius:6px;border:1px solid #C9DDF3}
+  .rg-sayac-badge{background:#FBE9EA;color:var(--red-d);font-family:Archivo,sans-serif;font-weight:800;font-size:12px;padding:5px 12px;border-radius:99px;white-space:nowrap}
+  .rg-ana-aciklama{margin:10px 0 0;font-size:13.8px;color:var(--mut);line-height:1.55}
+  .rg-teblig-serit{margin-top:12px;background:#FAFBFD;border:1px dashed #CFD5DE;border-left:4px solid #1F508B;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink2);line-height:1.5}
+  .rg-teblig-serit b{color:#1F508B;font-family:Archivo,sans-serif;text-transform:uppercase;font-size:11.5px;letter-spacing:.04em;margin-right:6px}
+  .rg-zincir{position:relative;margin-top:16px;padding-left:22px;border-left:3px solid #E2E6EE;display:flex;flex-direction:column;gap:14px}
+  .rg-adim{position:relative;background:#FAFBFD;border:1px solid var(--line);border-radius:13px;padding:16px 18px;transition:border-color .15s,box-shadow .15s}
+  .rg-adim:hover{border-color:#B8C2D1;box-shadow:0 4px 14px rgba(20,24,31,.05)}
+  .rg-adim::before{content:"";position:absolute;left:-29px;top:20px;width:11px;height:11px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 0 0 2px var(--red)}
+  .rg-adim.tur-teblig::before{background:#1F508B;box-shadow:0 0 0 2px #1F508B}
+  .rg-adim.tur-kok::before{background:#1E9E5A;box-shadow:0 0 0 2px #1E9E5A}
+  .rg-adim-ust{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .rg-adim-sol{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .rg-tur-rozet{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:3px 9px;border-radius:99px;background:#FBE9EA;color:var(--red-d)}
+  .rg-adim.tur-teblig .rg-tur-rozet{background:#EEF4FB;color:#1F508B}
+  .rg-adim.tur-kok .rg-tur-rozet{background:#EAF7F0;color:#1E9E5A}
+  .rg-bag-etiket{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#1F508B;background:#F2F6FC;border:1px solid #D5E3F7;border-radius:7px;padding:4px 10px;margin:4px 0 8px}
+  .rg-adim h4{margin:0 0 10px;font-family:Archivo,sans-serif;font-weight:800;font-size:16px;color:var(--ink);line-height:1.38}
+  .rg-adim h4 a{color:var(--ink);text-decoration:none}.rg-adim h4 a:hover{color:var(--red-d)}
+  .rg-matris-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:8px}
+  .rg-kutu{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.5;color:var(--ink2)}
+  .rg-kutu b.k-bas{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+  .rg-kutu.k-eski{border-top:3px solid #9AA2AD}.rg-kutu.k-eski b.k-bas{color:#5A6270}
+  .rg-kutu.k-yeni{border-top:3px solid #1E9E5A}.rg-kutu.k-yeni b.k-bas{color:#1E9E5A}
+  .rg-kutu.k-analiz{border-top:3px solid var(--red)}.rg-kutu.k-analiz b.k-bas{color:var(--red-d)}
+  .rg-alt-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:8px;border-top:1px solid #ECEFF4}
 </style>
 </head>
 <body>
@@ -149,9 +183,10 @@
 </div></section>
 
 <div class="wrap tabs-bar">
-  <div class="tabs" id="tabs" role="tablist">
+    <div class="tabs" id="tabs" role="tablist">
     <button type="button" data-v="sema" aria-pressed="true">1. Şematik Mimari &amp; Karşılaştırma Tablosu <span class="sy" id="mevSay">(12)</span></button>
-    <button type="button" data-v="gundem" aria-pressed="false">2. Güncel Haber &amp; Duyuru Analizi <span class="sy" id="habSay"></span></button>
+    <button type="button" data-v="arsiv" aria-pressed="false">2. Resmî Gazete Yönetmelik &amp; Tebliğ Arşivi (Geriye Dönük) <span class="sy" id="arsivSay">(6 Yönetmelik · 22 RG)</span></button>
+    <button type="button" data-v="gundem" aria-pressed="false">3. Güncel Haber &amp; Duyuru Analizi <span class="sy" id="habSay"></span></button>
   </div>
 </div>
 
@@ -540,6 +575,48 @@
 
 </div>
 
+<!-- GÖRÜNÜM 3: GERİYE DÖNÜK RESMÎ GAZETE YÖNETMELİK & BAĞLI TEBLİĞ / KARAR ARŞİVİ -->
+<div class="wrap gnd" id="view-arsiv" hidden>
+  <div class="flt-bar">
+    <div class="flt-ust">
+      <div class="ara">
+        <input type="search" id="arsivAra" placeholder="Resmî Gazete sayısı (33407, 33405, 30772), karar/tebliğ no (14909, 14531, 14671), madde veya konu ara…" autocomplete="off">
+      </div>
+      <span class="dedup-bilgi" id="arsivBilgi">6 Ana Yönetmelik · 22 Geriye Dönük RG &amp; Tebliğ Analizi</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <div class="flabel" style="margin-bottom:6px">Ana Yönetmelik &amp; Mevzuat Kümesi</div>
+        <div class="chips" id="arsivGrupFilt" role="group" aria-label="Ana Yönetmelik Kümesi"></div>
+      </div>
+      <div>
+        <div class="flabel" style="margin-bottom:6px">Görünüm Modu</div>
+        <div class="chips kayn" id="arsivModFilt" role="group" aria-label="Görünüm Modu">
+          <button type="button" data-m="agac" aria-pressed="true">Hiyerarşik (Yönetmelik + Bağlı Tebliğler)</button>
+          <button type="button" data-m="kronolojik" aria-pressed="false">Geriye Dönük Kronolojik (2026 → 2013)</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap">
+      <div>
+        <div class="flabel" style="margin-bottom:6px">Mevzuat Türü</div>
+        <div class="chips" id="arsivTurFilt" role="group" aria-label="Mevzuat Türü">
+          <button type="button" data-t="hepsi" aria-pressed="true">Tümü</button>
+          <button type="button" data-t="yonetmelik" aria-pressed="false">Ana / Değişiklik Yönetmeliği</button>
+          <button type="button" data-t="teblig" aria-pressed="false">Bağlı Tebliğ / Usul &amp; Esaslar / Kurul Kararı</button>
+        </div>
+      </div>
+      <div>
+        <div class="flabel" style="margin-bottom:6px">Yayın Yılı (Geriye Dönük)</div>
+        <div class="chips" id="arsivYilFilt" role="group" aria-label="Yayın Yılı"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rg-agac-liste" id="arsivListe"></div>
+  <div class="gdurum" id="arsivDurum" hidden>Eşleşen yönetmelik veya tebliğ kaydı bulunamadı.</div>
+</div>
+
 <!-- GÖRÜNÜM 2: TEKİLLEŞTİRİLMİŞ HABER & DUYURU AKIŞI -->
 <div class="wrap gnd" id="view-gundem" hidden>
   <div class="flt-bar">
@@ -897,12 +974,207 @@
 
   el("ara").addEventListener("input", function(){ q = el("ara").value.trim().toLocaleLowerCase("tr"); ciz(); });
 
+
+  /* 2B. GERİYE DÖNÜK RESMÎ GAZETE YÖNETMELİK & BAĞLI TEBLİĞ ARŞİVİ */
+  var arsivGrup = "hepsi", arsivTur = "hepsi", arsivYil = "hepsi", arsivMod = "agac", arsivQ = "";
+
+  function turSinifiBul(turStr){
+    var s = String(turStr||"").toLocaleLowerCase("tr");
+    if(s.indexOf("ana yönetmelik")>=0 || s.indexOf("kök")>=0) return "tur-kok";
+    if(s.indexOf("tebliğ")>=0 || s.indexOf("usul")>=0 || s.indexOf("karar")>=0) return "tur-teblig";
+    return "tur-yon";
+  }
+
+  function kayitEslesiyorMu(k, g){
+    if(arsivGrup!=="hepsi" && g.grup_id!==arsivGrup) return false;
+    if(arsivYil!=="hepsi"){
+      if(arsivYil==="2023-2013"){
+        if(Number(k.yil||2026) > 2023) return false;
+      } else if(String(k.yil)!==arsivYil){
+        return false;
+      }
+    }
+    if(arsivTur!=="hepsi"){
+      var ts = String(k.tur||"").toLocaleLowerCase("tr");
+      var isTeb = (ts.indexOf("tebliğ")>=0 || ts.indexOf("usul")>=0 || ts.indexOf("karar")>=0) && ts.indexOf("değişiklik yönetmeliği")<0;
+      if(arsivTur==="teblig" && !isTeb) return false;
+      if(arsivTur==="yonetmelik" && isTeb) return false;
+    }
+    if(arsivQ){
+      var saman = (
+        (g.ana_baslik||"")+" "+(g.bagli_teblig_ozet||"")+" "+
+        (k.rg||"")+" "+(k.tur||"")+" "+(k.bagli_oldugu||"")+" "+
+        (k.baslik||"")+" "+(k.onceki||"")+" "+(k.yeni||"")+" "+
+        (k.analiz||"")+" "+(k.aksiyon||"")+" "+((k.maddeler||[]).join(" "))
+      ).toLocaleLowerCase("tr");
+      if(saman.indexOf(arsivQ)<0) return false;
+    }
+    return true;
+  }
+
+  function renderArsivAdim(k, anaBaslikGoster){
+    var sinif = turSinifiBul(k.tur);
+    var mads = (k.maddeler||[]).map(function(m){ return '<span>'+esc(m)+'</span>'; }).join("");
+    var baslikHtml = k.url
+      ? '<a href="'+esc(k.url)+'" target="_blank" rel="noopener">'+esc(k.baslik)+'</a>'
+      : esc(k.baslik);
+    var ustBag = anaBaslikGoster
+      ? ('<div style="font-size:11.5px;font-weight:800;color:var(--red-d);margin-bottom:3px">📂 ANA YÖNETMELİK: '+esc(anaBaslikGoster)+'</div>')
+      : '';
+    var lnk = k.url
+      ? '<a href="'+esc(k.url)+'" target="_blank" rel="noopener" style="color:var(--red-d);font-weight:700;font-size:12.5px;text-decoration:none">Resmî Gazete Metnini Aç →</a>'
+      : '';
+    return '<div class="rg-adim '+sinif+'">'
+      + ustBag
+      + '<div class="rg-adim-ust">'
+        + '<div class="rg-adim-sol">'
+          + '<span class="rg-tag" style="margin:0">'+esc(k.rg||fmtTarih(k.tarih))+'</span>'
+          + '<span class="rg-tur-rozet">'+esc(k.tur||"Yönetmelik")+'</span>'
+        + '</div>'
+        + '<span class="tarih-badge">'+esc(fmtTarih(k.tarih))+'</span>'
+      + '</div>'
+      + '<div class="rg-bag-etiket">🔗 <span><b>Bağlı Yönetmelik / Tebliğ Maddesi:</b> '+esc(k.bagli_oldugu||"—")+'</span></div>'
+      + '<h4>'+baslikHtml+'</h4>'
+      + '<div class="rg-matris-3">'
+        + '<div class="rg-kutu k-eski"><b class="k-bas">1 · Önceki Uygulama (Geriye Dönük Karşılaştırma)</b>'+esc(k.onceki||"—")+'</div>'
+        + '<div class="rg-kutu k-yeni"><b class="k-bas">2 · Yeni Düzenleme &amp; Bağlı Tebliğ Hükmü</b>'+esc(k.yeni||"—")+'</div>'
+        + '<div class="rg-kutu k-analiz"><b class="k-bas">3 · Mühendislik Analizi &amp; Zorunlu Aksiyon</b>'+esc(k.analiz||"")+(k.aksiyon ? ('<div style="margin-top:6px;padding-top:6px;border-top:1px dashed #E2E6EE;font-weight:700;color:var(--red-d)">⚡ Aksiyon: '+esc(k.aksiyon)+'</div>') : '')+'</div>'
+      + '</div>'
+      + '<div class="rg-alt-bar"><div class="mad-list" style="margin:0">'+mads+'</div>'+lnk+'</div>'
+      + '</div>';
+  }
+
+  function arsivFiltreleriCiz(){
+    if(!mevVeri || !mevVeri.yonetmelik_agaci) return;
+    var agac = mevVeri.yonetmelik_agaci;
+    var topKayit = 0;
+    agac.forEach(function(g){ topKayit += (g.kayitlar||[]).length; });
+    if(el("arsivSay")) el("arsivSay").textContent = "(" + agac.length + " Yönetmelik · " + topKayit + " RG)";
+
+    var gHtml = '<button type="button" data-g="hepsi" aria-pressed="true">Tümü <span>('+agac.length+' Küme · '+topKayit+' RG)</span></button>';
+    agac.forEach(function(g){
+      var kisa = g.ana_baslik.replace("Elektrik Piyasasında ","").replace("Elektrik Piyasası ","");
+      if(kisa.length > 38) kisa = kisa.slice(0,36) + "…";
+      gHtml += '<button type="button" data-g="'+esc(g.grup_id)+'" aria-pressed="false">'+esc(kisa)+' <span>('+(g.kayitlar||[]).length+')</span></button>';
+    });
+    el("arsivGrupFilt").innerHTML = gHtml;
+    el("arsivGrupFilt").querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        arsivGrup = b.getAttribute("data-g");
+        el("arsivGrupFilt").querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        b.setAttribute("aria-pressed","true");
+        arsivCiz();
+      });
+    });
+
+    var yilSay = {"2026":0, "2024":0, "2023-2013":0};
+    agac.forEach(function(g){
+      (g.kayitlar||[]).forEach(function(k){
+        var y = Number(k.yil||2026);
+        if(y===2026) yilSay["2026"]++;
+        else if(y===2024) yilSay["2024"]++;
+        else yilSay["2023-2013"]++;
+      });
+    });
+    el("arsivYilFilt").innerHTML =
+      '<button type="button" data-y="hepsi" aria-pressed="true">Tümü <span>('+topKayit+')</span></button>'
+      +'<button type="button" data-y="2026" aria-pressed="false">2026 <span>('+yilSay["2026"]+')</span></button>'
+      +'<button type="button" data-y="2024" aria-pressed="false">2024 <span>('+yilSay["2024"]+')</span></button>'
+      +'<button type="button" data-y="2023-2013" aria-pressed="false">2023–2013 Kök Mevzuat <span>('+yilSay["2023-2013"]+')</span></button>';
+    el("arsivYilFilt").querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        arsivYil = b.getAttribute("data-y");
+        el("arsivYilFilt").querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        b.setAttribute("aria-pressed","true");
+        arsivCiz();
+      });
+    });
+
+    el("arsivTurFilt").querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        arsivTur = b.getAttribute("data-t");
+        el("arsivTurFilt").querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        b.setAttribute("aria-pressed","true");
+        arsivCiz();
+      });
+    });
+
+    el("arsivModFilt").querySelectorAll("button").forEach(function(b){
+      b.addEventListener("click", function(){
+        arsivMod = b.getAttribute("data-m");
+        el("arsivModFilt").querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed","false"); });
+        b.setAttribute("aria-pressed","true");
+        arsivCiz();
+      });
+    });
+  }
+
+  function arsivCiz(){
+    if(!mevVeri || !mevVeri.yonetmelik_agaci) return;
+    var agac = mevVeri.yonetmelik_agaci;
+    var topGosterilen = 0, html = "";
+
+    if(arsivMod === "agac"){
+      agac.forEach(function(g){
+        var eslesenler = (g.kayitlar||[]).filter(function(k){ return kayitEslesiyorMu(k, g); });
+        if(!eslesenler.length) return;
+        topGosterilen += eslesenler.length;
+        html += '<section class="rg-ana-kart">'
+          + '<div class="rg-ana-ust">'
+            + '<div>'
+              + '<div class="rg-ana-meta">'
+                + '<span class="rg-kok-badge">Kök RG: '+esc(g.kok_rg)+'</span>'
+                + '<span class="rg-dayanak-badge">Dayanak: '+esc(g.dayanak)+'</span>'
+                + '<span>Kurum: <b>'+esc(g.kurum)+'</b></span>'
+              + '</div>'
+              + '<h3 class="rg-ana-baslik">'+esc(g.ana_baslik)+'</h3>'
+              + '<p class="rg-ana-aciklama">'+esc(g.aciklama)+'</p>'
+            + '</div>'
+            + '<span class="rg-sayac-badge">'+eslesenler.length+' Geriye Dönük RG / Tebliğ</span>'
+          + '</div>'
+          + '<div class="rg-teblig-serit"><b>📌 Bağlı Tebliğler, Usul/Esaslar ve Kurul Kararları:</b> '+esc(g.bagli_teblig_ozet)+'</div>'
+          + '<div class="rg-zincir">'
+            + eslesenler.map(function(k){ return renderArsivAdim(k, ""); }).join("")
+          + '</div>'
+          + '</section>';
+      });
+    } else {
+      var duzListe = [];
+      agac.forEach(function(g){
+        (g.kayitlar||[]).forEach(function(k){
+          if(kayitEslesiyorMu(k, g)){
+            duzListe.push({k: k, ana: g.ana_baslik});
+          }
+        });
+      });
+      duzListe.sort(function(a,b){ return String(b.k.tarih||"").localeCompare(String(a.k.tarih||"")); });
+      topGosterilen = duzListe.length;
+      if(duzListe.length){
+        html = '<section class="rg-ana-kart"><div class="rg-zincir" style="margin-top:0">'
+          + duzListe.map(function(x){ return renderArsivAdim(x.k, x.ana); }).join("")
+          + '</div></section>';
+      }
+    }
+
+    el("arsivListe").innerHTML = html;
+    el("arsivDurum").hidden = topGosterilen > 0;
+    el("arsivBilgi").textContent = topGosterilen + " geriye dönük yönetmelik, tebliğ ve kurul kararı gösteriliyor";
+  }
+
+  if(el("arsivAra")){
+    el("arsivAra").addEventListener("input", function(){
+      arsivQ = el("arsivAra").value.trim().toLocaleLowerCase("tr");
+      arsivCiz();
+    });
+  }
+
   /* Sekme geçişi */
   el("tabs").querySelectorAll("button").forEach(function(b){
     b.addEventListener("click", function(){
       var v = b.getAttribute("data-v");
       el("tabs").querySelectorAll("button").forEach(function(x){ x.setAttribute("aria-pressed", x===b?"true":"false"); });
       el("view-sema").hidden = (v!=="sema");
+      if(el("view-arsiv")) el("view-arsiv").hidden = (v!=="arsiv");
       el("view-gundem").hidden = (v!=="gundem");
     });
   });
@@ -919,6 +1191,8 @@
       takvimCiz(mevVeri.takvim||[]);
       mevFiltreCiz();
       mevTabloCiz();
+      arsivFiltreleriCiz();
+      arsivCiz();
     }
     var ham = (habVeri && habVeri.haberler) ? habVeri.haberler : [];
     tumu = tekillestirVeZenginlestir(ham, mevVeri ? mevVeri.items : []);

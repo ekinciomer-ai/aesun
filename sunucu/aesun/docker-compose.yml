@@ -38,7 +38,8 @@ services:
     env_file: [/opt/aesun/musteri.env]
     volumes:
       - aesun_musteri:/musteri
-    mem_limit: 128m
+    mem_limit: 512m
+    shm_size: 256m
     logging:
       driver: json-file
       options: { max-size: "5m", max-file: "2" }

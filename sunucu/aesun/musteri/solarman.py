@@ -14,6 +14,7 @@ import hashlib, json, os, time, traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import requests
+import ace
 
 KOK = Path(os.environ.get("MUSTERI_VERI", "/musteri"))
 TABAN = os.environ.get("SOLARMAN_TABAN", "https://globalpro.solarmanpv.com")
@@ -184,6 +185,12 @@ def main():
                 s = tur(H); hepsi.update(s); durum["hesaplar"][H.ad] = {"tamam": True, "santral": len(s), "iz": H.iz}
             except Exception as e:
                 durum["hesaplar"][H.ad] = {"tamam": False, "hata": str(e)[:200], "iz": H.iz}; traceback.print_exc(limit=1); H.t = None
+        if ace.etkin():   # OSB sayaçları (Ace Center) — oturum çerezli, giriş yapmaz
+            try:
+                s = ace.tur(KOK, yaz); hepsi.update(s); durum["hesaplar"]["ace"] = {"tamam": True, "santral": len(s), "kaynak": "ace"}
+            except Exception as e:
+                durum["hesaplar"]["ace"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "ace", "oturum_dustu": isinstance(e, ace.OturumDustu)}
+                traceback.print_exc(limit=1)
         yaz(KOK / "santraller.json", hepsi); eski = hepsi
         hatalar = [f"{k}: {v['hata']}" for k, v in durum["hesaplar"].items() if not v["tamam"]]
         durum.update(tamam=not hatalar and bool(hesaplar), santral=len(hepsi))

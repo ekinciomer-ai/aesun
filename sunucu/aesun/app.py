@@ -129,7 +129,7 @@ def roller(req: Request):
 
 # ---- Müşteri Monitoring (AEMonitoring'den ayrı veri: /musteri, aesun-musteri kapsayıcısı yazar) ----
 MUSTERI = Path(os.environ.get("MUSTERI_VERI", "/musteri"))
-MUSTERI_DOSYA = re.compile(r"^(son|gun_\d{8}|ay_\d{6}|yil_\d{4})\.json$")
+MUSTERI_DOSYA = re.compile(r"^(son|reaktif|gun_\d{8}|ay_\d{6}|yil_\d{4})\.json$")
 
 def musteri_sidler(req: Request):
     """Yönetici: tüm santraller. Müşteri kullanıcısı: yalnız rolündeki santraller (ms_<sid>)."""

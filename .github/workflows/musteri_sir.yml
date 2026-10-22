@@ -23,9 +23,13 @@ jobs:
           SS_4: ${{ secrets.SOLARMAN_SIFRE_4 }}
           SK_5: ${{ secrets.SOLARMAN_KULLANICI_5 }}
           SS_5: ${{ secrets.SOLARMAN_SIFRE_5 }}
+          ACE_OTURUM: ${{ secrets.ACE_OTURUM }}
         run: |
           set -euo pipefail
           ENV=$(python3 -c "import os; e=['','_TATMAK','_2','_3','_4','_5']; print(''.join(f'SOLARMAN_KULLANICI{x}={os.environ[\"SK\"+x]}\nSOLARMAN_SIFRE{x}={os.environ[\"SS\"+x]}\n' for x in e if os.environ.get('SK'+x) and os.environ.get('SS'+x)),end='')")
+          # OSB sayaçları (Ace Center): oturum çerezi tek satır; Ömer tarayıcıdan girip Secrets'a kendisi koyar
+          ACE=$(python3 -c "import os; v=os.environ.get('ACE_OTURUM','').replace(chr(13),' ').replace(chr(10),' ').strip(); v=v[7:].strip() if v.lower().startswith('cookie:') else v; print(f'ACE_OTURUM={v}' if v else '')")
+          [ -n "$ACE" ] && ENV="${ENV:+${ENV}$'\n'}${ACE}" && echo "::notice::Ace Center oturumu tanımlı"
           [ -n "$ENV" ] || { echo "::error::SOLARMAN_KULLANICI / SOLARMAN_SIFRE sırları eksik"; exit 1; }
           echo "::notice::hesap sayısı: $(printf '%s' "$ENV" | grep -c '^SOLARMAN_KULLANICI')"
           mkdir -p ~/.ssh

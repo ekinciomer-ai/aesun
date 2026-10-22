@@ -114,8 +114,12 @@ async function grafikSayac(s) {
       const r = [...r0.filter(d => d.ay > n.getMonth() + 1).map(d => ({ ...d, y: y - 1 })), ...r1.map(d => ({ ...d, y }))];
       el.innerHTML = cubukN(r.map(d => ({ e: AYLAR[d.ay - 1] + ' ' + d.y, k: AYLAR[d.ay - 1] })), ser(r), 'Son 12 ay üretim ve tüketim');
     } else if (GRAF === 'osf07') {
-      const r = await al(`${API}/${s.sid}/osf07_${y}${a}.json`, b);
-      if (!r || !r.saatler || !r.saatler.length) { el.innerHTML = '<div class="bos">OSF-07 saatlik tablo verisi henüz oluşmadı.</div>'; return; }
+      const ham = await al(`${API}/${s.sid}/osf07_${y}${a}.json`, b);
+      if (!ham || !ham.saatler || !ham.saatler.length) { el.innerHTML = '<div class="bos">OSF-07 saatlik tablo verisi henüz oluşmadı.</div>'; return; }
+      const sayacMap = ham.sayaclar || { [ham.sayac_seri_no || s.sid]: ham };
+      const snList = Object.keys(sayacMap);
+      if (!window._OSF07_SN || !sayacMap[window._OSF07_SN]) window._OSF07_SN = sayacMap['45644611'] ? '45644611' : snList[0];
+      const r = sayacMap[window._OSF07_SN] || ham;
       window._SON_OSF07 = { s, r };
       const gunBaslik = Array.from({ length: 31 }, (_, i) => `<th>${i + 1}</th>`).join('');
       const satirlar = r.saatler.map(st => `<tr><td style="white-space:nowrap;font-weight:600">${esc(st.saat)}</td><td>${esc(st.yon)}</td>`
@@ -123,9 +127,10 @@ async function grafikSayac(s) {
         + `<td style="font-weight:600">${nf(st.toplam, 2)}</td></tr>`).join('');
       const topV = (r.gun_toplam_veris || []).map(v => `<td><b>${v ? nf(v, 2) : '0'}</b></td>`).join('');
       const topC = (r.gun_toplam_cekis || []).map(v => `<td><b>${v ? nf(v, 2) : '0'}</b></td>`).join('');
+      const secici = snList.length > 1 ? `<select onchange="window._OSF07_SN=this.value;grafikSayac(SANT.find(x=>x.sid===SEC)||SANT[0])" style="padding:5px 10px;border-radius:7px;border:1px solid #CCD2DA;font:inherit">${snList.map(sn => `<option value="${esc(sn)}"${sn === window._OSF07_SN ? ' selected' : ''}>Sayaç: ${esc(sn)}${sayacMap[sn].abone_adi ? ' — ' + esc(sayacMap[sn].abone_adi) : ''}</option>`).join('')}</select>` : '';
       el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">`
-        + `<span class="alt"><b>FORM NO: OSF.07.02</b> · Dengeleme Birimi Sayaç Değerleri Formu (${esc(r.donem || a + '/' + y)})</span>`
-        + `<button onclick="osf07CsvIndir()" style="padding:6px 12px;border-radius:7px;border:1px solid #CCD2DA;background:#fff;cursor:pointer;font-weight:600">⬇ OSF.07.02 CSV İndir</button></div>`
+        + `<span class="alt"><b>FORM NO: OSF.07.02</b> · Sayaç <b>${esc(r.sayac_seri_no || window._OSF07_SN)}</b> (${esc(r.donem || a + '/' + y)})</span>`
+        + `<div style="display:flex;gap:8px;align-items:center">${secici}<button onclick="osf07CsvIndir()" style="padding:6px 12px;border-radius:7px;border:1px solid #CCD2DA;background:#fff;cursor:pointer;font-weight:600">⬇ OSF.07.02 CSV İndir</button></div></div>`
         + `<div style="overflow-x:auto"><table style="font-size:12px"><tr><th>Saat/Gün</th><th>Yön</th>${gunBaslik}<th>Toplam</th></tr>`
         + satirlar
         + `<tr><td><b>Toplam</b></td><td><b>Veriş</b></td>${topV}<td><b>${nf(r.toplam_veris_kwh, 2)}</b></td></tr>`
@@ -143,16 +148,17 @@ async function grafikSayac(s) {
 }
 function osf07CsvIndir() {
   const paket = window._SON_OSF07; if (!paket) return;
-  const { s, r } = paket, pad = a => { const x = [...a]; while (x.length < 34) x.push(''); return x.slice(0, 34).join(','); };
+  const { s, r } = paket, sn = r.sayac_seri_no || s.sid, ad = r.abone_adi || s.ad;
+  const pad = a => { const x = [...a]; while (x.length < 34) x.push(''); return x.slice(0, 34).join(','); };
   const sat = [
     pad([]), pad(Array(8).fill('FORM NO: OSF.07.02')), pad(Array(8).fill('DENGELEME BİRİMİ SAYAÇ DEĞERLERİ FORMU')), pad(Array(8).fill('DENGELEME BİRİMİ SAYAÇ DEĞERLERİ FORMU')),
     pad([]), Array(34).fill('Ölçüm Sistemi Bilgileri').join(','),
     pad(['Sayaç Kodu:', 'Sayaç Kodu:', 'Sayaç Kodu:', '', '', '', 'ETSO Kodu:', 'ETSO Kodu:']), pad([]),
-    pad(['Sayaç Seri No:', 'Sayaç Seri No:', 'Sayaç Seri No:', s.sid, s.sid, s.sid]), pad([]),
+    pad(['Sayaç Seri No:', 'Sayaç Seri No:', 'Sayaç Seri No:', sn, sn, sn]), pad([]),
     pad(['Sayaçlardan', '', 'İletim Şirketi', '', 'Aksaray OSB']), pad([]),
-    pad(['Sorumlu Kurum:', '', 'Dağıtım Şirketi', '', 'Aksaray OSB', '', 'Adı:', s.ad, s.ad, s.ad, s.ad, s.ad]), pad([]),
+    pad(['Sorumlu Kurum:', '', 'Dağıtım Şirketi', '', 'Aksaray OSB', '', 'Adı:', ad, ad, ad, ad, ad]), pad([]),
     pad(['UEVÇB Kodu', 'UEVÇB Kodu', 'UEVÇB Kodu']), pad([]),
-    pad(['Uzlaştırma Dönemi:', 'Uzlaştırma Dönemi:', 'Uzlaştırma Dönemi:', r.donem || '', '', '', 'Abone No:', 'Abone No:', 'ELK-5210', 'ELK-5210']), pad([]),
+    pad(['Uzlaştırma Dönemi:', 'Uzlaştırma Dönemi:', 'Uzlaştırma Dönemi:', r.donem || '', '', '', 'Abone No:', 'Abone No:', r.abone_no || 'ELK-5210', r.abone_no || 'ELK-5210']), pad([]),
     Array(34).fill('Aktif Enerji Değerleri (kWh)').join(','), pad([]), pad([]),
     ['Saat/Gün', '', ...Array.from({ length: 31 }, (_, i) => i + 1), 'Toplam'].join(','),
     ...(r.saatler || []).map(st => [st.saat, st.yon, ...(st.gunler || []), st.toplam ?? ''].join(',')),
@@ -161,7 +167,7 @@ function osf07CsvIndir() {
     pad([]), pad(['Yetkili Adı', 'Yetkili Adı', ':']), pad([]), pad(['İmza', 'İmza', ':']), pad([]), pad(['Tarih', 'Tarih', ':'])
   ];
   const blob = new Blob(['\uFEFF' + sat.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `OSF_07_02_${s.sid}.csv`; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `OSF_07_02_${sn}.csv`; a.click();
 }
 function cizSayac(s, toplayici) {
   const sy = s.sayac || {}, ts = sy.tuketim_sn || [], aytop = ts.reduce((t, sn) => t + ((sy.ay_tuketim || {})[sn] || 0), 0);

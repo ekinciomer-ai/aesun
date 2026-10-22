@@ -237,6 +237,9 @@ def _xlsx_coz(xlsx_bytes: bytes) -> dict:
     return {
         "form_no": "OSF.07.02",
         "baslik": "DENGELEME BİRİMİ SAYAÇ DEĞERLERİ FORMU",
+        "sayac_seri_no": str(rows[8][3]).strip() if len(rows) > 8 and len(rows[8]) > 3 else "",
+        "santral_adi": str(rows[12][7]).strip() if len(rows) > 12 and len(rows[12]) > 7 else AD,
+        "abone_no": str(rows[16][8]).strip() if len(rows) > 16 and len(rows[16]) > 8 else "ELK-5210",
         "donem": sheet_name,
         "toplam_veris_kwh": top_veris,
         "toplam_cekis_kwh": top_cekis,
@@ -248,23 +251,41 @@ def _xlsx_coz(xlsx_bytes: bytes) -> dict:
     }
 
 
-def _osf07_indir(s: requests.Session, snu: str, yil: int, ay: int) -> dict:
-    """/Report/OSF07 uç noktasından OSF.07.02 Excel raporunu indirir ve çözümler."""
-    veri = {
-        "SearchKey": "", "TotalPage": "0", "SorterName": "", "SortDirection": "0", "Sorted": "",
-        "StartEndDates": f"{ay},{yil}", "Plant": "1", "Group": "188", "Modem": "", "Facility": "",
-        "Device": str(snu), "ExportType": "XLSX", "CurrentPage": "1", "annualfordevice": "1",
-    }
-    r = s.post(TABAN + "/Report/OSF07", data=veri, headers={"Referer": TABAN + "/Report/OSF07"}, timeout=45)
-    r.raise_for_status()
-    j = r.json()
-    dosyalar = ((j.get("Value") or {}) if isinstance(j, dict) else {}).get("ExportedFiles") or []
-    if not dosyalar:
+def _osf07_indir(s: requests.Session, sayaclar: list[str], yil: int, ay: int) -> dict:
+    """/Report/OSF07 uç noktasından tüm sayaçların (45644611, 45387414) OSF.07.02 Excel raporunu indirir ve çözümler."""
+    sonuc = {}
+    try:
+        s.get(TABAN + "/Report/OSF07", timeout=30)
+    except Exception:
+        pass
+    for dev in sayaclar:
+        try:
+            veri = {
+                "SearchKey": "", "TotalPage": "0", "SorterName": "", "SortDirection": "0", "Sorted": "",
+                "StartEndDates": f"{ay},{yil}", "Plant": "1", "Group": "188", "Modem": "", "Facility": "",
+                "Device": str(dev), "ExportType": "XLSX", "CurrentPage": "1", "annualfordevice": "1",
+            }
+            r = s.post(TABAN + "/Report/OSF07", data=veri, headers={"Referer": TABAN + "/Report/OSF07"}, timeout=45)
+            r.raise_for_status()
+            j = r.json()
+            dosyalar = ((j.get("Value") or {}) if isinstance(j, dict) else {}).get("ExportedFiles") or []
+            if not dosyalar:
+                continue
+            f_url = urljoin(TABAN + "/", str(dosyalar[0]).lstrip("/"))
+            fr = s.get(f_url, timeout=45)
+            fr.raise_for_status()
+            cozulen = _xlsx_coz(fr.content)
+            if cozulen and cozulen.get("saatler"):
+                cozulen["sayac_seri_no"] = cozulen.get("sayac_seri_no") or str(dev)
+                sonuc[str(dev)] = cozulen
+        except Exception:
+            continue
+    if not sonuc:
         return {}
-    f_url = urljoin(TABAN + "/", str(dosyalar[0]).lstrip("/"))
-    fr = s.get(f_url, timeout=45)
-    fr.raise_for_status()
-    return _xlsx_coz(fr.content)
+    ana_sn = "45644611" if "45644611" in sonuc else next(iter(sonuc))
+    ana = dict(sonuc[ana_sn])
+    ana["sayaclar"] = sonuc
+    return ana
 
 
 def tur(KOK: Path, yaz):
@@ -330,9 +351,10 @@ def tur(KOK: Path, yaz):
     # --- Saatlik OSF-07 (FORM NO: OSF.07.02) raporu (saatte bir veya dosya yoksa güncellenir)
     osf_yol = d / f"osf07_{bugun.year}{bugun.month:02d}.json"
     osf_veri = _oku(osf_yol, {})
-    if not osf_veri or (time.time() - osf_veri.get("toplandi", 0)) >= 3000:
+    tum_sayaclar = sorted({snu, "45644611", *tuk_sn})
+    if not osf_veri or not osf_veri.get("sayaclar") or (time.time() - osf_veri.get("toplandi", 0)) >= 3000:
         try:
-            yeni_osf = _osf07_indir(s, snu, bugun.year, bugun.month)
+            yeni_osf = _osf07_indir(s, tum_sayaclar, bugun.year, bugun.month)
             if yeni_osf and yeni_osf.get("saatler"):
                 osf_veri = yeni_osf
                 yaz(osf_yol, osf_veri)

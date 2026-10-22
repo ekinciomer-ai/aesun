@@ -161,16 +161,19 @@ def _otomatik_giris(kok: Path) -> requests.Session:
             return s
         raise RuntimeError("Fronius kullanıcı/şifre veya çerez tanımlı değil")
 
-    # 1. Solar.web ExternalLogin sayfasını aç -> login.fronius.com/authenticationendpoint/login.do'ya yönlenir
+    # 1. Önce ana sayfayı ziyaret et (SolarWeb_BrowserId vb. çerezler oluşsun), ardından ExternalLogin sayfasını aç
+    s.get("https://www.solarweb.com/", timeout=20)
     r0 = s.get("https://www.solarweb.com/Account/ExternalLogin", timeout=30, allow_redirects=True)
     r0.raise_for_status()
 
     if "login.fronius.com" in r0.url or "loginForm" in r0.text:
-        inputs = _form_inputs_coz(r0.text)
-        act_m = re.search(r'<form[^>]+id=["\']loginForm["\'][^>]+action=["\']([^"\']+)["\']|<form[^>]+action=["\']([^"\']*commonauth[^"\']*)["\']', r0.text, re.I)
-        post_url = urljoin(r0.url, _html.unescape((act_m.group(1) or act_m.group(2)) if act_m else "../commonauth"))
+        lf_m = re.search(r'<form[^>]+id=["\']loginForm["\'][^>]*>(.*?)</form>', r0.text, re.I | re.S)
+        form_html = lf_m.group(1) if lf_m else r0.text
+        inputs = _form_inputs_coz(form_html)
+        act_m = re.search(r'<form[^>]+action=["\']([^"\']*commonauth[^"\']*)["\']', r0.text, re.I)
+        post_url = urljoin(r0.url, _html.unescape(act_m.group(1) if act_m else "../commonauth"))
 
-        # İsteğe bağlı WSO2 logincontext kontrolü
+        # WSO2 logincontext kontrolü
         sdk = inputs.get("sessionDataKey", "")
         if sdk:
             try:
@@ -183,11 +186,15 @@ def _otomatik_giris(kok: Path) -> requests.Session:
             except Exception:
                 pass
 
-        form_data = dict(inputs)
-        form_data["usernameUserInput"] = kul
-        form_data["username"] = kul
-        form_data["password"] = sifre
-        form_data["chkRemember"] = "on"
+        form_data = {
+            "authenticators": inputs.get("authenticators", "SAMLSSOAuthenticator:Fronius Login;FroniusBasicAuthenticator:LOCAL"),
+            "tenantDomain": inputs.get("tenantDomain", "carbon.super"),
+            "allLoginParams": inputs.get("allLoginParams", ""),
+            "usernameUserInput": kul,
+            "username": kul,
+            "password": sifre,
+            "sessionDataKey": sdk,
+        }
 
         r1 = s.post(
             post_url,
@@ -202,13 +209,19 @@ def _otomatik_giris(kok: Path) -> requests.Session:
         cur_r = r1
         for _ in range(4):
             if "authFail" in cur_r.url or "authFailure=true" in cur_r.url:
-                raise RuntimeError("Fronius girişi reddedildi (kullanıcı adı veya şifre hatalı)")
+                from urllib.parse import parse_qs, urlparse
+                qs = parse_qs(urlparse(cur_r.url).query)
+                f_msg = (qs.get("authFailureMsg") or qs.get("errorCode") or [""])[0]
+                err_div = re.search(r'id=["\']error-msg["\'][^>]*>(.*?)</div>', cur_r.text, re.I | re.S)
+                err_txt = re.sub(r"<[^>]+>", " ", err_div.group(1)).strip() if err_div else ""
+                ipucu = f"kul_len={len(kul)},at={'@' in kul},sf_len={len(sifre)},msg={f_msg},err={err_txt[:60]}"
+                raise RuntimeError(f"Fronius girişi reddedildi ({ipucu})")
             fm = re.search(r'<form[^>]+action=["\']([^"\']+)["\'][^>]*>(.*?)</form>', cur_r.text, re.I | re.S)
             if not fm:
                 break
             f_action = _html.unescape(fm.group(1))
             if "loginForm" in fm.group(0) or "commonauth" in f_action:
-                raise RuntimeError("Fronius girişi tamamlanamadı (tekrar login formuna döndü)")
+                raise RuntimeError(f"Fronius girişi tamamlanamadı (url={cur_r.url[:80]})")
             f_url = urljoin(cur_r.url, f_action)
             f_inputs = _form_inputs_coz(fm.group(2))
             if not f_inputs:

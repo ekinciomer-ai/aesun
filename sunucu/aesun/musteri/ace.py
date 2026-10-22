@@ -442,10 +442,12 @@ def _hesap_tur(H: OsbHesap, KOK: Path, yaz, hedef_sid: str = None, hedef_santral
     sid = str(hedef_sid or snu_chart)
     d = KOK / sid
 
-    # --- Saatlik OSF-07 (FORM NO: OSF.07.02) raporu (saatte bir veya dosya yoksa güncellenir)
+    # --- Saatlik OSF-07 (FORM NO: OSF.07.02) raporu (saatte bir veya dosya/şema eksikse güncellenir)
     osf_yol = d / f"osf07_{bugun.year}{bugun.month:02d}.json"
     osf_veri = _oku(osf_yol, {})
-    if not osf_veri or not osf_veri.get("sayaclar") or (time.time() - osf_veri.get("toplandi", 0)) >= 3000:
+    sayaclar_mevcut = (osf_veri.get("sayaclar") or {}) if isinstance(osf_veri, dict) else {}
+    sema_tam = bool(sayaclar_mevcut) and all(isinstance(v, dict) and "gun_saat" in v and "ges_cekiste" in v for v in sayaclar_mevcut.values())
+    if not sema_tam or (time.time() - osf_veri.get("toplandi", 0)) >= 3000:
         try:
             yeni_osf = _osf07_indir(H, tum_cihazlar, bugun.year, bugun.month, vars_ad)
             if yeni_osf and yeni_osf.get("saatler"):
@@ -455,14 +457,14 @@ def _hesap_tur(H: OsbHesap, KOK: Path, yaz, hedef_sid: str = None, hedef_santral
             pass
 
     sayac_meta = (osf_veri.get("sayaclar") or {}) if isinstance(osf_veri, dict) else {}
-    # GES üretim sayacı (adında GES geçen ve Çekiş kanalında gündüz üretimi yazan sayaç, ör. 45644611)
+    # GES üretim sayacı (adında GES geçen ve Çekiş kanalında gündüz üretimi yazan sayaç, ör. 45644611 veya 80307896)
     ges_cekis_sayaclar = {sn for sn, m in sayac_meta.items() if m.get("ges_cekiste")}
     uretim_sn = next((sn for sn, m in sayac_meta.items() if "GES" in str(m.get("abone_adi", "")).upper()), snu_chart)
     tuk_sn = [sn for sn in tum_cihazlar if sn not in ges_cekis_sayaclar] or list(tum_cihazlar)
 
     # --- günlük (bu ay): üretim + sayaç başına tüketim + reaktif
     ay_yol = d / f"sayac_ay_{bugun.year}{bugun.month:02d}.json" if hedef_sid else d / f"ay_{bugun.year}{bugun.month:02d}.json"
-    gunler = {x["g"]: x for x in _oku(ay_yol, [])}
+    gunler = {}
     for x in gu:
         t = _gun(x["Term"])
         if (t.year, t.month) != (bugun.year, bugun.month):
@@ -486,7 +488,6 @@ def _hesap_tur(H: OsbHesap, KOK: Path, yaz, hedef_sid: str = None, hedef_santral
     ay_liste = [gunler[g] for g in sorted(gunler)]
     yaz(ay_yol, ay_liste)
     if hedef_sid:
-        # Hibrit santralde sayac_ay_ yanı sıra ana sayaç klasörüne de yaz
         yaz((KOK / snu_chart) / f"ay_{bugun.year}{bugun.month:02d}.json", ay_liste)
 
     # --- aylık (son 12 ay)
@@ -507,7 +508,7 @@ def _hesap_tur(H: OsbHesap, KOK: Path, yaz, hedef_sid: str = None, hedef_santral
             kay.setdefault("tuk", {})[sn] = {"kwh": _f(x.get("ActiveCons")), "ind": _f(x.get("EnductiveCons")), "kap": _f(x.get("CapasitiveCons"))}
     for y, aylar in yillar.items():
         p = d / (f"sayac_yil_{y}.json" if hedef_sid else f"yil_{y}.json")
-        eski = {x["ay"]: x for x in _oku(p, [])}
+        eski = {x["ay"]: x for x in _oku(p, []) if x.get("ay") not in aylar}
         eski.update(aylar)
         yaz(p, [eski[m] for m in sorted(eski)])
 
@@ -563,6 +564,8 @@ def _hesap_tur(H: OsbHesap, KOK: Path, yaz, hedef_sid: str = None, hedef_santral
     if hedef_sid:
         # Mevcut inverter son.json dosyasını zenginleştir (inverter + sayaç birleşik)
         mevcut = _oku(d / "son.json", {})
+        mevcut["inverter_var"] = True
+        mevcut["sayac_var"] = True
         mevcut["sayac"] = sayac_ozet
         mevcut["alarmlar"] = (mevcut.get("alarmlar") or []) + alarmlar
         yaz(d / "son.json", mevcut)

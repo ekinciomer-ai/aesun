@@ -15,6 +15,8 @@ jobs:
           SS: ${{ secrets.SOLARMAN_SIFRE }}
           SK_TATMAK: ${{ secrets.SOLARMAN_KULLANICI_TATMAK }}
           SS_TATMAK: ${{ secrets.SOLARMAN_SIFRE_TATMAK }}
+          SK_HASGERIDONUSUM: ${{ secrets.SOLARMAN_KULLANICI_HASGERIDONUSUM }}
+          SS_HASGERIDONUSUM: ${{ secrets.SOLARMAN_SIFRE_HASGERIDONUSUM }}
           SK_2: ${{ secrets.SOLARMAN_KULLANICI_2 }}
           SS_2: ${{ secrets.SOLARMAN_SIFRE_2 }}
           SK_3: ${{ secrets.SOLARMAN_KULLANICI_3 }}
@@ -23,14 +25,22 @@ jobs:
           SS_4: ${{ secrets.SOLARMAN_SIFRE_4 }}
           SK_5: ${{ secrets.SOLARMAN_KULLANICI_5 }}
           SS_5: ${{ secrets.SOLARMAN_SIFRE_5 }}
-          OSB_K_HAS: ${{ secrets.OSB_KULLANICI_HASGERIDONUSUM }}
-          OSB_S_HAS: ${{ secrets.OSB_SIFRE_HASGERIDONUSUM }}
+          OSB_K: ${{ secrets.OSB_KULLANICI }}
+          OSB_S: ${{ secrets.OSB_SIFRE }}
+          OSB_K_HASGERIDONUSUM: ${{ secrets.OSB_KULLANICI_HASGERIDONUSUM }}
+          OSB_S_HASGERIDONUSUM: ${{ secrets.OSB_SIFRE_HASGERIDONUSUM }}
+          OSB_K_TATMAK: ${{ secrets.OSB_KULLANICI_TATMAK }}
+          OSB_S_TATMAK: ${{ secrets.OSB_SIFRE_TATMAK }}
+          OSB_K_2: ${{ secrets.OSB_KULLANICI_2 }}
+          OSB_S_2: ${{ secrets.OSB_SIFRE_2 }}
+          OSB_K_3: ${{ secrets.OSB_KULLANICI_3 }}
+          OSB_S_3: ${{ secrets.OSB_SIFRE_3 }}
           ACE_OTURUM: ${{ secrets.ACE_OTURUM }}
         run: |
           set -euo pipefail
-          ENV=$(python3 -c "import os; e=['','_TATMAK','_2','_3','_4','_5']; print(''.join(f'SOLARMAN_KULLANICI{x}={os.environ[\"SK\"+x]}\nSOLARMAN_SIFRE{x}={os.environ[\"SS\"+x]}\n' for x in e if os.environ.get('SK'+x) and os.environ.get('SS'+x)),end='')")
-          OSB=$(python3 -c "import os; k=os.environ.get('OSB_K_HAS','').strip(); s=os.environ.get('OSB_S_HAS','').strip(); print(f'OSB_KULLANICI_HASGERIDONUSUM={k}\nOSB_SIFRE_HASGERIDONUSUM={s}' if k and s else '', end='')")
-          [ -n "$OSB" ] && ENV="${ENV:+${ENV}$'\n'}${OSB}" && echo "::notice::OSB Ace Center kullanıcı/şifre tanımlı (otomatik captcha girişi)"
+          ENV=$(python3 -c "import os; e=['','_TATMAK','_HASGERIDONUSUM','_2','_3','_4','_5']; print(''.join(f'SOLARMAN_KULLANICI{x}={os.environ[\"SK\"+x]}\nSOLARMAN_SIFRE{x}={os.environ[\"SS\"+x]}\n' for x in e if os.environ.get('SK'+x) and os.environ.get('SS'+x)),end='')")
+          OSB=$(python3 -c "import os; e=['','_HASGERIDONUSUM','_TATMAK','_2','_3']; print('\n'.join(f'OSB_KULLANICI{x}={os.environ[\"OSB_K\"+x].strip()}\nOSB_SIFRE{x}={os.environ[\"OSB_S\"+x].strip()}' for x in e if os.environ.get('OSB_K'+x,'').strip() and os.environ.get('OSB_S'+x,'').strip()), end='')")
+          [ -n "$OSB" ] && ENV="${ENV:+${ENV}$'\n'}${OSB}" && echo "::notice::OSB Ace Center hesap sayısı: $(printf '%s\n' "$OSB" | grep -c '^OSB_KULLANICI')"
           # İsteğe bağlı yedek: oturum çerezi
           ACE=$(python3 -c "import os; v=os.environ.get('ACE_OTURUM','').replace(chr(13),' ').replace(chr(10),' ').strip(); v=v[7:].strip() if v.lower().startswith('cookie:') else v; print(f'ACE_OTURUM={v}' if v else '')")
           [ -n "$ACE" ] && ENV="${ENV:+${ENV}$'\n'}${ACE}" && echo "::notice::Ace Center oturumu tanımlı"

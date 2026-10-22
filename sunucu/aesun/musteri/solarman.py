@@ -38,38 +38,43 @@ def giris(H, taban=None):
         raise RuntimeError(f"hesap {H.ad}: kullanıcı/şifre tanımlı değil")
     tb = taban or H.taban or TABAN
     pw = hashlib.sha256(H.sifre.encode()).hexdigest()
-    r = H.s.post(tb + "/oauth-s/oauth/token", timeout=30, data={
-        "grant_type": "mdc_password", "username": H.kul, "clear_text_pwd": "",
-        "password": pw, "identity_type": 2, "client_id": "test", "system": "SOLARMAN"})
-    if r.status_code != 200 or "access_token" not in r.text:
-        raise RuntimeError(f"hesap {H.ad}: giriş başarısız (HTTP {r.status_code})")
-    j = r.json(); t = j["access_token"]
-    # Business hesabında organizasyon listesi varsa (/user-s/acc/org/my → [{"org":{"id":...}}]) org_id ile jetonu yenile
+    id_tipleri = (2, 3, 1) if "@" in H.kul else (3, 2, 1)
+    j = None; t = None; secilen_tip = id_tipleri[0]; oauth_yol = "/oauth2-s/oauth/token"
+    for yol in ("/oauth2-s/oauth/token", "/oauth-s/oauth/token"):
+        for tip in id_tipleri:
+            r = H.s.post(tb + yol, timeout=30, data={
+                "grant_type": "mdc_password", "username": H.kul, "clear_text_pwd": "",
+                "password": pw, "identity_type": tip, "client_id": "test", "system": "SOLARMAN"})
+            if r.status_code == 200 and "access_token" in r.text:
+                j = r.json(); t = j.get("access_token")
+                if t:
+                    secilen_tip = tip; oauth_yol = yol; break
+        if t:
+            break
+    if not t:
+        raise RuntimeError(f"hesap {H.ad}: giriş başarısız")
+    # Business hesabında organizasyon listesi varsa (/user-s/acc/org/my → [{"org":{"id":...}}]) grant_type=switch_org ile jetonu organizasyona geçir
+    H.org_sayisi = 0
     try:
-        ro = H.s.get(tb + "/user-s/acc/org/my?language=en", headers={"Authorization": "bearer " + t}, timeout=15)
+        ro = H.s.get(tb + "/user-s/acc/org/my?language=en", headers={"Authorization": "Bearer " + t}, timeout=15)
         if ro.status_code == 200:
             oj = ro.json()
             ol = oj if isinstance(oj, list) else (oj.get("data") or oj.get("orgList") or oj.get("orgInfoList") or [])
             if ol and isinstance(ol, list):
+                H.org_sayisi = len(ol)
                 ilk_t = t
                 for item in ol:
                     org = (item.get("org") if isinstance(item, dict) and isinstance(item.get("org"), dict) else item) or {}
                     oid = org.get("id") or org.get("orgId") or org.get("companyId")
                     if not oid:
                         continue
-                    for d_veri in (
-                        {"grant_type": "refresh_token", "refresh_token": j.get("refresh_token"), "org_id": oid, "client_id": "test", "system": "SOLARMAN"},
-                        {"grant_type": "password", "username": H.kul, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": "SOLARMAN"},
-                        {"grant_type": "mdc_password", "username": H.kul, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": "SOLARMAN"},
-                    ):
-                        r2 = H.s.post(tb + "/oauth-s/oauth/token", timeout=20, data=d_veri)
-                        if r2.status_code == 200 and "access_token" in r2.text:
-                            j2 = r2.json()
-                            if j2.get("access_token") and j2.get("access_token") != ilk_t:
-                                j = j2; t = j2["access_token"]
-                                break
-                    if t != ilk_t:
-                        break
+                    r2 = H.s.post(tb + oauth_yol, timeout=20, headers={"Authorization": "Bearer " + ilk_t}, data={
+                        "grant_type": "switch_org", "identity_type": secilen_tip, "username": H.kul,
+                        "password": pw, "access_token": ilk_t, "client_id": "test", "org_id": oid, "system": "SOLARMAN"})
+                    if r2.status_code == 200 and "access_token" in r2.text:
+                        j2 = r2.json()
+                        if j2.get("access_token"):
+                            j = j2; t = j2["access_token"]; break
     except Exception:
         pass
     H.taban = tb; H.t = t; H.son = time.time() + int(j.get("expires_in", 3600)) - 300
@@ -79,21 +84,35 @@ def tur(H):
         if not H.t or time.time() > H.son:
             giris(H)
         for deneme in (1, 2):
-            h = {"Authorization": "bearer " + H.t}
+            h = {"Authorization": "Bearer " + H.t}
             r = H.s.post(H.taban + yol, json=govde, headers=h, timeout=30) if govde is not None else H.s.get(H.taban + yol, headers=h, timeout=30)
             if r.status_code == 401 and deneme == 1:
                 giris(H); continue
             r.raise_for_status(); return r.json()
 
+    def santral_ara():
+        for yol, govde in (
+            ("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}}),
+            ("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
+            ("/maintain-s/operating/station/search?page=1&size=100&order.direction=ASC&order.property=name", {}),
+        ):
+            try:
+                res = istek(yol, govde)
+                if (res or {}).get("data"):
+                    return res
+            except Exception:
+                continue
+        return {}
+
     simdi = datetime.now(TR); y, a, g = simdi.year, simdi.month, simdi.day
-    liste = istek("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {"station": {"powerTypeList": ["PV"]}})
-    if not (liste or {}).get("data"):
-        liste = istek("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {})
+    liste = santral_ara()
     if not (liste or {}).get("data") and H.taban != "https://globalhome.solarmanpv.com":
         try:
             giris(H, "https://globalhome.solarmanpv.com")
-            liste = istek("/maintain-s/operating/station/v2/search?page=1&size=100&order.direction=ASC&order.property=name", {})
+            liste = santral_ara()
         except Exception:
+            pass
+        if not (liste or {}).get("data"):
             giris(H, TABAN)
     santraller = {}
     for kay in (liste or {}).get("data", []):

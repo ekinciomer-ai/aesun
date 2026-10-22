@@ -150,13 +150,22 @@ def tur(H):
         yaz(d / f"gun_{y}{a:02d}{g:02d}.json", [{"t": int(r.get("dateTime") or 0), "w": r.get("generationPower")} for r in gun.get("records", [])])
         yaz(d / f"ay_{y}{a:02d}.json", [{"g": r.get("day"), "kwh": r.get("generationValue"), "saat": r.get("fullPowerHoursDay")} for r in ay.get("records", [])])
         yaz(d / f"yil_{y}.json", [{"ay": r.get("month"), "kwh": r.get("generationValue")} for r in yil.get("records", [])])
-        yaz(d / "son.json", {
+        eski_son = {}
+        try:
+            eski_son = json.loads((d / "son.json").read_text())
+        except Exception:
+            pass
+        yeni_son = {
             "sid": sid, "ad": s.get("name"), "adres": s.get("locationAddress"), "kapasite_kwp": s.get("installedCapacity"),
+            "inverter_var": True, "sayac_var": bool(eski_son.get("sayac")),
             "guc_w": s.get("generationPower"), "gunluk_kwh": s.get("generationValue"), "aylik_kwh": s.get("generationMonth"),
             "yillik_kwh": s.get("generationYear"), "toplam_kwh": s.get("generationTotal"), "tam_guc_saat": s.get("fullPowerHoursDay"),
             "iletisim": s.get("networkStatus"), "uyari": s.get("businessWarningStatus"), "son_veri": s.get("lastUpdateTime"),
             "alarmlar": [{k: x.get(k) for k in ("alertName", "level", "deviceSn", "alertTime", "content") if k in x} for x in alarm][:20],
-            "toplandi": int(time.time())})
+            "toplandi": int(time.time())}
+        if eski_son.get("sayac"):
+            yeni_son["sayac"] = eski_son["sayac"]
+        yaz(d / "son.json", yeni_son)
     # geçen yılın/ayın kapanışını bir kez tamamla
     if g <= 2:
         o = simdi - timedelta(days=g + 1)
@@ -185,9 +194,12 @@ def main():
                 s = tur(H); hepsi.update(s); durum["hesaplar"][H.ad] = {"tamam": True, "santral": len(s), "iz": H.iz}
             except Exception as e:
                 durum["hesaplar"][H.ad] = {"tamam": False, "hata": str(e)[:200], "iz": H.iz}; traceback.print_exc(limit=1); H.t = None
-        if ace.etkin():   # OSB sayaçları (Ace Center) — otomatik captcha girişi + OSF-07 saatlik rapor
+        if ace.etkin():   # OSB sayaçları (Ace Center) — çoklu hesap otomatik captcha girişi + OSF-07 saatlik rapor
             try:
-                s = ace.tur(KOK, yaz); hepsi.update(s); durum["hesaplar"]["ace"] = {"tamam": True, "santral": len(s), "kaynak": "ace"}
+                s, osb_d = ace.tur(KOK, yaz, hepsi)
+                hepsi.update(s)
+                durum["hesaplar"].update(osb_d)
+                durum["hesaplar"]["ace"] = {"tamam": bool(osb_d) and all(v.get("tamam") for v in osb_d.values()), "santral": len(s), "kaynak": "ace"}
             except Exception as e:
                 durum["hesaplar"]["ace"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "ace", "oturum_dustu": isinstance(e, ace.OturumDustu)}
                 traceback.print_exc(limit=1)

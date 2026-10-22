@@ -179,10 +179,16 @@ def _otomatik_giris(kok: Path) -> requests.Session:
             )
             ctx.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
             page = ctx.new_page()
-            page.goto("https://www.solarweb.com/Account/ExternalLogin", wait_until="domcontentloaded", timeout=45000)
-            page.wait_for_timeout(1500)
+            page.goto("https://www.solarweb.com/Account/ExternalLogin", wait_until="networkidle", timeout=45000)
+            page.wait_for_timeout(1000)
 
-            for tur_no in (1, 2, 3):
+            # Hesapta FriendlyCaptcha zorunlu olduğu için ilk ekranda reCaptcha=true yoksa doğrudan ekle
+            if "login.fronius.com" in page.url and "reCaptcha=true" not in page.url:
+                sep = "&" if "?" in page.url else "?"
+                page.goto(page.url + f"{sep}reCaptcha=true", wait_until="networkidle", timeout=45000)
+                page.wait_for_timeout(1500)
+
+            for tur_no in (1, 2):
                 if "solarweb.com" in page.url and "login.fronius.com" not in page.url and "ExternalLogin" not in page.url:
                     break
                 if page.locator("#usernameUserInput").count() == 0:
@@ -192,35 +198,83 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                     if page.locator("#usernameUserInput").count() == 0:
                         break
 
-                # Focus tetikle (FriendlyCaptcha data-start="focus" için)
-                page.click("#usernameUserInput")
-                page.fill("#usernameUserInput", kul)
-                page.fill("#password", sifre)
-
                 frc_var = page.locator(".frc-captcha").count() > 0
                 frc_cozuldu = False
+                durum_iz = []
                 if frc_var:
-                    try:
-                        page.evaluate("() => { if (window.frcaptcha) window.frcaptcha.getAllWidgets().forEach(w => w.start()); }")
-                    except Exception:
-                        pass
-                    for _ in range(50):
-                        val = page.evaluate("() => { const el = document.querySelector(\"[name='frc-captcha-response']\"); return el ? el.value : ''; }")
-                        if val and not str(val).startswith("."):
-                            frc_cozuldu = True
+                    # Widget ve Agent iframe'lerinin yüklenip hazır olmasını bekle
+                    for _ in range(30):
+                        st = page.evaluate("""() => {
+                            if (!window.frcaptcha || !window.frcaptcha.widgets) return 'no-sdk';
+                            const arr = Array.from(window.frcaptcha.widgets.values());
+                            return arr.length ? (arr[0].getState() || 'empty') : 'no-widget';
+                        }""")
+                        if st not in ("no-sdk", "no-widget", "init", "unconnected"):
                             break
                         page.wait_for_timeout(500)
-                iz_not.append(f"t{tur_no}:frc={int(frc_var)}/{int(frc_cozuldu)}")
+
+                # Kullanıcı adı ve şifreyi doldur (focusin tetikler)
+                page.mouse.move(300, 300)
+                page.click("#usernameUserInput")
+                page.fill("#usernameUserInput", kul)
+                page.click("#password")
+                page.fill("#password", sifre)
+
+                if frc_var:
+                    son_tik = -5
+                    for adim in range(70):
+                        bilgi = page.evaluate("""() => {
+                            const el = document.querySelector("[name='frc-captcha-response']");
+                            const val = el ? el.value : '';
+                            let st = 'none';
+                            if (window.frcaptcha && window.frcaptcha.widgets) {
+                                const arr = Array.from(window.frcaptcha.widgets.values());
+                                if (arr.length) st = arr[0].getState();
+                            }
+                            return {val, st};
+                        }""")
+                        st = bilgi.get("st", "none")
+                        val = bilgi.get("val", "")
+                        if not durum_iz or durum_iz[-1] != st:
+                            durum_iz.append(st)
+                        if st == "completed" or (val and not str(val).startswith(".")):
+                            frc_cozuldu = True
+                            break
+                        if st in ("unactivated", "activated", "expired", "error") and (adim - son_tik) >= 6:
+                            son_tik = adim
+                            try:
+                                page.evaluate("""() => {
+                                    if (window.frcaptcha && window.frcaptcha.widgets) {
+                                        Array.from(window.frcaptcha.widgets.values()).forEach(w => {
+                                            if (w.trigger) w.trigger('programmatic');
+                                        });
+                                    }
+                                }""")
+                            except Exception:
+                                pass
+                            try:
+                                btn = page.frame_locator("iframe.frc-i-widget").locator("button.button, .main").first
+                                if btn.count() > 0:
+                                    btn.click(timeout=2000, force=True)
+                            except Exception:
+                                pass
+                        page.wait_for_timeout(500)
+
+                iz_not.append(f"t{tur_no}:frc={int(frc_var)}/{int(frc_cozuldu)}({'-'.join(durum_iz)})")
 
                 with page.expect_navigation(wait_until="domcontentloaded", timeout=40000):
                     page.click("#login-button")
                 page.wait_for_timeout(2500)
 
                 # OIDC form_post sayfasıysa yönlenmenin tamamlanmasını bekle
-                for _ in range(12):
+                for _ in range(15):
                     if "login.fronius.com" not in page.url and "ExternalLoginCallback" not in page.url:
                         break
                     if page.locator("#usernameUserInput").count() > 0:
+                        try:
+                            page.wait_for_load_state("networkidle", timeout=15000)
+                        except Exception:
+                            pass
                         break
                     page.wait_for_timeout(1000)
 

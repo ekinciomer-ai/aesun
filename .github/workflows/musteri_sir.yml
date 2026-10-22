@@ -1,7 +1,6 @@
 name: Müşteri Monitoring kimliği (ns1)
-# SOLARMAN web hesabını ns1'e yazar: /opt/aesun/musteri.env (root, 600) → aesun-musteri yeniden başlar.
-# Değerler yalnız aesun → Settings → Secrets'ta durur; loga basılmaz. Her müşteri hesabı bir çift:
-#   SOLARMAN_KULLANICI / SOLARMAN_SIFRE (Çaylı Yem), SOLARMAN_KULLANICI_2 / SOLARMAN_SIFRE_2 (Tatmak GES), … _9'a kadar.
+# SOLARMAN web hesaplarını ns1'e yazar: /opt/aesun/musteri.env (root, 600) → aesun-musteri yeniden başlar.
+# Değerler yalnız aesun → Settings → Secrets'ta durur; loga basılmaz.
 on: workflow_dispatch
 concurrency: { group: sunucu-islem, cancel-in-progress: false }
 jobs:
@@ -12,10 +11,21 @@ jobs:
         env:
           ANAHTAR: ${{ secrets.SUNUCU_SSH }}
           ADRES: ${{ secrets.SUNUCU_ADRES }}
-          SIRLAR: ${{ toJSON(secrets) }}
+          SK: ${{ secrets.SOLARMAN_KULLANICI }}
+          SS: ${{ secrets.SOLARMAN_SIFRE }}
+          SK_TATMAK: ${{ secrets.SOLARMAN_KULLANICI_TATMAK }}
+          SS_TATMAK: ${{ secrets.SOLARMAN_SIFRE_TATMAK }}
+          SK_2: ${{ secrets.SOLARMAN_KULLANICI_2 }}
+          SS_2: ${{ secrets.SOLARMAN_SIFRE_2 }}
+          SK_3: ${{ secrets.SOLARMAN_KULLANICI_3 }}
+          SS_3: ${{ secrets.SOLARMAN_SIFRE_3 }}
+          SK_4: ${{ secrets.SOLARMAN_KULLANICI_4 }}
+          SS_4: ${{ secrets.SOLARMAN_SIFRE_4 }}
+          SK_5: ${{ secrets.SOLARMAN_KULLANICI_5 }}
+          SS_5: ${{ secrets.SOLARMAN_SIFRE_5 }}
         run: |
           set -euo pipefail
-          ENV=$(printf '%s' "$SIRLAR" | python3 -c "import sys,json; s=json.load(sys.stdin); e=sorted({k[18:] for k in s if k.startswith('SOLARMAN_KULLANICI')}); print(''.join('SOLARMAN_KULLANICI%s=%s\nSOLARMAN_SIFRE%s=%s\n'%(x,s['SOLARMAN_KULLANICI'+x],x,s['SOLARMAN_SIFRE'+x]) for x in e if s.get('SOLARMAN_KULLANICI'+x) and s.get('SOLARMAN_SIFRE'+x)),end='')")
+          ENV=$(python3 -c "import os; e=['','_TATMAK','_2','_3','_4','_5']; print(''.join(f'SOLARMAN_KULLANICI{x}={os.environ[\"SK\"+x]}\nSOLARMAN_SIFRE{x}={os.environ[\"SS\"+x]}\n' for x in e if os.environ.get('SK'+x) and os.environ.get('SS'+x)),end='')")
           [ -n "$ENV" ] || { echo "::error::SOLARMAN_KULLANICI / SOLARMAN_SIFRE sırları eksik"; exit 1; }
           echo "::notice::hesap sayısı: $(printf '%s' "$ENV" | grep -c '^SOLARMAN_KULLANICI')"
           mkdir -p ~/.ssh

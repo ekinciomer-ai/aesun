@@ -44,21 +44,32 @@ def giris(H, taban=None):
     if r.status_code != 200 or "access_token" not in r.text:
         raise RuntimeError(f"hesap {H.ad}: giriş başarısız (HTTP {r.status_code})")
     j = r.json(); t = j["access_token"]
-    # Business hesabında organizasyon listesi varsa org_id ile jetonu yenile
+    # Business hesabında organizasyon listesi varsa (/user-s/acc/org/my → [{"org":{"id":...}}]) org_id ile jetonu yenile
     try:
         ro = H.s.get(tb + "/user-s/acc/org/my?language=en", headers={"Authorization": "bearer " + t}, timeout=15)
         if ro.status_code == 200:
             oj = ro.json()
             ol = oj if isinstance(oj, list) else (oj.get("data") or oj.get("orgList") or oj.get("orgInfoList") or [])
             if ol and isinstance(ol, list):
-                oid = ol[0].get("orgId") or ol[0].get("id") or ol[0].get("companyId")
-                if oid:
-                    r2 = H.s.post(tb + "/oauth-s/oauth/token", timeout=20, data={
-                        "grant_type": "mdc_password", "username": H.kul, "clear_text_pwd": "",
-                        "password": pw, "identity_type": 2, "access_token": t, "org_id": oid,
-                        "client_id": "test", "system": "SOLARMAN"})
-                    if r2.status_code == 200 and "access_token" in r2.text:
-                        j = r2.json(); t = j["access_token"]
+                ilk_t = t
+                for item in ol:
+                    org = (item.get("org") if isinstance(item, dict) and isinstance(item.get("org"), dict) else item) or {}
+                    oid = org.get("id") or org.get("orgId") or org.get("companyId")
+                    if not oid:
+                        continue
+                    for d_veri in (
+                        {"grant_type": "refresh_token", "refresh_token": j.get("refresh_token"), "org_id": oid, "client_id": "test", "system": "SOLARMAN"},
+                        {"grant_type": "password", "username": H.kul, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": "SOLARMAN"},
+                        {"grant_type": "mdc_password", "username": H.kul, "clear_text_pwd": "", "password": pw, "identity_type": 2, "access_token": ilk_t, "org_id": oid, "client_id": "test", "system": "SOLARMAN"},
+                    ):
+                        r2 = H.s.post(tb + "/oauth-s/oauth/token", timeout=20, data=d_veri)
+                        if r2.status_code == 200 and "access_token" in r2.text:
+                            j2 = r2.json()
+                            if j2.get("access_token") and j2.get("access_token") != ilk_t:
+                                j = j2; t = j2["access_token"]
+                                break
+                    if t != ilk_t:
+                        break
     except Exception:
         pass
     H.taban = tb; H.t = t; H.son = time.time() + int(j.get("expires_in", 3600)) - 300

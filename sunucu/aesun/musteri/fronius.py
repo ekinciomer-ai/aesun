@@ -230,7 +230,7 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                     son_tik = -10
                     son_prog = ""
                     olceklendi = False
-                    for adim in range(1500):  # ilk oturumda tamamlanana dek (en çok 750 sn) bekle
+                    for adim in range(3000):  # ilk oturumda tamamlanana dek (en çok 1500 sn) bekle
                         bilgi = page.evaluate("""() => {
                             const el = document.querySelector("[name='frc-captcha-response']");
                             const val = el ? el.value : '';
@@ -245,12 +245,18 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                         val = bilgi.get("val", "")
                         if not durum_iz or durum_iz[-1] != st:
                             durum_iz.append(st)
-                        if st == "solving" and adim % 10 == 0:
+                        if st == "solving" and adim % 20 == 0:
                             try:
                                 for fr in page.frames:
                                     if "frcapi.com" in fr.url and "agent" in fr.url:
                                         if not olceklendi:
-                                            fr.evaluate("() => { if (window.agent && window.agent.pool) window.agent.pool.scaleToNumWorkers(4); }")
+                                            fr.evaluate("""() => {
+                                                if (window.agent && window.agent.power && window.agent.pool) {
+                                                    const ns = window.agent.power.info().numSolvers;
+                                                    if (ns) ns.active = 4;
+                                                    window.agent.pool.scaleToNumWorkers(4);
+                                                }
+                                            }""")
                                             olceklendi = True
                                         pi = fr.evaluate("() => window.agent && window.agent.power ? window.agent.power.info() : null")
                                         if pi and pi.get("requests"):

@@ -18,6 +18,9 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css?v=3">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://www.aksarayenerji.net/#org","name":"Aksaray Enerji","alternateName":"Aksaray Enerji Ürt. Elk. Proje Taah. İnş. San. Tic. Ltd. Şti.","url":"https://www.aksarayenerji.net/","sameAs":["https://aksarayenerji.com.tr/"],"telephone":"+90-382-213-25-95","email":"bilgi@aksarayenerji.com.tr","foundingDate":"2012","address":{"@type":"PostalAddress","streetAddress":"Ereğlikapı Mah. İpekyol İş Merkezi K:4 D:26","addressLocality":"Merkez","addressRegion":"Aksaray","addressCountry":"TR"},"description":"2012'den bu yana 23 ilde 79 proje, 140+ MWp kurulu güç: arazi ve çatı GES kurulumu, 25 kW altı GES başvuruları, OG/AG, 154 kV ENH ve trafo merkezi taahhüt."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"İlimde TEİAŞ trafo merkezi dolu görünüyorsa 25 kW altı GES başvurusu yapabilir miyim?","acceptedAnswer":{"@type":"Answer","text":"Evet. 25 kW ve altı çatı GES başvuruları TEİAŞ 154 kV trafo merkezine değil, bağlı olduğunuz 0,4 kV AG (Alçak Gerilim) mahalle, köy veya sanayi dağıtım trafosuna bağlanır. AG dağıtım trafosunda kapasite varsa TEİAŞ beklemeksizin çağrı mektubu alınabilir."}},{"@type":"Question","name":"25 kW altı GES başvurusu için hangi evraklar gerekir ve fazla elektrik satılabilir mi?","acceptedAnswer":{"@type":"Answer","text":"Son aya ait elektrik faturası (Tekil Kod), tapu senedi, yapı ruhsatı (veya yapı kayıt belgesi) ve kimlik/vergi levhası ile basitleştirilmiş usulde başvuru yapılır. Gündüz üretilen ve gece tüketilen elektrik aylık mahsuplaşır; tüketimi aşan üretim fazlası görevli tedarik şirketine satılır."}}]}]}
+</script>
 </head>
 <body>
 <a href="#biz" class="hp">İçeriğe geç</a>
@@ -73,6 +76,7 @@
       </div>
       <div class="stitch-tabs" role="tablist" aria-label="Yatırımcı araçları">
         <button type="button" class="stitch-tab" role="tab" aria-selected="true" onclick="stSekme('kapasite',this)">🗺️ TEİAŞ Trafo Kapasitesi <small>81 İl · 815 TM</small></button>
+        <button type="button" id="st-tab-25kw" class="stitch-tab" role="tab" aria-selected="false" onclick="stSekme('25kw',this)">🏠 25 kW Altı Başvuru <small>Konut · Tarım · İşyeri</small></button>
         <button type="button" class="stitch-tab" role="tab" aria-selected="false" onclick="stSekme('aecad',this)">📐 AeCAD GES Simülatörü <small>Canlı Şema</small></button>
         <button type="button" class="stitch-tab" role="tab" aria-selected="false" onclick="stSekme('dijital',this)">📱 Dijital Şantiye &amp; İzleme <small>Müşteri Portalı</small></button>
       </div>
@@ -147,6 +151,150 @@
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;font-size:13px;color:#9CA3AF">
         <span>Kaynak: TEİAŞ Lisanssız Elektrik Üretim Kapasite Tablosu · Yatırım öncesi resmi trafo ve OG hat etüdü ekibimizce ücretsiz yapılır.</span>
         <a id="st-il-teklif-btn" class="st-teklif-btn" href="iletisim.html">Seçili İl İçin Ücretsiz Bağlantı Görüşü &amp; Teklif İste →</a>
+        <button type="button" class="st-teklif-btn" style="border:0;cursor:pointer;background:#10B981" onclick="stSekme('25kw',document.getElementById('st-tab-25kw'))">🏠 Trafo Doluysa: 25 kW Altı (AG) Başvuru Alanı →</button>
+      </div>
+    </div>
+
+    <!-- PANEL 1.5: 25 kW ALTI BASİTLEŞTİRİLMİŞ USUL GES BAŞVURU & BİLGİ MERKEZİ -->
+    <div id="st-p-25kw" class="stitch-panel" role="tabpanel">
+      <div class="st-sim-grid">
+        <div class="st-sim-kutu">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+              <span class="st-rozet uygun">✅ TEİAŞ KAPASİTE MUAFİYETLİ · AG BAĞLANTI (≤ 25 kWe)</span>
+              <div class="st-chipler">
+                <button type="button" id="st-25-tip-konut" class="st-cip on" onclick="st25Tip('konut')">🏡 Konut / Villa</button>
+                <button type="button" id="st-25-tip-isyeri" class="st-cip" onclick="st25Tip('isyeri')">🏪 İşyeri / Atölye</button>
+                <button type="button" id="st-25-tip-tarim" class="st-cip" onclick="st25Tip('tarim')">🌾 Tarım / Sulama</button>
+              </div>
+            </div>
+
+            <div style="background:#16191E;border:1px solid #323842;border-radius:14px;padding:16px 18px;margin-bottom:14px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+                <label for="st-25-range" style="font-size:14px;font-weight:600;color:#D1D5DB">Hedef Kurulum Gücü (≤ 25 kWe):</label>
+                <b id="st-25-guc-lbl" style="font-family:Archivo,sans-serif;font-size:28px;color:#34D399;font-variant-numeric:tabular-nums">10 kWe</b>
+              </div>
+              <input id="st-25-range" class="st-range" type="range" min="3" max="25" step="1" value="10" oninput="st25Hesapla(this.value)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px">
+                <span style="font-size:12px;color:#9CA3AF">Popüler Güçler:</span>
+                <div class="st-chipler" id="st-25-guc-cipler">
+                  <button type="button" class="st-cip" onclick="st25Sec(5)">5 kWe (Ev)</button>
+                  <button type="button" class="st-cip on" onclick="st25Sec(10)">10 kWe (Villa + Araç Şarj)</button>
+                  <button type="button" class="st-cip" onclick="st25Sec(15)">15 kWe (Çiftlik / İşyeri)</button>
+                  <button type="button" class="st-cip" onclick="st25Sec(25)">25 kWe (Tam Sınır)</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+              <div class="st-kpi yesil" style="padding:12px 14px">
+                <small>Yıllık Üretim &amp; Mahsup</small>
+                <b id="st-25-uretim" style="font-size:20px">15.500 kWh/yıl</b>
+                <span id="st-25-tasarruf">Aylık ort. 1.290 kWh fatura mahsubu</span>
+              </div>
+              <div class="st-kpi mavi" style="padding:12px 14px">
+                <small>Panel Sayısı &amp; Çatı Alanı</small>
+                <b id="st-25-panel" style="font-size:20px">18 Adet (580 Wp)</b>
+                <span id="st-25-alan">Gerekli net çatı alanı: ≈ 47 m²</span>
+              </div>
+              <div class="st-kpi sari" style="padding:12px 14px">
+                <small>AG Bağlantı &amp; Sözleşme Gücü</small>
+                <b id="st-25-faz" style="font-size:19px">Trifaze (3 Faz) AG</b>
+                <span id="st-25-sozlesme">Min. 10 kW fatura sözleşme gücü</span>
+              </div>
+              <div class="st-kpi" style="padding:12px 14px">
+                <small>Başvuru Usulü</small>
+                <b style="font-size:19px;color:#34D399">Basitleştirilmiş Usul</b>
+                <span>ÇED &amp; TEİAŞ Muafiyetli · Hızlı Onay</span>
+              </div>
+            </div>
+
+            <div style="background:#16191E;border:1px solid #323842;border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+              <div>
+                <label for="st-25-konum" style="display:block;font-size:12px;font-weight:700;color:#9CA3AF;margin-bottom:4px">İl / İlçe / Mahalle (İsteğe Bağlı)</label>
+                <input id="st-25-konum" type="text" placeholder="ör. Aksaray Merkez / Ortaköy" oninput="st25Hesapla()" style="width:100%;min-height:38px;padding:0 10px;border-radius:8px;border:1px solid #3B424E;background:#20252D;color:#fff;font:inherit;font-size:13.5px">
+              </div>
+              <div>
+                <label for="st-25-soru" style="display:block;font-size:12px;font-weight:700;color:#9CA3AF;margin-bottom:4px">Merak Ettiğiniz / Bilgi İstediğiniz Konu</label>
+                <select id="st-25-soru" onchange="st25Hesapla()" style="width:100%;min-height:38px;padding:0 10px;border-radius:8px;border:1px solid #3B424E;background:#20252D;color:#fff;font:inherit;font-size:13.5px">
+                  <option value="25 kW altı anahtar teslim kurulum maliyeti ve başvuru süreci">Anahtar teslim kurulum fiyatı ve başvuru süreci</option>
+                  <option value="Mahalle/köy AG dağıtım trafomuzda 25 kW altı boş kapasite kontrolü">Mahalle/köy AG trafomuzda yer var mı? (Trafo kontrolü)</option>
+                  <option value="Faturamdaki sözleşme gücünü (kW) artırma ve 25 kW altı çağrı mektubu">Faturamdaki sözleşme gücüm düşük, nasıl artırırım?</option>
+                  <option value="Üretim fazlası elektrik satışı, çift yönlü sayaç ve aylık mahsuplaşma">Fazla elektriği satabilir miyim? Mahsuplaşma nasıl olur?</option>
+                  <option value="Hibrit / bataryalı (depolamalı) veya elektrikli araç şarjlı çatı GES">Bataryalı (kesintisiz) sistem veya elektrikli araç şarjı</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:10px">
+            <a id="st-25-cta-teklif" class="btn btn-red" href="iletisim.html" style="flex:1 1 240px;justify-content:center;min-height:48px;font-size:15px">
+              ⚡ 25 kW Altı Başvuru &amp; Fiyat Teklifi Al →
+            </a>
+            <a id="st-25-cta-soru" class="st-teklif-btn ik" href="iletisim.html" style="flex:1 1 200px;justify-content:center;min-height:48px;font-size:14px">
+              💬 Mühendislerimize Bilgi Sor →
+            </a>
+          </div>
+        </div>
+
+        <div class="st-sim-kutu" style="background:#14181F">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+              <div>
+                <b style="font-family:Archivo,sans-serif;font-size:16px;color:#fff">25 kW Altı AG Çatı Bağlantı &amp; Mahsup Şeması</b>
+                <div style="font-size:12.5px;color:#9CA3AF">EPDK Lisanssız Elektrik Üretim Yönetmeliği · Basitleştirilmiş Usul</div>
+              </div>
+              <span class="st-rozet uygun">Hızlı Projelendirme</span>
+            </div>
+
+            <div style="background:#0D1117;border:1px solid #2A313C;border-radius:12px;padding:10px;margin-bottom:14px">
+              <svg viewBox="0 0 520 115" style="width:100%;height:auto;display:block" aria-label="25 kW altı çatı GES bağlantı şeması">
+                <rect x="8" y="18" width="112" height="78" rx="8" fill="#1E3A8A" stroke="#38BDF8" stroke-width="1.5"/>
+                <text x="64" y="45" text-anchor="middle" fill="#fff" font-family="monospace" font-weight="bold" font-size="11">☀️ ÇATI GES</text>
+                <text id="st-25-svg-pv" x="64" y="63" text-anchor="middle" fill="#93C5FD" font-family="monospace" font-size="10">18 Panel · 10 kWe</text>
+                <text x="64" y="80" text-anchor="middle" fill="#38BDF8" font-family="monospace" font-size="9.5">DC Üretim</text>
+
+                <line x1="120" y1="57" x2="144" y2="57" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="4 2"/>
+                <rect x="144" y="18" width="106" height="78" rx="8" fill="#1F2937" stroke="#F59E0B" stroke-width="1.5"/>
+                <text x="197" y="45" text-anchor="middle" fill="#FDE68A" font-family="monospace" font-weight="bold" font-size="11">⚡ İNVERTER</text>
+                <text x="197" y="63" text-anchor="middle" fill="#D1D5DB" font-family="monospace" font-size="10">&amp; Ev/İşyeri Pano</text>
+                <text x="197" y="80" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="9.5">Önce Öztüketim</text>
+
+                <line x1="250" y1="57" x2="274" y2="57" stroke="#10B981" stroke-width="2.5"/>
+                <rect x="274" y="18" width="110" height="78" rx="8" fill="#1F2937" stroke="#10B981" stroke-width="1.5"/>
+                <text x="329" y="43" text-anchor="middle" fill="#34D399" font-family="monospace" font-weight="bold" font-size="10.5">🔄 ÇİFT YÖNLÜ</text>
+                <text x="329" y="59" text-anchor="middle" fill="#fff" font-family="monospace" font-weight="bold" font-size="10.5">MAHSUP SAYACI</text>
+                <text x="329" y="78" text-anchor="middle" fill="#9CA3AF" font-family="monospace" font-size="9.5">Veriş ↔ Çekiş</text>
+
+                <line x1="384" y1="57" x2="406" y2="57" stroke="#EF4444" stroke-width="2.5"/>
+                <rect x="406" y="18" width="106" height="78" rx="8" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>
+                <text x="459" y="43" text-anchor="middle" fill="#fff" font-family="monospace" font-weight="bold" font-size="10.5">🏘️ AG TRAFO</text>
+                <text x="459" y="59" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="10">0,4 kV Şebeke</text>
+                <text x="459" y="78" text-anchor="middle" fill="#FDE68A" font-family="monospace" font-size="9">TEİAŞ Muafiyetli</text>
+              </svg>
+            </div>
+
+            <div style="font-size:12.5px;font-weight:700;color:#FF6B70;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📌 25 kW Altı Başvurularda En Çok Sorulanlar</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#D1D5DB;line-height:1.45">
+              <div style="padding:10px 12px;background:#1C212B;border-left:3px solid #10B981;border-radius:8px">
+                <b style="color:#fff">1. İlimde TEİAŞ trafosu "Dolu" görünüyorsa başvurabilir miyim?</b><br>
+                Evet! 25 kW ve altı çatı GES'ler TEİAŞ 154 kV trafo merkezine değil, sokağınızdaki/köyünüzdeki <b>0,4 kV AG dağıtım trafosuna</b> bağlanır. AG trafoda kapasite varsa hemen çağrı mektubu alınır.
+              </div>
+              <div style="padding:10px 12px;background:#1C212B;border-left:3px solid #38BDF8;border-radius:8px">
+                <b style="color:#fff">2. Faturamdaki sözleşme gücüm düşükse (ör. 5 kW) ne yapılır?</b><br>
+                Kurulacak GES gücü, faturanızdaki sözleşme gücünü aşamaz; ancak başvuru öncesinde dağıtım şirketine (EDAŞ) <b>güç artırımı</b> yapılarak sözleşme gücünüz 10–25 kW seviyesine yükseltilebilir.
+              </div>
+              <div style="padding:10px 12px;background:#1C212B;border-left:3px solid #F59E0B;border-radius:8px">
+                <b style="color:#fff">3. Fazla ürettiğim elektriği satabilir miyim?</b><br>
+                Gündüz ürettiğiniz ve gece tükettiğiniz elektrik <b>aylık mahsuplaşır</b> (faturanız sıfırlanır). Tüketiminizi aşan üretim fazlası ise görevli tedarik şirketine satılarak hesabınıza yatırılır.
+              </div>
+              <div style="padding:10px 12px;background:#1C212B;border-left:3px solid #D32027;border-radius:8px">
+                <b style="color:#fff">4. Başvuru için hangi evraklar yeterli?</b><br>
+                Son aya ait <b>Elektrik Faturası</b> (Tekil Kod/Abone No), <b>Tapu Senedi</b>, <b>Yapı Ruhsatı</b> (veya Yapı Kayıt Belgesi) ve Kimlik/Vergi Levhası ile tüm proje, onay ve kurulumu anahtar teslim yapıyoruz.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -481,7 +629,7 @@ var ST_SECILI_IL = 'AKSARAY';
 var ST_SIM_TIP = 'arazi';
 
 function stSekme(id, btn) {
-  ['kapasite', 'aecad', 'dijital'].forEach(function(k) {
+  ['kapasite', '25kw', 'aecad', 'dijital'].forEach(function(k) {
     var p = document.getElementById('st-p-' + k);
     if (p) p.classList.toggle('aktif', k === id);
   });
@@ -741,8 +889,64 @@ function stAecadSvgCiz(mwp, masaAdet, invAdet, trafoKva, araziMi) {
   svg.innerHTML = s;
 }
 
+var ST_25_TIP = 'konut';
+
+function st25Tip(tip) {
+  ST_25_TIP = tip;
+  ['konut', 'isyeri', 'tarim'].forEach(function(t) {
+    var b = document.getElementById('st-25-tip-' + t);
+    if (b) b.classList.toggle('on', t === tip);
+  });
+  st25Hesapla();
+}
+
+function st25Sec(kwe) {
+  var r = document.getElementById('st-25-range');
+  if (r) r.value = kwe;
+  var cipler = document.querySelectorAll('#st-25-guc-cipler .st-cip');
+  for (var i = 0; i < cipler.length; i++) {
+    cipler[i].classList.toggle('on', parseInt(cipler[i].textContent, 10) === kwe);
+  }
+  st25Hesapla(kwe);
+}
+
+function st25Hesapla(val) {
+  var r = document.getElementById('st-25-range');
+  var kwe = parseInt(val || (r && r.value) || 10, 10);
+  var panelAdet = Math.max(6, Math.ceil((kwe * 1.12 * 1000) / 580));
+  if (panelAdet % 2 === 1) panelAdet += 1;
+  var yillikKwh = Math.round(kwe * 1550);
+  var aylikKwh = Math.round(yillikKwh / 12);
+  var catiM2 = Math.round(panelAdet * 2.6);
+  var fazStr = kwe <= 5 ? 'Monofaze / Trifaze AG' : 'Trifaze (3 Faz) AG';
+  var tipEtiket = ST_25_TIP === 'konut' ? 'Konut / Villa (Mesken)' : ST_25_TIP === 'isyeri' ? 'Ticarethane / İşyeri' : 'Tarımsal Sulama / Çiftlik';
+  var konum = (document.getElementById('st-25-konum') && document.getElementById('st-25-konum').value || '').trim();
+  var soru = (document.getElementById('st-25-soru') && document.getElementById('st-25-soru').value) || '25 kW altı GES başvuru ve fiyat talebi';
+
+  document.getElementById('st-25-guc-lbl').textContent = kwe + ' kWe';
+  document.getElementById('st-25-uretim').textContent = yillikKwh.toLocaleString('tr-TR') + ' kWh/yıl';
+  document.getElementById('st-25-tasarruf').textContent = 'Aylık ort. ' + aylikKwh.toLocaleString('tr-TR') + ' kWh fatura mahsubu';
+  document.getElementById('st-25-panel').textContent = panelAdet + ' Adet (580 Wp)';
+  document.getElementById('st-25-alan').textContent = 'Gerekli net çatı alanı: ≈ ' + catiM2 + ' m²';
+  document.getElementById('st-25-faz').textContent = fazStr;
+  document.getElementById('st-25-sozlesme').textContent = 'Min. ' + kwe + ' kW fatura sözleşme gücü';
+  var svgPv = document.getElementById('st-25-svg-pv');
+  if (svgPv) svgPv.textContent = panelAdet + ' Panel · ' + kwe + ' kWe';
+
+  var ortakDetay = '25 kW Altı Basitleştirilmiş Usul GES (' + tipEtiket + ') | Hedef Güç: ' + kwe + ' kWe (' + panelAdet + ' adet 580 Wp panel, ≈' + catiM2 + ' m² çatı, ' + fazStr + ') | Yıllık Üretim: ≈' + yillikKwh.toLocaleString('tr-TR') + ' kWh' + (konum ? ' | Konum: ' + konum : '') + ' | Bilgi Konusu: ' + soru;
+  var btnTeklif = document.getElementById('st-25-cta-teklif');
+  var btnSoru = document.getElementById('st-25-cta-soru');
+  var q = 'iletisim.html?konu=' + encodeURIComponent('25 kW altı GES (Konut / Tarım / İşyeri)')
+    + '&kap=' + encodeURIComponent(kwe + ' kWe (' + tipEtiket + ')')
+    + (konum ? '&il=' + encodeURIComponent(konum) : '')
+    + '&detay=' + encodeURIComponent(ortakDetay);
+  if (btnTeklif) btnTeklif.href = q;
+  if (btnSoru) btnSoru.href = q;
+}
+
 stKapasiteYukle();
 stSimHesapla(2.5);
+st25Hesapla(10);
 </script>
 </body>
 </html>

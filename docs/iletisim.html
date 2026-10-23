@@ -23,7 +23,7 @@
     <a class="emblem" href="portal/" aria-label="Personel girişi" tabindex="-1"><svg width="40" height="40" viewBox="0 0 56 56" aria-hidden="true"><path d="M28 2a26 26 0 0 0 0 52z" fill="#D32027"/><path d="M28 2a26 26 0 0 1 0 52z" fill="#3C4047"/><path d="M31 9 L19 31 H27 L23 47 L37 23 H29 Z" fill="#FFFFFF"/></svg></a>
     <a class="word" href="index.html"><b>AKSARAY</b>&nbsp;<b>ENERJİ</b></a>
   </div>
-  <nav class="nav" aria-label="Ana menü"><a href="index.html#biz" class="opt">Biz kimiz</a><a href="index.html#hizmetler" class="opt">Hizmetler</a><a href="referanslar.html">Referanslar</a><a href="gundem.html">Gündem</a><a href="iletisim.html" class="cta" aria-current="page">Teklif isteyin</a><a href="portal/" class="kgiris"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Kurumsal giriş</a></nav>
+  <nav class="nav" aria-label="Ana menü"><a href="index.html#biz" class="opt">Biz kimiz</a><a href="index.html#hizmetler" class="opt">Hizmetler</a><a href="index.html#araclar" class="kdemo"><i></i>Kapasite &amp; Fizibilite</a><a href="referanslar.html">Referanslar</a><a href="gundem.html">Gündem</a><a href="iletisim.html" class="cta" aria-current="page">Teklif isteyin</a><a href="portal/" class="kgiris"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Kurumsal giriş</a></nav>
 </div></header>
 <main class="wrap contact">
   <div class="info">
@@ -43,6 +43,7 @@
   <form class="f" method="post" action="iletisim.php" accept-charset="utf-8">
     <h2>Teklif ve bilgi formu</h2>
     <div id="durum" role="status"></div>
+    <div id="st-secim-ozet" class="st-prefill" role="region" aria-label="Seçilen teknik parametreler"></div>
     <div class="g2">
       <div class="fld"><label for="ad">Ad soyad</label><input id="ad" name="ad" type="text" autocomplete="name" required maxlength="120"></div>
       <div class="fld"><label for="firma">Firma</label><input id="firma" name="firma" type="text" autocomplete="organization" maxlength="160"></div>
@@ -86,6 +87,24 @@
   var q=new URLSearchParams(location.search).get('durum'),d=document.getElementById('durum');
   if(q==='ok'){d.className='note good';d.textContent='Mesajınız alındı. En kısa sürede dönüş yapacağız.';}
   else if(q==='hata'){d.className='note bad';d.textContent='Mesaj gönderilemedi. Lütfen 0 (382) 213 25 95 numarasını arayın ya da bilgi@aksarayenerji.com.tr adresine yazın.';}
+  var p=new URLSearchParams(location.search);
+  var konu=p.get('konu'),kap=p.get('kap'),il=p.get('il'),tm=p.get('tm'),edas=p.get('edas'),detay=p.get('detay');
+  if(konu||kap||tm||detay){
+    var kEl=document.getElementById('konu'),kapEl=document.getElementById('kap'),mEl=document.getElementById('mesaj'),oz=document.getElementById('st-secim-ozet');
+    if(konu&&kEl){for(var i=0;i<kEl.options.length;i++){if(kEl.options[i].value===konu||kEl.options[i].text===konu){kEl.selectedIndex=i;break;}}}
+    if(kap&&kapEl)kapEl.value=kap;
+    var satirlar=[];
+    if(il)satirlar.push('İl / Bölge: '+il);
+    if(tm)satirlar.push('Trafo Merkezi (TM): '+tm);
+    if(edas)satirlar.push('Dağıtım Şirketi / OSB: '+edas);
+    if(kap)satirlar.push('Hedef Kapasite: '+kap);
+    if(detay)satirlar.push('Teknik Not: '+detay);
+    if(mEl&&satirlar.length){mEl.value=satirlar.join('\n')+'\n\nEklemek istedikleriniz (ada/parsel veya çatı bilgisi): ';}
+    if(oz){
+      oz.className='st-prefill aktif';
+      oz.innerHTML='<b>✓ Mühendislik Aracından Seçtiğiniz Parametreler Forma Aktarıldı</b><span>'+(tm?tm+' ('+(il||'')+') · ':'')+(kap||detay||'')+' — İletişim bilgilerinizi girerek talebinizi doğrudan mühendislik ekibimize iletebilirsiniz.</span>';
+    }
+  }
 })();
 </script>
 <script>

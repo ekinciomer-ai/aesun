@@ -63,6 +63,315 @@
   </div>
 </section>
 
+<section id="araclar" class="stitch-sec" aria-label="Canlı Mühendislik ve Yatırımcı Araçları">
+  <div class="wrap">
+    <div class="stitch-ust">
+      <div>
+        <div class="eyebrow">CANLI MÜHENDİSLİK &amp; YATIRIMCI MERKEZİ</div>
+        <h2>Yatırımınızı verilerle planlayın, süreci canlı izleyin.</h2>
+        <p>Kurumsal portalımızdaki mühendislik araçlarını doğrudan deneyimleyin: ilinizdeki güncel TEİAŞ trafo merkezi boş kapasitesini sorgulayın, AeCAD motoruyla santral yerleşiminizi simüle edin ve dijital şantiye/izleme altyapımızı inceleyin.</p>
+      </div>
+      <div class="stitch-tabs" role="tablist" aria-label="Yatırımcı araçları">
+        <button type="button" class="stitch-tab" role="tab" aria-selected="true" onclick="stSekme('kapasite',this)">🗺️ TEİAŞ Trafo Kapasitesi <small>81 İl · 815 TM</small></button>
+        <button type="button" class="stitch-tab" role="tab" aria-selected="false" onclick="stSekme('aecad',this)">📐 AeCAD GES Simülatörü <small>Canlı Şema</small></button>
+        <button type="button" class="stitch-tab" role="tab" aria-selected="false" onclick="stSekme('dijital',this)">📱 Dijital Şantiye &amp; İzleme <small>Müşteri Portalı</small></button>
+      </div>
+    </div>
+
+    <!-- PANEL 1: TEİAŞ TRAFO KAPASİTESİ SORGULAMA -->
+    <div id="st-p-kapasite" class="stitch-panel aktif" role="tabpanel">
+      <div class="st-bar">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <label for="st-il-sec" style="font-size:13px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em">İl Seçin:</label>
+          <select id="st-il-sec" onchange="stIlDegisti(this.value)" aria-label="İl seçimi">
+            <option value="AKSARAY">AKSARAY</option>
+          </select>
+          <input id="st-tm-ara" type="text" placeholder="Trafo merkezi veya OSB ara…" oninput="stTabloCiz()" aria-label="Trafo merkezi ara" style="min-width:210px">
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:#D1D5DB;cursor:pointer;margin-left:4px">
+            <input id="st-yalniz-bos" type="checkbox" onchange="stTabloCiz()" style="width:16px;height:16px;accent-color:#D32027">
+            Yalnız boş kapasitesi olanlar
+          </label>
+        </div>
+        <div class="st-chipler" aria-label="Hızlı il seçimi">
+          <button type="button" class="st-cip on" onclick="stHizliIl('AKSARAY',this)">Aksaray</button>
+          <button type="button" class="st-cip" onclick="stHizliIl('KONYA',this)">Konya</button>
+          <button type="button" class="st-cip" onclick="stHizliIl('ANKARA',this)">Ankara</button>
+          <button type="button" class="st-cip" onclick="stHizliIl('KAYSERİ',this)">Kayseri</button>
+          <button type="button" class="st-cip" onclick="stHizliIl('BURSA',this)">Bursa</button>
+          <button type="button" class="st-cip" onclick="stHizliIl('GAZİANTEP',this)">Gaziantep</button>
+          <button type="button" class="st-cip" onclick="stHizliIl('TÜM_BOS',this)">🔥 Türkiye En Yüksek Boş TM'ler</button>
+        </div>
+      </div>
+
+      <div class="st-grid4">
+        <div class="st-kpi yesil">
+          <small>Tahsis Edilebilir Boş Kapasite</small>
+          <b id="st-kpi-mwe">— MWe</b>
+          <span id="st-kpi-donem">TEİAŞ Güncel Duyuru</span>
+        </div>
+        <div class="st-kpi mavi">
+          <small>Müsait Trafo Merkezi</small>
+          <b id="st-kpi-uygun">— / — TM</b>
+          <span>Çağrı mektubu başvurusu yapılabilir</span>
+        </div>
+        <div class="st-kpi sari">
+          <small>Kurulabilir DC Santral Gücü</small>
+          <b id="st-kpi-mwp">≈ — MWp</b>
+          <span>1,25 DC/AC oranı ile tahmini</span>
+        </div>
+        <div class="st-kpi">
+          <small>Dağıtım Şirketi / Bölge</small>
+          <b id="st-kpi-edas" style="font-size:20px">—</b>
+          <span>OG / AG bağlantı ve kabul muhatabı</span>
+        </div>
+      </div>
+
+      <div class="st-tablo-kutu">
+        <table class="st-tablo">
+          <thead>
+            <tr>
+              <th>İl</th>
+              <th>Trafo Merkezi (TM)</th>
+              <th>Bara</th>
+              <th>Dağıtım / OSB</th>
+              <th style="text-align:right">Güncel Boş Kapasite</th>
+              <th>Durum</th>
+              <th style="text-align:right">İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="st-tm-govde">
+            <tr><td colspan="7" style="text-align:center;padding:28px;color:#9CA3AF">TEİAŞ trafo merkezi verileri yükleniyor…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;font-size:13px;color:#9CA3AF">
+        <span>Kaynak: TEİAŞ Lisanssız Elektrik Üretim Kapasite Tablosu · Yatırım öncesi resmi trafo ve OG hat etüdü ekibimizce ücretsiz yapılır.</span>
+        <a id="st-il-teklif-btn" class="st-teklif-btn" href="iletisim.html">Seçili İl İçin Ücretsiz Bağlantı Görüşü &amp; Teklif İste →</a>
+      </div>
+    </div>
+
+    <!-- PANEL 2: AeCAD GES YERLEŞİM & FİZİBİLİTE SİMÜLATÖRÜ -->
+    <div id="st-p-aecad" class="stitch-panel" role="tabpanel">
+      <div class="st-sim-grid">
+        <div class="st-sim-kutu">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+              <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#FF6B70">AeCAD Otomatik Mühendislik Motoru</span>
+              <div class="st-chipler">
+                <button type="button" id="st-tip-arazi" class="st-cip on" onclick="stSimTip('arazi')">🏞️ Arazi GES (5.1.h)</button>
+                <button type="button" id="st-tip-cati" class="st-cip" onclick="stSimTip('cati')">🏭 Çatı GES (Sanayi/OSB)</button>
+              </div>
+            </div>
+
+            <div style="background:#16191E;border:1px solid #323842;border-radius:14px;padding:16px 18px;margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+                <label for="st-guc-range" style="font-size:14px;font-weight:600;color:#D1D5DB">Hedef Kurulu Güç (DC):</label>
+                <b id="st-sim-guc-lbl" style="font-family:Archivo,sans-serif;font-size:28px;color:#FF6B70;font-variant-numeric:tabular-nums">2,5 MWp</b>
+              </div>
+              <input id="st-guc-range" class="st-range" type="range" min="0.5" max="20" step="0.5" value="2.5" oninput="stSimHesapla(this.value)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap;gap:6px">
+                <span style="font-size:12px;color:#9CA3AF">Hızlı Seçim:</span>
+                <div class="st-chipler">
+                  <button type="button" class="st-cip" onclick="stSimSec(1)">1 MWp</button>
+                  <button type="button" class="st-cip on" onclick="stSimSec(2.5)">2,5 MWp</button>
+                  <button type="button" class="st-cip" onclick="stSimSec(5)">5 MWp</button>
+                  <button type="button" class="st-cip" onclick="stSimSec(10)">10 MWp</button>
+                  <button type="button" class="st-cip" onclick="stSimSec(15)">15 MWp</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+              <div class="st-kpi yesil" style="padding:13px 15px">
+                <small>Yıllık Elektrik Üretimi</small>
+                <b id="st-sim-uretim" style="font-size:21px">4.125 MWh</b>
+                <span id="st-sim-gelir">≈ 9,28 Milyon ₺ / yıl mahsup</span>
+              </div>
+              <div class="st-kpi mavi" style="padding:13px 15px">
+                <small>580 Wp TopCON Panel</small>
+                <b id="st-sim-panel" style="font-size:21px">4.312 Adet</b>
+                <span id="st-sim-masa">77 adet 2×28 çelik masa</span>
+              </div>
+              <div class="st-kpi sari" style="padding:13px 15px">
+                <small>İnverter &amp; OG Trafo</small>
+                <b id="st-sim-inv" style="font-size:21px">20 × 110 kW</b>
+                <span id="st-sim-trafo">2.500 kVA OG Trafo Köşkü</span>
+              </div>
+              <div class="st-kpi" style="padding:13px 15px">
+                <small>Gerekli Alan &amp; Karbon</small>
+                <b id="st-sim-alan" style="font-size:21px">37.500 m²</b>
+                <span id="st-sim-co2">37,5 dönüm · 2.681 ton CO₂/yıl</span>
+              </div>
+            </div>
+          </div>
+
+          <a id="st-sim-cta" class="btn btn-red" href="iletisim.html" style="justify-content:center;width:100%;min-height:48px;font-size:15.5px">
+            Bu Konfigürasyon İçin AeCAD Vaziyet Planı &amp; Teklif İste →
+          </a>
+        </div>
+
+        <!-- Sağ: Canlı AeCAD Şematik Vaziyet & Tek Hat Çizimi -->
+        <div class="st-sim-kutu" style="background:#14181F">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+              <div>
+                <b style="font-family:Archivo,sans-serif;font-size:16px;color:#fff">AeCAD Canlı Saha Yerleşim &amp; Tek Hat Şeması</b>
+                <div style="font-size:12.5px;color:#9CA3AF">Aksaray Enerji GES Çizim Esasları (Kuzey-Orta İnverter &amp; EKAT md.58 OG Kanal)</div>
+              </div>
+              <span class="st-rozet uygun">Otomatik Çizim</span>
+            </div>
+            <div style="background:#0D1117;border:1px solid #2A313C;border-radius:12px;padding:12px;overflow:hidden">
+              <svg id="st-aecad-svg" viewBox="0 0 520 270" style="width:100%;height:auto;display:block" aria-label="AeCAD dinamik GES saha yerleşim şeması"></svg>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;color:#9CA3AF;border-top:1px solid #2C323D;padding-top:12px">
+            <span>🔵 Güney yönelimli PV dizileri · 🟠 Kuzey-Orta String İnverter · 🔴 AG/OG Kablo &amp; TM</span>
+            <span id="st-sim-kablo-not" style="color:#34D399;font-weight:600">Gerilim düşümü &lt; %1,5 (Uygun)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: DİJİTAL ŞANTİYE (SAHA) & 7/24 SANTRAL İZLEME (AEMONITORING) -->
+    <div id="st-p-dijital" class="stitch-panel" role="tabpanel">
+      <div class="st-bar" style="margin-bottom:20px">
+        <div>
+          <b style="font-size:16px;color:#fff">Müşterilerimize Özel Şifreli Dijital Mühendislik Portalı</b>
+          <div style="font-size:13px;color:#9CA3AF">Santraliniz kurulurken şantiyeyi, devreye alındıktan sonra üretimi ve OSOS fatura mahsubunu canlı izlersiniz.</div>
+        </div>
+        <div class="st-chipler">
+          <button type="button" id="st-dj-btn1" class="st-cip on" onclick="stDijitalGorunum('saha')">🏗️ 1. Şantiye Kurulum Takibi (Saha)</button>
+          <button type="button" id="st-dj-btn2" class="st-cip" onclick="stDijitalGorunum('mon')">📊 2. 7/24 Üretim &amp; OSOS Mahsup (AEMonitoring)</button>
+          <button type="button" id="st-dj-btn3" class="st-cip" onclick="stDijitalGorunum('mevzuat')">📜 3. Şematik Mevzuat &amp; GesFin</button>
+        </div>
+      </div>
+
+      <!-- Alt Görünüm 1: SAHA İŞ YÖNETİMİ -->
+      <div id="st-dj-saha" class="st-sim-grid">
+        <div class="st-sim-kutu">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <span class="st-rozet uygun">CANLI ŞANTİYE ÖRNEĞİ</span>
+              <span style="font-size:12.5px;color:#9CA3AF;font-family:monospace">Portal Modülü: Saha İş Yönetimi</span>
+            </div>
+            <h3 style="margin:0 0 8px;font-family:Archivo,sans-serif;font-size:22px">Şantiyenizdeki her çakılan profili ve çekilen kabloyu gün gün takip edin.</h3>
+            <p style="margin:0 0 16px;font-size:14.5px;color:#B9BEC6;line-height:1.55">
+              Aksaray Enerji ile anahtar teslim veya işçilik sözleşmesi imzaladığınızda size özel <b>Saha Portalı</b> yetkisi tanımlanır. İş kalemlerinin tamamlanma yüzdesini, saha personel puantajını ve günlük şantiye fotoğraflarını şeffaf biçimde görürsünüz.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:10px;background:#16191E;padding:16px;border-radius:12px;border:1px solid #2E3440">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>1. Arazi Tesviye, Tel Çit &amp; Çelik Konstrüksiyon Çakma</span><b style="color:#34D399">%100 Tamamlandı</b></div>
+                <div style="height:8px;background:#262B33;border-radius:99px;overflow:hidden"><div style="width:100%;height:100%;background:#10B981"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>2. Bifacial TopCON Panel Montajı &amp; DC String Kablolama</span><b style="color:#34D399">%88 Devam Ediyor</b></div>
+                <div style="height:8px;background:#262B33;border-radius:99px;overflow:hidden"><div style="width:88%;height:100%;background:#10B981"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>3. İnverter, AG/OG Yeraltı Kablo Kanalı (EKAT md.58) &amp; TM</span><b style="color:#60A5FA">%75 Devam Ediyor</b></div>
+                <div style="height:8px;background:#262B33;border-radius:99px;overflow:hidden"><div style="width:75%;height:100%;background:#3B82F6"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>4. TEDAŞ / Dağıtım Şirketi Geçici Kabul &amp; Enerjilendirme</span><b style="color:#FBBF24">Planlanan: 12 Gün Sonra</b></div>
+                <div style="height:8px;background:#262B33;border-radius:99px;overflow:hidden"><div style="width:35%;height:100%;background:#F59E0B"></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a class="st-teklif-btn" href="iletisim.html?konu=Anahtar+teslim+GES&amp;detay=Dijital+Saha+Takibi+ve+EPC+Teklifi">Projem İçin Teklif &amp; Demo Hesabı İste →</a>
+            <a class="st-teklif-btn ik" href="portal/">Kurumsal Portal Girişi</a>
+          </div>
+        </div>
+
+        <div class="st-sim-kutu" style="background:#16191E">
+          <div style="font-size:13px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em">Şantiye Günlük Özeti · Örnek Yatırımcı Ekranı</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div class="st-kpi yesil" style="padding:12px"><small>Sahadaki Ekip</small><b style="font-size:20px">34 Kişi</b><span>Mekanik + Elektrik</span></div>
+            <div class="st-kpi mavi" style="padding:12px"><small>Bugün Montaj</small><b style="font-size:20px">640 Panel</b><span>11 Masa Tamam</span></div>
+            <div class="st-kpi sari" style="padding:12px"><small>Genel İlerleme</small><b style="font-size:20px">%82,4</b><span>Takvime Uygun</span></div>
+          </div>
+          <div style="background:#20252D;border:1px solid #323842;border-radius:12px;padding:14px;font-size:13.5px;color:#D1D5DB;line-height:1.55">
+            <b style="color:#fff;display:block;margin-bottom:4px">📋 Son Saha Mühendisi Raporu:</b>
+            "Sera-2 ve Anka parsellerinde 14. ve 15. inverter bölgelerinin DC solar kablo çekimi ve MC4 konnektör megger izolasyon testleri tamamlandı. Trafo köşkü OG hücre montajı yarın sabah başlıyor."
+          </div>
+          <div style="font-size:12.5px;color:#9CA3AF">✓ Hakediş, taşeron, malzeme sevkiyatı ve İSG tutanakları tek ekranda arşivlenir.</div>
+        </div>
+      </div>
+
+      <!-- Alt Görünüm 2: AEMONITORING & OSOS MAHSUP -->
+      <div id="st-dj-mon" class="st-sim-grid" style="display:none">
+        <div class="st-sim-kutu">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <span class="st-rozet uygun">7/24 TELEMETRİ &amp; OSOS</span>
+              <span style="font-size:12.5px;color:#9CA3AF;font-family:monospace">Portal Modülü: AEMonitoring</span>
+            </div>
+            <h3 style="margin:0 0 8px;font-family:Archivo,sans-serif;font-size:22px">Sadece inverteri değil, OSOS sayacınızı ve faturanızı da otomatik doğruluyoruz.</h3>
+            <p style="margin:0 0 16px;font-size:14.5px;color:#B9BEC6;line-height:1.55">
+              Standart izleme yazılımları yalnızca inverter üretimini gösterir. <b>AEMonitoring</b> ise FusionSolar, Sungrow ve İnavitas verilerini dağıtım şirketinin <b>OSOS çift yönlü sayacıyla</b> saatlik karşılaştırır; endüktif/kapasitif reaktif ceza riskini önceden yakalar.
+            </p>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+              <div class="st-kpi yesil" style="padding:12px"><small>OSOS — İnverter Uyumu</small><b style="font-size:20px">%99,4 Mutabık</b><span>±50 kWh tolerans kontrolü</span></div>
+              <div class="st-kpi mavi" style="padding:12px"><small>Çoklu Santral Mahsubu</small><b style="font-size:20px">Canlı Bakiye</b><span>Üretim ve tüketim tesisleri</span></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a class="st-teklif-btn" href="iletisim.html?konu=OG+i%C5%9Fletme+sorumlulu%C4%9Fu&amp;detay=AEMonitoring+ve+GES+Bakim+Izleme+Teklifi">Santralim İçin İzleme &amp; Bakım Teklifi Al →</a>
+            <a class="st-teklif-btn ik" href="portal/">Müşteri Paneli Girişi</a>
+          </div>
+        </div>
+
+        <div class="st-sim-kutu" style="background:#16191E">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;font-weight:700;color:#9CA3AF;text-transform:uppercase">Canlı İnverter String Isı Haritası (28/28 Aktif)</span>
+            <span style="font-size:12px;color:#34D399;font-weight:700">● PR %94,2</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
+            <div style="background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4);color:#34D399;padding:8px 4px;border-radius:8px;text-align:center;font-family:monospace;font-size:12px;font-weight:700">INV1<br>%98</div>
+            <div style="background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4);color:#34D399;padding:8px 4px;border-radius:8px;text-align:center;font-family:monospace;font-size:12px;font-weight:700">INV2<br>%97</div>
+            <div style="background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4);color:#34D399;padding:8px 4px;border-radius:8px;text-align:center;font-family:monospace;font-size:12px;font-weight:700">INV3<br>%99</div>
+            <div style="background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4);color:#34D399;padding:8px 4px;border-radius:8px;text-align:center;font-family:monospace;font-size:12px;font-weight:700">INV4<br>%96</div>
+            <div style="background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4);color:#34D399;padding:8px 4px;border-radius:8px;text-align:center;font-family:monospace;font-size:12px;font-weight:700">INV5<br>%98</div>
+            <div style="background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.45);color:#FBBF24;padding:8px 4px;border-radius:8px;text-align:center;font-family:monospace;font-size:12px;font-weight:700" title="String-3 tozlanma uyarısı">INV6<br>%89</div>
+            <div style="background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4);color:#34D399;padding:8px 4px;border-radius:8px;text-align:center;font-family:monospace;font-size:12px;font-weight:700">INV7<br>%98</div>
+          </div>
+          <div style="background:#20252D;border:1px solid #323842;border-radius:12px;padding:13px;font-size:13px;color:#D1D5DB">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>⚡ Aylık OSOS Şebekeye Veriş:</span><b style="color:#34D399;font-family:monospace">418.920 kWh</b></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>🏭 Aylık Tüketim Tesisleri Çekiş:</span><b style="color:#60A5FA;font-family:monospace">259.920 kWh</b></div>
+            <div style="display:flex;justify-content:space-between;border-top:1px solid #323842;padding-top:6px"><span>💰 Net Mahsup Fazlası (Satış/Alacak):</span><b style="color:#FBBF24;font-family:monospace">+159.000 kWh</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alt Görünüm 3: ENERJİ GÜNDEMİ & MEVZUAT -->
+      <div id="st-dj-mevzuat" class="st-sim-grid" style="display:none">
+        <div class="st-sim-kutu">
+          <div>
+            <span class="st-rozet uygun">ŞEMATİK MEVZUAT REHBERİ</span>
+            <h3 style="margin:10px 0 8px;font-family:Archivo,sans-serif;font-size:22px">Lisanssız GES (5.1.h / 5.1.c), EPDK ve Resmî Gazete kararlarını şemalarla takip edin.</h3>
+            <p style="margin:0 0 16px;font-size:14.5px;color:#B9BEC6;line-height:1.55">
+              Karmaşık yönetmelik metinleri yerine; mahsuplaşma sınırlarını, bağlantı anlaşması sürelerini, SKB/dağıtım bedellerini ve TEİAŞ duyurularını mühendislik tek hat şeması üzerinde açıklıyoruz.
+            </p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a class="st-teklif-btn" href="gundem.html">Şematik Enerji Gündemi &amp; Mevzuat Sayfasını Aç →</a>
+          </div>
+        </div>
+        <div class="st-sim-kutu" style="background:#16191E;justify-content:center;gap:10px">
+          <div style="padding:12px 14px;background:#20252D;border-left:4px solid #D32027;border-radius:10px">
+            <b style="color:#fff;font-size:14px">📌 Lisanssız Elektrik Üretim Yönetmeliği (Madde 5.1.h)</b>
+            <p style="margin:4px 0 0;font-size:13px;color:#9CA3AF">Sözleşme gücü sınırları, aynı/farklı ölçüm noktasında mahsuplaşma ve çağrı mektubu uzatma kriterleri.</p>
+          </div>
+          <div style="padding:12px 14px;background:#20252D;border-left:4px solid #10B981;border-radius:10px">
+            <b style="color:#fff;font-size:14px">📌 GesFin Fatura &amp; Gelir Doğrulama</b>
+            <p style="margin:4px 0 0;font-size:13px;color:#9CA3AF">Görevli tedarik şirketi faturalarının PTF, YEKDEM ve dağıtım bedeli kalemleriyle kuruşu kuruşuna kontrolü.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="soft"><div class="wrap sec">
   <div class="sec-head">
     <div><div class="eyebrow">NASIL ÇALIŞIYORUZ</div><h2 class="h2">Projeden işletmeye, tek sorumlu.</h2></div>
@@ -165,6 +474,275 @@
     else{v.pause();b.textContent='Videoyu oynat';b.setAttribute('aria-pressed','true');}
   });
 })();
+
+/* Stitch Yatırımcı & Mühendislik Merkezi Script */
+var ST_KAP_VERI = null;
+var ST_SECILI_IL = 'AKSARAY';
+var ST_SIM_TIP = 'arazi';
+
+function stSekme(id, btn) {
+  ['kapasite', 'aecad', 'dijital'].forEach(function(k) {
+    var p = document.getElementById('st-p-' + k);
+    if (p) p.classList.toggle('aktif', k === id);
+  });
+  var btns = document.querySelectorAll('.stitch-tab');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].setAttribute('aria-selected', btns[i] === btn ? 'true' : 'false');
+  }
+  if (id === 'aecad') {
+    var r = document.getElementById('st-guc-range');
+    if (r) stSimHesapla(r.value);
+  }
+}
+
+function stDijitalGorunum(mod) {
+  var m = { saha: 'st-dj-saha', mon: 'st-dj-mon', mevzuat: 'st-dj-mevzuat' };
+  var b = { saha: 'st-dj-btn1', mon: 'st-dj-btn2', mevzuat: 'st-dj-btn3' };
+  Object.keys(m).forEach(function(k) {
+    var el = document.getElementById(m[k]);
+    if (el) el.style.display = (k === mod) ? 'grid' : 'none';
+    var bt = document.getElementById(b[k]);
+    if (bt) bt.classList.toggle('on', k === mod);
+  });
+}
+
+function stEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function stIlDegisti(il) {
+  ST_SECILI_IL = il;
+  var cipler = document.querySelectorAll('#st-p-kapasite .st-cip');
+  for (var i = 0; i < cipler.length; i++) {
+    var t = cipler[i].textContent.toLocaleUpperCase('tr');
+    cipler[i].classList.toggle('on', (il === 'TÜM_BOS' && t.indexOf('TÜRKİYE') !== -1) || t === il);
+  }
+  stTabloCiz();
+}
+
+function stHizliIl(il, btn) {
+  ST_SECILI_IL = il;
+  var sel = document.getElementById('st-il-sec');
+  if (sel && sel.querySelector('option[value="' + il + '"]')) sel.value = il;
+  var cipler = document.querySelectorAll('#st-p-kapasite .st-cip');
+  for (var i = 0; i < cipler.length; i++) cipler[i].classList.remove('on');
+  if (btn) btn.classList.add('on');
+  stTabloCiz();
+}
+
+function stTabloCiz() {
+  var govde = document.getElementById('st-tm-govde');
+  if (!ST_KAP_VERI || !ST_KAP_VERI.rows) return;
+  var ara = (document.getElementById('st-tm-ara').value || '').trim().toLocaleLowerCase('tr');
+  var yalnizBos = document.getElementById('st-yalniz-bos').checked;
+  var rows = ST_KAP_VERI.rows;
+  var filtreli = [];
+  var ilToplamMwe = 0, ilToplamTm = 0, ilBosTm = 0;
+  var edasSet = {};
+
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var rIl = r[0], rTm = r[1], rBara = r[2], rEdas = r[3], mwe = Number(r[6] || 0);
+    var ilEsles = (ST_SECILI_IL === 'TÜM_BOS') ? (mwe > 0) : (rIl === ST_SECILI_IL);
+    if (!ilEsles) continue;
+
+    ilToplamTm++;
+    ilToplamMwe += mwe;
+    if (mwe > 0) ilBosTm++;
+    if (rEdas) edasSet[rEdas] = true;
+
+    if (yalnizBos && mwe <= 0) continue;
+    if (ara && (rTm.toLocaleLowerCase('tr').indexOf(ara) === -1 && rEdas.toLocaleLowerCase('tr').indexOf(ara) === -1 && rIl.toLocaleLowerCase('tr').indexOf(ara) === -1)) continue;
+    filtreli.push(r);
+  }
+
+  filtreli.sort(function(a, b) { return Number(b[6] || 0) - Number(a[6] || 0); });
+
+  var mweFmt = ilToplamMwe.toLocaleString('tr-TR', { maximumFractionDigits: 2 });
+  var mwpFmt = (ilToplamMwe * 1.25).toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+  document.getElementById('st-kpi-mwe').textContent = mweFmt + ' MWe';
+  document.getElementById('st-kpi-uygun').textContent = ilBosTm + ' / ' + ilToplamTm + ' TM';
+  document.getElementById('st-kpi-mwp').textContent = '≈ ' + mwpFmt + ' MWp';
+  var edasList = Object.keys(edasSet);
+  document.getElementById('st-kpi-edas').textContent = ST_SECILI_IL === 'TÜM_BOS' ? '21 EDAŞ & OSB' : (edasList.slice(0, 2).join(' · ') || '—');
+
+  var ilBtn = document.getElementById('st-il-teklif-btn');
+  if (ilBtn) {
+    var hedefIl = ST_SECILI_IL === 'TÜM_BOS' ? 'Türkiye Geneli' : ST_SECILI_IL;
+    ilBtn.href = 'iletisim.html?konu=' + encodeURIComponent('Anahtar teslim GES') + '&il=' + encodeURIComponent(hedefIl) + '&kap=' + encodeURIComponent(ilToplamMwe > 0 ? mweFmt + ' MWe (' + hedefIl + ')' : '1 MWp') + '&detay=' + encodeURIComponent(hedefIl + ' bölgesi trafo merkezleri için bağlantı görüşü ve GES fizibilite talebi');
+  }
+
+  if (!filtreli.length) {
+    govde.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#9CA3AF">Seçilen kriterlere uygun trafo merkezi bulunamadı. Filtreyi temizleyerek tüm trafo merkezlerini görebilirsiniz.</td></tr>';
+    return;
+  }
+
+  var html = '';
+  var goster = filtreli.slice(0, 45);
+  for (var j = 0; j < goster.length; j++) {
+    var x = goster[j];
+    var m = Number(x[6] || 0);
+    var uygun = m > 0;
+    var mStr = m.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + ' MWe';
+    var url = 'iletisim.html?konu=' + encodeURIComponent('Anahtar teslim GES')
+      + '&il=' + encodeURIComponent(x[0])
+      + '&tm=' + encodeURIComponent(x[1] + ' (' + x[2] + ')')
+      + '&edas=' + encodeURIComponent(x[3])
+      + '&kap=' + encodeURIComponent(uygun ? mStr : 'Öztüketim GES')
+      + '&detay=' + encodeURIComponent(x[0] + ' - ' + x[1] + ' (' + x[2] + ' barası, ' + x[3] + ') için ' + (uygun ? mStr + ' boş kapasite üzerinden çağrı mektubu ve anahtar teslim GES teklifi' : 'çatı/öztüketim GES ve trafo bağlantı analizi talebi'));
+
+    html += '<tr>'
+      + '<td style="font-weight:600;color:#9CA3AF">' + stEsc(x[0]) + '</td>'
+      + '<td style="font-weight:700;color:#fff">' + stEsc(x[1]) + '</td>'
+      + '<td>' + stEsc(x[2]) + '</td>'
+      + '<td>' + stEsc(x[3]) + '</td>'
+      + '<td style="text-align:right;font-weight:800;color:' + (uygun ? '#34D399' : '#94A3B8') + '">' + mStr + '</td>'
+      + '<td><span class="st-rozet ' + (uygun ? 'uygun' : 'dolu') + '">' + (uygun ? '● Tahsis Edilebilir' : '○ Kapasite Dolu') + '</span></td>'
+      + '<td style="text-align:right"><a class="st-teklif-btn ' + (uygun ? '' : 'ik') + '" href="' + url + '">' + (uygun ? 'Çağrı Mektubu &amp; Teklif →' : 'Öztüketim Analizi →') + '</a></td>'
+      + '</tr>';
+  }
+  govde.innerHTML = html;
+}
+
+function stKapasiteYukle() {
+  var uclar = ['assets/kapasite3.json', 'kapasite/kapasite3.json'];
+  function dene(idx) {
+    if (idx >= uclar.length) return;
+    fetch(uclar[idx]).then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function(j) {
+      ST_KAP_VERI = j;
+      var iller = [];
+      var goruldu = {};
+      for (var i = 0; i < j.rows.length; i++) {
+        var il = j.rows[i][0];
+        if (!goruldu[il]) { goruldu[il] = true; iller.push(il); }
+      }
+      iller.sort(function(a, b) { return a.localeCompare(b, 'tr'); });
+      var sel = document.getElementById('st-il-sec');
+      if (sel) {
+        var opts = '<option value="TÜM_BOS">🔥 TÜRKİYE GENELİ (En Yüksek Boş TM\'ler)</option>';
+        for (var k = 0; k < iller.length; k++) {
+          var s = iller[k] === 'AKSARAY' ? ' selected' : '';
+          opts += '<option value="' + stEsc(iller[k]) + '"' + s + '>' + stEsc(iller[k]) + '</option>';
+        }
+        sel.innerHTML = opts;
+      }
+      if (j.donemler && j.donemler.length) {
+        var son = j.donemler[j.donemler.length - 1];
+        var dEl = document.getElementById('st-kpi-donem');
+        if (dEl) dEl.textContent = 'TEİAŞ ' + son.etiket + ' (' + son.kisa + ') verisi';
+      }
+      stTabloCiz();
+    }).catch(function() { dene(idx + 1); });
+  }
+  dene(0);
+}
+
+function stSimTip(tip) {
+  ST_SIM_TIP = tip;
+  document.getElementById('st-tip-arazi').classList.toggle('on', tip === 'arazi');
+  document.getElementById('st-tip-cati').classList.toggle('on', tip === 'cati');
+  stSimHesapla(document.getElementById('st-guc-range').value);
+}
+
+function stSimSec(deger) {
+  var r = document.getElementById('st-guc-range');
+  if (r) r.value = deger;
+  var cipler = document.querySelectorAll('#st-p-aecad .st-chipler')[1].querySelectorAll('.st-cip');
+  for (var i = 0; i < cipler.length; i++) {
+    cipler[i].classList.toggle('on', parseFloat(cipler[i].textContent.replace(',', '.')) === deger);
+  }
+  stSimHesapla(deger);
+}
+
+function stSimHesapla(val) {
+  var mwp = parseFloat(val) || 2.5;
+  var araziMi = ST_SIM_TIP === 'arazi';
+  var birimUretim = araziMi ? 1650 : 1480;
+  var yillikMwh = Math.round(mwp * birimUretim);
+  var gelirTlMilyon = ((yillikMwh * 1000 * 2.45) / 1e6).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var panelAdet = Math.ceil((mwp * 1e6) / 580);
+  var masaBoyut = araziMi ? 56 : 28;
+  var masaAdet = Math.ceil(panelAdet / masaBoyut);
+  var panelTam = masaAdet * masaBoyut;
+  var invAdet = Math.max(1, Math.round((mwp * 1000) / 125));
+  var trafoKva = mwp <= 1 ? 1000 : mwp <= 1.6 ? 1600 : mwp <= 2.5 ? 2500 : Math.ceil(mwp / 2.5) * 2500;
+  var alanM2 = Math.round(mwp * (araziMi ? 15000 : 6200));
+  var donum = (alanM2 / 1000).toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+  var co2 = Math.round(yillikMwh * 0.65);
+
+  document.getElementById('st-sim-guc-lbl').textContent = mwp.toLocaleString('tr-TR', { minimumFractionDigits: mwp % 1 ? 1 : 0 }) + ' MWp';
+  document.getElementById('st-sim-uretim').textContent = yillikMwh.toLocaleString('tr-TR') + ' MWh';
+  document.getElementById('st-sim-gelir').textContent = '≈ ' + gelirTlMilyon + ' Milyon ₺ / yıl mahsup';
+  document.getElementById('st-sim-panel').textContent = panelTam.toLocaleString('tr-TR') + ' Adet';
+  document.getElementById('st-sim-masa').textContent = masaAdet.toLocaleString('tr-TR') + ' adet ' + (araziMi ? '2×28 çelik masa' : 'çatı konstrüksiyon dizisi');
+  document.getElementById('st-sim-inv').textContent = invAdet + ' × 110 kW';
+  document.getElementById('st-sim-trafo').textContent = trafoKva.toLocaleString('tr-TR') + ' kVA OG Trafo Merkezi';
+  document.getElementById('st-sim-alan').textContent = alanM2.toLocaleString('tr-TR') + ' m²';
+  document.getElementById('st-sim-co2').textContent = (araziMi ? donum + ' dönüm · ' : 'Çatı alanı · ') + co2.toLocaleString('tr-TR') + ' ton CO₂/yıl';
+
+  var cta = document.getElementById('st-sim-cta');
+  if (cta) {
+    var tipAd = araziMi ? 'Arazi Tipi GES (5.1.h)' : 'Çatı Tipi Öztüketim GES';
+    var gucStr = mwp.toLocaleString('tr-TR') + ' MWp';
+    cta.href = 'iletisim.html?konu=' + encodeURIComponent('Anahtar teslim GES')
+      + '&kap=' + encodeURIComponent(gucStr + ' (' + tipAd + ')')
+      + '&detay=' + encodeURIComponent('AeCAD Simülatör Özeti: ' + gucStr + ' ' + tipAd + ' | ' + panelTam + ' adet 580Wp panel (' + masaAdet + ' masa) | ' + invAdet + '×110kW inverter | ' + trafoKva + ' kVA OG Trafo | Tahmini Alan: ' + alanM2.toLocaleString('tr-TR') + ' m² | Yıllık Üretim: ' + yillikMwh.toLocaleString('tr-TR') + ' MWh.');
+  }
+
+  stAecadSvgCiz(mwp, masaAdet, invAdet, trafoKva, araziMi);
+}
+
+function stAecadSvgCiz(mwp, masaAdet, invAdet, trafoKva, araziMi) {
+  var svg = document.getElementById('st-aecad-svg');
+  if (!svg) return;
+  var satirSayisi = Math.min(6, Math.max(2, Math.ceil(mwp / 2.5) + 1));
+  var sutunSayisi = Math.min(7, Math.max(3, Math.ceil(mwp / 1.8) + 2));
+  var s = '';
+  s += '<defs><pattern id="aeGrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1B222D" stroke-width="1"/></pattern></defs>';
+  s += '<rect width="520" height="270" fill="url(#aeGrid)"/>';
+  s += '<rect x="16" y="20" width="356" height="230" rx="8" fill="rgba(16,185,129,0.03)" stroke="#2E4057" stroke-width="1.5" stroke-dasharray="6 4"/>';
+  s += '<text x="26" y="36" fill="#64748B" font-family="monospace" font-size="10">KUZEY (N) ↑ · PARSEL SINIRI (' + (araziMi ? 'ARAZİ GES' : 'ENDÜSTRİYEL ÇATI') + ')</text>';
+
+  var invX = 194, invY = 48;
+  s += '<rect x="' + (invX - 38) + '" y="' + (invY - 10) + '" width="76" height="22" rx="5" fill="#F59E0B" stroke="#FDE68A" stroke-width="1.5"/>';
+  s += '<text x="' + invX + '" y="' + (invY + 4) + '" text-anchor="middle" fill="#111827" font-family="monospace" font-weight="bold" font-size="10">INV (' + invAdet + ' ADET)</text>';
+
+  var startX = 32, startY = 82;
+  var cellW = Math.floor(320 / sutunSayisi), cellH = Math.floor(150 / satirSayisi);
+  for (var r = 0; r < satirSayisi; r++) {
+    var py = startY + r * cellH;
+    s += '<line x1="' + invX + '" y1="' + (invY + 12) + '" x2="' + invX + '" y2="' + (py + 8) + '" stroke="#F59E0B" stroke-width="1.5" stroke-opacity="0.7"/>';
+    for (var c = 0; c < sutunSayisi; c++) {
+      var px = startX + c * cellW;
+      var mw = cellW - 8, mh = Math.min(18, cellH - 8);
+      s += '<line x1="' + (px + mw/2) + '" y1="' + (py + mh/2) + '" x2="' + invX + '" y2="' + (py + mh/2) + '" stroke="#38BDF8" stroke-width="1" stroke-opacity="0.45"/>';
+      s += '<rect x="' + px + '" y="' + py + '" width="' + mw + '" height="' + mh + '" rx="2.5" fill="#1E3A8A" stroke="#38BDF8" stroke-width="1.2"/>';
+      s += '<line x1="' + px + '" y1="' + (py + mh/2) + '" x2="' + (px + mw) + '" y2="' + (py + mh/2) + '" stroke="#93C5FD" stroke-width="0.6" stroke-opacity="0.6"/>';
+    }
+  }
+
+  s += '<path d="M 232 48 L 405 48 L 405 110" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-dasharray="5 3"/>';
+  s += '<text x="318" y="42" text-anchor="middle" fill="#FCA5A5" font-family="monospace" font-size="9.5">AG/OG KABLO KANALI (EKAT md.58)</text>';
+
+  s += '<rect x="385" y="110" width="118" height="64" rx="8" fill="#1F2937" stroke="#EF4444" stroke-width="2"/>';
+  s += '<text x="444" y="132" text-anchor="middle" fill="#FFFFFF" font-family="monospace" font-weight="bold" font-size="11">OG TRAFO MERKEZİ</text>';
+  s += '<text x="444" y="148" text-anchor="middle" fill="#FCA5A5" font-family="monospace" font-size="10.5">' + trafoKva + ' kVA · 31,5 kV</text>';
+  s += '<text x="444" y="163" text-anchor="middle" fill="#34D399" font-family="monospace" font-size="9.5">Çift Yönlü OSOS Sayaç</text>';
+
+  s += '<line x1="444" y1="174" x2="444" y2="215" stroke="#10B981" stroke-width="2.5"/>';
+  s += '<rect x="385" y="215" width="118" height="35" rx="6" fill="rgba(16,185,129,0.12)" stroke="#10B981" stroke-width="1.5"/>';
+  s += '<text x="444" y="236" text-anchor="middle" fill="#34D399" font-family="monospace" font-weight="bold" font-size="10.5">⚡ TEİAŞ / EDAŞ ŞEBEKE</text>';
+
+  svg.innerHTML = s;
+}
+
+stKapasiteYukle();
+stSimHesapla(2.5);
 </script>
 </body>
 </html>

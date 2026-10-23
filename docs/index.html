@@ -130,6 +130,13 @@
         </div>
       </div>
 
+      <div style="margin-bottom:14px;padding:13px 16px;border-radius:12px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.38);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px">
+        <div style="font-size:13.5px;color:#E5E7EB;line-height:1.45">
+          <b style="color:#34D399">💡 Trafo merkezi "Kapasite Dolu (0 MWe)" mi görünüyor?</b> Ev, villa, tarımsal sulama ve küçük işletmeler için <b>25 kW altı çatı GES</b> başvuruları TEİAŞ kapasitesinden muaftır; doğrudan 0,4 kV AG mahalle/köy trafosundan başvuru yapılır.
+        </div>
+        <button type="button" class="st-teklif-btn" style="border:0;cursor:pointer;background:#10B981;color:#06281E;font-weight:800" onclick="st25Gec(ST_SECILI_IL,'')">🏠 Tek Tıkla 25 kW Altı Başvuru Ekranına Geç →</button>
+      </div>
+
       <div class="st-tablo-kutu">
         <table class="st-tablo">
           <thead>
@@ -747,8 +754,10 @@ function stTabloCiz() {
       + '<td>' + stEsc(x[2]) + '</td>'
       + '<td>' + stEsc(x[3]) + '</td>'
       + '<td style="text-align:right;font-weight:800;color:' + (uygun ? '#34D399' : '#94A3B8') + '">' + mStr + '</td>'
-      + '<td><span class="st-rozet ' + (uygun ? 'uygun' : 'dolu') + '">' + (uygun ? '● Tahsis Edilebilir' : '○ Kapasite Dolu') + '</span></td>'
-      + '<td style="text-align:right"><a class="st-teklif-btn ' + (uygun ? '' : 'ik') + '" href="' + url + '">' + (uygun ? 'Çağrı Mektubu &amp; Teklif →' : 'Öztüketim Analizi →') + '</a></td>'
+      + '<td><span class="st-rozet ' + (uygun ? 'uygun' : 'dolu') + '">' + (uygun ? '● Tahsis Edilebilir' : '○ Kapasite Dolu (AG 25 kW Açık)') + '</span></td>'
+      + '<td style="text-align:right">' + (uygun
+          ? '<a class="st-teklif-btn" href="' + url + '">Çağrı Mektubu &amp; Teklif →</a>'
+          : '<button type="button" class="st-teklif-btn" style="border:0;cursor:pointer;background:#10B981;color:#06281E;font-weight:700;margin-right:6px" onclick="st25Gec(\'' + stEsc(x[0]) + '\',\'' + stEsc(x[1]) + '\')">🏠 25 kW Altı Başvur →</button><a class="st-teklif-btn ik" href="' + url + '">Öztüketim →</a>') + '</td>'
       + '</tr>';
   }
   govde.innerHTML = html;
@@ -890,6 +899,19 @@ function stAecadSvgCiz(mwp, masaAdet, invAdet, trafoKva, araziMi) {
 }
 
 var ST_25_TIP = 'konut';
+
+function st25Gec(il, tm) {
+  var btn = document.getElementById('st-tab-25kw');
+  stSekme('25kw', btn);
+  var kInput = document.getElementById('st-25-konum');
+  if (kInput) {
+    var temizIl = (il && il !== 'TÜM_BOS') ? il : '';
+    kInput.value = temizIl + (tm ? ' (' + tm + ' bölgesi)' : '');
+  }
+  st25Hesapla();
+  var panel = document.getElementById('st-p-25kw');
+  if (panel && panel.scrollIntoView) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
 function st25Tip(tip) {
   ST_25_TIP = tip;

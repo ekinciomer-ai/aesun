@@ -1,5 +1,5 @@
 name: Müşteri Monitoring kimliği (ns1)
-# SOLARMAN web hesaplarını ns1'e yazar: /opt/aesun/musteri.env (root, 600) → aesun-musteri yeniden başlar.
+# SOLARMAN, OSB Ace Center, Fronius ve MEDAŞ OSOS hesaplarını ns1'e yazar: /opt/aesun/musteri.env (root, 600) → aesun-musteri yeniden başlar.
 # Değerler yalnız aesun → Settings → Secrets'ta durur; loga basılmaz.
 on: workflow_dispatch
 concurrency: { group: sunucu-islem, cancel-in-progress: false }
@@ -40,6 +40,8 @@ jobs:
           FR_S_HAS2: ${{ secrets.FRONIUS_SIFRE_HASGERIDONUSUM }}
           SW_COOKIE: ${{ secrets.SOLARWEB_COOKIE }}
           ACE_OTURUM: ${{ secrets.ACE_OTURUM }}
+          OSOS_K: ${{ secrets.OSOS_KULLANICI }}
+          OSOS_S: ${{ secrets.OSOS_SIFRE }}
         run: |
           set -euo pipefail
           ENV=$(python3 -c "import os; e=['','_TATMAK','_HASGERIDONUSUM','_2','_3','_4','_5']; print(''.join(f'SOLARMAN_KULLANICI{x}={os.environ[\"SK\"+x]}\nSOLARMAN_SIFRE{x}={os.environ[\"SS\"+x]}\n' for x in e if os.environ.get('SK'+x) and os.environ.get('SS'+x)),end='')")
@@ -47,6 +49,8 @@ jobs:
           [ -n "$OSB" ] && ENV="${ENV:+${ENV}$'\n'}${OSB}" && echo "::notice::OSB Ace Center hesap sayısı: $(printf '%s\n' "$OSB" | grep -c '^OSB_KULLANICI')"
           FR=$(python3 -c "import os; k=os.environ.get('FR_K_HAS','').strip(); s=(os.environ.get('FR_S_HAS1','') or os.environ.get('FR_S_HAS2','')).strip(); c=os.environ.get('SW_COOKIE','').replace(chr(13),' ').replace(chr(10),' ').strip(); out=[]; k and s and out.append(f'FRONIUS_GIRIS_HASGERIDONUSUM={k}\nFRONIUS_SIFRE_HASGERIDUNUS={s}'); c and out.append(f'SOLARWEB_COOKIE={c}'); print('\n'.join(out), end='')")
           [ -n "$FR" ] && ENV="${ENV:+${ENV}$'\n'}${FR}" && echo "::notice::Fronius Solar.web (HAS Geri Dönüşüm) tanımlı"
+          MEDAS=$(python3 -c "import os; k=os.environ.get('OSOS_K','').strip(); s=os.environ.get('OSOS_S','').strip(); print(f'OSOS_KULLANICI={k}\nOSOS_SIFRE={s}' if k and s else '', end='')")
+          [ -n "$MEDAS" ] && ENV="${ENV:+${ENV}$'\n'}${MEDAS}" && echo "::notice::MEDAŞ OSOS (Çaylı Yem 11506568) tanımlı"
           # İsteğe bağlı yedek: oturum çerezi
           ACE=$(python3 -c "import os; v=os.environ.get('ACE_OTURUM','').replace(chr(13),' ').replace(chr(10),' ').strip(); v=v[7:].strip() if v.lower().startswith('cookie:') else v; print(f'ACE_OTURUM={v}' if v else '')")
           [ -n "$ACE" ] && ENV="${ENV:+${ENV}$'\n'}${ACE}" && echo "::notice::Ace Center oturumu tanımlı"

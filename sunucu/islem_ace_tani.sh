@@ -7,7 +7,7 @@ echo "NOT: ACE_OTURUM tanımlı: $(grep -c '^ACE_OTURUM=.' /opt/aesun/musteri.en
 docker exec aesun-musteri python3 -c "
 import json, pathlib
 d = json.load(open('/musteri/durum.json'))
-osb = {k: v for k, v in d.get('hesaplar', {}).items() if k.startswith('osb') or k == 'ace'}
+osb = {k: v for k, v in d.get('hesaplar', {}).items() if k.startswith(('osb', 'medas')) or k == 'ace'}
 print('NOT: osb_durum:', json.dumps(osb, ensure_ascii=False))
 s = json.load(open('/musteri/santraller.json'))
 for sid, m in s.items():

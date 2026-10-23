@@ -16,6 +16,7 @@ from pathlib import Path
 import requests
 import ace
 import fronius
+import medas_osos
 
 KOK = Path(os.environ.get("MUSTERI_VERI", "/musteri"))
 TABAN = os.environ.get("SOLARMAN_TABAN", "https://globalpro.solarmanpv.com")
@@ -195,14 +196,6 @@ def main():
                 s = tur(H); hepsi.update(s); durum["hesaplar"][H.ad] = {"tamam": True, "santral": len(s), "iz": H.iz}
             except Exception as e:
                 durum["hesaplar"][H.ad] = {"tamam": False, "hata": str(e)[:200], "iz": H.iz}; traceback.print_exc(limit=1); H.t = None
-        if fronius.etkin():   # Fronius Solar.web (HAS GERİ DÖNÜŞÜM GES 11x Tauro inverter)
-            try:
-                s_fr, fr_d = fronius.tur(KOK, yaz, hepsi)
-                hepsi.update(s_fr)
-                durum["hesaplar"].update(fr_d)
-            except Exception as e:
-                durum["hesaplar"]["fronius_HASGERIDONUSUM"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "fronius"}
-                traceback.print_exc(limit=1)
         if ace.etkin():   # OSB sayaçları (Ace Center) — çoklu hesap otomatik captcha girişi + OSF-07 saatlik rapor
             try:
                 s, osb_d = ace.tur(KOK, yaz, hepsi)
@@ -212,9 +205,26 @@ def main():
             except Exception as e:
                 durum["hesaplar"]["ace"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "ace", "oturum_dustu": isinstance(e, ace.OturumDustu)}
                 traceback.print_exc(limit=1)
+        if medas_osos.etkin():   # MEDAŞ OSOS sayaçları (Çaylı Yem 11506568 vb.)
+            try:
+                s_md, md_d = medas_osos.tur(KOK, yaz, hepsi)
+                hepsi.update(s_md)
+                durum["hesaplar"].update(md_d)
+            except Exception as e:
+                durum["hesaplar"]["medas_11506568"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "medas"}
+                traceback.print_exc(limit=1)
+        yaz(KOK / "santraller.json", hepsi); eski = hepsi
+        if fronius.etkin():   # Fronius Solar.web (HAS GERİ DÖNÜŞÜM GES 11x Tauro inverter)
+            try:
+                s_fr, fr_d = fronius.tur(KOK, yaz, hepsi)
+                hepsi.update(s_fr)
+                durum["hesaplar"].update(fr_d)
+            except Exception as e:
+                durum["hesaplar"]["fronius_HASGERIDONUSUM"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "fronius"}
+                traceback.print_exc(limit=1)
         yaz(KOK / "santraller.json", hepsi); eski = hepsi
         hatalar = [f"{k}: {v['hata']}" for k, v in durum["hesaplar"].items() if not v["tamam"]]
-        aktif_var = bool(hesaplar or fronius.etkin() or ace.etkin())
+        aktif_var = bool(hesaplar or fronius.etkin() or ace.etkin() or medas_osos.etkin())
         durum.update(tamam=not hatalar and aktif_var, santral=len(hepsi))
         if hatalar or not aktif_var:
             durum["hata"] = "; ".join(hatalar)[:300] or "hesap tanımlı değil"

@@ -201,3 +201,48 @@ form.f button:hover{background:#B81B21}
 @media (prefers-reduced-motion:reduce){.nav a.kdemo i{animation:none}}
 @media (max-width:560px){.nav{gap:2px}.nav a{font-size:14px}.nav a.kdemo{margin-left:4px;font-size:14px}.nav a.kgiris{margin-left:4px;padding:0 11px;font-size:14px}.nav a.cta{padding:0 12px}}
 @media (max-width:430px){.nav a[href$="referanslar.html"]:not([aria-current]){display:none}}
+
+/* Stitch Yatırımcı & Mühendislik Merkezi (#araclar) */
+.stitch-sec{background:linear-gradient(180deg,#15171A 0%,#1E2125 100%);color:#fff;padding:88px 0;border-top:1px solid #2C3036;border-bottom:1px solid #2C3036}
+.stitch-ust{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:32px}
+.stitch-ust .eyebrow{color:#FF5A60;display:inline-flex;align-items:center;gap:8px}
+.stitch-ust .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:#2BD27A;box-shadow:0 0 0 4px rgba(43,210,122,.2)}
+.stitch-ust h2{margin:8px 0 0;font-family:Archivo,sans-serif;font-weight:800;font-size:clamp(28px,3.2vw,44px);line-height:1.1;letter-spacing:-.01em;color:#fff}
+.stitch-ust p{margin:10px 0 0;max-width:640px;font-size:16.5px;color:#B9BEC6;line-height:1.55}
+.stitch-tabs{display:inline-flex;flex-wrap:wrap;gap:6px;background:#23272D;padding:6px;border-radius:14px;border:1px solid #343942}
+.stitch-tab{border:0;background:transparent;color:#C9CDD3;font:inherit;font-weight:600;font-size:14.5px;padding:11px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .18s}
+.stitch-tab:hover{color:#fff;background:rgba(255,255,255,.05)}
+.stitch-tab[aria-selected=true]{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(211,32,39,.35)}
+.stitch-tab small{font-size:11.5px;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,.14);color:#fff;font-weight:700}
+.stitch-panel{display:none;background:#1C1F24;border:1px solid #30353E;border-radius:20px;padding:28px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.stitch-panel.aktif{display:block}
+.st-grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.st-kpi{background:#23272E;border:1px solid #343A44;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.st-kpi small{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9CA3AF}
+.st-kpi b{font-family:Archivo,sans-serif;font-size:26px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;line-height:1.15}
+.st-kpi span{font-size:12.5px;color:#9CA3AF}
+.st-kpi.yesil b{color:#34D399}.st-kpi.kirmizi b{color:#FF6B70}.st-kpi.mavi b{color:#60A5FA}.st-kpi.sari b{color:#FBBF24}
+.st-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:#23272E;border:1px solid #343A44;border-radius:14px;padding:14px 18px;margin-bottom:18px}
+.st-bar select,.st-bar input[type=text]{min-height:42px;padding:0 12px;border-radius:9px;border:1px solid #404754;background:#16191E;color:#fff;font:600 14px 'IBM Plex Sans',sans-serif}
+.st-bar select:focus,.st-bar input[type=text]:focus{outline:2px solid var(--red);border-color:var(--red)}
+.st-chipler{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.st-cip{border:1px solid #3B424E;background:#181B20;color:#D1D5DB;font:inherit;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer;transition:all .15s}
+.st-cip:hover,.st-cip.on{background:var(--red);border-color:var(--red);color:#fff}
+.st-tablo-kutu{border:1px solid #323842;border-radius:14px;overflow-x:auto;background:#16191E;max-height:380px;overflow-y:auto}
+.st-tablo{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums;min-width:680px}
+.st-tablo th{position:sticky;top:0;background:#20242B;color:#9CA3AF;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:12px 14px;text-align:left;border-bottom:1px solid #323842;z-index:1}
+.st-tablo td{padding:12px 14px;border-bottom:1px solid #262B33;color:#E5E7EB;vertical-align:middle}
+.st-tablo tr:hover td{background:rgba(255,255,255,.03)}
+.st-rozet{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.st-rozet.uygun{background:rgba(16,185,129,.16);color:#34D399;border:1px solid rgba(16,185,129,.35)}
+.st-rozet.dolu{background:rgba(148,163,184,.12);color:#94A3B8;border:1px solid rgba(148,163,184,.2)}
+.st-teklif-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:var(--red);color:#fff;font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .15s}
+.st-teklif-btn:hover{background:#B81B21;color:#fff}
+.st-teklif-btn.ik{background:#2B303A;color:#E5E7EB;border:1px solid #3E4552}.st-teklif-btn.ik:hover{border-color:#fff;color:#fff}
+.st-sim-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:stretch}
+.st-sim-kutu{background:#23272E;border:1px solid #343A44;border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+.st-range{width:100%;accent-color:var(--red);height:8px;cursor:pointer}
+.st-prefill{background:#F0FDF4;border:1px solid #86EFAC;border-left:4px solid #16A34A;color:#14532D;border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.5;display:none}
+.st-prefill.aktif{display:block}
+.st-prefill b{color:#064E3B;display:block;margin-bottom:4px;font-size:15px}
+@media (max-width:860px){.st-sim-grid{grid-template-columns:1fr}.stitch-panel{padding:18px}.stitch-sec{padding:64px 0}}

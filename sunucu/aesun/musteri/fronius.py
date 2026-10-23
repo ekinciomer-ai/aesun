@@ -179,7 +179,6 @@ def _otomatik_giris(kok: Path) -> requests.Session:
         )
         try:
             ctx = browser.new_context(
-                user_agent=UA,
                 locale="tr-TR",
                 viewport={"width": 1280, "height": 800},
             )
@@ -230,7 +229,8 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                 if frc_var:
                     son_tik = -10
                     son_prog = ""
-                    for adim in range(240):  # en çok 120 sn bekle
+                    olceklendi = False
+                    for adim in range(1500):  # ilk oturumda tamamlanana dek (en çok 750 sn) bekle
                         bilgi = page.evaluate("""() => {
                             const el = document.querySelector("[name='frc-captcha-response']");
                             const val = el ? el.value : '';
@@ -249,10 +249,13 @@ def _otomatik_giris(kok: Path) -> requests.Session:
                             try:
                                 for fr in page.frames:
                                     if "frcapi.com" in fr.url and "agent" in fr.url:
+                                        if not olceklendi:
+                                            fr.evaluate("() => { if (window.agent && window.agent.pool) window.agent.pool.scaleToNumWorkers(4); }")
+                                            olceklendi = True
                                         pi = fr.evaluate("() => window.agent && window.agent.power ? window.agent.power.info() : null")
                                         if pi and pi.get("requests"):
                                             rq = pi["requests"][0]
-                                            son_prog = f"{round(rq.get('value',0)/1e6,1)}/{round(rq.get('request',0)/1e6,1)}M(w={pi.get('numSolvers',{}).get('active')})"
+                                            son_prog = f"{round(rq.get('value',0)/1e6,1)}/{round(rq.get('request',0)/1e6,1)}M"
                                         elif pi and pi.get("errors"):
                                             son_prog = f"err:{pi['errors']}"
                             except Exception:

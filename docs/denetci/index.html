@@ -239,7 +239,8 @@ async function tumVerileriYukle() {
       bildirimKayit,
       analizDurum,
       aesunSon,
-      musteriListe
+      musteriListe,
+      internet
     ] = await Promise.all([
       jsonAl(API_KOK + '/v1/saglik'),
       jsonAl(API_KOK + '/v1/bekci'),
@@ -254,13 +255,14 @@ async function tumVerileriYukle() {
       dosya('n8n/bildirim_kayit.json'),
       dosya('n8n/analiz/durum.json'),
       dosya('n8n/aesun_son.json'),
-      (S && S.ka && BEL) ? jsonAl(API_KOK + '/v1/musteri/liste', BEL) : Promise.resolve(null)
+      (S && S.ka && BEL) ? jsonAl(API_KOK + '/v1/musteri/liste', BEL) : Promise.resolve(null),
+      dosya('n8n/analiz/internet.json')
     ]);
 
     VERI = {
       saglik, bekciNs1, denetim, aiTani, isHatalari, sef,
       sistemBekci, piNabiz, cihazBekci, bildirimDurum, bildirimKayit,
-      analizDurum, aesunSon, musteriListe
+      analizDurum, aesunSon, musteriListe, internet
     };
     SON_YUKLEME = new Date();
     ciz();
@@ -989,6 +991,256 @@ function bildirimlerCiz() {
 }
 
 // ---- 5. BÖLÜM: DURUM ANALİZİ, EKONOMİK RAPOR & PERFORMANS ----
+// ---- 🌐 İNTERNET KULLANIMI (saha Pi'si, kullanım yerine göre) ----
+const INT_RENK = {
+  'Madenci toplayıcı (altminer)': '#2a78d6',
+  'OSOS sayaç (MEDAŞ)': '#F08A24',
+  'Isınma öğrenmesi': '#7C3AED',
+  'Saha saatlik ölçüm': '#0D9488',
+  'Hash kaydı': '#1F3B66',
+  'Cihaz yönetimi': '#DB2777',
+  'İnverter / GES canlı': '#65A30D',
+  'Cihaz detay & günlük': '#B45309',
+  'Kompanzasyon': '#0891B2',
+  'Ağ tarama': '#A855F7',
+  'Nabız & bekçi': '#64748B',
+  'Demo / diğer': '#A3AAB5'
+};
+const intRenk = y => INT_RENK[y] || '#A3AAB5';
+const intGb = mb => mb == null ? '—' : (mb >= 1000 ? nf(mb / 1000, mb >= 10000 ? 1 : 2) + ' GB' : nf(mb, 0) + ' MB');
+function intKota() { try { return parseFloat(localStorage.getItem('ae_internet_kota_gb')) || 0; } catch (e) { return 0; } }
+function intKotaYaz(v) {
+  try { const n = parseFloat(String(v).replace(',', '.')); if (n > 0) localStorage.setItem('ae_internet_kota_gb', n); else localStorage.removeItem('ae_internet_kota_gb'); } catch (e) {}
+  ciz();
+}
+
+function internetCiz() {
+  const I = VERI.internet;
+  if (!I || I._hata) {
+    return `<div id="bolum-internet" class="kart"><h2>🌐 İnternet Kullanımı</h2><div class="bos">${I && I._hata === 'oturum_yok' ? 'İnternet kullanım raporu için Portal üzerinden yetkili oturum açın.' : 'İnternet kullanım raporu henüz oluşmadı (n8n/analiz/internet.json · ' + esc(I && I._hata) + ').'}</div></div>`;
+  }
+  const oz = I.ozet || {};
+  const gunler = (I.gunler || []).slice(-30);
+  const yerler24 = I.son24_yerler || [];
+  const kota = intKota();
+  const kotaMb = kota * 1000;
+  const ayYuzde = kotaMb ? oz.ay_mb / kotaMb * 100 : null;
+  const sonuYuzde = kotaMb ? oz.ay_sonu_tahmin_mb / kotaMb * 100 : null;
+  const yRenk = p => p == null ? '#64748B' : (p >= 100 ? '#D7262E' : (p >= 80 ? '#F08A24' : '#1E9E5A'));
+
+  // Kota dolma günü (bu ayın birikimi + 7 gün ortalaması)
+  let dolmaMetin = '';
+  if (kotaMb && oz.ort7_gun_mb > 0) {
+    if (oz.ay_mb >= kotaMb) dolmaMetin = 'Kota bu ay doldu';
+    else {
+      const gunKalan = (kotaMb - oz.ay_mb) / oz.ort7_gun_mb;
+      const d = new Date(Date.now() + gunKalan * 86400000);
+      dolmaMetin = 'Bu hızla kota ' + d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long' }) + ' civarı dolar';
+    }
+  }
+
+  let h = `<div id="bolum-internet" class="kart">
+    <h2>
+      <span>🌐 Saha İnternet Kullanımı — Kullanım Yerine Göre</span>
+      <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(I.guncellendi))}</b> ${yasEtiket(dkOnce(I.guncellendi), 90, 240)}</span>
+    </h2>
+    <p class="alt" style="margin:-4px 0 12px">${esc(I.aciklama || '')}</p>
+
+    <div class="kpi">
+      <div class="kpi-kutu" style="--kp-r:#2a78d6"><small>Son 24 saat</small><b>${intGb(oz.son24_mb)}</b><span class="alt-k">${nf(oz.son24_yazim)} dosya yazımı</span></div>
+      <div class="kpi-kutu" style="--kp-r:#0D9488"><small>Günlük ortalama (7 gün)</small><b>${intGb(oz.ort7_gun_mb)}</b><span class="alt-k">30 günde ≈ ${intGb(oz.ay_30gun_mb)}</span></div>
+      <div class="kpi-kutu" style="--kp-r:${yRenk(ayYuzde)}"><small>Bu ay (${esc(oz.ay || '')})</small><b>${intGb(oz.ay_mb)}</b><span class="alt-k">${ayYuzde != null ? '%' + nf(ayYuzde, 0) + ' kota' : oz.ay_gun_kayit + ' günlük kayıt'}</span></div>
+      <div class="kpi-kutu" style="--kp-r:${yRenk(sonuYuzde)}"><small>Ay sonu tahmini</small><b>${intGb(oz.ay_sonu_tahmin_mb)}</b><span class="alt-k">${sonuYuzde != null ? '%' + nf(sonuYuzde, 0) + ' kota · ' + esc(dolmaMetin) : 'Kota girin →'}</span></div>
+      <div class="kpi-kutu" style="--kp-r:#7C3AED;cursor:default">
+        <small>Aylık paket (GB)</small>
+        <div style="display:flex;gap:6px;margin-top:4px">
+          <input class="ara" id="int-kota" type="number" min="0" step="1" value="${kota || ''}" placeholder="örn. 20" style="width:90px" onkeydown="if(event.key==='Enter')intKotaYaz(this.value)">
+          <button class="btn" onclick="intKotaYaz($('int-kota').value)">Kaydet</button>
+        </div>
+        <span class="alt-k">Bu tarayıcıda saklanır</span>
+      </div>
+    </div>`;
+
+  if (kotaMb) {
+    const p = Math.min(100, ayYuzde || 0), p2 = Math.min(100, sonuYuzde || 0);
+    h += `<div style="margin:-4px 0 14px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--y)"><span>Ay içi kullanım ${intGb(oz.ay_mb)} / ${nf(kota)} GB</span><span>${esc(dolmaMetin)}</span></div>
+      <div style="position:relative;height:14px;background:#E2E5EA;border-radius:99px;overflow:hidden;margin-top:4px">
+        <div style="position:absolute;inset:0 auto 0 0;width:${p2}%;background:${yRenk(sonuYuzde)};opacity:.25"></div>
+        <div style="position:absolute;inset:0 auto 0 0;width:${p}%;background:${yRenk(ayYuzde)}"></div>
+      </div>
+    </div>`;
+  }
+
+  // 1) Akış şeması (Sankey benzeri): kullanım yeri → Pi / modem → GitHub + ns1
+  h += `<h3>🔀 Akış şeması — son 24 saat</h3>` + intSemaCiz(yerler24, oz.son24_mb, I.model || {});
+
+  // 2) Günlük yığılmış çubuk + ay içi birikim
+  h += `<div class="iki-kolon" style="margin-top:14px">
+    <div class="boru-adim"><h3>📅 Günlük kullanım (son ${gunler.length} gün, kullanım yerine göre)</h3>${intGunlukCiz(gunler)}</div>
+    <div class="boru-adim"><h3>📈 Ay içi birikim ${kota ? '— kota ' + nf(kota) + ' GB' : ''}</h3>${intBirikimCiz(I.gunler || [], oz, kotaMb)}</div>
+  </div>`;
+
+  // 3) Dağılım çubukları + saatlik
+  const top = yerler24.reduce((a, y) => a + (y.tahmin_mb || 0), 0) || 1;
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>🍰 Kullanım yeri payı (son 24 saat)</h3>` +
+    yerler24.map(y => `<div style="margin:7px 0">
+        <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${intRenk(y.yer)};margin-right:6px"></span><strong>${esc(y.yer)}</strong> <span style="color:var(--y)">· ${nf(y.yazim)} yazım</span></span>
+          <span style="font-variant-numeric:tabular-nums;white-space:nowrap"><strong>${intGb(y.tahmin_mb)}</strong> · %${nf(y.tahmin_mb / top * 100, 1)}</span>
+        </div>
+        <div class="bar-dis"><div class="bar-ic" style="width:${(y.tahmin_mb / top * 100).toFixed(1)}%;background:${intRenk(y.yer)}"></div></div>
+      </div>`).join('') +
+    `</div>
+    <div class="boru-adim"><h3>⏱️ Saatlik (son 48 saat)</h3>${intSaatlikCiz(I.saatlik || [])}</div>
+  </div>`;
+
+  // 4) Dosya tablosu
+  const dos = I.son24_dosyalar || [];
+  h += `<h3>📄 En çok veri gönderen dosyalar (son 24 saat)</h3><div class="tablo-kutu" style="margin-bottom:12px"><table>
+    <thead><tr><th>Dosya</th><th>Kullanım yeri</th><th class="sag">Yazım</th><th class="sag">Ort. boyut</th><th class="sag">Ham</th><th class="sag">Hat (tahmini)</th></tr></thead><tbody>` +
+    (dos.length ? dos.map(d => `<tr><td><code>${esc(d.yol)}</code></td><td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${intRenk(d.yer)};margin-right:5px"></span>${esc(d.yer)}</td><td class="sag">${nf(d.yazim)}</td><td class="sag">${nf(d.ort_kb)} KB</td><td class="sag">${nf(d.ham_mb, 1)} MB</td><td class="sag"><b>${intGb(d.tahmin_mb)}</b></td></tr>`).join('')
+      : '<tr><td colspan="6" class="bos">Son 24 saatte Pi yazımı yok (Pi çevrimdışı olabilir)</td></tr>') +
+    `</tbody></table></div>`;
+
+  const m = I.model || {};
+  h += `<div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)">
+    <b>Hesap modeli:</b> yazım başına hat ≈ ham boyut × ${nf(m.katsayi, 2)} (GitHub yazımı ×${nf(m.github_yaz, 2)} + yazım öncesi okuma ×${nf(m.github_oku, 2)} + ns1 kopyası ×${nf(m.ns1_kopya, 2)}) + ${nf(m.istek_kb)} KB istek yükü.
+    Cihaz yoklamaları yerel ağda kalır. Operatör/modem sayacı ile karşılaştırıp kalibre edin.
+    <br><b>Tasarruf:</b> en büyük kalem genellikle <i>Madenci toplayıcı</i> — ~230 KB'lık dosyanın her ~90 sn'de tamamen gönderilmesi; yalnız değişince / 5–10 dk'da bir ve sıkıştırılmış gönderim %80–90 azaltır.
+  </div></div>`;
+  return h;
+}
+
+function intSemaCiz(yerler, toplamMb, m) {
+  if (!yerler.length) return '<div class="bos">Son 24 saatte veri yok.</div>';
+  const ana = yerler.slice(0, 7);
+  const kalan = yerler.slice(7).reduce((a, y) => a + y.tahmin_mb, 0);
+  if (kalan > 0) ana.push({ yer: 'Diğer (' + (yerler.length - 7) + ' yer)', tahmin_mb: kalan, _renk: '#A3AAB5' });
+  const T = ana.reduce((a, y) => a + y.tahmin_mb, 0) || 1;
+  const W = 1000, H = 330, solX = 230, piX = 520, sagX = 760, ust = 20, alanH = H - 40;
+  const bosluk = 6, kullan = alanH - bosluk * (ana.length - 1);
+  // sol düğüm yükseklikleri: en az 30 px (etiketler çakışmasın), kalan alan orana göre
+  const MIN = 30, kucuk = ana.filter(y => kullan * y.tahmin_mb / T < MIN);
+  const buyukT = ana.filter(y => !kucuk.includes(y)).reduce((a, y) => a + y.tahmin_mb, 0) || 1;
+  const buyukH = Math.max(0, kullan - MIN * kucuk.length);
+  const solH = y => kucuk.includes(y) ? MIN : buyukH * y.tahmin_mb / buyukT;
+  let y0 = ust, svg = '';
+  const piY = ust + alanH * 0.08, piH = alanH * 0.84;
+  let piSira = piY;
+  ana.forEach(y => {
+    const hh = solH(y);
+    const r = y._renk || intRenk(y.yer);
+    const ph = piH * y.tahmin_mb / T;
+    const c1 = solX + 120;
+    svg += `<path d="M${solX},${y0} C${c1},${y0} ${piX - 120},${piSira} ${piX},${piSira} L${piX},${piSira + ph} C${piX - 120},${piSira + ph} ${c1},${y0 + hh} ${solX},${y0 + hh} Z" fill="${r}" opacity=".35"><title>${esc(y.yer)}: ${intGb(y.tahmin_mb)}</title></path>`;
+    svg += `<rect x="${solX - 8}" y="${y0}" width="8" height="${hh}" rx="2" fill="${r}"/>`;
+    svg += `<text x="${solX - 14}" y="${y0 + hh / 2 - 2}" text-anchor="end" font-size="12.5" font-weight="700" fill="#2B2F35">${esc(y.yer)}</text>`;
+    svg += `<text x="${solX - 14}" y="${y0 + hh / 2 + 12}" text-anchor="end" font-size="11.5" fill="#5B6470">${intGb(y.tahmin_mb)} · %${nf(y.tahmin_mb / T * 100, 0)}</text>`;
+    y0 += hh + bosluk; piSira += ph;
+  });
+  // Pi → hedefler (GitHub yazım+okuma, ns1 kopyası, istek yükü)
+  const kat = m.katsayi || 3.44;
+  const pay = [
+    { ad: 'GitHub API (yazım)', o: (m.github_yaz || 1.37) / kat, r: '#1F3B66' },
+    { ad: 'GitHub API (okuma)', o: (m.github_oku || 1.37) / kat, r: '#475569' },
+    { ad: 'ns1 sunucu kopyası', o: (m.ns1_kopya || 0.7) / kat, r: '#0D9488' }
+  ];
+  let ps = piY, hs = ust + 20;
+  const hedefH = alanH - 40 - bosluk * 2;
+  pay.forEach(p => {
+    const ph = piH * p.o, hh = hedefH * p.o;
+    svg += `<path d="M${piX + 22},${ps} C${piX + 130},${ps} ${sagX - 110},${hs} ${sagX},${hs} L${sagX},${hs + hh} C${sagX - 110},${hs + hh} ${piX + 130},${ps + ph} ${piX + 22},${ps + ph} Z" fill="${p.r}" opacity=".28"/>`;
+    svg += `<rect x="${sagX}" y="${hs}" width="8" height="${hh}" rx="2" fill="${p.r}"/>`;
+    svg += `<text x="${sagX + 16}" y="${hs + hh / 2 - 2}" font-size="12.5" font-weight="700" fill="#2B2F35">${p.ad}</text>`;
+    svg += `<text x="${sagX + 16}" y="${hs + hh / 2 + 12}" font-size="11.5" fill="#5B6470">≈ ${intGb(toplamMb * p.o)}</text>`;
+    ps += ph; hs += hh + bosluk;
+  });
+  svg += `<rect x="${piX}" y="${piY}" width="22" height="${piH}" rx="5" fill="#2B2F35"/>
+    <text x="${piX + 11}" y="${piY - 6}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2B2F35">Saha Pi · 4G modem</text>
+    <text x="${piX + 11}" y="${piY + piH + 16}" text-anchor="middle" font-size="12" fill="#5B6470">${intGb(toplamMb)} / 24 sa</text>`;
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:760px;height:auto;background:#F8FAFC;border:1px solid var(--c);border-radius:12px" role="img" aria-label="İnternet kullanım akış şeması">${svg}</svg></div>`;
+}
+
+function intGunlukCiz(gunler) {
+  if (!gunler.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 230, sol = 44, alt = 26, ust = 10;
+  const maks = Math.max(...gunler.map(g => g.tahmin_mb), 1);
+  const bw = (W - sol - 6) / gunler.length;
+  const yer = new Set(); gunler.forEach(g => Object.keys(g.yerler || {}).forEach(k => yer.add(k)));
+  const sira = Object.keys(INT_RENK).filter(k => yer.has(k)).concat([...yer].filter(k => !INT_RENK[k]));
+  let svg = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = maks * i / 4, y = H - alt - (H - alt - ust) * i / 4;
+    svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  gunler.forEach((g, i) => {
+    let yb = H - alt;
+    const x = sol + i * bw + 1;
+    sira.forEach(k => {
+      const v = (g.yerler || {})[k]; if (!v) return;
+      const hh = (H - alt - ust) * v / maks;
+      yb -= hh;
+      svg += `<rect x="${x}" y="${yb}" width="${Math.max(1, bw - 2)}" height="${hh}" fill="${intRenk(k)}"><title>${g.gun} · ${esc(k)}: ${intGb(v)}</title></rect>`;
+    });
+    svg += `<rect x="${x}" y="${ust}" width="${bw}" height="${H - alt - ust}" fill="transparent"><title>${g.gun}: ${intGb(g.tahmin_mb)} · ${nf(g.yazim)} yazım</title></rect>`;
+    if (i % Math.ceil(gunler.length / 8) === 0 || i === gunler.length - 1)
+      svg += `<text x="${x + bw / 2}" y="${H - 9}" text-anchor="middle" font-size="10" fill="#5B6470">${g.gun.slice(8, 10)}.${g.gun.slice(5, 7)}</text>`;
+  });
+  const lej = sira.slice(0, 8).map(k => `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 10px 2px 0;font-size:11.5px;color:var(--y)"><i style="width:9px;height:9px;border-radius:2px;background:${intRenk(k)};display:inline-block"></i>${esc(k)}</span>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="margin-top:4px">${lej}</div>`;
+}
+
+function intBirikimCiz(tum, oz, kotaMb) {
+  const ay = oz.ay || '';
+  const gunler = tum.filter(g => g.gun.startsWith(ay));
+  if (!gunler.length) return '<div class="bos">Bu ay kayıt yok.</div>';
+  const [yy, aa] = ay.split('-').map(Number);
+  const ayGun = new Date(yy, aa, 0).getDate();
+  const W = 560, H = 230, sol = 48, alt = 26, ust = 12;
+  let top = 0;
+  const nokta = gunler.map(g => { top += g.tahmin_mb; return { d: +g.gun.slice(8, 10), v: top }; });
+  const maks = Math.max(oz.ay_sonu_tahmin_mb || 0, kotaMb || 0, top) * 1.08 || 1;
+  const X = d => sol + (W - sol - 8) * (d - 0.5) / ayGun;
+  const Y = v => H - alt - (H - alt - ust) * v / maks;
+  let svg = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = maks * i / 4;
+    svg += `<line x1="${sol}" x2="${W}" y1="${Y(v)}" y2="${Y(v)}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${Y(v) + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  [1, 5, 10, 15, 20, 25, ayGun].forEach(d => { svg += `<text x="${X(d)}" y="${H - 9}" text-anchor="middle" font-size="10" fill="#5B6470">${d}</text>`; });
+  if (kotaMb) svg += `<line x1="${sol}" x2="${W}" y1="${Y(kotaMb)}" y2="${Y(kotaMb)}" stroke="#D7262E" stroke-width="1.6" stroke-dasharray="6 4"/><text x="${W - 4}" y="${Y(kotaMb) - 5}" text-anchor="end" font-size="11" font-weight="700" fill="#D7262E">Kota ${intGb(kotaMb)}</text>`;
+  const son = nokta[nokta.length - 1];
+  if (oz.ay_sonu_tahmin_mb) svg += `<line x1="${X(son.d)}" y1="${Y(son.v)}" x2="${X(ayGun)}" y2="${Y(oz.ay_sonu_tahmin_mb)}" stroke="#2a78d6" stroke-width="1.6" stroke-dasharray="4 4"/><text x="${X(ayGun) - 2}" y="${Y(oz.ay_sonu_tahmin_mb) + 14}" text-anchor="end" font-size="10.5" fill="#2a78d6">≈ ${intGb(oz.ay_sonu_tahmin_mb)}</text>`;
+  svg += `<path d="M${X(nokta[0].d)},${Y(0)} ${nokta.map(n => `L${X(n.d)},${Y(n.v)}`).join(' ')} L${X(son.d)},${Y(0)} Z" fill="#2a78d6" opacity=".12"/>`;
+  svg += `<polyline points="${nokta.map(n => X(n.d) + ',' + Y(n.v)).join(' ')}" fill="none" stroke="#2a78d6" stroke-width="2.2"/>`;
+  nokta.forEach(n => { svg += `<circle cx="${X(n.d)}" cy="${Y(n.v)}" r="2.6" fill="#2a78d6"><title>${n.d}. gün sonu: ${intGb(n.v)}</title></circle>`; });
+  if (kotaMb) {
+    const asim = nokta.find(n => n.v >= kotaMb);
+    if (asim) svg += `<circle cx="${X(asim.d)}" cy="${Y(asim.v)}" r="5" fill="none" stroke="#D7262E" stroke-width="2"><title>Kota ${asim.d}. gün aşıldı</title></circle>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg>`;
+}
+
+function intSaatlikCiz(saat) {
+  if (!saat.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 200, sol = 44, alt = 24, ust = 8;
+  const maks = Math.max(...saat.map(s => s.tahmin_mb), 1);
+  const bw = (W - sol - 4) / saat.length;
+  let svg = '';
+  for (let i = 0; i <= 3; i++) {
+    const v = maks * i / 3, y = H - alt - (H - alt - ust) * i / 3;
+    svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  saat.forEach((s, i) => {
+    const hh = (H - alt - ust) * s.tahmin_mb / maks, x = sol + i * bw;
+    svg += `<rect x="${x + .5}" y="${H - alt - hh}" width="${Math.max(1, bw - 1)}" height="${hh}" fill="#0D9488"><title>${s.saat}:00 · ${intGb(s.tahmin_mb)} · ${s.yazim} yazım</title></rect>`;
+    if (s.saat.slice(11) === '00') svg += `<text x="${x}" y="${H - 8}" font-size="10" fill="#5B6470">${s.saat.slice(8, 10)}.${s.saat.slice(5, 7)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg>`;
+}
+
 function durumAnaliziCiz() {
   const { analizDurum, aesunSon } = VERI;
   if (!analizDurum || analizDurum._hata) {
@@ -1152,6 +1404,7 @@ function ciz() {
     <button class="${SEKME === 'sef' ? 'on' : ''}" onclick="SEKME='sef';ciz()">🛠️ Şef &amp; Cihaz Bekçisi</button>
     <button class="${SEKME === 'bildirim' ? 'on' : ''}" onclick="SEKME='bildirim';ciz()">📲 Bildirimler &amp; Alarmlar (${aktifAlarmlar})</button>
     <button class="${SEKME === 'analiz' ? 'on' : ''}" onclick="SEKME='analiz';ciz()">📊 Durum Analizi &amp; Performans</button>
+    <button class="${SEKME === 'internet' ? 'on' : ''}" onclick="SEKME='internet';ciz()">🌐 İnternet Kullanımı</button>
   </div>`;
 
   if (!BEL) {
@@ -1172,6 +1425,8 @@ function ciz() {
     h += sematikCiz() + bildirimlerCiz();
   } else if (SEKME === 'analiz') {
     h += sematikCiz() + durumAnaliziCiz();
+  } else if (SEKME === 'internet') {
+    h += internetCiz();
   }
 
   $('ana').innerHTML = h;

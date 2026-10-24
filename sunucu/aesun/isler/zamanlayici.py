@@ -31,6 +31,8 @@ ISLER = [  # ad, dakikalar, komut, ek olarak yazılacak yollar
     ("Durum analizi", {41}, ["python", "durum_analizi.py"], ["n8n/analiz/"], "Durum analizi"),
     # 19 Eki: n8n "Ana döngü" + alt akışlar + Uyarı motoru yerine (n8n kotası) — panel özeti n8n/aesun_son.json
     ("İzleme özeti", {2, 32}, ["python", "izleme_ozet.py"], ["n8n/aesun_son.json", "n8n/izleme_durum.json"], "İzleme özeti"),
+    # 24 Eki: n8n "Denetçi" yerine — tüm portal modülleri ve işleri denetimi + mattpocock/skills AI teşhis (n8n/denetim.json)
+    ("Portal denetimi", {17, 47}, ["python", "portal_bekci.py"], ["n8n/denetim.json", "n8n/ai_bekci_tani.json"], "Portal denetimi"),
 ]
 
 def sh(*a, **k):

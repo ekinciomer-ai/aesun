@@ -49,7 +49,7 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_PASS: ${{ secrets.FTP_SIFRE }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
-          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/saha/=<title;/aecad/=AeCAD;/gundem/=<title;/kapasite/=<title;/musteri/=<title;/api/canli.php=durum"
+          CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/denetci/=<title;/saha/=<title;/aecad/=AeCAD;/gundem/=<title;/kapasite/=<title;/musteri/=<title;/api/canli.php=durum"
         run: |
           python3 cpanel/yukle.py dist_portal
           curl -fsSL "https://portal.aksarayenerji.net/api/canli.php?hedef_kod=${GITHUB_SHA:0:12}" >/dev/null || true

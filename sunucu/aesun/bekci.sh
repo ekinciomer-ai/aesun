@@ -18,9 +18,10 @@ if [ "$es" -gt 600 ]; then sorun_api="eşitleme ${es} sn önce"; fi
 pidsA=$(docker stats --no-stream --format '{{.PIDs}}' aesun-api 2>/dev/null || echo 0)
 [ "${pidsA:-0}" -gt 300 ] && sorun_api="${sorun_api:+$sorun_api; }süreç $pidsA"
 
-# 2) iş çalıştırıcı + işler
+# 2) iş çalıştırıcı + işler + müşteri toplayıcı
 dj=$(docker exec aesun-isler cat /veri/durum.json 2>/dev/null)
 echo "$dj" > $D/.isler_durum.json 2>/dev/null
+docker exec aesun-musteri cat /musteri/durum.json > $D/.musteri_durum.json 2>/dev/null || true
 ij=$(docker exec aesun-isler cat /veri/epias-ptf/n8n/is_hatalari.json 2>/dev/null)
 nabiz=$(echo "$dj" | python3 -c "import json,sys;print(json.load(sys.stdin).get('nabiz',''))" 2>/dev/null)
 etkin=$(echo "$dj" | python3 -c "import json,sys;print(json.load(sys.stdin).get('etkin'))" 2>/dev/null)
@@ -29,7 +30,7 @@ na=$(python3 -c "import sys,datetime as d;a,b=sys.argv[1:];print(int((d.datetime
 [ "$na" -gt 300 ] && sorun_isler="nabız ${na} sn önce"
 isler_json=$(echo "$ij" | python3 -c "
 import json,sys,datetime as dt
-LIM={'Bildirimler':40,'Veri arşivi':130,'Durum analizi':130,'İzleme özeti':70}   # iki tur kaçırınca
+LIM={'Bildirimler':40,'Veri arşivi':130,'Durum analizi':130,'İzleme özeti':70,'Portal denetimi':70}   # iki tur kaçırınca
 try: d=json.load(sys.stdin).get('isler',{})
 except Exception: d={}
 now=dt.datetime.now(dt.timezone.utc); out={}
@@ -123,9 +124,11 @@ ucl = [u for u in oku("/opt/aesun/uclar_durum.json", []) if not u.get("ok")]
 tarama = {"t": tar.get("t"), "izlenen": tar.get("izlenen"), "hata": tar.get("hata"), "geciken": tar.get("geciken") or []}
 uclar = {"kalan": ucl, "sorun": "; ".join(f"{u['ad']}: {u['neden']}" for u in ucl) or None,
          "hiz": [{"ad": u.get("ad"), "ok": u.get("ok"), "ms": u.get("ms")} for u in oku("/opt/aesun/uclar_durum.json", [])]}   # hız bekçisi
+mus = oku("/opt/aesun/.musteri_durum.json", {})
 d = {"t": iso, "durum": "sorun" if (sa or si or veri.get("sorun") or tarama["geciken"] or uclar["sorun"]) else "iyi",
      "api": {"sorun": sa or None, "esitleme_sn": int(es), "surec": int(pa or 0)},
      "isler": {"sorun": si or None, "nabiz_sn": int(na), "surec": int(pi or 0), "is": json.loads(isler or "{}"), "sure_sn": sure},
+     "musteri": {"zaman": mus.get("zaman"), "santral_sayisi": mus.get("santral_sayisi"), "tur_sn": mus.get("tur_sn"), "hatalar": mus.get("hatalar")},
      "veri": veri, "tarama": tarama, "uclar": uclar, "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
 open(p + ".tmp", "w").write(json.dumps(d, ensure_ascii=False)); import os; os.replace(p + ".tmp", p)
 PY

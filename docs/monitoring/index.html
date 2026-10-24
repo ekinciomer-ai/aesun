@@ -4646,9 +4646,11 @@ function denetimKarti(d) {
       + '<div style="display:flex;flex-direction:column;gap:4px;margin-top:8px">' + l.map(x => '<div style="display:flex;gap:8px;font-size:13px"><span style="color:' + (x.durum === 'ok' ? '#1E7A3C' : '#B42318') + ';font-weight:800">' + (x.durum === 'ok' ? '✓' : '✗') + '</span><span><b style="font-weight:600">' + esc(x.ad) + '</b> <span class="k">' + esc(x.not || '') + '</span></span></div>').join('') + '</div></details>';
   }).join('');
   const top = d.kontroller.length, ok = d.kontroller.filter(x => x.durum === 'ok').length;
-  return '<section class="panel" id="sistemSagligi" style="gap:12px"><div class="bas"><h2>Sistem sağlığı</h2><span class="k">n8n Denetçi · ' + (bayat ? '<b style="color:#B42318">' + yas + ' dk önce (denetçi çalışmıyor olabilir)</b>' : yas + ' dk önce') + ' · ' + ok + '/' + top + ' yolunda</span></div>'
+  const ai = (ok < top && d.ai_tani_ozet) ? '<details open style="border-radius:10px;background:#FFF8EB;border:1px solid #F5D08A;padding:10px 12px"><summary style="cursor:pointer;font-weight:700;color:#9A5B00">🧠 AI Bekçi Kök Neden Teşhisi (mattpocock/skills)</summary><pre style="margin:8px 0 0;white-space:pre-wrap;font:12.5px/1.5 ui-monospace,monospace;color:#2B2F35">' + esc(d.ai_tani_ozet) + '</pre></details>' : '';
+  return '<section class="panel" id="sistemSagligi" style="gap:12px"><div class="bas"><h2>Sistem sağlığı (Tüm Portal İşleri)</h2><span style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap"><a class="btn" href="../denetci/" style="font-size:12.5px;padding:4px 10px;background:#F3E8FF;color:#6D28D9;border-color:#DDD6FE;text-decoration:none">🛡️ Sistem Denetçisi (Şematik İzleme) →</a><span class="k">Portal AI Bekçi · ' + (bayat ? '<b style="color:#B42318">' + yas + ' dk önce (bekçi gecikti)</b>' : yas + ' dk önce') + ' · ' + ok + '/' + top + ' yolunda</span></span></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;align-items:start">' + gr + '</div>'
-    + '<div class="k">Saatlik denetim: işler zamanında mı (iş), kaynaklar okunuyor ve taze mi (veri okuma), uçlar ve işler hızlı mı (hız), yazılan kod yayında ve cihazlar güncel mi (sürüm), son 24 saatte hata var mı (hata). Yeni sorun ve düzelme e-postayla, her sabah 08:00 özet.</div></section>';
+    + ai
+    + '<div class="k">30 dk\'da bir ücretsiz denetim: tüm portal modülleri (Portal, Monitoring, Müşteri Monitoring, Saha, Fatura/GesFin, AeCAD, Gündem, Kapasite), ns1 ve Saha Pi işleri, veri kaynakları, hız, sürüm ve GitHub hataları.</div></section>';
 }
 async function yukle(taze) {
   try {

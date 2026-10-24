@@ -204,9 +204,10 @@ const IKON = {
   gunes: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   maden: '<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><path d="M13 8l-3 4h4l-3 4"/>',
   cad: '<path d="M3 21l6-6M3 21h6M3 21v-6"/><path d="M14 3l7 7-8 8-7-7z"/><path d="M11 9l4 4"/>',
+  denetci: '<path d="M12 2l8 4v6c0 5.5-3.8 10.3-8 12-4.2-1.7-8-6.5-8-12V6l8-4z"/><path d="M8 12h2l1.5-3 2 6 1.5-3h1"/>',
   diger: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'
 };
-const IKON_AD = { cad: 'CAD', saha: 'Saha', monitoring: 'Grafik', mali: 'Mali', muhasebe: 'Hesap', mail: 'Posta', proje: 'Klasör', insan: 'Kişi', ekip: 'Ekip', tedarik: 'Sevkiyat', egitim: 'Eğitim', iletisim: 'Mesaj', belge: 'Belge', takvim: 'Takvim', sepet: 'Sipariş', gunes: 'Güneş', maden: 'Madencilik', diger: 'Diğer' };
+const IKON_AD = { cad: 'CAD', denetci: 'Denetçi', saha: 'Saha', monitoring: 'Grafik', mali: 'Mali', muhasebe: 'Hesap', mail: 'Posta', proje: 'Klasör', insan: 'Kişi', ekip: 'Ekip', tedarik: 'Sevkiyat', egitim: 'Eğitim', iletisim: 'Mesaj', belge: 'Belge', takvim: 'Takvim', sepet: 'Sipariş', gunes: 'Güneş', maden: 'Madencilik', diger: 'Diğer' };
 const RENKLER = { kirmizi: ['Kırmızı', '#D7262E'], antrasit: ['Antrasit', '#3A3F47'], mavi: ['Mavi', '#2F6DB5'], turuncu: ['Turuncu', '#F08A24'], sari: ['Sarı', '#E9A800'], yesil: ['Yeşil', '#1E9E5A'], lacivert: ['Lacivert', '#1F3B66'], turkuaz: ['Turkuaz', '#1A97B5'] };
 const renkHex = r => (RENKLER[r] || RENKLER.kirmizi)[1];
 const MERKEZ = '<svg viewBox="0 0 320 250" aria-hidden="true"><g fill="none" stroke="#C9CED6" stroke-width="2" stroke-linecap="round"><path d="M18 120h22M28 110v20"/><path d="M290 60h18M299 51v18"/></g>'
@@ -229,6 +230,7 @@ const VARSAYILAN = [
   { id: 'muhasebe', ad: 'Muhasebe', aciklama: 'Muhasebe programı', url: '', ikon: 'muhasebe', renk: 'sari' },
   { id: 'mail', ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', url: '', ikon: 'mail', renk: 'antrasit' },
   { id: 'cad', ad: 'AeCAD', aciklama: 'DWG/DXF açma, 2D çizim, GES masa yerleşimi', url: 'https://ekinciomer-ai.github.io/aesun/aecad/', ikon: 'cad', renk: 'antrasit' },
+  { id: 'denetci', ad: 'Sistem Denetçisi', aciklama: 'Tüm işler, bekçiler, bildirimler, raporlar ve canlı şematik izleme (mattpocock/skills)', url: 'https://portal.aksarayenerji.net/denetci/', ikon: 'denetci', renk: 'kirmizi' },
   { id: 'fatura', ad: 'Fatura', aciklama: 'GesFin · fatura takibi (portal girişiyle)', url: 'https://fatura.aksarayenerji.net/', ikon: 'belge', renk: 'yesil', gizli: true }];   // ana ekranda kart yok; fatura.aksarayenerji.net adresi portal girişiyle açılır
 // Tek giriş (SSO): bu uygulamalar portal belirteciyle açılır — belirteç URL parçasında (#) taşınır, sunucu günlüğüne düşmez
 const SSO = { fatura: 'https://fatura.aksarayenerji.net/sso' };
@@ -370,6 +372,7 @@ async function apiOzetHesapla() {
   const oz = {};
   if (S.ka) oz.yonetici = await sha(await apiBelirtec('yonetici', S.ka));
   if (R.anahtarlar.monitoring) oz.monitoring = await sha(await apiBelirtec('monitoring', R.anahtarlar.monitoring));
+  if (R.anahtarlar.denetci) oz.denetci = await sha(await apiBelirtec('denetci', R.anahtarlar.denetci));
   if (R.anahtarlar.saha) oz.saha = await sha(await apiBelirtec('saha', R.anahtarlar.saha));
   if (R.anahtarlar.fatura) oz.fatura = await sha(await apiBelirtec('fatura', R.anahtarlar.fatura));
   if (R.parasal && R.parasal.ozel && R.parasal.ozel.d) oz.parasal = await sha(await apiBelirtec('parasal', R.parasal.ozel.d));
@@ -379,7 +382,7 @@ async function apiOzetHesapla() {
 // Sonradan eklenen hazır uygulamalar: yönetici girişinde eksikse portala eklenir (bir kez)
 async function ekModulEkle() {
   await rehber(); let degisti = false;
-  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura' || x.id === 'cad' || x.id === 'gundem' || x.id === 'kapasite' || x.id === 'musteri')) {
+  for (const m of VARSAYILAN.filter(x => x.id === 'mining-demo' || x.id === 'fatura' || x.id === 'cad' || x.id === 'gundem' || x.id === 'kapasite' || x.id === 'musteri' || x.id === 'denetci')) {
     if (R.anahtarlar[m.id]) continue;
     R.anahtarlar[m.id] = b64(rnd(32));
     V.moduller[m.id] = await sifrele(await hamAnahtar(R.anahtarlar[m.id]), { ad: m.ad, aciklama: m.aciklama, url: m.url, ikon: m.ikon, renk: m.renk, aktif: !m.gizli, yeni_sekme: true, sira: Object.keys(R.anahtarlar).length });
@@ -412,6 +415,10 @@ async function ekModulEkle() {
 function ac(id) {
   if (!S) return girisModal(id);
   const m = MOD[id];
+  if (id === 'denetci' && (!m || !String(m.url || '').trim()) && (S.ka || (S.anahtarlar && (S.anahtarlar.monitoring || S.anahtarlar.denetci)))) {
+    window.open(yerelUrl('https://portal.aksarayenerji.net/denetci/'), '_blank', 'noopener');
+    return;
+  }
   if (m && m.aktif !== false && String(m.url || '').trim()) {
     if (!SSO[id]) { window.open(m.url, m.yeni_sekme !== false ? '_blank' : '_self', 'noopener'); return; }
     const w = m.yeni_sekme !== false ? window.open('about:blank', '_blank') : null;   // pencere tıklama anında açılır (engelleyici yemesin)
@@ -491,13 +498,14 @@ async function git(s) {
   if (s === 'yonetim' && !S) { SAYFA = 'yonetim'; return girisModal(null); }
   if (s === 'yonetim' && S.ka) return yonetimCiz();
   const vs = ((V && V.vitrin) || []).filter(x => x.aktif !== false && MALI_ICIN.indexOf(x.id) < 0).sort((x, y) => (x.sira || 0) - (y.sira || 0));
+  if (!vs.some(x => x.id === 'denetci')) vs.push({ id: 'denetci', ad: 'Sistem Denetçisi', ikon: 'denetci', renk: 'kirmizi', aktif: true, _yerlesik: true });
   vs.push({ id: 'mali', ad: 'Mali', ikon: 'mali', renk: 'yesil', aktif: true, _grup: true });
   const n = vs.length, R0 = n > 8 ? 42 : 40;
   let h = '<h1 class="baslik">Kurumsal Portal</h1><p class="alt">' + (S ? 'Açmak istediğiniz uygulamaya tıklayın.' : 'Uygulamaya tıklayın; kullanıcı adı ve şifrenizle giriş yapın.') + '</p>'
     + '<div class="hub"><div class="halka"></div><div class="merkez">' + MERKEZ + '</div>';
   vs.forEach((v, i) => {
     const a = (-90 + i * 360 / n) * Math.PI / 180, x = 50 + R0 * Math.cos(a), y = 50 + R0 * Math.sin(a);
-    const yetki = v._grup ? true : (!S || MOD[v.id]);
+    const yetki = v._grup ? true : (v._yerlesik ? (!S || S.ka || (S.anahtarlar && (S.anahtarlar.monitoring || S.anahtarlar.denetci))) : (!S || MOD[v.id]));
     const tik = v._grup ? 'acMali()' : (v.id === 'saha' ? 'acSaha()' : ('ac(\'' + esc(v.id) + '\')'));
     h += '<button class="hm' + (yetki ? '' : ' kilit') + '" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + renkHex(v.renk) + '" onclick="' + tik + '"><span class="hd">' + ikon(v.ikon) + '</span><span class="ha">' + esc(v.ad) + '</span></button>';
   });

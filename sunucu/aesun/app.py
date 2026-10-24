@@ -197,7 +197,7 @@ def dosya(yol: str, request: Request):
     if ".." in yol or not IZINLI.match(yol):
         raise HTTPException(400, "geçersiz yol")
     r = roller(request)
-    gerek = {"yonetici", "parasal"} if PARA.search(yol) else {"yonetici", "parasal", "monitoring"}
+    gerek = {"yonetici", "parasal"} if PARA.search(yol) else {"yonetici", "parasal", "monitoring", "denetci"}
     if not r & gerek:
         DURUM["red"] += 1
         raise HTTPException(401 if not r else 403, "yetki yok")

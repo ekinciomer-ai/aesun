@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 D = "/opt/aesun"; TR = timezone(timedelta(hours=3))
 DURUM = D + "/sef_durum.json"; LOG = D + "/sef.log"
 REPO = "/veri/epias-ptf"
-ISLER = {"Bildirimler": 15, "Veri arşivi": 60, "Durum analizi": 60, "İzleme özeti": 30}   # olağan aralık (dk)
+ISLER = {"Bildirimler": 15, "Veri arşivi": 60, "Durum analizi": 60, "İzleme özeti": 30, "Portal denetimi": 30}   # olağan aralık (dk)
 BEKLE = {"itme": 600, "is_tetik": 1800, "isler": 1800, "api": 1800, "etkin": 1200}
 AD_GH = ("gh_yeniden", "gh_kapat")                         # aynı eylem en erken (sn)
 
@@ -133,7 +133,8 @@ def main():
         if dk > 2 * ara + 5: geciken.append((ad, round(dk)))
     # bekçilerin "geciken dosya" ve "eksik veri" bulgularını üreten işe çevir (ns1 işleri); Pi dosyaları Pi şefinin işi
     URETICI = (("n8n/bildirim_", "Bildirimler"), ("n8n/maden_maliyet", "Bildirimler"), ("n8n/analiz/", "Durum analizi"),
-               ("n8n/aesun_son", "İzleme özeti"), ("n8n/izleme_durum", "İzleme özeti"), ("arsiv_", "Veri arşivi"), ("n8n/is_hatalari", None))
+               ("n8n/aesun_son", "İzleme özeti"), ("n8n/izleme_durum", "İzleme özeti"), ("n8n/denetim.json", "Portal denetimi"),
+               ("arsiv_", "Veri arşivi"), ("n8n/is_hatalari", None))
     tar = oku(D + "/tarama_durum.json", {})
     ek = set()
     for g in tar.get("geciken") or []:

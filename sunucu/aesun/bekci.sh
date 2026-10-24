@@ -125,11 +125,34 @@ tarama = {"t": tar.get("t"), "izlenen": tar.get("izlenen"), "hata": tar.get("hat
 uclar = {"kalan": ucl, "sorun": "; ".join(f"{u['ad']}: {u['neden']}" for u in ucl) or None,
          "hiz": [{"ad": u.get("ad"), "ok": u.get("ok"), "ms": u.get("ms")} for u in oku("/opt/aesun/uclar_durum.json", [])]}   # hız bekçisi
 mus = oku("/opt/aesun/.musteri_durum.json", {})
+# Kapasite (Denetçi 'Veri Akışı → Kapasite'): disk, bellek, docker birimleri (birimler saatte bir ölçülür)
+import shutil, subprocess, time, os
+kap = {}
+try:
+    du = shutil.disk_usage("/"); kap["disk"] = {"toplam": du.total, "dolu": du.used, "bos": du.free}
+except Exception: pass
+try:
+    mi = {a.split(":")[0]: int(a.split()[1]) * 1024 for a in open("/proc/meminfo").read().splitlines() if a.split()[1:]}
+    kap["ram"] = {"toplam": mi.get("MemTotal"), "bos": mi.get("MemAvailable"), "takas_toplam": mi.get("SwapTotal"), "takas_bos": mi.get("SwapFree")}
+    kap["yuk"] = open("/proc/loadavg").read().split()[0]; kap["cekirdek"] = os.cpu_count()
+except Exception: pass
+bf = "/opt/aesun/.birim_boyut.json"; bb = oku(bf, {})
+if time.time() - bb.get("t", 0) > 3600:
+    bir = {}
+    for ad in ("aesun_veri", "aesun_isler", "aesun_musteri"):
+        yol = f"/var/lib/docker/volumes/{ad}/_data"
+        if os.path.isdir(yol):
+            try: bir[ad] = int(subprocess.run(["du", "-sb", yol], capture_output=True, text=True, timeout=120).stdout.split()[0])
+            except Exception: pass
+    bb = {"t": int(time.time()), "birim": bir}
+    try: open(bf, "w").write(json.dumps(bb))
+    except Exception: pass
+kap["birim"] = bb.get("birim", {})
 d = {"t": iso, "durum": "sorun" if (sa or si or veri.get("sorun") or tarama["geciken"] or uclar["sorun"]) else "iyi",
      "api": {"sorun": sa or None, "esitleme_sn": int(es), "surec": int(pa or 0)},
      "isler": {"sorun": si or None, "nabiz_sn": int(na), "surec": int(pi or 0), "is": json.loads(isler or "{}"), "sure_sn": sure},
      "musteri": {"zaman": mus.get("zaman"), "santral_sayisi": mus.get("santral_sayisi"), "tur_sn": mus.get("tur_sn"), "hatalar": mus.get("hatalar")},
-     "veri": veri, "tarama": tarama, "uclar": uclar, "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
+     "veri": veri, "kapasite": kap, "tarama": tarama, "uclar": uclar, "onarim_24s": int(o24), "son_onarim": son or None, "bu_tur": ayr}
 open(p + ".tmp", "w").write(json.dumps(d, ensure_ascii=False)); import os; os.replace(p + ".tmp", p)
 PY
 docker cp $DURUM aesun-api:/veri/bekci_ns1.json >/dev/null 2>&1 || true

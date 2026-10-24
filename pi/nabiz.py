@@ -48,6 +48,71 @@ def servisler(env):
     return sv
 
 
+def ag_sayac():
+    """Arayüz başına toplam alınan/gönderilen bayt (/proc/net/dev, açılıştan beri) — Denetçi 'Veri Akışı' ölçümü."""
+    try:
+        arayuz = {}
+        for s in Path("/proc/net/dev").read_text().splitlines()[2:]:
+            ad, veri = s.split(":", 1)
+            ad, a = ad.strip(), veri.split()
+            if ad == "lo" or ad.startswith(("docker", "veth", "br-")):
+                continue
+            arayuz[ad] = {"rx": int(a[0]), "tx": int(a[8])}
+        varsayilan = ""
+        for s in Path("/proc/net/route").read_text().splitlines()[1:]:
+            a = s.split()
+            if len(a) > 2 and a[1] == "00000000":
+                varsayilan = a[0]
+                break
+        acilis = float(Path("/proc/uptime").read_text().split()[0])
+        return {"t": int(datetime.now(timezone.utc).timestamp()), "acilis_sn": int(acilis),
+                "varsayilan": varsayilan, "arayuz": arayuz}
+    except Exception as e:
+        return {"hata": str(e)[:120]}
+
+
+def kapasite():
+    """Pi depolama/bellek kapasitesi — Denetçi 'Veri Akışı → Kapasite' kartı ve SD kart büyütme kararı için."""
+    import shutil
+    k = {}
+    try:
+        du = shutil.disk_usage("/")
+        k["disk"] = {"toplam": du.total, "dolu": du.used, "bos": du.free}
+    except Exception as e:
+        k["disk_hata"] = str(e)[:80]
+    try:
+        mi = {a.split(":")[0]: int(a.split()[1]) * 1024 for a in Path("/proc/meminfo").read_text().splitlines() if a.split()[1:]}
+        k["ram"] = {"toplam": mi.get("MemTotal"), "bos": mi.get("MemAvailable"), "takas_toplam": mi.get("SwapTotal"), "takas_bos": mi.get("SwapFree")}
+    except Exception:
+        pass
+    try:   # SD kartın fiziksel boyutu (bölüm büyütülmemişse disk toplamından büyük olabilir)
+        for b in ("mmcblk0", "sda", "nvme0n1"):
+            f = Path(f"/sys/block/{b}/size")
+            if f.exists():
+                k["kart"] = {"ad": b, "boyut": int(f.read_text()) * 512}
+                break
+    except Exception:
+        pass
+    try:   # yerel veri klasörleri (her nabızda değil, saatte bir — du pahalı olabilir)
+        ob = KOK / "onbellek" / "klasor_boyut.json"
+        eski = json.loads(ob.read_text()) if ob.exists() else {}
+        if datetime.now(timezone.utc).timestamp() - eski.get("t", 0) > 3600:
+            kl = {}
+            for ad, yol in (("aesun", KOK), ("SAHA", Path.home() / "SAHA"), ("log", Path("/var/log"))):
+                if yol.exists():
+                    c = komut("du", "-sb", str(yol))
+                    if c.split() and c.split()[0].isdigit():
+                        kl[ad] = int(c.split()[0])
+            eski = {"t": int(datetime.now(timezone.utc).timestamp()), "klasor": kl}
+            ob.parent.mkdir(parents=True, exist_ok=True)
+            ob.write_text(json.dumps(eski))
+        k["klasor"] = eski.get("klasor", {})
+    except Exception:
+        pass
+    k["yuk"] = (komut("cat", "/proc/loadavg").split() or ["?"])[0]
+    return k
+
+
 def son_satir(yol):
     try:
         return [s for s in Path(yol).read_text(errors="ignore").splitlines() if s.strip()][-1][:160]
@@ -84,6 +149,8 @@ def main():
         # sürüm bekçisi (n8n Denetçi): Pi'deki aesun kodunun sürümü ve zamanı
         "kod_sha": komut("git", "-C", str(KOK), "rev-parse", "--short=10", "HEAD"),
         "kod_zaman": komut("git", "-C", str(KOK), "log", "-1", "--format=%cI"),
+        "ag": ag_sayac(),
+        "kapasite": kapasite(),
     }
     icerik = base64.b64encode(json.dumps(govde, ensure_ascii=False, indent=1).encode()).decode()
     for deneme in range(0 if sunucu.yalniz_sunucu() else 2):

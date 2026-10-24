@@ -130,7 +130,7 @@ const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', 
 let S = null;
 let BEL = '';
 let VERI = {};
-let SEKME = 'tumu';
+let SEKME = (location.hash || '').slice(1) === 'akis' ? 'akis' : 'tumu';
 let SECILI_DUGUM = null;
 let DENETIM_FILTRE = 'hepsi';
 let BILDIRIM_KONU = 'hepsi';
@@ -1045,9 +1045,10 @@ function internetCiz() {
       <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(I.guncellendi))}</b> ${yasEtiket(dkOnce(I.guncellendi), 90, 240)}</span>
     </h2>
     <p class="alt" style="margin:-4px 0 12px">${esc(I.aciklama || '')}</p>
+    ${(oz.kesinti_48s || []).length ? `<div class="uyari-kutu" style="margin-bottom:12px"><b>⚠️ Pi çevrimdışı aralık (son 48 sa):</b> ${oz.kesinti_48s.map(k => esc(k.bas.slice(8, 10) + '.' + k.bas.slice(5, 7) + ' ' + k.bas.slice(11) + ':00') + ' → ' + esc(k.bit.slice(8, 10) + '.' + k.bit.slice(5, 7) + ' ' + k.bit.slice(11) + ':59') + ' (' + k.saat + ' sa)').join(' · ')}. Bu saatlerde yazım yok; son 24 saat değeri düşük görünür, 7 günlük ortalama kesintili günleri dışarıda bırakır (${nf(oz.ort7_gun_sayisi)} tam gün).</div>` : ''}
 
     <div class="kpi">
-      <div class="kpi-kutu" style="--kp-r:#2a78d6"><small>Son 24 saat</small><b>${intGb(oz.son24_mb)}</b><span class="alt-k">${nf(oz.son24_yazim)} dosya yazımı</span></div>
+      <div class="kpi-kutu" style="--kp-r:#2a78d6" onclick="SEKME='akis';ciz()"><small>Son 24 saat</small><b>${intGb(oz.son24_mb)}</b><span class="alt-k">${oz.son24_indirme_mb != null ? '↓' + intGb(oz.son24_indirme_mb) + ' · ↑' + intGb(oz.son24_yukleme_mb) + ' · ' : ''}${nf(oz.son24_yazim)} yazım</span></div>
       <div class="kpi-kutu" style="--kp-r:#0D9488"><small>Günlük ortalama (7 gün)</small><b>${intGb(oz.ort7_gun_mb)}</b><span class="alt-k">30 günde ≈ ${intGb(oz.ay_30gun_mb)}</span></div>
       <div class="kpi-kutu" style="--kp-r:${yRenk(ayYuzde)}"><small>Bu ay (${esc(oz.ay || '')})</small><b>${intGb(oz.ay_mb)}</b><span class="alt-k">${ayYuzde != null ? '%' + nf(ayYuzde, 0) + ' kota' : oz.ay_gun_kayit + ' günlük kayıt'}</span></div>
       <div class="kpi-kutu" style="--kp-r:${yRenk(sonuYuzde)}"><small>Ay sonu tahmini</small><b>${intGb(oz.ay_sonu_tahmin_mb)}</b><span class="alt-k">${sonuYuzde != null ? '%' + nf(sonuYuzde, 0) + ' kota · ' + esc(dolmaMetin) : 'Kota girin →'}</span></div>
@@ -1241,6 +1242,342 @@ function intSaatlikCiz(saat) {
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg>`;
 }
 
+// ---- 🔁 VERİ AKIŞI SEKMESİ (indirme / yükleme · sistem bazında · yoğunluk) ----
+let AKIS_SECILI = null;
+let AKIS_SAAT = 24;
+const AK_IND = '#2a78d6', AK_YUK = '#F08A24';
+function akisYon(y, m) {
+  // Yeni rapor alanları yoksa (eski internet.json) modelin oranlarıyla ayır
+  if (y.indirme_mb != null) return { ind: y.indirme_mb, yuk: y.yukleme_mb, ghY: y.gh_yukle_mb, ghI: y.gh_indir_mb, ns1: y.ns1_yukle_mb };
+  const kat = (m && m.katsayi) || 3.44, t = y.tahmin_mb || 0;
+  const ghI = t * ((m && m.github_oku) || 1.37) / kat, ns1 = t * ((m && m.ns1_kopya) || 0.7) / kat;
+  return { ind: ghI, yuk: t - ghI, ghY: t - ghI - ns1, ghI, ns1 };
+}
+function akisSec(ad) { AKIS_SECILI = AKIS_SECILI === ad ? null : ad; ciz(); setTimeout(() => { const e = $('akis-detay'); if (e && AKIS_SECILI) e.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 30); }
+
+function akisCiz() {
+  const I = VERI.internet;
+  if (!I || I._hata) {
+    return `<div id="bolum-akis" class="kart"><h2>🔁 Veri Akışı</h2><div class="bos">${I && I._hata === 'oturum_yok' ? 'Veri akışı raporu için Portal üzerinden yetkili oturum açın.' : 'Veri akışı raporu henüz oluşmadı (n8n/analiz/internet.json · ' + esc(I && I._hata) + ').'}</div></div>`;
+  }
+  const m = I.model || {};
+  const yerler = (I.son24_yerler || []).map(y => ({ ...y, ...akisYon(y, m) }));
+  const topInd = yerler.reduce((a, y) => a + y.ind, 0), topYuk = yerler.reduce((a, y) => a + y.yuk, 0);
+  const top = topInd + topYuk || 1;
+  const saatlik = (I.saatlik || []).map(s => ({ ...s, ...akisYon(s, m) }));
+  const enYogunSaat = saatlik.reduce((a, s) => (!a || s.tahmin_mb > a.tahmin_mb) ? s : a, null);
+  const enYogun = yerler[0];
+  const O = I.olcum || {};
+  const olcumVar = O.son24_indirme_mb != null;
+
+  let h = `<div id="bolum-akis" class="kart">
+    <h2>
+      <span>🔁 Veri Akışı — Hangi Sistem Ne İndirdi, Ne Yükledi</span>
+      <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(I.guncellendi))}</b> ${yasEtiket(dkOnce(I.guncellendi), 90, 240)}</span>
+    </h2>
+    <p class="alt" style="margin:-4px 0 12px">Son 24 saat · <span style="color:${AK_IND};font-weight:700">↓ indirme</span> = Pi'ye gelen (GitHub'dan okuma) · <span style="color:${AK_YUK};font-weight:700">↑ yükleme</span> = Pi'den giden (GitHub yazımı + ns1 kopyası). Sistem kutusuna dokununca dosya ayrıntısı açılır.</p>
+
+    <div class="kpi">
+      <div class="kpi-kutu" style="--kp-r:${AK_IND};cursor:default"><small>↓ İndirme (24 sa)</small><b>${intGb(topInd)}</b><span class="alt-k">%${nf(topInd / top * 100, 0)} · GitHub okuma</span></div>
+      <div class="kpi-kutu" style="--kp-r:${AK_YUK};cursor:default"><small>↑ Yükleme (24 sa)</small><b>${intGb(topYuk)}</b><span class="alt-k">%${nf(topYuk / top * 100, 0)} · GitHub + ns1</span></div>
+      <div class="kpi-kutu" style="--kp-r:#2B2F35;cursor:default"><small>Toplam trafik (24 sa)</small><b>${intGb(top)}</b><span class="alt-k">${nf(yerler.reduce((a, y) => a + (y.yazim || 0), 0))} yazım · ${yerler.length} sistem</span></div>
+      <div class="kpi-kutu" style="--kp-r:${enYogun ? intRenk(enYogun.yer) : '#64748B'}" onclick="${enYogun ? `akisSec('${esc(enYogun.yer).replace(/'/g, "\\'")}')` : ''}"><small>En yoğun sistem</small><b style="font-size:16px">${enYogun ? esc(enYogun.yer) : '—'}</b><span class="alt-k">${enYogun ? intGb(enYogun.ind + enYogun.yuk) + ' · %' + nf((enYogun.ind + enYogun.yuk) / top * 100, 0) : ''}</span></div>
+      <div class="kpi-kutu" style="--kp-r:#0D9488;cursor:default"><small>En yoğun saat (48 sa)</small><b>${enYogunSaat ? esc(enYogunSaat.saat.slice(11)) + ':00' : '—'}</b><span class="alt-k">${enYogunSaat ? esc(enYogunSaat.saat.slice(8, 10) + '.' + enYogunSaat.saat.slice(5, 7)) + ' · ' + intGb(enYogunSaat.tahmin_mb) : ''}</span></div>
+      <div class="kpi-kutu" style="--kp-r:${olcumVar ? '#1E9E5A' : '#A3AAB5'};cursor:default"><small>Ölçülen (Pi ağ sayacı)</small><b>${olcumVar ? '↓' + intGb(O.son24_indirme_mb) + ' ↑' + intGb(O.son24_yukleme_mb) : 'Birikiyor'}</b><span class="alt-k">${olcumVar ? esc(O.varsayilan || '') + ' · ' + nf(O.ornek) + ' örnek' : 'Pi nabzı 10 dk\'da bir örnek alır'}</span></div>
+    </div>`;
+
+  // 1) Şematik akış
+  h += `<h3>🗺️ Şematik akış — sistemler → Saha Pi → bulut</h3>` + akisSemaCiz(yerler, topInd, topYuk, O);
+
+  // 2) Sistem bazında indirme/yükleme (karşılıklı çubuk)
+  h += `<div class="iki-kolon" style="margin-top:14px">
+    <div class="boru-adim"><h3>⇅ Sistem bazında indirme / yükleme (24 sa)</h3>${akisCiftCubuk(yerler)}</div>
+    <div class="boru-adim"><h3>⏱️ Saatlik indirme / yükleme (48 sa)${olcumVar ? ' · <span style="color:#1E9E5A">— ölçülen</span>' : ''}</h3>${akisSaatlik(saatlik, O.saatlik)}</div>
+  </div>`;
+
+  // 3) Yoğunluk ısı haritası
+  h += `<div class="boru-adim" style="margin-bottom:14px">
+    <h3 style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>🔥 Veri yoğunluğu — sistem × saat</span>
+      <span style="display:flex;gap:6px">${[12, 24, 48].map(n => `<button class="btn${AKIS_SAAT === n ? ' aktif' : ''}" style="padding:3px 9px;font-size:12px" onclick="AKIS_SAAT=${n};ciz()">${n} sa</button>`).join('')}</span></h3>
+    ${akisIsiHaritasi(saatlik.slice(-AKIS_SAAT), yerler)}
+  </div>`;
+
+  // 4) Günlük
+  h += `<div class="boru-adim" style="margin-bottom:14px"><h3>📅 Günlük indirme / yükleme (son 30 gün)</h3>${akisGunluk((I.gunler || []).slice(-30), m, O.gunler)}</div>`;
+
+  // 5) Tablo
+  h += `<h3>📋 Sistem tablosu (son 24 saat)</h3><div class="tablo-kutu" style="margin-bottom:12px"><table>
+    <thead><tr><th>Sistem</th><th class="sag">Yazım</th><th class="sag">↓ İndirme</th><th class="sag">↑ Yükleme</th><th class="sag">GitHub ↑</th><th class="sag">GitHub ↓</th><th class="sag">ns1 ↑</th><th class="sag">Toplam</th><th class="sag">Pay</th><th class="sag">Yoğunluk</th><th class="sag">En yoğun saat</th></tr></thead><tbody>` +
+    (yerler.length ? yerler.map(y => {
+      const t = y.ind + y.yuk;
+      let enS = null, enV = 0;
+      saatlik.forEach(s => { const v = (s.yerler || {})[y.yer] || 0; if (v > enV) { enV = v; enS = s.saat; } });
+      return `<tr style="cursor:pointer${AKIS_SECILI === y.yer ? ';background:#EFF6FF' : ''}" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')">
+        <td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${intRenk(y.yer)};margin-right:5px"></span><b>${esc(y.yer)}</b></td>
+        <td class="sag">${nf(y.yazim)}</td>
+        <td class="sag" style="color:${AK_IND}">${intGb(y.ind)}</td>
+        <td class="sag" style="color:${AK_YUK}">${intGb(y.yuk)}</td>
+        <td class="sag">${intGb(y.ghY)}</td><td class="sag">${intGb(y.ghI)}</td><td class="sag">${intGb(y.ns1)}</td>
+        <td class="sag"><b>${intGb(t)}</b></td>
+        <td class="sag">%${nf(t / top * 100, 1)}</td>
+        <td class="sag">${nf(t / 24, 1)} MB/sa</td>
+        <td class="sag">${enS ? esc(enS.slice(8, 10) + '.' + enS.slice(5, 7) + ' ' + enS.slice(11)) + ':00 · ' + intGb(enV) : '—'}</td>
+      </tr>`;
+    }).join('') + `<tr style="background:#F8FAFC"><td><b>Toplam</b></td><td class="sag"><b>${nf(yerler.reduce((a, y) => a + (y.yazim || 0), 0))}</b></td><td class="sag" style="color:${AK_IND}"><b>${intGb(topInd)}</b></td><td class="sag" style="color:${AK_YUK}"><b>${intGb(topYuk)}</b></td><td class="sag">${intGb(yerler.reduce((a, y) => a + y.ghY, 0))}</td><td class="sag">${intGb(yerler.reduce((a, y) => a + y.ghI, 0))}</td><td class="sag">${intGb(yerler.reduce((a, y) => a + y.ns1, 0))}</td><td class="sag"><b>${intGb(top)}</b></td><td class="sag">%100</td><td class="sag">${nf(top / 24, 1)} MB/sa</td><td></td></tr>`
+      : '<tr><td colspan="11" class="bos">Son 24 saatte yazım yok (Pi çevrimdışı olabilir)</td></tr>') +
+    `</tbody></table></div>`;
+
+  // 6) Seçili sistemin dosyaları
+  if (AKIS_SECILI) {
+    const y = yerler.find(v => v.yer === AKIS_SECILI);
+    const dos = (I.son24_dosyalar || []).filter(d => d.yer === AKIS_SECILI).map(d => ({ ...d, ...akisYon(d, m) }));
+    h += `<div id="akis-detay" class="boru-adim" style="margin-bottom:12px;border-left:4px solid ${intRenk(AKIS_SECILI)}">
+      <h3 style="display:flex;justify-content:space-between;gap:8px"><span>🔎 ${esc(AKIS_SECILI)} — dosya ayrıntısı</span><button class="btn" style="padding:2px 9px;font-size:12px" onclick="akisSec(AKIS_SECILI)">Kapat ✕</button></h3>
+      ${y ? `<p class="alt" style="margin:0 0 8px">↓ ${intGb(y.ind)} · ↑ ${intGb(y.yuk)} · ${nf(y.yazim)} yazım · ${nf(y.dosya)} dosya · ham ${y.ham_mb != null ? nf(y.ham_mb, 1) + ' MB' : '—'}</p>` : ''}
+      <div class="tablo-kutu"><table><thead><tr><th>Dosya</th><th class="sag">Yazım</th><th class="sag">Ort. boyut</th><th class="sag">↓ İndirme</th><th class="sag">↑ Yükleme</th><th class="sag">Toplam</th></tr></thead><tbody>` +
+      (dos.length ? dos.map(d => `<tr><td><code>${esc(d.yol)}</code></td><td class="sag">${nf(d.yazim)}</td><td class="sag">${nf(d.ort_kb)} KB</td><td class="sag" style="color:${AK_IND}">${intGb(d.ind)}</td><td class="sag" style="color:${AK_YUK}">${intGb(d.yuk)}</td><td class="sag"><b>${intGb(d.tahmin_mb)}</b></td></tr>`).join('')
+        : '<tr><td colspan="6" class="bos">Bu sistemin dosyası ilk 25 listede yok.</td></tr>') +
+      `</tbody></table></div></div>`;
+  }
+
+  // 7) Ölçüm / model notu
+  let fark = '';
+  if (olcumVar) {
+    const fI = O.son24_indirme_mb - topInd, fY = O.son24_yukleme_mb - topYuk;
+    fark = `<br><b>Ölçülen − model:</b> ↓ ${intGb(Math.max(0, fI))} · ↑ ${intGb(Math.max(0, fY))} — kaynak çekimleri (MEDAŞ, Sungrow, Inavitas, FusionSolar), komut yoklaması, git pull ve yerel ağ (madenci yoklama) buradadır.` +
+      ((O.arayuzler || []).length ? ' Arayüzler: ' + O.arayuzler.map(a => `<code>${esc(a.ad)}</code> ↓${intGb(a.indirme_mb)} ↑${intGb(a.yukleme_mb)}`).join(' · ') + ' (rapor penceresi).' : '');
+  }
+  h += `<div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)">
+    <b>Nasıl hesaplanır:</b> sistem bazındaki değerler Pi'nin epias-ptf'ye yazdığı her dosya sürümünden tahmin edilir — GitHub yazımı ↑ ham×${nf((I.yon_model && I.yon_model.gh_yukle && I.yon_model.gh_yukle.katsayi) || m.github_yaz, 2)}, yazım öncesi okuma ↓ ham×${nf((I.yon_model && I.yon_model.gh_indir && I.yon_model.gh_indir.katsayi) || m.github_oku, 2)}, ns1 kopyası ↑ ham×${nf((I.yon_model && I.yon_model.ns1_yukle && I.yon_model.ns1_yukle.katsayi) || m.ns1_kopya, 2)} + istek yükü.
+    ${olcumVar ? 'Üstteki "Ölçülen" kutusu Pi\'nin gerçek ağ sayacıdır (<code>/proc/net/dev</code>).' : 'Pi nabzına ağ sayacı eklendi; ilk örnekler gelince "Ölçülen" değerler ve saatlik ölçüm çizgisi kendiliğinden görünür.'}${fark}
+  </div></div>`;
+  return h;
+}
+
+function akisSemaCiz(yerler, topInd, topYuk, O) {
+  if (!yerler.length) return '<div class="bos">Son 24 saatte veri yok.</div>';
+  const ana = yerler.slice(0, 8);
+  const kalan = yerler.slice(8);
+  if (kalan.length) ana.push({ yer: 'Diğer (' + kalan.length + ')', _renk: '#A3AAB5', ind: kalan.reduce((a, y) => a + y.ind, 0), yuk: kalan.reduce((a, y) => a + y.yuk, 0), ghY: kalan.reduce((a, y) => a + y.ghY, 0), ghI: kalan.reduce((a, y) => a + y.ghI, 0), ns1: kalan.reduce((a, y) => a + y.ns1, 0), _diger: true });
+  const kutuH = 46, ara = 10, ust = 46;
+  const H = Math.max(360, ust + ana.length * (kutuH + ara) + 20);
+  const W = 1000, solX = 16, solW = 250, piX = 470, piW = 120, sagX = 760, sagW = 224;
+  const maks = Math.max(...ana.map(y => Math.max(y.ind, y.yuk)), 1);
+  const kal = v => Math.max(1.2, Math.min(16, 1.2 + 14.8 * Math.sqrt(v / maks)));
+  const piY = ust, piH = H - ust - 20, piOrta = piY + piH / 2;
+  let svg = `<defs>
+    <marker id="ok-yuk" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0,0L10,5L0,10z" fill="${AK_YUK}"/></marker>
+    <marker id="ok-ind" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0,0L10,5L0,10z" fill="${AK_IND}"/></marker>
+  </defs>
+  <text x="${solX}" y="24" font-size="12" font-weight="800" fill="#5B6470" letter-spacing=".5">SİSTEMLER (KAYNAK)</text>
+  <text x="${piX + piW / 2}" y="24" text-anchor="middle" font-size="12" font-weight="800" fill="#5B6470" letter-spacing=".5">SAHA</text>
+  <text x="${sagX}" y="24" font-size="12" font-weight="800" fill="#5B6470" letter-spacing=".5">BULUT (HEDEF)</text>`;
+  ana.forEach((y, i) => {
+    const yy = ust + i * (kutuH + ara), orta = yy + kutuH / 2;
+    const r = y._renk || intRenk(y.yer);
+    const sec = AKIS_SECILI === y.yer;
+    const hedefY = piY + 18 + (piH - 36) * (i + 0.5) / ana.length;
+    const x1 = solX + solW, x2 = piX;
+    // ↑ yükleme: sistem → Pi (üst hat), ↓ indirme: Pi → sistem (alt hat)
+    svg += `<path class="akis-hat" d="M${x1},${orta - 6} C${x1 + 110},${orta - 6} ${x2 - 110},${hedefY - 6} ${x2 - 4},${hedefY - 6}" stroke="${AK_YUK}" stroke-width="${kal(y.yuk)}" fill="none" opacity=".75" marker-end="url(#ok-yuk)"><title>${esc(y.yer)} ↑ ${intGb(y.yuk)}</title></path>`;
+    svg += `<path class="akis-hat" d="M${x2},${hedefY + 6} C${x2 - 110},${hedefY + 6} ${x1 + 110},${orta + 6} ${x1 + 4},${orta + 6}" stroke="${AK_IND}" stroke-width="${kal(y.ind)}" fill="none" opacity=".65" marker-end="url(#ok-ind)"><title>${esc(y.yer)} ↓ ${intGb(y.ind)}</title></path>`;
+    const tik = y._diger ? '' : ` style="cursor:pointer" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')"`;
+    svg += `<g${tik}>
+      <rect x="${solX}" y="${yy}" width="${solW}" height="${kutuH}" rx="9" fill="#fff" stroke="${sec ? '#2a78d6' : '#D8DEE6'}" stroke-width="${sec ? 2.6 : 1.2}"/>
+      <rect x="${solX}" y="${yy}" width="6" height="${kutuH}" rx="3" fill="${r}"/>
+      <text x="${solX + 16}" y="${yy + 19}" font-size="12.5" font-weight="700" fill="#2B2F35">${esc(y.yer.length > 30 ? y.yer.slice(0, 29) + '…' : y.yer)}</text>
+      <text x="${solX + 16}" y="${yy + 36}" font-size="11.5" fill="${AK_IND}" font-weight="700">↓ ${intGb(y.ind)}</text>
+      <text x="${solX + 96}" y="${yy + 36}" font-size="11.5" fill="${AK_YUK}" font-weight="700">↑ ${intGb(y.yuk)}</text>
+      <text x="${solX + solW - 10}" y="${yy + 36}" text-anchor="end" font-size="11" fill="#5B6470">%${nf((y.ind + y.yuk) / ((topInd + topYuk) || 1) * 100, 0)}</text>
+    </g>`;
+  });
+  // Pi kutusu
+  svg += `<rect x="${piX}" y="${piY}" width="${piW}" height="${piH}" rx="14" fill="#2B2F35"/>
+    <text x="${piX + piW / 2}" y="${piOrta - 26}" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">Saha Pi</text>
+    <text x="${piX + piW / 2}" y="${piOrta - 9}" text-anchor="middle" font-size="11.5" fill="#CBD5E1">4G modem</text>
+    <text x="${piX + piW / 2}" y="${piOrta + 14}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#93C5FD">↓ ${intGb(topInd)}</text>
+    <text x="${piX + piW / 2}" y="${piOrta + 32}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#FDBA74">↑ ${intGb(topYuk)}</text>`;
+  if (O && O.son24_indirme_mb != null) {
+    svg += `<text x="${piX + piW / 2}" y="${piOrta + 54}" text-anchor="middle" font-size="10.5" fill="#86EFAC">ölçülen</text>
+      <text x="${piX + piW / 2}" y="${piOrta + 69}" text-anchor="middle" font-size="10.5" fill="#86EFAC">↓${intGb(O.son24_indirme_mb)} ↑${intGb(O.son24_yukleme_mb)}</text>`;
+  }
+  // Hedefler
+  const ghY = ana.reduce((a, y) => a + y.ghY, 0), ghI = ana.reduce((a, y) => a + y.ghI, 0), ns1 = ana.reduce((a, y) => a + y.ns1, 0);
+  const hm = Math.max(ghY, ghI, ns1, 1), hk = v => Math.max(2, Math.min(20, 2 + 18 * Math.sqrt(v / hm)));
+  const ghKY = ust + 10, ghKH = 120, nsKY = ghKY + ghKH + 40, nsKH = 92;
+  const x1 = piX + piW, x2 = sagX;
+  svg += `<path class="akis-hat" d="M${x1},${piOrta - 40} C${x1 + 80},${piOrta - 40} ${x2 - 80},${ghKY + 38} ${x2 - 4},${ghKY + 38}" stroke="${AK_YUK}" stroke-width="${hk(ghY)}" fill="none" opacity=".75" marker-end="url(#ok-yuk)"><title>GitHub yazımı ↑ ${intGb(ghY)}</title></path>
+    <path class="akis-hat" d="M${x2},${ghKY + 82} C${x2 - 80},${ghKY + 82} ${x1 + 80},${piOrta - 14} ${x1 + 4},${piOrta - 14}" stroke="${AK_IND}" stroke-width="${hk(ghI)}" fill="none" opacity=".65" marker-end="url(#ok-ind)"><title>GitHub okuma ↓ ${intGb(ghI)}</title></path>
+    <path class="akis-hat" d="M${x1},${piOrta + 22} C${x1 + 80},${piOrta + 22} ${x2 - 80},${nsKY + nsKH / 2} ${x2 - 4},${nsKY + nsKH / 2}" stroke="${AK_YUK}" stroke-width="${hk(ns1)}" fill="none" opacity=".75" marker-end="url(#ok-yuk)"><title>ns1 kopyası ↑ ${intGb(ns1)}</title></path>
+    <g>
+      <rect x="${sagX}" y="${ghKY}" width="${sagW}" height="${ghKH}" rx="11" fill="#fff" stroke="#1F3B66" stroke-width="1.4"/>
+      <rect x="${sagX}" y="${ghKY}" width="${sagW}" height="26" rx="11" fill="#1F3B66"/><rect x="${sagX}" y="${ghKY + 14}" width="${sagW}" height="12" fill="#1F3B66"/>
+      <text x="${sagX + 12}" y="${ghKY + 18}" font-size="12.5" font-weight="800" fill="#fff">GitHub · epias-ptf</text>
+      <text x="${sagX + 12}" y="${ghKY + 50}" font-size="12" fill="${AK_YUK}" font-weight="700">↑ Yazım (PUT)</text><text x="${sagX + sagW - 12}" y="${ghKY + 50}" text-anchor="end" font-size="12.5" font-weight="800" fill="#2B2F35">${intGb(ghY)}</text>
+      <text x="${sagX + 12}" y="${ghKY + 76}" font-size="12" fill="${AK_IND}" font-weight="700">↓ Okuma (sha)</text><text x="${sagX + sagW - 12}" y="${ghKY + 76}" text-anchor="end" font-size="12.5" font-weight="800" fill="#2B2F35">${intGb(ghI)}</text>
+      <text x="${sagX + 12}" y="${ghKY + 104}" font-size="11" fill="#5B6470">Toplam ${intGb(ghY + ghI)} · %${nf((ghY + ghI) / ((topInd + topYuk) || 1) * 100, 0)}</text>
+    </g>
+    <g>
+      <rect x="${sagX}" y="${nsKY}" width="${sagW}" height="${nsKH}" rx="11" fill="#fff" stroke="#0D9488" stroke-width="1.4"/>
+      <rect x="${sagX}" y="${nsKY}" width="${sagW}" height="26" rx="11" fill="#0D9488"/><rect x="${sagX}" y="${nsKY + 14}" width="${sagW}" height="12" fill="#0D9488"/>
+      <text x="${sagX + 12}" y="${nsKY + 18}" font-size="12.5" font-weight="800" fill="#fff">ns1 · api.aksarayenerji.net</text>
+      <text x="${sagX + 12}" y="${nsKY + 50}" font-size="12" fill="${AK_YUK}" font-weight="700">↑ Kopya (sıkı JSON)</text><text x="${sagX + sagW - 12}" y="${nsKY + 50}" text-anchor="end" font-size="12.5" font-weight="800" fill="#2B2F35">${intGb(ns1)}</text>
+      <text x="${sagX + 12}" y="${nsKY + 76}" font-size="11" fill="#5B6470">→ Portal · Monitoring · Denetçi</text>
+    </g>`;
+  // Lejant
+  const lY = H - 14;
+  svg += `<g font-size="11.5" fill="#5B6470">
+    <line x1="${sagX}" y1="${lY - 4}" x2="${sagX + 26}" y2="${lY - 4}" stroke="${AK_YUK}" stroke-width="4"/><text x="${sagX + 32}" y="${lY}">↑ yükleme</text>
+    <line x1="${sagX + 110}" y1="${lY - 4}" x2="${sagX + 136}" y2="${lY - 4}" stroke="${AK_IND}" stroke-width="4"/><text x="${sagX + 142}" y="${lY}">↓ indirme</text>
+  </g>`;
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" class="sema-svg" style="min-width:820px" role="img" aria-label="Veri akışı şeması">${svg}</svg></div>`;
+}
+
+function akisCiftCubuk(yerler) {
+  if (!yerler.length) return '<div class="bos">Kayıt yok.</div>';
+  const maks = Math.max(...yerler.map(y => Math.max(y.ind, y.yuk)), 1);
+  return `<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:4px 8px;align-items:center;font-size:12px">
+    <div style="text-align:right;color:${AK_IND};font-weight:700">↓ İndirme</div><div></div><div style="color:${AK_YUK};font-weight:700">↑ Yükleme</div>` +
+    yerler.map(y => `
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:6px"><span style="font-variant-numeric:tabular-nums;color:var(--y)">${intGb(y.ind)}</span><div style="height:12px;width:${(y.ind / maks * 100).toFixed(1)}%;min-width:2px;background:${AK_IND};border-radius:4px 0 0 4px"></div></div>
+      <div style="text-align:center;cursor:pointer;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:${AKIS_SECILI === y.yer ? 800 : 600}" title="${esc(y.yer)}" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${intRenk(y.yer)};margin-right:4px"></i>${esc(y.yer.replace(/ \(.*\)$/, ''))}</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="height:12px;width:${(y.yuk / maks * 100).toFixed(1)}%;min-width:2px;background:${AK_YUK};border-radius:0 4px 4px 0"></div><span style="font-variant-numeric:tabular-nums;color:var(--y)">${intGb(y.yuk)}</span></div>`).join('') +
+    `</div>`;
+}
+
+function akisSaatlik(saat, olcumSaat) {
+  if (!saat.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 240, sol = 46, alt = 22, ust = 10, orta = ust + (H - alt - ust) / 2;
+  const om = {}; (olcumSaat || []).forEach(o => { om[o.saat] = o; });
+  const maks = Math.max(...saat.map(s => Math.max(s.ind, s.yuk, (om[s.saat] || {}).indirme_mb || 0, (om[s.saat] || {}).yukleme_mb || 0)), 0.01);
+  const yarim = (H - alt - ust) / 2, bw = (W - sol - 4) / saat.length;
+  let svg = `<line x1="${sol}" x2="${W}" y1="${orta}" y2="${orta}" stroke="#94A3B8"/>`;
+  [1, 0.5].forEach(f => {
+    svg += `<line x1="${sol}" x2="${W}" y1="${orta - yarim * f}" y2="${orta - yarim * f}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${orta - yarim * f + 4}" text-anchor="end" font-size="10" fill="${AK_YUK}">↑${intGb(maks * f)}</text>`;
+    svg += `<line x1="${sol}" x2="${W}" y1="${orta + yarim * f}" y2="${orta + yarim * f}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${orta + yarim * f + 4}" text-anchor="end" font-size="10" fill="${AK_IND}">↓${intGb(maks * f)}</text>`;
+  });
+  let cU = '', cD = '';
+  saat.forEach((s, i) => {
+    const x = sol + i * bw, hu = yarim * s.yuk / maks, hd = yarim * s.ind / maks;
+    svg += `<rect x="${x + .5}" y="${orta - hu}" width="${Math.max(1, bw - 1)}" height="${hu}" fill="${AK_YUK}"><title>${s.saat}:00 ↑ ${intGb(s.yuk)}</title></rect>`;
+    svg += `<rect x="${x + .5}" y="${orta}" width="${Math.max(1, bw - 1)}" height="${hd}" fill="${AK_IND}"><title>${s.saat}:00 ↓ ${intGb(s.ind)}</title></rect>`;
+    const o = om[s.saat];
+    if (o) { cU += `${x + bw / 2},${orta - yarim * o.yukleme_mb / maks} `; cD += `${x + bw / 2},${orta + yarim * o.indirme_mb / maks} `; }
+    if (s.saat.slice(11) === '00') svg += `<text x="${x}" y="${H - 6}" font-size="10" fill="#5B6470">${s.saat.slice(8, 10)}.${s.saat.slice(5, 7)}</text>`;
+  });
+  if (cU) svg += `<polyline points="${cU}" fill="none" stroke="#1E9E5A" stroke-width="1.8"/><polyline points="${cD}" fill="none" stroke="#1E9E5A" stroke-width="1.8" stroke-dasharray="4 3"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg>`;
+}
+
+function akisIsiHaritasi(saat, yerler) {
+  if (!saat.length || !yerler.length) return '<div class="bos">Kayıt yok.</div>';
+  const satir = yerler.slice(0, 12);
+  const etW = 170, hc = 22, ust = 6, alt = 22;
+  const W = Math.max(1000, etW + saat.length * 18), cw = (W - etW - 4) / saat.length, H = ust + satir.length * hc + alt;
+  const maks = Math.max(...satir.flatMap(y => saat.map(s => (s.yerler || {})[y.yer] || 0)), 0.01);
+  let svg = '';
+  satir.forEach((y, r) => {
+    const yy = ust + r * hc;
+    svg += `<text x="${etW - 8}" y="${yy + hc / 2 + 4}" text-anchor="end" font-size="11.5" font-weight="${AKIS_SECILI === y.yer ? 800 : 600}" fill="#2B2F35" style="cursor:pointer" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')">${esc(y.yer.length > 24 ? y.yer.slice(0, 23) + '…' : y.yer)}</text>`;
+    saat.forEach((s, c) => {
+      const v = (s.yerler || {})[y.yer] || 0;
+      const t = Math.sqrt(v / maks);
+      svg += `<rect x="${etW + c * cw + .5}" y="${yy + 1}" width="${Math.max(1, cw - 1)}" height="${hc - 2}" rx="3" fill="${v ? intRenk(y.yer) : '#F1F5F9'}" opacity="${v ? (0.12 + 0.88 * t).toFixed(2) : 1}"><title>${esc(y.yer)} · ${s.saat}:00 → ${intGb(v)}</title></rect>`;
+    });
+  });
+  saat.forEach((s, c) => {
+    const sa = +s.saat.slice(11);
+    if (sa % (saat.length > 24 ? 6 : 3) === 0) svg += `<text x="${etW + c * cw + cw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#5B6470">${sa === 0 ? s.saat.slice(8, 10) + '.' + s.saat.slice(5, 7) : String(sa).padStart(2, '0')}</text>`;
+  });
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:640px;height:auto;display:block">${svg}</svg></div>
+    <p class="alt" style="margin:6px 0 0;font-size:12px">Koyu hücre = o saatte o sistemin hattan geçirdiği veri fazla (karekök ölçek, en yoğun hücre ${intGb(maks)}).</p>`;
+}
+
+function akisGunluk(gunler, m, olcumGun) {
+  if (!gunler.length) return '<div class="bos">Kayıt yok.</div>';
+  const g = gunler.map(x => ({ gun: x.gun, ...akisYon(x, m), o: (olcumGun || {})[x.gun] }));
+  const W = 1000, H = 230, sol = 54, alt = 24, ust = 10;
+  const maks = Math.max(...g.map(x => Math.max(x.ind + x.yuk, x.o ? x.o.indirme_mb + x.o.yukleme_mb : 0)), 1);
+  const bw = (W - sol - 6) / g.length;
+  let svg = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = maks * i / 4, y = H - alt - (H - alt - ust) * i / 4;
+    svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  g.forEach((x, i) => {
+    const X = sol + i * bw + 2, w = Math.max(2, bw - 4), Y0 = H - alt;
+    const hd = (H - alt - ust) * x.ind / maks, hu = (H - alt - ust) * x.yuk / maks;
+    svg += `<rect x="${X}" y="${Y0 - hd}" width="${w}" height="${hd}" fill="${AK_IND}"><title>${x.gun} ↓ ${intGb(x.ind)}</title></rect>`;
+    svg += `<rect x="${X}" y="${Y0 - hd - hu}" width="${w}" height="${hu}" fill="${AK_YUK}"><title>${x.gun} ↑ ${intGb(x.yuk)} · toplam ${intGb(x.ind + x.yuk)}</title></rect>`;
+    if (x.o) { const ho = (H - alt - ust) * (x.o.indirme_mb + x.o.yukleme_mb) / maks; svg += `<line x1="${X - 1}" x2="${X + w + 1}" y1="${Y0 - ho}" y2="${Y0 - ho}" stroke="#1E9E5A" stroke-width="2.2"><title>${x.gun} ölçülen ↓${intGb(x.o.indirme_mb)} ↑${intGb(x.o.yukleme_mb)}</title></line>`; }
+    if (i % Math.ceil(g.length / 15) === 0 || i === g.length - 1) svg += `<text x="${X + w / 2}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#5B6470">${x.gun.slice(8, 10)}.${x.gun.slice(5, 7)}</text>`;
+  });
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:560px;height:auto;display:block">${svg}</svg></div>
+    <div style="font-size:11.5px;color:var(--y);margin-top:4px"><i style="display:inline-block;width:9px;height:9px;background:${AK_IND};border-radius:2px"></i> ↓ indirme &nbsp; <i style="display:inline-block;width:9px;height:9px;background:${AK_YUK};border-radius:2px"></i> ↑ yükleme &nbsp; <i style="display:inline-block;width:14px;height:2px;background:#1E9E5A;vertical-align:middle"></i> ölçülen toplam</div>`;
+}
+
+// ---- KAPASİTE (Pi + ns1) ve Pi'de yerel depolama senaryosu ----
+const gbB = b => b == null ? '—' : (b >= 1e12 ? nf(b / 1e12, 2) + ' TB' : (b >= 1e9 ? nf(b / 1e9, b >= 1e11 ? 0 : 1) + ' GB' : nf(b / 1e6, 0) + ' MB'));
+function kapCubuk(ad, dolu, toplam, alt) {
+  if (!toplam) return `<div style="margin:8px 0"><strong>${ad}</strong> <span class="alt">— veri yok</span></div>`;
+  const y = dolu / toplam * 100, r = y >= 90 ? '#D7262E' : (y >= 75 ? '#F08A24' : '#1E9E5A');
+  return `<div style="margin:9px 0">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px;font-size:12.5px"><strong>${ad}</strong><span style="font-variant-numeric:tabular-nums;white-space:nowrap">${gbB(dolu)} / ${gbB(toplam)} · <strong style="color:${r}">%${nf(y, 0)}</strong> · kalan <strong>${gbB(toplam - dolu)}</strong></span></div>
+    <div class="bar-dis" style="height:10px"><div class="bar-ic" style="width:${Math.min(100, y).toFixed(1)}%;background:${r}"></div></div>
+    ${alt ? `<small style="color:var(--y)">${alt}</small>` : ''}
+  </div>`;
+}
+function kapasiteCiz() {
+  const pn = VERI.piNabiz || {}, pk = pn.kapasite || {};
+  const nk = (VERI.bekciNs1 && VERI.bekciNs1.kapasite) || {};
+  const I = VERI.internet || {}, oz = I.ozet || {};
+  const piDisk = pk.disk, piRam = pk.ram, nsDisk = nk.disk, nsRam = nk.ram;
+  let h = `<div class="kart" id="bolum-kapasite"><h2><span>💾 Kapasite — Saha Pi ve ns1 Sunucu</span>
+    <span style="font-size:12.5px;color:var(--y)">Pi: ${esc(trZaman(pn.son_ts))} · ns1: ${esc(trZaman(VERI.bekciNs1 && VERI.bekciNs1.t))}</span></h2>
+    <div class="iki-kolon">
+      <div class="boru-adim"><h3>🍓 Saha Pi</h3>` +
+      (piDisk ? kapCubuk('Hafıza kartı (/)', piDisk.toplam - piDisk.bos, piDisk.toplam,
+          (pk.kart && pk.kart.boyut > piDisk.toplam * 1.1 ? `⚠️ Kart ${gbB(pk.kart.boyut)}, bölüm ${gbB(piDisk.toplam)} — bölüm büyütülmemiş.` : (pk.kart ? 'Kart: ' + esc(pk.kart.ad) + ' · ' + gbB(pk.kart.boyut) : '')))
+        : `<div class="bos" style="padding:10px">Pi kapasite bilgisi bekleniyor — yeni nabız kodu Pi'ye en geç 30 dk'da iner (şimdilik: ${esc(pn.not_ || '—')}).</div>`) +
+      (piRam ? kapCubuk('Bellek (RAM)', piRam.toplam - piRam.bos, piRam.toplam, piRam.takas_toplam ? 'Takas: ' + gbB(piRam.takas_toplam - piRam.takas_bos) + ' / ' + gbB(piRam.takas_toplam) : 'Takas yok') : '') +
+      (pk.klasor && Object.keys(pk.klasor).length ? `<div style="font-size:12px;color:var(--y);margin-top:6px">Klasörler: ${Object.entries(pk.klasor).map(([k, v]) => `<strong>${esc(k)}</strong> ${gbB(v)}`).join(' · ')} · yük ${esc(pk.yuk || '—')}</div>` : '') +
+      `</div>
+      <div class="boru-adim"><h3>🖥️ ns1 (api.aksarayenerji.net)</h3>` +
+      (nsDisk ? kapCubuk('Disk (/)', nsDisk.toplam - nsDisk.bos, nsDisk.toplam, '') : `<div class="bos" style="padding:10px">ns1 kapasite bilgisi bekleniyor — bekçi güncellemesi yayınlanınca 5 dk içinde gelir.</div>`) +
+      (nsRam ? kapCubuk('Bellek (RAM)', nsRam.toplam - nsRam.bos, nsRam.toplam, (nk.cekirdek ? nk.cekirdek + ' çekirdek · yük ' + esc(nk.yuk) : '')) : '') +
+      (nk.birim && Object.keys(nk.birim).length ? `<div style="font-size:12px;color:var(--y);margin-top:6px">Docker birimleri: ${Object.entries(nk.birim).map(([k, v]) => `<strong>${esc(k.replace('aesun_', ''))}</strong> ${gbB(v)}`).join(' · ')}</div>` : '') +
+      `</div>
+    </div>`;
+
+  // Pi'de yerel depolama senaryosu: cihaz verisi Pi'de birikirse kart ne zaman dolar?
+  const hamGun = (oz.ham_gun_mb || 0) * 1e6;
+  const sonKayit = (I.son24_dosyalar || []).reduce((a, d) => a + (d.ort_kb || 0) * 1024, 0);
+  if (hamGun) {
+    const pay = piDisk ? Math.max(0, piDisk.bos - piDisk.toplam * 0.10) : null;   // %10 güvenlik payı
+    const sen = [
+      { ad: 'Son kayıt (üzerine yaz)', gun: 0, not: 'Her dosyanın yalnız son hali; büyümez. "Güncel veriyi getir" için yeterli.' },
+      { ad: 'Her sürüm · sıkıştırılmış', gun: hamGun * 0.12, not: 'JSON gzip ≈ %12. Geçmişe dönük sorgu için önerilen.' },
+      { ad: 'Her sürüm · ham', gun: hamGun, not: 'Bugün GitHub\'a gönderilenin aynısı (' + intGb(oz.ham_gun_mb) + '/gün).' }
+    ];
+    const kart = [32, 64, 128, 256, 512];
+    h += `<h3>📦 Cihaz verisi Pi'de saklanırsa — kart yeter mi?</h3>
+      <div class="tablo-kutu" style="margin-bottom:8px"><table style="min-width:600px"><thead><tr><th>Senaryo</th><th class="sag">Günlük artış</th><th class="sag">1 yılda</th><th class="sag">Kart dolma süresi</th><th>Öneri</th></tr></thead><tbody>` +
+      sen.map(x => {
+        const yil = x.gun * 365;
+        const sure = x.gun ? (pay != null ? pay / x.gun : null) : Infinity;
+        const sureMetin = sure === Infinity ? (gbB(sonKayit) + ' sabit') : (sure == null ? 'Pi kapasitesi bekleniyor' : (sure > 730 ? '2 yıldan fazla' : nf(sure, 0) + ' gün'));
+        const gerek = x.gun * 730 + (piDisk ? piDisk.dolu : 16e9);       // 2 yıl + mevcut doluluk
+        const oneriGB = kart.find(k => k * 1e9 * 0.9 >= gerek);
+        const yeter = sure === Infinity || (sure != null && sure > 730);
+        const oneri = yeter ? '✅ Mevcut kart yeter' : (oneriGB ? `⬆️ En az <strong>${oneriGB} GB</strong> kart (2 yıl)` : '⬆️ 512 GB+ / harici SSD');
+        return `<tr><td><strong>${x.ad}</strong><br><small style="color:var(--y)">${x.not}</small></td><td class="sag">${x.gun ? gbB(x.gun) : '—'}</td><td class="sag">${x.gun ? gbB(yil) : gbB(sonKayit)}</td><td class="sag"><strong>${sureMetin}</strong></td><td>${oneri}</td></tr>`;
+      }).join('') + `</tbody></table></div>
+      <p class="alt" style="margin:0;font-size:12px">Hesap: son ${nf(oz.ort7_gun_sayisi || 7)} tam günün ham yazım ortalaması (kesintili günler hariç) · kart dolma süresi = boş alan − %10 güvenlik payı. Pi zaten anlık durumu izlediği için "güncel veriyi getir" isteğinde son kaydı yerelden verirse GitHub'a sürekli tam dosya gönderimi (bugün ↑${intGb(oz.son24_yukleme_mb)}/24 sa) büyük ölçüde kalkar.</p>`;
+  }
+  h += `</div>`;
+  return h;
+}
+
 function durumAnaliziCiz() {
   const { analizDurum, aesunSon } = VERI;
   if (!analizDurum || analizDurum._hata) {
@@ -1405,6 +1742,7 @@ function ciz() {
     <button class="${SEKME === 'bildirim' ? 'on' : ''}" onclick="SEKME='bildirim';ciz()">📲 Bildirimler &amp; Alarmlar (${aktifAlarmlar})</button>
     <button class="${SEKME === 'analiz' ? 'on' : ''}" onclick="SEKME='analiz';ciz()">📊 Durum Analizi &amp; Performans</button>
     <button class="${SEKME === 'internet' ? 'on' : ''}" onclick="SEKME='internet';ciz()">🌐 İnternet Kullanımı</button>
+    <button class="${SEKME === 'akis' ? 'on' : ''}" onclick="SEKME='akis';ciz()">🔁 Veri Akışı (↓↑)</button>
   </div>`;
 
   if (!BEL) {
@@ -1426,7 +1764,9 @@ function ciz() {
   } else if (SEKME === 'analiz') {
     h += sematikCiz() + durumAnaliziCiz();
   } else if (SEKME === 'internet') {
-    h += internetCiz();
+    h += internetCiz() + kapasiteCiz();
+  } else if (SEKME === 'akis') {
+    h += akisCiz() + kapasiteCiz();
   }
 
   $('ana').innerHTML = h;

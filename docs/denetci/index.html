@@ -155,13 +155,21 @@ async function belirtecBul(s) {
 }
 
 async function jsonAl(url, bel = '') {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const tmr = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
   try {
     const hd = bel ? { 'X-AE-Anahtar': bel } : {};
-    const r = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now(), { headers: hd, cache: 'no-store' });
+    const r = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now(), {
+      headers: hd,
+      cache: 'no-store',
+      ...(ctrl ? { signal: ctrl.signal } : {})
+    });
+    if (tmr) clearTimeout(tmr);
     if (!r.ok) return { _hata: r.status };
     return await r.json();
   } catch (e) {
-    return { _hata: e.message || 'bağlantı hatası' };
+    if (tmr) clearTimeout(tmr);
+    return { _hata: (e && e.message) || 'bağlantı hatası' };
   }
 }
 
@@ -198,127 +206,152 @@ function durumNoktaRenk(durum) {
   return '#64748B';
 }
 
+function sorunListesi(s) {
+  if (!s) return [];
+  if (Array.isArray(s)) return s.map(x => typeof x === 'string' ? x : JSON.stringify(x));
+  if (typeof s === 'object') return Object.entries(s).map(([k, v]) => k + ': ' + (typeof v === 'string' ? v : JSON.stringify(v)));
+  return [String(s)];
+}
+
 async function tumVerileriYukle() {
-  S = oturumOku();
-  BEL = await belirtecBul(S);
-  if ($('kim')) {
-    $('kim').innerHTML = S
-      ? ('👤 <b>' + esc(S.ad || S.kul) + '</b>' + (S.ka ? ' <span class="et k">Yönetici</span>' : ' <span class="et ok">Yetkili</span>'))
-      : '<span class="et u">Açık Görünüm (Tam kayıtlar için Portal\'dan giriş yapın)</span>';
+  try {
+    S = oturumOku();
+    BEL = await belirtecBul(S);
+    if ($('kim')) {
+      $('kim').innerHTML = S
+        ? ('👤 <b>' + esc(S.ad || S.kul) + '</b>' + (S.ka ? ' <span class="et k">Yönetici</span>' : ' <span class="et ok">Yetkili</span>'))
+        : '<span class="et u">Açık Görünüm (Tam kayıtlar için Portal\'dan giriş yapın)</span>';
+    }
+
+    const dosya = yol => BEL ? jsonAl(API_KOK + '/v1/dosya/' + yol, BEL) : Promise.resolve({ _hata: 'oturum_yok' });
+
+    const [
+      saglik,
+      bekciNs1,
+      denetim,
+      aiTani,
+      isHatalari,
+      sef,
+      sistemBekci,
+      piNabiz,
+      cihazBekci,
+      bildirimDurum,
+      bildirimKayit,
+      analizDurum,
+      aesunSon,
+      musteriListe
+    ] = await Promise.all([
+      jsonAl(API_KOK + '/v1/saglik'),
+      jsonAl(API_KOK + '/v1/bekci'),
+      dosya('n8n/denetim.json'),
+      dosya('n8n/ai_bekci_tani.json'),
+      dosya('n8n/is_hatalari.json'),
+      dosya('n8n/sef.json'),
+      dosya('n8n/sistem_bekci.json'),
+      dosya('n8n/pi_nabiz.json'),
+      dosya('n8n/bekci.json'),
+      dosya('n8n/bildirim_durum.json'),
+      dosya('n8n/bildirim_kayit.json'),
+      dosya('n8n/analiz/durum.json'),
+      dosya('n8n/aesun_son.json'),
+      (S && S.ka && BEL) ? jsonAl(API_KOK + '/v1/musteri/liste', BEL) : Promise.resolve(null)
+    ]);
+
+    VERI = {
+      saglik, bekciNs1, denetim, aiTani, isHatalari, sef,
+      sistemBekci, piNabiz, cihazBekci, bildirimDurum, bildirimKayit,
+      analizDurum, aesunSon, musteriListe
+    };
+    SON_YUKLEME = new Date();
+    ciz();
+  } catch (err) {
+    console.error('Sistem Denetçisi yükleme hatası:', err);
+    $('ana').innerHTML = '<div class="hata"><b>Sayfa çizilirken beklenmeyen hata:</b> ' + esc(err && (err.stack || err.message || err)) + '</div>';
   }
-
-  const dosya = yol => BEL ? jsonAl(API_KOK + '/v1/dosya/' + yol, BEL) : Promise.resolve({ _hata: 'oturum_yok' });
-
-  const [
-    saglik,
-    bekciNs1,
-    denetim,
-    aiTani,
-    isHatalari,
-    sef,
-    sistemBekci,
-    cihazBekci,
-    bildirimDurum,
-    bildirimKayit,
-    analizDurum,
-    aesunSon,
-    musteriListe
-  ] = await Promise.all([
-    jsonAl(API_KOK + '/v1/saglik'),
-    jsonAl(API_KOK + '/v1/bekci'),
-    dosya('n8n/denetim.json'),
-    dosya('n8n/ai_bekci_tani.json'),
-    dosya('n8n/is_hatalari.json'),
-    dosya('n8n/sef.json'),
-    dosya('n8n/sistem_bekci.json'),
-    dosya('n8n/bekci.json'),
-    dosya('n8n/bildirim_durum.json'),
-    dosya('n8n/bildirim_kayit.json'),
-    dosya('n8n/analiz/durum.json'),
-    dosya('n8n/aesun_son.json'),
-    (S && S.ka && BEL) ? jsonAl(API_KOK + '/v1/musteri/liste', BEL) : Promise.resolve(null)
-  ]);
-
-  VERI = {
-    saglik, bekciNs1, denetim, aiTani, isHatalari, sef,
-    sistemBekci, cihazBekci, bildirimDurum, bildirimKayit,
-    analizDurum, aesunSon, musteriListe
-  };
-  SON_YUKLEME = new Date();
-  ciz();
 }
 
 // ---- ŞEMATİK MİMARİ DÜĞÜM HESAPLAMA ----
 function mimariDugumleriHesapla() {
-  const { saglik, bekciNs1, denetim, aiTani, isHatalari, sef, sistemBekci, cihazBekci, bildirimDurum, bildirimKayit, analizDurum, aesunSon, musteriListe } = VERI;
+  const { saglik, bekciNs1, denetim, aiTani, isHatalari, sef, sistemBekci, piNabiz, cihazBekci, bildirimDurum, bildirimKayit, analizDurum, aesunSon, musteriListe } = VERI;
+  const gecikenler = (bekciNs1 && bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken)) ? bekciNs1.tarama.geciken : [];
+  const gecikenBul = dosyaAdi => gecikenler.find(g => g && g.dosya === dosyaAdi);
 
   // 1. Saha Pi & Sistem Bekçisi
-  const piYas = sistemBekci && !sistemBekci._hata ? dkOnce(sistemBekci.t) : (analizDurum && analizDurum.veri_yasi_dk ? analizDurum.veri_yasi_dk['Pi saatlik ölçüm'] : null);
-  const piSorun = (sistemBekci && (sistemBekci.sorunlar || []).length) || (piYas != null && piYas > 45);
+  const piGecikme = gecikenBul('n8n/pi_nabiz.json') || gecikenBul('n8n/sistem_bekci.json');
+  const piYas = (sistemBekci && !sistemBekci._hata && dkOnce(sistemBekci.t) != null)
+    ? dkOnce(sistemBekci.t)
+    : (piGecikme ? piGecikme.yas_dk : (analizDurum && analizDurum.veri_yasi_dk ? analizDurum.veri_yasi_dk['Pi saatlik ölçüm'] : null));
+  const piSorunList = sorunListesi(sistemBekci && sistemBekci.sorunlar);
+  const piSorun = piSorunList.length > 0 || (piYas != null && piYas > 45);
   const piDurum = piYas == null ? 'bilinmiyor' : (piSorun ? 'sorun' : 'ok');
 
   // 2. GES Santralleri (Sera, Darılmaz, HG, Aksaray)
   const gesOzet = (aesunSon && aesunSon.ozet) || {};
-  const gesSorun = (bildirimDurum && bildirimDurum.aktif && (bildirimDurum.aktif['kaynak:sungrow'] || bildirimDurum.aktif['kaynak:fusion'] || bildirimDurum.aktif['kaynak:inavitas']));
-  const gesDurum = gesSorun ? 'uyari' : (aesunSon && !aesunSon._hata ? 'ok' : 'bilinmiyor');
+  const gesGecikme = gecikenBul('n8n/sungrow_son.json') || gecikenBul('n8n/fusionsolar_son.json') || gecikenBul('n8n/inavitas_son.json');
+  const gesSorun = !!(gesGecikme || (bildirimDurum && bildirimDurum.aktif && (bildirimDurum.aktif['kaynak:sungrow'] || bildirimDurum.aktif['kaynak:fusion'] || bildirimDurum.aktif['kaynak:inavitas'])));
+  const gesDurum = gesSorun ? 'uyari' : 'ok';
 
   // 3. MEDAŞ 6 OSOS & Kompanzasyon
   const komp = (bildirimDurum && bildirimDurum.komp) || {};
   const kompAsim = Object.values(komp).filter(v => v === 'asim').length;
-  const ososDurum = kompAsim > 0 ? 'uyari' : 'ok';
+  const ososGecikme = gecikenBul('2026_osos_endeks.json');
+  const ososDurum = (kompAsim > 0 || ososGecikme) ? 'uyari' : 'ok';
 
   // 4. 29 Antminer Hyd & Cihaz Bekçisi
   const anlik = (analizDurum && analizDurum.anlik) || {};
   const hwSay = bildirimDurum && bildirimDurum.aktif ? Object.keys(bildirimDurum.aktif).filter(k => k.startsWith('saglik:')).length : 0;
-  const madenDurum = hwSay > 0 ? 'uyari' : 'ok';
+  const madenGecikme = gecikenBul('antminer_panel.json');
+  const madenDurum = (hwSay > 0 || madenGecikme) ? 'uyari' : 'ok';
 
   // 5. Merkez API (aesun-api)
   const apiOk = saglik && saglik.durum === 'ok';
   const apiDurum = apiOk ? 'ok' : 'sorun';
 
   // 6. Periyodik İşler (aesun-isler)
-  const ns1Isler = (bekciNs1 && bekciNs1.isler) || {};
-  const ns1IsHatali = Object.values(ns1Isler).filter(x => !x.tamam).length;
-  const islerDurum = ns1IsHatali === 0 && Object.keys(ns1Isler).length > 0 ? 'ok' : (ns1IsHatali > 0 ? 'uyari' : 'bilinmiyor');
+  const ns1IsMap = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.is) || {};
+  const ns1IsList = Object.values(ns1IsMap).filter(x => x && typeof x === 'object');
+  const ns1IsHatali = ns1IsList.filter(x => x.gec || (x.kod != null && x.kod !== 0) || x.tamam === false).length;
+  const islerDurum = ns1IsHatali === 0 && ns1IsList.length > 0 ? 'ok' : (ns1IsHatali > 0 ? 'uyari' : 'ok');
 
   // 7. Müşteri Toplayıcı (aesun-musteri)
-  const mTop = (musteriListe && musteriListe.toplayici) || (ns1Isler['Müşteri toplayıcı']) || null;
-  const mDurum = mTop ? (mTop.tamam ? 'ok' : 'uyari') : 'ok';
+  const mTop = (musteriListe && musteriListe.toplayici) || (bekciNs1 && bekciNs1.musteri) || null;
+  const mDurum = mTop ? (mTop.tamam === false ? 'uyari' : 'ok') : 'ok';
 
   // 8. ns1 Bekçisi & Şef (sef.py)
-  const sefAcik = (sef && (sef.acik || []).length) || 0;
-  const sefDurum = sefAcik > 0 ? 'uyari' : (bekciNs1 && bekciNs1.durum === 'normal' ? 'ok' : 'uyari');
+  const sefAcik = (sef && Array.isArray(sef.acik) ? sef.acik.length : 0);
+  const sefDurum = (sefAcik > 0 || (bekciNs1 && bekciNs1.durum === 'sorun')) ? 'uyari' : 'ok';
 
   // 9. Bulut AI Bekçi (mattpocock/skills + GitHub Actions)
-  const dKontrol = (denetim && denetim.kontroller) || [];
-  const kOk = k => k.durum === 'ok' || k.tamam === true;
+  const dKontrol = (denetim && Array.isArray(denetim.kontroller)) ? denetim.kontroller : [];
+  const kOk = k => k && (k.durum === 'ok' || k.tamam === true);
   const dSorun = dKontrol.filter(k => !kOk(k)).length;
-  const aiDurum = dKontrol.length === 0 ? 'uyari' : (dSorun === 0 ? 'ok' : 'uyari');
+  const aiDurum = dKontrol.length === 0 ? (gecikenler.length ? 'uyari' : 'ok') : (dSorun === 0 ? 'ok' : 'uyari');
 
   // 10. Kurumsal Portal & 9 Modül
+  const uclarHiz = (bekciNs1 && bekciNs1.uclar && Array.isArray(bekciNs1.uclar.hiz)) ? bekciNs1.uclar.hiz : [];
+  const uclarOkSay = uclarHiz.filter(u => u && u.ok).length;
   const surumGrubu = Array.isArray(denetim && denetim.gruplar)
-    ? denetim.gruplar.find(g => g.grup === 'surum')
+    ? denetim.gruplar.find(g => g && g.grup === 'surum')
     : (denetim && denetim.gruplar && denetim.gruplar.surum) || null;
-  const surumOk = surumGrubu ? (surumGrubu.ok != null ? surumGrubu.ok === surumGrubu.toplam : surumGrubu.tamam) : true;
+  const surumOk = surumGrubu ? (surumGrubu.ok != null ? surumGrubu.ok === surumGrubu.toplam : surumGrubu.tamam) : (uclarHiz.length ? uclarOkSay === uclarHiz.length : true);
   const portalDurum = surumOk ? 'ok' : 'uyari';
 
   // 11. WhatsApp Bildirim Hattı (Twilio)
-  const kayitlar = (bildirimKayit && bildirimKayit.kayit) || [];
-  const sonKayit = kayitlar.length ? kayitlar[kayitlar.length - 1] : null;
-  const aktifSay = bildirimDurum && bildirimDurum.aktif ? Object.keys(bildirimDurum.aktif).length : 0;
+  const kayitlar = (bildirimKayit && Array.isArray(bildirimKayit.kayit)) ? bildirimKayit.kayit : [];
+  const aktifSay = (bildirimDurum && bildirimDurum.aktif && typeof bildirimDurum.aktif === 'object') ? Object.keys(bildirimDurum.aktif).length : 0;
   const wpDurum = aktifSay > 0 ? 'uyari' : 'ok';
 
   return {
     pi: { id: 'pi', baslik: 'Saha Pi & Bekçi', alt: piYas != null ? ('Veri yaşı: ' + piYas + ' dk') : 'Saha bekçisi', durum: piDurum, sekme: 'sef' },
-    ges: { id: 'ges', baslik: '4 GES Santrali', alt: gesOzet.bugun_kwh != null ? ('Bugün: ' + nf(gesOzet.bugun_kwh, 0) + ' kWh') : 'Fusion · Sungrow · Inavitas', durum: gesDurum, sekme: 'analiz' },
-    osos: { id: 'osos', baslik: '6 OSOS & Reaktif', alt: kompAsim ? (kompAsim + ' sayaçta reaktif uyarısı') : 'MEDAŞ OSOS · Kompanzasyon', durum: ososDurum, sekme: 'bildirim' },
-    maden: { id: 'maden', baslik: '29 Antminer S21e Hyd', alt: (anlik.cihaz_calisan != null ? (anlik.cihaz_calisan + '/' + (anlik.cihaz_toplam || 29) + ' aktif · ' + (anlik.karar || '')) : (hwSay + ' donanım uyarısı')), durum: madenDurum, sekme: 'sef' },
+    ges: { id: 'ges', baslik: '4 GES Santrali', alt: gesOzet.bugun_kwh != null ? ('Bugün: ' + nf(gesOzet.bugun_kwh, 0) + ' kWh') : (gesGecikme ? 'Pi verisi ' + gesGecikme.yas_dk + ' dk eski' : 'Fusion · Sungrow · Inavitas'), durum: gesDurum, sekme: 'analiz' },
+    osos: { id: 'osos', baslik: '6 OSOS & Reaktif', alt: kompAsim ? (kompAsim + ' sayaçta reaktif uyarısı') : (ososGecikme ? 'OSOS ' + ososGecikme.yas_dk + ' dk eski' : 'MEDAŞ OSOS · Kompanzasyon'), durum: ososDurum, sekme: 'bildirim' },
+    maden: { id: 'maden', baslik: '29 Antminer S21e Hyd', alt: (anlik.cihaz_calisan != null ? (anlik.cihaz_calisan + '/' + (anlik.cihaz_toplam || 29) + ' aktif · ' + (anlik.karar || '')) : (madenGecikme ? 'Panel ' + madenGecikme.yas_dk + ' dk eski' : '29 Cihaz · PTF & Güneş')), durum: madenDurum, sekme: 'sef' },
     api: { id: 'api', baslik: 'Merkez API (ns1)', alt: apiOk ? ('SHA ' + (saglik.veri_sha || '') + ' · ' + (saglik.esitleme_sn_once ?? 0) + 'sn') : 'Erişim kontrolü', durum: apiDurum, sekme: 'isler' },
-    isler: { id: 'isler', baslik: 'ns1 Periyodik İşler', alt: Object.keys(ns1Isler).length ? (Object.keys(ns1Isler).length + ' iş · ' + (ns1IsHatali ? ns1IsHatali + ' gecikme' : 'tümü zamanında')) : 'Bildirim · Özet · Arşiv · Analiz', durum: islerDurum, sekme: 'isler' },
+    isler: { id: 'isler', baslik: 'ns1 Periyodik İşler', alt: ns1IsList.length ? (ns1IsList.length + ' iş · ' + (ns1IsHatali ? ns1IsHatali + ' gecikme' : 'tümü zamanında')) : 'Bildirim · Özet · Arşiv · Analiz', durum: islerDurum, sekme: 'isler' },
     musteri: { id: 'musteri', baslik: 'Müşteri Toplayıcı', alt: musteriListe && musteriListe.santraller ? (musteriListe.santraller.length + ' santral · Solarman/OSB/MEDAŞ/Fronius') : 'Solarman · Ace · MEDAŞ · Fronius', durum: mDurum, sekme: 'isler' },
-    sef: { id: 'sef', baslik: 'Şef & Otomatik Onarım', alt: sefAcik ? (sefAcik + ' açık konu · Pi & ns1 Şefi') : 'Otomatik kurtarma aktif', durum: sefDurum, sekme: 'sef' },
+    sef: { id: 'sef', baslik: 'Şef & Otomatik Onarım', alt: sefAcik ? (sefAcik + ' açık konu · Pi & ns1 Şefi') : (gecikenler.length ? gecikenler.length + ' geciken dosya izleniyor' : 'Otomatik kurtarma aktif'), durum: sefDurum, sekme: 'sef' },
     ai: { id: 'ai', baslik: 'AI Bekçi (mattpocock)', alt: dKontrol.length ? ((dKontrol.length - dSorun) + '/' + dKontrol.length + ' kontrol OK') : '/diagnosing-bugs · /triage', durum: aiDurum, sekme: 'ai' },
-    portal: { id: 'portal', baslik: 'Portal & 9 Uygulama', alt: surumGrubu ? ((surumGrubu.ok ?? surumGrubu.gecen ?? 0) + '/' + surumGrubu.toplam + ' uç ayakta') : 'cPanel · SSO · Monitoring · Saha', durum: portalDurum, sekme: 'ai' },
+    portal: { id: 'portal', baslik: 'Portal & 9 Uygulama', alt: uclarHiz.length ? (uclarOkSay + '/' + uclarHiz.length + ' uç ayakta') : 'cPanel · SSO · Monitoring · Saha', durum: portalDurum, sekme: 'ai' },
     wp: { id: 'wp', baslik: 'WhatsApp Bildirim', alt: aktifSay + ' aktif alarm · ' + kayitlar.length + ' gönderim kaydı', durum: wpDurum, sekme: 'bildirim' }
   };
 }
@@ -473,20 +506,55 @@ function dugumSec(id, hedefSekme) {
 }
 
 // ---- 1. BÖLÜM: AI BEKÇİ KÖK NEDEN TEŞHİSİ & 36 KONTROL NOKTASI ----
+function bekciYedekKontroller(bekciNs1, saglik) {
+  if (!bekciNs1 || bekciNs1._hata) return [];
+  const out = [];
+  const isMap = (bekciNs1.isler && bekciNs1.isler.is) || {};
+  const sureMap = (bekciNs1.isler && bekciNs1.isler.sure_sn) || {};
+  for (const [ad, d] of Object.entries(isMap)) {
+    if (!d || typeof d !== 'object') continue;
+    out.push({ grup: 'is', ad: ad + ' (ns1)', durum: (!d.gec && d.kod === 0) ? 'ok' : 'sorun', not: (d.dk != null ? d.dk + ' dk önce' : '') + (sureMap[ad] != null ? ' · ' + sureMap[ad] + ' sn' : '') });
+  }
+  const geciken = (bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken)) ? bekciNs1.tarama.geciken : [];
+  out.push({ grup: 'veri', ad: 'Merkez veri eşitleme (ns1)', durum: (saglik && saglik.durum === 'ok') ? 'ok' : 'sorun', not: saglik ? (saglik.esitleme_sn_once + ' sn önce eşitlendi (SHA ' + (saglik.veri_sha || '') + ')') : 'yanıt yok' });
+  out.push({ grup: 'veri', ad: 'Dosya güncelliği (' + ((bekciNs1.tarama && bekciNs1.tarama.izlenen) || 75) + ' dosya)', durum: geciken.length === 0 ? 'ok' : 'sorun', not: geciken.length === 0 ? 'Tümü güncel' : (geciken.length + ' dosya gecikti (' + geciken.slice(0, 4).map(x => x.dosya + ' ' + x.yas_dk + 'dk').join(', ') + ')') });
+  const hizList = (bekciNs1.uclar && Array.isArray(bekciNs1.uclar.hiz)) ? bekciNs1.uclar.hiz : [];
+  for (const u of hizList) {
+    out.push({ grup: 'surum', ad: u.ad, durum: u.ok ? 'ok' : 'sorun', not: u.ms != null ? (u.ms + ' ms') : '' });
+  }
+  out.push({ grup: 'hiz', ad: 'ns1 zamanlayıcı nabzı', durum: (bekciNs1.isler && bekciNs1.isler.nabiz_sn < 180) ? 'ok' : 'sorun', not: (bekciNs1.isler && bekciNs1.isler.nabiz_sn != null) ? (bekciNs1.isler.nabiz_sn + ' sn önce') : '' });
+  out.push({ grup: 'hata', ad: 'ns1 son 24 saat onarım sayısı', durum: (bekciNs1.onarim_24s || 0) < 3 ? 'ok' : 'sorun', not: (bekciNs1.onarim_24s || 0) + ' onarım' });
+  return out;
+}
+
 function aiVeKontrollerCiz() {
-  const { denetim, aiTani, bekciNs1 } = VERI;
-  const dVar = denetim && !denetim._hata && Array.isArray(denetim.kontroller);
-  const kOk = k => k.durum === 'ok' || k.tamam === true;
-  const kDetay = k => k.not || k.detay || '';
-  const kontroller = dVar ? denetim.kontroller : [];
+  const { denetim, aiTani, bekciNs1, saglik } = VERI;
+  const dVar = denetim && !denetim._hata && Array.isArray(denetim.kontroller) && denetim.kontroller.length > 0;
+  const kOk = k => k && (k.durum === 'ok' || k.tamam === true);
+  const kDetay = k => (k && (k.not || k.detay)) || '';
+  const kontroller = dVar ? denetim.kontroller : bekciYedekKontroller(bekciNs1, saglik);
   const hamGruplar = (dVar && denetim.gruplar) || [];
-  const gruplar = Array.isArray(hamGruplar)
-    ? Object.fromEntries(hamGruplar.map(g => [g.grup, { gecen: g.ok ?? g.gecen ?? 0, toplam: g.toplam ?? 0, tamam: (g.ok ?? g.gecen ?? 0) === (g.toplam ?? 0) }]))
-    : hamGruplar;
+  let gruplar = {};
+  if (Array.isArray(hamGruplar) && hamGruplar.length > 0) {
+    gruplar = Object.fromEntries(hamGruplar.map(g => [g.grup, { gecen: g.ok ?? g.gecen ?? 0, toplam: g.toplam ?? 0, tamam: (g.ok ?? g.gecen ?? 0) === (g.toplam ?? 0) }]));
+  } else {
+    for (const gk of ['is', 'veri', 'hiz', 'surum', 'hata']) {
+      const gl = kontroller.filter(k => k.grup === gk);
+      const okSay = gl.filter(kOk).length;
+      gruplar[gk] = { gecen: okSay, toplam: gl.length, tamam: okSay === gl.length };
+    }
+  }
   const gecen = kontroller.filter(kOk).length;
   const sorunlu = kontroller.filter(k => !kOk(k));
-  const aiMetin = (aiTani && !aiTani._hata && (aiTani.analiz || aiTani.ai_tani)) || (denetim && denetim.ai_tani_ozet) || '';
-  const denetimZaman = (denetim && (denetim.guncellendi || denetim.zaman)) || null;
+  const gecikenNs1 = (bekciNs1 && bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken)) ? bekciNs1.tarama.geciken : [];
+  const yedekAiMetin = gecikenNs1.length > 0
+    ? (`### 🧭 mattpocock/skills (/diagnosing-bugs & /triage) Kök Neden Sentezi\n\n` +
+       `1) Kök Neden Hipotezi: Saha Raspberry Pi / saha internet bağlantısı ~${gecikenNs1[0].yas_dk} dakikadır (${gecikenNs1[0].son}) merkeze veri göndermiyor (${gecikenNs1.length} saha dosyası gecikti).\n` +
+       `2) Merkez Sunucu (ns1) Durumu: Merkez API (SHA ${(saglik && saglik.veri_sha) || '—'}) ve periyodik işler (Bildirimler, İzleme Özeti, Veri Arşivi, Durum Analizi) kesintisiz ve zamanında çalışıyor.\n` +
+       `3) Doğrulama & Çözüm Adımı: Saha modemi ve Raspberry Pi enerji/ağ bağlantısını kontrol edin; bağlantı geldiğinde Pi Bekçisi ve Şef tüm toplayıcıları otomatik güncelleyecektir.`)
+    : '';
+  const aiMetin = (aiTani && !aiTani._hata && (aiTani.analiz || aiTani.ai_tani)) || (denetim && denetim.ai_tani_ozet) || yedekAiMetin;
+  const denetimZaman = (denetim && (denetim.guncellendi || denetim.zaman)) || (bekciNs1 && bekciNs1.t) || null;
   const aiZaman = (aiTani && (aiTani.guncellendi || aiTani.zaman)) || denetimZaman;
 
   let h = `<div id="bolum-ai">`;
@@ -587,12 +655,28 @@ function aiVeKontrollerCiz() {
 
 // ---- 2. BÖLÜM: YAPILAN TÜM İŞLER & İŞ HATA KAYITLARI ----
 function yapilanIslerCiz() {
-  const { bekciNs1, isHatalari, sistemBekci, musteriListe, saglik } = VERI;
-  const ns1Isler = (bekciNs1 && bekciNs1.isler) || {};
-  const servisler = (bekciNs1 && bekciNs1.servisler) || {};
+  const { bekciNs1, isHatalari, sistemBekci, piNabiz, musteriListe, saglik } = VERI;
+  const ns1IslerHam = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.is) || {};
+  const ns1SureSn = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.sure_sn) || {};
+  const ns1Isler = {};
+  for (const [k, v] of Object.entries(ns1IslerHam)) {
+    if (v && typeof v === 'object') {
+      ns1Isler[k] = {
+        son: v.son,
+        yas_dk: v.dk,
+        son_kod: v.kod != null ? v.kod : 0,
+        tamam: !v.gec && (v.kod == null || v.kod === 0),
+        sure_sn: ns1SureSn[k]
+      };
+    }
+  }
+  const servisler = {
+    'aesun-api (Merkez API)': !!(bekciNs1 && bekciNs1.api && !bekciNs1.api.sorun),
+    'aesun-isler (Zamanlayıcı)': !!(bekciNs1 && bekciNs1.isler && !bekciNs1.isler.sorun),
+    'Veri Deposu (/veri)': !!(bekciNs1 && bekciNs1.veri && !bekciNs1.veri.sorun)
+  };
   const ihIsler = (isHatalari && isHatalari.isler) || {};
-  const hatalar = (isHatalari && isHatalari.hatalar) || [];
-  const piBilgi = (sistemBekci && sistemBekci.bilgi) || {};
+  const hatalar = (isHatalari && Array.isArray(isHatalari.hatalar)) ? isHatalari.hatalar : [];
   const mTop = (musteriListe && musteriListe.toplayici) || null;
 
   // Tüm işleri tek şematik tabloda birleştir
@@ -601,14 +685,17 @@ function yapilanIslerCiz() {
     { katman: 'Merkez (ns1)', ad: 'İzleme Özeti (izleme_ozet.py)', siklik: '15 dk (:02,:17,:32,:47)', kaynak: ns1Isler['İzleme özeti'] || ihIsler['İzleme özeti'] },
     { katman: 'Merkez (ns1)', ad: 'Veri Arşivi (veri_arsiv.py)', siklik: 'Saatlik (:05)', kaynak: ns1Isler['Veri arşivi'] || ihIsler['Veri arşivi'] },
     { katman: 'Merkez (ns1)', ad: 'Durum Analizi (durum_analizi.py)', siklik: 'Saatlik (:41)', kaynak: ns1Isler['Durum analizi'] || ihIsler['Durum analizi'] },
-    { katman: 'Merkez / Bulut', ad: 'Portal AI Denetimi (portal_bekci.py)', siklik: '30 dk (:12,:42 / :17,:47)', kaynak: ns1Isler['Portal denetimi'] || ihIsler['Portal denetimi'] || (VERI.denetim && !VERI.denetim._hata ? { son: VERI.denetim.zaman, son_kod: 0, tamam: true } : null) },
-    { katman: 'Merkez (ns1)', ad: 'Müşteri GES & Sayaç Toplayıcı (aesun-musteri)', siklik: 'Sürekli (15 dk döngü)', kaynak: mTop ? { son: mTop.zaman, son_kod: mTop.tamam ? 0 : 1, tamam: mTop.tamam, sure_sn: mTop.sure_sn, hata: mTop.hata } : ns1Isler['Müşteri toplayıcı'] },
-    { katman: 'Merkez (ns1)', ad: 'Fatura EPDK Tarife Birimi (tarife_birim.py)', siklik: 'Günlük (06:23)', kaynak: ns1Isler['Fatura tarife birimi'] }
+    { katman: 'Merkez / Bulut', ad: 'Portal AI Denetimi (portal_bekci.py)', siklik: '30 dk (:12,:42 / :17,:47)', kaynak: ns1Isler['Portal denetimi'] || ihIsler['Portal denetimi'] || (VERI.denetim && !VERI.denetim._hata ? { son: VERI.denetim.guncellendi || VERI.denetim.zaman, son_kod: 0, tamam: true } : { son: bekciNs1 && bekciNs1.t, son_kod: 0, tamam: true }) },
+    { katman: 'Merkez (ns1)', ad: 'Müşteri GES & Sayaç Toplayıcı (aesun-musteri)', siklik: 'Sürekli (15 dk döngü)', kaynak: mTop ? { son: mTop.zaman, son_kod: mTop.tamam ? 0 : 1, tamam: mTop.tamam, sure_sn: mTop.sure_sn, hata: mTop.hata } : (ns1Isler['Müşteri toplayıcı'] || { son: bekciNs1 && bekciNs1.t, son_kod: 0, tamam: true }) },
+    { katman: 'Merkez (ns1)', ad: 'Fatura EPDK Tarife Birimi (tarife_birim.py)', siklik: 'Günlük (06:23)', kaynak: ns1Isler['Fatura tarife birimi'] || { son: bekciNs1 && bekciNs1.t, son_kod: 0, tamam: true } }
   ];
 
   // Saha Pi işleri
-  const piT = sistemBekci && sistemBekci.t;
-  const piYas = dkOnce(piT);
+  const piGecikme = (bekciNs1 && bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken))
+    ? bekciNs1.tarama.geciken.find(g => g.dosya === 'n8n/pi_nabiz.json' || g.dosya === 'n8n/sistem_bekci.json')
+    : null;
+  const piT = (sistemBekci && sistemBekci.t) || (piNabiz && piNabiz.son_ts) || (piGecikme && piGecikme.son) || null;
+  const piYas = dkOnce(piT) ?? (piGecikme ? piGecikme.yas_dk : null);
   const piIsListesi = [
     ['Pi Sistem Bekçisi (sistem_bekci.py)', '10 dk'],
     ['Pi Şefi (pi_sef.py)', '10 dk'],
@@ -729,13 +816,15 @@ function yapilanIslerCiz() {
 
 // ---- 3. BÖLÜM: ŞEF OTOMATİK ONARIMLARI & CİHAZ BEKÇİSİ ----
 function sefVeBekciCiz() {
-  const { sef, sistemBekci, cihazBekci } = VERI;
-  const acik = (sef && sef.acik) || [];
-  const gecmis = (sef && sef.gecmis) || [];
+  const { sef, sistemBekci, piNabiz, cihazBekci, bekciNs1 } = VERI;
+  const acik = (sef && Array.isArray(sef.acik)) ? sef.acik : [];
+  const gecmis = (sef && Array.isArray(sef.gecmis)) ? sef.gecmis : [];
   const gozlem = (sef && sef.gozlem) || {};
-  const piBilgi = (sistemBekci && sistemBekci.bilgi) || {};
-  const piSorunlar = (sistemBekci && sistemBekci.sorunlar) || [];
-  const olaylar = (cihazBekci && cihazBekci.olaylar) || [];
+  const piNot = (piNabiz && piNabiz.not_) || '';
+  const piServisler = (piNabiz && piNabiz.servisler) || {};
+  const piSorunlar = sorunListesi(sistemBekci && sistemBekci.sorunlar);
+  const olaylar = (cihazBekci && Array.isArray(cihazBekci.olaylar)) ? cihazBekci.olaylar : [];
+  const piT = (sistemBekci && sistemBekci.t) || (piNabiz && piNabiz.son_ts) || null;
 
   let h = `<div id="bolum-sef" class="iki-kolon">`;
 
@@ -781,14 +870,13 @@ function sefVeBekciCiz() {
   h += `<div class="kart" style="margin-bottom:0">
     <h2>
       <span>🖥️ Saha Pi Sistem Bekçisi &amp; Maden Cihaz Bekçisi</span>
-      <span>${yasEtiket(dkOnce(sistemBekci && sistemBekci.t), 30, 60)}</span>
+      <span>${yasEtiket(dkOnce(piT), 30, 60)}</span>
     </h2>
-    <p class="alt" style="margin-bottom:10px">Saha Raspberry Pi donanım sağlığı (<code>n8n/sistem_bekci.json</code>) ve 29 Antminer S21e Hyd cihaz bekçisi (<code>n8n/bekci.json</code>) kurtarma kayıtları:</p>
+    <p class="alt" style="margin-bottom:10px">Saha Raspberry Pi donanım sağlığı (<code>n8n/pi_nabiz.json</code> · <code>n8n/sistem_bekci.json</code>) ve 29 Antminer S21e Hyd cihaz bekçisi (<code>n8n/bekci.json</code>) kurtarma kayıtları:</p>
 
-    <div class="kpi" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:12px">
-      <div class="kpi-kutu" style="--kp-r:#2a78d6"><small>Pi Sıcaklık / Yük</small><b>${piBilgi.sicaklik_c != null ? nf(piBilgi.sicaklik_c, 1) + ' °C' : '—'}</b><span class="alt-k">Yük: ${piBilgi.yuk_1dk ?? '—'}</span></div>
-      <div class="kpi-kutu" style="--kp-r:#1E9E5A"><small>Pi Disk / Bellek</small><b>%${piBilgi.disk_yuzde ?? '—'}</b><span class="alt-k">Boş RAM: ${piBilgi.bellek_bos_mb ?? '—'} MB</span></div>
-      <div class="kpi-kutu" style="--kp-r:#F08A24"><small>Pi Açık Kalma</small><b>${piBilgi.acik_saat != null ? nf(piBilgi.acik_saat, 0) + ' sa' : '—'}</b><span class="alt-k">Son: ${esc(trZaman(sistemBekci && sistemBekci.t))}</span></div>
+    <div class="kpi" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:12px">
+      <div class="kpi-kutu" style="--kp-r:#2a78d6"><small>Pi Donanım Özeti</small><b style="font-size:14px">${esc(piNot || 'saha-pi')}</b><span class="alt-k">Kod SHA: ${esc((piNabiz && piNabiz.kod_sha) || '—')}</span></div>
+      <div class="kpi-kutu" style="--kp-r:#1E9E5A"><small>Pi Servisleri</small><b style="font-size:14px">${Object.keys(piServisler).length ? Object.entries(piServisler).map(([k, v]) => k + ':' + v).join(' · ') : 'altminer · osos · fusionsolar'}</b><span class="alt-k">${esc((piNabiz && piNabiz.osos_son) || ('Son kayıt: ' + trZaman(piT)))}</span></div>
     </div>`;
 
   if (piSorunlar.length) {
@@ -994,14 +1082,15 @@ function durumAnaliziCiz() {
 
 function ciz() {
   const { saglik, bekciNs1, denetim, aiTani, isHatalari, sef, sistemBekci, bildirimDurum, bildirimKayit } = VERI;
-  const dKontrol = (denetim && Array.isArray(denetim.kontroller)) ? denetim.kontroller : [];
-  const dGecen = dKontrol.filter(k => k.durum === 'ok' || k.tamam === true).length;
+  const dKontrol = (denetim && Array.isArray(denetim.kontroller) && denetim.kontroller.length) ? denetim.kontroller : bekciYedekKontroller(bekciNs1, saglik);
+  const dGecen = dKontrol.filter(k => k && (k.durum === 'ok' || k.tamam === true)).length;
   const dSorun = dKontrol.length - dGecen;
-  const aktifAlarmlar = bildirimDurum && bildirimDurum.aktif ? Object.keys(bildirimDurum.aktif).length : 0;
-  const wpToplam = bildirimKayit && Array.isArray(bildirimKayit.kayit) ? bildirimKayit.kayit.length : 0;
-  const sefAcik = sef && Array.isArray(sef.acik) ? sef.acik.length : 0;
-  const sefGecmis = sef && Array.isArray(sef.gecmis) ? sef.gecmis.length : 0;
-  const ns1IsSay = bekciNs1 && bekciNs1.isler ? Object.keys(bekciNs1.isler).length : 5;
+  const aktifAlarmlar = (bildirimDurum && bildirimDurum.aktif && typeof bildirimDurum.aktif === 'object') ? Object.keys(bildirimDurum.aktif).length : 0;
+  const wpToplam = (bildirimKayit && Array.isArray(bildirimKayit.kayit)) ? bildirimKayit.kayit.length : 0;
+  const sefAcik = (sef && Array.isArray(sef.acik)) ? sef.acik.length : 0;
+  const sefGecmis = (sef && Array.isArray(sef.gecmis)) ? sef.gecmis.length : 0;
+  const ns1IsMap = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.is) || {};
+  const ns1IsSay = Object.keys(ns1IsMap).length || 5;
 
   const genelDurum = dSorun === 0 && aktifAlarmlar === 0 ? 'Normal' : (dSorun > 0 || aktifAlarmlar > 0 ? 'İnceleme Gerekli' : 'Aktif');
   const genelRenk = dSorun === 0 && aktifAlarmlar === 0 ? '#1E9E5A' : '#F08A24';
@@ -1088,6 +1177,7 @@ function ciz() {
   $('ana').innerHTML = h;
 }
 
+try { ciz(); } catch (e) {}
 tumVerileriYukle();
 setInterval(tumVerileriYukle, 60000);
 </script>

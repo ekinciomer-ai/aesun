@@ -9,6 +9,18 @@ Sahada çalışan parçalar ve bozulursa ne yapılır.
 | Modem (Mercusys MW301R) | Ağ, DHCP, sabit IP'ler | Modem arayüzünden yedek dosyası (elle, bir kez) | Yedeği geri yükle ya da rezervasyon listesini (etiket PDF'i 4. sayfa) yeniden gir |
 | Kod (aesun, epias-ptf) | Panel, Pi betikleri, veriler | GitHub (her değişiklik) | `git clone` |
 
+## Yeni karta taşıma (eski kart sağlamken — önerilen, şifre girmeden)
+
+1. Raspberry Pi Imager → Raspberry Pi OS Lite (64-bit) → ayarlar: ana bilgisayar adı `saha-pi`, kullanıcı `pi` + yeni şifre
+   (şifre yöneticisine kaydet), sahadaki Wi-Fi adı/şifresi, SSH açık, saat dilimi Europe/Istanbul. Yeni karta yaz.
+2. Pi'yi kapat → yeni kartı Pi'ye, eski kartı USB kart okuyucuyla Pi'nin USB'sine tak → aç.
+3. Aynı Wi-Fi'deki telefon/bilgisayardan `ssh pi@saha-pi.local` (ya da ekran-klavye) ile bağlan ve tek komut:
+   ```
+   curl -fsSL https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/pi/yeni_kart.sh | bash
+   ```
+   Betik eski kartı salt okunur bağlar; ev klasörünü (şifre dosyaları dahil), crontab'ı, altminer servisini ve
+   Tailscale kimliğini taşır, servisleri başlatır. Eski kart değişmez → sorun olursa eski kartı geri tak.
+
 ## Pi'yi sıfırdan kurma (SD kart bozulursa / yeni Pi)
 
 1. Raspberry Pi Imager ile **Raspberry Pi OS Lite (64-bit)** yaz. Kullanıcı adı `pi`, Wi-Fi/kablo ayarı, SSH açık.

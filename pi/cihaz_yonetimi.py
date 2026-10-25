@@ -35,7 +35,7 @@ Elle:  python3 cihaz_yonetimi.py            (tam hesap)
        python3 cihaz_yonetimi.py --tetik    (yalnız zamanı gelen komutu gönderir; dakikada bir)
        python3 cihaz_yonetimi.py --mod otomatik|izleme|kapali
 """
-import argparse, json, math, sys, time, uuid
+import argparse, json, math, sys, time, urllib.request, uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -428,8 +428,12 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
     yerel["cihaz_kom"] (cihaz başı son komut) ve yerel["gunes_okuma"] (son okumalar) güncellenir; kaydetmek çağırana kalır."""
     t = simdi.timestamp()
     kom = yerel.setdefault("cihaz_kom", {})
-    # okuma geçmişi: aynı FusionSolar zaman damgası bir kez sayılır
+    # okuma geçmişi: 45 dk'dan eski okumaları temizle, aynı FusionSolar zaman damgası bir kez sayılır
     ok = yerel.setdefault("gunes_okuma", [])
+    try:
+        ok[:] = [x for x in ok if isinstance(x, list) and len(x) >= 2 and abs((simdi - zaman(x[0])).total_seconds()) <= 2700]
+    except Exception:
+        pass
     if fs_ts is not None and uretim_kw is not None and (not ok or ok[-1][0] != fs_ts.isoformat()):
         ok.append([fs_ts.isoformat(), round(uretim_kw, 1)])
     del ok[:-4]
@@ -533,6 +537,42 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
     return sonuc
 
 
+def _yerel_panel_oku():
+    """İnternet yokken ya da uzak veri bayatken yerel antminer_panel (127.0.0.1:5000) durumunu okur."""
+    try:
+        with urllib.request.urlopen("http://127.0.0.1:5000/api/status", timeout=5) as r:
+            d = json.loads(r.read().decode())
+        if isinstance(d, dict) and d.get("devices") is not None:
+            return {"timestamp": d.get("last_scan") or datetime.now(TR).isoformat(timespec="seconds"),
+                    "summary": d.get("summary") or {}, "devices": d.get("devices") or []}
+    except Exception:
+        pass
+    return None
+
+
+def _yerel_komut_uygula(eylem, hedefler, gecikme_sn=0):
+    """İnternet kesikken komutu doğrudan yerel antminer_panel API'sine (127.0.0.1:5000) uygular."""
+    if eylem not in ("sleep", "wake"):
+        return
+    if hedefler == "all":
+        p = _yerel_panel_oku()
+        hedefler = sorted(int(d["suffix"]) for d in (p or {}).get("devices") or []
+                          if d.get("suffix") is not None and (d.get("online") or d.get("sleeping")))
+    hedef_liste = [int(x) for x in (hedefler or []) if str(x).isdigit()]
+    basarili = 0
+    for i, sfx in enumerate(hedef_liste):
+        if i > 0 and gecikme_sn > 0:
+            time.sleep(min(gecikme_sn, 5))
+        try:
+            req = urllib.request.Request(f"http://127.0.0.1:5000/api/device/{sfx}/{eylem}", data=b"{}",
+                                         headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=12):
+                basarili += 1
+        except Exception as e:
+            log(f"yerel komut hatası (.{sfx} {eylem}):", str(e)[:80])
+    log(f"YEREL KOMUT ({eylem}): {basarili}/{len(hedef_liste)} cihaza doğrudan LAN üzerinden uygulandı")
+
+
 def komut_gonder(eylem, a, neden, hedefler="all"):
     kom, sha = gh("antminer_commands.json")
     kom = kom or {"commands": []}
@@ -540,7 +580,9 @@ def komut_gonder(eylem, a, neden, hedefler="all"):
            "sort_by": None, "issued_at": datetime.now().isoformat(), "issued_by": "otomatik (cihaz yönetimi)"}
     kom["commands"] = (kom.get("commands") or [])[-49:] + [cmd]
     kom["updated_at"] = cmd["issued_at"]
-    gh("antminer_commands.json", kom, sha, f"otomatik {eylem}: {neden}")
+    sonuc = gh("antminer_commands.json", kom, sha, f"otomatik {eylem}: {neden}")
+    if ((sonuc or {}).get("content") or {}).get("sha") == "onbellek":
+        _yerel_komut_uygula(eylem, hedefler, a.get("sirali_gecikme_sn", 0))
     return cmd["id"]
 
 
@@ -608,9 +650,24 @@ def calistir():
         return
     ep, _ = gh("n8n/epias_gecmis.json")
     fs, _ = gh("n8n/fusionsolar_son.json")
+    try:   # Pi üzerindeki FusionSolar toplayıcısının yerel latest.json dosyası uzak kopyadan yeniyse onu kullan
+        fs_yerel_yol = Path.home() / "aesun/toplayicilar/fusionsolar/data/latest.json"
+        if fs_yerel_yol.exists():
+            fs_y = json.loads(fs_yerel_yol.read_text())
+            if fs_y.get("guncelleme") and (not fs or str(fs_y["guncelleme"]) > str(fs.get("guncelleme") or "")):
+                fs = {**(fs or {}), **fs_y}
+    except Exception:
+        pass
     gelir, _ = gh("arsiv_f2pool_gelir.json")
     fiyat, _ = gh("arsiv_btc_fiyat.json")
     mad, _ = gh("antminer_panel.json")
+    try:   # Uzak antminer_panel.json 2 dk'dan eskiyse ya da internet kesikse doğrudan yerel 127.0.0.1:5000'den oku
+        if not mad or (simdi - zaman((mad or {}).get("timestamp", "2000-01-01T00:00:00+03:00"))) > timedelta(minutes=2):
+            yerel_mad = _yerel_panel_oku()
+            if yerel_mad and yerel_mad.get("devices"):
+                mad = {**(mad or {}), **yerel_mad}
+    except Exception:
+        pass
     fw_haric = None
     try:                                                 # firmware yükseltmesindeki cihaz yönetim dışı (firmware.py durumu)
         fp = json.loads((AESUN / "firmware_pilot.json").read_text()) if (AESUN / "firmware_pilot.json").exists() else {}
@@ -628,7 +685,12 @@ def calistir():
     a = {**a, "cihaz_th": th, "cihaz_th_kaynak": th_kaynak, "cihaz_guc_kw": kw, "cihaz_guc_kaynak": kw_kaynak}
 
     def ptf_al(t):
-        g = (ep or {}).get("ptf", {}).get(t.strftime("%Y-%m-%d")) or []
+        ptf_harita = (ep or {}).get("ptf") or {}
+        g = ptf_harita.get(t.strftime("%Y-%m-%d")) or []
+        if not g and t.date() <= simdi.date() and ptf_harita:
+            tam = [k for k, v in ptf_harita.items() if isinstance(v, list) and len(v) >= 24]
+            if tam:
+                g = ptf_harita.get(max(tam)) or []
         return g[t.hour] if len(g) > t.hour and g[t.hour] is not None else None
 
     def yekdem_al(t):
@@ -763,7 +825,21 @@ def calistir():
     gt = None
     if gunes_aktif and istenen == "uyut" and mad_taze and ulasilan:
         detay, _ = gh("n8n/cihaz_detay.json")           # cihaz başı watt (bildiren cihazlar)
-        gt = gunes_takip(cihazlar, uretim_kw if fs_taze else None, fs_ts if fs_taze else None, kw_c, a, simdi, yerel, detay)
+        gt_kw = uretim_kw if fs_taze else None
+        gt_ts = fs_ts if fs_taze else None
+        if not fs_taze:
+            # İnternet/FusionSolar kesintisinde yedek güneş takibi:
+            # 1) Gün batımı / gece (batışa ≤45 dk veya doğuştan <1 sa): üretim 0 kabul edilir ki pahalı saatte cihazlar şebekeden çalışmasın
+            # 2) Gündüz ana üretim penceresi (doğuş+1.25 .. batış-1.25, kesinti >40 dk): planlanan saatlik güneş tahmininin %75'i kullanılır
+            dog_b, bat_b = gunes_saatleri(simdi.date())
+            saat_ond = simdi.hour + simdi.minute / 60.0
+            damga_5dk = simdi.replace(minute=(simdi.minute // 5) * 5, second=0, microsecond=0)
+            if saat_ond >= bat_b - 0.75 or saat_ond < dog_b + 1.0:
+                gt_kw, gt_ts = 0.0, damga_5dk
+            elif dog_b + 1.25 <= saat_ond <= bat_b - 1.25 and (fs_ts is None or (simdi - fs_ts) > timedelta(minutes=40)):
+                tahmin_kw = (plan[0].get("gunes_kw") if plan else None) or (a["cihaz_sayisi"] * kw_c)
+                gt_kw, gt_ts = round(float(tahmin_kw) * 0.75, 1), damga_5dk
+        gt = gunes_takip(cihazlar, gt_kw, gt_ts, kw_c, a, simdi, yerel, detay)
         if gt and gt.get("eylem") == "sleep" and not (uretim_kw or 0) >= 1:
             # Üretim yokken uyutmanın asıl nedeni ekonomik karardır; kayıtta "güneş takibi" diye görünmesin
             # Saat sonuna doğru takvim bir sonraki saatin "uyut" kararını önden uygular (16 Eki 05:55: kayıt

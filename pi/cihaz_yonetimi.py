@@ -574,6 +574,9 @@ def _yerel_komut_uygula(eylem, hedefler, gecikme_sn=0):
 
 
 def komut_gonder(eylem, a, neden, hedefler="all"):
+    if (AESUN / "cevrimdisi").exists():          # internet yok: çevrimdışı bekçi yerel ağdan yönetiyor; GitHub kuyruğuna
+        log("KOMUT ATLANDI (çevrimdışı)", eylem, "-", neden)   # yazılan komut internet gelince geç uygulanmasın
+        return None
     kom, sha = gh("antminer_commands.json")
     kom = kom or {"commands": []}
     cmd = {"id": str(uuid.uuid4())[:8], "action": eylem, "targets": hedefler, "delay_sec": a["sirali_gecikme_sn"],
@@ -1084,6 +1087,11 @@ if __name__ == "__main__":
             surec_yenile.uygula(log)
         except Exception as e:
             log("süreç yenileme hatası:", e)
+        try:
+            import cevrimdisi_bekci
+            cevrimdisi_bekci.kur(log)
+        except Exception as e:
+            log("çevrimdışı bekçi kurulum hatası:", e)
         try:
             import canli_kur
             canli_kur.uygula(log)

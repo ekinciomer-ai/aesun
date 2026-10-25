@@ -278,6 +278,21 @@ def _panel_anahtarlar(cihazlar):
     return {a for a, c in sayac.items() if n and c >= 0.8 * n}
 
 
+def _panel_neden(gerekli, neden):
+    """Yerel panel okumasının sonucu çağıran (gerekli alan kümesi) başına — nabız pi_nabiz.panel_yerel'e taşır (teşhis)."""
+    f = AESUN / "panel_yerel.json"
+    try:
+        d = json.loads(f.read_text()) if f.exists() else {}
+        if not isinstance(d, dict) or "neden" in d:
+            d = {}
+        d[",".join(gerekli)] = {"t": datetime.now(TR).isoformat(timespec="seconds"), "neden": neden}
+        gec = f.with_suffix(f".{os.getpid()}.tmp")
+        gec.write_text(json.dumps(d, ensure_ascii=False))
+        gec.replace(f)
+    except Exception:
+        pass
+
+
 def panel_oku(azami_yas_dk=10, gerekli=("ip", "online", "sleeping", "hashrate_TH")):
     """antminer_panel.json — önce Pi'deki toplayıcıdan (127.0.0.1:5000, internet harcamaz), olmazsa GitHub'dan.
 
@@ -313,18 +328,11 @@ def panel_oku(azami_yas_dk=10, gerekli=("ip", "online", "sleeping", "hashrate_TH
                        "devices": birlesik, "summary": {**(uzak.get("summary") or {}), **(d.get("summary") or {})}}
                 out["timestamp"] = t.replace(tzinfo=None).isoformat()      # GitHub kopyasıyla aynı biçim (TR, dilimsiz)
                 trafik("panel_yerel", 0, "antminer_panel.json")
-                try:
-                    (AESUN / "panel_yerel.json").write_text(json.dumps({"t": datetime.now(TR).isoformat(timespec="seconds"), "neden": "ok"}))
-                except Exception:
-                    pass
+                _panel_neden(gerekli, "ok")
                 return out, "yerel"
     except Exception as e:
         neden = "hata: " + str(e)[:120]
-    try:   # neden yerel kullanılamadı — nabız pi_nabiz'e taşır (teşhis)
-        (AESUN / "panel_yerel.json").write_text(json.dumps({"t": datetime.now(TR).isoformat(timespec="seconds"), "neden": neden},
-                                                           ensure_ascii=False))
-    except Exception:
-        pass
+    _panel_neden(gerekli, neden)
     v, _ = gh("antminer_panel.json")
     return v, "github"
 

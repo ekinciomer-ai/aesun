@@ -99,7 +99,9 @@ def karar_ver(t, filo):
     anahtar = t.strftime("%Y-%m-%d %H:00")
     satir = next((p for p in y.get("plan") or [] if p.get("t") == anahtar), None)
     if satir:
-        if satir.get("karar") == "calis":
+        # Plan gösteriminde ekonomik "uyut" saatleri güneş takibi için "calis" yazılır (karar_ham=uyut, gunes_cihaz=n).
+        # Fiyat kararı karar_ham'dadır: yalnız fiyat "çalış" ise tüm filo; değilse beklenen üretim kadar cihaz.
+        if (satir.get("karar_ham") or satir.get("karar")) == "calis" and satir.get("karar") == "calis":
             return "calis", filo, f"plan {anahtar[11:16]}: çalış (PTF {satir.get('ptf')})"
         g = satir.get("gunes_beklenen_kw") or 0
         n = min(filo, int(g * GUNES_PAY // kw))

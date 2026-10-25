@@ -71,6 +71,32 @@ def ag_sayac():
         return {"hata": str(e)[:120]}
 
 
+def gh_trafik():
+    """Son 24 saatin GitHub trafiği (ortak.trafik kaydı): tür ve dosya başına adet/bayt; 24 saatten eski satırları siler."""
+    f = Path.home() / ".aesun" / "gh_trafik.log"
+    if not f.exists():
+        return None
+    try:
+        sinir = datetime.now().timestamp() - 86400
+        satir = [s.split(" ", 3) for s in f.read_text(errors="ignore").splitlines()]
+        satir = [a for a in satir if len(a) == 4 and a[0].isdigit() and int(a[0]) >= sinir]
+        f.write_text("".join(" ".join(a) + "\n" for a in satir))
+        tur, dosya, saat = {}, {}, {}
+        sinir1 = datetime.now().timestamp() - 3600
+        for t, tr, b, yol in satir:
+            b = int(b)
+            x = tur.setdefault(tr, [0, 0]); x[0] += 1; x[1] += b
+            if b:
+                y = dosya.setdefault(yol, [0, 0]); y[0] += 1; y[1] += b
+            if int(t) >= sinir1:
+                z = saat.setdefault(tr, [0, 0]); z[0] += 1; z[1] += b
+        en = sorted(dosya.items(), key=lambda kv: -kv[1][1])[:12]
+        return {"tur_24s": tur, "tur_1s": saat, "dosya_24s": dict(en),
+                "ilk": int(satir[0][0]) if satir else None}
+    except Exception as e:
+        return {"hata": str(e)[:120]}
+
+
 def kapasite():
     """Pi depolama/bellek kapasitesi — Denetçi 'Veri Akışı → Kapasite' kartı ve SD kart büyütme kararı için."""
     import shutil
@@ -151,6 +177,7 @@ def main():
         "kod_zaman": komut("git", "-C", str(KOK), "log", "-1", "--format=%cI"),
         "ag": ag_sayac(),
         "kapasite": kapasite(),
+        "gh_trafik": gh_trafik(),
     }
     icerik = base64.b64encode(json.dumps(govde, ensure_ascii=False, indent=1).encode()).decode()
     for deneme in range(0 if sunucu.yalniz_sunucu() else 2):

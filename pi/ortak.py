@@ -13,6 +13,16 @@ ONBELLEK = AESUN / "onbellek"
 BEKLEYEN = ONBELLEK / "_bekleyen.json"
 ETAG = ONBELLEK / "_etag"           # GitHub ETag'leri: değişmeyen dosya yeniden indirilmez (304, ~1 KB)
 YEREL_PANEL = "http://127.0.0.1:5000/api/status"   # Pi'deki toplayıcı (altminer) — antminer_panel.json'un kaynağı
+TRAFIK = AESUN / "gh_trafik.log"    # internet trafiği ölçümü: "zaman tür bayt yol" (nabız 24 sa özetler, eskiyi siler)
+
+
+def trafik(tur, bayt, yol):
+    """İnternetten geçen GitHub trafiğini satır satır kaydeder (wlan0 sayacı yerel cihaz trafiğini de içerdiği için)."""
+    try:
+        with open(TRAFIK, "a") as f:
+            f.write(f"{int(datetime.now().timestamp())} {tur} {int(bayt)} {yol}\n")
+    except Exception:
+        pass
 
 
 def log(*a):
@@ -178,17 +188,22 @@ def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
             hk = {**h, "If-None-Match": kayit["etag"]} if kayit and kayit.get("etag") else h
             with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers=hk), timeout=30) as r:
                 etag = r.headers.get("ETag")
-                m = json.loads(r.read())
+                ham = r.read()
+                m = json.loads(ham)
+            trafik("oku", len(ham), yol)
             if m.get("content"):
                 out = json.loads(base64.b64decode(m["content"]).decode())
             else:   # 1 MB üstü: içerik ayrıca ham indirilir
                 with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers={**h, "Accept": "application/vnd.github.raw+json"}), timeout=60) as r:
-                    out = json.loads(r.read())
+                    ham = r.read()
+                    out = json.loads(ham)
+                trafik("oku", len(ham), yol)
             _etag_yaz(yol, etag, m.get("sha"), _onbellek_yaz(yol, out))
             _bekleyen_esitle()
             return out, m["sha"]
         except urllib.error.HTTPError as e:
             if e.code == 304:                            # değişmemiş: yerel kopya (indirme yok)
+                trafik("304", 0, yol)
                 yerel = _etag_onbellek(yol, kayit)
                 if yerel is not None:
                     _bekleyen_esitle()
@@ -227,9 +242,11 @@ def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
                     if e0.code != 304:
                         raise
                     govde["sha"] = kayit["sha"]
-            r = urllib.request.Request(REPO + yol, data=json.dumps(govde).encode(), headers={**h, "Content-Type": "application/json"}, method="PUT")
+            g = json.dumps(govde).encode()
+            r = urllib.request.Request(REPO + yol, data=g, headers={**h, "Content-Type": "application/json"}, method="PUT")
             with urllib.request.urlopen(r, timeout=30) as y:
                 sonuc = json.loads(y.read())
+            trafik("yaz", len(g), yol)
             sunucu.yaz(yol, veri)
             _bekleyen_esitle()
             return sonuc
@@ -280,6 +297,7 @@ def panel_oku(azami_yas_dk=10):
             if abs((datetime.now(TR) - t).total_seconds()) <= azami_yas_dk * 60:
                 out = {**(uzak or {}), **{k: v for k, v in d.items() if k not in ("timestamp", "last_scan")}}
                 out["timestamp"] = t.replace(tzinfo=None).isoformat()      # GitHub kopyasıyla aynı biçim (TR, dilimsiz)
+                trafik("panel_yerel", 0, "antminer_panel.json")
                 return out, "yerel"
     except Exception:
         pass

@@ -61,7 +61,14 @@ def yaz(yol, veri, zorunlu=False):
             raise RuntimeError("AE_SUNUCU_ANAHTAR yok (~/.aesun/osos.env)")
         return False
     try:
-        _istek("yaz", yol, json.dumps(veri, ensure_ascii=False, separators=(",", ":")).encode())
+        g = json.dumps(veri, ensure_ascii=False, separators=(",", ":")).encode()
+        _istek("yaz", yol, g)
+        try:   # internet trafiği ölçümü (ortak.trafik ile aynı kayıt)
+            import time
+            with open(Path.home() / ".aesun" / "gh_trafik.log", "a") as f:
+                f.write(f"{int(time.time())} ns1 {len(g)} {yol}\n")
+        except Exception:
+            pass
         return True
     except Exception as e:
         if zorunlu:

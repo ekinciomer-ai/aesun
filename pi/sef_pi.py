@@ -38,6 +38,11 @@ def main():
     benim = os.getpid()
 
     def kayit(eylem, sorun, sonuc, ok):
+        for e in eylemler:                       # aynı turda aynı olay (ör. aynı betiğin iki süreci) tek kayıt
+            if e["eylem"] == eylem and e["sorun"] == sorun:
+                e["adet"] = e.get("adet", 1) + 1
+                e["ok"] = e["ok"] and ok
+                return
         eylemler.append({"t": simdi.isoformat(timespec="seconds"), "eylem": eylem, "sorun": sorun, "sonuc": sonuc, "ok": ok})
         log("şef:", eylem, sorun, "→", sonuc)
 

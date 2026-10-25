@@ -17,7 +17,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ortak import TR, gh, log  # noqa: E402
+from ortak import TR, gh, log, panel_oku  # noqa: E402
 
 GIZLI = re.compile(r"pass|sifre|şifre|token|secret|key|auth|pwd", re.I)
 
@@ -144,7 +144,7 @@ def main():
 
     kimlik, ksha = gh("n8n/cihaz_kimlik.json")
     kimlik = kimlik or {}
-    mad, _ = gh("antminer_panel.json")
+    mad, _ = panel_oku()
     taranan = {d.get("ip"): d for d in (mad or {}).get("devices") or []}
     # toplayıcının bugünkü gördüğü kimlikleri kayda geçir
     for d in taranan.values():

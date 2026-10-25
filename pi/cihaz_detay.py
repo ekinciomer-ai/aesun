@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ortak import AESUN, TR, gh, log, anlik_yaz, hash_duzelt  # noqa: E402
+from ortak import AESUN, TR, gh, log, anlik_yaz, hash_duzelt, panel_oku  # noqa: E402
 import madenci as M                                          # noqa: E402
 
 AYAR_DIR = AESUN / "yedek/ayar"
@@ -234,7 +234,7 @@ def guc_kesif(sonuc, simdi):
 
 def main():
     simdi = datetime.now(TR)
-    mad, _ = gh("antminer_panel.json")
+    mad, _ = panel_oku()
     kim, _ = gh("n8n/cihaz_kimlik.json")
     kim = kim or {}
     cihazlar = [d for d in (mad or {}).get("devices") or [] if d.get("online") or d.get("sleeping")]

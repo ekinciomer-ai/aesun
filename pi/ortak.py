@@ -1,6 +1,6 @@
 """Pi betiklerinin ortak yardımcıları (yalnız standart kütüphane).
 Token: ~/.aesun/osos.env içindeki GITHUB_TOKEN (koda yazılmaz)."""
-import base64, json, os, urllib.error, urllib.request
+import base64, hashlib, json, os, urllib.error, urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -11,6 +11,8 @@ TR = timezone(timedelta(hours=3))
 AESUN = Path.home() / ".aesun"
 ONBELLEK = AESUN / "onbellek"
 BEKLEYEN = ONBELLEK / "_bekleyen.json"
+ETAG = ONBELLEK / "_etag"           # GitHub ETag'leri: değişmeyen dosya yeniden indirilmez (304, ~1 KB)
+YEREL_PANEL = "http://127.0.0.1:5000/api/status"   # Pi'deki toplayıcı (altminer) — antminer_panel.json'un kaynağı
 
 
 def log(*a):
@@ -33,17 +35,59 @@ def _onbellek_dosya(yol):
     return ONBELLEK / str(yol).lstrip("/")
 
 
+def _ozet(metin):
+    return hashlib.sha256(metin.encode()).hexdigest()
+
+
 def _onbellek_yaz(yol, veri):
+    """Yerel kopyayı yazar; içeriğin SHA-256 özetini döner (ETag eşleştirmesi için)."""
     if veri is None:
-        return
+        return None
     try:
         f = _onbellek_dosya(yol)
         f.parent.mkdir(parents=True, exist_ok=True)
-        gec = f.with_suffix(f.suffix + ".tmp")
-        gec.write_text(json.dumps(veri, ensure_ascii=False))
+        metin = json.dumps(veri, ensure_ascii=False)
+        gec = f.with_suffix(f.suffix + f".{os.getpid()}.tmp")
+        gec.write_text(metin)
+        gec.replace(f)
+        return _ozet(metin)
+    except Exception:
+        return None
+
+
+def _etag_dosya(yol):
+    return ETAG / (str(yol).lstrip("/") + ".json")
+
+
+def _etag_oku(yol):
+    try:
+        return json.loads(_etag_dosya(yol).read_text())
+    except Exception:
+        return None
+
+
+def _etag_yaz(yol, etag, sha, ozet):
+    if not (etag and sha and ozet):
+        return
+    try:
+        f = _etag_dosya(yol)
+        f.parent.mkdir(parents=True, exist_ok=True)
+        gec = f.with_suffix(f".{os.getpid()}.tmp")
+        gec.write_text(json.dumps({"etag": etag, "sha": sha, "ozet": ozet}))
         gec.replace(f)
     except Exception:
         pass
+
+
+def _etag_onbellek(yol, kayit):
+    """304 geldiğinde: yerel kopya ETag'in ait olduğu sürümle aynıysa onu döner (aksi halde None → tam indirme)."""
+    try:
+        metin = _onbellek_dosya(yol).read_text()
+        if kayit and _ozet(metin) == kayit.get("ozet"):
+            return json.loads(metin)
+    except Exception:
+        pass
+    return None
 
 
 def _onbellek_oku(yol):
@@ -100,7 +144,7 @@ def _bekleyen_esitle():
         pass
 
 
-def gh(yol, veri=None, sha=None, mesaj=None):
+def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
     """epias-ptf dosyası oku (veri=None) ya da yaz. Okuma (json, sha) döner; yoksa (None, None).
     AE_KAYNAK=sunucu ise yalnız sunucu; değilse GitHub + sunucuya kopya.
     İnternet kesintisinde yerel önbellekten (~/.aesun/onbellek) okur/yazar; bağlantı gelince eşitler."""
@@ -129,20 +173,31 @@ def gh(yol, veri=None, sha=None, mesaj=None):
             return {"content": {"sha": "onbellek"}}
     h = {"Authorization": "Bearer " + TOK, "Accept": "application/vnd.github+json", "User-Agent": "aesun-pi"}
     if veri is None:
+        kayit = None if _etagsiz else _etag_oku(yol)
         try:
-            with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers=h), timeout=30) as r:
+            hk = {**h, "If-None-Match": kayit["etag"]} if kayit and kayit.get("etag") else h
+            with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers=hk), timeout=30) as r:
+                etag = r.headers.get("ETag")
                 m = json.loads(r.read())
             if m.get("content"):
                 out = json.loads(base64.b64decode(m["content"]).decode())
-                _onbellek_yaz(yol, out)
-                _bekleyen_esitle()
-                return out, m["sha"]
-            with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers={**h, "Accept": "application/vnd.github.raw+json"}), timeout=60) as r:
-                out = json.loads(r.read())
-                _onbellek_yaz(yol, out)
-                _bekleyen_esitle()
-                return out, m["sha"]
+            else:   # 1 MB üstü: içerik ayrıca ham indirilir
+                with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers={**h, "Accept": "application/vnd.github.raw+json"}), timeout=60) as r:
+                    out = json.loads(r.read())
+            _etag_yaz(yol, etag, m.get("sha"), _onbellek_yaz(yol, out))
+            _bekleyen_esitle()
+            return out, m["sha"]
         except urllib.error.HTTPError as e:
+            if e.code == 304:                            # değişmemiş: yerel kopya (indirme yok)
+                yerel = _etag_onbellek(yol, kayit)
+                if yerel is not None:
+                    _bekleyen_esitle()
+                    return yerel, kayit["sha"]
+                try:
+                    _etag_dosya(yol).unlink()
+                except Exception:
+                    pass
+                return gh(yol, _etagsiz=True)
             if e.code == 404:
                 return None, None
             yerel = _onbellek_oku(yol)
@@ -155,14 +210,23 @@ def gh(yol, veri=None, sha=None, mesaj=None):
             log(f"çevrimdışı önbellek okuma ({yol}):", str(e)[:80])
             return (yerel, "onbellek") if yerel is not None else (None, None)
     govde = {"message": mesaj or ("aesun " + datetime.now(TR).strftime("%Y-%m-%d %H:%M")),
-             "content": base64.b64encode(json.dumps(veri, ensure_ascii=False, indent=1).encode()).decode()}
+             # sıkı JSON (girintisiz): aynı veri %15–57 daha küçük → GitHub'a yükleme ve sonraki indirmeler azalır
+             "content": base64.b64encode(json.dumps(veri, ensure_ascii=False, separators=(",", ":")).encode()).decode()}
     if sha and sha not in ("sunucu", "onbellek"):
         govde["sha"] = sha
-    for deneme in range(2):
+    yeni = False
+    for deneme in range(3):
         try:
-            if not govde.get("sha"):
-                with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers=h), timeout=20) as r0:
-                    govde["sha"] = json.loads(r0.read()).get("sha")
+            if not govde.get("sha") and not yeni:
+                kayit = _etag_oku(yol)
+                try:   # yalnız sha gerekiyor: ETag eşleşirse 304 ile (dosya indirilmeden) kayıtlı sha
+                    hk = {**h, "If-None-Match": kayit["etag"]} if not deneme and kayit and kayit.get("etag") else h
+                    with urllib.request.urlopen(urllib.request.Request(REPO + yol, headers=hk), timeout=20) as r0:
+                        govde["sha"] = json.loads(r0.read()).get("sha")
+                except urllib.error.HTTPError as e0:
+                    if e0.code != 304:
+                        raise
+                    govde["sha"] = kayit["sha"]
             r = urllib.request.Request(REPO + yol, data=json.dumps(govde).encode(), headers={**h, "Content-Type": "application/json"}, method="PUT")
             with urllib.request.urlopen(r, timeout=30) as y:
                 sonuc = json.loads(y.read())
@@ -170,10 +234,12 @@ def gh(yol, veri=None, sha=None, mesaj=None):
             _bekleyen_esitle()
             return sonuc
         except urllib.error.HTTPError as e:
-            if e.code == 404 and not govde.get("sha"):
-                pass
-            elif e.code in (409, 422) and not deneme:   # sha eskimiş: tazele ve bir kez daha dene
+            if e.code == 404 and not govde.get("sha") and not yeni:
+                yeni = True                                # dosya yok: sha'sız oluştur (eskiden bu durumda hiç yazılmıyordu)
+                continue
+            elif e.code in (409, 422) and deneme < 2:   # sha eskimiş: tazele ve bir kez daha dene
                 govde.pop("sha", None)
+                yeni = False
                 continue
             else:
                 _bekleyen_ekle(yol)
@@ -183,6 +249,42 @@ def gh(yol, veri=None, sha=None, mesaj=None):
             _bekleyen_ekle(yol)
             log(f"çevrimdışı önbellek yazma ({yol}):", str(e)[:80])
             return {"content": {"sha": "onbellek"}}
+
+
+def _panel_anahtarlar(cihazlar):
+    """Cihaz kayıtlarının çoğunda (%80) bulunan alan adları."""
+    sayac = {}
+    for d in cihazlar or []:
+        for a in (d or {}):
+            sayac[a] = sayac.get(a, 0) + 1
+    n = len(cihazlar or [])
+    return {a for a, c in sayac.items() if n and c >= 0.8 * n}
+
+
+def panel_oku(azami_yas_dk=10):
+    """antminer_panel.json — önce Pi'deki toplayıcıdan (127.0.0.1:5000, internet harcamaz), olmazsa GitHub'dan.
+
+    Toplayıcı bu dosyanın kaynağı; dakikada bir çalışan betiklerin (canlı, öğrenme, detay, ağ taraması) aynı veriyi
+    her seferinde GitHub'dan ~300 KB indirmesi saha internet kotasının en büyük kalemlerinden biriydi.
+    Yerel veri yalnız (1) son GitHub kopyasıyla aynı alanları taşıyorsa, (2) zaman damgası okunabiliyorsa ve
+    (3) azami_yas_dk'dan taze ise kullanılır; aksi halde eski yol (GitHub, ETag'li) sürer. Dönüş: (veri, kaynak)."""
+    uzak = _onbellek_oku("antminer_panel.json")
+    try:
+        with urllib.request.urlopen(YEREL_PANEL, timeout=4) as r:
+            d = json.loads(r.read().decode())
+        cihaz = d.get("devices") if isinstance(d, dict) else None
+        sablon = _panel_anahtarlar((uzak or {}).get("devices"))
+        if cihaz and sablon and sablon <= _panel_anahtarlar(cihaz):
+            ham = d.get("timestamp") or d.get("last_scan")
+            t = datetime.fromtimestamp(float(ham), TR) if isinstance(ham, (int, float)) else zaman(ham)
+            if abs((datetime.now(TR) - t).total_seconds()) <= azami_yas_dk * 60:
+                out = {**(uzak or {}), **{k: v for k, v in d.items() if k not in ("timestamp", "last_scan")}}
+                out["timestamp"] = t.replace(tzinfo=None).isoformat()      # GitHub kopyasıyla aynı biçim (TR, dilimsiz)
+                return out, "yerel"
+    except Exception:
+        pass
+    v, _ = gh("antminer_panel.json")
+    return v, "github"
 
 
 def zaman(s):

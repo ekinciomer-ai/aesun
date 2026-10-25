@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ortak import AESUN, TOK, TR, gh, log, zaman, hash_duzelt  # noqa: E402
+from ortak import AESUN, TOK, TR, gh, log, panel_oku, zaman, hash_duzelt  # noqa: E402
 
 IZ = AESUN / "cihaz_iz"
 YEREL = AESUN / "cihaz_ogrenme_yerel.json"
@@ -39,7 +39,7 @@ GRID = list(range(0, 61, 2))   # ortalama ısınma eğrisi için dakika noktalar
 
 # ---------------------------------------------------------------- örnekleme
 def ornek_al():
-    mad, _ = gh("antminer_panel.json")
+    mad, _ = panel_oku()
     if not mad or not mad.get("timestamp"):
         return False
     IZ.mkdir(parents=True, exist_ok=True)

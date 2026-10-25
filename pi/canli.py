@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import madenci as M                     # noqa: E402
-from ortak import gh, log                # noqa: E402
+from ortak import gh, log, panel_oku                # noqa: E402
 
 KOK = Path(__file__).resolve().parent.parent
 ADRES = os.environ.get("AE_CANLI_ADRES", "https://portal.aksarayenerji.net/api/canli.php")
@@ -43,7 +43,7 @@ def anahtar():
 
 
 def cihazlar():
-    mad, _ = gh("antminer_panel.json")
+    mad, _ = panel_oku()
     out = []
     for d in (mad or {}).get("devices") or []:
         if not d.get("ip") or not d.get("online"):

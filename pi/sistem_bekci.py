@@ -21,7 +21,11 @@ ISLER = {  # iş adı: (sınır dk, yedek olay türü)
     "Veri arşivi": (150, "yedek_arsiv"),
     "Durum analizi": (150, "yedek_analiz"),
     "İzleme özeti": (80, "yedek_izleme"),
+    "Portal denetimi": (100, "portal_bekci"),   # 24 Eki: ns1 + GitHub (portal_bekci.yml) — 30 dk'da bir
 }
+# Listede olmayan işler kendiliğinden izlenir: is_hatalari'nda görülen her iş için gözlenen çalışma aralıkları öğrenilir
+# (son 12 aralığın medyanı); sınır = en az 45 dk, en çok 3 × medyan. 7 gündür çalışmayan iş emekli sayılır (uyarı yok).
+EMEKLI_GUN = 7
 ARALIK_DK = 10
 OLAGAN = {"Bildirimler": "15 dk", "İzleme özeti": "30 dk"}
 
@@ -80,9 +84,30 @@ def calis(simdi=None):
 
     # 2) işler (GitHub'daki kayıttan — ns1'den bağımsız)
     yedek_son = st.get("yedek", {})
+    ogren = st.get("ogren") or {}
     try:
         ih, _ = gh("n8n/is_hatalari.json")
         isler = (ih or {}).get("isler", {})
+        for ad, b in isler.items():                      # çalışma aralığını öğren
+            son = (b or {}).get("son")
+            o = ogren.setdefault(ad, {"aralik": []})
+            if son and son != o.get("son"):
+                if o.get("son"):
+                    d = (zaman(son) - zaman(o["son"])).total_seconds() / 60
+                    if 1 <= d <= 1440:
+                        o["aralik"] = (o["aralik"] + [round(d)])[-12:]
+                o["son"] = son
+        for ad, b in isler.items():                      # listede olmayan, düzenli çalışan işler
+            if ad in ISLER or not (b or {}).get("son"):
+                continue
+            ar = sorted(ogren.get(ad, {}).get("aralik") or [])
+            dk = round((simdi - zaman(b["son"])).total_seconds() / 60)
+            if len(ar) < 4 or dk > EMEKLI_GUN * 1440:
+                continue
+            sinir = max(45, min(3 * ar[len(ar) // 2], 1440))
+            bilgi.setdefault("isler", {})[ad] = dk
+            if dk > sinir:
+                sorun["is:" + ad] = f"{ad} {dk} dk'dır çalışmadı (öğrenilen olağan aralık ~{ar[len(ar) // 2]} dk)"
         for ad, (sinir, tur) in ISLER.items():
             son = (isler.get(ad) or {}).get("son")
             dk = round((simdi - zaman(son)).total_seconds() / 60) if son else None
@@ -101,7 +126,8 @@ def calis(simdi=None):
         sorun["is_kaydi"] = f"İş kaydı okunamadı: {str(e)[:60]}"
 
     durum = "sorun" if sorun else "iyi"
-    v = {"t": simdi.isoformat(timespec="seconds"), "durum": durum, "sorunlar": sorun, "bilgi": bilgi, "yedek": yedek_son}
+    v = {"t": simdi.isoformat(timespec="seconds"), "durum": durum, "sorunlar": sorun, "bilgi": bilgi, "yedek": yedek_son,
+         "ogren": {k: o for k, o in ogren.items() if o.get("son") and (simdi - zaman(o["son"])).days <= 30}}
     degisti = (st.get("durum"), sorted(st.get("sorunlar", {}))) != (durum, sorted(sorun))
     if degisti or not st.get("yazildi") or (simdi - zaman(st["yazildi"])).total_seconds() > 1800:
         try:

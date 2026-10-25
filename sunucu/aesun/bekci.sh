@@ -28,17 +28,27 @@ etkin=$(echo "$dj" | python3 -c "import json,sys;print(json.load(sys.stdin).get(
 cn=$(docker exec aesun-isler date -Iseconds 2>/dev/null)   # kapsayıcının kendi saati (saat dilimi farkı olmasın)
 na=$(python3 -c "import sys,datetime as d;a,b=sys.argv[1:];print(int((d.datetime.fromisoformat(a).replace(tzinfo=None)-d.datetime.fromisoformat(b).replace(tzinfo=None)).total_seconds()))" "$cn" "$nabiz" 2>/dev/null || echo 999999)
 [ "$na" -gt 300 ] && sorun_isler="nabız ${na} sn önce"
-isler_json=$(echo "$ij" | python3 -c "
-import json,sys,datetime as dt
+# çalışan zamanlayıcının gerçekten tanımladığı işler (kapsayıcı eski sürümdeyse bekçi olmayan işi "gecikti" sayıp
+# kapsayıcıyı boş yere yeniden başlatmasın — 25.10: "Portal denetimi" yüzünden 24 saatte 18 yeniden başlatma)
+tanimli=$(docker exec -w /app aesun-isler python -c "import json,zamanlayici as z;print(json.dumps([i[0] for i in z.ISLER],ensure_ascii=False))" 2>/dev/null || echo '')
+isler_json=$(echo "$ij" | TANIMLI="$tanimli" python3 -c "
+import json,os,sys,datetime as dt
 LIM={'Bildirimler':40,'Veri arşivi':130,'Durum analizi':130,'İzleme özeti':70,'Portal denetimi':70}   # iki tur kaçırınca
+try: tan=json.loads(os.environ.get('TANIMLI') or 'null')
+except Exception: tan=None
 try: d=json.load(sys.stdin).get('isler',{})
 except Exception: d={}
 now=dt.datetime.now(dt.timezone.utc); out={}
+for ad in (tan or []):
+    LIM.setdefault(ad,130)                      # yeni eklenen iş: bekçi listesi güncellenmese de izlenir
 for ad,lim in LIM.items():
     s=(d.get(ad) or {}).get('son')
     dk=round((now-dt.datetime.fromisoformat(s)).total_seconds()/60) if s else None
-    out[ad]={'son':s,'dk':dk,'sinir_dk':lim,'kod':(d.get(ad) or {}).get('son_kod'),'gec':dk is None or dk>lim}
+    eksik=tan is not None and ad not in tan     # zamanlayıcıda yok: onarımla düzelmez (isler_guncelle gerekir)
+    out[ad]={'son':s,'dk':dk,'sinir_dk':lim,'kod':(d.get(ad) or {}).get('son_kod'),'gec':dk is not None and dk>lim and not eksik,'eksik':eksik,'hic':dk is None}   # hiç çalışmamış yeni iş: yeniden başlatma sebebi değil
 print(json.dumps(out,ensure_ascii=False))" 2>/dev/null || echo '{}')
+eksik_is=$(echo "$isler_json" | python3 -c "import json,sys;print(', '.join(k for k,v in json.load(sys.stdin).items() if v.get('eksik')))" 2>/dev/null)
+[ -n "$eksik_is" ] && ayrinti+=("zamanlayıcıda tanımsız iş: $eksik_is — sunucu işlemi isler_guncelle gerekli (yeniden başlatma çözmez)")
 gec=$(echo "$isler_json" | python3 -c "import json,sys;print(', '.join(k for k,v in json.load(sys.stdin).items() if v['gec']))" 2>/dev/null)
 [ "$etkin" = "True" ] && [ -n "$gec" ] && sorun_isler="${sorun_isler:+$sorun_isler; }gecikti: $gec"
 pidsI=$(docker stats --no-stream --format '{{.PIDs}}' aesun-isler 2>/dev/null || echo 0)
@@ -92,6 +102,10 @@ fi
 onar() {  # $1 kapsayıcı  $2 neden
   f=$D/.bekci_son_$1; son=$(cat $f 2>/dev/null || echo 0)
   if [ $(( simdi - son )) -lt 1800 ]; then ayrinti+=("$1: bekleniyor (son onarım $(( (simdi-son)/60 )) dk önce)"); return; fi
+  # aynı kapsayıcı 6 saatte 3 kez yeniden başlatıldıysa ve sorun sürüyorsa yeniden başlatma işe yaramıyor: dur, elle bakılsın
+  n6=$(awk -F'|' -v t="$(date -d '-6 hours' -Iseconds)" -v k="$1" '$1>t && $2==k' $D/bekci_onarim.log 2>/dev/null | wc -l)
+  case "$2" in *nabız*|*süreç*|*eşitleme*) n6=0;; esac     # çalıştırıcı/API donmuşsa yeniden başlatma gerçekten çözer: sınırlama yok
+  if [ "${n6:-0}" -ge 3 ]; then ayrinti+=("$1: 6 saatte $n6 yeniden başlatma sorunu çözmedi — onarım durduruldu, elle bakılmalı ($2)"); log "ONARIM DURDU $1: $2"; return; fi
   echo $simdi > $f; log "ONARIM $1: $2"
   if docker restart -t 20 $1 >/dev/null 2>&1; then ayrinti+=("$1 yeniden başlatıldı: $2"); echo "$iso|$1|$2" >> $D/bekci_onarim.log
   else ayrinti+=("$1 yeniden başlatılamadı: $2"); fi

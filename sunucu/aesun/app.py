@@ -439,3 +439,107 @@ def demo_saha():
                     "nom": v.get("nominal_kw") or 100, "t": v.get("sicaklik_c"), "pv": pv})
     durum_no = "".join(cihaz(n)["d"] for n in range(1, 30))
     return {"kabin": kabin, "inv": inv, "durum_no": durum_no, "t": fs.get("guncelleme")}
+
+
+# ---------------- Erişim günlüğü · Denetçi "Erişim Güvenliği" + fail2ban aesun-api kuralları ----------------
+# red.log  : reddedilen istekler (401/403 = yetkisiz, 404/400/405 + zafiyet yolu = tarama, 429 = hız) → fail2ban okur
+# iyi_ip.json: son 7 günde geçerli anahtar/çerezle başarılı istek yapan adresler → fail2ban bunları ASLA engellemez
+# giris.jsonl: portal / saha / cPanel köprüsü giriş olayları (POST /v1/olay/giris). Şifre ya da belirteç YAZILMAZ.
+import socket
+ERISIM = Path(os.environ.get("AESUN_ERISIM", "/veri/erisim"))
+ERISIM_TARAMA = re.compile(r"(\.php|\.env|wp-|/\.git|/admin|/cgi-bin|/vendor|/boaform|/actuator|/HNAP|/owa|/solr|/druid|/console|"
+                           r"/shell|/phpmyadmin|/\.aws|/config|/server-status|/xmlrpc|/autodiscover|/\.ssh|/backup|/\.DS_Store)", re.I)
+IYI_IP = {}
+IYI_YAZ = [0.0]
+OLAY_HIZ = {}
+CPANEL_IP = {"t": 0.0, "ip": set()}
+
+def istemci_ip(req: Request):
+    return re.sub(r"[^0-9a-fA-F.:]", "", (req.client.host if req.client else "") or "")[:45] or "?"
+
+def erisim_ekle(ad: str, satir: str, sinir: int = 2_000_000):
+    try:
+        ERISIM.mkdir(parents=True, exist_ok=True)
+        p = ERISIM / ad
+        if p.exists() and p.stat().st_size > sinir:
+            os.replace(p, p.with_name(ad + ".1"))
+        with open(p, "a") as f:
+            f.write(satir + "\n")
+    except Exception:
+        pass
+
+def _iyi_kaydet():
+    simdi = time.time()
+    for ip in [i for i, t in IYI_IP.items() if simdi - t > 7 * 86400]:
+        IYI_IP.pop(ip, None)
+    try:
+        ERISIM.mkdir(parents=True, exist_ok=True)
+        t = ERISIM / "iyi_ip.json.tmp"
+        t.write_text(json.dumps(IYI_IP)); os.replace(t, ERISIM / "iyi_ip.json")
+    except Exception:
+        pass
+    IYI_YAZ[0] = simdi
+
+@app.on_event("startup")
+def erisim_basla():
+    try:
+        IYI_IP.update({k: int(v) for k, v in json.loads((ERISIM / "iyi_ip.json").read_text()).items()})
+    except Exception:
+        pass
+
+@app.middleware("http")
+async def erisim_izle(request: Request, call_next):
+    resp = await call_next(request)
+    try:
+        k, yol, ip = resp.status_code, request.url.path, istemci_ip(request)
+        tur = "yetkisiz" if k in (401, 403) else ("tarama" if k in (400, 404, 405) and ERISIM_TARAMA.search(yol) else ("hiz" if k == 429 else None))
+        if tur:
+            erisim_ekle("red.log", f"{time.strftime('%Y-%m-%dT%H:%M:%S+0000', time.gmtime())} RED ip={ip} kod={k} tur={tur} "
+                                   f"yontem={request.method} yol={re.sub(r'[^A-Za-z0-9_./%-]', '', yol)[:80]}")
+        elif k < 400 and (len(request.headers.get("x-ae-anahtar", "")) >= 32 or request.cookies.get("ae_sso")):
+            IYI_IP[ip] = int(time.time())
+            if time.time() - IYI_YAZ[0] > 60:
+                _iyi_kaydet()
+    except Exception:
+        pass
+    return resp
+
+def cpanel_ipleri():
+    if time.time() - CPANEL_IP["t"] > 3600:
+        s = set()
+        for ad in ("portal.aksarayenerji.net", "aksarayenerji.net"):
+            try:
+                s.update(socket.gethostbyname_ex(ad)[2])
+            except Exception:
+                pass
+        CPANEL_IP.update(t=time.time(), ip=s or CPANEL_IP["ip"])
+    return CPANEL_IP["ip"]
+
+@app.post("/v1/olay/giris")
+async def olay_giris(request: Request):
+    """Portal/saha (tarayıcıdan) ve cPanel köprüsünden giriş olayı. Yalnız kayıt; yetki vermez."""
+    ip, simdi = istemci_ip(request), time.time()
+    q = [t for t in OLAY_HIZ.get(ip, []) if simdi - t < 600]
+    if len(q) >= 40:
+        OLAY_HIZ[ip] = q
+        raise HTTPException(429, "çok fazla bildirim")
+    OLAY_HIZ[ip] = q + [simdi]
+    if len(OLAY_HIZ) > 5000:
+        OLAY_HIZ.clear()
+    try:
+        g = json.loads((await request.body())[:4000] or b"{}")
+        assert isinstance(g, dict)
+    except Exception:
+        raise HTTPException(400, "JSON değil")
+    kaynak = str(g.get("kaynak", "portal"))
+    sonuc = str(g.get("sonuc", ""))
+    if kaynak not in ("portal", "saha", "cpanel") or sonuc not in ("basarili", "hatali", "kilit", "yetkisiz", "cikis"):
+        raise HTTPException(400, "geçersiz olay")
+    temiz = lambda v, n: re.sub(r"[^\w.@:/ -]", "", str(v or ""), flags=re.U)[:n]
+    olay = {"t": time.strftime("%Y-%m-%dT%H:%M:%S+00:00", time.gmtime()), "kaynak": kaynak, "sonuc": sonuc, "ip": ip,
+            "kul": temiz(g.get("kul"), 40), "ua": temiz(request.headers.get("user-agent"), 100), "not": temiz(g.get("not"), 80)}
+    if kaynak == "cpanel":   # köprü, kendi istemcisinin IP'sini bildirir; yalnız cPanel sunucusundan geldiyse doğrulanmış sayılır
+        olay.update(ip=temiz(g.get("ip"), 45), bildiren=ip, dogrulandi=ip in cpanel_ipleri(), yol=temiz(g.get("yol"), 80),
+                    kod=int(g.get("kod") or 0) if str(g.get("kod") or "0").isdigit() else 0)
+    erisim_ekle("giris.jsonl", json.dumps(olay, ensure_ascii=False))
+    return {"tamam": True}

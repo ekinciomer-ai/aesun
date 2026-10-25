@@ -1547,7 +1547,7 @@ function kapasiteCiz() {
       <div class="boru-adim"><h3>🖥️ ns1 (api.aksarayenerji.net)</h3>` +
       (nsDisk ? kapCubuk('Disk (/)', nsDisk.toplam - nsDisk.bos, nsDisk.toplam, '') : `<div class="bos" style="padding:10px">ns1 kapasite bilgisi bekleniyor — bekçi güncellemesi yayınlanınca 5 dk içinde gelir.</div>`) +
       (nsRam ? kapCubuk('Bellek (RAM)', nsRam.toplam - nsRam.bos, nsRam.toplam, (nk.cekirdek ? nk.cekirdek + ' çekirdek · yük ' + esc(nk.yuk) : '')) : '') +
-      (nk.birim && Object.keys(nk.birim).length ? `<div style="font-size:12px;color:var(--y);margin-top:6px">Docker birimleri: ${Object.entries(nk.birim).map(([k, v]) => `<strong>${esc(k.replace('aesun_', ''))}</strong> ${gbB(v)}`).join(' · ')}</div>` : '') +
+      (nk.birim && Object.keys(nk.birim).length ? `<div style="font-size:12px;color:var(--y);margin-top:6px">Docker birimleri: ${Object.entries(nk.birim).map(([k, v]) => `<strong>${esc(k.replace(/^(aesun_)+/, ''))}</strong> ${gbB(v)}`).join(' · ')}</div>` : '') +
       `</div>
     </div>`;
 
@@ -1583,41 +1583,75 @@ function kapasiteCiz() {
 // ---- 🛡️ SALDIRI & HATALI GİRİŞ (ns1: SSH, fail2ban, API) ----
 let GUV_ARA = '';
 let GUV_FILTRE = 'hepsi';
+let GUV_KAYNAK = 'hepsi';
+let GUV_SONUC = 'hepsi';
 function guvenlikCiz() {
   const G = VERI.guvenlik;
   if (!G || G._hata) {
-    return `<div class="kart"><h2>🛡️ Saldırı &amp; Hatalı Giriş</h2><div class="bos">${G && G._hata === 'oturum_yok' ? 'Güvenlik kayıtları için Portal üzerinden yetkili oturum açın.' : 'Güvenlik özeti henüz oluşmadı (n8n/guvenlik_ns1.json · ' + esc(G && G._hata) + '). ns1 bekçisi 15 dk\'da bir üretir.'}</div></div>`;
+    return `<div class="kart"><h2>🛡️ Erişim Güvenliği</h2><div class="bos">${G && G._hata === 'oturum_yok' ? 'Güvenlik kayıtları için Portal üzerinden yetkili oturum açın.' : 'Güvenlik özeti henüz oluşmadı (n8n/guvenlik_ns1.json · ' + esc(G && G._hata) + '). ns1 bekçisi 15 dk\'da bir üretir.'}</div></div>`;
   }
   const o = G.ozet || {}, f = G.fail2ban || {}, at = o.api_tur || {};
   const by = o.ssh_basarili_yontem || {};
   let h = `<div class="kart" id="bolum-guvenlik">
-    <h2><span>🛡️ Saldırı &amp; Hatalı Giriş — ns1 sunucu (son 24 saat)</span>
+    <h2><span>🛡️ Erişim Güvenliği — tüm giriş ve erişim denemeleri (son 24 saat)</span>
       <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(G.guncellendi))}</b> ${yasEtiket(dkOnce(G.guncellendi), 20, 60)}</span></h2>`;
   if ((G.uyarilar || []).length) h += `<div class="hata" style="margin-bottom:12px"><b>⚠️ Dikkat:</b><ul style="margin:6px 0 0 18px">${G.uyarilar.map(u => `<li>${esc(u)}</li>`).join('')}</ul></div>`;
   else h += `<div class="uyari-kutu" style="background:#ECFDF5;border-color:#A7F3D0;color:#065F46;margin-bottom:12px"><b>✅ Kritik bulgu yok.</b> Başarılı girişlerin tamamı anahtarla; ısrarcı adresler fail2ban ile engelleniyor.</div>`;
+  const ks = G.kaynak_sayilari || {};
+  const kk = (ad, renk, baslik, deger, alt, kaynak) => `<div class="kpi-kutu" style="--kp-r:${renk}${kaynak ? '' : ';cursor:default'}" ${kaynak ? `onclick="GUV_KAYNAK='${kaynak}';ciz();setTimeout(()=>{const e=$('guv-akis');e&&e.scrollIntoView({behavior:'smooth'})},30)"` : ''}><small>${baslik}</small><b>${deger}</b><span class="alt-k">${alt}</span></div>`;
   h += `<div class="kpi">
-    <div class="kpi-kutu" style="--kp-r:#D7262E;cursor:default"><small>SSH hatalı deneme</small><b>${nf(o.ssh_basarisiz_24s)}</b><span class="alt-k">${nf(o.ssh_farkli_ip_24s)} farklı adresten</span></div>
-    <div class="kpi-kutu" style="--kp-r:#7C3AED;cursor:default"><small>Şu an engelli adres</small><b>${nf(o.engelli_su_an)}</b><span class="alt-k">fail2ban ${f.etkin === 'active' ? '✅ çalışıyor' : '⚠️ ' + esc(f.etkin || '?')} · toplam ${nf(o.engel_toplam)} engel</span></div>
-    <div class="kpi-kutu" style="--kp-r:#F08A24;cursor:default"><small>API yetkisiz (401/403)</small><b>${nf(at['yetkisiz'] || 0)}</b><span class="alt-k">yanlış/eksik anahtar</span></div>
-    <div class="kpi-kutu" style="--kp-r:#B45309;cursor:default"><small>API tarama (zafiyet arama)</small><b>${nf(at['tarama'] || 0)}</b><span class="alt-k">${nf(at['hatalı istek'] || 0)} hatalı istek · ${nf(o.api_istek_24s)} toplam istek</span></div>
-    <div class="kpi-kutu" style="--kp-r:${by.parola ? '#D7262E' : '#1E9E5A'};cursor:default"><small>Başarılı SSH girişi</small><b>${nf(o.ssh_basarili_24s)}</b><span class="alt-k">anahtar ${nf(by.anahtar || 0)} · parola ${nf(by.parola || 0)} · ${nf(o.ssh_basarili_kaynak_sayisi)} kaynak</span></div>
+    ${kk('portal', (o.portal_hatali_24s || 0) >= 10 ? '#D7262E' : '#2a78d6', '🔑 Portal girişi', nf(o.portal_basarili_24s || 0) + ' ✓ · ' + nf(o.portal_hatali_24s || 0) + ' ✗', 'başarılı · hatalı şifre/kullanıcı', 'portal')}
+    ${kk('ssh', '#D7262E', '🖥️ SSH hatalı deneme', nf(o.ssh_basarisiz_24s), nf(o.ssh_farkli_ip_24s) + ' adres · başarılı ' + nf(o.ssh_basarili_24s) + (by.parola ? ' (⚠️ parola ' + by.parola + ')' : ' (anahtarla)'), 'ssh')}
+    ${kk('api', '#F08A24', '🌐 API reddi', nf((at['yetkisiz'] || 0) + (at['hiz'] || 0)) + ' · ' + nf(at['tarama'] || 0), 'yetkisiz · zafiyet taraması', 'api')}
+    ${kk('sso', '#B45309', '🧾 Fatura girişi (SSO)', nf(o.sso_red_24s || 0), 'reddedilen giriş', 'fatura-sso')}
+    ${kk('cpanel', '#0D9488', '🗄️ cPanel köprüsü', nf(o.cpanel_red_24s || 0), 'veri.php/canli.php reddi', 'cpanel')}
+    ${kk('f2b', '#7C3AED', '🚫 Şu an engelli', nf(o.engelli_su_an), 'fail2ban ' + (f.etkin === 'active' ? '✅' : '⚠️') + ' · ' + Object.keys(f.kurallar || {}).length + ' kural', 'fail2ban')}
   </div>`;
 
+  // Birleşik olay akışı
+  const KAY = { portal: ['🔑', 'Portal', '#2a78d6'], saha: ['📱', 'Saha', '#2a78d6'], ssh: ['🖥️', 'SSH', '#D7262E'], api: ['🌐', 'API', '#F08A24'], 'fatura-sso': ['🧾', 'Fatura', '#B45309'], cpanel: ['🗄️', 'cPanel', '#0D9488'], fail2ban: ['🚫', 'fail2ban', '#7C3AED'] };
+  const SON = { basarili: ['ok', 'başarılı'], hatali: ['k', 'hatalı'], yetkisiz: ['u', 'yetkisiz'], tarama: ['k', 'tarama'], hiz: ['u', 'hız sınırı'], engel: ['k', 'engellendi'], kaldirildi: ['ok', 'engel kalktı'] };
+  const akis = (G.akis || []).filter(x => (GUV_KAYNAK === 'hepsi' || x.kaynak === GUV_KAYNAK || (GUV_KAYNAK === 'portal' && x.kaynak === 'saha')) && (GUV_SONUC === 'hepsi' || (GUV_SONUC === 'basarili' ? x.sonuc === 'basarili' : x.sonuc !== 'basarili')) && (!GUV_ARA || (x.ip || '').includes(GUV_ARA) || (x.ayrinti || '').toLowerCase().includes(GUV_ARA.toLowerCase())));
+  h += `<div id="guv-akis"><h3>📜 Tüm erişim olayları — tek akış</h3>
+    <div class="filtre-satir">
+      ${[['hepsi', 'Tümü', (G.akis || []).length]].concat(Object.entries(KAY).filter(([k]) => ks[k]).map(([k, v]) => [k, v[0] + ' ' + v[1], ks[k]])).map(([k, a, n]) => `<button class="btn${GUV_KAYNAK === k ? ' aktif' : ''}" style="padding:4px 10px;font-size:12.5px" onclick="GUV_KAYNAK='${k}';ciz()">${a} <span style="opacity:.65">${nf(n)}</span></button>`).join('')}
+      <select class="secim" onchange="GUV_SONUC=this.value;ciz()">${[['hepsi', 'Tüm sonuçlar'], ['red', 'Yalnız red/hatalı'], ['basarili', 'Yalnız başarılı']].map(([k, a]) => `<option value="${k}"${GUV_SONUC === k ? ' selected' : ''}>${a}</option>`).join('')}</select>
+      <input class="ara" id="guv-ara" placeholder="IP / kullanıcı / yol ara…" value="${esc(GUV_ARA)}" oninput="GUV_ARA=this.value;clearTimeout(window._ga);window._ga=setTimeout(()=>{ciz();const e=$('guv-ara');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},300)">
+    </div>
+    <div class="tablo-kutu" style="max-height:440px;overflow:auto;margin-bottom:14px"><table>
+      <thead><tr><th>Zaman</th><th>Kaynak</th><th>Sonuç</th><th>Adres</th><th>Ayrıntı</th></tr></thead><tbody>` +
+      (akis.length ? akis.slice(0, 250).map(x => { const kk2 = KAY[x.kaynak] || ['•', x.kaynak, '#64748B'], ss = SON[x.sonuc] || ['', x.sonuc];
+        return `<tr><td style="white-space:nowrap;font-size:12px">${esc(trZaman(x.t))}</td><td style="white-space:nowrap"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${kk2[2]};margin-right:5px"></span>${kk2[0]} ${esc(kk2[1])}</td><td><span class="et ${ss[0]}">${esc(ss[1])}</span></td><td>${x.ip ? `<code style="cursor:pointer" onclick="GUV_ARA='${esc(x.ip)}';ciz()">${esc(x.ip)}</code>` : '—'}</td><td style="font-size:12.5px">${esc(x.ayrinti || '')}</td></tr>`; }).join('')
+        : '<tr><td colspan="5" class="bos">Bu filtreye uyan olay yok.</td></tr>') +
+    `</tbody></table></div></div>`;
+
+  // Portal girişleri
+  const P = G.portal || {};
+  if (P.basarili || P.hatali) {
+    h += `<div class="iki-kolon">
+      <div class="boru-adim"><h3>🔑 Portal — son başarılı girişler</h3>${(P.son_basarili || []).length ? P.son_basarili.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--c)"><span><b>${esc(x.kul)}</b> ${x.not ? '<span class="et">' + esc(x.not) + '</span>' : ''}</span><span style="color:var(--y);white-space:nowrap">${esc(trZaman(x.t))}</span></div>`).join('') : '<div class="bos">Yok.</div>'}</div>
+      <div class="boru-adim"><h3>⛔ Portal — hatalı denemeler</h3>
+        ${(P.hatali_kullanici || []).length ? `<div style="font-size:12px;color:var(--y);margin-bottom:4px">Denenen kullanıcı adları</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${P.hatali_kullanici.map(x => `<span style="padding:2px 9px;border-radius:99px;font-size:12.5px;background:#FDECEC;border:1px solid #F5C2C4"><code style="background:none">${esc(x.kul || '(boş)')}</code> <strong>${nf(x.sayi)}</strong></span>`).join('')}</div>` : '<div class="bos">Hatalı deneme yok.</div>'}
+        ${(P.hatali_ip || []).length ? `<div style="font-size:12px;color:var(--y);margin-bottom:4px">Adresler</div>` + P.hatali_ip.map(x => `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0"><code>${esc(x.ip)}</code><b style="color:${x.sayi >= 10 ? '#D7262E' : 'inherit'}">${nf(x.sayi)}</b></div>`).join('') : ''}
+      </div>
+    </div>`;
+  }
   h += `<div class="iki-kolon">
-    <div class="boru-adim"><h3>⏱️ Saatlik saldırı (24 sa)</h3>${guvSaatlik(G.saatlik || [])}</div>
+    <div class="boru-adim"><h3>⏱️ Saatlik erişim denemesi (24 sa)</h3>${guvSaatlik(G.saatlik || [])}</div>
     <div class="boru-adim"><h3>📅 Son 7 gün — SSH denemesi ve yeni engel</h3>${guvGunluk(G.gunluk || [])}</div>
   </div>`;
 
   // Saldırgan tablosu
   const L = (G.saldirganlar || []).filter(x => (!GUV_ARA || x.ip.includes(GUV_ARA)) &&
     (GUV_FILTRE === 'hepsi' || (GUV_FILTRE === 'acik' && !x.engel.length) || (GUV_FILTRE === 'engelli' && x.engel.length) || (GUV_FILTRE === 'ssh' && x.ssh) || (GUV_FILTRE === 'api' && x.api)));
-  h += `<h3>🎯 Saldıran adresler</h3>
+  void 0;
+  h += `<h3>🎯 Deneme yapan adresler <small style="font-weight:400;color:var(--y)">(yukarıdaki arama bu tabloyu da süzer)</small></h3>
     <div class="filtre-satir">
-      <input class="ara" placeholder="IP ara…" value="${esc(GUV_ARA)}" oninput="GUV_ARA=this.value;clearTimeout(window._ga);window._ga=setTimeout(()=>{ciz();const e=document.querySelector('#bolum-guvenlik input.ara');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},300)">
-      ${[['hepsi', 'Tümü'], ['acik', 'Engelsiz'], ['engelli', 'Engelli'], ['ssh', 'SSH'], ['api', 'API']].map(([k, a]) => `<button class="btn${GUV_FILTRE === k ? ' aktif' : ''}" style="padding:4px 10px;font-size:12.5px" onclick="GUV_FILTRE='${k}';ciz()">${a}</button>`).join('')}
+      
+      ${[['hepsi', 'Tümü'], ['acik', 'Engelsiz'], ['engelli', 'Engelli'], ['ssh', 'SSH'], ['api', 'Web']].map(([k, a]) => `<button class="btn${GUV_FILTRE === k ? ' aktif' : ''}" style="padding:4px 10px;font-size:12.5px" onclick="GUV_FILTRE='${k}';ciz()">${a}</button>`).join('')}
     </div>
     <div class="tablo-kutu" style="margin-bottom:14px"><table>
-    <thead><tr><th>Adres</th><th class="sag">SSH deneme</th><th class="sag">API</th><th>API türü</th><th>Son deneme</th><th>Durum</th></tr></thead><tbody>` +
+    <thead><tr><th>Adres</th><th class="sag">SSH deneme</th><th class="sag">Web</th><th>Web türü (API/portal/cPanel)</th><th>Son deneme</th><th>Durum</th></tr></thead><tbody>` +
     (L.length ? L.map(x => `<tr>
       <td><code>${esc(x.ip)}</code>${x.basarili_giris ? ' <span class="et k">başarılı giriş de var</span>' : ''}</td>
       <td class="sag"><b>${nf(x.ssh)}</b></td><td class="sag">${nf(x.api)}</td>
@@ -1642,29 +1676,31 @@ function guvenlikCiz() {
       (ay.length ? ay.map(x => `<tr><td><code>${esc(x.yol)}</code></td><td class="sag"><span class="et ${x.kod === 401 || x.kod === 403 ? 'u' : ''}">${x.kod}</span></td><td class="sag">${nf(x.sayi)}</td></tr>`).join('') : '<tr><td colspan="3" class="bos">Reddedilen istek yok.</td></tr>') +
     `</tbody></table></div></div>
     <div class="boru-adim"><h3>🚫 fail2ban kuralları</h3><div class="tablo-kutu" style="margin-bottom:10px"><table><thead><tr><th>Kural</th><th class="sag">Şu an engelli</th><th class="sag">Toplam engel</th><th class="sag">Takipte</th></tr></thead><tbody>` +
-      (kur.length ? kur.map(([k, v]) => `<tr><td><b>${esc(k)}</b><br><small style="color:var(--y)">${k === 'sshd' ? '10 dk 5 hata → 1 sa (artan)' : k === 'ssh-kalici' ? '24 sa 10 hata → kalıcı' : k === 'recidive' ? '2 kez engellenen → kalıcı' : ''}</small></td><td class="sag">${nf(v.su_an)}</td><td class="sag">${nf(v.toplam)}</td><td class="sag">${nf(v.basarisiz_su_an)}</td></tr>`).join('') : '<tr><td colspan="4" class="bos">Kural bilgisi yok.</td></tr>') +
+      (kur.length ? kur.map(([k, v]) => `<tr><td><b>${esc(k)}</b><br><small style="color:var(--y)">${k === 'sshd' ? '10 dk 5 hata → 1 sa (artan)' : k === 'ssh-kalici' ? '24 sa 10 hata → kalıcı' : k === 'recidive' ? '2 kez engellenen → kalıcı' : k === 'aesun-api-tarama' ? 'Web: 10 dk 3 tarama → 1 gün (artan)' : k === 'aesun-api-yetki' ? 'Web: 10 dk 20 red → 1 sa (artan)' : ''}</small></td><td class="sag">${nf(v.su_an)}</td><td class="sag">${nf(v.toplam)}</td><td class="sag">${nf(v.basarisiz_su_an)}</td></tr>`).join('') : '<tr><td colspan="4" class="bos">Kural bilgisi yok.</td></tr>') +
     `</tbody></table></div>
     <h3 style="font-size:13px">Son engel olayları</h3><div style="max-height:220px;overflow:auto;font-size:12px">` +
       ((G.olaylar || []).slice(0, 40).map(x => `<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed var(--c)"><span style="color:var(--y);white-space:nowrap">${esc(trZaman(x.t))}</span><span class="et ${x.olay === 'Ban' ? 'k' : 'ok'}">${x.olay === 'Ban' ? 'engel' : x.olay === 'Unban' ? 'kaldırıldı' : 'yeniden'}</span><code>${esc(x.ip)}</code><span style="color:var(--y)">${esc(x.kural)}</span></div>`).join('') || '<div class="bos">Olay yok.</div>') +
     `</div></div>
   </div>
-  <div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)"><b>Kaynak:</b> ns1 SSH günlüğü, fail2ban ve API erişim günlüğü (bekçi 15 dk'da bir okur, hiçbir ayar değiştirmez). Başarılı giriş yapan adresler gösterilmez. ${esc(G.not || '')}</div>
+  <div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)"><b>Kaynaklar:</b> portal girişleri (tarayıcı bildirir; şifre gönderilmez), ns1 SSH günlüğü, API/Fatura SSO erişim günlüğü, cPanel köprüsü (veri.php · canli.php) ve fail2ban — bekçi 15 dk'da bir toplar. Başarılı SSH girişi yapan adresler gösterilmez. Son 7 günde geçerli anahtarla erişen adresler (Pi, cPanel, kullanıcılar) otomatik engellenmez.</div>
   </div>`;
   return h;
 }
 function guvSaatlik(saat) {
   if (!saat.length) return '<div class="bos">Kayıt yok.</div>';
   const W = 560, H = 210, sol = 40, alt = 22, ust = 10;
-  const maks = Math.max(1, ...saat.map(s => s.ssh + s.api)), bw = (W - sol - 4) / saat.length;
+  const maks = Math.max(1, ...saat.map(s => s.ssh + s.api + (s.portal || 0))), bw = (W - sol - 4) / saat.length;
   let svg = '';
   for (let i = 0; i <= 3; i++) { const v = maks * i / 3, y = H - alt - (H - alt - ust) * i / 3; svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${nf(v)}</text>`; }
   saat.forEach((s, i) => {
     const x = sol + i * bw, hs = (H - alt - ust) * s.ssh / maks, ha = (H - alt - ust) * s.api / maks;
     svg += `<rect x="${x + 1}" y="${H - alt - hs}" width="${Math.max(1, bw - 2)}" height="${hs}" fill="#D7262E"><title>${s.saat}:00 SSH ${s.ssh}</title></rect>`;
     svg += `<rect x="${x + 1}" y="${H - alt - hs - ha}" width="${Math.max(1, bw - 2)}" height="${ha}" fill="#F08A24"><title>${s.saat}:00 API ${s.api}</title></rect>`;
+    const hp = (H - alt - ust) * (s.portal || 0) / maks;
+    svg += `<rect x="${x + 1}" y="${H - alt - hs - ha - hp}" width="${Math.max(1, bw - 2)}" height="${hp}" fill="#2a78d6"><title>${s.saat}:00 Portal ${s.portal || 0}</title></rect>`;
     if (i % 3 === 0) svg += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#5B6470">${s.saat.slice(11)}</text>`;
   });
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="font-size:11.5px;color:var(--y)"><i style="display:inline-block;width:9px;height:9px;background:#D7262E;border-radius:2px"></i> SSH &nbsp; <i style="display:inline-block;width:9px;height:9px;background:#F08A24;border-radius:2px"></i> API (yetkisiz + tarama)</div>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="font-size:11.5px;color:var(--y)"><i style="display:inline-block;width:9px;height:9px;background:#D7262E;border-radius:2px"></i> SSH &nbsp; <i style="display:inline-block;width:9px;height:9px;background:#F08A24;border-radius:2px"></i> API/SSO (yetkisiz + tarama) &nbsp; <i style="display:inline-block;width:9px;height:9px;background:#2a78d6;border-radius:2px"></i> Portal girişi</div>`;
 }
 function guvGunluk(gun) {
   if (!gun.length) return '<div class="bos">Kayıt yok.</div>';
@@ -1850,7 +1886,7 @@ function ciz() {
     <button class="${SEKME === 'analiz' ? 'on' : ''}" onclick="SEKME='analiz';ciz()">📊 Durum Analizi &amp; Performans</button>
     <button class="${SEKME === 'internet' ? 'on' : ''}" onclick="SEKME='internet';ciz()">🌐 İnternet Kullanımı</button>
     <button class="${SEKME === 'akis' ? 'on' : ''}" onclick="SEKME='akis';ciz()">🔁 Veri Akışı (↓↑)</button>
-    <button class="${SEKME === 'guvenlik' ? 'on' : ''}" onclick="SEKME='guvenlik';ciz()">🛡️ Saldırı &amp; Hatalı Giriş${VERI.guvenlik && VERI.guvenlik.ozet ? ' (' + nf(VERI.guvenlik.ozet.ssh_basarisiz_24s + (VERI.guvenlik.ozet.api_red_24s || 0)) + ((VERI.guvenlik.uyarilar || []).length ? '!' : '') + ')' : ''}</button>
+    <button class="${SEKME === 'guvenlik' ? 'on' : ''}" onclick="SEKME='guvenlik';ciz()">🛡️ Erişim Güvenliği${VERI.guvenlik && VERI.guvenlik.ozet ? ' (' + nf((VERI.guvenlik.ozet.ssh_basarisiz_24s || 0) + (VERI.guvenlik.ozet.api_red_24s || 0) + (VERI.guvenlik.ozet.portal_hatali_24s || 0) + (VERI.guvenlik.ozet.cpanel_red_24s || 0)) + ((VERI.guvenlik.uyarilar || []).length ? '!' : '') + ')' : ''}</button>
   </div>`;
 
   if (!BEL) {

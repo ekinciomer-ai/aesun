@@ -20,7 +20,17 @@ $TETIK = $dizin . '/tetik.json';
 $OZET_URLLER = ['https://api.aksarayenerji.net/v1/acik/n8n/canli_anahtar.json', 'https://raw.githubusercontent.com/ekinciomer-ai/epias-ptf/main/n8n/canli_anahtar.json'];
 $SAKLA = 6 * 3600;
 
-function cevap($kod, $v) { http_response_code($kod); echo json_encode($v, JSON_UNESCAPED_UNICODE); exit; }
+// Reddedilen erişimi ns1 erişim günlüğüne bildirir (Denetçi "Erişim Güvenliği"). Anahtar/şifre gönderilmez; en çok 2 sn.
+function erisimBildir(int $k, string $m): void {
+  if (!function_exists('curl_init')) return;
+  $h = curl_init('https://api.aksarayenerji.net/v1/olay/giris');
+  curl_setopt_array($h, [CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 2, CURLOPT_CONNECTTIMEOUT => 2,
+    CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'User-Agent: aesun-cpanel-kopru'],
+    CURLOPT_POSTFIELDS => json_encode(['kaynak' => 'cpanel', 'sonuc' => 'yetkisiz', 'ip' => $_SERVER['REMOTE_ADDR'] ?? '', 'kod' => $k,
+      'yol' => basename($_SERVER['SCRIPT_NAME'] ?? '') . '?' . substr((string)($_GET['a'] ?? ''), 0, 20), 'not' => mb_substr($m, 0, 60)], JSON_UNESCAPED_UNICODE)]);
+  @curl_exec($h); curl_close($h);
+}
+function cevap($kod, $v) { http_response_code($kod); echo json_encode($v, JSON_UNESCAPED_UNICODE); if ($kod === 401 || $kod === 403) { if (function_exists('fastcgi_finish_request')) fastcgi_finish_request(); erisimBildir((int)$kod, (string)($v['hata'] ?? '')); } exit; }
 
 function uzak_ozet($url) {
   $c = @file_get_contents($url . '?t=' . time(), false, stream_context_create(['http' => ['timeout' => 6]]));

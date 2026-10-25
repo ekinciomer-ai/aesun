@@ -156,9 +156,9 @@ except Exception: pass
 bf = "/opt/aesun/.birim_boyut.json"; bb = oku(bf, {})
 if time.time() - bb.get("t", 0) > 3600:
     bir = {}
-    for ad in ("aesun_veri", "aesun_isler", "aesun_musteri"):
-        yol = f"/var/lib/docker/volumes/{ad}/_data"
-        if os.path.isdir(yol):
+    for ad in [v for v in subprocess.run(["docker", "volume", "ls", "-q"], capture_output=True, text=True).stdout.split() if "aesun" in v]:
+        yol = subprocess.run(["docker", "volume", "inspect", "-f", "{{.Mountpoint}}", ad], capture_output=True, text=True).stdout.strip()
+        if yol and os.path.isdir(yol):
             try: bir[ad] = int(subprocess.run(["du", "-sb", yol], capture_output=True, text=True, timeout=120).stdout.split()[0])
             except Exception: pass
     bb = {"t": int(time.time()), "birim": bir}

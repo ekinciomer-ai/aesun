@@ -15,7 +15,17 @@ define('VK', getenv('AE_VERI') ?: dirname(__DIR__, 3) . '/ae_veri');
 const MERKEZ = 'https://api.aksarayenerji.net/v1/veri';
 const PARA_DOSYA = '#(^|/)(fatura/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat)#';
 
-function hata(int $k, string $m): never { http_response_code($k); echo json_encode(['hata' => $m], JSON_UNESCAPED_UNICODE); exit; }
+// Reddedilen erişimi ns1 erişim günlüğüne bildirir (Denetçi "Erişim Güvenliği"). Anahtar/şifre gönderilmez; en çok 2 sn.
+function erisimBildir(int $k, string $m): void {
+  if (!function_exists('curl_init')) return;
+  $h = curl_init('https://api.aksarayenerji.net/v1/olay/giris');
+  curl_setopt_array($h, [CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 2, CURLOPT_CONNECTTIMEOUT => 2,
+    CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'User-Agent: aesun-cpanel-kopru'],
+    CURLOPT_POSTFIELDS => json_encode(['kaynak' => 'cpanel', 'sonuc' => 'yetkisiz', 'ip' => $_SERVER['REMOTE_ADDR'] ?? '', 'kod' => $k,
+      'yol' => basename($_SERVER['SCRIPT_NAME'] ?? '') . '?' . substr((string)($_GET['a'] ?? ''), 0, 20), 'not' => mb_substr($m, 0, 60)], JSON_UNESCAPED_UNICODE)]);
+  @curl_exec($h); curl_close($h);
+}
+function hata(int $k, string $m): never { http_response_code($k); echo json_encode(['hata' => $m], JSON_UNESCAPED_UNICODE); if ($k === 401 || $k === 403) { if (function_exists('fastcgi_finish_request')) fastcgi_finish_request(); erisimBildir($k, $m); } exit; }
 function jo(string $p, $v = null) { if (!is_file($p)) return $v; $j = json_decode((string)file_get_contents($p), true); return $j ?? $v; }
 function yolUygun($y): string {
   if (!is_string($y) || strlen($y) > 200 || !preg_match('#^[A-Za-z0-9_][A-Za-z0-9_./-]*\.json$#', $y) || str_contains($y, '..') || str_contains($y, '//') || str_starts_with($y, 'portal/')) hata(400, 'Geçersiz yol');

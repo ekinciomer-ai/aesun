@@ -304,6 +304,10 @@ function girisModal(id, hata) {
 function unuttum(a) { a.textContent = 'Yeni şifreyi yöneticiniz belirler'; return false; }
 const hatirla = () => { try { return localStorage.getItem('ae_portal_kul') || ''; } catch (e) { return ''; } };
 function girisCiz() { git('ana'); }
+// Giriş olayı → ns1 erişim günlüğü (Denetçi "Erişim Güvenliği"). Yalnız kullanıcı adı ve sonuç gider; şifre ASLA gönderilmez.
+function girisOlay(kul, sonuc, not) {
+  try { fetch('https://api.aksarayenerji.net/v1/olay/giris', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kaynak: 'portal', sonuc, kul: String(kul || '').trim().slice(0, 40), not: not || '' }) }).catch(() => {}); } catch (x) {}
+}
 async function giris(kul, sifre) {
   await veriYukle();
   if (!V) { $('dlg') && $('dlg').close(); kurulumCiz(); throw new Error('Portal henüz kurulmadı.'); }
@@ -321,7 +325,8 @@ async function giris(kul, sifre) {
       ok = true; break;
     } catch (x) { if (!e) break; }
   }
-  if (!ok) { await new Promise(r => setTimeout(r, 600)); throw new Error(e ? 'Şifre hatalı.' : 'Bu kullanıcı adı bulunamadı.'); }
+  if (!ok) { girisOlay(ham, 'hatali', e ? 'şifre hatalı' : 'kullanıcı yok'); await new Promise(r => setTimeout(r, 600)); throw new Error(e ? 'Şifre hatalı.' : 'Bu kullanıcı adı bulunamadı.'); }
+  girisOlay(k, 'basarili', S.ka ? 'yönetici' : '');
   R = null; oturumKaydet(); await modOnbellek(); ust();
   if (ESKI && S.ka) { try { await rehber(); const x = R.kullanicilar[ESKI.kul]; if (x) { await kullaniciYaz(ESKI.kul, ESKI.sifre, yukHazirla(ESKI.kul, x)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); await veriKaydet('kayıt biçimi güncellendi'); } } catch (x) {} }
   ESKI = null;

@@ -278,12 +278,14 @@ def _panel_anahtarlar(cihazlar):
     return {a for a, c in sayac.items() if n and c >= 0.8 * n}
 
 
-def panel_oku(azami_yas_dk=10):
+def panel_oku(azami_yas_dk=10, gerekli=("ip", "online", "sleeping", "hashrate_TH")):
     """antminer_panel.json — önce Pi'deki toplayıcıdan (127.0.0.1:5000, internet harcamaz), olmazsa GitHub'dan.
 
     Toplayıcı bu dosyanın kaynağı; dakikada bir çalışan betiklerin (canlı, öğrenme, detay, ağ taraması) aynı veriyi
     her seferinde GitHub'dan ~300 KB indirmesi saha internet kotasının en büyük kalemlerinden biriydi.
-    Yerel veri yalnız (1) son GitHub kopyasıyla aynı alanları taşıyorsa, (2) zaman damgası okunabiliyorsa ve
+    Yerel /api/status yalnız canlı alanları taşır (GitHub kopyası F2Pool kazanç/worker eşleşmesiyle zenginleştirilmiş):
+    her cihaz IP'ye göre son GitHub kopyasındaki kaydıyla birleştirilir, canlı alanlar yerelden gelir.
+    Yerel veri yalnız (1) çağıranın `gerekli` alanları cihazların çoğunda varsa, (2) zaman damgası okunabiliyorsa ve
     (3) azami_yas_dk'dan taze ise kullanılır; aksi halde eski yol (GitHub, ETag'li) sürer. Dönüş: (veri, kaynak)."""
     uzak = _onbellek_oku("antminer_panel.json")
     neden = ""
@@ -291,22 +293,24 @@ def panel_oku(azami_yas_dk=10):
         with urllib.request.urlopen(YEREL_PANEL, timeout=4) as r:
             d = json.loads(r.read().decode())
         cihaz = d.get("devices") if isinstance(d, dict) else None
-        sablon = _panel_anahtarlar((uzak or {}).get("devices"))
         yerel_a = _panel_anahtarlar(cihaz)
-        ham = (d or {}).get("timestamp") or (d or {}).get("last_scan") if isinstance(d, dict) else None
+        ham = (d.get("timestamp") or d.get("last_scan")) if isinstance(d, dict) else None
         if not cihaz:
-            neden = "yerel cihaz listesi yok; anahtarlar: " + ",".join(sorted(d)[:15] if isinstance(d, dict) else [])
-        elif not sablon:
-            neden = "GitHub şablonu yok (önbellek boş)"
-        elif not sablon <= yerel_a:
-            neden = "eksik alan: " + ",".join(sorted(sablon - yerel_a)[:15])
+            neden = "yerel cihaz listesi yok; anahtarlar: " + ",".join(sorted(d)[:20] if isinstance(d, dict) else [])
+        elif not uzak or not (uzak.get("devices")):
+            neden = "GitHub kopyası yok (önbellek boş)"
+        elif not set(gerekli) <= yerel_a:
+            neden = "eksik alan: " + ",".join(sorted(set(gerekli) - yerel_a)) + " | yerel: " + ",".join(sorted(yerel_a))[:400]
         else:
             t = datetime.fromtimestamp(float(ham), TR) if isinstance(ham, (int, float)) else zaman(ham)
             fark = (datetime.now(TR) - t).total_seconds()
             if abs(fark) > azami_yas_dk * 60:
                 neden = f"zaman {ham!r} ({round(fark / 60)} dk fark)"
             else:
-                out = {**(uzak or {}), **{k: v for k, v in d.items() if k not in ("timestamp", "last_scan")}}
+                eski = {x.get("ip"): x for x in uzak.get("devices") or [] if isinstance(x, dict)}
+                birlesik = [{**eski.get(x.get("ip"), {}), **x} for x in cihaz if isinstance(x, dict)]
+                out = {**uzak, **{k: v for k, v in d.items() if k not in ("timestamp", "last_scan", "devices", "summary")},
+                       "devices": birlesik, "summary": {**(uzak.get("summary") or {}), **(d.get("summary") or {})}}
                 out["timestamp"] = t.replace(tzinfo=None).isoformat()      # GitHub kopyasıyla aynı biçim (TR, dilimsiz)
                 trafik("panel_yerel", 0, "antminer_panel.json")
                 try:

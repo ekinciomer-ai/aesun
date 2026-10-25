@@ -43,7 +43,7 @@ def anahtar():
 
 
 def cihazlar():
-    mad, _ = panel_oku()
+    mad, _ = panel_oku(gerekli=("ip", "online", "sleeping"))
     out = []
     for d in (mad or {}).get("devices") or []:
         if not d.get("ip") or not d.get("online"):

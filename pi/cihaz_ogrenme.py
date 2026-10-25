@@ -39,7 +39,7 @@ GRID = list(range(0, 61, 2))   # ortalama ısınma eğrisi için dakika noktalar
 
 # ---------------------------------------------------------------- örnekleme
 def ornek_al():
-    mad, _ = panel_oku()
+    mad, _ = panel_oku(gerekli=("ip", "suffix", "online", "sleeping", "hashrate_TH", "temp_water", "temp_max", "elapsed_hours"))
     if not mad or not mad.get("timestamp"):
         return False
     IZ.mkdir(parents=True, exist_ok=True)

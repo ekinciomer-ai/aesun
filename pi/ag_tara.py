@@ -144,7 +144,7 @@ def main():
 
     kimlik, ksha = gh("n8n/cihaz_kimlik.json")
     kimlik = kimlik or {}
-    mad, _ = panel_oku()
+    mad, _ = panel_oku(gerekli=("ip",))
     taranan = {d.get("ip"): d for d in (mad or {}).get("devices") or []}
     # toplayıcının bugünkü gördüğü kimlikleri kayda geçir
     for d in taranan.values():

@@ -66,6 +66,17 @@ def calis(simdi=None):
         return None
     sorun, bilgi = {}, {}
 
+    # 0) çevrimdışı bekçi (pi/cevrimdisi_bekci.py) dakikada bir çalışıyor mu? (kurulduysa)
+    try:
+        cd = json.loads((AESUN / "cevrimdisi_durum.json").read_text())
+        bilgi["cevrimdisi_bekci"] = {"t": cd.get("t"), "cevrimdisi": cd.get("cevrimdisi", False), "havuz": cd.get("havuz_var")}
+        if cd.get("t") and (simdi - zaman(cd["t"])).total_seconds() > 600:
+            sorun["cevrimdisi_bekci"] = "Çevrimdışı bekçi 10 dk'dır çalışmıyor (internet kesilirse yerel yönetim olmaz)"
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        bilgi["cevrimdisi_bekci"] = f"okunamadı: {str(e)[:60]}"
+
     # 1) ns1: API + ns1 bekçisi
     try:
         s = _get("saglik")

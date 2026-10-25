@@ -30,6 +30,19 @@ ARALIK_DK = 10
 OLAGAN = {"Bildirimler": "15 dk", "İzleme özeti": "30 dk"}
 
 
+
+def _onarim_taze(b, dk=120):
+    """ns1'in son onarımı son 2 saatte mi? Onarım sayacı 24 saat geriye bakar; sorun çözüldükten sonra
+    sayaç sıfırlanana kadar boşuna "sorun" denmesin (25.10: Portal denetimi düzeltildi, sayaç 18'de kaldı)."""
+    from datetime import datetime, timezone
+    try:
+        t = datetime.fromisoformat(str(b.get("son_onarim") or "").split("|")[0].replace("Z", "+00:00"))
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - t).total_seconds() < dk * 60
+    except Exception:
+        return True
+
 def _get(yol, sure=20):
     with urllib.request.urlopen(urllib.request.Request(API + yol, headers={"User-Agent": "aesun-pi-bekci"}), timeout=sure) as r:
         return json.loads(r.read())
@@ -76,7 +89,7 @@ def calis(simdi=None):
                 sorun["gec:" + g["dosya"]] = f"{g['dosya']} {g['yas_dk']} dk'dır güncellenmedi (olağanı ~{g['olagan_dk']:.0f} dk)"
             for u in ((b.get("uclar") or {}).get("kalan") or [])[:5]:          # duman testi: yanıt vermeyen uç
                 sorun["uc:" + u["ad"]] = f"{u['ad']} çalışmıyor — {u['neden']}"
-        if (b.get("onarim_24s") or 0) >= 3:
+        if (b.get("onarim_24s") or 0) >= 3 and _onarim_taze(b):   # eski (2 sa'ten önce bitmiş) onarımlar sorun sayılmaz
             sorun["ns1_onarim"] = f"ns1 son 24 saatte {b['onarim_24s']} kez kendini onardı — kalıcı bir arıza olabilir"
     except Exception as e:
         if "api" not in sorun:

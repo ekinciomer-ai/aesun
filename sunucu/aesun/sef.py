@@ -225,7 +225,13 @@ def main():
             acik.append({"sorun": mesaj, "neden": "ns1 — " + ("işler kapalı (ETKIN=0)" if dj.get("etkin") is False else "şef müdahale etti, 40 dk'da düzelmedi")})
         else:
             acik.append({"sorun": mesaj, "neden": "Pi tarafı ya da dış servis — şefin çözüm yolu yok"})
-    if (bk.get("onarim_24s") or 0) >= 3:
+    def _taze(v, dk=120):            # son onarım 2 saatten eskiyse sorun bitmiştir; 24 saatlik sayaç tek başına "açık" sayılmaz
+        try:
+            t = datetime.fromisoformat(str(v or "").split("|")[0].replace("Z", "+00:00"))
+            return (datetime.now(timezone.utc) - (t if t.tzinfo else t.replace(tzinfo=timezone.utc))).total_seconds() < dk * 60
+        except Exception:
+            return True
+    if (bk.get("onarim_24s") or 0) >= 3 and _taze(bk.get("son_onarim")):
         acik.append({"sorun": f"ns1 son 24 saatte {bk['onarim_24s']} kez kendini onardı", "neden": "kalıcı arıza olabilir"})
 
     gecmis = (st.get("gecmis") or []) + eylemler

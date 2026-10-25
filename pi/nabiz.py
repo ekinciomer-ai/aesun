@@ -178,6 +178,8 @@ def main():
         "ag": ag_sayac(),
         "kapasite": kapasite(),
         "gh_trafik": gh_trafik(),
+        "panel_yerel": (json.loads((Path.home() / ".aesun" / "panel_yerel.json").read_text())
+                        if (Path.home() / ".aesun" / "panel_yerel.json").exists() else None),
     }
     icerik = base64.b64encode(json.dumps(govde, ensure_ascii=False, indent=1).encode()).decode()
     for deneme in range(0 if sunucu.yalniz_sunucu() else 2):

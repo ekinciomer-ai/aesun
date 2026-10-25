@@ -286,19 +286,39 @@ def panel_oku(azami_yas_dk=10):
     Yerel veri yalnız (1) son GitHub kopyasıyla aynı alanları taşıyorsa, (2) zaman damgası okunabiliyorsa ve
     (3) azami_yas_dk'dan taze ise kullanılır; aksi halde eski yol (GitHub, ETag'li) sürer. Dönüş: (veri, kaynak)."""
     uzak = _onbellek_oku("antminer_panel.json")
+    neden = ""
     try:
         with urllib.request.urlopen(YEREL_PANEL, timeout=4) as r:
             d = json.loads(r.read().decode())
         cihaz = d.get("devices") if isinstance(d, dict) else None
         sablon = _panel_anahtarlar((uzak or {}).get("devices"))
-        if cihaz and sablon and sablon <= _panel_anahtarlar(cihaz):
-            ham = d.get("timestamp") or d.get("last_scan")
+        yerel_a = _panel_anahtarlar(cihaz)
+        ham = (d or {}).get("timestamp") or (d or {}).get("last_scan") if isinstance(d, dict) else None
+        if not cihaz:
+            neden = "yerel cihaz listesi yok; anahtarlar: " + ",".join(sorted(d)[:15] if isinstance(d, dict) else [])
+        elif not sablon:
+            neden = "GitHub şablonu yok (önbellek boş)"
+        elif not sablon <= yerel_a:
+            neden = "eksik alan: " + ",".join(sorted(sablon - yerel_a)[:15])
+        else:
             t = datetime.fromtimestamp(float(ham), TR) if isinstance(ham, (int, float)) else zaman(ham)
-            if abs((datetime.now(TR) - t).total_seconds()) <= azami_yas_dk * 60:
+            fark = (datetime.now(TR) - t).total_seconds()
+            if abs(fark) > azami_yas_dk * 60:
+                neden = f"zaman {ham!r} ({round(fark / 60)} dk fark)"
+            else:
                 out = {**(uzak or {}), **{k: v for k, v in d.items() if k not in ("timestamp", "last_scan")}}
                 out["timestamp"] = t.replace(tzinfo=None).isoformat()      # GitHub kopyasıyla aynı biçim (TR, dilimsiz)
                 trafik("panel_yerel", 0, "antminer_panel.json")
+                try:
+                    (AESUN / "panel_yerel.json").write_text(json.dumps({"t": datetime.now(TR).isoformat(timespec="seconds"), "neden": "ok"}))
+                except Exception:
+                    pass
                 return out, "yerel"
+    except Exception as e:
+        neden = "hata: " + str(e)[:120]
+    try:   # neden yerel kullanılamadı — nabız pi_nabiz'e taşır (teşhis)
+        (AESUN / "panel_yerel.json").write_text(json.dumps({"t": datetime.now(TR).isoformat(timespec="seconds"), "neden": neden},
+                                                           ensure_ascii=False))
     except Exception:
         pass
     v, _ = gh("antminer_panel.json")

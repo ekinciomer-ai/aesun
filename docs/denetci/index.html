@@ -130,7 +130,7 @@ const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', 
 let S = null;
 let BEL = '';
 let VERI = {};
-let SEKME = (location.hash || '').slice(1) === 'akis' ? 'akis' : 'tumu';
+let SEKME = ['akis', 'guvenlik'].includes((location.hash || '').slice(1)) ? location.hash.slice(1) : 'tumu';
 let SECILI_DUGUM = null;
 let DENETIM_FILTRE = 'hepsi';
 let BILDIRIM_KONU = 'hepsi';
@@ -240,7 +240,8 @@ async function tumVerileriYukle() {
       analizDurum,
       aesunSon,
       musteriListe,
-      internet
+      internet,
+      guvenlik
     ] = await Promise.all([
       jsonAl(API_KOK + '/v1/saglik'),
       jsonAl(API_KOK + '/v1/bekci'),
@@ -256,13 +257,14 @@ async function tumVerileriYukle() {
       dosya('n8n/analiz/durum.json'),
       dosya('n8n/aesun_son.json'),
       (S && S.ka && BEL) ? jsonAl(API_KOK + '/v1/musteri/liste', BEL) : Promise.resolve(null),
-      dosya('n8n/analiz/internet.json')
+      dosya('n8n/analiz/internet.json'),
+      dosya('n8n/guvenlik_ns1.json')
     ]);
 
     VERI = {
       saglik, bekciNs1, denetim, aiTani, isHatalari, sef,
       sistemBekci, piNabiz, cihazBekci, bildirimDurum, bildirimKayit,
-      analizDurum, aesunSon, musteriListe, internet
+      analizDurum, aesunSon, musteriListe, internet, guvenlik
     };
     SON_YUKLEME = new Date();
     ciz();
@@ -1578,6 +1580,111 @@ function kapasiteCiz() {
   return h;
 }
 
+// ---- 🛡️ SALDIRI & HATALI GİRİŞ (ns1: SSH, fail2ban, API) ----
+let GUV_ARA = '';
+let GUV_FILTRE = 'hepsi';
+function guvenlikCiz() {
+  const G = VERI.guvenlik;
+  if (!G || G._hata) {
+    return `<div class="kart"><h2>🛡️ Saldırı &amp; Hatalı Giriş</h2><div class="bos">${G && G._hata === 'oturum_yok' ? 'Güvenlik kayıtları için Portal üzerinden yetkili oturum açın.' : 'Güvenlik özeti henüz oluşmadı (n8n/guvenlik_ns1.json · ' + esc(G && G._hata) + '). ns1 bekçisi 15 dk\'da bir üretir.'}</div></div>`;
+  }
+  const o = G.ozet || {}, f = G.fail2ban || {}, at = o.api_tur || {};
+  const by = o.ssh_basarili_yontem || {};
+  let h = `<div class="kart" id="bolum-guvenlik">
+    <h2><span>🛡️ Saldırı &amp; Hatalı Giriş — ns1 sunucu (son 24 saat)</span>
+      <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(G.guncellendi))}</b> ${yasEtiket(dkOnce(G.guncellendi), 20, 60)}</span></h2>`;
+  if ((G.uyarilar || []).length) h += `<div class="hata" style="margin-bottom:12px"><b>⚠️ Dikkat:</b><ul style="margin:6px 0 0 18px">${G.uyarilar.map(u => `<li>${esc(u)}</li>`).join('')}</ul></div>`;
+  else h += `<div class="uyari-kutu" style="background:#ECFDF5;border-color:#A7F3D0;color:#065F46;margin-bottom:12px"><b>✅ Kritik bulgu yok.</b> Başarılı girişlerin tamamı anahtarla; ısrarcı adresler fail2ban ile engelleniyor.</div>`;
+  h += `<div class="kpi">
+    <div class="kpi-kutu" style="--kp-r:#D7262E;cursor:default"><small>SSH hatalı deneme</small><b>${nf(o.ssh_basarisiz_24s)}</b><span class="alt-k">${nf(o.ssh_farkli_ip_24s)} farklı adresten</span></div>
+    <div class="kpi-kutu" style="--kp-r:#7C3AED;cursor:default"><small>Şu an engelli adres</small><b>${nf(o.engelli_su_an)}</b><span class="alt-k">fail2ban ${f.etkin === 'active' ? '✅ çalışıyor' : '⚠️ ' + esc(f.etkin || '?')} · toplam ${nf(o.engel_toplam)} engel</span></div>
+    <div class="kpi-kutu" style="--kp-r:#F08A24;cursor:default"><small>API yetkisiz (401/403)</small><b>${nf(at['yetkisiz'] || 0)}</b><span class="alt-k">yanlış/eksik anahtar</span></div>
+    <div class="kpi-kutu" style="--kp-r:#B45309;cursor:default"><small>API tarama (zafiyet arama)</small><b>${nf(at['tarama'] || 0)}</b><span class="alt-k">${nf(at['hatalı istek'] || 0)} hatalı istek · ${nf(o.api_istek_24s)} toplam istek</span></div>
+    <div class="kpi-kutu" style="--kp-r:${by.parola ? '#D7262E' : '#1E9E5A'};cursor:default"><small>Başarılı SSH girişi</small><b>${nf(o.ssh_basarili_24s)}</b><span class="alt-k">anahtar ${nf(by.anahtar || 0)} · parola ${nf(by.parola || 0)} · ${nf(o.ssh_basarili_kaynak_sayisi)} kaynak</span></div>
+  </div>`;
+
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>⏱️ Saatlik saldırı (24 sa)</h3>${guvSaatlik(G.saatlik || [])}</div>
+    <div class="boru-adim"><h3>📅 Son 7 gün — SSH denemesi ve yeni engel</h3>${guvGunluk(G.gunluk || [])}</div>
+  </div>`;
+
+  // Saldırgan tablosu
+  const L = (G.saldirganlar || []).filter(x => (!GUV_ARA || x.ip.includes(GUV_ARA)) &&
+    (GUV_FILTRE === 'hepsi' || (GUV_FILTRE === 'acik' && !x.engel.length) || (GUV_FILTRE === 'engelli' && x.engel.length) || (GUV_FILTRE === 'ssh' && x.ssh) || (GUV_FILTRE === 'api' && x.api)));
+  h += `<h3>🎯 Saldıran adresler</h3>
+    <div class="filtre-satir">
+      <input class="ara" placeholder="IP ara…" value="${esc(GUV_ARA)}" oninput="GUV_ARA=this.value;clearTimeout(window._ga);window._ga=setTimeout(()=>{ciz();const e=document.querySelector('#bolum-guvenlik input.ara');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},300)">
+      ${[['hepsi', 'Tümü'], ['acik', 'Engelsiz'], ['engelli', 'Engelli'], ['ssh', 'SSH'], ['api', 'API']].map(([k, a]) => `<button class="btn${GUV_FILTRE === k ? ' aktif' : ''}" style="padding:4px 10px;font-size:12.5px" onclick="GUV_FILTRE='${k}';ciz()">${a}</button>`).join('')}
+    </div>
+    <div class="tablo-kutu" style="margin-bottom:14px"><table>
+    <thead><tr><th>Adres</th><th class="sag">SSH deneme</th><th class="sag">API</th><th>API türü</th><th>Son deneme</th><th>Durum</th></tr></thead><tbody>` +
+    (L.length ? L.map(x => `<tr>
+      <td><code>${esc(x.ip)}</code>${x.basarili_giris ? ' <span class="et k">başarılı giriş de var</span>' : ''}</td>
+      <td class="sag"><b>${nf(x.ssh)}</b></td><td class="sag">${nf(x.api)}</td>
+      <td style="font-size:12px">${Object.entries(x.api_tur || {}).map(([k, v]) => esc(k) + ' ' + v).join(' · ') || '—'}</td>
+      <td style="font-size:12px">${x.son ? esc(trZaman(x.son)) : '—'}</td>
+      <td>${x.engel.length ? `<span class="et ok">🚫 engelli · ${esc(x.engel.join(', '))}</span>` : (x.ssh >= 5 ? '<span class="et k">engelsiz</span>' : '<span class="et">izleniyor</span>')}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="bos">Kayıt yok.</td></tr>') + `</tbody></table></div>`;
+
+  // Kullanıcı adları + SSH türleri
+  const ka = G.kullanici_adlari || [], kaM = Math.max(1, ...ka.map(x => x.sayi));
+  const tr = Object.entries(G.ssh_turler || {});
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>👤 Denenen kullanıcı adları</h3>${ka.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${ka.map(x => `<span style="display:inline-flex;gap:5px;align-items:center;padding:3px 9px;border-radius:99px;font-size:12.5px;background:rgba(215,38,46,${(0.08 + 0.32 * x.sayi / kaM).toFixed(2)});border:1px solid #F5C2C4"><code style="background:none">${esc(x.ad)}</code><b>${nf(x.sayi)}</b></span>`).join('')}</div>` : '<div class="bos">Yok.</div>'}</div>
+    <div class="boru-adim"><h3>🔐 SSH deneme türleri</h3>${tr.length ? tr.map(([k, v]) => `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--c)"><span>${esc(k)}</span><b>${nf(v)}</b></div>`).join('') : '<div class="bos">Yok.</div>'}</div>
+  </div>`;
+
+  // API yolları + fail2ban
+  const ay = G.api_yollar || [];
+  const kur = Object.entries(f.kurallar || {});
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>🌐 API'de denenen adresler (reddedilen)</h3><div class="tablo-kutu"><table><thead><tr><th>Yol</th><th class="sag">Kod</th><th class="sag">Sayı</th></tr></thead><tbody>` +
+      (ay.length ? ay.map(x => `<tr><td><code>${esc(x.yol)}</code></td><td class="sag"><span class="et ${x.kod === 401 || x.kod === 403 ? 'u' : ''}">${x.kod}</span></td><td class="sag">${nf(x.sayi)}</td></tr>`).join('') : '<tr><td colspan="3" class="bos">Reddedilen istek yok.</td></tr>') +
+    `</tbody></table></div></div>
+    <div class="boru-adim"><h3>🚫 fail2ban kuralları</h3><div class="tablo-kutu" style="margin-bottom:10px"><table><thead><tr><th>Kural</th><th class="sag">Şu an engelli</th><th class="sag">Toplam engel</th><th class="sag">Takipte</th></tr></thead><tbody>` +
+      (kur.length ? kur.map(([k, v]) => `<tr><td><b>${esc(k)}</b><br><small style="color:var(--y)">${k === 'sshd' ? '10 dk 5 hata → 1 sa (artan)' : k === 'ssh-kalici' ? '24 sa 10 hata → kalıcı' : k === 'recidive' ? '2 kez engellenen → kalıcı' : ''}</small></td><td class="sag">${nf(v.su_an)}</td><td class="sag">${nf(v.toplam)}</td><td class="sag">${nf(v.basarisiz_su_an)}</td></tr>`).join('') : '<tr><td colspan="4" class="bos">Kural bilgisi yok.</td></tr>') +
+    `</tbody></table></div>
+    <h3 style="font-size:13px">Son engel olayları</h3><div style="max-height:220px;overflow:auto;font-size:12px">` +
+      ((G.olaylar || []).slice(0, 40).map(x => `<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed var(--c)"><span style="color:var(--y);white-space:nowrap">${esc(trZaman(x.t))}</span><span class="et ${x.olay === 'Ban' ? 'k' : 'ok'}">${x.olay === 'Ban' ? 'engel' : x.olay === 'Unban' ? 'kaldırıldı' : 'yeniden'}</span><code>${esc(x.ip)}</code><span style="color:var(--y)">${esc(x.kural)}</span></div>`).join('') || '<div class="bos">Olay yok.</div>') +
+    `</div></div>
+  </div>
+  <div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)"><b>Kaynak:</b> ns1 SSH günlüğü, fail2ban ve API erişim günlüğü (bekçi 15 dk'da bir okur, hiçbir ayar değiştirmez). Başarılı giriş yapan adresler gösterilmez. ${esc(G.not || '')}</div>
+  </div>`;
+  return h;
+}
+function guvSaatlik(saat) {
+  if (!saat.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 210, sol = 40, alt = 22, ust = 10;
+  const maks = Math.max(1, ...saat.map(s => s.ssh + s.api)), bw = (W - sol - 4) / saat.length;
+  let svg = '';
+  for (let i = 0; i <= 3; i++) { const v = maks * i / 3, y = H - alt - (H - alt - ust) * i / 3; svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${nf(v)}</text>`; }
+  saat.forEach((s, i) => {
+    const x = sol + i * bw, hs = (H - alt - ust) * s.ssh / maks, ha = (H - alt - ust) * s.api / maks;
+    svg += `<rect x="${x + 1}" y="${H - alt - hs}" width="${Math.max(1, bw - 2)}" height="${hs}" fill="#D7262E"><title>${s.saat}:00 SSH ${s.ssh}</title></rect>`;
+    svg += `<rect x="${x + 1}" y="${H - alt - hs - ha}" width="${Math.max(1, bw - 2)}" height="${ha}" fill="#F08A24"><title>${s.saat}:00 API ${s.api}</title></rect>`;
+    if (i % 3 === 0) svg += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#5B6470">${s.saat.slice(11)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="font-size:11.5px;color:var(--y)"><i style="display:inline-block;width:9px;height:9px;background:#D7262E;border-radius:2px"></i> SSH &nbsp; <i style="display:inline-block;width:9px;height:9px;background:#F08A24;border-radius:2px"></i> API (yetkisiz + tarama)</div>`;
+}
+function guvGunluk(gun) {
+  if (!gun.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 210, sol = 44, alt = 22, ust = 10;
+  const maks = Math.max(1, ...gun.map(g => g.ssh)), mE = Math.max(1, ...gun.map(g => g.engel));
+  const bw = (W - sol - 30) / gun.length;
+  let svg = '';
+  for (let i = 0; i <= 3; i++) { const v = maks * i / 3, y = H - alt - (H - alt - ust) * i / 3; svg += `<line x1="${sol}" x2="${W - 26}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${nf(v)}</text>`; }
+  let cz = '';
+  gun.forEach((g, i) => {
+    const x = sol + i * bw, hh = (H - alt - ust) * g.ssh / maks;
+    svg += `<rect x="${x + 6}" y="${H - alt - hh}" width="${bw - 12}" height="${hh}" rx="3" fill="#D7262E" opacity=".8"><title>${g.gun}: ${g.ssh} SSH denemesi · ${g.engel} engel</title></rect>`;
+    svg += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#5B6470">${g.gun.slice(8, 10)}.${g.gun.slice(5, 7)}</text>`;
+    cz += `${x + bw / 2},${H - alt - (H - alt - ust) * g.engel / mE} `;
+  });
+  svg += `<polyline points="${cz}" fill="none" stroke="#7C3AED" stroke-width="2"/>` + gun.map((g, i) => `<circle cx="${sol + i * bw + bw / 2}" cy="${H - alt - (H - alt - ust) * g.engel / mE}" r="3" fill="#7C3AED"><title>${g.gun}: ${g.engel} engel</title></circle>`).join('');
+  svg += `<text x="${W - 22}" y="${ust + 8}" font-size="10" fill="#7C3AED">${nf(mE)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="font-size:11.5px;color:var(--y)"><i style="display:inline-block;width:9px;height:9px;background:#D7262E;border-radius:2px"></i> SSH denemesi &nbsp; <i style="display:inline-block;width:14px;height:2px;background:#7C3AED;vertical-align:middle"></i> yeni engel (sağ eksen)</div>`;
+}
+
 function durumAnaliziCiz() {
   const { analizDurum, aesunSon } = VERI;
   if (!analizDurum || analizDurum._hata) {
@@ -1743,6 +1850,7 @@ function ciz() {
     <button class="${SEKME === 'analiz' ? 'on' : ''}" onclick="SEKME='analiz';ciz()">📊 Durum Analizi &amp; Performans</button>
     <button class="${SEKME === 'internet' ? 'on' : ''}" onclick="SEKME='internet';ciz()">🌐 İnternet Kullanımı</button>
     <button class="${SEKME === 'akis' ? 'on' : ''}" onclick="SEKME='akis';ciz()">🔁 Veri Akışı (↓↑)</button>
+    <button class="${SEKME === 'guvenlik' ? 'on' : ''}" onclick="SEKME='guvenlik';ciz()">🛡️ Saldırı &amp; Hatalı Giriş${VERI.guvenlik && VERI.guvenlik.ozet ? ' (' + nf(VERI.guvenlik.ozet.ssh_basarisiz_24s + (VERI.guvenlik.ozet.api_red_24s || 0)) + ((VERI.guvenlik.uyarilar || []).length ? '!' : '') + ')' : ''}</button>
   </div>`;
 
   if (!BEL) {
@@ -1752,7 +1860,7 @@ function ciz() {
   }
 
   if (SEKME === 'tumu') {
-    h += sematikCiz() + aiVeKontrollerCiz() + yapilanIslerCiz() + sefVeBekciCiz() + bildirimlerCiz() + durumAnaliziCiz();
+    h += sematikCiz() + aiVeKontrollerCiz() + yapilanIslerCiz() + sefVeBekciCiz() + bildirimlerCiz() + durumAnaliziCiz() + guvenlikCiz();
   } else if (SEKME === 'ai') {
     h += sematikCiz() + aiVeKontrollerCiz();
   } else if (SEKME === 'isler') {
@@ -1765,6 +1873,8 @@ function ciz() {
     h += sematikCiz() + durumAnaliziCiz();
   } else if (SEKME === 'internet') {
     h += internetCiz() + kapasiteCiz();
+  } else if (SEKME === 'guvenlik') {
+    h += guvenlikCiz();
   } else if (SEKME === 'akis') {
     h += akisCiz() + kapasiteCiz();
   }

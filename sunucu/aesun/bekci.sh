@@ -122,6 +122,9 @@ if [ "$tg" -gt 0 ] || [ $(( simdi - $(cat $tt 2>/dev/null || echo 0) )) -gt 840 
 ut=$D/.uclar_son; if [ $(( simdi - $(cat $ut 2>/dev/null || echo 0) )) -gt 540 ] && [ -f $D/izleme/duman_testi.py ]; then echo $simdi > $ut
   timeout 300 python3 $D/izleme/duman_testi.py --json > $D/uclar_durum.json.tmp 2>/dev/null; mv -f $D/uclar_durum.json.tmp $D/uclar_durum.json; fi
 
+# güvenlik özeti (SSH denemeleri, fail2ban, API 401/403/tarama) — 15 dk'da bir, yalnız okur → Denetçi "Saldırı & Hatalı Giriş"
+[ -f $D/guvenlik.py ] && timeout 300 python3 $D/guvenlik.py >/dev/null 2>&1 || true
+
 onarim24=$(awk -F'|' -v t="$(date -d '-24 hours' -Iseconds)" '$1>t' $D/bekci_onarim.log 2>/dev/null | wc -l)
 son_onarim=$(tail -1 $D/bekci_onarim.log 2>/dev/null)
 python3 - "$DURUM" "$iso" "$sorun_api" "$sorun_isler" "$es" "$na" "$pidsA" "$pidsI" "$onarim24" "$son_onarim" "$isler_json" "$veri_json" "${ayrinti[@]+"${ayrinti[@]}"}" <<'PY'

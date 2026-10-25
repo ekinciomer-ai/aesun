@@ -293,6 +293,28 @@ def _panel_neden(gerekli, neden):
         pass
 
 
+def _panel_dosya(gerekli, azami_yas_dk):
+    """Toplayıcının diske yazdığı tam panel JSON'u (varsa): ~/SAHA altında adında "panel" geçen, taze, cihaz listesi
+    çağıranın alanlarını taşıyan dosya. Dönüş: (veri, yol) ya da (None, aday listesi)."""
+    import time
+    adaylar = []
+    try:
+        kok = Path.home() / "SAHA"
+        for f in list(kok.glob("*/*panel*.json")) + list(kok.glob("*/*/*panel*.json")):
+            if "venv" in f.parts or f.stat().st_size < 1000:
+                continue
+            yas = (time.time() - f.stat().st_mtime) / 60
+            adaylar.append(f"{f.relative_to(kok)} ({yas:.0f} dk)")
+            if yas > azami_yas_dk:
+                continue
+            d = json.loads(f.read_text())
+            if isinstance(d, dict) and d.get("devices") and set(gerekli) <= _panel_anahtarlar(d["devices"]) and d.get("timestamp"):
+                return d, str(f.relative_to(kok))
+    except Exception as e:
+        adaylar.append("hata: " + str(e)[:60])
+    return None, adaylar
+
+
 def panel_oku(azami_yas_dk=10, gerekli=("ip", "online", "sleeping", "hashrate_TH")):
     """antminer_panel.json — önce Pi'deki toplayıcıdan (127.0.0.1:5000, internet harcamaz), olmazsa GitHub'dan.
 
@@ -315,7 +337,18 @@ def panel_oku(azami_yas_dk=10, gerekli=("ip", "online", "sleeping", "hashrate_TH
         elif not uzak or not (uzak.get("devices")):
             neden = "GitHub kopyası yok (önbellek boş)"
         elif not set(gerekli) <= yerel_a:
-            neden = "eksik alan: " + ",".join(sorted(set(gerekli) - yerel_a)) + " | yerel: " + ",".join(sorted(yerel_a))[:400]
+            tam, yol_ = _panel_dosya(gerekli, azami_yas_dk)       # API hafif; toplayıcının diskteki tam dosyası uygun mu
+            if tam is not None:
+                try:
+                    t = zaman(tam["timestamp"])
+                    if abs((datetime.now(TR) - t).total_seconds()) <= azami_yas_dk * 60:
+                        trafik("panel_yerel", 0, "antminer_panel.json")
+                        _panel_neden(gerekli, "ok (dosya: " + yol_ + ")")
+                        return tam, "yerel"
+                except Exception:
+                    pass
+            neden = ("eksik alan: " + ",".join(sorted(set(gerekli) - yerel_a)) + " | yerel: " + ",".join(sorted(yerel_a))[:300]
+                     + " | dosya adayları: " + "; ".join(yol_ if isinstance(yol_, list) else [str(yol_)])[:300])
         else:
             t = datetime.fromtimestamp(float(ham), TR) if isinstance(ham, (int, float)) else zaman(ham)
             fark = (datetime.now(TR) - t).total_seconds()

@@ -517,6 +517,7 @@ async function git(s) {
   if (!n) h += '<div class="kart" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%)">Henüz uygulama yok.</div>';
   h += '</div>';
   $('ana').innerHTML = h;
+  if (window.uzayKur) uzayKur(vs).catch(e => console.warn('uzay', e));
 }
 
 // ---- kurulum (veri.json yokken) ----
@@ -732,6 +733,149 @@ function modSil(id) {
   }
   git('ana');
 })();
+</script>
+<style>
+/* ---- Ana ekran: 3D uzay görünümü (WebGL yoksa eski halka görünümü kalır) ---- */
+body.uzay{--uzbg:#06070B;--uzink:#E9EBF3;--uzmut:#8C93A8;--uzdim:#596077;--uzust:rgba(10,11,16,.72);--uzline:#1C2030;--uzbtn:rgba(16,19,29,.8);--uzsh:#000}
+body.uzay[data-uz=kor]{--uzbg:#17191D;--uzink:#F2F2F3;--uzmut:#A0A4AC;--uzdim:#6C717A;--uzust:rgba(23,25,29,.8);--uzline:#2A2D33;--uzbtn:rgba(35,38,44,.85)}
+body.uzay[data-uz=gece]{--uzbg:#0A1730;--uzink:#F3EEDF;--uzmut:#A9B3C7;--uzdim:#6E7C98;--uzust:rgba(10,23,48,.78);--uzline:#1B2E52;--uzbtn:rgba(16,34,66,.85)}
+body.uzay[data-uz=acik]{--uzbg:#F3F4F6;--uzink:#2B2F35;--uzmut:#5B6470;--uzdim:#8A9099;--uzust:rgba(255,255,255,.85);--uzline:#E2E5EA;--uzbtn:rgba(255,255,255,.9);--uzsh:rgba(255,255,255,.9)}
+body.uzay{background:var(--uzbg);color:var(--uzink)}
+body.uzay .ust{background:var(--uzust);border-bottom-color:var(--uzline);backdrop-filter:blur(8px);position:relative;z-index:3}
+body.uzay .ust .marka{color:var(--uzink)}body.uzay .ust .bag{color:var(--uzink)}body.uzay .ust .bag:hover{color:#D7262E}body.uzay .ust .oturum{color:var(--uzmut)}
+body.uzay .ust .marka small{color:var(--uzmut)}
+body.uzay main{max-width:none;padding:0;position:relative}
+body.uzay footer{color:var(--uzdim);position:relative;z-index:2}
+body.uzay .baslik,body.uzay .alt{position:relative;z-index:2}
+body.uzay .baslik{color:var(--uzink);padding-top:22px;font-size:26px;letter-spacing:.02em}
+body.uzay .alt{color:var(--uzmut)}
+.hub.uz3{width:100%;max-width:none;aspect-ratio:auto;height:min(78vh,820px);min-height:520px;margin:-74px 0 0;overflow:hidden}
+.hub.uz3 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
+.hub.uz3 canvas:active{cursor:grabbing}
+.hub.uz3 .halka,.hub.uz3 .merkez{display:none}
+.hub.uz3 .hm{z-index:2;width:140px;transition:opacity .25s;will-change:transform}
+.hub.uz3 .hd{width:62px;height:62px;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--r) 70%,#fff),var(--r) 55%,color-mix(in srgb,var(--r) 55%,#000));box-shadow:0 0 0 1px color-mix(in srgb,var(--r) 60%,#fff),0 0 26px color-mix(in srgb,var(--r) 70%,transparent),0 0 60px color-mix(in srgb,var(--r) 35%,transparent)}
+.hub.uz3 .hd svg{width:28px;height:28px}
+.hub.uz3 .hm:hover .hd,.hub.uz3 .hm:focus-visible .hd{transform:scale(1.12);box-shadow:0 0 0 2px #fff,0 0 34px var(--r),0 0 80px color-mix(in srgb,var(--r) 50%,transparent)}
+.hub.uz3 .ha{color:var(--uzink);text-shadow:0 1px 3px var(--uzsh),0 0 10px var(--uzsh);font-size:13.5px}
+.hub.uz3 .hm.kilit .ha{color:var(--uzmut)}
+.hub.uz3 .hm .hac{display:block;font-size:11px;font-weight:400;color:var(--uzmut);max-width:150px;text-align:center;line-height:1.3;opacity:0;transition:opacity .2s;text-shadow:0 1px 3px var(--uzsh)}
+.hub.uz3 .hm:hover .hac,.hub.uz3 .hm:focus-visible .hac{opacity:1}
+.uzk{position:absolute;z-index:3;left:16px;bottom:16px;display:flex;gap:6px;align-items:center}
+.uzk button{width:38px;height:38px;border-radius:10px;border:1px solid var(--uzline);background:var(--uzbtn);color:var(--uzink);font:inherit;font-size:17px;cursor:pointer}
+.uzk span{font-size:11px;color:var(--uzdim);margin-left:6px}
+.uzl{position:absolute;z-index:2;pointer-events:none;font:600 10.5px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--uzdim);transform:translate(-50%,-50%);white-space:nowrap}
+.uzm{position:absolute;z-index:1;pointer-events:none;transform:translate(-50%,-50%);text-align:center}
+.uzm b{display:block;font-size:20px;letter-spacing:.2em;color:#fff;text-shadow:0 0 20px rgba(215,38,46,.6)}.uzm b i{font-style:normal;color:#F0525A}
+.uzm small{display:block;font-size:10.5px;letter-spacing:.18em;color:#8C93A8;text-transform:uppercase;margin-top:2px}
+@media (max-width:640px){
+ .hub.uz3{height:auto;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:26px 8px;padding:250px 12px 30px;margin-top:-60px}
+ .hub.uz3 canvas{height:250px;cursor:default}
+ .hub.uz3 .hm{position:relative;left:auto!important;top:auto!important;transform:none!important;width:auto;opacity:1!important}
+ .hub.uz3 .hm .hac{opacity:1}
+ .uzl,.uzk{display:none}
+}
+@media (prefers-reduced-motion:reduce){.hub.uz3 .hm{transition:none}}
+</style>
+<script>
+'use strict';
+/* Portal ana ekranı — 3D uzay. Uygulamalar yörüngede döner; dış kuşaktaki veri kaynaklarından uygulamalara,
+   uygulamalardan merkeze akan ışıklar veri akışını gösterir. Tıklama davranışı aynı kalır (mevcut düğmeler). */
+let UZ = null;
+// Renk temaları: kor = antrasit/kırmızı (marka), gece = lacivert/altın, acik = beyaz zemin
+const UZ_TEMA = {
+  kor:  { bg: 0x17191D, acik: false, yildiz: [.75, .75, .78], halka: 0x8A8F98, ic: 0xD7262E, kus: [[.95, .25, .28], [.75, .77, .8], [1, 1, 1]], k1: 0xF0525A, k2: 0xC9CDD4, akis: null },
+  gece: { bg: 0x0A1730, acik: false, yildiz: [.85, .82, .7], halka: 0xC9A45C, ic: 0xE9B44C, kus: [[.95, .75, .35], [.55, .7, 1], [.9, .9, .95]], k1: 0xE9B44C, k2: 0x8FB4FF, akis: null },
+  acik: { bg: 0xF3F4F6, acik: true, yildiz: [.62, .66, .72], halka: 0x9AA2AD, ic: 0xD7262E, kus: [[.84, .15, .18], [.35, .39, .44], [.6, .64, .7]], k1: 0xD7262E, k2: 0x3A3F47, akis: null }
+};
+const uzTemaAd = () => { const q = new URLSearchParams(location.search).get('tema'); return UZ_TEMA[q] ? q : 'acik'; };
+const UZ_THREE = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+function uzThree() {
+  if (window.THREE) return Promise.resolve(true);
+  if (uzThree.p) return uzThree.p;
+  return uzThree.p = new Promise(r => { const s = document.createElement('script'); s.src = UZ_THREE; s.async = true; s.onload = () => r(!!window.THREE); s.onerror = () => r(false); document.head.appendChild(s); setTimeout(() => r(!!window.THREE), 8000); });
+}
+function uzayDur() { if (UZ) { UZ.dur = true; try { UZ.renderer.dispose(); } catch (e) {} UZ = null; } document.body.classList.remove('uzay'); delete document.body.dataset.uz; }
+async function uzayKur(vs) {
+  uzayDur();
+  const hub = document.querySelector('#ana .hub'); if (!hub) return;
+  const gl = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('experimental-webgl')); } catch (e) { return false; } })();
+  if (!gl || !(await uzThree()) || !hub.isConnected) return;
+  const T = window.THREE, small = matchMedia('(max-width:640px)').matches, reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const TM = UZ_TEMA[uzTemaAd()], BL = TM.acik ? T.NormalBlending : T.AdditiveBlending;
+  document.body.classList.add('uzay'); document.body.dataset.uz = uzTemaAd(); hub.classList.add('uz3');
+  const ACK = Object.fromEntries(VARSAYILAN.map(m => [m.id, m.aciklama]));
+  const btns = [...hub.querySelectorAll('.hm')];
+  hub.addEventListener('mouseleave', () => hov = null);
+  btns.forEach((b, i) => { const v = vs[i]; if (!v) return; const d = (MOD[v.id] && MOD[v.id].aciklama) || ACK[v.id] || (v._grup ? 'Muhasebe, fatura ve parasal ekranlar' : ''); if (d && !b.querySelector('.hac')) b.insertAdjacentHTML('beforeend', '<span class="hac">' + esc(d) + '</span>'); });
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); renderer.setClearColor(TM.bg, 1);
+  hub.prepend(renderer.domElement); const cv = renderer.domElement;
+  const scene = new T.Scene();
+  const camera = new T.PerspectiveCamera(48, 1, .5, 2000);
+  const gc = document.createElement('canvas'); gc.width = gc.height = 64; const gx = gc.getContext('2d'); const gg = gx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gg.addColorStop(0, 'rgba(255,255,255,1)'); gg.addColorStop(.22, 'rgba(255,255,255,.55)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); gx.fillStyle = gg; gx.fillRect(0, 0, 64, 64);
+  const GT = new T.CanvasTexture(gc);
+  const spr = (hex, s, op) => { const m = new T.SpriteMaterial({ map: GT, color: hex, transparent: true, opacity: op, depthWrite: false, blending: BL }); const o = new T.Sprite(m); o.scale.set(s, s, 1); scene.add(o); return o; };
+  const noktalar = (n, f, size, op) => { const p = new Float32Array(n * 3), c = new Float32Array(n * 3); for (let i = 0; i < n; i++) f(i, p, c); const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(p, 3)); g.setAttribute('color', new T.BufferAttribute(c, 3)); scene.add(new T.Points(g, new T.PointsMaterial({ size, map: GT, vertexColors: true, transparent: true, opacity: op, depthWrite: false, blending: BL }))); };
+  // yıldızlar
+  noktalar(1800, (i, p, c) => { const r = 260 + Math.random() * 500, t = Math.random() * 6.283, f = Math.acos(2 * Math.random() - 1); p.set([r * Math.sin(f) * Math.cos(t), r * Math.cos(f), r * Math.sin(f) * Math.sin(t)], i * 3); const w = .6 + Math.random() * .4; c.set(TM.yildiz.map(x => x * w), i * 3); }, 2.2, TM.acik ? .5 : .8);
+  // merkez: kırmızı / antrasit çekirdek (amblem)
+  const core = new T.Group(); scene.add(core);
+  core.add(new T.Mesh(new T.SphereGeometry(7, 48, 32, 0, Math.PI), new T.MeshBasicMaterial({ color: 0xD7262E })));
+  core.add(new T.Mesh(new T.SphereGeometry(7, 48, 32, Math.PI, Math.PI), new T.MeshBasicMaterial({ color: 0x2B2F35 })));
+  const GO = TM.acik ? .4 : 1; const coreG = spr(0xF0525A, 46, .5 * GO); if (!TM.acik) spr(0xffffff, 12, .25);
+  // yörünge ve veri kuşağı
+  const ORB = small ? 30 : 60, BELT = small ? 52 : 100;
+  const ring = (r, col, op) => { const pts = []; for (let i = 0; i <= 128; i++) { const a = i / 128 * 6.283; pts.push(new T.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r)); } scene.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: col, transparent: true, opacity: op }))); };
+  ring(ORB, TM.halka, TM.acik ? .45 : .25); ring(ORB * .55, TM.ic, TM.acik ? .3 : .16);
+  noktalar(900, (i, p, c) => { const a = Math.random() * 6.283, r = BELT + (Math.random() - .5) * 14; p.set([Math.cos(a) * r, (Math.random() - .5) * 5, Math.sin(a) * r], i * 3); const w = Math.random(); c.set(w > .7 ? TM.kus[0] : w > .4 ? TM.kus[1] : TM.kus[2], i * 3); }, 1.8, TM.acik ? .6 : .55);
+  // gezegenler (uygulamalar) + her birine veri kaynakları
+  const P = vs.map((v, i) => { const col = new T.Color(renkHex(v.renk)); const a0 = -Math.PI / 2 + i * 6.283 / vs.length;
+    const srcs = [0, 1, 2].map(k => ({ a: a0 + (k - 1) * .5 + (Math.random() - .5) * .3, s: spr(new T.Color(k === 1 ? TM.k1 : TM.k2), 3.2, .9) }));
+    return { v, col, g: spr(col, small ? 14 : 22, .7), a0, srcs, pos: new T.Vector3(), b: btns[i], kilit: !!(btns[i] && btns[i].classList.contains('kilit')) }; });
+  const FL = []; P.forEach(p => { p.srcs.forEach(s => { for (let k = 0; k < 2; k++) FL.push({ p, s, in: true, off: Math.random(), sp: .22 + Math.random() * .15, o: spr(p.col, 2.6, 0) }); });
+    for (let k = 0; k < 3; k++) FL.push({ p, in: false, off: Math.random(), sp: .28 + Math.random() * .15, o: spr(p.col, 2.8, 0) }); });
+  const lab = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; hub.appendChild(d); return d; };
+  const bLb = lab('uzl', 'veri kaynakları · santral · sayaç · piyasa');
+  const kont = lab('uzk', '<button type="button" aria-label="Yakınlaş">+</button><button type="button" aria-label="Uzaklaş">−</button><button type="button" aria-label="Görünümü sıfırla">◎</button><span>sürükle · döndür</span>');
+  const P0 = small ? .9 : .62; let zoom = 1, zoomT = 1, yaw = 0, pitch = P0, yawT = 0, pitchT = P0, hov = null;
+  const zBy = f => { zoomT = Math.max(.45, Math.min(2.2, zoomT * f)); };
+  const [kp, km, ks] = kont.querySelectorAll('button'); kp.onclick = () => zBy(1 / 1.25); km.onclick = () => zBy(1.25); ks.onclick = () => { zoomT = 1; yawT = 0; pitchT = P0; };
+  let drag = null, pin = 0; const pts = new Map();
+  cv.addEventListener('pointerdown', e => { pts.set(e.pointerId, [e.clientX, e.clientY]); if (pts.size === 1) drag = { x: e.clientX, y: e.clientY, yaw: yawT, pitch: pitchT }; if (pts.size === 2) { const [a, b] = [...pts.values()]; pin = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
+  const mv = e => { if (!pts.has(e.pointerId) || small) return; pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pin) zBy(pin / d); pin = d; return; }
+    if (drag) { yawT = drag.yaw - (e.clientX - drag.x) * .006; pitchT = Math.max(.08, Math.min(1.35, drag.pitch + (e.clientY - drag.y) * .004)); } };
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pin = 0; if (!pts.size) drag = null; };
+  addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => { if (!e.ctrlKey && !e.metaKey) return; e.preventDefault(); zBy(e.deltaY > 0 ? 1.1 : 1 / 1.1); }, { passive: false });
+  btns.forEach((b, i) => { b.addEventListener('mouseenter', () => hov = i); b.addEventListener('mouseleave', () => hov = null); b.addEventListener('focus', () => hov = i); b.addEventListener('blur', () => hov = null); });
+  const me = UZ = { renderer, dur: false };
+  const v3 = new T.Vector3(), tmp = new T.Vector3(), t0 = performance.now(); let last = t0, spinA = 0;
+  function boyut() { const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+  addEventListener('resize', boyut); boyut();
+  function yer(el, p, op) { v3.copy(p).project(camera); const w = cv.clientWidth, h = cv.clientHeight; if (v3.z > 1) { el.style.opacity = 0; return; } el.style.left = ((v3.x * .5 + .5) * w) + 'px'; el.style.top = ((-v3.y * .5 + .5) * h) + 'px'; if (op != null) el.style.opacity = op; }
+  function kare(now) {
+    if (me.dur || !hub.isConnected) { if (UZ === me) uzayDur(); removeEventListener('resize', boyut); removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); return; }
+    const dt = Math.min(.05, (now - last) / 1000); last = now; const t = (now - t0) / 1000, k = Math.min(1, dt * 6);
+    zoom += (zoomT - zoom) * k; yaw += (yawT - yaw) * k; pitch += (pitchT - pitch) * k;
+    if (!reduce && hov == null && !drag) spinA += dt * .035; const spin = spinA, d = (small ? 120 : 175) * zoom;
+    camera.position.set(Math.sin(yaw) * Math.cos(pitch) * d, Math.sin(pitch) * d, Math.cos(yaw) * Math.cos(pitch) * d); camera.lookAt(0, -2, 0);
+    core.rotation.y = t * .3; coreG.material.opacity = GO * (.45 + Math.sin(t * 1.6) * .08);
+    P.forEach((p, i) => { const a = p.a0 + spin; p.pos.set(Math.cos(a) * ORB, Math.sin(a * 2 + i) * 1.5, Math.sin(a) * ORB); p.g.position.copy(p.pos);
+      const on = hov === i; p.g.scale.setScalar((small ? 14 : 22) * (on ? 1.5 : 1)); p.g.material.opacity = GO * (p.kilit ? .3 : (hov != null && !on ? .45 : .75));
+      p.srcs.forEach(s => s.s.position.set(Math.cos(s.a + spin * .6) * BELT, 0, Math.sin(s.a + spin * .6) * BELT));
+      if (p.b && !small) { yer(p.b, p.pos); v3.copy(p.pos).applyMatrix4(camera.matrixWorldInverse); const z = -v3.z, sc = Math.max(.72, Math.min(1.12, 175 * zoom / z));
+        p.b.style.transform = 'translate(-50%,-50%) scale(' + sc.toFixed(3) + ')'; p.b.style.zIndex = String(1000 - Math.round(z)); p.b.style.opacity = p.kilit ? .55 : (hov != null && hov !== i ? .7 : 1); } });
+    FL.forEach(f => { const ph = reduce ? f.off : (t * f.sp + f.off) % 1; const A = f.in ? f.s.s.position : f.p.pos, B = f.in ? f.p.pos : core.position;
+      tmp.copy(A).lerp(B, ph); tmp.y += Math.sin(ph * Math.PI) * (f.in ? 4 : 6); f.o.position.copy(tmp);
+      const on = hov == null || f.p === P[hov]; f.o.material.opacity = Math.sin(ph * Math.PI) * (on ? .95 : .15) * (f.p.kilit ? .4 : 1); f.o.scale.setScalar(on && hov != null ? 3.6 : 2.6); });
+    yer(bLb, tmp.set(0, -2, BELT + 10), small ? 0 : .9);
+    renderer.render(scene, camera); requestAnimationFrame(kare);
+  }
+  requestAnimationFrame(kare);
+}
 </script>
 </body>
 </html>

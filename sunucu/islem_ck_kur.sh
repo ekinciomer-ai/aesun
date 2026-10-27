@@ -13,11 +13,9 @@ if [ ! -f $H/.env ]; then
   echo "NOT: .env üretildi (yalnız root)"
 fi
 chmod 600 $H/.env
-grep -q '^CK_YAZARLAR=' $H/.env || echo "CK_YAZARLAR=${CK_YAZARLAR:-}" >> $H/.env
-# yazma anahtarlarının özetleri (yalnız SHA-256) aesun'dan kopyalanır; saatlik tazelenir
-V=$(docker volume ls --format '{{.Name}}' | grep -E 'aesun_veri$' | head -1)
-mkdir -p $H/anahtar && cp /var/lib/docker/volumes/$V/_data/anahtarlar.json $H/anahtar/anahtarlar.json && chmod 644 $H/anahtar/anahtarlar.json
-echo "17 * * * * root cp /var/lib/docker/volumes/$V/_data/anahtarlar.json $H/anahtar/anahtarlar.json" > /etc/cron.d/cutkoda-anahtar
+# yazma anahtarlarının özetleri (yalnız SHA-256) ck_anahtar.yml ile yazılır
+mkdir -p $H/anahtar; [ -f $H/anahtar/anahtarlar.json ] || echo '{}' > $H/anahtar/anahtarlar.json
+rm -f /etc/cron.d/cutkoda-anahtar
 # site görselleri (depoda yok): yayındaki siteden bir kez indirilir
 mkdir -p $K/site/assets
 for f in akis.jpg gok.jpg; do

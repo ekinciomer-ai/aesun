@@ -443,12 +443,29 @@ function acSonuc(id) {
 }
 // ---- Mali grubu: tek kutu, içinde Mail / Muhasebe / Hukuk-Sözleşme iç giriş sekmeleri ----
 const MALI_ALT = [
-  { id: 'mail', ids: ['mail'], ad: 'Mail', aciklama: '@aksarayenerji.com.tr e-posta', ikon: 'mail' },
+  { id: 'mail', ids: ['mail'], ad: 'Mail', aciklama: 'Tüm e-posta hesapları tek yerden', ikon: 'mail' },
   { id: 'muhasebe', ids: ['muhasebe'], ad: 'Muhasebe', aciklama: 'Muhasebe programı', ikon: 'muhasebe' },
   { id: 'hukuk', ids: ['hukuk', 'hukuk-sozlesme', 'hukuksozlesme'], ad: 'Hukuk / Sözleşme', aciklama: 'Sözleşmeler ve hukuki belgeler', ikon: 'belge' }
 ];
 const MALI_ICIN = MALI_ALT.reduce((a, x) => a.concat(x.ids), []);   // hub'da gizlenecek modül kimlikleri
 let MALI_SEK = 'mail';
+// Mail kutuları: her satır "adres" | "adres > hedef@gmail.com" (yönlendirme) | "adres | https://özel-adres"
+function kutuCoz(sat) {
+  const t = String(sat || '').trim(); if (!t || t[0] === '#') return null;
+  let adr = t, hedef = '', url = '';
+  const bo = t.indexOf('|'); if (bo > 0) { adr = t.slice(0, bo).trim(); url = t.slice(bo + 1).trim(); }
+  const ok = adr.indexOf('>'); if (ok > 0) { hedef = adr.slice(ok + 1).trim(); adr = adr.slice(0, ok).trim(); }
+  const alan = (adr.split('@')[1] || '').toLowerCase(), e = encodeURIComponent;
+  let tur = 'Webmail';
+  if (!url) {
+    if (hedef) { url = 'https://mail.google.com/mail/?authuser=' + e(hedef) + '#search/' + e('to:' + adr); tur = 'Yönlendirme'; }
+    else if (/^(gmail|googlemail)\.com$/.test(alan)) { url = 'https://mail.google.com/mail/?authuser=' + e(adr); tur = 'Gmail'; }
+    else if (/^(outlook|hotmail|live|msn)\.[a-z.]+$/.test(alan)) { url = 'https://outlook.live.com/mail/0/?login_hint=' + e(adr); tur = 'Outlook'; }
+    else if (alan) { url = 'https://webmail.' + alan + '/'; }
+  }
+  return /^https:\/\//i.test(url) ? { adr, url, tur } : null;
+}
+function kutular(m) { return String((m && m.kutular) || '').split(/\r?\n/).map(kutuCoz).filter(Boolean); }
 function acMali(sek) {
   if (!S) { SAYFA = 'ana'; return girisModal(null); }
   if (sek) MALI_SEK = sek;
@@ -457,7 +474,11 @@ function acMali(sek) {
   const sekler = MALI_ALT.map(x => '<button type="button" class="ysek' + (x.id === a.id ? ' on' : '') + '" onclick="acMali(\'' + x.id + '\')">' + esc(x.ad) + '</button>').join('');
   const m = (a.ids || [a.id]).map(i => MOD[i]).find(Boolean);
   const url = m && m.aktif !== false ? String(m.url || '').trim() : '';
-  const govde = url
+  const kl = a.id === 'mail' && m && m.aktif !== false ? kutular(m) : [];
+  const govde = kl.length
+    ? '<p class="ince">Posta kutusuna tıklayın; o hesap yeni sekmede açılır.</p><div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(k.adr) + '</span><span class="ince" style="margin:0;white-space:nowrap">' + esc(k.tur) + ' →</span></a>').join('') + '</div>' + (S.ka ? '<p class="ince" style="margin-top:12px"><a href="#" onclick="$(\'dlg\').close();git(\'yonetim\');setTimeout(()=>modDlg(\'mail\'),400);return false" style="color:#D7262E;font-weight:600">Kutuları düzenle</a></p>' : '')
+    : a.id === 'mail' && S.ka && m ? '<p class="ince" style="margin-bottom:10px">' + esc(a.aciklama) + '</p><div class="hata">Posta kutusu eklenmedi — Yönetim → Uygulamalar → Mail → “Posta kutuları” alanına her satıra bir adres yazın.</div>'
+    : url
     ? ((S.hesaplar || {})[a.id] ? '<p class="ince">Hesap: ' + esc(S.hesaplar[a.id]) + '</p>' : '') + '<p class="ince">' + esc(a.aciklama) + '</p><a class="btn tam" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(a.ad) + ' aç →</a>'
     : '<p class="ince" style="margin-bottom:10px">' + esc(a.aciklama) + '</p><div class="hata">Bağlantı henüz tanımlanmadı' + (S.ka ? ' — Yönetim → Uygulamalar\'dan “' + esc(a.ad) + '” (kimlik: ' + esc(a.id) + ') için adres ekleyin.' : ', yakında.') + '</div>';
   d.innerHTML = dlgBas('', 'Mali', 'Mail · Muhasebe · Hukuk / Sözleşme')
@@ -682,6 +703,7 @@ function modDlg(id) {
     + '<div style="display:flex;gap:14px;align-items:center">' + onz() + '<div style="flex:1"><label style="margin-top:0">Ad</label><input name="ad" type="text" value="' + esc(m.ad) + '" required></div></div>'
     + '<label>Açıklama</label><input name="aciklama" type="text" value="' + esc(m.aciklama || '') + '">'
     + '<label>Bağlantı</label><input name="url" type="text" value="' + esc(m.url || '') + '" placeholder="https://…">'
+    + (id === 'mail' ? '<label>Posta kutuları</label><textarea name="kutular" rows="5" style="width:100%;font:inherit;padding:10px;border:1px solid var(--cz,#ccc);border-radius:10px" placeholder="ornek@gmail.com\ninfo@alanadi.com > hedef@gmail.com">' + esc(m.kutular || '') + '</textarea><div class="ince">Her satıra bir adres. Gmail ve Outlook otomatik tanınır. Yalnız yönlendirilen adres (ör. Cloudflare) için: <code>adres &gt; gelen-gmail</code>. Özel adres için: <code>adres | https://…</code></div>' : '')
     + '<div class="satir"><div><label>Simge</label><select name="ikon" onchange="modOnz(this.form)">' + Object.entries(IKON_AD).map(([k, a]) => '<option value="' + k + '"' + ((m.ikon || 'diger') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div>'
     + '<div><label>Renk</label><select name="renk" onchange="modOnz(this.form)">' + Object.entries(RENKLER).map(([k, [a]]) => '<option value="' + k + '"' + ((m.renk || 'kirmizi') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div></div>'
     + '<div class="secim" style="margin-top:14px"><label><input type="checkbox" name="aktif"' + (m.aktif !== false ? ' checked' : '') + '> Ana ekranda göster</label><label><input type="checkbox" name="yeni_sekme"' + (m.yeni_sekme !== false ? ' checked' : '') + '> Yeni sekmede aç</label></div>'
@@ -696,6 +718,7 @@ function modKaydet(f, id0) {
     if (!ad) throw new Error('Ad gerekli.');
     if (url && !/^https:\/\//i.test(url)) throw new Error('Bağlantı https:// ile başlamalı.');
     const veri = { ad, aciklama: f.aciklama.value.trim(), url, ikon: f.ikon.value, renk: f.renk.value, aktif: f.aktif.checked, yeni_sekme: f.yeni_sekme.checked };
+    if (f.kutular) veri.kutular = f.kutular.value.trim(); else if (id0 && MOD[id0] && MOD[id0].kutular) veri.kutular = MOD[id0].kutular;
     let id = id0;
     if (!id) {
       id = ad.toLocaleLowerCase('tr').replace(/[çğıöşü]/g, c => ({ ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' }[c])).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'modul';

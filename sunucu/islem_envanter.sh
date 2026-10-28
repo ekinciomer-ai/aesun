@@ -1,0 +1,14 @@
+#!/bin/bash
+# Salt okunur: ns1 taşıma envanteri. Hiçbir şeyi değiştirmez, sır yazdırmaz.
+t() { tr '\n' ' ' | sed 's/  */ /g'; }
+echo "NOT: E1 sistem: $(lsb_release -ds 2>/dev/null) · $(nproc) çekirdek · bellek $(free -m | awk '/Mem/{print $3"/"$2" MB"}') · disk $(df -h / | awk 'NR==2{print $3"/"$2}') · açık $(uptime -p)"
+echo "NOT: E2 kapsayıcılar: $(docker ps -a --format '{{.Names}}[{{.Image}}|{{.Status}}|{{.Label "com.docker.compose.project"}}]' | sed 's/ ago//;s/Up /up /' | t)"
+echo "NOT: E3 compose projeleri: $(docker ps -a --format '{{.Label "com.docker.compose.project"}}={{.Label "com.docker.compose.project.working_dir"}}' | sort -u | t)"
+echo "NOT: E4 bellek/işlemci: $(docker stats --no-stream --format '{{.Name}}:{{.MemUsage}}/{{.CPUPerc}}' | sed 's/ \/ [0-9.]*[GM]iB//' | t)"
+echo "NOT: E5 birimler: $(docker volume ls -q | while read v; do echo "$v=$(du -sh /var/lib/docker/volumes/$v/_data 2>/dev/null | cut -f1)"; done | t) · /opt: $(du -sh /opt/* 2>/dev/null | awk '{print $2"="$1}' | t)"
+CF=$(docker inspect $(docker ps -q --filter name=caddy | head -1) --format '{{range .Mounts}}{{if eq .Destination "/etc/caddy/Caddyfile"}}{{.Source}}{{end}}{{end}}' 2>/dev/null)
+echo "NOT: E6 caddy ($(docker ps --filter name=caddy --format '{{.Names}}' | t)) $CF alanlar: $(grep -E '^[^#[:space:](][^{]*\{' ${CF:-/opt/caddy/Caddyfile} 2>/dev/null | sed 's/ *{$//' | t) · yönlendirme: $(grep -oE 'reverse_proxy [^ {]+' ${CF:-/opt/caddy/Caddyfile} 2>/dev/null | awk '{print $2}' | sort -u | t)"
+echo "NOT: E7 zamanlayıcılar: cron[$(for u in $(cut -d: -f1 /etc/passwd); do crontab -l -u $u 2>/dev/null | grep -v '^#' | grep . | sed "s/^/$u: /"; done | cut -c1-110 | t)] cron.d[$(grep -hv '^#' /etc/cron.d/* 2>/dev/null | grep . | cut -c1-110 | t)] timer[$(systemctl list-timers --all --no-legend 2>/dev/null | awk '{print $(NF-1)}' | grep -vE '^(apt|dpkg|e2scrub|fstrim|logrotate|man-db|motd|systemd|fwupd|sysstat|update-notifier|ua-|snapd|apport)' | t)]"
+echo "NOT: E8 elle servisler: $(ls /etc/systemd/system/*.service 2>/dev/null | xargs -n1 basename | grep -vE '^(dbus|sshd|syslog|snap|cloud|getty|display|vmtoolsd|multipath|iscsi|open-vm|systemd)' | t) · dinleyen portlar: $(ss -tlnpH 2>/dev/null | awk '{print $4"("$6")"}' | sed -E 's/users:\(\("([^"]+)".*/\1/' | sort -u | t)"
+echo "NOT: E9 dışarıdan gelen: son 1 saatte caddy istek alanları: $(docker logs --since 1h $(docker ps -q --filter name=caddy | head -1) 2>&1 | grep -oE '"host":"[^"]+"' | sort | uniq -c | sort -rn | head -15 | awk '{print $2"x"$1}' | sed 's/"host"://;s/"//g' | t)"
+echo "NOT: E10 git/kod: $(for d in /opt/* /root/*; do [ -d $d/.git ] && echo "$d@$(git -C $d remote get-url origin 2>/dev/null | sed -E 's#https://[^@]*@#https://#;s#\.git$##' | sed 's#.*github.com[:/]##')"; done | t) · ufw: $(ufw status 2>/dev/null | grep -c ALLOW) kural"

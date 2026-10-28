@@ -3,10 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       islem:
-        description: "listele | ekle"
+        description: "listele | ekle | tasi"
         default: listele
       ad:
         description: "alt alan adı (ekle için), IP = ns1"
+        default: ""
+      yeni_ip:
+        description: "tasi için yeni IP (ad alanına virgüllü adlar)"
         default: ""
 jobs:
   d:
@@ -17,4 +20,4 @@ jobs:
           CP_USER: ${{ secrets.FTP_KULLANICI }}
           CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
           IP: ${{ secrets.SUNUCU_ADRES }}
-        run: python3 cpanel/dns.py "${{ inputs.islem }}" "${{ inputs.ad }}" "$IP"
+        run: if [ "${{ inputs.islem }}" = tasi ]; then python3 cpanel/dns.py tasi "${{ inputs.ad }}" "$IP" "${{ inputs.yeni_ip }}"; else python3 cpanel/dns.py "${{ inputs.islem }}" "${{ inputs.ad }}" "$IP"; fi

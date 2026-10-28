@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""aksarayenerji.net DNS bölgesi: listele | ekle <ad> <ip>. Yalnız A kaydı ekler; var olanı değiştirmez/silmez."""
+"""aksarayenerji.net DNS bölgesi: listele | ekle <ad> <ip> | tasi <ad1,ad2> <eski_ip> <yeni_ip>.
+ekle yalnız yeni A kaydı ekler. tasi yalnız verilen adların, değeri eski_ip olan A kayıtlarını yeni_ip yapar (TTL 300)."""
 import base64, json, os, ssl, sys, urllib.parse, urllib.request
 H, U, T = os.environ.get("CP_HOST", "aksarayenerji.net"), os.environ["CP_USER"], os.environ["CP_TOKEN"]
 BOLGE = "aksarayenerji.net"
@@ -25,3 +26,20 @@ if len(sys.argv) >= 4 and sys.argv[1] == "ekle":
     q = {"zone": BOLGE, "serial": soa, "add": json.dumps({"dname": yeni, "ttl": 300, "record_type": "A", "data": [ip]})}
     r = istek("execute/DNS/mass_edit_zone?" + urllib.parse.urlencode(q))
     print("::notice::ekleme " + ("tamam" if r.get("status") else "HATA " + str(r.get("errors"))) + f": {yeni}.{BOLGE} A (sunucu IP)")
+
+if len(sys.argv) >= 5 and sys.argv[1] == "tasi":
+    adlar, eski, yeni_ip = sys.argv[2].split(","), sys.argv[3], sys.argv[4]
+    seri = next((r for r in z["data"] if r.get("record_type") == "SOA"), None)
+    soa = int(veri(seri)[2]) if seri else None
+    duzen = []
+    for r in kayit:
+        a = ad(r).rstrip(".").removesuffix("." + BOLGE)
+        if r.get("record_type") == "A" and a in adlar:
+            if veri(r) == [eski]:
+                duzen.append({"line_index": r["line_index"], "dname": a, "ttl": 300, "record_type": "A", "data": [yeni_ip]})
+            else:
+                print(f"::notice::{a} eski IP'de değil, dokunulmadı")
+    if duzen:
+        q = {"zone": BOLGE, "serial": soa, "edit": [json.dumps(d) for d in duzen]}
+        r = istek("execute/DNS/mass_edit_zone?" + urllib.parse.urlencode(q, doseq=True))
+        print("::notice::taşıma " + ("tamam" if r.get("status") else "HATA " + str(r.get("errors"))) + ": " + ",".join(d["dname"] for d in duzen) + " → " + yeni_ip)

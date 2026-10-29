@@ -64,6 +64,9 @@ yaz(os.path.join(P, "denetci", "index.html"), oku(os.path.join(DOCS, "denetci", 
 # CAD (portal oturumuyla açılır; DWG okuyucu wasm + pdf.js yerel)
 kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))
 yaz(os.path.join(P, "aecad", "index.html"), oku(os.path.join(DOCS, "aecad", "index.html")).replace("../portal/", "../"))
+# Araç Kütüphanesi (günlük keşif taraması; katalog.json kesif.yml ile güncellenir)
+kopya(os.path.join(DOCS, "kesif"), os.path.join(P, "kesif"))
+yaz(os.path.join(P, "kesif", "index.html"), oku(os.path.join(DOCS, "kesif", "index.html")).replace("../portal/", "../"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
 # Portal alt alanı PHP 8.3 ister (str_contains, never, adlandırılmış argümanlar). cPanel sürümü .htaccess işleyicisiyle
 # seçer; bu blok olmadan üst alanın (aksarayenerji.net, PHP 7.2) işleyicisi devreye girer ve api/*.php 500 verir (18 Eki).

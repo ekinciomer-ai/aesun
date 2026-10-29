@@ -6,7 +6,7 @@ arşivlenmiş, lisanssız, 6 aydır güncellenmeyen ve şüpheli tanımlı depol
 import datetime as dt, glob, io, json, os, re, subprocess, sys, tarfile, time, urllib.request
 
 KOK = os.path.dirname(os.path.abspath(__file__))
-CIKTI = os.path.join(KOK, '..', 'docs', 'portal', 'kesif', 'katalog.json')
+CIKTI = os.path.join(KOK, '..', 'docs', 'kesif', 'katalog.json')
 DURUM = os.path.join(KOK, 'gorulen.json')
 TOKEN = os.environ.get('GH_TOKEN', '')
 BUGUN = dt.date.today()
@@ -24,7 +24,7 @@ KONU = {
     'edit': ['video-editing', 'subtitles', 'background-removal', 'ffmpeg', 'image-processing'],
     'otomasyon': ['workflow-automation', 'mcp-server', 'social-media-automation', 'browser-automation', 'n8n'],
     'hata': ['error-monitoring', 'uptime-monitoring', 'observability', 'alerting', 'notifications'],
-    'guvenlik': ['security-scanner', 'secret-scanning', 'vulnerability-scanner', 'intrusion-detection', 'prompt-injection'],
+    'guvenlik': ['security-scanner', 'secret-scanning', 'vulnerability-scanner', 'intrusion-detection', 'llm-security', 'guardrails'],
     'enerji': ['solar-energy', 'photovoltaic', 'energy-monitoring', 'drone-mapping', 'construction-management'],
 }
 PA = {  # public-apis kategori → grup
@@ -56,7 +56,7 @@ SH = {  # awesome-selfhosted etiket → grup
 # Açıklamaya göre daha doğru gruba taşı
 ANAHTAR = [('ses', r'\b(speech|voice|tts|audio|music|sound)\b'), ('gorsel', r'\b(image|photo|video|art|draw|render)\b'),
            ('guvenlik', r'\b(security|malware|phishing|vulnerab|encrypt)\b')]
-SUPHELI = re.compile(r'crack|keygen|keylog|stealer|grabber|free api key|bypass (paywall|captcha)|account generator|spam|jailbreak|unlock premium', re.I)
+SUPHELI = re.compile(r'crack|keygen|keylog|stealer|grabber|free api key|bypass|account generator|spam|jailbreak|unlock premium|leak|system.?prompts?|liberat|uncensor|pliny|red.?team|exploit|payload|phish|rat\b|botnet|ddos', re.I)
 MIT = {'MIT', 'MIT-0'}
 IZINLI = {'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'Unlicense', '0BSD', 'Zlib', 'MPL-2.0'}
 
@@ -64,7 +64,7 @@ IZINLI = {'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'Unlicense', '0BS
 ONERI = [
     ('hata', 'louislam/uptime-kuma', 'Sunucu, site ve portal çökünce telefona anında uyarı. Kalıcı izleme için ilk kurulacak araç.'),
     ('hata', 'caronc/apprise', 'Tek komutla 100+ kanala bildirim (Telegram, e-posta, WhatsApp köprüsü). Tüm uyarılar tek yerden.'),
-    ('hata', 'glitchtip/glitchtip-backend', 'Uygulama hatalarını toplayıp gruplayan, Sentry uyumlu ama kendi sunucumuzda kalan sistem.'),
+    ('hata', 'healthchecks/healthchecks', 'Zamanlanmış işler (GitHub Actions, n8n, sabah brifingi) çalışmazsa uyarır. Sessizce duran işi yakalar.'),
     ('guvenlik', 'gitleaks/gitleaks', 'Depolarda unutulmuş şifre/anahtar taraması. GitHub işlemlerine eklenebilir.'),
     ('guvenlik', 'crowdsecurity/crowdsec', 'Sunucuya saldıran IP’leri otomatik engeller.'),
     ('guvenlik', 'aquasecurity/trivy', 'Kapsayıcı ve paketlerdeki bilinen açıkları tarar; tampon bölgeye uygun.'),
@@ -166,7 +166,7 @@ def selfhosted():
 
 
 def github():
-    out, gor = [], set()
+    out, gor = [], {ad for _, ad, _ in ONERI}
     alti_ay = (BUGUN - dt.timedelta(days=180)).isoformat()
     uc_ay = (BUGUN - dt.timedelta(days=90)).isoformat()
     for g, konular in KONU.items():
@@ -179,7 +179,7 @@ def github():
                 for x in (r or {}).get('items', []):
                     lic = (x.get('license') or {}).get('spdx_id')
                     sinif = lisans_sinif(lic)
-                    if not sinif or x['full_name'] in gor or x.get('fork') or SUPHELI.search(x.get('description') or ''):
+                    if not sinif or x['full_name'] in gor or x.get('fork') or SUPHELI.search((x.get('description') or '') + ' ' + x['full_name']):
                         continue
                     gor.add(x['full_name'])
                     out.append({'k': 'github', 'g': g, 'ad': x['full_name'], 'u': x['html_url'],

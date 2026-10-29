@@ -24,7 +24,7 @@ jobs:
       - name: Kaydet
         run: |
           git config user.name "aesun-kesif"; git config user.email "kesif@aksarayenerji.net"
-          git add docs/portal/kesif/katalog.json kesif/gorulen.json
+          git add docs/kesif/katalog.json kesif/gorulen.json
           git diff --cached --quiet && exit 0
           git commit -qm "Keşif: $(date +%d.%m.%Y) kütüphane güncellendi"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

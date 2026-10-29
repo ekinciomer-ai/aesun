@@ -21,6 +21,6 @@
     {"ad": "Merkez API müşteri yetkisiz kapalı", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/musteri/liste", "beklenen": [401]},
     {"ad": "Merkez API bekçi", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/bekci", "beklenen": [200], "icerir": "\"durum\""},
     {"ad": "Fatura (SSO arkasında)", "grup": "ns1", "url": "https://fatura.aksarayenerji.net/", "beklenen": [200, 302, 303, 401]},
-    {"ad": "Demo (şifre ister)", "grup": "demo", "url": "https://185.22.184.51/", "beklenen": [401]}
+    {"ad": "Demo (şifre ister)", "grup": "demo", "url": "https://159.198.76.80/", "beklenen": [401]}
   ]
 }

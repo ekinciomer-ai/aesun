@@ -373,7 +373,7 @@ def sso_cikis():
 
 # ---------------- Bağımsız demo · Mining Takip Sistemi (yalnız IP adresinden, Caddy basic_auth arkasında) ----------------
 # Alan adı üzerinden erişilemez: Host başlığı yalnız DEMO_HOST olduğunda yanıt verir (Caddy o siteyi basic_auth ile korur).
-DEMO_HOST = os.environ.get("AESUN_DEMO_HOST", "185.22.184.51")
+DEMO_HOST = os.environ.get("AESUN_DEMO_HOST", "159.198.76.80")
 DEMO_SAYFA = Path(__file__).with_name("demo") / "index.html"
 DEMO_ALAN = ("guncellendi", "mod", "karar", "durum", "ozet", "plan", "olaylar", "sonraki", "ogrenme")
 

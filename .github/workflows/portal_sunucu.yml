@@ -1,0 +1,38 @@
+name: Portal → sunucu
+# docs/ ve cpanel/ değişince portal ile kurumsal siteyi kendi sunucumuza (aesun-web kabı) kurar. Hostigen cPanel'in yerine geçti.
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**', 'cpanel/**', 'sunucu/portal/**', 'sunucu/islem_portal_kur.sh', '.github/workflows/portal_sunucu.yml']
+  workflow_dispatch:
+concurrency: { group: portal-sunucu, cancel-in-progress: false }
+jobs:
+  kur:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: { repository: ekinciomer-ai/saha, path: _saha }
+      - name: Paketle
+        run: python3 cpanel/paketle.py _saha
+      - name: Gönder ve kur
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          set +e -uo pipefail
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=20 root@$ADRES"
+          $S "mkdir -p /opt/aesun-web/site /opt/aesun-web/portal" || { echo "::error::sunucuya bağlanılamadı"; exit 1; }
+          R="rsync -az --delete -e 'ssh -i $HOME/.ssh/k -o BatchMode=yes'"
+          eval $R dist_site/ root@$ADRES:/opt/aesun-web/site/ || { echo "::error::site gönderilemedi"; exit 1; }
+          # portal: _veri (canlı depo) sunucuda üretilir, silinmez
+          eval $R --exclude _veri --exclude 'api/_veri' dist_portal/ root@$ADRES:/opt/aesun-web/portal/ || { echo "::error::portal gönderilemedi"; exit 1; }
+          tar czf - sunucu | $S "rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket && tar xzf - -C /tmp/aesun_paket && bash /tmp/aesun_paket/sunucu/islem_portal_kur.sh; k=\$?; rm -rf /tmp/aesun_paket; exit \$k" 2>&1 | tee c.txt
+          k=${PIPESTATUS[1]}
+          grep '^NOT:' c.txt | sed 's/^NOT: */::notice::/'
+          rm -f ~/.ssh/k
+          [ "$k" = 0 ] || { echo "::error::kurulum hatası: $(tail -c 600 c.txt | tr '\n' ' ')"; exit 1; }

@@ -191,6 +191,7 @@ const IKON = {
   monitoring: '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
   muhasebe: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/>',
   mali: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><path d="M15.5 14h2.5"/>',
+  ozel: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1.4"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   proje: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13h8M8 16h5"/>',
   insan: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
@@ -441,6 +442,34 @@ function acSonuc(id) {
   if (!d.open) d.showModal();
   if (url && SSO[id]) ssoUrl(id).then(u => { if (!u) return ssoYokDlg(id); const a = $('acLink'); if (a) a.href = u; });
 }
+// ---- Özel Alan: yalnız yönetici (Ömer) görür — Keşif, CutkodA, Brain, Mail ----
+const OZEL_ALT = [
+  { id: 'kesif', ad: 'Keşif', aciklama: 'Araç Kütüphanesi: her sabah taranan GitHub araçları, şema ve galaksi eşleşmesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/kesif/') },
+  { id: 'cutkoda', ad: 'CutkodA', aciklama: 'CutkodA yönetim paneli: sosyal medya kullanıcıları, kurgu işleri ve içerik onayı.', url: () => 'https://panel.cutkoda.com/' },
+  { id: 'brain', ad: 'Brain', aciklama: 'Tüm programların ve otomasyonların 3D galaksi haritası (Claude hesabınla açılır).', url: () => 'https://claude.ai/artifact/8k7gaTwGJyT8N3VVhdt8wh' },
+  { id: 'mail', ad: 'Mail', aciklama: 'Tüm e-posta hesapları tek yerden.' }
+];
+let OZEL_SEK = 'kesif';
+function acOzel(sek) {
+  if (!S) { SAYFA = 'ana'; return girisModal(null); }
+  if (!S.ka) return;
+  if (sek) OZEL_SEK = sek;
+  const a = OZEL_ALT.find(x => x.id === OZEL_SEK) || OZEL_ALT[0], d = dlg();
+  const sekler = OZEL_ALT.map(x => '<button type="button" class="ysek' + (x.id === a.id ? ' on' : '') + '" onclick="acOzel(\'' + x.id + '\')">' + esc(x.ad) + '</button>').join('');
+  let govde;
+  if (a.id === 'mail') {
+    const kl = MOD.mail && MOD.mail.aktif !== false ? kutular(MOD.mail) : [];
+    govde = kl.length ? '<p class="ince">' + esc(a.aciklama) + '</p><div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(k.adr) + '</span><span class="ince">' + esc(k.tur) + ' ↗</span></a>').join('') + '</div>'
+      : '<div class="hata">Posta kutusu eklenmedi — Yönetim → Uygulamalar → Mail → “Posta kutuları”.</div>';
+  } else {
+    const u = a.url();
+    govde = '<p class="ince">' + esc(a.aciklama) + '</p><a class="btn tam" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(a.ad) + ' aç →</a>';
+  }
+  d.innerHTML = dlgBas('', 'Özel Alan', 'Yalnız sizin görebildiğiniz alan')
+    + '<div class="ysekler" style="margin-top:14px;justify-content:center">' + sekler + '</div>'
+    + '<div style="margin-top:16px">' + govde + '</div></div></div>';
+  if (!d.open) d.showModal();
+}
 // ---- Mali grubu: tek kutu, içinde Mail / Muhasebe / Hukuk-Sözleşme iç giriş sekmeleri ----
 const MALI_ALT = [
   { id: 'mail', ids: ['mail'], ad: 'Mail', aciklama: 'Tüm e-posta hesapları tek yerden', ikon: 'mail' },
@@ -526,13 +555,14 @@ async function git(s) {
   const vs = ((V && V.vitrin) || []).filter(x => x.aktif !== false && MALI_ICIN.indexOf(x.id) < 0).sort((x, y) => (x.sira || 0) - (y.sira || 0));
   if (!vs.some(x => x.id === 'denetci')) vs.push({ id: 'denetci', ad: 'Sistem Denetçisi', ikon: 'denetci', renk: 'kirmizi', aktif: true, _yerlesik: true });
   vs.push({ id: 'mali', ad: 'Mali', ikon: 'mali', renk: 'yesil', aktif: true, _grup: true });
+  if (S && S.ka) vs.push({ id: 'ozel', ad: 'Özel Alan', ikon: 'ozel', renk: 'kirmizi', aktif: true, _grup: true, _ozel: true });
   const n = vs.length, R0 = n > 8 ? 42 : 40;
   let h = '<h1 class="baslik">Kurumsal Portal</h1><p class="alt">' + (S ? 'Açmak istediğiniz uygulamaya tıklayın.' : 'Uygulamaya tıklayın; kullanıcı adı ve şifrenizle giriş yapın.') + '</p>'
     + '<div class="hub"><div class="halka"></div><div class="merkez">' + MERKEZ + '</div>';
   vs.forEach((v, i) => {
     const a = (-90 + i * 360 / n) * Math.PI / 180, x = 50 + R0 * Math.cos(a), y = 50 + R0 * Math.sin(a);
     const yetki = v._grup ? true : (v._yerlesik ? (!S || S.ka || (S.anahtarlar && (S.anahtarlar.monitoring || S.anahtarlar.denetci))) : (!S || MOD[v.id]));
-    const tik = v._grup ? 'acMali()' : (v.id === 'saha' ? 'acSaha()' : ('ac(\'' + esc(v.id) + '\')'));
+    const tik = v._ozel ? 'acOzel()' : v._grup ? 'acMali()' : (v.id === 'saha' ? 'acSaha()' : ('ac(\'' + esc(v.id) + '\')'));
     h += '<button class="hm' + (yetki ? '' : ' kilit') + '" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + renkHex(v.renk) + '" onclick="' + tik + '"><span class="hd">' + ikon(v.ikon) + '</span><span class="ha">' + esc(v.ad) + '</span></button>';
   });
   if (!n) h += '<div class="kart" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%)">Henüz uygulama yok.</div>';

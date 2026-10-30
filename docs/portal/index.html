@@ -77,6 +77,14 @@ dialog.cam::backdrop{background:radial-gradient(circle at 12% 18%,rgba(215,38,46
 .cam .alan{display:block;margin-top:14px}.cam .alan>span{display:block;font-size:13px;color:var(--y);margin-bottom:4px}
 .cam .alan input{width:100%;padding:11px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;color:var(--s)}
 .cam .alan input:focus{outline:2px solid #F3B4B7;border-color:var(--k)}
+.cam .alan select,.cam .alan textarea{width:100%;padding:11px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit;color:var(--s);background:#fff}
+.cam .alan textarea{min-height:70px;resize:vertical}
+.tk-ust{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 12px}.tk-ust input{flex:1 1 180px;padding:9px 12px;border:1px solid #CCD2DA;border-radius:9px;font:inherit}
+.tk-oz{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:6px 0 12px}.tk-oz div{background:#fff;border:1px solid var(--c);border-radius:10px;padding:8px 12px}.tk-oz b{display:block;font-size:18px}.tk-oz span{font-size:12px;color:var(--y)}
+.tk-cip{border:1px solid #CCD2DA;background:#fff;border-radius:999px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer}.tk-cip.on{background:var(--s);color:#fff;border-color:var(--s)}
+.tk-l{display:grid;gap:8px}.tk{background:#fff;border:1px solid var(--c);border-left:4px solid var(--tr,#9AA0A8);border-radius:10px;padding:10px 14px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.tk:hover{border-color:#B8BEC6}.tk .b{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.tk .b b{font-size:15px}.tk .b span{font-weight:600;white-space:nowrap}
+.tk .a{font-size:12.5px;color:var(--y);margin-top:2px}.tk .d{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:6px;color:#fff;background:var(--tr,#9AA0A8);margin-right:6px}
 .cam .alt2{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;margin-top:12px}.cam .alt2 label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:12.5px}
 .cam .unut{color:var(--kk);text-decoration:none}.cam .unut:hover{text-decoration:underline}
 .cam .btn.tam{margin-top:20px}
@@ -442,16 +450,17 @@ function acSonuc(id) {
   if (!d.open) d.showModal();
   if (url && SSO[id]) ssoUrl(id).then(u => { if (!u) return ssoYokDlg(id); const a = $('acLink'); if (a) a.href = u; });
 }
-// ---- Özel Alan: yalnız yönetici (Ömer) görür — Keşif, Mimari, CutkodA, MEDAŞ CBS, Brain, Mail ----
+// ---- Özel Alan: yalnız yönetici (Ömer) görür — Teklifler, Keşif, Mimari, CutkodA, MEDAŞ CBS, Brain, Mail ----
 const OZEL_ALT = [
   { id: 'kesif', ad: 'Keşif', aciklama: 'Araç Kütüphanesi: her sabah taranan GitHub araçları, şema ve galaksi eşleşmesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/kesif/') },
   { id: 'cutkoda', ad: 'CutkodA', aciklama: 'CutkodA yönetim paneli: sosyal medya kullanıcıları, kurgu işleri ve içerik onayı.', url: () => 'https://panel.cutkoda.com/' },
+  { id: 'teklif', ad: 'Teklifler', aciklama: 'Teklif verdiğimiz projeler: kapasite, tutar, durum, kazanma oranı. Yalnız sizin anahtarınızla şifreli saklanır.', ic: true },
   { id: 'mimari', ad: 'Mimari', aciklama: 'Tüm otomasyonların ve ekosistemin şemaları: sunucular, enerji verisi, sosyal medya hatları, yayın ve zaman çizelgesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/mimari/') },
   { id: 'medas', ad: 'MEDAŞ CBS', aciklama: 'MEDAŞ CBS ekranı (Tailscale ağı üzerinden; bağlı cihazdan açılır).', url: () => 'http://100.102.153.95:8586/medas' },
   { id: 'brain', ad: 'Brain', aciklama: 'Tüm programların ve otomasyonların 3D galaksi haritası (Claude hesabınla açılır).', url: () => 'https://claude.ai/artifact/8k7gaTwGJyT8N3VVhdt8wh' },
   { id: 'mail', ad: 'Mail', aciklama: 'Tüm e-posta hesapları tek yerden.' }
 ];
-let OZEL_SEK = 'kesif';
+let OZEL_SEK = 'teklif';
 function acOzel(sek) {
   if (!S) { SAYFA = 'ana'; return girisModal(null); }
   if (!S.ka) return;
@@ -463,6 +472,8 @@ function acOzel(sek) {
     const kl = MOD.mail && MOD.mail.aktif !== false ? kutular(MOD.mail) : [];
     govde = kl.length ? '<p class="ince">' + esc(a.aciklama) + '</p><div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(k.adr) + '</span><span class="ince">' + esc(k.tur) + ' ↗</span></a>').join('') + '</div>'
       : '<div class="hata">Posta kutusu eklenmedi — Yönetim → Uygulamalar → Mail → “Posta kutuları”.</div>';
+  } else if (a.ic) {
+    govde = '<p class="ince">' + esc(a.aciklama) + '</p><button class="btn tam" onclick="teklifCiz()">Teklifleri aç →</button>';
   } else {
     const u = a.url();
     govde = '<p class="ince">' + esc(a.aciklama) + '</p><a class="btn tam" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(a.ad) + ' aç →</a>';
@@ -471,6 +482,69 @@ function acOzel(sek) {
     + '<div class="ysekler" style="margin-top:14px;justify-content:center">' + sekler + '</div>'
     + '<div style="margin-top:16px">' + govde + '</div></div></div>';
   if (!d.open) d.showModal();
+}
+// ---- Teklifler (Özel Alan): verdiğimiz teklifler; yalnız yönetici anahtarıyla şifreli saklanır (V.teklif) ----
+const TK_DURUM = { hazir: ['Hazırlanıyor', '#8A93A0'], verildi: ['Verildi', '#2F62A8'], gorusme: ['Görüşmede', '#C26A12'], kazanildi: ['Kazanıldı', '#1F8A4C'], kaybedildi: ['Kaybedildi', '#B91C24'], iptal: ['İptal', '#5C6470'] };
+const TK_KAPSAM = ['Mekanik montaj', 'Elektrik montaj', 'Mekanik + elektrik', 'Anahtar teslim (EPC)', 'Proje / mühendislik', 'Bakım / işletme', 'Diğer'];
+let TK = null, TK_F = 'hepsi', TK_Q = '';
+async function tkYukle() { if (TK) return TK; TK = V.teklif ? (await coz(await hamAnahtar(S.ka), V.teklif)).liste || [] : []; return TK; }
+async function tkKaydet(msj) { V.teklif = await sifrele(await hamAnahtar(S.ka), { liste: TK }); await veriKaydet(msj); }
+const tkPara = (v, pb) => v == null || v === '' ? '—' : Number(v).toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' ' + (pb || 'TL');
+const tkMw = t => { const k = parseFloat(String(t.kapasite || '').replace(',', '.')); return isNaN(k) ? 0 : (t.birim === 'kWp' ? k / 1000 : k); };
+async function teklifCiz() {
+  if (!S || !S.ka) return;
+  SAYFA = 'teklif'; try { $('dlg') && $('dlg').close(); } catch (e) {}
+  let l; try { l = await tkYukle(); } catch (e) { $('ana').innerHTML = '<div class="hata">Teklifler açılamadı: ' + esc(e.message || e) + '</div>'; return; }
+  const q = TK_Q.toLocaleLowerCase('tr');
+  const g = l.map((t, i) => ({ ...t, _i: i })).filter(t => (TK_F === 'hepsi' || t.durum === TK_F) && (!q || [t.ad, t.isveren, t.konum, t.kapsam, t.not].join(' ').toLocaleLowerCase('tr').includes(q)))
+    .sort((a, b) => String(b.tarih || '').localeCompare(String(a.tarih || '')));
+  const say = d => l.filter(t => t.durum === d).length, kaz = say('kazanildi'), son = kaz + say('kaybedildi');
+  const mw = l.reduce((a, t) => a + tkMw(t), 0), mwK = l.filter(t => t.durum === 'kazanildi').reduce((a, t) => a + tkMw(t), 0);
+  let h = '<h1 class="baslik">Teklifler</h1><p class="alt">Verdiğimiz teklifler · yalnız siz görürsünüz · <a href="#" onclick="git(\'ana\');return false" style="color:#D7262E;font-weight:600">← Portal</a></p>';
+  h += '<div class="tk-oz"><div><b>' + l.length + '</b><span>teklif</span></div><div><b>' + mw.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MWp</b><span>toplam kapasite</span></div>'
+    + '<div><b>' + (say('verildi') + say('gorusme')) + '</b><span>cevap bekleyen</span></div><div><b>' + kaz + (son ? ' · %' + Math.round(kaz / son * 100) : '') + '</b><span>kazanılan · oran</span></div>'
+    + '<div><b>' + mwK.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MWp</b><span>kazanılan kapasite</span></div></div>';
+  h += '<div class="tk-ust"><button class="btn kc" onclick="teklifForm(-1)">+ Yeni teklif</button><input id="tkq" type="search" placeholder="Ara: proje, işveren, il…" value="' + esc(TK_Q) + '"></div>';
+  h += '<div class="tk-ust">' + [['hepsi', 'Tümü', l.length], ...Object.entries(TK_DURUM).map(([k, v]) => [k, v[0], say(k)])].map(([k, ad, n]) => '<button class="tk-cip' + (TK_F === k ? ' on' : '') + '" onclick="TK_F=\'' + k + '\';teklifCiz()">' + esc(ad) + ' ' + n + '</button>').join('') + '</div>';
+  h += g.length ? '<div class="tk-l">' + g.map(t => { const d = TK_DURUM[t.durum] || TK_DURUM.hazir; const bf = t.tutar && tkMw(t) ? (Number(t.tutar) / (tkMw(t) * 1e6)).toLocaleString('tr-TR', { maximumFractionDigits: 3 }) + ' ' + (t.pb || 'TL') + '/Wp' : '';
+    return '<button class="tk" style="--tr:' + d[1] + '" onclick="teklifForm(' + t._i + ')"><div class="b"><b>' + esc(t.ad || 'Adsız proje') + '</b><span>' + tkPara(t.tutar, t.pb) + '</span></div>'
+      + '<div class="a"><span class="d">' + esc(d[0]) + '</span>' + [t.isveren, t.konum, t.kapasite ? t.kapasite + ' ' + (t.birim || 'MWp') : '', t.kapsam, t.tarih ? new Date(t.tarih).toLocaleDateString('tr-TR') : '', bf].filter(Boolean).map(esc).join(' · ') + '</div></button>'; }).join('') + '</div>'
+    : '<div class="kart" style="text-align:center">' + (l.length ? 'Bu süzgeçte teklif yok.' : 'Henüz teklif eklenmedi. “+ Yeni teklif” ile ilk projeyi ekleyin.') + '</div>';
+  $('ana').innerHTML = h;
+  const qi = $('tkq'); if (qi) { qi.oninput = () => { TK_Q = qi.value; clearTimeout(qi._t); qi._t = setTimeout(() => { teklifCiz().then(() => { const n = $('tkq'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }); }, 250); }; }
+}
+function teklifForm(i) {
+  const t = i >= 0 ? TK[i] : { durum: 'hazir', pb: 'TL', birim: 'MWp', tarih: new Date().toISOString().slice(0, 10) };
+  const a = (id, ad, v, tip, ek) => '<label class="alan"><span>' + ad + '</span><input id="tk_' + id + '" type="' + (tip || 'text') + '" value="' + esc(v == null ? '' : v) + '"' + (ek || '') + '></label>';
+  const sec = (id, ad, ops, v) => '<label class="alan"><span>' + ad + '</span><select id="tk_' + id + '">' + ops.map(([k, x]) => '<option value="' + esc(k) + '"' + (k === v ? ' selected' : '') + '>' + esc(x) + '</option>').join('') + '</select></label>';
+  const d = dlg();
+  d.innerHTML = dlgBas('', i >= 0 ? 'Teklifi düzenle' : 'Yeni teklif', 'Teklifler · yalnız siz görürsünüz')
+    + '<form id="tkf">' + a('ad', 'Proje adı', t.ad, 'text', ' required placeholder="ör. Konya 12 MWp GES"') + a('isveren', 'İşveren / müşteri', t.isveren) + a('konum', 'Konum (il / ilçe)', t.konum)
+    + '<div class="satir">' + a('kapasite', 'Kapasite', t.kapasite, 'text', ' inputmode="decimal" placeholder="ör. 12,5"') + sec('birim', 'Birim', [['MWp', 'MWp'], ['kWp', 'kWp']], t.birim) + '</div>'
+    + sec('kapsam', 'Kapsam', TK_KAPSAM.map(x => [x, x]), t.kapsam || TK_KAPSAM[2])
+    + '<div class="satir">' + a('tutar', 'Teklif tutarı (KDV hariç)', t.tutar, 'number', ' step="any" min="0"') + sec('pb', 'Para birimi', [['TL', 'TL'], ['USD', 'USD'], ['EUR', 'EUR']], t.pb) + '</div>'
+    + '<div class="satir">' + a('tarih', 'Teklif tarihi', t.tarih, 'date') + a('gecerlilik', 'Geçerlilik / son tarih', t.gecerlilik, 'date') + '</div>'
+    + sec('durum', 'Durum', Object.entries(TK_DURUM).map(([k, v]) => [k, v[0]]), t.durum)
+    + a('kisi', 'İlgili kişi', t.kisi) + a('belge', 'Teklif dosyası bağlantısı (Drive vb.)', t.belge, 'url', ' placeholder="https://"')
+    + '<label class="alan"><span>Not</span><textarea id="tk_not">' + esc(t.not || '') + '</textarea></label>'
+    + (t.belge ? '<p class="ince" style="margin-top:8px"><a href="' + esc(t.belge) + '" target="_blank" rel="noopener noreferrer">Teklif dosyasını aç ↗</a></p>' : '')
+    + '<div id="tkh"></div><button class="btn tam" type="submit">Kaydet</button>'
+    + (i >= 0 ? '<button type="button" class="btn ik tam" style="margin-top:8px" onclick="teklifSil(' + i + ')">Teklifi sil</button>' : '') + '</form></div></div>';
+  if (!d.open) d.showModal();
+  $('tkf').onsubmit = async e => {
+    e.preventDefault(); const b = e.submitter || $('tkf').querySelector('[type=submit]'); b.disabled = true; b.textContent = 'Kaydediliyor…';
+    const y = {}; ['ad', 'isveren', 'konum', 'kapasite', 'birim', 'kapsam', 'tutar', 'pb', 'tarih', 'gecerlilik', 'durum', 'kisi', 'belge', 'not'].forEach(k => { const el = $('tk_' + k); y[k] = el ? el.value.trim() : ''; });
+    if (y.tutar !== '') y.tutar = Number(y.tutar); if (y.belge && !/^https:\/\//i.test(y.belge)) y.belge = '';
+    y.guncel = new Date().toISOString();
+    const eski = TK.slice();
+    if (i >= 0) TK[i] = { ...TK[i], ...y }; else TK.push({ ...y, olustu: y.guncel });
+    try { await tkKaydet('teklif: ' + (y.ad || 'kayıt')); $('dlg').close(); teklifCiz(); }
+    catch (er) { TK = eski; b.disabled = false; b.textContent = 'Kaydet'; $('tkh').innerHTML = '<div class="hata">' + esc(er.message || er) + '</div>'; }
+  };
+}
+async function teklifSil(i) {
+  if (!TK[i]) return; const eski = TK.slice(); TK.splice(i, 1);
+  try { await tkKaydet('teklif silindi'); $('dlg').close(); teklifCiz(); } catch (er) { TK = eski; const h = $('tkh'); if (h) h.innerHTML = '<div class="hata">' + esc(er.message || er) + '</div>'; }
 }
 // ---- Mali grubu: tek kutu, içinde Mail / Muhasebe / Hukuk-Sözleşme iç giriş sekmeleri ----
 const MALI_ALT = [

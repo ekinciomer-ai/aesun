@@ -97,9 +97,10 @@ def main():
     bas = time.time()
     try:
         import medas_bekci
-        eylem, _, msj = medas_bekci.kontrol()
+        eylem, ok, msj = medas_bekci.kontrol()
         if eylem:
             log("canlı: medas portal ->", msj)
+            subprocess.Popen(["python3", str(KOK / "pi/sef_pi.py")])
     except Exception as e:
         log("canlı: medas kontrol hatası:", e)
     a = anahtar()
@@ -125,6 +126,7 @@ def main():
                     if r.returncode == 0:
                         kod = yerel_kod()
                         log("canlı: hızlı kod güncellemesi tamam ->", kod)
+                        subprocess.Popen(["python3", str(KOK / "pi/sef_pi.py")])
                 komut_t = int((yan or {}).get("komut_t") or 0)
                 if komut_t > son_komut_t and time.time() - komut_t < 120:
                     son_komut_t = komut_t

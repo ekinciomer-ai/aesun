@@ -66,6 +66,7 @@ kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))
 yaz(os.path.join(P, "aecad", "index.html"), oku(os.path.join(DOCS, "aecad", "index.html")).replace("../portal/", "../"))
 # Araç Kütüphanesi (günlük keşif taraması; katalog.json kesif.yml ile güncellenir)
 kopya(os.path.join(DOCS, "kesif"), os.path.join(P, "kesif"))
+yaz(os.path.join(P, "mimari", "index.html"), oku(os.path.join(DOCS, "mimari", "index.html")).replace("../portal/", "../"))   # Özel Alan · Sistem Mimarisi
 yaz(os.path.join(P, "kesif", "index.html"), oku(os.path.join(DOCS, "kesif", "index.html")).replace("../portal/", "../"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
 # Portal alt alanı PHP 8.3 ister (str_contains, never, adlandırılmış argümanlar). cPanel sürümü .htaccess işleyicisiyle

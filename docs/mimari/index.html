@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Sistem Mimarisi · Aksaray Enerji</title>
+<link rel="icon" href="../favicon.svg">
+<script>(function(){var S=null;try{var o=JSON.parse(localStorage.getItem('ae_portal')||'null');if(o&&o.S&&Date.now()<(o.son||0))S=o.S;}catch(e){}if(!S||!S.ka){location.replace('../portal/?git=mimari');return;}})();</script>
+<style>
+:root{--k:#D7262E;--kk:#B91C24;--a:#2B2F35;--z:#F6F5F3;--y:#fff;--c:#E4E1DC;--s:#6B6F76;
+ --enerji:#E08A1E;--altyapi:#6B7A96;--sosyal:#8E55D6;--medya:#D2468E;--ai:#3B76D8;--portal:#D7262E;--muh:#1F9C8E}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--z);color:var(--a)}
+header{background:var(--y);border-bottom:1px solid var(--c);position:sticky;top:0;z-index:5}
+.ust{max-width:1180px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.amb{width:30px;height:30px;flex:none}
+h1{font-size:18px;font-weight:700}
+.alt{color:var(--s);font-size:13px}
+nav.sek{max-width:1180px;margin:0 auto;padding:0 16px 10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav.sek a{flex:none;border:1px solid var(--c);background:var(--y);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--a);text-decoration:none}
+nav.sek a:hover{border-color:var(--k);color:var(--k)}
+main{max-width:1180px;margin:0 auto;padding:18px 16px 70px}
+section{margin-bottom:34px;scroll-margin-top:120px}
+h2{font-size:20px;font-weight:750;letter-spacing:-.01em;margin-bottom:4px}
+.ac{color:var(--s);font-size:14px;max-width:80ch;margin-bottom:14px}
+.ac b{color:var(--a)}
+/* şema */
+.sema{background:var(--y);border:1px solid var(--c);border-radius:16px;padding:16px}
+.seritler{display:grid;gap:10px;grid-template-columns:repeat(var(--n),minmax(0,1fr));align-items:stretch;position:relative}
+.serit{background:var(--z);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;position:relative}
+.serit>h3{font:600 11px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--s);display:flex;align-items:center;gap:6px}
+.serit>h3 i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.serit:not(:last-child)::after{content:"";position:absolute;right:-9px;top:50%;width:8px;height:14px;transform:translateY(-50%);background:var(--k);clip-path:polygon(0 0,100% 50%,0 100%);z-index:2}
+details.d{background:var(--y);border:1px solid var(--c);border-left:4px solid var(--r,var(--altyapi));border-radius:10px}
+details.d>summary{list-style:none;cursor:pointer;padding:8px 10px}
+details.d>summary::-webkit-details-marker{display:none}
+details.d>summary b{display:block;font-size:14px;font-weight:650}
+details.d>summary span{display:block;font-size:12px;color:var(--s)}
+details.d[open]{box-shadow:0 4px 16px rgba(43,47,53,.08)}
+details.d>div{padding:0 10px 10px;font-size:13px;color:#45494f}
+details.d>div ul{padding-left:18px;margin-top:4px}
+.odak{--r:var(--k);background:#FFF5F5}
+.alt-serit{margin-top:12px;background:#F1F4FA;border-radius:12px;padding:10px;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.alt-serit>h3{grid-column:1/-1;font:600 11px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:var(--s);text-transform:uppercase}
+/* akış (adım adım) */
+.akis{display:flex;flex-wrap:wrap;align-items:stretch;gap:0}
+.adim{flex:1 1 150px;min-width:150px;background:var(--y);border:1px solid var(--c);border-radius:12px;padding:10px 12px;position:relative;margin:0 14px 10px 0}
+.adim:not(:last-child)::after{content:"";position:absolute;right:-13px;top:50%;width:9px;height:14px;transform:translateY(-50%);background:var(--r,var(--s));clip-path:polygon(0 0,100% 50%,0 100%)}
+.adim small{display:block;font:600 10.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:var(--r,var(--s));text-transform:uppercase}
+.adim b{display:block;font-size:14px;margin:2px 0}
+.adim span{display:block;font-size:12.5px;color:var(--s)}
+.adim.onay{border-color:var(--k);background:#FFF5F5}
+.adim.onay small{color:var(--k)}
+.akis-bas{font-weight:650;font-size:14.5px;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.akis-bas i{width:10px;height:10px;border-radius:3px}
+.kart2{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.sk{background:var(--y);border:1px solid var(--c);border-top:4px solid var(--r);border-radius:12px;padding:12px 14px}
+.sk h4{font-size:15px}.sk .ip{font:12px ui-monospace,Menlo,monospace;color:var(--s)}
+.sk ul{padding-left:18px;margin-top:6px;font-size:13.5px}
+table{width:100%;border-collapse:collapse;background:var(--y);border:1px solid var(--c);border-radius:12px;overflow:hidden;font-size:13.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--c);vertical-align:top}
+th{font:600 11px ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--s);background:var(--z)}
+td.z{white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+.rz{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:5px;background:var(--z);color:var(--s);white-space:nowrap}
+.lej{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--s);margin-top:10px}
+.lej i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tw{overflow-x:auto;border-radius:12px}
+@media(max-width:860px){
+ .seritler{grid-template-columns:1fr}
+ .serit:not(:last-child)::after{right:auto;left:50%;top:auto;bottom:-10px;transform:translateX(-50%) rotate(90deg)}
+ .akis{flex-direction:column}
+ .adim{margin:0 0 14px 0}
+ .adim:not(:last-child)::after{right:auto;left:22px;top:auto;bottom:-13px;transform:rotate(90deg)}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="ust">
+<svg class="amb" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2a14 14 0 0 0 0 28z" fill="#D7262E"/><path d="M16 2a14 14 0 0 1 0 28z" fill="#2B2F35"/><path d="M18 6l-7 11h5l-2 9 7-12h-5z" fill="#fff"/></svg>
+<div><h1>Sistem Mimarisi</h1><div class="alt">Tüm otomasyonlar ve ekosistem · 30 Ekim 2026</div></div>
+</div>
+<nav class="sek"><a href="#ekosistem">Ekosistem</a><a href="#sunucular">Sunucular</a><a href="#enerji">Enerji verisi</a><a href="#sosyal">Sosyal medya</a><a href="#cutkoda">CutkodA video</a><a href="#yayin">Yayın & güvenlik</a><a href="#zaman">Zaman çizelgesi</a></nav>
+</header>
+<main>
+
+<section id="ekosistem">
+<h2>1 · Ekosistem</h2>
+<p class="ac">Veri soldan sağa akar: <b>kaynaklardan</b> toplanır, <b>merkez sunucuda</b> işlenir, <b>ekranlara</b> çıkar. Altta, her şeyi kuran ve yöneten katman. Kutuya dokun, ayrıntısı açılır.</p>
+<div class="sema">
+<div class="seritler" style="--n:4">
+ <div class="serit"><h3><i style="background:var(--enerji)"></i>Kaynaklar</h3>
+  <details class="d" style="--r:var(--enerji)"><summary><b>Santraller</b><span>FusionSolar · Sungrow · Inavitas · Fronius · SOLARMAN</span></summary><div>İnverter üretim verisi. Tek Yıldız, Anka, Aksaray tesisi ve müşteri santralleri. Çoğunda API yok; toplayıcı web hesabına girip okur.</div></details>
+  <details class="d" style="--r:var(--enerji)"><summary><b>Sayaç & piyasa</b><span>MEDAŞ OSOS · OSB Ace · EPİAŞ PTF</span></summary><div>Saatlik üretim/tüketim ve piyasa fiyatı. Mahsuplaşma ve madenci kararlarının ana girdisi.</div></details>
+  <details class="d" style="--r:var(--enerji)"><summary><b>Madencilik</b><span>F2Pool · 29 Antminer</span></summary><div>Kazanç ve cihaz durumu; Pi madencileri üretime göre açar/kapatır.</div></details>
+  <details class="d" style="--r:var(--sosyal)"><summary><b>Sosyal platformlar</b><span>Instagram · TikTok · YouTube · Facebook</span></summary><div>Resmi API'ler (panel), herkese açık profil sayfaları (rakipler), Apify/Windsor (karne, veri).</div></details>
+  <details class="d" style="--r:var(--portal)"><summary><b>Saha ekibi</b><span>telefon · saha uygulaması</span></summary><div>Puantaj, iş kalemi, malzeme, günlük. Çevrimdışı çalışır, n8n Saha Sync ile eşitlenir.</div></details>
+ </div>
+ <div class="serit"><h3><i style="background:var(--altyapi)"></i>Toplama</h3>
+  <details class="d" style="--r:var(--altyapi)"><summary><b>Saha Raspberry Pi</b><span>7/24 · 30 dk'da güncellenir</span></summary><div>Sungrow, FusionSolar, Inavitas, OSOS ve 29 madenciyi okur; cihaz komutlarını uygular; nabız ve kapasite gönderir.</div></details>
+  <details class="d" style="--r:var(--altyapi)"><summary><b>Müşteri toplayıcı</b><span>merkez sunucu · 15 dk döngü</span></summary><div>SOLARMAN, OSB Ace Center, MEDAŞ ve Fronius müşteri verisini toplar; Müşteri Monitoring'e yazar.</div></details>
+  <details class="d" style="--r:var(--altyapi)"><summary><b>n8n Cloud</b><span>Saha Sync · AEMonitoring · SosyalMedya</span></summary><div>Saha verisi eşitleme ve yedek; enerji toplayıcı akışları; sosyal medya ajanları (araştırma, içerik, yayın, rapor).</div></details>
+  <details class="d" style="--r:var(--altyapi)"><summary><b>GitHub Actions</b><span>EPİAŞ PTF · Fronius · durum analizi</span></summary><div>Zamanlanmış toplayıcılar ve saatlik analiz; çıktılar depoya ve merkez sunucuya yazılır.</div></details>
+ </div>
+ <div class="serit"><h3><i style="background:var(--k)"></i>Merkez sunucu</h3>
+  <details class="d odak"><summary><b>Merkez API + işler</b><span>api.aksarayenerji.net · Namecheap VPS</span></summary><div>Veri deposu, eşitleme, bildirimler (15 dk), izleme özeti, arşiv, durum analizi, portal denetimi. Bekçi 5 dk'da bir sağlık kontrolü ve onarım yapar.</div></details>
+  <details class="d" style="--r:var(--portal)"><summary><b>GesFin fatura</b><span>fatura.aksarayenerji.net · portal SSO</span></summary><div>Fatura kesme/takip; Sera2 satış faturalarından birim fiyat 6 saatte bir izlemeye aktarılır.</div></details>
+  <details class="d" style="--r:var(--medya)"><summary><b>CutkodA</b><span>site · api · motor · panel · işçiler</span></summary><div>Sosyal Stüdyo paneli, video kurgu motoru, ses servisi, karne, otomatik içerik hattı. Ayrı veritabanı (ck-db).</div></details>
+  <details class="d" style="--r:var(--altyapi)"><summary><b>Epixa · Mirsoft · Agrosev</b><span>ns1'den taşınan diğer sistemler</span></summary><div>29 Ekim'de taşındı; Caddy arkasında HTTPS.</div></details>
+ </div>
+ <div class="serit"><h3><i style="background:var(--portal)"></i>Ekranlar</h3>
+  <details class="d" style="--r:var(--portal)"><summary><b>Kurumsal Portal</b><span>cPanel · portal.aksarayenerji.net</span></summary><div>Monitoring, Müşteri Monitoring, Saha, AeCAD, Denetçi, Kapasite, Gündem, Mali (Mail), Özel Alan.</div></details>
+  <details class="d" style="--r:var(--portal)"><summary><b>WhatsApp uyarıları</b><span>Twilio · "Aksaray Enerji"</span></summary><div>Üretim düşüşü, reaktif aşımı, sistem sorunu bildirimleri.</div></details>
+  <details class="d" style="--r:var(--medya)"><summary><b>cutkoda.com</b><span>site · uygulama · panel · hesabım</span></summary><div>Sosyal medya kullanıcıları siteye girer, karne ister, video yükler; yönetim panel.cutkoda.com'dan.</div></details>
+  <details class="d" style="--r:var(--ai)"><summary><b>Claude sayfaları</b><span>Brain · raporlar · sabah brifingi</span></summary><div>Sana özel analiz ve haritalar; telefondan Claude uygulamasıyla.</div></details>
+ </div>
+</div>
+<div class="alt-serit"><h3>Kuran ve yöneten katman</h3>
+  <details class="d" style="--r:var(--ai)"><summary><b>Claude</b><span>zamanlanmış görevler · ajanlar · hafıza</span></summary><div>Sistemi kurar ve geliştirir; günde iki kez AEMonitoring iyileştirme, hafta içi sabah brifingi, sosyal medya haftalık/günlük döngü.</div></details>
+  <details class="d" style="--r:var(--ai)"><summary><b>GitHub</b><span>aesun · saha · cutkoda · epias-ptf</span></summary><div>Tüm kodun kaynağı; her gönderim otomatik yayına çıkar. Sırlar yalnız GitHub Secrets'ta.</div></details>
+  <details class="d" style="--r:var(--ai)"><summary><b>Bekçi & Şef</b><span>merkez 5 dk · Pi · AI bekçi</span></summary><div>Gecikeni yakalar, kapsayıcıyı yeniden başlatır, 3 başarısız onarımdan sonra durup haber verir.</div></details>
+  <details class="d" style="--r:var(--ai)"><summary><b>Araç keşfi & tampon</b><span>her sabah 06:17</span></summary><div>GitHub taranır, yeni araç önce tampon bölgede denenir, geçerse sisteme alınır.</div></details>
+</div>
+<div class="lej"><span><i style="background:var(--enerji)"></i>Enerji</span><span><i style="background:var(--sosyal)"></i>Sosyal medya</span><span><i style="background:var(--medya)"></i>CutkodA / medya</span><span><i style="background:var(--altyapi)"></i>Altyapı</span><span><i style="background:var(--ai)"></i>Zekâ ve yönetim</span><span><i style="background:var(--k)"></i>Kalp: merkez API</span></div>
+</div>
+</section>
+
+<section id="sunucular">
+<h2>2 · Hangi şey nerede çalışıyor</h2>
+<p class="ac">29 Ekim 2026'dan beri arka ucun tamamı <b>yeni merkez sunucuda</b>. Eski ns1'in bekçisi ve yedeği durduruldu.</p>
+<div class="kart2">
+ <div class="sk" style="--r:var(--k)"><h4>Merkez sunucu</h4><div class="ip">Namecheap VPS · 159.198.76.80</div><ul><li>Merkez API, işler, müşteri toplayıcı, bekçi, şef</li><li>GesFin fatura (fatura.aksarayenerji.net)</li><li>CutkodA: site, api, motor, ses, panel, işçiler</li><li>Epixa · Mirsoft · Agrosev</li><li>Tampon bölge (deneme alanı)</li><li>Önde Caddy: HTTPS, otomatik sertifika</li></ul></div>
+ <div class="sk" style="--r:var(--portal)"><h4>cPanel hosting</h4><div class="ip">aksarayenerji.net · portal.aksarayenerji.net</div><ul><li>Web sitesi ve portal ekranları</li><li>Giriş servisi ve veri köprüsü (PHP)</li><li>3 saatte bir ve her kod gönderiminde yenilenir</li></ul></div>
+ <div class="sk" style="--r:var(--enerji)"><h4>Saha Raspberry Pi</h4><div class="ip">sahada · 7/24</div><ul><li>Cihaz okuma ve madenci aç/kapa</li><li>30 dk'da bir GitHub'dan güncellenir</li><li>Nabız + kapasite → Denetçi</li></ul></div>
+ <div class="sk" style="--r:var(--altyapi)"><h4>n8n Cloud</h4><div class="ip">xbay.app.n8n.cloud</div><ul><li>Saha Sync (veri kaybına sıfır tolerans)</li><li>AEMonitoring toplayıcıları</li><li>SosyalMedya ajan akışları + panel köprüsü</li></ul></div>
+ <div class="sk" style="--r:var(--ai)"><h4>GitHub</h4><div class="ip">ekinciomer-ai · cutkoda</div><ul><li>Kod, yayın iş akışları, sırlar</li><li>Keşif taraması, PTF toplama, durum analizi</li><li>Sunucu işlemleri (onaylı betikler)</li></ul></div>
+ <div class="sk" style="--r:var(--ai)"><h4>Claude</h4><div class="ip">bulut · telefon · bilgisayar</div><ul><li>Zamanlanmış görevler ve ajanlar</li><li>Brain, raporlar, sabah brifingi</li><li>Hafıza ve skill kütüphanesi</li></ul></div>
+ <div class="sk" style="--r:#9AA0A8"><h4>Eski ns1</h4><div class="ip">185.22.184.51 · devre dışı</div><ul><li>Bekçi ve yedek durduruldu</li><li>Sistemleri yeni sunucuya taşındı</li><li>Kapatılmaya hazır</li></ul></div>
+</div>
+</section>
+
+<section id="enerji">
+<h2>3 · Enerji verisi (AEMonitoring)</h2>
+<p class="ac">Santralden WhatsApp uyarısına kadar bir ölçümün yolu.</p>
+<div class="sema">
+<div class="akis">
+ <div class="adim" style="--r:var(--enerji)"><small>Ölç</small><b>Santral & sayaç</b><span>inverter, OSOS, OSB, EPİAŞ, F2Pool</span></div>
+ <div class="adim" style="--r:var(--altyapi)"><small>Topla</small><b>Pi · n8n · toplayıcılar</b><span>15–60 dk aralıkla</span></div>
+ <div class="adim" style="--r:var(--k)"><small>Sakla</small><b>Merkez API</b><span>veri deposu + arşiv</span></div>
+ <div class="adim" style="--r:var(--enerji)"><small>Hesapla</small><b>Mahsup · maliyet · karar</b><span>SKB, bedelli satış, madenci aç/kapa</span></div>
+ <div class="adim" style="--r:var(--portal)"><small>Göster</small><b>Monitoring paneli</b><span>canlı, geçmiş, abone, cihaz</span></div>
+ <div class="adim" style="--r:var(--portal)"><small>Uyar</small><b>WhatsApp</b><span>üretim düşüşü, reaktif, sistem</span></div>
+</div>
+<div class="akis-bas"><i style="background:var(--ai)"></i>Kendini onaran döngü</div>
+<div class="akis">
+ <div class="adim" style="--r:var(--ai)"><small>5 dk</small><b>Bekçi</b><span>API eşitlemesi, iş nabzı, uçlar</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>Sorun</small><b>Şef</b><span>kapsayıcıyı yeniden başlatır</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>Günde 2</small><b>Claude iyileştirme</b><span>kanıtlı hatayı kodda düzeltir</span></div>
+ <div class="adim onay"><small>Sana</small><b>Denetçi + bildirim</b><span>çözülemeyen konu elle bakılır</span></div>
+</div>
+</div>
+</section>
+
+<section id="sosyal">
+<h2>4 · Sosyal medya nasıl yapılıyor</h2>
+<p class="ac">Dört hat birlikte çalışıyor. Hiçbir şey <b>senin onayın</b> olmadan yayınlanmıyor (kırmızı kutular). Rutin metin işleri ücretsiz yapay zekâ havuzunda (Cerebras → Groq → SambaNova → Gemini) yapılır; strateji Claude'da kalır.</p>
+<div class="sema">
+<div class="akis-bas"><i style="background:var(--sosyal)"></i>A · Sosyal Stüdyo ajan döngüsü (haftalık + günlük)</div>
+<div class="akis">
+ <div class="adim" style="--r:var(--sosyal)"><small>Pazar 18:31</small><b>Raporcu</b><span>geçen haftanın sayıları: takipçi, görüntülenme, etkileşim</span></div>
+ <div class="adim" style="--r:var(--sosyal)"><small>Araştır</small><b>Araştırmacı</b><span>rakip, trend, reklam mesajları · Apify, Crustdata, TinyFish</span></div>
+ <div class="adim" style="--r:var(--sosyal)"><small>Planla</small><b>Yayın saati</b><span>en iyi gün/saat, haftalık takvim</span></div>
+ <div class="adim" style="--r:var(--sosyal)"><small>Üret</small><b>İçerik geliştirici</b><span>metin + görsel fikri · humanizer ile doğal dil</span></div>
+ <div class="adim onay"><small>Onay</small><b>Panelde onayla</b><span>onayla · revize iste · iptal</span></div>
+ <div class="adim" style="--r:var(--sosyal)"><small>Her sabah 07:31</small><b>Günlük kontrol</b><span>yorum topla, yanıt taslağı, onaylıları yayınla</span></div>
+</div>
+<div class="akis-bas"><i style="background:var(--medya)"></i>B · CutkodA otomatik içerik hattı (yüklemesiz)</div>
+<div class="akis">
+ <div class="adim" style="--r:var(--medya)"><small>Ayar</small><b>Haftalık adet & saatler</b><span>her sosyal medya kullanıcısı için</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Fikir</small><b>Fikir listesi</b><span>yapay zekâ önerir</span></div>
+ <div class="adim onay"><small>Onay 1</small><b>Fikri seç</b><span>beğenmediğini ele</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Üret</small><b>Senaryo + dikey video + açıklama</b><span>1080×1920, marka fontları, platforma özel metin</span></div>
+ <div class="adim onay"><small>Onay 2</small><b>İçeriği onayla</b><span>info@cutkoda.com bildirim</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Yayın</small><b>Takvimde boş saate</b><span>işçi 20 sn'de bir yayınlar · 3 deneme</span></div>
+</div>
+<div class="akis-bas"><i style="background:var(--medya)"></i>C · Ücretsiz hesap karnesi (müşteri kazanma)</div>
+<div class="akis">
+ <div class="adim" style="--r:var(--medya)"><small>Form</small><b>cutkoda.com</b><span>ad, e-posta, hesap ve platform</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Veri</small><b>Son 30 gün</b><span>herkese açık veri · Apify / yt-dlp</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Analiz</small><b>Puan + 3 öneri</b><span>hazır PNG karne</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Gönder</small><b>info@cutkoda.com</b><span>panelde durum ve süre takibi</span></div>
+ <div class="adim onay"><small>Sen</small><b>İletişim</b><span>hesabın tamamı için görüşme</span></div>
+</div>
+<div class="akis-bas"><i style="background:var(--sosyal)"></i>D · Panelin sürekli işleri</div>
+<div class="kart2">
+ <div class="sk" style="--r:var(--sosyal)"><h4>Gelen kutusu</h4><ul><li>IG/FB/YT yorum ve mesajları tek yerde</li><li>Yorumlar 30'lu paketlerle etiketlenir, yanıt önerisi gelir</li><li>Anahtar kelimeye hazır yanıt kuralları</li></ul></div>
+ <div class="sk" style="--r:var(--sosyal)"><h4>Rakip & trend</h4><ul><li>Rakipler günde bir kez toplanır</li><li>YouTube trend ve izlenen kelimeler 6 saatte bir</li><li>Kıyas: en iyi saat, etiket, açılış kalıbı</li></ul></div>
+ <div class="sk" style="--r:var(--sosyal)"><h4>Hedef, iş birliği, uyum</h4><ul><li>Marka başına hedef ve bugün beklenen</li><li>Marka adayları ve teklif taslağı</li><li>#reklam, YZ içerik etiketi, müzik lisansı kontrolü</li></ul></div>
+ <div class="sk" style="--r:var(--altyapi)"><h4>n8n köprüsü</h4><ul><li>n8n ajan içerikleri panele "onay bekliyor" düşer (10 dk)</li><li>Panel kararı n8n'e geri gider: onay, red, revize, yayınlandı</li><li>Elle düzeltilen metin ezilmez</li></ul></div>
+</div>
+</div>
+</section>
+
+<section id="cutkoda">
+<h2>5 · CutkodA video kurgu</h2>
+<p class="ac">Sosyal medya kullanıcısı ham video yükler; sistem önceki tercihlerinden öğrenerek kurgular.</p>
+<div class="sema">
+<div class="akis">
+ <div class="adim" style="--r:var(--medya)"><small>Yükle</small><b>uygulama.cutkoda.com</b><span>ham video + not</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Dinle</small><b>faster-whisper</b><span>kelime kelime döküm</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Karar</small><b>Kurgu planı</b><span>tekrar/sessizlik atma, profil kuralları</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Üret</small><b>Altyazılı dikey video</b><span>kapak + .srt</span></div>
+ <div class="adim" style="--r:var(--medya)"><small>Öğren</small><b>Alışkanlık profili</b><span>beğeni ve düzeltmelerden</span></div>
+ <div class="adim" style="--r:var(--sosyal)"><small>Paylaş</small><b>Panele aktar</b><span>takvime koy, yayınla</span></div>
+</div>
+</div>
+</section>
+
+<section id="yayin">
+<h2>6 · Yayın ve güvenlik</h2>
+<p class="ac">Kod yazılınca canlıya nasıl çıkıyor, yeni bir araç sisteme nasıl giriyor.</p>
+<div class="sema">
+<div class="akis-bas"><i style="background:var(--ai)"></i>Kod → canlı</div>
+<div class="akis">
+ <div class="adim" style="--r:var(--ai)"><small>Yaz</small><b>Claude</b><span>değişiklik + önizleme</span></div>
+ <div class="adim onay"><small>Onay</small><b>Sen</b><span>canlıya çıkan her şey</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>Gönder</small><b>GitHub</b><span>aesun · cutkoda</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>Kur</small><b>Actions</b><span>cPanel yükleme · VPS yayın</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>Dene</small><b>Duman testi</b><span>tüm uçlar; bozulursa son sürüme döner</span></div>
+</div>
+<div class="akis-bas"><i style="background:var(--ai)"></i>Yeni araç → sistem</div>
+<div class="akis">
+ <div class="adim" style="--r:var(--ai)"><small>06:17</small><b>Keşif taraması</b><span>MIT, yıldız, güncel, şüpheli filtre</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>İncele</small><b>Kod taraması</b><span>veri gönderiyor mu, telemetri, lisans</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>Dene</small><b>Tampon bölge</b><span>yalıtılmış ağ, sınırlı kapsayıcı</span></div>
+ <div class="adim onay"><small>Karar</small><b>Sen</b><span>sonuç raporuyla</span></div>
+ <div class="adim" style="--r:var(--ai)"><small>Al</small><b>Sisteme ekle</b><span>Brain'e ve kütüphaneye işlenir</span></div>
+</div>
+<div class="kart2" style="margin-top:6px">
+ <div class="sk" style="--r:var(--k)"><h4>Koruma</h4><ul><li>Anahtarlı SSH, güvenlik duvarı, fail2ban, otomatik güncelleme</li><li>Sırlar yalnız GitHub Secrets'ta; sohbette şifre yok</li><li>Portal giriş günlüğü ve saldırı özeti Denetçi'de</li></ul></div>
+</div>
+</div>
+</section>
+
+<section id="zaman">
+<h2>7 · Zaman çizelgesi</h2>
+<p class="ac">Kendi kendine çalışan bütün işler.</p>
+<div class="tw"><table>
+<thead><tr><th>Ne zaman</th><th>İş</th><th>Nerede</th><th>Ne yapar</th></tr></thead>
+<tbody>
+<tr><td class="z">20 sn</td><td>Gönderi yayınlayıcı</td><td><span class="rz">CutkodA panel</span></td><td>zamanı gelen onaylı gönderiyi paylaşır</td></tr>
+<tr><td class="z">5 dk</td><td>Merkez bekçi + şef</td><td><span class="rz">merkez sunucu</span></td><td>sağlık, onarım, uç testi (10 dk), güvenlik özeti (15 dk)</td></tr>
+<tr><td class="z">10 dk</td><td>n8n köprüsü</td><td><span class="rz">CutkodA panel</span></td><td>ajan içeriklerini panele alır</td></tr>
+<tr><td class="z">15 dk</td><td>Bildirimler · İzleme özeti</td><td><span class="rz">merkez sunucu</span></td><td>uyarılar ve özet</td></tr>
+<tr><td class="z">15 dk</td><td>Müşteri toplayıcı</td><td><span class="rz">merkez sunucu</span></td><td>SOLARMAN, OSB, MEDAŞ, Fronius</td></tr>
+<tr><td class="z">30 dk</td><td>Pi güncelleme + cihaz yönetimi</td><td><span class="rz">saha Pi</span></td><td>madenci aç/kapa, nabız</td></tr>
+<tr><td class="z">30 dk</td><td>Portal denetimi</td><td><span class="rz">merkez + GitHub</span></td><td>AI bekçi kontrolleri</td></tr>
+<tr><td class="z">saatlik</td><td>Veri arşivi (:05) · Durum analizi (:41)</td><td><span class="rz">merkez sunucu</span></td><td>arşiv ve gecikme analizi</td></tr>
+<tr><td class="z">3 saat</td><td>cPanel yükleme</td><td><span class="rz">GitHub</span></td><td>site ve portal yenilenir</td></tr>
+<tr><td class="z">6 saat</td><td>Tarife birimi · YouTube trend</td><td><span class="rz">merkez · panel</span></td><td>GesFin birim fiyatı, trend kelimeler</td></tr>
+<tr><td class="z">günde 1</td><td>Rakip toplama</td><td><span class="rz">CutkodA panel</span></td><td>benzer hesapların sayıları</td></tr>
+<tr><td class="z">06:17</td><td>Araç keşfi</td><td><span class="rz">GitHub</span></td><td>yeni araçlar → Keşif bülteni</td></tr>
+<tr><td class="z">07:31</td><td>Sosyal günlük kontrol</td><td><span class="rz">Claude</span></td><td>yorum, revize, onaylı yayın</td></tr>
+<tr><td class="z">07:47 · 19:47</td><td>AEMonitoring iyileştirme</td><td><span class="rz">Claude</span></td><td>kanıtlı hata düzeltme</td></tr>
+<tr><td class="z">hafta içi 08:00</td><td>Sabah brifingi</td><td><span class="rz">Claude</span></td><td>gündem ve bekleyen kararlar</td></tr>
+<tr><td class="z">Pazar 18:31</td><td>Sosyal haftalık döngü</td><td><span class="rz">Claude</span></td><td>rapor → araştır → plan → içerik</td></tr>
+</tbody></table></div>
+</section>
+
+</main>
+</body>
+</html>

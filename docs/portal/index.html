@@ -442,10 +442,11 @@ function acSonuc(id) {
   if (!d.open) d.showModal();
   if (url && SSO[id]) ssoUrl(id).then(u => { if (!u) return ssoYokDlg(id); const a = $('acLink'); if (a) a.href = u; });
 }
-// ---- Özel Alan: yalnız yönetici (Ömer) görür — Keşif, CutkodA, Brain, Mail ----
+// ---- Özel Alan: yalnız yönetici (Ömer) görür — Keşif, Mimari, CutkodA, Brain, Mail ----
 const OZEL_ALT = [
   { id: 'kesif', ad: 'Keşif', aciklama: 'Araç Kütüphanesi: her sabah taranan GitHub araçları, şema ve galaksi eşleşmesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/kesif/') },
   { id: 'cutkoda', ad: 'CutkodA', aciklama: 'CutkodA yönetim paneli: sosyal medya kullanıcıları, kurgu işleri ve içerik onayı.', url: () => 'https://panel.cutkoda.com/' },
+  { id: 'mimari', ad: 'Mimari', aciklama: 'Tüm otomasyonların ve ekosistemin şemaları: sunucular, enerji verisi, sosyal medya hatları, yayın ve zaman çizelgesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/mimari/') },
   { id: 'brain', ad: 'Brain', aciklama: 'Tüm programların ve otomasyonların 3D galaksi haritası (Claude hesabınla açılır).', url: () => 'https://claude.ai/artifact/8k7gaTwGJyT8N3VVhdt8wh' },
   { id: 'mail', ad: 'Mail', aciklama: 'Tüm e-posta hesapları tek yerden.' }
 ];

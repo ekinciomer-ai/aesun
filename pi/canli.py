@@ -95,6 +95,13 @@ def gonder(a, veri):
 
 def main():
     bas = time.time()
+    try:
+        import medas_bekci
+        eylem, _, msj = medas_bekci.kontrol()
+        if eylem:
+            log("canlı: medas portal ->", msj)
+    except Exception as e:
+        log("canlı: medas kontrol hatası:", e)
     a = anahtar()
     liste = cihazlar()
     if not liste:

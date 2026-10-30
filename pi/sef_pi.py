@@ -112,6 +112,15 @@ def main():
         except Exception as e:
             log("ip_ekle kontrol hatası:", e)
 
+    # 2d) MEDAŞ dpPower CBS web portalı (port 8586) kontrolü
+    try:
+        import medas_bekci
+        m_eylem, m_ok, m_msj = medas_bekci.kontrol()
+        if m_eylem:
+            kayit("medas_portal", "MEDAŞ web portalı (port 8586) kapalıydı", m_msj, m_ok)
+    except Exception as e:
+        log("medas_bekci kontrol hatası:", e)
+
     # 3) disk
     du = shutil.disk_usage("/")
     if du.used / du.total > 0.90:

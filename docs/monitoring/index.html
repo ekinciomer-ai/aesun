@@ -3277,9 +3277,14 @@ async function malKatYukle() { if (malKatYuklendi) return; malKatYuklendi = true
 // EPİAŞ sayfası GÖSTERİMİ (Ömer 19.10): (PTF + YEKDEM) × komisyon + dağıtım — BTV yok. Hesaplar (birimMal, cihaz yönetimi, maliyet) değişmez.
 const epMal = (ptf, yk) => ptf != null && yk != null ? (ptf + yk) * MAL_P.komisyon + MAL_P.dagitim_tl_mwh : null;
 const MAL_GOSTER = () => '(PTF + YEKDEM) × ' + say(MAL_P.komisyon, 3) + ' + dağıtım ' + say(MAL_P.dagitim_tl_mwh, 2) + ' (gösterim; BTV ve KDV hariç)';
+// 31 Eki: EP bir kez yüklenip sabit kalıyordu; tarayıcı deposundaki eski kopyada bugünün PTF'si yoksa
+// arkada gelen yeni dosya EP'ye inmiyor, saatlik planda geçmiş saatler (00→şimdi) hiç çizilmiyordu.
+// al() bellek önbelleğinden döner (ucuz) ve süresi dolunca arkada tazeler; EP her çağrıda güncel metinden kurulur.
+let epTxt = null;
 function epYukle() {
-  if (EP) return Promise.resolve(EP);
-  if (!epYukleniyor) epYukleniyor = al('n8n/epias_gecmis.json').then(d => (EP = d)).finally(() => { epYukleniyor = null; });
+  const c = AL['n8n/epias_gecmis.json'];
+  if (EP && c && c.txt === epTxt) return Promise.resolve(EP);
+  if (!epYukleniyor) epYukleniyor = al('n8n/epias_gecmis.json').then(d => { EP = d; epTxt = (AL['n8n/epias_gecmis.json'] || {}).txt; return d; }).finally(() => { epYukleniyor = null; });
   return epYukleniyor;
 }
 const epDolu = a => (a || []).filter(x => x != null);

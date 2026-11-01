@@ -74,9 +74,9 @@ function ciz(){
  const q=F.q.toLocaleLowerCase('tr');
  const l=K.filter(x=>(!F.fp||x.platform===F.fp)&&(!F.fk||x.kanal===F.fk)&&(!F.fd||x.durum===F.fd)&&(!F.fs||x.seri===F.fs)&&(!F.fu||x.ureten===F.fu)&&(!q||String(x.baslik).toLocaleLowerCase('tr').includes(q)))
   .sort((a,b)=>(b.tarih||'0').localeCompare(a.tarih||'0')||(b.saat||'').localeCompare(a.saat||''));
- const yay=l.filter(x=>x.durum==='Yayında'),pl=l.filter(x=>x.durum==='Planlı');
+ const yay=l.filter(x=>x.durum==='Yayında'),pl=l.filter(x=>x.durum==='Planlı'),ts=l.filter(x=>x.durum==='Taslak');
  const gelecek7=pl.filter(x=>x.tarih>=bugun&&x.tarih<=new Date(Date.now()+7*864e5+3*36e5).toISOString().slice(0,10)).length;
- document.getElementById('kpi').innerHTML=[['Yayında',yay.length],['Planlı',pl.length],['Önümüzdeki 7 gün',gelecek7],['Toplam izlenme',sayi(yay.reduce((s,x)=>s+(x.izlenme||0),0))],['Bugün',l.filter(x=>x.tarih===bugun&&x.durum!=='Gizli').length]].map(([a,b])=>'<div><b>'+b+'</b><span>'+a+'</span></div>').join('');
+ document.getElementById('kpi').innerHTML=[['Yayında',yay.length],['Planlı',pl.length],['Taslak / Hazır',ts.length],['Önümüzdeki 7 gün',gelecek7],['Toplam izlenme',sayi(yay.reduce((s,x)=>s+(x.izlenme||0),0))],['Bugün',l.filter(x=>x.tarih===bugun&&x.durum!=='Gizli').length]].map(([a,b])=>'<div><b>'+b+'</b><span>'+a+'</span></div>').join('');
  document.getElementById('ozet').textContent=l.length+' kayıt gösteriliyor (toplam '+K.length+').';
  let h='',son=null;
  for(const x of l){

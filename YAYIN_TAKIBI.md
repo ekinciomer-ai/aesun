@@ -31,3 +31,8 @@ Portal → Özel Alan → **Yayın Takibi** (https://portal.aksarayenerji.net/ya
 
 Antigravity: kendi yüklediğin her içeriği `"ureten": "Antigravity"` ile ekle; listede `?` görünen ve senin yüklediğin kayıtları düzelt.
 Şifre, token, oturum bilgisi bu dosyaya asla yazılmaz.
+
+## Taslak Planlar ve Hazır Stok Kuralları
+- Bilgisayarda render'ı tamamlanmış ancak henüz YouTube/TikTok'a yüklenmemiş videolar `"durum": "Taslak"`, hedef `tarih`/`saat` ve `"not": "HAZIR · Dosya: <dosya_adi.mp4>"` olarak tabloya eklenir.
+- Henüz üretilmemiş sıradaki bölüm fikirleri (`Taslak Planlar`) `"durum": "Taslak"` ve `"not": "TASLAK PLAN · ..."` olarak tabloda tutulur; video üretildiğinde `"HAZIR"`, kanala yüklendiğinde `"Planlı"` veya `"Yayında"` olarak güncellenir.
+- **KESİN KURAL:** Video dosya isimlerinde ve yayındaki başlıklarda `TR`, `EN`, `yt_TR`, `yt_EN` gibi dil/platform ekleri **kullanılmaz**.

@@ -43,6 +43,17 @@ def _onarim_taze(b, dk=120):
     except Exception:
         return True
 
+def _kapandi(dosya, simdi):
+    """arsiv_f2pool_2026-10.json gibi dönemi bitmiş dosya artık yazılmaz; gecikti sayılmaz (1.11.2026 ay dönümü yanlış uyarısı)."""
+    import re
+    m = re.search(r"(?<!\d)(20\d\d)-(\d\d)(?:-(\d\d))?(?!\d)", str(dosya).rsplit("/", 1)[-1])
+    if not m:
+        return False
+    if m.group(3):
+        return (m.group(1), m.group(2), m.group(3)) < (f"{simdi.year}", f"{simdi.month:02d}", f"{simdi.day:02d}")
+    return (m.group(1), m.group(2)) < (f"{simdi.year}", f"{simdi.month:02d}")
+
+
 def _get(yol, sure=20):
     with urllib.request.urlopen(urllib.request.Request(API + yol, headers={"User-Agent": "aesun-pi-bekci"}), timeout=sure) as r:
         return json.loads(r.read())
@@ -96,7 +107,8 @@ def calis(simdi=None):
                 sorun["ns1_sorun"] = f"ns1 bekçisi sorun görüyor: {m[:120]}"
             if (b.get("veri") or {}).get("sorun"):
                 sorun["veri"] = f"Eksik veri: {b['veri']['sorun'][:160]}"
-            for g in ((b.get("tarama") or {}).get("geciken") or [])[:5]:      # öğrenen tarama: olağan düzenine göre geciken dosya
+            for g in [g for g in ((b.get("tarama") or {}).get("geciken") or []) if not _kapandi(g.get("dosya", ""), simdi)][:5]:
+                # öğrenen tarama: olağan düzenine göre geciken dosya (dönemi bitmiş aylık/günlük arşivler hariç)
                 sorun["gec:" + g["dosya"]] = f"{g['dosya']} {g['yas_dk']} dk'dır güncellenmedi (olağanı ~{g['olagan_dk']:.0f} dk)"
             for u in ((b.get("uclar") or {}).get("kalan") or [])[:5]:          # duman testi: yanıt vermeyen uç
                 sorun["uc:" + u["ad"]] = f"{u['ad']} çalışmıyor — {u['neden']}"

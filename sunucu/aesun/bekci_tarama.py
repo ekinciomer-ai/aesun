@@ -12,7 +12,7 @@ Kural (dosya başına):
     en az 4'ünde güncellenmişse (yani o saatlerde normalde yazılıyorsa) → "gecikti"
 Çıktı: /opt/aesun/tarama_durum.json (bekçi /v1/bekci'ye ekler). Yalnız okur; hiçbir dosyayı değiştirmez.
 """
-import json, os, statistics, subprocess, time
+import json, os, re, statistics, subprocess, time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
@@ -23,6 +23,19 @@ CIKTI = "/opt/aesun/tarama_durum.json"
 TR = timezone(timedelta(hours=3))
 GIT_ENV = {**os.environ, "GIT_SSH_COMMAND": "ssh -i /opt/aesun/ssh/id_ed25519 -o UserKnownHostsFile=/opt/aesun/ssh/known_hosts -o StrictHostKeyChecking=accept-new -o BatchMode=yes"}
 HARIC = (".github/", "__pycache__/")
+DONEM = re.compile(r"(?<!\d)(20\d\d)-(\d\d)(?:-(\d\d))?(?!\d)")
+
+
+def kapandi(f, simdi):
+    """Adında dönem olan dosya (arsiv_f2pool_2026-10.json, ..._2026-10-31.json) dönemi bitince artık yazılmaz → izlenmez.
+    1.11.2026: ay dönümünde arsiv_f2pool_2026-10.json "gecikti" sayıldı; şef "Veri arşivi"ni boşuna tekrar tetikledi."""
+    m = DONEM.search(f.rsplit("/", 1)[-1])
+    if not m:
+        return False
+    b = datetime.fromtimestamp(simdi, TR)
+    if m.group(3):
+        return (m.group(1), m.group(2), m.group(3)) < (f"{b.year}", f"{b.month:02d}", f"{b.day:02d}")
+    return (m.group(1), m.group(2)) < (f"{b.year}", f"{b.month:02d}")
 
 
 def git(*a, cwd=None, t=300):
@@ -58,7 +71,7 @@ def main():
     izlenen, geciken, ogrenilen = 0, [], {}
     for f, ts in Z.items():
         ts = sorted(set(ts))
-        if len(ts) < 12:
+        if len(ts) < 12 or kapandi(f, simdi):
             continue
         izlenen += 1
         ara = [b - a for a, b in zip(ts, ts[1:]) if b > a]

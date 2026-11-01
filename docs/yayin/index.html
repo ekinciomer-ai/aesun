@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Yayın Takibi · Aksaray Enerji</title><link rel="icon" href="../favicon.svg">
+<script>(function(){var S=null;try{var o=JSON.parse(localStorage.getItem('ae_portal')||'null');if(o&&o.S&&Date.now()<(o.son||0))S=o.S;}catch(e){}if(!S||!S.ka){location.replace('../portal/?git=yayin');return;}})();</script>
+<style>
+:root{--k:#D7262E;--a:#2B2F35;--z:#F6F5F3;--y:#fff;--c:#E4E1DC;--s:#6B6F76;--yes:#1F8A4C;--mav:#2463B5;--tur:#C26A12;--gri:#8A93A0}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--z);color:var(--a)}
+header{background:var(--y);border-bottom:1px solid var(--c);padding:12px 16px;position:sticky;top:0;z-index:5}
+.ust{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1200px;margin:0 auto}
+h1{font-size:18px;font-weight:700}
+.alt{color:var(--s);font-size:13px}
+.geri{color:var(--a);text-decoration:none;border:1px solid var(--c);border-radius:10px;padding:6px 10px;font-size:13px}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi div{background:var(--y);border:1px solid var(--c);border-radius:12px;padding:12px 14px}
+.kpi b{display:block;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi span{color:var(--s);font-size:12.5px}
+.filtre{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.ara{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--c);border-radius:10px;font:inherit;background:var(--y)}
+select{padding:8px 10px;border:1px solid var(--c);border-radius:10px;font:inherit;font-size:13.5px;background:var(--y);color:var(--a)}
+.ozet{color:var(--s);font-size:13px;margin:6px 0 10px}
+.tablo{background:var(--y);border:1px solid var(--c);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;font-weight:600;color:var(--s);text-transform:uppercase;letter-spacing:.03em;padding:10px 12px;border-bottom:1px solid var(--c);background:#FBFAF8;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--c);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tr.gun td{background:#FBFAF8;font-weight:600;font-size:13px;color:var(--s);padding:7px 12px}
+tr.bugun td{color:var(--k)}
+.bas{font-weight:550;word-break:break-word}
+.bas a{color:inherit;text-decoration:none}.bas a:hover{text-decoration:underline}
+.ince{color:var(--s);font-size:12.5px}
+.rozet{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;white-space:nowrap;color:#fff}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pl{font-weight:600;font-size:12.5px;white-space:nowrap}
+.yt{color:#C4302B}.tt{color:#111}
+.ur{font-size:12px;border:1px solid var(--c);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.ur.claude{border-color:#D9A27A;color:#9A4E1C}.ur.anti{border-color:#9BB5E0;color:#2463B5}.ur.bel{color:var(--gri)}
+.bos{padding:30px;text-align:center;color:var(--s)}
+@media (max-width:760px){
+ thead{display:none}
+ table,tbody,tr,td{display:block;width:100%}
+ tr:not(.gun){padding:10px 12px;border-bottom:1px solid var(--c)}
+ td{border:0;padding:2px 0}
+ td.num{text-align:left}
+ td[data-e]::before{content:attr(data-e) ": ";color:var(--s);font-size:12px}
+}
+</style></head><body>
+<header><div class="ust"><a class="geri" href="../portal/">← Portal</a><div><h1>Yayın Takibi</h1><div class="alt" id="guncel">Yükleniyor…</div></div></div></header>
+<main>
+<div class="kpi" id="kpi"></div>
+<div class="filtre">
+ <input class="ara" id="q" placeholder="Başlıkta ara…" autocomplete="off">
+ <select id="fp"><option value="">Tüm platformlar</option></select>
+ <select id="fk"><option value="">Tüm kanallar</option></select>
+ <select id="fd"><option value="">Tüm durumlar</option></select>
+ <select id="fs"><option value="">Tüm seriler</option></select>
+ <select id="fu"><option value="">Kim yayınladı: hepsi</option></select>
+</div>
+<div class="ozet" id="ozet"></div>
+<div class="tablo"><table><thead><tr><th>Saat</th><th>Platform · Kanal</th><th>İçerik</th><th>Durum</th><th class="num">İzlenme</th><th>Yayınlayan</th></tr></thead><tbody id="gv"></tbody></table></div>
+</main>
+<script>
+const DR={'Yayında':'#1F8A4C','Planlı':'#2463B5','Gizli':'#8A93A0','Taslak':'#C26A12','Kaldırıldı':'#5C6470'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AY=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],GN=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+const gunAd=t=>{if(!t)return 'Tarihsiz (taslak)';const d=new Date(t+'T12:00:00');return d.getDate()+' '+AY[d.getMonth()]+' '+d.getFullYear()+' · '+GN[d.getDay()]};
+const bugun=(()=>{const d=new Date(Date.now()+3*36e5);return d.toISOString().slice(0,10)})();
+const sayi=n=>n==null?'—':Number(n).toLocaleString('tr-TR');
+let K=[];
+const F={q:'',fp:'',fk:'',fd:'',fs:'',fu:''};
+function secenek(id,alan){const s=document.getElementById(id);[...new Set(K.map(x=>x[alan]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})}
+function ciz(){
+ const q=F.q.toLocaleLowerCase('tr');
+ const l=K.filter(x=>(!F.fp||x.platform===F.fp)&&(!F.fk||x.kanal===F.fk)&&(!F.fd||x.durum===F.fd)&&(!F.fs||x.seri===F.fs)&&(!F.fu||x.ureten===F.fu)&&(!q||String(x.baslik).toLocaleLowerCase('tr').includes(q)))
+  .sort((a,b)=>(b.tarih||'0').localeCompare(a.tarih||'0')||(b.saat||'').localeCompare(a.saat||''));
+ const yay=l.filter(x=>x.durum==='Yayında'),pl=l.filter(x=>x.durum==='Planlı');
+ const gelecek7=pl.filter(x=>x.tarih>=bugun&&x.tarih<=new Date(Date.now()+7*864e5+3*36e5).toISOString().slice(0,10)).length;
+ document.getElementById('kpi').innerHTML=[['Yayında',yay.length],['Planlı',pl.length],['Önümüzdeki 7 gün',gelecek7],['Toplam izlenme',sayi(yay.reduce((s,x)=>s+(x.izlenme||0),0))],['Bugün',l.filter(x=>x.tarih===bugun&&x.durum!=='Gizli').length]].map(([a,b])=>'<div><b>'+b+'</b><span>'+a+'</span></div>').join('');
+ document.getElementById('ozet').textContent=l.length+' kayıt gösteriliyor (toplam '+K.length+').';
+ let h='',son=null;
+ for(const x of l){
+  if(x.tarih!==son){son=x.tarih;h+='<tr class="gun'+(x.tarih===bugun?' bugun':'')+'"><td colspan="6">'+esc(gunAd(x.tarih))+(x.tarih===bugun?' · BUGÜN':'')+'</td></tr>'}
+  const pc=x.platform==='YouTube'?'yt':'tt',uc=x.ureten==='Claude'?'claude':x.ureten==='Antigravity'?'anti':'bel';
+  h+='<tr><td class="ince" data-e="Saat">'+esc(x.saat||'—')+'</td>'
+   +'<td><div class="pl '+pc+'">'+esc(x.platform)+' · '+esc(x.dil)+'</div><div class="ince">'+esc(x.kanal)+'</div></td>'
+   +'<td><div class="bas">'+(x.link?'<a href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer">'+esc(x.baslik)+' ↗</a>':esc(x.baslik))+'</div><div class="ince">'+esc(x.seri||'')+' · '+esc(x.tur||'')+(x.not?' · '+esc(x.not):'')+'</div></td>'
+   +'<td><span class="rozet" style="background:'+(DR[x.durum]||'#5C6470')+'">'+esc(x.durum)+'</span></td>'
+   +'<td class="num" data-e="İzlenme">'+sayi(x.izlenme)+'</td>'
+   +'<td data-e="Yayınlayan"><span class="ur '+uc+'">'+esc(x.ureten==='?'?'Belirsiz':x.ureten)+'</span></td></tr>';
+ }
+ document.getElementById('gv').innerHTML=h||'<tr><td colspan="6" class="bos">Kayıt yok.</td></tr>';
+}
+fetch('yayin.json?'+Date.now()).then(r=>r.json()).then(j=>{
+ K=j.kayitlar||[];
+ const g=new Date(j.guncelleme);document.getElementById('guncel').textContent='Son güncelleme: '+g.toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'})+' · '+(j.kaynak||'');
+ [['fp','platform'],['fk','kanal'],['fd','durum'],['fs','seri'],['fu','ureten']].forEach(([i,a])=>secenek(i,a));
+ ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
+ document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};
+ ciz();
+}).catch(e=>{document.getElementById('guncel').textContent='Veri okunamadı: '+e.message});
+</script>
+</body></html>

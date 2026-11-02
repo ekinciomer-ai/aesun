@@ -115,6 +115,47 @@ def main():
                 if x is not None and v is not None and x.get("izlenme") != int(v):
                     x["izlenme"] = int(v); degisti += 1
 
+    # 2b) Yorumlar (YT_API_KEY ile; bilgisayar gerekmez). Herkese açık videolardaki yorumlar okunur,
+    #     kanalın kendisinin yanıt verip vermediği işaretlenir. Yanıt GÖNDERİLMEZ.
+    if anahtar:
+        yorumlar, eski = [], {y["id"]: y for y in j.get("yorumlar", [])}
+        kanal_id = {v[0]: k for k, v in KANALLAR.items()}
+        for x in K:
+            if x.get("platform") != "YouTube" or x.get("durum") != "Yayında" or not x.get("vid"):
+                continue
+            cid = kanal_id.get(x.get("kanal"))
+            q = urllib.parse.urlencode({"part": "snippet,replies", "videoId": x["vid"], "maxResults": 50,
+                                        "order": "time", "textFormat": "plainText", "key": anahtar})
+            try:
+                d = json.loads(getir("https://www.googleapis.com/youtube/v3/commentThreads?" + q))
+            except Exception:
+                continue  # yorumları kapalı video vb.
+            for it in d.get("items", []):
+                ust = it["snippet"]["topLevelComment"]["snippet"]
+                yazar_cid = (ust.get("authorChannelId") or {}).get("value")
+                if cid and yazar_cid == cid:
+                    continue  # kanalın kendi yorumu
+                yanitlar = (it.get("replies") or {}).get("comments", [])
+                kanal_yaniti = next((r["snippet"]["textDisplay"] for r in yanitlar
+                                     if (r["snippet"].get("authorChannelId") or {}).get("value") == cid), None)
+                if kanal_yaniti is None and it["snippet"].get("totalReplyCount", 0) > len(yanitlar):
+                    kanal_yaniti = (eski.get(it["id"]) or {}).get("yanit")
+                t = datetime.fromisoformat(ust["publishedAt"].replace("Z", "+00:00")).astimezone(TZ)
+                yorumlar.append({
+                    "id": it["id"], "kanal": x.get("kanal"), "dil": x.get("dil"), "vid": x["vid"],
+                    "video": x.get("baslik"), "yazar": ust.get("authorDisplayName"),
+                    "metin": ust.get("textDisplay", "")[:1000], "zaman": t.isoformat(timespec="minutes"),
+                    "begeni": ust.get("likeCount", 0), "yanitlandi": kanal_yaniti is not None,
+                    "yanit": kanal_yaniti,
+                    "link": f"https://www.youtube.com/watch?v={x['vid']}&lc={it['id']}",
+                })
+        yorumlar.sort(key=lambda y: y["zaman"], reverse=True)
+        yeni_say = sum(1 for y in yorumlar if y["id"] not in eski)
+        if yorumlar != j.get("yorumlar"):
+            j["yorumlar"] = yorumlar; degisti += 1
+            if yeni_say:
+                notlar.append(f"{yeni_say} yeni yorum")
+
     # 3) TikTok: plan saati geçen planlı içerik
     for x in K:
         if x.get("platform") == "TikTok" and x.get("durum") == "Planlı" and x.get("tarih"):

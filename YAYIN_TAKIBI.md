@@ -36,3 +36,8 @@ Antigravity: kendi yüklediğin her içeriği `"ureten": "Antigravity"` ile ekle
 - Bilgisayarda render'ı tamamlanmış ancak henüz YouTube/TikTok'a yüklenmemiş videolar `"durum": "Taslak"`, hedef `tarih`/`saat` ve `"not": "HAZIR · Dosya: <dosya_adi.mp4>"` olarak tabloya eklenir.
 - Henüz üretilmemiş sıradaki bölüm fikirleri (`Taslak Planlar`) `"durum": "Taslak"` ve `"not": "TASLAK PLAN · ..."` olarak tabloda tutulur; video üretildiğinde `"HAZIR"`, kanala yüklendiğinde `"Planlı"` veya `"Yayında"` olarak güncellenir.
 - **KESİN KURAL:** Video dosya isimlerinde ve yayındaki başlıklarda `TR`, `EN`, `yt_TR`, `yt_EN` gibi dil/platform ekleri **kullanılmaz**.
+
+## Yorumlar (otomatik, bilgisayar gerekmez)
+- `yayin/guncelle.py`, GitHub Actions'ta 30 dakikada bir, `YT_API_KEY` sırrı varsa her herkese açık YouTube videosunun yorumlarını okur ve `yayin.json` → `yorumlar` dizisine yazar (`yanitlandi`: kanal yanıt verdi mi).
+- Portal → Yayın Takibi üstünde "💬 Yorumlar" kutusu yanıt bekleyenleri gösterir. Yanıt GÖNDERİLMEZ; yanıt Ömer'in onayıyla verilir.
+- `yorumlar` dizisini elle düzenleme; betik her çalışmada yeniden yazar.

@@ -40,6 +40,16 @@ tr.bugun td{color:var(--k)}
 .kpy button{border:1px solid var(--c);background:#FBFAF8;color:var(--a);border-radius:6px;padding:2px 8px;font:600 11.5px/1.3 inherit;cursor:pointer}
 .kpy button:hover{border-color:var(--mav);color:var(--mav)}
 .bos{padding:30px;text-align:center;color:var(--s)}
+.yrm{background:var(--y);border:1px solid var(--c);border-radius:12px;margin-bottom:14px}
+.yrm summary{cursor:pointer;padding:12px 14px;font-weight:650;list-style:none;display:flex;gap:8px;align-items:center}
+.yrm summary::-webkit-details-marker{display:none}
+.yrm .say{background:var(--k);color:#fff;border-radius:999px;padding:1px 9px;font-size:12.5px}
+.yrm .say.ok{background:var(--yes)}
+.yr{padding:10px 14px;border-top:1px solid var(--c)}
+.yr .m{margin:3px 0 6px;white-space:pre-wrap;word-break:break-word}
+.yr .yn{color:var(--yes);font-size:13px;margin-top:4px}
+.yr a.btn{display:inline-block;border:1px solid var(--c);border-radius:6px;padding:2px 9px;font:600 12px/1.4 inherit;color:var(--mav);text-decoration:none;margin-right:6px}
+.yr button{border:1px solid var(--c);background:#FBFAF8;border-radius:6px;padding:2px 9px;font:600 12px/1.4 inherit;cursor:pointer}
 @media (max-width:760px){
  thead{display:none}
  table,tbody,tr,td{display:block;width:100%}
@@ -52,6 +62,7 @@ tr.bugun td{color:var(--k)}
 <header><div class="ust"><a class="geri" href="../portal/">← Portal</a><div><h1>Yayın Takibi</h1><div class="alt" id="guncel">Yükleniyor…</div></div></div></header>
 <main>
 <div class="kpi" id="kpi"></div>
+<details class="yrm" id="yrm" hidden><summary></summary><div id="yrl"></div></details>
 <div class="filtre">
  <input class="ara" id="q" placeholder="Başlıkta ara…" autocomplete="off">
  <select id="fp"><option value="">Tüm platformlar</option></select>
@@ -105,6 +116,22 @@ function ciz(){
  }
  document.getElementById('gv').innerHTML=h||'<tr><td colspan="6" class="bos">Kayıt yok.</td></tr>';
 }
+function yorumCiz(Y){
+ const b=document.getElementById('yrm');if(!Y){b.hidden=true;return}
+ b.hidden=false;const bek=Y.filter(y=>!y.yanitlandi);
+ b.querySelector('summary').innerHTML='💬 Yorumlar <span class="say'+(bek.length?'':' ok')+'">'+(bek.length?bek.length+' yanıt bekliyor':'hepsi yanıtlandı')+'</span><span class="ince">· toplam '+Y.length+' · dokun, aç</span>';
+ if(bek.length&&!b.dataset.d){b.open=true;b.dataset.d=1}
+ const sirali=[...bek,...Y.filter(y=>y.yanitlandi).slice(0,10)];
+ window._yrm=sirali;
+ document.getElementById('yrl').innerHTML=sirali.map((y,i)=>'<div class="yr"><div class="ince">'+esc(y.kanal)+' · '+esc(y.video)+' · '+fmt(new Date(y.zaman))+'</div>'
+  +'<div><b>'+esc(y.yazar)+'</b>'+(y.yanitlandi?'':' <span class="rozet" style="background:var(--k)">Yanıt bekliyor</span>')+'</div>'
+  +'<div class="m">'+esc(y.metin)+'</div>'
+  +(y.yanit?'<div class="yn">↳ Kanal yanıtı: '+esc(y.yanit)+'</div>':'')
+  +'<div style="margin-top:6px"><a class="btn" href="'+esc(y.link)+'" target="_blank" rel="noopener noreferrer">YouTube\'da aç ↗</a>'
+  +'<button type="button" onclick="yorumKopya('+i+',this)">📋 Claude\'a sor</button></div></div>').join('')||'<div class="yr ince">Henüz yorum yok.</div>';
+}
+function yorumKopya(i,btn){const y=(window._yrm||[])[i];if(!y)return;
+ navigator.clipboard.writeText('Şu yoruma yanıt öner ve onaylarsam gönder: '+y.kanal+' · '+y.video+' · @'+y.yazar+': "'+y.metin+'"').then(()=>{const o=btn.textContent;btn.textContent='✅ Kopyalandı';setTimeout(()=>btn.textContent=o,1400)})}
 function kopyala(i,alan,btn){
  const x=(window._sonListe||[])[i];if(!x||!x[alan])return;
  navigator.clipboard.writeText(x[alan]).then(()=>{const o=btn.textContent;btn.textContent='✅ Kopyalandı';setTimeout(()=>btn.textContent=o,1400)});
@@ -131,7 +158,7 @@ async function yukle(){
   [['fp','platform'],['fk','kanal'],['fd','durum'],['fs','seri'],['fu','ureten']].forEach(([i,a])=>secenek(i,a));
   ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
   document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};}
- ciz();
+ ciz();yorumCiz(j.yorumlar);
 }
 yukle();setInterval(yukle,60000);
 </script>

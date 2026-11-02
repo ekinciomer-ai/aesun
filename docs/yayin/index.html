@@ -150,7 +150,7 @@ async function yukle(){
  if(c&&c.kayitlar){for(const v of c.kayitlar){const x=ix[v.vid];
   if(x){Object.assign(x,{durum:v.durum,tarih:v.tarih||x.tarih,saat:v.saat||x.saat,izlenme:v.izlenme??x.izlenme,baslik:v.baslik||x.baslik,link:x.link||v.link})}
   else{const y={...v,seri:seriTahmin(v.baslik),ureten:'?'};L.push(y);ix[v.vid]=y}}}
- for(const x of L){if(x.platform==='TikTok'&&x.durum==='Planlı'&&x.tarih&&(x.tarih+' '+(x.saat||'23:59'))<=simdi){x.durum='Yayında'}}
+ for(const x of L){if(x.platform==='TikTok'&&x.durum==='Planlı'&&!String(x.not||'').includes('HAZIR')&&x.tarih&&(x.tarih+' '+(x.saat||'23:59'))<=simdi){x.durum='Yayında'}}
  K=L;
  const g=new Date(j.guncelleme);
  document.getElementById('guncel').textContent=c&&c.zaman?('Canlı · '+fmt(new Date(c.zaman))+' · YouTube: '+Object.entries(c.kaynak||{}).map(([k,v])=>k+' → '+v).join(', ')+' · kayıtlar: '+fmt(g)):('Son güncelleme: '+fmt(g)+' (canlı kaynak şu an yanıt vermedi)');

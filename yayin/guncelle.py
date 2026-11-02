@@ -159,7 +159,8 @@ def main():
 
     # 3) TikTok: plan saati geçen planlı içerik
     for x in K:
-        if x.get("platform") == "TikTok" and x.get("durum") == "Planlı" and x.get("tarih"):
+        # Yalnız TikTok Studio'da gerçekten planlanmış olanlar (not'u "HAZIR" ile başlayan = henüz yüklenmemiş dosya; dokunma)
+        if x.get("platform") == "TikTok" and x.get("durum") == "Planlı" and x.get("tarih") and "HAZIR" not in (x.get("not") or ""):
             try:
                 t = datetime.strptime(f"{x['tarih']} {x.get('saat') or '23:59'}", "%Y-%m-%d %H:%M").replace(tzinfo=TZ)
             except ValueError:

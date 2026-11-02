@@ -1,0 +1,34 @@
+name: Yayın takibi (otomatik)
+# Bilgisayar gerekmeden Portal → Özel Alan → Yayın Takibi tablosunu günceller:
+# YouTube RSS (+ varsa YT_API_KEY) ile durum/izlenme, TikTok planlarının saati geçince "Yayında".
+on:
+  schedule:
+    - cron: '7 * * * *'   # her saat başı +7 dk
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['yayin/**', '.github/workflows/yayin_takip.yml']
+permissions:
+  contents: write
+  actions: write
+concurrency: { group: yayin-takip, cancel-in-progress: false }
+jobs:
+  guncelle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Güncelle
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+        run: python3 yayin/guncelle.py
+      - name: Kaydet ve portala gönder
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add docs/yayin/yayin.json
+          git diff --cached --quiet && exit 0
+          git commit -qm "Yayın takibi: otomatik güncelleme $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          gh workflow run cpanel_yukle.yml --ref main || true

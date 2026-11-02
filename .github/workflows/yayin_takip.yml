@@ -3,7 +3,7 @@ name: Yayın takibi (otomatik)
 # YouTube RSS (+ varsa YT_API_KEY) ile durum/izlenme, TikTok planlarının saati geçince "Yayında".
 on:
   schedule:
-    - cron: '7 * * * *'   # her saat başı +7 dk
+    - cron: '7 * * * *'   # saatlik yedek kayıt (sayfa zaten canlı okur)
   workflow_dispatch:
   push:
     branches: [main]

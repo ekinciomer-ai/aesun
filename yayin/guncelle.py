@@ -47,8 +47,28 @@ def main():
     simdi = datetime.now(TZ)
     degisti, notlar = 0, []
 
-    # 1) RSS
-    for cid, (kanal, dil) in KANALLAR.items():
+    # 0) CutkodA sunucusu canlı ucu (YouTube API bağlıysa planlı/gizli dahil tam liste)
+    canli_ok = False
+    try:
+        c = json.loads(getir("https://panel.cutkoda.com/api/yayin-takip"))
+        if c.get("kayitlar"):
+            canli_ok = True
+            for v in c["kayitlar"]:
+                x = vid_ix.get(v["vid"])
+                if x is None:
+                    x = {k: v.get(k) for k in ("platform", "kanal", "dil", "tur", "baslik", "durum", "tarih", "saat", "izlenme", "link", "vid")}
+                    x.update(seri=seri_tahmin(v.get("baslik", "")), ureten="?")
+                    K.append(x); vid_ix[v["vid"]] = x; degisti += 1
+                    notlar.append(f"Yeni içerik eklendi: {v.get('kanal')} · {v.get('baslik')}")
+                for k in ("durum", "tarih", "saat", "izlenme"):
+                    if v.get(k) not in (None, "") and x.get(k) != v[k]:
+                        x[k] = v[k]; degisti += 1
+            notlar += c.get("notlar", [])
+    except Exception as e:
+        notlar.append(f"CutkodA canlı ucu okunamadı: {e}")
+
+    # 1) RSS (canlı uç yoksa)
+    for cid, (kanal, dil) in ({} if canli_ok else KANALLAR).items():
         try:
             kok = ET.fromstring(getir(f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}"))
         except Exception as e:
@@ -112,7 +132,7 @@ def main():
     if not degisti:
         print("Değişiklik yok."); return 0
     j["guncelleme"] = simdi.isoformat(timespec="seconds")
-    j["otomatik"] = {"son_calisma": j["guncelleme"], "kaynak": "YouTube RSS" + (" + YouTube API" if anahtar else "") + " + TikTok plan saati",
+    j["otomatik"] = {"son_calisma": j["guncelleme"], "kaynak": ("CutkodA sunucusu" if canli_ok else "YouTube RSS") + (" + YouTube API" if anahtar else "") + " + TikTok plan saati",
                      "notlar": notlar[-10:]}
     json.dump(j, open(YOL, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"{degisti} alan güncellendi.")

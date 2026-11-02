@@ -91,13 +91,30 @@ function ciz(){
  }
  document.getElementById('gv').innerHTML=h||'<tr><td colspan="6" class="bos">Kayıt yok.</td></tr>';
 }
-fetch('yayin.json?'+Date.now()).then(r=>r.json()).then(j=>{
- K=j.kayitlar||[];
- const g=new Date(j.guncelleme);document.getElementById('guncel').textContent='Son güncelleme: '+g.toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'})+' · '+(j.kaynak||'');
- [['fp','platform'],['fk','kanal'],['fd','durum'],['fs','seri'],['fu','ureten']].forEach(([i,a])=>secenek(i,a));
- ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
- document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};
+// Canlı veri: CutkodA sunucusu (YouTube API / RSS, 2 dk önbellek). Taban kayıtlar: yayin.json (Claude/Antigravity notları, TikTok, taslaklar).
+const CANLI='https://panel.cutkoda.com/api/yayin-takip';
+const seriTahmin=t=>{t=String(t).toLowerCase();if(/emu|kedi|cat died|güvercin|pigeon/.test(t))return 'Tarihin Patileri';if(/tablo|painting|mona lisa|van gogh|venüs|venus|çığlık|scream|devriye|night watch|dalga|wave|akşam yemeği|supper|kaplumbağa|tortoise|inci küpeli|pearl/.test(t))return 'Tablo Serisi';return 'Gündem + Tarih'};
+const fmt=d=>d.toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'});
+let ILK=true;
+async function yukle(){
+ let j,c=null;
+ try{j=await (await fetch('yayin.json?'+Date.now())).json()}catch(e){document.getElementById('guncel').textContent='Veri okunamadı: '+e.message;return}
+ try{c=await (await fetch(CANLI,{cache:'no-store'})).json()}catch(e){}
+ const L=(j.kayitlar||[]).map(x=>({...x})),ix={};L.forEach(x=>{if(x.vid)ix[x.vid]=x});
+ const simdi=new Date(Date.now()+3*36e5).toISOString().slice(0,16).replace('T',' ');
+ if(c&&c.kayitlar){for(const v of c.kayitlar){const x=ix[v.vid];
+  if(x){Object.assign(x,{durum:v.durum,tarih:v.tarih||x.tarih,saat:v.saat||x.saat,izlenme:v.izlenme??x.izlenme,baslik:v.baslik||x.baslik,link:x.link||v.link})}
+  else{const y={...v,seri:seriTahmin(v.baslik),ureten:'?'};L.push(y);ix[v.vid]=y}}}
+ for(const x of L){if(x.platform==='TikTok'&&x.durum==='Planlı'&&x.tarih&&(x.tarih+' '+(x.saat||'23:59'))<=simdi){x.durum='Yayında'}}
+ K=L;
+ const g=new Date(j.guncelleme);
+ document.getElementById('guncel').textContent=c&&c.zaman?('Canlı · '+fmt(new Date(c.zaman))+' · YouTube: '+Object.entries(c.kaynak||{}).map(([k,v])=>k+' → '+v).join(', ')+' · kayıtlar: '+fmt(g)):('Son güncelleme: '+fmt(g)+' (canlı kaynak şu an yanıt vermedi)');
+ if(ILK){ILK=false;
+  [['fp','platform'],['fk','kanal'],['fd','durum'],['fs','seri'],['fu','ureten']].forEach(([i,a])=>secenek(i,a));
+  ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
+  document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};}
  ciz();
-}).catch(e=>{document.getElementById('guncel').textContent='Veri okunamadı: '+e.message});
+}
+yukle();setInterval(yukle,60000);
 </script>
 </body></html>

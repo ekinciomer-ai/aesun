@@ -4,6 +4,7 @@
 Kaynaklar:
   1) YouTube kanal RSS'i (anahtarsız, herkese açık): yayındaki son videolar, yayın saati, izlenme.
   2) YT_API_KEY sırrı varsa YouTube Data API: tablodaki TÜM herkese açık videoların güncel izlenmesi.
+  2b) YT_API_KEY varsa yorumlar (yanıt bekleyenler Portal → Yayın Takibi → Yorumlar kutusunda).
   3) TikTok: planlı içeriklerde plan saati geçtiyse "Yayında" yapılır (TikTok planlananı kendisi yayınlar).
 Planlı/gizli YouTube içerikleri herkese açık kaynaklarda görünmez; onları Claude/Antigravity yazar,
 bu betik yalnız yayına çıktıklarında durumlarını ve izlenmelerini günceller.

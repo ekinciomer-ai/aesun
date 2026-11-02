@@ -36,6 +36,9 @@ tr.bugun td{color:var(--k)}
 .yt{color:#C4302B}.tt{color:#111}
 .ur{font-size:12px;border:1px solid var(--c);border-radius:6px;padding:1px 6px;white-space:nowrap}
 .ur.claude{border-color:#D9A27A;color:#9A4E1C}.ur.anti{border-color:#9BB5E0;color:#2463B5}.ur.bel{color:var(--gri)}
+.kpy{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.kpy button{border:1px solid var(--c);background:#FBFAF8;color:var(--a);border-radius:6px;padding:2px 8px;font:600 11.5px/1.3 inherit;cursor:pointer}
+.kpy button:hover{border-color:var(--mav);color:var(--mav)}
 .bos{padding:30px;text-align:center;color:var(--s)}
 @media (max-width:760px){
  thead{display:none}
@@ -79,17 +82,32 @@ function ciz(){
  document.getElementById('kpi').innerHTML=[['Yayında',yay.length],['Planlı',pl.length],['Taslak / Hazır',ts.length],['Önümüzdeki 7 gün',gelecek7],['Toplam izlenme',sayi(yay.reduce((s,x)=>s+(x.izlenme||0),0))],['Bugün',l.filter(x=>x.tarih===bugun&&x.durum!=='Gizli').length]].map(([a,b])=>'<div><b>'+b+'</b><span>'+a+'</span></div>').join('');
  document.getElementById('ozet').textContent=l.length+' kayıt gösteriliyor (toplam '+K.length+').';
  let h='',son=null;
- for(const x of l){
+ window._sonListe=l;
+ for(let i=0;i<l.length;i++){
+  const x=l[i];
   if(x.tarih!==son){son=x.tarih;h+='<tr class="gun'+(x.tarih===bugun?' bugun':'')+'"><td colspan="6">'+esc(gunAd(x.tarih))+(x.tarih===bugun?' · BUGÜN':'')+'</td></tr>'}
   const pc=x.platform==='YouTube'?'yt':'tt',uc=x.ureten==='Claude'?'claude':x.ureten==='Antigravity'?'anti':'bel';
+  let kb='';
+  if(x.yt_baslik||x.yt_aciklama||x.yt_etiketler||x.tt_metin){
+   kb='<div class="kpy">'
+    +(x.yt_baslik?'<button type="button" onclick="kopyala('+i+',\'yt_baslik\',this)">📋 YT Başlık</button>':'')
+    +(x.yt_aciklama?'<button type="button" onclick="kopyala('+i+',\'yt_aciklama\',this)">📋 YT Açıklama</button>':'')
+    +(x.yt_etiketler?'<button type="button" onclick="kopyala('+i+',\'yt_etiketler\',this)">📋 YT Etiketler</button>':'')
+    +(x.tt_metin?'<button type="button" onclick="kopyala('+i+',\'tt_metin\',this)">📋 TikTok Metni</button>':'')
+    +'</div>';
+  }
   h+='<tr><td class="ince" data-e="Saat">'+esc(x.saat||'—')+'</td>'
    +'<td><div class="pl '+pc+'">'+esc(x.platform)+' · '+esc(x.dil)+'</div><div class="ince">'+esc(x.kanal)+'</div></td>'
-   +'<td><div class="bas">'+(x.link?'<a href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer">'+esc(x.baslik)+' ↗</a>':esc(x.baslik))+'</div><div class="ince">'+esc(x.seri||'')+' · '+esc(x.tur||'')+(x.not?' · '+esc(x.not):'')+'</div></td>'
+   +'<td><div class="bas">'+(x.link?'<a href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer">'+esc(x.baslik)+' ↗</a>':esc(x.baslik))+'</div><div class="ince">'+esc(x.seri||'')+' · '+esc(x.tur||'')+(x.not?' · '+esc(x.not):'')+'</div>'+kb+'</td>'
    +'<td><span class="rozet" style="background:'+(DR[x.durum]||'#5C6470')+'">'+esc(x.durum)+'</span></td>'
    +'<td class="num" data-e="İzlenme">'+sayi(x.izlenme)+'</td>'
    +'<td data-e="Yayınlayan"><span class="ur '+uc+'">'+esc(x.ureten==='?'?'Belirsiz':x.ureten)+'</span></td></tr>';
  }
  document.getElementById('gv').innerHTML=h||'<tr><td colspan="6" class="bos">Kayıt yok.</td></tr>';
+}
+function kopyala(i,alan,btn){
+ const x=(window._sonListe||[])[i];if(!x||!x[alan])return;
+ navigator.clipboard.writeText(x[alan]).then(()=>{const o=btn.textContent;btn.textContent='✅ Kopyalandı';setTimeout(()=>btn.textContent=o,1400)});
 }
 // Canlı veri: CutkodA sunucusu (YouTube API / RSS, 2 dk önbellek). Taban kayıtlar: yayin.json (Claude/Antigravity notları, TikTok, taslaklar).
 const CANLI='https://panel.cutkoda.com/api/yayin-takip';

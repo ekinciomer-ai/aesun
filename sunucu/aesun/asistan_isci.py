@@ -37,7 +37,7 @@ GIZLI_DESEN = re.compile(
     r"GOCSPX-[0-9A-Za-z_-]{15,})"
 )
 
-_ANT_AKTIF = True
+_ANT_AKTIF = False
 
 
 def maskele(metin: str) -> str:
@@ -663,26 +663,29 @@ def _llm_tek_cagri(mesajlar: list) -> str:
         except Exception:
             pass
 
-    # Hızlı GPT-4o OpenAI uyumlu uç (şemasız düz mesaj protokolü — 2-5 sn içinde yanıt verir)
+    # Hızlı GPT-4o OpenAI uyumlu uç (openai-fast 1-3 sn içinde yanıt verir)
     oai_key = os.environ.get("OPENAI_API_KEY", "").strip()
     uclar = []
     if oai_key:
-        uclar.append(("https://api.openai.com/v1/chat/completions", oai_key, "gpt-4o-mini"))
-    uclar.append(("https://text.pollinations.ai/openai", "", "openai"))
+        uclar.append(("https://api.openai.com/v1/chat/completions", oai_key, "gpt-4o-mini", 12))
+    uclar.append(("https://text.pollinations.ai/openai", "", "openai-fast", 14))
+    uclar.append(("https://text.pollinations.ai/openai", "", "openai-fast", 16))
+    uclar.append(("https://text.pollinations.ai/openai", "", "openai", 18))
 
-    for u_url, u_key, u_mod in uclar:
+    for u_url, u_key, u_mod, t_out in uclar:
         try:
-            hdrs = {"Content-Type": "application/json", "User-Agent": "aesun-asistan/3.0"}
+            hdrs = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
             if u_key:
                 hdrs["Authorization"] = f"Bearer {u_key}"
             govde = {"model": u_mod, "messages": mesajlar, "temperature": 0.2}
             req = urllib.request.Request(u_url, data=json.dumps(govde).encode("utf-8"), headers=hdrs, method="POST")
-            with urllib.request.urlopen(req, timeout=22) as r:
+            with urllib.request.urlopen(req, timeout=t_out) as r:
                 d = json.loads(r.read().decode("utf-8"))
             ic = ((d.get("choices") or [{}])[0].get("message") or {}).get("content", "").strip()
             if ic:
                 return ic
         except Exception:
+            time.sleep(0.3)
             continue
     return ""
 
@@ -726,9 +729,10 @@ def ai_ajan_calistir(metin: str) -> str:
     )
 
     gecmis = [{"role": "system", "content": sistem_ozeti}]
-    for m in mesajlari_oku()[-6:]:
+    onceki = [m for m in mesajlari_oku()[-5:] if m.get("metin", "").strip() != metin.strip()]
+    for m in onceki[-4:]:
         rol = "user" if m.get("kim") in ("kullanici", "omer") else "assistant"
-        ic = m.get("metin", "")[:600].strip()
+        ic = m.get("metin", "")[:500].strip()
         if not ic or "görev kutusuna kaydedildi" in ic:
             continue
         gecmis.append({"role": rol, "content": ic})
@@ -783,6 +787,17 @@ def akilli_komut_yorumla(metin: str) -> str:
 
     d = durum_guncelle(yedek_al=False)
     vids = d.get("videolar", [])
+    if any(k in m_low for k in ("izlenme", "abone", "beğeni", "begeni", "istatistik", "kaç kişi")):
+        kan = d.get("kanallar") or {}
+        satirlar = ["📊 **Canlı YouTube İzlenme & Kanal İstatistikleri:**"]
+        for kd, kv in kan.items():
+            satirlar.append(f"- **{kv.get('ad', kd)} ({kd}):** Toplam **{kv.get('izlenme', 0)}** izlenme · **{kv.get('abone', 0)}** abone · **{kv.get('video', 0)}** video")
+        yayinda = [v for v in vids if v.get("durum") == "Yayında" or int(v.get("izlenme", 0)) > 0]
+        if yayinda:
+            satirlar.append("\n🎬 **Yayındaki / İzlenen Videolar:**")
+            for v in sorted(yayinda, key=lambda x: int(x.get("izlenme", 0)), reverse=True)[:15]:
+                satirlar.append(f"  • [{v['dil']}] **{v['baslik'][:48]}** — 👁️ **{v.get('izlenme', 0)}** izlenme · 👍 {v.get('begeni', 0)} beğeni (`{v['vid']}`)")
+        return "\n".join(satirlar)
     planli = [v for v in vids if v["durum"] == "Planlı"]
     satirlar = [
         f"📡 **Merkez Sunucu (159.198.76.80) Canlı Durum ({d['guncellendi'][11:16]} TSİ):**",

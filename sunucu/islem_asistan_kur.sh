@@ -71,10 +71,9 @@ EOF
 systemctl daemon-reload
 systemctl enable --now aesun-asistan.service
 systemctl restart aesun-asistan.service
-sleep 8
+sleep 9
 
 echo "NOT: aesun-asistan servisi: $(systemctl is-active aesun-asistan.service)"
 echo "NOT: durum dosyasi: $(ls -lh "$KAYNAK/asistan/durum.json" 2>/dev/null | awk '{print $5, $9}' || echo 'hazirlaniyor')"
-echo "NOT: son mesajlar: $(python3 -c "import json; m=json.load(open('$KAYNAK/asistan/mesajlar.json')); print(' | '.join([f\"{x.get('kim')}: {x.get('metin','')[:250]}\" for x in m[-4:]]))" 2>&1 | tr '\n' ' ')"
-echo "NOT: ai testi: $(timeout 20 python3 -c "import sys; sys.path.insert(0,'/opt/aesun'); import asistan_isci as a; print(a.ai_ajan_calistir('Merhaba, tek cümleyle Türkçe yanıt ver.')[:140])" 2>&1 | tr '\n' ' ')"
+echo "NOT: son mesajlar: $(python3 -c "import json; m=json.load(open('$KAYNAK/asistan/mesajlar.json')); print(' | '.join([f\"{x.get('kim')}: {x.get('metin','')[:300]}\" for x in m[-3:]]))" 2>&1 | tr '\n' ' ')"
 echo "NOT: api saglik: $(curl -s --max-time 10 https://api.aksarayenerji.net/v1/saglik | cut -c1-180)"

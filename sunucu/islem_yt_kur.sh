@@ -22,13 +22,15 @@ if [ -f sunucu/yt/kod.sifreli ]; then
   coz sunucu/yt/kod.sifreli $D/kod.txt
   python3 - $D <<'PY'
 import json, sys, urllib.request, urllib.parse
-D = sys.argv[1]; c = json.load(open(D+"/istemci.json")); kod = open(D+"/kod.txt").read().strip()
-body = urllib.parse.urlencode({"code": kod, "client_id": c["client_id"], "client_secret": c["client_secret"],
-    "redirect_uri": "http://127.0.0.1:8765", "grant_type": "authorization_code"}).encode()
-try:
-    r = json.load(urllib.request.urlopen("https://oauth2.googleapis.com/token", body, timeout=30))
-except urllib.error.HTTPError as e:
-    print("NOT: HATA kod değişimi:", json.load(e).get("error_description", e.code)); sys.exit(1)
+D = sys.argv[1]; c = json.load(open(D+"/istemci.json")); r = None
+for kod in [k.strip() for k in open(D+"/kod.txt").read().split() if k.strip()]:  # ekrandan okunan kodun aday yazımları
+    body = urllib.parse.urlencode({"code": kod, "client_id": c["client_id"], "client_secret": c["client_secret"],
+        "redirect_uri": "http://127.0.0.1:8765", "grant_type": "authorization_code"}).encode()
+    try:
+        r = json.load(urllib.request.urlopen("https://oauth2.googleapis.com/token", body, timeout=30)); break
+    except urllib.error.HTTPError as e:
+        print("NOT: aday kod reddedildi:", json.load(e).get("error_description", e.code))
+if r is None: print("NOT: HATA hiçbir aday kod kabul edilmedi"); sys.exit(1)
 if "refresh_token" not in r: print("NOT: HATA yenileme anahtarı gelmedi"); sys.exit(1)
 import os
 at = r["access_token"]

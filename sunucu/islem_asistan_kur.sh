@@ -13,7 +13,7 @@ REPO_URL="https://github.com/ekinciomer-ai/aesun.git"
 
 if [ ! -d /opt/aesun/kod_aesun/.git ]; then
   rm -rf /opt/aesun/kod_aesun
-  timeout 30 git clone -q --depth 1 "$REPO_URL" /opt/aesun/kod_aesun || true
+  timeout 45 git clone -q --filter=blob:none --depth 1 "$REPO_URL" /opt/aesun/kod_aesun || true
 else
   git -C /opt/aesun/kod_aesun remote set-url origin "$REPO_URL" || true
   timeout 25 git -C /opt/aesun/kod_aesun fetch -q --depth 1 origin main || true

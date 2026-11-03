@@ -787,8 +787,58 @@ def arac_calistir(ad: str, arg: dict) -> str:
         return f"Araç hatası ({ad}): {maskele(str(e))}"
 
 
+def _llm_openai_tur(saglayici_url: str, anahtar: str, model: str, sistem_ozeti: str, metin: str) -> str:
+    """OpenAI uyumlu uçlar (OpenAI, GitHub Models, Pollinations GPT-4o) üzerinden çok adımlı (multi-turn) araç çağırma."""
+    gecmis = [{"role": "system", "content": sistem_ozeti}]
+    for m in mesajlari_oku()[-8:]:
+        rol = "user" if m.get("kim") in ("kullanici", "omer") else "assistant"
+        ic = m.get("metin", "")[:800].strip()
+        if not ic or "görev kutusuna kaydedildi" in ic:
+            continue
+        gecmis.append({"role": rol, "content": ic})
+    gecmis.append({"role": "user", "content": metin})
+
+    hdrs = {"Content-Type": "application/json", "User-Agent": "aesun-asistan/2.0"}
+    if anahtar:
+        hdrs["Authorization"] = f"Bearer {anahtar}"
+
+    for _adim in range(5):
+        govde = {"model": model, "messages": gecmis, "tools": ARAC_SEMALARI, "tool_choice": "auto", "temperature": 0.2}
+        req = urllib.request.Request(saglayici_url, data=json.dumps(govde).encode("utf-8"), headers=hdrs, method="POST")
+        with urllib.request.urlopen(req, timeout=55) as r:
+            yanit_obj = json.loads(r.read().decode("utf-8"))
+        secim = (yanit_obj.get("choices") or [{}])[0].get("message") or {}
+        arac_cagrilari = secim.get("tool_calls") or []
+        if not arac_cagrilari:
+            ic_metin = (secim.get("content") or "").strip()
+            if ic_metin:
+                return ic_metin
+            break
+        gecmis.append(secim)
+        for tc in arac_cagrilari[:5]:
+            fn = tc.get("function", {}).get("name", "")
+            raw_arg = tc.get("function", {}).get("arguments") or "{}"
+            try:
+                fargs = json.loads(raw_arg) if isinstance(raw_arg, str) else raw_arg
+            except Exception:
+                fargs = {}
+            sonuc_str = arac_calistir(fn, fargs)
+            gecmis.append({
+                "role": "tool",
+                "tool_call_id": tc.get("id", "call_1"),
+                "name": fn,
+                "content": sonuc_str[:5000],
+            })
+    # Son özet çağrısı (araçsız)
+    govde_son = {"model": model, "messages": gecmis, "temperature": 0.2}
+    req_son = urllib.request.Request(saglayici_url, data=json.dumps(govde_son).encode("utf-8"), headers=hdrs, method="POST")
+    with urllib.request.urlopen(req_son, timeout=55) as rs:
+        son_obj = json.loads(rs.read().decode("utf-8"))
+    return ((son_obj.get("choices") or [{}])[0].get("message") or {}).get("content", "").strip()
+
+
 def ai_ajan_calistir(metin: str) -> str:
-    """Anthropic Claude (veya OpenAI/Gemini) ile çok adımlı (multi-turn) tam yetkili araç çağırma çalıştırır."""
+    """Anthropic Claude, OpenAI, GitHub Models veya GPT-4o ucu ile çok adımlı (multi-turn) tam yetkili araç çağırma çalıştırır."""
     ortam_yukle()
     d = json.loads(DURUM_DOSYA.read_text(encoding="utf-8")) if DURUM_DOSYA.exists() else durum_guncelle()
     kisa_videolar = [
@@ -805,10 +855,10 @@ def ai_ajan_calistir(metin: str) -> str:
         f"- Yayın Takibi kodu: `docs/yayin/index.html` ve `docs/yayin/yayin.json`\n"
         f"Mevcut YouTube Videoları:\n" + "\n".join(kisa_videolar) + "\n\n"
         "KURALLAR:\n"
-        "1. Ömer senden bir arayüz/kod değişikliği, YouTube işlemi veya sunucu işlemi istediğinde ASLA 'yapamam' veya 'görev kutusuna kaydedildi' deme; "
+        "1. Ömer senden bir arayüz/kod değişikliği, YouTube işlemi veya sunucu işlemi istediğinde ASLA 'yapamam' veya 'kısıtlıyım' deme; "
         "doğrudan araçlarını (`kod_dosya_oku`, `kod_dosya_duzenle`, `kod_yayinla`, `sunucu_komut_calistir`, `yt_video_guncelle` vb.) kullanarak işlemi ŞİMDİ gerçekleştir!\n"
         "2. Kod değiştirdiğinde mutlaka `kod_yayinla` aracını çağırarak GitHub'a pushla.\n"
-        "3. Yanıtlarını Türkçe, samimi, net ve kısa tut."
+        "3. Yanıtlarını Türkçe, samimi, net ve doğrudan tut."
     )
 
     ant_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
@@ -920,8 +970,27 @@ def ai_ajan_calistir(metin: str) -> str:
                 metin_son = "\n".join(b.get("text", "") for b in resp_d.get("content", []) if b.get("type") == "text").strip()
                 if metin_son:
                     return metin_son
-            except Exception as e:
-                return f"⚠️ İşlem sırasında hata oluştu: {maskele(str(e))}"
+            except Exception:
+                pass
+
+    # OpenAI / GitHub Models / Pollinations GPT-4o çok adımlı araç çağırma
+    oai_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    gh_key = (os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("AESUN_GH_OKU") or "").strip()
+    aday_uclar = [
+        ("https://api.openai.com/v1/chat/completions", oai_key, "gpt-4o-mini"),
+        ("https://models.inference.ai.azure.com/chat/completions", gh_key, "gpt-4o"),
+        ("https://models.github.ai/inference/chat/completions", gh_key, "openai/gpt-4o-mini"),
+        ("https://text.pollinations.ai/openai", "", "openai"),
+    ]
+    for u_url, u_key, u_mod in aday_uclar:
+        if u_url != "https://text.pollinations.ai/openai" and not u_key:
+            continue
+        try:
+            cvp = _llm_openai_tur(u_url, u_key, u_mod, sistem_ozeti, metin)
+            if cvp:
+                return cvp
+        except Exception:
+            continue
 
     return ""
 

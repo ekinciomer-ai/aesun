@@ -543,3 +543,54 @@ async def olay_giris(request: Request):
                     kod=int(g.get("kod") or 0) if str(g.get("kod") or "0").isdigit() else 0)
     erisim_ekle("giris.jsonl", json.dumps(olay, ensure_ascii=False))
     return {"tamam": True}
+
+
+# ---------------- Sunucu Asistanı & Canlı YouTube Komut Merkezi (yalnız yönetici) ----------------
+import asyncio
+ASISTAN_KOK = Path(os.environ.get("AESUN_ASISTAN", "/veri/asistan"))
+
+@app.get("/v1/asistan/durum")
+def asistan_durum(request: Request):
+    DURUM["istek"] += 1
+    r = roller(request)
+    if "yonetici" not in r:
+        DURUM["red"] += 1
+        raise HTTPException(401 if not r else 403, "yönetici yetkisi gerekli")
+    durum_p = ASISTAN_KOK / "durum.json"
+    mesaj_p = ASISTAN_KOK / "mesajlar.json"
+    durum_v = json.loads(durum_p.read_text(encoding="utf-8")) if durum_p.is_file() else {}
+    mesaj_v = json.loads(mesaj_p.read_text(encoding="utf-8")) if mesaj_p.is_file() else []
+    return JSONResponse({"tamam": True, "durum": durum_v, "mesajlar": mesaj_v}, headers={"Cache-Control": "no-store"})
+
+@app.post("/v1/asistan/islem")
+async def asistan_islem(request: Request):
+    DURUM["istek"] += 1
+    r = roller(request)
+    if "yonetici" not in r:
+        DURUM["red"] += 1
+        raise HTTPException(401 if not r else 403, "yönetici yetkisi gerekli")
+    try:
+        govde = json.loads((await request.body())[:32768] or b"{}")
+        assert isinstance(govde, dict)
+    except Exception:
+        raise HTTPException(400, "geçersiz JSON")
+    kuyruk = ASISTAN_KOK / "kuyruk"
+    kuyruk.mkdir(parents=True, exist_ok=True)
+    kimlik = f"{int(time.time()*1000)}_{_secrets.token_hex(4)}"
+    istek_p = kuyruk / f"istek_{kimlik}.json"
+    yanit_p = kuyruk / f"yanit_{kimlik}.json"
+    tmp_p = istek_p.with_suffix(".tmp")
+    tmp_p.write_text(json.dumps(govde, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp_p, istek_p)
+    for _ in range(150):
+        if yanit_p.is_file():
+            try:
+                sonuc = json.loads(yanit_p.read_text(encoding="utf-8"))
+                yanit_p.unlink(missing_ok=True)
+                return JSONResponse(sonuc, headers={"Cache-Control": "no-store"})
+            except Exception:
+                pass
+        await asyncio.sleep(0.3)
+    istek_p.unlink(missing_ok=True)
+    raise HTTPException(504, "Sunucu asistan işçisi zaman aşımına uğradı.")
+

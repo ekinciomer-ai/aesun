@@ -30,19 +30,27 @@ try:
 except urllib.error.HTTPError as e:
     print("NOT: HATA kod değişimi:", json.load(e).get("error_description", e.code)); sys.exit(1)
 if "refresh_token" not in r: print("NOT: HATA yenileme anahtarı gelmedi"); sys.exit(1)
-json.dump({"refresh_token": r["refresh_token"], "scope": r.get("scope", "")}, open(D+"/token.json", "w"))
+import os
+at = r["access_token"]
+q = urllib.request.Request("https://www.googleapis.com/youtube/v3/channels?part=id&mine=true", headers={"Authorization": "Bearer " + at})
+kid = json.load(urllib.request.urlopen(q, timeout=30))["items"][0]["id"]
+os.makedirs(D+"/kanallar", exist_ok=True)
+json.dump({"refresh_token": r["refresh_token"], "scope": r.get("scope", "")}, open(D+"/kanallar/"+kid+".json", "w")); os.chmod(D+"/kanallar/"+kid+".json", 0o600)
 print("NOT: yenileme anahtarı kaydedildi · izinler:", " ".join(s.rsplit("/",1)[-1] for s in r.get("scope","").split()))
 PY
-  rm -f $D/kod.txt; chmod 600 $D/token.json
+  rm -f $D/kod.txt
 fi
-if [ -f $D/token.json ]; then
+if ls $D/kanallar/*.json >/dev/null 2>&1; then
   python3 - $D <<'PY'
 import json, sys, urllib.request, urllib.parse
-D = sys.argv[1]; c = json.load(open(D+"/istemci.json")); t = json.load(open(D+"/token.json"))
-body = urllib.parse.urlencode({"client_id": c["client_id"], "client_secret": c["client_secret"], "refresh_token": t["refresh_token"], "grant_type": "refresh_token"}).encode()
-at = json.load(urllib.request.urlopen("https://oauth2.googleapis.com/token", body, timeout=30))["access_token"]
-q = urllib.request.Request("https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true", headers={"Authorization": "Bearer " + at})
-for ch in json.load(urllib.request.urlopen(q, timeout=30)).get("items", []):
+import glob
+D = sys.argv[1]; c = json.load(open(D+"/istemci.json"))
+for f in sorted(glob.glob(D+"/kanallar/*.json")):
+  t = json.load(open(f))
+  body = urllib.parse.urlencode({"client_id": c["client_id"], "client_secret": c["client_secret"], "refresh_token": t["refresh_token"], "grant_type": "refresh_token"}).encode()
+  at = json.load(urllib.request.urlopen("https://oauth2.googleapis.com/token", body, timeout=30))["access_token"]
+  q = urllib.request.Request("https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true", headers={"Authorization": "Bearer " + at})
+  for ch in json.load(urllib.request.urlopen(q, timeout=30)).get("items", []):
     s = ch["statistics"]
     print("NOT: bağlı kanal:", ch["snippet"]["title"], ch["snippet"].get("customUrl", ""), "· abone", s.get("subscriberCount"), "· video", s.get("videoCount"), "· izlenme", s.get("viewCount"))
 PY

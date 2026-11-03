@@ -691,9 +691,12 @@ def ai_ajan_calistir(metin: str) -> str:
     """Hızlı JSON Araç Protokolü (ARAC_JSON) ile çalışan çok adımlı (multi-turn) tam yetkili AI ajan."""
     ortam_yukle()
     d = json.loads(DURUM_DOSYA.read_text(encoding="utf-8")) if DURUM_DOSYA.exists() else durum_guncelle()
+    kanallar_ozet = []
+    for kd, kv in (d.get("kanallar") or {}).items():
+        kanallar_ozet.append(f"- {kv.get('ad', kd)} ({kd}): Toplam {kv.get('izlenme', 0)} izlenme, {kv.get('abone', 0)} abone, {kv.get('video', 0)} video")
     kisa_videolar = [
-        f"{v['vid']} [{v['dil']}] ({v['durum']} {v.get('tarih','')} {v.get('saat','')}) {v['baslik'][:55]}"
-        for v in d.get("videolar", [])[:25]
+        f"- {v['vid']} [{v['dil']}] ({v['durum']} {v.get('tarih','')} {v.get('saat','')}) | 👁️ {v.get('izlenme', 0)} izlenme, 👍 {v.get('begeni', 0)} beğeni, 💬 {v.get('yorum', 0)} yorum | {v['baslik'][:55]}"
+        for v in d.get("videolar", [])[:30]
     ]
     sistem_ozeti = (
         f"Sen Aksaray Enerji & Antik Stüdyo'nun Merkez Sunucusu (159.198.76.80) üzerinde çalışan tam yetkili Antigravity Kodlama ve Sunucu Asistanısın.\n"
@@ -703,7 +706,8 @@ def ai_ajan_calistir(metin: str) -> str:
         f"- Kurumsal Portal kodu: `docs/portal/index.html`\n"
         f"- Sunucu Asistanı kodu: `docs/asistan/index.html`\n"
         f"- Yayın Takibi kodu: `docs/yayin/index.html` ve `docs/yayin/yayin.json`\n"
-        f"Mevcut YouTube Videoları:\n" + "\n".join(kisa_videolar) + "\n\n"
+        f"YouTube Kanal İstatistikleri:\n" + "\n".join(kanallar_ozet) + "\n"
+        f"Mevcut YouTube Videoları ve Anlık İzlenme Sayıları:\n" + "\n".join(kisa_videolar) + "\n\n"
         "KULLANABİLECEĞİN ARAÇLAR:\n"
         "Bir işlem yapman gerektiğinde yanıtının İLK SATIRINDA yalnızca şu formatta tek satır JSON yaz:\n"
         'ARAC_JSON: {"ad": "<arac_adi>", "arg": {...}}\n'
@@ -848,11 +852,11 @@ def main():
                 if son_soru:
                     yanit = akilli_komut_yorumla(son_soru)
                     mesaj_ekle("asistan", yanit)
-            elif len(ms) >= 2 and ms[-1].get("kim") == "asistan" and "📡 **Merkez Sunucu" in ms[-1].get("metin", "") and ms[-2].get("kim") in ("kullanici", "omer"):
+            elif len(ms) >= 2 and ms[-1].get("kim") == "asistan" and "Merkez Sunucu" in ms[-1].get("metin", "") and ms[-2].get("kim") in ("kullanici", "omer"):
                 son_soru = ms[-2].get("metin", "").strip()
                 if son_soru and not any(k in son_soru.lower() for k in ("planlı", "durum", "sağlık")):
                     ms.pop()
-                    atomik_json_yaz(MESAJ_DOSYA, ms)
+                    mesaj_kaydet(ms)
                     yanit = akilli_komut_yorumla(son_soru)
                     mesaj_ekle("asistan", yanit)
     except Exception:

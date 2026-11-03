@@ -11,14 +11,8 @@ GHT=$(grep -h '^GH_TOKEN=' /opt/aesun/isler.env /opt/aesun/.env 2>/dev/null | he
 REPO_URL="https://github.com/ekinciomer-ai/aesun.git"
 [ -n "$GHT" ] && REPO_URL="https://x-access-token:${GHT}@github.com/ekinciomer-ai/aesun.git"
 
-if [ ! -d /opt/aesun/kod_aesun/.git ]; then
-  rm -rf /opt/aesun/kod_aesun
-  timeout 45 git clone -q --filter=blob:none --depth 1 "$REPO_URL" /opt/aesun/kod_aesun || true
-else
-  git -C /opt/aesun/kod_aesun remote set-url origin "$REPO_URL" || true
-  timeout 25 git -C /opt/aesun/kod_aesun fetch -q --depth 1 origin main || true
-  git -C /opt/aesun/kod_aesun reset -q --hard origin/main || true
-fi
+rm -rf /opt/aesun/kod_aesun
+timeout 35 git clone -q --filter=blob:none --depth 1 "$REPO_URL" /opt/aesun/kod_aesun || true
 if [ -d /opt/aesun/kod_aesun/.git ]; then
   git -C /opt/aesun/kod_aesun config user.name "Antigravity Sunucu Asistani"
   git -C /opt/aesun/kod_aesun config user.email "ekinci.omer@gmail.com"
@@ -81,6 +75,6 @@ sleep 8
 
 echo "NOT: aesun-asistan servisi: $(systemctl is-active aesun-asistan.service)"
 echo "NOT: durum dosyasi: $(ls -lh "$KAYNAK/asistan/durum.json" 2>/dev/null | awk '{print $5, $9}' || echo 'hazirlaniyor')"
-echo "NOT: son mesajlar: $(python3 -c "import json; m=json.load(open('$KAYNAK/asistan/mesajlar.json')); print(' | '.join([f\"{x.get('kim')}: {x.get('metin','')[:100]}\" for x in m[-4:]]))" 2>&1 | tr '\n' ' ')"
+echo "NOT: son mesajlar: $(python3 -c "import json; m=json.load(open('$KAYNAK/asistan/mesajlar.json')); print(' | '.join([f\"{x.get('kim')}: {x.get('metin','')[:250]}\" for x in m[-4:]]))" 2>&1 | tr '\n' ' ')"
 echo "NOT: ai testi: $(timeout 20 python3 -c "import sys; sys.path.insert(0,'/opt/aesun'); import asistan_isci as a; print(a.ai_ajan_calistir('Merhaba, tek cümleyle Türkçe yanıt ver.')[:140])" 2>&1 | tr '\n' ' ')"
 echo "NOT: api saglik: $(curl -s --max-time 10 https://api.aksarayenerji.net/v1/saglik | cut -c1-180)"

@@ -451,19 +451,19 @@ function acSonuc(id) {
   if (!d.open) d.showModal();
   if (url && SSO[id]) ssoUrl(id).then(u => { if (!u) return ssoYokDlg(id); const a = $('acLink'); if (a) a.href = u; });
 }
-// ---- Özel Alan: yalnız yönetici (Ömer) görür — Asistan, Teklifler, Keşif, Yayın Takibi, Mimari, CutkodA, MEDAŞ CBS, Brain, Mail ----
+// ---- Özel Alan: yalnız yönetici (Ömer) görür — Kullanıcı dostu tek tıkla kart ızgarası + canlı Antigravity sohbeti ----
 const OZEL_ALT = [
-  { id: 'asistan', ad: 'Asistan', aciklama: 'Sunucu Asistanı (Antigravity): Merkez sunucu üzerinden doğrudan mesajlaşma ve canlı YouTube yönetimi.', url: () => yerelUrl('https://portal.aksarayenerji.net/asistan/') },
-  { id: 'kesif', ad: 'Keşif', aciklama: 'Araç Kütüphanesi: her sabah taranan GitHub araçları, şema ve galaksi eşleşmesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/kesif/') },
-  { id: 'cutkoda', ad: 'CutkodA', aciklama: 'CutkodA yönetim paneli: sosyal medya kullanıcıları, kurgu işleri ve içerik onayı.', url: () => 'https://panel.cutkoda.com/' },
-  { id: 'teklif', ad: 'Teklifler', aciklama: 'Teklif verdiğimiz projeler: kapasite, tutar, durum, kazanma oranı. Yalnız sizin anahtarınızla şifreli saklanır.', ic: true },
-  { id: 'yayin', ad: 'Yayın Takibi', aciklama: 'Antik Stüdyo / Ancient Studio: YouTube ve TikTok’ta yayınlanan ve planlanan tüm içerikler (Claude ve Antigravity), durum ve izlenme.', url: () => yerelUrl('https://portal.aksarayenerji.net/yayin/') },
-  { id: 'mimari', ad: 'Mimari', aciklama: 'Tüm otomasyonların ve ekosistemin şemaları: sunucular, enerji verisi, sosyal medya hatları, yayın ve zaman çizelgesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/mimari/') },
-  { id: 'medas', ad: 'MEDAŞ CBS', aciklama: 'MEDAŞ CBS ekranı (Tailscale ağı üzerinden; bağlı cihazdan açılır).', url: () => 'http://100.102.153.95:8586/medas' },
-  { id: 'brain', ad: 'Brain', aciklama: 'Tüm programların ve otomasyonların 3D galaksi haritası (Claude hesabınla açılır).', url: () => 'https://claude.ai/artifact/8k7gaTwGJyT8N3VVhdt8wh' },
-  { id: 'mail', ad: 'Mail', aciklama: 'Tüm e-posta hesapları tek yerden.' }
+  { id: 'asistan', ad: 'Sunucu Asistanı', kisa: 'Canlı YouTube & Sunucu Komut', ikon: '🤖', renk: '#D7262E', aciklama: 'Merkez sunucu üzerinden tam yetkili sohbet ve canlı YouTube yönetimi.', url: () => yerelUrl('https://portal.aksarayenerji.net/asistan/') },
+  { id: 'yayin', ad: 'Yayın Takibi', kisa: 'YouTube & TikTok Takvimi', ikon: '📺', renk: '#2463B5', aciklama: 'Antik Stüdyo / Ancient Studio yayınlanan ve planlanan tüm içerikler.', url: () => yerelUrl('https://portal.aksarayenerji.net/yayin/') },
+  { id: 'teklif', ad: 'Teklifler', kisa: 'GES Teklif & Kazanma Oranı', ikon: '📋', renk: '#1F8A4C', aciklama: 'Teklif verdiğimiz projeler: kapasite, tutar, durum (şifreli).', ic: true },
+  { id: 'cutkoda', ad: 'CutkodA', kisa: 'Kurgu & Sosyal Medya Paneli', ikon: '🎬', renk: '#C26A12', aciklama: 'CutkodA yönetim paneli: kurgu işleri ve içerik onayı.', url: () => 'https://panel.cutkoda.com/' },
+  { id: 'kesif', ad: 'Keşif', kisa: 'Günlük GitHub Araç Kütüphanesi', ikon: '🔍', renk: '#1A97B5', aciklama: 'Her sabah taranan GitHub araçları, şema ve galaksi eşleşmesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/kesif/') },
+  { id: 'mimari', ad: 'Sistem Mimarisi', kisa: 'Sunucu & Otomasyon Şeması', ikon: '🧭', renk: '#3A3F47', aciklama: 'Tüm otomasyonların, sunucuların ve enerji verisinin canlı şemaları.', url: () => yerelUrl('https://portal.aksarayenerji.net/mimari/') },
+  { id: 'medas', ad: 'MEDAŞ CBS', kisa: 'Harita & Şebeke (Tailscale)', ikon: '🗺️', renk: '#1F3B66', aciklama: 'MEDAŞ CBS ekranı (Tailscale ağı üzerinden bağlı cihazdan açılır).', url: () => 'http://100.102.153.95:8586/medas' },
+  { id: 'brain', ad: 'Brain 3D', kisa: '3D Galaksi Haritası', ikon: '🌌', renk: '#6B3FA0', aciklama: 'Tüm programların ve otomasyonların 3D galaksi haritası.', url: () => 'https://claude.ai/artifact/8k7gaTwGJyT8N3VVhdt8wh' },
+  { id: 'mail', ad: 'Kurumsal Mail', kisa: 'Tüm E-Posta Kutuları', ikon: '✉️', renk: '#5B6470', aciklama: 'Tüm @aksarayenerji.com.tr e-posta hesapları tek yerden.' }
 ];
-let OZEL_SEK = 'teklif';
+let OZEL_SEK = 'hepsi';
 async function asYukleOzel() {
   const kutu = $('asMesajlar'), oz = $('asOzet'); if (!kutu || !S || !S.ka) return;
   try {
@@ -473,10 +473,10 @@ async function asYukleOzel() {
     const d = await r.json();
     const drm = d.durum || d, vids = drm.videolar || [];
     const planli = vids.filter(v => v.durum === 'Planlı').length, yayinda = vids.filter(v => v.durum === 'Yayında').length;
-    if (oz) oz.textContent = 'Merkez Sunucu Aktif · ' + planli + ' Planlı · ' + yayinda + ' Yayında (' + vids.length + ' video)';
-    const ms = (d.mesajlar || []).slice(-8);
-    kutu.innerHTML = ms.length ? ms.map(m => '<div style="padding:7px 10px;border-radius:8px;font-size:12.5px;white-space:pre-wrap;word-break:break-word;background:' + (m.kim === 'kullanici' || m.kim === 'omer' ? '#FBE9EA' : '#F4F5F7') + ';border:1px solid #E2E5EA"><b>' + (m.kim === 'kullanici' || m.kim === 'omer' ? 'Ömer' : 'Antigravity') + ':</b> ' + esc(m.metin) + '</div>').join('')
-      : '<div class="ince">Sunucu bağlantısı hazır. Buradan doğal Türkçe veya !komut ile her işlemi yaptırabilirsiniz.</div>';
+    if (oz) oz.textContent = '🟢 Merkez Sunucu (159.198.76.80) Aktif · ' + planli + ' Planlı · ' + yayinda + ' Yayında (' + vids.length + ' video)';
+    const ms = (d.mesajlar || []).slice(-10);
+    kutu.innerHTML = ms.length ? ms.map(m => '<div style="padding:8px 11px;border-radius:10px;font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word;background:' + (m.kim === 'kullanici' || m.kim === 'omer' ? '#2B2F35;color:#fff;margin-left:24px' : '#fff;color:#2B2F35;border:1px solid #E2E5EA;margin-right:24px') + '"><b style="font-size:11.5px;opacity:.75;display:block;margin-bottom:2px">' + (m.kim === 'kullanici' || m.kim === 'omer' ? 'Siz' : 'Antigravity Sunucu Asistanı') + '</b>' + esc(m.metin) + '</div>').join('')
+      : '<div class="ince">Sunucu bağlantısı hazır. Buradan serbestçe her işlemi yazabilirsiniz.</div>';
     kutu.scrollTop = kutu.scrollHeight;
   } catch (e) { if (oz) oz.textContent = 'Sunucu durumu alınamadı: ' + (e.message || e); }
 }
@@ -486,7 +486,7 @@ async function asGonderOzel(ev, hazirMetin) {
   const metin = (hazirMetin != null ? hazirMetin : (inp ? inp.value : '')).trim();
   if (!metin) return false;
   if (inp && hazirMetin == null) inp.value = '';
-  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'İşleniyor…'; }
   try {
     const k = await apiBelirtec('yonetici', S.ka);
     const r = await fetch('https://api.aksarayenerji.net/v1/asistan/islem', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-AE-Anahtar': k }, body: JSON.stringify({ tip: 'sohbet', metin }) });
@@ -500,37 +500,51 @@ async function asGonderOzel(ev, hazirMetin) {
 function acOzel(sek) {
   if (!S) { SAYFA = 'ana'; return girisModal(null); }
   if (!S.ka) return;
-  if (sek) OZEL_SEK = sek;
-  const a = OZEL_ALT.find(x => x.id === OZEL_SEK) || OZEL_ALT[0], d = dlg();
-  const sekler = OZEL_ALT.map(x => '<button type="button" class="ysek' + (x.id === a.id ? ' on' : '') + '" onclick="acOzel(\'' + x.id + '\')">' + esc(x.ad) + '</button>').join('');
-  let govde;
-  if (a.id === 'asistan') {
-    const u = a.url();
-    govde = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="ince" id="asOzet">Merkez Sunucu bağlanıyor…</span><button type="button" class="bag" style="font-size:12px;color:#D7262E" onclick="asYukleOzel()">↻ Yenile</button></div>'
-      + '<div id="asMesajlar" style="display:grid;gap:6px;max-height:155px;overflow-y:auto;margin:8px 0;padding:4px 0"><div class="ince">Yükleniyor…</div></div>'
-      + '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">'
-      + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 8px" onclick="asGonderOzel(null,\'Planlı videoları göster\')">⏰ Planlılar</button>'
-      + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 8px" onclick="asGonderOzel(null,\'TR yorumları göster\')">💬 Yorumlar</button>'
-      + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 8px" onclick="asGonderOzel(null,\'docker servis durumu\')">🐳 Servisler</button>'
-      + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 8px" onclick="asGonderOzel(null,\'disk ve bellek durumu\')">🖥️ Sunucu</button>'
-      + '</div>'
-      + '<form onsubmit="return asGonderOzel(event)" style="display:flex;gap:6px"><input id="asYazi" type="text" placeholder="Her türlü YouTube veya sunucu komutunu yazın (ör. !docker ps, <vid> yarın 20:00)…" style="flex:1;padding:9px 11px;font-size:13px"><button class="btn kc" id="asBtn" type="submit" style="white-space:nowrap">Gönder</button></form>'
-      + '<a class="btn tam" style="margin-top:10px;text-align:center" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">Tam Ekran Asistan & Canlı YouTube Panelini Aç →</a>';
-  } else if (a.id === 'mail') {
+  const d = dlg();
+  if (sek === 'mail') {
     const kl = MOD.mail && MOD.mail.aktif !== false ? kutular(MOD.mail) : [];
-    govde = kl.length ? '<p class="ince">' + esc(a.aciklama) + '</p><div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(k.adr) + '</span><span class="ince">' + esc(k.tur) + ' ↗</span></a>').join('') + '</div>'
+    const mGovde = kl.length ? '<div style="display:grid;gap:8px;margin-top:12px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left;margin-top:0" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(k.adr) + '</span><span class="ince">' + esc(k.tur) + ' ↗</span></a>').join('') + '</div>'
       : '<div class="hata">Posta kutusu eklenmedi — Yönetim → Uygulamalar → Mail → “Posta kutuları”.</div>';
-  } else if (a.ic) {
-    govde = '<p class="ince">' + esc(a.aciklama) + '</p><button class="btn tam" onclick="teklifCiz()">Teklifleri aç →</button>';
-  } else {
-    const u = a.url();
-    govde = '<p class="ince">' + esc(a.aciklama) + '</p><a class="btn tam" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(a.ad) + ' aç →</a>';
+    d.innerHTML = '<div style="padding:26px 28px;position:relative"><button class="kapat" onclick="$(\'dlg\').close()" aria-label="Kapat">×</button>'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button type="button" class="btn ik kc" onclick="acOzel()">← Özel Alan</button><b>Kurumsal E-Posta Kutuları</b></div>'
+      + mGovde + '</div>';
+    if (!d.open) d.showModal();
+    return;
   }
-  d.innerHTML = dlgBas('', 'Özel Alan', 'Yalnız sizin görebildiğiniz alan')
-    + '<div class="ysekler" style="margin-top:14px;justify-content:center">' + sekler + '</div>'
-    + '<div style="margin-top:16px">' + govde + '</div></div></div>';
+  const kartlar = OZEL_ALT.map(x => {
+    const ortakStil = 'display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border-radius:12px;border:1px solid #E2E5EA;background:#fff;text-decoration:none;color:#2B2F35;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s;font:inherit;width:100%';
+    const ic = '<span style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:19px;flex:0 0 auto;background:' + x.renk + '18;color:' + x.renk + '">' + x.ikon + '</span>'
+      + '<span style="min-width:0;flex:1"><b style="display:block;font-size:14px;line-height:1.25">' + esc(x.ad) + '</b><span style="display:block;font-size:11.5px;color:#5B6470;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.kisa) + '</span></span>';
+    if (x.ic) return '<button type="button" style="' + ortakStil + '" onmouseover="this.style.borderColor=\'' + x.renk + '\'" onmouseout="this.style.borderColor=\'#E2E5EA\'" onclick="teklifCiz()">' + ic + '</button>';
+    if (x.id === 'mail') return '<button type="button" style="' + ortakStil + '" onmouseover="this.style.borderColor=\'' + x.renk + '\'" onmouseout="this.style.borderColor=\'#E2E5EA\'" onclick="acOzel(\'mail\')">' + ic + '</button>';
+    const u = x.url();
+    return '<a style="' + ortakStil + '" onmouseover="this.style.borderColor=\'' + x.renk + '\'" onmouseout="this.style.borderColor=\'#E2E5EA\'" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + ic + '</a>';
+  }).join('');
+
+  d.innerHTML = '<div style="padding:24px 26px;position:relative;background:#F8F9FA">'
+    + '<button class="kapat" onclick="$(\'dlg\').close()" aria-label="Kapat">×</button>'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding-right:28px">'
+    + '<div>' + MARKA + '<div style="font-size:18px;font-weight:700;margin-top:4px">Özel Alan · Yönetim & Komut Merkezi</div></div>'
+    + '<a class="btn kc" href="' + esc(yerelUrl('https://portal.aksarayenerji.net/asistan/')) + '" target="_blank" rel="noopener noreferrer">🎬 Tam Ekran YouTube & Asistan Paneli ↗</a>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px;margin-bottom:16px">' + kartlar + '</div>'
+    + '<div style="background:#fff;border:1px solid #E2E5EA;border-radius:14px;padding:14px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
+    + '<b style="font-size:14px">🤖 Doğrudan Sunucu Asistanı (Antigravity — Serbest Komut & Sohbet)</b>'
+    + '<span class="ince" id="asOzet" style="font-size:12px">Merkez Sunucu bağlanıyor…</span>'
+    + '</div>'
+    + '<div id="asMesajlar" style="display:grid;gap:7px;max-height:175px;overflow-y:auto;padding:8px;background:#F8F9FA;border-radius:10px;border:1px solid #EEF0F3;margin-bottom:8px"><div class="ince">Yükleniyor…</div></div>'
+    + '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">'
+    + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'Planlı videoları ve saatlerini listele\')">⏰ Planlı Videolar</button>'
+    + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'TR yorumları göster\')">💬 TR Yorumlar</button>'
+    + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'docker servis durumu\')">🐳 Servisler</button>'
+    + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'disk ve bellek durumu\')">🖥️ Sunucu Sağlığı</button>'
+    + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asYukleOzel()">↻ Yenile</button>'
+    + '</div>'
+    + '<form onsubmit="return asGonderOzel(event)" style="display:flex;gap:8px"><input id="asYazi" type="text" placeholder="Buradaki gibi serbestçe yazın (kod değişikliği, YouTube planlama, !komut)…" style="flex:1;padding:10px 12px;font-size:13.5px;border-radius:10px;border:1px solid #CCD2DA"><button class="btn" id="asBtn" type="submit" style="white-space:nowrap;padding:10px 18px">Gönder</button></form>'
+    + '</div></div>';
   if (!d.open) d.showModal();
-  if (a.id === 'asistan') asYukleOzel();
+  asYukleOzel();
 }
 // ---- Teklifler (Özel Alan): verdiğimiz teklifler; yalnız yönetici anahtarıyla şifreli saklanır (V.teklif) ----
 const TK_DURUM = { hazir: ['Hazırlanıyor', '#8A93A0'], verildi: ['Verildi', '#2F62A8'], gorusme: ['Görüşmede', '#C26A12'], kazanildi: ['Kazanıldı', '#1F8A4C'], kaybedildi: ['Kaybedildi', '#B91C24'], iptal: ['İptal', '#5C6470'] };

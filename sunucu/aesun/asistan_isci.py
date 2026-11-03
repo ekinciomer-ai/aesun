@@ -2,11 +2,12 @@
 """Merkez Sunucu (159.198.76.80) Antigravity Tam Yetkili Sunucu Asistanı & Canlı YouTube Komut İşçisi.
 
 aesun-api kapsayıcısı (/veri/asistan/kuyruk) üzerinden gelen yönetici (Ömer) onaylı
-istekleri root yetkisiyle işler:
+istekleri root yetkisiyle ve tam serbestlikle işler:
+- Kod Okuma / Düzenleme / GitHub Push & Canlı Yayınlama (/opt/aesun/kod_aesun)
 - Canlı YouTube API yönetimi (Antik Stüdyo TR & Ancient Studio EN): listeleme, planlama,
   başlık/açıklama/gizlilik değiştirme, silme, yorum okuma/yanıtlama, URL veya sunucu dosyasından yükleme
 - Doğrudan Merkez Sunucu (159.198.76.80) kabuk/komut çalıştırma (docker, systemctl, git, dosya, log)
-- AI Araç Çağırma (Tool-Calling) motoru (Gemini / OpenAI / Anthropic / GitHub Models + Doğal Türkçe Yorumlayıcı)
+- Çok Adımlı AI Araç Çağırma (Multi-Turn Tool-Calling) motoru (Claude / OpenAI / GitHub Models / Gemini)
 Hiçbir şifre, anahtar veya token çıktıya/dosyaya YAZILMAZ.
 """
 import json
@@ -23,6 +24,7 @@ from pathlib import Path
 
 TZ = timezone(timedelta(hours=3))
 YT_DIR = Path("/opt/aesun/youtube")
+KOD_DIR = Path("/opt/aesun/kod_aesun")
 KANALLAR = {
     "TR": ("UC77LyY3gqWmBNAKp2lbsGBg", "Antik Stüdyo"),
     "EN": ("UCFLJUlhUSgjcLbp9ad_t9PQ", "Ancient Studio"),
@@ -103,10 +105,9 @@ def klasor_hazirla():
                 "kim": "asistan",
                 "zaman": datetime.now(TZ).isoformat(timespec="seconds"),
                 "metin": (
-                    "Merhaba Ömer! Merkez Sunucu (159.198.76.80) üzerinden doğrudan tam yetkiyle bağlısın.\n"
-                    "Bana doğal Türkçe ile istediğin her işlemi yaptırabilirsin:\n"
-                    "• YouTube: «planlı videoları göster», «t6cTwqVJXm0 videosunu yarın 19:00'a al», «başlığını değiştir», «yorumları getir», «videoyu herkese açık yap»\n"
-                    "• Sunucu & Kod: «sunucuda çalışan servisleri göster», «disk ve bellek durumu», «!docker ps», «git durumunu kontrol et»"
+                    "Merhaba Ömer! Merkez Sunucu (159.198.76.80) üzerinden doğrudan ve kısıtlamasız bağlısın.\n"
+                    "Buradan bana serbestçe her şeyi yazabilirsin: portal/site kodlarını düzenleyip canlıya alabilir, "
+                    "YouTube kanallarını (Antik Stüdyo TR & Ancient Studio EN) yönetebilir ve sunucu üzerinde istediğin işlemi yaptırabilirsin."
                 ),
             }
         ])
@@ -509,18 +510,19 @@ def video_yukle(istek: dict) -> str:
     return f"{kad} ({dil}) kanalına yüklendi! Video ID: `{vid}` · https://youtube.com/shorts/{vid}"
 
 
-def sunucu_komut_calistir(komut: str, sure_sn: int = 35) -> str:
+def sunucu_komut_calistir(komut: str, sure_sn: int = 45) -> str:
     """Merkez Sunucu üzerinde bash komutu çalıştırır (anahtar/sır içeren dosyaları okumayı reddeder)."""
     yasak = re.search(r"(/opt/aesun/youtube/(istemci|kanallar)|\.env\b|anahtarlar\.json|id_ed25519|sso_sir)", komut)
     if yasak:
         return "⛔ Güvenlik kuralı gereği sır/anahtar dosyaları doğrudan çıktıya basılamaz."
+    calisma_dizin = str(KOD_DIR) if KOD_DIR.is_dir() else "/opt/aesun"
     try:
         p = subprocess.run(
             ["/bin/bash", "-c", komut],
-            cwd="/opt/aesun",
+            cwd=calisma_dizin,
             capture_output=True,
             text=True,
-            timeout=min(max(sure_sn, 5), 60),
+            timeout=min(max(sure_sn, 5), 90),
         )
         cikti = ((p.stdout or "") + ("\n" + p.stderr if p.stderr else "")).strip()
         cikti = maskele(cikti)
@@ -528,9 +530,55 @@ def sunucu_komut_calistir(komut: str, sure_sn: int = 35) -> str:
             cikti = f"(Komut tamamlandı, çıkış kodu: {p.returncode})"
         return f"💻 **Sunucu Komut Çıktısı (`exit={p.returncode}`):**\n```\n{cikti[:3500]}\n```"
     except subprocess.TimeoutExpired:
-        return "⏱️ Komut zaman aşımına uğradı (60 sn)."
+        return "⏱️ Komut zaman aşımına uğradı (90 sn)."
     except Exception as e:
         return f"❌ Komut hatası: {maskele(str(e))}"
+
+
+def kod_dosya_oku(yol: str, baslangic: int = 1, bitis: int = 250) -> str:
+    hedef = (KOD_DIR / yol.lstrip("/")).resolve()
+    if not str(hedef).startswith(str(KOD_DIR.resolve())) or not hedef.is_file():
+        return f"Dosya bulunamadı: {yol}"
+    satirlar = hedef.read_text(encoding="utf-8", errors="replace").splitlines()
+    b1 = max(1, int(baslangic or 1))
+    b2 = min(len(satirlar), int(bitis or (b1 + 250)))
+    secim = [f"{i}: {satirlar[i-1]}" for i in range(b1, b2 + 1)]
+    return f"Dosya: {yol} (toplam {len(satirlar)} satır, gösterilen {b1}-{b2}):\n" + "\n".join(secim)
+
+
+def kod_dosya_duzenle(yol: str, eski_metin: str, yeni_metin: str) -> str:
+    hedef = (KOD_DIR / yol.lstrip("/")).resolve()
+    if not str(hedef).startswith(str(KOD_DIR.resolve())) or not hedef.is_file():
+        return f"Dosya bulunamadı: {yol}"
+    icerik = hedef.read_text(encoding="utf-8")
+    if eski_metin not in icerik:
+        return f"Hata: `eski_metin` {yol} içinde birebir bulunamadı."
+    yeni_icerik = icerik.replace(eski_metin, yeni_metin, 1)
+    hedef.write_text(yeni_icerik, encoding="utf-8")
+    return f"✅ {yol} güncellendi."
+
+
+def kod_dosya_yaz(yol: str, icerik: str) -> str:
+    hedef = (KOD_DIR / yol.lstrip("/")).resolve()
+    if not str(hedef).startswith(str(KOD_DIR.resolve())):
+        return "Geçersiz dosya yolu."
+    hedef.parent.mkdir(parents=True, exist_ok=True)
+    hedef.write_text(icerik, encoding="utf-8")
+    return f"✅ {yol} yazıldı ({len(icerik)} karakter)."
+
+
+def kod_yayinla(commit_mesaji: str = "asistan: sunucu uzerinden guncelleme") -> str:
+    if not KOD_DIR.is_dir():
+        return "Hata: /opt/aesun/kod_aesun deposu bulunamadı."
+    komut = (
+        "git pull --rebase --autostash origin main && "
+        "git add -A && "
+        f"git commit -m {json.dumps(commit_mesaji)} && "
+        "git push origin main"
+    )
+    p = subprocess.run(["/bin/bash", "-c", komut], cwd=str(KOD_DIR), capture_output=True, text=True, timeout=60)
+    out = maskele((p.stdout or "") + "\n" + (p.stderr or "")).strip()
+    return f"🚀 Git & Canlı Dağıtım (`exit={p.returncode}`):\n{out[:1500]}"
 
 
 # ==================== AI ARAÇ ÇAĞIRMA (TOOL-CALLING) MOTORU ====================
@@ -637,6 +685,52 @@ ARAC_SEMALARI = [
     {
         "type": "function",
         "function": {
+            "name": "kod_dosya_oku",
+            "description": "aesun deposundaki (ör. docs/portal/index.html, docs/yayin/index.html, docs/asistan/index.html) bir kaynak kod dosyasının satırlarını okur.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "yol": {"type": "string", "description": "Depo içi dosya yolu, örn. docs/portal/index.html"},
+                    "baslangic": {"type": "integer", "description": "Başlangıç satır numarası (1 tabanlı)"},
+                    "bitis": {"type": "integer", "description": "Bitiş satır numarası"},
+                },
+                "required": ["yol"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "kod_dosya_duzenle",
+            "description": "aesun deposundaki bir dosyada eski_metin bloğunu yeni_metin ile değiştirir.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "yol": {"type": "string"},
+                    "eski_metin": {"type": "string"},
+                    "yeni_metin": {"type": "string"},
+                },
+                "required": ["yol", "eski_metin", "yeni_metin"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "kod_yayinla",
+            "description": "aesun deposunda yapılan kod değişikliklerini git commit + git push ile GitHub'a gönderir ve portal.aksarayenerji.net üzerinde canlıya alır.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "commit_mesaji": {"type": "string", "description": "Git commit açıklaması"},
+                },
+                "required": ["commit_mesaji"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "sunucu_komut_calistir",
             "description": "Merkez Sunucu (159.198.76.80) üzerinde doğrudan Linux bash komutu çalıştırır (docker, systemctl, git, python3, disk/bellek/log kontrolü, dosya işlemleri).",
             "parameters": {
@@ -680,6 +774,12 @@ def arac_calistir(ad: str, arg: dict) -> str:
             return yorumlari_getir(arg.get("dil", "TR"), int(arg.get("limit", 10)))
         if ad == "yt_yoruma_yanitla":
             return yoruma_yanitla(arg.get("parent_id", ""), arg.get("metin", ""), arg.get("dil", "TR"))
+        if ad == "kod_dosya_oku":
+            return kod_dosya_oku(arg.get("yol", ""), int(arg.get("baslangic", 1)), int(arg.get("bitis", 250)))
+        if ad == "kod_dosya_duzenle":
+            return kod_dosya_duzenle(arg.get("yol", ""), arg.get("eski_metin", ""), arg.get("yeni_metin", ""))
+        if ad == "kod_yayinla":
+            return kod_yayinla(arg.get("commit_mesaji", "asistan: sunucu uzerinden guncelleme"))
         if ad == "sunucu_komut_calistir":
             return sunucu_komut_calistir(arg.get("komut", ""))
         return f"Bilinmeyen araç: {ad}"
@@ -687,37 +787,8 @@ def arac_calistir(ad: str, arg: dict) -> str:
         return f"Araç hatası ({ad}): {maskele(str(e))}"
 
 
-def _llm_openai_uyumlu(url: str, api_key: str, model: str, mesajlar: list, tools: list = None) -> dict:
-    govde = {"model": model, "messages": mesajlar, "temperature": 0.2}
-    if tools:
-        govde["tools"] = tools
-        govde["tool_choice"] = "auto"
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(govde).encode("utf-8"),
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}", "User-Agent": "aesun-asistan"},
-        method="POST",
-    )
-    with urllib.request.urlopen(req, timeout=40) as r:
-        return json.loads(r.read().decode("utf-8"))
-
-
-def _llm_gemini(api_key: str, sistem: str, kullanici_metin: str) -> str:
-    """Gemini API üzerinden JSON eylem planı veya yanıt üretir."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-    govde = {
-        "systemInstruction": {"parts": [{"text": sistem}]},
-        "contents": [{"parts": [{"text": kullanici_metin}]}],
-        "generationConfig": {"temperature": 0.1},
-    }
-    req = urllib.request.Request(url, data=json.dumps(govde).encode("utf-8"), headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=40) as r:
-        d = json.loads(r.read().decode("utf-8"))
-        return d["candidates"][0]["content"]["parts"][0]["text"]
-
-
 def ai_ajan_calistir(metin: str) -> str:
-    """Önce LLM (OpenAI / GitHub Models / Gemini) ile tam araç çağırma dener; yoksa gelişmiş doğal dil motorunu çalıştırır."""
+    """Anthropic Claude (veya OpenAI/Gemini) ile çok adımlı (multi-turn) tam yetkili araç çağırma çalıştırır."""
     ortam_yukle()
     d = json.loads(DURUM_DOSYA.read_text(encoding="utf-8")) if DURUM_DOSYA.exists() else durum_guncelle()
     kisa_videolar = [
@@ -725,48 +796,114 @@ def ai_ajan_calistir(metin: str) -> str:
         for v in d.get("videolar", [])[:30]
     ]
     sistem_ozeti = (
-        f"Sen Aksaray Enerji & Antik Stüdyo'nun Merkez Sunucusu (159.198.76.80) üzerinde çalışan tam yetkili Antigravity Sunucu Asistanısın. "
+        f"Sen Aksaray Enerji & Antik Stüdyo'nun Merkez Sunucusu (159.198.76.80) üzerinde çalışan tam yetkili Antigravity Kodlama ve Sunucu Asistanısın. "
         f"Kullanıcın Ömer (yönetici). Bugün: {datetime.now(TZ).strftime('%Y-%m-%d %H:%M')} TSİ.\n"
         f"Sunucu: Bellek {d.get('sunucu',{}).get('bellek','?')}, Disk {d.get('sunucu',{}).get('disk','?')}.\n"
+        f"Sunucuda `/opt/aesun/kod_aesun` altında `ekinciomer-ai/aesun` deposu klonlu ve yazmaya hazırdır:\n"
+        f"- Kurumsal Portal kodu: `docs/portal/index.html`\n"
+        f"- Sunucu Asistanı kodu: `docs/asistan/index.html`\n"
+        f"- Yayın Takibi kodu: `docs/yayin/index.html` ve `docs/yayin/yayin.json`\n"
         f"Mevcut YouTube Videoları:\n" + "\n".join(kisa_videolar) + "\n\n"
-        "Ömer'in istediği işlemi gerçekleştirmek için araçları (yt_video_guncelle, yt_video_yukle, yt_video_sil, "
-        "yt_yorumlari_getir, yt_yoruma_yanitla, sunucu_komut_calistir, yt_durum_getir) doğrudan çağır ve sonucu Türkçe, net olarak açıkla."
+        "KURALLAR:\n"
+        "1. Ömer senden bir arayüz/kod değişikliği, YouTube işlemi veya sunucu işlemi istediğinde ASLA 'yapamam' veya 'görev kutusuna kaydedildi' deme; "
+        "doğrudan araçlarını (`kod_dosya_oku`, `kod_dosya_duzenle`, `kod_yayinla`, `sunucu_komut_calistir`, `yt_video_guncelle` vb.) kullanarak işlemi ŞİMDİ gerçekleştir!\n"
+        "2. Kod değiştirdiğinde mutlaka `kod_yayinla` aracını çağırarak GitHub'a pushla.\n"
+        "3. Yanıtlarını Türkçe, samimi, net ve kısa tut."
     )
 
-    oai_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    gh_key = (os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("AESUN_GH_OKU") or "").strip()
     ant_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
-
     if ant_key:
-        try:
-            ant_tools = [
-                {
-                    "name": t["function"]["name"],
-                    "description": t["function"]["description"],
-                    "input_schema": t["function"]["parameters"],
-                }
-                for t in ARAC_SEMALARI
-            ]
-            ant_msgs = []
-            for m in mesajlari_oku()[-6:]:
-                rol = "user" if m.get("kim") in ("kullanici", "omer") else "assistant"
-                ic = m.get("metin", "")[:600].strip()
-                if ic and (not ant_msgs or ant_msgs[-1]["role"] != rol):
-                    ant_msgs.append({"role": rol, "content": ic})
-            if ant_msgs and ant_msgs[-1]["role"] == "user":
-                ant_msgs[-1]["content"] += "\n" + metin
-            else:
-                ant_msgs.append({"role": "user", "content": metin})
+        ant_tools = [
+            {
+                "name": t["function"]["name"],
+                "description": t["function"]["description"],
+                "input_schema": t["function"]["parameters"],
+            }
+            for t in ARAC_SEMALARI
+        ]
+        ant_msgs = []
+        for m in mesajlari_oku()[-8:]:
+            rol = "user" if m.get("kim") in ("kullanici", "omer") else "assistant"
+            ic = m.get("metin", "")[:800].strip()
+            if not ic or "görev kutusuna kaydedildi" in ic:
+                continue
+            if not ant_msgs or ant_msgs[-1]["role"] != rol:
+                ant_msgs.append({"role": rol, "content": ic})
+        if ant_msgs and ant_msgs[-1]["role"] == "user":
+            ant_msgs[-1]["content"] += "\n" + metin
+        else:
+            ant_msgs.append({"role": "user", "content": metin})
+        if ant_msgs and ant_msgs[0]["role"] != "user":
+            ant_msgs = ant_msgs[1:]
 
-            for model_ad in [os.environ.get("CK_MODEL", ""), "claude-sonnet-4-20250514", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"]:
-                if not model_ad:
+        aday_modeller = [
+            os.environ.get("CK_MODEL", "").strip(),
+            "claude-sonnet-4-5-20250929",
+            "claude-sonnet-4-20250514",
+            "claude-3-7-sonnet-20250219",
+            "claude-3-5-sonnet-20241022",
+            "claude-3-5-haiku-20241022",
+            "claude-3-haiku-20240307",
+        ]
+        secilen_model = None
+        ilk_yanit = None
+        for m_ad in aday_modeller:
+            if not m_ad:
+                continue
+            try:
+                req = urllib.request.Request(
+                    "https://api.anthropic.com/v1/messages",
+                    data=json.dumps({
+                        "model": m_ad,
+                        "max_tokens": 3000,
+                        "system": sistem_ozeti,
+                        "tools": ant_tools,
+                        "messages": ant_msgs,
+                    }).encode("utf-8"),
+                    headers={
+                        "x-api-key": ant_key,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
+                    },
+                    method="POST",
+                )
+                with urllib.request.urlopen(req, timeout=55) as r:
+                    ilk_yanit = json.loads(r.read().decode("utf-8"))
+                    secilen_model = m_ad
+                    break
+            except urllib.error.HTTPError as he:
+                if he.code in (400, 404):
                     continue
-                try:
-                    req = urllib.request.Request(
+                break
+            except Exception:
+                continue
+
+        if ilk_yanit and secilen_model:
+            try:
+                resp_d = ilk_yanit
+                for _adim in range(6):
+                    content_blocks = resp_d.get("content", [])
+                    tool_uses = [b for b in content_blocks if b.get("type") == "tool_use"]
+                    if not tool_uses:
+                        metin_out = "\n".join(b.get("text", "") for b in content_blocks if b.get("type") == "text").strip()
+                        if metin_out:
+                            return metin_out
+                        break
+                    ant_msgs.append({"role": "assistant", "content": content_blocks})
+                    tool_results = []
+                    for tu in tool_uses[:6]:
+                        sonuc_str = arac_calistir(tu["name"], tu.get("input") or {})
+                        tool_results.append({
+                            "type": "tool_result",
+                            "tool_use_id": tu["id"],
+                            "content": sonuc_str[:6000],
+                        })
+                    ant_msgs.append({"role": "user", "content": tool_results})
+                    req_next = urllib.request.Request(
                         "https://api.anthropic.com/v1/messages",
                         data=json.dumps({
-                            "model": model_ad,
-                            "max_tokens": 1500,
+                            "model": secilen_model,
+                            "max_tokens": 3000,
                             "system": sistem_ozeti,
                             "tools": ant_tools,
                             "messages": ant_msgs,
@@ -778,106 +915,18 @@ def ai_ajan_calistir(metin: str) -> str:
                         },
                         method="POST",
                     )
-                    with urllib.request.urlopen(req, timeout=45) as r:
-                        resp_d = json.loads(r.read().decode("utf-8"))
-                    content_blocks = resp_d.get("content", [])
-                    tool_uses = [b for b in content_blocks if b.get("type") == "tool_use"]
-                    if tool_uses:
-                        ant_msgs.append({"role": "assistant", "content": content_blocks})
-                        tool_results = []
-                        for tu in tool_uses[:5]:
-                            sonuc_str = arac_calistir(tu["name"], tu.get("input") or {})
-                            tool_results.append({
-                                "type": "tool_result",
-                                "tool_use_id": tu["id"],
-                                "content": sonuc_str[:4000],
-                            })
-                        ant_msgs.append({"role": "user", "content": tool_results})
-                        req2 = urllib.request.Request(
-                            "https://api.anthropic.com/v1/messages",
-                            data=json.dumps({
-                                "model": model_ad,
-                                "max_tokens": 1500,
-                                "system": sistem_ozeti,
-                                "messages": ant_msgs,
-                            }).encode("utf-8"),
-                            headers={
-                                "x-api-key": ant_key,
-                                "anthropic-version": "2023-06-01",
-                                "content-type": "application/json",
-                            },
-                            method="POST",
-                        )
-                        with urllib.request.urlopen(req2, timeout=45) as r2:
-                            resp_d2 = json.loads(r2.read().decode("utf-8"))
-                        return "\n".join(b.get("text", "") for b in resp_d2.get("content", []) if b.get("type") == "text").strip()
-                    metin_out = "\n".join(b.get("text", "") for b in content_blocks if b.get("type") == "text").strip()
-                    if metin_out:
-                        return metin_out
-                except Exception:
-                    continue
-        except Exception:
-            pass
-
-    for saglayici_url, anahtar, model in [
-        ("https://api.openai.com/v1/chat/completions", oai_key, "gpt-4o-mini"),
-        ("https://models.github.ai/inference/chat/completions", gh_key, "openai/gpt-4o-mini"),
-    ]:
-        if not anahtar:
-            continue
-        try:
-            gecmis = [{"role": "system", "content": sistem_ozeti}]
-            for m in mesajlari_oku()[-6:]:
-                rol = "user" if m.get("kim") in ("kullanici", "omer") else "assistant"
-                gecmis.append({"role": rol, "content": m.get("metin", "")[:600]})
-            gecmis.append({"role": "user", "content": metin})
-
-            yanit_obj = _llm_openai_uyumlu(saglayici_url, anahtar, model, gecmis, ARAC_SEMALARI)
-            secim = yanit_obj["choices"][0]["message"]
-            arac_cagrilari = secim.get("tool_calls") or []
-            if arac_cagrilari:
-                gecmis.append(secim)
-                for tc in arac_cagrilari[:5]:
-                    fn = tc["function"]["name"]
-                    fargs = json.loads(tc["function"].get("arguments") or "{}")
-                    sonuc_str = arac_calistir(fn, fargs)
-                    gecmis.append({
-                        "role": "tool",
-                        "tool_call_id": tc["id"],
-                        "content": sonuc_str[:4000],
-                    })
-                son_obj = _llm_openai_uyumlu(saglayici_url, anahtar, model, gecmis, None)
-                return son_obj["choices"][0]["message"]["content"].strip()
-            if secim.get("content"):
-                return secim["content"].strip()
-        except Exception:
-            pass
-
-    gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if gemini_key:
-        try:
-            gemini_sistem = (
-                sistem_ozeti + "\n"
-                "Eğer bir araç çalıştırman gerekiyorsa İLK SATIRDA yalnızca şu JSON formatını yaz:\n"
-                'ARAC_JSON: {"ad": "arac_adi", "arg": {...}}\n'
-                "Ardından açıklamayı yaz. Araç gerekmiyorsa doğrudan Türkçe yanıt ver."
-            )
-            g_yanit = _llm_gemini(gemini_key, gemini_sistem, metin)
-            m_arac = re.search(r"ARAC_JSON:\s*(\{.*?\})", g_yanit)
-            if m_arac:
-                cagri = json.loads(m_arac.group(1))
-                arac_sonuc = arac_calistir(cagri.get("ad", ""), cagri.get("arg", {}))
-                temiz = re.sub(r"ARAC_JSON:\s*\{.*?\}\s*", "", g_yanit).strip()
-                return f"{arac_sonuc}\n\n{temiz}".strip()
-            return g_yanit.strip()
-        except Exception:
-            pass
+                    with urllib.request.urlopen(req_next, timeout=55) as rn:
+                        resp_d = json.loads(rn.read().decode("utf-8"))
+                metin_son = "\n".join(b.get("text", "") for b in resp_d.get("content", []) if b.get("type") == "text").strip()
+                if metin_son:
+                    return metin_son
+            except Exception as e:
+                return f"⚠️ İşlem sırasında hata oluştu: {maskele(str(e))}"
 
     return ""
 
 
 def akilli_komut_yorumla(metin: str) -> str:
-    """LLM anahtarı olmasa bile doğal Türkçe komutları ve kabuk işlemlerini doğrudan çalıştıran yerel motor."""
     m_str = metin.strip()
     m_low = m_str.lower()
 
@@ -927,50 +976,22 @@ def akilli_komut_yorumla(metin: str) -> str:
         return sunucu_komut_calistir("docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' && echo '---' && systemctl is-active aesun-asistan.service")
     if any(k in m_low for k in ("disk", "bellek", "ram", "cpu", "uptime", "yük")):
         return sunucu_komut_calistir("uptime && echo '---' && free -h && echo '---' && df -h /")
-    if "log" in m_low or "günlük" in m_low:
-        return sunucu_komut_calistir("docker logs --tail 25 aesun-api 2>&1")
-    if "medya" in m_low or "dosya" in m_low:
-        return sunucu_komut_calistir("ls -lh /opt/aesun/youtube/medya/ 2>/dev/null || true")
 
-    if any(k in m_low for k in ("plan", "video", "youtube", "kanal", "yenile", "liste", "durum", "sunucu", "merhaba", "selam", "yardım", "ne yapabilirsin")):
-        d = durum_guncelle(yedek_al=("yedek" in m_low))
-        vids = d.get("videolar", [])
-        planli = [v for v in vids if v["durum"] == "Planlı"]
-        ozel = [v for v in vids if v["durum"] == "Özel"]
-        yayinda = [v for v in vids if v["durum"] == "Yayında"]
-        satirlar = [
-            f"📡 **Merkez Sunucu (159.198.76.80) Canlı Raporu ({d['guncellendi'][11:16]} TSİ):**",
-            f"- **Sunucu:** Bellek {d['sunucu'].get('bellek', '?')} · Disk {d['sunucu'].get('disk', '?')} · Kapsayıcı: {len(d['sunucu'].get('kapsayicilar', []))} aktif",
-            f"- **YouTube Toplam:** {len(planli)} Planlı · {len(ozel)} Özel/Taslak · {len(yayinda)} Yayında",
-            "",
-            "**Yaklaşan Planlı Videolar:**",
-        ]
-        for v in sorted(planli, key=lambda x: (x.get("tarih", ""), x.get("saat", "")))[:12]:
-            satirlar.append(f"- `{v['tarih']} {v['saat']}` [{v['dil']}] **{v['baslik'][:50]}** (`{v['vid']}`)")
-        if ozel:
-            satirlar.append("\n**Özel / Taslak Videolar:**")
-            for v in ozel[:8]:
-                satirlar.append(f"- [{v['dil']}] **{v['baslik'][:50]}** (`{v['vid']}`)")
-        satirlar.append(
-            "\n💡 **Doğrudan Yapabileceklerin:**\n"
-            "- Video planla: `<video_id> 2026-11-05 20:00` veya `<video_id> yarın 21:00`\n"
-            "- Yayına al / gizle: `<video_id> yayına al` veya `<video_id> gizle`\n"
-            "- Başlık değiştir: `<video_id> başlığı: Yeni Başlık`\n"
-            "- Yorumları gör: `TR yorumları göster` veya `EN yorumları göster`\n"
-            "- Sunucu komutu çalıştır: `!docker ps`, `!df -h`, `!ls -lh /opt/aesun/youtube/medya`"
-        )
-        return "\n".join(satirlar)
-
-    return (
-        f"🤖 **Merkez Sunucu (`159.198.76.80`) Yanıtı:**\n"
-        f"İsteğin alındı: «{m_str}»\n\n"
-        f"Anında çalıştırabileceğin komut örnekleri:\n"
-        f"• **Video Saatini Değiştir:** `t6cTwqVJXm0 yarın 20:00` veya `t6cTwqVJXm0 2026-11-05 19:30`\n"
-        f"• **Hemen Yayınla / Gizle:** `t6cTwqVJXm0 yayına al` / `t6cTwqVJXm0 gizle`\n"
-        f"• **Başlık Değiştir:** `t6cTwqVJXm0 başlığı: Yeni Başlık #shorts`\n"
-        f"• **Kanal & Yorumlar:** `planlı videolar`, `TR yorumları göster`, `EN yorumları göster`\n"
-        f"• **Sunucu Bash Komutu:** Başına `!` koyarak istediğin Linux komutunu çalıştırabilirsin (ör. `!docker ps`, `!uptime`, `!ls -la /opt/aesun`)."
-    )
+    d = durum_guncelle(yedek_al=("yedek" in m_low))
+    vids = d.get("videolar", [])
+    planli = [v for v in vids if v["durum"] == "Planlı"]
+    ozel = [v for v in vids if v["durum"] == "Özel"]
+    yayinda = [v for v in vids if v["durum"] == "Yayında"]
+    satirlar = [
+        f"📡 **Merkez Sunucu (159.198.76.80) Canlı Raporu ({d['guncellendi'][11:16]} TSİ):**",
+        f"- **Sunucu:** Bellek {d['sunucu'].get('bellek', '?')} · Disk {d['sunucu'].get('disk', '?')}",
+        f"- **YouTube Toplam:** {len(planli)} Planlı · {len(ozel)} Özel/Taslak · {len(yayinda)} Yayında",
+        "",
+        "**Yaklaşan Planlı Videolar:**",
+    ]
+    for v in sorted(planli, key=lambda x: (x.get("tarih", ""), x.get("saat", "")))[:12]:
+        satirlar.append(f"- `{v['tarih']} {v['saat']}` [{v['dil']}] **{v['baslik'][:50]}** (`{v['vid']}`)")
+    return "\n".join(satirlar)
 
 
 def istek_isle(istek: dict) -> dict:
@@ -1023,7 +1044,7 @@ def main():
     ortam_yukle()
     klasor_hazirla()
     son_otomatik = 0.0
-    print(f"asistan_isci (tam yetkili) basladi: {KOK}", flush=True)
+    print(f"asistan_isci (tam yetkili AI) basladi: {KOK}", flush=True)
     while True:
         try:
             if time.time() - son_otomatik > 900 or not DURUM_DOSYA.exists():
@@ -1037,7 +1058,7 @@ def main():
                     sonuc = istek_isle(istek)
                 except urllib.error.HTTPError as e:
                     err_body = e.read().decode("utf-8", errors="replace")[:250]
-                    sonuc = {"tamam": False, "hata": f"YouTube API HTTP {e.code}: {maskele(err_body)}"}
+                    sonuc = {"tamam": False, "hata": f"HTTP {e.code}: {maskele(err_body)}"}
                 except Exception as e:
                     sonuc = {"tamam": False, "hata": maskele(str(e))[:250]}
                 finally:

@@ -100,9 +100,31 @@ def main():
                 if x.get(k) != v:
                     x[k] = v; degisti += 1
 
-    # 2) YouTube Data API (isteğe bağlı)
+    # 2) YouTube Data API (isteğe bağlı): kanalların herkese açık yüklemelerini bul + tüm izlenmeleri güncelle
     anahtar = os.environ.get("YT_API_KEY", "").strip()
     if anahtar:
+        for cid, (kanal, dil) in KANALLAR.items():
+            try:
+                q = urllib.parse.urlencode({"part": "contentDetails", "playlistId": "UU" + cid[2:], "maxResults": 50, "key": anahtar})
+                ids = [i["contentDetails"]["videoId"] for i in json.loads(getir("https://www.googleapis.com/youtube/v3/playlistItems?" + q)).get("items", [])]
+                yeni = [v for v in ids if v not in vid_ix]
+                if yeni:
+                    q = urllib.parse.urlencode({"part": "snippet,contentDetails", "id": ",".join(yeni), "key": anahtar})
+                    for v in json.loads(getir("https://www.googleapis.com/youtube/v3/videos?" + q)).get("items", []):
+                        sn = v["snippet"]; baslik = sn.get("title", "")
+                        yay = datetime.fromisoformat(sn["publishedAt"].replace("Z", "+00:00")).astimezone(TZ)
+                        dk = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", v["contentDetails"].get("duration", ""))
+                        sure = sum(int(a or 0) * b for a, b in zip(dk.groups(), (3600, 60, 1))) if dk else 999
+                        short = sure <= 180
+                        x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
+                                 seri=seri_tahmin(baslik), baslik=baslik, durum="Yayında", tarih=yay.strftime("%Y-%m-%d"),
+                                 saat=yay.strftime("%H:%M"), izlenme=None,
+                                 link=(f"https://youtube.com/shorts/{v['id']}" if short else f"https://youtu.be/{v['id']}"),
+                                 vid=v["id"], ureten="?")
+                        K.append(x); vid_ix[v["id"]] = x; degisti += 1
+                        notlar.append(f"Yeni içerik eklendi: {kanal} · {baslik}")
+            except Exception as e:
+                notlar.append(f"YouTube API kanal listesi okunamadı ({kanal}): {e}")
         vids = [v for v in vid_ix if v]
         for i in range(0, len(vids), 50):
             q = urllib.parse.urlencode({"part": "statistics,status", "id": ",".join(vids[i:i + 50]), "key": anahtar})
@@ -115,6 +137,8 @@ def main():
                 v = it.get("statistics", {}).get("viewCount")
                 if x is not None and v is not None and x.get("izlenme") != int(v):
                     x["izlenme"] = int(v); degisti += 1
+                if x is not None and it.get("status", {}).get("privacyStatus") == "public" and x.get("durum") == "Planlı":
+                    x["durum"] = "Yayında"; degisti += 1
 
     # 2b) Yorumlar (YT_API_KEY ile; bilgisayar gerekmez). Herkese açık videolardaki yorumlar okunur,
     #     kanalın kendisinin yanıt verip vermediği işaretlenir. Yanıt GÖNDERİLMEZ.

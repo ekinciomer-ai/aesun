@@ -5,17 +5,21 @@ set -euo pipefail
 cp -r sunucu/aesun/. /opt/aesun/
 chmod 700 /opt/aesun/asistan_isci.py
 
-# Sunucuda asistanın doğrudan kod okuyup düzenleyebilmesi ve pushlayabilmesi için /opt/aesun/kod_aesun deposunu hazırla
+# Sunucuda asistanın doğrudan kod okuyup düzenleyebilmesi için /opt/aesun/kod_aesun deposunu hazırla (--depth 1 ve zaman aşımlı)
+export GIT_TERMINAL_PROMPT=0
 GHT=$(grep -h '^GH_TOKEN=' /opt/aesun/isler.env /opt/aesun/.env 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r"' || true)
-if [ -n "$GHT" ]; then
-  if [ ! -d /opt/aesun/kod_aesun/.git ]; then
-    rm -rf /opt/aesun/kod_aesun
-    git clone -q "https://x-access-token:${GHT}@github.com/ekinciomer-ai/aesun.git" /opt/aesun/kod_aesun
-  else
-    git -C /opt/aesun/kod_aesun remote set-url origin "https://x-access-token:${GHT}@github.com/ekinciomer-ai/aesun.git"
-    git -C /opt/aesun/kod_aesun fetch -q origin main
-    git -C /opt/aesun/kod_aesun reset -q --hard origin/main
-  fi
+REPO_URL="https://github.com/ekinciomer-ai/aesun.git"
+[ -n "$GHT" ] && REPO_URL="https://x-access-token:${GHT}@github.com/ekinciomer-ai/aesun.git"
+
+if [ ! -d /opt/aesun/kod_aesun/.git ]; then
+  rm -rf /opt/aesun/kod_aesun
+  timeout 30 git clone -q --depth 1 "$REPO_URL" /opt/aesun/kod_aesun || true
+else
+  git -C /opt/aesun/kod_aesun remote set-url origin "$REPO_URL" || true
+  timeout 25 git -C /opt/aesun/kod_aesun fetch -q --depth 1 origin main || true
+  git -C /opt/aesun/kod_aesun reset -q --hard origin/main || true
+fi
+if [ -d /opt/aesun/kod_aesun/.git ]; then
   git -C /opt/aesun/kod_aesun config user.name "Antigravity Sunucu Asistani"
   git -C /opt/aesun/kod_aesun config user.email "ekinci.omer@gmail.com"
   chmod 700 /opt/aesun/kod_aesun
@@ -25,14 +29,14 @@ fi
 cd /opt/aesun
 docker compose build -q api
 docker compose up -d --no-deps api >/dev/null 2>&1
-sleep 5
+sleep 4
 
 KAYNAK=$(docker inspect aesun-api --format '{{range .Mounts}}{{if eq .Destination "/veri"}}{{.Source}}{{end}}{{end}}')
 mkdir -p "$KAYNAK/asistan/kuyruk"
 chown -R 1001:1001 "$KAYNAK/asistan"
 
-# Eski kalıp 'görev kutusuna kaydedildi' mesajlarını temizle ve güncel karşılama yaz
-python3 - "$KAYNAK/asistan/mesajlar.json" <<'PY'
+# Eski kalıp 'görev kutusuna kaydedildi' mesajlarını temizle ve güncel yanıtı ekle
+python3 -c '
 import json, sys
 from pathlib import Path
 p = Path(sys.argv[1])
@@ -50,7 +54,7 @@ if p.is_file():
         p.write_text(json.dumps(m, ensure_ascii=False, indent=1), encoding="utf-8")
     except Exception:
         pass
-PY
+' "$KAYNAK/asistan/mesajlar.json"
 chown -R 1001:1001 "$KAYNAK/asistan"
 
 cat > /etc/systemd/system/aesun-asistan.service <<EOF
@@ -73,9 +77,9 @@ EOF
 systemctl daemon-reload
 systemctl enable --now aesun-asistan.service
 systemctl restart aesun-asistan.service
-sleep 5
+sleep 4
 
 echo "NOT: aesun-asistan servisi: $(systemctl is-active aesun-asistan.service)"
 echo "NOT: durum dosyasi: $(ls -lh "$KAYNAK/asistan/durum.json" 2>/dev/null | awk '{print $5, $9}' || echo 'hazirlaniyor')"
-echo "NOT: ai testi: $(python3 -c "import sys; sys.path.insert(0,'/opt/aesun'); import asistan_isci as a; print(a.ai_ajan_calistir('Merhaba, hangi model olarak çalışıyorsun? Tek cümleyle söyle.')[:160])" 2>&1 | tr '\n' ' ')"
+echo "NOT: ai testi: $(timeout 25 python3 -c "import sys; sys.path.insert(0,'/opt/aesun'); import asistan_isci as a; print(a.ai_ajan_calistir('Merhaba, hangi yapay zeka modeli olarak çalışıyorsun? Tek cümleyle Türkçe söyle.')[:160])" 2>&1 | tr '\n' ' ')"
 echo "NOT: api saglik: $(curl -s --max-time 10 https://api.aksarayenerji.net/v1/saglik | cut -c1-180)"

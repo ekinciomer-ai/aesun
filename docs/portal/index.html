@@ -36,7 +36,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 .secim{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:6px}.secim label{display:flex;gap:6px;align-items:center;margin:0;color:var(--s);font-size:14px}
 .blok{margin-bottom:18px}
 .ybas{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.ysekler{display:flex;gap:4px;background:#E9ECF0;padding:4px;border-radius:11px}.ysek{border:0;background:none;font:inherit;font-weight:600;color:var(--y);padding:8px 14px;border-radius:8px;cursor:pointer}.ysek.on{background:#fff;color:var(--s);box-shadow:0 1px 3px rgba(0,0,0,.08)}.ysek span{font-size:12px;background:#D9DDE3;border-radius:99px;padding:1px 7px;margin-left:4px}.ysek.on span{background:#FBE9EA;color:var(--kk)}
+.ysekler{display:flex;flex-wrap:wrap;gap:4px;background:#E9ECF0;padding:4px;border-radius:11px}.ysek{border:0;background:none;font:inherit;font-weight:600;color:var(--y);padding:7px 11px;border-radius:8px;cursor:pointer;font-size:13.5px}.ysek.on{background:#fff;color:var(--s);box-shadow:0 1px 3px rgba(0,0,0,.08)}.ysek span{font-size:12px;background:#D9DDE3;border-radius:99px;padding:1px 7px;margin-left:4px}.ysek.on span{background:#FBE9EA;color:var(--kk)}
 .ust2{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .kartlar{display:grid;gap:10px}.kkart{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--c);border-radius:14px;padding:16px}
 .kav{width:44px;height:44px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-weight:700;color:#fff;background:linear-gradient(135deg,#D7262E,#3A3F47)}
@@ -453,7 +453,7 @@ function acSonuc(id) {
 }
 // ---- Özel Alan: yalnız yönetici (Ömer) görür — Asistan, Teklifler, Keşif, Yayın Takibi, Mimari, CutkodA, MEDAŞ CBS, Brain, Mail ----
 const OZEL_ALT = [
-  { id: 'asistan', ad: '🤖 Asistan', aciklama: 'Sunucu Asistanı (Antigravity): Merkez sunucu üzerinden doğrudan sohbet, canlı YouTube kanal yönetimi ve video planlama.', url: () => yerelUrl('https://ekinciomer-ai.github.io/aesun/asistan/') },
+  { id: 'asistan', ad: 'Asistan', aciklama: 'Sunucu Asistanı (Antigravity): Merkez sunucu üzerinden doğrudan mesajlaşma ve canlı YouTube yönetimi.', url: () => yerelUrl('https://portal.aksarayenerji.net/asistan/') },
   { id: 'kesif', ad: 'Keşif', aciklama: 'Araç Kütüphanesi: her sabah taranan GitHub araçları, şema ve galaksi eşleşmesi.', url: () => yerelUrl('https://portal.aksarayenerji.net/kesif/') },
   { id: 'cutkoda', ad: 'CutkodA', aciklama: 'CutkodA yönetim paneli: sosyal medya kullanıcıları, kurgu işleri ve içerik onayı.', url: () => 'https://panel.cutkoda.com/' },
   { id: 'teklif', ad: 'Teklifler', aciklama: 'Teklif verdiğimiz projeler: kapasite, tutar, durum, kazanma oranı. Yalnız sizin anahtarınızla şifreli saklanır.', ic: true },
@@ -464,6 +464,33 @@ const OZEL_ALT = [
   { id: 'mail', ad: 'Mail', aciklama: 'Tüm e-posta hesapları tek yerden.' }
 ];
 let OZEL_SEK = 'teklif';
+async function asYukleOzel() {
+  const kutu = $('asMesajlar'), oz = $('asOzet'); if (!kutu || !S || !S.ka) return;
+  try {
+    const k = await apiBelirtec('yonetici', S.ka);
+    const r = await fetch('https://api.aksarayenerji.net/v1/asistan/durum?t=' + Date.now(), { headers: { 'X-AE-Anahtar': k }, cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const tr = (d.kanallar && d.kanallar.tr && d.kanallar.tr.videolar) || [], en = (d.kanallar && d.kanallar.en && d.kanallar.en.videolar) || [];
+    if (oz) oz.textContent = 'Merkez Sunucu aktif · TR: ' + tr.length + ' video · EN: ' + en.length + ' video';
+    const ms = (d.mesajlar || []).slice(-6);
+    kutu.innerHTML = ms.length ? ms.map(m => '<div style="padding:6px 9px;border-radius:8px;font-size:12.5px;background:' + (m.kim === 'omer' ? '#FBE9EA' : '#F4F5F7') + ';border:1px solid #E2E5EA"><b>' + (m.kim === 'omer' ? 'Ömer' : 'Antigravity') + ':</b> ' + esc(m.metin) + '</div>').join('')
+      : '<div class="ince">Sunucu bağlantısı hazır. Buradan doğrudan mesaj veya komut gönderebilirsiniz.</div>';
+    kutu.scrollTop = kutu.scrollHeight;
+  } catch (e) { if (oz) oz.textContent = 'Sunucu durumu alınamadı: ' + (e.message || e); }
+}
+async function asGonderOzel(ev) {
+  if (ev) ev.preventDefault();
+  const inp = $('asYazi'), btn = $('asBtn'); if (!inp || !inp.value.trim() || !S || !S.ka) return false;
+  const metin = inp.value.trim(); inp.value = ''; if (btn) btn.disabled = true;
+  try {
+    const k = await apiBelirtec('yonetici', S.ka);
+    await fetch('https://api.aksarayenerji.net/v1/asistan/islem', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-AE-Anahtar': k }, body: JSON.stringify({ tip: 'mesaj', metin }) });
+    await asYukleOzel();
+  } catch (e) { alert('Gönderilemedi: ' + (e.message || e)); }
+  if (btn) btn.disabled = false;
+  return false;
+}
 function acOzel(sek) {
   if (!S) { SAYFA = 'ana'; return girisModal(null); }
   if (!S.ka) return;
@@ -471,7 +498,13 @@ function acOzel(sek) {
   const a = OZEL_ALT.find(x => x.id === OZEL_SEK) || OZEL_ALT[0], d = dlg();
   const sekler = OZEL_ALT.map(x => '<button type="button" class="ysek' + (x.id === a.id ? ' on' : '') + '" onclick="acOzel(\'' + x.id + '\')">' + esc(x.ad) + '</button>').join('');
   let govde;
-  if (a.id === 'mail') {
+  if (a.id === 'asistan') {
+    const u = a.url();
+    govde = '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="ince" id="asOzet">Merkez Sunucu bağlanıyor…</span><button type="button" class="bag" style="font-size:12px;color:#D7262E" onclick="asYukleOzel()">↻ Yenile</button></div>'
+      + '<div id="asMesajlar" style="display:grid;gap:6px;max-height:145px;overflow-y:auto;margin:8px 0;padding:4px 0"><div class="ince">Yükleniyor…</div></div>'
+      + '<form onsubmit="return asGonderOzel(event)" style="display:flex;gap:6px;margin-top:6px"><input id="asYazi" type="text" placeholder="Antigravity\'ye sunucu üzerinden yazın (ör. durum, videoları listele)…" style="flex:1;padding:9px 11px;font-size:13px"><button class="btn kc" id="asBtn" type="submit" style="white-space:nowrap">Gönder</button></form>'
+      + '<a class="btn tam" style="margin-top:10px;text-align:center" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">Tam Ekran Asistan & Canlı YouTube Panelini Aç →</a>';
+  } else if (a.id === 'mail') {
     const kl = MOD.mail && MOD.mail.aktif !== false ? kutular(MOD.mail) : [];
     govde = kl.length ? '<p class="ince">' + esc(a.aciklama) + '</p><div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(k.adr) + '</span><span class="ince">' + esc(k.tur) + ' ↗</span></a>').join('') + '</div>'
       : '<div class="hata">Posta kutusu eklenmedi — Yönetim → Uygulamalar → Mail → “Posta kutuları”.</div>';
@@ -485,6 +518,7 @@ function acOzel(sek) {
     + '<div class="ysekler" style="margin-top:14px;justify-content:center">' + sekler + '</div>'
     + '<div style="margin-top:16px">' + govde + '</div></div></div>';
   if (!d.open) d.showModal();
+  if (a.id === 'asistan') asYukleOzel();
 }
 // ---- Teklifler (Özel Alan): verdiğimiz teklifler; yalnız yönetici anahtarıyla şifreli saklanır (V.teklif) ----
 const TK_DURUM = { hazir: ['Hazırlanıyor', '#8A93A0'], verildi: ['Verildi', '#2F62A8'], gorusme: ['Görüşmede', '#C26A12'], kazanildi: ['Kazanıldı', '#1F8A4C'], kaybedildi: ['Kaybedildi', '#B91C24'], iptal: ['İptal', '#5C6470'] };

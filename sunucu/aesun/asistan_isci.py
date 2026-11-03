@@ -43,7 +43,7 @@ def maskele(metin: str) -> str:
 
 def ortam_yukle():
     """Sunucudaki mevcut .env dosyalarından (değerleri loglamadan) ortam değişkenlerini yükler."""
-    for p in ("/opt/aesun/.env", "/opt/aesun/isler.env", "/opt/cutkoda/.env", "/opt/aesun/asistan.env"):
+    for p in ("/opt/aesun/.env", "/opt/aesun/isler.env", "/opt/cutkoda/motor.env", "/opt/cutkoda/panel.env", "/opt/cutkoda/.env", "/opt/aesun/asistan.env"):
         try:
             yol = Path(p)
             if not yol.is_file():
@@ -735,6 +735,89 @@ def ai_ajan_calistir(metin: str) -> str:
 
     oai_key = os.environ.get("OPENAI_API_KEY", "").strip()
     gh_key = (os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("AESUN_GH_OKU") or "").strip()
+    ant_key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+
+    if ant_key:
+        try:
+            ant_tools = [
+                {
+                    "name": t["function"]["name"],
+                    "description": t["function"]["description"],
+                    "input_schema": t["function"]["parameters"],
+                }
+                for t in ARAC_SEMALARI
+            ]
+            ant_msgs = []
+            for m in mesajlari_oku()[-6:]:
+                rol = "user" if m.get("kim") in ("kullanici", "omer") else "assistant"
+                ic = m.get("metin", "")[:600].strip()
+                if ic and (not ant_msgs or ant_msgs[-1]["role"] != rol):
+                    ant_msgs.append({"role": rol, "content": ic})
+            if ant_msgs and ant_msgs[-1]["role"] == "user":
+                ant_msgs[-1]["content"] += "\n" + metin
+            else:
+                ant_msgs.append({"role": "user", "content": metin})
+
+            for model_ad in [os.environ.get("CK_MODEL", ""), "claude-sonnet-4-20250514", "claude-3-5-sonnet-latest", "claude-3-5-haiku-latest"]:
+                if not model_ad:
+                    continue
+                try:
+                    req = urllib.request.Request(
+                        "https://api.anthropic.com/v1/messages",
+                        data=json.dumps({
+                            "model": model_ad,
+                            "max_tokens": 1500,
+                            "system": sistem_ozeti,
+                            "tools": ant_tools,
+                            "messages": ant_msgs,
+                        }).encode("utf-8"),
+                        headers={
+                            "x-api-key": ant_key,
+                            "anthropic-version": "2023-06-01",
+                            "content-type": "application/json",
+                        },
+                        method="POST",
+                    )
+                    with urllib.request.urlopen(req, timeout=45) as r:
+                        resp_d = json.loads(r.read().decode("utf-8"))
+                    content_blocks = resp_d.get("content", [])
+                    tool_uses = [b for b in content_blocks if b.get("type") == "tool_use"]
+                    if tool_uses:
+                        ant_msgs.append({"role": "assistant", "content": content_blocks})
+                        tool_results = []
+                        for tu in tool_uses[:5]:
+                            sonuc_str = arac_calistir(tu["name"], tu.get("input") or {})
+                            tool_results.append({
+                                "type": "tool_result",
+                                "tool_use_id": tu["id"],
+                                "content": sonuc_str[:4000],
+                            })
+                        ant_msgs.append({"role": "user", "content": tool_results})
+                        req2 = urllib.request.Request(
+                            "https://api.anthropic.com/v1/messages",
+                            data=json.dumps({
+                                "model": model_ad,
+                                "max_tokens": 1500,
+                                "system": sistem_ozeti,
+                                "messages": ant_msgs,
+                            }).encode("utf-8"),
+                            headers={
+                                "x-api-key": ant_key,
+                                "anthropic-version": "2023-06-01",
+                                "content-type": "application/json",
+                            },
+                            method="POST",
+                        )
+                        with urllib.request.urlopen(req2, timeout=45) as r2:
+                            resp_d2 = json.loads(r2.read().decode("utf-8"))
+                        return "\n".join(b.get("text", "") for b in resp_d2.get("content", []) if b.get("type") == "text").strip()
+                    metin_out = "\n".join(b.get("text", "") for b in content_blocks if b.get("type") == "text").strip()
+                    if metin_out:
+                        return metin_out
+                except Exception:
+                    continue
+        except Exception:
+            pass
 
     for saglayici_url, anahtar, model in [
         ("https://api.openai.com/v1/chat/completions", oai_key, "gpt-4o-mini"),

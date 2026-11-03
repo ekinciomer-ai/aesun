@@ -38,4 +38,6 @@ sleep 6
 
 echo "NOT: aesun-asistan servisi: $(systemctl is-active aesun-asistan.service)"
 echo "NOT: durum dosyasi: $(ls -lh "$KAYNAK/asistan/durum.json" 2>/dev/null | awk '{print $5, $9}' || echo 'hazirlaniyor')"
+echo "NOT: env adlari: $(grep -hE '^[A-Za-z0-9_]+=' /opt/aesun/.env /opt/aesun/isler.env /opt/cutkoda/motor.env /opt/cutkoda/.env 2>/dev/null | cut -d= -f1 | sort -u | tr '\n' ' ')"
+echo "NOT: son mesajlar: $(python3 -c "import json; m=json.load(open('$KAYNAK/asistan/mesajlar.json')); print(' | '.join(x.get('kim')+': '+x.get('metin','')[:80].replace('\n',' ') for x in m[-4:]))" 2>/dev/null || echo 'yok')"
 echo "NOT: api saglik: $(curl -s --max-time 10 https://api.aksarayenerji.net/v1/saglik | cut -c1-180)"

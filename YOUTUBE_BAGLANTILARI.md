@@ -55,6 +55,10 @@ gh api -X POST repos/ekinciomer-ai/aesun/actions/workflows/sunucu_islem.yml/disp
 4. Kod, sunucunun açık anahtarıyla şifrelenir ve `sunucu/yt/kod.sifreli` olarak depoya gönderilir. Ardından `yt_kur` çalıştırılır.
 5. İş bitince `sunucu/yt/kod.sifreli` depodan silinir. Kod tek kullanımlıktır ve yaklaşık 10 dakikada geçersiz olur.
 
+## Otomatik kanal yönetimi
+
+- `islem_yt_yonet` (yayin_yonet.yml, günde 2 kez): iki kanalın tüm videolarının gerçek durumu + YouTube Analytics → `docs/yayin/analitik.json`; tekrar eden kopyaları Gizli'ye alır (silme ve herkese açma yok). Kurallar: `YAYIN_TAKIBI.md` → Yol haritası.
+
 ## Bilinen kısıtlar
 
 - **Yüklenen videolar özel olarak yüklenir.** Proje YouTube API denetiminden geçene kadar sunucudan yüklenen videolar yalnız "özel" olur; Studio'dan elle herkese açılır. Denetim başvurusu yapılacak.

@@ -1,0 +1,62 @@
+name: Kanal yönetimi (otomatik)
+# Bilgisayar ve Claude gerekmez. Günde 2 kez sunucudaki resmi YouTube bağlantısıyla:
+#  - iki kanalın tüm videolarının gerçek durumunu ve YouTube Analytics verisini okur → docs/yayin/analitik.json
+#  - docs/yayin/analiz.json'daki GİZLE eylemlerini uygular (yalnız tekrar eden kopya; silme/herkese açma YOK)
+# Ardından yayin_takip.yml tabloyu ve yol haritasını (analiz.json) bu veriyle yeniler.
+on:
+  schedule:
+    - cron: '41 6,18 * * *'   # 09:41 ve 21:41 (İstanbul)
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['sunucu/islem_yt_yonet.sh', '.github/workflows/yayin_yonet.yml']
+permissions:
+  contents: write
+concurrency: { group: yayin-yonet, cancel-in-progress: false }
+jobs:
+  yonet:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sunucuda çalıştır
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          set -o pipefail
+          mkdir -p ~/.ssh /tmp/pk/sunucu
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          cp sunucu/islem_yt_yonet.sh /tmp/pk/sunucu/
+          cp docs/yayin/analiz.json /tmp/pk/docs_analiz.json 2>/dev/null || echo '{}' > /tmp/pk/docs_analiz.json
+          tar czf /tmp/paket.tgz -C /tmp/pk .
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
+          $S "rm -rf /tmp/yt_yonet && mkdir -p /tmp/yt_yonet && tar xzf - -C /tmp/yt_yonet && cd /tmp/yt_yonet && bash sunucu/islem_yt_yonet.sh; k=\$?; rm -rf /tmp/yt_yonet; exit \$k" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1
+          kod=$?
+          rm -f ~/.ssh/k
+          grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
+          python3 - <<'PY'
+          import json, re, os
+          t = open('/tmp/cikti.txt', encoding='utf-8', errors='replace').read()
+          m = re.search(r'===ANALITIK===\n(.*?)\n===SON===', t, re.S)
+          if not m:
+              print('::error::sunucu çıktısında analitik yok'); raise SystemExit(1)
+          a = json.loads(m.group(1))
+          json.dump(a, open('docs/yayin/analitik.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+          yol = 'docs/yayin/yonetim_kaydi.json'
+          k = json.load(open(yol, encoding='utf-8')) if os.path.exists(yol) else {'islemler': []}
+          k['islemler'] = (k['islemler'] + a.get('islemler', []))[-500:]
+          k['son_calisma'] = a['zaman']; k['son_hatalar'] = a.get('hatalar', [])
+          json.dump(k, open(yol, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+          for h in a.get('hatalar', []): print('::warning::' + h)
+          PY
+          exit $kod
+      - name: Kaydet
+        if: always()
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add docs/yayin/analitik.json docs/yayin/yonetim_kaydi.json 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -qm "Kanal yönetimi: analitik ve durum $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

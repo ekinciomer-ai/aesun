@@ -41,3 +41,18 @@ Antigravity: kendi yüklediğin her içeriği `"ureten": "Antigravity"` ile ekle
 - `yayin/guncelle.py`, GitHub Actions'ta 30 dakikada bir, `YT_API_KEY` sırrı varsa her herkese açık YouTube videosunun yorumlarını okur ve `yayin.json` → `yorumlar` dizisine yazar (`yanitlandi`: kanal yanıt verdi mi).
 - Portal → Yayın Takibi üstünde "💬 Yorumlar" kutusu yanıt bekleyenleri gösterir. Yanıt GÖNDERİLMEZ; yanıt Ömer'in onayıyla verilir.
 - `yorumlar` dizisini elle düzenleme; betik her çalışmada yeniden yazar.
+
+## Yol haritası (BAĞLAYICI) — `docs/yayin/analiz.json`
+Analiz ve karar işi otomatiktir; Ömer'e öneri listesi sunulmaz, takip işi verilmez.
+- `yayin/analiz.py` her 30 dakikada (yayin_takip.yml) videoların ilk 48 saat izlenmesinden ve YouTube Analytics izlenme yüzdesinden
+  kanal × seri kararı üretir: **ARTIR / SÜRDÜR / DENE / DEĞİŞTİR / DURDUR**, günlük Short kotası ve seri dağılımı (`plan`).
+- `.github/workflows/yayin_yonet.yml` günde 2 kez (09:41, 21:41) sunucudaki resmi YouTube bağlantısıyla iki kanalın gerçek durumunu ve
+  analitiğini `docs/yayin/analitik.json`'a yazar ve `GİZLE` eylemlerini uygular (yalnız tekrar eden kopya; asıl video herkese açık ve aynı
+  süredeyse). Yapılan her işlem `docs/yayin/yonetim_kaydi.json`'a yazılır; işlem öncesi durum sunucuda yedeklenir.
+
+**Üretim/planlama yapan HER ajan (Claude, Antigravity, CutkodA sunucusu) yeni içerik üretmeden ya da planlamadan önce:**
+1. `docs/yayin/analiz.json` → `plan[kanal]`: günlük Short kotasını aşma, seri dağılımına uy.
+2. `DURDUR` kararındaki seriden yeni içerik üretme/planlama; `ERTELE` eylemindeki planları kaldır, slota dağılımdaki ilk seriyi koy.
+3. `DEĞİŞTİR` kararındaki seride kancayı ve konu seçimini değiştir; `en_iyi` listesindeki başlıkları örnek al.
+4. `kurallar` listesindeki her maddeye uy. `KONTROL` eylemlerini tarayıcısı/bağlantısı olan ilk ajan çözer ve tabloya işler.
+Eşikler kanalın kendi en iyi videolarına göre hesaplanır; elle değiştirilmez, gerekiyorsa `yayin/analiz.py` güncellenir.

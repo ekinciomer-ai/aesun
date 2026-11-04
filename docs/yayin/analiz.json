@@ -1,0 +1,306 @@
+{
+ "olusturma": "2026-11-04T16:34+03:00",
+ "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
+ "kurallar": [
+  "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
+  "DURDUR kararındaki seriden yeni video üretilmez/planlanmaz; ERTELE eylemindeki planlar bu seriden çıkarılır, slota dağılımdaki ilk seri konur.",
+  "DEĞİŞTİR kararındaki seride sıradaki videolar yeni kanca ve daha tanınmış konu ile üretilir (en iyi giden başlık örnek alınır).",
+  "Aynı içerik bir kanalda iki kez açık kalmaz (GİZLE eylemi: silme yok, Gizli'ye alınır).",
+  "Tablo serisinde sıralama: önce dünyaca tanınan eserler; az bilinen eser araya en fazla 3 günde bir girer.",
+  "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR)."
+ ],
+ "plan": {
+  "Antik Stüdyo": {
+   "gunluk_short_kotasi": 4,
+   "seri_dagilimi": {
+    "Tablo Serisi": 2,
+    "Gündem + Tarih": 2
+   },
+   "durdurulan": []
+  },
+  "Ancient Studio": {
+   "gunluk_short_kotasi": 3,
+   "seri_dagilimi": {
+    "Gündem + Tarih": 2,
+    "Tablo Serisi": 1
+   },
+   "durdurulan": []
+  }
+ },
+ "seriler": [
+  {
+   "kanal": "Ancient Studio",
+   "seri": "Gündem + Tarih",
+   "karar": "ARTIR",
+   "neden": "videoların %67'i tuttu (eşik 123 izlenme / 48 sa)",
+   "olculen": 3,
+   "erken": 0,
+   "medyan_48sa": 902,
+   "tutma_orani": 67,
+   "izlenme_yuzde": null,
+   "en_iyi": {
+    "baslik": "Why was Piri Reis executed?",
+    "i48": 918
+   }
+  },
+  {
+   "kanal": "Ancient Studio",
+   "seri": "Tablo Serisi",
+   "karar": "DENE",
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 1,
+   "medyan_48sa": 7,
+   "tutma_orani": 0,
+   "izlenme_yuzde": null,
+   "en_iyi": {
+    "baslik": "Van Gogh painted this in a mental asylum 🌌",
+    "i48": 7
+   }
+  },
+  {
+   "kanal": "Ancient Studio",
+   "seri": "Tarihi Magazin",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Ancient Studio",
+   "seri": "Tarihin Patileri",
+   "karar": "DENE",
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 1,
+   "medyan_48sa": 2,
+   "tutma_orani": 0,
+   "izlenme_yuzde": null,
+   "en_iyi": {
+    "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
+    "i48": 2
+   }
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "seri": "Gündem + Tarih",
+   "karar": "ARTIR",
+   "neden": "videoların %100'i tuttu (eşik 384 izlenme / 48 sa)",
+   "olculen": 3,
+   "erken": 0,
+   "medyan_48sa": 1599,
+   "tutma_orani": 100,
+   "izlenme_yuzde": null,
+   "en_iyi": {
+    "baslik": "Piri Reis neden idam edildi?",
+    "i48": 1793
+   }
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "seri": "Tablo Serisi",
+   "karar": "ARTIR",
+   "neden": "videoların %100'i tuttu (eşik 384 izlenme / 48 sa)",
+   "olculen": 3,
+   "erken": 1,
+   "medyan_48sa": 1978,
+   "tutma_orani": 100,
+   "izlenme_yuzde": null,
+   "en_iyi": {
+    "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
+    "i48": 1982
+   }
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "seri": "Tarihi Magazin",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "seri": "Tarihin Patileri",
+   "karar": "DENE",
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 16,
+   "tutma_orani": 0,
+   "izlenme_yuzde": null,
+   "en_iyi": {
+    "baslik": "Bir ordu kuşlara yenildi! 1932 Emu Savaşı 🐦",
+    "i48": 19
+   }
+  }
+ ],
+ "esikler": {
+  "Ancient Studio": 123,
+  "Antik Stüdyo": 384
+ },
+ "saatler": {
+  "Antik Stüdyo": {
+   "00:00": {
+    "n": 1,
+    "medyan": 19
+   },
+   "17:00": {
+    "n": 1,
+    "medyan": 12
+   },
+   "18:00": {
+    "n": 1,
+    "medyan": 1978
+   },
+   "19:00": {
+    "n": 2,
+    "medyan": 1696
+   },
+   "20:00": {
+    "n": 2,
+    "medyan": 1609
+   },
+   "21:00": {
+    "n": 1,
+    "medyan": 1345
+   }
+  },
+  "Ancient Studio": {
+   "00:00": {
+    "n": 3,
+    "medyan": 902
+   },
+   "17:00": {
+    "n": 1,
+    "medyan": 2
+   },
+   "21:00": {
+    "n": 1,
+    "medyan": 7
+   }
+  }
+ },
+ "eylemler": [
+  {
+   "tur": "GİZLE",
+   "kanal": "Antik Stüdyo",
+   "vid": "ELISG-GqRZE",
+   "kalan": "_MGM2L8UUok",
+   "baslik": "Kedin ölse kaşlarını kazır mıydın? 🐈 Antik Mısır",
+   "neden": "tekrar: ilk yüklenen _MGM2L8UUok kalır, bu kopya Gizli'ye alınır (silme yok)"
+  },
+  {
+   "tur": "GİZLE",
+   "kanal": "Antik Stüdyo",
+   "vid": "sFVxQWfNw_4",
+   "kalan": "cMqLyaxzKvU",
+   "baslik": "Süveyş Kanalı'nı 1869'da Fransızlar mı Açtı? (kopya)",
+   "neden": "tekrar: ilk yüklenen cMqLyaxzKvU kalır, bu kopya Gizli'ye alınır (silme yok)"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "wjPmU9N2eAQ",
+   "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
+   "neden": "2026-11-04 14:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "ELISG-GqRZE",
+   "baslik": "Kedin ölse kaşlarını kazır mıydın? 🐈 Antik Mısır",
+   "neden": "2026-11-03 17:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo (@antikstudyo)",
+   "platform": "TikTok",
+   "vid": "",
+   "baslik": "Zayıflamak için CANLI KURT yutan kadınlar?! 🐛💊 (1890 Diyet Çılgınlığı)",
+   "neden": "2026-11-03 20:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "",
+   "baslik": "[Taslak Plan #3] Bir güvercin 194 askeri nasıl kurtardı? 🕊️ Cher Ami, 1918",
+   "neden": "2026-11-04 12:30 planlıydı, hâlâ yayında görünmüyor"
+  }
+ ],
+ "bulgular": [
+  "Dün (2026-11-03) 1849 izlenme geldi.",
+  "Ancient Studio: son 5 Short'tan 2 tanesi tuttu (eşik 123 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 4 tanesi tuttu (eşik 384 izlenme / 48 sa).",
+  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 123 izlenme / 48 sa).",
+  "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 384 izlenme / 48 sa).",
+  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %100'i tuttu (eşik 384 izlenme / 48 sa).",
+  "Antik Stüdyo: en iyi yayın saati şimdilik 19:00 (medyan 1696 izlenme, 2 video).",
+  "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video)."
+ ],
+ "en_iyi": [
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
+   "i48": 1982
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "İnci Küpeli Kız'ın incisi gerçek mi? 🖼️",
+   "i48": 1978
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "Piri Reis neden idam edildi?",
+   "i48": 1793
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "1513 haritasını çizen amiral: Piri Reis",
+   "i48": 1599
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "Van Gogh bu tabloyu akıl hastanesinde yaptı 🌌",
+   "i48": 1345
+  }
+ ],
+ "en_zayif": [
+  {
+   "kanal": "Ancient Studio",
+   "baslik": "The fight over Hormuz started 474 years ago",
+   "i48": 32
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "Bir ordu kuşlara yenildi! 1932 Emu Savaşı 🐦",
+   "i48": 19
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "Emulara sonunda ne oldu? 🐦 Emu Savaşı'nın sonu",
+   "i48": 12
+  },
+  {
+   "kanal": "Ancient Studio",
+   "baslik": "Van Gogh painted this in a mental asylum 🌌",
+   "i48": 7
+  },
+  {
+   "kanal": "Ancient Studio",
+   "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
+   "i48": 2
+  }
+ ]
+}

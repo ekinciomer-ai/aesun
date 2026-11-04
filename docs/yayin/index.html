@@ -64,6 +64,16 @@ tr.bugun td{color:var(--k)}
 .yb .n{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;white-space:nowrap}
 .yb .r{grid-column:1/-1;height:6px}
 #ipucu{position:fixed;z-index:20;pointer-events:none;background:#2B2F35;color:#fff;font-size:12.5px;padding:6px 9px;border-radius:8px;max-width:260px;display:none;line-height:1.35}
+.yh{background:var(--y);border:1px solid var(--c);border-radius:12px;margin-bottom:14px}
+.yh summary{cursor:pointer;padding:12px 14px;font-weight:650;list-style:none}
+.yh summary::-webkit-details-marker{display:none}
+.yh .ic{padding:0 14px 14px;display:grid;gap:12px}
+.yh ul{margin:0;padding-left:18px}.yh li{margin:3px 0}
+.yh table{font-size:13px}.yh td,.yh th{padding:6px 8px}
+.kr{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:700;color:#fff}
+.kr.ARTIR{background:#1F8A4C}.kr.SÜRDÜR{background:#2463B5}.kr.DENE{background:#8A93A0}.kr.DEĞİŞTİR{background:#C26A12}.kr.DURDUR{background:#B91C24}
+.yh h4{font-size:13px;color:var(--s);font-weight:650;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+.yh .tb{overflow-x:auto;border:1px solid var(--c);border-radius:10px}
 .yrm{background:var(--y);border:1px solid var(--c);border-radius:12px;margin-bottom:14px}
 .yrm summary{cursor:pointer;padding:12px 14px;font-weight:650;list-style:none;display:flex;gap:8px;align-items:center}
 .yrm summary::-webkit-details-marker{display:none}
@@ -87,6 +97,7 @@ tr.bugun td{color:var(--k)}
 <main>
 <div class="kpi" id="kpi"></div>
 <div class="graf" id="graf" hidden></div><div id="ipucu"></div>
+<details class="yh" id="yh" hidden open><summary></summary><div class="ic" id="yhi"></div></details>
 <details class="yrm" id="yrm" hidden><summary></summary><div id="yrl"></div></details>
 <div class="filtre">
  <input class="ara" id="q" placeholder="Başlıkta ara…" autocomplete="off">
@@ -189,6 +200,17 @@ function grafCiz(){
  el.innerHTML=h1+h2+h3;
 }
 async function gecmisYukle(){try{G=await (await fetch('gecmis.json?'+Date.now())).json()}catch(e){G=null}}
+function yolCiz(A,R){const b=document.getElementById('yh');if(!A||!A.plan){b.hidden=true;return}b.hidden=false;
+ const yap=new Set(((R&&R.islemler)||[]).map(i=>i.vid));
+ b.querySelector('summary').innerHTML='🧭 Yol haritası <span class="ince">· otomatik · '+esc(fmt(new Date(A.olusturma)))+(R&&R.son_calisma?' · YouTube bağlantısı: '+esc(fmt(new Date(R.son_calisma))):'')+'</span>';
+ const plan=Object.entries(A.plan).map(([k,p])=>'<li><b>'+esc(k)+'</b>: günde en fazla '+p.gunluk_short_kotasi+' Short → '+(Object.entries(p.seri_dagilimi).map(([s,n])=>esc(s)+' ×'+n).join(', ')||'—')+(p.durdurulan.length?' · <span style="color:#B91C24">durdurulan: '+p.durdurulan.map(esc).join(', ')+'</span>':'')+'</li>').join('');
+ const ser='<div class="tb"><table><thead><tr><th>Kanal</th><th>Seri</th><th>Karar</th><th class="num">48 sa medyan</th><th class="num">Tutma</th><th class="num">İzlenme %</th><th>Neden</th></tr></thead><tbody>'+A.seriler.map(s=>'<tr><td>'+esc(s.kanal)+'</td><td>'+esc(s.seri)+'</td><td><span class="kr '+esc(s.karar)+'">'+esc(s.karar)+'</span></td><td class="num">'+sayi(s.medyan_48sa)+'</td><td class="num">'+(s.tutma_orani==null?'—':'%'+s.tutma_orani)+'</td><td class="num">'+(s.izlenme_yuzde==null?'—':'%'+s.izlenme_yuzde)+'</td><td class="ince">'+esc(s.neden)+(s.erken?' · '+s.erken+' yeni video ölçülüyor':'')+'</td></tr>').join('')+'</tbody></table></div>';
+ const ey=(A.eylemler||[]).map(e=>'<li><span class="kr '+(e.tur==='GİZLE'?'DEĞİŞTİR':e.tur==='ERTELE'?'DURDUR':'DENE')+'">'+esc(e.tur)+'</span> '+esc(e.kanal)+' · '+esc(String(e.baslik).slice(0,60))+' <span class="ince">— '+esc(e.neden)+(yap.has(e.vid)?' · ✅ yapıldı':'')+'</span></li>').join('');
+ const son=((R&&R.islemler)||[]).slice(-5).reverse().map(i=>'<li>'+esc(fmt(new Date(i.zaman)))+' · '+esc(i.kanal)+' · '+esc(i.vid)+' · '+esc(i.islem)+'</li>').join('');
+ document.getElementById('yhi').innerHTML='<div><h4>Bulgular</h4><ul>'+A.bulgular.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'
+  +'<div><h4>Plan (üretim buna uyar)</h4><ul>'+plan+'</ul></div><div><h4>Seri kararları</h4>'+ser+'</div>'
+  +(ey?'<div><h4>Yapılacaklar (sunucu ve ajanlar uygular)</h4><ul>'+ey+'</ul></div>':'')
+  +(son?'<div><h4>Son otomatik işlemler</h4><ul>'+son+'</ul></div>':'');}
 function kopyala(i,alan,btn){
  const x=(window._sonListe||[])[i];if(!x||!x[alan])return;
  navigator.clipboard.writeText(x[alan]).then(()=>{const o=btn.textContent;btn.textContent='✅ Kopyalandı';setTimeout(()=>btn.textContent=o,1400)});
@@ -216,6 +238,7 @@ async function yukle(){
   ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
   document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};}
  await gecmisYukle();ciz();yorumCiz(j.yorumlar);
+ let A=null,R=null;try{A=await (await fetch('analiz.json?'+Date.now())).json()}catch(e){}try{R=await (await fetch('yonetim_kaydi.json?'+Date.now())).json()}catch(e){}yolCiz(A,R);
 }
 yukle();setInterval(yukle,60000);
 </script>

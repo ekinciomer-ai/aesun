@@ -21,13 +21,13 @@ jobs:
       - name: Güncelle
         env:
           YT_API_KEY: ${{ secrets.YT_API_KEY }}
-        run: python3 yayin/guncelle.py
+        run: python3 yayin/guncelle.py && python3 yayin/analiz.py
       - name: Kaydet ve portala gönder
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
-          git add docs/yayin/yayin.json docs/yayin/gecmis.json
+          git add docs/yayin/yayin.json docs/yayin/gecmis.json docs/yayin/analiz.json
           git diff --cached --quiet && exit 0
           git commit -qm "Yayın takibi: otomatik güncelleme $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

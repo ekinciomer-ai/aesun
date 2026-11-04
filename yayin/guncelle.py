@@ -181,6 +181,46 @@ def main():
             if yeni_say:
                 notlar.append(f"{yeni_say} yeni yorum")
 
+    # 2c) Sunucudaki resmi YouTube bağlantısının okuduğu GERÇEK durum (docs/yayin/analitik.json, yayin_yonet.yml yazar)
+    try:
+        an = json.load(open(os.path.join(os.path.dirname(YOL), "analitik.json"), encoding="utf-8"))
+        taze = (simdi - datetime.fromisoformat(an["zaman"])).total_seconds() < 36 * 3600
+    except Exception:
+        an, taze = {}, False
+    if taze:
+        for kanal, kd in an.get("kanallar", {}).items():
+            dil = "TR" if kanal == "Antik Stüdyo" else "EN"
+            for vid, v in kd.get("videolar", {}).items():
+                if v.get("uploadStatus") not in (None, "processed", "uploaded"):
+                    continue
+                if v["durum"] == "public":
+                    d, t = "Yayında", datetime.fromisoformat(v["publishedAt"].replace("Z", "+00:00")).astimezone(TZ)
+                elif v.get("publishAt"):
+                    d, t = "Planlı", datetime.fromisoformat(v["publishAt"].replace("Z", "+00:00")).astimezone(TZ)
+                else:
+                    d, t = "Gizli", None
+                x = vid_ix.get(vid)
+                if x is None:
+                    if d == "Gizli":
+                        continue
+                    sure = v.get("sure") or ""
+                    m = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", sure)
+                    sn = (int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + int(m.group(3) or 0)) if m else 999
+                    short = sn <= 180
+                    x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
+                             seri=seri_tahmin(v.get("baslik") or ""), baslik=v.get("baslik") or "", durum=d, tarih="", saat="",
+                             izlenme=None, link=(f"https://youtube.com/shorts/{vid}" if short else f"https://youtu.be/{vid}"), vid=vid, ureten="?")
+                    K.append(x); vid_ix[vid] = x; degisti += 1
+                    notlar.append(f"Yeni içerik (YouTube'dan): {kanal} · {x['baslik']}")
+                yeni = {"durum": d, "izlenme": v.get("izlenme")}
+                if t is not None:
+                    yeni.update(tarih=t.strftime("%Y-%m-%d"), saat=t.strftime("%H:%M"))
+                if v.get("izlenme_yuzde") is not None:
+                    yeni["izlenme_yuzde"] = v["izlenme_yuzde"]
+                for k2, val in yeni.items():
+                    if x.get(k2) != val:
+                        x[k2] = val; degisti += 1
+
     # 3) TikTok: plan saati geçen planlı içerik
     for x in K:
         # Yalnız TikTok Studio'da gerçekten planlanmış olanlar (not'u "HAZIR" ile başlayan = henüz yüklenmemiş dosya; dokunma)

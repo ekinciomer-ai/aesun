@@ -14,7 +14,7 @@ import secrets as _secrets
 
 VERI = Path(os.environ.get("AESUN_VERI", "/veri/epias-ptf"))
 REPO = os.environ.get("AESUN_REPO", "https://github.com/ekinciomer-ai/epias-ptf.git")
-TOKEN = os.environ.get("AESUN_GH_OKU", "")          # depo gizli olunca: yalnız okuma yetkili belirteç (root-only .env)
+TOKEN = os.environ.get("AESUN_GH_OKU") or os.environ.get("GH_TOKEN") or ""          # depo gizli olunca: yalnız okuma yetkili belirteç (root-only .env)
 ARALIK = int(os.environ.get("AESUN_ESITLE_SN", "30"))
 PARA = re.compile(r"(^|/)(fatura/|maden_maliyet|arsiv_f2pool_gelir|arsiv_btc_fiyat|pay_|gelir)")
 ACIK = {"portal/veri.json", "n8n/canli_anahtar.json"}   # zaten şifreli/özet ya da herkese açık içerik
@@ -25,8 +25,12 @@ DURUM = {"sha": None, "son": 0.0, "hata": None, "ozet": {}, "basla": time.time()
 
 def _git(*a, cwd=None):
     url = REPO if not TOKEN else REPO.replace("https://", f"https://x-access-token:{TOKEN}@")
-    a = [x.replace("{URL}", url) for x in a]
-    r = subprocess.run(["git", *a], cwd=cwd, capture_output=True, text=True, timeout=120)
+    a_cmd = [x.replace("{URL}", url) for x in a]
+    r = subprocess.run(["git", *a_cmd], cwd=cwd, capture_output=True, text=True, timeout=120)
+    if r.returncode and TOKEN and REPO.startswith("git@github.com:"):
+        https_url = REPO.replace("git@github.com:", f"https://x-access-token:{TOKEN}@github.com/")
+        a_cmd2 = [x.replace("{URL}", https_url) for x in a]
+        r = subprocess.run(["git", *a_cmd2], cwd=cwd, capture_output=True, text=True, timeout=120)
     if r.returncode:
         raise RuntimeError((r.stderr or r.stdout).replace(TOKEN, "***")[-300:] if TOKEN else (r.stderr or r.stdout)[-300:])
     return r.stdout.strip()
@@ -51,6 +55,7 @@ def esitle():
         DURUM["son"] = time.time()
 
 def dongu():
+    _ozet_yukle()
     sayac = 0
     while True:
         try:

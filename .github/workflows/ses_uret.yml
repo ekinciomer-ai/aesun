@@ -1,0 +1,67 @@
+name: Seslendirme (ElevenLabs, bilgisayarsız)
+# sunucu/ses_kuyruk/<kod>.json → ElevenLabs bulut API'si ile seslendirir → sunucu/ses_cikti/<kod>.mp3
+# json: {"kod","metin","dil":"tr|en","ses":"<voice_id ya da ses adı>","model":"eleven_multilingual_v2","stability":0.45,"style":0.25}
+# Anahtar: depo sırrı ELEVENLABS_API_KEY (sohbete/koda yazılmaz). Her çalışmada hesaptaki ses listesi (ad + kimlik) sesler.json'a yazılır.
+on:
+  push:
+    branches: [main]
+    paths: ['sunucu/ses_kuyruk/*.json', '.github/workflows/ses_uret.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: ses-uret, cancel-in-progress: false }
+jobs:
+  uret:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seslendir
+        env:
+          XI: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          mkdir -p sunucu/ses_cikti sunucu/ses_kuyruk/tamam
+          python3 - <<'PY'
+          import json, os, glob, urllib.request, urllib.error, subprocess
+          from datetime import datetime, timezone, timedelta
+          K = os.environ.get('XI', '').strip(); out = {'zaman': datetime.now(timezone(timedelta(hours=3))).isoformat(timespec='minutes')}
+          if not K:
+              out['durum'] = 'ANAHTAR YOK: depo sırrı ELEVENLABS_API_KEY eklenmemiş'
+              json.dump(out, open('sunucu/ses_cikti/sesler.json', 'w'), ensure_ascii=False, indent=1); print(out['durum']); raise SystemExit(0)
+          def api(yol, veri=None):
+              r = urllib.request.Request('https://api.elevenlabs.io' + yol, data=(json.dumps(veri).encode() if veri else None),
+                                         headers={'xi-api-key': K, 'Content-Type': 'application/json', 'Accept': 'application/json' if veri is None else 'audio/mpeg'})
+              return urllib.request.urlopen(r, timeout=120).read()
+          try:
+              v = json.loads(api('/v1/voices'))
+              sesler = [{'ad': s['name'], 'id': s['voice_id'], 'tur': s.get('category')} for s in v.get('voices', [])]
+              out['durum'] = 'bağlı'; out['sesler'] = sesler
+              try:
+                  u = json.loads(api('/v1/user/subscription')); out['karakter_hakki'] = {'kullanilan': u.get('character_count'), 'limit': u.get('character_limit'), 'plan': u.get('tier')}
+              except Exception: pass
+          except urllib.error.HTTPError as e:
+              out['durum'] = f'HATA {e.code} (anahtar geçersiz ya da yetkisiz)'; sesler = []
+          adlar = {s['ad'].lower(): s['id'] for s in out.get('sesler', [])}
+          out['uretilen'] = []
+          for jf in sorted(glob.glob('sunucu/ses_kuyruk/*.json')):
+              it = json.load(open(jf, encoding='utf-8')); kod = it['kod']
+              vid = it['ses'] if it['ses'] in {s['id'] for s in out.get('sesler', [])} else adlar.get(str(it['ses']).lower(), it['ses'])
+              try:
+                  ses = api(f'/v1/text-to-speech/{vid}?output_format=mp3_44100_128', {
+                      'text': it['metin'], 'model_id': it.get('model', 'eleven_multilingual_v2'), 'language_code': it.get('dil'),
+                      'voice_settings': {'stability': it.get('stability', 0.45), 'similarity_boost': it.get('similarity', 0.85), 'style': it.get('style', 0.25)}})
+                  open(f'sunucu/ses_cikti/{kod}.mp3', 'wb').write(ses)
+                  subprocess.run(['git', 'mv', jf, f'sunucu/ses_kuyruk/tamam/{kod}.json'], check=False)
+                  out['uretilen'].append({'kod': kod, 'ses': vid, 'karakter': len(it['metin'])}); print('::notice::' + kod + ' seslendirildi')
+              except urllib.error.HTTPError as e:
+                  out['uretilen'].append({'kod': kod, 'hata': f'HTTP {e.code} ' + e.read().decode('utf-8', 'replace')[:200]})
+          json.dump(out, open('sunucu/ses_cikti/sesler.json', 'w'), ensure_ascii=False, indent=1)
+          print(out['durum'], len(out.get('sesler', [])), 'ses')
+          PY
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A sunucu/ses_cikti sunucu/ses_kuyruk
+          git diff --cached --quiet && exit 0
+          git commit -qm "Seslendirme: ElevenLabs $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

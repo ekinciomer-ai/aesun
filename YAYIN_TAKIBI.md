@@ -62,3 +62,7 @@ Video yüklemek için: `sunucu/yt_kuyruk/<KOD>.mp4` + `sunucu/yt_kuyruk/<KOD>.js
 (json alanları: `kod, kanal (TR|EN), baslik, aciklama, etiketler, kategori, publishAt (+03:00), sentetik, seri`).
 `yt_kuyruk.yml` sunucudaki resmi bağlantıyla yükler ve `publishAt` saatine planlar; aynı kod/başlık varsa yüklemez.
 İş bitince json `tamam/` altına taşınır, mp4 depodan silinir, kayıt Yayın Takibi'ne "Planlı" yazılır. Planlamadan önce `analiz.json` kotasına uy.
+
+## Telif ve marka kuralı (DEĞİŞMEZ, Ömer 4 Kas 2026)
+Kulüp/marka armaları ve logoları, maç/TV görüntüsü, UEFA/FIFA logo ve marşları, hazır (lisanssız) müzik hiçbir videoda kullanılmaz.
+Kulüp adları ve takım renkleri serbesttir. Görseller: kendi grafiğimiz, gerçek veri haritası, kamu malı/CC lisanslı ve künyeli görseller.

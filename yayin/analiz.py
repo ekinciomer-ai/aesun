@@ -204,6 +204,7 @@ def main():
             "Tablo serisinde sıralama: önce dünyaca tanınan eserler; az bilinen eser araya en fazla 3 günde bir girer.",
             "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR).",
             "Başlık kalıbı: tek merak sorusu + emoji ('X neden Y? 😨', 'Gerçekte ne oldu?'); kanıtı: kanalın tutan Short'ları ve ABD'de Zack D. Films (29 M abone) aynı kalıpla büyüdü.",
+            "Telif/marka: kulüp ve marka armaları/logoları, maç ve TV görüntüsü, UEFA/FIFA logo ve marşları, hazır müzik KULLANILMAZ. Kulüp adları ve takım renkleri serbest; müzik kanalın kendi üretimi ya da lisanslı olur.",
             "POV denemesi: trajedi/soykırım/savaş kurbanı POV'u YASAK (tepki ve topluluk kuralı riski); günlük yaşam, meslek, tuhaf adetler serbest. Görsellerde dönem doğruluğu kontrol edilir (ör. Roma binaları renkliydi).",
         ],
         "yeni_seri_denemeleri": [

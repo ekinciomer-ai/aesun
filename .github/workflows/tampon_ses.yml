@@ -1,0 +1,43 @@
+name: Tampon bölge – seslendirme denemesi
+# sunucu/islem_tampon_ses.sh'yi sunucuda yalıtılmış kapsayıcıda çalıştırır, örnek sesleri docs/tampon/ses/'e alır
+# (Portal → portal.aksarayenerji.net/tampon/ses/ adresinden dinlenir). Bilgisayar gerekmez.
+on:
+  push:
+    branches: [main]
+    paths: ['sunucu/islem_tampon_ses.sh', '.github/workflows/tampon_ses.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency: { group: tampon-ses, cancel-in-progress: false }
+jobs:
+  dene:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sunucuda dene
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "bash -s" < sunucu/islem_tampon_ses.sh > /tmp/cikti.txt 2>&1 || true
+          grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          mkdir -p docs/tampon/ses
+          scp $O "root@$ADRES:/opt/tampon/ses/cikti/*" docs/tampon/ses/ || echo "::warning::çıktı alınamadı"
+          grep '^NOT:' /tmp/cikti.txt > docs/tampon/ses/gunluk.txt || true
+          rm -f ~/.ssh/k
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A docs/tampon/ses
+          git diff --cached --quiet && exit 0
+          git commit -qm "Tampon bölge: seslendirme örnekleri $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          gh workflow run cpanel_yukle.yml --ref main || true
+        env:
+          GH_TOKEN: ${{ github.token }}

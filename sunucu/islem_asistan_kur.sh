@@ -20,6 +20,10 @@ if [ -d /opt/aesun/kod_aesun/.git ]; then
   echo "NOT: kod_aesun hazir ($(git -C /opt/aesun/kod_aesun rev-parse --short HEAD))"
 fi
 
+chown -R 1001:1001 /opt/aesun/ssh 2>/dev/null || true
+chmod 700 /opt/aesun/ssh 2>/dev/null || true
+chmod 600 /opt/aesun/ssh/id_* 2>/dev/null || true
+if [ -n "$GHT" ] && ! grep -q "^AESUN_GH_OKU=" /opt/aesun/.env 2>/dev/null; then echo "AESUN_GH_OKU=$GHT" >> /opt/aesun/.env; fi
 cd /opt/aesun
 docker compose build -q api
 docker compose up -d --no-deps api >/dev/null 2>&1

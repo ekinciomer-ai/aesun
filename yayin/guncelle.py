@@ -194,6 +194,23 @@ def main():
                 x["not"] = (x.get("not", "") + " · " if x.get("not") else "") + "Plan saatinde otomatik yayınlandı (TikTok)"
                 degisti += 1
 
+    # 4) Günlük izlenme geçmişi (grafik için): her günün son ölçümü, video başına toplam izlenme
+    try:
+        gyol = os.path.join(os.path.dirname(YOL), "gecmis.json")
+        g = json.load(open(gyol, encoding="utf-8")) if os.path.exists(gyol) else {"gunler": {}}
+        snap = {}
+        for x in K:
+            if x.get("durum") == "Yayında" and isinstance(x.get("izlenme"), int):
+                k = x.get("vid") or f"{x.get('platform','')}|{x.get('tarih') or ''}|{x.get('baslik','')}"
+                snap[k] = x["izlenme"]
+        bugun = simdi.strftime("%Y-%m-%d")
+        if snap and g["gunler"].get(bugun) != snap:
+            g["gunler"][bugun] = snap
+            g["gunler"] = dict(sorted(g["gunler"].items())[-400:])
+            json.dump(g, open(gyol, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    except Exception as e:
+        notlar.append(f"İzlenme geçmişi yazılamadı: {e}")
+
     for n in notlar:
         print(n)
     if not degisti:

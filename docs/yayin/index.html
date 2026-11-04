@@ -40,6 +40,30 @@ tr.bugun td{color:var(--k)}
 .kpy button{border:1px solid var(--c);background:#FBFAF8;color:var(--a);border-radius:6px;padding:2px 8px;font:600 11.5px/1.3 inherit;cursor:pointer}
 .kpy button:hover{border-color:var(--mav);color:var(--mav)}
 .bos{padding:30px;text-align:center;color:var(--s)}
+.kpi div.tik{cursor:pointer;border-color:#9BB5E0;position:relative}
+.kpi div.tik:hover{border-color:var(--mav)}
+.kpi div.tik i{position:absolute;top:10px;right:12px;font-style:normal;font-size:12px;color:var(--mav);font-weight:600}
+.graf{display:grid;gap:12px;margin-bottom:14px}
+.gk{background:var(--y);border:1px solid var(--c);border-radius:12px;padding:14px;min-width:0}
+.gk h3{font-size:14.5px;font-weight:650;margin-bottom:2px}
+.gk .ince{margin-bottom:10px}
+.sut{display:flex;align-items:flex-end;gap:4px;height:190px;border-bottom:1px solid var(--c);padding-top:18px}
+.sut .c{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:default}
+.sut .c b{font-size:11px;font-weight:600;color:var(--a);font-variant-numeric:tabular-nums;white-space:nowrap;margin-bottom:3px}
+.sut .c span{display:block;width:72%;max-width:34px;background:var(--mav);border-radius:4px 4px 0 0;min-height:2px}
+.sut .c:hover span{filter:brightness(1.15)}
+.sut .c.bg span{background:#7FA3D9}
+.etk{display:flex;gap:4px;margin-top:5px}
+.etk div{flex:1;min-width:0;text-align:center;font-size:10.5px;color:var(--s);line-height:1.25;overflow:hidden}
+.etk div em{display:block;font-style:normal;color:var(--a);font-weight:600}
+.yb{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;align-items:center;font-size:13px}
+.yb .ad{min-width:0}
+.yb .ad a{color:inherit;text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.yb .ad a:hover{text-decoration:underline}
+.yb .cz{height:8px;background:var(--mav);border-radius:0 4px 4px 0;margin-top:3px;min-width:2px}
+.yb .n{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;white-space:nowrap}
+.yb .r{grid-column:1/-1;height:6px}
+#ipucu{position:fixed;z-index:20;pointer-events:none;background:#2B2F35;color:#fff;font-size:12.5px;padding:6px 9px;border-radius:8px;max-width:260px;display:none;line-height:1.35}
 .yrm{background:var(--y);border:1px solid var(--c);border-radius:12px;margin-bottom:14px}
 .yrm summary{cursor:pointer;padding:12px 14px;font-weight:650;list-style:none;display:flex;gap:8px;align-items:center}
 .yrm summary::-webkit-details-marker{display:none}
@@ -62,6 +86,7 @@ tr.bugun td{color:var(--k)}
 <header><div class="ust"><a class="geri" href="../portal/">← Portal</a><a class="geri" href="../asistan/" style="border-color:#D7262E;color:#D7262E;font-weight:700">🤖 Sunucu Asistanı</a><div><h1>Yayın Takibi</h1><div class="alt" id="guncel">Yükleniyor…</div></div></div></header>
 <main>
 <div class="kpi" id="kpi"></div>
+<div class="graf" id="graf" hidden></div><div id="ipucu"></div>
 <details class="yrm" id="yrm" hidden><summary></summary><div id="yrl"></div></details>
 <div class="filtre">
  <input class="ara" id="q" placeholder="Başlıkta ara…" autocomplete="off">
@@ -90,7 +115,8 @@ function ciz(){
   .sort((a,b)=>(b.tarih||'0').localeCompare(a.tarih||'0')||(b.saat||'').localeCompare(a.saat||''));
  const yay=l.filter(x=>x.durum==='Yayında'),pl=l.filter(x=>x.durum==='Planlı'),ts=l.filter(x=>x.durum==='Taslak');
  const gelecek7=pl.filter(x=>x.tarih>=bugun&&x.tarih<=new Date(Date.now()+7*864e5+3*36e5).toISOString().slice(0,10)).length;
- document.getElementById('kpi').innerHTML=[['Yayında',yay.length],['Planlı',pl.length],['Taslak / Hazır',ts.length],['Önümüzdeki 7 gün',gelecek7],['Toplam izlenme',sayi(yay.reduce((s,x)=>s+(x.izlenme||0),0))],['Bugün',l.filter(x=>x.tarih===bugun&&x.durum!=='Gizli').length]].map(([a,b])=>'<div><b>'+b+'</b><span>'+a+'</span></div>').join('');
+ document.getElementById('kpi').innerHTML=[['Yayında',yay.length],['Planlı',pl.length],['Taslak / Hazır',ts.length],['Önümüzdeki 7 gün',gelecek7],['Toplam izlenme',sayi(yay.reduce((s,x)=>s+(x.izlenme||0),0))],['Bugün',l.filter(x=>x.tarih===bugun&&x.durum!=='Gizli').length]].map(([a,b])=>a==='Toplam izlenme'?'<div class="tik" role="button" tabindex="0" onclick="grafAc()" onkeydown="if(event.key===\'Enter\')grafAc()"><i>'+(GA?'▲ kapat':'📈 grafik')+'</i><b>'+b+'</b><span>'+a+'</span></div>':'<div><b>'+b+'</b><span>'+a+'</span></div>').join('');
+ window._grafListe=l; if(GA)grafCiz();
  document.getElementById('ozet').textContent=l.length+' kayıt gösteriliyor (toplam '+K.length+').';
  let h='',son=null;
  window._sonListe=l;
@@ -132,6 +158,37 @@ function yorumCiz(Y){
 }
 function yorumKopya(i,btn){const y=(window._yrm||[])[i];if(!y)return;
  navigator.clipboard.writeText('Şu yoruma yanıt öner ve onaylarsam gönder: '+y.kanal+' · '+y.video+' · @'+y.yazar+': "'+y.metin+'"').then(()=>{const o=btn.textContent;btn.textContent='✅ Kopyalandı';setTimeout(()=>btn.textContent=o,1400)})}
+let G=null,GA=false;
+function grafAc(){GA=!GA;document.getElementById('graf').hidden=!GA;ciz();if(GA)document.getElementById('graf').scrollIntoView({behavior:'smooth',block:'start'})}
+const kisa=t=>{const d=new Date(t+'T12:00:00');return d.getDate()+' '+AY[d.getMonth()].slice(0,3)};
+const anahtar=x=>x.vid||(x.platform+'|'+(x.tarih||'')+'|'+x.baslik);
+function ipucu(e,m){const t=document.getElementById('ipucu');if(!m){t.style.display='none';return}t.innerHTML=m;t.style.display='block';const r=t.getBoundingClientRect();let X=e.clientX+12,Y=e.clientY-r.height-10;if(X+r.width>innerWidth-8)X=innerWidth-r.width-8;if(Y<8)Y=e.clientY+16;t.style.left=X+'px';t.style.top=Y+'px'}
+function sutun(veri,deger,ust,alt,ipm,soluk){const mx=Math.max(1,...veri.map(deger));
+ return '<div class="sut">'+veri.map((v,i)=>'<div class="c'+(soluk&&soluk(v)?' bg':'')+'" onmousemove="ipucu(event,window._ip['+(window._ip.push(ipm(v))-1)+'])" onmouseleave="ipucu(event)" ontouchstart="ipucu(event.touches[0],window._ip['+(window._ip.length-1)+'])"><b>'+ust(v)+'</b><span style="height:'+(deger(v)/mx*100).toFixed(1)+'%"></span></div>').join('')+'</div>'
+  +'<div class="etk">'+veri.map(alt).join('')+'</div>'}
+function grafCiz(){
+ const el=document.getElementById('graf');if(!el)return;window._ip=[];
+ const l=(window._grafListe||K).filter(x=>x.durum==='Yayında');
+ const ac=new Set(l.map(anahtar));
+ // 1) Gün gün kazanılan izlenme (geçmiş ölçümlerden)
+ let h1='';const gn=G&&G.gunler?Object.keys(G.gunler).sort():[];
+ if(gn.length>=2){const art=[];for(let i=1;i<gn.length;i++){const a=G.gunler[gn[i-1]],b=G.gunler[gn[i]];let t=0,n=0;for(const k in b){if(!ac.has(k))continue;const f=b[k]-(a[k]||0);if(f>0){t+=f;n++}}art.push({g:gn[i],t,n})}
+  const v=art.slice(-14);
+  h1='<div class="gk"><h3>Günlük izlenme (o gün kazanılan)</h3><div class="ince">Her günün sonunda alınan ölçüme göre; bugün devam ediyor. Toplam: '+sayi(v.reduce((s,x)=>s+x.t,0))+'</div>'
+   +sutun(v,x=>x.t,x=>sayi(x.t),x=>'<div>'+kisa(x.g)+(x.g===bugun?'<em>bugün</em>':'')+'</div>',x=>'<b>'+gunAd(x.g)+'</b><br>+'+sayi(x.t)+' izlenme · '+x.n+' video izlendi',x=>x.g===bugun)+'</div>';}
+ else h1='<div class="gk"><h3>Günlük izlenme (o gün kazanılan)</h3><div class="ince">Ölçüm geçmişi birikiyor; ikinci günden itibaren burada görünür.</div></div>';
+ // 2) Yayın gününe göre: kaç video çıktı, toplam kaç izlenme aldılar
+ const gun={};for(const x of l){if(!x.tarih)continue;(gun[x.tarih]=gun[x.tarih]||{g:x.tarih,n:0,t:0,v:[]});gun[x.tarih].n++;gun[x.tarih].t+=x.izlenme||0;gun[x.tarih].v.push(x)}
+ const gv=Object.values(gun).sort((a,b)=>a.g.localeCompare(b.g)).slice(-14);
+ const h2='<div class="gk"><h3>Yayın gününe göre videolar</h3><div class="ince">Sütun: o gün yayınlanan videoların bugüne kadarki toplam izlenmesi · altında o gün çıkan video sayısı</div>'
+  +sutun(gv,x=>x.t,x=>sayi(x.t),x=>'<div>'+kisa(x.g)+'<em>'+x.n+' video</em></div>',x=>'<b>'+gunAd(x.g)+'</b><br>'+x.n+' video · '+sayi(x.t)+' izlenme<br>'+x.v.sort((a,b)=>(b.izlenme||0)-(a.izlenme||0)).slice(0,5).map(v=>'• '+esc(String(v.baslik).slice(0,38))+' — '+sayi(v.izlenme)).join('<br>'))+'</div>';
+ // 3) Video bazında
+ const vl=l.filter(x=>x.izlenme!=null).sort((a,b)=>(b.izlenme||0)-(a.izlenme||0));const top=vl.reduce((s,x)=>s+(x.izlenme||0),0),mx=Math.max(1,...vl.map(x=>x.izlenme||0));
+ const h3='<div class="gk"><h3>Video bazında izlenme</h3><div class="ince">'+vl.length+' video · toplam '+sayi(top)+' izlenme (filtreler uygulanır)</div><div class="yb">'
+  +vl.map(x=>'<div class="ad"><a href="'+esc(x.link||'#')+'" target="_blank" rel="noopener noreferrer" title="'+esc(x.baslik)+'">'+esc(x.baslik)+'</a><div class="ince" style="margin:0">'+esc(x.platform)+' · '+esc(x.kanal)+' · '+esc(x.tarih||'')+'</div><div class="cz" style="width:'+((x.izlenme||0)/mx*100).toFixed(1)+'%"></div></div><div class="n">'+sayi(x.izlenme)+'</div><div class="r"></div>').join('')+'</div></div>';
+ el.innerHTML=h1+h2+h3;
+}
+async function gecmisYukle(){try{G=await (await fetch('gecmis.json?'+Date.now())).json()}catch(e){G=null}}
 function kopyala(i,alan,btn){
  const x=(window._sonListe||[])[i];if(!x||!x[alan])return;
  navigator.clipboard.writeText(x[alan]).then(()=>{const o=btn.textContent;btn.textContent='✅ Kopyalandı';setTimeout(()=>btn.textContent=o,1400)});
@@ -158,7 +215,7 @@ async function yukle(){
   [['fp','platform'],['fk','kanal'],['fd','durum'],['fs','seri'],['fu','ureten']].forEach(([i,a])=>secenek(i,a));
   ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
   document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};}
- ciz();yorumCiz(j.yorumlar);
+ await gecmisYukle();ciz();yorumCiz(j.yorumlar);
 }
 yukle();setInterval(yukle,60000);
 </script>

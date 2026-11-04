@@ -2,7 +2,7 @@
 # Kanal yönetimi (otomatik, günde 2 kez; .github/workflows/yayin_yonet.yml çalıştırır).
 # 1) Her iki kanalın TÜM yüklemelerinin gerçek durumunu okur (herkese açık / planlı / gizli, yayın saati).
 # 2) YouTube Analytics'ten video başına izlenme, ortalama izlenme süresi ve izlenme yüzdesini okur.
-# 3) docs/yayin/analiz.json içindeki "GİZLE" eylemlerini uygular: yalnız TEKRAR eden kopyayı Gizli'ye alır.
+# 3) docs/yayin/analiz.json eylemlerini uygular: GİZLE (tekrar eden kopya → Gizli), ERTELE (durdurulan serinin ileri tarihli planını kaldırır).
 #    YASAK: silme, herkese açma, planlama, başlık/açıklama değişikliği. İşlem öncesi durum yedeklenir.
 # Çıktı: '===ANALITIK===' ile '===SON===' arasında sırsız JSON (iş akışı bunu docs/yayin/analitik.json'a yazar).
 set -euo pipefail
@@ -103,6 +103,21 @@ for cid, ad in KANALLAR.items():
             out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": e["vid"],
                                     "islem": "Gizli'ye alındı", "neden": e.get("neden")})
             print(f"NOT: {ad} · {e['vid']} Gizli'ye alındı (tekrar)")
+        # ERTELE: durdurulan serinin İLERİ TARİHLİ planı kaldırılır (video Gizli kalır, silinmez; plan yeniden kurulabilir)
+        for e in [e for e in analiz.get("eylemler", []) if e.get("tur") == "ERTELE" and e.get("vid") in videolar][:5]:
+            v = videolar[e["vid"]]
+            if v["durum"] != "private" or not v.get("publishAt"):
+                continue
+            mevcut = api(f"https://www.googleapis.com/youtube/v3/videos?part=status&id={e['vid']}", tok)["items"][0]
+            json.dump(mevcut, open(os.path.join(D, "yedek", f"ertele_{e['vid']}_{simdi.strftime('%Y%m%d%H%M')}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+            st = mevcut["status"]; eski_plan = st.pop("publishAt", None)
+            for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"):
+                st.pop(k, None)
+            api("https://www.googleapis.com/youtube/v3/videos?part=status", tok, {"id": e["vid"], "status": st}, "PUT")
+            v["publishAt"] = None
+            out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": e["vid"],
+                                    "islem": f"planı kaldırıldı (eski plan {eski_plan})", "neden": e.get("neden")})
+            print(f"NOT: {ad} · {e['vid']} planı kaldırıldı (seri durduruldu)")
         out["kanallar"][ad] = {"id": cid, "abone": int(ch["statistics"].get("subscriberCount", 0) or 0),
                                "toplam_izlenme": int(ch["statistics"].get("viewCount", 0) or 0), "videolar": videolar}
         print(f"NOT: {ad}: {len(videolar)} video okundu")

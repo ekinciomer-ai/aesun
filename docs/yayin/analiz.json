@@ -1,5 +1,5 @@
 {
- "olusturma": "2026-11-04T16:34+03:00",
+ "olusturma": "2026-11-04T17:03+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -7,7 +7,32 @@
   "DEĞİŞTİR kararındaki seride sıradaki videolar yeni kanca ve daha tanınmış konu ile üretilir (en iyi giden başlık örnek alınır).",
   "Aynı içerik bir kanalda iki kez açık kalmaz (GİZLE eylemi: silme yok, Gizli'ye alınır).",
   "Tablo serisinde sıralama: önce dünyaca tanınan eserler; az bilinen eser araya en fazla 3 günde bir girer.",
-  "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR)."
+  "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR).",
+  "Başlık kalıbı: tek merak sorusu + emoji ('X neden Y? 😨', 'Gerçekte ne oldu?'); kanıtı: kanalın tutan Short'ları ve ABD'de Zack D. Films (29 M abone) aynı kalıpla büyüdü.",
+  "POV denemesi: trajedi/soykırım/savaş kurbanı POV'u YASAK (tepki ve topluluk kuralı riski); günlük yaşam, meslek, tuhaf adetler serbest. Görsellerde dönem doğruluğu kontrol edilir (ör. Roma binaları renkliydi)."
+ ],
+ "yeni_seri_denemeleri": [
+  {
+   "seri": "POV Tarih",
+   "kanallar": [
+    "Ancient Studio",
+    "Antik Stüdyo"
+   ],
+   "kota": "kanal başına günde 1 (DENE payından)",
+   "kalip": "POV: 1750'de Paris'te bir perukçu olarak uyanıyorsun… (ilk 2 sn: tuhaf detay; sonda: gerçek mi efsane mi?)",
+   "kanit": "TikTok #HistoryAI POV akımı on milyonlarca izlenme; kanalda en yakın format Tarihi Magazin (Fare: 3 saatte 328)",
+   "basari": "3 bölümden sonra analiz motoru ARTIR/DURDUR kararını kendisi verir"
+  },
+  {
+   "seri": "Neden? (tek soru)",
+   "kanallar": [
+    "Ancient Studio"
+   ],
+   "kota": "Gündem + Tarih payının içinde",
+   "kalip": "Why did Romans… ? / Why was … banned? — 30-45 sn, tek soru tek cevap",
+   "kanit": "Zack D. Films (ABD) bu kalıpla 81 milyar izlenme; Antik Stüdyo'nun tutan Short'ları da soru başlıklı",
+   "basari": "EN kanal Gündem + Tarih ARTIR kararında; aynı ölçüyle izlenir"
+  }
  ],
  "plan": {
   "Antik Stüdyo": {
@@ -191,22 +216,6 @@
  },
  "eylemler": [
   {
-   "tur": "GİZLE",
-   "kanal": "Antik Stüdyo",
-   "vid": "ELISG-GqRZE",
-   "kalan": "_MGM2L8UUok",
-   "baslik": "Kedin ölse kaşlarını kazır mıydın? 🐈 Antik Mısır",
-   "neden": "tekrar: ilk yüklenen _MGM2L8UUok kalır, bu kopya Gizli'ye alınır (silme yok)"
-  },
-  {
-   "tur": "GİZLE",
-   "kanal": "Antik Stüdyo",
-   "vid": "sFVxQWfNw_4",
-   "kalan": "cMqLyaxzKvU",
-   "baslik": "Süveyş Kanalı'nı 1869'da Fransızlar mı Açtı? (kopya)",
-   "neden": "tekrar: ilk yüklenen cMqLyaxzKvU kalır, bu kopya Gizli'ye alınır (silme yok)"
-  },
-  {
    "tur": "KONTROL",
    "kanal": "Antik Stüdyo",
    "platform": "YouTube",
@@ -221,6 +230,14 @@
    "vid": "ELISG-GqRZE",
    "baslik": "Kedin ölse kaşlarını kazır mıydın? 🐈 Antik Mısır",
    "neden": "2026-11-03 17:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Ancient Studio",
+   "platform": "YouTube",
+   "vid": "tJ-I6ZUVK7w",
+   "baslik": "Is the Girl with a Pearl Earring's pearl real? 🖼️",
+   "neden": "2026-11-04 15:00 planlıydı, hâlâ yayında görünmüyor"
   },
   {
    "tur": "KONTROL",

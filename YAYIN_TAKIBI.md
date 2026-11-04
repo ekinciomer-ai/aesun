@@ -66,3 +66,10 @@ Video yüklemek için: `sunucu/yt_kuyruk/<KOD>.mp4` + `sunucu/yt_kuyruk/<KOD>.js
 ## Telif ve marka kuralı (DEĞİŞMEZ, Ömer 4 Kas 2026)
 Kulüp/marka armaları ve logoları, maç/TV görüntüsü, UEFA/FIFA logo ve marşları, hazır (lisanssız) müzik hiçbir videoda kullanılmaz.
 Kulüp adları ve takım renkleri serbesttir. Görseller: kendi grafiğimiz, gerçek veri haritası, kamu malı/CC lisanslı ve künyeli görseller.
+
+## Seslendirme (bilgisayar gerekmez)
+Asıl ses: ElevenLabs, sunucudaki bağlantı (`/opt/cutkoda/motor.env`). Klon ses `u2ZPme1hNaHzZRbw9S82`, model `eleven_v3`, stability 0.5, similarity 0.9.
+Kullanım: `sunucu/ses_kuyruk/<KOD>.json` (`kod, voice_id, model, dil, ayar, parcalar[{ad, metin}]`) push → `ses_kuyruk.yml` mp3'leri
+`sunucu/ses_kuyruk/cikti/<KOD>__<ad>.mp3` olarak yazar. Sahne başına ayrı parça üret: sahne süreleri ses süresinden hesaplanır.
+Yedek ses (ElevenLabs çalışmazsa): Piper `tr_TR-fahrettin-medium` (CC0), tampon bölgede. Klon seste YouTube "sentetik içerik" = EVET.
+Eski sürümün yerine yeni yükleme: kuyruk json'una `"yerine": "<eski vid>"` → eski sürümün planı kaldırılır, Gizli kalır (silme yok).

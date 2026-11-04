@@ -6,7 +6,7 @@
 # Çıktı: /opt/tampon/ses/cikti/*.mp3 → iş akışı bunları docs/tampon/ses/ altına alır (dinlemek için).
 set -u
 KOK=/opt/tampon/ses; IMAJ=tampon-ses:1
-mkdir -p "$KOK/cikti" "$KOK/onbellek"; rm -f "$KOK/cikti/"*
+mkdir -p "$KOK/cikti" "$KOK/onbellek"; rm -f "$KOK/cikti/"chatterbox_*
 BOS_GB=$(df -BG / | tail -1 | awk '{gsub("G","",$4); print $4}')
 [ "${BOS_GB:-0}" -lt 10 ] && { echo "NOT: HATA disk boş alanı 10 GB altında"; exit 1; }
 TOPLAM_MB=$(free -m | awk '/Mem/{print $2}'); BELLEK_MB=$(( TOPLAM_MB / 2 )); [ $BELLEK_MB -gt 8192 ] && BELLEK_MB=8192
@@ -55,17 +55,24 @@ try:
         mp3(f"{OUT}/{ad}.wav", ad); sonuc[ad] = {"sure_sn": round(time.time() - t, 1), "lisans": " ".join(lis)[:120]}
 except Exception as e:
     sonuc["piper_hata"] = f"{type(e).__name__}: {e}"[:200]
+json.dump(sonuc, open(f"{OUT}/sonuc.json", "w"), ensure_ascii=False, indent=1)
 # 2) Chatterbox Multilingual (MIT)
 try:
     import torch, torchaudio
     from chatterbox.mtl_tts import ChatterboxMultilingualTTS
     torch.set_num_threads(max(1, os.cpu_count() or 1))
     t = time.time(); model = ChatterboxMultilingualTTS.from_pretrained(device="cpu"); sonuc["chatterbox_yukleme_sn"] = round(time.time() - t, 1)
+    import re, gc
     for ad, metin, dil, ek in (("chatterbox_tr", TR, "tr", {}), ("chatterbox_tr_vurgulu", TR, "tr", {"exaggeration": 0.7, "cfg_weight": 0.3}),
                                ("chatterbox_en", EN, "en", {})):
-        t = time.time(); wav = model.generate(metin, language_id=dil, **ek)
-        torchaudio.save(f"{OUT}/{ad}.wav", wav, model.sr); mp3(f"{OUT}/{ad}.wav", ad)
+        t = time.time(); parcalar = []
+        for cumle in [c.strip() for c in re.split(r"(?<=[.?!])\s+", metin) if c.strip()]:   # bellek için cümle cümle
+            with torch.inference_mode():
+                parcalar.append(model.generate(cumle, language_id=dil, **ek))
+            parcalar.append(torch.zeros(1, int(model.sr * 0.25))); gc.collect()
+        torchaudio.save(f"{OUT}/{ad}.wav", torch.cat(parcalar, dim=1), model.sr); mp3(f"{OUT}/{ad}.wav", ad)
         sonuc[ad] = {"sure_sn": round(time.time() - t, 1)}
+        json.dump(sonuc, open(f"{OUT}/sonuc.json", "w"), ensure_ascii=False, indent=1)
 except Exception as e:
     sonuc["chatterbox_hata"] = f"{type(e).__name__}: {e}"[:300]
 json.dump(sonuc, open(f"{OUT}/sonuc.json", "w"), ensure_ascii=False, indent=1)

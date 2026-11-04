@@ -56,3 +56,9 @@ Analiz ve karar işi otomatiktir; Ömer'e öneri listesi sunulmaz, takip işi ve
 3. `DEĞİŞTİR` kararındaki seride kancayı ve konu seçimini değiştir; `en_iyi` listesindeki başlıkları örnek al.
 4. `kurallar` listesindeki her maddeye uy. `KONTROL` eylemlerini tarayıcısı/bağlantısı olan ilk ajan çözer ve tabloya işler.
 Eşikler kanalın kendi en iyi videolarına göre hesaplanır; elle değiştirilmez, gerekiyorsa `yayin/analiz.py` güncellenir.
+
+## YouTube yükleme kuyruğu (bilgisayar gerekmez)
+Video yüklemek için: `sunucu/yt_kuyruk/<KOD>.mp4` + `sunucu/yt_kuyruk/<KOD>.json` ekle ve push et
+(json alanları: `kod, kanal (TR|EN), baslik, aciklama, etiketler, kategori, publishAt (+03:00), sentetik, seri`).
+`yt_kuyruk.yml` sunucudaki resmi bağlantıyla yükler ve `publishAt` saatine planlar; aynı kod/başlık varsa yüklemez.
+İş bitince json `tamam/` altına taşınır, mp4 depodan silinir, kayıt Yayın Takibi'ne "Planlı" yazılır. Planlamadan önce `analiz.json` kotasına uy.

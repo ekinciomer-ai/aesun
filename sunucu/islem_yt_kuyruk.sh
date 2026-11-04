@@ -42,7 +42,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         cid = KANAL[dil]
         if dil not in toklar:
             toklar[dil] = token(cid); mevcut[dil] = basliklar(toklar[dil], cid)
-        if it["baslik"] in mevcut[dil]:
+        if it["baslik"] in mevcut[dil] and mevcut[dil][it["baslik"]] != it.get("yerine"):
             vid = mevcut[dil][it["baslik"]]; kayit[kod] = {"vid": vid}
             sonuc.append({"kod": kod, "durum": "zaten yüklü (başlık)", "vid": vid, **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri")}}); continue
         boyut = os.path.getsize(mp4)
@@ -65,6 +65,25 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         json.dump(kayit, open(kayit_yol, "w", encoding="utf-8"), ensure_ascii=False)
         sonuc.append({"kod": kod, "durum": "yüklendi ve planlandı", "vid": v["id"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri")}})
         print(f"NOT: {kod} yüklendi → {v['id']} (plan {it['publishAt']})")
+        # "yerine": aynı içeriğin eski sürümü → planı kaldırılır, Gizli kalır (silme yok, önce yedek)
+        eski = it.get("yerine")
+        if eski:
+            u = f"https://www.googleapis.com/youtube/v3/videos?part=status&id={eski}"
+            with urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": f"Bearer {toklar[dil]}"}), timeout=30) as r:
+                m = json.load(r)["items"][0]
+            json.dump(m, open(os.path.join(D, "yedek", f"yerine_{eski}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+            st = m["status"]
+            if st.get("privacyStatus") != "public":
+                st.pop("publishAt", None)
+                for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"): st.pop(k, None)
+                st["privacyStatus"] = "private"
+                req = urllib.request.Request("https://www.googleapis.com/youtube/v3/videos?part=status", data=json.dumps({"id": eski, "status": st}).encode(),
+                                             method="PUT", headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": "application/json"})
+                urllib.request.urlopen(req, timeout=30).read()
+                sonuc[-1]["eski_gizlendi"] = eski
+                print(f"NOT: eski sürüm {eski} planı kaldırıldı (Gizli)")
+            else:
+                print(f"NOT: eski sürüm {eski} zaten herkese açık; dokunulmadı")
     except urllib.error.HTTPError as e:
         govde = e.read().decode("utf-8", "replace")[:300]
         sonuc.append({"kod": kod, "durum": f"HATA HTTP {e.code}", "detay": govde.replace("\n", " ")})

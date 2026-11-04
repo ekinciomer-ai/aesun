@@ -59,6 +59,8 @@ jobs:
                        baslik=s['baslik'], durum='Planlı', tarih=p.strftime('%Y-%m-%d'), saat=p.strftime('%H:%M'), izlenme=x.get('izlenme'),
                        link=f"https://youtube.com/shorts/{s['vid']}", vid=s['vid'], ureten=x.get('ureten', 'Claude'))
               if s['vid'] not in ix: K.append(x)
+              if s.get('eski_gizlendi') and s['eski_gizlendi'] in ix:
+                  e = ix[s['eski_gizlendi']]; e['durum'] = 'Gizli'; e['not'] = f"yerine sesli sürüm yüklendi: {s['vid']}" 
               subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
               subprocess.run(['git', 'rm', '-q', '--ignore-unmatch', f'sunucu/yt_kuyruk/{kod}.mp4'], check=False)
               print(f'::notice::{kod}: {s["durum"]} → {s["vid"]}')

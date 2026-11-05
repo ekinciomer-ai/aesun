@@ -11,6 +11,6 @@ def iste(url,veri=None):
     except urllib.error.HTTPError as e: return e.code,re.sub(r'AIza[0-9A-Za-z_-]+','***',e.read().decode()[:400])
 c,d=iste("https://generativelanguage.googleapis.com/v1beta/models?pageSize=100")
 print("NOT: modeller:",c, (", ".join(m["name"].split("/")[1] for m in d.get("models",[]) if "flash" in m["name"])[:400]) if c==200 else d)
-c,d=iste("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{"contents":[{"parts":[{"text":"Di 'hola' en una palabra."}]}]})
-print("NOT: deneme 2.5-flash:",c, (d["candidates"][0]["content"]["parts"][0]["text"][:60] if c==200 else d))
+c,d=iste("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent",{"contents":[{"parts":[{"text":"Di 'hola' en una palabra."}]}]})
+print("NOT: deneme flash-latest:",c, (d["candidates"][0]["content"]["parts"][0]["text"][:60] if c==200 else d))
 PY

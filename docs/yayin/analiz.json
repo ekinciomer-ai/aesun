@@ -1,5 +1,5 @@
 {
- "olusturma": "2026-11-05T21:42+03:00",
+ "olusturma": "2026-11-06T00:12+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -73,14 +73,26 @@
   },
   {
    "kanal": "Ancient Studio",
+   "seri": "Spor + Tarih",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Ancient Studio",
    "seri": "Tablo Serisi",
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 44,
    "tutma_orani": 0,
-   "izlenme_yuzde": 49,
+   "izlenme_yuzde": 62,
    "en_iyi": {
     "baslik": "Why does the Mona Lisa have no eyebrows? 🖼️",
     "i48": 82
@@ -92,7 +104,7 @@
    "karar": "DENE",
    "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 0,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": null,
    "tutma_orani": null,
    "izlenme_yuzde": null,
@@ -130,14 +142,26 @@
   },
   {
    "kanal": "Antik Stüdyo",
+   "seri": "Spor + Tarih",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Antik Stüdyo",
    "seri": "Tablo Serisi",
    "karar": "ARTIR",
    "neden": "videoların %75'i tuttu (eşik 383 izlenme / 48 sa)",
    "olculen": 4,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 1658,
    "tutma_orani": 75,
-   "izlenme_yuzde": 60,
+   "izlenme_yuzde": 56,
    "en_iyi": {
     "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
     "i48": 1982
@@ -149,7 +173,7 @@
    "karar": "DENE",
    "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 0,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": null,
    "tutma_orani": null,
    "izlenme_yuzde": null,
@@ -164,7 +188,7 @@
    "erken": 0,
    "medyan_48sa": 17,
    "tutma_orani": 0,
-   "izlenme_yuzde": 25,
+   "izlenme_yuzde": 20,
    "en_iyi": {
     "baslik": "Bir ordu kuşlara yenildi! 1932 Emu Savaşı 🐦",
     "i48": 19
@@ -172,8 +196,8 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 127,
-  "Antik Stüdyo": 383
+  "Antik Stüdyo": 383,
+  "Ancient Studio": 127
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -220,11 +244,11 @@
  "eylemler": [
   {
    "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "rpmDktdisg4",
-   "baslik": "Büyük Dalga'nın içinde bir dağ saklanıyor 🌊",
-   "neden": "2026-11-05 18:00 planlıydı, hâlâ yayında görünmüyor"
+   "kanal": "Antik Stüdyo (@antikstudyo)",
+   "platform": "TikTok",
+   "vid": "",
+   "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 (Antik Roma Kremi)",
+   "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
   },
   {
    "tur": "KONTROL",
@@ -235,14 +259,6 @@
    "neden": "2026-11-05 12:30 planlıydı, hâlâ yayında görünmüyor"
   },
   {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "zgiNWWWx_gE",
-   "baslik": "Beşiktaş ilk kez bir İskoç takımıyla! Celtic'in şaşırtan hikâyesi ⚽ #shorts",
-   "neden": "2026-11-05 19:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
    "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
    "vid": "",
@@ -251,7 +267,7 @@
   }
  ],
  "bulgular": [
-  "Dün (2026-11-04) 1250 izlenme geldi; bir önceki gün 1849.",
+  "Dün (2026-11-05) 5875 izlenme geldi; bir önceki gün 1250.",
   "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 127 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 383 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 127 izlenme / 48 sa).",
@@ -260,8 +276,8 @@
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 19:00 (medyan 1691 izlenme, 2 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
-  "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %46 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
-  "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %29 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
+  "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %50 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
+  "Antik Stüdyo: tutan Short'lar ortalama %62 izleniyor, tutmayanlar %28 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
  ],
  "en_iyi": [
   {

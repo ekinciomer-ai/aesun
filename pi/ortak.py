@@ -193,13 +193,33 @@ def _bekleyen_esitle():
         pass
 
 
+# GitHub anahtarı reddedilirse (süresi dolmuş/iptal: HTTP 401) bu süreç sunucuya geçer: okuma ve yazma
+# yalnız merkez sunucudan (AE_KAYNAK=sunucu ile aynı yol). Veri kaybolmaz, yeni anahtar girilince GitHub'a döner.
+GH_RED = AESUN / "gh_anahtar_red.json"
+
+
+def _gh_red_mi():
+    try:
+        return (datetime.now().timestamp() - float(json.loads(GH_RED.read_text())["t"])) < 6 * 3600
+    except Exception:
+        return False
+
+
+def _gh_red_kaydet(kod):
+    try:
+        GH_RED.write_text(json.dumps({"t": datetime.now().timestamp(), "kod": kod}))
+        log(f"GitHub anahtarı reddedildi (HTTP {kod}); 6 saat boyunca sunucu yolu kullanılacak")
+    except Exception:
+        pass
+
+
 def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
     """epias-ptf dosyası oku (veri=None) ya da yaz. Okuma (json, sha) döner; yoksa (None, None).
     AE_KAYNAK=sunucu ise yalnız sunucu; değilse GitHub + sunucuya kopya.
     İnternet kesintisinde yerel önbellekten (~/.aesun/onbellek) okur/yazar; bağlantı gelince eşitler."""
     if veri is not None:
         _onbellek_yaz(yol, veri)
-    if sunucu.yalniz_sunucu():
+    if sunucu.yalniz_sunucu() or (sunucu.anahtar() and _gh_red_mi()):
         if veri is None:
             try:
                 v = sunucu.oku(yol)
@@ -259,6 +279,10 @@ def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
                 return gh(yol, _etagsiz=True)
             if e.code == 404:
                 return None, None
+            if e.code == 401 and sunucu.anahtar():
+                _gh_red_kaydet(401)
+                if _gh_red_mi():
+                    return gh(yol, _etagsiz=True)
             yerel = _onbellek_oku(yol)
             if yerel is not None:
                 log(f"HTTP {e.code} önbellek okuma ({yol})")
@@ -299,6 +323,12 @@ def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
             if e.code == 404 and not govde.get("sha") and not yeni:
                 yeni = True                                # dosya yok: sha'sız oluştur (eskiden bu durumda hiç yazılmıyordu)
                 continue
+            elif e.code == 401 and sunucu.anahtar():
+                _gh_red_kaydet(401)
+                if _gh_red_mi():
+                    return gh(yol, veri, sha, mesaj)
+                _bekleyen_ekle(yol)
+                return {"content": {"sha": "onbellek"}}
             elif e.code in (409, 422) and deneme < 2:   # sha eskimiş: tazele ve bir kez daha dene
                 govde.pop("sha", None)
                 yeni = False

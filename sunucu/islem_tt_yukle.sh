@@ -87,18 +87,25 @@ with sync_playwright() as p:
                     sw = kutu.locator("[role=switch], input[type=checkbox], [class*=witch]").first
                     if sw.count():
                         if (sw.get_attribute("aria-checked") or "false") != "true":
-                            sw.click(timeout=3000, force=True); time.sleep(1.5); tikla_metin(pg, ["Aç", "Turn on", "Onayla"], 2500)
+                            sw.click(timeout=3000, force=True); time.sleep(1.5)
+                            try: pg.get_by_role("button", name=re.compile(r"^(Aç|Turn on)$")).first.click(timeout=3000)
+                            except Exception: tikla_metin(pg, ["Aç", "Turn on"], 2000)
                     else:
                         # yedek: etiketin sağındaki anahtara koordinatla tıkla
-                        bb = etiket.bounding_box(); pg.mouse.click(bb["x"] + bb["width"] + 28, bb["y"] + bb["height"] / 2); time.sleep(1.5); tikla_metin(pg, ["Aç", "Turn on", "Onayla"], 2500)
+                        bb = etiket.bounding_box(); pg.mouse.click(bb["x"] + bb["width"] + 28, bb["y"] + bb["height"] / 2); time.sleep(1.5)
+                        try: pg.get_by_role("button", name=re.compile(r"^(Aç|Turn on)$")).first.click(timeout=3000)
+                        except Exception: pass
                 except Exception as e:
                     print(f"NOT: {kod} AI etiketi işaretlenemedi: {type(e).__name__}")
             ss(pg, kod, 3)
             # tarih / saat
             t = datetime.fromisoformat(it["planla"]); gun, saat, dk = t.day, f"{t.hour:02d}", f"{t.minute:02d}"
-            tarih = pg.locator("input[value^='20']").first; tarih.click(); time.sleep(1)
+            time.sleep(1); ss(pg, kod, 31)
+            tarih = pg.locator("input[value^='20']").first if pg.locator("input[value^='20']").count() else pg.get_by_text(re.compile(r"^20\d\d-\d\d-\d\d$")).first
+            tarih.click(timeout=5000); time.sleep(1.5); ss(pg, kod, 32)
             pg.get_by_text(str(gun), exact=True).last.click(timeout=4000); time.sleep(1)
-            saatk = pg.locator("input[value*=':']").first; saatk.click(); time.sleep(1)
+            saatk = pg.locator("input[value*=':']").first if pg.locator("input[value*=':']").count() else pg.get_by_text(re.compile(r"^\d\d:\d\d$")).first
+            saatk.click(timeout=5000); time.sleep(1.5); ss(pg, kod, 33)
             try:
                 pg.get_by_text(saat, exact=True).first.scroll_into_view_if_needed(); pg.get_by_text(saat, exact=True).first.click(timeout=3000); time.sleep(0.5)
                 pg.get_by_text(dk, exact=True).last.scroll_into_view_if_needed(); pg.get_by_text(dk, exact=True).last.click(timeout=3000)

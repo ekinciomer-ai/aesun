@@ -85,3 +85,7 @@ YouTube kuyruğu her videoyu yüklemeden önce `/opt/aesun/kalite_kapisi.py` ile
 - **Engel (yüklenmez):** kısa kenar 1080 pikselin altında, ses yok, siyah kare oranı %15'in üstünde, ses seviyesi -24 ile -9 LUFS dışında.
 - **Uyarı (yüklenir, günlüğe yazılır):** renk doygunluğu 18'in altında (soluk/pastel), kuyruk kaydında `sentetik` alanı yok, `kaynaklar` ya da `muzik_lisans` alanı yok.
 Kuyruk kaydına `"kaynaklar": [...]` (görsel/görüntü künyeleri) ve `"muzik_lisans": "..."` eklenmeli.
+
+## Yorum yanıtları (sunucudan)
+`docs/yayin/yorum_kuyrugu.json`: takip betiği yanıtsız yorum bulunca `durum: "ONAY BEKLİYOR"` ve taslak `yanit` ile kayıt düşülür (Yol haritası'nda görünür).
+Ömer sohbette onaylayınca kayıt `ONAYLANDI` yapılır; `islem_yt_yonet` (günde 2 kez, ya da elle tetiklenince) yanıtı YouTube'a gönderir ve `gönderildi` yazar. Otomatik yanıt yoktur.

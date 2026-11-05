@@ -30,6 +30,7 @@ jobs:
           chmod 600 ~/.ssh/k
           cp sunucu/islem_yt_yonet.sh /tmp/pk/sunucu/
           cp docs/yayin/analiz.json /tmp/pk/docs_analiz.json 2>/dev/null || echo '{}' > /tmp/pk/docs_analiz.json
+          cp docs/yayin/yorum_kuyrugu.json /tmp/pk/yorum_kuyrugu.json 2>/dev/null || echo '[]' > /tmp/pk/yorum_kuyrugu.json
           tar czf /tmp/paket.tgz -C /tmp/pk .
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
           $S "rm -rf /tmp/yt_yonet && mkdir -p /tmp/yt_yonet && tar xzf - -C /tmp/yt_yonet && cd /tmp/yt_yonet && bash sunucu/islem_yt_yonet.sh; k=\$?; rm -rf /tmp/yt_yonet; exit \$k" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1
@@ -49,6 +50,8 @@ jobs:
           k['islemler'] = (k['islemler'] + a.get('islemler', []))[-500:]
           k['son_calisma'] = a['zaman']; k['son_hatalar'] = a.get('hatalar', [])
           json.dump(k, open(yol, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+          if 'yorum_kuyrugu' in a: json.dump(a['yorum_kuyrugu'], open('docs/yayin/yorum_kuyrugu.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+          a.pop('yorum_kuyrugu', None); json.dump(a, open('docs/yayin/analitik.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
           for h in a.get('hatalar', []): print('::warning::' + h)
           PY
           exit $kod
@@ -56,7 +59,7 @@ jobs:
         if: always()
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
-          git add docs/yayin/analitik.json docs/yayin/yonetim_kaydi.json 2>/dev/null || true
+          git add docs/yayin/analitik.json docs/yayin/yonetim_kaydi.json docs/yayin/yorum_kuyrugu.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -qm "Kanal yönetimi: analitik ve durum $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

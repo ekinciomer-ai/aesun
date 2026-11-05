@@ -38,6 +38,10 @@ try:
 except Exception:
     analiz = {}
 gizle = [e for e in analiz.get("eylemler", []) if e.get("tur") == "GİZLE" and e.get("vid")]
+try:
+    yorum_kuyrugu = json.load(open(os.path.join(os.path.dirname(ANALIZ), "yorum_kuyrugu.json"), encoding="utf-8"))
+except Exception:
+    yorum_kuyrugu = []
 
 out = {"zaman": simdi.isoformat(timespec="minutes"), "kanallar": {}, "islemler": [], "hatalar": []}
 for cid, ad in KANALLAR.items():
@@ -118,12 +122,24 @@ for cid, ad in KANALLAR.items():
             out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": e["vid"],
                                     "islem": f"planı kaldırıldı (eski plan {eski_plan})", "neden": e.get("neden")})
             print(f"NOT: {ad} · {e['vid']} planı kaldırıldı (seri durduruldu)")
+        # YORUM YANITLARI: yalnız Ömer'in ONAYLADIĞI (durum == "ONAYLANDI") yanıtlar gönderilir; kanal eşleşmeli, yorum kimliği şart
+        for y in [y for y in yorum_kuyrugu if y.get("durum") == "ONAYLANDI" and y.get("kanal") == ad and y.get("yorum_id") and y.get("yanit")]:
+            try:
+                api("https://www.googleapis.com/youtube/v3/comments?part=snippet", tok,
+                    {"snippet": {"parentId": y["yorum_id"], "textOriginal": y["yanit"]}})
+                y["durum"] = "gönderildi"; y["gonderim"] = simdi.isoformat(timespec="minutes")
+                out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": y.get("vid", ""),
+                                        "islem": f"yorum yanıtlandı ({y.get('yazar')})", "neden": "Ömer onayı"})
+                print(f"NOT: {ad} · {y.get('yazar')} yorumuna yanıt gönderildi")
+            except urllib.error.HTTPError as e:
+                y["durum"] = f"HATA HTTP {e.code}"; out["hatalar"].append(f"{ad} yorum yanıtı: HTTP {e.code}")
         out["kanallar"][ad] = {"id": cid, "abone": int(ch["statistics"].get("subscriberCount", 0) or 0),
                                "toplam_izlenme": int(ch["statistics"].get("viewCount", 0) or 0), "videolar": videolar}
         print(f"NOT: {ad}: {len(videolar)} video okundu")
     except Exception as e:
         out["hatalar"].append(f"{ad}: {type(e).__name__} {e}"[:200])
         print(f"NOT: HATA {ad}: {type(e).__name__}")
+out["yorum_kuyrugu"] = yorum_kuyrugu
 print("===ANALITIK===")
 print(json.dumps(out, ensure_ascii=False))
 print("===SON===")

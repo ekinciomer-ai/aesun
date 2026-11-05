@@ -20,7 +20,7 @@ Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir
 - OAuth istemcisi: Masaüstü uygulaması türünde. Yönlendirme adresi `http://127.0.0.1:8765`
 - Yayın durumu: **In production**, doğrulanmamış uygulama. Yenileme anahtarlarının süresi dolmaz.
 - Gizlilik sayfası: https://aksarayenerji.net/uygulama-gizlilik.html
-- Verilen izinler: `youtube`, `youtube.upload`, `yt-analytics.readonly`, `yt-analytics-monetary.readonly`
+- Verilen izinler: `youtube`, `youtube.upload`, `youtube.force-ssl` (yorum yanıtlama, 5 Kas 2026'da eklendi), `yt-analytics.readonly`, `yt-analytics-monetary.readonly`
 
 ## Sırlar nerede
 
@@ -49,9 +49,9 @@ gh api -X POST repos/ekinciomer-ai/aesun/actions/workflows/sunucu_islem.yml/disp
 ## Yeni kanal bağlama
 
 1. Kanal sahibi şu bağlantıyı tarayıcıda açar, ilgili kanalı veya marka hesabını seçer ve izin verir:
-   `https://accounts.google.com/o/oauth2/v2/auth?client_id=568448750743-06valh039kui20d73cqkmnnu5okqkvdb.apps.googleusercontent.com&redirect_uri=http%3A%2F%2F127.0.0.1%3A8765&response_type=code&access_type=offline&prompt=consent%20select_account&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.upload%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyt-analytics.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyt-analytics-monetary.readonly`
+   `https://accounts.google.com/o/oauth2/v2/auth?client_id=568448750743-06valh039kui20d73cqkmnnu5okqkvdb.apps.googleusercontent.com&redirect_uri=http%3A%2F%2F127.0.0.1%3A8765&response_type=code&access_type=offline&prompt=consent%20select_account&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.upload%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.force-ssl%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyt-analytics.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyt-analytics-monetary.readonly`
 2. "Google bu uygulamayı doğrulamadı" uyarısında Gelişmiş'e, sonra "Kanal Yonetim'e git"e basılır.
-3. Son sayfa "Bu siteye ulaşılamıyor" hatası verir; bu normaldir. Adres çubuğundaki `code=` değeri alınır.
+3. Son sayfa "Bu siteye ulaşılamıyor" hatası verir; bu normaldir. Adres çubuğundaki `code=` değeri alınır (Claude: bilgisayar görüntüsünde adres çubuğunu yakınlaştırarak okur; I/l ve O/0 belirsizliği için `yt_kur` birden çok aday kodu dener).
 4. Kod, sunucunun açık anahtarıyla şifrelenir ve `sunucu/yt/kod.sifreli` olarak depoya gönderilir. Ardından `yt_kur` çalıştırılır.
 5. İş bitince `sunucu/yt/kod.sifreli` depodan silinir. Kod tek kullanımlıktır ve yaklaşık 10 dakikada geçersiz olur.
 
@@ -61,7 +61,7 @@ gh api -X POST repos/ekinciomer-ai/aesun/actions/workflows/sunucu_islem.yml/disp
 
 ## Bilinen kısıtlar
 
-- **Yüklenen videolar özel olarak yüklenir.** Proje YouTube API denetiminden geçene kadar sunucudan yüklenen videolar yalnız "özel" olur; Studio'dan elle herkese açılır. Denetim başvurusu yapılacak.
+- Sunucudan `publishAt` ile planlanan videolar saatinde herkese açılıyor (5 Kas 2026'da doğrulandı: Celtic Short'ları 19:00/20:30'da yayına girdi).
 - **Günlük kota:** YouTube API kotası proje başına günlüktür. Video yükleme kotayı en çok harcayan işlemdir. Toplu işlemden önce Google Cloud'daki kota sayfasına bakılmalıdır.
 - **Yapay zekâ etiketi:** Gerçekçi yapay zekâ görüntüsü içeren videolarda YouTube'un yapay zekâ beyanı işaretlenmelidir.
 

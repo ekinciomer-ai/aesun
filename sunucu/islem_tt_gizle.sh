@@ -18,7 +18,8 @@ with sync_playwright() as p:
     # planlı gönderide satır içi seçici kapalı → düzenle (kalem) sayfasından gizlilik değiştir
     try:
         satir.locator("button, [role=button]").first.click(timeout=5000); time.sleep(6); pg.screenshot(path="/work/adim/gizle_1.png")
-        kutu = pg.get_by_text(re.compile(r"kimler görebilir|Who can watch")).first.locator("xpath=following::*[self::div or self::button][contains(., 'Herkes') or contains(., 'Everyone')][1]")
+        metin = pg.inner_text("body"); print("NOT: sayfa:", " | ".join(x.strip() for x in metin.splitlines() if x.strip())[:600])
+        kutu = pg.get_by_text(re.compile(r"^(Herkes|Everyone)$")).first
         kutu.click(timeout=5000); time.sleep(1.5)
         pg.get_by_text(re.compile(r"^(Yalnızca ben|Only me|Sadece ben)$")).first.click(timeout=5000); time.sleep(1.5); pg.screenshot(path="/work/adim/gizle_2.png")
         for m in (r"^(Kaydet|Save|Güncelle|Update|Planla|Schedule)$",):

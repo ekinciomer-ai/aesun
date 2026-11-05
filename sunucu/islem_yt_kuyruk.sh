@@ -45,6 +45,17 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         if it["baslik"] in mevcut[dil] and mevcut[dil][it["baslik"]] != it.get("yerine"):
             vid = mevcut[dil][it["baslik"]]; kayit[kod] = {"vid": vid}
             sonuc.append({"kod": kod, "durum": "zaten yüklü (başlık)", "vid": vid, **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri")}}); continue
+        # Yayın öncesi kalite kapısı (ae-sistem-standartlari): engel varsa yüklenmez; uyarılar rapora girer
+        if os.path.exists("/opt/aesun/kalite_kapisi.py"):
+            import subprocess
+            kk = subprocess.run(["python3", "/opt/aesun/kalite_kapisi.py", mp4, jf], capture_output=True, text=True, timeout=900)
+            try: kq = json.loads(kk.stdout)
+            except Exception: kq = {"gecti": False, "engel": ["kalite kapısı çalışmadı"], "uyari": []}
+            if not kq.get("gecti"):
+                sonuc.append({"kod": kod, "durum": "KALİTE KAPISI: yüklenmedi", "engel": kq.get("engel"), **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri")}})
+                print(f"NOT: {kod} kalite kapısından geçemedi: {'; '.join(kq.get('engel') or [])}"); continue
+            if kq.get("uyari"):
+                print(f"NOT: {kod} kalite uyarısı: {'; '.join(kq['uyari'])}")
         boyut = os.path.getsize(mp4)
         dil_kodu = "tr" if dil == "TR" else "en"
         govde = {"snippet": {"title": it["baslik"][:100], "description": it["aciklama"][:4900], "tags": it.get("etiketler", []),

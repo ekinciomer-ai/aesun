@@ -3,7 +3,10 @@
 # Konu: $KONU (yoksa Granada 1492). Video kalite kapısından geçer; küçük önizleme günlüğe aktarılır.
 set -u
 KONU=${KONU:-"La caída de Granada en 1492"}
+SON=$(ls -td /opt/tampon/mpt/repo/storage/tasks/*/ 2>/dev/null | head -1)
+if [ "${YALNIZ_SONUC:-0}" = 1 ] && [ -n "$SON" ]; then T=$(basename "$SON"); S="sonuç"; fi
 R=/opt/tampon/mpt/repo; API=http://127.0.0.1:8180/api/v1
+if [ "${YALNIZ_SONUC:-0}" != 1 ]; then
 # 1) Metin: kısa cümleler (ekranda az yazı: her altyazı en çok ~7 kelime)
 ISTEM="Escribe frases muy cortas, de 4 a 7 palabras, cada una termina en punto. Nombra lugares, personas y objetos concretos. Sin introducción."
 METIN=$(KONU="$KONU" ISTEM="$ISTEM" python3 -c '
@@ -31,8 +34,9 @@ echo "NOT: görev $T başladı"
 for i in $(seq 1 120); do
   D=$(curl -s -m 20 $API/tasks/$T)
   S=$(echo "$D" | python3 -c 'import json,sys;d=json.load(sys.stdin).get("data") or {};print(d.get("state"),d.get("progress"))')
-  case "$S" in 1\ *|-1\ *) break;; esac; sleep 10
+  case "$S" in 1\ *|-1\ *) break;; esac; echo "ilerleme $S"; sleep 10   # bağlantı boşta kopmasın
 done
+fi
 echo "NOT: durum (1=tamam, -1=hata): $S"
 MP4=$(ls -t $R/storage/tasks/$T/final-*.mp4 2>/dev/null | head -1)
 if [ -z "$MP4" ]; then docker logs --since 25m tampon-mpt 2>&1 | grep -iE 'error|exception' | tail -4 | cut -c1-260 | sed -E 's/AIza[0-9A-Za-z_-]+/***/g; s/^/NOT: günlük: /'; exit 1; fi

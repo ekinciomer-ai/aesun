@@ -40,7 +40,8 @@ jobs:
             grep -q '"ok": true' docs/tampon/tiktok/giris.json 2>/dev/null && { echo "::notice::oturum açıldı"; break; }
             grep -q 'süre doldu' docs/tampon/tiktok/giris.json 2>/dev/null && break
           done
-          ssh $O root@$ADRES "docker rm -f tampon-tiktok >/dev/null 2>&1; rm -f /opt/aesun/tiktok/qr.png" || true
+          ssh $O root@$ADRES "docker logs --tail 40 tampon-tiktok 2>&1; docker rm -f tampon-tiktok >/dev/null 2>&1; rm -f /opt/aesun/tiktok/qr.png" > docs/tampon/tiktok/gunluk.txt 2>&1 || true
+          sed -i 's/code=[A-Za-z0-9_\/-]*/code=GIZLI/g' docs/tampon/tiktok/gunluk.txt
           rm -f ~/.ssh/k
           git rm -q --ignore-unmatch docs/tampon/tiktok/qr.png; git add -A docs/tampon/tiktok
           git diff --cached --quiet || { git commit -qm "TikTok giriş: bitti"; git pull -q --rebase origin main; git push -q origin HEAD:main; }

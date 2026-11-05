@@ -7,9 +7,14 @@ KOK=/opt/aesun/tiktok; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
 mkdir -p "$KOK/profil" "$KOK/is"; chmod 700 "$KOK"; rm -f "$KOK/qr.png" "$KOK/giris.json"
 docker image inspect "$IMAJ" >/dev/null 2>&1 || docker pull -q "$IMAJ" >/dev/null 2>&1 || { echo "NOT: HATA tarayıcı imajı indirilemedi"; exit 1; }
 cat > "$KOK/giris.py" <<'PY'
-import json, time, os
-from playwright.sync_api import sync_playwright
+import json, time, os, sys, traceback
 K = "/work"
+def yaz0(d): json.dump(d, open(f"{K}/giris.json", "w"), ensure_ascii=False)
+yaz0({"ok": False, "durum": "tarayıcı açılıyor"})
+try:
+    from playwright.sync_api import sync_playwright
+except Exception as e:
+    yaz0({"ok": False, "durum": f"playwright yok: {e}"}); raise
 def yaz(d): json.dump(d, open(f"{K}/giris.json.tmp", "w"), ensure_ascii=False); os.replace(f"{K}/giris.json.tmp", f"{K}/giris.json")
 with sync_playwright() as p:
     ctx = p.chromium.launch_persistent_context(f"{K}/profil", headless=True, locale="tr-TR", timezone_id="Europe/Istanbul",

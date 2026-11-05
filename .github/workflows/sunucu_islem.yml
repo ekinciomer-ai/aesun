@@ -30,7 +30,10 @@ jobs:
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
           # betik ve ek dosyalar (sunucu/aesun/ klasörü) tek SSH bağlantısıyla sunucuya taşınır ve çalıştırılır
           tar czf /tmp/paket.tgz sunucu izleme
-          $S "rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket && tar xzf - -C /tmp/aesun_paket && cd /tmp/aesun_paket && bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/aesun_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
+          # değişiklik yapan her işlemden önce anlık yedek (salt okunur işlemler hariç); yedek alınamazsa işlem durur
+          case "$ISLEM" in *_bak|*bak|durum*|envanter|*tani*|kapasite*|*_tur|veri_tani|yedek_kur|yedek_*) ON="";;
+            *) ON="if [ -x /opt/aesun/yedek/yedekle.sh ]; then timeout 900 /opt/aesun/yedek/yedekle.sh on_degisiklik && echo 'NOT: ön yedek alındı' || { echo 'NOT: HATA ön yedek alınamadı, işlem durduruldu'; exit 1; }; fi;";; esac
+          $S "rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket && tar xzf - -C /tmp/aesun_paket && cd /tmp/aesun_paket && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/aesun_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
           kod=${PIPESTATUS[0]}
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
           rm -f ~/.ssh/k

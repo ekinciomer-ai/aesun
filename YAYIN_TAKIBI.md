@@ -79,3 +79,9 @@ Sistem hiçbir adımda Ömer'den şifre istemez ve giriş eksikliğinde durmaz: 
 (`sunucu/tt_kuyruk/` TikTok, `docs/yayin/yorum_kuyrugu.json` yorum yanıtları), durum `docs/yayin/baglantilar.json`'da (Yol haritası → Bağlantılar).
 Ömer hesap bilgileriyle hazır olduğunda girişi kendisi bir kez yapar; şifre hiçbir dosyaya yazılmaz. Tarayıcı bağlandığında kuyruklar sırayla işlenir.
 Sunucuya yüklenen her video `/opt/aesun/youtube/medya/<kod>.mp4` olarak saklanır (TikTok ve yeniden kullanım için).
+
+## Kalite kapısı (otomatik, Ömer 5 Kas 2026 standardı)
+YouTube kuyruğu her videoyu yüklemeden önce `/opt/aesun/kalite_kapisi.py` ile ölçer.
+- **Engel (yüklenmez):** kısa kenar 1080 pikselin altında, ses yok, siyah kare oranı %15'in üstünde, ses seviyesi -24 ile -9 LUFS dışında.
+- **Uyarı (yüklenir, günlüğe yazılır):** renk doygunluğu 18'in altında (soluk/pastel), kuyruk kaydında `sentetik` alanı yok, `kaynaklar` ya da `muzik_lisans` alanı yok.
+Kuyruk kaydına `"kaynaklar": [...]` (görsel/görüntü künyeleri) ve `"muzik_lisans": "..."` eklenmeli.

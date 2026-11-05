@@ -88,6 +88,29 @@ yaz(os.path.join(P, ".htaccess"), oku(os.path.join(CP, ".htaccess")).rstrip() + 
 kopya(os.path.join(CP, "api"), os.path.join(P, "api"))   # anlık izleme deposu (canli.php)
 yaz(os.path.join(P, "robots.txt"), "User-agent: *\nDisallow: /\n")
 
+# Büyük satır içi betik ayrı, küçültülmüş ve önbelleklenebilir dosyaya alınır (sayfa hız standardı: mobilde < 2 sn).
+# Dosya adı içerik özetini taşır; içerik değişince adı değişir, tarayıcı eski kopyayı kullanmaz.
+def betik_ayir(html_yol, esik=100_000):
+    import hashlib, subprocess
+    s = oku(html_yol)
+    m = max(re.finditer(r"<script>(.*?)</script>", s, re.S), key=lambda x: len(x.group(1)), default=None)
+    if not m or len(m.group(1)) < esik:
+        return
+    kod = m.group(1)
+    try:
+        r = subprocess.run(["npx", "--yes", "terser@5.36.0", "-c", "passes=1", "-m", "--ecma", "2020"], input=kod,
+                           capture_output=True, text=True, timeout=180)
+        kucuk = r.stdout if r.returncode == 0 and len(r.stdout) > 1000 else kod
+    except Exception:
+        kucuk = kod
+    ad = "app." + hashlib.sha256(kucuk.encode()).hexdigest()[:10] + ".js"
+    yaz(os.path.join(os.path.dirname(html_yol), ad), kucuk)
+    yaz(html_yol, s[:m.start()] + f'<script src="{ad}"></script>' + s[m.end():])
+    print(html_yol, f"betik ayrıldı: {len(kod)//1024} KB → {len(kucuk)//1024} KB ({ad})")
+
+
+betik_ayir(os.path.join(P, "monitoring", "index.html"))
+
 for d in (S, P):
     n = sum(len(f) for _, _, f in os.walk(d))
     print(d, n, "dosya")

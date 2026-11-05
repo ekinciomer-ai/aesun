@@ -15,17 +15,21 @@ with sync_playwright() as p:
     pg.goto("https://www.tiktok.com/tiktokstudio/content", wait_until="domcontentloaded", timeout=60000); time.sleep(8)
     satir = pg.get_by_text(H, exact=False).first.locator("xpath=ancestor::*[.//button or .//*[@role='button']][1]")
     if not satir.count(): print("NOT: gönderi bulunamadı"); raise SystemExit(1)
-    # satırdaki gizlilik açılır kutusu (Herkes) → Yalnızca ben
+    # planlı gönderide satır içi seçici kapalı → düzenle (kalem) sayfasından gizlilik değiştir
     try:
-        secici = satir.get_by_text(re.compile(r"^(Herkes|Everyone)$")).first
-        if secici.count():
-            secici.click(timeout=4000); time.sleep(1.5)
-            pg.get_by_text(re.compile(r"^(Yalnızca ben|Only me|Sadece ben)$")).first.click(timeout=4000); time.sleep(2)
-            for m in ("Onayla", "Kaydet", "Confirm", "Save"):
-                try: pg.get_by_role("button", name=m).first.click(timeout=1500); time.sleep(1); break
-                except Exception: pass
+        satir.locator("button, [role=button]").first.click(timeout=5000); time.sleep(6); pg.screenshot(path="/work/adim/gizle_1.png")
+        kutu = pg.get_by_text(re.compile(r"kimler görebilir|Who can watch")).first.locator("xpath=following::*[self::div or self::button][contains(., 'Herkes') or contains(., 'Everyone')][1]")
+        kutu.click(timeout=5000); time.sleep(1.5)
+        pg.get_by_text(re.compile(r"^(Yalnızca ben|Only me|Sadece ben)$")).first.click(timeout=5000); time.sleep(1.5); pg.screenshot(path="/work/adim/gizle_2.png")
+        for m in (r"^(Kaydet|Save|Güncelle|Update|Planla|Schedule)$",):
+            try: pg.get_by_role("button", name=re.compile(m)).last.click(timeout=4000); time.sleep(4); break
+            except Exception as e: print(f"NOT: kaydet düğmesi: {type(e).__name__}")
+        for m in ("Onayla", "Confirm", "Evet", "Tamam"):
+            try: pg.get_by_role("button", name=m).first.click(timeout=1500); time.sleep(2); break
+            except Exception: pass
+        pg.screenshot(path="/work/adim/gizle_3.png")
     except Exception as e:
-        print(f"NOT: satır içi seçici olmadı: {type(e).__name__}")
+        print(f"NOT: düzenleme sayfası: {type(e).__name__}: {str(e)[:100]}"); pg.screenshot(path="/work/adim/gizle_9.png")
     pg.goto("https://www.tiktok.com/tiktokstudio/content", wait_until="domcontentloaded", timeout=60000); time.sleep(6)
     satir = pg.get_by_text(H, exact=False).first.locator("xpath=ancestor::*[.//button or .//*[@role='button']][1]")
     t = satir.inner_text() if satir.count() else ""

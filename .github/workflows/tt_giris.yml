@@ -1,0 +1,46 @@
+name: TikTok sunucu oturumu (QR ile giriş)
+# Sunucuda tarayıcı açar, TikTok QR kodunu 15 sn'de bir docs/tampon/tiktok/qr.png olarak depoya iter (7 dk boyunca).
+# Ömer QR'ı telefondaki TikTok uygulamasıyla okutur; oturum sunucuda kalır. Şifre hiçbir yere yazılmaz.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['sunucu/islem_tt_giris.sh', '.github/workflows/tt_giris.yml']
+permissions:
+  contents: write
+concurrency: { group: tt-giris, cancel-in-progress: true }
+jobs:
+  giris:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Başlat ve QR'ı ilet
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          mkdir -p ~/.ssh docs/tampon/tiktok
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          scp $O sunucu/islem_tt_giris.sh root@$ADRES:/tmp/tt_giris.sh
+          ssh $O root@$ADRES "bash /tmp/tt_giris.sh < /dev/null; rm -f /tmp/tt_giris.sh" | sed 's/^NOT: */::notice::/'
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          son=""
+          for i in $(seq 1 30); do
+            sleep 15
+            scp -q $O root@$ADRES:/opt/aesun/tiktok/giris.json docs/tampon/tiktok/giris.json 2>/dev/null || true
+            scp -q $O root@$ADRES:/opt/aesun/tiktok/qr.png docs/tampon/tiktok/qr.png 2>/dev/null || true
+            h=$(sha1sum docs/tampon/tiktok/qr.png docs/tampon/tiktok/giris.json 2>/dev/null | sha1sum | cut -c1-12)
+            if [ "$h" != "$son" ]; then
+              son=$h; git add -A docs/tampon/tiktok
+              git diff --cached --quiet || { git commit -qm "TikTok giriş: QR/durum $(TZ=Europe/Istanbul date +'%H:%M:%S')"; git pull -q --rebase origin main; git push -q origin HEAD:main; }
+            fi
+            grep -q '"ok": true' docs/tampon/tiktok/giris.json 2>/dev/null && { echo "::notice::oturum açıldı"; break; }
+            grep -q 'süre doldu' docs/tampon/tiktok/giris.json 2>/dev/null && break
+          done
+          ssh $O root@$ADRES "docker rm -f tampon-tiktok >/dev/null 2>&1; rm -f /opt/aesun/tiktok/qr.png" || true
+          rm -f ~/.ssh/k
+          git rm -q --ignore-unmatch docs/tampon/tiktok/qr.png; git add -A docs/tampon/tiktok
+          git diff --cached --quiet || { git commit -qm "TikTok giriş: bitti"; git pull -q --rebase origin main; git push -q origin HEAD:main; }

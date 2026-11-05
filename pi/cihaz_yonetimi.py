@@ -40,7 +40,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ortak import AESUN, TOK, TR, bildirim_tetikle, gh, log, zaman  # noqa: E402
+from ortak import AESUN, TOK, TR, bildirim_tetikle, gh, log, panel_oku, zaman  # noqa: E402
 import cihaz_ogrenme as OG  # noqa: E402
 
 YEREL = AESUN / "cihaz_yonetimi_yerel.json"
@@ -663,7 +663,7 @@ def calistir():
         pass
     gelir, _ = gh("arsiv_f2pool_gelir.json")
     fiyat, _ = gh("arsiv_btc_fiyat.json")
-    mad, _ = gh("antminer_panel.json")
+    mad, _ = panel_oku()   # önce Pi'deki toplayıcı (internet harcamaz), olmazsa GitHub
     try:   # Uzak antminer_panel.json 2 dk'dan eskiyse ya da internet kesikse doğrudan yerel 127.0.0.1:5000'den oku
         if not mad or (simdi - zaman((mad or {}).get("timestamp", "2000-01-01T00:00:00+03:00"))) > timedelta(minutes=2):
             yerel_mad = _yerel_panel_oku()

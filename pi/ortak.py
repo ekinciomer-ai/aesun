@@ -89,6 +89,45 @@ def _etag_yaz(yol, etag, sha, ozet):
         pass
 
 
+# Pi'nin kendi yazdığı dosyalar: son 15 dakikada başka kimse yazmadıysa GitHub'dan yeniden indirilmez, yerel kopya okunur.
+# (Saha internet kotasının en büyük kalemi Pi'nin kendi yazdığı dosyaları dakikada bir geri indirmesiydi.)
+# Başkası araya girerse sonraki yazımda GitHub 409 verir; yazma yolu sha'yı tazeleyip yeniden dener.
+SAHIP = ONBELLEK / "_sahip"
+SAHIP_SURE = 15 * 60
+SAHIP_DOSYALAR = ("n8n/saha_saatlik.json", "n8n/cihaz_yonetimi_durum.json", "n8n/cihaz_ogrenme.json", "n8n/cihaz_detay.json",
+                  "n8n/sungrow_detay.json", "n8n/kompanzasyon_durum.json")
+
+
+def _sahip_mi(yol):
+    y = str(yol).lstrip("/")
+    return y in SAHIP_DOSYALAR or y.startswith("n8n/hash/") or (y[:4].isdigit() and "_osos_" in y)
+
+
+def _sahip_kaydet(yol, sha):
+    if not (sha and _sahip_mi(yol)):
+        return
+    try:
+        f = SAHIP / (str(yol).lstrip("/") + ".json")
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps({"sha": sha, "t": datetime.now().timestamp()}))
+    except Exception:
+        pass
+
+
+def _sahip_oku(yol):
+    """Kendi yazdığımız ve hâlâ taze olan dosya için (veri, sha); değilse None."""
+    if not _sahip_mi(yol):
+        return None
+    try:
+        k = json.loads((SAHIP / (str(yol).lstrip("/") + ".json")).read_text())
+        if datetime.now().timestamp() - float(k["t"]) > SAHIP_SURE:
+            return None
+        v = _onbellek_oku(yol)
+        return (v, k["sha"]) if v is not None else None
+    except Exception:
+        return None
+
+
 def _etag_onbellek(yol, kayit):
     """304 geldiğinde: yerel kopya ETag'in ait olduğu sürümle aynıysa onu döner (aksi halde None → tam indirme)."""
     try:
@@ -183,6 +222,11 @@ def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
             return {"content": {"sha": "onbellek"}}
     h = {"Authorization": "Bearer " + TOK, "Accept": "application/vnd.github+json", "User-Agent": "aesun-pi"}
     if veri is None:
+        if not _etagsiz:
+            kendi = _sahip_oku(yol)
+            if kendi is not None:
+                trafik("yerel_sahip", 0, yol)
+                return kendi
         kayit = None if _etagsiz else _etag_oku(yol)
         try:
             hk = {**h, "If-None-Match": kayit["etag"]} if kayit and kayit.get("etag") else h
@@ -247,6 +291,7 @@ def gh(yol, veri=None, sha=None, mesaj=None, _etagsiz=False):
             with urllib.request.urlopen(r, timeout=30) as y:
                 sonuc = json.loads(y.read())
             trafik("yaz", len(g), yol)
+            _sahip_kaydet(yol, (sonuc.get("content") or {}).get("sha"))
             sunucu.yaz(yol, veri)
             _bekleyen_esitle()
             return sonuc

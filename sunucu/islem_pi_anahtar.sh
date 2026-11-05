@@ -46,6 +46,7 @@ import os;t=os.environ['T'].strip()
 tur='github_pat_' if t.startswith('github_pat_') else ('ghp_' if t.startswith('ghp_') else 'tanınmayan biçim')
 print(f'biçim: {tur}, uzunluk: {len(t)}, boşluk içeriyor: {\" \" in t}')")
   echo "NOT: Kasa'daki Pi anahtarı · $B · GitHub sınaması: $K"
+  case "$K" in geçerli*) echo "NOT: anahtar Pi'ye hazır";; *) rm -f $VOLD/depo/pi/gh_anahtar.json; echo "NOT: geçersiz anahtar Pi'ye verilmedi";; esac
   unset T
 else
   echo "NOT: Kasa'da pi_github_anahtari henüz yok (portal → Kasa'dan girilecek)"

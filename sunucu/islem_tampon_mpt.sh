@@ -47,6 +47,7 @@ docker run -d --name $AD --restart unless-stopped --memory 3g --cpus 2 --pids-li
   --security-opt no-new-privileges -p 127.0.0.1:8180:8080 -v "$R":/MoneyPrinterTurbo $IMAJ python3 main.py >/dev/null
 for i in $(seq 1 30); do c=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8180/docs); [ "$c" = 200 ] && break; sleep 3; done
 [ "$c" = 200 ] || echo "NOT: günlük sonu: $(docker logs $AD 2>&1 | grep -v "^\s*$" | tail -6 | tr "\n" " " | cut -c1-600)"
+[ "$c" = 200 ] || { docker rm -f $AD >/dev/null 2>&1; echo "NOT: kapsayıcı durduruldu (çökme döngüsüne girmesin)"; }
 echo "NOT: API: $c (200 beklenir) · bellek $(docker stats --no-stream --format '{{.MemUsage}}' $AD)"
 echo "NOT: sesler (ilk 5): $(curl -s http://127.0.0.1:8180/api/v1/tasks?page=1 -o /dev/null -w '%{http_code}') · günlük: $(docker logs $AD 2>&1 | tail -2 | tr '\n' ' ' | cut -c1-200)"
 # Diğer uygulamalar etkilendi mi

@@ -10,7 +10,10 @@ N=20000; T=95
 prof=np.ones(T); prof[:15]*=0.85; prof[45:60]*=1.05; prof[75:]*=1.2; prof/=prof.sum()
 SC=[('temel','Temel',.40,1,1,0),('ev','Ev sahibi baskısı / deplasman kötü günde',.15,1.15,.80,0),('dep','Deplasman form zirvesi',.15,.90,1.15,1),
     ('hakem','Hakem / VAR: kırmızı kart + penaltı',.15,1,1,2),('deg','Oyuncu değişiklikleri / yorgunluk',.15,1,1,3)]
+SG_T,SG_G=0.28,0.15
 def sim(lh,la,fh0,fa0,kind):
+  # gün etkisi: her maçta takımın formu ve maçın temposu rastgele sapar (sürpriz ve bol gollü maçlar için)
+  gt=np.exp(rng.normal(0,SG_G,N)-SG_G**2/2); fh_d=np.exp(rng.normal(0,SG_T,N)-SG_T**2/2)*gt; fa_d=np.exp(rng.normal(0,SG_T,N)-SG_T**2/2)*gt
   H=np.zeros(N,int);A=np.zeros(N,int);mh=np.ones(N);ma=np.ones(N);first=np.zeros(N,int)
   rm=np.where(rng.random((N,2))<0.06,rng.integers(20,90,(N,2)),-1); pm=np.where(rng.random((N,2))<0.14,rng.integers(5,92,(N,2)),-1)
   if kind==2:
@@ -25,7 +28,7 @@ def sim(lh,la,fh0,fa0,kind):
       p=(pm[:,t]==m)&(rng.random(N)<.77)
       if t==0: H+=p; first[(first==0)&p]=1
       else: A+=p; first[(first==0)&p]=2
-    gh=rng.random(N)<lh*fh*prof[m]; ga=rng.random(N)<la*fa*prof[m]
+    gh=rng.random(N)<lh*fh*fh_d*prof[m]; ga=rng.random(N)<la*fa*fa_d*prof[m]
     H+=gh; A+=ga; first[(first==0)&gh]=1; nf=(first==0)&ga; first[nf]=2
     if kind==1: mh[nf]*=.85; ma[nf]*=1.05
   return H,A
@@ -34,23 +37,29 @@ for i,(sa,h,a,o1,ox,o2) in enumerate(M):
   p=pb.implied.calculate_implied([o1,ox,o2],method='power').probabilities
   ge=pb.models.goal_expectancy(p[0],p[1],p[2],remove_overround=False)
   lh,la=ge['home_exp']*0.93,ge['away_exp']*0.93
-  agg={'1':0,'X':0,'2':0}; sk={}; sens=[]; xg=[0,0]; ou=0; kg=0
+  agg={'1':0,'X':0,'2':0}; sk={}; sens=[]; xg=[0,0]; ou=0; kg=0; o35=0; o45=0
   for sid,ad,w,fh,fa,k in SC:
     H,A=sim(lh,la,fh,fa,k)
     r=dict(id=sid,ad=ad,agirlik=w,ev=round((H>A).mean()*100,1),x=round((H==A).mean()*100,1),dep=round((H<A).mean()*100,1),xg_ev=round(H.mean(),2),xg_dep=round(A.mean(),2))
     c={}
     for x,y in zip(np.minimum(H,6),np.minimum(A,6)): c[(x,y)]=c.get((x,y),0)+1
     best=max(c,key=c.get); r['en_olasi']=f'{best[0]}-{best[1]}'; sens.append(r)
-    agg['1']+=w*r['ev'];agg['X']+=w*r['x'];agg['2']+=w*r['dep']; xg[0]+=w*H.mean(); xg[1]+=w*A.mean(); ou+=w*((H+A)>2).mean(); kg+=w*((H>0)&(A>0)).mean()
+    agg['1']+=w*r['ev'];agg['X']+=w*r['x'];agg['2']+=w*r['dep']; xg[0]+=w*H.mean(); xg[1]+=w*A.mean(); ou+=w*((H+A)>2).mean(); o35+=w*((H+A)>3).mean(); o45+=w*((H+A)>4).mean(); kg+=w*((H>0)&(A>0)).mean()
     for kk,v in c.items(): sk[kk]=sk.get(kk,0)+w*v/N
   tah=max(agg,key=agg.get)
   cand={kk:v for kk,v in sk.items() if (kk[0]>kk[1] if tah=='1' else kk[0]==kk[1] if tah=='X' else kk[0]<kk[1])}
   ts=max(cand,key=cand.get)
+  c3={kk:v for kk,v in cand.items() if kk[0]+kk[1]>=3}; ta=max(c3,key=c3.get) if c3 else ts
+  dz='1' if p[0]<p[2] else '2'; sz=agg[dz]
+  uy=[]
+  if sz>=25: uy.append(('Sürpriz riski: '+(h if dz=='1' else a)+' kazanabilir (%'+f'{sz:.0f}'+')'))
+  if o35>=0.40: uy.append('Bol gol beklentisi: 3,5 üst %'+f'{o35*100:.0f}')
+  if o45>=0.22: uy.append('Gol yağmuru ihtimali: 4,5 üst %'+f'{o45*100:.0f}')
   topsk=sorted(sk.items(),key=lambda z:-z[1])[:5]
   out.append(dict(no=i+1,saat=sa,ev=h,dep=a,mac=f'{h} – {a}',oran_1=o1,oran_x=ox,oran_2=o2,piyasa_1=round(p[0]*100,1),piyasa_x=round(p[1]*100,1),piyasa_2=round(p[2]*100,1),
     p1=round(agg['1'],1),px=round(agg['X'],1),p2=round(agg['2'],1),tahmin=tah,tahmin_yazi={'1':f'{h} kazanır','X':'Berabere','2':f'{a} kazanır'}[tah],
-    guven=round(agg[tah],1),tahmin_skor=f'{ts[0]}-{ts[1]}',xg_ev=round(xg[0],2),xg_dep=round(xg[1],2),ust25=round(ou*100,1),kg_var=round(kg*100,1),
+    guven=round(agg[tah],1),tahmin_skor=f'{ts[0]}-{ts[1]}',gollu_skor=f'{ta[0]}-{ta[1]}',xg_ev=round(xg[0],2),xg_dep=round(xg[1],2),ust25=round(ou*100,1),ust35=round(o35*100,1),ust45=round(o45*100,1),surpriz_takim=(h if dz=='1' else a),surpriz=round(sz,1),uyari=' · '.join(uy),kg_var=round(kg*100,1),
     senaryo_fav=sum(1 for r in sens if max(('1',r['ev']),('X',r['x']),('2',r['dep']),key=lambda z:z[1])[0]==tah),
     skorlar=' · '.join(f'{x}-{y} %{v*100:.1f}' for (x,y),v in topsk),senaryolar=sens,sonuc=None,gercek_skor=None,isabet=None))
-  print(sa,h,a,tah,round(agg[tah],1),f'{ts[0]}-{ts[1]}')
+  print(sa,h,a,tah,round(agg[tah],1),f'{ts[0]}-{ts[1]}',round(o35*100),round(sz),'|',' · '.join(uy))
 json.dump(out,open('gun_2026-11-05.json','w'),ensure_ascii=False,default=float)

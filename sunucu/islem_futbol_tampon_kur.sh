@@ -3,7 +3,8 @@
 set -e
 D=/opt/tampon/futbol; mkdir -p $D/havuz
 command -v python3 >/dev/null
-[ -x $D/venv/bin/python ] || python3 -m venv $D/venv
+python3 -c "import ensurepip" 2>/dev/null || { DEBIAN_FRONTEND=noninteractive apt-get -qq update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y python3.12-venv >/dev/null; echo "NOT: python3.12-venv kuruldu"; }
+[ -x $D/venv/bin/python ] || { rm -rf $D/venv; python3 -m venv $D/venv; }
 $D/venv/bin/pip -q install --upgrade pip >/dev/null 2>&1 || true
 $D/venv/bin/pip -q install penaltyblog numpy >/tmp/fpip.log 2>&1 || { tail -5 /tmp/fpip.log; echo "NOT: HATA penaltyblog kurulamadı"; exit 1; }
 cp sunucu/futbol/*.py sunucu/futbol/README.md $D/

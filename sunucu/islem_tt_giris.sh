@@ -53,4 +53,4 @@ PY
 chown -R 1000:1000 "$KOK"
 docker rm -f tampon-tiktok >/dev/null 2>&1
 docker run -d --name tampon-tiktok --memory 2048m --cpus 2 --pids-limit 256 --security-opt no-new-privileges \
-  -v "$KOK":/work -w /work "$IMAJ" python3 /work/giris.py >/dev/null && echo "NOT: tarayıcı başladı, QR bekleniyor"
+  -v "$KOK":/work -w /work "$IMAJ" /usr/local/bin/python /work/giris.py >/dev/null && echo "NOT: tarayıcı başladı, QR bekleniyor"

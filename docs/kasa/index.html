@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Kasa · Aksaray Enerji Portal</title>
+<style>
+:root{--bg:#F3F4F6;--kart:#fff;--y:#1C1F24;--s:#6B7280;--c:#E5E7EB;--v:#E8622A;--ok:#15803D;--uy:#B45309}
+@media (prefers-color-scheme:dark){:root{--bg:#111418;--kart:#1B2026;--y:#E8ECEF;--s:#9AA5AE;--c:#2B323A;--ok:#4ADE80;--uy:#FBBF24}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--y);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:4px 0 2px}.alt{color:var(--s);margin:0 0 18px;font-size:14px}
+.kart{background:var(--kart);border:1px solid var(--c);border-radius:14px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--s);margin:10px 0 4px}
+input,select{width:100%;padding:11px 12px;border:1px solid var(--c);border-radius:10px;background:var(--bg);color:var(--y);font:inherit}
+button{margin-top:14px;width:100%;padding:12px;border:0;border-radius:10px;background:var(--v);color:#fff;font:600 16px system-ui,sans-serif;cursor:pointer}
+button:disabled{opacity:.6}
+.satir{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--c)}.satir:first-child{border-top:0}
+.satir b{font-size:15px;word-break:break-all}.satir small{display:block;color:var(--s)}
+.d{font-size:13px;font-weight:600;white-space:nowrap}.d.ok{color:var(--ok)}.d.yok{color:var(--uy)}
+.mesaj{margin-top:10px;font-size:14px}.mesaj.ok{color:var(--ok)}.mesaj.hata{color:#DC2626}
+a{color:var(--v)}
+</style>
+</head>
+<body>
+<main>
+<a href="../">← Portal</a>
+<h1>Kasa</h1>
+<p class="alt">Şifre ve anahtarlar burada bir kez girilir. Girildiği an sunucuda şifrelenir; bu sayfa ve sunucunun web tarafı değeri bir daha göremez.</p>
+
+<div class="kart">
+  <label for="ad">Ne için?</label>
+  <select id="ad"><option value="">Seçin…</option></select>
+  <div id="yeniKutu" style="display:none"><label for="yeni">Yeni kayıt adı (küçük harf, rakam, _)</label><input id="yeni" autocomplete="off" spellcheck="false"></div>
+  <label for="deger">Şifre / anahtar</label>
+  <input id="deger" type="password" autocomplete="new-password" spellcheck="false">
+  <button id="kaydet">Kasaya kaydet</button>
+  <div id="mesaj" class="mesaj"></div>
+</div>
+
+<div class="kart"><div id="liste">Yükleniyor…</div></div>
+</main>
+<script>
+(function(){
+  var API='https://api.aksarayenerji.net/v1/kasa/', O=null;
+  try{O=JSON.parse(localStorage.getItem('ae_portal')||'null');}catch(e){}
+  if(!O||!O.S||!O.S.ka||!O.son||O.son<Date.now()){document.querySelector('main').innerHTML='<a href="../">← Portal</a><h1>Kasa</h1><div class="kart">Bu sayfa yalnız yönetici hesabıyla açılır. Önce <a href="../">portala giriş yapın</a>, sonra bu sayfayı yeniden açın.</div>';return;}
+  function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}
+  var anahtar=sha('aesun-api|yonetici|'+O.S.ka);
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var sec=document.getElementById('ad'), m=document.getElementById('mesaj');
+  function yukle(){
+    anahtar.then(function(k){return fetch(API+'liste',{headers:{'X-AE-Anahtar':k},cache:'no-store'});})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(j){
+      var L=j.kayitlar||[], h='', o='<option value="">Seçin…</option>';
+      L.forEach(function(x){
+        h+='<div class="satir"><div><b>'+esc(x.aciklama||x.ad)+'</b><small>'+esc(x.ad)+(x.zaman?' · '+esc(x.zaman.slice(0,16).replace('T',' ')):'')+'</small></div><span class="d '+(x.girildi?'ok">Girildi':'yok">Bekleniyor')+'</span></div>';
+        o+='<option value="'+esc(x.ad)+'">'+esc(x.aciklama||x.ad)+(x.girildi?' (güncelle)':'')+'</option>';
+      });
+      o+='<option value="__yeni">Başka bir şey…</option>';
+      sec.innerHTML=o; document.getElementById('liste').innerHTML=h||'<small>Henüz kayıt yok.</small>';
+    }).catch(function(e){document.getElementById('liste').textContent='Liste alınamadı: '+e.message;});
+  }
+  sec.onchange=function(){document.getElementById('yeniKutu').style.display=sec.value==='__yeni'?'block':'none';};
+  document.getElementById('kaydet').onclick=function(){
+    var ad=sec.value==='__yeni'?document.getElementById('yeni').value.trim():sec.value, d=document.getElementById('deger');
+    m.className='mesaj';
+    if(!ad){m.textContent='Ne için olduğunu seçin.';m.className='mesaj hata';return;}
+    if(!d.value){m.textContent='Değer boş.';m.className='mesaj hata';return;}
+    var b=this; b.disabled=true; b.textContent='Kaydediliyor…';
+    anahtar.then(function(k){return fetch(API+'yaz',{method:'POST',headers:{'Content-Type':'application/json','X-AE-Anahtar':k},body:JSON.stringify({ad:ad,deger:d.value})});})
+    .then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(!r.ok)throw new Error(j.detail||('HTTP '+r.status));return j;});})
+    .then(function(){d.value='';m.textContent='Kaydedildi ve şifrelendi.';m.className='mesaj ok';yukle();})
+    .catch(function(e){m.textContent='Kaydedilemedi: '+e.message;m.className='mesaj hata';})
+    .finally(function(){b.disabled=false;b.textContent='Kasaya kaydet';});
+  };
+  yukle();
+})();
+</script>
+</body>
+</html>

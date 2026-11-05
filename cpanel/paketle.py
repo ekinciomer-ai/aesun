@@ -56,6 +56,8 @@ yaz(os.path.join(P, "gundem", "index.html"), oku(os.path.join(DOCS, "gundem", "i
 # Kapasite Paneli (portal içi; TEİAŞ TM kapasite JSON'u yerel)
 kopya(os.path.join(DOCS, "kapasite"), os.path.join(P, "kapasite"))
 yaz(os.path.join(P, "kapasite", "index.html"), oku(os.path.join(DOCS, "kapasite", "index.html")).replace("../portal/", "../"))
+# Kasa (yalnız yönetici; değerleri yazar, göstermez)
+yaz(os.path.join(P, "kasa", "index.html"), oku(os.path.join(DOCS, "kasa", "index.html")))
 kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
 # Müşteri Monitoring (portal oturumuyla açılır; veri ns1 /v1/musteri — AEMonitoring'den ayrı)
 yaz(os.path.join(P, "musteri", "index.html"), oku(os.path.join(DOCS, "musteri", "index.html")))

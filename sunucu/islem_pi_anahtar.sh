@@ -41,7 +41,11 @@ import os,urllib.request,urllib.error
 r=urllib.request.Request('https://api.github.com/repos/ekinciomer-ai/epias-ptf',headers={'Authorization':'Bearer '+os.environ['T'].strip(),'User-Agent':'aesun'})
 try: import json;d=json.load(urllib.request.urlopen(r,timeout=15));print('geçerli, yazma izni', d.get('permissions',{}).get('push'))
 except urllib.error.HTTPError as e: print('GEÇERSİZ', e.code)")
-  echo "NOT: Kasa'daki Pi anahtarı Pi'ye hazır · GitHub sınaması: $K"
+  B=$(T="$T" python3 -c "
+import os;t=os.environ['T'].strip()
+tur='github_pat_' if t.startswith('github_pat_') else ('ghp_' if t.startswith('ghp_') else 'tanınmayan biçim')
+print(f'biçim: {tur}, uzunluk: {len(t)}, boşluk içeriyor: {\" \" in t}')")
+  echo "NOT: Kasa'daki Pi anahtarı · $B · GitHub sınaması: $K"
   unset T
 else
   echo "NOT: Kasa'da pi_github_anahtari henüz yok (portal → Kasa'dan girilecek)"

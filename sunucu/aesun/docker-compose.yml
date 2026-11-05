@@ -10,6 +10,7 @@ services:
       - aesun_veri:/veri
       - /opt/aesun/ssh:/home/aesun/.ssh:ro
       - aesun_musteri:/musteri:ro      # Müşteri Monitoring verisi (yalnız okuma)
+      - /opt/aesun/kasa_acik.pem:/kasa_acik.pem:ro   # kasa yalnız şifreler; özel anahtar burada yok
     networks: [gesfin-net]
     mem_limit: 256m
     logging:

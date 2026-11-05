@@ -125,12 +125,17 @@ async def portal_veri_yaz(request: Request, mesaj: str = "güncelleme"):
 def basla():
     threading.Thread(target=dongu, daemon=True).start()
 
+import kasa as _kasa   # şifreli kasa (yazılır, burada çözülemez)
+app.include_router(_kasa.router)
+
 def roller(req: Request):
     t = req.headers.get("x-ae-anahtar", "")
     if len(t) < 32:
         return set()
     h = hashlib.sha256(t.encode()).hexdigest()
     return {r for r, v in DURUM["ozet"].items() if hmac.compare_digest(v, h)}
+
+_kasa.bagla(roller)
 
 # ---- Müşteri Monitoring (AEMonitoring'den ayrı veri: /musteri, aesun-musteri kapsayıcısı yazar) ----
 MUSTERI = Path(os.environ.get("MUSTERI_VERI", "/musteri"))

@@ -38,8 +38,22 @@ with sync_playwright() as p:
             sonuc.append({"kod": kod, "durum": "HATA video dosyası yok"}); continue
         pg = ctx.new_page()
         try:
-            pg.goto("https://www.tiktok.com/tiktokstudio/upload?from=webapp", wait_until="domcontentloaded", timeout=60000); time.sleep(6)
-            pg.locator("input[type=file]").first.set_input_files(mp4); time.sleep(15); ss(pg, kod, 1)
+            pg.set_viewport_size({"width": 1400, "height": 1000})
+            pg.goto("https://www.tiktok.com/tiktokstudio/upload?from=webapp", wait_until="domcontentloaded", timeout=60000)
+            inp = None
+            for _ in range(30):   # dosya girişi hangi çerçevede olursa olsun bul
+                for fr in pg.frames:
+                    try:
+                        if fr.locator("input[type=file]").count(): inp = fr.locator("input[type=file]").first; break
+                    except Exception: pass
+                if inp: break
+                time.sleep(2)
+            if not inp: raise RuntimeError("dosya girişi bulunamadı")
+            inp.set_input_files(mp4, timeout=60000)
+            for _ in range(60):   # yükleme bitsin (açıklama editörü gelir)
+                if pg.locator("[contenteditable=true]").count(): break
+                time.sleep(3)
+            time.sleep(5); ss(pg, kod, 1)
             # açıklama
             ed = pg.locator("[contenteditable=true]").first; ed.click(); time.sleep(1)
             pg.evaluate("""() => { const e=document.querySelector('[contenteditable=true]'); e.focus(); const s=getSelection(); s.selectAllChildren(e); }""")

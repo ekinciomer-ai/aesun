@@ -214,7 +214,15 @@ def main():
                 durum["hesaplar"]["medas_11506568"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "medas"}
                 traceback.print_exc(limit=1)
         yaz(KOK / "santraller.json", hepsi); eski = hepsi
-        if fronius.etkin():   # Fronius Solar.web (HAS GERİ DÖNÜŞÜM GES 11x Tauro inverter)
+        FR_BEKLE = KOK / "fronius_bekle.json"   # giriş reddedilince 6 saat beklenir (hesap kilitlenmesin)
+        try:
+            fr_bekle = json.loads(FR_BEKLE.read_text()).get("kadar", 0)
+        except Exception:
+            fr_bekle = 0
+        if fronius.etkin() and time.time() < fr_bekle:
+            durum["hesaplar"]["fronius_HASGERIDONUSUM"] = {"tamam": False, "kaynak": "fronius",
+                "hata": "giriş reddedildi; yeniden deneme " + time.strftime("%H:%M", time.localtime(fr_bekle))}
+        elif fronius.etkin():   # Fronius Solar.web (HAS GERİ DÖNÜŞÜM GES 11x Tauro inverter)
             try:
                 s_fr, fr_d = fronius.tur(KOK, yaz, hepsi)
                 hepsi.update(s_fr)
@@ -222,8 +230,11 @@ def main():
             except Exception as e:
                 durum["hesaplar"]["fronius_HASGERIDONUSUM"] = {"tamam": False, "hata": str(e)[:200], "kaynak": "fronius"}
                 traceback.print_exc(limit=1)
+                if "reddedildi" in str(e):
+                    try: yaz(FR_BEKLE, {"kadar": time.time() + 6 * 3600, "neden": str(e)[:120]})
+                    except Exception: pass
         yaz(KOK / "santraller.json", hepsi); eski = hepsi
-        hatalar = [f"{k}: {v['hata']}" for k, v in durum["hesaplar"].items() if not v["tamam"]]
+        hatalar = [f"{k}: {v.get('hata', 'bilinmeyen hata')}" for k, v in durum["hesaplar"].items() if not v.get("tamam")]
         aktif_var = bool(hesaplar or fronius.etkin() or ace.etkin() or medas_osos.etkin())
         durum.update(tamam=not hatalar and aktif_var, santral=len(hepsi))
         if hatalar or not aktif_var:

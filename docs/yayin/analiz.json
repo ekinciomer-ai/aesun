@@ -1,5 +1,5 @@
 {
- "olusturma": "2026-11-05T13:45+03:00",
+ "olusturma": "2026-11-05T21:42+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -60,7 +60,7 @@
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %67'i tuttu (eşik 123 izlenme / 48 sa)",
+   "neden": "videoların %67'i tuttu (eşik 127 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 0,
    "medyan_48sa": 902,
@@ -78,12 +78,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 1,
-   "medyan_48sa": 4,
+   "medyan_48sa": 44,
    "tutma_orani": 0,
    "izlenme_yuzde": 49,
    "en_iyi": {
-    "baslik": "Van Gogh painted this in a mental asylum 🌌",
-    "i48": 7
+    "baslik": "Why does the Mona Lisa have no eyebrows? 🖼️",
+    "i48": 82
    }
   },
   {
@@ -162,7 +162,7 @@
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
    "olculen": 3,
    "erken": 0,
-   "medyan_48sa": 14,
+   "medyan_48sa": 17,
    "tutma_orani": 0,
    "izlenme_yuzde": 25,
    "en_iyi": {
@@ -172,8 +172,8 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 383,
-  "Ancient Studio": 123
+  "Ancient Studio": 127,
+  "Antik Stüdyo": 383
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -183,11 +183,11 @@
    },
    "17:00": {
     "n": 2,
-    "medyan": 13
+    "medyan": 14
    },
    "18:00": {
     "n": 2,
-    "medyan": 997
+    "medyan": 998
    },
    "19:00": {
     "n": 2,
@@ -213,11 +213,35 @@
    },
    "21:00": {
     "n": 2,
-    "medyan": 4
+    "medyan": 44
    }
   }
  },
  "eylemler": [
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "rpmDktdisg4",
+   "baslik": "Büyük Dalga'nın içinde bir dağ saklanıyor 🌊",
+   "neden": "2026-11-05 18:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "",
+   "baslik": "[Taslak Plan #4] Orduda Resmi Çavuş Olan Ayı! 🐻 II. Dünya Savaşı'nda Cephane Taşıyan Wojtek",
+   "neden": "2026-11-05 12:30 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "zgiNWWWx_gE",
+   "baslik": "Beşiktaş ilk kez bir İskoç takımıyla! Celtic'in şaşırtan hikâyesi ⚽ #shorts",
+   "neden": "2026-11-05 19:00 planlıydı, hâlâ yayında görünmüyor"
+  },
   {
    "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
@@ -228,9 +252,9 @@
  ],
  "bulgular": [
   "Dün (2026-11-04) 1250 izlenme geldi; bir önceki gün 1849.",
-  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 123 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 127 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 383 izlenme / 48 sa).",
-  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 123 izlenme / 48 sa).",
+  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 127 izlenme / 48 sa).",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 383 izlenme / 48 sa).",
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %75'i tuttu (eşik 383 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -269,6 +293,11 @@
  "en_zayif": [
   {
    "kanal": "Antik Stüdyo",
+   "baslik": "Kedin ölse kaşlarını kazır mıydın? 🐈 Antik Mısır #shorts",
+   "i48": 17
+  },
+  {
+   "kanal": "Antik Stüdyo",
    "baslik": "Emulara sonunda ne oldu? 🐦 Emu Savaşı'nın sonu",
    "i48": 12
   },
@@ -281,11 +310,6 @@
    "kanal": "Ancient Studio",
    "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
    "i48": 2
-  },
-  {
-   "kanal": "Ancient Studio",
-   "baslik": "Why does the Mona Lisa have no eyebrows? 🖼️",
-   "i48": 0
   },
   {
    "kanal": "Ancient Studio",

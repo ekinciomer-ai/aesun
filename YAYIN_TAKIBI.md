@@ -89,3 +89,11 @@ Kuyruk kaydına `"kaynaklar": [...]` (görsel/görüntü künyeleri) ve `"muzik_
 ## Yorum yanıtları (sunucudan)
 `docs/yayin/yorum_kuyrugu.json`: takip betiği yanıtsız yorum bulunca `durum: "ONAY BEKLİYOR"` ve taslak `yanit` ile kayıt düşülür (Yol haritası'nda görünür).
 Ömer sohbette onaylayınca kayıt `ONAYLANDI` yapılır; `islem_yt_yonet` (günde 2 kez, ya da elle tetiklenince) yanıtı YouTube'a gönderir ve `gönderildi` yazar. Otomatik yanıt yoktur.
+
+## TikTok (sunucudan, 6 Kas 2026)
+- Oturum: sunucuda kalıcı tarayıcı (`tt-tarayici`, profil `/opt/aesun/tiktok/chromium`). Giriş yalnız Ömer tarafından, `islem_tt_tarayici` ile 20 dk'lık
+  parolalı pencereden yapılır; şifre hiçbir yere yazılmaz. Dış erişim `islem_tt_tarayici_kapat` ile kapanır (20 dk sonra kendiliğinden de kapanır).
+- Yükleme: `sunucu/tt_kuyruk/<kod>.json` (+ mp4 ya da `kaynak.git_commit`) → `tt_kuyruk.yml` → `islem_tt_yukle.sh` TikTok Studio'da yükler,
+  açıklamayı yazar, AI etiketini açar, `planla` saatine planlar, içerik listesinden doğrular; kayıt Yayın Takibi'ne "Planlı" düşer.
+- Kontrol: `islem_tt_kontrol` oturumu ve son gönderileri okur. Hata ayıklama görüntüleri `docs/tampon/tiktok/adim/`.
+- Kural: TikTok hiçbir uygulamaya API ile bağlanmaz; yalnız bu tarayıcı oturumu kullanılır. Günde en fazla 2 TikTok gönderisi (12:30 / 21:00), 18:00 tablo.

@@ -1,6 +1,6 @@
 {
  "aciklama": "Bağlantı durumu. Giriş gerektiren işler burada bekler; Ömer hesap bilgileriyle hazır olduğunda tek seferde bağlanır, sistem onu bekletmez.",
- "guncelleme": "2026-11-06T00:20+03:00",
+ "guncelleme": "2026-11-06T02:10+03:00",
  "baglantilar": [
   {
    "ad": "YouTube · Antik Stüdyo",
@@ -28,9 +28,9 @@
   },
   {
    "ad": "TikTok · @antikstudyo",
-   "durum": "tarayıcı gerekli",
-   "nasil": "Resmî API bağlanmaz (karar). Yüklemeler sunucu/tt_kuyruk'ta bekler; Chrome'da TikTok oturumu açıkken yüklenir. Oturum düşmüşse Ömer bir kez giriş yapar, şifre sisteme yazılmaz.",
-   "giris_gerekli": "oturum düştüyse"
+   "durum": "bağlı",
+   "nasil": "Sunucudaki kalıcı tarayıcıda @antikstudyo oturumu açık (6 Kas, Ömer kendisi girdi; şifre kaydedilmedi). Yüklemeler sunucu/tt_kuyruk'tan TikTok Studio ile otomatik planlanır. Oturum düşerse: 'TikTok girişi' → 20 dk'lık pencere.",
+   "giris_gerekli": false
   },
   {
    "ad": "Instagram / Facebook",

@@ -17,7 +17,7 @@ def ayar(k,v):
     if not n: raise SystemExit("ayar bulunamadı: "+k)
 g=os.environ.get("GEM","").strip(); x=os.environ.get("PIX","").strip()
 if g:
-    ayar("gemini_api_key", json.dumps(g)); ayar("gemini_model_name", '"gemini-flash-latest"'); ayar("llm_provider", '"gemini"')
+    ayar("gemini_api_key", json.dumps(g)); ayar("gemini_model_name", '"gemini-3.5-flash"'); ayar("llm_provider", '"gemini"')
 if x:
     ayar("pixabay_api_keys", json.dumps([x])); ayar("video_source", '"pixabay"')
 open(p,'w',encoding='utf-8').write(s)

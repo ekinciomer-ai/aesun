@@ -27,7 +27,18 @@ open(p,'w',encoding='utf-8').write(s)
 PY
 fi
 # İmaj
-docker build -q --build-arg DOCKER_BUILD_MIRROR=default --build-arg PIP_USE_OFFICIAL=1 -t $IMAJ "$R" > "$KOK/build.log" 2>&1 \
+# Projenin Dockerfile'ı emekliye ayrılan Debian bullseye aynasını kullanıyor; kendi kısa tarifimiz (bookworm):
+cat > "$KOK/Dockerfile.aesun" <<'DF'
+FROM python:3.11-slim-bookworm
+WORKDIR /MoneyPrinterTurbo
+ENV PYTHONPATH=/MoneyPrinterTurbo PIP_NO_CACHE_DIR=1
+RUN apt-get update && apt-get install -y --no-install-recommends git ffmpeg && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt ./
+RUN pip install --retries 3 --timeout 60 -r requirements.txt
+COPY . .
+CMD ["python3","main.py"]
+DF
+docker build -q -f "$KOK/Dockerfile.aesun" -t $IMAJ "$R" > "$KOK/build.log" 2>&1 \
   || { echo "NOT: HATA imaj derlenemedi: $(tail -3 "$KOK/build.log" | tr '\n' ' ' | cut -c1-300)"; exit 1; }
 echo "NOT: imaj hazır $(docker image inspect $IMAJ --format '{{.Size}}' | awk '{printf "%.1f GB", $1/1e9}')"
 # Kapsayıcı (yalnız API; web arayüzü yok). Sınır: 3 GB bellek, 2 çekirdek.

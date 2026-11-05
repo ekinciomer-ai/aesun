@@ -212,6 +212,12 @@ function yolCiz(A,R){const b=document.getElementById('yh');if(!A||!A.plan){b.hid
   +((A.yeni_seri_denemeleri||[]).length?'<div><h4>Yeni seri denemeleri</h4><ul>'+A.yeni_seri_denemeleri.map(d=>'<li><b>'+esc(d.seri)+'</b> · '+esc(d.kanallar.join(', '))+' · '+esc(d.kota)+'<div class="ince">'+esc(d.kalip)+' — '+esc(d.kanit)+'</div></li>').join('')+'</ul></div>':'')
   +(ey?'<div><h4>Yapılacaklar (sunucu ve ajanlar uygular)</h4><ul>'+ey+'</ul></div>':'')
   +(son?'<div><h4>Son otomatik işlemler</h4><ul>'+son+'</ul></div>':'');}
+function bagCiz(B,YK){const el=document.getElementById('yhi');if(!el||!B)return;
+ const r={'bağlı':'ARTIR','tarayıcı gerekli':'DEĞİŞTİR','bağlı değil':'DURDUR','açılmadı':'DENE'};
+ let h='<div><h4>Bağlantılar (giriş gerektiren işler bekler, sistem durmaz)</h4><ul>'+B.baglantilar.map(b=>'<li><span class="kr '+(r[b.durum]||'DENE')+'">'+esc(b.durum)+'</span> <b>'+esc(b.ad)+'</b> <span class="ince">— '+esc(b.nasil)+'</span></li>').join('')+'</ul></div>';
+ const bek=(YK||[]).filter(y=>y.durum!=='gönderildi');
+ if(bek.length)h+='<div><h4>Yorum yanıtları (onay bekliyor)</h4><ul>'+bek.map(y=>'<li><b>'+esc(y.yazar)+'</b> · '+esc(y.video)+'<div class="ince">Taslak yanıt: '+esc(y.yanit)+'</div></li>').join('')+'</ul></div>';
+ el.insertAdjacentHTML('beforeend',h);}
 function kopyala(i,alan,btn){
  const x=(window._sonListe||[])[i];if(!x||!x[alan])return;
  navigator.clipboard.writeText(x[alan]).then(()=>{const o=btn.textContent;btn.textContent='✅ Kopyalandı';setTimeout(()=>btn.textContent=o,1400)});
@@ -239,7 +245,7 @@ async function yukle(){
   ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
   document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};}
  await gecmisYukle();ciz();yorumCiz(j.yorumlar);
- let A=null,R=null;try{A=await (await fetch('analiz.json?'+Date.now())).json()}catch(e){}try{R=await (await fetch('yonetim_kaydi.json?'+Date.now())).json()}catch(e){}yolCiz(A,R);
+ let A=null,R=null;try{A=await (await fetch('analiz.json?'+Date.now())).json()}catch(e){}try{R=await (await fetch('yonetim_kaydi.json?'+Date.now())).json()}catch(e){}yolCiz(A,R);let B=null,YK=null;try{B=await (await fetch('baglantilar.json?'+Date.now())).json()}catch(e){}try{YK=await (await fetch('yorum_kuyrugu.json?'+Date.now())).json()}catch(e){}bagCiz(B,YK);
 }
 yukle();setInterval(yukle,60000);
 </script>

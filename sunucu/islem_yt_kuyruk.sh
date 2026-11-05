@@ -62,6 +62,9 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         with urllib.request.urlopen(put, timeout=600) as r:
             v = json.load(r)
         kayit[kod] = {"vid": v["id"]}
+        try:
+            import shutil; os.makedirs(os.path.join(D, "medya"), exist_ok=True); shutil.copy(mp4, os.path.join(D, "medya", f"{kod}.mp4"))
+        except Exception: pass
         json.dump(kayit, open(kayit_yol, "w", encoding="utf-8"), ensure_ascii=False)
         sonuc.append({"kod": kod, "durum": "yüklendi ve planlandı", "vid": v["id"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri")}})
         print(f"NOT: {kod} yüklendi → {v['id']} (plan {it['publishAt']})")

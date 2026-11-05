@@ -1,0 +1,48 @@
+{
+ "aciklama": "Bağlantı durumu. Giriş gerektiren işler burada bekler; Ömer hesap bilgileriyle hazır olduğunda tek seferde bağlanır, sistem onu bekletmez.",
+ "guncelleme": "2026-11-05T09:00+03:00",
+ "baglantilar": [
+  {
+   "ad": "YouTube · Antik Stüdyo",
+   "durum": "bağlı",
+   "nasil": "Sunucudaki resmi bağlantı (süresiz). Yükleme, planlama, gizleme, analitik ve yorum okuma sunucudan.",
+   "giris_gerekli": false
+  },
+  {
+   "ad": "YouTube · Ancient Studio",
+   "durum": "bağlı",
+   "nasil": "Aynı bağlantı, marka hesabı.",
+   "giris_gerekli": false
+  },
+  {
+   "ad": "ElevenLabs (seslendirme)",
+   "durum": "bağlı",
+   "nasil": "Anahtar sunucuda; klon sesler sunucudan üretilir.",
+   "giris_gerekli": false
+  },
+  {
+   "ad": "YouTube yorum YANITLAMA",
+   "durum": "tarayıcı gerekli",
+   "nasil": "Sunucu bağlantısında yorum yazma izni yok. Onaylanan yanıtlar yorum kuyruğunda bekler; Chrome bağlanınca gönderilir. (İleride izin ekleme: Ömer tek tıkla onaylar, şifre girmez.)",
+   "giris_gerekli": false
+  },
+  {
+   "ad": "TikTok · @antikstudyo",
+   "durum": "tarayıcı gerekli",
+   "nasil": "Resmî API bağlanmaz (karar). Yüklemeler sunucu/tt_kuyruk'ta bekler; Chrome'da TikTok oturumu açıkken yüklenir. Oturum düşmüşse Ömer bir kez giriş yapar, şifre sisteme yazılmaz.",
+   "giris_gerekli": "oturum düştüyse"
+  },
+  {
+   "ad": "Instagram / Facebook",
+   "durum": "bağlı değil",
+   "nasil": "Hesap açılınca CutkodA paneli üzerinden resmî API ile bağlanır; giriş Ömer tarafından, bir kez.",
+   "giris_gerekli": true
+  },
+  {
+   "ad": "Estudio Antiguo (ES kanal)",
+   "durum": "açılmadı",
+   "nasil": "Açılınca aynı sunucu bağlantısına eklenir (YOUTUBE_BAGLANTILARI.md → Yeni kanal bağlama).",
+   "giris_gerekli": true
+  }
+ ]
+}

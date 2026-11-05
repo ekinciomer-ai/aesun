@@ -73,3 +73,9 @@ Kullanım: `sunucu/ses_kuyruk/<KOD>.json` (`kod, voice_id, model, dil, ayar, par
 `sunucu/ses_kuyruk/cikti/<KOD>__<ad>.mp3` olarak yazar. Sahne başına ayrı parça üret: sahne süreleri ses süresinden hesaplanır.
 Yedek ses (ElevenLabs çalışmazsa): Piper `tr_TR-fahrettin-medium` (CC0), tampon bölgede. Klon seste YouTube "sentetik içerik" = EVET.
 Eski sürümün yerine yeni yükleme: kuyruk json'una `"yerine": "<eski vid>"` → eski sürümün planı kaldırılır, Gizli kalır (silme yok).
+
+## Girişler ve bekleyen işler (kural, Ömer 5 Kas 2026)
+Sistem hiçbir adımda Ömer'den şifre istemez ve giriş eksikliğinde durmaz: giriş gerektiren iş kuyrukta bekler
+(`sunucu/tt_kuyruk/` TikTok, `docs/yayin/yorum_kuyrugu.json` yorum yanıtları), durum `docs/yayin/baglantilar.json`'da (Yol haritası → Bağlantılar).
+Ömer hesap bilgileriyle hazır olduğunda girişi kendisi bir kez yapar; şifre hiçbir dosyaya yazılmaz. Tarayıcı bağlandığında kuyruklar sırayla işlenir.
+Sunucuya yüklenen her video `/opt/aesun/youtube/medya/<kod>.mp4` olarak saklanır (TikTok ve yeniden kullanım için).

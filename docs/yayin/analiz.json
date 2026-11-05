@@ -1,5 +1,5 @@
 {
- "olusturma": "2026-11-05T05:45+03:00",
+ "olusturma": "2026-11-05T13:45+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -42,7 +42,9 @@
     "Tablo Serisi": 2,
     "Gündem + Tarih": 2
    },
-   "durdurulan": []
+   "durdurulan": [
+    "Tarihin Patileri"
+   ]
   },
   "Ancient Studio": {
    "gunluk_short_kotasi": 3,
@@ -73,10 +75,10 @@
    "kanal": "Ancient Studio",
    "seri": "Tablo Serisi",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 2,
-   "medyan_48sa": 7,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 4,
    "tutma_orani": 0,
    "izlenme_yuzde": 49,
    "en_iyi": {
@@ -100,10 +102,10 @@
    "kanal": "Ancient Studio",
    "seri": "Tarihin Patileri",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 2,
-   "medyan_48sa": 2,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 1,
    "tutma_orani": 0,
    "izlenme_yuzde": 20,
    "en_iyi": {
@@ -130,11 +132,11 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tablo Serisi",
    "karar": "ARTIR",
-   "neden": "videoların %100'i tuttu (eşik 383 izlenme / 48 sa)",
-   "olculen": 3,
-   "erken": 2,
-   "medyan_48sa": 1970,
-   "tutma_orani": 100,
+   "neden": "videoların %75'i tuttu (eşik 383 izlenme / 48 sa)",
+   "olculen": 4,
+   "erken": 1,
+   "medyan_48sa": 1658,
+   "tutma_orani": 75,
    "izlenme_yuzde": 60,
    "en_iyi": {
     "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
@@ -156,13 +158,13 @@
   {
    "kanal": "Antik Stüdyo",
    "seri": "Tarihin Patileri",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
-   "erken": 1,
-   "medyan_48sa": 16,
+   "karar": "DURDUR",
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
+   "olculen": 3,
+   "erken": 0,
+   "medyan_48sa": 14,
    "tutma_orani": 0,
-   "izlenme_yuzde": 32,
+   "izlenme_yuzde": 25,
    "en_iyi": {
     "baslik": "Bir ordu kuşlara yenildi! 1932 Emu Savaşı 🐦",
     "i48": 19
@@ -180,12 +182,12 @@
     "medyan": 19
    },
    "17:00": {
-    "n": 1,
-    "medyan": 12
+    "n": 2,
+    "medyan": 13
    },
    "18:00": {
-    "n": 1,
-    "medyan": 1970
+    "n": 2,
+    "medyan": 997
    },
    "19:00": {
     "n": 2,
@@ -206,52 +208,36 @@
     "medyan": 902
    },
    "17:00": {
-    "n": 1,
-    "medyan": 2
+    "n": 2,
+    "medyan": 1
    },
    "21:00": {
-    "n": 1,
-    "medyan": 7
+    "n": 2,
+    "medyan": 4
    }
   }
  },
  "eylemler": [
   {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo (@antikstudyo)",
-   "platform": "TikTok",
-   "vid": "",
-   "baslik": "Zayıflamak için CANLI KURT yutan kadınlar?! 🐛💊 (1890 Diyet Çılgınlığı)",
-   "neden": "2026-11-03 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo (@antikstudyo)",
-   "platform": "TikTok",
-   "vid": "",
-   "baslik": "Yüzünü eriten ZEHİRLİ fondöten! ☠️👑 (Kraliçe Elizabeth'in 2.5 Cm Maskesi)",
-   "neden": "2026-11-04 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
+   "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
    "vid": "",
-   "baslik": "[Taslak Plan #3] Bir güvercin 194 askeri nasıl kurtardı? 🕊️ Cher Ami, 1918",
-   "neden": "2026-11-04 12:30 planlıydı, hâlâ yayında görünmüyor"
+   "baslik": "[Taslak Plan #5] Caligula atını gerçekten konsül yaptı mı? 🐎 Incitatus",
+   "neden": "'Tarihin Patileri' serisi durduruldu; bu slotu Tablo Serisi, Gündem + Tarih kullanır"
   }
  ],
  "bulgular": [
   "Dün (2026-11-04) 1250 izlenme geldi; bir önceki gün 1849.",
-  "Ancient Studio: son 5 Short'tan 2 tanesi tuttu (eşik 123 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 4 tanesi tuttu (eşik 383 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 123 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 383 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 123 izlenme / 48 sa).",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 383 izlenme / 48 sa).",
-  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %100'i tuttu (eşik 383 izlenme / 48 sa).",
+  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %75'i tuttu (eşik 383 izlenme / 48 sa).",
+  "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 19:00 (medyan 1691 izlenme, 2 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %46 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
-  "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %32 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
+  "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %29 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
  ],
  "en_iyi": [
   {
@@ -282,16 +268,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Ancient Studio",
-   "baslik": "The fight over Hormuz started 474 years ago",
-   "i48": 32
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Bir ordu kuşlara yenildi! 1932 Emu Savaşı 🐦",
-   "i48": 19
-  },
-  {
    "kanal": "Antik Stüdyo",
    "baslik": "Emulara sonunda ne oldu? 🐦 Emu Savaşı'nın sonu",
    "i48": 12
@@ -305,6 +281,16 @@
    "kanal": "Ancient Studio",
    "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
    "i48": 2
+  },
+  {
+   "kanal": "Ancient Studio",
+   "baslik": "Why does the Mona Lisa have no eyebrows? 🖼️",
+   "i48": 0
+  },
+  {
+   "kanal": "Ancient Studio",
+   "baslik": "What happened to the emus? The end of the Emu War 🐦",
+   "i48": 0
   }
  ]
 }

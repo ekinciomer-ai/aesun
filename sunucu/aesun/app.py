@@ -253,6 +253,9 @@ async def veri(request: Request, a: str = "oku", yol: str = ""):
     yol = depo_yol(yol)
     kim = toplayici(request)
     if a == "oku":
+        if not kim and yol.startswith("pi/"):   # Pi'ye özel dosyalar (ör. yeni GitHub anahtarı) yalnız toplayıcı anahtarıyla
+            DURUM["red"] += 1
+            raise HTTPException(403, "Yalnız toplayıcı")
         if not kim:
             r = roller(request)
             gerek = {"yonetici", "parasal"} if PARA.search(yol) else {"yonetici", "parasal", "monitoring"}

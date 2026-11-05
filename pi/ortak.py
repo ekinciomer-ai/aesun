@@ -29,7 +29,16 @@ def log(*a):
     print(datetime.now(TR).strftime("%Y-%m-%d %H:%M:%S"), *a, flush=True)
 
 
+YENI_ANAHTAR = AESUN / "gh_anahtar.json"   # Kasa'dan sunucu üzerinden gelen yeni GitHub anahtarı (osos.env'den önce)
+
+
 def token():
+    try:
+        t = json.loads(YENI_ANAHTAR.read_text()).get("t", "").strip()
+        if t:
+            return t
+    except Exception:
+        pass
     for f in (AESUN / "osos.env", Path.home() / "aesun/env.txt"):
         if f.exists():
             for s in f.read_text().splitlines():
@@ -199,13 +208,40 @@ GH_RED = AESUN / "gh_anahtar_red.json"
 
 
 def _gh_red_mi():
+    try:   # yarım saatte bir: Kasa'dan yeni anahtar geldi mi
+        if GH_RED.exists() and (datetime.now().timestamp() - GH_RED.stat().st_mtime) > 1800:
+            if _yeni_anahtar_al():
+                return False
+            os.utime(GH_RED)
+    except Exception:
+        pass
     try:
         return (datetime.now().timestamp() - float(json.loads(GH_RED.read_text())["t"])) < 6 * 3600
     except Exception:
         return False
 
 
+def _yeni_anahtar_al():
+    """Kasa'ya girilen yeni anahtar sunucuda pi/gh_anahtar.json olarak bekler (yalnız toplayıcı anahtarıyla okunur)."""
+    global TOK
+    try:
+        v = sunucu.oku("pi/gh_anahtar.json")
+        t = (v or {}).get("t", "").strip()
+        if t and t != TOK:
+            YENI_ANAHTAR.write_text(json.dumps({"t": t, "alindi": datetime.now().timestamp()}))
+            os.chmod(YENI_ANAHTAR, 0o600)
+            TOK = t
+            GH_RED.unlink(missing_ok=True)
+            log("yeni GitHub anahtarı sunucudan alındı")
+            return True
+    except Exception as e:
+        log("yeni anahtar alınamadı:", str(e)[:80])
+    return False
+
+
 def _gh_red_kaydet(kod):
+    if _yeni_anahtar_al():
+        return
     try:
         GH_RED.write_text(json.dumps({"t": datetime.now().timestamp(), "kod": kod}))
         log(f"GitHub anahtarı reddedildi (HTTP {kod}); 6 saat boyunca sunucu yolu kullanılacak")

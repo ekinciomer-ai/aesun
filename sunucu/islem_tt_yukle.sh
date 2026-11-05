@@ -54,8 +54,13 @@ with sync_playwright() as p:
                 if pg.locator("[contenteditable=true]").count(): break
                 time.sleep(3)
             time.sleep(5); ss(pg, kod, 1)
+            def kapat_popup():
+                for _ in range(3):
+                    if not tikla_metin(pg, ["Anladım", "Got it", "Tamam", "Kapat", "Daha sonra", "Not now"], 1500): break
+                    time.sleep(1)
+            kapat_popup()
             # açıklama
-            ed = pg.locator("[contenteditable=true]").first; ed.click(); time.sleep(1)
+            ed = pg.locator("[contenteditable=true]").first; ed.scroll_into_view_if_needed(); ed.click(timeout=10000); time.sleep(1)
             pg.evaluate("""() => { const e=document.querySelector('[contenteditable=true]'); e.focus(); const s=getSelection(); s.selectAllChildren(e); }""")
             pg.keyboard.press("Delete"); time.sleep(0.5)
             pg.evaluate("""(t) => { const e=document.querySelector('[contenteditable=true]'); e.focus(); const dt=new DataTransfer(); dt.setData('text/plain', t);
@@ -69,7 +74,7 @@ with sync_playwright() as p:
                     pg.locator("input[type=file]").last.set_input_files(kapak); time.sleep(4)
                     tikla_metin(pg, ["Kaydet", "Save"]); time.sleep(2)
                 except Exception: pass
-            tikla_metin(pg, ["Daha fazla göster", "Show more"]); time.sleep(1)
+            kapat_popup(); tikla_metin(pg, ["Daha fazla göster", "Show more"]); time.sleep(1)
             # Planla seçeneği (radyo)
             try: pg.get_by_text("Planla", exact=True).first.click(timeout=4000)
             except Exception: pg.locator("text=Planla").first.click(timeout=4000)
@@ -98,7 +103,8 @@ with sync_playwright() as p:
                 time.sleep(3)
             time.sleep(2)
             # Planla düğmesi (sayfanın altındaki birincil)
-            btn = pg.get_by_role("button", name=re.compile(r"^(Planla|Schedule)$")).last; btn.click(timeout=5000); time.sleep(4)
+            kapat_popup()
+            btn = pg.get_by_role("button", name=re.compile(r"^(Planla|Schedule)$")).last; btn.scroll_into_view_if_needed(); btn.click(timeout=5000); time.sleep(4)
             if tikla_metin(pg, ["İptal", "Cancel"], 2000):
                 time.sleep(8); btn.click(timeout=5000); time.sleep(4)
             ss(pg, kod, 5)

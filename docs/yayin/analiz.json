@@ -1,5 +1,5 @@
 {
- "olusturma": "2026-11-05T01:11+03:00",
+ "olusturma": "2026-11-05T05:45+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -63,7 +63,7 @@
    "erken": 0,
    "medyan_48sa": 902,
    "tutma_orani": 67,
-   "izlenme_yuzde": 69,
+   "izlenme_yuzde": 70,
    "en_iyi": {
     "baslik": "Why was Piri Reis executed?",
     "i48": 918
@@ -75,10 +75,10 @@
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 7,
    "tutma_orani": 0,
-   "izlenme_yuzde": null,
+   "izlenme_yuzde": 49,
    "en_iyi": {
     "baslik": "Van Gogh painted this in a mental asylum 🌌",
     "i48": 7
@@ -90,7 +90,7 @@
    "karar": "DENE",
    "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 0,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": null,
    "tutma_orani": null,
    "izlenme_yuzde": null,
@@ -102,10 +102,10 @@
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 2,
    "tutma_orani": 0,
-   "izlenme_yuzde": null,
+   "izlenme_yuzde": 20,
    "en_iyi": {
     "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
     "i48": 2
@@ -120,7 +120,7 @@
    "erken": 0,
    "medyan_48sa": 1589,
    "tutma_orani": 100,
-   "izlenme_yuzde": 71,
+   "izlenme_yuzde": 67,
    "en_iyi": {
     "baslik": "Piri Reis neden idam edildi?",
     "i48": 1793
@@ -132,10 +132,10 @@
    "karar": "ARTIR",
    "neden": "videoların %100'i tuttu (eşik 383 izlenme / 48 sa)",
    "olculen": 3,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 1970,
    "tutma_orani": 100,
-   "izlenme_yuzde": 53,
+   "izlenme_yuzde": 60,
    "en_iyi": {
     "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
     "i48": 1982
@@ -147,7 +147,7 @@
    "karar": "DENE",
    "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 0,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": null,
    "tutma_orani": null,
    "izlenme_yuzde": null,
@@ -162,7 +162,7 @@
    "erken": 1,
    "medyan_48sa": 16,
    "tutma_orani": 0,
-   "izlenme_yuzde": 22,
+   "izlenme_yuzde": 32,
    "en_iyi": {
     "baslik": "Bir ordu kuşlara yenildi! 1932 Emu Savaşı 🐦",
     "i48": 19
@@ -170,8 +170,8 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 123,
-  "Antik Stüdyo": 383
+  "Antik Stüdyo": 383,
+  "Ancient Studio": 123
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -218,51 +218,11 @@
  "eylemler": [
   {
    "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "wjPmU9N2eAQ",
-   "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
-   "neden": "2026-11-04 18:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Ancient Studio",
-   "platform": "YouTube",
-   "vid": "tJ-I6ZUVK7w",
-   "baslik": "Is the Girl with a Pearl Earring's pearl real? 🖼️",
-   "neden": "2026-11-04 21:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Ancient Studio",
-   "platform": "YouTube",
-   "vid": "WFbCZFw7VKY",
-   "baslik": "If your cat died, would you shave your eyebrows? 🐈 Ancient Egypt",
-   "neden": "2026-11-04 17:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "TfdOoIGhxOU",
-   "baslik": "Zayıflamak için hap diye CANLI KURT yutanlar?! 🐛💊 #shorts #tarih #keşfet",
-   "neden": "2026-11-04 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
    "kanal": "Antik Stüdyo (@antikstudyo)",
    "platform": "TikTok",
    "vid": "",
    "baslik": "Zayıflamak için CANLI KURT yutan kadınlar?! 🐛💊 (1890 Diyet Çılgınlığı)",
    "neden": "2026-11-03 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Ancient Studio",
-   "platform": "YouTube",
-   "vid": "mEQA4dHdNIs",
-   "baslik": "Swallowing LIVE WORMS to lose weight in 1890?! 🐛💊 #shorts #history #fyp",
-   "neden": "2026-11-04 21:30 planlıydı, hâlâ yayında görünmüyor"
   },
   {
    "tur": "KONTROL",
@@ -290,8 +250,8 @@
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %100'i tuttu (eşik 383 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 19:00 (medyan 1691 izlenme, 2 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
-  "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %69 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
-  "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %22 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
+  "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %46 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
+  "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %32 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
  ],
  "en_iyi": [
   {

@@ -50,7 +50,6 @@ with sync_playwright() as p:
         yaz({"ok": False, "durum": "süre doldu (7 dk), QR okutulmadı"}); print("NOT: süre doldu")
     ctx.close()
 PY
-chown -R 1000:1000 "$KOK"
 docker rm -f tampon-tiktok >/dev/null 2>&1
 docker run -d --name tampon-tiktok --memory 2048m --cpus 2 --pids-limit 256 --security-opt no-new-privileges \
-  -v "$KOK":/work -w /work "$IMAJ" /usr/local/bin/python /work/giris.py >/dev/null && echo "NOT: tarayıcı başladı, QR bekleniyor"
+  -v "$KOK":/work -w /work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/giris.py" >/dev/null && echo "NOT: tarayıcı başladı, QR bekleniyor"

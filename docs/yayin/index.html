@@ -215,8 +215,8 @@ function yolCiz(A,R){const b=document.getElementById('yh');if(!A||!A.plan){b.hid
 function bagCiz(B,YK){const el=document.getElementById('yhi');if(!el||!B)return;
  const r={'bağlı':'ARTIR','tarayıcı gerekli':'DEĞİŞTİR','bağlı değil':'DURDUR','açılmadı':'DENE'};
  let h='<div><h4>Bağlantılar (giriş gerektiren işler bekler, sistem durmaz)</h4><ul>'+B.baglantilar.map(b=>'<li><span class="kr '+(r[b.durum]||'DENE')+'">'+esc(b.durum)+'</span> <b>'+esc(b.ad)+'</b> <span class="ince">— '+esc(b.nasil)+'</span></li>').join('')+'</ul></div>';
- const bek=(YK||[]).filter(y=>y.durum!=='gönderildi');
- if(bek.length)h+='<div><h4>Yorum yanıtları (onay bekliyor)</h4><ul>'+bek.map(y=>'<li><b>'+esc(y.yazar)+'</b> · '+esc(y.video)+'<div class="ince">Taslak yanıt: '+esc(y.yanit)+'</div></li>').join('')+'</ul></div>';
+ const bek=(YK||[]).filter(y=>['ONAY BEKLİYOR','TASLAK BEKLİYOR','ONAYLANDI'].includes(y.durum)||String(y.durum).startsWith('HATA'));
+ if(bek.length)h+='<div><h4>Yorum yanıtları</h4><ul>'+bek.map(y=>'<li><span class="kr '+(y.durum==='ONAYLANDI'?'ARTIR':y.durum==='ONAY BEKLİYOR'?'DEĞİŞTİR':'DENE')+'">'+esc(y.durum)+'</span> <b>'+esc(y.yazar)+'</b> · '+esc(y.video)+(y.metin?'<div class="ince">Yorum: '+esc(y.metin)+'</div>':'')+(y.yanit?'<div class="ince">Taslak yanıt: '+esc(y.yanit)+'</div>':'')+'</li>').join('')+'</ul></div>';
  el.insertAdjacentHTML('beforeend',h);}
 function kopyala(i,alan,btn){
  const x=(window._sonListe||[])[i];if(!x||!x[alan])return;

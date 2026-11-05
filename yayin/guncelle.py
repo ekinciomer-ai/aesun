@@ -176,6 +176,23 @@ def main():
                 })
         yorumlar.sort(key=lambda y: y["zaman"], reverse=True)
         yeni_say = sum(1 for y in yorumlar if y["id"] not in eski)
+        # Yanıtsız yorumlar → yorum kuyruğu (taslak yanıtı Claude yazar, Ömer onaylar, sunucu gönderir)
+        try:
+            kyol = os.path.join(os.path.dirname(YOL), "yorum_kuyrugu.json")
+            kq = json.load(open(kyol, encoding="utf-8")) if os.path.exists(kyol) else []
+            var = {k.get("yorum_id") for k in kq}; ekle = 0
+            for y in yorumlar:
+                if not y["yanitlandi"] and y["id"] not in var:
+                    kq.append({"kanal": y["kanal"], "video": y["video"], "vid": y["vid"], "yorum_id": y["id"], "yazar": y["yazar"],
+                               "metin": y["metin"][:300], "zaman": y["zaman"], "durum": "TASLAK BEKLİYOR", "yanit": ""}); ekle += 1
+            for k in kq:   # kanal yanıtlamışsa (Studio'dan elle) kuyruktan düş
+                if k.get("durum") in ("ONAY BEKLİYOR", "TASLAK BEKLİYOR") and any(y["id"] == k.get("yorum_id") and y["yanitlandi"] for y in yorumlar):
+                    k["durum"] = "elle yanıtlandı"
+            if ekle:
+                notlar.append(f"{ekle} yorum yanıt kuyruğuna eklendi")
+            json.dump(kq, open(kyol, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        except Exception as e:
+            notlar.append(f"yorum kuyruğu yazılamadı: {e}")
         if yorumlar != j.get("yorumlar"):
             j["yorumlar"] = yorumlar; degisti += 1
             if yeni_say:

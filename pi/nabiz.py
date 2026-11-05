@@ -153,9 +153,19 @@ def istek(url, token, veri=None, metot="GET"):
         return json.loads(y.read() or b"{}")
 
 
+def _yeni_gh_anahtar():
+    """Kasa üzerinden gelen yeni GitHub anahtarı (~/.aesun/gh_anahtar.json); yoksa boş."""
+    try:
+        import json as _j
+        from pathlib import Path as _P
+        return (_j.loads((_P.home() / ".aesun" / "gh_anahtar.json").read_text()).get("t") or "").strip()
+    except Exception:
+        return ""
+
+
 def main():
     env = env_oku()
-    token = env.get("GITHUB_TOKEN", "")
+    token = _yeni_gh_anahtar() or env.get("GITHUB_TOKEN", "")
     if not token and not sunucu.yalniz_sunucu():
         sys.exit("GITHUB_TOKEN yok (~/.aesun/osos.env)")
     try:

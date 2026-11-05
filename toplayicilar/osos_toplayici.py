@@ -76,6 +76,12 @@ def ayar_oku():
                 env[k.strip()] = v.strip()
     for k in ("OSOS_KULLANICI", "OSOS_SIFRE", "AESUN_ANAHTAR", "AESUN_WEBHOOK", "GITHUB_TOKEN"):
         env[k] = os.environ.get(k, env.get(k, ""))
+    try:   # Kasa üzerinden gelen yeni GitHub anahtarı (~/.aesun/gh_anahtar.json) varsa o kullanılır
+        _t = (json.loads((KLASOR / "gh_anahtar.json").read_text()).get("t") or "").strip()
+        if _t:
+            env["GITHUB_TOKEN"] = _t
+    except Exception:
+        pass
     # n8n webhook'u isteğe bağlı (kredi harcar). Yalnız osos.env'de AESUN_WEBHOOK yazılıysa gönderilir.
     eksik = [k for k in ("OSOS_KULLANICI", "OSOS_SIFRE") if not env[k]]
     if not env["GITHUB_TOKEN"] and not env["AESUN_ANAHTAR"]:

@@ -74,8 +74,18 @@ GH_PANEL = "n8n/fusionsolar_son.json"
 GH_ARALIK = int(os.getenv("FS_GITHUB_DK", "10")) * 60
 
 
+def _yeni_gh_anahtar():
+    """Kasa üzerinden gelen yeni GitHub anahtarı (~/.aesun/gh_anahtar.json); yoksa boş."""
+    try:
+        import json as _j
+        from pathlib import Path as _P
+        return (_j.loads((_P.home() / ".aesun" / "gh_anahtar.json").read_text()).get("t") or "").strip()
+    except Exception:
+        return ""
+
+
 def gh_token():
-    t = os.getenv("GITHUB_TOKEN", "")
+    t = _yeni_gh_anahtar() or os.getenv("GITHUB_TOKEN", "")
     f = Path.home() / ".aesun" / "osos.env"
     if not t and f.exists():
         for line in f.read_text(encoding="utf-8-sig").splitlines():

@@ -82,10 +82,17 @@ with sync_playwright() as p:
             # Yapay zekâ etiketi
             if it.get("sentetik"):
                 try:
-                    sw = pg.locator("text=AI ile oluşturulmuş içerik").locator("xpath=ancestor::*[.//input[@type='checkbox'] or .//*[@role='switch']][1]").locator("input[type=checkbox], [role=switch]").first
-                    if sw.count() and sw.get_attribute("aria-checked") != "true" and not sw.is_checked():
-                        sw.click(timeout=3000); time.sleep(1); tikla_metin(pg, ["Aç", "Turn on"], 2000)
-                except Exception: pass
+                    etiket = pg.get_by_text("AI ile oluşturulmuş içerik", exact=True).first
+                    kutu = etiket.locator("xpath=ancestor::div[.//*[@role='switch'] or .//input[@type='checkbox'] or .//*[contains(@class,'witch')]][1]")
+                    sw = kutu.locator("[role=switch], input[type=checkbox], [class*=witch]").first
+                    if sw.count():
+                        if (sw.get_attribute("aria-checked") or "false") != "true":
+                            sw.click(timeout=3000, force=True); time.sleep(1.5); tikla_metin(pg, ["Aç", "Turn on", "Onayla"], 2500)
+                    else:
+                        # yedek: etiketin sağındaki anahtara koordinatla tıkla
+                        bb = etiket.bounding_box(); pg.mouse.click(bb["x"] + bb["width"] + 28, bb["y"] + bb["height"] / 2); time.sleep(1.5); tikla_metin(pg, ["Aç", "Turn on", "Onayla"], 2500)
+                except Exception as e:
+                    print(f"NOT: {kod} AI etiketi işaretlenemedi: {type(e).__name__}")
             ss(pg, kod, 3)
             # tarih / saat
             t = datetime.fromisoformat(it["planla"]); gun, saat, dk = t.day, f"{t.hour:02d}", f"{t.minute:02d}"

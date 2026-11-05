@@ -9,7 +9,7 @@ MOD=${1:-ac}; KOK=/opt/aesun/tiktok; IMAJ=lscr.io/linuxserver/chromium:latest
 mkdir -p "$KOK/chromium"; chmod 700 "$KOK"
 docker image inspect "$IMAJ" >/dev/null 2>&1 || docker pull -q "$IMAJ" >/dev/null 2>&1 || { echo "NOT: HATA tarayıcı imajı indirilemedi"; exit 1; }
 docker rm -f tt-tarayici >/dev/null 2>&1
-ORTAK=(--name tt-tarayici --memory 2048m --cpus 2 --shm-size 1g --security-opt seccomp=unconfined --restart unless-stopped
+ORTAK=(--name tt-tarayici --memory 3584m --cpus 3 --shm-size 2g --security-opt seccomp=unconfined --restart unless-stopped
        -e PUID=1000 -e PGID=1000 -e TZ=Europe/Istanbul -e LC_ALL=tr_TR.UTF-8
        -e CHROME_CLI="--remote-debugging-port=9222 --remote-debugging-address=0.0.0.0 --lang=tr --disable-blink-features=AutomationControlled https://www.tiktok.com/login"
        -v "$KOK/chromium":/config)

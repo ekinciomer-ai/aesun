@@ -4,11 +4,27 @@
 set -u
 KONU=${KONU:-"La caída de Granada en 1492"}
 R=/opt/tampon/mpt/repo; API=http://127.0.0.1:8180/api/v1
-GOVDE=$(KONU="$KONU" python3 -c '
+# 1) Metin: kısa cümleler (ekranda az yazı: her altyazı en çok ~7 kelime)
+ISTEM="Escribe frases muy cortas, de 4 a 7 palabras, cada una termina en punto. Nombra lugares, personas y objetos concretos. Sin introducción."
+METIN=$(KONU="$KONU" ISTEM="$ISTEM" python3 -c '
+import json,os,urllib.request
+b=json.dumps({"video_subject":os.environ["KONU"],"video_language":"es","paragraph_number":2,"video_script_prompt":os.environ["ISTEM"]}).encode()
+r=urllib.request.Request("http://127.0.0.1:8180/api/v1/scripts",data=b,headers={"Content-Type":"application/json"})
+print((json.load(urllib.request.urlopen(r,timeout=120)).get("data") or {}).get("video_script",""))')
+[ -n "$METIN" ] || { echo "NOT: HATA metin yazılamadı"; exit 1; }
+# 2) Görüntü arama terimleri: metnin sırasıyla, somut (İngilizce)
+TERIM=$(KONU="$KONU" METIN="$METIN" python3 -c '
+import json,os,urllib.request
+b=json.dumps({"video_subject":os.environ["KONU"],"video_script":os.environ["METIN"],"amount":10,"match_materials_to_script":True}).encode()
+r=urllib.request.Request("http://127.0.0.1:8180/api/v1/terms",data=b,headers={"Content-Type":"application/json"})
+print(json.dumps((json.load(urllib.request.urlopen(r,timeout=120)).get("data") or {}).get("video_terms",[])))')
+echo "NOT: arama terimleri: $TERIM"
+GOVDE=$(KONU="$KONU" METIN="$METIN" TERIM="$TERIM" python3 -c '
 import json,os
-print(json.dumps({"video_subject":os.environ["KONU"],"video_language":"es","video_aspect":"9:16","paragraph_number":2,
- "video_source":"pixabay","voice_name":"es-ES-AlvaroNeural-Male","voice_rate":1.0,"bgm_type":"","subtitle_enabled":True,
- "font_name":"BeVietnamPro-Bold.ttf","font_size":64,"stroke_width":2.5,"video_clip_duration":4,"video_count":1,"n_threads":2}))')
+print(json.dumps({"video_subject":os.environ["KONU"],"video_script":os.environ["METIN"],"video_terms":json.loads(os.environ["TERIM"] or "[]"),
+ "match_materials_to_script":True,"video_language":"es","video_aspect":"9:16","video_source":"pixabay",
+ "voice_name":"es-ES-AlvaroNeural-Male","voice_rate":1.0,"bgm_type":"","subtitle_enabled":True,
+ "font_name":"BeVietnamPro-Bold.ttf","font_size":58,"stroke_width":2.5,"video_clip_duration":4,"video_count":1,"n_threads":2}))')
 T=$(curl -s -m 60 -X POST $API/videos -H 'Content-Type: application/json' -d "$GOVDE" | python3 -c 'import json,sys;print((json.load(sys.stdin).get("data") or {}).get("task_id",""))')
 [ -n "$T" ] || { echo "NOT: HATA görev başlamadı"; exit 1; }
 echo "NOT: görev $T başladı"

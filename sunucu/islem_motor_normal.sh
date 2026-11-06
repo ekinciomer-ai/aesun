@@ -18,9 +18,12 @@ fi
 # 2) Cümle sırasına göre görsel arama terimleri (İngilizce)
 TERIM=$(KONU="$KONU" METIN="$METIN" GK="$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null)" python3 - <<'PY'
 import json,os,urllib.request,re
-soru=("For a short history video, write one Wikimedia Commons search query per sentence below, in English, 2-4 words, "
- "aimed at historical paintings, engravings, maps, manuscripts or the real historic place (e.g. 'Surrender of Granada painting', "
- "'Alhambra Court of Lions', 'Boabdil portrait'). Avoid abstract words. Return only a JSON list of strings.\n"
+ipucu=("real photos of the place, satellite images, clear maps or the named object (e.g. 'Trans-Siberian Railway train', "
+ "'Kamchatka volcano', 'Russia time zones map')" if os.environ.get("TUR")=="cografya" else
+ "historical paintings, engravings, maps, manuscripts or the real historic place (e.g. 'Surrender of Granada painting', "
+ "'Alhambra Court of Lions', 'Boabdil portrait')")
+soru=("For a short video, write one Wikimedia Commons search query per sentence below, in English, 2-4 words, "
+ f"aimed at {ipucu}. Avoid abstract words. Return only a JSON list of strings.\n"
  f"Topic: {os.environ['KONU']}\nSentences:\n{os.environ['METIN']}")
 b=json.dumps({"contents":[{"parts":[{"text":soru}]}]}).encode()
 for m in ("gemini-flash-lite-latest","gemini-3.5-flash"):

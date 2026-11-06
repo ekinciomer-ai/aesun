@@ -68,10 +68,17 @@ def ilgili_mi(yol, konu, terim):
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", yol, "-vf", "scale=512:-1", yol + ".k.jpg"], check=True, timeout=60)
         resim = base64.b64encode(open(yol + ".k.jpg", "rb").read()).decode()
         os.unlink(yol + ".k.jpg")
-        soru = (f"Video topic: {konu}. This scene: {terim}. Is this image a fitting illustration for this historical scene "
-                "(a historical painting, engraving, map, manuscript, period artifact, or the real historical place)? "
-                "Answer NO if it is a modern unrelated photo, a different place with the same name, a collage, a document page "
-                "with mostly text, or a different era. Answer only YES or NO.")
+        tur = os.environ.get("TUR", "tarih")
+        if tur == "cografya":
+            soru = (f"Video topic: {konu}. This scene: {terim}. Is this image a fitting illustration for this scene "
+                    "(a real photo of the place, a satellite image, a clear map, or the named object)? Answer NO if it shows a "
+                    "different place or thing, an unrelated close-up, a collage, a page of mostly text, or low-quality clip art. "
+                    "Answer only YES or NO.")
+        else:
+            soru = (f"Video topic: {konu}. This scene: {terim}. Is this image a fitting illustration for this historical scene "
+                    "(a historical painting, engraving, map, manuscript, period artifact, or the real historical place)? "
+                    "Answer NO if it is a modern unrelated photo, a different place with the same name, a collage, a document page "
+                    "with mostly text, or a different era. Answer only YES or NO.")
         b = json.dumps({"contents": [{"parts": [{"text": soru}, {"inline_data": {"mime_type": "image/jpeg", "data": resim}}]}]}).encode()
         import time
         son = None

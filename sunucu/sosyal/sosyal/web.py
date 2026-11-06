@@ -194,6 +194,16 @@ def create_app(studyo=None):
             abort(404)
         return send_file(y, conditional=True)
 
+    # Ücretsiz katman günlük sınırları (yaklaşık; sağlayıcılar değiştirebilir, ayarla değiştirilebilir)
+    SINIR = {"gemini": {"istek": int(os.getenv("SOSYAL_SINIR_GEMINI_ISTEK", "250"))},
+             "groq": {"istek": int(os.getenv("SOSYAL_SINIR_GROQ_ISTEK", "1000")),
+                      "token": int(os.getenv("SOSYAL_SINIR_GROQ_TOKEN", "100000"))},
+             "openrouter": {"istek": int(os.getenv("SOSYAL_SINIR_OPENROUTER_ISTEK", "50"))}}
+
+    @app.get("/api/kullanim")
+    def kullanim():
+        return jsonify(**st.h.kullanim_ozet(int(request.args.get("gun", 7))), sinirlar=SINIR)
+
     @app.get("/api/gunluk")
     def gunluk():
         return jsonify(st.h.gunluk_listesi())

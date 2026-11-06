@@ -81,12 +81,29 @@ class Studyo:
     def _hazir(self, rol):
         return [self.m[a] for a in ayarlar.roller().get(rol, []) if a in self.m and self.m[a].hazir()]
 
+    def _yaz(self, mt, rol, sistem, mesaj, sicaklik=0.7, ara=False):
+        """Motoru çağırır ve kullanımı sayaca yazar (token: motorun bildirdiği; bildirmezse karakter/3,5 tahmini)."""
+        motorlar.son_kullanim()
+        try:
+            metin = mt.yaz(sistem, mesaj, sicaklik, ara=ara)
+        except motorlar.MotorHatasi as e:
+            k = motorlar.son_kullanim() or {}
+            tur = "kota" if re.search(r"HTTP 429|quota|rate limit", str(e), re.I) else "zaman" if "timed out" in str(e) else "hata"
+            self.h.kullanim_ekle(mt.ad, k.get("model") or getattr(mt, "model", ""), rol, 0, 0, False, False, tur)
+            raise
+        k = motorlar.son_kullanim()
+        tahmini = not (k and (k["giris"] or k["cikis"]))
+        giris = int(len(sistem + mesaj) / 3.5) if tahmini else k["giris"]
+        cikis = int(len(metin) / 3.5) if tahmini else k["cikis"]
+        self.h.kullanim_ekle(mt.ad, (k or {}).get("model") or getattr(mt, "model", ""), rol, giris, cikis, tahmini, True)
+        return metin
+
     def _cagir(self, rol, sistem, mesaj, haric=(), sicaklik=0.7, ara=False):
         adaylar = [x for x in self._hazir(rol) if x.ad not in haric] or self._hazir(rol)
         hatalar = []
         for mt in adaylar:
             try:
-                return mt.ad, mt.yaz(sistem, mesaj, sicaklik, ara=ara and mt.arama)
+                return mt.ad, self._yaz(mt, rol, sistem, mesaj, sicaklik, ara=ara and mt.arama)
             except motorlar.MotorHatasi as e:
                 hatalar.append(f"{mt.ad}: {e}")
                 self.h.gunluk("motor_hatasi", f"{rol} · {mt.ad} · {e}")
@@ -169,7 +186,7 @@ class Studyo:
         fikirciler = self._hazir("fikir")[:3]
         fikirler = []
         with ThreadPoolExecutor(max_workers=3) as hav:
-            isler = {hav.submit(m.yaz, fikir_sis, fikir_mesaj, 0.9): m for m in fikirciler}
+            isler = {hav.submit(self._yaz, m, "fikir", fikir_sis, fikir_mesaj, 0.9): m for m in fikirciler}
             for is_, m in isler.items():
                 try:
                     f = is_.result()

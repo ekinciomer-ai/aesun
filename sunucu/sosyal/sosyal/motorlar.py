@@ -7,6 +7,7 @@ Anahtarlar yalnız ortam değişkeninden okunur; hata mesajlarında anahtar gör
 import json
 import os
 import re
+import threading
 import urllib.error
 import urllib.request
 
@@ -16,6 +17,20 @@ _GIZLI = re.compile(r"(AIza[0-9A-Za-z_-]{20,}|sk-[0-9A-Za-z_-]{16,}|gsk_[0-9A-Za
 
 class MotorHatasi(Exception):
     pass
+
+
+_YEREL = threading.local()
+
+
+def _kullanim(model, giris, cikis):
+    """Son çağrının token sayıları (motorun bildirdiği). Aynı iş parçacığında son_kullanim() ile okunur."""
+    _YEREL.k = {"model": model, "giris": int(giris or 0), "cikis": int(cikis or 0)}
+
+
+def son_kullanim():
+    k = getattr(_YEREL, "k", None)
+    _YEREL.k = None
+    return k
 
 
 def _maskele(s) -> str:
@@ -77,6 +92,8 @@ class OpenAIUyumlu(Motor):
         cevap = _post(self.url, {"model": self.model, "temperature": sicaklik,
                                  "messages": [{"role": "system", "content": sistem},
                                               {"role": "user", "content": mesaj}]}, b)
+        u = cevap.get("usage") or {}
+        _kullanim(self.model, u.get("prompt_tokens"), u.get("completion_tokens"))
         try:
             return cevap["choices"][0]["message"]["content"].strip()
         except (KeyError, IndexError, TypeError):
@@ -111,6 +128,9 @@ class Gemini(Motor):
             govde["tools"] = [{"google_search": {}}]
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         cevap = _post(url, govde, {"x-goog-api-key": os.getenv("GEMINI_API_KEY", "")})
+        u = cevap.get("usageMetadata") or {}
+        _kullanim(model, u.get("promptTokenCount"),
+                  (u.get("candidatesTokenCount") or 0) + (u.get("thoughtsTokenCount") or 0))
         try:
             aday = cevap["candidates"][0]
             metin = "".join(p.get("text", "") for p in aday["content"]["parts"]).strip()
@@ -139,6 +159,8 @@ class Claude(Motor):
                       {"model": self.model, "max_tokens": 4000, "temperature": sicaklik, "system": sistem,
                        "messages": [{"role": "user", "content": mesaj}]},
                       {"x-api-key": os.getenv("ANTHROPIC_API_KEY", ""), "anthropic-version": "2023-06-01"})
+        u = cevap.get("usage") or {}
+        _kullanim(self.model, u.get("input_tokens"), u.get("output_tokens"))
         try:
             return "".join(p.get("text", "") for p in cevap["content"] if p.get("type") == "text").strip()
         except (KeyError, TypeError):

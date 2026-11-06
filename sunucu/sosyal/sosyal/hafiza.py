@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS mesajlar(
 CREATE TABLE IF NOT EXISTS arsiv_mesajlar(
   id INTEGER PRIMARY KEY, oturum_id INTEGER, veri TEXT, arsiv_ts TEXT, silinecek_ts TEXT);
 CREATE TABLE IF NOT EXISTS gunluk(id INTEGER PRIMARY KEY, ts TEXT, olay TEXT, ayrinti TEXT);
+CREATE TABLE IF NOT EXISTS kullanim(
+  id INTEGER PRIMARY KEY, ts TEXT, gun TEXT, motor TEXT, model TEXT, rol TEXT, giris INTEGER, cikis INTEGER,
+  tahmini INTEGER DEFAULT 0, basarili INTEGER, hata TEXT DEFAULT '');
+CREATE INDEX IF NOT EXISTS kullanim_gun ON kullanim(gun, motor);
 """
 
 
@@ -181,6 +185,21 @@ class Hafiza:
 
     def icerik_puanla(self, iid, puan, notlar=""):
         self._calis("UPDATE icerikler SET puan=?, notlar=? WHERE id=?", (puan, notlar, iid))
+
+    # ---- yapay zekâ kullanım sayacı
+    def kullanim_ekle(self, motor, model, rol, giris, cikis, tahmini, basarili, hata=""):
+        self._calis("INSERT INTO kullanim(ts,gun,motor,model,rol,giris,cikis,tahmini,basarili,hata) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    (simdi(), simdi()[:10], motor, model, rol, giris, cikis, int(tahmini), int(basarili), hata[:40]))
+
+    def kullanim_ozet(self, gun=7):
+        bas = (datetime.now(TZ) - timedelta(days=gun - 1)).strftime("%Y-%m-%d")
+        sql = ("SELECT gun, motor, COUNT(*) istek, SUM(basarili) basarili, SUM(giris) giris, SUM(cikis) cikis, "
+               "SUM(CASE WHEN hata='kota' THEN 1 ELSE 0 END) kota_hatasi, SUM(CASE WHEN basarili=0 THEN 1 ELSE 0 END) hata, "
+               "MAX(tahmini) tahmini FROM kullanim WHERE gun>=? GROUP BY gun, motor ORDER BY gun DESC, motor")
+        satir = self._oku(sql, (bas,))
+        roller = self._oku("SELECT motor, rol, COUNT(*) istek, SUM(giris+cikis) token FROM kullanim WHERE gun=? "
+                           "GROUP BY motor, rol ORDER BY token DESC", (simdi()[:10],))
+        return {"bugun": simdi()[:10], "gunler": satir, "roller": roller}
 
     def gunluk_listesi(self, limit=50):
         return self._oku("SELECT * FROM gunluk ORDER BY id DESC LIMIT ?", (limit,))

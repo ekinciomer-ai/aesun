@@ -46,6 +46,9 @@ summary{cursor:pointer;font-weight:600}
 .bekle{display:flex;align-items:center;gap:10px;color:var(--soluk)}
 .bekle::before{content:"";width:16px;height:16px;border:2px solid var(--cizgi);border-top-color:var(--ana);border-radius:50%;animation:d 1s linear infinite}
 @keyframes d{to{transform:rotate(360deg)}}
+.cubuk{height:8px;border-radius:99px;background:var(--cizgi);overflow:hidden;margin:6px 0 2px}
+.cubuk>i{display:block;height:100%;background:var(--iyi)}.cubuk.orta>i{background:var(--uyari)}.cubuk.dolu>i{background:var(--engel)}
+.gun{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--soluk);padding:4px 0}
 #giris{position:fixed;inset:0;background:var(--zemin);display:flex;align-items:center;justify-content:center;z-index:9;padding:16px}
 #giris .kart{width:100%;max-width:340px}
 </style>
@@ -128,6 +131,12 @@ summary{cursor:pointer;font-weight:600}
   <div class="kart"><h2>Kaynak dosyalar</h2><div class="liste" id="kayListe"></div></div>
 </section>
 <section id="s-motor" class="gizli">
+  <div class="kart"><h2>Bugünkü kullanım</h2>
+    <p class="soluk">Her çağrı sayılır. Token motorun bildirdiği sayıdır; bildirmeyende tahmindir (≈). Sınırlar ücretsiz katmanın yaklaşık günlük değerleridir; dolunca program sıradaki motora geçer.</p>
+    <div class="liste" id="kulBugun"></div>
+    <details><summary>Bugün görev başına</summary><div id="kulRol"></div></details>
+    <details><summary>Son 7 gün</summary><div id="kulGun"></div></details>
+  </div>
   <div class="kart"><h2>Yapay zekâ motorları</h2><div class="liste" id="motListe"></div></div>
   <div class="kart"><h2>Tampon araçları</h2><p class="soluk">GitHub'dan alınıp sunucuda yalıtılmış duran açık kaynak araçlar.</p><div id="aracListe"></div></div>
   <div class="kart"><h2>Görev dağılımı</h2><p class="soluk">Her görevde listedeki ilk hazır motor çalışır; hata verirse sıradakine geçilir.</p><div class="liste" id="rolListe"></div></div>
@@ -251,7 +260,22 @@ async function kaynakYukle(){
   const f=$("dosya").files[0];if(!f)return;const fd=new FormData();fd.append("dosya",f);
   try{await api("api/kaynak",{method:"POST",body:fd});$("dosya").value="";kaynakListe()}catch(e){alert(e.message)}
 }
+const bin=n=>n>=1000?(n/1000).toFixed(n>=10000?0:1).replace(/\.0$/,"")+" bin":String(n||0);
+function cubuk(deger,sinir,etiket){if(!sinir)return"";const o=Math.min(100,Math.round(100*deger/sinir));
+  return `<div class="cubuk ${o>=90?"dolu":o>=70?"orta":""}"><i style="width:${o}%"></i></div><div class="soluk">${etiket}: ${bin(deger)} / ${bin(sinir)} (%${o})</div>`}
+async function kullanimYukle(){
+  const k=await api("api/kullanim");const bug=k.gunler.filter(x=>x.gun===k.bugun);
+  $("kulBugun").innerHTML=bug.map(x=>{const s=k.sinirlar[x.motor]||{};const tok=(x.giris||0)+(x.cikis||0);
+    return `<div><b>${esc(x.motor)}</b> <span class="soluk">${x.istek} istek · ${x.tahmini?"≈":""}${bin(tok)} token (giden ${bin(x.giris)}, gelen ${bin(x.cikis)})</span>
+     ${x.hata?`<span class="rozet yasak">${x.hata} hata${x.kota_hatasi?`, ${x.kota_hatasi} kota`:""}</span>`:""}
+     ${cubuk(x.istek,s.istek,"istek")}${cubuk(tok,s.token,"token")}</div>`}).join("")||'<p class="soluk">Bugün henüz çağrı yok.</p>';
+  $("kulRol").innerHTML=k.roller.map(r=>`<div class="gun"><span>${esc(r.motor)} · ${esc(r.rol)}</span><span>${r.istek} istek · ${bin(r.token)} token</span></div>`).join("")||'<p class="soluk">Boş.</p>';
+  const gunler=[...new Set(k.gunler.map(x=>x.gun))];
+  $("kulGun").innerHTML=gunler.map(g=>{const l=k.gunler.filter(x=>x.gun===g);
+    return `<div class="gun"><span>${esc(g.slice(8,10)+"."+g.slice(5,7))}</span><span>${l.map(x=>`${esc(x.motor)} ${x.istek}/${bin((x.giris||0)+(x.cikis||0))}`).join(" · ")}</span></div>`}).join("")||'<p class="soluk">Boş.</p>';
+}
 async function motorYukle(){
+  kullanimYukle();
   const d=await api("api/durum");
   $("motListe").innerHTML=d.motorlar.map(m=>`<div><b>${esc(m.etiket)}</b> <span class="rozet ${m.hazir?"yetenek":"yasak"}">${m.hazir?"hazır":"anahtar yok"}</span> <span class="soluk">${esc(m.model)}${m.ucretsiz?" · ücretsiz katman":" · ücretli"}</span></div>`).join("");
   api("api/isler").then(x=>{$("aracListe").innerHTML=x.araclar&&x.araclar.zaman?aracSatir(x.araclar):'<p class="soluk">Sunucu işçisi henüz çalışmadı.</p>'});

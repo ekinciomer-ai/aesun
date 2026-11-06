@@ -124,3 +124,34 @@ def test_disarida_parolasiz_kapali_ve_deneme_siniri(ortam, monkeypatch):
     for _ in range(5):
         assert c.post("/api/giris", json={"parola": "x"}).status_code == 401
     assert c.post("/api/giris", json={"parola": "dogru-parola"}).status_code == 429
+
+
+def test_kullanim_sayaci(ortam, monkeypatch):
+    from sosyal import motorlar
+    st = ortam
+    oid = st.oturum_ac("youtube_shorts", "tr", "", "sayaç denemesi")
+    st.uret(oid, arastir=False)
+    oz = st.h.kullanim_ozet()
+    d = [x for x in oz["gunler"] if x["motor"] == "deneme"][0]
+    assert d["istek"] >= 4 and d["giris"] > 1000 and d["tahmini"] == 1
+    assert {"fikir", "yazar", "elestirmen"} <= {r["rol"] for r in oz["roller"]}
+
+    # motorun bildirdiği token ve kota hatası
+    def bildiren(self, *a, **k):
+        motorlar._kullanim("m1", 1234, 56)
+        return "x"
+    monkeypatch.setattr(motorlar.Deneme, "yaz", bildiren)
+    st._yaz(st.m["deneme"], "yazar", "s", "m")
+    son = st.h._oku("SELECT * FROM kullanim ORDER BY id DESC LIMIT 1")[0]
+    assert (son["giris"], son["cikis"], son["tahmini"], son["model"]) == (1234, 56, 0, "m1")
+
+    def kota(self, *a, **k):
+        raise motorlar.MotorHatasi("HTTP 429: quota")
+    monkeypatch.setattr(motorlar.Deneme, "yaz", kota)
+    import pytest as _p
+    with _p.raises(motorlar.MotorHatasi):
+        st._yaz(st.m["deneme"], "yazar", "s", "m")
+    assert st.h._oku("SELECT hata FROM kullanim ORDER BY id DESC LIMIT 1")[0]["hata"] == "kota"
+    from sosyal.web import create_app
+    j = create_app(st).test_client().get("/api/kullanim").json
+    assert j["sinirlar"]["groq"]["token"] == 100000 and j["gunler"]

@@ -157,28 +157,37 @@ def yaz(yol: Path, veri):
     gecici.replace(yol)
 
 
-def bir_tur():
-    for d in ("bekleyen", "cikti"):
+def bir_tur(hat=None):
+    """hat: 'ses' ya da 'video' (ayrı sıralar, ayrı kilit); None = ikisi."""
+    for d in ("bekleyen", "cikti", "iptal"):
         (KUYRUK / d).mkdir(parents=True, exist_ok=True)
     yaz(KUYRUK / "araclar.json", araclar())
     for dosya in sorted((KUYRUK / "bekleyen").glob("*.json")):
         try:
             j = json.loads(dosya.read_text(encoding="utf-8"))
-            if not str(j.get("id", "")).replace("_", "").isalnum():
-                raise ValueError("geçersiz iş kimliği")
-            if j.get("dil") not in EDGE_SES or j.get("tur") not in ("ses", "video"):
-                raise ValueError("geçersiz dil ya da iş türü")
+        except FileNotFoundError:
+            continue  # başka sıra aldı ya da iptal edildi
         except Exception as e:
             dosya.rename(dosya.with_suffix(".bozuk"))
             print("bozuk iş:", dosya.name, e)
             continue
+        if not str(j.get("id", "")).replace("_", "").isalnum() or j.get("dil") not in EDGE_SES \
+                or j.get("tur") not in ("ses", "video"):
+            dosya.rename(dosya.with_suffix(".bozuk"))
+            print("geçersiz iş:", dosya.name)
+            continue
+        if hat and j["tur"] != hat:
+            continue
         klasor = KUYRUK / "cikti" / j["id"]
         klasor.mkdir(parents=True, exist_ok=True)
+        try:
+            dosya.replace(klasor / "is.json")  # işi sahiplen (atomik); iş kaybolmaz, çıktının yanında saklanır
+        except FileNotFoundError:
+            continue
         yaz(klasor / "durum.json", {"durum": "isleniyor", "basla": zaman()})
-        dosya.replace(klasor / "is.json")  # iş kaybolmaz, çıktının yanında saklanır
         t = time.time()
         try:
-            sonuc = (video_uret if j.get("tur") == "video" else ses_uret)(j, klasor)
+            sonuc = (video_uret if j["tur"] == "video" else ses_uret)(j, klasor)
             sonuc.update(durum="bitti", sure_sn=round(time.time() - t))
         except Exception as e:
             sonuc = {"durum": "hata", "mesaj": str(e)[:400], "sure_sn": round(time.time() - t)}
@@ -189,10 +198,11 @@ def bir_tur():
 
 
 if __name__ == "__main__":
+    hat = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] in ("ses", "video") else None
     KUYRUK.mkdir(parents=True, exist_ok=True)
-    with open(KUYRUK / ".kilit", "w") as k:
+    with open(KUYRUK / f".kilit_{hat or 'hepsi'}", "w") as k:
         try:
             fcntl.flock(k, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            sys.exit(0)  # önceki tur sürüyor
-        bir_tur()
+            sys.exit(0)  # bu sıranın önceki turu sürüyor
+        bir_tur(hat)

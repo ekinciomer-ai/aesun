@@ -241,7 +241,7 @@ const saat=z=>{if(!z)return"";const d=new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(z)?z:
 const dk=z=>{const d=new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(z)?z:z+"Z");const m=Math.max(0,Math.round((Date.now()-d)/60000));return m<1?"1 dakikadan az":m+" dk"};
 let _yenile=null,_isler=[];
 function isHtml(x){const k=x.kalite||{};let d;
-  if(x.durum==="bekliyor")d=`<span class="durum sira">Sırada</span> <span class="soluk">Sunucu en geç 1 dakika içinde başlar.</span>`;
+  if(x.durum==="bekliyor")d=`<span class="durum sira">Sırada</span> <span class="soluk">Sunucu en geç 1 dakika içinde başlar${x.tur==="video"?" (önünde başka video varsa onun bitmesini bekler)":""}.</span> <button class="ikinci" style="margin-top:4px" onclick="isIptal('${x.id}',this)">İptal et</button>`;
   else if(x.durum==="isleniyor")d=`<span class="bekle"><span class="durum sira">Hazırlanıyor</span></span> <span class="soluk">başlayalı ${dk(x.basla||x.zaman)}${x.tur==="video"?" · video genelde 5–15 dk sürer":""}</span>`;
   else if(x.durum==="bitti")d=`<span class="durum hazir">Hazır ✓</span> <span class="soluk">${x.sure_sn?Math.max(1,Math.round(x.sure_sn/60))+" dk sürdü":""}</span>`;
   else if(x.durum==="kapıdan geçmedi")d=`<span class="durum olmadi">Kalite kontrolünden geçmedi</span> <span class="soluk">Video saklanmadı. Nedeni:</span>`;
@@ -271,6 +271,10 @@ async function icerikYukle(){
     ${isler.map(isHtml).join("")}</div>`}).join("")||'<div class="kart"><p class="soluk">Henüz onaylanmış içerik yok. Üret sekmesinde bir içerik üretip "İçeriği onayla ve kaydet" deyin.</p></div>';
   clearTimeout(_yenile);
   if(_isler.some(j=>j.durum==="bekliyor"||j.durum==="isleniyor")&&!$("s-icerik").classList.contains("gizli"))_yenile=setTimeout(icerikYukle,10000);
+}
+async function isIptal(id,dugme){
+  if(!confirm("Bu iş iptal edilsin mi?"))return;dugme.disabled=true;
+  try{await post(`api/is/${id}/iptal`);await icerikYukle()}catch(e){alert(e.message);dugme.disabled=false}
 }
 async function aracIs(id,tur,dugme){
   if(dugme){dugme.disabled=true;dugme.textContent="Sıraya alınıyor…"}

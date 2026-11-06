@@ -41,6 +41,8 @@ def is_olustur(icerik: dict, tur: str, ses: str = "", terimler=None):
         raise ValueError("İş türü ses ya da video olmalı.")
     if icerik.get("dil") not in denetim.DILLER:
         raise ValueError("Dil desteklenmiyor.")
+    if any(x["icerik_id"] == icerik["id"] and x["tur"] == tur and x["durum"] in ("bekliyor", "isleniyor") for x in isler(100)):
+        raise ValueError(("Ses" if tur == "ses" else "Video") + " işi bu içerik için zaten sırada ya da hazırlanıyor.")
     metin = seslendirme_metni(icerik["metin"])
     if len(metin) < 20:
         raise ValueError("İçerikte seslendirilecek '## Metin' bölümü bulunamadı.")
@@ -80,6 +82,19 @@ def isler(limit=30):
 
 def _ozet(j):
     return {k: j.get(k) for k in ("id", "tur", "icerik_id", "dil", "konu", "ses", "zaman")}
+
+
+def iptal(iid: str) -> bool:
+    """Sıradaki işi iptal eder: silinmez, iptal/ klasörüne taşınır. Başlamış iş iptal edilemez."""
+    if not re.fullmatch(r"[0-9]{14}_[0-9a-f]{6}", iid):
+        return False
+    k = kok()
+    (k / "iptal").mkdir(exist_ok=True)
+    try:
+        (k / "bekleyen" / f"{iid}.json").replace(k / "iptal" / f"{iid}.json")
+        return True
+    except FileNotFoundError:
+        return False
 
 
 def dosya_yolu(iid: str, ad: str):

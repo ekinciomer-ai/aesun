@@ -79,3 +79,25 @@ def test_web_arac(st):
     assert c.post(f"/api/icerik/{iid}/arac", json={"tur": "kotu"}).status_code == 400
     assert c.get("/api/isler").json["isler"][0]["durum"] == "bekliyor"
     assert c.get("/api/is/20260101000000_abcdef/ses.mp3").status_code == 404
+
+
+def test_tekrar_engeli_iptal_ve_ayri_siralar(st, tmp_path, monkeypatch):
+    from sosyal import arac
+    from sosyal.uretim import UretimHatasi
+    iid = st.h.icerikler()[0]["id"]
+    v = st.arac_isi(iid, "video")
+    with pytest.raises(UretimHatasi):
+        st.arac_isi(iid, "video")          # aynı iş ikinci kez girmez
+    sj = st.arac_isi(iid, "ses", "piper")  # farklı tür girer
+    import isci
+    monkeypatch.setattr(isci, "KUYRUK", tmp_path / "kuyruk")
+    monkeypatch.setattr(isci, "araclar", lambda: {})
+    calisan = []
+    monkeypatch.setattr(isci, "ses_uret", lambda j, k: calisan.append("ses") or {"dosyalar": []})
+    monkeypatch.setattr(isci, "video_uret", lambda j, k: calisan.append("video") or {"dosyalar": []})
+    isci.bir_tur("ses")                    # ses sırası videoyu beklemez, ona dokunmaz
+    assert calisan == ["ses"]
+    assert {x["id"]: x["durum"] for x in arac.isler()}[v["id"]] == "bekliyor"
+    assert arac.iptal(v["id"]) and not arac.iptal(v["id"])
+    assert (tmp_path / "kuyruk" / "iptal" / f"{v['id']}.json").exists()   # silinmedi, arşivde
+    assert not arac.iptal(sj["id"])        # başlamış iş iptal edilemez

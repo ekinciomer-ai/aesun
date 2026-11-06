@@ -187,6 +187,13 @@ def create_app(studyo=None):
     def isler():
         return jsonify(isler=arac.isler(), araclar=arac.araclar_durumu())
 
+    @app.post("/api/is/<iid>/iptal")
+    def is_iptal(iid):
+        if not arac.iptal(iid):
+            raise UretimHatasi("İş başlamış ya da bulunamadı; yalnız sıradaki iş iptal edilebilir.")
+        st.h.gunluk("arac_iptal", iid)
+        return jsonify(ok=True)
+
     @app.get("/api/is/<iid>/<ad>")
     def is_dosya(iid, ad):
         y = arac.dosya_yolu(iid, ad)

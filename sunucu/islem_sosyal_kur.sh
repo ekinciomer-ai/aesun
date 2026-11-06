@@ -19,26 +19,31 @@ done
 chown -R 1001:1001 $D/kaynak $D/kuyruk/bekleyen
 # Tampon araç işçisi (kapsayıcı dışında, dakikada bir; tek iş aynı anda)
 install -m 755 sunucu/sosyal/arac/isci.py $D/isci.py
-cat > /etc/systemd/system/sosyal-isci.service <<'UNIT'
+# İki ayrı sıra: ses (kısa işler) videoyu beklemez. Eski tek sıralı zamanlayıcı kapatılır; o an süren iş kesilmez.
+for H in ses video; do
+cat > /etc/systemd/system/sosyal-isci-$H.service <<UNIT
 [Unit]
-Description=Sosyal Stüdyo tampon araç işçisi
+Description=Sosyal Stüdyo araç işçisi ($H sırası)
 [Service]
 Type=oneshot
 Nice=10
 TimeoutStartSec=3600
-ExecStart=/usr/bin/python3 /opt/sosyal/isci.py
+ExecStart=/usr/bin/python3 /opt/sosyal/isci.py $H
 UNIT
-cat > /etc/systemd/system/sosyal-isci.timer <<'UNIT'
+cat > /etc/systemd/system/sosyal-isci-$H.timer <<UNIT
 [Unit]
-Description=Sosyal Stüdyo işçisi her dakika
+Description=Sosyal Stüdyo $H sırası her dakika
 [Timer]
 OnBootSec=2min
 OnUnitInactiveSec=1min
 [Install]
 WantedBy=timers.target
 UNIT
-systemctl daemon-reload && systemctl enable --now sosyal-isci.timer >/dev/null 2>&1
-python3 $D/isci.py >/dev/null 2>&1
+done
+systemctl disable --now sosyal-isci.timer >/dev/null 2>&1; rm -f /etc/systemd/system/sosyal-isci.timer
+systemctl daemon-reload && systemctl enable --now sosyal-isci-ses.timer sosyal-isci-video.timer >/dev/null 2>&1
+echo "NOT: işçi sıraları: ses $(systemctl is-active sosyal-isci-ses.timer) · video $(systemctl is-active sosyal-isci-video.timer)"
+timeout 120 python3 $D/isci.py ses >/dev/null 2>&1
 echo "NOT: tampon araçları: $(python3 -c "import json;d=json.load(open('$D/kuyruk/araclar.json'));print(' '.join(k+('=var' if v else '=YOK') for k,v in d.items() if k!='zaman'))" 2>/dev/null)"
 # 3) ayarlar (yoksa örnekten) ve kasadan anahtarlar
 if [ ! -f $D/sosyal.env ]; then

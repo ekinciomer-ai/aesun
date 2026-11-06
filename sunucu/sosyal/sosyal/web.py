@@ -3,6 +3,8 @@ import hmac
 import os
 import secrets
 import threading
+import time
+from datetime import timedelta
 
 from flask import Flask, Response, abort, jsonify, render_template, request, send_file, session
 
@@ -13,8 +15,10 @@ from .uretim import Studyo, UretimHatasi
 def create_app(studyo=None):
     app = Flask(__name__)
     app.secret_key = os.getenv("SOSYAL_OTURUM_ANAHTARI") or secrets.token_hex(32)
-    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Strict",
-                      MAX_CONTENT_LENGTH=2 * 1024 * 1024)
+    disarida = os.getenv("SOSYAL_DISARIDA", "") == "1"  # alan adından (HTTPS) yayında mı
+    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Strict", SESSION_COOKIE_SECURE=disarida,
+                      PERMANENT_SESSION_LIFETIME=timedelta(days=30), MAX_CONTENT_LENGTH=2 * 1024 * 1024)
+    denemeler = {}  # ip → yanlış parola zamanları (15 dk'da 5 hata → bekletilir)
     st = studyo or Studyo()
     st.h.temizle()
     calisan = {}  # oturum → {"is": ..., "hata": ...}; uzun işler arka planda yürür, ekran durumu sorar
@@ -45,9 +49,20 @@ def create_app(studyo=None):
 
     @app.before_request
     def koru():
+        if disarida and not parola() and request.path != "/saglik":
+            return jsonify(hata="Parola tanımlı değil; program dışarıya kapalı."), 503
         acik = request.path in ("/", "/saglik", "/api/giris") or request.path.startswith("/static")
         if parola() and not acik and not session.get("giris"):
             return jsonify(hata="Giriş gerekli."), 401
+
+    @app.after_request
+    def basliklar(r):
+        r.headers.setdefault("X-Content-Type-Options", "nosniff")
+        r.headers.setdefault("X-Frame-Options", "DENY")
+        r.headers.setdefault("Referrer-Policy", "no-referrer")
+        if request.path.startswith("/api/"):
+            r.headers.setdefault("Cache-Control", "no-store")
+        return r
 
     @app.errorhandler(UretimHatasi)
     def _hata(e):
@@ -66,9 +81,18 @@ def create_app(studyo=None):
 
     @app.post("/api/giris")
     def giris():
-        if parola() and hmac.compare_digest(str(j().get("parola", "")), parola()):
+        ip = (request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or request.remote_addr or "?")
+        simdi = time.time()
+        son = [t for t in denemeler.get(ip, []) if simdi - t < 900]
+        if len(son) >= 5:
+            return jsonify(hata="Çok fazla yanlış deneme. 15 dakika sonra tekrar deneyin."), 429
+        if parola() and hmac.compare_digest(str(j().get("parola", "")).encode(), parola().encode()):
+            session.permanent = True
             session["giris"] = True
+            denemeler.pop(ip, None)
             return jsonify(ok=True)
+        denemeler[ip] = son + [simdi]
+        st.h.gunluk("giris_hatasi", f"yanlış parola · {ip}")
         return jsonify(hata="Parola yanlış."), 401
 
     @app.get("/api/durum")

@@ -112,3 +112,15 @@ def test_adressiz_kaynak_uyarilir():
     assert any("adres yok" in u for u in d["uyari"])
     d = denetle("## Metin\nkısa metin\n## Kaynaklar\n- https://bbc.com/x", "facebook")
     assert not any("adres" in u for u in d["uyari"])
+
+
+def test_disarida_parolasiz_kapali_ve_deneme_siniri(ortam, monkeypatch):
+    from sosyal.web import create_app
+    monkeypatch.setenv("SOSYAL_DISARIDA", "1")
+    c = create_app(ortam).test_client()
+    assert c.get("/").status_code == 503 and c.get("/saglik").status_code == 200
+    monkeypatch.setenv("SOSYAL_PAROLA", "dogru-parola")
+    c = create_app(ortam).test_client()
+    for _ in range(5):
+        assert c.post("/api/giris", json={"parola": "x"}).status_code == 401
+    assert c.post("/api/giris", json={"parola": "dogru-parola"}).status_code == 429

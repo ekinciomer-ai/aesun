@@ -193,7 +193,20 @@ def main():
                             + (" → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor." if statistics.mean(b) < statistics.mean(a) - 10
                                else " → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil."))
     ust = sorted([v for v in vids if v["tur"] == "Short" and v["olgun"]], key=lambda v: -v["i48"])
+    # TikTok: hesap 7 günlük izlenmesi (tt_istatistik.yml yazar). Dağıtım yoksa yeni planlama durur, mevcut planlılar kalır.
+    tt = j.get("tiktok") or {}; tt_izl = 0
+    try: tt_izl = int(str((tt.get("hesap_7g") or {}).get("izlenme_7g", "0")).replace(".", "").replace(",", "") or 0)
+    except Exception: pass
+    tt_yay = [x for x in j["kayitlar"] if x.get("platform") == "TikTok" and x.get("durum") == "Yayında"]
+    if tt and tt_izl < 200 and len(tt_yay) >= 5:
+        tiktok = {"karar": "DURDUR (yeni planlama)", "izlenme_7g": tt_izl, "yayinda": len(tt_yay), "okuma": tt.get("okuma"),
+                  "sebep": "Hesap 7 günde %d izlenme, %d yayında video → TikTok 'Senin İçin' dağıtımı yok (uyarı/kısıtlama bildirimi yok, videolar herkese açık). Bu boşluğa 3/gün göndermek hesabın 'etkileşimsiz' geçmişini büyütür." % (tt_izl, len(tt_yay)),
+                  "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
+                  "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."}
+    else:
+        tiktok = {"karar": "SÜRDÜR" if tt else "VERİ YOK", "izlenme_7g": tt_izl, "yayinda": len(tt_yay), "okuma": tt.get("okuma")}
     out = {
+        "tiktok": tiktok,
         "olusturma": simdi.isoformat(timespec="minutes"),
         "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
         "kurallar": [
@@ -203,6 +216,7 @@ def main():
             "Aynı içerik bir kanalda iki kez açık kalmaz (GİZLE eylemi: silme yok, Gizli'ye alınır).",
             "Tablo serisinde sıralama: önce dünyaca tanınan eserler; az bilinen eser araya en fazla 3 günde bir girer.",
             "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR).",
+            "TikTok: 'tiktok.karar' DURDUR ise yeni TikTok planı yapılmaz (mevcut planlılar silinmez); karar hesap izlenmesine göre otomatik değişir.",
             "Başlık kalıbı: tek merak sorusu + emoji ('X neden Y? 😨', 'Gerçekte ne oldu?'); kanıtı: kanalın tutan Short'ları ve ABD'de Zack D. Films (29 M abone) aynı kalıpla büyüdü.",
             "Telif/marka: kulüp ve marka armaları/logoları, maç ve TV görüntüsü, UEFA/FIFA logo ve marşları, hazır müzik KULLANILMAZ. Kulüp adları ve takım renkleri serbest; müzik kanalın kendi üretimi ya da lisanslı olur.",
             "POV denemesi: trajedi/soykırım/savaş kurbanı POV'u YASAK (tepki ve topluluk kuralı riski); günlük yaşam, meslek, tuhaf adetler serbest. Görsellerde dönem doğruluğu kontrol edilir (ör. Roma binaları renkliydi).",

@@ -209,6 +209,8 @@ function yolCiz(A,R){const b=document.getElementById('yh');if(!A||!A.plan){b.hid
  const son=((R&&R.islemler)||[]).slice(-5).reverse().map(i=>'<li>'+esc(fmt(new Date(i.zaman)))+' · '+esc(i.kanal)+' · '+esc(i.vid)+' · '+esc(i.islem)+'</li>').join('');
  document.getElementById('yhi').innerHTML='<div><h4>Bulgular</h4><ul>'+A.bulgular.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'
   +'<div><h4>Plan (üretim buna uyar)</h4><ul>'+plan+'</ul></div><div><h4>Seri kararları</h4>'+ser+'</div>'
+  +(A.tiktok&&A.tiktok.karar?'<div><h4>TikTok (@antikstudyo)</h4><ul><li><span class="kr '+(A.tiktok.karar.startsWith('DURDUR')?'DURDUR':A.tiktok.karar.startsWith('SÜRDÜR')?'SÜRDÜR':'DENE')+'">'+esc(A.tiktok.karar)+'</span> · hesap 7 gün: '+esc(String(A.tiktok.izlenme_7g))+' izlenme · '+esc(String(A.tiktok.yayinda))+' yayında video'+(A.tiktok.okuma?' <span class="ince">· okuma '+esc(A.tiktok.okuma)+'</span>':'')+'</li>'
+    +(A.tiktok.sebep?'<li>'+esc(A.tiktok.sebep)+'</li>':'')+(A.tiktok.kosul?'<li><b>Koşul:</b> '+esc(A.tiktok.kosul)+'</li>':'')+(A.tiktok.sunucudan_yapilamayan?'<li><b>Sunucudan yapılamayan:</b> '+esc(A.tiktok.sunucudan_yapilamayan)+'</li>':'')+'</ul></div>':'')
   +((A.yeni_seri_denemeleri||[]).length?'<div><h4>Yeni seri denemeleri</h4><ul>'+A.yeni_seri_denemeleri.map(d=>'<li><b>'+esc(d.seri)+'</b> · '+esc(d.kanallar.join(', '))+' · '+esc(d.kota)+'<div class="ince">'+esc(d.kalip)+' — '+esc(d.kanit)+'</div></li>').join('')+'</ul></div>':'')
   +(ey?'<div><h4>Yapılacaklar (sunucu ve ajanlar uygular)</h4><ul>'+ey+'</ul></div>':'')
   +(son?'<div><h4>Son otomatik işlemler</h4><ul>'+son+'</ul></div>':'');}

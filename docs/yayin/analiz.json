@@ -1,5 +1,14 @@
 {
- "olusturma": "2026-11-06T10:22+03:00",
+ "tiktok": {
+  "karar": "DURDUR (yeni planlama)",
+  "izlenme_7g": 33,
+  "yayinda": 12,
+  "okuma": "2026-11-06 12:19",
+  "sebep": "Hesap 7 günde 33 izlenme, 12 yayında video → TikTok 'Senin İçin' dağıtımı yok (uyarı/kısıtlama bildirimi yok, videolar herkese açık). Bu boşluğa 3/gün göndermek hesabın 'etkileşimsiz' geçmişini büyütür.",
+  "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
+  "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
+ },
+ "olusturma": "2026-11-06T12:20+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -8,6 +17,7 @@
   "Aynı içerik bir kanalda iki kez açık kalmaz (GİZLE eylemi: silme yok, Gizli'ye alınır).",
   "Tablo serisinde sıralama: önce dünyaca tanınan eserler; az bilinen eser araya en fazla 3 günde bir girer.",
   "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR).",
+  "TikTok: 'tiktok.karar' DURDUR ise yeni TikTok planı yapılmaz (mevcut planlılar silinmez); karar hesap izlenmesine göre otomatik değişir.",
   "Başlık kalıbı: tek merak sorusu + emoji ('X neden Y? 😨', 'Gerçekte ne oldu?'); kanıtı: kanalın tutan Short'ları ve ABD'de Zack D. Films (29 M abone) aynı kalıpla büyüdü.",
   "Telif/marka: kulüp ve marka armaları/logoları, maç ve TV görüntüsü, UEFA/FIFA logo ve marşları, hazır müzik KULLANILMAZ. Kulüp adları ve takım renkleri serbest; müzik kanalın kendi üretimi ya da lisanslı olur.",
   "POV denemesi: trajedi/soykırım/savaş kurbanı POV'u YASAK (tepki ve topluluk kuralı riski); günlük yaşam, meslek, tuhaf adetler serbest. Görsellerde dönem doğruluğu kontrol edilir (ör. Roma binaları renkliydi)."
@@ -176,11 +186,11 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tarihi Magazin",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 2,
-   "medyan_48sa": 1545,
-   "tutma_orani": 100,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 813,
+   "tutma_orani": 50,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Saçının içinde FARE yaşayan zengin kadınlar?! 🐭👑 #shorts #tarih #keşfet",
@@ -204,8 +214,8 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 127,
-  "Antik Stüdyo": 447
+  "Antik Stüdyo": 447,
+  "Ancient Studio": 127
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -230,8 +240,8 @@
     "medyan": 1691
    },
    "20:00": {
-    "n": 2,
-    "medyan": 1609
+    "n": 3,
+    "medyan": 1236
    },
    "21:00": {
     "n": 1,
@@ -285,7 +295,7 @@
  "bulgular": [
   "Dün (2026-11-05) 5875 izlenme geldi; bir önceki gün 1250.",
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 127 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 4 tanesi tuttu (eşik 447 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 447 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 127 izlenme / 48 sa).",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 447 izlenme / 48 sa).",

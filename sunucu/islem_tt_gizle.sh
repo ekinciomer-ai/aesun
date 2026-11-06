@@ -17,7 +17,13 @@ with sync_playwright() as p:
     if not satir.count(): print("NOT: gönderi bulunamadı"); raise SystemExit(1)
     # planlı gönderide satır içi seçici kapalı → düzenle (kalem) sayfasından gizlilik değiştir
     try:
-        satir.locator("button, [role=button]").first.click(timeout=5000); time.sleep(6); pg.screenshot(path="/work/adim/gizle_1.png")
+        hucre = pg.get_by_text(H, exact=False).first.locator("xpath=ancestor::*[contains(@class,'row') or contains(@class,'Row') or self::tr][1]")
+        if not hucre.count(): hucre = satir
+        print("NOT: satırda düğme:", hucre.locator("button").count(), "svg:", hucre.locator("svg").count())
+        hucre.hover(); time.sleep(1)
+        hedef = hucre.locator("button").first if hucre.locator("button").count() else hucre.locator("svg").first
+        hedef.click(timeout=5000, force=True); time.sleep(6); pg.screenshot(path="/work/adim/gizle_1.png")
+        print("NOT: url:", pg.url[:120])
         metin = pg.inner_text("body"); print("NOT: sayfa:", " | ".join(x.strip() for x in metin.splitlines() if x.strip())[:600])
         kutu = pg.get_by_text(re.compile(r"^(Herkes|Everyone)$")).first
         kutu.click(timeout=5000); time.sleep(1.5)

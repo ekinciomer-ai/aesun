@@ -4,7 +4,7 @@
 set -uo pipefail
 docker exec sosyal-studyo rm -rf /tmp/dene
 T=$(date +%s)
-docker exec -e SOSYAL_VERI=/tmp/dene -e SOSYAL_KUYRUK=/tmp/dene/kuyruk sosyal-studyo python - <<'PY' > /tmp/sosyal_dene.txt 2>&1
+docker exec -i -e SOSYAL_VERI=/tmp/dene -e SOSYAL_KUYRUK=/tmp/dene/kuyruk sosyal-studyo python - <<'PY' > /tmp/sosyal_dene.txt 2>&1
 import json, time
 from sosyal.uretim import Studyo
 s = Studyo()

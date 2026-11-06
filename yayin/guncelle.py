@@ -228,6 +228,17 @@ def main():
                 continue  # yorumları kapalı / henüz yayında değil
             for it in d.get("items", []):
                 isle_thread(it, x.get("kanal"), cid)
+        # c) YouTube'un onaya beklettiği yorumlar: API anahtarıyla görünmez; sunucudaki resmi bağlantı okur (analitik.json)
+        try:
+            an_y = json.load(open(os.path.join(os.path.dirname(YOL), "analitik.json"), encoding="utf-8")).get("bekleyen_yorumlar", [])
+        except Exception:
+            an_y = []
+        for b in an_y:
+            if not b.get("id") or not b.get("vid") or b["id"] in gorulen or not (b.get("sn") or {}).get("publishedAt"):
+                continue
+            ekle_yorum(b["sn"], b["id"], b["vid"], b.get("kanal"), b.get("cid"), None)
+            if yorumlar and yorumlar[-1]["id"] == b["id"]:
+                yorumlar[-1]["onay_bekliyor"] = True  # Studio → Yorumlar → "İnceleme için tutulanlar"
         # Kalıcı: okuma hata verse de (ör. 2. sayfada) ya da yorum eski sayfalarda kalsa da eski yorumlar silinmez
         for y in j.get("yorumlar", []):
             if y["id"] not in gorulen:
@@ -243,6 +254,8 @@ def main():
                 if not y["yanitlandi"] and y["id"] not in var:
                     kq.append({"kanal": y["kanal"], "video": y["video"], "vid": y["vid"], "yorum_id": y["id"], "yazar": y["yazar"],
                                "metin": y["metin"][:300], "zaman": y["zaman"], "durum": "TASLAK BEKLİYOR", "yanit": ""}); ekle += 1
+                    if y.get("onay_bekliyor"):
+                        kq[-1]["not"] = "YouTube bu yorumu incelemeye aldı; yanıttan önce Studio'da onaylanmalı"
             for k in kq:   # kanal yanıtlamışsa (Studio'dan elle) kuyruktan düş
                 if k.get("durum") in ("ONAY BEKLİYOR", "TASLAK BEKLİYOR") and any(y["id"] == k.get("yorum_id") and y["yanitlandi"] for y in yorumlar):
                     k["durum"] = "elle yanıtlandı"

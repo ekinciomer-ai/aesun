@@ -162,7 +162,7 @@ function yorumCiz(Y){
  const sirali=[...bek,...Y.filter(y=>y.yanitlandi).slice(0,10)];
  window._yrm=sirali;
  document.getElementById('yrl').innerHTML=sirali.map((y,i)=>'<div class="yr"><div class="ince">'+esc(y.kanal)+' · '+esc(y.video)+' · '+fmt(new Date(y.zaman))+'</div>'
-  +'<div><b>'+esc(y.yazar)+'</b>'+(y.yanitlandi?'':' <span class="rozet" style="background:var(--k)">Yanıt bekliyor</span>')+'</div>'
+  +'<div><b>'+esc(y.yazar)+'</b>'+(y.yanitlandi?'':' <span class="rozet" style="background:var(--k)">Yanıt bekliyor</span>')+(y.onay_bekliyor?' <span class="rozet" style="background:#5C6470">YouTube onayında</span>':'')+'</div>'
   +'<div class="m">'+esc(y.metin)+'</div>'
   +(y.yanit?'<div class="yn">↳ Kanal yanıtı: '+esc(y.yanit)+'</div>':'')
   +'<div style="margin-top:6px"><a class="btn" href="'+esc(y.link)+'" target="_blank" rel="noopener noreferrer">YouTube\'da aç ↗</a>'

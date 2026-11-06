@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 KOK = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "yayin")
 TZ = timezone(timedelta(hours=3))
-GUNLUK_KOTA = {"Antik Stüdyo": 4, "Ancient Studio": 3}   # günde en fazla Short (YouTube), kanal başına
+GUNLUK_KOTA = {"Antik Stüdyo": 4, "Ancient Studio": 3, "Estudio Antiguo": 3}   # günde en fazla Short (YouTube), kanal başına
 MIN_ORNEK = 3          # karar için en az bu kadar ölçülmüş video
 OLGUN_SAAT = 40        # bu yaştan küçük video "erken" sayılır, karara katılmaz
 

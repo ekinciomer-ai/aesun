@@ -4,7 +4,7 @@
 aesun-api kapsayıcısı (/veri/asistan/kuyruk) üzerinden gelen yönetici (Ömer) onaylı
 istekleri root yetkisiyle ve tam serbestlikle işler:
 - Kod Okuma / Düzenleme / GitHub Push & Canlı Yayınlama (/opt/aesun/kod_aesun ve /opt/aesun-web/portal)
-- Canlı YouTube API yönetimi (Antik Stüdyo TR & Ancient Studio EN): listeleme, planlama,
+- Canlı YouTube API yönetimi (Antik Stüdyo TR, Ancient Studio EN, Estudio Antiguo ES): listeleme, planlama,
   başlık/açıklama/gizlilik değiştirme, silme, yorum okuma/yanıtlama, URL veya sunucu dosyasından yükleme
 - Doğrudan Merkez Sunucu (159.198.76.80) kabuk/komut çalıştırma (docker, systemctl, git, dosya, log)
 - Hızlı Çok Adımlı AI Araç Çağırma (Multi-Turn Tool-Calling) motoru
@@ -29,6 +29,7 @@ PORTAL_CANLI_DIR = Path("/opt/aesun-web/portal")
 KANALLAR = {
     "TR": ("UC77LyY3gqWmBNAKp2lbsGBg", "Antik Stüdyo"),
     "EN": ("UCFLJUlhUSgjcLbp9ad_t9PQ", "Ancient Studio"),
+    "ES": ("UCTC_yS0lwl-owMuo5b4bNtQ", "Estudio Antiguo"),
 }
 
 GIZLI_DESEN = re.compile(
@@ -322,14 +323,18 @@ def video_guncelle(istek: dict) -> str:
         tok
     ).get("items", [])
     if not mevcut:
-        diger = "EN" if dil == "TR" else "TR"
-        cid2, kad2 = KANALLAR[diger]
-        tok2 = get_access_token(cid2)
-        mevcut2 = yt_api(f"https://www.googleapis.com/youtube/v3/videos?part=snippet,status&id={vid}", tok2).get("items", [])
-        if mevcut2:
-            dil, cid, kad, tok, mevcut = diger, cid2, kad2, tok2, mevcut2
+        for diger in [d for d in KANALLAR if d != dil]:
+            cid2, kad2 = KANALLAR[diger]
+            try:
+                tok2 = get_access_token(cid2)
+                mevcut2 = yt_api(f"https://www.googleapis.com/youtube/v3/videos?part=snippet,status&id={vid}", tok2).get("items", [])
+            except Exception:
+                continue
+            if mevcut2:
+                dil, cid, kad, tok, mevcut = diger, cid2, kad2, tok2, mevcut2
+                break
         else:
-            raise ValueError(f"Video her iki kanalda da bulunamadı: {vid}")
+            raise ValueError(f"Video hiçbir kanalda bulunamadı: {vid}")
     v = mevcut[0]
     sn = v["snippet"]
     st = v["status"]

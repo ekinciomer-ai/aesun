@@ -1,6 +1,6 @@
 #!/bin/bash
 # Kanal yönetimi (otomatik, günde 2 kez; .github/workflows/yayin_yonet.yml çalıştırır).
-# 1) Her iki kanalın TÜM yüklemelerinin gerçek durumunu okur (herkese açık / planlı / gizli, yayın saati).
+# 1) Üç kanalın (TR/EN/ES) TÜM yüklemelerinin gerçek durumunu okur (herkese açık / planlı / gizli, yayın saati).
 # 2) YouTube Analytics'ten video başına izlenme, ortalama izlenme süresi ve izlenme yüzdesini okur.
 # 3) docs/yayin/analiz.json eylemlerini uygular: GİZLE (tekrar eden kopya → Gizli), ERTELE (durdurulan serinin ileri tarihli planını kaldırır).
 #    YASAK: silme, herkese açma, planlama, başlık/açıklama değişikliği. İşlem öncesi durum yedeklenir.
@@ -15,7 +15,8 @@ D, ANALIZ = sys.argv[1], sys.argv[2]
 TZ = timezone(timedelta(hours=3))
 simdi = datetime.now(TZ)
 ist = json.load(open(os.path.join(D, "istemci.json"), encoding="utf-8"))
-KANALLAR = {"UC77LyY3gqWmBNAKp2lbsGBg": "Antik Stüdyo", "UCFLJUlhUSgjcLbp9ad_t9PQ": "Ancient Studio"}
+KANALLAR = {"UC77LyY3gqWmBNAKp2lbsGBg": "Antik Stüdyo", "UCFLJUlhUSgjcLbp9ad_t9PQ": "Ancient Studio",
+            "UCTC_yS0lwl-owMuo5b4bNtQ": "Estudio Antiguo"}
 MAKS_GIZLE = 3
 
 def token(cid):
@@ -43,7 +44,7 @@ try:
 except Exception:
     yorum_kuyrugu = []
 
-out = {"zaman": simdi.isoformat(timespec="minutes"), "kanallar": {}, "islemler": [], "hatalar": []}
+out = {"zaman": simdi.isoformat(timespec="minutes"), "kanallar": {}, "islemler": [], "hatalar": [], "bekleyen_yorumlar": []}
 for cid, ad in KANALLAR.items():
     try:
         tok = token(cid)
@@ -82,6 +83,18 @@ for cid, ad in KANALLAR.items():
                              izlenme_yuzde=round(x.get("averageViewPercentage") or 0, 1), abone_kazanc=x.get("subscribersGained"), izlenme_dk=x.get("estimatedMinutesWatched"))
         except urllib.error.HTTPError as e:
             out["hatalar"].append(f"{ad} analitik: HTTP {e.code}")
+        # ONAYA BEKLETİLEN YORUMLAR (salt okunur): YouTube'un "incelenmek üzere tutulan" yorumları API anahtarıyla görünmez,
+        # yalnız kanalın resmi bağlantısıyla okunur. Hiçbir yorum onaylanmaz/reddedilmez; yalnız listelenir.
+        try:
+            q = urllib.parse.urlencode({"part": "snippet", "allThreadsRelatedToChannelId": cid, "moderationStatus": "heldForReview",
+                                        "maxResults": 100, "textFormat": "plainText"})
+            for it in api("https://www.googleapis.com/youtube/v3/commentThreads?" + q, tok).get("items", []):
+                s = it["snippet"]["topLevelComment"]["snippet"]
+                out["bekleyen_yorumlar"].append({"id": it["id"], "kanal": ad, "cid": cid,
+                    "vid": it["snippet"].get("videoId") or s.get("videoId"),
+                    "sn": {k: s.get(k) for k in ("publishedAt", "authorDisplayName", "textDisplay", "authorChannelId", "likeCount")}})
+        except Exception as e:
+            out["hatalar"].append(f"{ad} bekletilen yorumlar: {type(e).__name__}"[:120])
         # GİZLE: yalnız bu kanalın videosu, şu an public/planlı ise, en fazla MAKS_GIZLE
         for e in [e for e in gizle if e["vid"] in videolar][:MAKS_GIZLE]:
             v = videolar[e["vid"]]

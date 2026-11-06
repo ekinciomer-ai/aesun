@@ -54,6 +54,7 @@ rm -f $D/kod.txt; chmod 600 $D/rclone.conf 2>/dev/null
 fi
 [ -f $D/rclone.conf ] || exit 1
 RC="rclone --config $D/rclone.conf"
+echo "NOT: Drive hata ayrıntısı: $($RC lsd gdrive: 2>&1 | grep -oE "project [0-9]+|https://console[^ \"]+" | sort -u | head -3 | tr "\n" " ")"
 $RC mkdir gdrive:aesun-yedek && echo "NOT: Drive klasörü hazır: $($RC lsd gdrive: 2>&1 | grep -c aesun-yedek) · kota: $($RC about gdrive: 2>/dev/null | tr '\n' ' ')"
 timeout 7000 $RC sync /var/yedek/restic gdrive:aesun-yedek/restic --transfers 4 --stats-one-line --stats 0 2>&1 | tail -2 | sed 's/^/NOT: eşitleme: /'
 echo "NOT: Drive'daki dosya sayısı: $($RC size gdrive:aesun-yedek/restic 2>/dev/null | tr '\n' ' ')"

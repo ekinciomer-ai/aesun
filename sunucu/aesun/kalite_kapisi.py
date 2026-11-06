@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Yayın öncesi kalite kapısı (ffmpeg/ffprobe). Kullanım: kalite_kapisi.py <video.mp4> [kayit.json]
 Çıktı: JSON {"gecti": bool, "engel": [...], "uyari": [...], "olcum": {...}}; çıkış kodu 0 = geçti, 1 = engellendi.
-Engel (yayın durur): çözünürlük düşük, ses yok, süre yok, siyah kare çok, ses seviyesi çok düşük/yüksek.
+Engel (yayın durur): çözünürlük düşük, ses yok, süre yok, siyah kare çok, ses seviyesi çok düşük/yüksek,
+altyazı bandı dışında yazı (stok klipteki "Subscribe" gibi; tesseract ile).
 Uyarı (yayın sürer, rapora girer): renk soluk, yapay zekâ beyanı ya da kaynak/lisans bilgisi eksik."""
 import json, re, subprocess, sys
 
@@ -25,11 +26,33 @@ def olc(yol):
     sat = [float(x) for x in re.findall(r"SATAVG=([\d.]+)", r.stdout + r.stderr)]
     o["siyah_oran"] = round(siyah / o["sure_sn"], 3)
     o["doygunluk_ort"] = round(sum(sat) / len(sat), 1) if sat else None
+    o["yabanci_yazi_kare"] = yabanci_yazi(yol, o["sure_sn"])
     if a is not None:
         r = calis("ffmpeg", "-hide_banner", "-nostats", "-i", yol, "-af", "ebur128", "-vn", "-f", "null", "-")
         m = re.findall(r"I:\s*(-?[\d.]+) LUFS", r.stderr)
         o["ses_lufs"] = float(m[-1]) if m else None
     return o
+
+
+def yabanci_yazi(yol, sure):
+    """Altyazı bandı dışında (görüntünün üst %70'i) okunur yazı olan kare sayısı (6 örnek). tesseract yoksa None."""
+    import shutil, tempfile, os
+    if not shutil.which("tesseract") or sure <= 0:
+        return None
+    say = 0
+    with tempfile.TemporaryDirectory() as t:
+        for i in range(6):
+            k = os.path.join(t, f"k{i}.png")
+            calis("ffmpeg", "-v", "error", "-y", "-ss", str(sure * (i + 0.5) / 6), "-i", yol, "-frames:v", "1",
+                  "-vf", "crop=iw:ih*0.70:0:0", k, sure=60)
+            r = calis("tesseract", k, "-", "--psm", "11", "tsv", sure=60)
+            kelime = 0
+            for satir in r.stdout.splitlines()[1:]:
+                a = satir.split("\t")
+                if len(a) == 12 and a[11].strip() and float(a[10] or -1) > 75 and re.fullmatch(r"[A-Za-zÀ-ÿ]{4,}", a[11].strip()):
+                    kelime += 1
+            say += kelime >= 3
+    return say
 
 
 def degerlendir(o, kayit):
@@ -46,6 +69,8 @@ def degerlendir(o, kayit):
     l = o.get("ses_lufs")
     if l is not None and not (-24 <= l <= -9):
         engel.append(f"ses seviyesi uygun değil ({l} LUFS; -24 ile -9 arası olmalı)")
+    if o.get("yabanci_yazi_kare"):
+        engel.append(f"videoda altyazı dışında yazı var ({o['yabanci_yazi_kare']}/6 örnek karede); altyazıyla çakışabilir")
     d = o.get("doygunluk_ort")
     if d is not None and d < 18:
         uyari.append(f"renkler soluk görünüyor (doygunluk {d})")

@@ -293,6 +293,8 @@ def main():
                     yeni["izlenme_yuzde"] = v["izlenme_yuzde"]
                 if v.get("begeni") is not None:
                     yeni["begeni"] = v["begeni"]
+                if v.get("izlenme_dk") is not None:
+                    yeni["izlenme_dk"] = v["izlenme_dk"]
                 for k2, val in yeni.items():
                     if x.get(k2) != val:
                         x[k2] = val; degisti += 1

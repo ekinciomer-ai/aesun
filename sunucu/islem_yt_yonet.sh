@@ -69,9 +69,9 @@ for cid, ad in KANALLAR.items():
                                      "sentetik": st.get("containsSyntheticMedia")}
         # Analytics: video başına izlenme süresi ve izlenme yüzdesi (veri 1-2 gün gecikmeli gelir)
         try:
-            q = urllib.parse.urlencode({"ids": "channel==MINE", "startDate": (simdi - timedelta(days=60)).strftime("%Y-%m-%d"),
+            q = urllib.parse.urlencode({"ids": "channel==MINE", "startDate": "2026-01-01",
                                         "endDate": simdi.strftime("%Y-%m-%d"), "dimensions": "video",
-                                        "metrics": "views,averageViewDuration,averageViewPercentage,likes,subscribersGained",
+                                        "metrics": "views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained",
                                         "sort": "-views", "maxResults": 200})
             a = api("https://youtubeanalytics.googleapis.com/v2/reports?" + q, tok)
             kol = [c["name"] for c in a.get("columnHeaders", [])]
@@ -79,7 +79,7 @@ for cid, ad in KANALLAR.items():
                 x = dict(zip(kol, r)); v = videolar.get(x["video"])
                 if v is not None:
                     v.update(an_izlenme=x.get("views"), ort_sure_sn=x.get("averageViewDuration"),
-                             izlenme_yuzde=round(x.get("averageViewPercentage") or 0, 1), abone_kazanc=x.get("subscribersGained"))
+                             izlenme_yuzde=round(x.get("averageViewPercentage") or 0, 1), abone_kazanc=x.get("subscribersGained"), izlenme_dk=x.get("estimatedMinutesWatched"))
         except urllib.error.HTTPError as e:
             out["hatalar"].append(f"{ad} analitik: HTTP {e.code}")
         # GİZLE: yalnız bu kanalın videosu, şu an public/planlı ise, en fazla MAKS_GIZLE

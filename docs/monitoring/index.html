@@ -847,8 +847,8 @@ function cizSayac() {
   document.getElementById('kontrol').innerHTML = '<button class="btn" type="button"' + (ix <= 0 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix - 1] || '') + '\';cizSayac()">Önceki gün</button>'
     + '<label class="k" style="display:flex;align-items:center;gap:8px">Gün <input type="date" value="' + secGun + '" min="' + tumGunler[0] + '" max="' + sonG + '" onchange="if(this.value){secGun=this.value;cizSayac()}"></label>'
     + '<button class="btn" type="button"' + (ix >= tumGunler.length - 1 ? ' disabled' : '') + ' onclick="secGun=\'' + (tumGunler[ix + 1] || '') + '\';cizSayac()">Sonraki gün</button>'
-    + '<button class="btn koyu" type="button" onclick="yukle(true)">Yenile</button>';
-  const sekmeHtml = '<div class="sekmeler" role="tablist">' + [['sayac', 'Sayaçlar'], ['mahsup', 'Mahsup']].map(([k, ad]) => '<button role="tab" type="button" aria-selected="' + (sekme === k) + '" onclick="sekme=\'' + k + '\';cizSayac()">' + ad + '</button>').join('') + '</div>';
+    + '<button class="btn koyu" type="button" onclick="MF.yuklendi=false;yukle(true)">Yenile</button>';
+  const sekmeHtml = '<div class="sekmeler" role="tablist">' + [['sayac', 'Sayaçlar'], ['mahsup', 'Mahsup']].concat(PARA ? [['fatura', 'Fatura']] : []).map(([k, ad]) => '<button role="tab" type="button" aria-selected="' + (sekme === k) + '" onclick="sekme=\'' + k + '\';cizSayac()">' + ad + '</button>').join('') + '</div>';
   let govde = '';
   if (sekme === 'sayac') {
     const veri = sc => ((osos[sc.key] || {}).veri || {})[secGun] || {};
@@ -903,6 +903,8 @@ function cizSayac() {
         + '<td class="ayr">' + (r.ig == null ? '—' : say(r.ig)) + '</td><td>' + (r.gv ? say(r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? say(r.ig - r.gv.veris) : '—') + '</td><td>' + (r.ig != null && r.gv ? pc(r.ig, r.gv.veris) : '—') + '</td>'
         + '<td class="ayr">' + (r.n ? say(r.yI) : '—') + '</td><td>' + (r.n ? say(r.yV) : '—') + '</td><td><b>' + (r.n ? say(r.yI - r.yV) : '—') + '</b></td><td>' + r.n + '</td></tr>').join('')
       + '</tbody></table></div><div class="k">İç tüketim = inverter üretimi − sayaç verişi; üretim saatlerinde sayaç arkasında tüketilen enerji ile trafo/kablo kayıplarını içerir. Oran, inverterin sayaçtan ne kadar fazla gösterdiğidir. Bugün için yalnız iki tarafın da verisi tamamlanmış saatler karşılaştırılır. T1/T2 FusionSolar (Sera-1/Sera-2), YD Sungrow Darılmaz, Anka Sungrow HG YATIRIM AŞ, AE Inavitas Aksaray_GES verisidir; YD, Anka ve AE\'nin bugünkü saatlik verisi Pi\'nin canlı toplayıcısından (Sungrow/Inavitas, 10 dk), geçmiş günler günlük arşivden gelir. ' + (INV_CACHE[yilS] ? '' : 'İnverter verisi yükleniyor…') + '</div>';
+  } else if (sekme === 'fatura' && PARA) {
+    govde = '<div id="mfBolum"><div class="k">Faturalar yükleniyor…</div></div>';
   } else {
     const m = mahsupGun(osos, secGun);
     const ab = { T1: 0, T2: 0, A3: 0 }, tAb = { T1: 0, T2: 0, A3: 0 }, uAb = { T1: 0, T2: 0 }, kay = { T1: { T1: 0, T2: 0, A3: 0, bedelli: 0 }, T2: { T1: 0, T2: 0, A3: 0, bedelli: 0 } };
@@ -944,6 +946,157 @@ function cizSayac() {
       + (ayGun.length ? ayMahsupBolum(ayKod, ayGun, ta) : '');
   }
   document.getElementById('icerik').innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeHtml + govde + '</div>';
+  if (sekme === 'fatura' && PARA) mfCiz();
+}
+// ===== Mahsup › Fatura: A3 (Aksaray 3, tesisat 11200108) tedarikçi faturası + saatlik mahsup → mahsuplu fatura (KDV dahil)
+// Kaynaklar: 1) elle / PDF'ten eklenen kayıt (epias-ptf n8n/fatura/mahsup_A3.json, öncelikli) 2) fatura sistemi (gesfin) faturası.
+// Hesap: Net enerji = aktif enerji − mahsup kWh × 2,909687; BTV %1 net enerjiden; KDV %20. Gecikme bedeli iki taraftan da çıkarılır.
+const MF_B = 2.909687, MF_TES = '11200108', MF_YOL = 'n8n/fatura/mahsup_A3.json';
+const MF = { kayit: null, gesfin: null, yuklendi: false, ay: null, form: null, durum: '' };
+const mfSayi = s => { if (s == null) return null; const t = String(s).trim().replace(/\s/g, ''); if (!t) return null; const n = Number(/,/.test(t) ? t.replace(/\./g, '').replace(',', '.') : t); return isFinite(n) ? n : null; };
+function mfGesfin(fg) {
+  const r = {};
+  for (const f of ((fg && fg.faturalar) || [])) {
+    if (String(f.tesisat || '').replace(/^0+/, '') !== MF_TES) continue;
+    const ay = String(f.tarih || '').slice(0, 7); if (!/^\d{4}-\d{2}$/.test(ay)) continue;
+    const x = { kaynak: 'Fatura sistemi' + (f.tedarikci ? ' · ' + f.tedarikci : '') + (f.no ? ' · ' + f.no : ''), ham_kwh: null, aktif_tl: null, dagitim_tl: null, gecikme_tl: 0, fatura_tl: +f.odenecek || +f.toplam || null };
+    for (const k of (f.kalemler || [])) {
+      const a = String(k.a || '').toLocaleLowerCase('tr-TR'); let m = k.m == null ? null : +k.m; const tl = +k.ara || +k.t || 0;
+      if (m > 0 && tl / m > 40) m *= 1000;
+      if (/aktif enerji/.test(a) && !/reaktif/.test(a)) { x.aktif_tl = (x.aktif_tl || 0) + tl; if (m) x.ham_kwh = (x.ham_kwh || 0) + m; }
+      else if (/dağıtım bedel|dagitim bedel/.test(a)) x.dagitim_tl = (x.dagitim_tl || 0) + tl;
+      else if (/gecikme/.test(a)) x.gecikme_tl += tl;
+    }
+    if (x.aktif_tl && x.dagitim_tl && x.ham_kwh) r[ay] = x;
+  }
+  return r;
+}
+async function mfYukle(taze) {
+  const [k, g] = await Promise.all([al(MF_YOL, taze).catch(() => null), fatYukle().catch(() => null)]);
+  MF.kayit = (k && k.aylar) || {}; MF.gesfin = mfGesfin(g); MF.yuklendi = true;
+}
+function mfAylar() { return Object.assign({}, MF.gesfin || {}, MF.kayit || {}); }
+function mfHesap(ay, f) {
+  const r = aySonuc(D.osos, ay), M = r.ab.A3 || 0, H = +f.ham_kwh, akt = +f.aktif_tl, dag = +f.dagitim_tl;
+  const mb = M * MF_B, net = akt - mb, btv = net * 0.01, od = (net + dag + btv) * 1.2, brut = (akt + dag + akt * 0.01) * 1.2;
+  return { ay, f, M, H, akt, dag, mb, net, btv, od, brut, fayda: brut - od, sonra: H - M, gun: r.gunler.length, osA3: r.tAb.A3, gec: +f.gecikme_tl || 0 };
+}
+function mfTablo(h) {
+  const tl = v => say(v * 1.2, 2) + ' ₺', b = (v, n) => say(v, n);
+  const ayAd = AYLAR[+h.ay.slice(5) - 1] + ' ' + h.ay.slice(0, 4);
+  const sat = (a, v, kalin) => '<tr' + (kalin ? ' style="font-weight:700"' : '') + '><td class="sol">' + a + '</td><td>' + v + '</td></tr>';
+  const t1 = '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol"></th><th>Tutar (KDV dahil)</th></tr></thead><tbody>'
+    + sat('Ham (brüt) tüketim', b(h.H, 2) + ' kWh')
+    + sat('Mahsup edilen (T1 + T2 fazlası)', b(h.M, 2) + ' kWh (%' + say(h.H ? h.M / h.H * 100 : 0, 1) + ')')
+    + sat('Mahsup sonrası tüketim', b(h.sonra, 2) + ' kWh')
+    + sat('1) Aktif enerji (brüt)', tl(h.akt) + ' <span class="k" style="font-weight:400">(' + b(h.H, 2) + ' kWh × ' + b(h.akt * 1.2 / h.H, 6) + ' ₺/kWh)</span>', 1)
+    + sat('2) Mahsuplaşma (−)', '−' + tl(h.mb) + ' <span class="k" style="font-weight:400">(' + b(h.M, 2) + ' kWh × ' + b(MF_B * 1.2, 6) + ' ₺/kWh)</span>', 1)
+    + sat('Net Enerji Gideri', tl(h.net) + ' <span class="k" style="font-weight:400">(' + b(h.sonra, 2) + ' kWh × ' + b(h.sonra > 0 ? h.net * 1.2 / h.sonra : 0, 4) + ' ₺/kWh)</span>', 1)
+    + sat('3) Dağıtım bedeli', tl(h.dag) + ' <span class="k" style="font-weight:400">(' + b(h.H, 2) + ' kWh × ' + b(h.dag * 1.2 / h.H, 6) + ' ₺/kWh)</span>', 1)
+    + sat('BTV (%1, net enerji üzerinden)', tl(h.btv))
+    + sat('ÖDENECEK (mahsuplu)', say(h.od, 2) + ' ₺', 1)
+    + '</tbody></table></div>';
+  const t2 = '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol"></th><th>Tutar</th></tr></thead><tbody>'
+    + sat('Tedarikçinin kestiği fatura (mahsupsuz, brüt)', say(h.brut, 2) + ' ₺')
+    + sat('Mahsup Sonrası Yapılacak Ödeme', say(h.od, 2) + ' ₺')
+    + sat('Mahsup faydası (KDV dahil)', say(h.fayda, 2) + ' ₺', 1)
+    + '</tbody></table></div>';
+  const not = [];
+  if (h.gec > 0) not.push('Gecikme bedeli ' + say(h.gec * 1.2, 2) + ' ₺ (KDV dahil) iki taraftan da çıkarıldı' + (h.f.fatura_tl ? '; faturanın tamamı ' + say(h.f.fatura_tl, 2) + ' ₺' : '') + '.');
+  if (h.gun < +new Date(Date.UTC(+h.ay.slice(0, 4), +h.ay.slice(5), 0)).getUTCDate()) not.push('Bu ayın sayaç verisi eksik (' + h.gun + ' gün); mahsup kWh tamamlanınca değişir.');
+  if (h.osA3 && Math.abs(h.osA3 - h.H) > Math.max(50, h.H * 0.005)) not.push('Faturadaki tüketim (' + say(h.H) + ' kWh) sayaçtan (' + say(h.osA3) + ' kWh) farklı.');
+  if (h.ay < '2026-05') not.push('Mayıs 2026 öncesi mahsup aylık hesapla (elle girilen A3 değeri).');
+  return '<section class="panel" style="gap:12px"><div class="bas"><h2>' + ayAd + ' · Aksaray 3 (' + MF_TES + ')</h2><span class="k">' + esc(h.f.kaynak || '') + '</span></div>'
+    + '<div class="iki" style="align-items:start">' + t1 + t2 + '</div>'
+    + (not.length ? '<div class="k">' + not.map(esc).join('<br>') + '</div>' : '')
+    + (MF.kayit && MF.kayit[h.ay] ? '<div><button class="btn" type="button" onclick="mfSil(\'' + h.ay + '\')">Bu ayın elle eklenen kaydını sil</button></div>' : '') + '</section>';
+}
+function mfKarsilastir(L) {
+  if (!L.length) return '';
+  const kol = L.map(h => '<th>' + AYLAR[+h.ay.slice(5) - 1] + '</th>').join('');
+  const s = (a, f) => '<tr><td class="sol">' + a + '</td>' + L.map(h => '<td>' + f(h) + '</td>').join('') + '</tr>';
+  return '<section class="panel" style="gap:10px"><div class="bas"><h2>Aylar · karşılaştırma</h2><span class="k">KDV dahil</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol"></th>' + kol + '</tr></thead><tbody>'
+    + s('Brüt tüketim', h => say(h.H) + ' kWh')
+    + s('Mahsup edilen', h => say(h.M) + ' kWh (%' + say(h.H ? h.M / h.H * 100 : 0, 1) + ')')
+    + s('Aktif enerji birim fiyatı', h => say(h.akt * 1.2 / h.H, 4) + ' ₺/kWh')
+    + s('Mahsuplaşma bedeli', h => say(h.mb * 1.2) + ' ₺')
+    + s('Net Enerji Gideri', h => say(h.net * 1.2) + ' ₺ (' + say(h.sonra > 0 ? h.net * 1.2 / h.sonra : 0, 4) + ' ₺/kWh)')
+    + s('Mahsup Sonrası Yapılacak Ödeme', h => say(h.od) + ' ₺')
+    + s('<b>Mahsup faydası</b>', h => '<b>' + say(h.fayda) + ' ₺</b>')
+    + '</tbody></table></div></section>';
+}
+function mfFormHtml() {
+  const f = MF.form || {}, inp = 'padding:6px 8px;border:1px solid #DDE1E6;border-radius:6px;width:130px';
+  const alan = (k, ad, ph) => '<label class="k" style="display:flex;flex-direction:column;gap:4px">' + ad + '<input type="text" inputmode="decimal" value="' + esc(f[k] == null ? '' : f[k]) + '" placeholder="' + ph + '" oninput="MF.form=MF.form||{};MF.form.' + k + '=this.value" style="' + inp + '"></label>';
+  return '<section class="panel" style="gap:12px"><div class="bas"><h2>Fatura ekle</h2><span class="k">Fatura sisteminde olmayan ay için</span></div>'
+    + '<div class="k">Tedarikçi faturasının PDF\'ini seçin; tutarlar okunur. Kontrol edip "Kaydet"e basın. Tutarlar KDV hariç faturadaki gibi girilir.</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">'
+    + '<label class="btn" style="cursor:pointer">PDF seç<input type="file" accept="application/pdf" style="display:none" onchange="if(this.files[0])mfPdf(this.files[0])"></label>'
+    + '<label class="k" style="display:flex;flex-direction:column;gap:4px">Dönem<input type="month" value="' + esc(f.ay || '') + '" onchange="MF.form=MF.form||{};MF.form.ay=this.value" style="' + inp + '"></label>'
+    + alan('ham_kwh', 'Aktif tüketim (kWh)', '276.510,150') + alan('aktif_tl', 'Aktif enerji bedeli (₺)', '990.730,74') + alan('dagitim_tl', 'Dağıtım bedeli (₺)', '326.961,36') + alan('gecikme_tl', 'Gecikme bedeli (₺)', '0') + alan('fatura_tl', 'Ödenecek tutar (₺)', '1.608.800,58')
+    + '<button class="btn koyu" type="button" onclick="mfKaydet()">Kaydet</button></div>'
+    + (ghAnahtar() ? '' : '<div class="k">Kaydetmek için GitHub anahtarı gerekir: <input type="password" autocomplete="off" placeholder="github_pat_…" onchange="if(this.value){ghAnahtarKaydet(this.value.trim());cizSayac()}" style="' + inp + ';width:170px"></div>')
+    + '<div id="mfDurum" class="k">' + (MF.durum || '') + '</div></section>';
+}
+async function mfPdf(dosya) {
+  const d = () => document.getElementById('mfDurum');
+  d().innerHTML = '<span class="k">PDF okunuyor…</span>';
+  try {
+    const m = await odmPdfMetin(await dosya.arrayBuffer());
+    const bul = re => { const x = m.match(re); return x ? x : null; };
+    if (m.indexOf(MF_TES) < 0 && !window.confirm('PDF\'te tesisat ' + MF_TES + ' (Aksaray 3) bulunamadı. Yine de bu fatura olarak okunsun mu?')) { d().textContent = ''; return; }
+    const dn = bul(/D[öo]nemi?\s*:?\s*\d{2}[-.]\d{2}[-.]\d{4}\s*\/\s*(\d{4}-\d{2})/i) || bul(/(\d{4}-\d{2})/);
+    const ak = bul(/AKT[İI]F\s+ENERJ[İI]\s+BEDEL[İI]\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)/i);
+    const dg = bul(/DA[ĞG]ITIM\s+BEDEL[İI]\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)/i);
+    const gc = bul(/GEC[İI]KME\s+BEDEL[İI]\s+([\d.,]+)/i);
+    const od = bul(/[ÖO]denecek\s+Tutar\s+([\d.]+,\d{2})/i) || bul(/D[öo]nem\s+Fatura\s+Tutar[ıi]\s+([\d.,]+)/i);
+    MF.form = { ay: dn ? dn[1] : '', ham_kwh: ak ? ak[1] : '', aktif_tl: ak ? ak[3] : '', dagitim_tl: dg ? dg[3] : '', gecikme_tl: gc ? gc[1] : '0', fatura_tl: od ? od[1] : '', kaynak: 'PDF · ' + dosya.name };
+    const eksik = [['dönem', dn], ['aktif enerji', ak], ['dağıtım', dg]].filter(x => !x[1]).map(x => x[0]);
+    MF.durum = eksik.length ? '<span style="color:#9A5B00">Okunamayan: ' + eksik.join(', ') + '. Elle doldurup Kaydet\'e basın.</span>' : '<span style="color:#1E7A3C">Okundu. Değerleri kontrol edip Kaydet\'e basın.</span>';
+    cizSayac();
+  } catch (e) { d().innerHTML = '<span style="color:#B42318">PDF okunamadı: ' + esc(e.message || e) + '</span>'; }
+}
+async function mfYaz(fn, mesaj) {
+  const t = ghAnahtar(); if (!t) throw new Error('GitHub anahtarı yok');
+  const url = 'https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/' + MF_YOL, hd = { Authorization: 'Bearer ' + t, Accept: 'application/vnd.github+json' };
+  const g = await fetch(url + '?t=' + Date.now(), { headers: hd, cache: 'no-store' });
+  if (!g.ok && g.status !== 404) throw new Error('okuma HTTP ' + g.status + (g.status === 401 || g.status === 403 ? ' (anahtar geçersiz ya da yetkisi yok)' : ''));
+  const j = g.ok ? await g.json() : null;
+  const eski = j ? JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, ''))))) : { aciklama: 'A3 (11200108) tedarikçi faturaları, mahsuplu fatura hesabı için (monitoring › Mahsup › Fatura). Tutarlar KDV hariç.', aylar: {} };
+  eski.aylar = fn(eski.aylar || {}); eski.guncellendi = new Date().toISOString();
+  const icerik = btoa(unescape(encodeURIComponent(JSON.stringify(eski, null, 1) + '\n')));
+  const r = await fetch(url, { method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, hd), body: JSON.stringify(Object.assign({ message: mesaj, content: icerik }, j ? { sha: j.sha } : {})) });
+  if (!r.ok) throw new Error('yazma HTTP ' + r.status + (r.status === 409 ? ' (dosya bu arada değişti, tekrar deneyin)' : ''));
+  MF.kayit = eski.aylar; if (AL[MF_YOL]) AL[MF_YOL].txt = JSON.stringify(eski);
+}
+async function mfKaydet() {
+  const f = MF.form || {}, d = document.getElementById('mfDurum');
+  const x = { ham_kwh: mfSayi(f.ham_kwh), aktif_tl: mfSayi(f.aktif_tl), dagitim_tl: mfSayi(f.dagitim_tl), gecikme_tl: mfSayi(f.gecikme_tl) || 0, fatura_tl: mfSayi(f.fatura_tl), kaynak: f.kaynak || 'Elle girildi', kayit: new Date().toISOString(), kim: (PORTAL && (PORTAL.ad || PORTAL.kul)) || '' };
+  if (!/^\d{4}-\d{2}$/.test(f.ay || '')) { d.innerHTML = '<span style="color:#B42318">Dönemi seçin.</span>'; return; }
+  if (!(x.ham_kwh > 0 && x.aktif_tl > 0 && x.dagitim_tl > 0)) { d.innerHTML = '<span style="color:#B42318">Tüketim, aktif enerji ve dağıtım bedeli gerekli.</span>'; return; }
+  const bf = x.aktif_tl / x.ham_kwh; if ((bf < 0.5 || bf > 20) && !window.confirm('Aktif enerji birim fiyatı ' + say(bf, 4) + ' ₺/kWh çıkıyor, olağan dışı. Yine de kaydedilsin mi?')) return;
+  if (MF.kayit && MF.kayit[f.ay] && !window.confirm(AYLAR[+f.ay.slice(5) - 1] + ' ' + f.ay.slice(0, 4) + ' için kayıt var. Üzerine yazılsın mı? (eski değer GitHub geçmişinde kalır)')) return;
+  d.innerHTML = '<span class="k">Kaydediliyor…</span>';
+  try { await mfYaz(A => Object.assign(A, { [f.ay]: x }), 'Mahsup faturası A3 ' + f.ay); MF.ay = f.ay; MF.form = null; MF.durum = '<span style="color:#1E7A3C">Kaydedildi: ' + f.ay + '</span>'; cizSayac(); }
+  catch (e) { d.innerHTML = '<span style="color:#B42318">Kaydedilemedi: ' + esc(e.message || e) + '</span>'; }
+}
+async function mfSil(ay) {
+  if (!window.confirm(ay + ' için elle eklenen kayıt silinsin mi? (GitHub geçmişinde kalır; varsa fatura sistemindeki fatura kullanılır)')) return;
+  try { await mfYaz(A => { delete A[ay]; return A; }, 'Mahsup faturası A3 ' + ay + ' silindi'); cizSayac(); }
+  catch (e) { alert('Silinemedi: ' + (e.message || e)); }
+}
+function mfCiz() {
+  const el = document.getElementById('mfBolum'); if (!el) return;
+  if (!MF.yuklendi) { mfYukle().then(() => { if (sekme === 'fatura') mfCiz(); }).catch(e => { el.innerHTML = '<div class="k" style="color:#B42318">Faturalar yüklenemedi: ' + esc(e.message || e) + '</div>'; }); el.innerHTML = '<div class="k">Faturalar yükleniyor…</div>'; return; }
+  const A = mfAylar(), aylar = Object.keys(A).sort();
+  if (!MF.ay || !A[MF.ay]) MF.ay = aylar[aylar.length - 1] || null;
+  const L = aylar.map(ay => mfHesap(ay, A[ay]));
+  const sec = aylar.length ? '<div class="sekmeler" role="tablist">' + aylar.map(ay => '<button role="tab" type="button" aria-selected="' + (ay === MF.ay) + '" onclick="MF.ay=\'' + ay + '\';mfCiz()">' + AYK[+ay.slice(5) - 1] + ' ' + ay.slice(2, 4) + '</button>').join('') + '</div>' : '';
+  const h = L.find(x => x.ay === MF.ay);
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">'
+    + (aylar.length ? sec + mfTablo(h) + mfKarsilastir(L) : '<div class="panel"><div class="k">Henüz A3 faturası yok. Aşağıdan PDF ile ekleyin.</div></div>')
+    + mfFormHtml()
+    + '<div class="k">Mahsup kWh bu sayfadaki saatlik havuz hesabından (Aksaray 3 payı) gelir. Mahsup birim fiyatı ' + say(MF_B, 6) + ' ₺/kWh (KDV hariç). Elle/PDF kaydı fatura sistemindeki faturanın önüne geçer.</div></div>';
 }
 // Seçili ayın günlük mahsup dökümü: yığılmış çubuk (üretim = mahsup + bedelli, tüketim = mahsup + şebeke) ve tablo
 function ayMahsupBolum(ayKod, gunler, ta) {

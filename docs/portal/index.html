@@ -7,9 +7,10 @@
 <meta name="referrer" content="same-origin">
 <title>Portal · Aksaray Enerji</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4a28 28 0 0 0 0 56z' fill='%23D7262E'/%3E%3Cpath d='M32 4a28 28 0 0 1 0 56z' fill='%232B2F35'/%3E%3Cpath d='M36 10 20 36h11l-4 18 18-28H34z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-:root{--k:#D7262E;--kk:#A8131B;--s:#2B2F35;--y:#5B6470;--z:#F4F5F7;--c:#E2E5EA;--b:#fff}
-*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--s);background:var(--z);min-height:100vh;display:flex;flex-direction:column}
+:root{--k:#D32027;--kk:#B3161D;--s:#2B2E33;--y:#5A606A;--z:#F2F3F5;--c:#DDE1E6;--b:#fff}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--s);background:var(--z);min-height:100vh;display:flex;flex-direction:column}
 main{flex:1;width:100%;max-width:960px;margin:0 auto;padding:24px 16px}
 footer{text-align:center;color:var(--y);font-size:12px;padding:18px}
 a{color:var(--kk)}
@@ -24,7 +25,7 @@ input:focus{outline:2px solid #F3B4B7;border-color:var(--k)}
 .btn{display:inline-block;background:var(--k);color:#fff;border:0;border-radius:9px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}.btn:hover{background:var(--kk)}.btn:disabled{opacity:.6;cursor:wait}
 .btn.ik{background:#fff;color:var(--s);border:1px solid #CCD2DA}.btn.ik:hover{border-color:var(--s)}.btn.kc{padding:6px 12px;font-size:13px}.btn.tam{width:100%;margin-top:18px}
 .hata{background:#FDECEC;color:#8E1117;border-radius:9px;padding:10px 12px;margin:10px 0}.ok{background:#E8F5EC;color:#1D6B36;border-radius:9px;padding:10px 12px;margin:10px 0}
-h1{font-size:22px;margin:4px 0 18px}h2{font-size:17px;margin:0 0 12px}
+h1{font-size:24px;margin:4px 0 18px;font-family:"Archivo",system-ui,sans-serif;font-weight:800}h2{font-size:18px;margin:0 0 12px;font-family:"Archivo",system-ui,sans-serif;font-weight:700}
 .izgara{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
 .modul{display:flex;flex-direction:column;gap:10px;background:var(--b);border:1px solid var(--c);border-radius:14px;padding:20px;color:var(--s);text-decoration:none;transition:border-color .15s,transform .15s,box-shadow .15s;min-height:150px}
 .modul:hover{border-color:var(--k);transform:translateY(-2px);box-shadow:0 8px 24px rgba(43,47,53,.08)}
@@ -39,7 +40,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 .ysekler{display:flex;flex-wrap:wrap;gap:4px;background:#E9ECF0;padding:4px;border-radius:11px}.ysek{border:0;background:none;font:inherit;font-weight:600;color:var(--y);padding:7px 11px;border-radius:8px;cursor:pointer;font-size:13.5px}.ysek.on{background:#fff;color:var(--s);box-shadow:0 1px 3px rgba(0,0,0,.08)}.ysek span{font-size:12px;background:#D9DDE3;border-radius:99px;padding:1px 7px;margin-left:4px}.ysek.on span{background:#FBE9EA;color:var(--kk)}
 .ust2{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .kartlar{display:grid;gap:10px}.kkart{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid var(--c);border-radius:14px;padding:16px}
-.kav{width:44px;height:44px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-weight:700;color:#fff;background:linear-gradient(135deg,#D7262E,#3A3F47)}
+.kav{width:44px;height:44px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;font-weight:700;color:#fff;background:linear-gradient(135deg,#D32027,#3A3F47)}
 .kbt{display:flex;flex-direction:column;gap:6px;align-items:flex-end}.bag.sil{color:var(--kk);font-size:13px}
 .et small{color:var(--y)}.et b{color:var(--kk)}
 dialog.ydlg{width:min(620px,96vw);border-radius:16px}.ydf{padding:22px 24px}.ydbas{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.ydbas b{font-size:19px}.ydbas .kapat{position:static}
@@ -217,17 +218,17 @@ const IKON = {
   diger: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'
 };
 const IKON_AD = { cad: 'CAD', denetci: 'Denetçi', saha: 'Saha', monitoring: 'Grafik', mali: 'Mali', muhasebe: 'Hesap', mail: 'Posta', proje: 'Klasör', insan: 'Kişi', ekip: 'Ekip', tedarik: 'Sevkiyat', egitim: 'Eğitim', iletisim: 'Mesaj', belge: 'Belge', takvim: 'Takvim', sepet: 'Sipariş', gunes: 'Güneş', maden: 'Madencilik', diger: 'Diğer' };
-const RENKLER = { kirmizi: ['Kırmızı', '#D7262E'], antrasit: ['Antrasit', '#3A3F47'], mavi: ['Mavi', '#2F6DB5'], turuncu: ['Turuncu', '#F08A24'], sari: ['Sarı', '#E9A800'], yesil: ['Yeşil', '#1E9E5A'], lacivert: ['Lacivert', '#1F3B66'], turkuaz: ['Turkuaz', '#1A97B5'] };
+const RENKLER = { kirmizi: ['Kırmızı', '#D32027'], antrasit: ['Antrasit', '#3A3F47'], mavi: ['Mavi', '#2F6DB5'], turuncu: ['Turuncu', '#F08A24'], sari: ['Sarı', '#E9A800'], yesil: ['Yeşil', '#1E9E5A'], lacivert: ['Lacivert', '#1F3B66'], turkuaz: ['Turkuaz', '#1A97B5'] };
 const renkHex = r => (RENKLER[r] || RENKLER.kirmizi)[1];
 const MERKEZ = '<svg viewBox="0 0 320 250" aria-hidden="true"><g fill="none" stroke="#C9CED6" stroke-width="2" stroke-linecap="round"><path d="M18 120h22M28 110v20"/><path d="M290 60h18M299 51v18"/></g>'
   + '<rect x="40" y="40" width="210" height="140" rx="10" fill="#2B2F35"/><rect x="50" y="50" width="190" height="112" rx="3" fill="#F5F6F8"/>'
-  + '<g fill="#D7262E"><rect x="62" y="60" width="78" height="14" rx="2"/><rect x="62" y="80" width="38" height="30" rx="2"/><rect x="104" y="80" width="36" height="30" rx="2" opacity=".75"/><rect x="146" y="60" width="82" height="50" rx="2" opacity=".9"/><rect x="62" y="116" width="52" height="34" rx="2" opacity=".6"/><rect x="120" y="116" width="54" height="34" rx="2"/><rect x="180" y="116" width="48" height="34" rx="2" opacity=".75"/></g>'
+  + '<g fill="#D32027"><rect x="62" y="60" width="78" height="14" rx="2"/><rect x="62" y="80" width="38" height="30" rx="2"/><rect x="104" y="80" width="36" height="30" rx="2" opacity=".75"/><rect x="146" y="60" width="82" height="50" rx="2" opacity=".9"/><rect x="62" y="116" width="52" height="34" rx="2" opacity=".6"/><rect x="120" y="116" width="54" height="34" rx="2"/><rect x="180" y="116" width="48" height="34" rx="2" opacity=".75"/></g>'
   + '<path d="M128 180h34l6 26h-46z" fill="#3A3F47"/><rect x="104" y="204" width="82" height="8" rx="4" fill="#2B2F35"/>'
-  + '<rect x="232" y="120" width="44" height="80" rx="7" fill="#2B2F35"/><rect x="237" y="128" width="34" height="62" rx="2" fill="#F5F6F8"/><rect x="241" y="134" width="26" height="9" rx="1.5" fill="#D7262E"/><rect x="241" y="147" width="12" height="16" rx="1.5" fill="#D7262E" opacity=".7"/><rect x="255" y="147" width="12" height="16" rx="1.5" fill="#3A3F47" opacity=".5"/>'
+  + '<rect x="232" y="120" width="44" height="80" rx="7" fill="#2B2F35"/><rect x="237" y="128" width="34" height="62" rx="2" fill="#F5F6F8"/><rect x="241" y="134" width="26" height="9" rx="1.5" fill="#D32027"/><rect x="241" y="147" width="12" height="16" rx="1.5" fill="#D32027" opacity=".7"/><rect x="255" y="147" width="12" height="16" rx="1.5" fill="#3A3F47" opacity=".5"/>'
   + '<path d="M214 14h62a10 10 0 0 1 10 10v26a10 10 0 0 1-10 10h-34l-14 12v-12h-14a10 10 0 0 1-10-10V24a10 10 0 0 1 10-10z" fill="#3A3F47"/><g fill="#fff"><circle cx="230" cy="37" r="4"/><circle cx="245" cy="37" r="4"/><circle cx="260" cy="37" r="4"/></g>'
-  + '<path d="M250 52h46a8 8 0 0 1 8 8v22a8 8 0 0 1-8 8h-8v10l-12-10h-26a8 8 0 0 1-8-8V60a8 8 0 0 1 8-8z" fill="#D7262E" opacity=".92"/>'
+  + '<path d="M250 52h46a8 8 0 0 1 8 8v22a8 8 0 0 1-8 8h-8v10l-12-10h-26a8 8 0 0 1-8-8V60a8 8 0 0 1 8-8z" fill="#D32027" opacity=".92"/>'
   + '<rect x="6" y="160" width="30" height="21" rx="3" fill="none" stroke="#3A3F47" stroke-width="2.2"/><path d="M6 162l15 10 15-10" fill="none" stroke="#3A3F47" stroke-width="2.2"/>'
-  + '<circle cx="22" cy="60" r="13" fill="none" stroke="#D7262E" stroke-width="2.4"/><path d="M22 52v8l5 4" stroke="#D7262E" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
+  + '<circle cx="22" cy="60" r="13" fill="none" stroke="#D32027" stroke-width="2.4"/><path d="M22 52v8l5 4" stroke="#D32027" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
 const ikon = a => '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IKON[a] || IKON.diger) + '</svg>';
 const VARSAYILAN = [
   { id: 'saha', ad: 'Saha İş Yönetimi', aciklama: 'Saha takibi, günlük, puantaj', url: 'https://ekinciomer-ai.github.io/saha/', ikon: 'saha', renk: 'kirmizi' },
@@ -255,7 +256,7 @@ async function ssoUrl(id) {
 }
 function ust() {
   $('ust').innerHTML = '<header class="ust"><a href="#" class="marka" onclick="git(\'ana\');return false">' + MARKA.replace(/^<span class="marka">|<\/span>$/g, '') + '</a><nav><a class="bag" href="../">← Web sitesi</a>'
-    + (S ? '<span class="oturum">' + esc(S.ad || S.kul) + '</span>' + (S.ka ? '<a class="bag" href="' + esc(yerelUrl('https://ekinciomer-ai.github.io/aesun/asistan/')) + '" style="color:#D7262E;font-weight:700">🤖 Asistan</a><button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button>'
+    + (S ? '<span class="oturum">' + esc(S.ad || S.kul) + '</span>' + (S.ka ? '<a class="bag" href="' + esc(yerelUrl('https://ekinciomer-ai.github.io/aesun/asistan/')) + '" style="color:#D32027;font-weight:700">🤖 Asistan</a><button class="bag" onclick="git(\'yonetim\')">Yönetim</button>' : '') + '<button class="bag" onclick="cikis()">Çıkış</button>'
          : '<button class="bag" onclick="girisModal(null)">Giriş</button>') + '</nav></header>';
 }
 const sifreUygun = s => s.length < 6 ? 'Şifre en az 6 karakter olmalı.' : !/[A-Za-zÇĞİÖŞÜçğıöşü]/.test(s) || !/\d/.test(s) ? 'Şifrede harf ve rakam bulunmalı.' : null;
@@ -453,7 +454,7 @@ function acSonuc(id) {
 }
 // ---- Özel Alan: yalnız yönetici (Ömer) görür — Kullanıcı dostu tek tıkla kart ızgarası + canlı Antigravity sohbeti ----
 const OZEL_ALT = [
-  { id: 'asistan', ad: 'Sunucu Asistanı', kisa: 'Canlı YouTube & Sunucu Komut', ikon: '🤖', renk: '#D7262E', aciklama: 'Merkez sunucu üzerinden tam yetkili sohbet ve canlı YouTube yönetimi.', url: () => yerelUrl('https://portal.aksarayenerji.net/asistan/') },
+  { id: 'asistan', ad: 'Sunucu Asistanı', kisa: 'Canlı YouTube & Sunucu Komut', ikon: '🤖', renk: '#D32027', aciklama: 'Merkez sunucu üzerinden tam yetkili sohbet ve canlı YouTube yönetimi.', url: () => yerelUrl('https://portal.aksarayenerji.net/asistan/') },
   { id: 'yayin', ad: 'Yayın Takibi', kisa: 'YouTube & TikTok Takvimi', ikon: '📺', renk: '#2463B5', aciklama: 'Antik Stüdyo / Ancient Studio yayınlanan ve planlanan tüm içerikler.', url: () => yerelUrl('https://portal.aksarayenerji.net/yayin/') },
   { id: 'teklif', ad: 'Teklifler', kisa: 'GES Teklif & Kazanma Oranı', ikon: '📋', renk: '#1F8A4C', aciklama: 'Teklif verdiğimiz projeler: kapasite, tutar, durum (şifreli).', ic: true },
   { id: 'cutkoda', ad: 'CutkodA', kisa: 'Kurgu & Sosyal Medya Paneli', ikon: '🎬', renk: '#C26A12', aciklama: 'CutkodA yönetim paneli: kurgu işleri ve içerik onayı.', url: () => 'https://panel.cutkoda.com/' },
@@ -563,7 +564,7 @@ async function teklifCiz() {
     .sort((a, b) => String(b.tarih || '').localeCompare(String(a.tarih || '')));
   const say = d => l.filter(t => t.durum === d).length, kaz = say('kazanildi'), son = kaz + say('kaybedildi');
   const mw = l.reduce((a, t) => a + tkMw(t), 0), mwK = l.filter(t => t.durum === 'kazanildi').reduce((a, t) => a + tkMw(t), 0);
-  let h = '<h1 class="baslik">Teklifler</h1><p class="alt">Verdiğimiz teklifler · yalnız siz görürsünüz · <a href="#" onclick="git(\'ana\');return false" style="color:#D7262E;font-weight:600">← Portal</a></p>';
+  let h = '<h1 class="baslik">Teklifler</h1><p class="alt">Verdiğimiz teklifler · yalnız siz görürsünüz · <a href="#" onclick="git(\'ana\');return false" style="color:#D32027;font-weight:600">← Portal</a></p>';
   h += '<div class="tk-oz"><div><b>' + l.length + '</b><span>teklif</span></div><div><b>' + mw.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MWp</b><span>toplam kapasite</span></div>'
     + '<div><b>' + (say('verildi') + say('gorusme')) + '</b><span>cevap bekleyen</span></div><div><b>' + kaz + (son ? ' · %' + Math.round(kaz / son * 100) : '') + '</b><span>kazanılan · oran</span></div>'
     + '<div><b>' + mwK.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MWp</b><span>kazanılan kapasite</span></div></div>';
@@ -644,7 +645,7 @@ function acMali(sek) {
   const url = m && m.aktif !== false ? String(m.url || '').trim() : '';
   const kl = a.id === 'mail' && m && m.aktif !== false ? kutular(m) : [];
   const govde = kl.length
-    ? '<p class="ince">Posta kutusuna tıklayın; o hesap yeni sekmede açılır.</p><div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(k.adr) + '</span><span class="ince" style="margin:0;white-space:nowrap">' + esc(k.tur) + ' →</span></a>').join('') + '</div>' + (S.ka ? '<p class="ince" style="margin-top:12px"><a href="#" onclick="$(\'dlg\').close();git(\'yonetim\');setTimeout(()=>modDlg(\'mail\'),400);return false" style="color:#D7262E;font-weight:600">Kutuları düzenle</a></p>' : '')
+    ? '<p class="ince">Posta kutusuna tıklayın; o hesap yeni sekmede açılır.</p><div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:10px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(k.adr) + '</span><span class="ince" style="margin:0;white-space:nowrap">' + esc(k.tur) + ' →</span></a>').join('') + '</div>' + (S.ka ? '<p class="ince" style="margin-top:12px"><a href="#" onclick="$(\'dlg\').close();git(\'yonetim\');setTimeout(()=>modDlg(\'mail\'),400);return false" style="color:#D32027;font-weight:600">Kutuları düzenle</a></p>' : '')
     : a.id === 'mail' && S.ka && m ? '<p class="ince" style="margin-bottom:10px">' + esc(a.aciklama) + '</p><div class="hata">Posta kutusu eklenmedi — Yönetim → Uygulamalar → Mail → “Posta kutuları” alanına her satıra bir adres yazın.</div>'
     : url
     ? ((S.hesaplar || {})[a.id] ? '<p class="ince">Hesap: ' + esc(S.hesaplar[a.id]) + '</p>' : '') + '<p class="ince">' + esc(a.aciklama) + '</p><a class="btn tam" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>$(\'dlg\').close(),50)">' + esc(a.ad) + ' aç →</a>'
@@ -666,8 +667,8 @@ function acSaha() {
   const before = all.length; sahaProjeTazele(p => { if (p && p.length !== before) acSaha(); });
   const items = allowed.slice(); if (S.ka) items.push({ _add: true, ad: 'Yeni proje', renk: '#2E7D46' });
   const n = Math.max(items.length, 1), R0 = n > 8 ? 44 : (n > 4 ? 41 : 34);
-  let h = '<h1 class="baslik">Saha İş Yönetimi</h1><p class="alt">Projeyi seçin' + (S.ka ? ' ya da yeni proje açın.' : '.') + ' · <a href="#" onclick="git(\'ana\');return false" style="color:#D7262E;font-weight:600">← Portal</a></p>';
-  h += '<div class="hub"><div class="halka"></div><div class="merkez"><div style="width:min(150px,38vw);aspect-ratio:1;border-radius:50%;margin:0 auto;display:grid;place-items:center;color:#fff;background:#D7262E;box-shadow:0 0 0 14px rgba(215,38,46,.14),0 0 46px rgba(215,38,46,.4)">' + ikon('saha') + '</div><div style="text-align:center;font-weight:800;margin-top:10px;color:#D7262E">Saha</div></div>';
+  let h = '<h1 class="baslik">Saha İş Yönetimi</h1><p class="alt">Projeyi seçin' + (S.ka ? ' ya da yeni proje açın.' : '.') + ' · <a href="#" onclick="git(\'ana\');return false" style="color:#D32027;font-weight:600">← Portal</a></p>';
+  h += '<div class="hub"><div class="halka"></div><div class="merkez"><div style="width:min(150px,38vw);aspect-ratio:1;border-radius:50%;margin:0 auto;display:grid;place-items:center;color:#fff;background:#D32027;box-shadow:0 0 0 14px rgba(215,38,46,.14),0 0 46px rgba(215,38,46,.4)">' + ikon('saha') + '</div><div style="text-align:center;font-weight:800;margin-top:10px;color:#D32027">Saha</div></div>';
   items.forEach((v, i) => { const a = (-90 + i * 360 / n) * Math.PI / 180, x = 50 + R0 * Math.cos(a), y = 50 + R0 * Math.sin(a); const tik = v._add ? 'sahaYeniProje()' : ('sahaAc(\'' + esc(v.id) + '\')'); const rk = v._add ? '#2E7D46' : (v.renk || '#E8622A'); const ic = v._add ? '<span class="hd" style="--r:' + rk + ';font-size:42px;font-weight:300;line-height:1">＋</span>' : '<span class="hd" style="--r:' + rk + '">' + ikon('proje') + '</span>'; h += '<button class="hm" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) + '%;--r:' + rk + '" onclick="' + tik + '">' + ic + '<span class="ha">' + esc(v.ad) + '</span></button>'; });
   h += '</div>';
   $('ana').innerHTML = h;
@@ -935,7 +936,7 @@ body.uzay[data-uz=gece]{--uzbg:#0A1730;--uzink:#F3EEDF;--uzmut:#A9B3C7;--uzdim:#
 body.uzay[data-uz=acik]{--uzbg:#F3F4F6;--uzink:#2B2F35;--uzmut:#5B6470;--uzdim:#8A9099;--uzust:rgba(255,255,255,.85);--uzline:#E2E5EA;--uzbtn:rgba(255,255,255,.9);--uzsh:rgba(255,255,255,.9)}
 body.uzay{background:var(--uzbg);color:var(--uzink)}
 body.uzay .ust{background:var(--uzust);border-bottom-color:var(--uzline);backdrop-filter:blur(8px);position:relative;z-index:3}
-body.uzay .ust .marka{color:var(--uzink)}body.uzay .ust .bag{color:var(--uzink)}body.uzay .ust .bag:hover{color:#D7262E}body.uzay .ust .oturum{color:var(--uzmut)}
+body.uzay .ust .marka{color:var(--uzink)}body.uzay .ust .bag{color:var(--uzink)}body.uzay .ust .bag:hover{color:#D32027}body.uzay .ust .oturum{color:var(--uzmut)}
 body.uzay .ust .marka small{color:var(--uzmut)}
 body.uzay main{max-width:none;padding:0;position:relative}
 body.uzay footer{color:var(--uzdim);position:relative;z-index:2}

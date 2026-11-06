@@ -53,7 +53,7 @@ summary{cursor:pointer;font-weight:600}
 <body>
 {% if parola_var and not giris %}
 <div id="giris"><div class="kart"><h2>Sosyal Stüdyo</h2><label>Parola</label>
-<input type="password" id="parola" autocomplete="current-password"><button class="ana" onclick="girisYap()">Giriş</button>
+<input type="password" id="parola" autocomplete="current-password" enterkeyhint="go" onkeydown="if(event.key==='Enter')girisYap()"><button class="ana" onclick="girisYap()">Giriş</button>
 <div id="girisHata" class="not engel gizli"></div></div></div>
 {% endif %}
 <header><div class="ust"><h1>Sosyal Stüdyo</h1>

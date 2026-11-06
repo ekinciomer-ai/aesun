@@ -23,11 +23,18 @@ try:
         es = pg.get_by_text(H, exact=False)
         n_es = es.count(); print(f"NOT: eşleşme {n_es} (url {pg.url})")
         if n_es < 1: print("NOT: HATA hedef listede yok"); raise SystemExit(1)
-        hucre = es.first.locator("xpath=ancestor::*[contains(@class,'row') or contains(@class,'Row') or contains(@class,'item') or self::tr][1]")
-        if not hucre.count(): hucre = es.first.locator("xpath=ancestor::div[3]")
-        hucre.hover(); time.sleep(1); n = hucre.locator("svg").count(); print(f"NOT: satırda {n} simge")
+        # satır: eylem simgelerini (… menüsü) içeren en yakın ata; tt_gizle denemesinde 2 düğme / 7 svg'li satır doğruydu
+        hucre = None
+        for k in range(1, 9):
+            a = es.first.locator(f"xpath=ancestor::*[{k}]")
+            try: n = a.locator("svg").count()
+            except Exception: n = 0
+            if n >= 4: hucre = a; break
+        if hucre is None: print("NOT: HATA satır bulunamadı"); ss(8); raise SystemExit(1)
+        hucre.hover(); time.sleep(1); n = hucre.locator("svg").count(); print(f"NOT: satırda {n} simge (ata {k})")
         hucre.locator("svg").nth(n - 1).click(timeout=5000, force=True); time.sleep(2); ss(1)
-        pg.get_by_text(re.compile(r"^(Sil|Delete)$")).first.click(timeout=5000); time.sleep(2); ss(2)
+        menu = " | ".join(x.strip() for x in pg.inner_text("body").splitlines() if x.strip())[-120:]; print(f"NOT: menü: {menu}")
+        pg.get_by_text(re.compile(r"^\s*(Sil|Delete)\s*$")).last.click(timeout=5000); time.sleep(2); ss(2)
         try: pg.get_by_role("button", name=re.compile(r"^(Sil|Delete|Onayla|Confirm)$")).last.click(timeout=4000); time.sleep(4)
         except Exception as e: print(f"NOT: onay düğmesi: {type(e).__name__}")
         ss(3)

@@ -21,9 +21,15 @@ with sync_playwright() as p:
         if not hucre.count(): hucre = satir
         print("NOT: satırda düğme:", hucre.locator("button").count(), "svg:", hucre.locator("svg").count())
         hucre.hover(); time.sleep(1)
-        hedef = hucre.locator("button").first if hucre.locator("button").count() else hucre.locator("svg").first
-        hedef.click(timeout=5000, force=True); time.sleep(6); pg.screenshot(path="/work/adim/gizle_1.png")
+        n = hucre.locator("svg").count()
+        hucre.locator("svg").nth(max(0, n - 4)).click(timeout=5000, force=True); time.sleep(6); pg.screenshot(path="/work/adim/gizle_1.png")
         print("NOT: url:", pg.url[:120])
+        if "content" in pg.url and not pg.get_by_text(re.compile(r"kimler görebilir|Who can watch")).count():
+            # düzenleme açılmadı: son ikon (…) menüsünü dene ve seçenekleri yaz
+            hucre.locator("svg").nth(n - 1).click(timeout=5000, force=True); time.sleep(2); pg.screenshot(path="/work/adim/gizle_1b.png")
+            print("NOT: menü:", " | ".join(x.strip() for x in pg.inner_text("body").splitlines() if x.strip())[-400:])
+            try: pg.get_by_text(re.compile(r"^(Düzenle|Edit)$")).first.click(timeout=3000); time.sleep(6)
+            except Exception: pass
         metin = pg.inner_text("body"); print("NOT: sayfa:", " | ".join(x.strip() for x in metin.splitlines() if x.strip())[:600])
         kutu = pg.get_by_text(re.compile(r"^(Herkes|Everyone)$")).first
         kutu.click(timeout=5000); time.sleep(1.5)

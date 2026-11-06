@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-07T01:49+03:00",
+ "olusturma": "2026-11-07T02:01+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -103,10 +103,10 @@
    "karar": "DURDUR",
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
    "olculen": 3,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 82,
    "tutma_orani": 0,
-   "izlenme_yuzde": 62,
+   "izlenme_yuzde": 61,
    "en_iyi": {
     "baslik": "Is the Girl with a Pearl Earring's pearl real? 🖼️",
     "i48": 99
@@ -118,10 +118,10 @@
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 24,
    "tutma_orani": 0,
-   "izlenme_yuzde": null,
+   "izlenme_yuzde": 32,
    "en_iyi": {
     "baslik": "Swallowing LIVE WORMS to lose weight in 1890?! 🐛💊 #shorts #history #fyp",
     "i48": 42
@@ -175,10 +175,10 @@
    "karar": "ARTIR",
    "neden": "videoların %80'i tuttu (eşik 447 izlenme / 48 sa)",
    "olculen": 5,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 1970,
    "tutma_orani": 80,
-   "izlenme_yuzde": 56,
+   "izlenme_yuzde": 53,
    "en_iyi": {
     "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
     "i48": 2759
@@ -190,10 +190,10 @@
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 868,
    "tutma_orani": 50,
-   "izlenme_yuzde": null,
+   "izlenme_yuzde": 39,
    "en_iyi": {
     "baslik": "Saçının içinde FARE yaşayan zengin kadınlar?! 🐭👑 #shorts #tarih #keşfet",
     "i48": 1626
@@ -208,7 +208,7 @@
    "erken": 0,
    "medyan_48sa": 17,
    "tutma_orani": 0,
-   "izlenme_yuzde": 20,
+   "izlenme_yuzde": 40,
    "en_iyi": {
     "baslik": "Bir ordu kuşlara yenildi! 1932 Emu Savaşı 🐦",
     "i48": 19
@@ -228,9 +228,9 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 447,
   "Ancient Studio": 128,
-  "Estudio Antiguo": 50
+  "Estudio Antiguo": 50,
+  "Antik Stüdyo": 447
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -285,71 +285,11 @@
  "eylemler": [
   {
    "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "0Yhof30_bfg",
-   "baslik": "Son Akşam Yemeği neden yok oluyor? 🍞",
-   "neden": "2026-11-06 18:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Ancient Studio",
-   "platform": "YouTube",
-   "vid": "Lcvm_LATwkc",
-   "baslik": "The man in The Scream isn't screaming 😱",
-   "neden": "2026-11-06 21:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "iYo-p0Znk5c",
-   "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 #shorts #tarih #keşfet",
-   "neden": "2026-11-06 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
    "kanal": "Antik Stüdyo (@antikstudyo)",
    "platform": "TikTok",
    "vid": "",
    "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 (Antik Roma Kremi)",
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Ancient Studio",
-   "platform": "YouTube",
-   "vid": "BFSPqHA2tTI",
-   "baslik": "Why Roman women rubbed GLADIATOR SWEAT on their faces! ⚔️🏺 #shorts #history #fyp",
-   "neden": "2026-11-06 21:30 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Ancient Studio",
-   "vid": "5FV03dykFx0",
-   "baslik": "The Night Watch has the wrong name 🌙",
-   "neden": "'Tablo Serisi' serisi durduruldu; bu slotu Gündem + Tarih, Tarihi Magazin kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Ancient Studio",
-   "vid": "sIFBfQkepOA",
-   "baslik": "Venus couldn't stand up in real life 🐚",
-   "neden": "'Tablo Serisi' serisi durduruldu; bu slotu Gündem + Tarih, Tarihi Magazin kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Ancient Studio",
-   "vid": "yXEQI6QwFds",
-   "baslik": "Why The Last Supper is falling apart 🍞",
-   "neden": "'Tablo Serisi' serisi durduruldu; bu slotu Gündem + Tarih, Tarihi Magazin kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Ancient Studio",
-   "vid": "cOqujZOpVXY",
-   "baslik": "There's a mountain hiding in The Great Wave 🌊",
-   "neden": "'Tablo Serisi' serisi durduruldu; bu slotu Gündem + Tarih, Tarihi Magazin kullanır"
   }
  ],
  "bulgular": [
@@ -364,8 +304,8 @@
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 18:00 (medyan 1970 izlenme, 3 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
-  "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %50 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
-  "Antik Stüdyo: tutan Short'lar ortalama %62 izleniyor, tutmayanlar %28 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
+  "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %45 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
+  "Antik Stüdyo: tutan Short'lar ortalama %59 izleniyor, tutmayanlar %37 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
  ],
  "en_iyi": [
   {

@@ -228,6 +228,9 @@ const kamera = (t: number) => {
   ];
   let c = {x: plan[0].x, y: plan[0].y, z: plan[0].z};
   for (const a of plan) { if (t < a.t) break; const u = gir(t, a.t, a.d); c = {x: karis(c.x, a.x, u), y: karis(c.y, a.y, u), z: karis(c.z, a.z, u)}; }
+  // "Kim söyledi?" müzikteki vuruşla kısa kamera itişi
+  const v = t - ka(5, 'kim');
+  if (v > 0 && v < 0.5) c = {...c, z: c.z * (1 + 0.06 * Math.sin((v / 0.5) * Math.PI))};
   return c;
 };
 
@@ -263,7 +266,9 @@ const Video: React.FC = () => {
   const pumpkinYuz: KisiP['yuz'] = t >= an(11, 0) ? 'mutlu' : t >= an(4, 0) ? (t >= an(5, 0) ? 'ciddi' : 'sakin') : t >= an(3, 0) ? 'sasir' : 'gul';
   const son = gir(t, an(13, 0), 0.8);
   const ilk = 1 - gir(t, an(1, 0) - 0.1, 0.4);
-  const sicak = gir(t, an(10, 0), 6);
+  // duygu tonu: gerilimde soğuk ve koyu, itiraftan sonra yavaşça ısınır
+  const soguk = gir(t, an(6, 0) - 0.3, 1.2) * (1 - gir(t, an(10, 0) - 0.4, 1.6));
+  const sicak = gir(t, an(10, 0), 5);
   const kalemTitre = t >= ka(8, 'kâğıd') && t < an(9, 0) ? Math.sin(t * 40) * 4 : t >= an(9, 0) && t < anSon(10) ? Math.sin(t * 12) * 18 : 0;
   return (
     <AbsoluteFill style={{background: C.kagit}}>
@@ -343,7 +348,9 @@ const Video: React.FC = () => {
             <path d={`M 360 446 Q 540 458 ${karis(360, 720, cizgi)} 442`} fill="none" stroke={C.kirmizi} strokeWidth={6} strokeLinecap="round" opacity={cizgi > 0 ? 1 : 0} />
           </g>}
         </g>
-        <rect width={1080} height={1920} fill="#e08a3a" opacity={0.1 * sicak} style={{mixBlendMode: 'multiply'}} />
+        <rect width={1080} height={1920} fill="#3a4d72" opacity={0.2 * soguk} style={{mixBlendMode: 'multiply'}} />
+        <rect width={1080} height={1920} fill="#e08a3a" opacity={0.13 * sicak} style={{mixBlendMode: 'multiply'}} />
+        <rect width={1080} height={1920} fill="#ffd9a0" opacity={0.08 * sicak} style={{mixBlendMode: 'screen'}} />
         <rect width={1080} height={1920} filter="url(#leke)" />
         <rect width={1080} height={1920} filter="url(#gren)" />
         <rect width={1080} height={1920} fill="url(#vinyet)" />

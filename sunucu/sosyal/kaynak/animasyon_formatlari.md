@@ -115,6 +115,17 @@ Sen Karar Ver dili + Antik Stüdyo tarih içeriği.
 - **Çizim dili:** Sen Karar Ver (koyu zemin, kalın konturlu yuvarlak kafalar, HUD, dev büyük harf yazı); renkler döneme göre
   (toprak, kırmızı, altın). Şiddet gösterilmez, ima edilir. Dönem kıyafeti ve silahları doğru çizilir.
 
+## Müzik ve duygu geçişleri (bütün formatlar)
+Örnek: `kagit-arayis/ornek_pumpkin_2_dedikodu.mp4`, üreteç `sunucu/sosyal/animasyon/muzik/dedikodu.py`.
+- Müzik kodla sentezlenir (sample/kayıt yok): telif ve lisans sorunu olmaz, para kazanmaya uygundur.
+- Zamanlar kelime zamanlarından gelir; metin değişince müzik kendiliğinden hizalanır.
+- Duygu haritası satır satır çıkarılır: merak/sinsilik → pizzicato; sakinlik → sıcak katman; dönüm cümlesi → tek vuruş ve
+  sessizlik; gerilim → alçak uğultu, saat tiki, hızlanan kalp atışı, yükselen çello; itiraf/duygusal an → müzik kutusu,
+  minörden majöre; çözülme → sıcak majör; mizah → zıplayan notalar ve komik iniş; son soru → çözülmeyen akor.
+- Konuşurken müzik ~%45'e iner (ducking); son karışım -16 LUFS, tepe -1.5 dB.
+- Görüntü tonu müzikle birlikte değişir: gerilimde soğuk ve koyu katman, çözülmede sıcak ve aydınlık katman; dönüm cümlesinde
+  müzikteki vuruşla kısa kamera itişi.
+
 ## Üretim paketi (her animasyon için)
 Yazar şunları verir: (1) `metin.txt` satırları: her satır bir cümle grubu, ton yalnız değişeceği yerde `[...]` İngilizce,
 ekranda farklı okunan sözcük `gösterim|okunuş` (sayılar yazıyla okunur), 70–100 kelime; (2) sahne planı tablosu:

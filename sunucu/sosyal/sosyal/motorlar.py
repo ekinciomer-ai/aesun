@@ -63,7 +63,7 @@ class Motor:
 
     def bilgi(self):
         return {"ad": self.ad, "etiket": self.etiket, "hazir": self.hazir(), "ucretsiz": self.ucretsiz,
-                "model": getattr(self, "model", "")}
+                "model": getattr(self, "model", ""), "nasil": NASIL.get(self.ad, "")}
 
 
 class OpenAIUyumlu(Motor):
@@ -196,6 +196,20 @@ class Deneme(Motor):
                 "## Ses ve müzik\nPiper fahrettin; müzik CC0 kamu malı kayıt.\n\n"
                 "## Açıklama\nDeneme açıklaması. Temsili illüstrasyon (yapay zekâ).\n\n## Etiketler\n#tarih #shorts\n\n"
                 "## Kaynaklar\n- (doğrulanacak)")
+
+
+# Hazır olmayan motor için ekranda gösterilen kısa yol tarifi (anahtarlar portal → Kasa'ya girilir).
+NASIL = {
+    "gemini": "aistudio.google.com → Get API key. Kasa: gemini_api_key",
+    "groq": "console.groq.com → API Keys → Create API Key. Kasa: groq_api_key",
+    "openrouter": "Ücretsiz: openrouter.ai → Keys → Create Key. Kasa: openrouter_api_key",
+    "mistral": "Ücretsiz (Experiment planı): console.mistral.ai → API Keys. Kasa: mistral_api_key",
+    "deepseek": "Ücretli (kullandıkça öde): platform.deepseek.com. Kasa: deepseek_api_key",
+    "ollama": "Kendi sunucumuzda model çalıştırır; işe yarar model 5 GB+ boş bellek ister, şu an önerilmiyor",
+    "openai": "Ücretli: platform.openai.com. Kasa: openai_api_key",
+    "claude": "Ücretli API; API kredisi alınmıyor. Claude'u Üret sekmesindeki 'Claude paketini kopyala' ile kullanın",
+    "deneme": "Yalnız sınama için; gerçek kullanımda kapalı",
+}
 
 
 def hepsi():

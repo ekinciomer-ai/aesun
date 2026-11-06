@@ -307,7 +307,9 @@ async function kullanimYukle(){
 async function motorYukle(){
   kullanimYukle();
   const d=await api("api/durum");
-  $("motListe").innerHTML=d.motorlar.map(m=>`<div><b>${esc(m.etiket)}</b> <span class="rozet ${m.hazir?"yetenek":"yasak"}">${m.hazir?"hazır":"anahtar yok"}</span> <span class="soluk">${esc(m.model)}${m.ucretsiz?" · ücretsiz katman":" · ücretli"}</span></div>`).join("");
+  $("motListe").innerHTML=d.motorlar.map(m=>{const kapali=m.ad==="deneme"||m.ad==="ollama";
+    return `<div><b>${esc(m.etiket)}</b> <span class="rozet ${m.hazir?"yetenek":kapali?"":"yasak"}">${m.hazir?"bağlı":kapali?"kapalı":"bağlı değil"}</span>
+    <span class="soluk">${m.ucretsiz?"ücretsiz":"ücretli"}${m.model?" · "+esc(m.model):""}</span>${!m.hazir&&m.nasil?`<div class="soluk">${esc(m.nasil)}</div>`:""}</div>`}).join("");
   api("api/isler").then(x=>{$("aracListe").innerHTML=x.araclar&&x.araclar.zaman?aracSatir(x.araclar):'<p class="soluk">Sunucu işçisi henüz çalışmadı.</p>'});
   $("rolListe").innerHTML=Object.entries(d.roller).map(([r,l])=>`<div><b>${esc(r)}</b>: <span class="soluk">${l.map(esc).join(" → ")}</span></div>`).join("");
 }

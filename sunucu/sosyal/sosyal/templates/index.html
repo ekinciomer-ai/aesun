@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sosyal Stüdyo</title>
+<style>
+:root{--zemin:#f6f7f9;--kart:#fff;--yazi:#16181d;--soluk:#5d6470;--cizgi:#e3e6eb;--ana:#2457d6;--ana-y:#fff;
+--iyi:#137a3a;--uyari:#9a6400;--uyari-z:#fff6e0;--engel:#b42318;--engel-z:#fdecea;--rozet:#eef2fb}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--zemin:#111317;--kart:#1a1d23;--yazi:#e8eaee;
+--soluk:#9aa1ad;--cizgi:#2b2f37;--ana:#6d93ff;--ana-y:#0b0d12;--iyi:#4cc47a;--uyari:#f0b54a;--uyari-z:#2d2410;
+--engel:#ff7b6e;--engel-z:#33181a;--rozet:#232a3a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--zemin);color:var(--yazi);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--kart);border-bottom:1px solid var(--cizgi)}
+.ust{max-width:900px;margin:auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{font-size:17px;margin:0;font-weight:700}
+nav{display:flex;gap:4px;overflow-x:auto;max-width:100%}
+nav button{background:none;border:0;padding:8px 10px;border-radius:8px;color:var(--soluk);font:inherit;cursor:pointer;white-space:nowrap}
+nav button.secili{background:var(--rozet);color:var(--yazi);font-weight:600}
+main{max-width:900px;margin:auto;padding:16px}
+.kart{background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:16px;margin-bottom:14px}
+.kart h2{font-size:16px;margin:0 0 10px}
+label{display:block;font-size:13px;color:var(--soluk);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--cizgi);border-radius:8px;background:var(--zemin);color:var(--yazi);font:inherit}
+textarea{min-height:80px;resize:vertical}
+.satir{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+button.ana,button.ikinci{border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;margin-top:10px}
+button.ana{background:var(--ana);color:var(--ana-y)}
+button.ikinci{background:var(--rozet);color:var(--yazi)}
+button:disabled{opacity:.5;cursor:wait}
+.dugmeler{display:flex;gap:8px;flex-wrap:wrap}
+.rozet{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--rozet);color:var(--soluk)}
+.rozet.yasak{color:var(--engel)}.rozet.tercih{color:var(--uyari)}.rozet.yetenek{color:var(--iyi)}
+.cikti{white-space:pre-wrap;word-wrap:break-word}
+.cikti h3{font-size:14px;margin:14px 0 4px;color:var(--ana);text-transform:uppercase;letter-spacing:.03em}
+.not{border-radius:8px;padding:10px 12px;margin:8px 0;font-size:14px}
+.not.uyari{background:var(--uyari-z);color:var(--uyari)}.not.engel{background:var(--engel-z);color:var(--engel)}
+.not.iyi{background:var(--rozet);color:var(--iyi)}
+details{border-top:1px solid var(--cizgi);padding:8px 0}
+summary{cursor:pointer;font-weight:600}
+.liste>div{border-top:1px solid var(--cizgi);padding:10px 0}
+.liste>div:first-child{border-top:0}
+.soluk{color:var(--soluk);font-size:13px}
+.gizli{display:none}
+.bekle{display:flex;align-items:center;gap:10px;color:var(--soluk)}
+.bekle::before{content:"";width:16px;height:16px;border:2px solid var(--cizgi);border-top-color:var(--ana);border-radius:50%;animation:d 1s linear infinite}
+@keyframes d{to{transform:rotate(360deg)}}
+#giris{position:fixed;inset:0;background:var(--zemin);display:flex;align-items:center;justify-content:center;z-index:9;padding:16px}
+#giris .kart{width:100%;max-width:340px}
+</style>
+</head>
+<body>
+{% if parola_var and not giris %}
+<div id="giris"><div class="kart"><h2>Sosyal Stüdyo</h2><label>Parola</label>
+<input type="password" id="parola" autocomplete="current-password"><button class="ana" onclick="girisYap()">Giriş</button>
+<div id="girisHata" class="not engel gizli"></div></div></div>
+{% endif %}
+<header><div class="ust"><h1>Sosyal Stüdyo</h1>
+<nav id="sekmeler">
+<button data-s="uret" class="secili">Üret</button><button data-s="hafiza">Hafıza</button>
+<button data-s="icerik">İçerikler</button><button data-s="kaynak">Kaynaklar</button><button data-s="motor">Motorlar</button>
+</nav></div></header>
+<main>
+<section id="s-uret">
+  <div class="kart" id="yeniKart"><h2>Yeni sohbet</h2>
+    <p class="soluk">Her sohbet kaynak dosyaları ve hafızadaki yeteneklerle başlar. Bitirince öğrenilenler kaydedilir, sohbet silinir.</p>
+    <div class="satir">
+      <div><label>Platform</label><select id="platform"></select></div>
+      <div><label>Dil</label><select id="dil"></select></div>
+      <div><label>Format</label><input id="format" list="formatlar" placeholder="ör. Tarihi Magazin">
+        <datalist id="formatlar"><option>Gündem + Tarih</option><option>Tarihi Magazin</option><option>Tarihin Patileri</option>
+        <option>Spor + Tarih</option><option>İnanç + Tarih</option><option>Biliyor musunuz</option><option>POV tarih</option>
+        <option>Tablo Short (3 gizli detay)</option></datalist></div>
+    </div>
+    <label>Konu</label><textarea id="konu" placeholder="ör. Napolyon'un düğün gecesini bir köpek mahvetti"></textarea>
+    <label style="display:flex;gap:8px;align-items:center;color:var(--yazi)"><input type="checkbox" id="arastir" checked style="width:auto"> Önce web'de araştır (kaynaklı bilgi)</label>
+    <button class="ana" id="baslatBtn" onclick="baslat()">Başlat ve üret</button>
+  </div>
+  <div class="kart gizli" id="acikKart"><h2>Açık sohbetler</h2><div class="liste" id="acikListe"></div></div>
+
+  <div id="oturumKart" class="gizli">
+    <div class="kart"><div class="soluk" id="oturumBaslik"></div>
+      <div id="bekle" class="bekle gizli">Ekip çalışıyor: araştırma, fikir, yazım, eleştiri…</div>
+      <div id="denetimKutu"></div>
+      <div class="cikti" id="cikti"></div>
+      <div class="dugmeler"><button class="ikinci" onclick="kopyala(sonMetin)">Metni kopyala</button></div>
+      <details><summary>Ekip notları</summary><div class="liste" id="notlar"></div></details>
+    </div>
+    <div class="kart"><h2>Düzelt</h2>
+      <textarea id="geriMetin" placeholder="ör. Kancayı rakamla aç, metni 10 kelime kısalt"></textarea>
+      <button class="ana" onclick="geriGonder()">Düzelt</button>
+    </div>
+    <div class="kart"><h2>Claude ile (elle)</h2>
+      <p class="soluk">Claude API'si bağlı değilse: paketi kopyalayıp Claude sohbetine yapıştırın, cevabı buraya geri yapıştırın.</p>
+      <button class="ikinci" onclick="ellePaket()">Claude paketini kopyala</button>
+      <textarea id="elleMetin" placeholder="Claude'un cevabı"></textarea>
+      <button class="ana" onclick="elleGonder()">Cevabı ekle</button>
+    </div>
+    <div class="kart"><h2>Bitir</h2>
+      <div class="satir"><div><label>Puan</label><select id="puan"><option value="">—</option><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+      <div><label>Not</label><input id="onayNot" placeholder="isteğe bağlı"></div></div>
+      <div class="dugmeler"><button class="ana" onclick="onayla()">İçeriği onayla ve kaydet</button>
+      <button class="ikinci" onclick="kapat()">Sohbeti bitir ve öğren</button></div>
+      <div id="bitirSonuc"></div>
+    </div>
+  </div>
+</section>
+
+<section id="s-hafiza" class="gizli">
+  <div class="kart"><h2>Elle kayıt ekle</h2>
+    <div class="satir"><div><label>Tür</label><select id="yTur"><option value="tercih">Tercih</option><option value="yasak">Yasak</option><option value="yetenek">Yetenek</option></select></div>
+    <div><label>Ad</label><input id="yAd"></div></div>
+    <label>Açıklama</label><textarea id="yAciklama"></textarea>
+    <button class="ana" onclick="yetenekEkle()">Ekle</button>
+    <a class="soluk" href="api/hafiza.md" target="_blank" style="margin-left:10px">Hafızayı MD olarak aç</a>
+  </div>
+  <div class="kart"><h2>Yetenekler, tercihler, yasaklar</h2><div class="liste" id="yetListe"></div></div>
+  <div class="kart"><h2>Öğrenme günlüğü</h2><div class="liste" id="gunluk"></div></div>
+</section>
+<section id="s-icerik" class="gizli"><div class="kart"><h2>Üretilen içerikler</h2><div class="liste" id="icListe"></div></div></section>
+<section id="s-kaynak" class="gizli">
+  <div class="kart"><h2>MD dosyası ekle</h2><p class="soluk">Kurallar, marka rehberi, yetenek dosyaları. Her sohbette okunur.</p>
+    <input type="file" id="dosya" accept=".md,text/markdown"><button class="ana" onclick="kaynakYukle()">Yükle</button></div>
+  <div class="kart"><h2>Kaynak dosyalar</h2><div class="liste" id="kayListe"></div></div>
+</section>
+<section id="s-motor" class="gizli">
+  <div class="kart"><h2>Yapay zekâ motorları</h2><div class="liste" id="motListe"></div></div>
+  <div class="kart"><h2>Görev dağılımı</h2><p class="soluk">Her görevde listedeki ilk hazır motor çalışır; hata verirse sıradakine geçilir.</p><div class="liste" id="rolListe"></div></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let oid=null,sonMetin="",durumVeri=null;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function api(yol,ayar={}){
+  const r=await fetch(yol,{headers:ayar.body&&!(ayar.body instanceof FormData)?{"Content-Type":"application/json"}:{},...ayar});
+  const d=await r.json().catch(()=>({hata:"Sunucu cevabı okunamadı."}));
+  if(!r.ok)throw new Error(d.hata||("Hata "+r.status));
+  return d;
+}
+const post=(y,v)=>api(y,{method:"POST",body:JSON.stringify(v||{})});
+function hataGoster(e,kutu){const k=$(kutu||"denetimKutu");k.innerHTML=`<div class="not engel">${esc(e.message||e)}</div>`}
+async function girisYap(){try{await post("api/giris",{parola:$("parola").value});location.reload()}catch(e){$("girisHata").textContent=e.message;$("girisHata").classList.remove("gizli")}}
+document.querySelectorAll("#sekmeler button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#sekmeler button").forEach(x=>x.classList.toggle("secili",x===b));
+  document.querySelectorAll("main>section").forEach(s=>s.classList.toggle("gizli",s.id!=="s-"+b.dataset.s));
+  ({hafiza:hafizaYukle,icerik:icerikYukle,kaynak:kaynakListe,motor:motorYukle}[b.dataset.s]||(()=>{}))();
+});
+function md(m){return esc(m).replace(/^#{2,3}\s*(.+)$/gm,"<h3>$1</h3>")}
+function kopyala(t){navigator.clipboard.writeText(t).then(()=>alert("Kopyalandı"),()=>prompt("Kopyalayın:",t))}
+function mesgul(v){$("bekle").classList.toggle("gizli",!v);document.querySelectorAll("button").forEach(b=>b.disabled=v)}
+async function ilkYukle(){
+  try{durumVeri=await api("api/durum")}catch(e){return}
+  $("platform").innerHTML=durumVeri.platformlar.map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
+  $("dil").innerHTML=durumVeri.diller.map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
+  acikYukle();
+}
+async function acikYukle(){
+  const l=await api("api/oturumlar");$("acikKart").classList.toggle("gizli",!l.length);
+  $("acikListe").innerHTML=l.map(o=>`<div><b>${esc(o.konu)}</b> <span class="rozet">${esc(o.platform)}</span>
+   <div class="dugmeler"><button class="ikinci" onclick="ac(${o.id})">Devam et</button></div></div>`).join("");
+}
+function goster(d){
+  oid=d.oturum.id;sonMetin=d.son||"";
+  $("yeniKart").classList.add("gizli");$("acikKart").classList.add("gizli");$("oturumKart").classList.remove("gizli");
+  $("oturumBaslik").innerHTML=`<b>${esc(d.oturum.konu)}</b> · ${esc(d.oturum.platform)} · ${esc(d.oturum.dil)} · ${esc(d.oturum.format||"")}`+(d.son_motor?` · son yazan: <span class="rozet">${esc(d.son_motor)}</span>`:"");
+  $("cikti").innerHTML=d.son?md(d.son):'<p class="soluk">Henüz içerik yok.</p>';
+  const dn=d.denetim;
+  $("denetimKutu").innerHTML=!dn?"":(dn.engel.map(x=>`<div class="not engel">Engel: ${esc(x)}</div>`).join("")+
+    dn.uyari.map(x=>`<div class="not uyari">${esc(x)}</div>`).join("")+(dn.gecti&&!dn.uyari.length?'<div class="not iyi">Denetimden geçti.</div>':""));
+  $("notlar").innerHTML=d.mesajlar.filter(m=>m.asama!=="son"&&m.asama!=="istek").map(m=>`<div><span class="rozet">${esc(m.asama)}</span> <span class="rozet">${esc(m.motor||m.rol)}</span><div class="cikti">${esc(m.icerik)}</div></div>`).join("")||'<p class="soluk">Not yok.</p>';
+}
+async function baslat(){
+  try{mesgul(true);$("oturumKart").classList.remove("gizli");$("cikti").innerHTML="";$("denetimKutu").innerHTML="";
+    const {id}=await post("api/oturum",{platform:$("platform").value,dil:$("dil").value,format:$("format").value,konu:$("konu").value});
+    oid=id;goster(await post(`api/oturum/${id}/uret`,{arastir:$("arastir").checked}));
+  }catch(e){hataGoster(e)}finally{mesgul(false)}
+}
+async function ac(id){try{goster(await api(`api/oturum/${id}`))}catch(e){alert(e.message)}}
+async function geriGonder(){
+  const t=$("geriMetin").value.trim();if(!t)return;
+  try{mesgul(true);goster(await post(`api/oturum/${oid}/geri`,{metin:t}));$("geriMetin").value=""}catch(e){hataGoster(e)}finally{mesgul(false)}
+}
+async function ellePaket(){try{const d=await api(`api/oturum/${oid}/elle`);kopyala(d.paket)}catch(e){hataGoster(e)}}
+async function elleGonder(){try{goster(await post(`api/oturum/${oid}/elle`,{metin:$("elleMetin").value}));$("elleMetin").value=""}catch(e){hataGoster(e)}}
+async function onayla(){
+  try{await post(`api/oturum/${oid}/onayla`,{puan:$("puan").value,notlar:$("onayNot").value});
+    $("bitirSonuc").innerHTML='<div class="not iyi">İçerik kaydedildi. Bitirmek için "Sohbeti bitir ve öğren".</div>'}catch(e){hataGoster(e,"bitirSonuc")}
+}
+async function kapat(){
+  if(!confirm("Sohbet bitirilsin mi? Öğrenilenler kaydedilir, sohbet metni silinir."))return;
+  try{mesgul(true);const d=await post(`api/oturum/${oid}/kapat`);
+    $("bitirSonuc").innerHTML=`<div class="not iyi"><b>Öğrenilenler (${d.ogrenilen.length}):</b><br>${d.ogrenilen.map(esc).join("<br>")||"yeni ders yok"}<br><span class="soluk">${d.silinen_mesaj} mesaj silindi (${d.arsiv_gun} gün arşivde bekler).</span></div>`;
+    setTimeout(()=>{oid=null;$("oturumKart").classList.add("gizli");$("yeniKart").classList.remove("gizli");$("bitirSonuc").innerHTML="";$("konu").value="";acikYukle()},4000);
+  }catch(e){hataGoster(e,"bitirSonuc")}finally{mesgul(false)}
+}
+async function hafizaYukle(){
+  const y=await api("api/yetenekler");
+  $("yetListe").innerHTML=y.map(x=>`<div><span class="rozet ${x.tur}">${x.tur}</span> <b>${esc(x.ad)}</b> <span class="soluk">${esc(x.platform)} · güven ${x.guven.toFixed(1)} · ${x.kullanim} kez</span>
+    <div>${esc(x.aciklama)}</div><button class="ikinci" onclick="yetAktif(${x.id},${x.aktif?0:1})">${x.aktif?"Kapat":"Aç"}</button>${x.aktif?"":' <span class="soluk">kapalı</span>'}</div>`).join("")||'<p class="soluk">Henüz kayıt yok. İlk sohbet bitince dolacak.</p>';
+  const g=await api("api/gunluk");
+  $("gunluk").innerHTML=g.map(x=>`<div><span class="soluk">${esc(x.ts.slice(0,16).replace("T"," "))}</span> <span class="rozet">${esc(x.olay)}</span><div class="cikti soluk">${esc(x.ayrinti)}</div></div>`).join("")||'<p class="soluk">Boş.</p>';
+}
+async function yetAktif(id,v){await post(`api/yetenek/${id}`,{aktif:v});hafizaYukle()}
+async function yetenekEkle(){try{await post("api/yetenek",{tur:$("yTur").value,ad:$("yAd").value,aciklama:$("yAciklama").value});$("yAd").value=$("yAciklama").value="";hafizaYukle()}catch(e){alert(e.message)}}
+async function icerikYukle(){
+  const l=await api("api/icerikler");window._ic=l;
+  $("icListe").innerHTML=l.map((x,i)=>`<div><b>${esc(x.konu)}</b> <span class="rozet">${esc(x.platform)}/${esc(x.dil)}</span> <span class="soluk">${esc(x.tarih.slice(0,10))} · ${esc(x.motorlar)}${x.puan?" · puan "+x.puan:""}</span>
+   <details><summary>Metni göster</summary><div class="cikti">${md(x.metin)}</div></details><button class="ikinci" onclick="kopyala(window._ic[${i}].metin)">Kopyala</button></div>`).join("")||'<p class="soluk">Henüz içerik yok.</p>';
+}
+async function kaynakListe(){
+  const l=await api("api/kaynaklar");
+  $("kayListe").innerHTML=l.map(x=>`<div><b>${esc(x.ad)}</b> <span class="soluk">${(x.boyut/1024).toFixed(1)} KB · ${x.bolum} bölüm</span></div>`).join("")||'<p class="soluk">Kaynak yok.</p>';
+}
+async function kaynakYukle(){
+  const f=$("dosya").files[0];if(!f)return;const fd=new FormData();fd.append("dosya",f);
+  try{await api("api/kaynak",{method:"POST",body:fd});$("dosya").value="";kaynakListe()}catch(e){alert(e.message)}
+}
+async function motorYukle(){
+  const d=await api("api/durum");
+  $("motListe").innerHTML=d.motorlar.map(m=>`<div><b>${esc(m.etiket)}</b> <span class="rozet ${m.hazir?"yetenek":"yasak"}">${m.hazir?"hazır":"anahtar yok"}</span> <span class="soluk">${esc(m.model)}${m.ucretsiz?" · ücretsiz katman":" · ücretli"}</span></div>`).join("");
+  $("rolListe").innerHTML=Object.entries(d.roller).map(([r,l])=>`<div><b>${esc(r)}</b>: <span class="soluk">${l.map(esc).join(" → ")}</span></div>`).join("");
+}
+ilkYukle();
+</script>
+</body>
+</html>

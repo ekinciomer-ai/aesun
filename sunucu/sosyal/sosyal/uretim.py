@@ -4,7 +4,7 @@ import json
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-from . import ayarlar, denetim, kaynaklar, motorlar
+from . import arac, ayarlar, denetim, kaynaklar, motorlar
 from .hafiza import Hafiza
 
 KIMLIK = ("Sen bir sosyal medya içerik stüdyosunun ekibindesin. Birden çok yapay zekâ birlikte çalışıyor; "
@@ -268,6 +268,33 @@ class Studyo:
                       f"{'; '.join(ogrenilen) or 'yeni ders yok'}\n{silinen} mesaj silindi.")
         self.hafiza_disa_aktar()
         return {"ozet": ozet, "ogrenilen": ogrenilen, "silinen_mesaj": silinen, "arsiv_gun": ayarlar.arsiv_gun()}
+
+    # ---- tampon araçları (ses, video taslağı)
+    def arac_isi(self, iid, tur, ses=""):
+        ic = self.h.icerik(iid)
+        if not ic:
+            raise UretimHatasi("İçerik bulunamadı.")
+        terimler = []
+        if tur == "video":
+            metin = arac.seslendirme_metni(ic["metin"])
+            sahne = denetim.bolumler(ic["metin"]).get("sahneler", "")
+            try:
+                _, c = self._cagir("fikir", "GÖREV: GÖRSEL ARAMA\nKısa bir video için Wikimedia Commons arama terimleri "
+                                   "yaz. Her 1-2 cümleye bir terim, İngilizce, 2-4 kelime; tarihi tablo, gravür, harita, "
+                                   "el yazması ya da gerçek yer/nesne hedefle. Soyut kelime kullanma. YALNIZ JSON liste "
+                                   'döndür: ["...", "..."]', f"KONU: {ic['konu']}\nCÜMLELER:\n{metin}\nSAHNELER:\n{sahne}",
+                                   sicaklik=0.2)
+                m = re.search(r"\[.*\]", c, re.S)
+                terimler = [str(x) for x in json.loads(m.group(0))] if m else []
+            except (UretimHatasi, json.JSONDecodeError):
+                terimler = []
+            terimler = terimler or [ic["konu"]]
+        try:
+            j = arac.is_olustur(ic, tur, ses, terimler)
+        except ValueError as e:
+            raise UretimHatasi(str(e)) from None
+        self.h.gunluk("arac_isi", f"{tur} · içerik #{iid} · {ic['konu']} · iş {j['id']}")
+        return j
 
     def hafiza_disa_aktar(self):
         yol = ayarlar.veri_dizin() / "HAFIZA.md"

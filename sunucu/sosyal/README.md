@@ -22,6 +22,15 @@ kalıcı hafızaya yazar, sohbetin kendisini siler. Yeni sohbet hafızayı ve ka
    Sohbet metni silinir: önce 7 gün arşivde bekler, sonra kendiliğinden kalıcı silinir
    (`SOSYAL_SOHBET_ARSIV_GUN`, 0 = hemen sil).
 
+7. **Tampon araçları** (İçerikler sekmesi): onaylanan içerik "Seslendir" ya da "Video taslağı" ile kuyruğa
+   gider. Sunucudaki işçi (`arac/isci.py`, dakikada bir) GitHub'dan alınıp tampon bölgede yalıtılmış duran
+   araçları çalıştırır:
+   - Ses: Piper `tr_TR-fahrettin` (CC0, Türkçe) ya da Chatterbox Multilingual (MIT, TR/EN/ES)
+   - Video taslağı: yapay zekâ görsel arama terimlerini çıkarır → Wikimedia Commons serbest lisanslı görseller
+     (`commons_gorsel.py`) → MoneyPrinterTurbo (Edge ses, altyazı, yakınlaşma, 9:16) → kalite kapısı.
+     Kapıdan geçmeyen video saklanmaz ve gösterilmez; görsel kaynakları `kaynaklar.json`'da durur.
+   Program kapsayıcısı araçlara doğrudan erişmez, yalnız kuyruğa iş yazar ve sonucu okur.
+
 Hafızanın okunur hali `veri/HAFIZA.md` dosyasına ve `/api/hafiza.md` adresine yazılır. Başka bir yapay zekâ
 (ör. Claude sohbeti) yeni işe bunu okuyarak başlayabilir.
 

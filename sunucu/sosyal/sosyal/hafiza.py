@@ -173,6 +173,10 @@ class Hafiza:
     def icerikler(self, limit=50):
         return self._oku("SELECT * FROM icerikler ORDER BY id DESC LIMIT ?", (limit,))
 
+    def icerik(self, iid):
+        r = self._oku("SELECT * FROM icerikler WHERE id=?", (iid,))
+        return r[0] if r else None
+
     def icerik_puanla(self, iid, puan, notlar=""):
         self._calis("UPDATE icerikler SET puan=?, notlar=? WHERE id=?", (puan, notlar, iid))
 

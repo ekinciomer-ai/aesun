@@ -3,9 +3,9 @@ import hmac
 import os
 import secrets
 
-from flask import Flask, Response, jsonify, render_template, request, session
+from flask import Flask, Response, abort, jsonify, render_template, request, send_file, session
 
-from . import kaynaklar
+from . import arac, kaynaklar
 from .uretim import Studyo, UretimHatasi
 
 
@@ -121,6 +121,22 @@ def create_app(studyo=None):
         d = j()
         st.h.icerik_puanla(iid, int(d.get("puan", 0)) or None, str(d.get("notlar", "")))
         return jsonify(ok=True)
+
+    @app.post("/api/icerik/<int:iid>/arac")
+    def icerik_arac(iid):
+        d = j()
+        return jsonify(st.arac_isi(iid, str(d.get("tur", "")), str(d.get("ses", ""))))
+
+    @app.get("/api/isler")
+    def isler():
+        return jsonify(isler=arac.isler(), araclar=arac.araclar_durumu())
+
+    @app.get("/api/is/<iid>/<ad>")
+    def is_dosya(iid, ad):
+        y = arac.dosya_yolu(iid, ad)
+        if not y:
+            abort(404)
+        return send_file(y, conditional=True)
 
     @app.get("/api/gunluk")
     def gunluk():

@@ -9,6 +9,9 @@ services:
     volumes:
       - sosyal_veri:/veri
       - /opt/sosyal/kaynak:/kaynak
+      - /opt/sosyal/kuyruk:/kuyruk     # tampon araç işleri (işçi kapsayıcı dışında çalışır)
+    environment:
+      SOSYAL_KUYRUK: /kuyruk
     ports: ["127.0.0.1:5090:8000"]
     mem_limit: 256m
     cpus: 0.5

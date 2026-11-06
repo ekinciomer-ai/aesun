@@ -118,7 +118,10 @@ summary{cursor:pointer;font-weight:600}
   <div class="kart"><h2>Yetenekler, tercihler, yasaklar</h2><div class="liste" id="yetListe"></div></div>
   <div class="kart"><h2>Öğrenme günlüğü</h2><div class="liste" id="gunluk"></div></div>
 </section>
-<section id="s-icerik" class="gizli"><div class="kart"><h2>Üretilen içerikler</h2><div class="liste" id="icListe"></div></div></section>
+<section id="s-icerik" class="gizli">
+  <div class="kart"><h2>Araç işleri</h2><p class="soluk" id="aracOzet">Ses ve video taslakları sunucudaki tampon araçlarıyla üretilir; kalite kapısından geçmeyen video gösterilmez.</p>
+    <div class="liste" id="isListe"></div><button class="ikinci" onclick="isYukle()">Yenile</button></div>
+  <div class="kart"><h2>Üretilen içerikler</h2><div class="liste" id="icListe"></div></div></section>
 <section id="s-kaynak" class="gizli">
   <div class="kart"><h2>MD dosyası ekle</h2><p class="soluk">Kurallar, marka rehberi, yetenek dosyaları. Her sohbette okunur.</p>
     <input type="file" id="dosya" accept=".md,text/markdown"><button class="ana" onclick="kaynakYukle()">Yükle</button></div>
@@ -126,6 +129,7 @@ summary{cursor:pointer;font-weight:600}
 </section>
 <section id="s-motor" class="gizli">
   <div class="kart"><h2>Yapay zekâ motorları</h2><div class="liste" id="motListe"></div></div>
+  <div class="kart"><h2>Tampon araçları</h2><p class="soluk">GitHub'dan alınıp sunucuda yalıtılmış duran açık kaynak araçlar.</p><div id="aracListe"></div></div>
   <div class="kart"><h2>Görev dağılımı</h2><p class="soluk">Her görevde listedeki ilk hazır motor çalışır; hata verirse sıradakine geçilir.</p><div class="liste" id="rolListe"></div></div>
 </section>
 </main>
@@ -204,10 +208,30 @@ async function hafizaYukle(){
 }
 async function yetAktif(id,v){await post(`api/yetenek/${id}`,{aktif:v});hafizaYukle()}
 async function yetenekEkle(){try{await post("api/yetenek",{tur:$("yTur").value,ad:$("yAd").value,aciklama:$("yAciklama").value});$("yAd").value=$("yAciklama").value="";hafizaYukle()}catch(e){alert(e.message)}}
-async function icerikYukle(){
+async function icerikYukle(){isYukle();
   const l=await api("api/icerikler");window._ic=l;
   $("icListe").innerHTML=l.map((x,i)=>`<div><b>${esc(x.konu)}</b> <span class="rozet">${esc(x.platform)}/${esc(x.dil)}</span> <span class="soluk">${esc(x.tarih.slice(0,10))} · ${esc(x.motorlar)}${x.puan?" · puan "+x.puan:""}</span>
-   <details><summary>Metni göster</summary><div class="cikti">${md(x.metin)}</div></details><button class="ikinci" onclick="kopyala(window._ic[${i}].metin)">Kopyala</button></div>`).join("")||'<p class="soluk">Henüz içerik yok.</p>';
+   <details><summary>Metni göster</summary><div class="cikti">${md(x.metin)}</div></details><div class="dugmeler"><button class="ikinci" onclick="kopyala(window._ic[${i}].metin)">Kopyala</button>
+   <select id="ses${x.id}" style="width:auto;margin-top:10px">${x.dil==="tr"?'<option value="piper">Piper (Türkçe, CC0)</option>':""}<option value="chatterbox">Chatterbox (açık kaynak)</option></select>
+   <button class="ikinci" onclick="aracIs(${x.id},'ses')">Seslendir</button>
+   <button class="ikinci" onclick="aracIs(${x.id},'video')">Video taslağı</button></div></div>`).join("")||'<p class="soluk">Henüz içerik yok.</p>';
+}
+async function aracIs(id,tur){
+  try{await post(`api/icerik/${id}/arac`,{tur,ses:($("ses"+id)||{}).value||""});isYukle()}catch(e){alert(e.message)}
+}
+const AD={piper:"Piper ses",chatterbox:"Chatterbox ses",mpt:"MoneyPrinterTurbo video",commons:"Wikimedia görsel",kalite:"Kalite kapısı",ffmpeg:"ffmpeg"};
+function aracSatir(a){return Object.keys(AD).map(k=>`<span class="rozet ${a[k]?"yetenek":"yasak"}">${AD[k]}: ${a[k]?"hazır":"yok"}</span>`).join(" ")}
+async function isYukle(){
+  const d=await api("api/isler");const a=d.araclar||{};
+  $("aracOzet").innerHTML=a.zaman?`${aracSatir(a)} <span class="soluk">· işçi son: ${esc(a.zaman.slice(11,16))}</span>`:"Sunucu işçisi henüz çalışmadı (kurulumdan sonra dakikada bir döner).";
+  $("isListe").innerHTML=d.isler.map(x=>{const k=x.kalite||{};
+    const oy=(x.dosyalar||[]).map(f=>f==="video.mp4"?`<video controls preload="none" style="width:100%;max-width:270px;display:block;margin-top:8px" src="api/is/${x.id}/video.mp4"></video>`:
+      f==="ses.mp3"?`<audio controls preload="none" style="width:100%;margin-top:8px" src="api/is/${x.id}/ses.mp3"></audio>`:`<a class="soluk" href="api/is/${x.id}/${f}" target="_blank">${f}</a>`).join(" ");
+    return `<div><span class="rozet">${esc(x.tur)}</span> <b>${esc(x.konu||x.id)}</b> <span class="rozet ${x.durum==="bitti"?"yetenek":x.durum==="hata"?"yasak":"tercih"}">${esc(x.durum)}</span>
+     ${x.sure_sn?`<span class="soluk">${x.sure_sn} sn</span>`:""}
+     ${x.mesaj?`<div class="not engel">${esc(x.mesaj)}</div>`:""}
+     ${(k.engel||[]).map(e=>`<div class="not engel">Kalite: ${esc(e)}</div>`).join("")}${(k.uyari||[]).map(e=>`<div class="not uyari">${esc(e)}</div>`).join("")}
+     ${x.lisans?`<div class="soluk">${esc(x.lisans)}</div>`:""}${oy}</div>`}).join("")||'<p class="soluk">Henüz iş yok.</p>';
 }
 async function kaynakListe(){
   const l=await api("api/kaynaklar");
@@ -220,6 +244,7 @@ async function kaynakYukle(){
 async function motorYukle(){
   const d=await api("api/durum");
   $("motListe").innerHTML=d.motorlar.map(m=>`<div><b>${esc(m.etiket)}</b> <span class="rozet ${m.hazir?"yetenek":"yasak"}">${m.hazir?"hazır":"anahtar yok"}</span> <span class="soluk">${esc(m.model)}${m.ucretsiz?" · ücretsiz katman":" · ücretli"}</span></div>`).join("");
+  api("api/isler").then(x=>{$("aracListe").innerHTML=x.araclar&&x.araclar.zaman?aracSatir(x.araclar):'<p class="soluk">Sunucu işçisi henüz çalışmadı.</p>'});
   $("rolListe").innerHTML=Object.entries(d.roller).map(([r,l])=>`<div><b>${esc(r)}</b>: <span class="soluk">${l.map(esc).join(" → ")}</span></div>`).join("");
 }
 ilkYukle();

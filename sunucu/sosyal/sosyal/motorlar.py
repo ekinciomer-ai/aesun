@@ -151,6 +151,8 @@ class Deneme(Motor):
             return "- Kanca ilk 3 saniyede daha net olabilir.\n- Rakamlar kaynakla tekrar kontrol edilmeli."
         if sistem.startswith("GÖREV: FİKİR"):
             return "1. Az bilinen açı: deneme fikri A\n2. Şaşırtıcı rakamla açılış: deneme fikri B"
+        if sistem.startswith("GÖREV: GÖRSEL ARAMA"):
+            return '["Napoleon portrait painting", "Josephine de Beauharnais", "Malmaison castle"]'
         if sistem.startswith("GÖREV: ARAŞTIRMA"):
             return "- Deneme bilgisi (kaynak gerekli)."
         k = re.search(r"KONU: (.+)", mesaj)

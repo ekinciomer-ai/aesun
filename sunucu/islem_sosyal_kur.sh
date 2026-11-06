@@ -5,7 +5,7 @@
 set -uo pipefail
 cd /tmp/aesun_paket
 D=/opt/sosyal
-mkdir -p $D/kaynak $D/kod
+mkdir -p $D/kaynak $D/kod $D/kuyruk/bekleyen $D/kuyruk/cikti
 # 1) yedek
 ONCE=$(docker inspect sosyal-studyo --format '{{.Image}}' 2>/dev/null)
 [ -d $D/kod/sosyal ] && rm -rf $D/kod.onceki && cp -a $D/kod $D/kod.onceki
@@ -16,7 +16,30 @@ for f in sunucu/sosyal/kaynak/*.md; do
   [ -f "$h" ] && ! cmp -s "$f" "$h" && cp -a "$h" "$h.$(date +%Y%m%d%H%M).bak"
   cp "$f" "$h"
 done
-chown -R 1001:1001 $D/kaynak
+chown -R 1001:1001 $D/kaynak $D/kuyruk/bekleyen
+# Tampon araç işçisi (kapsayıcı dışında, dakikada bir; tek iş aynı anda)
+install -m 755 sunucu/sosyal/arac/isci.py $D/isci.py
+cat > /etc/systemd/system/sosyal-isci.service <<'UNIT'
+[Unit]
+Description=Sosyal Stüdyo tampon araç işçisi
+[Service]
+Type=oneshot
+Nice=10
+TimeoutStartSec=3600
+ExecStart=/usr/bin/python3 /opt/sosyal/isci.py
+UNIT
+cat > /etc/systemd/system/sosyal-isci.timer <<'UNIT'
+[Unit]
+Description=Sosyal Stüdyo işçisi her dakika
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=1min
+[Install]
+WantedBy=timers.target
+UNIT
+systemctl daemon-reload && systemctl enable --now sosyal-isci.timer >/dev/null 2>&1
+python3 $D/isci.py >/dev/null 2>&1
+echo "NOT: tampon araçları: $(python3 -c "import json;d=json.load(open('$D/kuyruk/araclar.json'));print(' '.join(k+('=var' if v else '=YOK') for k,v in d.items() if k!='zaman'))" 2>/dev/null)"
 # 3) ayarlar (yoksa örnekten) ve kasadan anahtarlar
 if [ ! -f $D/sosyal.env ]; then
   cp sunucu/sosyal/sosyal.env.ornek $D/sosyal.env

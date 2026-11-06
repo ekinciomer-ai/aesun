@@ -59,6 +59,9 @@ cd $D/kod
 saglik() { for i in $(seq 1 20); do [ "$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:5090/saglik)" = 200 ] && return 0; sleep 2; done; return 1; }
 if docker compose build -q >/tmp/sosyal_build.log 2>&1 && docker compose up -d >/dev/null 2>&1 && saglik; then
   echo "NOT: Sosyal Stüdyo yayında · $(curl -s --max-time 5 http://127.0.0.1:5090/saglik)"
+  # Alan adı yönlendiricisi (ck-caddy) varsa onun dış ağına da katılır; yeniden kurulumda bağlantı tazelenir.
+  AG=$(docker inspect ck-caddy -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' 2>/dev/null | tr ' ' '\n' | grep -m1 'ck-dis')
+  [ -n "$AG" ] && { docker network connect "$AG" sosyal-studyo 2>/dev/null; echo "NOT: yönlendirici ağı: $AG"; }
   docker exec sosyal-studyo python -m sosyal.cli durum 2>/dev/null | sed 's/^/NOT: /' | head -12
   rm -rf $D/kod.onceki
 else

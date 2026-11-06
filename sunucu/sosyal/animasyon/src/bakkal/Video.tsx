@@ -491,7 +491,7 @@ const Video: React.FC = () => {
             </Balon>
             {sasirma > 0 && <text x={e.x} y={e.y - 640} textAnchor="middle" fontFamily={EL} fontSize={120 * sasirma} fill={C.kirmizi}>!</text>}
             {otur > 0.3 && t < an(8, 0) && <text x={e.x + 70} y={e.y - 420 + Math.sin(t * 2) * 6} fontFamily={EL} fontSize={44} fill={C.mur} opacity={0.7}>off...</text>}
-            <Balon x={ODA * 7 + 820} y={ZEMIN - 780} w={360} h={140} u={amcaBalon} kuyruk={40}>
+            <Balon x={ODA * 7 + 700} y={ZEMIN - 800} w={420} h={140} u={amcaBalon} kuyruk={90}>
               <text y={14} textAnchor="middle" fontFamily={EL} fontSize={44} fill={C.mur}>Ekmek sıcak kızım!</text>
             </Balon>
             {[0, 1, 2].map((k) => <Kalp key={k} x={e.x - 40 + k * 40} y={e.y - 620} u={(t - kelimeAn(10, 'sakız') - k * 0.25) / 1.4} />)}

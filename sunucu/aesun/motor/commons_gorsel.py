@@ -113,7 +113,7 @@ def main():
         for deneme in (terim, terimler[0]):
             try:
                 for g in list(ara(deneme))[:5]:   # ücretsiz kota: terim başına en çok 5 görsel kontrol edilir
-                    if g["baslik"] in kullanilan or _cekirdek(g["baslik"]) in cekirdekler:   # aynı eserin kopyası (kırpılmış vb.)
+                    if g["baslik"] in kullanilan or any(_cekirdek(g["baslik"]).startswith(x) or x.startswith(_cekirdek(g["baslik"])) for x in cekirdekler):   # aynı eserin kopyası (kırpılmış vb.)
                         continue
                     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as t:
                         t.write(iste(g["kucuk"], 90))

@@ -36,7 +36,7 @@ def araclar_durumu():
         return {}
 
 
-def is_olustur(icerik: dict, tur: str, ses: str = "", terimler=None):
+def is_olustur(icerik: dict, tur: str, ses: str = "", terimler=None, konu_en: str = ""):
     if tur not in ("ses", "video"):
         raise ValueError("İş türü ses ya da video olmalı.")
     if icerik.get("dil") not in denetim.DILLER:
@@ -48,7 +48,7 @@ def is_olustur(icerik: dict, tur: str, ses: str = "", terimler=None):
         raise ValueError("İçerikte seslendirilecek '## Metin' bölümü bulunamadı.")
     iid = f"{time.strftime('%Y%m%d%H%M%S')}_{secrets.token_hex(3)}"
     j = {"id": iid, "tur": tur, "icerik_id": icerik["id"], "dil": icerik["dil"], "konu": icerik["konu"],
-         "metin": metin, "ses": ses, "terimler": list(terimler or [])[:12],
+         "metin": metin, "ses": ses, "terimler": list(terimler or [])[:12], "konu_en": konu_en,
          "zaman": datetime.now(timezone.utc).isoformat(timespec="seconds")}
     hedef = kok() / "bekleyen" / f"{iid}.json"
     gecici = hedef.with_suffix(".tmp")
@@ -75,7 +75,7 @@ def isler(limit=30):
         dosyalar = [x for x in durum.get("dosyalar", []) if x in IZINLI_DOSYA and (d / x).exists()]
         if durum.get("durum") == "bitti" and not (durum.get("kalite") or {}).get("gecti", True):
             durum["durum"] = "kapıdan geçmedi"
-        sonuc.append({**_ozet(j), **{k_: durum.get(k_) for k_ in ("durum", "mesaj", "kalite", "lisans", "sure_sn", "basla")},
+        sonuc.append({**_ozet(j), **{k_: durum.get(k_) for k_ in ("durum", "mesaj", "kalite", "lisans", "sure_sn", "basla", "gorsel_ozet")},
                       "dosyalar": dosyalar})
     return sonuc[:limit]
 

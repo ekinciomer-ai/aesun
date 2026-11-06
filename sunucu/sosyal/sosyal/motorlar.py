@@ -200,7 +200,7 @@ class Deneme(Motor):
         if sistem.startswith("GÖREV: FİKİR"):
             return "1. Az bilinen açı: deneme fikri A\n2. Şaşırtıcı rakamla açılış: deneme fikri B"
         if sistem.startswith("GÖREV: GÖRSEL ARAMA"):
-            return '["Napoleon portrait painting", "Josephine de Beauharnais", "Malmaison castle"]'
+            return '{"konu_en": "Napoleon and his dog", "terimler": ["Napoleon portrait painting 1796", "Josephine de Beauharnais portrait painting", "Malmaison castle engraving"]}'
         if sistem.startswith("GÖREV: ARAŞTIRMA"):
             return "- Deneme bilgisi (kaynak gerekli)."
         k = re.search(r"KONU: (.+)", mesaj)

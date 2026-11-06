@@ -252,6 +252,7 @@ function isHtml(x){const k=x.kalite||{};let d;
   return `<div class="is"><b>${x.tur==="video"?"Video taslağı":"Ses dosyası"}</b> <span class="soluk">· ${saat(x.zaman)}</span><div>${d}</div>
     ${x.mesaj?`<div class="not engel">${esc(x.mesaj)}</div>`:""}${(k.engel||[]).map(e=>`<div class="not engel">${esc(e)}</div>`).join("")}
     ${x.durum==="bitti"?(k.uyari||[]).map(e=>`<div class="not uyari">${esc(e)}</div>`).join(""):""}
+    ${x.gorsel_ozet?`<div class="soluk">${esc(x.gorsel_ozet)}</div>`:""}
     ${x.lisans&&x.durum==="bitti"?`<div class="soluk">${esc(x.lisans)}</div>`:""}${oy}</div>`}
 async function icerikYukle(){
   const [l,d]=await Promise.all([api("api/icerikler"),api("api/isler")]);window._ic=l;_isler=d.isler;

@@ -317,23 +317,32 @@ class Studyo:
         ic = self.h.icerik(iid)
         if not ic:
             raise UretimHatasi("İçerik bulunamadı.")
-        terimler = []
+        terimler, konu_en = [], ""
         if tur == "video":
             metin = arac.seslendirme_metni(ic["metin"])
             sahne = denetim.bolumler(ic["metin"]).get("sahneler", "")
             try:
-                _, c = self._cagir("fikir", "GÖREV: GÖRSEL ARAMA\nKısa bir video için Wikimedia Commons arama terimleri "
-                                   "yaz. Her 1-2 cümleye bir terim, İngilizce, 2-4 kelime; tarihi tablo, gravür, harita, "
-                                   "el yazması ya da gerçek yer/nesne hedefle. Soyut kelime kullanma. YALNIZ JSON liste "
-                                   'döndür: ["...", "..."]', f"KONU: {ic['konu']}\nCÜMLELER:\n{metin}\nSAHNELER:\n{sahne}",
-                                   sicaklik=0.2)
-                m = re.search(r"\[.*\]", c, re.S)
-                terimler = [str(x) for x in json.loads(m.group(0))] if m else []
+                _, c = self._cagir(
+                    "fikir", "GÖREV: GÖRSEL ARAMA\nKısa bir video için Wikimedia Commons'ta aranacak terimleri yaz. "
+                    "Her 1-2 cümleye ve her sahneye bir terim; İngilizce, 3-6 kelime. Her terim DÖNEMİ (yüzyıl ya da yıl), "
+                    "NESNEYİ/KİŞİYİ/YERİ ve GÖRSEL TÜRÜNÜ birlikte söyler: örn. '1920s flapper dress fashion plate', "
+                    "'Victorian crinoline dress painting', 'Ottoman kaftan Topkapi museum'. Tek kelimelik ya da soyut terim "
+                    "(fashion, history, style) yazma. Commons'ta bulunabilecek şeyleri seç: tarihî tablo, gravür, moda "
+                    "levhası, müze objesi, dönem fotoğrafı, harita. YALNIZ JSON döndür: "
+                    '{"konu_en": "konunun kısa İngilizcesi", "terimler": ["...", "..."]}',
+                    f"KONU: {ic['konu']}\nCÜMLELER:\n{metin}\nSAHNELER:\n{sahne}", sicaklik=0.2)
+                j = _json_bul(c)
+                if isinstance(j, dict):
+                    konu_en = str(j.get("konu_en", ""))[:200]
+                    terimler = [str(x) for x in j.get("terimler", []) if str(x).strip()]
+                else:
+                    m = re.search(r"\[.*\]", c, re.S)
+                    terimler = [str(x) for x in json.loads(m.group(0))] if m else []
             except (UretimHatasi, json.JSONDecodeError):
                 terimler = []
             terimler = terimler or [ic["konu"]]
         try:
-            j = arac.is_olustur(ic, tur, ses, terimler)
+            j = arac.is_olustur(ic, tur, ses, terimler, konu_en)
         except ValueError as e:
             raise UretimHatasi(str(e)) from None
         self.h.gunluk("arac_isi", f"{tur} · içerik #{iid} · {ic['konu']} · iş {j['id']}")

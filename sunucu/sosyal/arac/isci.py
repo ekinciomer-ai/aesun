@@ -8,7 +8,8 @@ Tampon araçları (GitHub'dan alınıp yalıtılmış kapsayıcılarda duran):
   - Wikimedia Commons görselleri         : /opt/aesun/motor/commons_gorsel.py (yalnız serbest lisans, yazılı görsel elenir)
   - MoneyPrinterTurbo (MIT)              : tampon-mpt, 127.0.0.1:8180 (Edge ses + altyazı + yakınlaşma, 9:16)
   - Kalite kapısı                        : /opt/aesun/kalite_kapisi.py (engel varsa video gösterilmez)
-Sır okumaz, port açmaz. Aynı anda tek iş (kilit dosyası).
+Port açmaz. Tek sır: görsel uygunluk kontrolü için kasadan Gemini anahtarı (yalnız alt sürece ortam değişkeni olarak
+verilir, yazılmaz). Her sırada aynı anda tek iş (kilit dosyası).
 """
 import fcntl
 import glob
@@ -39,8 +40,8 @@ PIPER_TR = ("tr_TR-fahrettin-medium", "tr/tr_TR/fahrettin/medium/tr_TR-fahrettin
 PIPER_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/"
 
 
-def calis(komut, sure=1800):
-    r = subprocess.run(komut, capture_output=True, text=True, timeout=sure)
+def calis(komut, sure=1800, env=None):
+    r = subprocess.run(komut, capture_output=True, text=True, timeout=sure, env=env)
     if r.returncode:
         raise RuntimeError((r.stderr or r.stdout)[-400:])
     return r.stdout
@@ -92,14 +93,33 @@ def _post(yol, govde):
     return json.load(urllib.request.urlopen(r, timeout=180))
 
 
+def kasa(ad):
+    try:
+        r = subprocess.run(["/opt/aesun/kasa_coz.sh", ad], capture_output=True, text=True, timeout=30)
+        return r.stdout.strip() if r.returncode == 0 else ""
+    except Exception:
+        return ""
+
+
 def video_uret(j, klasor: Path):
     is_ad = "sosyal_" + j["id"]
     gorsel = MPT_REPO / "storage" / "local_videos" / is_ad
     terimler = [t for t in j.get("terimler", []) if t][:12] or [j["konu"]]
-    calis([sys.executable, COMMONS, str(gorsel), *terimler], sure=900)
+    anahtar = kasa("gemini_api_key")
+    if not anahtar:
+        raise RuntimeError("Görsel uygunluk kontrolü için kasada gemini_api_key yok; kontrolsüz görsel kullanılmaz.")
+    # Her aday görsel Gemini'ye gösterilir: sahneye ve döneme uymayan elenir (anahtar yoksa araç kontrolü atlıyordu).
+    ortam = {**os.environ, "GEMINI_KEY": anahtar, "KONU": j.get("konu_en") or j["konu"], "TUR": "tarih"}
+    cikti = calis([sys.executable, COMMONS, str(gorsel), *terimler], sure=1500, env=ortam)
+    try:
+        kontrol = json.loads(cikti.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        kontrol = {}
     resimler = sorted(glob.glob(str(gorsel / "g*.png")))
     if len(resimler) < 3:
-        raise RuntimeError(f"Wikimedia'da yeterli serbest lisanslı görsel bulunamadı ({len(resimler)}).")
+        g = kontrol.get("gemini", {})
+        raise RuntimeError(f"Konuya uyan yeterli görsel bulunamadı ({len(resimler)} uygun; {g.get('hayir', 0)} görsel "
+                           f"sahneye uymadığı için elendi). Konu Wikimedia'daki tarihî görsellerle anlatılamıyor olabilir.")
     mat = [{"provider": "local", "url": f"/MoneyPrinterTurbo/storage/local_videos/{is_ad}/{Path(x).name}"}
            for x in resimler]
     govde = {"video_subject": j["konu"], "video_script": j["metin"], "video_source": "local", "video_materials": mat,
@@ -132,7 +152,10 @@ def video_uret(j, klasor: Path):
     if not kalite.get("gecti"):
         (klasor / "video.mp4").unlink(missing_ok=True)  # kapıdan geçmeyen video saklanmaz, gösterilmez
         dosyalar = ["kaynaklar.json"]
-    return {"dosyalar": dosyalar, "kalite": kalite, "mpt_gorev": gorev,
+    g = kontrol.get("gemini", {})
+    return {"dosyalar": dosyalar, "kalite": kalite, "mpt_gorev": gorev, "gorsel_kontrol": g,
+            "gorsel_ozet": f"{len(resimler)} görsel seçildi · {g.get('evet', 0) + g.get('hayir', 0)} aday kontrol edildi, "
+                           f"{g.get('hayir', 0)} uymadığı için elendi",
             "lisans": f"Ses: Microsoft Edge ({govde['voice_name']}), görseller: Wikimedia Commons (kaynaklar.json)"}
 
 

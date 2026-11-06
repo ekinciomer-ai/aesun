@@ -16,7 +16,7 @@ for f in sorted(glob.glob(D + "/kanallar/*.json")):
         for ad, u in (("LOGO", (sn.get("thumbnails", {}).get("high") or {}).get("url")), ("KAPAK", br.get("image", {}).get("bannerExternalUrl"))):
             if not u: print(f"NOT: {ad} yok"); continue
             try:
-                v = urllib.request.urlopen(u + ("=w1280" if ad == "KAPAK" else ""), timeout=30).read()
+                v = urllib.request.urlopen(u + ("=w2560" if ad == "KAPAK" else ""), timeout=30).read()
                 print(f"GORSEL_{ad}_{c['id']} " + base64.b64encode(v).decode())
             except Exception as e: print(f"NOT: {ad} indirilemedi {type(e).__name__}")
 PY

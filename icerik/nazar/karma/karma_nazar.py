@@ -15,7 +15,7 @@ def font(ad, px, metin=""):
 
 # metin ve ses
 M = [l.strip() for l in open(f"{K}/metin_{DIL}.txt", encoding="utf-8") if l.strip()]
-SES = [f"{K}/NAZAR_{DIL.upper()}_SES__s{i+1}.mp3" for i in range(len(M))]
+SES = [f"{K}/NAZAR2_{DIL.upper()}_SES__s{i+1}.mp3" for i in range(len(M))]
 def sure(p): return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", p]))
 D = [sure(p) for p in SES]; ARA = 0.3
 # sahneler: (görsel, yön, başlıklar[(küçük altın, büyük beyaz, büyük altın)])
@@ -30,7 +30,7 @@ B = {"tr": [
     ("s7", -1, [("186 TOPLUM", "KISKANÇLIK", "NAZARI BÜYÜTÜR")]),
     ("s8", 1, [("GÖZLER AYNI", "KORKU AYNI!", "TAMAMI KANALDA ▶")]),
 ], "en": [
-    ("s1", 1, [("TURKEY · TODAY", "2 OUT OF 3", "BELIEVE IT")]),
+    ("s1", 1, [("GREECE · INDIA · MEXICO", "MILLIONS", "BELIEVE IT")]),
     ("s8", -1, [("THE REAL SHOCK", "5,000 YEARS", "AGO!")]),
     ("s2", 1, [("1300 BC · UGARIT", "CLAY TABLET", "EVIL EYE")]),
     ("s3", -1, [("GREECE · ROME", "PLUTARCH", "EYES SHOOT RAYS")]),
@@ -39,10 +39,20 @@ B = {"tr": [
     ("s6", 1, [("GÖRECE → NAZARKÖY", "FURNACES", "WENT COLD")]),
     ("s7", -1, [("186 SOCIETIES", "ENVY", "FEEDS THE EYE")]),
     ("s8", 1, [("SAME EYES", "SAME FEAR!", "FULL STORY ▶")]),
+], "es": [
+    ("s9", 1, [("ROMA · 1923", "ALFONSO XIII", "¿MAL DE OJO?")]),
+    ("s8", -1, [("EL VERDADERO SUSTO", "5.000 AÑOS", "¡DE MIEDO!")]),
+    ("s2", 1, [("1300 A.C. · UGARIT", "TABLILLA", "MAL DE OJO")]),
+    ("s3", -1, [("GRECIA · ROMA", "PLUTARCO", "EL OJO LANZA RAYOS")]),
+    ("s4", 1, [("ROMA · 1850", "PÍO NONO", "EL PAPA GAFE")]),
+    ("s10", -1, [("ESPAÑA · SIGLO XVI", "LA HIGA", "DE AZABACHE")]),
+    ("s11", 1, [("ESPAÑA · HOY", "UN HUEVO", "Y UNA ORACIÓN")]),
+    ("s7", -1, [("186 SOCIEDADES", "ENVIDIA", "ALIMENTA EL OJO")]),
+    ("s8", 1, [("LOS MISMOS OJOS", "¡EL MISMO MIEDO!", "HISTORIA COMPLETA ▶")]),
 ]}[DIL]
 assert len(B) == len(M)
-ALT = {"tr": "Temsili illüstrasyon (yapay zekâ) · Ses: yapay zekâ ile klonlanmış kendi sesim", "en": "Illustration: AI generated · Voice: my own AI-cloned voice"}[DIL]
-KANAL = {"tr": "ANTİK STÜDYO", "en": "ANCIENT STUDIO"}[DIL]
+ALT = {"tr": "Temsili illüstrasyon (yapay zekâ) · Ses: yapay zekâ ile klonlanmış kendi sesim", "en": "Illustration: AI generated · Voice: my own AI-cloned voice", "es": "Ilustración: generada por IA · Voz: mi propia voz clonada con IA"}[DIL]
+KANAL = {"tr": "ANTİK STÜDYO", "en": "ANCIENT STUDIO", "es": "ESTUDIO ANTIGUO"}[DIL]
 
 # zaman çizelgesi
 T = []; t = 0.0
@@ -109,11 +119,13 @@ def kare(fi):
 if KURU:
     print(json.dumps({"toplam": round(TOPLAM, 1), "sahne": [(B[i][0], round(T[i][0], 1), round(T[i][1], 1)) for i in range(len(T))]}, ensure_ascii=False))
     kare(int(T[4][0] * FPS) + 20).save(f"{K}/kuru_{DIL}.png"); sys.exit()
-# ses birleştir
+# ses birleştir (her parça önce wav'a çevrilir; farklı kodekler concat'ta bozuluyor)
 lst = f"{K}/ses_{DIL}.txt"
+subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", str(ARA), f"{K}/sessiz.wav"], check=True)
 with open(lst, "w") as f:
-    for p in SES: f.write(f"file '{p}'\nfile '{K}/sessiz.wav'\n")
-subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", f"anullsrc=r=44100:cl=mono", "-t", str(ARA), f"{K}/sessiz.wav"], check=True)
+    for i, p in enumerate(SES):
+        w = f"{K}/p_{DIL}_{i}.wav"; subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", p, "-ar", "44100", "-ac", "1", w], check=True)
+        f.write(f"file '{w}'\nfile '{K}/sessiz.wav'\n")
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", lst, "-af", "loudnorm=I=-16:TP=-1.5", "-ar", "44100", f"{K}/ses_{DIL}.m4a"], check=True)
 out = f"{K}/NAZAR_{DIL.upper()}.mp4"
 ff = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", f"{K}/ses_{DIL}.m4a",

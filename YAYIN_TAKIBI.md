@@ -38,7 +38,7 @@ Antigravity: kendi yüklediğin her içeriği `"ureten": "Antigravity"` ile ekle
 - **KESİN KURAL:** Video dosya isimlerinde ve yayındaki başlıklarda `TR`, `EN`, `yt_TR`, `yt_EN` gibi dil/platform ekleri **kullanılmaz**.
 
 ## Yorumlar (otomatik, bilgisayar gerekmez)
-- `yayin/guncelle.py`, GitHub Actions'ta 30 dakikada bir, `YT_API_KEY` sırrı varsa her herkese açık YouTube videosunun yorumlarını okur ve `yayin.json` → `yorumlar` dizisine yazar (`yanitlandi`: kanal yanıt verdi mi).
+- `yayin/guncelle.py`, GitHub Actions'ta 10 dakikada bir (saatlik başlatılan iş kendi içinde döner), `YT_API_KEY` ile kanalın BÜTÜN videolarındaki yorumları kanal bazında okur (tablodaki durumdan bağımsız) ve `yayin.json` → `yorumlar` dizisine yazar (`yanitlandi`: kanal yanıt verdi mi). Yorumlara başkalarının yazdığı cevaplar da `ust_id` ile gelir. KANALLAR listesinde olmayan kanallar (yeni kanal) tablodaki videolar üzerinden tek tek taranır; yeni kanalın kimliği bilinince KANALLAR'a eklenmeli.
 - Portal → Yayın Takibi üstünde "💬 Yorumlar" kutusu yanıt bekleyenleri gösterir. Yanıt GÖNDERİLMEZ; yanıt Ömer'in onayıyla verilir.
 - `yorumlar` dizisini elle düzenleme; betik her çalışmada yeniden yazar.
 

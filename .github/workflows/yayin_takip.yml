@@ -3,7 +3,7 @@ name: Yayın takibi (otomatik)
 # YouTube RSS (+ varsa YT_API_KEY) ile durum/izlenme ve YORUMLAR, TikTok planlarının saati geçince "Yayında".
 on:
   schedule:
-    - cron: '7,37 * * * *'   # 30 dakikada bir: durum, izlenme ve yorumlar
+    - cron: '7 * * * *'   # saatte bir başlatıcı; iş kendi içinde 10 dakikada bir tarar (GitHub zamanlayıcısı gecikse de boşluk kalmaz)
   workflow_dispatch:
   push:
     branches: [main]
@@ -11,24 +11,34 @@ on:
 permissions:
   contents: write
   actions: write
-concurrency: { group: yayin-takip, cancel-in-progress: false }
+concurrency: { group: "yayin-takip-${{ github.event_name == 'schedule' && 'dongu' || 'tek' }}", cancel-in-progress: false }
 jobs:
   guncelle:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
-      - name: Güncelle
+      - name: Güncelle, kaydet, portala gönder (zamanlı çalışmada ~5,5 saat boyunca 10 dakikada bir)
         env:
           YT_API_KEY: ${{ secrets.YT_API_KEY }}
-        run: python3 yayin/guncelle.py && python3 yayin/analiz.py
-      - name: Kaydet ve portala gönder
-        env:
           GH_TOKEN: ${{ github.token }}
+          DONGU: ${{ github.event_name == 'schedule' }}
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
-          git add docs/yayin/yayin.json docs/yayin/gecmis.json docs/yayin/analiz.json docs/yayin/yorum_kuyrugu.json
-          git diff --cached --quiet && exit 0
-          git commit -qm "Yayın takibi: otomatik güncelleme $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
-          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
-          gh workflow run cpanel_yukle.yml --ref main || true
+          bitis=$(( $(date +%s) + 330*60 ))
+          while :; do
+            git pull -q --rebase origin main || { git rebase --abort 2>/dev/null; git reset -q --hard origin/main; }
+            if python3 yayin/guncelle.py && python3 yayin/analiz.py; then
+              git add docs/yayin/yayin.json docs/yayin/gecmis.json docs/yayin/analiz.json docs/yayin/yorum_kuyrugu.json
+              if ! git diff --cached --quiet; then
+                git commit -qm "Yayın takibi: otomatik güncelleme $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+                ok=0; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && { ok=1; break; }; sleep 5; done
+                [ $ok = 1 ] && { gh workflow run cpanel_yukle.yml --ref main || true; } || git reset -q --hard origin/main
+              fi
+            else
+              echo "::warning::tarama hata verdi, sonraki turda tekrar denenecek"; git checkout -q -- docs/yayin/ 2>/dev/null || true
+            fi
+            [ "$DONGU" = "true" ] || break
+            [ $(( $(date +%s) + 600 )) -lt $bitis ] || break
+            sleep 600
+          done

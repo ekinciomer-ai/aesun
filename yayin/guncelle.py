@@ -148,35 +148,89 @@ def main():
     if anahtar:
         yorumlar, eski = [], {y["id"]: y for y in j.get("yorumlar", [])}
         kanal_id = {v[0]: k for k, v in KANALLAR.items()}
+        gorulen = set()
+
+        def ekle_yorum(sn, yid, vid, kanal, cid, kanal_yaniti, ust_id=None):
+            if yid in gorulen:
+                return
+            yazar_cid = (sn.get("authorChannelId") or {}).get("value")
+            if cid and yazar_cid == cid:
+                return  # kanalın kendi yorumu
+            gorulen.add(yid)
+            x = vid_ix.get(vid) or {}
+            t = datetime.fromisoformat(sn["publishedAt"].replace("Z", "+00:00")).astimezone(TZ)
+            kayit = {
+                "id": yid, "kanal": kanal, "dil": x.get("dil") or KANALLAR.get(cid, ("", ""))[1], "vid": vid,
+                "video": x.get("baslik") or vid, "yazar": sn.get("authorDisplayName"),
+                "metin": sn.get("textDisplay", "")[:1000], "zaman": t.isoformat(timespec="minutes"),
+                "begeni": sn.get("likeCount", 0), "yanitlandi": kanal_yaniti is not None,
+                "yanit": kanal_yaniti,
+                "link": f"https://www.youtube.com/watch?v={vid}&lc={yid}",
+            }
+            if ust_id:
+                kayit["ust_id"] = ust_id  # bir yoruma yazılmış cevap
+            yorumlar.append(kayit)
+
+        def isle_thread(it, kanal, cid):
+            ust = it["snippet"]["topLevelComment"]["snippet"]
+            vid = it["snippet"].get("videoId") or ust.get("videoId")
+            if not vid:
+                return
+            yanitlar = (it.get("replies") or {}).get("comments", [])
+            kanal_yaniti = next((r["snippet"]["textDisplay"] for r in yanitlar
+                                 if (r["snippet"].get("authorChannelId") or {}).get("value") == cid), None)
+            if kanal_yaniti is None and it["snippet"].get("totalReplyCount", 0) > len(yanitlar):
+                kanal_yaniti = (eski.get(it["id"]) or {}).get("yanit")
+            ekle_yorum(ust, it["id"], vid, kanal, cid, kanal_yaniti)
+            # Başkalarının cevapları: kanal sonrasında yanıt vermediyse "yanıt bekliyor" sayılır
+            for i, r in enumerate(yanitlar):
+                rs = r["snippet"]
+                if (rs.get("authorChannelId") or {}).get("value") == cid:
+                    continue
+                sonra = next((q["snippet"]["textDisplay"] for q in yanitlar[i + 1:]
+                              if (q["snippet"].get("authorChannelId") or {}).get("value") == cid), None)
+                if sonra is None:
+                    sonra = (eski.get(r["id"]) or {}).get("yanit")
+                ekle_yorum(rs, r["id"], vid, kanal, cid, sonra, ust_id=it["id"])
+
+        # a) Kanal bazında: tablodaki durumdan bağımsız, kanalın BÜTÜN videolarındaki yorumlar
+        tarandi = set()
+        for cid, (ad, _dil) in KANALLAR.items():
+            sayfa = ""
+            for _ in range(5):
+                prm = {"part": "snippet,replies", "allThreadsRelatedToChannelId": cid, "maxResults": 100,
+                       "order": "time", "textFormat": "plainText", "key": anahtar}
+                if sayfa:
+                    prm["pageToken"] = sayfa
+                try:
+                    d = json.loads(getir("https://www.googleapis.com/youtube/v3/commentThreads?" + urllib.parse.urlencode(prm)))
+                except Exception as e:
+                    notlar.append(f"yorumlar okunamadı ({ad}): {e}"); break
+                for it in d.get("items", []):
+                    isle_thread(it, ad, cid)
+                tarandi.add(ad)
+                sayfa = d.get("nextPageToken")
+                if not sayfa:
+                    break
+        # b) Listede olmayan kanallar (ör. yeni açılan kanal): tablodaki yayındaki videolar tek tek
         for x in K:
-            if x.get("platform") != "YouTube" or x.get("durum") != "Yayında" or not x.get("vid"):
+            if x.get("platform") != "YouTube" or not x.get("vid") or x.get("kanal") in tarandi:
+                continue
+            if x.get("durum") not in ("Yayında", "Planlı"):
                 continue
             cid = kanal_id.get(x.get("kanal"))
-            q = urllib.parse.urlencode({"part": "snippet,replies", "videoId": x["vid"], "maxResults": 50,
+            q = urllib.parse.urlencode({"part": "snippet,replies", "videoId": x["vid"], "maxResults": 100,
                                         "order": "time", "textFormat": "plainText", "key": anahtar})
             try:
                 d = json.loads(getir("https://www.googleapis.com/youtube/v3/commentThreads?" + q))
             except Exception:
-                continue  # yorumları kapalı video vb.
+                continue  # yorumları kapalı / henüz yayında değil
             for it in d.get("items", []):
-                ust = it["snippet"]["topLevelComment"]["snippet"]
-                yazar_cid = (ust.get("authorChannelId") or {}).get("value")
-                if cid and yazar_cid == cid:
-                    continue  # kanalın kendi yorumu
-                yanitlar = (it.get("replies") or {}).get("comments", [])
-                kanal_yaniti = next((r["snippet"]["textDisplay"] for r in yanitlar
-                                     if (r["snippet"].get("authorChannelId") or {}).get("value") == cid), None)
-                if kanal_yaniti is None and it["snippet"].get("totalReplyCount", 0) > len(yanitlar):
-                    kanal_yaniti = (eski.get(it["id"]) or {}).get("yanit")
-                t = datetime.fromisoformat(ust["publishedAt"].replace("Z", "+00:00")).astimezone(TZ)
-                yorumlar.append({
-                    "id": it["id"], "kanal": x.get("kanal"), "dil": x.get("dil"), "vid": x["vid"],
-                    "video": x.get("baslik"), "yazar": ust.get("authorDisplayName"),
-                    "metin": ust.get("textDisplay", "")[:1000], "zaman": t.isoformat(timespec="minutes"),
-                    "begeni": ust.get("likeCount", 0), "yanitlandi": kanal_yaniti is not None,
-                    "yanit": kanal_yaniti,
-                    "link": f"https://www.youtube.com/watch?v={x['vid']}&lc={it['id']}",
-                })
+                isle_thread(it, x.get("kanal"), cid)
+        # Okuma hata verdiyse eski yorumlar silinmesin
+        for y in j.get("yorumlar", []):
+            if y["id"] not in gorulen and y.get("kanal") not in tarandi:
+                yorumlar.append(y); gorulen.add(y["id"])
         yorumlar.sort(key=lambda y: y["zaman"], reverse=True)
         yeni_say = sum(1 for y in yorumlar if y["id"] not in eski)
         # Yanıtsız yorumlar → yorum kuyruğu (taslak yanıtı Claude yazar, Ömer onaylar, sunucu gönderir)

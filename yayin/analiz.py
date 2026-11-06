@@ -216,6 +216,7 @@ def main():
             "Aynı içerik bir kanalda iki kez açık kalmaz (GİZLE eylemi: silme yok, Gizli'ye alınır).",
             "Tablo serisinde sıralama: önce dünyaca tanınan eserler; az bilinen eser araya en fazla 3 günde bir girer.",
             "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR).",
+            "YERELLEŞTİRME (kalıcı, 6 Kas 2026): her bölüm kanalının izleyicisine göre yapılır — TR: Türkiye (değerler, gündem/siyaset, spor, alışkanlıklar, kültür, etkileşim, özel günler); EN: İngiltere/ABD ya da genel dünya; ES: İspanya + Latin Amerika. Fotoğraf, video, ses, müzik ve metin tamamı o izleyiciye göre; bir sürümde başka ülkenin ayrıntısı olmaz.",
             "TikTok: 'tiktok.karar' DURDUR ise yeni TikTok planı yapılmaz (mevcut planlılar silinmez); karar hesap izlenmesine göre otomatik değişir.",
             "Başlık kalıbı: tek merak sorusu + emoji ('X neden Y? 😨', 'Gerçekte ne oldu?'); kanıtı: kanalın tutan Short'ları ve ABD'de Zack D. Films (29 M abone) aynı kalıpla büyüdü.",
             "Telif/marka: kulüp ve marka armaları/logoları, maç ve TV görüntüsü, UEFA/FIFA logo ve marşları, hazır müzik KULLANILMAZ. Kulüp adları ve takım renkleri serbest; müzik kanalın kendi üretimi ya da lisanslı olur.",

@@ -103,3 +103,11 @@ Kuyruk kaydına `"kaynaklar": [...]` (görsel/görüntü künyeleri) ve `"muzik_
 - `yayin/analiz.py → tiktok.karar`: hesap 7 günlük izlenme < 200 ve ≥5 yayında video ise **DURDUR (yeni planlama)**; 200'ü geçince DENE (günde 1), 1.000'i geçince normal kota. Mevcut planlılar silinmez.
 - Tanı (`islem_tt_tani.sh`, salt okunur): herkese açık profil, Studio uyarıları, video analiz sayfaları. 6 Kas: uyarı/kısıtlama yok, videolar herkese açık, 7 günde 33 izlenme / 1 profil görüntüleme / 0 takipçi → dağıtım yok (yeni hesap, insan etkinliği sıfır).
 - Silme: `islem_tt_sil.sh` (`sunucu/tt_hedef.txt` açıklama başı) yalnız Ömer onayıyla; planlı gönderide gizlilik değiştirilemez, tek yol silmek.
+
+## KALICI KURAL — Yerelleştirme (Ömer, 6 Kas 2026)
+Her bölüm **kanalının izleyicisine** göre üretilir; tek metnin çevirisi değildir.
+- **TR (Antik Stüdyo):** Türkiye'ye hitap — Türkiye'nin değerleri, gündemi/siyaseti, sporu, alışkanlıkları, kültürü, etkileşim biçimi, özel günleri.
+- **EN (Ancient Studio):** İngiltere/ABD ya da genel dünya izleyicisi — Türkiye'ye özgü örnek/ayrıntı girmez.
+- **ES (Estudio Antiguo):** İspanya + Latin Amerika — İspanyol/Latin örnekler, tarihler, deyimler.
+- Bu kural **fotoğraf, video, ses, müzik ve metin** katmanlarının hepsine uygulanır (ör. TR görselinde İstanbul, EN'de çok uluslu pazar, ES'de İspanyol limanı; TR özel günü başka dilde yoktur).
+- Üretim kontrol listesi: kanca ülkeye göre mi? örnekler o coğrafyadan mı? görsellerde yabancı bayrak/şehir var mı? seslendirme dili ve deyimler doğal mı? müzik/ses o kültüre uygun mu? özel gün/takvim o ülkeye göre mi?

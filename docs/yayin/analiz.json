@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-06T18:22+03:00",
+ "olusturma": "2026-11-06T22:21+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -17,6 +17,7 @@
   "Aynı içerik bir kanalda iki kez açık kalmaz (GİZLE eylemi: silme yok, Gizli'ye alınır).",
   "Tablo serisinde sıralama: önce dünyaca tanınan eserler; az bilinen eser araya en fazla 3 günde bir girer.",
   "Her gün 19:00 Gündem + Tarih Short'u boş bırakılmaz (TR).",
+  "YERELLEŞTİRME (kalıcı, 6 Kas 2026): her bölüm kanalının izleyicisine göre yapılır — TR: Türkiye (değerler, gündem/siyaset, spor, alışkanlıklar, kültür, etkileşim, özel günler); EN: İngiltere/ABD ya da genel dünya; ES: İspanya + Latin Amerika. Fotoğraf, video, ses, müzik ve metin tamamı o izleyiciye göre; bir sürümde başka ülkenin ayrıntısı olmaz.",
   "TikTok: 'tiktok.karar' DURDUR ise yeni TikTok planı yapılmaz (mevcut planlılar silinmez); karar hesap izlenmesine göre otomatik değişir.",
   "Başlık kalıbı: tek merak sorusu + emoji ('X neden Y? 😨', 'Gerçekte ne oldu?'); kanıtı: kanalın tutan Short'ları ve ABD'de Zack D. Films (29 M abone) aynı kalıpla büyüdü.",
   "Telif/marka: kulüp ve marka armaları/logoları, maç ve TV görüntüsü, UEFA/FIFA logo ve marşları, hazır müzik KULLANILMAZ. Kulüp adları ve takım renkleri serbest; müzik kanalın kendi üretimi ya da lisanslı olur.",
@@ -215,8 +216,8 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 447,
-  "Ancient Studio": 128
+  "Ancient Studio": 128,
+  "Antik Stüdyo": 447
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -271,11 +272,35 @@
  "eylemler": [
   {
    "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "0Yhof30_bfg",
+   "baslik": "Son Akşam Yemeği neden yok oluyor? 🍞",
+   "neden": "2026-11-06 18:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "iYo-p0Znk5c",
+   "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 #shorts #tarih #keşfet",
+   "neden": "2026-11-06 20:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
    "kanal": "Antik Stüdyo (@antikstudyo)",
    "platform": "TikTok",
    "vid": "",
    "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 (Antik Roma Kremi)",
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "",
+   "baslik": "[Taslak Plan #5] Zengin Görünmek İçin Dişlerini Kömürle Simsiyaha Boyayanlar! 🦷 (1590 Tudor & Japonya Ohaguro)",
+   "neden": "2026-11-06 20:00 planlıydı, hâlâ yayında görünmüyor"
   },
   {
    "tur": "KONTROL",
@@ -319,13 +344,6 @@
    "kanal": "Ancient Studio",
    "vid": "cOqujZOpVXY",
    "baslik": "There's a mountain hiding in The Great Wave 🌊",
-   "neden": "'Tablo Serisi' serisi durduruldu; bu slotu Gündem + Tarih, Tarihi Magazin kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Ancient Studio",
-   "vid": "Lcvm_LATwkc",
-   "baslik": "The man in The Scream isn't screaming 😱",
    "neden": "'Tablo Serisi' serisi durduruldu; bu slotu Gündem + Tarih, Tarihi Magazin kullanır"
   }
  ],

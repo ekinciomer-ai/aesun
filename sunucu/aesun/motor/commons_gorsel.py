@@ -65,11 +65,21 @@ def ilgili_mi(yol, konu, terim):
                 "Answer NO if it is a modern unrelated photo, a different place with the same name, a collage, a document page "
                 "with mostly text, or a different era. Answer only YES or NO.")
         b = json.dumps({"contents": [{"parts": [{"text": soru}, {"inline_data": {"mime_type": "image/jpeg", "data": resim}}]}]}).encode()
-        r = urllib.request.Request("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
-                                   data=b, headers={"x-goog-api-key": k, "Content-Type": "application/json"})
-        d = json.load(urllib.request.urlopen(r, timeout=90))
-        t = "".join(p.get("text", "") for p in d["candidates"][0]["content"]["parts"]).strip().upper()
-        return t.startswith("YES")
+        import time
+        son = None
+        for model, bekle in (("gemini-3.5-flash", 0), ("gemini-3.5-flash", 8), ("gemini-flash-lite-latest", 4), ("gemini-flash-lite-latest", 15)):
+            time.sleep(bekle)
+            try:
+                r = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                                           data=b, headers={"x-goog-api-key": k, "Content-Type": "application/json"})
+                d = json.load(urllib.request.urlopen(r, timeout=90))
+                t = "".join(p.get("text", "") for p in d["candidates"][0]["content"]["parts"]).strip().upper()
+                time.sleep(2)   # ücretsiz kota: dakikadaki istek sınırına takılmamak için
+                return t.startswith("YES")
+            except urllib.error.HTTPError as e:
+                son = e.code
+        print(f"uyarı: ilgi kontrolü yapılamadı (HTTP {son}); görsel elendi", file=sys.stderr)
+        return False
     except Exception as e:
         print(f"uyarı: ilgi kontrolü yapılamadı ({type(e).__name__}); görsel kabul edildi", file=sys.stderr)
         return True

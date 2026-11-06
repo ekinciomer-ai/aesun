@@ -14,8 +14,21 @@ METIN=$(post scripts "$(KONU="$KONU" DIL="$DIL" ISTEM="$ISTEM" python3 -c 'impor
   | python3 -c 'import json,sys;print((json.load(sys.stdin).get("data") or {}).get("video_script",""))')
 [ -n "$METIN" ] || { echo "NOT: HATA metin yazılamadı"; exit 1; }
 # 2) Cümle sırasına göre görsel arama terimleri (İngilizce)
-TERIM=$(post terms "$(KONU="$KONU" METIN="$METIN" python3 -c 'import json,os;print(json.dumps({"video_subject":os.environ["KONU"],"video_script":os.environ["METIN"],"amount":10,"match_materials_to_script":True}))')" \
-  | python3 -c 'import json,sys;print("\n".join((json.load(sys.stdin).get("data") or {}).get("video_terms",[])))')
+TERIM=$(KONU="$KONU" METIN="$METIN" GK="$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null)" python3 - <<'PY'
+import json,os,urllib.request,re
+soru=("For a short history video, write one Wikimedia Commons search query per sentence below, in English, 2-4 words, "
+ "aimed at historical paintings, engravings, maps, manuscripts or the real historic place (e.g. 'Surrender of Granada painting', "
+ "'Alhambra Court of Lions', 'Boabdil portrait'). Avoid abstract words. Return only a JSON list of strings.\n"
+ f"Topic: {os.environ['KONU']}\nSentences:\n{os.environ['METIN']}")
+b=json.dumps({"contents":[{"parts":[{"text":soru}]}]}).encode()
+for m in ("gemini-flash-lite-latest","gemini-3.5-flash"):
+    try:
+        r=urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent",data=b,headers={"x-goog-api-key":os.environ["GK"],"Content-Type":"application/json"})
+        t="".join(p.get("text","") for p in json.load(urllib.request.urlopen(r,timeout=90))["candidates"][0]["content"]["parts"])
+        print("\n".join(json.loads(re.search(r"\[.*\]",t,re.S).group(0))[:12])); break
+    except Exception: pass
+PY
+)
 echo "NOT: terimler: $(echo "$TERIM" | tr '\n' ';')"
 # 3) Commons görselleri
 IS=$(date +%Y%m%d_%H%M%S); G=$R/storage/local_videos/$IS

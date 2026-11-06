@@ -50,6 +50,9 @@ def yazi_var(yol):
     return kelime >= 3
 
 
+SAYAC = {"evet": 0, "hayir": 0, "hata": 0}
+
+
 def ilgili_mi(yol, konu, terim):
     """Gemini (ücretsiz) görsele bakar: konu ve döneme uygun mu? Anahtar yoksa True (eleme yapılmaz)."""
     k = os.environ.get("GEMINI_KEY", "").strip()
@@ -75,9 +78,11 @@ def ilgili_mi(yol, konu, terim):
                 d = json.load(urllib.request.urlopen(r, timeout=90))
                 t = "".join(p.get("text", "") for p in d["candidates"][0]["content"]["parts"]).strip().upper()
                 time.sleep(2)   # ücretsiz kota: dakikadaki istek sınırına takılmamak için
+                SAYAC["evet" if t.startswith("YES") else "hayir"] += 1
                 return t.startswith("YES")
             except urllib.error.HTTPError as e:
                 son = e.code
+        SAYAC["hata"] += 1
         print(f"uyarı: ilgi kontrolü yapılamadı (HTTP {son}); görsel elendi", file=sys.stderr)
         return False
     except Exception as e:
@@ -100,9 +105,9 @@ def main():
     kullanilan, kaynaklar = set(), []
     for i, terim in enumerate(terimler, 1):
         secilen = None
-        for deneme in (terim, terim + " painting", terimler[0]):
+        for deneme in (terim, terimler[0]):
             try:
-                for g in ara(deneme):
+                for g in list(ara(deneme))[:5]:   # ücretsiz kota: terim başına en çok 5 görsel kontrol edilir
                     if g["baslik"] in kullanilan:
                         continue
                     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as t:
@@ -126,7 +131,7 @@ def main():
         kullanilan.add(g["baslik"])
         kaynaklar.append({"dosya": os.path.basename(hedef), "terim": terim, **{k: g[k] for k in ("baslik", "yazar", "lisans", "adres")}})
     json.dump(kaynaklar, open(os.path.join(cikti, "kaynaklar.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print(json.dumps({"gorsel": len(kaynaklar), "terim": len(terimler)}))
+    print(json.dumps({"gorsel": len(kaynaklar), "terim": len(terimler), "gemini": SAYAC}))
 
 
 if __name__ == "__main__":

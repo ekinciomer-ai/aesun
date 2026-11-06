@@ -9,7 +9,7 @@ I=/opt/aesun/youtube/istemci.json
 command -v rclone >/dev/null || { curl -fsS https://rclone.org/install.sh | bash >/dev/null 2>&1; }
 echo "NOT: rclone $(rclone version 2>/dev/null | head -1) · depo boyutu: $(du -sh /var/yedek/restic | cut -f1) · dökümler: $(du -sh /var/yedek/dump 2>/dev/null | cut -f1)"
 SC="https://www.googleapis.com/auth/drive.file"
-if [ ! -f /tmp/aesun_paket/sunucu/drive/kod.sifreli ]; then
+if [ ! -f /tmp/aesun_paket/sunucu/drive/kod.sifreli ] && [ ! -f $D/rclone.conf ]; then
   python3 - "$I" "$SC" <<'PY'
 import json,sys,urllib.parse
 c=json.load(open(sys.argv[1]))
@@ -19,7 +19,8 @@ print("NOT: ONAY_ADRESI https://accounts.google.com/o/oauth2/v2/auth?"+urllib.pa
 PY
   exit 0
 fi
-# Aşama 2
+# Aşama 2 (belirteç zaten varsa yalnız eşitleme)
+if [ ! -f $D/rclone.conf ]; then
 A=/opt/aesun/sir/ozel.pem
 coz() {
   python3 - "$1" "$2" "$A" <<'PY0'
@@ -50,6 +51,7 @@ open(D+"/rclone.conf","w").write(f"[gdrive]\ntype = drive\nclient_id = {c['clien
 print("NOT: belirteç alındı · yenileme belirteci:", "var" if tok.get("refresh_token") else "YOK")
 PY
 rm -f $D/kod.txt; chmod 600 $D/rclone.conf 2>/dev/null
+fi
 [ -f $D/rclone.conf ] || exit 1
 RC="rclone --config $D/rclone.conf"
 $RC mkdir gdrive:aesun-yedek && echo "NOT: Drive klasörü hazır: $($RC lsd gdrive: 2>&1 | grep -c aesun-yedek) · kota: $($RC about gdrive: 2>/dev/null | tr '\n' ' ')"

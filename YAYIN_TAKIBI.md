@@ -97,3 +97,9 @@ Kuyruk kaydına `"kaynaklar": [...]` (görsel/görüntü künyeleri) ve `"muzik_
   açıklamayı yazar, AI etiketini açar, `planla` saatine planlar, içerik listesinden doğrular; kayıt Yayın Takibi'ne "Planlı" düşer.
 - Kontrol: `islem_tt_kontrol` oturumu ve son gönderileri okur. Hata ayıklama görüntüleri `docs/tampon/tiktok/adim/`.
 - Kural: TikTok hiçbir uygulamaya API ile bağlanmaz; yalnız bu tarayıcı oturumu kullanılır. Günde en fazla 2 TikTok gönderisi (12:30 / 21:00), 18:00 tablo.
+
+## TikTok sayıları ve kararı (6 Kas 2026)
+- `tt_istatistik.yml` günde 2 kez (09:23, 18:23) sunucudaki TikTok oturumuyla Studio içerik listesini okur; her TikTok kaydına `izlenme/begeni/yorum_sayisi`, `yayin.json → tiktok.hesap_7g`'ye hesap 7 günlük özet yazar. Hiçbir şey yayınlamaz.
+- `yayin/analiz.py → tiktok.karar`: hesap 7 günlük izlenme < 200 ve ≥5 yayında video ise **DURDUR (yeni planlama)**; 200'ü geçince DENE (günde 1), 1.000'i geçince normal kota. Mevcut planlılar silinmez.
+- Tanı (`islem_tt_tani.sh`, salt okunur): herkese açık profil, Studio uyarıları, video analiz sayfaları. 6 Kas: uyarı/kısıtlama yok, videolar herkese açık, 7 günde 33 izlenme / 1 profil görüntüleme / 0 takipçi → dağıtım yok (yeni hesap, insan etkinliği sıfır).
+- Silme: `islem_tt_sil.sh` (`sunucu/tt_hedef.txt` açıklama başı) yalnız Ömer onayıyla; planlı gönderide gizlilik değiştirilemez, tek yol silmek.

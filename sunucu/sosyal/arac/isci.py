@@ -15,6 +15,7 @@ import fcntl
 import glob
 import json
 import os
+import re
 import urllib.error
 import shutil
 import subprocess
@@ -97,9 +98,13 @@ def _post(yol, govde):
 def kasa(ad):
     try:
         r = subprocess.run(["/opt/aesun/kasa_coz.sh", ad], capture_output=True, text=True, timeout=30)
-        return r.stdout.strip() if r.returncode == 0 else ""
+        if r.returncode != 0:
+            return ""
     except Exception:
         return ""
+    # Kasaya bütün curl komutu yapıştırıldıysa içinden 'Bearer <anahtar>' alınır.
+    m = re.search(r"Bearer\s+([A-Za-z0-9_\-]{30,})", r.stdout)
+    return m.group(1) if m else r.stdout.strip().strip('"').strip("'")
 
 
 CF_MODEL = "@cf/black-forest-labs/flux-1-schnell"   # Apache 2.0: üretilen görsel ticari kullanılabilir

@@ -59,6 +59,8 @@ Kanal analizi, konu seçimi ve iyileştirme Claude'un işidir. Kullanıcıya yap
 - Çok bilinen konular dikkat çekmediği için kullanılmaz (örnek: 1453 fethi POV). Az bilinen, şaşırtıcı açı seçilir.
 - Hedef izlenmeyi artırmaktır. Hangi konunun, sesin, görselin ve kanca anının dikkat çektiğine Yayın Takibi verisinden bakılır. En çok izlenenin özellikleri sonraki işte uygulanır.
 - Karanlık, kasvetli görsel kullanılmaz; ilk kez izleyeni tutacak canlı görseller seçilir.
+- **Özel gün takvimi önce gelir.** Her haftalık plan, önümüzdeki 3 haftanın özel günleri taranarak başlar: TR resmî ve anma günleri (Öğretmenler Günü 24 Kasım gibi), hedef ülkelerin bayramları (Şükran Günü, Black Friday), dünya günleri. Özel gün videosu planda öncelikli slota konur ve en az 4 gün önce hazır olur. Anma günlerinde yayın yapılmaz; tablo otomasyonu da o gün durdurulur.
+- **Hazır stok kontrolü.** Plan yazılmadan önce Studio'daki planlı videolar ve `KANAL_RAPORU_VE_YAYIN_AKISI.md` stoğu okunur; yeni videolar onlarla çakışmayacak şekilde yerleştirilir. TR kanalına günde en fazla 3 video düşer.
 
 ## Metin
 
@@ -175,6 +177,103 @@ Kanal analizi, konu seçimi ve iyileştirme Claude'un işidir. Kullanıcıya yap
 - **Ortak durum dosyası:** `medya/tarihi_magazin/kod_paketi/KANAL_RAPORU_VE_YAYIN_AKISI.md`.
 - Antigravity'den gelen bilgi YouTube Studio ile karşılaştırılır; eskimiş satırlar düzeltilir.
 
+## Bağlantılar (nerede ne bağlı, nasıl kullanılır)
+
+Hiçbir şifre, anahtar ya da token sohbete, depoya veya belgeye düz metin yazılmaz. Depoya giden her sır sunucunun açık anahtarıyla şifrelenir; çözmeyi yalnız sunucu yapar.
+
+### Sunucular ve depolar
+
+| Ne | Nerede | Ne için |
+|---|---|---|
+| CutkodA sunucusu | Namecheap VPS, 159.198.76.80 | Panel (ck-panel), sunucu tarayıcısı (ck-tarayici), ses, kurgu, yayın |
+| `cutkoda/cutkoda` deposu | GitHub, özel | Betikler, iş akışları. Dallar: `main` (kod), `medya` (görsel, ses, video, üretim paketleri), `rapor` (betik çıktıları) |
+| `ekinciomer-ai/aesun` deposu | GitHub, özel | YouTube resmi API bağlantısı (`sunucu_islem.yml` → `sunucu/islem_<ad>.sh`) |
+
+- Sunucuya doğrudan SSH ile girilmez. Her iş, depodaki bir betiğin GitHub Actions üzerinden çalıştırılmasıyla yapılır:
+  - `islem.yml` (girdi `islem`): `sunucu/islem/<ad>.sh` sunucuda root olarak çalışır. Betiğin `/root/rapor/` altına yazdıkları `rapor` dalına `<ad>/` olarak düşer. `NOT:` satırları iş günlüğünde görünür.
+  - `tampon.yml` (girdi `deneme`): dış yazılımlar önce `sunucu/tampon/<ad>.sh` ile ayrı kapsayıcıda denenir.
+- Panelin içinde kod çalıştırmak: betikte `docker exec -i ck-panel python - <<'PY' ... PY` (örnek `sunucu/islem/oto_durum.sh`).
+- **Claude'un bu işleri yapabilmesi için oturuma `cutkoda/cutkoda` deposunun yazma (push) izni eklenmiş olmalı** (YouTube API işleri için `ekinciomer-ai/aesun` da). Yalnız okuma izni varsa betik eklenemez, iş akışı tetiklenemez; bu durumda kullanıcıya bir cümleyle söylenir ve izin istenir.
+
+### İş akışları (cutkoda/cutkoda)
+
+| İş akışı | Girdi | Yaptığı |
+|---|---|---|
+| `medya_al.yml` | url, ad | Topview görselini/videosunu `medya` dalına alır |
+| `hizala.yml` | ad, dil | Sesin kelime zamanlarını çıkarır (`<ad>.mp3.json`) |
+| `uydu_al.yml` | ad, kutu, z | Sentinel-2 uydu görüntüsü kırpar |
+| `kurgu_om.yml` | is, kompozisyon | OpenMontage (Remotion) ile dikey video üretir |
+| `islem.yml` | islem | Sunucuda betik çalıştırır (ses: `el_ses`, yayın: `antik_yayin` vb.) |
+| `tampon.yml` | deneme | Tampon bölgede deneme |
+
+Tetikleme: `gh api -X POST repos/cutkoda/cutkoda/actions/workflows/<dosya>/dispatches -f ref=main -f 'inputs[<girdi>]=<değer>'`, ardından çalışma bitene kadar beklenir ve sonuç `rapor` ya da `medya` dalından okunur.
+
+### YouTube
+
+Üç bağlantı var; her birinin işi ayrı.
+
+| Bağlantı | Nerede | Ne için | Kısıt |
+|---|---|---|---|
+| **Sunucu tarayıcısı (ck-tarayici)** | Kalıcı profilli Chrome, YouTube girişi yapılmış. Uzaktan ekran: panel.cutkoda.com/tarayici | **Asıl yükleme yolu.** `yt_yukle.py` Studio'dan yükler; başlık, açıklama, kapak, görünürlük, "çocuklara özel değil", "değiştirilmiş/sentetik içerik" işaretlerini doldurur | Kanal adı tutmazsa yüklemeyi reddeder. Google girişi düşerse kullanıcıdan bir kez panel.cutkoda.com/tarayici üzerinden giriş istenir |
+| **Resmi API (Kanal Yonetim)** | Google Cloud projesi `ancient-episode-513619-r1`; istemci `/opt/aesun/youtube/istemci.json`, kanal anahtarları `/opt/aesun/youtube/kanallar/<kanal_id>.json` (yalnız root) | İstatistik, Analytics, gelir raporu, kapak | Proje denetimden geçene kadar API ile yüklenen video yalnız **özel** olur. Bu yüzden yayın tarayıcı yolundan yapılır |
+| **Panel bağlantısı** | ck-panel, `p_hesap` tablosu (youtube, aktif) | Yayın Takibi (portal Özel Alan, `/api/yayin-takip`): yayında + planlı + gizli videolar, izlenme, beğeni | Bağlantı düşerse durum `yeniden_bagla` olur, RSS'e geçer (yalnız yayındakiler) |
+
+**Kanallar:**
+
+| Kanal | Kimlik | Durum |
+|---|---|---|
+| Antik Stüdyo (TR) | `UC77LyY3gqWmBNAKp2lbsGBg` | Üç bağlantıda da bağlı |
+| Ancient Studio (EN) | `UCFLJUlhUSgjcLbp9ad_t9PQ` | Üç bağlantıda da bağlı |
+| Estudio Antiguo (ES) | henüz yazılmadı | Aynı Google hesabında; API ve panel bağlantısı yapılacak; profil resmi ve kapak eksik |
+
+**Yeni kanalı resmi API'ye bağlama (bir kez, kullanıcı telefondan yapabilir):**
+1. Claude izin bağlantısını kullanıcıya verir (Kanal Yonetim istemcisi, yönlendirme `http://127.0.0.1:8765`, izinler: youtube, youtube.upload, yt-analytics.readonly, yt-analytics-monetary.readonly).
+2. Kullanıcı ilgili kanalı seçer; "Google bu uygulamayı doğrulamadı" uyarısında Gelişmiş → "Kanal Yonetim'e git".
+3. Son sayfa "Bu siteye ulaşılamıyor" der; bu normaldir. Kullanıcı adres çubuğunu kopyalayıp gönderir.
+4. Claude `code=` değerini sunucunun açık anahtarıyla şifreler, `sunucu/yt/kod.sifreli` olarak `aesun` deposuna koyar, `yt_kur` işlemini çalıştırır, sonra şifreli kodu depodan siler. Kod tek kullanımlıktır, ~10 dakikada geçersiz olur.
+5. Yeni kanalın kimliği bu dosyadaki tabloya ve `panel/app/yayin_takip.py` içindeki `KANALLAR` listesine eklenir.
+
+Bağlantıyı geri almak: myaccount.google.com/permissions → "Kanal Yonetim" kaldırılır.
+
+### Yükleme ve zamanlı yayın (YouTube)
+
+1. Video ve kapak sunucuya alınır (`medya` dalından ya da üretim çıktısından).
+2. İş dosyası yazılır: `{kanal, kanal_adi, video, baslik, aciklama, kapak, gorunurluk: "public", cocuk: false, sentetik: true, zaman: "2026-11-07T19:00:00+03:00"}`.
+3. İş dosyası bir `islem` betiğiyle ck-tarayici içindeki `/is/kuyruk/` klasörüne kopyalanır.
+4. `kuyruk.py` dakikada bir bakar; `zaman` gelince videoyu yükler ve **o anda yayınlar**. YouTube'un kendi zamanlama özelliği kullanılmaz; yayın saati kuyruktan gelir.
+5. Sonuç `/is/bitti/` ve `/is/sonuc/<ad>.json` (durum, video kimliği, bağlantı) ile ekran görüntülerine yazılır.
+6. Yayın Takibi'nde videonun göründüğü doğrulanır, bağlantı kullanıcıya verilir.
+
+Kuyruğa koymadan önce kullanıcı onayı alınır. Zamanı değiştirmek için iş dosyası kuyrukta güncellenir; yayınlanmış video için yeni sürüm yüklenir, eskisi Özel'e alınır, silinmez.
+
+### TikTok
+
+- @antikstudyo hesabı kısıtlı göründüğü için otomatik işlemler durduruldu. **TikTok paylaşımını kullanıcı telefondan yapar.** Claude videoyu, açıklamayı ve etiketleri hazır verir.
+- Ancient Studio ve Estudio Antiguo'nun TikTok hesapları henüz açılmadı.
+- CutkodA'nın TikTok geliştirici uygulaması (sandbox) CutkodA'ya aittir; Antik Stüdyo hesapları ona bağlanmaz.
+
+### Instagram
+
+- Antik Stüdyo için Instagram bağlantısı yok. Açılırsa yol: hesap Profesyonel'e (Üretici) çevrilir, bir Facebook Sayfasına bağlanır, sonra resmi API ile yetki verilir. Şifreyi kullanıcı girer.
+
+### Ses ve görsel bağlantıları
+
+- **ElevenLabs:** anahtar sunucuda (`/opt/cutkoda/motor.env`). Ses `el_ses.sh` ile `islem.yml` üzerinden üretilir (ayrıntı: Ses bölümü). Bilgisayardaki ElevenLabs bağlantısı kullanılmaz.
+- **Topview:** sohbetteki Topview araçlarıyla üretilir; adres sunucudan açılmadığı için `medya_al.yml` ile alınır.
+- **Wikimedia Commons:** tablo ve arşiv görselleri, kamu malı ya da CC lisanslı.
+
+## Kararlaştırılmış işler (her seferinde böyle yapılır)
+
+1. **Onay:** Konu ve metin Claude'un işidir. Yayınlama, planlama, video silme, Özel'e alma ve kanal ayarı kullanıcı onayıyla yapılır. Kullanıcı "zamanını ben söylerim" dediyse beklenir.
+2. **Haftalık plan:** Her plan şu sırayla yazılır: (1) önümüzdeki 3 haftanın özel günleri, (2) Studio'daki planlı videolar ve kuyruktaki işler, (3) `KANAL_RAPORU_VE_YAYIN_AKISI.md` stoğu, (4) Yayın Takibi verisi, (5) yeni senaryolar. TR kanalına günde en fazla 3 video.
+3. **Anma günleri:** 10 Kasım gibi günlerde hiçbir kanalda yayın yapılmaz, tablo otomasyonu da durur.
+4. **Ölçüm:** Shorts için "izlendi / kaydırıldı" oranı ve ortalama izlenme yüzdesi, yayından 48 saat sonra. Karar yalnız en az 2 videosu olan formata verilir. Ses testi aynı format içinde çiftle yapılır.
+5. **Derleme:** Her pazar haftanın en iyi Short'larından 8–10 dakikalık uzun video (izlenme saati için).
+6. **Tablo serisi:** Her gün 18:00, Uğur sesi, telifi düşmüş tablolar (ayrıntı: `Tablo_Short_Uretim_Yetenegi.md`). Mevcut günlük görev bilgisayara bağlı; bu dosyadaki sunucu yoluna taşınır, yenisi çalıştığı doğrulanmadan eskisi kapatılmaz.
+7. **Antigravity ile ortak çalışma:** Ortak durum dosyası `medya/tarihi_magazin/kod_paketi/KANAL_RAPORU_VE_YAYIN_AKISI.md`. Her yayından sonra güncellenir. Antigravity'ye verilen belgelerde sır olmaz.
+8. **Gelir:** Para EN kanalından ve uzun videodan gelir; TR Shorts büyüme içindir. Konular gelirin yüksek olduğu ülkelere göre seçilir ve ülkeler arasında taşınabilir.
+9. **Bilgisayar kullanılmaz:** Kullanıcının bilgisayarındaki klasör ve bağlantılar (AntikStudyo_Claude, elevensesdosyalari, bilgisayardaki ElevenLabs) yalnız eski arşivdir; yeni iş orada yapılmaz.
+
 ## Üretim sırası (her video)
 
 1. **Konu:** Formatı seç; gündemi ya da hedef ülkeyi ve dikkat verisini değerlendir; az bilinen bir açı bul.
@@ -185,7 +284,9 @@ Kanal analizi, konu seçimi ve iyileştirme Claude'un işidir. Kullanıcıya yap
 6. **Kurgu:** `stad.py` ya da `kurgu_om.yml`; kareleri kontrol et, sonra tam render al.
 7. **Arşiv:** Üretim paketini `medya` dalına yaz.
 8. **Yayın metni:** Başlık (kanca ve ölçülü emoji), açıklama, etiketler, kaynaklar, YZ notu.
-9. **Yayın:** Videoyu kullanıcıya gönder ve onay al. Yükleme kuyruğuna koy; Yayın Takibi'nde doğrula.
+9. **Yayın:** Videoyu kullanıcıya gönder ve onay al. ck-tarayici kuyruğuna koy (Yükleme ve zamanlı yayın bölümü); Yayın Takibi'nde doğrula.
+10. **TikTok:** Videoyu ve açıklamayı kullanıcıya telefondan paylaşması için hazır ver.
+11. **Kayıt:** `KANAL_RAPORU_VE_YAYIN_AKISI.md` dosyasını güncelle.
 
 ## Eksik ya da öğrenilen bilgi
 

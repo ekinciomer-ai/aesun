@@ -5,7 +5,7 @@ from pathlib import Path
 
 from . import ayarlar
 
-SABIT = re.compile(r"kural|yasak|telif|güvenlik|guvenlik|kesin|motto|metin", re.I)
+SABIT = re.compile(r"kural|yasak|telif|güvenlik|guvenlik|kesin|motto|metin|kararlaştır|konu seçimi", re.I)
 BUTCE = 16000  # bağlama girecek kaynak metni üst sınırı (karakter)
 
 

@@ -227,9 +227,9 @@ def main():
                 continue  # yorumları kapalı / henüz yayında değil
             for it in d.get("items", []):
                 isle_thread(it, x.get("kanal"), cid)
-        # Okuma hata verdiyse eski yorumlar silinmesin
+        # Kalıcı: okuma hata verse de (ör. 2. sayfada) ya da yorum eski sayfalarda kalsa da eski yorumlar silinmez
         for y in j.get("yorumlar", []):
-            if y["id"] not in gorulen and y.get("kanal") not in tarandi:
+            if y["id"] not in gorulen:
                 yorumlar.append(y); gorulen.add(y["id"])
         yorumlar.sort(key=lambda y: y["zaman"], reverse=True)
         yeni_say = sum(1 for y in yorumlar if y["id"] not in eski)

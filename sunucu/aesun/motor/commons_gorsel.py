@@ -97,7 +97,7 @@ def ilgili_mi(yol, konu, terim):
 
 def dikey(kaynak, hedef):
     """Bulanık arka plan + ortada tam görsel; alttaki altyazı bölgesi boş kalacak şekilde biraz yukarıda."""
-    f = ("[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.08:saturation=1.15[a];"
+    f = ("[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.06:saturation=1.3[a];"
          "[0:v]scale=1040:1400:force_original_aspect_ratio=decrease[b];[a][b]overlay=(W-w)/2:(H-h)/2-140")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", kaynak, "-filter_complex", f, "-frames:v", "1", hedef], check=True, timeout=120)
 

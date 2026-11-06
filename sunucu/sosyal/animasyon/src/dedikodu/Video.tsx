@@ -64,6 +64,38 @@ const Masa: React.FC<{x: number; ekran?: boolean; bitki?: boolean; t: number; ek
   </g>
 );
 
+// ---- fabl: kedi ve ciğer
+const Fabl: React.FC<{t: number; t0: number; tMundar: number; u: number}> = ({t, t0, tMundar, u}) => {
+  if (u <= 0) return null;
+  const vazgec = gir(t, tMundar - 0.3, 0.5);
+  const zipla = vazgec < 0.5 ? Math.abs(Math.sin((t - t0) * 4.2)) * 110 : 0;
+  return (
+    <g opacity={Math.min(1, u * 1.4)} transform={`translate(540,${karis(780, 760, u)})`}>
+      <path d="M -330 -200 Q 0 -216 330 -198 L 326 200 Q 0 214 -326 198 Z" fill="#efe3c6" stroke={C.mur} strokeWidth={4} />
+      <g transform="translate(-10,6) scale(1.3)">
+      {/* kasap çengeli ve ciğer */}
+      <path d="M 120 -130 L 120 -120 Q 120 -96 100 -100" fill="none" {...M} strokeWidth={5} />
+      <path d="M 70 -110 Q 60 -150 110 -146 Q 160 -150 160 -110 Q 166 -70 120 -60 Q 76 -60 70 -110 Z" fill="#8e2f2a" {...M} />
+      <path d="M 96 -120 q 12 -10 24 0" fill="none" stroke="#c45a52" strokeWidth={4} />
+      {/* zemin */}
+      <path d="M -200 150 L 200 150" {...M} strokeWidth={3} />
+      {/* kedi: sıçrar, uzanamaz, burnunu kaldırıp döner */}
+      <g transform={`translate(${karis(60, -90, vazgec)},${150 - zipla}) scale(${vazgec > 0.5 ? -1 : 1},1)`}>
+        <path d="M -40 0 Q -46 -54 0 -54 Q 40 -54 40 0 Z" fill="#c98a4b" {...M} />
+        <g transform={`rotate(${vazgec > 0.5 ? -25 : -35} 26 -70)`}>
+          <circle cx={26} cy={-72} r={24} fill="#c98a4b" {...M} />
+          <path d="M 10 -90 L 12 -108 L 26 -94 M 30 -94 L 44 -108 L 44 -88" fill="#c98a4b" {...M} strokeWidth={3} />
+          {vazgec > 0.5 ? <path d="M 16 -74 l 8 0 M 32 -74 l 8 0" {...M} strokeWidth={3} /> : <g><circle cx={20} cy={-76} r={3} fill={C.mur} /><circle cx={34} cy={-76} r={3} fill={C.mur} /></g>}
+        </g>
+        <path d={`M -40 -6 Q -80 ${-30 + Math.sin(t * 4) * 14} -66 -64`} fill="none" {...M} />
+        {vazgec <= 0.5 && <path d="M 30 -40 L 70 -90" {...M} strokeWidth={5} />}
+      </g>
+      {vazgec > 0.5 && <text x={-200} y={40} fontFamily={EL} fontSize={54} fill={C.kirmizi} opacity={vazgec}>pıh!</text>}
+      </g>
+    </g>
+  );
+};
+
 // ---- çubuk karakter (genel)
 type KisiP = {x: number; y: number; s?: number; t: number; adim?: number; yon?: 1 | -1; otur?: number;
   sac?: 'uzun' | 'kare' | 'kisa' | 'kir'; sacRenk?: string; goz?: string; ust?: string; alt?: string; etek?: boolean;
@@ -150,8 +182,8 @@ const yoneticiYolu = (): N[] => [
 
 // ---- mekân
 const Ofis: React.FC<{t: number}> = ({t}) => {
-  const isik = gir(t, an(6, 0), 0.6) * (1 - gir(t, an(9, 0), 0.8));
-  const bakis = (x: number) => (t >= an(6, 3) && t < an(9, 0) ? (x > DEDIKODU_X ? -8 : 8) : 0);
+  const isik = gir(t, an(6, 0), 0.6) * (1 - gir(t, an(11, 0), 0.8));
+  const bakis = (x: number) => (t >= an(6, 3) && t < an(11, 0) ? (x > DEDIKODU_X ? -8 : 8) : 0);
   return (
     <g>
       <rect x={-200} y={-400} width={ODA * 3 + 400} height={ZEMIN + 400} fill={C.duvar} />
@@ -165,7 +197,7 @@ const Ofis: React.FC<{t: number}> = ({t}) => {
       {/* arka masalardaki iş arkadaşları (yalnız baş) */}
       {[ODA - 150, ODA * 2 - 120].map((x, i) => (
         <g key={i}><Kisi t={t} x={x} y={ZEMIN - 60} s={0.8} otur={1} sac={i ? 'kisa' : 'uzun'} sacRenk={i ? C.siyah : '#8a4b2a'} ust={i ? C.yesil : '#b07d9b'}
-          etek={!i} yuz={t >= an(6, 0) && t < an(9, 0) ? 'sasir' : 'gul'} bak={bakis(x)} gizleBacak yon={-1} />
+          etek={!i} yuz={t >= an(6, 0) && t < an(11, 0) ? 'sasir' : 'gul'} bak={bakis(x)} gizleBacak yon={-1} />
           <Masa x={x + 20} t={t} bitki={false} ekranX={-170} /></g>))}
       <rect x={-200} y={ZEMIN} width={ODA * 3 + 400} height={800} fill="#cdb48c" />
       <path d={`M -200 ${ZEMIN} L ${ODA * 3 + 200} ${ZEMIN}`} {...M} />
@@ -190,9 +222,9 @@ const kamera = (t: number) => {
     {t: an(5, 1) - 0.2, d: 0.6, x: o(1) + 120, y: 900, z: 1.22},    // "Kim söyledi?"
     {t: an(6, 0) - 0.2, d: 1.2, x: o(0) + 60, y: 960, z: 1},        // gözler o masaya
     {t: ka(8, 'kâğıd') - 0.3, d: 0.9, x: DEDIKODU_X + 20, y: ZEMIN - 400, z: 1.8},  // boş kâğıt
-    {t: an(9, 0) - 0.1, d: 1.0, x: o(0) + 60, y: 960, z: 1},
-    {t: an(10, 0) - 0.2, d: 1.3, x: o(1) + 80, y: 960, z: 1},       // Pumpkin çay
-    {t: an(11, 0), d: 1.0, x: o(1) + 120, y: 900, z: 1.1},
+    {t: an(10, 0) - 0.3, d: 0.8, x: DEDIKODU_X + 70, y: ZEMIN - 290, z: 2.6},  // itiraf yazısı
+    {t: an(11, 0) - 0.2, d: 1.3, x: o(1) + 80, y: 960, z: 1},       // Pumpkin, katlanmış kâğıt, çay
+    {t: an(13, 0), d: 1.0, x: o(1) + 120, y: 900, z: 1.1},
   ];
   let c = {x: plan[0].x, y: plan[0].y, z: plan[0].z};
   for (const a of plan) { if (t < a.t) break; const u = gir(t, a.t, a.d); c = {x: karis(c.x, a.x, u), y: karis(c.y, a.y, u), z: karis(c.z, a.z, u)}; }
@@ -220,17 +252,19 @@ const Video: React.FC = () => {
   const musteriBalon = gir(t, an(2, 2), 0.5) * (1 - gir(t, an(3, 0), 0.4));
   const soru = gir(t, ka(3, 'bunu') - 0.1, 0.4) * (1 - gir(t, an(4, 0) + 0.3, 0.4));
   const kim = zipla(t, ka(5, 'kim') - 0.1, 0.5) * (1 - gir(t, an(6, 0) + 0.4, 0.4));
-  const ayaga = gir(t, an(5, 0), 0.6) * (1 - gir(t, an(10, 0) - 0.4, 0.6));
+  const ayaga = gir(t, an(5, 0), 0.6) * (1 - gir(t, an(11, 0) - 0.4, 0.6));
   const kagitUc = gir(t, ka(7, 'yazılı') - 0.1, 0.8);
   const ter = gir(t, an(6, 3), 0.5);
   const sifir = zipla(t, ka(8, 'gerçek') - 0.1, 0.5);
-  const ders = gir(t, an(9, 0), 0.6), ders2 = gir(t, ka(9, 'açıklamak'), 0.6), cizgi = gir(t, ka(9, 'zor'), 0.6);
+  const ders = gir(t, ka(12, 'kedi') - 0.2, 0.6), ders2 = gir(t, ka(12, 'mundar') - 0.1, 0.5), cizgi = gir(t, ka(12, 'der'), 0.5);
+  const fabl = gir(t, ka(12, 'kedi') - 0.2, 0.6) * (1 - gir(t, an(13, 0) + 0.3, 0.5));
+  const itiraf = K.filter((k) => k.c === 10);
   const dedikoduYuz: KisiP['yuz'] = t < an(2, 0) ? 'kibir' : t < an(6, 0) ? 'gul' : 'endise';
-  const pumpkinYuz: KisiP['yuz'] = t >= an(10, 0) ? 'mutlu' : t >= an(4, 0) ? (t >= an(5, 0) ? 'ciddi' : 'sakin') : t >= an(3, 0) ? 'sasir' : 'gul';
-  const son = gir(t, an(11, 0), 0.8);
+  const pumpkinYuz: KisiP['yuz'] = t >= an(11, 0) ? 'mutlu' : t >= an(4, 0) ? (t >= an(5, 0) ? 'ciddi' : 'sakin') : t >= an(3, 0) ? 'sasir' : 'gul';
+  const son = gir(t, an(13, 0), 0.8);
   const ilk = 1 - gir(t, an(1, 0) - 0.1, 0.4);
-  const sicak = gir(t, an(9, 0), 6);
-  const kalemTitre = t >= ka(8, 'kâğıd') ? Math.sin(t * 40) * 4 : 0;
+  const sicak = gir(t, an(10, 0), 6);
+  const kalemTitre = t >= ka(8, 'kâğıd') && t < an(9, 0) ? Math.sin(t * 40) * 4 : t >= an(9, 0) && t < anSon(10) ? Math.sin(t * 12) * 18 : 0;
   return (
     <AbsoluteFill style={{background: C.kagit}}>
       <Audio src={staticFile('dedikodu/ses.mp3')} />
@@ -255,10 +289,15 @@ const Video: React.FC = () => {
               elde={t >= ka(8, 'kâğıd') ? <g transform={`translate(${110 + kalemTitre},-210) rotate(30)`}><rect x={-5} y={-50} width={10} height={64} rx={4} fill={C.sari} {...M} strokeWidth={3} /></g> : null} />
             <Masa x={DEDIKODU_X + 30} t={t} ekranX={-170} bitkiX={150} />
             {/* masadaki kâğıt: Yazılı Açıklama, boş */}
-            {kagitUc > 0 && <g transform={`translate(${karis(650, DEDIKODU_X + 70, kagitUc)},${karis(ZEMIN - 520, ZEMIN - 300, kagitUc)}) rotate(${karis(-30, -4, kagitUc)})`}>
-              <rect x={-90} y={-60} width={180} height={120} fill={C.beyaz} {...M} strokeWidth={3} />
-              <text y={-26} textAnchor="middle" fontFamily={EL} fontSize={24} fill={C.mur}>Yazılı Açıklama</text>
-              {[0, 1, 2].map((i) => <path key={i} d={`M -70 ${4 + i * 20} L 70 ${4 + i * 20}`} stroke={C.gri} strokeWidth={2} />)}
+            {kagitUc > 0 && t < an(11, 0) && <g transform={`translate(${karis(650, DEDIKODU_X + 70, kagitUc)},${karis(ZEMIN - 520, ZEMIN - 300, kagitUc)}) rotate(${karis(-30, -4, kagitUc)})`}>
+              <rect x={-90} y={-60} width={180} height={124} fill={C.beyaz} {...M} strokeWidth={3} />
+              <text y={-30} textAnchor="middle" fontFamily={EL} fontSize={22} fill={C.mur}>Yazılı Açıklama</text>
+              {[0, 1, 2].map((i) => <path key={i} d={`M -76 ${2 + i * 22} L 76 ${2 + i * 22}`} stroke={C.gri} strokeWidth={1.5} />)}
+              {/* itiraf: söylendikçe el yazısıyla belirir */}
+              {[[0, 4], [4, 6], [6, 8]].map(([a, b], i) => (
+                <text key={i} x={-74} y={-2 + i * 22} fontFamily={EL} fontSize={17} fill="#2c3f7a">
+                  {itiraf.slice(a, b).filter((k) => t >= k.s - 0.05).map((k) => k.w).join(' ')}</text>
+              ))}
             </g>}
             <Fisilti x={DEDIKODU_X + 70} y={ZEMIN - 560} t={t} u={fisilti} />
             {/* müşteri */}
@@ -273,10 +312,12 @@ const Video: React.FC = () => {
             </Balon>
             {/* Pumpkin */}
             <Kisi t={t} x={PUMPKIN_X} y={karis(ZEMIN - 70, ZEMIN, ayaga)} s={1.05} otur={1 - ayaga} sac="uzun" goz={C.mavi} ust={C.kazak} etek cizgili
-              yon={-1} yuz={pumpkinYuz} gizleBacak={ayaga < 0.5} sagKol={t >= an(10, 0) ? -120 : 10}
-              elde={t >= an(10, 0) - 0.4 ? <Cay x={-120} y={-330} s={0.9} t={t} /> : null} />
+              yon={-1} yuz={pumpkinYuz} gizleBacak={ayaga < 0.5} sagKol={t >= ka(11, 'çay') - 0.3 ? -120 : 10}
+              elde={t >= ka(11, 'çay') - 0.3 ? <Cay x={-120} y={-330} s={0.9} t={t} /> : null} />
             <Masa x={PUMPKIN_X - 40} t={t} ekranX={140} bitkiX={-150} />
-            {t < an(10, 0) - 0.4 && <Cay x={PUMPKIN_X - 160} y={ZEMIN - 300} s={0.8} t={t} />}
+            {t < ka(11, 'çay') - 0.3 && <Cay x={PUMPKIN_X - 160} y={ZEMIN - 300} s={0.8} t={t} />}
+            {t >= an(11, 0) && <g transform={`translate(${PUMPKIN_X - 70},${ZEMIN - 304}) rotate(-6) scale(${karis(1, 0.6, gir(t, ka(11, 'katladı'), 0.5))},1)`}>
+              <rect x={-60} y={-14} width={120} height={22} fill={C.beyaz} {...M} strokeWidth={3} /><path d="M 0 -14 L 0 8" stroke={C.gri} strokeWidth={2} /></g>}
             <Balon x={PUMPKIN_X - 160} y={ZEMIN - 760} w={340} h={150} u={kim} kuyruk={90} dusunce={false}>
               <text y={20} textAnchor="middle" fontFamily={EL} fontSize={64} fill={C.kirmizi}>Kim söyledi?</text>
             </Balon>
@@ -291,14 +332,15 @@ const Video: React.FC = () => {
               <circle r={58} fill="#f6efdf" {...M} /><text y={30} textAnchor="middle" fontFamily={EL} fontSize={90} fill={C.kirmizi}>?</text></g>}
           </g>
         </g>
+        <g filter="url(#kalem)"><Fabl t={t} t0={ka(12, 'kedi')} tMundar={ka(12, 'mundar')} u={fabl} /></g>
         <g fontFamily={EL}>
           {ilk > 0 && <g opacity={ilk}><text x={80} y={330} fontSize={92} fill={C.mur}>Hiç tanımadığı biri,</text>
             <text x={80} y={440} fontSize={92} fill={C.kirmizi}>onu kötüledi.</text></g>}
-          {ders > 0 && <g opacity={ders * (1 - gir(t, an(10, 0) + 0.6, 0.6) * 0)}>
+          {ders > 0 && <g opacity={ders}>
             <path d="M 70 210 Q 540 190 1010 214 L 1004 468 Q 540 486 76 462 Z" fill="#efe3c6" stroke={C.mur} strokeWidth={4} />
-            <text x={540} y={310} textAnchor="middle" fontSize={84} fill={C.mur}>Kötülemek kolay.</text>
-            <text x={540} y={420} textAnchor="middle" fontSize={84} fill={C.kirmizi} opacity={ders2}>Açıklamak zor.</text>
-            <path d={`M 290 446 Q 540 458 ${karis(290, 790, cizgi)} 442`} fill="none" stroke={C.kirmizi} strokeWidth={6} strokeLinecap="round" opacity={cizgi > 0 ? 1 : 0} />
+            <text x={540} y={310} textAnchor="middle" fontSize={78} fill={C.mur}>Kedi uzanamadığı ciğere</text>
+            <text x={540} y={420} textAnchor="middle" fontSize={84} fill={C.kirmizi} opacity={ders2}>mundar der.</text>
+            <path d={`M 360 446 Q 540 458 ${karis(360, 720, cizgi)} 442`} fill="none" stroke={C.kirmizi} strokeWidth={6} strokeLinecap="round" opacity={cizgi > 0 ? 1 : 0} />
           </g>}
         </g>
         <rect width={1080} height={1920} fill="#e08a3a" opacity={0.1 * sicak} style={{mixBlendMode: 'multiply'}} />

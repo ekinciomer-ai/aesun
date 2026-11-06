@@ -78,7 +78,29 @@ def test_web(ortam, monkeypatch):
     assert c.post("/api/giris", json={"parola": "yanlis"}).status_code == 401
     assert c.post("/api/giris", json={"parola": "gizli"}).status_code == 200
     oid = c.post("/api/oturum", json={"platform": "tiktok", "dil": "en", "konu": "Vikings"}).json["id"]
-    assert c.post(f"/api/oturum/{oid}/uret", json={}).json["son"]
+    assert c.post(f"/api/oturum/{oid}/uret", json={}).json["durum"] == "calisiyor"
+    import time
+    for _ in range(50):
+        d = c.get(f"/api/oturum/{oid}").json
+        if not d["is_durumu"]:
+            break
+        time.sleep(0.1)
+    assert d["son"] and not d["is_durumu"]
     assert "YAZAR" in c.get(f"/api/oturum/{oid}/elle").json["paket"]
     assert c.post(f"/api/oturum/{oid}/kapat").status_code == 200
     assert c.get("/").status_code == 200
+
+
+def test_gemini_yedek_model(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "x")
+    from sosyal import motorlar
+    g = motorlar.Gemini()
+    denenen = []
+
+    def sahte(model, *a):
+        denenen.append(model)
+        if model == g.model:
+            raise motorlar.MotorHatasi("zaman aşımı")
+        return "tamam"
+    monkeypatch.setattr(g, "_yaz", sahte)
+    assert g.yaz("s", "m") == "tamam" and denenen == [g.model, "gemini-flash-lite-latest"]

@@ -10,7 +10,7 @@ import re
 import urllib.error
 import urllib.request
 
-ZAMAN_ASIMI = int(os.getenv("SOSYAL_ZAMAN_ASIMI", "90"))
+ZAMAN_ASIMI = int(os.getenv("SOSYAL_ZAMAN_ASIMI", "180"))
 _GIZLI = re.compile(r"(AIza[0-9A-Za-z_-]{20,}|sk-[0-9A-Za-z_-]{16,}|gsk_[0-9A-Za-z]{16,}|key=[^&\s]+)")
 
 
@@ -88,17 +88,28 @@ class Gemini(Motor):
 
     def __init__(self):
         self.model = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+        # Ana model yetişmezse sırayla denenir (aynı ücretsiz anahtar).
+        self.yedekler = [x.strip() for x in os.getenv("GEMINI_YEDEK", "gemini-flash-lite-latest").split(",") if x.strip()]
 
     def hazir(self):
         return bool(os.getenv("GEMINI_API_KEY"))
 
     def yaz(self, sistem, mesaj, sicaklik=0.7, ara=False):
+        hata = None
+        for model in dict.fromkeys([self.model, *self.yedekler]):
+            try:
+                return self._yaz(model, sistem, mesaj, sicaklik, ara)
+            except MotorHatasi as e:
+                hata = e
+        raise hata
+
+    def _yaz(self, model, sistem, mesaj, sicaklik, ara):
         govde = {"systemInstruction": {"parts": [{"text": sistem}]},
                  "contents": [{"role": "user", "parts": [{"text": mesaj}]}],
                  "generationConfig": {"temperature": sicaklik}}
         if ara:
             govde["tools"] = [{"google_search": {}}]
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         cevap = _post(url, govde, {"x-goog-api-key": os.getenv("GEMINI_API_KEY", "")})
         try:
             aday = cevap["candidates"][0]

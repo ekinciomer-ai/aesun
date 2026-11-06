@@ -2,6 +2,7 @@
 import hmac
 import os
 import secrets
+import threading
 
 from flask import Flask, Response, abort, jsonify, render_template, request, send_file, session
 
@@ -16,6 +17,28 @@ def create_app(studyo=None):
                       MAX_CONTENT_LENGTH=2 * 1024 * 1024)
     st = studyo or Studyo()
     st.h.temizle()
+    calisan = {}  # oturum → {"is": ..., "hata": ...}; uzun işler arka planda yürür, ekran durumu sorar
+    kilit = threading.Lock()
+
+    def arka_plan(oid, ad, fn, *a):
+        with kilit:
+            if calisan.get(oid, {}).get("durum") == "calisiyor":
+                raise UretimHatasi("Bu sohbette bir iş zaten sürüyor.")
+            calisan[oid] = {"durum": "calisiyor", "is": ad}
+
+        def yurut():
+            try:
+                fn(*a)
+                calisan.pop(oid, None)
+            except Exception as e:  # motor hatası dahil: ekranda gösterilir
+                calisan[oid] = {"durum": "hata", "is": ad, "hata": str(e)[:600]}
+        threading.Thread(target=yurut, daemon=True).start()
+        return {"durum": "calisiyor", "is": ad}
+
+    def ozet(oid):
+        d = st.oturum_ozeti(oid)
+        d["is_durumu"] = calisan.get(oid)
+        return d
 
     def parola():
         return os.getenv("SOSYAL_PAROLA", "")
@@ -64,15 +87,21 @@ def create_app(studyo=None):
 
     @app.get("/api/oturum/<int:oid>")
     def oturum(oid):
-        return jsonify(st.oturum_ozeti(oid))
+        if not st.h.oturum(oid):
+            raise UretimHatasi("Sohbet bulunamadı.")
+        return jsonify(ozet(oid))
 
     @app.post("/api/oturum/<int:oid>/uret")
     def uret(oid):
-        return jsonify(st.uret(oid, arastir=bool(j().get("arastir", True))))
+        st._oturum(oid)
+        return jsonify(arka_plan(oid, "uret", st.uret, oid, bool(j().get("arastir", True))))
 
     @app.post("/api/oturum/<int:oid>/geri")
     def geri(oid):
-        return jsonify(st.geri_bildirim(oid, str(j().get("metin", ""))))
+        metin = str(j().get("metin", "")).strip()
+        if not st.h.son_mesaj(oid, "son"):
+            raise UretimHatasi("Önce içerik üretin.")
+        return jsonify(arka_plan(oid, "geri", st.geri_bildirim, oid, metin))
 
     @app.get("/api/oturum/<int:oid>/elle")
     def elle(oid):
@@ -90,6 +119,9 @@ def create_app(studyo=None):
 
     @app.post("/api/oturum/<int:oid>/kapat")
     def kapat(oid):
+        if calisan.get(oid, {}).get("durum") == "calisiyor":
+            raise UretimHatasi("İş bitmeden sohbet kapatılamaz.")
+        calisan.pop(oid, None)
         return jsonify(st.kapat(oid))
 
     @app.get("/api/yetenekler")

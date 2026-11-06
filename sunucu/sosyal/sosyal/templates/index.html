@@ -178,13 +178,23 @@ function goster(d){
 async function baslat(){
   try{mesgul(true);$("oturumKart").classList.remove("gizli");$("cikti").innerHTML="";$("denetimKutu").innerHTML="";
     const {id}=await post("api/oturum",{platform:$("platform").value,dil:$("dil").value,format:$("format").value,konu:$("konu").value});
-    oid=id;goster(await post(`api/oturum/${id}/uret`,{arastir:$("arastir").checked}));
+    oid=id;await post(`api/oturum/${id}/uret`,{arastir:$("arastir").checked});await bekleBitir(id);
   }catch(e){hataGoster(e)}finally{mesgul(false)}
 }
-async function ac(id){try{goster(await api(`api/oturum/${id}`))}catch(e){alert(e.message)}}
+// Uzun işler sunucuda arka planda yürür; ekran 3 sn'de bir durumu sorar (en çok 15 dk).
+async function bekleBitir(id){
+  for(let i=0;i<300;i++){
+    const d=await api(`api/oturum/${id}`);const s=d.is_durumu;
+    if(!s||s.durum!=="calisiyor"){goster(d);if(s&&s.durum==="hata")throw new Error(s.hata);return d}
+    if(d.son)goster(d);$("bekle").classList.remove("gizli");
+    await new Promise(r=>setTimeout(r,3000));
+  }
+  throw new Error("İş uzun sürdü; sayfayı yenileyip sohbete devam edebilirsiniz.");
+}
+async function ac(id){try{const d=await api(`api/oturum/${id}`);goster(d);if(d.is_durumu&&d.is_durumu.durum==="calisiyor"){mesgul(true);try{await bekleBitir(id)}finally{mesgul(false)}}}catch(e){alert(e.message)}}
 async function geriGonder(){
   const t=$("geriMetin").value.trim();if(!t)return;
-  try{mesgul(true);goster(await post(`api/oturum/${oid}/geri`,{metin:t}));$("geriMetin").value=""}catch(e){hataGoster(e)}finally{mesgul(false)}
+  try{mesgul(true);await post(`api/oturum/${oid}/geri`,{metin:t});$("geriMetin").value="";await bekleBitir(oid)}catch(e){hataGoster(e)}finally{mesgul(false)}
 }
 async function ellePaket(){try{const d=await api(`api/oturum/${oid}/elle`);kopyala(d.paket)}catch(e){hataGoster(e)}}
 async function elleGonder(){try{goster(await post(`api/oturum/${oid}/elle`,{metin:$("elleMetin").value}));$("elleMetin").value=""}catch(e){hataGoster(e)}}

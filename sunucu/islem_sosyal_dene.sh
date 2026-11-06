@@ -10,9 +10,14 @@ from sosyal.uretim import Studyo
 s = Studyo()
 t = time.time()
 oid = s.oturum_ac("youtube_shorts", "tr", "Tarihi Magazin", "Napolyon'un düğün gecesini bir köpek mahvetti")
-d = s.uret(oid)
+try:
+    d = s.uret(oid)
+except Exception as e:
+    print("NOT: HATA üretim:", str(e)[:500])
+    for g in s.h.gunluk_listesi()[:6]: print("NOT: günlük:", g["olay"], g["ayrinti"][:250])
+    raise
 print("NOT: üretim süresi", round(time.time() - t), "sn · motorlar:", sorted({m["motor"] for m in d["mesajlar"] if m["motor"]}))
-print("NOT: aşamalar:", [m["asama"] for m in d["mesajlar"]])
+print("NOT: aşamalar:", [(m["asama"], m["motor"], m["ts"][11:19], len(m["icerik"])) for m in d["mesajlar"]])
 print("NOT: denetim:", json.dumps(d["denetim"], ensure_ascii=False)[:400])
 for satir in d["son"].splitlines()[:40]:
     if satir.strip(): print("NOT: |", satir[:220])
@@ -24,7 +29,7 @@ print("NOT: hata günlüğü:", [g["ayrinti"][:200] for g in s.h.gunluk_listesi(
 j = s.arac_isi(iid, "ses", "piper")
 print("ISJSON", json.dumps(j, ensure_ascii=False))
 PY
-grep '^NOT:' /tmp/sosyal_dene.txt | cut -c1-400
+grep '^NOT:' /tmp/sosyal_dene.txt | cut -c1-500
 grep -q ISJSON /tmp/sosyal_dene.txt || { echo "NOT: HATA üretim denemesi: $(tail -5 /tmp/sosyal_dene.txt | tr '\n' ' ' | cut -c1-400)"; exit 1; }
 # Piper ses işi geçici kuyrukta
 K=/opt/sosyal/dene_kuyruk; rm -rf $K; mkdir -p $K/bekleyen

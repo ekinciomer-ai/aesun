@@ -36,6 +36,11 @@ def ara(terim, adet=20):
                "kucuk": ii.get("thumburl") or ii.get("url")}
 
 
+def _cekirdek(baslik):
+    b = re.sub(r"^File:|\.[a-z]{3,4}$|\(.*?\)", "", baslik, flags=re.I).lower()
+    return " ".join(re.findall(r"[a-zà-ÿ]{3,}", b)[:4])
+
+
 def yazi_var(yol):
     """Görselde okunur yazı (4+ harfli, güveni yüksek 3+ kelime) varsa True. tesseract yoksa False."""
     try:
@@ -102,13 +107,13 @@ def main():
     cikti, terimler = sys.argv[1], sys.argv[2:]
     KONU = os.environ.get("KONU", terimler[0] if terimler else "")
     os.makedirs(cikti, exist_ok=True)
-    kullanilan, kaynaklar = set(), []
+    kullanilan, kaynaklar, cekirdekler = set(), [], set()
     for i, terim in enumerate(terimler, 1):
         secilen = None
         for deneme in (terim, terimler[0]):
             try:
                 for g in list(ara(deneme))[:5]:   # ücretsiz kota: terim başına en çok 5 görsel kontrol edilir
-                    if g["baslik"] in kullanilan:
+                    if g["baslik"] in kullanilan or _cekirdek(g["baslik"]) in cekirdekler:   # aynı eserin kopyası (kırpılmış vb.)
                         continue
                     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as t:
                         t.write(iste(g["kucuk"], 90))
@@ -128,7 +133,7 @@ def main():
         hedef = os.path.join(cikti, f"g{i:02d}.png")
         dikey(gecici, hedef)
         os.unlink(gecici)
-        kullanilan.add(g["baslik"])
+        kullanilan.add(g["baslik"]); cekirdekler.add(_cekirdek(g["baslik"]))
         kaynaklar.append({"dosya": os.path.basename(hedef), "terim": terim, **{k: g[k] for k in ("baslik", "yazar", "lisans", "adres")}})
     json.dump(kaynaklar, open(os.path.join(cikti, "kaynaklar.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(json.dumps({"gorsel": len(kaynaklar), "terim": len(terimler), "gemini": SAYAC}))

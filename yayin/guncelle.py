@@ -137,6 +137,9 @@ def main():
                 v = it.get("statistics", {}).get("viewCount")
                 if x is not None and v is not None and x.get("izlenme") != int(v):
                     x["izlenme"] = int(v); degisti += 1
+                lk = it.get("statistics", {}).get("likeCount")
+                if x is not None and lk is not None and x.get("begeni") != int(lk):
+                    x["begeni"] = int(lk); degisti += 1
                 if x is not None and it.get("status", {}).get("privacyStatus") == "public" and x.get("durum") == "Planlı":
                     x["durum"] = "Yayında"; degisti += 1
 
@@ -234,6 +237,8 @@ def main():
                     yeni.update(tarih=t.strftime("%Y-%m-%d"), saat=t.strftime("%H:%M"))
                 if v.get("izlenme_yuzde") is not None:
                     yeni["izlenme_yuzde"] = v["izlenme_yuzde"]
+                if v.get("begeni") is not None:
+                    yeni["begeni"] = v["begeni"]
                 for k2, val in yeni.items():
                     if x.get(k2) != val:
                         x[k2] = val; degisti += 1

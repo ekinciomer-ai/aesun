@@ -10,7 +10,7 @@ for u in K["uclar"]:
     if gruplar and u["grup"] not in gruplar:
         continue
     t0 = time.time(); kod, govde, hata = None, "", None
-    for deneme in range(2):                       # anlık ağ hıçkırığı yanlış alarm olmasın: bir kez daha dene
+    for deneme in range(3):                       # anlık ağ/DNS hıçkırığı yanlış alarm olmasın: iki kez daha dene
         try:
             r = urllib.request.urlopen(urllib.request.Request(u["url"] + ("&" if "?" in u["url"] else "?") + "_t=" + str(int(time.time())),
                                        headers={"User-Agent": "aesun-duman-testi"}), context=ctx, timeout=25)
@@ -21,7 +21,7 @@ for u in K["uclar"]:
             hata = str(e)[:120]
         if kod in u["beklenen"] and (not u.get("icerir") or u["icerir"] in govde):
             break
-        time.sleep(3)
+        time.sleep(15 if hata and ("address" in hata or "resolution" in hata or "Errno -" in hata) else 3)   # DNS geçici: biraz bekle
     ok = kod in u["beklenen"] and (not u.get("icerir") or u["icerir"] in govde)
     neden = "" if ok else (hata or (f"kod {kod} (beklenen {u['beklenen']})" if kod not in u["beklenen"] else f"yanıtta '{u['icerir']}' yok"))
     sonuc.append({"ad": u["ad"], "grup": u["grup"], "ok": ok, "kod": kod, "ms": round((time.time() - t0) * 1000), "neden": neden})

@@ -2,7 +2,7 @@
 # Animasyon denemesi: metin.txt'den ElevenLabs ile ses + kelime zamanları (Claude animasyon rehberi, ses.py yöntemi).
 # Anahtar /opt/cutkoda/motor.env'den okunur, yazdırılmaz. Çıktı /opt/sosyal/animasyon/<ad>/ ve günlükte base64 (indirmek için).
 set -uo pipefail
-AD=${AD:-kombin}; K=/tmp/aesun_paket/sunucu/sosyal/animasyon/public/$AD; H=/opt/sosyal/animasyon/$AD
+AD=${AD:-$(cat /tmp/aesun_paket/sunucu/sosyal/animasyon/SES_ISI 2>/dev/null || echo kombin)}; K=/tmp/aesun_paket/sunucu/sosyal/animasyon/public/$AD; H=/opt/sosyal/animasyon/$AD
 mkdir -p $H && cp $K/metin.txt $H/
 EL=$(grep '^ELEVENLABS_API_KEY=' /opt/cutkoda/motor.env 2>/dev/null | cut -d= -f2-)
 [ -n "$EL" ] || { echo "NOT: HATA ElevenLabs anahtarı yok"; exit 1; }

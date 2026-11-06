@@ -13,6 +13,14 @@ for ad, m in motorlar.hepsi().items():
         print(f"NOT: {ad} ({m.model}): ÇALIŞIYOR · {time.time()-t:.1f} sn · cevap: {c[:40]!r}")
     except Exception as e:
         print(f"NOT: {ad} ({m.model}): HATA · {str(e)[:220]}")
+g = motorlar.hepsi()["gemini"]
+for model in ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-flash", "gemini-2.5-flash"]:
+    motorlar.ZAMAN_ASIMI = 60; t = time.time()
+    try:
+        c = g._yaz(model, "Kısa cevap ver.", "Yalnız şunu yaz: tamam", 0.0, False)
+        print(f"NOT: gemini modeli {model}: {time.time()-t:.1f} sn · {c[:20]!r}")
+    except Exception as e:
+        print(f"NOT: gemini modeli {model}: HATA {time.time()-t:.0f} sn · {str(e)[:150]}")
 k = os.getenv("OPENROUTER_API_KEY")
 if k:
     r = urllib.request.Request("https://openrouter.ai/api/v1/models", headers={"Authorization": "Bearer " + k})

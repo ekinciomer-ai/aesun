@@ -51,6 +51,9 @@ if [ ! -f $D/sosyal.env ]; then
   sed -i "s/^SOSYAL_OTURUM_ANAHTARI=.*/SOSYAL_OTURUM_ANAHTARI=$(openssl rand -hex 32)/" $D/sosyal.env
   chmod 600 $D/sosyal.env
 fi
+# Kalkmış ücretsiz model adı ayarda kaldıysa güncel listeyle değiştirilir
+grep -q '^OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free$' $D/sosyal.env && \
+  sed -i 's#^OPENROUTER_MODEL=.*#OPENROUTER_MODEL=google/gemma-4-31b-it:free,nvidia/nemotron-3.5-super-vl:free,google/gemma-4-26b-a4b-it:free#' $D/sosyal.env && echo "NOT: OpenRouter modeli güncellendi"
 umask 077; : > $D/anahtar.env.yeni; BULUNAN=""
 for ad in gemini_api_key groq_api_key openrouter_api_key anthropic_api_key openai_api_key mistral_api_key deepseek_api_key sosyal_parola; do
   v=$(/opt/aesun/kasa_coz.sh $ad 2>/dev/null) || continue

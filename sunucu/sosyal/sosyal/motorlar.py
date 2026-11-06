@@ -38,8 +38,10 @@ def _maskele(s) -> str:
 
 
 def _post(url, govde, basliklar):
+    # Cloudflare arkasındaki servisler (Groq gibi) tanıtımsız "Python-urllib" isteğini engelliyor (hata 1010).
     istek = urllib.request.Request(url, data=json.dumps(govde).encode(), method="POST",
-                                   headers={"Content-Type": "application/json", **basliklar})
+                                   headers={"Content-Type": "application/json", "User-Agent": "SosyalStudyo/1.0",
+                                            "Accept": "application/json", **basliklar})
     try:
         with urllib.request.urlopen(istek, timeout=ZAMAN_ASIMI) as c:
             return json.loads(c.read().decode())
@@ -71,7 +73,9 @@ class OpenAIUyumlu(Motor):
 
     def __init__(self, ad, etiket, url, anahtar_env, model_env, model, ucretsiz=True, anahtarsiz=False):
         self.ad, self.etiket, self._url, self._anahtar_env = ad, etiket, url, anahtar_env
-        self.model = os.getenv(model_env, model)
+        # Virgülle birden çok model: ilki çalışmazsa (kalktı, kota, zaman aşımı) sıradaki denenir.
+        self.modeller = [x.strip() for x in os.getenv(model_env, model).split(",") if x.strip()]
+        self.model = self.modeller[0]
         self.ucretsiz, self._anahtarsiz = ucretsiz, anahtarsiz
 
     @property
@@ -86,14 +90,25 @@ class OpenAIUyumlu(Motor):
         return bool(os.getenv(self._anahtar_env))
 
     def yaz(self, sistem, mesaj, sicaklik=0.7, ara=False):
+        hata = None
+        for model in self.modeller:
+            try:
+                return self._yaz(model, sistem, mesaj, sicaklik)
+            except MotorHatasi as e:
+                hata = e
+        raise hata
+
+    def _yaz(self, model, sistem, mesaj, sicaklik):
         b = {}
         if os.getenv(self._anahtar_env):
             b["Authorization"] = "Bearer " + os.getenv(self._anahtar_env)
-        cevap = _post(self.url, {"model": self.model, "temperature": sicaklik,
+        if self.ad == "openrouter":
+            b.update({"HTTP-Referer": "https://sosyal.cutkoda.com", "X-Title": "Sosyal Studyo"})
+        cevap = _post(self.url, {"model": model, "temperature": sicaklik,
                                  "messages": [{"role": "system", "content": sistem},
                                               {"role": "user", "content": mesaj}]}, b)
         u = cevap.get("usage") or {}
-        _kullanim(self.model, u.get("prompt_tokens"), u.get("completion_tokens"))
+        _kullanim(model, u.get("prompt_tokens"), u.get("completion_tokens"))
         try:
             return cevap["choices"][0]["message"]["content"].strip()
         except (KeyError, IndexError, TypeError):
@@ -218,7 +233,8 @@ def hepsi():
         OpenAIUyumlu("groq", "Groq (Llama)", "https://api.groq.com/openai/v1/chat/completions",
                      "GROQ_API_KEY", "GROQ_MODEL", "llama-3.3-70b-versatile"),
         OpenAIUyumlu("openrouter", "OpenRouter (ücretsiz modeller)", "https://openrouter.ai/api/v1/chat/completions",
-                     "OPENROUTER_API_KEY", "OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free"),
+                     "OPENROUTER_API_KEY", "OPENROUTER_MODEL",
+                     "google/gemma-4-31b-it:free,nvidia/nemotron-3.5-super-vl:free,google/gemma-4-26b-a4b-it:free"),
         OpenAIUyumlu("mistral", "Mistral", "https://api.mistral.ai/v1/chat/completions",
                      "MISTRAL_API_KEY", "MISTRAL_MODEL", "mistral-small-latest", ucretsiz=False),
         OpenAIUyumlu("deepseek", "DeepSeek", "https://api.deepseek.com/chat/completions",

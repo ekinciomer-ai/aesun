@@ -1,5 +1,5 @@
 {
- "olusturma": "2026-11-06T00:12+03:00",
+ "olusturma": "2026-11-06T10:22+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -52,7 +52,9 @@
     "Gündem + Tarih": 2,
     "Tablo Serisi": 1
    },
-   "durdurulan": []
+   "durdurulan": [
+    "Tarihin Patileri"
+   ]
   }
  },
  "seriler": [
@@ -102,22 +104,25 @@
    "kanal": "Ancient Studio",
    "seri": "Tarihi Magazin",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 3,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 2,
+   "medyan_48sa": 5,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Did 1700s royal women really have LIVE MICE in their hair?! 🐭👑 #shorts #history #fyp",
+    "i48": 5
+   }
   },
   {
    "kanal": "Ancient Studio",
    "seri": "Tarihin Patileri",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
-   "erken": 1,
-   "medyan_48sa": 1,
+   "karar": "DURDUR",
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
+   "olculen": 3,
+   "erken": 0,
+   "medyan_48sa": 0,
    "tutma_orani": 0,
    "izlenme_yuzde": 20,
    "en_iyi": {
@@ -129,7 +134,7 @@
    "kanal": "Antik Stüdyo",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %100'i tuttu (eşik 383 izlenme / 48 sa)",
+   "neden": "videoların %100'i tuttu (eşik 447 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 0,
    "medyan_48sa": 1589,
@@ -156,28 +161,31 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tablo Serisi",
    "karar": "ARTIR",
-   "neden": "videoların %75'i tuttu (eşik 383 izlenme / 48 sa)",
-   "olculen": 4,
-   "erken": 2,
-   "medyan_48sa": 1658,
-   "tutma_orani": 75,
+   "neden": "videoların %80'i tuttu (eşik 447 izlenme / 48 sa)",
+   "olculen": 5,
+   "erken": 1,
+   "medyan_48sa": 1970,
+   "tutma_orani": 80,
    "izlenme_yuzde": 56,
    "en_iyi": {
-    "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
-    "i48": 1982
+    "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
+    "i48": 2747
    }
   },
   {
    "kanal": "Antik Stüdyo",
    "seri": "Tarihi Magazin",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 3,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 2,
+   "medyan_48sa": 1545,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Saçının içinde FARE yaşayan zengin kadınlar?! 🐭👑 #shorts #tarih #keşfet",
+    "i48": 1545
+   }
   },
   {
    "kanal": "Antik Stüdyo",
@@ -196,8 +204,8 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 383,
-  "Ancient Studio": 127
+  "Ancient Studio": 127,
+  "Antik Stüdyo": 447
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -205,13 +213,17 @@
     "n": 1,
     "medyan": 19
    },
+   "13:00": {
+    "n": 1,
+    "medyan": 1545
+   },
    "17:00": {
     "n": 2,
     "medyan": 14
    },
    "18:00": {
-    "n": 2,
-    "medyan": 998
+    "n": 3,
+    "medyan": 1970
    },
    "19:00": {
     "n": 2,
@@ -231,9 +243,13 @@
     "n": 3,
     "medyan": 902
    },
+   "14:00": {
+    "n": 1,
+    "medyan": 5
+   },
    "17:00": {
-    "n": 2,
-    "medyan": 1
+    "n": 3,
+    "medyan": 0
    },
    "21:00": {
     "n": 2,
@@ -268,18 +284,24 @@
  ],
  "bulgular": [
   "Dün (2026-11-05) 5875 izlenme geldi; bir önceki gün 1250.",
-  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 127 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 383 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 127 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 4 tanesi tuttu (eşik 447 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 127 izlenme / 48 sa).",
-  "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 383 izlenme / 48 sa).",
-  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %75'i tuttu (eşik 383 izlenme / 48 sa).",
+  "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
+  "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 447 izlenme / 48 sa).",
+  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %80'i tuttu (eşik 447 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Antik Stüdyo: en iyi yayın saati şimdilik 19:00 (medyan 1691 izlenme, 2 video).",
+  "Antik Stüdyo: en iyi yayın saati şimdilik 18:00 (medyan 1970 izlenme, 3 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %50 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Antik Stüdyo: tutan Short'lar ortalama %62 izleniyor, tutmayanlar %28 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
  ],
  "en_iyi": [
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
+   "i48": 2747
+  },
   {
    "kanal": "Antik Stüdyo",
    "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
@@ -299,24 +321,9 @@
    "kanal": "Antik Stüdyo",
    "baslik": "1513 haritasını çizen amiral: Piri Reis",
    "i48": 1589
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Van Gogh bu tabloyu akıl hastanesinde yaptı 🌌",
-   "i48": 1345
   }
  ],
  "en_zayif": [
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Kedin ölse kaşlarını kazır mıydın? 🐈 Antik Mısır #shorts",
-   "i48": 17
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Emulara sonunda ne oldu? 🐦 Emu Savaşı'nın sonu",
-   "i48": 12
-  },
   {
    "kanal": "Ancient Studio",
    "baslik": "Van Gogh painted this in a mental asylum 🌌",
@@ -324,8 +331,18 @@
   },
   {
    "kanal": "Ancient Studio",
+   "baslik": "Did 1700s royal women really have LIVE MICE in their hair?! 🐭👑 #shorts #history #fyp",
+   "i48": 5
+  },
+  {
+   "kanal": "Ancient Studio",
    "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
    "i48": 2
+  },
+  {
+   "kanal": "Ancient Studio",
+   "baslik": "If your cat died, would you shave your eyebrows? 🐈 Ancient Egypt",
+   "i48": 0
   },
   {
    "kanal": "Ancient Studio",

@@ -1,0 +1,39 @@
+{
+ "tarih": "2026-11-06",
+ "aday_sayisi": 22,
+ "not": "06.11 çalışması depoya yazamadı; kayıt 07.11'de özetten elle işlendi. Ayrıntı (url, lisans, yıldız) özetle gelmediği için null. 22 adayın tam listesi kayıp; yalnız GFAD'a giden 3 aday ve güvenlik bulguları biliniyor.",
+ "adaylar": [
+  {
+   "ad": "Indra OCR",
+   "url": null,
+   "alan": "teklif/fatura/belge (OCR)"
+  },
+  {
+   "ad": "earshot",
+   "url": null,
+   "alan": "video kurgu/ses"
+  },
+  {
+   "ad": "file-viewer",
+   "url": null,
+   "alan": "portal / belge görüntüleme"
+  }
+ ],
+ "guvenlik": [
+  {
+   "ad": "Agent-Reach",
+   "bulgu": "tarayıcı çerezlerini kopyalıyor",
+   "karar": "zararlı, önerilmez"
+  },
+  {
+   "ad": "morluto/rea",
+   "bulgu": "yıldız şişirme şüphesi",
+   "karar": "güvenilmez, önerilmez"
+  },
+  {
+   "ad": "storytold/*",
+   "bulgu": "yıldız şişirme şüphesi (kuruluşun depoları)",
+   "karar": "güvenilmez, önerilmez"
+  }
+ ]
+}

@@ -18,6 +18,7 @@ TZ = timezone(timedelta(hours=3))
 KANALLAR = {
     "UC77LyY3gqWmBNAKp2lbsGBg": ("Antik Stüdyo", "TR"),
     "UCFLJUlhUSgjcLbp9ad_t9PQ": ("Ancient Studio", "EN"),
+    "UCTC_yS0lwl-owMuo5b4bNtQ": ("Estudio Antiguo", "ES"),
 }
 NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
       "media": "http://search.yahoo.com/mrss/"}

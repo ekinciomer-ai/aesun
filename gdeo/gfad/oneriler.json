@@ -1,0 +1,33 @@
+[
+ {
+  "id": "GFAD-20261106-1",
+  "tarih": "2026-11-06",
+  "ad": "Indra OCR",
+  "url": null,
+  "puan": 75,
+  "hedef_sistem": "fatura/teklif belge okuma (OCR)",
+  "durum": "tampon_denemede",
+  "test_sayisi": 1
+ },
+ {
+  "id": "GFAD-20261106-2",
+  "tarih": "2026-11-06",
+  "ad": "earshot",
+  "url": null,
+  "puan": 72,
+  "hedef_sistem": "videoda ses kontrolü (Antik Stüdyo / CutkodA kurgu)",
+  "durum": "tampon_denemede",
+  "test_sayisi": 1
+ },
+ {
+  "id": "GFAD-20261106-3",
+  "tarih": "2026-11-06",
+  "ad": "file-viewer",
+  "url": null,
+  "puan": 70,
+  "hedef_sistem": "portal belge görüntüleme",
+  "durum": "iade",
+  "iade_gerekcesi": "Entegrasyon portal görünümünü değiştirmeyi gerektiriyor; bu OU'nun yasak listesinde.",
+  "tekrar_degerlendirme_kosulu": "Portala dokunmadan ayrı sayfa/servis olarak çalışabilen sürüm."
+ }
+]

@@ -10,8 +10,10 @@ mkdir -p $M && cp /tmp/aesun_paket/sunucu/aesun/motor/commons_gorsel.py $M/ && c
 post() { curl -s -m 180 -X POST "$API/$1" -H 'Content-Type: application/json' -d "$2"; }
 # 1) Metin
 ISTEM="Write very short sentences of 4 to 7 words, each ending with a period. Name concrete places, people and objects. No introduction. Write in the requested language."
+if [ -n "${METIN_DOSYA:-}" ]; then METIN=$(cat "/tmp/aesun_paket/$METIN_DOSYA"); echo "NOT: metin Claude tarafından yazıldı"; else
 METIN=$(post scripts "$(KONU="$KONU" DIL="$DIL" ISTEM="$ISTEM" python3 -c 'import json,os;print(json.dumps({"video_subject":os.environ["KONU"],"video_language":os.environ["DIL"],"paragraph_number":2,"video_script_prompt":os.environ["ISTEM"]}))')" \
   | python3 -c 'import json,sys;print((json.load(sys.stdin).get("data") or {}).get("video_script",""))')
+fi
 [ -n "$METIN" ] || { echo "NOT: HATA metin yazılamadı"; exit 1; }
 # 2) Cümle sırasına göre görsel arama terimleri (İngilizce)
 TERIM=$(KONU="$KONU" METIN="$METIN" GK="$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null)" python3 - <<'PY'

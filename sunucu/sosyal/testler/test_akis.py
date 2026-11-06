@@ -155,3 +155,20 @@ def test_kullanim_sayaci(ortam, monkeypatch):
     from sosyal.web import create_app
     j = create_app(st).test_client().get("/api/kullanim").json
     assert j["sinirlar"]["groq"]["token"] == 100000 and j["gunler"]
+
+
+def test_kalkan_modelde_guncel_model_secilir(monkeypatch):
+    monkeypatch.setenv("GROQ_API_KEY", "x")
+    from sosyal import motorlar
+    g = motorlar.hepsi()["groq"]
+    g.modeller = ["eski-model"]
+    cagri = []
+
+    def sahte(model, *a):
+        cagri.append(model)
+        if model == "eski-model":
+            raise motorlar.MotorHatasi('HTTP 404: {"code":"model_not_found"}')
+        return "tamam"
+    monkeypatch.setattr(g, "_yaz", sahte)
+    monkeypatch.setattr(g, "_model_bul", lambda: "llama-4-maverick-17b")
+    assert g.yaz("s", "m") == "tamam" and cagri == ["eski-model", "llama-4-maverick-17b"] and g.model == "llama-4-maverick-17b"

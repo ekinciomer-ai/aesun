@@ -96,7 +96,34 @@ class OpenAIUyumlu(Motor):
                 return self._yaz(model, sistem, mesaj, sicaklik)
             except MotorHatasi as e:
                 hata = e
+        # Sağlayıcı modeli kaldırdıysa güncel listeden uygun bir sohbet modeli seçilir (bir kez, sonra hatırlanır).
+        if re.search(r"model_not_found|does not exist|unavailable", str(hata)):
+            yeni = self._model_bul()
+            if yeni and yeni not in self.modeller:
+                self.modeller.insert(0, yeni)
+                self.model = yeni
+                return self._yaz(yeni, sistem, mesaj, sicaklik)
         raise hata
+
+    TERCIH = [r"gpt-oss-120b", r"llama-4-maverick", r"llama.*70b", r"qwen.*(32b|72b|235b)", r"kimi", r"deepseek",
+              r"gemma.*(27b|31b)", r"gpt-oss-20b", r"llama-4-scout"]
+
+    def _model_bul(self):
+        try:
+            u = self.url.replace("/chat/completions", "/models")
+            r = urllib.request.Request(u, headers={"Authorization": "Bearer " + os.getenv(self._anahtar_env, ""),
+                                                   "User-Agent": "SosyalStudyo/1.0"})
+            adlar = [x["id"] for x in json.load(urllib.request.urlopen(r, timeout=30)).get("data", [])]
+        except Exception:
+            return None
+        adlar = [a for a in adlar if not re.search(r"whisper|guard|tts|vision|embed|audio|moderation", a, re.I)]
+        if self.ad == "openrouter":
+            adlar = [a for a in adlar if a.endswith(":free")]
+        for desen in self.TERCIH:
+            for a in adlar:
+                if re.search(desen, a, re.I):
+                    return a
+        return adlar[0] if adlar else None
 
     def _yaz(self, model, sistem, mesaj, sicaklik):
         b = {}
@@ -119,7 +146,7 @@ class Gemini(Motor):
     ad, etiket, arama = "gemini", "Google Gemini", True
 
     def __init__(self):
-        self.model = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+        self.model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
         # Ana model yetişmezse sırayla denenir (aynı ücretsiz anahtar).
         self.yedekler = [x.strip() for x in os.getenv("GEMINI_YEDEK", "gemini-flash-lite-latest").split(",") if x.strip()]
 
@@ -231,7 +258,7 @@ def hepsi():
     m = [
         Gemini(),
         OpenAIUyumlu("groq", "Groq (Llama)", "https://api.groq.com/openai/v1/chat/completions",
-                     "GROQ_API_KEY", "GROQ_MODEL", "llama-3.3-70b-versatile"),
+                     "GROQ_API_KEY", "GROQ_MODEL", "openai/gpt-oss-120b,llama-3.3-70b-versatile"),
         OpenAIUyumlu("openrouter", "OpenRouter (ücretsiz modeller)", "https://openrouter.ai/api/v1/chat/completions",
                      "OPENROUTER_API_KEY", "OPENROUTER_MODEL",
                      "google/gemma-4-31b-it:free,nvidia/nemotron-3.5-super-vl:free,google/gemma-4-26b-a4b-it:free"),

@@ -21,6 +21,13 @@ for model in ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-fla
         print(f"NOT: gemini modeli {model}: {time.time()-t:.1f} sn · {c[:20]!r}")
     except Exception as e:
         print(f"NOT: gemini modeli {model}: HATA {time.time()-t:.0f} sn · {str(e)[:150]}")
+gq = os.getenv("GROQ_API_KEY")
+if gq:
+    r = urllib.request.Request("https://api.groq.com/openai/v1/models", headers={"Authorization": "Bearer " + gq, "User-Agent": "SosyalStudyo/1.0"})
+    try:
+        print("NOT: Groq modelleri:", " ".join(sorted(x["id"] for x in json.load(urllib.request.urlopen(r, timeout=30)).get("data", []))))
+    except Exception as e:
+        print("NOT: Groq model listesi alınamadı", str(e)[:120])
 k = os.getenv("OPENROUTER_API_KEY")
 if k:
     r = urllib.request.Request("https://openrouter.ai/api/v1/models", headers={"Authorization": "Bearer " + k})

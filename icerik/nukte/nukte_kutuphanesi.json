@@ -868,7 +868,7 @@
       "kisi": "Antonio Machado",
       "yil": 1912,
       "bolge": [
-        "ES"
+        "ES-yalniz-Ispanya"
       ],
       "soz": "Caminante, no hay camino, se hace camino al andar.",
       "kaynak": "Campos de Castilla, 'Proverbios y cantares' XXIX",
@@ -877,7 +877,8 @@
       "gorsel": "Kastilya ovasında patikasız yürüyen yolcu, ayak izleri",
       "metin": {
         "ES": "Caminante, no hay camino, se hace camino al andar."
-      }
+      },
+      "not_": "Latin Amerika'da telifli (Meksika 2039); ES kanalı LatAm'a da yayınladığı için kullanılmaz."
     },
     {
       "id": "SZ12",
@@ -973,5 +974,73 @@
     "dogrulama": "Her söz yayından önce asıl eserde aranır; bulunamazsa ya 'atfedilir' yazılır ya da kart iptal. yanlis_atiflar listesi 'Bunu hiç söylemedi' içeriği olarak kullanılabilir.",
     "siklik": "Videolar arasında haftada 2-3 kart (ör. Salı-Perşembe-Cumartesi), her kanal kendi bölgesindeki kartlardan.",
     "dil": "Söz kartın kanal diliyle basılır (metin alanı). Üst başlık ('aci') Türkçe taslaktır; EN/ES kartta hedef ülkeye göre yeniden yazılır, çevrilmez."
+  },
+  "ulke_degerleri": {
+    "TR": {
+      "degerler": [
+        "hoşgörü ve gönül dili",
+        "misafirperverlik",
+        "aile ve büyüklere saygı",
+        "ilim",
+        "halk zekâsı ve nükte",
+        "yolculuk/merak"
+      ],
+      "kisiler": [
+        "Yunus Emre",
+        "Evliya Çelebi",
+        "Nasreddin Hoca",
+        "Mimar Sinan",
+        "Piri Reis",
+        "Atatürk (yalnız saygı tonu)"
+      ],
+      "kacin": [
+        "dinî hassasiyeti zorlayan görsel/simge",
+        "10 Kasım ve yas günlerinde mizah"
+      ]
+    },
+    "EN": {
+      "degerler": [
+        "self-reliance",
+        "freedom and individuality",
+        "work ethic / time is money",
+        "dry wit",
+        "science and invention"
+      ],
+      "kisiler": [
+        "Benjamin Franklin",
+        "Henry David Thoreau",
+        "Abraham Lincoln",
+        "William Shakespeare",
+        "Isaac Newton",
+        "Charles Darwin (yalnız doğrulanmış söz)"
+      ],
+      "kacin": [
+        "Türkiye'ye özgü örnek",
+        "70 yıldan yeni ölmüş kişinin sözü (ör. Churchill: yalnız anlatım)"
+      ]
+    },
+    "ES": {
+      "degerler": [
+        "familia y vida social",
+        "raíces hispanas (Roma, al-Ándalus, Siglo de Oro)",
+        "literatura y lengua",
+        "pasión y honor",
+        "Latinoamérica"
+      ],
+      "kisiler": [
+        "Séneca (Córdoba)",
+        "Miguel de Cervantes",
+        "Sor Juana Inés de la Cruz (México)",
+        "Garcilaso de la Vega",
+        "Inca Garcilaso (Perú)",
+        "Francisco de Quevedo"
+      ],
+      "kacin": [
+        "Türkiye/İngiliz örneği",
+        "Latin Amerika'da telif süresi uzun yazarlar (ör. Machado: Meksika'da 2039'a kadar telifli)",
+        "güncel siyasi figür (ör. Bolívar siyasi yüklü)"
+      ]
+    },
+    "kural": "Kart ve kişi seçimi önce ülkenin değerinden başlar; bir ülkenin kartı başka ülkeye taşınmaz, o ülke için yeniden seçilir."
   }
 }

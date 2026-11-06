@@ -6,6 +6,7 @@ Kullanım: commons_gorsel.py <cikti_klasoru> <terim1> <terim2> ...  (her terim b
 Kurallar: yalnız kamu malı / CC0 / CC BY / CC BY-SA; en az 1000 px; içinde okunur yazı olan görsel (tesseract) elenir.
 Aynı görsel iki kez kullanılmaz. Bulunamayan terim için konu geneli (ilk terim) yedeği denenir.
 """
+KONU = ""
 import json, os, re, subprocess, sys, tempfile, urllib.parse, urllib.request
 
 UA = {"User-Agent": "AksarayEnerjiMotor/1.0 (https://aksarayenerji.net)"}
@@ -49,27 +50,54 @@ def yazi_var(yol):
     return kelime >= 3
 
 
+def ilgili_mi(yol, konu, terim):
+    """Gemini (ücretsiz) görsele bakar: konu ve döneme uygun mu? Anahtar yoksa True (eleme yapılmaz)."""
+    k = os.environ.get("GEMINI_KEY", "").strip()
+    if not k:
+        return True
+    import base64
+    try:
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", yol, "-vf", "scale=512:-1", yol + ".k.jpg"], check=True, timeout=60)
+        resim = base64.b64encode(open(yol + ".k.jpg", "rb").read()).decode()
+        os.unlink(yol + ".k.jpg")
+        soru = (f"Video topic: {konu}. This scene: {terim}. Is this image a fitting illustration for this historical scene "
+                "(a historical painting, engraving, map, manuscript, period artifact, or the real historical place)? "
+                "Answer NO if it is a modern unrelated photo, a different place with the same name, a collage, a document page "
+                "with mostly text, or a different era. Answer only YES or NO.")
+        b = json.dumps({"contents": [{"parts": [{"text": soru}, {"inline_data": {"mime_type": "image/jpeg", "data": resim}}]}]}).encode()
+        r = urllib.request.Request("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+                                   data=b, headers={"x-goog-api-key": k, "Content-Type": "application/json"})
+        d = json.load(urllib.request.urlopen(r, timeout=90))
+        t = "".join(p.get("text", "") for p in d["candidates"][0]["content"]["parts"]).strip().upper()
+        return t.startswith("YES")
+    except Exception as e:
+        print(f"uyarı: ilgi kontrolü yapılamadı ({type(e).__name__}); görsel kabul edildi", file=sys.stderr)
+        return True
+
+
 def dikey(kaynak, hedef):
     """Bulanık arka plan + ortada tam görsel; alttaki altyazı bölgesi boş kalacak şekilde biraz yukarıda."""
-    f = ("[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.18[a];"
+    f = ("[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.08:saturation=1.15[a];"
          "[0:v]scale=1040:1400:force_original_aspect_ratio=decrease[b];[a][b]overlay=(W-w)/2:(H-h)/2-140")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", kaynak, "-filter_complex", f, "-frames:v", "1", hedef], check=True, timeout=120)
 
 
 def main():
+    global KONU
     cikti, terimler = sys.argv[1], sys.argv[2:]
+    KONU = os.environ.get("KONU", terimler[0] if terimler else "")
     os.makedirs(cikti, exist_ok=True)
     kullanilan, kaynaklar = set(), []
     for i, terim in enumerate(terimler, 1):
         secilen = None
-        for deneme in (terim, terimler[0]):
+        for deneme in (terim, terim + " painting", terimler[0]):
             try:
                 for g in ara(deneme):
                     if g["baslik"] in kullanilan:
                         continue
                     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as t:
                         t.write(iste(g["kucuk"], 90))
-                    if yazi_var(t.name):
+                    if yazi_var(t.name) or not ilgili_mi(t.name, KONU, terim):
                         os.unlink(t.name)
                         continue
                     secilen = (g, t.name)

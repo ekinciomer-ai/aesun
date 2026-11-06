@@ -20,8 +20,8 @@ echo "NOT: terimler: $(echo "$TERIM" | tr '\n' ';')"
 # 3) Commons görselleri
 IS=$(date +%Y%m%d_%H%M%S); G=$R/storage/local_videos/$IS
 mapfile -t TL <<< "$TERIM"
-python3 $M/commons_gorsel.py "$G" "${TL[@]}" 2> /tmp/commons_uyari.txt | sed 's/^/NOT: görseller: /'
-grep -c uyarı /tmp/commons_uyari.txt | sed 's/^/NOT: bulunamayan terim: /'
+GEMINI_KEY="$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null)" KONU="$KONU" python3 $M/commons_gorsel.py "$G" "${TL[@]}" 2> /tmp/commons_uyari.txt | sed 's/^/NOT: görseller: /'
+grep -v "^$" /tmp/commons_uyari.txt | sort | uniq -c | head -5 | sed "s/^/NOT: uyarı: /"; grep -c uyarı /tmp/commons_uyari.txt | sed 's/^/NOT: bulunamayan terim: /'
 N=$(ls $G/*.png 2>/dev/null | wc -l); [ "$N" -ge 3 ] || { echo "NOT: HATA yeterli görsel yok ($N)"; exit 1; }
 # 4) Video (yerel görseller, sırayla)
 GOVDE=$(KONU="$KONU" METIN="$METIN" DIL="$DIL" SES="$SES" IS="$IS" python3 -c '

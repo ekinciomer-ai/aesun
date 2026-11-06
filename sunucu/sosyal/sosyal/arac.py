@@ -36,7 +36,36 @@ def araclar_durumu():
         return {}
 
 
-def is_olustur(icerik: dict, tur: str, ses: str = "", terimler=None, konu_en: str = ""):
+STIL_ON = ("2D cartoon illustration, vivid bright colors, clean bold outlines, expressive friendly characters, "
+           "historically accurate clothing and setting for the era, vertical composition")
+STIL_SON = "No text, no letters, no logos, no watermark."
+CIZGI = re.compile(r"çizgi|animasyon|cartoon|anime|illüstrasyon|illustrasyon|çizim|karikatür|2d", re.I)
+
+
+def otomatik_stil(icerik: dict) -> str:
+    return "cizgi" if CIZGI.search(f"{icerik.get('konu', '')} {icerik.get('format', '')}") else "tarihi"
+
+
+def sahne_istemleri(icerik_metni: str):
+    """'## Sahneler' bölümündeki İngilizce görsel istemlerini ayıklar (stil önekleri sonra eklenir)."""
+    b = denetim.bolumler(icerik_metni)
+    sahne = next((v for k, v in b.items() if "sahne" in k or "scene" in k), "")
+    l = []
+    for satir in sahne.splitlines():
+        m = re.search(r"(?:görsel istemi|ingilizce istem|image prompt|prompt|istem)\s*\**\s*[:：]\s*\**\s*(.+)", satir, re.I)
+        if m:
+            t = re.sub(r"[*_`]", "", m.group(1)).strip().strip('"')
+            t = re.sub(r"\s*no text,? no letters.*$", "", t, flags=re.I).strip(" .")
+            if len(t) > 15:
+                l.append(t)
+    return l
+
+
+def cizim_istemi(sahne: str) -> str:
+    return f"{STIL_ON}. {sahne}. {STIL_SON}"
+
+
+def is_olustur(icerik: dict, tur: str, ses: str = "", terimler=None, konu_en: str = "", stil: str = "", istemler=None):
     if tur not in ("ses", "video"):
         raise ValueError("İş türü ses ya da video olmalı.")
     if icerik.get("dil") not in denetim.DILLER:
@@ -49,6 +78,7 @@ def is_olustur(icerik: dict, tur: str, ses: str = "", terimler=None, konu_en: st
     iid = f"{time.strftime('%Y%m%d%H%M%S')}_{secrets.token_hex(3)}"
     j = {"id": iid, "tur": tur, "icerik_id": icerik["id"], "dil": icerik["dil"], "konu": icerik["konu"],
          "metin": metin, "ses": ses, "terimler": list(terimler or [])[:12], "konu_en": konu_en,
+         "stil": stil if stil in ("cizgi", "tarihi") else "tarihi", "istemler": list(istemler or [])[:12],
          "zaman": datetime.now(timezone.utc).isoformat(timespec="seconds")}
     hedef = kok() / "bekleyen" / f"{iid}.json"
     gecici = hedef.with_suffix(".tmp")
@@ -81,7 +111,7 @@ def isler(limit=30):
 
 
 def _ozet(j):
-    return {k: j.get(k) for k in ("id", "tur", "icerik_id", "dil", "konu", "ses", "zaman")}
+    return {k: j.get(k) for k in ("id", "tur", "icerik_id", "dil", "konu", "ses", "zaman", "stil")}
 
 
 def iptal(iid: str) -> bool:

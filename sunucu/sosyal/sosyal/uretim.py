@@ -313,12 +313,28 @@ class Studyo:
         return {"ozet": ozet, "ogrenilen": ogrenilen, "silinen_mesaj": silinen, "arsiv_gun": ayarlar.arsiv_gun()}
 
     # ---- tampon araçları (ses, video taslağı)
-    def arac_isi(self, iid, tur, ses=""):
+    def arac_isi(self, iid, tur, ses="", stil=""):
         ic = self.h.icerik(iid)
         if not ic:
             raise UretimHatasi("İçerik bulunamadı.")
-        terimler, konu_en = [], ""
-        if tur == "video":
+        terimler, konu_en, istemler = [], "", []
+        stil = stil if stil in ("cizgi", "tarihi") else arac.otomatik_stil(ic)
+        if tur == "video" and stil == "cizgi":
+            istemler = arac.sahne_istemleri(ic["metin"])
+            if len(istemler) < 3:
+                try:
+                    _, c = self._cagir("fikir", "GÖREV: ÇİZİM İSTEMİ\nKısa bir dikey video için sahne sahne çizim tarifi yaz. "
+                                       "Her 1-2 cümleye bir sahne, 6-10 sahne. İngilizce, her biri 20-40 kelime: kim, ne yapıyor, "
+                                       "dönem ve mekân, kıyafet, renkler. Yazı/harf/logo isteme. YALNIZ JSON liste döndür.",
+                                       f"KONU: {ic['konu']}\nMETİN:\n{arac.seslendirme_metni(ic['metin'])}", sicaklik=0.4)
+                    m = re.search(r"\[.*\]", c, re.S)
+                    istemler = [str(x) for x in json.loads(m.group(0))] if m else []
+                except (UretimHatasi, json.JSONDecodeError):
+                    istemler = []
+            if len(istemler) < 3:
+                raise UretimHatasi("Çizim için sahne tarifi çıkarılamadı; içerikte '## Sahneler' bölümü olmalı.")
+            istemler = [arac.cizim_istemi(x) for x in istemler]
+        elif tur == "video":
             metin = arac.seslendirme_metni(ic["metin"])
             sahne = denetim.bolumler(ic["metin"]).get("sahneler", "")
             try:
@@ -342,10 +358,10 @@ class Studyo:
                 terimler = []
             terimler = terimler or [ic["konu"]]
         try:
-            j = arac.is_olustur(ic, tur, ses, terimler, konu_en)
+            j = arac.is_olustur(ic, tur, ses, terimler, konu_en, stil, istemler)
         except ValueError as e:
             raise UretimHatasi(str(e)) from None
-        self.h.gunluk("arac_isi", f"{tur} · içerik #{iid} · {ic['konu']} · iş {j['id']}")
+        self.h.gunluk("arac_isi", f"{tur}{' · ' + stil if tur == 'video' else ''} · içerik #{iid} · {ic['konu']} · iş {j['id']}")
         return j
 
     def hafiza_disa_aktar(self):

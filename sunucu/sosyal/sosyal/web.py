@@ -181,7 +181,7 @@ def create_app(studyo=None):
     @app.post("/api/icerik/<int:iid>/arac")
     def icerik_arac(iid):
         d = j()
-        return jsonify(st.arac_isi(iid, str(d.get("tur", "")), str(d.get("ses", ""))))
+        return jsonify(st.arac_isi(iid, str(d.get("tur", "")), str(d.get("ses", "")), str(d.get("stil", ""))))
 
     @app.get("/api/isler")
     def isler():

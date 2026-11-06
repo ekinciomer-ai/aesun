@@ -101,3 +101,40 @@ def test_tekrar_engeli_iptal_ve_ayri_siralar(st, tmp_path, monkeypatch):
     assert arac.iptal(v["id"]) and not arac.iptal(v["id"])
     assert (tmp_path / "kuyruk" / "iptal" / f"{v['id']}.json").exists()   # silinmedi, arşivde
     assert not arac.iptal(sj["id"])        # başlamış iş iptal edilemez
+
+
+def test_cizgi_film_stili(st):
+    from sosyal import arac
+    m = "## Sahneler\n1. **00:00** | Ne görünüyor: x. İngilizce görsel istemi: A Victorian lady in a big crinoline dress in a park. No text, no letters, no logos, no watermark\n" \
+        "2. Görsel istemi: **A 1920s flapper girl dancing in a jazz club**\n3. prompt: A modern girl in front of a mirror choosing clothes"
+    l = arac.sahne_istemleri(m)
+    assert len(l) == 3 and l[1] == "A 1920s flapper girl dancing in a jazz club" and "No text" not in l[0]
+    assert arac.otomatik_stil({"konu": "elbise kombinleri çizgi film tadında"}) == "cizgi"
+    assert arac.otomatik_stil({"konu": "Napolyon"}) == "tarihi"
+    ic = st.h.icerikler()[0]
+    j = st.arac_isi(ic["id"], "video", stil="cizgi")   # deneme içeriğinde istem yok → yapay zekâ tarif yazar
+    assert j["stil"] == "cizgi" and len(j["istemler"]) == 3
+    assert all(x.startswith("2D cartoon") and x.endswith("no watermark.") for x in j["istemler"])
+
+
+def test_isci_ciz(tmp_path, monkeypatch):
+    import base64
+    import isci
+    monkeypatch.setattr(isci, "kasa", lambda ad: "anahtar")
+    cagri = []
+
+    def sahte_cf(yol, govde=None, anahtar=""):
+        cagri.append(yol)
+        if yol == "accounts":
+            return {"result": [{"id": "hesap1"}]}
+        if "kotu" in govde["prompt"]:
+            return {"success": False, "errors": [{"message": "NSFW"}]}
+        return {"result": {"image": base64.b64encode(b"jpg").decode()}}
+    monkeypatch.setattr(isci, "_cf", sahte_cf)
+    monkeypatch.setattr(isci, "dikey", lambda k, h, e="": Path(h).write_bytes(b"png"))
+    g = isci.ciz({"istemler": ["a cat", "kotu istem", "a dog"]}, tmp_path / "g")
+    assert g == {"evet": 2, "hayir": 0, "hata": 1, "ilk_hata": "NSFW"}
+    assert sorted(p.name for p in (tmp_path / "g").glob("g*.png")) == ["g01.png", "g03.png"]
+    assert "@cf/black-forest-labs/flux-1-schnell" in cagri[1]
+    k = json.loads((tmp_path / "g" / "kaynaklar.json").read_text())
+    assert k[0]["lisans"].startswith("Apache 2.0")

@@ -15,6 +15,7 @@ import fcntl
 import glob
 import json
 import os
+import urllib.error
 import shutil
 import subprocess
 import sys
@@ -101,9 +102,67 @@ def kasa(ad):
         return ""
 
 
+CF_MODEL = "@cf/black-forest-labs/flux-1-schnell"   # Apache 2.0: üretilen görsel ticari kullanılabilir
+YZ_ETIKET = "Temsili illüstrasyon (yapay zekâ)"
+YAZI_TIPI = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+
+
+def _cf(yol, govde=None, anahtar=""):
+    r = urllib.request.Request("https://api.cloudflare.com/client/v4/" + yol, method="POST" if govde else "GET",
+                               data=json.dumps(govde).encode() if govde else None,
+                               headers={"Authorization": "Bearer " + anahtar, "Content-Type": "application/json",
+                                        "User-Agent": "SosyalStudyo/1.0"})
+    try:
+        return json.load(urllib.request.urlopen(r, timeout=120))
+    except urllib.error.HTTPError as e:
+        try:
+            return json.loads(e.read())
+        except Exception:
+            return {"success": False, "errors": [{"message": f"HTTP {e.code}"}]}
+
+
+def dikey(kaynak, hedef, etiket=""):
+    """Bulanık arka plan + ortada görsel (altyazı bölgesi boş); istenirse sağ alta YZ etiketi."""
+    f = ("[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.06:saturation=1.3[a];"
+         "[0:v]scale=1040:1400:force_original_aspect_ratio=decrease[b];[a][b]overlay=(W-w)/2:(H-h)/2-140")
+    if etiket and os.path.exists(YAZI_TIPI):
+        f += (f",drawtext=fontfile={YAZI_TIPI}:text='{etiket}':fontsize=26:fontcolor=white@0.85:"
+              "box=1:boxcolor=black@0.35:boxborderw=8:x=w-tw-28:y=h-th-40")
+    calis(["ffmpeg", "-v", "error", "-y", "-i", str(kaynak), "-filter_complex", f, "-frames:v", "1", str(hedef)], sure=120)
+
+
+def ciz(j, gorsel: Path):
+    """Sahne istemlerini Cloudflare Workers AI (FLUX.1 schnell) ile çizer → g01.png… ve kaynaklar.json."""
+    import base64
+    anahtar = kasa("cloudflare_ai_anahtari")
+    if not anahtar:
+        raise RuntimeError("Çizim için kasada cloudflare_ai_anahtari yok (portal → Kasa).")
+    hesap = (_cf("accounts", anahtar=anahtar).get("result") or [{}])[0].get("id")
+    if not hesap:
+        raise RuntimeError("Cloudflare hesabı görünmüyor; anahtarın Workers AI yetkisi olmalı.")
+    gorsel.mkdir(parents=True, exist_ok=True)
+    kaynaklar, hatalar = [], []
+    for n, istem in enumerate([x for x in j.get("istemler", []) if x][:12], 1):
+        d = _cf(f"accounts/{hesap}/ai/run/{CF_MODEL}", {"prompt": istem[:2000], "steps": 6}, anahtar)
+        resim = (d.get("result") or {}).get("image")
+        if not resim:
+            hatalar.append(str((d.get("errors") or [{}])[0].get("message", "?"))[:120])
+            continue
+        ham = gorsel / f"ham{n:02d}.jpg"
+        ham.write_bytes(base64.b64decode(resim))
+        dikey(ham, gorsel / f"g{n:02d}.png", YZ_ETIKET)
+        ham.unlink()
+        kaynaklar.append({"dosya": f"g{n:02d}.png", "istem": istem, "kaynak": f"Cloudflare Workers AI {CF_MODEL}",
+                          "lisans": "Apache 2.0 (FLUX.1 schnell), yapay zekâ ile üretildi"})
+    (gorsel / "kaynaklar.json").write_text(json.dumps(kaynaklar, ensure_ascii=False, indent=1), encoding="utf-8")
+    return {"evet": len(kaynaklar), "hayir": 0, "hata": len(hatalar), "ilk_hata": hatalar[0] if hatalar else ""}
+
+
 def video_uret(j, klasor: Path):
     is_ad = "sosyal_" + j["id"]
     gorsel = MPT_REPO / "storage" / "local_videos" / is_ad
+    if j.get("stil") == "cizgi":
+        return _video_bitir(j, klasor, gorsel, ciz(j, gorsel), cizim=True)
     terimler = [t for t in j.get("terimler", []) if t][:12] or [j["konu"]]
     anahtar = kasa("gemini_api_key")
     if not anahtar:
@@ -115,9 +174,15 @@ def video_uret(j, klasor: Path):
         kontrol = json.loads(cikti.strip().splitlines()[-1])
     except (ValueError, IndexError):
         kontrol = {}
+    return _video_bitir(j, klasor, gorsel, kontrol.get("gemini", {}))
+
+
+def _video_bitir(j, klasor, gorsel, g, cizim=False):
+    is_ad = gorsel.name
     resimler = sorted(glob.glob(str(gorsel / "g*.png")))
+    if cizim and len(resimler) < 3:
+        raise RuntimeError(f"Yeterli çizim üretilemedi ({len(resimler)}). {g.get('ilk_hata', '')}")
     if len(resimler) < 3:
-        g = kontrol.get("gemini", {})
         raise RuntimeError(f"Konuya uyan yeterli görsel bulunamadı ({len(resimler)} uygun; {g.get('hayir', 0)} görsel "
                            f"sahneye uymadığı için elendi). Konu Wikimedia'daki tarihî görsellerle anlatılamıyor olabilir.")
     mat = [{"provider": "local", "url": f"/MoneyPrinterTurbo/storage/local_videos/{is_ad}/{Path(x).name}"}
@@ -152,11 +217,13 @@ def video_uret(j, klasor: Path):
     if not kalite.get("gecti"):
         (klasor / "video.mp4").unlink(missing_ok=True)  # kapıdan geçmeyen video saklanmaz, gösterilmez
         dosyalar = ["kaynaklar.json"]
-    g = kontrol.get("gemini", {})
-    return {"dosyalar": dosyalar, "kalite": kalite, "mpt_gorev": gorev, "gorsel_kontrol": g,
-            "gorsel_ozet": f"{len(resimler)} görsel seçildi · {g.get('evet', 0) + g.get('hayir', 0)} aday kontrol edildi, "
-                           f"{g.get('hayir', 0)} uymadığı için elendi",
-            "lisans": f"Ses: Microsoft Edge ({govde['voice_name']}), görseller: Wikimedia Commons (kaynaklar.json)"}
+    ozet = (f"{len(resimler)} sahne yapay zekâyla çizildi (FLUX.1 schnell)" if cizim else
+            f"{len(resimler)} görsel seçildi · {g.get('evet', 0) + g.get('hayir', 0)} aday kontrol edildi, "
+            f"{g.get('hayir', 0)} uymadığı için elendi")
+    return {"dosyalar": dosyalar, "kalite": kalite, "mpt_gorev": gorev, "gorsel_kontrol": g, "gorsel_ozet": ozet,
+            "lisans": f"Ses: Microsoft Edge ({govde['voice_name']}), görseller: " +
+                      ("yapay zekâ çizimi, FLUX.1 schnell (Apache 2.0); görsellerde 'Temsili illüstrasyon (yapay zekâ)' etiketi"
+                       if cizim else "Wikimedia Commons (kaynaklar.json)")}
 
 
 def araclar():
@@ -170,6 +237,7 @@ def araclar():
     return {"zaman": zaman(),
             "piper": imaj(SES_IMAJ), "chatterbox": imaj(SES_IMAJ), "mpt": mpt,
             "commons": os.path.exists(COMMONS), "kalite": os.path.exists(KALITE),
+            "cizim": bool(kasa("cloudflare_ai_anahtari")),
             "ffmpeg": shutil.which("ffmpeg") is not None}
 
 

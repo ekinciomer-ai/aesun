@@ -226,6 +226,8 @@ class Deneme(Motor):
             return "- Kanca ilk 3 saniyede daha net olabilir.\n- Rakamlar kaynakla tekrar kontrol edilmeli."
         if sistem.startswith("GÖREV: FİKİR"):
             return "1. Az bilinen açı: deneme fikri A\n2. Şaşırtıcı rakamla açılış: deneme fikri B"
+        if sistem.startswith("GÖREV: ÇİZİM İSTEMİ"):
+            return '["A Victorian lady in a crinoline dress walking in a London park", "A 1920s flapper dancing in a jazz club", "A modern teenager choosing an outfit in front of a mirror"]'
         if sistem.startswith("GÖREV: GÖRSEL ARAMA"):
             return '{"konu_en": "Napoleon and his dog", "terimler": ["Napoleon portrait painting 1796", "Josephine de Beauharnais portrait painting", "Malmaison castle engraving"]}'
         if sistem.startswith("GÖREV: ARAŞTIRMA"):

@@ -249,7 +249,7 @@ function isHtml(x){const k=x.kalite||{};let d;
   const oy=(x.dosyalar||[]).map(f=>f==="video.mp4"?`<video controls preload="none" style="width:100%;max-width:270px;display:block;margin-top:8px" src="api/is/${x.id}/video.mp4"></video><a class="soluk" href="api/is/${x.id}/video.mp4" download>Videoyu indir</a>`:
     f==="ses.mp3"?`<audio controls preload="none" style="width:100%;margin-top:8px" src="api/is/${x.id}/ses.mp3"></audio><a class="soluk" href="api/is/${x.id}/ses.mp3" download>Sesi indir</a>`:
     `<a class="soluk" href="api/is/${x.id}/${f}" target="_blank" style="margin-left:10px">Görsel kaynakları</a>`).join(" ");
-  return `<div class="is"><b>${x.tur==="video"?"Video taslağı":"Ses dosyası"}</b> <span class="soluk">· ${saat(x.zaman)}</span><div>${d}</div>
+  return `<div class="is"><b>${x.tur==="video"?(x.stil==="cizgi"?"Video taslağı · çizgi film":"Video taslağı · tarihî görseller"):"Ses dosyası"}</b> <span class="soluk">· ${saat(x.zaman)}</span><div>${d}</div>
     ${x.mesaj?`<div class="not engel">${esc(x.mesaj)}</div>`:""}${(k.engel||[]).map(e=>`<div class="not engel">${esc(e)}</div>`).join("")}
     ${x.durum==="bitti"?(k.uyari||[]).map(e=>`<div class="not uyari">${esc(e)}</div>`).join(""):""}
     ${x.gorsel_ozet?`<div class="soluk">${esc(x.gorsel_ozet)}</div>`:""}
@@ -267,8 +267,11 @@ async function icerikYukle(){
     <div class="eylem"><b>Ses dosyası yap</b><span class="soluk">Metni seslendirip mp3 yapar. Piper yaklaşık 1 dk, Chatterbox 5–10 dk sürer.</span>
       <div class="dugmeler"><select id="ses${x.id}" style="width:auto">${x.dil==="tr"?'<option value="piper">Piper sesi (Türkçe, ücretsiz lisans)</option>':""}<option value="chatterbox">Chatterbox sesi (TR/EN/ES)</option></select>
       <button class="ana" ${suruyor("ses")?"disabled":""} onclick="aracIs(${x.id},'ses',this)">${suruyor("ses")?"Hazırlanıyor…":"Sese çevir"}</button></div></div>
-    <div class="eylem"><b>Video taslağı yap</b><span class="soluk">Wikimedia'dan lisansı serbest görseller bulur, sesi ve altyazıyı ekleyip dikey video yapar. 5–15 dk sürer; kalite kontrolünden geçmezse gösterilmez.</span>
-      <div class="dugmeler"><button class="ana" ${suruyor("video")?"disabled":""} onclick="aracIs(${x.id},'video',this)">${suruyor("video")?"Hazırlanıyor…":"Video taslağı yap"}</button></div></div>
+    <div class="eylem"><b>Video taslağı yap</b><span class="soluk">Görselleri hazırlar, sesi ve altyazıyı ekleyip dikey video yapar. 5–15 dk sürer; kalite kontrolünden geçmezse gösterilmez.</span>
+      <div class="dugmeler"><select id="stil${x.id}" style="width:auto">
+        <option value="cizgi" ${/çizgi|animasyon|cartoon|anime|illüstrasyon|çizim|karikatür|2d/i.test(x.konu+" "+(x.format||""))?"selected":""}>Çizgi film (yapay zekâ çizer)</option>
+        <option value="tarihi" ${/çizgi|animasyon|cartoon|anime|illüstrasyon|çizim|karikatür|2d/i.test(x.konu+" "+(x.format||""))?"":"selected"}>Tarihî görseller (Wikimedia)</option></select>
+      <button class="ana" ${suruyor("video")?"disabled":""} onclick="aracIs(${x.id},'video',this)">${suruyor("video")?"Hazırlanıyor…":"Video taslağı yap"}</button></div></div>
     ${isler.map(isHtml).join("")}</div>`}).join("")||'<div class="kart"><p class="soluk">Henüz onaylanmış içerik yok. Üret sekmesinde bir içerik üretip "İçeriği onayla ve kaydet" deyin.</p></div>';
   clearTimeout(_yenile);
   if(_isler.some(j=>j.durum==="bekliyor"||j.durum==="isleniyor")&&!$("s-icerik").classList.contains("gizli"))_yenile=setTimeout(icerikYukle,10000);
@@ -279,9 +282,9 @@ async function isIptal(id,dugme){
 }
 async function aracIs(id,tur,dugme){
   if(dugme){dugme.disabled=true;dugme.textContent="Sıraya alınıyor…"}
-  try{await post(`api/icerik/${id}/arac`,{tur,ses:($("ses"+id)||{}).value||""});await icerikYukle()}catch(e){alert(e.message);if(dugme)dugme.disabled=false}
+  try{await post(`api/icerik/${id}/arac`,{tur,ses:($("ses"+id)||{}).value||"",stil:($("stil"+id)||{}).value||""});await icerikYukle()}catch(e){alert(e.message);if(dugme)dugme.disabled=false}
 }
-const AD={piper:"Piper ses",chatterbox:"Chatterbox ses",mpt:"Video yapıcı (MoneyPrinterTurbo)",commons:"Wikimedia görsel",kalite:"Kalite kontrolü",ffmpeg:"ffmpeg"};
+const AD={piper:"Piper ses",chatterbox:"Chatterbox ses",mpt:"Video yapıcı (MoneyPrinterTurbo)",commons:"Wikimedia görsel",cizim:"Çizim (Cloudflare)",kalite:"Kalite kontrolü",ffmpeg:"ffmpeg"};
 function aracSatir(a){return Object.keys(AD).map(k=>`${AD[k]} ${a[k]?"✓":"✗ çalışmıyor"}`).join(" · ")}
 async function kaynakListe(){
   const l=await api("api/kaynaklar");

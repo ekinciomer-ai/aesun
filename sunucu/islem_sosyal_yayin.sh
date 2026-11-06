@@ -12,8 +12,13 @@ DNS=$(getent hosts $AD | awk '{print $1}' | head -1)
 if [ -z "$DNS" ]; then
   CF=$(/opt/aesun/kasa_coz.sh cloudflare_dns_anahtari 2>/dev/null) || { echo "NOT: HATA $AD DNS kaydı yok ve kasada cloudflare_dns_anahtari yok; portal → Kasa'dan girilmeli."; exit 1; }
   CF="$CF" IP="$BEN" AD="$AD" python3 - <<'PY' || exit 1
-import json, os, urllib.request
-t, ip, ad = os.environ["CF"], os.environ["IP"], os.environ["AD"]
+import json, os, urllib.request, urllib.error
+import re as _re
+def _anahtar(ham):
+    """Kasaya bütün curl komutu yapıştırıldıysa içinden 'Bearer <anahtar>' kısmı alınır."""
+    m = _re.search(r"Bearer\s+([A-Za-z0-9_\-]{30,})", ham)
+    return m.group(1) if m else ham.strip().strip('"').strip("'")
+t, ip, ad = _anahtar(os.environ["CF"]), os.environ["IP"], os.environ["AD"]
 kok = ".".join(ad.split(".")[-2:])
 def iste(yol, govde=None):
     r = urllib.request.Request("https://api.cloudflare.com/client/v4/" + yol, method="POST" if govde else "GET",

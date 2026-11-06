@@ -3,8 +3,13 @@
 CF=$(/opt/aesun/kasa_coz.sh cloudflare_dns_anahtari 2>/dev/null) || { echo "NOT: kasada cloudflare_dns_anahtari yok"; exit 0; }
 CF="$CF" python3 - <<'PY'
 import json, os, urllib.request, urllib.error
-t = os.environ["CF"]
-print(f"NOT: anahtar uzunluğu {len(t)} · boşluk/satır sonu {'VAR' if t != t.strip() or chr(10) in t else 'yok'}")
+import re as _re
+def _anahtar(ham):
+    """Kasaya bütün curl komutu yapıştırıldıysa içinden 'Bearer <anahtar>' kısmı alınır."""
+    m = _re.search(r"Bearer\s+([A-Za-z0-9_\-]{30,})", ham)
+    return m.group(1) if m else ham.strip().strip('"').strip("'")
+ham = os.environ["CF"]; t = _anahtar(ham)
+print(f"NOT: kasadaki değer {len(ham)} karakter · komut içinden ayıklandı: {'evet' if t != ham.strip() else 'hayır'} · anahtar {len(t)} karakter")
 def iste(yol):
     r = urllib.request.Request("https://api.cloudflare.com/client/v4/" + yol, headers={"Authorization": "Bearer " + t.strip()})
     try:

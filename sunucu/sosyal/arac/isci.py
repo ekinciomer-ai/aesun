@@ -19,7 +19,13 @@ import subprocess
 import sys
 import time
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
+
+
+def zaman():
+    """Saat dilimiyle (UTC) ISO zaman; ekran Türkiye saatine çevirir."""
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 KUYRUK = Path(os.getenv("SOSYAL_KUYRUK_HOST", "/opt/sosyal/kuyruk"))
 SES_KOK = Path("/opt/tampon/ses")
@@ -138,7 +144,7 @@ def araclar():
         mpt = urllib.request.urlopen("http://127.0.0.1:8180/docs", timeout=5).status == 200
     except Exception:
         mpt = False
-    return {"zaman": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    return {"zaman": zaman(),
             "piper": imaj(SES_IMAJ), "chatterbox": imaj(SES_IMAJ), "mpt": mpt,
             "commons": os.path.exists(COMMONS), "kalite": os.path.exists(KALITE),
             "ffmpeg": shutil.which("ffmpeg") is not None}
@@ -168,7 +174,7 @@ def bir_tur():
             continue
         klasor = KUYRUK / "cikti" / j["id"]
         klasor.mkdir(parents=True, exist_ok=True)
-        yaz(klasor / "durum.json", {"durum": "isleniyor", "basla": time.strftime("%Y-%m-%dT%H:%M:%S")})
+        yaz(klasor / "durum.json", {"durum": "isleniyor", "basla": zaman()})
         dosya.replace(klasor / "is.json")  # iş kaybolmaz, çıktının yanında saklanır
         t = time.time()
         try:

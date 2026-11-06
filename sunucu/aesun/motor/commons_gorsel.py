@@ -67,7 +67,7 @@ def ilgili_mi(yol, konu, terim):
         b = json.dumps({"contents": [{"parts": [{"text": soru}, {"inline_data": {"mime_type": "image/jpeg", "data": resim}}]}]}).encode()
         import time
         son = None
-        for model, bekle in (("gemini-3.5-flash", 0), ("gemini-3.5-flash", 8), ("gemini-flash-lite-latest", 4), ("gemini-flash-lite-latest", 15)):
+        for model, bekle in (("gemini-flash-lite-latest", 0), ("gemini-flash-lite-latest", 10), ("gemini-3.5-flash", 2), ("gemini-flash-lite-latest", 30)):
             time.sleep(bekle)
             try:
                 r = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",

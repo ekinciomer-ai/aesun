@@ -146,9 +146,11 @@ class Hafiza:
         sql = ", ".join(f"{k}=?" for k in izinli)
         self._calis(f"UPDATE yetenekler SET {sql}, guncelleme=? WHERE id=?", (*izinli.values(), simdi(), yid))
 
-    def ilgili_yetenekler(self, platform, metin, limit=15, say=False):
-        """Tercih ve yasaklar hep gelir; teknikler platform ve konuyla örtüşmeye göre seçilir."""
-        hepsi = self.yetenekler(sadece_aktif=True)
+    def ilgili_yetenekler(self, platform, metin, limit=15, say=False, dil=""):
+        """Tercih ve yasaklar hep gelir; teknikler platform ve konuyla örtüşmeye göre seçilir.
+        Adı [TR]/[EN]/[ES] ile başlayan kayıt yalnız o dilin sohbetlerine girer."""
+        hepsi = [y for y in self.yetenekler(sadece_aktif=True)
+                 if not (dil and re.match(r"\[(TR|EN|ES)\]", y["ad"]) and not y["ad"].upper().startswith(f"[{dil.upper()}]"))]
         sabit = [y for y in hepsi if y["tur"] in ("tercih", "yasak")]
         k = _kelimeler(metin + " " + platform)
 

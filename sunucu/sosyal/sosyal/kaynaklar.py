@@ -7,6 +7,16 @@ from . import ayarlar
 
 SABIT = re.compile(r"kural|yasak|telif|güvenlik|guvenlik|kesin|motto|metin|kararlaştır|konu seçimi", re.I)
 BUTCE = 16000  # bağlama girecek kaynak metni üst sınırı (karakter)
+HEDEF = "hedef_kitle.md"  # her üretimde: "Ortak" bölümü + seçilen dilin bölümü tam olarak (bütçe dışı)
+
+
+def hedef_kitle(dil: str) -> str:
+    yol = ayarlar.kaynak_dizin() / HEDEF
+    if not yol.exists():
+        return ""
+    s = [b["metin"] for b in bolumler(yol) if b["baslik"].lower().startswith("ortak") or b["baslik"].upper() == dil.upper()]
+    giris = next((b["metin"] for b in bolumler(yol) if b["baslik"] == b["ust"]), "")
+    return "\n\n".join([giris, *s]).strip()
 
 
 def dosyalar():
@@ -35,7 +45,7 @@ def bolumler(yol: Path):
 
 
 def baglam(konu: str, butce: int = BUTCE) -> str:
-    hepsi = [b for p in dosyalar() for b in bolumler(p)]
+    hepsi = [b for p in dosyalar() if p.name != HEDEF for b in bolumler(p)]
     if not hepsi:
         return ""
     k = {w for w in re.findall(r"\w+", konu.lower()) if len(w) > 2}

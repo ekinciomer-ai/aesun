@@ -170,6 +170,8 @@ class Deneme(Motor):
         konu = k.group(1)[:80] if k else "Deneme konusu"
         return (f"## Başlık\n{konu} #shorts\n\n## İlk kare\n{konu.upper()}\n\n## Metin\n"
                 "Deneme metni. Bu metin deneme motorundan geldi.\n\n## Sahneler\n1. Açılış sahnesi\n\n"
+                "## Hedef kitle uyumu\nDeneme: Türkiye, Öğretmenler Günü bağı.\n\n## Görsel ve video\nWikimedia (CC0).\n\n"
+                "## Ses ve müzik\nPiper fahrettin; müzik CC0 kamu malı kayıt.\n\n"
                 "## Açıklama\nDeneme açıklaması. Temsili illüstrasyon (yapay zekâ).\n\n## Etiketler\n#tarih #shorts\n\n"
                 "## Kaynaklar\n- (doğrulanacak)")
 

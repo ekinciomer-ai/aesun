@@ -18,7 +18,12 @@ PLATFORMLAR = {
                  "kural": "Profesyonel ton, ilk iki satır kanca, en çok 3 etiket."},
     "facebook": {"ad": "Facebook", "karakter": 5000, "kelime": (30, 400), "kural": "Sohbet tonunda, soru ile biter."},
 }
-DILLER = {"tr": "Türkçe", "en": "İngilizce", "es": "İspanyolca"}
+DILLER = {"tr": "Türkçe · Türkiye", "en": "İngilizce · ABD, İngiltere, genel", "es": "İspanyolca · İspanya, Latin Amerika"}
+SIYASET = re.compile(r"\b(seçim|milletvekili|cumhurbaşkan|başbakan|AK ?Parti|CHP|MHP|DEM Parti|İYİ Parti|muhalefet|iktidar|"
+                     r"election|Democrat|Republican|Trump|Biden|Harris|Labour|Tory|Tories|Brexit|"
+                     r"elecciones|PSOE|Partido Popular|Vox|Podemos|Sánchez|Milei|Sheinbaum|Maduro|independentismo)\b", re.I)
+MUZIK_LISANS = re.compile(r"cc0|kamu mal|public domain|dominio público|ses kitaplığı|audio library|musopen|lisanslı|telifsiz|"
+                          r"royalty.free|kendi (ürettiğimiz|üretimimiz)|müzik yok|müziksiz|no music|sin música", re.I)
 TELIF = re.compile(r"\b(logo|arma|amblem|maç görüntüsü|mac goruntusu|ajans fotoğraf|basın fotoğraf|"
                    r"match footage|club crest|press photo|watermark)\b", re.I)
 YZ = re.compile(r"yapay zek|\bYZ\b|\bAI\b|sentetik|synthetic|inteligencia artificial|\bIA\b", re.I)
@@ -44,7 +49,7 @@ def _bul(b, *adlar):
     return ""
 
 
-def denetle(metin: str, platform: str) -> dict:
+def denetle(metin: str, platform: str, dil: str = "tr") -> dict:
     kural = PLATFORMLAR.get(platform, {})
     b = bolumler(metin)
     engel, uyari = [], []
@@ -79,6 +84,26 @@ def denetle(metin: str, platform: str) -> dict:
         uyari.append("Kaynaklar eksik ya da doğrulanmamış: her tarih ve rakam ikinci kez kontrol edilmeli.")
     elif not re.search(r"https?://", kaynak):
         uyari.append("Kaynaklarda adres yok: 'doğrulandı' yazısı tek başına yeterli değil, yayından önce kontrol edin.")
+    video_mu = platform in ("youtube_shorts", "youtube_uzun", "tiktok", "instagram_reels")
+    if not _bul(b, "hedef kitle", "kitle uyumu", "target audience", "público"):
+        uyari.append("'Hedef kitle uyumu' bölümü yok: içeriğin hangi ülkenin değerine, gündemine, sporuna ya da özel gününe bağlandığı yazılmalı.")
+    if video_mu:
+        ses_muzik = _bul(b, "ses ve müzik", "müzik", "music", "música")
+        if not ses_muzik:
+            uyari.append("'Ses ve müzik' bölümü yok: ses tonu ve lisanslı müzik seçimi yazılmalı.")
+        elif not MUZIK_LISANS.search(ses_muzik):
+            uyari.append("Müziğin lisansı belirtilmemiş (CC0/kamu malı kayıt, YouTube Ses Kitaplığı ya da kendi üretimimiz olmalı).")
+        if not _bul(b, "görsel ve video", "görsel", "visual"):
+            uyari.append("'Görsel ve video' bölümü yok: görsel kaynağı/lisansı ve YZ etiketi yazılmalı.")
+    if SIYASET.search(govde + " " + baslik):
+        uyari.append("Siyasi ad ya da terim geçiyor: taraf tutmadan, ayrıntıya girmeden; mümkünse çıkarın.")
+    saat = _bul(b, "yayın saati", "yayin saati", "publish")
+    from . import takvim
+    import datetime as _dt
+    for g in takvim.yayin_yok_gunleri(dil, _dt.date.today().year) + takvim.yayin_yok_gunleri(dil, _dt.date.today().year + 1):
+        aylar = ["ocak", "şubat", "mart", "nisan", "mayıs", "haziran", "temmuz", "ağustos", "eylül", "ekim", "kasım", "aralık"]
+        if re.search(rf"\b{g.day}\s*{aylar[g.month - 1]}|\b{g.day:02d}[./]{g.month:02d}\b", saat, re.I):
+            engel.append(f"Önerilen yayın günü ({g.day} {aylar[g.month - 1]}) yayın yapılmayan gün.")
     if TELIF.search(sahne + " " + govde) and not re.search(r"no logos?|logo yok|logosuz", sahne, re.I):
         uyari.append("Görsel tarifinde telif riski olabilecek öğe (logo/arma/maç/ajans fotoğrafı) geçiyor.")
     if sahne and re.search(r"prompt|istem", sahne, re.I) and not re.search(r"no text", sahne, re.I):

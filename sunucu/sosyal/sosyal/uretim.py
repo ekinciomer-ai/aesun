@@ -4,12 +4,16 @@ import json
 import re
 from concurrent.futures import ThreadPoolExecutor
 
-from . import arac, ayarlar, denetim, kaynaklar, motorlar
+from . import arac, ayarlar, denetim, kaynaklar, motorlar, takvim
 from .hafiza import Hafiza
 
 KIMLIK = ("Sen bir sosyal medya içerik stüdyosunun ekibindesin. Birden çok yapay zekâ birlikte çalışıyor; "
           "her biri bir görevi üstlenir. Kullanıcının kaynak dosyalarındaki kurallar ve hafızadaki "
-          "tercih/yasaklar her şeyin üstündedir. Doğrulanmamış bilgi kesin bilgi gibi yazılmaz.")
+          "tercih/yasaklar her şeyin üstündedir. Doğrulanmamış bilgi kesin bilgi gibi yazılmaz.\n"
+          "ASLA ATLANMAZ: İçerik seçilen dilin ülkesindeki insana yazılır (TR → Türkiye; EN → ABD, İngiltere ve genel; "
+          "ES → İspanya ve Latin Amerika). Konu, kanca, örnek, mizah; o kitlenin değerleri, siyasi hassasiyetleri, gündemi, "
+          "sporu, izleme alışkanlıkları, kültürü, etkileşim tarzı ve özel günleri; fotoğraf, video, ses ve müzik seçimi "
+          "HEDEF KİTLE bölümüne göre yapılır. Çeviri yapılmaz, uyarlama yapılır.")
 
 CIKTI_VIDEO = """Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm '## ' ile başlar):
 ## Başlık
@@ -17,8 +21,14 @@ CIKTI_VIDEO = """Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm 
 (ekranda ilk saniyede görünen BÜYÜK HARF kanca yazısı)
 ## Metin
 (seslendirme metni; kısa, düz cümleler)
+## Hedef kitle uyumu
+(hangi ülke/kitle; hangi değere, gündeme, spora, kültüre ya da özel güne nasıl bağlandı; siyasi hassasiyet kontrolü; neden bu kitle izler)
 ## Sahneler
 (numaralı; her sahne: süre, ne görünüyor, kamera/hareket ve İngilizce görsel istemi. İstemler 'No text, no letters, no logos, no watermark' ile biter)
+## Görsel ve video
+(her görselin kaynağı: Wikimedia (lisans) ya da YZ illüstrasyonu (etiketli); dönem doğruluğu; stok video lisansı; renk ve stil)
+## Ses ve müzik
+(anlatıcı sesi ve tonu; müziğin havası bu kitleye göre; müziğin kaynağı ve lisansı: CC0/kamu malı kayıt, YouTube Ses Kitaplığı ya da kendi üretimimiz)
 ## Açıklama
 (yapay zekâ/klon ses notu dahil)
 ## Etiketler
@@ -32,6 +42,8 @@ CIKTI_METIN = """Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm 
 ## Başlık
 ## Metin
 (gönderinin kendisi)
+## Hedef kitle uyumu
+(hangi ülke/kitle; hangi değere, gündeme, spora, kültüre ya da özel güne bağlandı; siyasi hassasiyet kontrolü)
 ## Görsel
 (görsel/kart önerisi ve İngilizce görsel istemi, 'No text, no letters, no logos, no watermark' ile biter)
 ## Etiketler
@@ -81,9 +93,9 @@ class Studyo:
         raise UretimHatasi(f"'{rol}' görevi için çalışan motor yok. " + " | ".join(hatalar))
 
     # ---- bağlam: her yeni sohbet buradan başlar (kaynak MD + hafıza)
-    def baglam(self, o, say=False):
+    def baglam(self, o, say=False, kisa=False):
         konu_metni = f"{o['format']} {o['konu']} {o['platform']}"
-        yet = self.h.ilgili_yetenekler(o["platform"], konu_metni, say=say)
+        yet = self.h.ilgili_yetenekler(o["platform"], konu_metni, say=say, dil=o["dil"])
         bas = {"yasak": "YASAK", "tercih": "TERCİH", "yetenek": "YETENEK"}
         satir = [f"- [{bas[y['tur']]}] {y['ad']}: {y['aciklama']}" + (f" (örnek: {y['ornek']})" if y["ornek"] else "")
                  for y in yet]
@@ -93,7 +105,11 @@ class Studyo:
                  f"PLATFORM: {kural.get('ad', o['platform'])}. {kural.get('kural', '')}",
                  f"DİL: {denetim.DILLER.get(o['dil'], o['dil'])}. Başka dile çeviri değil, o ülkenin açısıyla uyarlama yap.",
                  f"FORMAT: {o['format'] or 'serbest'}"]
-        kb = kaynaklar.baglam(konu_metni)
+        hk = kaynaklar.hedef_kitle(o["dil"])
+        if hk:
+            parca.append("HEDEF KİTLE (bağlayıcı, her maddeye uy):\n" + hk)
+        parca.append(f"ÖZEL GÜNLER (önümüzdeki 3 hafta, {denetim.DILLER.get(o['dil'], o['dil'])}):\n" + takvim.metin(o["dil"]))
+        kb = kaynaklar.baglam(konu_metni, 5000 if kisa else kaynaklar.BUTCE)
         if kb:
             parca.append("KULLANICININ KAYNAK DOSYALARI (bağlayıcı):\n" + kb)
         if satir:
@@ -102,8 +118,8 @@ class Studyo:
             parca.append("SON İÇERİKLER (aynı konuyu/açıyı tekrar etme):\n" + "\n".join(son))
         return "\n\n".join(parca)
 
-    def _sistem(self, gorev, o, ek=""):
-        return f"GÖREV: {gorev}\n{ek}\n\n{self.baglam(o)}"
+    def _sistem(self, gorev, o, ek="", kisa=False):
+        return f"GÖREV: {gorev}\n{ek}\n\n{self.baglam(o, kisa=kisa)}"
 
     def _cikti(self, o):
         return CIKTI_VIDEO if o["platform"] in ("youtube_shorts", "youtube_uzun", "tiktok", "instagram_reels") \
@@ -136,15 +152,19 @@ class Studyo:
         if arastir and self._hazir("arastirma"):
             try:
                 ad, arastirma = self._cagir(
-                    "arastirma", self._sistem("ARAŞTIRMA", o, "Konu hakkında az bilinen, doğrulanmış bilgileri "
-                                              "maddeler halinde çıkar. Her maddeye kaynak adresi ekle. Tartışmalı "
-                                              "olanları ayrıca işaretle."), istek, sicaklik=0.2, ara=True)
+                    "arastirma", self._sistem("ARAŞTIRMA", o, "1) Konu hakkında az bilinen, doğrulanmış bilgileri "
+                                              "maddeler halinde çıkar; her maddeye kaynak adresi ekle, tartışmalı olanları "
+                                              "işaretle. 2) Hedef kitlenin ülkesinde BU HAFTA konuşulan ve konuya bağlanabilecek "
+                                              "gündemi (spor, kültür, ekonomi, bilim, eğlence; siyasi taraf tutmadan) tarih ve "
+                                              "kaynakla yaz. Bulamazsan 'gündem bağı yok' de, uydurma.", kisa=True),
+                    istek, sicaklik=0.2, ara=True)
                 self.h.mesaj_ekle(oid, "yz", "arastirma", ad, arastirma)
             except UretimHatasi as e:
                 self.h.mesaj_ekle(oid, "sistem", "uyari", "", str(e))
         # 2. fikir: hazır motorlar aynı anda
         fikir_sis = self._sistem("FİKİR", o, "3 farklı açı öner. Her biri: kanca cümlesi (ilk 3 saniye), "
-                                 "neden dikkat çeker, tersine çevrilen bilinen bilgi. Kısa yaz.")
+                                 "neden dikkat çeker, tersine çevrilen bilinen bilgi, hedef kitlenin hangi değerine/"
+                                 "gündemine/özel gününe bağlandığı. Kısa yaz.", kisa=True)
         fikir_mesaj = istek + ("\n\nARAŞTIRMA NOTLARI:\n" + arastirma if arastirma else "")
         fikirciler = self._hazir("fikir")[:3]
         fikirler = []
@@ -166,9 +186,12 @@ class Studyo:
         try:
             el_ad, elestiri = self._cagir(
                 "elestirmen", self._sistem("ELEŞTİRMEN", o, "Taslağı kaynak dosyalardaki kurallara, hafızadaki "
-                                           "tercih/yasaklara ve platform kurallarına göre denetle. Yanlış ya da "
-                                           "kaynaksız iddiaları, zayıf kancayı, telif riskini madde madde yaz. "
-                                           "Yalnız düzeltme listesi ver."), taslak, haric=(yazar,), sicaklik=0.3)
+                                           "tercih/yasaklara ve platform kurallarına göre denetle. Ayrıca HEDEF KİTLE'ye "
+                                           "göre denetle: bu ülkenin insanına mı yazılmış (yoksa çeviri gibi mi), değerler ve "
+                                           "siyasi hassasiyet, gündem/spor/kültür bağı, özel gün, etkileşim sorusu, izleme "
+                                           "saati; fotoğraf, video, ses ve müzik seçimi ve lisansları. Yanlış ya da kaynaksız "
+                                           "iddiaları, zayıf kancayı, telif riskini madde madde yaz. Yalnız düzeltme listesi "
+                                           "ver.", kisa=True), taslak, haric=(yazar,), sicaklik=0.3)
             self.h.mesaj_ekle(oid, "yz", "elestiri", el_ad, elestiri)
             # 5. düzeltme
             _, son = self._cagir("yazar", self._sistem("YAZAR", o),
@@ -213,7 +236,7 @@ class Studyo:
         son = self.h.son_mesaj(oid, "son")
         if not son:
             raise UretimHatasi("Onaylanacak içerik yok.")
-        d = denetim.denetle(son["icerik"], o["platform"])
+        d = denetim.denetle(son["icerik"], o["platform"], o["dil"])
         if not d["gecti"]:
             raise UretimHatasi("Denetimden geçmedi: " + "; ".join(d["engel"]))
         kullanilan = sorted({m["motor"] for m in self.h.mesajlar(oid) if m["motor"]})
@@ -241,6 +264,8 @@ class Studyo:
                   've nasıl uygulanır","ornek":"kısa örnek","platform":"' + o["platform"] + ' ya da hepsi"}]}\n'
                   "Kurallar: Kullanıcının düzeltmeleri ve istekleri 'tercih' ya da 'yasak'tır. İşe yarayan kanca, yapı, "
                   "ton kalıpları 'yetenek'tir. Yalnız bu sohbete özgü ayrıntıyı (tek bir konunun bilgisi) yazma. "
+                  "Bir ders yalnız bir ülkeye/dile özgüyse (değer, gündem, spor, kültür, özel gün, müzik havası, yayın saati) "
+                  f"adının başına [{o['dil'].upper()}] yaz; her dile uyan ders öneksiz yazılır. "
                   "En çok 8 madde. Şifre, anahtar, kişisel veri yazma.\nMEVCUT KAYITLAR (aynısını ekleme, "
                   f"gerekirse aynı adla güncelle): {mevcut or '-'}")
         ogrenilen, ozet = [], ""
@@ -308,4 +333,4 @@ class Studyo:
         son = next((m for m in reversed(msj) if m["asama"] == "son"), None)
         return {"oturum": o, "mesajlar": msj, "son": son["icerik"] if son else "",
                 "son_motor": son["motor"] if son else "",
-                "denetim": denetim.denetle(son["icerik"], o["platform"]) if son else None}
+                "denetim": denetim.denetle(son["icerik"], o["platform"], o["dil"]) if son else None}

@@ -54,7 +54,7 @@ Bir motor hata verirse sıradaki denenir.
 
 GitHub Actions → "Sunucu işlemi (ns1)" → işlem: `sosyal_kur`. Betik önce yedek alır, kasadaki anahtarları
 `/opt/sosyal/anahtar.env`'e yazar, kapsayıcıyı kurar, sağlık kontrolü yapar; başarısızsa geri alır.
-Adres: **https://sosyal.aksarayenerji.net** (parola kasada `sosyal_parola`; giriş 30 gün hatırlanır,
+Adres: **https://sosyal.cutkoda.com** (eski sosyal.aksarayenerji.net buraya yönlenir) (parola kasada `sosyal_parola`; giriş 30 gün hatırlanır,
 15 dakikada 5 yanlış denemede bekletir). Yayın `islem_sosyal_yayin` ile yapıldı: ck-caddy ek dosyası
 `/opt/cutkoda/caddy-ek/sosyal.caddy`. Parola kasada yoksa program dışarıya hiç açılmaz.
 

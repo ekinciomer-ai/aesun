@@ -182,6 +182,13 @@ def video_uret(j, klasor: Path):
     return _video_bitir(j, klasor, gorsel, kontrol.get("gemini", {}))
 
 
+def sahne_suresi(metin, adet):
+    """Her görsel ekranda (tahmini ses süresi / görsel sayısı) kadar kalır: görseller tekrar dönmez, sırayla bir kez görünür.
+    Edge sesi Türkçe/İspanyolca/İngilizce'de saniyede yaklaşık 2,3 kelime okur."""
+    sure = len(re.findall(r"\w+", metin)) / 2.3 + 1.5
+    return max(3, min(12, round(sure / max(1, adet))))
+
+
 def _video_bitir(j, klasor, gorsel, g, cizim=False):
     is_ad = gorsel.name
     resimler = sorted(glob.glob(str(gorsel / "g*.png")))
@@ -196,7 +203,7 @@ def _video_bitir(j, klasor, gorsel, g, cizim=False):
              "video_concat_mode": "sequential", "image_motion": "zoom", "video_language": j.get("dil", "tr"),
              "video_aspect": "9:16", "voice_name": EDGE_SES.get(j.get("dil"), EDGE_SES["tr"]), "bgm_type": "",
              "subtitle_enabled": True, "font_name": "BeVietnamPro-Bold.ttf", "font_size": 58, "stroke_width": 2.5,
-             "video_clip_duration": 4, "video_count": 1, "n_threads": 2}
+             "video_clip_duration": sahne_suresi(j["metin"], len(resimler)), "video_count": 1, "n_threads": 2}
     gorev = (_post("videos", govde).get("data") or {}).get("task_id")
     if not gorev:
         raise RuntimeError("MoneyPrinterTurbo görevi başlatmadı.")

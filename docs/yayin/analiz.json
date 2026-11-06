@@ -3,12 +3,12 @@
   "karar": "DURDUR (yeni planlama)",
   "izlenme_7g": 33,
   "yayinda": 13,
-  "okuma": "2026-11-06 12:19",
+  "okuma": "2026-11-06 23:57",
   "sebep": "Hesap 7 günde 33 izlenme, 13 yayında video → TikTok 'Senin İçin' dağıtımı yok (uyarı/kısıtlama bildirimi yok, videolar herkese açık). Bu boşluğa 3/gün göndermek hesabın 'etkileşimsiz' geçmişini büyütür.",
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-06T22:21+03:00",
+ "olusturma": "2026-11-07T00:02+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -76,7 +76,7 @@
    "karar": "ARTIR",
    "neden": "videoların %67'i tuttu (eşik 128 izlenme / 48 sa)",
    "olculen": 3,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 902,
    "tutma_orani": 67,
    "izlenme_yuzde": 70,
@@ -148,7 +148,7 @@
    "karar": "ARTIR",
    "neden": "videoların %100'i tuttu (eşik 447 izlenme / 48 sa)",
    "olculen": 3,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 1589,
    "tutma_orani": 100,
    "izlenme_yuzde": 67,
@@ -216,8 +216,8 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 128,
-  "Antik Stüdyo": 447
+  "Antik Stüdyo": 447,
+  "Ancient Studio": 128
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -280,6 +280,14 @@
   },
   {
    "tur": "KONTROL",
+   "kanal": "Ancient Studio",
+   "platform": "YouTube",
+   "vid": "Lcvm_LATwkc",
+   "baslik": "The man in The Scream isn't screaming 😱",
+   "neden": "2026-11-06 21:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
    "kanal": "Antik Stüdyo",
    "platform": "YouTube",
    "vid": "iYo-p0Znk5c",
@@ -296,11 +304,27 @@
   },
   {
    "tur": "KONTROL",
+   "kanal": "Ancient Studio",
+   "platform": "YouTube",
+   "vid": "BFSPqHA2tTI",
+   "baslik": "Why Roman women rubbed GLADIATOR SWEAT on their faces! ⚔️🏺 #shorts #history #fyp",
+   "neden": "2026-11-06 21:30 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
    "kanal": "Antik Stüdyo",
    "platform": "YouTube",
    "vid": "",
    "baslik": "[Taslak Plan #5] Zengin Görünmek İçin Dişlerini Kömürle Simsiyaha Boyayanlar! 🦷 (1590 Tudor & Japonya Ohaguro)",
    "neden": "2026-11-06 20:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "",
+   "baslik": "[Taslak Plan] Karadeniz'in Kilidi Kırım: Gedik Ahmed Paşa'nın 1475 Kefe Seferi",
+   "neden": "2026-11-06 20:30 planlıydı, hâlâ yayında görünmüyor"
   },
   {
    "tur": "KONTROL",
@@ -348,7 +372,7 @@
   }
  ],
  "bulgular": [
-  "Dün (2026-11-05) 5875 izlenme geldi; bir önceki gün 1250.",
+  "Dün (2026-11-06) 4518 izlenme geldi; bir önceki gün 5875.",
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 128 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 447 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 128 izlenme / 48 sa).",

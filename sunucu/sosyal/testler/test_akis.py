@@ -104,3 +104,11 @@ def test_gemini_yedek_model(monkeypatch):
         return "tamam"
     monkeypatch.setattr(g, "_yaz", sahte)
     assert g.yaz("s", "m") == "tamam" and denenen == [g.model, "gemini-flash-lite-latest"]
+
+
+def test_adressiz_kaynak_uyarilir():
+    from sosyal.denetim import denetle
+    d = denetle("## Metin\nkısa metin\n## Kaynaklar\n- Biyografiler (Doğrulandı)", "facebook")
+    assert any("adres yok" in u for u in d["uyari"])
+    d = denetle("## Metin\nkısa metin\n## Kaynaklar\n- https://bbc.com/x", "facebook")
+    assert not any("adres" in u for u in d["uyari"])

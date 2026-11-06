@@ -23,7 +23,7 @@ CIKTI_VIDEO = """Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm 
 (yapay zekâ/klon ses notu dahil)
 ## Etiketler
 ## Kaynaklar
-(her iddia için kaynak; emin olunmayanı '(doğrulanacak)' diye işaretle)
+(her iddia için kaynak adresi (https://...). Adresi elinde olmayan bilgiyi '(doğrulanacak)' diye işaretle; adres göstermeden 'doğrulandı' yazma)
 ## Yayın saati önerisi
 ## Doğrulanacaklar
 (yayından önce ikinci kez kontrol edilmesi gereken tarih ve rakamlar)"""
@@ -36,6 +36,7 @@ CIKTI_METIN = """Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm 
 (görsel/kart önerisi ve İngilizce görsel istemi, 'No text, no letters, no logos, no watermark' ile biter)
 ## Etiketler
 ## Kaynaklar
+(adresiyle; adres yoksa '(doğrulanacak)', asla adressiz 'doğrulandı' yazma)
 ## Doğrulanacaklar"""
 
 

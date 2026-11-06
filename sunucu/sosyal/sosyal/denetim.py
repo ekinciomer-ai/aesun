@@ -77,6 +77,8 @@ def denetle(metin: str, platform: str) -> dict:
         uyari.append("Açıklamada yapay zekâ/sentetik içerik notu yok.")
     if not kaynak.strip() or re.search(r"doğrulanacak|dogrulanacak|kontrol et|\?\?", kaynak, re.I):
         uyari.append("Kaynaklar eksik ya da doğrulanmamış: her tarih ve rakam ikinci kez kontrol edilmeli.")
+    elif not re.search(r"https?://", kaynak):
+        uyari.append("Kaynaklarda adres yok: 'doğrulandı' yazısı tek başına yeterli değil, yayından önce kontrol edin.")
     if TELIF.search(sahne + " " + govde) and not re.search(r"no logos?|logo yok|logosuz", sahne, re.I):
         uyari.append("Görsel tarifinde telif riski olabilecek öğe (logo/arma/maç/ajans fotoğrafı) geçiyor.")
     if sahne and re.search(r"prompt|istem", sahne, re.I) and not re.search(r"no text", sahne, re.I):

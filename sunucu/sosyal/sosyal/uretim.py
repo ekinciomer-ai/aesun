@@ -38,6 +38,26 @@ CIKTI_VIDEO = """Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm 
 ## Doğrulanacaklar
 (yayından önce ikinci kez kontrol edilmesi gereken tarih ve rakamlar)"""
 
+CIKTI_ANIMASYON = """Bu bir KODLA ÇİZİLEN ANİMASYON videosu. Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm '## ' ile başlar):
+## Başlık
+## Format
+(kütüphaneden seçilen format ve neden)
+## İlk kare
+## Metin
+(seslendirme: 70-100 kelime, her satır bir cümle grubu; ton yalnız değiştiği yerde [İngilizce etiket];
+ekranda farklı okunan sözcük gösterim|okunuş biçiminde, sayılar yazıyla okunur)
+## Sahne planı
+(tablo: | Satır | Ekranda ne var |; her an tek fikir, görüntü konudan çıkar, sahneler bir nesne üzerinden bağlanır)
+## Karakterler ve mekânlar
+(her karakterin görünüşü: saç, göz, kıyafet; mekânlar; formatın çizim diline uygun)
+## Hedef kitle uyumu
+## Ses ve müzik
+## Açıklama
+(yapay zekâ/klon ses notu dahil)
+## Etiketler
+## Kaynaklar
+## Doğrulanacaklar"""
+
 CIKTI_METIN = """Cevabı tam olarak şu bölümlerle yaz (Markdown, her bölüm '## ' ile başlar):
 ## Başlık
 ## Metin
@@ -74,6 +94,7 @@ class Studyo:
     # ---- motor seçimi
     def durum(self):
         return {"motorlar": [x.bilgi() for x in self.m.values()], "roller": ayarlar.roller(),
+                "animasyon_formatlari": kaynaklar.animasyon_formatlari(),
                 "kaynaklar": kaynaklar.liste(), "sayilar": self.h.sayilar(),
                 "platformlar": [[k, v["ad"]] for k, v in denetim.PLATFORMLAR.items()],
                 "diller": [[k, v] for k, v in denetim.DILLER.items()]}
@@ -126,6 +147,9 @@ class Studyo:
         if hk:
             parca.append("HEDEF KİTLE (bağlayıcı, her maddeye uy):\n" + hk)
         parca.append(f"ÖZEL GÜNLER (önümüzdeki 3 hafta, {denetim.DILLER.get(o['dil'], o['dil'])}):\n" + takvim.metin(o["dil"]))
+        af = kaynaklar.animasyon_formati(o["format"], o["konu"])
+        if af:
+            parca.append("ANİMASYON FORMATI (kütüphane; kalıp, çizim dili ve yazı biçimi birebir uygulanır):\n" + af)
         kb = kaynaklar.baglam(konu_metni, 5000 if kisa else kaynaklar.BUTCE)
         if kb:
             parca.append("KULLANICININ KAYNAK DOSYALARI (bağlayıcı):\n" + kb)
@@ -139,6 +163,8 @@ class Studyo:
         return f"GÖREV: {gorev}\n{ek}\n\n{self.baglam(o, kisa=kisa)}"
 
     def _cikti(self, o):
+        if kaynaklar.animasyon_formati(o["format"], o["konu"]):
+            return CIKTI_ANIMASYON
         return CIKTI_VIDEO if o["platform"] in ("youtube_shorts", "youtube_uzun", "tiktok", "instagram_reels") \
             else CIKTI_METIN
 

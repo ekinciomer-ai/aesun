@@ -8,6 +8,33 @@ from . import ayarlar
 SABIT = re.compile(r"kural|yasak|telif|güvenlik|guvenlik|kesin|motto|metin|kararlaştır|konu seçimi", re.I)
 BUTCE = 16000  # bağlama girecek kaynak metni üst sınırı (karakter)
 HEDEF = "hedef_kitle.md"  # her üretimde: "Ortak" bölümü + seçilen dilin bölümü tam olarak (bütçe dışı)
+ANIM = "animasyon_formatlari.md"  # animasyon format kütüphanesi: seçilen format tam olarak girer (bütçe dışı)
+
+
+def _anim_bolumleri():
+    yol = ayarlar.kaynak_dizin() / ANIM
+    return bolumler(yol) if yol.exists() else []
+
+
+def _sade(s):
+    return re.sub(r"\s*\(.*?\)", "", s).replace("Format:", "").strip().lower()
+
+
+def animasyon_formatlari():
+    """Kütüphanedeki format adları (ekrandaki seçim listesi için)."""
+    return [re.sub(r"\s*\(.*?\)", "", b["baslik"][len("Format:"):]).strip()
+            for b in _anim_bolumleri() if b["baslik"].startswith("Format:")]
+
+
+def animasyon_formati(format_: str, konu: str = ""):
+    """Format bir animasyon formatıysa (ya da konu animasyon istiyorsa) ilgili bölümleri döndürür; değilse ''."""
+    f = (format_ or "").lower()
+    eslesen = [b for b in _anim_bolumleri() if b["baslik"].startswith("Format:") and _sade(b["baslik"]) in f]
+    istendi = eslesen or "animasyon" in f or "animasyon" in (konu or "").lower()
+    if not istendi:
+        return ""
+    ortak = [b for b in _anim_bolumleri() if b["baslik"] in ("Format seçimi", "Üretim paketi")]
+    return "\n\n".join(b["metin"] for b in eslesen + ortak)
 
 
 def hedef_kitle(dil: str) -> str:
@@ -45,7 +72,7 @@ def bolumler(yol: Path):
 
 
 def baglam(konu: str, butce: int = BUTCE) -> str:
-    hepsi = [b for p in dosyalar() if p.name != HEDEF for b in bolumler(p)]
+    hepsi = [b for p in dosyalar() if p.name not in (HEDEF, ANIM) for b in bolumler(p)]
     if not hepsi:
         return ""
     k = {w for w in re.findall(r"\w+", konu.lower()) if len(w) > 2}

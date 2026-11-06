@@ -20,3 +20,13 @@ Cevap aynı bölüm başlıklarıyla (## Başlık, ## Metin, …) yazılır ve p
 ## Sohbetin sonunda
 Öğrenilen kalıcı ders (kullanıcının düzeltmesi, işe yarayan kalıp) programda "Sohbeti bitir ve öğren" ile
 ya da Hafıza → "Elle kayıt ekle" ile kaydedilir. Sohbet metni saklanmaz.
+
+## Animasyon videoları (kodla çizilen)
+- Format kütüphanesi: `sunucu/sosyal/kaynak/animasyon_formatlari.md` (kalıp, çizim dili, renk kodları, yazı biçimi, ne zaman seçilir).
+  Örnek videolar ve kare panoları: `icerik/animasyon_formatlari/<kod>/`. Yöntem: `sunucu/sosyal/kaynak/Claude_Animasyon_Sistemi.md`.
+- İstenen konuya göre tablodan format seç; uymuyorsa mevcut formatlardan yenisini türet ve kütüphaneye "(türetilmiş)" diye ekle.
+- Sıra: metin (70–100 kelime) → `sunucu/sosyal/animasyon/public/<ad>/metin.txt` + `SES_ISI` → `sosyal_anim_ses` işlemi (ElevenLabs,
+  kelime zamanları) → `src/<ad>/Video.tsx` (şablon: aynı formattaki önceki video) → yarım boy önizleme + 48 karelik pano, en az iki
+  düzeltme turu → 300 karelik parçalarla tam boy, ses sonda eklenir → kalite kapısı → kullanıcıya gönder.
+- Render bu ortamda: `--browser-executable=/opt/pw-browsers/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell`,
+  `--concurrency=2 --timeout=120000`; uzun tek parça işleme takılıyor, parçalı işle.

@@ -31,6 +31,10 @@ kalıcı hafızaya yazar, sohbetin kendisini siler. Yeni sohbet hafızayı ve ka
      Kapıdan geçmeyen video saklanmaz ve gösterilmez; görsel kaynakları `kaynaklar.json`'da durur.
    Program kapsayıcısı araçlara doğrudan erişmez, yalnız kuyruğa iş yazar ve sonucu okur.
 
+8. **Animasyon formatları**: Format kutusunda "Animasyon · …" seçilince kütüphanedeki format
+   (`kaynak/animasyon_formatlari.md`) bağlama girer ve yazar animasyon üretim paketini (ses satırları, sahne planı,
+   karakterler) yazar. Kodla çizim ve işleme Claude Code ile yapılır (`animasyon/`, örnekler `icerik/animasyon_formatlari/`).
+
 Hafızanın okunur hali `veri/HAFIZA.md` dosyasına ve `/api/hafiza.md` adresine yazılır. Başka bir yapay zekâ
 (ör. Claude sohbeti) yeni işe bunu okuyarak başlayabilir.
 

@@ -176,6 +176,7 @@ function mesgul(v){$("bekle").classList.toggle("gizli",!v);document.querySelecto
 async function ilkYukle(){
   try{durumVeri=await api("api/durum")}catch(e){return}
   $("platform").innerHTML=durumVeri.platformlar.map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
+  (durumVeri.animasyon_formatlari||[]).forEach(f=>{const o=document.createElement("option");o.value="Animasyon · "+f;$("formatlar").appendChild(o)});
   $("dil").innerHTML=durumVeri.diller.map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
   acikYukle();
 }

@@ -8,6 +8,9 @@ Kural: Bir format seçildiğinde o formatın **kalıbı, çizim dili, yazı biç
 mekân ve nesneler konudan çıkar. Aynı format arka arkaya aynı sahne düzeniyle tekrarlanmaz (YouTube tekrarlayan içerik kuralı):
 format sabit, görsel dünya her videoda yeni.
 
+Fikir üretimi: yeni video fikri istendiğinde önce `ai_kisa_video_fikir_kutusu.md` (9 yapı: Y1–Y9, puanlama, haftalık
+karışım) kullanılır; seçilen yapı bu kütüphanedeki uygun formatla (doku/çizim dili) birleştirilir.
+
 ## Format seçimi
 
 | Konu türü | Format |

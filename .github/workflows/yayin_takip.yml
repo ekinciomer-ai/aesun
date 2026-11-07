@@ -38,6 +38,11 @@ jobs:
             else
               echo "::warning::tarama hata verdi, sonraki turda tekrar denenecek"; git checkout -q -- docs/yayin/ 2>/dev/null || true
             fi
+            # Keşif gecikme önleyici: bugün (UTC) tarama yoksa ve saat 03:17 UTC'yi geçtiyse kesif.yml'i bir kez başlat
+            ( bugun=$(date -u +%F); [ "$(date -u +%H%M)" -ge 0317 ] \
+              && [ "$(gh api "repos/${{ github.repository }}/actions/workflows/kesif.yml/runs?created=>=$bugun&per_page=1" --jq .total_count 2>/dev/null)" = "0" ] \
+              && gh api -X POST repos/${{ github.repository }}/actions/workflows/kesif.yml/dispatches -f ref=main \
+              && echo "Keşif taraması başlatıldı (zamanlayıcı gecikmişti)" ) || true
             [ "$DONGU" = "true" ] || break
             [ $(( $(date +%s) + 600 )) -lt $bitis ] || break
             sleep 600

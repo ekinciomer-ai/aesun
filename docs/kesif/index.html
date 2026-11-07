@@ -69,7 +69,23 @@ dialog::backdrop{background:rgba(43,47,53,.45)}
 .dt li b{display:block;font-size:13.5px}
 .dt li span{color:var(--s);font-size:12.5px}
 .dt .git{align-self:flex-start;background:var(--k);color:#fff;text-decoration:none;padding:9px 16px;border-radius:10px;font-weight:600}
-@media(max-width:600px){.sat{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-16px;margin-right:-16px;padding:0 16px}.cip{flex:none}.not{font-size:12px}.ust .gor{order:3}}
+.dsay{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.dsay div{background:var(--y);border:1px solid var(--c);border-radius:12px;padding:10px 12px}
+.dsay b{display:block;font-size:22px;line-height:1.1}.dsay span{font-size:12px;color:var(--s)}
+.dk{background:var(--y);border:1px solid var(--c);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.dk.entegre{box-shadow:inset 3px 0 0 var(--yes)}.dk.tampon_denemede{box-shadow:inset 3px 0 0 var(--mav)}.dk.iade{box-shadow:inset 3px 0 0 var(--s)}
+.dk .bas{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.dk .ad{font-weight:650;word-break:break-word}
+.dk .rz{margin-top:0}.dk a{margin-top:auto}
+.dk .pn{font-size:12px;color:var(--s);white-space:nowrap}
+.dk .fay{background:var(--z);border-radius:10px;padding:8px 10px;font-size:13px}
+.dk a{color:var(--k);font-size:13px;font-weight:600;text-decoration:none;align-self:flex-start}
+.rz .ok{background:#E6F4EC;color:var(--yes)}.rz .bek{background:#E7EFFA;color:var(--mav)}.rz .ret{background:#EEEDEA;color:var(--s)}.rz .hata{background:#FBE7E8;color:var(--kk)}
+.guv{display:flex;flex-direction:column;gap:6px}.guv div{background:var(--y);border:1px solid var(--c);border-left:4px solid var(--tur);border-radius:8px;padding:8px 10px;font-size:13.5px;word-break:break-word}
+.guv b{font-weight:650}.guv span{color:var(--s);font-size:12px}
+details.rap{background:var(--y);border:1px solid var(--c);border-radius:12px;padding:10px 14px}
+details.rap summary{cursor:pointer;font-weight:600}
+.rapm{white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.5;margin-top:10px;color:#3b3f45}
+@media(max-width:600px){.dsay{grid-template-columns:repeat(2,minmax(0,1fr))}.sat{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-16px;margin-right:-16px;padding:0 16px}.cip{flex:none}.not{font-size:12px}.ust .gor{order:3}}
 @media(max-width:760px){.sema{display:none}}
 </style>
 </head>
@@ -78,7 +94,7 @@ dialog::backdrop{background:rgba(43,47,53,.45)}
 <svg class="amb" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2a14 14 0 0 0 0 28z" fill="#D7262E"/><path d="M16 2a14 14 0 0 1 0 28z" fill="#2B2F35"/><path d="M18 6l-7 11h5l-2 9 7-12h-5z" fill="#fff"/></svg>
 <div><h1>Araç Kütüphanesi</h1><div class="alt" id="tarih">Yükleniyor…</div></div>
 <input class="ara" id="ara" type="search" placeholder="Ara: seslendirme, altyazı, güvenlik, solar…" aria-label="Ara">
-<div class="gor" role="group" aria-label="Görünüm"><button id="vSema" aria-pressed="true">Şema</button><button id="vListe" aria-pressed="false">Liste</button></div>
+<div class="gor" role="group" aria-label="Görünüm"><button id="vSema" aria-pressed="true">Şema</button><button id="vListe" aria-pressed="false">Liste</button><button id="vDen" aria-pressed="false">Denenen</button></div>
 </div></header>
 <main>
 <section id="semaBol">
@@ -98,6 +114,16 @@ dialog::backdrop{background:rgba(43,47,53,.45)}
 <div class="ozet" id="ozet"></div>
 <div class="izgara" id="liste"></div>
 <button class="cip daha" id="daha" hidden>Daha fazla göster</button>
+</section>
+<section id="denBol" hidden>
+<div class="not" id="dnot">Yükleniyor…</div>
+<div class="dsay" id="dsay"></div>
+<h2>Önerilen ve denenen araçlar</h2>
+<div class="izgara" id="darac"></div>
+<h2>Güvenlik uyarıları — kurulmayacaklar</h2>
+<div class="guv" id="dguv"></div>
+<h2>Son GDEO raporu</h2>
+<details class="rap" id="drap"><summary>Raporu aç</summary><div class="rapm" id="drapm"></div></details>
 </section>
 </main>
 <dialog id="dlg"><div class="dt" id="dt"></div></dialog>
@@ -167,7 +193,7 @@ function ciz(){
   return `<button class="kart${x.k==='oneri'?' oneri':''}" data-i="${i}"><span class="ad">${esc(x.ad)}</span>
   <span class="acik">${esc(x.a)}</span><span class="rz">${yeniMi(x)?'<span class="yeni">yeni</span>':''}<span>${esc(V.gruplar[x.g])}</span>${lis}${yil}<span>${esc(KAY[x.k])}</span></span></button>`}).join(''):'<div class="bos">Sonuç yok.</div>';
  $('daha').hidden=SON.length<=S.n;
- if(S.q&&S.v==='sema')gorunum('liste');
+ if(S.q&&S.v!=='liste')gorunum('liste');
 }
 function faydalar(x){
  const metin=x.ad+' '+x.a+' '+(x.konu||'')+' '+(x.kat||''), ids=[], notlar=[];
@@ -211,8 +237,32 @@ function sema(){
   <span class="dug">${GRUP_BILGI[g][1].map(i=>{const d=DUG[i],c=KUME[d[0]][1];return `<span class="dg" style="border-color:${c};color:${c}">${esc(d[1])}</span>`}).join('')}</span></button>`).join('');
  $('gkart').onclick=e=>{const b=e.target.closest('.gk');if(b){S.g=b.dataset.g;S.n=60;gorunum('liste');ciz()}};
 }
-function gorunum(v){S.v=v;$('semaBol').hidden=v!=='sema';$('listeBol').hidden=v!=='liste';$('vSema').setAttribute('aria-pressed',v==='sema');$('vListe').setAttribute('aria-pressed',v==='liste');window.scrollTo(0,0)}
-$('vSema').onclick=()=>gorunum('sema');$('vListe').onclick=()=>gorunum('liste');
+function gorunum(v){S.v=v;$('semaBol').hidden=v!=='sema';$('listeBol').hidden=v!=='liste';$('denBol').hidden=v!=='den';$('vSema').setAttribute('aria-pressed',v==='sema');$('vListe').setAttribute('aria-pressed',v==='liste');$('vDen').setAttribute('aria-pressed',v==='den');if(v==='den')denenen();try{history.replaceState(null,'',v==='den'?'#denenen':location.pathname+location.search)}catch(e){}window.scrollTo(0,0)}
+$('vSema').onclick=()=>gorunum('sema');$('vListe').onclick=()=>gorunum('liste');$('vDen').onclick=()=>gorunum('den');
+// ---- Denenen: GDEO önerileri, tampon testleri, kararlar, güvenlik (docs/kesif/denenen.json) ----
+const DUR={entegre:['Sisteme alındı','ok'],tampon_denemede:['Tamponda','bek'],iade:['Geri çevrildi','ret'],degerlendirmede:['Değerlendirmede','bek']};
+let DEN=null;
+function denenen(){if(DEN){denCiz();return}
+ fetch('denenen.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{DEN=d;denCiz()}).catch(()=>{$('dnot').textContent='Denenen araç kaydı henüz oluşmadı.'})}
+function tr(t){if(!t)return'';const[y,a,g]=t.slice(0,10).split('-');return g+'.'+a+'.'+y}
+function denCiz(){const d=DEN,s=d.sayilar||{},c=d.son_calisma||{};
+ $('dnot').textContent='Her gece GDEO GitHub ve web\'de işimize yarayacak araçları arar, puanlar ve yalıtılmış tampon bölgede dener. Son çalışma: '+tr(c.tarih)+' · '+(c.aday??'–')+' aday · '+(c.oneri??'–')+' öneri'+(c.depoya_yazildi===false?' · gece kaydı sonradan işlendi':'')+'. Sayfa '+d.uretildi+' UTC itibarıyla.';
+ $('dsay').innerHTML=[[s.entegre||0,'Sisteme alındı'],[s.tampon_denemede||0,'Tamponda'],[s.iade||0,'Geri çevrildi'],[(d.guvenlik||[]).length,'Güvenlik uyarısı']].map(([n,t])=>`<div><b>${n}</b><span>${t}</span></div>`).join('');
+ const sira={entegre:0,tampon_denemede:1,degerlendirmede:2,iade:3};
+ const A=(d.araclar||[]).slice().sort((a,b)=>(sira[a.durum]??9)-(sira[b.durum]??9)||((b.puan||0)-(a.puan||0)));
+ $('darac').innerHTML=A.length?A.map(a=>{const du=DUR[a.durum]||[a.durum,'bek'],t=a.test;
+  const tst=t?(t.durum==='basarili'?`<span class="ok">✓ test geçti · ${tr(t.tarih)}</span>`:`<span class="hata">✗ test başarısız · ${tr(t.tarih)}</span>`)+(t.guvenlik&&t.guvenlik.length?'<span class="hata">güvenlik bulgusu</span>':''):(a.durum==='tampon_denemede'?'<span>test bekliyor</span>':'');
+  return `<div class="dk ${esc(a.durum)}"><div class="bas"><span class="ad">${esc(a.ad)}</span><span class="pn">puan ${esc(a.puan??'–')}</span></div>
+  <span class="rz"><span class="${du[1]}">${esc(du[0])}</span>${tst}<span>${tr(a.tarih)}</span></span>
+  <div class="acik"><b>Nerede:</b> ${esc(a.hedef||'')}</div>
+  ${a.test_ozeti?`<div class="fay">${esc(a.test_ozeti)}</div>`:(a.fayda?`<div class="acik">${esc(a.fayda)}</div>`:'')}
+  ${a.durum==='iade'&&a.iade_gerekcesi?`<div class="acik"><b>Neden:</b> ${esc(a.iade_gerekcesi)}${a.tekrar_kosulu?' <span class="alt">· Tekrar bakılır: '+esc(a.tekrar_kosulu)+'</span>':''}</div>`:(a.risk?`<div class="alt">Risk: ${esc(a.risk)}</div>`:'')}
+  ${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">Kaynağa git ↗</a>`:''}</div>`}).join(''):'<div class="bos">Henüz öneri yok.</div>';
+ $('dguv').innerHTML=(d.guvenlik||[]).map(g=>`<div>${g.ad?`<b>${esc(g.ad)}</b> — `:''}${esc(g.not)} <span>· ${tr(g.tarih)}</span></div>`).join('')||'<div>Uyarı yok.</div>';
+ const R=d.rapor||{};$('drap').querySelector('summary').textContent=R.tarih?tr(R.tarih)+' raporunu aç'+(R.gecmis&&R.gecmis.length>1?' ('+R.gecmis.length+' günlük kayıt)':''):'Rapor yok';
+ $('drapm').textContent=(R.metin||'').replace(/^#+ /gm,'').replace(/\*\*|`/g,'').replace(/^\|[-| ]+\|$\n?/gm,'').replace(/^\| (.*) \|$/gm,(m,x)=>x.split(' | ').join(' · ')).replace(/^> /gm,'');
+}
+if(location.hash==='#denenen')gorunum('den');
 $('daha').onclick=()=>{S.n+=60;ciz()};
 $('fMit').onclick=()=>{S.mit=!S.mit;ciz()};$('fYeni').onclick=()=>{S.yeni=!S.yeni;ciz()};$('fAnah').onclick=()=>{S.anah=!S.anah;ciz()};
 let zt;$('ara').oninput=e=>{clearTimeout(zt);zt=setTimeout(()=>{S.q=e.target.value.trim().toLocaleLowerCase('tr');S.n=60;ciz()},150)};

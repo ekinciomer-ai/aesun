@@ -1,0 +1,27 @@
+name: Keşif · Denenen araçlar
+# GDEO kayıtları (gdeo/) veya tampon sonuçları (tampon/sonuc/) değişince portal Keşif → "Denenen" verisini
+# (docs/kesif/denenen.json) yeniden üretir ve portala gönderir. Yapay zekâ kullanmaz.
+on:
+  push:
+    branches: [main]
+    paths: ['gdeo/**', 'tampon/sonuc/**', 'docs/kesif/gdeo-rapor.json', 'kesif/denenen_uret.py', '.github/workflows/kesif_denenen.yml']
+  workflow_dispatch:
+permissions: { contents: write, actions: write }
+concurrency: { group: kesif-denenen, cancel-in-progress: false }
+jobs:
+  uret:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Üret, kaydet, portala gönder
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          python3 kesif/denenen_uret.py
+          python3 -m json.tool docs/kesif/denenen.json > /dev/null
+          git config user.name "aesun-kesif"; git config user.email "kesif@aksarayenerji.net"
+          git add docs/kesif/denenen.json
+          git diff --cached --quiet && exit 0
+          git commit -qm "Keşif: denenen araçlar güncellendi $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          gh api -X POST repos/${{ github.repository }}/actions/workflows/cpanel_yukle.yml/dispatches -f ref=main || true

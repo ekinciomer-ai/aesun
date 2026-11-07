@@ -89,7 +89,7 @@ jobs:
     needs: dene
     if: always() && needs.dene.result != 'skipped'
     runs-on: ubuntu-24.04
-    permissions: { contents: write }
+    permissions: { contents: write, actions: write }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -102,3 +102,4 @@ jobs:
           git add tampon/sonuc
           git diff --cached --quiet || git commit -qm "Tampon deneme sonucu $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          GH_TOKEN=${{ github.token }} gh api -X POST repos/${{ github.repository }}/actions/workflows/kesif_denenen.yml/dispatches -f ref=main || true

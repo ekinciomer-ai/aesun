@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   issues: write
+  actions: write
 concurrency: { group: kesif, cancel-in-progress: false }
 jobs:
   tara:
@@ -28,3 +29,4 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -qm "Keşif: $(date +%d.%m.%Y) kütüphane güncellendi"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          GH_TOKEN=${{ github.token }} gh api -X POST repos/${{ github.repository }}/actions/workflows/cpanel_yukle.yml/dispatches -f ref=main || true

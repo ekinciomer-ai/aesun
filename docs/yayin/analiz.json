@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-07T13:07+03:00",
+ "olusturma": "2026-11-07T13:37+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -65,6 +65,7 @@
    },
    "durdurulan": [
     "Tablo Serisi",
+    "Tarihi Magazin",
     "Tarihin Patileri"
    ]
   },
@@ -125,11 +126,11 @@
   {
    "kanal": "Ancient Studio",
    "seri": "Tarihi Magazin",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
-   "erken": 2,
-   "medyan_48sa": 24,
+   "karar": "DURDUR",
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
+   "olculen": 3,
+   "erken": 1,
+   "medyan_48sa": 40,
    "tutma_orani": 0,
    "izlenme_yuzde": 32,
    "en_iyi": {
@@ -241,9 +242,9 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 128,
   "Estudio Antiguo": 50,
-  "Antik Stüdyo": 447
+  "Antik Stüdyo": 447,
+  "Ancient Studio": 128
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -294,8 +295,8 @@
     "medyan": 30
    },
    "21:00": {
-    "n": 5,
-    "medyan": 42
+    "n": 6,
+    "medyan": 41
    }
   }
  },
@@ -315,6 +316,7 @@
   "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 447 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 128 izlenme / 48 sa).",
   "Ancient Studio · Tablo Serisi: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
+  "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 447 izlenme / 48 sa).",
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %83'i tuttu (eşik 447 izlenme / 48 sa).",

@@ -22,6 +22,7 @@ format sabit, görsel dünya her videoda yeni.
 | Tek nesneyle anlatılan şiirsel, sade hikâye; döngü sonlu | Sade Masal Resmi (yapay zekâ video) |
 | Sıcak, büyülü, romantik/merak dolu kış ya da gece hikâyesi; film kalitesi, müzikle anlatım | Kış Masalı Sinema 3B (yapay zekâ video) |
 | Kısa, şiirsel, mutluluk/özgürlük anı (yağmurda dans, ilk kar, bahar); 8–15 sn döngü, müzikli | Suluboya Yağmur (yapay zekâ video) |
+| Tek sahne, tek duygu, nostaljik sakin an; mevsim/özel gün; "tablo canlanıyor" | Canlanan Tablo – Yağlıboya (yapay zekâ video) |
 | Tarihî yolculuk, sefer, göç, rota, savaş hattı (harita üstünde) | Harita Yolculuğu (türetilmiş) |
 | Eskiden ve bugün karşılaştırması | Eskiden / Şimdi (türetilmiş) |
 | İki taraf, iki yöntem, kim kazandı | Sayaç Yarışı (türetilmiş) |
@@ -157,6 +158,21 @@ yayınlanmaz, karakteri kopyalanmaz).
   paper texture, cream paper edges, muted palette with a single red accent, rainy night, glowing street lamps reflected
   on wet cobblestones, smiling full moon with a face. No text." Görselde "Temsili illüstrasyon (yapay zekâ)".
   Tahmini maliyet: 4 ana kare 3,2 + 4×4 sn video ≈ 13 kredi → toplam ≈ 16 kredi.
+
+## Format: Canlanan Tablo – Yağlıboya
+Tam tarif: `yagliboya_canlanan_tablo.md` (Ömer'in verdiği yetenek dosyası; @shoof14 hesabı incelemesi, 7 Kasım 2026).
+**Bu format kodla çizilmez; yapay zekâ görsel + video üretimiyle yapılır.**
+- **Özet:** kalın fırça yağlıboya (impasto, spatula izleri), pastel mavi-krem, sıcak pencere ışığı; tek sahne, tek
+  karakter, tek duygu; 15–35 sn, 9:16; konuşma yok, sakin piyano; yazı yok ya da 3–4 kelime.
+- **En güçlü damar:** impasto yağlıboya + nostaljik kadın + sakin an (pencerede kitap, iskelede şapkalı kadın).
+- **Viral yapı (her 5–10 videoda en az bir):** tablo → kamera geri çekilir, görünmez ressamın dev fırçası sahneye müdahale
+  eder (kar boyar) → karakter fırçayı fark edip ressama bakar (dördüncü duvar) → mevsim değişmiş kapanış + mevsim etiketi.
+- **Görsel istemi iskeleti:** "thick impasto oil painting, visible palette-knife strokes, [karakter] [eylem] at [mekân],
+  soft pastel blue and cream palette, warm window light, nostalgic, vertical 9:16, highly detailed brushwork".
+- **Kurallar:** tanınmış karakter/tablo/film repliği yok, gerçek kişi yüzü yok, müzik telifsiz; yapay zekâ etiketi açık.
+  Karakter bizim (Pumpkin, Lale vb. bu dokuda yeniden çizilir).
+- **Bizim üretim yolu:** Topview (Nano Banana Pro ana kare + Kling 3.0 Turbo 5–8 sn) ya da ücretsiz yol (Cloudflare FLUX
+  ana kare + sunucuda kurgu, hafif yaklaşma/uzaklaşma). 4 kareli viral yapı Topview'da ≈ 3,2 + 4×4–6,4 ≈ 20–29 kredi.
 
 ## Format: Sade Masal Resmi
 Referans: `sade-masal-resmi/referans_shoof14_karahindiba.mp4` (başka üreticinin videosu; yalnız üslup referansı).

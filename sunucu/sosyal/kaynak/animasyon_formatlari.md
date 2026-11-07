@@ -20,6 +20,7 @@ format sabit, görsel dünya her videoda yeni.
 | Bir eşyanın/alışkanlığın yüzyıllar içindeki yolculuğu | Nesnenin Hayatı |
 | Duygusal, masalsı, sözsüz ya da az sözlü kısa hikâye; yüksek görsel kalite | Masal Bebek 3B (yapay zekâ video) |
 | Tek nesneyle anlatılan şiirsel, sade hikâye; döngü sonlu | Sade Masal Resmi (yapay zekâ video) |
+| Sıcak, büyülü, romantik/merak dolu kış ya da gece hikâyesi; film kalitesi, müzikle anlatım | Kış Masalı Sinema 3B (yapay zekâ video) |
 | Tarihî yolculuk, sefer, göç, rota, savaş hattı (harita üstünde) | Harita Yolculuğu (türetilmiş) |
 | Eskiden ve bugün karşılaştırması | Eskiden / Şimdi (türetilmiş) |
 | İki taraf, iki yöntem, kim kazandı | Sayaç Yarışı (türetilmiş) |
@@ -107,6 +108,31 @@ Referans: `masal-bebek-3b/referans_shoof14_semsiyeli_kiz.mp4` (başka üreticini
   exactly the same. No text." Kurgu Remotion `src/bakkal3b` (sahne arası 0,35 sn geçiş, hafif yakınlaşma, tam satır
   altyazı alt bölgede, üstte yapay zekâ etiketi). Ses karışımı: anlatım + kodla üretilen müzik, konuşmada müzik otomatik
   kısılır (sidechain), −16 LUFS. Toplam harcama ≈36 kredi.
+
+## Format: Kış Masalı Sinema 3B
+Referans: `kis-masali-sinema-3b/referans_shoof14_kis_masali.mp4` (başka üreticinin videosu; yalnız üslup referansı,
+yayınlanmaz, karakterleri kopyalanmaz). Karakter kartı: `kis-masali-sinema-3b/karakter_karti.jpg` (Lale, Kerem, Pamuk).
+**Bu format kodla çizilmez; yapay zekâ görsel + video üretimiyle yapılır (ücretli kredi).**
+- **Doku (dokunun tamamı):** büyük stüdyo animasyon filmi görünümü. Yumuşak, ışık geçiren cilt; büyük, parlak, duygulu
+  gözler; hafif abartılı oranlar. Kumaş en önemli doku: çok kalın, el örgüsü burgulu atkı (iri ilmek, uzun püskül, iki renk
+  geçişli), keçe dokulu yün palto, yün kazak; omuzlarda ve saçta kar taneleri. Mekân: mavi saat gecesi, karla örtülü
+  Arnavut kaldırımı, eski taş ve ahşap cepheler, sıcak sarı sokak fenerleri, buğulu vitrinler, antikacı rafları, eski
+  deri kitap, puslu çam ağaçları. Işık: soğuk lacivert gökyüzü + sıcak turuncu fener/vitrin ışığı karşıtlığı, ön planda
+  bulanık ışık noktaları (bokeh), havada süzülen kar. Renk: lacivert, mor-bordo, kahve, kehribar.
+- **Kamera:** sinematik; yakın yüz planları (duygu), omuz üstü, sırttan takip, ayrıntı planı (kitap kabı, el, cep),
+  yumuşak odak kayması, yavaş kaydırma. Bölüm başına 10–16 plan, 60–100 sn.
+- **Anlatım:** genellikle sözsüz; hikâyeyi yüz ifadesi ve müzik taşır (yumuşak piyano/yaylı, büyülü anlarda çan/çelesta).
+  Kalıp: yalnız yürüyüş → merak (vitrin/dükkân) → gizemli nesne → büyülü küçük yaratık → karşılaşma (ikinci karakter,
+  küçük bir ikram: kestane, sıcak salep) → sıcak gülümseme ile kapanış.
+- **Karakterlerimiz (kendi tasarımımız):** **Lale** (17, dalgalı kestane-kızıl saç, kâkül, yeşil göz, çil, hardal bere,
+  krem-kiremit iri örgü atkı, deve tüyü kaban, yeşil kadife pantolon), **Kerem** (19, dağınık koyu kıvırcık saç, kahve göz,
+  lacivert palto, bordo atkı, deri çanta, kestane külahı), **Pamuk** (avuç içi kadar, beyaz, altın uçlu tüylü baykuş
+  yavrusu, kehribar göz; büyülü yardımcı). Her sahnede karakter kartı referans verilir; saç, göz, kıyafet değişmez.
+- **Üretim:** Masal Bebek 3B ile aynı adımlar (karakter kartı → sahne ana kareleri → görselden video → kurgu + müzik).
+  Video istemi kalıbı: "3D animated feature film style. <tek hareket>. Keep <karakter> face, hair and clothes exactly the
+  same. Snow falling, warm lantern bokeh. No text." Görselde "Temsili illüstrasyon (yapay zekâ)", platformda "sentetik
+  içerik" işareti. Müzik telifsiz (kodla üretilir) ya da lisanslı.
+- **Uyarı:** Referans videodaki siyah saçlı kız, genç adam ve mavi kulaklı yaratık başka üreticinindir; benzerleri çizilmez.
 
 ## Format: Sade Masal Resmi
 Referans: `sade-masal-resmi/referans_shoof14_karahindiba.mp4` (başka üreticinin videosu; yalnız üslup referansı).

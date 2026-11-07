@@ -1,0 +1,50 @@
+usage: earshot [-h] [--threads THREADS] <command> ...
+
+Ears for coding agents: describe, match, search, compare, time-align and
+critique sound files you cannot hear.
+
+positional arguments:
+  <command>
+    describe         what does a sound sound like: calibrated tags, AudioSet
+                     labels, measurements
+    match            how well does a sound match a text description
+                     (calibrated z + verdict)
+    rank             rank sound files by how well they match a description
+    find             find the best moments for a description inside a long
+                     recording (sample trims)
+    compare          nearest reference recordings, typicality and feature
+                     differences
+    ab               A/B two sounds (or two trims): closer to a description /
+                     references, differences in words
+    realness         real recording / pro-produced audio vs code-synthesized
+                     sound
+    timeline         listen through a soundtrack / film: events, sections,
+                     loudness, beats, sync
+    sheet            annotated PNG of a soundtrack / film: frames,
+                     spectrogram, events, loudness, sync
+    critique         launch-video sound scorecard against professional
+                     reference films
+    profile          build a launch-sound reference profile from your own
+                     reference films
+    forge            make sounds in code and improve them by listening (recipe
+                     + critic + search)
+    fit              translate a recording into code: fit a model, write a
+                     forge recipe, resynthesis + spectrogram + quality
+                     (analysis by synthesis)
+    sfx              render one sound of the shipped bank by id, aimed at the
+                     picture; audit any sound effect (no models)
+    kit              a film's sound kit: one bank sound per role, rendered to
+                     takes with measured sync points (no models)
+    gallery          one static HTML page of forge results: players,
+                     spectrograms, numbers, recipes
+    measure          objective measurements only (loudness, peaks, envelope,
+                     spectrum; no models)
+    llm              optional audio-LLM critique (Gemini; needs your key +
+                     --yes-upload)
+    mcp              run earshot as an MCP server (stdio) for coding agents
+    doctor           check the install, models and CPU settings
+
+options:
+  -h, --help         show this help message and exit
+  --threads THREADS  CPU threads for torch and BLAS (default: EARSHOT_THREADS
+                     or min(4, cores/2))

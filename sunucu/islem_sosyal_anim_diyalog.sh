@@ -5,7 +5,7 @@
 set -uo pipefail
 AD=${AD:-$(cat /tmp/aesun_paket/sunucu/sosyal/animasyon/DIYALOG_ISI 2>/dev/null || echo tablo_sor)}
 K=/tmp/aesun_paket/sunucu/sosyal/animasyon/public/$AD; H=/opt/sosyal/animasyon/$AD
-mkdir -p $H/parca && cp $K/metin.txt $H/
+mkdir -p $H/parca && cp $K/metin.txt $H/ && { [ -f $K/sesler.json ] && cp $K/sesler.json $H/ || rm -f $H/sesler.json; }
 EL=$(grep '^ELEVENLABS_API_KEY=' /opt/cutkoda/motor.env 2>/dev/null | cut -d= -f2-)
 [ -n "$EL" ] || { echo "NOT: HATA ElevenLabs anahtarı yok"; exit 1; }
 command -v ffmpeg >/dev/null || { echo "NOT: HATA ffmpeg yok"; exit 1; }
@@ -16,6 +16,13 @@ UGUR, SESD = "fSruVisKJEvQqmgx0yZT", "u2ZPme1hNaHzZRbw9S82"
 # rol: (ses, kararlılık, hız). S soru, A esprili anlatım, C ikinci ses; E genç kız, I iç ses, D dede. "P: 1.5" = 1,5 sn sessizlik
 SESLER = {"S": (UGUR, 0.45, 1.0), "A": (UGUR, 0.32, 1.0), "C": (SESD, 0.3, 1.0),
           "E": (SESD, 0.3, 1.05), "I": (SESD, 0.5, 1.0), "D": (UGUR, 0.5, 0.88)}
+# bölüme özel sesler: public/<ad>/sesler.json {"E": ["ses_id", kararlılık, hız], ...} varsa üstüne yazar
+try:
+    for k, v in json.load(open(f"{klasor}/sesler.json", encoding="utf-8")).items():
+        SESLER[k] = tuple(v)
+    print("NOT: bölüm sesleri", ", ".join(SESLER))
+except FileNotFoundError:
+    pass
 BOSLUK = {"S": 0.5, "A": 0.7, "C": 0.75, "E": 0.35, "I": 0.45, "D": 0.5}  # satırdan sonra sessizlik (sn)
 def uret(ses, metin, stab, hiz=1.0):
     for model in ("eleven_v4", "eleven_v3"):

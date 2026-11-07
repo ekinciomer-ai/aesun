@@ -10,14 +10,10 @@ H = {"xi-api-key": os.environ["EL"], "Content-Type": "application/json"}
 def post(yol, govde):
     return json.load(urllib.request.urlopen(urllib.request.Request("https://api.elevenlabs.io" + yol, data=json.dumps(govde).encode(), headers=H), timeout=240))
 EZGI_TARIF = "Young Turkish woman in her early 20s, warm and energetic mid-high pitched voice, fast casual speech, playful and expressive, natural Istanbul Turkish accent, social media vlogger style"
-try:
-    r = post("/v1/text-to-voice", {"voice_name": "Ezgi (3B animasyon)", "voice_description": EZGI_TARIF, "generated_voice_id": "F6KwjrV26xxsXxloQFnC"})
-    print("NOT: EZGI_SES", r.get("voice_id"))
-except urllib.error.HTTPError as e:
-    print("NOT: HATA ezgi kaydedilemedi", e.code, e.read()[:200])
+print("NOT: EZGI_SES F6KwjrV26xxsXxloQFnC (önceden kaydedildi)")
 DEDE_TARIF = "Turkish grandfather in his 80s, warm deep slow voice, slightly raspy and gravelly, calm and few words, gentle hidden humor, natural Turkish accent"
 try:
-    d = post("/v1/text-to-voice/design", {"voice_description": DEDE_TARIF, "text": "Hııı... Haftaya yine gelelim. Sormadın ki. Çay soğumasın, evladım. Ördekler beni tanır.", "model_id": "eleven_ttv_v3", "guidance_scale": 5})
+    d = post("/v1/text-to-voice/design", {"voice_description": DEDE_TARIF, "text": "Hııı... Çay soğumasın, evladım. Haftaya yine gelelim, buraya. Ördekler beni tanır, ben de onları. Sormadın ki. Elli yıl oldu, bu göl hiç değişmedi.", "model_id": "eleven_ttv_v3", "guidance_scale": 5})
     pv = d["previews"]
     for i, p in enumerate(pv, 1):
         print(f"NOT: dede önizleme {i} {p.get('generated_voice_id')}")

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-07T22:03+03:00",
+ "olusturma": "2026-11-07T22:09+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -74,6 +74,18 @@
    "seri_dagilimi": {
     "İnanç & Kültür Tarihi": 1
    },
+   "durdurulan": []
+  },
+  "Kozmos Lab TR": {
+   "gunluk_short_kotasi": 2,
+   "seri_dagilimi": {
+    "Gündem + Tarih": 1
+   },
+   "durdurulan": []
+  },
+  "Kozmos Lab": {
+   "gunluk_short_kotasi": 2,
+   "seri_dagilimi": {},
    "durdurulan": []
   }
  },
@@ -239,12 +251,28 @@
    "tutma_orani": null,
    "izlenme_yuzde": null,
    "en_iyi": null
+  },
+  {
+   "kanal": "Kozmos Lab TR",
+   "seri": "Gündem + Tarih",
+   "karar": "DENE",
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 66,
+   "tutma_orani": 100,
+   "izlenme_yuzde": null,
+   "en_iyi": {
+    "baslik": "Sezar Kleopatra'dan Gece Yarısı 'Saray Boş' Mesajı Alırsa! 📱🐍 #tarih #komedi #shorts",
+    "i48": 66
+   }
   }
  ],
  "esikler": {
   "Antik Stüdyo": 447,
-  "Ancient Studio": 128,
-  "Estudio Antiguo": 50
+  "Kozmos Lab TR": 50,
+  "Estudio Antiguo": 50,
+  "Ancient Studio": 128
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -298,6 +326,12 @@
     "n": 6,
     "medyan": 44
    }
+  },
+  "Kozmos Lab TR": {
+   "15:00": {
+    "n": 1,
+    "medyan": 66
+   }
   }
  },
  "eylemler": [
@@ -338,6 +372,7 @@
   "Dün (2026-11-06) 4518 izlenme geldi; bir önceki gün 5875.",
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 128 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 447 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 1 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 128 izlenme / 48 sa).",
   "Ancient Studio · Tablo Serisi: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",

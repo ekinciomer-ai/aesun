@@ -16,7 +16,7 @@
  {
   "gfad_id": "GFAD-20261106-2",
   "tarih": "2026-11-06",
-  "karar": "tampon_denemede",
+  "karar": "entegre",
   "otomatik": true,
   "test": "1/3",
   "yapilanlar": [],
@@ -24,7 +24,8 @@
   "geri_donus": "gerek yok (canlıya alınmadı)",
   "tampon_sonuc": "07.11 tampon: BAŞARILI, güvenlik bulgusu yok. Celtic TR seslendirmesine bilerek eklenen 3 hatanın 3'ünü buldu: aşırı yüksek ses (−4,9 LUFS, '7,1 dB kıs'), 0:06.02–0:08.50 arası 2,4 sn boşluk, patlama (+0,4 dBTP). Temiz seste: müzik yatağı yok, mono, boğuk, telefon hoparlöründe konuşma netliği zayıf; sesi %81 'yapay zekâ sesi' tanıdı.",
   "notlar": [
-   "2026-11-07: tampon hattında (tampon_dene.yml) gerçek örnekle denendi; sonuç tampon/sonuc/GFAD-20261106-2/"
+   "2026-11-07: tampon hattında (tampon_dene.yml) gerçek örnekle denendi; sonuç tampon/sonuc/GFAD-20261106-2/",
+   "2026-11-07: kullanıcı isteğiyle video skill'lerine yayın öncesi ses kontrolü olarak eklendi."
   ]
  },
  {
@@ -86,5 +87,39 @@
   ],
   "commit": null,
   "geri_donus": "gerek yok (canlıya alınmadı)"
+ },
+ {
+  "gfad_id": "GFAD-20261107-4",
+  "tarih": "2026-11-07",
+  "karar": "entegre",
+  "otomatik": false,
+  "fayda_zarar": {
+   "kazanc": "66 kodla üretilen film görünümü (ağaç baskı, gravür, sessiz film, ukiyo-e, gölge oyunu, uydu brifingi, eski haber filmi); görsel üretim kredisi harcamadan tarih sahneleri.",
+   "risk": "Ekran kartı yok: render yavaş (1 dk video ≈ 10+ dk); ffmpeg 7 gerekir; demo yazı tipleri ayrıca indirilir; Çince ses için Microsoft'a metin gönderen edge-tts KULLANILMAZ."
+  },
+  "tampon_sonuc": "07.11 tampon: kurulum BAŞARILI, güvenlik bulgusu yok. Ağaç baskı, sessiz film ve gravür görünümlerinden 12 kare sorunsuz render edildi (kare başı ~1,4 sn, ekran kartısız). Tam video render'ı 10 dk deneme sınırına takıldı; ilk gerçek işte ölçülecek.",
+  "yapilanlar": [
+   "Tampon testi (tampon/sonuc/video-opuscar*, kesif-motion)",
+   "Skill güncellemesi önerildi: gundem-tarih-video, gercek-goruntulu-belgesel"
+  ],
+  "commit": null,
+  "geri_donus": "Skill'deki ilgili bölüm silinir; sunucuda kurulu kopya kaldırılır."
+ },
+ {
+  "gfad_id": "GFAD-20261107-5",
+  "tarih": "2026-11-07",
+  "karar": "entegre",
+  "otomatik": false,
+  "fayda_zarar": {
+   "kazanc": "Çizime 'canlılık' veren hareket kuralları: ışınlanma yok, küçük genlik, eklem etrafında dönme, faz gecikmeli takip, sahne başına tek ana hareket.",
+   "risk": "Yöntem/kural düzeyinde alındı; kendi kodu (React Native/SwiftUI) kullanılmıyor."
+  },
+  "tampon_sonuc": "07.11 tampon: kurulum BAŞARILI, güvenlik bulgusu yok. Yalnız yöntem belgesi skill'e alındı (kod çalıştırılmıyor).",
+  "yapilanlar": [
+   "Tampon testi (tampon/sonuc/video-opuscar*, kesif-motion)",
+   "Skill güncellemesi önerildi: gundem-tarih-video, gercek-goruntulu-belgesel"
+  ],
+  "commit": null,
+  "geri_donus": "Skill'deki ilgili bölüm silinir; sunucuda kurulu kopya kaldırılır."
  }
 ]

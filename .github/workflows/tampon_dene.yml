@@ -59,7 +59,7 @@ jobs:
           git clone --depth 1 ${REF:+-b "$REF"} "$REPO" /tmp/arac > /tmp/klon.log 2>&1; k0=$?
           cd /tmp/arac 2>/dev/null
           timeout $((SURE*60)) bash -c "$KURULUM" > /tmp/kurulum.log 2>&1; k1=$?
-          timeout 600 bash -c "$DUMAN" > /tmp/duman.log 2>&1; k2=$?
+          timeout $((SURE*60)) bash -c "$DUMAN" > /tmp/duman.log 2>&1; k2=$?
           sure=$(( $(date +%s) - bas ))
           # Basit güvenlik taraması: kurulum sırasında beklenmedik ağ/kimlik dosyası erişimi izleri
           bulgu=$(grep -rIlE "(\.ssh/|\.aws/credentials|GITHUB_TOKEN|discord(app)?\.com/api/webhooks|pastebin\.com)" /tmp/arac --include=*.py --include=*.js --include=*.sh 2>/dev/null | head -5 | tr '\n' ' ')

@@ -1,5 +1,5 @@
 {
- "uretildi": "2026-11-07 10:45",
+ "uretildi": "2026-11-07 10:46",
  "son_calisma": {
   "tarih": "2026-11-07",
   "aday": 24,
@@ -7,12 +7,32 @@
   "depoya_yazildi": false
  },
  "sayilar": {
-  "entegre": 0,
-  "tampon_denemede": 5,
+  "entegre": 3,
+  "tampon_denemede": 4,
   "iade": 1,
   "degerlendirmede": 0
  },
  "araclar": [
+  {
+   "id": "GFAD-20261107-4",
+   "ad": "lemo-opuscar",
+   "url": "https://github.com/lemomo-ai/lemo-opuscar",
+   "puan": 80,
+   "hedef": "gundem-tarih-video (animasyon) ve gercek-goruntulu-belgesel (harita/arşiv sahneleri)",
+   "fayda": "66 kodla üretilen film görünümü (ağaç baskı, gravür, sessiz film, ukiyo-e, gölge oyunu, uydu brifingi, eski haber filmi); görsel üretim kredisi harcamadan tarih sahneleri.",
+   "risk": "Ekran kartı yok: render yavaş (1 dk video ≈ 10+ dk); ffmpeg 7 gerekir; demo yazı tipleri ayrıca indirilir; Çince ses için Microsoft'a metin gönderen edge-tts KULLANILMAZ.",
+   "durum": "entegre",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-07",
+   "test": null,
+   "test_ozeti": "07.11 tampon: kurulum BAŞARILI, güvenlik bulgusu yok. Ağaç baskı, sessiz film ve gravür görünümlerinden 12 kare sorunsuz render edildi (kare başı ~1,4 sn, ekran kartısız). Tam video render'ı 10 dk deneme sınırına takıldı; ilk gerçek işte ölçülecek.",
+   "yapilanlar": [
+    "Tampon testi (tampon/sonuc/video-opuscar*, kesif-motion)",
+    "Skill güncellemesi önerildi: gundem-tarih-video, gercek-goruntulu-belgesel"
+   ],
+   "geri_donus": "Skill'deki ilgili bölüm silinir; sunucuda kurulu kopya kaldırılır."
+  },
   {
    "id": "GFAD-20261107-1",
    "ad": "Timestral",
@@ -71,6 +91,26 @@
    "geri_donus": "gerek yok (canlıya alınmadı)"
   },
   {
+   "id": "GFAD-20261107-5",
+   "ad": "rossark-motion-skill",
+   "url": "https://github.com/rossark0/rossark-motion-skill",
+   "puan": 71,
+   "hedef": "gundem-tarih-video (illüstrasyonlarda duman/bayrak/su hareketi)",
+   "fayda": "Çizime 'canlılık' veren hareket kuralları: ışınlanma yok, küçük genlik, eklem etrafında dönme, faz gecikmeli takip, sahne başına tek ana hareket.",
+   "risk": "Yöntem/kural düzeyinde alındı; kendi kodu (React Native/SwiftUI) kullanılmıyor.",
+   "durum": "entegre",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-07",
+   "test": null,
+   "test_ozeti": "07.11 tampon: kurulum BAŞARILI, güvenlik bulgusu yok. Yalnız yöntem belgesi skill'e alındı (kod çalıştırılmıyor).",
+   "yapilanlar": [
+    "Tampon testi (tampon/sonuc/video-opuscar*, kesif-motion)",
+    "Skill güncellemesi önerildi: gundem-tarih-video, gercek-goruntulu-belgesel"
+   ],
+   "geri_donus": "Skill'deki ilgili bölüm silinir; sunucuda kurulu kopya kaldırılır."
+  },
+  {
    "id": "GFAD-20261106-1",
    "ad": "Indra OCR",
    "url": "https://github.com/datalab-to/indra",
@@ -100,7 +140,7 @@
    "hedef": "videoda ses kontrolü (Antik Stüdyo / CutkodA kurgu)",
    "fayda": null,
    "risk": null,
-   "durum": "tampon_denemede",
+   "durum": "entegre",
    "iade_gerekcesi": null,
    "tekrar_kosulu": null,
    "tarih": "2026-11-06",

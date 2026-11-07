@@ -1,5 +1,5 @@
 #!/bin/bash
-# İki sesli diyalog: metin.txt'de "S:" satırları soran ses (Uğur), "C:" satırları cevap veren ses (Ses D).
+# Diyalog seslendirme: "S:" soru (Uğur), "A:" esprili anlatım (Uğur, daha canlı), "C:" cevap veren ikinci ses (Ses D).
 # Her satır ayrı üretilir, aralarına sessizlik konur; kelime zamanları tek zaman çizelgesinde birleşir.
 # Anahtar /opt/cutkoda/motor.env'den okunur, yazdırılmaz. Çıktı günlükte base64 (indirmek için).
 set -uo pipefail
@@ -12,8 +12,8 @@ command -v ffmpeg >/dev/null || { echo "NOT: HATA ffmpeg yok"; exit 1; }
 EL="$EL" H="$H" python3 - <<'PY'
 import base64, json, os, re, subprocess, urllib.request, urllib.error
 klasor = os.environ["H"]
-SESLER = {"S": ("fSruVisKJEvQqmgx0yZT", 0.45), "C": ("u2ZPme1hNaHzZRbw9S82", 0.3)}  # Uğur (soru), Ses D (cevap)
-BOSLUK = {"S": 0.45, "C": 0.75}  # satırdan sonra sessizlik (sn)
+SESLER = {"S": ("fSruVisKJEvQqmgx0yZT", 0.45), "A": ("fSruVisKJEvQqmgx0yZT", 0.32), "C": ("u2ZPme1hNaHzZRbw9S82", 0.3)}  # Uğur soru, Uğur esprili anlatım, Ses D
+BOSLUK = {"S": 0.5, "A": 0.7, "C": 0.75}  # satırdan sonra sessizlik (sn)
 def uret(ses, metin, stab):
     for model in ("eleven_v4", "eleven_v3"):
         for dil in (True, False):

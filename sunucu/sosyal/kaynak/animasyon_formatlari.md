@@ -21,6 +21,7 @@ format sabit, görsel dünya her videoda yeni.
 | Duygusal, masalsı, sözsüz ya da az sözlü kısa hikâye; yüksek görsel kalite | Masal Bebek 3B (yapay zekâ video) |
 | Tek nesneyle anlatılan şiirsel, sade hikâye; döngü sonlu | Sade Masal Resmi (yapay zekâ video) |
 | Sıcak, büyülü, romantik/merak dolu kış ya da gece hikâyesi; film kalitesi, müzikle anlatım | Kış Masalı Sinema 3B (yapay zekâ video) |
+| Kısa, şiirsel, mutluluk/özgürlük anı (yağmurda dans, ilk kar, bahar); 8–15 sn döngü, müzikli | Suluboya Yağmur (yapay zekâ video) |
 | Tarihî yolculuk, sefer, göç, rota, savaş hattı (harita üstünde) | Harita Yolculuğu (türetilmiş) |
 | Eskiden ve bugün karşılaştırması | Eskiden / Şimdi (türetilmiş) |
 | İki taraf, iki yöntem, kim kazandı | Sayaç Yarışı (türetilmiş) |
@@ -133,6 +134,29 @@ yayınlanmaz, karakterleri kopyalanmaz). Karakter kartı: `kis-masali-sinema-3b/
   same. Snow falling, warm lantern bokeh. No text." Görselde "Temsili illüstrasyon (yapay zekâ)", platformda "sentetik
   içerik" işareti. Müzik telifsiz (kodla üretilir) ya da lisanslı.
 - **Uyarı:** Referans videodaki siyah saçlı kız, genç adam ve mavi kulaklı yaratık başka üreticinindir; benzerleri çizilmez.
+
+## Format: Suluboya Yağmur
+Referans: `suluboya-yagmur/referans_shoof14_yagmur_dansi.mp4` (başka üreticinin videosu; yalnız üslup referansı,
+yayınlanmaz, karakteri kopyalanmaz).
+**Bu format kodla çizilmez; yapay zekâ görsel + video üretimiyle yapılır (ücretli kredi).**
+- **Doku:** el çizimi masal kitabı resmi: ince siyah mürekkep kontur + suluboya lekeleri, kâğıt dokusu görünür, köşelerde
+  boyanın kâğıda dağıldığı açık krem kenarlar (vinyet gibi). Yumuşak, hafif soluk renkler; tek güçlü vurgu rengi
+  (kırmızı şemsiye + kırmızı atkı). Islak taş zeminde fener ışığının uzun yansımaları, su birikintisinde halkalar,
+  yere düşmüş sonbahar yaprakları, çizgi çizgi yağmur.
+- **Mekân:** gece, eski Avrupa/İstanbul parkı: döküm sokak feneri, ahşap bank, taş fıskiye, uzakta kuleli çatılar, ağaç
+  dalları. Gökyüzünde **gülümseyen, yüzlü dolunay** (masal dokunuşu; karakterle göz göze gelir).
+- **Karakter dili:** sade çizgi yüz, kapalı gözlerle mutlu gülümseme, pembe yanak, dağınık topuz; uzun kaban, atkı
+  rüzgârda savrulur. Hareket dans gibi: dönme, su birikintisine adım, kollarını açma, şemsiyeyi çevirme.
+- **Kamera ve süre:** 8–15 sn; geniş plan → yüze yakın plan (yağmur damlası şemsiyeden süzülür, gözler kapalı) →
+  sırttan dönüş → ay ile bakışma → kollar açık geniş plan. Yavaş kaydırma, yumuşak yaklaşma; sözsüz, yalnız müzik
+  (yumuşak piyano/vals) ve yağmur sesi. Döngüye uygun: son kare ilk kareye yakın.
+- **Kullanım:** mevsim geçişleri, özel gün tebrikleri (ilk kar, bahar), "küçük mutluluklar" serisi, söz kartı arka planı.
+  Kendi karakterimizle yapılır (ör. Pumpkin ya da Lale bu dokuda yeniden çizilir).
+- **Üretim:** karakter kartı (bu dokuda) → 3–5 ana kare → görselden video (Kling 3.0 Turbo 720p, 3–5 sn) → kurgu + müzik.
+  Görsel istemi kalıbı: "Hand-drawn storybook illustration, fine black ink outlines with soft watercolor washes, visible
+  paper texture, cream paper edges, muted palette with a single red accent, rainy night, glowing street lamps reflected
+  on wet cobblestones, smiling full moon with a face. No text." Görselde "Temsili illüstrasyon (yapay zekâ)".
+  Tahmini maliyet: 4 ana kare 3,2 + 4×4 sn video ≈ 13 kredi → toplam ≈ 16 kredi.
 
 ## Format: Sade Masal Resmi
 Referans: `sade-masal-resmi/referans_shoof14_karahindiba.mp4` (başka üreticinin videosu; yalnız üslup referansı).

@@ -1,0 +1,3 @@
+{"id": "ceviri-dene", "repo": "https://github.com/Helsinki-NLP/Opus-MT", "ref": "",
+ "kurulum": "pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch && pip install --quiet transformers sentencepiece sacremoses",
+ "duman": "python3 -I $GIRDI/cevir_dene.py $GIRDI/ornek.json $CIKTI/ceviri.json && python3 -c \"import json;d=json.load(open('$CIKTI/ceviri.json'));[print('-',x['orijinal'][:90],'\\n  →',x['tr']) for x in d['sonuc'][:40]]\"", "sure_dk": 25}

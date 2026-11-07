@@ -177,7 +177,7 @@ function cips(el,ops,anah){el.innerHTML=ops.map(([v,t,n])=>`<button class="cip" 
  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;S[anah]=b.dataset.v;S.n=60;ciz()}}
 function uy(x,haric){const q=S.q;
  return (haric==='g'||S.g==='hepsi'||x.g===S.g)&&(haric==='k'||S.k==='hepsi'||x.k===S.k)&&(!S.mit||x.ls==='mit')&&(!S.yeni||yeniMi(x))
-  &&(!S.anah||x.y==='Anahtarsız')&&(!q||(x.ad+' '+x.a+' '+(x.konu||'')+' '+(x.kat||'')).toLocaleLowerCase('tr').includes(q))}
+  &&(!S.anah||x.y==='Anahtarsız')&&(!q||(x.ad+' '+x.a+' '+(x.a_en||'')+' '+(x.konu||'')+' '+(x.kat||'')).toLocaleLowerCase('tr').includes(q))}
 const sira={oneri:0,github:1,sunucu:2,api:3};
 let SON=[];
 function ciz(){
@@ -196,7 +196,7 @@ function ciz(){
  if(S.q&&S.v!=='liste')gorunum('liste');
 }
 function faydalar(x){
- const metin=x.ad+' '+x.a+' '+(x.konu||'')+' '+(x.kat||''), ids=[], notlar=[];
+ const metin=x.ad+' '+(x.a_en||x.a)+' '+(x.konu||'')+' '+(x.kat||''), ids=[], notlar=[];
  IPUCU.forEach(([re,d,n])=>{if(re.test(metin)&&notlar.length<2){notlar.push(n);d.forEach(i=>ids.includes(i)||ids.push(i))}});
  (GRUP_BILGI[x.g]||['',[]])[1].forEach(i=>ids.includes(i)||ids.push(i));
  return {notlar,ids:ids.slice(0,5)};
@@ -206,7 +206,7 @@ function detay(x){
  const lis=x.ls?{mit:'🟢 MIT — serbestçe kullanılır',izinli:'🔵 '+(x.l||'')+' — izin verici lisans',dikkat:'🟠 '+(x.l||'')+' — lisans koşullarına dikkat'}[x.ls]:'';
  const ek=[x.k==='api'?'Hazır internet servisi · '+esc(x.y||''):'',typeof x.y==='number'?'⭐ '+x.y.toLocaleString('tr'):'',x.gun?'son güncelleme '+esc(x.gun):'',lis].filter(Boolean).join(' · ');
  $('dt').innerHTML=`<button class="kap" aria-label="Kapat" onclick="dlg.close()">×</button><h3>${esc(x.ad)}</h3>
- <div class="acik">${esc(x.a)}</div><div class="alt">${ek}</div>
+ <div class="acik">${esc(x.a)}</div>${x.a_en?`<div class="alt">Orijinal: ${esc(x.a_en)} <i>(Türkçesi makine çevirisi)</i></div>`:''}<div class="alt">${ek}</div>
  <h4>Nerede faydalı</h4><div class="fay">${f.notlar.map(esc).join('<br>')||esc(gb[0])}</div>
  <h4>Galakside faydalı olacağı sistemler</h4><ul>${f.ids.map(i=>{const d=DUG[i];if(!d)return'';const k=KUME[d[0]];
   return `<li style="border-left-color:${k[1]}"><b>${esc(d[1])}</b><span>${esc(k[0])} · ${esc(d[2])}</span></li>`}).join('')}</ul>

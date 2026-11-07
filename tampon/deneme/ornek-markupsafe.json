@@ -1,0 +1,2 @@
+{"id": "ornek-markupsafe", "repo": "https://github.com/pallets/markupsafe", "ref": "main",
+ "kurulum": "pip install --quiet .", "duman": "python -c \"import markupsafe; print(markupsafe.escape('<b>tampon</b>'))\"", "sure_dk": 10}

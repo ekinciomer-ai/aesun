@@ -1,0 +1,92 @@
+name: Tampon deneme (GDEO/OU duman testi)
+# OU'nun önerdiği dış aracı YALITILMIŞ ortamda kurup dener. Bilgisayar ve sunucu gerekmez, ücretsizdir.
+# Kullanım: tampon/deneme/<GFAD-id>.json ekle → push. Biçim:
+#   {"id": "GFAD-20261107-1", "repo": "https://github.com/sahip/depo", "ref": "main",
+#    "kurulum": "pip install -e .", "duman": "python -c 'import paket; print(paket.__version__)'", "sure_dk": 20}
+# Güvenlik: deneme işi HİÇBİR yetki ve şifre almaz (permissions: {}, depo jetonu saklanmaz, sırlar verilmez);
+# denenen kod depoya yazamaz. Sonuç ayrı işte, yalnız tampon/sonuc/<id>.json olarak kaydedilir.
+on:
+  push:
+    branches: [main]
+    paths: ['tampon/deneme/*.json']
+  workflow_dispatch:
+    inputs:
+      id: { description: 'tampon/deneme/<id>.json', required: true }
+concurrency: { group: tampon-dene, cancel-in-progress: false }
+jobs:
+  sec:
+    runs-on: ubuntu-24.04
+    permissions: { contents: read }
+    outputs: { idler: '${{ steps.s.outputs.idler }}' }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2, persist-credentials: false }
+      - id: s
+        env: { GIRDI: '${{ github.event.inputs.id }}' }
+        run: |
+          if [ -n "$GIRDI" ]; then l="$GIRDI"
+          else l=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- 'tampon/deneme/*.json' | xargs -r -n1 basename | sed 's/\.json$//' | tr '\n' ' '); fi
+          echo "idler=$(python3 -c "import json,sys,re; print(json.dumps([x for x in sys.argv[1:] if re.fullmatch(r'[A-Za-z0-9_.-]+',x)]))" $l)" >> "$GITHUB_OUTPUT"
+  dene:
+    needs: sec
+    if: needs.sec.outputs.idler != '[]'
+    strategy: { fail-fast: false, max-parallel: 2, matrix: { id: '${{ fromJson(needs.sec.outputs.idler) }}' } }
+    runs-on: ubuntu-24.04
+    permissions: {}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: tampon/deneme, persist-credentials: false }
+      - name: Yalıtılmış kurulum ve duman testi
+        env: { ID: '${{ matrix.id }}' }
+        run: |
+          set +e
+          S=tampon/deneme/$ID.json; mkdir -p /tmp/sonuc
+          python3 - "$S" <<'PY' > /tmp/plan.env
+          import json, sys, shlex, re
+          d = json.load(open(sys.argv[1], encoding="utf-8"))
+          assert re.fullmatch(r"https://github\.com/[\w.-]+/[\w.-]+/?", d["repo"]), "repo yalnız github.com adresi olabilir"
+          for k in ("repo", "ref", "kurulum", "duman"):
+              print(f"{k.upper()}={shlex.quote(str(d.get(k) or ''))}")
+          print(f"SURE={int(d.get('sure_dk') or 20)}")
+          PY
+          [ $? = 0 ] || { echo '{"durum":"hata","neden":"tanım dosyası geçersiz"}' > /tmp/sonuc/$ID.json; exit 0; }
+          . /tmp/plan.env
+          bas=$(date +%s)
+          git clone --depth 1 ${REF:+-b "$REF"} "$REPO" /tmp/arac > /tmp/klon.log 2>&1; k0=$?
+          cd /tmp/arac 2>/dev/null
+          timeout $((SURE*60)) bash -c "$KURULUM" > /tmp/kurulum.log 2>&1; k1=$?
+          timeout 600 bash -c "$DUMAN" > /tmp/duman.log 2>&1; k2=$?
+          sure=$(( $(date +%s) - bas ))
+          # Basit güvenlik taraması: kurulum sırasında beklenmedik ağ/kimlik dosyası erişimi izleri
+          bulgu=$(grep -rIlE "(\.ssh/|\.aws/credentials|GITHUB_TOKEN|discord(app)?\.com/api/webhooks|pastebin\.com)" /tmp/arac --include=*.py --include=*.js --include=*.sh 2>/dev/null | head -5 | tr '\n' ' ')
+          python3 - "$ID" $k0 $k1 $k2 $sure "$bulgu" <<'PY'
+          import json, sys
+          i, k0, k1, k2, sure, bulgu = sys.argv[1], *map(int, sys.argv[2:6]), sys.argv[6].strip()
+          kuyruk = lambda p: open(p, errors="replace").read()[-1500:] if __import__("os").path.exists(p) else ""
+          durum = "basarili" if (k0, k1, k2) == (0, 0, 0) and not bulgu else "basarisiz"
+          json.dump({"id": i, "durum": durum, "klon": k0, "kurulum": k1, "duman": k2, "sure_sn": sure,
+                     "guvenlik_bulgusu": bulgu.split() if bulgu else [],
+                     "kurulum_sonu": kuyruk("/tmp/kurulum.log"), "duman_sonu": kuyruk("/tmp/duman.log")},
+                    open(f"/tmp/sonuc/{i}.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+          print(durum)
+          PY
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with: { name: 'sonuc-${{ matrix.id }}', path: '/tmp/sonuc/${{ matrix.id }}.json', retention-days: 7 }
+  kaydet:
+    needs: dene
+    if: always() && needs.dene.result != 'skipped'
+    runs-on: ubuntu-24.04
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'sonuc-*', path: /tmp/s, merge-multiple: true }
+      - run: |
+          mkdir -p tampon/sonuc; cp /tmp/s/*.json tampon/sonuc/ 2>/dev/null || exit 0
+          for f in tampon/sonuc/*.json; do python3 -m json.tool "$f" > /dev/null || rm -f "$f"; done
+          git config user.name "aesun-tampon"; git config user.email "tampon@aksarayenerji.net"
+          git add tampon/sonuc
+          git diff --cached --quiet || git commit -qm "Tampon deneme sonucu $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

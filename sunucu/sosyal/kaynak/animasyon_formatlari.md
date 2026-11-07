@@ -184,6 +184,10 @@ Tam tarif: `yagliboya_canlanan_tablo.md` (Ömer'in verdiği yetenek dosyası; @s
 - **Reddedilen yaklaşım (yapılmaz):** tabloyu konuşturmak, dudak/çene oynatmak, iki farklı ses, hep Mona Lisa.
   Ömer: "görüntü cansız, dudak hareketi basit ve sese göre hızlı, espriler komik değil, sesler uymadı".
 - **Kalıp:** 5 soru + 5 cevap + kapanış ("Sen bu tabloya ne sorardın? Yorumlara yaz."), 45–56 sn.
+  **Ton (Ömer, 2. bölümden itibaren):** mizah azaltılır, SORGULAYICI dil kullanılır: önce doğrulanmış bilgi, sonra
+  izleyiciyi düşündüren açık uçlu bir soru ("Bu anlamı tablo mu veriyor, biz mi yüklüyoruz?"). Espri yalnız hafif ve
+  bilgiye hizmet ediyorsa. Müzik: sakin, belgesel tadında (Topview Music); kodla üretilen şakacı müzik kullanılmaz.
+  Örnek 2: `tabloya-sorduk/ornek_kaplumbaga_terbiyecisi.mp4` (şablon `src/tablo_kaplumbaga`).
   Her soru tablodaki **görünür bir ayrıntıya** dair (yüz, karın, mum, imza, ayna...). Cevap: önce gerçek bilgi, sonra
   gündelik Türk hayatından espri (düğün masrafı, "bu mumu kim yaktı", okul sırasına "buradaydım", "kombin", fotobomba).
   Bilgi doğrulanır; tartışmalı konu "uzmanlara göre" diye söylenir.

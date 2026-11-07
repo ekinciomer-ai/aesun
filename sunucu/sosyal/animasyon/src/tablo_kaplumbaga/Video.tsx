@@ -19,7 +19,7 @@ const TABLO = {dosya: 'tablo_kaplumbaga/tablo.jpg', g: 1280, y: 2373, baslik: 'K
   alt: 'Pera Müzesi, İstanbul'};
 // her soru için ayrıntı: merkez (görsel pikseli), yakınlık, işaret halkası yarıçapları
 const AYRINTI = [
-  {x: 340, y: 2130, z: 2.2, rx: 260, ry: 190},  // kaplumbağalar
+  {x: 400, y: 1960, z: 2.3, rx: 250, ry: 180, hx: 330, hy: 2130},  // kaplumbağalar (çerçeve tablonun içinde kalsın)
   {x: 615, y: 880, z: 3.2, rx: 95, ry: 120},    // adamın yüzü
   {x: 1050, y: 1390, z: 2.3, rx: 120, ry: 290}, // ney
   {x: 520, y: 330, z: 1.9, rx: 330, ry: 200},   // duvar yazısı ve çiniler
@@ -56,14 +56,15 @@ const kamera = (t: number) => {
 const Halka: React.FC<{t: number}> = ({t}) => {
   const s = satirAn(t);
   if (!s || s.soruNo < 0 || s.soruNo >= SORU_SAYI) return null;
-  const a = AYRINTI[s.soruNo];
+  const a = AYRINTI[s.soruNo] as {x: number; y: number; z: number; rx: number; ry: number; hx?: number; hy?: number};
   const c = kamera(t);
+  const hx = a.hx ?? a.x, hy = a.hy ?? a.y;
   const gir = interpolate(t, [s.k === 'S' ? s.bas + 0.4 : s.bas - 0.3, (s.k === 'S' ? s.bas + 0.4 : s.bas - 0.3) + 0.35], [0, 1],
     {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(2))});
   const nabiz = 1 + 0.04 * Math.sin(t * 6);
   return (
     <svg width={1080} height={1920} style={{position: 'absolute'}}>
-      <ellipse cx={EKRAN.x + (a.x - c.x) * c.z} cy={EKRAN.y + (a.y - c.y) * c.z} rx={a.rx * c.z * gir * nabiz} ry={a.ry * c.z * gir * nabiz}
+      <ellipse cx={EKRAN.x + (hx - c.x) * c.z} cy={EKRAN.y + (hy - c.y) * c.z} rx={a.rx * c.z * gir * nabiz} ry={a.ry * c.z * gir * nabiz}
         fill="none" stroke={SARI} strokeWidth={9} strokeDasharray="28 14" opacity={gir} style={{filter: 'drop-shadow(0 0 12px rgba(0,0,0,.8))'}} />
     </svg>
   );
@@ -132,7 +133,7 @@ const Video: React.FC = () => {
       <Halka t={t} />
       <AbsoluteFill style={{background: 'radial-gradient(ellipse 75% 55% at 50% 50%, transparent 50%, rgba(0,0,0,.65) 100%)'}} />
       <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: 108, background: 'rgba(0,0,0,.72)', display: 'flex',
-        alignItems: 'center', justifyContent: 'center', fontFamily: YAZI, fontWeight: 900, fontSize: 36, color: SARI, letterSpacing: 1.5}}>{TABLO.baslik}</div>
+        alignItems: 'center', justifyContent: 'center', fontFamily: YAZI, fontWeight: 900, fontSize: TABLO.baslik.length > 36 ? 29 : 36, color: SARI, letterSpacing: 1}}>{TABLO.baslik}</div>
       <Soru t={t} />
       <Altyazi t={t} />
       <div style={{position: 'absolute', bottom: 64, left: 0, right: 0, textAlign: 'center', fontFamily: YAZI, fontWeight: 900, fontSize: 26,

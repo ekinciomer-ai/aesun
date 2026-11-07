@@ -12,12 +12,15 @@ command -v ffmpeg >/dev/null || { echo "NOT: HATA ffmpeg yok"; exit 1; }
 EL="$EL" H="$H" python3 - <<'PY'
 import base64, json, os, re, subprocess, urllib.request, urllib.error
 klasor = os.environ["H"]
-SESLER = {"S": ("fSruVisKJEvQqmgx0yZT", 0.45), "A": ("fSruVisKJEvQqmgx0yZT", 0.32), "C": ("u2ZPme1hNaHzZRbw9S82", 0.3)}  # Uğur soru, Uğur esprili anlatım, Ses D
-BOSLUK = {"S": 0.5, "A": 0.7, "C": 0.75}  # satırdan sonra sessizlik (sn)
-def uret(ses, metin, stab):
+UGUR, SESD = "fSruVisKJEvQqmgx0yZT", "u2ZPme1hNaHzZRbw9S82"
+# rol: (ses, kararlılık, hız). S soru, A esprili anlatım, C ikinci ses; E genç kız, I iç ses, D dede. "P: 1.5" = 1,5 sn sessizlik
+SESLER = {"S": (UGUR, 0.45, 1.0), "A": (UGUR, 0.32, 1.0), "C": (SESD, 0.3, 1.0),
+          "E": (SESD, 0.3, 1.05), "I": (SESD, 0.5, 1.0), "D": (UGUR, 0.5, 0.88)}
+BOSLUK = {"S": 0.5, "A": 0.7, "C": 0.75, "E": 0.35, "I": 0.45, "D": 0.5}  # satırdan sonra sessizlik (sn)
+def uret(ses, metin, stab, hiz=1.0):
     for model in ("eleven_v4", "eleven_v3"):
         for dil in (True, False):
-            govde = {"text": metin, "model_id": model, "voice_settings": {"stability": stab, "similarity_boost": 0.85, "speed": 1.0}}
+            govde = {"text": metin, "model_id": model, "voice_settings": {"stability": stab, "similarity_boost": 0.85, "speed": hiz}}
             if dil:
                 govde["language_code"] = "tr"
             r = urllib.request.Request(f"https://api.elevenlabs.io/v1/text-to-speech/{ses}/with-timestamps?output_format=mp3_44100_128",
@@ -31,6 +34,11 @@ satirlar = [x.strip() for x in open(f"{klasor}/metin.txt", encoding="utf-8") if 
 t0, kelimeler, liste, toplam = 0.0, [], [], 0
 for c, satir in enumerate(satirlar):
     kim, govde = satir.split(":", 1); kim = kim.strip(); govde = govde.strip()
+    if kim == "P":
+        sure = float(govde); wav = f"{klasor}/parca/{c:02d}.wav"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", str(sure), wav], check=True)
+        kelimeler.append({"w": "", "s": round(t0, 3), "e": round(t0 + sure, 3), "c": c, "k": "P"})
+        liste.append(wav); t0 += sure; print("NOT: satır", c, "P", sure, "sn"); continue
     metin, ks = "", []
     for parca in re.findall(r"\[[^\]]*\]|\S+", govde):
         if metin: metin += " "
@@ -38,7 +46,7 @@ for c, satir in enumerate(satirlar):
         gor, oku = parca.split("|", 1) if "|" in parca else (parca, parca)
         ks.append({"w": gor, "a": len(metin), "b": len(metin) + len(oku)}); metin += oku
     toplam += len(metin)
-    ses, stab = SESLER[kim]; s = uret(ses, metin, stab)
+    ses, stab, hiz = SESLER[kim]; s = uret(ses, metin, stab, hiz)
     mp3 = f"{klasor}/parca/{c:02d}.mp3"; open(mp3, "wb").write(base64.b64decode(s["audio_base64"]))
     h = s["alignment"]
     sure = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", mp3], capture_output=True, text=True).stdout)

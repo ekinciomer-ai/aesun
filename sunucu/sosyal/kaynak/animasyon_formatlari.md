@@ -26,6 +26,7 @@ karışım) kullanılır; seçilen yapı bu kütüphanedeki uygun formatla (doku
 | Sıcak, büyülü, romantik/merak dolu kış ya da gece hikâyesi; film kalitesi, müzikle anlatım | Kış Masalı Sinema 3B (yapay zekâ video) |
 | Kısa, şiirsel, mutluluk/özgürlük anı (yağmurda dans, ilk kar, bahar); 8–15 sn döngü, müzikli | Suluboya Yağmur (yapay zekâ video) |
 | Tek sahne, tek duygu, nostaljik sakin an; mevsim/özel gün; "tablo canlanıyor" | Canlanan Tablo – Yağlıboya (yapay zekâ video) |
+| Ünlü tabloya soru soruyoruz, tablodaki karakter komik cevap veriyor (mizah + gerçek bilgi) | Tabloya Sorduk |
 | Tarihî yolculuk, sefer, göç, rota, savaş hattı (harita üstünde) | Harita Yolculuğu (türetilmiş) |
 | Eskiden ve bugün karşılaştırması | Eskiden / Şimdi (türetilmiş) |
 | İki taraf, iki yöntem, kim kazandı | Sayaç Yarışı (türetilmiş) |
@@ -176,6 +177,22 @@ Tam tarif: `yagliboya_canlanan_tablo.md` (Ömer'in verdiği yetenek dosyası; @s
   Karakter bizim (Pumpkin, Lale vb. bu dokuda yeniden çizilir).
 - **Bizim üretim yolu:** Topview (Nano Banana Pro ana kare + Kling 3.0 Turbo 5–8 sn) ya da ücretsiz yol (Cloudflare FLUX
   ana kare + sunucuda kurgu, hafif yaklaşma/uzaklaşma). 4 kareli viral yapı Topview'da ≈ 3,2 + 4×4–6,4 ≈ 20–29 kredi.
+
+## Format: Tabloya Sorduk
+Örnek: `tabloya-sorduk/ornek_mona_lisa.mp4` (48 sn). Kod şablonu: `src/tablo_sor/Video.tsx`. Ses: `islem_sosyal_anim_diyalog.sh`.
+**Görsel üretim modeli kullanılmaz (kredi yok):** gerçek tablo (telifi düşmüş, Wikimedia Commons) + kodla hareket.
+- **Kalıp:** 5 soru + 5 cevap + kapanış sorusu ("Sıradaki tabloya ne soralım? Yorumlara yaz."), 40–50 sn.
+  Soru kısa ve merak uyandırır; cevap tablonun **gerçek** bir bilgisine dayanan espri (ör. 1911 hırsızlığı, silinmiş kaşlar,
+  Louvre'da selfie kalabalığı). Son cevap küçük bir hayat tavsiyesi. Bilgiler doğrulanır; uydurma tarih/olay yok.
+- **Sesler:** soru = Uğur (fSruVisKJEvQqmgx0yZT), cevap = tablonun karakterine uygun ses (kadın için Ses D u2ZPme1hNaHzZRbw9S82).
+  metin.txt satırları "S:" / "C:" ile başlar; [sighs], [laughs] gibi duygu etiketleri cevaplarda kullanılır.
+- **Görüntü:** soru anında tablonun tamamı + üstte sarı "SORU" kartı; cevapta kamera yüze yaklaşır (2×), çene bölgesi
+  kelime hecelerine göre birkaç piksel açılıp kapanır (konuşan tablo), altta konuşma balonu (söylenen kelime kırmızı,
+  söylenmemiş kelimeler soluk). Üstte "TABLOYA SORDUK • <TABLO ADI>", altta ressam • yıl • müze, "Seslendirme: yapay zekâ".
+- **Yeni tabloda yapılacak:** TABLO sabitinde dosya, yüz merkezi ve çene kutusu piksel koordinatları ayarlanır
+  (yüze ızgara çizip bakılır). Birden çok kişili tablolarda (ör. Son Akşam Yemeği) her karaktere ayrı ses ve yüz noktası.
+- **Müzik:** `muzik/tablo_sor.py` (şakacı pizzicato vals, telifsiz), konuşmada otomatik kısılır, −16 LUFS.
+- **Kural:** yalnız telifi düşmüş tablolar (ressam 70+ yıl önce ölmüş); dini/siyasi figürlerle saygısız espri yok.
 
 ## Format: Sade Masal Resmi
 Referans: `sade-masal-resmi/referans_shoof14_karahindiba.mp4` (başka üreticinin videosu; yalnız üslup referansı).

@@ -101,6 +101,12 @@ Referans: `masal-bebek-3b/referans_shoof14_semsiyeli_kiz.mp4` (başka üreticini
   Topview: görsel Nano Banana Pro 2K ≈0,8 kredi; video Seedance 2.0 Fast / Kling 3.0 Turbo 720p 5 sn ≈4 kredi,
   Seedance 2.5 ≈7,5 kredi. 8 sahnelik 40 sn video ≈40 kredi (+ yeniden üretimler). Önce ücretsiz havuz kontrol edilir,
   harcama önce sunulur. Görsellerde "Temsili illüstrasyon (yapay zekâ)", platformda "sentetik içerik" işaretlenir.
+- **İlk örnek (Pumpkin 1 – Bakkal, 3B):** 7 sahne, 39,5 sn. Ana kareler `image_edit` + karakter kartı referansı;
+  videolar Kling 3.0 Turbo 720p (izinli süre 3–15 sn; sahne süresi kadar istenir, kısa kalırsa kurguda hafif yavaşlatılır).
+  Video istemi kalıbı: "Stop-motion felt doll animation. <tek, basit hareket>. Keep her face, hair, sweater and skirt
+  exactly the same. No text." Kurgu Remotion `src/bakkal3b` (sahne arası 0,35 sn geçiş, hafif yakınlaşma, tam satır
+  altyazı alt bölgede, üstte yapay zekâ etiketi). Ses karışımı: anlatım + kodla üretilen müzik, konuşmada müzik otomatik
+  kısılır (sidechain), −16 LUFS. Toplam harcama ≈36 kredi.
 
 ## Format: Sade Masal Resmi
 Referans: `sade-masal-resmi/referans_shoof14_karahindiba.mp4` (başka üreticinin videosu; yalnız üslup referansı).

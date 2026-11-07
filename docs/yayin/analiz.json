@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-07T22:09+03:00",
+ "olusturma": "2026-11-07T22:13+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -96,7 +96,7 @@
    "karar": "ARTIR",
    "neden": "videoların %67'i tuttu (eşik 128 izlenme / 48 sa)",
    "olculen": 3,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 902,
    "tutma_orani": 67,
    "izlenme_yuzde": 70,
@@ -112,12 +112,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 33,
+   "medyan_48sa": 36,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Celtic v Beşiktaş: FIRST EVER meeting tonight ⚽ #shorts",
-    "i48": 33
+    "i48": 36
    }
   },
   {
@@ -127,7 +127,7 @@
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
    "olculen": 4,
    "erken": 1,
-   "medyan_48sa": 46,
+   "medyan_48sa": 48,
    "tutma_orani": 0,
    "izlenme_yuzde": 61,
    "en_iyi": {
@@ -147,7 +147,7 @@
    "izlenme_yuzde": 32,
    "en_iyi": {
     "baslik": "The royal makeup that ATE through Queen Elizabeth's skin! ☠️👑 #shorts #history #fyp",
-    "i48": 46
+    "i48": 48
    }
   },
   {
@@ -171,7 +171,7 @@
    "karar": "ARTIR",
    "neden": "videoların %100'i tuttu (eşik 447 izlenme / 48 sa)",
    "olculen": 3,
-   "erken": 4,
+   "erken": 5,
    "medyan_48sa": 1589,
    "tutma_orani": 100,
    "izlenme_yuzde": 67,
@@ -187,12 +187,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 1558,
+   "medyan_48sa": 1560,
    "tutma_orani": 100,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Beşiktaş ilk kez bir İskoç takımıyla! Celtic'in şaşırtan hikâyesi ⚽ #shorts",
-    "i48": 1558
+    "i48": 1560
    }
   },
   {
@@ -201,7 +201,7 @@
    "karar": "ARTIR",
    "neden": "videoların %83'i tuttu (eşik 447 izlenme / 48 sa)",
    "olculen": 6,
-   "erken": 3,
+   "erken": 4,
    "medyan_48sa": 1658,
    "tutma_orani": 83,
    "izlenme_yuzde": 53,
@@ -217,7 +217,7 @@
    "neden": "videoların %67'i tuttu (eşik 447 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 1,
-   "medyan_48sa": 1476,
+   "medyan_48sa": 1508,
    "tutma_orani": 67,
    "izlenme_yuzde": 39,
    "en_iyi": {
@@ -269,10 +269,10 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 447,
   "Kozmos Lab TR": 50,
   "Estudio Antiguo": 50,
-  "Ancient Studio": 128
+  "Ancient Studio": 128,
+  "Antik Stüdyo": 447
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -290,7 +290,7 @@
    },
    "18:00": {
     "n": 4,
-    "medyan": 1647
+    "medyan": 1648
    },
    "19:00": {
     "n": 3,
@@ -298,7 +298,7 @@
    },
    "20:00": {
     "n": 4,
-    "medyan": 1356
+    "medyan": 1372
    },
    "21:00": {
     "n": 1,
@@ -320,11 +320,11 @@
    },
    "20:00": {
     "n": 1,
-    "medyan": 33
+    "medyan": 36
    },
    "21:00": {
     "n": 6,
-    "medyan": 44
+    "medyan": 45
    }
   },
   "Kozmos Lab TR": {
@@ -337,35 +337,11 @@
  "eylemler": [
   {
    "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "_epFSy2zg20",
-   "baslik": "Venüs gerçekte ayakta duramazdı 🐚",
-   "neden": "2026-11-07 18:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
    "kanal": "Antik Stüdyo (@antikstudyo)",
    "platform": "TikTok",
    "vid": "",
    "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 (Antik Roma Kremi)",
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Ancient Studio",
-   "platform": "YouTube",
-   "vid": "815rbPENM9w",
-   "baslik": "How Was the Red Sea Locked 471 Years Ago? ⚓ Ozdemir Pasha (1555) #shorts",
-   "neden": "2026-11-07 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "AtvyZhEtBkk",
-   "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-   "neden": "2026-11-07 19:00 planlıydı, hâlâ yayında görünmüyor"
   }
  ],
  "bulgular": [
@@ -381,7 +357,7 @@
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %83'i tuttu (eşik 447 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %67'i tuttu (eşik 447 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Antik Stüdyo: en iyi yayın saati şimdilik 18:00 (medyan 1647 izlenme, 4 video).",
+  "Antik Stüdyo: en iyi yayın saati şimdilik 18:00 (medyan 1648 izlenme, 4 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %45 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Antik Stüdyo: tutan Short'lar ortalama %59 izleniyor, tutmayanlar %37 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."

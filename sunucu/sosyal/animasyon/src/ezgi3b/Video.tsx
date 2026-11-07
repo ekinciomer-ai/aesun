@@ -17,30 +17,28 @@ const SES_SON = 47.9;
 const SON = SES_SON + 3.2;
 
 // [başlangıç, bitiş, klip, klip süresi, geçiş (0 = kesme)]
+const G = 0.35; // sahneler arası yumuşak geçiş (sn)
 const SAHNE: [number, number, string, number, number][] = [
   [0, 4.7, 's1.mp4', 5.05, 0],
-  [4.7, 15.2, 's2.mp4', 10, 0],
-  [15.2, 22.1, 's3.mp4', 7, 0],
-  [22.1, 26.4, 's4.mp4', 5, 0],
-  [26.4, 32.0, 's5.mp4', 6, 0],
-  [32.0, 35.6, 's6.mp4', 4, 0],
-  [35.6, 39.5, 's7.mp4', 4, 0.6],
-  [39.5, SON, 's8.mp4', 9, 0.8],
+  [4.7, 15.2, 's2.mp4', 10, G],
+  [15.2, 22.1, 's3.mp4', 7, G],
+  [22.1, 26.4, 's4.mp4', 5, G],
+  [26.4, 32.0, 's5.mp4', 6, G],
+  [32.0, 35.6, 's6.mp4', 4, G],
+  [35.6, 39.5, 's7.mp4', 4, 0.7],
+  [39.5, SON, 's8.mp4', 9, 0.9],
 ];
 
 const Klip: React.FC<{dosya: string; klip: number; sure: number; gecis: number}> = ({dosya, klip, sure, gecis}) => {
   const t = useCurrentFrame() / FPS;
-  const hiz = Math.min(1, klip / Math.min(sure, klip + 0.6));
-  const op = gecis ? interpolate(t, [0, gecis], [0, 1], {extrapolateRight: 'clamp'}) : 1;
-  const z = interpolate(t, [0, sure], [1.0, 1.04]);
-  // klip bitince son kareyi dondur
-  const dur = t * hiz >= klip - 0.05;
+  // klip sahneden kısaysa hafif ağır çekim (en fazla %28 yavaşlama); donmuş kare yok
+  const hiz = Math.max(0.72, Math.min(1, (klip - 0.05) / sure));
+  const op = gecis ? interpolate(t, [0, gecis], [0, 1], {extrapolateRight: 'clamp', easing: Easing.inOut(Easing.quad)}) : 1;
+  const z = interpolate(t, [0, sure], [1.0, 1.05]);
   return (
     <AbsoluteFill style={{opacity: op}}>
-      {!dur ? <OffthreadVideo src={staticFile(`ezgi3b/${dosya}`)} muted playbackRate={hiz}
+      <OffthreadVideo src={staticFile(`ezgi3b/${dosya}`)} muted playbackRate={hiz}
         style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${z})`}} />
-        : <OffthreadVideo src={staticFile(`ezgi3b/${dosya}`)} muted startFrom={Math.floor((klip - 0.1) * FPS)} playbackRate={0.0001}
-        style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${z})`}} />}
     </AbsoluteFill>
   );
 };

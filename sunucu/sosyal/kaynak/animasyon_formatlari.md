@@ -18,6 +18,8 @@ format sabit, görsel dünya her videoda yeni.
 | Gerçek olay, rekor, veri, harita, gündem + tarih | Gerçek Olay |
 | İkilem, ahlak sorusu, seri bölüm, izleyici oyu | Sen Karar Ver |
 | Bir eşyanın/alışkanlığın yüzyıllar içindeki yolculuğu | Nesnenin Hayatı |
+| Duygusal, masalsı, sözsüz ya da az sözlü kısa hikâye; yüksek görsel kalite | Masal Bebek 3B (yapay zekâ video) |
+| Tek nesneyle anlatılan şiirsel, sade hikâye; döngü sonlu | Sade Masal Resmi (yapay zekâ video) |
 | Tarihî yolculuk, sefer, göç, rota, savaş hattı (harita üstünde) | Harita Yolculuğu (türetilmiş) |
 | Eskiden ve bugün karşılaştırması | Eskiden / Şimdi (türetilmiş) |
 | İki taraf, iki yöntem, kim kazandı | Sayaç Yarışı (türetilmiş) |
@@ -86,6 +88,28 @@ format sabit, görsel dünya her videoda yeni.
   her yüzyıl ayrı mekân, tek dünyada yan yana → dönüm noktası ("Nasıl mı değişti?") → ilk kareye dönüş → ders → soru.
 - **Çizim dili:** düz, canlı renkli vektör (kalın siyah kontur), Inter Black başlıklar, büyük harf 3'er kelimelik altyazı.
 - **Not:** ilk denemedir; dilenirse Kâğıt Masal diliyle de yapılır.
+
+## Format: Masal Bebek 3B
+Referans: `masal-bebek-3b/referans_shoof14_semsiyeli_kiz.mp4` (başka üreticinin videosu; yalnız üslup referansı, yayınlanmaz).
+**Bu format kodla çizilmez; yapay zekâ görsel + video üretimiyle yapılır (ücretli kredi).**
+- **Görünüm:** keçe/kil bebek (stop-motion hissi): büyük yuvarlak baş, pembe yanak, ince bacak, kumaş dokulu kıyafet, el yapımı
+  doku. Mekân: yağmurlu, Arnavut kaldırımlı, sıcak renkli taş evler, ıslak zeminde yansıma, sokak feneri; uçuşan yapraklar
+  (kırmızı gelincik) ve tek bir renkli nesne (puantiyeli kırmızı şemsiye) atmosferi taşır. Mavi-gri gökyüzü, sıcak ışık.
+- **Anlatım:** az söz ya da hiç; duygu yüz ifadesi, beden dili ve müzikle. Yavaş, masalsı kamera (hafif takip, yumuşak yaklaşma).
+- **Üretim:** (1) karakter kartı görseli (aynı karakter her sahnede: saç, göz, kıyafet sabit), (2) her sahne için 9:16 ana kare
+  (karakter kartı referans), (3) her ana kareden 4–6 sn görselden-video, (4) kurgu + ses + altyazı + kodla üretilen müzik.
+  Topview: görsel Nano Banana Pro 2K ≈0,8 kredi; video Seedance 2.0 Fast / Kling 3.0 Turbo 720p 5 sn ≈4 kredi,
+  Seedance 2.5 ≈7,5 kredi. 8 sahnelik 40 sn video ≈40 kredi (+ yeniden üretimler). Önce ücretsiz havuz kontrol edilir,
+  harcama önce sunulur. Görsellerde "Temsili illüstrasyon (yapay zekâ)", platformda "sentetik içerik" işaretlenir.
+
+## Format: Sade Masal Resmi
+Referans: `sade-masal-resmi/referans_shoof14_karahindiba.mp4` (başka üreticinin videosu; yalnız üslup referansı).
+**Yapay zekâ görsel + video üretimi (ücretli).**
+- **Görünüm:** guaj/pastel boya hissinde 2B resimli kitap çizimi; düz gri-bej fon, tek renk zemin şeridi (hardal), tek karakter
+  (abartılı saç, tek renk palto, çizgili çorap), tek nesne (karahindiba). Boşluk bol, ayrıntı az.
+- **Kalıp:** tek nesne → küçük eylem → beklenmedik büyüme/dönüşüm (tohum → tarla) → coşku → başa dönüş (döngü). Yazısız.
+- **Ne zaman:** sevgi, umut, sabır gibi tek duygulu kısa hikâyeler; Pumpkin serisinin "sessiz bölümleri".
+- **Üretim:** Masal Bebek 3B ile aynı adımlar; fon sade olduğu için ana kare tutarlılığı daha kolay.
 
 ## Format: Harita Yolculuğu (türetilmiş)
 Gerçek Olay + Antik Stüdyo harita kuralı (Wascemal tarzı) birleşimi.

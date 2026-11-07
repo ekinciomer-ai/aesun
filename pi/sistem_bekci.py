@@ -165,7 +165,7 @@ def calis(simdi=None):
     v = {"t": simdi.isoformat(timespec="seconds"), "durum": durum, "sorunlar": sorun, "bilgi": bilgi, "yedek": yedek_son,
          "ogren": {k: o for k, o in ogren.items() if o.get("son") and (simdi - zaman(o["son"])).days <= 30}}
     degisti = (st.get("durum"), sorted(st.get("sorunlar", {}))) != (durum, sorted(sorun))
-    if degisti or not st.get("yazildi") or (simdi - zaman(st["yazildi"])).total_seconds() > 1800:
+    if degisti or not st.get("yazildi") or (simdi - zaman(st["yazildi"])).total_seconds() > 1740:   # 10 dk turlarında 30 dk'da bir yaz (1800 sınırı saniye kaymasıyla 40 dk'ya çıkıp şefin 40 dk "sessiz" eşiğini aşıyordu)
         try:
             _, sha = gh(DOSYA)
             gh(DOSYA, v, sha, f"Sistem bekçisi: {durum}" + (f" ({len(sorun)})" if sorun else ""))

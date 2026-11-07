@@ -63,7 +63,7 @@ jobs:
           python3 - "$ID" $k0 $k1 $k2 $sure "$bulgu" <<'PY'
           import json, sys
           i, k0, k1, k2, sure, bulgu = sys.argv[1], *map(int, sys.argv[2:6]), sys.argv[6].strip()
-          kuyruk = lambda p: open(p, errors="replace").read()[-1500:] if __import__("os").path.exists(p) else ""
+          kuyruk = lambda p: open(p, errors="replace").read()[-6000:] if __import__("os").path.exists(p) else ""
           durum = "basarili" if (k0, k1, k2) == (0, 0, 0) and not bulgu else "basarisiz"
           json.dump({"id": i, "durum": durum, "klon": k0, "kurulum": k1, "duman": k2, "sure_sn": sure,
                      "guvenlik_bulgusu": bulgu.split() if bulgu else [],

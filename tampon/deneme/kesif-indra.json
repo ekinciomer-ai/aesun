@@ -1,0 +1,3 @@
+{"id": "kesif-indra", "repo": "https://github.com/datalab-to/indra", "ref": "",
+ "kurulum": "ls -la; pip install --quiet . 2>&1 | tail -5",
+ "duman": "grep -vE '^\\s*$|<img|badge|^!\\[' README.md | head -120; echo ====CLI; ls $(python -c 'import sysconfig;print(sysconfig.get_path(\"scripts\"))') | grep -i indra; indra --help 2>&1 | head -30", "sure_dk": 15}

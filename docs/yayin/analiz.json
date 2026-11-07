@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-07T12:57+03:00",
+ "olusturma": "2026-11-07T13:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -112,9 +112,9 @@
    "seri": "Tablo Serisi",
    "karar": "DURDUR",
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
-   "olculen": 3,
-   "erken": 2,
-   "medyan_48sa": 82,
+   "olculen": 4,
+   "erken": 1,
+   "medyan_48sa": 45,
    "tutma_orani": 0,
    "izlenme_yuzde": 61,
    "en_iyi": {
@@ -158,7 +158,7 @@
    "karar": "ARTIR",
    "neden": "videoların %100'i tuttu (eşik 447 izlenme / 48 sa)",
    "olculen": 3,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 1589,
    "tutma_orani": 100,
    "izlenme_yuzde": 67,
@@ -242,8 +242,8 @@
  ],
  "esikler": {
   "Ancient Studio": 128,
-  "Antik Stüdyo": 447,
-  "Estudio Antiguo": 50
+  "Estudio Antiguo": 50,
+  "Antik Stüdyo": 447
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -294,8 +294,8 @@
     "medyan": 30
    },
    "21:00": {
-    "n": 4,
-    "medyan": 62
+    "n": 5,
+    "medyan": 42
    }
   }
  },

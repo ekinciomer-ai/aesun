@@ -16,7 +16,8 @@ TZ = timezone(timedelta(hours=3))
 simdi = datetime.now(TZ)
 ist = json.load(open(os.path.join(D, "istemci.json"), encoding="utf-8"))
 KANALLAR = {"UC77LyY3gqWmBNAKp2lbsGBg": "Antik Stüdyo", "UCFLJUlhUSgjcLbp9ad_t9PQ": "Ancient Studio",
-            "UCTC_yS0lwl-owMuo5b4bNtQ": "Estudio Antiguo"}
+            "UCTC_yS0lwl-owMuo5b4bNtQ": "Estudio Antiguo",
+            "UC7o3DG9m1gBbvMjFZjB5KEg": "Kozmos Lab TR", "UC41-Z82jCQ8955az6JUDIAw": "Kozmos Lab"}
 MAKS_GIZLE = 3
 
 def token(cid):

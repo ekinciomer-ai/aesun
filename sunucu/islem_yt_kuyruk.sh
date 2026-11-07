@@ -11,7 +11,8 @@ python3 - "$D" "$(pwd)/kuyruk" <<'PY'
 import json, os, sys, glob, urllib.request, urllib.parse, urllib.error
 D, KQ = sys.argv[1], sys.argv[2]
 ist = json.load(open(os.path.join(D, "istemci.json"), encoding="utf-8"))
-KANAL = {"TR": "UC77LyY3gqWmBNAKp2lbsGBg", "EN": "UCFLJUlhUSgjcLbp9ad_t9PQ", "ES": "UCTC_yS0lwl-owMuo5b4bNtQ"}
+KANAL = {"TR": "UC77LyY3gqWmBNAKp2lbsGBg", "EN": "UCFLJUlhUSgjcLbp9ad_t9PQ", "ES": "UCTC_yS0lwl-owMuo5b4bNtQ",
+         "KZ_TR": "UC7o3DG9m1gBbvMjFZjB5KEg", "KZ_EN": "UC41-Z82jCQ8955az6JUDIAw"}
 kayit_yol = os.path.join(D, "yuklenen_kuyruk.json")
 kayit = json.load(open(kayit_yol, encoding="utf-8")) if os.path.exists(kayit_yol) else {}
 

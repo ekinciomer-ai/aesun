@@ -11,6 +11,8 @@ Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir
 | Antik Stüdyo (TR) | @antikstudyo | arabas400.mrc@gmail.com (kişisel kanal) | Bağlı |
 | Ancient Studio (global) | @ancientstudiotv | arabas400.mrc@gmail.com altındaki marka hesabı | Bağlı |
 | Estudio Antiguo (ES) | `UCTC_yS0lwl-owMuo5b4bNtQ` · @estudioantiguo | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (7 Kas 2026); kapak + açıklama sunucudan, logo elle |
+| Kozmos Lab TR (uzay/teknoloji) | `UC7o3DG9m1gBbvMjFZjB5KEg` · @eskikanal99882 → @kozmoslabtr (8 Kas) | modernantiktv@gmail.com (kişisel kanal) | İzin bekliyor |
+| Kozmos Lab (global EN) | `UC41-Z82jCQ8955az6JUDIAw` · @eskiglobal99882 → @kozmoslab (8 Kas) | modernantiktv@gmail.com (marka hesabı) | İzin bekliyor |
 
 ## Google Cloud projesi
 

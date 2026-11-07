@@ -19,6 +19,8 @@ KANALLAR = {
     "UC77LyY3gqWmBNAKp2lbsGBg": ("Antik Stüdyo", "TR"),
     "UCFLJUlhUSgjcLbp9ad_t9PQ": ("Ancient Studio", "EN"),
     "UCTC_yS0lwl-owMuo5b4bNtQ": ("Estudio Antiguo", "ES"),
+    "UC7o3DG9m1gBbvMjFZjB5KEg": ("Kozmos Lab TR", "TR"),
+    "UC41-Z82jCQ8955az6JUDIAw": ("Kozmos Lab", "EN"),
 }
 NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
       "media": "http://search.yahoo.com/mrss/"}

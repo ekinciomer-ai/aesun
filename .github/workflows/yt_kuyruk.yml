@@ -53,11 +53,12 @@ jobs:
               if not s.get('vid'):
                   print('::warning::' + kod + ' ' + s['durum'] + ' ' + s.get('detay', '')); continue
               p = datetime.fromisoformat(s['publishAt'])
-              kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo'}.get(s['kanal'], 'Ancient Studio')
+              kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab'}.get(s['kanal'], s['kanal'])
               x = ix.get(s['vid']) or {}
-              x.update(platform='YouTube', kanal=kanal, dil=s['kanal'], tur='Short', seri=s.get('seri') or x.get('seri') or 'Gündem + Tarih',
+              tur = s.get('tur') or 'Short'
+              x.update(platform='YouTube', kanal=kanal, dil=s['kanal'], tur=tur, seri=s.get('seri') or x.get('seri') or 'Gündem + Tarih',
                        baslik=s['baslik'], durum='Planlı', tarih=p.strftime('%Y-%m-%d'), saat=p.strftime('%H:%M'), izlenme=x.get('izlenme'),
-                       link=f"https://youtube.com/shorts/{s['vid']}", vid=s['vid'], ureten=s.get('ureten') or x.get('ureten') or 'Claude')
+                       link=(f"https://youtube.com/shorts/{s['vid']}" if tur == 'Short' else f"https://youtube.com/watch?v={s['vid']}"), vid=s['vid'], ureten=s.get('ureten') or x.get('ureten') or 'Claude')
               if s['vid'] not in ix: K.append(x)
               if s.get('eski_gizlendi') and s['eski_gizlendi'] in ix:
                   e = ix[s['eski_gizlendi']]; e['durum'] = 'Gizli'; e['not'] = f"yerine sesli sürüm yüklendi: {s['vid']}" 

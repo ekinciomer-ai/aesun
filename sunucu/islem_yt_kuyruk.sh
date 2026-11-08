@@ -37,15 +37,16 @@ sonuc, toklar, mevcut = [], {}, {}
 for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
     it = json.load(open(jf, encoding="utf-8")); kod = it["kod"]; dil = it["kanal"]
     mp4 = jf[:-5] + ".mp4"
+    if not os.path.exists(mp4) and it.get("sunucu_video"): mp4 = "/opt/aesun/video_bekleyen/" + os.path.basename(it["sunucu_video"])
     try:
         if kod in kayit:
-            sonuc.append({"kod": kod, "durum": "zaten yüklü", "vid": kayit[kod]["vid"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten")}}); continue
+            sonuc.append({"kod": kod, "durum": "zaten yüklü", "vid": kayit[kod]["vid"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         cid = KANAL[dil]
         if dil not in toklar:
             toklar[dil] = token(cid); mevcut[dil] = basliklar(toklar[dil], cid)
         if it["baslik"] in mevcut[dil] and mevcut[dil][it["baslik"]] != it.get("yerine"):
             vid = mevcut[dil][it["baslik"]]; kayit[kod] = {"vid": vid}
-            sonuc.append({"kod": kod, "durum": "zaten yüklü (başlık)", "vid": vid, **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten")}}); continue
+            sonuc.append({"kod": kod, "durum": "zaten yüklü (başlık)", "vid": vid, **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         # Yayın öncesi kalite kapısı (ae-sistem-standartlari): engel varsa yüklenmez; uyarılar rapora girer
         if os.path.exists("/opt/aesun/kalite_kapisi.py"):
             import subprocess
@@ -56,7 +57,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
                 kq["engel"] = [e for e in kq["engel"] if "altyazı dışında yazı" not in e]
                 kq["gecti"] = not kq["engel"]
             if not kq.get("gecti"):
-                sonuc.append({"kod": kod, "durum": "KALİTE KAPISI: yüklenmedi", "engel": kq.get("engel"), **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten")}})
+                sonuc.append({"kod": kod, "durum": "KALİTE KAPISI: yüklenmedi", "engel": kq.get("engel"), **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}})
                 print(f"NOT: {kod} kalite kapısından geçemedi: {'; '.join(kq.get('engel') or [])}"); continue
             if kq.get("uyari"):
                 print(f"NOT: {kod} kalite uyarısı: {'; '.join(kq['uyari'])}")
@@ -81,7 +82,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             import shutil; os.makedirs(os.path.join(D, "medya"), exist_ok=True); shutil.copy(mp4, os.path.join(D, "medya", f"{kod}.mp4"))
         except Exception: pass
         json.dump(kayit, open(kayit_yol, "w", encoding="utf-8"), ensure_ascii=False)
-        sonuc.append({"kod": kod, "durum": "yüklendi ve planlandı", "vid": v["id"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten")}})
+        sonuc.append({"kod": kod, "durum": "yüklendi ve planlandı", "vid": v["id"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}})
         print(f"NOT: {kod} yüklendi → {v['id']} (plan {it['publishAt']})")
         # "yerine": aynı içeriğin eski sürümü → planı kaldırılır, Gizli kalır (silme yok, önce yedek)
         eski = it.get("yerine")

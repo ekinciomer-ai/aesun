@@ -12,7 +12,8 @@ on:
       ad: {description: "çıktı adı", required: true}
       parca: {description: "paralel parça sayısı", required: false, default: "8"}
 permissions:
-  contents: read
+  contents: write
+  actions: read
 jobs:
   plan:
     runs-on: ubuntu-24.04
@@ -67,3 +68,8 @@ jobs:
           ls -la /tmp/${{ inputs.ad }}.mp4
       - uses: actions/upload-artifact@v4
         with: {name: "video-${{ inputs.ad }}", path: "/tmp/${{ inputs.ad }}.mp4", retention-days: 7}
+  aktar:
+    needs: birlestir
+    uses: ./.github/workflows/video_aktar.yml
+    with: {run_id: "${{ github.run_id }}", ad: "${{ inputs.ad }}"}
+    secrets: inherit

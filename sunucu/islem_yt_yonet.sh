@@ -136,15 +136,31 @@ for cid, ad in KANALLAR.items():
             out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": e["vid"],
                                     "islem": f"planı kaldırıldı (eski plan {eski_plan})", "neden": e.get("neden")})
             print(f"NOT: {ad} · {e['vid']} planı kaldırıldı (seri durduruldu)")
-        # YORUM YANITLARI: yalnız Ömer'in ONAYLADIĞI (durum == "ONAYLANDI") yanıtlar gönderilir; kanal eşleşmeli, yorum kimliği şart
-        for y in [y for y in yorum_kuyrugu if y.get("durum") == "ONAYLANDI" and y.get("kanal") == ad and y.get("yorum_id") and y.get("yanit")]:
+        # YORUM YANITLARI VE KANAL AÇIKLAMA NOTLARI: yalnız Ömer'in ONAYLADIĞI (durum == "ONAYLANDI") kayıtlar gönderilir
+        for y in [y for y in yorum_kuyrugu if y.get("durum") == "ONAYLANDI" and y.get("kanal") == ad and y.get("yanit")]:
             try:
-                api("https://www.googleapis.com/youtube/v3/comments?part=snippet", tok,
-                    {"snippet": {"parentId": y["yorum_id"], "textOriginal": y["yanit"]}})
+                if y.get("tur") == "ust_yorum" and y.get("vid"):
+                    res = api("https://www.googleapis.com/youtube/v3/commentThreads?part=snippet", tok,
+                              {"snippet": {"videoId": y["vid"], "topLevelComment": {"snippet": {"textOriginal": y["yanit"]}}}})
+                    y["yorum_id"] = res.get("id", "")
+                    # Video açıklamasına da tarihî notu ekle
+                    try:
+                        v_mevcut = api(f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={y['vid']}", tok)["items"][0]
+                        sn_m = v_mevcut["snippet"]
+                        if "Tarihî Not (Safevî Devleti" not in (sn_m.get("description") or ""):
+                            sn_m["description"] = ((sn_m.get("description") or "").rstrip() + "\n\n" + y["yanit"])[:4900]
+                            api("https://www.googleapis.com/youtube/v3/videos?part=snippet", tok, {"id": y["vid"], "snippet": sn_m}, "PUT")
+                    except Exception:
+                        pass
+                elif y.get("yorum_id"):
+                    api("https://www.googleapis.com/youtube/v3/comments?part=snippet", tok,
+                        {"snippet": {"parentId": y["yorum_id"], "textOriginal": y["yanit"]}})
+                else:
+                    continue
                 y["durum"] = "gönderildi"; y["gonderim"] = simdi.isoformat(timespec="minutes")
                 out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": y.get("vid", ""),
-                                        "islem": f"yorum yanıtlandı ({y.get('yazar')})", "neden": "Ömer onayı"})
-                print(f"NOT: {ad} · {y.get('yazar')} yorumuna yanıt gönderildi")
+                                        "islem": f"yorum/açıklama notu gönderildi ({y.get('yazar')})", "neden": "Ömer onayı"})
+                print(f"NOT: {ad} · {y.get('yazar')} yorum/açıklama notu gönderildi")
             except urllib.error.HTTPError as e:
                 y["durum"] = f"HATA HTTP {e.code}"; out["hatalar"].append(f"{ad} yorum yanıtı: HTTP {e.code}")
         out["kanallar"][ad] = {"id": cid, "abone": int(ch["statistics"].get("subscriberCount", 0) or 0),

@@ -43,8 +43,16 @@ def _onarim_taze(b, dk=120):
     except Exception:
         return True
 
+# Yalnız olay olunca yazılan dosyalar: sessiz dönemde "gecikti" sayılmaz. bildirim_kayit yalnız mesaj gidince yazılır;
+# 08.11.2026 09:07–14:07 sakin günde 257 dk "gecikti" → uyarının kendi mesajı dosyayı yazıp "düzeldi" (yanlış uyarı döngüsü).
+# Bildirimler işinin sağlığı ayrıca is_hatalari (2. bölüm) ile izleniyor.
+OLAY_DOSYALARI = {"n8n/bildirim_kayit.json"}
+
+
 def _kapandi(dosya, simdi):
     """arsiv_f2pool_2026-10.json gibi dönemi bitmiş dosya artık yazılmaz; gecikti sayılmaz (1.11.2026 ay dönümü yanlış uyarısı)."""
+    if str(dosya) in OLAY_DOSYALARI:
+        return True
     import re
     m = re.search(r"(?<!\d)(20\d\d)-(\d\d)(?:-(\d\d))?(?!\d)", str(dosya).rsplit("/", 1)[-1])
     if not m:

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-08T01:15+03:00",
+ "olusturma": "2026-11-08T10:02+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -167,7 +167,7 @@
    "kanal": "Antik Stüdyo",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %100'i tuttu (eşik 447 izlenme / 48 sa)",
+   "neden": "videoların %100'i tuttu (eşik 474 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 5,
    "medyan_48sa": 1589,
@@ -197,11 +197,11 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tablo Serisi",
    "karar": "ARTIR",
-   "neden": "videoların %83'i tuttu (eşik 447 izlenme / 48 sa)",
-   "olculen": 6,
-   "erken": 4,
-   "medyan_48sa": 1658,
-   "tutma_orani": 83,
+   "neden": "videoların %86'i tuttu (eşik 474 izlenme / 48 sa)",
+   "olculen": 7,
+   "erken": 3,
+   "medyan_48sa": 1970,
+   "tutma_orani": 86,
    "izlenme_yuzde": 52,
    "en_iyi": {
     "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
@@ -212,7 +212,7 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tarihi Magazin",
    "karar": "ARTIR",
-   "neden": "videoların %67'i tuttu (eşik 447 izlenme / 48 sa)",
+   "neden": "videoların %67'i tuttu (eşik 474 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 1,
    "medyan_48sa": 1508,
@@ -252,9 +252,9 @@
   }
  ],
  "esikler": {
+  "Antik Stüdyo": 474,
   "Ancient Studio": 128,
-  "Estudio Antiguo": 50,
-  "Antik Stüdyo": 447
+  "Estudio Antiguo": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -271,8 +271,8 @@
     "medyan": 14
    },
    "18:00": {
-    "n": 4,
-    "medyan": 1648
+    "n": 5,
+    "medyan": 1970
    },
    "19:00": {
     "n": 3,
@@ -323,16 +323,16 @@
  "bulgular": [
   "Dün (2026-11-07) 14064 izlenme geldi; bir önceki gün 4518.",
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 128 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 447 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 474 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 128 izlenme / 48 sa).",
   "Ancient Studio · Tablo Serisi: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 447 izlenme / 48 sa).",
-  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %83'i tuttu (eşik 447 izlenme / 48 sa).",
-  "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %67'i tuttu (eşik 447 izlenme / 48 sa).",
+  "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 474 izlenme / 48 sa).",
+  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %86'i tuttu (eşik 474 izlenme / 48 sa).",
+  "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %67'i tuttu (eşik 474 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Antik Stüdyo: en iyi yayın saati şimdilik 18:00 (medyan 1648 izlenme, 4 video).",
+  "Antik Stüdyo: en iyi yayın saati şimdilik 18:00 (medyan 1970 izlenme, 5 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %48 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Antik Stüdyo: tutan Short'lar ortalama %56 izleniyor, tutmayanlar %38 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."
@@ -342,6 +342,11 @@
    "kanal": "Antik Stüdyo",
    "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
    "i48": 2759
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "baslik": "Son Akşam Yemeği neden yok oluyor? 🍞",
+   "i48": 2370
   },
   {
    "kanal": "Antik Stüdyo",
@@ -357,11 +362,6 @@
    "kanal": "Antik Stüdyo",
    "baslik": "Piri Reis neden idam edildi?",
    "i48": 1793
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Saçının içinde FARE yaşayan zengin kadınlar?! 🐭👑 #shorts #tarih #keşfet",
-   "i48": 1626
   }
  ],
  "en_zayif": [

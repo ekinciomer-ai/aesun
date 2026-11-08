@@ -7,6 +7,7 @@ import json, os, re, shutil, sys, time, urllib.parse, urllib.request
 LISTE, HEDEF = sys.argv[1], sys.argv[2]
 UA = {"User-Agent": "KozmosArsiv/1.0 (+portal.aksarayenerji.net)"}
 MIN_BOS_GB = 25            # disk bu sınırın altına inerse indirme durur
+TAM_KENAR = 6000           # bundan büyük kayıtlı görsel yeniden indirilmez
 MIN_KENAR = 2000           # en uzun kenarı bundan küçük görsel arşive alınmaz
 MAX_BAYT = 2 * 1024**3
 os.makedirs(HEDEF, exist_ok=True)
@@ -100,8 +101,16 @@ def ekle(ad, kat, urls, kaynak, kredi, lisans, baslik, sayfa):
         yol = os.path.join(HEDEF, "orijinal", kat, ad + uz)
         rel = os.path.relpath(yol, HEDEF)
         os.makedirs(os.path.dirname(yol), exist_ok=True)
-        if rel in manifest and os.path.exists(yol):
+        eski = manifest.get(rel)
+        if eski and os.path.exists(yol) and (eski.get("indirme") == urls[0] or max(eski["genislik"], eski["yukseklik"]) >= TAM_KENAR):
             durum["atlandi"] += 1; return "var"
+        # aynı görselin eski/küçük kopyası ya da başka kategorideki kaydı temizlenir (yerine tam sürüm gelecek)
+        for k, m in list(manifest.items()):
+            if m["ad"] == ad:
+                for f in [k] + list(m.get("turev", {}).values()):
+                    try: os.remove(os.path.join(HEDEF, f))
+                    except OSError: pass
+                del manifest[k]
         durum["su_an"] = f"{ad} ← {url}"; kaydet()
         if not indir(url, yol): continue
         w, h = olcu(yol)
@@ -131,7 +140,8 @@ for e in L.get("esa", []):
     except Exception:
         pass
     cdn = f"https://cdn.{site}.org/archives/images"
-    r = ekle(f"{site.replace('esa', '')}_{i}", e["kategori"], [f"{cdn}/publicationjpg/{i}.jpg", f"{cdn}/large/{i}.jpg"],
+    r = ekle(f"{site.replace('esa', '')}_{i}", e["kategori"], [f"{cdn}/large/{i}.jpg", f"https://{site}.org/media/archives/images/original/{i}.tif",
+              f"https://{site}.org/media/archives/images/publicationtiff10k/{i}.tif", f"{cdn}/publicationjpg/{i}.jpg"],
              site, kredi, "CC BY 4.0 (kredi zorunlu)", baslik, sayfa)
     if r == "dur": break
 

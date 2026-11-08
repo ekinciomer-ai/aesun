@@ -137,7 +137,7 @@ const Video: React.FC = () => {
       <Soru t={t} />
       <Altyazi t={t} />
       <div style={{position: 'absolute', bottom: 64, left: 0, right: 0, textAlign: 'center', fontFamily: YAZI, fontWeight: 900, fontSize: 26,
-        color: 'rgba(255,248,230,.7)', letterSpacing: 2}}>{TABLO.alt}</div>
+        color: 'rgba(255,248,230,.7)', letterSpacing: 2}}>ANTİK STÜDYO • {TABLO.alt}</div>
       <AbsoluteFill style={{background: '#000', opacity: Math.max(acilis, kapanis)}} />
     </AbsoluteFill>
   );

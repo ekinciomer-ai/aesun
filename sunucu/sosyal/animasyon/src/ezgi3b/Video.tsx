@@ -111,8 +111,6 @@ const Video: React.FC = () => {
       <Kapanis t={t} />
       <div style={{position: 'absolute', top: 54, left: 0, right: 0, textAlign: 'center', fontFamily: YAZI, fontWeight: 900, fontSize: 24,
         color: 'rgba(255,255,255,.75)', letterSpacing: 1}}>Temsili animasyon (yapay zekâ)</div>
-      <div style={{position: 'absolute', bottom: 64, left: 0, right: 0, textAlign: 'center', fontFamily: YAZI, fontWeight: 900, fontSize: 26,
-        color: 'rgba(255,255,255,.7)', letterSpacing: 4}}>ANTİK STÜDYO</div>
       <AbsoluteFill style={{background: '#000', opacity: Math.max(acilis, kapat)}} />
     </AbsoluteFill>
   );

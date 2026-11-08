@@ -1,0 +1,4 @@
+{"id": "GFAD-20261108-pixelfx", "repo": "https://github.com/patch-gg/pixelfx", "ref": "main",
+ "kurulum": "sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null; node --version",
+ "duman": "node tools/check.mjs | tail -3 && node tools/render.mjs fire/campfire weather/aurora lightning/plasma-ball --mp4 --scale 6 && node tools/act.mjs moves/fireball-throw --mp4 --scale 6; find records -name '*.mp4' -o -name 'contact.png' | head -12 | while read f; do cp \"$f\" \"$CIKTI/$(echo $f | tr / _)\"; done; ls -la $CIKTI",
+ "sure_dk": 20}

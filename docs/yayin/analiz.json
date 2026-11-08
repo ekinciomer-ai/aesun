@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-08T14:35+03:00",
+ "olusturma": "2026-11-08T15:45+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -92,11 +92,11 @@
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %67'i tuttu (eşik 141 izlenme / 48 sa)",
-   "olculen": 3,
-   "erken": 2,
-   "medyan_48sa": 902,
-   "tutma_orani": 67,
+   "neden": "videoların %75'i tuttu (eşik 143 izlenme / 48 sa)",
+   "olculen": 4,
+   "erken": 1,
+   "medyan_48sa": 613,
+   "tutma_orani": 75,
    "izlenme_yuzde": 70,
    "en_iyi": {
     "baslik": "Why was Piri Reis executed?",
@@ -288,9 +288,9 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 141,
-  "Estudio Antiguo": 50,
-  "Antik Stüdyo": 474
+  "Ancient Studio": 143,
+  "Antik Stüdyo": 474,
+  "Estudio Antiguo": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -343,6 +343,10 @@
    "21:00": {
     "n": 8,
     "medyan": 45
+   },
+   "23:00": {
+    "n": 1,
+    "medyan": 324
    }
   }
  },
@@ -358,9 +362,9 @@
  ],
  "bulgular": [
   "Dün (2026-11-07) 14064 izlenme geldi; bir önceki gün 4518.",
-  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 141 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 143 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 474 izlenme / 48 sa).",
-  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 141 izlenme / 48 sa).",
+  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %75'i tuttu (eşik 143 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 474 izlenme / 48 sa).",

@@ -250,15 +250,26 @@ S.montaj=saha(false);S.uretim=saha(true);
 S.son={...S.hero,kur:(u,t)=>S.hero.kur(u,t,true),sc:S.hero.sc,c:S.hero.c,bl:S.hero.bl};
 
 /* ======================= HUD ======================= */
+const DIL=Q.get("dil")||"tr";
+const SOZ={"ARK FIRINI":"ARC FURNACE","SAFLIK · POLİSİLİSYUM":"PURITY · POLYSILICON","SİLİSYUM ERİME NOKTASI":"SILICON MELTING POINT","WAFER KALINLIĞI":"WAFER THICKNESS","ELMAS TEL":"DIAMOND WIRE","DİLİMLEME":"SLICING",
+"PİRAMİT DOKU":"PYRAMID TEXTURE","IŞIK TUZAĞI":"LIGHT TRAP","P-N EKLEMİ":"P-N JUNCTION","KATKILAMA":"DOPING","YANSIMA ÖNLEYİCİ":"ANTI-REFLECTIVE","MAVİ KAPLAMA":"BLUE COATING","GÜMÜŞ ÇİZGİLER":"SILVER LINES","AKIM TOPLAYICI":"CURRENT COLLECTORS",
+"GÜNEŞ SİMÜLATÖRÜ":"SUN SIMULATOR","LAMİNASYON":"LAMINATION","ISI + VAKUM":"HEAT + VACUUM","6 × 10 HÜCRE":"6 × 10 CELLS","SERİ BAĞLANTI":"SERIES CONNECTION","PALET":"PALLET","KÖŞE KORUMA · SARGI":"CORNER GUARDS · WRAP",
+"600+ PANEL":"600+ PANELS","40 FİTLİK KONTEYNER":"40-FOOT CONTAINER","SAHAYA":"TO THE SITE","TIR İLE":"BY TRUCK","FOTON → ELEKTRON":"PHOTON → ELECTRON","HÜCREDE":"IN THE CELL","İNVERTÖR":"INVERTER","ŞEBEKEYE":"TO THE GRID","TRAFO · İLETİM HATTI":"TRANSFORMER · POWER LINE",
+"KAZIK":"PILES","ÇELİK · ÇAKMA":"STEEL · DRIVEN","KONSTRÜKSİYON":"STRUCTURE","RAY · BAĞLANTI":"RAILS · FIXINGS","PANEL MONTAJI":"PANEL MOUNTING","TEK TEK":"ONE BY ONE","KABLOLAMA":"CABLING","DİZİ → İNVERTÖR":"STRING → INVERTER"};
+const ceviri=h=>{if(DIL==="tr")return h;let o=h;Object.keys(SOZ).sort((a,b)=>b.length-a.length).forEach(k=>{o=o.split(k).join(SOZ[k])});return o.replace(/(\d)([.,])(\d)/g,(m,x,p,y)=>x+(p==="."?",":".")+y)};
+
 const BAS={hero:["","KUMDAN ELEKTRİĞE","BİR GÜNEŞ PANELİNİN YOLCULUĞU"],kuvars:["01","KUVARS","HAMMADDE · SiO₂"],firin:["02","ARK FIRINI","METALURJİK SİLİSYUM"],siemens:["03","ARITMA","SİEMENS YÖNTEMİ · POLİSİLİSYUM"],
   kutuk:["04","KRİSTAL KÜTÜK","CZOCHRALSKİ YÖNTEMİ"],dilim:["05","DİLİMLEME","ELMAS TEL · WAFER"],hucre:["06","HÜCRE","DOKU · EKLEM · KAPLAMA · GÜMÜŞ"],panel:["07","PANEL","LEHİM · CAM · LAMİNASYON · ÇERÇEVE"],
   nakliye:["08","NAKLİYE","PALET · KONTEYNER · TIR"],montaj:["09","MONTAJ","KAZIK · KONSTRÜKSİYON · PANEL · KABLO"],uretim:["10","ELEKTRİK","FOTON → ELEKTRON → ŞEBEKE"],son:["","KUMDAN ELEKTRİĞE","25+ YIL · YAKITSIZ ÜRETİM"]};
+if(DIL==="en")Object.assign(BAS,{hero:["","FROM SAND TO POWER","THE JOURNEY OF A SOLAR PANEL"],kuvars:["01","QUARTZ","RAW MATERIAL · SiO₂"],firin:["02","ARC FURNACE","METALLURGICAL SILICON"],siemens:["03","PURIFICATION","SIEMENS PROCESS · POLYSILICON"],
+  kutuk:["04","CRYSTAL INGOT","CZOCHRALSKI METHOD"],dilim:["05","SLICING","DIAMOND WIRE · WAFER"],hucre:["06","CELL","TEXTURE · JUNCTION · COATING · SILVER"],panel:["07","PANEL","STRINGING · GLASS · LAMINATION · FRAME"],
+  nakliye:["08","SHIPPING","PALLET · CONTAINER · TRUCK"],montaj:["09","INSTALLATION","PILES · STRUCTURE · PANELS · CABLES"],uretim:["10","POWER","PHOTON → ELECTRON → GRID"],son:["","FROM SAND TO POWER","25+ YEARS · ZERO FUEL"]});
 const SIRA=["kuvars","firin","siemens","kutuk","dilim","hucre","panel","nakliye","montaj","uretim"];
-const $=s=>document.getElementById(s);$("yol").innerHTML=SIRA.map(()=>"<i><s></s></i>").join("");
-let sonBas="";function hud(ad,u,fl){const b=BAS[ad];if(sonBas!==ad){sonBas=ad;$("bn").textContent=b[0]?`ADIM ${b[0]} / 10`:"KOZMOS LAB · TEKNOLOJİ";$("bt").textContent=b[1];$("bs").textContent=b[2]}
+const $=s=>document.getElementById(s);if(DIL==="en")$("oku").textContent="SAND → QUARTZ → SILICON → INGOT → WAFER → CELL → PANEL → SITE → GRID";$("yol").innerHTML=SIRA.map(()=>"<i><s></s></i>").join("");
+let sonBas="";function hud(ad,u,fl){const b=BAS[ad];if(sonBas!==ad){sonBas=ad;$("bn").textContent=b[0]?`${DIL==="en"?"STEP":"ADIM"} ${b[0]} / 10`:(DIL==="en"?"KOZMOS LAB · TECH":"KOZMOS LAB · TEKNOLOJİ");$("bt").textContent=b[1];$("bs").textContent=b[2]}
   const gi=sm(0,.08,u);$("bas").style.opacity=gi;$("bas").style.transform=`translateY(${(1-gi)*2}vmin)`;
   const si=SIRA.indexOf(ad);[...$("yol").children].forEach((e,i)=>{e.className=(ad==="son"||i<si)?"done":"";e.firstChild.style.transform=i===si?`scaleX(${u})`:""});
-  $("sayac").textContent=si>=0?`${String(si+1).padStart(2,"0")}/10`:"";const S_=S[ad];$("veri").innerHTML=S_.veri?S_.veri(u):"";$("veri").style.opacity=S_.veri?sm(.05,.15,u):0}
+  $("sayac").textContent=si>=0?`${String(si+1).padStart(2,"0")}/10`:"";const S_=S[ad];$("veri").innerHTML=S_.veri?ceviri(S_.veri(u)):"";$("veri").style.opacity=S_.veri?sm(.05,.15,u):0}
 
 /* ======================= ZAMAN ÇİZELGESİ ======================= */
 let K={sahneler:[{ad:"hero",bas:0,son:4},{ad:"kuvars",bas:4,son:8},{ad:"firin",bas:8,son:12},{ad:"siemens",bas:12,son:16},{ad:"kutuk",bas:16,son:20},{ad:"dilim",bas:20,son:24},{ad:"hucre",bas:24,son:28},{ad:"panel",bas:28,son:32},{ad:"nakliye",bas:32,son:38},{ad:"montaj",bas:38,son:42},{ad:"uretim",bas:42,son:47},{ad:"son",bas:47,son:51}],altyazi:[],gecis:"flas"};

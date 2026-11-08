@@ -38,8 +38,8 @@ jobs:
           sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null
           ffmpeg -v error -y -i /tmp/v/${{ inputs.ad }}.mp4 -vf "scale='if(gt(iw,ih),960,540)':-2" -c:v libx264 -preset veryfast -crf 30 -c:a aac -b:a 96k -movflags +faststart /tmp/${{ inputs.ad }}.mp4
           ls -la /tmp/${{ inputs.ad }}.mp4
-          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
-          git fetch -q origin video-onizleme && git checkout -q -B video-onizleme origin/video-onizleme || git checkout -q --orphan video-onizleme
-          git rm -rq --cached . 2>/dev/null || true; find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          git fetch -q origin video-onizleme 2>/dev/null && git checkout -q origin/video-onizleme -- . 2>/dev/null || true
-          cp /tmp/${{ inputs.ad }}.mp4 . && git add ${{ inputs.ad }}.mp4 && git commit -qm "önizleme: ${{ inputs.ad }}" && for i in 1 2 3; do git push -q origin HEAD:video-onizleme && break; git pull -q --rebase origin video-onizleme; done
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q && git config user.name "aesun-yayin" && git config user.email "yayin@aksarayenerji.net"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          if git fetch -q --depth 1 origin video-onizleme; then git checkout -q -b video-onizleme FETCH_HEAD; else git checkout -q --orphan video-onizleme; fi
+          for f in $(ls -A | grep -v -E '\.mp4$|^\.git$'); do git rm -rq --ignore-unmatch "$f"; rm -rf "$f"; done
+          cp /tmp/${{ inputs.ad }}.mp4 . && git add -A && git commit -qm "önizleme: ${{ inputs.ad }}" && git push -q origin HEAD:video-onizleme

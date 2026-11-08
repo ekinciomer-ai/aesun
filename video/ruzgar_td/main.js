@@ -372,11 +372,16 @@ const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
 const PR = Array.from({length: NR}, () => ({x: (rnd() - 0.5) * 190, y: 20 + rnd() * 140, z0: rnd() * 320, k: 0.75 + rnd() * 0.5, L: 6 + rnd() * 10}));
 
 // ------------------------------------------------------------ UI
-const ui = createUI(app, L);
+const YATAY = Q.get('ar') === '169';
+const UW = YATAY ? 1920 : 1080, UH = YATAY ? 1080 : 1920;
+// etiket bölgesi: dikeyde 3D bant, yatayda sağdaki paneller hariç alan
+const EB = YATAY ? {x0: 30, x1: 1350, y0: 330, y1: 1000, orta: 690, yb: 340, ys: 930, sag: 1350} : {x0: 30, x1: 1050, y0: 330, y1: 1300, orta: 540, yb: 380, ys: 1180, sag: 1040};
+const ui = createUI(app, L, YATAY);
 const EGRI = egri();
 
 // ------------------------------------------------------------ sahneler: kamera {tx,ty,tz,az,el,d,fov,sy}, rüzgâr, poz
-const ALT_Y = -150; // görüntüyü yukarı al: 3D bölge 330–1300
+const ALT_Y = YATAY ? 0 : -150; // dikeyde görüntüyü yukarı al: 3D bölge 330–1300
+const SOL_X = YATAY ? 260 : 0; // yatayda görüntüyü sola al (sağda paneller)
 const SAHNE = {
   hero: {
     dunya: 'turbin',
@@ -630,7 +635,7 @@ const pv = new V3();
 const proj = (p) => {
   pv.copy(p).project(camera);
   if (pv.z > 1 || pv.z < -1) return null;
-  return [(pv.x * 0.5 + 0.5) * 1080, (-pv.y * 0.5 + 0.5) * 1920];
+  return [(pv.x * 0.5 + 0.5) * UW, (-pv.y * 0.5 + 0.5) * UH];
 };
 function etiketYerlestir(list) {
   const pts = list
@@ -641,16 +646,16 @@ function etiketYerlestir(list) {
       const [n, sub] = L.e[ETAD[ad] || ad] || [ad, ''];
       return {ad: n, alt: sub, at, o};
     })
-    .filter((x) => x.at && x.at[0] > 30 && x.at[0] < 1050 && x.at[1] > 330 && x.at[1] < 1300);
-  const Lc = pts.filter((x) => x.at[0] < 540).sort((a, b) => a.at[1] - b.at[1]);
-  const Rc = pts.filter((x) => x.at[0] >= 540).sort((a, b) => a.at[1] - b.at[1]);
+    .filter((x) => x.at && x.at[0] > EB.x0 && x.at[0] < EB.x1 && x.at[1] > EB.y0 && x.at[1] < EB.y1);
+  const Lc = pts.filter((x) => x.at[0] < EB.orta).sort((a, b) => a.at[1] - b.at[1]);
+  const Rc = pts.filter((x) => x.at[0] >= EB.orta).sort((a, b) => a.at[1] - b.at[1]);
   const out = [];
   const stack = (col, sag) => {
-    let y = 380;
+    let y = EB.yb;
     for (const c of col) {
-      y = Math.max(y, Math.min(1180, c.at[1] - 40));
+      y = Math.max(y, Math.min(EB.ys, c.at[1] - 40));
       const w = Math.max(c.ad.length * 20.5, c.alt.length * 15.6 + 25) + 26;
-      const x = sag ? 1040 - w : 44;
+      const x = sag ? EB.sag - w : 44;
       out.push({...c, label: [x, y], w});
       y += 96;
     }
@@ -760,12 +765,12 @@ function kare(t) {
   // kamera
   const c = camAt(t);
   const az = c.az * D2R, el = c.el * D2R;
-  camera.fov = c.fov;
+  camera.fov = YATAY ? c.fov * 0.75 : c.fov;
   camera.near = Math.max(0.1, c.d * 0.02);
   camera.far = c.d * 12 + 1500;
   camera.position.set(c.tx + c.d * Math.cos(el) * Math.sin(az), c.ty + c.d * Math.sin(el), c.tz + c.d * Math.cos(el) * Math.cos(az));
   camera.lookAt(c.tx, c.ty, c.tz);
-  camera.setViewOffset(W, H, 0, -ALT_Y * (H / 1920), W, H);
+  camera.setViewOffset(W, H, SOL_X * (W / UW), -ALT_Y * (H / UH), W, H);
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld();
   scene.fog.near = c.d * 1.6 + 60;

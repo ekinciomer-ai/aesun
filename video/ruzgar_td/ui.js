@@ -2,7 +2,7 @@
 // ölçü çizgileri, beyaz flaş ve kapanış kartı. update(s) her kareyi yeniden çizer.
 export const C = {ink: '#16181b', mute: '#7d828a', faint: '#c9ccd0', line: '#e1e3e6', panel: 'rgba(248,248,249,.94)', acc: '#2f7fd6'};
 const CSS = `
-#ui{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;pointer-events:none;font-family:Inter,system-ui,sans-serif;color:${C.ink};-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+#ui{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;font-family:Inter,system-ui,sans-serif;color:${C.ink};-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 #ui .mo{font-family:'JetBrains Mono',monospace;font-variant-ligatures:none}
 #ui .cp{position:absolute;background:${C.panel};border:2px solid ${C.line};border-radius:10px;box-shadow:0 4px 18px rgba(30,40,60,.07)}
 #ui .ph{position:absolute;display:flex;align-items:center;gap:14px;font:700 25px 'JetBrains Mono',monospace;letter-spacing:.12em}
@@ -14,7 +14,7 @@ const CSS = `
 #ui .call b i{display:block;width:13px;height:13px;background:${C.acc};flex:none}
 #ui .call span{display:block;font:600 25px 'JetBrains Mono',monospace;letter-spacing:.06em;color:#5d636b;margin:4px 0 0 25px;text-shadow:0 0 8px rgba(243,244,246,.95)}
 #ui .chip{position:absolute;height:44px;padding:0 16px;display:flex;align-items:center;border:2px solid ${C.faint};border-radius:7px;background:#fdfdfd;font:700 21px 'JetBrains Mono',monospace;letter-spacing:.08em;white-space:nowrap}
-#alt2{position:absolute;left:60px;right:60px;bottom:${1920 - 1336}px;text-align:center}
+#alt2{position:absolute;left:60px;right:60px;bottom:584px;text-align:center}
 #alt2 span{display:inline;font:700 47px/1.32 Inter,sans-serif;color:${C.ink};background:rgba(250,250,251,.93);padding:6px 22px;box-decoration-break:clone;-webkit-box-decoration-break:clone;border-radius:10px;box-shadow:0 3px 14px rgba(20,30,50,.10)}
 #alt2 em{font-style:normal;color:${C.acc}}
 `;
@@ -24,11 +24,14 @@ const el = (h) => {
   return d.firstElementChild;
 };
 
-export function createUI(app, L) {
+export function createUI(app, L, YT = false) {
+  const UW = YT ? 1920 : 1080, UH = YT ? 1080 : 1920;
+  // yatay (16:9) yerleşim: paneller sağ sütunda, çipler başlığın altında, altyazı altta ortada
+  const P1 = YT ? [1388, 300] : [40, 1372], P2 = YT ? [1388, 592] : [548, 1372], CY = YT ? 272 : 1664;
   const st = document.createElement('style');
   st.textContent = CSS;
   document.head.appendChild(st);
-  const ui = el(`<div id="ui"></div>`);
+  const ui = el(`<div id="ui" style="width:${UW}px;height:${UH}px"></div>`);
   app.appendChild(ui);
   const add = (h) => {
     const n = el(h);
@@ -38,11 +41,11 @@ export function createUI(app, L) {
   const panel = (x, y, w, h, title, n) => {
     add(`<div class="cp" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"></div>`);
     add(`<div class="ph" style="left:${x + 24}px;top:${y + 22}px"><i></i>${title}</div>`);
-    add(`<div class="pn" style="right:${1080 - x - w + 22}px;top:${y + 24}px">${n}</div>`);
+    add(`<div class="pn" style="right:${UW - x - w + 22}px;top:${y + 24}px">${n}</div>`);
   };
   const fit = () => {
-    const k = Math.min(innerWidth / 1080, innerHeight / 1920);
-    ui.style.transform = `translate(${(innerWidth - 1080 * k) / 2}px,${(innerHeight - 1920 * k) / 2}px) scale(${k})`;
+    const k = Math.min(innerWidth / UW, innerHeight / UH);
+    ui.style.transform = `translate(${(innerWidth - UW * k) / 2}px,${(innerHeight - UH * k) / 2}px) scale(${k})`;
   };
   fit();
   addEventListener('resize', fit);
@@ -59,37 +62,39 @@ export function createUI(app, L) {
   {
     let h = '';
     for (let r = 0; r < 2; r++) for (let c = 0; c < 9; c++) h += `<path d="M${c * 30 + 6} ${r * 30}v12M${c * 30} ${r * 30 + 6}h12" stroke="${C.acc}" stroke-width="2" opacity=".6"/>`;
-    add(`<svg style="position:absolute;left:780px;top:280px" width="280" height="50">${h}</svg>`);
+    add(`<svg style="position:absolute;left:${UW - 300}px;top:${YT ? 110 : 280}px" width="280" height="50">${h}</svg>`);
   }
 
   // ------------------------------------------------------------ altyazı
   const alt = add(`<div id="alt2"></div>`);
+  if (YT) Object.assign(alt.style, {left: '260px', right: '600px', bottom: '70px'});
 
   const n0 = ui.children.length;
   // ------------------------------------------------------------ 01 canlı veri
-  panel(40, 1372, 492, 272, L.canli, '01');
+  const [p1x, p1y] = P1, [p2x, p2y] = P2;
+  panel(p1x, p1y, 492, 272, L.canli, '01');
   const ROWS = [L.r_ruz, L.r_rot, L.r_jen, L.r_pit, L.r_guc];
   const bars = ROWS.map((n, i) => {
-    const y = 1428 + i * 41;
-    add(`<div class="sm" style="position:absolute;left:64px;top:${y + 2}px;font-size:19px;letter-spacing:.06em">${n}</div>`);
-    add(`<div style="position:absolute;left:214px;top:${y + 11}px;width:84px;height:7px;background:#e6e7e9;border-radius:4px"></div>`);
-    const f = add(`<div style="position:absolute;left:214px;top:${y + 11}px;height:7px;background:${C.acc};border-radius:4px"></div>`);
-    const v = add(`<div class="mo" style="position:absolute;right:${1080 - 512}px;top:${y - 6}px;font-size:29px;font-weight:700;white-space:nowrap"></div>`);
+    const y = p1y + 56 + i * 41;
+    add(`<div class="sm" style="position:absolute;left:${p1x + 24}px;top:${y + 2}px;font-size:19px;letter-spacing:.06em">${n}</div>`);
+    add(`<div style="position:absolute;left:${p1x + 174}px;top:${y + 11}px;width:84px;height:7px;background:#e6e7e9;border-radius:4px"></div>`);
+    const f = add(`<div style="position:absolute;left:${p1x + 174}px;top:${y + 11}px;height:7px;background:${C.acc};border-radius:4px"></div>`);
+    const v = add(`<div class="mo" style="position:absolute;right:${UW - p1x - 472}px;top:${y - 6}px;font-size:29px;font-weight:700;white-space:nowrap"></div>`);
     return {f, v};
   });
 
   // ------------------------------------------------------------ 02 güç eğrisi
-  panel(548, 1372, 440, 272, L.egri, '02');
-  const ch = add(`<svg style="position:absolute;left:566px;top:1420px" width="404" height="190"></svg>`);
-  const formul = add(`<div class="mo" style="position:absolute;left:572px;top:1604px;font-size:21px;color:#5d636b;letter-spacing:.04em">P = ½·ρ·A·Cp·v³</div>`);
+  panel(p2x, p2y, YT ? 492 : 440, 272, L.egri, '02');
+  const ch = add(`<svg style="position:absolute;left:${p2x + 18}px;top:${p2y + 48}px" width="404" height="190"></svg>`);
+  const formul = add(`<div class="mo" style="position:absolute;left:${p2x + 24}px;top:${p2y + 232}px;font-size:21px;color:#5d636b;letter-spacing:.04em">P = ½·ρ·A·Cp·v³</div>`);
   void formul;
 
   const pnl = Array.from(ui.children).slice(n0);
   // ------------------------------------------------------------ 03 bölümler
   const chips = {};
   {
-    let x = 40;
-    const y = 1664;
+    let x = YT ? 180 : 40;
+    const y = CY;
     for (const k of L.bolumler) {
       const w = Math.round(L.ad[k].length * 13.4 + 34);
       chips[k] = add(`<div class="chip" style="left:${x}px;top:${y}px;width:${w}px">${L.ad[k]}</div>`);
@@ -98,10 +103,10 @@ export function createUI(app, L) {
   }
 
   // ------------------------------------------------------------ etiketler, ölçüler, flaş, kapanış
-  const callSvg = add(`<svg style="position:absolute;left:0;top:0;overflow:visible" width="1080" height="1920"></svg>`);
+  const callSvg = add(`<svg style="position:absolute;left:0;top:0;overflow:visible" width="${UW}" height="${UH}"></svg>`);
   const callG = add(`<div style="position:absolute;inset:0"></div>`);
-  const kart = add(`<div style="position:absolute;left:0;right:0;top:700px;text-align:center;opacity:0"></div>`);
-  const bilgi = add(`<div style="position:absolute;left:40px;top:1372px;width:948px;height:272px;display:none"></div>`);
+  const kart = add(`<div style="position:absolute;left:0;right:${YT ? 520 : 0}px;top:${YT ? 380 : 700}px;text-align:center;opacity:0"></div>`);
+  const bilgi = add(`<div style="position:absolute;left:${YT ? 1388 : 40}px;top:${YT ? 300 : 1372}px;width:${YT ? 492 : 948}px;height:272px;display:none"></div>`);
   const flas = add(`<div style="position:absolute;inset:0;background:#fff;opacity:0"></div>`);
 
   const fmt = (x, d) => x.toFixed(d).replace('.', L.ondalik);

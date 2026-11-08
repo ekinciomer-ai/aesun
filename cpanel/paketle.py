@@ -74,6 +74,9 @@ yaz(os.path.join(P, "yayin", "index.html"), oku(os.path.join(DOCS, "yayin", "ind
 yaz(os.path.join(P, "asistan", "index.html"), oku(os.path.join(DOCS, "asistan", "index.html")).replace("../portal/", "../"))   # Özel Alan · Sunucu Asistanı (Antigravity)
 yaz(os.path.join(P, "kesif", "index.html"), oku(os.path.join(DOCS, "kesif", "index.html")).replace("../portal/", "../"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
+# Teklif sayfaları (çatı GES yerleşimi vb.): docs/teklif/ → portal.aksarayenerji.net/teklif/
+if os.path.isdir(os.path.join(DOCS, "teklif")):
+    kopya(os.path.join(DOCS, "teklif"), os.path.join(P, "teklif"))
 # Portal alt alanı PHP 8.3 ister (str_contains, never, adlandırılmış argümanlar). cPanel sürümü .htaccess işleyicisiyle
 # seçer; bu blok olmadan üst alanın (aksarayenerji.net, PHP 7.2) işleyicisi devreye girer ve api/*.php 500 verir (18 Eki).
 yaz(os.path.join(P, ".htaccess"), oku(os.path.join(CP, ".htaccess")).rstrip() + """

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-08T15:45+03:00",
+ "olusturma": "2026-11-08T16:06+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -71,8 +71,8 @@
   "Estudio Antiguo": {
    "gunluk_short_kotasi": 3,
    "seri_dagilimi": {
-    "Frase del Día": 1,
-    "İnanç & Kültür Tarihi": 1
+    "İnanç & Kültür Tarihi": 1,
+    "Frase del Día": 1
    },
    "durdurulan": []
   },
@@ -180,9 +180,9 @@
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
    "neden": "videoların %100'i tuttu (eşik 474 izlenme / 48 sa)",
-   "olculen": 3,
-   "erken": 5,
-   "medyan_48sa": 1589,
+   "olculen": 4,
+   "erken": 4,
+   "medyan_48sa": 1644,
    "tutma_orani": 100,
    "izlenme_yuzde": 67,
    "en_iyi": {
@@ -278,19 +278,22 @@
    "kanal": "Estudio Antiguo",
    "seri": "İnanç & Kültür Tarihi",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 1266,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "El 'Ojo Turco' ya estaba en España hace 2.500 años 🧿 (De Mesopotamia a Ibiza) #historia",
+    "i48": 1266
+   }
   }
  ],
  "esikler": {
   "Ancient Studio": 143,
   "Antik Stüdyo": 474,
-  "Estudio Antiguo": 50
+  "Estudio Antiguo": 253
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -321,6 +324,10 @@
    "21:00": {
     "n": 1,
     "medyan": 1345
+   },
+   "23:00": {
+    "n": 1,
+    "medyan": 1700
    }
   },
   "Ancient Studio": {
@@ -348,6 +355,12 @@
     "n": 1,
     "medyan": 324
    }
+  },
+  "Estudio Antiguo": {
+   "23:00": {
+    "n": 1,
+    "medyan": 1266
+   }
   }
  },
  "eylemler": [
@@ -363,7 +376,8 @@
  "bulgular": [
   "Dün (2026-11-07) 14064 izlenme geldi; bir önceki gün 4518.",
   "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 143 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 474 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 6 tanesi tuttu (eşik 474 izlenme / 48 sa).",
+  "Estudio Antiguo: son 1 Short'tan 1 tanesi tuttu (eşik 253 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %75'i tuttu (eşik 143 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",

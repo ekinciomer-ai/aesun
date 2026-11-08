@@ -1,59 +1,50 @@
 #!/bin/bash
-# Konut Bloğu 3D tanıtım sitesi: https://185.22.184.51/konut-blogu/  (şifresiz, noindex)
-# Bağımsız küçük nginx kapsayıcısı (bina3d-web) /opt/bina3d'yi sunar; Caddy IP bloğuna yalnız bu yol eklenir.
-# Demo'nun şifresi diğer yollar için aynen kalır. Caddy doğrulanmazsa eski hâline döner.
-set -euo pipefail
-echo "NOT: caddy kapsayıcıları: $(docker ps --format '{{.Names}}' | grep -i caddy | tr '\n' ' ') · Caddyfile var mı: $(ls /opt/caddy/Caddyfile 2>&1)"
-IP=185.22.184.51; CF=/opt/caddy/Caddyfile
-C=$(for n in $(docker ps --format "{{.Names}}"); do docker inspect $n --format "{{range .Mounts}}{{.Source}} {{end}}" | grep -q "$CF" && echo $n && break; done || true)
-[ -n "$C" ] || { echo "NOT: Caddyfile kullanan kapsayıcı yok; caddy kapsayıcıları: $(docker ps --format "{{.Names}}" | grep -i caddy | tr "\n" " ")"; exit 1; }
-HEDEF=$(docker inspect $C --format '{{range .Mounts}}{{if eq .Source "'$CF'"}}{{.Destination}}{{end}}{{end}}')
-echo "NOT: caddy kapsayıcısı $C ($HEDEF)"
-D=/opt/bina3d/konut-blogu
-mkdir -p $D
-[ -d /opt/bina3d/konut-blogu.onceki ] && rm -rf /opt/bina3d/konut-blogu.onceki
-cp -r $D /opt/bina3d/konut-blogu.onceki 2>/dev/null || true
-cp sunucu/bina3d/* $D/
-chmod -R a+rX /opt/bina3d
-AG=$(docker inspect $C --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' | awk '{print $1}')
-echo "NOT: caddy ağı $AG"
-if ! docker ps --format '{{.Names}}' | grep -qx bina3d-web; then
-  docker rm -f bina3d-web >/dev/null 2>&1 || true
-  docker run -d --name bina3d-web --restart unless-stopped --network "$AG" --memory 64m --cpus 0.5 \
-    -v /opt/bina3d:/usr/share/nginx/html:ro nginx:1.27-alpine >/dev/null
-fi
+# Gürses Yapı · Konut Bloğu 3D — ayrı proje. https://gursesyapi.<ip-tireli>.sslip.io (ücretsiz ad, Let's Encrypt sertifikası)
+# Ömer onayı (9 Kas 2026): ck-caddy'ye yalnız kendi ek dosyası eklenir; hata olursa geri alınır.
+set -uo pipefail
+IP=$(curl -s4 --max-time 5 https://api.ipify.org || hostname -I | awk '{print $1}')
+AD="gursesyapi.$(echo $IP | tr . -).sslip.io"
+EK=/opt/cutkoda/caddy-ek/bina3d.caddy
+D=/opt/bina3d/site
+mkdir -p $D && cp sunucu/bina3d/* $D/ && chmod -R a+rX /opt/bina3d
+rm -rf /opt/aesun-web/portal/teklif/konut-blogu 2>/dev/null
+AG=$(docker inspect ck-caddy -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' | tr ' ' '\n' | grep -m1 'ck-dis')
+docker rm -f bina3d-web >/dev/null 2>&1
+docker run -d --name bina3d-web --restart unless-stopped --network "$AG" -m 64m --cpus 0.5 --read-only \
+  --tmpfs /var/cache/nginx --tmpfs /var/run --tmpfs /tmp \
+  -v $D:/usr/share/nginx/html:ro --log-opt max-size=5m --log-opt max-file=2 nginx:1.27-alpine >/dev/null \
+  || { echo "NOT: kapsayıcı başlatılamadı"; exit 1; }
 sleep 3
-echo "NOT: kapsayıcı iç test: $(docker exec bina3d-web wget -qO- http://127.0.0.1/konut-blogu/ | grep -o '<title>[^<]*' | cut -c8-)"
-cp $CF $CF.yedek-$(date +%Y%m%d%H%M%S)
-python3 - "$CF" "$IP" <<'PY'
-import re, sys
-p, ip = sys.argv[1:3]
-s = open(p).read()
-m = re.search(r"\n" + re.escape(ip) + r" \{.*?\n\}\n?", s, re.S)
-if not m: print("NOT: IP bloğu bulunamadı"); sys.exit(1)
-b = m.group(0)
-if "bina3d-web" in b: print("NOT: konut-blogu yolu zaten var"); sys.exit(0)
-b2 = b.replace("\tbasic_auth {", "\t@korumali not path /konut-blogu /konut-blogu/*\n\tbasic_auth @korumali {", 1)
-ek = """	redir /konut-blogu /konut-blogu/ 301
-	handle /konut-blogu/* {
-		header X-Frame-Options SAMEORIGIN
-		reverse_proxy bina3d-web:80
+echo "NOT: kapsayıcı iç: $(docker exec ck-caddy wget -qO- http://bina3d-web/ 2>/dev/null | grep -o '<title>[^<]*' | cut -c8-)"
+ESKI=""; [ -f $EK ] && ESKI=$(cat $EK)
+cat > $EK <<C
+# Gürses Yapı · Konut Bloğu 3D (bina3d-web) — ayrı proje
+$AD {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Robots-Tag "noindex, nofollow"
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy no-referrer
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
 	}
-"""
-b2 = b2.replace("\t@demo path", ek + "\t@demo path", 1)
-if b2 == b or "@korumali" not in b2: print("NOT: blok beklenen biçimde değil"); sys.exit(1)
-open(p, "w").write(s.replace(b, b2))
-print("NOT: Caddyfile güncellendi")
-PY
-if docker exec $C caddy validate --config $HEDEF --adapter caddyfile >/tmp/cv.txt 2>&1; then
-  docker exec $C caddy reload --config $HEDEF --adapter caddyfile && echo "NOT: Caddy yüklendi"
+	@yaz not method GET HEAD
+	respond @yaz 405
+	reverse_proxy bina3d-web:80
+}
+C
+if docker exec ck-caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/tmp/b3.txt 2>&1 && docker exec ck-caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile >>/tmp/b3.txt 2>&1; then
+  echo "NOT: Caddy yenilendi"
 else
-  echo "NOT: doğrulama BAŞARISIZ, geri alındı: $(grep -i error /tmp/cv.txt | tail -1 | cut -c1-220)"
-  cp $(ls -t $CF.yedek-* | head -1) $CF; exit 1
+  echo "NOT: Caddy HATA, geri alındı: $(grep -i error /tmp/b3.txt | tail -1 | cut -c1-250)"
+  if [ -n "$ESKI" ]; then echo "$ESKI" > $EK; else rm -f $EK; fi
+  docker exec ck-caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1; exit 1
 fi
-sleep 3
-U=https://$IP
-echo "NOT: site: $(curl -sk -o /tmp/k.html -w '%{http_code}' --max-time 15 $U/konut-blogu/) $(grep -o '<title>[^<]*' /tmp/k.html | cut -c8-) · bina.html $(curl -sk -o /dev/null -w '%{http_code} %{size_download}' --max-time 30 $U/konut-blogu/bina.html) · plan $(curl -sk -o /dev/null -w '%{http_code}' --max-time 15 $U/konut-blogu/plan-A.jpg)"
-echo "NOT: geçerli sertifika ile: $(curl -s -o /dev/null -w '%{http_code}' --max-time 15 $U/konut-blogu/ || echo hata)"
-echo "NOT: demo hâlâ şifreli: $(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 $U/) / demo:demo $(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 -u demo:demo $U/)"
-echo "NOT: diğer siteler: api $(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://api.aksarayenerji.net/v1/saglik)"
+U=https://$AD
+for i in $(seq 1 18); do curl -s -o /dev/null --max-time 8 $U/ && break; sleep 10; done
+echo "NOT: site: $(curl -s -o /tmp/k.html -w '%{http_code}' --max-time 15 $U/ || echo SERTIFIKA_YOK) $(grep -o '<title>[^<]*' /tmp/k.html 2>/dev/null | cut -c8-) · bina.html $(curl -s -o /dev/null -w '%{http_code} %{size_download}' --max-time 30 $U/bina.html) · plan $(curl -s -o /dev/null -w '%{http_code}' --max-time 15 $U/plan-A.jpg) · POST $(curl -s -o /dev/null -w '%{http_code}' -X POST --max-time 10 $U/)"
+echo "NOT: sertifika: $(echo | openssl s_client -connect 127.0.0.1:443 -servername $AD 2>/dev/null | openssl x509 -noout -issuer -enddate 2>/dev/null | tr '\n' ' ' | cut -c1-140)"
+echo "NOT: diğer siteler: cutkoda $(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://cutkoda.com/) · api $(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://api.aksarayenerji.net/v1/saglik) · portal $(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://portal.aksarayenerji.net/) · portal eski kopya $(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://portal.aksarayenerji.net/teklif/konut-blogu/)"
+echo "NOT: caddy hata: $(docker logs --since 4m ck-caddy 2>&1 | grep -i '"error"' | grep -i 'sslip\|bina3d' | tail -1 | cut -c1-250)"

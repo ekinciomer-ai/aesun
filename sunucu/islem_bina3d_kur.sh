@@ -3,7 +3,11 @@
 # Bağımsız küçük nginx kapsayıcısı (bina3d-web) /opt/bina3d'yi sunar; Caddy IP bloğuna yalnız bu yol eklenir.
 # Demo'nun şifresi diğer yollar için aynen kalır. Caddy doğrulanmazsa eski hâline döner.
 set -euo pipefail
-IP=185.22.184.51; CF=/opt/caddy/Caddyfile; C=gesfin-caddy; HEDEF=/etc/caddy/Caddyfile
+IP=185.22.184.51; CF=/opt/caddy/Caddyfile
+C=$(for n in $(docker ps --format "{{.Names}}"); do docker inspect $n --format "{{range .Mounts}}{{.Source}} {{end}}" | grep -q "$CF" && echo $n && break; done)
+[ -n "$C" ] || { echo "NOT: Caddyfile kullanan kapsayıcı yok; caddy kapsayıcıları: $(docker ps --format "{{.Names}}" | grep -i caddy | tr "\n" " ")"; exit 1; }
+HEDEF=$(docker inspect $C --format '{{range .Mounts}}{{if eq .Source "'$CF'"}}{{.Destination}}{{end}}{{end}}')
+echo "NOT: caddy kapsayıcısı $C ($HEDEF)"
 D=/opt/bina3d/konut-blogu
 mkdir -p $D
 [ -d /opt/bina3d/konut-blogu.onceki ] && rm -rf /opt/bina3d/konut-blogu.onceki

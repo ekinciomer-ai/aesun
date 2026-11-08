@@ -50,6 +50,10 @@ jobs:
           os.makedirs('sunucu/yt_kuyruk/tamam', exist_ok=True)
           for s in sonuc:
               kod = s['kod']
+              if s.get('durum') == 'plan kaldırıldı':
+                  if s['eski'] in ix: ix[s['eski']]['durum'] = 'Gizli'; ix[s['eski']]['not'] = 'planı kaldırıldı'
+                  subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
+                  print(f'::notice::{kod}: planı kaldırıldı → {s["eski"]}'); continue
               if not s.get('vid'):
                   print('::warning::' + kod + ' ' + s['durum'] + ' ' + s.get('detay', '')); continue
               p = datetime.fromisoformat(s['publishAt'])

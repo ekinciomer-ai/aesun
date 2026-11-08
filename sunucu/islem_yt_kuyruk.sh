@@ -39,6 +39,26 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
     mp4 = jf[:-5] + ".mp4"
     if not os.path.exists(mp4) and it.get("sunucu_video"): mp4 = "/opt/aesun/video_bekleyen/" + os.path.basename(it["sunucu_video"])
     try:
+        if it.get("islem") == "plan_kaldir":
+            # yalnız planı kaldır: video Gizli kalır, silinmez (önce durum yedeği)
+            cid = KANAL[dil]
+            if dil not in toklar:
+                toklar[dil] = token(cid); mevcut[dil] = basliklar(toklar[dil], cid)
+            eski = it["vid"]
+            u = f"https://www.googleapis.com/youtube/v3/videos?part=status&id={eski}"
+            with urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": f"Bearer {toklar[dil]}"}), timeout=30) as r:
+                m = json.load(r)["items"][0]
+            json.dump(m, open(os.path.join(D, "yedek", f"plan_kaldir_{eski}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+            st = m["status"]
+            if st.get("privacyStatus") == "public":
+                print(f"NOT: {eski} zaten herkese açık; dokunulmadı"); sonuc.append({"kod": kod, "durum": "plan kaldırılamadı (yayında)", "eski": eski}); continue
+            st.pop("publishAt", None)
+            for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"): st.pop(k, None)
+            st["privacyStatus"] = "private"
+            req = urllib.request.Request("https://www.googleapis.com/youtube/v3/videos?part=status", data=json.dumps({"id": eski, "status": st}).encode(),
+                                         method="PUT", headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=30).read()
+            print(f"NOT: {eski} planı kaldırıldı (Gizli)"); sonuc.append({"kod": kod, "durum": "plan kaldırıldı", "eski": eski}); continue
         if kod in kayit:
             sonuc.append({"kod": kod, "durum": "zaten yüklü", "vid": kayit[kod]["vid"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         cid = KANAL[dil]

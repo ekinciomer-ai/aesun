@@ -7,7 +7,7 @@ import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {Pass} from 'three/addons/postprocessing/Pass.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {T, durum, egri} from './kin.js';
-import {ACC, MAT, mats, buildTurbin, buildSergi, buildTir, buildVinc} from './model.js';
+import {ACC, MAT, mats, buildTurbin, buildSergi, buildTir, buildVinc, kanatGeo} from './model.js';
 import {createUI} from './ui.js';
 
 const V3 = THREE.Vector3;
@@ -28,10 +28,10 @@ const LX = {
     r_ruz: 'RÜZGÂR', r_rot: 'ROTOR', r_jen: 'JENERATÖR', r_pit: 'KANAT AÇISI', r_guc: 'GÜÇ',
     bolumler: ['hero', 'ruzgar', 'kanat', 'nasel', 'nakliye', 'kurulum', 'uretim', 'koruma'],
     ad: {hero: 'GENEL', ruzgar: 'RÜZGÂR', kanat: 'KANAT', nasel: 'NASEL', nakliye: 'NAKLİYE', kurulum: 'KURULUM', uretim: 'ÜRETİM', koruma: 'KORUMA', son: 'SON'},
-    baslik: {hero: 'Rüzgâr Türbini', ruzgar: 'Rüzgârın Gücü', kanat: 'Kanat', nasel: 'Nasel', nakliye: 'Nakliye', kurulum: 'Kurulum', uretim: 'Üretim', koruma: 'Fırtına Koruması', son: 'Rüzgâr'},
+    baslik: {hero: 'Rüzgâr Türbini', ruzgar: 'Rüzgârın Gücü', kanat: 'Kanat', nasel: 'Nasel', nakliye: 'Nakliye', kurulum: 'Kurulum', uretim: 'Üretim', koruma: 'Fırtına Koruması', son: 'Rüzgâr', mhero: 'Rüzgârın Devi', mkanat: '153 m Kanat', malan: 'Dev Rotor', mkarsi: '5 MW ve 26 MW', muretim: 'Yıllık Üretim', mson: 'Rüzgârın Devi'},
     alt: {
       hero: 'NREL 5 MW REFERANS TÜRBİNİ', ruzgar: 'GÜÇ, HIZIN KÜPÜYLE ARTAR', kanat: 'CAM + KARBON ELYAF · REÇİNE', nasel: 'ANA MİL → ŞANZIMAN → JENERATÖR',
-      nakliye: 'UZATILABİLİR DORSE', kurulum: 'TEMEL · KULE · NASEL · ROTOR', uretim: 'DÖNÜŞ → ELEKTRİK → ŞEBEKE', koruma: 'PİTCH + YAW KONTROLÜ', son: 'YAKITSIZ ELEKTRİK',
+      nakliye: 'UZATILABİLİR DORSE', kurulum: 'TEMEL · KULE · NASEL · ROTOR', uretim: 'DÖNÜŞ → ELEKTRİK → ŞEBEKE', koruma: 'PİTCH + YAW KONTROLÜ', son: 'YAKITSIZ ELEKTRİK', mhero: 'BİLİYOR MUYDUN? · DONGFANG 26 MW', mkanat: 'BİR FUTBOL SAHASINDAN UZUN', malan: 'ROTOR ÇAPI 310 m', mkarsi: 'NREL 5 MW · DONGFANG 26 MW', muretim: 'ÜRETİCİ VERİSİ', mson: 'KOZMOS LAB',
     },
     e: {
       kanat: ['KANAT', '61,5 m · 17,7 t'], nasel: ['NASEL', '240 t'], kule: ['KULE', '87,6 m · 347 t'], gobek: ['GÖBEK', '3 kanat'],
@@ -41,7 +41,15 @@ const LX = {
       cam: ['CAM ELYAF KABUK', 'dış kabuk'], karbonU: ['KARBON KİRİŞ', 'ana yük taşıyıcı'], web1: ['KESME GÖVDESİ', 'iki kabuğu bağlar'], cekirdek: ['BALSA / KÖPÜK', 'hafif çekirdek'], kalip: ['KALIP', 'reçine infüzyonu'],
       temel: ['BETON TEMEL', 'ankraj civataları'], rotor: ['ROTOR', '110 t'], sebeke: ['ŞEBEKE', ''], pad: ['TRAFO', 'gerilimi yükseltir'],
     },
-    olcu: {cap: 'Ø 126 m', hub: '90 m', kanat: '61,5 m'},
+    olcu: {cap: 'Ø 126 m', hub: '90 m', kanat: '61,5 m', devKanat: '153 m', saha: '105 m', devCap: 'Ø 310 m'},
+    bilgi: (k) => ({
+      b26: bilgiKutu('26', 'MW', 'DONGFANG 26 MW', 'TEST TÜRBİNİ · DONGYING, ÇİN', 'referans türbin<br><b style="color:#16181b">5 MW</b>'),
+      b153: bilgiKutu('153', 'm', 'TEK KANAT', 'FUTBOL SAHASI: 105 m', 'referans kanat<br><b style="color:#16181b">61,5 m</b>'),
+      b310: bilgiKutu('77.000', 'm²', 'SÜPÜRÜLEN ALAN', 'ROTOR ÇAPI 310 m · ≈ 10 FUTBOL SAHASI', 'referans rotor<br><b style="color:#16181b">Ø 126 m</b>'),
+      b5v26: bilgiKutu('×2,5', '', 'ROTOR ÇAPI', '310 m ÷ 126 m', 'NREL 5 MW<br><b style="color:#16181b">Ø 126 m</b>'),
+      b100: bilgiKutu('100', 'GWh/yıl', 'YILLIK ÜRETİM', 'ORT. 10 m/s RÜZGÂRDA · ÜRETİCİ VERİSİ', 'yaklaşık<br><b style="color:#16181b">55.000 ev</b>'),
+    })[k],
+    kartMag: () => `<div class="mo" style="font-size:30px;letter-spacing:.2em;color:#7d828a">BİLİYOR MUYDUN?</div><div style="font-size:112px;font-weight:700;letter-spacing:-.03em;margin-top:6px">Rüzgârın devi<span style="color:${ACC}">.</span></div><div class="mo" style="font-size:26px;letter-spacing:.14em;margin-top:8px;color:#5d636b">KOZMOS LAB</div>`,
     kart: (o) => `<div class="mo" style="font-size:30px;letter-spacing:.2em;color:#7d828a">SIRADAKİ BÖLÜM</div><div style="font-size:120px;font-weight:700;letter-spacing:-.03em;margin-top:6px">Su<span style="color:${ACC}">.</span></div><div class="mo" style="font-size:26px;letter-spacing:.14em;margin-top:8px;color:#5d636b">ENERJİ ÜRETİM KAYNAKLARI · 03</div>`,
   },
   en: {
@@ -49,10 +57,10 @@ const LX = {
     r_ruz: 'WIND', r_rot: 'ROTOR', r_jen: 'GENERATOR', r_pit: 'PITCH', r_guc: 'POWER',
     bolumler: ['hero', 'ruzgar', 'kanat', 'nasel', 'nakliye', 'kurulum', 'uretim', 'koruma'],
     ad: {hero: 'OVERVIEW', ruzgar: 'WIND', kanat: 'BLADE', nasel: 'NACELLE', nakliye: 'TRANSPORT', kurulum: 'ERECTION', uretim: 'POWER', koruma: 'SAFETY', son: 'END'},
-    baslik: {hero: 'Wind Turbine', ruzgar: 'Power in the Wind', kanat: 'The Blade', nasel: 'The Nacelle', nakliye: 'Transport', kurulum: 'Erection', uretim: 'Generation', koruma: 'Storm Protection', son: 'Wind'},
+    baslik: {hero: 'Wind Turbine', ruzgar: 'Power in the Wind', kanat: 'The Blade', nasel: 'The Nacelle', nakliye: 'Transport', kurulum: 'Erection', uretim: 'Generation', koruma: 'Storm Protection', son: 'Wind', mhero: 'Wind Giant', mkanat: 'A 153 m Blade', malan: 'Giant Rotor', mkarsi: '5 MW vs 26 MW', muretim: 'Yearly Output', mson: 'Wind Giant'},
     alt: {
       hero: 'NREL 5 MW REFERENCE TURBINE', ruzgar: 'POWER GROWS WITH SPEED CUBED', kanat: 'GLASS + CARBON FIBRE · RESIN', nasel: 'MAIN SHAFT → GEARBOX → GENERATOR',
-      nakliye: 'EXTENDABLE TRAILER', kurulum: 'FOUNDATION · TOWER · NACELLE · ROTOR', uretim: 'ROTATION → ELECTRICITY → GRID', koruma: 'PITCH + YAW CONTROL', son: 'FUEL-FREE POWER',
+      nakliye: 'EXTENDABLE TRAILER', kurulum: 'FOUNDATION · TOWER · NACELLE · ROTOR', uretim: 'ROTATION → ELECTRICITY → GRID', koruma: 'PITCH + YAW CONTROL', son: 'FUEL-FREE POWER', mhero: 'DID YOU KNOW? · DONGFANG 26 MW', mkanat: 'LONGER THAN A FOOTBALL PITCH', malan: 'ROTOR DIAMETER 310 m', mkarsi: 'NREL 5 MW · DONGFANG 26 MW', muretim: 'MAKER DATA', mson: 'KOZMOS LAB',
     },
     e: {
       kanat: ['BLADE', '61.5 m · 17.7 t'], nasel: ['NACELLE', '240 t'], kule: ['TOWER', '87.6 m · 347 t'], gobek: ['HUB', '3 blades'],
@@ -62,10 +70,23 @@ const LX = {
       cam: ['GLASS-FIBRE SHELL', 'outer skin'], karbonU: ['CARBON SPAR CAP', 'main load path'], web1: ['SHEAR WEB', 'ties the shells'], cekirdek: ['BALSA / FOAM', 'light core'], kalip: ['MOULD', 'resin infusion'],
       temel: ['CONCRETE BASE', 'anchor bolts'], rotor: ['ROTOR', '110 t'], sebeke: ['GRID', ''], pad: ['TRANSFORMER', 'steps up voltage'],
     },
-    olcu: {cap: 'Ø 126 m', hub: '90 m', kanat: '61.5 m'},
+    olcu: {cap: 'Ø 126 m', hub: '90 m', kanat: '61.5 m', devKanat: '153 m', saha: '105 m', devCap: 'Ø 310 m'},
+    bilgi: (k) => ({
+      b26: bilgiKutu('26', 'MW', 'DONGFANG 26 MW', 'TEST TURBINE · DONGYING, CHINA', 'reference turbine<br><b style="color:#16181b">5 MW</b>'),
+      b153: bilgiKutu('153', 'm', 'ONE BLADE', 'FOOTBALL PITCH: 105 m', 'reference blade<br><b style="color:#16181b">61.5 m</b>'),
+      b310: bilgiKutu('77,000', 'm²', 'SWEPT AREA', 'ROTOR 310 m · ≈ 10 FOOTBALL PITCHES', 'reference rotor<br><b style="color:#16181b">Ø 126 m</b>'),
+      b5v26: bilgiKutu('×2.5', '', 'ROTOR DIAMETER', '310 m ÷ 126 m', 'NREL 5 MW<br><b style="color:#16181b">Ø 126 m</b>'),
+      b100: bilgiKutu('100', 'GWh/yr', 'ANNUAL OUTPUT', 'AT 10 m/s AVG WIND · MAKER DATA', 'about<br><b style="color:#16181b">55,000 homes</b>'),
+    })[k],
+    kartMag: () => `<div class="mo" style="font-size:30px;letter-spacing:.2em;color:#7d828a">DID YOU KNOW?</div><div style="font-size:112px;font-weight:700;letter-spacing:-.03em;margin-top:6px">Wind giant<span style="color:${ACC}">.</span></div><div class="mo" style="font-size:26px;letter-spacing:.14em;margin-top:8px;color:#5d636b">KOZMOS LAB</div>`,
     kart: (o) => `<div class="mo" style="font-size:30px;letter-spacing:.2em;color:#7d828a">NEXT EPISODE</div><div style="font-size:120px;font-weight:700;letter-spacing:-.03em;margin-top:6px">Hydro<span style="color:${ACC}">.</span></div><div class="mo" style="font-size:26px;letter-spacing:.14em;margin-top:8px;color:#5d636b">ENERGY SOURCES · 03</div>`,
   },
 };
+const bilgiKutu = (buyuk, birim, ust, alt, kiyas) => `<div style="position:absolute;inset:0;background:rgba(248,248,249,.95);border:2px solid #e1e3e6;border-radius:10px;box-shadow:0 4px 18px rgba(30,40,60,.07)"></div>
+<div style="position:absolute;left:24px;top:22px;display:flex;align-items:center;gap:14px;font:700 25px 'JetBrains Mono',monospace;letter-spacing:.12em"><i style="display:block;width:5px;height:24px;background:${ACC}"></i>${ust}</div>
+<div style="position:absolute;left:28px;top:70px;font:700 132px/1 Inter,sans-serif;letter-spacing:-.04em;color:#16181b">${buyuk}<span style="font-size:52px;letter-spacing:0;color:${ACC};margin-left:12px">${birim}</span></div>
+<div style="position:absolute;left:30px;top:214px;font:600 24px 'JetBrains Mono',monospace;letter-spacing:.06em;color:#5d636b">${alt}</div>
+<div style="position:absolute;right:28px;top:96px;width:300px;text-align:right;font:600 25px/1.5 'JetBrains Mono',monospace;color:#7d828a">${kiyas}</div>`;
 const L = LX[DIL];
 
 // ------------------------------------------------------------ sahne kurulumu
@@ -262,6 +283,81 @@ for (const [x, z, ry] of [[-190, -230, 0.2], [210, -330, 1.1], [-330, -520, 2.0]
   kopyalar.push({k, rot, ry});
 }
 scene.add(ciftlik);
+// magazin: Dongfang 26 MW test türbini (rotor 310 m, kanat 153 m; üretici açıklaması, Eylül 2025) — NREL modelinin 310/126 ölçeği
+const DEV_K = 310 / 126;
+const dev = TB.root.clone(true);
+dev.scale.setScalar(DEV_K);
+dev.position.set(300, 0, -40);
+let devRotor = null;
+dev.traverse((o) => {
+  if (o.userData.rotor) devRotor = o;
+});
+scene.add(dev);
+// süpürülen alan diski
+const disk = new THREE.Mesh(new THREE.CircleGeometry(155, 128), new THREE.MeshBasicMaterial({color: ACC, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide}));
+const diskHalka = new THREE.Mesh(new THREE.RingGeometry(153.5, 156, 160), new THREE.MeshBasicMaterial({color: ACC, transparent: true, opacity: 0.9, side: THREE.DoubleSide}));
+const diskG = new THREE.Group();
+diskG.add(disk, diskHalka);
+scene.add(diskG);
+// stadyum dünyası: futbol sahası (105 x 68 m) + 153 m kanat + insan
+const stad = new THREE.Group();
+stad.position.set(0, 0, 3000);
+{
+  const c = document.createElement('canvas');
+  c.width = 1050;
+  c.height = 680;
+  const g = c.getContext('2d');
+  for (let i = 0; i < 14; i++) {
+    g.fillStyle = i % 2 ? '#76a865' : '#6c9d5c';
+    g.fillRect(i * 75, 0, 75, 680);
+  }
+  g.strokeStyle = '#ffffff';
+  g.lineWidth = 6;
+  g.strokeRect(10, 10, 1030, 660);
+  g.beginPath();
+  g.moveTo(525, 10);
+  g.lineTo(525, 670);
+  g.stroke();
+  g.beginPath();
+  g.arc(525, 340, 91.5, 0, Math.PI * 2);
+  g.stroke();
+  g.strokeRect(10, 138, 165, 403);
+  g.strokeRect(875, 138, 165, 403);
+  const tx = new THREE.CanvasTexture(c);
+  tx.colorSpace = THREE.SRGBColorSpace;
+  tx.anisotropy = 8;
+  const saha = new THREE.Mesh(new THREE.PlaneGeometry(105, 68), new THREE.MeshStandardMaterial({map: tx, roughness: 0.9}));
+  saha.rotation.x = -Math.PI / 2;
+  saha.position.set(0, 0.05, 0);
+  saha.receiveShadow = true;
+  stad.add(saha);
+  for (const x of [-52.5, 52.5]) {
+    const kale = new THREE.Group();
+    kale.add(new THREE.Mesh(new THREE.BoxGeometry(0.15, 2.44, 0.15), MAT.boya), new THREE.Mesh(new THREE.BoxGeometry(0.15, 2.44, 0.15), MAT.boya), new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 7.32), MAT.boya));
+    kale.children[0].position.set(0, 1.22, -3.66);
+    kale.children[1].position.set(0, 1.22, 3.66);
+    kale.children[2].position.set(0, 2.44, 0);
+    kale.position.x = x;
+    stad.add(kale);
+  }
+}
+const devKanat = new THREE.Mesh(kanatGeo(64), new THREE.MeshStandardMaterial({color: '#d9dde2', roughness: 0.4, envMapIntensity: 0.55}));
+devKanat.castShadow = devKanat.receiveShadow = true;
+{
+  // açıklık +x, kiriş z, kalınlık y; sahanın yanında yerde, kökü sahanın sol kenarında
+  const m4 = new THREE.Matrix4().makeBasis(new V3(0, 0, 1), new V3(1, 0, 0), new V3(0, 1, 0));
+  devKanat.matrixAutoUpdate = false;
+  devKanat.matrix.copy(new THREE.Matrix4().makeTranslation(-52.5, 2.2 * DEV_K, 50).multiply(m4).multiply(new THREE.Matrix4().makeScale(DEV_K, DEV_K, DEV_K)));
+}
+stad.add(devKanat);
+const insan = new THREE.Group();
+insan.add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.2, 1.1, 16), MAT.koyu), new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), MAT.koyu));
+insan.children[0].position.y = 0.95;
+insan.children[1].position.y = 1.65;
+insan.position.set(-55, 0, 44);
+stad.add(insan);
+scene.add(stad);
+
 
 // rüzgâr çizgileri: incelmiş kutular, hız yönünde
 const NR = 340;
@@ -348,6 +444,60 @@ const SAHNE = {
     olcu: () => [],
     ruzgar: 1,
   },
+  mhero: {
+    dunya: 'turbin',
+    cam: (k) => ({tx: 240, ty: 140, tz: -40, az: lerp(198, 222, k), el: lerp(2, 6, k), d: lerp(620, 560, k), fov: 44}),
+    v: () => 10,
+    etiket: () => [],
+    olcu: () => [],
+    ruzgar: 0.5,
+    bilgi: 'b26',
+  },
+  mkanat: {
+    dunya: 'stad',
+    cam: (k) => ({tx: 24, ty: 2, tz: 3000 + 14, az: lerp(80, 100, k), el: lerp(66, 58, k), d: lerp(380, 350, k), fov: 44}),
+    v: () => 10,
+    etiket: () => [],
+    olcu: (k) => [['devKanat', ss(0.1, 0.25, k)], ['saha', ss(0.25, 0.4, k)]],
+    bilgi: 'b153',
+  },
+  malan: {
+    dunya: 'turbin',
+    cam: (k) => ({tx: 300, ty: 190, tz: -40, az: lerp(28, 12, k), el: lerp(4, 8, k), d: lerp(820, 760, k), fov: 44}),
+    v: () => 10,
+    disk: (k) => ss(0.08, 0.3, k),
+    etiket: () => [],
+    olcu: (k) => [['devCap', ss(0.2, 0.35, k)]],
+    bilgi: 'b310',
+  },
+  mkarsi: {
+    dunya: 'turbin',
+    cam: (k) => ({tx: 150, ty: 150, tz: -20, az: lerp(4, 10, k), el: 4, d: lerp(860, 800, k), fov: 44}),
+    v: () => 10,
+    etiket: () => [],
+    olcu: (k) => [['cap', ss(0.1, 0.25, k)], ['devCap', ss(0.25, 0.4, k)]],
+    bilgi: 'b5v26',
+  },
+  muretim: {
+    dunya: 'turbin',
+    cam: (k) => ({tx: 300, ty: 222, tz: -40, az: lerp(150, 120, k), el: lerp(10, 16, k), d: lerp(300, 380, k), fov: 44}),
+    v: () => 10,
+    etiket: () => [],
+    olcu: () => [],
+    ruzgar: 1,
+    bilgi: 'b100',
+  },
+  mson: {
+    dunya: 'turbin',
+    cam: (k) => ({tx: 150, ty: 130, tz: -40, az: lerp(200, 215, k), el: 3, d: lerp(820, 760, k), fov: 44}),
+    v: () => 10,
+    etiket: () => [],
+    olcu: () => [],
+    ruzgar: 0.5,
+    bilgi: 'b26',
+    kart: (k) => ss(0.15, 0.35, k),
+    kartAd: 'mag',
+  },
   son: {
     dunya: 'turbin',
     cam: (k) => ({tx: 20, ty: 80, tz: -260, az: lerp(4, 9, k), el: 3 + 3 * k, d: lerp(500, 460, k), fov: 44}),
@@ -388,6 +538,13 @@ const AN = {
 };
 const ETAD = {tirKanat: 'kanat'};
 const OLCU = {
+  devKanat: () => [stad.localToWorld(new V3(-52.5, 0.4, 62)), stad.localToWorld(new V3(-52.5 + 153, 0.4, 62)), {dy: 46}],
+  saha: () => [stad.localToWorld(new V3(-52.5, 0.4, -40)), stad.localToWorld(new V3(52.5, 0.4, -40)), {dy: -46}],
+  devCap: () => {
+    const c = devRotor.localToWorld(new V3(0, 0, 1));
+    const ax = devRotor.parent.localToWorld(new V3(1, 0, 1)).sub(devRotor.parent.localToWorld(new V3(0, 0, 1))).normalize();
+    return [c.clone().addScaledVector(ax, -155), c.clone().addScaledVector(ax, 155), {dy: -44}];
+  },
   hub: () => [new V3(-9, 0, 0), new V3(-9, T.hub, 0), {dx: -70}],
   cap: () => {
     const c = TB.tahrik.localToWorld(new V3(0, 0, 1));
@@ -516,6 +673,15 @@ function kare(t) {
   VINC.root.visible = s.ad === 'kurulum';
   sebeke.visible = dunya === 'turbin';
   ciftlik.visible = s.ad === 'son';
+  const mag = s.ad[0] === 'm' && s.ad !== 'ruzgar';
+  dev.visible = mag && dunya === 'turbin';
+  stad.visible = dunya === 'stad';
+  if (stad.visible) zemin.visible = true;
+  sebeke.visible = sebeke.visible && !mag;
+  const dk = S.disk ? S.disk(k) : 0;
+  diskG.visible = dk > 0.01;
+  disk.material.opacity = 0.2 * dk;
+  diskHalka.material.opacity = 0.9 * dk;
   // türbin pozu
   const aci = look(ACI, t);
   const poz = S.poz ? S.poz(k) : {};
@@ -580,6 +746,14 @@ function kare(t) {
       direk.setMatrixAt(i, m4);
     }
     direk.instanceMatrix.needsUpdate = true;
+  }
+  if (devRotor) {
+    devRotor.rotation.z = look(ACI, t) * 0.45;
+    devRotor.updateMatrixWorld(true);
+    if (diskG.visible) {
+      diskG.position.copy(devRotor.localToWorld(new V3(0, 0, 0.5)));
+      diskG.quaternion.copy(devRotor.getWorldQuaternion(new THREE.Quaternion()));
+    }
   }
   // çiftlik
   for (const c of kopyalar) if (c.rot) c.rot.rotation.z = aci * 0.93 + c.ry;
@@ -656,7 +830,9 @@ function kare(t) {
     etiketler,
     olculer,
     flas,
-    kart: S.kart ? {o: S.kart(k), html: L.kart()} : null,
+    kart: S.kart ? {o: S.kart(k), html: S.kartAd ? L.kartMag() : L.kart()} : null,
+    bilgi: S.bilgi ? L.bilgi(S.bilgi) : null,
+    cipYok: !!S.bilgi,
   });
 }
 window.kare = kare;

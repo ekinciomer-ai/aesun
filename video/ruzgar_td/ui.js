@@ -65,6 +65,7 @@ export function createUI(app, L) {
   // ------------------------------------------------------------ altyazı
   const alt = add(`<div id="alt2"></div>`);
 
+  const n0 = ui.children.length;
   // ------------------------------------------------------------ 01 canlı veri
   panel(40, 1372, 492, 272, L.canli, '01');
   const ROWS = [L.r_ruz, L.r_rot, L.r_jen, L.r_pit, L.r_guc];
@@ -83,6 +84,7 @@ export function createUI(app, L) {
   const formul = add(`<div class="mo" style="position:absolute;left:572px;top:1604px;font-size:21px;color:#5d636b;letter-spacing:.04em">P = ½·ρ·A·Cp·v³</div>`);
   void formul;
 
+  const pnl = Array.from(ui.children).slice(n0);
   // ------------------------------------------------------------ 03 bölümler
   const chips = {};
   {
@@ -99,6 +101,7 @@ export function createUI(app, L) {
   const callSvg = add(`<svg style="position:absolute;left:0;top:0;overflow:visible" width="1080" height="1920"></svg>`);
   const callG = add(`<div style="position:absolute;inset:0"></div>`);
   const kart = add(`<div style="position:absolute;left:0;right:0;top:700px;text-align:center;opacity:0"></div>`);
+  const bilgi = add(`<div style="position:absolute;left:40px;top:1372px;width:948px;height:272px;display:none"></div>`);
   const flas = add(`<div style="position:absolute;inset:0;background:#fff;opacity:0"></div>`);
 
   const fmt = (x, d) => x.toFixed(d).replace('.', L.ondalik);
@@ -143,6 +146,8 @@ export function createUI(app, L) {
         ch.innerHTML = h;
       }
       // çipler
+      if (s.cipYok) for (const k in chips) chips[k].style.visibility = 'hidden';
+      else for (const k in chips) chips[k].style.visibility = 'visible';
       for (const k in chips) {
         const on = k === s.bolum;
         const gecti = L.bolumler.indexOf(k) < L.bolumler.indexOf(s.bolum);
@@ -175,6 +180,9 @@ export function createUI(app, L) {
       callSvg.innerHTML = lh;
       callG.innerHTML = chh;
       // kapanış
+      for (const e of pnl) e.style.visibility = s.bilgi ? 'hidden' : 'visible';
+      bilgi.style.display = s.bilgi ? 'block' : 'none';
+      if (s.bilgi) bilgi.innerHTML = s.bilgi;
       kart.style.opacity = String(s.kart?.o ?? 0);
       if (s.kart) kart.innerHTML = s.kart.html;
       flas.style.opacity = String(s.flas ?? 0);

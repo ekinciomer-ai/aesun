@@ -64,6 +64,7 @@ jobs:
           sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null
           cd /tmp/p && ls parca_*.mp4 | sort -t_ -k2 -n | sed "s/^/file '/;s/$/'/" > l.txt && ffmpeg -v error -f concat -safe 0 -i l.txt -c copy /tmp/sessiz.mp4
           D="$GITHUB_WORKSPACE/${{ inputs.dizin }}"; T=$(python3 -c "import json;print(json.load(open('$D/${{ inputs.kurgu }}'))['toplam'])")
+          export CRF=$(python3 -c "import json;print(16 if json.load(open('$D/${{ inputs.kurgu }}')).get('olcek') else 20)")
           bash $GITHUB_WORKSPACE/video/arac/karistir.sh /tmp/sessiz.mp4 "$D/${{ inputs.anlatim }}" "$D/${{ inputs.muzik }}" $T /tmp/${{ inputs.ad }}.mp4
           ls -la /tmp/${{ inputs.ad }}.mp4
       - uses: actions/upload-artifact@v4

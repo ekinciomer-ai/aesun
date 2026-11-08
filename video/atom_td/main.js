@@ -82,7 +82,8 @@ canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:bl
 app.appendChild(canvas);
 const W = innerWidth, H = innerHeight;
 const renderer = new THREE.WebGLRenderer({canvas, antialias: false, preserveDrawingBuffer: true});
-renderer.setPixelRatio(1);
+const PXR = +(Q.get('pr') || Math.min(2.5, (devicePixelRatio || 1) * 1.25)); // süper örnekleme: çizim, ekran çözünürlüğünün 1,5 katı
+renderer.setPixelRatio(PXR);
 renderer.setSize(W, H, false);
 renderer.toneMapping = THREE.NeutralToneMapping;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -109,7 +110,7 @@ const BG = '#e8e9eb';
 scene.fog = new THREE.Fog(BG, 200, 900);
 const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 4000);
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W, H, {type: THREE.HalfFloatType, samples: 4}));
-composer.setPixelRatio(1);
+composer.setPixelRatio(PXR);
 composer.setSize(W, H);
 composer.addPass(new RenderPass(scene, camera));
 const gtao = new GTAOPass(scene, camera, W, H);
@@ -158,7 +159,7 @@ composer.addPass(new OutputPass());
 const SUN = new V3(-0.42, 0.8, 0.43).normalize();
 const sun = new THREE.DirectionalLight('#fffaf2', 2.4);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(4096, 4096);
 sun.shadow.radius = 8;
 sun.shadow.blurSamples = 16;
 sun.shadow.bias = -0.0004;

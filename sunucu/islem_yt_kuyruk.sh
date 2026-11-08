@@ -83,10 +83,14 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
                 print(f"NOT: {kod} kalite uyarısı: {'; '.join(kq['uyari'])}")
         boyut = os.path.getsize(mp4)
         dil_kodu = {"TR": "tr", "EN": "en", "ES": "es"}.get(dil, "en")
+        from datetime import datetime, timezone
+        hemen_yayin = datetime.fromisoformat(it["publishAt"]) <= datetime.now(timezone.utc)
+        durum_alan = ({"privacyStatus": "public", "selfDeclaredMadeForKids": False, "containsSyntheticMedia": bool(it.get("sentetik", False))}
+                      if hemen_yayin else
+                      {"privacyStatus": "private", "publishAt": it["publishAt"], "selfDeclaredMadeForKids": False, "containsSyntheticMedia": bool(it.get("sentetik", False))})
         govde = {"snippet": {"title": it["baslik"][:100], "description": it["aciklama"][:4900], "tags": it.get("etiketler", []),
                              "categoryId": it.get("kategori", "27"), "defaultLanguage": dil_kodu, "defaultAudioLanguage": dil_kodu},
-                 "status": {"privacyStatus": "private", "publishAt": it["publishAt"], "selfDeclaredMadeForKids": False,
-                            "containsSyntheticMedia": bool(it.get("sentetik", False))}}
+                 "status": durum_alan}
         req = urllib.request.Request("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
                                      data=json.dumps(govde).encode(), method="POST",
                                      headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": "application/json; charset=UTF-8",

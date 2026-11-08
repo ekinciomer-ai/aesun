@@ -1,0 +1,8 @@
+{
+ "id": "video-opuscar",
+ "repo": "https://github.com/lemomo-ai/lemo-opuscar",
+ "ref": "",
+ "kurulum": "sudo apt-get install -y -qq ffmpeg > /dev/null && LEMO_OPUSCAR_HOME=$PWD sh plugin/skills/lemo-opuscar/scripts/setup.sh deps 2>&1 | tail -3 && sh $GIRDI/font_al.sh",
+ "duman": "for s in woodcut silent-film engraving; do grep -ohE 'DUR *= *[0-9.]+' -r styles/$s/demo --include=*.js --include=*.html | head -1; node core/render/still.mjs styles/$s/demo 2 8 16 30 --size 960x540 --out $CIKTI --prefix ${s}_ 2>&1 | tail -4 || echo HATA_$s; done; ls $CIKTI; T0=$(date +%s); node core/render/video.mjs styles/woodcut/demo --fps 24 --workers 4 --size 1280x720 --out /tmp/woodcut_ham.mp4 2>&1 | tail -3 && echo \"woodcut video render: $(( $(date +%s)-T0 )) sn\" && ffmpeg -v error -y -i /tmp/woodcut_ham.mp4 -t 30 -vf scale=960:-2 -c:v libx264 -crf 30 -preset veryfast -an $CIKTI/woodcut_ornek.mp4 && ls -la $CIKTI/woodcut_ornek.mp4",
+ "sure_dk": 40
+}

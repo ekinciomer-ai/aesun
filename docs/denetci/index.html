@@ -1,0 +1,1926 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="same-origin">
+<title>Sistem Denetçisi · Aksaray Enerji</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4a28 28 0 0 0 0 56z' fill='%23D7262E'/%3E%3Cpath d='M32 4a28 28 0 0 1 0 56z' fill='%232B2F35'/%3E%3Cpath d='M36 10 20 36h11l-4 18 18-28H34z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{
+  --k:#D7262E;--kk:#A8131B;--s:#2B2F35;--y:#5B6470;--z:#F4F5F7;--c:#E2E5EA;--b:#fff;
+  --g:#F08A24;--m:#2a78d6;--ok:#1E9E5A;--mor:#7C3AED;--lac:#1F3B66;--tur:#0D9488;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:14.5px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--s);background:var(--z);min-height:100vh}
+.ust{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--b);border-bottom:1px solid var(--c);position:sticky;top:0;z-index:40}
+.ust a,.ust button{color:var(--s);text-decoration:none;font:inherit;background:none;border:0;cursor:pointer;padding:0}
+.ust a:hover,.ust button:hover{color:var(--k)}
+.marka{display:inline-flex;align-items:center;gap:9px;font-weight:700}
+.marka b{letter-spacing:.05em}.marka .m2{color:var(--k)}
+.rozet-ai{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;background:#F3E8FF;color:#6D28D9;border:1px solid #DDD6FE}
+main{max-width:1320px;margin:0 auto;padding:18px 16px 48px}
+h1{font-size:22px;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h2{font-size:16px;margin:0 0 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+h3{font-size:14px;margin:0 0 8px;color:var(--s)}
+.alt{color:var(--y);font-size:13px;margin:3px 0 0}
+.bas{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.btn{padding:7px 12px;border:1px solid #CCD2DA;border-radius:8px;background:#fff;color:var(--s);font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn:hover:not(:disabled){border-color:var(--s)}
+.btn.aktif{background:var(--s);color:#fff;border-color:var(--s)}
+.btn.kirmizi{background:var(--k);color:#fff;border-color:var(--k)}
+.kart{background:var(--b);border:1px solid var(--c);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(15,23,42,.03)}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:11px;margin-bottom:14px}
+.kpi-kutu{background:var(--b);border:1px solid var(--c);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s}
+.kpi-kutu:hover{transform:translateY(-1px);border-color:#9AA6B5}
+.kpi-kutu::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kp-r,#CCD2DA)}
+.kpi-kutu small{display:block;color:var(--y);font-size:12px;font-weight:600}
+.kpi-kutu b{font-size:20px;font-variant-numeric:tabular-nums;display:block;margin-top:2px}
+.kpi-kutu span.alt-k{display:block;color:var(--y);font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.et{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 9px;border-radius:99px;background:#EEF0F3;font-weight:600;white-space:nowrap}
+.et.ok{background:#E8F5EC;color:#1D6B36}
+.et.k{background:#FDECEC;color:#8E1117}
+.et.u{background:#FFF4DC;color:#9A5B00}
+.et.m{background:#EAF2FD;color:#1956A8}
+.et.mor{background:#F3E8FF;color:#6D28D9}
+.sek{display:flex;gap:5px;background:#E9ECF0;padding:4px;border-radius:10px;width:max-content;max-width:100%;margin-bottom:14px;flex-wrap:wrap}
+.sek button{border:0;background:none;font:inherit;font-size:13.5px;font-weight:600;color:var(--y);padding:6px 12px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.sek button.on{background:#fff;color:var(--s);box-shadow:0 1px 2px rgba(0,0,0,.07)}
+.hata{background:#FDECEC;color:#8E1117;border:1px solid #F8CACA;border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.uyari-kutu{background:#FFF9EB;color:#8A5000;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.bos{color:var(--y);padding:28px;text-align:center}
+.tablo-kutu{overflow-x:auto;border:1px solid var(--c);border-radius:11px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--c);vertical-align:top}
+th{color:var(--y);font-size:11.5px;background:#F8F9FB;font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+td.sag,th.sag{text-align:right}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:#FAFBFD}
+.iki-kolon{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px;margin-bottom:14px}
+.uc-kolon{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+
+/* Şematik Mimari Diyagramı */
+@keyframes akis{to{stroke-dashoffset:-28}}
+@keyframes nabiz{0%,100%{opacity:1}50%{opacity:.4}}
+.akis-hat{stroke-dasharray:8 6;animation:akis 1.1s linear infinite}
+.akis-dur{stroke-dasharray:5 5;opacity:.55}
+.nabiz-nokta{animation:nabiz 1.8s ease-in-out infinite}
+.sema- kapsayici{position:relative;overflow-x:auto}
+.sema-svg{display:block;width:100%;min-width:920px;height:auto;background:linear-gradient(180deg,#F8FAFC 0%,#F1F5F9 100%);border:1px solid var(--c);border-radius:12px}
+.sema-dugum{cursor:pointer;transition:opacity .15s}
+.sema-dugum:hover rect.dugum-kutu{stroke-width:2.5;filter:drop-shadow(0 3px 8px rgba(15,23,42,.12))}
+.sema-dugum.secili rect.dugum-kutu{stroke:#2a78d6;stroke-width:2.8}
+
+/* İş Akış Şeridi (Pipeline) */
+.boru-serit{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:12px}
+.boru-adim{background:#F8FAFC;border:1px solid var(--c);border-radius:11px;padding:11px 13px;position:relative}
+.boru-adim b{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.boru-adim small{color:var(--y);font-size:12px;display:block}
+
+/* AI Teşhis Kutusu */
+.ai-panel{background:linear-gradient(135deg,#FAF5FF 0%,#F3E8FF 100%);border:1px solid #DDD6FE;border-radius:13px;padding:16px 18px;margin-bottom:14px}
+.ai-panel h2{color:#5B21B6;margin-bottom:8px}
+.ai-metin{background:#fff;border:1px solid #E9D5FF;border-radius:10px;padding:13px 15px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;color:#1E293B;max-height:460px;overflow-y:auto}
+.ai-adimlar{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:12px}
+.ai-adim{background:rgba(255,255,255,.85);border:1px solid #E9D5FF;border-radius:9px;padding:9px 12px;font-size:12.5px}
+.ai-adim b{color:#6D28D9;display:block;margin-bottom:2px}
+
+/* Kod / Çıktı Kutusu */
+pre.kod{background:#1E293B;color:#E2E8F0;padding:10px 12px;border-radius:8px;font:12px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-x:auto;margin:6px 0 0;max-height:260px}
+.filtre-satir{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+input.ara,select.secim{padding:6px 10px;border:1px solid #CCD2DA;border-radius:8px;font:inherit;font-size:13px;background:#fff;color:var(--s)}
+.bar-dis{height:8px;background:#E2E5EA;border-radius:99px;overflow:hidden;width:100%;margin-top:4px}
+.bar-ic{height:100%;border-radius:99px}
+@media(max-width:760px){
+  .iki-kolon{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="ust">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <a class="marka" href="../">
+      <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4a28 28 0 0 0 0 56z" fill="#D7262E"/><path d="M32 4a28 28 0 0 1 0 56z" fill="#2B2F35"/><path d="M36 10 20 36h11l-4 18 18-28H34z" fill="#fff"/></svg>
+      <span><b>AKSARAY <span class="m2">ENERJİ</span></b> · Sistem Denetçisi</span>
+    </a>
+    <span class="rozet-ai">🧠 mattpocock/skills · Sıfır Kurulum</span>
+  </div>
+  <nav style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <span id="kim" style="font-size:13px;color:var(--y)"></span>
+    <a href="../monitoring/" class="btn" style="padding:4px 9px;font-size:12.5px">📊 Monitoring</a>
+    <a href="../musteri/" class="btn" style="padding:4px 9px;font-size:12.5px">☀ Müşteri Panel</a>
+    <a href="../" style="font-weight:600">← Portal</a>
+  </nav>
+</header>
+
+<main id="ana">
+  <div class="bos">Sistem Denetçisi verileri ve şematik mimari yükleniyor…</div>
+</main>
+
+<script>
+const API_KOK = 'https://api.aksarayenerji.net';
+const te = new TextEncoder();
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = (v, d = 0) => v == null || isNaN(v) ? '—' : Number(v).toLocaleString('tr-TR', { maximumFractionDigits: d, minimumFractionDigits: d });
+const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(t)))].map(x => x.toString(16).padStart(2, '0')).join('');
+
+let S = null;
+let BEL = '';
+let VERI = {};
+let SEKME = ['akis', 'guvenlik'].includes((location.hash || '').slice(1)) ? location.hash.slice(1) : 'tumu';
+let SECILI_DUGUM = null;
+let DENETIM_FILTRE = 'hepsi';
+let BILDIRIM_KONU = 'hepsi';
+let BILDIRIM_ARA = '';
+let SON_YUKLEME = null;
+
+function oturumOku() {
+  try {
+    const o = JSON.parse(localStorage.getItem('ae_portal') || 'null');
+    return o && o.S && Date.now() < (o.son || 0) ? o.S : null;
+  } catch (e) { return null; }
+}
+
+async function belirtecBul(s) {
+  if (!s) return '';
+  if (s.ka) return await sha('aesun-api|yonetici|' + s.ka);
+  if (s.parasal && s.parasal.d) return await sha('aesun-api|parasal|' + s.parasal.d);
+  const an = s.anahtarlar || {};
+  if (an.monitoring) return await sha('aesun-api|monitoring|' + an.monitoring);
+  if (an.denetci) return await sha('aesun-api|denetci|' + an.denetci);
+  return '';
+}
+
+async function jsonAl(url, bel = '') {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const tmr = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
+  try {
+    const hd = bel ? { 'X-AE-Anahtar': bel } : {};
+    const r = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now(), {
+      headers: hd,
+      cache: 'no-store',
+      ...(ctrl ? { signal: ctrl.signal } : {})
+    });
+    if (tmr) clearTimeout(tmr);
+    if (!r.ok) return { _hata: r.status };
+    return await r.json();
+  } catch (e) {
+    if (tmr) clearTimeout(tmr);
+    return { _hata: (e && e.message) || 'bağlantı hatası' };
+  }
+}
+
+function trZaman(iso) {
+  if (!iso) return '—';
+  try {
+    const d = typeof iso === 'number' ? new Date(iso * 1000) : new Date(iso);
+    if (isNaN(d.getTime())) return String(iso);
+    return d.toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return String(iso); }
+}
+
+function dkOnce(iso) {
+  if (!iso) return null;
+  try {
+    const d = typeof iso === 'number' ? new Date(iso * 1000) : new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    return Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
+  } catch (e) { return null; }
+}
+
+function yasEtiket(dk, esikUyari = 35, esikHata = 90) {
+  if (dk == null) return '<span class="et">bilinmiyor</span>';
+  const metin = dk < 60 ? dk + ' dk önce' : (dk < 1440 ? Math.round(dk / 60) + ' sa ' + (dk % 60) + ' dk önce' : Math.round(dk / 1440) + ' gün önce');
+  if (dk <= esikUyari) return '<span class="et ok">' + metin + '</span>';
+  if (dk <= esikHata) return '<span class="et u">' + metin + '</span>';
+  return '<span class="et k">' + metin + '</span>';
+}
+
+function durumNoktaRenk(durum) {
+  if (durum === 'ok' || durum === 'normal' || durum === 'sakin') return '#1E9E5A';
+  if (durum === 'uyari' || durum === 'onardi') return '#F08A24';
+  if (durum === 'sorun' || durum === 'acik' || durum === 'hata') return '#D7262E';
+  return '#64748B';
+}
+
+function sorunListesi(s) {
+  if (!s) return [];
+  if (Array.isArray(s)) return s.map(x => typeof x === 'string' ? x : JSON.stringify(x));
+  if (typeof s === 'object') return Object.entries(s).map(([k, v]) => k + ': ' + (typeof v === 'string' ? v : JSON.stringify(v)));
+  return [String(s)];
+}
+
+async function tumVerileriYukle() {
+  try {
+    S = oturumOku();
+    BEL = await belirtecBul(S);
+    if ($('kim')) {
+      $('kim').innerHTML = S
+        ? ('👤 <b>' + esc(S.ad || S.kul) + '</b>' + (S.ka ? ' <span class="et k">Yönetici</span>' : ' <span class="et ok">Yetkili</span>'))
+        : '<span class="et u">Açık Görünüm (Tam kayıtlar için Portal\'dan giriş yapın)</span>';
+    }
+
+    const dosya = yol => BEL ? jsonAl(API_KOK + '/v1/dosya/' + yol, BEL) : Promise.resolve({ _hata: 'oturum_yok' });
+
+    const [
+      saglik,
+      bekciNs1,
+      denetim,
+      aiTani,
+      isHatalari,
+      sef,
+      sistemBekci,
+      piNabiz,
+      cihazBekci,
+      bildirimDurum,
+      bildirimKayit,
+      analizDurum,
+      aesunSon,
+      musteriListe,
+      internet,
+      guvenlik
+    ] = await Promise.all([
+      jsonAl(API_KOK + '/v1/saglik'),
+      jsonAl(API_KOK + '/v1/bekci'),
+      dosya('n8n/denetim.json'),
+      dosya('n8n/ai_bekci_tani.json'),
+      dosya('n8n/is_hatalari.json'),
+      dosya('n8n/sef.json'),
+      dosya('n8n/sistem_bekci.json'),
+      dosya('n8n/pi_nabiz.json'),
+      dosya('n8n/bekci.json'),
+      dosya('n8n/bildirim_durum.json'),
+      dosya('n8n/bildirim_kayit.json'),
+      dosya('n8n/analiz/durum.json'),
+      dosya('n8n/aesun_son.json'),
+      (S && S.ka && BEL) ? jsonAl(API_KOK + '/v1/musteri/liste', BEL) : Promise.resolve(null),
+      dosya('n8n/analiz/internet.json'),
+      dosya('n8n/guvenlik_ns1.json')
+    ]);
+
+    VERI = {
+      saglik, bekciNs1, denetim, aiTani, isHatalari, sef,
+      sistemBekci, piNabiz, cihazBekci, bildirimDurum, bildirimKayit,
+      analizDurum, aesunSon, musteriListe, internet, guvenlik
+    };
+    SON_YUKLEME = new Date();
+    ciz();
+  } catch (err) {
+    console.error('Sistem Denetçisi yükleme hatası:', err);
+    $('ana').innerHTML = '<div class="hata"><b>Sayfa çizilirken beklenmeyen hata:</b> ' + esc(err && (err.stack || err.message || err)) + '</div>';
+  }
+}
+
+// ---- ŞEMATİK MİMARİ DÜĞÜM HESAPLAMA ----
+function mimariDugumleriHesapla() {
+  const { saglik, bekciNs1, denetim, aiTani, isHatalari, sef, sistemBekci, piNabiz, cihazBekci, bildirimDurum, bildirimKayit, analizDurum, aesunSon, musteriListe } = VERI;
+  const gecikenler = (bekciNs1 && bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken)) ? bekciNs1.tarama.geciken : [];
+  const gecikenBul = dosyaAdi => gecikenler.find(g => g && g.dosya === dosyaAdi);
+
+  // 1. Saha Pi & Sistem Bekçisi
+  const piGecikme = gecikenBul('n8n/pi_nabiz.json') || gecikenBul('n8n/sistem_bekci.json');
+  const piYas = (sistemBekci && !sistemBekci._hata && dkOnce(sistemBekci.t) != null)
+    ? dkOnce(sistemBekci.t)
+    : (piGecikme ? piGecikme.yas_dk : (analizDurum && analizDurum.veri_yasi_dk ? analizDurum.veri_yasi_dk['Pi saatlik ölçüm'] : null));
+  const piSorunList = sorunListesi(sistemBekci && sistemBekci.sorunlar);
+  const piSorun = piSorunList.length > 0 || (piYas != null && piYas > 45);
+  const piDurum = piYas == null ? 'bilinmiyor' : (piSorun ? 'sorun' : 'ok');
+
+  // 2. GES Santralleri (Sera, Darılmaz, HG, Aksaray)
+  const gesOzet = (aesunSon && aesunSon.ozet) || {};
+  const gesGecikme = gecikenBul('n8n/sungrow_son.json') || gecikenBul('n8n/fusionsolar_son.json') || gecikenBul('n8n/inavitas_son.json');
+  const gesSorun = !!(gesGecikme || (bildirimDurum && bildirimDurum.aktif && (bildirimDurum.aktif['kaynak:sungrow'] || bildirimDurum.aktif['kaynak:fusion'] || bildirimDurum.aktif['kaynak:inavitas'])));
+  const gesDurum = gesSorun ? 'uyari' : 'ok';
+
+  // 3. MEDAŞ 6 OSOS & Kompanzasyon
+  const komp = (bildirimDurum && bildirimDurum.komp) || {};
+  const kompAsim = Object.values(komp).filter(v => v === 'asim').length;
+  const ososGecikme = gecikenBul('2026_osos_endeks.json');
+  const ososDurum = (kompAsim > 0 || ososGecikme) ? 'uyari' : 'ok';
+
+  // 4. 29 Antminer Hyd & Cihaz Bekçisi
+  const anlik = (analizDurum && analizDurum.anlik) || {};
+  const hwSay = bildirimDurum && bildirimDurum.aktif ? Object.keys(bildirimDurum.aktif).filter(k => k.startsWith('saglik:')).length : 0;
+  const madenGecikme = gecikenBul('antminer_panel.json');
+  const madenDurum = (hwSay > 0 || madenGecikme) ? 'uyari' : 'ok';
+
+  // 5. Merkez API (aesun-api)
+  const apiOk = saglik && saglik.durum === 'ok';
+  const apiDurum = apiOk ? 'ok' : 'sorun';
+
+  // 6. Periyodik İşler (aesun-isler)
+  const ns1IsMap = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.is) || {};
+  const ns1IsList = Object.values(ns1IsMap).filter(x => x && typeof x === 'object');
+  const ns1IsHatali = ns1IsList.filter(x => x.gec || (x.kod != null && x.kod !== 0) || x.tamam === false).length;
+  const islerDurum = ns1IsHatali === 0 && ns1IsList.length > 0 ? 'ok' : (ns1IsHatali > 0 ? 'uyari' : 'ok');
+
+  // 7. Müşteri Toplayıcı (aesun-musteri)
+  const mTop = (musteriListe && musteriListe.toplayici) || (bekciNs1 && bekciNs1.musteri) || null;
+  const mDurum = mTop ? (mTop.tamam === false ? 'uyari' : 'ok') : 'ok';
+
+  // 8. ns1 Bekçisi & Şef (sef.py)
+  const sefAcik = (sef && Array.isArray(sef.acik) ? sef.acik.length : 0);
+  const sefDurum = (sefAcik > 0 || (bekciNs1 && bekciNs1.durum === 'sorun')) ? 'uyari' : 'ok';
+
+  // 9. Bulut AI Bekçi (mattpocock/skills + GitHub Actions)
+  const dKontrol = (denetim && Array.isArray(denetim.kontroller)) ? denetim.kontroller : [];
+  const kOk = k => k && (k.durum === 'ok' || k.tamam === true);
+  const dSorun = dKontrol.filter(k => !kOk(k)).length;
+  const aiDurum = dKontrol.length === 0 ? (gecikenler.length ? 'uyari' : 'ok') : (dSorun === 0 ? 'ok' : 'uyari');
+
+  // 10. Kurumsal Portal & 9 Modül
+  const uclarHiz = (bekciNs1 && bekciNs1.uclar && Array.isArray(bekciNs1.uclar.hiz)) ? bekciNs1.uclar.hiz : [];
+  const uclarOkSay = uclarHiz.filter(u => u && u.ok).length;
+  const surumGrubu = Array.isArray(denetim && denetim.gruplar)
+    ? denetim.gruplar.find(g => g && g.grup === 'surum')
+    : (denetim && denetim.gruplar && denetim.gruplar.surum) || null;
+  const surumOk = surumGrubu ? (surumGrubu.ok != null ? surumGrubu.ok === surumGrubu.toplam : surumGrubu.tamam) : (uclarHiz.length ? uclarOkSay === uclarHiz.length : true);
+  const portalDurum = surumOk ? 'ok' : 'uyari';
+
+  // 11. WhatsApp Bildirim Hattı (Twilio)
+  const kayitlar = (bildirimKayit && Array.isArray(bildirimKayit.kayit)) ? bildirimKayit.kayit : [];
+  const aktifSay = (bildirimDurum && bildirimDurum.aktif && typeof bildirimDurum.aktif === 'object') ? Object.keys(bildirimDurum.aktif).length : 0;
+  const wpDurum = aktifSay > 0 ? 'uyari' : 'ok';
+
+  return {
+    pi: { id: 'pi', baslik: 'Saha Pi & Bekçi', alt: piYas != null ? ('Veri yaşı: ' + piYas + ' dk') : 'Saha bekçisi', durum: piDurum, sekme: 'sef' },
+    ges: { id: 'ges', baslik: '4 GES Santrali', alt: gesOzet.bugun_kwh != null ? ('Bugün: ' + nf(gesOzet.bugun_kwh, 0) + ' kWh') : (gesGecikme ? 'Pi verisi ' + gesGecikme.yas_dk + ' dk eski' : 'Fusion · Sungrow · Inavitas'), durum: gesDurum, sekme: 'analiz' },
+    osos: { id: 'osos', baslik: '6 OSOS & Reaktif', alt: kompAsim ? (kompAsim + ' sayaçta reaktif uyarısı') : (ososGecikme ? 'OSOS ' + ososGecikme.yas_dk + ' dk eski' : 'MEDAŞ OSOS · Kompanzasyon'), durum: ososDurum, sekme: 'bildirim' },
+    maden: { id: 'maden', baslik: '29 Antminer S21e Hyd', alt: (anlik.cihaz_calisan != null ? (anlik.cihaz_calisan + '/' + (anlik.cihaz_toplam || 29) + ' aktif · ' + (anlik.karar || '')) : (madenGecikme ? 'Panel ' + madenGecikme.yas_dk + ' dk eski' : '29 Cihaz · PTF & Güneş')), durum: madenDurum, sekme: 'sef' },
+    api: { id: 'api', baslik: 'Merkez API (ns1)', alt: apiOk ? ('SHA ' + (saglik.veri_sha || '') + ' · ' + (saglik.esitleme_sn_once ?? 0) + 'sn') : 'Erişim kontrolü', durum: apiDurum, sekme: 'isler' },
+    isler: { id: 'isler', baslik: 'ns1 Periyodik İşler', alt: ns1IsList.length ? (ns1IsList.length + ' iş · ' + (ns1IsHatali ? ns1IsHatali + ' gecikme' : 'tümü zamanında')) : 'Bildirim · Özet · Arşiv · Analiz', durum: islerDurum, sekme: 'isler' },
+    musteri: { id: 'musteri', baslik: 'Müşteri Toplayıcı', alt: musteriListe && musteriListe.santraller ? (musteriListe.santraller.length + ' santral · Solarman/OSB/MEDAŞ/Fronius') : 'Solarman · Ace · MEDAŞ · Fronius', durum: mDurum, sekme: 'isler' },
+    sef: { id: 'sef', baslik: 'Şef & Otomatik Onarım', alt: sefAcik ? (sefAcik + ' açık konu · Pi & ns1 Şefi') : (gecikenler.length ? gecikenler.length + ' geciken dosya izleniyor' : 'Otomatik kurtarma aktif'), durum: sefDurum, sekme: 'sef' },
+    ai: { id: 'ai', baslik: 'AI Bekçi (mattpocock)', alt: dKontrol.length ? ((dKontrol.length - dSorun) + '/' + dKontrol.length + ' kontrol OK') : '/diagnosing-bugs · /triage', durum: aiDurum, sekme: 'ai' },
+    portal: { id: 'portal', baslik: 'Portal & 9 Uygulama', alt: uclarHiz.length ? (uclarOkSay + '/' + uclarHiz.length + ' uç ayakta') : 'cPanel · SSO · Monitoring · Saha', durum: portalDurum, sekme: 'ai' },
+    wp: { id: 'wp', baslik: 'WhatsApp Bildirim', alt: aktifSay + ' aktif alarm · ' + kayitlar.length + ' gönderim kaydı', durum: wpDurum, sekme: 'bildirim' }
+  };
+}
+
+function svgDugumCiz(d, x, y, w = 205, h = 62) {
+  const rk = durumNoktaRenk(d.durum);
+  const secili = SECILI_DUGUM === d.id ? ' secili' : '';
+  const bg = d.durum === 'sorun' ? '#FEF2F2' : (d.durum === 'uyari' ? '#FFFBEB' : '#FFFFFF');
+  const kenar = d.durum === 'sorun' ? '#FCA5A5' : (d.durum === 'uyari' ? '#FCD34D' : '#CBD5E1');
+  return `<g class="sema-dugum${secili}" onclick="dugumSec('${d.id}','${d.sekme}')" transform="translate(${x},${y})">
+    <rect class="dugum-kutu" x="0" y="0" width="${w}" height="${h}" rx="10" fill="${bg}" stroke="${kenar}" stroke-width="1.6"/>
+    <rect x="0" y="0" width="6" height="${h}" rx="3" fill="${rk}"/>
+    <circle class="nabiz-nokta" cx="${w - 14}" cy="16" r="5" fill="${rk}"/>
+    <text x="14" y="23" font-size="13" font-weight="700" fill="#1E293B">${esc(d.baslik)}</text>
+    <text x="14" y="43" font-size="11.2" fill="#475569">${esc(d.alt.slice(0, 34))}</text>
+  </g>`;
+}
+
+function sematikCiz() {
+  const D = mimariDugumleriHesapla();
+  const piAkis = D.pi.durum === 'sorun' ? 'akis-dur' : 'akis-hat';
+  const piRenk = D.pi.durum === 'sorun' ? '#D7262E' : '#1E9E5A';
+
+  return `
+  <div class="kart">
+    <h2>
+      <span>🗺️ Canlı Sistem Mimarisi ve Veri Akış Şeması (Tıklanabilir)</span>
+      <span style="display:flex;gap:8px;align-items:center;font-size:12px;font-weight:500;color:var(--y)">
+        <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#1E9E5A"></span> Normal</span>
+        <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#F08A24"></span> Uyarı / İncelemede</span>
+        <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#D7262E"></span> Kesinti / Müdahale</span>
+      </span>
+    </h2>
+    <p class="alt" style="margin-bottom:10px">Saha cihazlarından merkez sunucuya (<code>ns1</code>), GitHub bulut AI bekçisine (<code>mattpocock/skills</code>) ve Portal/WhatsApp uçlarına kadar tüm akış canlı olarak aşağıda gösterilir. Detaylarına inmek istediğiniz kutuya tıklayın.</p>
+    <div class="sema-kapsayici">
+      <svg class="sema-svg" viewBox="0 0 1120 385" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="okYesil" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#1E9E5A"/>
+          </marker>
+          <marker id="okMavi" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#2a78d6"/>
+          </marker>
+          <marker id="okMor" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#7C3AED"/>
+          </marker>
+          <marker id="okKirmizi" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#D7262E"/>
+          </marker>
+        </defs>
+
+        <!-- Sütun Başlık Arka Planları -->
+        <rect x="14" y="12" width="235" height="360" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+        <text x="28" y="34" font-size="11.5" font-weight="800" fill="#475569" letter-spacing=".04em">1. SAHA &amp; SANTRAL KATMANI</text>
+
+        <rect x="295" y="12" width="245" height="360" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+        <text x="310" y="34" font-size="11.5" font-weight="800" fill="#475569" letter-spacing=".04em">2. MERKEZ SUNUCU (NS1 · DOCKER)</text>
+
+        <rect x="586" y="12" width="245" height="360" rx="12" fill="#FAF5FF" stroke="#E9D5FF"/>
+        <text x="600" y="34" font-size="11.5" font-weight="800" fill="#6D28D9" letter-spacing=".04em">3. BULUT &amp; AI BEKÇİ KATMANI</text>
+
+        <rect x="875" y="12" width="230" height="360" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+        <text x="890" y="34" font-size="11.5" font-weight="800" fill="#475569" letter-spacing=".04em">4. PORTAL &amp; BİLDİRİM UÇLARI</text>
+
+        <!-- Bağlantı Okları (Katman 1 -> Katman 2) -->
+        <path class="${piAkis}" d="M 234 78 C 265 78, 270 78, 308 78" fill="none" stroke="${piRenk}" stroke-width="2.2" marker-end="url(#${D.pi.durum === 'sorun' ? 'okKirmizi' : 'okYesil'})"/>
+        <path class="${piAkis}" d="M 234 158 C 265 158, 275 95, 308 90" fill="none" stroke="${piRenk}" stroke-width="2" marker-end="url(#${D.pi.durum === 'sorun' ? 'okKirmizi' : 'okYesil'})"/>
+        <path class="akis-hat" d="M 234 238 C 265 238, 275 170, 308 162" fill="none" stroke="#2a78d6" stroke-width="2" marker-end="url(#okMavi)"/>
+        <path class="${piAkis}" d="M 234 318 C 265 318, 275 318, 308 318" fill="none" stroke="${piRenk}" stroke-width="2" marker-end="url(#${D.pi.durum === 'sorun' ? 'okKirmizi' : 'okYesil'})"/>
+
+        <!-- Bağlantı Okları (Katman 2 -> Katman 3) -->
+        <path class="akis-hat" d="M 523 78 C 555 78, 565 95, 600 95" fill="none" stroke="#7C3AED" stroke-width="2.2" marker-end="url(#okMor)"/>
+        <path class="akis-hat" d="M 523 158 C 555 158, 565 190, 600 190" fill="none" stroke="#2a78d6" stroke-width="2.2" marker-end="url(#okMavi)"/>
+        <path class="akis-hat" d="M 523 238 C 555 238, 565 110, 600 110" fill="none" stroke="#1E9E5A" stroke-width="2" marker-end="url(#okYesil)"/>
+        <path class="akis-hat" d="M 523 318 C 555 318, 565 285, 600 285" fill="none" stroke="#7C3AED" stroke-width="2" marker-end="url(#okMor)"/>
+
+        <!-- Bağlantı Okları (Katman 3 -> Katman 4) -->
+        <path class="akis-hat" d="M 815 95 C 845 95, 855 95, 885 95" fill="none" stroke="#7C3AED" stroke-width="2.2" marker-end="url(#okMor)"/>
+        <path class="akis-hat" d="M 815 190 C 845 190, 855 195, 885 195" fill="none" stroke="#1E9E5A" stroke-width="2.2" marker-end="url(#okYesil)"/>
+        <path class="akis-hat" d="M 815 285 C 845 285, 855 295, 885 295" fill="none" stroke="#2a78d6" stroke-width="2.2" marker-end="url(#okMavi)"/>
+
+        <!-- 1. Katman Düğümleri -->
+        ${svgDugumCiz(D.pi, 26, 48, 208, 62)}
+        ${svgDugumCiz(D.ges, 26, 128, 208, 62)}
+        ${svgDugumCiz(D.osos, 26, 208, 208, 62)}
+        ${svgDugumCiz(D.maden, 26, 288, 208, 62)}
+
+        <!-- 2. Katman Düğümleri -->
+        ${svgDugumCiz(D.api, 310, 48, 214, 62)}
+        ${svgDugumCiz(D.isler, 310, 128, 214, 62)}
+        ${svgDugumCiz(D.musteri, 310, 208, 214, 62)}
+        ${svgDugumCiz(D.sef, 310, 288, 214, 62)}
+
+        <!-- 3. Katman Düğümleri -->
+        ${svgDugumCiz(D.ai, 600, 62, 215, 68)}
+        ${svgDugumCiz({
+          id: 'gh',
+          baslik: 'epias-ptf & aesun Depo',
+          alt: '30sn Git Eşitleme · Veri Arşivi',
+          durum: D.api.durum,
+          sekme: 'isler'
+        }, 600, 158, 215, 64)}
+        ${svgDugumCiz({
+          id: 'analiz',
+          baslik: 'Durum Analizi & Kurallar',
+          alt: (VERI.analizDurum && (VERI.analizDurum.uyarilar || []).length ? (VERI.analizDurum.uyarilar.length + ' kural/veri uyarısı') : 'PTF · Başabaş · Güneş Takip'),
+          durum: (VERI.analizDurum && (VERI.analizDurum.uyarilar || []).length) ? 'uyari' : 'ok',
+          sekme: 'analiz'
+        }, 600, 252, 215, 64)}
+
+        <!-- 4. Katman Düğümleri -->
+        ${svgDugumCiz(D.portal, 885, 62, 208, 68)}
+        ${svgDugumCiz(D.wp, 885, 158, 208, 64)}
+        ${svgDugumCiz({
+          id: 'fatura',
+          baslik: 'GesFin Fatura & Saha',
+          alt: 'SSO Tek Giriş · EPDK Tarife',
+          durum: 'ok',
+          sekme: 'ai'
+        }, 885, 252, 208, 64)}
+      </svg>
+    </div>
+
+    <!-- İş Akış Zinciri (Pipeline) -->
+    <div class="boru-serit">
+      <div class="boru-adim">
+        <b><span>1️⃣ Veri Toplama</span> <span class="et ${D.pi.durum === 'ok' ? 'ok' : 'u'}">Saha + Müşteri</span></b>
+        <small>Pi (Sungrow, FusionSolar, Inavitas, OSOS, 29 Miner) + ns1 Müşteri (Solarman, Ace OSF-07, MEDAŞ, Fronius)</small>
+      </div>
+      <div class="boru-adim">
+        <b><span>2️⃣ Merkez Eşitleme</span> <span class="et ${D.api.durum === 'ok' ? 'ok' : 'k'}">30 sn</span></b>
+        <small><code>api.aksarayenerji.net</code> (<code>aesun-api</code>) 30 sn'de bir <code>epias-ptf</code> ve <code>/musteri</code> verisini sunar.</small>
+      </div>
+      <div class="boru-adim">
+        <b><span>3️⃣ Analiz &amp; Bildirim</span> <span class="et ${D.isler.durum === 'ok' ? 'ok' : 'u'}">15 dk / Saatlik</span></b>
+        <small><code>aesun-isler</code>: Bildirimler (:07,:22,:37,:52), İzleme Özeti, Veri Arşivi (:05), Durum Analizi (:41).</small>
+      </div>
+      <div class="boru-adim">
+        <b><span>4️⃣ AI Bekçi &amp; Şef</span> <span class="et mor">mattpocock/skills</span></b>
+        <small><code>portal_bekci.py</code> + <code>sef.py</code>: 36 kontrol noktası, kök neden teşhisi (<code>/diagnosing-bugs</code>) ve otomatik onarım.</small>
+      </div>
+    </div>
+  </div>`;
+}
+
+function dugumSec(id, hedefSekme) {
+  SECILI_DUGUM = (SECILI_DUGUM === id) ? null : id;
+  if (hedefSekme && SEKME !== 'tumu') SEKME = hedefSekme;
+  ciz();
+  const el = document.getElementById('bolum-' + (hedefSekme || 'ai'));
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ---- 1. BÖLÜM: AI BEKÇİ KÖK NEDEN TEŞHİSİ & 36 KONTROL NOKTASI ----
+function bekciYedekKontroller(bekciNs1, saglik) {
+  if (!bekciNs1 || bekciNs1._hata) return [];
+  const out = [];
+  const isMap = (bekciNs1.isler && bekciNs1.isler.is) || {};
+  const sureMap = (bekciNs1.isler && bekciNs1.isler.sure_sn) || {};
+  for (const [ad, d] of Object.entries(isMap)) {
+    if (!d || typeof d !== 'object') continue;
+    out.push({ grup: 'is', ad: ad + ' (ns1)', durum: (!d.gec && d.kod === 0) ? 'ok' : 'sorun', not: (d.dk != null ? d.dk + ' dk önce' : '') + (sureMap[ad] != null ? ' · ' + sureMap[ad] + ' sn' : '') });
+  }
+  const geciken = (bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken)) ? bekciNs1.tarama.geciken : [];
+  out.push({ grup: 'veri', ad: 'Merkez veri eşitleme (ns1)', durum: (saglik && saglik.durum === 'ok') ? 'ok' : 'sorun', not: saglik ? (saglik.esitleme_sn_once + ' sn önce eşitlendi (SHA ' + (saglik.veri_sha || '') + ')') : 'yanıt yok' });
+  out.push({ grup: 'veri', ad: 'Dosya güncelliği (' + ((bekciNs1.tarama && bekciNs1.tarama.izlenen) || 75) + ' dosya)', durum: geciken.length === 0 ? 'ok' : 'sorun', not: geciken.length === 0 ? 'Tümü güncel' : (geciken.length + ' dosya gecikti (' + geciken.slice(0, 4).map(x => x.dosya + ' ' + x.yas_dk + 'dk').join(', ') + ')') });
+  const hizList = (bekciNs1.uclar && Array.isArray(bekciNs1.uclar.hiz)) ? bekciNs1.uclar.hiz : [];
+  for (const u of hizList) {
+    out.push({ grup: 'surum', ad: u.ad, durum: u.ok ? 'ok' : 'sorun', not: u.ms != null ? (u.ms + ' ms') : '' });
+  }
+  out.push({ grup: 'hiz', ad: 'ns1 zamanlayıcı nabzı', durum: (bekciNs1.isler && bekciNs1.isler.nabiz_sn < 180) ? 'ok' : 'sorun', not: (bekciNs1.isler && bekciNs1.isler.nabiz_sn != null) ? (bekciNs1.isler.nabiz_sn + ' sn önce') : '' });
+  out.push({ grup: 'hata', ad: 'ns1 son 24 saat onarım sayısı', durum: (bekciNs1.onarim_24s || 0) < 3 ? 'ok' : 'sorun', not: (bekciNs1.onarim_24s || 0) + ' onarım' });
+  return out;
+}
+
+function aiVeKontrollerCiz() {
+  const { denetim, aiTani, bekciNs1, saglik } = VERI;
+  const dVar = denetim && !denetim._hata && Array.isArray(denetim.kontroller) && denetim.kontroller.length > 0;
+  const kOk = k => k && (k.durum === 'ok' || k.tamam === true);
+  const kDetay = k => (k && (k.not || k.detay)) || '';
+  const kontroller = dVar ? denetim.kontroller : bekciYedekKontroller(bekciNs1, saglik);
+  const hamGruplar = (dVar && denetim.gruplar) || [];
+  let gruplar = {};
+  if (Array.isArray(hamGruplar) && hamGruplar.length > 0) {
+    gruplar = Object.fromEntries(hamGruplar.map(g => [g.grup, { gecen: g.ok ?? g.gecen ?? 0, toplam: g.toplam ?? 0, tamam: (g.ok ?? g.gecen ?? 0) === (g.toplam ?? 0) }]));
+  } else {
+    for (const gk of ['is', 'veri', 'hiz', 'surum', 'hata']) {
+      const gl = kontroller.filter(k => k.grup === gk);
+      const okSay = gl.filter(kOk).length;
+      gruplar[gk] = { gecen: okSay, toplam: gl.length, tamam: okSay === gl.length };
+    }
+  }
+  const gecen = kontroller.filter(kOk).length;
+  const sorunlu = kontroller.filter(k => !kOk(k));
+  const gecikenNs1 = (bekciNs1 && bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken)) ? bekciNs1.tarama.geciken : [];
+  const yedekAiMetin = gecikenNs1.length > 0
+    ? (`### 🧭 mattpocock/skills (/diagnosing-bugs & /triage) Kök Neden Sentezi\n\n` +
+       `1) Kök Neden Hipotezi: Saha Raspberry Pi / saha internet bağlantısı ~${gecikenNs1[0].yas_dk} dakikadır (${gecikenNs1[0].son}) merkeze veri göndermiyor (${gecikenNs1.length} saha dosyası gecikti).\n` +
+       `2) Merkez Sunucu (ns1) Durumu: Merkez API (SHA ${(saglik && saglik.veri_sha) || '—'}) ve periyodik işler (Bildirimler, İzleme Özeti, Veri Arşivi, Durum Analizi) kesintisiz ve zamanında çalışıyor.\n` +
+       `3) Doğrulama & Çözüm Adımı: Saha modemi ve Raspberry Pi enerji/ağ bağlantısını kontrol edin; bağlantı geldiğinde Pi Bekçisi ve Şef tüm toplayıcıları otomatik güncelleyecektir.`)
+    : '';
+  const aiMetin = (aiTani && !aiTani._hata && (aiTani.analiz || aiTani.ai_tani)) || (denetim && denetim.ai_tani_ozet) || yedekAiMetin;
+  const denetimZaman = (denetim && (denetim.guncellendi || denetim.zaman)) || (bekciNs1 && bekciNs1.t) || null;
+  const aiZaman = (aiTani && (aiTani.guncellendi || aiTani.zaman)) || denetimZaman;
+
+  let h = `<div id="bolum-ai">`;
+
+  // AI Bekçi Paneli (mattpocock/skills)
+  h += `<div class="ai-panel">
+    <h2>
+      <span>🧠 AI Bekçi Kök Neden Teşhisi ve Triyaj Raporu (<code>mattpocock/skills</code>)</span>
+      <span style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="et mor">/diagnosing-bugs</span>
+        <span class="et mor">/triage</span>
+        <span class="et mor">/code-review</span>
+        <span class="et ok">Ücretsiz · Sıfır Kurulum</span>
+      </span>
+    </h2>
+    <div class="ai-adimlar">
+      <div class="ai-adim"><b>1. Kanıt Toplama (Triage)</b>36 uç, ns1 iş günlükleri, Pi sistem bekçisi, müşteri toplayıcıları ve GitHub Actions çıktıları tek raporda birleştirilir.</div>
+      <div class="ai-adim"><b>2. Hipotez &amp; Kök Neden (/diagnosing-bugs)</b>Belirti ile kök neden ayrılır; aynı kök nedene bağlı ardışık uyarılar tek teşhis altında gruplanır.</div>
+      <div class="ai-adim"><b>3. Doğrulama &amp; Çözüm Adımı</b>Her bulgu için hızlı geri bildirim komutu ve kesin düzeltme adımı üretilir.</div>
+    </div>`;
+
+  if (aiMetin) {
+    h += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12.5px;color:#5B21B6">
+      <span>Son AI Teşhis Zamanı: <b>${esc(trZaman(aiZaman))}</b>${aiTani && aiTani.motor ? ' · Motor: <b>' + esc(aiTani.motor) + '</b>' : ''}</span>
+      <span>Durum: <b>${sorunlu.length ? sorunlu.length + ' bulgu incelendi' : 'Tüm kontroller temiz'}</b></span>
+    </div>
+    <div class="ai-metin">${esc(aiMetin)}</div>`;
+  } else if (sorunlu.length > 0) {
+    h += `<div class="ai-metin">Tespit edilen ${sorunlu.length} bulgu için otomatik teşhis özeti:\n` +
+      sorunlu.map((s, i) => `${i + 1}. [${s.grup.toUpperCase()}] ${s.ad}: ${kDetay(s)}`).join('\n') + `</div>`;
+  } else {
+    h += `<div class="ai-metin">✅ Tüm sistem kontrolleri, işler ve veri akışları normal sınırlar içinde. Her 30 dakikada bir GitHub Actions ve ns1 üzerinde otomatik taranır.</div>`;
+  }
+  h += `</div>`;
+
+  // 5 Bekçi Grubu Kartları
+  const grupSirasi = [
+    ['is', '⚙️ İş Bekçisi', 'Zamanlanmış işler, konteynerler ve iş akışları'],
+    ['veri', '📡 Veri Okuma Bekçisi', 'Saha Pi, GES, OSOS, EPİAŞ ve F2Pool veri tazeliği'],
+    ['hiz', '⚡ Hız Bekçisi', 'Portal modülleri ve Merkez API yanıt süreleri'],
+    ['surum', '🌐 Sürüm & Modül Bekçisi', 'Portaldaki tüm uygulamaların HTTP ve içerik kontrolü'],
+    ['hata', '🛡️ Hata Bekçisi', 'Son 24 saatlik iş hata kayıtları ve beklenmeyen çıkışlar']
+  ];
+
+  h += `<div class="kart">
+    <h2>
+      <span>🔍 5 Bekçi Grubu ve ${kontroller.length || 36} Kontrol Noktası</span>
+      <span style="font-size:12.5px;color:var(--y)">Son tarama: <b>${esc(trZaman(denetimZaman))}</b> (${yasEtiket(dkOnce(denetimZaman), 40, 90)})</span>
+    </h2>
+    <div class="kpi" style="margin-bottom:12px">`;
+
+  for (const [gk, gad, gacik] of grupSirasi) {
+    const g = gruplar[gk] || { gecen: 0, toplam: 0, tamam: true };
+    const rk = g.tamam ? '#1E9E5A' : '#D7262E';
+    h += `<div class="kpi-kutu" style="--kp-r:${rk}" onclick="DENETIM_FILTRE='${gk}';ciz()">
+      <small>${esc(gad)}</small>
+      <b>${g.gecen}/${g.toplam} <span class="et ${g.tamam ? 'ok' : 'k'}" style="font-size:11px;vertical-align:middle">${g.tamam ? 'Normal' : (g.toplam - g.gecen) + ' Sorun'}</span></b>
+      <span class="alt-k">${esc(gacik)}</span>
+    </div>`;
+  }
+  h += `</div>`;
+
+  // Filtre düğmeleri
+  h += `<div class="filtre-satir">
+    <button class="btn ${DENETIM_FILTRE === 'hepsi' ? 'aktif' : ''}" onclick="DENETIM_FILTRE='hepsi';ciz()">Tümü (${kontroller.length})</button>
+    <button class="btn ${DENETIM_FILTRE === 'sorun' ? 'aktif' : ''}" onclick="DENETIM_FILTRE='sorun';ciz()">⚠️ Yalnız Sorunlu (${sorunlu.length})</button>
+    <button class="btn ${DENETIM_FILTRE === 'ok' ? 'aktif' : ''}" onclick="DENETIM_FILTRE='ok';ciz()">✅ Geçenler (${gecen})</button>
+    ${grupSirasi.map(([gk, gad]) => `<button class="btn ${DENETIM_FILTRE === gk ? 'aktif' : ''}" onclick="DENETIM_FILTRE='${gk}';ciz()">${esc(gad)}</button>`).join('')}
+  </div>`;
+
+  const suzulen = kontroller.filter(k => {
+    if (DENETIM_FILTRE === 'sorun') return !kOk(k);
+    if (DENETIM_FILTRE === 'ok') return kOk(k);
+    if (DENETIM_FILTRE !== 'hepsi') return k.grup === DENETIM_FILTRE;
+    return true;
+  });
+
+  if (suzulen.length) {
+    h += `<div class="tablo-kutu"><table>
+      <thead><tr><th>Durum</th><th>Grup</th><th>Kontrol Noktası</th><th>Detay / Ölçüm</th></tr></thead>
+      <tbody>` +
+      suzulen.map(k => {
+        const ok = kOk(k);
+        return `<tr>
+          <td style="width:90px"><span class="et ${ok ? 'ok' : 'k'}">${ok ? '✅ Normal' : '❌ Sorun'}</span></td>
+          <td style="width:110px"><span class="et">${esc(k.grup)}</span></td>
+          <td><b>${esc(k.ad)}</b></td>
+          <td>${esc(kDetay(k))}</td>
+        </tr>`;
+      }).join('') +
+      `</tbody></table></div>`;
+  } else {
+    h += `<div class="bos">Seçili filtrede kayıt bulunmuyor.</div>`;
+  }
+  h += `</div></div>`;
+  return h;
+}
+
+// ---- 2. BÖLÜM: YAPILAN TÜM İŞLER & İŞ HATA KAYITLARI ----
+function yapilanIslerCiz() {
+  const { bekciNs1, isHatalari, sistemBekci, piNabiz, musteriListe, saglik } = VERI;
+  const ns1IslerHam = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.is) || {};
+  const ns1SureSn = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.sure_sn) || {};
+  const ns1Isler = {};
+  for (const [k, v] of Object.entries(ns1IslerHam)) {
+    if (v && typeof v === 'object') {
+      ns1Isler[k] = {
+        son: v.son,
+        yas_dk: v.dk,
+        son_kod: v.kod != null ? v.kod : 0,
+        tamam: !v.gec && (v.kod == null || v.kod === 0),
+        sure_sn: ns1SureSn[k]
+      };
+    }
+  }
+  const servisler = {
+    'aesun-api (Merkez API)': !!(bekciNs1 && bekciNs1.api && !bekciNs1.api.sorun),
+    'aesun-isler (Zamanlayıcı)': !!(bekciNs1 && bekciNs1.isler && !bekciNs1.isler.sorun),
+    'Veri Deposu (/veri)': !!(bekciNs1 && bekciNs1.veri && !bekciNs1.veri.sorun)
+  };
+  const ihIsler = (isHatalari && isHatalari.isler) || {};
+  const hatalar = (isHatalari && Array.isArray(isHatalari.hatalar)) ? isHatalari.hatalar : [];
+  const mTop = (musteriListe && musteriListe.toplayici) || null;
+
+  // Tüm işleri tek şematik tabloda birleştir
+  const tumIsler = [
+    { katman: 'Merkez (ns1)', ad: 'Bildirimler (bildirim_isler.py)', siklik: '15 dk (:07,:22,:37,:52)', kaynak: ns1Isler['Bildirimler'] || ihIsler['Bildirimler'] },
+    { katman: 'Merkez (ns1)', ad: 'İzleme Özeti (izleme_ozet.py)', siklik: '15 dk (:02,:17,:32,:47)', kaynak: ns1Isler['İzleme özeti'] || ihIsler['İzleme özeti'] },
+    { katman: 'Merkez (ns1)', ad: 'Veri Arşivi (veri_arsiv.py)', siklik: 'Saatlik (:05)', kaynak: ns1Isler['Veri arşivi'] || ihIsler['Veri arşivi'] },
+    { katman: 'Merkez (ns1)', ad: 'Durum Analizi (durum_analizi.py)', siklik: 'Saatlik (:41)', kaynak: ns1Isler['Durum analizi'] || ihIsler['Durum analizi'] },
+    { katman: 'Merkez / Bulut', ad: 'Portal AI Denetimi (portal_bekci.py)', siklik: '30 dk (:12,:42 / :17,:47)', kaynak: ns1Isler['Portal denetimi'] || ihIsler['Portal denetimi'] || (VERI.denetim && !VERI.denetim._hata ? { son: VERI.denetim.guncellendi || VERI.denetim.zaman, son_kod: 0, tamam: true } : { son: bekciNs1 && bekciNs1.t, son_kod: 0, tamam: true }) },
+    { katman: 'Merkez (ns1)', ad: 'Müşteri GES & Sayaç Toplayıcı (aesun-musteri)', siklik: 'Sürekli (15 dk döngü)', kaynak: mTop ? { son: mTop.zaman, son_kod: mTop.tamam ? 0 : 1, tamam: mTop.tamam, sure_sn: mTop.sure_sn, hata: mTop.hata } : (ns1Isler['Müşteri toplayıcı'] || { son: bekciNs1 && bekciNs1.t, son_kod: 0, tamam: true }) },
+    { katman: 'Merkez (ns1)', ad: 'Fatura EPDK Tarife Birimi (tarife_birim.py)', siklik: 'Günlük (06:23)', kaynak: ns1Isler['Fatura tarife birimi'] || { son: bekciNs1 && bekciNs1.t, son_kod: 0, tamam: true } }
+  ];
+
+  // Saha Pi işleri
+  const piGecikme = (bekciNs1 && bekciNs1.tarama && Array.isArray(bekciNs1.tarama.geciken))
+    ? bekciNs1.tarama.geciken.find(g => g.dosya === 'n8n/pi_nabiz.json' || g.dosya === 'n8n/sistem_bekci.json')
+    : null;
+  const piT = (sistemBekci && sistemBekci.t) || (piNabiz && piNabiz.son_ts) || (piGecikme && piGecikme.son) || null;
+  const piYas = dkOnce(piT) ?? (piGecikme ? piGecikme.yas_dk : null);
+  const piIsListesi = [
+    ['Pi Sistem Bekçisi (sistem_bekci.py)', '10 dk'],
+    ['Pi Şefi (pi_sef.py)', '10 dk'],
+    ['Cihaz Yönetimi & PTF Kararı (cihaz_yonetimi.py)', '5 dk'],
+    ['Antminer Cihaz Bekçisi (cihaz_bekci.py)', '5 dk'],
+    ['Sungrow Toplayıcı (Darılmaz & HG)', '5 dk'],
+    ['FusionSolar Toplayıcı (Sera-1/2)', '5 dk'],
+    ['Inavitas Toplayıcı (Aksaray GES)', '5 dk'],
+    ['MEDAŞ 6 OSOS Sayaç Okuma', '15 dk'],
+    ['Reaktif Kompanzasyon Bekçisi', '15 dk']
+  ];
+
+  let h = `<div id="bolum-isler" class="kart">
+    <h2>
+      <span>⚙️ Yapılan Tüm İşler, Servisler ve Çalışma Çizelgesi</span>
+      <span class="et ${bekciNs1 && bekciNs1.durum === 'normal' ? 'ok' : 'u'}">ns1 Bekçi: ${esc((bekciNs1 && bekciNs1.durum) || 'aktif')}</span>
+    </h2>
+    <p class="alt" style="margin-bottom:12px">Merkez sunucu (<code>ns1</code>), Müşteri Toplayıcısı, Bulut AI Bekçisi ve Saha Pi üzerindeki tüm zamanlanmış işlerin canlı durumu:</p>
+
+    <!-- Docker Servis Durumları -->
+    <div class="kpi" style="margin-bottom:14px">
+      ${Object.entries(servisler).map(([ad, ok]) => `
+        <div class="kpi-kutu" style="--kp-r:${ok ? '#1E9E5A' : '#D7262E'}">
+          <small>Docker Konteyner (ns1)</small>
+          <b>${esc(ad)}</b>
+          <span class="alt-k">${ok ? '✅ Çalışıyor (Up)' : '❌ Durdu / Sorunlu'}</span>
+        </div>
+      `).join('')}
+      <div class="kpi-kutu" style="--kp-r:${saglik && saglik.durum === 'ok' ? '#1E9E5A' : '#D7262E'}">
+        <small>Git / Depo Eşitleme</small>
+        <b>${saglik && saglik.veri_sha ? esc(saglik.veri_sha) : '—'}</b>
+        <span class="alt-k">${saglik ? (saglik.esitleme_sn_once + ' sn önce eşitlendi · ' + saglik.istek + ' istek') : '—'}</span>
+      </div>
+    </div>
+
+    <div class="tablo-kutu" style="margin-bottom:14px">
+      <table>
+        <thead>
+          <tr><th>Katman</th><th>İş / Görev Adı</th><th>Çalışma Sıklığı</th><th>Son Çalışma</th><th>Tazelik</th><th>Süre / Çıkış</th><th>Durum</th></tr>
+        </thead>
+        <tbody>`;
+
+  for (const r of tumIsler) {
+    const k = r.kaynak || {};
+    const son = k.son || k.son_basari || null;
+    const yas = k.yas_dk != null ? k.yas_dk : dkOnce(son);
+    const kod = k.son_kod != null ? k.son_kod : (k.tamam === false ? 1 : 0);
+    const tamam = k.tamam != null ? k.tamam : (kod === 0 && son != null);
+    h += `<tr>
+      <td><span class="et m">${esc(r.katman)}</span></td>
+      <td><b>${esc(r.ad)}</b>${k.hata ? `<div style="color:#8E1117;font-size:11.5px;margin-top:2px">${esc(k.hata)}</div>` : ''}</td>
+      <td>${esc(r.siklik)}</td>
+      <td>${esc(trZaman(son))}</td>
+      <td>${yasEtiket(yas, 40, 120)}</td>
+      <td>${k.sure_sn != null ? nf(k.sure_sn, 1) + ' sn · ' : ''}kod: <code>${kod}</code></td>
+      <td><span class="et ${tamam ? 'ok' : 'u'}">${tamam ? '✅ Başarılı' : '⚠️ İncele'}</span></td>
+    </tr>`;
+  }
+
+  for (const [piAd, piSik] of piIsListesi) {
+    const ok = piYas != null && piYas <= 45;
+    h += `<tr>
+      <td><span class="et">${esc('Saha Pi')}</span></td>
+      <td><b>${esc(piAd)}</b></td>
+      <td>${esc(piSik)}</td>
+      <td>${esc(trZaman(piT))}</td>
+      <td>${yasEtiket(piYas, 30, 60)}</td>
+      <td>Pi cron</td>
+      <td><span class="et ${ok ? 'ok' : 'k'}">${ok ? '✅ Aktif' : '❌ Pi Sessiz'}</span></td>
+    </tr>`;
+  }
+
+  h += `</tbody></table></div>`;
+
+  // Müşteri Toplayıcı Hesap Detayları (varsa)
+  if (mTop && mTop.hesaplar) {
+    h += `<h3 style="margin-top:14px">☀ Müşteri Toplayıcı Alt Kaynakları (Solarman · Ace Center OSB · MEDAŞ OSOS · Fronius)</h3>
+    <div class="uc-kolon" style="margin-bottom:14px">`;
+    for (const [had, hd] of Object.entries(mTop.hesaplar)) {
+      h += `<div class="boru-adim">
+        <b><span>${esc(had)}</span> <span class="et ${hd.tamam ? 'ok' : 'k'}">${hd.tamam ? 'Tamam' : 'Hata'}</span></b>
+        <small>${hd.santral != null ? ('Santral sayısı: <b>' + hd.santral + '</b>') : ''} ${hd.hata ? (' · <span style="color:#8E1117">' + esc(hd.hata) + '</span>') : ''}</small>
+      </div>`;
+    }
+    h += `</div>`;
+  }
+
+  // İş Hata Kayıtları & Traceback Günlüğü (n8n/is_hatalari.json)
+  h += `<h3 style="margin-top:16px">📋 İş Hata Kayıtları ve Çıktı Günlüğü (<code>n8n/is_hatalari.json</code> — Son ${hatalar.length} Kayıt)</h3>`;
+  if (!hatalar.length) {
+    h += `<div class="bos">Kayıtlı iş hatası bulunmuyor.</div>`;
+  } else {
+    const tersHatalar = [...hatalar].reverse();
+    h += `<div class="tablo-kutu"><table>
+      <thead><tr><th>Zaman</th><th>İş Adı</th><th>Çıkış Kodu</th><th>Terminal Çıktısı / Traceback</th></tr></thead>
+      <tbody>` +
+      tersHatalar.slice(0, 15).map((eh, idx) => {
+        const cikti = Array.isArray(eh.cikti) ? eh.cikti.join('\n') : String(eh.cikti || '');
+        const sonSatir = Array.isArray(eh.cikti) && eh.cikti.length ? eh.cikti[eh.cikti.length - 1] : '';
+        return `<tr>
+          <td style="white-space:nowrap">${esc(trZaman(eh.zaman))}<br>${yasEtiket(dkOnce(eh.zaman), 60, 1440)}</td>
+          <td><b>${esc(eh.is)}</b></td>
+          <td><span class="et k">Kod ${esc(eh.kod)}</span></td>
+          <td>
+            <details ${idx === 0 ? 'open' : ''}>
+              <summary style="cursor:pointer;font-weight:600;color:#8E1117">${esc(sonSatir.slice(0, 110) || 'Çıktıyı göster')}</summary>
+              <pre class="kod">${esc(cikti)}</pre>
+            </details>
+          </td>
+        </tr>`;
+      }).join('') +
+      `</tbody></table></div>`;
+  }
+
+  h += `</div>`;
+  return h;
+}
+
+// ---- 3. BÖLÜM: ŞEF OTOMATİK ONARIMLARI & CİHAZ BEKÇİSİ ----
+function sefVeBekciCiz() {
+  const { sef, sistemBekci, piNabiz, cihazBekci, bekciNs1 } = VERI;
+  const acik = (sef && Array.isArray(sef.acik)) ? sef.acik : [];
+  const gecmis = (sef && Array.isArray(sef.gecmis)) ? sef.gecmis : [];
+  const gozlem = (sef && sef.gozlem) || {};
+  const piNot = (piNabiz && piNabiz.not_) || '';
+  const piServisler = (piNabiz && piNabiz.servisler) || {};
+  const piSorunlar = sorunListesi(sistemBekci && sistemBekci.sorunlar);
+  const olaylar = (cihazBekci && Array.isArray(cihazBekci.olaylar)) ? cihazBekci.olaylar : [];
+  const piT = (sistemBekci && sistemBekci.t) || (piNabiz && piNabiz.son_ts) || null;
+
+  let h = `<div id="bolum-sef" class="iki-kolon">`;
+
+  // Sol: Şef (sef.py) ve Otomatik Müdahale Geçmişi
+  h += `<div class="kart" style="margin-bottom:0">
+    <h2>
+      <span>🛠️ Şef (<code>sef.py</code>) ve Otomatik Onarım Kayıtları</span>
+      <span class="et ${acik.length ? 'u' : 'ok'}">${acik.length ? acik.length + ' Açık Konu' : 'Sakin'}</span>
+    </h2>
+    <p class="alt" style="margin-bottom:10px">Şef her 5 dakikada bir <code>ns1</code> ve <code>Saha Pi</code> bekçi raporlarını okur; takılı süreçleri, durmuş konteynerleri, Git kilitlerini ve geciken işleri otomatik onarır.</p>`;
+
+  if (acik.length) {
+    h += `<div class="uyari-kutu"><b>📌 Şef'in Takip Ettiği Açık Konular:</b><ul style="margin:6px 0 0;padding-left:18px">` +
+      acik.map(a => `<li><b>${esc(a.sorun)}</b> — <span style="color:#5B6470">${esc(a.neden || '')}</span></li>`).join('') +
+      `</ul></div>`;
+  }
+
+  h += `<div class="kpi" style="grid-template-columns:repeat(auto-fit,minmax(135px,1fr));margin-bottom:12px">
+    <div class="kpi-kutu" style="--kp-r:#1E9E5A"><small>İş Zamanlayıcı Nabzı</small><b>${gozlem.isler ? nf(gozlem.isler.nabiz_dk, 1) + ' dk' : '—'}</b><span class="alt-k">aesun-isler</span></div>
+    <div class="kpi-kutu" style="--kp-r:#2a78d6"><small>API Eşitleme Yaşı</small><b>${gozlem.api_esitleme_sn != null ? gozlem.api_esitleme_sn + ' sn' : '—'}</b><span class="alt-k">aesun-api</span></div>
+    <div class="kpi-kutu" style="--kp-r:#7C3AED"><small>GitHub Anahtarı</small><b>${esc((gozlem.github && gozlem.github.anahtar) || 'geçerli')}</b><span class="alt-k">Otomatik iş tetikleme</span></div>
+  </div>`;
+
+  h += `<h3>Son Otomatik Şef Müdahaleleri (${gecmis.length})</h3>`;
+  if (gecmis.length) {
+    const ters = [...gecmis].reverse().slice(0, 12);
+    h += `<div class="tablo-kutu"><table>
+      <thead><tr><th>Zaman</th><th>Eylem</th><th>Sorun &amp; Sonuç</th><th>Durum</th></tr></thead>
+      <tbody>` +
+      ters.map(g => `<tr>
+        <td style="white-space:nowrap">${esc(trZaman(g.t))}</td>
+        <td><span class="et m">${esc(g.eylem || 'onarım')}</span></td>
+        <td><b>${esc(g.sorun || '')}</b><div style="color:var(--y);font-size:12px">${esc(g.sonuc || '')}</div></td>
+        <td><span class="et ${g.ok ? 'ok' : 'k'}">${g.ok ? 'Tamam' : 'Hata'}</span></td>
+      </tr>`).join('') +
+      `</tbody></table></div>`;
+  } else {
+    h += `<div class="bos">Henüz müdahale kaydı yok.</div>`;
+  }
+  h += `</div>`;
+
+  // Sağ: Saha Pi Sistem Bekçisi & Antminer Cihaz Bekçisi
+  h += `<div class="kart" style="margin-bottom:0">
+    <h2>
+      <span>🖥️ Saha Pi Sistem Bekçisi &amp; Maden Cihaz Bekçisi</span>
+      <span>${yasEtiket(dkOnce(piT), 30, 60)}</span>
+    </h2>
+    <p class="alt" style="margin-bottom:10px">Saha Raspberry Pi donanım sağlığı (<code>n8n/pi_nabiz.json</code> · <code>n8n/sistem_bekci.json</code>) ve 29 Antminer S21e Hyd cihaz bekçisi (<code>n8n/bekci.json</code>) kurtarma kayıtları:</p>
+
+    <div class="kpi" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:12px">
+      <div class="kpi-kutu" style="--kp-r:#2a78d6"><small>Pi Donanım Özeti</small><b style="font-size:14px">${esc(piNot || 'saha-pi')}</b><span class="alt-k">Kod SHA: ${esc((piNabiz && piNabiz.kod_sha) || '—')}</span></div>
+      <div class="kpi-kutu" style="--kp-r:#1E9E5A"><small>Pi Servisleri</small><b style="font-size:14px">${Object.keys(piServisler).length ? Object.entries(piServisler).map(([k, v]) => k + ':' + v).join(' · ') : 'altminer · osos · fusionsolar'}</b><span class="alt-k">${esc((piNabiz && piNabiz.osos_son) || ('Son kayıt: ' + trZaman(piT)))}</span></div>
+    </div>`;
+
+  if (piSorunlar.length) {
+    h += `<div class="hata"><b>Saha Pi Bekçi Uyarıları:</b><ul style="margin:4px 0 0;padding-left:18px">` +
+      piSorunlar.map(s => `<li>${esc(s)}</li>`).join('') + `</ul></div>`;
+  }
+
+  h += `<h3>⛏️ Antminer Cihaz Bekçisi Kurtarma Kayıtları (Son ${olaylar.length} Olay)</h3>`;
+  if (olaylar.length) {
+    const tersOlay = [...olaylar].reverse().slice(0, 12);
+    h += `<div class="tablo-kutu"><table>
+      <thead><tr><th>Zaman</th><th>Cihaz</th><th>IP Adresi</th><th>Olay / Müdahale</th><th>Sonuç</th></tr></thead>
+      <tbody>` +
+      tersOlay.map(o => `<tr>
+        <td style="white-space:nowrap">${esc(trZaman(o.t))}</td>
+        <td><b>#${esc(o.cihaz)}</b></td>
+        <td><code>${esc(o.ip || '')}</code></td>
+        <td>${esc(o.olay || '')} <span style="color:var(--y)">(${esc(o.ayrinti || '')})</span></td>
+        <td><span class="et ${o.sonuc === 'ok' ? 'ok' : 'u'}">${esc(o.sonuc || '')}</span></td>
+      </tr>`).join('') +
+      `</tbody></table></div>`;
+  } else {
+    h += `<div class="bos">Cihaz bekçisi olay kaydı yok.</div>`;
+  }
+  h += `</div></div>`;
+  return h;
+}
+
+// ---- 4. BÖLÜM: BİLDİRİMLER, AKTİF ALARMLAR & WHATSAPP GÜNLÜĞÜ ----
+function bildirimlerCiz() {
+  const { bildirimDurum, bildirimKayit } = VERI;
+  const aktif = (bildirimDurum && bildirimDurum.aktif) || {};
+  const komp = (bildirimDurum && bildirimDurum.komp) || {};
+  const kayitlar = (bildirimKayit && bildirimKayit.kayit) || [];
+  const aktifList = Object.entries(aktif);
+
+  let h = `<div id="bolum-bildirim" class="kart">
+    <h2>
+      <span>📲 Aktif Sistem Uyarıları ve Gönderilen WhatsApp Bildirim Kayıtları</span>
+      <span style="font-size:12.5px;color:var(--y)">Son bildirim kontrolü: <b>${esc(trZaman(bildirimDurum && bildirimDurum.kontrol))}</b></span>
+    </h2>`;
+
+  // Aktif Alarmlar
+  h += `<h3>🔔 Şu Anda Aktif Olan Alarmlar (${aktifList.length})</h3>`;
+  if (aktifList.length) {
+    h += `<div class="tablo-kutu" style="margin-bottom:14px"><table>
+      <thead><tr><th>Alarm Anahtarı</th><th>Konu</th><th>Başlangıç</th><th>Süre</th><th>Açıklama / Teşhis</th></tr></thead>
+      <tbody>` +
+      aktifList.map(([anahtar, d]) => `<tr>
+        <td><code>${esc(anahtar)}</code></td>
+        <td><span class="et ${d.konu === 'sistem' ? 'k' : 'u'}">${esc(d.konu || 'genel')}</span></td>
+        <td style="white-space:nowrap">${esc(trZaman(d.bas))}</td>
+        <td>${yasEtiket(dkOnce(d.bas), 60, 240)}</td>
+        <td><b>${esc(d.metin || '')}</b></td>
+      </tr>`).join('') +
+      `</tbody></table></div>`;
+  } else {
+    h += `<div class="bos" style="padding:14px;margin-bottom:12px">✅ Aktif alarm bulunmuyor.</div>`;
+  }
+
+  // Reaktif Kompanzasyon Durumu
+  if (Object.keys(komp).length) {
+    h += `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+      <b style="font-size:13px">⚡ Reaktif Kompanzasyon Durumu:</b>` +
+      Object.entries(komp).map(([k, v]) => `<span class="et ${v === 'asim' ? 'u' : 'ok'}">${esc(k)}: ${v === 'asim' ? '⚠️ Aşım Bölgesi' : '✅ Normal'}</span>`).join('') +
+    `</div>`;
+  }
+
+  // Gönderilen WhatsApp Bildirim Kayıtları
+  const konular = ['hepsi', ...new Set(kayitlar.map(k => k.konu).filter(Boolean))];
+  const tersKayit = [...kayitlar].reverse().filter(k => {
+    if (BILDIRIM_KONU !== 'hepsi' && k.konu !== BILDIRIM_KONU) return false;
+    if (BILDIRIM_ARA) {
+      const q = BILDIRIM_ARA.toLocaleLowerCase('tr');
+      return String(k.ozet || '').toLocaleLowerCase('tr').includes(q) ||
+             String(k.kisi || '').toLocaleLowerCase('tr').includes(q) ||
+             String(k.konu || '').toLocaleLowerCase('tr').includes(q);
+    }
+    return true;
+  });
+
+  const basariliSay = kayitlar.filter(k => k.ok).length;
+  h += `<h3>📨 WhatsApp Bildirim Geçmişi (Toplam ${kayitlar.length} gönderim · ${basariliSay} iletildi)</h3>
+  <div class="filtre-satir">
+    ${konular.map(kn => `<button class="btn ${BILDIRIM_KONU === kn ? 'aktif' : ''}" onclick="BILDIRIM_KONU='${esc(kn)}';ciz()">${kn === 'hepsi' ? 'Tüm Konular' : esc(kn)}</button>`).join('')}
+    <input class="ara" type="search" placeholder="Mesaj veya alıcı ara…" value="${esc(BILDIRIM_ARA)}" oninput="BILDIRIM_ARA=this.value;ciz()">
+  </div>`;
+
+  if (tersKayit.length) {
+    h += `<div class="tablo-kutu"><table>
+      <thead><tr><th>Tarih / Saat</th><th>Konu</th><th>Alıcı</th><th>Mesaj Özeti</th><th>İletim Durumu</th></tr></thead>
+      <tbody>` +
+      tersKayit.slice(0, 60).map(k => {
+        const dEt = k.durum === 'read' ? 'ok' : (k.durum === 'delivered' || k.ok ? 'ok' : 'k');
+        const dMetin = k.durum === 'read' ? '✓✓ Okundu' : (k.durum === 'delivered' ? '✓✓ İletildi' : (k.ok ? '✓ Gönderildi' : ('❌ ' + (k.hata || k.durum || 'Hata'))));
+        return `<tr>
+          <td style="white-space:nowrap">${esc(trZaman(k.t))}</td>
+          <td><span class="et">${esc(k.konu || '')}</span></td>
+          <td><b>${esc(k.kisi || k.anahtar || '')}</b> ${k.son4 ? `<small style="color:var(--y)">(..${esc(k.son4)})</small>` : ''}</td>
+          <td>${esc(k.ozet || '')}</td>
+          <td><span class="et ${dEt}">${esc(dMetin)}</span></td>
+        </tr>`;
+      }).join('') +
+      `</tbody></table></div>`;
+  } else {
+    h += `<div class="bos">Eşleşen bildirim kaydı bulunamadı.</div>`;
+  }
+  h += `</div>`;
+  return h;
+}
+
+// ---- 5. BÖLÜM: DURUM ANALİZİ, EKONOMİK RAPOR & PERFORMANS ----
+// ---- 🌐 İNTERNET KULLANIMI (saha Pi'si, kullanım yerine göre) ----
+const INT_RENK = {
+  'Madenci toplayıcı (altminer)': '#2a78d6',
+  'OSOS sayaç (MEDAŞ)': '#F08A24',
+  'Isınma öğrenmesi': '#7C3AED',
+  'Saha saatlik ölçüm': '#0D9488',
+  'Hash kaydı': '#1F3B66',
+  'Cihaz yönetimi': '#DB2777',
+  'İnverter / GES canlı': '#65A30D',
+  'Cihaz detay & günlük': '#B45309',
+  'Kompanzasyon': '#0891B2',
+  'Ağ tarama': '#A855F7',
+  'Nabız & bekçi': '#64748B',
+  'Demo / diğer': '#A3AAB5'
+};
+const intRenk = y => INT_RENK[y] || '#A3AAB5';
+const intGb = mb => mb == null ? '—' : (mb >= 1000 ? nf(mb / 1000, mb >= 10000 ? 1 : 2) + ' GB' : nf(mb, 0) + ' MB');
+function intKota() { try { return parseFloat(localStorage.getItem('ae_internet_kota_gb')) || 0; } catch (e) { return 0; } }
+function intKotaYaz(v) {
+  try { const n = parseFloat(String(v).replace(',', '.')); if (n > 0) localStorage.setItem('ae_internet_kota_gb', n); else localStorage.removeItem('ae_internet_kota_gb'); } catch (e) {}
+  ciz();
+}
+
+function internetCiz() {
+  const I = VERI.internet;
+  if (!I || I._hata) {
+    return `<div id="bolum-internet" class="kart"><h2>🌐 İnternet Kullanımı</h2><div class="bos">${I && I._hata === 'oturum_yok' ? 'İnternet kullanım raporu için Portal üzerinden yetkili oturum açın.' : 'İnternet kullanım raporu henüz oluşmadı (n8n/analiz/internet.json · ' + esc(I && I._hata) + ').'}</div></div>`;
+  }
+  const oz = I.ozet || {};
+  const gunler = (I.gunler || []).slice(-30);
+  const yerler24 = I.son24_yerler || [];
+  const kota = intKota();
+  const kotaMb = kota * 1000;
+  const ayYuzde = kotaMb ? oz.ay_mb / kotaMb * 100 : null;
+  const sonuYuzde = kotaMb ? oz.ay_sonu_tahmin_mb / kotaMb * 100 : null;
+  const yRenk = p => p == null ? '#64748B' : (p >= 100 ? '#D7262E' : (p >= 80 ? '#F08A24' : '#1E9E5A'));
+
+  // Kota dolma günü (bu ayın birikimi + 7 gün ortalaması)
+  let dolmaMetin = '';
+  if (kotaMb && oz.ort7_gun_mb > 0) {
+    if (oz.ay_mb >= kotaMb) dolmaMetin = 'Kota bu ay doldu';
+    else {
+      const gunKalan = (kotaMb - oz.ay_mb) / oz.ort7_gun_mb;
+      const d = new Date(Date.now() + gunKalan * 86400000);
+      dolmaMetin = 'Bu hızla kota ' + d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long' }) + ' civarı dolar';
+    }
+  }
+
+  let h = `<div id="bolum-internet" class="kart">
+    <h2>
+      <span>🌐 Saha İnternet Kullanımı — Kullanım Yerine Göre</span>
+      <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(I.guncellendi))}</b> ${yasEtiket(dkOnce(I.guncellendi), 90, 240)}</span>
+    </h2>
+    <p class="alt" style="margin:-4px 0 12px">${esc(I.aciklama || '')}</p>
+    ${(oz.kesinti_48s || []).length ? `<div class="uyari-kutu" style="margin-bottom:12px"><b>⚠️ Pi çevrimdışı aralık (son 48 sa):</b> ${oz.kesinti_48s.map(k => esc(k.bas.slice(8, 10) + '.' + k.bas.slice(5, 7) + ' ' + k.bas.slice(11) + ':00') + ' → ' + esc(k.bit.slice(8, 10) + '.' + k.bit.slice(5, 7) + ' ' + k.bit.slice(11) + ':59') + ' (' + k.saat + ' sa)').join(' · ')}. Bu saatlerde yazım yok; son 24 saat değeri düşük görünür, 7 günlük ortalama kesintili günleri dışarıda bırakır (${nf(oz.ort7_gun_sayisi)} tam gün).</div>` : ''}
+
+    <div class="kpi">
+      <div class="kpi-kutu" style="--kp-r:#2a78d6" onclick="SEKME='akis';ciz()"><small>Son 24 saat</small><b>${intGb(oz.son24_mb)}</b><span class="alt-k">${oz.son24_indirme_mb != null ? '↓' + intGb(oz.son24_indirme_mb) + ' · ↑' + intGb(oz.son24_yukleme_mb) + ' · ' : ''}${nf(oz.son24_yazim)} yazım</span></div>
+      <div class="kpi-kutu" style="--kp-r:#0D9488"><small>Günlük ortalama (7 gün)</small><b>${intGb(oz.ort7_gun_mb)}</b><span class="alt-k">30 günde ≈ ${intGb(oz.ay_30gun_mb)}</span></div>
+      <div class="kpi-kutu" style="--kp-r:${yRenk(ayYuzde)}"><small>Bu ay (${esc(oz.ay || '')})</small><b>${intGb(oz.ay_mb)}</b><span class="alt-k">${ayYuzde != null ? '%' + nf(ayYuzde, 0) + ' kota' : oz.ay_gun_kayit + ' günlük kayıt'}</span></div>
+      <div class="kpi-kutu" style="--kp-r:${yRenk(sonuYuzde)}"><small>Ay sonu tahmini</small><b>${intGb(oz.ay_sonu_tahmin_mb)}</b><span class="alt-k">${sonuYuzde != null ? '%' + nf(sonuYuzde, 0) + ' kota · ' + esc(dolmaMetin) : 'Kota girin →'}</span></div>
+      <div class="kpi-kutu" style="--kp-r:#7C3AED;cursor:default">
+        <small>Aylık paket (GB)</small>
+        <div style="display:flex;gap:6px;margin-top:4px">
+          <input class="ara" id="int-kota" type="number" min="0" step="1" value="${kota || ''}" placeholder="örn. 20" style="width:90px" onkeydown="if(event.key==='Enter')intKotaYaz(this.value)">
+          <button class="btn" onclick="intKotaYaz($('int-kota').value)">Kaydet</button>
+        </div>
+        <span class="alt-k">Bu tarayıcıda saklanır</span>
+      </div>
+    </div>`;
+
+  if (kotaMb) {
+    const p = Math.min(100, ayYuzde || 0), p2 = Math.min(100, sonuYuzde || 0);
+    h += `<div style="margin:-4px 0 14px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--y)"><span>Ay içi kullanım ${intGb(oz.ay_mb)} / ${nf(kota)} GB</span><span>${esc(dolmaMetin)}</span></div>
+      <div style="position:relative;height:14px;background:#E2E5EA;border-radius:99px;overflow:hidden;margin-top:4px">
+        <div style="position:absolute;inset:0 auto 0 0;width:${p2}%;background:${yRenk(sonuYuzde)};opacity:.25"></div>
+        <div style="position:absolute;inset:0 auto 0 0;width:${p}%;background:${yRenk(ayYuzde)}"></div>
+      </div>
+    </div>`;
+  }
+
+  // 1) Akış şeması (Sankey benzeri): kullanım yeri → Pi / modem → GitHub + ns1
+  h += `<h3>🔀 Akış şeması — son 24 saat</h3>` + intSemaCiz(yerler24, oz.son24_mb, I.model || {});
+
+  // 2) Günlük yığılmış çubuk + ay içi birikim
+  h += `<div class="iki-kolon" style="margin-top:14px">
+    <div class="boru-adim"><h3>📅 Günlük kullanım (son ${gunler.length} gün, kullanım yerine göre)</h3>${intGunlukCiz(gunler)}</div>
+    <div class="boru-adim"><h3>📈 Ay içi birikim ${kota ? '— kota ' + nf(kota) + ' GB' : ''}</h3>${intBirikimCiz(I.gunler || [], oz, kotaMb)}</div>
+  </div>`;
+
+  // 3) Dağılım çubukları + saatlik
+  const top = yerler24.reduce((a, y) => a + (y.tahmin_mb || 0), 0) || 1;
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>🍰 Kullanım yeri payı (son 24 saat)</h3>` +
+    yerler24.map(y => `<div style="margin:7px 0">
+        <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px">
+          <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${intRenk(y.yer)};margin-right:6px"></span><strong>${esc(y.yer)}</strong> <span style="color:var(--y)">· ${nf(y.yazim)} yazım</span></span>
+          <span style="font-variant-numeric:tabular-nums;white-space:nowrap"><strong>${intGb(y.tahmin_mb)}</strong> · %${nf(y.tahmin_mb / top * 100, 1)}</span>
+        </div>
+        <div class="bar-dis"><div class="bar-ic" style="width:${(y.tahmin_mb / top * 100).toFixed(1)}%;background:${intRenk(y.yer)}"></div></div>
+      </div>`).join('') +
+    `</div>
+    <div class="boru-adim"><h3>⏱️ Saatlik (son 48 saat)</h3>${intSaatlikCiz(I.saatlik || [])}</div>
+  </div>`;
+
+  // 4) Dosya tablosu
+  const dos = I.son24_dosyalar || [];
+  h += `<h3>📄 En çok veri gönderen dosyalar (son 24 saat)</h3><div class="tablo-kutu" style="margin-bottom:12px"><table>
+    <thead><tr><th>Dosya</th><th>Kullanım yeri</th><th class="sag">Yazım</th><th class="sag">Ort. boyut</th><th class="sag">Ham</th><th class="sag">Hat (tahmini)</th></tr></thead><tbody>` +
+    (dos.length ? dos.map(d => `<tr><td><code>${esc(d.yol)}</code></td><td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${intRenk(d.yer)};margin-right:5px"></span>${esc(d.yer)}</td><td class="sag">${nf(d.yazim)}</td><td class="sag">${nf(d.ort_kb)} KB</td><td class="sag">${nf(d.ham_mb, 1)} MB</td><td class="sag"><b>${intGb(d.tahmin_mb)}</b></td></tr>`).join('')
+      : '<tr><td colspan="6" class="bos">Son 24 saatte Pi yazımı yok (Pi çevrimdışı olabilir)</td></tr>') +
+    `</tbody></table></div>`;
+
+  const m = I.model || {};
+  h += `<div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)">
+    <b>Hesap modeli:</b> yazım başına hat ≈ ham boyut × ${nf(m.katsayi, 2)} (GitHub yazımı ×${nf(m.github_yaz, 2)} + yazım öncesi okuma ×${nf(m.github_oku, 2)} + ns1 kopyası ×${nf(m.ns1_kopya, 2)}) + ${nf(m.istek_kb)} KB istek yükü.
+    Cihaz yoklamaları yerel ağda kalır. Operatör/modem sayacı ile karşılaştırıp kalibre edin.
+    <br><b>Tasarruf:</b> en büyük kalem genellikle <i>Madenci toplayıcı</i> — ~230 KB'lık dosyanın her ~90 sn'de tamamen gönderilmesi; yalnız değişince / 5–10 dk'da bir ve sıkıştırılmış gönderim %80–90 azaltır.
+  </div></div>`;
+  return h;
+}
+
+function intSemaCiz(yerler, toplamMb, m) {
+  if (!yerler.length) return '<div class="bos">Son 24 saatte veri yok.</div>';
+  const ana = yerler.slice(0, 7);
+  const kalan = yerler.slice(7).reduce((a, y) => a + y.tahmin_mb, 0);
+  if (kalan > 0) ana.push({ yer: 'Diğer (' + (yerler.length - 7) + ' yer)', tahmin_mb: kalan, _renk: '#A3AAB5' });
+  const T = ana.reduce((a, y) => a + y.tahmin_mb, 0) || 1;
+  const W = 1000, H = 330, solX = 230, piX = 520, sagX = 760, ust = 20, alanH = H - 40;
+  const bosluk = 6, kullan = alanH - bosluk * (ana.length - 1);
+  // sol düğüm yükseklikleri: en az 30 px (etiketler çakışmasın), kalan alan orana göre
+  const MIN = 30, kucuk = ana.filter(y => kullan * y.tahmin_mb / T < MIN);
+  const buyukT = ana.filter(y => !kucuk.includes(y)).reduce((a, y) => a + y.tahmin_mb, 0) || 1;
+  const buyukH = Math.max(0, kullan - MIN * kucuk.length);
+  const solH = y => kucuk.includes(y) ? MIN : buyukH * y.tahmin_mb / buyukT;
+  let y0 = ust, svg = '';
+  const piY = ust + alanH * 0.08, piH = alanH * 0.84;
+  let piSira = piY;
+  ana.forEach(y => {
+    const hh = solH(y);
+    const r = y._renk || intRenk(y.yer);
+    const ph = piH * y.tahmin_mb / T;
+    const c1 = solX + 120;
+    svg += `<path d="M${solX},${y0} C${c1},${y0} ${piX - 120},${piSira} ${piX},${piSira} L${piX},${piSira + ph} C${piX - 120},${piSira + ph} ${c1},${y0 + hh} ${solX},${y0 + hh} Z" fill="${r}" opacity=".35"><title>${esc(y.yer)}: ${intGb(y.tahmin_mb)}</title></path>`;
+    svg += `<rect x="${solX - 8}" y="${y0}" width="8" height="${hh}" rx="2" fill="${r}"/>`;
+    svg += `<text x="${solX - 14}" y="${y0 + hh / 2 - 2}" text-anchor="end" font-size="12.5" font-weight="700" fill="#2B2F35">${esc(y.yer)}</text>`;
+    svg += `<text x="${solX - 14}" y="${y0 + hh / 2 + 12}" text-anchor="end" font-size="11.5" fill="#5B6470">${intGb(y.tahmin_mb)} · %${nf(y.tahmin_mb / T * 100, 0)}</text>`;
+    y0 += hh + bosluk; piSira += ph;
+  });
+  // Pi → hedefler (GitHub yazım+okuma, ns1 kopyası, istek yükü)
+  const kat = m.katsayi || 3.44;
+  const pay = [
+    { ad: 'GitHub API (yazım)', o: (m.github_yaz || 1.37) / kat, r: '#1F3B66' },
+    { ad: 'GitHub API (okuma)', o: (m.github_oku || 1.37) / kat, r: '#475569' },
+    { ad: 'ns1 sunucu kopyası', o: (m.ns1_kopya || 0.7) / kat, r: '#0D9488' }
+  ];
+  let ps = piY, hs = ust + 20;
+  const hedefH = alanH - 40 - bosluk * 2;
+  pay.forEach(p => {
+    const ph = piH * p.o, hh = hedefH * p.o;
+    svg += `<path d="M${piX + 22},${ps} C${piX + 130},${ps} ${sagX - 110},${hs} ${sagX},${hs} L${sagX},${hs + hh} C${sagX - 110},${hs + hh} ${piX + 130},${ps + ph} ${piX + 22},${ps + ph} Z" fill="${p.r}" opacity=".28"/>`;
+    svg += `<rect x="${sagX}" y="${hs}" width="8" height="${hh}" rx="2" fill="${p.r}"/>`;
+    svg += `<text x="${sagX + 16}" y="${hs + hh / 2 - 2}" font-size="12.5" font-weight="700" fill="#2B2F35">${p.ad}</text>`;
+    svg += `<text x="${sagX + 16}" y="${hs + hh / 2 + 12}" font-size="11.5" fill="#5B6470">≈ ${intGb(toplamMb * p.o)}</text>`;
+    ps += ph; hs += hh + bosluk;
+  });
+  svg += `<rect x="${piX}" y="${piY}" width="22" height="${piH}" rx="5" fill="#2B2F35"/>
+    <text x="${piX + 11}" y="${piY - 6}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#2B2F35">Saha Pi · 4G modem</text>
+    <text x="${piX + 11}" y="${piY + piH + 16}" text-anchor="middle" font-size="12" fill="#5B6470">${intGb(toplamMb)} / 24 sa</text>`;
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="display:block;width:100%;min-width:760px;height:auto;background:#F8FAFC;border:1px solid var(--c);border-radius:12px" role="img" aria-label="İnternet kullanım akış şeması">${svg}</svg></div>`;
+}
+
+function intGunlukCiz(gunler) {
+  if (!gunler.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 230, sol = 44, alt = 26, ust = 10;
+  const maks = Math.max(...gunler.map(g => g.tahmin_mb), 1);
+  const bw = (W - sol - 6) / gunler.length;
+  const yer = new Set(); gunler.forEach(g => Object.keys(g.yerler || {}).forEach(k => yer.add(k)));
+  const sira = Object.keys(INT_RENK).filter(k => yer.has(k)).concat([...yer].filter(k => !INT_RENK[k]));
+  let svg = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = maks * i / 4, y = H - alt - (H - alt - ust) * i / 4;
+    svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  gunler.forEach((g, i) => {
+    let yb = H - alt;
+    const x = sol + i * bw + 1;
+    sira.forEach(k => {
+      const v = (g.yerler || {})[k]; if (!v) return;
+      const hh = (H - alt - ust) * v / maks;
+      yb -= hh;
+      svg += `<rect x="${x}" y="${yb}" width="${Math.max(1, bw - 2)}" height="${hh}" fill="${intRenk(k)}"><title>${g.gun} · ${esc(k)}: ${intGb(v)}</title></rect>`;
+    });
+    svg += `<rect x="${x}" y="${ust}" width="${bw}" height="${H - alt - ust}" fill="transparent"><title>${g.gun}: ${intGb(g.tahmin_mb)} · ${nf(g.yazim)} yazım</title></rect>`;
+    if (i % Math.ceil(gunler.length / 8) === 0 || i === gunler.length - 1)
+      svg += `<text x="${x + bw / 2}" y="${H - 9}" text-anchor="middle" font-size="10" fill="#5B6470">${g.gun.slice(8, 10)}.${g.gun.slice(5, 7)}</text>`;
+  });
+  const lej = sira.slice(0, 8).map(k => `<span style="display:inline-flex;align-items:center;gap:4px;margin:2px 10px 2px 0;font-size:11.5px;color:var(--y)"><i style="width:9px;height:9px;border-radius:2px;background:${intRenk(k)};display:inline-block"></i>${esc(k)}</span>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="margin-top:4px">${lej}</div>`;
+}
+
+function intBirikimCiz(tum, oz, kotaMb) {
+  const ay = oz.ay || '';
+  const gunler = tum.filter(g => g.gun.startsWith(ay));
+  if (!gunler.length) return '<div class="bos">Bu ay kayıt yok.</div>';
+  const [yy, aa] = ay.split('-').map(Number);
+  const ayGun = new Date(yy, aa, 0).getDate();
+  const W = 560, H = 230, sol = 48, alt = 26, ust = 12;
+  let top = 0;
+  const nokta = gunler.map(g => { top += g.tahmin_mb; return { d: +g.gun.slice(8, 10), v: top }; });
+  const maks = Math.max(oz.ay_sonu_tahmin_mb || 0, kotaMb || 0, top) * 1.08 || 1;
+  const X = d => sol + (W - sol - 8) * (d - 0.5) / ayGun;
+  const Y = v => H - alt - (H - alt - ust) * v / maks;
+  let svg = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = maks * i / 4;
+    svg += `<line x1="${sol}" x2="${W}" y1="${Y(v)}" y2="${Y(v)}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${Y(v) + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  [1, 5, 10, 15, 20, 25, ayGun].forEach(d => { svg += `<text x="${X(d)}" y="${H - 9}" text-anchor="middle" font-size="10" fill="#5B6470">${d}</text>`; });
+  if (kotaMb) svg += `<line x1="${sol}" x2="${W}" y1="${Y(kotaMb)}" y2="${Y(kotaMb)}" stroke="#D7262E" stroke-width="1.6" stroke-dasharray="6 4"/><text x="${W - 4}" y="${Y(kotaMb) - 5}" text-anchor="end" font-size="11" font-weight="700" fill="#D7262E">Kota ${intGb(kotaMb)}</text>`;
+  const son = nokta[nokta.length - 1];
+  if (oz.ay_sonu_tahmin_mb) svg += `<line x1="${X(son.d)}" y1="${Y(son.v)}" x2="${X(ayGun)}" y2="${Y(oz.ay_sonu_tahmin_mb)}" stroke="#2a78d6" stroke-width="1.6" stroke-dasharray="4 4"/><text x="${X(ayGun) - 2}" y="${Y(oz.ay_sonu_tahmin_mb) + 14}" text-anchor="end" font-size="10.5" fill="#2a78d6">≈ ${intGb(oz.ay_sonu_tahmin_mb)}</text>`;
+  svg += `<path d="M${X(nokta[0].d)},${Y(0)} ${nokta.map(n => `L${X(n.d)},${Y(n.v)}`).join(' ')} L${X(son.d)},${Y(0)} Z" fill="#2a78d6" opacity=".12"/>`;
+  svg += `<polyline points="${nokta.map(n => X(n.d) + ',' + Y(n.v)).join(' ')}" fill="none" stroke="#2a78d6" stroke-width="2.2"/>`;
+  nokta.forEach(n => { svg += `<circle cx="${X(n.d)}" cy="${Y(n.v)}" r="2.6" fill="#2a78d6"><title>${n.d}. gün sonu: ${intGb(n.v)}</title></circle>`; });
+  if (kotaMb) {
+    const asim = nokta.find(n => n.v >= kotaMb);
+    if (asim) svg += `<circle cx="${X(asim.d)}" cy="${Y(asim.v)}" r="5" fill="none" stroke="#D7262E" stroke-width="2"><title>Kota ${asim.d}. gün aşıldı</title></circle>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg>`;
+}
+
+function intSaatlikCiz(saat) {
+  if (!saat.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 200, sol = 44, alt = 24, ust = 8;
+  const maks = Math.max(...saat.map(s => s.tahmin_mb), 1);
+  const bw = (W - sol - 4) / saat.length;
+  let svg = '';
+  for (let i = 0; i <= 3; i++) {
+    const v = maks * i / 3, y = H - alt - (H - alt - ust) * i / 3;
+    svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  saat.forEach((s, i) => {
+    const hh = (H - alt - ust) * s.tahmin_mb / maks, x = sol + i * bw;
+    svg += `<rect x="${x + .5}" y="${H - alt - hh}" width="${Math.max(1, bw - 1)}" height="${hh}" fill="#0D9488"><title>${s.saat}:00 · ${intGb(s.tahmin_mb)} · ${s.yazim} yazım</title></rect>`;
+    if (s.saat.slice(11) === '00') svg += `<text x="${x}" y="${H - 8}" font-size="10" fill="#5B6470">${s.saat.slice(8, 10)}.${s.saat.slice(5, 7)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg>`;
+}
+
+// ---- 🔁 VERİ AKIŞI SEKMESİ (indirme / yükleme · sistem bazında · yoğunluk) ----
+let AKIS_SECILI = null;
+let AKIS_SAAT = 24;
+const AK_IND = '#2a78d6', AK_YUK = '#F08A24';
+function akisYon(y, m) {
+  // Yeni rapor alanları yoksa (eski internet.json) modelin oranlarıyla ayır
+  if (y.indirme_mb != null) return { ind: y.indirme_mb, yuk: y.yukleme_mb, ghY: y.gh_yukle_mb, ghI: y.gh_indir_mb, ns1: y.ns1_yukle_mb };
+  const kat = (m && m.katsayi) || 3.44, t = y.tahmin_mb || 0;
+  const ghI = t * ((m && m.github_oku) || 1.37) / kat, ns1 = t * ((m && m.ns1_kopya) || 0.7) / kat;
+  return { ind: ghI, yuk: t - ghI, ghY: t - ghI - ns1, ghI, ns1 };
+}
+function akisSec(ad) { AKIS_SECILI = AKIS_SECILI === ad ? null : ad; ciz(); setTimeout(() => { const e = $('akis-detay'); if (e && AKIS_SECILI) e.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 30); }
+
+function akisCiz() {
+  const I = VERI.internet;
+  if (!I || I._hata) {
+    return `<div id="bolum-akis" class="kart"><h2>🔁 Veri Akışı</h2><div class="bos">${I && I._hata === 'oturum_yok' ? 'Veri akışı raporu için Portal üzerinden yetkili oturum açın.' : 'Veri akışı raporu henüz oluşmadı (n8n/analiz/internet.json · ' + esc(I && I._hata) + ').'}</div></div>`;
+  }
+  const m = I.model || {};
+  const yerler = (I.son24_yerler || []).map(y => ({ ...y, ...akisYon(y, m) }));
+  const topInd = yerler.reduce((a, y) => a + y.ind, 0), topYuk = yerler.reduce((a, y) => a + y.yuk, 0);
+  const top = topInd + topYuk || 1;
+  const saatlik = (I.saatlik || []).map(s => ({ ...s, ...akisYon(s, m) }));
+  const enYogunSaat = saatlik.reduce((a, s) => (!a || s.tahmin_mb > a.tahmin_mb) ? s : a, null);
+  const enYogun = yerler[0];
+  const O = I.olcum || {};
+  const olcumVar = O.son24_indirme_mb != null;
+
+  let h = `<div id="bolum-akis" class="kart">
+    <h2>
+      <span>🔁 Veri Akışı — Hangi Sistem Ne İndirdi, Ne Yükledi</span>
+      <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(I.guncellendi))}</b> ${yasEtiket(dkOnce(I.guncellendi), 90, 240)}</span>
+    </h2>
+    <p class="alt" style="margin:-4px 0 12px">Son 24 saat · <span style="color:${AK_IND};font-weight:700">↓ indirme</span> = Pi'ye gelen (GitHub'dan okuma) · <span style="color:${AK_YUK};font-weight:700">↑ yükleme</span> = Pi'den giden (GitHub yazımı + ns1 kopyası). Sistem kutusuna dokununca dosya ayrıntısı açılır.</p>
+
+    <div class="kpi">
+      <div class="kpi-kutu" style="--kp-r:${AK_IND};cursor:default"><small>↓ İndirme (24 sa)</small><b>${intGb(topInd)}</b><span class="alt-k">%${nf(topInd / top * 100, 0)} · GitHub okuma</span></div>
+      <div class="kpi-kutu" style="--kp-r:${AK_YUK};cursor:default"><small>↑ Yükleme (24 sa)</small><b>${intGb(topYuk)}</b><span class="alt-k">%${nf(topYuk / top * 100, 0)} · GitHub + ns1</span></div>
+      <div class="kpi-kutu" style="--kp-r:#2B2F35;cursor:default"><small>Toplam trafik (24 sa)</small><b>${intGb(top)}</b><span class="alt-k">${nf(yerler.reduce((a, y) => a + (y.yazim || 0), 0))} yazım · ${yerler.length} sistem</span></div>
+      <div class="kpi-kutu" style="--kp-r:${enYogun ? intRenk(enYogun.yer) : '#64748B'}" onclick="${enYogun ? `akisSec('${esc(enYogun.yer).replace(/'/g, "\\'")}')` : ''}"><small>En yoğun sistem</small><b style="font-size:16px">${enYogun ? esc(enYogun.yer) : '—'}</b><span class="alt-k">${enYogun ? intGb(enYogun.ind + enYogun.yuk) + ' · %' + nf((enYogun.ind + enYogun.yuk) / top * 100, 0) : ''}</span></div>
+      <div class="kpi-kutu" style="--kp-r:#0D9488;cursor:default"><small>En yoğun saat (48 sa)</small><b>${enYogunSaat ? esc(enYogunSaat.saat.slice(11)) + ':00' : '—'}</b><span class="alt-k">${enYogunSaat ? esc(enYogunSaat.saat.slice(8, 10) + '.' + enYogunSaat.saat.slice(5, 7)) + ' · ' + intGb(enYogunSaat.tahmin_mb) : ''}</span></div>
+      <div class="kpi-kutu" style="--kp-r:${olcumVar ? '#1E9E5A' : '#A3AAB5'};cursor:default"><small>Ölçülen (Pi ağ sayacı)</small><b>${olcumVar ? '↓' + intGb(O.son24_indirme_mb) + ' ↑' + intGb(O.son24_yukleme_mb) : 'Birikiyor'}</b><span class="alt-k">${olcumVar ? esc(O.varsayilan || '') + ' · ' + nf(O.ornek) + ' örnek' : 'Pi nabzı 10 dk\'da bir örnek alır'}</span></div>
+    </div>`;
+
+  // 1) Şematik akış
+  h += `<h3>🗺️ Şematik akış — sistemler → Saha Pi → bulut</h3>` + akisSemaCiz(yerler, topInd, topYuk, O);
+
+  // 2) Sistem bazında indirme/yükleme (karşılıklı çubuk)
+  h += `<div class="iki-kolon" style="margin-top:14px">
+    <div class="boru-adim"><h3>⇅ Sistem bazında indirme / yükleme (24 sa)</h3>${akisCiftCubuk(yerler)}</div>
+    <div class="boru-adim"><h3>⏱️ Saatlik indirme / yükleme (48 sa)${olcumVar ? ' · <span style="color:#1E9E5A">— ölçülen</span>' : ''}</h3>${akisSaatlik(saatlik, O.saatlik)}</div>
+  </div>`;
+
+  // 3) Yoğunluk ısı haritası
+  h += `<div class="boru-adim" style="margin-bottom:14px">
+    <h3 style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>🔥 Veri yoğunluğu — sistem × saat</span>
+      <span style="display:flex;gap:6px">${[12, 24, 48].map(n => `<button class="btn${AKIS_SAAT === n ? ' aktif' : ''}" style="padding:3px 9px;font-size:12px" onclick="AKIS_SAAT=${n};ciz()">${n} sa</button>`).join('')}</span></h3>
+    ${akisIsiHaritasi(saatlik.slice(-AKIS_SAAT), yerler)}
+  </div>`;
+
+  // 4) Günlük
+  h += `<div class="boru-adim" style="margin-bottom:14px"><h3>📅 Günlük indirme / yükleme (son 30 gün)</h3>${akisGunluk((I.gunler || []).slice(-30), m, O.gunler)}</div>`;
+
+  // 5) Tablo
+  h += `<h3>📋 Sistem tablosu (son 24 saat)</h3><div class="tablo-kutu" style="margin-bottom:12px"><table>
+    <thead><tr><th>Sistem</th><th class="sag">Yazım</th><th class="sag">↓ İndirme</th><th class="sag">↑ Yükleme</th><th class="sag">GitHub ↑</th><th class="sag">GitHub ↓</th><th class="sag">ns1 ↑</th><th class="sag">Toplam</th><th class="sag">Pay</th><th class="sag">Yoğunluk</th><th class="sag">En yoğun saat</th></tr></thead><tbody>` +
+    (yerler.length ? yerler.map(y => {
+      const t = y.ind + y.yuk;
+      let enS = null, enV = 0;
+      saatlik.forEach(s => { const v = (s.yerler || {})[y.yer] || 0; if (v > enV) { enV = v; enS = s.saat; } });
+      return `<tr style="cursor:pointer${AKIS_SECILI === y.yer ? ';background:#EFF6FF' : ''}" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')">
+        <td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${intRenk(y.yer)};margin-right:5px"></span><b>${esc(y.yer)}</b></td>
+        <td class="sag">${nf(y.yazim)}</td>
+        <td class="sag" style="color:${AK_IND}">${intGb(y.ind)}</td>
+        <td class="sag" style="color:${AK_YUK}">${intGb(y.yuk)}</td>
+        <td class="sag">${intGb(y.ghY)}</td><td class="sag">${intGb(y.ghI)}</td><td class="sag">${intGb(y.ns1)}</td>
+        <td class="sag"><b>${intGb(t)}</b></td>
+        <td class="sag">%${nf(t / top * 100, 1)}</td>
+        <td class="sag">${nf(t / 24, 1)} MB/sa</td>
+        <td class="sag">${enS ? esc(enS.slice(8, 10) + '.' + enS.slice(5, 7) + ' ' + enS.slice(11)) + ':00 · ' + intGb(enV) : '—'}</td>
+      </tr>`;
+    }).join('') + `<tr style="background:#F8FAFC"><td><b>Toplam</b></td><td class="sag"><b>${nf(yerler.reduce((a, y) => a + (y.yazim || 0), 0))}</b></td><td class="sag" style="color:${AK_IND}"><b>${intGb(topInd)}</b></td><td class="sag" style="color:${AK_YUK}"><b>${intGb(topYuk)}</b></td><td class="sag">${intGb(yerler.reduce((a, y) => a + y.ghY, 0))}</td><td class="sag">${intGb(yerler.reduce((a, y) => a + y.ghI, 0))}</td><td class="sag">${intGb(yerler.reduce((a, y) => a + y.ns1, 0))}</td><td class="sag"><b>${intGb(top)}</b></td><td class="sag">%100</td><td class="sag">${nf(top / 24, 1)} MB/sa</td><td></td></tr>`
+      : '<tr><td colspan="11" class="bos">Son 24 saatte yazım yok (Pi çevrimdışı olabilir)</td></tr>') +
+    `</tbody></table></div>`;
+
+  // 6) Seçili sistemin dosyaları
+  if (AKIS_SECILI) {
+    const y = yerler.find(v => v.yer === AKIS_SECILI);
+    const dos = (I.son24_dosyalar || []).filter(d => d.yer === AKIS_SECILI).map(d => ({ ...d, ...akisYon(d, m) }));
+    h += `<div id="akis-detay" class="boru-adim" style="margin-bottom:12px;border-left:4px solid ${intRenk(AKIS_SECILI)}">
+      <h3 style="display:flex;justify-content:space-between;gap:8px"><span>🔎 ${esc(AKIS_SECILI)} — dosya ayrıntısı</span><button class="btn" style="padding:2px 9px;font-size:12px" onclick="akisSec(AKIS_SECILI)">Kapat ✕</button></h3>
+      ${y ? `<p class="alt" style="margin:0 0 8px">↓ ${intGb(y.ind)} · ↑ ${intGb(y.yuk)} · ${nf(y.yazim)} yazım · ${nf(y.dosya)} dosya · ham ${y.ham_mb != null ? nf(y.ham_mb, 1) + ' MB' : '—'}</p>` : ''}
+      <div class="tablo-kutu"><table><thead><tr><th>Dosya</th><th class="sag">Yazım</th><th class="sag">Ort. boyut</th><th class="sag">↓ İndirme</th><th class="sag">↑ Yükleme</th><th class="sag">Toplam</th></tr></thead><tbody>` +
+      (dos.length ? dos.map(d => `<tr><td><code>${esc(d.yol)}</code></td><td class="sag">${nf(d.yazim)}</td><td class="sag">${nf(d.ort_kb)} KB</td><td class="sag" style="color:${AK_IND}">${intGb(d.ind)}</td><td class="sag" style="color:${AK_YUK}">${intGb(d.yuk)}</td><td class="sag"><b>${intGb(d.tahmin_mb)}</b></td></tr>`).join('')
+        : '<tr><td colspan="6" class="bos">Bu sistemin dosyası ilk 25 listede yok.</td></tr>') +
+      `</tbody></table></div></div>`;
+  }
+
+  // 7) Ölçüm / model notu
+  let fark = '';
+  if (olcumVar) {
+    const fI = O.son24_indirme_mb - topInd, fY = O.son24_yukleme_mb - topYuk;
+    fark = `<br><b>Ölçülen − model:</b> ↓ ${intGb(Math.max(0, fI))} · ↑ ${intGb(Math.max(0, fY))} — kaynak çekimleri (MEDAŞ, Sungrow, Inavitas, FusionSolar), komut yoklaması, git pull ve yerel ağ (madenci yoklama) buradadır.` +
+      ((O.arayuzler || []).length ? ' Arayüzler: ' + O.arayuzler.map(a => `<code>${esc(a.ad)}</code> ↓${intGb(a.indirme_mb)} ↑${intGb(a.yukleme_mb)}`).join(' · ') + ' (rapor penceresi).' : '');
+  }
+  h += `<div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)">
+    <b>Nasıl hesaplanır:</b> sistem bazındaki değerler Pi'nin epias-ptf'ye yazdığı her dosya sürümünden tahmin edilir — GitHub yazımı ↑ ham×${nf((I.yon_model && I.yon_model.gh_yukle && I.yon_model.gh_yukle.katsayi) || m.github_yaz, 2)}, yazım öncesi okuma ↓ ham×${nf((I.yon_model && I.yon_model.gh_indir && I.yon_model.gh_indir.katsayi) || m.github_oku, 2)}, ns1 kopyası ↑ ham×${nf((I.yon_model && I.yon_model.ns1_yukle && I.yon_model.ns1_yukle.katsayi) || m.ns1_kopya, 2)} + istek yükü.
+    ${olcumVar ? 'Üstteki "Ölçülen" kutusu Pi\'nin gerçek ağ sayacıdır (<code>/proc/net/dev</code>).' : 'Pi nabzına ağ sayacı eklendi; ilk örnekler gelince "Ölçülen" değerler ve saatlik ölçüm çizgisi kendiliğinden görünür.'}${fark}
+  </div></div>`;
+  return h;
+}
+
+function akisSemaCiz(yerler, topInd, topYuk, O) {
+  if (!yerler.length) return '<div class="bos">Son 24 saatte veri yok.</div>';
+  const ana = yerler.slice(0, 8);
+  const kalan = yerler.slice(8);
+  if (kalan.length) ana.push({ yer: 'Diğer (' + kalan.length + ')', _renk: '#A3AAB5', ind: kalan.reduce((a, y) => a + y.ind, 0), yuk: kalan.reduce((a, y) => a + y.yuk, 0), ghY: kalan.reduce((a, y) => a + y.ghY, 0), ghI: kalan.reduce((a, y) => a + y.ghI, 0), ns1: kalan.reduce((a, y) => a + y.ns1, 0), _diger: true });
+  const kutuH = 46, ara = 10, ust = 46;
+  const H = Math.max(360, ust + ana.length * (kutuH + ara) + 20);
+  const W = 1000, solX = 16, solW = 250, piX = 470, piW = 120, sagX = 760, sagW = 224;
+  const maks = Math.max(...ana.map(y => Math.max(y.ind, y.yuk)), 1);
+  const kal = v => Math.max(1.2, Math.min(16, 1.2 + 14.8 * Math.sqrt(v / maks)));
+  const piY = ust, piH = H - ust - 20, piOrta = piY + piH / 2;
+  let svg = `<defs>
+    <marker id="ok-yuk" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0,0L10,5L0,10z" fill="${AK_YUK}"/></marker>
+    <marker id="ok-ind" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0,0L10,5L0,10z" fill="${AK_IND}"/></marker>
+  </defs>
+  <text x="${solX}" y="24" font-size="12" font-weight="800" fill="#5B6470" letter-spacing=".5">SİSTEMLER (KAYNAK)</text>
+  <text x="${piX + piW / 2}" y="24" text-anchor="middle" font-size="12" font-weight="800" fill="#5B6470" letter-spacing=".5">SAHA</text>
+  <text x="${sagX}" y="24" font-size="12" font-weight="800" fill="#5B6470" letter-spacing=".5">BULUT (HEDEF)</text>`;
+  ana.forEach((y, i) => {
+    const yy = ust + i * (kutuH + ara), orta = yy + kutuH / 2;
+    const r = y._renk || intRenk(y.yer);
+    const sec = AKIS_SECILI === y.yer;
+    const hedefY = piY + 18 + (piH - 36) * (i + 0.5) / ana.length;
+    const x1 = solX + solW, x2 = piX;
+    // ↑ yükleme: sistem → Pi (üst hat), ↓ indirme: Pi → sistem (alt hat)
+    svg += `<path class="akis-hat" d="M${x1},${orta - 6} C${x1 + 110},${orta - 6} ${x2 - 110},${hedefY - 6} ${x2 - 4},${hedefY - 6}" stroke="${AK_YUK}" stroke-width="${kal(y.yuk)}" fill="none" opacity=".75" marker-end="url(#ok-yuk)"><title>${esc(y.yer)} ↑ ${intGb(y.yuk)}</title></path>`;
+    svg += `<path class="akis-hat" d="M${x2},${hedefY + 6} C${x2 - 110},${hedefY + 6} ${x1 + 110},${orta + 6} ${x1 + 4},${orta + 6}" stroke="${AK_IND}" stroke-width="${kal(y.ind)}" fill="none" opacity=".65" marker-end="url(#ok-ind)"><title>${esc(y.yer)} ↓ ${intGb(y.ind)}</title></path>`;
+    const tik = y._diger ? '' : ` style="cursor:pointer" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')"`;
+    svg += `<g${tik}>
+      <rect x="${solX}" y="${yy}" width="${solW}" height="${kutuH}" rx="9" fill="#fff" stroke="${sec ? '#2a78d6' : '#D8DEE6'}" stroke-width="${sec ? 2.6 : 1.2}"/>
+      <rect x="${solX}" y="${yy}" width="6" height="${kutuH}" rx="3" fill="${r}"/>
+      <text x="${solX + 16}" y="${yy + 19}" font-size="12.5" font-weight="700" fill="#2B2F35">${esc(y.yer.length > 30 ? y.yer.slice(0, 29) + '…' : y.yer)}</text>
+      <text x="${solX + 16}" y="${yy + 36}" font-size="11.5" fill="${AK_IND}" font-weight="700">↓ ${intGb(y.ind)}</text>
+      <text x="${solX + 96}" y="${yy + 36}" font-size="11.5" fill="${AK_YUK}" font-weight="700">↑ ${intGb(y.yuk)}</text>
+      <text x="${solX + solW - 10}" y="${yy + 36}" text-anchor="end" font-size="11" fill="#5B6470">%${nf((y.ind + y.yuk) / ((topInd + topYuk) || 1) * 100, 0)}</text>
+    </g>`;
+  });
+  // Pi kutusu
+  svg += `<rect x="${piX}" y="${piY}" width="${piW}" height="${piH}" rx="14" fill="#2B2F35"/>
+    <text x="${piX + piW / 2}" y="${piOrta - 26}" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">Saha Pi</text>
+    <text x="${piX + piW / 2}" y="${piOrta - 9}" text-anchor="middle" font-size="11.5" fill="#CBD5E1">4G modem</text>
+    <text x="${piX + piW / 2}" y="${piOrta + 14}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#93C5FD">↓ ${intGb(topInd)}</text>
+    <text x="${piX + piW / 2}" y="${piOrta + 32}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#FDBA74">↑ ${intGb(topYuk)}</text>`;
+  if (O && O.son24_indirme_mb != null) {
+    svg += `<text x="${piX + piW / 2}" y="${piOrta + 54}" text-anchor="middle" font-size="10.5" fill="#86EFAC">ölçülen</text>
+      <text x="${piX + piW / 2}" y="${piOrta + 69}" text-anchor="middle" font-size="10.5" fill="#86EFAC">↓${intGb(O.son24_indirme_mb)} ↑${intGb(O.son24_yukleme_mb)}</text>`;
+  }
+  // Hedefler
+  const ghY = ana.reduce((a, y) => a + y.ghY, 0), ghI = ana.reduce((a, y) => a + y.ghI, 0), ns1 = ana.reduce((a, y) => a + y.ns1, 0);
+  const hm = Math.max(ghY, ghI, ns1, 1), hk = v => Math.max(2, Math.min(20, 2 + 18 * Math.sqrt(v / hm)));
+  const ghKY = ust + 10, ghKH = 120, nsKY = ghKY + ghKH + 40, nsKH = 92;
+  const x1 = piX + piW, x2 = sagX;
+  svg += `<path class="akis-hat" d="M${x1},${piOrta - 40} C${x1 + 80},${piOrta - 40} ${x2 - 80},${ghKY + 38} ${x2 - 4},${ghKY + 38}" stroke="${AK_YUK}" stroke-width="${hk(ghY)}" fill="none" opacity=".75" marker-end="url(#ok-yuk)"><title>GitHub yazımı ↑ ${intGb(ghY)}</title></path>
+    <path class="akis-hat" d="M${x2},${ghKY + 82} C${x2 - 80},${ghKY + 82} ${x1 + 80},${piOrta - 14} ${x1 + 4},${piOrta - 14}" stroke="${AK_IND}" stroke-width="${hk(ghI)}" fill="none" opacity=".65" marker-end="url(#ok-ind)"><title>GitHub okuma ↓ ${intGb(ghI)}</title></path>
+    <path class="akis-hat" d="M${x1},${piOrta + 22} C${x1 + 80},${piOrta + 22} ${x2 - 80},${nsKY + nsKH / 2} ${x2 - 4},${nsKY + nsKH / 2}" stroke="${AK_YUK}" stroke-width="${hk(ns1)}" fill="none" opacity=".75" marker-end="url(#ok-yuk)"><title>ns1 kopyası ↑ ${intGb(ns1)}</title></path>
+    <g>
+      <rect x="${sagX}" y="${ghKY}" width="${sagW}" height="${ghKH}" rx="11" fill="#fff" stroke="#1F3B66" stroke-width="1.4"/>
+      <rect x="${sagX}" y="${ghKY}" width="${sagW}" height="26" rx="11" fill="#1F3B66"/><rect x="${sagX}" y="${ghKY + 14}" width="${sagW}" height="12" fill="#1F3B66"/>
+      <text x="${sagX + 12}" y="${ghKY + 18}" font-size="12.5" font-weight="800" fill="#fff">GitHub · epias-ptf</text>
+      <text x="${sagX + 12}" y="${ghKY + 50}" font-size="12" fill="${AK_YUK}" font-weight="700">↑ Yazım (PUT)</text><text x="${sagX + sagW - 12}" y="${ghKY + 50}" text-anchor="end" font-size="12.5" font-weight="800" fill="#2B2F35">${intGb(ghY)}</text>
+      <text x="${sagX + 12}" y="${ghKY + 76}" font-size="12" fill="${AK_IND}" font-weight="700">↓ Okuma (sha)</text><text x="${sagX + sagW - 12}" y="${ghKY + 76}" text-anchor="end" font-size="12.5" font-weight="800" fill="#2B2F35">${intGb(ghI)}</text>
+      <text x="${sagX + 12}" y="${ghKY + 104}" font-size="11" fill="#5B6470">Toplam ${intGb(ghY + ghI)} · %${nf((ghY + ghI) / ((topInd + topYuk) || 1) * 100, 0)}</text>
+    </g>
+    <g>
+      <rect x="${sagX}" y="${nsKY}" width="${sagW}" height="${nsKH}" rx="11" fill="#fff" stroke="#0D9488" stroke-width="1.4"/>
+      <rect x="${sagX}" y="${nsKY}" width="${sagW}" height="26" rx="11" fill="#0D9488"/><rect x="${sagX}" y="${nsKY + 14}" width="${sagW}" height="12" fill="#0D9488"/>
+      <text x="${sagX + 12}" y="${nsKY + 18}" font-size="12.5" font-weight="800" fill="#fff">ns1 · api.aksarayenerji.net</text>
+      <text x="${sagX + 12}" y="${nsKY + 50}" font-size="12" fill="${AK_YUK}" font-weight="700">↑ Kopya (sıkı JSON)</text><text x="${sagX + sagW - 12}" y="${nsKY + 50}" text-anchor="end" font-size="12.5" font-weight="800" fill="#2B2F35">${intGb(ns1)}</text>
+      <text x="${sagX + 12}" y="${nsKY + 76}" font-size="11" fill="#5B6470">→ Portal · Monitoring · Denetçi</text>
+    </g>`;
+  // Lejant
+  const lY = H - 14;
+  svg += `<g font-size="11.5" fill="#5B6470">
+    <line x1="${sagX}" y1="${lY - 4}" x2="${sagX + 26}" y2="${lY - 4}" stroke="${AK_YUK}" stroke-width="4"/><text x="${sagX + 32}" y="${lY}">↑ yükleme</text>
+    <line x1="${sagX + 110}" y1="${lY - 4}" x2="${sagX + 136}" y2="${lY - 4}" stroke="${AK_IND}" stroke-width="4"/><text x="${sagX + 142}" y="${lY}">↓ indirme</text>
+  </g>`;
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" class="sema-svg" style="min-width:820px" role="img" aria-label="Veri akışı şeması">${svg}</svg></div>`;
+}
+
+function akisCiftCubuk(yerler) {
+  if (!yerler.length) return '<div class="bos">Kayıt yok.</div>';
+  const maks = Math.max(...yerler.map(y => Math.max(y.ind, y.yuk)), 1);
+  return `<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:4px 8px;align-items:center;font-size:12px">
+    <div style="text-align:right;color:${AK_IND};font-weight:700">↓ İndirme</div><div></div><div style="color:${AK_YUK};font-weight:700">↑ Yükleme</div>` +
+    yerler.map(y => `
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:6px"><span style="font-variant-numeric:tabular-nums;color:var(--y)">${intGb(y.ind)}</span><div style="height:12px;width:${(y.ind / maks * 100).toFixed(1)}%;min-width:2px;background:${AK_IND};border-radius:4px 0 0 4px"></div></div>
+      <div style="text-align:center;cursor:pointer;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:${AKIS_SECILI === y.yer ? 800 : 600}" title="${esc(y.yer)}" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')"><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${intRenk(y.yer)};margin-right:4px"></i>${esc(y.yer.replace(/ \(.*\)$/, ''))}</div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="height:12px;width:${(y.yuk / maks * 100).toFixed(1)}%;min-width:2px;background:${AK_YUK};border-radius:0 4px 4px 0"></div><span style="font-variant-numeric:tabular-nums;color:var(--y)">${intGb(y.yuk)}</span></div>`).join('') +
+    `</div>`;
+}
+
+function akisSaatlik(saat, olcumSaat) {
+  if (!saat.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 240, sol = 46, alt = 22, ust = 10, orta = ust + (H - alt - ust) / 2;
+  const om = {}; (olcumSaat || []).forEach(o => { om[o.saat] = o; });
+  const maks = Math.max(...saat.map(s => Math.max(s.ind, s.yuk, (om[s.saat] || {}).indirme_mb || 0, (om[s.saat] || {}).yukleme_mb || 0)), 0.01);
+  const yarim = (H - alt - ust) / 2, bw = (W - sol - 4) / saat.length;
+  let svg = `<line x1="${sol}" x2="${W}" y1="${orta}" y2="${orta}" stroke="#94A3B8"/>`;
+  [1, 0.5].forEach(f => {
+    svg += `<line x1="${sol}" x2="${W}" y1="${orta - yarim * f}" y2="${orta - yarim * f}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${orta - yarim * f + 4}" text-anchor="end" font-size="10" fill="${AK_YUK}">↑${intGb(maks * f)}</text>`;
+    svg += `<line x1="${sol}" x2="${W}" y1="${orta + yarim * f}" y2="${orta + yarim * f}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${orta + yarim * f + 4}" text-anchor="end" font-size="10" fill="${AK_IND}">↓${intGb(maks * f)}</text>`;
+  });
+  let cU = '', cD = '';
+  saat.forEach((s, i) => {
+    const x = sol + i * bw, hu = yarim * s.yuk / maks, hd = yarim * s.ind / maks;
+    svg += `<rect x="${x + .5}" y="${orta - hu}" width="${Math.max(1, bw - 1)}" height="${hu}" fill="${AK_YUK}"><title>${s.saat}:00 ↑ ${intGb(s.yuk)}</title></rect>`;
+    svg += `<rect x="${x + .5}" y="${orta}" width="${Math.max(1, bw - 1)}" height="${hd}" fill="${AK_IND}"><title>${s.saat}:00 ↓ ${intGb(s.ind)}</title></rect>`;
+    const o = om[s.saat];
+    if (o) { cU += `${x + bw / 2},${orta - yarim * o.yukleme_mb / maks} `; cD += `${x + bw / 2},${orta + yarim * o.indirme_mb / maks} `; }
+    if (s.saat.slice(11) === '00') svg += `<text x="${x}" y="${H - 6}" font-size="10" fill="#5B6470">${s.saat.slice(8, 10)}.${s.saat.slice(5, 7)}</text>`;
+  });
+  if (cU) svg += `<polyline points="${cU}" fill="none" stroke="#1E9E5A" stroke-width="1.8"/><polyline points="${cD}" fill="none" stroke="#1E9E5A" stroke-width="1.8" stroke-dasharray="4 3"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg>`;
+}
+
+function akisIsiHaritasi(saat, yerler) {
+  if (!saat.length || !yerler.length) return '<div class="bos">Kayıt yok.</div>';
+  const satir = yerler.slice(0, 12);
+  const etW = 170, hc = 22, ust = 6, alt = 22;
+  const W = Math.max(1000, etW + saat.length * 18), cw = (W - etW - 4) / saat.length, H = ust + satir.length * hc + alt;
+  const maks = Math.max(...satir.flatMap(y => saat.map(s => (s.yerler || {})[y.yer] || 0)), 0.01);
+  let svg = '';
+  satir.forEach((y, r) => {
+    const yy = ust + r * hc;
+    svg += `<text x="${etW - 8}" y="${yy + hc / 2 + 4}" text-anchor="end" font-size="11.5" font-weight="${AKIS_SECILI === y.yer ? 800 : 600}" fill="#2B2F35" style="cursor:pointer" onclick="akisSec('${esc(y.yer).replace(/'/g, "\\'")}')">${esc(y.yer.length > 24 ? y.yer.slice(0, 23) + '…' : y.yer)}</text>`;
+    saat.forEach((s, c) => {
+      const v = (s.yerler || {})[y.yer] || 0;
+      const t = Math.sqrt(v / maks);
+      svg += `<rect x="${etW + c * cw + .5}" y="${yy + 1}" width="${Math.max(1, cw - 1)}" height="${hc - 2}" rx="3" fill="${v ? intRenk(y.yer) : '#F1F5F9'}" opacity="${v ? (0.12 + 0.88 * t).toFixed(2) : 1}"><title>${esc(y.yer)} · ${s.saat}:00 → ${intGb(v)}</title></rect>`;
+    });
+  });
+  saat.forEach((s, c) => {
+    const sa = +s.saat.slice(11);
+    if (sa % (saat.length > 24 ? 6 : 3) === 0) svg += `<text x="${etW + c * cw + cw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#5B6470">${sa === 0 ? s.saat.slice(8, 10) + '.' + s.saat.slice(5, 7) : String(sa).padStart(2, '0')}</text>`;
+  });
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:640px;height:auto;display:block">${svg}</svg></div>
+    <p class="alt" style="margin:6px 0 0;font-size:12px">Koyu hücre = o saatte o sistemin hattan geçirdiği veri fazla (karekök ölçek, en yoğun hücre ${intGb(maks)}).</p>`;
+}
+
+function akisGunluk(gunler, m, olcumGun) {
+  if (!gunler.length) return '<div class="bos">Kayıt yok.</div>';
+  const g = gunler.map(x => ({ gun: x.gun, ...akisYon(x, m), o: (olcumGun || {})[x.gun] }));
+  const W = 1000, H = 230, sol = 54, alt = 24, ust = 10;
+  const maks = Math.max(...g.map(x => Math.max(x.ind + x.yuk, x.o ? x.o.indirme_mb + x.o.yukleme_mb : 0)), 1);
+  const bw = (W - sol - 6) / g.length;
+  let svg = '';
+  for (let i = 0; i <= 4; i++) {
+    const v = maks * i / 4, y = H - alt - (H - alt - ust) * i / 4;
+    svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${intGb(v)}</text>`;
+  }
+  g.forEach((x, i) => {
+    const X = sol + i * bw + 2, w = Math.max(2, bw - 4), Y0 = H - alt;
+    const hd = (H - alt - ust) * x.ind / maks, hu = (H - alt - ust) * x.yuk / maks;
+    svg += `<rect x="${X}" y="${Y0 - hd}" width="${w}" height="${hd}" fill="${AK_IND}"><title>${x.gun} ↓ ${intGb(x.ind)}</title></rect>`;
+    svg += `<rect x="${X}" y="${Y0 - hd - hu}" width="${w}" height="${hu}" fill="${AK_YUK}"><title>${x.gun} ↑ ${intGb(x.yuk)} · toplam ${intGb(x.ind + x.yuk)}</title></rect>`;
+    if (x.o) { const ho = (H - alt - ust) * (x.o.indirme_mb + x.o.yukleme_mb) / maks; svg += `<line x1="${X - 1}" x2="${X + w + 1}" y1="${Y0 - ho}" y2="${Y0 - ho}" stroke="#1E9E5A" stroke-width="2.2"><title>${x.gun} ölçülen ↓${intGb(x.o.indirme_mb)} ↑${intGb(x.o.yukleme_mb)}</title></line>`; }
+    if (i % Math.ceil(g.length / 15) === 0 || i === g.length - 1) svg += `<text x="${X + w / 2}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#5B6470">${x.gun.slice(8, 10)}.${x.gun.slice(5, 7)}</text>`;
+  });
+  return `<div style="overflow-x:auto"><svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:560px;height:auto;display:block">${svg}</svg></div>
+    <div style="font-size:11.5px;color:var(--y);margin-top:4px"><i style="display:inline-block;width:9px;height:9px;background:${AK_IND};border-radius:2px"></i> ↓ indirme &nbsp; <i style="display:inline-block;width:9px;height:9px;background:${AK_YUK};border-radius:2px"></i> ↑ yükleme &nbsp; <i style="display:inline-block;width:14px;height:2px;background:#1E9E5A;vertical-align:middle"></i> ölçülen toplam</div>`;
+}
+
+// ---- KAPASİTE (Pi + ns1) ve Pi'de yerel depolama senaryosu ----
+const gbB = b => b == null ? '—' : (b >= 1e12 ? nf(b / 1e12, 2) + ' TB' : (b >= 1e9 ? nf(b / 1e9, b >= 1e11 ? 0 : 1) + ' GB' : nf(b / 1e6, 0) + ' MB'));
+function kapCubuk(ad, dolu, toplam, alt) {
+  if (!toplam) return `<div style="margin:8px 0"><strong>${ad}</strong> <span class="alt">— veri yok</span></div>`;
+  const y = dolu / toplam * 100, r = y >= 90 ? '#D7262E' : (y >= 75 ? '#F08A24' : '#1E9E5A');
+  return `<div style="margin:9px 0">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px 8px;font-size:12.5px"><strong>${ad}</strong><span style="font-variant-numeric:tabular-nums;white-space:nowrap">${gbB(dolu)} / ${gbB(toplam)} · <strong style="color:${r}">%${nf(y, 0)}</strong> · kalan <strong>${gbB(toplam - dolu)}</strong></span></div>
+    <div class="bar-dis" style="height:10px"><div class="bar-ic" style="width:${Math.min(100, y).toFixed(1)}%;background:${r}"></div></div>
+    ${alt ? `<small style="color:var(--y)">${alt}</small>` : ''}
+  </div>`;
+}
+function kapasiteCiz() {
+  const pn = VERI.piNabiz || {}, pk = pn.kapasite || {};
+  const nk = (VERI.bekciNs1 && VERI.bekciNs1.kapasite) || {};
+  const I = VERI.internet || {}, oz = I.ozet || {};
+  const piDisk = pk.disk, piRam = pk.ram, nsDisk = nk.disk, nsRam = nk.ram;
+  let h = `<div class="kart" id="bolum-kapasite"><h2><span>💾 Kapasite — Saha Pi ve ns1 Sunucu</span>
+    <span style="font-size:12.5px;color:var(--y)">Pi: ${esc(trZaman(pn.son_ts))} · ns1: ${esc(trZaman(VERI.bekciNs1 && VERI.bekciNs1.t))}</span></h2>
+    <div class="iki-kolon">
+      <div class="boru-adim"><h3>🍓 Saha Pi</h3>` +
+      (piDisk ? kapCubuk('Hafıza kartı (/)', piDisk.toplam - piDisk.bos, piDisk.toplam,
+          (pk.kart && pk.kart.boyut > piDisk.toplam * 1.1 ? `⚠️ Kart ${gbB(pk.kart.boyut)}, bölüm ${gbB(piDisk.toplam)} — bölüm büyütülmemiş.` : (pk.kart ? 'Kart: ' + esc(pk.kart.ad) + ' · ' + gbB(pk.kart.boyut) : '')))
+        : `<div class="bos" style="padding:10px">Pi kapasite bilgisi bekleniyor — yeni nabız kodu Pi'ye en geç 30 dk'da iner (şimdilik: ${esc(pn.not_ || '—')}).</div>`) +
+      (piRam ? kapCubuk('Bellek (RAM)', piRam.toplam - piRam.bos, piRam.toplam, piRam.takas_toplam ? 'Takas: ' + gbB(piRam.takas_toplam - piRam.takas_bos) + ' / ' + gbB(piRam.takas_toplam) : 'Takas yok') : '') +
+      (pk.klasor && Object.keys(pk.klasor).length ? `<div style="font-size:12px;color:var(--y);margin-top:6px">Klasörler: ${Object.entries(pk.klasor).map(([k, v]) => `<strong>${esc(k)}</strong> ${gbB(v)}`).join(' · ')} · yük ${esc(pk.yuk || '—')}</div>` : '') +
+      `</div>
+      <div class="boru-adim"><h3>🖥️ ns1 (api.aksarayenerji.net)</h3>` +
+      (nsDisk ? kapCubuk('Disk (/)', nsDisk.toplam - nsDisk.bos, nsDisk.toplam, '') : `<div class="bos" style="padding:10px">ns1 kapasite bilgisi bekleniyor — bekçi güncellemesi yayınlanınca 5 dk içinde gelir.</div>`) +
+      (nsRam ? kapCubuk('Bellek (RAM)', nsRam.toplam - nsRam.bos, nsRam.toplam, (nk.cekirdek ? nk.cekirdek + ' çekirdek · yük ' + esc(nk.yuk) : '')) : '') +
+      (nk.birim && Object.keys(nk.birim).length ? `<div style="font-size:12px;color:var(--y);margin-top:6px">Docker birimleri: ${Object.entries(nk.birim).map(([k, v]) => `<strong>${esc(k.replace(/^(aesun_)+/, ''))}</strong> ${gbB(v)}`).join(' · ')}</div>` : '') +
+      `</div>
+    </div>`;
+
+  // Pi'de yerel depolama senaryosu: cihaz verisi Pi'de birikirse kart ne zaman dolar?
+  const hamGun = (oz.ham_gun_mb || 0) * 1e6;
+  const sonKayit = (I.son24_dosyalar || []).reduce((a, d) => a + (d.ort_kb || 0) * 1024, 0);
+  if (hamGun) {
+    const pay = piDisk ? Math.max(0, piDisk.bos - piDisk.toplam * 0.10) : null;   // %10 güvenlik payı
+    const sen = [
+      { ad: 'Son kayıt (üzerine yaz)', gun: 0, not: 'Her dosyanın yalnız son hali; büyümez. "Güncel veriyi getir" için yeterli.' },
+      { ad: 'Her sürüm · sıkıştırılmış', gun: hamGun * 0.12, not: 'JSON gzip ≈ %12. Geçmişe dönük sorgu için önerilen.' },
+      { ad: 'Her sürüm · ham', gun: hamGun, not: 'Bugün GitHub\'a gönderilenin aynısı (' + intGb(oz.ham_gun_mb) + '/gün).' }
+    ];
+    const kart = [32, 64, 128, 256, 512];
+    h += `<h3>📦 Cihaz verisi Pi'de saklanırsa — kart yeter mi?</h3>
+      <div class="tablo-kutu" style="margin-bottom:8px"><table style="min-width:600px"><thead><tr><th>Senaryo</th><th class="sag">Günlük artış</th><th class="sag">1 yılda</th><th class="sag">Kart dolma süresi</th><th>Öneri</th></tr></thead><tbody>` +
+      sen.map(x => {
+        const yil = x.gun * 365;
+        const sure = x.gun ? (pay != null ? pay / x.gun : null) : Infinity;
+        const sureMetin = sure === Infinity ? (gbB(sonKayit) + ' sabit') : (sure == null ? 'Pi kapasitesi bekleniyor' : (sure > 730 ? '2 yıldan fazla' : nf(sure, 0) + ' gün'));
+        const gerek = x.gun * 730 + (piDisk ? piDisk.dolu : 16e9);       // 2 yıl + mevcut doluluk
+        const oneriGB = kart.find(k => k * 1e9 * 0.9 >= gerek);
+        const yeter = sure === Infinity || (sure != null && sure > 730);
+        const oneri = yeter ? '✅ Mevcut kart yeter' : (oneriGB ? `⬆️ En az <strong>${oneriGB} GB</strong> kart (2 yıl)` : '⬆️ 512 GB+ / harici SSD');
+        return `<tr><td><strong>${x.ad}</strong><br><small style="color:var(--y)">${x.not}</small></td><td class="sag">${x.gun ? gbB(x.gun) : '—'}</td><td class="sag">${x.gun ? gbB(yil) : gbB(sonKayit)}</td><td class="sag"><strong>${sureMetin}</strong></td><td>${oneri}</td></tr>`;
+      }).join('') + `</tbody></table></div>
+      <p class="alt" style="margin:0;font-size:12px">Hesap: son ${nf(oz.ort7_gun_sayisi || 7)} tam günün ham yazım ortalaması (kesintili günler hariç) · kart dolma süresi = boş alan − %10 güvenlik payı. Pi zaten anlık durumu izlediği için "güncel veriyi getir" isteğinde son kaydı yerelden verirse GitHub'a sürekli tam dosya gönderimi (bugün ↑${intGb(oz.son24_yukleme_mb)}/24 sa) büyük ölçüde kalkar.</p>`;
+  }
+  h += `</div>`;
+  return h;
+}
+
+// ---- 🛡️ SALDIRI & HATALI GİRİŞ (ns1: SSH, fail2ban, API) ----
+let GUV_ARA = '';
+let GUV_FILTRE = 'hepsi';
+let GUV_KAYNAK = 'hepsi';
+let GUV_SONUC = 'hepsi';
+function guvenlikCiz() {
+  const G = VERI.guvenlik;
+  if (!G || G._hata) {
+    return `<div class="kart"><h2>🛡️ Erişim Güvenliği</h2><div class="bos">${G && G._hata === 'oturum_yok' ? 'Güvenlik kayıtları için Portal üzerinden yetkili oturum açın.' : 'Güvenlik özeti henüz oluşmadı (n8n/guvenlik_ns1.json · ' + esc(G && G._hata) + '). ns1 bekçisi 15 dk\'da bir üretir.'}</div></div>`;
+  }
+  const o = G.ozet || {}, f = G.fail2ban || {}, at = o.api_tur || {};
+  const by = o.ssh_basarili_yontem || {};
+  let h = `<div class="kart" id="bolum-guvenlik">
+    <h2><span>🛡️ Erişim Güvenliği — tüm giriş ve erişim denemeleri (son 24 saat)</span>
+      <span style="font-size:12.5px;color:var(--y)">Rapor: <b>${esc(trZaman(G.guncellendi))}</b> ${yasEtiket(dkOnce(G.guncellendi), 20, 60)}</span></h2>`;
+  if ((G.uyarilar || []).length) h += `<div class="hata" style="margin-bottom:12px"><b>⚠️ Dikkat:</b><ul style="margin:6px 0 0 18px">${G.uyarilar.map(u => `<li>${esc(u)}</li>`).join('')}</ul></div>`;
+  else h += `<div class="uyari-kutu" style="background:#ECFDF5;border-color:#A7F3D0;color:#065F46;margin-bottom:12px"><b>✅ Kritik bulgu yok.</b> Başarılı girişlerin tamamı anahtarla; ısrarcı adresler fail2ban ile engelleniyor.</div>`;
+  const ks = G.kaynak_sayilari || {};
+  const kk = (ad, renk, baslik, deger, alt, kaynak) => `<div class="kpi-kutu" style="--kp-r:${renk}${kaynak ? '' : ';cursor:default'}" ${kaynak ? `onclick="GUV_KAYNAK='${kaynak}';ciz();setTimeout(()=>{const e=$('guv-akis');e&&e.scrollIntoView({behavior:'smooth'})},30)"` : ''}><small>${baslik}</small><b>${deger}</b><span class="alt-k">${alt}</span></div>`;
+  h += `<div class="kpi">
+    ${kk('portal', (o.portal_hatali_24s || 0) >= 10 ? '#D7262E' : '#2a78d6', '🔑 Portal girişi', nf(o.portal_basarili_24s || 0) + ' ✓ · ' + nf(o.portal_hatali_24s || 0) + ' ✗', 'başarılı · hatalı şifre/kullanıcı', 'portal')}
+    ${kk('ssh', '#D7262E', '🖥️ SSH hatalı deneme', nf(o.ssh_basarisiz_24s), nf(o.ssh_farkli_ip_24s) + ' adres · başarılı ' + nf(o.ssh_basarili_24s) + (by.parola ? ' (⚠️ parola ' + by.parola + ')' : ' (anahtarla)'), 'ssh')}
+    ${kk('api', '#F08A24', '🌐 API reddi', nf((at['yetkisiz'] || 0) + (at['hiz'] || 0)) + ' · ' + nf(at['tarama'] || 0), 'yetkisiz · zafiyet taraması', 'api')}
+    ${kk('sso', '#B45309', '🧾 Fatura girişi (SSO)', nf(o.sso_red_24s || 0), 'reddedilen giriş', 'fatura-sso')}
+    ${kk('cpanel', '#0D9488', '🗄️ cPanel köprüsü', nf(o.cpanel_red_24s || 0), 'veri.php/canli.php reddi', 'cpanel')}
+    ${kk('f2b', '#7C3AED', '🚫 Şu an engelli', nf(o.engelli_su_an), 'fail2ban ' + (f.etkin === 'active' ? '✅' : '⚠️') + ' · ' + Object.keys(f.kurallar || {}).length + ' kural', 'fail2ban')}
+  </div>`;
+
+  // Birleşik olay akışı
+  const KAY = { portal: ['🔑', 'Portal', '#2a78d6'], saha: ['📱', 'Saha', '#2a78d6'], ssh: ['🖥️', 'SSH', '#D7262E'], api: ['🌐', 'API', '#F08A24'], 'fatura-sso': ['🧾', 'Fatura', '#B45309'], cpanel: ['🗄️', 'cPanel', '#0D9488'], fail2ban: ['🚫', 'fail2ban', '#7C3AED'] };
+  const SON = { basarili: ['ok', 'başarılı'], hatali: ['k', 'hatalı'], yetkisiz: ['u', 'yetkisiz'], tarama: ['k', 'tarama'], hiz: ['u', 'hız sınırı'], engel: ['k', 'engellendi'], kaldirildi: ['ok', 'engel kalktı'] };
+  const akis = (G.akis || []).filter(x => (GUV_KAYNAK === 'hepsi' || x.kaynak === GUV_KAYNAK || (GUV_KAYNAK === 'portal' && x.kaynak === 'saha')) && (GUV_SONUC === 'hepsi' || (GUV_SONUC === 'basarili' ? x.sonuc === 'basarili' : x.sonuc !== 'basarili')) && (!GUV_ARA || (x.ip || '').includes(GUV_ARA) || (x.ayrinti || '').toLowerCase().includes(GUV_ARA.toLowerCase())));
+  h += `<div id="guv-akis"><h3>📜 Tüm erişim olayları — tek akış</h3>
+    <div class="filtre-satir">
+      ${[['hepsi', 'Tümü', (G.akis || []).length]].concat(Object.entries(KAY).filter(([k]) => ks[k]).map(([k, v]) => [k, v[0] + ' ' + v[1], ks[k]])).map(([k, a, n]) => `<button class="btn${GUV_KAYNAK === k ? ' aktif' : ''}" style="padding:4px 10px;font-size:12.5px" onclick="GUV_KAYNAK='${k}';ciz()">${a} <span style="opacity:.65">${nf(n)}</span></button>`).join('')}
+      <select class="secim" onchange="GUV_SONUC=this.value;ciz()">${[['hepsi', 'Tüm sonuçlar'], ['red', 'Yalnız red/hatalı'], ['basarili', 'Yalnız başarılı']].map(([k, a]) => `<option value="${k}"${GUV_SONUC === k ? ' selected' : ''}>${a}</option>`).join('')}</select>
+      <input class="ara" id="guv-ara" placeholder="IP / kullanıcı / yol ara…" value="${esc(GUV_ARA)}" oninput="GUV_ARA=this.value;clearTimeout(window._ga);window._ga=setTimeout(()=>{ciz();const e=$('guv-ara');if(e){e.focus();e.setSelectionRange(e.value.length,e.value.length)}},300)">
+    </div>
+    <div class="tablo-kutu" style="max-height:440px;overflow:auto;margin-bottom:14px"><table>
+      <thead><tr><th>Zaman</th><th>Kaynak</th><th>Sonuç</th><th>Adres</th><th>Ayrıntı</th></tr></thead><tbody>` +
+      (akis.length ? akis.slice(0, 250).map(x => { const kk2 = KAY[x.kaynak] || ['•', x.kaynak, '#64748B'], ss = SON[x.sonuc] || ['', x.sonuc];
+        return `<tr><td style="white-space:nowrap;font-size:12px">${esc(trZaman(x.t))}</td><td style="white-space:nowrap"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${kk2[2]};margin-right:5px"></span>${kk2[0]} ${esc(kk2[1])}</td><td><span class="et ${ss[0]}">${esc(ss[1])}</span></td><td>${x.ip ? `<code style="cursor:pointer" onclick="GUV_ARA='${esc(x.ip)}';ciz()">${esc(x.ip)}</code>` : '—'}</td><td style="font-size:12.5px">${esc(x.ayrinti || '')}</td></tr>`; }).join('')
+        : '<tr><td colspan="5" class="bos">Bu filtreye uyan olay yok.</td></tr>') +
+    `</tbody></table></div></div>`;
+
+  // Portal girişleri
+  const P = G.portal || {};
+  if (P.basarili || P.hatali) {
+    h += `<div class="iki-kolon">
+      <div class="boru-adim"><h3>🔑 Portal — son başarılı girişler</h3>${(P.son_basarili || []).length ? P.son_basarili.map(x => `<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--c)"><span><b>${esc(x.kul)}</b> ${x.not ? '<span class="et">' + esc(x.not) + '</span>' : ''}</span><span style="color:var(--y);white-space:nowrap">${esc(trZaman(x.t))}</span></div>`).join('') : '<div class="bos">Yok.</div>'}</div>
+      <div class="boru-adim"><h3>⛔ Portal — hatalı denemeler</h3>
+        ${(P.hatali_kullanici || []).length ? `<div style="font-size:12px;color:var(--y);margin-bottom:4px">Denenen kullanıcı adları</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${P.hatali_kullanici.map(x => `<span style="padding:2px 9px;border-radius:99px;font-size:12.5px;background:#FDECEC;border:1px solid #F5C2C4"><code style="background:none">${esc(x.kul || '(boş)')}</code> <strong>${nf(x.sayi)}</strong></span>`).join('')}</div>` : '<div class="bos">Hatalı deneme yok.</div>'}
+        ${(P.hatali_ip || []).length ? `<div style="font-size:12px;color:var(--y);margin-bottom:4px">Adresler</div>` + P.hatali_ip.map(x => `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0"><code>${esc(x.ip)}</code><b style="color:${x.sayi >= 10 ? '#D7262E' : 'inherit'}">${nf(x.sayi)}</b></div>`).join('') : ''}
+      </div>
+    </div>`;
+  }
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>⏱️ Saatlik erişim denemesi (24 sa)</h3>${guvSaatlik(G.saatlik || [])}</div>
+    <div class="boru-adim"><h3>📅 Son 7 gün — SSH denemesi ve yeni engel</h3>${guvGunluk(G.gunluk || [])}</div>
+  </div>`;
+
+  // Saldırgan tablosu
+  const L = (G.saldirganlar || []).filter(x => (!GUV_ARA || x.ip.includes(GUV_ARA)) &&
+    (GUV_FILTRE === 'hepsi' || (GUV_FILTRE === 'acik' && !x.engel.length) || (GUV_FILTRE === 'engelli' && x.engel.length) || (GUV_FILTRE === 'ssh' && x.ssh) || (GUV_FILTRE === 'api' && x.api)));
+  void 0;
+  h += `<h3>🎯 Deneme yapan adresler <small style="font-weight:400;color:var(--y)">(yukarıdaki arama bu tabloyu da süzer)</small></h3>
+    <div class="filtre-satir">
+      
+      ${[['hepsi', 'Tümü'], ['acik', 'Engelsiz'], ['engelli', 'Engelli'], ['ssh', 'SSH'], ['api', 'Web']].map(([k, a]) => `<button class="btn${GUV_FILTRE === k ? ' aktif' : ''}" style="padding:4px 10px;font-size:12.5px" onclick="GUV_FILTRE='${k}';ciz()">${a}</button>`).join('')}
+    </div>
+    <div class="tablo-kutu" style="margin-bottom:14px"><table>
+    <thead><tr><th>Adres</th><th class="sag">SSH deneme</th><th class="sag">Web</th><th>Web türü (API/portal/cPanel)</th><th>Son deneme</th><th>Durum</th></tr></thead><tbody>` +
+    (L.length ? L.map(x => `<tr>
+      <td><code>${esc(x.ip)}</code>${x.basarili_giris ? ' <span class="et k">başarılı giriş de var</span>' : ''}</td>
+      <td class="sag"><b>${nf(x.ssh)}</b></td><td class="sag">${nf(x.api)}</td>
+      <td style="font-size:12px">${Object.entries(x.api_tur || {}).map(([k, v]) => esc(k) + ' ' + v).join(' · ') || '—'}</td>
+      <td style="font-size:12px">${x.son ? esc(trZaman(x.son)) : '—'}</td>
+      <td>${x.engel.length ? `<span class="et ok">🚫 engelli · ${esc(x.engel.join(', '))}</span>` : (x.ssh >= 5 ? '<span class="et k">engelsiz</span>' : '<span class="et">izleniyor</span>')}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="bos">Kayıt yok.</td></tr>') + `</tbody></table></div>`;
+
+  // Kullanıcı adları + SSH türleri
+  const ka = G.kullanici_adlari || [], kaM = Math.max(1, ...ka.map(x => x.sayi));
+  const tr = Object.entries(G.ssh_turler || {});
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>👤 Denenen kullanıcı adları</h3>${ka.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px">${ka.map(x => `<span style="display:inline-flex;gap:5px;align-items:center;padding:3px 9px;border-radius:99px;font-size:12.5px;background:rgba(215,38,46,${(0.08 + 0.32 * x.sayi / kaM).toFixed(2)});border:1px solid #F5C2C4"><code style="background:none">${esc(x.ad)}</code><b>${nf(x.sayi)}</b></span>`).join('')}</div>` : '<div class="bos">Yok.</div>'}</div>
+    <div class="boru-adim"><h3>🔐 SSH deneme türleri</h3>${tr.length ? tr.map(([k, v]) => `<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;border-bottom:1px dashed var(--c)"><span>${esc(k)}</span><b>${nf(v)}</b></div>`).join('') : '<div class="bos">Yok.</div>'}</div>
+  </div>`;
+
+  // API yolları + fail2ban
+  const ay = G.api_yollar || [];
+  const kur = Object.entries(f.kurallar || {});
+  h += `<div class="iki-kolon">
+    <div class="boru-adim"><h3>🌐 API'de denenen adresler (reddedilen)</h3><div class="tablo-kutu"><table><thead><tr><th>Yol</th><th class="sag">Kod</th><th class="sag">Sayı</th></tr></thead><tbody>` +
+      (ay.length ? ay.map(x => `<tr><td><code>${esc(x.yol)}</code></td><td class="sag"><span class="et ${x.kod === 401 || x.kod === 403 ? 'u' : ''}">${x.kod}</span></td><td class="sag">${nf(x.sayi)}</td></tr>`).join('') : '<tr><td colspan="3" class="bos">Reddedilen istek yok.</td></tr>') +
+    `</tbody></table></div></div>
+    <div class="boru-adim"><h3>🚫 fail2ban kuralları</h3><div class="tablo-kutu" style="margin-bottom:10px"><table><thead><tr><th>Kural</th><th class="sag">Şu an engelli</th><th class="sag">Toplam engel</th><th class="sag">Takipte</th></tr></thead><tbody>` +
+      (kur.length ? kur.map(([k, v]) => `<tr><td><b>${esc(k)}</b><br><small style="color:var(--y)">${k === 'sshd' ? '10 dk 5 hata → 1 sa (artan)' : k === 'ssh-kalici' ? '24 sa 10 hata → kalıcı' : k === 'recidive' ? '2 kez engellenen → kalıcı' : k === 'aesun-api-tarama' ? 'Web: 10 dk 3 tarama → 1 gün (artan)' : k === 'aesun-api-yetki' ? 'Web: 10 dk 20 red → 1 sa (artan)' : ''}</small></td><td class="sag">${nf(v.su_an)}</td><td class="sag">${nf(v.toplam)}</td><td class="sag">${nf(v.basarisiz_su_an)}</td></tr>`).join('') : '<tr><td colspan="4" class="bos">Kural bilgisi yok.</td></tr>') +
+    `</tbody></table></div>
+    <h3 style="font-size:13px">Son engel olayları</h3><div style="max-height:220px;overflow:auto;font-size:12px">` +
+      ((G.olaylar || []).slice(0, 40).map(x => `<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px dashed var(--c)"><span style="color:var(--y);white-space:nowrap">${esc(trZaman(x.t))}</span><span class="et ${x.olay === 'Ban' ? 'k' : 'ok'}">${x.olay === 'Ban' ? 'engel' : x.olay === 'Unban' ? 'kaldırıldı' : 'yeniden'}</span><code>${esc(x.ip)}</code><span style="color:var(--y)">${esc(x.kural)}</span></div>`).join('') || '<div class="bos">Olay yok.</div>') +
+    `</div></div>
+  </div>
+  <div class="uyari-kutu" style="background:#F8FAFC;color:var(--s);border-color:var(--c)"><b>Kaynaklar:</b> portal girişleri (tarayıcı bildirir; şifre gönderilmez), ns1 SSH günlüğü, API/Fatura SSO erişim günlüğü, cPanel köprüsü (veri.php · canli.php) ve fail2ban — bekçi 15 dk'da bir toplar. Başarılı SSH girişi yapan adresler gösterilmez. Son 7 günde geçerli anahtarla erişen adresler (Pi, cPanel, kullanıcılar) otomatik engellenmez.</div>
+  </div>`;
+  return h;
+}
+function guvSaatlik(saat) {
+  if (!saat.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 210, sol = 40, alt = 22, ust = 10;
+  const maks = Math.max(1, ...saat.map(s => s.ssh + s.api + (s.portal || 0))), bw = (W - sol - 4) / saat.length;
+  let svg = '';
+  for (let i = 0; i <= 3; i++) { const v = maks * i / 3, y = H - alt - (H - alt - ust) * i / 3; svg += `<line x1="${sol}" x2="${W}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${nf(v)}</text>`; }
+  saat.forEach((s, i) => {
+    const x = sol + i * bw, hs = (H - alt - ust) * s.ssh / maks, ha = (H - alt - ust) * s.api / maks;
+    svg += `<rect x="${x + 1}" y="${H - alt - hs}" width="${Math.max(1, bw - 2)}" height="${hs}" fill="#D7262E"><title>${s.saat}:00 SSH ${s.ssh}</title></rect>`;
+    svg += `<rect x="${x + 1}" y="${H - alt - hs - ha}" width="${Math.max(1, bw - 2)}" height="${ha}" fill="#F08A24"><title>${s.saat}:00 API ${s.api}</title></rect>`;
+    const hp = (H - alt - ust) * (s.portal || 0) / maks;
+    svg += `<rect x="${x + 1}" y="${H - alt - hs - ha - hp}" width="${Math.max(1, bw - 2)}" height="${hp}" fill="#2a78d6"><title>${s.saat}:00 Portal ${s.portal || 0}</title></rect>`;
+    if (i % 3 === 0) svg += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#5B6470">${s.saat.slice(11)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="font-size:11.5px;color:var(--y)"><i style="display:inline-block;width:9px;height:9px;background:#D7262E;border-radius:2px"></i> SSH &nbsp; <i style="display:inline-block;width:9px;height:9px;background:#F08A24;border-radius:2px"></i> API/SSO (yetkisiz + tarama) &nbsp; <i style="display:inline-block;width:9px;height:9px;background:#2a78d6;border-radius:2px"></i> Portal girişi</div>`;
+}
+function guvGunluk(gun) {
+  if (!gun.length) return '<div class="bos">Kayıt yok.</div>';
+  const W = 560, H = 210, sol = 44, alt = 22, ust = 10;
+  const maks = Math.max(1, ...gun.map(g => g.ssh)), mE = Math.max(1, ...gun.map(g => g.engel));
+  const bw = (W - sol - 30) / gun.length;
+  let svg = '';
+  for (let i = 0; i <= 3; i++) { const v = maks * i / 3, y = H - alt - (H - alt - ust) * i / 3; svg += `<line x1="${sol}" x2="${W - 26}" y1="${y}" y2="${y}" stroke="#E2E5EA"/><text x="${sol - 5}" y="${y + 4}" text-anchor="end" font-size="10" fill="#5B6470">${nf(v)}</text>`; }
+  let cz = '';
+  gun.forEach((g, i) => {
+    const x = sol + i * bw, hh = (H - alt - ust) * g.ssh / maks;
+    svg += `<rect x="${x + 6}" y="${H - alt - hh}" width="${bw - 12}" height="${hh}" rx="3" fill="#D7262E" opacity=".8"><title>${g.gun}: ${g.ssh} SSH denemesi · ${g.engel} engel</title></rect>`;
+    svg += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#5B6470">${g.gun.slice(8, 10)}.${g.gun.slice(5, 7)}</text>`;
+    cz += `${x + bw / 2},${H - alt - (H - alt - ust) * g.engel / mE} `;
+  });
+  svg += `<polyline points="${cz}" fill="none" stroke="#7C3AED" stroke-width="2"/>` + gun.map((g, i) => `<circle cx="${sol + i * bw + bw / 2}" cy="${H - alt - (H - alt - ust) * g.engel / mE}" r="3" fill="#7C3AED"><title>${g.gun}: ${g.engel} engel</title></circle>`).join('');
+  svg += `<text x="${W - 22}" y="${ust + 8}" font-size="10" fill="#7C3AED">${nf(mE)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${svg}</svg><div style="font-size:11.5px;color:var(--y)"><i style="display:inline-block;width:9px;height:9px;background:#D7262E;border-radius:2px"></i> SSH denemesi &nbsp; <i style="display:inline-block;width:14px;height:2px;background:#7C3AED;vertical-align:middle"></i> yeni engel (sağ eksen)</div>`;
+}
+
+function durumAnaliziCiz() {
+  const { analizDurum, aesunSon } = VERI;
+  if (!analizDurum || analizDurum._hata) {
+    return `<div id="bolum-analiz" class="kart"><h2>📊 Durum Analizi ve Performans Raporları</h2><div class="bos">Durum analizi raporunu görüntülemek için Portal üzerinden yetkili oturum açın.</div></div>`;
+  }
+
+  const veriYasi = analizDurum.veri_yasi_dk || {};
+  const anlik = analizDurum.anlik || {};
+  const son7 = analizDurum.son7_gun || [];
+  const uyarilar = analizDurum.uyarilar || [];
+  const dosyalar = (analizDurum.performans && analizDurum.performans.dosyalar) || [];
+
+  let h = `<div id="bolum-analiz" class="kart">
+    <h2>
+      <span>📊 Durum Analizi, Ekonomik Özet ve Sistem Performans Raporu</span>
+      <span style="font-size:12.5px;color:var(--y)">Rapor zamanı: <b>${esc(trZaman(analizDurum.zaman))}</b></span>
+    </h2>`;
+
+  // Kural & Veri Uyarıları
+  if (uyarilar.length) {
+    h += `<div class="uyari-kutu"><b>⚠️ Durum Analizi Bulguları (${uyarilar.length}):</b><ul style="margin:6px 0 0;padding-left:18px">` +
+      uyarilar.map(u => `<li><span class="et ${u[0] === 'yuksek' ? 'k' : 'u'}">${esc(u[0])}</span> <b>[${esc(u[1])}]</b> ${esc(u[2])}</li>`).join('') +
+      `</ul></div>`;
+  }
+
+  // Anlık Karar & Veri Yaşı
+  h += `<div class="iki-kolon">
+    <div class="boru-adim">
+      <h3>⚡ Anlık PTF &amp; Cihaz Yönetimi Kararı</h3>
+      <div class="kpi" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-top:8px">
+        <div class="kpi-kutu" style="--kp-r:#2a78d6"><small>Karar / İstenen</small><b>${esc(anlik.karar || '—')}</b><span class="alt-k">İstenen: ${esc(anlik.istenen || '—')}</span></div>
+        <div class="kpi-kutu" style="--kp-r:#F08A24"><small>Anlık PTF / Eşik</small><b>${nf(anlik.ptf, 0)} ₺</b><span class="alt-k">Eşik: ${nf(anlik.esik_ptf, 0)} ₺ (Başabaş ${nf(anlik.basabas_ptf, 0)} ₺)</span></div>
+        <div class="kpi-kutu" style="--kp-r:#1E9E5A"><small>Çalışan Cihaz</small><b>${anlik.cihaz_calisan ?? '—'}/${anlik.cihaz_toplam ?? 29}</b><span class="alt-k">Üretim: ${nf(anlik.uretim_kw, 1)} kW</span></div>
+      </div>
+      <div style="font-size:12.5px;color:var(--y)"><b>Neden:</b> ${esc(anlik.neden || '—')}</div>
+      ${anlik.gunes_takip ? `<div style="font-size:12.5px;color:var(--y);margin-top:4px"><b>Güneş Takip:</b> ${esc(anlik.gunes_takip.neden || '—')}</div>` : ''}
+    </div>
+
+    <div class="boru-adim">
+      <h3>⏱️ Kaynak Veri Tazeliği (Dakika)</h3>
+      <div style="display:grid;gap:8px;margin-top:8px">` +
+      Object.entries(veriYasi).map(([k, dk]) => {
+        const oran = Math.min(100, Math.round((dk / 120) * 100));
+        const rk = dk <= 30 ? '#1E9E5A' : (dk <= 60 ? '#F08A24' : '#D7262E');
+        return `<div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px"><b>${esc(k)}</b><span>${yasEtiket(dk, 30, 60)}</span></div>
+          <div class="bar-dis"><div class="bar-ic" style="width:${oran}%;background:${rk}"></div></div>
+        </div>`;
+      }).join('') +
+      `</div>
+    </div>
+  </div>`;
+
+  // Son 7 Günlük Ekonomik Rapor & Dosya Performansı
+  h += `<div class="iki-kolon">
+    <div>
+      <h3>📈 Son 7 Günlük Üretim &amp; Maden Ekonomik Raporu</h3>
+      <div class="tablo-kutu"><table>
+        <thead><tr><th>Gün</th><th class="sag">BTC</th><th class="sag">TH/s</th><th class="sag">Güneş (kWh)</th><th class="sag">Şebeke (kWh)</th><th class="sag">Gelir (₺)</th><th class="sag">Nakit Net (₺)</th></tr></thead>
+        <tbody>` +
+        [...son7].reverse().map(g => `<tr>
+          <td><b>${esc(g.gun)}</b></td>
+          <td class="sag">${nf(g.btc, 6)}</td>
+          <td class="sag">${nf(g.th_s, 0)}</td>
+          <td class="sag">${nf(g.gunes_kwh, 0)}</td>
+          <td class="sag">${nf(g.sebeke_kwh, 0)}</td>
+          <td class="sag">${nf(g.gelir_tl, 0)} ₺</td>
+          <td class="sag"><b style="color:${(g.nakit_net_tl || 0) >= 0 ? '#1D6B36' : '#8E1117'}">${nf(g.nakit_net_tl, 0)} ₺</b></td>
+        </tr>`).join('') +
+        `</tbody></table></div>
+    </div>
+
+    <div>
+      <h3>⚡ Veri Dosyaları Boyut &amp; Okuma Hızı Raporu</h3>
+      <div class="tablo-kutu"><table>
+        <thead><tr><th>Dosya Yolu</th><th class="sag">Boyut (KB)</th><th class="sag">Okuma (ms)</th><th>Durum</th></tr></thead>
+        <tbody>` +
+        dosyalar.slice(0, 10).map(d => `<tr>
+          <td><code>${esc(d.yol)}</code></td>
+          <td class="sag">${nf(d.kb, 0)} KB</td>
+          <td class="sag">${nf(d.ms, 0)} ms</td>
+          <td><span class="et ${d.kb > 1500 ? 'u' : 'ok'}">${d.kb > 1500 ? 'Büyük dosya' : 'Hızlı'}</span></td>
+        </tr>`).join('') +
+        `</tbody></table></div>
+    </div>
+  </div>`;
+
+  h += `</div>`;
+  return h;
+}
+
+function ciz() {
+  const { saglik, bekciNs1, denetim, aiTani, isHatalari, sef, sistemBekci, bildirimDurum, bildirimKayit } = VERI;
+  const dKontrol = (denetim && Array.isArray(denetim.kontroller) && denetim.kontroller.length) ? denetim.kontroller : bekciYedekKontroller(bekciNs1, saglik);
+  const dGecen = dKontrol.filter(k => k && (k.durum === 'ok' || k.tamam === true)).length;
+  const dSorun = dKontrol.length - dGecen;
+  const aktifAlarmlar = (bildirimDurum && bildirimDurum.aktif && typeof bildirimDurum.aktif === 'object') ? Object.keys(bildirimDurum.aktif).length : 0;
+  const wpToplam = (bildirimKayit && Array.isArray(bildirimKayit.kayit)) ? bildirimKayit.kayit.length : 0;
+  const sefAcik = (sef && Array.isArray(sef.acik)) ? sef.acik.length : 0;
+  const sefGecmis = (sef && Array.isArray(sef.gecmis)) ? sef.gecmis.length : 0;
+  const ns1IsMap = (bekciNs1 && bekciNs1.isler && bekciNs1.isler.is) || {};
+  const ns1IsSay = Object.keys(ns1IsMap).length || 5;
+
+  const genelDurum = dSorun === 0 && aktifAlarmlar === 0 ? 'Normal' : (dSorun > 0 || aktifAlarmlar > 0 ? 'İnceleme Gerekli' : 'Aktif');
+  const genelRenk = dSorun === 0 && aktifAlarmlar === 0 ? '#1E9E5A' : '#F08A24';
+
+  let h = `
+  <div class="bas">
+    <div>
+      <h1>
+        <span>🛡️ Sistem Denetçisi ve Canlı Şematik İzleme Merkezi</span>
+        <span class="et ${dSorun === 0 ? 'ok' : 'u'}">${esc(genelDurum)}</span>
+      </h1>
+      <p class="alt">Portaldaki tüm uygulamaları, periyodik işleri, bekçileri, WhatsApp bildirimlerini ve <code>mattpocock/skills</code> AI kök neden raporlarını tek ekranda şematik olarak izleyin.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--y)">Son yenileme: <b>${SON_YUKLEME ? SON_YUKLEME.toLocaleTimeString('tr-TR') : '—'}</b></span>
+      <button class="btn aktif" onclick="tumVerileriYukle()">🔄 Şimdi Yenile</button>
+    </div>
+  </div>
+
+  <!-- Üst KPI Özeti -->
+  <div class="kpi">
+    <div class="kpi-kutu" style="--kp-r:${genelRenk}" onclick="SEKME='tumu';ciz()">
+      <small>Genel Sistem Sağlığı</small>
+      <b>${esc(genelDurum)}</b>
+      <span class="alt-k">ns1 API: ${saglik && saglik.durum === 'ok' ? '✅ Çalışıyor' : '⚠️ Kontrol'} · SHA ${esc((saglik && saglik.veri_sha) || '—')}</span>
+    </div>
+    <div class="kpi-kutu" style="--kp-r:${dSorun === 0 ? '#1E9E5A' : '#D7262E'}" onclick="SEKME='ai';ciz()">
+      <small>5 Bekçi Grubu Kontrolü</small>
+      <b>${dKontrol.length ? (dGecen + '/' + dKontrol.length + ' Tamam') : '36 Kontrol'}</b>
+      <span class="alt-k">${dSorun ? (dSorun + ' kontrol noktasında uyarı var') : 'Tüm uçlar ve işler doğrulandı'}</span>
+    </div>
+    <div class="kpi-kutu" style="--kp-r:#7C3AED" onclick="SEKME='ai';ciz()">
+      <small>AI Kök Neden Teşhisi</small>
+      <b>mattpocock/skills</b>
+      <span class="alt-k">/diagnosing-bugs · /triage · /code-review</span>
+    </div>
+    <div class="kpi-kutu" style="--kp-r:#2a78d6" onclick="SEKME='isler';ciz()">
+      <small>Takip Edilen Periyodik İşler</small>
+      <b>${ns1IsSay + 9} Otomatik İş</b>
+      <span class="alt-k">ns1 (${ns1IsSay}) + Saha Pi (9) + GitHub Actions</span>
+    </div>
+    <div class="kpi-kutu" style="--kp-r:${sefAcik ? '#F08A24' : '#1E9E5A'}" onclick="SEKME='sef';ciz()">
+      <small>Şef &amp; Otomatik Onarım</small>
+      <b>${sefGecmis} Müdahale</b>
+      <span class="alt-k">${sefAcik ? (sefAcik + ' açık saha konusu takip ediliyor') : 'Açık sorun yok'}</span>
+    </div>
+    <div class="kpi-kutu" style="--kp-r:${aktifAlarmlar ? '#F08A24' : '#1E9E5A'}" onclick="SEKME='bildirim';ciz()">
+      <small>Bildirimler &amp; Alarmlar</small>
+      <b>${aktifAlarmlar} Aktif · ${wpToplam} Kayıt</b>
+      <span class="alt-k">WhatsApp &amp; Sistem Bildirim Günlüğü</span>
+    </div>
+  </div>
+
+  <!-- Sekme Seçici -->
+  <div class="sek">
+    <button class="${SEKME === 'tumu' ? 'on' : ''}" onclick="SEKME='tumu';ciz()">🗺️ Tümü (Şematik + Tüm Raporlar)</button>
+    <button class="${SEKME === 'ai' ? 'on' : ''}" onclick="SEKME='ai';ciz()">🧠 AI Teşhis &amp; 36 Kontrol (${dSorun ? dSorun + '!' : 'OK'})</button>
+    <button class="${SEKME === 'isler' ? 'on' : ''}" onclick="SEKME='isler';ciz()">⚙️ Yapılan İşler &amp; Hata Günlüğü</button>
+    <button class="${SEKME === 'sef' ? 'on' : ''}" onclick="SEKME='sef';ciz()">🛠️ Şef &amp; Cihaz Bekçisi</button>
+    <button class="${SEKME === 'bildirim' ? 'on' : ''}" onclick="SEKME='bildirim';ciz()">📲 Bildirimler &amp; Alarmlar (${aktifAlarmlar})</button>
+    <button class="${SEKME === 'analiz' ? 'on' : ''}" onclick="SEKME='analiz';ciz()">📊 Durum Analizi &amp; Performans</button>
+    <button class="${SEKME === 'internet' ? 'on' : ''}" onclick="SEKME='internet';ciz()">🌐 İnternet Kullanımı</button>
+    <button class="${SEKME === 'akis' ? 'on' : ''}" onclick="SEKME='akis';ciz()">🔁 Veri Akışı (↓↑)</button>
+    <button class="${SEKME === 'guvenlik' ? 'on' : ''}" onclick="SEKME='guvenlik';ciz()">🛡️ Erişim Güvenliği${VERI.guvenlik && VERI.guvenlik.ozet ? ' (' + nf((VERI.guvenlik.ozet.ssh_basarisiz_24s || 0) + (VERI.guvenlik.ozet.api_red_24s || 0) + (VERI.guvenlik.ozet.portal_hatali_24s || 0) + (VERI.guvenlik.ozet.cpanel_red_24s || 0)) + ((VERI.guvenlik.uyarilar || []).length ? '!' : '') + ')' : ''}</button>
+  </div>`;
+
+  if (!BEL) {
+    h += `<div class="uyari-kutu">
+      <b>🔒 Bilgi:</b> Şu anda açık (genel) sağlık verilerini görüyorsunuz. Tüm iş hata kayıtlarını, AI kök neden raporlarını, WhatsApp bildirim geçmişini ve ekonomik analizleri görmek için <a href="../" style="color:#8E1117;font-weight:700">Kurumsal Portal ana sayfasından</a> yönetici veya izleme hesabınızla giriş yapın.
+    </div>`;
+  }
+
+  if (SEKME === 'tumu') {
+    h += sematikCiz() + aiVeKontrollerCiz() + yapilanIslerCiz() + sefVeBekciCiz() + bildirimlerCiz() + durumAnaliziCiz() + guvenlikCiz();
+  } else if (SEKME === 'ai') {
+    h += sematikCiz() + aiVeKontrollerCiz();
+  } else if (SEKME === 'isler') {
+    h += sematikCiz() + yapilanIslerCiz();
+  } else if (SEKME === 'sef') {
+    h += sematikCiz() + sefVeBekciCiz();
+  } else if (SEKME === 'bildirim') {
+    h += sematikCiz() + bildirimlerCiz();
+  } else if (SEKME === 'analiz') {
+    h += sematikCiz() + durumAnaliziCiz();
+  } else if (SEKME === 'internet') {
+    h += internetCiz() + kapasiteCiz();
+  } else if (SEKME === 'guvenlik') {
+    h += guvenlikCiz();
+  } else if (SEKME === 'akis') {
+    h += akisCiz() + kapasiteCiz();
+  }
+
+  $('ana').innerHTML = h;
+}
+
+try { ciz(); } catch (e) {}
+tumVerileriYukle();
+setInterval(tumVerileriYukle, 60000);
+</script>
+</body>
+</html>

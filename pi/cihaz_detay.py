@@ -1,0 +1,312 @@
+#!/usr/bin/env python3
+"""AEMonitoring · Cihaz detay toplayıcı + bekçi (Pi, crontab 5 dakikada bir, toplayıcının venv'i ile).
+
+1) Toplayıcının gördüğü her cihazdan web arayüzü üzerinden ayrıntı okur (salt okuma):
+   kart (hashboard) bazında hız / ideal hız / frekans / çip sayısı / PCB ve çip sıcaklığı / HW hatası,
+   fanlar, çalışma modu, frekans seviyesi, çalışma süresi. → epias-ptf/n8n/cihaz_detay.json
+   Her model için ham örnek günde bir kez → n8n/cihaz_detay_ornek.json (alan adlarını görmek için).
+2) Sağlam ayarı (havuz + worker) olan her cihazın ayarını yerelde yedekler: ~/.aesun/yedek/ayar/<no>.json
+3) Bekçi (bekci.py): ayarı bozulan ya da takılan cihazı kendisi onarır (bkz. bekci.py).
+4) Sistem bekçisi (sistem_bekci.py): ns1 sunucusu ve periyodik işler (bildirim, arşiv, analiz) zamanında mı; değilse uyarı + yedek yol.
+
+Elle:  ~/SAHA/antminer/venv/bin/python ~/aesun/pi/cihaz_detay.py [--bekci-yok]
+"""
+import concurrent.futures as CF, json, sys, time
+from datetime import datetime, timedelta
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from ortak import AESUN, TR, gh, log, anlik_yaz, hash_duzelt, panel_oku  # noqa: E402
+import madenci as M                                          # noqa: E402
+
+AYAR_DIR = AESUN / "yedek/ayar"
+DOSYA, ORNEK = "n8n/cihaz_detay.json", "n8n/cihaz_detay_ornek.json"
+
+
+def _maks(v):
+    v = [x for x in (v or []) if isinstance(x, (int, float)) and x > 0]
+    return max(v) if v else None
+
+
+def kart_ozet(st):
+    S = (st or {}).get("STATS") or []
+    s = S[0] if S and isinstance(S[0], dict) else {}
+    kart = []
+    for ch in s.get("chain") or []:
+        kart.append({"i": ch.get("index"), "hiz": ch.get("rate_real"), "ideal": ch.get("rate_ideal"),
+                     "frek": ch.get("freq_avg"), "asic": ch.get("asic_num"), "asic_dizi": ch.get("asic"),
+                     "t_pcb": _maks(ch.get("temp_pcb")), "t_chip": _maks(ch.get("temp_chip")),
+                     "t_pic": _maks(ch.get("temp_pic")), "hw": ch.get("hw"), "hwp": ch.get("hwp"), "sn": ch.get("sn")})
+    bilinen = {"chain", "fan", "rate_5s", "rate_avg", "rate_30m", "rate_ideal", "rate_unit", "elapsed", "miner-mode",
+               "freq-level", "hwp_total", "chain_num", "fan_num"}
+    diger = {k: v for k, v in s.items() if k not in bilinen and isinstance(v, (int, float, str)) and len(str(v)) < 40}
+    return {"hiz": s.get("rate_5s"), "hiz_30dk": s.get("rate_30m"), "ort": s.get("rate_avg"), "ideal": s.get("rate_ideal"),
+            "birim": s.get("rate_unit"), "fan": s.get("fan"), "mod": s.get("miner-mode"), "frek_seviye": s.get("freq-level"),
+            "hwp": s.get("hwp_total"), "sure_sn": s.get("elapsed"), "kart": kart, "diger": dict(list(diger.items())[:30])}
+
+
+def kimlik_bul(d, kim):
+    w = str(d.get("actual_worker") or "").split(".")[-1]
+    if w:
+        return w
+    for k, v in kim.items():
+        if v.get("serial") and v["serial"] == d.get("serial"):
+            return k
+        if v.get("mac") and d.get("mac") and v["mac"].upper() == str(d["mac"]).upper():
+            return k
+    return None
+
+
+def oku(d, w, ayar_vakti):
+    ip = d["ip"]
+    o = {"ip": ip, "worker": w, "model": d.get("model"), "durum": d.get("status"), "uyku": bool(d.get("sleeping")),
+         "hash_th": d.get("hashrate_TH")}
+    if d.get("online") and not d.get("sleeping"):
+        k, st = M.cgi(ip, "stats.cgi", timeout=10)
+        o["stats_kod"] = k
+        if k == 200 and isinstance(st, dict):
+            o.update(kart_ozet(st)); o["_ham"] = st
+            o["fw"] = ((st.get("INFO") or {}).get("miner_version"))
+            o["tip"] = ((st.get("INFO") or {}).get("type"))
+    k_, si = M.cgi(ip, "get_system_info.cgi", timeout=8)                 # yazılım sürümü (uykuda da yanıt verir)
+    if k_ == 200 and isinstance(si, dict):
+        o["fw_surum"] = si.get("system_filesystem_version") or si.get("firmware_version")
+        o["fw_tip"] = si.get("firmware_type")
+    if ayar_vakti or d.get("online"):
+        k, c = M.cgi(ip, "get_miner_conf.cgi", timeout=10)
+        o["ayar_kod"] = k
+        o["ayar_saglam"] = M.ayar_saglam(c) if k == 200 else False
+        if k == 200 and isinstance(c, dict):
+            o["ayar_mod"] = c.get("bitmain-work-mode")
+            o["havuz_user"] = sorted({(p or {}).get("user") for p in c.get("pools") or [] if (p or {}).get("user")})
+            if o["ayar_saglam"] and w and all(u.endswith("." + w) for u in o["havuz_user"]):
+                AYAR_DIR.mkdir(parents=True, exist_ok=True)
+                (AYAR_DIR / f"{w}.json").write_text(json.dumps({"zaman": datetime.now(TR).isoformat(timespec="seconds"),
+                                                              "ip": ip, "serial": d.get("serial"), "model": d.get("model"),
+                                                              "ayar": c}, ensure_ascii=False, indent=1))
+    return o
+
+
+HASH_ADIM = 5                                                # dk; panelde cihaza tıklayınca açılan hashrate grafiği
+
+
+def hash_kaydet(mad, kim, simdi):
+    """Cihaz başı anlık hashrate'i günlük dosyaya 5 dk dilimle yazar: n8n/hash/YYYY-MM-DD.json
+    {"c": {"008": [288 değer]}} · TH/s = çalışıyor, 0 = uykuda / açık ama hash yok, null = veri yok."""
+    try:
+        ts = datetime.fromisoformat(str((mad or {}).get("timestamp"))[:19]).replace(tzinfo=TR)
+    except Exception:
+        return
+    if abs((simdi - ts).total_seconds()) > 10 * 60:         # toplayıcı verisi eski: dilim boş kalsın
+        return
+    ip2w = {v.get("son_ip"): k for k, v in (kim or {}).items() if v.get("son_ip")}
+    deger = {}
+    for d in (mad or {}).get("devices") or []:
+        if not (d.get("online") or d.get("sleeping")):
+            continue
+        w = kimlik_bul(d, kim) or ip2w.get(d.get("ip"))
+        if w:
+            deger[w] = 0 if d.get("sleeping") else round(float(hash_duzelt(w, d.get("hashrate_TH") or 0, simdi)), 1)
+    if not deger:
+        return
+    gun, i = ts.strftime("%Y-%m-%d"), (ts.hour * 60 + ts.minute) // HASH_ADIM
+    n = 24 * 60 // HASH_ADIM
+    yol = f"n8n/hash/{gun}.json"
+    d, sha = gh(yol)
+    yeni = d is None
+    d = d or {"gun": gun, "adim_dk": HASH_ADIM, "kaynak": "toplayıcı (antminer_panel.json), Pi cihaz_detay.py", "c": {}}
+    for w, v in deger.items():
+        d["c"].setdefault(w, [None] * n)[i] = v
+    d["c"] = dict(sorted(d["c"].items()))
+    gh(yol, d, sha, "Hash " + ts.strftime("%H:%M"))
+    if yeni:
+        ix, isha = gh("n8n/hash/gunler.json")
+        ix = ix or {"gunler": [], "adim_dk": HASH_ADIM}
+        if gun not in ix["gunler"]:
+            ix["gunler"] = sorted(ix["gunler"] + [gun])
+            gh("n8n/hash/gunler.json", ix, isha, "Hash gün listesi " + gun)
+
+
+LOG_DIR = "n8n/cihaz_log"
+LOG_ARALIK_DK = 30
+_ONEMLI = ("temp", "sicak", "power", "psu", "volt", "chain", "fail", "error", "err", "pic", "sensor", "protect",
+           "shutdown", "stop", "lost", "hashboard", "board", "fan", "water", "reboot", "restart")
+
+
+def log_kaydet(o, simdi):
+    """Kartları duran (hepsi 0 hız, açılalı 10 dk'dan fazla) cihazın çekirdek günlüğünü okur (salt okuma),
+    en çok 30 dk'da bir n8n/cihaz_log/<no>.json'a yazar. Şifre/parola geçen satırlar maskelenir."""
+    import re
+    w = o.get("worker")
+    kart = o.get("kart") or []
+    if not w or o.get("uyku") or not kart or any((k.get("hiz") or 0) > 0 for k in kart) or (o.get("sure_sn") or 0) < 600:
+        return
+    yol = f"{LOG_DIR}/{w}.json"
+    eski, sha = gh(yol)
+    if eski and simdi - datetime.fromisoformat(eski["zaman"]) < timedelta(minutes=LOG_ARALIK_DK):
+        return
+    try:
+        r = M.requests.get(f"http://{o['ip']}/cgi-bin/log.cgi", auth=M.filo_auth(), timeout=20)
+        metin = r.text.replace("\x00", "")
+    except Exception as e:
+        log("günlük okunamadı", w, e); return
+    satir = [re.sub(r"(pass\w*|sifre|password)(\S*\s*[:=]\s*)\S+", r"\1\2***", x, flags=re.I) for x in metin.splitlines() if x.strip()]
+    onemli = [x for x in satir if any(k in x.lower() for k in _ONEMLI)]
+    gh(yol, {"zaman": simdi.isoformat(timespec="seconds"), "ip": o["ip"], "neden": "tüm kartlar 0 hız",
+             "satir_sayisi": len(satir), "onemli": onemli[-200:], "son": satir[-120:]}, sha, f"Cihaz günlüğü {w} " + simdi.strftime("%H:%M"))
+    log("günlük kaydedildi", w, len(satir), "satır")
+
+
+KESIF = "n8n/guc_kesif.json"
+_GUC_RE = None
+
+
+def _guc_alanlari(x, yol=""):
+    """İç içe yanıtta güç/gerilim/akım/PSU ile ilgili alanları (yol, değer) olarak toplar."""
+    import re
+    global _GUC_RE
+    _GUC_RE = _GUC_RE or re.compile(r"pow|watt|volt|curr|amp|psu|pwr|consum|energy|jt\b|vin|vout|iin|iout|pin\b|pout", re.I)
+    out = []
+    if isinstance(x, dict):
+        for k, v in x.items():
+            if isinstance(v, (dict, list)):
+                out += _guc_alanlari(v, f"{yol}/{k}")
+            elif _GUC_RE.search(str(k)):
+                out.append([f"{yol}/{k}", v])
+    elif isinstance(x, list):
+        for i, v in enumerate(x[:6]):
+            out += _guc_alanlari(v, f"{yol}[{i}]")
+    return out
+
+
+def _api4028(ip, komut, timeout=4):
+    import socket
+    try:
+        with socket.create_connection((ip, 4028), timeout=timeout) as so:
+            so.sendall(json.dumps({"command": komut}).encode())
+            b = b""
+            while True:
+                p = so.recv(65536)
+                if not p:
+                    break
+                b += p
+        t = b.replace(b"\x00", b"").decode(errors="replace")
+        try:
+            return json.loads(t)
+        except Exception:
+            return t[:300]
+    except Exception as e:
+        return {"_hata": str(e)[:100]}
+
+
+def guc_kesif(sonuc, simdi):
+    """Günde bir kez (salt okuma): her (model, yazılım sürümü) grubundan bir çalışan cihazda güç/akım/gerilim
+    bilgisi veren uç nokta var mı bakar → n8n/guc_kesif.json. Watt bildiren ve bildirmeyen cihazların sürümleri de yazılır."""
+    eski, sha = gh(KESIF)
+    if eski and eski.get("gun") == simdi.strftime("%Y-%m-%d"):
+        return
+    gruplar = {}
+    for o in sonuc:
+        if o.get("_ham") and not o.get("uyku"):
+            gruplar.setdefault(f"{o.get('tip') or o.get('model')} | {o.get('fw')}", o)
+    cgi_uclar = ["summary.cgi", "miner_summary.cgi", "get_system_info.cgi", "chart.cgi", "warning.cgi", "miner_type.cgi",
+                 "get_miner_status.cgi", "get_psu_info.cgi", "psu.cgi", "get_power.cgi"]
+    api_kom = ["stats", "summary", "devs", "estats", "psu", "power"]
+    sonuc_g = {}
+    for g, o in gruplar.items():
+        r = {"ip": o["ip"], "worker": o["worker"], "stats_guc": _guc_alanlari(o["_ham"]), "cgi": {}, "api4028": {}}
+        for u in cgi_uclar:
+            k, v = M.cgi(o["ip"], u, timeout=8)
+            r["cgi"][u] = {"kod": k, "guc": _guc_alanlari(v) if isinstance(v, (dict, list)) else [],
+                           "anahtar": sorted(v)[:40] if isinstance(v, dict) else (str(v)[:120] if k == 200 else None)}
+        for c in api_kom:
+            v = _api4028(o["ip"], c)
+            r["api4028"][c] = {"guc": _guc_alanlari(v) if isinstance(v, (dict, list)) else [],
+                               "ozet": (v.get("_hata") if isinstance(v, dict) and "_hata" in v else
+                                        (sorted(v)[:20] if isinstance(v, dict) else str(v)[:120]))}
+        sonuc_g[g] = r
+    surum = {(o["worker"] or o["ip"]): {"ip": o["ip"], "tip": o.get("tip"), "fw": o.get("fw"),
+                                        "watt": (o.get("diger") or {}).get("watt")} for o in sonuc if o.get("fw")}
+    gh(KESIF, {"gun": simdi.strftime("%Y-%m-%d"), "zaman": simdi.isoformat(timespec="seconds"),
+               "gruplar": sonuc_g, "cihaz_surum": dict(sorted(surum.items()))}, sha, "Güç keşfi " + simdi.strftime("%d.%m"))
+    log("güç keşfi:", len(sonuc_g), "grup")
+
+
+def main():
+    simdi = datetime.now(TR)
+    mad, _ = panel_oku()
+    kim, _ = gh("n8n/cihaz_kimlik.json")
+    kim = kim or {}
+    cihazlar = [d for d in (mad or {}).get("devices") or [] if d.get("online") or d.get("sleeping")]
+    if not cihazlar:
+        log("cihaz yok (toplayıcı verisi boş)"); return
+    ayar_vakti = simdi.minute < 5                    # saatte bir uyuyan cihazların ayarını da oku (yedek için)
+    with CF.ThreadPoolExecutor(8) as ex:
+        sonuc = list(ex.map(lambda d: oku(d, kimlik_bul(d, kim), ayar_vakti), cihazlar))
+    # günde bir kez her modelden bir ham örnek
+    ornek, osha = gh(ORNEK)
+    if not ornek or (ornek.get("gun") != simdi.strftime("%Y-%m-%d")):
+        om = {}
+        for o in sonuc:
+            m_ = (o.get("model") if o.get("model") not in (None, "?") else o.get("tip")) or "?"
+            if o.get("_ham") and m_ not in om:
+                om[m_] = {"ip": o["ip"], "worker": o["worker"], "fw": o.get("fw"), "stats": o["_ham"]}
+        if om:
+            gh(ORNEK, {"gun": simdi.strftime("%Y-%m-%d"), "modeller": om}, osha, "Cihaz ham örnek " + simdi.strftime("%d.%m"))
+    try:
+        guc_kesif(sonuc, simdi)
+    except Exception as e:
+        log("güç keşfi hatası:", e)
+    try:
+        import firmware
+        firmware.calis(sonuc, simdi)
+    except Exception as e:
+        log("firmware keşfi hatası:", e)
+    for o in sonuc:
+        o.pop("_ham", None)
+        try:
+            log_kaydet(o, simdi)
+        except Exception as e:
+            log("günlük hatası:", e)
+    veri = {"zaman": simdi.isoformat(timespec="seconds"), "cihaz": {(o["worker"] or o["ip"]): o for o in sonuc}}
+    if "--bekci-yok" not in sys.argv:
+        try:
+            import bekci
+            try:
+                import firmware
+                hr = firmware.pilot_haric()
+            except Exception:
+                hr = None
+            hr_ip = f"192.168.0.{hr}" if hr else None          # yükseltilen cihaza bekçi dokunmaz
+            veri["bekci"] = bekci.calis([o for o in sonuc if o.get("ip") != hr_ip], mad, kim)
+        except Exception as e:
+            log("bekçi hatası:", e); veri["bekci"] = {"hata": str(e)[:200]}
+    hiz = {}
+    for o in sonuc:                     # anlık hız (TH/s): hash kayıtları ortalama yerine bununla düzeltilir
+        if not o.get("worker") or o.get("uyku"):
+            continue
+        kartlar = o.get("kart") or []
+        if o.get("hiz") is not None or kartlar:
+            v = max(float(o.get("hiz") or 0), sum(float(k.get("hiz") or 0) for k in kartlar))
+            hiz[o["worker"]] = round(v / (1000 if (o.get("birim") or "GH/s").upper().startswith("GH") else 1), 1)
+    anlik_yaz(hiz, simdi)
+    _, sha = gh(DOSYA)
+    gh(DOSYA, veri, sha, "Cihaz detay " + simdi.strftime("%H:%M"))
+    try:
+        import sistem_bekci            # ns1 ve işler dışarıdan denetlenir (10 dk'da bir), gerekirse yedek yol
+        sistem_bekci.calis(simdi)
+    except Exception as e:
+        log("sistem bekçisi hatası:", e)
+    try:
+        hash_kaydet(mad, kim, simdi)
+    except Exception as e:
+        log("hash kaydı hatası:", e)
+    sorunlu = [o["worker"] or o["ip"] for o in sonuc if o.get("ayar_kod") not in (None, 200) or (o.get("kart") and any((k.get("hiz") or 0) <= 0 for k in o["kart"]))]
+    log(f"{len(sonuc)} cihaz okundu; dikkat: {', '.join(sorunlu) or 'yok'}")
+
+
+if __name__ == "__main__":
+    import signal, socket
+    socket.setdefaulttimeout(60)
+    signal.alarm(900)               # bekçi onarımı dahil en çok 15 dk; takılırsa kilidi bırak
+    main()

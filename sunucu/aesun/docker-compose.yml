@@ -1,0 +1,53 @@
+# AEMonitoring merkez servisi. gesfin'in ağına (gesfin-net) yalnız Caddy'nin ulaşması için katılır; dışarıya port açmaz.
+services:
+  api:
+    build: .
+    container_name: aesun-api
+    init: true          # yetim süreçleri (git/ssh) toplar; birikirse fork EAGAIN verir
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - aesun_veri:/veri
+      - /opt/aesun/ssh:/home/aesun/.ssh:ro
+      - aesun_musteri:/musteri:ro      # Müşteri Monitoring verisi (yalnız okuma)
+      - /opt/aesun/kasa_acik.pem:/kasa_acik.pem:ro   # kasa yalnız şifreler; özel anahtar burada yok
+    networks: [gesfin-net]
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+  isler:
+    build: ./isler
+    container_name: aesun-isler
+    init: true
+    restart: unless-stopped
+    env_file: [/opt/aesun/isler.env]
+    volumes:
+      - aesun_isler:/veri
+      - /opt/aesun/ssh:/home/aesun/.ssh:ro
+      - /opt/aesun/sir:/sir:ro
+    mem_limit: 384m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+  # Müşteri Monitoring: AEMonitoring'den ayrı toplayıcı ve ayrı birim. Dışarıya port açmaz; GitHub'a yazmaz.
+  musteri:
+    build: ./musteri
+    container_name: aesun-musteri
+    init: true
+    restart: unless-stopped
+    env_file: [/opt/aesun/musteri.env]
+    volumes:
+      - aesun_musteri:/musteri
+    mem_limit: 512m
+    shm_size: 256m
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "2" }
+volumes:
+  aesun_musteri:
+  aesun_veri:
+  aesun_isler:
+networks:
+  gesfin-net:
+    external: true

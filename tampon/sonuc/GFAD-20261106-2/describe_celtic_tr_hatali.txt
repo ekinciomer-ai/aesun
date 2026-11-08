@@ -1,0 +1,15 @@
+25.83 s busy, 4.6 onsets/s, loudness range 12 LU. Sounds most like: a sub bass drop (z +3.0), a punchy impact hit (z +2.1), a door slam (z +1.9) [clear reading]. Other readings: a police siren (everyday, z +1.9), an office ambience (ambience, z +1.8). Unvalidated hint: a voice-over narration (z +6.3). AudioSet: Speech 0.83, Speech synthesizer 0.81, Narration, monologue 0.21. peak 0.4 dBFS, -4.9 LUFS, brightness 816 Hz, bandwidth 10.2 kHz, mono. Uniform: all 5 analysed 10 s windows read as a sub bass drop.
+
+top tags (z calibrated: >= 3 clear, 2.5-3 plausible, 2-2.5 weak, < 2 tentative):
+   +3.0  a sub bass drop  [impacts]  cos 0.119
+   +2.1  a punchy impact hit  [impacts]  cos 0.003
+   +1.9  a door slam  [impacts]  cos 0.028
+   +1.9  a police siren  [everyday]  cos 0.008
+   +1.8  an office ambience  [ambience]  cos -0.012
+   +1.8  a deep cinematic boom  [impacts]  cos 0.021
+   +1.7  a singing bowl  [chimes]  cos -0.006
+   +1.6  a chat message pop  [ui]  cos 0.124
+unvalidated hints (music genre / mood, instruments, voice): a voice-over narration (+6.3), a man speaking (+3.9), a woman speaking (+2.8), a man shouting (+2.6), a vocal chop (+2.0)
+best per category: transitions: a deep cinematic whoosh (+0.5); impacts: a sub bass drop (+3.0); ui: a chat message pop (+1.6); keyboard: a deep thocky mechanical keyboard (+0.3); foley: a finger tapping on glass (+1.3); water: bubbles underwater (+0.5); nature: digging in soil (+1.3); chimes: a singing bowl (+1.7); ambience: an office ambience (+1.8); everyday: a police siren (+1.9); music_genre: trap beat (+1.6); music_mood: confident and cool music (+1.3); instruments: a vocal chop (+2.0); voice: a voice-over narration (+6.3); quality: a boomy sound (+1.4); production: a recording made on a phone (+1.5)
+audioset: Speech 0.83, Speech synthesizer 0.81, Narration, monologue 0.21, Male speech, man speaking 0.09, Silence 0.07
+measurements: duration 25.828, peak_dbfs 0.4, true_peak_dbtp 0.4, rms_dbfs -7.8, lufs -4.9, lra_lu 12.1, attack_ms 195.0, decay_ms 929.0, brightness_hz 816, bandwidth_hz 10240, noise_floor_dbfs -49.5, flatness 0.0001, harmonic_ratio 0.573, onset_count 119, onsets_per_s 4.61, width mono, digital_silence_frac 0.0

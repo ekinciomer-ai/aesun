@@ -1,0 +1,26 @@
+name: CutkodA anahtarı
+# n8n için yeni yazma anahtarı üretir: düz hali n8n kimlik bilgisine, özeti ns1'e (/opt/cutkoda/anahtar) gider.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ver:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Anahtar üret ve n8n'e kaydet
+        env:
+          N8N_ANAHTAR: ${{ secrets.N8N_ANAHTAR }}
+        run: python3 cpanel/ck_anahtar_ver.py
+      - name: Özeti ns1'e yaz
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@$ADRES \
+            "mkdir -p /opt/cutkoda/anahtar && cat > /opt/cutkoda/anahtar/anahtarlar.json && chmod 644 /opt/cutkoda/anahtar/anahtarlar.json && echo NOT: özet yazıldı" < ozet.txt
+          rm -f ~/.ssh/k ozet.txt

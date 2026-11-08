@@ -1,0 +1,8 @@
+[Unit]
+Description=aesun Pi nabzi (n8n)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/pi/aesun/pi/nabiz.sh

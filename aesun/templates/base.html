@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block baslik %}Otocoin{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..750&display=swap">
+<script>try{var t=localStorage.getItem('aesun-tema');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+:root{--zemin:#E9EDF2;--panel:#FFFFFF;--kenar:#D5DCE5;--cizgi:#E3E8EE;--ink:#10233F;--ink2:#4A5A70;--nav:#10233F;--nav-ink:#C9D3E0;--nav-hover:#1B3254;
+--kr-bg:#FDECEA;--kr:#B42318;--kr-ink:#7A1A12;--kr-ink2:#5B2A24;--uy-bg:#FFF4DC;--uy:#9A5B00;--uy-ink:#5E3800;--bl-bg:#EAF0F6;--bl:#3B5878;--iyi:#1E7A3C;--bos:#9AA6B5;--meter:#E3E8EE;
+--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#4a3aa7;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--zemin:#0E1621;--panel:#152030;--kenar:#243346;--cizgi:#243346;--ink:#EAF0F7;--ink2:#A9B6C8;--nav:#0A111A;--nav-ink:#A9B6C8;--nav-hover:#1C2836;
+--kr-bg:#3A1518;--kr:#FF8A80;--kr-ink:#FFCDC9;--kr-ink2:#FFB4AE;--uy-bg:#3A2A10;--uy:#F5B83D;--uy-ink:#FFE2A8;--bl-bg:#1C2836;--bl:#9CC3F5;--iyi:#6EE7A0;--bos:#5A6678;--meter:#243346;
+--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#9085e9;color-scheme:dark}}
+:root[data-theme="dark"]{--zemin:#0E1621;--panel:#152030;--kenar:#243346;--cizgi:#243346;--ink:#EAF0F7;--ink2:#A9B6C8;--nav:#0A111A;--nav-ink:#A9B6C8;--nav-hover:#1C2836;
+--kr-bg:#3A1518;--kr:#FF8A80;--kr-ink:#FFCDC9;--kr-ink2:#FFB4AE;--uy-bg:#3A2A10;--uy:#F5B83D;--uy-ink:#FFE2A8;--bl-bg:#1C2836;--bl:#9CC3F5;--iyi:#6EE7A0;--bos:#5A6678;--meter:#243346;
+--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#9085e9;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--zemin);color:var(--ink);font-family:'Archivo',system-ui,sans-serif}
+a{color:var(--s1)}a:hover{color:var(--ink)}
+.num{font-variant-numeric:tabular-nums;font-stretch:88%}
+.k{font-size:13px;color:var(--ink2)}
+.yer{display:flex;flex-wrap:wrap;min-height:100vh}
+.nav{flex:1 1 232px;max-width:260px;background:var(--nav);padding:24px 16px;display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:var(--nav-ink);font-size:14px;min-height:44px}
+.nav a:hover{background:var(--nav-hover);color:#fff}
+.nav a[aria-current]{background:#fff;color:#10233F;font-weight:600}
+.rozet{margin-left:auto;font-size:12px;font-weight:700;border-radius:10px;padding:1px 8px}
+main{flex:999 1 560px;min-width:0;padding:28px 32px 48px;display:flex;flex-direction:column;gap:24px;max-width:1240px}
+.panel{background:var(--panel);border-radius:14px;border:1px solid var(--kenar);padding:22px 24px}
+h1{margin:0;font-size:34px;line-height:1.1;font-weight:700;font-stretch:105%}
+h2{margin:0;font-size:20px;font-weight:700}
+.btn{font:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:9px 14px;cursor:pointer;min-height:40px;border:1px solid var(--kenar);background:var(--panel);color:var(--ink)}
+.btn.koyu{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+:focus-visible{outline:2px solid #86b6ef;outline-offset:2px}
+.uyari{display:flex;gap:12px;padding:10px 12px;border-radius:10px}
+.uyari.kritik{background:var(--kr-bg)}.uyari.uyari_{background:var(--uy-bg)}.uyari.bilgi{background:var(--bl-bg)}
+.uyari .b{font-size:15px;font-weight:650}.uyari .d{font-size:13px;margin-top:2px}
+.kritik .b{color:var(--kr-ink)}.kritik .d{color:var(--kr-ink2)}.uyari_ .b,.uyari_ .d{color:var(--uy-ink)}.bilgi .b{color:var(--ink)}.bilgi .d{color:var(--ink2)}
+.sev{margin-left:auto;font-size:12px;font-weight:700;flex:none}
+.sayac{padding:4px 18px;border-left:1px solid var(--cizgi);display:flex;flex-direction:column;gap:10px;min-width:0}
+.sayaclar{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.sayaclar .sayac:first-child{border-left:0;padding-left:0}
+.buyuk{font-size:24px;font-weight:700}.birim{font-size:13px;font-weight:500;color:var(--ink2)}
+.durum{font-size:13px;display:flex;align-items:center;gap:6px}
+.kare{width:14px;height:14px;border-radius:3px;display:inline-block}
+@media (max-width:760px){.nav{max-width:none;flex-basis:100%;flex-direction:row;flex-wrap:wrap;padding:12px}.nav .bosluk,.nav .marka small{display:none}main{padding:20px 16px 40px}.sayac{border-left:0;padding:12px 0;border-top:1px solid var(--cizgi)}}
+@media (prefers-reduced-motion:no-preference){.uyari{transition:background .2s}}
+{% block stil %}{% endblock %}
+</style>
+</head>
+<body>
+<div class="yer">
+<nav class="nav" aria-label="Ana menü">
+<div class="marka" style="display:flex;align-items:center;gap:10px;padding:4px 12px 20px">
+<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13" fill="none" stroke="#eda100" stroke-width="2.5"/><path d="M15 6 L15 24 M9 15 L21 15" stroke="#eda100" stroke-width="2.5" stroke-linecap="round"/></svg>
+<div><div style="font-size:18px;font-weight:700;color:#fff;font-stretch:110%">Otocoin</div><small style="font-size:12px;color:#9FB0C6">Tekyıldız GES ve madencilik</small></div>
+</div>
+<a href="/" {% if aktif == "genel" %}aria-current="page"{% endif %}>Genel bakış</a>
+<a href="/sayaclar" {% if aktif == "sayaclar" %}aria-current="page"{% endif %}>Sayaçlar ve mahsup</a>
+<a href="/#inverter">İnverterler{% if inverter_uyari %}<span class="rozet" style="background:#B42318;color:#fff">{{ inverter_uyari }}</span>{% endif %}</a>
+<a href="/#madencilik">Madencilik{% if madencilik_uyari %}<span class="rozet" style="background:#C98500;color:#10233F">{{ madencilik_uyari }}</span>{% endif %}</a>
+<a href="/#gelir">Gelir dağılımı</a>
+<a href="/#uyarilar">Uyarılar{% if uyari_kritik %}<span class="rozet" style="background:#B42318;color:#fff">{{ uyari_kritik }}</span>{% endif %}</a>
+<div class="bosluk" style="flex:1 1 auto;min-height:24px"></div>
+<button class="btn" id="tema" type="button" style="background:transparent;color:var(--nav-ink);border-color:#2A3D58">Koyu / açık tema</button>
+</nav>
+
+{% block icerik %}{% endblock %}
+</div>
+<script>
+document.getElementById('tema').addEventListener('click',function(){var r=document.documentElement;var koyu=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=koyu?'light':'dark';try{localStorage.setItem('aesun-tema',r.dataset.theme);}catch(e){}});
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+name: Sunucu tanı (yalnız okuma)
+# ns1 sunucusuna SSH ile bağlanır, HİÇBİR ŞEY DEĞİŞTİRMEZ; özet sonuçları iş notu (annotation) olarak yazar.
+# Gerekli sırlar: SUNUCU_SSH (özel anahtar), SUNUCU_ADRES (IP/alan adı), isteğe bağlı SUNUCU_KULLANICI (varsayılan root), SUNUCU_PORT (varsayılan 22)
+on:
+  workflow_dispatch:
+    inputs:
+      bolum:
+        description: "1 = sistem, 2 = docker / uygulamalar / ağ, 3 = disk temizlik analizi"
+        default: "1"
+jobs:
+  tani:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bağlan ve oku
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          KUL: ${{ secrets.SUNUCU_KULLANICI }}
+          PORT: ${{ secrets.SUNUCU_PORT }}
+        run: |
+          if [ -z "$ANAHTAR" ] || [ -z "$ADRES" ]; then echo "::error::SUNUCU_SSH / SUNUCU_ADRES sırları yok"; exit 1; fi
+          mkdir -p ~/.ssh
+          # yapıştırırken oluşan boşluk/boş satır/CR farklarını düzelt: gövdeyi tek satıra indirip 70 karakterde yeniden böl
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); assert m, 'BEGIN/END bulunamadı'; g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k || { echo "::error::Anahtarda BEGIN/END satırları bulunamadı"; exit 1; }
+          chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -p ${PORT:-22} -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 -o BatchMode=yes ${KUL:-root}@$ADRES"
+          head -1 ~/.ssh/k | grep -q 'BEGIN' || echo "::warning::Anahtarın ilk satırı BEGIN ile başlamıyor"
+          [ "${{ inputs.bolum }}" = "1" ] && echo "::notice title=Anahtar::$(ssh-keygen -y -f ~/.ssh/k >/dev/null 2>&1 && echo 'özel anahtar geçerli; açık anahtar parmak izi:' $(ssh-keygen -lf ~/.ssh/k | awk '{print $2}') || echo 'özel anahtar OKUNAMADI (eksik/bozuk yapıştırılmış)')"
+          [ "${{ inputs.bolum }}" = "1" ] && for p in ${PORT:-22} 22 2222 2200; do timeout 6 bash -c "</dev/tcp/$ADRES/$p" 2>/dev/null && echo "::notice title=Port $p::açık" || echo "::notice title=Port $p::kapalı/erişilemiyor"; done
+          if ! $S 'true' 2>/tmp/ssh_hata; then
+            echo "::error title=SSH::$(grep -v '^Warning' /tmp/ssh_hata | tail -3 | tr '\n' ' ' | cut -c1-400)"
+            exit 1
+          fi
+          not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "8" ]; then
+            not "Portal sürüm" "$(curl -s --max-time 15 "https://portal.aksarayenerji.net/?t=$(date +%s)" | grep -c parasalAnahtar) eşleşme; $(curl -sI --max-time 15 https://portal.aksarayenerji.net/ | grep -iE 'cache|expires|last-mod|etag' | tr '\r\n' '  ')"
+            exit 0
+          fi
+          if [ "${{ inputs.bolum }}" = "7" ]; then
+            not "Caddy" "$($S 'for f in /opt/caddy/Caddyfile /opt/gesfin/Caddyfile /opt/gesfin/caddy/Caddyfile; do [ -f $f ] && echo "== $f" && grep -vE "(password|secret|token|key)" $f | sed "s/#.*//" | grep -v "^\s*$" | head -40; done')"
+            not "gesfin dosyalar" "$($S 'cd /opt/gesfin && ls -la | awk "{print \$NF}" | tr "\n" " "; echo; find app -maxdepth 3 -type d | head -40 | tr "\n" " "')"
+            not "gesfin compose" "$($S 'cd /opt/gesfin && grep -vE "(PASSWORD|SECRET|TOKEN|KEY)=" docker-compose.yml | grep -E "^[a-z ]|image:|ports:|- \"|container_name|command" | head -40')"
+            not "gesfin api" "$($S 'cd /opt/gesfin && grep -rhoE "@(router|app)\.(get|post|put|delete)\(\"[^\"]+\"" app 2>/dev/null | sort -u | head -80 | tr "\n" " "')"
+            not "gesfin tablolar" "$($S 'docker exec -i gesfin-db psql -U gesfin -d gesfin -At' < sunucu/gesfin_sema.sql 2>&1 | tr "\n" " " | head -c 3800)"
+            not "gesfin modeller" "$($S 'cd /opt/gesfin && grep -rhoE "__tablename__ *= *\"[a-z_]+\"|class [A-Za-z]+\((Base|SQLModel)" app 2>/dev/null | sort -u | head -80 | tr "\n" " "')"
+            exit 0
+          fi
+          if [ "${{ inputs.bolum }}" = "6" ]; then
+            for ip in 5.27.1.254 5.229.203.28; do
+              not "SmartLogger $ip" "$($S "for p in 502 6607 443 80 16100 2121 22; do timeout 4 bash -c \"</dev/tcp/$ip/\$p\" 2>/dev/null && echo -n \"\$p:açık \" || echo -n \"\$p:kapalı \"; done; echo; ping -c2 -W2 $ip | tail -2")"
+            done
+            exit 0
+          fi
+          if [ "${{ inputs.bolum }}" = "5" ]; then
+            not "Canlı API" "$($S 'curl -s --max-time 15 "https://portal.aksarayenerji.net/api/canli.php?s=9999999999"; echo; echo simdi=$(date +%s)')"
+            exit 0
+          fi
+          if [ "${{ inputs.bolum }}" = "3" ] || [ "${{ inputs.bolum }}" = "4" ]; then
+            [ "${{ inputs.bolum }}" = "3" ] && not "Docker df" "$($S 'docker system df 2>/dev/null')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Kullanılmayan imajlar" "$($S 'U=$(docker ps -a --format "{{.Image}}" | sort -u); docker images --format "{{.Repository}}:{{.Tag}} {{.ID}} {{.Size}} {{.CreatedSince}}" | while read r id sz c; do echo "$U" | grep -qx "$r" || echo "$U" | grep -qx "${r%:latest}" || echo "$r|$sz|$c;"; done | head -25')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Sahipsiz birimler" "$($S 'for v in $(docker volume ls -qf dangling=true); do echo -n "$v $(du -sh /var/lib/docker/volumes/$v 2>/dev/null | cut -f1); "; done')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Durmuş konteynerler" "$($S 'docker ps -a --filter status=exited --filter status=created --format "{{.Names}} {{.Image}} {{.Status}} {{.Size}}" | head -15')"
+            [ "${{ inputs.bolum }}" = "3" ] && not "Günlük/önbellek" "$($S 'journalctl --disk-usage 2>/dev/null; du -sh /var/log /var/cache/apt /root/.cache /root/.npm /tmp 2>/dev/null | tr "\n" " "; echo; ls /var/lib/docker/containers/*/*-json.log 2>/dev/null | xargs -r du -ch | tail -1')"
+            not "Büyük dosyalar" "$($S 'find / -xdev -type f -size +150M -not -path "/proc/*" -not -path "/var/lib/docker/overlay2/*" -printf "%s %p\n" 2>/dev/null | sort -rn | head -15 | awk "{printf \"%.0fMB %s; \", \$1/1048576, \$2}"')"
+            not "Yedek/arşiv dosyaları" "$($S 'find /opt /root /home /srv /var/backups -xdev -type f \( -iname "*.sql" -o -iname "*.sql.gz" -o -iname "*.dump" -o -iname "*.tar*" -o -iname "*.zip" -o -iname "*.bak" -o -iname "*backup*" -o -iname "*.yedek" \) -size +5M -printf "%s %TY-%Tm-%Td %p\n" 2>/dev/null | sort -rn | head -20 | awk "{printf \"%.0fMB %s %s; \", \$1/1048576, \$2, \$3}"')"
+            not "Klasör boyutları" "$($S 'du -xsh /opt/* /root /home /var/lib/docker/volumes /var/lib/docker/overlay2 /var/lib/containerd /snap /usr 2>/dev/null | sort -h | tr "\t\n" ": "')"
+            not "Çekirdek/snap" "$($S 'dpkg -l "linux-image-*" 2>/dev/null | awk "/^ii/{print \$2}" | tr "\n" " "; echo; uname -r; snap list --all 2>/dev/null | awk "/disabled/{print \$1\" \"\$3}" | tr "\n" " "')"
+            exit 0
+          fi
+          if [ "${{ inputs.bolum }}" = "2" ]; then
+            not "Docker" "$($S 'docker ps --format "{{.Names}} | {{.Image}} | {{.Ports}} | {{.Status}}" 2>/dev/null | head -20')"
+            not "opt" "$($S 'ls -la /opt; ls /opt/* 2>/dev/null | head -40')"
+            not "Compose" "$($S 'docker compose ls 2>/dev/null; find /opt /root -maxdepth 3 -name "docker-compose*.y*ml" -o -maxdepth 3 -name "compose*.y*ml" 2>/dev/null | head')"
+            not "Güvenlik duvarı" "$($S 'ufw status 2>/dev/null | head -12; iptables -S INPUT 2>/dev/null | head -8')"
+            not "Dış erişim" "$($S 'curl -s -4 --max-time 8 ifconfig.me; echo; curl -s -o /dev/null -w "github %{http_code}" --max-time 8 https://api.github.com')"
+            not "Diskte büyükler" "$($S 'du -xsh /var/lib/docker /opt/* /root /var/log 2>/dev/null | sort -h | tail -8')"
+            exit 0
+          fi
+          not "Sistem" "$($S 'hostname; . /etc/os-release 2>/dev/null; echo $PRETTY_NAME; uname -r; uptime -p; nproc; echo çekirdek')"
+          not "Bellek/disk" "$($S 'free -h | sed -n 2p; df -h / | tail -1')"
+          not "Yazılımlar" "$($S 'for p in python3 pip3 node docker nginx apache2 httpd caddy psql mysql redis-server named pdns_server git certbot cloudflared; do command -v $p >/dev/null && echo -n "$p "; done; echo; python3 --version 2>&1')"
+          not "Dinleyen portlar" "$($S 'ss -ltnp 2>/dev/null | awk "NR>1{print \$4\" \"\$6}" | sed "s/users:((\"//;s/\",.*//" | sort -u | head -40')"
+          not "Çalışan servisler" "$($S 'systemctl list-units --type=service --state=running --no-legend 2>/dev/null | awk "{print \$1}" | head -60')"
+          not "Web/DNS" "$($S 'ls /etc/nginx/sites-enabled /etc/apache2/sites-enabled /etc/httpd/conf.d 2>/dev/null | head -30; ls /etc/bind /var/named 2>/dev/null | head -10; ls /usr/local/cpanel /usr/local/directadmin /usr/local/psa /opt/plesk 2>/dev/null | head -3')"
+          not "Docker" "$($S 'docker ps --format "{{.Names}} {{.Image}} {{.Status}}" 2>/dev/null | head -20')"
+          not "Güvenlik duvarı" "$($S 'ufw status 2>/dev/null | head -12; firewall-cmd --list-all 2>/dev/null | head -12')"
+          not "Dış IP" "$($S 'curl -s -4 --max-time 8 ifconfig.me; echo; curl -s -o /dev/null -w "github %{http_code}" --max-time 8 https://api.github.com')"
+          rm -f ~/.ssh/k

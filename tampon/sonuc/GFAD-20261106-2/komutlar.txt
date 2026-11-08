@@ -1,0 +1,27 @@
+earshot cannot judge is in [docs/LIMITS.md](docs/LIMITS.md).
+earshot doctor --fetch     
+earshot fit --forge made/click_fit.py --budget 96 --dir made/click_variations   
+earshot fit --morph a.wav b.wav --amount 0.5 -o made/ab_morph.py
+earshot fit click.wav -o made/click_fit.py --report    
+earshot forge --list                             
+earshot forge --render keypress --params made/keypress/report.json --seeds 1 2 3 --dir made/again
+earshot forge keypress --refs path/to/real/keypresses/ --budget 144 --variants 4 --dir made/keypress
+earshot forge whoosh --refset whoosh_fast --budget 96 --dir made/whoosh      
+earshot forge whoosh --target "a fast crisp air whoosh" --alts "a wind gust" "a sword swing" \
+earshot gallery --compare "r2:out/forge_v2/*/final_r2" "r3:out/forge_v2/*/final" -o compare.html \
+earshot gallery --compare "v1:old/*/final" "v2:out/forge_v2/*/final" --alias keypress=typing_key -o v1_v2.html
+earshot gallery out/forge_v2 -o g.html --refs forge                        
+earshot gallery out/forge_v2 -o g.html --results eval/forge/results_v2r6.json   
+earshot gallery out/forge_v2 -o out/gallery/gallery.html                  
+earshot gallery out/forge_v2 -o portable.html --embed                      
+earshot gallery out/forge_v2 -o share.html --embed-compressed              
+earshot hears through two open models and a set of measurements. Trustworthy: loudness, timing and sync to picture,
+earshot kit init --preset calm -o audio/kit.json                     
+earshot kit render audio/kit.json --out audio/kit                    
+earshot loads them from that cache only and never contacts the Hub; a damaged cache is an error that names the folder,
+earshot sfx check w.wav                                              
+earshot sfx list --kind whoosh                                      
+earshot sfx render pluck/kalimba -o e5.wav --pitch E5                
+earshot sfx render ui_pop/soft -o pop.wav --pitch A4                 
+earshot sfx render whoosh_fast/crisp -o w.wav --dur 0.8 --apex 0.32  
+earshot turns sound into evidence an agent can reason about: what a file sounds like in words, how well it fits a

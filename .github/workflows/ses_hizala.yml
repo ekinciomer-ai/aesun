@@ -1,0 +1,38 @@
+name: Ses hizalama (kelime zamanları + yazıya döküm)
+# sunucu/ses_kuyruk/cikti/<önek>*.mp3 dosyalarını faster-whisper ile yazıya döker; kelime zamanlarını icerik/<klasör>/kelimeler/<ad>.json'a yazar.
+# Kurgu betikleri altyazıyı bu zamanlarla senkronlar; yazıya döküm sesin bozuk/eksik okunup okunmadığını gösterir.
+on:
+  workflow_dispatch:
+    inputs:
+      onek: { description: 'Dosya öneki (ör. NAZAR5_)', required: true }
+      klasor: { description: 'Hedef klasör (ör. icerik/nazar)', required: true }
+permissions:
+  contents: write
+jobs:
+  hizala:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q faster-whisper "av==13.1.0"
+      - name: Hizala
+        env: { ONEK: '${{ inputs.onek }}', KLASOR: '${{ inputs.klasor }}' }
+        run: |
+          python3 - <<'PY'
+          import glob, json, os
+          from faster_whisper import WhisperModel
+          m = WhisperModel("small", device="cpu", compute_type="int8")
+          onek, kl = os.environ["ONEK"], os.environ["KLASOR"]; os.makedirs(f"{kl}/kelimeler", exist_ok=True)
+          dil = {"TR": "tr", "EN": "en", "ES": "es"}
+          for f in sorted(glob.glob(f"sunucu/ses_kuyruk/cikti/{onek}*.mp3")):
+              ad = os.path.basename(f)[:-4]; l = next((v for k, v in dil.items() if f"_{k}_" in ad), None)
+              segs, _ = m.transcribe(f, language=l, word_timestamps=True)
+              w = [{"k": x.word.strip(), "b": round(x.start, 2), "s": round(x.end, 2)} for sg in segs for x in sg.words]
+              json.dump(w, open(f"{kl}/kelimeler/{ad}.json", "w", encoding="utf-8"), ensure_ascii=False)
+              print(f"::notice::{ad}: " + " ".join(x["k"] for x in w)[:300])
+          PY
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A "${{ inputs.klasor }}/kelimeler"; git diff --cached --quiet && exit 0
+          git commit -qm "Ses hizalama: ${{ inputs.onek }}"; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

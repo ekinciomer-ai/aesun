@@ -1,0 +1,49 @@
+name: Yayın takibi (otomatik)
+# Bilgisayar gerekmeden Portal → Özel Alan → Yayın Takibi tablosunu günceller:
+# YouTube RSS (+ varsa YT_API_KEY) ile durum/izlenme ve YORUMLAR, TikTok planlarının saati geçince "Yayında".
+on:
+  schedule:
+    - cron: '7 * * * *'   # saatte bir başlatıcı; iş kendi içinde 10 dakikada bir tarar (GitHub zamanlayıcısı gecikse de boşluk kalmaz)
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['yayin/**', '.github/workflows/yayin_takip.yml']
+permissions:
+  contents: write
+  actions: write
+concurrency: { group: "yayin-takip-${{ github.event_name == 'schedule' && 'dongu' || 'tek' }}", cancel-in-progress: false }
+jobs:
+  guncelle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Güncelle, kaydet, portala gönder (zamanlı çalışmada ~5,5 saat boyunca 10 dakikada bir)
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          DONGU: ${{ github.event_name == 'schedule' }}
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          bitis=$(( $(date +%s) + 330*60 ))
+          while :; do
+            git pull -q --rebase origin main || { git rebase --abort 2>/dev/null; git reset -q --hard origin/main; }
+            if python3 yayin/guncelle.py && python3 yayin/analiz.py; then
+              git add docs/yayin/yayin.json docs/yayin/gecmis.json docs/yayin/analiz.json docs/yayin/yorum_kuyrugu.json
+              if ! git diff --cached --quiet; then
+                git commit -qm "Yayın takibi: otomatik güncelleme $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+                ok=0; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && { ok=1; break; }; sleep 5; done
+                [ $ok = 1 ] && { gh workflow run cpanel_yukle.yml --ref main || true; } || git reset -q --hard origin/main
+              fi
+            else
+              echo "::warning::tarama hata verdi, sonraki turda tekrar denenecek"; git checkout -q -- docs/yayin/ 2>/dev/null || true
+            fi
+            # Keşif gecikme önleyici: bugün (UTC) tarama yoksa ve saat 03:17 UTC'yi geçtiyse kesif.yml'i bir kez başlat
+            ( bugun=$(date -u +%F); [ "$(date -u +%H%M)" -ge 0317 ] \
+              && [ "$(gh api "repos/${{ github.repository }}/actions/workflows/kesif.yml/runs?created=>=$bugun&per_page=1" --jq .total_count 2>/dev/null)" = "0" ] \
+              && gh api -X POST repos/${{ github.repository }}/actions/workflows/kesif.yml/dispatches -f ref=main \
+              && echo "Keşif taraması başlatıldı (zamanlayıcı gecikmişti)" ) || true
+            [ "$DONGU" = "true" ] || break
+            [ $(( $(date +%s) + 600 )) -lt $bitis ] || break
+            sleep 600
+          done

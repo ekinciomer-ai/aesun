@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""cPanel paketleri:
+  dist_site/   → aksarayenerji.net          (kurumsal web sitesi)
+  dist_portal/ → portal.aksarayenerji.net   (portal kökte; /monitoring/ /demo/ /saha/)
+Portal oturumu tarayıcıda alan adına bağlı olduğu için portal ve uygulamalar aynı alt alandadır."""
+import os, re, shutil, sys
+
+KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DOCS, CP = os.path.join(KOK, "docs"), os.path.join(KOK, "cpanel")
+SAHA = sys.argv[1] if len(sys.argv) > 1 else os.path.join(KOK, "_saha")
+SITE_URL, PORTAL_URL = "https://aksarayenerji.net/", "https://portal.aksarayenerji.net/"
+
+
+def oku(p):
+    return open(p, encoding="utf-8").read()
+
+
+def yaz(p, s):
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    open(p, "w", encoding="utf-8").write(s)
+
+
+def kopya(src, dst, haric=()):
+    shutil.copytree(src, dst, dirs_exist_ok=True, ignore=shutil.ignore_patterns(*haric))
+
+
+for d in ("dist_site", "dist_portal"):
+    shutil.rmtree(os.path.join(KOK, d), ignore_errors=True)
+S, P = os.path.join(KOK, "dist_site"), os.path.join(KOK, "dist_portal")
+
+# ---- site ----
+for f in ("index.html", "referanslar.html", "gundem.html", "iletisim.html", "kvkk.html", "uygulama-gizlilik.html", "favicon.svg"):
+    s = oku(os.path.join(DOCS, f)) if f.endswith(".html") else None
+    if s is None:
+        os.makedirs(S, exist_ok=True); shutil.copy(os.path.join(DOCS, f), S); continue
+    s = s.replace('href="portal/"', f'href="{PORTAL_URL}"').replace('href="demo/"', f'href="{PORTAL_URL}demo/"')
+    s = s.replace('location.replace("monitoring/"+location.hash)', f'location.replace("{PORTAL_URL}monitoring/"+location.hash)')
+    if f == "iletisim.html":   # cPanel'de form PHP ile gönderilir; GitHub sürümündeki mailto yedeği kaldırılır
+        s = re.sub(r"<script>\s*\(function\(\)\{\s*var f=document\.querySelector\('form\.f'\).*?</script>", "", s, flags=re.S)
+    yaz(os.path.join(S, f), s)
+kopya(os.path.join(DOCS, "assets"), os.path.join(S, "assets"))
+for f in (".htaccess", "robots.txt", "sitemap.xml", "iletisim.php"):
+    shutil.copy(os.path.join(CP, f), S)
+
+# ---- portal alt alanı ----
+s = oku(os.path.join(DOCS, "portal", "index.html"))
+s = s.replace('class="bag" href="../"', f'class="bag" href="{SITE_URL}"')
+yaz(os.path.join(P, "index.html"), s)
+for app in ("monitoring", "demo"):
+    s = oku(os.path.join(DOCS, app, "index.html"))
+    s = s.replace("../portal/", "../")
+    yaz(os.path.join(P, app, "index.html"), s)
+# Enerji Gündemi (portal içi derin sürüm; token'lı /portal ucunu çeker)
+kopya(os.path.join(DOCS, "gundem"), os.path.join(P, "gundem"))
+yaz(os.path.join(P, "gundem", "index.html"), oku(os.path.join(DOCS, "gundem", "index.html")).replace("../portal/", "../"))
+# Kapasite Paneli (portal içi; TEİAŞ TM kapasite JSON'u yerel)
+kopya(os.path.join(DOCS, "kapasite"), os.path.join(P, "kapasite"))
+yaz(os.path.join(P, "kapasite", "index.html"), oku(os.path.join(DOCS, "kapasite", "index.html")).replace("../portal/", "../"))
+# Kasa (yalnız yönetici; değerleri yazar, göstermez)
+yaz(os.path.join(P, "kasa", "index.html"), oku(os.path.join(DOCS, "kasa", "index.html")))
+kopya(SAHA, os.path.join(P, "saha"), haric=(".git", ".github", "*.md", "eski.html"))
+# Müşteri Monitoring (portal oturumuyla açılır; veri ns1 /v1/musteri — AEMonitoring'den ayrı)
+yaz(os.path.join(P, "musteri", "index.html"), oku(os.path.join(DOCS, "musteri", "index.html")))
+# Sistem Denetçisi (tüm işler, bekçiler, raporlar, bildirimler ve canlı şematik mimari)
+yaz(os.path.join(P, "denetci", "index.html"), oku(os.path.join(DOCS, "denetci", "index.html")).replace("../portal/", "../"))
+# CAD (portal oturumuyla açılır; DWG okuyucu wasm + pdf.js yerel)
+kopya(os.path.join(DOCS, "aecad"), os.path.join(P, "aecad"))
+yaz(os.path.join(P, "aecad", "index.html"), oku(os.path.join(DOCS, "aecad", "index.html")).replace("../portal/", "../"))
+# Araç Kütüphanesi (günlük keşif taraması; katalog.json kesif.yml ile güncellenir)
+kopya(os.path.join(DOCS, "kesif"), os.path.join(P, "kesif"))
+yaz(os.path.join(P, "mimari", "index.html"), oku(os.path.join(DOCS, "mimari", "index.html")).replace("../portal/", "../"))   # Özel Alan · Sistem Mimarisi
+kopya(os.path.join(DOCS, "yayin"), os.path.join(P, "yayin"))   # Özel Alan · Yayın Takibi (yayin.json Claude/Antigravity tarafından güncellenir)
+yaz(os.path.join(P, "yayin", "index.html"), oku(os.path.join(DOCS, "yayin", "index.html")).replace("../portal/", "../"))
+yaz(os.path.join(P, "asistan", "index.html"), oku(os.path.join(DOCS, "asistan", "index.html")).replace("../portal/", "../"))   # Özel Alan · Sunucu Asistanı (Antigravity)
+yaz(os.path.join(P, "kesif", "index.html"), oku(os.path.join(DOCS, "kesif", "index.html")).replace("../portal/", "../"))
+shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
+# Teklif sayfaları (çatı GES yerleşimi vb.): docs/teklif/ → portal.aksarayenerji.net/teklif/
+if os.path.isdir(os.path.join(DOCS, "teklif")):
+    kopya(os.path.join(DOCS, "teklif"), os.path.join(P, "teklif"))
+# Portal alt alanı PHP 8.3 ister (str_contains, never, adlandırılmış argümanlar). cPanel sürümü .htaccess işleyicisiyle
+# seçer; bu blok olmadan üst alanın (aksarayenerji.net, PHP 7.2) işleyicisi devreye girer ve api/*.php 500 verir (18 Eki).
+yaz(os.path.join(P, ".htaccess"), oku(os.path.join(CP, ".htaccess")).rstrip() + """
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php83” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
+""")
+kopya(os.path.join(CP, "api"), os.path.join(P, "api"))   # anlık izleme deposu (canli.php)
+yaz(os.path.join(P, "robots.txt"), "User-agent: *\nDisallow: /\n")
+
+# Büyük satır içi betik ayrı, küçültülmüş ve önbelleklenebilir dosyaya alınır (sayfa hız standardı: mobilde < 2 sn).
+# Dosya adı içerik özetini taşır; içerik değişince adı değişir, tarayıcı eski kopyayı kullanmaz.
+def betik_ayir(html_yol, esik=100_000):
+    import hashlib, subprocess
+    s = oku(html_yol)
+    m = max(re.finditer(r"<script>(.*?)</script>", s, re.S), key=lambda x: len(x.group(1)), default=None)
+    if not m or len(m.group(1)) < esik:
+        return
+    kod = m.group(1)
+    try:
+        r = subprocess.run(["npx", "--yes", "terser@5.36.0", "-c", "passes=1", "-m", "--ecma", "2020"], input=kod,
+                           capture_output=True, text=True, timeout=180)
+        kucuk = r.stdout if r.returncode == 0 and len(r.stdout) > 1000 else kod
+    except Exception:
+        kucuk = kod
+    ad = "app." + hashlib.sha256(kucuk.encode()).hexdigest()[:10] + ".js"
+    yaz(os.path.join(os.path.dirname(html_yol), ad), kucuk)
+    yaz(html_yol, s[:m.start()] + f'<script src="{ad}"></script>' + s[m.end():])
+    print(html_yol, f"betik ayrıldı: {len(kod)//1024} KB → {len(kucuk)//1024} KB ({ad})")
+
+
+betik_ayir(os.path.join(P, "monitoring", "index.html"))
+
+for d in (S, P):
+    n = sum(len(f) for _, _, f in os.walk(d))
+    print(d, n, "dosya")
+kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html")) + oku(os.path.join(P, "aecad", "index.html")) + oku(os.path.join(P, "gundem", "index.html")) + oku(os.path.join(P, "kapasite", "index.html"))]
+if kalan or 'href="portal/"' in oku(os.path.join(S, "index.html")):
+    sys.exit("bağlantı dönüşümü eksik")

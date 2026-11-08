@@ -1,0 +1,20 @@
+name: cPanel kod incele (yalnız okuma)
+on:
+  workflow_dispatch:
+    inputs:
+      tam:
+        description: "evet = tam içerik (sırlar maskeli)"
+        default: "hayir"
+      dosyalar:
+        description: "docroot'a göre dosyalar, boşlukla"
+        default: "api/portal.php"
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          CP_USER: ${{ secrets.FTP_KULLANICI }}
+          CP_TOKEN: ${{ secrets.CPANEL_ANAHTAR }}
+        run: |
+          if [ "${{ inputs.tam }}" = "anahtar_iptal" ]; then python3 cpanel/anahtar_iptal.py n8n; elif [ "${{ inputs.tam }}" = "php" ]; then python3 cpanel/php_surum.py; elif [ "${{ inputs.tam }}" = "hata" ]; then python3 cpanel/hata_kaydi.py ${{ inputs.dosyalar }}; elif [ "${{ inputs.tam }}" = "evet" ]; then python3 cpanel/kod_tam.py ${{ inputs.dosyalar }}; else python3 cpanel/kod_incele.py ${{ inputs.dosyalar }}; fi

@@ -1,0 +1,221 @@
+{
+ "uretildi": "2026-11-07 10:47",
+ "son_calisma": {
+  "tarih": "2026-11-07",
+  "aday": 24,
+  "oneri": 3,
+  "depoya_yazildi": false
+ },
+ "sayilar": {
+  "entegre": 3,
+  "tampon_denemede": 4,
+  "iade": 1,
+  "degerlendirmede": 0
+ },
+ "araclar": [
+  {
+   "id": "GFAD-20261107-4",
+   "ad": "lemo-opuscar",
+   "url": "https://github.com/lemomo-ai/lemo-opuscar",
+   "puan": 80,
+   "hedef": "gundem-tarih-video (animasyon) ve gercek-goruntulu-belgesel (harita/arşiv sahneleri)",
+   "fayda": "66 kodla üretilen film görünümü (ağaç baskı, gravür, sessiz film, ukiyo-e, gölge oyunu, uydu brifingi, eski haber filmi); görsel üretim kredisi harcamadan tarih sahneleri.",
+   "risk": "Ekran kartı yok: render yavaş (1 dk video ≈ 10+ dk); ffmpeg 7 gerekir; demo yazı tipleri ayrıca indirilir; Çince ses için Microsoft'a metin gönderen edge-tts KULLANILMAZ.",
+   "durum": "entegre",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-07",
+   "test": null,
+   "test_ozeti": "07.11 tampon: kurulum BAŞARILI, güvenlik bulgusu yok. Ağaç baskı, sessiz film ve gravür görünümlerinden 12 kare sorunsuz render edildi (kare başı ~1,4 sn, ekran kartısız). Tam video render'ı 10 dk deneme sınırına takıldı; ilk gerçek işte ölçülecek.",
+   "yapilanlar": [
+    "Tampon testi (tampon/sonuc/video-opuscar*, kesif-motion)",
+    "Skill güncellemesi önerildi: gundem-tarih-video, gercek-goruntulu-belgesel"
+   ],
+   "geri_donus": "Skill'deki ilgili bölüm silinir; sunucuda kurulu kopya kaldırılır."
+  },
+  {
+   "id": "GFAD-20261107-1",
+   "ad": "Timestral",
+   "url": "https://github.com/mistralai/timestral",
+   "puan": 76,
+   "hedef": "AEMonitoring (GES üretim beklentisi, sapma/anomali uyarısı)",
+   "fayda": "Saatlik üretim ve hava verisiyle ertesi gün/saat üretim tahmini; gerçekleşen tahmin bandının dışına düşünce erken arıza işareti; madencilik güç planına girdi.",
+   "risk": "PyTorch bağımlılığı (~1 GB); ağırlık lisansı 'Modified MIT'; küçük veriyle aşırı güven.",
+   "durum": "tampon_denemede",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-07",
+   "test": null,
+   "test_ozeti": null,
+   "yapilanlar": [
+    "Depo statik incelendi (bulgu yok); tampon testi bekliyor."
+   ],
+   "geri_donus": "gerek yok (canlıya alınmadı)"
+  },
+  {
+   "id": "GFAD-20261107-2",
+   "ad": "claude-animated-shorts",
+   "url": "https://github.com/mromidev/claude-animated-shorts",
+   "puan": 74,
+   "hedef": "Antik Stüdyo / gundem-tarih-video, video-making",
+   "fayda": "Tarih hikâyelerini ücretsiz three.js animasyonuyla 55-70 sn Shorts'a çevirme; görsel üretim kredisi harcamadan seri üretim.",
+   "risk": "Render süresi/CPU yükü; yeni depo, yıldız hızı izlenmeli; marka stiline uyarlanmalı.",
+   "durum": "tampon_denemede",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-07",
+   "test": null,
+   "test_ozeti": null,
+   "yapilanlar": [
+    "Depo statik incelendi (bulgu yok); tampon testi bekliyor."
+   ],
+   "geri_donus": "gerek yok (canlıya alınmadı)"
+  },
+  {
+   "id": "GFAD-20261107-3",
+   "ad": "go-cad",
+   "url": "https://github.com/unitedrhino/go-cad",
+   "puan": 72,
+   "hedef": "AeCAD / ges-proje-cizim (DWG okuma-yazma)",
+   "fayda": "Müşteri DWG'lerinden metin/katman çıkarma ve doğrudan DWG çıktısı; tek Go programı, Apache lisans.",
+   "risk": "76 yıldız, tek ekip, Çince belge; karmaşık çizimlerde eksik varlık türü olabilir.",
+   "durum": "tampon_denemede",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-07",
+   "test": null,
+   "test_ozeti": null,
+   "yapilanlar": [
+    "Depo statik incelendi (bulgu yok); tampon testi bekliyor."
+   ],
+   "geri_donus": "gerek yok (canlıya alınmadı)"
+  },
+  {
+   "id": "GFAD-20261107-5",
+   "ad": "rossark-motion-skill",
+   "url": "https://github.com/rossark0/rossark-motion-skill",
+   "puan": 71,
+   "hedef": "gundem-tarih-video (illüstrasyonlarda duman/bayrak/su hareketi)",
+   "fayda": "Çizime 'canlılık' veren hareket kuralları: ışınlanma yok, küçük genlik, eklem etrafında dönme, faz gecikmeli takip, sahne başına tek ana hareket.",
+   "risk": "Yöntem/kural düzeyinde alındı; kendi kodu (React Native/SwiftUI) kullanılmıyor.",
+   "durum": "entegre",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-07",
+   "test": null,
+   "test_ozeti": "07.11 tampon: kurulum BAŞARILI, güvenlik bulgusu yok. Yalnız yöntem belgesi skill'e alındı (kod çalıştırılmıyor).",
+   "yapilanlar": [
+    "Tampon testi (tampon/sonuc/video-opuscar*, kesif-motion)",
+    "Skill güncellemesi önerildi: gundem-tarih-video, gercek-goruntulu-belgesel"
+   ],
+   "geri_donus": "Skill'deki ilgili bölüm silinir; sunucuda kurulu kopya kaldırılır."
+  },
+  {
+   "id": "GFAD-20261106-1",
+   "ad": "Indra OCR",
+   "url": "https://github.com/datalab-to/indra",
+   "puan": 75,
+   "hedef": "fatura/teklif belge okuma (OCR)",
+   "fayda": null,
+   "risk": null,
+   "durum": "tampon_denemede",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-06",
+   "test": {
+    "durum": "basarili",
+    "sure_sn": 24,
+    "guvenlik": [],
+    "tarih": "2026-11-07"
+   },
+   "test_ozeti": "07.11 tampon: BAŞARILI, güvenlik bulgusu yok. Telefonla çekilmiş Türkçe teklifte 21/21 kritik alan doğru (%98,8 karakter); şu anki Tesseract 19/21 (398.712,00→398.712.090, 96.000→96:000, %20→9620). Tabloyu tablo olarak korur. Sayfa başı ~1 sn, ekran kartı gerekmez.",
+   "yapilanlar": [],
+   "geri_donus": "gerek yok (canlıya alınmadı)"
+  },
+  {
+   "id": "GFAD-20261106-2",
+   "ad": "earshot",
+   "url": "https://github.com/Leonxlnx/earshot",
+   "puan": 72,
+   "hedef": "videoda ses kontrolü (Antik Stüdyo / CutkodA kurgu)",
+   "fayda": null,
+   "risk": null,
+   "durum": "entegre",
+   "iade_gerekcesi": null,
+   "tekrar_kosulu": null,
+   "tarih": "2026-11-06",
+   "test": {
+    "durum": "basarili",
+    "sure_sn": 222,
+    "guvenlik": [],
+    "tarih": "2026-11-07"
+   },
+   "test_ozeti": "07.11 tampon: BAŞARILI, güvenlik bulgusu yok. Celtic TR seslendirmesine bilerek eklenen 3 hatanın 3'ünü buldu: aşırı yüksek ses (−4,9 LUFS, '7,1 dB kıs'), 0:06.02–0:08.50 arası 2,4 sn boşluk, patlama (+0,4 dBTP). Temiz seste: müzik yatağı yok, mono, boğuk, telefon hoparlöründe konuşma netliği zayıf; sesi %81 'yapay zekâ sesi' tanıdı.",
+   "yapilanlar": [],
+   "geri_donus": "gerek yok (canlıya alınmadı)"
+  },
+  {
+   "id": "GFAD-20261106-3",
+   "ad": "file-viewer",
+   "url": null,
+   "puan": 70,
+   "hedef": "portal belge görüntüleme",
+   "fayda": null,
+   "risk": "portal görünümü değişir (yasak)",
+   "durum": "iade",
+   "iade_gerekcesi": "Entegrasyon portal görünümünü değiştirmeyi gerektiriyor; bu OU'nun yasak listesinde.",
+   "tekrar_kosulu": "Portala dokunmadan ayrı sayfa/servis olarak çalışabilen sürüm.",
+   "tarih": "2026-11-06",
+   "test": null,
+   "test_ozeti": null,
+   "yapilanlar": [],
+   "geri_donus": "gerek yok"
+  }
+ ],
+ "guvenlik": [
+  {
+   "ad": "Agent-Reach",
+   "url": null,
+   "not": "tarayıcı çerezlerini kopyalıyor — zararlı, önerilmez",
+   "tarih": "2026-11-06"
+  },
+  {
+   "ad": "morluto/rea",
+   "url": null,
+   "not": "yıldız şişirme şüphesi — güvenilmez, önerilmez",
+   "tarih": "2026-11-06"
+  },
+  {
+   "ad": "storytold/*",
+   "url": null,
+   "not": "yıldız şişirme şüphesi (kuruluşun depoları) — güvenilmez, önerilmez",
+   "tarih": "2026-11-06"
+  },
+  {
+   "ad": null,
+   "url": null,
+   "not": "notivn/AIEVv2 çerez tabanlı resmî olmayan Gemini API + tünel",
+   "tarih": "2026-11-07"
+  },
+  {
+   "ad": null,
+   "url": null,
+   "not": "wheresryan22/anatomy yıldız şişirme şüphesi",
+   "tarih": "2026-11-07"
+  },
+  {
+   "ad": null,
+   "url": null,
+   "not": "getcadcraft/cadcraft storytold-benzeri adlandırma",
+   "tarih": "2026-11-07"
+  }
+ ],
+ "rapor": {
+  "tarih": "2026-11-07",
+  "metin": "# GDEO günlük rapor — 07.11.2026\n\n> Gece çalışması depoya yazamadı; kayıt Drive'da (`GDEO_bekleyen_2026-11-07.json`), özet 07.11 13:10'da depoya işlendi. Tampon sonuçları aynı gün eklendi.\n\n## KAŞİF\n- GitHub arama (14 sorgu), Keşif kataloğu (2.252 kayıt), web araması. ~170 depo tarandı → **24 aday**; en güçlü 10'u GFAD'a gitti.\n- Ulaşılamayan: Hacker News, Reddit (ağ engeli), GitHub trending.\n\n## GFAD önerileri\n| Araç | Puan | Hedef |\n|---|---|---|\n| Timestral (mistralai) | 76 | AEMonitoring üretim tahmini ve sapma uyarısı |\n| claude-animated-shorts | 74 | Antik Stüdyo animasyonlu tarih Shorts'u |\n| go-cad | 72 | AeCAD DWG okuma/yazma |\n\nElenenler (70 altı): overlook 68, shorts-kit 66, hass-miner 65, GEOInflow 62, MiniCPM-OCR 60, stack-diagram 58. Bizde daha iyisi var: youtube-agent-skill (→ youtube-ajan), teardown (→ teardown-simulator).\n\n## OU kararları ve tampon testleri\n- **Indra OCR** (75): tampon testi **başarılı**. Türkçe teklif fotoğrafında 21/21 kritik alan doğru; mevcut Tesseract 19/21.\n- **earshot** (72): tampon testi **başarılı**. Eklenen 3 ses hatasının 3'ünü buldu.\n- **Timestral, claude-animated-shorts, go-cad**: tamponda, test bekliyor.\n- **file-viewer** (70): iade — portal görünümünü değiştirmek gerekiyor.\n\n## Güvenlik uyarıları\n- notivn/AIEVv2: çerez tabanlı resmî olmayan Gemini API ve tünel → önerilmez.\n- wheresryan22/anatomy: bir ayda ~25k yıldız → şişirme şüphesi.\n- getcadcraft/cadcraft: storytold/* ailesine benzer adlandırma → doğrulanana kadar önerilmez.\n- Sürenler: Agent-Reach (zararlı), morluto/rea, storytold/*.\n\n## Yarına kalanlar\n- Indra OCR: test geçti, puan 75 → OU otomatik entegrasyon.\n- earshot: test geçti, puan 72 (<75) → beklemede.\n- Timestral, claude-animated-shorts, go-cad tampon testleri.\n",
+  "gecmis": [
+   "2026-11-07",
+   "2026-11-06"
+  ]
+ }
+}

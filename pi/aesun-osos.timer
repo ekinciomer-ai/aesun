@@ -1,0 +1,9 @@
+[Unit]
+Description=AEMonitoring OSOS toplayici - her saat xx:10
+
+[Timer]
+OnCalendar=*-*-* *:10:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=EPIAS PTF cekici
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/pi/ptf_toplayici
+ExecStart=/usr/bin/python3 /home/pi/ptf_toplayici/ptf_cek.py

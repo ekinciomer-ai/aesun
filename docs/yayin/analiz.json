@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-08T12:03+03:00",
+ "olusturma": "2026-11-08T13:04+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -61,10 +61,9 @@
    "gunluk_short_kotasi": 3,
    "seri_dagilimi": {
     "Gündem + Tarih": 2,
-    "Spor + Tarih": 1
+    "Tablo Serisi": 1
    },
    "durdurulan": [
-    "Tablo Serisi",
     "Tarihi Magazin",
     "Tarihin Patileri"
    ]
@@ -92,7 +91,7 @@
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %67'i tuttu (eşik 128 izlenme / 48 sa)",
+   "neden": "videoların %67'i tuttu (eşik 141 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 2,
    "medyan_48sa": 902,
@@ -121,16 +120,16 @@
   {
    "kanal": "Ancient Studio",
    "seri": "Tablo Serisi",
-   "karar": "DURDUR",
-   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
-   "olculen": 4,
-   "erken": 1,
-   "medyan_48sa": 48,
-   "tutma_orani": 0,
+   "karar": "SÜRDÜR",
+   "neden": "tutma oranı %20",
+   "olculen": 5,
+   "erken": 0,
+   "medyan_48sa": 82,
+   "tutma_orani": 20,
    "izlenme_yuzde": 51,
    "en_iyi": {
-    "baslik": "Is the Girl with a Pearl Earring's pearl real? 🖼️",
-    "i48": 99
+    "baslik": "The man in The Scream isn't screaming 😱",
+    "i48": 293
    }
   },
   {
@@ -252,9 +251,9 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 128,
-  "Antik Stüdyo": 474,
-  "Estudio Antiguo": 50
+  "Ancient Studio": 141,
+  "Estudio Antiguo": 50,
+  "Antik Stüdyo": 474
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -305,8 +304,8 @@
     "medyan": 36
    },
    "21:00": {
-    "n": 6,
-    "medyan": 45
+    "n": 7,
+    "medyan": 48
    }
   }
  },
@@ -322,10 +321,9 @@
  ],
  "bulgular": [
   "Dün (2026-11-07) 14064 izlenme geldi; bir önceki gün 4518.",
-  "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 128 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 141 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 474 izlenme / 48 sa).",
-  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 128 izlenme / 48 sa).",
-  "Ancient Studio · Tablo Serisi: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
+  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 141 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 474 izlenme / 48 sa).",

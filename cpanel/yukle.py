@@ -125,6 +125,22 @@ def main():
                 yukle_dizine(hedef, paket)
             print(f"  {hedef or DIZIN}: {len(liste)} dosya")
         uapi("Fileman", "save_file_content", dir=DIZIN, file=MANIFEST, content=json.dumps(yerel))
+    # kaldırılmış tek seferlik sayfalar: repodan çıkınca sunucudan da silinir (yalnız bu listedeki önekler)
+    KALDIRILAN = ("teklif/konut-blogu/",)
+    sil = [y for y in eski if y.startswith(KALDIRILAN) and y not in yerel]
+    for y in sil:
+        try:
+            api2("Fileman", "fileop", op="unlink", sourcefiles=f"{DIZIN}/{y}", doubledecode=0); print("  -", y)
+        except Exception as e:
+            print(f"::warning::silinemedi {y}: {e}")
+    for k in KALDIRILAN:
+        if any(y.startswith(k) for y in sil):
+            try:
+                api2("Fileman", "fileop", op="unlink", sourcefiles=f"{DIZIN}/{k.rstrip('/')}", doubledecode=0)
+            except Exception as e:
+                print(f"::warning::klasör silinemedi {k}: {e}")
+    if sil and not degisen:
+        uapi("Fileman", "save_file_content", dir=DIZIN, file=MANIFEST, content=json.dumps(yerel))
     for y in degisen[:40]:
         print("  +", y)
     # klasör izinleri 0755 (web sunucusu okuyabilsin)

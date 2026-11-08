@@ -44,7 +44,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         cid = KANAL[dil]
         if dil not in toklar:
             toklar[dil] = token(cid); mevcut[dil] = basliklar(toklar[dil], cid)
-        if it["baslik"] in mevcut[dil] and mevcut[dil][it["baslik"]] != it.get("yerine"):
+        if not it.get("yerine") and it["baslik"] in mevcut[dil]:  # "yerine" verilmişse aynı başlık bilerek yeniden yüklenir
             vid = mevcut[dil][it["baslik"]]; kayit[kod] = {"vid": vid}
             sonuc.append({"kod": kod, "durum": "zaten yüklü (başlık)", "vid": vid, **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         # Yayın öncesi kalite kapısı (ae-sistem-standartlari): engel varsa yüklenmez; uyarılar rapora girer

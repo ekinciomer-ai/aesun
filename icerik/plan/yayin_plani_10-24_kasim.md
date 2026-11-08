@@ -1,4 +1,4 @@
-# Yayın Planı · 11–24 Kasım 2026
+# Yayın Planı · 10–24 Kasım 2026
 Antik Stüdyo (TR) · Ancient Studio (EN) · Estudio Antiguo (ES)
 
 Bu plan otomatik yol haritasına (analiz.json, 9 Kas 02:19) uyar. İçerikleri siz üretiyorsunuz, planlama ve kuyruğa koyma bende. Saatler Türkiye saatidir.
@@ -12,7 +12,7 @@ Bu plan otomatik yol haritasına (analiz.json, 9 Kas 02:19) uyar. İçerikleri s
 | Estudio Antiguo | 3 | İnanç & Kültür 1 · Frase del Día 1 · 1 deneme | 23:00 (1.320, tek video) |
 
 - **Durdurulanlar:** Tarihin Patileri (TR+EN) ve Tarihi Magazin (EN). TR'de Tarihi Magazin "ARTIR" kararında; mevcut 3 taslak 13:00 slotuna konur.
-- **10 Kasım:** hiçbir kanalda yayın yok.
+- **10 Kasım:** yayın var, ama yalnız normal (bilgi tonlu) içerik. Magazin, mizah, şaka içeren tablo ya da hareketli/komik müzik yok; müzik sakin, başlıkta emoji yok.
 - **Her gün TR 19:00:** Gündem + Tarih. Bu slot boş bırakılmaz.
 - **Tablo sırası:** önce dünyaca bilinen eser; yerel ya da az bilinen eser en fazla 3 günde bir girer.
 - **Yerelleştirme:** EN ve ES birebir çeviri değildir. Her kanal kendi ülkesinin eserini, örneğini ve özel gününü alır.
@@ -25,6 +25,7 @@ G+T = Gündem + Tarih. Konusu yayından 24–48 saat önce günün haberine gör
 
 | Gün | 13:00 | 18:00 Tablo (canlanan tablo) | 19:00 G+T | 21:30 Tablo |
 |---|---|---|---|---|
+| Sal 10 | ✚ Biliyor musunuz (bilgi tonu) | ✚ Atina Okulu (Raffaello), bilgi tonu | ✚ G+T (mizahsız) | ✚ Yıldızlı Gece (Van Gogh), bilgi tonu |
 | Çar 11 | ✎ Magazin #9 Yıkanmayan kral | ✔ Kaplumbağa Terbiyecisi | ✚ G+T | ✎ #11 Öpücük (Klimt) |
 | Per 12 | ✎ Magazin #10 VIII. Henry'nin tuvalet hizmetkârı | ✚ Yıldızlı Gece (Van Gogh) | ✚ G+T | ✎ #12 Dünyevi Zevkler Bahçesi |
 | Cum 13 | ✚ G+T | ✎ #10 Âdem'in Yaratılışı (9 Kas taslağı buraya alınır) | ✚ G+T | ✚ Büyük Dalga (Hokusai) |
@@ -61,7 +62,7 @@ Hedef izleyici: ABD/İngiltere. Türkiye'ye özgü eser ve örnek girmez.
 | Pzt 23 | ✚ Why… | ✚ The Anatomy Lesson (Rembrandt) | ✚ G+T |
 | Sal 24 | ✚ **Thanksgiving'e 2 gün:** 1621'de hindi değil 5 geyik vardı | ✚ The School of Athens | ✚ G+T |
 
-Gizli bekleyen "Venus couldn't stand up" ve "The Night Watch has the wrong name" 9 ve 10 Kasım'da kalıyor. 10 Kasım kuralı Türkiye'ye özgü olduğu için EN kanalı etkilemez.
+Gizli bekleyen "Venus couldn't stand up" ve "The Night Watch has the wrong name" 9 ve 10 Kasım'da kalıyor. EN ve ES kanallar 10 Kasım'da normal akışında devam eder.
 
 ## 4. Estudio Antiguo (ES)
 

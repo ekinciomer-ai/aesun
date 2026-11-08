@@ -1,3 +1,0 @@
-{"id": "kesif-opuscar", "repo": "https://github.com/lemomo-ai/lemo-opuscar", "ref": "",
- "kurulum": "ls -la | head -30; find . -maxdepth 3 -name 'SKILL.md' -o -maxdepth 2 -name package.json | head",
- "duman": "grep -vE '^\\s*$|<img|badge|^!\\[' README.md | head -150; echo ====SKILL; f=$(find . -name SKILL.md | head -1); [ -n \"$f\" ] && sed -n 1,80p $f; echo ====PKG; cat package.json 2>/dev/null | head -40", "sure_dk": 10}

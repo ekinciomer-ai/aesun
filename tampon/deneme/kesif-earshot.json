@@ -1,3 +1,0 @@
-{"id": "kesif-earshot", "repo": "https://github.com/Leonxlnx/earshot", "ref": "",
- "kurulum": "ls -la; (test -f package.json && npm install --silent 2>&1 | tail -5) ; (test -f pyproject.toml && pip install --quiet . 2>&1 | tail -5); true",
- "duman": "grep -vE '^\\s*$|<img|badge|^!\\[' README.md | head -140; echo ====PKG; cat package.json 2>/dev/null | head -40", "sure_dk": 15}

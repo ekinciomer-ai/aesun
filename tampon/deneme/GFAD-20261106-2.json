@@ -1,3 +1,0 @@
-{"id": "GFAD-20261106-2", "repo": "https://github.com/Leonxlnx/earshot", "ref": "",
- "kurulum": "sudo apt-get install -y -qq ffmpeg > /dev/null; pip install --quiet . && earshot --help",
- "duman": "earshot --help > $CIKTI/yardim.txt 2>&1; grep -oE '^earshot [a-z-]+[^#]*' README.md | sort -u > $CIKTI/komutlar.txt; cat $CIKTI/komutlar.txt; for f in celtic_tr_temiz celtic_tr_hatali; do for c in critique review check audit analyze describe; do timeout 300 earshot $c $GIRDI/$f.mp3 > $CIKTI/${c}_$f.txt 2>&1 && echo \"OK $c $f\" || rm -f $CIKTI/${c}_$f.txt; done; done; ls $CIKTI; for x in $CIKTI/*_celtic_tr_hatali.txt; do echo \"==== $x\"; head -60 $x; done", "sure_dk": 25}

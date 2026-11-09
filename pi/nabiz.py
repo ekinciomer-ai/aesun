@@ -111,6 +111,25 @@ def kapasite():
         k["ram"] = {"toplam": mi.get("MemTotal"), "bos": mi.get("MemAvailable"), "takas_toplam": mi.get("SwapTotal"), "takas_bos": mi.get("SwapFree")}
     except Exception:
         pass
+    try:   # bellek sızıntısı teşhisi: RSS+takas'a göre en büyük 6 süreç (MB)
+        sl = []
+        for p in Path("/proc").iterdir():
+            if not p.name.isdigit():
+                continue
+            try:
+                st = {a.split(":")[0]: a.split()[1] for a in (p / "status").read_text().splitlines() if a.split()[1:]}
+                rss, sw = int(st.get("VmRSS", 0)) // 1024, int(st.get("VmSwap", 0)) // 1024
+                if rss + sw < 20:
+                    continue
+                # yalnız program + betik adı (argümanlar yazılmaz: içlerinde anahtar olabilir)
+                arg = [a for a in (p / "cmdline").read_bytes().decode(errors="ignore").split("\0") if a][:2]
+                cmd = " ".join(a.rsplit("/", 1)[-1] for a in arg if not a.startswith("-"))
+                sl.append({"pid": int(p.name), "mb": rss, "takas_mb": sw, "komut": (cmd or st.get("Name", ""))[:60]})
+            except Exception:
+                continue
+        k["surecler"] = sorted(sl, key=lambda s: -(s["mb"] + s["takas_mb"]))[:6]
+    except Exception:
+        pass
     try:   # SD kartın fiziksel boyutu (bölüm büyütülmemişse disk toplamından büyük olabilir)
         for b in ("mmcblk0", "sda", "nvme0n1"):
             f = Path(f"/sys/block/{b}/size")

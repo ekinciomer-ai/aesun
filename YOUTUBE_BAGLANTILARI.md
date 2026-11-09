@@ -13,6 +13,7 @@ Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir
 | Estudio Antiguo (ES) | `UCTC_yS0lwl-owMuo5b4bNtQ` · @estudioantiguo | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (7 Kas 2026); kapak + açıklama sunucudan, logo elle |
 | Kozmos Lab TR (uzay/teknoloji) | `UC7o3DG9m1gBbvMjFZjB5KEg` · @kozmoslabtr | modernantiktv@gmail.com (kişisel kanal) | Bağlı (7 Kas 2026) |
 | Kozmos Lab (global EN) | `UC41-Z82jCQ8955az6JUDIAw` · @kozmoslab | modernantiktv@gmail.com (marka hesabı) | Bağlı (7 Kas 2026) |
+| Ömür Dediğin (65+ nostalji, TR) | `UCg75Mvb6C8CBSJPeuwzBFZA` · @omurdedigin70 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (10 Kas 2026) · kuyruk anahtarı `OD` |
 | Kara Kutu Mayday (TR, kaza/afet analizi) | `UCYtvxRIP1eF3-f0TAqh2PvA` · @KaraKutu7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
 | Black Box Files Mayday (EN) | `UCsV0ubiBEy8dxigNk8I_LqA` · @BlackBoxFiles7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
 | Caja Negra (ES) | `UCM6LhKp6tDx4ddZ65oZUCvQ` · @CajaNegra_7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |

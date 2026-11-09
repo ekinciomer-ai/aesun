@@ -12,7 +12,7 @@ import json, os, sys, glob, urllib.request, urllib.parse, urllib.error
 D, KQ = sys.argv[1], sys.argv[2]
 ist = json.load(open(os.path.join(D, "istemci.json"), encoding="utf-8"))
 KANAL = {"TR": "UC77LyY3gqWmBNAKp2lbsGBg", "EN": "UCFLJUlhUSgjcLbp9ad_t9PQ", "ES": "UCTC_yS0lwl-owMuo5b4bNtQ",
-         "KZ_TR": "UC7o3DG9m1gBbvMjFZjB5KEg", "KZ_EN": "UC41-Z82jCQ8955az6JUDIAw"}
+         "KZ_TR": "UC7o3DG9m1gBbvMjFZjB5KEg", "KZ_EN": "UC41-Z82jCQ8955az6JUDIAw", "OD": "UCg75Mvb6C8CBSJPeuwzBFZA"}
 kayit_yol = os.path.join(D, "yuklenen_kuyruk.json")
 kayit = json.load(open(kayit_yol, encoding="utf-8")) if os.path.exists(kayit_yol) else {}
 
@@ -82,7 +82,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             if kq.get("uyari"):
                 print(f"NOT: {kod} kalite uyarısı: {'; '.join(kq['uyari'])}")
         boyut = os.path.getsize(mp4)
-        dil_kodu = {"TR": "tr", "EN": "en", "ES": "es"}.get(dil, "en")
+        dil_kodu = {"TR": "tr", "EN": "en", "ES": "es", "KZ_TR": "tr", "OD": "tr"}.get(dil, "en")
         from datetime import datetime, timezone
         hemen_yayin = datetime.fromisoformat(it["publishAt"]) <= datetime.now(timezone.utc)
         durum_alan = ({"privacyStatus": "public", "selfDeclaredMadeForKids": False, "containsSyntheticMedia": bool(it.get("sentetik", False))}

@@ -58,7 +58,7 @@ jobs:
                   print('::warning::' + kod + ' ' + s['durum'] + ' ' + s.get('detay', '')); continue
               p = datetime.fromisoformat(s['publishAt'])
               durum_str = 'Yayında' if p <= datetime.now(p.tzinfo) else 'Planlı'
-              kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab'}.get(s['kanal'], s['kanal'])
+              kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab', 'OD': 'Ömür Dediğin'}.get(s['kanal'], s['kanal'])
               x = ix.get(s['vid']) or {}
               tur = s.get('tur') or 'Short'
               x.update(platform='YouTube', kanal=kanal, dil=s['kanal'], tur=tur, seri=s.get('seri') or x.get('seri') or 'Gündem + Tarih',

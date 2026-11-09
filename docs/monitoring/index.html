@@ -978,8 +978,10 @@ async function mfYukle(taze) {
 function mfAylar() { return Object.assign({}, MF.gesfin || {}, MF.kayit || {}); }
 function mfHesap(ay, f) {
   const r = aySonuc(D.osos, ay), M = r.ab.A3 || 0, H = +f.ham_kwh, akt = +f.aktif_tl, dag = +f.dagitim_tl;
-  const mb = M * MF_B, net = akt - mb, btv = net * 0.01, od = (net + dag + btv) * 1.2, brut = (akt + dag + akt * 0.01) * 1.2;
-  return { ay, f, M, H, akt, dag, mb, net, btv, od, brut, fayda: brut - od, sonra: H - M, gun: r.gunler.length, osA3: r.tAb.A3, gec: +f.gecikme_tl || 0 };
+  const gec = +f.gecikme_tl || 0, mb = M * MF_B, net = akt - mb, btv = net * 0.01, od = (net + dag + btv + gec) * 1.2;
+  // Tedarikçinin kestiği fatura: faturadaki ödenecek tutar (girildiyse) — yoksa kalemlerden hesap
+  const hesapBrut = (akt + dag + akt * 0.01 + gec) * 1.2, brut = +f.fatura_tl > 0 ? +f.fatura_tl : hesapBrut;
+  return { ay, f, M, H, akt, dag, mb, net, btv, od, brut, hesapBrut, fayda: brut - od, sonra: H - M, gun: r.gunler.length, osA3: r.tAb.A3, gec };
 }
 function mfTablo(h) {
   const tl = v => say(v * 1.2, 2) + ' ₺', b = (v, n) => say(v, n);
@@ -994,6 +996,7 @@ function mfTablo(h) {
     + sat('Net Enerji Gideri', tl(h.net) + ' <span class="k" style="font-weight:400">(' + b(h.sonra, 2) + ' kWh × ' + b(h.sonra > 0 ? h.net * 1.2 / h.sonra : 0, 4) + ' ₺/kWh)</span>', 1)
     + sat('3) Dağıtım bedeli', tl(h.dag) + ' <span class="k" style="font-weight:400">(' + b(h.H, 2) + ' kWh × ' + b(h.dag * 1.2 / h.H, 6) + ' ₺/kWh)</span>', 1)
     + sat('BTV (%1, net enerji üzerinden)', tl(h.btv))
+    + (h.gec > 0 ? sat('Gecikme bedeli', tl(h.gec)) : '')
     + sat('ÖDENECEK (mahsuplu)', say(h.od, 2) + ' ₺', 1)
     + '</tbody></table></div>';
   const t2 = '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol"></th><th>Tutar</th></tr></thead><tbody>'
@@ -1002,7 +1005,8 @@ function mfTablo(h) {
     + sat('Mahsup faydası (KDV dahil)', say(h.fayda, 2) + ' ₺', 1)
     + '</tbody></table></div>';
   const not = [];
-  if (h.gec > 0) not.push('Gecikme bedeli ' + say(h.gec * 1.2, 2) + ' ₺ (KDV dahil) iki taraftan da çıkarıldı' + (h.f.fatura_tl ? '; faturanın tamamı ' + say(h.f.fatura_tl, 2) + ' ₺' : '') + '.');
+  if (h.gec > 0) not.push('Gecikme bedeli ' + say(h.gec * 1.2, 2) + ' ₺ (KDV dahil) faturada var; mahsuplu ödemeye de eklendi.');
+  if (+h.f.fatura_tl > 0 && Math.abs(h.hesapBrut - h.brut) > 5) not.push('Faturadaki tutar (' + say(h.brut, 2) + ' ₺) kalemlerden hesaplanandan (' + say(h.hesapBrut, 2) + ' ₺) ' + say(h.brut - h.hesapBrut, 2) + ' ₺ farklı; faturada başka kalem olabilir.');
   if (h.gun < +new Date(Date.UTC(+h.ay.slice(0, 4), +h.ay.slice(5), 0)).getUTCDate()) not.push('Bu ayın sayaç verisi eksik (' + h.gun + ' gün); mahsup kWh tamamlanınca değişir.');
   if (h.osA3 && Math.abs(h.osA3 - h.H) > Math.max(50, h.H * 0.005)) not.push('Faturadaki tüketim (' + say(h.H) + ' kWh) sayaçtan (' + say(h.osA3) + ' kWh) farklı.');
   if (h.ay < '2026-05') not.push('Mayıs 2026 öncesi mahsup aylık hesapla (elle girilen A3 değeri).');

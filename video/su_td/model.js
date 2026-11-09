@@ -51,11 +51,14 @@ const kesitGeo = (pts, x0, x1) => {
   g.translate(x0, 0, 0);
   return g;
 };
-export function buildBaraj() {
+// tip 'beton': Hoover tipi beton kemer-ağırlık (221 m, tabanda 201 m, krette 14 m)
+export function buildBaraj(tip = 'kaya') {
   const g = new THREE.Group();
+  const BETON = tip === 'beton';
+  if (BETON) Object.assign(BRJ, {H: 221, kret: 14, egim: 0.43});
   const H = BRJ.H, k = BRJ.kret / 2, e = BRJ.egim;
-  const T = H * e + k; // taban yarım genişliği
-  const dis = [[-T, 0], [-k, H], [k, H], [T, 0]];
+  const T = BETON ? 190 : H * e + k; // taban yarım genişliği
+  const dis = BETON ? [[-12, 0], [-7, H], [7, H], [189, 0]] : [[-T, 0], [-k, H], [k, H], [T, 0]];
   const cek = [[-62, 0], [-7, H - 4], [7, H - 4], [62, 0]];
   const fil = [[-84, 0], [-11, H - 3], [11, H - 3], [84, 0]];
   const anr = [[-T, 0], [-k, H], [-k + 0.1, H], [-T + 9, 0]];
@@ -63,10 +66,17 @@ export function buildBaraj() {
   // iki yarım: A (x -450..0, kesit yüzü x=0'da görünür), B (0..450)
   for (const [x0, x1, ad] of [[-BRJ.L / 2, 0, 'A'], [0, BRJ.L / 2, 'B']]) {
     const y = new THREE.Group();
-    y.add(mesh(kesitGeo(dis, x0, x1), MAT.kaya));
-    y.add(mesh(kesitGeo(fil, x0, x1 + (ad === 'A' ? 0.4 : -0.4)), MAT.filtre));
-    y.add(mesh(kesitGeo(cek, x0, x1 + (ad === 'A' ? 0.8 : -0.8)), MAT.kil));
-    y.add(mesh(kesitGeo([[-T - 0.5, 0], [-k - 0.3, H + 0.3], [-k + 1.5, H + 0.3], [-T + 8, 0]], x0, x1), MAT.anrosman));
+    if (BETON) {
+      y.add(mesh(kesitGeo(dis, x0, x1), MAT.beton));
+      // muayene galerileri (kesit yüzünde koyu boşluklar)
+      for (const [z, yy] of [[0, 30], [20, 70], [10, 120], [2, 170], [60, 25], [110, 25]])
+        y.add(mesh(new THREE.BoxGeometry(x1 - x0 + 0.6, 3, 2.5), MAT.koyu, (o) => o.position.set((x0 + x1) / 2, yy, z)));
+    } else {
+      y.add(mesh(kesitGeo(dis, x0, x1), MAT.kaya));
+      y.add(mesh(kesitGeo(fil, x0, x1 + (ad === 'A' ? 0.4 : -0.4)), MAT.filtre));
+      y.add(mesh(kesitGeo(cek, x0, x1 + (ad === 'A' ? 0.8 : -0.8)), MAT.kil));
+      y.add(mesh(kesitGeo([[-T - 0.5, 0], [-k - 0.3, H + 0.3], [-k + 1.5, H + 0.3], [-T + 8, 0]], x0, x1), MAT.anrosman));
+    }
     // kret yolu
     y.add(mesh(new THREE.BoxGeometry(x1 - x0, 1.2, BRJ.kret), MAT.beton, (o) => o.position.set((x0 + x1) / 2, H + 0.6, 0)));
     y.userData.ad = ad;
@@ -130,13 +140,16 @@ export function buildBaraj() {
   santral.add(mesh(new THREE.BoxGeometry(270, 48, 70), MAT.betonK, (o) => o.position.set(SX, 24, SZ + 10)));
   santral.add(mesh(new THREE.BoxGeometry(274, 2, 74), MAT.betonK, (o) => o.position.set(SX, 48.5, SZ + 10)));
   const uniteler = [];
-  for (let i = 0; i < 8; i++) {
-    const x = SX - 105 + i * 30;
+  const NU = BETON ? 17 : 8;
+  for (let i = 0; i < NU; i++) {
+    const x = SX - 120 + (i * 240) / (NU - 1);
+    const sc = BETON ? 0.62 : 1;
     const u = new THREE.Group();
     u.add(mesh(cyl(9, 9, 6, 48), MAT.yesil, (o) => (o.position.y = 3)));
     u.add(mesh(cyl(5, 5, 2, 48), MAT.dokum, (o) => (o.position.y = 7)));
     u.add(mesh(cyl(1.5, 1.5, 3, 24), MAT.koyu, (o) => (o.position.y = 9.5)));
     u.position.set(x, 18, SZ + 4);
+    u.scale.setScalar(sc);
     santral.add(u);
     uniteler.push(u);
   }

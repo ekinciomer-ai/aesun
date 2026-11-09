@@ -42,6 +42,7 @@ for q in J["sorgular"]:
         m = (it.get("data") or [{}])[0]
         nid = m.get("nasa_id")
         if not nid or nid in bulunan: continue
+        if any(h in (m.get("title", "") + " " + nid).lower() for h in J.get("haric", [])): continue
         metin = (m.get("title", "") + " " + m.get("description", "")).lower()
         puan = sum(metin.count(k) for k in ANAHTAR) + (5 if "parmitano" in metin else 0) + (5 if re.search(r"eva[ -]?23", metin) else 0)
         bulunan[nid] = {"nasa_id": nid, "baslik": m.get("title", ""), "aciklama": m.get("description", "")[:1500],

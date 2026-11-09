@@ -33,6 +33,7 @@ jobs:
           git config user.name "kozmos-bot"; git config user.email "kozmos-bot@users.noreply.github.com"
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
           if git fetch -q --depth 1 origin kozmos-ham; then git checkout -q -b kozmos-ham FETCH_HEAD; else git checkout -q --orphan kozmos-ham; fi
+          find /tmp/ham -type f -size +95M -print -delete
           for d in /tmp/ham/*; do ad=$(basename $d); rm -rf "$ad"; cp -r "$d" "$ad"; done
           git add -A && git commit -qm "NASA ham görüntü: $(ls /tmp/ham | tr '\n' ' ')" || exit 0
           for i in 1 2 3; do git push -q origin HEAD:kozmos-ham && break; sleep 5; done

@@ -6,7 +6,7 @@ K = os.path.dirname(os.path.abspath(__file__))
 SES = os.path.join(K, "../../sunucu/ses_kuyruk")
 FONT = os.path.join(K, "../vanguard/fonts")
 MUZIK = os.path.join(K, "../ruzgar_mag/muzik.mp3")
-KOD = "KZ_KASK1_S1_TR"
+KOD = os.environ.get("KOD", "KZ_KASK1_S1_TR")
 W, H, FPS = 1080, 1920, 30
 def run(a): subprocess.run(a, check=True)
 def sure(f): return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f]))
@@ -69,7 +69,7 @@ ass.append(f"Dialogue: 1,{ts(0)},{ts(TOPLAM)},Logo,,0,0,0,,KOZMOS {{\\c&H006BC4F
 for (s, e), et in zip(sinirlar, etiket): ass.append(f"Dialogue: 1,{ts(s)},{ts(e)},Etiket,,0,0,0,,{et}")
 ass.append(f"Dialogue: 2,{ts(0.15)},{ts(b[1]-0.1)},Baslik,,0,0,0,,{{\\fad(150,200)}}UZAYDA\\NBOĞULMAK\\NÜZEREYDİ")
 ass.append(f"Dialogue: 2,{ts(b[1]+2.2)},{ts(b[2])},Sayac,,0,0,0,,{{\\fad(200,200)}}EVA-23 · 00:44")
-ass.append(f"Dialogue: 2,{ts(b[4]+3.6)},{ts(TOPLAM)},Son,,0,0,0,,{{\\fad(300,0)}}TAMAMI YARIN\\N{{\\c&H00FAF5F3&\\fs60}}Astronot Kask Kamerası · Bölüm 1")
+ass.append(f"Dialogue: 2,{ts(b[4]+3.6)},{ts(TOPLAM)},Son,,0,0,0,,{{\\fad(300,0)}}DEVAMI YARIN\\N{{\\c&H00FAF5F3&\\fs60}}Astronot Kask Kamerası · Bölüm 1")
 for p, s, d in zaman:  # altyazı: cümle parçaları, karakter sayısına göre süre
     m = re.sub(r"\[[^\]]*\]\s*", "", p["metin"]).strip(); ch, cur = [], ""
     for w in m.split():

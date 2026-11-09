@@ -31,10 +31,27 @@ parcalar = [
     ("foto", f"{FOT}/iss036e037249.jpg", 3.6, "in"),
     ("foto", f"{FOT}/iss036e037243.jpg", 0, "out"),
 ]
+ETIKET = ["CANLANDIRMA", "NASA FOTOĞRAFI · 16 TEMMUZ 2013", "NASA FOTOĞRAFI · 16 TEMMUZ 2013", "TEMSİLİ GÖRÜNTÜ · NASA",
+          "TEMSİLİ GÖRÜNTÜ · NASA", "CANLANDIRMA", "NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ", "NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ"]
+BASLIK = "UZAYDA\\NBOĞULMAK\\NÜZEREYDİ"; SAYAC = [(b[1] + 2.2, b[2], "EVA-23 · 00:44")]
+SON_BAS = b[4] + 3.6; SON_YAZI = "DEVAMI YARIN\\N{\\c&H00FAF5F3&\\fs60}Astronot Kask Kamerası · Bölüm 1"
+if "_S2" in KOD:  # magazin: "NASA bu hatayı bir hafta önce görmüştü"
+    o12, o45 = (b[1] + b[2]) / 2, (b[4] + b[5]) / 2
+    parcalar = [("foto", f"{FOT}/iss036e037249.jpg", b[1], "in"),
+                ("foto", f"{FOT}/iss036e016531.jpg", o12 - b[1], "in"), ("foto", f"{FOT}/iss036e016853.jpg", b[2] - o12, "out"),
+                ("foto", f"{FOT}/iss036e018184.jpg", b[3] - b[2], "in"), ("foto", f"{FOT}/iss036e019555.jpg", b[4] - b[3], "out"),
+                ("foto", f"{FOT}/iss036e037243.jpg", o45 - b[4], "in"), ("foto", f"{FOT}/iss036e037230.jpg", b[5] - o45, "out"),
+                ("foto", f"{FOT}/iss036e037249.jpg", 0, "out")]
+    ETIKET = ["NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ", "NASA FOTOĞRAFI · 9 TEMMUZ 2013", "NASA FOTOĞRAFI · 9 TEMMUZ 2013",
+              "NASA FOTOĞRAFI · 14 TEMMUZ 2013", "NASA FOTOĞRAFI · 16 TEMMUZ 2013", "NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ",
+              "NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ", "NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ"]
+    BASLIK = "NASA BU HATAYI\\NÖNCEDEN\\NGÖRMÜŞTÜ"
+    SAYAC = [(b[1] + 0.3, b[2], "EVA-22 · 9 TEMMUZ"), (b[3] + 0.3, b[4], "EVA-23 · 16 TEMMUZ")]
+    SON_BAS = b[5]; SON_YAZI = "SENCE NEDEN?\\N{\\c&H00FAF5F3&\\fs60}Yorumlara yaz"
 son = TOPLAM - sum(p[2] for p in parcalar[:-1]); parcalar[-1] = parcalar[-1][:2] + (son, "out")
-os.makedirs(f"{IS}/p", exist_ok=True); liste = []
+P_ = f"{IS}/p_{KOD}"; os.makedirs(P_, exist_ok=True); liste = []
 for i, (tur, src, d, ek) in enumerate(parcalar):
-    o = f"{IS}/p/{i:02d}.mp4"; n = int(round(d * FPS))
+    o = f"{P_}/{i:02d}.mp4"; n = int(round(d * FPS))
     if tur == "foto":  # yavaş yakınlaştırma, dikey kırpma
         z = "min(1.0+0.0009*on,1.25)" if ek == "in" else "max(1.22-0.0009*on,1.0)"
         vf = (f"scale={W*2}:{H*2}:force_original_aspect_ratio=increase,crop={W*2}:{H*2},"
@@ -47,15 +64,13 @@ for i, (tur, src, d, ek) in enumerate(parcalar):
     else:
         run(["ffmpeg", "-v", "error", "-y", "-i", src, "-vf", f"fps={FPS},tpad=stop_mode=clone:stop_duration=2", "-frames:v", str(n), "-an", "-pix_fmt", "yuv420p", "-c:v", "libx264", "-preset", "veryfast", "-crf", "17", o])
     liste.append(o)
-open(f"{IS}/p/liste.txt", "w").write("".join(f"file '{x}'\n" for x in liste))
-run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", f"{IS}/p/liste.txt", "-c", "copy", f"{IS}/goruntu.mp4"])
+open(f"{P_}/liste.txt", "w").write("".join(f"file '{x}'\n" for x in liste))
+run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", f"{P_}/liste.txt", "-c", "copy", f"{P_}/goruntu.mp4"])
 
 # 3) yazılar (ASS)
 def ts(s): s = max(0, s); return f"{int(s//3600)}:{int(s%3600//60):02d}:{s%60:05.2f}"
 sinirlar = []; a = 0
 for p in parcalar: sinirlar.append((a, a + p[2])); a += p[2]
-etiket = ["CANLANDIRMA", "NASA FOTOĞRAFI · 16 TEMMUZ 2013", "NASA FOTOĞRAFI · 16 TEMMUZ 2013", "TEMSİLİ GÖRÜNTÜ · NASA",
-          "TEMSİLİ GÖRÜNTÜ · NASA", "CANLANDIRMA", "NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ", "NASA FOTOĞRAFI · 27 AĞUSTOS 2013 TESTİ"]
 ass = ["[Script Info]", "ScriptType: v4.00+", f"PlayResX: {W}", f"PlayResY: {H}", "WrapStyle: 0", "",
        "[V4+ Styles]", "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
        "Style: Alt,Instrument Sans,64,&H00FAF5F3,&H00FFFFFF,&H00000000,&H90100805,1,0,0,0,100,100,0,0,3,14,0,2,90,90,330,1",
@@ -66,10 +81,10 @@ ass = ["[Script Info]", "ScriptType: v4.00+", f"PlayResX: {W}", f"PlayResY: {H}"
        "Style: Son,Archivo,96,&H006BC4F2,&H00FFFFFF,&H00000000,&H64000000,1,0,0,0,85,100,1,0,1,0,6,5,70,70,0,1",
        "", "[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
 ass.append(f"Dialogue: 1,{ts(0)},{ts(TOPLAM)},Logo,,0,0,0,,KOZMOS {{\\c&H006BC4F2&}}LAB")
-for (s, e), et in zip(sinirlar, etiket): ass.append(f"Dialogue: 1,{ts(s)},{ts(e)},Etiket,,0,0,0,,{et}")
-ass.append(f"Dialogue: 2,{ts(0.15)},{ts(b[1]-0.1)},Baslik,,0,0,0,,{{\\fad(150,200)}}UZAYDA\\NBOĞULMAK\\NÜZEREYDİ")
-ass.append(f"Dialogue: 2,{ts(b[1]+2.2)},{ts(b[2])},Sayac,,0,0,0,,{{\\fad(200,200)}}EVA-23 · 00:44")
-ass.append(f"Dialogue: 2,{ts(b[4]+3.6)},{ts(TOPLAM)},Son,,0,0,0,,{{\\fad(300,0)}}DEVAMI YARIN\\N{{\\c&H00FAF5F3&\\fs60}}Astronot Kask Kamerası · Bölüm 1")
+for (s, e), et in zip(sinirlar, ETIKET): ass.append(f"Dialogue: 1,{ts(s)},{ts(e)},Etiket,,0,0,0,,{et}")
+ass.append(f"Dialogue: 2,{ts(0.15)},{ts(b[1]-0.1)},Baslik,,0,0,0,,{{\\fad(150,200)}}{BASLIK}")
+for a0, a1, yz in SAYAC: ass.append(f"Dialogue: 2,{ts(a0)},{ts(a1)},Sayac,,0,0,0,,{{\\fad(200,200)}}{yz}")
+ass.append(f"Dialogue: 2,{ts(SON_BAS)},{ts(TOPLAM)},Son,,0,0,0,,{{\\fad(300,0)}}{SON_YAZI}")
 for p, s, d in zaman:  # altyazı: cümle parçaları, karakter sayısına göre süre
     m = re.sub(r"\[[^\]]*\]\s*", "", p["metin"]).strip(); ch, cur = [], ""
     for w in m.split():
@@ -80,25 +95,25 @@ for p, s, d in zaman:  # altyazı: cümle parçaları, karakter sayısına göre
     tot = sum(len(c) for c in ch); u = s
     for c in ch:
         dd = d * len(c) / tot
-        if not (p["ad"] == "k05" and u > b[4] + 3.6): ass.append(f"Dialogue: 0,{ts(u)},{ts(u+dd)},Alt,,0,0,0,,{c}")
+        if not (p is zaman[-1][0] and u >= SON_BAS - 0.05): ass.append(f"Dialogue: 0,{ts(u)},{ts(u+dd)},Alt,,0,0,0,,{c}")
         u += dd
-open(f"{IS}/yazi.ass", "w", encoding="utf-8").write("\n".join(ass) + "\n")
+open(f"{P_}/yazi.ass", "w", encoding="utf-8").write("\n".join(ass) + "\n")
 
 # 4) anlatım izi
 gir, fil = [], []
 for i, (p, s, d) in enumerate(zaman):
     gir += ["-i", f"{SES}/cikti/{KOD}__{p['ad']}.mp3"]; fil.append(f"[{i}:a]aresample=48000,adelay={int(s*1000)}:all=1[a{i}]")
 fil.append("".join(f"[a{i}]" for i in range(len(zaman))) + f"amix=inputs={len(zaman)}:normalize=0,apad,atrim=0:{TOPLAM}[o]")
-run(["ffmpeg", "-v", "error", "-y", *gir, "-filter_complex", ";".join(fil), "-map", "[o]", "-ac", "1", f"{IS}/anlatim.wav"])
+run(["ffmpeg", "-v", "error", "-y", *gir, "-filter_complex", ";".join(fil), "-map", "[o]", "-ac", "1", f"{P_}/anlatim.wav"])
 
 # 5) birleştir: yazılar + anlatım + alçak müzik (8. sahne başında müzik kısılır)
-g0, g1 = b[3], b[4]
-fc = (f"[0:v]ass={IS}/yazi.ass:fontsdir={FONT}[v];"
+g0, g1 = (b[3], b[4]) if "_S2" not in KOD else (-1, -1)
+fc = (f"[0:v]ass={P_}/yazi.ass:fontsdir={FONT}[v];"
       f"[1:a]aformat=sample_rates=48000:channel_layouts=stereo,highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,asplit[n1][n2];"
       f"[2:a]aformat=sample_rates=48000:channel_layouts=stereo,atrim=0:{TOPLAM},afade=t=in:d=0.8,afade=t=out:st={TOPLAM-2}:d=2,"
       f"volume='if(between(t,{g0},{g1}),0.05,0.18)':eval=frame[m];"
       f"[m][n1]sidechaincompress=threshold=0.025:ratio=10:attack=15:release=400[md];[md][n2]amix=inputs=2:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=9[a]")
-run(["ffmpeg", "-v", "error", "-y", "-i", f"{IS}/goruntu.mp4", "-i", f"{IS}/anlatim.wav", "-stream_loop", "-1", "-i", MUZIK,
+run(["ffmpeg", "-v", "error", "-y", "-i", f"{P_}/goruntu.mp4", "-i", f"{P_}/anlatim.wav", "-stream_loop", "-1", "-i", MUZIK,
      "-filter_complex", fc, "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "19", "-c:a", "aac", "-b:a", "192k",
      "-t", str(TOPLAM), "-movflags", "+faststart", OUT])
 print("bitti", OUT, TOPLAM, "sn")

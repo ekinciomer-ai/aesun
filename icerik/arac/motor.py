@@ -238,7 +238,7 @@ if muz:  # müzik sesin altında (-20 dB civarı), sonda kısılır
                     "-map", "[o]", f"{tmp}/karisik.wav"], check=True); sesg = f"{tmp}/karisik.wav"
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", sesg, "-af", "loudnorm=I=-16:TP=-1.5", "-ar", "44100", "-c:a", "aac", "-b:a", "160k", f"{tmp}/ses.m4a"], check=True)
 ff = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", f"{tmp}/ses.m4a",
-                       "-c:v", "libx264", "-preset", "veryfast", "-crf", "20" if not ONIZ else "26", *([] if ONIZ else ["-maxrate", "3500k" if YATAY else "6000k", "-bufsize", "8000k"]), "-pix_fmt", "yuv420p", "-c:a", "copy", "-shortest", "-movflags", "+faststart", CIK], stdin=subprocess.PIPE)
+                       "-c:v", "libx264", "-preset", "veryfast", "-crf", "20" if not ONIZ else "26", *([] if ONIZ else ["-maxrate", "2800k" if YATAY else "6000k", "-bufsize", "8000k"]), "-pix_fmt", "yuv420p", "-c:a", "copy", "-shortest", "-movflags", "+faststart", CIK], stdin=subprocess.PIPE)
 for fi in range(N):
     try: ff.stdin.write(kare(fi).tobytes())
     except BrokenPipeError: break

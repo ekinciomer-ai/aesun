@@ -10,7 +10,8 @@ import {Pass} from 'three/addons/postprocessing/Pass.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {ACC, KES, MAT, mats, BRJ, buildBaraj, buildUnite, arazi, buildUcBogaz} from './model.js';
 import {createUI} from './ui.js';
-import {UYDU, TR_KUCUK} from './uydu_veri.js';
+import * as UTR from './uydu_tr.js';
+import * as UUS from './uydu_us.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 const V3 = THREE.Vector3;
@@ -52,31 +53,37 @@ const LX = {
   },
   en: {
     no: '03', bolum: 'EPISODE', seri: 'ENERGY SOURCES', etut: 'MECHANISM STUDY', canli: 'LIVE DATA', egri: 'POWER – FLOW', ondalik: '.',
-    rows: ['FLOW', 'UNITS', 'POWER', 'GATES', 'ANNUAL'],
+    rows: ['POWER', 'UNITS', 'GATES', 'HEAD', 'DAM'],
     bolumler: ['hero', 'dongu', 'baraj', 'boru', 'turbin', 'sebeke', 'pompaj', 'dunya'],
     ad: {hero: 'INTRO', dongu: 'CYCLE', baraj: 'DAM', boru: 'PENSTOCK', turbin: 'TURBINE', sebeke: 'GRID', pompaj: 'PUMPED', dunya: 'WORLD', son: 'END'},
     baslik: {hero: 'Water', dongu: 'The Water Cycle', baraj: 'The Dam', boru: 'Penstocks', turbin: 'Francis Turbine', sebeke: 'To the Grid', pompaj: 'Pumped Storage', dunya: 'Three Gorges', son: 'Water'},
     alt: {
-      hero: 'ATATÜRK DAM · 2,400 MW', dongu: 'SUN → VAPOUR → RAIN → RIVER', baraj: 'ROCKFILL · CLAY CORE · 169 m', boru: 'Ø 7.25 m STEEL PIPES',
-      turbin: 'SPIRAL CASE → WICKET GATES → RUNNER', sebeke: '8 UNITS × 300 MW', pompaj: 'A GIANT BATTERY', dunya: 'CHINA · 22,500 MW', son: 'FROM RAIN TO POWER',
+      hero: 'HOOVER DAM · 2,080 MW', dongu: 'SUN → VAPOUR → RAIN → RIVER', baraj: 'CONCRETE ARCH-GRAVITY · 221 m', boru: 'Ø 9.1 m STEEL PIPES',
+      turbin: 'SPIRAL CASE → WICKET GATES → RUNNER', sebeke: '17 GENERATORS · 2,080 MW', pompaj: 'A GIANT BATTERY', dunya: 'CHINA · 22,500 MW', son: 'FROM RAIN TO POWER',
     },
     e: {
-      tr: ['TÜRKİYE', ''],
-      firat: ['EUPHRATES', ''],
-      ataturk: ['ATATÜRK DAM', 'Adıyaman · Şanlıurfa'],
-      baraj: ['DAM BODY', 'rockfill · 169 m'], rez: ['RESERVOIR', '48.7 billion m³'], santral: ['POWERHOUSE', '8 units'], boru: ['PENSTOCK', 'up to Ø 7.25 m'],
+      tr: ['USA', ''],
+      firat: ['COLORADO RIVER', ''],
+      ataturk: ['HOOVER DAM', 'Nevada · Arizona'], mead2: ['', ''],
+      baraj: ['DAM BODY', 'concrete · 221 m'], rez: ['LAKE MEAD', 'reservoir'], santral: ['POWERHOUSE', '17 generators'], boru: ['PENSTOCK', 'Ø 9.1 m'], mead: ['LAKE MEAD', 'reservoir'], beton: ['CONCRETE ARCH-GRAVITY', '221 m tall'], taban: ['201 m THICK', 'at the base'], kret: ['14 m', 'at the crest'],
       kil: ['CLAY CORE', 'watertight'], filtre: ['FILTER', 'protects the core'], kaya: ['ROCKFILL', 'the dam\'s weight'], anr: ['RIPRAP', 'wave armour'],
-      salyangoz: ['SPIRAL CASE', 'spreads the water'], ayar: ['WICKET GATES', 'set the flow'], cark: ['FRANCIS RUNNER', 'water → rotation'], emme: ['DRAFT TUBE', 'releases the water'], jen: ['GENERATOR', '300 MW'], mil: ['SHAFT', ''],
+      salyangoz: ['SPIRAL CASE', 'spreads the water'], ayar: ['WICKET GATES', 'set the flow'], cark: ['FRANCIS RUNNER', 'water → rotation'], emme: ['DRAFT TUBE', 'releases the water'], jen: ['GENERATOR', ''], mil: ['SHAFT', ''],
       gunes: ['SUN', 'evaporates water'], bulut: ['CLOUD', ''], dag: ['RAIN / SNOW', 'on the mountains'], nehir: ['RIVER', 'fills the dam'],
       ust: ['UPPER RESERVOIR', 'stored energy'], alt: ['LOWER RESERVOIR', ''], pt: ['PUMP-TURBINE', 'works both ways'],
       ucb: ['THREE GORGES DAM', '181 m · 22,500 MW'], trafo: ['TRANSFORMERS', 'step up voltage'], hat: ['POWER LINE', ''],
     },
-    olcu: {h: '169 m', ucL: '2,335 m'},
+    olcu: {h: '221 m', ucL: '2,335 m'},
     gece: 'NIGHT · PUMPING', gunduz: 'DAY · GENERATING',
     kart: () => `<div class="mo" style="font-size:30px;letter-spacing:.2em;color:#7d828a">NEXT EPISODE</div><div style="font-size:120px;font-weight:700;letter-spacing:-.03em;margin-top:6px">The Atom<span style="color:${ACC}">.</span></div><div class="mo" style="font-size:26px;letter-spacing:.14em;margin-top:8px;color:#5d636b">ENERGY SOURCES · 04</div>`,
   },
 };
 const L = LX[DIL];
+// İngilizce kanal ABD izleyicisine göre: Hoover Barajı (Nevada/Arizona)
+const US = DIL === 'en';
+const {UYDU, KUCUK} = US ? UUS : UTR;
+const YER = US
+  ? {geo: {lat: 36.016, lon: -114.7377}, img: ['us_bm', 'hv_bolge', 'hv_yakin', 'hv_baraj'], bm: 'us_bm', bas: [39.0, -98.0], son: [38.0, -102.0], ulke: [40.5, -103.0], nehir: [35.93, -114.73], d0: 3.6e6, d1: 7500, d2: 3.2e6, ad: 'HOOVER DAM'}
+  : {geo: {lat: 37.48, lon: 38.32}, img: ['tr_bm', 'ata_bolge', 'ata_yakin', 'ata_baraj'], bm: 'tr_bm', bas: [39.2, 35.2], son: [38.6, 35.2], ulke: [39.0, 33.0], nehir: [37.25, 38.27], d0: 2.2e6, d1: 5200, d2: 1.25e6, ad: 'ATATÜRK BARAJI'};
 
 // ------------------------------------------------------------ sahne kurulumu
 mats();
@@ -178,7 +185,7 @@ yerler.push(zemin);
 
 // ------------------------------------------------------------ dünyalar
 const OF = {uydu: new V3(0, -50000, 0), uydu2: new V3(0, -100000, 0), baraj: new V3(0, 0, 0), unite: new V3(40000, 30, 0), dongu: new V3(10000, 0, 0), pompaj: new V3(20000, 0, 0), ucb: new V3(30000, 0, 0)};
-const BR = buildBaraj();
+const BR = buildBaraj(US ? 'beton' : 'kaya');
 scene.add(BR.root);
 // trafolar ve hat (santralin yanında)
 const sebekeG = new THREE.Group();
@@ -315,7 +322,7 @@ const UB = buildUcBogaz();
 UB.root.position.copy(OF.ucb);
 scene.add(UB.root);
 // uydu dünyaları: coğrafi koordinat → metre (orijin: baraj). Görüntüler ışıktan bağımsız (gerçek renk).
-const GEO = {ata: {lat: 37.48, lon: 38.32}, ucb: {lat: 30.8225, lon: 111.0035}};
+const GEO = {ata: YER.geo, ucb: {lat: 30.8225, lon: 111.0035}};
 const geo = (o, lat, lon) => new V3((lon - o.lon) * 111320 * Math.cos(o.lat * D2R), 0, -(lat - o.lat) * 110574);
 const YUK = [];
 const yukle = (src) => {
@@ -343,7 +350,7 @@ const uyduDunya = (o, adlar) => {
   yerler.push(g);
   return g;
 };
-const UY1 = uyduDunya(GEO.ata, ['tr_bm', 'ata_bolge', 'ata_yakin', 'ata_baraj']);
+const UY1 = uyduDunya(GEO.ata, YER.img);
 UY1.position.set(0, 0, 0);
 const uy1 = new THREE.Group();
 uy1.add(UY1);
@@ -367,11 +374,12 @@ parc.frustumCulled = false;
 scene.add(parc);
 
 // ------------------------------------------------------------ fizik: debi → güç (sabit düşüde yaklaşık doğrusal)
+const NU = US ? 17 : 8, PMAX = US ? 2080 : 2400;
 const durum = (Qt) => {
   const Q2 = cl(Qt, 0, 2000);
-  const unite = Q2 <= 0 ? 0 : Math.min(8, Math.ceil(Q2 / 250));
-  const P = 2400 * (Q2 / 2000);
-  const kapak = unite ? Q2 / (unite * 250) : 0;
+  const unite = Q2 <= 0 ? 0 : Math.min(NU, Math.ceil((Q2 / 2000) * NU));
+  const P = PMAX * (Q2 / 2000);
+  const kapak = unite ? Q2 / ((unite * 2000) / NU) : 0;
   return {Q: Q2, unite, P, kapak};
 };
 
@@ -385,9 +393,9 @@ function grafik(d) {
   const W = 380, H = 150;
   let h = `<g transform="translate(18 8)"><line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="#16181b" stroke-width="2"/><line x1="0" x2="0" y1="0" y2="${H}" stroke="#16181b" stroke-width="2"/>`;
   h += `<path d="M0 ${H} L${W * 0.92} ${H - H * 0.85}" stroke="#16181b" stroke-width="3" fill="none"/>`;
-  const mx = (d.Q / 2000) * W * 0.92, my = H - (d.P / 2400) * H * 0.85;
+  const mx = (d.Q / 2000) * W * 0.92, my = H - (d.P / PMAX) * H * 0.85;
   h += `<line x1="${mx}" x2="${mx}" y1="${my}" y2="${H}" stroke="${ACC}" stroke-width="2"/><circle cx="${mx}" cy="${my}" r="10" fill="${ACC}" stroke="#fff" stroke-width="3"/>`;
-  h += `<text x="${W}" y="${H + 26}" text-anchor="end" font-size="17" font-family="JetBrains Mono" fill="#7d828a">m³/s</text><text x="6" y="16" font-size="17" font-family="JetBrains Mono" fill="#7d828a">MW</text>`;
+  h += `<text x="${W}" y="${H + 26}" text-anchor="end" font-size="17" font-family="JetBrains Mono" fill="#7d828a">${US ? 'flow' : 'm³/s'}</text><text x="6" y="16" font-size="17" font-family="JetBrains Mono" fill="#7d828a">MW</text>`;
   return h + '</g>';
 }
 
@@ -398,22 +406,26 @@ const ob = (k, v) => OF[k].clone().add(v);
 const SAHNE = {
   hero: {dunya: 'uydu', uydu: true, cam: (k) => {
       const z = ss(0, 0.92, k);
-      const t0 = geo(GEO.ata, 39.2, 35.2), t1 = new V3(0, 0, 0);
+      const t0 = geo(GEO.ata, ...YER.bas), t1 = new V3(0, 0, 0);
       const tt = t0.clone().lerp(t1, ss(0, 0.55, k)).add(OF.uydu);
-      return {t: tt, az: lerp(0, 20, z), el: lerp(89, 58, ss(0.5, 1, k)), d: Math.exp(lerp(Math.log(2.2e6), Math.log(5200), z)), fov: 42};
-    }, Q: () => 1500, etiket: (k) => [['tr', ss(0.0, 0.08, k) * (1 - ss(0.3, 0.38, k))], ['firat', ss(0.45, 0.55, k) * (1 - ss(0.75, 0.8, k))], ['ataturk', ss(0.62, 0.72, k)]]},
+      return {t: tt, az: lerp(0, 20, z), el: lerp(89, 58, ss(0.5, 1, k)), d: Math.exp(lerp(Math.log(YER.d0), Math.log(YER.d1), z)), fov: 42};
+    }, Q: () => 1500, etiket: (k) => [['tr', ss(0.0, 0.08, k) * (1 - ss(0.3, 0.38, k))], ['firat', ss(0.45, 0.55, k) * (1 - ss(0.75, 0.8, k))], ...(US ? [['mead', ss(0.5, 0.6, k) * (1 - ss(0.75, 0.8, k))]] : []), ['ataturk', ss(0.62, 0.72, k)]]},
   dongu: {dunya: 'dongu', cam: (k) => ({t: ob('dongu', new V3(0, 60, 0)), az: lerp(140, 165, k), el: lerp(26, 22, k), d: lerp(820, 760, k), fov: 42}), Q: () => 900, etiket: (k) => [['gunes', ss(0.05, 0.15, k)], ['bulut', ss(0.25, 0.35, k)], ['dag', ss(0.45, 0.55, k)], ['nehir', ss(0.65, 0.75, k)]]},
-  baraj: {dunya: 'baraj', yamacYok: true, cam: (k) => ({t: new V3(0, 70, -60), az: lerp(70, 86, k), el: lerp(10, 4, k), d: lerp(1500, 1350, k), fov: 42}), ac: (k) => ss(0.08, 0.3, k), Q: () => 1500, etiket: (k) => [['kil', ss(0.3, 0.38, k)], ['filtre', ss(0.36, 0.44, k)], ['kaya', ss(0.42, 0.5, k)], ['anr', ss(0.48, 0.56, k)]], olcu: (k) => [['h', ss(0.55, 0.7, k)]]},
+  baraj: {dunya: 'baraj', yamacYok: true, cam: (k) => ({t: new V3(0, 70, -60), az: lerp(70, 86, k), el: lerp(10, 4, k), d: lerp(1500, 1350, k), fov: 42}), ac: (k) => ss(0.08, 0.3, k), Q: () => 1500, etiket: (k) => (US ? [['beton', ss(0.3, 0.38, k)], ['taban', ss(0.38, 0.46, k)], ['kret', ss(0.46, 0.54, k)]] : [['kil', ss(0.3, 0.38, k)], ['filtre', ss(0.36, 0.44, k)], ['kaya', ss(0.42, 0.5, k)], ['anr', ss(0.48, 0.56, k)]]), olcu: (k) => [['h', ss(0.55, 0.7, k)]]},
   boru: {dunya: 'baraj', cam: (k) => ({t: new V3(-150, 80, 330), az: lerp(58, 72, k), el: lerp(22, 16, k), d: lerp(720, 620, k), fov: 42}), Q: (k) => lerp(600, 2000, ss(0, 0.8, k)), parc: 'boru', etiket: (k) => [['boru', ss(0.15, 0.3, k)], ['santral', ss(0.5, 0.65, k)]]},
   turbin: {dunya: 'unite', kesit: true, cam: (k) => ({t: ob('unite', new V3(2, lerp(-1, 4, k), 0)), az: lerp(28, 48, k), el: lerp(26, 18, k), d: lerp(62, 74, k), fov: 42}), Q: (k) => lerp(800, 2000, ss(0, 0.6, k)), parc: 'unite', etiket: (k) => [['salyangoz', ss(0.06, 0.14, k)], ['ayar', ss(0.12, 0.2, k)], ['cark', ss(0.18, 0.26, k)], ['emme', ss(0.3, 0.38, k)], ['jen', ss(0.5, 0.58, k)], ['mil', ss(0.55, 0.63, k)]]},
   sebeke: {dunya: 'baraj', kesit: true, cam: (k) => ({t: new V3(-60, 30, 520), az: lerp(20, 40, k), el: lerp(28, 22, k), d: lerp(620, 700, k), fov: 42}), Q: () => 2000, etiket: (k) => [['santral', ss(0.05, 0.15, k)], ['trafo', ss(0.3, 0.4, k)], ['hat', ss(0.5, 0.6, k)]]},
   pompaj: {dunya: 'pompaj', cam: (k) => ({t: ob('pompaj', new V3(0, 50, 10)), az: lerp(-6, 12, k), el: lerp(32, 28, k), d: lerp(820, 760, k), fov: 42}), Q: (k) => (k < 0.5 ? -1000 : 1000), parc: 'pompaj', etiket: (k) => [['ust', ss(0.05, 0.15, k)], ['alt', ss(0.1, 0.2, k)], ['pt', ss(0.25, 0.35, k)]]},
   dunya: {dunya: 'uydu2', uydu: true, cam: (k) => ({t: UCB_A.clone().lerp(UCB_B, 0.5).add(OF.uydu2), az: lerp(-10, 15, k), el: lerp(89, 62, ss(0.4, 1, k)), d: Math.exp(lerp(Math.log(95000), Math.log(5600), ss(0, 0.6, k))), fov: 42}), Q: () => 2000, ucb: true, etiket: (k) => [['ucb', ss(0.45, 0.55, k)]], olcu: (k) => [['ucL', ss(0.55, 0.7, k)]]},
-  son: {dunya: 'uydu', uydu: true, cam: (k) => ({t: new V3(0, 0, 0).lerp(geo(GEO.ata, 38.6, 35.2), ss(0.2, 1, k)).add(OF.uydu), az: lerp(20, 0, k), el: lerp(60, 89, ss(0, 0.5, k)), d: Math.exp(lerp(Math.log(6000), Math.log(1.25e6), ss(0, 0.9, k))), fov: 42}), Q: () => 1500, kart: (k) => ss(0.4, 0.55, k), etiket: (k) => [['ataturk', 1 - ss(0.2, 0.3, k)]]},
+  son: {dunya: 'uydu', uydu: true, cam: (k) => ({t: new V3(0, 0, 0).lerp(geo(GEO.ata, ...YER.son), ss(0.2, 1, k)).add(OF.uydu), az: lerp(20, 0, k), el: lerp(60, 89, ss(0, 0.5, k)), d: Math.exp(lerp(Math.log(YER.d1 * 1.15), Math.log(YER.d2), ss(0, 0.9, k))), fov: 42}), Q: () => 1500, kart: (k) => ss(0.4, 0.55, k), etiket: (k) => [['ataturk', 1 - ss(0.2, 0.3, k)]]},
 };
 const AN = {
-  tr: () => geo(GEO.ata, 39.0, 33.0).add(OF.uydu),
-  firat: () => geo(GEO.ata, 37.25, 38.27).add(OF.uydu),
+  tr: () => geo(GEO.ata, ...YER.ulke).add(OF.uydu),
+  mead: () => geo(GEO.ata, 36.06, -114.66).add(OF.uydu),
+  beton: () => new V3(0, 150, 30),
+  taban: () => new V3(0, 8, 120),
+  kret: () => new V3(0, BRJ.H, 0),
+  firat: () => geo(GEO.ata, ...YER.nehir).add(OF.uydu),
   ataturk: () => OF.uydu.clone(),
   baraj: () => new V3(250, BRJ.H - 10, 30),
   rez: () => new V3(0, BRJ.H - 9, -900),
@@ -441,12 +453,12 @@ const AN = {
   hat: () => new V3(BR.SX + 500, 64, BR.SZ + 300),
 };
 const OLCU = {
-  h: () => [new V3(0, 0, BRJ.H * BRJ.egim + 30), new V3(0, BRJ.H, BRJ.H * BRJ.egim + 30), {dx: 70}],
+  h: () => (US ? [new V3(0, 0, 215), new V3(0, BRJ.H, 215), {dx: 70}] : [new V3(0, 0, BRJ.H * BRJ.egim + 30), new V3(0, BRJ.H, BRJ.H * BRJ.egim + 30), {dx: 70}]),
   ucL: () => [UCB_A.clone().add(OF.uydu2), UCB_B.clone().add(OF.uydu2), {dy: -46}],
 };
 
 const KONUM = (() => {
-  const [s0, w0, n0, e0] = UYDU.tr_bm.bbox;
+  const [s0, w0, n0, e0] = UYDU[YER.bm].bbox;
   // küçük harita 260x120 kutuda ortalanmış "cover": oranı hesapla
   const W0 = 480, H0 = Math.round((480 * (n0 - s0)) / (e0 - w0));
   const px = ((GEO.ata.lon - w0) / (e0 - w0)) * W0, py = ((n0 - GEO.ata.lat) / (n0 - s0)) * H0;
@@ -643,8 +655,15 @@ function kare(t) {
     [d.kapak, `%${fmt(d.kapak * 100, 0)}`],
     [0.74, `${fmt(8900, 0)} GWh`],
   ];
+  if (US) {
+    vals[0] = [d.P / PMAX, `${pomp ? '−' : ''}${fmt(d.P, 0)} MW`];
+    vals[1] = [d.unite / NU, `${d.unite} / ${NU}`];
+    vals[2] = [d.kapak, `${fmt(d.kapak * 100, 0)}%`];
+    vals[3] = [0.8, '≈ 180 m'];
+    vals[4] = [1, '221 m'];
+  }
   if (S.ucb) {
-    vals[2] = [1, `${fmt(22500, 0)} MW`];
+    vals[US ? 0 : 2] = [1, `${fmt(22500, 0)} MW`];
     vals[1] = [1, '34'];
   }
   const etiketler = etiketYerlestir(S.etiket(k));
@@ -671,7 +690,7 @@ function kare(t) {
     olculer,
     flas,
     kart: S.kart ? {o: S.kart(k), html: L.kart()} : null,
-    konum: S.uydu || dunya === 'dongu' || dunya === 'pompaj' ? null : {img: TR_KUCUK, ...KONUM, ad: DIL === 'en' ? 'ATATÜRK DAM' : 'ATATÜRK BARAJI'},
+    konum: S.uydu || dunya === 'dongu' || dunya === 'pompaj' ? null : {img: KUCUK.src, ...KONUM, ad: YER.ad},
     kaynak: S.uydu ? (DIL === 'en' ? 'Satellite: NASA GIBS · HLS / MODIS / Blue Marble' : 'Uydu: NASA GIBS · HLS / MODIS / Blue Marble') : null,
   });
 }

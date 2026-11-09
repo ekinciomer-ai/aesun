@@ -29,7 +29,11 @@ for c in $(docker ps --format '{{.Names}}' | grep -iE 'tarayici|chrom|browser|se
   else echo "NOT: $c zaten sınırlı (cpu=$((nc/1000000000)) bellek=$((mem/1048576))MB)"; fi
 done
 # 3) Sınırsız ve şu an çalışan geçici tarayıcı yardımcıları (isimsiz playwright kapsayıcıları)
-for c in $(docker ps --format '{{.ID}} {{.Names}}' | awk '$2 !~ /-/ && $2 ~ /_/ {print $1}'); do
+# compose projesine ait olmayan, adı verilmemiş (Docker'ın rastgele adı) ve içinde chromium çalışan kapsayıcılar
+for c in $(docker ps -q); do
+  [ -n "$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' $c)" ] && continue
+  case "$(docker inspect -f '{{.Name}}' $c)" in /tt-*|/ck-*|/aesun*|/gesfin*|/epixa*|/mirsoft*|/agrosev*) continue;; esac
+  docker top $c -eo comm 2>/dev/null | grep -qi chrom || continue
   n=$(docker inspect -f '{{.HostConfig.NanoCpus}} {{.Config.Image}}' $c); case "$n" in "0 "*) docker update --cpus 2 $c >/dev/null && echo "NOT: geçici kapsayıcı $c sınırlandı (${n#0 })";; esac
 done
 echo "NOT: sonuç: yük $(cut -d' ' -f1-3 /proc/loadavg) · $(free -m | awk 'NR==2{print "bellek "$3"/"$2" MB"} NR==3{print "takas "$3"/"$2" MB"}' | tr '\n' ' ')"

@@ -32,6 +32,7 @@ h2{margin:0;font-size:20px;font-weight:700}
 .btn.sec{background:#1E2125;color:#fff;border-color:#1E2125}
 select{font:inherit;font-size:13px;border:1px solid #B9C4D2;border-radius:8px;padding:8px 10px;min-height:40px;background:#fff;color:#1E2125}
 .iki{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+.mf-tam .tablo-kutu{overflow:visible}.mf-tam table.tb{width:100%}.mf-tam table.tb td,.mf-tam table.tb th{white-space:normal}.mf-tam table.tb td:first-child{min-width:150px}.mf-tam .iki{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .uc{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 ul.uy{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
 ul.uy li{display:flex;gap:12px;padding:10px 12px;border-radius:10px}
@@ -1011,7 +1012,7 @@ function mfTablo(h) {
   if (h.gun < +new Date(Date.UTC(+h.ay.slice(0, 4), +h.ay.slice(5), 0)).getUTCDate()) not.push('Bu ayın sayaç verisi eksik (' + h.gun + ' gün); mahsup kWh tamamlanınca değişir.');
   if (h.osA3 && Math.abs(h.osA3 - h.H) > Math.max(50, h.H * 0.005)) not.push('Faturadaki tüketim (' + say(h.H) + ' kWh) sayaçtan (' + say(h.osA3) + ' kWh) farklı.');
   if (h.ay < '2026-05') not.push('Mayıs 2026 öncesi mahsup aylık hesapla (elle girilen A3 değeri).');
-  return '<section class="panel" style="gap:12px"><div class="bas"><h2>' + ayAd + ' · Aksaray 3 (' + MF_TES + ')</h2><span class="k">' + esc(h.f.kaynak || '') + '</span></div>'
+  return '<section class="panel mf-tam" id="mfAy" style="gap:12px"><div class="bas"><h2>' + ayAd + ' · Aksaray 3 (' + MF_TES + ')</h2><span class="k">' + esc(h.f.kaynak || '') + '</span>' + mfGoruntuBtn('mfAy', 'A3_mahsup_' + h.ay) + '</div>'
     + '<div class="iki" style="align-items:start">' + t1 + t2 + '</div>'
     + (not.length ? '<div class="k">' + not.map(esc).join('<br>') + '</div>' : '')
     + (MF.kayit && MF.kayit[h.ay] && !(MF.gesfin && MF.gesfin[h.ay]) ? '<div><button class="btn" type="button" onclick="mfSil(\'' + h.ay + '\')">Bu ayın elle eklenen kaydını sil</button></div>' : '') + '</section>';
@@ -1020,7 +1021,7 @@ function mfKarsilastir(L) {
   if (!L.length) return '';
   const kol = L.map(h => '<th>' + AYLAR[+h.ay.slice(5) - 1] + '</th>').join('');
   const s = (a, f) => '<tr><td class="sol">' + a + '</td>' + L.map(h => '<td>' + f(h) + '</td>').join('') + '</tr>';
-  return '<section class="panel" style="gap:10px"><div class="bas"><h2>Aylar · karşılaştırma</h2><span class="k">KDV dahil</span></div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol"></th>' + kol + '</tr></thead><tbody>'
+  return '<section class="panel mf-tam" id="mfKar" style="gap:10px"><div class="bas"><h2>Aylar · karşılaştırma</h2><span class="k">KDV dahil</span>' + mfGoruntuBtn('mfKar', 'A3_mahsup_karsilastirma') + '</div><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol"></th>' + kol + '</tr></thead><tbody>'
     + s('Brüt tüketim', h => say(h.H) + ' kWh')
     + s('Mahsup edilen', h => say(h.M) + ' kWh (%' + say(h.H ? h.M / h.H * 100 : 0, 1) + ')')
     + s('Aktif enerji birim fiyatı', h => say(h.akt * 1.2 / h.H, 4) + ' ₺/kWh')
@@ -1029,6 +1030,21 @@ function mfKarsilastir(L) {
     + s('Mahsup Sonrası Yapılacak Ödeme', h => say(h.od) + ' ₺')
     + s('<b>Mahsup faydası</b>', h => '<b>' + say(h.fayda) + ' ₺</b>')
     + '</tbody></table></div></section>';
+}
+function mfGoruntuBtn(id, ad) { return '<button class="btn" type="button" data-gizle="1" onclick="mfGoruntu(\'' + id + '\',\'' + ad + '\',this)">Görüntü al / paylaş</button>'; }
+// Bölümün PNG görüntüsü (tam boy, kesiksiz): telefonda paylaş menüsü (WhatsApp vb.), bilgisayarda indirir
+async function mfGoruntu(id, ad, btn) {
+  const el = document.getElementById(id); if (!el) return;
+  const eski = btn.textContent; btn.textContent = 'Hazırlanıyor…'; btn.disabled = true;
+  try {
+    const h2c = await odmBetik('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 'html2canvas');
+    const cv = await h2c(el, { backgroundColor: '#ffffff', scale: 2, windowWidth: Math.max(el.scrollWidth + 40, 900), ignoreElements: x => x.dataset && x.dataset.gizle === '1' });
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const dosya = new File([blob], ad + '.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [dosya] })) { try { await navigator.share({ files: [dosya], title: ad }); } catch (e) { if (e && e.name !== 'AbortError') throw e; } }
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = dosya.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
+  } catch (e) { alert('Görüntü alınamadı: ' + (e.message || e)); }
+  btn.textContent = eski; btn.disabled = false;
 }
 function mfFormHtml() {
   const f = MF.form || {}, inp = 'padding:6px 8px;border:1px solid #DDE1E6;border-radius:6px;width:130px';

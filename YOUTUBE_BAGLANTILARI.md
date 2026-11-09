@@ -1,6 +1,6 @@
 # YouTube bağlantıları (sunucu)
 
-Son güncelleme: 3 Kasım 2026
+Son güncelleme: 9 Kasım 2026
 
 Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir yapay zekâ ajanının (Antigravity, Claude vb.) kanallarla çalışırken izleyeceği kuralları içerir. **Bu dosyada hiçbir şifre, anahtar ya da token yoktur ve eklenmemelidir.**
 
@@ -13,6 +13,9 @@ Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir
 | Estudio Antiguo (ES) | `UCTC_yS0lwl-owMuo5b4bNtQ` · @estudioantiguo | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (7 Kas 2026); kapak + açıklama sunucudan, logo elle |
 | Kozmos Lab TR (uzay/teknoloji) | `UC7o3DG9m1gBbvMjFZjB5KEg` · @kozmoslabtr | modernantiktv@gmail.com (kişisel kanal) | Bağlı (7 Kas 2026) |
 | Kozmos Lab (global EN) | `UC41-Z82jCQ8955az6JUDIAw` · @kozmoslab | modernantiktv@gmail.com (marka hesabı) | Bağlı (7 Kas 2026) |
+| Kara Kutu Mayday (TR, kaza/afet analizi) | `UCYtvxRIP1eF3-f0TAqh2PvA` · @KaraKutu7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
+| Black Box Files Mayday (EN) | `UCsV0ubiBEy8dxigNk8I_LqA` · @BlackBoxFiles7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
+| Caja Negra (ES) | `UCM6LhKp6tDx4ddZ65oZUCvQ` · @CajaNegra_7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
 
 ## Google Cloud projesi
 
@@ -62,6 +65,8 @@ gh api -X POST repos/ekinciomer-ai/aesun/actions/workflows/sunucu_islem.yml/disp
 - `islem_yt_yonet` (yayin_yonet.yml, günde 2 kez): iki kanalın tüm videolarının gerçek durumu + YouTube Analytics → `docs/yayin/analitik.json`; tekrar eden kopyaları Gizli'ye alır (silme ve herkese açma yok). Kurallar: `YAYIN_TAKIBI.md` → Yol haritası.
 
 ## Bilinen kısıtlar
+
+- Sunucu işlemleri aynı anda çalışırsa `/tmp/aesun_paket` klasörü çakışıp iş yarıda kalabiliyor (9 Kas 2026: tar "Cannot mkdir"). Tek kullanımlık izin kodu gönderilecekse önce çalışan `sunucu_islem` işi olmadığına bakılır.
 
 - Sunucudan `publishAt` ile planlanan videolar saatinde herkese açılıyor (5 Kas 2026'da doğrulandı: Celtic Short'ları 19:00/20:30'da yayına girdi).
 - **Günlük kota:** YouTube API kotası proje başına günlüktür. Video yükleme kotayı en çok harcayan işlemdir. Toplu işlemden önce Google Cloud'daki kota sayfasına bakılmalıdır.

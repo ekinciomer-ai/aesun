@@ -98,6 +98,9 @@ export function createUI(app, L) {
   const callSvg = add(`<svg style="position:absolute;left:0;top:0;overflow:visible" width="1080" height="1920"></svg>`);
   const callG = add(`<div style="position:absolute;inset:0"></div>`);
   const kart = add(`<div style="position:absolute;left:0;right:0;top:700px;text-align:center;opacity:0"></div>`);
+  const perde = add(`<div style="position:absolute;left:0;top:0;width:1080px;height:420px;background:linear-gradient(rgba(244,244,245,.96) 55%,rgba(244,244,245,0));display:none"></div>`);
+  ui.insertBefore(perde, ui.firstChild);
+  const kaynak = add(`<div class="mo" style="position:absolute;right:48px;top:1346px;font-size:16px;letter-spacing:.06em;color:#5d636b;display:none"></div>`);
   const flas = add(`<div style="position:absolute;inset:0;background:#fff;opacity:0"></div>`);
 
   const fmt = (x, d) => x.toFixed(d).replace('.', L.ondalik);
@@ -148,6 +151,9 @@ export function createUI(app, L) {
       callSvg.innerHTML = lh;
       callG.innerHTML = chh;
       // kapanış
+      perde.style.display = s.kaynak ? 'block' : 'none';
+      kaynak.style.display = s.kaynak ? 'block' : 'none';
+      if (s.kaynak) kaynak.textContent = s.kaynak;
       kart.style.opacity = String(s.kart?.o ?? 0);
       if (s.kart) kart.innerHTML = s.kart.html;
       flas.style.opacity = String(s.flas ?? 0);

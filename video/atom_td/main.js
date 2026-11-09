@@ -6,7 +6,8 @@ import {GTAOPass} from 'three/addons/postprocessing/GTAOPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 import {Pass} from 'three/addons/postprocessing/Pass.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
-import {ACC, KES, KES2, MAT, mats, buildAda, buildTurbinBina, buildKule, buildYakit, nukleus, RPV, YK} from './model.js';
+import {ACC, KES, KES2, MAT, mats, buildAda, buildTurbinBina, buildKule, buildYakit, nukleus, RPV, YK, tipAyarla} from './model.js';
+import {UYDU, KUCUK} from './uydu_us.js';
 import {createUI} from './ui.js';
 
 const V3 = THREE.Vector3;
@@ -52,27 +53,31 @@ const LX = {
     rows: ['THERMAL', 'ELECTRIC', 'PRESSURE', 'OUTLET TEMP', 'NEUTRON k'],
     g: ['HEAT', 'ELECTRIC', 'WASTE HEAT'],
     bolumler: ['hero', 'fisyon', 'zincir', 'yakit', 'isi', 'turbin', 'guvenlik', 'turkiye'],
-    ad: {hero: 'INTRO', fisyon: 'FISSION', zincir: 'CHAIN', yakit: 'FUEL', isi: 'HEAT', turbin: 'TURBINE', guvenlik: 'SAFETY', turkiye: 'AKKUYU', son: 'END'},
-    baslik: {hero: 'The Atom', fisyon: 'Fission', zincir: 'Chain Reaction', yakit: 'Fuel', isi: 'Heat', turbin: 'Steam & Turbine', guvenlik: 'Safety', turkiye: 'Akkuyu', son: 'The Atom'},
+    ad: {hero: 'INTRO', fisyon: 'FISSION', zincir: 'CHAIN', yakit: 'FUEL', isi: 'HEAT', turbin: 'TURBINE', guvenlik: 'SAFETY', turkiye: 'VOGTLE', son: 'END'},
+    baslik: {hero: 'The Atom', fisyon: 'Fission', zincir: 'Chain Reaction', yakit: 'Fuel', isi: 'Heat', turbin: 'Steam & Turbine', guvenlik: 'Safety', turkiye: 'Plant Vogtle', son: 'The Atom'},
     alt: {
-      hero: 'VVER-1200 · PRESSURISED WATER REACTOR', fisyon: 'ONE NEUTRON, ONE SPLIT', zincir: 'BALANCED BY CONTROL RODS', yakit: 'PELLET → ROD → ASSEMBLY',
-      isi: 'PRIMARY CIRCUIT · 16.5 MPa', turbin: 'SECONDARY CIRCUIT · 7.0 MPa STEAM', guvenlik: 'STEEL VESSEL + DOUBLE CONCRETE SHELL', turkiye: 'MERSIN · 4 UNITS', son: 'THE ENERGY INSIDE THE ATOM',
+      hero: 'AP1000 · PRESSURISED WATER REACTOR', fisyon: 'ONE NEUTRON, ONE SPLIT', zincir: 'BALANCED BY CONTROL RODS', yakit: 'PELLET → ROD → ASSEMBLY',
+      isi: 'PRIMARY CIRCUIT · 15.5 MPa', turbin: 'SECONDARY CIRCUIT · 7.0 MPa STEAM', guvenlik: 'STEEL CONTAINMENT + CONCRETE SHIELD', turkiye: 'GEORGIA, USA · 4 UNITS', son: 'THE ENERGY INSIDE THE ATOM',
     },
     e: {
-      pelet: ['URANIUM PELLET', 'UO₂ · Ø 7.6 mm'], komur: ['≈ 1 TONNE OF COAL', 'same energy'],
+      pelet: ['URANIUM PELLET', 'UO₂ · Ø 8.2 mm'], komur: ['≈ 1 TONNE OF COAL', 'same energy'],
       u235: ['URANIUM-235', '92 protons · 143 neutrons'], notron: ['NEUTRON', ''], ba: ['BARIUM-141', 'fission product'], kr: ['KRYPTON-92', 'fission product'], yeni: ['3 NEW NEUTRONS', ''], enerji: ['≈ 200 MeV', 'becomes heat'],
       cubukK: ['CONTROL RODS', 'absorb neutrons'],
-      zarf: ['ZIRCONIUM CLADDING', 'Ø 9.1 mm'], yigin: ['PELLET STACK', ''], demet: ['FUEL ASSEMBLY', '312 rods · hexagonal'], boy: ['ACTIVE LENGTH', '3.73 m'],
-      kap: ['PRESSURE VESSEL', 'steel'], cekirdek: ['CORE', '163 fuel assemblies'], ug: ['STEAM GENERATOR', 'horizontal · 4 units'], pompa: ['MAIN PUMP', ''], basincli: ['PRESSURISER', ''], sicakBacak: ['HOT LEG', '329 °C'],
-      buharHatti: ['MAIN STEAM LINE', '7.0 MPa'], ybTurbin: ['HIGH PRESSURE', 'turbine'], abTurbin: ['LOW PRESSURE', 'turbine'], jenerator: ['GENERATOR', '≈ 1200 MWe'], kondenser: ['CONDENSER', 'steam back to water'], kule: ['COOLING TOWER', 'plume: water vapour'],
-      icKoruma: ['INNER CONTAINMENT', 'prestressed concrete'], disKoruma: ['OUTER CONTAINMENT', 'concrete'], yakalayici: ['CORE CATCHER', ''], crdm: ['ROD DRIVES', ''],
-      akkuyu: ['AKKUYU NPP', 'Mersin · Gülnar'], deniz: ['MEDITERRANEAN', 'seawater cooling'],
+      zarf: ['ZIRCONIUM CLADDING', 'Ø 9.5 mm'], yigin: ['PELLET STACK', ''], demet: ['FUEL ASSEMBLY', '264 rods · 17 × 17'], boy: ['ACTIVE LENGTH', '4.27 m'],
+      kap: ['PRESSURE VESSEL', 'steel'], cekirdek: ['CORE', '157 fuel assemblies'], ug: ['STEAM GENERATOR', 'vertical · 2 units'], pompa: ['MAIN PUMP', ''], basincli: ['PRESSURISER', ''], sicakBacak: ['HOT LEG', '≈ 321 °C'],
+      buharHatti: ['MAIN STEAM LINE', '7.0 MPa'], ybTurbin: ['HIGH PRESSURE', 'turbine'], abTurbin: ['LOW PRESSURE', 'turbine'], jenerator: ['GENERATOR', '≈ 1117 MWe'], kondenser: ['CONDENSER', 'steam back to water'], kule: ['COOLING TOWER', 'plume: water vapour'],
+      icKoruma: ['STEEL CONTAINMENT', 'steel vessel'], disKoruma: ['SHIELD BUILDING', 'concrete'], pcs: ['PASSIVE COOLING TANK', 'water by gravity'], yakalayici: ['', ''], crdm: ['ROD DRIVES', ''],
+      vogtle: ['PLANT VOGTLE', '4 units · ≈ 4,664 MW'], vkule: ['COOLING TOWERS', ''], abd: ['USA', ''], georgia: ['GEORGIA', ''],
     },
     olcu: {pelet: '≈ 1 cm', dort: '4 × 1200 MW = 4800 MW'},
     kart: () => `<div class="mo" style="font-size:30px;letter-spacing:.2em;color:#7d828a">NEXT EPISODE</div><div style="font-size:112px;font-weight:700;letter-spacing:-.03em;margin-top:6px">Geothermal<span style="color:${ACC}">.</span></div><div class="mo" style="font-size:26px;letter-spacing:.14em;margin-top:8px;color:#5d636b">ENERGY SOURCES · 05</div>`,
   },
 };
 const L = LX[DIL];
+// İngilizce kanal ABD izleyicisi için: AP1000 (Vogtle 3-4) ve Plant Vogtle, Georgia
+const US = DIL === 'en';
+tipAyarla(US ? 'ap' : 'vver');
+const RX = US ? {mwt: 3400, mwe: 1117, mpa: 15.5, c: 321} : {mwt: 3212, mwe: 1200, mpa: 16.5, c: 328.6};
 
 // ------------------------------------------------------------ sahne kurulumu
 mats();
@@ -220,6 +225,32 @@ akkuyu.add(deniz);
 scene.add(akkuyu);
 // yakıt dünyası
 const YAK = buildYakit();
+// uydu dünyası (yalnız EN): NASA GIBS, Plant Vogtle
+const VG = {lat: 33.1427, lon: -81.7624};
+const OF_UY = new V3(0, -60000, 0);
+const geo = (o, lat, lon) => new V3((lon - o.lon) * 111320 * Math.cos(o.lat * D2R), 0, -(lat - o.lat) * 110574);
+const YUK = [];
+const uydu = new THREE.Group();
+uydu.position.copy(OF_UY);
+if (US)
+  ['us_bm', 'vg_bolge', 'vg_yakin'].forEach((ad, i) => {
+    const r = UYDU[ad];
+    const [s0, w0, n0, e0] = r.bbox;
+    const a = geo(VG, s0, w0), b = geo(VG, n0, e0);
+    let bitti;
+    YUK.push(new Promise((rr) => (bitti = rr)));
+    const tx = new THREE.TextureLoader().load(r.src, () => bitti(), undefined, () => bitti());
+    tx.colorSpace = THREE.SRGBColorSpace;
+    tx.anisotropy = 8;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(b.x - a.x, a.z - b.z), new THREE.MeshBasicMaterial({map: tx, toneMapped: false, fog: false, depthWrite: false, transparent: i > 0}));
+    m.rotation.x = -Math.PI / 2;
+    m.position.set((a.x + b.x) / 2, 0, (a.z + b.z) / 2);
+    m.renderOrder = i;
+    m.userData.gen = b.x - a.x;
+    uydu.add(m);
+  });
+scene.add(uydu);
+yerler.push(uydu);
 scene.add(YAK.root);
 // mikro dünya: fisyon + zincir
 const mikro = new THREE.Group();
@@ -334,8 +365,8 @@ const AKY = [];
   const yK = RPV.y0 + RPV.r; // kabın yerel orijini
   const Hh = RPV.h, R = RPV.r;
   for (let i = 0; i < NA; i++) {
-    const loop = i % 4;
-    const a = Math.PI / 4 + loop * (Math.PI / 2);
+    const loop = i % ADA.ugs.length;
+    const a = ADA.ugs.length === 2 ? loop * Math.PI : Math.PI / 4 + loop * (Math.PI / 2);
     const da = ((i * 0.37) % 1 - 0.5) * 1.0;
     const rr = ((i * 0.61) % 1) * 1.5;
     const ug = ADA.ugs[loop];
@@ -361,11 +392,11 @@ const ui = createUI(app, L);
 const fmt = (x, d) => x.toFixed(d).replace('.', L.ondalik);
 function grafik(g) {
   const W = 380, H = 150;
-  const v = [3212 * g, 1200 * g, 2012 * g];
+  const v = [RX.mwt * g, RX.mwe * g, (RX.mwt - RX.mwe) * g];
   let h = '';
   const row = (i, val, col, birim) => {
     const y = 6 + i * 52;
-    const w = (val / 3212) * (W - 10);
+    const w = (val / RX.mwt) * (W - 10);
     h += `<text x="0" y="${y + 14}" font-size="18" font-family="JetBrains Mono" font-weight="700" fill="#7d828a" letter-spacing="1.5">${L.g[i]}</text>`;
     h += `<rect x="0" y="${y + 22}" width="${W - 10}" height="14" rx="3" fill="#e6e7e9"/>`;
     h += `<rect x="0" y="${y + 22}" width="${w.toFixed(1)}" height="14" rx="3" fill="${col}"/>`;
@@ -437,10 +468,21 @@ const SAHNE = {
     kesit: [0, 0, 0],
     cam: (k) => ({tx: 0, ty: lerp(26, 30, k), tz: 0, az: lerp(-20, 5, k), el: lerp(8, 14, k), d: lerp(130, 120, k), fov: 42}),
     g: () => 1,
-    etiket: (k) => [['disKoruma', ss(0.05, 0.14, k)], ['icKoruma', ss(0.12, 0.22, k)], ['kap', ss(0.22, 0.32, k)], ['yakalayici', ss(0.35, 0.45, k)]],
+    etiket: (k) => [['disKoruma', ss(0.05, 0.14, k)], ['icKoruma', ss(0.12, 0.22, k)], ['kap', ss(0.22, 0.32, k)], US ? ['pcs', ss(0.35, 0.45, k)] : ['yakalayici', ss(0.35, 0.45, k)]],
     olcu: () => [],
   },
-  turkiye: {
+  turkiye: US ? {
+    dunya: 'uydu',
+    uydu: true,
+    cam: (k) => {
+      const z = ss(0, 0.85, k);
+      const t0 = geo(VG, 38.5, -97.0).lerp(new V3(), ss(0, 0.6, k)).add(OF_UY);
+      return {tx: t0.x, ty: t0.y, tz: t0.z, az: lerp(0, 18, z), el: lerp(89, 55, ss(0.55, 1, k)), d: Math.exp(lerp(Math.log(3.6e6), Math.log(9500), z)), fov: 42};
+    },
+    g: () => 1,
+    etiket: (k) => [['abd', ss(0, 0.08, k) * (1 - ss(0.25, 0.32, k))], ['georgia', ss(0.3, 0.38, k) * (1 - ss(0.55, 0.6, k))], ['vogtle', ss(0.62, 0.72, k)], ['vkule', ss(0.72, 0.8, k)]],
+    olcu: () => [],
+  } : {
     dunya: 'akkuyu',
     cam: (k) => ({tx: lerp(-40, 0, k), ty: 20, tz: 10, az: lerp(-62, -52, k), el: lerp(20, 24, k), d: lerp(760, 700, k), fov: 42}),
     g: () => 1,
@@ -488,6 +530,11 @@ const AN = {
   disKoruma: () => new V3(-22, 30, -8),
   yakalayici: () => new V3(-2, 3, 0),
   akkuyu: () => akkuyu.children[1].localToWorld(new V3(0, 72, 0)),
+  vogtle: () => geo(VG, 33.1427, -81.7624).add(OF_UY),
+  vkule: () => geo(VG, 33.1414, -81.7716).add(OF_UY),
+  abd: () => geo(VG, 40.0, -101.0).add(OF_UY),
+  georgia: () => geo(VG, 32.7, -83.4).add(OF_UY),
+  pcs: () => (ADA.P.pcs ? ADA.P.pcs.at.clone() : new V3()),
   deniz: () => new V3(120, 0, 260),
 };
 const OLCU = {
@@ -564,11 +611,20 @@ function kare(t) {
   santral.visible = dunya === 'santral';
   KULE.root.visible = dunya === 'santral';
   akkuyu.visible = dunya === 'akkuyu';
+  uydu.visible = dunya === 'uydu';
+  zemin.visible = dunya !== 'uydu';
+  if (ADA.P.yakalayici) ADA.P.yakalayici.obj.visible = !US;
+  if (dunya === 'uydu') {
+    const dd = S.cam(k).d;
+    uydu.children.forEach((m, i) => {
+      if (i) m.material.opacity = 1 - ss(m.userData.gen * 2.0, m.userData.gen * 3.2, dd);
+    });
+  }
   YAK.root.visible = dunya === 'yakit';
   mikro.visible = dunya === 'mikro';
   fis.visible = s.ad === 'fisyon';
   zincir.visible = s.ad === 'zincir';
-  zemin.visible = dunya !== 'akkuyu' || true;
+  zemin.visible = dunya !== 'uydu';
   const poz = S.poz ? S.poz(k) : {};
   // kamera
   const c = camAt(t);
@@ -581,8 +637,8 @@ function kare(t) {
   camera.setViewOffset(W, H, 0, -ALT_Y * (H / 1920), W, H);
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld();
-  scene.fog.near = c.d * 1.6 + c.d * 0.2;
-  scene.fog.far = c.d * 6 + c.d * 2;
+  scene.fog.near = dunya === 'uydu' ? 1e9 : c.d * 1.6 + c.d * 0.2;
+  scene.fog.far = dunya === 'uydu' ? 2e9 : c.d * 6 + c.d * 2;
   gtao.updateGtaoMaterial({radius: Math.max(0.0005, c.d * 0.012)});
   // kesit: kameraya bakan yarı açılır
   if (S.kesit) {
@@ -707,10 +763,10 @@ function kare(t) {
   const g = S.g(k);
   const kk = S.k ? S.k(k) : DIL === 'en' ? '1.00' : '1,00';
   const vals = [
-    [g, `${fmt(3212 * g, 0)} MWt`],
-    [g, `≈ ${fmt(1200 * g, 0)} MWe`],
-    [16.5 / 20, `${fmt(16.5, 1)} MPa`],
-    [328.6 / 350, `${fmt(328.6, 0)} °C`],
+    [g, `${fmt(RX.mwt * g, 0)} MWt`],
+    [g, `≈ ${fmt(RX.mwe * g, 0)} MWe`],
+    [RX.mpa / 20, `${fmt(RX.mpa, 1)} MPa`],
+    [RX.c / 350, `${fmt(RX.c, 0)} °C`],
     [kk === '> 1' ? 1 : 0.6, `${kk}`],
   ];
   const etiketler = etiketYerlestir(S.etiket(k));
@@ -737,6 +793,7 @@ function kare(t) {
     olculer,
     flas,
     kart: S.kart ? {o: S.kart(k), html: L.kart()} : null,
+    kaynak: dunya === 'uydu' ? 'Satellite: NASA GIBS · HLS / MODIS / Blue Marble' : null,
   });
 }
 window.kare = kare;
@@ -744,6 +801,7 @@ window.kare = kare;
 const VARS = {toplam: 72, sahneler: Object.keys(SAHNE).map((ad, i) => ({ad, bas: i * 8, son: i * 8 + 8})), altyazi: []};
 (async () => {
   await document.fonts.ready;
+  await Promise.all(YUK);
   window.kurgu(VARS);
   kare(0.5);
   window.HAZIR = true;

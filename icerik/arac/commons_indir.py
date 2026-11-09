@@ -5,7 +5,7 @@ Lisans süzgeci: Public domain, PD-*, CC0, CC BY, CC BY-SA. Künye manifest.json
 import json, os, re, sys, time, urllib.parse, urllib.request
 IST, OUT = sys.argv[1], sys.argv[2]; os.makedirs(OUT, exist_ok=True)
 J = json.load(open(IST, encoding="utf-8"))
-UA = {"User-Agent": "AntikStudyo-arsiv/1.0 (https://github.com/ekinciomer-ai/aesun; kamu malı görsel arşivi)"}
+UA = {"User-Agent": "AntikStudyo-arsiv/1.0 (https://github.com/ekinciomer-ai/aesun; public domain image archive)"}
 API = "https://commons.wikimedia.org/w/api.php"
 IZIN = re.compile(r"(public domain|^pd|cc0|cc[- ]by(-sa)?( |$|-)|cc by)", re.I)
 def api(**p):

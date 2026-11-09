@@ -240,6 +240,9 @@ subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", sesg, "-af", "loudnorm=I=-1
 ff = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", f"{tmp}/ses.m4a",
                        "-c:v", "libx264", "-preset", "veryfast", "-crf", "20" if not ONIZ else "26", "-pix_fmt", "yuv420p", "-c:a", "copy", "-shortest", "-movflags", "+faststart", CIK], stdin=subprocess.PIPE)
 for fi in range(N):
-    ff.stdin.write(kare(fi).tobytes())
+    try: ff.stdin.write(kare(fi).tobytes())
+    except BrokenPipeError: break
     if fi % 500 == 0: print(f"{os.path.basename(CIK)} kare {fi}/{N}", flush=True)
-ff.stdin.close(); ff.wait(); print("bitti", CIK, os.path.getsize(CIK) // 1024, "KB", round(TOPLAM, 1), "sn")
+try: ff.stdin.close()
+except BrokenPipeError: pass
+ff.wait(); print("bitti", CIK, os.path.getsize(CIK) // 1024, "KB", round(TOPLAM, 1), "sn")

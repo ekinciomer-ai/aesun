@@ -72,9 +72,16 @@ export function buildAda() {
     // kesit yüzü: halka kalınlığı (kesit düzleminde görünür kapak)
     return grp;
   };
-  const dis = kab(25, 0.8, 44, MAT.beton2);
-  const ic = kab(22, 1.2, 42, MAT.beton);
+  const dis = kab(25, TIP === 'ap' ? 0.9 : 0.8, 44, MAT.beton2);
+  const ic = TIP === 'ap' ? kab(20, 0.05, 40, MAT.celikK) : kab(22, 1.2, 42, MAT.beton);
   g.add(dis, ic);
+  if (TIP === 'ap') {
+    // pasif soğutma su tankı (kalkan binasının tepesinde halka tank)
+    const tank = mesh(lathe([[3.5, 0], [9, 0], [9, 6], [3.5, 6], [3.5, 0]], 96), MAT.betonD);
+    tank.position.y = 44 + 25 - 6;
+    g.add(tank);
+    P.pcs = {obj: tank, at: new V3(0, 72, 0)};
+  }
   P.disKoruma = {obj: dis};
   P.icKoruma = {obj: ic};
   // taban ve döşemeler
@@ -149,8 +156,17 @@ export function buildAda() {
         pts.push([x, z, Math.hypot(x, z)]);
       }
     pts.sort((a, b) => a[2] - b[2]);
-    const sec = pts.slice(0, 163);
-    const im = new THREE.InstancedMesh(hexGeo(0.115, 3.73), MAT.zirkK, 163);
+    let sec = pts.slice(0, 163);
+    let geoD = hexGeo(0.115, 3.73), geoS = hexGeo(0.116, 3.6);
+    if (TIP === 'ap') {
+      const kp = [];
+      for (let i = -7; i <= 7; i++) for (let j = -7; j <= 7; j++) kp.push([i * 0.215, j * 0.215, Math.hypot(i, j * 1.0001)]);
+      kp.sort((a, b) => a[2] - b[2]);
+      sec = kp.slice(0, 157);
+      geoD = new THREE.BoxGeometry(0.212, 4.27, 0.212);
+      geoS = new THREE.BoxGeometry(0.214, 4.1, 0.214);
+    }
+    const im = new THREE.InstancedMesh(geoD, MAT.zirkK, sec.length);
     const m4 = new THREE.Matrix4();
     sec.forEach(([x, z], i) => {
       m4.makeTranslation(x, 0, z);
@@ -158,7 +174,7 @@ export function buildAda() {
     });
     im.castShadow = true;
     cek.add(im);
-    const sicak = new THREE.InstancedMesh(hexGeo(0.116, 3.6), MAT.acc.clone(), 163);
+    const sicak = new THREE.InstancedMesh(geoS, MAT.acc.clone(), sec.length);
     sicak.material.clippingPlanes = [KES];
     sicak.material.transparent = true;
     sec.forEach(([x, z], i) => {
@@ -194,9 +210,49 @@ export function buildAda() {
   P.kap = {obj: kap};
   P.cekirdek = {obj: cek};
   P.cubuk = {obj: cubuk};
-  // 4 döngü: yatay buhar üreteci, sıcak/soğuk bacak, ana pompa
   const SGY = RPV.y0 + R + Hh - R - 1.35 + 0.0;
   const ugs = [];
+  if (TIP === 'ap') {
+    // AP1000: 2 dikey buhar üreteci, her biri 1 sıcak bacak + 2 soğuk bacak ve kanallı motor pompaları
+    for (let i = 0; i < 2; i++) {
+      const a = i * Math.PI;
+      const c = new V3(Math.cos(a) * 11, 0, Math.sin(a) * 11);
+      const sg = new THREE.Group();
+      const prof = [[0.001, -2.0], [1.5, -1.9], [2.2, -1.0], [2.2, 10], [2.9, 12.5], [2.9, 18.5], [2.2, 20.2], [0.9, 20.9], [0.001, 21]];
+      sg.add(mesh(lathe(prof, 96), MAT.celikK));
+      // iç U-boru demeti
+      const im = new THREE.InstancedMesh(cyl(0.04, 0.04, 9, 6), MAT.parlak, 60);
+      const m4 = new THREE.Matrix4();
+      for (let k = 0; k < 60; k++) {
+        const aa = (k / 60) * Math.PI * 2, rr = 0.5 + (k % 4) * 0.4;
+        m4.makeTranslation(Math.cos(aa) * rr, 5, Math.sin(aa) * rr);
+        im.setMatrixAt(k, m4);
+      }
+      sg.add(im);
+      sg.add(mesh(cyl(0.5, 0.5, 2, 32), MAT.celikK, (o) => o.position.set(0, 21.5, 0)));
+      sg.position.set(c.x, RPV.y0 + 2, c.z);
+      g.add(sg);
+      ugs.push(sg);
+      const n1 = new V3(Math.cos(a) * 3.2, RPV.y0 + R + Hh - R - 0.9, Math.sin(a) * 3.2);
+      const hot = new V3(c.x * 0.86, RPV.y0 + 0.4, c.z * 0.86);
+      const sb = tube([n1, n1.clone().lerp(hot, 0.5).setY(n1.y - 1), hot], 0.48, MAT.celikK);
+      g.add(sb);
+      for (const s2 of [-1, 1]) {
+        const tan = new V3(-Math.sin(a), 0, Math.cos(a)).multiplyScalar(s2);
+        const pompa = new V3(c.x * 0.95, RPV.y0 - 1.5, c.z * 0.95).addScaledVector(tan, 1.6);
+        const n2 = new V3(Math.cos(a + 0.5 * s2) * 3.2, RPV.y0 + R + Hh - R - 1.8, Math.sin(a + 0.5 * s2) * 3.2);
+        g.add(tube([pompa.clone().add(new V3(0, -1.3, 0)), pompa.clone().add(new V3(0, -1.6, 0)).lerp(n2, 0.4).setY(n2.y - 2), n2], 0.4, MAT.celikK));
+        const pm = new THREE.Group();
+        pm.add(mesh(cyl(0.9, 0.9, 2.6, 48), MAT.dokum));
+        pm.position.copy(pompa);
+        g.add(pm);
+        if (i === 0 && s2 === 1) P.pompa = {obj: pm, at: pompa.clone().add(new V3(0, 1.6, 0))};
+      }
+      if (i === 0) P.sicakBacak = {obj: sb, at: n1.clone().lerp(hot, 0.5).setY(n1.y - 1)};
+      sg.userData.hot = [n1, hot];
+    }
+  } else {
+  // 4 döngü: yatay buhar üreteci, sıcak/soğuk bacak, ana pompa
   for (let i = 0; i < 4; i++) {
     const a = Math.PI / 4 + i * (Math.PI / 2);
     const c = new V3(Math.cos(a) * 13, SGY + 3.0, Math.sin(a) * 13);
@@ -255,6 +311,7 @@ export function buildAda() {
     }
     ugs[i].userData.hot = [n1, hot];
   }
+  }
   P.ug = {obj: ugs[0]};
   // basınçlandırıcı
   const bas = new THREE.Group();
@@ -274,7 +331,7 @@ export function buildAda() {
   });
   g.add(vinc);
   // ana buhar hattı: buhar üretecinden binadan dışarı (türbine)
-  const bh = tube([ugs[3].position.clone().add(new V3(0, 3.5, 0)), new V3(10, 31, -12), new V3(0, 31, -21), new V3(0, 31, -40), new V3(0, 30, -52)], 0.6, MAT.celikK, 80);
+  const bh = tube([ugs[ugs.length - 1].position.clone().add(new V3(0, TIP === 'ap' ? 22 : 3.5, 0)), new V3(10, 31, -12), new V3(0, 31, -21), new V3(0, 31, -40), new V3(0, 30, -52)], 0.6, MAT.celikK, 80);
   g.add(bh);
   P.buharHatti = {obj: bh, at: new V3(0, 31, -30)};
   return {root: g, P, ugs, kap, cubuk, cek, sicak: P.sicak.obj, SGY};
@@ -388,6 +445,13 @@ export function buildKule() {
 
 // ------------------------------------------------------------ pelet, çubuk, demet (gerçek ölçü, metre)
 export const YK = {peletR: 0.0038, peletH: 0.0095, delik: 0.0007, zarfR: 0.00455, zarfT: 0.00065, boy: 3.73, demet: 312, adim: 0.01275};
+// TIP 'ap': AP1000 (ABD Vogtle 3-4): 157 kare demet 17x17 (264 çubuk, Ø 9,5 mm), aktif boy 4,27 m, 2 dikey buhar üreteci,
+// çelik koruma kabı + beton kalkan binası ve pasif soğutma su tankı. 'vver': VVER-1200 (Akkuyu).
+export let TIP = 'vver';
+export function tipAyarla(t) {
+  TIP = t;
+  if (t === 'ap') Object.assign(YK, {peletR: 0.0041, peletH: 0.0098, delik: 0.0001, zarfR: 0.00475, boy: 4.27, demet: 264, adim: 0.0126});
+}
 export function buildYakit() {
   const g = new THREE.Group();
   // tek pelet (çukur uçlu, ortası delikli silindir)
@@ -445,9 +509,16 @@ export function buildYakit() {
       if (ring <= 10 && !(q === 0 && r === 0)) pos.push([YK.adim * (q + r / 2), YK.adim * r * 0.866, ring]);
     }
   // 331 konumdan 18 kılavuz kanal + merkez → 312 çubuk
-  const kilavuz = pos.filter(([, , ring], i) => ring === 3 || (ring === 6 && i % 3 === 0)).slice(0, 18);
-  const kset = new Set(kilavuz);
-  const cub = pos.filter((p) => !kset.has(p)).slice(0, 312);
+  let kilavuz = pos.filter(([, , ring], i) => ring === 3 || (ring === 6 && i % 3 === 0)).slice(0, 18);
+  let kset = new Set(kilavuz);
+  let cub = pos.filter((p) => !kset.has(p)).slice(0, 312);
+  if (TIP === 'ap') {
+    // 17x17: 24 kılavuz tüp + 1 ölçüm tüpü, 264 yakıt çubuğu
+    const K = new Set(['2,5', '2,8', '2,11', '3,3', '3,13', '5,2', '5,5', '5,8', '5,11', '5,14', '8,2', '8,5', '8,8', '8,11', '8,14', '11,2', '11,5', '11,8', '11,11', '11,14', '13,3', '13,13', '14,5', '14,8', '14,11']);
+    kilavuz = [];
+    cub = [];
+    for (let i = 0; i < 17; i++) for (let j = 0; j < 17; j++) (K.has(`${i},${j}`) ? kilavuz : cub).push([(i - 8) * YK.adim, (j - 8) * YK.adim, 0]);
+  }
   const im = new THREE.InstancedMesh(cyl(YK.zarfR, YK.zarfR, YK.boy, 12), MAT.zirk, cub.length);
   const m4 = new THREE.Matrix4();
   cub.forEach(([x, z], i) => {
@@ -462,19 +533,20 @@ export function buildYakit() {
     kim.setMatrixAt(i, m4);
   });
   demet.add(kim);
-  const hex = (r, h, y, m) => demet.add(mesh(hexGeo(r, h), m, (o) => (o.position.y = y)));
+  const AP = TIP === 'ap';
+  const hex = (r, h, y, m) => demet.add(mesh(AP ? new THREE.BoxGeometry(0.214, h, 0.214) : hexGeo(r, h), m, (o) => (o.position.y = y)));
   for (let k = 0; k < 13; k++) {
     const y = 0.35 + k * 0.27;
-    const gr = mesh(new THREE.TorusGeometry(0.117, 0.004, 4, 6), MAT.parlak, (o) => {
+    const gr = mesh(new THREE.TorusGeometry(AP ? 0.151 : 0.117, 0.004, 4, AP ? 4 : 6), MAT.parlak, (o) => {
       o.rotation.x = Math.PI / 2;
-      o.rotation.z = Math.PI / 6;
+      o.rotation.z = AP ? Math.PI / 4 : Math.PI / 6;
       o.position.y = y;
       o.scale.z = 4;
     });
     demet.add(gr);
   }
   hex(0.118, 0.12, 0.06, MAT.dokum);
-  demet.add(mesh((() => { const g2 = new THREE.CylinderGeometry(0.118, 0.118, 0.05, 6, 1, true); g2.rotateY(Math.PI / 6); return g2; })(), MAT.dokum, (o) => { o.position.y = YK.boy + 0.17; o.material = MAT.dokum.clone(); o.material.side = THREE.DoubleSide; }));
+  demet.add(mesh((() => { const g2 = new THREE.CylinderGeometry(AP ? 0.151 : 0.118, AP ? 0.151 : 0.118, 0.05, AP ? 4 : 6, 1, true); g2.rotateY(AP ? Math.PI / 4 : Math.PI / 6); return g2; })(), MAT.dokum, (o) => { o.position.y = YK.boy + 0.17; o.material = MAT.dokum.clone(); o.material.side = THREE.DoubleSide; }));
   demet.position.set(0.5, 0, 0.1);
   g.add(demet);
   return {root: g, pelet, komur, cubuk, zarf, yigin, demet, cubPos: cub};

@@ -1,0 +1,27 @@
+name: Kamu malı görsel indir (Wikimedia Commons)
+# icerik/<bölüm>/istek_commons.json → görseller ayrı "icerik-ham" dalına (<bölüm>/). Ana dal şişmez; diğer işlerden bağımsız.
+on:
+  workflow_dispatch:
+    inputs:
+      istek: {description: "istek dosyası (ör. icerik/seri_kasim/istek_commons.json)", required: true}
+permissions: {contents: write}
+concurrency: {group: commons-indir}
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: İndir
+        run: |
+          f="${{ inputs.istek }}"; case "$f" in icerik/*/istek_commons.json) ;; *) echo "geçersiz istek"; exit 1;; esac
+          ad=$(basename $(dirname "$f")); python3 icerik/arac/commons_indir.py "$f" "/tmp/ham/$ad"; ls -la /tmp/ham/$ad | head -100
+      - name: icerik-ham dalına koy
+        run: |
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q
+          git config user.name "icerik-bot"; git config user.email "icerik-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          if git fetch -q --depth 1 origin icerik-ham; then git checkout -q -b icerik-ham FETCH_HEAD; else git checkout -q --orphan icerik-ham; fi
+          for d in /tmp/ham/*; do ad=$(basename $d); mkdir -p "$ad"; cp "$d"/* "$ad"/; done
+          git add -A && git commit -qm "Kamu malı görseller: $(ls /tmp/ham | tr '\n' ' ')" || exit 0
+          for i in 1 2 3; do git push -q origin HEAD:icerik-ham && break; sleep 5; done

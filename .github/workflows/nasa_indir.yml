@@ -1,0 +1,39 @@
+name: NASA video indir (kamu malı, Kozmos Lab)
+# video/<bölüm>/istek.json değişince NASA arşivinde arar, uygun videoları indirir ve
+# ana dalı şişirmemek için ayrı "kozmos-ham" dalına <bölüm>/ altında koyar.
+on:
+  workflow_dispatch:
+    inputs:
+      istek: {description: "istek dosyası (ör. video/kask_b1/istek.json)", required: true}
+  push:
+    branches: [main]
+    paths: ['video/*/istek.json']
+permissions: {contents: write}
+concurrency: {group: nasa-indir}
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 2}
+      - name: İstekleri bul
+        id: b
+        run: |
+          if [ -n "${{ inputs.istek }}" ]; then L="${{ inputs.istek }}"; else L=$(git diff --name-only HEAD~1 HEAD | grep -E '^video/[^/]+/istek\.json$' || true); fi
+          echo "liste=$(echo $L | tr '\n' ' ')" >> $GITHUB_OUTPUT
+      - name: İndir
+        run: |
+          for f in ${{ steps.b.outputs.liste }}; do
+            ad=$(basename $(dirname $f)); python3 video/arac/nasa_indir.py "$f" "/tmp/ham/$ad"
+          done
+      - name: kozmos-ham dalına koy
+        run: |
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q
+          git config user.name "kozmos-bot"; git config user.email "kozmos-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          if git fetch -q --depth 1 origin kozmos-ham; then git checkout -q -b kozmos-ham FETCH_HEAD; else git checkout -q --orphan kozmos-ham; fi
+          for d in /tmp/ham/*; do ad=$(basename $d); rm -rf "$ad"; cp -r "$d" "$ad"; done
+          git add -A && git commit -qm "NASA ham görüntü: $(ls /tmp/ham | tr '\n' ' ')" || exit 0
+          for i in 1 2 3; do git push -q origin HEAD:kozmos-ham && break; sleep 5; done
+          du -sh /tmp/ham/*

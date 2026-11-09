@@ -107,6 +107,12 @@ export function createUI(app, L, YT = false) {
   const callG = add(`<div style="position:absolute;inset:0"></div>`);
   const kart = add(`<div style="position:absolute;left:0;right:${YT ? 520 : 0}px;top:${YT ? 380 : 700}px;text-align:center;opacity:0"></div>`);
   const bilgi = add(`<div style="position:absolute;left:${YT ? 1388 : 40}px;top:${YT ? 300 : 1372}px;width:${YT ? 492 : 948}px;height:272px;display:none"></div>`);
+  // uydu sahnelerinde başlık okunurluğu için üst perde
+  const perde = add(`<div style="position:absolute;left:0;top:0;width:${UW}px;height:${YT ? 300 : 420}px;background:linear-gradient(rgba(244,244,245,.96) 55%,rgba(244,244,245,0));display:none"></div>`);
+  ui.insertBefore(perde, ui.firstChild);
+  // konum haritası (küçük) ve uydu kaynak notu
+  const konum = add(`<div style="position:absolute;left:${UW - 300}px;top:${YT ? 160 : 330}px;width:260px;height:120px;border:2px solid #fff;border-radius:8px;box-shadow:0 4px 14px rgba(20,30,50,.18);background-size:cover;background-position:center;display:none;overflow:hidden"><i style="position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:${C.acc};border:3px solid #fff"></i><span class="mo" style="position:absolute;left:8px;bottom:5px;font-size:15px;font-weight:700;color:#fff;letter-spacing:.08em;text-shadow:0 0 4px #000"></span></div>`);
+  const kaynak = add(`<div class="mo" style="position:absolute;right:48px;top:${YT ? 1040 : 1346}px;font-size:16px;letter-spacing:.06em;color:#5d636b;display:none"></div>`);
   const flas = add(`<div style="position:absolute;inset:0;background:#fff;opacity:0"></div>`);
 
   const fmt = (x, d) => x.toFixed(d).replace('.', L.ondalik);
@@ -163,6 +169,16 @@ export function createUI(app, L, YT = false) {
       for (const e of pnl) e.style.visibility = s.bilgi ? 'hidden' : 'visible';
       bilgi.style.display = s.bilgi ? 'block' : 'none';
       if (s.bilgi) bilgi.innerHTML = s.bilgi;
+      if (s.konum) {
+        konum.style.display = 'block';
+        konum.style.backgroundImage = `url(${s.konum.img})`;
+        konum.firstElementChild.style.left = `${s.konum.x * 100}%`;
+        konum.firstElementChild.style.top = `${s.konum.y * 100}%`;
+        konum.lastElementChild.textContent = s.konum.ad;
+      } else konum.style.display = 'none';
+      kaynak.style.display = s.kaynak ? 'block' : 'none';
+      perde.style.display = s.kaynak ? 'block' : 'none';
+      if (s.kaynak) kaynak.textContent = s.kaynak;
       kart.style.opacity = String(s.kart?.o ?? 0);
       if (s.kart) kart.innerHTML = s.kart.html;
       flas.style.opacity = String(s.flas ?? 0);

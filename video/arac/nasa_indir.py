@@ -28,12 +28,14 @@ def boyut(url):
 
 bulunan = {}
 for q in J["sorgular"]:
-    u = f"{API}/search?" + urllib.parse.urlencode({"q": q, "media_type": "video",
-        "year_start": J.get("tarih_bas", 1958), "year_end": J.get("tarih_son", 2030)})
+    par = {"q": q, "media_type": "video"}
+    if J.get("tarih_bas"): par["year_start"] = J["tarih_bas"]
+    u = f"{API}/search?" + urllib.parse.urlencode(par)
     try:
         d = json.loads(getir(u))
     except Exception as e:
         print("arama hatası", q, e); continue
+    print("  bulunan (ham):", d.get("collection", {}).get("metadata", {}).get("total_hits"))
     for it in d.get("collection", {}).get("items", []):
         m = (it.get("data") or [{}])[0]
         nid = m.get("nasa_id")

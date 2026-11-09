@@ -72,7 +72,7 @@ for (kl, dl), (bas, govde, et, zaman, seri) in M.items():
     uzun = kl.startswith("L")
     aciklama = f"{govde}\n\n{SORU[dl]}\n\n{KB[dl]}: {KAYNAK[kl][dl]}\n\n{GK[dl]}:\n" + "\n".join(kun) + f"\n\n{NOT[dl]}\n\n#tarih {KAN[dl]}" + ("" if uzun else " #shorts")
     if dl != "tr": aciklama = aciklama.replace("#tarih", "#history" if dl == "en" else "#historia")
-    j = {"kod": kod, "kanal": dl.upper(), "seri": seri, "kategori": "27", "sentetik": True, "ureten": "Claude", "publishAt": zaman,
+    j = {"kod": kod, "kanal": dl.upper(), "seri": seri, "kategori": "27", "sentetik": True, "ust_bant_izinli": True, "ureten": "Claude", "publishAt": zaman,
          "baslik": bas + ("" if uzun else " #shorts"), "aciklama": aciklama[:4900], "etiketler": et + (["shorts"] if not uzun else []),
          "kaynaklar": [x[2:] for x in kun], "muzik_lisans": "Müzik yok (yalnız seslendirme)"}
     json.dump(j, open(os.path.join(K, kod + ".json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)

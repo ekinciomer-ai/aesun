@@ -145,7 +145,7 @@ S.lisans=(()=>{const sc=new THREE.Scene();const c=cam();stud(sc);const d=dronYap
 function kartSahne(vurgu){const sc=new THREE.Scene();const c=cam();stud(sc);
   const K=[kart("P0","HOBİ · 10+ YAŞ","#6FE3FF"),kart("P1","TİCARİ · 18+","#F2C46B"),kart("P2","GÖZ ÖTESİ · 18+","#ff8a5c")];K.forEach((k,i)=>{k.position.set((i-1)*(YATAY?1.9:1.25),0,0);k.scale.setScalar(YATAY?1:.72);sc.add(k)});
   return{sc,c,ex:.85,bl:[.6,.45,.85],kur(q,t){K.forEach((k,i)=>{const gir=sm(i*.08,i*.08+.2,vurgu?1:q);let one=0;if(vurgu){const a=i/3,b=(i+1)/3;one=sm(a,a+.06,q)*(1-sm(b-.02,b+.04,q))}
-      k.position.y=lerp(-2.4,0,gir)+one*.25+Math.sin(t*1.2+i)*.03;k.position.z=one*.9;k.rotation.y=Math.sin(t*.7+i)*.12+(1-gir)*1.5;const s=(YATAY?1:.72)*(1+one*.25);k.scale.setScalar(s)});
+      const x0=(i-1)*(YATAY?1.9:1.25);k.position.x=lerp(x0,x0*.35,one);k.position.y=lerp(-2.4,0,gir)+one*.25+Math.sin(t*1.2+i)*.03;k.position.z=one*.9;k.rotation.y=Math.sin(t*.7+i)*.12+(1-gir)*1.5;const s=(YATAY?1:.72)*(1+one*.25);k.scale.setScalar(s)});
     orb(c,V3(0,0,0),(YATAY?4.6:5.6),1.57,.05)},veri(q){if(!vurgu)return`3 LİSANS<small>30 TEMMUZ 2026</small>`;return["P0<small>HOBİ · GÖRÜŞ İÇİNDE</small>","P1<small>TİCARİ · GÖRÜŞ İÇİNDE</small>","P2<small>GÖRÜŞ ÖTESİ</small>"][Math.min(2,Math.floor(q*3))]}}}
 S.kartlar=kartSahne(false);S.kartlar2=kartSahne(true);
 // 7) YEŞİL BÖLGE: arazi üstünde uçan drone, yeşil daire, çevrede kırmızı yasak bölge

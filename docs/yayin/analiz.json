@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-09T02:19+03:00",
+ "olusturma": "2026-11-09T04:51+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -179,7 +179,7 @@
    "kanal": "Antik Stüdyo",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %100'i tuttu (eşik 511 izlenme / 48 sa)",
+   "neden": "videoların %100'i tuttu (eşik 519 izlenme / 48 sa)",
    "olculen": 4,
    "erken": 6,
    "medyan_48sa": 1691,
@@ -221,11 +221,11 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tablo Serisi",
    "karar": "ARTIR",
-   "neden": "videoların %86'i tuttu (eşik 511 izlenme / 48 sa)",
-   "olculen": 7,
-   "erken": 5,
+   "neden": "videoların %89'i tuttu (eşik 519 izlenme / 48 sa)",
+   "olculen": 9,
+   "erken": 3,
    "medyan_48sa": 1970,
-   "tutma_orani": 86,
+   "tutma_orani": 89,
    "izlenme_yuzde": 50,
    "en_iyi": {
     "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
@@ -236,7 +236,7 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tarihi Magazin",
    "karar": "ARTIR",
-   "neden": "videoların %75'i tuttu (eşik 511 izlenme / 48 sa)",
+   "neden": "videoların %75'i tuttu (eşik 519 izlenme / 48 sa)",
    "olculen": 4,
    "erken": 0,
    "medyan_48sa": 1160,
@@ -315,10 +315,10 @@
   }
  ],
  "esikler": {
-  "Estudio Antiguo": 264,
-  "Kozmos Lab (@kozmoslab)": 50,
-  "Antik Stüdyo": 511,
   "Ancient Studio": 149,
+  "Kozmos Lab (@kozmoslab)": 50,
+  "Estudio Antiguo": 264,
+  "Antik Stüdyo": 519,
   "Kozmos Lab TR (@kozmoslabtr)": 50
  },
  "saatler": {
@@ -326,6 +326,10 @@
    "00:00": {
     "n": 1,
     "medyan": 19
+   },
+   "12:00": {
+    "n": 2,
+    "medyan": 1754
    },
    "13:00": {
     "n": 1,
@@ -402,14 +406,14 @@
  "bulgular": [
   "Dün (2026-11-08) 6827 izlenme geldi; bir önceki gün 14064.",
   "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 149 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 6 tanesi tuttu (eşik 511 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 6 tanesi tuttu (eşik 519 izlenme / 48 sa).",
   "Estudio Antiguo: son 1 Short'tan 1 tanesi tuttu (eşik 264 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %75'i tuttu (eşik 149 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 511 izlenme / 48 sa).",
-  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %86'i tuttu (eşik 511 izlenme / 48 sa).",
-  "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 511 izlenme / 48 sa).",
+  "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %100'i tuttu (eşik 519 izlenme / 48 sa).",
+  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %89'i tuttu (eşik 519 izlenme / 48 sa).",
+  "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 519 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 18:00 (medyan 1970 izlenme, 5 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
@@ -429,6 +433,11 @@
   },
   {
    "kanal": "Antik Stüdyo",
+   "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
+   "i48": 2332
+  },
+  {
+   "kanal": "Antik Stüdyo",
    "baslik": "Yakanda Taşıdığın O Mavi Göz Aslında Kimin Gözü? 🧿 (5.500 Yıllık Sır) #nazar #tarih",
    "i48": 2215
   },
@@ -436,11 +445,6 @@
    "kanal": "Antik Stüdyo",
    "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️",
    "i48": 1982
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "İnci Küpeli Kız'ın incisi gerçek mi? 🖼️",
-   "i48": 1970
   }
  ],
  "en_zayif": [

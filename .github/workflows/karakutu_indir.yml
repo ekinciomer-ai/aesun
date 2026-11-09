@@ -1,0 +1,30 @@
+name: Kara Kutu kamu malı görüntü indir
+# karakutu/<bölüm>/istek.json → ham dosyalar ayrı "karakutu-ham" dalına (<bölüm>/). Ana dal şişmez; diğer işlerden bağımsız.
+on:
+  workflow_dispatch:
+    inputs:
+      istek: {description: "istek dosyası (ör. karakutu/d02_sthelens/istek.json)", required: true}
+permissions: {contents: write}
+concurrency: {group: karakutu-indir}
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: İndir
+        run: |
+          f="${{ inputs.istek }}"; case "$f" in karakutu/*/istek.json) ;; *) echo "geçersiz istek"; exit 1;; esac
+          ad=$(basename $(dirname "$f")); python3 karakutu/arac/kamu_indir.py "$f" "/tmp/ham/$ad"; ls -la /tmp/ham/$ad
+      - name: karakutu-ham dalına koy
+        run: |
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q
+          git config user.name "karakutu-bot"; git config user.email "karakutu-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          if git fetch -q --depth 1 origin karakutu-ham; then git checkout -q -b karakutu-ham FETCH_HEAD; else git checkout -q --orphan karakutu-ham; fi
+          for d in /tmp/ham/*; do ad=$(basename $d); rm -rf "$ad"; mkdir -p "$ad"; cp "$d"/manifest.json "$ad"/; done
+          # büyük video: 95 MB üstü parçalara bölünür (GitHub dosya sınırı 100 MB)
+          for d in /tmp/ham/*; do ad=$(basename $d); for v in "$d"/*.mp4; do [ -f "$v" ] || continue; b=$(basename "$v"); split -b 90m -d "$v" "$ad/$b.part"; done; done
+          git add -A && git commit -qm "Kara Kutu ham görüntü: $(ls /tmp/ham | tr '\n' ' ')" || exit 0
+          for i in 1 2 3; do git push -q origin HEAD:karakutu-ham && break; sleep 5; done
+          du -sh /tmp/ham/*

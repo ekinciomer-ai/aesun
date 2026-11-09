@@ -83,10 +83,10 @@ function plan(mod, b) {
     const D = {t, y: yt, z: zf, halat: L, birak, patla, pervane: patla > 0.3 ? 0.15 : 1, egim: i === 0 ? -0.12 * (1 - sm(0.6, 1, u)) : 0};
     const K = [
       (q) => ({tx: 0, ty: H - 0.6, tz: zf, az: 150 - 10 * q, el: 10, d: 12}),
-      (q) => ({tx: 0, ty: H - 0.1, tz: 0, az: 40 + 12 * q, el: 12, d: 7.5}),
-      (q) => ({tx: 0, ty: 1.7, tz: 0, az: 65, el: 6, d: 18}),
-      (q) => ({tx: 0, ty: Math.max(1.7, yt - 3.6), tz: 0, az: 75 + 10 * q, el: 10, d: 20}),
-      (q) => ({tx: 0, ty: Math.max(2, yt - 4), tz: 0, az: 120 + 12 * q, el: 18, d: 26}),
+      (q) => ({tx: 0, ty: H - 0.4, tz: 0, az: 40 + 12 * q, el: 12, d: 8.5}),
+      (q) => ({tx: 0, ty: 2.1, tz: 0, az: 65, el: 6, d: 21}),
+      (q) => ({tx: 0, ty: Math.max(2.1, yt - 2.6), tz: 0, az: 75 + 10 * q, el: 10, d: 23}),
+      (q) => ({tx: 0, ty: Math.max(2, yt - 2.6), tz: 0, az: 120 + 12 * q, el: 16, d: 28}),
     ];
     const kalan = Math.max(0, Lyer - L0);
     const durum = ['TESLİMAT NOKTASINA YAKLAŞMA', 'AYRIŞTIRILMIŞ GÖRÜNÜM', birak ? 'TESLİM EDİLDİ' : L0 > 0 ? `VİNÇLE İNDİRME · ${tr(kalan, 1)} M KALDI` : 'HAVADA ASILI', 'GERİ DÖNÜŞ · PARAŞÜT HAZIR', 'GÖREV TAMAM'][i];

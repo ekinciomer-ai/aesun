@@ -1105,6 +1105,7 @@ class Collector:
         nxt = {k: 0.0 for k, _ in jobs}
         kod = Path(__file__).resolve()
         kod_mt = kod.stat().st_mtime
+        basla = time.time()
         while True:
             t = time.time()
             try:
@@ -1113,6 +1114,13 @@ class Collector:
                     return
             except OSError:
                 pass
+            # 9 Kas: uzun ömürlü Chromium renderer belleği sızdırıyor (4 günde 2,7 GB RSS + 0,5 GB takas, Pi RAM'i
+            # bitiyor). Süreç 12 saati geçince gece (TSİ 21–04, üretim yok) çık; cron (10 dk, flock) temiz başlatır.
+            # 36 saati geçerse saatten bağımsız çık.
+            yas, saat = t - basla, (time.gmtime(t).tm_hour + 3) % 24
+            if yas > 36 * 3600 or (yas > 12 * 3600 and (saat >= 21 or saat < 5)):
+                log.info("Tarayıcı belleği için periyodik yeniden başlatma (%.1f saat); çıkılıyor", yas / 3600)
+                return
             ran = False
             for k, f in jobs:
                 if t >= nxt[k]:

@@ -189,11 +189,18 @@ def altyazi(d, tz):
             break
 
 KANAL = J["kanal"]; ALT = J["alt"]; KAP = J["kapanis"]
+YUMUSAK = J.get("gecis") == "yumusak"; XF = 0.6
 def kare(fi):
     tz = fi / FPS
     si = next((i for i, (a, b) in enumerate(T) if tz < b + ARA), len(T) - 1)
     sc = B[si]; a, b = T[si]; p = min(1, max(0, (tz - a) / (b - a + ARA)))
     fr = harita_kare(sc, tz, p, a) if "harita" in sc else gorsel_kare(sc, p, tz, a)
+    if YUMUSAK and si + 1 < len(B):
+        a3 = T[si + 1][0]
+        if tz > a3 - XF:  # sonraki sahneye çapraz geçiş
+            sc2 = B[si + 1]; b3 = T[si + 1][1]
+            fr2 = harita_kare(sc2, a3, 0, a3) if "harita" in sc2 else gorsel_kare(sc2, 0, a3, a3 + 1)
+            fr = Image.blend(fr, fr2, eio(min(1, (tz - (a3 - XF)) / XF)))
     fr = kompoze(fr, fi); fr = Image.alpha_composite(fr.convert("RGBA"), GOLGE); d = ImageDraw.Draw(fr, "RGBA")
     if "harita" not in sc: toz(d, tz)
     if si == len(B) - 1:
@@ -211,7 +218,7 @@ def kare(fi):
     while d.textlength(satir, font=ft) > W - 40 * S and ft.size > 9: ft = font("interb", ft.size - 1)
     d.text((W - d.textlength(satir, font=ft) - 22 * S, H - (112 if not YATAY else 40) * S), satir, font=ft, fill=(225, 225, 225), stroke_width=max(1, int(2 * S)), stroke_fill=(0, 0, 0))
     for k, (a3, _) in enumerate(T[1:], 1):
-        if abs(tz - a3) < 0.12: d.rectangle((0, 0, W, H), fill=(250, 240, 220, int(170 * (1 - abs(tz - a3) / 0.12))))
+        if not YUMUSAK and abs(tz - a3) < 0.12: d.rectangle((0, 0, W, H), fill=(250, 240, 220, int(170 * (1 - abs(tz - a3) / 0.12))))
     if tz < 0.25: d.rectangle((0, 0, W, H), fill=(0, 0, 0, int(255 * (1 - tz / 0.25))))
     if tz > TOPLAM - 0.6: d.rectangle((0, 0, W, H), fill=(0, 0, 0, int(255 * min(1, (tz - (TOPLAM - 0.6)) / 0.6))))
     return fr.convert("RGB")

@@ -1,0 +1,51 @@
+# Çatışma bekçisi (Ömer onayı, 9 Kas 2026): bir eşitleme (ör. STAR) dosyalara git çatışma işaretleri (<<<<<<<) bırakırsa
+# ya da docs altındaki bir JSON bozulursa, o dosyayı geçmişteki son sağlam sürümüne döndürür. Hiçbir şey silinmez (geçmiş git'te kalır).
+name: Çatışma bekçisi
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+concurrency: { group: catisma-bekci, cancel-in-progress: false }
+permissions: { contents: write }
+jobs:
+  bekci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 200 }
+      - name: Bozuk dosyaları bul ve onar
+        run: |
+          set -e
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          python3 - <<'PY'
+          import json, subprocess, ast
+          def sh(*a): return subprocess.run(a, capture_output=True, text=True).stdout
+          dosyalar = [f for f in sh("git", "grep", "-l", "^<<<<<<< ", "--", "*.json", "*.py", "*.html", "*.js", "*.sh", "*.yml", "*.md").split() if f]
+          for f in sh("git", "ls-files", "docs/*.json", "docs/**/*.json").split():
+              try: json.load(open(f, encoding="utf-8"))
+              except Exception:
+                  if f not in dosyalar: dosyalar.append(f)
+          def saglam(f, icerik):
+              if ("\n" + icerik).find("\n<<<<<<< ") >= 0 or icerik.find("\n>>>>>>> ") >= 0: return False
+              if f.endswith(".json"):
+                  try: json.loads(icerik); return True
+                  except Exception: return False
+              if f.endswith(".py"):
+                  try: ast.parse(icerik); return True
+                  except Exception: return False
+              return True
+          onarilan = []
+          for f in dosyalar:
+              for c in sh("git", "log", "--format=%H", "-60", "--", f).split()[1:]:
+                  r = subprocess.run(["git", "show", f"{c}:{f}"], capture_output=True, text=True)
+                  if r.returncode == 0 and saglam(f, r.stdout):
+                      open(f, "w", encoding="utf-8").write(r.stdout); onarilan.append(f"{f} <- {c[:7]}"); break
+          print("onarılan:", onarilan or "yok")
+          open("/tmp/onarilan.txt", "w").write("\n".join(onarilan))
+          PY
+          if [ -s /tmp/onarilan.txt ]; then
+            git add -A; git commit -m "Çatışma bekçisi: bozuk dosyalar son sağlam sürüme döndü" -m "$(cat /tmp/onarilan.txt)"
+            for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+          fi

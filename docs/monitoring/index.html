@@ -959,7 +959,7 @@ function mfGesfin(fg) {
   for (const f of ((fg && fg.faturalar) || [])) {
     if (String(f.tesisat || '').replace(/^0+/, '') !== MF_TES) continue;
     const ay = String(f.tarih || '').slice(0, 7); if (!/^\d{4}-\d{2}$/.test(ay)) continue;
-    const x = { kaynak: 'Fatura sistemi' + (f.tedarikci ? ' · ' + f.tedarikci : '') + (f.no ? ' · ' + f.no : ''), ham_kwh: null, aktif_tl: null, dagitim_tl: null, gecikme_tl: 0, fatura_tl: +f.odenecek || +f.toplam || null };
+    const x = { kaynak: 'Fatura sistemi (gesfin)' + (f.tedarikci ? ' · ' + f.tedarikci : '') + (f.no ? ' · ' + f.no : ''), ham_kwh: null, aktif_tl: null, dagitim_tl: null, gecikme_tl: 0, fatura_tl: +f.odenecek || +f.toplam || null };
     for (const k of (f.kalemler || [])) {
       const a = String(k.a || '').toLocaleLowerCase('tr-TR'); let m = k.m == null ? null : +k.m; const tl = +k.ara || +k.t || 0;
       if (m > 0 && tl / m > 40) m *= 1000;
@@ -975,7 +975,8 @@ async function mfYukle(taze) {
   const [k, g] = await Promise.all([al(MF_YOL, taze).catch(() => null), fatYukle().catch(() => null)]);
   MF.kayit = (k && k.aylar) || {}; MF.gesfin = mfGesfin(g); MF.yuklendi = true;
 }
-function mfAylar() { return Object.assign({}, MF.gesfin || {}, MF.kayit || {}); }
+// Öncelik fatura sistemi (gesfin); orada olmayan ay için elle / PDF kaydı
+function mfAylar() { return Object.assign({}, MF.kayit || {}, MF.gesfin || {}); }
 function mfHesap(ay, f) {
   const r = aySonuc(D.osos, ay), M = r.ab.A3 || 0, H = +f.ham_kwh, akt = +f.aktif_tl, dag = +f.dagitim_tl;
   const gec = +f.gecikme_tl || 0, mb = M * MF_B, net = akt - mb, btv = net * 0.01, od = (net + dag + btv + gec) * 1.2;
@@ -1013,7 +1014,7 @@ function mfTablo(h) {
   return '<section class="panel" style="gap:12px"><div class="bas"><h2>' + ayAd + ' · Aksaray 3 (' + MF_TES + ')</h2><span class="k">' + esc(h.f.kaynak || '') + '</span></div>'
     + '<div class="iki" style="align-items:start">' + t1 + t2 + '</div>'
     + (not.length ? '<div class="k">' + not.map(esc).join('<br>') + '</div>' : '')
-    + (MF.kayit && MF.kayit[h.ay] ? '<div><button class="btn" type="button" onclick="mfSil(\'' + h.ay + '\')">Bu ayın elle eklenen kaydını sil</button></div>' : '') + '</section>';
+    + (MF.kayit && MF.kayit[h.ay] && !(MF.gesfin && MF.gesfin[h.ay]) ? '<div><button class="btn" type="button" onclick="mfSil(\'' + h.ay + '\')">Bu ayın elle eklenen kaydını sil</button></div>' : '') + '</section>';
 }
 function mfKarsilastir(L) {
   if (!L.length) return '';
@@ -1100,7 +1101,7 @@ function mfCiz() {
   el.innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">'
     + (aylar.length ? sec + mfTablo(h) + mfKarsilastir(L) : '<div class="panel"><div class="k">Henüz A3 faturası yok. Aşağıdan PDF ile ekleyin.</div></div>')
     + mfFormHtml()
-    + '<div class="k">Mahsup kWh bu sayfadaki saatlik havuz hesabından (Aksaray 3 payı) gelir. Mahsup birim fiyatı ' + say(MF_B, 6) + ' ₺/kWh (KDV hariç). Elle/PDF kaydı fatura sistemindeki faturanın önüne geçer.</div></div>';
+    + '<div class="k">Mahsup kWh bu sayfadaki saatlik havuz hesabından (Aksaray 3 payı) gelir. Mahsup birim fiyatı ' + say(MF_B, 6) + ' ₺/kWh (KDV hariç). Fatura sistemindeki (gesfin) fatura önceliklidir; elle / PDF kaydı yalnız orada olmayan ay için kullanılır.</div></div>';
 }
 // Seçili ayın günlük mahsup dökümü: yığılmış çubuk (üretim = mahsup + bedelli, tüketim = mahsup + şebeke) ve tablo
 function ayMahsupBolum(ayKod, gunler, ta) {

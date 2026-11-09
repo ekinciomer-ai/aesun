@@ -140,5 +140,5 @@ with sync_playwright() as p:
             except Exception: pass
 print("===TT==="); print(json.dumps(sonuc, ensure_ascii=False)); print("===SON===")
 PY
-docker run --rm --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/yukle.py" 2>&1 | grep -v "^\s*$"
+docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/yukle.py" 2>&1 | grep -v "^\s*$"
 rm -f "$KOK/is/"*.mp4

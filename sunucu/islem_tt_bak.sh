@@ -20,4 +20,4 @@ with sync_playwright() as p:
         except Exception: pass
     pg.screenshot(path="/work/adim/bak.png"); pg.close()
 PY
-docker run --rm --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/bak.py" 2>&1 | grep "^NOT:"
+docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/bak.py" 2>&1 | grep "^NOT:"

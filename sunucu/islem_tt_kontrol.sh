@@ -19,4 +19,4 @@ with sync_playwright() as p:
     for l in sat[:40]: print("NOT: |", l[:100])
     pg.close()
 PY
-docker run --rm --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/kontrol.py" 2>&1 | grep "^NOT:" | head -45
+docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/kontrol.py" 2>&1 | grep "^NOT:" | head -45

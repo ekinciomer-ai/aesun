@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 """Kask Kamerası B1 · Shorts 1 (TR) önizleme kurgusu.
 python3 birlestir.py <ham klasörü (kozmos-ham dalı)> <çalışma klasörü (canlandırma mp4'leri burada)> <çıktı.mp4>"""
 import json, os, re, subprocess, sys
@@ -119,4 +117,3 @@ run(["ffmpeg", "-v", "error", "-y", "-i", f"{P_}/goruntu.mp4", "-i", f"{P_}/anla
      "-filter_complex", fc, "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "19", "-c:a", "aac", "-b:a", "192k",
      "-t", str(TOPLAM), "-movflags", "+faststart", OUT])
 print("bitti", OUT, TOPLAM, "sn")
->>>>>>> e5bcd78cd1d43e11dd65d82b2ba0cd8519004c4e

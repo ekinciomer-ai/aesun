@@ -21,7 +21,7 @@ def HR(merkez, zoom, noktalar, bas=None, yol=None, bz=0.55):
     if bas: s["bas"] = bas
     return s
 KANAL = {"tr": "ANTİK STÜDYO", "en": "ANCIENT STUDIO", "es": "ESTUDIO ANTIGUO"}
-KAP = {"tr": "YORUMLARA YAZ 👇", "en": "TELL ME IN THE COMMENTS", "es": "TE LEO EN COMENTARIOS"}
+KAP = {"tr": "YORUMLARA YAZ", "en": "TELL ME IN THE COMMENTS", "es": "TE LEO EN COMENTARIOS"}
 ALT = {"tr": "Görseller: kamu malı / Wikimedia Commons · Harita: Natural Earth · Ses: yapay zekâ ile klonlanmış ses",
        "en": "Images: public domain / Wikimedia Commons · Map: Natural Earth · Voice: AI-cloned voice",
        "es": "Imágenes: dominio público / Wikimedia Commons · Mapa: Natural Earth · Voz: clonada con IA"}
@@ -72,7 +72,7 @@ V["S1_TABLO", "es"] = ("TABLO_GOTIK", "La familia de Carlos IV", [
 IST = [28.98, 41.02]
 def ist_harita(bas, et):
     return HR([29.0, 40.9], 260, [[28.97, 41.03, et, 1, -60, True]], bas, bz=0.15)
-GEMI = ("fatih_gemi_1", "fatih_gemi2_1", "fatih_minyatur_1", "fatih_kusatma_1")
+GEMI = ("fatih_gemi2_3", "fatih_minyatur_1")
 V["S2_GEMI", "tr"] = ("FATIH_GEMI", "Fatih'in gemileri", [
     I(GEMI, None, None, ("BİR GECEDE", "70 GEMİ", "KARADAN!")),
     ist_harita(("NİSAN 1453", "İSTANBUL", "KUŞATMASI"), "İSTANBUL"),
@@ -81,9 +81,9 @@ V["S2_GEMI", "tr"] = ("FATIH_GEMI", "Fatih'in gemileri", [
     I("fatih_bellini", [0.15, 0.1, 0.85, 0.7], None, ("21 YAŞINDA", "FATİH", "ÇILGIN PLAN")),
     I("fatih_harita_2", [0.2, 0.0, 1.0, 0.6], [0.45, 0.0, 1.0, 0.45], ("GALATA", "YAĞLI", "KALASLAR")),
     I(GEMI, [0.0, 0.0, 0.7, 1.0], [0.3, 0.0, 1.0, 1.0], ("İNSAN VE HAYVAN GÜCÜ", "YELKENLER", "AÇIK!")),
-    I(("fatih_halic_2", "fatih_halic_1"), None, None, ("22 NİSAN SABAHI", "GEMİLER", "HALİÇ'TE!")),
+    I("fatih_minyatur_1", [0.0, 0.35, 1.0, 0.85], [0.1, 0.5, 0.9, 1.0], ("22 NİSAN SABAHI", "GEMİLER", "HALİÇ'TE!")),
     I("fatih_harita_1", None, None, ("ZİNCİR", "İŞE", "YARAMADI")),
-    I("fatih_bellini", None, None, ("37 GÜN SONRA", "FETİH", "")),
+    I("fatih_gemi2_1", None, None, ("37 GÜN SONRA", "FETİH", "")),
 ])
 V["S2_GEMI", "en"] = ("FATIH_GEMI", "Ships over land", [
     I(GEMI, None, None, ("70 WARSHIPS", "OVER", "A HILL!")),
@@ -93,9 +93,9 @@ V["S2_GEMI", "en"] = ("FATIH_GEMI", "Ships over land", [
     I("fatih_bellini", [0.15, 0.1, 0.85, 0.7], None, ("AGE 21", "SULTAN MEHMED", "A CRAZY PLAN")),
     I("fatih_harita_2", [0.2, 0.0, 1.0, 0.6], [0.45, 0.0, 1.0, 0.45], ("BEHIND GALATA", "GREASED", "LOGS")),
     I(GEMI, [0.0, 0.0, 0.7, 1.0], [0.3, 0.0, 1.0, 1.0], ("MEN & OXEN", "SAILS", "UP!")),
-    I(("fatih_halic_2", "fatih_halic_1"), None, None, ("APRIL 22", "FLEET", "INSIDE!")),
+    I("fatih_minyatur_1", [0.0, 0.35, 1.0, 0.85], [0.1, 0.5, 0.9, 1.0], ("APRIL 22", "FLEET", "INSIDE!")),
     I("fatih_harita_1", None, None, ("", "CHAIN", "USELESS")),
-    I("fatih_bellini", None, None, ("37 DAYS LATER", "THE CITY", "FALLS")),
+    I("fatih_gemi2_1", None, None, ("37 DAYS LATER", "THE CITY", "FALLS")),
 ])
 V["S2_GEMI", "es"] = ("FATIH_GEMI", "Barcos por tierra", [
     I(GEMI, None, None, ("70 BARCOS", "POR ENCIMA", "DE UNA COLINA")),
@@ -105,9 +105,9 @@ V["S2_GEMI", "es"] = ("FATIH_GEMI", "Barcos por tierra", [
     I("fatih_bellini", [0.15, 0.1, 0.85, 0.7], None, ("21 AÑOS", "MEHMED", "IDEA DE LOCOS")),
     I("fatih_harita_2", [0.2, 0.0, 1.0, 0.6], [0.45, 0.0, 1.0, 0.45], ("GÁLATA", "TRONCOS", "CON GRASA")),
     I(GEMI, [0.0, 0.0, 0.7, 1.0], [0.3, 0.0, 1.0, 1.0], ("HOMBRES Y BUEYES", "VELAS", "DESPLEGADAS")),
-    I(("fatih_halic_2", "fatih_halic_1"), None, None, ("22 DE ABRIL", "LA FLOTA", "¡DENTRO!")),
-    I(("es_cortes_1", "es_cortes2"), None, None, ("MÉXICO · 1521", "CORTÉS", "13 BERGANTINES")),
-    I(("es_cortes2", "fatih_bellini"), None, None, ("DOS IMPERIOS", "LA MISMA", "IDEA LOCA")),
+    I("fatih_minyatur_1", [0.0, 0.35, 1.0, 0.85], [0.1, 0.5, 0.9, 1.0], ("22 DE ABRIL", "LA FLOTA", "¡DENTRO!")),
+    I(("es_cortes2",), None, None, ("MÉXICO · 1521", "CORTÉS", "13 BERGANTINES")),
+    I("fatih_gemi2_3", None, None, ("DOS IMPERIOS", "LA MISMA", "IDEA LOCA")),
 ])
 # ---------------- S3 ----------------
 HAP = ("hap_hapsirik_2",); GREG = ("hap_gregory3", "hap_gregory4", "hap_gregory_2"); PROC = ("hap_procesion", "hap_veba_1")

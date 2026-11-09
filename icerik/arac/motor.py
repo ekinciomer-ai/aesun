@@ -199,7 +199,7 @@ def kare(fi):
     if si == len(B) - 1:
         g = ease(min(1, max(0, (tz - a - 1.0) / 0.5)))
         if g > 0:
-            ft = font("inter", 46 * S); tw = d.textlength(KAP, font=ft); bx, by = (W - tw) / 2 - 36 * S, (560 * S if not YATAY else H * 0.42)
+            ft = font("inter", 46 * S); tw = d.textlength(KAP, font=ft); bx, by = (W - tw) / 2 - 36 * S, (1300 * S if not YATAY else H * 0.42)
             d.rounded_rectangle((bx, by, bx + tw + 72 * S, by + 92 * S), 22 * S, fill=(200, 30, 30, int(235 * g)), outline=(255, 255, 255, int(255 * g)), width=max(1, int(3 * S)))
             d.text(((W - tw) / 2, by + 20 * S), KAP, font=ft, fill=(255, 255, 255, int(255 * g)))
     baslik(d, sc.get("bas"), tz, a); altyazi(d, tz)

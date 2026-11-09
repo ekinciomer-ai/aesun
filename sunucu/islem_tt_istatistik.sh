@@ -38,4 +38,4 @@ with sync_playwright() as p:
 print(f"NOT: {len(out['gonderiler'])} gönderi okundu · hesap 7 gün: {out['hesap']}")
 print("===TT==="); print(json.dumps(out, ensure_ascii=False)); print("===SON===")
 PY
-docker run --rm --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/istatistik.py" 2>&1 | grep -v "pip\|^\s*$"
+docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/istatistik.py" 2>&1 | grep -v "pip\|^\s*$"

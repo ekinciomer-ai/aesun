@@ -45,6 +45,6 @@ except SystemExit: raise
 except Exception as e:
     print(f"NOT: HATA {type(e).__name__}: {str(e)[:200]}"); ss(9); traceback.print_exc(); raise SystemExit(1)
 PY
-docker run --rm --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/sil.py" 2>&1 \
+docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/sil.py" 2>&1 \
   | awk '/^NOT:/{print; next} {print "NOT: çıktı: " substr($0,1,200)}'
 exit "${PIPESTATUS[0]}"

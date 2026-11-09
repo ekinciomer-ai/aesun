@@ -42,4 +42,4 @@ with sync_playwright() as p:
         if ilg: print(f"NOT: video {vid[:19]} uyarı:", " | ".join(ilg)[:300])
     pg.screenshot(path="/work/adim/tani_son.png"); pg.close()
 PY
-docker run --rm --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/tani.py" 2>&1 | awk '/^NOT:/{print; next} {print "NOT: çıktı: " substr($0,1,200)}'
+docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/tani.py" 2>&1 | awk '/^NOT:/{print; next} {print "NOT: çıktı: " substr($0,1,200)}'

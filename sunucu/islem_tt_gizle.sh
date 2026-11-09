@@ -50,4 +50,4 @@ with sync_playwright() as p:
     print("NOT: sonuç:", " | ".join(x.strip() for x in t.splitlines() if x.strip())[:200])
     pg.close()
 PY
-docker run --rm --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/gizle.py" 2>&1 | grep "^NOT:"
+docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/gizle.py" 2>&1 | grep "^NOT:"

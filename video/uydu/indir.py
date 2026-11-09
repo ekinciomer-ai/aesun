@@ -4,7 +4,8 @@ from PIL import Image
 import numpy as np
 W = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi"
 istek = json.load(open(sys.argv[1]))
-sec = {}
+import os
+sec = json.load(open("secim.json")) if os.path.exists("secim.json") else {}
 for ad, r in istek.items():
     s, w, n, e = r["bbox"]
     gen = r.get("w", 2048); yuk = int(gen * (n - s) / (e - w)) if not r.get("h") else r["h"]

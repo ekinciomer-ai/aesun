@@ -33,7 +33,9 @@ def yol(p): return p if os.path.isabs(p) else os.path.join(JD, p)
 
 M = J["metin"]; SES = [yol(p) for p in J["ses"]]; B = J["sahneler"]
 assert len(M) == len(SES) == len(B), (len(M), len(SES), len(B))
-def sure(p): return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", p]))
+def _sure(p): return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", p]))
+HIZ = float(J.get("ses_hiz", 1.0))
+def sure(p): return _sure(p) / HIZ
 D = [sure(p) for p in SES]; ARA = J.get("ara", 0.28 if not YATAY else 0.45); KUYRUK = 1.6
 T = []; t = 0.0
 for d in D: T.append((t, t + d)); t += d + ARA
@@ -234,7 +236,7 @@ subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "anullsrc=r=
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", str(KUYRUK), f"{tmp}/k.wav"], check=True)
 with open(f"{tmp}/l.txt", "w") as f:
     for i, pth in enumerate(SES):
-        w = f"{tmp}/p{i}.wav"; subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", pth, "-ar", "44100", "-ac", "1", w], check=True)
+        w = f"{tmp}/p{i}.wav"; subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", pth, *(["-filter:a", f"atempo={HIZ}"] if HIZ != 1.0 else []), "-ar", "44100", "-ac", "1", w], check=True)
         f.write(f"file '{w}'\n" + (f"file '{tmp}/a.wav'\n" if i < len(SES) - 1 else f"file '{tmp}/k.wav'\n"))
 sesg = f"{tmp}/ses.wav"
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", f"{tmp}/l.txt", sesg], check=True)

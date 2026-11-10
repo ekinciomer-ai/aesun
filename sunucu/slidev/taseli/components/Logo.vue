@@ -10,5 +10,5 @@
 </template>
 <style scoped>
 .logo{display:flex;align-items:center;gap:9px;font-family:Archivo,sans-serif;letter-spacing:.12em;font-size:.8rem}
-.logo b{color:#e9eaec;font-weight:800}.logo i{font-style:normal;color:#ff3b47;font-weight:800}
+.logo b{color:#23262b;font-weight:800}.logo i{font-style:normal;color:#d6182b;font-weight:800}
 </style>

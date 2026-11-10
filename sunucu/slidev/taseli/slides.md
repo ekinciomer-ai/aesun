@@ -2,7 +2,7 @@
 theme: default
 title: Taşeli GES – İş Planı
 info: Aksaray Enerji · Taşeli GES mekanik ve elektrik montaj iş planı
-colorSchema: dark
+colorSchema: light
 transition: fade
 aspectRatio: 16/9
 canvasWidth: 1000

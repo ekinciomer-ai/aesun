@@ -36,8 +36,18 @@ jobs:
           $S "rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket && tar xzf - -C /tmp/aesun_paket && cd /tmp/aesun_paket && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/aesun_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
           kod=${PIPESTATUS[0]}
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
+          # tampon çıktıları (varsa) geri getirilir: sunucuda /opt/tampon/disari/*.tgz
+          $S "cd /opt/tampon/disari 2>/dev/null && ls *.tgz >/dev/null 2>&1 && tar cf - *.tgz && rm -f *.tgz" > /tmp/disari.tar 2>/dev/null || true
+          [ -s /tmp/disari.tar ] && mkdir -p /tmp/disari && tar xf /tmp/disari.tar -C /tmp/disari || true
           rm -f ~/.ssh/k
           exit $kod
+      - name: Tampon çıktıları
+        if: always() && hashFiles('/tmp/disari/*.tgz') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: disari
+          path: /tmp/disari/*.tgz
+          retention-days: 3
       - name: Duman testi (bilgi)
         if: always()
         run: python3 izleme/duman_testi.py ns1 cpanel demo || echo "::warning::uçlardan biri yanıt vermiyor (yukarıdaki listeye bakın)"

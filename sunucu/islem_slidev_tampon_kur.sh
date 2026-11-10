@@ -7,7 +7,7 @@ IMG=mcr.microsoft.com/playwright:v1.58.2-noble
 docker image inspect $IMG >/dev/null 2>&1 || docker pull -q $IMG >/dev/null
 cat > $D/proje/calis.sh <<'IS'
 #!/bin/bash
-cd /work; t0=$(date +%s); echo "başladı $(date +%H:%M)"
+exec 2>&1; set -x; cd /work; t0=$(date +%s); echo "başladı $(date +%H:%M)"
 [ -f package.json ] || npm init -y >/dev/null
 [ -d node_modules/@slidev/cli ] || npm i -s --no-audit --no-fund @slidev/cli @slidev/theme-default playwright-chromium@1.58.2 >npm.log 2>&1 || { tail -15 npm.log; echo BITTI; exit 1; }
 echo "slidev $(npx slidev --version 2>/dev/null) kuruldu ($(( $(date +%s)-t0 )) sn)"
@@ -21,5 +21,5 @@ done
 echo "toplam $(( $(date +%s)-t0 )) sn"; echo BITTI
 IS
 chmod +x $D/proje/calis.sh
-docker rm -f slidev-tampon >/dev/null 2>&1
-docker run -d --name slidev-tampon -m 3g --cpus 2 -v $D/proje:/work -v /opt/tampon/disari:/disari $IMG bash -c '/work/calis.sh > /work/sonuc.txt 2>&1' >/dev/null && echo "NOT: Slidev kapsayıcısı başladı (ayrık)" || echo "NOT: HATA kapsayıcı başlamadı"
+docker rm -f slidev-uretim >/dev/null 2>&1
+docker run -d --name slidev-uretim -m 3g --cpus 2 -v $D/proje:/work -v /opt/tampon/disari:/disari $IMG bash -c '/work/calis.sh > /work/sonuc.txt 2>&1' >/dev/null && echo "NOT: Slidev kapsayıcısı başladı (ayrık)" || echo "NOT: HATA kapsayıcı başlamadı"

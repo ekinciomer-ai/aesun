@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-10T06:09+03:00",
+ "olusturma": "2026-11-10T06:39+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -108,13 +108,16 @@
    "kanal": "Ancient Studio",
    "seri": "Quote of the Day",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 25,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "A journey of a thousand miles begins with a single step 🏔️ | Lao Tzu #shorts",
+    "i48": 25
+   }
   },
   {
    "kanal": "Ancient Studio",
@@ -270,13 +273,16 @@
    "kanal": "Estudio Antiguo",
    "seri": "Frase del Día",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 1,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Un viaje de mil millas comienza con un solo paso 🏔️ | Lao Tzu #shorts",
+    "i48": 1
+   }
   },
   {
    "kanal": "Estudio Antiguo",
@@ -355,10 +361,10 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 188,
   "Antik Stüdyo": 637,
-  "Estudio Antiguo": 264,
   "Kozmos Lab TR (@kozmoslabtr)": 50,
+  "Ancient Studio": 188,
+  "Estudio Antiguo": 132,
   "Kozmos Lab (@kozmoslab)": 50
  },
  "saatler": {
@@ -410,8 +416,8 @@
     "medyan": 902
    },
    "14:00": {
-    "n": 1,
-    "medyan": 7
+    "n": 2,
+    "medyan": 16
    },
    "17:00": {
     "n": 3,
@@ -431,6 +437,10 @@
    }
   },
   "Estudio Antiguo": {
+   "14:00": {
+    "n": 1,
+    "medyan": 1
+   },
    "23:00": {
     "n": 1,
     "medyan": 1320
@@ -451,7 +461,7 @@
   "Dün (2026-11-09) 9181 izlenme geldi; bir önceki gün 6827.",
   "Ancient Studio: son 6 Short'tan 3 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 4 tanesi tuttu (eşik 637 izlenme / 48 sa).",
-  "Estudio Antiguo: son 1 Short'tan 1 tanesi tuttu (eşik 264 izlenme / 48 sa).",
+  "Estudio Antiguo: son 2 Short'tan 1 tanesi tuttu (eşik 132 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %80'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -493,11 +503,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Ancient Studio",
-   "baslik": "Did 1700s royal women really have LIVE MICE in their hair?! 🐭👑 #shorts #history #fyp",
-   "i48": 7
-  },
-  {
    "kanal": "Antik Stüdyo",
    "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
    "i48": 4
@@ -506,6 +511,11 @@
    "kanal": "Ancient Studio",
    "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
    "i48": 2
+  },
+  {
+   "kanal": "Estudio Antiguo",
+   "baslik": "Un viaje de mil millas comienza con un solo paso 🏔️ | Lao Tzu #shorts",
+   "i48": 1
   },
   {
    "kanal": "Ancient Studio",

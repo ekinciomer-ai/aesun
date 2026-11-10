@@ -38,15 +38,15 @@ jobs:
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
           # tampon çıktıları (varsa) geri getirilir: sunucuda /opt/tampon/disari/*.tgz
           $S "cd /opt/tampon/disari 2>/dev/null && ls *.tgz >/dev/null 2>&1 && tar cf - *.tgz && rm -f *.tgz" > /tmp/disari.tar 2>/dev/null || true
-          [ -s /tmp/disari.tar ] && mkdir -p /tmp/disari && tar xf /tmp/disari.tar -C /tmp/disari || true
+          [ -s /tmp/disari.tar ] && mkdir -p disari && tar xf /tmp/disari.tar -C disari || true
           rm -f ~/.ssh/k
           exit $kod
       - name: Tampon çıktıları
-        if: always() && hashFiles('/tmp/disari/*.tgz') != ''
+        if: always() && hashFiles('disari/*.tgz') != ''
         uses: actions/upload-artifact@v4
         with:
           name: disari
-          path: /tmp/disari/*.tgz
+          path: disari/*.tgz
           retention-days: 3
       - name: Duman testi (bilgi)
         if: always()

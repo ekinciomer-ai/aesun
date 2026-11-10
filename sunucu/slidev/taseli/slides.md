@@ -5,6 +5,8 @@ info: Aksaray Enerji · Taşeli GES mekanik ve elektrik montaj iş planı
 colorSchema: light
 transition: slide-left
 aspectRatio: 16/9
+routerMode: hash
+download: false
 canvasWidth: 1100
 fonts:
   sans: Inter

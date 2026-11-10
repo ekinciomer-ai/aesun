@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-10T12:40+03:00",
+ "olusturma": "2026-11-10T14:01+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -339,13 +339,16 @@
    "kanal": "Kozmos Lab (@kozmoslab)",
    "seri": "How It's Made",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 2,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "How does a handful of sand become a solar panel? ☀️ #shorts",
+    "i48": 2
+   }
   },
   {
    "kanal": "Kozmos Lab TR (@kozmoslabtr)",
@@ -376,10 +379,10 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab (@kozmoslab)": 50,
   "Antik Stüdyo": 637,
-  "Estudio Antiguo": 132,
   "Ancient Studio": 188,
+  "Kozmos Lab (@kozmoslab)": 50,
+  "Estudio Antiguo": 132,
   "Kozmos Lab TR (@kozmoslabtr)": 179
  },
  "saatler": {
@@ -466,6 +469,12 @@
     "n": 1,
     "medyan": 893
    }
+  },
+  "Kozmos Lab (@kozmoslab)": {
+   "22:00": {
+    "n": 1,
+    "medyan": 2
+   }
   }
  },
  "eylemler": [
@@ -483,6 +492,7 @@
   "Ancient Studio: son 6 Short'tan 3 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 2 Short'tan 1 tanesi tuttu (eşik 132 izlenme / 48 sa).",
+  "Kozmos Lab (@kozmoslab): son 1 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR (@kozmoslabtr): son 1 Short'tan 1 tanesi tuttu (eşik 179 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -525,13 +535,13 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
-   "i48": 4
-  },
-  {
    "kanal": "Ancient Studio",
    "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
+   "i48": 2
+  },
+  {
+   "kanal": "Kozmos Lab (@kozmoslab)",
+   "baslik": "How does a handful of sand become a solar panel? ☀️ #shorts",
    "i48": 2
   },
   {

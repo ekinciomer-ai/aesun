@@ -331,7 +331,8 @@ const AB = { T1: 'tekyildiz_1', T2: 'tekyildiz_2', A3: 'aksaray_3' };
 function saatVeri(osos, gun, s) {
   const v = k => ((((osos[AB[k]] || {}).veri || {})[gun] || {})[s]) || null;
   const x1 = v('T1'), x2 = v('T2'), x3 = v('A3');
-  return { var: !!(x1 || x2 || x3), u: { T1: x1 ? +x1.veris || 0 : 0, T2: x2 ? +x2.veris || 0 : 0 }, t: { T1: x1 ? +x1.cekis || 0 : 0, T2: x2 ? +x2.cekis || 0 : 0, A3: x3 ? +x3.cekis || 0 : 0 } };
+  const n = (x, f) => { const d = x ? +x[f] || 0 : 0; return d > 0 ? d : 0; };   // negatif = bozuk okuma (sayaç değişimi / endeks sıfırlanması) → 0
+  return { var: !!(x1 || x2 || x3), u: { T1: n(x1, 'veris'), T2: n(x2, 'veris') }, t: { T1: n(x1, 'cekis'), T2: n(x2, 'cekis'), A3: n(x3, 'cekis') } };
 }
 // Ofis paneli "kaynak takipli havuz": üreticiler büyükten küçüğe; her üreticiden önce T2, sonra A3, en son T1; artan bedelli
 function havuz(u, t) {
@@ -944,7 +945,8 @@ function cizSayac() {
       + '<section class="panel"><h2>Üretim nereye gitti</h2>' + kaySatir + '<div class="k">Büyük üretici önce işlenir; kalan üretim bedelli satılır.</div></section></div>'
       + '<h2>Saatlik mahsup</h2><div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol" rowspan="2">Saat</th><th class="ayr" colspan="3" style="text-align:center">Üretim</th><th class="ayr" colspan="4" style="text-align:center">Tüketim</th><th class="ayr" colspan="4" style="text-align:center">Mahsuplaşan</th><th class="ayr" colspan="2" style="text-align:center">Kalan</th></tr>'
       + '<tr><th class="ayr">T1</th><th>T2</th><th>Toplam</th><th class="ayr">T1</th><th>T2</th><th>A3</th><th>Toplam</th><th class="ayr">T2</th><th>A3</th><th>T1</th><th>Toplam</th><th class="ayr">Bedelli</th><th>Şebekeden</th></tr></thead><tbody>' + satir + '</tbody></table></div>'
-      + (ayGun.length ? ayMahsupBolum(ayKod, ayGun, ta) : '');
+      + (ayGun.length ? ayMahsupBolum(ayKod, ayGun, ta) : '')
+      + donemOzet(osos);
   }
   document.getElementById('icerik').innerHTML = '<div style="display:flex;flex-direction:column;gap:20px">' + sekmeHtml + govde + '</div>';
   if (sekme === 'fatura' && PARA) mfCiz();
@@ -1120,6 +1122,36 @@ function mfCiz() {
     + '<div class="k">Mahsup kWh bu sayfadaki saatlik havuz hesabından (Aksaray 3 payı) gelir. Mahsup birim fiyatı ' + say(MF_B, 6) + ' ₺/kWh (KDV hariç). Fatura sistemindeki (gesfin) fatura önceliklidir; elle / PDF kaydı yalnız orada olmayan ay için kullanılır.</div></div>';
 }
 // Seçili ayın günlük mahsup dökümü: yığılmış çubuk (üretim = mahsup + bedelli, tüketim = mahsup + şebeke) ve tablo
+// İlk sayaç verisinden bugüne aylık mahsup özeti (yıl ara toplamları + genel toplam)
+let DONEM_ON = null;
+function donemOzet(osos) {
+  const a3 = (osos.aksaray_3 || {}).veri || {}, t1 = (osos.tekyildiz_1 || {}).veri || {};
+  const anahtar = Object.keys(t1).length + ':' + Object.keys(a3).length + ':' + (sonOsosSaati(osos) || '');
+  if (DONEM_ON && DONEM_ON.k === anahtar) return DONEM_ON.h;
+  const ilk = Object.keys(t1).sort()[0]; if (!ilk) return '';
+  const bugun = bugunTR().slice(0, 7), aylar = [];
+  for (let [y, m] = ilk.slice(0, 7).split('-').map(Number); ; ) { const k = y + '-' + String(m).padStart(2, '0'); if (k > bugun) break; aylar.push(k); if (++m > 12) { m = 1; y++; } }
+  const S = aylar.map(ay => {
+    const r = aySonuc(osos, ay), gs = new Date(Date.UTC(+ay.slice(0, 4), +ay.slice(5), 0)).getUTCDate();
+    const son = ay === bugun ? +bugunTR().slice(8, 10) : gs;
+    const a3g = Object.keys(a3).filter(g => g.startsWith(ay)).length;
+    return { ay, U: r.uretim, T: r.tuketim, M: r.mahsup, A3: r.ab.A3 || 0, B: r.bedelli, eksik: a3g < son ? son - a3g : 0, aylik: r.aylik };
+  });
+  const top = L => L.reduce((t, x) => { for (const k of ['U', 'T', 'M', 'A3', 'B']) t[k] += x[k]; return t; }, { U: 0, T: 0, M: 0, A3: 0, B: 0 });
+  const satir = (ad, x, cls, not) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="sol">' + ad + '</td><td>' + say(x.U) + '</td><td>' + say(x.T) + '</td><td><b>' + say(x.M) + '</b></td><td>' + say(x.A3) + '</td><td>' + say(x.B) + '</td><td class="sol k" style="white-space:normal">' + (not || '') + '</td></tr>';
+  let g = '', yil = null;
+  const yillar = [...new Set(S.map(x => x.ay.slice(0, 4)))];
+  for (const y of yillar) {
+    const L = S.filter(x => x.ay.startsWith(y));
+    for (const x of L) g += satir(AYK[+x.ay.slice(5) - 1] + ' ' + x.ay.slice(0, 4), x, '', (x.eksik ? 'A3 verisi ' + x.eksik + ' gün eksik' : '') + (x.ay === bugun ? (x.eksik ? ' · ' : '') + 'ay sürüyor' : '') + (x.aylik && !x.eksik ? 'aylık hesap' : ''));
+    g += satir(y + ' toplamı', top(L), 'top');
+  }
+  g += satir('GENEL TOPLAM', top(S), 'top');
+  const h = '<section class="panel mf-tam" id="donemOzet" style="gap:10px"><div class="bas"><h2>Dönem özeti · ' + AYK[+aylar[0].slice(5) - 1] + ' ' + aylar[0].slice(0, 4) + '\'ten bugüne</h2><span class="k">kWh</span>' + mfGoruntuBtn('donemOzet', 'mahsup_donem_ozeti') + '</div>'
+    + '<div class="tablo-kutu"><table class="tb"><thead><tr><th class="sol">Ay</th><th>Üretim (T1 + T2)</th><th>Tüketim</th><th>Mahsup edilen</th><th>A3 payı</th><th>Bedelli</th><th class="sol">Not</th></tr></thead><tbody>' + g + '</tbody></table></div>'
+    + '<div class="k">Mayıs 2026 öncesi aylar aylık, sonrası saatlik hesaplanır. A3 verisi eksik aylarda (18 Tem 2025 öncesi, 29 Kas–31 Ara 2025) mahsup gerçekte daha yüksektir; 2025\'te Tekyıldız 1 üretiminin tamamı mahsup edildiği için o aylarda gerçek mahsup ≈ üretimdir. 18.07.2025 12:00\'deki bozuk A3 okuması hesaba katılmaz.</div></section>';
+  DONEM_ON = { k: anahtar, h }; return h;
+}
 function ayMahsupBolum(ayKod, gunler, ta) {
   const R = { M: '#1baf7a', B: '#eda100', S: '#eb6834' };
   const kE = v => v >= 1000 ? say(v / 1000, v >= 10000 ? 0 : 1) + ' MWh' : say(v) + ' kWh';

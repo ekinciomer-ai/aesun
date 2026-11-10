@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-10T04:48+03:00",
+ "olusturma": "2026-11-10T06:09+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -195,13 +195,16 @@
    "kanal": "Antik Stüdyo",
    "seri": "Günün Sözü",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 312,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Bin millik yolculuk tek bir adımla başlar 🏔️ | Lao Tzu #shorts",
+    "i48": 312
+   }
   },
   {
    "kanal": "Antik Stüdyo",
@@ -352,11 +355,11 @@
   }
  ],
  "esikler": {
+  "Ancient Studio": 188,
+  "Antik Stüdyo": 637,
   "Estudio Antiguo": 264,
   "Kozmos Lab TR (@kozmoslabtr)": 50,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab (@kozmoslab)": 50,
-  "Ancient Studio": 188
+  "Kozmos Lab (@kozmoslab)": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -373,8 +376,8 @@
     "medyan": 1804
    },
    "14:00": {
-    "n": 1,
-    "medyan": 4114
+    "n": 2,
+    "medyan": 2213
    },
    "17:00": {
     "n": 2,
@@ -447,7 +450,7 @@
  "bulgular": [
   "Dün (2026-11-09) 9181 izlenme geldi; bir önceki gün 6827.",
   "Ancient Studio: son 6 Short'tan 3 tanesi tuttu (eşik 188 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 5 tanesi tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 4 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 1 Short'tan 1 tanesi tuttu (eşik 264 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %80'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -456,7 +459,7 @@
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %90'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Antik Stüdyo: en iyi yayın saati şimdilik 12:00 (medyan 1808 izlenme, 2 video).",
+  "Antik Stüdyo: en iyi yayın saati şimdilik 14:00 (medyan 2213 izlenme, 2 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %69 izleniyor, tutmayanlar %47 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Antik Stüdyo: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %34 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor."

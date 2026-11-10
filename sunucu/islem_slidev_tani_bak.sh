@@ -1,10 +1,10 @@
 #!/bin/bash
-# Salt okunur tanı: Slidev tampon durumu
-echo "NOT: klasör: $(ls /opt/tampon/slidev 2>&1 | tr '\n' ' ')"
-echo "NOT: proje: $(ls /opt/tampon/slidev/proje 2>&1 | tr '\n' ' ')"
-echo "NOT: süreç: $(pgrep -af 'is.sh|slidev' | head -3 | tr '\n' ';')"
-echo "NOT: docker: $(docker ps --format '{{.Names}} {{.Status}}' | grep -i slidev)"
-echo "NOT: imaj: $(docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | grep playwright)"
-for f in sonuc.txt proje/npm.log proje/build.log; do [ -f /opt/tampon/slidev/$f ] && tail -6 /opt/tampon/slidev/$f | sed "s|^|NOT: $f: |"; done
-echo "NOT: disk: $(df -h /opt | tail -1 | awk '{print $4}') boş"
+# Salt okunur tanı: Slidev kapsayıcısı neden durdu
+echo "NOT: tüm kapsayıcılar: $(docker ps -a --format '{{.Names}}:{{.Status}}' | tr '\n' ' ' | cut -c1-600)"
+echo "NOT: olaylar: $(docker events --since 60m --until 0s --filter container=slidev-tampon --format '{{.Time}} {{.Action}}' 2>&1 | tr '\n' ';' | cut -c1-500)"
+echo "NOT: oom: $(dmesg 2>/dev/null | grep -i -E 'oom|killed process' | tail -3 | tr '\n' ';')"
+echo "NOT: sonuc: $(ls -la --time-style=+%H:%M /opt/tampon/slidev/proje/ | tr '\n' ';' | cut -c1-700)"
+tail -5 /opt/tampon/slidev/proje/npm.log 2>/dev/null | sed 's/^/NOT: npm: /'
+echo "NOT: bellek: $(free -m | awk '/Mem/{print $2" toplam, "$7" kullanılabilir MB"}')"
+echo "NOT: zamanlı işler: $(crontab -l 2>/dev/null | grep -i docker | head -3 | tr '\n' ';') $(grep -rl 'docker' /etc/cron* 2>/dev/null | tr '\n' ' ')"
 exit 0

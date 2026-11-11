@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       gorev:
-        description: "onizleme | film"
+        description: "onizleme | film | kurgu"
         required: true
         default: onizleme
       parca:
@@ -28,7 +28,30 @@ jobs:
         run: |
           n="${{ inputs.parca }}"; case "$n" in ''|*[!0-9]*) n=1;; esac; [ "$n" -gt 20 ] && n=20; [ "$n" -lt 1 ] && n=1
           echo "liste=[$(seq -s, 0 $((n-1)))]" >> "$GITHUB_OUTPUT"
+  kurgu:
+    if: inputs.gorev == 'kurgu'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null
+      - name: Kareleri sunucudan al, kurguyu yap, geri gönder
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k; chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@$ADRES"
+          mkdir -p kareler && $S "tar cf - -C /opt/tampon/kozmos/midong_kareler ." | tar xf - -C kareler
+          $S "ls /opt/tampon/kozmos/earth/*.mp4 2>/dev/null | head -1" > earth_yol.txt || true
+          E=""; if [ -s earth_yol.txt ]; then $S "cat $(cat earth_yol.txt)" > earth.mp4 && E=earth.mp4; fi
+          bash sunucu/kozmos/midong_kurgu.sh kareler midong_onizleme_480p.mp4 $E
+          $S "cat > /opt/tampon/kozmos/midong_onizleme_480p.mp4" < midong_onizleme_480p.mp4
+          rm -f ~/.ssh/k
+          D=$RUNNER_TEMP/dal; git clone -q --depth 1 --branch kozmos-cikti https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} $D
+          mkdir -p $D/kurgu && cp midong_onizleme_480p.mp4 $D/kurgu/ && cd $D && git add -A && git -c user.name=kozmos-bot -c user.email=bot@users.noreply.github.com commit -q -m "midong önizleme" && git push -q origin kozmos-cikti
   render:
+    if: inputs.gorev != 'kurgu'
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 340

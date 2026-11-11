@@ -47,7 +47,7 @@ exec 9>/run/gesfin-yenile.lock; flock -n 9 || { echo "Başka bir yenileme sürü
 L=/var/log/gesfin-yenile.log; T=$(date +%Y%m%d-%H%M%S); K=/home/mehmetali/gesfin; A=/var/lib/gesfin-surumler
 log(){ echo "$(date '+%F %T') $*" | tee -a $L; }
 DIS='--exclude=.env --exclude=.env.* --exclude=secrets/ --exclude=backups/ --exclude=backup.log --exclude=*.tar.gz --exclude=*.yedek* --exclude=.git/ --exclude=node_modules/ --exclude=__pycache__/ --exclude=.vscode/ --exclude=docker-compose.yml --exclude=docker-compose.*'
-saglik(){ for i in $(seq 1 24); do c=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 https://fatura.aksarayenerji.net/api/health); [ "$c" = 200 ] && return 0; sleep 5; done; return 1; }
+saglik(){ for i in $(seq 1 24); do b=$(docker exec gesfin-backend python3 -c "import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=5).status)" 2>/dev/null); w=$(docker exec gesfin-mobile-web sh -c 'wget -q -O /dev/null http://127.0.0.1/ && echo 200' 2>/dev/null); [ "$b" = 200 ] && [ "$w" = 200 ] && return 0; sleep 5; done; return 1; }
 log "BAŞLADI ($SUDO_USER)"
 [ -d $K ] || { log "HATA: $K yok"; exit 1; }
 echo "1/4 Yedek alınıyor..."
@@ -116,4 +116,4 @@ echo "NOT: /opt/gesfin/.env okuma: $(sudo -u $U cat /opt/gesfin/.env >/dev/null 
 echo "NOT: docker: $(sudo -u $U docker ps >/dev/null 2>&1 && echo AÇIK-HATA || echo kapalı)"
 echo "NOT: sudo izinleri: $(sudo -l -U $U | grep -o '/usr/local/bin/gesfin-[a-z-]*' | tr '\n' ' ')"
 echo "NOT: sshd Match: $(sshd -T -C user=$U,host=x,addr=1.2.3.4 | grep -E '^(allowtcpforwarding|passwordauthentication) ' | tr '\n' ';')"
-echo "NOT: canlı sağlık: $(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://fatura.aksarayenerji.net/api/health)"
+echo "NOT: canlı sağlık (iç): $(sed -n '/^saglik()/p' /usr/local/bin/gesfin-yenile >/tmp/s.sh; . /tmp/s.sh; saglik && echo 200-tamam || echo HATA; rm -f /tmp/s.sh)"

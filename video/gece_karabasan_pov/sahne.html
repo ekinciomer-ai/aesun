@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<title>Karabasan POV</title>
+<style>
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+25BC,U+FEFF,U+FFFD}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-ext-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0000-00FF,U+0131,U+2000-206F}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0100-02BA,U+1E00-1E9F}
+html,body{margin:0;background:#0d1320;overflow:hidden}svg{display:block;width:100vw;height:100vh}
+</style></head><body>
+<svg id="s" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid slice"></svg>
+<script>
+// Karabasan Short'u — "POV gece" tarzı: koyu sinematik çizim, tek ana karakter (sarı bereli genç), "sen" anlatımı,
+// üstte büyük sayaç, ortada 1–2 kelimelik dev altyazı (anahtar kelime sarı). Kayıt sözleşmesi: kurgu(K), kare(t), HAZIR
+const SV=document.getElementById('s');let K=null;
+const INK='#0a0f18',NAVY='#16213a',NAVY2='#1d2b4a',TEAL='#2b4a5e',MOON='#f3e7b5',YEL='#ffd23f',SKIN='#e8b98f',HOOD='#3f7a5c',BEANIE='#f0b429',WALL='#1a2540',WALL2='#223152',BED='#5a3f2e',SHEET='#7c8fb8';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=p=>1-Math.pow(1-cl(p),3);
+const st=(f,w=5)=>`fill="${f}" stroke="${INK}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+const g=(x,y,s,inner,r=0,op=1)=>`<g transform="translate(${x},${y}) rotate(${r}) scale(${s})" opacity="${op}">${inner}</g>`;
+const DEFS=`<defs>
+<radialGradient id="ay" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff6d0" stop-opacity=".55"/><stop offset="1" stop-color="#fff6d0" stop-opacity="0"/></radialGradient>
+<radialGradient id="ekran" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#9fd3ff" stop-opacity=".6"/><stop offset="1" stop-color="#9fd3ff" stop-opacity="0"/></radialGradient>
+<radialGradient id="beyin" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd23f" stop-opacity=".55"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient>
+<linearGradient id="isik" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfe0ff" stop-opacity=".22"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></linearGradient>
+<radialGradient id="vin" cx="50%" cy="45%" r="70%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".65"/></radialGradient>
+<clipPath id="pen"><rect x="160" y="420" width="300" height="360"/></clipPath></defs>`;
+
+// ---------- ortam ----------
+function oda(ts,acik=0){let o=`<rect x="-60" y="-60" width="1200" height="2040" fill="${WALL}"/><rect x="-60" y="1300" width="1200" height="700" fill="#141c30"/>`;
+ o+=`<rect x="160" y="420" width="300" height="360" ${st('#0f1a33',8)}/><g clip-path="url(#pen)"><circle cx="370" cy="510" r="40" fill="${MOON}"/><circle cx="388" cy="498" r="36" fill="#0f1a33"/>`+
+  [[220,470],[260,600],[420,650],[300,720],[200,690]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${2.5+Math.sin(ts*3+i)}" fill="${MOON}"/>`).join('')+`</g><line x1="310" y1="420" x2="310" y2="780" stroke="${INK}" stroke-width="8"/><line x1="160" y1="600" x2="460" y2="600" stroke="${INK}" stroke-width="8"/>`;
+ o+=`<path d="M160,780 L460,780 L1000,1500 L520,1500Z" fill="url(#isik)"/><circle cx="370" cy="510" r="260" fill="url(#ay)" opacity=".5"/>`;
+ o+=`<rect x="760" y="560" width="200" height="560" ${st('#2a2236',6)}/><circle cx="930" cy="850" r="10" fill="#8a7a52"/>`;
+ if(acik>0)o+=`<rect x="-60" y="-60" width="1200" height="2040" fill="#f3d79a" opacity="${acik*0.18}"/>`;return o}
+function yatak(){return `<rect x="80" y="1220" width="920" height="120" rx="14" ${st(BED)}/><rect x="60" y="1060" width="60" height="300" rx="10" ${st(BED)}/><rect x="100" y="1150" width="880" height="90" rx="30" ${st('#d9dfec')}/>`}
+// karakter yatarken (yan profil, başı solda)
+function yatan(ts,o){o=Object.assign({goz:1,agiz:'duz',titre:0},o);const tx=Math.sin(ts*40)*o.titre;
+ return g(tx,0,1,`<ellipse cx="250" cy="1145" rx="120" ry="40" ${st('#eef1f7')}/>`+
+  `<circle cx="250" cy="1080" r="72" ${st(SKIN)}/><path d="M178,1060 Q180,990 250,985 Q320,990 322,1060 Q250,1040 178,1060Z" ${st(BEANIE)}/><rect x="176" y="1052" width="148" height="20" rx="8" ${st('#d99a1c',4)}/>`+
+  (o.goz>0.5?`<circle cx="228" cy="1090" r="11" fill="#fff" stroke="${INK}" stroke-width="3"/><circle cx="272" cy="1090" r="11" fill="#fff" stroke="${INK}" stroke-width="3"/><circle cx="230" cy="1092" r="5" fill="${INK}"/><circle cx="274" cy="1092" r="5" fill="${INK}"/>`
+   :`<path d="M216,1092 q12,6 24,0 M260,1092 q12,6 24,0" stroke="${INK}" stroke-width="4" fill="none"/>`)+
+  ({duz:`<path d="M238,1122 h24" stroke="${INK}" stroke-width="4"/>`,o:`<ellipse cx="250" cy="1124" rx="8" ry="10" fill="#5b2420" stroke="${INK}" stroke-width="3"/>`,gul:`<path d="M234,1118 q16,14 32,0" fill="none" stroke="${INK}" stroke-width="4"/>`}[o.agiz])+
+  `<path d="M300,1120 Q600,1060 960,1110 L960,1230 L300,1230Z" ${st(SHEET)}/><path d="M340,1150 Q600,1110 940,1150" fill="none" stroke="#5b6d95" stroke-width="5"/>`)}
+// ayakta karakter (önden)
+function ayakta(x,y,s,o){o=Object.assign({kol1:20,kol2:-20,agiz:'duz',goz:1,tel:false},o);
+ return g(x,y,s,`<rect x="-26" y="-120" width="22" height="120" rx="8" ${st('#2b3550',4)}/><rect x="6" y="-120" width="22" height="120" rx="8" ${st('#2b3550',4)}/>`+
+  `<g transform="translate(-58,-290) rotate(${o.kol1})"><rect x="-14" y="0" width="28" height="140" rx="14" ${st(HOOD,4)}/><circle cx="0" cy="146" r="16" ${st(SKIN,4)}/></g>`+
+  `<path d="M-70,-120 L-62,-300 Q0,-330 62,-300 L70,-120Z" ${st(HOOD)}/>`+
+  `<g transform="translate(58,-290) rotate(${o.kol2})"><rect x="-14" y="0" width="28" height="140" rx="14" ${st(HOOD,4)}/><circle cx="0" cy="146" r="16" ${st(SKIN,4)}/>${o.tel?`<rect x="-16" y="138" width="34" height="58" rx="6" ${st('#222',3)}/><rect x="-11" y="144" width="24" height="44" fill="#9fd3ff"/><circle cx="1" cy="166" r="70" fill="url(#ekran)"/>`:''}</g>`+
+  `<circle cx="0" cy="-390" r="78" ${st(SKIN)}/><path d="M-80,-400 Q-78,-490 0,-494 Q78,-490 80,-400 Q0,-430 -80,-400Z" ${st(BEANIE)}/><rect x="-82" y="-410" width="164" height="22" rx="9" ${st('#d99a1c',4)}/>`+
+  (o.goz>0.5?`<circle cx="-26" cy="-380" r="12" fill="#fff" stroke="${INK}" stroke-width="3"/><circle cx="26" cy="-380" r="12" fill="#fff" stroke="${INK}" stroke-width="3"/><circle cx="-24" cy="-378" r="6" fill="${INK}"/><circle cx="28" cy="-378" r="6" fill="${INK}"/>`:`<path d="M-38,-378 q12,6 24,0 M14,-378 q12,6 24,0" stroke="${INK}" stroke-width="4" fill="none"/>`)+
+  ({duz:`<path d="M-12,-340 h24" stroke="${INK}" stroke-width="4"/>`,o:`<ellipse cx="0" cy="-338" rx="9" ry="11" fill="#5b2420" stroke="${INK}" stroke-width="3"/>`,gul:`<path d="M-18,-346 q18,16 36,0" fill="none" stroke="${INK}" stroke-width="4"/>`}[o.agiz]))}
+function golge(ts,op){const k=Math.sin(ts*1.6)*6;return g(880,1050+k,1,`<path d="M-90,120 C-110,-40 -80,-200 0,-220 C80,-200 110,-40 90,120 Q60,90 30,120 Q0,90 -30,120 Q-60,90 -90,120Z" fill="#05070c" opacity="${op}"/><circle cx="-26" cy="-130" r="7" fill="#ff6b6b" opacity="${op*0.8}"/><circle cx="26" cy="-130" r="7" fill="#ff6b6b" opacity="${op*0.8}"/>`)}
+function beyin(x,y,s,ts,kilit){return g(x,y,s,`<circle r="230" fill="url(#beyin)" opacity="${0.6+0.3*Math.sin(ts*4)}"/>`+
+ `<path d="M-150,10 C-170,-90 -90,-160 -10,-150 C60,-185 160,-120 155,-30 C190,20 150,110 70,105 C30,140 -60,140 -90,100 C-150,110 -175,60 -150,10Z" ${st('#f2a3b4',6)}/>`+
+ `<path d="M-100,-60 q40,-20 70,10 M-20,-110 q20,40 -10,80 M40,-100 q-10,50 40,70 M-110,40 q50,-10 80,30 M20,40 q40,-30 90,0" fill="none" stroke="#c06a80" stroke-width="6" stroke-linecap="round"/>`+
+ (kilit>0?g(150,90,ease(kilit),`<rect x="-46" y="-20" width="92" height="76" rx="12" ${st(YEL,5)}/><path d="M-28,-20 v-26 a28,28 0 0 1 56,0 v26" fill="none" stroke="${INK}" stroke-width="12"/><path d="M-28,-20 v-26 a28,28 0 0 1 56,0 v26" fill="none" stroke="${YEL}" stroke-width="6"/><circle cy="14" r="9" fill="${INK}"/>`):''))}
+function insan(x,y,s,c){return g(x,y,s,`<circle cy="-46" r="16" fill="${c}"/><path d="M-22,0 Q-22,-28 0,-28 Q22,-28 22,0Z" fill="${c}"/>`)}
+function kagit(x,y,s,i,ts){return g(x,y,s,`<rect x="-34" y="-44" width="68" height="88" rx="4" fill="#e9edf5" stroke="${INK}" stroke-width="3"/>`+[0,1,2,3].map(k=>`<line x1="-22" y1="${-26+k*16}" x2="${18-(k%2)*12}" y2="${-26+k*16}" stroke="#8a95ab" stroke-width="4"/>`).join(''),Math.sin(i*1.7)*8)}
+function saat(x,y,s,ts){const a=ts*30;return g(x,y,s,`<circle r="90" ${st('#e9edf5',6)}/><line x1="0" y1="0" x2="${Math.sin(a*Math.PI/180)*60}" y2="${-Math.cos(a*Math.PI/180)*60}" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><line x1="0" y1="0" x2="34" y2="-30" stroke="${INK}" stroke-width="8" stroke-linecap="round"/><circle r="8" fill="${INK}"/>`)}
+
+// ---------- sahneler ----------
+const S={
+ uyanis(ts){return oda(ts)+yatak()+yatan(ts,{goz:ts>0.8?1:0,agiz:'duz'})},
+ agirlik(ts){const op=ease((ts-0.5)/1.2);return oda(ts)+golge(ts,op*0.9)+yatak()+yatan(ts,{goz:1,agiz:'o',titre:1.5})+`<ellipse cx="560" cy="1110" rx="${170+Math.sin(ts*3)*8}" ry="60" fill="#05070c" opacity="${op*0.55}"/>`},
+ bilim(ts){return `<rect x="-60" y="-60" width="1200" height="2040" fill="${NAVY}"/>`+beyin(540,980,1.5*ease(ts/0.5),ts,0)},
+ kilit(ts){let o=`<rect x="-60" y="-60" width="1200" height="2040" fill="${NAVY}"/>`+beyin(540,760,1.05,ts,(ts-1.2)/0.5);
+  o+=g(540,1380,1,`<path d="M-260,0 Q0,-60 260,0" fill="none" stroke="#3b5b8a" stroke-width="60" stroke-linecap="round"/>`+[...Array(7)].map((_,i)=>`<rect x="${-240+i*70}" y="-30" width="20" height="40" rx="6" fill="${YEL}" opacity="${cl((ts-1.6-i*0.1)/0.3)}"/>`).join(''));
+  o+=`<text x="540" y="1520" text-anchor="middle" font-family="Kalam" font-size="44" fill="#a9b8d6" opacity="${cl((ts-2)/0.4)}">kaslar kilitli</text>`;return o},
+ saniye(ts){const n=Math.max(0,5-Math.floor(ts*0.9));return oda(ts)+yatak()+yatan(ts,{goz:1,agiz:'o',titre:ts<4?1.2:0})+g(780,760,0.75,beyin(0,0,1,ts,1))+
+  `<text x="780" y="1000" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="120" fill="${YEL}" opacity=".9">${n}</text>`},
+ arastirma(ts){let o=`<rect x="-60" y="-60" width="1200" height="2040" fill="${NAVY}"/>`;const n=Math.min(35,Math.floor(ease((ts-0.2)/2.6)*35.99));
+  for(let i=0;i<n;i++){const c=i%7,r=Math.floor(i/7);o+=kagit(220+c*106,620+r*120,0.95,i,ts)}
+  const kisi=Math.floor(ease((ts-0.2)/3)*36533);o+=`<text x="540" y="1340" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="110" fill="#fff">${kisi.toLocaleString('tr-TR')}</text><text x="540" y="1410" text-anchor="middle" font-family="Kalam" font-size="46" fill="#a9b8d6">kişinin verisi</text>`;return o},
+ yuzde(ts){let o=`<rect x="-60" y="-60" width="1200" height="2040" fill="${NAVY}"/>`;const sec=[3,15,28,41,57,66,82,94];
+  for(let i=0;i<100;i++){const c=i%10,r=Math.floor(i/10);const on=sec.slice(0,Math.floor(ease((ts-0.6)/1.4)*7.6+0.4)).includes(i)&&ts>0.6;o+=insan(180+c*80,600+r*80,1.1,on?YEL:'#3d5078')}
+  return o},
+ ogrenci(ts){return oda(ts,0.2)+`<rect x="160" y="1150" width="760" height="40" ${st('#6b4a33')}/><rect x="200" y="1190" width="30" height="200" fill="#4a3324"/><rect x="850" y="1190" width="30" height="200" fill="#4a3324"/>`+
+  g(330,1130,1,`<rect x="-80" y="-40" width="160" height="40" ${st('#c0392b',4)}/><rect x="-70" y="-76" width="150" height="36" ${st('#2e86c1',4)}/><rect x="-60" y="-108" width="130" height="32" ${st('#27ae60',4)}/>`)+
+  ayakta(620,1450,0.95,{kol1:30,kol2:-60,agiz:'o',goz:ts%2.2<0.15?0:1})+`<text x="820" y="760" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="150" fill="${YEL}" opacity="${cl((ts-0.4)/0.4)}">%28</text>`},
+ sebep(ts){return oda(ts)+saat(800,640,1,ts*8)+`<text x="800" y="790" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="50" fill="#e9edf5">03:12</text>`+
+  ayakta(420,1450,1.05,{kol1:20,kol2:-150,tel:true,agiz:'duz',goz:1})+g(700,1250,1,`<rect x="-34" y="-60" width="68" height="70" rx="10" ${st('#d9dfec',4)}/><path d="M34,-40 q30,0 30,24 q0,22 -30,22" fill="none" stroke="${INK}" stroke-width="5"/><path d="M-14,-74 q-10,-20 6,-34 M10,-74 q-10,-20 6,-34" stroke="#a9b8d6" stroke-width="4" fill="none" opacity="${0.5+0.4*Math.sin(ts*4)}"/>`)},
+ final(ts){const k=ease(ts/1.4);return oda(ts)+yatak()+yatan(ts,{goz:ts>1.4?0:1,agiz:'gul'})+g(640+(1-k)*-120,1170,1,`<rect x="-30" y="-50" width="60" height="100" rx="8" ${st('#222',4)}/><rect x="-22" y="-40" width="44" height="80" fill="${k>0.9?'#111':'#9fd3ff'}"/>`,90*k)+
+  `<text x="640" y="900" font-family="Kalam" font-size="70" fill="#a9b8d6" opacity="${cl((ts-1.8)/0.5)}">z z z</text>`}
+};
+
+// ---------- üst sayaç, altyazı ----------
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');const trU=s=>s.replace(/i/g,'İ').replace(/ı/g,'I').toUpperCase();
+function ust(s,ts,op){const a=ease(ts/0.35)*op;const t=s.ust,f=Math.min(120,1700/Math.max(6,t.length));
+ return `<g opacity="${a}" transform="translate(540,${250+(1-a)*-30})"><text x="0" y="0" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${f}" fill="#fff" stroke="${INK}" stroke-width="14" paint-order="stroke">${esc(t)}</text><rect x="${-Math.min(440,t.length*f*0.27)}" y="26" width="${2*Math.min(440,t.length*f*0.27)*ease((ts-0.15)/0.4)}" height="12" rx="6" fill="${YEL}"/></g>`}
+let GRUP=[];
+function grupla(){GRUP=[];let tam=[];const KW=K.kelimeler;const bos=j=>{if(!tam.length)return;const t0=KW[tam[0]].b,t1=j+1<KW.length?KW[j+1].b:KW[j].s+0.8;GRUP.push({t0,t1,w:tam.map(i=>KW[i].k)});tam=[]};
+ KW.forEach((w,i)=>{tam.push(i);const uz=tam.map(k=>KW[k].k).join(' ').length;if(tam.length===2||uz>13||/[.!?…:;,]$/.test(w.k))bos(i)});bos(KW.length-1)}
+const nrm=w=>w.toLowerCase().replace(/İ/g,'i').replace(/[^\wçğıöşüâ]/g,'');const sari=w=>{const n=nrm(w);return K.anahtar.some(a=>n.startsWith(nrm(a)))};
+function altyazi(t){const G=GRUP.find(x=>t>=x.t0&&t<x.t1);if(!G)return'';const u=ease((t-G.t0)/0.1);const words=G.w.map(trU);const L=words.join(' ').length;const fs=Math.min(140,1700/Math.max(7,L));
+ const iki=words.length>1&&L>9;const lines=iki?[[words[0]],words.slice(1)]:[words];
+ return `<g transform="translate(540,1610) scale(${0.85+0.15*u})" opacity="${u}">`+lines.map((ln,li)=>`<text x="0" y="${li*fs*1.02-(lines.length-1)*fs*0.5}" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${fs}" stroke="${INK}" stroke-width="16" paint-order="stroke">${ln.map(w=>`<tspan fill="${sari(w)?YEL:'#fff'}">${esc(w)}</tspan>`).join(' ')}</text>`).join('')+`</g>`}
+
+let ilk=true;
+function kare(t){if(ilk){grupla();ilk=false}
+ const SS=K.sahneler;let i=SS.findIndex(s=>t>=s.bas&&t<s.son);if(i<0)i=t<SS[0].bas?0:SS.length-1;const s=SS[i],ts=t-s.bas,u=cl(ts/(s.son-s.bas)),GEC=0.3;
+ const cam=(si,tt)=>{const sc=SS[si],uu=cl(tt/(sc.son-sc.bas));const z=1.0+0.07*ease(uu),dx=Math.sin(uu*Math.PI)*-12;return `<g transform="translate(${540+dx},960) scale(${z}) translate(-540,-960)">${S[sc.ad](tt)}</g>`};
+ let o=DEFS+cam(i,ts);if(i>0&&ts<GEC)o+=`<g opacity="${1-ts/GEC}">${cam(i-1,ts+SS[i-1].son-SS[i-1].bas)}</g>`;
+ o+=`<rect x="-60" y="-60" width="1200" height="2040" fill="url(#vin)"/>`;
+ const son=K.kelimeler[K.kelimeler.length-1].s;
+ if(t>son-0.2){const a=ease((t-(son-0.2))/0.4);o+=`<g opacity="${a}"><text x="540" y="250" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="96" fill="#fff" stroke="${INK}" stroke-width="14" paint-order="stroke">TAMAMI KANALDA</text><text x="540" y="350" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="60" fill="${YEL}" stroke="${INK}" stroke-width="12" paint-order="stroke">SEN HİÇ YAŞADIN MI? ▼</text></g>`}
+ else{o+=ust(s,ts,1);if(i>0&&ts<GEC)o+=ust(SS[i-1],5,1-ts/GEC)}
+ o+=altyazi(t);
+ o+=`<text x="540" y="1820" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="34" fill="#fff" opacity=".85">ANTİK STÜDYO</text><text x="540" y="1862" text-anchor="middle" font-family="Kalam" font-size="24" fill="#a9b8d6">Özgün çizim canlandırma · Ses: yapay zekâ ile klonlanmış kendi sesim · Müzik: kanal üretimi</text>`;
+ o+=`<rect x="0" y="0" width="${1080*t/K.toplam}" height="8" fill="${YEL}"/>`;
+ if(t>K.toplam-0.6)o+=`<rect width="1080" height="1920" fill="#000" opacity="${(t-(K.toplam-0.6))/0.6}"/>`;
+ SV.innerHTML=o}
+window.kurgu=k=>{K=k;ilk=true};window.kare=kare;
+document.fonts.load('800 40px Baloo').then(()=>document.fonts.load('400 40px Kalam')).then(()=>{window.HAZIR=true});setTimeout(()=>{window.HAZIR=true},4000);
+</script></body></html>

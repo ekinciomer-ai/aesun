@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<title>Gece Sakız 2D</title>
+<style>
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+25BC,U+FEFF,U+FFFD}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+25BC,U+FEFF,U+FFFD}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+25BC,U+FEFF,U+FFFD}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-ext-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+html,body{margin:0;background:#e9d8b0;overflow:hidden}
+svg{display:block;width:100vw;height:100vh}
+</style></head>
+<body>
+<svg id="s" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid slice"></svg>
+<script>
+// Gece Sakız Short'u — 2D vektör çizgi film canlandırması (Antik Stüdyo "Cevahir" tarzı: kalın mürekkep çizgi, parşömen renkler).
+// Kayıt sözleşmesi (video/arac/kayit.js): window.kurgu(K), window.kare(t), window.HAZIR
+const SV=document.getElementById('s');let K=null;
+const INK='#3a2c1e',PAPER='#ead9b2',P2='#dcc597',RED='#b8442e',GOLD='#d9a531',SEA='#6fa3ad',SEA2='#5a8d97',HILL='#c8b07a',HILL2='#b59c66',
+TREE='#6f8a4f',TREE2='#5b7440',SKIN='#f0c9a0',SKY='#f2e4c0',NIGHT='#3f4f6b',NIGHT2='#2f3c54';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=p=>1-Math.pow(1-cl(p),3),pop=p=>{p=cl(p);return 1+Math.sin(p*Math.PI)*0.12*(1-p)};
+const W=5; // mürekkep kalınlığı
+const PS=1.32; // karakter büyütme
+const st=(f,w=W)=>`fill="${f}" stroke="${INK}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+const g=(x,y,s,inner,r=0,op=1)=>`<g transform="translate(${x},${y}) rotate(${r}) scale(${s})" opacity="${op}">${inner}</g>`;
+
+// ---------- yapı taşları ----------
+function cloud(x,y,s){return g(x,y,s,`<path d="M-90,20 Q-95,-25 -50,-20 Q-40,-60 5,-45 Q35,-75 65,-35 Q105,-35 95,20 Z" ${st('#fbf3df',4)}/>`)}
+function sun(x,y,r,t){let ray='';for(let i=0;i<12;i++){const a=i*30+t*12;ray+=`<line x1="${Math.cos(a*Math.PI/180)*(r+14)}" y1="${Math.sin(a*Math.PI/180)*(r+14)}" x2="${Math.cos(a*Math.PI/180)*(r+34)}" y2="${Math.sin(a*Math.PI/180)*(r+34)}" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`}
+ return g(x,y,1,ray+`<circle r="${r}" ${st(GOLD)}/>`)}
+function bird(x,y,t){const f=Math.sin(t*9)*10;return `<path d="M${x-18},${y+f*0.3} Q${x-8},${y-10-f} ${x},${y} Q${x+8},${y-10-f} ${x+18},${y+f*0.3}" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`}
+function tree(x,y,s){return g(x,y,s,`<rect x="-9" y="-40" width="18" height="44" ${st('#8a6a44',4)}/><path d="M0,-150 C55,-150 70,-90 50,-60 C70,-30 30,-20 0,-25 C-30,-20 -70,-30 -50,-60 C-70,-90 -55,-150 0,-150Z" ${st(TREE)}/>`)}
+function cypress(x,y,s){return g(x,y,s,`<path d="M0,-190 C25,-120 28,-40 18,0 L-18,0 C-28,-40 -25,-120 0,-190Z" ${st(TREE2)}/>`)}
+function shrub(x,y,s,t,tears){let d='';if(tears)for(let i=0;i<5;i++){const yy=-20+((t*30+i*17)%40);d+=`<ellipse cx="${-40+i*20}" cy="${yy}" rx="6" ry="8" ${st(GOLD,3)}/>`}
+ return g(x,y,s,`<path d="M-15,0 Q-20,-30 -40,-40 M15,0 Q25,-35 45,-45" stroke="#7a5a38" stroke-width="10" fill="none" stroke-linecap="round"/><ellipse cx="0" cy="-70" rx="85" ry="48" ${st(TREE)}/><ellipse cx="-45" cy="-55" rx="40" ry="28" ${st(TREE2,4)}/>`+d)}
+function house(x,y,s,dome){return g(x,y,s,`<rect x="-45" y="-80" width="90" height="80" ${st('#f6efe0')}/><rect x="-14" y="-40" width="28" height="40" ${st('#8fb3bd',4)}/><rect x="-36" y="-66" width="18" height="16" ${st('#8fb3bd',3)}/><rect x="18" y="-66" width="18" height="16" ${st('#8fb3bd',3)}/>`+
+ (dome?`<path d="M-32,-80 A32,32 0 0 1 32,-80Z" ${st('#5c8aa8')}/>`:`<path d="M-55,-78 L0,-118 L55,-78Z" ${st('#c46a4a')}/>`))}
+function hills(y,c1,c2){return `<path d="M0,${y} C160,${y-140} 300,${y-150} 460,${y-40} C600,${y-170} 820,${y-160} 1080,${y-30} L1080,${y+60} L0,${y+60}Z" ${st(c2)}/>`+
+ `<path d="M0,${y+40} C220,${y-60} 420,${y-40} 600,${y+20} C760,${y-50} 920,${y-40} 1080,${y+20} L1080,${y+200} L0,${y+200}Z" ${st(c1)}/>`}
+function waves(y,t,c=SEA){let d=`<rect x="-10" y="${y}" width="1100" height="260" fill="${c}" stroke="${INK}" stroke-width="${W}"/>`;
+ for(let r=0;r<3;r++)for(let i=0;i<7;i++){const x=((i*170+t*40*(r%2?1:-1)+r*60)%1250+1250)%1250-80,yy=y+50+r*70;d+=`<path d="M${x},${yy} q20,-14 40,0 q20,14 40,0" fill="none" stroke="#e9f2f2" stroke-width="4" stroke-linecap="round" opacity=".8"/>`}return d}
+function ground(y){return `<rect x="-10" y="${y}" width="1100" height="${1920-y}" fill="#d8bf8a" stroke="${INK}" stroke-width="${W}"/>`+
+ [[120,60],[400,140],[760,90],[950,180],[250,260]].map(([x,dy])=>`<path d="M${x},${y+dy} l12,-14 l8,10 l10,-16" fill="none" stroke="#9c7f50" stroke-width="4" stroke-linecap="round"/>`).join('')}
+function sparkle(x,y,s,t,ph=0){const k=0.6+0.4*Math.sin(t*8+ph);return g(x,y,s*k,`<path d="M0,-26 L6,-6 L26,0 L6,6 L0,26 L-6,6 L-26,0 L-6,-6Z" fill="#fff6c8" stroke="${GOLD}" stroke-width="3"/>`,t*40+ph*20)}
+function crate(x,y,s,full=true){return g(x,y,s,`<rect x="-60" y="-70" width="120" height="70" ${st('#b8864f')}/><line x1="-60" y1="-35" x2="60" y2="-35" stroke="${INK}" stroke-width="4"/>`+
+ (full?[-36,-12,12,36].map((xx,i)=>`<ellipse cx="${xx}" cy="-76" rx="13" ry="10" ${st('#f5e7b0',3)}/>`).join(''):''))}
+function jar(x,y,s,lid,t){return g(x,y,s,`<ellipse cx="0" cy="0" rx="150" ry="26" ${st('#c99a3a')}/>`+
+ `<path d="M-90,-10 C-120,-80 -100,-150 -60,-170 L60,-170 C100,-150 120,-80 90,-10 Z" ${st('#cfd4d8')}/>`+
+ `<path d="M-60,-120 Q0,-95 60,-120" fill="none" stroke="${INK}" stroke-width="4"/><path d="M-70,-70 Q0,-45 70,-70" fill="none" stroke="#9aa1a6" stroke-width="4"/>`+
+ `<circle cx="-30" cy="-95" r="7" fill="#9aa1a6"/><circle cx="0" cy="-90" r="7" fill="#9aa1a6"/><circle cx="30" cy="-95" r="7" fill="#9aa1a6"/>`+
+ `<g transform="translate(0,${-170-lid*90}) rotate(${-lid*14})"><path d="M-70,0 Q0,-50 70,0Z" ${st('#dfe3e6')}/><circle cy="-34" r="12" ${st('#dfe3e6',4)}/></g>`+
+ (lid>0.3?[-40,-15,10,35].map((xx,i)=>`<ellipse cx="${xx}" cy="${-178-Math.sin(t*3+i)*4}" rx="16" ry="12" fill="#f8edc2" stroke="${INK}" stroke-width="3"/>`).join(''):''))}
+function galley(x,y,s,t){let oars='';for(let i=0;i<7;i++){const a=Math.sin(t*5+i*0.3)*14;oars+=`<line x1="${-150+i*48}" y1="10" x2="${-150+i*48+Math.sin(a*Math.PI/180)*60-20}" y2="80" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`}
+ return g(x,y,s,oars+`<path d="M-230,-10 L220,-10 Q200,45 150,50 L-170,50 Q-215,40 -230,-10Z" ${st('#9b6a3e')}/><line x1="-220" y1="12" x2="210" y2="12" stroke="${INK}" stroke-width="4"/>`+
+ `<line x1="-20" y1="-10" x2="-20" y2="-300" stroke="${INK}" stroke-width="8"/><path d="M-20,-290 Q90,-200 140,-40 L-20,-40Z" ${st('#fbf3df')}/>`+
+ `<path d="M-20,-300 L40,-285 L-20,-270Z" fill="${RED}" stroke="${INK}" stroke-width="4"/><path d="M170,-10 L240,-60" stroke="${INK}" stroke-width="6"/>`)}
+function bed(x,y,s,c){return g(x,y,s,`<rect x="-230" y="-60" width="460" height="90" ${st('#9b6a3e')}/><rect x="-250" y="-200" width="40" height="230" ${st('#9b6a3e')}/>`+
+ `<rect x="-215" y="-110" width="430" height="70" rx="20" ${st(c)}/>`)}
+function windowNight(x,y,s,t){return g(x,y,s,`<rect x="-130" y="-170" width="260" height="300" ${st(NIGHT2)}/><circle cx="50" cy="-90" r="34" fill="#f8efc6" stroke="${INK}" stroke-width="4"/><circle cx="64" cy="-100" r="30" fill="${NIGHT2}"/>`+
+ [[-70,-120],[-30,-40],[-90,40],[40,20],[80,80]].map(([a,b],i)=>`<circle cx="${a}" cy="${b}" r="${3+Math.sin(t*4+i)*1.5}" fill="#f8efc6"/>`).join('')+`<line x1="0" y1="-170" x2="0" y2="130" stroke="${INK}" stroke-width="6"/><line x1="-130" y1="-20" x2="130" y2="-20" stroke="${INK}" stroke-width="6"/>`)}
+
+// ---------- karakter: ayaklar (x,y) ----------
+function person(x,y,s,o){o=Object.assign({robe:'#3f6b4a',robe2:null,skin:SKIN,head:'turban',beard:null,a1:20,a2:-20,mouth:'smile',blink:false,glasses:false,bob:0,hair:null,face:1},o);
+ const sh=-200,hy=-262,eye=o.blink?`<path d="M-17,${hy} q7,4 14,0 M5,${hy} q7,4 14,0" stroke="${INK}" stroke-width="4" fill="none"/>`:`<circle cx="-10" cy="${hy}" r="5.5" fill="${INK}"/><circle cx="12" cy="${hy}" r="5.5" fill="${INK}"/>`;
+ const mouth={smile:`<path d="M-12,${hy+22} q12,10 24,0" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`,o:`<ellipse cx="1" cy="${hy+24}" rx="8" ry="10" fill="#7a2e22" stroke="${INK}" stroke-width="3"/>`,
+  laugh:`<path d="M-15,${hy+18} q16,26 32,0Z" fill="#7a2e22" stroke="${INK}" stroke-width="3"/>`,grin:`<path d="M-16,${hy+18} q16,14 32,0" fill="#fff" stroke="${INK}" stroke-width="3"/>`,chew:`<ellipse cx="1" cy="${hy+24}" rx="10" ry="${3+Math.abs(o.chew||0)*6}" fill="#7a2e22" stroke="${INK}" stroke-width="3"/>`}[o.mouth];
+ const arm=(sx,a,flip)=>`<g transform="translate(${sx},${sh+12}) rotate(${a})"><path d="M0,0 L${flip*8},92" stroke="${o.robe2||o.robe}" stroke-width="26" stroke-linecap="round"/><path d="M0,0 L${flip*8},92" stroke="${INK}" stroke-width="34" stroke-linecap="round" opacity="0"/><circle cx="${flip*8}" cy="100" r="15" ${st(o.skin,4)}/></g>`;
+ let head='';
+ if(o.head==='turban')head=`<ellipse cx="0" cy="${hy-48}" rx="50" ry="34" ${st('#f7f1e3')}/><path d="M-44,${hy-40} q44,-22 88,0" fill="none" stroke="${INK}" stroke-width="3"/><circle cx="0" cy="${hy-84}" r="9" ${st(RED,3)}/>`;
+ let back='';if(o.head==='scarf'){back=`<path d="M-62,${hy+20} C-70,${hy-80} 70,${hy-80} 62,${hy+20} L56,${hy+60} L-56,${hy+60}Z" ${st('#f7f1e3')}/>`;head=`<path d="M-44,${hy-22} Q0,${hy-58} 44,${hy-22} Q0,${hy-36} -44,${hy-22}Z" fill="#f7f1e3" stroke="${INK}" stroke-width="4"/>`}
+ if(o.head==='scarfFront')head='';
+ if(o.head==='tricorne')head=`<path d="M-72,${hy-30} Q0,${hy-110} 72,${hy-30} Q0,${hy-52} -72,${hy-30}Z" ${st('#2c2a35')}/><path d="M-50,${hy-20} q-14,24 -4,46 M50,${hy-20} q14,24 4,46" stroke="#f3efe6" stroke-width="16" fill="none" stroke-linecap="round"/>`;
+ if(o.head==='bork')head=`<path d="M-34,${hy-30} L-26,${hy-150} Q0,${hy-170} 26,${hy-150} L34,${hy-30}Z" ${st('#f7f1e3')}/><rect x="-40" y="${hy-44}" width="80" height="20" ${st(GOLD,4)}/>`;
+ if(o.head==='cap')head=`<path d="M-48,${hy-20} Q0,${hy-90} 48,${hy-20}Z" ${st('#2c2a35')}/><rect x="-46" y="${hy-12}" width="92" height="14" fill="#2c2a35"/>`;
+ const hair=o.hair==='curly'?[-44,-24,0,24,44,-34,34].map((xx,i)=>`<circle cx="${xx}" cy="${hy-36+(i>4?18:0)}" r="${i>4?20:22}" ${st('#5a3a22',4)}/>`).join(''):(o.hair==='wig'?`<path d="M-48,${hy-10} q-14,40 0,60 M48,${hy-10} q14,40 0,60" stroke="#f3efe6" stroke-width="18" fill="none"/>`:'');
+ const beard=o.beard?`<path d="M-38,${hy+10} Q-30,${hy+80} 0,${hy+92} Q30,${hy+80} 38,${hy+10} Q0,${hy+40} -38,${hy+10}Z" ${st(o.beard,4)}/>`:'';
+ const mus=o.mus?`<path d="M-30,${hy+16} q15,-12 30,0 q15,-12 30,0" fill="${INK}" stroke="${INK}" stroke-width="3"/>`:'';
+ const mask=o.mask?`<rect x="-46" y="${hy-12}" width="92" height="22" rx="10" fill="#222"/><circle cx="-10" cy="${hy}" r="4" fill="#fff"/><circle cx="12" cy="${hy}" r="4" fill="#fff"/>`:'';
+ const gl=o.glasses?`<circle cx="-11" cy="${hy}" r="13" fill="none" stroke="${INK}" stroke-width="3.5"/><circle cx="13" cy="${hy}" r="13" fill="none" stroke="${INK}" stroke-width="3.5"/><line x1="2" y1="${hy}" x2="0" y2="${hy}" stroke="${INK}" stroke-width="3"/>`:'';
+ const stripes=o.stripes?[0,1,2,3].map(i=>`<line x1="-48" y1="${-170+i*36}" x2="48" y2="${-170+i*36}" stroke="#f3efe6" stroke-width="10"/>`).join(''):'';
+ const body=`<path d="M-42,${sh} L42,${sh} L62,0 L-62,0Z" ${st(o.robe)}/>`+stripes+(o.sash?`<rect x="-50" y="-120" width="100" height="18" ${st(o.sash,3)}/>`:'')+`<rect x="-34" y="-6" width="26" height="10" rx="5" fill="${INK}"/><rect x="8" y="-6" width="26" height="10" rx="5" fill="${INK}"/>`;
+ return g(x,y+o.bob,s*PS,arm(-38,o.a1,-1)+body+arm(38,o.a2,1)+back+hair+`<circle cx="0" cy="${hy}" r="${46*o.face}" ${st(o.skin)}/>`+beard+mus+eye+gl+mask+mouth+head)}
+
+// ---------- başlık, sayaç, altyazı ----------
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const trU=s=>s.replace(/i/g,'İ').replace(/ı/g,'I').toUpperCase();
+function baslik(s,ts,op){const a=ease(ts/0.4)*op;let o='';let y=210;
+ if(s.etiket){const w=s.etiket.length*21+50;o+=`<g opacity="${a}"><rect x="${540-w/2}" y="${y-48}" width="${w}" height="56" rx="14" fill="${INK}"/><text x="540" y="${y-10}" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="34" fill="${GOLD}">${esc(s.etiket)}</text></g>`;y+=78}
+ const t1=trU(s.b1),t2=trU(s.b2),f1=Math.min(96,1750/Math.max(10,t1.length)),f2=Math.min(84,1650/Math.max(10,t2.length));
+ const b1=ease((ts-0.1)/0.4)*op,b2=ease((ts-0.25)/0.4)*op;
+ o+=`<text x="540" y="${y+(1-b1)*24}" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${f1}" fill="${INK}" opacity="${b1}" stroke="${PAPER}" stroke-width="10" paint-order="stroke">${esc(t1)}</text>`;
+ o+=`<text x="540" y="${y+f2+6+(1-b2)*24}" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${f2}" fill="${RED}" opacity="${b2}" stroke="${PAPER}" stroke-width="10" paint-order="stroke">${esc(t2)}</text>`;
+ return o}
+function sayac(x,y,label,val,col){return `<text x="${x}" y="${y}" text-anchor="middle" font-family="Kalam" font-weight="700" font-size="40" fill="${col}">${esc(label)}</text><text x="${x}" y="${y+92}" text-anchor="middle" font-family="Kalam" font-weight="700" font-size="104" fill="${col}">${val}</text>`}
+let GRUP=[];
+function grupla(){GRUP=[];let tam=[];const KW=K.kelimeler;
+ const bos=j=>{if(!tam.length)return;const t0=KW[tam[0]].b,t1=j+1<KW.length?KW[j+1].b:KW[j].s+0.8;GRUP.push({t0,t1,w:tam.map(i=>KW[i].k)});tam=[]};
+ KW.forEach((w,i)=>{tam.push(i);if(tam.length===3||/[.!?…:;]$/.test(w.k))bos(i)});bos(KW.length-1)}
+const nrm=w=>w.toLowerCase().replace(/İ/g,'i').replace(/[^\wçğıöşüâ]/g,'');
+function sari(w){const n=nrm(w);return K.anahtar.some(a=>n.startsWith(nrm(a)))}
+function altyazi(t){const G=GRUP.find(x=>t>=x.t0&&t<x.t1);if(!G)return'';const u=ease((t-G.t0)/0.15);
+ const parts=G.w.map(w=>`<tspan fill="${sari(w)?RED:INK}">${esc(w)}</tspan>`).join(' ');const fs=Math.min(78,1700/Math.max(12,G.w.join(' ').length));
+ return `<g opacity="${u}" transform="translate(540,1560) scale(${0.92+0.08*u})"><rect x="-500" y="-78" width="1000" height="112" rx="26" fill="#f7eed6" stroke="${INK}" stroke-width="4" opacity=".93"/><text x="0" y="0" text-anchor="middle" font-family="Kalam" font-weight="700" font-size="${fs}">${parts}</text></g>`}
+
+// ---------- sahneler: f(ts, u, t) → çizim (sahne alanı ~ y 420–1400) ----------
+const SAHNE={
+ yatak(ts,u,t,fin){const bub=fin?ease(ts/2.2)*1.6:(ts<2.4?ease(ts/2.2):0),popd=!fin&&ts>2.4&&ts<2.8;const chew=Math.sin(ts*12);
+  let o=`<rect x="-10" y="420" width="1100" height="1000" fill="${NIGHT}" stroke="${INK}" stroke-width="${W}"/>`+`<rect x="-10" y="1150" width="1100" height="270" fill="#6b5a46" stroke="${INK}" stroke-width="${W}"/>`;
+  o+=windowNight(300,800,1,t)+`<rect x="700" y="560" width="220" height="560" ${st('#8a6a44')}/><circle cx="880" cy="860" r="12" fill="${GOLD}" stroke="${INK}" stroke-width="3"/>`;
+  o+=`<path d="M600,1150 L600,1000 L640,960 L680,1000 L680,1150Z" ${st('#e6c36a')}/><ellipse cx="640" cy="1150" rx="70" ry="14" fill="#f8e9a8" opacity=".5"/>`;
+  o+=bed(420,1240,1,'#8e6fb0');
+  o+=person(330,1200,0.95,{robe:'#8e6fb0',head:'none',hair:'curly',a1:-30,a2:30,mouth:bub>0.05&&!fin?'chew':(fin?'grin':'chew'),chew,blink:Math.sin(t*1.7)>0.97});
+  o+=g(420,1240,1,`<rect x="-200" y="-150" width="400" height="120" rx="30" ${st('#8e6fb0')}/><path d="M-170,-120 q30,20 60,0 q30,20 60,0 q30,20 60,0 q30,20 60,0 q30,20 60,0" fill="none" stroke="#c7b2e0" stroke-width="5"/>`);
+  if(bub>0.02)o+=`<circle cx="${395}" cy="${905}" r="${16+bub*60}" fill="#f4a3c4" stroke="${INK}" stroke-width="4" opacity=".95"/><ellipse cx="${385}" cy="${890-bub*20}" rx="${6+bub*10}" ry="${4+bub*6}" fill="#fff" opacity=".7"/>`;
+  if(popd)o+=[0,1,2,3,4,5].map(i=>{const a=i*60*Math.PI/180,r=60+(ts-2.4)*300;return `<circle cx="${395+Math.cos(a)*r}" cy="${905+Math.sin(a)*r}" r="10" fill="#f4a3c4" stroke="${INK}" stroke-width="3"/>`}).join('');
+  const peek=fin?1:ease((ts-0.3)/0.6);
+  o+=person(fin?640:790+(1-peek)*140,1200,1.0,{robe:'#6c4d8a',head:'scarf',glasses:true,a1:fin?-40:10,a2:fin?40:(-150+Math.sin(ts*10)*25),mouth:fin?'laugh':'o',bob:fin?Math.sin(ts*14)*6:0});
+  if(fin)o+=`<text x="560" y="820" font-family="Kalam" font-weight="700" font-size="64" fill="#f8efc6" transform="rotate(-8 560 820)">ha ha!</text>`;
+  return o},
+ soru(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="#c9a87a" stroke="${INK}" stroke-width="${W}"/><rect x="-10" y="1150" width="1100" height="270" fill="#8b5e3c" stroke="${INK}" stroke-width="${W}"/>`;
+  o+=`<rect x="150" y="980" width="780" height="200" rx="40" ${st('#5f7d6a')}/><rect x="150" y="900" width="780" height="120" rx="40" ${st('#6f8f7a')}/>`;
+  o+=person(380,1180,1.05,{robe:'#6c4d8a',head:'scarf',glasses:true,a1:-140+Math.sin(ts*6)*25,a2:120+Math.sin(ts*6+1)*25,mouth:Math.sin(ts*10)>0?'o':'smile'});
+  [[640,1170,.6,'#3f6b9a'],[760,1170,.6,'#b8442e'],[880,1170,.6,'#d9a531']].forEach(([x,y,s,c],i)=>{o+=person(x,y,s,{robe:c,head:'none',hair:i===1?'curly':null,a1:20,a2:-20,mouth:'o',bob:Math.sin(ts*5+i)*4})});
+  const q=pop(ts/0.6);o+=g(560,640+Math.sin(ts*3)*14,1.6*q*ease(ts/0.3),`<text x="0" y="0" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="220" fill="${GOLD}" stroke="${INK}" stroke-width="8" paint-order="stroke">?</text>`,Math.sin(ts*4)*8);
+  return o},
+ ada(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="${SKY}" stroke="${INK}" stroke-width="${W}"/>`+sun(860,560,58,t)+cloud(220+ts*14,560,1)+cloud(620+ts*8,640,0.7)+bird(420+ts*40,600,t)+bird(470+ts*40,630,t+0.4);
+  o+=waves(1010,t);o+=`<path d="M60,1030 C200,820 520,760 760,880 C880,940 1000,1000 1060,1030Z" ${st(HILL)}/>`;
+  o+=house(360,930,0.8,true)+house(470,900,0.75)+house(560,925,0.8)+house(650,950,0.7);
+  o+=shrub(200,1010,0.7,t,false)+shrub(820,1015,0.65,t,false)+shrub(930,1030,0.5,t,false);
+  o+=g(150+ts*30,1110,0.5,`<path d="M-60,0 L60,0 L40,30 L-40,30Z" ${st('#9b6a3e',6)}/><line x1="0" y1="0" x2="0" y2="-110" stroke="${INK}" stroke-width="6"/><path d="M0,-105 L55,-20 L0,-20Z" ${st('#fbf3df',6)}/>`);
+  o+=ground(1250);return o},
+ gemi(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="${SKY}" stroke="${INK}" stroke-width="${W}"/>`+sun(170,560,50,t)+cloud(760,560,0.9);
+  o+=`<path d="M560,1010 L560,860 C640,780 1080,780 1090,860 L1090,1010Z" ${st(HILL)}/>`+house(700,880,0.7)+house(820,860,0.75,true)+house(950,880,0.7);
+  o+=`<rect x="700" y="980" width="390" height="40" ${st('#9b7a52')}/>`;
+  o+=waves(1010,t);const gx=1300-ease(ts/3.4)*820;o+=galley(gx,1050+Math.sin(t*2)*6,0.95,t);
+  [[760,975],[860,975],[960,975]].forEach(([x,y],i)=>{o+=person(x,y,0.42,{robe:['#3f6b9a','#b8442e','#6f8a4f'][i],head:i==1?'scarf':'turban',a1:-150+Math.sin(t*8+i)*30,a2:20,mouth:'grin'})});
+  return o},
+ koyler(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="${SKY}" stroke="${INK}" stroke-width="${W}"/>`+hills(820,HILL,HILL2)+cloud(820,540,0.8);
+  o+=tree(120,1010,0.8)+cypress(980,1000,0.9);o+=shrub(330,1060,1.1,t,true)+shrub(760,1040,0.9,t,true);
+  o+=person(470,1180,0.85,{robe:'#3f6b9a',head:'scarf',a1:-60+Math.sin(t*5)*15,a2:30,mouth:'smile',sash:'#b8442e'});
+  o+=person(640,1170,0.8,{robe:'#2e4f7a',head:'scarf',a1:40,a2:-70+Math.sin(t*5+1)*15,mouth:'smile',sash:GOLD});
+  o+=`<path d="M560,1190 q-40,40 0,60 q40,-20 80,0" ${st('#c2955c',4)}/>`;
+  const p=ease((ts-1.2)/2.4);if(p>0){o+=`<path d="M300,760 C450,${640} 650,640 830,720" fill="none" stroke="${RED}" stroke-width="8" stroke-dasharray="20 16" stroke-dashoffset="${-t*60}" opacity="${p}"/>`;
+   o+=g(860,720,0.8*pop(p),`<rect x="-80" y="-60" width="160" height="80" ${st('#f6efe0')}/><path d="M-60,-60 A60,60 0 0 1 60,-60Z" ${st('#5c8aa8')}/><rect x="-100" y="-90" width="20" height="110" ${st('#f6efe0',4)}/><rect x="80" y="-90" width="20" height="110" ${st('#f6efe0',4)}/><path d="M-100,-90 L-90,-120 L-80,-90 M80,-90 L90,-120 L100,-90" ${st('#5c8aa8',4)}/>`)+
+   `<text x="860" y="790" text-anchor="middle" font-family="Kalam" font-weight="700" font-size="48" fill="${RED}" opacity="${p}">saray</text>`}
+  o+=ground(1250);return o},
+ sakizlik(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="#2f5f86" stroke="${INK}" stroke-width="${W}"/>`;
+  for(let i=0;i<6;i++)for(let j=0;j<4;j++)o+=`<rect x="${i*180+10}" y="${440+j*180}" width="160" height="160" rx="12" fill="#3a6f99" stroke="#9cc2d9" stroke-width="3"/><circle cx="${i*180+90}" cy="${520+j*180}" r="34" fill="none" stroke="#e9f2f2" stroke-width="5"/><path d="M${i*180+90},${486+j*180} l0,68 M${i*180+56},${520+j*180} l68,0" stroke="#e9f2f2" stroke-width="4"/>`;
+  o+=`<path d="M140,1420 L140,700 Q540,440 940,700 L940,1420" fill="none" stroke="${INK}" stroke-width="22"/><path d="M140,1420 L140,700 Q540,440 940,700 L940,1420" fill="none" stroke="${GOLD}" stroke-width="10"/>`;
+  o+=`<rect x="-10" y="1180" width="1100" height="240" fill="#8a3f2c" stroke="${INK}" stroke-width="${W}"/><rect x="200" y="1170" width="680" height="60" rx="20" ${st('#7a4a2c')}/>`;
+  const lid=ease((ts-1.6)/1.2);o+=jar(540,1180,1.25,lid,t);
+  if(lid>0.3)for(let i=0;i<7;i++)o+=sparkle(380+i*55,880-Math.sin(i*1.3)*80,0.8,t,i);
+  return o},
+ tournefort(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="${SKY}" stroke="${INK}" stroke-width="${W}"/>`+cloud(240,540,0.8)+waves(940,t);
+  o+=galley(820,960,0.55,t*0.3);o+=`<rect x="-10" y="1080" width="1100" height="340" fill="#cdb183" stroke="${INK}" stroke-width="${W}"/>`;
+  const n=Math.floor(ease((ts-0.4)/3.4)*286),ton=Math.floor(ease((ts-0.4)/3.4)*128),stack=Math.min(9,Math.floor(ease((ts-0.4)/3.4)*9.99));
+  for(let i=0;i<stack;i++){const c=i%3,r=Math.floor(i/3);o+=crate(600+c*130-r*0,1210-r*78,0.9)}
+  o+=person(300,1260,1,{robe:'#2e4f7a',robe2:'#2e4f7a',head:'tricorne',hair:'wig',a1:-70,a2:-100+Math.sin(t*10)*8,mouth:ts>2?'o':'smile',sash:GOLD});
+  o+=g(395,1060,1,`<rect x="-40" y="-30" width="80" height="54" ${st('#f3ead2',4)}/><line x1="-28" y1="-12" x2="24" y2="-12" stroke="${INK}" stroke-width="3"/><line x1="-28" y1="2" x2="18" y2="2" stroke="${INK}" stroke-width="3"/><path d="M30,-30 L60,-90" stroke="${INK}" stroke-width="4"/><path d="M60,-90 q-20,10 -26,40" fill="#fff" stroke="${INK}" stroke-width="3"/>`,-10);
+  o+=sayac(300,560,'sandık',n,INK)+sayac(780,560,'ton sakız',ton,RED);
+  return o},
+ hirsiz(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="${SKY}" stroke="${INK}" stroke-width="${W}"/>`+cloud(800,540,0.8)+waves(900,t,SEA2)+galley(300,930,0.6,t);
+  o+=`<rect x="-10" y="1020" width="1100" height="400" fill="#cdb183" stroke="${INK}" stroke-width="${W}"/>`;
+  const run=ts*240,tx=380+run,leg=Math.sin(t*20);
+  for(let i=0;i<6;i++){const dx=tx-80-i*70;if(dx>200)o+=`<ellipse cx="${dx}" cy="${1240+Math.sin(i)*8}" rx="10" ry="8" fill="#f5e7b0" stroke="${INK}" stroke-width="3"/>`}
+  o+=person(tx,1260+Math.abs(leg)*-10,0.95,{robe:'#3c3c48',stripes:true,head:'cap',mask:true,a1:60+leg*30,a2:-60-leg*30,mouth:'grin'});
+  o+=g(tx+40,1080,1,`<path d="M-30,-40 Q-60,40 0,60 Q60,40 30,-40 Q0,-60 -30,-40Z" ${st('#c2a06a')}/>`,leg*6);
+  const gx=150+ts*200;o+=person(gx,1260,1,{robe:'#b8442e',robe2:'#b8442e',head:'bork',mus:true,a1:-100,a2:-40,mouth:'o',sash:GOLD,bob:Math.abs(Math.sin(t*16))*-8});
+  if(ts>0.5)o+=`<text x="${gx+60}" y="720" font-family="Kalam" font-weight="700" font-size="70" fill="${RED}" transform="rotate(-6 ${gx} 720)">dur!</text>`;
+  return o},
+ unesco(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="${SKY}" stroke="${INK}" stroke-width="${W}"/>`+sun(880,560,50,t)+hills(900,HILL,HILL2)+house(160,1000,0.8,true)+house(920,1010,0.8);
+  o+=shrub(540,1130,1.7,t,false);const rb=pop(ts/0.8);o+=g(540,1080,rb,`<path d="M-70,0 L0,-10 L70,0 L0,10Z" ${st(GOLD,4)}/><path d="M-10,0 L-60,60 M10,0 L60,60" stroke="${GOLD}" stroke-width="16" stroke-linecap="round"/><path d="M-10,0 L-60,60 M10,0 L60,60" stroke="${INK}" stroke-width="3" fill="none"/><circle r="18" ${st(GOLD,4)}/>`);
+  [[250,'#3f6b9a','scarf'],[380,'#b8442e','turban'],[700,'#6f8a4f','none'],[830,'#8e6fb0','scarf']].forEach(([x,c,h],i)=>{const j=Math.abs(Math.sin(t*6+i))*-40;o+=person(x,1300,0.75,{robe:c,head:h,hair:h==='none'?'curly':null,a1:-150,a2:150,mouth:'laugh',bob:j})});
+  for(let i=0;i<40;i++){const x=(i*97)%1080,y=420+((t*180+i*53)%980),c=[RED,GOLD,SEA,TREE][i%4];o+=`<rect x="${x}" y="${y}" width="14" height="22" fill="${c}" stroke="${INK}" stroke-width="2" transform="rotate(${t*200+i*30} ${x} ${y})"/>`}
+  return o},
+ hazine(ts,u,t){let o=`<rect x="-10" y="420" width="1100" height="1000" fill="#7a2f2a" stroke="${INK}" stroke-width="${W}"/>`;
+  o+=`<path d="M200,1260 Q540,1180 880,1260 L860,1330 Q540,1260 220,1330Z" ${st('#a83a32')}/><ellipse cx="540" cy="1230" rx="300" ry="60" ${st('#c9473b')}/>`;
+  for(let i=0;i<7;i++){const x=400+i*45,y=1200-(i%2)*24;o+=`<ellipse cx="${x}" cy="${y}" rx="22" ry="17" fill="#f8edc2" stroke="${INK}" stroke-width="3"/>`}
+  o+=g(700,1150,0.9*pop(ts/0.7),`<path d="M-70,0 L-80,-70 L-40,-30 L0,-90 L40,-30 L80,-70 L70,0Z" ${st(GOLD)}/><circle cy="-90" r="10" ${st(RED,3)}/>`);
+  for(let i=0;i<8;i++)o+=sparkle(280+i*75,1080-Math.sin(i*1.7)*90,0.7,t,i);
+  const k=ease((ts-0.3)/2.4);o+=sayac(290,560,'ölü eti',Math.round(100*(1-k)),'#f3e6c4')+sayac(790,560,'sultan sakızı',Math.round(100*k),GOLD);
+  return o},
+ final(ts,u,t){return SAHNE.yatak(ts,u,t,true)}
+};
+
+// ---------- kare ----------
+let ilk=true;
+function kare(t){if(ilk){grupla();ilk=false}
+ const S=K.sahneler;let i=S.findIndex(s=>t>=s.bas&&t<s.son);if(i<0)i=t<S[0].bas?0:S.length-1;const s=S[i],ts=t-s.bas,u=cl(ts/(s.son-s.bas));
+ const GEC=0.35;let o=`<rect width="1080" height="1920" fill="${PAPER}"/>`;
+ // sahne görüntüsü: hafif kamera yakınlaşması + geçişte çapraz kararma
+ const cam=(si,tt)=>{const ss=S[si],uu=cl((tt-ss.bas)/(ss.son-ss.bas));const z=1+0.05*ease(uu);return `<g transform="translate(540,920) scale(${z}) translate(-540,-920)">${SAHNE[ss.ad](tt-ss.bas,uu,tt)}</g>`};
+ o+=`<g clip-path="url(#kes)">`+cam(i,t);if(i>0&&ts<GEC)o+=`<g opacity="${1-ease(ts/GEC)}">${cam(i-1,t)}</g>`;o+=`</g>`;
+ o+=`<rect x="20" y="420" width="1040" height="1000" rx="28" fill="none" stroke="${INK}" stroke-width="10"/>`;
+ // üst: ilerleme + başlık
+ o+=`<rect x="0" y="0" width="1080" height="12" fill="${P2}"/><rect x="0" y="0" width="${1080*t/K.toplam}" height="12" fill="${RED}"/>`;
+ const son=K.kelimeler[K.kelimeler.length-1].s;
+ if(t>son-0.2){const a=ease((t-(son-0.2))/0.4);o+=`<text x="540" y="230" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="76" fill="${INK}" opacity="${a}" stroke="${PAPER}" stroke-width="10" paint-order="stroke">TAMAMI KANALDA</text><text x="540" y="320" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="64" fill="${RED}" opacity="${a}" stroke="${PAPER}" stroke-width="10" paint-order="stroke">YORUMLARA YAZ ▼</text>`}
+ else{o+=baslik(s,ts,1);if(i>0&&ts<GEC)o+=baslik(S[i-1],ts+5,1-ease(ts/GEC))}
+ o+=altyazi(t);
+ o+=`<text x="540" y="1830" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="34" fill="${INK}">ANTİK STÜDYO</text><text x="540" y="1872" text-anchor="middle" font-family="Kalam" font-size="24" fill="#6b5a46">Özgün vektörel canlandırma · Ses: yapay zekâ ile klonlanmış kendi sesim · Müzik: kanal üretimi</text>`;
+ if(t>K.toplam-0.6)o+=`<rect width="1080" height="1920" fill="#000" opacity="${(t-(K.toplam-0.6))/0.6}"/>`;
+ SV.innerHTML=`<defs><clipPath id="kes"><rect x="20" y="420" width="1040" height="1000" rx="28"/></clipPath></defs>`+o}
+window.kurgu=k=>{K=k;ilk=true};window.kare=kare;
+document.fonts.load('800 40px Baloo').then(()=>document.fonts.load('700 40px Kalam')).then(()=>document.fonts.load('400 40px Kalam')).then(()=>{window.HAZIR=true});
+setTimeout(()=>{window.HAZIR=true},4000);
+</script></body></html>

@@ -12,7 +12,7 @@ CIKTI = os.path.join(KOK, "docs", "kesif", "uretici_ornek.json")
 GRUPLAR = ("gorsel", "edit")
 ROZET = re.compile(r"shields\.io|badge|badgen|star-history|stars?\.svg|contrib\.rocks|codecov|travis|circleci|"
                    r"github\.com/.+/actions|readthedocs|discord|twitter|x\.com|sponsor|buymeacoffee|ko-fi|logo|icon|"
-                   r"trendshift|producthunt|deepwiki|visitor|hits|wechat|qr|avatar|emoji|\.ico$", re.I)
+                   r"trendshift|producthunt|deepwiki|visitor|hits|wechat|qr|avatar|emoji|\.ico$|bmc-cdn|gstar|star[-_]?history|installation[-_]matrix|arch(itecture)?[._-]|comp_effic|benchmark|chart|diagram|flowchart|wechat|group|contact|donate|paypal|alipay", re.I)
 MEDYA = re.compile(r"\.(png|jpe?g|gif|webp|mp4|webm)(\?|$)", re.I)
 GPU = re.compile(r"\b(cuda|vram|gpu|nvidia|rtx|a100|h100|\d+\s?gb (of )?vram)\b", re.I)
 
@@ -68,8 +68,9 @@ def main():
         md = base64.b64decode(r.get("content", "")).decode("utf-8", "replace")
         dal = (re.search(r"raw\.githubusercontent\.com/[^/]+/[^/]+/([^/]+)/", r.get("download_url") or "") or [None, "HEAD"])[1]
         gpu = len(GPU.findall(md))
+        vram = bool(re.search(r"\bvram\b|\b\d+\s?gb\b.{0,20}(gpu|vram|memory)", md, re.I))
         sonuc[x["ad"]] = {"dosyalar": adresler(md, sahip, depo, dal),
-                          "donanim": "gpu" if gpu >= 2 else "cpu",
+                          "donanim": "gpu" if (vram and gpu >= 2) or gpu >= 6 else "cpu",
                           "kaynak": x["u"]}
         time.sleep(0.2)
     if not sonuc and eski:

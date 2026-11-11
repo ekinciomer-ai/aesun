@@ -203,7 +203,7 @@ function ciz(){
   const lis=x.ls?`<span class="${x.ls}">${esc(x.l||'lisans ?')}</span>`:'';
   const yil=typeof x.y==='number'?`<span>⭐ ${x.y.toLocaleString('tr')}</span>`:(x.y?`<span>${esc(x.y)}</span>`:'');
   return `<button class="kart${x.k==='oneri'?' oneri':''}" data-i="${i}"><span class="ad">${esc(x.ad)}</span>
-  <span class="acik">${esc(x.a)}</span><span class="rz">${ORN[x.ad]?'<span class="ornrozet">▶ örnek var</span>':(URET[x.ad]&&URET[x.ad].dosyalar.length?'<span class="ornrozet ur">▷ üretici örneği</span>':'')}${URET[x.ad]&&URET[x.ad].donanim==='gpu'?'<span class="gpurozet">GPU</span>':''}${yeniMi(x)?'<span class="yeni">yeni</span>':''}<span>${esc(V.gruplar[x.g])}</span>${lis}${yil}<span>${esc(KAY[x.k])}</span></span></button>`}).join(''):'<div class="bos">Sonuç yok.</div>';
+  <span class="acik">${esc(x.a)}</span><span class="rz">${ORN[x.ad]?'<span class="ornrozet">▶ örnek var</span>':(URET[x.ad]&&URET[x.ad].dosyalar.length?'<span class="ornrozet ur">▷ üretici örneği</span>':'')}${!ORN[x.ad]&&URET[x.ad]&&URET[x.ad].donanim==='gpu'?'<span class="gpurozet">GPU</span>':''}${yeniMi(x)?'<span class="yeni">yeni</span>':''}<span>${esc(V.gruplar[x.g])}</span>${lis}${yil}<span>${esc(KAY[x.k])}</span></span></button>`}).join(''):'<div class="bos">Sonuç yok.</div>';
  $('daha').hidden=SON.length<=S.n;
  if(S.q&&S.v!=='liste')gorunum('liste');
 }

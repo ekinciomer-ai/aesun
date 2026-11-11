@@ -1,3 +1,46 @@
-{"_not": "Eski tampon denemelerinin hangi araca ait olduğu (yeni denemelerde deneme JSON'undaki 'arac' alanı yeterli).",
- "video-opuscar": {"arac": "lemomo-ai/lemo-opuscar", "not": "Üç hazır stilin (gravür, sessiz film, ağaç baskı) kareleri; 1280×720."},
- "GFAD-20261108-pixelfx": {"arac": "patch-gg/pixelfx", "not": "Piksel efekt kütüphanesi: kamp ateşi, plazma topu, ateş topu atma; 244 efektin hepsi testi geçti."}}
+{
+ "_not": "Eski tampon denemelerinin hangi araca ait olduğu (yeni denemelerde deneme JSON'undaki 'arac' alanı yeterli).",
+ "video-opuscar": {
+  "arac": "lemomo-ai/lemo-opuscar",
+  "not": "Üç hazır stilin (gravür, sessiz film, ağaç baskı) kareleri; 1280×720.",
+  "karar": "✅ Stil kareleri kaliteli (gravür, sessiz film). Antik Stüdyo için uygun; video render uzun sürüyor."
+ },
+ "GFAD-20261108-pixelfx": {
+  "arac": "patch-gg/pixelfx",
+  "not": "Piksel efekt kütüphanesi: kamp ateşi, plazma topu, ateş topu atma; 244 efektin hepsi testi geçti.",
+  "karar": "✅ Piksel efektleri temiz ve hızlı; Shorts geçiş/vurgu efekti olarak kullanılabilir."
+ },
+ "ornek-rembg": {
+  "karar": "✅ Değer. 3 sn'de temiz kesim; astronot ve otobüs+insanlar doğru ayrıldı. Kapak, ürün ve kişi görselleri için ilk tercih."
+ },
+ "ornek-backgroundremover": {
+  "karar": "🟡 rembg ile aynı modeli kullanıyor, sonuç neredeyse aynı. Ayrıca kurmaya gerek yok."
+ },
+ "ornek-transparent-background": {
+  "karar": "🟡 Kesim iyi; 'arka planı bulanıklaştır' modu güzel (portre etkisi). Ama rembg'den yavaş (3,5 dk kurulum)."
+ },
+ "ornek-auto-editor": {
+  "karar": "✅ Değer. 20 sn videodaki 6 sn sessizliği 1 sn'de kesti (20 → 14,6 sn). CutkodA otomatik kurgunun ilk adımı."
+ },
+ "ornek-moviepy": {
+  "karar": "✅ Değer. Kodla yakınlaşmalı, yazılı, geçişli dikey video; Türkçe harfler doğru. Basit Shorts/slayt videoları için."
+ },
+ "ornek-sharp": {
+  "karar": "✅ Değer. 50 görseli 1080px'e 7 sn'de çevirdi. Portal/site görsellerini küçültme, toplu düzenleme için."
+ },
+ "ornek-opencv": {
+  "karar": "✅ Değer. Uydu görüntüsünde su yüzeyini otomatik buldu (%13,5). GES arazi/gölge analizi ve görsel efektler için temel kütüphane."
+ },
+ "ornek-supervision": {
+  "karar": "✅ Değer. Otobüs ve 4 kişiyi 1,3 sn'de tanıdı (CPU). Saha fotoğrafında kask/insan/araç sayma için. Not: güvenlik taraması kendi belge betiğinde GITHUB_TOKEN kelimesini buldu; araç kodu değil, zararsız."
+ },
+ "ornek-satori": {
+  "karar": "🟡 Koddan bilgi kartını 0,1 sn'de üretti. Ama büyük sayılar taşabiliyor; düzen elle ayarlanmalı. Biz bu işi teardown sayfalarıyla zaten yapıyoruz."
+ },
+ "ornek-gowall": {
+  "karar": "🔴 Hazır renk temaları zayıf; görsel solgunlaşıyor. İşimize yaramaz."
+ },
+ "ornek-kornia": {
+  "karar": "🟡 Yapay zekâ eğitimi için görsel çoğaltma; ancak kendi modelimizi eğitirsek gerekir. Şimdilik değil."
+ }
+}

@@ -120,7 +120,7 @@ def ornekler():
             continue
         kayit = [l for l in (t.get("duman_sonu") or "").splitlines() if l.strip() and not l.startswith(("WARNING", "  ", "Downloading"))]
         sonuc.setdefault(arac, []).append({
-            "id": i, "durum": t.get("durum"), "sure_sn": t.get("sure_sn"), "not": d.get("ornek_not") or h.get("not"),
+            "id": i, "durum": t.get("durum"), "sure_sn": t.get("sure_sn"), "not": d.get("ornek_not") or h.get("not"), "karar": h.get("karar"),
             "tarih": datetime.fromtimestamp(os.path.getmtime(f), timezone.utc).strftime("%Y-%m-%d"),
             "dosyalar": dosyalar, "kayit": kayit[-8:]})
     with open(yol("docs", "kesif", "ornek.json"), "w", encoding="utf-8") as fp:

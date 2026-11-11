@@ -216,7 +216,7 @@ const GORSEL_G=['gorsel','edit'];
 function ornBolum(ad,g){const O=ORN[ad];
  if(!O)return GORSEL_G.includes(g)?'<h4>Örnek çıktı</h4><div class="orn"><span class="alt">Henüz tampon bölgede örnek üretilmedi.</span></div>':'';
  const n=O.reduce((t,o)=>t+o.dosyalar.length,0);
- return '<h4>Örnek çıktı</h4>'+O.map(o=>`<div class="orn"><div class="ust"><span>${esc(o.not||'Tampon deneme çıktısı')}<br><span class="alt">${o.durum==='basarili'?'✓ ':'✗ '}tampon · ${tr(o.tarih)}${o.sure_sn?' · '+Math.round(o.sure_sn/60)+' dk kurulum+deneme':''}</span></span>
+ return '<h4>Örnek çıktı</h4>'+O.map(o=>`<div class="orn"><div class="ust"><span>${o.karar?`<b>${esc(o.karar)}</b><br>`:''}${esc(o.not||'Tampon deneme çıktısı')}<br><span class="alt">${o.durum==='basarili'?'✓ ':'✗ '}tampon · ${tr(o.tarih)}${o.sure_sn?' · '+Math.round(o.sure_sn/60)+' dk kurulum+deneme':''}</span></span>
   <button class="gos" data-orn="${esc(ad)}" data-id="${esc(o.id)}">Göster (${o.dosyalar.length})</button></div><div class="galeri" hidden></div></div>`).join('');}
 function ornAc(b){const ad=b.dataset.orn,o=(ORN[ad]||[]).find(z=>z.id===b.dataset.id),gal=b.closest('.orn').querySelector('.galeri');
  if(!o)return;if(!gal.hidden){gal.hidden=true;b.textContent='Göster ('+o.dosyalar.length+')';$('dlg').classList.remove('buyuk');return}

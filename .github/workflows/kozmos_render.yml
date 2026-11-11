@@ -13,7 +13,7 @@ on:
         required: false
         default: "1"
       ayar:
-        description: "film ayarları: FPS RES SAMPLES (örn. '12 854x480 10')"
+        description: "film ayarları: FPS RES SAMPLES [KARELER] (örn. '12 854x480 10' ya da '12 854x480 10 300,700')"
         required: false
         default: "12 854x480 10"
 permissions:
@@ -67,7 +67,7 @@ jobs:
             cp $RUNNER_TEMP/modeller/kaynakca.json cikti/ 2>/dev/null || true
           else
             set -- ${{ inputs.ayar }}
-            FPS=$1 RES=$2 SAMPLES=$3 MODELLER=$RUNNER_TEMP/modeller PARCA=${{ matrix.i }} PARCA_SAYISI=${{ inputs.parca }} \
+            FPS=$1 RES=$2 SAMPLES=$3 FRAMES=${4:-} MODELLER=$RUNNER_TEMP/modeller PARCA=${{ matrix.i }} PARCA_SAYISI=${{ inputs.parca }} \
               ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/midong_film.py -- cikti 2>&1 | grep -E 'KARE|BITTI|Error|Traceback' | tail -20
           fi
           ls cikti | head
@@ -75,7 +75,7 @@ jobs:
         run: |
           D=$RUNNER_TEMP/dal; git clone -q --depth 1 --branch kozmos-cikti https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} $D 2>/dev/null || { git init -q $D; git -C $D checkout -q -b kozmos-cikti; git -C $D remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}; }
           H=${{ inputs.gorev }}/${{ matrix.i }}; rm -rf $D/$H; mkdir -p $D/$H
-          if [ "${{ inputs.gorev }}" = "onizleme" ]; then cp cikti/* $D/$H/; else cp cikti/*.json $D/$H/ 2>/dev/null; ls cikti/kare_*.jpg | awk 'NR%24==1' | xargs -r -I{} cp {} $D/$H/; fi
+          if [ "${{ inputs.gorev }}" = "onizleme" ]; then cp cikti/* $D/$H/; else cp cikti/*.json $D/$H/ 2>/dev/null; ls cikti/kare_*.jpg | awk -v n="${{ inputs.ayar }}" 'BEGIN{split(n,a," "); k=(a[4]!="")?1:24} NR%k==1 || k==1' | xargs -r -I{} cp {} $D/$H/; fi
           cd $D && git add -A && git -c user.name=kozmos-bot -c user.email=bot@users.noreply.github.com commit -q -m "kozmos ${{ inputs.gorev }} ${{ matrix.i }}" && for k in 1 2 3; do git pull -q --rebase origin kozmos-cikti 2>/dev/null || true; git push -q origin kozmos-cikti && break; sleep $((k*3)); done
       - name: Film karelerini sunucuya gönder
         if: inputs.gorev == 'film'

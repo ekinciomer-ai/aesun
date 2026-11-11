@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Yayın analizi ve yol haritası motoru (GitHub Actions'ta her çalışmada; bilgisayar ve Claude gerekmez).
 
-Girdi : docs/yayin/yayin.json (kayıtlar), docs/yayin/gecmis.json (günlük izlenme ölçümleri)
+Girdi : docs/yayin/yayin.json (kayıtlar), docs/yayin/gecmis.json (günlük izlenme ölçümleri), docs/yayin/analitik.json
 Çıktı : docs/yayin/analiz.json  → Portal → Yayın Takibi → "Yol haritası" kutusu
         Bu dosya ÜRETİM İÇİN BAĞLAYICIDIR: Claude, Antigravity ve CutkodA sunucusu
-        yeni içerik üretmeden/planlamadan önce 'plan' ve 'eylemler' alanına uyar (YAYIN_TAKIBI.md).
+        yeni içerik üretmeden/planlamadan önce 'plan', 'takvim_aciklari', 'kopru_onerileri' ve 'eylemler' alanına uyar (YAYIN_TAKIBI.md).
 
-Ölçü  : Her Short'un yayından sonraki ilk ~48 saatteki izlenmesi (Shorts izlenmesinin çoğu bu sürede gelir).
+Ölçü  : Her Short'un yayından sonraki ilk ~48 saatteki izlenmesi (Shorts izlenmesinin çoğu bu sürede gelir)
+        + YouTube Analytics izlenme yüzdesi (averageViewPercentage) + kaydırmadan izleme oranı (engagedViews/views).
 Karar : kanal × seri bazında; eşikler kanalın kendi en iyi videolarına göre (sabit sayı değil).
 """
 import json, os, re, statistics
@@ -14,9 +15,29 @@ from datetime import datetime, timedelta, timezone
 
 KOK = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "yayin")
 TZ = timezone(timedelta(hours=3))
-GUNLUK_KOTA = {"Antik Stüdyo": 4, "Ancient Studio": 3, "Estudio Antiguo": 3, "Kozmos Lab TR": 2, "Kozmos Lab": 2}   # günde en fazla Short (YouTube), kanal başına
+GUNLUK_KOTA = {
+    "Antik Stüdyo": 4,
+    "Ancient Studio": 3,
+    "Estudio Antiguo": 3,
+    "Kozmos Lab TR": 2,
+    "Kozmos Lab": 2,
+}  # günde en fazla Short (YouTube), kanal başına
+KANAL_NORMAL = {
+    "Kozmos Lab TR (@kozmoslabtr)": "Kozmos Lab TR",
+    "Kozmos Lab (@kozmoslab)": "Kozmos Lab",
+}
+SERI_NORMAL = {"Did You Know?": "Did you know?"}
 MIN_ORNEK = 3          # karar için en az bu kadar ölçülmüş video
 OLGUN_SAAT = 40        # bu yaştan küçük video "erken" sayılır, karara katılmaz
+
+KOPRU_KONULARI = [
+    ("piri", ["piri reis", "hürmüz", "hormuz"]),
+    ("bogaz", ["boğaz", "kızıldeniz", "red sea", "babülmendep", "don-volga", "caspian", "bosphorus", "70 gemi", "70 warships", "70 barcos", "süveyş", "suez", "cinco mares", "sea gates"]),
+    ("tablo", ["tablo", "painting", "cuadro", "mona lisa", "çığlık", "scream", "venüs", "venus", "gece devriyesi", "night watch", "rembrandt", "van gogh", "inci küpeli", "pearl earring", "amerikan gotiği", "american gothic", "prado", "dalga", "wave", "akşam yemeği", "supper", "kaplumbağa", "tortoise"]),
+    ("gunes", ["kum", "sand", "güneş panel", "solar panel"]),
+    ("ruzgar", ["rüzgâr türbin", "ruzgar turbin", "wind turbine"]),
+    ("tuna", ["tuna", "plevne"]),
+]
 
 
 def yukle(ad, bos):
@@ -34,9 +55,14 @@ def zaman(x):
 
 
 def normal(b):
-    b = re.sub(r"#\S+", "", b.lower()).split("|")[0]
+    b = re.sub(r"#\S+", "", (b or "").lower()).split("|")[0]
     b = re.sub(r"\((kopya|eski yükleme)\)", "", b)
-    return re.sub(r"[^\wçğıöşü ]+", "", b).strip()
+    return re.sub(r"[^\wçğıöşüáéíóúñ ]+", "", b).strip()
+
+
+def konu_etiketleri(baslik):
+    bl = (baslik or "").lower()
+    return {ad for ad, anahtarlar in KOPRU_KONULARI if any(k in bl for k in anahtarlar)}
 
 
 def main():
@@ -45,7 +71,7 @@ def main():
     simdi = datetime.now(TZ)
     K = j.get("kayitlar", [])
 
-    # 1) Video başına ilk 48 saat izlenmesi
+    # 1) Video başına ilk 48 saat izlenmesi (Short + Video)
     vids = []
     for x in K:
         if x.get("platform") != "YouTube" or x.get("durum") != "Yayında" or not x.get("vid"):
@@ -53,17 +79,22 @@ def main():
         t = zaman(x)
         if not t:
             continue
+        kanal = KANAL_NORMAL.get(x.get("kanal"), x.get("kanal"))
+        seri = SERI_NORMAL.get(x.get("seri"), x.get("seri") or "?")
         yas = (simdi - t).total_seconds() / 3600
         hedef = (t + timedelta(hours=48)).strftime("%Y-%m-%d")
         g48 = next((gun[d][x["vid"]] for d in sorted(gun) if d >= hedef and x["vid"] in gun[d]), None)
         olcu = g48 if g48 is not None else (x.get("izlenme") or 0)
-        vids.append(dict(vid=x["vid"], kanal=x.get("kanal"), seri=x.get("seri") or "?", tur=x.get("tur") or "Short",
-                         baslik=x.get("baslik", ""), tarih=x["tarih"], saat=x.get("saat") or "", yas=round(yas),
-                         i48=olcu, toplam=x.get("izlenme") or 0, olgun=yas >= OLGUN_SAAT, yuzde=x.get("izlenme_yuzde")))
+        vids.append(dict(
+            vid=x["vid"], kanal=kanal, seri=seri, tur=x.get("tur") or "Short",
+            baslik=x.get("baslik", ""), tarih=x["tarih"], saat=x.get("saat") or "", yas=round(yas),
+            i48=olcu, toplam=x.get("izlenme") or 0, olgun=yas >= OLGUN_SAAT,
+            yuzde=x.get("izlenme_yuzde"), tutma_yz=x.get("tutma_yuzdesi"), abone=x.get("abone_kazanc"),
+        ))
 
     # 2) Kanal eşikleri: "tuttu" = kanalın en iyi 3 Short'unun ortalamasının %20'si
     esik = {}
-    for kanal in {v["kanal"] for v in vids}:
+    for kanal in {v["kanal"] for v in vids} | set(GUNLUK_KOTA):
         s = sorted((v["i48"] for v in vids if v["kanal"] == kanal and v["tur"] == "Short" and v["olgun"]), reverse=True)
         esik[kanal] = max(50, round(statistics.mean(s[:3]) * 0.2)) if s else 50
     for v in vids:
@@ -90,9 +121,16 @@ def main():
             karar, neden = "SÜRDÜR", f"tutma oranı %{oran}"
         en_iyi = max(L, key=lambda v: v["i48"]) if L else None
         yz = [v["yuzde"] for v in L if v.get("yuzde") is not None]
-        seriler.append(dict(kanal=kanal, seri=seri, karar=karar, neden=neden, olculen=n, erken=len(erken),
-                            medyan_48sa=med, tutma_orani=oran, izlenme_yuzde=(round(statistics.median(yz)) if yz else None),
-                            en_iyi=(en_iyi and {"baslik": en_iyi["baslik"], "i48": en_iyi["i48"]})))
+        tyz = [v["tutma_yz"] for v in L if v.get("tutma_yz") is not None]
+        kayit = dict(
+            kanal=kanal, seri=seri, karar=karar, neden=neden, olculen=n, erken=len(erken),
+            medyan_48sa=med, tutma_orani=oran,
+            izlenme_yuzde=(round(statistics.median(yz)) if yz else None),
+            en_iyi=(en_iyi and {"baslik": en_iyi["baslik"], "i48": en_iyi["i48"]}),
+        )
+        if tyz:
+            kayit["kaydirmadan_izleme_yuzde"] = round(statistics.median(tyz))
+        seriler.append(kayit)
 
     # 4) Günlük slot dağıtımı (kota, puana göre): ARTIR 2 pay, SÜRDÜR/DENE 1, DEĞİŞTİR 1 (yeni kanca ile), DURDUR 0
     pay = {"ARTIR": 2, "SÜRDÜR": 1, "DENE": 1, "DEĞİŞTİR": 1, "DURDUR": 0}
@@ -109,16 +147,15 @@ def main():
         plan[kanal] = {"gunluk_short_kotasi": kota, "seri_dagilimi": dag,
                        "durdurulan": [s["seri"] for s in S if s["karar"] == "DURDUR"]}
 
-    # 5) Saat performansı (yalnız olgun TR/EN Short'lar)
+    # 5) Saat performansı (yalnız olgun Short'lar)
     saatler = {}
     for v in vids:
         if v["tur"] == "Short" and v["olgun"] and v["saat"]:
             saatler.setdefault(v["kanal"], {}).setdefault(v["saat"][:2] + ":00", []).append(v["i48"])
     saat_tablo = {k: {h: {"n": len(a), "medyan": round(statistics.median(a))} for h, a in sorted(d.items())} for k, d in saatler.items()}
 
-    # 6) Yapılacak işler (tarayıcısı olan ilk ajan yapar, sonra yayin.json'a işler)
+    # 6) Yapılacak işler (sunucu ve ajanlar uygular) + gerçek kanal verisi
     eylemler = []
-    grup = {}
     an = yukle("analitik.json", {})
     try:
         taze = (simdi - datetime.fromisoformat(an["zaman"])).total_seconds() < 36 * 3600
@@ -127,41 +164,127 @@ def main():
     kaynak = []
     if taze:   # sunucunun YouTube'dan okuduğu gerçek durum
         for kanal, kd in an.get("kanallar", {}).items():
+            kanal = KANAL_NORMAL.get(kanal, kanal)
             for vid, v in kd.get("videolar", {}).items():
                 if v.get("durum") == "public" or v.get("publishAt"):
                     sure = v.get("sure") or ""
                     m = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", sure)
                     sn = (int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + int(m.group(3) or 0)) if m else 0
-                    t = v.get("publishedAt") if v.get("durum") == "public" else v.get("publishAt")
-                    kaynak.append({"platform": "YouTube", "kanal": kanal, "vid": vid, "baslik": v.get("baslik") or "",
-                                   "tur": "Short" if sn <= 180 else "Video", "izlenme": v.get("izlenme"), "sn": sn,
-                                   "durum": "Yayında" if v.get("durum") == "public" else "Planlı",
-                                   "tarih": (t or "")[:10], "saat": (t or "")[11:16]})
+                    t_raw = v.get("publishedAt") if v.get("durum") == "public" else v.get("publishAt")
+                    try:
+                        t_ist = datetime.fromisoformat(t_raw.replace("Z", "+00:00")).astimezone(TZ) if t_raw else None
+                    except Exception:
+                        t_ist = None
+                    kaynak.append({
+                        "platform": "YouTube", "kanal": kanal, "vid": vid, "baslik": v.get("baslik") or "",
+                        "tur": "Short" if sn <= 180 else "Video", "izlenme": v.get("izlenme") or 0, "sn": sn,
+                        "durum": "Yayında" if v.get("durum") == "public" else "Planlı",
+                        "tarih": t_ist.strftime("%Y-%m-%d") if t_ist else (t_raw or "")[:10],
+                        "saat": t_ist.strftime("%H:%M") if t_ist else (t_raw or "")[11:16],
+                        "izlenme_yuzde": v.get("izlenme_yuzde"),
+                    })
     else:
-        kaynak = K
+        for x in K:
+            y = dict(x)
+            y["kanal"] = KANAL_NORMAL.get(y.get("kanal"), y.get("kanal"))
+            kaynak.append(y)
+
+    # Kopya (tekrar) tespiti: sabit //4 kutusu yerine <=5 sn süre yakınlığı (ör. 43 sn ve 44 sn kopyaları da yakalar)
+    baslik_grup = {}
     for x in kaynak:
         if x.get("platform") == "YouTube" and x.get("durum") in ("Yayında", "Planlı") and x.get("vid"):
-            g = grup.setdefault((x.get("kanal"), x.get("tur"), normal(x.get("baslik", "")), (x.get("sn") or 0) // 4), {})   # aynı başlık + aynı süre = tekrar
-            g.setdefault(x["vid"], x)          # aynı vid tabloda iki kez yazılmışsa tek sayılır
-    for (kanal, _, _, _), G in grup.items():
-        L = list(G.values())
-        if len(L) > 1:
-            L = sorted(L, key=lambda x: (x.get("durum") != "Yayında", x.get("tarih") or "9", x.get("saat") or ""))   # yayındaki ilk yükleme kalır
-            for x in L[1:]:
-                eylemler.append({"tur": "GİZLE", "kanal": kanal, "vid": x["vid"], "kalan": L[0]["vid"], "baslik": x["baslik"],
-                                 "neden": f"tekrar: ilk yüklenen {L[0]['vid']} kalır, bu kopya Gizli'ye alınır (silme yok)"})
+            nb = normal(x.get("baslik", ""))
+            if nb:
+                baslik_grup.setdefault((x.get("kanal"), x.get("tur"), nb), {})[x["vid"]] = x
+    for (kanal, _, _), G in baslik_grup.items():
+        adaylar = list(G.values())
+        if len(adaylar) <= 1:
+            continue
+        islenen = set()
+        for i, a in enumerate(adaylar):
+            if a["vid"] in islenen:
+                continue
+            kume = [a]
+            for b in adaylar[i + 1:]:
+                if b["vid"] in islenen:
+                    continue
+                if not a.get("sn") or not b.get("sn") or abs((a.get("sn") or 0) - (b.get("sn") or 0)) <= 5:
+                    kume.append(b)
+            if len(kume) > 1:
+                for u in kume:
+                    islenen.add(u["vid"])
+                # Yayında olan ve izlenmesi yüksek olan (eşitse ilk yüklenen) asıl video kalır
+                L = sorted(kume, key=lambda x: (x.get("durum") != "Yayında", -(x.get("izlenme") or 0), x.get("tarih") or "9", x.get("saat") or ""))
+                for x in L[1:]:
+                    eylemler.append({
+                        "tur": "GİZLE", "kanal": kanal, "vid": x["vid"], "kalan": L[0]["vid"], "baslik": x["baslik"],
+                        "neden": f"tekrar: asıl video {L[0]['vid']} ({L[0].get('izlenme', 0)} izl) kalır, bu kopya Gizli'ye alınır (silme yok)",
+                    })
+
     for x in K:
         t = zaman(x) if x.get("tarih") else None
         if x.get("durum") == "Planlı" and t and simdi > t + timedelta(hours=2):
-            eylemler.append({"tur": "KONTROL", "kanal": x.get("kanal"), "platform": x.get("platform"), "vid": x.get("vid", ""),
+            eylemler.append({"tur": "KONTROL", "kanal": KANAL_NORMAL.get(x.get("kanal"), x.get("kanal")), "platform": x.get("platform"), "vid": x.get("vid", ""),
                              "baslik": x.get("baslik"), "neden": f"{x['tarih']} {x.get('saat','')} planlıydı, hâlâ yayında görünmüyor"})
     for kanal, p in plan.items():
         for seri in p["durdurulan"]:
             for x in K:
                 t = zaman(x) if x.get("tarih") else None
-                if x.get("kanal") == kanal and x.get("seri") == seri and x.get("durum") in ("Planlı", "Taslak") and t and t > simdi:
+                kn = KANAL_NORMAL.get(x.get("kanal"), x.get("kanal"))
+                if kn == kanal and x.get("seri") == seri and x.get("durum") in ("Planlı", "Taslak") and t and t > simdi:
                     eylemler.append({"tur": "ERTELE", "kanal": kanal, "vid": x.get("vid", ""), "baslik": x.get("baslik"),
                                      "neden": f"'{seri}' serisi durduruldu; bu slotu {', '.join(p['seri_dagilimi']) or 'en iyi seri'} kullanır"})
+
+    # 6b) Önümüzdeki 72 saat takvim & kota açıkları
+    takvim_aciklari = []
+    uc_gun = [(simdi + timedelta(days=g)).strftime("%Y-%m-%d") for g in range(3)]
+    for kanal, kota in GUNLUK_KOTA.items():
+        for g_str in uc_gun:
+            gun_short = [x for x in kaynak if x.get("kanal") == kanal and x.get("tur") == "Short"
+                         and x.get("durum") in ("Yayında", "Planlı") and x.get("tarih") == g_str]
+            eksik = kota - len(gun_short)
+            ozel_uyari = []
+            if kanal == "Antik Stüdyo":
+                saat_19 = any((x.get("saat") or "").startswith("19:") for x in gun_short)
+                if not saat_19:
+                    ozel_uyari.append("19:00 Gündem+Tarih slotu BOŞ")
+            elif kanal == "Ancient Studio" and g_str > uc_gun[0]:
+                saat_00 = any((x.get("saat") or "").startswith(("00:", "23:")) for x in gun_short)
+                if not saat_00:
+                    ozel_uyari.append("00:00/23:00 ana slot BOŞ")
+            if eksik > 0 or ozel_uyari:
+                takvim_aciklari.append({
+                    "kanal": kanal, "tarih": g_str, "planli_short": len(gun_short), "hedef_kota": kota,
+                    "eksik": max(0, eksik),
+                    "uyari": ", ".join(ozel_uyari) if ozel_uyari else f"{eksik} Short slotu boş",
+                })
+
+    # 6c) Uzun videolar + Shorts → Uzun Video ("İlgili Video / Related Video") köprü önerileri
+    uzun_videolar = [x for x in kaynak if x.get("platform") == "YouTube" and x.get("tur") == "Video" and x.get("durum") in ("Yayında", "Planlı")]
+    kopru_onerileri = []
+    for uv in sorted(uzun_videolar, key=lambda x: (x.get("kanal") or "", -(x.get("izlenme") or 0))):
+        u_etiket = konu_etiketleri(uv.get("baslik", ""))
+        if not u_etiket:
+            continue
+        aday_shorts = [
+            s for s in kaynak
+            if s.get("kanal") == uv.get("kanal") and s.get("tur") == "Short" and s.get("durum") in ("Yayında", "Planlı")
+            and (konu_etiketleri(s.get("baslik", "")) & u_etiket)
+        ]
+        aday_shorts.sort(key=lambda s: -(s.get("izlenme") or 0))
+        if aday_shorts:
+            kopru_onerileri.append({
+                "kanal": uv["kanal"],
+                "uzun_vid": uv["vid"],
+                "uzun_baslik": uv["baslik"],
+                "uzun_durum": uv["durum"],
+                "uzun_izlenme": uv.get("izlenme", 0),
+                "baglanacak_shortlar": [
+                    {"vid": s["vid"], "baslik": s["baslik"], "izlenme": s.get("izlenme", 0), "durum": s["durum"]}
+                    for s in aday_shorts[:5]
+                ],
+                "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın",
+            })
 
     # 7) Bulgular (insan diliyle, Ömer için)
     bulgular = []
@@ -192,6 +315,20 @@ def main():
             bulgular.append(f"{kanal}: tutan Short'lar ortalama %{round(statistics.mean(a))} izleniyor, tutmayanlar %{round(statistics.mean(b))}"
                             + (" → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor." if statistics.mean(b) < statistics.mean(a) - 10
                                else " → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil."))
+        ty = [v["tutma_yz"] for v in vids if v["kanal"] == kanal and v["tur"] == "Short" and v.get("tutma_yz") is not None]
+        if ty:
+            ort_ty = round(statistics.mean(ty))
+            bulgular.append(f"{kanal}: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %{ort_ty} (hedef ≥%70).")
+
+    uzun_yayinda = [u for u in uzun_videolar if u.get("durum") == "Yayında"]
+    if uzun_yayinda:
+        ort_uzun = round(statistics.median([u.get("izlenme") or 0 for u in uzun_yayinda]))
+        bulgular.append(f"Uzun videolar ({len(uzun_yayinda)} yayında): medyan {ort_uzun} izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü ({len(kopru_onerileri)} eşleşme hazır) kritik.")
+
+    tr_19_bos = [t["tarih"] for t in takvim_aciklari if t["kanal"] == "Antik Stüdyo" and "19:00" in t["uyari"]]
+    if tr_19_bos:
+        bulgular.append(f"TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: {', '.join(tr_19_bos)}.")
+
     ust = sorted([v for v in vids if v["tur"] == "Short" and v["olgun"]], key=lambda v: -v["i48"])
     # TikTok: hesap 7 günlük izlenmesi (tt_istatistik.yml yazar). Dağıtım yoksa yeni planlama durur, mevcut planlılar kalır.
     tt = j.get("tiktok") or {}; tt_izl = 0
@@ -219,6 +356,8 @@ def main():
             "YERELLEŞTİRME (kalıcı, 6 Kas 2026): her bölüm kanalının izleyicisine göre yapılır — TR: Türkiye (değerler, gündem/siyaset, spor, alışkanlıklar, kültür, etkileşim, özel günler); EN: İngiltere/ABD ya da genel dünya; ES: İspanya + Latin Amerika. Fotoğraf, video, ses, müzik ve metin tamamı o izleyiciye göre; bir sürümde başka ülkenin ayrıntısı olmaz.",
             "TikTok: 'tiktok.karar' DURDUR ise yeni TikTok planı yapılmaz (mevcut planlılar silinmez); karar hesap izlenmesine göre otomatik değişir.",
             "Başlık kalıbı: tek merak sorusu + emoji ('X neden Y? 😨', 'Gerçekte ne oldu?'); kanıtı: kanalın tutan Short'ları ve ABD'de Zack D. Films (29 M abone) aynı kalıpla büyüdü.",
+            "İlk kare & döngü kuralı: Shorts'larda ilk 0.25 sn siyah ekran (fade-in) ve sonda uzun sessizlik/kararma KULLANILMAZ; ilk kare doğrudan parlak görsel kancayla başlar ve kesintisiz döngü (loop) yapar.",
+            "Uzun–Kısa köprüsü: Her uzun belgesel video, aynı konudaki Short videolarına YouTube Studio 'İlgili Video (Related Video)' alanından bağlanır ('kopru_onerileri' listesi).",
             "Telif/marka: kulüp ve marka armaları/logoları, maç ve TV görüntüsü, UEFA/FIFA logo ve marşları, hazır müzik KULLANILMAZ. Kulüp adları ve takım renkleri serbest; müzik kanalın kendi üretimi ya da lisanslı olur.",
             "POV denemesi: trajedi/soykırım/savaş kurbanı POV'u YASAK (tepki ve topluluk kuralı riski); günlük yaşam, meslek, tuhaf adetler serbest. Görsellerde dönem doğruluğu kontrol edilir (ör. Roma binaları renkliydi).",
         ],
@@ -233,6 +372,8 @@ def main():
              "basari": "EN kanal Gündem + Tarih ARTIR kararında; aynı ölçüyle izlenir"},
         ],
         "plan": plan, "seriler": seriler, "esikler": esik, "saatler": saat_tablo,
+        "takvim_aciklari": takvim_aciklari,
+        "kopru_onerileri": kopru_onerileri,
         "eylemler": eylemler, "bulgular": bulgular,
         "en_iyi": [{"kanal": v["kanal"], "baslik": v["baslik"], "i48": v["i48"]} for v in ust[:5]],
         "en_zayif": [{"kanal": v["kanal"], "baslik": v["baslik"], "i48": v["i48"]} for v in ust[-5:]],

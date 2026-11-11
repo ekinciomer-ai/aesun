@@ -1,7 +1,7 @@
 #!/bin/bash
 # Kanal yönetimi (otomatik, günde 2 kez; .github/workflows/yayin_yonet.yml çalıştırır).
-# 1) Üç kanalın (TR/EN/ES) TÜM yüklemelerinin gerçek durumunu okur (herkese açık / planlı / gizli, yayın saati).
-# 2) YouTube Analytics'ten video başına izlenme, ortalama izlenme süresi ve izlenme yüzdesini okur.
+# 1) Bağlı kanalların TÜM yüklemelerinin gerçek durumunu okur (herkese açık / planlı / gizli, yayın saati).
+# 2) YouTube Analytics'ten video başına izlenme, etkin izlenme (engagedViews / kaydırmadan izleme), ortalama izlenme süresi, izlenme yüzdesi, paylaşım ve abone kazancını okur.
 # 3) docs/yayin/analiz.json eylemlerini uygular: GİZLE (tekrar eden kopya → Gizli), ERTELE (durdurulan serinin ileri tarihli planını kaldırır).
 #    YASAK: silme, herkese açma, planlama, başlık/açıklama değişikliği. İşlem öncesi durum yedeklenir.
 # Çıktı: '===ANALITIK===' ile '===SON===' arasında sırsız JSON (iş akışı bunu docs/yayin/analitik.json'a yazar).
@@ -15,9 +15,14 @@ D, ANALIZ = sys.argv[1], sys.argv[2]
 TZ = timezone(timedelta(hours=3))
 simdi = datetime.now(TZ)
 ist = json.load(open(os.path.join(D, "istemci.json"), encoding="utf-8"))
-KANALLAR = {"UC77LyY3gqWmBNAKp2lbsGBg": "Antik Stüdyo", "UCFLJUlhUSgjcLbp9ad_t9PQ": "Ancient Studio",
-            "UCTC_yS0lwl-owMuo5b4bNtQ": "Estudio Antiguo",
-            "UC7o3DG9m1gBbvMjFZjB5KEg": "Kozmos Lab TR", "UC41-Z82jCQ8955az6JUDIAw": "Kozmos Lab"}
+KANALLAR = {
+    "UC77LyY3gqWmBNAKp2lbsGBg": "Antik Stüdyo",
+    "UCFLJUlhUSgjcLbp9ad_t9PQ": "Ancient Studio",
+    "UCTC_yS0lwl-owMuo5b4bNtQ": "Estudio Antiguo",
+    "UC7o3DG9m1gBbvMjFZjB5KEg": "Kozmos Lab TR",
+    "UC41-Z82jCQ8955az6JUDIAw": "Kozmos Lab",
+    "UCg75Mvb6C8CBSJPeuwzBFZA": "Ömür Dediğin",
+}
 MAKS_GIZLE = 3
 
 def token(cid):
@@ -47,9 +52,14 @@ except Exception:
 
 out = {"zaman": simdi.isoformat(timespec="minutes"), "kanallar": {}, "islemler": [], "hatalar": [], "bekleyen_yorumlar": []}
 for cid, ad in KANALLAR.items():
+    if not os.path.exists(os.path.join(D, "kanallar", f"{cid}.json")):
+        continue
     try:
         tok = token(cid)
-        ch = api(f"https://www.googleapis.com/youtube/v3/channels?part=contentDetails,statistics&id={cid}", tok)["items"][0]
+        ch_items = api(f"https://www.googleapis.com/youtube/v3/channels?part=contentDetails,statistics&id={cid}", tok).get("items", [])
+        if not ch_items:
+            continue
+        ch = ch_items[0]
         up = ch["contentDetails"]["relatedPlaylists"]["uploads"]
         ids, sayfa = [], ""
         while True:
@@ -69,19 +79,33 @@ for cid, ad in KANALLAR.items():
                                      "begeni": int(v.get("statistics", {}).get("likeCount", 0) or 0),
                                      "yorum": int(v.get("statistics", {}).get("commentCount", 0) or 0),
                                      "sentetik": st.get("containsSyntheticMedia")}
-        # Analytics: video başına izlenme süresi ve izlenme yüzdesi (veri 1-2 gün gecikmeli gelir)
+        # Analytics: video başına izlenme süresi, izlenme yüzdesi ve engagedViews / shares (veri 1-2 gün gecikmeli gelir)
         try:
-            q = urllib.parse.urlencode({"ids": "channel==MINE", "startDate": "2026-01-01",
-                                        "endDate": simdi.strftime("%Y-%m-%d"), "dimensions": "video",
-                                        "metrics": "views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained",
-                                        "sort": "-views", "maxResults": 200})
-            a = api("https://youtubeanalytics.googleapis.com/v2/reports?" + q, tok)
+            try:
+                q = urllib.parse.urlencode({"ids": "channel==MINE", "startDate": "2026-01-01",
+                                            "endDate": simdi.strftime("%Y-%m-%d"), "dimensions": "video",
+                                            "metrics": "views,engagedViews,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,shares,subscribersGained",
+                                            "sort": "-views", "maxResults": 200})
+                a = api("https://youtubeanalytics.googleapis.com/v2/reports?" + q, tok)
+            except urllib.error.HTTPError:
+                q = urllib.parse.urlencode({"ids": "channel==MINE", "startDate": "2026-01-01",
+                                            "endDate": simdi.strftime("%Y-%m-%d"), "dimensions": "video",
+                                            "metrics": "views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,likes,subscribersGained",
+                                            "sort": "-views", "maxResults": 200})
+                a = api("https://youtubeanalytics.googleapis.com/v2/reports?" + q, tok)
             kol = [c["name"] for c in a.get("columnHeaders", [])]
             for r in a.get("rows", []):
                 x = dict(zip(kol, r)); v = videolar.get(x["video"])
                 if v is not None:
                     v.update(an_izlenme=x.get("views"), ort_sure_sn=x.get("averageViewDuration"),
-                             izlenme_yuzde=round(x.get("averageViewPercentage") or 0, 1), abone_kazanc=x.get("subscribersGained"), izlenme_dk=x.get("estimatedMinutesWatched"))
+                             izlenme_yuzde=round(x.get("averageViewPercentage") or 0, 1),
+                             abone_kazanc=x.get("subscribersGained"), izlenme_dk=x.get("estimatedMinutesWatched"))
+                    if x.get("engagedViews") is not None:
+                        v["etkin_izlenme"] = x["engagedViews"]
+                        if x.get("views") and x["views"] > 0:
+                            v["tutma_yuzdesi"] = round(min(100.0, x["engagedViews"] * 100.0 / x["views"]), 1)
+                    if x.get("shares") is not None:
+                        v["paylasim"] = x["shares"]
         except urllib.error.HTTPError as e:
             out["hatalar"].append(f"{ad} analitik: HTTP {e.code}")
         # ONAYA BEKLETİLEN YORUMLAR (salt okunur): YouTube'un "incelenmek üzere tutulan" yorumları API anahtarıyla görünmez,
@@ -106,8 +130,8 @@ for cid, ad in KANALLAR.items():
                 import re as _r
                 m = _r.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", d or "")
                 return (int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + int(m.group(3) or 0)) if m else -99
-            # güvenlik: kalacak asıl video bu kanalda HERKESE AÇIK olmalı ve süreleri aynı olmalı (gerçek tekrar)
-            if not k or k["durum"] != "public" or abs(sn(k.get("sure")) - sn(v.get("sure"))) > 3:
+            # güvenlik: kalacak asıl video bu kanalda HERKESE AÇIK olmalı ve süreleri yakın olmalı (gerçek tekrar)
+            if not k or k["durum"] != "public" or abs(sn(k.get("sure")) - sn(v.get("sure"))) > 5:
                 print(f"NOT: {ad} · {e['vid']} atlandı (asıl video doğrulanamadı)")
                 continue
             mevcut = api(f"https://www.googleapis.com/youtube/v3/videos?part=status&id={e['vid']}", tok)["items"][0]

@@ -1,6 +1,6 @@
 name: YouTube yükleme kuyruğu (otomatik)
-# sunucu/yt_kuyruk/<kod>.json + <kod>.mp4 eklenince sunucudaki resmi YouTube bağlantısıyla yükler ve publishAt'e planlar.
-# Bilgisayar gerekmez. Başarılı işler sunucu/yt_kuyruk/tamam/ altına taşınır, video dosyası depodan çıkarılır,
+# sunucu/yt_kuyruk/<kod>.json + <kod>.mp4 (+ isteğe bağlı <kod>.jpg/.png kapak) eklenince sunucudaki resmi YouTube bağlantısıyla yükler ve publishAt'e planlar.
+# Bilgisayar gerekmez. Başarılı işler sunucu/yt_kuyruk/tamam/ altına taşınır, video/kapak dosyası depodan çıkarılır,
 # kayıt docs/yayin/yayin.json'a "Planlı" olarak yazılır. Kurallar: YAYIN_TAKIBI.md (yol haritası, kota, tekrar yok).
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k
           cp sunucu/islem_yt_kuyruk.sh /tmp/pk/sunucu/
-          cp sunucu/yt_kuyruk/*.json /tmp/pk/kuyruk/; cp sunucu/yt_kuyruk/*.mp4 /tmp/pk/kuyruk/ 2>/dev/null || true
+          cp sunucu/yt_kuyruk/*.json /tmp/pk/kuyruk/; cp sunucu/yt_kuyruk/*.mp4 sunucu/yt_kuyruk/*.jpg sunucu/yt_kuyruk/*.png /tmp/pk/kuyruk/ 2>/dev/null || true
           tar czf /tmp/paket.tgz -C /tmp/pk .
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
           $S "rm -rf /tmp/yt_kuyruk && mkdir -p /tmp/yt_kuyruk && tar xzf - -C /tmp/yt_kuyruk && cd /tmp/yt_kuyruk && bash sunucu/islem_yt_kuyruk.sh; k=\$?; rm -rf /tmp/yt_kuyruk; exit \$k" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1 || true
@@ -59,16 +59,17 @@ jobs:
               p = datetime.fromisoformat(s['publishAt'])
               durum_str = 'Yayında' if p <= datetime.now(p.tzinfo) else 'Planlı'
               kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab', 'OD': 'Ömür Dediğin'}.get(s['kanal'], s['kanal'])
+              dil = {'TR': 'TR', 'EN': 'EN', 'ES': 'ES', 'KZ_TR': 'TR', 'KZ_EN': 'EN', 'OD': 'TR'}.get(s['kanal'], s['kanal'])
               x = ix.get(s['vid']) or {}
               tur = s.get('tur') or 'Short'
-              x.update(platform='YouTube', kanal=kanal, dil=s['kanal'], tur=tur, seri=s.get('seri') or x.get('seri') or 'Gündem + Tarih',
+              x.update(platform='YouTube', kanal=kanal, dil=dil, tur=tur, seri=s.get('seri') or x.get('seri') or 'Gündem + Tarih',
                        baslik=s['baslik'], durum=durum_str, tarih=p.strftime('%Y-%m-%d'), saat=p.strftime('%H:%M'), izlenme=x.get('izlenme'),
                        link=(f"https://youtube.com/shorts/{s['vid']}" if tur == 'Short' else f"https://youtube.com/watch?v={s['vid']}"), vid=s['vid'], ureten=s.get('ureten') or x.get('ureten') or 'Claude')
               if s['vid'] not in ix: K.append(x)
               if s.get('eski_gizlendi') and s['eski_gizlendi'] in ix:
-                  e = ix[s['eski_gizlendi']]; e['durum'] = 'Gizli'; e['not'] = f"yerine sesli sürüm yüklendi: {s['vid']}" 
+                  e = ix[s['eski_gizlendi']]; e['durum'] = 'Gizli'; e['not'] = f"yerine sesli sürüm yüklendi: {s['vid']}"
               subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
-              subprocess.run(['git', 'rm', '-q', '--ignore-unmatch', f'sunucu/yt_kuyruk/{kod}.mp4'], check=False)
+              subprocess.run(['git', 'rm', '-q', '--ignore-unmatch', f'sunucu/yt_kuyruk/{kod}.mp4', f'sunucu/yt_kuyruk/{kod}.jpg', f'sunucu/yt_kuyruk/{kod}.png'], check=False)
               print(f'::notice::{kod}: {s["durum"]} → {s["vid"]}')
           json.dump(j, open(yol, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
           PY

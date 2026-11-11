@@ -1,7 +1,7 @@
 #!/bin/bash
 # YouTube yükleme kuyruğu (bilgisayar gerekmez). .github/workflows/yt_kuyruk.yml çalıştırır.
-# Girdi: paket içinde kuyruk/<kod>.json + kuyruk/<kod>.mp4
-#   json: {"kod","kanal":"TR|EN","baslik","aciklama","etiketler":[],"kategori":"17","publishAt":"2026-11-05T19:00:00+03:00","sentetik":false,"seri"}
+# Girdi: paket içinde kuyruk/<kod>.json + kuyruk/<kod>.mp4 (+ isteğe bağlı kuyruk/<kod>.jpg veya .png özel kapak)
+#   json: {"kod","kanal":"TR|EN|ES|KZ_TR|KZ_EN|OD","baslik","aciklama","etiketler":[],"kategori":"27","publishAt":"2026-11-05T19:00:00+03:00","sentetik":false,"seri"}
 # Kurallar: aynı kod ya da aynı başlık kanalda varsa YÜKLEMEZ; herkese açma yalnız publishAt ile planlıdır; silme yok.
 # Çıktı: '===KUYRUK===' ... '===SON===' arasında sırsız JSON sonuç listesi.
 set -euo pipefail
@@ -101,6 +101,24 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             put = urllib.request.Request(loc, data=f.read(), method="PUT", headers={"Content-Type": "video/mp4", "Content-Length": str(boyut)})
         with urllib.request.urlopen(put, timeout=600) as r:
             v = json.load(r)
+        # Özel kapak (varsa: <kod>.jpg veya <kod>.png) — telefon doğrulaması yoksa 403 döner, yüklemeyi bozmaz
+        kapak_yol = next((p for p in (jf[:-5] + ".jpg", jf[:-5] + ".png") if os.path.exists(p)), None)
+        if kapak_yol:
+            try:
+                mime = "image/png" if kapak_yol.endswith(".png") else "image/jpeg"
+                with open(kapak_yol, "rb") as kf:
+                    kveri = kf.read()
+                treq = urllib.request.Request(
+                    f"https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId={v['id']}",
+                    data=kveri, method="POST",
+                    headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": mime, "Content-Length": str(len(kveri))},
+                )
+                urllib.request.urlopen(treq, timeout=60).read()
+                print(f"NOT: {kod} özel kapak yüklendi ({os.path.basename(kapak_yol)})")
+            except urllib.error.HTTPError as ke:
+                print(f"NOT: {kod} özel kapak atlandı (HTTP {ke.code} — youtube.com/verify gerekli olabilir)")
+            except Exception as ke:
+                print(f"NOT: {kod} özel kapak hatası: {type(ke).__name__}")
         kayit[kod] = {"vid": v["id"]}
         try:
             import shutil; os.makedirs(os.path.join(D, "medya"), exist_ok=True); shutil.copy(mp4, os.path.join(D, "medya", f"{kod}.mp4"))

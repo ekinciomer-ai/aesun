@@ -21,7 +21,15 @@ KANALLAR = {
     "UCTC_yS0lwl-owMuo5b4bNtQ": ("Estudio Antiguo", "ES"),
     "UC7o3DG9m1gBbvMjFZjB5KEg": ("Kozmos Lab TR", "TR"),
     "UC41-Z82jCQ8955az6JUDIAw": ("Kozmos Lab", "EN"),
+    "UCg75Mvb6C8CBSJPeuwzBFZA": ("Ömür Dediğin", "TR"),
 }
+KANAL_DIL = {ad: dil for _, (ad, dil) in KANALLAR.items()}
+KANAL_NORMAL = {
+    "Kozmos Lab TR (@kozmoslabtr)": "Kozmos Lab TR",
+    "Kozmos Lab (@kozmoslab)": "Kozmos Lab",
+}
+DIL_NORMAL = {"KZ_TR": "TR", "KZ_EN": "EN", "OD": "TR"}
+SERI_NORMAL = {"Did You Know?": "Did you know?"}
 NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
       "media": "http://search.yahoo.com/mrss/"}
 UA = {"User-Agent": "Mozilla/5.0 (AksarayEnerji-YayinTakibi/1.0)"}
@@ -33,37 +41,80 @@ def getir(url):
         return r.read()
 
 
-def seri_tahmin(t):
-    tl = t.lower()
-    if any(k in tl for k in ["emu", "kedi", "cat died", "güvercin", "pigeon", "patileri", "paws"]):
+def seri_tahmin(t, kanal=""):
+    tl = (t or "").lower()
+    if "kozmos" in (kanal or "").lower():
+        if any(k in tl for k in ["kum", "sand", "nasıl üretilir", "how a solar", "become a solar"]):
+            return "Nasıl Yapılır" if "TR" in kanal else "How It's Made"
+        if any(k in tl for k in ["türbin", "turbine", "baraj", "dam", "nükleer", "nuclear"]) and "26 mw" not in tl:
+            return "Enerji Üretim Kaynakları" if "TR" in kanal else "Energy Sources"
+        if "drone" in tl:
+            return "Drone Nerede Çalışır?" if "TR" in kanal else "Did you know?"
+        return "Biliyor muydun?" if "TR" in kanal else "Did you know?"
+    if kanal == "Ömür Dediğin":
+        return "Hatıra Dayı"
+    if any(k in tl for k in ["10 kasım", "10kasım", "09.05", "paseo de la reforma", "memorial to a turkish commander"]):
+        return "10 Kasım"
+    if any(k in tl for k in ["emu", "kedi", "cat died", "güvercin", "pigeon", "patileri", "paws", "çavuş olan ayı", "caligula"]):
         return "Tarihin Patileri"
-    if any(k in tl for k in ["tablo", "painting", "mona lisa", "van gogh", "venüs", "venus", "çığlık", "scream",
+    if any(k in tl for k in ["tablo", "painting", "cuadro", "prado", "mona lisa", "van gogh", "venüs", "venus", "çığlık", "scream",
                              "gece devriyesi", "night watch", "dalga", "wave", "akşam yemeği", "supper",
-                             "kaplumbağa", "tortoise", "inci küpeli", "pearl earring"]):
+                             "kaplumbağa", "tortoise", "inci küpeli", "pearl earring", "rembrandt", "american gothic",
+                             "amerikan gotiği", "klimt", "öpücük", "bosch", "goya", "meninas", "vermeer", "bellini"]):
         return "Tablo Serisi"
-    return "Gündem + Tarih"
+    if any(k in tl for k in ["fare", "live mice", "gladyatör teri", "gladiator sweat", "fondöten", "royal makeup",
+                             "canlı kurt", "live worms", "zehir damlat", "poison in their eyes", "veneno en los ojos",
+                             "belladonna", "belladona", "radyum", "parfüm konisi"]):
+        return "Tarihi Magazin" if kanal != "Estudio Antiguo" else "İnanç & Kültür Tarihi"
+    if any(k in tl for k in ["beşiktaş", "celtic", "maraton", "marathon", "maratón", "olimpiyat", "olympic"]):
+        return "Spor + Tarih" if kanal in ("Antik Stüdyo", "Ancient Studio") else "İnanç & Kültür Tarihi"
+    if any(k in tl for k in ["lao tzu", "bin millik", "thousand miles", "mil millas"]):
+        return "Frase del Día" if kanal == "Estudio Antiguo" else ("Quote of the Day" if kanal == "Ancient Studio" else "Günün Sözü")
+    if any(k in tl for k in ["nazar", "evil eye", "ojo turco", "mavi göz", "çok yaşa", "bless you", "estornudar", "brujas", "zugarramurdi"]):
+        return "İnanç & Kültür Tarihi" if kanal in ("Estudio Antiguo", "Antik Stüdyo") else "Gündem + Tarih"
+    return "İnanç & Kültür Tarihi" if kanal == "Estudio Antiguo" else "Gündem + Tarih"
 
 
 def main():
     j = json.load(open(YOL, encoding="utf-8"))
     K = j.get("kayitlar", [])
-    vid_ix = {x.get("vid"): x for x in K if x.get("vid")}
     simdi = datetime.now(TZ)
     degisti, notlar = 0, []
 
+    # Mevcut kayıtlarda bölünmüş kanal adı / dil kodu / seri yazımı normalizasyonu
+    for x in K:
+        if x.get("platform") == "YouTube":
+            kn = KANAL_NORMAL.get(x.get("kanal"))
+            if kn and x.get("kanal") != kn:
+                x["kanal"] = kn; degisti += 1
+            dn = DIL_NORMAL.get(x.get("dil")) or KANAL_DIL.get(x.get("kanal"))
+            if dn and x.get("dil") != dn:
+                x["dil"] = dn; degisti += 1
+            sn = SERI_NORMAL.get(x.get("seri"))
+            if sn and x.get("seri") != sn:
+                x["seri"] = sn; degisti += 1
+
+    vid_ix = {x.get("vid"): x for x in K if x.get("vid")}
+
     # 0) CutkodA sunucusu canlı ucu (YouTube API bağlıysa planlı/gizli dahil tam liste)
     canli_ok = False
+    canli_kanallar = set()
     try:
         c = json.loads(getir("https://panel.cutkoda.com/api/yayin-takip"))
         if c.get("kayitlar"):
             canli_ok = True
             for v in c["kayitlar"]:
+                kn = KANAL_NORMAL.get(v.get("kanal"), v.get("kanal"))
+                if kn:
+                    canli_kanallar.add(kn)
                 x = vid_ix.get(v["vid"])
                 if x is None:
                     x = {k: v.get(k) for k in ("platform", "kanal", "dil", "tur", "baslik", "durum", "tarih", "saat", "izlenme", "link", "vid")}
-                    x.update(seri=seri_tahmin(v.get("baslik", "")), ureten="?")
+                    x["kanal"] = kn
+                    x["dil"] = DIL_NORMAL.get(x.get("dil")) or KANAL_DIL.get(kn) or x.get("dil")
+                    x.update(seri=seri_tahmin(v.get("baslik", ""), kn), ureten="?")
                     K.append(x); vid_ix[v["vid"]] = x; degisti += 1
-                    notlar.append(f"Yeni içerik eklendi: {v.get('kanal')} · {v.get('baslik')}")
+                    notlar.append(f"Yeni içerik eklendi: {kn} · {v.get('baslik')}")
                 for k in ("durum", "tarih", "saat", "izlenme"):
                     if v.get(k) not in (None, "") and x.get(k) != v[k]:
                         x[k] = v[k]; degisti += 1
@@ -71,12 +122,14 @@ def main():
     except Exception as e:
         notlar.append(f"CutkodA canlı ucu okunamadı: {e}")
 
-    # 1) RSS (canlı uç yoksa)
-    for cid, (kanal, dil) in ({} if canli_ok else KANALLAR).items():
+    # 1) RSS (canlı uçta dönmeyen tüm kanallar için de taranır)
+    rss_hedef = {cid: (kanal, dil) for cid, (kanal, dil) in KANALLAR.items() if kanal not in canli_kanallar}
+    for cid, (kanal, dil) in rss_hedef.items():
         try:
             kok = ET.fromstring(getir(f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}"))
         except Exception as e:
-            notlar.append(f"RSS okunamadı ({kanal}): {e}")
+            if kanal != "Ömür Dediğin":
+                notlar.append(f"RSS okunamadı ({kanal}): {e}")
             continue
         for en in kok.findall("a:entry", NS):
             vid = en.findtext("yt:videoId", namespaces=NS)
@@ -90,10 +143,9 @@ def main():
             x = vid_ix.get(vid)
             if x is None:
                 x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
-                         seri=seri_tahmin(baslik), baslik=baslik, durum="Yayında", tarih="", saat="",
+                         seri=seri_tahmin(baslik, kanal), baslik=baslik, durum="Yayında", tarih="", saat="",
                          izlenme=None, link=(f"https://youtube.com/shorts/{vid}" if short else f"https://youtu.be/{vid}"),
-                         vid=vid, ureten="?", not_="")
-                x.pop("not_")
+                         vid=vid, ureten="?")
                 K.append(x); vid_ix[vid] = x; degisti += 1
                 notlar.append(f"Yeni içerik eklendi: {kanal} · {baslik}")
             yeni = {"durum": "Yayında", "tarih": yay.strftime("%Y-%m-%d"), "saat": yay.strftime("%H:%M")}
@@ -120,14 +172,15 @@ def main():
                         sure = sum(int(a or 0) * b for a, b in zip(dk.groups(), (3600, 60, 1))) if dk else 999
                         short = sure <= 180
                         x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
-                                 seri=seri_tahmin(baslik), baslik=baslik, durum="Yayında", tarih=yay.strftime("%Y-%m-%d"),
+                                 seri=seri_tahmin(baslik, kanal), baslik=baslik, durum="Yayında", tarih=yay.strftime("%Y-%m-%d"),
                                  saat=yay.strftime("%H:%M"), izlenme=None,
                                  link=(f"https://youtube.com/shorts/{v['id']}" if short else f"https://youtu.be/{v['id']}"),
                                  vid=v["id"], ureten="?")
                         K.append(x); vid_ix[v["id"]] = x; degisti += 1
                         notlar.append(f"Yeni içerik eklendi: {kanal} · {baslik}")
             except Exception as e:
-                notlar.append(f"YouTube API kanal listesi okunamadı ({kanal}): {e}")
+                if kanal != "Ömür Dediğin":
+                    notlar.append(f"YouTube API kanal listesi okunamadı ({kanal}): {e}")
         vids = [v for v in vid_ix if v]
         for i in range(0, len(vids), 50):
             q = urllib.parse.urlencode({"part": "statistics,status", "id": ",".join(vids[i:i + 50]), "key": anahtar})
@@ -208,7 +261,9 @@ def main():
                 try:
                     d = json.loads(getir("https://www.googleapis.com/youtube/v3/commentThreads?" + urllib.parse.urlencode(prm)))
                 except Exception as e:
-                    notlar.append(f"yorumlar okunamadı ({ad}): {e}"); break
+                    if ad != "Ömür Dediğin":
+                        notlar.append(f"yorumlar okunamadı ({ad}): {e}")
+                    break
                 for it in d.get("items", []):
                     isle_thread(it, ad, cid)
                 tarandi.add(ad)
@@ -247,7 +302,7 @@ def main():
                 yorumlar.append(y); gorulen.add(y["id"])
         yorumlar.sort(key=lambda y: y["zaman"], reverse=True)
         yeni_say = sum(1 for y in yorumlar if y["id"] not in eski)
-        # Yanıtsız yorumlar → yorum kuyruğu (taslak yanıtı Claude yazar, Ömer onaylar, sunucu gönderir)
+        # Yanıtsız yorumlar → yorum kuyruğu (taslak yanıtı Claude/Antigravity yazar, Ömer onaylar, sunucu gönderir)
         try:
             kyol = os.path.join(os.path.dirname(YOL), "yorum_kuyrugu.json")
             kq = json.load(open(kyol, encoding="utf-8")) if os.path.exists(kyol) else []
@@ -279,7 +334,8 @@ def main():
         an, taze = {}, False
     if taze:
         for kanal, kd in an.get("kanallar", {}).items():
-            dil = "TR" if kanal == "Antik Stüdyo" else "EN"
+            kanal = KANAL_NORMAL.get(kanal, kanal)
+            dil = KANAL_DIL.get(kanal, "EN")
             for vid, v in kd.get("videolar", {}).items():
                 if v.get("uploadStatus") not in (None, "processed", "uploaded"):
                     continue
@@ -298,19 +354,16 @@ def main():
                     sn = (int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + int(m.group(3) or 0)) if m else 999
                     short = sn <= 180
                     x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
-                             seri=seri_tahmin(v.get("baslik") or ""), baslik=v.get("baslik") or "", durum=d, tarih="", saat="",
+                             seri=seri_tahmin(v.get("baslik") or "", kanal), baslik=v.get("baslik") or "", durum=d, tarih="", saat="",
                              izlenme=None, link=(f"https://youtube.com/shorts/{vid}" if short else f"https://youtu.be/{vid}"), vid=vid, ureten="?")
                     K.append(x); vid_ix[vid] = x; degisti += 1
                     notlar.append(f"Yeni içerik (YouTube'dan): {kanal} · {x['baslik']}")
-                yeni = {"durum": d, "izlenme": v.get("izlenme")}
+                yeni = {"durum": d, "izlenme": v.get("izlenme"), "kanal": kanal, "dil": dil}
                 if t is not None:
                     yeni.update(tarih=t.strftime("%Y-%m-%d"), saat=t.strftime("%H:%M"))
-                if v.get("izlenme_yuzde") is not None:
-                    yeni["izlenme_yuzde"] = v["izlenme_yuzde"]
-                if v.get("begeni") is not None:
-                    yeni["begeni"] = v["begeni"]
-                if v.get("izlenme_dk") is not None:
-                    yeni["izlenme_dk"] = v["izlenme_dk"]
+                for ek_alan in ("izlenme_yuzde", "begeni", "izlenme_dk", "etkin_izlenme", "tutma_yuzdesi", "paylasim", "abone_kazanc", "ort_sure_sn"):
+                    if v.get(ek_alan) is not None:
+                        yeni[ek_alan] = v[ek_alan]
                 for k2, val in yeni.items():
                     if x.get(k2) != val:
                         x[k2] = val; degisti += 1

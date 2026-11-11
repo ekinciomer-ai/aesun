@@ -39,6 +39,11 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
     mp4 = jf[:-5] + ".mp4"
     if not os.path.exists(mp4) and it.get("sunucu_video"): mp4 = "/opt/aesun/video_bekleyen/" + os.path.basename(it["sunucu_video"])
     try:
+        if it.get("en_erken_yukle"):
+            from datetime import datetime, timezone, timedelta
+            bugun_ist = datetime.now(timezone(timedelta(hours=3))).strftime("%Y-%m-%d")
+            if bugun_ist < it["en_erken_yukle"]:
+                print(f"NOT: {kod} zamana yayılı yükleme ({it['en_erken_yukle']} bekleniyor)"); continue
         if it.get("islem") == "plan_kaldir":
             # yalnız planı kaldır: video Gizli kalır, silinmez (önce durum yedeği)
             cid = KANAL[dil]

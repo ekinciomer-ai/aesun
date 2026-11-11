@@ -1,0 +1,76 @@
+name: Kozmos render (Blender)
+# Blender render işleri GitHub'ın bulut makinelerinde çalışır (sunucunun sanal işlemcisi Blender'ı desteklemiyor; sunucu yük almaz).
+# Modeller sunucudaki tampondan (/opt/tampon/kozmos/modeller) okunur, depoya girmez. Çıktı: iş eseri (artifact).
+on:
+  workflow_dispatch:
+    inputs:
+      gorev:
+        description: "onizleme | film"
+        required: true
+        default: onizleme
+      parca:
+        description: "film için paralel parça sayısı (1-20)"
+        required: false
+        default: "1"
+      ayar:
+        description: "film ayarları: FPS RES SAMPLES (örn. '12 854x480 10')"
+        required: false
+        default: "12 854x480 10"
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      liste: ${{ steps.p.outputs.liste }}
+    steps:
+      - id: p
+        run: |
+          n="${{ inputs.parca }}"; case "$n" in ''|*[!0-9]*) n=1;; esac; [ "$n" -gt 20 ] && n=20; [ "$n" -lt 1 ] && n=1
+          echo "liste=[$(seq -s, 0 $((n-1)))]" >> "$GITHUB_OUTPUT"
+  render:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        i: ${{ fromJSON(needs.plan.outputs.liste) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Blender 4.5 LTS
+        uses: actions/cache@v4
+        id: bc
+        with:
+          path: ~/blender
+          key: blender-4.5.0
+      - if: steps.bc.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/blender && curl -sL https://download.blender.org/release/Blender4.5/blender-4.5.0-linux-x64.tar.xz | tar xJ -C ~/blender --strip-components=1
+      - name: Sistem kitaplıkları
+        run: sudo apt-get -qq update && sudo apt-get -qq install -y libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libxkbcommon0 libsm6 libice6 >/dev/null
+      - name: Modelleri sunucudan al
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@$ADRES "tar cf - -C /opt/tampon/kozmos modeller" | tar xf - -C $RUNNER_TEMP
+          rm -f ~/.ssh/k; du -sh $RUNNER_TEMP/modeller
+      - name: Render
+        run: |
+          mkdir -p cikti
+          if [ "${{ inputs.gorev }}" = "onizleme" ]; then
+            ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/model_onizle.py -- $RUNNER_TEMP/modeller cikti 2>&1 | grep -E 'ONIZLEME|Error|Traceback' || true
+            cp $RUNNER_TEMP/modeller/kaynakca.json cikti/ 2>/dev/null || true
+          else
+            set -- ${{ inputs.ayar }}
+            FPS=$1 RES=$2 SAMPLES=$3 MODELLER=$RUNNER_TEMP/modeller PARCA=${{ matrix.i }} PARCA_SAYISI=${{ inputs.parca }} \
+              ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/midong_film.py -- cikti 2>&1 | grep -E 'KARE|BITTI|Error|Traceback' | tail -20
+          fi
+          ls cikti | head
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kozmos-${{ inputs.gorev }}-${{ matrix.i }}
+          path: cikti
+          retention-days: 5

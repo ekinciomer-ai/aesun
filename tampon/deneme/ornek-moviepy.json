@@ -1,0 +1,10 @@
+{
+ "id": "ornek-moviepy",
+ "arac": "Zulko/moviepy",
+ "repo": "https://github.com/Zulko/moviepy",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && sudo apt-get -qq install -y ffmpeg fonts-dejavu-core >/dev/null; pip install -q moviepy",
+ "duman": "python3 $GIRDI/moviepy_ornek.py",
+ "sure_dk": 20,
+ "ornek_not": "Python ile 3 görselden yakınlaşmalı, yazılı, geçişli dikey video."
+}

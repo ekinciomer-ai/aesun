@@ -1,0 +1,10 @@
+{
+ "id": "ornek-sharp",
+ "arac": "lovell/sharp",
+ "repo": "https://github.com/lovell/sharp",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && mkdir -p /tmp/s && cd /tmp/s && npm i -s sharp >/dev/null && cp /sharp_ornek.mjs .",
+ "duman": "cd /tmp/s && node sharp_ornek.mjs",
+ "sure_dk": 15,
+ "ornek_not": "Tek görsele 6 işlem (gri, bulanık, kontrast, ton, negatif) ve hız ölçümü."
+}

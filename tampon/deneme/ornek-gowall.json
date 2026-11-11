@@ -1,0 +1,10 @@
+{
+ "id": "ornek-gowall",
+ "arac": "Achno/gowall",
+ "repo": "https://github.com/Achno/gowall",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && go install github.com/Achno/gowall@latest",
+ "duman": "export PATH=$PATH:$(go env GOPATH)/bin; for t in nord catppuccin dracula; do gowall convert $GIRDI/kare.jpg -t $t --output $CIKTI/gowall_$t.png 2>&1 | tail -2; done; cp $GIRDI/kare.jpg $CIKTI/; ls $CIKTI",
+ "sure_dk": 20,
+ "ornek_not": "Görseli hazır renk temalarına çevirme (marka rengine uydurma)."
+}

@@ -30,7 +30,7 @@ jobs:
   dene:
     needs: sec
     if: needs.sec.outputs.idler != '[]'
-    strategy: { fail-fast: false, max-parallel: 2, matrix: { id: '${{ fromJson(needs.sec.outputs.idler) }}' } }
+    strategy: { fail-fast: false, max-parallel: 4, matrix: { id: '${{ fromJson(needs.sec.outputs.idler) }}' } }
     runs-on: ubuntu-24.04
     permissions: {}
     timeout-minutes: 45
@@ -43,6 +43,7 @@ jobs:
           set +e
           S=tampon/deneme/$ID.json; mkdir -p /tmp/sonuc /tmp/girdi /tmp/cikti
           # Örnek girdiler (isteğe bağlı): tampon/ornek/<id>/ → /tmp/girdi ; araç çıktılarını /tmp/cikti'ye yazar
+          [ -d tampon/ornek/ortak ] && cp -r tampon/ornek/ortak/. /tmp/girdi/  # ortak test girdileri (görsel, video, örnek betikler)
           [ -d "tampon/ornek/$ID" ] && cp -r "tampon/ornek/$ID/." /tmp/girdi/
           export GIRDI=/tmp/girdi CIKTI=/tmp/cikti
           python3 - "$S" <<'PY' > /tmp/plan.env

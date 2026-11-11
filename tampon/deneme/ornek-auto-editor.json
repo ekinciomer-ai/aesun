@@ -1,0 +1,10 @@
+{
+ "id": "ornek-auto-editor",
+ "arac": "WyattBlue/auto-editor",
+ "repo": "https://github.com/WyattBlue/auto-editor",
+ "ref": "",
+ "kurulum": "sudo apt-get -qq install -y ffmpeg >/dev/null; pip install -q auto-editor",
+ "duman": "cp $GIRDI/sessizli.mp4 $CIKTI/once_sessizli.mp4; auto-editor $GIRDI/sessizli.mp4 -o $CIKTI/sonra_kesik.mp4 --no-open; for f in $CIKTI/*.mp4; do echo \"$f $(ffprobe -v error -show_entries format=duration -of csv=p=0 $f) sn\"; done",
+ "sure_dk": 15,
+ "ornek_not": "20 sn'lik videoda iki adet 3 sn sessizlik vardı; araç otomatik kesti."
+}

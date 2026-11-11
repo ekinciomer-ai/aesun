@@ -1,0 +1,10 @@
+{
+ "id": "ornek-supervision",
+ "arac": "roboflow/supervision",
+ "repo": "https://github.com/roboflow/supervision",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && pip install -q supervision ultralytics opencv-python-headless",
+ "duman": "python3 $GIRDI/sv_ornek.py",
+ "sure_dk": 25,
+ "ornek_not": "YOLO11n ile nesne tanıma; kutular ve etiketler supervision ile çizildi."
+}

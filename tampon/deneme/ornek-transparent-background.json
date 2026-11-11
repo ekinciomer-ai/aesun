@@ -1,0 +1,10 @@
+{
+ "id": "ornek-transparent-background",
+ "arac": "plemeri/transparent-background",
+ "repo": "https://github.com/plemeri/transparent-background",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && pip install -q transparent-background",
+ "duman": "transparent-background --source $GIRDI/astronot.jpg --dest $CIKTI --type rgba; transparent-background --source $GIRDI/otobus.jpg --dest $CIKTI --type rgba; transparent-background --source $GIRDI/astronot.jpg --dest $CIKTI --type blur; cp $GIRDI/astronot.jpg $CIKTI/; ls $CIKTI",
+ "sure_dk": 30,
+ "ornek_not": "InSPyReNet ile arka plan silme ve arka plan bulanıklaştırma."
+}

@@ -88,5 +88,46 @@ def main():
     print(f"denenen.json: {len(araclar)} araç, {len(guv)} güvenlik uyarısı, son rapor {cikti['rapor']['tarih']}")
 
 
+MEDYA = {".jpg": "img", ".jpeg": "img", ".png": "img", ".webp": "img", ".gif": "img", ".svg": "img",
+         ".mp4": "video", ".webm": "video", ".mp3": "ses", ".wav": "ses"}
+
+
+def ornekler():
+    """Tampon denemelerinin görsel/video çıktılarını Keşif kartlarına bağlar: docs/kesif/ornek.json + ornek/<id>/"""
+    import shutil
+    harita = oku(yol("tampon", "ornek_harita.json"), {})
+    hedef = yol("docs", "kesif", "ornek")
+    shutil.rmtree(hedef, ignore_errors=True)
+    sonuc = {}
+    for f in sorted(glob.glob(yol("tampon", "sonuc", "*.json"))):
+        i = os.path.basename(f)[:-5]
+        d = oku(yol("tampon", "deneme", f"{i}.json"), {})
+        h = harita.get(i) or {}
+        arac = d.get("arac") or h.get("arac")
+        klasor = yol("tampon", "sonuc", i)
+        if not arac or not os.path.isdir(klasor):
+            continue
+        t = oku(f, {})
+        dosyalar = []
+        for m in sorted(os.listdir(klasor)):
+            tur = MEDYA.get(os.path.splitext(m)[1].lower())
+            if not tur:
+                continue
+            os.makedirs(os.path.join(hedef, i), exist_ok=True)
+            shutil.copy2(os.path.join(klasor, m), os.path.join(hedef, i, m))
+            dosyalar.append({"f": f"ornek/{i}/{m}", "tur": tur, "ad": m})
+        if not dosyalar:
+            continue
+        kayit = [l for l in (t.get("duman_sonu") or "").splitlines() if l.strip() and not l.startswith(("WARNING", "  ", "Downloading"))]
+        sonuc.setdefault(arac, []).append({
+            "id": i, "durum": t.get("durum"), "sure_sn": t.get("sure_sn"), "not": d.get("ornek_not") or h.get("not"),
+            "tarih": datetime.fromtimestamp(os.path.getmtime(f), timezone.utc).strftime("%Y-%m-%d"),
+            "dosyalar": dosyalar, "kayit": kayit[-8:]})
+    with open(yol("docs", "kesif", "ornek.json"), "w", encoding="utf-8") as fp:
+        json.dump(sonuc, fp, ensure_ascii=False, indent=1)
+    print(f"ornek.json: {len(sonuc)} araç, {sum(len(x['dosyalar']) for v in sonuc.values() for x in v)} dosya")
+
+
 if __name__ == "__main__":
     main()
+    ornekler()

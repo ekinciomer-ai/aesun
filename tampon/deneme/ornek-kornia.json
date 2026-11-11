@@ -1,0 +1,10 @@
+{
+ "id": "ornek-kornia",
+ "arac": "kornia/kornia",
+ "repo": "https://github.com/kornia/kornia",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && pip install -q torch --index-url https://download.pytorch.org/whl/cpu && pip install -q kornia opencv-python-headless",
+ "duman": "python3 $GIRDI/kornia_ornek.py",
+ "sure_dk": 25,
+ "ornek_not": "Yapay zekâ eğitimi için görsel çoğaltma (renk, açı, perspektif) + kenar ve kontrast."
+}

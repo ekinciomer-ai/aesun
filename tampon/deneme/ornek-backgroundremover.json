@@ -1,0 +1,10 @@
+{
+ "id": "ornek-backgroundremover",
+ "arac": "nadermx/backgroundremover",
+ "repo": "https://github.com/nadermx/backgroundremover",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && pip install -q backgroundremover",
+ "duman": "for f in astronot otobus; do backgroundremover -i $GIRDI/$f.jpg -o $CIKTI/bgr_$f.png; done; cp $GIRDI/astronot.jpg $CIKTI/",
+ "sure_dk": 25,
+ "ornek_not": "Arka plan silme (rembg ile aynı görseller, karşılaştırma için)."
+}

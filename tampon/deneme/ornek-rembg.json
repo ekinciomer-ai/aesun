@@ -1,0 +1,10 @@
+{
+ "id": "ornek-rembg",
+ "arac": "danielgatis/rembg",
+ "repo": "https://github.com/danielgatis/rembg",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && pip install -q 'rembg[cpu,cli]'",
+ "duman": "for f in astronot otobus kare; do T0=$(date +%s%N); rembg i $GIRDI/$f.jpg $CIKTI/rembg_$f.png && echo \"$f $(( ($(date +%s%N)-T0)/1000000 )) ms\"; done; rembg i -m isnet-general-use $GIRDI/astronot.jpg $CIKTI/rembg_isnet_astronot.png; cp $GIRDI/astronot.jpg $GIRDI/otobus.jpg $CIKTI/",
+ "sure_dk": 25,
+ "ornek_not": "Aynı fotoğrafın arka planı silindi (önce / sonra)."
+}

@@ -1,0 +1,10 @@
+{
+ "id": "ornek-opencv",
+ "arac": "opencv/opencv",
+ "repo": "https://github.com/opencv/opencv",
+ "ref": "",
+ "kurulum": "sh $GIRDI/foto_al.sh >/dev/null && pip install -q opencv-contrib-python-headless",
+ "duman": "python3 $GIRDI/opencv_ornek.py",
+ "sure_dk": 15,
+ "ornek_not": "Uydu görüntüsünde kenar bulma ve su yüzeyi tespiti; fotoğrafa çizim efekti."
+}

@@ -7,7 +7,7 @@
 #          {"harita": {"merkez":[lon,lat], "zoom": px/derece, "noktalar": [[lon,lat,etiket,yon,dy,buyuk]], "yol": [[lon,lat],...]}, "bas": [...]}
 import os, sys, subprocess, json, math, random
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 from fontTools.ttLib import TTFont
 
 A = os.path.dirname(os.path.abspath(__file__)); KOK = os.path.dirname(A)
@@ -63,7 +63,7 @@ for i, s in enumerate(M):
 GOR = {}
 def gorsel(p):
     if p not in GOR:
-        im = Image.open(yol(p)).convert("RGB")
+        im = ImageEnhance.Color(Image.open(yol(p)).convert("RGB")).enhance(1.28)
         mx = 2600 if not ONIZ else 1400
         if max(im.size) > mx: r = mx / max(im.size); im = im.resize((int(im.width * r), int(im.height * r)), Image.LANCZOS)
         # arka plan: kapla + bulanık + karartılmış

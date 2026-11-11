@@ -1,0 +1,137 @@
+name: Büyüme paketi video üretimi ve YouTube planlama (otomatik)
+# icerik/seri_buyume/ altındaki bölümleri uçtan uca üretir ve sunucudan YouTube'a planlar:
+# 1) Kamu malı / serbest lisanslı Wikimedia Commons görsellerini indirir (manifest.json künyeli)
+# 2) Sunucuda (ns1) ElevenLabs klon seslendirmelerini üretir
+# 3) Telifsiz özgün atmosferik ses yatağı + 0. kare parlak kanca + kesintisiz döngü ile 1080x1920 MP4 ve özel kapak (.jpg) üretir
+# 4) Sunucuda kalite kapısından geçirip YouTube'a planlar (islem_yt_kuyruk.sh) ve docs/yayin/yayin.json + analiz.json'u günceller.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['icerik/seri_buyume/**', '.github/workflows/icerik_uret.yml']
+permissions:
+  contents: write
+concurrency: { group: icerik-uret-buyume, cancel-in-progress: false }
+jobs:
+  uret_ve_yukle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zaten yüklü mü kontrol et
+        id: kontrol
+        run: |
+          python3 - <<'PY' >> $GITHUB_OUTPUT
+          import os, sys
+          sys.path.insert(0, "icerik/seri_buyume")
+          import uret
+          eksik = [b["kod"] for b in uret.BOLUMLER if not os.path.exists(f"sunucu/yt_kuyruk/tamam/{b['kod']}.json")]
+          print("eksik=" + ("1" if eksik else "0"))
+          print("Eksik bölümler:", eksik, file=sys.stderr)
+          PY
+      - name: Ortam kurulumu (ffmpeg, font, Python paketleri)
+        if: steps.kontrol.outputs.eksik == '1'
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y ffmpeg fonts-inter fonts-dejavu-core python3-pil python3-numpy python3-fonttools >/dev/null
+      - name: Kamu malı görselleri indir (Wikimedia Commons)
+        if: steps.kontrol.outputs.eksik == '1'
+        run: |
+          python3 icerik/arac/commons_indir.py icerik/seri_buyume/istek_commons.json /tmp/ham_buyume
+          ls -lh /tmp/ham_buyume
+      - name: Sunucuda seslendirme üret (ElevenLabs)
+        if: steps.kontrol.outputs.eksik == '1'
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh /tmp/ses_pk/kuyruk /tmp/ses_cikti
+          python3 icerik/seri_buyume/uret.py ses /tmp/ses_pk/kuyruk
+          cp sunucu/islem_ses_kuyruk.sh /tmp/ses_pk/
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          tar czf /tmp/ses_paket.tgz -C /tmp/ses_pk .
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "rm -rf /tmp/ses_b && mkdir -p /tmp/ses_b && tar xzf - -C /tmp/ses_b && cd /tmp/ses_b && bash islem_ses_kuyruk.sh < /dev/null && tar czf /tmp/ses_b_cikti.tgz -C /tmp/ses_b cikti" < /tmp/ses_paket.tgz > /tmp/ses_log.txt 2>&1
+          scp $O root@$ADRES:/tmp/ses_b_cikti.tgz /tmp/ses_b_cikti.tgz
+          ssh $O root@$ADRES "rm -rf /tmp/ses_b /tmp/ses_b_cikti.tgz" || true
+          rm -f ~/.ssh/k
+          tar xzf /tmp/ses_b_cikti.tgz -C /tmp/ses_cikti
+          { grep '^NOT:' /tmp/ses_log.txt || true; } | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          ls -lh /tmp/ses_cikti/cikti
+      - name: 1080x1920 Shorts + özel kapak (.jpg) render et
+        if: steps.kontrol.outputs.eksik == '1'
+        run: |
+          set -euo pipefail
+          python3 icerik/seri_buyume/uret.py sahne /tmp/ham_buyume /tmp/ses_cikti/cikti /tmp/render_buyume
+          for sj in /tmp/render_buyume/*_sahne.json; do
+            echo "=== Render: $sj ==="
+            python3 icerik/arac/motor.py "$sj"
+          done
+          python3 icerik/seri_buyume/uret.py kuyruk /tmp/ham_buyume /tmp/render_buyume /tmp/yt_pk/kuyruk
+          ls -lh /tmp/yt_pk/kuyruk
+      - name: Kalite kapısı + YouTube yükleme ve planlama (sunucudan)
+        if: steps.kontrol.outputs.eksik == '1'
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh /tmp/yt_pk/sunucu
+          # Zaten tamamlanmış olanları çıkar
+          for f in /tmp/yt_pk/kuyruk/*.json; do
+            kod=$(basename "$f" .json)
+            if [ -f "sunucu/yt_kuyruk/tamam/${kod}.json" ]; then
+              rm -f "/tmp/yt_pk/kuyruk/${kod}".*
+            fi
+          done
+          cp sunucu/islem_yt_kuyruk.sh /tmp/yt_pk/sunucu/
+          cp sunucu/aesun/kalite_kapisi.py /tmp/yt_pk/sunucu/
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          tar czf /tmp/yt_paket.tgz -C /tmp/yt_pk .
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
+          $S "rm -rf /tmp/yt_buyume && mkdir -p /tmp/yt_buyume && tar xzf - -C /tmp/yt_buyume && cp /tmp/yt_buyume/sunucu/kalite_kapisi.py /opt/aesun/kalite_kapisi.py && chmod +x /opt/aesun/kalite_kapisi.py && cd /tmp/yt_buyume && bash sunucu/islem_yt_kuyruk.sh; k=\$?; rm -rf /tmp/yt_buyume; exit \$k" < /tmp/yt_paket.tgz > /tmp/yt_cikti.txt 2>&1 || true
+          rm -f ~/.ssh/k
+          { grep '^NOT:' /tmp/yt_cikti.txt || true; } | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          python3 - <<'PY'
+          import json, os, re, shutil
+          from datetime import datetime
+          t = open('/tmp/yt_cikti.txt', encoding='utf-8', errors='replace').read()
+          m = re.search(r'===KUYRUK===\n(.*?)\n===SON===', t, re.S)
+          if not m:
+              print('::error::sunucu kuyruk sonucu okunamadı'); print(t[-2000:]); raise SystemExit(1)
+          sonuc = json.loads(m.group(1))
+          yol = 'docs/yayin/yayin.json'; j = json.load(open(yol, encoding='utf-8')); K = j['kayitlar']
+          ix = {x.get('vid'): x for x in K if x.get('vid')}
+          os.makedirs('sunucu/yt_kuyruk/tamam', exist_ok=True)
+          for s in sonuc:
+              kod = s['kod']
+              if not s.get('vid'):
+                  print('::warning::' + kod + ' ' + s.get('durum', '') + ' ' + s.get('detay', '')); continue
+              p = datetime.fromisoformat(s['publishAt'])
+              durum_str = 'Yayında' if p <= datetime.now(p.tzinfo) else 'Planlı'
+              kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab', 'OD': 'Ömür Dediğin'}.get(s['kanal'], s['kanal'])
+              dil = {'TR': 'TR', 'EN': 'EN', 'ES': 'ES', 'KZ_TR': 'TR', 'KZ_EN': 'EN', 'OD': 'TR'}.get(s['kanal'], s['kanal'])
+              x = ix.get(s['vid']) or {}
+              tur = s.get('tur') or 'Short'
+              x.update(platform='YouTube', kanal=kanal, dil=dil, tur=tur, seri=s.get('seri') or 'Gündem + Tarih',
+                       baslik=s['baslik'], durum=durum_str, tarih=p.strftime('%Y-%m-%d'), saat=p.strftime('%H:%M'), izlenme=x.get('izlenme'),
+                       link=f"https://youtube.com/shorts/{s['vid']}", vid=s['vid'], ureten=s.get('ureten') or 'Antigravity')
+              if s['vid'] not in ix: K.append(x)
+              src_json = f'/tmp/yt_pk/kuyruk/{kod}.json'
+              if os.path.exists(src_json):
+                  shutil.copy(src_json, f'sunucu/yt_kuyruk/tamam/{kod}.json')
+              print(f"::notice::{kod}: {s['durum']} -> {s['vid']}")
+          json.dump(j, open(yol, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+          PY
+          python3 yayin/analiz.py
+      - name: Kaydet
+        if: steps.kontrol.outputs.eksik == '1'
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A sunucu/yt_kuyruk/tamam docs/yayin/yayin.json docs/yayin/analiz.json
+          git diff --cached --quiet && exit 0
+          git commit -qm "Büyüme paketi: 4 prime-time Short üretildi ve planlandı $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase --autostash origin main && git push -q origin HEAD:main && break; sleep 5; done

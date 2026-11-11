@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-11T20:44+03:00",
+ "olusturma": "2026-11-11T21:09+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -432,6 +432,18 @@
   },
   {
    "kanal": "Kozmos Lab TR",
+   "seri": "Gezegen Kartları",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Kozmos Lab TR",
    "seri": "Nasıl Yapılır",
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
@@ -448,12 +460,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 97,
-  "Antik Stüdyo": 637,
-  "Estudio Antiguo": 122,
-  "Ömür Dediğin": 50,
+  "Ancient Studio": 188,
   "Kozmos Lab": 50,
-  "Ancient Studio": 188
+  "Ömür Dediğin": 50,
+  "Estudio Antiguo": 122,
+  "Kozmos Lab TR": 97,
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1063,6 +1075,22 @@
    "vid": "1kpYFEtsiP0",
    "baslik": "Bu adam neden kaplumbağa eğitiyor? 🐢 Lale Devri'nin yürüyen kandilleri #shorts",
    "neden": "2026-11-11 18:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Kozmos Lab TR",
+   "platform": "YouTube",
+   "vid": "8KYR4MwnX9A",
+   "baslik": "Rüzgâr Türbini Nasıl Çalışır? Parça Parça 3D Anlatım | NREL 5 MW",
+   "neden": "2026-11-11 19:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "K-NKbxs4NFc",
+   "baslik": "Mimar Sinan Süleymaniye'deki isleri neden mürekkebe çevirdi? 🕌 #shorts",
+   "neden": "2026-11-11 19:00 planlıydı, hâlâ yayında görünmüyor"
   }
  ],
  "bulgular": [

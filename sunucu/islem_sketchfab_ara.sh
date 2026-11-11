@@ -11,11 +11,20 @@ python3 - "$D/aday.json" <<'PY'
 import json, sys, urllib.request, urllib.parse
 out = sys.argv[1]
 Q = {
- "gunes_kazik": ["solar pile driver", "post driver machine", "pile ramming machine", "hydraulic pile hammer"],
- "cekici_tir": ["semi truck", "tractor unit truck", "lowboy trailer"],
- "isci_animasyon": ["construction worker rigged", "worker walking animation", "builder character"],
- "trafo": ["power transformer high voltage", "substation transformer", "high voltage switchgear"],
- "telehandler": ["telehandler"],
+ "loft_ofis": ["loft 18 mini office", "loft mini office environment"],
+ "kanepe": ["modern sofa", "sectional sofa"],
+ "yatak": ["modern bed", "double bed"],
+ "yemek_masasi": ["dining table chairs", "dining set"],
+ "mutfak": ["modern kitchen", "kitchen island"],
+ "koltuk": ["armchair modern", "lounge chair"],
+ "ic_kapi": ["interior door", "wooden door"],
+ "pencere": ["window aluminium", "sliding glass door"],
+ "banyo": ["bathroom vanity", "bathroom set"],
+ "aydinlatma": ["pendant lamp", "floor lamp"],
+ "bitki": ["indoor plant", "potted plant"],
+ "agac": ["olive tree", "cypress tree", "palm tree"],
+ "bahce_mobilya": ["sun lounger", "outdoor furniture"],
+ "araba": ["sedan car", "suv car"],
 }
 ok = {"cc0", "by", "by-sa"}
 res = {}
@@ -23,7 +32,7 @@ for k, qs in Q.items():
     seen, items = set(), []
     for q in qs:
         for lic in ("by", "cc0", "by-sa"):
-            u = "https://api.sketchfab.com/v3/search?" + urllib.parse.urlencode({"type": "models", "q": q, "downloadable": "true", "license": lic, "sort_by": "-likeCount", "count": 24})
+            u = "https://api.sketchfab.com/v3/search?" + urllib.parse.urlencode({"type": "models", "q": q, "downloadable": "true", "license": lic, "sort_by": "-likeCount", "count": 24, "max_face_count": 150000})
             try:
                 d = json.load(urllib.request.urlopen(u, timeout=30))
             except Exception as e:

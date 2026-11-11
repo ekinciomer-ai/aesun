@@ -1,11 +1,11 @@
 {
  "id": "ornek-sharp",
- "durum": "basarisiz",
+ "durum": "basarili",
  "klon": 0,
- "kurulum": 1,
- "duman": 1,
- "sure_sn": 4,
+ "kurulum": 0,
+ "duman": 0,
+ "sure_sn": 15,
  "guvenlik_bulgusu": [],
- "kurulum_sonu": "cp: cannot stat '/sharp_ornek.mjs': No such file or directory\n",
- "duman_sonu": "node:internal/modules/cjs/loader:1433\n  throw err;\n  ^\n\nError: Cannot find module '/tmp/s/sharp_ornek.mjs'\n    at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)\n    at defaultResolveImpl (node:internal/modules/cjs/loader:1040:19)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1045:22)\n    at Function._load (node:internal/modules/cjs/loader:1216:25)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49 {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: []\n}\n\nNode.js v22.23.4\n"
+ "kurulum_sonu": "",
+ "duman_sonu": "50 görsel 1080px webp: 7389 ms\n"
 }

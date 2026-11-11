@@ -1,0 +1,29 @@
+name: YouTube video kare çıkar (görsel stil incelemesi)
+# Referans bir videodan eşit aralıklı 8 kare alır (yt-dlp + ffmpeg), icerik/inceleme/<video>_kare/ altına küçük jpg olarak yazar.
+# Salt okunur: videoyu depoya koymaz, yalnız inceleme kareleri. Başka hiçbir işi etkilemez.
+on:
+  workflow_dispatch:
+    inputs:
+      video: { description: 'Video kimliği (ör. 1F5rgi8KjqQ)', required: true }
+permissions:
+  contents: write
+jobs:
+  kare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q yt-dlp && sudo apt-get install -y -qq ffmpeg >/dev/null
+      - name: Kare çıkar
+        env: { V: '${{ inputs.video }}' }
+        run: |
+          D="icerik/inceleme/${V}_kare"; mkdir -p "$D" /tmp/v
+          yt-dlp -q -f "bv*[height<=720]+ba/b[height<=720]/b" -o "/tmp/v/v.%(ext)s" "https://www.youtube.com/shorts/$V" || yt-dlp -q -o "/tmp/v/v.%(ext)s" "https://www.youtube.com/watch?v=$V"
+          F=$(ls /tmp/v/v.* | head -1); S=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$F")
+          for i in 0 1 2 3 4 5 6 7; do T=$(python3 -c "print(round($S*($i+0.5)/8,2))"); ffmpeg -v error -y -ss "$T" -i "$F" -frames:v 1 -vf "scale=360:-2" -q:v 4 "$D/k$i.jpg"; done
+          echo "sure=$S" > "$D/bilgi.txt"; ls -la "$D"
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A icerik/inceleme; git diff --cached --quiet && exit 0
+          git commit -qm "Video kare incelemesi: ${{ inputs.video }}"; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

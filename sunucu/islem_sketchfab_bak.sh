@@ -2,8 +2,8 @@
 # Sketchfab kısa bağlantılarını çözer, modelin lisansını, indirilebilirliğini ve yüz sayısını yazar (salt okuma).
 set -uo pipefail
 K=$(/opt/aesun/kasa_coz.sh sketchfab_api 2>/dev/null) || { echo "NOT: HATA anahtar yok"; exit 1; }
-for kisa in https://skfb.ly/prNBQ; do
-  son=$(curl -s -o /dev/null -w '%{url_effective}' -L --max-time 30 "$kisa")
+for kisa in https://sketchfab.com/3d-models/hause-6cdba7c5fc5d46109c371c8ce12ba398; do
+  son="$kisa"
   uid=$(echo "$son" | grep -oE '[0-9a-f]{32}' | tail -1)
   echo "NOT: $kisa -> $son"
   [ -n "$uid" ] || continue

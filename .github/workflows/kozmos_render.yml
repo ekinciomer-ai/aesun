@@ -9,7 +9,7 @@ on:
         required: false
         default: kozmos
       gorev:
-        description: "onizleme | parca | film | kurgu"
+        description: "onizleme | parca | disari | film | kurgu"
         required: true
         default: onizleme
       parca:
@@ -89,7 +89,9 @@ jobs:
       - name: Render
         run: |
           mkdir -p cikti
-          if [ "${{ inputs.gorev }}" = "parca" ]; then
+          if [ "${{ inputs.gorev }}" = "disari" ]; then
+            ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/parca_disari.py -- $RUNNER_TEMP/modeller cikti 2>&1 | grep -E 'DISARI|YOK|Error|Traceback' || true
+          elif [ "${{ inputs.gorev }}" = "parca" ]; then
             ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/parca_onizle.py -- $RUNNER_TEMP/modeller cikti 2>&1 | grep -E 'PARCA|Error|Traceback' || true
           elif [ "${{ inputs.gorev }}" = "onizleme" ]; then
             ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/model_onizle.py -- $RUNNER_TEMP/modeller cikti 2>&1 | grep -E 'ONIZLEME|Error|Traceback' || true
@@ -106,7 +108,7 @@ jobs:
           set +e
           D=$RUNNER_TEMP/dal; git clone -q --depth 1 --branch kozmos-cikti https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} $D 2>/dev/null || { git init -q $D; git -C $D checkout -q -b kozmos-cikti; git -C $D remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}; }
           H=${{ inputs.gorev }}/${{ matrix.i }}; rm -rf $D/$H; mkdir -p $D/$H
-          if [ "${{ inputs.gorev }}" = "onizleme" ] || [ "${{ inputs.gorev }}" = "parca" ]; then cp cikti/* $D/$H/; else cp cikti/*.json $D/$H/ 2>/dev/null || true; ls cikti/kare_*.jpg | awk -v n="${{ inputs.ayar }}" 'BEGIN{split(n,a," "); k=(a[4]!="")?1:24} NR%k==1 || k==1' | xargs -r -I{} cp {} $D/$H/; fi
+          if [ "${{ inputs.gorev }}" = "onizleme" ] || [ "${{ inputs.gorev }}" = "parca" ] || [ "${{ inputs.gorev }}" = "disari" ]; then cp cikti/* $D/$H/; else cp cikti/*.json $D/$H/ 2>/dev/null || true; ls cikti/kare_*.jpg | awk -v n="${{ inputs.ayar }}" 'BEGIN{split(n,a," "); k=(a[4]!="")?1:24} NR%k==1 || k==1' | xargs -r -I{} cp {} $D/$H/; fi
           cd $D && git add -A && git -c user.name=kozmos-bot -c user.email=bot@users.noreply.github.com commit -q -m "kozmos ${{ inputs.gorev }} ${{ matrix.i }}" && for k in 1 2 3; do git pull -q --rebase origin kozmos-cikti 2>/dev/null || true; git push -q origin kozmos-cikti && break; sleep $((k*3)); done
       - name: Film karelerini sunucuya gönder
         if: inputs.gorev == 'film'

@@ -220,7 +220,7 @@ function ornBolum(ad,g){const O=ORN[ad]||[],U=URET[ad];
  let h='<h4>Örnek çıktı</h4>';
  h+=O.map(o=>`<div class="orn"><div class="ust"><span>${o.karar?`<b>${esc(o.karar)}</b><br>`:''}${esc(o.not||'Tampon deneme çıktısı')}<br><span class="alt">${o.durum==='basarili'?'✓ ':'✗ '}bizim tampon testimiz · ${tr(o.tarih)}${o.sure_sn?' · '+Math.round(o.sure_sn/60)+' dk kurulum+deneme':''}</span></span>
   <button class="gos" data-orn="${esc(ad)}" data-id="${esc(o.id)}">Göster (${o.dosyalar.length})</button></div><div class="galeri" hidden></div></div>`).join('');
- if(!O.length)h+=`<div class="orn"><span class="alt">${U&&U.donanim==='gpu'?'⚙️ Ekran kartı (GPU) gerekli — donanım eklenince gerçek test yapılacak.':'Henüz tampon bölgede test edilmedi.'}</span></div>`;
+ if(!O.length)h+=`<div class="orn"><span class="alt">${U&&U.donanim==='gpu'?'⚙️ Ekran kartı (GPU) istiyor ya da onunla çalışmak üzere yapılmış — donanım eklenince gerçek test yapılacak.':'Henüz tampon bölgede test edilmedi.'}</span></div>`;
  if(U&&U.dosyalar.length)h+=`<div class="orn ur"><div class="ust"><span>Üreticinin kendi örneği<br><span class="alt">Bizim testimiz değil; aracın sayfasındaki demo, kaynağından gösteriliyor.</span></span>
   <button class="gos" data-orn="${esc(ad)}" data-id="_ur">Göster (${U.dosyalar.length})</button></div><div class="galeri" hidden></div></div>`;
  return h;}

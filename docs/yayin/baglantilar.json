@@ -1,6 +1,6 @@
 {
  "aciklama": "Bağlantı durumu. Giriş gerektiren işler burada bekler; Ömer hesap bilgileriyle hazır olduğunda tek seferde bağlanır, sistem onu bekletmez.",
- "guncelleme": "2026-11-07T02:45+03:00",
+ "guncelleme": "2026-11-11T14:45+03:00",
  "baglantilar": [
   {
    "ad": "YouTube · Antik Stüdyo",
@@ -12,6 +12,18 @@
    "ad": "YouTube · Ancient Studio",
    "durum": "bağlı",
    "nasil": "Aynı bağlantı, marka hesabı.",
+   "giris_gerekli": false
+  },
+  {
+   "ad": "YouTube · Estudio Antiguo",
+   "durum": "bağlı",
+   "nasil": "Aynı sunucu bağlantısı, marka hesabı (7 Kas 2026). Yükleme kuyruğu, kanal yönetimi ve yorum takibinde.",
+   "giris_gerekli": false
+  },
+  {
+   "ad": "YouTube · Kozmos Lab TR & Kozmos Lab (EN)",
+   "durum": "bağlı",
+   "nasil": "Sunucu bağlantısıyla yükleme kuyruğu, kanal yönetimi ve analitik okuma aktif.",
    "giris_gerekli": false
   },
   {
@@ -27,9 +39,15 @@
    "giris_gerekli": false
   },
   {
+   "ad": "YouTube · Telefon Doğrulaması (youtube.com/verify)",
+   "durum": "tarayıcı gerekli",
+   "nasil": "Özel kapak (thumbnails.set) yükleyebilmek ve günlük 10+ video yükleme sınırını açmak için youtube.com/verify üzerinden bir kez telefon doğrulaması yapılmalı.",
+   "giris_gerekli": true
+  },
+  {
    "ad": "TikTok · @antikstudyo",
    "durum": "bağlı",
-   "nasil": "Sunucudaki kalıcı tarayıcıda @antikstudyo oturumu açık (6 Kas, Ömer kendisi girdi; şifre kaydedilmedi). Yüklemeler sunucu/tt_kuyruk'tan TikTok Studio ile otomatik planlanır. Oturum düşerse: 'TikTok girişi' → 20 dk'lık pencere.",
+   "nasil": "Sunucudaki kalıcı tarayıcıda @antikstudyo oturumu açık (6 Kas, Ömer kendisi girdi; şifre kaydedilmedi). Yüklemeler sunucu/tt_kuyruk'tan TikTok Studio ile otomatik planlanır.",
    "giris_gerekli": false
   },
   {
@@ -37,12 +55,6 @@
    "durum": "bağlı değil",
    "nasil": "Hesap açılınca CutkodA paneli üzerinden resmî API ile bağlanır; giriş Ömer tarafından, bir kez.",
    "giris_gerekli": true
-  },
-  {
-   "ad": "YouTube · Estudio Antiguo",
-   "durum": "bağlı",
-   "nasil": "Aynı sunucu bağlantısı, marka hesabı (7 Kas 2026). Yükleme kuyruğu, kanal yönetimi ve yorum takibinde.",
-   "giris_gerekli": false
   }
  ]
 }

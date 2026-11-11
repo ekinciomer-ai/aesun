@@ -112,6 +112,8 @@ tr.bugun td{color:var(--k)}
 </main>
 <script>
 const DR={'İptal':'#B91C24','Yayında':'#1F8A4C','Planlı':'#2463B5','Gizli':'#8A93A0','Taslak':'#C26A12','Kaldırıldı':'#5C6470'};
+const KN={'Kozmos Lab TR (@kozmoslabtr)':'Kozmos Lab TR','Kozmos Lab (@kozmoslab)':'Kozmos Lab'};
+const DN={'KZ_TR':'TR','KZ_EN':'EN','OD':'TR'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const AY=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],GN=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const gunAd=t=>{if(!t)return 'Tarihsiz (taslak)';const d=new Date(t+'T12:00:00');return d.getDate()+' '+AY[d.getMonth()]+' '+d.getFullYear()+' · '+GN[d.getDay()]};
@@ -145,9 +147,10 @@ function ciz(){
     +(x.tt_metin?'<button type="button" onclick="kopyala('+i+',\'tt_metin\',this)">📋 TikTok Metni</button>':'')
     +'</div>';
   }
+  const ekBilgi=(x.izlenme_yuzde!=null?' · %'+x.izlenme_yuzde+' izl':'')+(x.tutma_yuzdesi!=null?' · %'+x.tutma_yuzdesi+' tutma':'');
   h+='<tr><td class="ince" data-e="Saat">'+esc(x.saat||'—')+'</td>'
    +'<td><div class="pl '+pc+'">'+esc(x.platform)+' · '+esc(x.dil)+'</div><div class="ince">'+esc(x.kanal)+'</div></td>'
-   +'<td><div class="bas">'+(x.link?'<a href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer">'+esc(x.baslik)+' ↗</a>':esc(x.baslik))+'</div><div class="ince">'+esc(x.seri||'')+' · '+esc(x.tur||'')+(x.not?' · '+esc(x.not):'')+'</div>'+kb+'</td>'
+   +'<td><div class="bas">'+(x.link?'<a href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer">'+esc(x.baslik)+' ↗</a>':esc(x.baslik))+'</div><div class="ince">'+esc(x.seri||'')+' · '+esc(x.tur||'')+esc(ekBilgi)+(x.not?' · '+esc(x.not):'')+'</div>'+kb+'</td>'
    +'<td><span class="rozet" style="background:'+(DR[x.durum]||'#5C6470')+'">'+esc(x.durum)+'</span></td>'
    +'<td class="num" data-e="İzlenme">'+sayi(x.izlenme)+'</td>'
    +'<td data-e="Yayınlayan"><span class="ur '+uc+'">'+esc(x.ureten==='?'?'Belirsiz':x.ureten)+'</span></td></tr>';
@@ -205,11 +208,15 @@ function yolCiz(A,R){const b=document.getElementById('yh');if(!A||!A.plan){b.hid
  const yap=new Set(((R&&R.islemler)||[]).map(i=>i.vid));
  b.querySelector('summary').innerHTML='🧭 Yol haritası <span class="ince">· otomatik · '+esc(fmt(new Date(A.olusturma)))+(R&&R.son_calisma?' · YouTube bağlantısı: '+esc(fmt(new Date(R.son_calisma))):'')+'</span>';
  const plan=Object.entries(A.plan).map(([k,p])=>'<li><b>'+esc(k)+'</b>: günde en fazla '+p.gunluk_short_kotasi+' Short → '+(Object.entries(p.seri_dagilimi).map(([s,n])=>esc(s)+' ×'+n).join(', ')||'—')+(p.durdurulan.length?' · <span style="color:#B91C24">durdurulan: '+p.durdurulan.map(esc).join(', ')+'</span>':'')+'</li>').join('');
- const ser='<div class="tb"><table><thead><tr><th>Kanal</th><th>Seri</th><th>Karar</th><th class="num">48 sa medyan</th><th class="num">Tutma</th><th class="num">İzlenme %</th><th>Neden</th></tr></thead><tbody>'+A.seriler.map(s=>'<tr><td>'+esc(s.kanal)+'</td><td>'+esc(s.seri)+'</td><td><span class="kr '+esc(s.karar)+'">'+esc(s.karar)+'</span></td><td class="num">'+sayi(s.medyan_48sa)+'</td><td class="num">'+(s.tutma_orani==null?'—':'%'+s.tutma_orani)+'</td><td class="num">'+(s.izlenme_yuzde==null?'—':'%'+s.izlenme_yuzde)+'</td><td class="ince">'+esc(s.neden)+(s.erken?' · '+s.erken+' yeni video ölçülüyor':'')+'</td></tr>').join('')+'</tbody></table></div>';
+ const ser='<div class="tb"><table><thead><tr><th>Kanal</th><th>Seri</th><th>Karar</th><th class="num">48 sa medyan</th><th class="num">Tutma</th><th class="num">İzlenme %</th><th>Neden</th></tr></thead><tbody>'+A.seriler.map(s=>'<tr><td>'+esc(s.kanal)+'</td><td>'+esc(s.seri)+'</td><td><span class="kr '+esc(s.karar)+'">'+esc(s.karar)+'</span></td><td class="num">'+sayi(s.medyan_48sa)+'</td><td class="num">'+(s.tutma_orani==null?'—':'%'+s.tutma_orani)+'</td><td class="num">'+(s.izlenme_yuzde==null?'—':'%'+s.izlenme_yuzde)+(s.kaydirmadan_izleme_yuzde!=null?' (kaydırmasız %'+s.kaydirmadan_izleme_yuzde+')':'')+'</td><td class="ince">'+esc(s.neden)+(s.erken?' · '+s.erken+' yeni video ölçülüyor':'')+'</td></tr>').join('')+'</tbody></table></div>';
  const ey=(A.eylemler||[]).map(e=>'<li><span class="kr '+(e.tur==='GİZLE'?'DEĞİŞTİR':e.tur==='ERTELE'?'DURDUR':'DENE')+'">'+esc(e.tur)+'</span> '+esc(e.kanal)+' · '+esc(String(e.baslik).slice(0,60))+' <span class="ince">— '+esc(e.neden)+(yap.has(e.vid)?' · ✅ yapıldı':'')+'</span></li>').join('');
+ const tak=(A.takvim_aciklari||[]).slice(0,12).map(t=>'<li><span class="kr '+((t.uyari||'').includes('19:00')?'DURDUR':'DEĞİŞTİR')+'">'+esc(t.tarih)+'</span> <b>'+esc(t.kanal)+'</b>: '+t.planli_short+'/'+t.hedef_kota+' Short planlı <span class="ince">— '+esc(t.uyari)+'</span></li>').join('');
+ const kop=(A.kopru_onerileri||[]).map(k=>'<li><b>'+esc(k.kanal)+'</b> · Uzun Video: <a href="https://youtu.be/'+esc(k.uzun_vid)+'" target="_blank" rel="noopener noreferrer">'+esc(k.uzun_baslik)+' ↗</a> ('+esc(k.uzun_durum)+', '+sayi(k.uzun_izlenme)+' izl)<div class="ince">Bağlanacak Short\'lar (Related Video): '+k.baglanacak_shortlar.map(s=>esc(String(s.baslik).slice(0,42))+' ('+sayi(s.izlenme)+')').join(' · ')+'</div></li>').join('');
  const son=((R&&R.islemler)||[]).slice(-5).reverse().map(i=>'<li>'+esc(fmt(new Date(i.zaman)))+' · '+esc(i.kanal)+' · '+esc(i.vid)+' · '+esc(i.islem)+'</li>').join('');
  document.getElementById('yhi').innerHTML='<div><h4>Bulgular</h4><ul>'+A.bulgular.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'
   +'<div><h4>Plan (üretim buna uyar)</h4><ul>'+plan+'</ul></div><div><h4>Seri kararları</h4>'+ser+'</div>'
+  +(tak?'<div><h4>72 Saatlik Takvim & Kota Açıkları</h4><ul>'+tak+'</ul></div>':'')
+  +(kop?'<div><h4>Shorts → Uzun Video Köprü Eşleşmeleri (Related Video)</h4><ul>'+kop+'</ul></div>':'')
   +(A.tiktok&&A.tiktok.karar?'<div><h4>TikTok (@antikstudyo)</h4><ul><li><span class="kr '+(A.tiktok.karar.startsWith('DURDUR')?'DURDUR':A.tiktok.karar.startsWith('SÜRDÜR')?'SÜRDÜR':'DENE')+'">'+esc(A.tiktok.karar)+'</span> · hesap 7 gün: '+esc(String(A.tiktok.izlenme_7g))+' izlenme · '+esc(String(A.tiktok.yayinda))+' yayında video'+(A.tiktok.okuma?' <span class="ince">· okuma '+esc(A.tiktok.okuma)+'</span>':'')+'</li>'
     +(A.tiktok.sebep?'<li>'+esc(A.tiktok.sebep)+'</li>':'')+(A.tiktok.kosul?'<li><b>Koşul:</b> '+esc(A.tiktok.kosul)+'</li>':'')+(A.tiktok.sunucudan_yapilamayan?'<li><b>Sunucudan yapılamayan:</b> '+esc(A.tiktok.sunucudan_yapilamayan)+'</li>':'')+'</ul></div>':'')
   +((A.yeni_seri_denemeleri||[]).length?'<div><h4>Yeni seri denemeleri</h4><ul>'+A.yeni_seri_denemeleri.map(d=>'<li><b>'+esc(d.seri)+'</b> · '+esc(d.kanallar.join(', '))+' · '+esc(d.kota)+'<div class="ince">'+esc(d.kalip)+' — '+esc(d.kanit)+'</div></li>').join('')+'</ul></div>':'')
@@ -227,18 +234,18 @@ function kopyala(i,alan,btn){
 }
 // Canlı veri: CutkodA sunucusu (YouTube API / RSS, 2 dk önbellek). Taban kayıtlar: yayin.json (Claude/Antigravity notları, TikTok, taslaklar).
 const CANLI='https://panel.cutkoda.com/api/yayin-takip';
-const seriTahmin=t=>{t=String(t).toLowerCase();if(/emu|kedi|cat died|güvercin|pigeon/.test(t))return 'Tarihin Patileri';if(/tablo|painting|mona lisa|van gogh|venüs|venus|çığlık|scream|devriye|night watch|dalga|wave|akşam yemeği|supper|kaplumbağa|tortoise|inci küpeli|pearl/.test(t))return 'Tablo Serisi';return 'Gündem + Tarih'};
+const seriTahmin=t=>{t=String(t).toLowerCase();if(/emu|kedi|cat died|güvercin|pigeon/.test(t))return 'Tarihin Patileri';if(/tablo|painting|cuadro|prado|mona lisa|van gogh|venüs|venus|çığlık|scream|devriye|night watch|dalga|wave|akşam yemeği|supper|kaplumbağa|tortoise|inci küpeli|pearl|rembrandt|gothic|gotiği|klimt|goya/.test(t))return 'Tablo Serisi';if(/fare|live mice|gladyatör|gladiator|fondöten|makeup|kurt|worms|zehir|poison|belladonna/.test(t))return 'Tarihi Magazin';if(/beşiktaş|celtic|maraton|marathon/.test(t))return 'Spor + Tarih';return 'Gündem + Tarih'};
 const fmt=d=>d.toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'});
 let ILK=true;
 async function yukle(){
  let j,c=null;
  try{j=await (await fetch('yayin.json?'+Date.now())).json()}catch(e){document.getElementById('guncel').textContent='Veri okunamadı: '+e.message;return}
  try{c=await (await fetch(CANLI,{cache:'no-store'})).json()}catch(e){}
- const L=(j.kayitlar||[]).map(x=>({...x})),ix={};L.forEach(x=>{if(x.vid)ix[x.vid]=x});
+ const L=(j.kayitlar||[]).map(x=>({...x,kanal:KN[x.kanal]||x.kanal,dil:DN[x.dil]||x.dil})),ix={};L.forEach(x=>{if(x.vid)ix[x.vid]=x});
  const simdi=new Date(Date.now()+3*36e5).toISOString().slice(0,16).replace('T',' ');
- if(c&&c.kayitlar){for(const v of c.kayitlar){const x=ix[v.vid];
-  if(x){Object.assign(x,{durum:v.durum,tarih:v.tarih||x.tarih,saat:v.saat||x.saat,izlenme:v.izlenme??x.izlenme,baslik:v.baslik||x.baslik,link:x.link||v.link})}
-  else{const y={...v,seri:seriTahmin(v.baslik),ureten:'?'};L.push(y);ix[v.vid]=y}}}
+ if(c&&c.kayitlar){for(const v of c.kayitlar){const kn=KN[v.kanal]||v.kanal,dl=DN[v.dil]||v.dil,x=ix[v.vid];
+  if(x){Object.assign(x,{kanal:kn,dil:dl||x.dil,durum:v.durum,tarih:v.tarih||x.tarih,saat:v.saat||x.saat,izlenme:v.izlenme??x.izlenme,baslik:v.baslik||x.baslik,link:x.link||v.link})}
+  else{const y={...v,kanal:kn,dil:dl,seri:seriTahmin(v.baslik),ureten:'?'};L.push(y);ix[v.vid]=y}}}
  for(const x of L){if(x.platform==='TikTok'&&x.durum==='Planlı'&&!String(x.not||'').includes('HAZIR')&&x.tarih&&(x.tarih+' '+(x.saat||'23:59'))<=simdi){x.durum='Yayında'}}
  K=L;
  const g=new Date(j.guncelleme);

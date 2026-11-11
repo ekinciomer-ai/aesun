@@ -3,7 +3,7 @@
 Çıktı: JSON {"gecti": bool, "engel": [...], "uyari": [...], "olcum": {...}}; çıkış kodu 0 = geçti, 1 = engellendi.
 Engel (yayın durur): çözünürlük düşük, ses yok, süre yok, siyah kare çok, ses seviyesi çok düşük/yüksek,
 altyazı bandı dışında yazı (stok klipteki "Subscribe" gibi; tesseract ile).
-Uyarı (yayın sürer, rapora girer): renk soluk, yapay zekâ beyanı ya da kaynak/lisans bilgisi eksik."""
+Uyarı (yayın sürer, rapora girer): renk soluk, ilk kare karanlık (Shorts kaydırma riski), yapay zekâ beyanı ya da kaynak/lisans bilgisi eksik."""
 import json, re, subprocess, sys
 
 
@@ -19,6 +19,11 @@ def olc(yol):
          "sure_sn": round(float(p.get("format", {}).get("duration") or 0), 1), "ses": a is not None}
     if o["sure_sn"] <= 0:
         return o
+    # İlk kare parlaklığı (Shorts ilk kare kancası kontrolü: siyah/karanlık açılış kaydırmayı artırır)
+    r0 = calis("ffmpeg", "-hide_banner", "-nostats", "-i", yol, "-frames:v", "1",
+               "-vf", "signalstats,metadata=print:key=lavfi.signalstats.YAVG", "-an", "-f", "null", "-", sure=30)
+    ym = re.findall(r"YAVG=([\d.]+)", r0.stdout + r0.stderr)
+    o["ilk_kare_parlaklik"] = round(float(ym[0]), 1) if ym else None
     # siyah kare oranı + renk doygunluğu (saniyede 2 kare örneklenir)
     r = calis("ffmpeg", "-hide_banner", "-nostats", "-i", yol, "-vf", "fps=2,blackdetect=d=0.5:pix_th=0.10,signalstats,metadata=print:key=lavfi.signalstats.SATAVG",
               "-an", "-f", "null", "-")
@@ -74,6 +79,9 @@ def degerlendir(o, kayit):
     d = o.get("doygunluk_ort")
     if d is not None and d < 18:
         uyari.append(f"renkler soluk görünüyor (doygunluk {d})")
+    ikp = o.get("ilk_kare_parlaklik")
+    if ikp is not None and ikp < 22 and o["yukseklik"] > o["genislik"]:
+        uyari.append(f"Shorts ilk karesi çok karanlık (YAVG={ikp}); kaydırma oranını artırır")
     if kayit is not None:
         if "sentetik" not in kayit:
             uyari.append("yapay zekâ beyanı (sentetik) belirtilmemiş")

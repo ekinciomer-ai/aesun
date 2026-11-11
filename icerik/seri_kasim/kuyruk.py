@@ -76,4 +76,8 @@ for (kl, dl), (bas, govde, et, zaman, seri) in M.items():
          "baslik": bas + ("" if uzun else " #shorts"), "aciklama": aciklama[:4900], "etiketler": et + (["shorts"] if not uzun else []),
          "kaynaklar": [x[2:] for x in kun], "muzik_lisans": "Müzik yok (yalnız seslendirme)"}
     json.dump(j, open(os.path.join(K, kod + ".json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    shutil.copy(mp4, os.path.join(K, kod + ".mp4")); print("kuyruğa", kod, os.path.getsize(mp4) // 1048576, "MB", zaman)
+    shutil.copy(mp4, os.path.join(K, kod + ".mp4"))
+    kapak = mp4[:-4] + ".jpg"
+    if os.path.exists(kapak):
+        shutil.copy(kapak, os.path.join(K, kod + ".jpg"))
+    print("kuyruğa", kod, os.path.getsize(mp4) // 1048576, "MB", zaman)

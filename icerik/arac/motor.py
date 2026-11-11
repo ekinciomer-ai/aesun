@@ -1,5 +1,6 @@
 # Antik Stüdyo kurgu motoru (Nazar PRO kalıbının genel hâli): kamu malı tablo/fotoğraf + odak yakınlaşması, harita sahnesi,
-# 3 katlı başlık, kelime kelime altyazı, toz/film dokusu/renk tonu, geçiş flaşı, kapanış kartı.
+# 3 katlı başlık, kelime kelime altyazı, toz/film dokusu/renk tonu, geçiş flaşı, kapanış kartı + otomatik kapak görseli.
+# Shorts (dikey) optimizasyonu: 0. karede siyah kararma YOK (kaydırmayı önler), sonda ölü sessizlik/siyah ekran YOK (kesintisiz döngü / loop).
 # Kullanım: python3 motor.py <sahne.json> [--onizleme] [--kuru]
 #   sahne.json: {kod, dil, format: dikey|yatay, metin:[...], ses:[mp3...], sahneler:[...], alt, kanal, kapanis, cikti}
 #   sahne: {"img": yol, "odak": [x0,y0,x1,y1], "odak2": [...], "bas": [kucuk, buyuk, buyuk2]}  (odak: görsel oranı 0-1)
@@ -36,7 +37,9 @@ assert len(M) == len(SES) == len(B), (len(M), len(SES), len(B))
 def _sure(p): return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", p]))
 HIZ = float(J.get("ses_hiz", 1.0))
 def sure(p): return _sure(p) / HIZ
-D = [sure(p) for p in SES]; ARA = J.get("ara", 0.28 if not YATAY else 0.45); KUYRUK = 1.6
+D = [sure(p) for p in SES]
+ARA = float(J.get("ara", 0.22 if not YATAY else 0.45))
+KUYRUK = float(J.get("kuyruk", 0.35 if not YATAY else 1.2))
 T = []; t = 0.0
 for d in D: T.append((t, t + d)); t += d + ARA
 TOPLAM = t - ARA + KUYRUK; N = int(TOPLAM * FPS)
@@ -167,12 +170,16 @@ def baslik(d, bas, tz, a):
     if not bas: return
     if YATAY: ys = 56 * S; boy = [(bas[0], "cinzel7", 34, (232, 196, 112)), (bas[1], "alfa", 78, (255, 255, 255)), (bas[2], "cinzel9", 56, (232, 196, 112))]
     else: ys = 140 * S; boy = [(bas[0], "cinzel7", 44, (232, 196, 112)), (bas[1], "alfa", 112, (255, 255, 255)), (bas[2], "cinzel9", 82, (232, 196, 112))]
+    # İlk sahnede (a == 0, dikey Short) başlık 0. kareden itibaren görünür başlar (ilk kare kancası)
+    ilk_kanca = (not YATAY) and (a == 0)
     for j, (metin, fad, px, renk) in enumerate(boy):
         if not metin: continue
-        px *= S; gec = ease(min(1, max(0, (tz - a - 0.18 * j) / 0.5))); ft = font(fad, px, metin)
+        px *= S
+        gec = 1.0 if (ilk_kanca and tz < 0.08 and j <= 1) else ease(min(1, max(0.35 if ilk_kanca else 0, (tz - a - 0.14 * j) / 0.4)))
+        ft = font(fad, px, metin)
         sinir = (W * 0.62) if YATAY else W - 80 * S
         while d.textlength(metin, font=ft) > sinir and px > 20: px -= 3; ft = font(fad, px, metin)
-        tw = d.textlength(metin, font=ft); x = 70 * S if YATAY else (W - tw) / 2; y = ys + (1 - gec) * 40 * S
+        tw = d.textlength(metin, font=ft); x = 70 * S if YATAY else (W - tw) / 2; y = ys + (1 - gec) * 32 * S
         d.text((x, y), metin, font=ft, fill=renk + (int(255 * gec),), stroke_width=max(1, int(5 * S)), stroke_fill=(0, 0, 0, int(235 * gec)))
         if j == 1:
             lw = tw * gec; lx = x if YATAY else (W - lw) / 2
@@ -205,8 +212,9 @@ def kare(fi):
             fr = Image.blend(fr, fr2, eio(min(1, (tz - (a3 - XF)) / XF)))
     fr = kompoze(fr, fi); fr = Image.alpha_composite(fr.convert("RGBA"), GOLGE); d = ImageDraw.Draw(fr, "RGBA")
     if "harita" not in sc: toz(d, tz)
-    if si == len(B) - 1:
-        g = ease(min(1, max(0, (tz - a - 1.0) / 0.5)))
+    if si == len(B) - 1 and KAP:
+        gecikme = 0.6 if not YATAY else 1.0
+        g = ease(min(1, max(0, (tz - a - gecikme) / 0.45)))
         if g > 0:
             ft = font("inter", 46 * S); tw = d.textlength(KAP, font=ft); bx, by = (W - tw) / 2 - 36 * S, (1300 * S if not YATAY else H * 0.42)
             d.rounded_rectangle((bx, by, bx + tw + 72 * S, by + 92 * S), 22 * S, fill=(200, 30, 30, int(235 * g)), outline=(255, 255, 255, int(255 * g)), width=max(1, int(3 * S)))
@@ -220,9 +228,10 @@ def kare(fi):
     while d.textlength(satir, font=ft) > W - 40 * S and ft.size > 9: ft = font("interb", ft.size - 1)
     d.text((W - d.textlength(satir, font=ft) - 22 * S, H - (112 if not YATAY else 40) * S), satir, font=ft, fill=(225, 225, 225), stroke_width=max(1, int(2 * S)), stroke_fill=(0, 0, 0))
     for k, (a3, _) in enumerate(T[1:], 1):
-        if not YUMUSAK and abs(tz - a3) < 0.12: d.rectangle((0, 0, W, H), fill=(250, 240, 220, int(170 * (1 - abs(tz - a3) / 0.12))))
-    if tz < 0.25: d.rectangle((0, 0, W, H), fill=(0, 0, 0, int(255 * (1 - tz / 0.25))))
-    if tz > TOPLAM - 0.6: d.rectangle((0, 0, W, H), fill=(0, 0, 0, int(255 * min(1, (tz - (TOPLAM - 0.6)) / 0.6))))
+        if not YUMUSAK and abs(tz - a3) < 0.10: d.rectangle((0, 0, W, H), fill=(250, 240, 220, int(150 * (1 - abs(tz - a3) / 0.10))))
+    # Siyah kararma yalnız yatay (uzun) videoda kullanılır; dikey Short 0. karede tam parlak açılır ve kesintisiz döngü yapar
+    if YATAY and tz < 0.20: d.rectangle((0, 0, W, H), fill=(0, 0, 0, int(255 * (1 - tz / 0.20))))
+    if YATAY and tz > TOPLAM - 0.6: d.rectangle((0, 0, W, H), fill=(0, 0, 0, int(255 * min(1, (tz - (TOPLAM - 0.6)) / 0.6))))
     return fr.convert("RGB")
 
 CIK = yol(J["cikti"]); os.makedirs(os.path.dirname(CIK), exist_ok=True)
@@ -242,8 +251,10 @@ sesg = f"{tmp}/ses.wav"
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", f"{tmp}/l.txt", sesg], check=True)
 muz = J.get("muzik")
 if muz:  # müzik sesin altında (-20 dB civarı), sonda kısılır
+    fade_d = 2.0 if YATAY else 0.45
+    fade_st = max(0.1, TOPLAM - fade_d)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", sesg, "-stream_loop", "-1", "-i", yol(muz), "-filter_complex",
-                    f"[1:a]volume={J.get('muzik_seviye', 0.12)},afade=t=out:st={TOPLAM - 2.5}:d=2.5[m];[0:a][m]amix=inputs=2:duration=first:normalize=0[o]",
+                    f"[1:a]volume={J.get('muzik_seviye', 0.12)},afade=t=out:st={fade_st}:d={fade_d}[m];[0:a][m]amix=inputs=2:duration=first:normalize=0[o]",
                     "-map", "[o]", f"{tmp}/karisik.wav"], check=True); sesg = f"{tmp}/karisik.wav"
 subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", sesg, "-af", "loudnorm=I=-16:TP=-1.5", "-ar", "44100", "-c:a", "aac", "-b:a", "160k", f"{tmp}/ses.m4a"], check=True)
 ff = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-i", f"{tmp}/ses.m4a",
@@ -254,4 +265,13 @@ for fi in range(N):
     if fi % 500 == 0: print(f"{os.path.basename(CIK)} kare {fi}/{N}", flush=True)
 try: ff.stdin.close()
 except BrokenPipeError: pass
-ff.wait(); print("bitti", CIK, os.path.getsize(CIK) // 1024, "KB", round(TOPLAM, 1), "sn")
+ff.wait()
+if not ONIZ:
+    try:
+        kapak_kare = kare(int(min(TOPLAM * 0.5, 0.85) * FPS))
+        if YATAY and kapak_kare.size != (1280, 720):
+            kapak_kare = kapak_kare.resize((1280, 720), Image.LANCZOS)
+        kapak_kare.save(CIK.replace(".mp4", ".jpg"), quality=92)
+    except Exception:
+        pass
+print("bitti", CIK, os.path.getsize(CIK) // 1024, "KB", round(TOPLAM, 1), "sn")

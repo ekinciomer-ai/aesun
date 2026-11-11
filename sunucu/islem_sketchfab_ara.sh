@@ -11,14 +11,11 @@ python3 - "$D/aday.json" <<'PY'
 import json, sys, urllib.request, urllib.parse
 out = sys.argv[1]
 Q = {
- "kazik_makinesi": ["pile driver", "piling rig", "pile driving machine"],
- "paletli_vinc": ["crawler crane", "mobile crane"],
- "tir": ["semi truck trailer", "flatbed truck"],
- "isci": ["construction worker", "worker hard hat"],
- "trafo": ["power transformer", "electrical substation"],
- "forklift": ["telehandler", "forklift"],
- "ekskavator": ["excavator"],
- "pikap": ["pickup truck"],
+ "gunes_kazik": ["solar pile driver", "post driver machine", "pile ramming machine", "hydraulic pile hammer"],
+ "cekici_tir": ["semi truck", "tractor unit truck", "lowboy trailer"],
+ "isci_animasyon": ["construction worker rigged", "worker walking animation", "builder character"],
+ "trafo": ["power transformer high voltage", "substation transformer", "high voltage switchgear"],
+ "telehandler": ["telehandler"],
 }
 ok = {"cc0", "by", "by-sa"}
 res = {}

@@ -56,8 +56,15 @@ jobs:
         run: |
           python3 icerik/arac/commons_indir.py icerik/seri_taslak/istek_commons.json /tmp/ham_taslak
           ls -lh /tmp/ham_taslak
-      - name: Sunucuda seslendirme üret (ElevenLabs)
+      - name: Seslendirme önbelleği
+        id: ses_cache
         if: steps.kontrol.outputs.eksik == '1'
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/ses_cikti
+          key: ses-${{ matrix.grup }}-${{ hashFiles('icerik/seri_taslak/bolumler.py') }}
+      - name: Sunucuda seslendirme üret (ElevenLabs)
+        if: steps.kontrol.outputs.eksik == '1' && steps.ses_cache.outputs.cache-hit != 'true'
         env:
           ANAHTAR: ${{ secrets.SUNUCU_SSH }}
           ADRES: ${{ secrets.SUNUCU_ADRES }}
@@ -77,6 +84,12 @@ jobs:
           tar xzf /tmp/ses_b_cikti.tgz -C /tmp/ses_cikti
           { grep '^NOT:' /tmp/ses_log.txt || true; } | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
           ls -lh /tmp/ses_cikti/cikti
+      - name: Seslendirmeyi önbelleğe yaz (yeniden denemede kredi harcanmasın)
+        if: steps.kontrol.outputs.eksik == '1' && steps.ses_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/ses_cikti
+          key: ses-${{ matrix.grup }}-${{ hashFiles('icerik/seri_taslak/bolumler.py') }}
       - name: 1080x1920 Shorts + özel kapak (.jpg) render et
         if: steps.kontrol.outputs.eksik == '1'
         run: |

@@ -40,7 +40,7 @@ def gorsel_bul(ham_dizin, ad):
         p = os.path.join(ham_dizin, ad + ext)
         if os.path.exists(p):
             return p
-    raise SystemExit(f"Görsel bulunamadı: {ad} ({ham_dizin})")
+    return None
 
 
 def ana():
@@ -78,7 +78,13 @@ def ana():
             sahneler = []
             for sc in b["sahneler"]:
                 yeni = dict(sc)
-                yeni["img"] = os.path.abspath(gorsel_bul(ham, sc["img"]))
+                g = gorsel_bul(ham, sc["img"])
+                if g is None:  # görsel inmediyse aynı bölümün inen başka görseline düş
+                    g = next((x for x in (gorsel_bul(ham, o["img"]) for o in b["sahneler"]) if x), None)
+                    print("UYARI görsel yok, yedek kullanıldı:", sc["img"], "->", g)
+                if g is None:
+                    raise SystemExit(f"Görsel bulunamadı: {b['kod']}")
+                yeni["img"] = os.path.abspath(g)
                 sahneler.append(yeni)
             ses_dosyalari = [os.path.abspath(os.path.join(ses_cikti, f"{b['kod']}_SES__s{i + 1}.mp3")) for i in range(len(b["metin"]))]
             sj = {

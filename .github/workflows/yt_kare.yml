@@ -1,34 +1,49 @@
-name: YouTube video kare çıkar (görsel stil incelemesi)
-# Referans bir videodan eşit aralıklı 8 kare alır (yt-dlp + ffmpeg), icerik/inceleme/<video>_kare/ altına küçük jpg olarak yazar.
-# Salt okunur: videoyu depoya koymaz, yalnız inceleme kareleri. Başka hiçbir işi etkilemez.
+name: Video kare çıkar (görsel stil + DNA incelemesi)
+# Referans bir videodan (YouTube kimliği ya da TikTok/YouTube tam bağlantısı) eşit aralıklı 12 kare, istatistikler ve konuşma metni çıkarır.
+# Çıktı: icerik/inceleme/<ad>_kare/ (küçük jpg + bilgi.json + metin.txt). Salt okunur: videonun kendisi depoya konmaz.
 on:
   workflow_dispatch:
     inputs:
-      video: { description: 'Video kimliği (ör. 1F5rgi8KjqQ)', required: true }
+      video: { description: 'YouTube kimliği (ör. 1F5rgi8KjqQ) ya da tam bağlantı (TikTok/YouTube)', required: true }
 permissions:
   contents: write
 jobs:
   kare:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - run: pip install -q yt-dlp && sudo apt-get install -y -qq ffmpeg >/dev/null
+      - run: pip install -q yt-dlp faster-whisper "av==13.1.0" && sudo apt-get install -y -qq ffmpeg >/dev/null
       - name: Kare çıkar
         env: { V: '${{ inputs.video }}' }
         run: |
-          D="icerik/inceleme/${V}_kare"; mkdir -p "$D" /tmp/v
-          if yt-dlp -q -f "bv*[height<=720]+ba/b[height<=720]/b" -o "/tmp/v/v.%(ext)s" "https://www.youtube.com/shorts/$V"; then
-            F=$(ls /tmp/v/v.* | head -1); S=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$F")
-            for i in 0 1 2 3 4 5 6 7; do T=$(python3 -c "print(round($S*($i+0.5)/8,2))"); ffmpeg -v error -y -ss "$T" -i "$F" -frames:v 1 -vf "scale=360:-2" -q:v 4 "$D/k$i.jpg"; done
-            echo "sure=$S" > "$D/bilgi.txt"
+          case "$V" in *://*) URL="$V"; AD=$(echo "$V" | grep -oE '[0-9]{12,}|[A-Za-z0-9_-]{11}$' | tail -1);; *) URL="https://www.youtube.com/shorts/$V"; AD="$V";; esac
+          [ -n "$AD" ] || AD=$(echo "$V" | md5sum | cut -c1-12)
+          D="icerik/inceleme/${AD}_kare"; mkdir -p "$D" /tmp/v; echo "AD=$AD" >> $GITHUB_ENV
+          if yt-dlp -q -f "bv*[height<=720]+ba/b[height<=720]/b" --write-info-json -o "/tmp/v/v.%(ext)s" "$URL"; then
+            F=$(ls /tmp/v/v.* | grep -v json | head -1); S=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$F")
+            for i in $(seq 0 11); do T=$(python3 -c "print(round($S*($i+0.5)/12,2))"); ffmpeg -v error -y -ss "$T" -i "$F" -frames:v 1 -vf "scale=360:-2" -q:v 4 "$D/k$(printf %02d $i).jpg"; done
+            python3 - "$D" <<'PY'
+          import json, sys, glob
+          D = sys.argv[1]; j = json.load(open(glob.glob("/tmp/v/*.info.json")[0]))
+          keep = {k: j.get(k) for k in ["title","description","uploader","channel","channel_follower_count","duration","width","height","view_count","like_count","comment_count","repost_count","save_count","upload_date","track","artist","tags"]}
+          json.dump(keep, open(f"{D}/bilgi.json","w",encoding="utf-8"), ensure_ascii=False, indent=1)
+          PY
+            python3 - "$D" "$F" <<'PY'
+          import sys
+          from faster_whisper import WhisperModel
+          D, F = sys.argv[1], sys.argv[2]; m = WhisperModel("small", device="cpu", compute_type="int8")
+          segs, info = m.transcribe(F, word_timestamps=False)
+          satir = [f"[{s.start:5.1f}-{s.end:5.1f}] {s.text.strip()}" for s in segs]
+          open(f"{D}/metin.txt","w",encoding="utf-8").write(f"dil={info.language} olasılık={info.language_probability:.2f}\n" + "\n".join(satir))
+          PY
           else   # YouTube indirmeyi engellerse: herkese açık kapak + otomatik ara kareler
-            for n in maxresdefault hqdefault oar2 1 2 3 hq1 hq2 hq3; do curl -fsSL -o "$D/t_$n.jpg" "https://i.ytimg.com/vi/$V/$n.jpg" || rm -f "$D/t_$n.jpg"; done
-            echo "kaynak=kapak_ve_ara_kareler" > "$D/bilgi.txt"
+            for n in maxresdefault hqdefault oar2 1 2 3 hq1 hq2 hq3; do curl -fsSL -o "$D/t_$n.jpg" "https://i.ytimg.com/vi/$AD/$n.jpg" || rm -f "$D/t_$n.jpg"; done
+            echo '{"kaynak":"kapak_ve_ara_kareler"}' > "$D/bilgi.json"
           fi
           ls -la "$D"
       - name: Kaydet
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
           git add -A icerik/inceleme; git diff --cached --quiet && exit 0
-          git commit -qm "Video kare incelemesi: ${{ inputs.video }}"; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          git commit -qm "Video kare incelemesi: $AD"; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

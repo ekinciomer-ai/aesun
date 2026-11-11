@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-11T15:34+03:00",
+ "olusturma": "2026-11-11T17:06+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -74,8 +74,8 @@
    "gunluk_short_kotasi": 3,
    "seri_dagilimi": {
     "İnanç & Kültür Tarihi": 1,
-    "Frase del Día": 1,
-    "10 Kasım": 1
+    "Gündem + Tarih": 1,
+    "Frase del Día": 1
    },
    "durdurulan": []
   },
@@ -101,11 +101,11 @@
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %62'i tuttu (eşik 188 izlenme / 48 sa)",
-   "olculen": 8,
-   "erken": 1,
-   "medyan_48sa": 330,
-   "tutma_orani": 62,
+   "neden": "videoların %56'i tuttu (eşik 188 izlenme / 48 sa)",
+   "olculen": 9,
+   "erken": 0,
+   "medyan_48sa": 245,
+   "tutma_orani": 56,
    "izlenme_yuzde": 67,
    "en_iyi": {
     "baslik": "How Was the Red Sea Locked 471 Years Ago? ⚓ Ozdemir Pasha (1555) #shorts",
@@ -333,13 +333,16 @@
    "kanal": "Estudio Antiguo",
    "seri": "Gündem + Tarih",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 505,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Un rumor quemó a 6 personas: las brujas de Zugarramurdi 🔥 #shorts",
+    "i48": 505
+   }
   },
   {
    "kanal": "Estudio Antiguo",
@@ -445,12 +448,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 50,
-  "Ömür Dediğin": 50,
   "Antik Stüdyo": 637,
+  "Estudio Antiguo": 122,
+  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 97,
   "Ancient Studio": 188,
-  "Estudio Antiguo": 132,
-  "Kozmos Lab TR": 97
+  "Kozmos Lab": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -492,7 +495,7 @@
    },
    "21:00": {
     "n": 2,
-    "medyan": 708
+    "medyan": 709
    },
    "23:00": {
     "n": 1,
@@ -501,8 +504,8 @@
   },
   "Ancient Studio": {
    "00:00": {
-    "n": 3,
-    "medyan": 902
+    "n": 4,
+    "medyan": 476
    },
    "14:00": {
     "n": 2,
@@ -531,8 +534,8 @@
     "medyan": 1
    },
    "23:00": {
-    "n": 1,
-    "medyan": 1320
+    "n": 2,
+    "medyan": 912
    }
   },
   "Kozmos Lab TR": {
@@ -1056,12 +1059,12 @@
  ],
  "bulgular": [
   "Dün (2026-11-10) 2841 izlenme geldi; bir önceki gün 9181.",
-  "Ancient Studio: son 6 Short'tan 3 tanesi tuttu (eşik 188 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 637 izlenme / 48 sa).",
-  "Estudio Antiguo: son 2 Short'tan 1 tanesi tuttu (eşik 132 izlenme / 48 sa).",
+  "Estudio Antiguo: son 3 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 2 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR: son 2 Short'tan 1 tanesi tuttu (eşik 97 izlenme / 48 sa).",
-  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %62'i tuttu (eşik 188 izlenme / 48 sa).",
+  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %56'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
@@ -1069,7 +1072,8 @@
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 14:00 (medyan 2214 izlenme, 2 video).",
-  "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 902 izlenme, 3 video).",
+  "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 476 izlenme, 4 video).",
+  "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 912 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %69 izleniyor, tutmayanlar %51 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %44 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %63 izleniyor, tutmayanlar %53 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",

@@ -265,7 +265,7 @@ key(trk, 'hide_render', [(0, True), (55, False), (110, True)], C)
 # ---- hazır modeller (CC-BY, kaynakça açıklamaya yazılır) ----
 import glob as _g
 _cache = {}
-def model(ad, hedef_boy, yer=(0, 0, 0), yaw=0.0, ad2=None):
+def model(ad, hedef_boy, yer=(0, 0, 0), yaw=0.0, ad2=None, zemin_at=False):
     """glTF'i bir kez içe aktarır; ölçüyü en uzun yatay kenarı hedef_boy olacak biçimde ayarlar; kopyayı yerleştirir."""
     if not MODELLER: return None
     if ad not in _cache:
@@ -277,6 +277,11 @@ def model(ad, hedef_boy, yer=(0, 0, 0), yaw=0.0, ad2=None):
             for c in o.users_collection: c.objects.unlink(o)
             col.objects.link(o)
         bpy.context.view_layer.update()
+        if zemin_at:   # drone taramasındaki çim zemini at: en alttaki geniş ve yassı parçalar
+            mz = min((o.matrix_world @ Vector(o.bound_box[0])).z for o in new if o.type == 'MESH')
+            for o in [o for o in new if o.type == 'MESH']:
+                z0 = (o.matrix_world @ Vector(o.bound_box[0])).z; d = o.dimensions
+                if z0 < mz + 3 and d.z < 7.5 and max(d.x, d.y) > 20: col.objects.unlink(o); new.remove(o)
         lo, hi = Vector((1e9,) * 3), Vector((-1e9,) * 3)
         for o in new:
             if o.type == 'MESH':
@@ -338,7 +343,7 @@ for b_ in range(5):
     so = obj_from(bm, f'tm_{b_}', [M_conc, M_trafo, M_white, M_steel]); so.parent = g
     s0 = 95 + b_ * 2; key(g, 'scale', [(0, Vector((1, 1, 1))), (4.99, Vector((1, 1, 1))), (5, Vector((1e-4,) * 3)), (s0, Vector((1e-4,) * 3)), (s0 + 4, Vector((1, 1, 1))), (110, Vector((1e-4,) * 3)), (128 + b_, Vector((1e-4,) * 3)), (131 + b_, Vector((1, 1, 1)))])
     if MODELLER:
-        tm = model('yg_trafo', 54, (0, 4, 0.3), 0.0, ad2=f'yg_trafo_{b_}')
+        tm = model('yg_trafo', 46, (0, 4, 0.3), 0.0, ad2=f'yg_trafo_{b_}', zemin_at=True)
         if tm: tm.parent = g; tm.location = (0, 4, 0.3); so.hide_render = False
     subs.append(g)
 if MODELLER:

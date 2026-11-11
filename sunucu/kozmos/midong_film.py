@@ -40,7 +40,7 @@ def mat(name, color, rough=0.5, metal=0.0, coat=0.0, spec=0.5):
     b.inputs['Base Color'].default_value = (*color, 1); b.inputs['Roughness'].default_value = rough
     b.inputs['Metallic'].default_value = metal; b.inputs['Coat Weight'].default_value = coat; b.inputs['Specular IOR Level'].default_value = spec
     return m, b
-M_mod, b = mat('panel', (0.04, 0.05, 0.09), 0.08, 0, 0.2, 0.3)
+M_mod, b = mat('panel', (0.04, 0.05, 0.09), 0.16, 0, 0.0, 0.12)   # yansıma önleyici kaplamalı solar cam
 it = M_mod.node_tree.nodes.new('ShaderNodeTexImage'); it.image = bpy.data.images.get('panel_hucre') or bpy.data.images.load(ptex); M_mod.node_tree.links.new(it.outputs['Color'], b.inputs['Base Color'])
 M_back, _ = mat('panel_arka', (0.8, 0.81, 0.83), 0.35)
 M_steel, _ = mat('celik', (0.62, 0.64, 0.66), 0.38, 1.0)
@@ -289,15 +289,20 @@ def model(ad, hedef_boy, yer=(0, 0, 0), yaw=0.0, ad2=None):
     e.scale = (k, k, k); e.location = yer; e.rotation_euler = (0, 0, yaw); sc.collection.objects.link(e); return e
 def worker(name, carry=False):
     bm = bmesh.new()
-    for sx in (-0.11, 0.11): add_box(bm, Vector((sx, 0, 0.45)), (0.15, 0.17, 0.9), mi=1)
-    add_box(bm, Vector((0, 0, 1.2)), (0.44, 0.26, 0.62), mi=0)
-    for sx in (-0.29, 0.29): add_box(bm, Vector((sx, 0.05, 1.15)), (0.11, 0.12, 0.58), mi=0)
-    add_cyl(bm, Vector((0, 0, 1.64)), 0.11, 0.2, 12, 3); add_cyl(bm, Vector((0, 0, 1.79)), 0.15, 0.13, 14, 2)
+    for sx in (-0.1, 0.1): add_cyl(bm, Vector((sx, 0, 0.44)), 0.075, 0.88, 12, 1, r2=0.085); add_box(bm, Vector((sx, 0.04, 0.05)), (0.11, 0.26, 0.1), mi=1)
+    add_cyl(bm, Vector((0, 0, 1.2)), 0.19, 0.6, 16, 0, r2=0.21)                       # gövde (yelek)
+    for sx in (-0.26, 0.26): add_cyl(bm, Vector((sx, 0.05, 1.18)), 0.055, 0.56, 10, 1, Euler((0.25, 0, 0)))
+    add_cyl(bm, Vector((0, 0, 1.55)), 0.06, 0.1, 10, 3)
+    s_ = bmesh.ops.create_uvsphere(bm, u_segments=14, v_segments=10, radius=0.11, matrix=Matrix.Translation((0, 0, 1.68)))
+    for f in {f for v in s_['verts'] for f in v.link_faces}: f.material_index = 3
+    s_ = bmesh.ops.create_uvsphere(bm, u_segments=14, v_segments=8, radius=0.135, matrix=Matrix.Translation((0, 0, 1.74)) @ Matrix.Diagonal((1, 1.08, 0.72, 1)))
+    for f in {f for v in s_['verts'] for f in v.link_faces}: f.material_index = 2
     if carry: add_box(bm, Vector((0, 0.32, 1.25)), (2.38, 0.04, 1.3), mi=4)
-    return obj_from(bm, name, [M_vest, M_cloth, M_helm, M_skin, M_back])
+    o = obj_from(bm, name, [M_vest, M_cloth, M_helm, M_skin, M_back])
+    for p_ in o.data.polygons: p_.use_smooth = True
+    return o
 def person(name, i):
-    e = model('isci', 0.62 + 0.04 * (i % 3), ad2=name)   # gerçek model (omuz genişliği ölçeği)
-    return e if e else worker(name)
+    return worker(name)   # tek hazır işçi modeli kollar havada pozda; sahada kullanılmıyor
 crew = []
 for i in range(6):  # panel taşıyanlar: çiftler halinde, paletten masaya (modelde taşıma pozu yok; yanlarında panel)
     w = worker(f'isci_{i}', carry=True) if not MODELLER else person(f'isci_{i}', i); crew.append(w)
@@ -411,7 +416,7 @@ SHOTS = [
  (60, camera('C_panel', [(60, (HX - 26, HY - 13, 2.4), (HX - 8, HY - 3, 1.2)), (80, (HX - 18, HY - 15, 3.2), (HX + 2, HY, 1.4))], 30, 5.6, 18)),
  (80, camera('C_drone', [(80, (-60, -30, 40), (300, 300, 0)), (95, (600, -60, 110), (1100, 500, 0))], 26)),
  (95, camera('C_trafo', [(95, (fx * 0.3 - 80, -120, 30), (fx * 0.3, -40, 5)), (110, (fx * 0.55, -170, 55), (fx * 0.6, -60, 5))], 30)),
- (110, camera('T_timelapse', [(110, (-260, -260, 230), (fx * 0.42, fd * 0.45, 0)), (140, (-262, -260, 230), (fx * 0.42, fd * 0.45, 0))], 24)),
+ (110, camera('T_timelapse', [(110, (-60, -150, 95), (fx * 0.28, fd * 0.35, 0)), (140, (-62, -150, 95), (fx * 0.28, fd * 0.35, 0))], 26)),
  (140, camera('F_final', [(140, (fx * 0.35, 10, 6), (fx * 0.45, 300, 0)), (165, (fx * 0.3, -420, 420), (fx * 0.5, fd * 0.55, 0))], 26)),
 ]
 for t_, cam in SHOTS:

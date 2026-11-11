@@ -17,7 +17,8 @@ for d in sorted(glob.glob(os.path.join(src, '*'))):
             w = o.matrix_world @ Vector(c); lo = Vector(map(min, lo, w)); hi = Vector(map(max, hi, w))
     size = hi - lo; ctr = (hi + lo) / 2
     rapor[ad] = {'dosya': os.path.relpath(g[0], d), 'olcu_m': [round(v, 3) for v in size], 'merkez': [round(v, 3) for v in ctr],
-                 'yuz': sum(len(o.data.polygons) for o in ms), 'nesne': len(ms)}
+                 'yuz': sum(len(o.data.polygons) for o in ms), 'nesne': len(ms),
+                 'parcalar': sorted([(o.name, [round(x, 2) for x in o.dimensions], round((o.matrix_world @ Vector(o.bound_box[0])).z, 2)) for o in ms], key=lambda t: -max(t[1]))[:8]}
     r = max(size) * 1.6 + 0.01
     cd = bpy.data.cameras.new('k'); cam = bpy.data.objects.new('k', cd); sc.collection.objects.link(cam); sc.camera = cam
     cam.location = ctr + Vector((r * 0.8, -r, r * 0.55)); cam.rotation_euler = (ctr - cam.location).to_track_quat('-Z', 'Y').to_euler()

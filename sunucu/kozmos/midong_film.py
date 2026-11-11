@@ -317,7 +317,7 @@ for i in range(6):  # panel taşıyanlar: çiftler halinde, paletten masaya (mod
     w.rotation_euler = (0, 0, -0.3 + 0.1 * i + (math.pi if MODELLER else 0))
     key(w, 'hide_render', [(0, True), (55, False), (85, True)], C)
 for i in range(4):  # kazık ekibi
-    w = person(f'kazikci_{i}', i); w.location = (DX + 2.5 + i * 1.2, DY + 1.5 - i * 0.7, 0); w.rotation_euler = (0, 0, 2.5 - i * 0.4)
+    w = person(f'kazikci_{i}', i); w.location = [(DX + 1.3, DY + 2.6, 0), (DX - 1.6, DY + 3.4, 0), (DX + 4.5, DY - 1.2, 0), (DX + 9.5, DY - 4.2, 0)][i]; w.rotation_euler = (0, 0, [3.6, 0.9, 2.2, -2.4][i])
     key(w, 'hide_render', [(0, True), (20, False), (45, True)], C)
 if MODELLER:
     for nm, boy, yer, yaw, t0, t1 in [('forklift', 3.6, (HX - 16, HY - 9.5, 0), 0.4, 55, 110), ('pikap', 4.9, (HX + 14, HY - 12, 0), 2.6, 20, 110),
@@ -341,7 +341,7 @@ for b_ in range(5):
     for fx_ in (-30, 30): add_box(bm, Vector((fx_, 0, 1.1)), (0.05, 40, 2.2), mi=3)
     for fy_ in (-20, 20): add_box(bm, Vector((0, fy_, 1.1)), (60, 0.05, 2.2), mi=3)
     so = obj_from(bm, f'tm_{b_}', [M_conc, M_trafo, M_white, M_steel]); so.parent = g
-    s0 = 95 + b_ * 2; key(g, 'scale', [(0, Vector((1, 1, 1))), (4.99, Vector((1, 1, 1))), (5, Vector((1e-4,) * 3)), (s0, Vector((1e-4,) * 3)), (s0 + 4, Vector((1, 1, 1))), (110, Vector((1e-4,) * 3)), (128 + b_, Vector((1e-4,) * 3)), (131 + b_, Vector((1, 1, 1)))])
+    s0 = 86 + b_ * 1.5; key(g, 'scale', [(0, Vector((1, 1, 1))), (4.99, Vector((1, 1, 1))), (5, Vector((1e-4,) * 3)), (s0, Vector((1e-4,) * 3)), (s0 + 4, Vector((1, 1, 1))), (110, Vector((1e-4,) * 3)), (128 + b_, Vector((1e-4,) * 3)), (131 + b_, Vector((1, 1, 1)))])
     if MODELLER:
         tm = model('yg_trafo', 46, (0, 4, 0.3), 0.0, ad2=f'yg_trafo_{b_}', zemin_at=True)
         if tm: tm.parent = g; tm.location = (0, 4, 0.3); so.hide_render = False
@@ -420,7 +420,7 @@ SHOTS = [
  (44, camera('C_konst', [(44, (HX - 25, HY - 14, 3), (HX + 20, HY + 30, 1)), (60, (HX - 25, HY - 14, 22), (HX + 30, HY + 60, 0))], 28, 8, 40)),
  (60, camera('C_panel', [(60, (HX - 26, HY - 13, 2.4), (HX - 8, HY - 3, 1.2)), (80, (HX - 18, HY - 15, 3.2), (HX + 2, HY, 1.4))], 30, 5.6, 18)),
  (80, camera('C_drone', [(80, (-60, -30, 40), (300, 300, 0)), (95, (600, -60, 110), (1100, 500, 0))], 26)),
- (95, camera('C_trafo', [(95, (fx * 0.3 - 80, -120, 30), (fx * 0.3, -40, 5)), (110, (fx * 0.55, -170, 55), (fx * 0.6, -60, 5))], 30)),
+ (95, camera('C_trafo', [(95, (FIELD_W * 0.3 - 75, -105, 16), (FIELD_W * 0.3, -40, 5)), (110, (FIELD_W * 0.3 + 55, -110, 34), (FIELD_W * 0.3 + 10, -38, 4))], 30, 8, 80)),
  (110, camera('T_timelapse', [(110, (-60, -150, 95), (fx * 0.28, fd * 0.35, 0)), (140, (-62, -150, 95), (fx * 0.28, fd * 0.35, 0))], 26)),
  (140, camera('F_final', [(140, (fx * 0.35, 10, 6), (fx * 0.45, 300, 0)), (165, (fx * 0.3, -420, 420), (fx * 0.5, fd * 0.55, 0))], 26)),
 ]

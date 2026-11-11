@@ -235,6 +235,35 @@ def main():
                     eylemler.append({"tur": "ERTELE", "kanal": kanal, "vid": x.get("vid", ""), "baslik": x.get("baslik"),
                                      "neden": f"'{seri}' serisi durduruldu; bu slotu {', '.join(p['seri_dagilimi']) or 'en iyi seri'} kullanır"})
 
+    # Prime-time saat optimizasyonu (SAAT_KAYDIR): yalnız ileri tarihli planlı Short'ları verisi kanıtlanmış ana saate taşır
+    planli_slotlar = {(x.get("kanal"), x.get("tarih"), (x.get("saat") or "")[:2]) for x in kaynak if x.get("durum") == "Planlı"}
+    for x in kaynak:
+        if x.get("platform") != "YouTube" or x.get("tur") != "Short" or x.get("durum") != "Planlı" or not x.get("vid"):
+            continue
+        try:
+            dt_mevcut = datetime.strptime(f"{x['tarih']} {x['saat']}", "%Y-%m-%d %H:%M").replace(tzinfo=TZ)
+        except Exception:
+            continue
+        if dt_mevcut <= simdi + timedelta(hours=2):
+            continue
+        if x.get("kanal") == "Kozmos Lab TR" and x.get("saat") == "13:00":
+            if ("Kozmos Lab TR", x["tarih"], "19") not in planli_slotlar:
+                planli_slotlar.add(("Kozmos Lab TR", x["tarih"], "19"))
+                eylemler.append({
+                    "tur": "SAAT_KAYDIR", "kanal": "Kozmos Lab TR", "vid": x["vid"], "baslik": x["baslik"],
+                    "yeni_publishAt": f"{x['tarih']}T19:00:00+03:00",
+                    "neden": "13:00 slotu (medyan 68) → 19:00 prime-time slotuna (medyan 903) taşındı",
+                })
+        elif x.get("kanal") == "Ancient Studio" and x.get("saat") == "23:00":
+            ertesi = (dt_mevcut + timedelta(days=1)).strftime("%Y-%m-%d")
+            if ("Ancient Studio", ertesi, "00") not in planli_slotlar:
+                planli_slotlar.add(("Ancient Studio", ertesi, "00"))
+                eylemler.append({
+                    "tur": "SAAT_KAYDIR", "kanal": "Ancient Studio", "vid": x["vid"], "baslik": x["baslik"],
+                    "yeni_publishAt": f"{ertesi}T00:00:00+03:00",
+                    "neden": "23:00 slotu → ABD/İngiltere prime-time 00:00 TR slotuna (medyan 902) taşındı",
+                })
+
     # 6b) Önümüzdeki 72 saat takvim & kota açıkları
     takvim_aciklari = []
     uc_gun = [(simdi + timedelta(days=g)).strftime("%Y-%m-%d") for g in range(3)]

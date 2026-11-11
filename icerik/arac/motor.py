@@ -18,8 +18,13 @@ W0, H0 = (1920, 1080) if YATAY else (1080, 1920)
 OL = 480 / min(W0, H0) if ONIZ else 1.0
 W, H = int(W0 * OL) // 2 * 2, int(H0 * OL) // 2 * 2; S = min(W, H) / 1080; FPS = 25
 FD = f"{KOK}/nazar/karma"
+def _font_bul(*adaylar):
+    for q in adaylar:
+        if os.path.exists(q): return q
+    return f"{FD}/alfa-400.ttf"
 FONT = {"cinzel7": f"{FD}/cinzel-700.ttf", "cinzel9": f"{FD}/cinzel-900.ttf", "alfa": f"{FD}/alfa-400.ttf",
-        "inter": "/usr/share/fonts/opentype/inter/Inter-Black.otf", "interb": "/usr/share/fonts/opentype/inter/Inter-ExtraBold.otf"}
+        "inter": _font_bul("/usr/share/fonts/opentype/inter/Inter-Black.otf", "/usr/share/fonts/truetype/inter/Inter-Black.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        "interb": _font_bul("/usr/share/fonts/opentype/inter/Inter-ExtraBold.otf", "/usr/share/fonts/truetype/inter/Inter-Bold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")}
 CMAP = {k: set(TTFont(v).getBestCmap().keys()) for k, v in FONT.items()}
 _FC = {}
 def font(ad, px, metin=""):

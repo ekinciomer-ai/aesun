@@ -2,8 +2,8 @@
 # Kanal yönetimi (otomatik, günde 2 kez; .github/workflows/yayin_yonet.yml çalıştırır).
 # 1) Bağlı kanalların TÜM yüklemelerinin gerçek durumunu okur (herkese açık / planlı / gizli, yayın saati).
 # 2) YouTube Analytics'ten video başına izlenme, etkin izlenme (engagedViews / kaydırmadan izleme), ortalama izlenme süresi, izlenme yüzdesi, paylaşım ve abone kazancını okur.
-# 3) docs/yayin/analiz.json eylemlerini uygular: GİZLE (tekrar eden kopya → Gizli), ERTELE (durdurulan serinin ileri tarihli planını kaldırır).
-#    YASAK: silme, herkese açma, planlama, başlık/açıklama değişikliği. İşlem öncesi durum yedeklenir.
+# 3) docs/yayin/analiz.json eylemlerini uygular: GİZLE (tekrar eden kopya → Gizli), ERTELE (durdurulan serinin ileri tarihli planını kaldırır), SAAT_KAYDIR (ileri tarihli planlı Short saatini prime-time slotuna taşır).
+#    YASAK: silme, plansız videoyu herkese açma, başlık/açıklama değişikliği. İşlem öncesi durum yedeklenir.
 # Çıktı: '===ANALITIK===' ile '===SON===' arasında sırsız JSON (iş akışı bunu docs/yayin/analitik.json'a yazar).
 set -euo pipefail
 D=/opt/aesun/youtube
@@ -24,6 +24,7 @@ KANALLAR = {
     "UCg75Mvb6C8CBSJPeuwzBFZA": "Ömür Dediğin",
 }
 MAKS_GIZLE = 3
+MAKS_SAAT = 15
 
 def token(cid):
     t = json.load(open(os.path.join(D, "kanallar", f"{cid}.json"), encoding="utf-8"))
@@ -45,6 +46,7 @@ try:
 except Exception:
     analiz = {}
 gizle = [e for e in analiz.get("eylemler", []) if e.get("tur") == "GİZLE" and e.get("vid")]
+saat_kaydir = [e for e in analiz.get("eylemler", []) if e.get("tur") == "SAAT_KAYDIR" and e.get("vid") and e.get("yeni_publishAt")]
 try:
     yorum_kuyrugu = json.load(open(os.path.join(os.path.dirname(ANALIZ), "yorum_kuyrugu.json"), encoding="utf-8"))
 except Exception:
@@ -108,8 +110,7 @@ for cid, ad in KANALLAR.items():
                         v["paylasim"] = x["shares"]
         except urllib.error.HTTPError as e:
             out["hatalar"].append(f"{ad} analitik: HTTP {e.code}")
-        # ONAYA BEKLETİLEN YORUMLAR (salt okunur): YouTube'un "incelenmek üzere tutulan" yorumları API anahtarıyla görünmez,
-        # yalnız kanalın resmi bağlantısıyla okunur. Hiçbir yorum onaylanmaz/reddedilmez; yalnız listelenir.
+        # ONAYA BEKLETİLEN YORUMLAR (salt okunur)
         try:
             q = urllib.parse.urlencode({"part": "snippet", "allThreadsRelatedToChannelId": cid, "moderationStatus": "heldForReview",
                                         "maxResults": 100, "textFormat": "plainText"})
@@ -130,7 +131,6 @@ for cid, ad in KANALLAR.items():
                 import re as _r
                 m = _r.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", d or "")
                 return (int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + int(m.group(3) or 0)) if m else -99
-            # güvenlik: kalacak asıl video bu kanalda HERKESE AÇIK olmalı ve süreleri yakın olmalı (gerçek tekrar)
             if not k or k["durum"] != "public" or abs(sn(k.get("sure")) - sn(v.get("sure"))) > 5:
                 print(f"NOT: {ad} · {e['vid']} atlandı (asıl video doğrulanamadı)")
                 continue
@@ -138,6 +138,8 @@ for cid, ad in KANALLAR.items():
             yedek = os.path.join(D, "yedek", f"gizle_{e['vid']}_{simdi.strftime('%Y%m%d%H%M')}.json")
             json.dump(mevcut, open(yedek, "w", encoding="utf-8"), ensure_ascii=False)
             st = mevcut["status"]; st["privacyStatus"] = "private"; st.pop("publishAt", None)
+            st["selfDeclaredMadeForKids"] = bool(st.get("madeForKids", False))
+            st["containsSyntheticMedia"] = True
             for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"):
                 st.pop(k, None)
             api("https://www.googleapis.com/youtube/v3/videos?part=status", tok, {"id": e["vid"], "status": st}, "PUT")
@@ -153,6 +155,8 @@ for cid, ad in KANALLAR.items():
             mevcut = api(f"https://www.googleapis.com/youtube/v3/videos?part=status&id={e['vid']}", tok)["items"][0]
             json.dump(mevcut, open(os.path.join(D, "yedek", f"ertele_{e['vid']}_{simdi.strftime('%Y%m%d%H%M')}.json"), "w", encoding="utf-8"), ensure_ascii=False)
             st = mevcut["status"]; eski_plan = st.pop("publishAt", None)
+            st["selfDeclaredMadeForKids"] = bool(st.get("madeForKids", False))
+            st["containsSyntheticMedia"] = True
             for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"):
                 st.pop(k, None)
             api("https://www.googleapis.com/youtube/v3/videos?part=status", tok, {"id": e["vid"], "status": st}, "PUT")
@@ -160,6 +164,36 @@ for cid, ad in KANALLAR.items():
             out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": e["vid"],
                                     "islem": f"planı kaldırıldı (eski plan {eski_plan})", "neden": e.get("neden")})
             print(f"NOT: {ad} · {e['vid']} planı kaldırıldı (seri durduruldu)")
+        # SAAT_KAYDIR: yalnız zaten ileri tarihli planlı (private + publishAt) videoların saatini prime-time slotuna taşır (önce yedek)
+        for e in [e for e in saat_kaydir if e["vid"] in videolar and e.get("kanal") == ad][:MAKS_SAAT]:
+            v = videolar[e["vid"]]
+            if v["durum"] != "private" or not v.get("publishAt"):
+                continue
+            try:
+                eski_dt = datetime.fromisoformat(v["publishAt"].replace("Z", "+00:00")).astimezone(timezone.utc)
+                yeni_dt = datetime.fromisoformat(e["yeni_publishAt"]).astimezone(timezone.utc)
+            except Exception:
+                continue
+            if eski_dt <= datetime.now(timezone.utc) + timedelta(minutes=30) or yeni_dt <= datetime.now(timezone.utc) + timedelta(minutes=30):
+                continue
+            if abs((eski_dt - yeni_dt).total_seconds()) < 60:
+                continue
+            yeni_utc = yeni_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+            mevcut = api(f"https://www.googleapis.com/youtube/v3/videos?part=status&id={e['vid']}", tok)["items"][0]
+            json.dump(mevcut, open(os.path.join(D, "yedek", f"saat_{e['vid']}_{simdi.strftime('%Y%m%d%H%M')}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+            st = mevcut["status"]
+            eski_plan = st.get("publishAt")
+            st["privacyStatus"] = "private"
+            st["publishAt"] = yeni_utc
+            st["selfDeclaredMadeForKids"] = bool(st.get("madeForKids", False))
+            st["containsSyntheticMedia"] = True
+            for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"):
+                st.pop(k, None)
+            api("https://www.googleapis.com/youtube/v3/videos?part=status", tok, {"id": e["vid"], "status": st}, "PUT")
+            v["publishAt"] = yeni_utc
+            out["islemler"].append({"zaman": simdi.isoformat(timespec="minutes"), "kanal": ad, "vid": e["vid"],
+                                    "islem": f"yayın saati prime-time'a taşındı ({eski_plan} → {yeni_utc})", "neden": e.get("neden")})
+            print(f"NOT: {ad} · {e['vid']} saat taşındı ({eski_plan} -> {yeni_utc})")
         # YORUM YANITLARI VE KANAL AÇIKLAMA NOTLARI: yalnız Ömer'in ONAYLADIĞI (durum == "ONAYLANDI") kayıtlar gönderilir
         for y in [y for y in yorum_kuyrugu if y.get("durum") == "ONAYLANDI" and y.get("kanal") == ad and y.get("yanit")]:
             try:
@@ -167,7 +201,6 @@ for cid, ad in KANALLAR.items():
                     res = api("https://www.googleapis.com/youtube/v3/commentThreads?part=snippet", tok,
                               {"snippet": {"videoId": y["vid"], "topLevelComment": {"snippet": {"textOriginal": y["yanit"]}}}})
                     y["yorum_id"] = res.get("id", "")
-                    # Video açıklamasına da tarihî notu ekle
                     try:
                         v_mevcut = api(f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={y['vid']}", tok)["items"][0]
                         sn_m = v_mevcut["snippet"]

@@ -38,9 +38,17 @@ jobs:
           PY
       - name: Ortam kurulumu (ffmpeg, font, Python paketleri)
         if: steps.kontrol.outputs.eksik == '1'
+        timeout-minutes: 12
         run: |
-          sudo apt-get -qq update
-          sudo apt-get -qq install -y ffmpeg fonts-inter fonts-dejavu-core python3-pil python3-numpy python3-fonttools >/dev/null
+          # apt takılırsa iş beklemesin: süre sınırlı dene, olmazsa pip + hazır ffmpeg
+          sudo timeout 240 apt-get -qq -o Acquire::Retries=2 -o Acquire::http::Timeout=20 update || echo "::warning::apt update atlandı"
+          sudo timeout 300 apt-get -qq -o Acquire::Retries=2 -o Acquire::http::Timeout=20 install -y --no-install-recommends ffmpeg fonts-inter fonts-dejavu-core >/dev/null || echo "::warning::apt kurulum yarım kaldı"
+          python3 -m pip install -q --break-system-packages pillow numpy fonttools || pip install -q pillow numpy fonttools
+          if ! command -v ffmpeg >/dev/null; then
+            curl -sSL --retry 3 -o /tmp/ff.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+            mkdir -p /tmp/ff && tar xf /tmp/ff.tar.xz -C /tmp/ff --strip-components=1 && sudo cp /tmp/ff/ffmpeg /tmp/ff/ffprobe /usr/local/bin/
+          fi
+          ffmpeg -version | head -1; python3 -c "import PIL, numpy, fontTools; print('python paketleri tamam')"
       - name: Kamu malı görselleri indir (Wikimedia Commons)
         if: steps.kontrol.outputs.eksik == '1'
         run: |

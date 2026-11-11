@@ -4,6 +4,10 @@ name: Kozmos render (Blender)
 on:
   workflow_dispatch:
     inputs:
+      klasor:
+        description: "model klasörü: kozmos | bta"
+        required: false
+        default: kozmos
       gorev:
         description: "onizleme | film | kurgu"
         required: true
@@ -80,7 +84,7 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k
-          ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@$ADRES "tar cf - -C /opt/tampon/kozmos modeller" | tar xf - -C $RUNNER_TEMP
+          ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@$ADRES "tar cf - -C /opt/tampon/${{ inputs.klasor || 'kozmos' }} modeller" | tar xf - -C $RUNNER_TEMP
           rm -f ~/.ssh/k; du -sh $RUNNER_TEMP/modeller
       - name: Render
         run: |

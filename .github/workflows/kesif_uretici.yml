@@ -1,0 +1,29 @@
+name: Keşif · Üretici örnekleri
+# Görsel/video araçlarının README'sindeki demo görsel/video ADRESLERİNİ ve donanım ihtiyacını (GPU/CPU) toplar.
+# Dosya kopyalanmaz; portal kaynağından gösterir. Yapay zekâ kullanmaz. Günlük keşiften sonra çalışır.
+on:
+  schedule:
+    - cron: '47 5 * * *'   # her gün 08:47 (TR), günlük keşiften sonra
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['kesif/uretici_ornek.py', '.github/workflows/kesif_uretici.yml']
+permissions: { contents: write, actions: write }
+concurrency: { group: kesif-uretici, cancel-in-progress: false }
+jobs:
+  topla:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Topla, kaydet, portala gönder
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          python3 kesif/uretici_ornek.py
+          python3 -m json.tool docs/kesif/uretici_ornek.json > /dev/null
+          git config user.name "aesun-kesif"; git config user.email "kesif@aksarayenerji.net"
+          git add docs/kesif/uretici_ornek.json
+          git diff --cached --quiet && exit 0
+          git commit -qm "Keşif: üretici örnekleri $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          gh api -X POST repos/${{ github.repository }}/actions/workflows/cpanel_yukle.yml/dispatches -f ref=main || true

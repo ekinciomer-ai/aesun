@@ -66,6 +66,8 @@ dialog{margin:auto;border:0;border-radius:16px;padding:0;max-width:560px;width:c
 .galeri img,.galeri video{width:100%;max-height:340px;object-fit:contain;border-radius:8px;border:1px solid var(--c);background:repeating-conic-gradient(#e9e9e6 0 25%,#fff 0 50%) 0 0/16px 16px;cursor:zoom-in}
 .galeri figcaption{font-size:11px;color:#8b8f95;word-break:break-all}
 .galeri .log{grid-column:1/-1;font:11px/1.45 ui-monospace,monospace;background:#f1f1ee;border-radius:8px;padding:8px;white-space:pre-wrap;color:#555}
+.ornrozet.ur{background:#f1efe9;color:#6b6457}.gpurozet{background:#fdeee0;color:#a2521a;border-radius:999px;padding:1px 8px;font-weight:600}
+.orn.ur{background:#fff;border-style:dashed}
 .ornrozet{background:#e8f3ff;color:#1d5fa8;border-radius:999px;padding:1px 8px;font-weight:600}
 dialog.buyuk{max-width:min(1100px,96vw)}
 dialog::backdrop{background:rgba(43,47,53,.45)}
@@ -186,7 +188,7 @@ let ILK='';const yeniMi=x=>x.k!=='api'&&x.k!=='oneri'&&x.ilk>ILK&&x.ilk>=yedi;
 function cips(el,ops,anah){el.innerHTML=ops.map(([v,t,n])=>`<button class="cip" data-v="${v}" aria-pressed="${S[anah]===v}">${esc(t)}<b>${n}</b></button>`).join('');
  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;S[anah]=b.dataset.v;S.n=60;ciz()}}
 function uy(x,haric){const q=S.q;
- return (haric==='g'||S.g==='hepsi'||x.g===S.g)&&(haric==='k'||S.k==='hepsi'||x.k===S.k)&&(!S.orn||ORN[x.ad])&&(!S.mit||x.ls==='mit')&&(!S.yeni||yeniMi(x))
+ return (haric==='g'||S.g==='hepsi'||x.g===S.g)&&(haric==='k'||S.k==='hepsi'||x.k===S.k)&&(!S.orn||ORN[x.ad]||(URET[x.ad]&&URET[x.ad].dosyalar.length))&&(!S.mit||x.ls==='mit')&&(!S.yeni||yeniMi(x))
   &&(!S.anah||x.y==='Anahtarsız')&&(!q||(x.ad+' '+x.a+' '+(x.a_en||'')+' '+(x.konu||'')+' '+(x.kat||'')).toLocaleLowerCase('tr').includes(q))}
 const sira={oneri:0,github:1,sunucu:2,api:3};
 let SON=[];
@@ -201,7 +203,7 @@ function ciz(){
   const lis=x.ls?`<span class="${x.ls}">${esc(x.l||'lisans ?')}</span>`:'';
   const yil=typeof x.y==='number'?`<span>⭐ ${x.y.toLocaleString('tr')}</span>`:(x.y?`<span>${esc(x.y)}</span>`:'');
   return `<button class="kart${x.k==='oneri'?' oneri':''}" data-i="${i}"><span class="ad">${esc(x.ad)}</span>
-  <span class="acik">${esc(x.a)}</span><span class="rz">${ORN[x.ad]?'<span class="ornrozet">▶ örnek var</span>':''}${yeniMi(x)?'<span class="yeni">yeni</span>':''}<span>${esc(V.gruplar[x.g])}</span>${lis}${yil}<span>${esc(KAY[x.k])}</span></span></button>`}).join(''):'<div class="bos">Sonuç yok.</div>';
+  <span class="acik">${esc(x.a)}</span><span class="rz">${ORN[x.ad]?'<span class="ornrozet">▶ örnek var</span>':(URET[x.ad]&&URET[x.ad].dosyalar.length?'<span class="ornrozet ur">▷ üretici örneği</span>':'')}${URET[x.ad]&&URET[x.ad].donanim==='gpu'?'<span class="gpurozet">GPU</span>':''}${yeniMi(x)?'<span class="yeni">yeni</span>':''}<span>${esc(V.gruplar[x.g])}</span>${lis}${yil}<span>${esc(KAY[x.k])}</span></span></button>`}).join(''):'<div class="bos">Sonuç yok.</div>';
  $('daha').hidden=SON.length<=S.n;
  if(S.q&&S.v!=='liste')gorunum('liste');
 }
@@ -211,16 +213,20 @@ function faydalar(x){
  (GRUP_BILGI[x.g]||['',[]])[1].forEach(i=>ids.includes(i)||ids.push(i));
  return {notlar,ids:ids.slice(0,5)};
 }
-let ORN={};
+let ORN={},URET={};
 const GORSEL_G=['gorsel','edit'];
-function ornBolum(ad,g){const O=ORN[ad];
- if(!O)return GORSEL_G.includes(g)?'<h4>Örnek çıktı</h4><div class="orn"><span class="alt">Henüz tampon bölgede örnek üretilmedi.</span></div>':'';
- const n=O.reduce((t,o)=>t+o.dosyalar.length,0);
- return '<h4>Örnek çıktı</h4>'+O.map(o=>`<div class="orn"><div class="ust"><span>${o.karar?`<b>${esc(o.karar)}</b><br>`:''}${esc(o.not||'Tampon deneme çıktısı')}<br><span class="alt">${o.durum==='basarili'?'✓ ':'✗ '}tampon · ${tr(o.tarih)}${o.sure_sn?' · '+Math.round(o.sure_sn/60)+' dk kurulum+deneme':''}</span></span>
-  <button class="gos" data-orn="${esc(ad)}" data-id="${esc(o.id)}">Göster (${o.dosyalar.length})</button></div><div class="galeri" hidden></div></div>`).join('');}
-function ornAc(b){const ad=b.dataset.orn,o=(ORN[ad]||[]).find(z=>z.id===b.dataset.id),gal=b.closest('.orn').querySelector('.galeri');
+function ornBolum(ad,g){const O=ORN[ad]||[],U=URET[ad];
+ if(!O.length&&!U&&!GORSEL_G.includes(g))return'';
+ let h='<h4>Örnek çıktı</h4>';
+ h+=O.map(o=>`<div class="orn"><div class="ust"><span>${o.karar?`<b>${esc(o.karar)}</b><br>`:''}${esc(o.not||'Tampon deneme çıktısı')}<br><span class="alt">${o.durum==='basarili'?'✓ ':'✗ '}bizim tampon testimiz · ${tr(o.tarih)}${o.sure_sn?' · '+Math.round(o.sure_sn/60)+' dk kurulum+deneme':''}</span></span>
+  <button class="gos" data-orn="${esc(ad)}" data-id="${esc(o.id)}">Göster (${o.dosyalar.length})</button></div><div class="galeri" hidden></div></div>`).join('');
+ if(!O.length)h+=`<div class="orn"><span class="alt">${U&&U.donanim==='gpu'?'⚙️ Ekran kartı (GPU) gerekli — donanım eklenince gerçek test yapılacak.':'Henüz tampon bölgede test edilmedi.'}</span></div>`;
+ if(U&&U.dosyalar.length)h+=`<div class="orn ur"><div class="ust"><span>Üreticinin kendi örneği<br><span class="alt">Bizim testimiz değil; aracın sayfasındaki demo, kaynağından gösteriliyor.</span></span>
+  <button class="gos" data-orn="${esc(ad)}" data-id="_ur">Göster (${U.dosyalar.length})</button></div><div class="galeri" hidden></div></div>`;
+ return h;}
+function ornAc(b){const ad=b.dataset.orn,o=b.dataset.id==='_ur'?URET[ad]:(ORN[ad]||[]).find(z=>z.id===b.dataset.id),gal=b.closest('.orn').querySelector('.galeri');
  if(!o)return;if(!gal.hidden){gal.hidden=true;b.textContent='Göster ('+o.dosyalar.length+')';$('dlg').classList.remove('buyuk');return}
- gal.innerHTML=o.dosyalar.map(f=>`<figure>${f.tur==='video'?`<video src="${esc(f.f)}" controls muted loop playsinline preload="metadata"></video>`:f.tur==='ses'?`<audio src="${esc(f.f)}" controls preload="none"></audio>`:`<a href="${esc(f.f)}" target="_blank" rel="noopener"><img src="${esc(f.f)}" loading="lazy" alt="${esc(f.ad)}"></a>`}<figcaption>${esc(f.ad)}</figcaption></figure>`).join('')+(o.kayit&&o.kayit.length?`<div class="log">${esc(o.kayit.join('\n'))}</div>`:'');
+ gal.innerHTML=o.dosyalar.map(f=>`<figure>${f.tur==='video'?`<video src="${esc(f.f)}" controls muted loop playsinline preload="metadata" onerror="this.outerHTML='<a href=&quot;${esc(f.f)}&quot; target=_blank rel=noopener>Videoyu kaynağında aç ↗</a>'"></video>`:f.tur==='ses'?`<audio src="${esc(f.f)}" controls preload="none"></audio>`:`<a href="${esc(f.f)}" target="_blank" rel="noopener"><img src="${esc(f.f)}" referrerpolicy="no-referrer" loading="lazy" alt="${esc(f.ad)}"></a>`}<figcaption>${esc(f.ad||'')}</figcaption></figure>`).join('')+(o.kayit&&o.kayit.length?`<div class="log">${esc(o.kayit.join('\n'))}</div>`:'');
  gal.hidden=false;b.textContent='Gizle';$('dlg').classList.add('buyuk');}
 document.addEventListener('click',e=>{const b=e.target.closest('.gos');if(b)ornAc(b)});
 function detay(x){
@@ -290,7 +296,7 @@ if(location.hash==='#denenen')gorunum('den');
 $('daha').onclick=()=>{S.n+=60;ciz()};
 $('fOrn').onclick=()=>{S.orn=!S.orn;S.n=60;ciz()};$('fMit').onclick=()=>{S.mit=!S.mit;ciz()};$('fYeni').onclick=()=>{S.yeni=!S.yeni;ciz()};$('fAnah').onclick=()=>{S.anah=!S.anah;ciz()};
 let zt;$('ara').oninput=e=>{clearTimeout(zt);zt=setTimeout(()=>{S.q=e.target.value.trim().toLocaleLowerCase('tr');S.n=60;ciz()},150)};
-fetch('ornek.json',{cache:'no-cache'}).then(r=>r.ok?r.json():{}).catch(()=>({})).then(o=>{ORN=o||{};return fetch('katalog.json',{cache:'no-cache'})}).then(r=>r.json()).then(d=>{V=d;ILK=d.kayit.reduce((m,x)=>x.ilk&&x.ilk<m?x.ilk:m,'9999');$('tarih').textContent='Son tarama: '+d.tarih+' UTC · '+d.kayit.length+' kayıt';sema();ciz()})
+Promise.all(['ornek.json','uretici_ornek.json'].map(u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():{}).catch(()=>({})))).then(([o,u])=>{ORN=o||{};URET=u||{};return fetch('katalog.json',{cache:'no-cache'})}).then(r=>r.json()).then(d=>{V=d;ILK=d.kayit.reduce((m,x)=>x.ilk&&x.ilk<m?x.ilk:m,'9999');$('tarih').textContent='Son tarama: '+d.tarih+' UTC · '+d.kayit.length+' kayıt';sema();ciz()})
  .catch(()=>{$('tarih').textContent='Katalog henüz oluşmadı';$('gkart').innerHTML='<div class="bos">İlk tarama bekleniyor.</div>'});
 </script>
 </body>

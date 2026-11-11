@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-11T02:43+03:00",
+ "olusturma": "2026-11-11T05:05+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -406,13 +406,16 @@
    "kanal": "Kozmos Lab TR (@kozmoslabtr)",
    "seri": "Biliyor muydun?",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 68,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "1958'den beri uzayda dönen güneş enerjili uydu 🛰️ #shorts",
+    "i48": 68
+   }
   },
   {
    "kanal": "Kozmos Lab TR (@kozmoslabtr)",
@@ -443,14 +446,14 @@
   }
  ],
  "esikler": {
+  "Antik Stüdyo": 637,
   "Ömür Dediğin": 50,
-  "Ancient Studio": 188,
   "Kozmos Lab TR": 50,
   "Estudio Antiguo": 132,
   "Kozmos Lab": 50,
   "Kozmos Lab (@kozmoslab)": 50,
-  "Kozmos Lab TR (@kozmoslabtr)": 181,
-  "Antik Stüdyo": 637
+  "Ancient Studio": 188,
+  "Kozmos Lab TR (@kozmoslabtr)": 97
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -536,6 +539,10 @@
    }
   },
   "Kozmos Lab TR (@kozmoslabtr)": {
+   "13:00": {
+    "n": 1,
+    "medyan": 68
+   },
    "19:00": {
     "n": 1,
     "medyan": 903
@@ -564,7 +571,7 @@
   "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 2 Short'tan 1 tanesi tuttu (eşik 132 izlenme / 48 sa).",
   "Kozmos Lab (@kozmoslab): son 1 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
-  "Kozmos Lab TR (@kozmoslabtr): son 1 Short'tan 1 tanesi tuttu (eşik 181 izlenme / 48 sa).",
+  "Kozmos Lab TR (@kozmoslabtr): son 2 Short'tan 1 tanesi tuttu (eşik 97 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %67'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",

@@ -16,6 +16,8 @@ on:
         description: "film ayarları: FPS RES SAMPLES (örn. '12 854x480 10')"
         required: false
         default: "12 854x480 10"
+permissions:
+  contents: write
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -69,8 +71,18 @@ jobs:
               ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/midong_film.py -- cikti 2>&1 | grep -E 'KARE|BITTI|Error|Traceback' | tail -20
           fi
           ls cikti | head
-      - uses: actions/upload-artifact@v4
-        with:
-          name: kozmos-${{ inputs.gorev }}-${{ matrix.i }}
-          path: cikti
-          retention-days: 5
+      - name: Küçük çıktıları kozmos-cikti dalına yaz (önizleme ve kontak kareleri)
+        run: |
+          D=$RUNNER_TEMP/dal; git clone -q --depth 1 --branch kozmos-cikti https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} $D 2>/dev/null || { git init -q $D; git -C $D checkout -q -b kozmos-cikti; git -C $D remote add origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}; }
+          H=${{ inputs.gorev }}/${{ matrix.i }}; rm -rf $D/$H; mkdir -p $D/$H
+          if [ "${{ inputs.gorev }}" = "onizleme" ]; then cp cikti/* $D/$H/; else cp cikti/*.json $D/$H/ 2>/dev/null; ls cikti/kare_*.jpg | awk 'NR%24==1' | xargs -r -I{} cp {} $D/$H/; fi
+          cd $D && git add -A && git -c user.name=kozmos-bot -c user.email=bot@users.noreply.github.com commit -q -m "kozmos ${{ inputs.gorev }} ${{ matrix.i }}" && for k in 1 2 3; do git pull -q --rebase origin kozmos-cikti 2>/dev/null; git push -q origin kozmos-cikti && break; sleep $((k*3)); done
+      - name: Film karelerini sunucuya gönder
+        if: inputs.gorev == 'film'
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k; chmod 600 ~/.ssh/k
+          tar cf - -C cikti . | ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@$ADRES "mkdir -p /opt/tampon/kozmos/midong_kareler && tar xf - -C /opt/tampon/kozmos/midong_kareler"
+          rm -f ~/.ssh/k

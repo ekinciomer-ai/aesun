@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 K = os.path.dirname(os.path.abspath(__file__)); KOK = os.path.abspath(f"{K}/../..")
 AD = sys.argv[1]; V = json.load(open(f"{K}/videolar.json", encoding="utf-8"))[AD]
-KURU = os.environ.get("KURU") == "1"; ONIZ = os.environ.get("ONIZ") == "1"
+KURU = os.environ.get("KURU") == "1"; ONIZ = os.environ.get("ONIZ") == "1"; STIL = V.get("stil", "foto")
 W, H, FPS = 1080, 1920, 30
 FI = {"black": "/usr/share/fonts/opentype/inter/Inter-Black.otf", "xbold": "/usr/share/fonts/opentype/inter/Inter-ExtraBold.otf", "bold": "/usr/share/fonts/opentype/inter/Inter-Bold.otf"}
 _FC = {}
@@ -82,8 +82,13 @@ yy, xx = np.mgrid[0:H, 0:W]; VIN = (1 - 0.12 * np.clip(((xx - W / 2) / (W * 0.65
 GRAIN = [np.random.randint(-4, 5, (H, W, 1)).astype(np.int16) for _ in range(6)]
 def sahne_taban(si, tz):
     t0, t1, ad, yon = SAHNE[si][:4]; p = min(1, max(0, (tz - t0) / max(0.8, t1 - t0)))
-    im = gorsel(ad); w, h = im.size; z = 1.0 + 0.08 * (ease(p) if yon > 0 else 1 - ease(p)); cw, ch = int(W / z), int(H / z)
-    cx = (w - cw) // 2 + int((w - cw) * 0.25 * math.sin(p * 3.14) * yon); cy = (h - ch) // 2 + int((h - ch) * 0.12 * (p - 0.5) * yon)
+    im = gorsel(ad); w, h = im.size
+    if STIL == "2d":   # çizgi film: daha geniş yakınlaşma + sahne girişinde yumuşak "oturma" zıplaması
+        ts = tz - t0; zip_ = 0.05 * math.exp(-ts * 5) * math.cos(ts * 14) if ts < 1.2 else 0.0
+        z = 1.0 + 0.13 * (ease(p) if yon > 0 else 1 - ease(p)) + max(0.0, zip_); kay = 0.45
+    else: z = 1.0 + 0.08 * (ease(p) if yon > 0 else 1 - ease(p)); kay = 0.25
+    cw, ch = int(W / z), int(H / z)
+    cx = (w - cw) // 2 + int((w - cw) * kay * math.sin(p * 3.14) * yon); cy = (h - ch) // 2 + int((h - ch) * 0.12 * (p - 0.5) * yon)
     return im.crop((cx, cy, cx + cw, cy + ch)).resize((W, H), Image.BILINEAR)
 def sigdir(d, metin, ad, px, maxw):
     ft = font(ad, px)

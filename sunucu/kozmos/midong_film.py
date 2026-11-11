@@ -6,7 +6,6 @@ Kullanım: blender -b -P ges_film.py -- <çıktı_klasörü>   (FPS, RES, SAMPLE
 import bpy, bmesh, math, random, sys, os
 from mathutils import Matrix, Vector, Euler
 import numpy as np
-from PIL import Image
 
 OUT = sys.argv[sys.argv.index('--') + 1] if '--' in sys.argv else '/tmp/film'
 os.makedirs(OUT, exist_ok=True)
@@ -32,7 +31,9 @@ def panel_tex(path):
             img[y0:y1, x0:x1] = (0.03, 0.045, 0.085)
             for b in range(1, 5): bx = int(x0 + b * (x1 - x0) / 5); img[y0:y1, bx:bx + 1] = (0.22, 0.24, 0.27)
     mid = H // 2; img[mid - 3:mid + 3, fx:W - fx] = (0.8, 0.81, 0.83)
-    Image.fromarray((img ** (1 / 2.2) * 255).clip(0, 255).astype(np.uint8)).save(path)
+    im = bpy.data.images.new('panel_hucre', W, H, alpha=True)
+    rgba = np.ones((H, W, 4), np.float32); rgba[..., :3] = img[::-1]          # Blender görüntüsü alttan başlar; doğrusal renk
+    im.pixels.foreach_set(rgba.ravel()); im.filepath_raw = path; im.file_format = 'PNG'; im.save()
 ptex = os.path.join(OUT, 'panel_hucre.png'); panel_tex(ptex)
 def mat(name, color, rough=0.5, metal=0.0, coat=0.0, spec=0.5):
     m = bpy.data.materials.new(name); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
@@ -40,7 +41,7 @@ def mat(name, color, rough=0.5, metal=0.0, coat=0.0, spec=0.5):
     b.inputs['Metallic'].default_value = metal; b.inputs['Coat Weight'].default_value = coat; b.inputs['Specular IOR Level'].default_value = spec
     return m, b
 M_mod, b = mat('panel', (0.04, 0.05, 0.09), 0.08, 0, 0.2, 0.3)
-it = M_mod.node_tree.nodes.new('ShaderNodeTexImage'); it.image = bpy.data.images.load(ptex); M_mod.node_tree.links.new(it.outputs['Color'], b.inputs['Base Color'])
+it = M_mod.node_tree.nodes.new('ShaderNodeTexImage'); it.image = bpy.data.images.get('panel_hucre') or bpy.data.images.load(ptex); M_mod.node_tree.links.new(it.outputs['Color'], b.inputs['Base Color'])
 M_back, _ = mat('panel_arka', (0.8, 0.81, 0.83), 0.35)
 M_steel, _ = mat('celik', (0.62, 0.64, 0.66), 0.38, 1.0)
 M_pile, _ = mat('kazik', (0.52, 0.54, 0.55), 0.45, 1.0)

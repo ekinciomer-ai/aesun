@@ -117,13 +117,13 @@ const DN={'KZ_TR':'TR','KZ_EN':'EN','OD':'TR'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const AY=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],GN=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const gunAd=t=>{if(!t)return 'Tarihsiz (taslak)';const d=new Date(t+'T12:00:00');return d.getDate()+' '+AY[d.getMonth()]+' '+d.getFullYear()+' · '+GN[d.getDay()]};
-const bugun=(()=>{const d=new Date(Date.now()+3*36e5);return d.toISOString().slice(0,10)})();
+const bugunHesap=()=>new Date(Date.now()+3*36e5).toISOString().slice(0,10);let bugun=bugunHesap();
 const sayi=n=>n==null?'—':Number(n).toLocaleString('tr-TR');
 const sureYaz=dk=>{dk=Math.round(dk||0);if(!dk)return '—';const sa=Math.floor(dk/60),m=dk%60;return sa?sayi(sa)+' sa '+m+' dk':m+' dk';};
 let K=[];
 const F={q:'',fp:'',fk:'',fd:'',fs:'',fu:''};
 function secenek(id,alan){const s=document.getElementById(id);[...new Set(K.map(x=>x[alan]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})}
-function ciz(){
+function ciz(){bugun=bugunHesap();
  const q=F.q.toLocaleLowerCase('tr');
  const l=K.filter(x=>(!F.fp||x.platform===F.fp)&&(!F.fk||x.kanal===F.fk)&&(!F.fd||x.durum===F.fd)&&(!F.fs||x.seri===F.fs)&&(!F.fu||x.ureten===F.fu)&&(!q||String(x.baslik).toLocaleLowerCase('tr').includes(q)))
   .sort((a,b)=>(b.tarih||'0').localeCompare(a.tarih||'0')||(b.saat||'').localeCompare(a.saat||''));

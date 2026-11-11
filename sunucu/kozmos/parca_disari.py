@@ -18,6 +18,9 @@ for ad, sec in SECIM.items():
         bpy.ops.import_scene.gltf(filepath=g[0]); bpy.context.view_layer.update()
         obs = [o for o in sc.objects if o.type == 'MESH' and re.split(r'_Material', o.name)[0] == kok]
         if not obs: print('GRUP_YOK', kok); continue
+        from mathutils import Matrix
+        for o in obs:
+            mw = o.matrix_world.copy(); o.parent = None; o.data.transform(mw); o.matrix_world = Matrix.Identity(4)
         for o in list(sc.objects):
             if o not in obs: bpy.data.objects.remove(o, do_unlink=True)
         bpy.ops.object.select_all(action='DESELECT')

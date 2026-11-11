@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-11T21:09+03:00",
+ "olusturma": "2026-11-12T00:22+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -287,6 +287,18 @@
   },
   {
    "kanal": "Antik Stüdyo",
+   "seri": "Tarihin Deneyleri",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Antik Stüdyo",
    "seri": "Tarihin Patileri",
    "karar": "DURDUR",
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
@@ -462,10 +474,10 @@
  "esikler": {
   "Ancient Studio": 188,
   "Kozmos Lab": 50,
-  "Ömür Dediğin": 50,
+  "Antik Stüdyo": 637,
   "Estudio Antiguo": 122,
-  "Kozmos Lab TR": 97,
-  "Antik Stüdyo": 637
+  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 97
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -574,14 +586,6 @@
  "takvim_aciklari": [
   {
    "kanal": "Antik Stüdyo",
-   "tarih": "2026-11-11",
-   "planli_short": 3,
-   "hedef_kota": 4,
-   "eksik": 1,
-   "uyari": "1 Short slotu boş"
-  },
-  {
-   "kanal": "Antik Stüdyo",
    "tarih": "2026-11-12",
    "planli_short": 3,
    "hedef_kota": 4,
@@ -597,12 +601,12 @@
    "uyari": "1 Short slotu boş"
   },
   {
-   "kanal": "Ancient Studio",
-   "tarih": "2026-11-11",
-   "planli_short": 0,
-   "hedef_kota": 3,
-   "eksik": 3,
-   "uyari": "3 Short slotu boş"
+   "kanal": "Antik Stüdyo",
+   "tarih": "2026-11-14",
+   "planli_short": 2,
+   "hedef_kota": 4,
+   "eksik": 2,
+   "uyari": "19:00 Gündem+Tarih slotu BOŞ"
   },
   {
    "kanal": "Ancient Studio",
@@ -621,8 +625,8 @@
    "uyari": "2 Short slotu boş"
   },
   {
-   "kanal": "Estudio Antiguo",
-   "tarih": "2026-11-11",
+   "kanal": "Ancient Studio",
+   "tarih": "2026-11-14",
    "planli_short": 1,
    "hedef_kota": 3,
    "eksik": 2,
@@ -645,12 +649,12 @@
    "uyari": "2 Short slotu boş"
   },
   {
-   "kanal": "Kozmos Lab TR",
-   "tarih": "2026-11-11",
+   "kanal": "Estudio Antiguo",
+   "tarih": "2026-11-14",
    "planli_short": 1,
-   "hedef_kota": 2,
-   "eksik": 1,
-   "uyari": "1 Short slotu boş"
+   "hedef_kota": 3,
+   "eksik": 2,
+   "uyari": "2 Short slotu boş"
   },
   {
    "kanal": "Kozmos Lab TR",
@@ -669,12 +673,12 @@
    "uyari": "2 Short slotu boş"
   },
   {
-   "kanal": "Kozmos Lab",
-   "tarih": "2026-11-11",
-   "planli_short": 0,
+   "kanal": "Kozmos Lab TR",
+   "tarih": "2026-11-14",
+   "planli_short": 1,
    "hedef_kota": 2,
-   "eksik": 2,
-   "uyari": "2 Short slotu boş"
+   "eksik": 1,
+   "uyari": "1 Short slotu boş"
   },
   {
    "kanal": "Kozmos Lab",
@@ -691,6 +695,14 @@
    "hedef_kota": 2,
    "eksik": 2,
    "uyari": "2 Short slotu boş"
+  },
+  {
+   "kanal": "Kozmos Lab",
+   "tarih": "2026-11-14",
+   "planli_short": 1,
+   "hedef_kota": 2,
+   "eksik": 1,
+   "uyari": "1 Short slotu boş"
   }
  ],
  "kopru_onerileri": [
@@ -1078,6 +1090,14 @@
   },
   {
    "tur": "KONTROL",
+   "kanal": "Kozmos Lab",
+   "platform": "YouTube",
+   "vid": "oKb9BFM4jRg",
+   "baslik": "How Does a Wind Turbine Work? A Piece-by-Piece 3D Teardown | NREL 5 MW",
+   "neden": "2026-11-11 22:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
    "kanal": "Kozmos Lab TR",
    "platform": "YouTube",
    "vid": "8KYR4MwnX9A",
@@ -1094,7 +1114,7 @@
   }
  ],
  "bulgular": [
-  "Dün (2026-11-10) 2841 izlenme geldi; bir önceki gün 9181.",
+  "Dün (2026-11-11) 2083 izlenme geldi; bir önceki gün 2841.",
   "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 3 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
@@ -1118,7 +1138,8 @@
   "Estudio Antiguo: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %32 (hedef ≥%70).",
   "Kozmos Lab: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %100 (hedef ≥%70).",
   "Kozmos Lab TR: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %50 (hedef ≥%70).",
-  "Uzun videolar (7 yayında): medyan 10 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik."
+  "Uzun videolar (7 yayında): medyan 10 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
+  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-14."
  ],
  "en_iyi": [
   {

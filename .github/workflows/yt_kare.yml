@@ -18,10 +18,15 @@ jobs:
         env: { V: '${{ inputs.video }}' }
         run: |
           D="icerik/inceleme/${V}_kare"; mkdir -p "$D" /tmp/v
-          yt-dlp -q -f "bv*[height<=720]+ba/b[height<=720]/b" -o "/tmp/v/v.%(ext)s" "https://www.youtube.com/shorts/$V" || yt-dlp -q -o "/tmp/v/v.%(ext)s" "https://www.youtube.com/watch?v=$V"
-          F=$(ls /tmp/v/v.* | head -1); S=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$F")
-          for i in 0 1 2 3 4 5 6 7; do T=$(python3 -c "print(round($S*($i+0.5)/8,2))"); ffmpeg -v error -y -ss "$T" -i "$F" -frames:v 1 -vf "scale=360:-2" -q:v 4 "$D/k$i.jpg"; done
-          echo "sure=$S" > "$D/bilgi.txt"; ls -la "$D"
+          if yt-dlp -q -f "bv*[height<=720]+ba/b[height<=720]/b" -o "/tmp/v/v.%(ext)s" "https://www.youtube.com/shorts/$V"; then
+            F=$(ls /tmp/v/v.* | head -1); S=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$F")
+            for i in 0 1 2 3 4 5 6 7; do T=$(python3 -c "print(round($S*($i+0.5)/8,2))"); ffmpeg -v error -y -ss "$T" -i "$F" -frames:v 1 -vf "scale=360:-2" -q:v 4 "$D/k$i.jpg"; done
+            echo "sure=$S" > "$D/bilgi.txt"
+          else   # YouTube indirmeyi engellerse: herkese açık kapak + otomatik ara kareler
+            for n in maxresdefault hqdefault oar2 1 2 3 hq1 hq2 hq3; do curl -fsSL -o "$D/t_$n.jpg" "https://i.ytimg.com/vi/$V/$n.jpg" || rm -f "$D/t_$n.jpg"; done
+            echo "kaynak=kapak_ve_ara_kareler" > "$D/bilgi.txt"
+          fi
+          ls -la "$D"
       - name: Kaydet
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"

@@ -50,6 +50,300 @@
    ]
   }
  ],
+ "WyattBlue/auto-editor": [
+  {
+   "id": "ornek-auto-editor",
+   "durum": "basarili",
+   "sure_sn": 20,
+   "not": "20 sn'lik videoda iki adet 3 sn sessizlik vardı; araç otomatik kesti.",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-auto-editor/once_sessizli.mp4",
+     "tur": "video",
+     "ad": "once_sessizli.mp4"
+    },
+    {
+     "f": "ornek/ornek-auto-editor/sonra_kesik.mp4",
+     "tur": "video",
+     "ad": "sonra_kesik.mp4"
+    }
+   ],
+   "kayit": [
+    "Finished. took 1.07 seconds (0:00:01)",
+    "URL: https://github.com/WyattBlue/auto-editor/releases/download/29.3.1/auto-editor-linux-x86_64",
+    "Download completed successfully!",
+    "/tmp/cikti/once_sessizli.mp4 20.240000 sn",
+    "/tmp/cikti/sonra_kesik.mp4 14.600000 sn"
+   ]
+  }
+ ],
+ "nadermx/backgroundremover": [
+  {
+   "id": "ornek-backgroundremover",
+   "durum": "basarili",
+   "sure_sn": 145,
+   "not": "Arka plan silme (rembg ile aynı görseller, karşılaştırma için).",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-backgroundremover/astronot.jpg",
+     "tur": "img",
+     "ad": "astronot.jpg"
+    },
+    {
+     "f": "ornek/ornek-backgroundremover/bgr_astronot.png",
+     "tur": "img",
+     "ad": "bgr_astronot.png"
+    },
+    {
+     "f": "ornek/ornek-backgroundremover/bgr_otobus.png",
+     "tur": "img",
+     "ad": "bgr_otobus.png"
+    }
+   ],
+   "kayit": [
+    "downloading part 2/4 of u2net (attempt 1/3)",
+    "finished downloading part 2/4 of u2net",
+    "downloading part 3/4 of u2net (attempt 1/3)",
+    "finished downloading part 3/4 of u2net",
+    "downloading part 4/4 of u2net (attempt 1/3)",
+    "finished downloading part 4/4 of u2net",
+    "Successfully downloaded u2net (176290937 bytes)",
+    "Device: CPU (no GPU detected - install CUDA toolkit for GPU acceleration)"
+   ]
+  }
+ ],
+ "Achno/gowall": [
+  {
+   "id": "ornek-gowall",
+   "durum": "basarili",
+   "sure_sn": 55,
+   "not": "Görseli hazır renk temalarına çevirme (marka rengine uydurma).",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-gowall/gowall_catppuccin.png",
+     "tur": "img",
+     "ad": "gowall_catppuccin.png"
+    },
+    {
+     "f": "ornek/ornek-gowall/gowall_dracula.png",
+     "tur": "img",
+     "ad": "gowall_dracula.png"
+    },
+    {
+     "f": "ornek/ornek-gowall/gowall_nord.png",
+     "tur": "img",
+     "ad": "gowall_nord.png"
+    },
+    {
+     "f": "ornek/ornek-gowall/kare.jpg",
+     "tur": "img",
+     "ad": "kare.jpg"
+    }
+   ],
+   "kayit": [
+    "go: downloading go1.25.0 (linux/amd64)",
+    "::: Image completed & saved in /tmp/cikti/gowall_nord.png, 0 Images left :::",
+    "::: Image completed & saved in /tmp/cikti/gowall_catppuccin.png, 0 Images left :::",
+    "::: Image completed & saved in /tmp/cikti/gowall_dracula.png, 0 Images left :::",
+    "gowall_catppuccin.png",
+    "gowall_dracula.png",
+    "gowall_nord.png",
+    "kare.jpg"
+   ]
+  }
+ ],
+ "kornia/kornia": [
+  {
+   "id": "ornek-kornia",
+   "durum": "basarili",
+   "sure_sn": 32,
+   "not": "Yapay zekâ eğitimi için görsel çoğaltma (renk, açı, perspektif) + kenar ve kontrast.",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-kornia/kornia_8.jpg",
+     "tur": "img",
+     "ad": "kornia_8.jpg"
+    }
+   ],
+   "kayit": [
+    "/tmp/girdi/kornia_ornek.py:3: DeprecationWarning: Since kornia 0.8.3 the `image_to_tensor` is deprecated in favor of `kornia.image.image_to_tensor`.",
+    "tamam"
+   ]
+  }
+ ],
+ "Zulko/moviepy": [
+  {
+   "id": "ornek-moviepy",
+   "durum": "basarili",
+   "sure_sn": 48,
+   "not": "Python ile 3 görselden yakınlaşmalı, yazılı, geçişli dikey video.",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-moviepy/moviepy_ornek.mp4",
+     "tur": "video",
+     "ad": "moviepy_ornek.mp4"
+    }
+   ],
+   "kayit": [
+    "tamam 8.2"
+   ]
+  }
+ ],
+ "opencv/opencv": [
+  {
+   "id": "ornek-opencv",
+   "durum": "basarili",
+   "sure_sn": 15,
+   "not": "Uydu görüntüsünde kenar bulma ve su yüzeyi tespiti; fotoğrafa çizim efekti.",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-opencv/opencv_efekt.jpg",
+     "tur": "img",
+     "ad": "opencv_efekt.jpg"
+    },
+    {
+     "f": "ornek/ornek-opencv/opencv_uydu_kenar_su.jpg",
+     "tur": "img",
+     "ad": "opencv_uydu_kenar_su.jpg"
+    }
+   ],
+   "kayit": [
+    "tamam"
+   ]
+  }
+ ],
+ "danielgatis/rembg": [
+  {
+   "id": "ornek-rembg",
+   "durum": "basarili",
+   "sure_sn": 187,
+   "not": "Aynı fotoğrafın arka planı silindi (önce / sonra).",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-rembg/astronot.jpg",
+     "tur": "img",
+     "ad": "astronot.jpg"
+    },
+    {
+     "f": "ornek/ornek-rembg/otobus.jpg",
+     "tur": "img",
+     "ad": "otobus.jpg"
+    },
+    {
+     "f": "ornek/ornek-rembg/rembg_astronot.png",
+     "tur": "img",
+     "ad": "rembg_astronot.png"
+    },
+    {
+     "f": "ornek/ornek-rembg/rembg_isnet_astronot.png",
+     "tur": "img",
+     "ad": "rembg_isnet_astronot.png"
+    },
+    {
+     "f": "ornek/ornek-rembg/rembg_kare.png",
+     "tur": "img",
+     "ad": "rembg_kare.png"
+    },
+    {
+     "f": "ornek/ornek-rembg/rembg_otobus.png",
+     "tur": "img",
+     "ad": "rembg_otobus.png"
+    }
+   ],
+   "kayit": [
+    " 48%|██████████████████▊                    | 86.0M/179M [00:00<00:00, 127MB/s]",
+    " 56%|█████████████████████▋                 | 99.3M/179M [00:00<00:00, 129MB/s]",
+    " 63%|█████████████████████████▏              | 113M/179M [00:01<00:00, 130MB/s]",
+    " 71%|████████████████████████████▏           | 126M/179M [00:01<00:00, 132MB/s]",
+    " 78%|███████████████████████████████▏        | 139M/179M [00:01<00:00, 132MB/s]",
+    " 85%|██████████████████████████████████▏     | 153M/179M [00:01<00:00, 132MB/s]",
+    " 93%|█████████████████████████████████████▏  | 166M/179M [00:01<00:00, 133MB/s]",
+    "100%|███████████████████████████████████████| 179M/179M [00:00<00:00, 1.23TB/s]"
+   ]
+  }
+ ],
+ "roboflow/supervision": [
+  {
+   "id": "ornek-supervision",
+   "durum": "basarisiz",
+   "sure_sn": 113,
+   "not": "YOLO11n ile nesne tanıma; kutular ve etiketler supervision ile çizildi.",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-supervision/supervision_kare.jpg",
+     "tur": "img",
+     "ad": "supervision_kare.jpg"
+    },
+    {
+     "f": "ornek/ornek-supervision/supervision_otobus.jpg",
+     "tur": "img",
+     "ad": "supervision_otobus.jpg"
+    },
+    {
+     "f": "ornek/ornek-supervision/supervision_uydu.jpg",
+     "tur": "img",
+     "ad": "supervision_uydu.jpg"
+    }
+   ],
+   "kayit": [
+    "Creating new Ultralytics Settings v0.0.8 file ✅ ",
+    "View Ultralytics Settings with 'yolo settings' or at '/home/runner/.config/Ultralytics/settings.json'",
+    "Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/usage/settings",
+    "otobus.jpg 5 nesne 1.32 sn ['bus 0.94', 'person 0.89', 'person 0.88', 'person 0.86', 'person 0.62']",
+    "uydu.jpg 0 nesne 0.08 sn []",
+    "kare.jpg 0 nesne 0.06 sn []"
+   ]
+  }
+ ],
+ "plemeri/transparent-background": [
+  {
+   "id": "ornek-transparent-background",
+   "durum": "basarili",
+   "sure_sn": 222,
+   "not": "InSPyReNet ile arka plan silme ve arka plan bulanıklaştırma.",
+   "tarih": "2026-11-11",
+   "dosyalar": [
+    {
+     "f": "ornek/ornek-transparent-background/astronot.jpg",
+     "tur": "img",
+     "ad": "astronot.jpg"
+    },
+    {
+     "f": "ornek/ornek-transparent-background/astronot_blur.jpg",
+     "tur": "img",
+     "ad": "astronot_blur.jpg"
+    },
+    {
+     "f": "ornek/ornek-transparent-background/astronot_rgba.png",
+     "tur": "img",
+     "ad": "astronot_rgba.png"
+    },
+    {
+     "f": "ornek/ornek-transparent-background/otobus_rgba.png",
+     "tur": "img",
+     "ad": "otobus_rgba.png"
+    }
+   ],
+   "kayit": [
+    "Settings -> Mode=base, Device=cpu, Torchscript=disabled",
+    "astronot.jpg:    0%|                                                  | 0/1 [00:00<?, ?it/s]",
+    "astronot.jpg:  100%|██████████████████████████████████████████████████| 1/1 [00:17<00:00, 17.08s/it]",
+    "Done. Results are saved in /tmp/cikti",
+    "astronot.jpg",
+    "astronot_blur.jpg",
+    "astronot_rgba.png",
+    "otobus_rgba.png"
+   ]
+  }
+ ],
  "lemomo-ai/lemo-opuscar": [
   {
    "id": "video-opuscar",

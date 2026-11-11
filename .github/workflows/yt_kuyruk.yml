@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths: ['sunucu/yt_kuyruk/*.json', 'sunucu/islem_yt_kuyruk.sh', '.github/workflows/yt_kuyruk.yml']
   workflow_dispatch:
+  schedule:
+    - cron: '17 */4 * * *'
 permissions:
   contents: write
 concurrency: { group: yt-kuyruk-v2, cancel-in-progress: false }
@@ -60,12 +62,14 @@ jobs:
               durum_str = 'Yayında' if p <= datetime.now(p.tzinfo) else 'Planlı'
               kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab', 'OD': 'Ömür Dediğin'}.get(s['kanal'], s['kanal'])
               dil = {'TR': 'TR', 'EN': 'EN', 'ES': 'ES', 'KZ_TR': 'TR', 'KZ_EN': 'EN', 'OD': 'TR'}.get(s['kanal'], s['kanal'])
-              x = ix.get(s['vid']) or {}
+              taslak_eslesme = next((r for r in K if not r.get('vid') and r.get('kanal') == kanal and (r.get('baslik') == s['baslik'] or (s.get('seri') and r.get('seri') == s.get('seri') and r.get('tarih') == p.strftime('%Y-%m-%d')))), None)
+              x = ix.get(s['vid']) or taslak_eslesme or {}
               tur = s.get('tur') or 'Short'
               x.update(platform='YouTube', kanal=kanal, dil=dil, tur=tur, seri=s.get('seri') or x.get('seri') or 'Gündem + Tarih',
                        baslik=s['baslik'], durum=durum_str, tarih=p.strftime('%Y-%m-%d'), saat=p.strftime('%H:%M'), izlenme=x.get('izlenme'),
                        link=(f"https://youtube.com/shorts/{s['vid']}" if tur == 'Short' else f"https://youtube.com/watch?v={s['vid']}"), vid=s['vid'], ureten=s.get('ureten') or x.get('ureten') or 'Claude')
-              if s['vid'] not in ix: K.append(x)
+              if taslak_eslesme is not None: x.pop('not', None)
+              if s['vid'] not in ix and taslak_eslesme is None: K.append(x)
               if s.get('eski_gizlendi') and s['eski_gizlendi'] in ix:
                   e = ix[s['eski_gizlendi']]; e['durum'] = 'Gizli'; e['not'] = f"yerine sesli sürüm yüklendi: {s['vid']}"
               subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)

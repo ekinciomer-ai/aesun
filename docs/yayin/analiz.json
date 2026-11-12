@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T09:06+03:00",
+ "olusturma": "2026-11-12T11:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -197,15 +197,15 @@
    "kanal": "Antik Stüdyo",
    "seri": "10 Kasım",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 1,
-   "medyan_48sa": 11,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 0,
+   "medyan_48sa": 23,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
-    "baslik": "10 Kasım · Saat 09.05 · Saygı, minnet ve özlemle 🇹🇷 #shorts",
-    "i48": 11
+    "baslik": "Saat 09.05. Onu yalnız Türkiye anmıyor 🇹🇷 #10Kasım #shorts",
+    "i48": 35
    }
   },
   {
@@ -392,10 +392,10 @@
    "kanal": "Kozmos Lab",
    "seri": "Did you know?",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 2,
-   "medyan_48sa": 3,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 2,
    "tutma_orani": 0,
    "izlenme_yuzde": 290,
    "en_iyi": {
@@ -494,12 +494,12 @@
   }
  ],
  "esikler": {
-  "Estudio Antiguo": 122,
-  "Antik Stüdyo": 637,
+  "Kozmos Lab": 50,
   "Ömür Dediğin": 50,
-  "Kozmos Lab TR": 67,
+  "Antik Stüdyo": 637,
+  "Estudio Antiguo": 122,
   "Ancient Studio": 188,
-  "Kozmos Lab": 50
+  "Kozmos Lab TR": 67
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -532,8 +532,8 @@
     "medyan": 1484
    },
    "19:00": {
-    "n": 7,
-    "medyan": 1560
+    "n": 8,
+    "medyan": 1351
    },
    "20:00": {
     "n": 6,
@@ -602,6 +602,10 @@
    "17:00": {
     "n": 1,
     "medyan": 3
+   },
+   "19:00": {
+    "n": 1,
+    "medyan": 0
    },
    "22:00": {
     "n": 1,
@@ -1092,7 +1096,7 @@
   "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 3 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
-  "Kozmos Lab: son 2 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "Kozmos Lab: son 3 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR: son 4 Short'tan 2 tanesi tuttu (eşik 67 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %56'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1146,11 +1150,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Ancient Studio",
-   "baslik": "An army lost to birds?! The 1932 Emu War 🐦",
-   "i48": 2
-  },
-  {
    "kanal": "Kozmos Lab",
    "baslik": "How does a handful of sand become a solar panel? ☀️ #shorts",
    "i48": 2
@@ -1168,6 +1167,11 @@
   {
    "kanal": "Ancient Studio",
    "baslik": "What happened to the emus? The end of the Emu War 🐦",
+   "i48": 0
+  },
+  {
+   "kanal": "Kozmos Lab",
+   "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
    "i48": 0
   }
  ]

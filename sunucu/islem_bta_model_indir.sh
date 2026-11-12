@@ -1,5 +1,5 @@
 #!/bin/bash
-# BTA: Sketchfab'dan iç mekân modellerini indirir (yalnız indirilebilir ve lisansı uygun olanlar). Lisans bilgisi kaynakca.json'a yazılır.
+# BTA: Sketchfab'dan iç mekân, araç ve insan modellerini indirir (yalnız indirilebilir ve lisansı uygun olanlar). Lisans bilgisi kaynakca.json'a yazılır.
 # Not: 'free-st' (Sketchfab Free Standard) modeller yalnız render/video içindir; web sayfasında ham dosya olarak sunulmaz.
 set -uo pipefail
 M=/opt/tampon/bta/modeller; mkdir -p $M; [ -f $M/kaynakca.json ] || echo "[]" > $M/kaynakca.json
@@ -19,7 +19,13 @@ k.append({'ad':'$ad','model':d.get('name'),'yazar':d['user']['displayName'] or d
 json.dump(k,open(f,'w'),ensure_ascii=False,indent=1)"
   echo "NOT: $ad indirildi ($(du -sh $M/$ad | cut -f1), lisans $lic)"
 done <<'L'
-loft17 1bc27584241b4078975b31dd4610d6e0
-ic14 79262bfc39d54fd2a0edc9d80fafdb6d
+arac_paket 20f9af9b8a404d5cb022ac6fe87f21f5
+arac_kucuk 67c84e4d30ae42fda22c0a0c7526df26
+arac_suv edc994ad28ed438cb365c0e0389ac177
+insan_nathan 143a2b1ea5eb4385ae90a73657aca3bc
+insan_sophia dc448c3be0e74f96a55fb475a13433cf
+insan_eric a46bc9f67aaa415bb4f3241eef900e7f
+insan_carla acf520f450d14dd799f98a6fede3edf5
+insan_claudia c659bd0accab47c6bbe390cf822a2b92
 L
 du -sh $M | sed 's/^/NOT: toplam /'

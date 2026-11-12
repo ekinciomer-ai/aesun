@@ -8,10 +8,10 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T18:40+03:00",
+ "olusturma": "2026-11-12T20:30+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
-  "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 4 Short, YALNIZ Gündem + Tarih (2), Tablo Serisi (1), Tarihi Magazin (1); Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) olduğu gibi yayınlanır; kural yeni üretime uygulanır.",
+  "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
   "Aynı konu bir kanalda 14 gün içinde ikinci kez işlenmez (ör. Mimar Sinan 6 günde 5 kez işlenince 5.191 → 17 izlenmeye düştü).",
   "Shorts başlığı kısa tek soru olur (≤55 karakter, '|' ile ikinci başlık yok); en iyi örnekler: 'Mona Lisa'nın kaşları neden yok?', 'İnci Küpeli Kız'ın incisi gerçek mi?'.",
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -53,11 +53,10 @@
  ],
  "plan": {
   "Antik Stüdyo": {
-   "gunluk_short_kotasi": 4,
+   "gunluk_short_kotasi": 2,
    "seri_dagilimi": {
-    "Gündem + Tarih": 2,
-    "Tablo Serisi": 1,
-    "Tarihi Magazin": 1
+    "Gündem + Tarih (19:00, her gün)": 1,
+    "Tablo Serisi / Tarihi Magazin (18:00, gün aşırı)": 1
    },
    "durdurulan": [
     "10 Kasım",
@@ -536,12 +535,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 50,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 67,
+  "Ancient Studio": 188,
   "Estudio Antiguo": 122,
-  "Ömür Dediğin": 50,
-  "Ancient Studio": 188
+  "Kozmos Lab": 50,
+  "Kozmos Lab TR": 67,
+  "Antik Stüdyo": 637,
+  "Ömür Dediğin": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -664,8 +663,8 @@
    "kanal": "Antik Stüdyo",
    "tarih": "2026-11-14",
    "planli_short": 2,
-   "hedef_kota": 4,
-   "eksik": 2,
+   "hedef_kota": 2,
+   "eksik": 0,
    "uyari": "19:00 Gündem+Tarih slotu BOŞ"
   }
  ],

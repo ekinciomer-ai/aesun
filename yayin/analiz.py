@@ -29,12 +29,13 @@ KANAL_NORMAL = {
 SERI_NORMAL = {"Did You Know?": "Did you know?"}
 
 # ODAK DÖNEMİ (Ömer kararı, 12 Kas 2026): bir ay boyunca yalnız Antik Stüdyo büyütülür.
-#  - Antik Stüdyo: günde 4 Short, YALNIZ Gündem + Tarih (2), Tablo Serisi (1), Tarihi Magazin (1); Spor + Tarih maç haftalarında Gündem slotunda; diğerleri durur.
+#  - Antik Stüdyo: günde 2 Short (12 Kas 20:20): 1 Gündem + Tarih (19:00) + gün aşırı Tablo / Magazin (18:00); Spor + Tarih maç haftalarında Gündem slotunda; diğerleri durur.
 #  - Diğer kanallar: haftada en fazla 2 Short (günlük kota 0, haftalık 2).
 #  - Aynı konu (KONU_ANAHTARLARI) bir kanalda 14 gün içinde ikinci kez yayınlanmaz.
 ODAK_BITIS = "2026-12-12"
 ODAK_KANAL = "Antik Stüdyo"
-ODAK_SERILER = {"Gündem + Tarih": 2, "Tablo Serisi": 1, "Tarihi Magazin": 1}
+ODAK_SERILER = {"Gündem + Tarih": 1, "Tablo Serisi": 1, "Tarihi Magazin": 1}
+ODAK_GUNLUK = 2  # Ömer kararı 12 Kas 20:20: günde 2 — her gün 1 Gündem + Tarih (19:00) + gün aşırı Tablo / Magazin (18:00)
 ODAK_EK_IZINLI = {"Spor + Tarih"}  # yalnız önemli maç haftalarında, Gündem + Tarih slotunu kullanır
 # 12 Kas 2026'da zaten üretilmiş/planlanmış videolar kurallara takılmaz (Ömer: "hazır olanlar yayınlansın")
 try:
@@ -181,7 +182,7 @@ def main():
                        "durdurulan": [s["seri"] for s in S if s["karar"] == "DURDUR"]}
     if odak_aktif(simdi):
         tum_seri = {s["seri"] for s in seriler if s["kanal"] == ODAK_KANAL}
-        plan[ODAK_KANAL] = {"gunluk_short_kotasi": sum(ODAK_SERILER.values()), "seri_dagilimi": dict(ODAK_SERILER),
+        plan[ODAK_KANAL] = {"gunluk_short_kotasi": ODAK_GUNLUK, "seri_dagilimi": {"Gündem + Tarih (19:00, her gün)": 1, "Tablo Serisi / Tarihi Magazin (18:00, gün aşırı)": 1},
                             "durdurulan": sorted(tum_seri - set(ODAK_SERILER) - ODAK_EK_IZINLI), "odak": f"ODAK DÖNEMİ {ODAK_BITIS}'e kadar"}
         for kn, hk in ODAK_HAFTALIK.items():
             p0 = plan.get(kn, {"seri_dagilimi": {}, "durdurulan": []})
@@ -343,7 +344,7 @@ def main():
     # 6b) Önümüzdeki 72 saat takvim & kota açıkları
     takvim_aciklari = []
     uc_gun = [(simdi + timedelta(days=g)).strftime("%Y-%m-%d") for g in range(3)]
-    kota_listesi = ({ODAK_KANAL: sum(ODAK_SERILER.values())} if odak_aktif(simdi) else GUNLUK_KOTA)
+    kota_listesi = ({ODAK_KANAL: ODAK_GUNLUK} if odak_aktif(simdi) else GUNLUK_KOTA)
     for kanal, kota in kota_listesi.items():
         for g_str in uc_gun:
             gun_short = [x for x in kaynak if x.get("kanal") == kanal and x.get("tur") == "Short"
@@ -453,7 +454,7 @@ def main():
         "olusturma": simdi.isoformat(timespec="minutes"),
         "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
         "kurallar": [
-            f"ODAK DÖNEMİ ({ODAK_BITIS}'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 4 Short, YALNIZ Gündem + Tarih (2), Tablo Serisi (1), Tarihi Magazin (1); Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) olduğu gibi yayınlanır; kural yeni üretime uygulanır.",
+            f"ODAK DÖNEMİ ({ODAK_BITIS}'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
             f"Aynı konu bir kanalda {KONU_TEKRAR_GUN} gün içinde ikinci kez işlenmez (ör. Mimar Sinan 6 günde 5 kez işlenince 5.191 → 17 izlenmeye düştü).",
             "Shorts başlığı kısa tek soru olur (≤55 karakter, '|' ile ikinci başlık yok); en iyi örnekler: 'Mona Lisa'nın kaşları neden yok?', 'İnci Küpeli Kız'ın incisi gerçek mi?'.",
             "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",

@@ -16,7 +16,7 @@ if [ ! -d $G/.git ]; then rm -rf $G; git clone -q $URL $G 2>/dev/null || { mkdir
 cd $G; git config user.name "gesfin-sunucu"; git config user.email "sunucu@aksarayenerji.net"
 if [ -z "$(git ls-remote --heads origin main)" ]; then
   git checkout -q -B main
-  rsync -a --exclude=.env --exclude='.env.*' --exclude=secrets/ --exclude=backups/ --exclude=backup.log --exclude='*.tar.gz' --exclude='*.yedek*' --exclude='docker-compose*' --exclude=__pycache__/ --exclude=node_modules/ /opt/gesfin/ $G/
+  rsync -a --exclude=.env --exclude='.env.*' --exclude=secrets/ --exclude='*.sql' --exclude='*.dump' --exclude=backups/ --exclude=backup.log --exclude='*.tar.gz' --exclude='*.yedek*' --exclude='docker-compose*' --exclude=__pycache__/ --exclude=node_modules/ /opt/gesfin/ $G/
   mkdir -p evrak/gelen evrak/giden; touch evrak/gelen/.gitkeep evrak/giden/.gitkeep
   printf '%s\n' '.env' '.env.*' 'secrets/' 'backups/' '*.tar.gz' '__pycache__/' 'node_modules/' 'docker-compose*' > .gitignore
   cat > CLAUDE.md <<'M'
@@ -53,7 +53,7 @@ DEG=$(git diff --name-only $SON $YENI 2>/dev/null | grep -v -E '^(evrak/|YAYIN_D
 git checkout -q -B main $YENI
 echo $YENI > $S/son
 [ "$DEG" -eq 0 ] && [ -n "$SON" ] && exit 0
-rsync -a --delete --exclude=.git/ --exclude=evrak/ --exclude=YAYIN_DURUMU.md --exclude=CLAUDE.md --exclude=README.md --exclude=.gitignore --exclude=.github/ --exclude=.env --exclude='.env.*' --exclude=secrets/ --exclude='docker-compose*' $G/ /home/mehmetali/gesfin/
+rsync -a --delete --exclude=.git/ --exclude=evrak/ --exclude=YAYIN_DURUMU.md --exclude=CLAUDE.md --exclude=README.md --exclude=.gitignore --exclude=.github/ --exclude=.env --exclude='.env.*' --exclude=secrets/ --exclude='*.sql' --exclude='*.dump' --exclude='docker-compose*' $G/ /home/mehmetali/gesfin/
 chown -R mehmetali:mehmetali /home/mehmetali/gesfin
 CIKTI=$(/usr/local/bin/gesfin-yenile 2>&1); KOD=$?
 case "$CIKTI" in *TAMAM*) D="TAMAM — yeni sürüm canlıda";; *"Eski sürüm geri"*) D="GERİ DÖNÜLDÜ — yeni sürüm çalışmadı, eski sürüm canlıda. Ayrıntı aşağıda.";; *"Başka bir yenileme"*) echo $SON > $S/son; exit 0;; *) D="HATA — Ömer Bey'e haber verin";; esac

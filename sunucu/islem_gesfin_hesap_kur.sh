@@ -32,7 +32,7 @@ S
 sshd -t || { rm -f /etc/ssh/sshd_config.d/60-mehmetali.conf; echo "NOT: HATA sshd ayarı geçersiz, geri alındı"; exit 1; }; systemctl reload ssh 2>/dev/null || systemctl reload sshd
 
 # Çalışma kopyası (ilk kurulumda bir kez; varsa dokunulmaz)
-DIS='--exclude=.env --exclude=.env.* --exclude=secrets/ --exclude=backups/ --exclude=backup.log --exclude=*.tar.gz --exclude=*.yedek* --exclude=*.yedek2 --exclude=.git/ --exclude=node_modules/ --exclude=__pycache__/ --exclude=.vscode/'
+DIS='--exclude=.env --exclude=.env.* --exclude=secrets/ --exclude='*.sql' --exclude='*.dump' --exclude=backups/ --exclude=backup.log --exclude=*.tar.gz --exclude=*.yedek* --exclude=*.yedek2 --exclude=.git/ --exclude=node_modules/ --exclude=__pycache__/ --exclude=.vscode/'
 if [ ! -d $H/gesfin ]; then
   rsync -a $DIS /opt/gesfin/ $H/gesfin/
   chown -R $U:$U $H/gesfin
@@ -46,7 +46,7 @@ cat > /usr/local/bin/gesfin-yenile <<'Y'
 exec 9>/run/gesfin-yenile.lock; flock -n 9 || { echo "Başka bir yenileme sürüyor, biraz sonra tekrar deneyin."; exit 1; }
 L=/var/log/gesfin-yenile.log; T=$(date +%Y%m%d-%H%M%S); K=/home/mehmetali/gesfin; A=/var/lib/gesfin-surumler
 log(){ echo "$(date '+%F %T') $*" | tee -a $L; }
-DIS='--exclude=.env --exclude=.env.* --exclude=secrets/ --exclude=backups/ --exclude=backup.log --exclude=*.tar.gz --exclude=*.yedek* --exclude=.git/ --exclude=node_modules/ --exclude=__pycache__/ --exclude=.vscode/ --exclude=docker-compose.yml --exclude=docker-compose.*'
+DIS='--exclude=.env --exclude=.env.* --exclude=secrets/ --exclude='*.sql' --exclude='*.dump' --exclude=backups/ --exclude=backup.log --exclude=*.tar.gz --exclude=*.yedek* --exclude=.git/ --exclude=node_modules/ --exclude=__pycache__/ --exclude=.vscode/ --exclude=docker-compose.yml --exclude=docker-compose.*'
 saglik(){ for i in $(seq 1 24); do b=$(docker exec gesfin-backend python3 -c "import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=5).status)" 2>/dev/null); w=$(docker exec gesfin-mobile-web sh -c 'wget -q -O /dev/null http://127.0.0.1/ && echo 200' 2>/dev/null); [ "$b" = 200 ] && [ "$w" = 200 ] && return 0; sleep 5; done; return 1; }
 log "BAŞLADI ($SUDO_USER)"
 [ -d $K ] || { log "HATA: $K yok"; exit 1; }
@@ -83,7 +83,7 @@ cat > /usr/local/bin/gesfin-kopya-tazele <<'Z'
 [ "$(id -u)" = 0 ] || exec sudo -n /usr/local/bin/gesfin-kopya-tazele
 K=/home/mehmetali/gesfin; T=$(date +%Y%m%d-%H%M%S)
 [ -d $K ] && mv $K /home/mehmetali/gesfin-onceki-$T
-rsync -a --exclude=.env --exclude='.env.*' --exclude=secrets/ --exclude=backups/ --exclude=backup.log --exclude='*.tar.gz' --exclude='*.yedek*' /opt/gesfin/ $K/
+rsync -a --exclude=.env --exclude='.env.*' --exclude=secrets/ --exclude='*.sql' --exclude='*.dump' --exclude=backups/ --exclude=backup.log --exclude='*.tar.gz' --exclude='*.yedek*' /opt/gesfin/ $K/
 chown -R mehmetali:mehmetali $K /home/mehmetali/gesfin-onceki-$T 2>/dev/null
 echo "Kopya canlıdan yenilendi. Eski kopyan: ~/gesfin-onceki-$T"
 Z

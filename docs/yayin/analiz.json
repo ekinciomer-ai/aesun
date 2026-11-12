@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T04:04+03:00",
+ "olusturma": "2026-11-12T04:35+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -197,13 +197,16 @@
    "kanal": "Antik Stüdyo",
    "seri": "10 Kasım",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 2,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 1,
+   "medyan_48sa": 11,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "10 Kasım · Saat 09.05 · Saygı, minnet ve özlemle 🇹🇷 #shorts",
+    "i48": 11
+   }
   },
   {
    "kanal": "Antik Stüdyo",
@@ -487,12 +490,12 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 97,
-  "Kozmos Lab": 50,
   "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 97,
+  "Antik Stüdyo": 637,
+  "Ancient Studio": 188,
   "Estudio Antiguo": 122,
-  "Ancient Studio": 188
+  "Kozmos Lab": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -505,8 +508,8 @@
     "medyan": 1509
    },
    "12:00": {
-    "n": 2,
-    "medyan": 1808
+    "n": 3,
+    "medyan": 1221
    },
    "13:00": {
     "n": 2,
@@ -1079,7 +1082,7 @@
  "bulgular": [
   "Dün (2026-11-11) 2083 izlenme geldi; bir önceki gün 2841.",
   "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 188 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 3 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 2 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR: son 2 Short'tan 1 tanesi tuttu (eşik 97 izlenme / 48 sa).",

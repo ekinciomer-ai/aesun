@@ -90,7 +90,7 @@ jobs:
         run: |
           mkdir -p cikti
           if [ "${{ inputs.gorev }}" = "arac" ]; then
-            ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/arac_insan_disari.py -- $RUNNER_TEMP/modeller cikti 2>&1 | grep -E 'DISARI|PAKET|ATLA|YOK|MOD|Error|Traceback' || true
+            ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/arac_insan_disari.py -- $RUNNER_TEMP/modeller cikti 2>&1 | grep -E 'DISARI|PAKET|ATLA|YOK|MOD|BASLA|HATA|Error|Traceback|rror' | head -120 || true
             cp $RUNNER_TEMP/modeller/kaynakca.json cikti/ 2>/dev/null || true
           elif [ "${{ inputs.gorev }}" = "disari" ]; then
             ~/blender/blender -b --python-exit-code 1 -P sunucu/kozmos/parca_disari.py -- $RUNNER_TEMP/modeller cikti 2>&1 | grep -E 'DISARI|YOK|Error|Traceback' || true

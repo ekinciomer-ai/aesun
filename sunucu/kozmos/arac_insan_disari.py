@@ -39,19 +39,21 @@ def sadelestir(o, sinir):
         bpy.context.view_layer.objects.active = o; bpy.ops.object.modifier_apply(modifier='d')
     return n0
 
+def vbox(o):
+    ws = [o.matrix_world @ v.co for v in o.data.vertices]
+    lo = Vector([min(p[i] for p in ws) for i in range(3)]); hi = Vector([max(p[i] for p in ws) for i in range(3)])
+    return lo, hi
+
 def yerlestir(o, hedef, eksen):
     """eksen 'boy' = Z yüksekliği hedefe, 'uzun' = en uzun yatay kenar hedef aralığına; uzun kenar X'e döner."""
-    lo, hi = bbox([o]); s = hi - lo
-    if eksen == 'uzun':
-        if s.y > s.x:
-            o.data.transform(Matrix.Rotation(math.pi / 2, 4, 'Z')); lo, hi = bbox([o]); s = hi - lo
-        L = s.x
-        k = 1.0 if hedef[0] <= L <= hedef[1] else (sum(hedef) / 2) / L
-    else:
-        k = 1.0 if hedef[0] <= s.z <= hedef[1] else (sum(hedef) / 2) / s.z
-    o.data.transform(Matrix.Scale(k, 4)); lo, hi = bbox([o])
+    lo, hi = vbox(o); s = hi - lo
+    if eksen == 'uzun' and s.y > s.x:
+        o.data.transform(Matrix.Rotation(math.pi / 2, 4, 'Z')); lo, hi = vbox(o); s = hi - lo
+    L = s.x if eksen == 'uzun' else s.z
+    k = 1.0 if hedef[0] <= L <= hedef[1] else (sum(hedef) / 2) / L
+    o.data.transform(Matrix.Scale(k, 4)); lo, hi = vbox(o)
     o.data.transform(Matrix.Translation(-Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z))))
-    lo, hi = bbox([o]); return [round(v, 2) for v in (hi - lo)], k
+    o.data.update(); lo, hi = vbox(o); return [round(v, 2) for v in (hi - lo)], k
 
 def dokular(px):
     for im in bpy.data.images:
@@ -80,46 +82,50 @@ def disari(o, ad, kaynak, olcu, n0, k, png=True):
     print('DISARI', ad, olcu, 'olcek', round(k, 4), rapor[-1]['yuz'], 'yüz', rapor[-1]['kb'], 'KB')
 
 # ---------- araçlar ----------
+def kumele(ms):
+    """Paket: nesneleri yatay kutuları (0,3 m pay) kesişenler aynı araç olacak şekilde kümeler; yer düzlemlerini atar."""
+    kut = []
+    for o in ms:
+        lo, hi = bbox([o]); s = hi - lo
+        if s.z < 0.05 and max(s.x, s.y) > 8: continue
+        kut.append([o.name, lo, hi])
+    ana = list(range(len(kut)))
+    def bul(i):
+        while ana[i] != i: ana[i] = ana[ana[i]]; i = ana[i]
+        return i
+    for i in range(len(kut)):
+        for j in range(i + 1, len(kut)):
+            a, b = kut[i], kut[j]
+            if all(a[1][d] - 0.3 <= b[2][d] and b[1][d] - 0.3 <= a[2][d] for d in (0, 1)): ana[bul(i)] = bul(j)
+    gr = {}
+    for i, k in enumerate(kut): gr.setdefault(bul(i), []).append(k[0])
+    return list(gr.values())
+
 for kay in ('arac_kucuk', 'arac_suv', 'arac_paket'):
-    temiz()
-    if not yukle(kay): continue
-    sc = bpy.context.scene
-    # paket: her en üst nesne ağacı ayrı araç; tekli: hepsi bir araç
-    kokler = [o for o in sc.objects if o.parent is None]
-    def agaclar(r):
-        res = [r]; [res.extend(agaclar(c)) for c in r.children]; return res
-    gruplar = []
-    if kay == 'arac_paket':
-        # tek kök altında ise bir alt seviyeye in
-        while len(kokler) == 1 and kokler[0].children: kokler = list(kokler[0].children)
-        for r in kokler:
-            ms = [o for o in agaclar(r) if o.type == 'MESH']
-            if ms: gruplar.append(ms)
-        print('PAKET', kay, len(gruplar), 'grup', [tuple(round(v, 1) for v in (lambda b: b[1] - b[0])(bbox(g))) for g in gruplar][:20])
-    else:
-        gruplar = [[o for o in sc.objects if o.type == 'MESH']]
-    for gi in range(len(gruplar)):
-        temiz(); yukle(kay); sc = bpy.context.scene
-        kokler = [o for o in sc.objects if o.parent is None]
-        if kay == 'arac_paket':
-            while len(kokler) == 1 and kokler[0].children: kokler = list(kokler[0].children)
-            ms = [o for o in agaclar(kokler[gi]) if o.type == 'MESH'] if gi < len(kokler) else []
-        else:
-            ms = [o for o in sc.objects if o.type == 'MESH']
-        if not ms: continue
-        lo, hi = bbox(ms); s = hi - lo
-        if kay == 'arac_paket' and (max(s.x, s.y) < 1e-3): continue
-        o = tek_ag(ms); n0 = sadelestir(o, 40000)
-        olcu, k = yerlestir(o, (3.4, 5.2), 'uzun')
-        if not (1.2 <= olcu[2] / max(olcu[0], 1e-6) * 4.4 <= 2.4):
-            print('ATLA', kay, gi, olcu, '(araç oranı değil)'); continue
-        dokular(512)
-        disari(o, f'{kay}_{gi}' if kay == 'arac_paket' else kay, kay, olcu, n0, k)
+    try:
+        temiz()
+        if not yukle(kay): continue
+        ms = [o for o in bpy.context.scene.objects if o.type == 'MESH']
+        gruplar = kumele(ms) if kay == 'arac_paket' else [[o.name for o in ms]]
+        print('PAKET', kay, len(gruplar), 'grup')
+        for gi, adlar in enumerate(gruplar):
+            temiz(); yukle(kay)
+            ms = [bpy.data.objects[n] for n in adlar if n in bpy.data.objects]
+            if not ms: continue
+            o = tek_ag(ms); n0 = sadelestir(o, 40000)
+            olcu, k = yerlestir(o, (3.4, 5.2), 'uzun')
+            oran = olcu[2] / max(olcu[0], 1e-6)
+            if not (0.22 <= oran <= 0.55) or olcu[1] / olcu[0] > 0.6:
+                print('ATLA', kay, gi, olcu, 'oran', round(oran, 2)); continue
+            dokular(512)
+            disari(o, f'{kay}_{gi}' if kay == 'arac_paket' else kay, kay, olcu, n0, k)
+    except Exception as e:
+        import traceback; print('HATA', kay, ' | '.join(traceback.format_exc().splitlines()[-4:]))
 
 # ---------- insanlar ----------
-for kay in ('insan_nathan', 'insan_sophia', 'insan_eric', 'insan_carla', 'insan_claudia'):
+def insan(kay):
     temiz()
-    if not yukle(kay): continue
+    if not yukle(kay): return
     sc = bpy.context.scene
     arm = [o for o in sc.objects if o.type == 'ARMATURE']
     if arm and arm[0].animation_data and arm[0].animation_data.action:
@@ -137,6 +143,12 @@ for kay in ('insan_nathan', 'insan_sophia', 'insan_eric', 'insan_carla', 'insan_
     olcu, k = yerlestir(o, (1.55, 1.9), 'boy')
     dokular(1024)
     disari(o, kay, kay, olcu, n0, k)
+
+for kay in ('insan_nathan', 'insan_sophia', 'insan_eric', 'insan_carla', 'insan_claudia'):
+    try:
+        print('BASLA', kay); insan(kay)
+    except Exception as e:
+        import traceback; print('HATA', kay, ' | '.join(traceback.format_exc().splitlines()[-4:]))
 
 json.dump(rapor, open(os.path.join(out, 'olcu.json'), 'w'), ensure_ascii=False, indent=1)
 print('DISARI_BITTI', len(rapor))

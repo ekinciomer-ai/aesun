@@ -24,7 +24,7 @@ P
 cat > $D/Dockerfile <<'F'
 FROM python:3.12-slim
 COPY kod /kod
-RUN pip install --no-cache-dir /kod && useradd -u 1500 -m aleph
+RUN pip install --no-cache-dir "numpy<2.3" /kod && useradd -u 1500 -m aleph
 COPY baslat.py /baslat.py
 USER aleph
 CMD ["python", "/baslat.py"]

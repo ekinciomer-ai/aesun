@@ -6,10 +6,14 @@ permissions:
 jobs:
   al:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        aralik: ["442 446", "446 449", "449 453", "453 456", "456 460", "460 466"]
     steps:
       - uses: actions/checkout@v4
-      - run: python3 sunucu/bagli/tkgm_parseller.py cikti
+      - run: python3 sunucu/bagli/tkgm_parseller.py cikti ${{ matrix.aralik }}
       - name: kozmos-cikti dalına yaz
         if: always()
         run: |

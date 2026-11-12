@@ -20,7 +20,9 @@ sonuc, hata = [], 0
 # önce erişim testi
 t = al(446, 1); print('TEST 446/1:', 'ok' if isinstance(t, dict) else t, flush=True)
 if not isinstance(t, dict): sys.exit(0)
-for ada in range(438, 466):
+A0, A1 = (int(sys.argv[2]), int(sys.argv[3])) if len(sys.argv) > 3 else (442, 466)
+DOSYA = os.path.join(OUT, f'parseller_tkgm_{A0}.json')
+for ada in range(A0, A1):
     bos, enbuyuk = 0, 0
     for p in range(1, 41):
         d = al(ada, p); time.sleep(0.8)
@@ -32,6 +34,6 @@ for ada in range(438, 466):
             sonuc.append({'id': f'{ada}/{p}', 'ada': ada, 'parsel': p, 'm2': float(str(pr.get('alan', '0')).replace('.', '').replace(',', '.') or 0), 'nitelik': pr.get('nitelik'), 'pafta': pr.get('pafta'), 'xy': [xy(c[0], c[1]) for c in ring]})
         if bos >= 8 and p > enbuyuk + 7: break
     print('ada', ada, 'en büyük parsel', enbuyuk, 'toplam', len(sonuc), flush=True)
-    json.dump(sonuc, open(os.path.join(OUT, 'parseller_tkgm.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
-json.dump(sonuc, open(os.path.join(OUT, 'parseller_tkgm.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+    json.dump(sonuc, open(DOSYA, 'w'), ensure_ascii=False, separators=(',', ':'))
+json.dump(sonuc, open(DOSYA, 'w'), ensure_ascii=False, separators=(',', ':'))
 print('TKGM_BITTI', len(sonuc), 'hata', hata)

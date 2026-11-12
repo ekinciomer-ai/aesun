@@ -99,14 +99,14 @@ function altyazi(t){const G=GRUP.find(x=>t>=x.t0&&t<x.t1);if(!G)return'';const u
 let ilk=true;
 function kare(t){if(ilk){grupla();ilk=false}
  const SS=K.sahneler;let i=SS.findIndex(s=>t>=s.bas&&t<s.son);if(i<0)i=t<SS[0].bas?0:SS.length-1;const s=SS[i],ts=t-s.bas,u=cl(ts/(s.son-s.bas)),GEC=0.3;
- const cam=(si,tt)=>{const sc=SS[si],uu=cl(tt/(sc.son-sc.bas));const z=1.0+0.07*ease(uu),dx=Math.sin(uu*Math.PI)*-12;return `<g transform="translate(${540+dx},960) scale(${z}) translate(-540,-960)">${S[sc.ad](tt)}</g>`};
+ const cam=(si,tt)=>{const sc=SS[si];if(!S[sc.ad])return '';let uu=cl(tt/(sc.son-sc.bas));const z=1.0+0.07*ease(uu),dx=Math.sin(uu*Math.PI)*-12;return `<g transform="translate(${540+dx},960) scale(${z}) translate(-540,-960)">${S[sc.ad](tt)}</g>`};
  let o=DEFS+cam(i,ts);if(i>0&&ts<GEC)o+=`<g opacity="${1-ts/GEC}">${cam(i-1,ts+SS[i-1].son-SS[i-1].bas)}</g>`;
  o+=`<rect x="-60" y="-60" width="1200" height="2040" fill="url(#vin)"/>`;
  const son=K.kelimeler[K.kelimeler.length-1].s;
  if(t>son-0.2){const a=ease((t-(son-0.2))/0.4);o+=`<g opacity="${a}"><text x="540" y="250" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="96" fill="#fff" stroke="${INK}" stroke-width="14" paint-order="stroke">TAMAMI KANALDA</text><text x="540" y="350" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="60" fill="${YEL}" stroke="${INK}" stroke-width="12" paint-order="stroke">SEN HİÇ YAŞADIN MI? ▼</text></g>`}
- else{o+=ust(s,ts,1);if(i>0&&ts<GEC)o+=ust(SS[i-1],5,1-ts/GEC)}
+ else{o+=ust(s,ts,1);if(i>0&&ts<GEC&&SS[i-1].ust)o+=ust(SS[i-1],5,1-ts/GEC)}
  o+=altyazi(t);
- o+=`<text x="540" y="1820" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="34" fill="#fff" opacity=".85">ANTİK STÜDYO</text><text x="540" y="1862" text-anchor="middle" font-family="Kalam" font-size="24" fill="#a9b8d6">Özgün çizim canlandırma · Ses: yapay zekâ ile klonlanmış kendi sesim · Müzik: kanal üretimi</text>`;
+ o+=`<text x="540" y="1820" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="34" fill="#fff" opacity=".85">ANTİK STÜDYO</text><text x="540" y="1862" text-anchor="middle" font-family="Kalam" font-size="24" fill="#a9b8d6">Özgün çizim canlandırma · Ses: yapay zekâ seslendirme · Müzik: kanal üretimi</text>`;
  o+=`<rect x="0" y="0" width="${1080*t/K.toplam}" height="8" fill="${YEL}"/>`;
  if(t>K.toplam-0.6)o+=`<rect width="1080" height="1920" fill="#000" opacity="${(t-(K.toplam-0.6))/0.6}"/>`;
  SV.innerHTML=o}

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T06:03+03:00",
+ "olusturma": "2026-11-12T09:06+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -436,11 +436,11 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Biliyor muydun?",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 1,
-   "medyan_48sa": 69,
-   "tutma_orani": 100,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 0,
+   "medyan_48sa": 40,
+   "tutma_orani": 50,
    "izlenme_yuzde": 62,
    "en_iyi": {
     "baslik": "1958'den beri uzayda dönen güneş enerjili uydu 🛰️ #shorts",
@@ -494,12 +494,12 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 188,
-  "Kozmos Lab": 50,
-  "Kozmos Lab TR": 67,
-  "Ömür Dediğin": 50,
+  "Estudio Antiguo": 122,
   "Antik Stüdyo": 637,
-  "Estudio Antiguo": 122
+  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 67,
+  "Ancient Studio": 188,
+  "Kozmos Lab": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -588,6 +588,10 @@
    "13:00": {
     "n": 2,
     "medyan": 52
+   },
+   "17:00": {
+    "n": 1,
+    "medyan": 10
    },
    "19:00": {
     "n": 1,
@@ -1089,7 +1093,7 @@
   "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 3 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 2 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
-  "Kozmos Lab TR: son 3 Short'tan 2 tanesi tuttu (eşik 67 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 4 Short'tan 2 tanesi tuttu (eşik 67 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %56'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",

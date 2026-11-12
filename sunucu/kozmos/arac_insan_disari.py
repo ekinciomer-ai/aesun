@@ -9,7 +9,10 @@ src, out = sys.argv[sys.argv.index('--') + 1:][:2]; os.makedirs(out, exist_ok=Tr
 rapor = []
 
 def temiz():
-    bpy.ops.wm.read_factory_settings(use_empty=True)
+    # read_factory_settings betik içinde Blender'ı çökertiyor; nesneleri silip artıkları temizle
+    for ob in list(bpy.data.objects): bpy.data.objects.remove(ob, do_unlink=True)
+    try: bpy.data.orphans_purge(do_recursive=True)
+    except Exception: pass
 
 def yukle(ad):
     g = glob.glob(os.path.join(src, ad, '**', '*.gltf'), recursive=True) + glob.glob(os.path.join(src, ad, '**', '*.glb'), recursive=True)
@@ -62,7 +65,7 @@ def dokular(px):
 
 def onizle(fn):
     sc = bpy.context.scene
-    lo, hi = bbox([o for o in sc.objects if o.type == 'MESH']); c = (lo + hi) / 2; r = (hi - lo).length
+    lo, hi = bbox([o for o in sc.objects if o.type == 'MESH' and not o.hide_render]); c = (lo + hi) / 2; r = (hi - lo).length
     cam = bpy.data.objects.new('k', bpy.data.cameras.new('k')); sc.collection.objects.link(cam); sc.camera = cam
     cam.location = c + Vector((r * 0.9, -r * 1.1, r * 0.6)); cam.rotation_euler = (c - cam.location).to_track_quat('-Z', 'Y').to_euler()
     l = bpy.data.objects.new('l', bpy.data.lights.new('l', 'SUN')); l.data.energy = 4; l.rotation_euler = (0.7, 0.2, 0.6); sc.collection.objects.link(l)
@@ -72,10 +75,11 @@ def onizle(fn):
     bpy.data.objects.remove(cam); bpy.data.objects.remove(l)
 
 def disari(o, ad, kaynak, olcu, n0, k, png=True):
-    for x in list(bpy.context.scene.objects):
-        if x != o: bpy.data.objects.remove(x, do_unlink=True)
+    for x in bpy.context.scene.objects:
+        x.select_set(x == o); x.hide_render = x != o
+    bpy.context.view_layer.objects.active = o
     fn = os.path.join(out, ad + '.glb')
-    bpy.ops.export_scene.gltf(filepath=fn, export_format='GLB', export_image_format='JPEG', export_jpeg_quality=80,
+    bpy.ops.export_scene.gltf(filepath=fn, export_format='GLB', use_selection=True, export_image_format='JPEG', export_jpeg_quality=80,
                               export_draco_mesh_compression_enable=False, export_apply=True, export_animations=False, export_skins=False)
     if png: onizle(os.path.join(out, ad + '.png'))
     rapor.append({'ad': ad, 'kaynak': kaynak, 'olcu_m': olcu, 'olcek': round(k, 4), 'yuz': len(o.data.polygons), 'yuz_ilk': n0, 'kb': os.path.getsize(fn) // 1024})
@@ -109,7 +113,6 @@ for kay in ('arac_kucuk', 'arac_suv', 'arac_paket'):
         gruplar = kumele(ms) if kay == 'arac_paket' else [[o.name for o in ms]]
         print('PAKET', kay, len(gruplar), 'grup')
         for gi, adlar in enumerate(gruplar):
-            temiz(); yukle(kay)
             ms = [bpy.data.objects[n] for n in adlar if n in bpy.data.objects]
             if not ms: continue
             o = tek_ag(ms); n0 = sadelestir(o, 40000)
@@ -119,6 +122,7 @@ for kay in ('arac_kucuk', 'arac_suv', 'arac_paket'):
                 print('ATLA', kay, gi, olcu, 'oran', round(oran, 2)); continue
             dokular(512)
             disari(o, f'{kay}_{gi}' if kay == 'arac_paket' else kay, kay, olcu, n0, k)
+            bpy.data.objects.remove(o, do_unlink=True)
     except Exception as e:
         import traceback; print('HATA', kay, ' | '.join(traceback.format_exc().splitlines()[-4:]))
 

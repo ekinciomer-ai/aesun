@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T23:01+03:00",
+ "olusturma": "2026-11-13T00:02+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -535,12 +535,12 @@
   }
  ],
  "esikler": {
+  "Estudio Antiguo": 122,
+  "Kozmos Lab": 50,
+  "Ömür Dediğin": 50,
   "Antik Stüdyo": 637,
   "Ancient Studio": 188,
-  "Kozmos Lab": 50,
-  "Kozmos Lab TR": 67,
-  "Estudio Antiguo": 122,
-  "Ömür Dediğin": 50
+  "Kozmos Lab TR": 67
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -663,6 +663,14 @@
    "kanal": "Antik Stüdyo",
    "tarih": "2026-11-14",
    "planli_short": 2,
+   "hedef_kota": 2,
+   "eksik": 0,
+   "uyari": "19:00 Gündem+Tarih slotu BOŞ"
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "tarih": "2026-11-15",
+   "planli_short": 3,
    "hedef_kota": 2,
    "eksik": 0,
    "uyari": "19:00 Gündem+Tarih slotu BOŞ"
@@ -1057,6 +1065,14 @@
   },
   {
    "tur": "KONTROL",
+   "kanal": "Kozmos Lab",
+   "platform": "YouTube",
+   "vid": "IkKI1JGVbLw",
+   "baslik": "How does Hoover Dam make electricity? 💧 #shorts",
+   "neden": "2026-11-12 22:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
    "kanal": "Kozmos Lab TR",
    "platform": "YouTube",
    "vid": "11MbMN7fERo",
@@ -1145,7 +1161,7 @@
   }
  ],
  "bulgular": [
-  "Dün (2026-11-11) 2083 izlenme geldi; bir önceki gün 2841.",
+  "Dün (2026-11-12) 872 izlenme geldi; bir önceki gün 2083.",
   "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 4 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
@@ -1173,7 +1189,7 @@
   "Kozmos Lab TR: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %62 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Kozmos Lab TR: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %47 (hedef ≥%70).",
   "Uzun videolar (9 yayında): medyan 17 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
-  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-14."
+  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-14, 2026-11-15."
  ],
  "en_iyi": [
   {

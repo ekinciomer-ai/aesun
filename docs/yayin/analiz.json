@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T18:31+03:00",
+ "olusturma": "2026-11-12T18:40+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 4 Short, YALNIZ Gündem + Tarih (2), Tablo Serisi (1), Tarihi Magazin (1); Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) olduğu gibi yayınlanır; kural yeni üretime uygulanır.",
@@ -224,12 +224,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 23,
+   "medyan_48sa": 24,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Saat 09.05. Onu yalnız Türkiye anmıyor 🇹🇷 #10Kasım #shorts",
-    "i48": 35
+    "i48": 37
    }
   },
   {
@@ -250,7 +250,7 @@
    "karar": "ARTIR",
    "neden": "videoların %69'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 13,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": 1509,
    "tutma_orani": 69,
    "izlenme_yuzde": 66,
@@ -298,7 +298,7 @@
    "karar": "ARTIR",
    "neden": "videoların %83'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 12,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 1414,
    "tutma_orani": 83,
    "izlenme_yuzde": 54,
@@ -450,12 +450,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 17,
+   "medyan_48sa": 19,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "How does a wind turbine make electricity? 🌬️ #shorts",
-    "i48": 17
+    "i48": 19
    }
   },
   {
@@ -497,12 +497,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 35,
+   "medyan_48sa": 37,
    "tutma_orani": 0,
    "izlenme_yuzde": 62,
    "en_iyi": {
     "baslik": "Rüzgâr türbini elektriği nasıl üretir? 🌬️ #shorts",
-    "i48": 35
+    "i48": 37
    },
    "kaydirmadan_izleme_yuzde": 50
   },
@@ -536,12 +536,12 @@
   }
  ],
  "esikler": {
-  "Estudio Antiguo": 122,
-  "Ancient Studio": 188,
-  "Kozmos Lab TR": 67,
   "Kozmos Lab": 50,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 67,
+  "Estudio Antiguo": 122,
   "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637
+  "Ancient Studio": 188
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -563,7 +563,7 @@
    },
    "14:00": {
     "n": 3,
-    "medyan": 558
+    "medyan": 570
    },
    "17:00": {
     "n": 2,
@@ -593,7 +593,7 @@
   "Ancient Studio": {
    "00:00": {
     "n": 4,
-    "medyan": 480
+    "medyan": 486
    },
    "14:00": {
     "n": 2,
@@ -633,11 +633,11 @@
   "Kozmos Lab TR": {
    "13:00": {
     "n": 2,
-    "medyan": 52
+    "medyan": 53
    },
    "17:00": {
     "n": 1,
-    "medyan": 10
+    "medyan": 12
    },
    "19:00": {
     "n": 1,
@@ -651,7 +651,7 @@
    },
    "19:00": {
     "n": 1,
-    "medyan": 0
+    "medyan": 2
    },
    "22:00": {
     "n": 2,
@@ -660,22 +660,6 @@
   }
  },
  "takvim_aciklari": [
-  {
-   "kanal": "Antik Stüdyo",
-   "tarih": "2026-11-12",
-   "planli_short": 3,
-   "hedef_kota": 4,
-   "eksik": 1,
-   "uyari": "1 Short slotu boş"
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "tarih": "2026-11-13",
-   "planli_short": 3,
-   "hedef_kota": 4,
-   "eksik": 1,
-   "uyari": "1 Short slotu boş"
-  },
   {
    "kanal": "Antik Stüdyo",
    "tarih": "2026-11-14",
@@ -742,13 +726,13 @@
     {
      "vid": "LYZZ8R-Qo8A",
      "baslik": "How Did Mehmed II Lock the Bosphorus in Just 139 Days? 🏰 (1452) #shorts",
-     "izlenme": 247,
+     "izlenme": 248,
      "durum": "Yayında"
     },
     {
      "vid": "C62qY8WVRRg",
      "baslik": "How Did the Ottomans Try to Connect the Black Sea & Caspian in 1569? 🗺️ #shorts",
-     "izlenme": 83,
+     "izlenme": 84,
      "durum": "Yayında"
     },
     {
@@ -792,7 +776,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2772,
+     "izlenme": 2774,
      "durum": "Yayında"
     },
     {
@@ -816,7 +800,7 @@
     {
      "vid": "7a3yi4BG3Pw",
      "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
-     "izlenme": 1189,
+     "izlenme": 1196,
      "durum": "Yayında"
     }
    ],
@@ -860,7 +844,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2772,
+     "izlenme": 2774,
      "durum": "Yayında"
     },
     {
@@ -872,13 +856,13 @@
     {
      "vid": "7a3yi4BG3Pw",
      "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
-     "izlenme": 1189,
+     "izlenme": 1196,
      "durum": "Yayında"
     },
     {
      "vid": "ZMMptkEnGMs",
      "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
-     "izlenme": 187,
+     "izlenme": 188,
      "durum": "Yayında"
     },
     {
@@ -912,19 +896,19 @@
     {
      "vid": "bsK8ALbOA8g",
      "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️ #shorts",
-     "izlenme": 2788,
+     "izlenme": 2789,
      "durum": "Yayında"
     },
     {
-     "vid": "_epFSy2zg20",
-     "baslik": "Venüs gerçekte ayakta duramazdı 🐚 #shorts",
-     "izlenme": 1527,
+     "vid": "TkHPfx33Jqg",
+     "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
+     "izlenme": 2570,
      "durum": "Yayında"
     },
     {
-     "vid": "mBBJnS3kPsE",
-     "baslik": "Van Gogh bu tabloyu akıl hastanesinde yaptı 🌌 #shorts",
-     "izlenme": 1415,
+     "vid": "FvZCiJBoMyg",
+     "baslik": "Bu Rembrandt 36 yıldır kayıp 🕵️ #shorts",
+     "izlenme": 2164,
      "durum": "Yayında"
     }
    ],
@@ -940,7 +924,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2772,
+     "izlenme": 2774,
      "durum": "Yayında"
     },
     {
@@ -952,13 +936,13 @@
     {
      "vid": "7a3yi4BG3Pw",
      "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
-     "izlenme": 1189,
+     "izlenme": 1196,
      "durum": "Yayında"
     },
     {
      "vid": "ZMMptkEnGMs",
      "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
-     "izlenme": 187,
+     "izlenme": 188,
      "durum": "Yayında"
     },
     {
@@ -996,7 +980,7 @@
     {
      "vid": "2W3av1wzx5A",
      "baslik": "¿Por qué hay una mujer sin cara en este cuadro del Prado? 🤔 #shorts",
-     "izlenme": 0,
+     "izlenme": 2,
      "durum": "Yayında"
     }
    ],
@@ -1007,7 +991,7 @@
    "uzun_vid": "HvRuOsJcczM",
    "uzun_baslik": "From Sand to Power: How a Solar Panel Is Made | Step-by-Step 3D Explainer",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 14,
+   "uzun_izlenme": 17,
    "baglanacak_shortlar": [
     {
      "vid": "oEFXYkmfE-E",
@@ -1028,13 +1012,13 @@
     {
      "vid": "cfbwB6z1_cA",
      "baslik": "How does a wind turbine make electricity? 🌬️ #shorts",
-     "izlenme": 17,
+     "izlenme": 19,
      "durum": "Yayında"
     },
     {
      "vid": "7naXMebQd70",
      "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
-     "izlenme": 0,
+     "izlenme": 2,
      "durum": "Yayında"
     }
    ],
@@ -1050,7 +1034,7 @@
     {
      "vid": "MSOsi_wK55Q",
      "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
-     "izlenme": 924,
+     "izlenme": 926,
      "durum": "Yayında"
     },
     {
@@ -1071,14 +1055,6 @@
    "vid": "",
    "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 (Antik Roma Kremi)",
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "nGacEJhKQbU",
-   "baslik": "800 yıl önce elektrik olmadan çalışan tavus kuşu robotu! 🦚⚙️ | El-Cezeri (1206) #shorts",
-   "neden": "2026-11-12 14:00 planlıydı, hâlâ yayında görünmüyor"
   }
  ],
  "bulgular": [
@@ -1096,9 +1072,9 @@
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1804 izlenme, 2 video).",
-  "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 480 izlenme, 4 video).",
+  "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 486 izlenme, 4 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 913 izlenme, 2 video).",
-  "Kozmos Lab TR: en iyi yayın saati şimdilik 13:00 (medyan 52 izlenme, 2 video).",
+  "Kozmos Lab TR: en iyi yayın saati şimdilik 13:00 (medyan 53 izlenme, 2 video).",
   "Kozmos Lab: en iyi yayın saati şimdilik 22:00 (medyan 10 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %73 izleniyor, tutmayanlar %50 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %44 (hedef ≥%70).",
@@ -1109,7 +1085,7 @@
   "Kozmos Lab: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %42 (hedef ≥%70).",
   "Kozmos Lab TR: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %62 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Kozmos Lab TR: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %47 (hedef ≥%70).",
-  "Uzun videolar (8 yayında): medyan 13 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
+  "Uzun videolar (9 yayında): medyan 17 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
   "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-14."
  ],
  "en_iyi": [
@@ -1141,6 +1117,11 @@
  ],
  "en_zayif": [
   {
+   "kanal": "Kozmos Lab",
+   "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
+   "i48": 2
+  },
+  {
    "kanal": "Estudio Antiguo",
    "baslik": "Un viaje de mil millas comienza con un solo paso 🏔️ | Lao Tzu #shorts",
    "i48": 1
@@ -1153,11 +1134,6 @@
   {
    "kanal": "Ancient Studio",
    "baslik": "What happened to the emus? The end of the Emu War 🐦",
-   "i48": 0
-  },
-  {
-   "kanal": "Kozmos Lab",
-   "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
    "i48": 0
   },
   {

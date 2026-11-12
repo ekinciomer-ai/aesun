@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T11:07+03:00",
+ "olusturma": "2026-11-12T13:56+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -210,6 +210,18 @@
   },
   {
    "kanal": "Antik Stüdyo",
+   "seri": "Gece Yasakları",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Antik Stüdyo",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
    "neden": "videoların %69'i tuttu (eşik 637 izlenme / 48 sa)",
@@ -320,13 +332,16 @@
    "kanal": "Estudio Antiguo",
    "seri": "10 Kasım",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 0,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "¿Qué hace un líder turco en el Paseo de la Reforma? 🇲🇽 #shorts",
+    "i48": 0
+   }
   },
   {
    "kanal": "Estudio Antiguo",
@@ -494,12 +509,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 50,
   "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637,
-  "Estudio Antiguo": 122,
   "Ancient Studio": 188,
-  "Kozmos Lab TR": 67
+  "Estudio Antiguo": 122,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 67,
+  "Kozmos Lab": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -578,6 +593,10 @@
    "14:00": {
     "n": 1,
     "medyan": 1
+   },
+   "21:00": {
+    "n": 1,
+    "medyan": 0
    },
    "23:00": {
     "n": 2,
@@ -1095,7 +1114,7 @@
   "Dün (2026-11-11) 2083 izlenme geldi; bir önceki gün 2841.",
   "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
-  "Estudio Antiguo: son 3 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
+  "Estudio Antiguo: son 4 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 3 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR: son 4 Short'tan 2 tanesi tuttu (eşik 67 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %56'i tuttu (eşik 188 izlenme / 48 sa).",
@@ -1150,11 +1169,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Kozmos Lab",
-   "baslik": "How does a handful of sand become a solar panel? ☀️ #shorts",
-   "i48": 2
-  },
-  {
    "kanal": "Estudio Antiguo",
    "baslik": "Un viaje de mil millas comienza con un solo paso 🏔️ | Lao Tzu #shorts",
    "i48": 1
@@ -1172,6 +1186,11 @@
   {
    "kanal": "Kozmos Lab",
    "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
+   "i48": 0
+  },
+  {
+   "kanal": "Estudio Antiguo",
+   "baslik": "¿Qué hace un líder turco en el Paseo de la Reforma? 🇲🇽 #shorts",
    "i48": 0
   }
  ]

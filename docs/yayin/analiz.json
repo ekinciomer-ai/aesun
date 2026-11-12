@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-13T01:03+03:00",
+ "olusturma": "2026-11-13T01:33+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -479,7 +479,7 @@
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 40,
    "tutma_orani": 50,
    "izlenme_yuzde": 62,
@@ -504,6 +504,18 @@
     "i48": 37
    },
    "kaydirmadan_izleme_yuzde": 50
+  },
+  {
+   "kanal": "Kozmos Lab TR",
+   "seri": "Gerçek Görüntü",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
   },
   {
    "kanal": "Kozmos Lab TR",
@@ -535,12 +547,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 50,
   "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 67,
   "Estudio Antiguo": 122,
-  "Ancient Studio": 188,
-  "Ömür Dediğin": 50
+  "Ömür Dediğin": 50,
+  "Kozmos Lab": 50,
+  "Kozmos Lab TR": 67,
+  "Ancient Studio": 188
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1104,6 +1116,22 @@
    "neden": "2026-11-12 21:00 planlıydı, hâlâ yayında görünmüyor"
   },
   {
+   "tur": "KONTROL",
+   "kanal": "Kozmos Lab",
+   "platform": "YouTube",
+   "vid": "ReCRjuyawNk",
+   "baslik": "Real footage: 4 astronauts' trip around the Moon, start to splashdown 🚀🌕 #shorts",
+   "neden": "2026-11-12 19:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "MH2cG2GIFdk",
+   "baslik": "Telefonuna 2 saniye bakmanın gerçek bedeli neden 23 dakika? 🧠📱 #shorts",
+   "tarih": "2026-11-18",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Kozmos Lab TR",
    "vid": "3wAiVTn0uko",
@@ -1133,6 +1161,14 @@
    "vid": "QAzkFFZij2E",
    "baslik": "Bu gece Süper Ay! 🌕 #shorts",
    "tarih": "2026-11-24",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "BqJQSRakmho",
+   "baslik": "Açık bıraktığın bildirim sekmeleri anlık IQ skorunu 10 puan düşürüyor 🧠💻 #shorts",
+   "tarih": "2026-11-25",
    "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {

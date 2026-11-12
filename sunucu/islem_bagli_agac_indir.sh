@@ -19,13 +19,9 @@ k.append({'ad':'$ad','model':d.get('name'),'yazar':d['user']['displayName'] or d
 json.dump(k,open(f,'w'),ensure_ascii=False,indent=1)"
   echo "NOT: $ad indirildi ($(du -sh $M/$ad | cut -f1), lisans $lic)"
 done <<'L'
-arac_paket 20f9af9b8a404d5cb022ac6fe87f21f5
-arac_kucuk 67c84e4d30ae42fda22c0a0c7526df26
-arac_suv edc994ad28ed438cb365c0e0389ac177
-insan_nathan 143a2b1ea5eb4385ae90a73657aca3bc
-insan_sophia dc448c3be0e74f96a55fb475a13433cf
-insan_eric a46bc9f67aaa415bb4f3241eef900e7f
-insan_carla acf520f450d14dd799f98a6fede3edf5
-insan_claudia c659bd0accab47c6bbe390cf822a2b92
+agac_genel d989c0f801d847b9a74992ec4ddcfdfc
+agac_cam d45218a3fab349e5b1de040f29e7b6f9
+agac_kavak ec7c1d301bbc43dca5fe5f0650148d13
+agac_sari_cam 422b961ff3d14e7baa7e9077572b2247
 L
-du -sh $M | sed 's/^/NOT: toplam /'
+rm -rf $M/loft17 $M/ic14 $M/arac_* $M/insan_* 2>/dev/null; du -sh $M | sed 's/^/NOT: toplam /'

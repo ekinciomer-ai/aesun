@@ -36,14 +36,20 @@ def ornekle(M, ox, oy, z, step, bilinear=True):
     g = lambda yy, xx: A[np.clip(yy, 0, A.shape[0] - 1), np.clip(xx, 0, A.shape[1] - 1)]
     return g(y0, x0) * (1 - fx) * (1 - fy) + g(y0, x0 + 1) * fx * (1 - fy) + g(y0 + 1, x0) * (1 - fx) * fy + g(y0 + 1, x0 + 1) * fx * fy, xs, ys
 # uydu
-M, ox, oy = mozaik(19, 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 'RGB')
-U, xs, ys = ornekle(M, ox, oy, 19, 0.25)
+URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+for ZU in (19, 18, 17):  # "Map data not yet available" karoları gri ve düz: varyansa bak
+    lo, la = ll(260, 290); px, py = merc(lo, la, ZU); t = np.asarray(Image.open(io.BytesIO(get(URL.format(z=ZU, x=int(px // 256), y=int(py // 256))))).convert('L')).astype(float)
+    print('z', ZU, 'std', t.std())
+    if t.std() > 12: break
+M, ox, oy = mozaik(ZU, URL, 'RGB')
+ADIM = {19: 0.25, 18: 0.4, 17: 0.8}[ZU]
+U, xs, ys = ornekle(M, ox, oy, ZU, ADIM)
 Image.fromarray(np.clip(U, 0, 255).astype(np.uint8)).save(os.path.join(OUT, 'uydu.jpg'), quality=78, optimize=True, progressive=True)
 # DEM (Terrarium: (R*256 + G + B/256) - 32768); karoyu RGB olarak al, yüksekliğe çevir sonra örnekle
 D, dx, dy = mozaik(15, 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png', 'RGB')
 a = np.asarray(D).astype(np.float64); H = a[..., 0] * 256 + a[..., 1] + a[..., 2] / 256 - 32768
 E, exs, eys = ornekle(Image.fromarray(H.astype(np.float32), mode='F'), dx, dy, 15, 2.0)
 json.dump({'x0': X0, 'y1': Y1, 'step': 2.0, 'nx': len(exs), 'ny': len(eys), 'kot_dm': [int(round(v * 10)) for v in E.flatten()]}, open(os.path.join(OUT, 'dem.json'), 'w'), separators=(',', ':'))
-json.dump({'uydu': {'x0': X0, 'x1': X0 + (len(xs) - 1) * 0.25, 'y0': Y1 - (len(ys) - 1) * 0.25, 'y1': Y1, 'px': [len(xs), len(ys)], 'kaynak': 'Esri World Imagery (Esri, Maxar, Earthstar Geographics)', 'z': 19},
+json.dump({'uydu': {'x0': X0, 'x1': X0 + (len(xs) - 1) * ADIM, 'y0': Y1 - (len(ys) - 1) * ADIM, 'y1': Y1, 'px': [len(xs), len(ys)], 'kaynak': 'Esri World Imagery (Esri, Maxar, Earthstar Geographics)', 'z': ZU, 'adim': ADIM},
            'dem': {'kaynak': 'AWS Terrain Tiles (Terrarium; SRTM/ALOS/Copernicus karışımı)', 'z': 15, 'min': float(E.min()), 'max': float(E.max())}}, open(os.path.join(OUT, 'bilgi.json'), 'w'), ensure_ascii=False, indent=1)
 print('UYDU_DEM_BITTI', U.shape, E.shape, E.min(), E.max())

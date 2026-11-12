@@ -27,6 +27,39 @@ KANAL_NORMAL = {
     "Kozmos Lab (@kozmoslab)": "Kozmos Lab",
 }
 SERI_NORMAL = {"Did You Know?": "Did you know?"}
+
+# ODAK DÖNEMİ (Ömer kararı, 12 Kas 2026): bir ay boyunca yalnız Antik Stüdyo büyütülür.
+#  - Antik Stüdyo: günde 4 Short, YALNIZ Gündem + Tarih (2), Tablo Serisi (1), Tarihi Magazin (1); Spor + Tarih maç haftalarında Gündem slotunda; diğerleri durur.
+#  - Diğer kanallar: haftada en fazla 2 Short (günlük kota 0, haftalık 2).
+#  - Aynı konu (KONU_ANAHTARLARI) bir kanalda 14 gün içinde ikinci kez yayınlanmaz.
+ODAK_BITIS = "2026-12-12"
+ODAK_KANAL = "Antik Stüdyo"
+ODAK_SERILER = {"Gündem + Tarih": 2, "Tablo Serisi": 1, "Tarihi Magazin": 1}
+ODAK_EK_IZINLI = {"Spor + Tarih"}  # yalnız önemli maç haftalarında, Gündem + Tarih slotunu kullanır
+# 12 Kas 2026'da zaten üretilmiş/planlanmış videolar kurallara takılmaz (Ömer: "hazır olanlar yayınlansın")
+try:
+    ODAK_ISTISNA = set(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "odak_istisna.json"), encoding="utf-8"))["vid"])
+except Exception:
+    ODAK_ISTISNA = set()
+ODAK_HAFTALIK = {"Ancient Studio": 2, "Estudio Antiguo": 2, "Kozmos Lab TR": 2, "Kozmos Lab": 2, "Ömür Dediğin": 2}
+KONU_TEKRAR_GUN = 14
+KONU_ANAHTARLARI = {
+    "Mimar Sinan": ["mimar sinan", "süleymaniye", "sinan"], "Mona Lisa": ["mona lisa"], "Kaplumbağa Terbiyecisi": ["kaplumbağa"],
+    "Piri Reis": ["piri reis"], "Rembrandt / Gece Devriyesi": ["rembrandt", "gece devriyesi"], "Tuna": ["tuna"],
+    "Boğaz / Kızıldeniz": ["boğaz", "kızıldeniz", "babülmendep", "hazar"], "Emu Savaşı": ["emu"], "İnci Küpeli Kız": ["inci küpeli"],
+    "Çığlık": ["çığlık"], "Venüs'ün Doğuşu": ["venüs"], "Son Akşam Yemeği": ["akşam yemeği"], "Büyük Dalga": ["büyük dalga"],
+    "Amerikan Gotiği": ["amerikan gotiği"], "Klimt / Öpücük": ["öpücük", "klimt"], "Bosch": ["bosch", "dünyevi zevkler"],
+    "İbn-i Sina": ["ibn-i sînâ", "ibn-i sina", "ibn sina"], "Fatih": ["fatih"], "Atatürk": ["atatürk", "09.05"],
+}
+
+
+def odak_aktif(simdi):
+    return simdi.strftime("%Y-%m-%d") <= ODAK_BITIS
+
+
+def konu_bul(baslik):
+    t = (baslik or "").lower()
+    return [k for k, anahtarlar in KONU_ANAHTARLARI.items() if any(a in t for a in anahtarlar)]
 MIN_ORNEK = 3          # karar için en az bu kadar ölçülmüş video
 OLGUN_SAAT = 40        # bu yaştan küçük video "erken" sayılır, karara katılmaz
 
@@ -146,6 +179,14 @@ def main():
                 dag[s["seri"]] = k; kalan -= k
         plan[kanal] = {"gunluk_short_kotasi": kota, "seri_dagilimi": dag,
                        "durdurulan": [s["seri"] for s in S if s["karar"] == "DURDUR"]}
+    if odak_aktif(simdi):
+        tum_seri = {s["seri"] for s in seriler if s["kanal"] == ODAK_KANAL}
+        plan[ODAK_KANAL] = {"gunluk_short_kotasi": sum(ODAK_SERILER.values()), "seri_dagilimi": dict(ODAK_SERILER),
+                            "durdurulan": sorted(tum_seri - set(ODAK_SERILER) - ODAK_EK_IZINLI), "odak": f"ODAK DÖNEMİ {ODAK_BITIS}'e kadar"}
+        for kn, hk in ODAK_HAFTALIK.items():
+            p0 = plan.get(kn, {"seri_dagilimi": {}, "durdurulan": []})
+            plan[kn] = {"gunluk_short_kotasi": 0, "haftalik_short_kotasi": hk, "seri_dagilimi": p0.get("seri_dagilimi", {}),
+                        "durdurulan": p0.get("durdurulan", []), "odak": f"ODAK DÖNEMİ {ODAK_BITIS}'e kadar: haftada en fazla {hk} Short"}
 
     # 5) Saat performansı (yalnız olgun Short'lar)
     saatler = {}
@@ -231,9 +272,44 @@ def main():
             for x in K:
                 t = zaman(x) if x.get("tarih") else None
                 kn = KANAL_NORMAL.get(x.get("kanal"), x.get("kanal"))
-                if kn == kanal and x.get("seri") == seri and x.get("durum") in ("Planlı", "Taslak") and t and t > simdi:
+                if kn == kanal and x.get("seri") == seri and x.get("durum") in ("Planlı", "Taslak") and t and t > simdi and x.get("vid") not in ODAK_ISTISNA:
                     eylemler.append({"tur": "ERTELE", "kanal": kanal, "vid": x.get("vid", ""), "baslik": x.get("baslik"),
                                      "neden": f"'{seri}' serisi durduruldu; bu slotu {', '.join(p['seri_dagilimi']) or 'en iyi seri'} kullanır"})
+
+    if odak_aktif(simdi):
+        # Haftalık kota: odak dışı kanallarda her 7 günlük pencerede en fazla N Short (ileri tarihli planlılar)
+        for kanal, hk in ODAK_HAFTALIK.items():
+            ileri = sorted([x for x in K if KANAL_NORMAL.get(x.get("kanal"), x.get("kanal")) == kanal and x.get("platform") == "YouTube"
+                            and x.get("durum") == "Planlı" and x.get("tarih") and zaman(x) > simdi], key=lambda x: (x["tarih"], x.get("saat") or ""))
+            gecmis = [zaman(x) for x in K if KANAL_NORMAL.get(x.get("kanal"), x.get("kanal")) == kanal and x.get("platform") == "YouTube"
+                      and x.get("durum") == "Yayında" and x.get("tarih") and simdi - timedelta(days=7) < zaman(x) <= simdi]
+            secilen = list(gecmis)
+            for x in ileri:
+                t = zaman(x)
+                if x.get("vid") in ODAK_ISTISNA:
+                    secilen.append(t); continue
+                if sum(1 for u in secilen if t - timedelta(days=7) < u <= t) >= hk:
+                    eylemler.append({"tur": "HAFTALIK_KOTA", "kanal": kanal, "vid": x.get("vid", ""), "baslik": x.get("baslik"),
+                                     "tarih": x["tarih"], "neden": f"odak dönemi: {kanal} haftada en fazla {hk} Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"})
+                else:
+                    secilen.append(t)
+        # Konu tekrarı: aynı kanalda aynı konu 14 gün içinde ikinci kez planlanmaz
+        for x in K:
+            if x.get("durum") not in ("Planlı", "Taslak") or not x.get("tarih") or zaman(x) <= simdi or x.get("vid") in ODAK_ISTISNA:
+                continue
+            kn = KANAL_NORMAL.get(x.get("kanal"), x.get("kanal"))
+            konular = konu_bul(x.get("baslik"))
+            if not konular:
+                continue
+            t = zaman(x)
+            for y in K:
+                if y is x or KANAL_NORMAL.get(y.get("kanal"), y.get("kanal")) != kn or y.get("durum") not in ("Yayında", "Planlı") or not y.get("tarih"):
+                    continue
+                ty = zaman(y)
+                if ty < t and t - ty < timedelta(days=KONU_TEKRAR_GUN) and set(konular) & set(konu_bul(y.get("baslik"))):
+                    eylemler.append({"tur": "KONU_TEKRARI", "kanal": kn, "vid": x.get("vid", ""), "baslik": x.get("baslik"), "tarih": x["tarih"],
+                                     "neden": f"'{', '.join(set(konular) & set(konu_bul(y.get('baslik'))))}' konusu {y['tarih']} tarihinde işlendi; {KONU_TEKRAR_GUN} gün dolmadan tekrar edilmez"})
+                    break
 
     # Prime-time saat optimizasyonu (SAAT_KAYDIR): yalnız ileri tarihli planlı Short'ları verisi kanıtlanmış ana saate taşır
     planli_slotlar = {(x.get("kanal"), x.get("tarih"), (x.get("saat") or "")[:2]) for x in kaynak if x.get("durum") == "Planlı"}
@@ -267,7 +343,8 @@ def main():
     # 6b) Önümüzdeki 72 saat takvim & kota açıkları
     takvim_aciklari = []
     uc_gun = [(simdi + timedelta(days=g)).strftime("%Y-%m-%d") for g in range(3)]
-    for kanal, kota in GUNLUK_KOTA.items():
+    kota_listesi = ({ODAK_KANAL: sum(ODAK_SERILER.values())} if odak_aktif(simdi) else GUNLUK_KOTA)
+    for kanal, kota in kota_listesi.items():
         for g_str in uc_gun:
             gun_short = [x for x in kaynak if x.get("kanal") == kanal and x.get("tur") == "Short"
                          and x.get("durum") in ("Yayında", "Planlı") and x.get("tarih") == g_str]
@@ -376,6 +453,9 @@ def main():
         "olusturma": simdi.isoformat(timespec="minutes"),
         "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
         "kurallar": [
+            f"ODAK DÖNEMİ ({ODAK_BITIS}'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 4 Short, YALNIZ Gündem + Tarih (2), Tablo Serisi (1), Tarihi Magazin (1); Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) olduğu gibi yayınlanır; kural yeni üretime uygulanır.",
+            f"Aynı konu bir kanalda {KONU_TEKRAR_GUN} gün içinde ikinci kez işlenmez (ör. Mimar Sinan 6 günde 5 kez işlenince 5.191 → 17 izlenmeye düştü).",
+            "Shorts başlığı kısa tek soru olur (≤55 karakter, '|' ile ikinci başlık yok); en iyi örnekler: 'Mona Lisa'nın kaşları neden yok?', 'İnci Küpeli Kız'ın incisi gerçek mi?'.",
             "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
             "DURDUR kararındaki seriden yeni video üretilmez/planlanmaz; ERTELE eylemindeki planlar bu seriden çıkarılır, slota dağılımdaki ilk seri konur.",
             "DEĞİŞTİR kararındaki seride sıradaki videolar yeni kanca ve daha tanınmış konu ile üretilir (en iyi giden başlık örnek alınır).",

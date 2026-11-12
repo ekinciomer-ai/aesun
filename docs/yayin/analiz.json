@@ -8,9 +8,12 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T16:08+03:00",
+ "olusturma": "2026-11-12T18:31+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
+  "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 4 Short, YALNIZ Gündem + Tarih (2), Tablo Serisi (1), Tarihi Magazin (1); Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) olduğu gibi yayınlanır; kural yeni üretime uygulanır.",
+  "Aynı konu bir kanalda 14 gün içinde ikinci kez işlenmez (ör. Mimar Sinan 6 günde 5 kez işlenince 5.191 → 17 izlenmeye düştü).",
+  "Shorts başlığı kısa tek soru olur (≤55 karakter, '|' ile ikinci başlık yok); en iyi örnekler: 'Mona Lisa'nın kaşları neden yok?', 'İnci Küpeli Kız'ın incisi gerçek mi?'.",
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
   "DURDUR kararındaki seriden yeni video üretilmez/planlanmaz; ERTELE eylemindeki planlar bu seriden çıkarılır, slota dağılımdaki ilk seri konur.",
   "DEĞİŞTİR kararındaki seride sıradaki videolar yeni kanca ve daha tanınmış konu ile üretilir (en iyi giden başlık örnek alınır).",
@@ -53,14 +56,21 @@
    "gunluk_short_kotasi": 4,
    "seri_dagilimi": {
     "Gündem + Tarih": 2,
-    "Tablo Serisi": 2
+    "Tablo Serisi": 1,
+    "Tarihi Magazin": 1
    },
    "durdurulan": [
+    "10 Kasım",
+    "Gece Yasakları",
+    "Günün Sözü",
+    "Tarihin Deneyleri",
     "Tarihin Patileri"
-   ]
+   ],
+   "odak": "ODAK DÖNEMİ 2026-12-12'e kadar"
   },
   "Ancient Studio": {
-   "gunluk_short_kotasi": 3,
+   "gunluk_short_kotasi": 0,
+   "haftalik_short_kotasi": 2,
    "seri_dagilimi": {
     "Gündem + Tarih": 2,
     "Tablo Serisi": 1
@@ -68,32 +78,46 @@
    "durdurulan": [
     "Tarihi Magazin",
     "Tarihin Patileri"
-   ]
+   ],
+   "odak": "ODAK DÖNEMİ 2026-12-12'e kadar: haftada en fazla 2 Short"
   },
   "Estudio Antiguo": {
-   "gunluk_short_kotasi": 3,
+   "gunluk_short_kotasi": 0,
+   "haftalik_short_kotasi": 2,
    "seri_dagilimi": {
     "İnanç & Kültür Tarihi": 1,
     "Gündem + Tarih": 1,
     "Frase del Día": 1
    },
-   "durdurulan": []
+   "durdurulan": [],
+   "odak": "ODAK DÖNEMİ 2026-12-12'e kadar: haftada en fazla 2 Short"
   },
   "Kozmos Lab TR": {
-   "gunluk_short_kotasi": 2,
+   "gunluk_short_kotasi": 0,
+   "haftalik_short_kotasi": 2,
    "seri_dagilimi": {
     "Nasıl Yapılır": 1,
     "Biliyor muydun?": 1
    },
-   "durdurulan": []
+   "durdurulan": [],
+   "odak": "ODAK DÖNEMİ 2026-12-12'e kadar: haftada en fazla 2 Short"
   },
   "Kozmos Lab": {
-   "gunluk_short_kotasi": 2,
+   "gunluk_short_kotasi": 0,
+   "haftalik_short_kotasi": 2,
    "seri_dagilimi": {
     "Energy Sources": 1,
     "Did you know?": 1
    },
-   "durdurulan": []
+   "durdurulan": [],
+   "odak": "ODAK DÖNEMİ 2026-12-12'e kadar: haftada en fazla 2 Short"
+  },
+  "Ömür Dediğin": {
+   "gunluk_short_kotasi": 0,
+   "haftalik_short_kotasi": 2,
+   "seri_dagilimi": {},
+   "durdurulan": [],
+   "odak": "ODAK DÖNEMİ 2026-12-12'e kadar: haftada en fazla 2 Short"
   }
  },
  "seriler": [
@@ -512,12 +536,12 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 188,
-  "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 67,
   "Estudio Antiguo": 122,
-  "Kozmos Lab": 50
+  "Ancient Studio": 188,
+  "Kozmos Lab TR": 67,
+  "Kozmos Lab": 50,
+  "Ömür Dediğin": 50,
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -659,70 +683,6 @@
    "hedef_kota": 4,
    "eksik": 2,
    "uyari": "19:00 Gündem+Tarih slotu BOŞ"
-  },
-  {
-   "kanal": "Ancient Studio",
-   "tarih": "2026-11-12",
-   "planli_short": 1,
-   "hedef_kota": 3,
-   "eksik": 2,
-   "uyari": "2 Short slotu boş"
-  },
-  {
-   "kanal": "Ancient Studio",
-   "tarih": "2026-11-13",
-   "planli_short": 1,
-   "hedef_kota": 3,
-   "eksik": 2,
-   "uyari": "2 Short slotu boş"
-  },
-  {
-   "kanal": "Ancient Studio",
-   "tarih": "2026-11-14",
-   "planli_short": 1,
-   "hedef_kota": 3,
-   "eksik": 2,
-   "uyari": "2 Short slotu boş"
-  },
-  {
-   "kanal": "Estudio Antiguo",
-   "tarih": "2026-11-12",
-   "planli_short": 2,
-   "hedef_kota": 3,
-   "eksik": 1,
-   "uyari": "1 Short slotu boş"
-  },
-  {
-   "kanal": "Estudio Antiguo",
-   "tarih": "2026-11-13",
-   "planli_short": 1,
-   "hedef_kota": 3,
-   "eksik": 2,
-   "uyari": "2 Short slotu boş"
-  },
-  {
-   "kanal": "Estudio Antiguo",
-   "tarih": "2026-11-14",
-   "planli_short": 1,
-   "hedef_kota": 3,
-   "eksik": 2,
-   "uyari": "2 Short slotu boş"
-  },
-  {
-   "kanal": "Kozmos Lab TR",
-   "tarih": "2026-11-13",
-   "planli_short": 1,
-   "hedef_kota": 2,
-   "eksik": 1,
-   "uyari": "1 Short slotu boş"
-  },
-  {
-   "kanal": "Kozmos Lab",
-   "tarih": "2026-11-13",
-   "planli_short": 1,
-   "hedef_kota": 2,
-   "eksik": 1,
-   "uyari": "1 Short slotu boş"
   }
  ],
  "kopru_onerileri": [

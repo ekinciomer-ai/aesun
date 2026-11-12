@@ -1,0 +1,19 @@
+name: Bağlıkaya uydu + DEM
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  al:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q numpy pillow
+      - run: python3 sunucu/bagli/uydu_dem.py cikti
+      - name: kozmos-cikti dalına yaz
+        if: always()
+        run: |
+          set +e
+          D=$RUNNER_TEMP/dal; git clone -q --depth 1 --branch kozmos-cikti https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} $D
+          rm -rf $D/bagli; mkdir -p $D/bagli && cp cikti/* $D/bagli/ && ls -la $D/bagli
+          cd $D && git add -A && git -c user.name=kozmos-bot -c user.email=bot@users.noreply.github.com commit -q -m "bagli uydu dem" && for k in 1 2 3; do git pull -q --rebase origin kozmos-cikti; git push -q origin kozmos-cikti && break; sleep 3; done

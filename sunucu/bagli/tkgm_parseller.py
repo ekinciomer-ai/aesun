@@ -10,11 +10,11 @@ def al(ada, p):
     u = f'https://cbsapi.tkgm.gov.tr/megsiswebapi.v3/api/parsel/{MAH}/{ada}/{p}'
     for k in range(3):
         try:
-            r = urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=30); return json.loads(r.read())
+            r = urllib.request.urlopen(urllib.request.Request(u, headers=H), timeout=12); return json.loads(r.read())
         except urllib.error.HTTPError as e:
             if e.code in (404, 400, 204): return None
-            print('HTTP', e.code, ada, p, flush=True); time.sleep(5 * (k + 1))
-        except Exception as e: print('HATA', ada, p, e, flush=True); time.sleep(5 * (k + 1))
+            print('HTTP', e.code, ada, p, flush=True); time.sleep(3)
+        except Exception as e: print('HATA', ada, p, e, flush=True); time.sleep(2)
     return 'hata'
 sonuc, hata = [], 0
 # önce erişim testi
@@ -32,5 +32,6 @@ for ada in range(438, 466):
             sonuc.append({'id': f'{ada}/{p}', 'ada': ada, 'parsel': p, 'm2': float(str(pr.get('alan', '0')).replace('.', '').replace(',', '.') or 0), 'nitelik': pr.get('nitelik'), 'pafta': pr.get('pafta'), 'xy': [xy(c[0], c[1]) for c in ring]})
         if bos >= 8 and p > enbuyuk + 7: break
     print('ada', ada, 'en büyük parsel', enbuyuk, 'toplam', len(sonuc), flush=True)
+    json.dump(sonuc, open(os.path.join(OUT, 'parseller_tkgm.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 json.dump(sonuc, open(os.path.join(OUT, 'parseller_tkgm.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 print('TKGM_BITTI', len(sonuc), 'hata', hata)

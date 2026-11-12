@@ -74,7 +74,7 @@ def onizle(fn):
     bpy.ops.render.render(write_still=True)
     bpy.data.objects.remove(cam); bpy.data.objects.remove(l)
 
-def disari(o, ad, kaynak, olcu, n0, k, png=True):
+def disari(o, ad, kaynak, olcu, n0, k, png=False):
     for x in bpy.context.scene.objects:
         x.select_set(x == o); x.hide_render = x != o
     bpy.context.view_layer.objects.active = o

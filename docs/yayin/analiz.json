@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-12T04:35+03:00",
+ "olusturma": "2026-11-12T05:05+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "Günlük Short kotası aşılmaz; seri dağılımı 'plan' alanındaki gibidir.",
@@ -440,7 +440,7 @@
    "olculen": 1,
    "erken": 1,
    "medyan_48sa": 69,
-   "tutma_orani": 0,
+   "tutma_orani": 100,
    "izlenme_yuzde": 62,
    "en_iyi": {
     "baslik": "1958'den beri uzayda dönen güneş enerjili uydu 🛰️ #shorts",
@@ -452,13 +452,17 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Enerji Üretim Kaynakları",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
-   "izlenme_yuzde": null,
-   "en_iyi": null
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 35,
+   "tutma_orani": 0,
+   "izlenme_yuzde": 62,
+   "en_iyi": {
+    "baslik": "Rüzgâr türbini elektriği nasıl üretir? 🌬️ #shorts",
+    "i48": 35
+   },
+   "kaydirmadan_izleme_yuzde": 50
   },
   {
    "kanal": "Kozmos Lab TR",
@@ -491,9 +495,9 @@
  ],
  "esikler": {
   "Ömür Dediğin": 50,
-  "Kozmos Lab TR": 97,
   "Antik Stüdyo": 637,
   "Ancient Studio": 188,
+  "Kozmos Lab TR": 67,
   "Estudio Antiguo": 122,
   "Kozmos Lab": 50
  },
@@ -582,8 +586,8 @@
   },
   "Kozmos Lab TR": {
    "13:00": {
-    "n": 1,
-    "medyan": 69
+    "n": 2,
+    "medyan": 52
    },
    "19:00": {
     "n": 1,
@@ -1085,7 +1089,7 @@
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 3 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 2 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
-  "Kozmos Lab TR: son 2 Short'tan 1 tanesi tuttu (eşik 97 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 3 Short'tan 2 tanesi tuttu (eşik 67 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %56'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1096,6 +1100,7 @@
   "Antik Stüdyo: en iyi yayın saati şimdilik 14:00 (medyan 2214 izlenme, 2 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 480 izlenme, 4 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 913 izlenme, 2 video).",
+  "Kozmos Lab TR: en iyi yayın saati şimdilik 13:00 (medyan 52 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %73 izleniyor, tutmayanlar %50 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %44 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %64 izleniyor, tutmayanlar %57 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
@@ -1103,7 +1108,7 @@
   "Estudio Antiguo: tutan Short'lar ortalama %77 izleniyor, tutmayanlar %0 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Estudio Antiguo: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %42 (hedef ≥%70).",
   "Kozmos Lab: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %42 (hedef ≥%70).",
-  "Kozmos Lab TR: tutan Short'lar ortalama %60 izleniyor, tutmayanlar %62 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
+  "Kozmos Lab TR: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %62 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Kozmos Lab TR: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %47 (hedef ≥%70).",
   "Uzun videolar (8 yayında): medyan 13 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
   "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-14."

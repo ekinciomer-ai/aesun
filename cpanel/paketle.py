@@ -72,6 +72,7 @@ yaz(os.path.join(P, "mimari", "index.html"), oku(os.path.join(DOCS, "mimari", "i
 kopya(os.path.join(DOCS, "yayin"), os.path.join(P, "yayin"))   # Özel Alan · Yayın Takibi (yayin.json Claude/Antigravity tarafından güncellenir)
 yaz(os.path.join(P, "yayin", "index.html"), oku(os.path.join(DOCS, "yayin", "index.html")).replace("../portal/", "../"))
 yaz(os.path.join(P, "asistan", "index.html"), oku(os.path.join(DOCS, "asistan", "index.html")).replace("../portal/", "../"))   # Özel Alan · Sunucu Asistanı (Antigravity)
+yaz(os.path.join(P, "avy", "index.html"), oku(os.path.join(DOCS, "avy", "index.html")).replace("../portal/", "../"))   # Özel Alan · AVY (Arazi Veri Yönetimi)
 yaz(os.path.join(P, "kesif", "index.html"), oku(os.path.join(DOCS, "kesif", "index.html")).replace("../portal/", "../"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)
 # Teklif sayfaları (çatı GES yerleşimi vb.): docs/teklif/ → portal.aksarayenerji.net/teklif/
@@ -117,6 +118,6 @@ betik_ayir(os.path.join(P, "monitoring", "index.html"))
 for d in (S, P):
     n = sum(len(f) for _, _, f in os.walk(d))
     print(d, n, "dosya")
-kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html")) + oku(os.path.join(P, "aecad", "index.html")) + oku(os.path.join(P, "gundem", "index.html")) + oku(os.path.join(P, "kapasite", "index.html"))]
+kalan = [p for p in ("../portal/",) if p in oku(os.path.join(P, "monitoring", "index.html")) + oku(os.path.join(P, "demo", "index.html")) + oku(os.path.join(P, "aecad", "index.html")) + oku(os.path.join(P, "gundem", "index.html")) + oku(os.path.join(P, "kapasite", "index.html")) + oku(os.path.join(P, "avy", "index.html"))]
 if kalan or 'href="portal/"' in oku(os.path.join(S, "index.html")):
     sys.exit("bağlantı dönüşümü eksik")

@@ -15,12 +15,14 @@
     {"ad": "AeCAD", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/aecad/", "beklenen": [200], "icerir": "AeCAD"},
     {"ad": "Portal gündem", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/gundem/", "beklenen": [200], "icerir": "Enerji Gündemi"},
     {"ad": "Kapasite paneli", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/kapasite/", "beklenen": [200], "icerir": "Kapasite Paneli"},
+    {"ad": "AVY köprüsü (Özel Alan)", "grup": "cpanel", "url": "https://portal.aksarayenerji.net/avy/", "beklenen": [200], "icerir": "Arazi Veri Yönetimi"},
     {"ad": "Merkez API sağlık", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/saglik", "beklenen": [200], "icerir": "\"durum\":\"ok\""},
     {"ad": "Merkez API portal verisi", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/acik/portal/veri.json", "beklenen": [200], "icerir": "kullanicilar"},
     {"ad": "Merkez API yetkisiz okuma kapalı", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/dosya/antminer_panel.json", "beklenen": [401]},
     {"ad": "Merkez API müşteri yetkisiz kapalı", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/musteri/liste", "beklenen": [401]},
     {"ad": "Merkez API bekçi", "grup": "ns1", "url": "https://api.aksarayenerji.net/v1/bekci", "beklenen": [200], "icerir": "\"durum\""},
     {"ad": "Fatura (SSO arkasında)", "grup": "ns1", "url": "https://fatura.aksarayenerji.net/", "beklenen": [200, 302, 303, 401]},
+    {"ad": "AVY · Arazi Veri Yönetimi (SSO)", "grup": "ns1", "url": "https://avy.159-198-76-80.sslip.io/", "beklenen": [200, 302, 303, 401]},
     {"ad": "Demo (şifre ister)", "grup": "demo", "url": "https://159.198.76.80/", "beklenen": [401]}
   ]
 }

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>AVY · Arazi Veri Yönetimi · Aksaray Enerji</title>
+<link rel="icon" href="../favicon.svg">
+<style>
+  :root{--k:#D7262E;--kk:#A8131B;--a:#2B2F35;--z:#F6F5F3;--y:#fff;--c:#E4E1DC;--s:#6B6F76}
+  *{box-sizing:border-box;margin:0}
+  body{min-height:100vh;display:grid;place-items:center;background:var(--z);color:var(--a);font:14.5px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px}
+  .kart{background:var(--y);border:1px solid var(--c);border-radius:16px;padding:28px 30px;width:min(440px,94vw);box-shadow:0 18px 50px rgba(20,24,30,.08);text-align:center}
+  .ust{display:inline-flex;align-items:center;gap:10px;margin-bottom:12px}
+  .ust b{font-size:18px;letter-spacing:.02em}
+  .aciklama{color:var(--s);font-size:13.5px;margin-top:6px}
+  .hata{background:#FDECEC;color:#8E1117;border-radius:10px;padding:10px 12px;margin-top:14px;font-size:13.5px;display:none}
+  .btn{display:inline-block;margin-top:16px;background:var(--k);color:#fff;text-decoration:none;padding:9px 18px;border-radius:10px;font-weight:600;font-size:13.5px}
+  .btn:hover{background:var(--kk)}
+</style>
+</head>
+<body>
+<div class="kart">
+  <div class="ust">
+    <svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4a28 28 0 0 0 0 56z" fill="#D7262E"/><path d="M32 4a28 28 0 0 1 0 56z" fill="#2B2F35"/><path d="M36 10 20 36h11l-4 18 18-28H34z" fill="#fff"/></svg>
+    <b>AVY · Arazi Veri Yönetimi</b>
+  </div>
+  <div id="durum">Portal oturumuyla bağlanılıyor…</div>
+  <p class="aciklama">Uydu görüntüsü (GeoTIFF), arazi kotu (DEM), OSM bina/yol, sokak görünümü ve 3B arazi modeli paneli.</p>
+  <div id="hata" class="hata"></div>
+  <a id="geri" class="btn" href="../portal/" style="display:none">← Portal'a Dön</a>
+</div>
+<script>
+(async function () {
+  var HEDEF_SSO = 'https://avy.159-198-76-80.sslip.io/sso';
+  var S = null;
+  try {
+    var o = JSON.parse(localStorage.getItem('ae_portal') || 'null');
+    if (o && o.S && Date.now() < (o.son || 0)) S = o.S;
+  } catch (e) {}
+  if (!S) {
+    location.replace('../portal/?git=avy');
+    return;
+  }
+  var rol = S.ka ? 'yonetici' : (S.anahtarlar && S.anahtarlar.avy ? 'avy' : '');
+  var anahtar = rol === 'yonetici' ? S.ka : (rol === 'avy' ? S.anahtarlar.avy : '');
+  if (!rol || !anahtar) {
+    document.getElementById('durum').textContent = 'Yetki Gerekli';
+    var h = document.getElementById('hata');
+    h.style.display = 'block';
+    h.textContent = 'AVY · Arazi Veri Yönetimi yalnız Özel Alan (yönetici) yetkisiyle açılır.';
+    document.getElementById('geri').style.display = 'inline-block';
+    return;
+  }
+  try {
+    var ham = new TextEncoder().encode('aesun-api|' + rol + '|' + anahtar);
+    var ozet = await crypto.subtle.digest('SHA-256', ham);
+    var tok = Array.from(new Uint8Array(ozet)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    location.replace(HEDEF_SSO + '#t=' + tok + '&r=' + encodeURIComponent(rol));
+  } catch (e) {
+    var h2 = document.getElementById('hata');
+    h2.style.display = 'block';
+    h2.textContent = 'Bağlantı hazırlanamadı: ' + (e.message || e);
+    document.getElementById('geri').style.display = 'inline-block';
+  }
+})();
+</script>
+</body>
+</html>

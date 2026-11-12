@@ -49,3 +49,8 @@ for h in aksarayenerji.net portal.aksarayenerji.net; do
 done
 echo "NOT: php kaynak sızıntı denetimi: $(docker exec ck-caddy wget -qO- --header 'Host: portal.aksarayenerji.net' http://aesun-web/api/veri.php 2>/dev/null | head -c 5 | grep -c '<?php') (0 olmalı)"
 echo "NOT: dosyalar: site $(find $W/site -type f | wc -l) · portal $(find $W/portal -type f | wc -l)"
+# AVY · Arazi Veri Yönetimi (Özel Alan · Portal SSO korumalı harita ve arazi indirme servisi)
+if [ -f /tmp/aesun_paket/sunucu/islem_avy_kur.sh ]; then
+  sed -i 's/\r$//' /tmp/aesun_paket/sunucu/islem_avy_kur.sh /tmp/aesun_paket/sunucu/avy/baslat.py 2>/dev/null || true
+  bash /tmp/aesun_paket/sunucu/islem_avy_kur.sh || echo "NOT: UYARI avy kurulumunda sorun oluştu"
+fi

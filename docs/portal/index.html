@@ -307,6 +307,7 @@ function girisModal(id, hata) {
     try { await giris($('kul').value, $('sif').value); }
     catch (er) { return girisModal(id, er.message); }
     if (HEDEF === 'asistan' && S && S.ka) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/asistan/')); return; }
+    if (HEDEF === 'avy' && S && (S.ka || (S.anahtarlar && S.anahtarlar.avy))) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/avy/')); return; }
     if (HEDEF && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { const u = await ssoUrl(HEDEF); if (u) { location.replace(u); return; } d.close(); git('ana'); return ssoYokDlg(HEDEF); }
     try { if ($('hatirla') && $('hatirla').checked) localStorage.setItem('ae_portal_kul', $('kul').value.trim()); else localStorage.removeItem('ae_portal_kul'); } catch (x) {}
     if (id) acSonuc(id); else d.close();
@@ -454,6 +455,7 @@ function acSonuc(id) {
 }
 // ---- Özel Alan: yalnız yönetici (Ömer) görür — Kullanıcı dostu tek tıkla kart ızgarası + canlı Antigravity sohbeti ----
 const OZEL_ALT = [
+  { id: 'avy', ad: 'AVY · Arazi Veri Yönetimi', kisa: 'Uydu, Kot (DEM), 3B & Sokak', ikon: '🛰️', renk: '#0E7C66', aciklama: 'Haritadan alan çizerek uydu (GeoTIFF), arazi kotu (DEM), OSM bina/yol, sokak görünümü ve 3B model indirme paneli.', url: () => yerelUrl('https://ekinciomer-ai.github.io/aesun/avy/') },
   { id: 'asistan', ad: 'Sunucu Asistanı', kisa: 'Canlı YouTube & Sunucu Komut', ikon: '🤖', renk: '#D32027', aciklama: 'Merkez sunucu üzerinden tam yetkili sohbet ve canlı YouTube yönetimi.', url: () => yerelUrl('https://portal.aksarayenerji.net/asistan/') },
   { id: 'yayin', ad: 'Yayın Takibi', kisa: 'YouTube & TikTok Takvimi', ikon: '📺', renk: '#2463B5', aciklama: 'Antik Stüdyo / Ancient Studio yayınlanan ve planlanan tüm içerikler.', url: () => yerelUrl('https://portal.aksarayenerji.net/yayin/') },
   { id: 'teklif', ad: 'Teklifler', kisa: 'GES Teklif & Kazanma Oranı', ikon: '📋', renk: '#1F8A4C', aciklama: 'Teklif verdiğimiz projeler: kapasite, tutar, durum (şifreli).', ic: true },
@@ -922,6 +924,7 @@ function modSil(id) {
   if (S && S.ka) { try { await parasalAnahtar(); await apiOzet(); } catch (e) { console.warn('parasal anahtar', e); } }
   if (HEDEF) {
     if (HEDEF === 'asistan' && S && S.ka) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/asistan/')); return; }
+    if (HEDEF === 'avy' && S && (S.ka || (S.anahtarlar && S.anahtarlar.avy))) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/avy/')); return; }
     if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { const u = await ssoUrl(HEDEF); if (u) { location.replace(u); return; } git('ana'); return ssoYokDlg(HEDEF); }
     git('ana'); return S ? acSonuc(HEDEF) : girisModal(HEDEF);
   }

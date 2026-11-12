@@ -98,6 +98,7 @@ tr.bugun td{color:var(--k)}
 <div class="kpi" id="kpi"></div>
 <div class="graf" id="graf" hidden></div><div id="ipucu"></div>
 <details class="yh" id="yh" hidden open><summary></summary><div class="ic" id="yhi"></div></details>
+<details class="yh" id="kb" hidden><summary></summary><div class="ic" id="kbi"></div></details>
 <details class="yrm" id="yrm" hidden><summary></summary><div id="yrl"></div></details>
 <div class="filtre">
  <input class="ara" id="q" placeholder="Başlıkta ara…" autocomplete="off">
@@ -204,10 +205,17 @@ function grafCiz(){
  el.innerHTML=h1+h2+h3;
 }
 async function gecmisYukle(){try{G=await (await fetch('gecmis.json?'+Date.now())).json()}catch(e){G=null}}
+function kancaCiz(K){const b=document.getElementById('kb');if(!K||!K.videolar){b.hidden=true;return}b.hidden=false;b.open=(K.ozet||[]).length>0;
+ const ren={'İYİ':'ARTIR','GÜÇLÜ BAŞLANGIÇ':'ARTIR','ORTA':'SÜRDÜR','NORMAL':'SÜRDÜR','ZAYIF KANCA':'DURDUR','ZAYIF BAŞLANGIÇ':'DURDUR','ZAYIF':'DURDUR','ÖLÇÜLÜYOR':'DENE'};
+ b.querySelector('summary').innerHTML='🎣 Kanca bekçisi <span class="ince">· ilk saniye: izlemeyi seçen ≥%'+K.esikler.iyi+' iyi, <%'+K.esikler.zayif+' zayıf · '+esc(fmt(new Date(K.olusturma)))+'</span>';
+ const oz=(K.ozet||[]).length?'<ul>'+K.ozet.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<div class="ince">Son 30 saatte uyarı yok.</div>';
+ const se='<div class="tb"><table><thead><tr><th>Kanal</th><th>Seri</th><th class="num">İzlemeyi seçen (son 5)</th><th>Durum</th></tr></thead><tbody>'+(K.seriler||[]).map(r=>'<tr><td>'+esc(r.kanal)+'</td><td>'+esc(r.seri)+'</td><td class="num">%'+r.ortanca_tutma+' <span class="ince">('+r.son_video+')</span></td><td><span class="kr '+(ren[r.durum]||'DENE')+'">'+esc(r.durum)+'</span></td></tr>').join('')+'</tbody></table></div>';
+ const vi='<div class="tb"><table><thead><tr><th>Video</th><th>Kanal</th><th class="num">Saat</th><th class="num">İzlenme</th><th class="num">Seçen</th><th>Durum</th></tr></thead><tbody>'+K.videolar.slice(0,8).map(r=>'<tr><td>'+esc(String(r.baslik||'').slice(0,48))+'</td><td>'+esc(r.kanal)+'</td><td class="num">'+r.yas_saat+'</td><td class="num">'+sayi(r.izlenme)+'</td><td class="num">'+(r.tutma==null?'—':'%'+r.tutma)+'</td><td><span class="kr '+(ren[r.durum]||'DENE')+'">'+esc(r.durum)+'</span></td></tr>').join('')+'</tbody></table></div>';
+ document.getElementById('kbi').innerHTML=oz+se+'<details><summary class="ince">Son videolar</summary>'+vi+'</details>'}
 function yolCiz(A,R){const b=document.getElementById('yh');if(!A||!A.plan){b.hidden=true;return}b.hidden=false;
  const yap=new Set(((R&&R.islemler)||[]).map(i=>i.vid));
  b.querySelector('summary').innerHTML='🧭 Yol haritası <span class="ince">· otomatik · '+esc(fmt(new Date(A.olusturma)))+(R&&R.son_calisma?' · YouTube bağlantısı: '+esc(fmt(new Date(R.son_calisma))):'')+'</span>';
- const plan=Object.entries(A.plan).map(([k,p])=>'<li><b>'+esc(k)+'</b>: günde en fazla '+p.gunluk_short_kotasi+' Short → '+(Object.entries(p.seri_dagilimi).map(([s,n])=>esc(s)+' ×'+n).join(', ')||'—')+(p.durdurulan.length?' · <span style="color:#B91C24">durdurulan: '+p.durdurulan.map(esc).join(', ')+'</span>':'')+'</li>').join('');
+ const plan=Object.entries(A.plan).map(([k,p])=>'<li><b>'+esc(k)+'</b>: '+(p.haftalik_short_kotasi?'haftada en fazla '+p.haftalik_short_kotasi:'günde en fazla '+p.gunluk_short_kotasi)+' Short → '+(Object.entries(p.seri_dagilimi).map(([s,n])=>esc(s)+' ×'+n).join(', ')||'—')+(p.durdurulan.length?' · <span style="color:#B91C24">durdurulan: '+p.durdurulan.map(esc).join(', ')+'</span>':'')+'</li>').join('');
  const ser='<div class="tb"><table><thead><tr><th>Kanal</th><th>Seri</th><th>Karar</th><th class="num">48 sa medyan</th><th class="num">Tutma</th><th class="num">İzlenme %</th><th>Neden</th></tr></thead><tbody>'+A.seriler.map(s=>'<tr><td>'+esc(s.kanal)+'</td><td>'+esc(s.seri)+'</td><td><span class="kr '+esc(s.karar)+'">'+esc(s.karar)+'</span></td><td class="num">'+sayi(s.medyan_48sa)+'</td><td class="num">'+(s.tutma_orani==null?'—':'%'+s.tutma_orani)+'</td><td class="num">'+(s.izlenme_yuzde==null?'—':'%'+s.izlenme_yuzde)+(s.kaydirmadan_izleme_yuzde!=null?' (kaydırmasız %'+s.kaydirmadan_izleme_yuzde+')':'')+'</td><td class="ince">'+esc(s.neden)+(s.erken?' · '+s.erken+' yeni video ölçülüyor':'')+'</td></tr>').join('')+'</tbody></table></div>';
  const ey=(A.eylemler||[]).map(e=>'<li><span class="kr '+(e.tur==='GİZLE'?'DEĞİŞTİR':e.tur==='ERTELE'?'DURDUR':'DENE')+'">'+esc(e.tur)+'</span> '+esc(e.kanal)+' · '+esc(String(e.baslik).slice(0,60))+' <span class="ince">— '+esc(e.neden)+(yap.has(e.vid)?' · ✅ yapıldı':'')+'</span></li>').join('');
  const tak=(A.takvim_aciklari||[]).slice(0,12).map(t=>'<li><span class="kr '+((t.uyari||'').includes('19:00')?'DURDUR':'DEĞİŞTİR')+'">'+esc(t.tarih)+'</span> <b>'+esc(t.kanal)+'</b>: '+t.planli_short+'/'+t.hedef_kota+' Short planlı <span class="ince">— '+esc(t.uyari)+'</span></li>').join('');
@@ -255,7 +263,7 @@ async function yukle(){
   ['fp','fk','fd','fs','fu'].forEach(i=>document.getElementById(i).onchange=e=>{F[i]=e.target.value;ciz()});
   document.getElementById('q').oninput=e=>{F.q=e.target.value;ciz()};}
  await gecmisYukle();ciz();yorumCiz(j.yorumlar);
- let A=null,R=null;try{A=await (await fetch('analiz.json?'+Date.now())).json()}catch(e){}try{R=await (await fetch('yonetim_kaydi.json?'+Date.now())).json()}catch(e){}yolCiz(A,R);let B=null,YK=null;try{B=await (await fetch('baglantilar.json?'+Date.now())).json()}catch(e){}try{YK=await (await fetch('yorum_kuyrugu.json?'+Date.now())).json()}catch(e){}bagCiz(B,YK);
+ let A=null,R=null;try{A=await (await fetch('analiz.json?'+Date.now())).json()}catch(e){}try{R=await (await fetch('yonetim_kaydi.json?'+Date.now())).json()}catch(e){}yolCiz(A,R);let KB=null;try{KB=await (await fetch('kanca.json?'+Date.now())).json()}catch(e){}kancaCiz(KB);let B=null,YK=null;try{B=await (await fetch('baglantilar.json?'+Date.now())).json()}catch(e){}try{YK=await (await fetch('yorum_kuyrugu.json?'+Date.now())).json()}catch(e){}bagCiz(B,YK);
 }
 yukle();setInterval(yukle,60000);
 </script>

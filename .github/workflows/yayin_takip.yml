@@ -29,7 +29,8 @@ jobs:
           while :; do
             git pull -q --rebase origin main || { git rebase --abort 2>/dev/null; git reset -q --hard origin/main; }
             if python3 yayin/guncelle.py && python3 yayin/analiz.py; then
-              git add docs/yayin/yayin.json docs/yayin/gecmis.json docs/yayin/analiz.json docs/yayin/yorum_kuyrugu.json
+              python3 yayin/kanca.py || echo "::warning::kanca bekçisi hata verdi (takip etkilenmez)"
+              git add docs/yayin/yayin.json docs/yayin/gecmis.json docs/yayin/analiz.json docs/yayin/yorum_kuyrugu.json docs/yayin/kanca.json docs/yayin/kanca_izlek.json
               if ! git diff --cached --quiet; then
                 git commit -qm "Yayın takibi: otomatik güncelleme $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
                 ok=0; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && { ok=1; break; }; sleep 5; done

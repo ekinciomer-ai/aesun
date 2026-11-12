@@ -7,7 +7,7 @@ from PIL import Image
 OUT = sys.argv[1]; os.makedirs(OUT, exist_ok=True)
 LAT0, LON0, R = 38.497350, 33.919770, 6371008.8
 COS = math.cos(math.radians(38.499735))
-X0, X1, Y0, Y1 = -40.0, 560.0, 60.0, 520.0
+X0, X1, Y0, Y1 = [float(v) for v in os.environ.get('KUTU', '-40 560 60 520').split()]
 def ll(x, y): return LON0 + math.degrees(x / (R * COS)), LAT0 + math.degrees(y / R)
 def merc(lon, lat, z):
     n = 2 ** z; return (lon + 180) / 360 * n * 256, (1 - math.log(math.tan(math.radians(lat)) + 1 / math.cos(math.radians(lat))) / math.pi) / 2 * n * 256

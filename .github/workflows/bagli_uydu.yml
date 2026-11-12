@@ -1,6 +1,11 @@
 name: Bağlıkaya uydu + DEM
 on:
   workflow_dispatch:
+    inputs:
+      kutu:
+        description: 'x0 x1 y0 y1 (m, yerel)'
+        required: false
+        default: '-40 560 60 520'
 permissions:
   contents: write
 jobs:
@@ -9,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install -q numpy pillow
-      - run: python3 sunucu/bagli/uydu_dem.py cikti
+      - run: KUTU="${{ inputs.kutu }}" python3 sunucu/bagli/uydu_dem.py cikti
       - name: kozmos-cikti dalına yaz
         if: always()
         run: |

@@ -1,0 +1,18 @@
+name: Bağlıkaya TKGM parselleri
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  al:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 sunucu/bagli/tkgm_parseller.py cikti
+      - name: kozmos-cikti dalına yaz
+        if: always()
+        run: |
+          set +e
+          D=$RUNNER_TEMP/dal; git clone -q --depth 1 --branch kozmos-cikti https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} $D
+          mkdir -p $D/bagli && cp cikti/* $D/bagli/ 2>/dev/null; cd $D && git add -A && git -c user.name=kozmos-bot -c user.email=bot@users.noreply.github.com commit -q -m "bagli tkgm" && for k in 1 2 3; do git pull -q --rebase origin kozmos-cikti; git push -q origin kozmos-cikti && break; sleep 3; done

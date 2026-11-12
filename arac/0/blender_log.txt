@@ -1,63 +1,251 @@
-10:52:22 | INFO: Data are loaded, start creating Blender stuff
-10:52:22 | INFO: Blender create Mesh node Plane_Material_0
-10:52:22 | INFO: Blender create Mesh node Plane.004_interior_0
-10:52:22 | INFO: Blender create Mesh node Plane.001_panel_0
-10:52:22 | INFO: Blender create Mesh node Cube_chair1_0
-10:52:22 | INFO: Blender create Mesh node Cube.001_chair2_0
-10:52:22 | INFO: Blender create Mesh node Cube.002_chair3_0
-10:52:22 | INFO: Blender create Mesh node Cube.004_chair1_0
-10:52:22 | INFO: Blender create Mesh node Cube.006_chair2_0
-10:52:22 | INFO: Blender create Mesh node Cube.007_chair3_0
-10:52:22 | INFO: Blender create Mesh node Cube.008_lamp2_0
-10:52:22 | INFO: Blender create Mesh node Plane.005_lamp_0
-10:52:22 | INFO: Blender create Mesh node Cube.010_handle_0
-10:52:22 | INFO: Blender create Mesh node Plane.006_brake_0
-10:52:22 | INFO: Blender create Mesh node Cube.009_chair back1_0
-10:52:22 | INFO: Blender create Mesh node Cube.012_chair back2_0
-10:52:22 | INFO: Blender create Mesh node Cube.013_chair back3_0
-10:52:22 | INFO: Blender create Mesh node Cube.014_chair back3_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.006_wheel_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.007_disk_0
-10:52:22 | INFO: Blender create Mesh node Plane.007_steering wheel_0
-10:52:22 | INFO: Blender create Mesh node Cylinder_steering wheel 1_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.001_wheel panel_0
-10:52:22 | INFO: Blender create Mesh node Plane.008_brake_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.003_wheel_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.009_disk_0
-10:52:22 | INFO: Blender create Mesh node Cube.011_lamp2_0
-10:52:22 | INFO: Blender create Mesh node Plane.009_lamp_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.010_wheel_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.011_disk_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.012_wheel_0
-10:52:22 | INFO: Blender create Mesh node Cylinder.013_disk_0
-10:52:22 | INFO: Blender create Mesh node Cube.015_handle_0
-10:52:22 | INFO: Blender create Mesh node Cube.016_handle.004_0
-10:52:22 | INFO: Blender create Mesh node Cube.017_handle.004_0
-10:52:22 | INFO: glTF import finished in 0.09s
+10:54:28 | INFO: Data are loaded, start creating Blender stuff
+10:54:28 | INFO: Blender create Mesh node Plane_Material_0
+10:54:29 | INFO: Blender create Mesh node Plane.004_interior_0
+10:54:29 | INFO: Blender create Mesh node Plane.001_panel_0
+10:54:29 | INFO: Blender create Mesh node Cube_chair1_0
+10:54:29 | INFO: Blender create Mesh node Cube.001_chair2_0
+10:54:29 | INFO: Blender create Mesh node Cube.002_chair3_0
+10:54:29 | INFO: Blender create Mesh node Cube.004_chair1_0
+10:54:29 | INFO: Blender create Mesh node Cube.006_chair2_0
+10:54:29 | INFO: Blender create Mesh node Cube.007_chair3_0
+10:54:29 | INFO: Blender create Mesh node Cube.008_lamp2_0
+10:54:29 | INFO: Blender create Mesh node Plane.005_lamp_0
+10:54:29 | INFO: Blender create Mesh node Cube.010_handle_0
+10:54:29 | INFO: Blender create Mesh node Plane.006_brake_0
+10:54:29 | INFO: Blender create Mesh node Cube.009_chair back1_0
+10:54:29 | INFO: Blender create Mesh node Cube.012_chair back2_0
+10:54:29 | INFO: Blender create Mesh node Cube.013_chair back3_0
+10:54:29 | INFO: Blender create Mesh node Cube.014_chair back3_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.006_wheel_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.007_disk_0
+10:54:29 | INFO: Blender create Mesh node Plane.007_steering wheel_0
+10:54:29 | INFO: Blender create Mesh node Cylinder_steering wheel 1_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.001_wheel panel_0
+10:54:29 | INFO: Blender create Mesh node Plane.008_brake_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.003_wheel_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.009_disk_0
+10:54:29 | INFO: Blender create Mesh node Cube.011_lamp2_0
+10:54:29 | INFO: Blender create Mesh node Plane.009_lamp_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.010_wheel_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.011_disk_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.012_wheel_0
+10:54:29 | INFO: Blender create Mesh node Cylinder.013_disk_0
+10:54:29 | INFO: Blender create Mesh node Cube.015_handle_0
+10:54:29 | INFO: Blender create Mesh node Cube.016_handle.004_0
+10:54:29 | INFO: Blender create Mesh node Cube.017_handle.004_0
+10:54:29 | INFO: glTF import finished in 0.12s
 PAKET arac_kucuk 1 grup
 INFO Draco mesh compression is available, use library at /home/runner/blender/4.5/scripts/addons_core/io_scene_gltf2/libextern_draco.so
-10:52:23 | INFO: Starting glTF 2.0 export
-10:52:23 | INFO: Extracting primitive: Plane_Material_0
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:23 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
-10:52:24 | INFO: Primitives created: 19
-10:52:24 | INFO: Finished glTF 2.0 export in 1.014399766921997 s
-Couldn't open libEGL.so.1: libEGL.so.1: cannot open shared object file: No such file or directory
+10:54:30 | INFO: Starting glTF 2.0 export
+10:54:30 | INFO: Extracting primitive: Plane_Material_0
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:30 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:31 | INFO: Primitives created: 19
+10:54:31 | INFO: Finished glTF 2.0 export in 1.2186191082000732 s
+
+DISARI arac_kucuk [4.3, 1.91, 1.3] olcek 0.7359 39999 yüz 2544 KB
+10:54:31 | INFO: Data are loaded, start creating Blender stuff
+10:54:31 | INFO: Blender create Mesh node Interior_Interior_0
+10:54:31 | INFO: Blender create Mesh node Glass_Glass_0
+10:54:31 | INFO: Blender create Mesh node Wheel_FL_Texture_0
+10:54:31 | INFO: Blender create Mesh node Body_Body_0
+10:54:31 | INFO: Blender create Mesh node Body_Texture_0
+10:54:31 | INFO: Blender create Mesh node Wheel_FR_Texture_0
+10:54:31 | INFO: Blender create Mesh node Wheel_RL_Texture_0
+10:54:31 | INFO: Blender create Mesh node Wheel_RR_Texture_0
+10:54:31 | INFO: Blender create Mesh node Shadow_Shadow_0
+10:54:31 | INFO: Blender create Mesh node Details_Texture_0
+10:54:31 | INFO: glTF import finished in 0.03s
+PAKET arac_suv 1 grup
+10:54:32 | INFO: Starting glTF 2.0 export
+10:54:32 | INFO: Extracting primitive: Interior_Interior_0
+10:54:33 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:33 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:33 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:33 | INFO: Primitives created: 5
+10:54:33 | INFO: Finished glTF 2.0 export in 1.4574029445648193 s
+
+DISARI arac_suv [4.3, 2.25, 1.26] olcek 0.7617 8024 yüz 745 KB
+10:54:33 | INFO: Data are loaded, start creating Blender stuff
+10:54:33 | INFO: Blender create Mesh node Wheel_C_Wheel_0
+10:54:33 | INFO: Blender create Mesh node Wheel_C001_Wheel_0
+10:54:33 | INFO: Blender create Mesh node Wheel_C002_Wheel_0
+10:54:33 | INFO: Blender create Mesh node Wheel_C003_Wheel_0
+10:54:33 | INFO: Blender create Mesh node Compact Body_Body_0
+10:54:33 | INFO: Blender create Mesh node Compact Body_Glass_0
+10:54:33 | INFO: Blender create Mesh node Compact Body_Optics_0
+10:54:33 | INFO: Blender create Mesh node Coupe Body_Body_0
+10:54:34 | INFO: Blender create Mesh node Coupe Body_Glass_0
+10:54:34 | INFO: Blender create Mesh node Coupe Body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_F001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_F002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_F003_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_F_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Hatchback Body_Body_0
+10:54:34 | INFO: Blender create Mesh node Hatchback Body_Glass_0
+10:54:34 | INFO: Blender create Mesh node Hatchback Body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_B_Wheek_0
+10:54:34 | INFO: Blender create Mesh node Wheel_B001_Wheek_0
+10:54:34 | INFO: Blender create Mesh node Wheel_B002_Wheek_0
+10:54:34 | INFO: Blender create Mesh node Wheel_B003_Wheek_0
+10:54:34 | INFO: Blender create Mesh node Wheel_D_Wheel_0
+10:54:34 | INFO: Blender create Mesh node minivan body_Body_0
+10:54:34 | INFO: Blender create Mesh node minivan body_Glass_0
+10:54:34 | INFO: Blender create Mesh node minivan body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_D001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_D002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_D003_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_G_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Offroad Body_Body_0
+10:54:34 | INFO: Blender create Mesh node Offroad Body_Glass_0
+10:54:34 | INFO: Blender create Mesh node Offroad Body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_G001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_G001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_G002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Pickup Body_Body_0
+10:54:34 | INFO: Blender create Mesh node Pickup Body_Glass_0
+10:54:34 | INFO: Blender create Mesh node Pickup Body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E003_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Sedan Body_Body_0
+10:54:34 | INFO: Blender create Mesh node Sedan Body_Glass_0
+10:54:34 | INFO: Blender create Mesh node Sedan Body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A003_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_H_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_H001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_H002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_H003_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Sport body_Body_0
+10:54:34 | INFO: Blender create Mesh node Sport body_Glass_0
+10:54:34 | INFO: Blender create Mesh node Sport body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E_Body_0
+10:54:34 | INFO: Blender create Mesh node SUV Body_Body_0
+10:54:34 | INFO: Blender create Mesh node SUV Body_Glass_0
+10:54:34 | INFO: Blender create Mesh node SUV Body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E001_Body_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E002_Body_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E003_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_E003_Body_0
+10:54:34 | INFO: Blender create Mesh node Wagon Body_Body_0
+10:54:34 | INFO: Blender create Mesh node Wagon Body_Glass_0
+10:54:34 | INFO: Blender create Mesh node Wagon Body_Optics_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A001_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A002_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Wheel_A003_Wheel_0
+10:54:34 | INFO: Blender create Mesh node Cylinder001__0
+10:54:34 | INFO: glTF import finished in 0.18s
+PAKET arac_paket 7 grup
+ATLA arac_paket 0 [4.3, 3.72, 1.84] oran 0.43
+10:54:36 | INFO: Starting glTF 2.0 export
+10:54:36 | INFO: Extracting primitive: Coupe Body_Body_0
+10:54:36 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:36 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:36 | INFO: Primitives created: 4
+10:54:36 | INFO: Finished glTF 2.0 export in 0.297837495803833 s
+
+DISARI arac_paket_1 [4.2, 2.5, 1.28] olcek 1.0 6022 yüz 357 KB
+ATLA arac_paket 2 [4.3, 4.04, 1.13] oran 0.26
+ATLA arac_paket 3 [4.3, 3.85, 1.01] oran 0.23
+10:54:36 | INFO: Starting glTF 2.0 export
+10:54:36 | INFO: Extracting primitive: Wheel_E_Wheel_0
+10:54:37 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:37 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:37 | INFO: Primitives created: 4
+10:54:37 | INFO: Finished glTF 2.0 export in 0.3001127243041992 s
+
+DISARI arac_paket_4 [5.18, 2.07, 1.7] olcek 1.0 6917 yüz 398 KB
+10:54:37 | INFO: Starting glTF 2.0 export
+10:54:37 | INFO: Extracting primitive: Sedan Body_Body_0
+10:54:37 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:37 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+10:54:37 | INFO: Primitives created: 4
+10:54:37 | INFO: Finished glTF 2.0 export in 0.28302478790283203 s
+
+DISARI arac_paket_5 [4.36, 1.94, 1.34] olcek 1.0 7122 yüz 420 KB
+ATLA arac_paket 6 [4.3, 3.63, 1.08] oran 0.25
+BASLA insan_nathan
+10:54:37 | INFO: Data are loaded, start creating Blender stuff
+10:54:37 | INFO: Blender create Mesh node rp_nathan_animated_003_walking_geo_rp_nathan_animated_003_mat_0
+10:54:37 | INFO: glTF import finished in 0.10s
+Warning: No mesh data to join
+10:54:38 | INFO: Starting glTF 2.0 export
+10:54:38 | INFO: Extracting primitive: rp_nathan_animated_003_walking_geo_rp_nathan_animated_003_mat_0
+10:54:38 | INFO: Primitives created: 1
+10:54:38 | INFO: Finished glTF 2.0 export in 0.6209702491760254 s
+
+DISARI insan_nathan [0.51, 0.58, 1.72] olcek 0.0093 20000 yüz 600 KB
+BASLA insan_sophia
+10:54:38 | INFO: Data are loaded, start creating Blender stuff
+10:54:38 | INFO: Blender create Mesh node rp_sophia_animated_003_idling_geo_rp_sophia_animated_003_mat_0
+10:54:39 | INFO: glTF import finished in 0.27s
+Warning: No mesh data to join
+10:54:39 | INFO: Starting glTF 2.0 export
+10:54:39 | INFO: Extracting primitive: rp_sophia_animated_003_idling_geo_rp_sophia_animated_003_mat_0
+10:54:40 | INFO: Primitives created: 1
+10:54:40 | INFO: Finished glTF 2.0 export in 0.5675301551818848 s
+
+DISARI insan_sophia [0.52, 0.38, 1.73] olcek 0.0101 16475 yüz 502 KB
+BASLA insan_eric
+10:54:40 | INFO: Data are loaded, start creating Blender stuff
+10:54:40 | INFO: Blender create Mesh node rp_eric_rigged_001_geo_rp_eric_rigged_001_mat_0
+10:54:40 | INFO: glTF import finished in 0.07s
+Warning: No mesh data to join
+10:54:41 | INFO: Starting glTF 2.0 export
+10:54:41 | INFO: Extracting primitive: rp_eric_rigged_001_geo_rp_eric_rigged_001_mat_0
+10:54:42 | INFO: Primitives created: 1
+10:54:42 | INFO: Finished glTF 2.0 export in 1.2004263401031494 s
+
+DISARI insan_eric [1.21, 0.33, 1.73] olcek 0.0093 19999 yüz 718 KB
+BASLA insan_carla
+10:54:42 | INFO: Data are loaded, start creating Blender stuff
+10:54:42 | INFO: Blender create Mesh node rp_carla_rigged_001_geo_rp_carla_rigged_001_mat_0
+10:54:42 | INFO: glTF import finished in 0.06s
+Warning: No mesh data to join
+10:54:44 | INFO: Starting glTF 2.0 export
+10:54:44 | INFO: Extracting primitive: rp_carla_rigged_001_geo_rp_carla_rigged_001_mat_0
+10:54:45 | INFO: Primitives created: 1
+10:54:45 | INFO: Finished glTF 2.0 export in 1.3781933784484863 s
+
+DISARI insan_carla [1.19, 0.35, 1.72] olcek 0.01 19988 yüz 760 KB
+BASLA insan_claudia
+10:54:45 | INFO: Data are loaded, start creating Blender stuff
+10:54:45 | INFO: Blender create Mesh node rp_claudia_rigged_002_geo_rp_claudia_rigged_002_mat_0
+10:54:45 | INFO: glTF import finished in 0.08s
+Warning: No mesh data to join
+10:54:47 | INFO: Starting glTF 2.0 export
+10:54:47 | INFO: Extracting primitive: rp_claudia_rigged_002_geo_rp_claudia_rigged_002_mat_0
+10:54:48 | INFO: Primitives created: 1
+10:54:48 | INFO: Finished glTF 2.0 export in 1.3930115699768066 s
+
+DISARI insan_claudia [1.15, 0.32, 1.73] olcek 0.0094 20000 yüz 718 KB
+DISARI_BITTI 10
+Blender 4.5.0 (hash 8cb6b388974a built 2025-07-15 01:36:28)
+
+Blender quit

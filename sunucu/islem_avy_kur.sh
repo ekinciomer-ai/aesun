@@ -58,9 +58,11 @@ docker build -q -t avy-servis:latest "$D" >/tmp/avy_build.txt 2>&1 \
 IP=$(curl -s4 --max-time 5 https://api.ipify.org || hostname -I | awk '{print $1}')
 AG=$(docker inspect ck-caddy -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' | tr ' ' '\n' | grep -m1 'ck-dis')
 
-# Eski aleph-tampon kabını kaldır (çift bellek tüketmesin), avy-servis kabını başlat
+# Eski aleph-tampon kabını kaldır (çift bellek tüketmesin), avy-servis kabını başlat (4 GB bellek + 2 PBF işçisi)
 docker rm -f aleph-tampon avy-servis >/dev/null 2>&1 || true
-docker run -d --name avy-servis --restart unless-stopped --network "$AG" -m 1500m --cpus 2 \
+docker run -d --name avy-servis --restart unless-stopped --network "$AG" \
+  -m 4g --memory-swap 5g --shm-size 512m --cpus 3 \
+  -e AVY_PBF_ISCI=2 -e AVY_KURTAR_ID=aleph-20261112T174942Z-pptd778o \
   -v "$D/captures:/veri/captures" -v "$D/cache:/veri/cache" \
   --add-host "api.aksarayenerji.net:$IP" --add-host "portal.aksarayenerji.net:$IP" \
   --log-opt max-size=5m --log-opt max-file=2 \
@@ -112,4 +114,26 @@ for i in $(seq 1 12); do
   [ "$KOD" = "200" ] && break
   sleep 4
 done
-echo "NOT: AVY dış kontrol: saglik=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$AD_AVY/saglik") · kok=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$AD_AVY/") (302 beklenir)"
+
+HEDEF_KAYIT="$D/captures/aleph-20261112T174942Z-pptd778o"
+if [ -f "$HEDEF_KAYIT/manifest.json" ]; then
+  for s in $(seq 1 15); do
+    DURUM_K=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d.get("state","?"))' "$HEDEF_KAYIT/manifest.json" 2>/dev/null || echo "?")
+    [ "$DURUM_K" = "complete" ] && break
+    sleep 5
+  done
+  OZET_K=$(python3 - "$HEDEF_KAYIT" 2>/dev/null <<'PY' || echo "okunamadi"
+import json, pathlib, sys
+p = pathlib.Path(sys.argv[1])
+d = json.loads((p / "manifest.json").read_text(encoding="utf-8"))
+st = ",".join("%s:%d" % (s.get("mode", "?"), len(s.get("results", []))) for s in d.get("stages", []))
+outs = ["%s(%.1fMB)" % (f.name, f.stat().st_size / 1048576) for f in sorted(p.iterdir()) if f.is_file() and f.name != "manifest.json"]
+print("state=%s err=%s stages=[%s] files=%s" % (d.get("state"), d.get("error"), st, outs))
+PY
+)
+  echo "NOT: AVY hedef kayıt: $OZET_K"
+fi
+
+BELLEK_K=$(docker stats --no-stream --format '{{.MemUsage}} ({{.CPUPerc}})' avy-servis 2>/dev/null || true)
+echo "NOT: AVY bellek/durum: $(docker ps --filter name=avy-servis --format '{{.Status}}') · $BELLEK_K"
+echo "NOT: AVY dış kontrol: saglik=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$AD_AVY/saglik") · head=$(curl -sI -o /dev/null -w '%{http_code}' --max-time 10 "https://$AD_AVY/saglik") · kok=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$AD_AVY/") (302 beklenir)"

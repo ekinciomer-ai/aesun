@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-13T15:04+03:00",
+ "olusturma": "2026-11-13T16:05+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -172,11 +172,11 @@
    "kanal": "Ancient Studio",
    "seri": "Tablo Serisi",
    "karar": "SÜRDÜR",
-   "neden": "tutma oranı %20",
-   "olculen": 5,
-   "erken": 1,
-   "medyan_48sa": 82,
-   "tutma_orani": 20,
+   "neden": "tutma oranı %17",
+   "olculen": 6,
+   "erken": 0,
+   "medyan_48sa": 48,
+   "tutma_orani": 17,
    "izlenme_yuzde": 54,
    "en_iyi": {
     "baslik": "The man in The Scream isn't screaming 😱",
@@ -570,12 +570,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 50,
   "Antik Stüdyo": 637,
-  "Estudio Antiguo": 122,
+  "Kozmos Lab": 50,
+  "Ömür Dediğin": 50,
   "Ancient Studio": 188,
-  "Kozmos Lab TR": 67,
-  "Ömür Dediğin": 50
+  "Estudio Antiguo": 122,
+  "Kozmos Lab TR": 67
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -630,8 +630,8 @@
   },
   "Ancient Studio": {
    "00:00": {
-    "n": 4,
-    "medyan": 486
+    "n": 5,
+    "medyan": 70
    },
    "14:00": {
     "n": 2,
@@ -1108,6 +1108,14 @@
   },
   {
    "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "2a8CLbBrZco",
+   "baslik": "Avrupa akıl hastalarını yakarken Osmanlı neden su sesi ve müzik dinletti? 🎶⛲ (1488) #shorts",
+   "neden": "2026-11-13 14:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
    "kanal": "Kozmos Lab",
    "platform": "YouTube",
    "vid": "ReCRjuyawNk",
@@ -1197,7 +1205,7 @@
  ],
  "bulgular": [
   "Dün (2026-11-12) 872 izlenme geldi; bir önceki gün 2083.",
-  "Ancient Studio: son 6 Short'tan 2 tanesi tuttu (eşik 188 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 0 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 5 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 4 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
@@ -1210,7 +1218,7 @@
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1804 izlenme, 2 video).",
-  "Ancient Studio: en iyi yayın saati şimdilik 00:00 (medyan 486 izlenme, 4 video).",
+  "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 506 izlenme, 3 video).",
   "Kozmos Lab TR: en iyi yayın saati şimdilik 13:00 (medyan 53 izlenme, 2 video).",
   "Kozmos Lab: en iyi yayın saati şimdilik 22:00 (medyan 10 izlenme, 2 video).",

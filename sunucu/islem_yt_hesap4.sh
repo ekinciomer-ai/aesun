@@ -1,5 +1,6 @@
 #!/bin/bash
-# Tek seferlik (13 Kas 2026, Ömer: "yayınları azalt"): 6 kanalın planlı videolarını hesap genelinde günde en fazla 4 yayına yayar.
+# (13 Kas 2026, Ömer: "yayınları azalt") — 2. çalıştırma: TARİHE BAĞLI videolar SABIT listesiyle asıl günlerine döner.
+# Tek seferlik: 6 kanalın planlı videolarını hesap genelinde günde en fazla 4 yayına yayar.
 # Öncelik Antik Stüdyo (yerinde kalır), sonra diğer kanallar kendi sıralarıyla ilk boş güne (aynı saat) kayar.
 # Silme/gizleme yok; yalnız publishAt değişir. Eski değerler /opt/aesun/youtube/yedek/hesap4_<zaman>.json
 set -euo pipefail
@@ -8,6 +9,10 @@ python3 - "$D" <<'PY'
 import json, os, sys, urllib.request, urllib.parse
 from datetime import datetime, timedelta, timezone
 D = sys.argv[1]; TZ = timezone(timedelta(hours=3)); simdi = datetime.now(TZ); GUNLUK = 4
+# Tarihe bağlı içerik (gök olayı "bu gece / yarın / sıradaki 24 Kasım"): ASLA kaydırılmaz, asıl saatine sabitlenir.
+SABIT = {"XiWQHCF8pPI": "2026-11-17 21:00", "SSWnBsrAjQU": "2026-11-18 02:00", "L5IIRYQ0i7c": "2026-11-19 21:00",
+         "Xv82CELi5hM": "2026-11-20 02:00", "yCiaMGpe34E": "2026-11-23 21:00", "vbF9fnQz3Lc": "2026-11-24 02:00",
+         "QAzkFFZij2E": "2026-11-24 21:00", "ZXqZrhJmIs8": "2026-11-25 02:00"}
 KANAL = [("TR", "UC77LyY3gqWmBNAKp2lbsGBg"), ("EN", "UCFLJUlhUSgjcLbp9ad_t9PQ"), ("ES", "UCTC_yS0lwl-owMuo5b4bNtQ"),
          ("KZ_TR", "UC7o3DG9m1gBbvMjFZjB5KEg"), ("KZ_EN", "UC41-Z82jCQ8955az6JUDIAw"), ("OD", "UCg75Mvb6C8CBSJPeuwzBFZA")]
 ist = json.load(open(os.path.join(D, "istemci.json"), encoding="utf-8"))
@@ -41,13 +46,20 @@ for kod, cid in KANAL:
                 g = datetime.fromisoformat(v["snippet"]["publishedAt"].replace("Z", "+00:00")).astimezone(TZ).date()
                 if g == simdi.date(): gun[g] = gun.get(g, 0) + 1
 # Öncelik: Antik Stüdyo önce, sonra zaman sırası
-planli.sort(key=lambda p: (p["kod"] != "TR", p["t"]))
+for p in planli:
+    if p["v"]["id"] in SABIT:
+        p["t_hedef"] = datetime.strptime(SABIT[p["v"]["id"]], "%Y-%m-%d %H:%M").replace(tzinfo=TZ)
+planli.sort(key=lambda p: (p["v"]["id"] not in SABIT, p["kod"] != "TR", p["t"]))
 yedek, degisen = [], 0
 for p in planli:
-    t = p["t"]; g = t.date()
-    while gun.get(g, 0) >= GUNLUK: g += timedelta(days=1)
-    gun[g] = gun.get(g, 0) + 1
-    yeni = t.replace(year=g.year, month=g.month, day=g.day)
+    t = p["t"]
+    if "t_hedef" in p:  # sabit: günü doluluğa bakmadan asıl tarihine
+        yeni = p["t_hedef"]; g = yeni.date(); gun[g] = gun.get(g, 0) + 1
+    else:
+        g = t.date()
+        while gun.get(g, 0) >= GUNLUK: g += timedelta(days=1)
+        gun[g] = gun.get(g, 0) + 1
+        yeni = t.replace(year=g.year, month=g.month, day=g.day)
     if yeni == t: continue
     v = p["v"]; st = dict(v["status"])
     yedek.append({"vid": v["id"], "kanal": p["kod"], "eski_publishAt": st["publishAt"]})

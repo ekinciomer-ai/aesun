@@ -1,7 +1,8 @@
 #!/bin/bash
 # YouTube yükleme kuyruğu (bilgisayar gerekmez). .github/workflows/yt_kuyruk.yml çalıştırır.
 # Girdi: paket içinde kuyruk/<kod>.json + kuyruk/<kod>.mp4 (+ isteğe bağlı kuyruk/<kod>.jpg veya .png özel kapak)
-#   json: {"kod","kanal":"TR|EN|ES|KZ_TR|KZ_EN|OD","baslik","aciklama","etiketler":[],"kategori":"27","publishAt":"2026-11-05T19:00:00+03:00","sentetik":false,"seri"}
+#   json: {"kod","kanal":"TR|EN|ES|KZ_TR|KZ_EN|OD","baslik","aciklama","etiketler":[],"kategori":"27","publishAt":"2026-11-05T19:00:00+03:00","sentetik":false,"seri","tarih_sabit":false}
+# HESAP SINIRI: 6 kanal toplamı günde en fazla 4 yükleme + 4 yayın; dolu günde yayın ilk boş güne kayar (tarih_sabit:true olanlar hariç).
 # Kurallar: aynı kod ya da aynı başlık kanalda varsa YÜKLEMEZ; herkese açma yalnız publishAt ile planlıdır; silme yok.
 # Çıktı: '===KUYRUK===' ... '===SON===' arasında sırsız JSON sonuç listesi.
 set -euo pipefail
@@ -131,9 +132,10 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         if _t < _dt.now(_IST):
             _t = _dt.now(_IST).replace(second=0, microsecond=0) + _td(hours=2)
         _eski_pa = it["publishAt"]
-        for _k in range(0, 120):
+        # Tarihe bağlı içerik ("bu gece", maç günü, gök olayı) kuyruk json'unda "tarih_sabit": true taşır; günü kaydırılmaz.
+        for _k in (range(0, 1) if it.get("tarih_sabit") else range(0, 120)):
             _g = (_t + _td(days=_k)).strftime("%Y-%m-%d")
-            if _pl.get(_g, 0) < HESAP_GUNLUK:
+            if it.get("tarih_sabit") or _pl.get(_g, 0) < HESAP_GUNLUK:
                 _t = _t + _td(days=_k); break
         it["publishAt"] = _t.isoformat(timespec="seconds")
         if it["publishAt"][:10] != _eski_pa[:10]:

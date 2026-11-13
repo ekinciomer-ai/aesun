@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-13T16:05+03:00",
+ "olusturma": "2026-11-13T19:12+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -106,9 +106,11 @@
    "haftalik_short_kotasi": 2,
    "seri_dagilimi": {
     "Energy Sources": 1,
-    "Did you know?": 1
+    "How It's Made": 1
    },
-   "durdurulan": [],
+   "durdurulan": [
+    "Did you know?"
+   ],
    "odak": "ODAK DÖNEMİ 2026-12-12'e kadar: haftada en fazla 2 Short"
   },
   "Ömür Dediğin": {
@@ -250,7 +252,7 @@
    "karar": "ARTIR",
    "neden": "videoların %60'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 15,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": 1236,
    "tutma_orani": 60,
    "izlenme_yuzde": 64,
@@ -331,12 +333,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 49,
+   "medyan_48sa": 57,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "İbn-i Sînâ İki Kuzudan Birini Hiç Dokunmadan Nasıl Öldürdü? 🐑🐺 | 1000 Yıllık Vehim Deneyi #shorts",
-    "i48": 49
+    "i48": 57
    }
   },
   {
@@ -409,23 +411,23 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 4,
+   "medyan_48sa": 5,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "¿Por qué hay una mujer sin cara en este cuadro del Prado? 🤔 #shorts",
-    "i48": 4
+    "i48": 5
    }
   },
   {
    "kanal": "Estudio Antiguo",
    "seri": "İnanç & Kültür Tarihi",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 2,
-   "medyan_48sa": 1320,
-   "tutma_orani": 100,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 662,
+   "tutma_orani": 50,
    "izlenme_yuzde": 98,
    "en_iyi": {
     "baslik": "El 'Ojo Turco' ya estaba en España hace 2.500 años 🧿 (De Mesopotamia a Ibiza) #historia",
@@ -436,10 +438,10 @@
   {
    "kanal": "Kozmos Lab",
    "seri": "Did you know?",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
-   "erken": 2,
+   "karar": "DURDUR",
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
+   "olculen": 3,
+   "erken": 1,
    "medyan_48sa": 2,
    "tutma_orani": 0,
    "izlenme_yuzde": 290,
@@ -480,6 +482,18 @@
     "i48": 2
    },
    "kaydirmadan_izleme_yuzde": 50
+  },
+  {
+   "kanal": "Kozmos Lab",
+   "seri": "Real Footage",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
   },
   {
    "kanal": "Kozmos Lab TR",
@@ -544,12 +558,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 5,
+   "medyan_48sa": 8,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Satürn suya konsa yüzer mi? 🪐 #shorts",
-    "i48": 5
+    "i48": 8
    }
   },
   {
@@ -570,11 +584,11 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 637,
-  "Kozmos Lab": 50,
   "Ömür Dediğin": 50,
+  "Kozmos Lab": 50,
   "Ancient Studio": 188,
   "Estudio Antiguo": 122,
+  "Antik Stüdyo": 637,
   "Kozmos Lab TR": 67
  },
  "saatler": {
@@ -621,7 +635,7 @@
    },
    "22:00": {
     "n": 1,
-    "medyan": 49
+    "medyan": 57
    },
    "23:00": {
     "n": 1,
@@ -655,6 +669,10 @@
    }
   },
   "Estudio Antiguo": {
+   "01:00": {
+    "n": 1,
+    "medyan": 5
+   },
    "14:00": {
     "n": 1,
     "medyan": 1
@@ -683,10 +701,14 @@
    },
    "21:00": {
     "n": 1,
-    "medyan": 5
+    "medyan": 8
    }
   },
   "Kozmos Lab": {
+   "02:00": {
+    "n": 1,
+    "medyan": 1
+   },
    "17:00": {
     "n": 1,
     "medyan": 3
@@ -730,7 +752,7 @@
     {
      "vid": "Lcvm_LATwkc",
      "baslik": "The man in The Scream isn't screaming 😱 #shorts",
-     "izlenme": 374,
+     "izlenme": 376,
      "durum": "Yayında"
     },
     {
@@ -782,13 +804,13 @@
     {
      "vid": "C62qY8WVRRg",
      "baslik": "How Did the Ottomans Try to Connect the Black Sea & Caspian in 1569? 🗺️ #shorts",
-     "izlenme": 84,
+     "izlenme": 85,
      "durum": "Yayında"
     },
     {
      "vid": "kEDrn8ytfAU",
      "baslik": "How did 70 warships cross a hill in one night? ⚓ #shorts",
-     "izlenme": 13,
+     "izlenme": 38,
      "durum": "Yayında"
     }
    ],
@@ -804,7 +826,7 @@
     {
      "vid": "lcGHHhXM_74",
      "baslik": "Why was Piri Reis executed? #Shorts",
-     "izlenme": 923,
+     "izlenme": 924,
      "durum": "Yayında"
     },
     {
@@ -826,13 +848,13 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2776,
+     "izlenme": 2777,
      "durum": "Yayında"
     },
     {
      "vid": "Ov0ftdfKjCI",
      "baslik": "Piri Reis neden idam edildi? #Shorts",
-     "izlenme": 2291,
+     "izlenme": 2292,
      "durum": "Yayında"
     },
     {
@@ -850,7 +872,7 @@
     {
      "vid": "7a3yi4BG3Pw",
      "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
-     "izlenme": 1198,
+     "izlenme": 1199,
      "durum": "Yayında"
     }
    ],
@@ -861,12 +883,12 @@
    "uzun_vid": "42vh7-zmom4",
    "uzun_baslik": "Piri Reis'in Bütün Hikâyesi: Korsanlıktan Hürmüz'e, Haritadan İdama",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 41,
+   "uzun_izlenme": 44,
    "baglanacak_shortlar": [
     {
      "vid": "Ov0ftdfKjCI",
      "baslik": "Piri Reis neden idam edildi? #Shorts",
-     "izlenme": 2291,
+     "izlenme": 2292,
      "durum": "Yayında"
     },
     {
@@ -894,7 +916,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2776,
+     "izlenme": 2777,
      "durum": "Yayında"
     },
     {
@@ -906,7 +928,7 @@
     {
      "vid": "7a3yi4BG3Pw",
      "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
-     "izlenme": 1198,
+     "izlenme": 1199,
      "durum": "Yayında"
     },
     {
@@ -934,13 +956,13 @@
     {
      "vid": "0Yhof30_bfg",
      "baslik": "Son Akşam Yemeği neden yok oluyor? 🍞 #shorts",
-     "izlenme": 2909,
+     "izlenme": 2908,
      "durum": "Yayında"
     },
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2874,
+     "izlenme": 2875,
      "durum": "Yayında"
     },
     {
@@ -952,7 +974,7 @@
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2570,
+     "izlenme": 2574,
      "durum": "Yayında"
     },
     {
@@ -974,7 +996,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2776,
+     "izlenme": 2777,
      "durum": "Yayında"
     },
     {
@@ -986,7 +1008,7 @@
     {
      "vid": "7a3yi4BG3Pw",
      "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
-     "izlenme": 1198,
+     "izlenme": 1199,
      "durum": "Yayında"
     },
     {
@@ -1030,7 +1052,7 @@
     {
      "vid": "2W3av1wzx5A",
      "baslik": "¿Por qué hay una mujer sin cara en este cuadro del Prado? 🤔 #shorts",
-     "izlenme": 4,
+     "izlenme": 5,
      "durum": "Yayında"
     }
    ],
@@ -1041,7 +1063,7 @@
    "uzun_vid": "HvRuOsJcczM",
    "uzun_baslik": "From Sand to Power: How a Solar Panel Is Made | Step-by-Step 3D Explainer",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 21,
+   "uzun_izlenme": 26,
    "baglanacak_shortlar": [
     {
      "vid": "oEFXYkmfE-E",
@@ -1062,13 +1084,13 @@
     {
      "vid": "cfbwB6z1_cA",
      "baslik": "How does a wind turbine make electricity? 🌬️ #shorts",
-     "izlenme": 19,
+     "izlenme": 21,
      "durum": "Yayında"
     },
     {
      "vid": "7naXMebQd70",
      "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
-     "izlenme": 2,
+     "izlenme": 4,
      "durum": "Yayında"
     }
    ],
@@ -1084,7 +1106,7 @@
     {
      "vid": "MSOsi_wK55Q",
      "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
-     "izlenme": 927,
+     "izlenme": 925,
      "durum": "Yayında"
     },
     {
@@ -1107,20 +1129,32 @@
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
   },
   {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "2a8CLbBrZco",
-   "baslik": "Avrupa akıl hastalarını yakarken Osmanlı neden su sesi ve müzik dinletti? 🎶⛲ (1488) #shorts",
-   "neden": "2026-11-13 14:00 planlıydı, hâlâ yayında görünmüyor"
+   "tur": "ERTELE",
+   "kanal": "Kozmos Lab",
+   "vid": "VaosKgKjX9Y",
+   "baslik": "Mercury: scorching and freezing ☄️ #shorts",
+   "neden": "'Did you know?' serisi durduruldu; bu slotu Energy Sources, How It's Made kullanır"
   },
   {
-   "tur": "KONTROL",
+   "tur": "ERTELE",
    "kanal": "Kozmos Lab",
-   "platform": "YouTube",
-   "vid": "ReCRjuyawNk",
-   "baslik": "Real footage: 4 astronauts' trip around the Moon, start to splashdown 🚀🌕 #shorts",
-   "neden": "2026-11-13 03:00 planlıydı, hâlâ yayında görünmüyor"
+   "vid": "LTXaHGTs_YU",
+   "baslik": "The Infinity of Space 🌌 #shorts",
+   "neden": "'Did you know?' serisi durduruldu; bu slotu Energy Sources, How It's Made kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Kozmos Lab",
+   "vid": "vbF9fnQz3Lc",
+   "baslik": "Supermoon tomorrow night: when & where to look 🌕 #shorts",
+   "neden": "'Did you know?' serisi durduruldu; bu slotu Energy Sources, How It's Made kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Kozmos Lab",
+   "vid": "ZXqZrhJmIs8",
+   "baslik": "Supermoon tonight! 🌕 #shorts",
+   "neden": "'Did you know?' serisi durduruldu; bu slotu Energy Sources, How It's Made kullanır"
   },
   {
    "tur": "HAFTALIK_KOTA",
@@ -1207,8 +1241,8 @@
   "Dün (2026-11-12) 872 izlenme geldi; bir önceki gün 2083.",
   "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 0 tanesi tuttu (eşik 637 izlenme / 48 sa).",
-  "Estudio Antiguo: son 5 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
-  "Kozmos Lab: son 4 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "Estudio Antiguo: son 6 Short'tan 2 tanesi tuttu (eşik 122 izlenme / 48 sa).",
+  "Kozmos Lab: son 5 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR: son 5 Short'tan 2 tanesi tuttu (eşik 67 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %56'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1217,6 +1251,7 @@
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %77'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
+  "Kozmos Lab · Did you know?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1804 izlenme, 2 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 506 izlenme, 3 video).",
@@ -1231,7 +1266,7 @@
   "Kozmos Lab: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %33 (hedef ≥%70).",
   "Kozmos Lab TR: tutan Short'lar ortalama %60 izleniyor, tutmayanlar %56 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Kozmos Lab TR: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %37 (hedef ≥%70).",
-  "Uzun videolar (9 yayında): medyan 21 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
+  "Uzun videolar (9 yayında): medyan 26 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
   "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-13, 2026-11-15."
  ],
  "en_iyi": [
@@ -1263,13 +1298,13 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Kozmos Lab",
-   "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
-   "i48": 2
-  },
-  {
    "kanal": "Estudio Antiguo",
    "baslik": "Un viaje de mil millas comienza con un solo paso 🏔️ | Lao Tzu #shorts",
+   "i48": 1
+  },
+  {
+   "kanal": "Kozmos Lab",
+   "baslik": "Could Saturn float in water? 🪐 #shorts",
    "i48": 1
   },
   {

@@ -12,6 +12,8 @@ def B(kod, grup, dil, kanal_kodu, seri, publishAt, baslik, govde, etiketler, kay
     for i, (_, img, bas) in enumerate(satirlar):
         sahneler.append({"img": img, "odak": _ODAK[i % 2], "odak2": _ODAK[(i + 1) % 2], "bas": bas})
     kapanis = {"tr": "TAKİP ET", "en": "FOLLOW FOR MORE"}[dil]
+    if kanal_kodu == "EN":
+        kapanis = "FOLLOW FOR MORE"
     if kanal_kodu == "TR":
         kapanis = "YORUMLARA YAZ"
     return {"kod": kod, "grup": grup, "dil": dil, "kanal_kodu": kanal_kodu, "kanal_etiket": kanal_etiket, "kapanis": kapanis,
@@ -368,4 +370,19 @@ BOLUMLER = [
        ("Gizli detay üç: ortadaki bahçede dev çilekler ve kuşlar var; insanlardan bile büyük.", "bosch_bahce", ["GİZLİ DETAY 3/3", "DEV", "ÇİLEKLER"]),
        ("Cennet mi, uyarı mı? Sence Bosch ne anlatmak istedi? Yorumlara yaz!", "bosch_bahce", ["SENCE?", "CENNET Mİ", "UYARI MI?"])],
       voice=UGUR, kanal_etiket="ANTİK STÜDYO"),
+    # ---------------- ANCIENT STUDIO · KANCA DENEMESİ (13 Kas 2026) ----------------
+    # Ömer onayı: EN Tablo serisinde "izlemeyi seçen" %23–37 → ilk karede tek soru, tablo adı arkaya, ~25 sn.
+    # Kanca Bekçisi ölçer; ≥%45 tutarsa EN Tablo kalıbı bu olur. Haftalık kota: 17–23 Kas penceresinde 2. video.
+    B("ENT_1123_BOSCH_KANCA", "kanca_en", "en", "EN", "Tablo Serisi", "2026-11-23T02:00:00+03:00",
+      "Someone wrote a song on this man's butt 🎵 #shorts",
+      "A 500-year-old melody hidden in Hieronymus Bosch's The Garden of Earthly Delights (c. 1490–1510, Museo del Prado, Madrid). In 2014 a college student transcribed it and recorded it.",
+      ["garden of earthly delights", "hieronymus bosch", "art history", "painting", "hidden details", "ancient studio", "shorts"],
+      "Museo Nacional del Prado, The Garden of Earthly Delights; 2014 transcription by Amelia Hamrick (Oklahoma Christian University), widely reported (e.g. Smithsonian Magazine, Feb 2014).",
+      [("Someone wrote a song on this man's butt.", "bosch_cehennem", ["", "A SONG", "ON HIS BUTT?"]),
+       ("And people have actually played it.", "bosch_cehennem", ["500 YEARS OLD", "AND PLAYABLE", ""]),
+       ("It's in Hieronymus Bosch's Garden of Earthly Delights, painted around fifteen hundred.", "bosch_bahce", ["BOSCH", "≈1500", "PRADO, MADRID"]),
+       ("In the hell panel, sheet music is painted right across a sinner's backside.", "bosch_cehennem", ["HELL PANEL", "SHEET MUSIC", "ON HIS BACKSIDE"]),
+       ("In twenty fourteen, a college student in Oklahoma transcribed it and recorded it.", "bosch_cehennem", ["2014", "TRANSCRIBED", "& RECORDED"]),
+       ("They call it the five-hundred-year-old butt song. Would you listen to it?", "bosch_bahce", ["THE 500-YEAR-OLD", "BUTT SONG", "WOULD YOU LISTEN?"])],
+      kanal_etiket="ANCIENT STUDIO"),
 ]

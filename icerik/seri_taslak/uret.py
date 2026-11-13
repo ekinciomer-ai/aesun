@@ -20,7 +20,7 @@ BOLUMLER = [b for b in _TUM if not _GRUP or b["grup"] == _GRUP]
 
 NOTLAR = {
     "tr": "Not: Görseller kamu malı ya da serbest lisanslı fotoğraf/eserlerdir; seslendirme yapay zekâ ile yapılmıştır.",
-    "en": "Note: images are public domain or freely licensed (NASA/ESA/Wikimedia Commons); narration uses an AI clone of my own voice.",
+    "en": "Note: images are public domain or freely licensed (Wikimedia Commons); narration uses an AI clone of my own voice.",
     "es": "Nota: las imágenes son obras y fotografías de dominio público o con licencia libre; la narración está generada con IA.",
 }
 SORULAR = {
@@ -30,7 +30,7 @@ SORULAR = {
 }
 ALT_BANT = {
     "tr": "Görseller: kamu malı / Wikimedia Commons · Ses: yapay zekâ ile klonlanmış ses",
-    "en": "Images: public domain / NASA · Wikimedia Commons · Voice: AI clone",
+    "en": "Images: public domain / Wikimedia Commons · Voice: AI clone",
     "es": "Imágenes: dominio público / Wikimedia Commons · Voz: clonada con IA",
 }
 
@@ -133,7 +133,7 @@ def ana():
             dl = b["dil"]
             kb = {"tr": "Kaynaklar", "en": "Sources", "es": "Fuentes"}[dl]
             gk = {"tr": "Görsel künyeleri", "en": "Image credits", "es": "Créditos de imágenes"}[dl]
-            kan_tag = {"TR": "#antikstüdyo #tablo #sanat #shorts", "KZ_TR": "#kozmoslab #uzay #astronomi #shorts", "KZ_EN": "#kozmoslab #space #astronomy #shorts"}.get(b["kanal_kodu"], "#shorts")
+            kan_tag = {"TR": "#antikstüdyo #tablo #sanat #shorts", "KZ_TR": "#kozmoslab #uzay #astronomi #shorts", "KZ_EN": "#kozmoslab #space #astronomy #shorts", "EN": "#ancientstudio #arthistory #painting #shorts"}.get(b["kanal_kodu"], "#shorts")
             aciklama = (
                 f"{b['govde']}\n\n{SORULAR[dl]}\n\n{kb}: {b['kaynak_metin']}\n\n{gk}:\n"
                 + "\n".join(kun)

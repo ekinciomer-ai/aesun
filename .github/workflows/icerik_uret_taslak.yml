@@ -20,7 +20,7 @@ jobs:
       max-parallel: 1
       fail-fast: false
       matrix:
-        grup: [kz_tr, tablo, kz_en]
+        grup: [kz_tr, tablo, kz_en, kanca_en]
     env:
       GRUP: ${{ matrix.grup }}
     steps:

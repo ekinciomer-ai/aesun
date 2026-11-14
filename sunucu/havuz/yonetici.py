@@ -20,12 +20,20 @@ KOK = "/opt/aesun/havuz"
 IST = timezone(timedelta(hours=3))
 IDX = f"{KOK}/havuz.json"
 GEREKLI = ["kod", "kanal", "platformlar", "format", "seri", "amac", "baslik", "aciklama", "dil", "sentetik", "kaynaklar", "lisans", "kaynak_dosya"]
-KANALLAR = {"TR": "Antik Stüdyo", "EN": "Ancient Studio", "ES": "Estudio Antiguo", "KZ_TR": "Kozmos Lab TR", "KZ_EN": "Kozmos Lab", "OD": "Ömür Dediğin"}
+KANALLAR = {"TR": "Antik Stüdyo", "EN": "Ancient Studio", "ES": "Estudio Antiguo", "KZ_TR": "Kozmos Lab TR", "KZ_EN": "Kozmos Lab", "OD": "Ömür Dediğin", "YR": "Yeraltı"}
 PLATFORMLAR = {"youtube", "tiktok", "instagram"}
 # Odak dönemi (12 Ara 2026'ya kadar): Antik Stüdyo yalnız bu seriler
 ODAK_SON = "2026-12-12"
 ODAK_SERI = {"Gündem + Tarih", "Tablo Serisi", "Tarihi Magazin", "Spor + Tarih"}
 TEKRAR_GUN = 14
+# Yayın kilidi (Ömer onayı 15.11.2026; Antik Stüdyo'da toplu yükleme hesabı keşiften düşürdü).
+# Aynı kanal + platform için: günlük üst sınır ve iki yayın arası en az süre. Sınırı aşan video kuyruğa gitmez,
+# "onaylandi" durumunda bekler ve bir sonraki uygun saat önerilir. Değerler /opt/aesun/havuz/sinirlar.json ile değiştirilebilir.
+YENI_HESAP_GUN = 30          # hesap açılışından bu kadar gün "yeni hesap" sayılır
+SINIR_YENI = 1               # yeni hesapta günlük en fazla video (platform başına)
+SINIR_NORMAL = 3             # sonrasında günlük en fazla video (platform başına)
+MIN_ARA_SAAT = 3             # aynı kanal + platformda iki yayın arası en az saat
+SINIR_DOSYA = f"{KOK}/sinirlar.json"   # {"kanal": {"acilis": "YYYY-MM-DD", "gunluk": n, "ara_saat": n}, "varsayilan": {...}}
 
 
 def simdi():
@@ -152,15 +160,83 @@ def onay(kod, karar, notu="", zaman=None):
     kaydet(idx); print(f"NOT: {kod}: {it['durum']}"); return 0
 
 
+def zaman_oku(s):
+    try:
+        t = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+        return (t if t.tzinfo else t.replace(tzinfo=IST)).astimezone(IST)
+    except Exception:
+        return None
+
+
+def sinir_al(kanal):
+    ayar = {}
+    try:
+        d = json.load(open(SINIR_DOSYA, encoding="utf-8"))
+        ayar = {**d.get("varsayilan", {}), **d.get(kanal, {})}
+    except Exception:
+        pass
+    ara = float(ayar.get("ara_saat", MIN_ARA_SAAT))
+    if "gunluk" in ayar:
+        return int(ayar["gunluk"]), ara, "ayar"
+    acilis = zaman_oku(ayar.get("acilis")) if ayar.get("acilis") else None
+    if acilis and datetime.now(IST) - acilis < timedelta(days=YENI_HESAP_GUN):
+        return SINIR_YENI, ara, f"yeni hesap (açılış {acilis:%d.%m.%Y})"
+    return SINIR_NORMAL, ara, "normal"
+
+
+def kilit_kontrol(kod, k, platform, planli):
+    """planli: [(kanal, platform, zaman)] kuyrukta/yayında olanlar. Uygunsa None, değilse (sebep, öneri) döner."""
+    t = zaman_oku(k.get("yayin_zamani"))
+    if not t:
+        return ("yayın zamanı okunamadı", None)
+    gunluk, ara, tur = sinir_al(k["kanal"])
+    ayni = [z for (kn, p, z) in planli if kn == k["kanal"] and p == platform and z]
+
+    def uygun(x):
+        if sum(1 for z in ayni if z.date() == x.date()) >= gunluk:
+            return f"{x:%d.%m} günü {platform} sınırı dolu ({gunluk}/gün, {tur})"
+        for z in ayni:
+            if abs((x - z).total_seconds()) < ara * 3600:
+                return f"{z:%d.%m %H:%M} yayınına {ara:g} saatten yakın"
+        return None
+
+    sebep = uygun(t)
+    if not sebep:
+        return None
+    oneri, neden = t, sebep
+    for _ in range(24 * 60):  # en çok 60 gün ileri bak
+        # gün sınırı doluysa ertesi gün aynı saat; yalnız ara süresi sorunuysa 1 saat ileri
+        oneri += timedelta(days=1) if "sınırı dolu" in neden else timedelta(hours=1)
+        neden = uygun(oneri)
+        if not neden:
+            break
+    return (sebep, oneri.isoformat(timespec="minutes"))
+
+
 def yonlendir():
     """Onaylananların videosunu platform kuyruklarının okuduğu yerlere kopyalar, kuyruk kartlarını yazdırır."""
     idx = yukle(); cikti = []
-    for kod, it in idx.items():
+    planli = []
+    for it in idx.values():
+        if it.get("durum") in ("kuyrukta", "yayinda"):
+            for p in it["kart"].get("platformlar", []):
+                planli.append((it["kart"].get("kanal"), p, zaman_oku(it["kart"].get("yayin_zamani"))))
+    for kod, it in sorted(idx.items(), key=lambda x: str(x[1].get("kart", {}).get("yayin_zamani") or "")):
         if it.get("durum") != "onaylandi":
             continue
         k = it["kart"]; pl = set(k.get("platformlar", []))
         if not k.get("yayin_zamani"):
             print(f"NOT: {kod}: yayın zamanı yok, yönlendirilmedi (onay kararına yayin_zamani ekleyin)"); continue
+        kilit = [(p, kilit_kontrol(kod, k, p, planli)) for p in sorted(pl)]
+        kilit = [(p, s) for p, s in kilit if s]
+        if kilit:
+            metin = "; ".join(f"{p}: {s[0]}" + (f" → öneri {s[1]}" if s[1] else "") for p, s in kilit)
+            if it.get("kilit") != metin:
+                it["kilit"] = metin; olay(it, f"yayın kilidi: bekletildi · {metin}")
+            print(f"NOT: KİLİT {kod} bekletildi · {metin}"); continue
+        it.pop("kilit", None)
+        for p in pl:
+            planli.append((k["kanal"], p, zaman_oku(k["yayin_zamani"])))
         if "youtube" in pl:
             os.makedirs("/opt/aesun/video_bekleyen", exist_ok=True)
             shutil.copy2(it["dosya"], f"/opt/aesun/video_bekleyen/{kod}.mp4")
@@ -204,11 +280,11 @@ def durum(js=False):
     ozet = [{"kod": k, "durum": v.get("durum"), "kanal": KANALLAR.get(v["kart"].get("kanal"), v["kart"].get("kanal")),
              "platformlar": v["kart"].get("platformlar"), "seri": v["kart"].get("seri"), "baslik": v["kart"].get("baslik"),
              "amac": v["kart"].get("amac"), "yayin_zamani": v["kart"].get("yayin_zamani"), "sure_sn": v.get("kontrol", {}).get("olcum", {}).get("sure_sn"),
-             "engel": v.get("kontrol", {}).get("engel"), "uyari": v.get("kontrol", {}).get("uyari"), "teslim": v.get("teslim")} for k, v in idx.items()]
+             "engel": v.get("kontrol", {}).get("engel"), "uyari": v.get("kontrol", {}).get("uyari"), "kilit": v.get("kilit"), "teslim": v.get("teslim")} for k, v in idx.items()]
     if js:
         print("===HAVUZ==="); print(json.dumps(ozet, ensure_ascii=False)); print("===SON===")
     for o in ozet:
-        print(f"NOT: {o['kod']} · {o['durum']} · {o['kanal']} · {o['seri']} · {o['baslik']}")
+        print(f"NOT: {o['kod']} · {o['durum']} · {o['kanal']} · {o['seri']} · {o['baslik']}" + (f" · KİLİT: {o['kilit']}" if o.get('kilit') else ""))
     if not ozet: print("NOT: havuz boş")
     return 0
 

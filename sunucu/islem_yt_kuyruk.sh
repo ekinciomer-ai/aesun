@@ -41,6 +41,8 @@ sonuc, toklar, mevcut = [], {}, {}
 # publishAt aynı saatle ilk boş güne kaydırılır. Sayaç: /opt/aesun/youtube/hesap_sayac.json
 from datetime import datetime as _dt, timezone as _tz, timedelta as _td
 HESAP_GUNLUK = 4
+# Tek seferlik istisna (Ömer, 15 Kas 2026 02:04): "15.11'e özel 6 video olsun" — yalnız listedeki maç günü videoları ek hakkı kullanır.
+HESAP_ISTISNA = {"2026-11-15": {"limit": 6, "kodlar": {"SPT_FRA_TUR_KALMA_TR", "SPT_FRA_TUR_KALMA_FR"}}}
 _IST = _tz(_td(hours=3))
 _sayac_yol = os.path.join(D, "hesap_sayac.json")
 try:
@@ -143,8 +145,10 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             if kq.get("uyari"):
                 print(f"NOT: {kod} kalite uyarısı: {'; '.join(kq['uyari'])}")
         _bugun = _dt.now(_IST).strftime("%Y-%m-%d")
-        if _sayac.get(_bugun, 0) >= HESAP_GUNLUK:
-            print(f"NOT: {kod} HESAP SINIRI: bugün {HESAP_GUNLUK} yükleme yapıldı; sırada kaldı, sonraki günde yüklenecek")
+        _ist = HESAP_ISTISNA.get(_bugun, {})
+        _lim = _ist["limit"] if kod in _ist.get("kodlar", ()) else HESAP_GUNLUK
+        if _sayac.get(_bugun, 0) >= _lim:
+            print(f"NOT: {kod} HESAP SINIRI: bugün {_lim} yükleme yapıldı; sırada kaldı, sonraki günde yüklenecek")
             sonuc.append({"kod": kod, "durum": "hesap sınırı: sırada", **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         _pl = _plan_sayim()
         _t = _dt.fromisoformat(it["publishAt"]).astimezone(_IST)

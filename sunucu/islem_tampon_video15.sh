@@ -71,7 +71,7 @@ dene 05_claude_motion 1800 "cd /work/repo/claude-motion && npm install -s >/dev/
 # 6 animate: kesik kâğıt stili demo
 dene 06_animate_cutpaper 1800 "cd /work/repo/animate/plugins/animate/skills/animate && (test -f package.json || npm init -y >/dev/null) && npm i -s playwright@1 >/dev/null && npx playwright install chromium >/dev/null && rm -rf pieces/demo && mkdir -p pieces && cp -r styles/cut-paper/demo pieces/demo && node tools/build.mjs pieces/demo && node tools/export.mjs pieces/demo --share --workers 3 && cp \$(ls pieces/demo/renders/share.mp4 pieces/demo/renders/final.mp4 2>/dev/null | head -1) /work/cikti/06_animate_cutpaper.mp4"
 # 3 claude-motion-design örnek film (30 fps, alt kare yok: hızlı deneme)
-dene 07_motion_design_film 1800 "cd /work/repo/claude-motion-design/examples/howseen-launch && python3 -m venv /work/.home/venv7 && . /work/.home/venv7/bin/activate && pip -q install playwright numpy imageio-ffmpeg >/dev/null && python -m playwright install chromium >/dev/null && (python fetch_assets.py >/dev/null 2>&1 || true) && sed -i 's/FPS, T, SUB = 60, 24.0, 8/FPS, T, SUB = 30, 24.0, 1/' render.py && mkdir -p out && (python -m http.server 8000 >/dev/null 2>&1 &) && sleep 2 && python render.py full && cp out/video.mp4 /work/cikti/07_motion_design_film.mp4"
+dene 07_motion_design_film 1800 "cd /work/repo/claude-motion-design/examples/howseen-launch && python3 -m venv /work/.home/venv7 && . /work/.home/venv7/bin/activate && pip -q install playwright "numpy==1.26.4" imageio-ffmpeg >/dev/null && python -m playwright install chromium >/dev/null && (python fetch_assets.py >/dev/null 2>&1 || true) && sed -i 's/FPS, T, SUB = 60, 24.0, 8/FPS, T, SUB = 30, 24.0, 1/' render.py && mkdir -p out && (python -m http.server 8000 >/dev/null 2>&1 &) && sleep 2 && python render.py full && cp out/video.mp4 /work/cikti/07_motion_design_film.mp4"
 
 # Hata ayrıntısı (başarısız testlerin son satırları)
 for t in 01_hyperframes_antik 02_herk_starter 07_motion_design_film; do
@@ -83,7 +83,7 @@ for f in $KOK/cikti/*.mp4; do [ -f "$f" ] || continue
   echo "NOT: ÇIKTI $(basename $f): $(du -h $f | cut -f1) · $(ffprobe -v error -show_entries stream=width,height -show_entries format=duration -of csv=p=0 $f 2>/dev/null | tr '\n' ' ')"
 done
 # Önizleme: her video 540 px genişlik, küçük boyut; iş günlüğüne base64 basılır (sohbete getirmek için)
-mkdir -p $KOK/onizleme
+mkdir -p $KOK/onizleme && chown 1500:1500 $KOK/onizleme
 for f in $KOK/cikti/*.mp4; do [ -f "$f" ] || continue; o=$KOK/onizleme/$(basename $f)
   [ -f "$o" ] || docker run --rm --memory 1g --cpus 2 --cap-drop ALL -v $KOK:/work $IMAJ ffmpeg -v error -y -i /work/cikti/$(basename $f) -vf "scale=540:-2" -c:v libx264 -crf 30 -preset veryfast -c:a aac -b:a 64k -movflags +faststart /work/onizleme/$(basename $f)
   echo "ONIZLEME_BASLA $(basename $f)"; base64 -w 4000 "$o"; echo "ONIZLEME_BITTI"

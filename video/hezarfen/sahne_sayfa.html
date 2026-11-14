@@ -95,9 +95,9 @@ soru(t,d){g.save();g.font='800 54px Archivo';g.fillStyle='#fbf6e8';g.textAlign='
  damga(g,'TEK KAYNAK',1500,300,ez((t-1.8)/.8),70,10);el(g,'Uçtu mu?',460,280,ez((t-d*.55)/1.2),130,KIRMIZI,-6);el(g,'yoruma yaz ↓',1450,980,ez((t-d*.7)/1),64,'#fff',-3)}
 };
 // ---------- sayfa ----------
-const KX=40,KY=430,KW=1000,KH=KW*CH/CW,BL={kule:'YIL',deneme:'GALATA',ucus:'SEYAHATNÂME'};
-function kutucuk(x,y,p,ciz,yazi){if(p<=0)return;const s=eb(p);P.save();P.translate(x,y);P.scale(s,s);const q=new Path2D();q.roundRect(-85,-85,170,170,30);kb(P,q,'#c99b62',6);ciz();P.restore();
- P.save();P.globalAlpha=ez(p*2);P.font='700 30px "Space Mono"';P.fillStyle='#efe6d2';P.textAlign='center';P.fillText(yazi,x,y+130);P.restore()}
+const KX=10,KY=196,KW=1060,KH=KW*CH/CW,BL={kule:'YIL',deneme:'GALATA',ucus:'SEYAHATNÂME'};
+function kutucuk(x,y,p,ciz,yazi){if(p<=0)return;const s=eb(p);P.save();P.translate(x,y);P.scale(s,s);const q=new Path2D();q.roundRect(-46,-46,92,92,18);kb(P,q,'#c99b62',6);ciz();P.restore();
+ P.save();P.globalAlpha=ez(p*2);P.font='700 18px "Space Mono"';P.fillStyle='#efe6d2';P.textAlign='center';P.fillText(yazi,x,y+72);P.restore()}
 const HIMG=new Image();HIMG.src='harita.jpg';
 function etiketK(z,metin,x,y,renk){z.save();z.font='700 22px "Space Mono"';const tw=z.measureText(metin).width;z.translate(x,y);z.rotate(-.03);z.shadowColor='rgba(0,0,0,.45)';z.shadowBlur=8;z.shadowOffsetY=3;
  z.fillStyle=renk||'#fbf6e8';z.fillRect(-tw/2-12,-17,tw+24,34);z.shadowColor='transparent';z.fillStyle=MUR;z.textAlign='center';z.textBaseline='middle';z.fillText(metin,0,1);z.restore()}
@@ -118,10 +118,10 @@ function harita(t,ilerleme){const w=1000,h=428;m.clearRect(0,0,w,h);const zem=ne
  m.restore();m.save();m.strokeStyle='rgba(239,230,210,.35)';m.lineWidth=3;m.stroke(zem);m.restore()}
 function sayfa(t,ad,ts,d){P.fillStyle='#141312';P.fillRect(0,0,PW,PH);P.save();P.globalAlpha=.05;P.fillStyle=DPp;P.fillRect(0,0,PW,PH);P.restore();
  // üst: 3 karton kutucuk (STORYBOX'taki araç logoları yerine konu kimliği)
- kutucuk(210,200,ez(t/.6),()=>{P.font='900 56px Archivo';P.fillStyle=MUR;P.textAlign='center';P.textBaseline='middle';P.fillText('1632',0,4)},'YIL');
- kutucuk(540,200,ez((t-.15)/.6),()=>{P.save();P.scale(.28,.28);P.translate(0,230);galata(P,0,0,1);P.restore()},'GALATA');
- kutucuk(870,200,ez((t-.3)/.6),()=>{P.save();P.scale(.26,.26);P.translate(0,-60);kitap(P,0,0,1);P.restore()},'SEYAHATNÂME');
- P.font='700 60px Archivo';P.fillStyle='#efe6d2';P.textAlign='center';P.textBaseline='middle';P.fillText('+',375,200);P.fillText('+',705,200);
+ kutucuk(380,80,ez(t/.6),()=>{P.font='900 32px Archivo';P.fillStyle=MUR;P.textAlign='center';P.textBaseline='middle';P.fillText('1632',0,3)},'YIL');
+ kutucuk(540,80,ez((t-.15)/.6),()=>{P.save();P.scale(.16,.16);P.translate(0,230);galata(P,0,0,1);P.restore()},'GALATA');
+ kutucuk(700,80,ez((t-.3)/.6),()=>{P.save();P.scale(.15,.15);P.translate(0,-60);kitap(P,0,0,1);P.restore()},'SEYAHATNÂME');
+ P.font='700 36px Archivo';P.fillStyle='#efe6d2';P.textAlign='center';P.textBaseline='middle';P.fillText('+',460,80);P.fillText('+',620,80);
  // kart
  P.save();const q=new Path2D();q.roundRect(KX,KY,KW,KH,28);P.shadowColor='rgba(0,0,0,.7)';P.shadowBlur=40;P.shadowOffsetY=16;P.fillStyle='#000';P.fill(q);P.shadowColor='transparent';P.clip(q);P.drawImage(KC,KX,KY,KW,KH);P.restore();
  // başlık + altyazı
@@ -131,7 +131,7 @@ function sayfa(t,ad,ts,d){P.fillStyle='#141312';P.fillRect(0,0,PW,PH);P.save();P
  // alt panel: karton harita (STORYBOX'taki iş akışı ekranı yerine)
  let ilerleme=0;const SS=K?K.sahneler:[];const u=SS.find(s=>s.ad==='ucus'),su=SS.find(s=>s.ad==='sultan');
  if(u&&su){const t0=u.bas,t1=su.bas+(su.son-su.bas)*.85;ilerleme=(t-t0)/(t1-t0)}
- harita(t,ilerleme);P.save();P.shadowColor='rgba(0,0,0,.7)';P.shadowBlur=30;P.shadowOffsetY=12;P.drawImage(MC,40,1230,1000,428);P.restore();P.font='700 28px "Space Mono"';P.fillStyle='rgba(239,230,210,.75)';P.textAlign='center';P.fillText('UÇUŞ ROTASI · EVLİYA ÇELEBİ\'YE GÖRE',PW/2,1705);
+ harita(t,ilerleme);P.save();P.shadowColor='rgba(0,0,0,.7)';P.shadowBlur=30;P.shadowOffsetY=12;P.drawImage(MC,10,1110,1060,454);P.restore();P.font='700 28px "Space Mono"';P.fillStyle='rgba(239,230,210,.75)';P.textAlign='center';P.fillText('UÇUŞ ROTASI · EVLİYA ÇELEBİ\'YE GÖRE',PW/2,1606);
  P.font='800 34px Archivo';P.fillStyle='rgba(239,230,210,.28)';P.fillText('ANTİK STÜDYO',PW/2,1840)}
 function kare(t){if(!K)return;const SS=K.sahneler;let i=SS.findIndex(s=>t>=s.bas&&t<s.son);if(i<0)i=t<SS[0].bas?0:SS.length-1;const s=SS[i],ts=t-s.bas,d=s.son-s.bas;
  g.fillStyle='#000';g.fillRect(0,0,CW,CH);

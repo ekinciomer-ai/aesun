@@ -14,7 +14,7 @@ html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}
 const PW=1080,PH=1920,CW=1920,CH=1080;
 const cv=document.getElementById('c');cv.width=PW;cv.height=PH;const P=cv.getContext('2d');
 const KC=document.createElement('canvas');KC.width=CW;KC.height=CH;const g=KC.getContext('2d');
-const MC=document.createElement('canvas');MC.width=1000;MC.height=420;const m=MC.getContext('2d');
+const MC=document.createElement('canvas');MC.width=1000;MC.height=428;const m=MC.getContext('2d');
 let K=null;
 const ez=x=>x<0?0:x>1?1:x,eo=x=>1-Math.pow(1-ez(x),3),eio=x=>{x=ez(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2},eb=x=>{x=ez(x);const c=1.7;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
 function rng(s){let a=s|0||1;return()=>{a^=a<<13;a^=a>>>17;a^=a<<5;return((a>>>0)%100000)/100000}}
@@ -98,18 +98,24 @@ soru(t,d){g.save();g.font='800 54px Archivo';g.fillStyle='#fbf6e8';g.textAlign='
 const KX=40,KY=430,KW=1000,KH=KW*CH/CW,BL={kule:'YIL',deneme:'GALATA',ucus:'SEYAHATNÂME'};
 function kutucuk(x,y,p,ciz,yazi){if(p<=0)return;const s=eb(p);P.save();P.translate(x,y);P.scale(s,s);const q=new Path2D();q.roundRect(-85,-85,170,170,30);kb(P,q,'#c99b62',6);ciz();P.restore();
  P.save();P.globalAlpha=ez(p*2);P.font='700 30px "Space Mono"';P.fillStyle='#efe6d2';P.textAlign='center';P.fillText(yazi,x,y+130);P.restore()}
-function harita(t,ilerleme){const w=1000,h=420;m.clearRect(0,0,w,h);const zem=new Path2D();zem.roundRect(0,0,w,h,26);m.fillStyle='#d2a96f';m.fill(zem);
- m.save();m.clip(zem);m.globalAlpha=.25;m.globalCompositeOperation='overlay';m.fillStyle=DPm;m.fillRect(0,0,w,h);m.restore();
- const su=new Path2D();su.moveTo(540,-10);su.bezierCurveTo(520,120,560,170,520,250);su.bezierCurveTo(490,310,470,360,430,430);su.lineTo(760,430);su.bezierCurveTo(690,330,700,250,660,170);su.bezierCurveTo(640,100,690,40,700,-10);su.closePath();
- su.moveTo(560,215);su.bezierCurveTo(420,210,330,250,180,250);su.lineTo(180,282);su.bezierCurveTo(330,285,430,262,535,262);su.closePath();
- m.save();m.fillStyle='#6da0c2';m.fill(su);m.restore();
- const nok=(x,y,ad,al)=>{m.fillStyle=MUR;m.beginPath();m.arc(x,y,9,0,6.3);m.fill();m.font='700 24px "Space Mono"';m.textAlign=al||'left';m.fillText(ad,x+(al==='right'?-16:16),y+8)};
- nok(470,200,'GALATA','right');nok(545,300,'SARAYBURNU','right');nok(700,240,'DOĞANCILAR');
- const A=[470,200],B=[700,240],C=[585,150];m.save();m.strokeStyle=KIRMIZI;m.lineWidth=6;m.setLineDash([14,10]);m.beginPath();const n=40,k=ez(ilerleme);let son=A;m.moveTo(...A);
- for(let i=1;i<=n*k;i++){const u=i/n;son=[(1-u)*(1-u)*A[0]+2*u*(1-u)*C[0]+u*u*B[0],(1-u)*(1-u)*A[1]+2*u*(1-u)*C[1]+u*u*B[1]];m.lineTo(...son)}m.stroke();m.restore();
- if(k>0){m.fillStyle=KIRMIZI;m.beginPath();m.arc(son[0],son[1],12,0,6.3);m.fill()}
- m.font='700 30px Kalam';m.fillStyle=KIRMIZI;m.textAlign='center';if(k>.3)m.fillText('≈ 3,2 km',600,120);
- m.font='800 26px Archivo';m.fillStyle=MUR;m.textAlign='left';m.fillText('KUZEY ↑',30,50);m.fillText('LODOS ↗',30,390)}
+const HIMG=new Image();HIMG.src='harita.jpg';
+function etiketK(z,metin,x,y,renk){z.save();z.font='700 22px "Space Mono"';const tw=z.measureText(metin).width;z.translate(x,y);z.rotate(-.03);z.shadowColor='rgba(0,0,0,.45)';z.shadowBlur=8;z.shadowOffsetY=3;
+ z.fillStyle=renk||'#fbf6e8';z.fillRect(-tw/2-12,-17,tw+24,34);z.shadowColor='transparent';z.fillStyle=MUR;z.textAlign='center';z.textBaseline='middle';z.fillText(metin,0,1);z.restore()}
+function pin(z,x,y,r){z.save();z.shadowColor='rgba(0,0,0,.5)';z.shadowBlur=6;z.shadowOffsetY=3;z.fillStyle=KIRMIZI;z.beginPath();z.arc(x,y-r*1.6,r,Math.PI,0);z.lineTo(x,y);z.closePath();z.fill();z.fillStyle='#fff';z.beginPath();z.arc(x,y-r*1.6,r*.4,0,6.3);z.fill();z.restore()}
+function harita(t,ilerleme){const w=1000,h=428;m.clearRect(0,0,w,h);const zem=new Path2D();zem.roundRect(0,0,w,h,26);m.save();m.clip(zem);
+ const k=ez(ilerleme),zm=1.06-.04*k;m.save();m.translate(w/2,h/2);m.scale(zm,zm);m.translate(-w/2+(k-.5)*-14,-h/2);if(HIMG.complete&&HIMG.naturalWidth)m.drawImage(HIMG,0,0,w,h);m.restore();
+ const vg=m.createRadialGradient(w/2,h/2,h*.3,w/2,h/2,w*.62);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(20,10,0,.45)');m.fillStyle=vg;m.fillRect(0,0,w,h);
+ const A=[355,82],B=[820,215],C=[600,10];const nok=u=>[(1-u)*(1-u)*A[0]+2*u*(1-u)*C[0]+u*u*B[0],(1-u)*(1-u)*A[1]+2*u*(1-u)*C[1]+u*u*B[1]];
+ // rota: beyaz gölge + kırmızı kesikli + uç
+ if(k>0){for(const[renk,gen,dash]of[['rgba(255,250,235,.85)',11,[]],[KIRMIZI,6,[16,10]]]){m.save();m.strokeStyle=renk;m.lineWidth=gen;m.lineCap='round';m.setLineDash(dash);m.lineDashOffset=-t*30;m.beginPath();m.moveTo(...A);for(let i=1;i<=60*k;i++)m.lineTo(...nok(i/60));m.stroke();m.restore()}
+  const [ux,uy]=nok(k),[vx,vy]=nok(Math.max(0,k-.02));const ang=Math.atan2(uy-vy,ux-vx);m.save();m.translate(ux,uy);m.rotate(ang);m.shadowColor='rgba(0,0,0,.5)';m.shadowBlur=8;
+  m.fillStyle='#efe5cf';for(const yon of[-1,1]){m.beginPath();m.moveTo(-4,0);m.quadraticCurveTo(-10,yon*28,6,yon*30);m.lineTo(8,yon*4);m.closePath();m.fill()}m.fillStyle='#3f6f5a';m.beginPath();m.ellipse(0,0,11,6,0,0,6.3);m.fill();
+  m.fillStyle='#fbf7ee';m.beginPath();m.arc(10,0,6,0,6.3);m.fill();m.fillStyle=KIRMIZI;m.beginPath();m.arc(10,0,2.6,0,6.3);m.fill();m.restore()}
+ pin(m,A[0],A[1]+14,11);pin(m,445,330,9);pin(m,B[0],B[1]+8,11);
+ etiketK(m,'GALATA KULESİ',A[0]-6,A[1]+50);etiketK(m,'SARAYBURNU · KÖŞK',445,370);etiketK(m,'DOĞANCILAR',B[0],B[1]+44);
+ if(k>.25){m.save();m.globalAlpha=ez((k-.25)/.2);m.font='700 40px Kalam';m.fillStyle=KIRMIZI;m.strokeStyle='#fff8e8';m.lineWidth=6;m.textAlign='center';m.strokeText('≈ 3,2 km',610,72);m.fillText('≈ 3,2 km',610,72);m.restore()}
+ m.save();m.font='800 24px Archivo';m.fillStyle='#fff8e8';m.shadowColor='rgba(0,0,0,.7)';m.shadowBlur=6;m.fillText('AVRUPA',40,410);m.textAlign='right';m.fillText('ASYA · ÜSKÜDAR',w-120,40);m.restore();
+ m.restore();m.save();m.strokeStyle='rgba(239,230,210,.35)';m.lineWidth=3;m.stroke(zem);m.restore()}
 function sayfa(t,ad,ts,d){P.fillStyle='#141312';P.fillRect(0,0,PW,PH);P.save();P.globalAlpha=.05;P.fillStyle=DPp;P.fillRect(0,0,PW,PH);P.restore();
  // üst: 3 karton kutucuk (STORYBOX'taki araç logoları yerine konu kimliği)
  kutucuk(210,200,ez(t/.6),()=>{P.font='900 56px Archivo';P.fillStyle=MUR;P.textAlign='center';P.textBaseline='middle';P.fillText('1632',0,4)},'YIL');
@@ -125,7 +131,7 @@ function sayfa(t,ad,ts,d){P.fillStyle='#141312';P.fillRect(0,0,PW,PH);P.save();P
  // alt panel: karton harita (STORYBOX'taki iş akışı ekranı yerine)
  let ilerleme=0;const SS=K?K.sahneler:[];const u=SS.find(s=>s.ad==='ucus'),su=SS.find(s=>s.ad==='sultan');
  if(u&&su){const t0=u.bas,t1=su.bas+(su.son-su.bas)*.85;ilerleme=(t-t0)/(t1-t0)}
- harita(t,ilerleme);P.drawImage(MC,40,1230,1000,420);P.font='700 28px "Space Mono"';P.fillStyle='rgba(239,230,210,.75)';P.textAlign='center';P.fillText('UÇUŞ ROTASI · EVLİYA ÇELEBİ\'YE GÖRE',PW/2,1700);
+ harita(t,ilerleme);P.save();P.shadowColor='rgba(0,0,0,.7)';P.shadowBlur=30;P.shadowOffsetY=12;P.drawImage(MC,40,1230,1000,428);P.restore();P.font='700 28px "Space Mono"';P.fillStyle='rgba(239,230,210,.75)';P.textAlign='center';P.fillText('UÇUŞ ROTASI · EVLİYA ÇELEBİ\'YE GÖRE',PW/2,1705);
  P.font='800 34px Archivo';P.fillStyle='rgba(239,230,210,.28)';P.fillText('ANTİK STÜDYO',PW/2,1840)}
 function kare(t){if(!K)return;const SS=K.sahneler;let i=SS.findIndex(s=>t>=s.bas&&t<s.son);if(i<0)i=t<SS[0].bas?0:SS.length-1;const s=SS[i],ts=t-s.bas,d=s.son-s.bas;
  g.fillStyle='#000';g.fillRect(0,0,CW,CH);

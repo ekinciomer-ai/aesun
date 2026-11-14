@@ -140,6 +140,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         it["publishAt"] = _t.isoformat(timespec="seconds")
         if it["publishAt"][:10] != _eski_pa[:10]:
             print(f"NOT: {kod} HESAP SINIRI: {_eski_pa[:16]} dolu, yayın {it['publishAt'][:16]} gününe kaydırıldı")
+        boyut = os.path.getsize(mp4)
         dil_kodu = {"TR": "tr", "EN": "en", "ES": "es", "KZ_TR": "tr", "OD": "tr"}.get(dil, "en")
         from datetime import datetime, timezone
         hemen_yayin = datetime.fromisoformat(it["publishAt"]) <= datetime.now(timezone.utc)

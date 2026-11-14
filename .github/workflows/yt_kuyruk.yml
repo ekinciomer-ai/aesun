@@ -51,7 +51,7 @@ jobs:
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k
           cp sunucu/islem_yt_kuyruk.sh /tmp/pk/sunucu/
-          while IFS= read -r kod; do
+          while IFS= read -r kod || [ -n "$kod" ]; do  # son satır (sonda yeni satır yok) da okunsun
             [ -z "$kod" ] && continue
             cp "sunucu/yt_kuyruk/${kod}.json" /tmp/pk/kuyruk/
             for ext in mp4 jpg png; do [ -f "sunucu/yt_kuyruk/${kod}.${ext}" ] && cp "sunucu/yt_kuyruk/${kod}.${ext}" /tmp/pk/kuyruk/ || true; done

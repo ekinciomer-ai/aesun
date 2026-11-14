@@ -5,8 +5,8 @@ set -u
 MOD=tam
 KOK=/opt/tampon/antik_b01; IMAJ=tampon-video15:2
 cp sunucu/antik_b01/kesim.json sunucu/antik_b01/taban.py sunucu/antik_b01/gercek.html sunucu/antik_b01/kayit3d.mjs $KOK/ && chown -R 1500:1500 $KOK
-RUN="docker run --rm --memory 4096m --cpus 3 --pids-limit 2048 --shm-size 1g --security-opt no-new-privileges --cap-drop ALL -e HOME=/work/.home -e PLAYWRIGHT_BROWSERS_PATH=/pwc -v /opt/tampon/video15/.home/.cache/ms-playwright:/pwc:ro -v /opt/tampon/video15/pwkayit/node_modules:/work/node_modules:ro -v $KOK:/work -w /work $IMAJ"
-$RUN -e MOD=tam timeout 3000 bash -c '
+RUN="docker run -e MOD=tam --rm --memory 4096m --cpus 3 --pids-limit 2048 --shm-size 1g --security-opt no-new-privileges --cap-drop ALL -e HOME=/work/.home -e PLAYWRIGHT_BROWSERS_PATH=/pwc -v /opt/tampon/video15/.home/.cache/ms-playwright:/pwc:ro -v /opt/tampon/video15/pwkayit/node_modules:/work/node_modules:ro -v $KOK:/work -w /work $IMAJ"
+$RUN timeout 3000 bash -c '
 set -e
 python3 taban.py
 python3 -m http.server 8000 --bind 127.0.0.1 >/dev/null 2>&1 & sleep 1

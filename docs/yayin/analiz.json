@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-14T15:07+03:00",
+ "olusturma": "2026-11-14T16:08+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -126,11 +126,11 @@
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %56'i tuttu (eşik 188 izlenme / 48 sa)",
-   "olculen": 9,
-   "erken": 1,
-   "medyan_48sa": 245,
-   "tutma_orani": 56,
+   "neden": "videoların %50'i tuttu (eşik 188 izlenme / 48 sa)",
+   "olculen": 10,
+   "erken": 0,
+   "medyan_48sa": 158,
+   "tutma_orani": 50,
    "izlenme_yuzde": 70,
    "en_iyi": {
     "baslik": "How Was the Red Sea Locked 471 Years Ago? ⚓ Ozdemir Pasha (1555) #shorts",
@@ -594,11 +594,11 @@
  ],
  "esikler": {
   "Ömür Dediğin": 50,
-  "Kozmos Lab": 50,
-  "Estudio Antiguo": 122,
   "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 67,
+  "Estudio Antiguo": 122,
   "Ancient Studio": 188,
-  "Kozmos Lab TR": 67
+  "Kozmos Lab": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -653,8 +653,8 @@
   },
   "Ancient Studio": {
    "00:00": {
-    "n": 5,
-    "medyan": 70
+    "n": 6,
+    "medyan": 54
    },
    "14:00": {
     "n": 2,
@@ -1201,7 +1201,7 @@
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 1 tanesi tuttu (eşik 67 izlenme / 48 sa).",
-  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %56'i tuttu (eşik 188 izlenme / 48 sa).",
+  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %50'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gündem + Tarih: ARTIR — videoların %53'i tuttu (eşik 637 izlenme / 48 sa).",

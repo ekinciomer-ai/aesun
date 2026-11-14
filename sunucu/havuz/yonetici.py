@@ -81,7 +81,14 @@ def kontrol(kart, dosya, idx):
     try:
         r = subprocess.run(["python3", "/opt/aesun/kalite_kapisi.py", dosya], capture_output=True, text=True, timeout=900)
         kk = json.loads(r.stdout.strip().splitlines()[-1])
-        engel += [f"kalite: {e}" for e in kk.get("engel", [])]
+        kengel = kk.get("engel", [])
+        # Ömer onayı (14.11.2026): kolaj/etiketli tasarımlarda (Vox kolaj vb.) ekran yazısı bilinçli tasarımdır.
+        # Kart açıkça "ekran_yazisi": "tasarim" derse yalnız bu kontrol engel değil uyarı olur; diğer her şey aynen engeldir.
+        if kart.get("ekran_yazisi") == "tasarim":
+            tas = [e for e in kengel if "altyazı dışında yazı" in e]
+            kengel = [e for e in kengel if e not in tas]
+            uyari += [f"kalite (tasarım gereği, onayda gözle bakılmalı): {e}" for e in tas]
+        engel += [f"kalite: {e}" for e in kengel]
         uyari += [f"kalite: {u}" for u in kk.get("uyari", [])]
     except Exception as e:
         engel.append(f"kalite kapısı çalışmadı: {str(e)[:80]}")

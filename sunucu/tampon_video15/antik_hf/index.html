@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><title>Antik Stüdyo deneme: Firavun Grubu</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#2a1a0c;font-family:Poppins,sans-serif}
+#antik{position:relative;width:1080px;height:1920px;overflow:hidden}
+.bg{position:absolute;inset:0;background:linear-gradient(180deg,#f3d9a4 0%,#d9a75e 55%,#8a5a2b 100%)}
+.gunes{position:absolute;left:640px;top:250px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#fff3c4 0%,#ffd36b 45%,rgba(255,200,90,0) 70%)}
+.piramit{position:absolute;bottom:0;width:0;height:0;border-left:360px solid transparent;border-right:360px solid transparent;border-bottom:520px solid #b07a3c}
+.p1{left:-120px}.p2{left:520px;border-bottom-color:#9c6a31;transform:scale(.7);transform-origin:bottom center}
+.telefon{position:absolute;left:110px;top:300px;width:860px;height:1240px;border-radius:56px;background:#0f1a17;box-shadow:0 40px 90px rgba(0,0,0,.45);overflow:hidden}
+.ust{height:150px;background:#1f2c33;display:flex;align-items:center;padding:0 40px;gap:26px}
+.avatar{width:86px;height:86px;border-radius:50%;background:#e2b04a;display:flex;align-items:center;justify-content:center;font:900 44px Poppins;color:#5a3510}
+.grup b{display:block;color:#fff;font:700 40px Poppins}.grup span{color:#9fb3ad;font:400 27px Poppins}
+.ekran{position:absolute;top:150px;left:0;right:0;bottom:0;background:#0b141a;padding:40px 34px}
+.msj{position:absolute;max-width:620px;padding:22px 30px;border-radius:30px;font:400 36px/1.3 Poppins;color:#e9edef}
+.msj i{display:block;font:700 26px Poppins;font-style:normal;margin-bottom:6px}
+.sol{left:34px;background:#202c33;border-top-left-radius:6px}.sol i{color:#f5b041}
+.sag{right:34px;background:#005c4b;border-top-right-radius:6px}.sag i{color:#7fe3c4}
+.m1{top:60px}.m2{top:270px}.m3{top:440px}.m4{top:650px}
+.sistem{position:absolute;left:50%;top:930px;width:640px;margin-left:-320px;text-align:center;padding:16px 24px;border-radius:20px;background:#182229;color:#d9c08a;font:400 28px Poppins}
+.kapak{position:absolute;inset:0;background:#120b05;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.kapak h1{margin:0;color:#ffcf66;font:900 120px/1 Poppins;letter-spacing:6px}
+.kapak p{margin:30px 0 0;color:#f3e3c2;font:400 44px Poppins}
+.cizgi{width:420px;height:8px;background:#ffcf66;margin-top:36px;border-radius:4px}
+</style></head><body>
+<div id="antik" data-composition-id="antik" data-start="0" data-duration="9" data-width="1080" data-height="1920">
+  <div id="sahne" class="clip" data-start="0" data-duration="7" data-track-index="0" style="position:absolute;inset:0">
+    <div class="bg"></div><div class="gunes" id="gunes"></div>
+    <div class="piramit p1"></div><div class="piramit p2"></div>
+    <div class="telefon" id="telefon">
+      <div class="ust"><div class="avatar">F</div><div class="grup"><b>Firavun &amp; Ekibi</b><span>Firavun, Hemiunu, 2.300.000 işçi</span></div></div>
+      <div class="ekran">
+        <div class="msj sol m1" id="m1"><i>Mimar Hemiunu</i>Efendim, piramit bitti.</div>
+        <div class="msj sag m2" id="m2"><i>Firavun</i>Ucu neden sivri?</div>
+        <div class="msj sol m3" id="m3"><i>Mimar Hemiunu</i>Taş bitti efendim.</div>
+        <div class="msj sag m4" id="m4"><i>Firavun</i>Tamam. Tasarım bu olsun, herkese "bilerek yaptık" deyin.</div>
+        <div class="sistem" id="m5">Firavun grubun adını "Piramit Projesi" yaptı</div>
+      </div>
+    </div>
+  </div>
+  <div id="kapak" class="clip" data-start="7" data-duration="2" data-track-index="1" style="position:absolute;inset:0">
+    <div class="kapak"><h1 id="baslik">ANTİK STÜDYO</h1><div class="cizgi" id="cizgi"></div><p id="alt">Tarih, bugünün diliyle.</p></div>
+  </div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.from('#telefon',{y:260,opacity:0,duration:.7,ease:'power3.out'},0);
+tl.to('#gunes',{y:-60,duration:7,ease:'none'},0);
+[['#m1',.8],['#m2',2.1],['#m3',3.4],['#m4',4.6]].forEach(([s,t])=>{
+  tl.from(s,{scale:.6,opacity:0,y:30,duration:.45,ease:'back.out(2)',transformOrigin:s==='#m2'||s==='#m4'?'right top':'left top'},t);
+});
+tl.from('#m5',{opacity:0,y:20,duration:.5,ease:'power2.out'},5.9);
+tl.to('#telefon',{scale:1.04,duration:.4,ease:'power2.inOut',yoyo:true,repeat:1},3.4);
+tl.from('#baslik',{scale:1.4,opacity:0,duration:.6,ease:'power3.out'},7.05);
+tl.from('#cizgi',{scaleX:0,duration:.5,ease:'power2.out'},7.45);
+tl.from('#alt',{opacity:0,y:20,duration:.5,ease:'power2.out'},7.7);
+window.__timelines=window.__timelines||{};window.__timelines['antik']=tl;
+</script></body></html>

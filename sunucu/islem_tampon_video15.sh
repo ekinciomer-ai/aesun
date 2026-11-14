@@ -74,7 +74,7 @@ dene 06_animate_cutpaper 1800 "cd /work/repo/animate/plugins/animate/skills/anim
 dene 07_motion_design_film 1800 "cd /work/repo/claude-motion-design/examples/howseen-launch && python3 -m venv /work/.home/venv7 && . /work/.home/venv7/bin/activate && pip -q install playwright "numpy==1.26.4" imageio-ffmpeg >/dev/null && python -m playwright install chromium >/dev/null && (python fetch_assets.py >/dev/null 2>&1 || true) && sed -i 's/FPS, T, SUB = 60, 24.0, 8/FPS, T, SUB = 30, 24.0, 1/' render.py && mkdir -p out && (python -m http.server 8000 >/dev/null 2>&1 &) && sleep 2 && python render.py full && cp out/video.mp4 /work/cikti/07_motion_design_film.mp4"
 
 # Kodla Film Stilleri (kendi kodumuz, canvas): Antik Stüdyo için 5 stil (Ukiyo-e, Sessiz Film, Kâğıt Kesik, Mürekkep, Vitray)
-dene 08_kodla_film_5stil 1800 "mkdir -p /work/.pw && cd /work/.pw && (test -f package.json || npm init -y >/dev/null) && npm i -s playwright@1 >/dev/null && npx playwright install chromium >/dev/null && cp /work/is/kodla_film/kayit.mjs /work/.pw/ && node /work/.pw/kayit.mjs /work/is/kodla_film/index.html /work/cikti/08_kodla_film_5stil.mp4 24"
+dene 08_kodla_film_5stil 1800 "mkdir -p /work/pwkayit && cd /work/pwkayit && (test -f package.json || npm init -y >/dev/null) && npm i -s playwright@1 >/dev/null && npx playwright install chromium >/dev/null && cp /work/is/kodla_film/kayit.mjs /work/pwkayit/ && node /work/pwkayit/kayit.mjs /work/is/kodla_film/index.html /work/cikti/08_kodla_film_5stil.mp4 24"
 
 # Hata ayrıntısı (başarısız testlerin son satırları)
 for t in 01_hyperframes_antik 02_herk_starter 07_motion_design_film 08_kodla_film_5stil; do

@@ -16,19 +16,20 @@ function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t
 // ---------- 3D ----------
 const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H,false);
 R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.toneMapping=THREE.ACESFilmicToneMapping;R.outputColorSpace=THREE.SRGBColorSpace;
-const S=new THREE.Scene(), CAM=new THREE.PerspectiveCamera(36,W/H,0.5,2000);
-const SIYAH=new THREE.Color('#05070a'), GOK=new THREE.Color('#bcd6ea'), UFUK=new THREE.Color('#f2d9ae');
-S.background=SIYAH.clone(); S.fog=new THREE.Fog(UFUK.clone(),180,520);
+const S=new THREE.Scene(), CAM=new THREE.PerspectiveCamera(42,W/H,0.5,2000);
+const SIYAH=new THREE.Color('#05070a'), GOK=new THREE.Color('#8ec5ee'), UFUK=new THREE.Color('#f4cf94');
+S.background=SIYAH.clone(); S.fog=new THREE.Fog(UFUK.clone(),300,800);
 const HEM=new THREE.HemisphereLight('#dfeeff','#b08a55',0), GUN=new THREE.DirectionalLight('#fff1d6',0);
 GUN.position.set(-120,160,90);GUN.castShadow=true;GUN.shadow.mapSize.set(2048,2048);Object.assign(GUN.shadow.camera,{left:-120,right:120,top:120,bottom:-120,near:10,far:500});GUN.shadow.bias=-0.0006;
 S.add(HEM,GUN);
 // gökyüzü küresi (degrade)
-const gokG=new THREE.SphereGeometry(900,32,16), gc=[];{const p=gokG.attributes.position;for(let i=0;i<p.count;i++){const y=cl(p.getY(i)/500,0,1);const col=UFUK.clone().lerp(new THREE.Color('#5d97cf'),Math.pow(y,0.6));gc.push(col.r,col.g,col.b)}}
+const gokG=new THREE.SphereGeometry(900,32,16), gc=[];{const p=gokG.attributes.position;for(let i=0;i<p.count;i++){const y=cl(p.getY(i)/500,0,1);const col=UFUK.clone().lerp(new THREE.Color('#2f7fd1'),Math.pow(y,0.6));gc.push(col.r,col.g,col.b)}}
 gokG.setAttribute('color',new THREE.Float32BufferAttribute(gc,3));
 const gokM=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,transparent:true,opacity:0,fog:false,depthWrite:false});S.add(new THREE.Mesh(gokG,gokM));
 
+const IZGARA=new THREE.GridHelper(600,60,'#59f0ff','#59f0ff');IZGARA.material.transparent=true;IZGARA.material.opacity=0;S.add(IZGARA);
 const PARCA=[]; // {mesh, edges, gercek(Color), kil(Color), sira}
-const KIL=new THREE.Color('#9a9792'), CIZGI=new THREE.Color('#59f0ff');
+const KIL=new THREE.Color('#9a9792'), CIZGI=new THREE.Color('#7ff8ff');
 function ekle(geo,renk,sira,{gol=true,parlak=0.85,metal=0,yer=null,grup=S}={}){
   const m=new THREE.MeshStandardMaterial({color:KIL.clone(),roughness:parlak,metalness:metal,flatShading:true,transparent:true,opacity:0});
   const me=new THREE.Mesh(geo,m);me.castShadow=gol;me.receiveShadow=true;if(yer)me.position.copy(yer);grup.add(me);
@@ -37,7 +38,7 @@ function ekle(geo,renk,sira,{gol=true,parlak=0.85,metal=0,yer=null,grup=S}={}){
 // zemin: kum tepeleri (piramit çevresi düz)
 const zG=new THREE.PlaneGeometry(900,900,90,90);zG.rotateX(-Math.PI/2);{const p=zG.attributes.position,r=rng(3);for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),d=Math.hypot(x+10,z+15);
   const k=cl((d-70)/80);p.setY(i,k*(2.2*Math.sin(x*0.045+1)*Math.cos(z*0.05)+1.4*Math.sin(x*0.11+z*0.07)+r()*0.5))}zG.computeVertexNormals()}
-const zemin=ekle(zG,'#d9b26f',0,{gol:false,parlak:1});zemin.me.castShadow=false;
+const zemin=ekle(zG,'#d6a35a',0,{gol:false,parlak:1});zemin.me.castShadow=false;
 // Nil (doğuda) + yeşil şerit
 const nil=ekle(new THREE.PlaneGeometry(26,900).rotateX(-Math.PI/2),'#2f6f8f',2,{gol:false,parlak:0.25,yer:new THREE.Vector3(95,0.25,0)});
 ekle(new THREE.PlaneGeometry(16,900).rotateX(-Math.PI/2),'#5f8f3a',2,{gol:false,yer:new THREE.Vector3(74,0.2,0)});
@@ -52,7 +53,7 @@ function piramit(taban,boy,kesik,yer,sira,renk){
   const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
   const sl=new THREE.LineSegments(sg,new THREE.LineBasicMaterial({color:'#6b5434',transparent:true,opacity:0}));p.me.add(sl);p.sira_cizgi=sl;return p}
 const KEOPS={taban:23.0,boy:14.66,kesik:0.055};
-const keops=piramit(KEOPS.taban,KEOPS.boy,KEOPS.kesik,new THREE.Vector3(0,0,0),1,'#c9a46b');
+const keops=piramit(KEOPS.taban,KEOPS.boy,KEOPS.kesik,new THREE.Vector3(0,0,0),1,'#cf9a55');
 const kefren=piramit(21.5,14.35,0.0,new THREE.Vector3(-30,0.6,-31),3,'#c19a62');
 const mikerinos=piramit(10.5,6.55,0.0,new THREE.Vector3(-52,0,-60),4,'#b98f5a');
 // Kefren'in tepesinde kalan kaplama
@@ -116,9 +117,10 @@ function uygula(T){
     if(p.sira_cizgi)p.sira_cizgi.material.opacity=0.55*e.renk;
   }
   ip.material.opacity=e.renk;
-  S.background.copy(SIYAH).lerp(GOK,e.renk); gokM.opacity=e.renk; S.fog.color.copy(SIYAH).lerp(UFUK,e.renk); S.fog.near=lerp(400,180,e.renk);
+  IZGARA.material.opacity=0.35*ease((T-0.1)/0.8)*(1-e.kil);
+  S.background.copy(SIYAH).lerp(GOK,e.renk); gokM.opacity=e.renk; S.fog.color.copy(SIYAH).lerp(UFUK,e.renk); S.fog.near=lerp(400,300,e.renk);
   HEM.intensity=lerp(0,0.55,e.kil)+0.35*e.renk; GUN.intensity=lerp(0,2.2,e.kil)+0.6*e.renk;
-  R.toneMappingExposure=lerp(0.9,1.05,e.renk); return e}
+  R.toneMappingExposure=lerp(0.9,1.12,e.renk); return e}
 
 // ---------- kamera yolu ----------
 const HEDEF=new THREE.Vector3();
@@ -128,12 +130,12 @@ const ACI0=0.75;
 function kamera(i,q,d,T){ // i: sahne, q: sahne içi sn, d: süre
   const k=q/d;
   if(i===0){const a=ACI0+0.5*k, z=ease((k-0.55)/0.45); yorunge(a,lerp(78,30,z),lerp(34,18,z),lerp(5,12,z))}
-  else if(i===1){bak(0,lerp(9,7.5,k),lerp(52,47,k),0,7.2,0)}
-  else if(i===2){const a=0.3+0.9*ease(k); yorunge(a,lerp(44,62,ease((k-0.5)/0.5)),lerp(12,24,k),lerp(7,5,k));
+  else if(i===1){bak(0,lerp(11,9,k),lerp(74,68,k),0,7.4,0)}
+  else if(i===2){const a=0.3+0.9*ease(k); yorunge(a,lerp(58,72,ease((k-0.5)/0.5)),lerp(14,26,k),lerp(7,5,k));
     if(k>0.72){const m=ease((k-0.72)/0.28);CAM.position.lerp(new THREE.Vector3(40,40,60),m);HEDEF.lerp(new THREE.Vector3(95,0,0),m*0.8);CAM.lookAt(HEDEF)}}
   else if(i===3){const t0=TEKNE[0];const z=t0.z0+ (T*3.2); bak(t0.x+24,lerp(14,9,k),z+lerp(30,18,k),t0.x,1.5,z)}
   else {const fin=Z.sahneler[4], son=ease((k-0.5)/0.4);
-    const kx=kizak.position; const p1=new THREE.Vector3(kx.x-10,2.2,kx.z+14), t1=new THREE.Vector3(kx.x,2,kx.z);
+    const kx=kizak.position; const p1=new THREE.Vector3(kx.x+16,5,kx.z-16), t1=new THREE.Vector3(kx.x,1.6,kx.z-7);
     const a=ACI0, p2=new THREE.Vector3(Math.sin(a)*78,34,Math.cos(a)*78), t2=new THREE.Vector3(0,5,0);
     const p3=new THREE.Vector3(Math.sin(a)*26,TEPE_Y+4,Math.cos(a)*26), t3=new THREE.Vector3(0,TEPE_Y,0);
     if(k<0.5){CAM.position.copy(p1);HEDEF.copy(t1)}else{const pp=p1.clone().lerp(p3,son),tt=t1.clone().lerp(t3,son);CAM.position.copy(pp);HEDEF.copy(tt)}

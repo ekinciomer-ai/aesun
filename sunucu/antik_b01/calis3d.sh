@@ -6,7 +6,7 @@ set -e
 python3 -m http.server 8000 --bind 127.0.0.1 >/dev/null 2>&1 & sleep 1
 if [ "$1" = ornek ]; then
   mkdir -p kontrol && rm -f kontrol/*
-  TS=$(python3 -c 'import json;z=json.load(open("zaman.json"));print(",".join(f"{s[\"bas\"]+s[\"sure\"]*f:.2f}" for s in z["sahneler"] for f in (0.25,0.75)))')
+  TS=$(python3 -c 'import json;z=json.load(open("zaman.json"));print(",".join("%.2f"%(s["bas"]+s["sure"]*f) for s in z["sahneler"] for f in (0.25,0.75)))')
   node kayit3d.mjs http://127.0.0.1:8000/dunya.html zaman.json kontrol/k.jpg 30 "$TS"
   ffmpeg -v error -y -pattern_type glob -i 'kontrol/k_*.jpg' -vf "scale=270:480,tile=10x1" kontrol/pano.jpg
 else

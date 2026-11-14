@@ -101,6 +101,25 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
                                          method="PUT", headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": "application/json"})
             urllib.request.urlopen(req, timeout=30).read()
             print(f"NOT: {eski} planı kaldırıldı (Gizli)"); sonuc.append({"kod": kod, "durum": "plan kaldırıldı", "eski": eski}); continue
+        if it.get("islem") == "baslik_degis":
+            # yüklenmiş videonun yalnız başlığını (ve verilirse açıklamasını) değiştirir; önce snippet yedeği
+            cid = KANAL[dil]
+            if dil not in toklar:
+                toklar[dil] = token(cid); mevcut[dil] = basliklar(toklar[dil], cid)
+            hv = it["vid"]
+            u = f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={hv}"
+            with urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": f"Bearer {toklar[dil]}"}), timeout=30) as r:
+                m = json.load(r)["items"][0]
+            json.dump(m, open(os.path.join(D, "yedek", f"baslik_{hv}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+            sn = m["snippet"]; eski_b = sn.get("title")
+            sn["title"] = it["baslik"][:100]
+            if it.get("aciklama"): sn["description"] = it["aciklama"][:4900]
+            for k in ("thumbnails", "localized", "channelTitle", "publishedAt", "channelId"): sn.pop(k, None)
+            req = urllib.request.Request("https://www.googleapis.com/youtube/v3/videos?part=snippet", data=json.dumps({"id": hv, "snippet": sn}).encode(),
+                                         method="PUT", headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=30).read()
+            print(f"NOT: {hv} başlık değişti: {eski_b} → {sn['title']}")
+            sonuc.append({"kod": kod, "durum": "başlık değişti", "vid": hv, "eski": eski_b}); continue
         if kod in kayit:
             sonuc.append({"kod": kod, "durum": "zaten yüklü", "vid": kayit[kod]["vid"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         cid = KANAL[dil]

@@ -78,6 +78,11 @@ jobs:
                   if s['eski'] in ix: ix[s['eski']]['durum'] = 'Gizli'; ix[s['eski']]['not'] = 'planı kaldırıldı'
                   subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
                   print(f'::notice::{kod}: planı kaldırıldı → {s["eski"]}'); continue
+              if s.get('durum') == 'başlık değişti':
+                  hj = json.load(open(f'sunucu/yt_kuyruk/{kod}.json', encoding='utf-8'))
+                  if s['vid'] in ix: ix[s['vid']]['baslik'] = hj['baslik']
+                  subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
+                  print(f'::notice::{kod}: başlık değişti → {s["vid"]}'); continue
               if not s.get('vid'):
                   print('::warning::' + kod + ' ' + s['durum'] + ' ' + s.get('detay', '')); continue
               p = datetime.fromisoformat(s['publishAt'])

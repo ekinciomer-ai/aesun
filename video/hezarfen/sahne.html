@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8"><title>Karton minyatür motoru · Hezarfen · Antik Stüdyo</title>
 <!-- STORYBOX kalıbı (dikey sayfa: üstte 3 karton kutucuk, ortada 16:9 karton dünya kartı, altında altyazı + karton harita paneli).
-     Tamamen kodla çizilir (telifsiz, ücretsiz). Kayıt: video/arac/kayit.js → kurgu(K), kare(t), window.HAZIR. -->
+     Kart: 3D karton diorama (diorama.js, Three.js); üst/alt panel 2D. Tamamen kodla çizilir (telifsiz, ücretsiz). Kayıt: video/arac/kayit.js → kurgu(K), kare(t), window.HAZIR. -->
 <style>
 @font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-700-normal.woff2);font-weight:700;unicode-range:U+0100-024F,U+1E00-1EFF}
 @font-face{font-family:Kalam;src:url(fonts/kalam-latin-700-normal.woff2);font-weight:700}
@@ -10,6 +10,8 @@
 @font-face{font-family:"Instrument Sans";src:url(fonts/InstrumentSans.ttf);font-weight:400 700}
 html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}
 </style></head><body><canvas id="c"></canvas>
+<script src="lib/three.min.js"></script>
+<script src="diorama.js"></script>
 <script>
 const PW=1080,PH=1920,CW=1920,CH=1080;
 const cv=document.getElementById('c');cv.width=PW;cv.height=PH;const P=cv.getContext('2d');
@@ -81,41 +83,18 @@ function gok(z,t){const gr=z.createLinearGradient(0,0,0,CH);gr.addColorStop(0,'#
 function silsile(z,ofs,b){// uzak tarihi yarımada silueti
  cami(z,300-ofs*.3,b,.7,'#d7bf95');cami(z,820-ofs*.3,b,.55,'#d7bf95');bina(z,520-ofs*.3,b,120,90,'#cdb085',30,3);bina(z,1060-ofs*.3,b,160,70,'#cdb085',26,4);cami(z,1400-ofs*.3,b,.62,'#d7bf95')}
 // ---------- sahneler (ts: sahne içi sn, d: süre) ----------
+// 3D karton dioramanın üstüne 2D etiket/el yazısı katmanı
 const S={
-kule(ts,d){const t=ts,cam=eio(t/d);gok(g,t);bulut(g,300+t*12,260,1);bulut(g,1300+t*8,200,.8);
- g.save();g.translate(0,cam*-40);silsile(g,cam*120,760);deniz(g,760,CW,t);
- bina(g,40,1030,200,180,KRAFT2,50,1);bina(g,1380,1040,220,150,KRAFT2,40,2);bina(g,1600,1040,260,210,KRAFT,60,9);
- g.save();g.translate(860,1060);g.scale(1+cam*.12,1+cam*.12);galata(g,0,0,1.55);kisi(g,0,-720,1.15,{kanat:1,ka:Math.sin(t*3),sakal:1,renk:'#3f6f5a'});g.restore();
- g.restore();etiket(g,'1632 · GALATA KULESİ',420,110,ez((t-.3)/1.2),-2);el(g,'kartal kanatları',1420,520,ez((t-2.2)/1.4),70,KIRMIZI,-6)},
-deneme(ts,d){const t=ts;gok(g,t);bulut(g,500+t*15,230,.9);const tepe=new Path2D();tepe.moveTo(-50,CH);tepe.quadraticCurveTo(700,560,1980,760);tepe.lineTo(1980,CH);tepe.closePath();kb(g,tepe,'#9aa860',8);
- for(let i=0;i<9;i++){const x=120+i*210,y=830+Math.sin(i)*30;const a=new Path2D();a.arc(x,y,40+(i%3)*12,0,6.3);kb(g,a,'#7d8e4a',5)}
- const per=d/3.2,k=(t%per)/per,n=Math.min(3,Math.floor(t/per)+1),x=520+k*560,y=760-Math.sin(k*Math.PI)*260;kisi(g,x,y,1,{kanat:1,ucus:1,ka:Math.sin(t*9),r:-.15+k*.3,sakal:1});
- g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=5;g.lineCap='round';for(let i=0;i<4;i++){const xx=(1900-((t*420+i*480)%1900)),yy=380+i*90;g.beginPath();g.moveTo(xx,yy);g.lineTo(xx+140,yy);g.stroke()}
- etiket(g,'OKMEYDANI · DENEMELER',430,110,ez((t-.2)/1.2),-2);el(g,'deneme '+n,1500,300,1,80,KIRMIZI,-5);el(g,'← rüzgâra karşı',1330,470,ez((t-1.5)/1.2),56,MUR,-3)},
-ucus(ts,d){const t=ts,k=eio(t/d),ofs=k*900;gok(g,t);bulut(g,600-ofs*.2,240,1);bulut(g,1500-ofs*.2,180,.8);
- g.save();g.translate(-ofs*.5,0);silsile(g,0,700);g.restore();deniz(g,720,CW,t);
- g.save();g.translate(-ofs,0);galata(g,320,1080,1.2);bina(g,60,1080,180,170,KRAFT2,40,5);
- cami(g,2350,980,.9,'#e0c79b');bina(g,2050,1000,160,120,KRAFT,30,6);bina(g,2600,1000,200,140,KRAFT2,34,7);tekne(g,1300,860,1,t);tekne(g,1900,900,.8,t);g.restore();
- const px=320-ofs+k*1500,py=520-Math.sin(k*Math.PI*.9)*160+k*140;kisi(g,px,py,.9,{kanat:1,ucus:1,ka:Math.sin(t*2)*.3,r:.12,sakal:1});
- g.save();g.strokeStyle=KIRMIZI;g.setLineDash([18,14]);g.lineWidth=6;g.beginPath();for(let i=0;i<=40;i++){const kk=k*i/40;g.lineTo(320-ofs+kk*1500,520-Math.sin(kk*Math.PI*.9)*160+kk*140-60)}g.stroke();g.restore();
- for(let i=0;i<3;i++){const ax=180+((t*260+i*560)%1700);g.save();g.translate(ax,330+i*70);g.fillStyle='rgba(255,255,255,.9)';g.font='700 34px "Space Mono"';g.fillText('LODOS →',0,0);g.restore()}
- etiket(g,'BOĞAZ',960,1010,ez((t-1)/1),2)},
-sultan(ts,d){const t=ts,ik=t/d<.5;gok(g,t);
- if(ik){const k=eio(t/(d*.5));deniz(g,760,CW,t);kosk(g,640,800,1.6);kisi(g,640,790,1.3,{sultan:1,renk:'#b0352a',sakal:1});kisi(g,450,790,1,{renk:'#4a5f7a'});kisi(g,830,790,1,{renk:'#4a5f7a'});
-  kisi(g,1300+k*300,330-k*40,.6,{kanat:1,ucus:1,ka:Math.sin(t*2)*.3,r:.1});etiket(g,'SARAYBURNU · SULTAN IV. MURAD',760,110,ez((t-.2)/1.2),-2);el(g,'izliyor',1100,640,ez((t-1.2)/1.2),70,KIRMIZI,-6)}
- else{const tt=t-d*.5,dd=d*.5,k=eo(tt/(dd*.7));deniz(g,820,CW,t);bina(g,80,880,240,190,KRAFT2,40,11);cami(g,1500,860,.8,'#e0c79b');bina(g,1700,880,200,150,KRAFT,30,12);
-  const zem=new Path2D();zem.rect(0,860,CW,240);kb(g,zem,'#c7a676',4,false);
-  for(let i=0;i<9;i++)kisi(g,520+i*110,960-Math.abs(Math.sin(t*5+i))*18,.8,{renk:['#4a5f7a','#7a4a3a','#5a7a4a'][i%3]});
-  kisi(g,900+(1-k)*500,820-(1-k)*420,.95,{kanat:1,ucus:k<.95,ka:Math.sin(t*2)*.3,r:(1-k)*.2,sakal:1});etiket(g,'ÜSKÜDAR · DOĞANCILAR',760,110,ez(tt/1.2),-2);el(g,'iniş!',1500,420,ez((tt-1.2)/1),90,KIRMIZI,-8)}},
-surgun(ts,d){const t=ts,f=t/d;gok(g,t);const zem=new Path2D();zem.rect(0,820,CW,260);kb(g,zem,'#b58f5e',4,false);
- if(f<.42){const k=eb(t/1);kese(g,960,240+k*480,1.8);for(let i=0;i<14;i++){const a=i/14*6.28,rr=ez((t-.8)/.6)*200;const c=new Path2D();c.arc(960+Math.cos(a)*rr,700+Math.sin(a)*rr*.4,14,0,6.3);if(t>.8)kb(g,c,'#f2c230',3)}
-  el(g,'1 kese altın',1450,300,ez((t-1)/1.2),80,KIRMIZI,-6);kisi(g,420,860,1.2,{sultan:1,renk:'#b0352a',sakal:1})}
- else if(f<.72){const tt=t-d*.42;kisi(g,300,880,1.2,{sultan:1,renk:'#b0352a',sakal:1});kart_alinti(g,'Bu adamdan korkmak gerek, ne isterse yapabilir.',1100,420,1300,ez(tt/1.2))}
- else{const tt=t-d*.72,k=eio(tt/(d*.28));deniz(g,700,CW,t);gemi(g,500+k*1100,760,1.2,t);etiket(g,'→ CEZAYİR',1500,180,ez(tt/1),-2);damga(g,'SÜRGÜN',700,300,ez((tt-.6)/.8),100,-12)}},
-soru(ts,d){const t=ts;const ma=new Path2D();ma.rect(0,0,CW,CH);kb(g,ma,'#a8784a',0,false);kitap(g,960,560,1.6);
- g.save();g.font='800 52px Archivo';g.fillStyle=MUR;g.textAlign='center';g.fillText('SEYAHATNÂME',960,470);g.restore();
- damga(g,'TEK KAYNAK',1440,250,ez((t-1.8)/.8),70,10);const a=t*.9;kisi(g,960+Math.cos(a)*620,330+Math.sin(a)*120,.55,{kanat:1,ucus:1,ka:Math.sin(t*2)*.3,r:.15});
- el(g,'Uçtu mu?',540,240,ez((t-d*.55)/1.2),120,KIRMIZI,-6);el(g,'yoruma yaz ↓',1400,980,ez((t-d*.7)/1),60,MUR,-3)}
+kule(t,d){etiket(g,'1632 · GALATA KULESİ',420,110,ez((t-.3)/1.2),-2);el(g,'kartal kanatları',1420,330,ez((t-2.2)/1.4),74,KIRMIZI,-6)},
+deneme(t,d){const per=d/3.2,n=Math.min(3,Math.floor(t/per)+1);etiket(g,'OKMEYDANI · DENEMELER',430,110,ez((t-.2)/1.2),-2);el(g,'deneme '+n,1540,200,1,84,KIRMIZI,-5);el(g,'← rüzgâra karşı',1400,340,ez((t-1.5)/1.2),58,MUR,-3)},
+ucus(t,d){etiket(g,'LODOS →',300,110,ez((t-.2)/1),-2);el(g,'Boğaz',1500,900,ez((t-1)/1),80,'#fff',-4)},
+sultan(t,d){if(t<d*.5){etiket(g,'SARAYBURNU · SULTAN IV. MURAD',760,110,ez((t-.2)/1.2),-2);el(g,'izliyor',1500,300,ez((t-1.2)/1.2),80,KIRMIZI,-6)}
+ else{const tt=t-d*.5;etiket(g,'ÜSKÜDAR · DOĞANCILAR',700,110,ez(tt/1.2),-2);el(g,'iniş!',1500,300,ez((tt-1.2)/1),100,KIRMIZI,-8)}},
+surgun(t,d){const f=t/d;if(f<.42)el(g,'1 kese altın',1450,220,ez((t-1)/1.2),84,KIRMIZI,-6);
+ else if(f<.72){const tt=t-d*.42;g.fillStyle=`rgba(20,12,4,${.35*ez(tt/.5)})`;g.fillRect(0,0,CW,CH);kart_alinti(g,'Bu adamdan korkmak gerek, ne isterse yapabilir.',960,520,1300,ez(tt/1.2))}
+ else{const tt=t-d*.72;etiket(g,'→ CEZAYİR',1500,150,ez(tt/1),-2);damga(g,'SÜRGÜN',600,260,ez((tt-.6)/.8),100,-12)}},
+soru(t,d){g.save();g.font='800 54px Archivo';g.fillStyle='#fbf6e8';g.textAlign='center';g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=12;g.fillText('SEYAHATNÂME',960,120);g.restore();
+ damga(g,'TEK KAYNAK',1500,300,ez((t-1.8)/.8),70,10);el(g,'Uçtu mu?',460,280,ez((t-d*.55)/1.2),130,KIRMIZI,-6);el(g,'yoruma yaz ↓',1450,980,ez((t-d*.7)/1),64,'#fff',-3)}
 };
 // ---------- sayfa ----------
 const KX=40,KY=430,KW=1000,KH=KW*CH/CW,BL={kule:'YIL',deneme:'GALATA',ucus:'SEYAHATNÂME'};
@@ -151,6 +130,8 @@ function sayfa(t,ad,ts,d){P.fillStyle='#141312';P.fillRect(0,0,PW,PH);P.save();P
  harita(t,ilerleme);P.drawImage(MC,40,1230,1000,420);P.font='700 28px "Space Mono"';P.fillStyle='rgba(239,230,210,.75)';P.textAlign='center';P.fillText('UÇUŞ ROTASI · EVLİYA ÇELEBİ\'YE GÖRE',PW/2,1700);
  P.font='800 34px Archivo';P.fillStyle='rgba(239,230,210,.28)';P.fillText('ANTİK STÜDYO',PW/2,1840)}
 function kare(t){if(!K)return;const SS=K.sahneler;let i=SS.findIndex(s=>t>=s.bas&&t<s.son);if(i<0)i=t<SS[0].bas?0:SS.length-1;const s=SS[i],ts=t-s.bas,d=s.son-s.bas;
+ D3.ciz(s.ad,ts,d);g.drawImage(D3.canvas,0,0,CW,CH);
+ const vg=g.createRadialGradient(CW/2,CH/2,CH*.45,CW/2,CH/2,CH*1.05);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(30,15,0,.45)');g.fillStyle=vg;g.fillRect(0,0,CW,CH);
  g.save();(S[s.ad]||S.kule)(ts,d);g.restore();
  if(i>0&&ts<.35){g.fillStyle=`rgba(20,12,4,${.7*(1-ts/.35)})`;g.fillRect(0,0,CW,CH)}
  sayfa(t,s.ad,ts,d)}

@@ -7,7 +7,16 @@ for si,s in enumerate(z['sahneler']):
     for c in K[si]:
         bas=round((s['bas']+c['bas']*s['sure'])*FPS); son=round((s['bas']+c['son']*s['sure'])*FPS); kare=son-bas
         if kare<=0: continue
-        d=kare/FPS; src=f"klip/{c['klip']}.mp4"; L=sure(src); k0=min(c['kaynak'],max(0,L-0.5))
+        d=kare/FPS
+        if c['mod']=='foto':
+            z0,z1=c['zoom']; zexp=f"({z0}+({z1}-{z0})*n/{max(kare-1,1)})"; out=f"parca/{n:02d}.mp4"
+            fc=(f"[0:v]fps={FPS},scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=30:2,eq=brightness=-0.25[bg];"
+                f"[1:v]scale=2000:1500,zoompan=z='{z0}+({z1}-{z0})*on/{max(kare-1,1)}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1000x750:fps={FPS},eq=contrast=1.08:saturation=1.1[fg];"
+                f"[bg][fg]overlay=(W-w)/2:(H-h)/2-120:shortest=1,setsar=1[v]")
+            subprocess.check_call(['ffmpeg','-v','error','-y','-loop','1','-framerate',str(FPS),'-i',f"klip/{c['klip']}.jpg",'-loop','1','-framerate',str(FPS),'-i',f"klip/{c['klip']}.jpg",
+                '-filter_complex',fc,'-map','[v]','-frames:v',str(kare),'-c:v','libx264','-preset','veryfast','-crf','16','-pix_fmt','yuv420p',out])
+            liste.append(out); n+=1; print('parça',out,c['klip'],kare,'kare (foto)'); continue
+        src=f"klip/{c['klip']}.mp4"; L=sure(src); k0=min(c['kaynak'],max(0,L-0.5))
         hiz=1.0
         if L-k0<d: hiz=max((L-k0)/d,1/1.6); k0=max(0,L-d*hiz)   # kısa klip: en çok 1,6 kat yavaşlat
         z0,z1=c['zoom']; zexp=f"({z0}+({z1}-{z0})*n/{max(kare-1,1)})"

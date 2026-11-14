@@ -27,49 +27,50 @@ function dikey(x,y1,y2,metin,a,yan){if(a<=0.01)return;const yy=lerp(y1,y2,ease(a
   if(a>0.6){g.save();g.globalAlpha=ease((a-0.6)/0.4);g.font=`900 52px ${SANS}`;const w=g.measureText(metin).width+36;const bx=yan>0?x+18:x-18-w;kutu(bx,(y1+y2)/2-38,w,76,12,'rgba(8,6,4,0.82)');yazi(metin,bx+w/2,(y1+y2)/2,52,'#fff');g.restore()}}
 function ust(T){const s=Z.sahneler;for(let j=0;j<s.length;j++){const f=cl((T-s[j].bas)/s[j].sure);kutu(60+j*196,64,184,8,4,'rgba(255,255,255,0.3)');kutu(60+j*196,64,184*f,8,4,'#ffcf66')}
   g.save();g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=10;yazi('ANTİK STÜDYO',60,120,30,'rgba(255,255,255,0.9)','left','900');yazi('TARİHİ MAGAZİN',60,156,22,'#ffcf66','left','700');g.restore()}
+function sayac(n,x,y,boy,renk){yazi(Math.round(n).toLocaleString('tr-TR'),x,y,boy,renk,'center','900')}
+function kapTasi(x,y,s,renk1,renk2,a){if(a<=0.01)return;g.save();g.globalAlpha=a;g.fillStyle=renk1;g.beginPath();g.moveTo(x,y-80*s);g.lineTo(x+70*s,y+20*s);g.lineTo(x-70*s,y+20*s);g.closePath();g.fill();
+  g.fillStyle=renk2;g.beginPath();g.moveTo(x,y-80*s);g.lineTo(x+70*s,y+20*s);g.lineTo(x,y+20*s);g.closePath();g.fill();g.restore()}
+function parilti(x,y,r,a,renk='255,210,90'){if(a<=0.01)return;g.save();g.globalAlpha=a;const gl=g.createRadialGradient(x,y,5,x,y,r);gl.addColorStop(0,`rgba(${renk},0.9)`);gl.addColorStop(1,`rgba(${renk},0)`);g.fillStyle=gl;g.fillRect(x-r,y-r,2*r,2*r);g.restore()}
 function kaplama(i,q,d,T){const k=q/d;
-  if(i===0){ // kanca: grafik tepe taşı uçar, damga
-    const a=ease((k-0.1)/0.12)*(1-ease((k-0.5)/0.08)); if(a>0){const y=lerp(820,560,ease((k-0.12)/0.35));g.save();g.globalAlpha=a;
-      const gl=g.createRadialGradient(540,y,5,540,y,170);gl.addColorStop(0,'rgba(255,210,90,0.9)');gl.addColorStop(1,'rgba(255,210,90,0)');g.fillStyle=gl;g.fillRect(360,y-190,360,380);
-      g.fillStyle='#ffd35a';g.beginPath();g.moveTo(540,y-80);g.lineTo(610,y+20);g.lineTo(470,y+20);g.closePath();g.fill();g.fillStyle='#c9952e';g.beginPath();g.moveTo(540,y-80);g.lineTo(610,y+20);g.lineTo(540,y+20);g.closePath();g.fill();
-      yazi('?',540,y-170,130,'#ffffff','center','900');g.restore()}
-    damga('TEPESİ KAYIP',540,1180,ease((k-0.18)/0.12)*(k<0.52?1:0),'#ff3b2f',-0.06,74);
-    bant('4.500 YILLIK SIR',1180,ease((k-0.6)/0.12));}
-  if(i===1){ // ölçü şeması (Keops oranları), görüntünün üstünde mavi kopya paneli
-    const a=ease((k-0.02)/0.1); if(a>0){g.save();g.globalAlpha=a*(k<0.62?1:1-ease((k-0.62)/0.06));
-      kutu(70,520,940,760,24,'rgba(12,30,70,0.78)');g.strokeStyle='rgba(170,210,255,0.18)';g.lineWidth=1;
-      for(let x=90;x<1000;x+=40){g.beginPath();g.moveTo(x,535);g.lineTo(x,1265);g.stroke()}for(let y=540;y<1270;y+=40){g.beginPath();g.moveTo(85,y);g.lineTo(995,y);g.stroke()}
-      const by=1150,yar=320,h=406,ty=by-h,kes=by-h*(138/146),cz=ease((k-0.06)/0.18);
-      g.strokeStyle='#e6f2ff';g.lineWidth=5;g.beginPath();g.moveTo(540-yar,by);g.lineTo(540-yar+(yar-yar*0.055)*cz,by-(by-kes)*cz);
-      if(cz>=1){g.lineTo(540+yar*0.055,kes);g.lineTo(540+yar,by);g.closePath()}g.stroke();
-      yazi('KEOPS · BÜYÜK PİRAMİT',540,580,36,'#cfe2ff','center','800');yazi('taban ~230 m · ölçek şematik',540,1215,26,'#9fc0ea','center','600');
-      g.restore();
-      dikey(170,by,ty,'146 m',ease((k-0.16)/0.18)*(k<0.62?1:0),1); dikey(910,by,kes,'138 m',ease((k-0.34)/0.18)*(k<0.62?1:0),-1);
-      if(k>0.46&&k<0.62){const b=ease((k-0.46)/0.08);g.save();g.globalAlpha=b;g.setLineDash([10,8]);g.strokeStyle='#ff3b2f';g.lineWidth=5;
-        g.beginPath();g.moveTo(540-yar*0.055,kes);g.lineTo(540,ty);g.lineTo(540+yar*0.055,kes);g.stroke();g.setLineDash([]);yazi('8 m',612,ty-6,40,'#ff6b5f','left','900');g.restore()}}
-    damga('KAYIP: ~8 METRE',540,760,ease((k-0.66)/0.12),'#ff3b2f',-0.08,64);}
+  if(i===0){ // kanca + açık döngü
+    const a=ease((k-0.06)/0.1)*(1-ease((k-0.42)/0.08)), y=lerp(820,520,ease((k-0.1)/0.32));
+    parilti(540,y-20,180,a);kapTasi(540,y,1,'#ffd35a','#c9952e',a);
+    damga('TEPESİ KAYIP',540,1150,ease((k-0.14)/0.1)*(k<0.6?1:0),'#ff3b2f',-0.06,74);
+    bant('8 METRE EKSİK',470,ease((k-0.28)/0.1)*(k<0.6?1:0));
+    if(k>0.62){const b=ease((k-0.62)/0.1);parilti(540,760,200,b*0.5,'255,255,255');kapTasi(540,800,1.3,'#111','#000',b);
+      g.save();g.globalAlpha=b;yazi('?',540,770,110,'#ffcf66','center','900');g.restore();bant('SONUNDA GÖSTERECEĞİM ↓',1150,ease((k-0.66)/0.1),'#ffcf66',48);}}
+  if(i===1){ // ölçü + rekor
+    const a=ease((k-0.02)/0.1)*(1-ease((k-0.52)/0.06)); if(a>0){g.save();g.globalAlpha=a;
+      kutu(70,520,940,700,24,'rgba(12,30,70,0.8)');g.strokeStyle='rgba(170,210,255,0.18)';g.lineWidth=1;
+      for(let x=90;x<1000;x+=40){g.beginPath();g.moveTo(x,535);g.lineTo(x,1205);g.stroke()}for(let y=540;y<1210;y+=40){g.beginPath();g.moveTo(85,y);g.lineTo(995,y);g.stroke()}
+      const by=1110,yar=320,h=406,ty=by-h,kes=by-h*(138/146),cz=ease((k-0.05)/0.14);
+      g.strokeStyle='#e6f2ff';g.lineWidth=5;g.beginPath();g.moveTo(540-yar,by);g.lineTo(540-yar+(yar-yar*0.055)*cz,by-(by-kes)*cz);if(cz>=1){g.lineTo(540+yar*0.055,kes);g.lineTo(540+yar,by);g.closePath()}g.stroke();
+      yazi('KEOPS · BÜYÜK PİRAMİT',540,575,36,'#cfe2ff','center','800');g.restore();
+      dikey(170,by,ty,'146 m',ease((k-0.1)/0.14)*(k<0.52?1:0),1);
+      g.save();g.globalAlpha=ease((k-0.3)/0.08)*(k<0.52?1:0);g.setLineDash([10,8]);g.strokeStyle='#ff3b2f';g.lineWidth=5;g.beginPath();g.moveTo(540-yar*0.055,kes);g.lineTo(540,ty);g.lineTo(540+yar*0.055,kes);g.stroke();g.setLineDash([]);g.restore()}
+    if(k>0.5){const b=ease((k-0.5)/0.08)*(1-ease((k-0.82)/0.05));if(b>0){g.save();g.globalAlpha=b;kutu(110,600,860,420,26,'rgba(8,6,4,0.82)');
+      sayac(3800*ease((k-0.52)/0.22),540,760,170,'#ffcf66');yazi('YIL BOYUNCA',540,880,50,'#ffffff','center','900');yazi('DÜNYANIN EN YÜKSEK YAPISI',540,950,40,'#f3e3c2','center','800');g.restore()}}
+    bant('BUGÜN: 138 m',600,ease((k-0.84)/0.08),'#ffffff',54);}
   if(i===2){ // kaplama
-    const [x,y]=P.s3_tepe; if(k<0.55){bant('KEFREN: KAPLAMA HÂLÂ TEPEDE',470,ease((k-0.05)/0.1),'#ffffff',44);
-      bant('TURA KİREÇTAŞI · CİLALI BEYAZ',1300,ease((k-0.22)/0.1),'#ffcf66',44);}
+    if(k<0.55){bant('KEFREN: KAPLAMA HÂLÂ TEPEDE',470,ease((k-0.03)/0.1),'#ffffff',44);bant('CİLALI KİREÇTAŞI · BEMBEYAZ',1300,ease((k-0.2)/0.1),'#ffcf66',44);}
     else {bant('TAŞLAR SÖKÜLDÜ',470,ease((k-0.57)/0.08));bant('→ KAHİRE BİNALARINA',1300,ease((k-0.68)/0.08),'#ffffff',46);}}
-  if(i===3){ // Merer
-    if(k<0.48){bant('NİL · TURA → GİZE',470,ease((k-0.05)/0.1));}
-    else {const a=ease((k-0.5)/0.12);g.save();g.globalAlpha=a;const y0=lerp(640,560,a);kutu(100,y0,880,360,22,'rgba(240,231,210,0.96)');
-      yazi('DOSYA · MERER\'İN GÜNLÜĞÜ',540,y0+62,42,'#1a1612');g.fillStyle='#1a1612';g.fillRect(150,y0+98,780,4);
-      yazi('2013 · Vadi el-Cerf, Kızıldeniz',540,y0+160,42,'#1a1612','center','800');yazi('Tura\'dan Gize\'ye taş taşıma kayıtları',540,y0+228,34,'#3a3228','center','600');
-      yazi('Pierre Tallet kazısı',540,y0+290,30,'#5a5046','center','500');g.restore();
-      damga('EN ESKİ YAZILI PAPİRÜS',540,y0+420,ease((k-0.68)/0.12),'#c4231c',0.05,52);}}
-  if(i===4){ // finale
-    if(k<0.24) bant('KÖLE DEĞİLDİLER',470,ease((k-0.02)/0.08));
-    else if(k<0.46) bant('TAYIN: EKMEK + BİRA',470,ease((k-0.26)/0.08));
-    else { const x=540,y=780; const a=ease((k-0.5)/0.1)*(1-ease((k-0.8)/0.06));
-      if(a>0){g.save();g.globalAlpha=a;const gl=g.createRadialGradient(x,y-20,5,x,y-20,140);gl.addColorStop(0,'rgba(255,215,100,0.95)');gl.addColorStop(1,'rgba(255,215,100,0)');g.fillStyle=gl;g.fillRect(x-160,y-180,320,320);
-        g.fillStyle='#ffd35a';g.beginPath();g.moveTo(x,y-70+Math.sin(T*3)*8);g.lineTo(x+46,y-6+Math.sin(T*3)*8);g.lineTo(x-46,y-6+Math.sin(T*3)*8);g.closePath();g.fill();g.restore()}
-      bant('TEPE TAŞI NEREDE? YORUMA YAZ',1180,ease((k-0.55)/0.1)*(1-ease((k-0.8)/0.06)),'#ffcf66',46);
-      const f=ease((k-0.83)/0.08); if(f>0){g.save();g.globalAlpha=f;g.fillStyle='rgba(6,4,2,0.78)';g.fillRect(0,0,W,H);yazi('ANTİK STÜDYO',540,860,104,'#ffcf66','center','900');
-        g.fillStyle='#ffcf66';g.fillRect(340,925,400,6);yazi('Tarih, bugünün diliyle.',540,990,44,'#f3e3c2','center','600');g.restore()}}}
+  if(i===3){ // altın mı?
+    const a=ease((k-0.05)/0.1)*(1-ease((k-0.48)/0.06)), yy=700+Math.sin(T*2.5)*14;parilti(540,yy-20,240,a);kapTasi(540,yy,1.6,'#ffd35a','#c9952e',a);
+    if(a>0){g.save();g.globalAlpha=a;yazi('ALTIN?',540,yy+130,80,'#ffcf66','center','900');g.restore()}
+    damga('KAYIT YOK',540,760,ease((k-0.5)/0.1),'#ff3b2f',-0.07,90);
+    bant('NE ÇİZİM · NE PARÇA',1150,ease((k-0.72)/0.1),'#ffffff',48);}
+  if(i===4){ // ödül: gerçek tepe taşı fotoğrafı
+    bant('İŞTE BİR TEPE TAŞI',300,ease((k-0.02)/0.08)*(1-ease((k-0.3)/0.06)),'#ffcf66',52);
+    bant('III. AMENEMHAT · ~MÖ 1850',300,ease((k-0.33)/0.08)*(1-ease((k-0.86)/0.04)),'#ffcf66',46);
+    const c1=ease((k-0.25)/0.08),c2=ease((k-0.45)/0.08);
+    if(c1>0){g.save();g.globalAlpha=c1;kutu(90,1235,430,80,14,'rgba(8,6,4,0.85)');yazi('1,4 m · ~4,5 ton',305,1275,40,'#fff');g.restore()}
+    if(c2>0){g.save();g.globalAlpha=c2;kutu(540,1235,450,80,14,'rgba(8,6,4,0.85)');yazi('MISIR MÜZESİ, KAHİRE',765,1275,34,'#ffcf66');g.restore()}
+    g.save();g.globalAlpha=0.8;yazi('Foto: Jon Bodsworth · kamu malı',1030,1205,22,'#ddd','right','600');g.restore();
+    bant('KEOPS\'UNKİ NEREDE? YORUMA YAZ',1150,ease((k-0.7)/0.08)*(1-ease((k-0.88)/0.03)),'#ffcf66',44);
+    const f=ease((k-0.9)/0.06); if(f>0){g.save();g.globalAlpha=f;g.fillStyle='rgba(6,4,2,0.82)';g.fillRect(0,0,W,H);yazi('ANTİK STÜDYO',540,860,104,'#ffcf66','center','900');
+      g.fillStyle='#ffcf66';g.fillRect(340,925,400,6);yazi('Tarih, bugünün diliyle.',540,990,44,'#f3e3c2','center','600');g.restore()}}
 }
-const VURGU=/^(kayıp|146|138|sekiz|tura|kahire|merer|2013|iki|bin|on|üçte|köle|ekmek|bira|yoruma|bembeyaz|papirüs)/i;
+const VURGU=/^(sekiz|eksik|bulamadı|sonunda|146|kırk|otuz|bin|yüksek|bembeyaz|kahire|altın|hiçbir|kayıt|amenemhat|kara|dört|buçuk|ton|müzesi|yoruma)/i;
 function altyazi(T){const K=Z.kelimeler;if(!K.length)return;const i=K.findIndex(k=>T>=k.s&&T<k.e+0.25);if(i<0)return;
   let bas=i;while(bas>0&&(i-bas)<1&&!/[.?!,]$/.test(K[bas-1].w)&&K[bas].s-K[bas-1].e<0.4)bas--;
   const grup=[];for(let j=bas;j<K.length&&grup.length<3;j++){grup.push(j);if(/[.?!,]$/.test(K[j].w))break}if(!grup.includes(i))return;

@@ -2,16 +2,20 @@
 Format: Shorts 1080×1920 · ~40 sn · TR · Ses: ElevenLabs "Umit Dogan - Energetic and Dynamic" (dDcfsSsiSzmphdMGCECb)
 Görsel: Kodla Film Stilleri (canvas, video modeli yok) · Müzik: kodla sentez (telifsiz) · Durum: ÖNİZLEME, yayınlanmadı
 
-| # | Stil | Metin (ses) | Ekranda vurgulanan |
+## v2 (14.11 — Ömer: "köle değildi konudan kopuk", "izleyiciyi içeri çekecek bir şey yok")
+Yapı: tek gizem (tepe taşı) · başta açık döngü ("sonunda göstereceğim") · ortada artan bilgi · sonda ödül (gerçek bir tepe taşı).
+
+| # | Görüntü | Metin (ses) | Ekran |
 |---|---|---|---|
-| 1 | Sessiz Film | Keops Piramidi'nin tepesi kayıp. Dört bin beş yüz yıldır kimse nerede olduğunu bilmiyor. | TEPESİ KAYIP |
-| 2 | Mavi Kopya | Piramit yapıldığında yüz kırk altı metreydi. Bugün yüz otuz sekiz. Aradaki yaklaşık sekiz metre? Gitmiş. | 146 m · 138 m · 8 m |
-| 3 | Vitray | Üstelik bir zamanlar bembeyaz parlıyordu. Cilalı Tura kireçtaşıyla kaplıydı. Bu taşların çoğu yüzyıllar sonra sökülüp Kahire'nin binalarında kullanıldı. | Tura kireçtaşı · Kahire |
-| 4 | Yarım Ton Dosya | Peki taşları kim taşıdı? İki bin on üçte bulunan Merer'in günlüğü, bir ekip şefinin notları. Bulunan en eski yazılı papirüsler. | Merer · 2013 · en eski papirüs |
-| 5 | Kâğıt Kesik | Ve işçiler köle değildi. Tayınlarında ekmek ve bira vardı. Sizce o tepe taşı nerede? Yoruma yazın. | köle değildi · ekmek ve bira · yoruma yaz |
+| 1 | Gize drone + gün batımı | Dünyanın en ünlü piramidinin tepesinde sekiz metre eksik. Dört bin beş yüz yıldır kimse o parçayı bulamadı. Videonun sonunda, neye benzediğini göstereceğim. | uçan altın tepe taşı, TEPESİ KAYIP, 8 METRE EKSİK, siyah gizemli taş + SONUNDA GÖSTERECEĞİM ↓ |
+| 2 | Gize geniş + deveyle çöl | Keops Piramidi bitirildiğinde yüz kırk altı metreydi. Tam üç bin sekiz yüz yıl boyunca dünyanın en yüksek yapısıydı. Bugün yüz otuz sekiz metre. | ölçü şeması 146 m, 3.800 sayacı, BUGÜN 138 m |
+| 3 | Kefren (kaplamalı tepe) + Kahire | Ve şunu bilmiyor olabilirsin: bembeyazdı. Cilalı kireçtaşıyla kaplıydı, güneşte parlıyordu. Sonra bu taşlar sökülüp Kahire'nin binalarında kullanıldı. | KEFREN: KAPLAMA HÂLÂ TEPEDE, TAŞLAR SÖKÜLDÜ → KAHİRE |
+| 4 | Gün batımı + drone | Peki tepe taşı? Kimileri altın kaplı olduğunu düşünüyor. Ama hiçbir kayıt onu anlatmıyor. Ne bir çizim, ne bir parça. | ALTIN?, KAYIT YOK |
+| 5 | III. Amenemhat piramidyonu (foto) | Ama başka bir firavunun tepe taşı bugün hâlâ duruyor. Üçüncü Amenemhat'ın kara taştan tepe taşı. Tam dört buçuk ton. Kahire'deki Mısır Müzesi'nde. Sence Keops'unki nerede? Yoruma yaz. | 1,4 m · ~4,5 ton, MISIR MÜZESİ, CTA |
 
 ## Kaynaklar
-- Keops Piramidi yükseklik ~146,6 m (özgün) / ~138,5 m (bugün); tepe taşı (pyramidion) kayıp — Britannica "Pyramids of Giza"; Smithsonian Magazine.
-- Tura kireçtaşı kaplama, 1303 depremi sonrası Kahire yapılarında kullanılması — Britannica; Lehner, *The Complete Pyramids* (1997).
-- Merer'in günlüğü, Vadi el-Cerf papirüsleri (2013, Pierre Tallet), bilinen en eski yazılı papirüsler, Tura'dan Gize'ye taş taşıma — Tallet & Marouard, *Near Eastern Archaeology* 77/1 (2014); Smithsonian Magazine (2017).
-- İşçilerin köle değil, tayın alan işçiler olduğu; işçi köyü ve mezarları — Mark Lehner / AERA kazıları; Zahi Hawass, işçi mezarları (1990'lar–2010).
+- Keops: özgün ~146,6 m, bugün ~138,5 m; 3.800 yıl en yüksek yapı (Lincoln Katedrali, 1311); kaplama sökülüp Kahire'de kullanıldı — Britannica; Wikipedia "Great Pyramid of Giza"; Lehner, The Complete Pyramids (1997).
+- Tepe taşının altın olduğu kanıtlanmadı, kayıt yok — genel kabul; Wikipedia "Pyramidion" (altın varak bazı piramidyonlar için).
+- III. Amenemhat piramidyonu: Dahşur Kara Piramit, 1900'de bulundu, 1,40 m, ~4,5 t, Kahire Mısır Müzesi JE 35133 (Merkez Salon) — egyptianmuseumcairo.eg; Wikipedia "Pyramidion of Amenemhat III"; Maspero 1902.
+- Fotoğraf: Jon Bodsworth (egyptarchive.co.uk, telifsiz) — Wikimedia Commons.
+- Klipler: Pixabay (382833, 309430, 55718, 262458, 360197, 223565) — kaynaklar.json.

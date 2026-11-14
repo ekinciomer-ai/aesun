@@ -1,14 +1,146 @@
-{"_not": "Sahne başına kesimler. bas/son: sahne içi oran (0-1). mod: kirp (9:16 tam ekran, cx=kırpma merkezi 0-1) | sigdir (16:9 ortada, arka plan bulanık). kaynak: klipte başlangıç sn. zoom: başlangıç→bitiş ölçek.",
+{
+ "_not": "Sahne başına kesimler. bas/son: sahne içi oran (0-1). mod: kirp (9:16 tam ekran, cx=kırpma merkezi 0-1) | sigdir (16:9 ortada, arka plan bulanık). kaynak: klipte başlangıç sn. zoom: başlangıç→bitiş ölçek.",
  "sahneler": [
-  [{"klip":309430,"bas":0,"son":0.45,"mod":"kirp","cx":0.665,"kaynak":2,"zoom":[1.0,1.18]},
-   {"klip":382833,"bas":0.45,"son":1,"mod":"kirp","cx":0.5,"kaynak":9,"zoom":[1.12,1.0]}],
-  [{"klip":55718,"bas":0,"son":0.62,"mod":"sigdir","kaynak":4,"zoom":[1.0,1.0]},
-   {"klip":262458,"bas":0.62,"son":1,"mod":"kirp","cx":0.83,"kaynak":5,"zoom":[1.0,1.08]}],
-  [{"klip":360197,"bas":0,"son":0.55,"mod":"sigdir","kaynak":0,"zoom":[1.0,1.0]},
-   {"klip":223565,"bas":0.55,"son":1,"mod":"kirp","cx":0.68,"kaynak":18,"zoom":[1.0,1.1]}],
-  [{"klip":377554,"bas":0,"son":0.48,"mod":"kirp","cx":0.55,"kaynak":3,"zoom":[1.08,1.0]},
-   {"klip":130459,"bas":0.48,"son":1,"mod":"kirp","cx":0.3,"kaynak":4,"zoom":[1.0,1.1]}],
-  [{"klip":252077,"bas":0,"son":0.24,"mod":"kirp","cx":0.4,"kaynak":2,"zoom":[1.0,1.06]},
-   {"klip":129868,"bas":0.24,"son":0.46,"mod":"kirp","cx":0.42,"kaynak":0.5,"zoom":[1.05,1.15]},
-   {"klip":309430,"bas":0.46,"son":1,"mod":"kirp","cx":0.665,"kaynak":10,"zoom":[1.0,1.12]}]
- ]}
+  [
+   {
+    "klip": 382833,
+    "bas": 0,
+    "son": 0.55,
+    "mod": "kirp",
+    "cx": 0.45,
+    "kaynak": 0,
+    "zoom": [
+     1.15,
+     1.0
+    ]
+   },
+   {
+    "klip": 309430,
+    "bas": 0.55,
+    "son": 1,
+    "mod": "kirp",
+    "cx": 0.665,
+    "kaynak": 2,
+    "zoom": [
+     1.0,
+     1.15
+    ]
+   }
+  ],
+  [
+   {
+    "klip": 55718,
+    "bas": 0,
+    "son": 0.62,
+    "mod": "kirp",
+    "cx": 0.42,
+    "kaynak": 4,
+    "zoom": [
+     1.0,
+     1.06
+    ]
+   },
+   {
+    "klip": 262458,
+    "bas": 0.62,
+    "son": 1,
+    "mod": "kirp",
+    "cx": 0.83,
+    "kaynak": 5,
+    "zoom": [
+     1.0,
+     1.08
+    ]
+   }
+  ],
+  [
+   {
+    "klip": 360197,
+    "bas": 0,
+    "son": 0.55,
+    "mod": "sigdir",
+    "kaynak": 0,
+    "zoom": [
+     1.0,
+     1.0
+    ]
+   },
+   {
+    "klip": 223565,
+    "bas": 0.55,
+    "son": 1,
+    "mod": "kirp",
+    "cx": 0.68,
+    "kaynak": 18,
+    "zoom": [
+     1.0,
+     1.1
+    ]
+   }
+  ],
+  [
+   {
+    "klip": 377554,
+    "bas": 0,
+    "son": 0.48,
+    "mod": "kirp",
+    "cx": 0.55,
+    "kaynak": 3,
+    "zoom": [
+     1.08,
+     1.0
+    ]
+   },
+   {
+    "klip": 130459,
+    "bas": 0.48,
+    "son": 1,
+    "mod": "kirp",
+    "cx": 0.3,
+    "kaynak": 4,
+    "zoom": [
+     1.0,
+     1.1
+    ]
+   }
+  ],
+  [
+   {
+    "klip": 252077,
+    "bas": 0,
+    "son": 0.24,
+    "mod": "kirp",
+    "cx": 0.4,
+    "kaynak": 2,
+    "zoom": [
+     1.0,
+     1.06
+    ]
+   },
+   {
+    "klip": 129868,
+    "bas": 0.24,
+    "son": 0.46,
+    "mod": "kirp",
+    "cx": 0.42,
+    "kaynak": 0.5,
+    "zoom": [
+     1.05,
+     1.15
+    ]
+   },
+   {
+    "klip": 309430,
+    "bas": 0.46,
+    "son": 1,
+    "mod": "kirp",
+    "cx": 0.665,
+    "kaynak": 10,
+    "zoom": [
+     1.0,
+     1.12
+    ]
+   }
+  ]
+ ]
+}

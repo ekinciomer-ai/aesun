@@ -28,19 +28,28 @@ function dikey(x,y1,y2,metin,a,yan){if(a<=0.01)return;const yy=lerp(y1,y2,ease(a
 function ust(T){const s=Z.sahneler;for(let j=0;j<s.length;j++){const f=cl((T-s[j].bas)/s[j].sure);kutu(60+j*196,64,184,8,4,'rgba(255,255,255,0.3)');kutu(60+j*196,64,184*f,8,4,'#ffcf66')}
   g.save();g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=10;yazi('ANTİK STÜDYO',60,120,30,'rgba(255,255,255,0.9)','left','900');yazi('TARİHİ MAGAZİN',60,156,22,'#ffcf66','left','700');g.restore()}
 function kaplama(i,q,d,T){const k=q/d;
-  if(i===0){ // kanca
-    const [x,y]=P.s1_tepe; halka(x,y,80,ease((k-0.12)/0.12)*(k<0.45?1:0)); if(k<0.45&&k>0.18){g.save();g.globalAlpha=ease((k-0.18)/0.1);yazi('?',x,y-150,150,'#ff3b2f','center','900');g.restore()}
-    damga('TEPESİ KAYIP',540,1180,ease((k-0.2)/0.12)*(k<0.45?1:0),'#ff3b2f',-0.06,74);
-    bant('4.500 YILLIK SIR',1180,ease((k-0.55)/0.12));}
-  if(i===1){ // ölçü (sığdır modunda 55718)
-    const ky=P.s2_taban_y, ty=P.s2_tepe[1]; const kes=ty+(ky-ty)*0.055;
-    dikey(P.s2_sol-40,ky,ty-14,'146 m',ease((k-0.08)/0.22),-1); dikey(P.s2_sag+40,ky,kes,'138 m',ease((k-0.34)/0.22),1);
-    if(k>0.5){const a=ease((k-0.5)/0.12);g.save();g.globalAlpha=a;g.setLineDash([10,8]);g.strokeStyle='#ff3b2f';g.lineWidth=5;const [tx]=P.s2_tepe;
-      g.beginPath();g.moveTo(tx-30,kes);g.lineTo(tx,ty-14);g.lineTo(tx+30,kes);g.stroke();g.setLineDash([]);g.restore()}
-    if(k<0.62) bant('KEOPS · BÜYÜK PİRAMİT',470,ease((k-0.02)/0.1));
-    damga('KAYIP: ~8 METRE',540,600,ease((k-0.66)/0.12),'#ff3b2f',-0.08,64);}
+  if(i===0){ // kanca: grafik tepe taşı uçar, damga
+    const a=ease((k-0.1)/0.12)*(1-ease((k-0.5)/0.08)); if(a>0){const y=lerp(820,560,ease((k-0.12)/0.35));g.save();g.globalAlpha=a;
+      const gl=g.createRadialGradient(540,y,5,540,y,170);gl.addColorStop(0,'rgba(255,210,90,0.9)');gl.addColorStop(1,'rgba(255,210,90,0)');g.fillStyle=gl;g.fillRect(360,y-190,360,380);
+      g.fillStyle='#ffd35a';g.beginPath();g.moveTo(540,y-80);g.lineTo(610,y+20);g.lineTo(470,y+20);g.closePath();g.fill();g.fillStyle='#c9952e';g.beginPath();g.moveTo(540,y-80);g.lineTo(610,y+20);g.lineTo(540,y+20);g.closePath();g.fill();
+      yazi('?',540,y-170,130,'#ffffff','center','900');g.restore()}
+    damga('TEPESİ KAYIP',540,1180,ease((k-0.18)/0.12)*(k<0.52?1:0),'#ff3b2f',-0.06,74);
+    bant('4.500 YILLIK SIR',1180,ease((k-0.6)/0.12));}
+  if(i===1){ // ölçü şeması (Keops oranları), görüntünün üstünde mavi kopya paneli
+    const a=ease((k-0.02)/0.1); if(a>0){g.save();g.globalAlpha=a*(k<0.62?1:1-ease((k-0.62)/0.06));
+      kutu(70,520,940,760,24,'rgba(12,30,70,0.78)');g.strokeStyle='rgba(170,210,255,0.18)';g.lineWidth=1;
+      for(let x=90;x<1000;x+=40){g.beginPath();g.moveTo(x,535);g.lineTo(x,1265);g.stroke()}for(let y=540;y<1270;y+=40){g.beginPath();g.moveTo(85,y);g.lineTo(995,y);g.stroke()}
+      const by=1150,yar=320,h=406,ty=by-h,kes=by-h*(138/146),cz=ease((k-0.06)/0.18);
+      g.strokeStyle='#e6f2ff';g.lineWidth=5;g.beginPath();g.moveTo(540-yar,by);g.lineTo(540-yar+(yar-yar*0.055)*cz,by-(by-kes)*cz);
+      if(cz>=1){g.lineTo(540+yar*0.055,kes);g.lineTo(540+yar,by);g.closePath()}g.stroke();
+      yazi('KEOPS · BÜYÜK PİRAMİT',540,580,36,'#cfe2ff','center','800');yazi('taban ~230 m · ölçek şematik',540,1215,26,'#9fc0ea','center','600');
+      g.restore();
+      dikey(170,by,ty,'146 m',ease((k-0.16)/0.18)*(k<0.62?1:0),1); dikey(910,by,kes,'138 m',ease((k-0.34)/0.18)*(k<0.62?1:0),-1);
+      if(k>0.46&&k<0.62){const b=ease((k-0.46)/0.08);g.save();g.globalAlpha=b;g.setLineDash([10,8]);g.strokeStyle='#ff3b2f';g.lineWidth=5;
+        g.beginPath();g.moveTo(540-yar*0.055,kes);g.lineTo(540,ty);g.lineTo(540+yar*0.055,kes);g.stroke();g.setLineDash([]);yazi('8 m',612,ty-6,40,'#ff6b5f','left','900');g.restore()}}
+    damga('KAYIP: ~8 METRE',540,760,ease((k-0.66)/0.12),'#ff3b2f',-0.08,64);}
   if(i===2){ // kaplama
-    const [x,y]=P.s3_tepe; if(k<0.55){halka(x,y,70,ease((k-0.1)/0.1),'#ffffff');bant('KEFREN: KAPLAMA HÂLÂ TEPEDE',470,ease((k-0.05)/0.1),'#ffffff',44);
+    const [x,y]=P.s3_tepe; if(k<0.55){bant('KEFREN: KAPLAMA HÂLÂ TEPEDE',470,ease((k-0.05)/0.1),'#ffffff',44);
       bant('TURA KİREÇTAŞI · CİLALI BEYAZ',1300,ease((k-0.22)/0.1),'#ffcf66',44);}
     else {bant('TAŞLAR SÖKÜLDÜ',470,ease((k-0.57)/0.08));bant('→ KAHİRE BİNALARINA',1300,ease((k-0.68)/0.08),'#ffffff',46);}}
   if(i===3){ // Merer
@@ -53,7 +62,7 @@ function kaplama(i,q,d,T){const k=q/d;
   if(i===4){ // finale
     if(k<0.24) bant('KÖLE DEĞİLDİLER',470,ease((k-0.02)/0.08));
     else if(k<0.46) bant('TAYIN: EKMEK + BİRA',470,ease((k-0.26)/0.08));
-    else { const [x,y]=P.s5_tepe; const a=ease((k-0.5)/0.1)*(1-ease((k-0.8)/0.06));
+    else { const x=540,y=780; const a=ease((k-0.5)/0.1)*(1-ease((k-0.8)/0.06));
       if(a>0){g.save();g.globalAlpha=a;const gl=g.createRadialGradient(x,y-20,5,x,y-20,140);gl.addColorStop(0,'rgba(255,215,100,0.95)');gl.addColorStop(1,'rgba(255,215,100,0)');g.fillStyle=gl;g.fillRect(x-160,y-180,320,320);
         g.fillStyle='#ffd35a';g.beginPath();g.moveTo(x,y-70+Math.sin(T*3)*8);g.lineTo(x+46,y-6+Math.sin(T*3)*8);g.lineTo(x-46,y-6+Math.sin(T*3)*8);g.closePath();g.fill();g.restore()}
       bant('TEPE TAŞI NEREDE? YORUMA YAZ',1180,ease((k-0.55)/0.1)*(1-ease((k-0.8)/0.06)),'#ffcf66',46);

@@ -37,8 +37,8 @@ function ekle(geo,renk,sira,{gol=true,parlak=0.85,metal=0,yer=null,grup=S}={}){
   const p={me,e,gercek:new THREE.Color(renk),sira};PARCA.push(p);return p}
 // zemin: kum tepeleri (piramit çevresi düz)
 const zG=new THREE.PlaneGeometry(900,900,90,90);zG.rotateX(-Math.PI/2);{const p=zG.attributes.position,r=rng(3);for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),d=Math.hypot(x+10,z+15);
-  const k=cl((d-70)/80);p.setY(i,k*(2.2*Math.sin(x*0.045+1)*Math.cos(z*0.05)+1.4*Math.sin(x*0.11+z*0.07)+r()*0.5))}zG.computeVertexNormals()}
-const zemin=ekle(zG,'#d6a35a',0,{gol:false,parlak:1});zemin.me.castShadow=false;
+  const k=cl((d-150)/120);p.setY(i,k*(2.2*Math.sin(x*0.045+1)*Math.cos(z*0.05)+1.4*Math.sin(x*0.11+z*0.07)+r()*0.5))}zG.computeVertexNormals()}
+const zemin=ekle(zG,'#d6a35a',0,{gol:false,parlak:1});zemin.kil=new THREE.Color('#4a4844');zemin.me.castShadow=false;
 // Nil (doğuda) + yeşil şerit
 const nil=ekle(new THREE.PlaneGeometry(26,900).rotateX(-Math.PI/2),'#2f6f8f',2,{gol:false,parlak:0.25,yer:new THREE.Vector3(95,0.25,0)});
 ekle(new THREE.PlaneGeometry(16,900).rotateX(-Math.PI/2),'#5f8f3a',2,{gol:false,yer:new THREE.Vector3(74,0.2,0)});
@@ -112,7 +112,7 @@ function uygula(T){
     const gor=ease((T-0.15-p.sira*0.35)/0.6)*(T<s0.bas+s0.sure?1:1); // parçalar sırayla belirir
     const kati=Math.max(e.kil,0)*gor;
     p.me.material.opacity=kati; p.me.material.transparent=kati<0.999; p.me.material.depthWrite=kati>0.5;
-    p.me.material.color.copy(KIL).lerp(p.gercek,e.renk);
+    p.me.material.color.copy(p.kil||KIL).lerp(p.gercek,e.renk);
     p.e.material.opacity=gor*lerp(0.95,0.0,e.kil)+ (e.renk<1?0.06*e.kil:0);
     if(p.sira_cizgi)p.sira_cizgi.material.opacity=0.55*e.renk;
   }
@@ -130,7 +130,7 @@ const ACI0=0.75;
 function kamera(i,q,d,T){ // i: sahne, q: sahne içi sn, d: süre
   const k=q/d;
   if(i===0){const a=ACI0+0.5*k, z=ease((k-0.55)/0.45); yorunge(a,lerp(78,30,z),lerp(34,18,z),lerp(5,12,z))}
-  else if(i===1){bak(0,lerp(11,9,k),lerp(74,68,k),0,7.4,0)}
+  else if(i===1){bak(0,lerp(12,10,k),lerp(90,84,k),0,7.4,0)}
   else if(i===2){const a=0.3+0.9*ease(k); yorunge(a,lerp(58,72,ease((k-0.5)/0.5)),lerp(14,26,k),lerp(7,5,k));
     if(k>0.72){const m=ease((k-0.72)/0.28);CAM.position.lerp(new THREE.Vector3(40,40,60),m);HEDEF.lerp(new THREE.Vector3(95,0,0),m*0.8);CAM.lookAt(HEDEF)}}
   else if(i===3){const t0=TEKNE[0];const z=t0.z0+ (T*3.2); bak(t0.x+24,lerp(14,9,k),z+lerp(30,18,k),t0.x,1.5,z)}
@@ -185,15 +185,15 @@ function damga(t,x,y,a,renk='#e8392e',aci=-0.1){if(a<=0)return;const sc=lerp(2.2
   g.strokeStyle=renk;g.lineWidth=7;g.strokeRect(-w/2,-50,w,100);yazi(t,0,3,54,renk);g.restore();g.globalAlpha=1}
 function olcu(a,b,metin,al,yan=1){if(al<=0)return;const [x1,y1]=proj(a),[x2,y2]=proj(b);g.globalAlpha=al;g.strokeStyle='#ffffff';g.lineWidth=4;
   g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();for(const [x,y] of [[x1,y1],[x2,y2]]){g.beginPath();g.moveTo(x-22,y);g.lineTo(x+22,y);g.stroke()}
-  g.save();g.translate((x1+x2)/2+yan*58,(y1+y2)/2);g.rotate(-yan*Math.PI/2);kutu(-95,-34,190,68,12,'rgba(8,6,4,0.7)');yazi(metin,0,2,44,'#ffffff');g.restore();g.globalAlpha=1}
+  g.save();g.translate((x1+x2)/2-yan*60,(y1+y2)/2);g.rotate(-yan*Math.PI/2);kutu(-95,-34,190,68,12,'rgba(8,6,4,0.7)');yazi(metin,0,2,44,'#ffffff');g.restore();g.globalAlpha=1}
 function kaplama(i,q,d,T){
   const k=q/d;
-  if(i===0){etiketBant('TEPESİ KAYIP',560,ease((k-0.45)/0.15));
+  if(i===0){etiketBant('TEPESİ KAYIP',1250,ease((k-0.45)/0.15));
     const [x,y]=proj(new THREE.Vector3(0,TEPE_Y,0)); const a=ease((k-0.35)/0.2)*(0.6+0.4*Math.sin(T*6));
     if(a>0){g.globalAlpha=a;g.setLineDash([14,12]);g.strokeStyle='#ff5a4e';g.lineWidth=5;g.beginPath();g.arc(x,y,70,0,7);g.stroke();g.setLineDash([]);yazi('?',x,y-120,110,'#ff5a4e');g.globalAlpha=1}}
-  if(i===1){const a=KEOPS.taban/2+3;
-    olcu(new THREE.Vector3(-a,0,a),new THREE.Vector3(-a,KEOPS.boy,a),'146 m',ease((k-0.12)/0.2),1);
-    olcu(new THREE.Vector3(a,0,a),new THREE.Vector3(a,KEOPS.boy*(1-KEOPS.kesik),a),'138 m',ease((k-0.42)/0.2),-1);
+  if(i===1){const a=KEOPS.taban/2+1;
+    olcu(new THREE.Vector3(-a,0,0),new THREE.Vector3(-a,KEOPS.boy,0),'146 m',ease((k-0.12)/0.2),1);
+    olcu(new THREE.Vector3(a,0,0),new THREE.Vector3(a,KEOPS.boy*(1-KEOPS.kesik),0),'138 m',ease((k-0.42)/0.2),-1);
     const g2=ease((k-0.6)/0.2);if(g2>0){const [x,y]=proj(new THREE.Vector3(0,TEPE_Y,0));g.globalAlpha=g2;g.setLineDash([12,10]);g.strokeStyle='#ff5a4e';g.lineWidth=5;
       const [xa,ya]=proj(new THREE.Vector3(-tepeR*0.7,KEOPS.boy*(1-KEOPS.kesik),tepeR*0.7)),[xb,yb]=proj(new THREE.Vector3(tepeR*0.7,KEOPS.boy*(1-KEOPS.kesik),tepeR*0.7)),[xt,yt]=proj(new THREE.Vector3(0,KEOPS.boy,0));
       g.beginPath();g.moveTo(xa,ya);g.lineTo(xt,yt);g.lineTo(xb,yb);g.stroke();g.setLineDash([]);g.globalAlpha=1}

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><title>Antik Stüdyo B01 · Tek Komut: Gize</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./three_mod/node_modules/three/build/three.module.min.js"}}</script>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script type="module">
+// Kodla Film Stilleri #21 "Tek Komut": Gize platosu adım adım kurulur. Kamera yok, her piksel kod.
+// window.ZAMAN = {sahneler:[{bas,sure}], kelimeler:[{w,s,e}]} kayıtta enjekte edilir.
+import * as THREE from 'three';
+const Z = window.ZAMAN || {sahneler:[{bas:0,sure:6.5},{bas:6.5,sure:8},{bas:14.5,sure:9.5},{bas:24,sure:8},{bas:32,sure:8}],kelimeler:[]};
+const W=1080,H=1920, c=document.getElementById('c'), g=c.getContext('2d');
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), ease=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}, lerp=(a,b,x)=>a+(b-a)*x;
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+// ---------- 3D ----------
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H,false);
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;R.toneMapping=THREE.ACESFilmicToneMapping;R.outputColorSpace=THREE.SRGBColorSpace;
+const S=new THREE.Scene(), CAM=new THREE.PerspectiveCamera(36,W/H,0.5,2000);
+const SIYAH=new THREE.Color('#05070a'), GOK=new THREE.Color('#bcd6ea'), UFUK=new THREE.Color('#f2d9ae');
+S.background=SIYAH.clone(); S.fog=new THREE.Fog(UFUK.clone(),180,520);
+const HEM=new THREE.HemisphereLight('#dfeeff','#b08a55',0), GUN=new THREE.DirectionalLight('#fff1d6',0);
+GUN.position.set(-120,160,90);GUN.castShadow=true;GUN.shadow.mapSize.set(2048,2048);Object.assign(GUN.shadow.camera,{left:-120,right:120,top:120,bottom:-120,near:10,far:500});GUN.shadow.bias=-0.0006;
+S.add(HEM,GUN);
+// gökyüzü küresi (degrade)
+const gokG=new THREE.SphereGeometry(900,32,16), gc=[];{const p=gokG.attributes.position;for(let i=0;i<p.count;i++){const y=cl(p.getY(i)/500,0,1);const col=UFUK.clone().lerp(new THREE.Color('#5d97cf'),Math.pow(y,0.6));gc.push(col.r,col.g,col.b)}}
+gokG.setAttribute('color',new THREE.Float32BufferAttribute(gc,3));
+const gokM=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,transparent:true,opacity:0,fog:false,depthWrite:false});S.add(new THREE.Mesh(gokG,gokM));
+
+const PARCA=[]; // {mesh, edges, gercek(Color), kil(Color), sira}
+const KIL=new THREE.Color('#9a9792'), CIZGI=new THREE.Color('#59f0ff');
+function ekle(geo,renk,sira,{gol=true,parlak=0.85,metal=0,yer=null,grup=S}={}){
+  const m=new THREE.MeshStandardMaterial({color:KIL.clone(),roughness:parlak,metalness:metal,flatShading:true,transparent:true,opacity:0});
+  const me=new THREE.Mesh(geo,m);me.castShadow=gol;me.receiveShadow=true;if(yer)me.position.copy(yer);grup.add(me);
+  const e=new THREE.LineSegments(new THREE.EdgesGeometry(geo,20),new THREE.LineBasicMaterial({color:CIZGI.clone(),transparent:true,opacity:0}));me.add(e);
+  const p={me,e,gercek:new THREE.Color(renk),sira};PARCA.push(p);return p}
+// zemin: kum tepeleri (piramit çevresi düz)
+const zG=new THREE.PlaneGeometry(900,900,90,90);zG.rotateX(-Math.PI/2);{const p=zG.attributes.position,r=rng(3);for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),d=Math.hypot(x+10,z+15);
+  const k=cl((d-70)/80);p.setY(i,k*(2.2*Math.sin(x*0.045+1)*Math.cos(z*0.05)+1.4*Math.sin(x*0.11+z*0.07)+r()*0.5))}zG.computeVertexNormals()}
+const zemin=ekle(zG,'#d9b26f',0,{gol:false,parlak:1});zemin.me.castShadow=false;
+// Nil (doğuda) + yeşil şerit
+const nil=ekle(new THREE.PlaneGeometry(26,900).rotateX(-Math.PI/2),'#2f6f8f',2,{gol:false,parlak:0.25,yer:new THREE.Vector3(95,0.25,0)});
+ekle(new THREE.PlaneGeometry(16,900).rotateX(-Math.PI/2),'#5f8f3a',2,{gol:false,yer:new THREE.Vector3(74,0.2,0)});
+ekle(new THREE.PlaneGeometry(16,900).rotateX(-Math.PI/2),'#5f8f3a',2,{gol:false,yer:new THREE.Vector3(116,0.2,0)});
+// piramit (kesik koni, 4 yüz) + taş sıraları
+function piramit(taban,boy,kesik,yer,sira,renk){
+  const h=boy*(1-kesik), rB=taban/Math.SQRT2, rT=rB*kesik;
+  const geo=new THREE.CylinderGeometry(rT,rB,h,4,1);geo.rotateY(Math.PI/4);geo.translate(0,h/2,0);
+  const p=ekle(geo,renk,sira,{yer});
+  // sıralar: yatay çizgiler
+  const v=[];for(let y=0.45;y<h;y+=0.45){const r=(taban/2)*(1-y/boy);v.push(-r,y,-r, r,y,-r, r,y,-r, r,y,r, r,y,r, -r,y,r, -r,y,r, -r,y,-r)}
+  const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+  const sl=new THREE.LineSegments(sg,new THREE.LineBasicMaterial({color:'#6b5434',transparent:true,opacity:0}));p.me.add(sl);p.sira_cizgi=sl;return p}
+const KEOPS={taban:23.0,boy:14.66,kesik:0.055};
+const keops=piramit(KEOPS.taban,KEOPS.boy,KEOPS.kesik,new THREE.Vector3(0,0,0),1,'#c9a46b');
+const kefren=piramit(21.5,14.35,0.0,new THREE.Vector3(-30,0.6,-31),3,'#c19a62');
+const mikerinos=piramit(10.5,6.55,0.0,new THREE.Vector3(-52,0,-60),4,'#b98f5a');
+// Kefren'in tepesinde kalan kaplama
+const kapG=new THREE.CylinderGeometry(0.01,(21.5/Math.SQRT2)*0.2,14.35*0.2,4,1);kapG.rotateY(Math.PI/4);kapG.translate(0,14.35*0.9+0.6,0);
+const kefrenKap=ekle(kapG,'#efe6d2',5,{yer:new THREE.Vector3(-30,0,-31),parlak:0.4});
+// Tepe taşı (altın piramidyon)
+const tepeH=KEOPS.boy*KEOPS.kesik, tepeR=(KEOPS.taban/Math.SQRT2)*KEOPS.kesik;
+const tepeG=new THREE.ConeGeometry(tepeR,tepeH,4,1);tepeG.rotateY(Math.PI/4);
+const tepeM=new THREE.MeshStandardMaterial({color:'#e9b949',metalness:0.9,roughness:0.25,emissive:'#7a5410',emissiveIntensity:0.6,transparent:true,opacity:0});
+const tepe=new THREE.Mesh(tepeG,tepeM);tepe.castShadow=true;S.add(tepe);
+const TEPE_Y=KEOPS.boy*(1-KEOPS.kesik)+tepeH/2;
+// Tura kaplama karoları (Keops yüzleri): sonra Kahire'ye (doğu) uçar
+const KAROLAR=[];{const n=9,r=rng(21),geo=new THREE.PlaneGeometry(1,1),mat=new THREE.MeshStandardMaterial({color:'#f6f1e4',roughness:0.3,metalness:0.05,side:THREE.DoubleSide,transparent:true,opacity:0});
+  const hh=KEOPS.boy*(1-KEOPS.kesik), a=KEOPS.taban/2, egim=Math.atan2(KEOPS.boy,a);
+  for(let yuz=0;yuz<4;yuz++)for(let i=0;i<n;i++){const sat=n-i;for(let j=0;j<sat;j++){
+    const yy=(i+0.5)/n*hh, gen=2*a*(1-yy/KEOPS.boy), u=(j+0.5)/sat-0.5, m=new THREE.Mesh(geo,mat.clone());
+    const sx=gen/sat*1.02, sy=(hh/n)/Math.sin(egim)*1.02;m.scale.set(sx,sy,1);
+    const d=a*(1-yy/KEOPS.boy)+0.06, aci=yuz*Math.PI/2;
+    m.position.set(Math.sin(aci)*d+Math.cos(aci)*u*gen,yy,Math.cos(aci)*d-Math.sin(aci)*u*gen);
+    m.rotation.set(0,aci,0,'YXZ');m.rotateX(-(Math.PI/2-egim));m.castShadow=true;S.add(m);
+    KAROLAR.push({m,p0:m.position.clone(),r0:m.rotation.clone(),gec:r(),dr:new THREE.Vector3(1+r(),0.6+r(),(r()-.5)*0.8)})}}}
+// palmiyeler
+const PALM=new THREE.Group();S.add(PALM);{const r=rng(8);for(let i=0;i<70;i++){const x=(r()<.5?70+r()*10:112+r()*12),z=-300+r()*600,s=0.8+r()*0.6;
+  ekle(new THREE.CylinderGeometry(0.18*s,0.28*s,5*s,5),'#7a5a36',2,{yer:new THREE.Vector3(x,2.5*s,z),grup:PALM});
+  const y=ekle(new THREE.ConeGeometry(2.2*s,1.6*s,6),'#3f7a2c',2,{yer:new THREE.Vector3(x,5.4*s,z),grup:PALM});y.me.rotation.x=Math.PI}}
+// feluka tekneleri (taş yüklü)
+const TEKNE=[];for(let i=0;i<3;i++){const grp=new THREE.Group();S.add(grp);
+  ekle(new THREE.BoxGeometry(2.6,0.8,8),'#6b4a2b',3,{grup:grp,yer:new THREE.Vector3(0,0.6,0)});
+  ekle(new THREE.CylinderGeometry(0.12,0.12,8,5),'#5a3e22',3,{grup:grp,yer:new THREE.Vector3(0,4.6,1)});
+  const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(0,7);sh.lineTo(4.2,0.5);sh.closePath();
+  const yel=ekle(new THREE.ShapeGeometry(sh),'#f1ead8',3,{grup:grp,yer:new THREE.Vector3(0.1,1.4,1)});yel.me.rotation.y=Math.PI/2;yel.me.material.side=THREE.DoubleSide;
+  ekle(new THREE.BoxGeometry(1.8,1.2,2.4),'#e8e1cf',3,{grup:grp,yer:new THREE.Vector3(0,1.6,-2)});
+  TEKNE.push({grp,z0:-120+i*-38,x:91+i*3.5})}
+// işçiler + kızak + blok
+const ISCI=[];const kizak=new THREE.Group();S.add(kizak);
+ekle(new THREE.BoxGeometry(2.6,2.2,3.2),'#cdb487',4,{grup:kizak,yer:new THREE.Vector3(0,1.6,0)});
+ekle(new THREE.BoxGeometry(3,0.4,4.2),'#6b4a2b',4,{grup:kizak,yer:new THREE.Vector3(0,0.3,0)});
+{const r=rng(13);for(let i=0;i<14;i++){const grp=new THREE.Group();kizak.add(grp);
+  ekle(new THREE.CylinderGeometry(0.28,0.35,1.5,6),'#efe6d0',4,{grup:grp,yer:new THREE.Vector3(0,0.85,0)});
+  ekle(new THREE.SphereGeometry(0.3,8,6),'#8a5a35',4,{grup:grp,yer:new THREE.Vector3(0,1.85,0)});
+  grp.position.set((i%2?1:-1)*(0.9+r()*0.3),0,4.5+Math.floor(i/2)*1.4);ISCI.push({grp,faz:r()*6})}}
+// ip
+const ipG=new THREE.BufferGeometry();ipG.setAttribute('position',new THREE.Float32BufferAttribute([-0.9,1.1,1.7,-0.9,1.1,14,0.9,1.1,1.7,0.9,1.1,14],3));
+const ip=new THREE.LineSegments(ipG,new THREE.LineBasicMaterial({color:'#4a3420',transparent:true,opacity:0}));kizak.add(ip);
+// ekmek ve bira küpleri (işçi kampı)
+for(let i=0;i<6;i++){ekle(new THREE.CylinderGeometry(0.6,0.45,1.6,8),'#a0623a',4,{yer:new THREE.Vector3(30+i*1.6,0.8,30+((i*7)%3))});}
+for(let i=0;i<5;i++){ekle(new THREE.SphereGeometry(0.55,8,6).scale(1,0.55,1),'#d9a35e',4,{yer:new THREE.Vector3(30+i*1.7,1.0,26)});}
+
+// ---------- evreler: tel kafes → kil → renk ----------
+function evre(T){ // sahne zamanlarından: 0..1 tel, kil, renk
+  const s=Z.sahneler; const b1=s[1].bas, b2=s[2].bas;
+  return {tel:1, kil:ease((T-(b1-0.4))/1.2), renk:ease((T-(b2-0.4))/1.4)}}
+function uygula(T){
+  const e=evre(T), s0=Z.sahneler[0];
+  for(const p of PARCA){
+    const gor=ease((T-0.15-p.sira*0.35)/0.6)*(T<s0.bas+s0.sure?1:1); // parçalar sırayla belirir
+    const kati=Math.max(e.kil,0)*gor;
+    p.me.material.opacity=kati; p.me.material.transparent=kati<0.999; p.me.material.depthWrite=kati>0.5;
+    p.me.material.color.copy(KIL).lerp(p.gercek,e.renk);
+    p.e.material.opacity=gor*lerp(0.95,0.0,e.kil)+ (e.renk<1?0.06*e.kil:0);
+    if(p.sira_cizgi)p.sira_cizgi.material.opacity=0.55*e.renk;
+  }
+  ip.material.opacity=e.renk;
+  S.background.copy(SIYAH).lerp(GOK,e.renk); gokM.opacity=e.renk; S.fog.color.copy(SIYAH).lerp(UFUK,e.renk); S.fog.near=lerp(400,180,e.renk);
+  HEM.intensity=lerp(0,0.55,e.kil)+0.35*e.renk; GUN.intensity=lerp(0,2.2,e.kil)+0.6*e.renk;
+  R.toneMappingExposure=lerp(0.9,1.05,e.renk); return e}
+
+// ---------- kamera yolu ----------
+const HEDEF=new THREE.Vector3();
+function bak(px,py,pz,tx,ty,tz){CAM.position.set(px,py,pz);HEDEF.set(tx,ty,tz);CAM.lookAt(HEDEF)}
+function yorunge(aci,yar,yuk,ty){bak(Math.sin(aci)*yar,yuk,Math.cos(aci)*yar,0,ty,0)}
+const ACI0=0.75;
+function kamera(i,q,d,T){ // i: sahne, q: sahne içi sn, d: süre
+  const k=q/d;
+  if(i===0){const a=ACI0+0.5*k, z=ease((k-0.55)/0.45); yorunge(a,lerp(78,30,z),lerp(34,18,z),lerp(5,12,z))}
+  else if(i===1){bak(0,lerp(9,7.5,k),lerp(52,47,k),0,7.2,0)}
+  else if(i===2){const a=0.3+0.9*ease(k); yorunge(a,lerp(44,62,ease((k-0.5)/0.5)),lerp(12,24,k),lerp(7,5,k));
+    if(k>0.72){const m=ease((k-0.72)/0.28);CAM.position.lerp(new THREE.Vector3(40,40,60),m);HEDEF.lerp(new THREE.Vector3(95,0,0),m*0.8);CAM.lookAt(HEDEF)}}
+  else if(i===3){const t0=TEKNE[0];const z=t0.z0+ (T*3.2); bak(t0.x+24,lerp(14,9,k),z+lerp(30,18,k),t0.x,1.5,z)}
+  else {const fin=Z.sahneler[4], son=ease((k-0.5)/0.4);
+    const kx=kizak.position; const p1=new THREE.Vector3(kx.x-10,2.2,kx.z+14), t1=new THREE.Vector3(kx.x,2,kx.z);
+    const a=ACI0, p2=new THREE.Vector3(Math.sin(a)*78,34,Math.cos(a)*78), t2=new THREE.Vector3(0,5,0);
+    const p3=new THREE.Vector3(Math.sin(a)*26,TEPE_Y+4,Math.cos(a)*26), t3=new THREE.Vector3(0,TEPE_Y,0);
+    if(k<0.5){CAM.position.copy(p1);HEDEF.copy(t1)}else{const pp=p1.clone().lerp(p3,son),tt=t1.clone().lerp(t3,son);CAM.position.copy(pp);HEDEF.copy(tt)}
+    if(k>0.86){const m=ease((k-0.86)/0.14);CAM.position.lerp(p2,m);HEDEF.lerp(t2,m)}
+    CAM.lookAt(HEDEF)}
+}
+
+// ---------- hareket ----------
+function hareket(T,i,q,d){
+  const s=Z.sahneler, k=q/d;
+  // tepe taşı: kancada kaybolur, finalde iner
+  const kancaK=i===0?q/d:1;
+  let ty=TEPE_Y, top=0;
+  if(i===0){top=1-ease((kancaK-0.2)/0.3); ty=TEPE_Y+ease((kancaK-0.15)/0.45)*14}
+  if(i===4){const iner=ease((k-0.55)/0.3); top=ease((k-0.48)/0.1); ty=lerp(TEPE_Y+16,TEPE_Y,iner)}
+  tepe.position.set(0,ty,0); tepe.rotation.y=T*0.6; tepeM.opacity=top; tepe.visible=top>0.01; tepeM.emissiveIntensity=0.5+0.4*Math.sin(T*4);
+  // karolar: sahne 3'te parlar, sonra Kahire'ye uçar
+  const s3=s[2], q3=T-s3.bas, d3=s3.sure;
+  for(const c of KAROLAR){const gor=ease((q3+0.0)/(d3*0.25))*(T>=s3.bas?1:0), uc=ease((q3-d3*(0.45+c.gec*0.25))/(d3*0.25));
+    c.m.material.opacity=T<s3.bas?0:(T>s3.bas+d3?0:gor*(1-uc)); c.m.visible=c.m.material.opacity>0.01;
+    c.m.position.copy(c.p0).addScaledVector(c.dr,uc*40); c.m.rotation.copy(c.r0); c.m.rotation.z+=uc*3*c.gec}
+  // tekneler kuzeye akar
+  for(const t of TEKNE){t.grp.position.set(t.x,Math.sin(T*1.5+t.x)*0.15,t.z0+T*3.2);t.grp.rotation.z=Math.sin(T*1.2+t.x)*0.03}
+  // kızak piramide doğru çekilir
+  const kz=lerp(70,40,cl(T/s[4].bas+0)); kizak.position.set(14,0,kz-(T-s[4].bas>0?(T-s[4].bas)*0.9:0)); kizak.rotation.y=Math.PI;
+  for(const w of ISCI){w.grp.position.y=Math.abs(Math.sin(T*5+w.faz))*0.18; w.grp.rotation.z=Math.sin(T*5+w.faz)*0.06}
+}
+
+// ---------- 2D kaplama ----------
+const SANS='"DejaVu Sans", Arial, sans-serif', MONO='"DejaVu Sans Mono", monospace';
+function yazi(t,x,y,boy,renk,font=SANS,hiza='center',agir='800'){g.font=`${agir} ${boy}px ${font}`;g.fillStyle=renk;g.textAlign=hiza;g.textBaseline='middle';g.fillText(t,x,y)}
+function kutu(x,y,w,h,r,renk){g.fillStyle=renk;g.beginPath();g.roundRect(x,y,w,h,r);g.fill()}
+const BOLUM=[['01','ŞEKİL','gize.şekil()'],['02','ÖLÇÜ','keops.ölç()'],['03','RENK','keops.kapla("tura")'],['04','HAREKET','nil.taşı(merer)'],['05','HAYAT','işçi.yaşat()']];
+function proj(v){const p=v.clone().project(CAM);return [(p.x+1)/2*W,(1-p.y)/2*H]}
+function ust(i,q,T){
+  const a=ease(q/0.5); const [no,ad,kod]=BOLUM[i];
+  g.globalAlpha=a; kutu(60,120,96,96,18,'rgba(0,0,0,0.55)'); yazi(no,108,170,46,'#ffcf66');
+  yazi(ad,180,152,46,'#ffffff',SANS,'left'); g.font=`600 30px ${MONO}`; const kw=g.measureText(kod).width+40;
+  kutu(180,184,kw,44,22,'rgba(89,240,255,0.16)'); yazi(kod,200,207,30,'#8ff6ff',MONO,'left','600'); g.globalAlpha=1;
+  // ilerleme çubukları
+  for(let j=0;j<5;j++){const s=Z.sahneler[j];const f=cl((T-s.bas)/s.sure);kutu(60+j*196,70,184,8,4,'rgba(255,255,255,0.25)');kutu(60+j*196,70,184*f,8,4,'#ffcf66')}
+  // filigran
+  yazi('ANTİK STÜDYO',1020,150,26,'rgba(255,255,255,0.75)',SANS,'right','800');
+}
+function etiketBant(t,y,a,renk='#ffcf66'){if(a<=0)return;g.globalAlpha=a;g.font=`900 50px ${SANS}`;const w=g.measureText(t).width+60;kutu(540-w/2,y-42,w,84,16,'rgba(8,6,4,0.78)');yazi(t,540,y,50,renk);g.globalAlpha=1}
+function damga(t,x,y,a,renk='#e8392e',aci=-0.1){if(a<=0)return;const sc=lerp(2.2,1,a);g.save();g.translate(x,y);g.rotate(aci);g.scale(sc,sc);g.globalAlpha=a;g.font=`900 54px ${SANS}`;const w=g.measureText(t).width+50;
+  g.strokeStyle=renk;g.lineWidth=7;g.strokeRect(-w/2,-50,w,100);yazi(t,0,3,54,renk);g.restore();g.globalAlpha=1}
+function olcu(a,b,metin,al,yan=1){if(al<=0)return;const [x1,y1]=proj(a),[x2,y2]=proj(b);g.globalAlpha=al;g.strokeStyle='#ffffff';g.lineWidth=4;
+  g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();for(const [x,y] of [[x1,y1],[x2,y2]]){g.beginPath();g.moveTo(x-22,y);g.lineTo(x+22,y);g.stroke()}
+  g.save();g.translate((x1+x2)/2+yan*58,(y1+y2)/2);g.rotate(-yan*Math.PI/2);kutu(-95,-34,190,68,12,'rgba(8,6,4,0.7)');yazi(metin,0,2,44,'#ffffff');g.restore();g.globalAlpha=1}
+function kaplama(i,q,d,T){
+  const k=q/d;
+  if(i===0){etiketBant('TEPESİ KAYIP',560,ease((k-0.45)/0.15));
+    const [x,y]=proj(new THREE.Vector3(0,TEPE_Y,0)); const a=ease((k-0.35)/0.2)*(0.6+0.4*Math.sin(T*6));
+    if(a>0){g.globalAlpha=a;g.setLineDash([14,12]);g.strokeStyle='#ff5a4e';g.lineWidth=5;g.beginPath();g.arc(x,y,70,0,7);g.stroke();g.setLineDash([]);yazi('?',x,y-120,110,'#ff5a4e');g.globalAlpha=1}}
+  if(i===1){const a=KEOPS.taban/2+3;
+    olcu(new THREE.Vector3(-a,0,a),new THREE.Vector3(-a,KEOPS.boy,a),'146 m',ease((k-0.12)/0.2),1);
+    olcu(new THREE.Vector3(a,0,a),new THREE.Vector3(a,KEOPS.boy*(1-KEOPS.kesik),a),'138 m',ease((k-0.42)/0.2),-1);
+    const g2=ease((k-0.6)/0.2);if(g2>0){const [x,y]=proj(new THREE.Vector3(0,TEPE_Y,0));g.globalAlpha=g2;g.setLineDash([12,10]);g.strokeStyle='#ff5a4e';g.lineWidth=5;
+      const [xa,ya]=proj(new THREE.Vector3(-tepeR*0.7,KEOPS.boy*(1-KEOPS.kesik),tepeR*0.7)),[xb,yb]=proj(new THREE.Vector3(tepeR*0.7,KEOPS.boy*(1-KEOPS.kesik),tepeR*0.7)),[xt,yt]=proj(new THREE.Vector3(0,KEOPS.boy,0));
+      g.beginPath();g.moveTo(xa,ya);g.lineTo(xt,yt);g.lineTo(xb,yb);g.stroke();g.setLineDash([]);g.globalAlpha=1}
+    damga('KAYIP: ~8 m',540,560,ease((k-0.72)/0.2))}
+  if(i===2){etiketBant('TURA KİREÇTAŞI KAPLAMA',520,ease((k-0.12)/0.15)*(1-ease((k-0.6)/0.1)));etiketBant('→ KAHİRE BİNALARINA',520,ease((k-0.68)/0.12));
+    etiketBant('Kefren\'in tepesinde hâlâ duruyor',650,ease((k-0.3)/0.12)*(1-ease((k-0.6)/0.1)),'#ffffff')}
+  if(i===3){const a=ease((k-0.32)/0.18);if(a>0){g.globalAlpha=a;const y0=lerp(560,500,a);kutu(110,y0,860,330,22,'rgba(239,230,210,0.95)');
+      yazi('DOSYA · MERER\'İN GÜNLÜĞÜ',540,y0+60,40,'#1a1612');g.fillStyle='#1a1612';g.fillRect(160,y0+92,760,4);
+      yazi('2013 · Vadi el-Cerf',540,y0+150,44,'#1a1612');yazi('Tura → Gize: taş taşıma kayıtları',540,y0+215,34,'#3a3228',SANS,'center','500');g.globalAlpha=1;
+      damga('EN ESKİ YAZILI PAPİRÜS',540,y0+300,ease((k-0.6)/0.18),'#c4231c',0.05)}}
+  if(i===4){etiketBant('KÖLE DEĞİLDİLER',520,ease((k-0.05)/0.12)*(1-ease((k-0.42)/0.08)));
+    etiketBant('Tayın: ekmek + bira',640,ease((k-0.2)/0.12)*(1-ease((k-0.42)/0.08)),'#ffffff');
+    etiketBant('Tepe taşı nerede? Yoruma yaz',520,ease((k-0.6)/0.12)*(1-ease((k-0.86)/0.06)));
+    const f=ease((k-0.88)/0.08);if(f>0){g.globalAlpha=f;kutu(90,640,900,250,26,'rgba(10,7,4,0.82)');yazi('ANTİK STÜDYO',540,735,96,'#ffcf66',SANS,'center','900');
+      yazi('Kamera yok. Her piksel kod.',540,830,40,'#f3e3c2',SANS,'center','500');g.globalAlpha=1}}
+}
+// altyazı (kelime kelime)
+const VURGU=/^(kayıp|146|138|sekiz|tura|kahire|merer|2013|iki|bin|on|üçte|köle|ekmek|bira|yoruma|bembeyaz|papirüs)/i;
+function altyazi(T){
+  const K=Z.kelimeler; if(!K.length)return; const i=K.findIndex(k=>T>=k.s&&T<k.e+0.25); if(i<0)return;
+  let bas=i; while(bas>0&&(i-bas)<1&&!/[.?!,]$/.test(K[bas-1].w)&&K[bas].s-K[bas-1].e<0.4)bas--;
+  const grup=[];for(let j=bas;j<K.length&&grup.length<3;j++){grup.push(j);if(/[.?!,]$/.test(K[j].w))break} if(!grup.includes(i))return;
+  const parca=grup.map(j=>K[j].w.toLocaleUpperCase('tr')); let fs=66; g.font=`900 ${fs}px ${SANS}`; let gen=g.measureText(parca.join(' ')).width;
+  if(gen>900){fs=Math.max(40,Math.floor(66*900/gen));g.font=`900 ${fs}px ${SANS}`;gen=g.measureText(parca.join(' ')).width}
+  let x=540-gen/2; const y=1460; g.textAlign='left';g.textBaseline='middle';g.lineJoin='round';
+  grup.forEach((j,n)=>{const s=parca[n]+' ', akt=j===i, vur=VURGU.test(K[j].w);g.lineWidth=14;g.strokeStyle='rgba(0,0,0,0.92)';g.strokeText(s,x,y);
+    g.fillStyle=akt?(vur?'#ffcf33':'#ffffff'):(vur?'rgba(255,215,90,0.85)':'rgba(255,255,255,0.78)');g.fillText(s,x,y);x+=g.measureText(s).width});
+}
+
+// ---------- kare ----------
+window.TOPLAM=Z.sahneler.reduce((a,s)=>Math.max(a,s.bas+s.sure),0);
+window.renderAt=function(T){
+  let i=Z.sahneler.findIndex(s=>T>=s.bas&&T<s.bas+s.sure); if(i<0)i=Z.sahneler.length-1; const s=Z.sahneler[i], q=T-s.bas;
+  uygula(T); hareket(T,i,q,s.sure); kamera(i,q,s.sure,T); R.render(S,CAM);
+  g.drawImage(R.domElement,0,0);
+  // hafif vinyet
+  const v=g.createRadialGradient(540,960,500,540,960,1200);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,0.45)');g.fillStyle=v;g.fillRect(0,0,W,H);
+  ust(i,q,T); kaplama(i,q,s.sure,T); altyazi(T);
+  if(i>0&&q<0.2){g.fillStyle=`rgba(255,255,255,${0.35*(1-q/0.2)})`;g.fillRect(0,0,W,H)} // geçiş parlaması
+  return true};
+window.__REC=true; window.HAZIR=true; window.renderAt(3);
+</script></body></html>

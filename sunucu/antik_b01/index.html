@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><title>Antik Stüdyo B01 · Keops'un tepesi kayıp</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// window.ZAMAN = {sahneler:[{bas,sure}], kelimeler:[{w,s,e}]} kayıt sırasında enjekte edilir. Yoksa deneme değerleri.
+const Z = window.ZAMAN || {sahneler:[{bas:0,sure:6},{bas:6,sure:8},{bas:14,sure:9},{bas:23,sure:9},{bas:32,sure:9}],kelimeler:[]};
+const W=1080,H=1920,c=document.getElementById('c'),g=c.getContext('2d');
+function rng(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), ease=x=>1-Math.pow(1-cl(x),3), lerp=(a,b,x)=>a+(b-a)*x;
+const SERIF='"DejaVu Serif", Georgia, serif', SANS='"DejaVu Sans", Arial, sans-serif';
+function yazi(t,x,y,boy,renk,font=SERIF,hiza='center',agirlik='700'){g.font=`${agirlik} ${boy}px ${font}`;g.fillStyle=renk;g.textAlign=hiza;g.textBaseline='middle';g.fillText(t,x,y)}
+function piramit(cx,by,w,h){g.beginPath();g.moveTo(cx-w/2,by);g.lineTo(cx,by-h);g.lineTo(cx+w/2,by);g.closePath()}
+function kesik(cx,by,w,h,k){const x=w/2*k;g.beginPath();g.moveTo(cx-w/2,by);g.lineTo(cx-x,by-h*(1-k));g.lineTo(cx+x,by-h*(1-k));g.lineTo(cx+w/2,by);g.closePath()}
+// Ankh mührü (Çince karakter yerine, yazı tipi gerektirmez)
+function ankh(x,y,s,renk,a){g.save();g.globalAlpha=a;g.fillStyle='rgba(180,30,25,1)';g.fillRect(x-s/2,y-s/2,s,s);g.strokeStyle=renk;g.lineWidth=s*0.09;g.lineCap='round';
+  g.beginPath();g.ellipse(x,y-s*0.2,s*0.13,s*0.17,0,0,7);g.stroke();g.beginPath();g.moveTo(x,y-s*0.03);g.lineTo(x,y+s*0.36);g.moveTo(x-s*0.24,y+s*0.06);g.lineTo(x+s*0.24,y+s*0.06);g.stroke();g.restore()}
+function etiket(no,ad,renk,zemin){g.fillStyle=zemin;g.fillRect(70,130,520,76);yazi(no+' · '+ad,330,169,34,renk,SERIF)}
+
+// 1 SESSİZ FİLM — kanca
+function sessiz(t,d){
+  const tq=Math.floor(t*16)/16, fr=Math.floor(t*24), r=rng(100+fr), kart=t>d*0.62;
+  g.save();g.translate((r()-.5)*8,(r()-.5)*10);
+  if(!kart){
+    let gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#cdb88e');gr.addColorStop(1,'#4f3d29');g.fillStyle=gr;g.fillRect(-20,-20,W+40,H+40);
+    const z=lerp(1,1.12,ease(tq/(d*0.6)));g.save();g.translate(540,1300);g.scale(z,z);g.translate(-540,-1300);
+    g.fillStyle='#3a2b1b';kesik(540,1500,920,800,0.07);g.fill();
+    g.setLineDash([18,16]);g.strokeStyle=`rgba(240,228,200,${0.5+0.5*Math.sin(tq*8)})`;g.lineWidth=6;
+    g.beginPath();g.moveTo(540-64,756);g.lineTo(540,700);g.lineTo(540+64,756);g.stroke();g.setLineDash([]);g.restore();
+    yazi('?',540,590,140,`rgba(240,228,200,${ease((tq-0.6)/0.4)})`,SERIF);
+  } else {
+    g.fillStyle='#14100b';g.fillRect(-20,-20,W+40,H+40);g.strokeStyle='#d9c79e';g.lineWidth=6;g.strokeRect(120,700,840,520);g.lineWidth=2;g.strokeRect(140,720,800,480);
+    const a=ease((t-d*0.62)/0.3);yazi('KEOPS PİRAMİDİ',540,850,52,`rgba(230,215,180,${a})`);yazi('TEPESİ',540,980,104,`rgba(230,215,180,${a})`);yazi('KAYIP',540,1090,104,`rgba(230,215,180,${a})`);
+  }
+  g.restore();
+  const fl=0.88+r()*0.18;g.fillStyle=`rgba(0,0,0,${1-fl})`;g.fillRect(0,0,W,H);
+  for(let i=0;i<1500;i++){g.fillStyle=`rgba(${r()<.5?0:255},${r()<.5?0:240},200,${r()*0.08})`;g.fillRect(r()*W,r()*H,2,2)}
+  if(r()<0.6){g.strokeStyle='rgba(240,230,200,0.35)';g.lineWidth=2;const x=r()*W;g.beginPath();g.moveTo(x,0);g.lineTo(x+(r()-.5)*30,H);g.stroke()}
+  let v=g.createRadialGradient(W/2,H/2,300,W/2,H/2,1150);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,0.85)');g.fillStyle=v;g.fillRect(0,0,W,H);
+  g.fillStyle='rgba(112,66,20,0.16)';g.fillRect(0,0,W,H);
+}
+
+// 2 MAVİ KOPYA — ölçüler, sonda tek kırmızı damga
+function blueprint(t,d){
+  let gr=g.createLinearGradient(0,0,W,H);gr.addColorStop(0,'#18336B');gr.addColorStop(1,'#2A58A6');g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.strokeStyle='rgba(200,225,255,0.10)';g.lineWidth=1;for(let x=0;x<W;x+=40){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<H;y+=40){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}
+  const cx=540,by=1360,w=820,h=760, ciz=ease(t/(d*0.3));
+  g.strokeStyle='rgba(230,242,255,0.95)';g.lineWidth=5;g.beginPath();g.moveTo(cx-w/2,by);g.lineTo(cx-w/2+(w/2)*ciz,by-h*ciz);g.stroke();
+  if(ciz>=1){g.beginPath();g.moveTo(cx,by-h);g.lineTo(cx+w/2,by);g.lineTo(cx-w/2,by);g.stroke()}
+  const k=0.055, top=by-h*(1-k);
+  const a1=ease((t-d*0.25)/0.4);g.globalAlpha=a1;g.strokeStyle='#e6f2ff';g.lineWidth=3;
+  g.beginPath();g.moveTo(cx-w/2-70,by);g.lineTo(cx-w/2-70,by-h);g.stroke();g.beginPath();g.moveTo(cx-w/2-90,by-h);g.lineTo(cx-w/2-50,by-h);g.moveTo(cx-w/2-90,by);g.lineTo(cx-w/2-50,by);g.stroke();
+  g.save();g.translate(cx-w/2-110,by-h/2);g.rotate(-Math.PI/2);yazi('146 m',0,0,46,'#e6f2ff',SANS);g.restore();g.globalAlpha=1;
+  const a2=ease((t-d*0.45)/0.4);g.globalAlpha=a2;g.beginPath();g.moveTo(cx+w/2+70,by);g.lineTo(cx+w/2+70,top);g.stroke();g.beginPath();g.moveTo(cx+w/2+50,top);g.lineTo(cx+w/2+90,top);g.moveTo(cx+w/2+50,by);g.lineTo(cx+w/2+90,by);g.stroke();
+  g.save();g.translate(cx+w/2+112,by-(by-top)/2);g.rotate(Math.PI/2);yazi('138 m',0,0,46,'#e6f2ff',SANS);g.restore();g.globalAlpha=1;
+  const a3=ease((t-d*0.62)/0.3);g.fillStyle=`rgba(255,80,70,${0.35*a3})`;piramit(cx,top,w*k*2,h*k);g.fill();
+  g.setLineDash([12,10]);g.strokeStyle=`rgba(255,90,80,${a3})`;g.lineWidth=4;g.beginPath();g.moveTo(cx-w*k,top);g.lineTo(cx+w*k,top);g.stroke();g.setLineDash([]);
+  // antet
+  g.strokeStyle='rgba(230,242,255,0.8)';g.lineWidth=3;g.strokeRect(560,1560,440,170);g.beginPath();g.moveTo(560,1620);g.lineTo(1000,1620);g.stroke();
+  yazi('KEOPS PİRAMİDİ',780,1590,30,'#e6f2ff',SANS);yazi('GİZE · MÖ ~2560',780,1652,26,'#cfe2ff',SANS,'center','400');yazi('ÖLÇEK 1:2000',780,1698,22,'#cfe2ff',SANS,'center','400');
+  const s=ease((t-d*0.75)/0.25), sc=lerp(2.2,1,s);g.save();g.translate(540,560);g.rotate(-0.12);g.scale(sc,sc);g.globalAlpha=s;
+  g.strokeStyle='#e8392e';g.lineWidth=8;g.strokeRect(-230,-70,460,140);yazi('KAYIP: ~8 m',0,4,60,'#e8392e',SANS,'center','900');g.restore();
+}
+
+// 3 VİTRAY — ince Voronoi (yarım çözünürlük), ışık arkadan artar, kaplama sökülür
+const VT=document.createElement('canvas');VT.width=360;VT.height=640;const vg=VT.getContext('2d');
+const VP=(()=>{const r=rng(7),p=[];for(let i=0;i<120;i++)p.push([r()*360,r()*640]);return p})();
+const VR=['#1f4fa3','#2c7a3e','#9e2f2a','#c9962a','#5a2f8a','#1f7a8a','#274f8f'];
+const VC=(()=>{const r=rng(9);return VP.map(()=>VR[Math.floor(r()*VR.length)])})();
+function vitray(t,d){
+  const isik=ease(t/(d*0.45)), sok=ease((t-d*0.55)/(d*0.3)), img=vg.createImageData(360,640), D=img.data;
+  const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];const RC=VC.map(hex);
+  for(let y=0;y<640;y++)for(let x=0;x<360;x++){
+    let b=0,bd=1e9,d2=1e9;for(let i=0;i<VP.length;i++){const dx=VP[i][0]-x,dy=VP[i][1]-y,q=dx*dx+dy*dy;if(q<bd){d2=bd;bd=q;b=i}else if(q<d2)d2=q}
+    const ic=y>210&&y<500&&Math.abs(x-180)<(y-210)*150/290;
+    let col; const kenar=Math.sqrt(d2)-Math.sqrt(bd)<1.6;
+    if(kenar)col=[22,17,12];else if(ic){const k=(b*37%100)/100<sok?1:0;col=k?[120,110,95]:[248,240,220]}else col=RC[b];
+    const L=ic&&!kenar?1:0.3+0.7*isik, o=(y*360+x)*4;D[o]=col[0]*L;D[o+1]=col[1]*L;D[o+2]=col[2]*L;D[o+3]=255}
+  vg.putImageData(img,0,0);g.imageSmoothingEnabled=true;g.drawImage(VT,0,0,W,H);
+  let gl=g.createRadialGradient(540,1000,60,540,1000,900);gl.addColorStop(0,`rgba(255,244,210,${0.38*isik*(1-sok*0.6)})`);gl.addColorStop(1,'rgba(255,244,210,0)');g.fillStyle=gl;g.fillRect(0,0,W,H);
+  const a=ease((t-d*0.2)/0.3);g.fillStyle=`rgba(16,12,8,${0.82*a})`;g.fillRect(140,380,800,110);yazi('TURA KİREÇTAŞI KAPLAMA',540,435,44,`rgba(255,236,190,${a})`,SANS);
+  const b=ease((t-d*0.62)/0.3);g.fillStyle=`rgba(16,12,8,${0.82*b})`;g.fillRect(180,1580,720,100);yazi('→ KAHİRE BİNALARINA',540,1630,42,`rgba(255,236,190,${b})`,SANS);
+}
+
+// 4 YARIM TON DOSYA — Merer'in günlüğü
+function dosya(t,d){
+  g.fillStyle='#efe6d2';g.fillRect(0,0,W,H);const r=rng(5);
+  for(let i=0;i<400;i++){g.fillStyle=`rgba(80,60,30,${r()*0.05})`;g.fillRect(r()*W,r()*H,r()*30,1)}
+  yazi('GİZLİ DEĞİL · ARŞİV',540,280,34,'#2a2420',SANS,'center','400');yazi('DOSYA: MERER\'İN GÜNLÜĞÜ',540,345,48,'#1a1612',SANS);
+  g.fillStyle='#1a1612';g.fillRect(140,380,800,4);
+  // yarım ton: papirüs rulosu + tekne; nokta yarıçapı = koyuluk
+  const p=ease(t/(d*0.5)), S=22;
+  for(let y=480;y<1240;y+=S)for(let x=120;x<960;x+=S){
+    const nx=(x-540)/400, ny=(y-860)/400; let k=0;
+    if(Math.abs(nx)<0.85&&Math.abs(ny)<0.42) k=0.35+0.25*Math.sin(y/30)+0.15*Math.sin(x/11);   // papirüs
+    if(Math.abs(nx)>0.85&&Math.abs(nx)<1&&Math.abs(ny)<0.5) k=0.85;                      // rulo uçları
+    if(ny>0.55&&ny<0.8&&Math.abs(nx)<0.7-(ny-0.55)) k=0.8;                               // tekne gövdesi
+    if(Math.abs(nx)<0.03&&ny>0.1&&ny<0.6) k=0.9;                                         // direk
+    if(nx>0.03&&nx<0.45&&ny>0.15&&ny<0.5&&ny>0.15+(nx)*0.6) k=Math.max(k,0.5);            // yelken
+    const rad=(S/2)*Math.sqrt(cl(k))*p; if(rad>0.5){g.fillStyle='#1a1612';g.beginPath();g.arc(x,y,rad,0,7);g.fill()}
+  }
+  const a=ease((t-d*0.3)/0.3);yazi('2013 · VADİ EL-CERF',540,1290,44,`rgba(26,22,18,${a})`,SANS);yazi('Tura → Gize: taş taşıma kayıtları',540,1355,36,`rgba(26,22,18,${a})`,SERIF,'center','400');
+  const s=ease((t-d*0.6)/0.25), sc=lerp(2.4,1,s);g.save();g.translate(540,1600);g.rotate(0.08);g.scale(sc,sc);g.globalAlpha=s;
+  g.strokeStyle='#c4231c';g.lineWidth=7;g.strokeRect(-330,-58,660,116);yazi('EN ESKİ YAZILI PAPİRÜS',0,4,46,'#c4231c',SANS,'center','900');g.restore();
+}
+
+// 5 KÂĞIT KESİK — işçiler, ekmek ve bira; tek altın: tepe taşı; final marka
+function kagit(t,d){
+  g.fillStyle='#f1e2c9';g.fillRect(0,0,W,H);const renk=['#7a0e12','#9c1419','#c0201f','#de3a2c'];
+  for(let k=0;k<4;k++){const p=ease((t-k*0.18)/0.6), y0=H-(k*200+380)*p;
+    g.save();g.shadowColor='rgba(40,0,0,0.45)';g.shadowBlur=30;g.shadowOffsetY=-12;g.fillStyle=renk[k];
+    g.beginPath();g.moveTo(0,H);for(let x=0;x<=W;x+=36)g.lineTo(x,y0+Math.sin(x/90+k*1.7)*40+(k%2?18:0));g.lineTo(W,H);g.closePath();g.fill();g.restore()}
+  const pp=ease((t-0.5)/0.6);g.save();g.globalAlpha=pp;g.shadowColor='rgba(40,0,0,0.5)';g.shadowBlur=36;g.shadowOffsetY=14;g.fillStyle='#5e0a0d';
+  g.translate(0,(1-pp)*400);kesik(540,1250,760,620,0.08);g.fill();g.restore();
+  // işçi siluetleri + ekmek/testi
+  const iw=ease((t-d*0.15)/0.4);g.fillStyle=`rgba(40,5,5,${iw})`;
+  for(let i=0;i<7;i++){const x=150+i*130,y=1330+(i%2)*20;g.fillRect(x,y,26,80);g.beginPath();g.arc(x+13,y-14,16,0,7);g.fill()}
+  const eb=ease((t-d*0.3)/0.3);g.fillStyle=`rgba(225,180,110,${eb})`;g.beginPath();g.ellipse(250,1600,60,32,0,0,7);g.fill();
+  g.fillStyle=`rgba(160,95,50,${eb})`;g.beginPath();g.moveTo(800,1560);g.quadraticCurveTo(850,1550,860,1600);g.quadraticCurveTo(840,1660,800,1660);g.quadraticCurveTo(760,1660,740,1600);g.quadraticCurveTo(750,1550,800,1560);g.fill();
+  const a=ease((t-d*0.1)/0.3);g.fillStyle=`rgba(94,10,13,${0.92*a})`;g.fillRect(140,300,800,110);yazi('KÖLE DEĞİLDİLER',540,355,56,`rgba(241,226,201,${a})`,SANS,'center','900');
+  // altın tepe taşı (soru)
+  const gp=ease((t-d*0.5)/0.4), yy=lerp(560,600,Math.sin(t*2)*0.5+0.5);g.fillStyle=`rgba(212,170,60,${gp})`;piramit(540,yy,110,90);g.fill();yazi('?',540,yy-140,90,`rgba(212,170,60,${gp})`,SERIF);
+  const f=ease((t-(d-1.6))/0.4);if(f>0){g.fillStyle=`rgba(18,11,5,${0.9*f})`;g.fillRect(0,720,W,300);yazi('ANTİK STÜDYO',540,830,104,`rgba(255,207,102,${f})`,SERIF,'center','900');yazi('Tarih, bugünün diliyle.',540,930,44,`rgba(243,227,194,${f})`,SERIF,'center','400');ankh(900,980,90,'#ffe9c4',f)}
+}
+
+const SAHNE=[sessiz,blueprint,vitray,dosya,kagit];
+const VURGU=/^(kayıp|146|138|sekiz|tura|kahire|merer|2013|iki|bin|on|üçte|köle|ekmek|bira|yoruma)/i;
+function altyazi(T){
+  const K=Z.kelimeler; if(!K.length)return; let i=K.findIndex(k=>T>=k.s&&T<k.e+0.25); if(i<0)return;
+  // 3 kelimelik parçalar (noktalamada kırılır)
+  let bas=i; while(bas>0 && (i-bas)<2 && !/[.?!,]$/.test(K[bas-1].w) && K[bas].s-K[bas-1].e<0.4) bas--;
+  const grup=[];for(let j=bas;j<K.length&&grup.length<3;j++){grup.push(j);if(/[.?!,]$/.test(K[j].w))break}
+  if(!grup.includes(i))return;
+  g.font=`900 64px ${SANS}`;const parca=grup.map(j=>K[j].w.toLocaleUpperCase('tr'));const gen=g.measureText(parca.join(' ')).width;
+  let x=540-gen/2;const y=1475;g.textAlign='left';g.textBaseline='middle';g.lineJoin='round';
+  grup.forEach((j,n)=>{const s=parca[n]+' ';const aktif=j===i;const vurgu=VURGU.test(K[j].w);
+    g.lineWidth=14;g.strokeStyle='rgba(0,0,0,0.9)';g.strokeText(s,x,y);g.fillStyle=aktif?(vurgu?'#ffcf33':'#ffffff'):'rgba(255,255,255,0.78)';if(vurgu&&!aktif)g.fillStyle='rgba(255,215,90,0.85)';g.fillText(s,x,y);x+=g.measureText(s).width});
+}
+window.TOPLAM=Z.sahneler.reduce((a,s)=>Math.max(a,s.bas+s.sure),0);
+window.renderAt=function(T){let i=Z.sahneler.findIndex(s=>T>=s.bas&&T<s.bas+s.sure);if(i<0)i=Z.sahneler.length-1;const s=Z.sahneler[i];
+  g.save();SAHNE[i](T-s.bas,s.sure);g.restore();
+  // sahne geçişi: 0.25 sn siyah kırpma
+  const q=T-s.bas; if(i>0&&q<0.25){g.fillStyle=`rgba(0,0,0,${1-q/0.25})`;g.fillRect(0,0,W,H)}
+  altyazi(T)};
+window.__REC=true;window.renderAt(1);
+</script></body></html>

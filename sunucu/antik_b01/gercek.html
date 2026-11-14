@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><title>Antik Stüdyo B01 · Keops'un tepesi kayıp (gerçek görüntü)</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Taban: kare/%05d.jpg (gerçek klipler, taban.py). Üstüne kodla efekt: ölçü çizgileri, etiketler, damga, dosya kartı, altyazı.
+const Z=window.ZAMAN||{sahneler:[{bas:0,sure:6.9},{bas:6.9,sure:8.4},{bas:15.3,sure:9.6},{bas:24.9,sure:8.1},{bas:33,sure:6.5}],kelimeler:[]};
+const W=1080,H=1920,FPS=30,c=document.getElementById('c'),g=c.getContext('2d');
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=x=>1-Math.pow(1-cl(x),3),lerp=(a,b,x)=>a+(b-a)*x;
+const SANS='"DejaVu Sans", Arial, sans-serif';
+function yazi(t,x,y,boy,renk,hiza='center',agir='800'){g.font=`${agir} ${boy}px ${SANS}`;g.fillStyle=renk;g.textAlign=hiza;g.textBaseline='middle';g.fillText(t,x,y)}
+function kutu(x,y,w,h,r,renk){g.fillStyle=renk;g.beginPath();g.roundRect(x,y,w,h,r);g.fill()}
+// Ekran koordinatları (kontrol karelerine göre ayarlanır)
+const P={
+  s1_tepe:[540,640],                       // gün batımı siluetinde Keops'un tepesi (kırpma merkezi tepe)
+  s2_tepe:[371,762], s2_taban_y:1015, s2_sol:186, s2_sag:709,   // sığdır modunda 55718
+  s3_tepe:[287,677],                       // sığdır modunda Kefren (360197), kaplamalı tepe
+  s5_tepe:[540,640]
+};
+function bant(t,y,a,renk='#ffcf66',boy=50){if(a<=0.01)return;g.save();g.globalAlpha=a;g.font=`900 ${boy}px ${SANS}`;const w=g.measureText(t).width+64;
+  const x=lerp(-w,540-w/2,ease(a*1.4));kutu(x,y-boy*0.85,w,boy*1.7,14,'rgba(8,6,4,0.8)');g.fillStyle=renk;g.fillRect(x,y-boy*0.85,10,boy*1.7);yazi(t,x+w/2+5,y,boy,renk);g.restore()}
+function damga(t,x,y,a,renk='#ff3b2f',aci=-0.1,boy=58){if(a<=0.01)return;const sc=lerp(2.4,1,ease(a));g.save();g.translate(x,y);g.rotate(aci);g.scale(sc,sc);g.globalAlpha=cl(a*2);
+  g.font=`900 ${boy}px ${SANS}`;const w=g.measureText(t).width+54;g.fillStyle='rgba(0,0,0,0.35)';g.fillRect(-w/2,-boy,w,boy*2);g.strokeStyle=renk;g.lineWidth=8;g.strokeRect(-w/2,-boy,w,boy*2);yazi(t,0,4,boy,renk);g.restore()}
+function halka(x,y,r,a,renk='#ff3b2f'){if(a<=0.01)return;g.save();g.globalAlpha=a;g.setLineDash([16,12]);g.lineDashOffset=-TT*60;g.strokeStyle=renk;g.lineWidth=6;g.beginPath();g.arc(x,y,r*lerp(1.6,1,ease(a)),0,7);g.stroke();g.setLineDash([]);g.restore()}
+function dikey(x,y1,y2,metin,a,yan){if(a<=0.01)return;const yy=lerp(y1,y2,ease(a));g.save();g.globalAlpha=cl(a*2);g.strokeStyle='#fff';g.lineWidth=5;g.shadowColor='rgba(0,0,0,.7)';g.shadowBlur=8;
+  g.beginPath();g.moveTo(x,y1);g.lineTo(x,yy);g.stroke();g.beginPath();g.moveTo(x-20,y1);g.lineTo(x+20,y1);g.moveTo(x-20,yy);g.lineTo(x+20,yy);g.stroke();g.restore();
+  if(a>0.6){g.save();g.globalAlpha=ease((a-0.6)/0.4);g.font=`900 52px ${SANS}`;const w=g.measureText(metin).width+36;const bx=yan>0?x+18:x-18-w;kutu(bx,(y1+y2)/2-38,w,76,12,'rgba(8,6,4,0.82)');yazi(metin,bx+w/2,(y1+y2)/2,52,'#fff');g.restore()}}
+function ust(T){const s=Z.sahneler;for(let j=0;j<s.length;j++){const f=cl((T-s[j].bas)/s[j].sure);kutu(60+j*196,64,184,8,4,'rgba(255,255,255,0.3)');kutu(60+j*196,64,184*f,8,4,'#ffcf66')}
+  g.save();g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=10;yazi('ANTİK STÜDYO',60,120,30,'rgba(255,255,255,0.9)','left','900');yazi('TARİHİ MAGAZİN',60,156,22,'#ffcf66','left','700');g.restore()}
+function kaplama(i,q,d,T){const k=q/d;
+  if(i===0){ // kanca
+    const [x,y]=P.s1_tepe; halka(x,y,80,ease((k-0.12)/0.12)*(k<0.45?1:0)); if(k<0.45&&k>0.18){g.save();g.globalAlpha=ease((k-0.18)/0.1);yazi('?',x,y-150,150,'#ff3b2f','center','900');g.restore()}
+    damga('TEPESİ KAYIP',540,1180,ease((k-0.2)/0.12)*(k<0.45?1:0),'#ff3b2f',-0.06,74);
+    bant('4.500 YILLIK SIR',1180,ease((k-0.55)/0.12));}
+  if(i===1){ // ölçü (sığdır modunda 55718)
+    const ky=P.s2_taban_y, ty=P.s2_tepe[1]; const kes=ty+(ky-ty)*0.055;
+    dikey(P.s2_sol-40,ky,ty-14,'146 m',ease((k-0.08)/0.22),-1); dikey(P.s2_sag+40,ky,kes,'138 m',ease((k-0.34)/0.22),1);
+    if(k>0.5){const a=ease((k-0.5)/0.12);g.save();g.globalAlpha=a;g.setLineDash([10,8]);g.strokeStyle='#ff3b2f';g.lineWidth=5;const [tx]=P.s2_tepe;
+      g.beginPath();g.moveTo(tx-30,kes);g.lineTo(tx,ty-14);g.lineTo(tx+30,kes);g.stroke();g.setLineDash([]);g.restore()}
+    if(k<0.62) bant('KEOPS · BÜYÜK PİRAMİT',470,ease((k-0.02)/0.1));
+    damga('KAYIP: ~8 METRE',540,600,ease((k-0.66)/0.12),'#ff3b2f',-0.08,64);}
+  if(i===2){ // kaplama
+    const [x,y]=P.s3_tepe; if(k<0.55){halka(x,y,70,ease((k-0.1)/0.1),'#ffffff');bant('KEFREN: KAPLAMA HÂLÂ TEPEDE',470,ease((k-0.05)/0.1),'#ffffff',44);
+      bant('TURA KİREÇTAŞI · CİLALI BEYAZ',1300,ease((k-0.22)/0.1),'#ffcf66',44);}
+    else {bant('TAŞLAR SÖKÜLDÜ',470,ease((k-0.57)/0.08));bant('→ KAHİRE BİNALARINA',1300,ease((k-0.68)/0.08),'#ffffff',46);}}
+  if(i===3){ // Merer
+    if(k<0.48){bant('NİL · TURA → GİZE',470,ease((k-0.05)/0.1));}
+    else {const a=ease((k-0.5)/0.12);g.save();g.globalAlpha=a;const y0=lerp(640,560,a);kutu(100,y0,880,360,22,'rgba(240,231,210,0.96)');
+      yazi('DOSYA · MERER\'İN GÜNLÜĞÜ',540,y0+62,42,'#1a1612');g.fillStyle='#1a1612';g.fillRect(150,y0+98,780,4);
+      yazi('2013 · Vadi el-Cerf, Kızıldeniz',540,y0+160,42,'#1a1612','center','800');yazi('Tura\'dan Gize\'ye taş taşıma kayıtları',540,y0+228,34,'#3a3228','center','600');
+      yazi('Pierre Tallet kazısı',540,y0+290,30,'#5a5046','center','500');g.restore();
+      damga('EN ESKİ YAZILI PAPİRÜS',540,y0+420,ease((k-0.68)/0.12),'#c4231c',0.05,52);}}
+  if(i===4){ // finale
+    if(k<0.24) bant('KÖLE DEĞİLDİLER',470,ease((k-0.02)/0.08));
+    else if(k<0.46) bant('TAYIN: EKMEK + BİRA',470,ease((k-0.26)/0.08));
+    else { const [x,y]=P.s5_tepe; const a=ease((k-0.5)/0.1)*(1-ease((k-0.8)/0.06));
+      if(a>0){g.save();g.globalAlpha=a;const gl=g.createRadialGradient(x,y-20,5,x,y-20,140);gl.addColorStop(0,'rgba(255,215,100,0.95)');gl.addColorStop(1,'rgba(255,215,100,0)');g.fillStyle=gl;g.fillRect(x-160,y-180,320,320);
+        g.fillStyle='#ffd35a';g.beginPath();g.moveTo(x,y-70+Math.sin(T*3)*8);g.lineTo(x+46,y-6+Math.sin(T*3)*8);g.lineTo(x-46,y-6+Math.sin(T*3)*8);g.closePath();g.fill();g.restore()}
+      bant('TEPE TAŞI NEREDE? YORUMA YAZ',1180,ease((k-0.55)/0.1)*(1-ease((k-0.8)/0.06)),'#ffcf66',46);
+      const f=ease((k-0.83)/0.08); if(f>0){g.save();g.globalAlpha=f;g.fillStyle='rgba(6,4,2,0.78)';g.fillRect(0,0,W,H);yazi('ANTİK STÜDYO',540,860,104,'#ffcf66','center','900');
+        g.fillStyle='#ffcf66';g.fillRect(340,925,400,6);yazi('Tarih, bugünün diliyle.',540,990,44,'#f3e3c2','center','600');g.restore()}}}
+}
+const VURGU=/^(kayıp|146|138|sekiz|tura|kahire|merer|2013|iki|bin|on|üçte|köle|ekmek|bira|yoruma|bembeyaz|papirüs)/i;
+function altyazi(T){const K=Z.kelimeler;if(!K.length)return;const i=K.findIndex(k=>T>=k.s&&T<k.e+0.25);if(i<0)return;
+  let bas=i;while(bas>0&&(i-bas)<1&&!/[.?!,]$/.test(K[bas-1].w)&&K[bas].s-K[bas-1].e<0.4)bas--;
+  const grup=[];for(let j=bas;j<K.length&&grup.length<3;j++){grup.push(j);if(/[.?!,]$/.test(K[j].w))break}if(!grup.includes(i))return;
+  const parca=grup.map(j=>K[j].w.toLocaleUpperCase('tr'));let fs=70;g.font=`900 ${fs}px ${SANS}`;let gen=g.measureText(parca.join(' ')).width;
+  if(gen>920){fs=Math.max(42,Math.floor(70*920/gen));g.font=`900 ${fs}px ${SANS}`;gen=g.measureText(parca.join(' ')).width}
+  let x=540-gen/2;const y=1470;g.textAlign='left';g.textBaseline='middle';g.lineJoin='round';
+  // aktif kelime hafif zıplar
+  grup.forEach((j,n)=>{const s=parca[n]+' ',akt=j===i,vur=VURGU.test(K[j].w);const zp=akt?1+0.12*(1-ease((T-K[j].s)/0.15)):1;
+    g.save();g.translate(x+g.measureText(s).width/2,y);g.scale(zp,zp);g.lineWidth=16;g.strokeStyle='rgba(0,0,0,0.95)';g.textAlign='center';g.strokeText(s,0,0);
+    g.fillStyle=akt?(vur?'#ffcf33':'#ffffff'):(vur?'rgba(255,215,90,0.85)':'rgba(255,255,255,0.8)');g.fillText(s,0,0);g.restore();x+=g.measureText(s).width});}
+const IMG=new Image();let TT=0;
+window.TOPLAM=Z.sahneler.reduce((a,s)=>Math.max(a,s.bas+s.sure),0);
+window.renderAt=async function(T){TT=T;
+  const n=Math.min(Math.round(T*FPS)+1,Math.round(window.TOPLAM*FPS)); IMG.src=`kare/${String(n).padStart(5,'0')}.jpg`; await IMG.decode().catch(()=>{});
+  g.drawImage(IMG,0,0,W,H);
+  let i=Z.sahneler.findIndex(s=>T>=s.bas&&T<s.bas+s.sure);if(i<0)i=Z.sahneler.length-1;const s=Z.sahneler[i],q=T-s.bas;
+  // alt kısım okunurluk için koyu degrade
+  const gr=g.createLinearGradient(0,1250,0,1700);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(0.5,'rgba(0,0,0,0.45)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,1250,W,450);
+  const gt=g.createLinearGradient(0,0,0,260);gt.addColorStop(0,'rgba(0,0,0,0.55)');gt.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gt;g.fillRect(0,0,W,260);
+  ust(T);kaplama(i,q,s.sure,T);altyazi(T);
+  if(i>0&&q<0.12){g.fillStyle=`rgba(255,255,255,${0.5*(1-q/0.12)})`;g.fillRect(0,0,W,H)}
+  return true};
+window.HAZIR=true;
+</script></body></html>

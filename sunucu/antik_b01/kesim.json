@@ -3,28 +3,18 @@
  "sahneler": [
   [
    {
-    "klip": 382833,
+    "klip": "take1",
     "bas": 0,
-    "son": 0.62,
-    "mod": "kirp",
-    "cx": 0.45,
-    "kaynak": 0,
-    "zoom": [
-     1.18,
-     1.0
-    ]
-   },
-   {
-    "klip": 309430,
-    "bas": 0.62,
     "son": 1,
     "mod": "kirp",
-    "cx": 0.665,
-    "kaynak": 2,
+    "cx": 0.5,
+    "kaynak": 0,
     "zoom": [
      1.0,
-     1.15
-    ]
+     1.0
+    ],
+    "sunucu": true,
+    "gecikme": 0.25
    }
   ],
   [
@@ -108,12 +98,26 @@
    {
     "klip": "piramidyon",
     "bas": 0,
-    "son": 1,
+    "son_kelime": "Sence",
     "mod": "foto",
     "zoom": [
      1.0,
      1.18
     ]
+   },
+   {
+    "klip": "take2",
+    "bas_kelime": "Sence",
+    "son": 1,
+    "mod": "kirp",
+    "cx": 0.5,
+    "kaynak": 0,
+    "zoom": [
+     1.0,
+     1.0
+    ],
+    "sunucu": true,
+    "gecikme": 0.05
    }
   ]
  ]

@@ -5,6 +5,13 @@ os.makedirs('parca',exist_ok=True); liste=[]; n=0
 def sure(f): return float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',f]).decode())
 for si,s in enumerate(z['sahneler']):
     for c in K[si]:
+        def kelime_oran(w):
+            for kk in z['kelimeler']:
+                if kk['w'].startswith(w) and s['bas'] <= kk['s'] < s['bas']+s['sure']:
+                    return max(0.0, (kk['s']-0.05-s['bas'])/s['sure'])
+            raise SystemExit(f"kelime bulunamadı: {w}")
+        if 'son_kelime' in c: c['son']=kelime_oran(c['son_kelime'])
+        if 'bas_kelime' in c: c['bas']=kelime_oran(c['bas_kelime'])
         bas=round((s['bas']+c['bas']*s['sure'])*FPS); son=round((s['bas']+c['son']*s['sure'])*FPS); kare=son-bas
         if kare<=0: continue
         d=kare/FPS
@@ -18,12 +25,14 @@ for si,s in enumerate(z['sahneler']):
             liste.append(out); n+=1; print('parça',out,c['klip'],kare,'kare (foto)'); continue
         src=f"klip/{c['klip']}.mp4"; L=sure(src); k0=min(c['kaynak'],max(0,L-0.5))
         hiz=1.0
+        if c.get('sunucu'): L=1e9
         if L-k0<d: hiz=max((L-k0)/d,1/1.6); k0=max(0,L-d*hiz)   # kısa klip: en çok 1,6 kat yavaşlat
         z0,z1=c['zoom']; zexp=f"({z0}+({z1}-{z0})*n/{max(kare-1,1)})"
         renk="eq=contrast=1.08:saturation=1.18:brightness=0.01,vignette=PI/5"
         if c['mod']=='kirp':
             cx=c['cx']
-            vf=(f"setpts=(PTS-STARTPTS)/{hiz},fps={FPS},scale=-2:1920,"
+            ek=(f"tpad=start_duration={c.get('gecikme',0)}:start_mode=clone:stop_mode=clone:stop_duration=30," if c.get('sunucu') else "")
+            vf=(f"setpts=(PTS-STARTPTS)/{hiz},fps={FPS},{ek}scale=-2:1920,"
                 f"crop=1080:1920:'max(0,min(iw-1080,iw*{cx}-540))':0,"
                 f"scale=w='trunc(1080*{zexp}/2)*2':h='trunc(1920*{zexp}/2)*2':eval=frame:flags=bicubic,"
                 f"crop=1080:1920:'(iw-1080)/2':'(ih-1920)/2',{renk},setsar=1")

@@ -32,13 +32,13 @@ function kapTasi(x,y,s,renk1,renk2,a){if(a<=0.01)return;g.save();g.globalAlpha=a
   g.fillStyle=renk2;g.beginPath();g.moveTo(x,y-80*s);g.lineTo(x+70*s,y+20*s);g.lineTo(x,y+20*s);g.closePath();g.fill();g.restore()}
 function parilti(x,y,r,a,renk='255,210,90'){if(a<=0.01)return;g.save();g.globalAlpha=a;const gl=g.createRadialGradient(x,y,5,x,y,r);gl.addColorStop(0,`rgba(${renk},0.9)`);gl.addColorStop(1,`rgba(${renk},0)`);g.fillStyle=gl;g.fillRect(x-r,y-r,2*r,2*r);g.restore()}
 function kaplama(i,q,d,T){const k=q/d;
-  if(i===0){ // kanca + açık döngü
-    const a=ease((k-0.06)/0.1)*(1-ease((k-0.42)/0.08)), y=lerp(820,520,ease((k-0.1)/0.32));
-    parilti(540,y-20,180,a);kapTasi(540,y,1,'#ffd35a','#c9952e',a);
-    damga('TEPESİ KAYIP',540,1150,ease((k-0.14)/0.1)*(k<0.6?1:0),'#ff3b2f',-0.06,74);
-    bant('8 METRE EKSİK',470,ease((k-0.28)/0.1)*(k<0.6?1:0));
-    if(k>0.62){const b=ease((k-0.62)/0.1);parilti(540,760,200,b*0.5,'255,255,255');kapTasi(540,800,1.3,'#111','#000',b);
-      g.save();g.globalAlpha=b;yazi('?',540,770,110,'#ffcf66','center','900');g.restore();bant('SONUNDA GÖSTERECEĞİM ↓',1150,ease((k-0.66)/0.1),'#ffcf66',48);}}
+  if(i===0){ // kanca (sunucu konuşuyor: efektler yüzü kapatmaz)
+    const a=ease((k-0.06)/0.1)*(1-ease((k-0.42)/0.08)), y=lerp(420,250,ease((k-0.1)/0.32));
+    parilti(880,y-10,110,a);kapTasi(880,y,0.6,'#ffd35a','#c9952e',a);
+    bant('8 METRE EKSİK',330,ease((k-0.12)/0.1)*(k<0.6?1:0));
+    damga('TEPESİ KAYIP',540,1260,ease((k-0.2)/0.1)*(k<0.6?1:0),'#ff3b2f',-0.06,64);
+    if(k>0.62){const b=ease((k-0.62)/0.1);parilti(880,1130,120,b*0.5,'255,255,255');kapTasi(880,1160,0.8,'#111','#000',b);
+      g.save();g.globalAlpha=b;yazi('?',880,1130,70,'#ffcf66','center','900');g.restore();bant('SONUNDA GÖSTERECEĞİM ↓',1300,ease((k-0.66)/0.1),'#ffcf66',44);}}
   if(i===1){ // ölçü + rekor
     const a=ease((k-0.02)/0.1)*(1-ease((k-0.52)/0.06)); if(a>0){g.save();g.globalAlpha=a;
       kutu(70,520,940,700,24,'rgba(12,30,70,0.8)');g.strokeStyle='rgba(170,210,255,0.18)';g.lineWidth=1;
@@ -59,14 +59,18 @@ function kaplama(i,q,d,T){const k=q/d;
     if(a>0){g.save();g.globalAlpha=a;yazi('ALTIN?',540,yy+130,80,'#ffcf66','center','900');g.restore()}
     damga('KAYIT YOK',540,760,ease((k-0.5)/0.1),'#ff3b2f',-0.07,90);
     bant('NE ÇİZİM · NE PARÇA',1150,ease((k-0.72)/0.1),'#ffffff',48);}
-  if(i===4){ // ödül: gerçek tepe taşı fotoğrafı
+  if(i===4){ // ödül: gerçek tepe taşı fotoğrafı, sonra sunucu soruyor
+    const TS=(Z.kelimeler.find(w=>w.w.startsWith('Sence')&&w.s>=Z.sahneler[4].bas)||{s:1e9}).s-0.05;
+    if(T>=TS){ bant('YORUMA YAZ 👇',1300,ease((T-TS-0.3)/0.3)*(1-ease((k-0.86)/0.04)),'#ffcf66',50);
+      const f=ease((k-0.9)/0.06); if(f>0){g.save();g.globalAlpha=f;g.fillStyle='rgba(6,4,2,0.82)';g.fillRect(0,0,W,H);yazi('ANTİK STÜDYO',540,860,104,'#ffcf66','center','900');
+        g.fillStyle='#ffcf66';g.fillRect(340,925,400,6);yazi('Tarih, bugünün diliyle.',540,990,44,'#f3e3c2','center','600');g.restore()}
+      return;}
     bant('İŞTE BİR TEPE TAŞI',300,ease((k-0.02)/0.08)*(1-ease((k-0.3)/0.06)),'#ffcf66',52);
     bant('III. AMENEMHAT · ~MÖ 1850',300,ease((k-0.33)/0.08)*(1-ease((k-0.86)/0.04)),'#ffcf66',46);
     const c1=ease((k-0.25)/0.08),c2=ease((k-0.45)/0.08);
     if(c1>0){g.save();g.globalAlpha=c1;kutu(90,1235,430,80,14,'rgba(8,6,4,0.85)');yazi('1,4 m · ~4,5 ton',305,1275,40,'#fff');g.restore()}
     if(c2>0){g.save();g.globalAlpha=c2;kutu(540,1235,450,80,14,'rgba(8,6,4,0.85)');yazi('MISIR MÜZESİ, KAHİRE',765,1275,34,'#ffcf66');g.restore()}
     g.save();g.globalAlpha=0.8;yazi('Foto: Jon Bodsworth · kamu malı',1030,1205,22,'#ddd','right','600');g.restore();
-    bant('KEOPS\'UNKİ NEREDE? YORUMA YAZ',1150,ease((k-0.7)/0.08)*(1-ease((k-0.88)/0.03)),'#ffcf66',44);
     const f=ease((k-0.9)/0.06); if(f>0){g.save();g.globalAlpha=f;g.fillStyle='rgba(6,4,2,0.82)';g.fillRect(0,0,W,H);yazi('ANTİK STÜDYO',540,860,104,'#ffcf66','center','900');
       g.fillStyle='#ffcf66';g.fillRect(340,925,400,6);yazi('Tarih, bugünün diliyle.',540,990,44,'#f3e3c2','center','600');g.restore()}}
 }

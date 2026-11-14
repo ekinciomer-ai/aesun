@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Model
         run: |
-          pip install -q opencv-python-headless numpy
+          pip install -q "opencv-python-headless==4.10.0.84" "numpy<2.3"
           mkdir -p /tmp/m && cd /tmp/m
           curl -sfL -o p.prototxt https://raw.githubusercontent.com/richzhang/colorization/caffe/colorization/models/colorization_deploy_v2.prototxt
           curl -sfL -o pts.npy https://raw.githubusercontent.com/richzhang/colorization/caffe/colorization/resources/pts_in_hull.npy
@@ -24,7 +24,7 @@ jobs:
       - name: Renklendir
         env: {KL: "${{ inputs.klasor }}"}
         run: |
-          python3 - <<'PY'
+          python3 - <<'PY' 2>&1 | tee /tmp/r.log; grep -E "Error|error" /tmp/r.log | tail -3 | sed "s/^/::notice::/"; ls "$KL"/renkli/*.jpg >/dev/null
           import cv2, numpy as np, os
           kl=os.environ["KL"]; os.makedirs(f"{kl}/renkli",exist_ok=True)
           net=cv2.dnn.readNetFromCaffe("/tmp/m/p.prototxt","/tmp/m/m.caffemodel"); pts=np.load("/tmp/m/pts.npy").transpose().reshape(2,313,1,1)

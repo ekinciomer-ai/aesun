@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-15T01:24+03:00",
+ "olusturma": "2026-11-15T01:45+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -602,12 +602,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 50,
-  "Estudio Antiguo": 122,
-  "Kozmos Lab TR": 67,
   "Ancient Studio": 188,
+  "Antik Stüdyo": 637,
+  "Estudio Antiguo": 122,
+  "Kozmos Lab": 50,
   "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637
+  "Kozmos Lab TR": 67
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -707,7 +707,7 @@
   "Kozmos Lab TR": {
    "01:00": {
     "n": 2,
-    "medyan": 8
+    "medyan": 6
    },
    "13:00": {
     "n": 2,
@@ -792,7 +792,7 @@
     {
      "vid": "tJ-I6ZUVK7w",
      "baslik": "Is the Girl with a Pearl Earring's pearl real? 🖼️ #shorts",
-     "izlenme": 105,
+     "izlenme": 104,
      "durum": "Yayında"
     },
     {
@@ -917,12 +917,12 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 229,
+   "uzun_izlenme": 228,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
      "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
-     "izlenme": 15,
+     "izlenme": 16,
      "durum": "Yayında"
     }
    ],
@@ -990,7 +990,7 @@
     {
      "vid": "gXn5GB17DUc",
      "baslik": "Fatih 70 gemiyi karadan nasıl yürüttü? ⚓⛰️ #shorts",
-     "izlenme": 114,
+     "izlenme": 120,
      "durum": "Yayında"
     }
    ],
@@ -1070,7 +1070,7 @@
     {
      "vid": "gXn5GB17DUc",
      "baslik": "Fatih 70 gemiyi karadan nasıl yürüttü? ⚓⛰️ #shorts",
-     "izlenme": 114,
+     "izlenme": 120,
      "durum": "Yayında"
     }
    ],
@@ -1312,11 +1312,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Kozmos Lab",
-   "baslik": "Why does the Moon change shape? 🌙 #shorts",
-   "i48": 1
-  },
-  {
    "kanal": "Ancient Studio",
    "baslik": "If your cat died, would you shave your eyebrows? 🐈 Ancient Egypt",
    "i48": 0
@@ -1334,6 +1329,11 @@
   {
    "kanal": "Estudio Antiguo",
    "baslik": "¿Qué hace un líder turco en el Paseo de la Reforma? 🇲🇽 #shorts",
+   "i48": 0
+  },
+  {
+   "kanal": "Kozmos Lab TR",
+   "baslik": "Telefonu neden elimizden bırakamıyoruz? 🐦📱 #shorts",
    "i48": 0
   }
  ]

@@ -128,10 +128,10 @@ const VURGU=/^(kayıp|146|138|sekiz|tura|kahire|merer|2013|iki|bin|on|üçte|kö
 function altyazi(T){
   const K=Z.kelimeler; if(!K.length)return; let i=K.findIndex(k=>T>=k.s&&T<k.e+0.25); if(i<0)return;
   // 3 kelimelik parçalar (noktalamada kırılır)
-  let bas=i; while(bas>0 && (i-bas)<2 && !/[.?!,]$/.test(K[bas-1].w) && K[bas].s-K[bas-1].e<0.4) bas--;
+  let bas=i; while(bas>0 && (i-bas)<1 && !/[.?!,]$/.test(K[bas-1].w) && K[bas].s-K[bas-1].e<0.4) bas--;
   const grup=[];for(let j=bas;j<K.length&&grup.length<3;j++){grup.push(j);if(/[.?!,]$/.test(K[j].w))break}
   if(!grup.includes(i))return;
-  g.font=`900 64px ${SANS}`;const parca=grup.map(j=>K[j].w.toLocaleUpperCase('tr'));const gen=g.measureText(parca.join(' ')).width;
+  const parca=grup.map(j=>K[j].w.toLocaleUpperCase('tr'));g.font=`900 64px ${SANS}`;let fs=64,gen=g.measureText(parca.join(' ')).width;if(gen>900){fs=Math.max(40,Math.floor(64*900/gen));g.font=`900 ${fs}px ${SANS}`;gen=g.measureText(parca.join(' ')).width}
   let x=540-gen/2;const y=1475;g.textAlign='left';g.textBaseline='middle';g.lineJoin='round';
   grup.forEach((j,n)=>{const s=parca[n]+' ';const aktif=j===i;const vurgu=VURGU.test(K[j].w);
     g.lineWidth=14;g.strokeStyle='rgba(0,0,0,0.9)';g.strokeText(s,x,y);g.fillStyle=aktif?(vurgu?'#ffcf33':'#ffffff'):'rgba(255,255,255,0.78)';if(vurgu&&!aktif)g.fillStyle='rgba(255,215,90,0.85)';g.fillText(s,x,y);x+=g.measureText(s).width});

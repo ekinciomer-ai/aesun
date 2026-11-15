@@ -519,7 +519,9 @@ def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
         sec = (uygun + (yeni if fazla > 2 else []))[:fazla]
         if sec:
             sonuc.update({"eylem": "sleep", "hedefler": sorted(d["suffix"] for d in sec),
-                          "neden": f"güneş takibi: {a['gunes_kaynak']} {uretim_kw:.0f} kW, {C} cihaz × {kw_c:.2f} kW = {C * kw_c:.0f} kW → {len(sec)} cihaz uyut"})
+                          "neden": f"güneş takibi: {a['gunes_kaynak']} {uretim_kw:.0f} kW"
+                                    + (f" (düşüşte ileri tahmin {p_kapat:.0f} kW)" if p_kapat < uretim_kw else "")
+                                    + f", {C} cihaz × {kw_c:.2f} kW = {C * kw_c:.0f} kW → {len(sec)} cihaz uyut"})
         else:
             sonuc["neden"] = "fazla cihazlar en az çalışma süresini doldurmadı, bekleniyor"
         return sonuc

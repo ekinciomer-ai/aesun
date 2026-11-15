@@ -1,0 +1,32 @@
+name: NASA foto indir (kamu malı, belirli ID'ler)
+# Verilen NASA ID'lerinin büyük boy fotoğraflarını kozmos-ham dalına <klasör>/ altına koyar.
+on:
+  workflow_dispatch:
+    inputs:
+      klasor: {description: "kozmos-ham içindeki klasör (ör. evren_turu)", required: true}
+      idler: {description: "boşlukla ayrılmış NASA ID listesi", required: true}
+permissions: {contents: write}
+concurrency: {group: nasa-indir}
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: İndir
+        run: |
+          mkdir -p /tmp/ham/${{ inputs.klasor }} && cd /tmp/ham/${{ inputs.klasor }}
+          for id in ${{ inputs.idler }}; do
+            for boy in large orig medium; do
+              curl -sfL -A "KozmosLab-arsiv/1.0" -o "$id.jpg" "https://images-assets.nasa.gov/image/$id/$id~$boy.jpg" && break
+            done
+            ls -la "$id.jpg" || echo "YOK $id"
+          done
+      - name: kozmos-ham dalına koy
+        run: |
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q
+          git config user.name "kozmos-bot"; git config user.email "kozmos-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          if git fetch -q --depth 1 origin kozmos-ham; then git checkout -q -b kozmos-ham FETCH_HEAD; else git checkout -q --orphan kozmos-ham; fi
+          mkdir -p "${{ inputs.klasor }}" && cp /tmp/ham/${{ inputs.klasor }}/*.jpg "${{ inputs.klasor }}/"
+          git add -A && git commit -qm "NASA foto: ${{ inputs.klasor }}" || exit 0
+          for i in 1 2 3; do git push -q origin HEAD:kozmos-ham && break; sleep 5; done

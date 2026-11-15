@@ -1,9 +1,9 @@
 #!/bin/bash
-# Tampon bölge: MoneyPrinterTurbo (harry0703/MoneyPrinterTurbo, MIT, v1.3.9) — AI motorunun Normal (ücretsiz) girişi.
+# Tampon bölge: MoneyPrinterTurbo (harry0703/MoneyPrinterTurbo, MIT, v1.3.10) — AI motorunun Normal (ücretsiz) girişi.
 # Yalıtılmış kapsayıcı, kaynak sınırlı, yalnız sunucu içinden (127.0.0.1:8180). Diğer uygulamalara dokunmaz, sır okumaz.
 # Anahtarlar (Pexels, Gemini) ayrı işlemle Kasa'dan config.toml'a yazılır. Telifli olabilecek hazır müzikler kapalı.
 set -u
-KOK=/opt/tampon/mpt; R=$KOK/repo; IMAJ=tampon-mpt:1.3.9; AD=tampon-mpt; SURUM=v1.3.9
+KOK=/opt/tampon/mpt; R=$KOK/repo; IMAJ=tampon-mpt:1.3.10; AD=tampon-mpt; SURUM=v1.3.10
 BOS_GB=$(df -BG / | tail -1 | awk '{gsub("G","",$4); print $4}')
 [ "${BOS_GB:-0}" -lt 10 ] && { echo "NOT: HATA disk boş alanı 10 GB altında"; exit 1; }
 mkdir -p "$KOK"

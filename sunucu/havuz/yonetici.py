@@ -9,6 +9,8 @@ Kurallar: Ömer'in onayı olmadan hiçbir video kuyruğa gitmez. Silme yok (red/
 Komutlar:
   yonetici.py teslim <kart.json>            kartı ve videoyu havuza alır, kontrol eder
   yonetici.py onay <kod> <evet|hayir> [not] [yayin_zamani] Ömer'in kararı (yalnız onay_bekliyor durumundaki işe)
+  yonetici.py planla                        yayın planını yönetici kendisi yapar: zamanı olmayan işlere kanal saatine,
+                                            günlük sınıra ve ara süreye göre ilk uygun saati verir (plan.json)
   yonetici.py yonlendir                     onaylananları platform kuyruklarına hazırlar, kuyruk kartlarını yazdırır
   yonetici.py esitle                        platform yükleme kayıtlarından durumu günceller
   yonetici.py durum [--json]                havuz özeti
@@ -33,7 +35,11 @@ YENI_HESAP_GUN = 30          # hesap açılışından bu kadar gün "yeni hesap"
 SINIR_YENI = 1               # yeni hesapta günlük en fazla video (platform başına)
 SINIR_NORMAL = 3             # sonrasında günlük en fazla video (platform başına)
 MIN_ARA_SAAT = 3             # aynı kanal + platformda iki yayın arası en az saat
-SINIR_DOSYA = f"{KOK}/sinirlar.json"   # {"kanal": {"acilis": "YYYY-MM-DD", "gunluk": n, "ara_saat": n}, "varsayilan": {...}}
+SINIR_DOSYA = f"{KOK}/sinirlar.json"   # {"kanal": {"acilis": "YYYY-MM-DD", "gunluk": n, "ara_saat": n, "saatler": ["19:30"]}, "varsayilan": {...}}
+# Plan saatleri (Türkiye saati): kitleye göre varsayılan yayın saatleri; sinirlar.json "saatler" ile değiştirilebilir.
+PLAN_SAAT = {"OD": ["10:30", "20:30"], "KZ_TR": ["19:30", "12:30"], "KZ_EN": ["02:30", "21:30"], "TR": ["19:30", "13:00"],
+             "EN": ["02:00", "22:00"], "ES": ["03:00", "23:00"], "YR": ["20:00", "13:00"]}
+PLAN_DOSYA = f"{KOK}/plan.json"
 
 
 def simdi():
@@ -129,6 +135,14 @@ def teslim(kart_yol):
     if kod in idx and idx[kod].get("durum") not in ("kontrol_hatasi",):
         print(f"NOT: {kod} havuzda zaten var ({idx[kod]['durum']}), atlandı"); return 0
     src = kart.get("kaynak_dosya", "")
+    if not os.path.isfile(src) and kart.get("kaynak_url"):
+        try:
+            import urllib.request
+            os.makedirs(os.path.dirname(src) or ".", exist_ok=True)
+            urllib.request.urlretrieve(kart["kaynak_url"], src + ".tmp"); os.replace(src + ".tmp", src)
+            print(f"NOT: {kod}: video adresten indirildi")
+        except Exception as e:
+            print(f"NOT: HATA {kod}: video indirilemedi: {str(e)[:80]}")
     if not os.path.isfile(src):
         print(f"NOT: HATA {kod}: video bulunamadı: {src}"); return 1
     os.makedirs(f"{KOK}/video", exist_ok=True); os.makedirs(f"{KOK}/kart", exist_ok=True)
@@ -154,6 +168,8 @@ def onay(kod, karar, notu="", zaman=None):
     if it["durum"] != "onay_bekliyor":
         print(f"NOT: {kod} onay beklemiyor (durum: {it['durum']})"); return 1
     if zaman: it["kart"]["yayin_zamani"] = zaman
+    elif karar == "evet" and it["kart"].get("plan_zamani") and not it["kart"].get("yayin_zamani"):
+        it["kart"]["yayin_zamani"] = it["kart"]["plan_zamani"]
     it["durum"] = "onaylandi" if karar == "evet" else "reddedildi"
     it["onay"] = {"karar": karar, "zaman": simdi(), "not": notu}
     olay(it, f"Ömer kararı: {karar}" + (f" · {notu}" if notu else ""))
@@ -182,6 +198,60 @@ def sinir_al(kanal):
     if acilis and datetime.now(IST) - acilis < timedelta(days=YENI_HESAP_GUN):
         return SINIR_YENI, ara, f"yeni hesap (açılış {acilis:%d.%m.%Y})"
     return SINIR_NORMAL, ara, "normal"
+
+
+def saatler_al(kanal):
+    try:
+        d = json.load(open(SINIR_DOSYA, encoding="utf-8"))
+        st = {**d.get("varsayilan", {}), **d.get(kanal, {})}.get("saatler")
+        if st: return list(st)
+    except Exception:
+        pass
+    return PLAN_SAAT.get(kanal, ["19:30"])
+
+
+def planla(sessiz=False):
+    """Yayın planını yönetici yapar. Zamanı olmayan onay_bekliyor/onaylandi işlere ilk uygun saati verir.
+    onay_bekliyor → kart.plan_zamani (öneri; Ömer 'evet' derse yayın zamanı olur); onaylandi → yayin_zamani.
+    Sıra: kart.sira (seri sırası) sonra teslim zamanı. Ömer'in verdiği zamanlara dokunmaz."""
+    idx = yukle(); planli = []
+    for it in idx.values():
+        k = it.get("kart", {})
+        z = zaman_oku(k.get("yayin_zamani")) if it.get("durum") in ("kuyrukta", "yayinda", "onaylandi") else None
+        if z:
+            for p in k.get("platformlar", []): planli.append((k.get("kanal"), p, z))
+    bekleyen = [(kod, it) for kod, it in idx.items() if it.get("durum") in ("onay_bekliyor", "onaylandi") and not it["kart"].get("yayin_zamani")]
+    bekleyen.sort(key=lambda x: (x[1]["kart"].get("kanal", ""), x[1]["kart"].get("sira", 999), x[1].get("teslim", "")))
+    yarin = (datetime.now(IST) + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    plan = []
+    for kod, it in bekleyen:
+        k = it["kart"]; secilen = None
+        for gun in range(60):
+            for hm in sorted(saatler_al(k["kanal"])):
+                h, m = map(int, hm.split(":"))
+                aday = (yarin + timedelta(days=gun)).replace(hour=h, minute=m)
+                dene = dict(k, yayin_zamani=aday.isoformat(timespec="minutes"))
+                if all(kilit_kontrol(kod, dene, p, planli) is None for p in k.get("platformlar", [])):
+                    secilen = aday; break
+            if secilen: break
+        if not secilen:
+            continue
+        zs = secilen.isoformat(timespec="minutes")
+        for p in k.get("platformlar", []): planli.append((k["kanal"], p, secilen))
+        if it["durum"] == "onaylandi":
+            k["yayin_zamani"] = zs; olay(it, f"yönetici planı: yayın {secilen:%d.%m %H:%M}")
+        else:
+            if k.get("plan_zamani") != zs: olay(it, f"yönetici planı önerisi: {secilen:%d.%m %H:%M}")
+            k["plan_zamani"] = zs
+        plan.append({"kod": kod, "kanal": KANALLAR.get(k["kanal"], k["kanal"]), "durum": it["durum"], "zaman": zs, "baslik": k.get("baslik")})
+    kaydet(idx)
+    tum = sorted([{"kod": kd, "kanal": KANALLAR.get(v["kart"].get("kanal"), v["kart"].get("kanal")), "durum": v.get("durum"),
+                   "zaman": v["kart"].get("yayin_zamani") or v["kart"].get("plan_zamani"), "baslik": v["kart"].get("baslik")}
+                  for kd, v in idx.items() if v.get("durum") in ("onay_bekliyor", "onaylandi", "kuyrukta")], key=lambda x: str(x["zaman"]))
+    json.dump({"guncelleme": simdi(), "plan": tum}, open(PLAN_DOSYA, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    if not sessiz:
+        for p in tum: print(f"NOT: PLAN {str(p['zaman'])[:16]} · {p['kanal']} · {p['kod']} · {p['durum']} · {p['baslik']}")
+    return 0
 
 
 def kilit_kontrol(kod, k, platform, planli):
@@ -215,6 +285,7 @@ def kilit_kontrol(kod, k, platform, planli):
 
 def yonlendir():
     """Onaylananların videosunu platform kuyruklarının okuduğu yerlere kopyalar, kuyruk kartlarını yazdırır."""
+    planla(sessiz=True)
     idx = yukle(); cikti = []
     planli = []
     for it in idx.values():
@@ -279,12 +350,12 @@ def durum(js=False):
     idx = yukle()
     ozet = [{"kod": k, "durum": v.get("durum"), "kanal": KANALLAR.get(v["kart"].get("kanal"), v["kart"].get("kanal")),
              "platformlar": v["kart"].get("platformlar"), "seri": v["kart"].get("seri"), "baslik": v["kart"].get("baslik"),
-             "amac": v["kart"].get("amac"), "yayin_zamani": v["kart"].get("yayin_zamani"), "sure_sn": v.get("kontrol", {}).get("olcum", {}).get("sure_sn"),
+             "amac": v["kart"].get("amac"), "yayin_zamani": v["kart"].get("yayin_zamani"), "plan_zamani": v["kart"].get("plan_zamani"), "sure_sn": v.get("kontrol", {}).get("olcum", {}).get("sure_sn"),
              "engel": v.get("kontrol", {}).get("engel"), "uyari": v.get("kontrol", {}).get("uyari"), "kilit": v.get("kilit"), "teslim": v.get("teslim")} for k, v in idx.items()]
     if js:
         print("===HAVUZ==="); print(json.dumps(ozet, ensure_ascii=False)); print("===SON===")
     for o in ozet:
-        print(f"NOT: {o['kod']} · {o['durum']} · {o['kanal']} · {o['seri']} · {o['baslik']}" + (f" · KİLİT: {o['kilit']}" if o.get('kilit') else ""))
+        print(f"NOT: {o['kod']} · {o['durum']} · {o['kanal']} · {o['seri']} · {o['baslik']}" + (f" · plan {str(o.get('plan_zamani'))[:16]}" if o.get('plan_zamani') and not o.get('yayin_zamani') else "") + (f" · KİLİT: {o['kilit']}" if o.get('kilit') else ""))
     if not ozet: print("NOT: havuz boş")
     return 0
 
@@ -293,5 +364,5 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if not a: print(__doc__); sys.exit(0)
     k = a[0]
-    sys.exit({"teslim": lambda: teslim(a[1]), "onay": lambda: onay(a[1], a[2], *(a[3:5])), "yonlendir": yonlendir,
+    sys.exit({"teslim": lambda: teslim(a[1]), "onay": lambda: onay(a[1], a[2], *(a[3:5])), "yonlendir": yonlendir, "planla": planla,
               "esitle": esitle, "durum": lambda: durum("--json" in a)}[k]())

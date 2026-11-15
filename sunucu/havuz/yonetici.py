@@ -5,12 +5,16 @@ Tüm üretilen videolar buraya "kimlik kartı" ile teslim edilir; yüklemeden ya
 Akış:  teslim → kontrol (kalite kapısı + kart + kurallar) → onay_bekliyor → (Ömer onayı) onaylandi
        → yonlendir: platform kuyruklarına (YouTube: /opt/aesun/video_bekleyen, TikTok: /opt/aesun/youtube/medya) → kuyrukta
        → esitle: platformun yükleme kaydında görülünce yayinda.
+Plan: saat ve sırayı yönetici belirler (Ömer 16.11.2026); Claude yalnız teslim eder. Ömer planı tek tıkla onaylar.
 Kurallar: Ömer'in onayı olmadan hiçbir video kuyruğa gitmez. Silme yok (red/eski → arsiv durumu, dosya yerinde kalır).
 Komutlar:
   yonetici.py teslim <kart.json>            kartı ve videoyu havuza alır, kontrol eder
   yonetici.py onay <kod> <evet|hayir> [not] [yayin_zamani] Ömer'in kararı (yalnız onay_bekliyor durumundaki işe)
   yonetici.py planla                        yayın planını yönetici kendisi yapar: zamanı olmayan işlere kanal saatine,
                                             günlük sınıra ve ara süreye göre ilk uygun saati verir (plan.json)
+  yonetici.py planla                        yayın planını YÖNETİCİ yapar (saat/sıra; kilit, odak dönemi, bekletme kurallarıyla)
+  yonetici.py onay_toplu [not]              tek tıkla onay: planı hazır bütün işleri önerilen saatle onaylar
+  yonetici.py beklet <kod> [not|kaldir]     işi plandan çıkarır (Ömer "beklesin"); 'kaldir' ile geri alır
   yonetici.py yonlendir                     onaylananları platform kuyruklarına hazırlar, kuyruk kartlarını yazdırır
   yonetici.py esitle                        platform yükleme kayıtlarından durumu günceller
   yonetici.py durum [--json]                havuz özeti
@@ -176,6 +180,28 @@ def onay(kod, karar, notu="", zaman=None):
     kaydet(idx); print(f"NOT: {kod}: {it['durum']}"); return 0
 
 
+def beklet(kod, notu=""):
+    """Ömer 'beklesin' dediğinde: iş plana girmez, onaylanmaz. notu 'kaldir' ise bekletme kalkar."""
+    idx = yukle(); it = idx.get(kod)
+    if not it:
+        print(f"NOT: HATA {kod} havuzda yok"); return 1
+    if notu == "kaldir":
+        it["kart"].pop("bekletme", None); olay(it, "bekletme kaldırıldı")
+    else:
+        it["kart"]["bekletme"] = notu or "Ömer: beklesin"; it["kart"].pop("plan_zamani", None); olay(it, f"bekletmeye alındı · {notu}")
+    kaydet(idx); print(f"NOT: {kod}: {'bekletme kaldırıldı' if notu == 'kaldir' else 'bekletmede'}"); return 0
+
+
+def onay_toplu(notu=""):
+    """Tek tıkla onay: planı hazır (plan_zamani olan, bekletilmeyen) bütün onay_bekliyor işleri önerilen saatle onaylar."""
+    idx = yukle(); n = 0
+    for kod, it in idx.items():
+        k = it.get("kart", {})
+        if it.get("durum") == "onay_bekliyor" and k.get("plan_zamani") and not k.get("bekletme"):
+            onay(kod, "evet", notu or "toplu onay (planı onayla)"); n += 1
+    print(f"NOT: toplu onay: {n} iş onaylandı"); return 0
+
+
 def zaman_oku(s):
     try:
         t = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
@@ -220,16 +246,24 @@ def planla(sessiz=False):
         z = zaman_oku(k.get("yayin_zamani")) if it.get("durum") in ("kuyrukta", "yayinda", "onaylandi") else None
         if z:
             for p in k.get("platformlar", []): planli.append((k.get("kanal"), p, z))
-    bekleyen = [(kod, it) for kod, it in idx.items() if it.get("durum") in ("onay_bekliyor", "onaylandi") and not it["kart"].get("yayin_zamani")]
+    bekleyen = [(kod, it) for kod, it in idx.items() if it.get("durum") in ("onay_bekliyor", "onaylandi")
+                and not it["kart"].get("yayin_zamani") and not it["kart"].get("bekletme")]
+    for it in idx.values():  # bekletilen işlerin eski önerisi silinir (plana girmez)
+        if it.get("kart", {}).get("bekletme") and it["kart"].get("plan_zamani"):
+            it["kart"].pop("plan_zamani", None); olay(it, "bekletmede: plan önerisi kaldırıldı")
     bekleyen.sort(key=lambda x: (x[1]["kart"].get("kanal", ""), x[1]["kart"].get("sira", 999), x[1].get("teslim", "")))
     yarin = (datetime.now(IST) + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     plan = []
     for kod, it in bekleyen:
         k = it["kart"]; secilen = None
-        for gun in range(60):
+        bas = yarin
+        if k.get("kanal") in ("TR", "EN", "ES") and k.get("seri") not in ODAK_SERI:
+            odak_sonu = datetime.fromisoformat(ODAK_SON).replace(tzinfo=IST) + timedelta(days=1)
+            bas = max(bas, odak_sonu)  # odak dönemi dışı seri: odak bitince
+        for gun in range(90):
             for hm in sorted(saatler_al(k["kanal"])):
                 h, m = map(int, hm.split(":"))
-                aday = (yarin + timedelta(days=gun)).replace(hour=h, minute=m)
+                aday = (bas + timedelta(days=gun)).replace(hour=h, minute=m)
                 dene = dict(k, yayin_zamani=aday.isoformat(timespec="minutes"))
                 if all(kilit_kontrol(kod, dene, p, planli) is None for p in k.get("platformlar", [])):
                     secilen = aday; break
@@ -248,6 +282,9 @@ def planla(sessiz=False):
     tum = sorted([{"kod": kd, "kanal": KANALLAR.get(v["kart"].get("kanal"), v["kart"].get("kanal")), "durum": v.get("durum"),
                    "zaman": v["kart"].get("yayin_zamani") or v["kart"].get("plan_zamani"), "baslik": v["kart"].get("baslik")}
                   for kd, v in idx.items() if v.get("durum") in ("onay_bekliyor", "onaylandi", "kuyrukta")], key=lambda x: str(x["zaman"]))
+    for p in tum:
+        if not p["zaman"] and idx[p["kod"]]["kart"].get("bekletme"):
+            p["durum"] += " · BEKLETİLİYOR: " + str(idx[p["kod"]]["kart"]["bekletme"])[:60]
     json.dump({"guncelleme": simdi(), "plan": tum}, open(PLAN_DOSYA, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     if not sessiz:
         for p in tum: print(f"NOT: PLAN {str(p['zaman'])[:16]} · {p['kanal']} · {p['kod']} · {p['durum']} · {p['baslik']}")
@@ -365,4 +402,5 @@ if __name__ == "__main__":
     if not a: print(__doc__); sys.exit(0)
     k = a[0]
     sys.exit({"teslim": lambda: teslim(a[1]), "onay": lambda: onay(a[1], a[2], *(a[3:5])), "yonlendir": yonlendir, "planla": planla,
+              "beklet": lambda: beklet(a[1], a[2] if len(a) > 2 else ""), "onay_toplu": lambda: onay_toplu(a[1] if len(a) > 1 else ""),
               "esitle": esitle, "durum": lambda: durum("--json" in a)}[k]())

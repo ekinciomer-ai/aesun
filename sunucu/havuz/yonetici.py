@@ -37,7 +37,9 @@ TEKRAR_GUN = 14
 # "onaylandi" durumunda bekler ve bir sonraki uygun saat önerilir. Değerler /opt/aesun/havuz/sinirlar.json ile değiştirilebilir.
 YENI_HESAP_GUN = 30          # hesap açılışından bu kadar gün "yeni hesap" sayılır
 SINIR_YENI = 1               # yeni hesapta günlük en fazla video (platform başına)
-SINIR_NORMAL = 3             # sonrasında günlük en fazla video (platform başına)
+SINIR_NORMAL = 4             # sonrasında bir kanalda günlük en fazla video (platform başına) · Ömer 16.11.2026
+SINIR_KANAL_UST = 4          # ayar dosyası ne derse desin bir kanalda günde 4'ü geçmez · Ömer 16.11.2026
+SINIR_TOPLAM = 8             # bütün kanallar toplamı: günde en fazla 8 video (platform başına) · Ömer 16.11.2026
 MIN_ARA_SAAT = 3             # aynı kanal + platformda iki yayın arası en az saat
 SINIR_DOSYA = f"{KOK}/sinirlar.json"   # {"kanal": {"acilis": "YYYY-MM-DD", "gunluk": n, "ara_saat": n, "saatler": ["19:30"]}, "varsayilan": {...}}
 # Plan saatleri (Türkiye saati): kitleye göre varsayılan yayın saatleri; sinirlar.json "saatler" ile değiştirilebilir.
@@ -219,7 +221,7 @@ def sinir_al(kanal):
         pass
     ara = float(ayar.get("ara_saat", MIN_ARA_SAAT))
     if "gunluk" in ayar:
-        return int(ayar["gunluk"]), ara, "ayar"
+        return min(int(ayar["gunluk"]), SINIR_KANAL_UST), ara, "ayar"
     acilis = zaman_oku(ayar.get("acilis")) if ayar.get("acilis") else None
     if acilis and datetime.now(IST) - acilis < timedelta(days=YENI_HESAP_GUN):
         return SINIR_YENI, ara, f"yeni hesap (açılış {acilis:%d.%m.%Y})"
@@ -298,10 +300,18 @@ def kilit_kontrol(kod, k, platform, planli):
         return ("yayın zamanı okunamadı", None)
     gunluk, ara, tur = sinir_al(k["kanal"])
     ayni = [z for (kn, p, z) in planli if kn == k["kanal"] and p == platform and z]
+    hepsi = [z for (kn, p, z) in planli if p == platform and z]
+    try:
+        toplam = int(json.load(open(SINIR_DOSYA, encoding="utf-8")).get("varsayilan", {}).get("toplam_gunluk", SINIR_TOPLAM))
+    except Exception:
+        toplam = SINIR_TOPLAM
+    toplam = min(toplam, SINIR_TOPLAM)
 
     def uygun(x):
         if sum(1 for z in ayni if z.date() == x.date()) >= gunluk:
             return f"{x:%d.%m} günü {platform} sınırı dolu ({gunluk}/gün, {tur})"
+        if sum(1 for z in hepsi if z.date() == x.date()) >= toplam:
+            return f"{x:%d.%m} günü {platform} toplam sınırı dolu (tüm kanallar {toplam}/gün)"
         for z in ayni:
             if abs((x - z).total_seconds()) < ara * 3600:
                 return f"{z:%d.%m %H:%M} yayınına {ara:g} saatten yakın"

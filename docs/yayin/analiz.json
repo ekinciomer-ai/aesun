@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-15T06:07+03:00",
+ "olusturma": "2026-11-15T13:04+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -572,10 +572,10 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Gezegen Kartları",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 1,
-   "medyan_48sa": 8,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 0,
+   "medyan_48sa": 4,
    "tutma_orani": 0,
    "izlenme_yuzde": 59,
    "en_iyi": {
@@ -603,11 +603,11 @@
  ],
  "esikler": {
   "Kozmos Lab TR": 67,
-  "Estudio Antiguo": 122,
-  "Antik Stüdyo": 637,
-  "Ancient Studio": 188,
   "Ömür Dediğin": 50,
-  "Kozmos Lab": 50
+  "Estudio Antiguo": 122,
+  "Kozmos Lab": 50,
+  "Antik Stüdyo": 637,
+  "Ancient Studio": 188
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -722,7 +722,7 @@
     "medyan": 464
    },
    "21:00": {
-    "n": 2,
+    "n": 3,
     "medyan": 8
    }
   },
@@ -1321,11 +1321,6 @@
  "en_zayif": [
   {
    "kanal": "Ancient Studio",
-   "baslik": "If your cat died, would you shave your eyebrows? 🐈 Ancient Egypt",
-   "i48": 0
-  },
-  {
-   "kanal": "Ancient Studio",
    "baslik": "What happened to the emus? The end of the Emu War 🐦",
    "i48": 0
   },
@@ -1337,6 +1332,11 @@
   {
    "kanal": "Estudio Antiguo",
    "baslik": "¿Qué hace un líder turco en el Paseo de la Reforma? 🇲🇽 #shorts",
+   "i48": 0
+  },
+  {
+   "kanal": "Kozmos Lab TR",
+   "baslik": "Venüs'te bir gün, bir yıldan uzun ☀️ #shorts",
    "i48": 0
   },
   {

@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>Gürültü önleyici kulaklık — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 9.06], "B": [9.06, 12.04], "C": [12.04, 18.02], "D": [18.02, 24.56], "E": [24.56, 36.5], "F": [36.5, 47.06], "G": [47.06, 51.82], "H": [51.82, 56.28]};window.SUB=[[0.3, 1.88, "Uçakta motor uğulduyor."], [1.88, 5.16, "Kulaklığı takıp bir tuşa basıyorsun ve uğultu kayboluyor."], [5.16, 7.28, "Ama kulaklık sesi engellemiyor;"], [7.28, 9.06, "tam tersine, ses çıkarıyor."], [9.06, 12.04, "Önce dışarıdaki küçük mikrofon gürültüyü dinler."], [12.04, 15.14, "Sonra işlemci o dalganın ayna görüntüsünü üretir:"], [15.14, 18.02, "tepe olan yer çukur, çukur olan yer tepe olur."], [18.02, 20.82, "İki dalga kulağında buluşunca birbirini götürür."], [20.82, 22.82, "Artı bir, eksi bir: sıfır."], [22.82, 24.56, "Fizikte buna yıkıcı girişim denir."], [24.56, 27.46, "Kulaklık bunu neredeyse anında yapmak zorunda,"], [27.46, 30.64, "yoksa dalgalar kayar ve gürültü azalacağına artar."], [30.64, 34.14, "Bu yüzden en iyi motor uğultusu gibi kalın seslerde çalışır;"], [34.14, 36.5, "ince sesleri kulaklığın yastığı keser."], [36.5, 41.74, "Fikir, Paul Lueg'in 1936'da aldığı bir patente dayanıyor."], [41.74, 47.06, "1978'de bir uçak yolculuğunda Amar Bose, bunu kulaklığa taşımaya karar verdi."], [47.06, 49.7, "Yani bu sessizlik, sesin yokluğu değil;"], [49.7, 51.82, "iki sesin birbirini götürmesi."], [51.82, 54.4, "Sıradaki bölüm: GPS seni nasıl buluyor?"], [54.4, 55.78, "Takip et."]];window.DUR=56.28;</script>
+<script>
+let TM=window.TM||{A:[0,7],B:[7,10],C:[10,16],D:[16,23],E:[23,31],F:[31,38],G:[38,42],H:[42,46]},SUB=window.SUB||[],DUR=window.DUR||46;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+const OR='#ff9a5a',BL='#40c4ff',GR='#5dffb0',RD='#e8364f',YL='#ffcf5a';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+// gürültü dalgası: motor uğultusu (iki kalın bileşen + az pürüz)
+const nz=(x,t)=>Math.sin(x*.022-t*5)+.45*Math.sin(x*.047-t*8.3+1)+.12*Math.sin(x*.13-t*15);
+function wave(x0,x1,yc,amp,f,c,lw,a){g.globalAlpha=a==null?1:a;g.strokeStyle=c;g.lineWidth=lw||5;g.lineJoin='round';g.beginPath();for(let x=x0;x<=x1;x+=3){const y=yc+amp*f(x);x>x0?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();g.globalAlpha=1}
+function axis(x0,x1,y){g.strokeStyle='rgba(255,255,255,.18)';g.lineWidth=2;g.setLineDash([10,10]);g.beginPath();g.moveTo(x0,y);g.lineTo(x1,y);g.stroke();g.setLineDash([])}
+// kulaklık (yan görünüş, sol kap)
+function phones(cx,cy,s,glow){g.save();g.translate(cx,cy);g.scale(s,s);g.strokeStyle='#8fa6d8';g.lineWidth=18;g.lineCap='round';g.beginPath();g.arc(0,-40,190,Math.PI*1.08,Math.PI*1.92);g.stroke();
+ [-1,1].forEach(d=>{g.fillStyle='#10183a';g.strokeStyle='#8fa6d8';g.lineWidth=7;g.beginPath();g.roundRect(d*185-55,-60,110,190,40);g.fill();g.stroke();
+  if(glow){g.fillStyle='rgba(93,255,176,'+glow+')';g.beginPath();g.arc(d*185,35,22,0,TAU);g.fill()}});g.restore()}
+// büyük kesit: kulaklık kabı + kulak
+function cup(t,micOn,spk){const x=640,y=1000;g.fillStyle='#10183a';g.strokeStyle='#8fa6d8';g.lineWidth=7;g.beginPath();g.roundRect(x-40,y-260,230,520,60);g.fill();g.stroke();
+ g.fillStyle='#2a3566';g.beginPath();g.roundRect(x-70,y-220,40,440,20);g.fill();T('yastık',x-50,y+300,26,'#8fa6d8',600);
+ // kulak
+ g.strokeStyle='#e9c6a8';g.lineWidth=8;g.beginPath();g.ellipse(x-150,y,55,140,0,0,TAU);g.stroke();g.fillStyle='rgba(233,198,168,.15)';g.fill();T('kulak',x-150,y+190,28,'#e9c6a8',600);
+ // mikrofon (dış)
+ g.fillStyle=micOn?GR:'#5b6a99';g.beginPath();g.roundRect(x+170,y-150,40,60,12);g.fill();T('mikrofon',x+190,y-200,26,micOn?GR:'#8fa6d8',700);
+ // hoparlör
+ g.fillStyle=spk?BL:'#3b4a80';g.beginPath();g.moveTo(x-20,y-60);g.lineTo(x+40,y-100);g.lineTo(x+40,y+100);g.lineTo(x-20,y+60);g.closePath();g.fill();
+ // çip
+ g.fillStyle=spk?YL:'#5b6a99';g.fillRect(x+80,y-30,60,60);T('işlemci',x+110,y+70,24,spk?YL:'#8fa6d8',700)}
+function sceneA(t){const p=loc(t,'A');T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 3 · GÜRÜLTÜ ÖNLEYİCİ',W/2,440,RD,44);
+ // uçak penceresi
+ const cx=W/2,cy=760;g.fillStyle='#0d1533';g.strokeStyle='#8fa6d8';g.lineWidth=8;g.beginPath();g.roundRect(cx-150,cy-170,300,340,140);g.fill();g.stroke();
+ const sky=g.createLinearGradient(0,cy-150,0,cy+150);sky.addColorStop(0,'#1e3a8a');sky.addColorStop(1,'#60a5fa');g.fillStyle=sky;g.beginPath();g.roundRect(cx-120,cy-140,240,280,115);g.fill();
+ g.fillStyle='#cbd5e1';g.beginPath();g.moveTo(cx-120,cy+60);g.lineTo(cx+120,cy+10);g.lineTo(cx+120,cy+40);g.lineTo(cx-120,cy+90);g.fill();
+ const off=ease((p-0.384)*3);const amp=150*(1-off)+4;
+ wave(90,990,1200,amp*.6,x=>nz(x,t),OR,6);T(off<.5?'motor uğultusu':'…',W/2,1050,40,off<.5?OR:GR,700);
+ phones(W/2,1460,.75,off>0?off:0);if(off>0){g.globalAlpha=off;T('tuşa bastın',W/2,1600,40,GR,700);g.globalAlpha=1}
+ if(p>0.57){g.globalAlpha=ease((p-0.57)*5);g.fillStyle='rgba(7,12,32,.97)';g.fillRect(0,1000,W,330);T('engellemiyor…',W/2,1130,64,'#fff',800);T('ses çıkarıyor!',W/2,1240,76,YL,900);g.globalAlpha=1}}
+function sceneB(t){const p=loc(t,'B');T('1 · Mikrofon dinler',W/2,250,56,'#fff',800);T('dışarıdaki gürültüyü yakalar',W/2,330,36,'#c9d4f2',500);
+ cup(t,p>.3,false);const reach=200+800*ease(p*1.3);g.save();g.beginPath();g.rect(830,0,250,H);g.clip();wave(1080-reach,1080,850,40,x=>nz(x,t),OR,6);g.restore();
+ if(p>.3){g.globalAlpha=ease((p-.3)*3);g.strokeStyle=GR;g.lineWidth=3;for(let i=0;i<3;i++){const r=((t*90+i*30)%90)+20;g.globalAlpha=(1-r/110)*ease((p-.3)*3);g.beginPath();g.arc(830,880,r,0,TAU);g.stroke()}g.globalAlpha=1}}
+function sceneC(t){const p=loc(t,'C');T('2 · Ayna dalga',W/2,250,56,'#fff',800);T('işlemci gürültünün tersini üretir',W/2,330,36,'#c9d4f2',500);
+ axis(90,990,760);wave(90,990,760,110,x=>nz(x,t),OR,6);T('gürültü',110,600,34,OR,700,'left');
+ const k=ease(p*1.6);axis(90,990,1200);wave(90,90+900*k,1200,110,x=>-nz(x,t),BL,6);T('ters dalga',110,1040,34,BL,700,'left');
+ if(p>.4){g.globalAlpha=ease((p-.4)*3);const xs=[300,640];xs.forEach(x=>{let best=0;});
+  pill('tepe ⟶ çukur',W/2,1440,'#2a5bd7',42);pill('çukur ⟶ tepe',W/2,1560,'#2a5bd7',42);g.globalAlpha=1}}
+function sceneD(t){const p=loc(t,'D');T('3 · Buluşunca: sıfır',W/2,250,56,'#fff',800);T('yıkıcı girişim',W/2,330,40,YL,700);
+ const m=ease(p*1.8);const y1=700+260*m,y2=1220-260*m;
+ if(m<1){wave(90,990,y1,100,x=>nz(x,t),OR,6,1-m*.6);wave(90,990,y2,100,x=>-nz(x,t),BL,6,1-m*.6)}
+ axis(90,990,960);const e=Math.max(0,1-m);wave(90,990,960,100*e*.15+0,x=>nz(x,t),GR,8);
+ if(p>.45){g.globalAlpha=ease((p-.45)*3);T('+1',W/2-240,1360,90,OR,900);T('+',W/2-120,1360,70,'#fff',700);T('−1',W/2,1360,90,BL,900);T('=',W/2+120,1360,70,'#fff',700);T('0',W/2+240,1360,100,GR,900);g.globalAlpha=1}
+ if(p>.7){g.globalAlpha=ease((p-.7)*4);pill('sessizlik',W/2,1520,'#1f8a4c',50);g.globalAlpha=1}}
+function sceneE(t){const p=loc(t,'E');T('4 · Hız şart',W/2,250,56,'#fff',800);T('neredeyse anında yapılmalı',W/2,330,36,'#c9d4f2',500);
+ if(p<0.509){const q=ease(p/0.509*1.2);const sh=q*70;axis(90,990,640);wave(90,990,640,70,x=>nz(x,t),OR,5,.8);wave(90,990,640,70,x=>-nz(x-sh,t),BL,5,.8);
+  axis(90,990,960);wave(90,990,960,70,x=>nz(x,t)-nz(x-sh,t),q>.3?RD:GR,7);T(q>.3?'geç kalırsa: gürültü artar':'zamanında: sıfır',W/2,1130,42,q>.3?RD:GR,800)}
+ else{const k=ease((p-0.509)*4);g.globalAlpha=k;
+  T('kalın ses',300,560,44,OR,800);T('motor uğultusu',300,615,30,'#c9d4f2',500);wave(90,510,800,80,x=>Math.sin(x*.02-t*4),OR,6);pill('kulaklık siler',300,960,'#1f8a4c',36);
+  T('ince ses',780,560,44,'#ffd0e0',800);T('konuşma, tıkırtı',780,615,30,'#c9d4f2',500);wave(570,990,800,60,x=>Math.sin(x*.12-t*14),'#ffd0e0',4);pill('yastık keser',780,960,'#2a5bd7',36);
+  g.strokeStyle='rgba(255,255,255,.2)';g.lineWidth=2;g.beginPath();g.moveTo(540,540);g.lineTo(540,1020);g.stroke();g.globalAlpha=1}}
+function card(x,y,yr,l1,l2,c,a){g.globalAlpha=a;g.fillStyle='#121a3a';g.beginPath();g.roundRect(x-400,y-150,800,300,28);g.fill();g.strokeStyle=c;g.lineWidth=4;g.stroke();T(yr,x,y-75,84,c,900);T(l1,x,y+20,40,'#fff',700);T(l2,x,y+80,32,'#c9d4f2',500);g.globalAlpha=1}
+function sceneF(t){const p=loc(t,'F');T('Fikir nereden geldi?',W/2,250,56,'#fff',800);
+ 
+ card(W/2,680,'1936','Paul Lueg patenti','mikrofon + ters dalga + hoparlör',YL,ease(p*3));
+ card(W/2,1150,'1978','Amar Bose, bir uçakta','fikri kulaklığa taşımaya karar verir',BL,ease((p-.4)*3))}
+function sceneG(t){const p=loc(t,'G');T('Sessizlik =',W/2,520,70,'#fff',800);T('iki sesin',W/2,620,70,'#fff',800);T('birbirini götürmesi',W/2,720,70,YL,900);
+ const k=ease(p*1.5);wave(90,990,1050,90*(1-k),x=>nz(x,t),OR,5,.8);wave(90,990,1050,90*(1-k),x=>-nz(x,t),BL,5,.8);if(k>.6){axis(90,990,1050);wave(90,990,1050,0,x=>0,GR,8)}
+ phones(W/2,1380,.7,.8)}
+function sceneH(t){T('Sıradaki bölüm',W/2,520,56,'#8fa6d8',600);T('GPS seni',W/2,640,76,'#fff',800);T('nasıl buluyor?',W/2,740,76,'#fff',800);
+ const cx=W/2,cy=1170;[[cx-230,cy-120,220],[cx+240,cy-80,250],[cx+20,cy+210,200]].forEach(([x,y,r],i)=>{g.strokeStyle=[BL,OR,GR][i];g.lineWidth=4;g.globalAlpha=.85;g.beginPath();g.arc(x,y,r*(.85+.15*Math.sin(t*2+i)),0,TAU);g.stroke();g.globalAlpha=1;g.fillStyle=[BL,OR,GR][i];g.fillRect(x-14,y-14,28,28)});
+ g.fillStyle=RD;g.beginPath();g.arc(cx,cy+5,16,0,TAU);g.fill();pill('Takip et',W/2,1560,RD,58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=1745-(lines.length-1)*30;lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);const S=[['A',sceneA],['B',sceneB],['C',sceneC],['D',sceneD],['E',sceneE],['F',sceneF],['G',sceneG],['H',sceneH]];let f=sceneA;for(const[k,fn]of S)if(t>=TM[k][0])f=fn;f(t);
+ if(t<TM.H[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>MP3 — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 9.36], "B": [9.36, 19.7], "C": [19.7, 26.44], "D": [26.44, 33.92], "E": [33.92, 40.5]};window.SUB=[[0.3, 3.86, "Üç dakikalık bir şarkı, CD'de yaklaşık 32 MB."], [3.86, 6.26, "Telefonunda ise sadece 3 MB."], [6.26, 9.36, "Peki aradaki 29 MB nereye gitti?"], [9.36, 11.0, "Cevap: dönen çemberler."], [11.0, 17.02, "MP3, şarkıyı binlerce ayrı frekansa, yani farklı hızlarda dönen dalgalara ayırır."], [17.02, 19.7, "Bu, Fourier ailesinden bir matematik."], [19.7, 21.84, "Sonra kulağının bir zaafını kullanır:"], [21.84, 24.44, "Güçlü bir ses, yanındaki zayıf sesi bastırır."], [24.44, 26.44, "Bastırılan sesi zaten duymazsın."], [26.44, 28.78, "MP3 de duyamayacağın bu parçaları siler."], [28.78, 33.92, "Sonuç: Dosya yaklaşık 10 kat küçülür, kulağın ise farkı neredeyse hiç anlamaz."], [33.92, 37.68, "Sıradaki bölüm: Shazam bir şarkıyı birkaç saniyede nasıl tanır?"], [37.68, 38.76, "Takip et."]];window.DUR=40.5;</script>
+<script>
+let TM=window.TM||{A:[0,9],B:[9,19],C:[19,29],D:[29,37],E:[37,42]},SUB=window.SUB||[],DUR=window.DUR||42;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+const HAR=[[1,1,0],[2,.55,1.1],[3,.38,2.2],[5,.25,.4],[7,.16,2.9],[11,.1,1.7]];
+function wave(x,u,n){let y=0;for(let i=0;i<n;i++){const[f,a,p]=HAR[i];y+=a*Math.sin(TAU*f*x+p+u)}return y}
+function sceneA(t){const p=loc(t,'A');T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 1 · MP3',W/2,440,'#e8364f',46);
+ const k1=ease(p*3),k2=ease(p*3-.9);g.fillStyle='rgba(255,255,255,.08)';g.beginPath();g.roundRect(120,700,840,120,24);g.fill();g.fillStyle='#40c4ff';g.beginPath();g.roundRect(120,700,840*k1,120,24);g.fill();T('CD',150,640,48,'#fff',800,'left');T(Math.round(32*k1)+' MB',W-150,640,56,'#40c4ff',800,'right');
+ g.fillStyle='rgba(255,255,255,.08)';g.beginPath();g.roundRect(120,1000,840,120,24);g.fill();g.fillStyle='#5dffb0';g.beginPath();g.roundRect(120,1000,Math.max(1,840*3/32*k2),120,24);g.fill();T('MP3',150,940,48,'#fff',800,'left');T((k2>0?Math.round(3*k2):0)+' MB',W-150,940,56,'#5dffb0',800,'right');
+ if(p>.6){const k=ease((p-.6)*4);g.globalAlpha=k;T('29 MB',W/2,1280,120,'#ff9a5a',900);T('nereye gitti?',W/2,1390,64,'#fff',800);g.globalAlpha=1}
+ T('3 dakikalık şarkı · yaklaşık değerler',W/2,1180,30,'rgba(200,210,240,.6)',500)}
+function sceneB(t){const p=loc(t,'B'),u=t*1.2;T('Cevap: dönen çemberler',W/2,250,64,'#fff',800);
+ const cx=230,cy=640;let x=cx,y=cy;const sc=70;for(let i=0;i<HAR.length;i++){const[f,a,ph]=HAR[i],r=a*sc,an=TAU*f*(-u*.25)+ph;const nx=x+r*Math.cos(an),ny=y+r*Math.sin(an);g.strokeStyle='rgba(170,190,255,.3)';g.lineWidth=2;g.beginPath();g.arc(x,y,r,0,TAU);g.stroke();g.strokeStyle=i%2?'#40c4ff':'#ff9a5a';g.lineWidth=3;g.beginPath();g.moveTo(x,y);g.lineTo(nx,ny);g.stroke();x=nx;y=ny}
+ g.strokeStyle='rgba(255,255,255,.35)';g.setLineDash([6,6]);g.beginPath();g.moveTo(x,y);g.lineTo(470,y);g.stroke();g.setLineDash([]);g.fillStyle='#ff4d6d';g.beginPath();g.arc(x,y,9,0,TAU);g.fill();
+ g.beginPath();for(let i=0;i<=560;i+=3){let yy=0,tt=-u*.25-i/560*.75;for(const[f,a,ph]of HAR)yy+=a*Math.sin(TAU*f*tt+ph);const q=[470+i,cy+yy*sc];i?g.lineTo(...q):g.moveTo(...q)}g.strokeStyle='#5dffb0';g.lineWidth=5;g.stroke();T('şarkının dalgası',760,440,34,'#5dffb0',600);
+ const k=ease((p-.35)*3);if(k>0){g.globalAlpha=k;HAR.forEach(([f,a,ph],i)=>{const y0=860+i*100;g.strokeStyle=i%2?'#40c4ff':'#ff9a5a';g.lineWidth=3;g.beginPath();for(let j=0;j<=700;j+=4){const q=[300+j,y0+a*48*Math.sin(TAU*f*(j/700*1.2-u*.25)+ph)];j?g.lineTo(...q):g.moveTo(...q)}g.stroke();T((f*110)+' Hz',260,y0,32,'#c9d4f2',600,'right')});g.globalAlpha=1;
+  T('= binlerce ayrı frekans',W/2,1440,44,'#fff',700)}
+ if(p>.75){g.globalAlpha=ease((p-.75)*5);pill('Fourier ailesinden bir matematik',W/2,1550,'#2a5bd7',40);g.globalAlpha=1}}
+const BARS=[.45,.55,.3,.42,1,.5,.35,.28,.22,.5,.58,.3,.25,.85,.35,.22,.18,.4,.46,.35,.38,.3];
+const LOUD=[4,13];function mask(i){let m=0;for(const L of LOUD){const d=i-L;m=Math.max(m,BARS[L]*(d>=0?Math.exp(-d/3.2):Math.exp(d/1.4))*.95)}return m}
+function spectrum(p,del,t){const x0=110,w=860/BARS.length,base=1260,hh=520;BARS.forEach((v,i)=>{const m=mask(i),hid=!LOUD.includes(i)&&v<m;let a=1,col='#40c4ff';if(LOUD.includes(i))col='#ffcf5a';else if(hid&&p>.45){col='#6c7593';a=del?1-ease(del*1.5):1}
+ const k=ease(p*2.2-i*.03);g.globalAlpha=a;g.fillStyle=col;g.beginPath();g.roundRect(x0+i*w+4,base-v*hh*k,w-8,v*hh*k,6);g.fill();g.globalAlpha=1;
+ if(hid&&del&&del>.2){g.strokeStyle='rgba(255,90,90,'+(1-ease(del*1.5))+')';g.lineWidth=4;g.beginPath();g.moveTo(x0+i*w+6,base-v*hh-6);g.lineTo(x0+i*w+w-6,base-6);g.stroke()}});
+ if(p>.3&&!del){g.globalAlpha=ease((p-.3)*4);g.strokeStyle='#ff9a5a';g.lineWidth=4;g.setLineDash([10,8]);g.beginPath();for(let i=0;i<BARS.length;i+=.2){const q=[x0+i*w+w/2,base-mask(i)*hh];i?g.lineTo(...q):g.moveTo(...q)}g.stroke();g.setLineDash([]);g.globalAlpha=1}
+ T('← pes sesler',x0,base+50,30,'#8fa6d8',500,'left');T('tiz sesler →',W-x0,base+50,30,'#8fa6d8',500,'right')}
+function sceneC(t){const p=loc(t,'C');T('Kulağının zaafı',W/2,250,68,'#fff',800);T('güçlü ses, yanındaki zayıf sesi bastırır',W/2,330,38,'#c9d4f2',500);spectrum(Math.min(1,p*1.3),0,t);
+ if(p>.3){g.globalAlpha=ease((p-.3)*4);[['güçlü ses','#ffcf5a',580],['bastırma eğrisi','#ff9a5a',650],['duyulmayan sesler','#8a93b0',720]].forEach(([s,c,y])=>{g.fillStyle=c;g.beginPath();g.arc(170,y,14,0,TAU);g.fill();T(s,200,y,38,'#e9eefc',600,'left')});g.globalAlpha=1}}
+function sceneD(t){const p=loc(t,'D');T('MP3 bunları siler',W/2,250,68,'#fff',800);spectrum(1,Math.max(.001,p*1.6),t);
+ const mb=32-29*ease(p*1.4);T(mb.toFixed(mb<10?1:0)+' MB',W/2,560,150,'#5dffb0',900);
+ if(p>.55){g.globalAlpha=ease((p-.55)*4);pill('yaklaşık 10 kat küçük',W/2,1430,'#1f8a4c',52);T('kulağın farkı neredeyse hiç anlamaz',W/2,1540,40,'#e9eefc',600);g.globalAlpha=1}}
+function sceneE(t){const p=loc(t,'E');T('Sıradaki bölüm',W/2,520,56,'#8fa6d8',600);T('Shazam bir şarkıyı',W/2,640,76,'#fff',800);T('nasıl tanır?',W/2,740,76,'#fff',800);
+ for(let i=0;i<5;i++){const r=((t*120+i*90)%450);g.strokeStyle='rgba(64,196,255,'+(1-r/450)+')';g.lineWidth=4;g.beginPath();g.arc(W/2,1080,r,0,TAU);g.stroke()}
+ pill('Takip et',W/2,1420,'#e8364f',58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=1745-(lines.length-1)*30;lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);if(t<TM.B[0])sceneA(t);else if(t<TM.C[0])sceneB(t);else if(t<TM.D[0])sceneC(t);else if(t<TM.E[0])sceneD(t);else sceneE(t);
+ if(t<TM.E[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

@@ -1,0 +1,39 @@
+{
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Bu Matematik Hayatında Nerede?",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji meraklıları, öğrenciler",
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy), telif yok",
+  "gorsel": "kodla çizilmiş özgün animasyon (HTML canvas), dış görsel yok, marka logosu yok",
+  "ses": "ElevenLabs klon ses — Ömer Ekinci'nin kendi sesi (benim2), abonelik, ticari kullanım"
+ },
+ "ureten": "Claude",
+ "kod": "KZ_MAT_02_SHAZAM",
+ "konu": "Shazam şarkı tanıma ve Fourier",
+ "amac": "Serinin 2. bölümü: Fourier'in parmak izi/arama alanındaki kullanımı (Shazam). Uzay temalı 'takımyıldız haritası' bağlantısı Kozmos Lab kimliğine uyar. Ölçüt: izlenme süresi, 3. bölüme (gürültü önleyici kulaklık) geçiş.",
+ "baslik": "Shazam şarkıyı nasıl tanır? Bir takımyıldız haritası ✨",
+ "aciklama": "Kafede bir şarkı çalıyor; telefonunu kaldırıyorsun ve birkaç saniyede şarkının adı ekranda. Nasıl?\n\n1) Fourier: ses an be an frekanslarına ayrılır, bir zaman–frekans haritası çıkar.\n2) En güçlü noktalar kalır, gerisi atılır. Shazam'ın kurucularından Avery Wang buna 'takımyıldız haritası' (constellation map) der.\n3) Noktalar ikişer bağlanır; her çift küçük bir parmak izidir.\n4) Bu parmak izleri, milyonlarca şarkı arasında aynı aralıklarla dizilmiş olanı bulur. Gürültülü yerde bile çoğu zaman çalışır, çünkü en güçlü noktalar gürültünün üstünde kalır.\n\nBu Matematik Hayatında Nerede? · Bölüm 2\nSıradaki bölüm: Gürültü önleyici kulaklık sesi nasıl yok eder?\n\n📚 Kaynak\n• Avery Li-Chun Wang, 'An Industrial-Strength Audio Search Algorithm', ISMIR 2003\n\n🎨 Animasyon kodla çizilmiştir; Shazam markası/logosu kullanılmamıştır. Seslendirme yapay zekâ ile üretilmiş klon sestir (kanal sahibinin kendi sesi). Müzik özgün olarak üretilmiştir.\n\n#shazam #fourier #matematik #bilim #kozmoslab",
+ "etiketler": [
+  "shazam",
+  "fourier",
+  "şarkı tanıma",
+  "matematik",
+  "spektrogram",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "Avery Li-Chun Wang — An Industrial-Strength Audio Search Algorithm (ISMIR 2003)",
+  "DXOMARK — How do algorithms listen to music?"
+ ],
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MAT_02_SHAZAM_kaynak.mp4"
+}

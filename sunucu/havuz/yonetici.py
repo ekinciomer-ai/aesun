@@ -26,7 +26,7 @@ KOK = "/opt/aesun/havuz"
 IST = timezone(timedelta(hours=3))
 IDX = f"{KOK}/havuz.json"
 GEREKLI = ["kod", "kanal", "platformlar", "format", "seri", "amac", "baslik", "aciklama", "dil", "sentetik", "kaynaklar", "lisans", "kaynak_dosya"]
-KANALLAR = {"TR": "Antik Stüdyo", "EN": "Ancient Studio", "ES": "Estudio Antiguo", "KZ_TR": "Kozmos Lab TR", "KZ_EN": "Kozmos Lab", "OD": "Ömür Dediğin", "YR": "Yeraltı"}
+KANALLAR = {"TR": "Antik Stüdyo", "EN": "Ancient Studio", "ES": "Estudio Antiguo", "KZ_TR": "Kozmos Lab TR", "KZ_EN": "Kozmos Lab", "OD": "Ömür Dediğin", "YR": "Yeraltı", "NY": "Nasıl Yapıldı"}
 PLATFORMLAR = {"youtube", "tiktok", "instagram"}
 # Odak dönemi (12 Ara 2026'ya kadar): Antik Stüdyo yalnız bu seriler
 ODAK_SON = "2026-12-12"
@@ -44,7 +44,7 @@ MIN_ARA_SAAT = 3             # aynı kanal + platformda iki yayın arası en az 
 SINIR_DOSYA = f"{KOK}/sinirlar.json"   # {"kanal": {"acilis": "YYYY-MM-DD", "gunluk": n, "ara_saat": n, "saatler": ["19:30"]}, "varsayilan": {...}}
 # Plan saatleri (Türkiye saati): kitleye göre varsayılan yayın saatleri; sinirlar.json "saatler" ile değiştirilebilir.
 PLAN_SAAT = {"OD": ["10:30", "20:30"], "KZ_TR": ["19:30", "12:30"], "KZ_EN": ["02:30", "21:30"], "TR": ["19:30", "13:00"],
-             "EN": ["02:00", "22:00"], "ES": ["03:00", "23:00"], "YR": ["20:00", "13:00"]}
+             "EN": ["02:00", "22:00"], "ES": ["03:00", "23:00"], "YR": ["20:00", "13:00"], "NY": ["19:30", "13:00"]}
 PLAN_DOSYA = f"{KOK}/plan.json"
 
 

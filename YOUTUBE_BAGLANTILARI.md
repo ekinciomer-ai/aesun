@@ -1,6 +1,6 @@
 # YouTube bağlantıları (sunucu)
 
-Son güncelleme: 9 Kasım 2026
+Son güncelleme: 16 Kasım 2026
 
 Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir yapay zekâ ajanının (Antigravity, Claude vb.) kanallarla çalışırken izleyeceği kuralları içerir. **Bu dosyada hiçbir şifre, anahtar ya da token yoktur ve eklenmemelidir.**
 
@@ -16,6 +16,7 @@ Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir
 | Ömür Dediğin (65+ nostalji, TR) | `UCg75Mvb6C8CBSJPeuwzBFZA` · @omurdedigin70 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (10 Kas 2026) · kuyruk anahtarı `OD` |
 | Kara Kutu Mayday (TR, kaza/afet analizi) | `UCYtvxRIP1eF3-f0TAqh2PvA` · @KaraKutu7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
 | Black Box Files Mayday (EN) | `UCsV0ubiBEy8dxigNk8I_LqA` · @BlackBoxFiles7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
+| Nasıl Yapıldı (TR, yapılar nasıl yapıldı) | `UCscZRPONJahcgtZhTNeUcRA` · @nasilyapildiogren | nasilyapildiogren@gmail.com (kişisel kanal) | Bağlı (16 Kas 2026) · kuyruk anahtarı `NY` · yeni hesap kilidi 16.12'ye kadar günde 1 |
 | Caja Negra (ES) | `UCM6LhKp6tDx4ddZ65oZUCvQ` · @CajaNegra_7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
 
 ## Google Cloud projesi

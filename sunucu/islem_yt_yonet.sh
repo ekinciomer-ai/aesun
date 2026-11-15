@@ -22,6 +22,7 @@ KANALLAR = {
     "UC7o3DG9m1gBbvMjFZjB5KEg": "Kozmos Lab TR",
     "UC41-Z82jCQ8955az6JUDIAw": "Kozmos Lab",
     "UCg75Mvb6C8CBSJPeuwzBFZA": "Ömür Dediğin",
+    "UCscZRPONJahcgtZhTNeUcRA": "Nasıl Yapıldı",
 }
 MAKS_GIZLE = 3
 MAKS_SAAT = 15

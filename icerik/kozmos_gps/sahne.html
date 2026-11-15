@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>GPS — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 7.32], "B": [7.32, 14.86], "C": [14.86, 22.04], "D": [22.04, 39.2], "E": [39.2, 50.1], "F": [50.1, 54.74], "G": [54.74, 60.48]};window.SUB=[[0.3, 4.24, "Telefonundaki mavi nokta, nerede olduğunu birkaç metre farkla biliyor."], [4.24, 7.32, "Ama telefon seni görmüyor; sadece saat dinliyor."], [7.32, 11.28, "Yaklaşık yirmi bin kilometre yukarıda, otuzdan fazla uydu dönüyor."], [11.28, 14.86, "Her biri durmadan şunu yayınlar: ben buradayım, saat tam şu."], [14.86, 18.66, "Telefonun, bu sinyalin yolda ne kadar kaldığını ölçer."], [18.66, 22.04, "Süreyi ışık hızıyla çarpınca, uyduya olan uzaklık çıkar."], [22.04, 25.34, "Tek uydu, seni dev bir kürenin üzerinde bir yere koyar."], [25.34, 27.28, "İkinci küre bunu bir çembere indirir."], [27.28, 30.94, "Üçüncüsü iki noktaya; biri uzayda kalır, öbürü sensin."], [30.94, 35.22, "Dördüncü uydu ise telefonundaki ucuz saatin hatasını düzeltir."], [35.22, 39.2, "Buna trilaterasyon denir: açı değil, uzaklık ölçerek yer bulmak."], [39.2, 45.92, "Bir sürpriz daha: uydudaki saatler, görelilik yüzünden günde otuz sekiz mikrosaniye hızlı işler."], [45.92, 50.1, "Düzeltilmese, konumun her gün yaklaşık on kilometre kayardı."], [50.1, 54.74, "Yani haritadaki mavi nokta; biraz geometri, biraz ışık hızı, biraz da Einstein."], [54.74, 58.54, "Sıradaki bölüm: QR kod yırtılsa bile neden okunur?"], [58.54, 59.98, "Takip et."]];window.DUR=60.48;</script>
+<script>
+let TM=window.TM||{A:[0,6],B:[6,12],C:[12,18],D:[18,34],E:[34,42],F:[42,46],G:[46,50]},SUB=window.SUB||[],DUR=window.DUR||46;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+const OR='#ff9a5a',BL='#40c4ff',GR='#5dffb0',RD='#e8364f',YL='#ffcf5a';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+
+const st=i=>SUB[i]?SUB[i][0]:0;const since=(t,i,d)=>ease((t-st(i))/(d||1));
+function phone(cx,cy,s){g.save();g.translate(cx,cy);g.scale(s,s);g.fillStyle='#10183a';g.strokeStyle='#8fa6d8';g.lineWidth=7;g.beginPath();g.roundRect(-150,-280,300,560,40);g.fill();g.stroke();
+ g.save();g.beginPath();g.roundRect(-130,-250,260,500,24);g.clip();g.fillStyle='#16223f';g.fillRect(-130,-250,260,500);
+ g.strokeStyle='rgba(143,166,216,.35)';g.lineWidth=10;[[-130,-120,130,-40],[-60,-250,-20,250],[40,-250,90,250],[-130,120,130,60]].forEach(([a,b,c,d])=>{g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke()});g.restore();g.restore()}
+function dot(x,y,t,r){const p=(t*1.2)%1;g.fillStyle='rgba(64,196,255,'+(.35*(1-p))+')';g.beginPath();g.arc(x,y,r+40*p,0,TAU);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(x,y,r+5,0,TAU);g.fill();g.fillStyle=BL;g.beginPath();g.arc(x,y,r,0,TAU);g.fill()}
+function sat(x,y,s,c){g.save();g.translate(x,y);g.scale(s,s);g.fillStyle=c||'#c9d4f2';g.fillRect(-18,-18,36,36);g.fillStyle='#2a5bd7';g.fillRect(-70,-12,44,24);g.fillRect(26,-12,44,24);g.strokeStyle='rgba(255,255,255,.4)';g.lineWidth=2;g.strokeRect(-70,-12,44,24);g.strokeRect(26,-12,44,24);g.restore()}
+function earth(cx,cy,r){const gr=g.createRadialGradient(cx-r*.3,cy-r*.3,r*.1,cx,cy,r);gr.addColorStop(0,'#3b82f6');gr.addColorStop(1,'#0b2a6b');g.fillStyle=gr;g.beginPath();g.arc(cx,cy,r,0,TAU);g.fill();g.fillStyle='rgba(93,255,176,.35)';[[-.3,-.2,.35,.2],[.25,.1,.25,.3],[-.1,.45,.2,.12]].forEach(([a,b,c,d])=>{g.beginPath();g.ellipse(cx+a*r,cy+b*r,c*r,d*r,.4,0,TAU);g.fill()})}
+function sceneA(t){const p=loc(t,'A');T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 4 · GPS',W/2,440,RD,46);
+ phone(W/2,960,1);dot(W/2+10,960,t,18);
+ if(t>st(1)){const k=since(t,1,.6);g.globalAlpha=k;g.fillStyle='rgba(7,12,32,.9)';g.beginPath();g.roundRect(170,1300,740,200,30);g.fill();T('seni görmüyor…',W/2,1360,52,'#fff',800);T('saat dinliyor ⏱',W/2,1440,56,YL,900);g.globalAlpha=1}}
+function sceneB(t){T('20.200 km yukarıda',W/2,250,56,'#fff',800);T('30\'dan fazla uydu',W/2,330,40,'#c9d4f2',500);
+ const cx=W/2,cy=1000;earth(cx,cy,230);g.strokeStyle='rgba(143,166,216,.25)';g.lineWidth=2;
+ for(let o=0;o<3;o++){g.beginPath();g.ellipse(cx,cy,400,400*[.35,.75,1][o],o*1.05,0,TAU);g.stroke()}
+ for(let i=0;i<8;i++){const o=i%3,a=t*.35+i*.8,ry=400*[.35,.75,1][o],ex=400*Math.cos(a),ey=ry*Math.sin(a),r=o*1.05;sat(cx+ex*Math.cos(r)-ey*Math.sin(r),cy+ex*Math.sin(r)+ey*Math.cos(r),.55)}
+ if(t>st(3)){const k=since(t,3,.6);g.globalAlpha=k;g.fillStyle='#121a3a';g.strokeStyle=YL;g.lineWidth=4;g.beginPath();g.roundRect(150,1480,780,170,28);g.fill();g.stroke();T('📡 "Ben buradayım,',W/2,1535,44,'#fff',700);T('saat tam 12:00:00,000000"',W/2,1600,40,YL,800);g.globalAlpha=1}}
+function sceneC(t){T('Gecikme × ışık hızı',W/2,250,56,'#fff',800);T('= uzaklık',W/2,330,44,GR,800);
+ const sx=W/2,sy=560,py=1180;sat(sx,sy,1);phone(sx,py+90,.35);
+ const per=1.2,ph=((t-TM.C[0])%per)/per;g.fillStyle=YL;g.beginPath();g.arc(sx,sy+40+(py-sy-60)*ph,12,0,TAU);g.fill();g.strokeStyle='rgba(255,207,90,.4)';g.setLineDash([12,12]);g.lineWidth=3;g.beginPath();g.moveTo(sx,sy+40);g.lineTo(sx,py-20);g.stroke();g.setLineDash([]);
+ T('0,067 saniye',sx+40,(sy+py)/2,40,YL,800,'left');
+ if(t>st(5)){const k=since(t,5,.7);g.globalAlpha=k;g.fillStyle='#121a3a';g.beginPath();g.roundRect(110,1420,860,220,28);g.fill();T('0,067 s × 300.000 km/s',W/2,1490,46,'#fff',800);T('≈ 20.200 km',W/2,1575,64,GR,900);g.globalAlpha=1}}
+function sceneD(t){const p=loc(t,'D');T('Üç kenar ölçümü',W/2,250,56,'#fff',800);T('trilaterasyon',W/2,330,40,YL,700);
+ const me=[570,1010];const C=[[[300,760],BL],[[840,760],OR],[[560,1330],GR]];
+ C.forEach(([[x,y],c],i)=>{if(t<st(6+i))return;const k=since(t,6+i,.8);const r=Math.hypot(me[0]-x,me[1]-y);g.strokeStyle=c;g.lineWidth=5;g.globalAlpha=.9;g.beginPath();g.arc(x,y,r*k,0,TAU);g.stroke();g.fillStyle=c;g.fillRect(x-14,y-14,28,28);g.globalAlpha=1});
+ if(t>st(7)&&t<st(8)){g.globalAlpha=since(t,7,.6);pill('artık bir çember',W/2,1520,'#2a5bd7',40);g.globalAlpha=1}
+ if(t>st(8)){dot(me[0],me[1],t,14);g.globalAlpha=since(t,8,.6);g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=3;g.beginPath();g.arc(570,510,22,0,TAU);g.stroke();T('uzayda',570,465,30,'#8fa6d8',700);T('sen',me[0]+60,me[1]-40,38,'#fff',800,'left');g.globalAlpha=1}
+ if(t>st(9)&&t<st(10)){g.globalAlpha=since(t,9,.6);pill('4. uydu: telefonun saatini düzeltir',W/2,1540,'#1f8a4c',36);g.globalAlpha=1}
+ if(t>st(10)){g.globalAlpha=since(t,10,.6);pill('açı değil, uzaklık',W/2,1540,RD,42);g.globalAlpha=1}}
+function sceneE(t){T('Einstein sürprizi',W/2,250,56,'#fff',800);T('uydudaki saat günde hızlı işler',W/2,330,36,'#c9d4f2',500);
+ g.fillStyle='#121a3a';g.strokeStyle=YL;g.lineWidth=5;g.beginPath();g.arc(W/2,700,200,0,TAU);g.fill();g.stroke();for(let i=0;i<12;i++){const a=i/12*TAU;g.fillStyle='#8fa6d8';g.fillRect(W/2+170*Math.cos(a)-4,700+170*Math.sin(a)-4,8,8)}
+ const a=t*3;g.strokeStyle='#fff';g.lineWidth=8;g.beginPath();g.moveTo(W/2,700);g.lineTo(W/2+140*Math.cos(a),700+140*Math.sin(a));g.stroke();T('+38 µs / gün',W/2,990,64,YL,900);
+ if(t>st(12)){const k=since(t,12,3);g.strokeStyle='rgba(143,166,216,.3)';g.lineWidth=8;[[100,1250,980,1200],[300,1100,360,1650],[700,1100,640,1650]].forEach(([a1,b,c,d])=>{g.beginPath();g.moveTo(a1,b);g.lineTo(c,d);g.stroke()});
+  const x0=330,x1=x0+480*k;g.globalAlpha=.4;dot(x0,1230,t,12);g.globalAlpha=1;dot(x1,1230+150*k,t,14);g.strokeStyle=RD;g.setLineDash([10,10]);g.lineWidth=3;g.beginPath();g.moveTo(x0,1230);g.lineTo(x1,1230+150*k);g.stroke();g.setLineDash([]);T('düzeltilmese: ~10 km / gün',W/2,1540,44,RD,800)}}
+function sceneF(t){T('Mavi nokta =',W/2,500,66,'#fff',800);[['geometri',BL],['ışık hızı',YL],['Einstein',GR]].forEach(([s,c],i)=>{if(t<TM.F[0]+i*.9)return;g.globalAlpha=ease((t-TM.F[0]-i*.9)*2);pill(s,W/2,700+i*170,c==YL?'#8a6a10':c==GR?'#1f8a4c':'#2a5bd7',56);g.globalAlpha=1});dot(W/2,1330,t,22)}
+function sceneG(t){T('Sıradaki bölüm',W/2,520,56,'#8fa6d8',600);T('QR kod yırtılsa bile',W/2,640,68,'#fff',800);T('neden okunur?',W/2,740,68,'#fff',800);
+ const n=21,s=26,x0=W/2-n*s/2,y0=880;for(let i=0;i<n;i++)for(let j=0;j<n;j++){const f=(i<7&&j<7)||(i<7&&j>13)||(i>13&&j<7);let on=f?((i%6==0||j%6==0||(i>1&&i<5&&j>1&&j<5)||(i>15&&i<19&&j>1&&j<5)||(i>1&&i<5&&j>15&&j<19)||i==20||j==20)&&!(i==6&&j>13)):R(i*31+j)>.5;
+ if(f){const ii=i>13?i-14:i,jj=j>13?j-14:j;on=(ii==0||ii==6||jj==0||jj==6||(ii>1&&ii<5&&jj>1&&jj<5))}
+ const torn=(i+j>28+3*Math.sin(j))&&((t*.6)%2>.6);if(on&&!torn){g.fillStyle='#fff';g.fillRect(x0+j*s,y0+i*s,s,s)}}
+ pill('Takip et',W/2,1560,RD,58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=1745-(lines.length-1)*30;lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);const S=[['A',sceneA],['B',sceneB],['C',sceneC],['D',sceneD],['E',sceneE],['F',sceneF],['G',sceneG]];let f=sceneA;for(const[k,fn]of S)if(t>=TM[k][0])f=fn;f(t);
+ if(t<TM.G[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

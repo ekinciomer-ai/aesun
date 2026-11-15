@@ -1,0 +1,34 @@
+name: Evren Turu ses (edge-tts, ücretsiz)
+# video/evren_turu/ses/istek_*.json değişince her satırı mp3'e çevirir, kozmos-ham dalına evren_turu/ses/ altına koyar.
+on:
+  push:
+    paths: ["video/evren_turu/ses/istek_*.json"]
+permissions: {contents: write}
+concurrency: {group: evren-ses}
+jobs:
+  ses:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Üret
+        run: |
+          pip install -q edge-tts==7.*
+          mkdir -p /tmp/ses && python3 - <<'PY'
+          import json, glob, asyncio, edge_tts
+          async def m():
+              for f in glob.glob("video/evren_turu/ses/istek_*.json"):
+                  for r in json.load(open(f)):
+                      await edge_tts.Communicate(r["metin"], r["ses"], rate=r.get("hiz","+0%"), pitch=r.get("perde","+0Hz")).save(f"/tmp/ses/{r['ad']}.mp3")
+                      print("ok", r["ad"])
+          asyncio.run(m())
+          PY
+      - name: kozmos-ham dalına koy
+        run: |
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q
+          git config user.name "kozmos-bot"; git config user.email "kozmos-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          git fetch -q --depth 1 origin kozmos-ham && git checkout -q -b kozmos-ham FETCH_HEAD
+          mkdir -p evren_turu/ses && cp /tmp/ses/*.mp3 evren_turu/ses/
+          git add -A && git commit -qm "Evren Turu ses" || exit 0
+          for i in 1 2 3; do git push -q origin HEAD:kozmos-ham && break; sleep 5; git pull -q --rebase origin kozmos-ham; done

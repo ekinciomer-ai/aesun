@@ -1,0 +1,38 @@
+{
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Bu Matematik Hayatında Nerede?",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji meraklıları, öğrenciler",
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy), telif yok",
+  "gorsel": "kodla çizilmiş özgün animasyon (HTML canvas), dış görsel yok, marka logosu yok",
+  "ses": "ElevenLabs klon ses — Ömer Ekinci'nin kendi sesi (benim2), abonelik, ticari kullanım"
+ },
+ "ureten": "Claude",
+ "kod": "KZ_MAT_05_QR",
+ "konu": "QR kod hata düzeltme: Reed-Solomon",
+ "amac": "Serinin 5. bölümü: hata düzeltme kodu (polinom/eğri fikri). Ölçüt: izlenme süresi, 6. bölüme (yüz tanıma) geçiş.",
+ "baslik": "QR kod yırtılsa bile neden okunur? %30 hasar kuralı 📱",
+ "aciklama": "Kahve devrildi, menüdeki QR kodun bir köşesi lekelendi; telefonu tutuyorsun ve yine açılıyor. Nasıl?\n\n1) QR kod mesajını tek kez yazmaz; yanına ondan hesaplanan fazladan parçalar ekler.\n2) Bu yönteme Reed–Solomon kodu denir (Irving Reed ve Gustave Solomon, 1960).\n3) Fikir: iki noktadan tek doğru geçer. Mesajı bir eğrinin noktaları gibi düşün, aynı eğriden birkaç nokta daha ekle; bazıları silinse bile kalanlar eğriyi yeniden çizer.\n4) En güçlü ayarda (H) kodun yaklaşık %30'u bozulsa bile okunabilir. Köşelerdeki üç kare telefona kodun yerini ve yönünü gösterir.\n\nAynı matematik müzik disklerinde ve uzay sondalarının sinyallerinde de çalışır. QR kodu 1994'te Japonya'da Masahiro Hara'nın ekibi (Denso) geliştirdi; ilham Go oyununun taşlarıydı.\n\nBu Matematik Hayatında Nerede? · Bölüm 5\nSıradaki bölüm: Telefonun yüzünü nasıl tanıyor?\n\n📚 Kaynak\n• Denso Wave — QR kod hata düzeltme seviyeleri (L/M/Q/H)\n• Reed & Solomon, 'Polynomial Codes over Certain Finite Fields' (1960)\n\n🎨 Animasyon kodla çizilmiştir; videodaki QR kod gerçektir ve lekeli hâliyle de okunur. Seslendirme yapay zekâ ile üretilmiş klon sestir (kanal sahibinin kendi sesi). Müzik özgün olarak üretilmiştir. QR Code, DENSO WAVE'in tescilli markasıdır.\n\n#qrkod #reedsolomon #matematik #bilim #kozmoslab",
+ "etiketler": [
+  "qr kod",
+  "reed solomon",
+  "hata düzeltme",
+  "matematik",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "Denso Wave — QR code error correction levels",
+  "Reed & Solomon (1960), MIT Lincoln Laboratory"
+ ],
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MAT_05_QR_kaynak.mp4"
+}

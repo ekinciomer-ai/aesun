@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-15T20:30+03:00",
+ "olusturma": "2026-11-15T21:11+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -62,6 +62,7 @@
     "10 Kasım",
     "Gece Yasakları",
     "Günün Sözü",
+    "Pürdikkat & Çalınan Dikkat",
     "Tarihin Deneyleri",
     "Tarihin Patileri"
    ],
@@ -162,7 +163,7 @@
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 36,
    "tutma_orani": 0,
    "izlenme_yuzde": 54,
@@ -286,11 +287,23 @@
   },
   {
    "kanal": "Antik Stüdyo",
+   "seri": "Pürdikkat & Çalınan Dikkat",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Antik Stüdyo",
    "seri": "Spor + Tarih",
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 1560,
    "tutma_orani": 100,
    "izlenme_yuzde": 43,
@@ -577,12 +590,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 574,
+   "medyan_48sa": 616,
    "tutma_orani": 50,
    "izlenme_yuzde": 59,
    "en_iyi": {
     "baslik": "Venüs'te bir gün, bir yıldan uzun ☀️ #shorts",
-    "i48": 1140
+    "i48": 1225
    },
    "kaydirmadan_izleme_yuzde": 43
   },
@@ -604,12 +617,12 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 188,
-  "Estudio Antiguo": 122,
+  "Kozmos Lab TR": 146,
   "Kozmos Lab": 50,
-  "Kozmos Lab TR": 141,
+  "Estudio Antiguo": 122,
   "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637
+  "Antik Stüdyo": 637,
+  "Ancient Studio": 188
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -854,7 +867,7 @@
     {
      "vid": "lcGHHhXM_74",
      "baslik": "Why was Piri Reis executed? #Shorts",
-     "izlenme": 924,
+     "izlenme": 927,
      "durum": "Yayında"
     },
     {
@@ -994,7 +1007,7 @@
    "kanal": "Antik Stüdyo",
    "uzun_vid": "hDR8xjW4HAc",
    "uzun_baslik": "7 ünlü tablonun kimsenin fark etmediği ayrıntısı",
-   "uzun_durum": "Planlı",
+   "uzun_durum": "Yayında",
    "uzun_izlenme": 0,
    "baglanacak_shortlar": [
     {
@@ -1006,19 +1019,19 @@
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2882,
+     "izlenme": 2883,
      "durum": "Yayında"
     },
     {
      "vid": "bsK8ALbOA8g",
      "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️ #shorts",
-     "izlenme": 2798,
+     "izlenme": 2799,
      "durum": "Yayında"
     },
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2583,
+     "izlenme": 2584,
      "durum": "Yayında"
     },
     {
@@ -1107,7 +1120,7 @@
    "uzun_vid": "HvRuOsJcczM",
    "uzun_baslik": "From Sand to Power: How a Solar Panel Is Made | Step-by-Step 3D Explainer",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 37,
+   "uzun_izlenme": 38,
    "baglanacak_shortlar": [
     {
      "vid": "oEFXYkmfE-E",
@@ -1171,6 +1184,69 @@
    "vid": "",
    "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 (Antik Roma Kremi)",
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Carl Jung evine neden elektrik bile bağlatmadı? 🕯️📐 | 174 Gazetelik Bilgi Seli #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Aynı anda iki iş yapınca zekân neden 10 puan düşüyor? ⚛️🚨 | Senin Kararın #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Charles Darwin günde sadece 3 saat çalışarak dev eserini nasıl yazdı? 🧬🕰️ #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Ekrandan okumakla basılı kitap okumak beyinde neden aynı değil? 📖⚡ | Miyelin Kesiti #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Ünlü matematikçi aylarca çözemediği soruyu otobüse binerken nasıl çözdü? 🚌💡 #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Seni kızdıran paylaşımlar neden hep önüne düşüyor? 🔥💻 | Knuth'un Kararı #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Hafta sonu dijital detoks yapmak neden işe yaramıyor? 😷🕯️ | Harvard BCG Deneyi #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Finlandiya'da çocukların dikkati neden dağılmıyor? 🏃‍♂️🌲 | 45+15 Haritası #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Akşam 17:30'dan sonra hiç çalışmadan üretimini nasıl ikiye katladı? 🌅🔓 | Gün Işığı #shorts",
+   "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
   {
    "tur": "HAFTALIK_KOTA",
@@ -1251,7 +1327,7 @@
   "Antik Stüdyo: son 6 Short'tan 0 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
-  "Kozmos Lab TR: son 6 Short'tan 1 tanesi tuttu (eşik 141 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 6 Short'tan 1 tanesi tuttu (eşik 146 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %50'i tuttu (eşik 188 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1275,7 +1351,7 @@
   "Kozmos Lab: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %20 (hedef ≥%70).",
   "Kozmos Lab TR: tutan Short'lar ortalama %60 izleniyor, tutmayanlar %50 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Kozmos Lab TR: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %53 (hedef ≥%70).",
-  "Uzun videolar (9 yayında): medyan 37 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
+  "Uzun videolar (10 yayında): medyan 25 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
   "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-16, 2026-11-17."
  ],
  "en_iyi": [

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       klasor: {description: "kozmos-ham içindeki klasör (ör. evren_turu)", required: true}
-      idler: {description: "boşlukla ayrılmış NASA ID listesi", required: true}
+      idler: {description: "| ile ayrılmış NASA ID listesi (boşluklu ID olabilir)", required: true}
 permissions: {contents: write}
 concurrency: {group: nasa-indir}
 jobs:
@@ -15,12 +15,18 @@ jobs:
       - name: İndir
         run: |
           mkdir -p /tmp/ham/${{ inputs.klasor }} && cd /tmp/ham/${{ inputs.klasor }}
-          for id in ${{ inputs.idler }}; do
-            for boy in large orig medium; do
-              curl -sfL -A "KozmosLab-arsiv/1.0" -o "$id.jpg" "https://images-assets.nasa.gov/image/$id/$id~$boy.jpg" && break
-            done
-            ls -la "$id.jpg" || echo "YOK $id"
-          done
+          python3 - <<'PY'
+          import urllib.parse, urllib.request, re
+          for i in "${{ inputs.idler }}".split("|"):
+              i=i.strip()
+              if not i: continue
+              q=urllib.parse.quote(i); ad=re.sub(r"[^A-Za-z0-9._-]+","_",i)
+              for boy in ("large","orig","medium"):
+                  try:
+                      r=urllib.request.urlopen(urllib.request.Request(f"https://images-assets.nasa.gov/image/{q}/{q}~{boy}.jpg",headers={"User-Agent":"KozmosLab-arsiv/1.0"}),timeout=60)
+                      open(ad+".jpg","wb").write(r.read()); print("ok",ad,boy); break
+                  except Exception as e: print("yok",i,boy,e)
+          PY
       - name: kozmos-ham dalına koy
         run: |
           cd /tmp && rm -rf o && mkdir o && cd o && git init -q

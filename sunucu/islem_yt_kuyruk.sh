@@ -2,7 +2,7 @@
 # YouTube yükleme kuyruğu (bilgisayar gerekmez). .github/workflows/yt_kuyruk.yml çalıştırır.
 # Girdi: paket içinde kuyruk/<kod>.json + kuyruk/<kod>.mp4 (+ isteğe bağlı kuyruk/<kod>.jpg veya .png özel kapak)
 #   json: {"kod","kanal":"TR|EN|ES|KZ_TR|KZ_EN|OD","baslik","aciklama","etiketler":[],"kategori":"27","publishAt":"2026-11-05T19:00:00+03:00","sentetik":false,"seri","tarih_sabit":false}
-# HESAP SINIRI: 6 kanal toplamı günde en fazla 4 yükleme + 4 yayın; dolu günde yayın ilk boş güne kayar (tarih_sabit:true olanlar hariç).
+# KANAL SINIRI: her kanal için günde en fazla 4 yükleme + 4 yayın (Ömer, 15 Kas 2026: "her kanal için 4, toplam 4 değil"); dolu günde yayın ilk boş güne kayar (tarih_sabit:true olanlar hariç).
 # Kurallar: aynı kod ya da aynı başlık kanalda varsa YÜKLEMEZ; herkese açma yalnız publishAt ile planlıdır; silme yok.
 # Çıktı: '===KUYRUK===' ... '===SON===' arasında sırsız JSON sonuç listesi.
 set -euo pipefail
@@ -36,9 +36,9 @@ def basliklar(tok, cid):
 
 sonuc, toklar, mevcut = [], {}, {}
 
-# ── HESAP SINIRI (Ömer, 13 Kas 2026): 6 kanalın toplamı günde en fazla 4 YÜKLEME ve günde en fazla 4 YAYIN. ──
+# ── KANAL SINIRI (Ömer, 15 Kas 2026 düzeltme; ilk kural 13 Kas): HER KANAL için günde en fazla 4 YÜKLEME ve günde en fazla 4 YAYIN. ──
 # Sınır dolarsa iş silinmez: yükleme sırada kalır (kuyruk 4 saatte bir yeniden dener), yayın günü dolu ise
-# publishAt aynı saatle ilk boş güne kaydırılır. Sayaç: /opt/aesun/youtube/hesap_sayac.json
+# publishAt aynı saatle ilk boş güne kaydırılır. Sayaç: /opt/aesun/youtube/hesap_sayac.json (anahtar "YYYY-MM-DD|KANAL")
 from datetime import datetime as _dt, timezone as _tz, timedelta as _td
 HESAP_GUNLUK = 4
 # Tek seferlik istisna (Ömer, 15 Kas 2026 02:04): "15.11'e özel 6 video olsun" — yalnız listedeki maç günü videoları ek hakkı kullanır.
@@ -52,7 +52,7 @@ except Exception:
 _plan = None
 
 def _plan_sayim():
-    """Tüm kanallarda planlı (publishAt) ve bugün yayınlanmış videoları güne göre say."""
+    """Her kanalda planlı (publishAt) ve yayınlanmış videoları (gün, kanal) çiftine göre say."""
     global _plan
     if _plan is not None:
         return _plan
@@ -69,7 +69,7 @@ def _plan_sayim():
                         _pa = _v["status"].get("publishAt") or (_v["snippet"].get("publishedAt") if _v["status"].get("privacyStatus") == "public" else None)
                         if _pa:
                             _g = _dt.fromisoformat(_pa.replace("Z", "+00:00")).astimezone(_IST).strftime("%Y-%m-%d")
-                            _plan[_g] = _plan.get(_g, 0) + 1
+                            _plan[(_g, _d)] = _plan.get((_g, _d), 0) + 1
         except Exception as _e:
             print(f"NOT: hesap sayımı {_d} okunamadı: {type(_e).__name__}")
     return _plan
@@ -147,8 +147,8 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         _bugun = _dt.now(_IST).strftime("%Y-%m-%d")
         _ist = HESAP_ISTISNA.get(_bugun, {})
         _lim = _ist["limit"] if kod in _ist.get("kodlar", ()) else HESAP_GUNLUK
-        if _sayac.get(_bugun, 0) >= _lim:
-            print(f"NOT: {kod} HESAP SINIRI: bugün {_lim} yükleme yapıldı; sırada kaldı, sonraki günde yüklenecek")
+        if _sayac.get(f"{_bugun}|{dil}", 0) >= _lim:
+            print(f"NOT: {kod} KANAL SINIRI ({dil}): bugün bu kanala {_lim} yükleme yapıldı; sırada kaldı, sonraki günde yüklenecek")
             sonuc.append({"kod": kod, "durum": "hesap sınırı: sırada", **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         _pl = _plan_sayim()
         _t = _dt.fromisoformat(it["publishAt"]).astimezone(_IST)
@@ -158,11 +158,11 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         # Tarihe bağlı içerik ("bu gece", maç günü, gök olayı) kuyruk json'unda "tarih_sabit": true taşır; günü kaydırılmaz.
         for _k in (range(0, 1) if it.get("tarih_sabit") else range(0, 120)):
             _g = (_t + _td(days=_k)).strftime("%Y-%m-%d")
-            if it.get("tarih_sabit") or _pl.get(_g, 0) < HESAP_GUNLUK:
+            if it.get("tarih_sabit") or _pl.get((_g, dil), 0) < HESAP_GUNLUK:
                 _t = _t + _td(days=_k); break
         it["publishAt"] = _t.isoformat(timespec="seconds")
         if it["publishAt"][:10] != _eski_pa[:10]:
-            print(f"NOT: {kod} HESAP SINIRI: {_eski_pa[:16]} dolu, yayın {it['publishAt'][:16]} gününe kaydırıldı")
+            print(f"NOT: {kod} KANAL SINIRI ({dil}): {_eski_pa[:16]} dolu, yayın {it['publishAt'][:16]} gününe kaydırıldı")
         boyut = os.path.getsize(mp4)
         dil_kodu = {"TR": "tr", "EN": "en", "ES": "es", "KZ_TR": "tr", "OD": "tr"}.get(dil, "en")
         from datetime import datetime, timezone
@@ -208,8 +208,8 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         json.dump(kayit, open(kayit_yol, "w", encoding="utf-8"), ensure_ascii=False)
         sonuc.append({"kod": kod, "durum": "yüklendi ve planlandı", "vid": v["id"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}})
         print(f"NOT: {kod} yüklendi → {v['id']} (plan {it['publishAt']})")
-        _sayac[_bugun] = _sayac.get(_bugun, 0) + 1
-        _g = it["publishAt"][:10]; _pl[_g] = _pl.get(_g, 0) + 1
+        _sayac[f"{_bugun}|{dil}"] = _sayac.get(f"{_bugun}|{dil}", 0) + 1
+        _g = it["publishAt"][:10]; _pl[(_g, dil)] = _pl.get((_g, dil), 0) + 1
         json.dump({k: v2 for k, v2 in _sayac.items() if k >= (_dt.now(_IST) - _td(days=30)).strftime("%Y-%m-%d")}, open(_sayac_yol, "w"), indent=1)
         # "yerine": aynı içeriğin eski sürümü → planı kaldırılır, Gizli kalır (silme yok, önce yedek)
         eski = it.get("yerine")

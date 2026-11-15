@@ -72,6 +72,7 @@ yaz(os.path.join(P, "mimari", "index.html"), oku(os.path.join(DOCS, "mimari", "i
 kopya(os.path.join(DOCS, "yayin"), os.path.join(P, "yayin"))   # Özel Alan · Yayın Takibi (yayin.json Claude/Antigravity tarafından güncellenir)
 yaz(os.path.join(P, "yayin", "index.html"), oku(os.path.join(DOCS, "yayin", "index.html")).replace("../portal/", "../"))
 yaz(os.path.join(P, "asistan", "index.html"), oku(os.path.join(DOCS, "asistan", "index.html")).replace("../portal/", "../"))   # Özel Alan · Sunucu Asistanı (Antigravity)
+yaz(os.path.join(P, "tartisma", "index.html"), oku(os.path.join(DOCS, "tartisma", "index.html")).replace("../portal/", "../"))   # Özel Alan · Üç Vuruş senaryo tartışması (veri: n8n tartisma-portal)
 yaz(os.path.join(P, "avy", "index.html"), oku(os.path.join(DOCS, "avy", "index.html")).replace("../portal/", "../"))   # Özel Alan · AVY (Arazi Veri Yönetimi)
 yaz(os.path.join(P, "kesif", "index.html"), oku(os.path.join(DOCS, "kesif", "index.html")).replace("../portal/", "../"))
 shutil.copy(os.path.join(DOCS, "favicon.svg"), P)

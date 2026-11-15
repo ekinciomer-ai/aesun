@@ -27,7 +27,7 @@ aside h3{margin:0;padding:14px 16px 8px;font-size:11.5px;text-transform:uppercas
 .oturum .metin{margin-top:3px;font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .rozet{font-size:11px;font-weight:600;padding:1px 8px;border-radius:99px;white-space:nowrap}
 .r-uzlasildi{background:#E3F6EE;color:var(--ok)}.r-revizyon_gerekli{background:#FDF3E1;color:var(--warn)}
-.r-suruyor{background:#E6EFFC;color:var(--agy)}.r-yarim{background:#EEF0F3;color:var(--muted)}.r-karar{background:#FFF3E8;color:#B5541C}
+.r-suruyor{background:#E6EFFC;color:var(--agy)}.r-yarim{background:#EEF0F3;color:var(--muted)}.r-karar{background:#FFF3E8;color:#B5541C}.r-canli{background:#FFF7D6;color:#8A6D00}
 .karar{max-width:900px;margin:18px 0;padding:14px 16px;border-radius:12px;background:#FFF8F1;border:2px solid #E9A46B}
 .karar .kb{font-weight:800;letter-spacing:.03em;color:#B5541C;margin-bottom:6px;font-size:13.5px}
 .r-bekliyor{background:#EEF0F3;color:var(--muted)}.r-alindi{background:#E3F6EE;color:var(--ok)}
@@ -96,10 +96,10 @@ form.yaz button:disabled{opacity:.5;cursor:default}
       <button class="yeni" id="yeni">↓ Yeni mesaj</button>
     </div>
     <form class="yaz" id="yazForm" hidden>
-      <textarea id="yazi" rows="1" maxlength="4000" placeholder="Tartışmaya yaz… (yazar bir sonraki turda dikkate alır)"></textarea>
+      <textarea id="yazi" rows="1" maxlength="4000" placeholder="Panele yaz… (anında yanıt verir)"></textarea>
       <button id="gonder">Gönder</button>
     </form>
-    <div class="ipucu" id="ipucu" hidden>Enter gönderir, Shift+Enter yeni satır. Mesajın önce bu bilgisayardaki köprüye ulaşır; tartışma çalışıyorsa sıradaki turda yazara iletilir.</div>
+    <div class="ipucu" id="ipucu" hidden>Enter gönderir, Shift+Enter yeni satır. Yazdığın anda panel canlı yanıt verir ve yazar notunu senaryoya hemen uygular; tartışma sürüyorsa not sıradaki turda da kullanılır.</div>
   </section>
 </main>
 <script>
@@ -168,7 +168,9 @@ function mesajHtml(o) {
     const y = { oybirligi: 'Oy birliği', cogunluk: 'Çoğunluk', hakem: 'Hakem kararı' }[k.cevap?.yontem] || 'Karar';
     return `<div class="karar"><div class="kb">⚖️ KARAR VERİLDİ · ${kac(y)}${k.cevap?.oy ? ' · oy ' + kac(k.cevap.oy) : ''}</div><div class="icerik">${kac(k.cevap?.gerekce || '')}</div></div>`;
   }
-  if (k.rol === 'yazar') { rol = `<span class="rol">${k.tur === 1 ? 'ilk taslağı yazdı' : 'eleştirilere göre yeniden yazdı'}</span>`; govde = senaryoHtml(k.cevap); }
+  if (k.rol === 'yanit') { rol = `<span class="rol">Moderatöre yanıt${a.uz ? ' · ' + kac(a.uz) : ''}</span><span class="rozet r-canli">⚡ canlı</span>`; govde = `<div class="icerik">${kac(k.cevap?.yanit ?? '')}</div>`; }
+  else if (k.rol === 'yazar' && !k.tur) { rol = '<span class="rol">notunu senaryoya hemen uyguladı</span><span class="rozet r-canli">⚡ yeni taslak</span>'; govde = senaryoHtml(k.cevap); }
+  else if (k.rol === 'yazar') { rol = `<span class="rol">${k.tur === 1 ? 'ilk taslağı yazdı' : 'eleştirilere göre yeniden yazdı'}</span>`; govde = senaryoHtml(k.cevap); }
   else if (k.rol === 'hakem') { rol = '<span class="rol">hakem olarak nihai senaryoyu yazdı</span><span class="rozet r-karar">⚖️ Hakem</span>'; govde = `<div class="icerik" style="margin-bottom:10px"><b>Gerekçe:</b> ${kac(k.cevap?.gerekce || '')}</div>` + senaryoHtml(k.cevap?.senaryo); }
   else if (k.rol === 'kullanici') { rol = '<span class="rol">notu tartışmaya iletildi</span>'; govde = `<div class="icerik">${kac(k.cevap?.metin ?? k.cevap)}</div>`; }
   else {
@@ -201,9 +203,13 @@ function tartismaCiz(t) {
   const onceki = yeniOturum ? 0 : akis.querySelectorAll('.mesaj').length;
   let html = '', tur = null;
   for (const o of ogeler) {
-    if (o.tip === 'kayit' && o.tur !== tur) { tur = o.tur; html += `<div class="ayrac">Tur ${o.tur}</div>`; }
+    if (o.tip === 'kayit' && o.tur !== tur) { tur = o.tur; html += `<div class="ayrac">${o.tur ? 'Tur ' + o.tur : '⚡ Canlı sohbet'}</div>`; }
     html += mesajHtml(o);
   }
+  // Son notundan sonra henüz cevap gelmediyse panelin yazdığını göster.
+  const sonNot = t.notlar.at(-1), sonKayit = t.kayitlar.reduce((m, k) => Math.max(m, Date.parse(k.ts) || 0), 0);
+  const notBekliyor = sonNot && (Date.parse(sonNot.ts) || 0) > sonKayit && Date.now() - (Date.parse(sonNot.ts) || 0) < 10 * 60 * 1000;
+  if (notBekliyor && durum !== 'suruyor') html += `<div class="yaziyor"><i><b></b><b></b><b></b></i>${sonNot.durum === 'alindi' ? 'Panel notunu okudu, yanıtlıyor' : 'Notun köprüye gidiyor'}…</div>`;
   if (durum === 'suruyor') {
     const s = t.kayitlar.at(-1);
     html += `<div class="yaziyor"><i><b></b><b></b><b></b></i>${!s ? 'Yazar ilk taslağı yazıyor' : s.rol === 'yazar' ? 'Eleştirmenler taslağı okuyor' : (s.tur >= 3 ? 'Son tur: karar bekleniyor' : 'Sıradaki yanıt bekleniyor')}…</div>`;
@@ -276,7 +282,7 @@ let zamanlayici;
   // Tartışmaya özel belirteç: merkez sunucunun yönetici belirtecinden farklıdır, sızarsa yalnızca tartışmalara erişim verir.
   BELIRTEC = await sha('aesun-api|tartisma|' + S.ka);
   await yenile();
-  zamanlayici = setInterval(() => { if (!document.hidden) yenile(); }, 4000);
+  zamanlayici = setInterval(() => { if (!document.hidden) yenile(); }, 2000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) yenile(); });
 })();
 </script>

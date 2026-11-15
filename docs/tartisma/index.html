@@ -106,9 +106,14 @@ form.yaz button:disabled{opacity:.5;cursor:default}
 const API = 'https://xbay.app.n8n.cloud/webhook/tartisma-portal';
 const S = window._AE_S;
 const AJAN = {
-  claude: { ad: 'Claude', kisa: 'C', renk: 'var(--claude)' },
-  gpt: { ad: 'GPT', kisa: 'G', renk: 'var(--gpt)' },
-  antigravity: { ad: 'Antigravity', kisa: 'A', renk: 'var(--agy)' },
+  claude: { ad: 'Claude', kisa: 'C', renk: 'var(--claude)', uz: 'Hikâye yapısı & gizem' },
+  gpt: { ad: 'GPT', kisa: 'G', renk: 'var(--gpt)', uz: 'Kanca & izlenme' },
+  antigravity: { ad: 'Antigravity', kisa: 'A', renk: 'var(--agy)', uz: 'Stil & üretilebilirlik' },
+  'gemini-argon': { ad: 'Gemini Argon', kisa: 'Ar', renk: '#7A3FB8', uz: 'Korku & gerilim' },
+  sonnet: { ad: 'Claude Sonnet', kisa: 'S', renk: '#A0522D', uz: 'Türkçe dil & anlatım' },
+  o3: { ad: 'o3', kisa: 'o3', renk: '#0F6E6E', uz: 'Mantık & gerçeklik' },
+  'gemini-carbon': { ad: 'Gemini Carbon', kisa: 'Ca', renk: '#33507A', uz: 'Görsel yönetmen' },
+  'gpt-sol': { ad: 'GPT Sol', kisa: 'So', renk: '#4E7D2E', uz: 'Seri mimarı' },
   omer: { ad: 'Moderatör', kisa: 'M', renk: 'var(--omer)' },
 };
 const ajan = m => AJAN[m] || { ad: m, kisa: (m || '?')[0].toUpperCase(), renk: 'var(--muted)' };
@@ -168,7 +173,7 @@ function mesajHtml(o) {
   else if (k.rol === 'kullanici') { rol = '<span class="rol">notu tartışmaya iletildi</span>'; govde = `<div class="icerik">${kac(k.cevap?.metin ?? k.cevap)}</div>`; }
   else {
     const ok = k.cevap?.onay === true;
-    rol = `<span class="rol">değerlendirdi</span><span class="rozet ${ok ? 'r-uzlasildi' : 'r-revizyon_gerekli'}">${ok ? '✓ Onayladı' : '✗ Onaylamadı'}</span>`;
+    rol = `<span class="rol">${a.uz ? kac(a.uz) + ' açısından ' : ''}değerlendirdi</span><span class="rozet ${ok ? 'r-uzlasildi' : 'r-revizyon_gerekli'}">${ok ? '✓ Onayladı' : '✗ Onaylamadı'}</span>`;
     govde = `<div class="icerik">${kac(k.cevap?.elestiri ?? JSON.stringify(k.cevap))}</div>`;
   }
   return `<div class="mesaj" style="--c:${a.renk}"><div class="avatar">${kac(a.kisa)}</div><div class="balon"><div class="kim"><b>${kac(a.ad)}</b>${rol}<time>${saatYaz(k.ts)}</time></div>${govde}</div></div>`;

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-15T21:11+03:00",
+ "olusturma": "2026-11-15T21:41+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -617,12 +617,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 146,
-  "Kozmos Lab": 50,
   "Estudio Antiguo": 122,
+  "Kozmos Lab TR": 146,
   "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637,
-  "Ancient Studio": 188
+  "Ancient Studio": 188,
+  "Kozmos Lab": 50,
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1188,21 +1188,21 @@
   {
    "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
-   "vid": null,
+   "vid": "SsLRBKsUtWQ",
    "baslik": "Carl Jung evine neden elektrik bile bağlatmadı? 🕯️📐 | 174 Gazetelik Bilgi Seli #shorts",
    "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
   {
    "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
-   "vid": null,
+   "vid": "_LvNwr6kdZU",
    "baslik": "Aynı anda iki iş yapınca zekân neden 10 puan düşüyor? ⚛️🚨 | Senin Kararın #shorts",
    "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
   {
    "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
-   "vid": null,
+   "vid": "h6Xbu0JSf4g",
    "baslik": "Charles Darwin günde sadece 3 saat çalışarak dev eserini nasıl yazdı? 🧬🕰️ #shorts",
    "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
@@ -1263,6 +1263,22 @@
    "baslik": "Someone wrote a song on this man's butt 🎵 #shorts",
    "tarih": "2026-11-28",
    "neden": "odak dönemi: Ancient Studio haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "nP5ZQJT56_w",
+   "baslik": "Şarkı neden 10 kat küçülür? MP3'ün matematiği 🎧",
+   "tarih": "2026-11-16",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "0FreXZ_KKD8",
+   "baslik": "Shazam şarkıyı nasıl tanır? Bir takımyıldız haritası ✨",
+   "tarih": "2026-11-16",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
    "tur": "HAFTALIK_KOTA",

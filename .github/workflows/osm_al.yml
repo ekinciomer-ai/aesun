@@ -1,0 +1,32 @@
+name: OSM harita verisi al
+# OpenStreetMap (Overpass) yol verisini GitHub sunucusunda çeker ve depoya yazar. Kod çalıştırmaz, yalnız veri indirir.
+on:
+  workflow_dispatch:
+    inputs:
+      bbox: { description: 'güney,batı,kuzey,doğu', required: true }
+      hedef: { description: 'Çıktı dosyası (ör. icerik/kozmos_nav/osm.json)', required: true }
+permissions:
+  contents: write
+jobs:
+  al:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Overpass
+        env: { BBOX: '${{ inputs.bbox }}', HEDEF: '${{ inputs.hedef }}' }
+        run: |
+          Q="[out:json][timeout:60];(way[\"highway\"~\"^(primary|secondary|tertiary|residential|unclassified|living_street|pedestrian|primary_link|secondary_link|tertiary_link|trunk|trunk_link)$\"]($BBOX);way[\"leisure\"=\"park\"]($BBOX);way[\"historic\"]($BBOX);way[\"tourism\"=\"attraction\"]($BBOX););out geom;"
+          for u in https://overpass-api.de/api/interpreter https://overpass.kumi.systems/api/interpreter; do curl -s -m 120 --data-urlencode "data=$Q" "$u" -o /tmp/osm.json && python3 -c "import json;json.load(open('/tmp/osm.json'))" && break; done
+          mkdir -p "$(dirname "$HEDEF")"
+          python3 - <<'P'
+          import json,os
+          d=json.load(open('/tmp/osm.json'));out=[]
+          for e in d.get('elements',[]):
+              if e.get('type')=='way' and 'geometry' in e:
+                  t=e.get('tags',{});out.append([t.get('highway') or t.get('leisure') or t.get('historic') or t.get('tourism'),t.get('name',''),[[round(p['lat'],6),round(p['lon'],6)] for p in e['geometry']]])
+          json.dump(out,open(os.environ['HEDEF'],'w'),ensure_ascii=False,separators=(',',':'));print('yol',len(out))
+          P
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add "$HEDEF"; git diff --cached --quiet && exit 0
+          git commit -qm "OSM verisi: $HEDEF (© OpenStreetMap katkıda bulunanlar, ODbL)"; for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

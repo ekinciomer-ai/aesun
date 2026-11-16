@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>Yüz tanıma — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 6.9], "B": [6.9, 17.7], "C": [17.7, 24.58], "D": [24.58, 33.24], "E": [33.24, 48.38], "F": [48.38, 54.8], "G": [54.8, 58.24], "H": [58.24, 63.86]};window.SUB=[[0.3, 2.42, "Telefona bakıyorsun, kilit açılıyor."], [2.42, 6.9, "Ama telefon yüzünü bir fotoğraf gibi hatırlamıyor; onu sayılara çeviriyor."], [6.9, 12.38, "Önce yüzündeki önemli noktaları bulur: gözler, burnun ucu, dudak kenarları, çene."], [12.38, 17.7, "Bazı telefonlar bunun için yüzüne otuz binden fazla görünmez ışık noktası yansıtır."], [17.7, 24.58, "Sonra bir yapay zekâ bu yüzü 128 sayılık bir listeye çevirir; bu, senin yüz parmak izin."], [24.58, 30.1, "Kilidi açarken telefon yeni listeyi kayıtlı olanla karşılaştırır ve aradaki mesafeyi ölçer."], [30.1, 33.24, "Mesafe küçükse sensin, büyükse yabancı."], [33.24, 35.26, "Peki yapay zekâ bunu nasıl öğrendi?"], [35.26, 40.58, "Ona milyonlarca üçlü gösterildi: aynı kişinin iki fotoğrafı ve bir yabancınınki."], [40.58, 44.38, "Kural basit: aynı kişiyi yaklaştır, yabancıyı uzaklaştır."], [44.38, 48.38, "Bu yöntem 2015'te FaceNet adıyla yayımlandı."], [48.38, 54.8, "Ondan önce, 1991'de, her yüz bir ortalama yüze eklenen birkaç hayalet yüzle yazılıyordu."], [54.8, 58.24, "Yani yüzün, telefon için dev bir haritadaki tek bir nokta."], [58.24, 61.94, "Sıradaki bölüm: Instagram filtresi yüzünü nasıl takip ediyor?"], [61.94, 63.36, "Takip et."]];window.DUR=63.86;</script>
+<script>
+let TM=window.TM||{A:[0,6],B:[6,12],C:[12,18],D:[18,34],E:[34,42],F:[42,46],G:[46,50]},SUB=window.SUB||[],DUR=window.DUR||46;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+const OR='#ff9a5a',BL='#40c4ff',GR='#5dffb0',RD='#e8364f',YL='#ffcf5a';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+
+const st=i=>SUB[i]?SUB[i][0]:0;const since=(t,i,d)=>ease((t-st(i))/(d||1));
+const LM=[[-70,-40],[70,-40],[-100,-45],[-40,-45],[40,-45],[100,-45],[0,20],[-20,40],[20,40],[-55,95],[55,95],[0,85],[0,110],[0,185],[-120,120],[120,120],[-150,0],[150,0],[-110,-100],[110,-100],[0,-60]];
+function face(cx,cy,s,al,col){g.save();g.translate(cx,cy);g.scale(s,s);g.globalAlpha=al==null?1:al;g.strokeStyle=col||'#c9d4f2';g.lineWidth=5;g.beginPath();g.ellipse(0,20,165,210,0,0,TAU);g.stroke();
+ [[-70,-40],[70,-40]].forEach(([x,y])=>{g.beginPath();g.ellipse(x,y,32,16,0,0,TAU);g.stroke();g.fillStyle=col||'#c9d4f2';g.beginPath();g.arc(x,y,8,0,TAU);g.fill()});
+ g.beginPath();g.moveTo(-100,-85);g.quadraticCurveTo(-70,-100,-40,-88);g.moveTo(40,-88);g.quadraticCurveTo(70,-100,100,-85);g.stroke();
+ g.beginPath();g.moveTo(0,-20);g.lineTo(-15,35);g.lineTo(15,40);g.stroke();g.beginPath();g.moveTo(-55,95);g.quadraticCurveTo(0,125,55,95);g.stroke();g.restore();g.globalAlpha=1}
+function marks(cx,cy,s,k,t,mesh){const n=Math.floor(LM.length*k);if(mesh){g.strokeStyle='rgba(93,255,176,.35)';g.lineWidth=2;for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const d=Math.hypot(LM[i][0]-LM[j][0],LM[i][1]-LM[j][1]);if(d<95){g.beginPath();g.moveTo(cx+LM[i][0]*s,cy+LM[i][1]*s);g.lineTo(cx+LM[j][0]*s,cy+LM[j][1]*s);g.stroke()}}}
+ for(let i=0;i<n;i++){g.fillStyle=GR;g.beginPath();g.arc(cx+LM[i][0]*s,cy+LM[i][1]*s,8+2*Math.sin(t*4+i),0,TAU);g.fill()}}
+function lockIcon(x,y,open){g.strokeStyle='#fff';g.lineWidth=7;g.beginPath();g.arc(x+(open?30:0),y-30,26,Math.PI,0);g.stroke();g.fillStyle=open?GR:'#fff';g.beginPath();g.roundRect(x-38,y-30,76,60,10);g.fill()}
+function sceneA(t){T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 6 · YÜZ TANIMA',W/2,440,RD,44);
+ face(W/2,930,1.35);const op=t>1.4;lockIcon(W/2,1340,op);
+ if(t>st(1)){const k=since(t,1,.8);g.globalAlpha=k;g.font='700 30px monospace';g.fillStyle=GR;for(let i=0;i<46;i++){const x=150+R(i)*780,y=620+((R(i+50)*700+t*140*(.5+R(i+9)))%700);g.fillText((R(i*3+Math.floor(t*3))*2-1).toFixed(2),x,y)}g.globalAlpha=1}}
+function sceneB(t){const ir=t>st(3);T(ir?'30.000+ görünmez nokta':'Önemli noktalar',W/2,250,56,'#fff',800);T(ir?'kızılötesi ışıkla 3B harita':'göz · burun · dudak · çene',W/2,330,38,ir?'#ff8a8a':'#c9d4f2',600);
+ face(W/2,950,1.5,ir?.35:1);
+ if(ir){const k=since(t,3,1.2);for(let i=0;i<900*k;i++){const a=R(i)*TAU,r=Math.sqrt(R(i+3000))*1;const x=W/2+Math.cos(a)*r*250,y=980+Math.sin(a)*r*320;g.fillStyle='rgba(255,90,90,'+(.45+.4*R(i+7))+')';g.fillRect(x,y,4,4)}}
+ else marks(W/2,950,1.5,since(t,2,2.2),t,true)}
+function sceneC(t){T('Yüz → 128 sayı',W/2,250,56,'#fff',800);T('yüz parmak izi',W/2,330,40,YL,700);
+ face(250,700,.7);marks(250,700,.7,1,t,true);g.strokeStyle='#fff';g.lineWidth=5;g.beginPath();g.moveTo(420,700);g.lineTo(560,700);g.lineTo(540,682);g.moveTo(560,700);g.lineTo(540,718);g.stroke();
+ const k=since(t,4,2);const n=Math.floor(128*k);for(let i=0;i<n;i++){const r=Math.floor(i/8),c=i%8;const v=Math.sin(i*1.7)*.5+.5;g.fillStyle=`hsl(${190+v*140},80%,${35+v*30}%)`;g.fillRect(600+c*48,460+r*30,44,26)}
+ if(k>.6){g.globalAlpha=ease((k-.6)*3);g.font='600 30px monospace';g.fillStyle='#c9d4f2';g.textAlign='center';g.fillText('[0.12, −0.48, 0.91, 0.03, … ]',W/2,1020+300);g.globalAlpha=1}}
+function sceneD(t){T('Mesafe ölçülür',W/2,250,56,'#fff',800);T('d = ‖ yeni − kayıtlı ‖',W/2,330,40,YL,700);
+ const O=[200,1300];g.strokeStyle='rgba(143,166,216,.3)';g.lineWidth=2;for(let i=0;i<8;i++){g.beginPath();g.moveTo(140,560+i*100);g.lineTo(940,560+i*100);g.stroke();g.beginPath();g.moveTo(140+i*114,560);g.lineTo(140+i*114,1260);g.stroke()}
+ const K=[420,800],N=[490,860];const k=since(t,5,1);g.fillStyle=BL;g.beginPath();g.arc(K[0],K[1],20,0,TAU);g.fill();T('kayıtlı',K[0]-30,K[1]-50,32,BL,700);
+ if(k>0){g.fillStyle=GR;g.beginPath();g.arc(N[0],N[1],18,0,TAU);g.fill();g.strokeStyle=GR;g.lineWidth=4;g.beginPath();g.moveTo(K[0],K[1]);g.lineTo(N[0],N[1]);g.stroke();T('yeni',N[0]+60,N[1]+20,32,GR,700)}
+ if(t>st(6)){const j=since(t,6,.8);const S=[820,1150];g.globalAlpha=j;g.fillStyle=RD;g.beginPath();g.arc(S[0],S[1],18,0,TAU);g.fill();g.strokeStyle=RD;g.setLineDash([12,10]);g.beginPath();g.moveTo(K[0],K[1]);g.lineTo(S[0],S[1]);g.stroke();g.setLineDash([]);T('yabancı',S[0],S[1]+55,32,RD,700);
+  pill('küçük → sen ✓',300,1440,'#1f8a4c',36);pill('büyük → yabancı ✗',770,1440,'#a3243a',36);g.globalAlpha=1}}
+function sceneE(t){const late=t>st(10);T(late?'FaceNet · 2015':'Nasıl öğrendi?',W/2,250,56,'#fff',800);T(late?'Google araştırmacıları':'üçlüler: aynı kişi + yabancı',W/2,330,38,late?YL:'#c9d4f2',600);
+ const k=t<st(9)?0:since(t,9,2);const A=[540,860],P=[760-150*k,700+110*k],N=[300-120*k,1080+130*k];
+ if(t>=st(8)){[[A,BL,'A · sen'],[P,GR,'P · yine sen'],[N,RD,'N · yabancı']].forEach(([p,c,l])=>{face(p[0],p[1],.32,1,c);T(l,p[0],p[1]+105,30,c,700)});
+  if(k>0){g.lineWidth=5;g.strokeStyle=GR;g.beginPath();g.moveTo(A[0]+60,A[1]-20);g.lineTo(P[0]-60,P[1]+20);g.stroke();g.strokeStyle=RD;g.setLineDash([12,10]);g.beginPath();g.moveTo(A[0]-60,A[1]+30);g.lineTo(N[0]+60,N[1]-30);g.stroke();g.setLineDash([])}}
+ if(t>=st(9)){g.globalAlpha=since(t,9,.6);pill('yaklaştır',800,1330,'#1f8a4c',36);pill('uzaklaştır',280,1330,'#a3243a',36);g.globalAlpha=1}
+ if(late){g.globalAlpha=since(t,10,.6);g.fillStyle='#121a3a';g.beginPath();g.roundRect(110,1420,860,170,24);g.fill();T('kayıp = max(d(A,P)² − d(A,N)² + α, 0)',W/2,1505,34,'#fff',700);g.globalAlpha=1}}
+function ghost(cx,cy,s,seed,t){const gr=g.createRadialGradient(cx,cy,10,cx,cy,140*s);gr.addColorStop(0,`hsla(${seed*70},60%,70%,.55)`);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.ellipse(cx,cy,110*s,140*s,0,0,TAU);g.fill();face(cx,cy,.55*s,.6,'#e2e8f0')}
+function sceneF(t){T('1991 · Eigenfaces',W/2,250,56,'#fff',800);T('"hayalet yüzler" (Turk & Pentland, MIT)',W/2,330,34,YL,600);
+ const k=since(t,11,3);const items=[['ortalama',0],['+ w₁ ×',1],['+ w₂ ×',2],['+ w₃ ×',3]];items.forEach(([l,i],n)=>{if(k*4<n)return;const x=170+n*245;ghost(x,820,1,i,t);T(l,x,1020,34,'#fff',700)});
+ if(k>.85){g.globalAlpha=ease((k-.85)*6);T('= senin yüzün',W/2,1200,56,GR,900);face(W/2,1450,.6);g.globalAlpha=1}}
+function sceneG(t){T('Yüzün =',W/2,250,56,'#fff',800);T('dev haritada tek bir nokta',W/2,330,40,YL,700);
+ for(let i=0;i<600;i++){const x=110+R(i)*860,y=500+R(i+999)*950;g.fillStyle=`rgba(143,166,216,${.25+.5*R(i+5)})`;g.beginPath();g.arc(x,y,3+3*R(i+17),0,TAU);g.fill()}
+ const p=(t*1.2)%1;g.strokeStyle='rgba(93,255,176,'+(1-p)+')';g.lineWidth=4;g.beginPath();g.arc(W/2,980,20+60*p,0,TAU);g.stroke();g.fillStyle=GR;g.beginPath();g.arc(W/2,980,16,0,TAU);g.fill();T('sen',W/2+60,960,40,'#fff',800,'left')}
+function sceneH(t){T('Sıradaki bölüm',W/2,520,56,'#8fa6d8',600);T('Instagram filtresi yüzünü',W/2,640,62,'#fff',800);T('nasıl takip ediyor?',W/2,740,68,'#fff',800);
+ const cx=W/2+120*Math.sin(t*1.3),cy=1140+30*Math.sin(t*2.1),r=.2*Math.sin(t*1.3);g.save();g.translate(cx,cy);g.rotate(r);face(0,0,.85);
+ g.fillStyle='#111';g.strokeStyle=YL;g.lineWidth=4;[-60,60].forEach(x=>{g.beginPath();g.roundRect(x-48,-62,96,50,16);g.fill();g.stroke()});g.beginPath();g.moveTo(-12,-40);g.lineTo(12,-40);g.stroke();marks(0,0,.85,1,t,false);g.restore();pill('Takip et',W/2,1560,RD,58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=1745-(lines.length-1)*30;lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);const S=[['A',sceneA],['B',sceneB],['C',sceneC],['D',sceneD],['E',sceneE],['F',sceneF],['G',sceneG],['H',sceneH]];let f=sceneA;for(const[k,fn]of S)if(t>=TM[k][0])f=fn;f(t);
+ if(t<TM.H[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

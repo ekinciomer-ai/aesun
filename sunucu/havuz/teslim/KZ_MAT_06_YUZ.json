@@ -1,0 +1,40 @@
+{
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Bu Matematik Hayatında Nerede?",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji meraklıları, öğrenciler",
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy), telif yok",
+  "gorsel": "kodla çizilmiş özgün animasyon (HTML canvas), dış görsel yok, marka logosu yok",
+  "ses": "ElevenLabs klon ses — Ömer Ekinci'nin kendi sesi (benim2), abonelik, ticari kullanım"
+ },
+ "ureten": "Claude",
+ "kod": "KZ_MAT_06_YUZ",
+ "konu": "Yüz tanıma: yüz → 128 sayı, mesafe ve üçlü kayıp",
+ "amac": "Serinin 6. bölümü: vektör, mesafe, makine öğrenmesi. Ölçüt: izlenme süresi, 7. bölüme (Instagram filtresi) geçiş.",
+ "baslik": "Telefonun yüzünü nasıl tanıyor? Yüzün aslında 128 sayı 🤳",
+ "aciklama": "Telefona bakıyorsun, kilit açılıyor. Ama telefon yüzünü bir fotoğraf gibi hatırlamıyor; onu sayılara çeviriyor.\n\n1) Önce yüzündeki önemli noktaları bulur: gözler, burnun ucu, dudak kenarları, çene. Bazı telefonlar bunun için yüzüne 30.000'den fazla görünmez kızılötesi nokta yansıtır.\n2) Yapay zekâ yüzü 128 sayılık bir listeye çevirir: yüz parmak izin.\n3) Kilidi açarken yeni liste kayıtlı olanla karşılaştırılır; aradaki mesafe küçükse sensin, büyükse yabancı.\n4) Yapay zekâ milyonlarca üçlüyle eğitildi: aynı kişinin iki fotoğrafı ve bir yabancınınki. Kural: aynı kişiyi yaklaştır, yabancıyı uzaklaştır (FaceNet, 2015).\n5) Ondan önce, 1991'de, her yüz bir ortalama yüze eklenen birkaç 'hayalet yüzle' yazılıyordu (Eigenfaces).\n\nBu Matematik Hayatında Nerede? · Bölüm 6\nSıradaki bölüm: Instagram filtresi yüzünü nasıl takip ediyor?\n\n📚 Kaynak\n• Schroff, Kalenichenko, Philbin — FaceNet (Google, 2015)\n• Turk & Pentland — Eigenfaces for Recognition (MIT, 1991)\n\n🎨 Animasyon kodla çizilmiştir; marka/logo kullanılmamıştır. Seslendirme yapay zekâ ile üretilmiş klon sestir (kanal sahibinin kendi sesi). Müzik özgün olarak üretilmiştir.\n\n#yüztanıma #yapayzeka #matematik #bilim #kozmoslab",
+ "etiketler": [
+  "yüz tanıma",
+  "face id",
+  "yapay zeka",
+  "facenet",
+  "eigenfaces",
+  "matematik",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "Schroff et al., FaceNet (2015)",
+  "Turk & Pentland, Eigenfaces for Recognition (1991)"
+ ],
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MAT_06_YUZ_kaynak.mp4"
+}

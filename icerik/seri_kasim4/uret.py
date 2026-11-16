@@ -36,7 +36,13 @@ ALT_BANT = {
 
 
 # Bölüme özel alt bant (görsel kaynağı farklıysa; ses önbelleği bozulmasın diye bolumler.py'ye değil buraya yazılır)
-ALT_OZEL = {"AS_GT_BASOGRETMEN": "Görseller: yapay zekâ ile üretilmiş temsilî sahneler · Ses: yapay zekâ ile klonlanmış ses"}
+ALT_OZEL = {"AS_GT_BASOGRETMEN": "Görseller: yapay zekâ ile üretilmiş temsilî sahneler · Ses: yapay zekâ ile klonlanmış ses",
+            "AS_TB_SUTCU_KIZ": "Tablo: kamu malı (Rijksmuseum) · Eski hâli: yapay zekâ ile temsilî canlandırma · Ses: yapay zekâ"}
+# Ömer 17.11: "tablonun eski hâlini göster". Rijksmuseum 2022 bulgusuna göre (duvarda testi askısı, sağ altta söğüt sepet)
+# yapay zekâ ile temsilî canlandırma; yalnız ilgili sahnelerde kullanılır ve ekranda "TEMSİLÎ" yazar.
+SAHNE_OZEL = {("AS_TB_SUTCU_KIZ", 2): {"img": "vermeer_eski", "odak": [0.45, 0.0, 1.0, 0.75], "odak2": [0.55, 0.05, 1.0, 0.6], "bas0": "ESKİ HÂLİ · TEMSİLÎ"},
+              ("AS_TB_SUTCU_KIZ", 3): {"img": "vermeer_eski", "odak": [0.0, 0.0, 1.0, 1.0], "odak2": [0.35, 0.0, 1.0, 0.85], "bas0": "ESKİ HÂLİ · TEMSİLÎ"},
+              ("AS_TB_SUTCU_KIZ", 4): {"img": "vermeer_eski", "odak": [0.35, 0.35, 1.0, 1.0], "odak2": [0.55, 0.55, 1.0, 1.0], "bas0": "ESKİ HÂLİ · TEMSİLÎ"}}
 
 
 def gorsel_bul(ham_dizin, ad):
@@ -80,8 +86,12 @@ def ana():
             if not os.path.exists(amb_wav):
                 subprocess.run([sys.executable, amb_betik, amb_wav, "70", b["ambiyans"]], check=True)
             sahneler = []
-            for sc in b["sahneler"]:
+            for _n, sc in enumerate(b["sahneler"]):
                 yeni = dict(sc)
+                oz = SAHNE_OZEL.get((b["kod"], _n))
+                if oz:
+                    yeni.update({k: v for k, v in oz.items() if k != "bas0"}); yeni["bas"] = [oz["bas0"]] + list(sc["bas"][1:])
+                    sc = yeni
                 g = gorsel_bul(ham, sc["img"])
                 if g is None:  # görsel inmediyse aynı bölümün inen başka görseline düş
                     g = next((x for x in (gorsel_bul(ham, o["img"]) for o in b["sahneler"]) if x), None)

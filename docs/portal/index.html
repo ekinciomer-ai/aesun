@@ -113,7 +113,7 @@ const ITER = 600000, OTURUM_SN = 12 * 3600;
 /* varsayılan KAPALI (hassas / yönetici) yetkiler — modül açılınca otomatik verilmez, elle seçilir */
 const KAPALI = new Set(['parasal', 'yedek', 'proje', 'rapor', 'ilerleme', 'ekip', 'od_hakedis', 'od_taseron']);
 /* Saha projeleri — saha uygulaması ile AYNI origin'de localStorage'ta tutulur; n8n yedeği */
-const N8N_SAHA = (() => { try { return localStorage.getItem('sh2:n8n') || 'https://xbay.app.n8n.cloud/webhook'; } catch (e) { return 'https://xbay.app.n8n.cloud/webhook'; } })();
+const N8N_SAHA = (() => { try { const u = localStorage.getItem('sh2:n8n') || ''; return (u && u.indexOf('n8n.cloud') < 0) ? u : 'https://api.aksarayenerji.net/v1/saha'; } catch (e) { return 'https://api.aksarayenerji.net/v1/saha'; } })();
 // Saha API yetkisi: portal oturumundan türetilen belirteç (GET: k=, POST: gövdede k) — anahtarın kendisi gönderilmez
 async function sahaK() { if (!S) return null; const src = S.ka ? 'aesun-api|yonetici|' + S.ka : (S.anahtarlar && S.anahtarlar.saha ? 'aesun-api|saha|' + S.anahtarlar.saha : null); if (!src) return null; return [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(src)))].map(x => x.toString(16).padStart(2, '0')).join(''); }
 async function sahaFetch(url, o) { o = o || {}; const k = await sahaK().catch(() => null); if (k) { if (!o.method || o.method === 'GET') url += (url.includes('?') ? '&' : '?') + 'k=' + k; else if (typeof o.body === 'string') { const b = JSON.parse(o.body); b.k = k; o = { ...o, body: JSON.stringify(b) }; } } return fetch(url, o); }

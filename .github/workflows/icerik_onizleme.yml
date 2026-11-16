@@ -1,0 +1,104 @@
+name: İçerik üret → yalnız önizleme (YouTube'a YÜKLEMEZ)
+# icerik/<klasor>/ (bolumler.py + uret.py + istek_commons.json) bölümlerini üretir: kamu malı görsel, sunucuda ElevenLabs ses,
+# 1080x1920 render + kapak + yükleme kartı taslağı. Sonuç "video-onizleme" dalına <klasor>/ altına konur (1080p + 480p önizleme).
+# Yayın yok: Ömer önizlemeyi onaylayınca video Yükleme Yöneticisi'ne teslim edilir (sunucu/havuz/teslim, kaynak_url).
+on:
+  workflow_dispatch:
+    inputs:
+      klasor: {description: "icerik altındaki klasör (ör. seri_kasim4)", required: true}
+permissions: {contents: write}
+concurrency:
+  group: icerik-onizleme-${{ inputs.klasor }}
+  cancel-in-progress: false
+jobs:
+  uret:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      K: icerik/${{ inputs.klasor }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Klasör kontrolü
+        run: |
+          case "${{ inputs.klasor }}" in *[!a-z0-9_]*|"") echo "::error::geçersiz klasör"; exit 1;; esac
+          test -f "$K/bolumler.py" && test -f "$K/uret.py" && test -f "$K/istek_commons.json"
+      - name: Ortam kurulumu (ffmpeg, font, Python paketleri)
+        timeout-minutes: 15
+        run: |
+          # apt takılırsa iş beklemesin: süre sınırlı dene, olmazsa pip + hazır ffmpeg
+          sudo timeout 90 apt-get -qq -o Acquire::Retries=2 -o Acquire::http::Timeout=20 update || echo "::warning::apt update atlandı"
+          sudo timeout 120 apt-get -qq -o Acquire::Retries=2 -o Acquire::http::Timeout=20 install -y --no-install-recommends ffmpeg fonts-inter fonts-dejavu-core >/dev/null || echo "::warning::apt kurulum yarım kaldı"
+          python3 -m pip install -q --break-system-packages pillow numpy fonttools || pip install -q pillow numpy fonttools
+          if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+            curl -fsSL --retry 3 -o /tmp/ff.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+            mkdir -p /tmp/ff && tar xf /tmp/ff.tar.xz -C /tmp/ff --strip-components=1
+            sudo cp /tmp/ff/bin/ffmpeg /tmp/ff/bin/ffprobe /usr/local/bin/
+          fi
+          command -v ffmpeg && command -v ffprobe
+          ffmpeg -version | head -1; python3 -c "import PIL, numpy, fontTools; print('python paketleri tamam')"
+      - name: Kamu malı görselleri indir (Wikimedia Commons)
+        run: |
+          python3 icerik/arac/commons_indir.py $K/istek_commons.json /tmp/ham
+          if [ -d "$K/gorsel" ]; then cp "$K"/gorsel/* /tmp/ham/; fi   # özgün/üretilmiş görseller (kişi tasviri yok)
+          ls -lh /tmp/ham
+      - name: Seslendirme önbelleği
+        id: ses_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/ses_cikti
+          key: ses-onz-${{ inputs.klasor }}-${{ hashFiles(format('icerik/{0}/bolumler.py', inputs.klasor)) }}
+      - name: Sunucuda seslendirme üret (ElevenLabs)
+        if: steps.ses_cache.outputs.cache-hit != 'true'
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh /tmp/ses_pk/kuyruk /tmp/ses_cikti
+          python3 $K/uret.py ses /tmp/ses_pk/kuyruk
+          cp sunucu/islem_ses_kuyruk.sh /tmp/ses_pk/
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          tar czf /tmp/ses_paket.tgz -C /tmp/ses_pk .
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "rm -rf /tmp/ses_b && mkdir -p /tmp/ses_b && tar xzf - -C /tmp/ses_b && cd /tmp/ses_b && bash islem_ses_kuyruk.sh < /dev/null && tar czf /tmp/ses_b_cikti.tgz -C /tmp/ses_b cikti" < /tmp/ses_paket.tgz > /tmp/ses_log.txt 2>&1
+          scp $O root@$ADRES:/tmp/ses_b_cikti.tgz /tmp/ses_b_cikti.tgz
+          ssh $O root@$ADRES "rm -rf /tmp/ses_b /tmp/ses_b_cikti.tgz" || true
+          rm -f ~/.ssh/k
+          tar xzf /tmp/ses_b_cikti.tgz -C /tmp/ses_cikti
+          { grep '^NOT:' /tmp/ses_log.txt || true; } | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          ls -lh /tmp/ses_cikti/cikti
+      - name: Seslendirmeyi önbelleğe yaz (yeniden denemede kredi harcanmasın)
+        if: steps.ses_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/ses_cikti
+          key: ses-onz-${{ inputs.klasor }}-${{ hashFiles(format('icerik/{0}/bolumler.py', inputs.klasor)) }}
+      - name: 1080x1920 Shorts + özel kapak (.jpg) render et
+        run: |
+          set -euo pipefail
+          python3 $K/uret.py sahne /tmp/ham /tmp/ses_cikti/cikti /tmp/render
+          for sj in /tmp/render/*_sahne.json; do
+            echo "=== Render: $sj ==="
+            python3 icerik/arac/motor.py "$sj"
+          done
+          python3 $K/uret.py kuyruk /tmp/ham /tmp/render /tmp/yt_pk/kuyruk
+          ls -lh /tmp/yt_pk/kuyruk
+      - name: 480p önizleme + video-onizleme dalına koy
+        run: |
+          set -euo pipefail
+          ad="${{ inputs.klasor }}"; mkdir -p /tmp/onz/$ad
+          for f in /tmp/yt_pk/kuyruk/*.mp4; do
+            k=$(basename "$f" .mp4)
+            cp "$f" /tmp/onz/$ad/; cp /tmp/yt_pk/kuyruk/$k.json /tmp/onz/$ad/ || true; cp /tmp/yt_pk/kuyruk/$k.jpg /tmp/onz/$ad/ 2>/dev/null || true
+            ffmpeg -nostdin -loglevel error -y -i "$f" -vf scale=480:-2 -c:v libx264 -crf 28 -preset veryfast -c:a aac -b:a 96k /tmp/onz/$ad/${k}_480p.mp4
+          done
+          cp /tmp/ham/manifest.json /tmp/onz/$ad/gorsel_kunye.json 2>/dev/null || true
+          ls -lh /tmp/onz/$ad
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q
+          git config user.name "icerik-bot"; git config user.email "icerik-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          if git fetch -q --depth 1 origin video-onizleme; then git checkout -q -b video-onizleme FETCH_HEAD; else git checkout -q --orphan video-onizleme; fi
+          mkdir -p $ad && cp /tmp/onz/$ad/* $ad/
+          git add -A && git commit -qm "Önizleme: $ad" || exit 0
+          for i in 1 2 3; do git push -q origin HEAD:video-onizleme && break; git pull -q --rebase origin video-onizleme || true; sleep 5; done

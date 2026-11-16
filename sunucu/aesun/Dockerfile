@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git openssh-cli
  && pip install --no-cache-dir fastapi==0.115.6 uvicorn==0.32.1 cryptography==43.0.3 \
  && useradd -m -u 1001 aesun && mkdir -p /veri && chown aesun:aesun /veri
 WORKDIR /app
-COPY app.py kasa.py ./
+COPY app.py kasa.py saha.py ./
 COPY demo/ demo/
 USER aesun
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*", "--workers", "1"]

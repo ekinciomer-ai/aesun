@@ -127,6 +127,8 @@ def basla():
 
 import kasa as _kasa   # şifreli kasa (yazılır, burada çözülemez)
 app.include_router(_kasa.router)
+import saha as _saha   # saha eşitleme API'si (n8n Saha Sync/Foto yerine)
+app.include_router(_saha.router)
 
 def roller(req: Request):
     t = req.headers.get("x-ae-anahtar", "")

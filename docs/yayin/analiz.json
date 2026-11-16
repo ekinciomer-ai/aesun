@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-16T13:31+03:00",
+ "olusturma": "2026-11-16T14:32+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -241,15 +241,15 @@
    "kanal": "Antik Stüdyo",
    "seri": "Gece Yasakları",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 2,
-   "medyan_48sa": 196,
-   "tutma_orani": 0,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 723,
+   "tutma_orani": 50,
    "izlenme_yuzde": 47,
    "en_iyi": {
-    "baslik": "Gece Sakız Çiğneme… Ama Sultanlar Çiğniyordu #shorts",
-    "i48": 196
+    "baslik": "Karabasan Aslında Ne? 100 Kişiden 7'si Yaşıyor #shorts",
+    "i48": 1250
    },
    "kaydirmadan_izleme_yuzde": 32
   },
@@ -618,12 +618,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 146,
-  "Antik Stüdyo": 637,
-  "Estudio Antiguo": 122,
-  "Kozmos Lab": 50,
   "Ancient Studio": 188,
-  "Ömür Dediğin": 50
+  "Ömür Dediğin": 50,
+  "Kozmos Lab": 50,
+  "Kozmos Lab TR": 146,
+  "Estudio Antiguo": 122,
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -668,8 +668,8 @@
     "medyan": 709
    },
    "22:00": {
-    "n": 1,
-    "medyan": 57
+    "n": 2,
+    "medyan": 654
    },
    "23:00": {
     "n": 1,
@@ -1321,7 +1321,7 @@
  "bulgular": [
   "Dün (2026-11-15) 3984 izlenme geldi; bir önceki gün 332.",
   "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 188 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 1 tanesi tuttu (eşik 146 izlenme / 48 sa).",

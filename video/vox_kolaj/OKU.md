@@ -39,6 +39,7 @@ Kayıt: `video/arac/kayit.js` (değişmedi). `?ar=169` yatay, `?ar=916` dikey ka
 | `madalyon` | img, x, y, r, ad, sepia | Yuvarlak portre, zıplayarak belirir (kapanış kadrosu) |
 | `baslik` | ust, metin, hiza, renk | Küçük daktilo üst satır + büyük kırmızı vurucu satır |
 | `perde` | alfa, renk, bitis | Ekranı karartma/açma |
+| `kar` | sayi, alfa | Yağan kar (kış konuları) |
 | `foto` + `murekkep:1` | — | Görseli mürekkep çizim gibi (gri, sert kontrast) gösterir |
 
 Görsel yoksa yer tutucu çizilir, kayıt durmaz. Örnek: `sahneler.js` + `ornek_kurgu.json` (Al Karısı · Karakoncolos · Şahmeran · Tepegöz).

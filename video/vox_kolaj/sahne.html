@@ -167,7 +167,10 @@ function baslik(e,p){const s=e.boy||1;g.save();g.translate(e.x*W,e.y*H);g.rotate
  if(e.ust){g.font=`700 ${34*U*s}px "Space Mono"`;g.fillStyle=e.ustRenk||TM.yazi;g.fillText(e.ust.slice(0,Math.ceil(e.ust.length*ez(p*2))),0,-8*U*s)}
  const k=eo((p-.3)*1.8);g.font=`900 ${110*U*s}px Archivo`;g.globalAlpha=ez((p-.3)*4);g.fillStyle=e.renk||KIRMIZI;g.translate(0,(1-k)*30*U);g.fillText(e.metin,0,96*U*s);g.restore()}
 function perde(e,p){g.save();g.globalAlpha=ez(p)*(e.alfa||.85);g.fillStyle=e.renk||'#000';g.fillRect(-W,-H,3*W,3*H);g.restore()}
-const CIZ={foto,etiket,el,kutu,daire,damga,dev,cizgi,alinti,ucak,sayac,kimlik,figur,golge,karalama,isik,ay,sis,kivilcim,madalyon,baslik,perde};
+function kar(e,p,t){const r=rng(hs(e.ad||'kar')),n=e.sayi||120;g.save();g.globalAlpha=ez(p*2)*(e.alfa||.85);g.fillStyle='#fff';
+ for(let i=0;i<n;i++){const x0=r()*W,hz=.05+r()*.09,ph=r(),sz=(1+r()*3.2)*U,sal=8+r()*30;const q=((t||0)*hz+ph)%1;
+  g.globalAlpha=ez(p*2)*(e.alfa||.85)*(.35+.65*(sz/(4.2*U)));g.beginPath();g.arc(x0+Math.sin(q*7+i)*sal*U,-20*U+q*(H+40*U),sz,0,6.3);g.fill()}g.restore()}
+const CIZ={foto,etiket,el,kutu,daire,damga,dev,cizgi,alinti,ucak,sayac,kimlik,figur,golge,karalama,isik,ay,sis,kivilcim,madalyon,baslik,perde,kar};
 // ---------- sahne çizimi ----------
 function sahneCiz(S,ts,dur){TM=TEMALAR[S.tema]||TEMALAR.kagit;g.drawImage(zeminYap(S.tema||'kagit'),0,0);if(S.arka&&IMG[S.arka]){const im=IMG[S.arka];g.save();g.globalAlpha=.09;g.filter='grayscale(1)';g.globalCompositeOperation='multiply';const [cx,cy,cw,ch]=kapla(im,W*1.1,H*1.1);g.translate(W/2,H/2);g.rotate(-.05);g.drawImage(im,cx,cy,cw,ch,-W*.55,-H*.55,W*1.1,H*1.1);g.restore()}const kam=1+(S.kam!=null?S.kam:0.025)*ts/Math.max(dur,1);g.save();g.translate(W/2,H/2);g.scale(kam,kam);g.translate(-W/2,-H/2);
  for(const e of S.ogeler){if(e.k==='kesit')continue;const kz=S.ogeler.find(x=>x.k==='kesit'&&x.img===e.img&&e.k==='foto');e._kalk=kz?Math.max(0,ts-(kz.f||0)*dur):0;const bas=(e.f||0)*dur+(e.t||0),p=(ts-bas)/(e.sure||0.7);if(p<=0)continue;if(e.bitis!=null&&ts>e.bitis*dur)continue;CIZ[e.k](e,ez(p>1?1:p)+(p>1?p-1:0)*0,ts-bas)}

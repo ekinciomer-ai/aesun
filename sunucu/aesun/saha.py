@@ -11,7 +11,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 DB = os.environ.get("AESUN_SAHA_DB", "/veri/saha.db")
-MAX_ADET, MAX_KV, MAX_FOTO = 200, 100 * 1024, 2 * 1024 * 1024
+MAX_ADET, MAX_KV, MAX_FOTO = 200, 1024 * 1024, 2 * 1024 * 1024
 PROJE = re.compile(r"^[A-Za-z0-9_.:-]{1,60}$")
 router = APIRouter()
 _kilit = threading.Lock()
@@ -90,7 +90,7 @@ async def saha_set(req: Request):
         d = it.get("deger")
         d = d if isinstance(d, str) else json.dumps(d, ensure_ascii=False, separators=(",", ":"))
         if len(d) > MAX_KV:
-            return _ret(413, f"{k} cok buyuk ({len(d) // 1024} KB, sinir 100 KB)")
+            return _ret(413, f"{k} cok buyuk ({len(d) // 1024} KB, sinir 1 MB)")
         out.append((proje, k, d, cihaz, now))
     with _kilit:
         c = _baglan()

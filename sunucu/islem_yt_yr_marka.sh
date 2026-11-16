@@ -2,6 +2,20 @@
 # Yolu Seç ! (YR) kanal markası: kapak görseli yüklenir, açıklama, anahtar kelimeler, ülke ve dil yazılır.
 # Önce mevcut ayar yedeklenir (/opt/aesun/youtube/yedek/). Profil fotoğrafı API ile değiştirilemez (YouTube kısıtı): elle yüklenir.
 set -u
+# Kapak Canva'dan: indirme adresi şifreli gelir, sunucuda çözülüp indirilir (adres süreli ve imzalı)
+if [ -f sunucu/yt/marka/yr_kapak_url.sifreli ]; then
+  python3 - sunucu/yt/marka/yr_kapak_url.sifreli /tmp/yr_url.txt /opt/aesun/sir/ozel.pem <<'PY2'
+import base64, json, subprocess, sys, tempfile
+d = json.load(open(sys.argv[1])); out, key = sys.argv[2], sys.argv[3]
+with tempfile.TemporaryDirectory() as t:
+    open(t+"/ak","wb").write(base64.b64decode(d["ak"])); open(t+"/ct","wb").write(base64.b64decode(d["ct"]))
+    subprocess.run(["openssl","pkeyutl","-decrypt","-inkey",key,"-pkeyopt","rsa_padding_mode:oaep","-pkeyopt","rsa_oaep_md:sha256","-in",t+"/ak","-out",t+"/k"],check=True)
+    k = open(t+"/k","rb").read().hex()
+    subprocess.run(["openssl","enc","-d","-aes-256-cbc","-K",k,"-iv",d["iv"],"-in",t+"/ct","-out",out],check=True)
+PY2
+  curl -sSf -o sunucu/yt/marka/yr_kapak.jpg "$(cat /tmp/yr_url.txt)" && echo "NOT: Canva kapağı indirildi ($(stat -c%s sunucu/yt/marka/yr_kapak.jpg) bayt)" || { echo "NOT: HATA Canva kapağı indirilemedi"; rm -f /tmp/yr_url.txt; exit 1; }
+  rm -f /tmp/yr_url.txt
+fi
 D=/opt/aesun/youtube M=/tmp/aesun_paket/sunucu/yt/marka python3 - <<'PY'
 import json, os, glob, time, urllib.request, urllib.parse
 D, M = os.environ["D"], os.environ["M"]

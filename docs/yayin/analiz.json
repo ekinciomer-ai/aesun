@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-16T17:05+03:00",
+ "olusturma": "2026-11-16T23:21+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -60,11 +60,13 @@
    },
    "durdurulan": [
     "10 Kasım",
+    "Ateş Akıncı",
     "Gece Yasakları",
     "Günün Sözü",
     "Pürdikkat & Çalınan Dikkat",
     "Tarihin Deneyleri",
-    "Tarihin Patileri"
+    "Tarihin Patileri",
+    "İnanç & Kültür Tarihi"
    ],
    "odak": "ODAK DÖNEMİ 2026-12-12'e kadar"
   },
@@ -126,6 +128,18 @@
   }
  },
  "seriler": [
+  {
+   "kanal": "Ancient Studio",
+   "seri": "Ateş Akıncı",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
   {
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
@@ -240,17 +254,29 @@
   },
   {
    "kanal": "Antik Stüdyo",
+   "seri": "Ateş Akıncı",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Antik Stüdyo",
    "seri": "Gece Yasakları",
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 1,
-   "medyan_48sa": 723,
+   "medyan_48sa": 750,
    "tutma_orani": 50,
    "izlenme_yuzde": 47,
    "en_iyi": {
     "baslik": "Karabasan Aslında Ne? 100 Kişiden 7'si Yaşıyor #shorts",
-    "i48": 1250
+    "i48": 1303
    },
    "kaydirmadan_izleme_yuzde": 32
   },
@@ -260,7 +286,7 @@
    "karar": "ARTIR",
    "neden": "videoların %50'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 20,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 856,
    "tutma_orani": 50,
    "izlenme_yuzde": 57,
@@ -377,6 +403,18 @@
     "i48": 19
    },
    "kaydirmadan_izleme_yuzde": 38
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "seri": "İnanç & Kültür Tarihi",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
   },
   {
    "kanal": "Estudio Antiguo",
@@ -555,11 +593,23 @@
   },
   {
    "kanal": "Kozmos Lab TR",
+   "seri": "Bu Matematik Hayatında Nerede?",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 2,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Kozmos Lab TR",
    "seri": "Enerji Üretim Kaynakları",
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 32,
    "tutma_orani": 0,
    "izlenme_yuzde": 47,
@@ -619,12 +669,12 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 146,
   "Antik Stüdyo": 637,
-  "Ömür Dediğin": 50,
+  "Ancient Studio": 188,
+  "Kozmos Lab TR": 146,
   "Estudio Antiguo": 122,
-  "Kozmos Lab": 50,
-  "Ancient Studio": 188
+  "Ömür Dediğin": 50,
+  "Kozmos Lab": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -670,7 +720,7 @@
    },
    "22:00": {
     "n": 2,
-    "medyan": 654
+    "medyan": 680
    },
    "23:00": {
     "n": 1,
@@ -849,7 +899,7 @@
     {
      "vid": "LYZZ8R-Qo8A",
      "baslik": "How Did Mehmed II Lock the Bosphorus in Just 139 Days? 🏰 (1452) #shorts",
-     "izlenme": 245,
+     "izlenme": 247,
      "durum": "Yayında"
     },
     {
@@ -877,7 +927,7 @@
     {
      "vid": "lcGHHhXM_74",
      "baslik": "Why was Piri Reis executed? #Shorts",
-     "izlenme": 927,
+     "izlenme": 928,
      "durum": "Yayında"
     },
     {
@@ -894,12 +944,12 @@
    "uzun_vid": "Ub6wYt_50lY",
    "uzun_baslik": "Piri Reis Neden İdam Edildi? | 474 Yıl Önce Hürmüz Boğazı",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 902,
+   "uzun_izlenme": 903,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2788,
+     "izlenme": 2789,
      "durum": "Yayında"
     },
     {
@@ -934,7 +984,7 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 235,
+   "uzun_izlenme": 237,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
@@ -950,7 +1000,7 @@
    "uzun_vid": "42vh7-zmom4",
    "uzun_baslik": "Piri Reis'in Bütün Hikâyesi: Korsanlıktan Hürmüz'e, Haritadan İdama",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 46,
+   "uzun_izlenme": 47,
    "baglanacak_shortlar": [
     {
      "vid": "Ov0ftdfKjCI",
@@ -983,7 +1033,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2788,
+     "izlenme": 2789,
      "durum": "Yayında"
     },
     {
@@ -1007,7 +1057,7 @@
     {
      "vid": "gXn5GB17DUc",
      "baslik": "Fatih 70 gemiyi karadan nasıl yürüttü? ⚓⛰️ #shorts",
-     "izlenme": 163,
+     "izlenme": 167,
      "durum": "Yayında"
     }
    ],
@@ -1018,7 +1068,7 @@
    "uzun_vid": "hDR8xjW4HAc",
    "uzun_baslik": "7 ünlü tablonun kimsenin fark etmediği ayrıntısı",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 0,
+   "uzun_izlenme": 3,
    "baglanacak_shortlar": [
     {
      "vid": "0Yhof30_bfg",
@@ -1029,19 +1079,19 @@
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2884,
+     "izlenme": 2885,
      "durum": "Yayında"
     },
     {
      "vid": "bsK8ALbOA8g",
      "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️ #shorts",
-     "izlenme": 2803,
+     "izlenme": 2805,
      "durum": "Yayında"
     },
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2588,
+     "izlenme": 2591,
      "durum": "Yayında"
     },
     {
@@ -1063,7 +1113,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2788,
+     "izlenme": 2789,
      "durum": "Yayında"
     },
     {
@@ -1087,7 +1137,7 @@
     {
      "vid": "gXn5GB17DUc",
      "baslik": "Fatih 70 gemiyi karadan nasıl yürüttü? ⚓⛰️ #shorts",
-     "izlenme": 163,
+     "izlenme": 167,
      "durum": "Yayında"
     }
    ],
@@ -1130,12 +1180,12 @@
    "uzun_vid": "HvRuOsJcczM",
    "uzun_baslik": "From Sand to Power: How a Solar Panel Is Made | Step-by-Step 3D Explainer",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 42,
+   "uzun_izlenme": 51,
    "baglanacak_shortlar": [
     {
      "vid": "oEFXYkmfE-E",
      "baslik": "How does a handful of sand become a solar panel? ☀️ #shorts",
-     "izlenme": 5,
+     "izlenme": 6,
      "durum": "Yayında"
     }
    ],
@@ -1157,7 +1207,7 @@
     {
      "vid": "7naXMebQd70",
      "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
-     "izlenme": 7,
+     "izlenme": 8,
      "durum": "Yayında"
     }
    ],
@@ -1168,12 +1218,12 @@
    "uzun_vid": "dNERFLZ93rA",
    "uzun_baslik": "Kumdan Elektriğe: Bir Güneş Paneli Nasıl Üretilir? | Adım Adım 3D Anlatım",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 9,
+   "uzun_izlenme": 10,
    "baglanacak_shortlar": [
     {
      "vid": "MSOsi_wK55Q",
      "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
-     "izlenme": 926,
+     "izlenme": 931,
      "durum": "Yayında"
     },
     {
@@ -1194,30 +1244,6 @@
    "vid": "",
    "baslik": "Yüzlerine GLADYATÖR TERİ süren zengin kadınlar?! ⚔️🏺 (Antik Roma Kremi)",
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "-Jm2jS1QSKs",
-   "baslik": "Ayasofyadan büyük kubbe yapılamaz! diyenlere 80 yaşındaki Sinanın cevabı! 🕌 (1575) #shorts",
-   "neden": "2026-11-16 14:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "iRNCJppv3nw",
-   "baslik": "Akıncı ruhu bir motorcuya geçerse? 🔥 #shorts",
-   "neden": "2026-11-16 15:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Kozmos Lab TR",
-   "platform": "YouTube",
-   "vid": "nP5ZQJT56_w",
-   "baslik": "Şarkı neden 10 kat küçülür? MP3'ün matematiği 🎧",
-   "neden": "2026-11-16 13:30 planlıydı, hâlâ yayında görünmüyor"
   },
   {
    "tur": "ERTELE",
@@ -1257,26 +1283,10 @@
   {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Ancient Studio",
-   "vid": "Q3cPL6xN57Y",
-   "baslik": "What would an Ottoman raider ride today? 🔥 #shorts",
-   "tarih": "2026-11-16",
-   "neden": "odak dönemi: Ancient Studio haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Ancient Studio",
    "vid": "uj0xUXqOPKo",
    "baslik": "Someone wrote a song on this man's butt 🎵 #shorts",
    "tarih": "2026-11-28",
    "neden": "odak dönemi: Ancient Studio haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
-   "vid": "0FreXZ_KKD8",
-   "baslik": "Shazam şarkıyı nasıl tanır? Bir takımyıldız haritası ✨",
-   "tarih": "2026-11-16",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
    "tur": "HAFTALIK_KOTA",

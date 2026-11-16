@@ -1,6 +1,6 @@
 from playwright.sync_api import sync_playwright
 import subprocess,base64
-FPS=30;N=int(60.92*FPS)
+FPS=30;N=int(55.93*FPS)
 ff=subprocess.Popen(['ffmpeg','-y','-loglevel','error','-f','image2pipe','-framerate',str(FPS),'-c:v','mjpeg','-i','-','-i','karisim.wav','-c:v','libx264','-preset','veryfast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart','KozmosLab_BuMatematikNerede_05_QRKod.mp4'],stdin=subprocess.PIPE)
 with sync_playwright() as p:
     b=p.chromium.launch(executable_path='/usr/bin/google-chrome')

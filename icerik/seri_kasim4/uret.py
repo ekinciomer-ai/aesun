@@ -35,6 +35,10 @@ ALT_BANT = {
 }
 
 
+# Bölüme özel alt bant (görsel kaynağı farklıysa; ses önbelleği bozulmasın diye bolumler.py'ye değil buraya yazılır)
+ALT_OZEL = {"AS_GT_BASOGRETMEN": "Görseller: yapay zekâ ile üretilmiş temsilî sahneler · Ses: yapay zekâ ile klonlanmış ses"}
+
+
 def gorsel_bul(ham_dizin, ad):
     for ext in (".jpg", ".png", ".JPG", ".jpeg"):
         p = os.path.join(ham_dizin, ad + ext)
@@ -98,7 +102,7 @@ def ana():
                 "muzik_seviye": 0.09,
                 "kanal": b["kanal_etiket"],
                 "kapanis": b["kapanis"],
-                "alt": ALT_BANT[b["dil"]],
+                "alt": ALT_OZEL.get(b["kod"], ALT_BANT[b["dil"]]),
                 "cikti": os.path.abspath(os.path.join(render_out, f"{b['kod']}.mp4")),
             }
             sj_yol = os.path.join(render_out, f"{b['kod']}_sahne.json")

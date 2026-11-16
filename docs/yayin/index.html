@@ -113,8 +113,8 @@ tr.bugun td{color:var(--k)}
 </main>
 <script>
 const DR={'İptal':'#B91C24','Yayında':'#1F8A4C','Planlı':'#2463B5','Gizli':'#8A93A0','Taslak':'#C26A12','Kaldırıldı':'#5C6470'};
-const KN={'Kozmos Lab TR (@kozmoslabtr)':'Kozmos Lab TR','Kozmos Lab (@kozmoslab)':'Kozmos Lab'};
-const DN={'KZ_TR':'TR','KZ_EN':'EN','OD':'TR'};
+const KN={'Kozmos Lab TR (@kozmoslabtr)':'Kozmos Lab TR','Kozmos Lab (@kozmoslab)':'Kozmos Lab','Yolu Seç ! (@yolusec)':'Yolu Seç !'};
+const DN={'KZ_TR':'TR','KZ_EN':'EN','OD':'TR','NY':'TR','YR':'TR'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const AY=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],GN=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const gunAd=t=>{if(!t)return 'Tarihsiz (taslak)';const d=new Date(t+'T12:00:00');return d.getDate()+' '+AY[d.getMonth()]+' '+d.getFullYear()+' · '+GN[d.getDay()]};

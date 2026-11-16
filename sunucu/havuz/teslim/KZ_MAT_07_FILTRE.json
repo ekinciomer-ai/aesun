@@ -1,0 +1,40 @@
+{
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Bu Matematik Hayatında Nerede?",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji meraklıları, öğrenciler",
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy), telif yok",
+  "gorsel": "kodla çizilmiş özgün animasyon (HTML canvas), dış görsel yok, marka logosu yok",
+  "ses": "ElevenLabs klon ses — Ömer Ekinci'nin kendi sesi (benim2), abonelik, ticari kullanım"
+ },
+ "ureten": "Claude",
+ "kod": "KZ_MAT_07_FILTRE",
+ "konu": "Yüz filtresi: 468 noktalık yüz ağı ve dönüşüm matrisi",
+ "amac": "Serinin 7. bölümü: 3B nokta ağı, dönüşüm matrisi (taşı-döndür-büyüt). Ölçüt: izlenme süresi, 8. bölüme (navigasyon) geçiş.",
+ "baslik": "Instagram filtresi yüzünü nasıl takip ediyor? 468 nokta 😎",
+ "aciklama": "Kameranı açıp bir filtre seçiyorsun; gözlük tam gözüne oturuyor, başını çevirsen de düşmüyor.\n\n1) Telefon her saniye yaklaşık 30 kez aynı işi yapar: önce görüntüde yüzünü bulur.\n2) Sonra yüzüne 468 noktalık üç boyutlu bir ağ yerleştirir: göz kenarları, dudaklar, çene hattı.\n3) Gözlük iki göz noktasına bağlanır: gözlerin arası açılırsa büyür, başın eğilirse aynı açıyla eğilir. Bu hesaba dönüşüm matrisi denir: taşı, döndür, büyüt.\n4) Telefon her karede yalnızca küçük farkı hesaplar; yüzü kaybedince yeniden arar.\n5) Eskiden yüz bulmak için siyah-beyaz kareler kullanılırdı (Viola–Jones, 2001). Bugün bunu küçük bir yapay zekâ, ayrı derinlik sensörü olmadan yapıyor.\n\nBu Matematik Hayatında Nerede? · Bölüm 7\nSıradaki bölüm: Navigasyon en kısa yolu nasıl buluyor?\n\n📚 Kaynak\n• Google MediaPipe Face Mesh (468 3B yüz noktası)\n• Viola & Jones, Rapid Object Detection (2001)\n\n🎨 Animasyon kodla çizilmiştir; marka/logo kullanılmamıştır. Instagram, Meta'nın markasıdır; bu video bağımsız bir anlatımdır. Seslendirme yapay zekâ ile üretilmiş klon sestir (kanal sahibinin kendi sesi). Müzik özgün olarak üretilmiştir.\n\n#filtre #arfilter #matematik #bilim #kozmoslab",
+ "etiketler": [
+  "yüz filtresi",
+  "ar filtre",
+  "instagram filtresi",
+  "face mesh",
+  "dönüşüm matrisi",
+  "matematik",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "Google MediaPipe Face Mesh",
+  "Viola & Jones (2001)"
+ ],
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MAT_07_FILTRE_kaynak.mp4"
+}

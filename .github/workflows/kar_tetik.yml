@@ -1,0 +1,81 @@
+name: Kar tetiği (Yükleme Yöneticisi)
+# Ömer 17.11.2026: "kış videosu için meteorolojiyi takip et, kar uyarısı olduğunda yayınla".
+# 3 saatte bir sunucu/havuz/tetik/kar.json'daki şehirler için kar tahminine bakar (Open-Meteo, ücretsiz).
+# Önümüzdeki 'gun' gün içinde herhangi bir şehirde günlük kar ≥ esik_cm ise: bekletilen videoyu sunucuda
+# tetik_onay ile ilk uygun saate onaylatır, yönlendirir, kuyruk kartlarını depoya yazar, kuyruk görevlerini çalıştırır.
+# Her video bir kez tetiklenir (sunucu/havuz/tetik/<kod>.yapildi). Bilgisayar ve Claude gerekmez.
+on:
+  schedule:
+    - cron: '23 */3 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency: { group: kar-tetik, cancel-in-progress: false }
+jobs:
+  tetik:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kar tahmini
+        id: hava
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          c = json.load(open('sunucu/havuz/tetik/kar.json', encoding='utf-8'))
+          bekleyen = [k for k in c['kodlar'] if not os.path.exists(f'sunucu/havuz/tetik/{k}.yapildi')]
+          bulunan = []
+          for ad, (la, lo) in c['sehirler'].items():
+              u = f"https://api.open-meteo.com/v1/forecast?latitude={la}&longitude={lo}&daily=snowfall_sum&forecast_days={c['gun']}&timezone=Europe%2FIstanbul"
+              try:
+                  d = json.load(urllib.request.urlopen(u, timeout=30))['daily']
+                  for g, v in zip(d['time'], d['snowfall_sum']):
+                      if v is not None and v >= c['esik_cm']: bulunan.append(f"{ad} {g}: {v} cm")
+              except Exception as e:
+                  print(f"::warning::{ad} tahmini okunamadı: {e}")
+          print('Kar:', bulunan or 'yok', '· bekleyen:', bekleyen)
+          tetik = bool(bulunan and bekleyen)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"tetik={'evet' if tetik else 'hayir'}\nkodlar={' '.join(bekleyen)}\nneden={'; '.join(bulunan)[:200]}\n")
+          PY
+      - name: Sunucuda onayla ve yönlendir
+        if: steps.hava.outputs.tetik == 'evet'
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          KODLAR: ${{ steps.hava.outputs.kodlar }}
+          NEDEN: ${{ steps.hava.outputs.neden }}
+        run: |
+          set -uo pipefail
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
+          scp -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes sunucu/havuz/yonetici.py root@$ADRES:/opt/aesun/havuz/yonetici.py.yeni
+          $S "cp /opt/aesun/havuz/havuz.json /opt/aesun/havuz/havuz.json.kar_oncesi_\$(date +%s); install -m 755 /opt/aesun/havuz/yonetici.py.yeni /opt/aesun/havuz/yonetici.py; for k in $KODLAR; do python3 /opt/aesun/havuz/yonetici.py tetik_onay \$k 'kar uyarısı: $NEDEN'; done; python3 /opt/aesun/havuz/yonetici.py yonlendir" > /tmp/cikti.txt 2>&1; kod=$?
+          grep "NOT:" /tmp/cikti.txt || true
+          python3 - <<'PY'
+          import json, re, os
+          t = open('/tmp/cikti.txt', encoding='utf-8', errors='replace').read()
+          m = re.search(r'===YONLENDIR===\n(.*?)\n===SON===', t, re.S)
+          if not m: print('::error::yönlendirme çıktısı yok'); raise SystemExit(1)
+          for c in json.loads(m.group(1)):
+              os.makedirs(os.path.dirname(c['dosya']), exist_ok=True)
+              json.dump(c['icerik'], open(c['dosya'], 'w', encoding='utf-8'), ensure_ascii=False, indent=1); print('kuyruk:', c['dosya'])
+          for k in os.environ['KODLAR'].split():
+              if f'{k}: tetik onayı' in t: open(f'sunucu/havuz/tetik/{k}.yapildi', 'w').write(os.environ['NEDEN'] + '\n')
+          PY
+          exit $kod
+      - name: Kaydet ve kuyrukları çalıştır
+        if: steps.hava.outputs.tetik == 'evet'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add sunucu/yt_kuyruk sunucu/tt_kuyruk sunucu/havuz/tetik 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -qm "Kar tetiği: ${{ steps.hava.outputs.kodlar }} yayına yönlendirildi (${{ steps.hava.outputs.neden }})"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          gh workflow run yt_kuyruk.yml --ref main || true
+          gh workflow run tt_kuyruk.yml --ref main || true

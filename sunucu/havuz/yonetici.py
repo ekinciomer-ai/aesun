@@ -14,6 +14,7 @@ Komutlar:
                                             günlük sınıra ve ara süreye göre ilk uygun saati verir (plan.json)
   yonetici.py planla                        yayın planını YÖNETİCİ yapar (saat/sıra; kilit, odak dönemi, bekletme kurallarıyla)
   yonetici.py onay_toplu [not]              tek tıkla onay: planı hazır bütün işleri önerilen saatle onaylar
+  yonetici.py tetik_onay <kod> [not]         koşullu onay (ör. kar uyarısı): bekletmeyi kaldırır, ilk uygun saate onaylar
   yonetici.py beklet <kod> [not|kaldir]     işi plandan çıkarır (Ömer "beklesin"); 'kaldir' ile geri alır
   yonetici.py yonlendir                     onaylananları platform kuyruklarına hazırlar, kuyruk kartlarını yazdırır
   yonetici.py esitle                        platform yükleme kayıtlarından durumu günceller
@@ -192,6 +193,35 @@ def beklet(kod, notu=""):
     else:
         it["kart"]["bekletme"] = notu or "Ömer: beklesin"; it["kart"].pop("plan_zamani", None); olay(it, f"bekletmeye alındı · {notu}")
     kaydet(idx); print(f"NOT: {kod}: {'bekletme kaldırıldı' if notu == 'kaldir' else 'bekletmede'}"); return 0
+
+
+def tetik_onay(kod, notu=""):
+    """Koşullu onay (ör. Ömer: "kar uyarısı olunca yayınla"): bekletmeyi kaldırır, şimdiden en az 90 dk sonraki
+    ilk uygun kanal saatini (kilit kurallarıyla) yayın zamanı yapar ve onaylar. Yalnız onay_bekliyor işe."""
+    idx = yukle(); it = idx.get(kod)
+    if not it or it.get("durum") != "onay_bekliyor":
+        print(f"NOT: {kod} tetik onayı yapılmadı (durum: {it and it.get('durum')})"); return 1
+    k = it["kart"]; planli = []
+    for v in idx.values():
+        z = zaman_oku(v.get("kart", {}).get("yayin_zamani")) if v.get("durum") in ("kuyrukta", "yayinda", "onaylandi") else None
+        if z:
+            for p in v["kart"].get("platformlar", []): planli.append((v["kart"].get("kanal"), p, z))
+    bas = datetime.now(IST) + timedelta(minutes=90); secilen = None
+    for gun in range(8):
+        for hm in sorted(saatler_al(k["kanal"])):
+            h, m = map(int, hm.split(":"))
+            aday = (bas.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=gun)).replace(hour=h, minute=m)
+            if aday < bas: continue
+            dene = dict(k, yayin_zamani=aday.isoformat(timespec="minutes"))
+            if all(kilit_kontrol(kod, dene, p, planli) is None for p in k.get("platformlar", [])):
+                secilen = aday; break
+        if secilen: break
+    if not secilen:
+        print(f"NOT: HATA {kod}: 8 gün içinde uygun saat yok"); return 1
+    k.pop("bekletme", None); k.pop("plan_zamani", None); k["yayin_zamani"] = secilen.isoformat(timespec="minutes")
+    it["durum"] = "onaylandi"; it["onay"] = {"karar": "evet", "zaman": simdi(), "not": notu or "koşullu onay tetiklendi"}
+    olay(it, f"tetik: {notu} · yayın {secilen:%d.%m %H:%M}"); kaydet(idx)
+    print(f"NOT: {kod}: tetik onayı · yayın {secilen:%d.%m %H:%M}"); return 0
 
 
 def onay_toplu(notu=""):
@@ -412,5 +442,5 @@ if __name__ == "__main__":
     if not a: print(__doc__); sys.exit(0)
     k = a[0]
     sys.exit({"teslim": lambda: teslim(a[1]), "onay": lambda: onay(a[1], a[2], *(a[3:5])), "yonlendir": yonlendir, "planla": planla,
-              "beklet": lambda: beklet(a[1], a[2] if len(a) > 2 else ""), "onay_toplu": lambda: onay_toplu(a[1] if len(a) > 1 else ""),
+              "beklet": lambda: beklet(a[1], a[2] if len(a) > 2 else ""), "tetik_onay": lambda: tetik_onay(a[1], a[2] if len(a) > 2 else ""), "onay_toplu": lambda: onay_toplu(a[1] if len(a) > 1 else ""),
               "esitle": esitle, "durum": lambda: durum("--json" in a)}[k]())

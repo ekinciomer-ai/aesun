@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>Navigasyon — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 5.1], "B": [5.1, 10.28], "C": [10.28, 16.7], "D": [16.7, 28.18], "E": [28.18, 37.16], "F": [37.16, 42.36], "G": [42.36, 46.46], "H": [46.46, 50.34]};window.SUB=[[0.3, 5.1, "Navigasyonda hedefi yazıyorsun; bir saniyede binlerce sokak arasından tek bir yol çıkıyor."], [5.1, 7.64, "Telefon için şehir bir harita değil, bir ağdır."], [7.64, 10.28, "Kavşaklar nokta, yollar çizgidir; her çizginin bir bedeli vardır: dakika."], [10.28, 16.7, "1956'da Hollandalı Edsger Dijkstra, bir kafede yirmi dakikada bu soruyu çözdü."], [16.7, 20.02, "Fikri şu: başlangıçtan dışarı doğru, su gibi yayıl."], [20.02, 24.24, "Her adımda ulaşılan en yakın kavşağı kesinleştir ve komşularına yeni süreleri yaz."], [24.24, 26.32, "Daha kısa bir süre bulursan eskisini sil."], [26.32, 28.18, "Hedefe ulaştığında geriye doğru izi sür: işte en kısa yol."], [28.18, 33.42, "1968'de buna bir pusula eklendi: hedefe kuş uçuşu uzaklık."], [33.42, 37.16, "Bu yönteme A* denir; bütün şehri değil, hedefe doğru olan tarafı arar."], [37.16, 42.36, "Bir yolda trafik sıkışınca o çizginin bedeli artar ve hesap saniyeler içinde yeniden yapılır."], [42.36, 46.46, "Yani navigasyon, şehri bir ağa çevirip en ucuz zinciri arıyor."], [46.46, 48.54, "Sıradaki bölümü sen seç: yorumlara yaz."], [48.54, 49.84, "Takip et."]];window.DUR=50.34;</script>
+<script>
+let TM=window.TM||{A:[0,6],B:[6,12],C:[12,18],D:[18,34],E:[34,42],F:[42,46],G:[46,50]},SUB=window.SUB||[],DUR=window.DUR||46;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+const OR='#ff9a5a',BL='#40c4ff',GR='#5dffb0',RD='#e8364f',YL='#ffcf5a';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+
+const st=i=>SUB[i]?SUB[i][0]:0;const since=(t,i,d)=>ease((t-st(i))/(d||1));
+const NR=7,NC=5,ND=[],ED=[];for(let r=0;r<NR;r++)for(let c=0;c<NC;c++)ND.push([170+c*185+(R(r*9+c)-.5)*70,560+r*150+(R(r*5+c+40)-.5)*60]);
+const id=(r,c)=>r*NC+c;for(let r=0;r<NR;r++)for(let c=0;c<NC;c++){if(c<NC-1)ED.push([id(r,c),id(r,c+1)]);if(r<NR-1)ED.push([id(r,c),id(r+1,c)]);if(r<NR-1&&c<NC-1&&R(r*3+c)>.6)ED.push([id(r,c),id(r+1,c+1)])}
+const WT=ED.map(([a,b],i)=>Math.ceil(Math.hypot(ND[a][0]-ND[b][0],ND[a][1]-ND[b][1])/185*(1+R(i*11+3)*1.6)*3));const S0=0,G0=ND.length-1;
+function dij(wt,astar){const n=ND.length,d=Array(n).fill(1e9),pv=Array(n).fill(-1),done=Array(n).fill(false),ord=[];d[S0]=0;const h=v=>astar?Math.hypot(ND[v][0]-ND[G0][0],ND[v][1]-ND[G0][1])/185*3:0;
+ for(;;){let u=-1,b=1e18;for(let v=0;v<n;v++)if(!done[v]&&d[v]+h(v)<b){b=d[v]+h(v);u=v}if(u<0)break;done[u]=true;ord.push(u);if(u==G0)break;
+  ED.forEach(([a,c],i)=>{const v=a==u?c:c==u?a:-1;if(v<0||done[v])return;if(d[u]+wt[i]<d[v]){d[v]=d[u]+wt[i];pv[v]=u}})}
+ const path=[];for(let v=G0;v>=0;v=pv[v])path.unshift(v);return{d,ord,path}}
+const DJ=dij(WT,false),AS=dij(WT,true);const pe=new Set();for(let i=0;i<DJ.path.length-1;i++){const a=DJ.path[i],b=DJ.path[i+1];pe.add(ED.findIndex(([x,y])=>(x==a&&y==b)||(x==b&&y==a)))}
+const TE=[...pe][Math.floor(pe.size/2)];const WT2=WT.slice();WT2[TE]=40;const DJ2=dij(WT2,false);
+function graph(opt){const o=opt||{};ED.forEach(([a,b],i)=>{g.strokeStyle=o.ec?o.ec(i):'rgba(143,166,216,.45)';g.lineWidth=o.ew?o.ew(i):4;g.beginPath();g.moveTo(ND[a][0],ND[a][1]);g.lineTo(ND[b][0],ND[b][1]);g.stroke();
+  if(o.w){const mx=(ND[a][0]+ND[b][0])/2,my=(ND[a][1]+ND[b][1])/2;g.globalAlpha=o.w;T((o.wt||WT)[i]+'',mx,my,22,'#8fa6d8',700);g.globalAlpha=1}});
+ ND.forEach(([x,y],v)=>{g.fillStyle=o.nc?o.nc(v):'#c9d4f2';g.beginPath();g.arc(x,y,v==S0||v==G0?18:11,0,TAU);g.fill()});
+ g.fillStyle=GR;g.beginPath();g.arc(ND[S0][0],ND[S0][1],20,0,TAU);g.fill();g.fillStyle=RD;g.beginPath();g.arc(ND[G0][0],ND[G0][1],20,0,TAU);g.fill()}
+function drawPath(p,k,c){g.strokeStyle=c||YL;g.lineWidth=10;g.lineCap='round';g.beginPath();const n=Math.max(1,Math.floor((p.length-1)*k)+1);for(let i=0;i<n;i++){const[x,y]=ND[p[i]];i?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()}
+function sceneA(t){T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 8 · NAVİGASYON',W/2,440,RD,44);
+ g.fillStyle='#0f1838';g.fillRect(110,520,860,1060);g.strokeStyle='rgba(143,166,216,.25)';g.lineWidth=14;for(let i=0;i<9;i++){g.beginPath();g.moveTo(110,560+i*120+20*Math.sin(i));g.lineTo(970,600+i*120-20*Math.cos(i));g.stroke()}for(let i=0;i<6;i++){g.beginPath();g.moveTo(160+i*160,520);g.lineTo(140+i*170,1580);g.stroke()}
+ drawPath(DJ.path,ease((t-.8)/1.5),BL);T(t>1.5?'14 dk':'',W/2,1500,56,'#fff',900)}
+function sceneB(t){T('Şehir = ağ',W/2,250,56,'#fff',800);T(t>st(2)?'kavşak = nokta · yol = çizgi · bedel = dakika':'harita değil',W/2,330,34,YL,700);graph({w:t>st(2)?since(t,2,.8):0})}
+function sceneC(t){T('1956 · Amsterdam',W/2,250,56,'#fff',800);T('bir kafe, yirmi dakika',W/2,330,40,YL,700);
+ g.fillStyle='#121a3a';g.strokeStyle=YL;g.lineWidth=4;g.beginPath();g.roundRect(150,560,780,560,30);g.fill();g.stroke();
+ g.strokeStyle='#e2e8f0';g.lineWidth=7;g.beginPath();g.moveTo(420,760);g.lineTo(440,960);g.lineTo(640,960);g.lineTo(660,760);g.stroke();g.beginPath();g.arc(680,860,40,-1.2,1.2);g.stroke();
+ for(let i=0;i<3;i++){g.strokeStyle='rgba(226,232,240,.4)';g.lineWidth=4;g.beginPath();const x=490+i*50,yy=730-((t*40+i*20)%60);g.moveTo(x,740);g.bezierCurveTo(x-20,yy,x+20,yy-20,x,yy-50);g.stroke()}
+ T('Edsger W. Dijkstra',W/2,1040,46,'#fff',800);T('yayın: 1959',W/2,1210,36,'#c9d4f2',600)}
+function sceneD(t){const k=since(t,4,(st(7)-st(4))*.9);const n=Math.floor(DJ.ord.length*k);const set=new Set(DJ.ord.slice(0,n));const back=t>st(7);
+ T(back?'Geriye doğru iz':'Su gibi yayıl',W/2,250,56,'#fff',800);T(back?'en kısa yol':t>st(6)?'daha kısasını bulursan: eskisini sil':'en yakını kesinleştir',W/2,330,36,back?GR:YL,700);
+ graph({nc:v=>set.has(v)?GR:'#3b4a80',ec:i=>{const[a,b]=ED[i];return set.has(a)&&set.has(b)?'rgba(93,255,176,.55)':'rgba(143,166,216,.3)'}});
+ DJ.ord.slice(0,n).forEach(v=>{if(v==S0)return;T(DJ.d[v]+'',ND[v][0],ND[v][1]-34,26,'#fff',800)});if(back)drawPath(DJ.path,since(t,7,1.4),YL)}
+function sceneE(t){const as=t>st(9);T(as?'A* · 1968':'Pusula: kuş uçuşu',W/2,250,56,'#fff',800);T(as?'hedefe doğru olan tarafı arar':'hedefe uzaklık tahmini',W/2,330,36,YL,700);
+ const L=as?AS:DJ;const k=as?since(t,9,2):1;const n=Math.floor(L.ord.length*k);const set=new Set(L.ord.slice(0,n));
+ graph({nc:v=>set.has(v)?(as?OR:GR):'#3b4a80'});g.strokeStyle='rgba(255,207,90,.6)';g.setLineDash([14,12]);g.lineWidth=4;g.beginPath();g.moveTo(ND[S0][0],ND[S0][1]);g.lineTo(ND[G0][0],ND[G0][1]);g.stroke();g.setLineDash([]);
+ if(as){T('Dijkstra: '+DJ.ord.length+' kavşak',W/2,1560-60,38,GR,800);T('A*: '+AS.ord.length+' kavşak',W/2,1620-60,38,OR,800);drawPath(AS.path,1,YL)}}
+function sceneF(t){const k=since(t,10,1.2);T('Trafik!',W/2,250,60,RD,900);T('çizginin bedeli artar → yeniden hesap',W/2,330,34,'#c9d4f2',600);
+ graph({ec:i=>i==TE?`rgba(232,54,79,${.5+.5*Math.sin(t*8)})`:'rgba(143,166,216,.4)',ew:i=>i==TE?12:4,w:1,wt:k>.3?WT2:WT});
+ drawPath(DJ.path,1,'rgba(255,207,90,.25)');if(k>.5)drawPath(DJ2.path,ease((k-.5)*2),GR)}
+function sceneG(t){T('Navigasyon =',W/2,250,56,'#fff',800);T('en ucuz zincir',W/2,330,44,YL,800);graph({});drawPath(DJ2.path,1,GR)}
+function sceneH(t){T('Sıradaki bölümü',W/2,560,66,'#fff',800);T('SEN SEÇ',W/2,680,96,YL,900);
+ [[-260,'💬 JPEG?'],[0,'💬 Wi-Fi?'],[260,'💬 Kripto?']].forEach(([x,l],i)=>{const y=920+40*Math.sin(t*2+i);g.fillStyle='#121a3a';g.strokeStyle=BL;g.lineWidth=4;g.beginPath();g.roundRect(W/2+x-120,y-60,240,120,24);g.fill();g.stroke();T(l,W/2+x,y,38,'#fff',800)});
+ T('yorumlara yaz 👇',W/2,1200,52,GR,800);pill('Takip et',W/2,1560,RD,58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=1745-(lines.length-1)*30;lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);const S=[['A',sceneA],['B',sceneB],['C',sceneC],['D',sceneD],['E',sceneE],['F',sceneF],['G',sceneG],['H',sceneH]];let f=sceneA;for(const[k,fn]of S)if(t>=TM[k][0])f=fn;f(t);
+ if(t<TM.H[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

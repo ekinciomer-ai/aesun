@@ -1,0 +1,40 @@
+{
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Bu Matematik Hayatında Nerede?",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji meraklıları, öğrenciler",
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy), telif yok",
+  "gorsel": "kodla çizilmiş özgün animasyon (HTML canvas), dış görsel yok, marka logosu yok",
+  "ses": "ElevenLabs klon ses — Ömer Ekinci'nin kendi sesi (benim2), abonelik, ticari kullanım"
+ },
+ "ureten": "Claude",
+ "kod": "KZ_MAT_08_NAV",
+ "konu": "Navigasyon: Dijkstra ve A* en kısa yol",
+ "amac": "Serinin 8. bölümü: graf, en kısa yol algoritmaları. Ölçüt: izlenme süresi + yorum sayısı (sıradaki bölümü izleyici seçer).",
+ "baslik": "Navigasyon en kısa yolu nasıl buluyor? Bir kafede 20 dakikada bulunan fikir 🗺️",
+ "aciklama": "Navigasyonda hedefi yazıyorsun; bir saniyede binlerce sokak arasından tek bir yol çıkıyor.\n\n1) Telefon için şehir bir ağdır: kavşaklar nokta, yollar çizgi; her çizginin bir bedeli var: dakika.\n2) 1956'da Edsger Dijkstra, Amsterdam'da bir kafede yaklaşık yirmi dakikada bu soruyu çözdü (yayın 1959).\n3) Fikir: başlangıçtan su gibi yayıl; her adımda en yakın kavşağı kesinleştir, komşularına yeni süreleri yaz, daha kısasını bulursan eskisini sil. Hedefe varınca geriye doğru izi sür.\n4) 1968'de buna bir pusula eklendi: hedefe kuş uçuşu uzaklık. A* (A yıldız) bütün şehri değil, hedefe doğru olan tarafı arar.\n5) Trafik sıkışınca o yolun bedeli artar ve hesap yeniden yapılır.\n\nBu Matematik Hayatında Nerede? · Bölüm 8\nSıradaki bölümü sen seç: yorumlara yaz!\n\n📚 Kaynak\n• E. W. Dijkstra, A note on two problems in connexion with graphs (1959)\n• Hart, Nilsson, Raphael — A* (SRI, 1968)\n\n🎨 Animasyon kodla çizilmiştir; algoritmalar videoda gerçekten hesaplanmıştır. Seslendirme yapay zekâ ile üretilmiş klon sestir (kanal sahibinin kendi sesi). Müzik özgün olarak üretilmiştir.\n\n#navigasyon #dijkstra #algoritma #matematik #kozmoslab",
+ "etiketler": [
+  "navigasyon",
+  "en kısa yol",
+  "dijkstra",
+  "a yıldız",
+  "algoritma",
+  "matematik",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "Dijkstra (1959)",
+  "Hart, Nilsson, Raphael (1968)"
+ ],
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MAT_08_NAV_kaynak.mp4"
+}

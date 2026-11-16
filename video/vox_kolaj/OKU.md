@@ -41,6 +41,7 @@ Kayıt: `video/arac/kayit.js` (değişmedi). `?ar=169` yatay, `?ar=916` dikey ka
 | `perde` | alfa, renk, bitis | Ekranı karartma/açma |
 | `kar` | sayi, alfa | Yağan kar (kış konuları) |
 | `foto` + `murekkep:1` | — | Görseli mürekkep çizim gibi (gri, sert kontrast) gösterir |
+| `foto` + `nesneler` | [{img, sx, sy, sw, sh, hareket: kay\|yuru\|salla, vx, f, amp, aci, zip}] | **Eski fotoğrafta nesne canlandırma (ücretsiz):** vapur ilerler, kızak kayar, insan yürür, gemi sallanır. Hazırlık: `arac/nesne_ayir.py foto klasör ad x0,y0,x1,y1 ...` → boş plaka (nesne silinmiş, yeri komşu dokuyla dolu) + şeffaf nesneler + `<ad>_nesne.json` (sx..sh değerleri). Büyük/ön plandaki figürlerde boşluk doğal dolmaz; küçük-orta nesneler ve sade zemin (su, buz, gök, toprak) için kullan. |
 
 Görsel yoksa yer tutucu çizilir, kayıt durmaz. Örnek: `sahneler.js` + `ornek_kurgu.json` (Al Karısı · Karakoncolos · Şahmeran · Tepegöz).
 

@@ -79,6 +79,13 @@ function foto(e,p,t){g.save();const M=fotoMatris(e,p,t,g),{w,h,kn,zoom}=M;g.glob
  g.save();g.translate(kn,kn);g.beginPath();g.rect(0,0,w,h);g.clip();const src=M.iw||tutucu(e.img,Math.round(w),Math.round(h));
  const [cx,cy,cw,ch]=kapla(src,w,h,e.odak);const flt=e.murekkep?'grayscale(1) contrast(1.7) brightness(1.08)':e.renk?'contrast(1.08) saturate(1.1)':e.sepia?'sepia(.55) contrast(1.12) brightness(1.02)':'grayscale(1) contrast(1.18)';
  g.translate(w/2,h/2);g.scale(zoom,zoom);g.filter=flt;g.drawImage(src,cx,cy,cw,ch,-w/2,-h/2,w,h);
+ if(e.nesneler){const sw0=src.naturalWidth||src.width,sh0=src.naturalHeight||src.height,k=w/cw,tt=t||0;
+  for(const n of e.nesneler){const ni=IMG[n.img];if(!ni)continue;const dx=(n.sx*sw0-cx)*k-w/2,dy=(n.sy*sh0-cy)*k-h/2,dw=n.sw*sw0*k,dh=n.sh*sh0*k;
+   let ox=0,oy=0,rot=0;const mv=n.hareket||'kay';
+   if(mv==='kay'){ox=(n.vx||.004)*w*tt;oy=Math.sin(tt*(n.f||2.2))*(n.zip||0)*h}
+   else if(mv==='yuru'){ox=(n.vx||.006)*w*tt;oy=-Math.abs(Math.sin(tt*(n.f||6)))*(n.amp||.004)*h;rot=Math.sin(tt*(n.f||6))*.8*Math.PI/180}
+   else if(mv==='salla'){rot=Math.sin(tt*(n.f||1.2))*(n.aci||1.5)*Math.PI/180;oy=Math.sin(tt*(n.f||1.2)+1)*(n.amp||.004)*h}
+   g.save();g.translate(dx+dw/2+ox,dy+dh+oy);g.rotate(rot);g.drawImage(ni,-dw/2,-dh,dw,dh);g.restore()}}
  const L=e._kalk||0;if(L>0&&IMG[e.img+'_bos']){g.globalAlpha=ez(L*1.6);g.filter=flt+' blur('+(4*U)+'px) brightness(.92)';g.drawImage(IMG[e.img+'_bos'],cx,cy,cw,ch,-w/2,-h/2,w,h)}
  g.filter='none';g.restore();
  if(e.bant){g.fillStyle='rgba(240,228,190,.82)';g.save();g.translate(w/2+kn,0);g.rotate(-.06);g.fillRect(-60*U,-14*U,120*U,34*U);g.restore()}

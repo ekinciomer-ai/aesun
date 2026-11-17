@@ -23,7 +23,8 @@ jobs:
           ANAHTAR: ${{ secrets.SUNUCU_SSH }}
           ADRES: ${{ secrets.SUNUCU_ADRES }}
         run: |
-          ls video/ny/kuyruk/*.json >/dev/null 2>&1 || { echo "kuyruk boş"; exit 0; }
+          set +e
+          ls video/ny/kuyruk/*.json video/ny/hizala/*.wav >/dev/null 2>&1 || { echo "kuyruk boş"; exit 0; }
           mkdir -p ~/.ssh /tmp/pk/kuyruk
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k
@@ -35,10 +36,10 @@ jobs:
           ssh $O root@$ADRES "rm -rf /tmp/ny_t /tmp/ny_t.tgz" || true
           rm -f ~/.ssh/k
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
-          grep -q ANAHTAR_YOK /tmp/cikti.txt && { echo "::error::Kasaya google_tts_anahtar girilmeli (portal → Kasa)"; exit 1; }
+          grep -q ANAHTAR_YOK /tmp/cikti.txt && { echo "::error::Kasaya google_tts_anahtar girilmeli (portal → Kasa)"; }
           for f in video/ny/hizala/*.wav; do [ -f "$f" ] || continue; k=$(basename $f .wav); mkdir -p /tmp/al/cikti/$k; cp $f /tmp/al/cikti/$k/tam.wav
             echo '{"kaynak":"gemini-tts","ses":"Charon","tempo":1.0,"bol":1}' > /tmp/al/cikti/$k/meta.json; git rm -q $f; done
-          if ls /tmp/al/cikti/*/tam.wav >/dev/null 2>&1; then sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null; pip install -q faster-whisper; fi
+          if ls /tmp/al/cikti/*/tam.wav >/dev/null 2>&1; then sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null; pip install -q faster-whisper > /tmp/pip.txt 2>&1 || { tail -n 3 /tmp/pip.txt | while IFS= read -r l; do echo "::error::pip $l"; done; }; echo "::notice::kurulum bitti"; fi
           for d in /tmp/al/cikti/*/; do k=$(basename $d); [ -f $d/meta.json ] || continue
             if [ -f $d/tam.wav ]; then KJ=video/ny/kuyruk/$k.json; [ -f $KJ ] || KJ=video/ny/kuyruk/tamam/$k.json; python3 video/ny/arac/hizala.py $d/tam.wav $KJ $d > /tmp/h_$k.txt 2>&1; hs=$?; cat /tmp/h_$k.txt; if [ $hs != 0 ]; then tail -n 6 /tmp/h_$k.txt | while IFS= read -r l; do echo "::error::$k $l"; done; continue; fi; rm -f $d/tam.wav; fi
             rm -rf video/ny/ses/$k; mkdir -p video/ny/ses/$k; cp $d/* video/ny/ses/$k/

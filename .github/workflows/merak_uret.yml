@@ -66,7 +66,7 @@ jobs:
           n=0
           for k in $(echo '${{ needs.liste.outputs.kodlar }}' | python3 -c "import sys,json;print(' '.join(json.load(sys.stdin)))"); do
             if curl -sfI "https://raw.githubusercontent.com/${{ github.repository }}/video-onizleme/$k.mp4" >/dev/null; then
-              python3 video/merak/arac/kart.py video/merak/kuyruk/$k.json sunucu/havuz/teslim
+              mkdir -p video/merak/kuyruk/tamam; python3 video/merak/arac/kart.py video/merak/kuyruk/$k.json sunucu/havuz/teslim
               git mv video/merak/kuyruk/$k.json video/merak/kuyruk/tamam/$k.json; n=$((n+1))
             else echo "::warning::$k üretilemedi, kuyrukta kaldı"; fi
           done

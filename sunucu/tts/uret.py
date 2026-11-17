@@ -63,9 +63,25 @@ _GMODELLER = []
 _BITEN_MODELLER = set()
 _DIL_YOK = set()
 
-def gemini_modeller(k, tercih_ust=None):
+def gemini_anahtarlar(tercih_ad=None):
+    sira = []
+    if tercih_ad:
+        sira.append((tercih_ad, os.environ.get(f"KASA_{tercih_ad}") or ""))
+    for ad in ("gemini_api_anahtar_nasilyapildi", "gemini_api_key", "gemini_api_anahtar", "gemini_api_anahtar_kozmos"):
+        sira.append((ad, os.environ.get(f"KASA_{ad}") or ""))
+    sira.append(("varsayilan", os.environ.get("GEMINI_KEY") or ""))
+    cikti, gorulen = [], set()
+    for ad, val in sira:
+        val = val.strip()
+        if val and val not in gorulen:
+            gorulen.add(val); cikti.append((ad, val))
+    return cikti
+
+def gemini_modeller(k, tercih_ust=None, anahtar_ad="varsayilan"):
     if _GMODELLER:
-        kalan = [m for m in _GMODELLER if m not in _BITEN_MODELLER] or list(_GMODELLER)
+        kalan = [m for m in _GMODELLER if (anahtar_ad, m) not in _BITEN_MODELLER]
+        if not kalan:
+            return []
         if tercih_ust and tercih_ust in kalan:
             kalan = [tercih_ust] + [m for m in kalan if m != tercih_ust]
         return kalan
@@ -80,63 +96,65 @@ def gemini_modeller(k, tercih_ust=None):
 def gemini_model(k):
     return gemini_modeller(k)[0]
 
-def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None):
+def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None, anahtar_tercih=None):
     import time, urllib.error
-    k = os.environ.get("GEMINI_KEY")
-    if not k: raise RuntimeError("gemini anahtarı yok")
+    anahtarlar = gemini_anahtarlar(anahtar_tercih)
+    if not anahtarlar: raise RuntimeError("gemini anahtarı yok")
     son_hata = None
-    for m in gemini_modeller(k, tercih_ust):
-        istek_metin = f"{GYON.get(ton, GYON['normal'])} in Turkish: {metin}" if "2.5" in m else metin
-        sc = {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}
-        if m not in _DIL_YOK: sc["languageCode"] = "tr-TR"  # yalnız Türkçe okusun (Ömer 18.11.2026); desteklemeyen modelde düşülür
-        govde = {"contents": [{"parts": [{"text": istek_metin}]}],
-                 "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
-        for deneme in range(3):
-            r = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={k}",
-                                       data=json.dumps(govde).encode(), headers={"Content-Type": "application/json"}, method="POST")
-            try:
-                with urllib.request.urlopen(r, timeout=300) as y:
-                    d = json.load(y)
-                parca = d["candidates"][0]["content"]["parts"][0]["inlineData"]
-                mime = (parca.get("mimeType") or "").lower()
-                hz = re.search(r"rate=(\d+)", mime); hz = hz.group(1) if hz else "24000"
-                veri = base64.b64decode(parca["data"])
-                ham = yol_wav + ".bin"; open(ham, "wb").write(veri)
-                if veri[:4] in (b"RIFF", b"OggS", b"fLaC") or veri[:3] == b"ID3" or any(x in mime for x in ("wav", "mp3", "mpeg", "ogg")):
-                    ff("-i", ham, "-ar", "24000", "-ac", "1", yol_wav)
-                else:
-                    ff("-f", "s16le", "-ar", hz, "-ac", "1", "-i", ham, "-ar", "24000", "-ac", "1", yol_wav)
-                os.remove(ham)
-                print(f"NOT: Gemini {m} ({ses}) okudu")
-                time.sleep(5); return
-            except urllib.error.HTTPError as e:
-                govde_hata = e.read().decode("utf-8", "replace")
-                son_hata = f"Gemini {m} HTTP {e.code} {govde_hata[:120]}"
-                if e.code == 400 and "language" in govde_hata.lower() and m not in _DIL_YOK:
-                    _DIL_YOK.add(m); print(f"NOT: {m} dil kodunu desteklemiyor, dil kodsuz denenecek")
-                    return gemini_soyle(metin, ses, yol_wav, ton, m)
-                if e.code == 429:
-                    if "PerDay" in govde_hata:
-                        _BITEN_MODELLER.add(m)
-                        print(f"NOT: {m} günlük kota dolu (429 PerDay), sıradaki Gemini TTS modeline geçiliyor...")
-                        break
-                    if deneme < 2 and (m == (tercih_ust or "gemini-3.1-flash-tts-preview") or m == "gemini-3.8-flash-lite-tts"):
-                        rd = re.search(r'"retryDelay":\s*"(\d+)', govde_hata)
-                        bekle = min(65, (int(rd.group(1)) + 3) if rd else 25)
-                        print(f"NOT: {m} dakikalık sınır (429 RPM), {bekle} sn beklenip tekrar denenecek...")
-                        time.sleep(bekle)
+    for anahtar_ad, k in anahtarlar:
+        for m in gemini_modeller(k, tercih_ust, anahtar_ad):
+            istek_metin = f"{GYON.get(ton, GYON['normal'])} in Turkish: {metin}" if "2.5" in m else metin
+            sc = {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}
+            if m not in _DIL_YOK: sc["languageCode"] = "tr-TR"
+            govde = {"contents": [{"parts": [{"text": istek_metin}]}],
+                     "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
+            for deneme in range(3):
+                r = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={k}",
+                                           data=json.dumps(govde).encode(), headers={"Content-Type": "application/json"}, method="POST")
+                try:
+                    with urllib.request.urlopen(r, timeout=300) as y:
+                        d = json.load(y)
+                    parca = d["candidates"][0]["content"]["parts"][0]["inlineData"]
+                    mime = (parca.get("mimeType") or "").lower()
+                    hz = re.search(r"rate=(\d+)", mime); hz = hz.group(1) if hz else "24000"
+                    veri = base64.b64decode(parca["data"])
+                    ham = yol_wav + ".bin"; open(ham, "wb").write(veri)
+                    if veri[:4] in (b"RIFF", b"OggS", b"fLaC") or veri[:3] == b"ID3" or any(x in mime for x in ("wav", "mp3", "mpeg", "ogg")):
+                        ff("-i", ham, "-ar", "24000", "-ac", "1", yol_wav)
+                    else:
+                        ff("-f", "s16le", "-ar", hz, "-ac", "1", "-i", ham, "-ar", "24000", "-ac", "1", yol_wav)
+                    os.remove(ham)
+                    print(f"NOT: Gemini {m} ({ses}, kasa:{anahtar_ad}) okudu")
+                    time.sleep(5); return
+                except urllib.error.HTTPError as e:
+                    govde_hata = e.read().decode("utf-8", "replace")
+                    son_hata = f"Gemini {m} ({anahtar_ad}) HTTP {e.code} {govde_hata[:120]}"
+                    if e.code == 400 and "language" in govde_hata.lower() and m not in _DIL_YOK:
+                        _DIL_YOK.add(m); print(f"NOT: {m} dil kodunu desteklemiyor, dil kodsuz denenecek")
                         continue
-                    print(f"NOT: {m} kota dolu (429), sıradaki Gemini TTS modeline geçiliyor...")
-                    break
-                print(f"NOT: {son_hata}"); break
-            except Exception as e:
-                son_hata = f"Gemini {m} {e}"; print(f"NOT: {son_hata}"); break
-    raise RuntimeError(son_hata or "Tüm Gemini TTS modelleri dolu")
+                    if e.code == 429:
+                        if "PerDay" in govde_hata:
+                            _BITEN_MODELLER.add((anahtar_ad, m))
+                            print(f"NOT: {m} ({anahtar_ad}) günlük kota dolu (429 PerDay), sıradakine geçiliyor...")
+                            break
+                        if deneme < 2:
+                            rd = re.search(r'"retryDelay":\s*"(\d+)', govde_hata)
+                            bekle = min(65, (int(rd.group(1)) + 3) if rd else 25)
+                            print(f"NOT: {m} ({anahtar_ad}) dakikalık sınır (429 RPM), {bekle} sn beklenip tekrar denenecek...")
+                            time.sleep(bekle)
+                            continue
+                        print(f"NOT: {m} ({anahtar_ad}) kota dolu (429), sıradakine geçiliyor...")
+                        break
+                    print(f"NOT: {son_hata}"); break
+                except Exception as e:
+                    son_hata = f"Gemini {m} {e}"; print(f"NOT: {son_hata}"); break
+    raise RuntimeError(son_hata or "Tüm kasa anahtarlarındaki Gemini TTS modelleri dolu")
 
 def gemini_uret(is_, parca, tmp):
+    anahtar_tercih = parca.get("anahtar") or is_.get("anahtar")
     if parca.get("tek_istek"):
         w = f"{tmp}/g000.wav"
-        gemini_soyle(parca["metin"], parca.get("ses", is_.get("ses", "charon")), w, parca.get("ton", "anlatici"), is_.get("model_tercih"))
+        gemini_soyle(parca["metin"], parca.get("ses", is_.get("ses", "charon")), w, parca.get("ton", "anlatici"), is_.get("model_tercih"), anahtar_tercih)
         return [w], 1, 0
     adimlar = ayristir(parca["metin"], parca.get("ses", is_.get("ses", "charon")), False)
     obek = []  # [ses, ton, [cümleler]] veya ["dur", sn]
@@ -151,7 +169,7 @@ def gemini_uret(is_, parca, tmp):
         if o[0] == "dur":
             ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{o[1]:.2f}", w); wavlar.append(w); continue
         ses, ton, cs = o; metin = " ".join(cs)
-        gemini_soyle(metin, ses, w, ton, is_.get("model_tercih"))
+        gemini_soyle(metin, ses, w, ton, is_.get("model_tercih"), anahtar_tercih)
         sure = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", w],
                                     capture_output=True, text=True).stdout or 0)
         if sure > len(metin) / 9 + 3:

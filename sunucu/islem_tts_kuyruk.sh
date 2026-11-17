@@ -27,6 +27,11 @@ if [ -s anahtar_adi ]; then AD=$(tr -cd 'a-z0-9_' < anahtar_adi); G=$(/opt/aesun
 [ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=""
 [ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""
 [ -n "$G" ] && printf 'GEMINI_KEY=%s\n' "$G" >> "$EF" || echo "NOT: uyarı Gemini anahtarı yok"; unset G
+for KA in gemini_api_anahtar_nasilyapildi gemini_api_key gemini_api_anahtar gemini_api_anahtar_kozmos; do
+  KV=$(/opt/aesun/kasa_coz.sh "$KA" 2>/dev/null) || KV=""
+  [ -n "$KV" ] && printf 'KASA_%s=%s\n' "$KA" "$KV" >> "$EF"
+  unset KV
+done
 echo "NOT: seslendirme başlıyor"
 timeout 1500 docker run --rm --env-file "$EF" --memory 1g --cpus 2 -v "$PWD:/work" "$IMAJ" python /work/uret.py 2>&1 | grep -E '^NOT:' | head -60
 exit 0

@@ -4,8 +4,11 @@ Kanal: **Nasıl Yapıldı** (@nasilyapildiogren) · havuz kodu `NY` · format 9:
 Tek dosya YouTube Shorts + Instagram Reels + TikTok'a uyar. Her parti **3 video**.
 
 ## Akış (hepsi GitHub üzerinde, ücretsiz; bilgisayar ve sunucu gerekmez)
-1. **Metin** → `kuyruk/<KOD>.json` (parça parça seslendirme metni; sayılar yazıyla).
-   Push edilince `ny_gtts.yml` Google TTS (gTTS) ile `ses/<KOD>/sNN.mp3` üretir.
+1. **Metin** → `kuyruk/<KOD>.json` (parça parça seslendirme metni; sayılar yazıyla; her parçada `ton` alanı:
+   kanca merak/enerjik, sıra canlı belgesel, bir_giris gerilim+vurgu, kapanış samimi — tekdüze ses yasak).
+   Push edilince `ny_gtts.yml` sunucuda **Google Gemini TTS** (ses "Charon", kasa: gemini_api_anahtar, ücretsiz kota) ile
+   videoyu TEK istekte okur, faster-whisper ile parçalara hizalar → `ses/<KOD>/sNN.wav`. Ses sunucuda önbellekte (kota harcamaz).
+   Yedek: Google Cloud TTS (kasa: google_tts_anahtar). gTTS (Google Çeviri sesi) Ömer tarafından reddedildi, kullanma.
 2. **Konu kartı** → `konular/<KOD>.json` (öğeler, değerler, renkler, sahne sırası, kaynaklar).
 3. **İstek** → `istek/<KOD>.json` `{"kod": "...", "mod": "onizleme" | "final"}`.
    `ny_render.yml`: hazırla (anlatım hızlandırma + kodla ses tasarımı + kurgu) → 3D kare kare paralel render → birleştir.

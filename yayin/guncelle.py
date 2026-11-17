@@ -26,6 +26,12 @@ KANALLAR = {
     "UCqVae87VSs6HokK4Qdm29Hw": ("Yolu Seç !", "TR"),
     "UCDwQWwMPkGKxsEz7t1HCPbA": ("LVL MAX", "EN"),
 }
+# Yalnız YORUMLARI taranan kanallar (yayın tablosuna / analize / otomatik eylemlere girmez)
+YORUM_EK_KANALLAR = {
+    "UCYtvxRIP1eF3-f0TAqh2PvA": ("Kara Kutu Mayday", "TR"),
+    "UCsV0ubiBEy8dxigNk8I_LqA": ("Black Box Files Mayday", "EN"),
+    "UCM6LhKp6tDx4ddZ65oZUCvQ": ("Caja Negra", "ES"),
+}
 KANAL_DIL = {ad: dil for _, (ad, dil) in KANALLAR.items()}
 KANAL_NORMAL = {
     "Kozmos Lab TR (@kozmoslabtr)": "Kozmos Lab TR",
@@ -219,7 +225,7 @@ def main():
             x = vid_ix.get(vid) or {}
             t = datetime.fromisoformat(sn["publishedAt"].replace("Z", "+00:00")).astimezone(TZ)
             kayit = {
-                "id": yid, "kanal": kanal, "dil": x.get("dil") or KANALLAR.get(cid, ("", ""))[1], "vid": vid,
+                "id": yid, "kanal": kanal, "dil": x.get("dil") or {**KANALLAR, **YORUM_EK_KANALLAR}.get(cid, ("", ""))[1], "vid": vid,
                 "video": x.get("baslik") or vid, "yazar": sn.get("authorDisplayName"),
                 "metin": sn.get("textDisplay", "")[:1000], "zaman": t.isoformat(timespec="minutes"),
                 "begeni": sn.get("likeCount", 0), "yanitlandi": kanal_yaniti is not None,
@@ -254,7 +260,7 @@ def main():
 
         # a) Kanal bazında: tablodaki durumdan bağımsız, kanalın BÜTÜN videolarındaki yorumlar
         tarandi = set()
-        for cid, (ad, _dil) in KANALLAR.items():
+        for cid, (ad, _dil) in {**KANALLAR, **YORUM_EK_KANALLAR}.items():
             sayfa = ""
             for _ in range(5):
                 prm = {"part": "snippet,replies", "allThreadsRelatedToChannelId": cid, "maxResults": 100,
@@ -303,6 +309,17 @@ def main():
         for y in j.get("yorumlar", []):
             if y["id"] not in gorulen:
                 yorumlar.append(y); gorulen.add(y["id"])
+        # Tabloda olmayan videoların (ör. yalnız yorumu taranan kanallar) başlığını getir
+        bilinmeyen = sorted({y["vid"] for y in yorumlar if y.get("video") == y.get("vid")})
+        for i in range(0, len(bilinmeyen), 50):
+            try:
+                q = urllib.parse.urlencode({"part": "snippet", "id": ",".join(bilinmeyen[i:i + 50]), "key": anahtar})
+                bas = {v["id"]: v["snippet"]["title"] for v in json.loads(getir("https://www.googleapis.com/youtube/v3/videos?" + q)).get("items", [])}
+                for y in yorumlar:
+                    if y.get("video") == y.get("vid") and y["vid"] in bas:
+                        y["video"] = bas[y["vid"]]
+            except Exception:
+                pass
         yorumlar.sort(key=lambda y: y["zaman"], reverse=True)
         yeni_say = sum(1 for y in yorumlar if y["id"] not in eski)
         # Yanıtsız yorumlar → yorum kuyruğu (taslak yanıtı Claude/Antigravity yazar, Ömer onaylar, sunucu gönderir)

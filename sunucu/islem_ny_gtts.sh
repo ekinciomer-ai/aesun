@@ -15,31 +15,54 @@ mkdir -p cikti
 G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""
 if [ -n "$G" ]; then
 python3 - "$G" <<'PY'
-import json, sys, glob, os, base64, time, wave, urllib.request, urllib.error
+# Ücretsiz katman günde az istek verir: her video TEK istekte okunur, paragraflar arası sessizlikten parçalara bölünür.
+import json, sys, glob, os, base64, time, wave, array, urllib.request, urllib.error
 G = sys.argv[1]; U = "https://generativelanguage.googleapis.com/v1beta"
 def get(u): return json.load(urllib.request.urlopen(urllib.request.Request(u, headers={"x-goog-api-key": G}), timeout=30))
 try: ml = [m["name"].split("/")[1] for m in get(f"{U}/models?pageSize=200").get("models", []) if "tts" in m["name"]]
 except Exception as e: print(f"NOT: Gemini model listesi alınamadı {e}"); sys.exit(0)
-pro = [m for m in ml if "pro" in m]; model = (pro or ml or [None])[0]
-if not model: print("NOT: Gemini TTS modeli yok"); sys.exit(0)
-print(f"NOT: Gemini TTS model {model}")
+fl = [m for m in ml if "flash" in m]; modeller = fl + [m for m in ml if m not in fl]
+if not modeller: print("NOT: Gemini TTS modeli yok"); sys.exit(0)
+SR = 24000
+def oku(model, metin, ses):
+    g = {"contents": [{"parts": [{"text": metin}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": ses}}}}}
+    r = urllib.request.Request(f"{U}/models/{model}:generateContent", data=json.dumps(g).encode(), headers={"x-goog-api-key": G, "Content-Type": "application/json"}, method="POST")
+    y = json.load(urllib.request.urlopen(r, timeout=300)); return base64.b64decode(y["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
+def kes(pcm, n, agirlik):
+    a = array.array("h"); a.frombytes(pcm); fr = SR // 50  # 20 ms
+    en = [max(abs(x) for x in a[i:i + fr]) if a[i:i + fr] else 0 for i in range(0, len(a), fr)]
+    esik = max(en) * 0.03; sess = []; b = None
+    for i, e in enumerate(en + [esik * 99]):
+        if e < esik and b is None: b = i
+        elif e >= esik and b is not None:
+            if i - b >= 8 and b > 0 and i < len(en): sess.append((i - b, (b + i) // 2))
+            b = None
+    T = len(en); top = sum(agirlik); hedef = []; c = 0
+    for w in agirlik[:-1]: c += w; hedef.append(T * c / top)
+    secim = []
+    for h in hedef:  # her beklenen sınıra en yakın uzun sessizlik
+        aday = [s for s in sess if s[1] not in secim and abs(s[1] - h) < T * 0.12]
+        if not aday: return None
+        secim.append(max(aday, key=lambda s: s[0] - abs(s[1] - h) / 25)[1])
+    if secim != sorted(secim): return None
+    return [x * fr for x in secim]
 for jf in sorted(glob.glob("kuyruk/*.json")):
-    j = json.load(open(jf, encoding="utf-8")); kod = j["kod"]; os.makedirs(f"cikti/{kod}", exist_ok=True); ses = j.get("gemini_ses", "Charon"); tamam = True
-    for p in j["parcalar"]:
-        metin = (p.get("ton", "Belgesel anlatıcısı gibi canlı oku") + ": " + p["metin"])
-        g = {"contents": [{"parts": [{"text": metin}]}], "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": ses}}}}}
-        for d in range(6):
-            try:
-                r = urllib.request.Request(f"{U}/models/{model}:generateContent", data=json.dumps(g).encode(), headers={"x-goog-api-key": G, "Content-Type": "application/json"}, method="POST")
-                y = json.load(urllib.request.urlopen(r, timeout=180)); pcm = base64.b64decode(y["candidates"][0]["content"]["parts"][0]["inlineData"]["data"])
-                w = wave.open(f"cikti/{kod}/{p['id']}.wav", "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(24000); w.writeframes(pcm); w.close(); break
-            except urllib.error.HTTPError as e:
-                m = e.read().decode("utf-8", "replace")[:160]; print(f"NOT: {kod}/{p['id']} HTTP {e.code} {m}"); time.sleep(25 * (d + 1))
-            except Exception as e: print(f"NOT: {kod}/{p['id']} {e}"); time.sleep(10)
-        else: tamam = False; break
-        time.sleep(7)
-    if tamam:
-        json.dump({"kaynak": "gemini-tts", "model": model, "ses": ses, "tempo": 1.0}, open(f"cikti/{kod}/meta.json", "w")); print(f"NOT: {kod} tamam · Gemini {ses}")
+    j = json.load(open(jf, encoding="utf-8")); kod = j["kod"]; ses = j.get("gemini_ses", "Charon"); P = j["parcalar"]
+    talimat = ("Türkçe, merak uyandıran, canlı ve tonları sürekli değişen bir belgesel anlatıcısı gibi oku; tekdüze olma. "
+               "Her paragraftan sonra bir saniye sus. Paragrafların tonları sırayla: " + " | ".join(p.get("ton", "canlı") for p in P) + ".\n\n")
+    metin = talimat + "\n\n".join(p["metin"] for p in P)
+    pcm = None
+    for model in modeller:
+        try: pcm = oku(model, metin, ses); print(f"NOT: {kod} Gemini {model} {ses} {len(pcm)/2/SR:.1f} sn"); break
+        except urllib.error.HTTPError as e: print(f"NOT: {kod} {model} HTTP {e.code} {e.read().decode('utf-8','replace')[:120]}")
+        except Exception as e: print(f"NOT: {kod} {model} {e}")
+    if not pcm: continue
+    sinir = kes(pcm, len(P), [len(p["metin"]) for p in P])
+    if not sinir: print(f"NOT: {kod} paragraf sınırları bulunamadı, Gemini sesi kullanılmadı"); continue
+    os.makedirs(f"cikti/{kod}", exist_ok=True); bs = [0] + sinir + [len(pcm) // 2]
+    for k, p in enumerate(P):
+        w = wave.open(f"cikti/{kod}/{p['id']}.wav", "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm[bs[k] * 2:bs[k + 1] * 2]); w.close()
+    json.dump({"kaynak": "gemini-tts", "ses": ses, "tempo": 1.0}, open(f"cikti/{kod}/meta.json", "w")); print(f"NOT: {kod} tamam · {len(P)} parça")
 PY
 fi
 K=$(/opt/aesun/kasa_coz.sh google_tts_anahtar 2>/dev/null) || K=""

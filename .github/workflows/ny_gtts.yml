@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
-concurrency: { group: ny-gtts, cancel-in-progress: false }
+concurrency: { group: ny-gtts-v2, cancel-in-progress: false }
 jobs:
   ses:
     runs-on: ubuntu-24.04

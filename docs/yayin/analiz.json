@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-17T19:34+03:00",
+ "olusturma": "2026-11-17T21:16+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -189,7 +189,7 @@
    "izlenme_yuzde": 54,
    "en_iyi": {
     "baslik": "France–Turquie ce soir : plus qu'un match ! 🇫🇷🇹🇷 #shorts",
-    "i48": 104
+    "i48": 105
    },
    "kaydirmadan_izleme_yuzde": 46
   },
@@ -324,12 +324,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 28,
+   "medyan_48sa": 31,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Mesaja 5 saniye bakınca beyninde neden 'tortu' kalıyor? 📱⏳ | Senin Kararın #shorts",
-    "i48": 28
+    "i48": 31
    }
   },
   {
@@ -339,7 +339,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 974,
+   "medyan_48sa": 978,
    "tutma_orani": 50,
    "izlenme_yuzde": 43,
    "en_iyi": {
@@ -515,7 +515,7 @@
    "izlenme_yuzde": 31,
    "en_iyi": {
     "baslik": "On Venus, a day is longer than a year ☀️ #shorts",
-    "i48": 1244
+    "i48": 1246
    },
    "kaydirmadan_izleme_yuzde": 38
   },
@@ -605,7 +605,7 @@
    "karar": "DENE",
    "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 0,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": null,
    "tutma_orani": null,
    "izlenme_yuzde": null,
@@ -661,6 +661,18 @@
   },
   {
    "kanal": "Kozmos Lab TR",
+   "seri": "Gökyüzünde Bu Hafta",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Kozmos Lab TR",
    "seri": "Nasıl Yapılır",
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
@@ -676,12 +688,24 @@
    "kaydirmadan_izleme_yuzde": 50
   },
   {
+   "kanal": "Kozmos Lab TR",
+   "seri": "Uzay Akışı",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
    "kanal": "Yolu Seç !",
    "seri": "Yolu Seç · Isınma Turu",
    "karar": "DENE",
    "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 0,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": null,
    "tutma_orani": null,
    "izlenme_yuzde": null,
@@ -701,13 +725,13 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 637,
   "Kozmos Lab": 85,
   "Estudio Antiguo": 122,
+  "Antik Stüdyo": 637,
   "Ömür Dediğin": 50,
-  "Kozmos Lab TR": 146,
   "Yolu Seç !": 50,
-  "Ancient Studio": 188
+  "Ancient Studio": 188,
+  "Kozmos Lab TR": 146
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -741,7 +765,7 @@
    },
    "19:00": {
     "n": 12,
-    "medyan": 764
+    "medyan": 769
    },
    "20:00": {
     "n": 7,
@@ -775,7 +799,7 @@
    },
    "20:00": {
     "n": 5,
-    "medyan": 104
+    "medyan": 105
    },
    "21:00": {
     "n": 8,
@@ -932,7 +956,7 @@
     {
      "vid": "LYZZ8R-Qo8A",
      "baslik": "How Did Mehmed II Lock the Bosphorus in Just 139 Days? 🏰 (1452) #shorts",
-     "izlenme": 248,
+     "izlenme": 249,
      "durum": "Yayında"
     },
     {
@@ -977,7 +1001,7 @@
    "uzun_vid": "Ub6wYt_50lY",
    "uzun_baslik": "Piri Reis Neden İdam Edildi? | 474 Yıl Önce Hürmüz Boğazı",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 903,
+   "uzun_izlenme": 904,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",

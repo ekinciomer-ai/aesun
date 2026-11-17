@@ -52,13 +52,11 @@ def google_soyle(cumle, ses, ton, oto, yol):
         open(yol, "wb").write(base64.b64decode(json.load(y)["audioContent"]))
 
 # Gemini TTS: tonlar doğal dil yönergesiyle verilir (gerçek duygulu okuma). Ücretsiz kotalı.
-GYON = {"normal": "doğal ve canlı", "anlatici": "etkileyici bir belgesel anlatıcısı gibi", "heyecan": "çok heyecanlı ve enerjik",
-        "fisilti": "fısıldayarak, sır verir gibi", "gizem": "gizemli, alçak sesle ve yavaş", "gerilim": "gergin, nefesler tutulmuş gibi",
-        "soru": "merakla, dinleyiciye sorar gibi", "vurgu": "kararlı ve vurgulayarak", "sakin": "sakin ve sıcak",
-        "komik": "eğlenceli, gülümseyerek", "hizli": "hızlı", "yavas": "yavaş ve ağır"}
-GTALIMAT = ("Sen dikkat çekici, duygulu bir Türkçe seslendirme sanatçısısın. Aşağıdaki Türkçe metni seslendir. "
-            "Köşeli parantez içindeki yönergeleri ASLA sesli okuma; yalnızca o noktadan sonraki okuma tonunu belirlerler. "
-            "Tekdüze olma: vurguyu, hızı ve tonu cümleden cümleye değiştir, merak uyandır.\n\n")
+GYON = {"normal": "Say naturally and engagingly", "anlatici": "Narrate like a captivating documentary narrator",
+        "heyecan": "Say very excitedly and energetically", "fisilti": "Whisper secretively",
+        "gizem": "Say mysteriously, slowly and in a low voice", "gerilim": "Say tensely, full of suspense",
+        "soru": "Ask curiously, as if asking the listener", "vurgu": "Say firmly with strong emphasis",
+        "sakin": "Say calmly and warmly", "komik": "Say playfully, with a smile", "hizli": "Say quickly", "yavas": "Say slowly"}
 _GMODEL = []
 
 def gemini_model(k):
@@ -76,7 +74,7 @@ def gemini_soyle(metin, ses, yol_wav):
     k = os.environ.get("GEMINI_KEY")
     if not k: raise RuntimeError("gemini anahtarı yok")
     m = gemini_model(k)
-    govde = {"contents": [{"parts": [{"text": GTALIMAT + metin}]}],
+    govde = {"contents": [{"parts": [{"text": metin}]}],
              "generationConfig": {"responseModalities": ["AUDIO"],
                                   "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}}}
     for dene in range(3):
@@ -102,21 +100,25 @@ def gemini_soyle(metin, ses, yol_wav):
 
 def gemini_uret(is_, parca, tmp):
     adimlar = ayristir(parca["metin"], parca.get("ses", is_.get("ses", "charon")), False)
-    bolumler = []  # (ses, metin)
+    obek = []  # [ses, ton, [cümleler]] veya ["dur", sn]
     for a in adimlar:
-        if a[0] == "dur":
-            if bolumler: bolumler[-1][1].append("[burada kısa bir es ver]")
-            continue
+        if a[0] == "dur": obek.append(["dur", a[1]]); continue
         _, ses, ton, c = a
-        if not bolumler or bolumler[-1][0] != ses: bolumler.append((ses, [], [None]))
-        b = bolumler[-1]
-        if b[2][0] != ton: b[1].append(f"[{GYON[ton]}]"); b[2][0] = ton
-        b[1].append(c)
-    wavlar = []
-    for i, (ses, ps, _) in enumerate(bolumler):
-        w = f"{tmp}/g{i:03d}.wav"; gemini_soyle(" ".join(ps), ses, w)
-        w2 = f"{tmp}/g{i:03d}p.wav"; ff("-i", w, "-af", "apad=pad_dur=0.35", w2); wavlar.append(w2)
-    return wavlar, len(bolumler)
+        if obek and obek[-1][0] == ses and obek[-1][1] == ton: obek[-1][2].append(c)
+        else: obek.append([ses, ton, [c]])
+    wavlar, uyari = [], 0
+    for i, o in enumerate(obek):
+        w = f"{tmp}/g{i:03d}.wav"
+        if o[0] == "dur":
+            ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{o[1]:.2f}", w); wavlar.append(w); continue
+        ses, ton, cs = o; metin = " ".join(cs)
+        gemini_soyle(f"{GYON[ton]} in Turkish: {metin}", ses, w)
+        sure = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", w],
+                                    capture_output=True, text=True).stdout or 0)
+        if sure > len(metin) / 9 + 3:
+            uyari += 1; print(f"NOT: uyarı {is_['kod']}/{parca['ad']} parça {i} beklenenden uzun ({sure:.0f} sn), fazladan okuma olabilir")
+        w2 = f"{tmp}/g{i:03d}p.wav"; ff("-i", w, "-af", f"apad=pad_dur={TONLAR[ton][3]}", w2); wavlar.append(w2)
+    return wavlar, len(obek), uyari
 
 ETIKET = re.compile(r"\[\s*([a-zçğıöşü]+)\s*(?::\s*([a-z]+)|\s+([0-9.]+))?\s*\]", re.I)
 
@@ -170,11 +172,11 @@ def ff(*a):
 
 def uret(is_, parca, tmp):
     if is_.get("motor") == "gemini":
-        wavlar, n = gemini_uret(is_, parca, tmp)
+        wavlar, n, uyari = gemini_uret(is_, parca, tmp)
         liste = f"{tmp}/liste.txt"; open(liste, "w").write("".join(f"file '{w}'\n" for w in wavlar))
         cikis = f"cikti/{is_['kod']}__{parca['ad']}.mp3"
         ff("-f", "concat", "-safe", "0", "-i", liste, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "44100", "-b:a", "128k", cikis)
-        return cikis, n, 0
+        return cikis, n, uyari
     oto = is_.get("oto_ton", True)
     adimlar = ayristir(parca["metin"], parca.get("ses", is_.get("ses", "ahmet")), oto)
     wavlar, yedek = [], 0

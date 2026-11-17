@@ -1,0 +1,124 @@
+"""Ücretsiz, tonlu Türkçe seslendirme (edge-tts; yedek: gTTS).
+İş dosyası: kuyruk/<kod>.json
+  {"kod":"X","ses":"ahmet","oto_ton":true,
+   "parcalar":[{"ad":"s1","metin":"[heyecan] Bakın! [fisilti] ama kimse bilmiyordu... [dur 0.8] [ses:emel] Sahi mi?"}]}
+Etiketler (metnin içinde, istenen yerde): [normal] [heyecan] [fisilti] [gizem] [gerilim] [soru] [vurgu] [sakin]
+  [komik] [hizli] [yavas] [anlatici] — [ses:ahmet|emel|andrew|ava|brian|emma|florian|seraphina|remy|vivienne]
+  [dur 0.6] (saniye sessizlik)
+oto_ton (varsayılan açık): etiketsiz cümlelerde ? → soru, ! → heyecan, ... → gizem; diğerlerine küçük doğal oynama.
+Çıktı: cikti/<kod>__<ad>.mp3
+"""
+import asyncio, glob, hashlib, json, os, re, subprocess, sys, tempfile
+
+SESLER = {  # Türkçe yerli 2 ses + Türkçe konuşabilen çok dilli sesler (hafif aksanlı, çeşitlilik için)
+    "ahmet": "tr-TR-AhmetNeural", "emel": "tr-TR-EmelNeural",
+    "andrew": "en-US-AndrewMultilingualNeural", "ava": "en-US-AvaMultilingualNeural",
+    "brian": "en-US-BrianMultilingualNeural", "emma": "en-US-EmmaMultilingualNeural",
+    "florian": "de-DE-FlorianMultilingualNeural", "seraphina": "de-DE-SeraphinaMultilingualNeural",
+    "remy": "fr-FR-RemyMultilingualNeural", "vivienne": "fr-FR-VivienneMultilingualNeural",
+}
+#            hız %, perde Hz, ses %, sonrasında es (sn)
+TONLAR = {
+    "normal":   (0, 0, 0, 0.28),
+    "anlatici": (-4, -2, 0, 0.35),
+    "heyecan":  (18, 12, 10, 0.22),
+    "fisilti":  (-12, -6, -35, 0.45),
+    "gizem":    (-15, -10, -10, 0.60),
+    "gerilim":  (-8, -14, 0, 0.50),
+    "soru":     (4, 15, 0, 0.45),
+    "vurgu":    (-6, 4, 15, 0.40),
+    "sakin":    (-10, -4, -5, 0.40),
+    "komik":    (12, 20, 5, 0.30),
+    "hizli":    (25, 3, 0, 0.18),
+    "yavas":    (-20, -3, 0, 0.45),
+}
+ETIKET = re.compile(r"\[\s*([a-zçğıöşü]+)\s*(?::\s*([a-z]+)|\s+([0-9.]+))?\s*\]", re.I)
+
+def cumleler(metin):
+    return [c.strip() for c in re.findall(r"[^.!?…]+(?:\.\.\.|[.!?…]+)?", metin) if c.strip(" \n\t")]
+
+def ayristir(metin, ses, oto):
+    """Metni (tür, değer) adımlarına böler: ('soz', ses, ton, cümle) | ('dur', sn)."""
+    adimlar, ton, etiketli, konum = [], "normal", False, 0
+    parcalar = []
+    for m in ETIKET.finditer(metin):
+        parcalar.append(("metin", metin[konum:m.start()])); konum = m.end()
+        ad, deger, sayi = m.group(1).lower(), m.group(2), m.group(3)
+        parcalar.append(("etiket", (ad, (deger or "").lower(), sayi)))
+    parcalar.append(("metin", metin[konum:]))
+    for tur, v in parcalar:
+        if tur == "etiket":
+            ad, deger, sayi = v
+            if ad == "ses" and deger in SESLER: ses = deger
+            elif ad in ("dur", "es") and sayi: adimlar.append(("dur", min(float(sayi), 5.0)))
+            elif ad in TONLAR: ton, etiketli = ad, True
+            continue
+        for c in cumleler(v):
+            t = ton
+            if oto and (not etiketli or ton == "normal"):
+                if c.endswith("?"): t = "soru"
+                elif c.endswith("!"): t = "heyecan"
+                elif c.endswith("...") or c.endswith("…"): t = "gizem"
+            adimlar.append(("soz", ses, t, c))
+    return adimlar
+
+def oynama(cumle, ton, oto):
+    h, p, v, es = TONLAR[ton]
+    if oto:  # aynı metin hep aynı sonucu verir; ama cümleler birbirinden hafif farklı → tekdüzelik kırılır
+        d = hashlib.md5(cumle.encode()).digest()
+        h += d[0] % 9 - 4; p += d[1] % 7 - 3
+    f = lambda x, b: f"{'+' if x >= 0 else ''}{int(x)}{b}"
+    return f(h, "%"), f(p, "Hz"), f(v, "%"), es
+
+async def edge_soyle(cumle, ses, ton, oto, yol):
+    import edge_tts
+    h, p, v, _ = oynama(cumle, ton, oto)
+    await edge_tts.Communicate(cumle, SESLER[ses], rate=h, pitch=p, volume=v).save(yol)
+
+def gtts_soyle(cumle, yol):
+    from gtts import gTTS
+    gTTS(cumle, lang="tr").save(yol)
+
+def ff(*a):
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", *a], check=True)
+
+def uret(is_, parca, tmp):
+    oto = is_.get("oto_ton", True)
+    adimlar = ayristir(parca["metin"], parca.get("ses", is_.get("ses", "ahmet")), oto)
+    wavlar, yedek = [], 0
+    for i, a in enumerate(adimlar):
+        w = f"{tmp}/{i:04d}.wav"
+        if a[0] == "dur":
+            ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{a[1]:.2f}", w); wavlar.append(w); continue
+        _, ses, ton, c = a; m = f"{tmp}/{i:04d}.mp3"
+        try:
+            asyncio.run(edge_soyle(c, ses, ton, oto, m))
+        except Exception as e:
+            yedek += 1; print(f"NOT: uyarı edge-tts olmadı ({str(e)[:80]}), Google gTTS ile (tonsuz) devam"); gtts_soyle(c, m)
+        es = TONLAR[ton][3]
+        ff("-i", m, "-af", f"apad=pad_dur={es}", "-ar", "24000", "-ac", "1", w); wavlar.append(w)
+    liste = f"{tmp}/liste.txt"
+    open(liste, "w").write("".join(f"file '{w}'\n" for w in wavlar))
+    cikis = f"cikti/{is_['kod']}__{parca['ad']}.mp3"
+    ff("-f", "concat", "-safe", "0", "-i", liste, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "44100", "-b:a", "128k", cikis)
+    return cikis, len([a for a in adimlar if a[0] == "soz"]), yedek
+
+def main():
+    os.makedirs("cikti", exist_ok=True)
+    isler = sorted(glob.glob("kuyruk/*.json"))
+    if not isler: print("NOT: kuyruk boş"); return
+    for jf in isler:
+        is_ = json.load(open(jf, encoding="utf-8"))
+        for parca in is_["parcalar"]:
+            with tempfile.TemporaryDirectory() as tmp:
+                try:
+                    yol, n, yedek = uret(is_, parca, tmp)
+                    print(f"NOT: {is_['kod']}/{parca['ad']} tamam ({n} cümle{', ' + str(yedek) + ' yedek' if yedek else ''})")
+                except Exception as e:
+                    print(f"NOT: HATA {is_['kod']}/{parca['ad']}: {str(e)[:160]}")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--dene":  # ağsız ayrıştırma denemesi
+        for a in ayristir(sys.argv[2], "ahmet", True): print(a, oynama(a[3], a[2], True) if a[0] == "soz" else "")
+    else:
+        main()

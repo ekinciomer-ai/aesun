@@ -146,7 +146,13 @@ def teslim(kart_yol):
         try:
             import urllib.request
             os.makedirs(os.path.dirname(src) or ".", exist_ok=True)
-            urllib.request.urlretrieve(kart["kaynak_url"], src + ".tmp"); os.replace(src + ".tmp", src)
+            # zaman sınırı: asılı kalan indirme bütün sunucu işlerini kilitliyordu (17.11.2026)
+            with urllib.request.urlopen(kart["kaynak_url"], timeout=60) as r, open(src + ".tmp", "wb") as w:
+                while True:
+                    b = r.read(1 << 20)
+                    if not b: break
+                    w.write(b)
+            os.replace(src + ".tmp", src)
             print(f"NOT: {kod}: video adresten indirildi")
         except Exception as e:
             print(f"NOT: HATA {kod}: video indirilemedi: {str(e)[:80]}")

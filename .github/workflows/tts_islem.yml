@@ -1,0 +1,27 @@
+name: Seslendirme işlemi (sunucu, ayrı sıra)
+# sunucu/islem_tts_<ad>.sh betiklerini kendi sırasında çalıştırır (diğer sunucu işlerinin sırasını bekletmez/iptal etmez).
+on:
+  workflow_dispatch:
+    inputs:
+      islem: { description: "tts_ ile başlayan betik adı", required: true }
+concurrency: { group: tts-islem, cancel-in-progress: false }
+jobs:
+  calis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Çalıştır
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          ISLEM: ${{ inputs.islem }}
+        run: |
+          case "$ISLEM" in tts_*) ;; *) echo "::error::yalnız tts_ betikleri"; exit 1;; esac
+          case "$ISLEM" in *[!a-z0-9_]*) echo "::error::geçersiz ad"; exit 1;; esac
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          tar czf /tmp/p.tgz sunucu/islem_${ISLEM}.sh sunucu/tts sunucu/tts_kuyruk/cikti
+          ssh -i ~/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes root@$ADRES "rm -rf /tmp/tts_i && mkdir -p /tmp/tts_i && tar xzf - -C /tmp/tts_i && cd /tmp/tts_i && bash sunucu/islem_${ISLEM}.sh; rm -rf /tmp/tts_i" < /tmp/p.tgz 2>&1 | grep '^NOT:' | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          rm -f ~/.ssh/k

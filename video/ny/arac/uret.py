@@ -196,6 +196,9 @@ def main():
     kare_sinir = int(sys.argv[sys.argv.index("--kare") + 1]) if "--kare" in sys.argv else None
     konu = json.load(open(f"{KOK}/konular/{kod}.json"))
     is_ = f"{KOK}/is/{kod}"; os.makedirs(is_, exist_ok=True); os.makedirs(f"{KOK}/cikti", exist_ok=True)
+    meta_f = f"{KOK}/ses/{kod}/meta.json"
+    global TEMPO
+    if os.path.exists(meta_f) and "NY_TEMPO" not in os.environ: TEMPO = json.load(open(meta_f)).get("tempo", TEMPO)
     metin = {p["id"]: p["metin"] for p in json.load(open(f"{KOK}/kuyruk/tamam/{kod}.json"))["parcalar"]}
     # 1) ses parçaları
     t, parcalar, anl = .35, [], []
@@ -254,10 +257,14 @@ def main():
     atm = atmosfer(T, konu["tip"])
     # anlatıma göre kısma (sidechain benzeri)
     env = lp(np.abs(nar), 8); env = env / (env.max() + 1e-9)
-    duck = 1 - .62 * np.clip(env * 6, 0, 1); duck = lp(duck, 4)
+    konus = lp(np.clip(env * 8, 0, 1), 3)                       # anlatım varken 1
+    duck = 1 - .78 * konus                                        # müzik konuşmada ~-13 dB
+    sduck = 1 - .6 * konus                                        # efektler konuşmada ~-8 dB
     fade = np.minimum(1, np.arange(n) / (.4 * SR)) * np.minimum(1, (n - np.arange(n)) / (1.8 * SR))
-    mix = pan(nar, 0) * 1.0 + muz * (duck * .3 * fade)[:, None] + atm * (duck * .05 * fade)[:, None] + sfx * .55
-    mix /= np.abs(mix).max() + 1e-9; mix *= .9
+    nar = nar / (np.abs(nar).max() + 1e-9) * .9                   # anlatım referans seviye
+    muz = muz / (np.abs(muz).max() + 1e-9); atm = atm / (np.abs(atm).max() + 1e-9); sfx = sfx / (np.abs(sfx).max() + 1e-9)
+    mix = pan(nar, 0) + muz * (duck * .16 * fade)[:, None] + atm * (duck * .03 * fade)[:, None] + sfx * (sduck * .2)[:, None]
+    mix = np.tanh(mix * 1.1) / np.tanh(1.1)                     # yumuşak sınırlayıcı
     wav_yaz(f"{is_}/miks.wav", mix)
     if "--sadece-hazirla" in sys.argv: print("hazır", is_); return
     # 4) görüntü

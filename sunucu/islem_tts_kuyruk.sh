@@ -21,7 +21,10 @@ chown -R 1502:1502 . 2>/dev/null
 EF=$(mktemp); chmod 600 "$EF"; trap 'rm -f "$EF"' EXIT
 K=$(/opt/aesun/kasa_coz.sh google_tts_anahtar 2>/dev/null) || K=""
 [ -n "$K" ] && printf 'GOOGLE_TTS_KEY=%s\n' "$K" > "$EF" || echo "NOT: uyarı Google anahtarı yok, edge-tts kullanılacak"; unset K
-G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=""
+G=""
+# Kanal ayrı ücretsiz anahtar isterse (ör. Kozmos Lab) paket içindeki anahtar_adi dosyası kasa adını verir; yoksa ortak anahtar
+if [ -s anahtar_adi ]; then AD=$(tr -cd 'a-z0-9_' < anahtar_adi); G=$(/opt/aesun/kasa_coz.sh "$AD" 2>/dev/null) || G=""; [ -n "$G" ] && echo "NOT: kanal anahtarı kullanılıyor ($AD)" || echo "NOT: uyarı $AD kasada yok, ortak anahtar kullanılıyor"; fi
+[ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=""
 [ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""
 [ -n "$G" ] && printf 'GEMINI_KEY=%s\n' "$G" >> "$EF" || echo "NOT: uyarı Gemini anahtarı yok"; unset G
 echo "NOT: seslendirme başlıyor"

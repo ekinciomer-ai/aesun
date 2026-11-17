@@ -11,7 +11,7 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 5. Günlük zamanlanmış görev her gün 2 yeni senaryo yazar (konu bankasından), kuyruğa koyar.
 
 ## Ses
-- gTTS ve edge-tts **kullanılmaz** (Ömer 17.11.2026: gerçekçi değil). Ses yalnız onaylı kütüphaneden (Gemini: puck = canlı Shorts anlatıcısı, charon = tok, kore = kadın). Senaryoda `"ses":"puck"`, parçada isteğe bağlı `"ton"` (soru, heyecan, anlatici, gizem, vurgu...).
+- gTTS ve edge-tts **kullanılmaz** (Ömer 17.11.2026: gerçekçi değil). Ses yalnız onaylı kütüphaneden (Gemini: puck = canlı Shorts anlatıcısı, charon = tok, kore = kadın). Senaryoda `"ses":"puck"`; **her parça kendi tonuyla** okunur (Ömer 18.11.2026): kanca `soru`, sayı anı `vurgu`, ara parçalar `anlatici`/`heyecan` sırayla, kapanış `sakin`; parçada `"ton"` yazılırsa o kullanılır. Ses hakkı Kozmos Lab'ın ayrı ücretsiz Gemini anahtarından (kasa: `gemini_api_anahtar_kozmos`); yoksa ortak anahtara düşer.
 
 ## Senaryo kuralları
 - 8–10 parça, toplam ~140–160 kelime (≈ 55–65 sn). Parça başına 1–2 cümle.

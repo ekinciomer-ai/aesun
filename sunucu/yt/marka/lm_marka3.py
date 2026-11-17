@@ -106,3 +106,22 @@ def kapak_D():
 
 if __name__ == "__main__":
     logo_C(); kapak_C(); logo_D(); kapak_D()
+
+
+def kapak_CD():
+    """Seçilen banner: solda kürsü, ortada LVL MAX, sağda tier listesi (Ömer 18.11.2026: C ve D birlikte)."""
+    W, H = 2560, 1440; im = zemin(W, H); d = ImageDraw.Draw(im)
+    kursu(im, 680, 905, 95, (100, 150, 70), None)
+    f = font(F_BLK, 145)
+    t = "LVL MAX"; x = ort(d, t, f, 1240) - 4
+    m = Image.new("L", (W, H), 0); ImageDraw.Draw(m).text((x, 610), t, font=f, fill=255)
+    parla(im, m, (255, 150, 30), 26, .55); im.paste(Image.new("RGB", (W, H), (255, 255, 255)), (0, 0), m)
+    ft = font(F_XBI, 42); tt = "RANKING EVERYTHING  #5 → #1"
+    d.text((ort(d, tt, ft, 1240), 800), tt, font=ft, fill=ALTIN)
+    tier(im, 1650, 575, 380, 58, 8, "MAX")
+    im.save(os.path.join(KOK, "lm_kapak.jpg"), quality=92)
+    Image.open(os.path.join(KOK, "lm_logo_C.png")).save(os.path.join(KOK, "lm_logo.png"))
+
+
+if __name__ == "__main__":
+    kapak_CD()

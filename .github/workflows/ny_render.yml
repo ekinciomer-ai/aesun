@@ -72,7 +72,7 @@ jobs:
     needs: [hazirla, parca]
     if: needs.hazirla.outputs.var == '1'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null
@@ -86,15 +86,45 @@ jobs:
             ls -d /tmp/a/p-$KOD-$MOD-* | sort -t- -k4 -n | while read d; do echo "file '$(ls $d/*.mp4)'"; done > /tmp/liste_$KOD.txt
             cat /tmp/liste_$KOD.txt
             ffmpeg -v error -y -f concat -safe 0 -i /tmp/liste_$KOD.txt -c copy /tmp/sessiz_$KOD.mp4
-            mkdir -p cikti/$MOD
-            CRF=$([ "$MOD" = final ] && echo 17 || echo 24)
+            mkdir -p cikti/$MOD rapor/kontrol
+            CRF=$([ "$MOD" = final ] && echo 18 || echo 24)
+            OUT=cikti/$MOD/$KOD.mp4; [ "$MOD" = final ] && OUT=/tmp/teslim/${KOD}_kaynak.mp4 && mkdir -p /tmp/teslim
             ffmpeg -v error -y -i /tmp/sessiz_$KOD.mp4 -i /tmp/a/hazir/$KOD/miks.wav -filter_complex "[1:a]loudnorm=I=-14:TP=-1.5:LRA=11[a]" \
-              -map 0:v -map "[a]" -c:v libx264 -preset slow -crf $CRF -pix_fmt yuv420p -c:a aac -b:a 192k -ar 48000 -shortest -movflags +faststart cikti/$MOD/$KOD.mp4
-            ls -la cikti/$MOD/$KOD.mp4; echo "::notice::$KOD $MOD hazır"
+              -map 0:v -map "[a]" -c:v libx264 -preset slow -crf $CRF -pix_fmt yuv420p -c:a aac -b:a 192k -ar 48000 -shortest -movflags +faststart $OUT
+            D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 $OUT)
+            ffmpeg -v error -y -i $OUT -vf "fps=6/$D,scale=180:-1,tile=6x1" -frames:v 1 rapor/kontrol/$KOD.jpg || true
+            echo "::notice::$KOD $MOD hazır ($D sn)"
+            if [ "$MOD" = final ]; then python3 arac/kart_yaz.py $KOD /tmp/teslim/$KOD.json; fi
             mkdir -p istek/tamam && git mv -f "$f" istek/tamam/
           done
+      - name: Yükleme Yöneticisi'ne teslim
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          set +e
+          ls /tmp/teslim/*.json >/dev/null 2>&1 || { echo "teslim yok"; exit 0; }
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k; O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "mkdir -p /opt/aesun/video_bekleyen /tmp/ny_teslim"
+          scp $O /tmp/teslim/* root@$ADRES:/tmp/ny_teslim/
+          ssh $O root@$ADRES 'cd /tmp/ny_teslim && for j in *.json; do k=${j%.json}; install -m 644 ${k}_kaynak.mp4 /opt/aesun/video_bekleyen/${k}_kaynak.mp4 && python3 /opt/aesun/havuz/yonetici.py teslim $j; done; python3 /opt/aesun/havuz/yonetici.py planla; rm -rf /tmp/ny_teslim' > /tmp/teslim.txt 2>&1
+          rm -f ~/.ssh/k; cat /tmp/teslim.txt
+          grep '^NOT:' /tmp/teslim.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          G=$(TZ=Europe/Istanbul date +%Y-%m-%d); mkdir -p video/ny/rapor
+          python3 - "$G" <<'PY'
+          import json, glob, os, sys, subprocess
+          f = f"video/ny/rapor/{sys.argv[1]}.json"; r = json.load(open(f)) if os.path.exists(f) else {"tarih": sys.argv[1], "teslim": []}
+          notlar = [l[5:].strip() for l in open("/tmp/teslim.txt", encoding="utf-8", errors="replace") if l.startswith("NOT:")]
+          for j in sorted(glob.glob("/tmp/teslim/*.json")):
+              k = json.load(open(j)); d = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", k["kaynak_dosya"].replace("/opt/aesun/video_bekleyen", "/tmp/teslim")], capture_output=True, text=True).stdout.strip()
+              r["teslim"].append({"kod": k["kod"], "seri": k["seri"], "baslik": k["baslik"], "sure": d, "notlar": [n for n in notlar if k["kod"] in n]})
+          r["son_plan"] = [n for n in notlar if "plan" in n.lower()][-5:]
+          json.dump(r, open(f, "w"), ensure_ascii=False, indent=1)
+          PY
       - run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
-          git add -A video/ny/cikti video/ny/istek
+          git add -A video/ny/cikti video/ny/istek video/ny/rapor
           git commit -qm "Nasıl Yapıldı: video çıktısı $(TZ=Europe/Istanbul date +'%d.%m %H:%M')" || exit 0
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

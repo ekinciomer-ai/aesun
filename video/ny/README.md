@@ -17,6 +17,21 @@ Tek dosya YouTube Shorts + Instagram Reels + TikTok'a uyar. Her parti **3 video*
 4. Ömer önizlemeyi onaylar → `final` isteği → Yükleme Yöneticisi havuzuna teslim (`kanal: NY`).
    Yayın planını yönetici yapar, Ömer tek tıkla onaylar. Görmediği video yayınlanmaz.
 
+## Formatlar (konular/<KOD>.json → "tip", parcalar[].sahne)
+| Seri | tip | Sahneler | Ses |
+|---|---|---|---|
+| Sıralama (en uzun/yüksek/büyük 5) | nehir / dag / gol | kanca, soru, sira, bir_giris, ek, kapanis | Charon |
+| Bilgi şıklı soru (3 soru) | quiz | kanca, q_soru(soru, siklar[4], dogru, bekle:3, il, gizli), q_cevap(il), kapanis | Puck |
+| İllere göre yemekler ("Bu yemek hangi ilin?") | quiz | q_soru gizli:1 (cevap ili önceden boyanmaz) | Puck |
+| Görsel hafıza (renkli iller 5 sn) | quiz | h_goster(iller[{ad,renk}], bekle:5), h_sor(siklar), q_cevap(il), kapanis | Puck |
+| En ilginç bilgiler | quiz | kanca, bilgi(il, baslik, sayi, sayi_on, birim, alt), kapanis | Charon |
+İl adları geo.json → il_ad listesindekiyle birebir (ör. "Hakkari", "İstanbul", "Iğdır").
+
+## Yayın bilgisi (final için zorunlu): konular/<KOD>.json → "yayin"
+`{"baslik": "...", "aciklama": "...", "etiketler": [...], "tiktok_metin": "...", "amac": "...", "platformlar": ["youtube"]}`
+`istek` `mod: "final"` olunca render sonrası video **doğrudan sunucuya, Yükleme Yöneticisi havuzuna** teslim edilir (depoya video yazılmaz),
+kontrol şeridi `rapor/kontrol/<KOD>.jpg`, günlük rapor `rapor/<YYYY-AA-GG>.json`. Yayın planını yönetici yapar; Ömer tek tıkla onaylar.
+
 ## Motor
 - `motor/sahne.html` — three.js 3D sahne: gerçek yükselti (AWS Terrain Tiles / SRTM, `dem.png`),
   Türkiye maskesi ve parlak sınır, Natural Earth nehir/göl verisi (kamu malı).

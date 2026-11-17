@@ -19,13 +19,13 @@ YASAK = ("ai", "ai generated", "ai-generated", "generated", "generative", "artif
          "sora", "veo", "kling", "runway", "render", "3d", "cgi", "animation", "animated", "digital art", "illustration")
 secim = []
 def indir(url, yol):
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64)"})
     with urllib.request.urlopen(req, timeout=180) as r, open(yol, "wb") as f:
         f.write(r.read())
 for s in plan["seviye"]:
     indir(s["ai_url"], f"{KOK}/kaynak/{s['ai']}.mp4")
     q = urllib.parse.urlencode({"key": key, "q": s["sorgu"], "per_page": 40, "safesearch": "true", "order": "popular"})
-    with urllib.request.urlopen(f"https://pixabay.com/api/videos/?{q}", timeout=60) as r:
+    with urllib.request.urlopen(urllib.request.Request(f"https://pixabay.com/api/videos/?{q}", headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64)"}), timeout=60) as r:
         hits = json.load(r).get("hits", [])
     aday = []
     for h in hits:

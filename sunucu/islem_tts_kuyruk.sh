@@ -18,6 +18,9 @@ D
   echo "NOT: seslendirme imajı kuruldu"
 fi
 chown -R 1502:1502 . 2>/dev/null
+EF=$(mktemp); chmod 600 "$EF"; trap 'rm -f "$EF"' EXIT
+K=$(/opt/aesun/kasa_coz.sh google_tts_anahtar 2>/dev/null) || K=""
+[ -n "$K" ] && printf 'GOOGLE_TTS_KEY=%s\n' "$K" > "$EF" || echo "NOT: uyarı Google anahtarı yok, edge-tts kullanılacak"; unset K
 echo "NOT: seslendirme başlıyor"
-timeout 1080 docker run --rm --memory 1g --cpus 2 -v "$PWD:/work" "$IMAJ" python /work/uret.py 2>&1 | grep -E '^NOT:' | head -60
+timeout 1080 docker run --rm --env-file "$EF" --memory 1g --cpus 2 -v "$PWD:/work" "$IMAJ" python /work/uret.py 2>&1 | grep -E '^NOT:' | head -60
 exit 0

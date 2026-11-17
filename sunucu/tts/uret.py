@@ -8,7 +8,7 @@ Etiketler (metnin içinde, istenen yerde): [normal] [heyecan] [fisilti] [gizem] 
 oto_ton (varsayılan açık): etiketsiz cümlelerde ? → soru, ! → heyecan, ... → gizem; diğerlerine küçük doğal oynama.
 Çıktı: cikti/<kod>__<ad>.mp3
 """
-import asyncio, glob, hashlib, json, os, re, subprocess, sys, tempfile
+import asyncio, base64, glob, hashlib, json, os, re, subprocess, sys, tempfile, urllib.request
 
 SESLER = {  # Türkçe yerli 2 ses + Türkçe konuşabilen çok dilli sesler (hafif aksanlı, çeşitlilik için)
     "ahmet": "tr-TR-AhmetNeural", "emel": "tr-TR-EmelNeural",
@@ -17,6 +17,12 @@ SESLER = {  # Türkçe yerli 2 ses + Türkçe konuşabilen çok dilli sesler (ha
     "florian": "de-DE-FlorianMultilingualNeural", "seraphina": "de-DE-SeraphinaMultilingualNeural",
     "remy": "fr-FR-RemyMultilingualNeural", "vivienne": "fr-FR-VivienneMultilingualNeural",
 }
+# Google Chirp 3 HD (doğal, duygulu; varsayılan motor). Anahtar sunucu kasasından ortam değişkeniyle gelir.
+GSESLER = {"charon": ("Charon", "erkek"), "fenrir": ("Fenrir", "erkek"), "puck": ("Puck", "erkek"), "orus": ("Orus", "erkek"),
+           "enceladus": ("Enceladus", "erkek"), "iapetus": ("Iapetus", "erkek"), "algenib": ("Algenib", "erkek"),
+           "aoede": ("Aoede", "kadın"), "kore": ("Kore", "kadın"), "leda": ("Leda", "kadın"), "zephyr": ("Zephyr", "kadın"),
+           "despina": ("Despina", "kadın"), "callirrhoe": ("Callirrhoe", "kadın"), "sulafat": ("Sulafat", "kadın")}
+GES = {"ahmet": "charon", "emel": "kore"}  # eski adlar
 #            hız %, perde Hz, ses %, sonrasında es (sn)
 TONLAR = {
     "normal":   (0, 0, 0, 0.28),
@@ -32,6 +38,19 @@ TONLAR = {
     "hizli":    (25, 3, 0, 0.18),
     "yavas":    (-20, -3, 0, 0.45),
 }
+def google_soyle(cumle, ses, ton, oto, yol):
+    k = os.environ.get("GOOGLE_TTS_KEY")
+    if not k: raise RuntimeError("google anahtarı yok")
+    g = GSESLER[GES.get(ses, ses)][0]
+    h, _, v, _ = oynama(cumle, ton, oto)
+    hiz = max(0.25, min(2.0, 1 + int(h.rstrip("%")) / 100))
+    govde = {"input": {"text": cumle}, "voice": {"languageCode": "tr-TR", "name": f"tr-TR-Chirp3-HD-{g}"},
+             "audioConfig": {"audioEncoding": "MP3", "speakingRate": round(hiz, 2), "volumeGainDb": max(-12, min(8, int(v.rstrip("%")) / 4))}}
+    r = urllib.request.Request(f"https://texttospeech.googleapis.com/v1/text:synthesize?key={k}", data=json.dumps(govde).encode(),
+                               headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(r, timeout=40) as y:
+        open(yol, "wb").write(base64.b64decode(json.load(y)["audioContent"]))
+
 ETIKET = re.compile(r"\[\s*([a-zçğıöşü]+)\s*(?::\s*([a-z]+)|\s+([0-9.]+))?\s*\]", re.I)
 
 def cumleler(metin):
@@ -49,7 +68,7 @@ def ayristir(metin, ses, oto):
     for tur, v in parcalar:
         if tur == "etiket":
             ad, deger, sayi = v
-            if ad == "ses" and deger in SESLER: ses = deger
+            if ad == "ses" and (deger in SESLER or deger in GSESLER): ses = deger
             elif ad in ("dur", "es") and sayi: adimlar.append(("dur", min(float(sayi), 5.0)))
             elif ad in TONLAR: ton, etiketli = ad, True
             continue
@@ -92,7 +111,15 @@ def uret(is_, parca, tmp):
             ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{a[1]:.2f}", w); wavlar.append(w); continue
         _, ses, ton, c = a; m = f"{tmp}/{i:04d}.mp3"
         try:
-            asyncio.run(edge_soyle(c, ses, ton, oto, m))
+            if is_.get("motor", "google") == "google" and (GES.get(ses, ses) in GSESLER):
+                try:
+                    google_soyle(c, ses, ton, oto, m)
+                except Exception as e:
+                    if ses not in SESLER: ses = "ahmet"
+                    print(f"NOT: uyarı Google olmadı ({str(e)[:60]}), edge-tts ile devam")
+                    asyncio.run(edge_soyle(c, ses, ton, oto, m))
+            else:
+                asyncio.run(edge_soyle(c, ses if ses in SESLER else "ahmet", ton, oto, m))
         except Exception as e:
             yedek += 1; print(f"NOT: uyarı edge-tts olmadı ({str(e)[:80]}), Google gTTS ile (tonsuz) devam"); gtts_soyle(c, m)
         es = TONLAR[ton][3]

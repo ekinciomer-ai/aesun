@@ -24,7 +24,7 @@ jobs:
           ADRES: ${{ secrets.SUNUCU_ADRES }}
         run: |
           set +e
-          ls video/ny/kuyruk/*.json video/ny/hizala/*.wav >/dev/null 2>&1 || { echo "kuyruk boş"; exit 0; }
+          ( ls video/ny/kuyruk/*.json || ls video/ny/hizala/*.wav ) >/dev/null 2>&1 || { echo "kuyruk boş"; exit 0; }
           mkdir -p ~/.ssh /tmp/pk/kuyruk
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k

@@ -21,6 +21,9 @@ chown -R 1502:1502 . 2>/dev/null
 EF=$(mktemp); chmod 600 "$EF"; trap 'rm -f "$EF"' EXIT
 K=$(/opt/aesun/kasa_coz.sh google_tts_anahtar 2>/dev/null) || K=""
 [ -n "$K" ] && printf 'GOOGLE_TTS_KEY=%s\n' "$K" > "$EF" || echo "NOT: uyarı Google anahtarı yok, edge-tts kullanılacak"; unset K
+G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=""
+[ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""
+[ -n "$G" ] && printf 'GEMINI_KEY=%s\n' "$G" >> "$EF" || echo "NOT: uyarı Gemini anahtarı yok"; unset G
 echo "NOT: seslendirme başlıyor"
 timeout 1080 docker run --rm --env-file "$EF" --memory 1g --cpus 2 -v "$PWD:/work" "$IMAJ" python /work/uret.py 2>&1 | grep -E '^NOT:' | head -60
 exit 0

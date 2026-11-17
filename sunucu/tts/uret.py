@@ -51,6 +51,68 @@ def google_soyle(cumle, ses, ton, oto, yol):
     with urllib.request.urlopen(r, timeout=40) as y:
         open(yol, "wb").write(base64.b64decode(json.load(y)["audioContent"]))
 
+# Gemini TTS: tonlar doğal dil yönergesiyle verilir (gerçek duygulu okuma). Ücretsiz kotalı.
+GYON = {"normal": "doğal ve canlı", "anlatici": "etkileyici bir belgesel anlatıcısı gibi", "heyecan": "çok heyecanlı ve enerjik",
+        "fisilti": "fısıldayarak, sır verir gibi", "gizem": "gizemli, alçak sesle ve yavaş", "gerilim": "gergin, nefesler tutulmuş gibi",
+        "soru": "merakla, dinleyiciye sorar gibi", "vurgu": "kararlı ve vurgulayarak", "sakin": "sakin ve sıcak",
+        "komik": "eğlenceli, gülümseyerek", "hizli": "hızlı", "yavas": "yavaş ve ağır"}
+GTALIMAT = ("Sen dikkat çekici, duygulu bir Türkçe seslendirme sanatçısısın. Aşağıdaki Türkçe metni seslendir. "
+            "Köşeli parantez içindeki yönergeleri ASLA sesli okuma; yalnızca o noktadan sonraki okuma tonunu belirlerler. "
+            "Tekdüze olma: vurguyu, hızı ve tonu cümleden cümleye değiştir, merak uyandır.\n\n")
+_GMODEL = []
+
+def gemini_model(k):
+    if _GMODEL: return _GMODEL[0]
+    with urllib.request.urlopen(f"https://generativelanguage.googleapis.com/v1beta/models?key={k}&pageSize=200", timeout=40) as y:
+        adlar = [m["name"].split("/")[-1] for m in json.load(y).get("models", []) if "tts" in m["name"]]
+    adlar.sort(key=lambda a: (("flash" not in a), ("preview" in a), a))
+    if not adlar: raise RuntimeError("Gemini TTS modeli bulunamadı")
+    _GMODEL.append(adlar[0]); print(f"NOT: Gemini modeli {adlar[0]}"); return adlar[0]
+
+def gemini_soyle(metin, ses, yol_wav):
+    import time, urllib.error
+    k = os.environ.get("GEMINI_KEY")
+    if not k: raise RuntimeError("gemini anahtarı yok")
+    m = gemini_model(k)
+    govde = {"contents": [{"parts": [{"text": GTALIMAT + metin}]}],
+             "generationConfig": {"responseModalities": ["AUDIO"],
+                                  "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}}}
+    for dene in range(3):
+        r = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={k}",
+                                   data=json.dumps(govde).encode(), headers={"Content-Type": "application/json"}, method="POST")
+        try:
+            with urllib.request.urlopen(r, timeout=120) as y:
+                d = json.load(y)
+            parca = d["candidates"][0]["content"]["parts"][0]["inlineData"]
+            hz = re.search(r"rate=(\d+)", parca.get("mimeType", "")); hz = hz.group(1) if hz else "24000"
+            ham = yol_wav + ".pcm"; open(ham, "wb").write(base64.b64decode(parca["data"]))
+            ff("-f", "s16le", "-ar", hz, "-ac", "1", "-i", ham, "-ar", "24000", "-ac", "1", yol_wav); os.remove(ham)
+            time.sleep(6); return
+        except urllib.error.HTTPError as e:
+            govde_hata = e.read().decode("utf-8", "replace")
+            if e.code in (429, 500, 503) and dene < 2:
+                bek = re.search(r'"retryDelay":\s*"(\d+)', govde_hata); bek = min(int(bek.group(1)) + 2 if bek else 25, 45)
+                print(f"NOT: Gemini {e.code}, {bek} sn bekleniyor"); time.sleep(bek); continue
+            raise RuntimeError(f"Gemini HTTP {e.code} {govde_hata[:160]}")
+
+def gemini_uret(is_, parca, tmp):
+    adimlar = ayristir(parca["metin"], parca.get("ses", is_.get("ses", "charon")), False)
+    bolumler = []  # (ses, metin)
+    for a in adimlar:
+        if a[0] == "dur":
+            if bolumler: bolumler[-1][1].append("[burada kısa bir es ver]")
+            continue
+        _, ses, ton, c = a
+        if not bolumler or bolumler[-1][0] != ses: bolumler.append((ses, [], [None]))
+        b = bolumler[-1]
+        if b[2][0] != ton: b[1].append(f"[{GYON[ton]}]"); b[2][0] = ton
+        b[1].append(c)
+    wavlar = []
+    for i, (ses, ps, _) in enumerate(bolumler):
+        w = f"{tmp}/g{i:03d}.wav"; gemini_soyle(" ".join(ps), ses, w)
+        w2 = f"{tmp}/g{i:03d}p.wav"; ff("-i", w, "-af", "apad=pad_dur=0.35", w2); wavlar.append(w2)
+    return wavlar, len(bolumler)
+
 ETIKET = re.compile(r"\[\s*([a-zçğıöşü]+)\s*(?::\s*([a-z]+)|\s+([0-9.]+))?\s*\]", re.I)
 
 def cumleler(metin):
@@ -102,6 +164,12 @@ def ff(*a):
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", *a], check=True)
 
 def uret(is_, parca, tmp):
+    if is_.get("motor") == "gemini":
+        wavlar, n = gemini_uret(is_, parca, tmp)
+        liste = f"{tmp}/liste.txt"; open(liste, "w").write("".join(f"file '{w}'\n" for w in wavlar))
+        cikis = f"cikti/{is_['kod']}__{parca['ad']}.mp3"
+        ff("-f", "concat", "-safe", "0", "-i", liste, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "44100", "-b:a", "128k", cikis)
+        return cikis, n, 0
     oto = is_.get("oto_ton", True)
     adimlar = ayristir(parca["metin"], parca.get("ses", is_.get("ses", "ahmet")), oto)
     wavlar, yedek = [], 0

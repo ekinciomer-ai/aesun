@@ -1,5 +1,5 @@
 import numpy as np,wave
-sr=44100;D=58.49;t=np.arange(int(sr*D))/sr;out=np.zeros_like(t)
+sr=44100;D=54.31;t=np.arange(int(sr*D))/sr;out=np.zeros_like(t)
 n=lambda m:440*2**((m-69)/12)
 ch=[[48,52,55],[53,57,60],[50,53,57],[55,59,62]]
 for i in range(31):
@@ -8,7 +8,7 @@ for i in range(31):
     out[idx]+=.05*env*np.sin(2*np.pi*n(c[0]-24)*tt)
     for k in range(8):
         a=s+k*.25;j=(t>=a)&(t<a+.35);u=t[j]-a;out[j]+=.022*np.exp(-u*10)*np.sin(2*np.pi*n(c[k%3]+24)*u)
-for a in [6.3, 16.1, 22.4, 30.2, 44.0, 49.9]:
+for a in [5.9, 14.9, 20.7, 28.0, 40.8, 46.2]:
     j=(t>=a)&(t<a+.5);u=t[j]-a;out[j]+=.08*np.exp(-u*8)*np.sin(2*np.pi*(1100-500*u)*u)
 out*=np.minimum(1,np.minimum(t/0.6,(D-t)/2));out=out/np.abs(out).max()*.5
 w=wave.open('muzik.wav','w');w.setnchannels(1);w.setsampwidth(2);w.setframerate(sr);w.writeframes((out*32767).astype(np.int16).tobytes());w.close()

@@ -2,8 +2,8 @@
 # Henüz YouTube'a yüklenmemiş bir videoyu yeni sürümle değiştirir (havuz kopyası + yükleme dosyası). Eskisi .eski olarak saklanır.
 # Kullanım: sunucu/havuz/gelen/<KOD>.mp4 + YENILE_KOD / YENILE_NOT aşağıda.
 set -u
-N=${YENILE_NOT:-"gerçek harita: Kızılay → Anıtkabir (OSM)"}
-for K in ${YENILE_KODLAR:-KZ_MAT_08_NAV}; do
+N=${YENILE_NOT:-"ses %8 daha hızlandırıldı (Ömer 18.11)"}
+for K in ${YENILE_KODLAR:-KZ_MAT_05_QR KZ_MAT_06_YUZ KZ_MAT_07_FILTRE KZ_MAT_08_NAV KZ_MAT_09_WIFI KZ_MAT_10_KRIPTO}; do
 Y=/opt/aesun/video_bekleyen
 for f in $Y/${K}.mp4 $Y/${K}_kaynak.mp4; do [ -f "$f" ] && cp -p "$f" "$f.eski"; install -m 644 sunucu/havuz/gelen/$K.mp4 "$f"; done
 ( cd /opt/aesun/havuz && python3 - "$K" "$N" <<'PY'

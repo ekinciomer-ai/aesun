@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-17T12:00+03:00",
+ "olusturma": "2026-11-17T16:11+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -75,8 +75,8 @@
    "haftalik_short_kotasi": 2,
    "seri_dagilimi": {
     "Gündem + Tarih": 1,
-    "Tablo Serisi": 1,
-    "Spor + Tarih": 1
+    "Spor + Tarih": 1,
+    "Tablo Serisi": 1
    },
    "durdurulan": [
     "Tarihi Magazin",
@@ -181,15 +181,15 @@
    "kanal": "Ancient Studio",
    "seri": "Spor + Tarih",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 1,
-   "medyan_48sa": 36,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 0,
+   "medyan_48sa": 70,
    "tutma_orani": 0,
    "izlenme_yuzde": 54,
    "en_iyi": {
-    "baslik": "Celtic v Beşiktaş: FIRST EVER meeting tonight ⚽ #shorts",
-    "i48": 36
+    "baslik": "France–Turquie ce soir : plus qu'un match ! 🇫🇷🇹🇷 #shorts",
+    "i48": 104
    },
    "kaydirmadan_izleme_yuzde": 46
   },
@@ -272,12 +272,12 @@
   {
    "kanal": "Antik Stüdyo",
    "seri": "Gece Yasakları",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
-   "erken": 1,
-   "medyan_48sa": 750,
-   "tutma_orani": 50,
+   "karar": "SÜRDÜR",
+   "neden": "tutma oranı %33",
+   "olculen": 3,
+   "erken": 0,
+   "medyan_48sa": 196,
+   "tutma_orani": 33,
    "izlenme_yuzde": 54,
    "en_iyi": {
     "baslik": "Karabasan Aslında Ne? 100 Kişiden 7'si Yaşıyor #shorts",
@@ -677,13 +677,13 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 146,
-  "Yolu Seç !": 50,
-  "Ömür Dediğin": 50,
   "Estudio Antiguo": 122,
   "Ancient Studio": 188,
-  "Kozmos Lab": 50,
-  "Antik Stüdyo": 637
+  "Ömür Dediğin": 50,
+  "Yolu Seç !": 50,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 146,
+  "Kozmos Lab": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -728,8 +728,8 @@
     "medyan": 709
    },
    "22:00": {
-    "n": 2,
-    "medyan": 680
+    "n": 3,
+    "medyan": 57
    },
    "23:00": {
     "n": 1,
@@ -750,8 +750,8 @@
     "medyan": 0
    },
    "20:00": {
-    "n": 4,
-    "medyan": 154
+    "n": 5,
+    "medyan": 104
    },
    "21:00": {
     "n": 8,
@@ -1255,6 +1255,30 @@
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
   },
   {
+   "tur": "KONTROL",
+   "kanal": "Antik Stüdyo",
+   "platform": "YouTube",
+   "vid": "KIR1PL2da2s",
+   "baslik": "Osmanlı savaş gemilerinin en altına neden kuru nohut çuvalı dizilirdi? ⚓⛵ #shorts",
+   "neden": "2026-11-17 14:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Ömür Dediğin",
+   "platform": "YouTube",
+   "vid": "81vbG4vtub4",
+   "baslik": "Eskiden pekmez nasıl yapılırdı? 🍇 Bağdan kazana",
+   "neden": "2026-11-17 10:30 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
+   "tur": "KONTROL",
+   "kanal": "Yolu Seç !",
+   "platform": "YouTube",
+   "vid": "GuOAMZWMLkA",
+   "baslik": "Bu kanalda videoyu izlemiyorsun, kararı SEN veriyorsun! 🔦🪨 #shorts",
+   "neden": "2026-11-17 13:00 planlıydı, hâlâ yayında görünmüyor"
+  },
+  {
    "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
    "vid": null,
@@ -1357,7 +1381,7 @@
  ],
  "bulgular": [
   "Dün (2026-11-16) 2842 izlenme geldi; bir önceki gün 3984.",
-  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 188 izlenme / 48 sa).",
+  "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",

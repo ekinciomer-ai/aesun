@@ -11,8 +11,10 @@ if "google_tts_anahtar" not in d:
     json.dump(d, open(f, "w"), ensure_ascii=False, indent=1); os.chown(f, 1001, 1001); os.chmod(f, 0o600)
 PY
 mkdir -p cikti
-# 1) Gemini TTS (Google, tonlu anlatım) — kasa: gemini_api_anahtar / gemini_api_key
-G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""
+# 1) Gemini TTS (Google, tonlu anlatım) — önce kanala ayrılmış anahtar (gemini_api_anahtar_nasilyapildi; diğer kanalların ses hakkını tüketmez),
+#    yoksa ortak: gemini_api_anahtar / gemini_api_key
+G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar_nasilyapildi 2>/dev/null) || G=""
+[ -n "$G" ] && echo "NOT: Nasıl Yapıldı kanal anahtarı kullanılıyor" || { G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""; }
 if [ -n "$G" ]; then
 python3 - "$G" <<'PY'
 # Ücretsiz katman günde az istek verir: her video TEK istekte okunur, paragraflar arası sessizlikten parçalara bölünür.

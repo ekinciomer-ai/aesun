@@ -42,7 +42,7 @@ jobs:
           for d in /tmp/al/cikti/*/; do k=$(basename $d); [ -f $d/meta.json ] || continue
             if [ -f $d/tam.wav ]; then KJ=video/ny/kuyruk/$k.json; [ -f $KJ ] || KJ=video/ny/kuyruk/tamam/$k.json; python3 video/ny/arac/hizala.py $d/tam.wav $KJ $d > /tmp/h_$k.txt 2>&1; hs=$?; cat /tmp/h_$k.txt; if [ $hs != 0 ]; then tail -n 6 /tmp/h_$k.txt | while IFS= read -r l; do echo "::error::$k $l"; done; continue; fi; rm -f $d/tam.wav; fi
             rm -rf video/ny/ses/$k; mkdir -p video/ny/ses/$k; cp $d/* video/ny/ses/$k/
-            mkdir -p video/ny/kuyruk/tamam; [ -f video/ny/kuyruk/$k.json ] && git mv -f video/ny/kuyruk/$k.json video/ny/kuyruk/tamam/$k.json; done
+            mkdir -p video/ny/kuyruk/tamam; if [ -f video/ny/kuyruk/$k.json ]; then git mv -f video/ny/kuyruk/$k.json video/ny/kuyruk/tamam/$k.json; fi; done
       - name: Kaydet
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"

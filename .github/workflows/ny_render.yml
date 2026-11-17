@@ -51,11 +51,13 @@ jobs:
         with: {sparse-checkout: "video/ny"}
       - uses: actions/download-artifact@v4
         with: {name: hazir, path: video/ny/is}
-      - run: |
+      - shell: bash
+        run: |
           cd video/ny && npm i --silent playwright@1.49.1 && npx playwright install --with-deps chromium >/dev/null
           W=$([ "${{ matrix.mod }}" = final ] && echo 1080 || echo 540); AR=$([ "${{ matrix.mod }}" = final ] && echo 1300 || echo 900)
           if [ ! -f motor/arazi_$AR.bin ]; then pip install -q numpy pillow matplotlib scipy && python3 arac/arazi_hazirla.py motor $AR; fi
-          node arac/kayit.js motor is/${{ matrix.kod }}/kurgu.json /tmp/p_${{ matrix.i }}.mp4 $W 30 ${{ matrix.a }} ${{ matrix.b }} $AR
+          set +e; node arac/kayit.js motor is/${{ matrix.kod }}/kurgu.json /tmp/p_${{ matrix.i }}.mp4 $W 30 ${{ matrix.a }} ${{ matrix.b }} $AR > /tmp/log.txt 2>&1; s=$?
+          cat /tmp/log.txt; if [ $s != 0 ]; then tail -n 12 /tmp/log.txt | while IFS= read -r l; do echo "::error::$l"; done; exit 1; fi
       - uses: actions/upload-artifact@v4
         with: {name: "p-${{ matrix.kod }}-${{ matrix.mod }}-${{ matrix.i }}", path: "/tmp/p_${{ matrix.i }}.mp4", retention-days: 2}
   birlestir:

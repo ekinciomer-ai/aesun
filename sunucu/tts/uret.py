@@ -65,8 +65,10 @@ def gemini_model(k):
     if _GMODEL: return _GMODEL[0]
     with urllib.request.urlopen(f"https://generativelanguage.googleapis.com/v1beta/models?key={k}&pageSize=200", timeout=40) as y:
         adlar = [m["name"].split("/")[-1] for m in json.load(y).get("models", []) if "tts" in m["name"]]
-    adlar.sort(key=lambda a: (("flash" not in a), ("preview" in a), a))
+    tercih = os.environ.get("GEMINI_TTS_MODEL")
+    adlar.sort(key=lambda a: (a != tercih, "lite" in a, "flash" not in a, "preview" in a, a))
     if not adlar: raise RuntimeError("Gemini TTS modeli bulunamadı")
+    print(f"NOT: Gemini TTS modelleri: {', '.join(adlar)}")
     _GMODEL.append(adlar[0]); print(f"NOT: Gemini modeli {adlar[0]}"); return adlar[0]
 
 def gemini_soyle(metin, ses, yol_wav):
@@ -81,14 +83,17 @@ def gemini_soyle(metin, ses, yol_wav):
         r = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={k}",
                                    data=json.dumps(govde).encode(), headers={"Content-Type": "application/json"}, method="POST")
         try:
-            with urllib.request.urlopen(r, timeout=120) as y:
+            with urllib.request.urlopen(r, timeout=300) as y:
                 d = json.load(y)
             parca = d["candidates"][0]["content"]["parts"][0]["inlineData"]
             hz = re.search(r"rate=(\d+)", parca.get("mimeType", "")); hz = hz.group(1) if hz else "24000"
             ham = yol_wav + ".pcm"; open(ham, "wb").write(base64.b64decode(parca["data"]))
             ff("-f", "s16le", "-ar", hz, "-ac", "1", "-i", ham, "-ar", "24000", "-ac", "1", yol_wav); os.remove(ham)
             time.sleep(6); return
-        except urllib.error.HTTPError as e:
+        except (TimeoutError, OSError) as e:
+            if not isinstance(e, urllib.error.HTTPError):
+                if dene < 2: print("NOT: Gemini yanıtı gecikti, tekrar deneniyor"); continue
+                raise
             govde_hata = e.read().decode("utf-8", "replace")
             if e.code in (429, 500, 503) and dene < 2:
                 bek = re.search(r'"retryDelay":\s*"(\d+)', govde_hata); bek = min(int(bek.group(1)) + 2 if bek else 25, 45)
@@ -202,7 +207,7 @@ def main():
     os.makedirs("cikti", exist_ok=True)
     isler = sorted(glob.glob("kuyruk/*.json"))
     if not isler: print("NOT: kuyruk boş"); return
-    import socket; socket.setdefaulttimeout(40)
+    import socket; socket.setdefaulttimeout(300)
     for jf in isler:
         is_ = json.load(open(jf, encoding="utf-8"))
         for parca in is_["parcalar"]:

@@ -25,5 +25,5 @@ G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=""
 [ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""
 [ -n "$G" ] && printf 'GEMINI_KEY=%s\n' "$G" >> "$EF" || echo "NOT: uyarı Gemini anahtarı yok"; unset G
 echo "NOT: seslendirme başlıyor"
-timeout 1080 docker run --rm --env-file "$EF" --memory 1g --cpus 2 -v "$PWD:/work" "$IMAJ" python /work/uret.py 2>&1 | grep -E '^NOT:' | head -60
+timeout 1500 docker run --rm --env-file "$EF" --memory 1g --cpus 2 -v "$PWD:/work" "$IMAJ" python /work/uret.py 2>&1 | grep -E '^NOT:' | head -60
 exit 0

@@ -6,7 +6,9 @@ wav, kf, out = sys.argv[1:4]; os.makedirs(out, exist_ok=True)
 P = json.load(open(kf, encoding="utf-8"))["parcalar"]
 def n(w): return re.sub(r"[^a-zçğıöşü0-9]", "", w.lower().replace("İ", "i").replace("I", "ı"))
 m = WhisperModel(os.environ.get("NY_WHISPER", "small"), device="cpu", compute_type="int8")
-seg, _ = m.transcribe(wav, language="tr", word_timestamps=True, beam_size=5)
+import numpy as np
+ses = np.frombuffer(subprocess.check_output(["ffmpeg", "-v", "error", "-i", wav, "-f", "f32le", "-ac", "1", "-ar", "16000", "-"]), np.float32)
+seg, _ = m.transcribe(ses, language="tr", word_timestamps=True, beam_size=5)
 W = [(n(w.word), w.start, w.end) for s in seg for w in s.words if n(w.word)]
 S, bas = [], []
 for p in P:

@@ -38,10 +38,10 @@ jobs:
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
           grep -q ANAHTAR_YOK /tmp/cikti.txt && { echo "::error::Kasaya google_tts_anahtar girilmeli (portal → Kasa)"; }
           for f in video/ny/hizala/*.wav; do [ -f "$f" ] || continue; k=$(basename $f .wav); mkdir -p /tmp/al/cikti/$k; cp $f /tmp/al/cikti/$k/tam.wav
-            echo '{"kaynak":"gemini-tts","ses":"Charon","tempo":1.0,"bol":1}' > /tmp/al/cikti/$k/meta.json; git rm -q $f; done
+            echo '{"kaynak":"gemini-tts","ses":"Charon","tempo":1.0,"bol":1}' > /tmp/al/cikti/$k/meta.json; done
           if ls /tmp/al/cikti/*/tam.wav >/dev/null 2>&1; then sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null; pip install -q faster-whisper > /tmp/pip.txt 2>&1 || { tail -n 3 /tmp/pip.txt | while IFS= read -r l; do echo "::error::pip $l"; done; }; echo "::notice::kurulum bitti"; fi
           for d in /tmp/al/cikti/*/; do k=$(basename $d); [ -f $d/meta.json ] || continue
-            if [ -f $d/tam.wav ]; then KJ=video/ny/kuyruk/$k.json; [ -f $KJ ] || KJ=video/ny/kuyruk/tamam/$k.json; python3 video/ny/arac/hizala.py $d/tam.wav $KJ $d > /tmp/h_$k.txt 2>&1; hs=$?; cat /tmp/h_$k.txt; if [ $hs != 0 ]; then tail -n 6 /tmp/h_$k.txt | while IFS= read -r l; do echo "::error::$k $l"; done; continue; fi; rm -f $d/tam.wav; fi
+            if [ -f $d/tam.wav ]; then KJ=video/ny/kuyruk/$k.json; [ -f $KJ ] || KJ=video/ny/kuyruk/tamam/$k.json; python3 video/ny/arac/hizala.py $d/tam.wav $KJ $d > /tmp/h_$k.txt 2>&1; hs=$?; cat /tmp/h_$k.txt; if [ $hs != 0 ]; then tail -n 6 /tmp/h_$k.txt | while IFS= read -r l; do echo "::error::$k $l"; done; continue; fi; rm -f $d/tam.wav; git rm -q --ignore-unmatch video/ny/hizala/$k.wav; fi
             rm -rf video/ny/ses/$k; mkdir -p video/ny/ses/$k; cp $d/* video/ny/ses/$k/
             mkdir -p video/ny/kuyruk/tamam; if [ -f video/ny/kuyruk/$k.json ]; then git mv -f video/ny/kuyruk/$k.json video/ny/kuyruk/tamam/$k.json; fi; done
       - name: Kaydet

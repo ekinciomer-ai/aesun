@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>Wi-Fi — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 4.3], "B": [4.3, 13.62], "C": [13.62, 24.4], "D": [24.4, 29.36], "E": [29.36, 48.84], "F": [48.84, 59.58], "G": [59.58, 65.02], "H": [65.02, 69.44]};window.SUB=[[0.3, 4.3, "Modem salonda, sen yatak odasındasın; duvar arada ama video açılıyor."], [4.3, 8.24, "Çünkü Wi-Fi bir ışık türüdür; sadece gözümüzün göremediği bir renkte."], [8.24, 13.62, "Saniyede 2,4 milyar kez titreşir; dalga boyu yaklaşık 12,5 santimetre."], [13.62, 18.92, "Bu kadar uzun bir dalga tuğlanın ve alçının içinden geçebilir; ama her duvarda biraz güç kaybeder."], [18.92, 24.4, "Beton ve metal en çok emer; su da öyle. Mikrodalga fırınlar da neredeyse aynı frekansta çalışır."], [24.4, 29.36, "Asıl sorun yankıdır: sinyal duvarlardan sekip sana farklı anlarda, kopyalar hâlinde ulaşır."], [29.36, 35.06, "Avustralyalı radyo astronomlar, uzaydan gelen zayıf sinyallerle uğraşırken bu sorunu çözmeye çalışmıştı."], [35.06, 39.42, "Çözümleri: veriyi tek bir hızlı şeride değil, yan yana yüzlerce yavaş şeride bölmek."], [39.42, 44.32, "Yavaş şeritler yankıdan daha az etkilenir; bu hesabın kalbinde yine Fourier dönüşümü vardır."], [44.32, 48.84, "Bu fikir 1990'larda patentlendi ve Wi-Fi standardının parçası oldu."], [48.84, 54.96, "Ondan elli yıl önce, 1942'de, oyuncu Hedy Lamarr frekans atlama fikrinin patentini almıştı."], [54.96, 59.58, "Bugün Bluetooth kulaklığın tam olarak bunu yapıyor: saniyede 1600 kez kanal değiştiriyor."], [59.58, 65.02, "Yani Wi-Fi, duvarın içinden geçen ve yankısını matematikle temizleyen görünmez bir ışık."], [65.02, 67.52, "Sıradaki bölüm: Kripto şifreler nasıl kırılmaz?"], [67.52, 68.94, "Takip et."]];window.DUR=69.44;</script>
+<script>
+let TM=window.TM||{A:[0,6],B:[6,12],C:[12,18],D:[18,34],E:[34,42],F:[42,46],G:[46,50]},SUB=window.SUB||[],DUR=window.DUR||46;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+const OR='#ff9a5a',BL='#40c4ff',GR='#5dffb0',RD='#e8364f',YL='#ffcf5a';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+
+const st=i=>SUB[i]?SUB[i][0]:0;const since=(t,i,d)=>ease((t-st(i))/(d||1));
+function house(){g.strokeStyle='#8fa6d8';g.lineWidth=6;g.strokeRect(90,600,900,560);g.fillStyle='#5b6a99';g.fillRect(520,600,40,560);T('salon',300,650,34,'#8fa6d8',600);T('yatak odası',780,650,34,'#8fa6d8',600)}
+function router(x,y){g.fillStyle='#c9d4f2';g.beginPath();g.roundRect(x-60,y-20,120,40,10);g.fill();g.strokeStyle='#c9d4f2';g.lineWidth=5;[-35,35].forEach(d=>{g.beginPath();g.moveTo(x+d,y-20);g.lineTo(x+d*1.2,y-80);g.stroke()});g.fillStyle=GR;g.fillRect(x-40,y-4,10,8)}
+function phoneS(x,y,on){g.fillStyle='#10183a';g.strokeStyle='#8fa6d8';g.lineWidth=5;g.beginPath();g.roundRect(x-55,y-95,110,190,16);g.fill();g.stroke();if(on){g.fillStyle=RD;g.beginPath();g.moveTo(x-15,y-25);g.lineTo(x+25,y);g.lineTo(x-15,y+25);g.fill()}}
+function waves(x,y,t,maxr,cut,col){for(let i=0;i<7;i++){const r=((t*160+i*80)%560)+20;if(r>maxr)continue;let a=1-r/maxr;if(cut&&x+r>cut)a*=.45;g.strokeStyle=col||`rgba(64,196,255,${a})`;g.globalAlpha=a;g.lineWidth=4;g.beginPath();g.arc(x,y,r,-1.2,1.2);g.stroke();g.globalAlpha=1}}
+function sceneA(t){T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 9 · WI-FI',W/2,440,RD,46);house();router(240,880);waves(240,880,t,700,540);phoneS(800,900,t>1.5)}
+function sceneB(t){const w=t>st(2);T(w?'2,4 GHz · λ ≈ 12,5 cm':'Wi-Fi = görünmez ışık',W/2,250,54,'#fff',800);T(w?'λ = ışık hızı / frekans':'aynı aileden: radyo · Wi-Fi · ışık',W/2,330,36,YL,700);
+ const bands=[['radyo','#5b6a99',150],['Wi-Fi',BL,120],['mikrodalga','#2a5bd7',140],['kızılötesi','#a3243a',140],['görünür','rainbow',120],['UV','#8b5cf6',100]];let x=80;
+ bands.forEach(([n,c,wd])=>{if(c=='rainbow'){const gr=g.createLinearGradient(x,0,x+wd,0);['#e8364f','#ffcf5a','#5dffb0','#40c4ff','#8b5cf6'].forEach((cc,i)=>gr.addColorStop(i/4,cc));g.fillStyle=gr}else g.fillStyle=c;g.fillRect(x,600,wd,80);T(n,x+wd/2,720,26,n=='Wi-Fi'?BL:'#c9d4f2',n=='Wi-Fi'?900:600);x+=wd+8});
+ g.strokeStyle=BL;g.lineWidth=5;g.strokeRect(80+158-4,596,128,88);
+ if(w){const k=since(t,2,1);const L=600;g.strokeStyle=BL;g.lineWidth=6;g.beginPath();for(let xx=140;xx<=140+L*1.5*k;xx+=4){const y=1000+90*Math.sin((xx-140)/L*TAU-t*3);xx>140?g.lineTo(xx,y):g.moveTo(xx,y)}g.stroke();
+  g.strokeStyle=YL;g.lineWidth=4;g.beginPath();g.moveTo(140,1150);g.lineTo(140+L,1150);g.moveTo(140,1130);g.lineTo(140,1170);g.moveTo(140+L,1130);g.lineTo(140+L,1170);g.stroke();T('12,5 cm (gerçek boyda ~ avuç içi)',140+L/2,1200,32,YL,700)}}
+function sceneC(t){const water=t>st(4);T(water?'Beton · metal · su':'Her duvar biraz güç alır',W/2,250,52,'#fff',800);T(water?'en çok emenler':'dalga zayıflayarak geçer',W/2,330,36,YL,700);
+ const walls=[['alçı',300,.85,'#94a3b8'],['tuğla',520,.6,'#c2410c'],['beton',740,.25,'#64748b']];let amp=110;g.strokeStyle=BL;g.lineWidth=6;g.beginPath();
+ for(let x=80;x<=1000;x+=4){walls.forEach(([n,wx,f])=>{if(x==wx+40)amp*=f});const y=900+amp*Math.sin(x/38-t*5);x>80?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();
+ walls.forEach(([n,wx,f,c])=>{g.fillStyle=c;g.globalAlpha=.8;g.fillRect(wx,700,40,400);g.globalAlpha=1;T(n,wx+20,1150,30,'#fff',700);T('%'+Math.round(f*100),wx+20,660,28,YL,800)});
+ if(water){g.globalAlpha=since(t,4,.6);g.fillStyle=BL;g.beginPath();g.moveTo(300,1320);g.bezierCurveTo(250,1400,260,1460,300,1460);g.bezierCurveTo(340,1460,350,1400,300,1320);g.fill();T('su',300,1500,32,'#fff',700);
+  g.strokeStyle='#c9d4f2';g.lineWidth=5;g.strokeRect(560,1330,300,170);g.strokeRect(590,1360,180,110);T('2,45 GHz',710,1540,32,YL,800);g.globalAlpha=1}}
+function sceneD(t){T('Asıl sorun: yankı',W/2,250,56,'#fff',800);T('aynı sinyal, farklı anlarda',W/2,330,36,YL,700);house();router(240,880);phoneS(800,900,false);
+ const paths=[[[240,880],[800,900],GR],[[240,880],[520,600],[800,900],OR],[[240,880],[520,1160],[800,900],'#ff8ab3']];
+ paths.forEach((p,i)=>{if(t<TM.D[0]+i*.5)return;g.strokeStyle=p[p.length-1];g.lineWidth=4;g.setLineDash([12,10]);g.beginPath();p.slice(0,-1).forEach(([x,y],j)=>j?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.setLineDash([])});
+ [[GR,0],[OR,.6],['#ff8ab3',1.2]].forEach(([c,d],i)=>{g.strokeStyle=c;g.lineWidth=4;g.beginPath();for(let x=120;x<=960;x+=4){const y=1300+i*0+60*Math.sin((x-120)/50-d*3)*(1-i*.25);x>120?g.lineTo(x,y):g.moveTo(x,y)}g.stroke()});T('üst üste binen kopyalar',W/2,1420,34,'#c9d4f2',600)}
+function dish(x,y,s){g.save();g.translate(x,y);g.scale(s,s);g.rotate(-.35);g.fillStyle='#c9d4f2';g.strokeStyle='#c9d4f2';g.lineWidth=8;g.beginPath();for(let i=-160;i<=160;i+=5){const yy=-i*i/260+60;i>-160?g.lineTo(i,yy):g.moveTo(i,yy)}g.stroke();
+ g.lineWidth=5;g.beginPath();g.moveTo(-120,5);g.lineTo(0,-110);g.lineTo(120,-5);g.stroke();g.beginPath();g.arc(0,-110,12,0,TAU);g.fill();g.restore();
+ g.strokeStyle='#c9d4f2';g.lineWidth=10;g.beginPath();g.moveTo(x,y+60*s);g.lineTo(x,y+150*s);g.moveTo(x-90*s,y+150*s);g.lineTo(x+90*s,y+150*s);g.stroke();
+ for(let i=0;i<4;i++){const r=((performance.now?0:0)+i*40);}}
+function sceneE(t){if(t<st(7)){T('Uzaydan gelen fikir',W/2,250,56,'#fff',800);T('Avustralya · radyo astronomlar (CSIRO)',W/2,330,34,YL,700);dish(W/2,860,1.5);for(let i=0;i<4;i++){const r=((t*120+i*60)%240);g.strokeStyle=`rgba(64,196,255,${1-r/240})`;g.lineWidth=3;g.beginPath();g.arc(W/2+260,560,40+r,Math.PI*.55,Math.PI*1.0);g.stroke()}for(let i=0;i<60;i++){g.fillStyle='rgba(255,255,255,.6)';g.fillRect(R(i)*W,500+R(i+9)*200,3,3)}return}
+ const many=t>st(7)+1.2;T(many?'Yüzlerce yavaş şerit':'Tek hızlı şerit',W/2,250,56,'#fff',800);T(t>st(9)?'1990\'lar: patent → Wi-Fi standardı':t>st(8)?'kalbinde: Fourier dönüşümü':'yankı karışıyor',W/2,330,36,YL,700);
+ if(!many){g.fillStyle=RD;g.fillRect(100,800,880,100);for(let i=0;i<12;i++){g.fillStyle='#fff';g.fillRect(100+((t*600+i*80)%880),835,40,30)}}
+ else{const n=48;for(let i=0;i<n;i++){const y=600+i*18;g.fillStyle=`hsl(${190+i*3},70%,${40+8*Math.sin(i)}%)`;g.fillRect(100,y,880,12);g.fillStyle='rgba(255,255,255,.8)';g.fillRect(100+((t*80+i*37)%860),y+2,20,8)}}}
+function sceneF(t){const bt=t>st(11);T(bt?'Bluetooth: 1600 atlama/sn':'1942 · Hedy Lamarr',W/2,250,52,'#fff',800);T(bt?'kulaklığın kanal değiştirir':'oyuncu + mucit: frekans atlama',W/2,330,36,YL,700);
+ const rows=10,cols=14;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){g.strokeStyle='rgba(143,166,216,.25)';g.lineWidth=2;g.strokeRect(120+c*60,560+r*70,60,70)}
+ const sp=bt?12:2.5;for(let c=0;c<cols;c++){const r=Math.floor(R(c*7+Math.floor(t*sp))*rows);const cur=Math.floor(t*sp)%cols;g.fillStyle=c==cur?YL:'rgba(255,207,90,.35)';g.fillRect(124+c*60,564+r*70,52,62)}
+ T('kanal ↑   zaman →',W/2,1320,32,'#8fa6d8',600);if(!bt)T('piyano rulosundan ilham',W/2,1400,36,'#c9d4f2',600)}
+function sceneG(t){T('Wi-Fi =',W/2,250,56,'#fff',800);T('duvardan geçen görünmez ışık',W/2,330,40,YL,700);house();router(240,880);waves(240,880,t,700,540,null);phoneS(800,900,true)}
+function sceneH(t){T('Sıradaki bölüm',W/2,520,56,'#8fa6d8',600);T('Kripto şifreler',W/2,640,72,'#fff',800);T('nasıl kırılmaz?',W/2,740,72,'#fff',800);
+ g.strokeStyle=YL;g.lineWidth=14;g.beginPath();g.arc(W/2,1000,90,Math.PI,0);g.stroke();g.fillStyle=YL;g.beginPath();g.roundRect(W/2-140,1000,280,220,24);g.fill();g.fillStyle='#070c20';g.beginPath();g.arc(W/2,1090,24,0,TAU);g.fill();g.fillRect(W/2-8,1090,16,60);
+ ['2','3','5','7','11','13','17','19','23'].forEach((p,i)=>{const a=i/9*TAU+t*.5;T(p,W/2+300*Math.cos(a),1110+230*Math.sin(a),40,BL,800)});pill('Takip et',W/2,1560,RD,58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=Math.min(1745,1790-(lines.length-1)*60);lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);const S=[['A',sceneA],['B',sceneB],['C',sceneC],['D',sceneD],['E',sceneE],['F',sceneF],['G',sceneG],['H',sceneH]];let f=sceneA;for(const[k,fn]of S)if(t>=TM[k][0])f=fn;f(t);
+ if(t<TM.H[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

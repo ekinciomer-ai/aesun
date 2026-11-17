@@ -89,25 +89,36 @@ run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", f"{TMP}/
 fnt = f"fontfile={FONT}:" if FONT else ""
 ciz = []
 bas = plan["baslik"]
-fs_b = int(64 * K)
+fs_b = int(66 * K)
+try:
+    from PIL import ImageFont
+    _f = ImageFont.truetype(FONT, fs_b)
+    olc = lambda m: _f.getlength(m)
+except Exception:
+    olc = lambda m: len(m) * 0.74 * fs_b
 for j, satir in enumerate(bas):
-    ciz.append(f"drawtext={fnt}text='{esc(satir)}':fontsize={fs_b}:fontcolor=white:borderw={int(6*K)}:bordercolor=black:"
-               f"x=(w-text_w)/2:y={int(60*K)+j*int(78*K)}")
+    parcalar_b = satir if isinstance(satir, list) else [[satir, "white"]]
+    bosluk = olc(" ") * 1.4
+    x = (W - sum(olc(p[0]) for p in parcalar_b) - bosluk * (len(parcalar_b) - 1)) / 2
+    for metin, renk in parcalar_b:
+        ciz.append(f"drawtext={fnt}text='{esc(metin)}':fontsize={fs_b}:fontcolor={renk}:borderw={int(6*K)}:bordercolor=black:"
+                   f"x={int(x)}:y={int(60*K)+j*int(80*K)}")
+        x += olc(metin) + bosluk
 fs_r = int(46 * K); y0 = int(250 * K); dy = int(70 * K)
 for no in range(1, N + 1):
     y = y0 + (no - 1) * dy
     ciz.append(f"drawtext={fnt}text='{no}.':fontsize={fs_r}:fontcolor=white:borderw={int(4*K)}:bordercolor=black:x={int(28*K)}:y={y}")
 for i, s in enumerate(sira):
-    no = int(s["no"]); a, b = zamanlar[i]
+    no = i + 1; a, b = zamanlar[i]
     y = y0 + (no - 1) * dy
-    et = esc(s["etiket"].upper())
+    et = esc(s.get("etiket") or f"Level {no}")
     ciz.append(f"drawtext={fnt}text='{et}':fontsize={fs_r}:fontcolor={RENK}:borderw={int(4*K)}:bordercolor=black:"
                f"x={int(92*K)}:y={y}:enable='gte(t,{a})':alpha='if(lt(t,{a}+0.25),(t-{a})/0.25,1)'")
     ciz.append(f"drawbox=x={int(18*K)}:y={y-int(8*K)}:w={int(560*K)}:h={int(62*K)}:color={RENK}@0.9:t={int(5*K)}:enable='between(t,{a},{b})'")
     # büyük sıra rozeti (ilk 1 sn)
-    ciz.append(f"drawtext={fnt}text='#{no}':fontsize={int(190*K)}:fontcolor={RENK}:borderw={int(10*K)}:bordercolor=black:"
+    ciz.append(f"drawtext={fnt}text='LEVEL {no}':fontsize={int(130*K)}:fontcolor={RENK}:borderw={int(10*K)}:bordercolor=black:"
                f"x=(w-text_w)/2:y=h*0.62:enable='between(t,{a},{a+0.9})'")
-ciz.append(f"drawtext={fnt}text='LVL MAX':fontsize={int(34*K)}:fontcolor=white@0.85:borderw={int(3*K)}:bordercolor=black:x=w-text_w-{int(24*K)}:y=h-{int(70*K)}")
+ciz.append(f"drawtext={fnt}text='LVL MAX':fontsize={int(34*K)}:fontcolor=white@0.85:borderw={int(3*K)}:bordercolor=black:x=(w-text_w)/2:y=h-{int(90*K)}")
 vf = ",".join(ciz)
 
 # 4) Efekt izi: her geçişte whoosh + ding; son sırada ekstra boom

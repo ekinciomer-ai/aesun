@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kozmos Lab · Merak</title>
+<style>
+@font-face{font-family:Archivo;src:url(fonts/Archivo.ttf);font-stretch:62% 125%;font-weight:100 900}
+@font-face{font-family:"Space Mono";src:url(fonts/SpaceMono-Regular.ttf)}
+@font-face{font-family:"Space Mono";src:url(fonts/SpaceMono-Bold.ttf);font-weight:700}
+@font-face{font-family:"Instrument Sans";src:url(fonts/InstrumentSans.ttf);font-weight:400 700}
+:root{--a:#6FE3FF;--g:#F2C46B;--r:#FF6A4D;--ink:#F3F5FA}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hud{position:fixed;inset:0;pointer-events:none;color:var(--ink);font-family:"Instrument Sans",sans-serif}
+.vg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%,transparent 52%,rgba(0,0,0,.62))}
+#tane{position:absolute;inset:-50%;opacity:.07;mix-blend-mode:overlay}
+.br{position:absolute;width:5vmin;height:5vmin;border:.32vmin solid var(--a);opacity:.7}
+.br.a{left:3vmin;top:3vmin;border-right:0;border-bottom:0}.br.b{right:3vmin;top:3vmin;border-left:0;border-bottom:0}
+.br.c{left:3vmin;bottom:3vmin;border-right:0;border-top:0}.br.d{right:3vmin;bottom:3vmin;border-left:0;border-top:0}
+#logo{position:absolute;left:6vmin;top:5vmin;font:700 2.2vmin "Space Mono";letter-spacing:.32em;color:var(--a)}
+#logo b{color:var(--g)}
+#no{position:absolute;right:6vmin;top:5vmin;font:700 2.2vmin "Space Mono";letter-spacing:.2em;opacity:.85}
+#soru{position:absolute;left:6vmin;right:6vmin;top:0;transform-origin:50% 0;text-align:center}
+#soru .t{font:850 9.4vmin/0.93 Archivo;font-stretch:66%;text-transform:uppercase;letter-spacing:.005em;text-shadow:0 .5vmin 3vmin rgba(0,0,0,.85)}
+#soru .t i{font-style:normal;color:var(--g)}
+#soru .s{font:700 2.3vmin "Space Mono";letter-spacing:.3em;color:var(--a);margin-bottom:1.6vmin}
+#kart{position:absolute;left:7vmin;right:7vmin;text-align:center}
+.sat{opacity:0;transform:translateY(2vmin);margin:1.2vmin auto 0;width:max-content;max-width:100%}
+.formul{font:700 4.3vmin/1.15 "Space Mono";letter-spacing:-.02em;padding:1.1vmin 2.6vmin;background:rgba(6,12,22,.62);border:.25vmin solid rgba(111,227,255,.55);border-radius:1.2vmin;box-shadow:0 0 3vmin rgba(111,227,255,.18)}
+.formul em{font-style:normal;color:var(--g)}
+.sayi{font:850 15vmin/0.95 Archivo;font-stretch:72%;color:var(--g);text-shadow:0 0 4vmin rgba(242,196,107,.55),0 .6vmin 2vmin #000}
+.sayi small{font:700 5.2vmin Archivo;font-stretch:80%;color:var(--ink);margin-left:1.4vmin}
+.sayi.soguk{color:var(--a);text-shadow:0 0 4vmin rgba(111,227,255,.6),0 .6vmin 2vmin #000}
+.ust{font:700 2.4vmin "Space Mono";letter-spacing:.3em;color:var(--a);margin-bottom:.4vmin}
+.etiket{font:700 3.2vmin "Space Mono";letter-spacing:.06em;color:var(--ink);background:rgba(242,196,107,.16);border-left:.7vmin solid var(--g);padding:.8vmin 2vmin}
+#alt{position:absolute;left:7vmin;right:7vmin;text-align:center;font:800 5.6vmin/1.15 "Instrument Sans";text-shadow:0 0 1.4vmin #000,0 .4vmin 1vmin #000,0 0 3vmin rgba(0,0,0,.7)}
+#alt b{display:inline-block;margin:0 1.5vmin;font-weight:800}
+#alt b.on{color:var(--g);transform:scale(1.08)}
+#alt b.son{opacity:.95}
+#yol{position:absolute;left:6vmin;right:6vmin;height:.8vmin;display:flex;gap:.7vmin}
+#yol i{flex:1;background:rgba(255,255,255,.16);position:relative;overflow:hidden;border-radius:.4vmin}
+#yol i s{position:absolute;inset:0;background:var(--a);transform-origin:0 50%}
+#flas{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:screen}
+#kara{position:absolute;inset:0;background:#000;opacity:0}
+#cerceve{position:absolute;inset:0}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="hud"><canvas id="tane" width="256" height="256"></canvas><div class="vg"></div>
+<div id="cerceve"><div class="br a"></div><div class="br b"></div><div class="br c"></div><div class="br d"></div></div>
+<div id="logo">KOZMOS <b>LAB</b></div><div id="no"></div>
+<div id="soru"><div class="s"></div><div class="t"></div></div>
+<div id="kart"></div>
+<div id="alt"></div>
+<div id="yol"></div>
+<div id="flas"></div><div id="kara"></div></div>
+<script src="lib/three.min.js"></script>
+<script src="lib/RoomEnvironment.js"></script>
+<script src="lib/CopyShader.js"></script><script src="lib/LuminosityHighPassShader.js"></script>
+<script src="lib/ACESFilmicToneMappingShader.js"></script><script src="lib/GammaCorrectionShader.js"></script>
+<script src="lib/EffectComposer.js"></script><script src="lib/RenderPass.js"></script><script src="lib/ShaderPass.js"></script><script src="lib/MaskPass.js"></script><script src="lib/UnrealBloomPass.js"></script>
+<script src="motor.js"></script>
+<script src="sahneler.js"></script>
+<script src="calistir.js"></script>
+</body></html>

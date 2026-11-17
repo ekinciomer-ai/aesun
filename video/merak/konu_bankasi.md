@@ -1,0 +1,33 @@
+# Merak Lab · konu bankası
+Günlük görev her çalışmada sıradaki 2 `[ ]` konuyu alır (biri uzay, biri enerji/mühendislik dengesi gözetilir), araştırır, doğrular, senaryo yazar ve `[x] KOD` olarak işaretler.
+Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Doğrulanamayan konu `[-]` ile atlanır.
+
+## Yapıldı
+- [x] KZ_MRK_01_GUNES — Güneş şu an yok olsa ne zaman fark ederdin? (uzay)
+- [x] KZ_MRK_02_PANEL — Tek panel günde kaç telefon şarj eder? (enerji)
+
+## Sırada
+- [ ] Ay'a arabayla gitsek kaç günde varırız? (384.400 km, 100 km/sa) — uzay
+- [ ] Bir rüzgâr türbininin tek turu kaç telefonu şarj eder? — enerji
+- [ ] Uluslararası Uzay İstasyonu Türkiye'nin üstünden kaç saniyede geçer? (~7,66 km/s) — uzay
+- [ ] Bir yıldırımda kaç evin günlük elektriği var? — enerji
+- [ ] Dünya dönmeyi bir anda bıraksa ne olur? (ekvatorda ~1.670 km/sa) — uzay
+- [ ] 1 MW güneş santrali kaç futbol sahası kaplar? — enerji
+- [ ] Mars'ta bir gün kaç saat, bir yıl kaç gün? — uzay
+- [ ] Bir elektrikli araba 1 kWh ile kaç km gider? — enerji
+- [ ] Güneş'e uçakla gitsek kaç yıl sürer? — uzay
+- [ ] Bir ampulü 1 saat yakmak için kaç dakika pedal çevirmek gerekir? — enerji
+- [ ] Ay neden hep aynı yüzünü gösterir? (kütleçekim kilidi) — uzay
+- [ ] Panel tozlanınca üretim ne kadar düşer? — enerji
+- [ ] Jüpiter'e Dünya'dan kaç tane sığar? — uzay
+- [ ] Bir trafo neden uğuldar? (50 Hz → 100 Hz manyetostriksiyon) — enerji
+- [ ] Işık hızıyla gitsen en yakın yıldıza ne zaman varırsın? (Proxima, 4,24 ışık yılı) — uzay
+- [ ] Bir barajın türbininden saniyede kaç ton su geçer? — enerji
+- [ ] Satürn suya konsa yüzer mi? (ortalama yoğunluk 0,69 g/cm³) — uzay
+- [ ] Kablo neden ısınır? Akımı 2 katına çıkarınca ısı kaç katına çıkar? (I²R) — enerji
+- [ ] Ay'da zıplasan ne kadar yükselirsin? (1/6 g) — uzay
+- [ ] Güneş paneli neden soğukta daha çok üretir? (sıcaklık katsayısı) — enerji
+- [ ] Bir nötron yıldızının bir çay kaşığı kaç ton? — uzay
+- [ ] Bir bitcoin madencilik cihazı bir günde ne kadar elektrik yer? — enerji
+- [ ] Kara delikten kaçmak için ne kadar hızlı olmalısın? — uzay
+- [ ] Türkiye'nin bütün elektriği için ne kadar alan panel gerekir? — enerji

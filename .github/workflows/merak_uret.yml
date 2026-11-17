@@ -1,0 +1,77 @@
+name: Kozmos Lab · Merak Shorts üretimi
+# video/merak/kuyruk/<KOD>.json eklenince: Google TTS → 3D kare kare render → kodla ses tasarımı → mp4
+# → sunucuya (/opt/aesun/video_bekleyen) + önizleme dalı → Yükleme Yöneticisi havuzuna teslim (onay bekler, kendiliğinden yayınlanmaz).
+on:
+  push:
+    branches: [main]
+    paths: ['video/merak/kuyruk/*.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency: { group: merak-uret, cancel-in-progress: false }
+jobs:
+  liste:
+    runs-on: ubuntu-24.04
+    outputs: { kodlar: "${{ steps.l.outputs.kodlar }}" }
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: video/merak/kuyruk }
+      - id: l
+        run: |
+          K=$(ls video/merak/kuyruk/*.json 2>/dev/null | xargs -r -n1 basename | sed 's/\.json$//' | python3 -c "import sys,json;print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))")
+          echo "kodlar=$K" >> "$GITHUB_OUTPUT"; echo "kuyruk: $K"
+  uret:
+    needs: liste
+    if: needs.liste.outputs.kodlar != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy: { fail-fast: false, matrix: { kod: "${{ fromJson(needs.liste.outputs.kodlar) }}" } }
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: video/merak }
+      - name: Araçlar
+        run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg fonts-noto-color-emoji >/dev/null
+          pip install -q gTTS==2.5.4 scipy numpy pillow
+          cd video/merak && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm i -s --no-save playwright@1.49.1 >/dev/null
+      - name: Üret (ses → kurgu → görüntü → ses tasarımı → birleştir)
+        env: { CHROME_YOL: /usr/bin/google-chrome }
+        run: |
+          cd video/merak
+          python3 arac/uret.py kuyruk/${{ matrix.kod }}.json --is /tmp/is
+          ls -la /tmp/is/${{ matrix.kod }}/
+          ffprobe -v error -show_entries format=duration:stream=width,height -of compact /tmp/is/${{ matrix.kod }}/${{ matrix.kod }}.mp4
+      - uses: actions/upload-artifact@v4
+        with: { name: "video-${{ matrix.kod }}", path: "/tmp/is/${{ matrix.kod }}/${{ matrix.kod }}.mp4", retention-days: 14 }
+      - uses: actions/upload-artifact@v4
+        with: { name: "ek-${{ matrix.kod }}", path: "/tmp/is/${{ matrix.kod }}/kapak.jpg\n/tmp/is/${{ matrix.kod }}/kurgu.json", retention-days: 14 }
+  aktar:
+    needs: [liste, uret]
+    if: always() && needs.liste.outputs.kodlar != '[]'
+    strategy: { fail-fast: false, max-parallel: 1, matrix: { kod: "${{ fromJson(needs.liste.outputs.kodlar) }}" } }
+    uses: ./.github/workflows/video_aktar.yml
+    with: { run_id: "${{ github.run_id }}", ad: "${{ matrix.kod }}" }
+    secrets: inherit
+  teslim:
+    needs: [liste, aktar]
+    if: always() && needs.liste.outputs.kodlar != '[]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Havuz kartları + kuyruğu kapat
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          n=0
+          for k in $(echo '${{ needs.liste.outputs.kodlar }}' | python3 -c "import sys,json;print(' '.join(json.load(sys.stdin)))"); do
+            if curl -sfI "https://raw.githubusercontent.com/${{ github.repository }}/video-onizleme/$k.mp4" >/dev/null; then
+              python3 video/merak/arac/kart.py video/merak/kuyruk/$k.json sunucu/havuz/teslim
+              git mv video/merak/kuyruk/$k.json video/merak/kuyruk/tamam/$k.json; n=$((n+1))
+            else echo "::warning::$k üretilemedi, kuyrukta kaldı"; fi
+          done
+          [ $n -gt 0 ] || exit 0
+          git add -A sunucu/havuz/teslim video/merak/kuyruk
+          git commit -qm "Merak Lab: $n video havuza teslim $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3 4; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 6; done
+          gh api -X POST repos/${{ github.repository }}/actions/workflows/sunucu_islem.yml/dispatches -f ref=main -f 'inputs[islem]=havuz_teslim'

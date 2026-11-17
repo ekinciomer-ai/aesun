@@ -9,13 +9,11 @@ T=$(mktemp -d); trap 'rm -rf $T' EXIT
 curl -s -m 30 -H "x-goog-api-key: $G" "$U/models?pageSize=200" -o $T/m.json
 MODELLER=$(python3 -c "import json;print(' '.join(m['name'].split('/')[1] for m in json.load(open('$T/m.json')).get('models',[]) if 'tts' in m['name']))" 2>/dev/null)
 echo "NOT: TTS modelleri: ${MODELLER:-yok ($(head -c 200 $T/m.json | tr '\n' ' '))}"
-MODEL=""
-for m in gemini-3.8-flash-tts $MODELLER; do case " $MODELLER " in *" $m "*) MODEL=$m; break;; esac; done
-[ -n "$MODEL" ] || { echo "NOT: HATA TTS modeli bulunamadı"; exit 1; }
-echo "NOT: kullanılan model: $MODEL"
 METIN='Heyecanlı, merak uyandıran bir belgesel anlatıcısı gibi oku: Türkiye’nin çatısı neresi? En yüksek on dağa haritada tek tek dolaşalım. Ve birinci… Ağrı Dağı! Beş bin yüz otuz yedi metre ile Türkiye’nin çatısı.'
 mkdir -p $T/out
 for SES in Charon Fenrir; do
+ for MODEL in gemini-3.8-flash-tts gemini-3.8-flash-lite-tts gemini-3.1-flash-tts-preview gemini-2.5-flash-preview-tts; do
+  case " $MODELLER " in *" $MODEL "*) ;; *) continue;; esac
   python3 - "$METIN" "$SES" > $T/istek.json <<'PY'
 import json, sys
 print(json.dumps({"contents":[{"parts":[{"text":sys.argv[1]}]}],
@@ -23,12 +21,13 @@ print(json.dumps({"contents":[{"parts":[{"text":sys.argv[1]}]}],
   "speechConfig":{"voiceConfig":{"prebuiltVoiceConfig":{"voiceName":sys.argv[2]}}}}}))
 PY
   k=$(curl -s -m 120 -o $T/y.json -w '%{http_code}' -H "x-goog-api-key: $G" -H 'Content-Type: application/json' -d @$T/istek.json "$U/models/$MODEL:generateContent")
-  python3 - $T/y.json $T/out/$SES.wav <<'PY' && echo "NOT: $SES: $k tamam" || echo "NOT: $SES: $k HATA $(head -c 300 $T/y.json | tr '\n' ' ')"
+  python3 - $T/y.json $T/out/${SES}__$MODEL.wav <<'PY' && { echo "NOT: $SES / $MODEL: $k tamam"; break; } || echo "NOT: $SES / $MODEL: $k $(grep -o '"message": "[^"]\{0,90\}' $T/y.json | head -1)"
 import base64, json, sys, wave
 d = json.load(open(sys.argv[1]))
 p = d["candidates"][0]["content"]["parts"][0]["inlineData"]["data"]
 w = wave.open(sys.argv[2], "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(24000); w.writeframes(base64.b64decode(p)); w.close()
 PY
+ done
 done
 ls $T/out/*.wav >/dev/null 2>&1 || exit 1
 if command -v ffmpeg >/dev/null; then for f in $T/out/*.wav; do ffmpeg -loglevel error -y -i $f -b:a 128k ${f%.wav}.mp3 && rm $f; done

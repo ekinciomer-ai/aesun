@@ -51,18 +51,19 @@ for jf in sorted(glob.glob("kuyruk/*.json")):
     talimat = ("Türkçe, merak uyandıran, canlı ve tonları sürekli değişen bir belgesel anlatıcısı gibi oku; tekdüze olma. "
                "Her paragraftan sonra bir saniye sus. Paragrafların tonları sırayla: " + " | ".join(p.get("ton", "canlı") for p in P) + ".\n\n")
     metin = talimat + "\n\n".join(p["metin"] for p in P)
-    pcm = None
-    for model in modeller:
+    import hashlib
+    ONB = "/opt/tampon/ny_gemini"; onb = f"{ONB}/{kod}_{hashlib.md5((ses + metin).encode()).hexdigest()[:10]}.pcm"
+    pcm = open(onb, "rb").read() if os.path.exists(onb) else None
+    if pcm: print(f"NOT: {kod} önbellekten")
+    for model in ([] if pcm else modeller):
         try: pcm = oku(model, metin, ses); print(f"NOT: {kod} Gemini {model} {ses} {len(pcm)/2/SR:.1f} sn"); break
         except urllib.error.HTTPError as e: print(f"NOT: {kod} {model} HTTP {e.code} {e.read().decode('utf-8','replace')[:120]}")
         except Exception as e: print(f"NOT: {kod} {model} {e}")
     if not pcm: continue
-    sinir = kes(pcm, len(P), [len(p["metin"]) for p in P])
-    if not sinir: print(f"NOT: {kod} paragraf sınırları bulunamadı, Gemini sesi kullanılmadı"); continue
-    os.makedirs(f"cikti/{kod}", exist_ok=True); bs = [0] + sinir + [len(pcm) // 2]
-    for k, p in enumerate(P):
-        w = wave.open(f"cikti/{kod}/{p['id']}.wav", "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm[bs[k] * 2:bs[k + 1] * 2]); w.close()
-    json.dump({"kaynak": "gemini-tts", "ses": ses, "tempo": 1.0}, open(f"cikti/{kod}/meta.json", "w")); print(f"NOT: {kod} tamam · {len(P)} parça")
+    os.makedirs(f"cikti/{kod}", exist_ok=True)
+    w = wave.open(f"cikti/{kod}/tam.wav", "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm); w.close()
+    os.makedirs(ONB, exist_ok=True); open(onb, "wb").write(pcm)
+    json.dump({"kaynak": "gemini-tts", "ses": ses, "tempo": 1.0, "bol": 1}, open(f"cikti/{kod}/meta.json", "w")); print(f"NOT: {kod} tam ses hazır")
 PY
 fi
 K=$(/opt/aesun/kasa_coz.sh google_tts_anahtar 2>/dev/null) || K=""

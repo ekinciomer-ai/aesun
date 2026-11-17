@@ -5,7 +5,7 @@ name: Nasıl Yapıldı – Google TTS seslendirme
 on:
   push:
     branches: [main]
-    paths: ['video/ny/kuyruk/*.json', 'sunucu/islem_ny_gtts.sh', '.github/workflows/ny_gtts.yml']
+    paths: ['video/ny/kuyruk/*.json', 'video/ny/hizala/*.wav', 'sunucu/islem_ny_gtts.sh', '.github/workflows/ny_gtts.yml']
   schedule:
     - cron: '*/20 * * * *'
   workflow_dispatch:
@@ -36,9 +36,13 @@ jobs:
           rm -f ~/.ssh/k
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
           grep -q ANAHTAR_YOK /tmp/cikti.txt && { echo "::error::Kasaya google_tts_anahtar girilmeli (portal → Kasa)"; exit 1; }
+          for f in video/ny/hizala/*.wav; do [ -f "$f" ] || continue; k=$(basename $f .wav); mkdir -p /tmp/al/cikti/$k; cp $f /tmp/al/cikti/$k/tam.wav
+            echo '{"kaynak":"gemini-tts","ses":"Charon","tempo":1.0,"bol":1}' > /tmp/al/cikti/$k/meta.json; git rm -q $f; done
+          if ls /tmp/al/cikti/*/tam.wav >/dev/null 2>&1; then sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null; pip install -q faster-whisper; fi
           for d in /tmp/al/cikti/*/; do k=$(basename $d); [ -f $d/meta.json ] || continue
+            if [ -f $d/tam.wav ]; then KJ=video/ny/kuyruk/$k.json; [ -f $KJ ] || KJ=video/ny/kuyruk/tamam/$k.json; python3 video/ny/arac/hizala.py $d/tam.wav $KJ $d || { echo "::error::$k hizalanamadı"; continue; }; rm -f $d/tam.wav; fi
             rm -rf video/ny/ses/$k; mkdir -p video/ny/ses/$k; cp $d/* video/ny/ses/$k/
-            mkdir -p video/ny/kuyruk/tamam; git mv -f video/ny/kuyruk/$k.json video/ny/kuyruk/tamam/$k.json; done
+            mkdir -p video/ny/kuyruk/tamam; [ -f video/ny/kuyruk/$k.json ] && git mv -f video/ny/kuyruk/$k.json video/ny/kuyruk/tamam/$k.json; done
       - name: Kaydet
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"

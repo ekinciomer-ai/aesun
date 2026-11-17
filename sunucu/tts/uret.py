@@ -60,11 +60,15 @@ GYON = {"normal": "Say naturally and engagingly", "anlatici": "Narrate like a ca
 _GMODELLER = []
 _BITEN_MODELLER = set()
 
-def gemini_modeller(k):
-    if _GMODELLER: return [m for m in _GMODELLER if m not in _BITEN_MODELLER] or list(_GMODELLER)
+def gemini_modeller(k, tercih_ust=None):
+    if _GMODELLER:
+        kalan = [m for m in _GMODELLER if m not in _BITEN_MODELLER] or list(_GMODELLER)
+        if tercih_ust and tercih_ust in kalan:
+            kalan = [tercih_ust] + [m for m in kalan if m != tercih_ust]
+        return kalan
     with urllib.request.urlopen(f"https://generativelanguage.googleapis.com/v1beta/models?key={k}&pageSize=200", timeout=40) as y:
         adlar = [m["name"].split("/")[-1] for m in json.load(y).get("models", []) if "tts" in m["name"]]
-    tercih = os.environ.get("GEMINI_TTS_MODEL")
+    tercih = tercih_ust or os.environ.get("GEMINI_TTS_MODEL") or "gemini-3.1-flash-tts-preview"
     adlar.sort(key=lambda a: (a != tercih, "lite" in a, "flash" not in a, "preview" in a, a))
     if not adlar: raise RuntimeError("Gemini TTS modeli bulunamadı")
     print(f"NOT: Gemini TTS modelleri: {', '.join(adlar)}")
@@ -73,12 +77,12 @@ def gemini_modeller(k):
 def gemini_model(k):
     return gemini_modeller(k)[0]
 
-def gemini_soyle(metin, ses, yol_wav, ton="normal"):
+def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None):
     import time, urllib.error
     k = os.environ.get("GEMINI_KEY")
     if not k: raise RuntimeError("gemini anahtarı yok")
     son_hata = None
-    for m in gemini_modeller(k):
+    for m in gemini_modeller(k, tercih_ust):
         istek_metin = f"{GYON.get(ton, GYON['normal'])} in Turkish: {metin}" if "2.5" in m else metin
         govde = {"contents": [{"parts": [{"text": istek_metin}]}],
                  "generationConfig": {"responseModalities": ["AUDIO"],
@@ -113,6 +117,10 @@ def gemini_soyle(metin, ses, yol_wav, ton="normal"):
     raise RuntimeError(son_hata or "Tüm Gemini TTS modelleri dolu")
 
 def gemini_uret(is_, parca, tmp):
+    if parca.get("tek_istek"):
+        w = f"{tmp}/g000.wav"
+        gemini_soyle(parca["metin"], parca.get("ses", is_.get("ses", "charon")), w, parca.get("ton", "anlatici"), is_.get("model_tercih"))
+        return [w], 1, 0
     adimlar = ayristir(parca["metin"], parca.get("ses", is_.get("ses", "charon")), False)
     obek = []  # [ses, ton, [cümleler]] veya ["dur", sn]
     for a in adimlar:
@@ -126,7 +134,7 @@ def gemini_uret(is_, parca, tmp):
         if o[0] == "dur":
             ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{o[1]:.2f}", w); wavlar.append(w); continue
         ses, ton, cs = o; metin = " ".join(cs)
-        gemini_soyle(metin, ses, w, ton)
+        gemini_soyle(metin, ses, w, ton, is_.get("model_tercih"))
         sure = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", w],
                                     capture_output=True, text=True).stdout or 0)
         if sure > len(metin) / 9 + 3:

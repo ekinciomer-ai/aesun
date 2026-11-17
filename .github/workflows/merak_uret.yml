@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths: ['video/merak/kuyruk/*.json']
   workflow_dispatch:
+  schedule:
+    - cron: '17 */3 * * *'   # kuyrukta bekleyen (ör. ses kotası yüzünden kalan) senaryoları yeniden dener
 permissions:
   contents: write
   actions: write
@@ -26,10 +28,10 @@ jobs:
     if: needs.liste.outputs.kodlar != '[]'
     runs-on: ubuntu-24.04
     timeout-minutes: 150
-    strategy: { fail-fast: false, matrix: { kod: "${{ fromJson(needs.liste.outputs.kodlar) }}" } }
+    strategy: { fail-fast: false, max-parallel: 1, matrix: { kod: "${{ fromJson(needs.liste.outputs.kodlar) }}" } }
     steps:
       - uses: actions/checkout@v4
-        with: { sparse-checkout: "video/merak\nsunucu/tts\nsunucu/islem_tts_kuyruk.sh", sparse-checkout-cone-mode: false }
+        with: { sparse-checkout: "video/merak\nvideo/ny/arac/hizala.py\nsunucu/tts\nsunucu/islem_tts_kuyruk.sh", sparse-checkout-cone-mode: false }
       - name: Araçlar
         run: |
           sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg fonts-noto-color-emoji >/dev/null
@@ -50,7 +52,11 @@ jobs:
           grep '^NOT:' /tmp/cikti.txt | while IFS= read -r l; do echo "::notice::$l"; done
           scp $O root@$ADRES:$D.tgz /tmp/ses.tgz && mkdir -p /tmp/sc && tar xzf /tmp/ses.tgz -C /tmp/sc
           ssh $O root@$ADRES "rm -rf $D $D.tgz" || true; rm -f ~/.ssh/k
-          for f in /tmp/sc/cikti/${KOD}__*.mp3; do b=$(basename "$f" .mp3); cp "$f" /tmp/is/$KOD/ses/${b#${KOD}__}.mp3; done
+          test -s /tmp/sc/cikti/${KOD}__tam.mp3 || { echo "::error::ses alınamadı (Gemini kotası dolmuş olabilir); senaryo kuyrukta kalır, sonraki denemede yeniden"; exit 1; }
+          # tek parça anlatımı parçalara böl (faster-whisper kelime zamanları)
+          pip install -q faster-whisper "av==13.1.0"
+          python3 video/ny/arac/hizala.py /tmp/sc/cikti/${KOD}__tam.mp3 video/merak/kuyruk/$KOD.json /tmp/parca
+          for f in /tmp/parca/*.wav; do ffmpeg -v error -y -i "$f" -b:a 192k /tmp/is/$KOD/ses/$(basename "$f" .wav).mp3; done
           ls -la /tmp/is/$KOD/ses/
       - name: Üret (ses → kurgu → görüntü → ses tasarımı → birleştir)
         env: { CHROME_YOL: /usr/bin/google-chrome }

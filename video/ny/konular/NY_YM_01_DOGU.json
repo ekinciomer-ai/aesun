@@ -1,0 +1,87 @@
+{
+ "kanal": "NY",
+ "seri": "İllere Göre Yemekler",
+ "dil": "tr",
+ "kod": "NY_YM_01_DOGU",
+ "baslik_bant": "BU YEMEK HANGİ İLİN?",
+ "tip": "quiz",
+ "abartma": 11,
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 YEMEK",
+   "ust": "HANGİ İLİN?",
+   "alt": "BİLEN GURMEDİR",
+   "alt_kelime": "gurmedir"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "TANTUNİ HANGİ İLİN YEMEĞİ?",
+   "siklar": [
+    "Adana",
+    "Mersin",
+    "Hatay",
+    "Antalya"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Mersin"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "TESTİ KEBABI HANGİ İLİN?",
+   "siklar": [
+    "Nevşehir",
+    "Kayseri",
+    "Niğde",
+    "Aksaray"
+   ],
+   "dogru": 0,
+   "bekle": 3
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Nevşehir"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "CAĞ KEBABI HANGİ İLİN?",
+   "siklar": [
+    "Erzincan",
+    "Kars",
+    "Erzurum",
+    "Bayburt"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Erzurum"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "SIRADAKİ İLİ YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Türk Patent – Coğrafi işaretler: Erzurum Cağ Kebabı",
+  "Mersin Tantunisi (Mersin il kültür turizm)",
+  "Nevşehir Testi Kebabı (Kapadokya mutfağı)"
+ ]
+}

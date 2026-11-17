@@ -40,7 +40,7 @@ def sayilari_birlestir(kel):
             kullan.append(kel[j]); j += 1
             if re.search(r"[.,!?:]$", kel[j - 1]["w"]): break
         deg = top + ara
-        if len(kullan) >= 2 or (len(kullan) == 1 and deg >= 10 and sayi_kelime(kullan[0]["w"]) not in ("on",)):
+        if len(kullan) >= 2 or (len(kullan) == 1 and deg >= 10 and sayi_kelime(kullan[0]["w"]) not in ("on", "yüz", "bin")):
             if len(kullan) >= 2 and sayi_kelime(kullan[0]["w"]) == "bir" and sayi_kelime(kullan[1]["w"]) in BIR: kullan = []
         else: kullan = []
         if kullan:
@@ -222,9 +222,9 @@ def main():
         if p.get("alt_kelime"): q["alt_t"] = bul(p["alt_kelime"])
         if p.get("cip_kelime"): q["cip_t"] = [bul(w) for w in p["cip_kelime"]]
         if p["sahne"] == "bir_giris": q["son_kelime_t"] = kel[-1]["t0"]
-        parcalar.append(q); anl.append((t, dst)); t += d + .22
+        parcalar.append(q); anl.append((t, dst)); t += d + .22 + float(p.get("bekle", 0))
     T = round(parcalar[-1]["t1"] + 2.2, 2)
-    K = {"toplam": T, "konu": {k: konu[k] for k in ("baslik_bant", "tip", "birim", "abartma", "ogeler")}, "parcalar": parcalar}
+    K = {"toplam": T, "konu": {k: konu.get(k) for k in ("baslik_bant", "tip", "birim", "abartma", "ogeler")}, "parcalar": parcalar}
     json.dump(K, open(f"{is_}/kurgu.json", "w"), ensure_ascii=False, indent=1)
     print(f"süre {T} sn · {len(parcalar)} parça")
     # 2) anlatım izi
@@ -235,7 +235,7 @@ def main():
     sfx = np.zeros((n, 2))
     bir_aralik = []
     for i, p in enumerate(parcalar):
-        if i and p["sahne"] not in ("bir_giris",) and parcalar[i - 1]["sahne"] != "bir_giris": koy(sfx, whoosh(.8, 1 if i % 2 else -1), p["t0"] - .45, .5)
+        if i and p["sahne"] not in ("bir_giris", "q_cevap") and parcalar[i - 1]["sahne"] != "bir_giris": koy(sfx, whoosh(.8, 1 if i % 2 else -1), p["t0"] - .45, .5)
         if p["sahne"] == "kanca":
             koy(sfx, boom(), 0, .8)
             if p.get("alt_t"): koy(sfx, damga(), p["alt_t"] - .02, .75)
@@ -248,13 +248,17 @@ def main():
             bir_aralik.append((p["t0"] - .2, st))
         for ct in (p.get("cip_t") or []):
             if ct: koy(sfx, zil(1046), ct, .3)
+        if p.get("bekle"):
+            for k in range(int(p["bekle"])): koy(sfx, tik(1500 if k < int(p["bekle"]) - 1 else 2200), p["t1"] + .1 + k, .5)
+        if p["sahne"] == "q_cevap": koy(sfx, zil(1318), p["t0"] - .05, .45); koy(sfx, damga(), p["t0"] - .05, .35)
+        if p["sahne"] == "h_goster": koy(sfx, zil(988), p["t0"] + .1, .3)
         if p["sahne"] == "kapanis":
             for k in range(5): koy(sfx, tik(1500 + k * 250), p["t0"] + .15 + k * .12, .4)
             koy(sfx, zil(784), p["t0"] + 1.1, .35)
     son = parcalar[-1]["t0"]
     yog = [(0, .35), (parcalar[1]["t0"], .7), (T * .55, .85), (son, 1.0), (T, .8)]
     muz = muzik(T, bir_aralik, yog)
-    atm = atmosfer(T, konu["tip"])
+    atm = atmosfer(T, konu["tip"] if konu["tip"] in ("dag", "nehir", "gol") else "gol")
     # anlatıma göre kısma (sidechain benzeri)
     env = lp(np.abs(nar), 8); env = env / (env.max() + 1e-9)
     konus = lp(np.clip(env * 8, 0, 1), 3)                       # anlatım varken 1

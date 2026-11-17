@@ -1,0 +1,110 @@
+{
+ "kanal": "NY",
+ "seri": "Görsel Hafıza",
+ "dil": "tr",
+ "kod": "NY_HF_01_RENK",
+ "baslik_bant": "GÖRSEL HAFIZA TESTİ",
+ "tip": "quiz",
+ "abartma": 11,
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "5 SANİYE",
+   "ust": "HAFIZA TESTİ",
+   "alt": "HAFIZAN NE KADAR GÜÇLÜ?",
+   "alt_kelime": "hafızan"
+  },
+  {
+   "id": "s02",
+   "sahne": "h_goster",
+   "iller": [
+    {
+     "ad": "Sivas",
+     "renk": "#ff3b2f"
+    },
+    {
+     "ad": "Antalya",
+     "renk": "#3f8cff"
+    },
+    {
+     "ad": "Rize",
+     "renk": "#2fe05a"
+    },
+    {
+     "ad": "Edirne",
+     "renk": "#b45cff"
+    },
+    {
+     "ad": "Van",
+     "renk": "#ffd23f"
+    }
+   ],
+   "bekle": 5
+  },
+  {
+   "id": "s03",
+   "sahne": "h_sor",
+   "soru": "KIRMIZI OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Konya",
+    "Sivas",
+    "Ankara",
+    "Kayseri"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s04",
+   "sahne": "q_cevap",
+   "il": "Sivas"
+  },
+  {
+   "id": "s05",
+   "sahne": "h_sor",
+   "soru": "MAVİ OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Muğla",
+    "Antalya",
+    "Mersin",
+    "Burdur"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s06",
+   "sahne": "q_cevap",
+   "il": "Antalya"
+  },
+  {
+   "id": "s07",
+   "sahne": "h_sor",
+   "soru": "YEŞİL OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Trabzon",
+    "Rize",
+    "Artvin",
+    "Giresun"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s08",
+   "sahne": "q_cevap",
+   "il": "Rize"
+  },
+  {
+   "id": "s09",
+   "sahne": "kapanis",
+   "cta": "KAÇINI HATIRLADIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "TÜİK il yüz ölçümleri (Sivas ikinci büyük il)",
+  "ÇAYKUR – Türkiye çay üretimi Rize ağırlıklı"
+ ]
+}

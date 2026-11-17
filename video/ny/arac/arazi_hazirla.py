@@ -17,6 +17,11 @@ mk = mk.reshape(H, W).astype(np.float32)
 # kenarı yumuşat (3x3 bulanıklık)
 from scipy.ndimage import gaussian_filter
 mk = np.clip(gaussian_filter(mk, 1.2) * 255, 0, 255).astype(np.uint8)
-open(f"{M}/arazi_{W}.bin", "wb").write(np.round(E).astype(np.int16).tobytes() + mk.tobytes())
+ilid = np.zeros(len(P), np.uint8)
+for k, ad in enumerate(geo.get("il_ad", [])):
+    for h in geo["il"][ad]:
+        hp_ = Path(h); bb = hp_.get_extents(); sec = (P[:, 0] >= bb.x0) & (P[:, 0] <= bb.x1) & (P[:, 1] >= bb.y0) & (P[:, 1] <= bb.y1)
+        ii = np.where(sec)[0]; ilid[ii[hp_.contains_points(P[ii])]] = k + 1
+open(f"{M}/arazi_{W}.bin", "wb").write(np.round(E).astype(np.int16).tobytes() + mk.tobytes() + ilid.tobytes())
 json.dump({**{k: meta[k] for k in ("lon0", "lon1", "lat0", "lat1")}, "w": W, "h": H}, open(f"{M}/arazi_{W}.json", "w"))
 print("arazi", W, H, E.min(), E.max())

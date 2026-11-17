@@ -1,0 +1,45 @@
+name: Nasıl Yapıldı – Google TTS seslendirme
+# video/ny/kuyruk/<kod>.json eklenince Google TTS (gTTS, ücretsiz) ile her parçayı seslendirir.
+# Çıktı: video/ny/ses/<kod>/<parca>.mp3 ; iş dosyası video/ny/kuyruk/tamam/ altına taşınır. Bilgisayar gerekmez.
+on:
+  push:
+    branches: [main]
+    paths: ['video/ny/kuyruk/*.json', '.github/workflows/ny_gtts.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: ny-gtts, cancel-in-progress: false }
+jobs:
+  ses:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seslendir
+        run: |
+          ls video/ny/kuyruk/*.json >/dev/null 2>&1 || { echo "kuyruk boş"; exit 0; }
+          pip install -q gTTS==2.5.4
+          python3 - <<'PY'
+          import json, glob, os, time
+          from gtts import gTTS
+          for f in sorted(glob.glob("video/ny/kuyruk/*.json")):
+              d = json.load(open(f)); kod = d["kod"]; out = f"video/ny/ses/{kod}"; os.makedirs(out, exist_ok=True)
+              for p in d["parcalar"]:
+                  for deneme in range(4):
+                      try:
+                          gTTS(p["metin"], lang="tr", tld=d.get("tld", "com.tr")).save(f"{out}/{p['id']}.mp3"); break
+                      except Exception as e:
+                          print("tekrar", p["id"], e); time.sleep(5 * (deneme + 1))
+                  else:
+                      raise SystemExit(f"HATA {kod}/{p['id']}")
+              print("::notice::", kod, len(d["parcalar"]), "parça")
+          PY
+          mkdir -p video/ny/kuyruk/tamam
+          for f in video/ny/kuyruk/*.json; do git mv "$f" video/ny/kuyruk/tamam/; done
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A video/ny
+          git diff --cached --quiet && exit 0
+          git commit -qm "Nasıl Yapıldı: Google TTS sesleri $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

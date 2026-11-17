@@ -205,13 +205,20 @@ def uret(is_, parca, tmp):
     ff("-f", "concat", "-safe", "0", "-i", liste, "-af", "loudnorm=I=-16:TP=-1.5:LRA=11", "-ar", "44100", "-b:a", "128k", cikis)
     return cikis, len([a for a in adimlar if a[0] == "soz"]), yedek
 
+def kutuphane():
+    for yol in ("kutuphane/SES_KUTUPHANESI.json", os.path.join(os.path.dirname(os.path.abspath(__file__)), "kutuphane/SES_KUTUPHANESI.json")):
+        if os.path.exists(yol): return json.load(open(yol, encoding="utf-8"))
+    return {"varsayilan_motor": "gemini", "varsayilan_ses": "charon"}
+
 def main():
     os.makedirs("cikti", exist_ok=True)
+    k = kutuphane()
     isler = sorted(glob.glob("kuyruk/*.json"))
     if not isler: print("NOT: kuyruk boş"); return
     import socket; socket.setdefaulttimeout(300)
     for jf in isler:
         is_ = json.load(open(jf, encoding="utf-8"))
+        is_.setdefault("motor", k.get("varsayilan_motor", "gemini")); is_.setdefault("ses", k.get("varsayilan_ses", "charon"))
         for parca in is_["parcalar"]:
             with tempfile.TemporaryDirectory() as tmp:
                 try:

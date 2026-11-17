@@ -1,0 +1,57 @@
+{
+ "aciklama": "Ömer'in onayladığı seslendirme sesleri. Seslendirme kuyruğu (sunucu/tts_kuyruk) varsayılan motoru ve sesi buradan alır.",
+ "varsayilan_motor": "gemini",
+ "varsayilan_ses": "charon",
+ "onayli": {
+  "charon": {
+   "motor": "gemini",
+   "cinsiyet": "erkek",
+   "karakter": "tok, güven veren anlatıcı",
+   "kullanim": "belgesel, tarih, gizem anlatımı",
+   "ornek": "ornekler/GEMINI_SES__ses_charon.mp3",
+   "onay": "2026-11-17"
+  },
+  "puck": {
+   "motor": "gemini",
+   "cinsiyet": "erkek",
+   "karakter": "canlı, enerjik",
+   "kullanim": "Shorts kancası, heyecanlı/komik anlatım",
+   "ornek": "ornekler/GEMINI_SES__ses_puck.mp3",
+   "onay": "2026-11-17"
+  },
+  "kore": {
+   "motor": "gemini",
+   "cinsiyet": "kadın",
+   "karakter": "net, kararlı",
+   "kullanim": "kadın anlatıcı, diyalogda ikinci ses",
+   "ornek": "ornekler/GEMINI_SES__ses_kore.mp3",
+   "onay": "2026-11-17"
+  }
+ },
+ "denenecek": {
+  "fenrir": "erkek, heyecanlı",
+  "orus": "erkek, kararlı",
+  "leda": "kadın, genç",
+  "aoede": "kadın, ferah",
+  "zephyr": "kadın, parlak"
+ },
+ "kullanilmaz": {
+  "edge-tts (ahmet, emel ve çok dilli sesler)": "2026-11-17 Ömer beğenmedi, tekdüze buldu"
+ },
+ "tonlar": [
+  "normal",
+  "anlatici",
+  "heyecan",
+  "fisilti",
+  "gizem",
+  "gerilim",
+  "soru",
+  "vurgu",
+  "sakin",
+  "komik",
+  "hizli",
+  "yavas"
+ ],
+ "kullanim": "sunucu/tts_kuyruk/<kod>.json: {\"kod\":\"X\",\"parcalar\":[{\"ad\":\"s1\",\"metin\":\"[gizem] ... [ses:kore][soru] ... [dur 0.6]\"}]} — motor/ses yazılmazsa varsayılanlar kullanılır.",
+ "sinir": "Gemini ücretsiz kota: dakikalık ve günlük sınır var; uzun işler kendini yavaşlatır. Gemini olmazsa iş HATA verir, beğenilmeyen sese düşülmez."
+}

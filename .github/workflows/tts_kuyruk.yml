@@ -24,7 +24,7 @@ jobs:
           mkdir -p ~/.ssh /tmp/pk/kuyruk
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k
-          cp sunucu/islem_tts_kuyruk.sh sunucu/tts/uret.py /tmp/pk/; cp sunucu/tts_kuyruk/*.json /tmp/pk/kuyruk/
+          cp sunucu/islem_tts_kuyruk.sh sunucu/tts/uret.py /tmp/pk/; cp sunucu/tts_kuyruk/*.json /tmp/pk/kuyruk/; mkdir -p /tmp/pk/kutuphane; cp sunucu/tts/kutuphane/SES_KUTUPHANESI.json /tmp/pk/kutuphane/
           tar czf /tmp/paket.tgz -C /tmp/pk .
           O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
           ssh $O root@$ADRES "rm -rf /tmp/tts_k && mkdir -p /tmp/tts_k && tar xzf - -C /tmp/tts_k && cd /tmp/tts_k && bash islem_tts_kuyruk.sh < /dev/null; tar czf /tmp/tts_cikti.tgz -C /tmp/tts_k cikti" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1 || true

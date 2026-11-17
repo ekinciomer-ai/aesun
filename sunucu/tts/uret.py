@@ -73,11 +73,11 @@ def oynama(cumle, ton, oto):
 async def edge_soyle(cumle, ses, ton, oto, yol):
     import edge_tts
     h, p, v, _ = oynama(cumle, ton, oto)
-    await edge_tts.Communicate(cumle, SESLER[ses], rate=h, pitch=p, volume=v).save(yol)
+    await asyncio.wait_for(edge_tts.Communicate(cumle, SESLER[ses], rate=h, pitch=p, volume=v).save(yol), timeout=40)
 
 def gtts_soyle(cumle, yol):
     from gtts import gTTS
-    gTTS(cumle, lang="tr").save(yol)
+    gTTS(cumle, lang="tr", timeout=40).save(yol)
 
 def ff(*a):
     subprocess.run(["ffmpeg", "-loglevel", "error", "-y", *a], check=True)
@@ -107,6 +107,7 @@ def main():
     os.makedirs("cikti", exist_ok=True)
     isler = sorted(glob.glob("kuyruk/*.json"))
     if not isler: print("NOT: kuyruk boş"); return
+    import socket; socket.setdefaulttimeout(40)
     for jf in isler:
         is_ = json.load(open(jf, encoding="utf-8"))
         for parca in is_["parcalar"]:

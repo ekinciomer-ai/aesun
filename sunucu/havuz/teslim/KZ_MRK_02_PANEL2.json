@@ -1,0 +1,47 @@
+{
+ "kod": "KZ_MRK_02_PANEL2",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
+ "aciklama": "550 W'lık tipik bir güneş paneli Türkiye'de günde yaklaşık 2 kWh üretir. 5.000 mAh'lik bir telefonun bir tam dolumu kayıplarla ~23 Wh. Sonuç: tek panel her gün ~85 telefon! 1 MW'lık bir santral ise ~150.000 telefon.\n\nSenin tahminin kaç çıkmıştı? Yorumlara yaz 👇\n\nHesaplar ortalama değerlerle yapılmıştır; gerçek üretim konuma, eğime ve mevsime göre değişir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Enerji ve Tabii Kaynaklar Bakanlığı – GEPA (Türkiye ort. 4,18 kWh/m²·gün), tipik 550 W monokristal modül veri sayfaları (~%21 verim, 2,28 × 1,13 m), Li-ion telefon pili 5.000 mAh × 3,85 V.\n\n#kozmoslab #güneşenerjisi #ges #bilim #shorts",
+ "etiketler": [
+  "güneş paneli",
+  "güneş enerjisi",
+  "ges",
+  "telefon şarjı",
+  "enerji",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "T.C. Enerji ve Tabii Kaynaklar Bakanlığı – Güneş Enerjisi Potansiyel Atlası (GEPA): Türkiye yıllık ort. 1.527 kWh/m² (günlük ~4,18 kWh/m²), 2.741 saat güneşlenme",
+  "Tipik 550 W monokristal PERC/TOPCon modül veri sayfaları: ~%21,3 verim, ~2.278 × 1.134 mm (~2,58 m²)",
+  "Sistem kayıpları (kablo, sıcaklık, inverter): performans oranı ~%80-85 (IEC 61724 kavramı, sektör ortalaması)",
+  "Telefon pili: 5.000 mAh × 3,85 V nominal = 19,25 Wh; şarj verimi ~%80-85",
+  "1 MWp / 550 Wp ≈ 1.818 panel",
+  "Çamaşır makinesi: 40 °C pamuklu program ~0,8–1 kWh/yıkama (AB enerji etiketi verileri)",
+  "Su ısıtıcısı (kettle) ~2.000 W: 19 Wh ≈ 34 saniye",
+  "1 MWp sabit eğimli GES arazi ihtiyacı ~1,5–2 hektar; futbol sahası ~0,7 hektar"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_02_PANEL2.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_02_PANEL2.mp4"
+}

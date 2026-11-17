@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Kozmos Lab · Merak Shorts üretim hattı (sunucu / GitHub Actions; bilgisayar gerekmez).
-Adımlar: ses (Google TTS) → kurgu (zaman çizelgesi) → görüntü (3D kare kare) → ses tasarımı (kodla) → karıştırma → mp4
+Adımlar: ses (sunucuda Gemini, onaylı ses kütüphanesi) → kurgu (zaman çizelgesi) → görüntü (3D kare kare) → ses tasarımı (kodla) → karıştırma → mp4
 
 Kullanım:
   python3 uret.py <senaryo.json> [--is is_klasoru] [--sahte-ses] [--adim ses,kurgu,goruntu,sfx,birlestir]
@@ -11,7 +11,7 @@ import numpy as np
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SR = 48000
-TEMPO = 1.2          # gTTS biraz yavaş; doğal hıza çek
+TEMPO = 1.04          # gTTS biraz yavaş; doğal hıza çek
 ARA = 0.22            # parçalar arası nefes
 ILK = 0.45            # video başında sessizlik
 
@@ -47,16 +47,8 @@ def ses(S, IS, sahte=False):
         if sahte:  # yerel deneme: tahmini süreli sessizlik
             d = max(1.5, len(p["metin"]) / 15.5)
             wav_yaz(wv, np.zeros(int(d * SR))); continue
-        if not os.path.exists(mp3):
-            from gtts import gTTS
-            import time
-            for dn in range(5):
-                try:
-                    gTTS(p["metin"], lang="tr", tld="com.tr").save(mp3); break
-                except Exception as e:
-                    print("tekrar", p["id"], e); time.sleep(5 * (dn + 1))
-            else:
-                raise SystemExit(f"HATA TTS {p['id']}")
+        if not os.path.exists(mp3):  # ses sunucudaki Gemini kuyruğundan gelir; gTTS/edge-tts kullanılmaz (Ömer 17.11.2026)
+            raise SystemExit(f"HATA ses yok: {mp3} (sunucu seslendirmesi başarısız)")
         # baş/son sessizliği kırp, hızlandır, hafif ses rengi (sıcaklık + parlaklık), 48 kHz
         sh("ffmpeg", "-v", "error", "-y", "-i", mp3, "-af",
            "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05:stop_periods=-1:stop_threshold=-45dB:stop_duration=0.3:stop_silence=0.16,areverse,"

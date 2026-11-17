@@ -1,5 +1,5 @@
 name: Kozmos Lab · Merak Shorts üretimi
-# video/merak/kuyruk/<KOD>.json eklenince: Google TTS → 3D kare kare render → kodla ses tasarımı → mp4
+# video/merak/kuyruk/<KOD>.json eklenince: sunucuda Gemini seslendirme (onaylı ses kütüphanesi) → 3D kare kare render → kodla ses tasarımı → mp4
 # → sunucuya (/opt/aesun/video_bekleyen) + önizleme dalı → Yükleme Yöneticisi havuzuna teslim (onay bekler, kendiliğinden yayınlanmaz).
 on:
   push:
@@ -33,8 +33,25 @@ jobs:
       - name: Araçlar
         run: |
           sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg fonts-noto-color-emoji >/dev/null
-          pip install -q gTTS==2.5.4 scipy numpy pillow
+          pip install -q scipy numpy pillow
           cd video/merak && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm i -s --no-save playwright@1.49.1 >/dev/null
+      - name: Sunucuda gerçekçi seslendirme (Gemini, onaylı ses kütüphanesi)
+        env: { ANAHTAR: "${{ secrets.SUNUCU_SSH }}", ADRES: "${{ secrets.SUNUCU_ADRES }}", KOD: "${{ matrix.kod }}" }
+        run: |
+          mkdir -p ~/.ssh /tmp/pk/kuyruk /tmp/pk/kutuphane /tmp/is/$KOD/ses
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          python3 video/merak/arac/ses_isi.py video/merak/kuyruk/$KOD.json /tmp/pk/kuyruk/$KOD.json
+          cp sunucu/islem_tts_kuyruk.sh sunucu/tts/uret.py /tmp/pk/; cp sunucu/tts/kutuphane/SES_KUTUPHANESI.json /tmp/pk/kutuphane/
+          tar czf /tmp/paket.tgz -C /tmp/pk .
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          D=/tmp/tts_merak_$KOD
+          ssh $O root@$ADRES "rm -rf $D && mkdir -p $D && tar xzf - -C $D && cd $D && bash islem_tts_kuyruk.sh < /dev/null; tar czf $D.tgz -C $D cikti" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1 || true
+          grep '^NOT:' /tmp/cikti.txt | while IFS= read -r l; do echo "::notice::$l"; done
+          scp $O root@$ADRES:$D.tgz /tmp/ses.tgz && mkdir -p /tmp/sc && tar xzf /tmp/ses.tgz -C /tmp/sc
+          ssh $O root@$ADRES "rm -rf $D $D.tgz" || true; rm -f ~/.ssh/k
+          for f in /tmp/sc/cikti/${KOD}__*.mp3; do b=$(basename "$f" .mp3); cp "$f" /tmp/is/$KOD/ses/${b#${KOD}__}.mp3; done
+          ls -la /tmp/is/$KOD/ses/
       - name: Üret (ses → kurgu → görüntü → ses tasarımı → birleştir)
         env: { CHROME_YOL: /usr/bin/google-chrome }
         run: |

@@ -12,7 +12,7 @@ kart = {
     "kaynaklar": S["kaynaklar"],
     "lisans": {"muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
                "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
-               "ses": "Google TTS (gTTS, Türkçe), yapay zekâ sesi"},
+               "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"},
     "kaynak_dosya": f"/opt/aesun/video_bekleyen/{kod}.mp4",
     "kaynak_url": f"https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/{kod}.mp4",
 }

@@ -37,6 +37,7 @@ TONLAR = {
     "komik":    (12, 20, 5, 0.30),
     "hizli":    (25, 3, 0, 0.18),
     "yavas":    (-20, -3, 0, 0.45),
+    "canli":    (8, 4, 5, 0.18),   # Shorts bilim anlatıcısı: tek istekte cümleden cümleye ton değişir (kota dostu)
 }
 def google_soyle(cumle, ses, ton, oto, yol):
     k = os.environ.get("GOOGLE_TTS_KEY")
@@ -56,7 +57,8 @@ GYON = {"normal": "Say naturally and engagingly", "anlatici": "Narrate like a ca
         "heyecan": "Say very excitedly and energetically", "fisilti": "Whisper secretively",
         "gizem": "Say mysteriously, slowly and in a low voice", "gerilim": "Say tensely, full of suspense",
         "soru": "Ask curiously, as if asking the listener", "vurgu": "Say firmly with strong emphasis",
-        "sakin": "Say calmly and warmly", "komik": "Say playfully, with a smile", "hizli": "Say quickly", "yavas": "Say slowly"}
+        "sakin": "Say calmly and warmly", "komik": "Say playfully, with a smile", "hizli": "Say quickly", "yavas": "Say slowly",
+        "canli": "Read like an energetic, fast-paced science Shorts narrator. Keep a brisk pace with short pauses. Change your tone sentence by sentence: curious and intriguing on questions, punchy emphasis on numbers, playful on everyday comparisons, warm and inviting at the end"}
 _GMODELLER = []
 _BITEN_MODELLER = set()
 

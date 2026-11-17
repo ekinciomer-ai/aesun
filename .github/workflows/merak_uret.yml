@@ -53,8 +53,10 @@ jobs:
           grep '^NOT:' /tmp/cikti.txt | while IFS= read -r l; do echo "::notice::$l"; done
           scp $O root@$ADRES:$D.tgz /tmp/ses.tgz && mkdir -p /tmp/sc && tar xzf /tmp/ses.tgz -C /tmp/sc
           ssh $O root@$ADRES "rm -rf $D $D.tgz" || true; rm -f ~/.ssh/k
-          ls /tmp/sc/cikti/${KOD}__*.mp3 >/dev/null 2>&1 || { echo "::error::ses alınamadı (ses kotası dolmuş olabilir); senaryo kuyrukta kalır, sonraki denemede yeniden"; exit 1; }
-          for f in /tmp/sc/cikti/${KOD}__*.mp3; do b=$(basename "$f" .mp3); cp "$f" /tmp/is/$KOD/ses/${b#${KOD}__}.mp3; done
+          test -s /tmp/sc/cikti/${KOD}__tam.mp3 || { echo "::error::ses alınamadı (ses kotası dolmuş olabilir); senaryo kuyrukta kalır, sonraki denemede yeniden"; exit 1; }
+          pip install -q faster-whisper "av==13.1.0"
+          python3 video/ny/arac/hizala.py /tmp/sc/cikti/${KOD}__tam.mp3 video/merak/kuyruk/$KOD.json /tmp/parca
+          for f in /tmp/parca/*.wav; do ffmpeg -v error -y -i "$f" -b:a 192k /tmp/is/$KOD/ses/$(basename "$f" .wav).mp3; done
           ls -la /tmp/is/$KOD/ses/
       - name: Üret (ses → kurgu → görüntü → ses tasarımı → birleştir)
         env: { CHROME_YOL: /usr/bin/google-chrome }

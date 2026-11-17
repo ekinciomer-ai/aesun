@@ -203,7 +203,7 @@ def main():
     # 1) ses parçaları
     t, parcalar, anl = .35, [], []
     for i, p in enumerate(konu["parcalar"]):
-        src = f"{KOK}/ses/{kod}/{p['id']}.mp3"; dst = f"{is_}/{p['id']}.wav"
+        src = f"{KOK}/ses/{kod}/{p['id']}.mp3"; src = src if os.path.exists(src) else src[:-4] + ".wav"; dst = f"{is_}/{p['id']}.wav"
         sh("ffmpeg", "-v", "error", "-y", "-i", src, "-af",
            f"silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.02,areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse,atempo={TEMPO},highpass=f=80,equalizer=f=3200:t=q:w=1.2:g=3,acompressor=threshold=-18dB:ratio=3:attack=5:release=80",
            "-ar", str(SR), "-ac", "1", dst)

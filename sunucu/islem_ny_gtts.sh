@@ -55,6 +55,7 @@ def soyle(metin, ses):
 for jf in sorted(glob.glob("kuyruk/*.json")):
     j = json.load(open(jf, encoding="utf-8")); kod = j["kod"]; os.makedirs(f"cikti/{kod}", exist_ok=True)
     if os.path.exists(f"cikti/{kod}/meta.json"): continue
+    if os.path.exists(f"cikti/{kod}/meta.json"): continue
     adaylar = ([j["ses"]] if j.get("ses") else []) + SESLER; kullanilan = None
     for p in j["parcalar"]:
         for s in ([kullanilan] if kullanilan else adaylar):

@@ -1,0 +1,39 @@
+{
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Bu Matematik Hayatında Nerede?",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji meraklıları, öğrenciler",
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy), telif yok",
+  "gorsel": "kodla çizilmiş özgün animasyon (HTML canvas), dış görsel yok, marka logosu yok",
+  "ses": "ElevenLabs klon ses — Ömer Ekinci'nin kendi sesi (benim2), abonelik, ticari kullanım"
+ },
+ "ureten": "Claude",
+ "kod": "KZ_MAT_11_JPEG",
+ "konu": "JPEG: 8×8 DCT ve nicemleme",
+ "amac": "Serinin 11. bölümü (MP3'ün görüntü kardeşi): renk alt örnekleme, 8×8 DCT, nicemleme. Ölçüt: izlenme süresi + yorum.",
+ "baslik": "Fotoğraf neden 10 kat küçülür? JPEG'in 8×8 sırrı 📸",
+ "aciklama": "Telefonunla çektiğin bir fotoğraf ham hâliyle yaklaşık on kat daha büyük olurdu. Onu küçülten şey: 1992'de onaylanan JPEG.\n\n1) Fotoğraf parlaklık ve renk diye ikiye ayrılır; gözümüz rengi parlaklık kadar keskin görmez, bu yüzden renk bilgisinin dörtte üçü ilk adımda atılır.\n2) Resim 8×8 piksellik karelere bölünür; her kare 64 hazır desenin karışımı olarak yazılır (ayrık kosinüs dönüşümü).\n3) Gözün zor fark ettiği ince desenler yuvarlanır ve çoğu sıfır olur; 64 sayı birkaç anlamlı sayıya ve uzun bir sıfır dizisine iner.\n4) Sonuç: veri yaklaşık on kat küçülür, fotoğraf neredeyse aynı görünür. Kaliteyi çok düşürürsen 8×8 kareleri görürsün.\n\nBu desen fikri Nasir Ahmed'e ait: 1972'de araştırma desteği istediğinde 'fazla basit' bulunup reddedildi; makaleyi 1974'te yayımladı.\n\nBu Matematik Hayatında Nerede? · Bölüm 11\nSıradaki bölümü sen seç: yorumlara yaz!\n\n📚 Kaynak\n• ITU-T T.81 (JPEG, 1992)\n• Ahmed, Natarajan, Rao — Discrete Cosine Transform, IEEE Trans. Computers (1974)\n\n🎨 Animasyon ve resim kodla üretilmiştir; JPEG hesabı videoda gerçekten yapılmıştır. Seslendirme yapay zekâ ile üretilmiş klon sestir (kanal sahibinin kendi sesi). Müzik özgün olarak üretilmiştir.\n\n#jpeg #fotoğraf #matematik #bilim #kozmoslab",
+ "etiketler": [
+  "jpeg",
+  "fotoğraf sıkıştırma",
+  "dct",
+  "nasir ahmed",
+  "matematik",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "ITU-T T.81 (1992)",
+  "Ahmed, Natarajan, Rao (1974)"
+ ],
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MAT_11_JPEG_kaynak.mp4"
+}

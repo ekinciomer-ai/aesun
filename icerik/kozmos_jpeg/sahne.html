@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>JPEG — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 7.37], "B": [7.37, 15.74], "C": [15.74, 18.67], "D": [18.67, 23.45], "E": [23.45, 33.5], "F": [33.5, 37.17], "G": [37.17, 49.87], "H": [49.87, 53.26], "I": [53.26, 56.61], "J": [56.61, 60.24]};window.SUB=[[0.3, 4.0, "Telefonunla çektiğin bir fotoğraf, ham hâliyle on kat daha büyük olurdu."], [4.0, 7.37, "Onu küçülten şey, 1992'de onaylanan JPEG."], [7.37, 12.15, "Önce fotoğrafı parlaklık ve renk diye ikiye ayırır; gözümüz rengi parlaklık kadar keskin görmez."], [12.15, 15.74, "Bu yüzden renk bilgisinin dörtte üçü daha ilk adımda atılır; çoğumuz farkı göremez."], [15.74, 18.67, "Sonra resim 8'e 8 piksellik küçük karelere bölünür."], [18.67, 23.45, "Her kare, 64 hazır desenin karışımı olarak yazılır: düz bir renkten ince çizgilere kadar."], [23.45, 27.19, "İnce desenler, yani gözün zor fark ettiği ayrıntılar yuvarlanır ve çoğu sıfır olur."], [27.19, 33.5, "64 sayı, birkaç anlamlı sayıya ve uzun bir sıfır dizisine iner; sıfırları paketlemek çok kolaydır."], [33.5, 37.17, "Sonuç: veri yaklaşık on kat küçülür, fotoğraf neredeyse aynı görünür."], [37.17, 44.04, "Bu desen fikri Nasir Ahmed'e ait; 1972'de araştırma desteği istediğinde fikir fazla basit bulunup reddedildi."], [44.04, 49.87, "Ahmed vazgeçmedi, makaleyi 1974'te yayımladı; bugün neredeyse her fotoğraf bu hesapla saklanıyor."], [49.87, 53.26, "Kaliteyi çok düşürürsen, o 8'e 8 kareleri fotoğrafta sen de görürsün."], [53.26, 56.61, "Yani her fotoğraf, gözünün göremediği ayrıntılar silinerek küçülüyor."], [56.61, 58.39, "Sıradaki bölümü yorumlarda sen seç."], [58.39, 59.74, "Takip et."]];window.DUR=60.24;</script>
+<script>
+let TM=window.TM||{A:[0,6],B:[6,12],C:[12,18],D:[18,34],E:[34,42],F:[42,46],G:[46,50]},SUB=window.SUB||[],DUR=window.DUR||46;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+const OR='#ff9a5a',BL='#40c4ff',GR='#5dffb0',RD='#e8364f',YL='#ffcf5a';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+
+const st=i=>SUB[i]?SUB[i][0]:0;const since=(t,i,d)=>ease((t-st(i))/(d||1));
+const N=256;const SRC=document.createElement('canvas');SRC.width=SRC.height=N;(function(){const c=SRC.getContext('2d');const sk=c.createLinearGradient(0,0,0,N);sk.addColorStop(0,'#1e3a8a');sk.addColorStop(.55,'#f97316');sk.addColorStop(.75,'#fde68a');c.fillStyle=sk;c.fillRect(0,0,N,N);
+ c.fillStyle='#fff7d6';c.beginPath();c.arc(170,150,30,0,TAU);c.fill();c.fillStyle='#3b2a52';c.beginPath();c.moveTo(0,200);c.lineTo(60,140);c.lineTo(110,185);c.lineTo(160,130);c.lineTo(220,190);c.lineTo(256,160);c.lineTo(256,256);c.lineTo(0,256);c.fill();
+ c.fillStyle='#1a1430';c.fillRect(0,215,N,41);for(let i=0;i<40;i++){c.fillStyle=`rgba(255,240,200,${R(i)*.8})`;c.fillRect(R(i+3)*N,R(i+7)*120,2,2)}c.strokeStyle='#0b0a14';c.lineWidth=3;c.beginPath();c.moveTo(40,256);c.lineTo(40,175);c.stroke();for(let k=0;k<5;k++){c.beginPath();c.moveTo(40,180+k*6);c.lineTo(40+(k%2?-14:14),172+k*6);c.stroke()}})();
+const SD=SRC.getContext('2d').getImageData(0,0,N,N).data;const Yc=new Float32Array(N*N),Cb=new Float32Array(N*N),Cr=new Float32Array(N*N);
+for(let i=0;i<N*N;i++){const r=SD[i*4],g2=SD[i*4+1],b=SD[i*4+2];Yc[i]=.299*r+.587*g2+.114*b;Cb[i]=128-.1687*r-.3313*g2+.5*b;Cr[i]=128+.5*r-.4187*g2-.0813*b}
+const QL=[16,11,10,16,24,40,51,61,12,12,14,19,26,58,60,55,14,13,16,24,40,57,69,56,14,17,22,29,51,87,80,62,18,22,37,56,68,109,103,77,24,35,55,64,81,104,113,92,49,64,78,87,103,121,120,101,72,92,95,98,112,100,103,99];
+const CS=[];for(let u=0;u<8;u++){CS[u]=[];for(let x=0;x<8;x++)CS[u][x]=Math.cos((2*x+1)*u*Math.PI/16)*(u?Math.sqrt(2/8):Math.sqrt(1/8))}
+function dct(b){const o=new Float32Array(64);for(let u=0;u<8;u++)for(let v=0;v<8;v++){let s=0;for(let x=0;x<8;x++)for(let y=0;y<8;y++)s+=b[y*8+x]*CS[u][x]*CS[v][y];o[v*8+u]=s}return o}
+function idct(c){const o=new Float32Array(64);for(let x=0;x<8;x++)for(let y=0;y<8;y++){let s=0;for(let u=0;u<8;u++)for(let v=0;v<8;v++)s+=c[v*8+u]*CS[u][x]*CS[v][y];o[y*8+x]=s}return o}
+function comp(ch,sc,sub){const out=new Float32Array(N*N);const st=sub?16:8;let zeros=0,tot=0;
+ for(let by=0;by<N;by+=st)for(let bx=0;bx<N;bx+=st){const b=new Float32Array(64);for(let y=0;y<8;y++)for(let x=0;x<8;x++){const sx=bx+x*(st/8),sy=by+y*(st/8);let a=0,n=0;for(let dy=0;dy<st/8;dy++)for(let dx=0;dx<st/8;dx++){a+=ch[(sy+dy)*N+sx+dx];n++}b[y*8+x]=a/n-128}
+  const c=dct(b);for(let i=0;i<64;i++){const q=Math.max(1,QL[i]*sc);c[i]=Math.round(c[i]/q)*q;tot++;if(c[i]==0)zeros++}const r=idct(c);
+  for(let y=0;y<st;y++)for(let x=0;x<st;x++)out[(by+y)*N+bx+x]=r[Math.floor(y/(st/8))*8+Math.floor(x/(st/8))]+128}return{out,z:zeros/tot}}
+function toCanvas(Y,B,Rr){const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),im=x.createImageData(N,N);for(let i=0;i<N*N;i++){const y=Y[i],cb=B[i]-128,cr=Rr[i]-128;im.data[i*4]=y+1.402*cr;im.data[i*4+1]=y-.344136*cb-.714136*cr;im.data[i*4+2]=y+1.772*cb;im.data[i*4+3]=255}x.putImageData(im,0,0);return c}
+let BX=0,BY=0;{let best=-1;for(let by=0;by<N;by+=8)for(let bx=0;bx<N;bx+=8){let m=0,v=0;for(let y=0;y<8;y++)for(let x=0;x<8;x++)m+=Yc[(by+y)*N+bx+x];m/=64;for(let y=0;y<8;y++)for(let x=0;x<8;x++)v+=(Yc[(by+y)*N+bx+x]-m)**2;if(v>best&&v<64*900){best=v;BX=bx;BY=by}}}
+const LV={};function lv(sc){if(!LV[sc]){const y=comp(Yc,sc,false),b=comp(Cb,sc*1.5,true),r=comp(Cr,sc*1.5,true);LV[sc]={c:toCanvas(y.out,b.out,r.out),z:y.z}}return LV[sc]}
+const GRAY=toCanvas(Yc,new Float32Array(N*N).fill(128),new Float32Array(N*N).fill(128));const COL=(()=>{const y=new Float32Array(N*N).fill(140);const b=comp(Cb,.01,true).out,r=comp(Cr,.01,true).out;return toCanvas(y,b,r)})();
+function photo(c,x,y,s){g.imageSmoothingEnabled=false;g.drawImage(c,x,y,N*s,N*s);g.imageSmoothingEnabled=true}
+function bar(x,y,w,f,c,l){g.fillStyle='rgba(143,166,216,.2)';g.fillRect(x,y,w,40);g.fillStyle=c;g.fillRect(x,y,w*f,40);T(l,x+w+20,y+20,32,'#fff',800,'left')}
+function sceneA(t){T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 11 · JPEG',W/2,440,RD,46);photo(SRC,W/2-384,540,3);
+ const k=t>st(1)?since(t,1,1.2):0;bar(140,1360,560,1,'#8fa6d8','ham: 100%');bar(140,1430,560,1-.9*k,GR,k>.5?'JPEG: ~10%':'')}
+function sceneB(t){const c=t>st(3);T(c?'Rengin ¾\'ü atılır':'Parlaklık + renk',W/2,250,56,'#fff',800);T(c?'göz farkı zor görür':'göz rengi daha bulanık görür',W/2,330,38,YL,700);
+ photo(GRAY,100,560,1.6);T('parlaklık',305,1000,34,'#fff',700);photo(c?COL:toCanvas(new Float32Array(N*N).fill(140),Cb,Cr),570,560,1.6);T(c?'renk (¼ çözünürlük)':'renk',775,1000,34,'#fff',700);
+ if(c){photo(lv(.05).c,W/2-205,1060,1.6);T('birleşince: neredeyse aynı',W/2,1500,34,GR,700)}}
+function sceneC(t){T('8 × 8 kareler',W/2,250,56,'#fff',800);T('resim küçük bloklara bölünür',W/2,330,38,YL,700);photo(SRC,W/2-384,540,3);const k=since(t,4,1.2);g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1;
+ for(let i=0;i<=32*k;i++){g.beginPath();g.moveTo(W/2-384+i*24,540);g.lineTo(W/2-384+i*24,540+768);g.stroke();g.beginPath();g.moveTo(W/2-384,540+i*24);g.lineTo(W/2+384,540+i*24);g.stroke()}g.strokeStyle=YL;g.lineWidth=5;g.strokeRect(W/2-384+BX*3,540+BY*3,24,24)}
+function basis(x0,y0,s,u,v){for(let y=0;y<8;y++)for(let x=0;x<8;x++){const c=CS[u][x]*CS[v][y]*(u?1:Math.sqrt(2))*(v?1:Math.sqrt(2))*2;const l=128+c*127;g.fillStyle=`rgb(${l},${l},${l})`;g.fillRect(x0+x*s,y0+y*s,s,s)}}
+function sceneD(t){T('64 hazır desen',W/2,250,56,'#fff',800);T('her kare bunların karışımı',W/2,330,38,YL,700);const k=since(t,5,2);const n=Math.floor(64*k);
+ for(let i=0;i<n;i++){const u=i%8,v=Math.floor(i/8);basis(140+u*102,560+v*102,11,u,v)}T('düz ↖',140,1400,30,'#c9d4f2',600,'left');T('ince çizgiler ↘',940,1400,30,'#c9d4f2',600,'right')}
+function sceneE(t){const q=t>st(6)+.8;T(q?'İnce ayrıntı → 0':'64 sayı',W/2,250,56,'#fff',800);T(t>st(7)?'birkaç sayı + uzun sıfır dizisi':'yuvarla',W/2,330,38,YL,700);
+ const b=new Float32Array(64);for(let y=0;y<8;y++)for(let x=0;x<8;x++)b[y*8+x]=Yc[(BY+y)*N+BX+x]-128;const c=dct(b);
+ for(let i=0;i<64;i++){const u=i%8,v=Math.floor(i/8);let val=Math.round(c[i]);if(q)val=Math.round(c[i]/QL[i]);const x=160+u*100,y=560+v*90;g.fillStyle=val==0?'rgba(143,166,216,.12)':'rgba(255,207,90,.25)';g.fillRect(x-45,y-38,90,76);T(String(val),x,y,30,val==0?'#5b6a99':'#fff',800)}
+ if(t>st(7)){g.strokeStyle=GR;g.lineWidth=4;g.beginPath();const zz=[[0,0],[1,0],[0,1],[0,2],[1,1],[2,0],[3,0],[2,1],[1,2],[0,3]];zz.forEach(([u,v],i)=>{const x=160+u*100,y=560+v*90;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();T('… 0 0 0 0 0 0',W/2,1340,44,GR,800)}}
+function sceneF(t){T('~10 kat küçük',W/2,250,56,'#fff',800);T('neredeyse aynı görünür',W/2,330,38,YL,700);photo(SRC,90,560,1.7);photo(lv(1).c,555,560,1.7);T('orijinal',308,1030,34,'#fff',700);T('JPEG',773,1030,34,GR,800);bar(140,1150,560,1,'#8fa6d8','100%');bar(140,1220,560,.1,GR,'~10%')}
+function sceneG(t){const p=t>st(10);T(p?'1974 · makale yayımlandı':'1972 · Nasir Ahmed',W/2,250,54,'#fff',800);T(p?'bugün neredeyse her fotoğrafta':'araştırma desteği istedi',W/2,330,38,YL,700);
+ g.fillStyle='#f4f1ea';g.beginPath();g.roundRect(220,560,640,780,16);g.fill();for(let i=0;i<14;i++){g.fillStyle='#cbd5e1';g.fillRect(270,640+i*44,540*(0.6+.4*R(i)),14)}T(p?'IEEE Transactions':'Destek başvurusu',W/2,600,30,'#334155',800);
+ if(!p&&t>st(9)+1.5){g.save();g.translate(W/2,1000);g.rotate(-.25);g.strokeStyle=RD;g.lineWidth=10;g.strokeRect(-230,-70,460,140);T('RED',0,-15,70,RD,900);T('"fazla basit"',0,45,34,RD,800);g.restore()}
+ if(p){basis(W/2-120,1100,30,1,0)}}
+function sceneH(t){const k=since(t,11,2);const sc=k<.33?1:k<.66?4:12;T('Kaliteyi düşür →',W/2,250,56,'#fff',800);T('8×8 kareler görünür',W/2,330,38,RD,700);photo(lv(sc).c,W/2-384,540,3);bar(140,1360,560,1-k*.9,k>.5?RD:YL,'kalite')}
+function sceneI(t){T('Fotoğraf =',W/2,250,56,'#fff',800);T('görmediğin ayrıntı silinir',W/2,330,40,YL,700);photo(lv(1).c,W/2-384,540,3)}
+function sceneJ(t){T('Sıradaki bölümü',W/2,560,66,'#fff',800);T('SEN SEÇ',W/2,680,96,YL,900);T('yorumlara yaz 👇',W/2,900,56,GR,800);pill('Takip et',W/2,1560,RD,58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=Math.min(1745,1790-(lines.length-1)*60);lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);const S=[['A',sceneA],['B',sceneB],['C',sceneC],['D',sceneD],['E',sceneE],['F',sceneF],['G',sceneG],['H',sceneH],['I',sceneI],['J',sceneJ]];let f=sceneA;for(const[k,fn]of S)if(t>=TM[k][0])f=fn;f(t);
+ if(t<TM.J[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

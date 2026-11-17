@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>Kripto — Bu Matematik Hayatında Nerede? · Kozmos Lab</title>
+<style>html,body{margin:0;background:#000;height:100%;display:flex;align-items:center;justify-content:center}canvas{height:100vh;max-width:100vw;aspect-ratio:9/16}</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>window.TM={"A": [0, 7.66], "B": [7.66, 12.06], "C": [12.06, 21.98], "D": [21.98, 26.04], "E": [26.04, 33.48], "F": [33.48, 51.32], "G": [51.32, 58.22], "H": [58.22, 65.12]};window.SUB=[[0.3, 3.96, "Bankanın sitesine giriyorsun; adres çubuğunda küçük bir kilit beliriyor."], [3.96, 7.66, "O kilidin arkasında ilkokulda öğrendiğin bir şey var: asal sayılar."], [7.66, 12.06, "İki asal sayıyı çarpmak kolaydır: 61 çarpı 53, 3233."], [12.06, 17.52, "Ama sana sadece 3233'ü verip hangi iki asaldan çıktığını sorsam, tek tek denemek zorundasın."], [17.52, 21.98, "Sayılar yüzlerce basamak olunca bu deneme, en güçlü bilgisayarlara bile yıllar sürer."], [21.98, 26.04, "Şifrelemenin sırrı bu: bir yönü kolay, geri dönüşü neredeyse imkânsız bir işlem."], [26.04, 30.56, "Herkese açık bir asma kilit dağıtırsın; çarpımı herkes bilir, kilitlemek serbesttir."], [30.56, 33.48, "Ama kilidi açan anahtar, o iki asalı bilen kişidedir."], [33.48, 37.8, "Bu yöntemi 1977'de Rivest, Shamir ve Adleman buldu; baş harflerinden adı RSA."], [37.8, 47.52, "2020'de 250 basamaklı bir sayıyı bölmek, tek bir işlemciyle 2700 yıl sürecek kadar hesap gerektirdi."], [47.52, 51.32, "Bugün yaygın kullanılan anahtarlar ise 617 basamaklı."], [51.32, 58.22, "Kuantum bilgisayarlar bir gün bu kilidi zorlayabilir; bu yüzden matematikçiler şimdiden yeni kilitler tasarlıyor."], [58.22, 61.22, "Yani o küçük kilit, iki asal sayının sırrını saklıyor."], [61.22, 63.34, "Sıradaki bölümü yorumlarda sen seç."], [63.34, 64.62, "Takip et."]];window.DUR=65.12;</script>
+<script>
+let TM=window.TM||{A:[0,6],B:[6,12],C:[12,18],D:[18,34],E:[34,42],F:[42,46],G:[46,50]},SUB=window.SUB||[],DUR=window.DUR||46;
+const W=1080,H=1920,TAU=Math.PI*2,cv=document.getElementById('c'),g=cv.getContext('2d');
+const ease=x=>x<0?0:x>1?1:x*x*(3-2*x),R=i=>{const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v)};
+const F='Inter, "DejaVu Sans", sans-serif';
+const OR='#ff9a5a',BL='#40c4ff',GR='#5dffb0',RD='#e8364f',YL='#ffcf5a';
+function T(s,x,y,sz,c,w,al){g.font=(w||700)+' '+sz+'px '+F;g.fillStyle=c;g.textAlign=al||'center';g.textBaseline='middle';g.fillText(s,x,y)}
+function pill(s,x,y,c,sz){g.font='800 '+sz+'px '+F;const w=g.measureText(s).width+sz*1.3;g.fillStyle=c;g.beginPath();g.roundRect(x-w/2,y-sz*.9,w,sz*1.8,sz*.9);g.fill();T(s,x,y+2,sz,'#fff',800)}
+function bg(t){g.fillStyle='#070c20';g.fillRect(0,0,W,H);for(let i=0;i<150;i++){g.fillStyle='rgba(200,220,255,'+(.15+.3*Math.abs(Math.sin(t*.7+i)))+')';const s=R(i+900)*2+.6;g.fillRect(R(i)*W,R(i+500)*H,s,s)}
+ g.strokeStyle='rgba(120,160,255,.05)';g.lineWidth=1;for(let x=0;x<=W;x+=60){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}for(let y=0;y<=H;y+=60){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}}
+const loc=(t,k)=>(t-TM[k][0])/(TM[k][1]-TM[k][0]);
+
+const st=i=>SUB[i]?SUB[i][0]:0;const since=(t,i,d)=>ease((t-st(i))/(d||1));
+function lock(x,y,s,open,col){g.save();g.translate(x,y);g.scale(s,s);g.strokeStyle=col||YL;g.lineWidth=16;g.beginPath();g.arc(0,open?-40:0,70,Math.PI,0);g.lineTo(70,open?-40:0);g.stroke();g.fillStyle=col||YL;g.beginPath();g.roundRect(-100,0,200,160,24);g.fill();g.fillStyle='#070c20';g.beginPath();g.arc(0,60,20,0,TAU);g.fill();g.fillRect(-7,60,14,50);g.restore()}
+function key(x,y,s,col){g.save();g.translate(x,y);g.scale(s,s);g.strokeStyle=col||GR;g.lineWidth=14;g.beginPath();g.arc(-60,0,40,0,TAU);g.stroke();g.beginPath();g.moveTo(-20,0);g.lineTo(110,0);g.moveTo(80,0);g.lineTo(80,35);g.moveTo(110,0);g.lineTo(110,30);g.stroke();g.restore()}
+function digits(n,seed){let s='';for(let i=0;i<n;i++)s+=Math.floor(R(seed+i*1.7)*10);return s}
+function sceneA(t){T('Bu matematik',W/2,250,64,'#8fa6d8',600);T('hayatında nerede?',W/2,330,64,'#8fa6d8',600);pill('BÖLÜM 10 · KRİPTO',W/2,440,RD,46);
+ g.fillStyle='#121a3a';g.beginPath();g.roundRect(90,600,900,110,55);g.fill();lock(170,640,.28,false,GR);T('https://banka.ornek',230,655,40,'#c9d4f2',600,'left');
+ if(t>.8)lock(W/2,1000,1.2*ease((t-.8)*2),false);
+ if(t>st(1)){['2','3','5','7','11','13','17','19','23','29','31','37'].forEach((p,i)=>{const a=i/12*TAU+t*.4;g.globalAlpha=since(t,1,.8);T(p,W/2+330*Math.cos(a),1110+260*Math.sin(a),44,BL,800);g.globalAlpha=1})}}
+function sceneB(t){T('Çarpmak: kolay',W/2,250,56,'#fff',800);T('asal × asal',W/2,330,40,GR,700);const k=since(t,2,1.5);
+ T('61',300,800,140,BL,900);T('×',W/2,800,110,'#fff',700);T('53',780,800,140,BL,900);if(k>.5){g.globalAlpha=ease((k-.5)*2);T('=',W/2,1000,110,'#fff',700);T('3233',W/2,1200,170,GR,900);g.globalAlpha=1}T('⚡ anında',W/2,1420,48,GR,800)}
+function sceneC(t){const big=t>st(4);T(big?'Basamak büyüdükçe':'Geri dönmek: zor',W/2,250,56,'#fff',800);T(big?'en güçlü bilgisayarlara bile yıllar':'3233 = ? × ?',W/2,330,40,RD,700);
+ if(!big){const ps=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53];const n=Math.min(ps.length,Math.floor((t-st(3))*3.2)+1);
+  for(let i=0;i<n;i++){const p=ps[i],ok=3233%p==0;const x=150+(i%4)*260,y=560+Math.floor(i/4)*170;g.fillStyle=ok?'#1f8a4c':'#3b1220';g.beginPath();g.roundRect(x-110,y-55,220,110,20);g.fill();T('÷ '+p+(ok?' ✓':' ✗'),x,y,44,ok?'#fff':'#ff8a8a',800)}}
+ else{g.font='600 30px monospace';g.fillStyle='rgba(201,212,242,.85)';g.textAlign='left';const off=(t*60)%60;for(let r=0;r<22;r++){g.fillText(digits(44,r*97+Math.floor(t*2)*0),80,560+r*48-off)}g.fillStyle='#070c20';g.fillRect(250,1440,580,120);T('⏳ yıllar…',W/2,1500,60,YL,900)}}
+function sceneD(t){T('Tek yönlü işlem',W/2,250,56,'#fff',800);T('kolay → ↛ zor',W/2,330,40,YL,700);
+ T('61 , 53',250,800,64,BL,900);T('3233',830,800,64,GR,900);const k=since(t,5,1);g.strokeStyle=GR;g.lineWidth=10;g.beginPath();g.moveTo(400,760);g.lineTo(400+300*k,760);g.stroke();T('çarp: kolay',550,700,36,GR,800);
+ g.strokeStyle=RD;g.setLineDash([16,14]);g.beginPath();g.moveTo(700,860);g.lineTo(700-300*k,860);g.stroke();g.setLineDash([]);T('böl: çok zor',550,930,36,RD,800);if(k>.6){T('✗',550,1080,90,RD,900)}}
+function sceneE(t){const kk=t>st(7);T(kk?'Anahtar sende':'Açık kilit herkese',W/2,250,56,'#fff',800);T(kk?'iki asalı bilen açar':'çarpım (3233) herkesin elinde',W/2,330,36,YL,700);
+ for(let i=0;i<5;i++){const x=170+i*185;lock(x,700,.42,true,'rgba(255,207,90,.85)');T('3233',x,820,30,'#fff',700)}
+ g.fillStyle='#c9d4f2';for(let i=0;i<5;i++){const x=170+i*185;g.beginPath();g.arc(x,980,26,0,TAU);g.fill();g.fillRect(x-30,1010,60,70)}
+ if(kk){const k=since(t,7,.8);key(W/2-30,1300,1.3*k,GR);T('61 · 53',W/2,1420,52,GR,900)}}
+function sceneF(t){if(t<st(9)){T('1977 · RSA',W/2,250,60,'#fff',800);T('Rivest · Shamir · Adleman',W/2,330,40,YL,700);['R','S','A'].forEach((c,i)=>{g.globalAlpha=since(t,8+0,.4+i*.4);g.fillStyle='#121a3a';g.strokeStyle=YL;g.lineWidth=5;g.beginPath();g.roundRect(160+i*280,650,200,240,24);g.fill();g.stroke();T(c,260+i*280,770,130,YL,900);g.globalAlpha=1});return}
+ if(t<st(10)){T('2020 · 250 basamak',W/2,250,56,'#fff',800);T('≈ 2700 işlemci-yılı hesap',W/2,330,40,YL,700);g.font='600 26px monospace';g.fillStyle='rgba(201,212,242,.9)';g.textAlign='left';for(let r=0;r<7;r++)g.fillText(digits(40,r*31),110,600+r*44);
+  const k=since(t,9,2.5);for(let i=0;i<Math.floor(60*k);i++){const x=130+(i%10)*85,y=1000+Math.floor(i/10)*70;g.fillStyle=GR;g.fillRect(x,y,60,46);g.fillStyle='#070c20';g.fillRect(x+12,y+10,36,26)}T('binlerce bilgisayar, aylarca',W/2,1460,36,'#c9d4f2',600);return}
+ T('Bugünkü anahtar: 617 basamak',W/2,250,52,'#fff',800);T('250 değil — 617',W/2,330,40,RD,700);g.font='600 22px monospace';g.fillStyle='rgba(255,207,90,.85)';g.textAlign='left';const rows=Math.floor(25*since(t,10,1.5));for(let r=0;r<rows;r++)g.fillText(digits(50,r*53+7),95,560+r*36)}
+function sceneG(t){T('Kuantum bilgisayar?',W/2,250,56,'#fff',800);T('yeni kilitler şimdiden tasarlanıyor',W/2,330,36,YL,700);
+ const cx=W/2,cy=950;g.strokeStyle='#8b5cf6';g.lineWidth=5;g.beginPath();g.arc(cx,cy,260,0,TAU);g.stroke();g.beginPath();g.ellipse(cx,cy,260,80,0,0,TAU);g.stroke();const a=t*1.4;g.strokeStyle=YL;g.lineWidth=8;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+200*Math.cos(a)*.9,cy-180*Math.sin(a*.7));g.stroke();lock(cx,1330,.7,false,GR)}
+function sceneH(t){if(t<st(13)){T('Küçük kilit =',W/2,450,62,'#fff',800);T('iki asalın sırrı',W/2,560,62,YL,900);lock(W/2,850,1.3,false,GR);T('61 × 53',W/2,1250,60,BL,900);return}
+ T('Sıradaki bölümü',W/2,560,66,'#fff',800);T('SEN SEÇ',W/2,680,96,YL,900);T('yorumlara yaz 👇',W/2,900,56,GR,800);pill('Takip et',W/2,1560,RD,58)}
+function subs(t){const s=SUB.find(z=>t>=z[0]&&t<z[1]);if(!s)return;g.font='700 46px '+F;const words=s[2].split(' ');const lines=[];let cur='';for(const w2 of words){const tr=cur?cur+' '+w2:w2;if(g.measureText(tr).width>900){lines.push(cur);cur=w2}else cur=tr}lines.push(cur);
+ const y0=Math.min(1745,1790-(lines.length-1)*60);lines.forEach((l,i)=>{const w2=g.measureText(l).width+40;g.fillStyle='rgba(0,0,0,.55)';g.beginPath();g.roundRect(W/2-w2/2,y0+i*60-32,w2,62,14);g.fill();T(l,W/2,y0+i*60,46,'#fff',700)})}
+function renderAt(t){bg(t);const S=[['A',sceneA],['B',sceneB],['C',sceneC],['D',sceneD],['E',sceneE],['F',sceneF],['G',sceneG],['H',sceneH]];let f=sceneA;for(const[k,fn]of S)if(t>=TM[k][0])f=fn;f(t);
+ if(t<TM.H[0])subs(t);T('KOZMOS LAB',W/2,1850,34,'rgba(255,255,255,.8)',800);T('@kozmoslabtr',W/2,1890,24,'rgba(200,210,240,.5)',500)}
+window.renderAt=renderAt;
+if(!/rec/.test(location.search)){const t0=performance.now();(function f(){renderAt(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(f)})()}
+</script></body></html>

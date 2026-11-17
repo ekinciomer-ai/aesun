@@ -150,7 +150,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         _bugun = _dt.now(_IST).strftime("%Y-%m-%d")
         _ist = HESAP_ISTISNA.get(_bugun, {})
         _lim = _ist["limit"] if kod in _ist.get("kodlar", ()) else HESAP_GUNLUK
-        if _sayac.get(f"{_bugun}|{dil}", 0) >= _lim:
+        if not it.get("yerine") and _sayac.get(f"{_bugun}|{dil}", 0) >= _lim:
             print(f"NOT: {kod} KANAL SINIRI ({dil}): bugün bu kanala {_lim} yükleme yapıldı; sırada kaldı, sonraki günde yüklenecek")
             sonuc.append({"kod": kod, "durum": "hesap sınırı: sırada", **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         _pl = _plan_sayim()
@@ -159,9 +159,9 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             _t = _dt.now(_IST).replace(second=0, microsecond=0) + _td(hours=2)
         _eski_pa = it["publishAt"]
         # Tarihe bağlı içerik ("bu gece", maç günü, gök olayı) kuyruk json'unda "tarih_sabit": true taşır; günü kaydırılmaz.
-        for _k in (range(0, 1) if it.get("tarih_sabit") else range(0, 120)):
+        for _k in (range(0, 1) if (it.get("tarih_sabit") or it.get("yerine")) else range(0, 120)):
             _g = (_t + _td(days=_k)).strftime("%Y-%m-%d")
-            if it.get("tarih_sabit") or _pl.get((_g, dil), 0) < HESAP_GUNLUK:
+            if it.get("tarih_sabit") or it.get("yerine") or _pl.get((_g, dil), 0) < HESAP_GUNLUK:
                 _t = _t + _td(days=_k); break
         it["publishAt"] = _t.isoformat(timespec="seconds")
         if it["publishAt"][:10] != _eski_pa[:10]:
@@ -211,8 +211,9 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         json.dump(kayit, open(kayit_yol, "w", encoding="utf-8"), ensure_ascii=False)
         sonuc.append({"kod": kod, "durum": "yüklendi ve planlandı", "vid": v["id"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}})
         print(f"NOT: {kod} yüklendi → {v['id']} (plan {it['publishAt']})")
-        _sayac[f"{_bugun}|{dil}"] = _sayac.get(f"{_bugun}|{dil}", 0) + 1
-        _g = it["publishAt"][:10]; _pl[(_g, dil)] = _pl.get((_g, dil), 0) + 1
+        if not it.get("yerine"):
+            _sayac[f"{_bugun}|{dil}"] = _sayac.get(f"{_bugun}|{dil}", 0) + 1
+            _g = it["publishAt"][:10]; _pl[(_g, dil)] = _pl.get((_g, dil), 0) + 1
         json.dump({k: v2 for k, v2 in _sayac.items() if k >= (_dt.now(_IST) - _td(days=30)).strftime("%Y-%m-%d")}, open(_sayac_yol, "w"), indent=1)
         # "yerine": aynı içeriğin eski sürümü → planı kaldırılır, Gizli kalır (silme yok, önce yedek)
         eski = it.get("yerine")

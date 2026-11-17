@@ -89,7 +89,7 @@ jobs:
               durum_str = 'Yayında' if p <= datetime.now(p.tzinfo) else 'Planlı'
               kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab', 'OD': 'Ömür Dediğin', 'NY': 'Nasıl Yapıldı', 'YR': 'Yolu Seç !', 'LM': 'LVL MAX'}.get(s['kanal'], s['kanal'])
               dil = {'TR': 'TR', 'EN': 'EN', 'ES': 'ES', 'KZ_TR': 'TR', 'KZ_EN': 'EN', 'OD': 'TR', 'NY': 'TR', 'YR': 'TR', 'LM': 'EN'}.get(s['kanal'], s['kanal'])
-              taslak_eslesme = next((r for r in K if not r.get('vid') and r.get('kanal') == kanal and (r.get('baslik') == s['baslik'] or (s.get('seri') and r.get('seri') == s.get('seri') and r.get('tarih') == p.strftime('%Y-%m-%d')))), None)
+              taslak_eslesme = None if s.get('eski_gizlendi') else next((r for r in K if not r.get('vid') and r.get('kanal') == kanal and (r.get('baslik') == s['baslik'] or (s.get('seri') and r.get('seri') == s.get('seri') and r.get('tarih') == p.strftime('%Y-%m-%d') and (not r.get('saat') or r.get('saat') == p.strftime('%H:%M'))))), None)
               x = ix.get(s['vid']) or taslak_eslesme or {}
               tur = s.get('tur') or 'Short'
               x.update(platform='YouTube', kanal=kanal, dil=dil, tur=tur, seri=s.get('seri') or x.get('seri') or 'Gündem + Tarih',

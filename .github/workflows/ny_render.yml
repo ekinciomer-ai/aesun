@@ -53,6 +53,7 @@ jobs:
         with: {name: hazir, path: video/ny/is}
       - shell: bash
         run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null
           cd video/ny && npm i --silent playwright@1.49.1 && npx playwright install --with-deps chromium >/dev/null
           W=$([ "${{ matrix.mod }}" = final ] && echo 1080 || echo 540); AR=$([ "${{ matrix.mod }}" = final ] && echo 1300 || echo 900)
           if [ ! -f motor/arazi_$AR.bin ]; then pip install -q numpy pillow matplotlib scipy && python3 arac/arazi_hazirla.py motor $AR; fi

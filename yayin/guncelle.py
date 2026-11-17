@@ -24,13 +24,14 @@ KANALLAR = {
     "UCg75Mvb6C8CBSJPeuwzBFZA": ("Ömür Dediğin", "TR"),
     "UCscZRPONJahcgtZhTNeUcRA": ("Nasıl Yapıldı", "TR"),
     "UCqVae87VSs6HokK4Qdm29Hw": ("Yolu Seç !", "TR"),
+    "UCDwQWwMPkGKxsEz7t1HCPbA": ("LVL MAX", "EN"),
 }
 KANAL_DIL = {ad: dil for _, (ad, dil) in KANALLAR.items()}
 KANAL_NORMAL = {
     "Kozmos Lab TR (@kozmoslabtr)": "Kozmos Lab TR",
     "Kozmos Lab (@kozmoslab)": "Kozmos Lab",
 }
-DIL_NORMAL = {"KZ_TR": "TR", "KZ_EN": "EN", "OD": "TR", "NY": "TR", "YR": "TR"}
+DIL_NORMAL = {"KZ_TR": "TR", "KZ_EN": "EN", "OD": "TR", "NY": "TR", "YR": "TR", "LM": "EN"}
 SERI_NORMAL = {"Did You Know?": "Did you know?"}
 NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
       "media": "http://search.yahoo.com/mrss/"}

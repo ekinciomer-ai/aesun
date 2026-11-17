@@ -1,7 +1,7 @@
 #!/bin/bash
 # YouTube yükleme kuyruğu (bilgisayar gerekmez). .github/workflows/yt_kuyruk.yml çalıştırır.
 # Girdi: paket içinde kuyruk/<kod>.json + kuyruk/<kod>.mp4 (+ isteğe bağlı kuyruk/<kod>.jpg veya .png özel kapak)
-#   json: {"kod","kanal":"TR|EN|ES|KZ_TR|KZ_EN|OD","baslik","aciklama","etiketler":[],"kategori":"27","publishAt":"2026-11-05T19:00:00+03:00","sentetik":false,"seri","tarih_sabit":false}
+#   json: {"kod","kanal":"TR|EN|ES|KZ_TR|KZ_EN|OD|NY|YR|LM","baslik","aciklama","etiketler":[],"kategori":"27","publishAt":"2026-11-05T19:00:00+03:00","sentetik":false,"seri","tarih_sabit":false}
 # KANAL SINIRI: her kanal için günde en fazla 4 yükleme + 4 yayın (Ömer, 15 Kas 2026: "her kanal için 4, toplam 4 değil"); dolu günde yayın ilk boş güne kayar (tarih_sabit:true olanlar hariç).
 # Kurallar: aynı kod ya da aynı başlık kanalda varsa YÜKLEMEZ; herkese açma yalnız publishAt ile planlıdır; silme yok.
 # Çıktı: '===KUYRUK===' ... '===SON===' arasında sırsız JSON sonuç listesi.
@@ -15,7 +15,8 @@ ist = json.load(open(os.path.join(D, "istemci.json"), encoding="utf-8"))
 KANAL = {"TR": "UC77LyY3gqWmBNAKp2lbsGBg", "EN": "UCFLJUlhUSgjcLbp9ad_t9PQ", "ES": "UCTC_yS0lwl-owMuo5b4bNtQ",
          "KZ_TR": "UC7o3DG9m1gBbvMjFZjB5KEg", "KZ_EN": "UC41-Z82jCQ8955az6JUDIAw", "OD": "UCg75Mvb6C8CBSJPeuwzBFZA",
          "NY": "UCscZRPONJahcgtZhTNeUcRA",
-         "YR": "UCqVae87VSs6HokK4Qdm29Hw"}
+         "YR": "UCqVae87VSs6HokK4Qdm29Hw",
+         "LM": "UCDwQWwMPkGKxsEz7t1HCPbA"}
 kayit_yol = os.path.join(D, "yuklenen_kuyruk.json")
 kayit = json.load(open(kayit_yol, encoding="utf-8")) if os.path.exists(kayit_yol) else {}
 
@@ -166,7 +167,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         if it["publishAt"][:10] != _eski_pa[:10]:
             print(f"NOT: {kod} KANAL SINIRI ({dil}): {_eski_pa[:16]} dolu, yayın {it['publishAt'][:16]} gününe kaydırıldı")
         boyut = os.path.getsize(mp4)
-        dil_kodu = {"TR": "tr", "EN": "en", "ES": "es", "KZ_TR": "tr", "OD": "tr", "NY": "tr", "YR": "tr"}.get(dil, "en")
+        dil_kodu = {"TR": "tr", "EN": "en", "ES": "es", "KZ_TR": "tr", "OD": "tr", "NY": "tr", "YR": "tr", "LM": "en"}.get(dil, "en")
         from datetime import datetime, timezone
         hemen_yayin = datetime.fromisoformat(it["publishAt"]) <= datetime.now(timezone.utc)
         durum_alan = ({"privacyStatus": "public", "selfDeclaredMadeForKids": False, "containsSyntheticMedia": bool(it.get("sentetik", False))}

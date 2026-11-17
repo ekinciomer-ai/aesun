@@ -18,6 +18,7 @@ Bu dosya, YouTube kanallarının sunucuya nasıl bağlandığını anlatır. Bir
 | Black Box Files Mayday (EN) | `UCsV0ubiBEy8dxigNk8I_LqA` · @BlackBoxFiles7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
 | Nasıl Yapıldı (TR, yapılar nasıl yapıldı) | `UCscZRPONJahcgtZhTNeUcRA` · @nasilyapildiogren | nasilyapildiogren@gmail.com (kişisel kanal) | Bağlı (16 Kas 2026) · kuyruk anahtarı `NY` · yeni hesap kilidi 16.12'ye kadar günde 1 |
 | Yolu Seç ! (TR, Yeraltı · Derinkuyu ve benzeri) | `UCqVae87VSs6HokK4Qdm29Hw` · @yolusec | nasilyapildiogren@gmail.com altındaki marka hesabı | Bağlı (16 Kas 2026) · kuyruk anahtarı `YR` · yeni hesap kilidi 16.12'ye kadar günde 1 |
+| LVL MAX (global, sıralama Shorts) | `UCDwQWwMPkGKxsEz7t1HCPbA` · @lvlmaxtv | lvlmax.tv@gmail.com (kişisel kanal) | Bağlı (18 Kas 2026) · kuyruk anahtarı `LM` · yeni hesap kilidi 17.12'ye kadar günde 1, 17:00 |
 | Caja Negra (ES) | `UCM6LhKp6tDx4ddZ65oZUCvQ` · @CajaNegra_7700 | arabas400.mrc@gmail.com (marka hesabı) | Bağlı (9 Kas 2026) |
 
 ## Google Cloud projesi

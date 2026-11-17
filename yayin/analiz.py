@@ -22,6 +22,7 @@ GUNLUK_KOTA = {
     "Kozmos Lab TR": 2,
     "Kozmos Lab": 2,
     "Yolu Seç !": 4,
+    "LVL MAX": 1,  # yeni hesap (17.11.2026): ilk 30 gün günde 1
 }  # günde en fazla Short (YouTube), kanal başına
 KANAL_NORMAL = {
     "Kozmos Lab TR (@kozmoslabtr)": "Kozmos Lab TR",

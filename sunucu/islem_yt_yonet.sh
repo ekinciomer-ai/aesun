@@ -24,6 +24,7 @@ KANALLAR = {
     "UCg75Mvb6C8CBSJPeuwzBFZA": "Ömür Dediğin",
     "UCscZRPONJahcgtZhTNeUcRA": "Nasıl Yapıldı",
     "UCqVae87VSs6HokK4Qdm29Hw": "Yolu Seç !",
+    "UCDwQWwMPkGKxsEz7t1HCPbA": "LVL MAX",
 }
 MAKS_GIZLE = 3
 MAKS_SAAT = 15

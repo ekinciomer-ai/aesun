@@ -1,0 +1,174 @@
+{
+ "kanal": "NY",
+ "seri": "Türkiye'nin En'leri",
+ "dil": "tr",
+ "kod": "NY_EN_02_DAG",
+ "baslik_bant": "TÜRKİYE'NİN EN YÜKSEK 5 DAĞI",
+ "tip": "dag",
+ "birim": "m",
+ "abartma": 16,
+ "ogeler": [
+  {
+   "id": "erciyes",
+   "ad": "ERCİYES",
+   "ll": [
+    35.447,
+    38.531
+   ],
+   "deger": 3917,
+   "sira": 5,
+   "renk": "#3fd0ff",
+   "alt": "Kayseri · volkan",
+   "volkan": 1,
+   "etiket": [
+    [
+     "Kayseri",
+     35.48,
+     38.73
+    ]
+   ]
+  },
+  {
+   "id": "kackar",
+   "ad": "KAÇKAR",
+   "ll": [
+    41.161,
+    40.835
+   ],
+   "deger": 3937,
+   "sira": 4,
+   "renk": "#2fe0b0",
+   "alt": "Rize · buzul vadileri",
+   "etiket": []
+  },
+  {
+   "id": "suphan",
+   "ad": "SÜPHAN",
+   "ll": [
+    42.833,
+    38.926
+   ],
+   "deger": 4058,
+   "sira": 3,
+   "renk": "#b6f04a",
+   "alt": "Bitlis · volkan",
+   "volkan": 1,
+   "etiket": [
+    [
+     "Van Gölü",
+     42.9,
+     38.6
+    ]
+   ]
+  },
+  {
+   "id": "uludoruk",
+   "ad": "ULUDORUK",
+   "ll": [
+    44.017,
+    37.467
+   ],
+   "deger": 4135,
+   "sira": 2,
+   "renk": "#ffb02e",
+   "alt": "Hakkari · Cilo Dağları",
+   "etiket": [
+    [
+     "Hakkari",
+     43.74,
+     37.58
+    ]
+   ]
+  },
+  {
+   "id": "agri",
+   "ad": "AĞRI DAĞI",
+   "ll": [
+    44.298,
+    39.702
+   ],
+   "deger": 5137,
+   "sira": 1,
+   "renk": "#ff3b2f",
+   "alt": "Iğdır · Ağrı · volkan",
+   "volkan": 1,
+   "etiket": [
+    [
+     "Iğdır Ovası",
+     44.05,
+     39.93
+    ]
+   ]
+  }
+ ],
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 / 5",
+   "ust": "EN YÜKSEK 5 DAĞ",
+   "alt": "ASLINDA YANARDAĞ",
+   "alt_kelime": "aslında"
+  },
+  {
+   "id": "s02",
+   "sahne": "soru",
+   "buyuk": "?"
+  },
+  {
+   "id": "s03",
+   "sahne": "sira",
+   "oge": "erciyes"
+  },
+  {
+   "id": "s04",
+   "sahne": "sira",
+   "oge": "kackar"
+  },
+  {
+   "id": "s05",
+   "sahne": "sira",
+   "oge": "suphan"
+  },
+  {
+   "id": "s06",
+   "sahne": "sira",
+   "oge": "uludoruk"
+  },
+  {
+   "id": "s07",
+   "sahne": "bir_giris",
+   "oge": "agri"
+  },
+  {
+   "id": "s08",
+   "sahne": "sira",
+   "oge": "agri"
+  },
+  {
+   "id": "s09",
+   "sahne": "ek",
+   "oge": "agri",
+   "volkanlar": 1,
+   "cipler": [
+    "3 VOLKAN",
+    "ERCİYES · SÜPHAN · AĞRI"
+   ],
+   "cip_kelime": [
+    "üç",
+    "Erciyes"
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "kapanis",
+   "cta": "HANGİSİNE TIRMANMAK İSTERDİN?"
+  }
+ ],
+ "kaynaklar": [
+  "MSÜ coğrafya özeti – Ağrı 5137 m, Süphan 4058 m, Erciyes 3917 m",
+  "Wikipedia – Uludoruk 4135 m (Cilo Dağları), Kaçkar 3937 m",
+  "OMÜ – Süphan Dağı genç volkanik kütle, Ağrı'dan sonra en büyük volkan konisi",
+  "Harita: Natural Earth (kamu malı); yükselti: AWS Terrain Tiles (SRTM/GMTED açık veri)"
+ ]
+}

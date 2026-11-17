@@ -1,0 +1,88 @@
+name: Nasıl Yapıldı – 3D video üretimi (paralel render)
+# video/ny/istek/<KOD>.json  {"kod": "...", "mod": "onizleme" | "final"} eklenince:
+#  1) hazırla: Google TTS parçalarından anlatım + kodla ses tasarımı + kurgu (uret.py --sadece-hazirla)
+#  2) parça: 3D sahne (three.js) kare kare, paralel işlerde kaydedilir
+#  3) birleştir: parçalar + miks (-14 LUFS) → video/ny/cikti/<mod>/<KOD>.mp4 ; istek tamam/ altına taşınır
+# Ücretsiz (açık depo GitHub Actions). Bilgisayar ve sunucu yükü yok.
+on:
+  push:
+    branches: [main]
+    paths: ['video/ny/istek/*.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: ny-render, cancel-in-progress: false }
+jobs:
+  hazirla:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      matris: ${{ steps.m.outputs.matris }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {sparse-checkout: "video/ny"}
+      - run: sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null && pip install -q numpy scipy pillow matplotlib
+      - id: m
+        run: |
+          cd video/ny
+          python3 - <<'PY'
+          import json, glob, math, subprocess, os
+          M = []
+          for f in sorted(glob.glob("istek/*.json")):
+              r = json.load(open(f)); kod, mod = r["kod"], r.get("mod", "onizleme")
+              subprocess.run(["python3", "arac/uret.py", kod, mod, "--sadece-hazirla"], check=True)
+              T = json.load(open(f"is/{kod}/kurgu.json"))["toplam"]; N = math.ceil(T * 30)
+              P = 5 if mod == "onizleme" else 12; adim = math.ceil(N / P)
+              for i in range(P): M.append({"kod": kod, "mod": mod, "i": i, "a": i * adim, "b": min(N, (i + 1) * adim)})
+          open(os.environ["GITHUB_OUTPUT"], "a").write("matris=" + json.dumps({"include": M}) + "\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: hazir, path: video/ny/is, retention-days: 2}
+  parca:
+    needs: hazirla
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.hazirla.outputs.matris) }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {sparse-checkout: "video/ny"}
+      - uses: actions/download-artifact@v4
+        with: {name: hazir, path: video/ny/is}
+      - run: |
+          cd video/ny && npm i --silent playwright@1.49.1 && npx playwright install --with-deps chromium >/dev/null
+          W=$([ "${{ matrix.mod }}" = final ] && echo 1080 || echo 540); AR=$([ "${{ matrix.mod }}" = final ] && echo 1300 || echo 900)
+          if [ ! -f motor/arazi_$AR.bin ]; then pip install -q numpy pillow matplotlib scipy && python3 arac/arazi_hazirla.py motor $AR; fi
+          node arac/kayit.js motor is/${{ matrix.kod }}/kurgu.json /tmp/p_${{ matrix.i }}.mp4 $W 30 ${{ matrix.a }} ${{ matrix.b }} $AR
+      - uses: actions/upload-artifact@v4
+        with: {name: "p-${{ matrix.kod }}-${{ matrix.mod }}-${{ matrix.i }}", path: "/tmp/p_${{ matrix.i }}.mp4", retention-days: 2}
+  birlestir:
+    needs: [hazirla, parca]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null
+      - uses: actions/download-artifact@v4
+        with: {path: /tmp/a}
+      - run: |
+          cd video/ny
+          for f in istek/*.json; do
+            KOD=$(python3 -c "import json;print(json.load(open('$f'))['kod'])"); MOD=$(python3 -c "import json;print(json.load(open('$f')).get('mod','onizleme'))")
+            ls -d /tmp/a/p-$KOD-$MOD-* | sort -t- -k4 -n | while read d; do echo "file '$(ls $d/*.mp4)'"; done > /tmp/liste_$KOD.txt
+            cat /tmp/liste_$KOD.txt
+            ffmpeg -v error -y -f concat -safe 0 -i /tmp/liste_$KOD.txt -c copy /tmp/sessiz_$KOD.mp4
+            mkdir -p cikti/$MOD
+            CRF=$([ "$MOD" = final ] && echo 17 || echo 24)
+            ffmpeg -v error -y -i /tmp/sessiz_$KOD.mp4 -i /tmp/a/hazir/$KOD/miks.wav -filter_complex "[1:a]loudnorm=I=-14:TP=-1.5:LRA=11[a]" \
+              -map 0:v -map "[a]" -c:v libx264 -preset slow -crf $CRF -pix_fmt yuv420p -c:a aac -b:a 192k -ar 48000 -shortest -movflags +faststart cikti/$MOD/$KOD.mp4
+            ls -la cikti/$MOD/$KOD.mp4; echo "::notice::$KOD $MOD hazır"
+            mkdir -p istek/tamam && git mv "$f" istek/tamam/
+          done
+      - run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A video/ny/cikti video/ny/istek
+          git commit -qm "Nasıl Yapıldı: video çıktısı $(TZ=Europe/Istanbul date +'%d.%m %H:%M')" || exit 0
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

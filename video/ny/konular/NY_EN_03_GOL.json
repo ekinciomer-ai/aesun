@@ -1,0 +1,177 @@
+{
+ "kanal": "NY",
+ "seri": "Türkiye'nin En'leri",
+ "dil": "tr",
+ "kod": "NY_EN_03_GOL",
+ "baslik_bant": "TÜRKİYE'NİN EN BÜYÜK 5 GÖLÜ",
+ "tip": "gol",
+ "birim": "km²",
+ "abartma": 11,
+ "ogeler": [
+  {
+   "id": "iznik",
+   "ad": "İZNİK",
+   "elips": [
+    29.53,
+    40.43,
+    0.19,
+    0.052
+   ],
+   "deger": 308,
+   "sira": 5,
+   "renk": "#3fd0ff",
+   "alt": "Bursa",
+   "etiket": [
+    [
+     "Bursa",
+     29.06,
+     40.19
+    ]
+   ]
+  },
+  {
+   "id": "egirdir",
+   "ad": "EĞİRDİR",
+   "geo": "Eğirdir",
+   "deger": 482,
+   "sira": 4,
+   "renk": "#2fe0b0",
+   "alt": "Isparta",
+   "etiket": [
+    [
+     "Isparta",
+     30.55,
+     37.76
+    ]
+   ]
+  },
+  {
+   "id": "beysehir",
+   "ad": "BEYŞEHİR",
+   "geo": "Beyşehir",
+   "deger": 656,
+   "sira": 3,
+   "renk": "#b6f04a",
+   "alt": "En büyük tatlı su gölü",
+   "etiket": []
+  },
+  {
+   "id": "tuz",
+   "ad": "TUZ GÖLÜ",
+   "geo": "Lake Tuz",
+   "deger": 1500,
+   "yaklasik": 1,
+   "sira": 2,
+   "renk": "#ffffff",
+   "alt": "Derinlik: 1-2 metre",
+   "etiket": [
+    [
+     "Aksaray",
+     34.03,
+     38.37
+    ]
+   ]
+  },
+  {
+   "id": "van",
+   "ad": "VAN GÖLÜ",
+   "geo": "Lake Van",
+   "deger": 3713,
+   "sira": 1,
+   "renk": "#ff3b2f",
+   "alt": "Derinlik: 451 metre",
+   "etiket": [
+    [
+     "Van",
+     43.38,
+     38.5
+    ],
+    [
+     "Tatvan",
+     42.28,
+     38.5
+    ]
+   ]
+  }
+ ],
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "oge": "tuz",
+   "buyuk": "1-2 m",
+   "ust": "2. BÜYÜK GÖL",
+   "alt": "İÇİNDE YÜRÜNÜR",
+   "alt_kelime": "yürüyebilirsin"
+  },
+  {
+   "id": "s02",
+   "sahne": "soru",
+   "buyuk": "?"
+  },
+  {
+   "id": "s03",
+   "sahne": "sira",
+   "oge": "iznik"
+  },
+  {
+   "id": "s04",
+   "sahne": "sira",
+   "oge": "egirdir"
+  },
+  {
+   "id": "s05",
+   "sahne": "sira",
+   "oge": "beysehir"
+  },
+  {
+   "id": "s06",
+   "sahne": "sira",
+   "oge": "tuz"
+  },
+  {
+   "id": "s07",
+   "sahne": "ek",
+   "oge": "tuz",
+   "tuz": 1,
+   "cipler": [
+    "YAZIN: BEYAZ TUZ KABUĞU",
+    "TUZUN ~%50'Sİ"
+   ],
+   "cip_kelime": [
+    "tuz",
+    "yarısı"
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "bir_giris",
+   "oge": "van"
+  },
+  {
+   "id": "s09",
+   "sahne": "sira",
+   "oge": "van",
+   "cipler": [
+    "451 m DERİNLİK",
+    "TEK BALIK: İNCİ KEFALİ"
+   ],
+   "cip_kelime": [
+    "Derinliği",
+    "inci"
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "kapanis",
+   "cta": "HANGİSİNDE YÜZDÜN?"
+  }
+ ],
+ "kaynaklar": [
+  "Küre Ansiklopedi – Van Gölü 3.713 km², en derin 451 m",
+  "Wikipedia – List of lakes of Turkey (Tuz 1500 km², derinlik 2 m; Beyşehir 656; Eğirdir 482)",
+  "WorldAtlas / Cyclowiki – İznik 308 km²",
+  "Milliyet – Tuz Gölü ülkenin tuz ihtiyacının %50'si",
+  "Harita: Natural Earth (kamu malı); yükselti: AWS Terrain Tiles (SRTM/GMTED açık veri)"
+ ]
+}

@@ -1,0 +1,200 @@
+{
+ "kanal": "NY",
+ "seri": "Türkiye'nin En'leri",
+ "dil": "tr",
+ "kod": "NY_EN_01_NEHIR",
+ "baslik_bant": "TÜRKİYE'NİN EN UZUN 5 NEHRİ",
+ "tip": "nehir",
+ "birim": "km",
+ "abartma": 11,
+ "ogeler": [
+  {
+   "id": "aras",
+   "ad": "ARAS",
+   "geo": "aras",
+   "deger": 548,
+   "sira": 5,
+   "renk": "#3fd0ff",
+   "alt": "Türkiye'deki bölümü",
+   "etiket": [
+    [
+     "Erzurum",
+     41.27,
+     39.9
+    ],
+    [
+     "Hazar'a →",
+     44.6,
+     39.85
+    ]
+   ]
+  },
+  {
+   "id": "murat",
+   "ad": "MURAT",
+   "geo": "murat",
+   "deger": 722,
+   "sira": 4,
+   "renk": "#2fe0b0",
+   "alt": "Fırat'ın kolu",
+   "etiket": [
+    [
+     "Ağrı",
+     43.05,
+     39.72
+    ],
+    [
+     "Fırat'a karışır",
+     38.9,
+     38.8
+    ]
+   ]
+  },
+  {
+   "id": "sakarya",
+   "ad": "SAKARYA",
+   "geo": "sakarya",
+   "deger": 824,
+   "sira": 3,
+   "renk": "#b6f04a",
+   "alt": "Eskişehir → Karadeniz",
+   "etiket": [
+    [
+     "Eskişehir",
+     30.52,
+     39.78
+    ],
+    [
+     "Karadeniz",
+     30.64,
+     41.2
+    ]
+   ]
+  },
+  {
+   "id": "firat",
+   "ad": "FIRAT",
+   "geo": "firat",
+   "deger": 1263,
+   "toplam": 2800,
+   "sira": 2,
+   "renk": "#ffb02e",
+   "alt": "Türkiye'deki bölümü · toplam 2.800 km",
+   "etiket": [
+    [
+     "Erzurum",
+     41.27,
+     39.9
+    ],
+    [
+     "SURİYE",
+     38.9,
+     35.9
+    ],
+    [
+     "IRAK",
+     41.6,
+     34.7
+    ]
+   ]
+  },
+  {
+   "id": "kizilirmak",
+   "ad": "KIZILIRMAK",
+   "geo": "kizilirmak",
+   "deger": 1355,
+   "sira": 1,
+   "renk": "#ff3b2f",
+   "alt": "Tamamı Türkiye'de",
+   "etiket": [
+    [
+     "Sivas · Kızıldağ",
+     38.37,
+     39.86
+    ],
+    [
+     "Bafra",
+     35.9,
+     41.57
+    ],
+    [
+     "Kayseri",
+     35.48,
+     38.73
+    ]
+   ]
+  }
+ ],
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "oge": "firat",
+   "buyuk": "2.800 km",
+   "ust": "FIRAT",
+   "alt": "AMA EN UZUN DEĞİL",
+   "alt_kelime": "Ama"
+  },
+  {
+   "id": "s02",
+   "sahne": "soru",
+   "buyuk": "?"
+  },
+  {
+   "id": "s03",
+   "sahne": "sira",
+   "oge": "aras"
+  },
+  {
+   "id": "s04",
+   "sahne": "sira",
+   "oge": "murat"
+  },
+  {
+   "id": "s05",
+   "sahne": "sira",
+   "oge": "sakarya"
+  },
+  {
+   "id": "s06",
+   "sahne": "sira",
+   "oge": "firat"
+  },
+  {
+   "id": "s07",
+   "sahne": "bir_giris",
+   "oge": "kizilirmak"
+  },
+  {
+   "id": "s08",
+   "sahne": "sira",
+   "oge": "kizilirmak"
+  },
+  {
+   "id": "s09",
+   "sahne": "ek",
+   "oge": "kizilirmak",
+   "cipler": [
+    "0 SINIR GEÇİŞİ",
+    "ADI: KIZIL TOPRAK"
+   ],
+   "cip_kelime": [
+    "sınır",
+    "Adını"
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "kapanis",
+   "cta": "SENİN ŞEHRİNDEN HANGİSİ GEÇİYOR?"
+  }
+ ],
+ "kaynaklar": [
+  "Ankara Üniversitesi Açık Ders – Türkiye akarsuları (Kızılırmak 1355 km; Fırat 2800 km, 1263 km'si Türkiye'de)",
+  "OMÜ – Türkiye Hidrografyası 2020 (Kızılırmak Kızıldağ'dan doğar, Orta Anadolu'da yay çizer)",
+  "Küre Ansiklopedi – Sakarya Nehri 824 km",
+  "Wikipedia – Murat River 722 km",
+  "sorubak.com / ders kaynakları – Aras Ermenistan sınırına kadar 548 km",
+  "Harita: Natural Earth (kamu malı); yükselti: AWS Terrain Tiles (SRTM/GMTED açık veri)"
+ ]
+}

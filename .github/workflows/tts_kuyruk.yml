@@ -42,4 +42,4 @@ jobs:
           mkdir -p sunucu/tts_kuyruk; git add -A sunucu/tts_kuyruk
           git diff --cached --quiet && exit 0
           git commit -qm "Tonlu seslendirme: sesler hazır $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
-          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done
+          for i in 1 2 3; do git pull -q --rebase -X theirs origin main && git push -q origin HEAD:main && break; git rebase --abort 2>/dev/null || true; sleep 5; done

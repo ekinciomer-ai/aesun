@@ -398,6 +398,8 @@ def yonlendir():
             yt = {"kod": kod, "kanal": k["kanal"], "baslik": k["baslik"], "aciklama": k["aciklama"], "etiketler": k.get("etiketler", []),
                   "kategori": k.get("kategori", "27"), "publishAt": k.get("yayin_zamani") or "", "sentetik": bool(k["sentetik"]),
                   "seri": k["seri"], "tur": k["format"], "sunucu_video": f"{kod}.mp4", "ureten": k.get("ureten", "Claude"), "havuz": True}
+            if k.get("ekran_yazisi") == "tasarim":  # Ömer'in onaylı tasarım-yazısı istisnası (14.11, 18.11) yükleyiciye de taşınır
+                yt["ust_bant_izinli"] = True
             cikti.append({"platform": "youtube", "dosya": f"sunucu/yt_kuyruk/{kod}.json", "icerik": yt})
         if "tiktok" in pl:
             os.makedirs("/opt/aesun/youtube/medya", exist_ok=True)

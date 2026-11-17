@@ -84,9 +84,15 @@ def gemini_soyle(metin, ses, yol_wav):
             with urllib.request.urlopen(r, timeout=300) as y:
                 d = json.load(y)
             parca = d["candidates"][0]["content"]["parts"][0]["inlineData"]
-            hz = re.search(r"rate=(\d+)", parca.get("mimeType", "")); hz = hz.group(1) if hz else "24000"
-            ham = yol_wav + ".pcm"; open(ham, "wb").write(base64.b64decode(parca["data"]))
-            ff("-f", "s16le", "-ar", hz, "-ac", "1", "-i", ham, "-ar", "24000", "-ac", "1", yol_wav); os.remove(ham)
+            mime = (parca.get("mimeType") or "").lower()
+            hz = re.search(r"rate=(\d+)", mime); hz = hz.group(1) if hz else "24000"
+            veri = base64.b64decode(parca["data"])
+            ham = yol_wav + ".bin"; open(ham, "wb").write(veri)
+            if veri[:4] in (b"RIFF", b"OggS", b"fLaC") or veri[:3] == b"ID3" or any(x in mime for x in ("wav", "mp3", "mpeg", "ogg")):
+                ff("-i", ham, "-ar", "24000", "-ac", "1", yol_wav)
+            else:
+                ff("-f", "s16le", "-ar", hz, "-ac", "1", "-i", ham, "-ar", "24000", "-ac", "1", yol_wav)
+            os.remove(ham)
             time.sleep(6); return
         except (TimeoutError, OSError) as e:
             if not isinstance(e, urllib.error.HTTPError):
@@ -112,7 +118,9 @@ def gemini_uret(is_, parca, tmp):
         if o[0] == "dur":
             ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono", "-t", f"{o[1]:.2f}", w); wavlar.append(w); continue
         ses, ton, cs = o; metin = " ".join(cs)
-        gemini_soyle(f"{GYON[ton]} in Turkish: {metin}", ses, w)
+        m_ad = gemini_model(os.environ.get("GEMINI_KEY", ""))
+        istek = f"{GYON[ton]} in Turkish: {metin}" if "2.5" in m_ad else metin
+        gemini_soyle(istek, ses, w)
         sure = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", w],
                                     capture_output=True, text=True).stdout or 0)
         if sure > len(metin) / 9 + 3:

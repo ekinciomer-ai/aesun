@@ -15,9 +15,9 @@ S.gunes=()=>{const sc=new THREE.Scene();const c=cam(46);const U=uzay(sc);const g
       const d=o.pt-ts;sok.material.opacity=d>0?Math.max(0,1-d/.45)*1.0:0;sok.scale.setScalar(5+Math.max(0,d)*26);
       kv.material.opacity=d>0?Math.max(0,1-d/1.4)*.9:0;kv.scale.setScalar(3.1+Math.max(0,d)*14);
       U.m.uniforms.k.value=lerp(.55,1.2,1-k);
-      orb(c,V3(0,2.4,0),lerp(17,13,eio(o.pu)),lerp(1.35,1.6,o.pu),lerp(.06,.02,o.pu));kv.lookAt(c.position);hl.lookAt(c.position)}
+      orb(c,V3(0,2.6,0),lerp(M.T.acik?24:17,M.T.acik?19:13,eio(o.pu)),lerp(1.35,1.6,o.pu),lerp(.06,.02,o.pu));kv.lookAt(c.position);hl.lookAt(c.position)}
     else{g.ayar(o.t,0);hl.ayar(o.t,sm(0,.25,o.pu));sok.material.opacity=0;kv.material.opacity=0;U.m.uniforms.k.value=1.2;
-      orb(c,V3(0,2.6,0),lerp(19,16,eio(o.pu)),1.57,lerp(.02,.06,o.pu));hl.lookAt(c.position)}}}};
+      orb(c,V3(0,M.T.acik?-1.2:2.6,0),lerp(M.T.acik?26:19,M.T.acik?22:16,eio(o.pu)),1.57,lerp(.02,.06,o.pu));hl.lookAt(c.position)}}}};
 
 /* ---------- IŞIK YOLU: Güneş → Dünya (hız, mesafe, süre, son ışık) ---------- */
 S.isik=()=>{const sc=new THREE.Scene();const c=cam(50);const U=uzay(sc);const SY=7.5,EY=-7.5;
@@ -100,8 +100,8 @@ S.donma=()=>{const sc=new THREE.Scene();const c=cam(46);uzay(sc);const e=dunya(1
 function studyo(sc,ust="#0b1a33",alt="#02040a"){const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{u:{value:L(ust)},a:{value:L(alt)}},
   vertexShader:"varying vec3 v;void main(){v=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
   fragmentShader:"uniform vec3 u,a;varying vec3 v;void main(){float h=clamp(v.y*.5+.5,0.,1.);gl_FragColor=vec4(mix(a,u,pow(h,1.6)),1.);}"});sc.add(new THREE.Mesh(new THREE.SphereGeometry(600,32,16),m));
-  const z=new THREE.Mesh(new THREE.CircleGeometry(60,64),std("#070b14",.5,.6,{envMapIntensity:.25}));z.rotation.x=-PI/2;sc.add(z);const g=izgara(sc,60,60,"#6FE3FF",.09);g.position.y=.002;sc.fog=new THREE.FogExp2(L(alt),.035);return m}
-const POZ={soru:{p:[0,1.7,0],r:[.25,0,.0],cam:[8.4,1.55,.14,2.75]},olcu:{p:[0,1.75,0],r:[0,0,0],cam:[7.9,1.57,.04,1.3]},isin:{p:[0,1.3,0],r:[-.75,0,0],cam:[7.4,1.2,.3,.55]},sonuc:{p:[0,1.7,0],r:[.25,0,0],cam:[8.4,1.55,.14,.9]}};
+  const A=M.T.acik;const z=new THREE.Mesh(new THREE.CircleGeometry(60,64),A?new THREE.MeshLambertMaterial({color:L("#efeee9")}):std("#070b14",.5,.6,{envMapIntensity:.25}));z.rotation.x=-PI/2;sc.add(z);z.userData.kabuk=1;const g=izgara(sc,60,60,A?"#9aa3b5":"#6FE3FF",A?.35:.09);g.position.y=.002;if(!A)sc.fog=new THREE.FogExp2(L(alt),.035);return m}
+const POZ={soru:{p:[0,1.7,0],r:[.25,0,.0],cam:[8.4,1.55,.14,2.75]},olcu:{p:[0,1.75,0],r:[0,0,0],cam:[9.6,1.57,.04,1.05]},isin:{p:[0,1.3,0],r:[-.75,0,0],cam:[7.4,1.2,.3,.55]},sonuc:{p:[0,1.7,0],r:[.25,0,0],cam:[8.4,1.55,.14,.9]}};
 S.panel=()=>{const sc=new THREE.Scene();const c=cam(46);studyo(sc);isik(sc,"#ffffff",2.4,"#6FE3FF",1.6);const pn=panel();sc.add(pn);
   const tel=[];for(let i=0;i<10;i++){const t=telefon();t.scale.setScalar(.42);sc.add(t);t.ekran.ciz(.15+.08*i,"");tel.push(t)}
   const w=yazi("1,13 m",{boy:.32,renk:"#F2C46B"}),hh=yazi("2,28 m",{boy:.32,renk:"#F2C46B"});
@@ -162,9 +162,9 @@ S.enerji=()=>{const sc=new THREE.Scene();const c=cam(46);studyo(sc,"#0c1a30");is
   return{sc,c,bl:[.85,.5,.75],kur(o){const t=o.t;const f1=eio(sm(.02,.42,o.pu));const kop=sm(.5,.85,o.pu);const sev=2310*f1-310*kop;const hy=(sev/2400)*H;
     sv.scale.y=Math.max(.001,hy);sv.position.y=.12+hy/2;
     parcalar.forEach((g,i)=>{const d=cl((kop*1.25)-i*.12);g.position.set(Math.cos(i*2.094+1)*d*1.2,.12+(2310/2400)*H+.07+d*1.4-d*d*3.5,Math.sin(i*2.094+1)*d*1.2);g.rotation.set(d*1.2,d*2,0);g.visible=o.pu>.42&&d<.98;g.m.material.opacity=1-sm(.6,1,d);g.y.material.opacity=sm(.0,.15,d)*(1-sm(.7,1,d))});
-    ust.set(Math.round(sev).toLocaleString("tr-TR")+" Wh");ust.position.set(0,H+.8,0);
+    ust.visible=false;ust.position.set(0,H+.8,0);
     for(let i=0;i<N;i++){const[a,ph,r]=D[i];const q=(t*.3+ph)%1;const yy=.15+q*hy;P.set([Math.cos(a+t)*.75*r,yy,Math.sin(a+t)*.75*r],i*3);const f=Math.sin(q*PI)*.9;C.set([f*.4,f*.9,f*1.1],i*3)}ps.geometry.attributes.position.needsUpdate=ps.geometry.attributes.color.needsUpdate=true;
-    orb(c,V3(0,1.25,0),lerp(11,10,eio(o.pu)),1.1+o.pu*.5,lerp(.3,.22,o.pu))}}};
+    orb(c,V3(0,1.75,0),lerp(12,11,eio(o.pu)),1.1+o.pu*.5,lerp(.3,.22,o.pu))}}};
 
 /* telefon: 0 → %100 dolum */
 S.telefon=()=>{const sc=new THREE.Scene();const c=cam(42);studyo(sc,"#0c1730");isik(sc,"#ffffff",2.2,"#6FE3FF",1.8);const ph=telefon();ph.scale.setScalar(1.12);sc.add(ph);
@@ -175,7 +175,7 @@ S.telefon=()=>{const sc=new THREE.Scene();const c=cam(42);studyo(sc,"#0c1730");i
     kb.scale.y=4.4;kb.position.y=2.05-.86-2.2;
     l3.material.opacity=sm(.35,.45,o.pu);
     for(let i=0;i<N;i++){const q=(t*.8+i/N)%1;P.set([Math.sin(i*7.1)*.03,-2.2+q*3.4,Math.cos(i*3.3)*.03],i*3);const f=Math.sin(q*PI)*1.0*(1-sm(.95,1,o.pu));C.set([f*.3,f,f*.6],i*3)}ps.geometry.attributes.position.needsUpdate=ps.geometry.attributes.color.needsUpdate=true;
-    orb(c,V3(0,1.25,0),lerp(7.6,7.0,eio(o.pu)),1.57+Math.sin(o.t*.3)*.12,lerp(.12,.06,o.pu))}}};
+    orb(c,V3(0,1.55,0),lerp(8.2,7.6,eio(o.pu)),1.57+Math.sin(o.t*.3)*.12,lerp(.12,.06,o.pu))}}};
 
 /* 85 telefon ızgarası */
 S.izgara=()=>{const sc=new THREE.Scene();const c=cam(46);studyo(sc,"#0b1630");isik(sc,"#ffffff",2.2,"#6FE3FF",1.5);

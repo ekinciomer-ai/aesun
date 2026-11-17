@@ -1,50 +1,217 @@
 {
  "kod": "KZ_MRK_02_PANEL",
  "no": "MERAK #02",
- "soru": {"ust": "MERAK LAB", "t": "TEK PANEL GÜNDE<br><i>KAÇ TELEFON</i> ŞARJ EDER?"},
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "TEK PANEL GÜNDE<br><i>KAÇ TELEFON</i> ŞARJ EDER?"
+ },
  "parcalar": [
-  {"id": "s01", "sahne": "panel", "p": {"mod": "soru"},
-   "metin": "Tek bir güneş paneli, bir günde kaç telefonu şarj eder? Tahminini aklında tut.", "ekran": []},
-  {"id": "s02", "sahne": "panel", "p": {"mod": "olcu"},
+  {
+   "id": "s01",
+   "sahne": "panel",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Tek bir güneş paneli, bir günde kaç telefonu şarj eder? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "panel",
+   "p": {
+    "mod": "olcu"
+   },
    "metin": "Büyük güneş santrallerinde kullanılan tipik bir panel: beş yüz elli vat, yaklaşık iki buçuk metrekare.",
-   "ekran": [{"tip": "sayi", "say": 550, "ek": "W", "ust": "PANEL GÜCÜ", "k": "beş"}]},
-  {"id": "s03", "sahne": "panel", "p": {"mod": "isin"},
+   "ekran": [
+    {
+     "tip": "sayi",
+     "say": 550,
+     "ek": "W",
+     "ust": "PANEL GÜCÜ",
+     "k": "beş"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "panel",
+   "p": {
+    "mod": "isin"
+   },
    "metin": "Panele düşen güneş ışığının sadece beşte biri elektriğe dönüşür. Gerisi ısı olarak kaybolur.",
-   "ekran": [{"tip": "formul", "y": "<em>%21</em> elektrik · %79 ısı", "k": "beşte"}]},
-  {"id": "s04", "sahne": "gun", "p": {},
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "<em>%21</em> elektrik · %79 ısı",
+     "k": "beşte"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "gun",
+   "p": {},
    "metin": "Türkiye'de bir metrekareye günde ortalama dört virgül iki kilovatsaat güneş enerjisi düşer. Bu, panelin günde yaklaşık dört saat tam güçte çalışması demek.",
-   "ekran": [{"tip": "sayi", "say": 4.2, "dec": 1, "ek": "kWh/m²", "ust": "TÜRKİYE · GÜNLÜK ORT.", "k": "dört"},
-             {"tip": "etiket", "y": "≈ 4,2 saat tam güç", "k": "saat"}]},
-  {"id": "s05", "sahne": "enerji", "p": {"kart": 50},
-   "metin": "Beş yüz elli vat çarpı dört virgül iki saat: iki bin üç yüz vatsaat. Kablo, ısı ve inverter kayıplarından sonra elimizde yaklaşık iki bin vatsaat kalır.",
-   "ekran": [{"tip": "formul", "y": "550 W <em>×</em> 4,2 h = 2.310 Wh", "k": "Beş"},
-             {"tip": "sayi", "say": 2000, "on": "≈ ", "ek": "Wh", "ust": "KAYIPLARDAN SONRA", "k": "elimizde"}]},
-  {"id": "s06", "sahne": "telefon", "p": {"kart": 54},
-   "metin": "Şimdi telefon. Beş bin miliamper saatlik bir pil, yaklaşık on dokuz vatsaat enerji tutar. Şarj kayıplarıyla bir tam dolum, yirmi üç vatsaat eder.",
-   "ekran": [{"tip": "formul", "y": "5.000 mAh <em>×</em> 3,85 V ≈ 19 Wh", "k": "Beş"},
-             {"tip": "sayi", "say": 23, "ek": "Wh / dolum", "ust": "KAYIPLARLA", "k": "yirmi"}]},
-  {"id": "s07", "sahne": "izgara", "p": {},
+   "ekran": [
+    {
+     "tip": "sayi",
+     "say": 4.2,
+     "dec": 1,
+     "ek": "kWh/m²",
+     "ust": "TÜRKİYE · GÜNLÜK ORT.",
+     "k": "dört"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 4,2 saat tam güç",
+     "k": "saat"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "enerji",
+   "p": {
+    "kart": 48
+   },
+   "metin": "Beş yüz elli vat çarpı dört virgül iki saat: iki bin üç yüz vatsaat. Kayıplardan sonra yaklaşık iki bin vatsaat kalır. Bu, çamaşır makinesini iki kez çalıştırmaya yeter.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "550 W <em>×</em> 4,2 h = 2.310 Wh",
+     "k": "Beş"
+    },
+    {
+     "tip": "sayi",
+     "say": 2000,
+     "on": "≈ ",
+     "ek": "Wh",
+     "ust": "KAYIPLARDAN SONRA",
+     "k": "kayıplardan"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 2 çamaşır yıkama",
+     "k": "çamaşır"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "telefon",
+   "p": {
+    "kart": 47
+   },
+   "metin": "Şimdi telefon. Beş bin miliamper saatlik bir pil, yaklaşık on dokuz vatsaat tutar. Bu, su ısıtıcısını sadece yarım dakika çalıştırır. Şarj kayıplarıyla bir dolum, yirmi üç vatsaat eder.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "5.000 mAh <em>×</em> 3,85 V ≈ 19 Wh",
+     "k": "Beş"
+    },
+    {
+     "tip": "etiket",
+     "y": "= su ısıtıcısında ~35 saniye",
+     "k": "su"
+    },
+    {
+     "tip": "sayi",
+     "say": 23,
+     "ek": "Wh / dolum",
+     "ust": "KAYIPLARLA",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "izgara",
+   "p": {},
    "metin": "İki bini, yirmi üçe böl: yaklaşık seksen beş telefon. Tek panel, her gün.",
-   "ekran": [{"tip": "formul", "y": "2.000 <em>÷</em> 23", "k": "İki"},
-             {"tip": "sayi", "say": 85, "on": "≈ ", "ek": "telefon", "sure": 2.2, "k": "seksen"}]},
-  {"id": "s08", "sahne": "santral", "p": {},
-   "metin": "Bir megavatlık bir güneş santralinde ise yaklaşık bin sekiz yüz panel var. Bu da her gün yüz elli bin telefon demek.",
-   "ekran": [{"tip": "etiket", "y": "1 MW ≈ 1.800 panel", "k": "bin"},
-             {"tip": "sayi", "say": 150000, "on": "≈ ", "ek": "telefon/gün", "sure": 2.0, "k": "yüz"}]},
-  {"id": "s09", "sahne": "panel", "p": {"mod": "soru", "son": true},
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "2.000 <em>÷</em> 23",
+     "k": "İki"
+    },
+    {
+     "tip": "sayi",
+     "say": 85,
+     "on": "≈ ",
+     "ek": "telefon",
+     "sure": 2.2,
+     "k": "seksen"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "santral",
+   "p": {},
+   "metin": "Bir megavatlık güneş santrali ise iki futbol sahası kadar alanda, yaklaşık bin sekiz yüz panel demek. Bu da her gün yüz elli bin telefon.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "1 MW ≈ 1.800 panel ≈ 2 futbol sahası",
+     "k": "futbol"
+    },
+    {
+     "tip": "sayi",
+     "say": 150000,
+     "on": "≈ ",
+     "ek": "telefon/gün",
+     "sure": 2.0,
+     "k": "yüz"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "panel",
+   "p": {
+    "mod": "soru",
+    "son": true
+   },
    "metin": "Senin tahminin kaç çıkmıştı? Yorumlara yaz.",
-   "ekran": [{"tip": "sayi", "say": 85, "ust": "DOĞRU CEVAP", "ek": "telefon", "k": "Senin"}, {"tip": "etiket", "y": "Yorumlara yaz 👇", "k": "Yorumlara"}]}
+   "ekran": [
+    {
+     "tip": "sayi",
+     "say": 85,
+     "ust": "DOĞRU CEVAP",
+     "ek": "telefon",
+     "k": "Senin"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
  ],
  "yayin": {
   "baslik": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
   "aciklama": "550 W'lık tipik bir güneş paneli Türkiye'de günde yaklaşık 2 kWh üretir. 5.000 mAh'lik bir telefonun bir tam dolumu kayıplarla ~23 Wh. Sonuç: tek panel her gün ~85 telefon! 1 MW'lık bir santral ise ~150.000 telefon.\n\nSenin tahminin kaç çıkmıştı? Yorumlara yaz 👇\n\nHesaplar ortalama değerlerle yapılmıştır; gerçek üretim konuma, eğime ve mevsime göre değişir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Enerji ve Tabii Kaynaklar Bakanlığı – GEPA (Türkiye ort. 4,18 kWh/m²·gün), tipik 550 W monokristal modül veri sayfaları (~%21 verim, 2,28 × 1,13 m), Li-ion telefon pili 5.000 mAh × 3,85 V.\n\n#kozmoslab #güneşenerjisi #ges #bilim #shorts",
-  "etiketler": ["güneş paneli", "güneş enerjisi", "ges", "telefon şarjı", "enerji", "bilim", "kozmos lab", "shorts"]
+  "etiketler": [
+   "güneş paneli",
+   "güneş enerjisi",
+   "ges",
+   "telefon şarjı",
+   "enerji",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
  },
  "kaynaklar": [
   "T.C. Enerji ve Tabii Kaynaklar Bakanlığı – Güneş Enerjisi Potansiyel Atlası (GEPA): Türkiye yıllık ort. 1.527 kWh/m² (günlük ~4,18 kWh/m²), 2.741 saat güneşlenme",
   "Tipik 550 W monokristal PERC/TOPCon modül veri sayfaları: ~%21,3 verim, ~2.278 × 1.134 mm (~2,58 m²)",
   "Sistem kayıpları (kablo, sıcaklık, inverter): performans oranı ~%80-85 (IEC 61724 kavramı, sektör ortalaması)",
   "Telefon pili: 5.000 mAh × 3,85 V nominal = 19,25 Wh; şarj verimi ~%80-85",
-  "1 MWp / 550 Wp ≈ 1.818 panel"
- ]
+  "1 MWp / 550 Wp ≈ 1.818 panel",
+  "Çamaşır makinesi: 40 °C pamuklu program ~0,8–1 kWh/yıkama (AB enerji etiketi verileri)",
+  "Su ısıtıcısı (kettle) ~2.000 W: 19 Wh ≈ 34 saniye",
+  "1 MWp sabit eğimli GES arazi ihtiyacı ~1,5–2 hektar; futbol sahası ~0,7 hektar"
+ ],
+ "tema": "acik"
 }

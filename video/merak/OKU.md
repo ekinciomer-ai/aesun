@@ -17,11 +17,12 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 - Son parça: cevabı tekrar göster + "Yorumlara yaz" (yorum = algoritma sinyali).
 - Bilgi %100 doğrulanmış olmalı; `kaynaklar` alanı zorunlu, güvenilir kaynak (NASA, ESA, bakanlık, hakemli makale, üretici veri sayfası). Tartışmalı rakamda temkinli ifade ("yaklaşık", "altına").
 - Metin TTS için yazılır: kısaltma yok, sayılar yazıyla ("yüz elli milyon"), `°C`/`km` gibi birimler yazıyla.
+- **Hayatın içinden örnek zorunlu:** her büyük sayının yanına gündelik bir karşılaştırma (ör. 8 dk = bir çay demi, −18 °C = derin dondurucu, 19 Wh = su ısıtıcısında 35 sn, 150 milyon km = 330 bin kez İstanbul–Ankara). Karşılaştırma da doğrulanır ve kaynaklara yazılır; ekranda `etiket` olarak gösterilir.
 - Sağlık tavsiyesi, siyaset, marka/logo, telifli karakter yok.
 
 ## JSON biçimi
 ```json
-{"kod":"KZ_MRK_03_AY","no":"MERAK #03","soru":{"ust":"MERAK LAB","t":"AY'A ARABAYLA<br><i>KAÇ GÜNDE?</i>"},
+{"kod":"KZ_MRK_03_AY","no":"MERAK #03","tema":"acik","soru":{"ust":"MERAK LAB","t":"AY'A ARABAYLA<br><i>KAÇ GÜNDE?</i>"},
  "ses_modu":"uzay",          // uzay | enerji (atmosfer akoru)
  "parcalar":[{"id":"s01","sahne":"gunes","p":{"mod":"son"},"metin":"...","ekran":[]},
    {"id":"s02","sahne":"isik","p":{"mod":"mesafe","kart":52},"metin":"...",
@@ -53,8 +54,9 @@ Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne ek
 Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,goruntu --kareler 60,300,900` → `arac/sayfa.py` ile kontrol sayfası.
 
 ## Görsel kurallar
+- **Tema: açık** (Ömer 17.11.2026): chionglab gibi kâğıt beyazı zemin, ince koyu kontur, düz renkler, bloom yok. `tema` alanı yoksa açık kabul edilir (`"koyu"` yalnız istenirse).
 - Ana nesne ekranın %20–55 bandında (üstte soru başlığı, %57'de hesap kartı, %73'te altyazı, alt %18 platform arayüzü).
-- Parlaklık: ACES + bloom; Güneş beyaza patlamasın. Altyazı kelime kelime, sarı vurgu.
+- Koyu temada: ACES + bloom; Güneş beyaza patlamasın. Altyazı kelime kelime, sarı vurgu.
 - Ses: atmosfer akoru konuşma altında −9 dB kısılır; geçişte whoosh + darbe, sayıda tık + çan. Müzik sesi bastırmaz.
 
 ## Durum

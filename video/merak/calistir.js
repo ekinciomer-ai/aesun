@@ -2,8 +2,8 @@
 (function(){
 const {cl,sm,lerp,eo,eob,ciz}=M;const $=id=>document.getElementById(id);
 let K=null,B=[],CH=[];const ORN={};
-function sahneAl(ad){if(!ORN[ad]){if(!S[ad])throw new Error("sahne yok: "+ad);ORN[ad]=S[ad]()}return ORN[ad]}
-function hazirla(k){K=k;B=[];
+function sahneAl(ad){if(!ORN[ad]){if(!S[ad])throw new Error("sahne yok: "+ad);ORN[ad]=S[ad]();M.murekkep(ORN[ad].sc)}return ORN[ad]}
+function hazirla(k){K=k;B=[];M.T.acik=(K.tema||"acik")==="acik";document.body.classList.toggle("acik",M.T.acik);
   // ardışık aynı sahneli parçalar tek blok
   K.parcalar.forEach((p,i)=>{const son=B[B.length-1];if(son&&son.sahne===p.sahne&&!p.yeni){son.parcalar.push(p);son.son=p.son}else B.push({sahne:p.sahne,bas:p.bas,son:p.son,parcalar:[p]})});
   B.forEach((b,i)=>{b.i=i;const sonb=B[i+1];if(sonb)b.son=sonb.bas});B[B.length-1].son=K.toplam;
@@ -32,9 +32,9 @@ function kare(t){let bi=B.findIndex(b=>t>=b.bas&&t<b.son);if(bi<0)bi=t<B[0].bas?
   let pi=b.parcalar.findIndex(p=>t>=p.bas&&t<p.son);if(pi<0)pi=t<b.parcalar[0].bas?0:b.parcalar.length-1;const p=b.parcalar[pi];
   const pEnd=pi<b.parcalar.length-1?b.parcalar[pi+1].bas:b.son;const o={t,u:cl((t-b.bas)/(b.son-b.bas)),bt:t-b.bas,dur:b.son-b.bas,pi,pu:cl((t-p.bas)/(pEnd-p.bas)),pt:t-p.bas,pd:pEnd-p.bas,p:p.p||{},pp:b.parcalar.map(x=>x.p||{}),
     pb:b.parcalar.map(x=>x.bas-b.bas),ev:(p.ekran||[]).map(e=>e.t-p.bas),son:bi===B.length-1,ilk:bi===0};
-  const sn=sahneAl(b.sahne);sn.kur(o);ciz(sn);
+  const sn=sahneAl(b.sahne);sn.kur(o);if(M.T.acik)sn.sc.traverse(x=>{if(x.userData.bb)x.quaternion.copy(sn.c.quaternion)});ciz(sn);
   // geçiş: flaş + zoom vuruşu
-  const dt=t-b.bas;$("flas").style.opacity=bi>0&&dt<.16?(1-dt/.16)*.5:0;const z=bi>0?1+.07*(1-eo(cl(dt/.45))):1;$("c").style.transform=`scale(${z})`;
+  const dt=t-b.bas;$("flas").style.opacity=M.T.acik?0:(bi>0&&dt<.16?(1-dt/.16)*.5:0);const z=bi>0?1+.07*(1-eo(cl(dt/.45))):1;$("c").style.transform=`scale(${z})`;
   const kalan=K.toplam-t;$("kara").style.opacity=Math.max(cl(1-t/.4),cl(1-kalan/.5));
   // soru başlığı: açılışta ortada büyük, sonra yukarı küçülür
   const ilkSon=K.parcalar[0].son,g=eo(cl((t-ilkSon+.15)/.6)),gir=eob(cl(t/.55));const s=$("soru");

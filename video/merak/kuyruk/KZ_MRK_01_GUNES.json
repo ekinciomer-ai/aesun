@@ -1,50 +1,220 @@
 {
  "kod": "KZ_MRK_01_GUNES",
  "no": "MERAK #01",
- "soru": {"ust": "MERAK LAB", "t": "GÜNEŞ ŞU AN<br><i>YOK OLSA?</i>"},
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "GÜNEŞ ŞU AN<br><i>YOK OLSA?</i>"
+ },
  "parcalar": [
-  {"id": "s01", "sahne": "gunes", "p": {"mod": "son", "an": 0.55},
-   "metin": "Güneş şu an yok olsa, bunu ne zaman fark ederdin? Cevap: hemen değil.", "ekran": []},
-  {"id": "s02", "sahne": "isik", "p": {"mod": "hiz"},
+  {
+   "id": "s01",
+   "sahne": "gunes",
+   "p": {
+    "mod": "son",
+    "an": 0.55
+   },
+   "metin": "Güneş şu an yok olsa, bunu ne zaman fark ederdin? Cevap: hemen değil.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "isik",
+   "p": {
+    "mod": "hiz"
+   },
    "metin": "Güneşten çıkan ışık, saniyede yaklaşık üç yüz bin kilometre yol alır.",
-   "ekran": [{"tip": "sayi", "ust": "IŞIK HIZI", "say": 299792, "ek": "km/s", "k": "üç"}]},
-  {"id": "s03", "sahne": "isik", "p": {"mod": "mesafe"},
-   "metin": "Dünya'ya ulaşmak için ise yüz elli milyon kilometre gitmesi gerekir.",
-   "ekran": [{"tip": "sayi", "ust": "GÜNEŞ → DÜNYA", "say": 149.6, "dec": 1, "ek": "milyon km", "k": "yüz"}]},
-  {"id": "s04", "sahne": "isik", "p": {"mod": "sure", "kart": 52},
-   "metin": "Böl bakalım. Yüz elli milyonu, üç yüz bine. Sonuç yaklaşık beş yüz saniye. Yani sekiz dakika, on dokuz saniye.",
-   "ekran": [{"tip": "formul", "y": "149.600.000 <em>÷</em> 299.792", "k": "Yüz"},
-             {"tip": "sayi", "say": 499, "ek": "saniye", "on": "≈ ", "k": "beş"},
-             {"tip": "etiket", "y": "= 8 dakika 19 saniye", "k": "sekiz"}]},
-  {"id": "s05", "sahne": "isik", "p": {"mod": "son"},
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "IŞIK HIZI",
+     "say": 299792,
+     "ek": "km/s",
+     "k": "üç"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "isik",
+   "p": {
+    "mod": "mesafe"
+   },
+   "metin": "Dünya'ya ulaşmak için ise yüz elli milyon kilometre gitmesi gerekir. İstanbul'dan Ankara'ya üç yüz otuz bin kez gitmek gibi.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "GÜNEŞ → DÜNYA",
+     "say": 149.6,
+     "dec": 1,
+     "ek": "milyon km",
+     "k": "yüz"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 330.000 × İstanbul–Ankara",
+     "k": "İstanbul'dan"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "isik",
+   "p": {
+    "mod": "sure",
+    "kart": 47
+   },
+   "metin": "Böl bakalım. Yüz elli milyonu, üç yüz bine. Sonuç: sekiz dakika on dokuz saniye. Aşağı yukarı bir çayın demlenme süresi.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "149.600.000 <em>÷</em> 299.792",
+     "k": "Yüz"
+    },
+    {
+     "tip": "sayi",
+     "say": 499,
+     "ek": "saniye",
+     "on": "≈ ",
+     "k": "sekiz"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 8 dk 19 sn = bir çay demi ☕",
+     "k": "çayın"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "isik",
+   "p": {
+    "mod": "son"
+   },
    "metin": "Bu sürede gökyüzü hâlâ aydınlık. Çünkü gördüğün ışık, Güneş'ten sekiz dakika önce yola çıkmıştı.",
-   "ekran": [{"tip": "etiket", "y": "Gördüğün ışık 8 dk 19 sn önce çıktı", "k": "gördüğün"}]},
-  {"id": "s06", "sahne": "yorunge", "p": {},
-   "metin": "Peki ya yerçekimi? O da ışık hızında yayılır. Dünya, sekiz dakika boyunca hiçbir şey olmamış gibi dönmeye devam eder.",
-   "ekran": [{"tip": "etiket", "y": "Kütleçekim de ışık hızında", "k": "ışık"}]},
-  {"id": "s07", "sahne": "yorunge", "p": {},
-   "metin": "Sonra saniyede otuz kilometre hızla, dümdüz bir çizgide uzaya fırlar.",
-   "ekran": [{"tip": "sayi", "ust": "YÖRÜNGE HIZI", "say": 29.8, "dec": 1, "ek": "km/s", "k": "otuz"}]},
-  {"id": "s08", "sahne": "jupiter", "p": {},
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "Gördüğün ışık 8 dk 19 sn önce çıktı",
+     "k": "gördüğün"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "yorunge",
+   "p": {},
+   "metin": "Peki ya yerçekimi? O da ışık hızında yayılır. Dünya sekiz dakika boyunca hiçbir şey olmamış gibi dönmeye devam eder.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "Kütleçekim de ışık hızında",
+     "k": "ışık"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "yorunge",
+   "p": {},
+   "metin": "Sonra saniyede otuz kilometre hızla, dümdüz bir çizgide uzaya fırlar. Bir tüfek mermisinden otuz kat hızlı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "YÖRÜNGE HIZI",
+     "say": 29.8,
+     "dec": 1,
+     "ek": "km/s",
+     "k": "otuz"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 30 × tüfek mermisi",
+     "k": "tüfek"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "jupiter",
+   "p": {},
    "metin": "Ama asıl sürpriz şu: Jüpiter bir saatten fazla parlamaya devam eder. Çünkü onun yansıttığı ışık, çok daha uzun bir yoldan gelir.",
-   "ekran": [{"tip": "formul", "y": "43 + 33 <em>−</em> 8 ≈ <em>68 dk</em>", "k": "uzun"}]},
-  {"id": "s09", "sahne": "donma", "p": {},
-   "metin": "Bir hafta içinde, yeryüzünün ortalama sıcaklığı eksi on sekiz derecenin altına iner.",
-   "ekran": [{"tip": "sayi", "ust": "1 HAFTA SONRA", "den": 15, "say": -18, "ek": "°C", "soguk": true, "sure": 2.4, "k": "yeryüzünün"}]},
-  {"id": "s10", "sahne": "gunes", "p": {"mod": "halka"},
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "43 + 33 <em>−</em> 8 ≈ <em>68 dk</em>",
+     "k": "uzun"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "donma",
+   "p": {},
+   "metin": "Bir hafta içinde yeryüzünün ortalama sıcaklığı eksi on sekiz derecenin altına iner. Tıpkı evdeki derin dondurucunun içi gibi.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 HAFTA SONRA",
+     "den": 15,
+     "say": -18,
+     "ek": "°C",
+     "soguk": true,
+     "sure": 2.4,
+     "k": "yeryüzünün"
+    },
+    {
+     "tip": "etiket",
+     "y": "= derin dondurucu ❄",
+     "k": "derin"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "gunes",
+   "p": {
+    "mod": "halka"
+   },
    "metin": "Sence o sekiz dakikada ne yapardın? Yorumlara yaz.",
-   "ekran": [{"tip": "sayi", "ust": "SENİN 8 DAKİKAN", "y": "8:19", "k": "sekiz"}, {"tip": "etiket", "y": "Yorumlara yaz 👇", "k": "yorumlara"}]}
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "SENİN 8 DAKİKAN",
+     "y": "8:19",
+     "k": "sekiz"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "yorumlara"
+    }
+   ]
+  }
  ],
  "yayin": {
   "baslik": "Güneş şu an yok olsa, ne zaman fark ederdin? ☀️ #shorts",
   "aciklama": "Güneş bir anda yok olsa 8 dakika 19 saniye hiçbir şey fark etmezdik: ışık da kütleçekim de ışık hızıyla gelir. Sonra Dünya saniyede 29,8 km hızla düz bir çizgide uzaya fırlar; Jüpiter ise bir saatten fazla parlamaya devam eder. Bir hafta içinde yüzey sıcaklığı −18 °C'nin altına iner.\n\nSence o 8 dakikada ne yapardın? Yorumlara yaz 👇\n\nBu video bir düşünce deneyidir; Güneş'in bir anda yok olması fiziksel olarak mümkün değildir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA (Güneş-Dünya uzaklığı, ışık hızı), LIGO/Virgo GW170817 (kütleçekimin hızı), NASA Jüpiter bilgi sayfası, Popular Science – David Stevenson (Caltech).\n\n#kozmoslab #uzay #güneş #bilim #shorts",
-  "etiketler": ["güneş", "güneş yok olsa", "ışık hızı", "kütleçekim", "jüpiter", "uzay", "bilim", "kozmos lab", "shorts"]
+  "etiketler": [
+   "güneş",
+   "güneş yok olsa",
+   "ışık hızı",
+   "kütleçekim",
+   "jüpiter",
+   "uzay",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
  },
  "kaynaklar": [
   "NASA – Sun facts / astronomik birim 149,6 milyon km; ışık hızı 299.792,458 km/s (ışığın Güneş'ten Dünya'ya ~8 dk 19 sn'de gelmesi)",
   "LIGO/Virgo GW170817 + Fermi GRB 170817A (2017): kütleçekim dalgalarının ışık hızıyla yayıldığının ölçümü",
   "NASA Earth Fact Sheet: ortalama yörünge hızı 29,78 km/s",
   "NASA Jupiter Fact Sheet: Güneş'e ort. uzaklık 778,5 milyon km (~43 ışık dakikası); Dünya'ya en yakın ~588 milyon km (~33 ışık dakikası)",
-  "Popular Science (2013) – David Stevenson, Caltech: bir haftada ortalama yüzey sıcaklığı 0 °F (−18 °C) altına, bir yılda ~−73 °C"
- ]
+  "Popular Science (2013) – David Stevenson, Caltech: bir haftada ortalama yüzey sıcaklığı 0 °F (−18 °C) altına, bir yılda ~−73 °C",
+  "İstanbul–Ankara karayolu ~450 km (149,6 milyon / 450 ≈ 332.000)",
+  "Tüfek mermisi namlu çıkış hızı ~0,8–1 km/s",
+  "Derin dondurucu standart çalışma sıcaklığı −18 °C"
+ ],
+ "tema": "acik"
 }

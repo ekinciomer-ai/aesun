@@ -48,14 +48,14 @@ jobs:
         with: { name: "ek-${{ matrix.kod }}", path: "/tmp/is/${{ matrix.kod }}/kapak.jpg\n/tmp/is/${{ matrix.kod }}/kurgu.json", retention-days: 14 }
   aktar:
     needs: [liste, uret]
-    if: always() && needs.liste.outputs.kodlar != '[]'
+    if: ${{ !cancelled() && needs.liste.outputs.kodlar != '[]' }}
     strategy: { fail-fast: false, max-parallel: 1, matrix: { kod: "${{ fromJson(needs.liste.outputs.kodlar) }}" } }
     uses: ./.github/workflows/video_aktar.yml
     with: { run_id: "${{ github.run_id }}", ad: "${{ matrix.kod }}" }
     secrets: inherit
   teslim:
     needs: [liste, aktar]
-    if: always() && needs.liste.outputs.kodlar != '[]'
+    if: ${{ !cancelled() && needs.liste.outputs.kodlar != '[]' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

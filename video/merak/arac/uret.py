@@ -11,7 +11,7 @@ import numpy as np
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SR = 48000
-TEMPO = 1.12          # gTTS biraz yavaş; doğal hıza çek
+TEMPO = 1.16          # gTTS biraz yavaş; doğal hıza çek
 ARA = 0.22            # parçalar arası nefes
 ILK = 0.45            # video başında sessizlik
 

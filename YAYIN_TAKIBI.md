@@ -111,3 +111,10 @@ Her bölüm **kanalının izleyicisine** göre üretilir; tek metnin çevirisi d
 - **ES (Estudio Antiguo):** İspanya + Latin Amerika — İspanyol/Latin örnekler, tarihler, deyimler.
 - Bu kural **fotoğraf, video, ses, müzik ve metin** katmanlarının hepsine uygulanır (ör. TR görselinde İstanbul, EN'de çok uluslu pazar, ES'de İspanyol limanı; TR özel günü başka dilde yoktur).
 - Üretim kontrol listesi: kanca ülkeye göre mi? örnekler o coğrafyadan mı? görsellerde yabancı bayrak/şehir var mı? seslendirme dili ve deyimler doğal mı? müzik/ses o kültüre uygun mu? özel gün/takvim o ülkeye göre mi?
+
+## Sekmeler, hesaplar ve İçerik Yöneticisi (18 Kas 2026)
+Sayfa sekmeli: Özet · Kanallar & Hesaplar · İçerik Yöneticisi · Yayın Listesi · Analiz · Yorumlar.
+- `docs/yayin/hesaplar.json`: Google hesabı → kanal haritası + vidIQ ölçümü (tipik video eğrisi: 1sa/6sa/24sa/48sa/72sa/7g medyan).
+  Yeni kanal açılınca buraya eklenir. vidIQ kredisi sınırlı (aylık); ölçümü Claude elle yeniler. Canlı abone/izlenme `analitik.json`'dan gelir.
+  Yayın Listesi'ndeki ▲/▼ etiketi videoyu aynı yaştaki tipik videoyla (vidIQ medyanı) kıyaslar.
+- `docs/yayin/havuz.json`: Yükleme Yöneticisi iş durumları; `havuz_disa.yml` saatte bir sunucudan SALT OKUNUR çeker. Elle düzenlenmez.

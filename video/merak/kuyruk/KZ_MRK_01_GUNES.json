@@ -13,7 +13,7 @@
     "mod": "son",
     "an": 0.55
    },
-   "metin": "Güneş şu an yok olsa, bunu ne zaman fark ederdin? Cevap: hemen değil.",
+   "metin": "Güneş şu an yok olsa, ne zaman fark ederdin? Cevap: hemen değil.",
    "ekran": []
   },
   {
@@ -22,7 +22,7 @@
    "p": {
     "mod": "hiz"
    },
-   "metin": "Güneşten çıkan ışık, saniyede yaklaşık üç yüz bin kilometre yol alır.",
+   "metin": "Güneşin ışığı saniyede yaklaşık üç yüz bin kilometre gider.",
    "ekran": [
     {
      "tip": "sayi",
@@ -39,7 +39,7 @@
    "p": {
     "mod": "mesafe"
    },
-   "metin": "Dünya'ya ulaşmak için ise yüz elli milyon kilometre gitmesi gerekir. İstanbul'dan Ankara'ya üç yüz otuz bin kez gitmek gibi.",
+   "metin": "Dünya'ya uzaklığı ise yüz elli milyon kilometre. İstanbul'dan Ankara'ya üç yüz otuz bin kez gitmek gibi.",
    "ekran": [
     {
      "tip": "sayi",
@@ -63,12 +63,12 @@
     "mod": "sure",
     "kart": 47
    },
-   "metin": "Böl bakalım. Yüz elli milyonu, üç yüz bine. Sonuç: sekiz dakika on dokuz saniye. Aşağı yukarı bir çayın demlenme süresi.",
+   "metin": "Böl bakalım: sekiz dakika on dokuz saniye. Aşağı yukarı bir çayın demlenme süresi.",
    "ekran": [
     {
      "tip": "formul",
      "y": "149.600.000 <em>÷</em> 299.792",
-     "k": "Yüz"
+     "k": "Böl"
     },
     {
      "tip": "sayi",
@@ -79,7 +79,7 @@
     },
     {
      "tip": "etiket",
-     "y": "≈ 8 dk 19 sn = bir çay demi ☕",
+     "y": "= 8 dk 19 sn ≈ bir çay demi ☕",
      "k": "çayın"
     }
    ]
@@ -90,7 +90,7 @@
    "p": {
     "mod": "son"
    },
-   "metin": "Bu sürede gökyüzü hâlâ aydınlık. Çünkü gördüğün ışık, Güneş'ten sekiz dakika önce yola çıkmıştı.",
+   "metin": "Yani bu sürede gökyüzü hâlâ aydınlık. Gördüğün ışık, sekiz dakika önce yola çıkmıştı.",
    "ekran": [
     {
      "tip": "etiket",
@@ -103,7 +103,7 @@
    "id": "s06",
    "sahne": "yorunge",
    "p": {},
-   "metin": "Peki ya yerçekimi? O da ışık hızında yayılır. Dünya sekiz dakika boyunca hiçbir şey olmamış gibi dönmeye devam eder.",
+   "metin": "Yerçekimi de ışık hızında yayılır. Dünya sekiz dakika boyunca hiçbir şey olmamış gibi döner.",
    "ekran": [
     {
      "tip": "etiket",
@@ -116,7 +116,7 @@
    "id": "s07",
    "sahne": "yorunge",
    "p": {},
-   "metin": "Sonra saniyede otuz kilometre hızla, dümdüz bir çizgide uzaya fırlar. Bir tüfek mermisinden otuz kat hızlı.",
+   "metin": "Sonra saniyede otuz kilometre hızla dümdüz uzaya fırlar. Bir tüfek mermisinden otuz kat hızlı.",
    "ekran": [
     {
      "tip": "sayi",
@@ -137,7 +137,7 @@
    "id": "s08",
    "sahne": "jupiter",
    "p": {},
-   "metin": "Ama asıl sürpriz şu: Jüpiter bir saatten fazla parlamaya devam eder. Çünkü onun yansıttığı ışık, çok daha uzun bir yoldan gelir.",
+   "metin": "Asıl sürpriz: Jüpiter bir saatten fazla parlamaya devam eder. Çünkü yansıttığı ışık çok daha uzun yoldan gelir.",
    "ekran": [
     {
      "tip": "formul",
@@ -150,7 +150,7 @@
    "id": "s09",
    "sahne": "donma",
    "p": {},
-   "metin": "Bir hafta içinde yeryüzünün ortalama sıcaklığı eksi on sekiz derecenin altına iner. Tıpkı evdeki derin dondurucunun içi gibi.",
+   "metin": "Bir hafta içinde ortalama sıcaklık eksi on sekiz derecenin altına iner. Derin dondurucunun içi gibi.",
    "ekran": [
     {
      "tip": "sayi",
@@ -160,7 +160,7 @@
      "ek": "°C",
      "soguk": true,
      "sure": 2.4,
-     "k": "yeryüzünün"
+     "k": "ortalama"
     },
     {
      "tip": "etiket",
@@ -175,7 +175,7 @@
    "p": {
     "mod": "halka"
    },
-   "metin": "Sence o sekiz dakikada ne yapardın? Yorumlara yaz.",
+   "metin": "Sen o sekiz dakikada ne yapardın? Yorumlara yaz.",
    "ekran": [
     {
      "tip": "sayi",

@@ -11,7 +11,7 @@ import numpy as np
 
 KOK = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SR = 48000
-TEMPO = 1.16          # gTTS biraz yavaş; doğal hıza çek
+TEMPO = 1.2          # gTTS biraz yavaş; doğal hıza çek
 ARA = 0.22            # parçalar arası nefes
 ILK = 0.45            # video başında sessizlik
 
@@ -59,7 +59,7 @@ def ses(S, IS, sahte=False):
                 raise SystemExit(f"HATA TTS {p['id']}")
         # baş/son sessizliği kırp, hızlandır, hafif ses rengi (sıcaklık + parlaklık), 48 kHz
         sh("ffmpeg", "-v", "error", "-y", "-i", mp3, "-af",
-           "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse,"
+           "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05:stop_periods=-1:stop_threshold=-45dB:stop_duration=0.3:stop_silence=0.16,areverse,"
            "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.08,areverse,"
            f"atempo={TEMPO},highpass=f=70,equalizer=f=180:t=q:w=1:g=2.5,equalizer=f=3500:t=q:w=1.2:g=2,"
            "acompressor=threshold=-18dB:ratio=3:attack=8:release=120,aresample=48000",

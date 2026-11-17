@@ -21,7 +21,7 @@
    "p": {
     "mod": "olcu"
    },
-   "metin": "Büyük güneş santrallerinde kullanılan tipik bir panel: beş yüz elli vat, yaklaşık iki buçuk metrekare.",
+   "metin": "Santrallerde kullanılan tipik bir panel: beş yüz elli vat, yaklaşık iki buçuk metrekare.",
    "ekran": [
     {
      "tip": "sayi",
@@ -38,7 +38,7 @@
    "p": {
     "mod": "isin"
    },
-   "metin": "Panele düşen güneş ışığının sadece beşte biri elektriğe dönüşür. Gerisi ısı olarak kaybolur.",
+   "metin": "Üstüne düşen güneşin sadece beşte biri elektriğe dönüşür. Gerisi ısı olur.",
    "ekran": [
     {
      "tip": "formul",
@@ -51,7 +51,7 @@
    "id": "s04",
    "sahne": "gun",
    "p": {},
-   "metin": "Türkiye'de bir metrekareye günde ortalama dört virgül iki kilovatsaat güneş enerjisi düşer. Bu, panelin günde yaklaşık dört saat tam güçte çalışması demek.",
+   "metin": "Türkiye'de bir metrekareye günde ortalama dört virgül iki kilovatsaat güneş düşer. Yani panel günde dört saat tam güçte çalışmış gibi.",
    "ekran": [
     {
      "tip": "sayi",
@@ -74,7 +74,7 @@
    "p": {
     "kart": 48
    },
-   "metin": "Beş yüz elli vat çarpı dört virgül iki saat: iki bin üç yüz vatsaat. Kayıplardan sonra yaklaşık iki bin vatsaat kalır. Bu, çamaşır makinesini iki kez çalıştırmaya yeter.",
+   "metin": "Beş yüz elli vat çarpı dört virgül iki saat, kayıplardan sonra yaklaşık iki bin vatsaat. Çamaşır makinesini iki kez çalıştırmaya yeter.",
    "ekran": [
     {
      "tip": "formul",
@@ -102,12 +102,12 @@
    "p": {
     "kart": 47
    },
-   "metin": "Şimdi telefon. Beş bin miliamper saatlik bir pil, yaklaşık on dokuz vatsaat tutar. Bu, su ısıtıcısını sadece yarım dakika çalıştırır. Şarj kayıplarıyla bir dolum, yirmi üç vatsaat eder.",
+   "metin": "Telefon pili ise yaklaşık on dokuz vatsaat. Su ısıtıcısını yarım dakika çalıştıracak kadar. Şarj kayıplarıyla yirmi üç vatsaat.",
    "ekran": [
     {
      "tip": "formul",
      "y": "5.000 mAh <em>×</em> 3,85 V ≈ 19 Wh",
-     "k": "Beş"
+     "k": "Telefon"
     },
     {
      "tip": "etiket",
@@ -127,7 +127,7 @@
    "id": "s07",
    "sahne": "izgara",
    "p": {},
-   "metin": "İki bini, yirmi üçe böl: yaklaşık seksen beş telefon. Tek panel, her gün.",
+   "metin": "İki bini yirmi üçe böl: yaklaşık seksen beş telefon. Tek panel, her gün.",
    "ekran": [
     {
      "tip": "formul",
@@ -148,7 +148,7 @@
    "id": "s08",
    "sahne": "santral",
    "p": {},
-   "metin": "Bir megavatlık güneş santrali ise iki futbol sahası kadar alanda, yaklaşık bin sekiz yüz panel demek. Bu da her gün yüz elli bin telefon.",
+   "metin": "Bir megavatlık santralde, iki futbol sahası kadar alanda, bin sekiz yüz panel var. Bu da günde yüz elli bin telefon.",
    "ekran": [
     {
      "tip": "etiket",
@@ -161,7 +161,7 @@
      "on": "≈ ",
      "ek": "telefon/gün",
      "sure": 2.0,
-     "k": "yüz"
+     "k": "günde"
     }
    ]
   },

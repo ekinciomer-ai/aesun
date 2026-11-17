@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-17T19:04+03:00",
+ "olusturma": "2026-11-17T19:34+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -119,7 +119,9 @@
   },
   "Yolu Seç !": {
    "gunluk_short_kotasi": 4,
-   "seri_dagilimi": {},
+   "seri_dagilimi": {
+    "Yolu Seç · Isınma Turu": 1
+   },
    "durdurulan": []
   },
   "Ömür Dediğin": {
@@ -289,7 +291,7 @@
    "karar": "ARTIR",
    "neden": "videoların %50'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 20,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 856,
    "tutma_orani": 50,
    "izlenme_yuzde": 57,
@@ -322,12 +324,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 24,
+   "medyan_48sa": 28,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Mesaja 5 saniye bakınca beyninde neden 'tortu' kalıyor? 📱⏳ | Senin Kararın #shorts",
-    "i48": 24
+    "i48": 28
    }
   },
   {
@@ -337,7 +339,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 966,
+   "medyan_48sa": 974,
    "tutma_orani": 50,
    "izlenme_yuzde": 43,
    "en_iyi": {
@@ -513,7 +515,7 @@
    "izlenme_yuzde": 31,
    "en_iyi": {
     "baslik": "On Venus, a day is longer than a year ☀️ #shorts",
-    "i48": 1108
+    "i48": 1244
    },
    "kaydirmadan_izleme_yuzde": 38
   },
@@ -672,16 +674,40 @@
     "i48": 903
    },
    "kaydirmadan_izleme_yuzde": 50
+  },
+  {
+   "kanal": "Yolu Seç !",
+   "seri": "Yolu Seç · Isınma Turu",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 2,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Ömür Dediğin",
+   "seri": "Eskiden Nasıl Yapılırdı?",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
   }
  ],
  "esikler": {
-  "Ancient Studio": 188,
-  "Yolu Seç !": 50,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab": 85,
+  "Estudio Antiguo": 122,
   "Ömür Dediğin": 50,
   "Kozmos Lab TR": 146,
-  "Antik Stüdyo": 637,
-  "Estudio Antiguo": 122,
-  "Kozmos Lab": 76
+  "Yolu Seç !": 50,
+  "Ancient Studio": 188
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -715,7 +741,7 @@
    },
    "19:00": {
     "n": 12,
-    "medyan": 758
+    "medyan": 764
    },
    "20:00": {
     "n": 7,
@@ -991,7 +1017,7 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 239,
+   "uzun_izlenme": 242,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
@@ -1086,7 +1112,7 @@
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2885,
+     "izlenme": 2887,
      "durum": "Yayında"
     },
     {
@@ -1176,7 +1202,7 @@
     {
      "vid": "2W3av1wzx5A",
      "baslik": "¿Por qué hay una mujer sin cara en este cuadro del Prado? 🤔 #shorts",
-     "izlenme": 6,
+     "izlenme": 7,
      "durum": "Yayında"
     }
    ],
@@ -1187,7 +1213,7 @@
    "uzun_vid": "HvRuOsJcczM",
    "uzun_baslik": "From Sand to Power: How a Solar Panel Is Made | Step-by-Step 3D Explainer",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 56,
+   "uzun_izlenme": 60,
    "baglanacak_shortlar": [
     {
      "vid": "oEFXYkmfE-E",
@@ -1208,7 +1234,7 @@
     {
      "vid": "cfbwB6z1_cA",
      "baslik": "How does a wind turbine make electricity? 🌬️ #shorts",
-     "izlenme": 22,
+     "izlenme": 24,
      "durum": "Yayında"
     },
     {
@@ -1253,38 +1279,6 @@
    "neden": "2026-11-05 20:00 planlıydı, hâlâ yayında görünmüyor"
   },
   {
-   "tur": "KONTROL",
-   "kanal": "Antik Stüdyo",
-   "platform": "YouTube",
-   "vid": "KIR1PL2da2s",
-   "baslik": "Osmanlı savaş gemilerinin en altına neden kuru nohut çuvalı dizilirdi? ⚓⛵ #shorts",
-   "neden": "2026-11-17 14:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Ömür Dediğin",
-   "platform": "YouTube",
-   "vid": "81vbG4vtub4",
-   "baslik": "Eskiden pekmez nasıl yapılırdı? 🍇 Bağdan kazana",
-   "neden": "2026-11-17 10:30 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Yolu Seç !",
-   "platform": "YouTube",
-   "vid": "GuOAMZWMLkA",
-   "baslik": "Bu kanalda videoyu izlemiyorsun, kararı SEN veriyorsun! 🔦🪨 #shorts",
-   "neden": "2026-11-17 13:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
-   "tur": "KONTROL",
-   "kanal": "Yolu Seç !",
-   "platform": "YouTube",
-   "vid": "AkJaCtr4T_M",
-   "baslik": "Derinkuyu’daki 420 kiloluk taş kapı dışarıdan neden AÇILAMAZ? ⚙️🪨 #shorts",
-   "neden": "2026-11-17 17:00 planlıydı, hâlâ yayında görünmüyor"
-  },
-  {
    "tur": "ERTELE",
    "kanal": "Antik Stüdyo",
    "vid": null,
@@ -1319,14 +1313,6 @@
    "baslik": "Someone wrote a song on this man's butt 🎵 #shorts",
    "tarih": "2026-11-28",
    "neden": "odak dönemi: Ancient Studio haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
-   "vid": "8uN4pz0V-Yo",
-   "baslik": "Gürültü önleyici kulaklık sesi nasıl yok eder? 🎧 +1 −1 = 0",
-   "tarih": "2026-11-17",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
    "tur": "HAFTALIK_KOTA",
@@ -1390,7 +1376,7 @@
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
-  "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 76 izlenme / 48 sa).",
+  "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 85 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 1 tanesi tuttu (eşik 146 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",

@@ -1,0 +1,51 @@
+name: Nasıl Yapıldı – Türkiye yükselti haritası (DEM)
+# AWS Terrain Tiles (açık veri, Mapzen/terrarium) indirir, Türkiye kutusunu eşdikdörtgen ızgaraya çevirir.
+# Çıktı: video/ny/motor/dem.png  (yükseklik = R*256 + G - 6000 metre). Lisans: açık veri (SRTM/ETOPO/GMTED kaynaklı).
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ny_dem.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  dem:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: İndir ve dönüştür
+        run: |
+          pip install -q numpy pillow requests
+          python3 - <<'PY'
+          import math, io, numpy as np, requests
+          from PIL import Image
+          Z=8; L0,L1,B0,B1=24.0,46.5,34.0,44.0; W=3072
+          H=int(round(W*(B1-B0)/((L1-L0)*math.cos(math.radians(39)))))
+          def tx(lon): return (lon+180)/360*2**Z
+          def ty(lat): r=math.radians(lat); return (1-math.log(math.tan(r)+1/math.cos(r))/math.pi)/2*2**Z
+          x0,x1=int(tx(L0)),int(tx(L1)); y0,y1=int(ty(B1)),int(ty(B0))
+          M=np.zeros(((y1-y0+1)*256,(x1-x0+1)*256),np.float32); s=requests.Session()
+          for X in range(x0,x1+1):
+            for Y in range(y0,y1+1):
+              for d in range(4):
+                try:
+                  r=s.get(f"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{Z}/{X}/{Y}.png",timeout=30); r.raise_for_status(); break
+                except Exception as e: print("tekrar",X,Y,e)
+              a=np.asarray(Image.open(io.BytesIO(r.content)).convert("RGB")).astype(np.float32)
+              M[(Y-y0)*256:(Y-y0+1)*256,(X-x0)*256:(X-x0+1)*256]=a[...,0]*256+a[...,1]+a[...,2]/256-32768
+          lons=L0+(np.arange(W)+.5)/W*(L1-L0); lats=B1-(np.arange(H)+.5)/H*(B1-B0)
+          px=((np.array([tx(l) for l in lons])-x0)*256).astype(int); py=((np.array([ty(l) for l in lats])-y0)*256).astype(int)
+          E=M[py[:,None],px[None,:]]
+          v=np.clip(np.round(E)+6000,0,65535).astype(np.uint32)
+          o=np.zeros((H,W,3),np.uint8); o[...,0]=v>>8; o[...,1]=v&255
+          Image.fromarray(o).save("video/ny/motor/dem.png",optimize=True)
+          open("video/ny/motor/dem.json","w").write('{"lon0":%s,"lon1":%s,"lat0":%s,"lat1":%s,"w":%d,"h":%d,"ofset":6000}'%(L0,L1,B0,B1,W,H))
+          print("::notice::DEM",W,H,float(E.min()),float(E.max()))
+          PY
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add video/ny/motor/dem.png video/ny/motor/dem.json
+          git commit -qm "Nasıl Yapıldı: Türkiye DEM" || exit 0
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

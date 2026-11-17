@@ -61,6 +61,7 @@ GYON = {"normal": "Say naturally and engagingly", "anlatici": "Narrate like a ca
         "canli": "Read like an energetic, fast-paced science Shorts narrator. Keep a brisk pace with short pauses. Change your tone sentence by sentence: curious and intriguing on questions, punchy emphasis on numbers, playful on everyday comparisons, warm and inviting at the end"}
 _GMODELLER = []
 _BITEN_MODELLER = set()
+_DIL_YOK = set()
 
 def gemini_modeller(k, tercih_ust=None):
     if _GMODELLER:
@@ -86,9 +87,10 @@ def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None):
     son_hata = None
     for m in gemini_modeller(k, tercih_ust):
         istek_metin = f"{GYON.get(ton, GYON['normal'])} in Turkish: {metin}" if "2.5" in m else metin
+        sc = {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}
+        if m not in _DIL_YOK: sc["languageCode"] = "tr-TR"  # yalnız Türkçe okusun (Ömer 18.11.2026); desteklemeyen modelde düşülür
         govde = {"contents": [{"parts": [{"text": istek_metin}]}],
-                 "generationConfig": {"responseModalities": ["AUDIO"],
-                                      "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}}}
+                 "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
         r = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent?key={k}",
                                    data=json.dumps(govde).encode(), headers={"Content-Type": "application/json"}, method="POST")
         try:
@@ -109,6 +111,9 @@ def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None):
         except urllib.error.HTTPError as e:
             govde_hata = e.read().decode("utf-8", "replace")
             son_hata = f"Gemini {m} HTTP {e.code} {govde_hata[:120]}"
+            if e.code == 400 and "language" in govde_hata.lower() and m not in _DIL_YOK:
+                _DIL_YOK.add(m); print(f"NOT: {m} dil kodunu desteklemiyor, dil kodsuz denenecek")
+                return gemini_soyle(metin, ses, yol_wav, ton, m)
             if e.code == 429:
                 _BITEN_MODELLER.add(m)
                 print(f"NOT: {m} kota dolu (429), sıradaki Gemini TTS modeline geçiliyor...")

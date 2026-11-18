@@ -96,6 +96,9 @@ def gemini_modeller(k, tercih_ust=None, anahtar_ad="varsayilan"):
 def gemini_model(k):
     return gemini_modeller(k)[0]
 
+DIL = "tr"  # iş dosyasındaki "dil" alanı (tr|en|es); yoksa Türkçe
+DILKOD = {"tr": ("tr-TR", "Turkish"), "en": ("en-US", "English"), "es": ("es-ES", "Spanish")}
+
 def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None, anahtar_tercih=None):
     import time, urllib.error
     anahtarlar = gemini_anahtarlar(anahtar_tercih)
@@ -103,9 +106,9 @@ def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None, anahtar_ter
     son_hata = None
     for anahtar_ad, k in anahtarlar:
         for m in gemini_modeller(k, tercih_ust, anahtar_ad):
-            istek_metin = f"{GYON.get(ton, GYON['normal'])} in Turkish: {metin}" if "2.5" in m else metin
+            istek_metin = f"{GYON.get(ton, GYON['normal'])} in {DILKOD.get(DIL, DILKOD['tr'])[1]}: {metin}" if "2.5" in m else metin
             sc = {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}
-            if m not in _DIL_YOK: sc["languageCode"] = "tr-TR"
+            if m not in _DIL_YOK: sc["languageCode"] = DILKOD.get(DIL, DILKOD["tr"])[0]
             govde = {"contents": [{"parts": [{"text": istek_metin}]}],
                      "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": sc}}
             for deneme in range(3):
@@ -275,6 +278,7 @@ def main():
     import socket; socket.setdefaulttimeout(300)
     for jf in isler:
         is_ = json.load(open(jf, encoding="utf-8"))
+        global DIL; DIL = is_.get("dil", "tr")
         is_.setdefault("motor", k.get("varsayilan_motor", "gemini")); is_.setdefault("ses", k.get("varsayilan_ses", "charon"))
         for parca in is_["parcalar"]:
             with tempfile.TemporaryDirectory() as tmp:

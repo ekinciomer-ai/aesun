@@ -11,6 +11,6 @@ for v in $S/*.mp4; do
     || ffmpeg -nostdin -v error -y -ss $t -i $v -frames:v 1 -vf "scale=180:-2" -q:v 6 $T/${AD}_$(printf %02d $i).jpg
   done
   ffmpeg -nostdin -v error -y -pattern_type glob -i "$T/${AD}_*.jpg" -vf "tile=8x2" -frames:v 1 -q:v 6 $T/pano_$AD.jpg && {
-    echo "PANO_BASLA $AD"; base64 -w 0 $T/pano_$AD.jpg; echo; echo "PANO_BITTI"; }
+    echo "PANO_BASLA $AD"; base64 -w 4000 $T/pano_$AD.jpg; echo "PANO_BITTI"; }
 done
 rm -rf $T

@@ -8,6 +8,7 @@ import json, os
 f = "/opt/aesun/havuz/sinirlar.json"
 d = json.load(open(f, encoding="utf-8")) if os.path.exists(f) else {}
 d.setdefault("OD", {}).setdefault("acilis", "2026-11-09")
+d["KK_TR"] = {"acilis": "2026-11-09", "gunluk": 2, "ara_saat": 3, "saatler": ["14:00", "18:00"]}
 json.dump(d, open(f, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 PY
 for k in sunucu/havuz/teslim/*.json; do [ -f "$k" ] || continue; python3 /opt/aesun/havuz/yonetici.py teslim "$k"; done

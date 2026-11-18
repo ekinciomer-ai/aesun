@@ -11,7 +11,8 @@ def oku(y, v):
 idx = oku(f"{KOK}/havuz.json", {})
 plan = oku(f"{KOK}/plan.json", {})
 AD = {"TR": "Antik Stüdyo", "EN": "Ancient Studio", "ES": "Estudio Antiguo", "KZ_TR": "Kozmos Lab TR", "KZ_EN": "Kozmos Lab",
-      "OD": "Ömür Dediğin", "YR": "Yolu Seç !", "NY": "Nasıl Yapıldı", "LM": "LVL MAX"}
+      "OD": "Ömür Dediğin", "YR": "Yolu Seç !", "NY": "Nasıl Yapıldı", "LM": "LVL MAX",
+      "KK_TR": "Kara Kutu Mayday", "KK_EN": "Black Box Files Mayday", "KK_ES": "Caja Negra"}
 out = []
 for kod, it in idx.items():
     k = it.get("kart", {}); kt = it.get("kontrol", {})

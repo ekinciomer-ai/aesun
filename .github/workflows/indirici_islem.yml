@@ -10,6 +10,8 @@ on:
 concurrency:
   group: indirici-islem
   cancel-in-progress: false
+permissions:
+  contents: write
 jobs:
   calis:
     runs-on: ubuntu-latest
@@ -40,10 +42,11 @@ jobs:
           [ -s /tmp/disari.tar ] && mkdir -p disari && tar xf /tmp/disari.tar -C disari || true
           rm -f ~/.ssh/k
           exit $kod
-      - name: İndirilenler
+      - name: İndirilenler (geçici, gizli taslak sürüm)
+        # Taslak sürüm herkese açık değildir; yalnız depo yetkilileri indirebilir. Teslimden sonra silinir.
         if: always() && hashFiles('disari/*.tgz') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: indirilenler
-          path: disari/*.tgz
-          retention-days: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view indirici-gecici >/dev/null 2>&1 || gh release create indirici-gecici --draft --title "indirici geçici" --notes "geçici teslim; indirildikten sonra silinir"
+          gh release upload indirici-gecici disari/*.tgz --clobber

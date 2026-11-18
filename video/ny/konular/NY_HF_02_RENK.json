@@ -1,0 +1,130 @@
+{
+ "kanal": "NY",
+ "seri": "Görsel Hafıza",
+ "dil": "tr",
+ "kod": "NY_HF_02_RENK",
+ "baslik_bant": "GÖRSEL HAFIZA TESTİ",
+ "tip": "quiz",
+ "abartma": 11,
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "5 SANİYE",
+   "ust": "HAFIZA TESTİ",
+   "alt": "SADECE YÜZDE KAÇI HEPSİNİ BİLİR?",
+   "alt_kelime": "hepsini"
+  },
+  {
+   "id": "s02",
+   "sahne": "h_goster",
+   "iller": [
+    {
+     "ad": "Kars",
+     "renk": "#ff3b2f"
+    },
+    {
+     "ad": "İzmir",
+     "renk": "#3f8cff"
+    },
+    {
+     "ad": "Bolu",
+     "renk": "#2fe05a"
+    },
+    {
+     "ad": "Samsun",
+     "renk": "#b45cff"
+    },
+    {
+     "ad": "Kayseri",
+     "renk": "#ffd23f"
+    }
+   ],
+   "bekle": 5
+  },
+  {
+   "id": "s03",
+   "sahne": "h_sor",
+   "soru": "KIRMIZI OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Ardahan",
+    "Erzurum",
+    "Kars",
+    "Ağrı"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s04",
+   "sahne": "q_cevap",
+   "il": "Kars"
+  },
+  {
+   "id": "s05",
+   "sahne": "h_sor",
+   "soru": "MAVİ OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "İzmir",
+    "Aydın",
+    "Manisa",
+    "Balıkesir"
+   ],
+   "dogru": 0,
+   "bekle": 3
+  },
+  {
+   "id": "s06",
+   "sahne": "q_cevap",
+   "il": "İzmir"
+  },
+  {
+   "id": "s07",
+   "sahne": "h_sor",
+   "soru": "YEŞİL OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Düzce",
+    "Karabük",
+    "Sakarya",
+    "Bolu"
+   ],
+   "dogru": 3,
+   "bekle": 3
+  },
+  {
+   "id": "s08",
+   "sahne": "q_cevap",
+   "il": "Bolu"
+  },
+  {
+   "id": "s09",
+   "sahne": "kapanis",
+   "cta": "KAÇINI HATIRLADIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "T.C. Kültür ve Turizm Bakanlığı (Türkiye Müzeleri) – Ani, Kars'a 42 km; 2016'da UNESCO Dünya Mirası Listesi'ne girdi https://turkishmuseums.kprod.kultur.gov.tr/blog/detail/unesco-sites-of-turkiye-a-magical-city-on-the-silk-road-ani/10051/4",
+  "TÜİK ADNKS 2024 (Forbes Türkiye) – İzmir 4.493.242 ile en kalabalık 3. il https://www.forbes.com.tr/makale/tuik-2024-nufus-istatistiklerini-acikladi-nufus-artis-hizi-yukseldi",
+  "Küre Ansiklopedi – Yedigöller Milli Parkı Bolu il sınırlarında, yedi göl https://kureansiklopedi.com/tr/detay/yedigoller-milli-parki-8d5d7",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "5 saniye bak, 3 soruyu bil! Hafızan ne kadar güçlü?",
+  "aciklama": "Haritada 5 il renkleniyor. Sadece 5 saniyen var! Sonra soruyorum: kırmızı, mavi ve yeşil olan iller hangileriydi?\n\n💬 Kaçını hatırladın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "hafıza testi",
+   "görsel hafıza",
+   "türkiye haritası",
+   "iller",
+   "quiz",
+   "beyin oyunu",
+   "shorts"
+  ],
+  "tiktok_metin": "5 saniye bak, 3 soruyu bil! 🧠 #hafızatesti #türkiye #quiz",
+  "amac": "Görsel hafıza serisi; izleyiciyi puan yazmaya teşvik ederek yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

@@ -1,0 +1,107 @@
+{
+ "kanal": "NY",
+ "seri": "Bilgi Şıklı Soru",
+ "dil": "tr",
+ "kod": "NY_SQ_01_MIRAS",
+ "baslik_bant": "3 SORUDA TÜRKİYE",
+ "tip": "quiz",
+ "abartma": 11,
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 SORU",
+   "ust": "TÜRKİYE'Yİ BİLİYOR MUSUN?",
+   "alt": "SONUNCUSU ÇOĞUNU ŞAŞIRTIYOR",
+   "alt_kelime": "sonuncusu"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "il": "Adıyaman",
+   "soru": "NEMRUT DAĞI'NDAKİ DEV HEYKELLERİ KİM YAPTIRDI?",
+   "siklar": [
+    "Büyük İskender",
+    "Kral I. Antiokhos",
+    "Kral Kroisos",
+    "Kraliçe Kleopatra"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Adıyaman"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "il": "Denizli",
+   "soru": "PAMUKKALE'Yİ BEMBEYAZ YAPAN NE?",
+   "siklar": [
+    "Tuz",
+    "Kar ve buz",
+    "Kireç (kalsit)",
+    "Beyaz kum"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Denizli"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "il": "Şanlıurfa",
+   "soru": "GÖBEKLİTEPE KAÇ YILLIK?",
+   "siklar": [
+    "2 bin yıl",
+    "4 bin yıl",
+    "7 bin yıl",
+    "11 bin yıldan fazla"
+   ],
+   "dogru": 3,
+   "bekle": 3
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Şanlıurfa"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "History Hit – Nemrut: Kommagene Kralı I. Antiokhos'un MÖ 1. yüzyıl anıt mezarı (UNESCO 1987) https://www.historyhit.com/locations/nemrut/",
+  "UNESCO Dünya Mirası – Göbekli Tepe: MÖ 9.600–8.200 arasında avcı-toplayıcılarca dikildi https://whc.unesco.org/en/list/1572/",
+  "Wikipedia – Pamukkale: termal suların bıraktığı karbonat mineralı, kalsitçe zengin kaynaklar (UNESCO'ya atıfla) https://en.wikipedia.org/wiki/Pamukkale",
+  "Harita: Natural Earth (kamu malı); yükselti: AWS Terrain Tiles (SRTM/GMTED açık veri)"
+ ],
+ "yayin": {
+  "baslik": "Türkiye'yi bildiğini mi sanıyorsun? Sonuncu soru çoğunu yanıltıyor!",
+  "aciklama": "3 soruluk Türkiye testi: Nemrut Dağı'nın dev heykelleri, Pamukkale'nin beyaz rengi ve Göbeklitepe'nin yaşı. Cevaplar videonun içinde!\n\n💬 Kaç doğru yaptın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "türkiye",
+   "bilgi yarışması",
+   "quiz",
+   "göbeklitepe",
+   "pamukkale",
+   "nemrut dağı",
+   "genel kültür",
+   "shorts"
+  ],
+  "tiktok_metin": "3 soruda Türkiye testi! Sonuncusu çoğunu yanıltıyor 🤔 #quiz #genelkültür #türkiye",
+  "amac": "Bilgi şıklı soru serisinin ilk videosu; izleyiciyi cevap vermeye ve puanını yorumlamaya teşvik",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

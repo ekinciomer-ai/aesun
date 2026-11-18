@@ -109,8 +109,16 @@ jobs:
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k; O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
           ssh $O root@$ADRES "mkdir -p /opt/aesun/video_bekleyen /tmp/ny_teslim"
+          cat > /tmp/teslim/yenile.py <<'PY'
+          import json, sys, os
+          f = "/opt/aesun/havuz/havuz.json"
+          d = json.load(open(f, encoding="utf-8")) if os.path.exists(f) else {}
+          it = d.get(sys.argv[1], {})
+          print("YENILE" if it and it.get("durum") in ("onay_bekliyor", "kuyrukta", "onaylandi") else "")
+          PY
+          mv /tmp/teslim/yenile.py /tmp/teslim/yenile.py.x 2>/dev/null; mv /tmp/teslim/yenile.py.x /tmp/teslim/yenile.py
           scp $O /tmp/teslim/* root@$ADRES:/tmp/ny_teslim/
-          ssh $O root@$ADRES 'cd /tmp/ny_teslim && for j in *.json; do k=${j%.json}; install -m 644 ${k}_kaynak.mp4 /opt/aesun/video_bekleyen/${k}_kaynak.mp4 && python3 /opt/aesun/havuz/yonetici.py teslim $j; done; python3 /opt/aesun/havuz/yonetici.py planla; rm -rf /tmp/ny_teslim' > /tmp/teslim.txt 2>&1
+          ssh $O root@$ADRES 'cd /tmp/ny_teslim && for j in NY_*.json; do k=${j%.json}; install -m 644 ${k}_kaynak.mp4 /opt/aesun/video_bekleyen/${k}_kaynak.mp4 && python3 /opt/aesun/havuz/yonetici.py teslim $j; d=$(python3 /tmp/ny_teslim/yenile.py $k); [ "$d" = YENILE ] && install -m 644 ${k}_kaynak.mp4 /opt/aesun/havuz/video/$k.mp4 && echo "NOT: $k havuzdaki video yeni sürümle değiştirildi"; done; python3 /opt/aesun/havuz/yonetici.py planla; rm -rf /tmp/ny_teslim' > /tmp/teslim.txt 2>&1
           rm -f ~/.ssh/k; cat /tmp/teslim.txt
           grep '^NOT:' /tmp/teslim.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
           G=$(TZ=Europe/Istanbul date +%Y-%m-%d); mkdir -p video/ny/rapor

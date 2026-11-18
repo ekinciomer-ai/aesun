@@ -1,0 +1,26 @@
+{
+  "kod": "KZ_MAT_11_JPEG",
+  "kanal": "KZ_TR",
+  "baslik": "Fotoğraf neden 10 kat küçülür? JPEG'in 8×8 sırrı 📸",
+  "aciklama": "Telefonunla çektiğin bir fotoğraf ham hâliyle yaklaşık on kat daha büyük olurdu. Onu küçülten şey: 1992'de onaylanan JPEG.\n\n1) Fotoğraf parlaklık ve renk diye ikiye ayrılır; gözümüz rengi parlaklık kadar keskin görmez, bu yüzden renk bilgisinin dörtte üçü ilk adımda atılır.\n2) Resim 8×8 piksellik karelere bölünür; her kare 64 hazır desenin karışımı olarak yazılır (ayrık kosinüs dönüşümü).\n3) Gözün zor fark ettiği ince desenler yuvarlanır ve çoğu sıfır olur; 64 sayı birkaç anlamlı sayıya ve uzun bir sıfır dizisine iner.\n4) Sonuç: veri yaklaşık on kat küçülür, fotoğraf neredeyse aynı görünür. Kaliteyi çok düşürürsen 8×8 kareleri görürsün.\n\nBu desen fikri Nasir Ahmed'e ait: 1972'de araştırma desteği istediğinde 'fazla basit' bulunup reddedildi; makaleyi 1974'te yayımladı.\n\nBu Matematik Hayatında Nerede? · Bölüm 11\nSıradaki bölümü sen seç: yorumlara yaz!\n\n📚 Kaynak\n• ITU-T T.81 (JPEG, 1992)\n• Ahmed, Natarajan, Rao — Discrete Cosine Transform, IEEE Trans. Computers (1974)\n\n🎨 Animasyon ve resim kodla üretilmiştir; JPEG hesabı videoda gerçekten yapılmıştır. Seslendirme yapay zekâ ile üretilmiş klon sestir (kanal sahibinin kendi sesi). Müzik özgün olarak üretilmiştir.\n\n#jpeg #fotoğraf #matematik #bilim #kozmoslab",
+  "etiketler": [
+    "jpeg",
+    "fotoğraf sıkıştırma",
+    "dct",
+    "nasir ahmed",
+    "matematik",
+    "bilim",
+    "kozmos lab",
+    "shorts"
+  ],
+  "kategori": "27",
+  "publishAt": "2026-11-25T19:30:00+03:00",
+  "sentetik": true,
+  "seri": "Bu Matematik Hayatında Nerede?",
+  "tur": "Short",
+  "sunucu_video": "KZ_MAT_11_JPEG.mp4",
+  "ureten": "Claude",
+  "havuz": true,
+  "ust_bant_izinli": true,
+  "en_erken_yukle": "2026-11-25"
+}

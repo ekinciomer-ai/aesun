@@ -207,4 +207,101 @@ S.santral=()=>{const sc=new THREE.Scene();const c=cam(46);const gk=new THREE.Sha
   const ayak=new THREE.InstancedMesh(new THREE.BoxGeometry(.06,1.3,.06),std("#8d939c",.8,.4),SIRA*26);ayak.frustumCulled=false;sc.add(ayak);let ai=0;for(let r=0;r<SIRA;r++)for(let k=0;k<26;k++){m4.compose(V3((k*4-50)*1.16,.62,(r-(SIRA-1)/2)*5.2),new THREE.Quaternion(),V3(1,1,1));ayak.setMatrixAt(ai++,m4)}
   const kosk=new THREE.Mesh(new THREE.BoxGeometry(4,2.6,2.4),std("#e9ecef",.1,.6));kosk.position.set(0,1.3,(SIRA/2)*5.2+6);sc.add(kosk);
   return{sc,c,bl:[.55,.5,.85],exp:.9,kur(o){const k=eio(o.pu);c.position.set(lerp(-26,6,k),lerp(10,58,k),lerp(62,78,k));c.lookAt(lerp(-6,0,k),0,lerp(26,-4,k))}}};
+
+/* ================= AY'A ARABAYLA (araba, ölçü, takvim, roket, ışık) ================= */
+function ayTex(){const c=document.createElement("canvas");c.width=512;c.height=256;const x=c.getContext("2d");x.fillStyle="#c9c7c1";x.fillRect(0,0,512,256);
+  for(let i=0;i<9;i++){x.fillStyle="rgba(120,118,112,.45)";x.beginPath();x.ellipse(rnd()*512,40+rnd()*176,30+rnd()*50,20+rnd()*30,0,0,6.283);x.fill()}
+  for(let i=0;i<70;i++){const X=rnd()*512,Y=rnd()*256,r=2+rnd()*9;x.strokeStyle="rgba(80,78,74,.55)";x.lineWidth=1.2;x.beginPath();x.arc(X,Y,r,0,6.283);x.stroke();x.fillStyle="rgba(95,93,88,.25)";x.fill()}
+  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t}
+function araba(){const g=new THREE.Group();const gv=new THREE.Mesh(new THREE.BoxGeometry(1.6,.38,.78),std("#e0452a",.2,.45));gv.position.y=.34;g.add(gv);
+  const kb=new THREE.Mesh(new THREE.BoxGeometry(.86,.32,.7),std("#f3f5fa",.1,.4));kb.position.set(-.1,.68,0);g.add(kb);
+  const cm=new THREE.Mesh(new THREE.BoxGeometry(.06,.24,.62),std("#1580bd",.3,.2));cm.position.set(.34,.68,0);g.add(cm);
+  const far=new THREE.Mesh(new THREE.BoxGeometry(.04,.1,.16),bas("#f2c46b"));far.position.set(.81,.38,.24);g.add(far);const far2=far.clone();far2.position.z=-.24;g.add(far2);
+  g.teker=[];[[.5,.4],[-.5,.4],[.5,-.4],[-.5,-.4]].forEach(([x,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.19,.19,.14,20),std("#1b2233",.3,.6));w.rotation.x=PI/2;w.position.set(x,.19,z);g.add(w);g.teker.push(w)});return g}
+const AYLAR=["OCAK","ŞUBAT","MART","NİSAN","MAYIS","HAZİRAN","TEMMUZ","AĞUSTOS","EYLÜL","EKİM","KASIM","ARALIK"];const AYG=[31,28,31,30,31,30,31,31,30,31,30,31];
+function ayAdi(g){let d=Math.floor(g);for(let i=0;i<12;i++){if(d<AYG[i])return AYLAR[i];d-=AYG[i]}return "OCAK"}
+S.ay=()=>{const sc=new THREE.Scene();const c=cam(50);uzay(sc);const EY=-5,AY=5.5,ER=2,MR=.78;
+  const e=dunya(ER);e.position.y=EY;sc.add(e);
+  const ay=new THREE.Mesh(new THREE.SphereGeometry(MR,64,48),new THREE.MeshStandardMaterial({map:ayTex(),roughness:.95,metalness:0}));ay.position.y=AY;sc.add(ay);
+  const dl=new THREE.DirectionalLight(L("#ffffff"),1.6);dl.position.set(4,3,6);sc.add(dl);sc.add(new THREE.AmbientLight(L("#40506a"),.5));
+  const Y0=EY+ER+.02,Y1=AY-MR-.02;const yol=cizgi([V3(0,Y0,0),V3(0,Y1,0)],"#1580bd",.6,.22);sc.add(yol);
+  const olc=olcu(V3(2.3,EY,0),V3(2.3,AY,0),"384.400 KM","#F2C46B",{boy:1.3,yer:V3(.25,0,0),cent:.3});olc.children[3].center.set(0,.5);sc.add(olc);
+  const ar=araba();ar.scale.setScalar(.8);sc.add(ar);
+  const sa=dyazi({boy:1.15,renk:"#F2C46B",sol:true,gen:16});sc.add(sa);
+  const hz=yazi("100 KM/SA",{boy:.5,renk:"#e0452a"});sc.add(hz);
+  const zz=yazi("Z z z",{boy:1.0,renk:"#1580bd"});sc.add(zz);
+  const rk=new THREE.Group();const g1=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.8,20),std("#f3f5fa",.2,.4));const g2=new THREE.Mesh(new THREE.ConeGeometry(.16,.36,20),std("#e0452a",.2,.4));g2.position.y=.58;
+  const g3=new THREE.Mesh(new THREE.ConeGeometry(.26,.3,4),std("#1580bd",.2,.4));g3.position.y=-.32;rk.add(g1,g2,g3);const alev=spr("#ff9a3a",.7,1);alev.position.y=-.7;rk.add(alev);sc.add(rk);
+  const rl=yazi("≈ 3 GÜN",{boy:1.2,renk:"#1580bd"});sc.add(rl);
+  const ft=spr("#f2c46b",.9,0);sc.add(ft);const iz=[];for(let i=0;i<12;i++){const s=spr("#f2c46b",.6-i*.03,0);sc.add(s);iz.push(s)}
+  const fl=yazi("1,3 SANİYE",{boy:1.2,renk:"#de8400"});sc.add(fl);
+  const bay=new THREE.Group();const dir=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.6,8),std("#1b2233"));dir.position.y=.3;const bz=new THREE.Mesh(new THREE.BoxGeometry(.34,.2,.01),std("#e0452a"));bz.position.set(.17,.5,0);bay.add(dir,bz);sc.add(bay);
+  const yer=f=>lerp(Y0+.05,Y1-.05,f);
+  return{sc,c,bl:[.8,.5,.75],kur(o){const t=o.t,mod=o.p.mod||"soru";e.ayar(t,{rot:2.4});ay.rotation.y=.6;
+    const YC=(EY-ER+AY+MR)/2,DT=40.5,YK=EY+ER+.6,DK=21;let f=0,gor=true,yaz="",kamY=YC,kamD=DT,dur=false,hzv=0,zv=0,rv=false,fv=false;
+    if(mod==="soru"){f=0;const k=eio(sm(.15,1,o.pu));kamY=lerp(YK,YC,k);kamD=lerp(DK,DT,k);olc.ilerle(0)}
+    else if(mod==="mesafe"){olc.ilerle(sm(.05,.7,o.pu));f=0}
+    else if(mod==="hiz"){f=.025*eio(sm(.1,1,o.pu));hzv=sm(.1,.3,o.pu);olc.ilerle(1-sm(0,.3,o.pu));kamY=YK+.5*o.pu;kamD=DK;const h=Math.round(f*3844);yaz=h+" SAAT"}
+    else if(mod==="saat"){f=lerp(.025,.35,sm(.05,.95,o.pu));const k=eio(sm(0,.4,o.pu));kamY=lerp(YK+.5,YC,k);kamD=lerp(DK,DT,k);yaz=Math.round(f*3844).toLocaleString("tr-TR")+" SAAT"}
+    else if(mod==="takvim"){f=lerp(.35,1,eio(sm(.05,.9,o.pu)));const g=f*160.2;yaz="GÜN "+Math.round(g)+" · "+ayAdi(g)}
+    else if(mod==="uyku"){const gs=480.5;const q=sm(.05,.92,o.pu)*gs;const gun=Math.floor(q),fr=q-gun;f=(gun+Math.min(1,fr*3))/gs;dur=fr>1/3;zv=dur?1:0;yaz="GÜN "+Math.round(q)}
+    else if(mod==="roket"){gor=false;rv=true;f=0}
+    else if(mod==="isik"){gor=false;fv=true}
+    else{f=1;const k=eio(sm(0,.6,o.pu));kamY=lerp(YC,AY+.6,k);kamD=lerp(DT,13,k)}
+    if(mod!=="soru"&&mod!=="mesafe"&&mod!=="hiz")olc.ilerle(0);
+    const y=yer(f);ar.visible=gor;ar.position.set(-.05,y,.0);ar.rotation.set(0,0,PI/2);ar.teker.forEach(w=>w.rotation.y=-(f*900+(mod==="soru"?0:0)));
+    if(mod==="son"){ar.position.y=AY+MR-.02;ar.rotation.set(0,-.4,0);ar.position.x=-.25}
+    sa.visible=!!yaz&&gor;sa.set(yaz);sa.position.set(.8,y+.25,0);
+    hz.visible=false;zz.position.set(-2,y+1.3+Math.sin(t*3)*.08,0);zz.material.opacity=zv*(mod==="uyku"?1:0);
+    // roket: Dünya → Ay
+    rk.visible=rv;rl.material.opacity=rv?sm(.45,.6,o.pu):0;if(rv){const rf=eio(sm(.1,.75,o.pu));rk.position.set(-.6,yer(rf),0);rl.position.set(-3.6,yer(rf),0);alev.scale.setScalar(.6+Math.sin(t*40)*.15)}
+    // ışık: çok hızlı
+    if(fv){const ff=sm(.25,.42,o.pu);const fy=yer(ff);ft.position.set(.4,fy,0);ft.material.opacity=ff>0&&ff<1?1:0;iz.forEach((s,i)=>{s.position.set(.4,fy-i*.35,0);s.material.opacity=ff>0&&ff<1?(1-i/12)*.8:0});fl.material.opacity=sm(.4,.5,o.pu);fl.position.set(3.6,0,0)}
+    else{ft.material.opacity=0;iz.forEach(s=>s.material.opacity=0);fl.material.opacity=0}
+    bay.visible=mod==="son";bay.position.set(.5,AY+MR-.05,0);bay.rotation.z=-.15;
+    const of=mod==="soru"?lerp(.06,.1166,eio(sm(.15,1,o.pu))):.1166;orb(c,V3(0,kamY-of*kamD,0),kamD,1.57+Math.sin(t*.2)*.08,mod==="son"?.18:.05)}}};
+
+/* ================= RÜZGÂR TÜRBİNİ (5 MW, 126 m rotor, 12,1 dev/dk) ================= */
+S.turbin=()=>{const sc=new THREE.Scene();const c=cam(46);studyo(sc);isik(sc,"#ffffff",2.3,"#6FE3FF",1.4);const HH=9,RR=6.3,W=12.1*2*PI/60;
+  const kule=new THREE.Mesh(new THREE.CylinderGeometry(.19,.32,HH,28),std("#f3f5fa",.2,.5));kule.position.y=HH/2;sc.add(kule);
+  const nac=new THREE.Mesh(new THREE.BoxGeometry(.5,.5,1.3),std("#e9ecf0",.2,.5));nac.position.set(0,HH+.1,-.2);sc.add(nac);
+  const rot=new THREE.Group();rot.position.set(0,HH+.1,.55);sc.add(rot);const gb=new THREE.Mesh(new THREE.SphereGeometry(.3,32,24),std("#f3f5fa",.2,.4));gb.scale.z=1.3;rot.add(gb);
+  const kanatlar=[];for(let i=0;i<3;i++){const k=new THREE.Group();const b=new THREE.Mesh(new THREE.CylinderGeometry(.03,.2,RR-.2,10),std("#f6f7f9",.1,.45));b.scale.set(1.5,1,.35);b.position.y=(RR-.2)/2+.2;k.add(b);
+    const uc=new THREE.Mesh(new THREE.BoxGeometry(.09,.5,.04),bas("#e0452a"));uc.position.y=RR-.3;k.add(uc);k.rotation.z=i*2.094;rot.add(k);kanatlar.push(k)}
+  const yayN=120,yp=[];for(let i=0;i<=yayN;i++){const a=PI/2+i/yayN*6.283;yp.push(V3(Math.cos(a)*RR,Math.sin(a)*RR,0))}const yay=cizgi(yp,"#de8400",1);yay.position.copy(rot.position).add(V3(0,0,.2));sc.add(yay);
+  const olc=olcu(V3(-RR,HH+.1,.6),V3(RR,HH+.1,.6),"126 METRE","#F2C46B",{boy:1.5,yer:V3(0,-1.4,0),cent:.4});sc.add(olc);
+  const sa=dyazi({boy:1.9,renk:"#de8400",gen:9});sc.add(sa);
+  const hzy=yazi("≈ 287 KM/SA",{boy:1.7,renk:"#e0452a"});sc.add(hzy);
+  const izN=40,izp=pts(izN,.35);sc.add(izp);
+  // batarya
+  const H=4.2;const bat=new THREE.Group();bat.position.set(7.4,3.2,1);bat.scale.setScalar(1.25);sc.add(bat);
+  const tup=new THREE.Mesh(new THREE.CylinderGeometry(1,1,H,48,1,true),new THREE.MeshStandardMaterial({color:L("#cfe4f2"),transparent:true,opacity:.25,side:THREE.DoubleSide}));tup.position.y=H/2+.1;bat.add(tup);
+  const tc=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(1,1,H,24)),new THREE.LineBasicMaterial({color:L("#1b2233")}));tc.position.y=H/2+.1;tc.userData.kabuk=1;bat.add(tc);
+  const kp=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.25,24),std("#b8bec8",.6,.3));kp.position.y=H+.22;bat.add(kp);
+  const sv=new THREE.Mesh(new THREE.CylinderGeometry(.94,.94,1,48),std("#19c46c",0,.5));bat.add(sv);
+  const by=dyazi({boy:1.5,renk:"#13a35a",gen:8});by.position.set(0,H+1.1,0);bat.add(by);
+  // 300 telefon
+  const N=300,KOL=30;const gov=new THREE.InstancedMesh(M.yuvarlakKutu(.72,1.5,.06,.1),std("#1d2129",.6,.4),N);const ek=new THREE.InstancedMesh(new THREE.PlaneGeometry(.64,1.38),new THREE.MeshBasicMaterial({color:0xffffff}),N);
+  gov.frustumCulled=ek.frustumCulled=false;sc.add(gov,ek);const POS=[];for(let i=0;i<N;i++){const r=Math.floor(i/KOL),cc=i%KOL;POS.push(V3((cc-(KOL-1)/2)*.62,1.2+r*1.45,-4))}
+  const m4=new THREE.Matrix4(),qq=new THREE.Quaternion(),col=new THREE.Color();
+  const sy=dyazi({boy:1.3,renk:"#13a35a",gen:4});sc.add(sy);
+  return{sc,c,bl:[.8,.5,.8],kur(o){const t=o.t,mod=o.p.mod||"soru";let aci=t*W;
+    let tY=5.4,tD=54,yw=1.57+Math.sin(t*.15)*.12,pt=.1,ol=0,yk=0,sav="",hz=0,bk=-1,tel=0,say=0;
+    if(mod==="soru"){const k=eio(o.pu);tD=lerp(46,54,k);tY=lerp(HH+3,5.4,k);yw=lerp(1.0,1.5,k)}
+    else if(mod==="olcu"){ol=sm(.1,.7,o.pu)}
+    else if(mod==="tur"){const t0=o.pd*.15,tt=cl((o.pt-t0)/(60/12.1));aci=tt*6.283;yk=tt;sav=(tt*60/12.1).toFixed(2).replace(".",",")+" SN"}
+    else if(mod==="uc"){hz=sm(.2,.4,o.pu);tD=lerp(54,46,eio(o.pu));tY=lerp(5.4,6.6,eio(o.pu))}
+    else if(mod==="enerji"){const t0=o.pd*.1,tt=cl((o.pt-t0)/(60/12.1));aci=tt*6.283;yk=tt;bk=tt;yw=lerp(1.57,1.35,eio(sm(0,.3,o.pu)));tY=5.4}
+    else if(mod==="telefon"||mod==="son"){tel=1;const t0=mod==="son"?-9:(o.ev[1]!==undefined?o.ev[1]:o.pd*.4);say=Math.round(N*eo(cl((o.pt-t0)/2.2)));tD=54;tY=5.4;yw=1.57}
+    rot.rotation.z=-aci;olc.ilerle(ol);olc.visible=ol>0;
+    yay.ilerle(yk);yay.visible=yk>0;yay.rotation.z=0;
+    sa.visible=!!sav;sa.set(sav);sa.position.set(0,HH+RR+1.6,0);
+    hzy.material.opacity=hz;hzy.position.set(0,HH+RR+1.6,0);
+    const IP=izp.geometry.attributes.position.array,IC=izp.geometry.attributes.color.array;for(let i=0;i<izN;i++){const a=PI/2-aci+i*.035;IP.set([Math.cos(a)*RR,HH+.1+Math.sin(a)*RR,.75],i*3);const f=(1-i/izN)*hz;IC.set([f*.9,f*.3,f*.2],i*3)}izp.geometry.attributes.position.needsUpdate=izp.geometry.attributes.color.needsUpdate=true;izp.visible=hz>0;
+    bat.visible=bk>=0;if(bk>=0){const h=Math.max(.001,eio(bk)*(H-.1));sv.scale.y=h;sv.position.y=.1+h/2;by.set((bk*6.9).toFixed(1).replace(".",",")+" kWh")}
+    gov.visible=ek.visible=tel>0;sy.visible=false;
+    if(tel>0){for(let i=0;i<N;i++){const p=POS[i];const ap=mod==="son"?1:eob(cl((o.pt-.05-i*.004)/.4));const sc_=.72*ap;m4.compose(p.clone().setZ(-4-(1-ap)*2),qq,V3(sc_,sc_,sc_));gov.setMatrixAt(i,m4);m4.compose(p.clone().setZ(-4+.05*sc_-(1-ap)*2),qq,V3(sc_,sc_,sc_));ek.setMatrixAt(i,m4);col.copy(i<say?L("#19c46c"):L("#2a3348"));ek.setColorAt(i,col)}
+      gov.instanceMatrix.needsUpdate=ek.instanceMatrix.needsUpdate=true;ek.instanceColor.needsUpdate=true;sy.set(String(say));sy.position.set(0,HH+RR+1.8,0)}
+    orb(c,V3(0,tY,0),tD,yw,pt)}}};
+
 })();

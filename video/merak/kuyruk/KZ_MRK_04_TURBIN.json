@@ -1,0 +1,212 @@
+{
+ "kod": "KZ_MRK_04_TURBIN",
+ "no": "MERAK #04",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "TÜRBİNİN TEK TURU<br><i>KAÇ TELEFON?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "turbin",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Dev bir rüzgâr türbini, pervanesi tek bir tur döndüğünde, kaç telefonu şarj eder? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "turbin",
+   "p": {
+    "mod": "olcu"
+   },
+   "metin": "Mesela beş megavatlık bir deniz türbininin kanatları uçtan uca yüz yirmi altı metre. Bir futbol sahasından daha geniş.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "ROTOR ÇAPI",
+     "say": 126,
+     "ek": "m",
+     "k": "yüz"
+    },
+    {
+     "tip": "etiket",
+     "y": "> futbol sahası (105 m) ⚽",
+     "k": "futbol"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "turbin",
+   "p": {
+    "mod": "tur"
+   },
+   "metin": "Rüzgâr yeterince güçlüyken pervane dakikada on iki tur atar. Yani bir tur, yaklaşık beş saniye.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "60 sn <em>÷</em> 12,1 tur",
+     "k": "Yani"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 4.96,
+     "dec": 2,
+     "ek": "sn",
+     "k": "beş"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "turbin",
+   "p": {
+    "mod": "uc"
+   },
+   "metin": "Yavaş görünür ama kanat ucu saatte iki yüz seksen yedi kilometreyle döner. Otoyoldaki arabanın iki katından hızlı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "KANAT UCU",
+     "on": "≈ ",
+     "say": 287,
+     "ek": "km/sa",
+     "k": "iki"
+    },
+    {
+     "tip": "etiket",
+     "y": "> 2 × otoyol hızı (120 km/sa)",
+     "k": "Otoyoldaki"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "turbin",
+   "p": {
+    "mod": "enerji",
+    "kart": 52
+   },
+   "metin": "Bu beş saniyede türbin beş megavat güçle çalışır: yaklaşık altı virgül dokuz kilovatsaat. Yedi kez çamaşır yıkamaya yeter.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "5.000 kW <em>×</em> 4,96 sn",
+     "k": "beş"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 6.9,
+     "dec": 1,
+     "ek": "kWh",
+     "k": "altı"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 7 çamaşır yıkama 🧺",
+     "k": "Yedi"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "telefon",
+   "p": {
+    "kart": 55
+   },
+   "metin": "Bir telefonu doldurmak ise kayıplarla yaklaşık yirmi üç vatsaat. Su ısıtıcısını kırk saniye çalıştırmak kadar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 DOLUM (KAYIPLARLA)",
+     "say": 23,
+     "ek": "Wh",
+     "k": "yirmi"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ su ısıtıcısında 40 saniye",
+     "k": "Su"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "turbin",
+   "p": {
+    "mod": "telefon",
+    "kart": 60
+   },
+   "metin": "Altı bin dokuz yüzü yirmi üçe böl: yaklaşık üç yüz telefon. Hem de pervanenin tek bir turunda.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "6.900 Wh <em>÷</em> 23 Wh",
+     "k": "Altı"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 300,
+     "ek": "telefon",
+     "sure": 2.2,
+     "k": "üç"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "turbin",
+   "p": {
+    "mod": "son",
+    "kart": 60
+   },
+   "metin": "Yani pervane her döndüğünde yaklaşık üç yüz telefon dolar. Senin tahminin kaç çıkmıştı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "say": 300,
+     "ek": "telefon",
+     "k": "üç"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Rüzgâr türbininin tek turu kaç telefon şarj eder? 🌬️🔋 #shorts",
+  "aciklama": "5 MW'lık bir deniz rüzgâr türbininin rotor çapı 126 m. Tam güçte dakikada 12,1 tur atar: bir tur ~4,96 saniye, kanat ucu ~287 km/sa. Bu tek turda ~6,9 kWh elektrik üretir. Bir telefonun bir tam dolumu kayıplarla ~23 Wh; sonuç: tek tur ≈ 300 telefon!\n\nSenin tahminin kaç çıkmıştı? Yorumlara yaz 👇\n\nHesap türbinin anma (tam) gücüyle yapılmıştır; rüzgâr zayıfken hem dönüş hem üretim azalır. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NREL 5 MW referans türbini (Jonkman ve ark., NREL/TP-500-38060; 5.000 kW, 126 m rotor, 12,1 dev/dk), Li-ion telefon pili 5.000 mAh × 3,85 V, AB enerji etiketi verileri (çamaşır ~1 kWh/yıkama).\n\n#kozmoslab #rüzgarenerjisi #yenilenebilirenerji #bilim #shorts",
+  "etiketler": [
+   "rüzgar türbini",
+   "rüzgar enerjisi",
+   "yenilenebilir enerji",
+   "telefon şarjı",
+   "elektrik",
+   "enerji",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NREL Turbine Archive – NREL 5MW 126 RWT: anma gücü 5.000 kW, rotor çapı 126 m, anma rüzgâr hızı 11,4 m/s, göbek yüksekliği 90 m",
+  "Jonkman ve ark. (2009) NREL/TP-500-38060 'Definition of a 5-MW Reference Wind Turbine'; anma rotor hızı 12,1 dev/dk (Mahdizadeh, Schmid, Oetomo 2019, arXiv:1906.07550, Tablo 1)",
+  "Hesap: 60 ÷ 12,1 = 4,96 sn/tur; 5.000 kW × 4,96 sn = 24.793 kJ ≈ 6,89 kWh; uç hızı 2π × 63 m × 12,1/60 = 79,8 m/s ≈ 287 km/sa",
+  "Futbol sahası: FIFA/IFAB Oyun Kuralları – uluslararası maç sahası uzunluğu 100–110 m (tipik 105 m)",
+  "Türkiye otoyol hız sınırı (otomobil) 120 km/sa – Karayolları Trafik Yönetmeliği",
+  "Telefon pili 5.000 mAh × 3,85 V = 19,25 Wh; şarj verimi ~%80–85 → ~23 Wh/dolum; 6.890 ÷ 23 ≈ 300",
+  "Çamaşır makinesi ~0,8–1 kWh/yıkama (AB enerji etiketi verileri); su ısıtıcısı ~2.000 W: 23 Wh ≈ 41 sn"
+ ]
+}

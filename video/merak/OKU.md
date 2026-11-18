@@ -52,6 +52,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `telefon` | — | Telefon %0 → %100 |
 | `izgara` | — | 85 telefon ızgarası (ekran[1] anında dolar) |
 | `santral` | — | 1 MW GES sahası uçuş |
+| `ay` | `mod: soru / mesafe / hiz / saat / takvim / uyku / roket / isik / son` | Dünya→Ay yolu, araba (saat/gün/ay sayacı), roket, ışık, Ay'a park |
+| `turbin` | `mod: soru / olcu / tur / uc / enerji / telefon / son` | 5 MW rüzgâr türbini (12,1 dev/dk), çap ölçüsü, tur yayı, uç izi, batarya, 300 telefon duvarı |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
 Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,goruntu --kareler 60,300,900` → `arac/sayfa.py` ile kontrol sayfası.
@@ -64,4 +66,5 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 
 ## Durum
 - Bölüm 1 (Güneş yok olsa) ve 2 (Tek panel kaç telefon) — 17.11.2026, ilk üretim.
+- Bölüm 3 (Ay'a arabayla) ve 4 (Türbinin tek turu) — 18.11.2026, günlük görev.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

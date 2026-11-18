@@ -5,10 +5,10 @@ Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Do�
 ## Yapıldı
 - [x] KZ_MRK_01_GUNES — Güneş şu an yok olsa ne zaman fark ederdin? (uzay)
 - [x] KZ_MRK_02_PANEL — Tek panel günde kaç telefon şarj eder? (enerji)
+- [x] KZ_MRK_03_AY — Ay'a arabayla gitsek kaç günde varırız? (uzay)
+- [x] KZ_MRK_04_TURBIN — Bir rüzgâr türbininin tek turu kaç telefonu şarj eder? (enerji)
 
 ## Sırada
-- [ ] Ay'a arabayla gitsek kaç günde varırız? (384.400 km, 100 km/sa) — uzay
-- [ ] Bir rüzgâr türbininin tek turu kaç telefonu şarj eder? — enerji
 - [ ] Uluslararası Uzay İstasyonu Türkiye'nin üstünden kaç saniyede geçer? (~7,66 km/s) — uzay
 - [ ] Bir yıldırımda kaç evin günlük elektriği var? — enerji
 - [ ] Dünya dönmeyi bir anda bıraksa ne olur? (ekvatorda ~1.670 km/sa) — uzay

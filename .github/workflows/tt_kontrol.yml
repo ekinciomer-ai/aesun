@@ -1,0 +1,43 @@
+name: TikTok oturum kontrolü (hesap seçmeli, kilit beklemez)
+# Salt okunur: o hesabın kalıcı tarayıcısında TikTok Studio'yu açar, oturumun açık olup olmadığını ve hesap adını yazar.
+# kapat=evet ise giriş penceresinin dış erişimini kapatır (oturum kalır).
+on:
+  workflow_dispatch:
+    inputs:
+      hesap:
+        description: "boş = @antikstudyo, yr = @yolu.se"
+        required: false
+        default: "yr"
+      kapat:
+        description: "giriş penceresini kapat (evet/hayır)"
+        required: false
+        default: "evet"
+permissions:
+  contents: read
+jobs:
+  kontrol:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            sunucu/islem_tt_kontrol.sh
+            sunucu/islem_tt_tarayici.sh
+          sparse-checkout-cone-mode: false
+      - name: Kontrol
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          H: ${{ inputs.hesap }}
+          KAPAT: ${{ inputs.kapat }}
+        run: |
+          case "$H" in ""|yr) ;; *) echo "::error::geçersiz hesap"; exit 1;; esac
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          tar czf /tmp/p.tgz sunucu
+          ssh $O root@$ADRES "rm -rf /tmp/ttk && mkdir -p /tmp/ttk && tar xzf - -C /tmp/ttk && TT_HESAP=$H bash /tmp/ttk/sunucu/islem_tt_kontrol.sh; if [ '$KAPAT' = evet ]; then TT_HESAP=$H bash /tmp/ttk/sunucu/islem_tt_tarayici.sh kapat; fi; rm -rf /tmp/ttk" < /tmp/p.tgz | sed 's/^NOT: */::notice::/' | head -30
+          rm -f ~/.ssh/k

@@ -27,6 +27,6 @@ Motorun bugün desteklediği tipler: nehir, dag, gol. Diğerleri için motora ti
 Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer önizlemeyi onaylamadan final yok.
 
 ## Parti 5 — Karışık formatlar (2026-11-18)
-- [~] NY_SQ_01_MIRAS · Bilgi şıklı soru: Nemrut, Pamukkale, Göbeklitepe — kanca: "Sonuncusu çoğunu yanıltıyor"
-- [~] NY_YM_02_ETLI · Bu yemek hangi ilin: Etliekmek, Ali Nazik, Perde Pilavı
-- [~] NY_HF_02_RENK · Görsel hafıza: Kars, İzmir, Bolu (+Samsun, Kayseri)
+- [x] NY_SQ_01_MIRAS · Bilgi şıklı soru: Nemrut, Pamukkale, Göbeklitepe — kanca: "Sonuncusu çoğunu yanıltıyor"
+- [x] NY_YM_02_ETLI · Bu yemek hangi ilin: Etliekmek, Ali Nazik, Perde Pilavı
+- [x] NY_HF_02_RENK · Görsel hafıza: Kars, İzmir, Bolu (+Samsun, Kayseri)

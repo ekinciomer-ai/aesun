@@ -33,6 +33,7 @@ jobs:
           O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
           tar czf /tmp/p.tgz sunucu/islem_tt_qr.sh sunucu/islem_tt_tarayici.sh
           ssh $O root@$ADRES "rm -rf /tmp/ttq && mkdir -p /tmp/ttq && tar xzf - -C /tmp/ttq && TT_HESAP=$H bash /tmp/ttq/sunucu/islem_tt_qr.sh < /dev/null" < /tmp/p.tgz | sed 's/^NOT: */::notice::/'
+          sleep 25; ssh $O root@$ADRES "ls -la $KOK | grep -v chromium; cat $KOK/giris.json; echo; docker ps -a --format '{{.Names}} {{.Status}}' | grep -i 'tt-\|qr'; docker logs --tail 15 tampon-qr${H:+-$H} 2>&1" | sed 's/^/::notice::TANI /'
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
           son=""
           for i in $(seq 1 55); do

@@ -29,7 +29,7 @@ IDX = f"{KOK}/havuz.json"
 GEREKLI = ["kod", "kanal", "platformlar", "format", "seri", "amac", "baslik", "aciklama", "dil", "sentetik", "kaynaklar", "lisans", "kaynak_dosya"]
 KANALLAR = {"TR": "Antik Stüdyo", "EN": "Ancient Studio", "ES": "Estudio Antiguo", "KZ_TR": "Kozmos Lab TR", "KZ_EN": "Kozmos Lab", "OD": "Ömür Dediğin", "YR": "Yeraltı", "NY": "Nasıl Yapıldı", "LM": "LVL MAX", "KK_TR": "Kara Kutu Mayday", "KK_EN": "Black Box Files Mayday", "KK_ES": "Caja Negra"}
 PLATFORMLAR = {"youtube", "tiktok", "instagram"}
-# TikTok hesabı kanala göre: boş = @antikstudyo (/opt/aesun/tiktok), "yr" = @yolu.se (/opt/aesun/tiktok_yr)
+# TikTok hesabı kanala göre: boş = @antikstudyo (/opt/aesun/tiktok), "yr" = @yolu.sec (/opt/aesun/tiktok_yr)
 TT_HESAP = {"YR": "yr"}
 # Odak dönemi (12 Ara 2026'ya kadar): Antik Stüdyo yalnız bu seriler
 ODAK_SON = "2026-12-12"

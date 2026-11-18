@@ -23,7 +23,7 @@ jobs:
           chmod 600 ~/.ssh/k
           cp sunucu/islem_tt_istatistik.sh /tmp/pk/sunucu/; tar czf /tmp/paket.tgz -C /tmp/pk .
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
-          # Hesap başına: boş = @antikstudyo, yr = @yolu.se (oturum yoksa o hesap atlanır, diğerini bozmaz)
+          # Hesap başına: boş = @antikstudyo, yr = @yolu.sec (oturum yoksa o hesap atlanır, diğerini bozmaz)
           for H in "" yr; do
             $S "rm -rf /tmp/tt_i && mkdir -p /tmp/tt_i && tar xzf - -C /tmp/tt_i && cd /tmp/tt_i && TT_HESAP=$H bash sunucu/islem_tt_istatistik.sh; k=\$?; rm -rf /tmp/tt_i; exit \$k" < /tmp/paket.tgz > /tmp/cikti_${H:-as}.txt 2>&1 || true
           done
@@ -36,7 +36,7 @@ jobs:
           def norm(x): return re.sub(r'\W+', '', unicodedata.normalize('NFKD', (x or '')).lower())[:40]
           yol = 'docs/yayin/yayin.json'; j = json.load(open(yol, encoding='utf-8'))
           simdi = datetime.now(timezone(timedelta(hours=3))); tum = 0
-          for H, kanal, alan in (('as', 'Antik Stüdyo (@antikstudyo)', 'tiktok'), ('yr', 'Yolu Seç ! (@yolu.se)', 'tiktok_yr')):
+          for H, kanal, alan in (('as', 'Antik Stüdyo (@antikstudyo)', 'tiktok'), ('yr', 'Yolu Seç ! (@yolu.sec)', 'tiktok_yr')):
               try: t = open(f'/tmp/cikti_{H}.txt', encoding='utf-8', errors='replace').read()
               except Exception: continue
               m = re.search(r'===TT===\n(.*?)\n===SON===', t, re.S)

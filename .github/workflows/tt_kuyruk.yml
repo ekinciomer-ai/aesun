@@ -32,7 +32,7 @@ jobs:
           chmod 600 ~/.ssh/k
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
           : > /tmp/cikti.txt; mkdir -p docs/tampon/tiktok/adim
-          # Hesap başına ayrı paket: json'da "hesap" yok = @antikstudyo, "hesap":"yr" = @yolu.se (ayrı oturum/kapsayıcı)
+          # Hesap başına ayrı paket: json'da "hesap" yok = @antikstudyo, "hesap":"yr" = @yolu.sec (ayrı oturum/kapsayıcı)
           for H in "" yr; do
             rm -rf /tmp/pk; mkdir -p /tmp/pk/sunucu /tmp/pk/kuyruk; cp sunucu/islem_tt_yukle.sh /tmp/pk/sunucu/; say=0
             for j in sunucu/tt_kuyruk/*.json; do
@@ -60,7 +60,7 @@ jobs:
           if not B:
               print('::error::sunucu sonucu okunamadı'); print(t[-1200:]); raise SystemExit(1)
           sonuc = [x for b in B for x in json.loads(b)]
-          HESAP = {'': ('Antik Stüdyo (@antikstudyo)', 'https://www.tiktok.com/@antikstudyo', 'Gündem + Tarih'), 'yr': ('Yolu Seç ! (@yolu.se)', 'https://www.tiktok.com/@yolu.se', 'Yolu Seç')}
+          HESAP = {'': ('Antik Stüdyo (@antikstudyo)', 'https://www.tiktok.com/@antikstudyo', 'Gündem + Tarih'), 'yr': ('Yolu Seç ! (@yolu.sec)', 'https://www.tiktok.com/@yolu.sec', 'Yolu Seç')}
           yol = 'docs/yayin/yayin.json'; j = json.load(open(yol, encoding='utf-8')); K = j['kayitlar']
           os.makedirs('sunucu/tt_kuyruk/tamam', exist_ok=True)
           for s in sonuc:

@@ -1,7 +1,7 @@
 #!/bin/bash
 # TikTok QR ile giriş — kalıcı tarayıcının (tt-tarayici[-H]) KENDİ profiline. Port açmaz, şifre yok.
 # Tarayıcı iç ağda çalışmıyorsa başlatır; CDP ile login/qrcode sayfasını açar, QR'ı 15 sn'de bir $KOK/qr.png'ye yazar (7 dk).
-# Durum: $KOK/giris.json  ({"ok":true} = oturum açıldı). TT_HESAP=yr → @yolu.se.
+# Durum: $KOK/giris.json  ({"ok":true} = oturum açıldı). TT_HESAP=yr → @yolu.sec.
 set -u
 H=${TT_HESAP:-}; KOK=/opt/aesun/tiktok${H:+_$H}; KAP=tt-tarayici${H:+-$H}; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
 mkdir -p "$KOK"; chmod 700 "$KOK"; rm -f "$KOK/qr.png" "$KOK/giris.json"

@@ -2,7 +2,7 @@
 # TikTok için sunucuda kalıcı tarayıcı (linuxserver/chromium, GPL-3 imaj). Ömer "normal giriş"i bu pencereden kendisi yapar;
 # şifre hiçbir yere yazılmaz, oturum /opt/aesun/tiktok/chromium profilinde kalır. Pencere yalnız GİRİŞ sırasında dışa açılır
 # (3001 portu, HTTPS, tek seferlik parola) ve 20 dakika sonra kendiliğinden kapanır; sonra tarayıcı sadece sunucu içinde çalışır.
-# Çok hesap: TT_HESAP boş = @antikstudyo (port 3001, /opt/aesun/tiktok); TT_HESAP=yr = @yolu.se (port 3002, /opt/aesun/tiktok_yr).
+# Çok hesap: TT_HESAP boş = @antikstudyo (port 3001, /opt/aesun/tiktok); TT_HESAP=yr = @yolu.sec (port 3002, /opt/aesun/tiktok_yr).
 # Kullanım: islem_tt_tarayici.sh ac   → giriş penceresi (parola NOT satırında, tek kullanımlık, 20 dk)
 #           islem_tt_tarayici.sh kapat → dış erişimi kapat, tarayıcıyı iç ağda bırak
 set -u

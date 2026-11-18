@@ -1,6 +1,6 @@
 #!/bin/bash
 # TikTok profil güncelleme (ad, biyografi, profil fotoğrafı) — o hesabın kalıcı tarayıcısındaki oturumla.
-# Girdi: profil.json {"ad","bio","logo_url"(opsiyonel)} aynı klasörde. TT_HESAP=yr → @yolu.se.
+# Girdi: profil.json {"ad","bio","logo_url"(opsiyonel)} aynı klasörde. TT_HESAP=yr → @yolu.sec.
 # Önce/sonra ekran görüntüleri $KOK/adim/profil_*.png. Sır yazdırmaz.
 set -u
 H=${TT_HESAP:-}; KOK=/opt/aesun/tiktok${H:+_$H}; KAP=tt-tarayici${H:+-$H}; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy

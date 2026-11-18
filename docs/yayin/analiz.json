@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-18T19:05+03:00",
+ "olusturma": "2026-11-18T19:35+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -302,7 +302,7 @@
    "karar": "SÜRDÜR",
    "neden": "tutma oranı %48",
    "olculen": 21,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": 570,
    "tutma_orani": 48,
    "izlenme_yuzde": 57,
@@ -620,7 +620,7 @@
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 673,
    "tutma_orani": 100,
    "izlenme_yuzde": null,
@@ -744,13 +744,13 @@
  ],
  "esikler": {
   "LVL MAX": 50,
-  "Antik Stüdyo": 637,
-  "Yolu Seç !": 50,
-  "Ancient Studio": 188,
-  "Kozmos Lab TR": 202,
-  "Estudio Antiguo": 122,
   "Ömür Dediğin": 50,
-  "Kozmos Lab": 85
+  "Kozmos Lab": 85,
+  "Yolu Seç !": 50,
+  "Estudio Antiguo": 122,
+  "Kozmos Lab TR": 202,
+  "Ancient Studio": 188,
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1345,14 +1345,6 @@
    "baslik": "Someone wrote a song on this man's butt 🎵 #shorts",
    "tarih": "2026-11-28",
    "neden": "odak dönemi: Ancient Studio haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
-   "vid": "jogs0Swksew",
-   "baslik": "GPS seni nasıl buluyor? 3 çember ve Einstein 🛰️",
-   "tarih": "2026-11-18",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
    "tur": "HAFTALIK_KOTA",

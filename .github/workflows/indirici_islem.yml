@@ -35,5 +35,15 @@ jobs:
           $S "rm -rf /tmp/indirici_paket && mkdir -p /tmp/indirici_paket && tar xzf - -C /tmp/indirici_paket && cd /tmp/indirici_paket && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/indirici_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
           kod=${PIPESTATUS[0]}
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
+          # indirici çıktıları (varsa) geri getirilir: /opt/tampon/indirici/disari/*.tgz
+          $S "cd /opt/tampon/indirici/disari 2>/dev/null && ls *.tgz >/dev/null 2>&1 && tar cf - *.tgz && rm -f *.tgz" > /tmp/disari.tar 2>/dev/null || true
+          [ -s /tmp/disari.tar ] && mkdir -p disari && tar xf /tmp/disari.tar -C disari || true
           rm -f ~/.ssh/k
           exit $kod
+      - name: İndirilenler
+        if: always() && hashFiles('disari/*.tgz') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: indirilenler
+          path: disari/*.tgz
+          retention-days: 2

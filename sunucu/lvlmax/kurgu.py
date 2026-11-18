@@ -66,7 +66,9 @@ for i, s in enumerate(sira):
     if z:
         za, zs = float(z[0]), float(z[1])
         zoomf = f"if(between(t,{za},{za+zs}),1.35,1)"
-    vf = (f"[0:v]setpts=PTS-STARTPTS,fps={FPS},split=2[a][b];"
+    kr = s.get("kirp")  # [x,y,w,h] oran: kaynaktaki yabancı yazıları kırpmak için
+    kirp = f"crop=iw*{kr[2]}:ih*{kr[3]}:iw*{kr[0]}:ih*{kr[1]}," if kr else ""
+    vf = (f"[0:v]{kirp}setpts=PTS-STARTPTS,fps={FPS},split=2[a][b];"
           f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},boxblur=20:2,eq=brightness=-0.15[bg];"
           f"[b]scale={W}:-2,scale=w='trunc(iw*{zoomf}/2)*2':h=-2:eval=frame,crop='min(iw\\,{W})':'min(ih\\,{int(H*0.78)})'[fg];"
           f"[bg][fg]overlay=(W-w)/2:(H-h)/2+{int(110*K)}:format=auto,setsar=1[v]")

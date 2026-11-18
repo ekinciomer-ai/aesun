@@ -10,5 +10,5 @@ cd $KOK
 python3 /tmp/aesun_paket/sunucu/lvlmax/kurgu.py plan.json kaynak cikti/${P}_onizleme.mp4 1 || exit 1
 python3 /tmp/aesun_paket/sunucu/lvlmax/kurgu.py plan.json kaynak cikti/${P}_1080.mp4 || exit 1
 ls -la cikti | awk '{print "NOT: " $5 " " $9}' | tail -3
-tar czf /opt/tampon/disari/lvlmax_onizleme.tgz -C $KOK/cikti ${P}_onizleme.mp4 ${P}_1080.mp4
-echo "NOT: önizleme hazır"
+echo "ONIZLEME_BASLA ${P}_onizleme.mp4"; base64 -w 4000 cikti/${P}_onizleme.mp4; echo "ONIZLEME_BITTI"
+echo "NOT: önizleme hazır (1080p sunucuda: $KOK/cikti/${P}_1080.mp4)"

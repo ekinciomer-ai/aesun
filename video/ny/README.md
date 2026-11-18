@@ -27,6 +27,17 @@ Tek dosya YouTube Shorts + Instagram Reels + TikTok'a uyar. Her parti **3 video*
 | En ilginç bilgiler | quiz | kanca, bilgi(il, baslik, sayi, sayi_on, birim, alt), kapanis | Charon |
 İl adları geo.json → il_ad listesindekiyle birebir (ör. "Hakkari", "İstanbul", "Iğdır").
 
+## Harita teması
+Varsayılan `tema: "illustre"` — renkli illüstrasyon Türkiye haritası (pastel iller, beyaz sınırlar, turkuaz deniz). Dağlık fiziki
+görünüm Ömer tarafından istenmedi; yalnız gerekirse `tema: "fiziki"`.
+
+## Yemek fotoğrafları (yemek serisi için zorunlu)
+Telif güvenliği için yalnız Wikimedia Commons serbest lisanslı fotoğraflar (CC0/kamu malı/CC BY öncelikli, yoksa CC BY-SA).
+Yapay zekâ yemek görseli kullanma (yanlış yemek + filigran çıktı). Akış: `gorsel/liste.json`'a {"ad","ara","anahtar"} ekle → push →
+`ny_yemek_foto.yml` fotoğrafı `motor/gorsel/yemek/<ad>.jpg` + `lisans.json`'a yazar, adaylar `gorsel/aday/<ad>.jpg`. Adaylara bak;
+yanlışsa `"sec": n` ile değiştir. Bitince konuda q_soru'ya `"gorsel": "gorsel/yemek/<ad>.jpg"`. Lisans/yazar açıklamaya otomatik eklenir.
+Fotoğraflar hazır olmadan istek (render) gönderme.
+
 ## Yayın bilgisi (final için zorunlu): konular/<KOD>.json → "yayin"
 `{"baslik": "...", "aciklama": "...", "etiketler": [...], "tiktok_metin": "...", "amac": "...", "platformlar": ["youtube"]}`
 `istek` `mod: "final"` olunca render sonrası video **doğrudan sunucuya, Yükleme Yöneticisi havuzuna** teslim edilir (depoya video yazılmaz),

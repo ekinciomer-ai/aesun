@@ -8,6 +8,12 @@ meta = {}
 try: meta = json.load(open(f"{KOK}/ses/{kod}/meta.json"))
 except Exception: pass
 kaynak = list(k.get("kaynaklar", [])) + ["Harita: Natural Earth (kamu malı), geoBoundaries (CC BY 4.0); yükselti: AWS Terrain Tiles (SRTM/GMTED açık veri)"]
+try:
+    LIS = json.load(open(f"{KOK}/motor/gorsel/yemek/lisans.json", encoding="utf-8"))
+    for g in sorted({p.get("gorsel") for p in k.get("parcalar", []) if p.get("gorsel")}):
+        a_ = os.path.splitext(os.path.basename(g))[0]
+        if a_ in LIS: x = LIS[a_]; kaynak.append(f"Fotoğraf: {x['baslik'].replace('File:', '')} — {x['yazar'] or 'Wikimedia Commons'}, {x['lisans']} ({x['sayfa']})")
+except Exception: pass
 aciklama = y.get("aciklama") or k.get("baslik_bant", "")
 aciklama += "\n\n📚 Kaynaklar: " + "; ".join(kaynak) + "\n\n🎨 Animasyon kodla üretilmiştir. Seslendirme yapay zekâ sesidir (Google Gemini), müzik ve efektler özgündür."
 kart = {

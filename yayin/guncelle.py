@@ -378,6 +378,9 @@ def main():
                              izlenme=None, link=(f"https://youtube.com/shorts/{vid}" if short else f"https://youtu.be/{vid}"), vid=vid, ureten="?")
                     K.append(x); vid_ix[vid] = x; degisti += 1
                     notlar.append(f"Yeni içerik (YouTube'dan): {kanal} · {x['baslik']}")
+                if d == "Planlı" and t is not None and t <= simdi and x.get("durum") == "Yayında":
+                    # Anlık görüntü plan saatinden önce alınmış; canlı kaynak (API/RSS) yayında diyor → geri "Planlı"ya çekme
+                    continue
                 yeni = {"durum": d, "izlenme": v.get("izlenme"), "kanal": kanal, "dil": dil}
                 if t is not None:
                     yeni.update(tarih=t.strftime("%Y-%m-%d"), saat=t.strftime("%H:%M"))

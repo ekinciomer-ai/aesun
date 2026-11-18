@@ -35,6 +35,6 @@ jobs:
           O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
           tar czf /tmp/p.tgz sunucu
           ssh $O root@$ADRES "rm -rf /tmp/ttp && mkdir -p /tmp/ttp && tar xzf - -C /tmp/ttp && TT_HESAP=$H bash /tmp/ttp/sunucu/islem_tt_profil.sh; rm -rf /tmp/ttp" < /tmp/p.tgz | sed 's/^NOT: */::notice::/'
-          scp -q $O "root@$ADRES:/opt/aesun/tiktok${H:+_$H}/adim/profil_*.png" ekran/ 2>/dev/null || true
+          scp -q $O "root@$ADRES:/opt/aesun/tiktok${H:+_$H}/adim/profil_*" ekran/ 2>/dev/null || true
           rm -f ~/.ssh/k
-          for y in ekran/*.png; do [ -f "$y" ] || continue; d="docs/tampon/tiktok${H:+_$H}/profil/$(basename $y)"; sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/$d?ref=main" --jq .sha 2>/dev/null || true); gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$d" -f message="TikTok profil ekranı ${H:-as}" -f content="$(base64 -w0 $y)" ${sha:+-f sha=$sha} >/dev/null || echo "::warning::$d yazılamadı"; done
+          for y in ekran/*; do [ -f "$y" ] || continue; d="docs/tampon/tiktok${H:+_$H}/profil/$(basename $y)"; sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/$d?ref=main" --jq .sha 2>/dev/null || true); python3 -c "import json,base64,sys;print(json.dumps({'message':'TikTok profil ekranı','content':base64.b64encode(open(sys.argv[1],'rb').read()).decode(),**({'sha':sys.argv[2]} if sys.argv[2] else {})}))" "$y" "$sha" > /tmp/g.json; gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$d" --input /tmp/g.json >/dev/null || echo "::warning::$d yazılamadı"; done

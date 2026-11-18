@@ -1,0 +1,46 @@
+name: Nasıl Yapıldı – yemek illüstrasyonları
+# video/ny/gorsel/istek/*.json eklenince sunucuda Gemini görsel modeliyle yemek illüstrasyonu üretir → video/ny/motor/gorsel/yemek/<ad>.png
+on:
+  push:
+    branches: [main]
+    paths: ['video/ny/gorsel/istek/*.json', 'sunucu/islem_ny_gorsel.sh', '.github/workflows/ny_gorsel.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: ny-gorsel, cancel-in-progress: false }
+jobs:
+  gorsel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: {sparse-checkout: "video/ny\nsunucu"}
+      - name: Sunucuda üret
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          set +e
+          ls video/ny/gorsel/istek/*.json >/dev/null 2>&1 || { echo "istek yok"; exit 0; }
+          mkdir -p ~/.ssh /tmp/pk/istek
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          cp sunucu/islem_ny_gorsel.sh /tmp/pk/; cp video/ny/gorsel/istek/*.json /tmp/pk/istek/
+          tar czf /tmp/paket.tgz -C /tmp/pk .
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "rm -rf /tmp/ny_g && mkdir -p /tmp/ny_g && tar xzf - -C /tmp/ny_g && cd /tmp/ny_g && bash islem_ny_gorsel.sh < /dev/null; tar czf /tmp/ny_g.tgz -C /tmp/ny_g cikti 2>/dev/null" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1
+          mkdir -p /tmp/al && scp $O root@$ADRES:/tmp/ny_g.tgz /tmp/ && tar xzf /tmp/ny_g.tgz -C /tmp/al
+          ssh $O root@$ADRES "rm -rf /tmp/ny_g /tmp/ny_g.tgz"
+          rm -f ~/.ssh/k
+          grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          pip install -q pillow; mkdir -p video/ny/motor/gorsel/yemek
+          for f in /tmp/al/cikti/*.png; do [ -f "$f" ] || continue; a=$(basename $f .png); python3 -c "
+          from PIL import Image; im=Image.open('$f').convert('RGB'); im.thumbnail((768,768)); im.save('video/ny/motor/gorsel/yemek/$a.jpg',quality=88)"; done
+          mkdir -p video/ny/gorsel/istek/tamam; for f in video/ny/gorsel/istek/*.json; do git mv -f $f video/ny/gorsel/istek/tamam/; done
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A video/ny/motor/gorsel video/ny/gorsel
+          git diff --cached --quiet && exit 0
+          git commit -qm "Nasıl Yapıldı: yemek illüstrasyonları $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

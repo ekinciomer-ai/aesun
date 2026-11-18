@@ -224,7 +224,7 @@ def main():
         if p["sahne"] == "bir_giris": q["son_kelime_t"] = kel[-1]["t0"]
         parcalar.append(q); anl.append((t, dst)); t += d + .22 + float(p.get("bekle", 0))
     T = round(parcalar[-1]["t1"] + 2.2, 2)
-    K = {"toplam": T, "kod": kod, "konu": {k: konu.get(k) for k in ("baslik_bant", "tip", "birim", "abartma", "ogeler")}, "parcalar": parcalar}
+    K = {"toplam": T, "kod": kod, "konu": {k: konu.get(k) for k in ("baslik_bant", "tip", "birim", "abartma", "ogeler", "tema")}, "parcalar": parcalar}
     json.dump(K, open(f"{is_}/kurgu.json", "w"), ensure_ascii=False, indent=1)
     print(f"süre {T} sn · {len(parcalar)} parça")
     # 2) anlatım izi

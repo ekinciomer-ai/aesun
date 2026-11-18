@@ -12,6 +12,7 @@ const TUR={'.html':'text/html','.js':'text/javascript','.json':'application/json
  p.on('pageerror',e=>console.error('HATA',e.message));p.on('console',m=>{if(m.type()==='error')console.error('KONSOL',m.text())});
  await p.goto(`http://127.0.0.1:${port}/sahne.html?arazi=${arS||'900'}`);await p.waitForFunction(()=>window.HAZIR,{timeout:180000});
  await p.evaluate(k=>kurgu(k),K);
+ await p.waitForFunction(()=>window.GORSEL_HAZIR!==false,{timeout:60000}).catch(()=>{});
  if(process.env.NY_ANLAR){for(const a of process.env.NY_ANLAR.split(',')){await p.evaluate(t=>kare(t),+a);await p.screenshot({path:`${out}_${a}.png`})}await b.close();srv.close();return}
  const NT=Math.ceil(K.toplam*fps),F0=+f0S||0,N=Math.min(NT,f1S?+f1S:NT);
  const ff=spawn('ffmpeg',['-v','error','-y','-f','image2pipe','-framerate',String(fps),'-c:v','mjpeg','-i','-','-c:v','libx264','-preset','veryfast','-crf','16','-pix_fmt','yuv420p','-r',String(fps),out],{stdio:['pipe','inherit','inherit']});

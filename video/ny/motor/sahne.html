@@ -9,6 +9,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050b14;font-family:
 #ui{position:absolute;inset:0;pointer-events:none;--u:calc(100vw/1080)}
 .ab{position:absolute}
 #vin{position:absolute;inset:0;background:radial-gradient(ellipse 75% 60% at 50% 45%,transparent 45%,rgba(2,6,12,.75) 100%)}
+#scrim{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,16,28,.82) 0%,rgba(6,16,28,.45) 22%,rgba(6,16,28,0) 40%,rgba(6,16,28,0) 58%,rgba(6,16,28,.55) 78%,rgba(6,16,28,.8) 100%);opacity:0}
+#ykart{position:absolute;left:0;top:0;width:calc(440*var(--u));height:calc(440*var(--u));border-radius:50%;overflow:hidden;border:calc(12*var(--u)) solid #fff;box-shadow:0 18px 60px rgba(0,0,0,.45);opacity:0;background:#fff6e6}
+#ykart img{width:100%;height:100%;object-fit:cover}
 #karart{position:absolute;inset:0;background:#02060c;opacity:0}
 #grain{position:absolute;inset:-50%;width:200%;height:200%;opacity:.07;mix-blend-mode:overlay}
 #marka{left:calc(54*var(--u));top:calc(150*var(--u));display:flex;align-items:center;gap:calc(14*var(--u));font-weight:900;font-size:calc(30*var(--u));letter-spacing:.08em}
@@ -65,7 +68,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050b14;font-family:
  <div id="vin"></div>
  <canvas id="grain" width="256" height="256"></canvas>
  <div id="etiketler" class="ab" style="inset:0"></div>
+ <div id="scrim"></div>
  <div id="karart"></div>
+ <div id="ykart"><img id="yimg"></div>
  <div id="marka" class="ab"><i></i>NASIL YAPILDI</div>
  <div id="bant" class="ab"></div>
  <div id="dots" class="ab"></div>
@@ -108,14 +113,14 @@ const V3=(lon,lat,up=0)=>new THREE.Vector3(X(lon),Y(h(lon,lat))+up,Z(lat));
 const W=innerWidth,H=innerHeight;
 const R=new THREE.WebGLRenderer({canvas:$('#c'),antialias:true,preserveDrawingBuffer:true});
 R.setPixelRatio(devicePixelRatio);R.setSize(W,H,false);R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;
-const S=new THREE.Scene();const BG=new THREE.Color('#06101c');S.background=BG;S.fog=new THREE.Fog(BG,10,40);
+const S=new THREE.Scene();const BG=new THREE.Color('#06101c');S.background=BG;S.fog=new THREE.Fog(BG,10,40);let ILL=false;
 const CAM=new THREE.PerspectiveCamera(38,W/H,.05,200);
-S.add(new THREE.HemisphereLight('#9fc3ff','#1a1208',.55));
+const HEMI=new THREE.HemisphereLight('#9fc3ff','#1a1208',.55);S.add(HEMI);
 const SUN=new THREE.DirectionalLight('#fff1dc',2.4);SUN.position.set(-6,7,-3);S.add(SUN);
 
 let K, OG={}, NESNE={}; const SINIR=[];
 const ILD=new Uint8Array(128*4);const ILT=new THREE.DataTexture(ILD,128,1,THREE.RGBAFormat);ILT.needsUpdate=true;
-const ILO={};
+const ILO={};const UDIM={value:0};
 function ilNesne(ad){if(ILO[ad])return ILO[ad];const rs=GEO.il[ad];if(!rs){console.error('il yok',ad);return null}
  const big=rs.reduce((a,b)=>a.length>b.length?a:b);const cx=big.reduce((s,p)=>s+p[0],0)/big.length,cy=big.reduce((s,p)=>s+p[1],0)/big.length;
  const kenar=[];for(const r of rs){const p=r.map(([lo,la])=>V3(lo,la,.014));p.push(p[0]);
@@ -142,12 +147,21 @@ function renk(m,mask){ // hipsometrik koyu palet
  c.r=lerp(lerp(c.r,g,.6)*dim,c.r,k);c.g=lerp(lerp(c.g,g,.6)*dim,c.g,k);c.b=lerp(lerp(c.b,g,.6)*dim+.012,c.b,k);
  return c;
 }
+const PASTEL=['#f6c85f','#f4a259','#9bc995','#6fb7a8','#e88a8a','#b8a1d9','#f2d49b','#8cc0e8','#f0b5c8','#c9d97a','#ffd166','#a7d3a6','#f7a072','#b5c7ed','#e6b89c','#c3e0a8'];
+const PCOL=PASTEL.map(c=>new THREE.Color(c));
+function renkIll(k,i,j,w,hh,m){
+ const id=AI[k];
+ if(id){const nb=[k-1,k+1,k-w,k+w];for(const q of nb){if(q<0||q>=w*hh)continue;if(AI[q]!==id)return new THREE.Color('#ffffff')}
+  return PCOL[(id*7+3)%PCOL.length].clone();}
+ if(m>0)return new THREE.Color(AM[k]>40?'#ffffff':'#ece2c9');
+ return new THREE.Color('#5ec3d9');
+}
 function arazi(){
  const w=AR.w,hh=AR.h, pos=new Float32Array(w*hh*3), col=new Float32Array(w*hh*3);
  for(let j=0;j<hh;j++)for(let i=0;i<w;i++){
   const k=j*w+i, lon=AR.lon0+(i+.5)/w*(AR.lon1-AR.lon0), lat=AR.lat1-(j+.5)/hh*(AR.lat1-AR.lat0), m=AH[k];
-  pos[k*3]=X(lon);pos[k*3+1]=m>0?Y(m):m/KM*EX*.25-.004;pos[k*3+2]=Z(lat);
-  const c=renk(m,AM[k]);col[k*3]=c.r;col[k*3+1]=c.g;col[k*3+2]=c.b;
+  pos[k*3]=X(lon);pos[k*3+1]=ILL?(m>0?Y(m)*.07:-.006):(m>0?Y(m):m/KM*EX*.25-.004);pos[k*3+2]=Z(lat);
+  const c=ILL?renkIll(k,i,j,w,hh,m):renk(m,AM[k]);col[k*3]=c.r;col[k*3+1]=c.g;col[k*3+2]=c.b;
  }
  const idx=new Uint32Array((w-1)*(hh-1)*6);let n=0;
  for(let j=0;j<hh-1;j++)for(let i=0;i<w-1;i++){const a=j*w+i,b=a+1,c=a+w,d=c+1;idx[n++]=a;idx[n++]=c;idx[n++]=b;idx[n++]=b;idx[n++]=c;idx[n++]=d;}
@@ -155,20 +169,20 @@ function arazi(){
  const ila=new Float32Array(w*hh);for(let k=0;k<w*hh;k++)ila[k]=AI[k];g.setAttribute('ilid',new THREE.BufferAttribute(ila,1));
  const mat=new THREE.MeshLambertMaterial({vertexColors:true});
  mat.onBeforeCompile=sh=>{sh.uniforms.ilT={value:ILT};
-  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float ilid;varying float vIl;').replace('#include <begin_vertex>','#include <begin_vertex>\nvIl=ilid;');
-  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform sampler2D ilT;varying float vIl;').replace('#include <color_fragment>','#include <color_fragment>\nvec4 ic=texture2D(ilT,vec2((floor(vIl+.5)+.5)/128.,.5));diffuseColor.rgb=mix(diffuseColor.rgb,ic.rgb,ic.a);');};
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float ilid;varying float vIl;').replace('#include <begin_vertex>','#include <begin_vertex>\nvIl=ilid;vec4 ic0=texture2D(ilT,vec2((floor(ilid+.5)+.5)/128.,.5));transformed.y+=ic0.a*uLift;');sh.uniforms.uLift={value:ILL?.07:0.};sh.vertexShader=sh.vertexShader.replace('attribute float ilid;','attribute float ilid;uniform sampler2D ilT;uniform float uLift;');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform sampler2D ilT;varying float vIl;').replace('#include <color_fragment>','#include <color_fragment>\nvec4 ic=texture2D(ilT,vec2((floor(vIl+.5)+.5)/128.,.5));diffuseColor.rgb=mix(diffuseColor.rgb,ic.rgb,ic.a);if(ic.a<.01&&vIl>.5)diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.92,.93,.94),uDim);');sh.uniforms.uDim=UDIM;sh.fragmentShader=sh.fragmentShader.replace('uniform sampler2D ilT;varying float vIl;','uniform sampler2D ilT;varying float vIl;uniform float uDim;');};
  S.add(new THREE.Mesh(g,mat));
  // il sınırları (silik)
  const lp=[];for(const ad of GEO.il_ad||[])for(const r of GEO.il[ad]){for(let i=0;i<r.length;i++){const a=r[i],b=r[(i+1)%r.length];lp.push(V3(a[0],a[1],.006),V3(b[0],b[1],.006))}}
- if(lp.length){const lg=new THREE.BufferGeometry().setFromPoints(lp);S.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:'#dfefff',transparent:true,opacity:.16,fog:false})))}
- const deniz=new THREE.Mesh(new THREE.PlaneGeometry(60,40),new THREE.MeshPhongMaterial({color:'#0d3150',transparent:true,opacity:.72,shininess:90,specular:'#5f8fb0'}));
- deniz.rotation.x=-Math.PI/2;deniz.position.y=.0005;S.add(deniz);
+ if(lp.length){const lg=new THREE.BufferGeometry().setFromPoints(lp);S.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:'#ffffff',transparent:true,opacity:ILL?.95:.16,fog:false})))}
+ const deniz=new THREE.Mesh(new THREE.PlaneGeometry(60,40),(ILL?new THREE.MeshBasicMaterial({color:'#5ec3d9'}):new THREE.MeshPhongMaterial({color:'#0d3150',transparent:true,opacity:.72,shininess:90,specular:'#5f8fb0'})));
+ deniz.rotation.x=-Math.PI/2;deniz.position.y=ILL?-.012:.0005;if(ILL)deniz.scale.set(3,3,1);S.add(deniz);
  // Türkiye sınırı (parlak çizgi)
  for(const r of GEO.ulke.TUR){if(r.length<40)continue;
   const p=r.map(([lo,la])=>V3(lo,la,.012));p.push(p[0]);
   const cu=new THREE.CatmullRomCurve3(p,false,'centripetal');
-  const m1=new THREE.Mesh(new THREE.TubeGeometry(cu,p.length*2,.009,4),new THREE.MeshBasicMaterial({color:'#e8f4ff',transparent:true,opacity:.75,fog:false}));m1.userData.op=.75;
-  const m2=new THREE.Mesh(new THREE.TubeGeometry(cu,p.length*2,.04,4),new THREE.MeshBasicMaterial({color:'#7fc4ff',transparent:true,opacity:.13,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));m2.userData.op=.13;S.add(m1,m2);SINIR.push(m1,m2);
+  const m1=new THREE.Mesh(new THREE.TubeGeometry(cu,p.length*2,.009,4),new THREE.MeshBasicMaterial({color:'#e8f4ff',transparent:true,opacity:.75,fog:false}));m1.userData.op=ILL?.95:.75;if(ILL)m1.material.color.set('#ffffff');
+  const m2=new THREE.Mesh(new THREE.TubeGeometry(cu,p.length*2,.04,4),new THREE.MeshBasicMaterial({color:'#7fc4ff',transparent:true,opacity:.13,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));m2.userData.op=ILL?0:.13;S.add(m1,m2);SINIR.push(m1,m2);
  }
 }
 // ---------- öğeler ----------
@@ -248,7 +262,10 @@ function karisim(a,b,t){return {hedef:a.hedef.clone().lerp(b.hedef,t),yaw:lerp(a
 // ---------- kurgu ----------
 let PL=[], TRPTS=[];
 window.kurgu=k=>{
- K=k;EX=K.konu.abartma||11;arazi();
+ K=k;EX=K.konu.abartma||11;ILL=(K.konu.tema||'illustre')==='illustre';
+ if(ILL){BG.set('#bfe6f2');S.fog.color.set('#bfe6f2');HEMI.intensity=1.25;HEMI.color.set('#ffffff');HEMI.groundColor.set('#cfc6b0');SUN.intensity=1.1;$('#vin').style.background='radial-gradient(ellipse 80% 65% at 50% 45%,transparent 55%,rgba(10,30,45,.35) 100%)';$('#scrim').style.opacity=1;$('#grain').style.opacity=.03}
+ window.GORSEL_HAZIR=false;{const ls=[...new Set(k.parcalar.map(p=>p.gorsel).filter(Boolean))];let n=ls.length;if(!n)window.GORSEL_HAZIR=true;for(const g of ls){const im=new Image();im.onload=im.onerror=()=>{if(--n<=0)window.GORSEL_HAZIR=true};im.src=g}}
+ arazi();
  for(const r of GEO.ulke.TUR)if(r.length>40)for(let i=0;i<r.length;i+=6)TRPTS.push(V3(r[i][0],r[i][1]));
  $('#bant').textContent=K.konu.baslik_bant;
  const dots=$('#dots');for(const o of [...(K.konu.ogeler||[])].sort((a,b)=>b.sira-a.sira)){const d=document.createElement('b');d.textContent=o.sira;d.dataset.s=o.sira;dots.appendChild(d)}
@@ -263,7 +280,7 @@ window.kurgu=k=>{
  const genel=plan(TRPTS,-.12,.98,1.0,.3);
  const DEKOR=[[34.83,38.65],[44.3,39.7],[41.16,40.84],[35.15,37.83],[38.74,37.98],[35.45,38.53],[42.9,38.6],[29.05,41.1],[29.12,37.92],[29.22,40.07],[31.4,36.9],[40.7,40.6],[36.2,36.6],[27.4,37.5],[32.5,37.3],[39.4,39.4]];
  let tohum=0;for(const ch of (K.kod||K.konu.baslik_bant||''))tohum=(tohum*31+ch.charCodeAt(0))%9973;
- const dekor=(i,pitch=.42)=>{const d=DEKOR[(tohum+i*5)%DEKOR.length];const c=V3(d[0],d[1]);return {hedef:c,yaw:((tohum+i*37)%628)/100,pitch,dist:1.25+((tohum+i)%5)*.12,ofsY:0}};
+ const dekor=(i,pitch=.42)=>{if(ILL)pitch=Math.max(pitch,.82);const d=DEKOR[(tohum+i*5)%DEKOR.length];const c=V3(d[0],d[1]);return {hedef:c,yaw:ILL?(((tohum+i*37)%120)/100-.6):((tohum+i*37)%628)/100,pitch,dist:(ILL?3.2:1.25)+((tohum+i)%5)*(ILL?.35:.12),ofsY:0}};
  PL=K.parcalar.map((p,i)=>{
   if(p.sahne==='h_goster'){const pts=p.iller.flatMap(x=>ilNesne(x.ad).pts);return plan(pts,-.08,1.0,.92,.25)}
   if((p.il||p.iller)&&!(p.gizli&&p.sahne==='q_soru')&&p.sahne!=='h_sor'){const ads=p.iller?p.iller.map(x=>x.ad):[p.il];let pts=ads.flatMap(a=>ilNesne(a).pts);
@@ -298,7 +315,7 @@ window.kare=t=>{
  else sh.yaw-=pr*.45;                                // ters yörünge
  if(i===0)sh={...sh,dist:sh.dist*lerp(1.8,1,eout(t/2.4))};
  {const k=cl((sh.dist-2.2)/3.5);for(const m of SINIR)m.material.opacity=m.userData.op*k;}
- kamKur(sh);CAM.updateMatrixWorld();S.fog.near=sh.dist*.7;S.fog.far=sh.dist*2.2;
+ kamKur(sh);CAM.updateMatrixWorld();S.fog.near=sh.dist*(ILL?1.4:.7);S.fog.far=sh.dist*(ILL?4.5:2.2);
  // öğe durumları
  const tip=K.konu.tip;
  for(const id in NESNE){
@@ -350,7 +367,7 @@ window.kare=t=>{
  if(P.sahne==='h_goster')for(const x of P.iller)ilBoya(x.ad,x.renk,cl(dt/.5));
  if(P.sahne==='q_cevap'){if(sorP&&sorP.sahne==='h_sor'&&hgP)for(const x of hgP.iller)ilBoya(x.ad,x.renk,.55);if(P.il)ilBoya(P.il,'#2fe08a',cl(dt/.4)*(.85+.15*Math.sin(t*6)))}
  if((P.sahne==='q_soru'&&P.il&&!P.gizli)||(P.sahne==='bilgi'&&P.il)||(P.sahne==='kanca'&&P.il))ilBoya(P.il,'#ffd23f',cl(dt/.5)*.8);
- ILT.needsUpdate=true;
+ ILT.needsUpdate=true;UDIM.value=ILL&&(P.sahne==='h_goster'||(P.sahne==='q_cevap'&&sorP&&sorP.sahne==='h_sor'))?.75*cl(dt/.4):(ILL&&P.sahne==='q_cevap'?.45*cl(dt/.5):0);
  for(const ad in ILO){const o=ILO[ad];const on=(P.il===ad&&(P.sahne==='q_cevap'||P.sahne==='bilgi'||P.sahne==='kanca'||(P.sahne==='q_soru'&&!P.gizli)))||(P.sahne==='h_goster'&&P.iller.some(x=>x.ad===ad));
   for(const m of o.kenar)m.material.opacity=on?cl(dt/.4):0;o.etk.op=(on&&P.sahne!=='h_goster')?cl((dt-.3)/.3):0}
  for(const p of K.parcalar)if(p._etk)for(const e of p._etk)e.op=(P===p)?cl((dt-.3)/.3):0;
@@ -371,6 +388,13 @@ window.kare=t=>{
  if(P.sahne==='bilgi'){$('#bbas').textContent=P.baslik||'';const sT=cl((dt-.4)/1.2);$('#bsay').textContent=P.sayi!=null?(P.sayi_on||'')+fmt(P.sayi*eout(sT))+(P.birim?' '+P.birim:''):'';$('#balt').textContent=P.alt||'';$('#balt').style.display=P.alt?'inline-block':'none';
   goster($('#bbas'),cl(dt/.3),(1-eout(dt/.4))*30*u);goster($('#bsay'),cl((dt-.35)/.2),0,1+.12*Math.max(0,1-Math.abs(dt-1.62)/.15));goster($('#balt'),cl((dt-.9)/.3));bl.style.opacity=1}
  else bl.style.opacity=0;
+ // yemek görseli kartı
+ {const yk=$('#ykart'),gp=P.gorsel||(P.sahne==='q_cevap'&&sorP&&sorP.gorsel)||null;
+  if(gp){if($('#yimg').getAttribute('src')!==gp)$('#yimg').setAttribute('src',gp);
+   if(P.sahne==='q_cevap'&&P.il&&ILO[P.il]){const q=ILO[P.il].merkez.clone().add(new THREE.Vector3(0,.05,0)).project(CAM);const sz=300*u;
+    yk.style.width=yk.style.height=sz+'px';yk.style.left=((q.x+1)/2*W-sz/2)+'px';yk.style.top=((1-q.y)/2*H-sz-70*u)+'px';yk.style.opacity=cl((dt-.2)/.3);yk.style.transform=`scale(${lerp(.3,1,back((dt-.2)/.45))}) rotate(-4deg)`}
+   else{const sz=460*u;yk.style.width=yk.style.height=sz+'px';yk.style.left=(W/2-sz/2)+'px';yk.style.top=(640*u)+'px';yk.style.opacity=cl(dt/.25)*(1-cl((t-(P.t1+(P.bekle||0))+.1)/.2));yk.style.transform=`scale(${lerp(.4,1,back(dt/.5))}) rotate(${Math.sin(t*1.5)*2}deg)`}}
+  else yk.style.opacity=0}
  // ---- arayüz ----
  const sir=P.oge&&P.sahne==='sira'?OG[P.oge]:null;
  // nokta göstergesi

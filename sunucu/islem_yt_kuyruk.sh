@@ -16,7 +16,10 @@ KANAL = {"TR": "UC77LyY3gqWmBNAKp2lbsGBg", "EN": "UCFLJUlhUSgjcLbp9ad_t9PQ", "ES
          "KZ_TR": "UC7o3DG9m1gBbvMjFZjB5KEg", "KZ_EN": "UC41-Z82jCQ8955az6JUDIAw", "OD": "UCg75Mvb6C8CBSJPeuwzBFZA",
          "NY": "UCscZRPONJahcgtZhTNeUcRA",
          "YR": "UCqVae87VSs6HokK4Qdm29Hw",
-         "LM": "UCDwQWwMPkGKxsEz7t1HCPbA"}
+         "LM": "UCDwQWwMPkGKxsEz7t1HCPbA",
+         "KK_TR": "UCYtvxRIP1eF3-f0TAqh2PvA",
+         "KK_EN": "UCsV0ubiBEy8dxigNk8I_LqA",
+         "KK_ES": "UCM6LhKp6tDx4ddZ65oZUCvQ"}
 kayit_yol = os.path.join(D, "yuklenen_kuyruk.json")
 kayit = json.load(open(kayit_yol, encoding="utf-8")) if os.path.exists(kayit_yol) else {}
 
@@ -167,7 +170,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
         if it["publishAt"][:10] != _eski_pa[:10]:
             print(f"NOT: {kod} KANAL SINIRI ({dil}): {_eski_pa[:16]} dolu, yayın {it['publishAt'][:16]} gününe kaydırıldı")
         boyut = os.path.getsize(mp4)
-        dil_kodu = {"TR": "tr", "EN": "en", "ES": "es", "KZ_TR": "tr", "OD": "tr", "NY": "tr", "YR": "tr", "LM": "en"}.get(dil, "en")
+        dil_kodu = {"TR": "tr", "EN": "en", "ES": "es", "KZ_TR": "tr", "OD": "tr", "NY": "tr", "YR": "tr", "LM": "en", "KK_TR": "tr", "KK_EN": "en", "KK_ES": "es"}.get(dil, "en")
         from datetime import datetime, timezone
         hemen_yayin = datetime.fromisoformat(it["publishAt"]) <= datetime.now(timezone.utc)
         durum_alan = ({"privacyStatus": "public", "selfDeclaredMadeForKids": False, "containsSyntheticMedia": bool(it.get("sentetik", False))}

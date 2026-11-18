@@ -85,6 +85,10 @@ jobs:
                   print(f'::notice::{kod}: başlık değişti → {s["vid"]}'); continue
               if not s.get('vid'):
                   print('::warning::' + kod + ' ' + s['durum'] + ' ' + s.get('detay', '')); continue
+              if s.get('kanal') in ('KK_TR', 'KK_EN', 'KK_ES'):
+                  subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
+                  subprocess.run(['git', 'rm', '-q', '--ignore-unmatch', f'sunucu/yt_kuyruk/{kod}.mp4', f'sunucu/yt_kuyruk/{kod}.jpg', f'sunucu/yt_kuyruk/{kod}.png'], check=False)
+                  print(f'::notice::{kod}: {s["durum"]} → {s["vid"]} (SALT_YORUM kanalı, yayin tablosuna eklenmedi)'); continue
               p = datetime.fromisoformat(s['publishAt'])
               durum_str = 'Yayında' if p <= datetime.now(p.tzinfo) else 'Planlı'
               kanal = {'TR': 'Antik Stüdyo', 'EN': 'Ancient Studio', 'ES': 'Estudio Antiguo', 'KZ_TR': 'Kozmos Lab TR', 'KZ_EN': 'Kozmos Lab', 'OD': 'Ömür Dediğin', 'NY': 'Nasıl Yapıldı', 'YR': 'Yolu Seç !', 'LM': 'LVL MAX'}.get(s['kanal'], s['kanal'])

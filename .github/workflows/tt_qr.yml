@@ -19,11 +19,17 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 50 }
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            sunucu/islem_tt_qr.sh
+            sunucu/islem_tt_tarayici.sh
+          sparse-checkout-cone-mode: false
       - name: QR
         env:
           ANAHTAR: ${{ secrets.SUNUCU_SSH }}
           ADRES: ${{ secrets.SUNUCU_ADRES }}
+          GH_TOKEN: ${{ github.token }}
           H: ${{ inputs.hesap }}
         run: |
           case "$H" in ""|yr) ;; *) echo "::error::geçersiz hesap"; exit 1;; esac
@@ -34,22 +40,21 @@ jobs:
           tar czf /tmp/p.tgz sunucu/islem_tt_qr.sh sunucu/islem_tt_tarayici.sh
           ssh $O root@$ADRES "rm -rf /tmp/ttq && mkdir -p /tmp/ttq && tar xzf - -C /tmp/ttq && TT_HESAP=$H bash /tmp/ttq/sunucu/islem_tt_qr.sh < /dev/null" < /tmp/p.tgz | sed 's/^NOT: */::notice::/'
           sleep 25; ssh $O root@$ADRES "ls -la $KOK | grep -v chromium; cat $KOK/giris.json; echo; docker ps -a --format '{{.Names}} {{.Status}}' | grep -i 'tt-\|qr'; docker logs --tail 15 tampon-qr${H:+-$H} 2>&1" | sed 's/^/::notice::TANI /'
-          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          # Depoya git ile değil, GitHub içerik API'siyle yaz (büyük depoyu indirmeden, çakışmasız)
+          koy() { y="$1"; sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/$y?ref=main" --jq .sha 2>/dev/null || true); gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$y" -f message="TikTok QR ${H:-as}: $(TZ=Europe/Istanbul date +'%H:%M:%S')" -f content="$(base64 -w0 "$y")" ${sha:+-f sha=$sha} >/dev/null 2>&1 || echo "::warning::$y yazılamadı"; }
+          sil() { y="$1"; sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/$y?ref=main" --jq .sha 2>/dev/null || true); [ -n "$sha" ] && gh api -X DELETE "repos/$GITHUB_REPOSITORY/contents/$y" -f message="TikTok QR ${H:-as}: bitti" -f sha=$sha >/dev/null 2>&1 || true; }
           son=""
           for i in $(seq 1 55); do
             sleep 10
             scp -q $O root@$ADRES:$KOK/giris.json $D/giris.json 2>/dev/null || true
             scp -q $O root@$ADRES:$KOK/qr.png $D/qr.png 2>/dev/null || true
-            scp -q $O root@$ADRES:$KOK/sayfa.png $D/sayfa.png 2>/dev/null || true
-            h=$(sha1sum $D/qr.png $D/giris.json 2>/dev/null | sha1sum | cut -c1-12)
+                        h=$(sha1sum $D/qr.png $D/giris.json 2>/dev/null | sha1sum | cut -c1-12)
             if [ "$h" != "$son" ]; then
-              son=$h; git add -A $D
-              git diff --cached --quiet || { git commit -qm "TikTok QR ${H:-as}: $(TZ=Europe/Istanbul date +'%H:%M:%S')"; for t in 1 2 3; do git pull -q --rebase -X theirs origin main && git push -q origin HEAD:main && break || { echo "::warning::itme denemesi $t başarısız"; git rebase --abort 2>/dev/null; sleep 2; }; done; }
+              son=$h; for y in $D/qr.png $D/giris.json; do [ -f $y ] && koy $y; done
             fi
             grep -q '"ok": true' $D/giris.json 2>/dev/null && { echo "::notice::oturum açıldı"; break; }
             grep -q 'süre doldu\|bağlanılamadı' $D/giris.json 2>/dev/null && break
           done
           ssh $O root@$ADRES "docker logs --tail 30 tampon-qr${H:+-$H} 2>&1; docker rm -f tampon-qr${H:+-$H} >/dev/null 2>&1; rm -f $KOK/qr.png; rm -rf /tmp/ttq" > $D/gunluk.txt 2>&1 || true
           rm -f ~/.ssh/k
-          git rm -q --ignore-unmatch $D/qr.png $D/sayfa.png; git add -A $D
-          git diff --cached --quiet || { git commit -qm "TikTok QR ${H:-as}: bitti"; git pull -q --rebase origin main; git push -q origin HEAD:main; }
+          koy $D/giris.json; koy $D/gunluk.txt; sil $D/qr.png

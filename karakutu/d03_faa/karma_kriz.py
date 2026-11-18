@@ -205,7 +205,7 @@ def harita_kare(tur, tz, p, a):
     global HAR
     if HAR is None: HAR = harita_taban()
     im, S, x0, y0 = HAR
-    hedef = {"ABD": ((-97, 37, 15.5), (-96, 37, 17.5)), "AR": ((-96, 37, 17.5), (-97.2, 35.0, 50)), "KAP": ((-84, 37.5, 26), (-84, 37.5, 22))}[tur]
+    hedef = {"ABD": ((-97, 37, 15.5), (-96, 37, 17.5)), "AR": ((-96, 37, 17.5), (-97.2, 35.0, 50)), "KAP": ((-97, 39, 18), (-97, 39, 16.5))}[tur]
     e = ease(min(1, p * 1.3)); (l0, b0, z0), (l1, b1, z1) = hedef
     clon, clat, z = l0 + (l1 - l0) * e, b0 + (b1 - b0) * e, z0 + (z1 - z0) * e
     cw, ch = W / z, H / z; px0 = (clon - cw / 2 - x0) * S; py0 = (y0 - (clat + ch / 2)) * S
@@ -251,7 +251,7 @@ def harita_kare(tur, tz, p, a):
             g = ease(min(1, max(0, (tz - a - 0.3 - i * 0.5) / 0.4)))
             if g <= 0: continue
             x, y = pr(lon, lat); nabiz(x, y, rk, R=70, hiz=1.2 + i * 0.2, g=g)
-            etiket(x, y, OLAY[i], rk, 1 if i == 0 else (-1 if i == 2 else 1), (-80, 80, -80)[i], g, 34)
+            etiket(x, y, OLAY[i], rk, (1, 1, -1)[i], (-80, 80, -80)[i], g, 34)
     return fr
 
 # ---------- açılış: üç sistem kartı sırayla çöker (kod) ----------
@@ -271,22 +271,23 @@ def uc_kare(tz, p, a):
     fr = Image.new("RGB", (W, H), (8, 10, 16)); d = ImageDraw.Draw(fr, "RGBA")
     for yy in range(0, H, 6): d.line((0, yy, W, yy), fill=(255, 255, 255, 6))
     for i in range(3):
-        y0 = 520 + i * 380; giris = ease(min(1, max(0, (tz - a - 0.15 * i) / 0.4))); x0 = 70 + (1 - giris) * -900
+        y0 = 430 + i * 320; giris = ease(min(1, max(0, (tz - a - 0.15 * i) / 0.4))); x0 = 70 + (1 - giris) * -900
         cok = tz - a > 0.9 + i * 0.9; t_c = tz - a - (0.9 + i * 0.9)
         sars = int(14 * math.sin(t_c * 60) * math.exp(-t_c * 6)) if cok else 0
         x0 += sars; gl = (200, 30, 30) if cok else (40, 120, 70)
-        d.rounded_rectangle((x0, y0, x0 + W - 140, y0 + 320), 28, fill=(18, 22, 30, 240), outline=gl + (255,), width=5)
-        ikon(d, i, x0 + 150, y0 + 160, 85, (255, 90, 80) if cok else (120, 230, 150))
-        d.text((x0 + 280, y0 + 50), UC[i][0], font=font("interb", 44), fill=(200, 200, 200))
-        d.text((x0 + 280, y0 + 105), UC[i][1], font=font("inter", 84), fill=(255, 255, 255))
-        d.text((x0 + 280, y0 + 205), UC[i][2], font=font("interb", 50), fill=RENK)
+        d.rounded_rectangle((x0, y0, x0 + W - 140, y0 + 280), 28, fill=(18, 22, 30, 240), outline=gl + (255,), width=5)
+        ikon(d, i, x0 + 140, y0 + 140, 80, (255, 90, 80) if cok else (120, 230, 150))
+        d.text((x0 + 260, y0 + 40), UC[i][0], font=font("interb", 40), fill=(200, 200, 200))
+        d.text((x0 + 260, y0 + 90), UC[i][1], font=font("inter", 70), fill=(255, 255, 255))
+        d.text((x0 + 260, y0 + 180), UC[i][2], font=font("interb", 46), fill=RENK)
         if cok:
-            g = ease(min(1, t_c / 0.15)); ft = font("inter", int(150 - 40 * g)); tw = d.textlength(COKTU, font=ft)
-            cx, cy = x0 + (W - 140) - tw / 2 - 40, y0 + 160
-            d.text((cx - tw / 2, cy - 70), COKTU, font=ft, fill=(230, 30, 30, int(255 * g)), stroke_width=6, stroke_fill=(255, 255, 255, int(255 * g)))
+            g = ease(min(1, t_c / 0.15)); ft = font("inter", int(80 - 22 * g)); tw = d.textlength(COKTU, font=ft)
+            bx1 = x0 + W - 140 - 30; bx0 = bx1 - tw - 40; by0 = y0 + 280 - ft.size - 28 - 28
+            d.rounded_rectangle((bx0, by0, bx1, by0 + ft.size + 28), 14, fill=(200, 20, 20, int(240 * g)), outline=(255, 255, 255, int(255 * g)), width=3)
+            d.text((bx0 + 20, by0 + 8), COKTU, font=ft, fill=(255, 255, 255, int(255 * g)))
             if t_c < 0.35:
                 for _ in range(8):
-                    yy = random.randint(y0, y0 + 320); d.rectangle((x0, yy, x0 + W - 140, yy + random.randint(2, 10)), fill=(255, 40, 40, 70))
+                    yy = random.randint(y0, y0 + 280); d.rectangle((x0, yy, x0 + W - 140, yy + random.randint(2, 10)), fill=(255, 40, 40, 70))
     return fr
 
 # ---------- "siber saldırı mı?" animasyonu (kod) ----------
@@ -392,7 +393,7 @@ def kare(fi):
     if si == len(B) - 1:
         g = ease(min(1, max(0, (tz - a - 0.8) / 0.5)))
         if g > 0:
-            ft = font("inter", 50); tw = d.textlength(KAPANIS, font=ft); bx, by = (W - tw) / 2 - 36, 640
+            ft = font("inter", 50); tw = d.textlength(KAPANIS, font=ft); bx, by = (W - tw) / 2 - 36, 1250
             d.rounded_rectangle((bx, by, bx + tw + 72, by + 96), 22, fill=RENK + (int(235 * g),), outline=(255, 255, 255, int(255 * g)), width=3)
             d.text(((W - tw) / 2, by + 20), KAPANIS, font=ft, fill=(0, 0, 0, int(255 * g)) if DIL != "en" else (255, 255, 255, int(255 * g)))
     baslik(d, bas, tz, a)

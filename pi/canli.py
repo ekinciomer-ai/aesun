@@ -82,6 +82,23 @@ def yerel_kod():
         return ""
 
 
+CEKME_BEKLE = Path("/tmp/aesun_canli_cekme_bekle")
+
+
+def _cekme_beklesin():
+    try:
+        return time.time() - CEKME_BEKLE.stat().st_mtime < 1800
+    except OSError:
+        return False
+
+
+def _cekme_basarisiz():
+    try:
+        CEKME_BEKLE.touch()
+    except OSError:
+        pass
+
+
 def gonder(a, veri):
     r = urllib.request.Request(ADRES, data=json.dumps(veri, separators=(",", ":")).encode(),
                                headers={"Content-Type": "application/json", "X-AE-Canli": a, "User-Agent": "aesun-pi-canli"},
@@ -120,9 +137,14 @@ def main():
             try:
                 yan = gonder(a, {"t": int(t0), "top": round(top, 1), "n": sum(1 for v in c.values() if v and (v[0] or 0) > 1), "c": c, "kod": kod})
                 hedef_kod = str((yan or {}).get("kod") or "")
-                if hedef_kod and kod and not kod.startswith(hedef_kod[:7]) and time.time() - son_cek > 20:
+                if hedef_kod and kod and not kod.startswith(hedef_kod[:7]) and time.time() - son_cek > 20 and not _cekme_beklesin():
                     son_cek = time.time()
-                    r = subprocess.run(["git", "-C", str(KOK), "pull", "-q", "--ff-only"], capture_output=True, text=True, timeout=30)
+                    try:
+                        r = subprocess.run(["git", "-C", str(KOK), "pull", "-q", "--ff-only"], capture_output=True, text=True, timeout=30)
+                    except subprocess.TimeoutExpired:
+                        r = subprocess.CompletedProcess([], 1)
+                    if r.returncode != 0:
+                        _cekme_basarisiz()          # yarım kalan çekme interneti boşa harcar: 30 dk bekle (cron pull sürer)
                     if r.returncode == 0:
                         kod = yerel_kod()
                         log("canlı: hızlı kod güncellemesi tamam ->", kod)

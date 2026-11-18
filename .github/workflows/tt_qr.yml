@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 50 }
       - name: QR
         env:
           ANAHTAR: ${{ secrets.SUNUCU_SSH }}
@@ -41,7 +42,7 @@ jobs:
             h=$(sha1sum $D/qr.png $D/giris.json 2>/dev/null | sha1sum | cut -c1-12)
             if [ "$h" != "$son" ]; then
               son=$h; git add -A $D
-              git diff --cached --quiet || { git commit -qm "TikTok QR ${H:-as}: $(TZ=Europe/Istanbul date +'%H:%M:%S')"; git pull -q --rebase origin main; git push -q origin HEAD:main; }
+              git diff --cached --quiet || { git commit -qm "TikTok QR ${H:-as}: $(TZ=Europe/Istanbul date +'%H:%M:%S')"; for t in 1 2 3; do git pull -q --rebase -X theirs origin main && git push -q origin HEAD:main && break || { echo "::warning::itme denemesi $t başarısız"; git rebase --abort 2>/dev/null; sleep 2; }; done; }
             fi
             grep -q '"ok": true' $D/giris.json 2>/dev/null && { echo "::notice::oturum açıldı"; break; }
             grep -q 'süre doldu\|bağlanılamadı' $D/giris.json 2>/dev/null && break

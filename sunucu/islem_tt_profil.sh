@@ -32,7 +32,8 @@ with sync_playwright() as p:
         except Exception: pass
     if P.get("bio"):
         bio = pg.locator("textarea[data-e2e='edit-profile-bio-input'], [data-e2e='edit-profile-bio-input'] textarea").first
-        bio.fill(P["bio"], timeout=10000); print("NOT: biyografi yazıldı")
+        bio.click(timeout=10000); pg.keyboard.press("Control+A"); pg.keyboard.press("Backspace"); time.sleep(0.5)
+        pg.keyboard.type(P["bio"], delay=40); time.sleep(1); print("NOT: biyografi yazıldı:", bio.input_value()[:40])
     if P.get("ad"):
         try:
             ad = pg.locator("input[data-e2e='edit-profile-name-input'], [data-e2e='edit-profile-name-input'] input, input[placeholder='Ad'], input[placeholder='Name']").first
@@ -42,7 +43,11 @@ with sync_playwright() as p:
     time.sleep(2); ss(pg, "4_dolu")
     kaydet = pg.locator("[data-e2e='edit-profile-save']").first
     if not kaydet.count(): kaydet = pg.get_by_role("button", name="Kaydet").last
-    kaydet.click(timeout=15000); time.sleep(6); ss(pg, "5_kaydedildi")
+    bb = kaydet.bounding_box(); print("NOT: kaydet etkin:", kaydet.is_enabled())
+    pg.mouse.click(bb["x"] + bb["width"]/2, bb["y"] + bb["height"]/2); time.sleep(1.5)
+    ss(pg, "5a_hemen"); time.sleep(5); ss(pg, "5_kaydedildi")
+    for l in [x.strip() for x in pg.inner_text("body").splitlines() if x.strip()][:200]:
+        if any(k in l.lower() for k in ("hata", "error", "uygun", "deneyin", "kaydedildi", "güncellendi", "başarı")): print("NOT: MESAJ", l[:100])
     pg.reload(wait_until="domcontentloaded"); time.sleep(6); ss(pg, "6_sonra")
     t = pg.inner_text("body")
     print("NOT: kontrol ad:", P.get("ad","") in t, "bio:", P.get("bio","")[:25] in t)

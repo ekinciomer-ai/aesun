@@ -4,7 +4,7 @@
 # Çıktı: /opt/tampon/indirici/disari/parcalar.tgz
 set -u
 KOK=/opt/tampon/indirici; G=$KOK/rank; C=$KOK/parcalar; mkdir -p $C $KOK/disari
-$KOK/venv/bin/pip install -q scenedetect rapidocr-onnxruntime opencv-python-headless >/dev/null 2>&1 || { echo "NOT: HATA paketler kurulamadı"; exit 1; }
+$KOK/venv/bin/pip install -q "numpy<2.3" "opencv-python-headless<4.13" scenedetect rapidocr-onnxruntime >/dev/null 2>&1 || { echo "NOT: HATA paketler kurulamadı"; exit 1; }
 cat > $KOK/parcala.py <<'PY'
 #!/usr/bin/env python3
 """Sıralama derlemesini ayrı kliplere böler, yazıları kaldırır.
@@ -115,7 +115,8 @@ print(json.dumps({"video": AD, "kirpma_ust": int(ust), "kirpma_alt": int(alt), "
 PY
 ls $G/*.mp4 >/dev/null 2>&1 || { echo "NOT: HATA rank klasörü boş"; exit 1; }
 export OMP_NUM_THREADS=2
-ls $G/*.mp4 | xargs -P 4 -I{} sh -c 'nice -n 10 timeout 3000 '$KOK'/venv/bin/python '$KOK'/parcala.py "{}" '$C' > "{}.json" 2>"{}.log" || echo "NOT: HATA $(basename {})"'
+$KOK/venv/bin/python -c "import numpy, cv2, rapidocr_onnxruntime, scenedetect" 2>/tmp/imp.err || { echo "NOT: HATA kütüphane: $(tail -1 /tmp/imp.err | cut -c1-150)"; exit 1; }
+ls $G/*.mp4 | xargs -P 4 -I{} sh -c 'nice -n 10 timeout 3000 '$KOK'/venv/bin/python '$KOK'/parcala.py "{}" '$C' > "{}.json" 2>"{}.log" || echo "NOT: HATA $(basename {}): $(tail -1 "{}.log" | cut -c1-150)"'
 for j in $G/*.json; do python3 -c "import json,sys;d=json.load(open('$j'));print('NOT:',d['video'],'→',len(d['klipler']),'klip')" 2>/dev/null; done
 rm -f $G/*.json $G/*.log
 echo "NOT: toplam $(ls $C/*.mp4 | wc -l) klip · $(du -sh $C | cut -f1)"

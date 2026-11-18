@@ -1,0 +1,36 @@
+name: TikTok canlı giriş penceresi (hesap seçmeli)
+# Sunucudaki kalıcı tarayıcıyı 20 dk için dışa açar (HTTPS, tek seferlik parola), sonra kendiliğinden kapanır.
+# Ömer TikTok girişini (QR dahil) bu canlı ekrandan yapar. Sunucu kilidini beklemez; yalnız o hesabın tarayıcısına dokunur.
+on:
+  workflow_dispatch:
+    inputs:
+      hesap:
+        description: "boş = @antikstudyo, yr = @yolu.se"
+        required: false
+        default: "yr"
+permissions:
+  contents: read
+jobs:
+  ac:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            sunucu/islem_tt_tarayici.sh
+          sparse-checkout-cone-mode: false
+      - name: Aç
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          H: ${{ inputs.hesap }}
+        run: |
+          case "$H" in ""|yr) ;; *) echo "::error::geçersiz hesap"; exit 1;; esac
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "docker rm -f tampon-qr${H:+-$H} >/dev/null 2>&1; mkdir -p /opt/aesun/tt_pencere; cat > /opt/aesun/tt_pencere/t.sh; TT_HESAP=$H bash /opt/aesun/tt_pencere/t.sh ac; echo \"NOT: ADRES https://\$(curl -s -4 --max-time 5 ifconfig.me || hostname -I | cut -d' ' -f1)\"" < sunucu/islem_tt_tarayici.sh | sed 's/^NOT: */::notice::/'
+          rm -f ~/.ssh/k

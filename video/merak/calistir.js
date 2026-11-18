@@ -29,7 +29,7 @@ function altCiz(t){const c=CH.find(x=>t>=x.bas&&t<x.son);const el=$("alt");if(!c
   el.innerHTML=c.k.map(w=>`<b class="${t>=w.b&&t<w.s+.08?"on":t>=w.s?"son":""}">${w.w.toLocaleUpperCase("tr-TR")}</b>`).join(" ")}
 let tsTane=-1;function tane(fr){if(fr===tsTane)return;tsTane=fr;const c=$("tane"),x=c.getContext("2d"),d=x.createImageData(256,256);let s=fr*9301+49297;for(let i=0;i<d.data.length;i+=4){s=(s*16807)%2147483647;const v=s%255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}x.putImageData(d,0,0)}
 function kare(t){let bi=B.findIndex(b=>t>=b.bas&&t<b.son);if(bi<0)bi=t<B[0].bas?0:B.length-1;const b=B[bi];
-  let pi=b.parcalar.findIndex(p=>t>=p.bas&&t<p.son);if(pi<0)pi=t<b.parcalar[0].bas?0:b.parcalar.length-1;const p=b.parcalar[pi];
+  let pi=0;b.parcalar.forEach((q,j)=>{if(t>=q.bas)pi=j});const p=b.parcalar[pi];
   const pEnd=pi<b.parcalar.length-1?b.parcalar[pi+1].bas:b.son;const o={t,u:cl((t-b.bas)/(b.son-b.bas)),bt:t-b.bas,dur:b.son-b.bas,pi,pu:cl((t-p.bas)/(pEnd-p.bas)),pt:t-p.bas,pd:pEnd-p.bas,p:p.p||{},pp:b.parcalar.map(x=>x.p||{}),
     pb:b.parcalar.map(x=>x.bas-b.bas),ev:(p.ekran||[]).map(e=>e.t-p.bas),son:bi===B.length-1,ilk:bi===0};
   const sn=sahneAl(b.sahne);sn.kur(o);if(M.T.acik)sn.sc.traverse(x=>{if(x.userData.bb)x.quaternion.copy(sn.c.quaternion)});ciz(sn);

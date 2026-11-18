@@ -1,0 +1,197 @@
+{
+ "kod": "KZ_MRK_06_EV",
+ "no": "MERAK #06",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "ELEKTRİKLİ ARABA<br><i>1 kWh İLE KAÇ KM?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "ev",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Bir elektrikli araba, tek bir kilovatsaat elektrikle kaç kilometre gider? Tahminini aklında tut, cevap seni şaşırtabilir.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "ev",
+   "p": {
+    "mod": "kwh"
+   },
+   "metin": "Önce bir kilovatsaat ne kadar? Su ısıtıcısını yarım saat çalıştırmak kadar.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "2.000 W <em>×</em> 0,5 saat = 1 kWh",
+     "k": "Önce"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ su ısıtıcısında 30 dakika",
+     "k": "Su"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "ev",
+   "p": {
+    "mod": "test"
+   },
+   "metin": "Almanya'da otomobil kulübü ADAC'ın testlerinde, elektrikli arabalar yüz kilometrede ortalama yirmi kilovatsaat harcadı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "ADAC TEST ORT. (2023)",
+     "say": 19.7,
+     "dec": 1,
+     "ek": "kWh / 100 km",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "ev",
+   "p": {
+    "mod": "km",
+    "kart": 60
+   },
+   "metin": "Şimdi yüzü yirmiye böl: bir kilovatsaatle yaklaşık beş kilometre gider.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "100 km <em>÷</em> 19,7 kWh",
+     "k": "yüzü"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 5,
+     "ek": "km",
+     "k": "beş"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "ev",
+   "p": {
+    "mod": "yuru",
+    "kart": 60
+   },
+   "metin": "Beş kilometre, yürüyerek yaklaşık bir saatlik yol. Araba ise bu yolu, su ısıtıcısının yarım saatte harcadığı elektrikle gider.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "5 km ≈ 1 saat yürüyüş 🚶",
+     "k": "yürüyerek"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "telefon",
+   "p": {
+    "kart": 52
+   },
+   "metin": "Aynı bir kilovatsaatle kırk üç telefon da tam dolar. Yani beş kilometre, kırk üç telefona bedel.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1.000 Wh <em>÷</em> 23 Wh",
+     "k": "Aynı"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 43,
+     "ek": "telefon",
+     "k": "kırk"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "ev",
+   "p": {
+    "mod": "benzin",
+    "kart": 58
+   },
+   "metin": "Yüz kilometrede altı litre yakan benzinli bir araba, aynı beş kilometre için yaklaşık iki virgül yedi kilovatsaat enerji yakar. Yani neredeyse üç katı.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "0,3 L <em>×</em> 8,9 kWh/L",
+     "k": "aynı"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 2.7,
+     "dec": 1,
+     "ek": "kWh",
+     "k": "iki"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 3 × elektrikli",
+     "k": "üç"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "ev",
+   "p": {
+    "mod": "son",
+    "kart": 60
+   },
+   "metin": "Yani cevap: bir kilovatsaatle yaklaşık beş kilometre. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "on": "≈ ",
+     "say": 5,
+     "ek": "km / kWh",
+     "k": "beş"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Elektrikli araba 1 kWh elektrikle kaç km gider? 🚗⚡ #shorts",
+  "aciklama": "ADAC testlerinde (2023) elektrikli arabalar 100 km'de ortalama 19,7 kWh harcadı. Yani 1 kWh ≈ 5 km. 1 kWh; su ısıtıcısını yarım saat çalıştırmaya ya da ~43 telefonu tam doldurmaya yeter. 100 km'de 6 litre yakan benzinli bir araba aynı 5 km için ~2,7 kWh enerji yakar: neredeyse üç katı.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nGerçek tüketim modele, hıza, havaya ve sürüş tarzına göre değişir; hesap ortalama değerlerle yapılmıştır. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: ADAC Ecotest 2023 ortalaması 19,7 kWh/100 km (ecomento.de haberi), EnBW – ADAC Ecotest tablosu (16–24,5 kWh/100 km), ABD EPA MPGe tanımı (1 galon benzin = 33,7 kWh → ~8,9 kWh/L).\n\n#kozmoslab #elektrikliaraba #enerji #bilim #shorts",
+  "etiketler": [
+   "elektrikli araba",
+   "elektrikli araç",
+   "kwh",
+   "menzil",
+   "şarj",
+   "enerji",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "ecomento.de (31.01.2024): '2023 konsumierten die vom ADAC getesteten Elektroautos im Mittel 19,7 kWh/100 Kilometer' (ADAC Ecotest)",
+  "EnBW – Wie hoch ist der Stromverbrauch von Elektroautos? ADAC-Ecotest (Ocak 2025): 16–24,5 kWh/100 km, ortalama ~20",
+  "ABD EPA – MPGe tanımı: 33,7 kWh = 1 galon benzin (3,785 L) → ~8,9 kWh/L; 6 L/100 km → 5 km için 0,3 L ≈ 2,67 kWh",
+  "Su ısıtıcısı ~2.000 W × 0,5 sa = 1 kWh; telefon dolumu kayıplarla ~23 Wh (#02/#04 ile aynı) → 1.000 ÷ 23 ≈ 43",
+  "Yetişkin rahat yürüme hızı ~1,3–1,4 m/s ≈ 5 km/sa (Bohannon 1997, Age and Ageing)",
+  "Hesap: 100 ÷ 19,7 ≈ 5,1 km/kWh"
+ ]
+}

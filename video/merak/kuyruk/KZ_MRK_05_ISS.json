@@ -1,0 +1,232 @@
+{
+ "kod": "KZ_MRK_05_ISS",
+ "no": "MERAK #05",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "UZAY İSTASYONU<br><i>TÜRKİYE'Yİ KAÇ SANİYEDE</i> GEÇER?"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "iss",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Uluslararası Uzay İstasyonu, Türkiye'nin bir ucundan öbür ucuna kaç saniyede gider? Tahminini aklında tut, cevap çok kısa.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "iss",
+   "p": {
+    "mod": "irtifa"
+   },
+   "metin": "İstasyon yaklaşık dört yüz kilometre yukarıda uçuyor. Neredeyse İstanbul ile Ankara arası kadar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "YÜKSEKLİK",
+     "on": "≈ ",
+     "say": 400,
+     "ek": "km",
+     "k": "dört"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ İstanbul–Ankara (450 km)",
+     "k": "Neredeyse"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "iss",
+   "p": {
+    "mod": "hiz"
+   },
+   "metin": "Hızı ise saatte yaklaşık yirmi sekiz bin kilometre. Bir yolcu uçağından otuz kat hızlı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "HIZ",
+     "on": "≈ ",
+     "say": 28000,
+     "ek": "km/sa",
+     "k": "yirmi"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 30 × yolcu uçağı ✈️",
+     "k": "otuz"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "iss",
+   "p": {
+    "mod": "hiz"
+   },
+   "metin": "Saniyeye çevirelim: her saniye yaklaşık yedi virgül sekiz kilometre.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "28.000 <em>÷</em> 3.600",
+     "k": "Saniyeye"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 7.8,
+     "dec": 1,
+     "ek": "km/sn",
+     "k": "yedi"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "iss",
+   "p": {
+    "mod": "harita"
+   },
+   "metin": "Türkiye ise uçtan uca bin altı yüz kilometreden uzun. Yaklaşık üç buçuk İstanbul–Ankara yolu.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "TÜRKİYE UZUNLUĞU",
+     "on": "≈ ",
+     "say": 1600,
+     "ek": "km",
+     "k": "bin"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 3,5 × İstanbul–Ankara",
+     "k": "Yaklaşık"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "iss",
+   "p": {
+    "mod": "harita",
+    "gec": true
+   },
+   "metin": "Bin altı yüzü yedi virgül sekize böl: yaklaşık iki yüz beş saniye. Yani üç buçuk dakika, bir çay demlenmeden biter.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1.600 <em>÷</em> 7,8",
+     "k": "böl"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 205,
+     "ek": "saniye",
+     "k": "iki"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 3,5 dk < bir çay demi ☕",
+     "k": "çay"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "iss",
+   "p": {
+    "mod": "tur"
+   },
+   "metin": "Bütün Dünya'yı ise doksan dakikada dolaşır. Tam bir futbol maçı kadar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "BİR TUR",
+     "say": 90,
+     "ek": "dakika",
+     "k": "doksan"
+    },
+    {
+     "tip": "etiket",
+     "y": "= bir futbol maçı ⚽",
+     "k": "futbol"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "iss",
+   "p": {
+    "mod": "gun"
+   },
+   "metin": "Bu yüzden astronotlar bir günde on altı kez Güneş'in doğuşunu, on altı kez de batışını görür.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "24 × 60 <em>÷</em> 90",
+     "k": "Bu"
+    },
+    {
+     "tip": "sayi",
+     "say": 16,
+     "ek": "gün doğumu",
+     "k": "on"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "iss",
+   "p": {
+    "mod": "son"
+   },
+   "metin": "Yani cevap: yaklaşık üç buçuk dakika. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "on": "≈ ",
+     "say": 205,
+     "ek": "saniye",
+     "k": "üç"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Uzay İstasyonu Türkiye'yi kaç saniyede geçer? 🛰️ #shorts",
+  "aciklama": "Uluslararası Uzay İstasyonu yaklaşık 400 km yükseklikte, saatte ~28.000 km (saniyede ~7,8 km) hızla uçar. Türkiye uçtan uca 1.600 km'den uzun; istasyon bu yolu ~205 saniyede, yani yaklaşık 3,5 dakikada alır. Dünya'nın çevresini 90 dakikada dolaşır, bu yüzden astronotlar günde 16 kez gün doğumu görür.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nHesap ortalama değerlerle yapılmıştır; istasyonun yörüngesi eğik olduğu için Türkiye üzerindeki gerçek geçiş yolu her seferinde farklıdır. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA (ISS: 17.500 mil/sa, 90 dakikada bir tur, 370–460 km yükseklik), Karadeniz Teknik Üniversitesi – Türkiye coğrafyası (1.600 km'den uzun, 800 km geniş).\n\n#kozmoslab #uzay #uzayistasyonu #bilim #shorts",
+  "etiketler": [
+   "uzay istasyonu",
+   "iss",
+   "uluslararası uzay istasyonu",
+   "astronot",
+   "uzay",
+   "türkiye",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA – What Is the International Space Station? (Grades 5-8): 17.500 mil/sa (≈ 28.000 km/sa), Dünya çevresini 90 dakikada bir dolaşır, ortalama ~250 mil (~400 km) yükseklik",
+  "NASA – International Space Station reference: yükseklik 370–460 km",
+  "Karadeniz Teknik Üniversitesi – About Türkiye, Geography and Climate: 'more than 1,600 kilometres long and 800 km wide'",
+  "Hesap: 28.000 ÷ 3.600 ≈ 7,8 km/sn; 1.600 ÷ 7,8 ≈ 205 sn ≈ 3,4 dk; 24 × 60 ÷ 90 = 16 tur/gün",
+  "Yolcu uçağı seyir hızı ~900 km/sa (Mach ~0,8): 28.000 ÷ 900 ≈ 31",
+  "İstanbul–Ankara karayolu ~450 km; 1.600 ÷ 450 ≈ 3,6",
+  "Futbol maçı 2 × 45 dakika (IFAB Oyun Kuralları); çay demleme ~8 dk (#01 ile aynı karşılaştırma)"
+ ]
+}

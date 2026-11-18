@@ -53,6 +53,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `izgara` | — | 85 telefon ızgarası (ekran[1] anında dolar) |
 | `santral` | — | 1 MW GES sahası uçuş |
 | `ay` | `mod: soru / mesafe / hiz / saat / takvim / uyku / roket / isik / son` | Dünya→Ay yolu, araba (saat/gün/ay sayacı), roket, ışık, Ay'a park |
+| `iss` | `mod: soru / irtifa / hiz / harita (gec:true geçiş) / tur / gun / son` | Uzay İstasyonu: 400 km ölçü, hız izi + uçak, Türkiye şeridi geçiş sayacı, 90 dk tur, 16 gün doğumu |
+| `ev` | `mod: soru / kwh / test / km / yuru / benzin / son` | Elektrikli araba: 1 kWh pil, 100 km test sayacı, 5 km yol (üstten), yürüyen insan, elektrik/benzin enerji çubukları |
 | `turbin` | `mod: soru / olcu / tur / uc / enerji / telefon / son` | 5 MW rüzgâr türbini (12,1 dev/dk), çap ölçüsü, tur yayı, uç izi, batarya, 300 telefon duvarı |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
@@ -67,4 +69,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 ## Durum
 - Bölüm 1 (Güneş yok olsa) ve 2 (Tek panel kaç telefon) — 17.11.2026, ilk üretim.
 - Bölüm 3 (Ay'a arabayla) ve 4 (Türbinin tek turu) — 18.11.2026, günlük görev.
+- Bölüm 5 (Uzay İstasyonu) ve 6 (Elektrikli araba 1 kWh) — 18.11.2026.
+- Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

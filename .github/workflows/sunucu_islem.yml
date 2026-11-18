@@ -7,9 +7,8 @@ on:
       islem:
         description: "betik adı (sunucu/islem_<ad>.sh)"
         required: true
-concurrency:
-  group: sunucu-islem
-  cancel-in-progress: false
+# Sıra GitHub'da değil sunucuda tutulur (flock): GitHub tek bekleyen iş tuttuğu için
+# arkadan gelen iş öncekini iptal ediyordu. Artık her iş sunucudaki kilidi sırayla bekler, hiçbiri düşmez.
 jobs:
   calis:
     runs-on: ubuntu-latest
@@ -33,7 +32,8 @@ jobs:
           # değişiklik yapan her işlemden önce anlık yedek (salt okunur işlemler hariç); yedek alınamazsa işlem durur
           case "$ISLEM" in *_bak|*bak|durum*|envanter|*tani*|kapasite*|*_tur|veri_tani|yedek_kur|yedek_*) ON="";;
             *) ON="if [ -x /opt/aesun/yedek/yedekle.sh ]; then timeout 900 /opt/aesun/yedek/yedekle.sh on_degisiklik && echo 'NOT: ön yedek alındı' || { echo 'NOT: HATA ön yedek alınamadı, işlem durduruldu'; exit 1; }; fi;";; esac
-          $S "rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket && tar xzf - -C /tmp/aesun_paket && cd /tmp/aesun_paket && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/aesun_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
+          echo "NOT: sırada bekleniyor (sunucu kilidi)"
+          $S "exec 9>/var/lock/aesun_islem.lock; flock -w 10800 9 || { echo 'NOT: HATA 3 saat sıra beklendi, işlem başlamadı'; exit 1; }; rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket && tar xzf - -C /tmp/aesun_paket && cd /tmp/aesun_paket && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/aesun_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
           kod=${PIPESTATUS[0]}
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
           # tampon çıktıları (varsa) geri getirilir: sunucuda /opt/tampon/disari/*.tgz

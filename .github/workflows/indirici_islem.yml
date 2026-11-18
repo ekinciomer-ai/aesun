@@ -1,0 +1,39 @@
+name: İndirici işlemi (tampon)
+# Yalnız video indirici (/opt/tampon/indirici) işleri için ayrı kapı: sunucu_islem kuyruğundaki uzun işlerin arkasında beklemez.
+# Yalnız sunucu/islem_indirici_*.sh betiklerini çalıştırır. Değişiklik öncesi ön yedek alınır.
+on:
+  workflow_dispatch:
+    inputs:
+      islem:
+        description: "betik adı (sunucu/islem_indirici_<ad>.sh → indirici_<ad>)"
+        required: true
+concurrency:
+  group: indirici-islem
+  cancel-in-progress: false
+jobs:
+  calis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Çalıştır
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+          ISLEM: ${{ inputs.islem }}
+        run: |
+          set -o pipefail
+          case "$ISLEM" in indirici_*) ;; *) echo "::error::bu kapı yalnız indirici_* işleri içindir"; exit 1;; esac
+          case "$ISLEM" in *[!a-z0-9_]*) echo "::error::geçersiz işlem adı"; exit 1;; esac
+          B="sunucu/islem_${ISLEM}.sh"; [ -f "$B" ] || { echo "::error::$B yok"; exit 1; }
+          mkdir -p ~/.ssh
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
+          mkdir -p /tmp/p/sunucu && cp "$B" /tmp/p/sunucu/ && tar czf /tmp/paket.tgz -C /tmp/p sunucu
+          ON="if [ -x /opt/aesun/yedek/yedekle.sh ]; then timeout 900 /opt/aesun/yedek/yedekle.sh on_degisiklik && echo 'NOT: ön yedek alındı' || { echo 'NOT: HATA ön yedek alınamadı, işlem durduruldu'; exit 1; }; fi;"
+          case "$ISLEM" in *_bak|*tani*) ON="";; esac
+          $S "rm -rf /tmp/indirici_paket && mkdir -p /tmp/indirici_paket && tar xzf - -C /tmp/indirici_paket && cd /tmp/indirici_paket && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/indirici_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
+          kod=${PIPESTATUS[0]}
+          grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
+          rm -f ~/.ssh/k
+          exit $kod

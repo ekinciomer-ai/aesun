@@ -52,7 +52,8 @@ jobs:
           CP_KONTROL: "/=Kurumsal Portal;/monitoring/=<title;/denetci/=<title;/saha/=<title;/aecad/=AeCAD;/gundem/=<title;/kapasite/=<title;/musteri/=<title;/api/canli.php=durum"
         run: |
           python3 cpanel/yukle.py dist_portal
-          curl -fsSL "https://portal.aksarayenerji.net/api/canli.php?hedef_kod=${GITHUB_SHA:0:12}" >/dev/null || true
+          # Pi hızlı kod tetiği (hedef_kod) 18.11'de kapatıldı: her docs/ yüklemesi Pi'ye aesun çektiriyordu; aesun büyük içerik
+          # taşıdığı için yarım kalan çekmeler saha internet kotasını bitirdi. Pi kodu cron'daki 30 dk'lık git pull ile gelir.
       # Yüklemeden sonra TÜM uçlar denenir (izleme/uclar.json). Biri bozulduysa son başarılı sürüm geri yüklenir ve iş kırmızı biter.
       - name: Duman testi
         id: duman

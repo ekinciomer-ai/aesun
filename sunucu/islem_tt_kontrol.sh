@@ -2,8 +2,8 @@
 # TikTok sunucu oturumu kontrolü: tt-tarayici kapsayıcısındaki Chromium'a (CDP 9222) bağlanır, TikTok Studio içerik sayfasını açar,
 # hesap adını ve son gönderileri okur; ekran görüntüsünü /opt/aesun/tiktok/kontrol.png'ye yazar. Sır yazdırmaz.
 set -u
-KOK=/opt/aesun/tiktok; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
-docker ps --format '{{.Names}}' | grep -q '^tt-tarayici$' || { echo "NOT: HATA tt-tarayici çalışmıyor"; exit 1; }
+H=${TT_HESAP:-}; KOK=/opt/aesun/tiktok${H:+_$H}; KAP=tt-tarayici${H:+-$H}; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
+docker ps --format '{{.Names}}' | grep -qx "$KAP" || { echo "NOT: HATA $KAP çalışmıyor"; exit 1; }
 cat > "$KOK/kontrol.py" <<'PY'
 import json, time
 from playwright.sync_api import sync_playwright
@@ -19,4 +19,4 @@ with sync_playwright() as p:
     for l in sat[:40]: print("NOT: |", l[:100])
     pg.close()
 PY
-docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/kontrol.py" 2>&1 | grep "^NOT:" | head -45
+docker run --rm --cpus 2 --memory 2g --network container:$KAP -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/kontrol.py" 2>&1 | grep "^NOT:" | head -45

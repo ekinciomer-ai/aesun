@@ -29,6 +29,8 @@ IDX = f"{KOK}/havuz.json"
 GEREKLI = ["kod", "kanal", "platformlar", "format", "seri", "amac", "baslik", "aciklama", "dil", "sentetik", "kaynaklar", "lisans", "kaynak_dosya"]
 KANALLAR = {"TR": "Antik Stüdyo", "EN": "Ancient Studio", "ES": "Estudio Antiguo", "KZ_TR": "Kozmos Lab TR", "KZ_EN": "Kozmos Lab", "OD": "Ömür Dediğin", "YR": "Yeraltı", "NY": "Nasıl Yapıldı", "LM": "LVL MAX", "KK_TR": "Kara Kutu Mayday", "KK_EN": "Black Box Files Mayday", "KK_ES": "Caja Negra"}
 PLATFORMLAR = {"youtube", "tiktok", "instagram"}
+# TikTok hesabı kanala göre: boş = @antikstudyo (/opt/aesun/tiktok), "yr" = @yolu.se (/opt/aesun/tiktok_yr)
+TT_HESAP = {"YR": "yr"}
 # Odak dönemi (12 Ara 2026'ya kadar): Antik Stüdyo yalnız bu seriler
 ODAK_SON = "2026-12-12"
 ODAK_SERI = {"Gündem + Tarih", "Tablo Serisi", "Tarihi Magazin", "Spor + Tarih"}
@@ -405,6 +407,7 @@ def yonlendir():
             os.makedirs("/opt/aesun/youtube/medya", exist_ok=True)
             shutil.copy2(it["dosya"], f"/opt/aesun/youtube/medya/{kod}.mp4")
             tt = {"kod": kod, "metin": k.get("tiktok_metin") or k["baslik"], "planla": (k.get("yayin_zamani") or "")[:16], "sentetik": bool(k["sentetik"]), "havuz": True}
+            if TT_HESAP.get(k["kanal"]): tt["hesap"] = TT_HESAP[k["kanal"]]
             cikti.append({"platform": "tiktok", "dosya": f"sunucu/tt_kuyruk/{kod}.json", "icerik": tt})
         it["durum"] = "kuyrukta"; olay(it, "platform kuyruklarına gönderildi: " + ", ".join(sorted(pl)))
     kaydet(idx)
@@ -418,6 +421,7 @@ def esitle():
         try: return json.load(open(y, encoding="utf-8"))
         except Exception: return {}
     yt = oku("/opt/aesun/youtube/yuklenen_kuyruk.json"); tt = oku("/opt/aesun/tiktok/yuklenen.json")
+    for h in set(TT_HESAP.values()): tt.update(oku(f"/opt/aesun/tiktok_{h}/yuklenen.json"))
     for kod, it in idx.items():
         if it.get("durum") != "kuyrukta":
             continue

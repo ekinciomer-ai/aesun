@@ -2,8 +2,8 @@
 # TikTok istatistik (salt okunur): sunucudaki oturumla Studio içerik listesini okur; her gönderi için izlenme/beğeni/yorum ve
 # hesap 7 günlük özetini '===TT===' ... '===SON===' JSON olarak verir. Yayın Takibi'ne (yayin.json) tt_istatistik.yml işler.
 set -u
-KOK=/opt/aesun/tiktok; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
-docker ps --format '{{.Names}}' | grep -q '^tt-tarayici$' || { echo "NOT: HATA tt-tarayici çalışmıyor"; echo "===TT==="; echo "{}"; echo "===SON==="; exit 1; }
+H=${TT_HESAP:-}; KOK=/opt/aesun/tiktok${H:+_$H}; KAP=tt-tarayici${H:+-$H}; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
+docker ps --format '{{.Names}}' | grep -qx "$KAP" || { echo "NOT: HATA $KAP çalışmıyor"; echo "===TT==="; echo "{}"; echo "===SON==="; exit 1; }
 cat > "$KOK/istatistik.py" <<'PY'
 import time, re, json
 from playwright.sync_api import sync_playwright
@@ -38,4 +38,4 @@ with sync_playwright() as p:
 print(f"NOT: {len(out['gonderiler'])} gönderi okundu · hesap 7 gün: {out['hesap']}")
 print("===TT==="); print(json.dumps(out, ensure_ascii=False)); print("===SON===")
 PY
-docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/istatistik.py" 2>&1 | grep -v "pip\|^\s*$"
+docker run --rm --cpus 2 --memory 2g --network container:$KAP -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/istatistik.py" 2>&1 | grep -v "pip\|^\s*$"

@@ -30,29 +30,37 @@ jobs:
           mkdir -p ~/.ssh /tmp/pk/sunucu /tmp/pk/kuyruk
           printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
           chmod 600 ~/.ssh/k
-          cp sunucu/islem_tt_yukle.sh /tmp/pk/sunucu/
-          for j in sunucu/tt_kuyruk/*.json; do
-            k=$(basename "$j" .json); cp "$j" /tmp/pk/kuyruk/
-            [ -f "sunucu/tt_kuyruk/$k.mp4" ] && cp "sunucu/tt_kuyruk/$k.mp4" /tmp/pk/kuyruk/
-            c=$(python3 -c "import json;d=json.load(open('$j'));print((d.get('kaynak') or {}).get('git_commit',''))"); y=$(python3 -c "import json;d=json.load(open('$j'));print((d.get('kaynak') or {}).get('yol',''))")
-            [ -n "$c" ] && [ ! -f "/tmp/pk/kuyruk/$k.mp4" ] && git show "$c:$y" > "/tmp/pk/kuyruk/$k.mp4" 2>/dev/null && echo "$k: video depo geçmişinden alındı ($(stat -c %s /tmp/pk/kuyruk/$k.mp4) bayt)"
-            [ -f "sunucu/tt_kuyruk/${k}_kapak.jpg" ] && cp "sunucu/tt_kuyruk/${k}_kapak.jpg" /tmp/pk/kuyruk/ || true
-          done
-          tar czf /tmp/paket.tgz -C /tmp/pk .
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
-          $S "rm -rf /tmp/tt_k && mkdir -p /tmp/tt_k && tar xzf - -C /tmp/tt_k && cd /tmp/tt_k && bash sunucu/islem_tt_yukle.sh; k=\$?; rm -rf /tmp/tt_k; exit \$k" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1 || true
-          grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
-          mkdir -p docs/tampon/tiktok/adim
-          scp -q -i ~/.ssh/k -o StrictHostKeyChecking=accept-new "root@$ADRES:/opt/aesun/tiktok/adim/*" docs/tampon/tiktok/adim/ 2>/dev/null || true
+          : > /tmp/cikti.txt; mkdir -p docs/tampon/tiktok/adim
+          # Hesap başına ayrı paket: json'da "hesap" yok = @antikstudyo, "hesap":"yr" = @yolu.se (ayrı oturum/kapsayıcı)
+          for H in "" yr; do
+            rm -rf /tmp/pk; mkdir -p /tmp/pk/sunucu /tmp/pk/kuyruk; cp sunucu/islem_tt_yukle.sh /tmp/pk/sunucu/; say=0
+            for j in sunucu/tt_kuyruk/*.json; do
+              [ "$(python3 -c "import json;print(json.load(open('$j')).get('hesap',''))")" = "$H" ] || continue
+              k=$(basename "$j" .json); cp "$j" /tmp/pk/kuyruk/; say=$((say+1))
+              [ -f "sunucu/tt_kuyruk/$k.mp4" ] && cp "sunucu/tt_kuyruk/$k.mp4" /tmp/pk/kuyruk/
+              c=$(python3 -c "import json;d=json.load(open('$j'));print((d.get('kaynak') or {}).get('git_commit',''))"); y=$(python3 -c "import json;d=json.load(open('$j'));print((d.get('kaynak') or {}).get('yol',''))")
+              [ -n "$c" ] && [ ! -f "/tmp/pk/kuyruk/$k.mp4" ] && git show "$c:$y" > "/tmp/pk/kuyruk/$k.mp4" 2>/dev/null && echo "$k: video depo geçmişinden alındı ($(stat -c %s /tmp/pk/kuyruk/$k.mp4) bayt)"
+              [ -f "sunucu/tt_kuyruk/${k}_kapak.jpg" ] && cp "sunucu/tt_kuyruk/${k}_kapak.jpg" /tmp/pk/kuyruk/ || true
+            done
+            [ $say -eq 0 ] && continue
+            echo "hesap ${H:-antikstudyo}: $say iş"
+            tar czf /tmp/paket.tgz -C /tmp/pk .
+            $S "rm -rf /tmp/tt_k && mkdir -p /tmp/tt_k && tar xzf - -C /tmp/tt_k && cd /tmp/tt_k && TT_HESAP=$H bash sunucu/islem_tt_yukle.sh; k=\$?; rm -rf /tmp/tt_k; exit \$k" < /tmp/paket.tgz > /tmp/cikti_h.txt 2>&1 || true
+            cat /tmp/cikti_h.txt >> /tmp/cikti.txt
+            grep '^NOT:' /tmp/cikti_h.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::[${H:-antikstudyo}] $l"; done
+            scp -q -i ~/.ssh/k -o StrictHostKeyChecking=accept-new "root@$ADRES:/opt/aesun/tiktok${H:+_$H}/adim/*" docs/tampon/tiktok/adim/ 2>/dev/null || true
+          done
           rm -f ~/.ssh/k
           python3 - <<'PY'
           import json, re, os, subprocess
           from datetime import datetime
           t = open('/tmp/cikti.txt', encoding='utf-8', errors='replace').read()
-          m = re.search(r'===TT===\n(.*?)\n===SON===', t, re.S)
-          if not m:
+          B = re.findall(r'===TT===\n(.*?)\n===SON===', t, re.S)
+          if not B:
               print('::error::sunucu sonucu okunamadı'); print(t[-1200:]); raise SystemExit(1)
-          sonuc = json.loads(m.group(1))
+          sonuc = [x for b in B for x in json.loads(b)]
+          HESAP = {'': ('Antik Stüdyo (@antikstudyo)', 'https://www.tiktok.com/@antikstudyo', 'Gündem + Tarih'), 'yr': ('Yolu Seç ! (@yolu.se)', 'https://www.tiktok.com/@yolu.se', 'Yolu Seç')}
           yol = 'docs/yayin/yayin.json'; j = json.load(open(yol, encoding='utf-8')); K = j['kayitlar']
           os.makedirs('sunucu/tt_kuyruk/tamam', exist_ok=True)
           for s in sonuc:
@@ -60,10 +68,10 @@ jobs:
               if not s['durum'].startswith(('yüklendi', 'zaten')):
                   print('::warning::' + kod + ' ' + s['durum']); continue
               it = json.load(open(f'sunucu/tt_kuyruk/{kod}.json', encoding='utf-8'))
-              p = datetime.fromisoformat(s.get('planla') or it['planla'])
-              K.append(dict(platform='TikTok', kanal='Antik Stüdyo (@antikstudyo)', dil='TR', tur='Short', seri=it.get('seri', 'Gündem + Tarih'),
+              p = datetime.fromisoformat(s.get('planla') or it['planla']); kn, ln, sr = HESAP.get(it.get('hesap', ''), HESAP[''])
+              K.append(dict(platform='TikTok', kanal=kn, dil='TR', tur='Short', seri=it.get('seri', sr),
                             baslik=it['metin'].split('\n')[0][:90], durum='Planlı', tarih=p.strftime('%Y-%m-%d'), saat=p.strftime('%H:%M'),
-                            izlenme=None, link='https://www.tiktok.com/@antikstudyo', ureten='Claude', **{'not': 'sunucudan TikTok Studio ile planlandı'}))
+                            izlenme=None, link=ln, ureten='Claude', **{'not': 'sunucudan TikTok Studio ile planlandı'}))
               subprocess.run(['git', 'mv', f'sunucu/tt_kuyruk/{kod}.json', f'sunucu/tt_kuyruk/tamam/{kod}.json'], check=False)
               subprocess.run(['git', 'rm', '-q', '--ignore-unmatch', f'sunucu/tt_kuyruk/{kod}.mp4', f'sunucu/tt_kuyruk/{kod}_kapak.jpg'], check=False)
               print(f'::notice::{kod}: {s["durum"]}')

@@ -23,28 +23,36 @@ jobs:
           chmod 600 ~/.ssh/k
           cp sunucu/islem_tt_istatistik.sh /tmp/pk/sunucu/; tar czf /tmp/paket.tgz -C /tmp/pk .
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
-          $S "rm -rf /tmp/tt_i && mkdir -p /tmp/tt_i && tar xzf - -C /tmp/tt_i && cd /tmp/tt_i && bash sunucu/islem_tt_istatistik.sh; k=\$?; rm -rf /tmp/tt_i; exit \$k" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1 || true
+          # Hesap başına: boş = @antikstudyo, yr = @yolu.se (oturum yoksa o hesap atlanır, diğerini bozmaz)
+          for H in "" yr; do
+            $S "rm -rf /tmp/tt_i && mkdir -p /tmp/tt_i && tar xzf - -C /tmp/tt_i && cd /tmp/tt_i && TT_HESAP=$H bash sunucu/islem_tt_istatistik.sh; k=\$?; rm -rf /tmp/tt_i; exit \$k" < /tmp/paket.tgz > /tmp/cikti_${H:-as}.txt 2>&1 || true
+          done
+          cat /tmp/cikti_as.txt > /tmp/cikti.txt
           rm -f ~/.ssh/k
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
           python3 - <<'PY'
           import json, re, unicodedata
           from datetime import datetime, timezone, timedelta
-          t = open('/tmp/cikti.txt', encoding='utf-8', errors='replace').read()
-          m = re.search(r'===TT===\n(.*?)\n===SON===', t, re.S)
-          if not m: print('::error::sunucu sonucu okunamadı'); print(t[-800:]); raise SystemExit(1)
-          d = json.loads(m.group(1)); G = d.get('gonderiler') or []
-          if not G: print('::warning::gönderi okunamadı'); raise SystemExit(0)
           def norm(x): return re.sub(r'\W+', '', unicodedata.normalize('NFKD', (x or '')).lower())[:40]
-          yol = 'docs/yayin/yayin.json'; j = json.load(open(yol, encoding='utf-8')); n = 0
-          simdi = datetime.now(timezone(timedelta(hours=3)))
-          for k in j['kayitlar']:
-              if k.get('platform') != 'TikTok': continue
-              for g in G:
-                  if norm(g['metin']).startswith(norm(k.get('baslik'))[:30]) and len(norm(k.get('baslik'))) >= 10:
-                      k['izlenme'] = g['izlenme']; k['begeni'] = g['begeni']; k['yorum_sayisi'] = g['yorum']; k['tt_gizlilik'] = g['gizlilik']; n += 1; break
-          j['tiktok'] = {'okuma': simdi.strftime('%Y-%m-%d %H:%M'), 'hesap_7g': d.get('hesap', {}), 'gonderi': len(G)}
+          yol = 'docs/yayin/yayin.json'; j = json.load(open(yol, encoding='utf-8'))
+          simdi = datetime.now(timezone(timedelta(hours=3))); tum = 0
+          for H, kanal, alan in (('as', 'Antik Stüdyo (@antikstudyo)', 'tiktok'), ('yr', 'Yolu Seç ! (@yolu.se)', 'tiktok_yr')):
+              try: t = open(f'/tmp/cikti_{H}.txt', encoding='utf-8', errors='replace').read()
+              except Exception: continue
+              m = re.search(r'===TT===\n(.*?)\n===SON===', t, re.S)
+              if not m: print(f'::warning::{kanal}: sunucu sonucu okunamadı'); continue
+              d = json.loads(m.group(1)); G = d.get('gonderiler') or []
+              if not G and not d.get('hesap'): print(f'::warning::{kanal}: oturum yok ya da gönderi okunamadı'); continue
+              n = 0
+              for k in j['kayitlar']:
+                  if k.get('platform') != 'TikTok': continue
+                  if (k.get('kanal') or 'Antik Stüdyo (@antikstudyo)') != kanal: continue
+                  for g in G:
+                      if norm(g['metin']).startswith(norm(k.get('baslik'))[:30]) and len(norm(k.get('baslik'))) >= 10:
+                          k['izlenme'] = g['izlenme']; k['begeni'] = g['begeni']; k['yorum_sayisi'] = g['yorum']; k['tt_gizlilik'] = g['gizlilik']; n += 1; break
+              j[alan] = {'okuma': simdi.strftime('%Y-%m-%d %H:%M'), 'hesap_7g': d.get('hesap', {}), 'gonderi': len(G)}
+              print(f'::notice::{kanal}: {n} kayda sayılar işlendi ({len(G)} gönderi)'); tum += 1
           json.dump(j, open(yol, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-          print(f'::notice::{n} TikTok kaydına sayılar işlendi')
           PY
       - name: Kaydet
         if: always()

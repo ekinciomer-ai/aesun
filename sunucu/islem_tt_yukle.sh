@@ -5,9 +5,9 @@
 # Kurallar: aynı kod daha önce yüklendiyse atlar (/opt/aesun/tiktok/yuklenen.json); TikTok'u hiçbir uygulamaya API ile bağlamaz.
 # Çıktı: '===TT===' ... '===SON===' JSON; adım görüntüleri /opt/aesun/tiktok/adim/<kod>_N.png (hata ayıklama için).
 set -u
-KOK=/opt/aesun/tiktok; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
+H=${TT_HESAP:-}; KOK=/opt/aesun/tiktok${H:+_$H}; KAP=tt-tarayici${H:+-$H}; IMAJ=mcr.microsoft.com/playwright/python:v1.47.0-jammy
 mkdir -p "$KOK/adim" "$KOK/is"; rm -f "$KOK/is/"*
-docker ps --format '{{.Names}}' | grep -q '^tt-tarayici$' || { echo "NOT: HATA tt-tarayici çalışmıyor"; echo "===TT==="; echo "[]"; echo "===SON==="; exit 1; }
+docker ps --format '{{.Names}}' | grep -qx "$KAP" || { echo "NOT: HATA $KAP çalışmıyor"; echo "===TT==="; echo "[]"; echo "===SON==="; exit 1; }
 cp kuyruk/* "$KOK/is/" 2>/dev/null
 for j in "$KOK"/is/*.json; do [ -f "$j" ] || continue; k=$(basename "$j" .json); [ -f "$KOK/is/$k.mp4" ] || cp "/opt/aesun/youtube/medya/$k.mp4" "$KOK/is/$k.mp4" 2>/dev/null; done
 cat > "$KOK/yukle.py" <<'PY'
@@ -140,5 +140,5 @@ with sync_playwright() as p:
             except Exception: pass
 print("===TT==="); print(json.dumps(sonuc, ensure_ascii=False)); print("===SON===")
 PY
-docker run --rm --cpus 2 --memory 2g --network container:tt-tarayici -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/yukle.py" 2>&1 | grep -v "^\s*$"
+docker run --rm --cpus 2 --memory 2g --network container:$KAP -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/yukle.py" 2>&1 | grep -v "^\s*$"
 rm -f "$KOK/is/"*.mp4

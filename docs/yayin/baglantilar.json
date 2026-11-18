@@ -1,6 +1,6 @@
 {
  "aciklama": "Bağlantı durumu. Giriş gerektiren işler burada bekler; Ömer hesap bilgileriyle hazır olduğunda tek seferde bağlanır, sistem onu bekletmez.",
- "guncelleme": "2026-11-17T02:22+03:00",
+ "guncelleme": "2026-11-18T23:30+03:00",
  "baglantilar": [
   {
    "ad": "YouTube · Antik Stüdyo",
@@ -55,6 +55,12 @@
    "durum": "bağlı",
    "nasil": "Sunucudaki kalıcı tarayıcıda @antikstudyo oturumu açık (6 Kas, Ömer kendisi girdi; şifre kaydedilmedi). Yüklemeler sunucu/tt_kuyruk'tan TikTok Studio ile otomatik planlanır.",
    "giris_gerekli": false
+  },
+  {
+   "ad": "TikTok · @yolu.se (Yolu Seç !)",
+   "durum": "giriş bekliyor",
+   "nasil": "CutkodA sunucusunda ayrı kalıcı tarayıcı (tt-tarayici-yr). Ömer bir kez kendisi girer (şifre kaydedilmez); sonra yükleme kuyruğu (hesap: yr) ve günlük istatistik sunucudan yürür. @antikstudyo oturumundan bağımsız.",
+   "giris_gerekli": true
   },
   {
    "ad": "Instagram / Facebook",

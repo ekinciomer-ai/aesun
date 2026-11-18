@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v4
         with: {sparse-checkout: "video/ny"}
       - run: pip install -q pillow && python3 video/ny/arac/yemek_gorsel.py video/ny/gorsel/liste.json
-      - run: |
+      - if: always()
+        run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
           git add -A video/ny/motor/gorsel video/ny/gorsel
           git diff --cached --quiet && exit 0

@@ -13,7 +13,7 @@ def al(u, json_=False):
         except urllib.error.HTTPError as e:
             if e.code == 429: time.sleep(20 * (d + 1)); continue
             raise
-    raise SystemExit("429 sürüyor")
+    raise RuntimeError("429 sürüyor")
 def puan(l):
     l = (l or "").lower()
     if l in ("cc0", "public domain") or l.startswith("pd") or "public domain" in l: return 3
@@ -22,9 +22,9 @@ def puan(l):
     return 0
 def norm(s): return s.lower().replace("ı", "i").replace("ş", "s").replace("ğ", "g").replace("ç", "c").replace("ö", "o").replace("ü", "u").replace("_", " ")
 lf = f"{D}/lisans.json"; L = json.load(open(lf, encoding="utf-8")) if os.path.exists(lf) else {}
-for it in json.load(open(sys.argv[1], encoding="utf-8")):
+def isle(it):
     ad = it["ad"]
-    if os.path.exists(f"{D}/{ad}.jpg") and "sec" not in it: continue
+    if os.path.exists(f"{D}/{ad}.jpg") and "sec" not in it: return
     u = ("https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=30&prop=imageinfo"
          "&iiprop=url|extmetadata|size&iiurlwidth=900&format=json&gsrsearch=" + urllib.parse.quote(it["ara"]))
     d = al(u, True); ad_l = []
@@ -35,7 +35,7 @@ for it in json.load(open(sys.argv[1], encoding="utf-8")):
         yazar = re.sub("<[^>]+>", "", m.get("Artist", {}).get("value", "")).strip()[:80]
         ad_l.append({"baslik": p["title"], "lisans": lis, "yazar": yazar, "sayfa": ii["descriptionurl"], "kucuk": ii["thumburl"], "p": puan(lis), "idx": p.get("index", 99)})
     ad_l.sort(key=lambda x: (-x["p"], x["idx"]))
-    if not ad_l: print(f"::warning::{ad} serbest lisanslı görsel yok"); continue
+    if not ad_l: print(f"::warning::{ad} serbest lisanslı görsel yok"); return
     imgs = []
     for a in ad_l[:4]:
         try:
@@ -53,5 +53,8 @@ for it in json.load(open(sys.argv[1], encoding="utf-8")):
         imgs[s].save(f"{D}/{ad}.jpg", quality=88); a = ad_l[s]
         L[ad] = {k: a[k] for k in ("baslik", "lisans", "yazar", "sayfa")}
         print(f"::notice::{ad} ← {a['baslik']} ({a['lisans']})")
+    json.dump(L, open(lf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     time.sleep(3)
-json.dump(L, open(lf, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+for it in json.load(open(sys.argv[1], encoding="utf-8")):
+    try: isle(it)
+    except Exception as e: print(f"::warning::{it['ad']} atlandı: {e}"); time.sleep(30)

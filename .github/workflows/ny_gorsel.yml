@@ -33,10 +33,29 @@ jobs:
           ssh $O root@$ADRES "rm -rf /tmp/ny_g /tmp/ny_g.tgz"
           rm -f ~/.ssh/k
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          # Gemini görsel kotası yoksa: Pollinations (açık kaynak, ücretsiz, anahtarsız) ile üret
+          mkdir -p /tmp/al/cikti
+          python3 - <<'PY'
+          import json, glob, os, time, urllib.parse, urllib.request
+          STIL = ("flat vector illustration, top-down view of a single Turkish dish on a round plate, bold clean outlines, "
+                  "warm vibrant colors, soft shadow, centered, plain solid light cream background, no text, no letters, no logo, no people, ")
+          for jf in sorted(glob.glob("video/ny/gorsel/istek/*.json")):
+              for it in json.load(open(jf, encoding="utf-8")):
+                  out = f"/tmp/al/cikti/{it['ad']}.png"
+                  if os.path.exists(out): continue
+                  q = urllib.parse.quote(STIL + it["istem"])
+                  for d in range(4):
+                      try:
+                          u = f"https://image.pollinations.ai/prompt/{q}?width=768&height=768&nologo=true&model=flux&seed={abs(hash(it['ad']))%9999}"
+                          b = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=180).read()
+                          if len(b) > 20000: open(out, "wb").write(b); print(f"::notice::{it['ad']} pollinations"); break
+                      except Exception as e: print("tekrar", it["ad"], e); time.sleep(10 * (d + 1))
+                  time.sleep(4)
+          PY
           pip install -q pillow; mkdir -p video/ny/motor/gorsel/yemek
           for f in /tmp/al/cikti/*.png; do [ -f "$f" ] || continue; a=$(basename $f .png); python3 -c "
           from PIL import Image; im=Image.open('$f').convert('RGB'); im.thumbnail((768,768)); im.save('video/ny/motor/gorsel/yemek/$a.jpg',quality=88)"; done
-          mkdir -p video/ny/gorsel/istek/tamam; for f in video/ny/gorsel/istek/*.json; do git mv -f $f video/ny/gorsel/istek/tamam/; done
+          n=$(ls video/ny/motor/gorsel/yemek/*.jpg 2>/dev/null | wc -l); echo "::notice::toplam görsel $n"; [ $n -gt 0 ] && { mkdir -p video/ny/gorsel/istek/tamam; for f in video/ny/gorsel/istek/*.json; do git mv -f $f video/ny/gorsel/istek/tamam/; done; }
       - name: Kaydet
         run: |
           git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"

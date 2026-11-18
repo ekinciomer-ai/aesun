@@ -27,12 +27,15 @@ with sync_playwright() as p:
         for t in ("Uygula", "Apply", "Kaydet"):
             loc = pg.get_by_role("button", name=t)
             if loc.count(): loc.last.click(); time.sleep(4); print("NOT: fotoğraf kırpma onaylandı"); break
+    for el in pg.locator("[role='dialog'] input, [role='dialog'] textarea, [role='dialog'] button, [class*='Modal'] input, [class*='Modal'] textarea").all()[:30]:
+        try: print("NOT: ÖĞE", el.evaluate("e=>e.tagName+' '+(e.type||'')+' e2e='+(e.getAttribute('data-e2e')||'')+' ph='+(e.placeholder||'')+' val='+(e.value||e.innerText||'').slice(0,30)"))
+        except Exception: pass
     if P.get("ad"):
-        ad = pg.locator("[data-e2e='edit-profile-name-input'] input, input[placeholder*='Ad'], input[placeholder*='Name']").first
-        ad.fill(P["ad"]); print("NOT: ad yazıldı")
+        ad = pg.locator("[data-e2e='edit-profile-name-input'] input, input[data-e2e='edit-profile-name-input'], input[placeholder*='Ad'], input[placeholder*='Name'], input[placeholder*='İsim']").first
+        ad.fill(P["ad"], timeout=10000); print("NOT: ad yazıldı")
     if P.get("bio"):
-        bio = pg.locator("[data-e2e='edit-profile-bio-input'] textarea, textarea").first
-        bio.fill(P["bio"]); print("NOT: biyografi yazıldı")
+        bio = pg.locator("[data-e2e='edit-profile-bio-input'] textarea, textarea[data-e2e='edit-profile-bio-input'], textarea").first
+        bio.fill(P["bio"], timeout=10000); print("NOT: biyografi yazıldı")
     time.sleep(2); ss(pg, "4_dolu")
     kaydet = pg.locator("[data-e2e='edit-profile-save']").first
     if not kaydet.count(): kaydet = pg.get_by_role("button", name="Kaydet").last
@@ -42,4 +45,4 @@ with sync_playwright() as p:
     print("NOT: kontrol ad:", P.get("ad","") in t, "bio:", P.get("bio","")[:25] in t)
     pg.close()
 PY
-docker run --rm --cpus 2 --memory 2g --network container:$KAP -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/profil.py" 2>&1 | grep -E "^NOT:|Error|Timeout" | head -20
+docker run --rm --cpus 2 --memory 2g --network container:$KAP -v "$KOK":/work "$IMAJ" bash -c "python3 -c 'import playwright' 2>/dev/null || pip install -q playwright==1.47.0; python3 /work/profil.py" 2>&1 | grep -E "^NOT:|Error|Timeout" | head -50

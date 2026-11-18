@@ -28,12 +28,12 @@ jobs:
           chmod 600 ~/.ssh/k
           S="ssh -i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20 root@$ADRES"
           # betik ve ek dosyalar (sunucu/aesun/ klasörü) tek SSH bağlantısıyla sunucuya taşınır ve çalıştırılır
-          tar czf /tmp/paket.tgz sunucu izleme
+          tar --exclude='sunucu/yt_kuyruk/*.mp4' --exclude='sunucu/tts_kuyruk/cikti/*.mp3' --exclude='sunucu/ses_kuyruk/cikti/*.mp3' -czf /tmp/paket.tgz sunucu izleme
           # değişiklik yapan her işlemden önce anlık yedek (salt okunur işlemler hariç); yedek alınamazsa işlem durur
           case "$ISLEM" in *_bak|*bak|durum*|envanter|*tani*|kapasite*|*_tur|veri_tani|yedek_kur|yedek_*) ON="";;
             *) ON="if [ -x /opt/aesun/yedek/yedekle.sh ]; then timeout 900 /opt/aesun/yedek/yedekle.sh on_degisiklik && echo 'NOT: ön yedek alındı' || { echo 'NOT: HATA ön yedek alınamadı, işlem durduruldu'; exit 1; }; fi;";; esac
           echo "NOT: sırada bekleniyor (sunucu kilidi)"
-          $S "exec 9>/var/lock/aesun_islem.lock; flock -w 10800 9 || { echo 'NOT: HATA 3 saat sıra beklendi, işlem başlamadı'; exit 1; }; rm -rf /tmp/aesun_paket && mkdir -p /tmp/aesun_paket && tar xzf - -C /tmp/aesun_paket && cd /tmp/aesun_paket && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf /tmp/aesun_paket; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
+          $S "exec 9>/var/lock/aesun_islem.lock; flock -w 10800 9 || { echo 'NOT: HATA 3 saat sıra beklendi, işlem başlamadı'; exit 1; }; PK=/tmp/aesun_paket_\$\$; mkdir -p \"\$PK\" && tar xzf - -C \"\$PK\" && cd \"\$PK\" && $ON bash sunucu/islem_${ISLEM}.sh; k=\$?; rm -rf \"\$PK\"; exit \$k" < /tmp/paket.tgz 2>&1 | tee /tmp/cikti.txt
           kod=${PIPESTATUS[0]}
           grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | head -40 | while IFS= read -r l; do echo "::notice::$l"; done
           # tampon çıktıları (varsa) geri getirilir: sunucuda /opt/tampon/disari/*.tgz

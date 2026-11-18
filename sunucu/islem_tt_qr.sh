@@ -29,15 +29,16 @@ with sync_playwright() as p:
         pg.goto("https://www.tiktok.com/tiktokstudio/content", wait_until="domcontentloaded", timeout=60000); time.sleep(5)
         if "login" not in pg.url: yaz({"ok": True, "zaten": True}); print("NOT: oturum zaten açık"); pg.close(); raise SystemExit(0)
     pg.goto("https://www.tiktok.com/login/qrcode?lang=tr-TR", wait_until="domcontentloaded", timeout=60000); time.sleep(6)
-    basla = time.time(); son = 0
+    basla = time.time(); son = 0; yenile = time.time()
     while time.time() - basla < 420:
         if oturum_var():
             time.sleep(3); pg.goto("https://www.tiktok.com/tiktokstudio/content", wait_until="domcontentloaded", timeout=60000); time.sleep(5)
             yaz({"ok": True, "url": pg.url[:80]}); print("NOT: TikTok oturumu açıldı"); break
-        if time.time() - son > 15:
+        if time.time() - son > 10:
             try:
-                for sec in ("text=Yenile", "text=Refresh", "[data-e2e='qr-refresh']"):
-                    if pg.locator(sec).count(): pg.locator(sec).first.click(); time.sleep(2); break
+                # QR'ı gereksiz yenileme: yalnız 100 sn'de bir sayfayı tazele (TikTok kodu ~2 dk geçerli)
+                if time.time() - yenile > 100:
+                    pg.goto("https://www.tiktok.com/login/qrcode?lang=tr-TR", wait_until="domcontentloaded", timeout=60000); time.sleep(6); yenile = time.time()
                 qr = pg.locator("[data-e2e='qrcode-image'], canvas, img[src^='data:image']").first
                 (qr.screenshot(path=f"{K}/qr.tmp.png") if qr.count() else pg.screenshot(path=f"{K}/qr.tmp.png"))
                 os.replace(f"{K}/qr.tmp.png", f"{K}/qr.png"); son = time.time()

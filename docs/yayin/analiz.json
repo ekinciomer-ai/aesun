@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-19T19:38+03:00",
+ "olusturma": "2026-11-19T20:09+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -64,6 +64,7 @@
     "Gece Yasakları",
     "Günün Sözü",
     "Pürdikkat & Çalınan Dikkat",
+    "Pürdikkat Hikâyeleri",
     "Tarihin Deneyleri",
     "Tarihin Patileri",
     "İnanç & Kültür Tarihi"
@@ -344,6 +345,18 @@
     "i48": 31
    },
    "kaydirmadan_izleme_yuzde": 32
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "seri": "Pürdikkat Hikâyeleri",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
   },
   {
    "kanal": "Antik Stüdyo",
@@ -771,15 +784,15 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 637,
-  "Kozmos Lab": 89,
-  "Ömür Dediğin": 50,
-  "Yolu Seç !": 179,
-  "Nasıl Yapıldı": 50,
   "Ancient Studio": 188,
   "Kozmos Lab TR": 207,
-  "Estudio Antiguo": 122,
-  "LVL MAX": 50
+  "Antik Stüdyo": 637,
+  "Ömür Dediğin": 50,
+  "Nasıl Yapıldı": 50,
+  "Yolu Seç !": 179,
+  "LVL MAX": 50,
+  "Kozmos Lab": 89,
+  "Estudio Antiguo": 122
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1307,6 +1320,69 @@
    "vid": null,
    "baslik": "Akşam 17:30'dan sonra hiç çalışmadan üretimini nasıl ikiye katladı? 🌅🔓 | Gün Işığı #shorts",
    "neden": "'Pürdikkat & Çalınan Dikkat' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "8 saat çekiç sallayan usta neden ofis çalışanından daha mutlu? ⚔️🔥 | Pürdikkat #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Koridoru olmayan bu 5 odalı tuhaf bina neden tasarlandı? 🏛️📐 | Eudaimonia Makinesi #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Duvara astığı tek bir takvimle efsane olan komedyenin sırrı! ❌📅 | Zinciri Kırma #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Evde tek satır yazamayınca geceliği 1.000 dolarlık otele kaçan yazar! 🏰✍️ #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Çatısı akan ahşap barakadan neden milyar dolarlık icatlar çıktı? 🏚️📐 | MIT Bina 20 #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Sınıfın en az ders çalışan öğrencisi Harvard'da nasıl derece yaptı? 🥊⏱️ | Roosevelt #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Evindeki her şeyi kolilere koyup 7 gün bekleyen adam ne gördü? 📦📱 | Senin Kararın #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Gece çalışmayı kendine yasaklayıp Science kapağına çıkan profesör! 🤖📐 | Pürdikkat #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Antik Stüdyo",
+   "vid": null,
+   "baslik": "Kod yazarken klavyede uyuyakalan 19 yaşındaki öğrenci ve Zeigarnik sırrı! ⌨️⚡ #shorts",
+   "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
   {
    "tur": "HAFTALIK_KOTA",

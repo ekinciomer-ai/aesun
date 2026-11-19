@@ -4,9 +4,9 @@ Durum: [ ] bekliyor · [~] üretimde · [x] yayına teslim
 Motorun bugün desteklediği tipler: nehir, dag, gol. Diğerleri için motora tip eklenir (nokta/çizgi/alan).
 
 ## Parti 1 — Türkiye'nin En'leri
-- [~] NY_EN_01_NEHIR · En uzun 5 nehir — kanca: "Fırat 2.800 km ama en uzun değil"
-- [~] NY_EN_02_DAG · En yüksek 5 dağ — kanca: "5 dağın 3'ü yanardağ"
-- [~] NY_EN_03_GOL · En büyük 5 göl — kanca: "2. büyük gölün ortasında yürüyebilirsin"
+- [x] NY_EN_01_NEHIR · En uzun 5 nehir — kanca: "Fırat 2.800 km ama en uzun değil"
+- [x] NY_EN_02_DAG · En yüksek 5 dağ — kanca: "5 dağın 3'ü yanardağ"
+- [x] NY_EN_03_GOL · En büyük 5 göl — kanca: "2. büyük gölün ortasında yürüyebilirsin"
 
 ## Parti 2 — Su (nehir/gol tipi)
 - [ ] Türkiye'nin en büyük 5 baraj gölü — kanca: "Atatürk Barajı'nın suyu bir şehri ... kez doldurur" (kaynaklı sayı bul)
@@ -19,7 +19,7 @@ Motorun bugün desteklediği tipler: nehir, dag, gol. Diğerleri için motora ti
 - [ ] En büyük 5 ova — kanca: "Türkiye'nin ekmeği bu 5 düzlükten çıkıyor"
 
 ## Parti 4 — Yapılar (yeni tip: nokta/çizgi; kanal adına en uygun seri)
-- [ ] En uzun 5 köprü — Nasıl yapıldı? kanca: "Çanakkale Köprüsü'nün kuleleri Eyfel'den ..."
+- [x] En uzun 5 köprü → NY_EN_04_KOPRU (2026-11-19)
 - [ ] En uzun 5 tünel — kanca: "Dağın altından ... km"
 - [ ] En büyük 5 havalimanı / baraj / GES
 
@@ -30,3 +30,8 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_SQ_01_MIRAS · Bilgi şıklı soru: Nemrut, Pamukkale, Göbeklitepe — kanca: "Sonuncusu çoğunu yanıltıyor"
 - [x] NY_YM_02_ETLI · Bu yemek hangi ilin: Etliekmek, Ali Nazik, Perde Pilavı
 - [x] NY_HF_02_RENK · Görsel hafıza: Kars, İzmir, Bolu (+Samsun, Kayseri)
+
+## Parti 6 — Karışık formatlar (2026-11-19)
+- [~] NY_EN_04_KOPRU · En uzun açıklıklı 5 asma köprü — kanca: "2.023 m aslında bir tarih"
+- [~] NY_BL_02_HAVA · Hava rekorları: Rize yağış, Çaldıran −46,4, Sarıcakaya 49,5, Silopi 50,5 — kanca: "97 derece fark"
+- [~] NY_YM_03_UNLU · Bu yemek hangi ilin: İskender (Bursa), Boyoz (İzmir), Künefe (Hatay)

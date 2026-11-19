@@ -48,6 +48,8 @@ kontrol şeridi `rapor/kontrol/<KOD>.jpg`, günlük rapor `rapor/<YYYY-AA-GG>.js
   Türkiye maskesi ve parlak sınır, Natural Earth nehir/göl verisi (kamu malı).
 - Öğe tipleri: `nehir` (parlayan çizim + akış parçacıkları), `dag` (ışık sütunu, volkan etiketi),
   `gol` (dolma animasyonu). Yeni tip eklenirse buraya yaz.
+  `dag` tipi nokta olarak da kullanılır (köprü vb.): öğeye `"sabit": 1` verilirse `ll` en yüksek komşu noktaya kaydırılmaz.
+- `bilgi` sahnesinde `"ondalik": 1` → sayı ondalıklı yazılır (50,5 °C). Altyazıda "kırk altı virgül dört" → 46,4; "... yılı" önündeki yıl 2025 (noktasız).
 - Sahne türleri (`parcalar[].sahne`): `kanca` (merak sorusu, büyük sayı + damga), `soru` (?),
   `sira` (#N kart + sayaç), `bir_giris` (karartma + gerilim + 1 numaranın adı), `ek` (bilgi çipleri),
   `kapanis` (çubuk grafik + yorum çağrısı).

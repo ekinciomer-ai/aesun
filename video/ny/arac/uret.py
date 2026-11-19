@@ -46,6 +46,7 @@ def sayilari_birlestir(kel):
         if kullan:
             son = kullan[-1]["w"]; ek = re.search(r"[.,!?:]+$", son)
             tok = {"w": f"{deg:,}".replace(",", ".") + (ek.group(0) if ek else ""), "t0": kullan[0]["t0"], "t1": kullan[-1]["t1"]}; i += len(kullan)
+            if not ek and i < len(kel) and 1000 <= deg <= 2100 and kel[i]["w"].lower().startswith("yıl"): tok["w"] = str(deg)  # yıl: 2025 (2.025 değil)
             if not ek and i < len(kel):
                 nw = kel[i]["w"]; low = nw.lower()
                 for kok_, bir_ in (("kilometrekare", "km²"), ("kilometre", "km"), ("metre", "m")):
@@ -54,6 +55,14 @@ def sayilari_birlestir(kel):
                         tok = {"w": tok["w"] + " " + bir_ + ("'" + m_.group(1) if m_.group(1) else "") + m_.group(2), "t0": tok["t0"], "t1": kel[i]["t1"]}; i += 1; break
             out.append(tok)
         else: out.append(kel[i]); i += 1
+    # ondalık: "46 virgül dört" -> "46,4"
+    k = 0
+    while k + 2 < len(out):
+        if re.fullmatch(r"[\d.]+", out[k]["w"]) and sayi_kelime(out[k + 1]["w"]) == "virgül":
+            m_ = re.match(r"^([^\W\d_]+)(.*)$", out[k + 2]["w"]); v = BIR.get(sayi_kelime(m_.group(1))) if m_ else None
+            if v is not None:
+                out[k:k + 3] = [{"w": out[k]["w"] + "," + str(v) + m_.group(2), "t0": out[k]["t0"], "t1": out[k + 2]["t1"]}]
+        k += 1
     return out
 def kelime_zamanla(metin, t0, t1):
     ws = metin.split(); ag = [len(re.sub(r"\W", "", w)) + 2 + (5 if re.search(r"(\.\.\.|[.!?])$", w) else 2 if re.search(r"[,:]$", w) else 0) for w in ws]

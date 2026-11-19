@@ -1,0 +1,115 @@
+{
+ "kanal": "NY",
+ "seri": "İllere Göre Yemekler",
+ "dil": "tr",
+ "kod": "NY_YM_03_UNLU",
+ "baslik_bant": "BU YEMEK HANGİ İLİN?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 YEMEK",
+   "ust": "HANGİ İLİN?",
+   "alt": "SONUNCUSU AVRUPA'DA BİLE TESCİLLİ",
+   "alt_kelime": "sonuncusu"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "İSKENDER KEBAP HANGİ İLİN?",
+   "siklar": [
+    "Eskişehir",
+    "Bursa",
+    "Bilecik",
+    "Balıkesir"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/iskender.jpg"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Bursa"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BOYOZ HANGİ İLİN?",
+   "siklar": [
+    "Manisa",
+    "Aydın",
+    "Muğla",
+    "İzmir"
+   ],
+   "dogru": 3,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/boyoz.jpg"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "İzmir"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "KÜNEFE HANGİ İLİN?",
+   "siklar": [
+    "Gaziantep",
+    "Hatay",
+    "Adana",
+    "Kahramanmaraş"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/kunefe.jpg"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Hatay"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "SIRADAKİ İLİ YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "İskender ailesi resmî sitesi – İskender Efendi, 1867, Bursa (aile anlatımı) https://iskenderiskenderoglu.com.tr/our-history",
+  "TÜRKPATENT – Bursa Döner Kebabı coğrafi işaret, tescil no 1151 (17.06.2022) https://ci.turkpatent.gov.tr/Files/GeographicalSigns/f1492197-5434-48de-93c2-a83a0d721f94.pdf",
+  "Küre Ansiklopedi – İzmir Boyozu, coğrafi işaret tescili 08.12.2017 https://kureansiklopedi.com/tr/detay/izmir-boyozu-bf7f6",
+  "Haber7 – İzmir boyozuna coğrafi işaret https://www.haber7.com/izmir/2509048-izmir-boyozuna-cografi-isaret",
+  "Küre Ansiklopedi – Antakya Künefesi, coğrafi işaret no 101 (2008), AB tescili 2023 https://kureansiklopedi.com/tr/detay/antakya-kunefesi-a1604",
+  "CNN Türk – Antakya künefesine AB tescili https://www.cnnturk.com/dunya/antakya-kunefesine-ab-tescili",
+  "Fotoğraflar: Wikimedia Commons serbest lisanslı (lisans/yazar açıklamaya otomatik eklenir)",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu 3 yemek hangi ilin? Sonuncusu Avrupa'da bile tescilli!",
+  "aciklama": "İskender, boyoz ve künefe... Bu ünlü lezzetler hangi ile ait? Cevaplar videonun içinde.\n\n💬 Kaç doğru yaptın? Sıradaki ili yorumlara yaz.",
+  "etiketler": [
+   "yöresel yemekler",
+   "türk mutfağı",
+   "hangi ilin",
+   "iskender",
+   "boyoz",
+   "künefe",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu 3 yemek hangi ilin? 🍽️ Sonuncusu Avrupa'da bile tescilli! #yöreselyemek #türkmutfağı #quiz",
+  "amac": "İllere göre yemekler serisi; izleyiciden sıradaki il önerisi alarak yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

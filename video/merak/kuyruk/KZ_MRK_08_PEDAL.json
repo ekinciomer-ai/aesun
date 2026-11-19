@@ -1,0 +1,210 @@
+{
+ "kod": "KZ_MRK_08_PEDAL",
+ "no": "MERAK #08",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "AMPULÜ 1 SAAT YAKMAK<br><i>KAÇ DAKİKA PEDAL?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "pedal",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Bir ampulü tam bir saat yakmak için, bisiklette kaç dakika pedal çevirmen gerekir? Tahminini aklında tut, cevap ampule göre değişiyor.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "pedal",
+   "p": {
+    "mod": "guc",
+    "kart": 58
+   },
+   "metin": "Jeneratörlü bir bisiklette, uzun süre dayanabileceğin orta tempoda yaklaşık altmış vat elektrik üretirsin.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "ORTA TEMPO PEDAL",
+     "on": "≈ ",
+     "say": 60,
+     "ek": "W",
+     "k": "altmış"
+    },
+    {
+     "tip": "etiket",
+     "y": "45–75 W arası",
+     "k": "elektrik"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "pedal",
+   "p": {
+    "mod": "eski",
+    "kart": 60
+   },
+   "metin": "Altmış vat, eski tip tek bir akkor ampul demek. Yani bütün emeğin, tek bir ampulü yakmaya ancak yetiyor.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "60 W = 1 eski ampul 💡",
+     "k": "eski"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "pedal",
+   "p": {
+    "mod": "sure",
+    "kart": 58
+   },
+   "metin": "Onu bir saat yakmak altmış vatsaat ister. Yani durmadan, tam bir saat pedal çevirmen gerekir.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "60 W <em>×</em> 1 saat = 60 Wh",
+     "k": "altmış"
+    },
+    {
+     "tip": "sayi",
+     "say": 60,
+     "ek": "dakika",
+     "k": "tam"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "pedal",
+   "p": {
+    "mod": "mac",
+    "kart": 60
+   },
+   "metin": "Bu, bir futbol maçının kırk beş dakikalık ilk yarısından bile uzun.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "60 dk > ilk yarı 45 dk ⚽",
+     "k": "futbol"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "pedal",
+   "p": {
+    "mod": "led",
+    "kart": 60
+   },
+   "metin": "Ama aynı ışığı veren bir LED ampul, sadece sekiz virgül sekiz vat çeker.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "LED · 800 LÜMEN",
+     "say": 8.8,
+     "dec": 1,
+     "ek": "W",
+     "k": "sekiz"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "pedal",
+   "p": {
+    "mod": "ledsure",
+    "kart": 58
+   },
+   "metin": "Sekiz virgül sekiz vatsaati altmış vata bölersen, yaklaşık dokuz dakika.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "8,8 Wh <em>÷</em> 60 W",
+     "k": "Sekiz"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 9,
+     "ek": "dakika",
+     "k": "dokuz"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "pedal",
+   "p": {
+    "mod": "sarki",
+    "kart": 58
+   },
+   "metin": "Yani iki üç şarkılık pedal yeter. Eski ampule göre neredeyse yedi kat daha kısa.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ 2–3 şarkı 🎵",
+     "k": "şarkılık"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 7 kat kısa",
+     "k": "yedi"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "pedal",
+   "p": {
+    "mod": "son",
+    "kart": 56
+   },
+   "metin": "Cevap: LED için yaklaşık dokuz dakika, eski ampul için bir saat. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP · LED",
+     "on": "≈ ",
+     "say": 9,
+     "ek": "dakika",
+     "k": "dokuz"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Ampulü 1 saat yakmak için kaç dakika pedal çevirmelisin? 🚲💡 #shorts",
+  "aciklama": "Jeneratörlü bisiklette uzun süre dayanılabilen orta tempoda üretilen elektrik 45–75 W arasıdır (Low-tech Magazine ölçümü); hesapta 60 W kullandık. Eski tip 60 W akkor ampulü 1 saat yakmak 60 Wh ister → 60 dakika pedal (futbol maçının 45 dakikalık ilk yarısından uzun). Aynı ışığı (800 lümen) veren LED ampul 8,8 W çeker → 8,8 Wh ÷ 60 W ≈ 9 dakika, yani yaklaşık 2–3 şarkı.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nGerçek değerler kişiye, jeneratöre ve kayıplara göre değişir; hesap ortalama değerlerle yapılmıştır. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Low-tech Magazine – How to Build a Practical Household Bike Generator (2022): orta tempoda 45–75 W; IEEE Spectrum (2011): ortalama kişi bir saatlik yoğun egzersizde 50–150 W; ENERGY STAR – Learn About Brightness: 60 W akkor = 800 lümen; Signify/Philips LED A19 veri sayfası: 8,8 W, 800 lm, 60 W eşdeğeri; IFAB Oyun Kuralları – Kural 7: devreler 45 dakika.\n\n#kozmoslab #enerji #ampul #bisiklet #bilim #shorts",
+  "etiketler": [
+   "pedal",
+   "bisiklet jeneratörü",
+   "ampul",
+   "led",
+   "watt",
+   "enerji",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "Low-tech Magazine (06.03.2022) How to build a practical household bike generator: 'During a moderate effort – which we can sustain for a longer time – power production is between 45 and 75 watts'; 60 W ortalamayla deneme",
+  "IEEE Spectrum (21.06.2011) These Exercise Machines Turn Your Sweat Into Electricity: ortalama kişi 'can generate only 50 to 150 watts during an hour of strenuous exercise'",
+  "ENERGY STAR – Learn About Brightness: eski 60 W akkor ampul = en az 800 lümen",
+  "Signify (Philips) veri sayfası 929003584964, 8.8A19 LED (2024): Power Consumption 8.8 W, Luminous Flux 800 lm, Wattage Equivalent 60 W",
+  "IFAB Laws of the Game – Law 7: maç 45'er dakikalık iki devre",
+  "Hesap: 60 Wh ÷ 60 W = 60 dk; 8,8 Wh ÷ 60 W = 0,147 sa ≈ 8,8 dk ≈ 9 dk; 60 ÷ 8,8 ≈ 6,8 (≈ 7 kat); pop şarkısı tipik 3–4 dk → 9 dk ≈ 2–3 şarkı"
+ ]
+}

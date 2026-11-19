@@ -1,0 +1,211 @@
+{
+ "kod": "KZ_MRK_07_DONUS",
+ "no": "MERAK #07",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "DÜNYA DURSA<br><i>KAÇ KM/SA SAVRULURSUN?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "donus",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Dünya bir anda dönmeyi bıraksa, İstanbul'da duran sen hangi hızla savrulurdun? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "donus",
+   "p": {
+    "mod": "cevre",
+    "kart": 57
+   },
+   "metin": "Ekvatorun çevresi yaklaşık kırk bin kilometre. Dünya bu turu yaklaşık yirmi dört saatte atar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "EKVATOR ÇEVRESİ",
+     "on": "≈ ",
+     "say": 40075,
+     "ek": "km",
+     "k": "kırk"
+    },
+    {
+     "tip": "formul",
+     "y": "40.075 km <em>÷</em> 23,9 saat",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "donus",
+   "p": {
+    "mod": "hiz",
+    "kart": 57
+   },
+   "metin": "Yani ekvatordaki biri saatte bin altı yüz yetmiş kilometreyle döner. Bu hızla İstanbul'dan Ankara'ya on altı dakikada varırdın.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "EKVATORDA",
+     "on": "≈ ",
+     "say": 1670,
+     "ek": "km/sa",
+     "k": "bin"
+    },
+    {
+     "tip": "etiket",
+     "y": "İstanbul → Ankara ≈ 16 dakika",
+     "k": "İstanbul'dan"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "donus",
+   "p": {
+    "mod": "enlem",
+    "kart": 62
+   },
+   "metin": "Ama İstanbul kuzeyde, kırk bir derece enlemde. Orada çember küçülür, hız da onunla birlikte azalır.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1.674 <em>×</em> cos 41°",
+     "k": "kırk"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "donus",
+   "p": {
+    "mod": "sonuc",
+    "kart": 62
+   },
+   "metin": "Sonuç: İstanbul saatte yaklaşık bin iki yüz altmış kilometreyle dönüyor.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "İSTANBUL",
+     "on": "≈ ",
+     "say": 1260,
+     "ek": "km/sa",
+     "k": "bin"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "donus",
+   "p": {
+    "mod": "ses",
+    "kart": 57
+   },
+   "metin": "Ses havada saatte yaklaşık bin iki yüz yirmi beş kilometre gider. Yani İstanbul, sesten bile hızlı dönüyor.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "SES HIZI (15 °C)",
+     "on": "≈ ",
+     "say": 1225,
+     "ek": "km/sa",
+     "k": "bin",
+     "soguk": true
+    },
+    {
+     "tip": "etiket",
+     "y": "İstanbul 1.260 > ses 1.225",
+     "k": "sesten"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "donus",
+   "p": {
+    "mod": "hisset",
+    "kart": 62
+   },
+   "metin": "Peki neden hissetmiyoruz? Çünkü hava, deniz ve sen, hepiniz aynı hızla birlikte dönüyorsunuz. Uçakta çay içmek gibi.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "uçakta çay ☕ = herkes aynı hızda",
+     "k": "Uçakta"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "donus",
+   "yeni": true,
+   "p": {
+    "mod": "gun",
+    "kart": 62
+   },
+   "metin": "Dünya dursaydı, Güneş gökyüzünde yılda bir tur atardı. Yaklaşık altı ay gündüz, altı ay gece.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "1 gün ≈ 1 yıl",
+     "k": "yılda"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "donus",
+   "yeni": true,
+   "p": {
+    "mod": "son",
+    "kart": 57
+   },
+   "metin": "Yani cevap: saatte yaklaşık bin iki yüz altmış kilometre, sesten hızlı. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "on": "≈ ",
+     "say": 1260,
+     "ek": "km/sa",
+     "k": "bin"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Dünya bir anda dursa kaç km/sa savrulurdun? 🌍 #shorts",
+  "aciklama": "Ekvatorun çevresi ≈ 40.075 km; Dünya bir turu ≈ 23,9 saatte (yıldız günü) atar → ekvatorda ≈ 1.670 km/sa. Hız enlemin kosinüsüyle azalır: İstanbul (41° K) ≈ 1.674 × cos 41° ≈ 1.260 km/sa. Deniz seviyesinde 15 °C havada ses ≈ 1.225 km/sa, yani İstanbul sesten hızlı dönüyor. Hissetmeyiz çünkü hava, deniz ve biz birlikte döneriz. Dünya dönmeyi bıraksa Güneş gökyüzünde yılda bir tur atardı: yaklaşık 6 ay gündüz, 6 ay gece.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nBu bir düşünce deneyidir; Dünya'nın bir anda durması fiziksel olarak beklenen bir olay değildir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA Imagine the Universe – Ask an Astrophysicist (ekvator çevresi 40.075 km, bir yıldız gününde bir tur, hız × enlem kosinüsü); NASA/JPL Universe in the Classroom No. 71 (ekvatorda ≈ 1.600 km/sa); NASA Glenn – Speed of Sound / standart atmosfer (15 °C'de ≈ 340 m/s); İstanbul–Ankara karayolu ≈ 450 km (yaklaşık).\n\n#kozmoslab #dünya #uzay #bilim #shorts",
+  "etiketler": [
+   "dünya dursa",
+   "dünyanın dönüşü",
+   "dönüş hızı",
+   "ses hızı",
+   "ekvator",
+   "uzay",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA Imagine the Universe – Ask an Astrophysicist (imagine.gsfc.nasa.gov/ask_astro/earth.html): 'An object on the Earth's equator will travel once around the Earth's circumference (40,075.036 kilometers) each sidereal day'; 'Multiply by cosine of your latitude'",
+  "NASA/JPL Universe in the Classroom No. 71 (2007, nightsky.jpl.nasa.gov HowFast.pdf): ekvatorda 'close to 1000 miles per hour (1600 km/hr)'",
+  "Hesap: 40.075 km ÷ 23,934 sa (yıldız günü) ≈ 1.674 km/sa; İstanbul enlemi ≈ 41,0° K → 1.674 × cos 41° ≈ 1.263 km/sa (≈ 1.260)",
+  "NASA Glenn Research Center – Speed of Sound / ISA standart atmosfer: deniz seviyesi 15 °C'de ≈ 340,3 m/s ≈ 1.225 km/sa",
+  "İstanbul–Ankara karayolu ≈ 450 km (yaklaşık; #01, #05 ile aynı); 450 ÷ 1.670 × 60 ≈ 16 dk",
+  "Durmuş Dünya'da güneş günü = bir yıl (Güneş'in gökyüzündeki görünür hareketi yalnız yörüngeden gelir) → ≈ 6 ay gündüz / 6 ay gece; kutup yakınları ve eğiklik ayrıntısı ihmal edilmiştir"
+ ]
+}

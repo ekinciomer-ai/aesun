@@ -1,12 +1,11 @@
 #!/bin/bash
-# İndirici: rank/ içindeki derlemeleri kliplere böler, yazı/emoji/filigranı LaMa ile siler (v2). Çıktı disari/parcalar.tgz
+# İndirici: LaMa ile bölme + yazı silme işini sunucuda ARKA PLANDA başlatır (GitHub süre sınırına takılmaz).
+# Diğer sistemleri yavaşlatmamak için en fazla 4 çekirdek (CPUQuota=400%), 6 GB bellek, düşük öncelik.
 set -u
-KOK=/opt/tampon/indirici; mkdir -p $KOK/model $KOK/disari
+KOK=/opt/tampon/indirici; C=$KOK/parcalar_v2; mkdir -p $KOK/model $KOK/disari $C
+if systemctl is-active --quiet tampon-parcala; then echo "NOT: zaten çalışıyor"; exit 0; fi
 $KOK/venv/bin/pip install -q "numpy<2.3" "opencv-python-headless<4.13" scenedetect rapidocr-onnxruntime onnxruntime >/dev/null 2>&1 || { echo "NOT: HATA paketler"; exit 1; }
-if [ ! -s $KOK/model/lama_fp32.onnx ]; then
-  curl -fsSL --max-time 900 -o $KOK/model/lama_fp32.onnx.tmp https://huggingface.co/Carve/LaMa-ONNX/resolve/main/lama_fp32.onnx && mv $KOK/model/lama_fp32.onnx.tmp $KOK/model/lama_fp32.onnx || { echo "NOT: HATA LaMa modeli indirilemedi"; exit 1; }
-fi
-echo "NOT: LaMa modeli $(du -h $KOK/model/lama_fp32.onnx | cut -f1)"
+[ -s $KOK/model/lama_fp32.onnx ] || { curl -fsSL --max-time 900 -o $KOK/model/l.tmp https://huggingface.co/Carve/LaMa-ONNX/resolve/main/lama_fp32.onnx && mv $KOK/model/l.tmp $KOK/model/lama_fp32.onnx; } || { echo "NOT: HATA model"; exit 1; }
 cat > $KOK/lama.py <<'PY'
 """LaMa (ONNX) ile yazı silme yardımcıları. Model: Carve/LaMa-ONNX (Apache-2.0)."""
 import cv2, numpy as np, onnxruntime as ort, os
@@ -109,9 +108,11 @@ def sahne_kareleri(a, b, adim):
         if f is not None: out.append(f[gu:H - ga])
     return out
 
-def siyah_kenar(fs):
+def siyah_kenar(fs, m):
+    """Satır/sütunun %88'i koyu ya da yazı maskesiyse kenar sayılır (siyah şerit + içindeki başlık)."""
     mx = np.max(np.stack([cv2.cvtColor(f, cv2.COLOR_BGR2GRAY) for f in fs]), axis=0)
-    r = mx.max(axis=1) < 28; c = mx.max(axis=0) < 28
+    koyu = (mx < 32) | (m > 0)
+    r = koyu.mean(axis=1) > 0.88; c = koyu.mean(axis=0) > 0.88
     def bas(v):
         n = 0
         for x in v:
@@ -133,7 +134,7 @@ def maske(fs):
         std = g.std(0); hareket = float(np.median(std))
         if hareket > 6:
             kenar = cv2.Laplacian(g.mean(0), cv2.CV_32F, ksize=3)
-            sabit = ((std < 3.5) & (np.abs(kenar) > 25)).astype(np.uint8) * 255
+            sabit = ((std < 5.5) & (np.abs(kenar) > 20)).astype(np.uint8) * 255
             sabit = cv2.morphologyEx(sabit, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
             n, et, st, _ = cv2.connectedComponentsWithStats(sabit, 8)
             for i in range(1, n):
@@ -150,11 +151,12 @@ for a, b in sahneler:
     if not fs: continue
     orta = fs[len(fs) // 2]; gr = cv2.cvtColor(orta, cv2.COLOR_BGR2GRAY)
     if gr.mean() < 25 or gr.std() < 12: continue
-    su, sa, ss, sg = siyah_kenar(fs)
+    m = maske(fs)
+    su, sa, ss, sg = siyah_kenar(fs, m)
     hh, ww = orta.shape[:2]
     if (hh - su - sa) < hh * 0.3 or (ww - ss - sg) < ww * 0.3: su = sa = ss = sg = 0
     fs = [f[su:hh - sa, ss:ww - sg] for f in fs]
-    m = maske(fs)
+    m = m[su:hh - sa, ss:ww - sg]
     no += 1
     if ORNEK:
         o = fs[len(fs) // 2]; t = lama.doldur(o, m)
@@ -174,14 +176,19 @@ for a, b in sahneler:
         f = lama.doldur(f, m)[:OH, :OW]
         enc.stdin.write(np.ascontiguousarray(f).tobytes())
     enc.stdin.close(); enc.wait()
+    open(os.path.join(CIKTI, ".ilerleme.log"), "a").write(f"{AD} klip{no:02d} tamam\n")
     rapor.append({"klip": no, "baslangic": round(bas, 2), "sure": round(sure, 2), "yazi_orani": round(float((m > 0).mean()), 3)})
 os.remove(ARA)
 print(json.dumps({"video": AD, "klipler": rapor}, ensure_ascii=False))
 PY
-export OMP_NUM_THREADS=2 LAMA_THREAD=2 LAMA_MODEL=$KOK/model/lama_fp32.onnx
-$KOK/venv/bin/python -c "import numpy, cv2, onnxruntime, rapidocr_onnxruntime, scenedetect" 2>/tmp/imp.err || { echo "NOT: HATA kütüphane: $(tail -1 /tmp/imp.err | cut -c1-150)"; exit 1; }
-C=$KOK/parcalar_v2; mkdir -p $C
-ls $KOK/rank/*.mp4 | xargs -P 4 -I{} sh -c 'f="{}"; b=$(basename "$f" | cut -d_ -f1-2); ls '$C'/${b}*_klip01.mp4 >/dev/null 2>&1 && exit 0; nice -n 10 timeout 7000 '$KOK'/venv/bin/python '$KOK'/parcala.py "$f" '$C' >"$f.json" 2>"$f.err" || echo "NOT: HATA $(basename "$f"): $(tail -1 "$f.err" | cut -c1-150)"'
-rm -f $KOK/rank/*.json $KOK/rank/*.err $C/.*_ara.mp4
-echo "NOT: toplam $(ls $C/*.mp4 | wc -l) klip · $(du -sh $C | cut -f1)"
-tar cf $KOK/disari/parcalar.tgz -C $C . && echo "NOT: paket hazır"
+cat > $KOK/lama_calis.sh <<'SH'
+#!/bin/bash
+KOK=/opt/tampon/indirici; C=$KOK/parcalar_v2
+export OMP_NUM_THREADS=1 LAMA_THREAD=1 LAMA_MODEL=$KOK/model/lama_fp32.onnx
+date +%s > $C/.basla
+ls -S -r $KOK/rank/*.mp4 | xargs -P 4 -I{} sh -c 'f="{}"; b=$(basename "$f" | cut -d_ -f1); [ -f '$C'/.bitti_$b ] && exit 0; timeout 36000 '$KOK'/venv/bin/python '$KOK'/parcala.py "$f" '$C' >'$C'/.$b.json 2>'$C'/.$b.err && touch '$C'/.bitti_$b || echo "$b HATA: $(tail -1 '$C'/.$b.err)" >> '$C'/.hatalar'
+date +%s > $C/.son
+SH
+chmod +x $KOK/lama_calis.sh
+rm -f $C/.son
+systemd-run --unit=tampon-parcala --collect -p CPUQuota=400% -p MemoryMax=6G -p Nice=10 /bin/bash $KOK/lama_calis.sh >/dev/null 2>&1 && echo "NOT: arka planda başladı (16 video, 4 paralel)" || echo "NOT: HATA başlatılamadı"

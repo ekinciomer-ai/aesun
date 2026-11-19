@@ -1,0 +1,46 @@
+{
+ "kod": "KZ_MRK_07_DONUS",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Dünya bir anda dursa kaç km/sa savrulurdun? 🌍 #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Dünya bir anda dursa kaç km/sa savrulurdun? 🌍 #shorts",
+ "aciklama": "Ekvatorun çevresi ≈ 40.075 km; Dünya bir turu ≈ 23,9 saatte (yıldız günü) atar → ekvatorda ≈ 1.670 km/sa. Hız enlemin kosinüsüyle azalır: İstanbul (41° K) ≈ 1.674 × cos 41° ≈ 1.260 km/sa. Deniz seviyesinde 15 °C havada ses ≈ 1.225 km/sa, yani İstanbul sesten hızlı dönüyor. Hissetmeyiz çünkü hava, deniz ve biz birlikte döneriz. Dünya dönmeyi bıraksa Güneş gökyüzünde yılda bir tur atardı: yaklaşık 6 ay gündüz, 6 ay gece.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nBu bir düşünce deneyidir; Dünya'nın bir anda durması fiziksel olarak beklenen bir olay değildir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA Imagine the Universe – Ask an Astrophysicist (ekvator çevresi 40.075 km, bir yıldız gününde bir tur, hız × enlem kosinüsü); NASA/JPL Universe in the Classroom No. 71 (ekvatorda ≈ 1.600 km/sa); NASA Glenn – Speed of Sound / standart atmosfer (15 °C'de ≈ 340 m/s); İstanbul–Ankara karayolu ≈ 450 km (yaklaşık).\n\n#kozmoslab #dünya #uzay #bilim #shorts",
+ "etiketler": [
+  "dünya dursa",
+  "dünyanın dönüşü",
+  "dönüş hızı",
+  "ses hızı",
+  "ekvator",
+  "uzay",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "NASA Imagine the Universe – Ask an Astrophysicist (imagine.gsfc.nasa.gov/ask_astro/earth.html): 'An object on the Earth's equator will travel once around the Earth's circumference (40,075.036 kilometers) each sidereal day'; 'Multiply by cosine of your latitude'",
+  "NASA/JPL Universe in the Classroom No. 71 (2007, nightsky.jpl.nasa.gov HowFast.pdf): ekvatorda 'close to 1000 miles per hour (1600 km/hr)'",
+  "Hesap: 40.075 km ÷ 23,934 sa (yıldız günü) ≈ 1.674 km/sa; İstanbul enlemi ≈ 41,0° K → 1.674 × cos 41° ≈ 1.263 km/sa (≈ 1.260)",
+  "NASA Glenn Research Center – Speed of Sound / ISA standart atmosfer: deniz seviyesi 15 °C'de ≈ 340,3 m/s ≈ 1.225 km/sa",
+  "İstanbul–Ankara karayolu ≈ 450 km (yaklaşık; #01, #05 ile aynı); 450 ÷ 1.670 × 60 ≈ 16 dk",
+  "Durmuş Dünya'da güneş günü = bir yıl (Güneş'in gökyüzündeki görünür hareketi yalnız yörüngeden gelir) → ≈ 6 ay gündüz / 6 ay gece; kutup yakınları ve eğiklik ayrıntısı ihmal edilmiştir"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_07_DONUS.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_07_DONUS.mp4"
+}

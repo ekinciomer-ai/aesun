@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-19T11:35+03:00",
+ "olusturma": "2026-11-19T15:54+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -119,7 +119,7 @@
   "Yolu Seç !": {
    "gunluk_short_kotasi": 4,
    "seri_dagilimi": {
-    "Yolu Seç · Isınma Turu": 1
+    "Yolu Seç · Isınma Turu": 2
    },
    "durdurulan": []
   },
@@ -284,16 +284,16 @@
   {
    "kanal": "Antik Stüdyo",
    "seri": "Gece Yasakları",
-   "karar": "SÜRDÜR",
-   "neden": "tutma oranı %33",
-   "olculen": 3,
-   "erken": 2,
-   "medyan_48sa": 196,
-   "tutma_orani": 33,
+   "karar": "ARTIR",
+   "neden": "videoların %50'i tuttu (eşik 637 izlenme / 48 sa)",
+   "olculen": 4,
+   "erken": 1,
+   "medyan_48sa": 750,
+   "tutma_orani": 50,
    "izlenme_yuzde": 46,
    "en_iyi": {
-    "baslik": "Karabasan Aslında Ne? 100 Kişiden 7'si Yaşıyor #shorts",
-    "i48": 1303
+    "baslik": "Gece Tırnak Kesmenin Asıl Yasak Sebebi #shorts",
+    "i48": 1692
    },
    "kaydirmadan_izleme_yuzde": 52
   },
@@ -303,7 +303,7 @@
    "karar": "SÜRDÜR",
    "neden": "tutma oranı %45",
    "olculen": 22,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": 517,
    "tutma_orani": 45,
    "izlenme_yuzde": 57,
@@ -620,7 +620,7 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Bu Matematik Hayatında Nerede?",
    "karar": "ARTIR",
-   "neden": "videoların %100'i tuttu (eşik 203 izlenme / 48 sa)",
+   "neden": "videoların %100'i tuttu (eşik 206 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 1,
    "medyan_48sa": 460,
@@ -684,13 +684,16 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Gökyüzünde Bu Hafta",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 951,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Bu gece Leonidler + Voyager 1 bir ışık günü uzakta 🚀 #shorts",
+    "i48": 951
+   }
   },
   {
    "kanal": "Kozmos Lab TR",
@@ -712,27 +715,30 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Uzay Akışı",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 853,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Uzayın Derinliği 🌌 #shorts",
+    "i48": 853
+   }
   },
   {
    "kanal": "Yolu Seç !",
    "seri": "Yolu Seç · Isınma Turu",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
+   "karar": "ARTIR",
+   "neden": "videoların %67'i tuttu (eşik 176 izlenme / 48 sa)",
+   "olculen": 3,
    "erken": 4,
-   "medyan_48sa": 675,
-   "tutma_orani": 50,
+   "medyan_48sa": 1252,
+   "tutma_orani": 67,
    "izlenme_yuzde": null,
    "en_iyi": {
-    "baslik": "Derinkuyu’daki 420 kiloluk taş kapı dışarıdan neden AÇILAMAZ? ⚙️🪨 #shorts",
-    "i48": 1252
+    "baslik": "Mağarada çakmak çaktığında alev DİMDİK duruyorsa ne anlama gelir? 🔥 #shorts",
+    "i48": 1297
    }
   },
   {
@@ -753,14 +759,14 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 203,
+  "Kozmos Lab TR": 206,
   "LVL MAX": 50,
-  "Estudio Antiguo": 122,
-  "Ancient Studio": 188,
-  "Kozmos Lab": 85,
   "Antik Stüdyo": 637,
+  "Kozmos Lab": 85,
+  "Ancient Studio": 188,
   "Ömür Dediğin": 50,
-  "Yolu Seç !": 135
+  "Yolu Seç !": 176,
+  "Estudio Antiguo": 122
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -809,8 +815,8 @@
     "medyan": 709
    },
    "22:00": {
-    "n": 3,
-    "medyan": 57
+    "n": 4,
+    "medyan": 680
    },
    "23:00": {
     "n": 1,
@@ -879,8 +885,8 @@
     "medyan": 448
    },
    "21:00": {
-    "n": 3,
-    "medyan": 8
+    "n": 5,
+    "medyan": 853
    }
   },
   "Kozmos Lab": {
@@ -919,6 +925,10 @@
    "17:00": {
     "n": 1,
     "medyan": 1252
+   },
+   "20:00": {
+    "n": 1,
+    "medyan": 1297
    }
   }
  },
@@ -1401,25 +1411,27 @@
  "bulgular": [
   "Dün (2026-11-18) 5569 izlenme geldi; bir önceki gün 2157.",
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 188 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 0 tanesi tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 85 izlenme / 48 sa).",
-  "Kozmos Lab TR: son 6 Short'tan 5 tanesi tuttu (eşik 203 izlenme / 48 sa).",
-  "Yolu Seç !: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 206 izlenme / 48 sa).",
+  "Yolu Seç !: son 3 Short'tan 2 tanesi tuttu (eşik 176 izlenme / 48 sa).",
   "Ömür Dediğin: son 1 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
+  "Antik Stüdyo · Gece Yasakları: ARTIR — videoların %50'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %71'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Estudio Antiguo · İnanç & Kültür Tarihi: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %100'i tuttu (eşik 203 izlenme / 48 sa).",
+  "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %100'i tuttu (eşik 206 izlenme / 48 sa).",
+  "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %67'i tuttu (eşik 176 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1804 izlenme, 2 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 5 izlenme, 5 video).",
-  "Kozmos Lab TR: en iyi yayın saati şimdilik 19:00 (medyan 448 izlenme, 5 video).",
+  "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 853 izlenme, 5 video).",
   "Kozmos Lab: en iyi yayın saati şimdilik 22:00 (medyan 2 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %72 izleniyor, tutmayanlar %48 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %43 (hedef ≥%70).",

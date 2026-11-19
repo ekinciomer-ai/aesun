@@ -32,6 +32,6 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_HF_02_RENK · Görsel hafıza: Kars, İzmir, Bolu (+Samsun, Kayseri)
 
 ## Parti 6 — Karışık formatlar (2026-11-19)
-- [~] NY_EN_04_KOPRU · En uzun açıklıklı 5 asma köprü — kanca: "2.023 m aslında bir tarih"
-- [~] NY_BL_02_HAVA · Hava rekorları: Rize yağış, Çaldıran −46,4, Sarıcakaya 49,5, Silopi 50,5 — kanca: "97 derece fark"
-- [~] NY_YM_03_UNLU · Bu yemek hangi ilin: İskender (Bursa), Boyoz (İzmir), Künefe (Hatay)
+- [x] NY_EN_04_KOPRU · En uzun açıklıklı 5 asma köprü — kanca: "2.023 m aslında bir tarih"
+- [x] NY_BL_02_HAVA · Hava rekorları: Rize yağış, Çaldıran −46,4, Sarıcakaya 49,5, Silopi 50,5 — kanca: "97 derece fark"
+- [~] NY_YM_03_UNLU · Bu yemek hangi ilin: İskender (Bursa), Boyoz (İzmir), Künefe (Hatay) — final hazır; havuz 14 gün kuralıyla reddetti (NY_YM_02_ETLI), 02.12 sonrası yeniden teslim

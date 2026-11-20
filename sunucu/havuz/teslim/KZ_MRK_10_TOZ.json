@@ -1,0 +1,45 @@
+{
+ "kod": "KZ_MRK_10_TOZ",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Güneş paneli tozlanınca ne kadar kaybeder? ☀️🧹 #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Güneş paneli tozlanınca ne kadar kaybeder? ☀️🧹 #shorts",
+ "aciklama": "IEA PVPS (Uluslararası Enerji Ajansı Fotovoltaik Güç Sistemleri Programı) Task 13 raporuna göre kirlenme (toz, kar vb.), ışınımdan sonra güneş santrali verimini en çok etkileyen etkendir ve dünyada yıllık PV üretiminin %3–5'ine mal olur; ekonomik kaybı yılda 3–5 milyar avro düzeyindedir. Kurak bölgelerde etki daha büyüktür; temizlik robotları ve kir tutmaz kaplamalar kullanılır.\n\nHesap: 365 gün × %3–5 ≈ 11–18 günlük üretim. Merak #02'deki 550 W panel Türkiye'de günde ≈ 2.000 Wh üretir (≈ 85 telefon); %3–5'i 60–100 Wh ≈ 3–4 telefon (telefon başına ≈ 23 Wh). Yılda ortalama %4 ile 80 Wh × 365 ≈ 29 kWh ≈ 30 kWh; çamaşır makinesi yıkama başına ≈ 0,8–1 kWh → ≈ 30 yıkama.\n\nSenin tahminin kaçtı? Sence panel kaç ayda bir silinmeli? Yorumlara yaz 👇\n\nGerçek kayıp iklime, yağmura, eğime ve temizlik sıklığına göre çok değişir; hesap ortalama değerlerle yapılmıştır. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: IEA PVPS Task 13 – Soiling Losses: Impact on the Performance of Photovoltaic Power Plants (Ocak 2023); T.C. Enerji ve Tabii Kaynaklar Bakanlığı – Güneş Enerjisi Potansiyel Atlası (GEPA); tipik 550 W modül veri sayfaları; AB enerji etiketi verileri (çamaşır makinesi).\n\n#kozmoslab #güneşenerjisi #ges #enerji #bilim #shorts",
+ "etiketler": [
+  "güneş paneli",
+  "panel temizliği",
+  "toz",
+  "kirlenme kaybı",
+  "ges",
+  "güneş enerjisi",
+  "enerji",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "IEA PVPS Task 13 (Ocak 2023) Soiling Losses – Impact on the Performance of Photovoltaic Power Plants (iea-pvps.org/key-topics/soiling-losses-impact-on-the-performance-of-photovoltaic-power-plants): 'soiling is the single most influential factor impacting solar photovoltaic (PV) system yield and is estimated to cause a loss of annual PV energy production of 3-5%, corresponding to an economic loss on the order of 3-5 billion euros'; 'Especially in arid regions, soiling may affect large utility-scale PV plants to a significant extent ... cleaning robots'",
+  "Merak #02 (KZ_MRK_02_PANEL) doğrulanmış değerleri: ETKB GEPA Türkiye ort. ≈ 4,18 kWh/m²·gün; 550 W modül; performans oranı ≈ %80–85 → ≈ 2.000 Wh/gün; telefon 19,25 Wh + şarj kaybı ≈ 23 Wh → ≈ 85 telefon",
+  "Çamaşır makinesi: 40 °C pamuklu program ≈ 0,8–1 kWh/yıkama (AB enerji etiketi verileri, #02 ile aynı)",
+  "Hesap: 365 × 0,03 ≈ 11, 365 × 0,05 ≈ 18 gün; 2.000 × 0,03–0,05 = 60–100 Wh; 60/23 ≈ 2,6, 100/23 ≈ 4,3 → 3–4 telefon; ortalama %4: 80 Wh × 365 = 29,2 kWh ≈ 30 kWh ≈ 30 yıkama"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_10_TOZ.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_10_TOZ.mp4"
+}

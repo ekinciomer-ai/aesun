@@ -6,21 +6,12 @@ set -euo pipefail
 DAL=gecici-dava-arsiv; AD=samet_kazasi_2026-11-20
 H=/opt/aesun/ozel/davalar
 T=$(mktemp -d /root/dava_tasima.XXXXXX); trap 'rm -rf "$T"' EXIT
-mkdir -p "$T/d/gecici_dava"; S="$T/d/gecici_dava"; OK=0
-for AD_ in GH_TOKEN AESUN_GH_OKU; do
-  for F in /opt/aesun/isler.env /opt/aesun/.env; do
-    GHT=$(grep -h "^$AD_=" "$F" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r"' || true)
-    [ -n "$GHT" ] || continue
-    printf 'header = "Authorization: Bearer %s"\n' "$GHT" > "$T/h.cfg"; chmod 600 "$T/h.cfg"; unset GHT
-    L=$(curl -sf -K "$T/h.cfg" "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/gecici_dava?ref=$DAL" | python3 -c 'import sys,json;print(" ".join(x["name"] for x in json.load(sys.stdin)))' 2>/dev/null || true)
-    if [ -n "$L" ]; then
-      for f in $L; do curl -sfL -K "$T/h.cfg" -H "Accept: application/vnd.github.raw" -o "$S/$f" "https://api.github.com/repos/ekinciomer-ai/epias-ptf/contents/gecici_dava/$f?ref=$DAL"; done
-      echo "NOT: geçici daldan $(ls "$S" | wc -l) parça alındı ($AD_)"; OK=1; break 2
-    fi
-  done
-done
-rm -f "$T/h.cfg"
-[ $OK = 1 ] || { echo "NOT: HATA sunucudaki depo anahtarlarıyla geçici dal okunamadı"; exit 1; }
+mkdir -p "$T/d"; S="$T/d/gecici_dava"
+# epias-ptf'e erişim: aesun-isler kapsayıcısının kendi dağıtım anahtarı (Ömer onayı 20.11.2026; anahtar bu betikte görünmez)
+C=$(docker ps --format '{{.Names}}' | grep -E '^aesun[-_]isler' | head -1)
+[ -n "$C" ] || { echo "NOT: HATA aesun-isler kapsayıcısı bulunamadı"; exit 1; }
+docker exec "$C" sh -c "cd /veri/epias-ptf && git fetch -q --depth 1 origin $DAL:refs/remotes/origin/$DAL && git archive refs/remotes/origin/$DAL gecici_dava" | tar xf - -C "$T/d"
+echo "NOT: geçici daldan $(ls "$S" 2>/dev/null | wc -l) parça alındı"
 [ -f "$S/anahtar.sarili" ] || { echo "NOT: HATA geçici dal okunamadı"; exit 1; }
 mkdir -p "$H"; chmod 700 /opt/aesun/ozel "$H"; chown root:root /opt/aesun/ozel "$H"
 cat "$S"/p_* > "$T/a.enc"
@@ -40,3 +31,5 @@ chmod 600 "$H"/*
 echo "NOT: dava arşivi alındı ve doğrulandı: $N dosya, $(du -h "$H/$AD.enc" | cut -f1) şifreli"
 echo "NOT: klasörler: $KL"
 ls -la "$H" | tail -n +2 | sed 's/^/NOT: /'
+# geçici dalı depodan ve kapsayıcıdaki kopyadan kaldır
+docker exec "$C" sh -c "cd /veri/epias-ptf && git push -q origin --delete $DAL; git update-ref -d refs/remotes/origin/$DAL" >/dev/null 2>&1 && echo "NOT: geçici dal silindi" || echo "NOT: UYARI geçici dal silinemedi"

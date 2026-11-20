@@ -1,0 +1,217 @@
+{
+ "kod": "KZ_MRK_09_MARS",
+ "no": "MERAK #09",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "MARS'TA BİR GÜN KAÇ SAAT,<br><i>BİR YIL KAÇ GÜN?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "mars",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Mars'ta bir gün kaç saat sürer, bir yıl kaç gün? Tahminini aklında tut, iki cevap da şaşırtıyor.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "mars",
+   "p": {
+    "mod": "gun",
+    "kart": 56
+   },
+   "metin": "Mars da Dünya gibi kendi çevresinde döner. Ama bir Mars günü, yirmi dört saat otuz yedi dakika.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 MARS GÜNÜ",
+     "say": 24,
+     "ek": "saat",
+     "k": "yirmi"
+    },
+    {
+     "tip": "etiket",
+     "y": "+ 37 dakika",
+     "k": "otuz"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "mars",
+   "p": {
+    "mod": "fark",
+    "kart": 56
+   },
+   "metin": "Her gün otuz yedi dakika fazladan. Bir haftada bu, dört saatten fazla ekstra uyku demek.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "37 dk <em>×</em> 7 = 259 dk",
+     "k": "Bir"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 4 saat 19 dk uyku 😴",
+     "k": "dört"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "mars",
+   "p": {
+    "mod": "uzak",
+    "kart": 56
+   },
+   "metin": "Bu Mars gününe sol denir. Peki yıl? Mars, Güneş'e Dünya'dan bir buçuk kat daha uzak.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "1 sol = 24 sa 37 dk",
+     "k": "sol"
+    },
+    {
+     "tip": "sayi",
+     "ust": "GÜNEŞ'E UZAKLIK",
+     "say": 1.5,
+     "dec": 1,
+     "ek": "kat",
+     "k": "bir"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "mars",
+   "p": {
+    "mod": "yil",
+    "kart": 63
+   },
+   "metin": "Yolu uzun olduğu için Güneş'in çevresindeki turu, altı yüz seksen yedi Dünya günü sürer.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 MARS YILI",
+     "say": 687,
+     "ek": "Dünya günü",
+     "k": "altı"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "mars",
+   "p": {
+    "mod": "iki",
+    "kart": 62
+   },
+   "metin": "Yani neredeyse iki Dünya yılı. Dünya neredeyse iki tur atarken, Mars ancak bir tur tamamlar.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "687 <em>÷</em> 365 ≈ 1,88",
+     "k": "neredeyse"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 2 Dünya yılı",
+     "k": "iki"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "mars",
+   "p": {
+    "mod": "sol",
+    "kart": 63
+   },
+   "metin": "Ama Mars günleri daha uzun olduğu için, bir Mars yılı altı yüz altmış dokuz sol eder.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 MARS YILI",
+     "say": 669,
+     "ek": "sol",
+     "k": "altı"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "mars",
+   "p": {
+    "mod": "yas",
+    "kart": 61
+   },
+   "metin": "Dünya'da on yaşındaysan, Mars'ta sadece beş yaşındasın. Mevsimler de neredeyse iki kat uzun sürer.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "10 <em>÷</em> 1,88 ≈ 5,3",
+     "k": "Mars'ta"
+    },
+    {
+     "tip": "etiket",
+     "y": "🎂 10 yaş → 5 yaş",
+     "k": "beş"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "mars",
+   "p": {
+    "mod": "son",
+    "kart": 57
+   },
+   "metin": "Cevap: bir gün yirmi dört saat otuz yedi dakika, bir yıl altı yüz seksen yedi gün. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "say": 687,
+     "ek": "gün",
+     "k": "altı"
+    },
+    {
+     "tip": "etiket",
+     "y": "1 gün = 24 sa 37 dk",
+     "k": "yirmi"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Mars'ta bir gün kaç saat, bir yıl kaç gün? 🔴🪐 #shorts",
+  "aciklama": "Mars kendi çevresinde yaklaşık 24 saat 37 dakikada döner; bu Mars gününe 'sol' denir (ESA). Her gün 37 dakika fazla: bir haftada 37 × 7 = 259 dakika, yani yaklaşık 4 saat 19 dakika. Mars Güneş'e ortalama 228 milyon km uzakta, Dünya'nın yaklaşık 1,5 katı (NASA). Güneş çevresindeki bir turu 687 Dünya günü (≈ 1,88 Dünya yılı) ya da yaklaşık 669 sol sürer (NASA, ESA). Dünya'da 10 yaşındaysan Mars yılıyla 10 ÷ 1,88 ≈ 5,3 yaşındasın; yıl uzun olduğu için mevsimler de ortalama neredeyse iki kat uzun.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\n3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA Science – Mars Facts (science.nasa.gov/mars/facts): bir tur 24,6 saat, bir yıl 669,6 sol = 687 Dünya günü, ortalama uzaklık 228 milyon km (1,5 AU), eksen eğikliği 25°, belirgin mevsimler; ESA – Facts about Mars: Mars günü (sol) 24 saat 37 dakika, Mars yılı 669 sol ya da 687 Dünya günü.\n\n#kozmoslab #mars #uzay #astronomi #bilim #shorts",
+  "etiketler": [
+   "mars",
+   "mars günü",
+   "sol",
+   "mars yılı",
+   "uzay",
+   "astronomi",
+   "gezegen",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA Science – Mars Facts (güncelleme 10.07.2026): 'completes one rotation every 24.6 hours'; 'A year on Mars lasts 669.6 sols, which is the same as 687 Earth days'; 'average distance of 142 million miles (228 million kilometers), Mars is 1.5 astronomical units away from the Sun'; eksen eğikliği 25°; 'Like Earth, Mars has distinct seasons'",
+  "ESA – Facts about Mars (Mars Express): 'Martian day (a sol): 24 hours 37 minutes'; 'Martian year: 669 sols or 687 Earth days'; 'Average distance from the Sun: 227 940 000 km (1.52 times that of Earth)'",
+  "Hesap: 37 dk × 7 = 259 dk = 4 sa 19 dk; 687 ÷ 365,25 ≈ 1,88; 10 ÷ 1,88 ≈ 5,3; yıl 1,88 kat uzun → mevsimler ortalama ≈ 1,9 kat (Mars mevsimleri yörünge basıklığı nedeniyle eşit değildir; 'neredeyse iki kat' ortalama ifadesi)"
+ ]
+}

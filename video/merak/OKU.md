@@ -57,6 +57,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `ev` | `mod: soru / kwh / test / km / yuru / benzin / son` | Elektrikli araba: 1 kWh pil, 100 km test sayacı, 5 km yol (üstten), yürüyen insan, elektrik/benzin enerji çubukları |
 | `turbin` | `mod: soru / olcu / tur / uc / enerji / telefon / son` | 5 MW rüzgâr türbini (12,1 dev/dk), çap ölçüsü, tur yayı, uç izi, batarya, 300 telefon duvarı |
 | `donus` | `mod: soru / cevre / hiz / enlem / sonuc / ses / hisset / gun (yeni:true) / son` | Dönen Dünya durur, ekvator çemberi, İstanbul (41°) işareti, doğuya hız okları (ekvator/İstanbul/ses), dönmeyen Dünya çevresinde Güneş (gün=yıl) |
+| `mars` | `mod: soru / gun / fark / uzak / yil / iki / sol / yas / son` | Mars yakın plan; Dünya–Mars yan yana dönüş (24 sa / 24 sa 37 dk, hafta sayacı); üstten yörüngeler (1× / 1,5× ölçü, gün/tur/sol sayacı); yaş karşılaştırması |
+| `toz` | `mod: soru / uret / toz / isin / takvim / telefon / yil / robot / son` | Panel + kirlenme örtüsü, tozda duran ışınlar, 365 günlük takvim (11–18 gün gri), yan telefonlar, temizlik robotu |
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
@@ -73,5 +75,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 3 (Ay'a arabayla) ve 4 (Türbinin tek turu) — 18.11.2026, günlük görev.
 - Bölüm 5 (Uzay İstasyonu) ve 6 (Elektrikli araba 1 kWh) — 18.11.2026.
 - Bölüm 7 (Dünya dursa kaç km/sa) ve 8 (Ampul için kaç dakika pedal) — 19.11.2026, günlük görev; yeni sahneler `donus`, `pedal`.
+- Bölüm 9 (Mars'ta gün/yıl) ve 10 (Panel tozlanınca kayıp) — 20.11.2026, günlük görev; yeni sahneler `mars`, `toz`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

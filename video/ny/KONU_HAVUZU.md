@@ -37,7 +37,7 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [~] NY_YM_03_UNLU · Bu yemek hangi ilin: İskender (Bursa), Boyoz (İzmir), Künefe (Hatay) — final hazır; havuz 14 gün kuralıyla reddetti (NY_YM_02_ETLI), 02.12 sonrası yeniden teslim
 
 ## Parti 7 — Karışık formatlar (2026-11-20)
-- [~] NY_SQ_02_YAPI · Bilgi şıklı soru "Bu yapı hangi ilde?": Sümela (Trabzon), Safranbolu (Karabük), İshak Paşa Sarayı (Ağrı)
-- [~] NY_HF_03_HARITA · Görsel hafıza "5 saniyelik harita testi": Mardin, Muğla, Artvin (+Ankara, Konya)
-- [~] NY_YM_04_TATLI · Bu tatlı hangi ilin: Katmer (Gaziantep), Pişmaniye (Kocaeli), Kemalpaşa (Bursa)
+- [x] NY_SQ_02_YAPI · Bilgi şıklı soru "Bu yapı hangi ilde?": Sümela (Trabzon), Safranbolu (Karabük), İshak Paşa Sarayı (Ağrı)
+- [x] NY_HF_03_HARITA · Görsel hafıza "5 saniyelik harita testi": Mardin, Muğla, Artvin (+Ankara, Konya)
+- [x] NY_YM_04_TATLI · Bu tatlı hangi ilin: Katmer (Gaziantep), Pişmaniye (Kocaeli), Kemalpaşa (Bursa)
 - Not: havuz "aynı konu" kontrolü `baslik_bant` ile yapılıyor; her videoda farklı bant kullan (YM_03 bu yüzden reddedildi).

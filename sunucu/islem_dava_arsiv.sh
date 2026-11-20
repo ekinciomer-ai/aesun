@@ -10,7 +10,10 @@ mkdir -p "$T/d"; S="$T/d/gecici_dava"
 # epias-ptf'e erişim: aesun-isler kapsayıcısının kendi dağıtım anahtarı (Ömer onayı 20.11.2026; anahtar bu betikte görünmez)
 C=$(docker ps --format '{{.Names}}' | grep -E '^aesun[-_]isler' | head -1)
 [ -n "$C" ] || { echo "NOT: HATA aesun-isler kapsayıcısı bulunamadı"; exit 1; }
-docker exec "$C" sh -c "cd /veri/epias-ptf && git fetch -q --depth 1 origin $DAL:refs/remotes/origin/$DAL && git archive refs/remotes/origin/$DAL gecici_dava" | tar xf - -C "$T/d"
+echo "NOT: depo bağlantı türü: $(docker exec "$C" sh -c 'cd /veri/epias-ptf && git remote get-url origin' | sed -E 's#(://)[^@]*@#\1***@#' | cut -c1-25)"
+timeout 1500 docker exec -e GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20' -e GIT_TERMINAL_PROMPT=0 "$C" sh -c "cd /veri/epias-ptf && git fetch -q --depth 1 origin $DAL:refs/remotes/origin/$DAL" </dev/null || { echo "NOT: HATA geçici dal çekilemedi (zaman aşımı ya da erişim)"; exit 1; }
+echo "NOT: geçici dal çekildi"
+timeout 600 docker exec "$C" sh -c "cd /veri/epias-ptf && git archive refs/remotes/origin/$DAL gecici_dava" </dev/null | tar xf - -C "$T/d"
 echo "NOT: geçici daldan $(ls "$S" 2>/dev/null | wc -l) parça alındı"
 [ -f "$S/anahtar.sarili" ] || { echo "NOT: HATA geçici dal okunamadı"; exit 1; }
 mkdir -p "$H"; chmod 700 /opt/aesun/ozel "$H"; chown root:root /opt/aesun/ozel "$H"
@@ -32,4 +35,4 @@ echo "NOT: dava arşivi alındı ve doğrulandı: $N dosya, $(du -h "$H/$AD.enc"
 echo "NOT: klasörler: $KL"
 ls -la "$H" | tail -n +2 | sed 's/^/NOT: /'
 # geçici dalı depodan ve kapsayıcıdaki kopyadan kaldır
-docker exec "$C" sh -c "cd /veri/epias-ptf && git push -q origin --delete $DAL; git update-ref -d refs/remotes/origin/$DAL" >/dev/null 2>&1 && echo "NOT: geçici dal silindi" || echo "NOT: UYARI geçici dal silinemedi"
+timeout 300 docker exec -e GIT_SSH_COMMAND="ssh -o BatchMode=yes" -e GIT_TERMINAL_PROMPT=0 "$C" sh -c "cd /veri/epias-ptf && git push -q origin --delete $DAL; git update-ref -d refs/remotes/origin/$DAL" >/dev/null 2>&1 && echo "NOT: geçici dal silindi" || echo "NOT: UYARI geçici dal silinemedi"

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-20T09:06+03:00",
+ "olusturma": "2026-11-20T09:47+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -757,7 +757,7 @@
    "kanal": "Yolu Seç !",
    "seri": "Yolu Seç · Isınma Turu",
    "karar": "ARTIR",
-   "neden": "videoların %80'i tuttu (eşik 260 izlenme / 48 sa)",
+   "neden": "videoların %80'i tuttu (eşik 262 izlenme / 48 sa)",
    "olculen": 5,
    "erken": 4,
    "medyan_48sa": 1266,
@@ -765,7 +765,7 @@
    "izlenme_yuzde": 49,
    "en_iyi": {
     "baslik": "Yıllardır kapalı bir mağara kapısını aralarsan dışarı ilk ne sızar? ⚠️🌫️ #shorts",
-    "i48": 1320
+    "i48": 1343
    },
    "kaydirmadan_izleme_yuzde": 47
   },
@@ -787,15 +787,15 @@
   }
  ],
  "esikler": {
-  "Nasıl Yapıldı": 50,
-  "LVL MAX": 50,
-  "Yolu Seç !": 260,
-  "Kozmos Lab TR": 211,
   "Ömür Dediğin": 50,
-  "Ancient Studio": 188,
   "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 211,
+  "Yolu Seç !": 262,
+  "Kozmos Lab": 89,
+  "Ancient Studio": 188,
+  "Nasıl Yapıldı": 50,
   "Estudio Antiguo": 122,
-  "Kozmos Lab": 89
+  "LVL MAX": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -949,11 +949,11 @@
   "Yolu Seç !": {
    "13:00": {
     "n": 2,
-    "medyan": 672
+    "medyan": 674
    },
    "17:00": {
     "n": 2,
-    "medyan": 1293
+    "medyan": 1304
    },
    "20:00": {
     "n": 1,
@@ -1121,7 +1121,7 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 253,
+   "uzun_izlenme": 255,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
@@ -1188,7 +1188,7 @@
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2602,
+     "izlenme": 2603,
      "durum": "Yayında"
     },
     {
@@ -1242,7 +1242,7 @@
     {
      "vid": "oEFXYkmfE-E",
      "baslik": "How does a handful of sand become a solar panel? ☀️ #shorts",
-     "izlenme": 7,
+     "izlenme": 8,
      "durum": "Yayında"
     }
    ],
@@ -1452,7 +1452,7 @@
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 89 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 211 izlenme / 48 sa).",
-  "Yolu Seç !: son 5 Short'tan 4 tanesi tuttu (eşik 260 izlenme / 48 sa).",
+  "Yolu Seç !: son 5 Short'tan 4 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1465,14 +1465,14 @@
   "Estudio Antiguo · İnanç & Kültür Tarihi: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %100'i tuttu (eşik 211 izlenme / 48 sa).",
-  "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %80'i tuttu (eşik 260 izlenme / 48 sa).",
+  "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %80'i tuttu (eşik 262 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1626 izlenme, 3 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 5 izlenme, 5 video).",
   "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 963 izlenme, 5 video).",
   "Kozmos Lab: en iyi yayın saati şimdilik 02:00 (medyan 36 izlenme, 4 video).",
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 88 izlenme, 2 video).",
-  "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 1293 izlenme, 2 video).",
+  "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 1304 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %72 izleniyor, tutmayanlar %49 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %43 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %62 izleniyor, tutmayanlar %54 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-20T09:47+03:00",
+ "olusturma": "2026-11-20T10:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -394,11 +394,11 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tarihi Magazin",
    "karar": "ARTIR",
-   "neden": "videoların %75'i tuttu (eşik 637 izlenme / 48 sa)",
-   "olculen": 4,
-   "erken": 1,
-   "medyan_48sa": 1160,
-   "tutma_orani": 75,
+   "neden": "videoların %60'i tuttu (eşik 637 izlenme / 48 sa)",
+   "olculen": 5,
+   "erken": 0,
+   "medyan_48sa": 813,
+   "tutma_orani": 60,
    "izlenme_yuzde": 50,
    "en_iyi": {
     "baslik": "Saçının içinde FARE yaşayan zengin kadınlar?! 🐭👑 #shorts #tarih #keşfet",
@@ -787,15 +787,15 @@
   }
  ],
  "esikler": {
-  "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 211,
   "Yolu Seç !": 262,
   "Kozmos Lab": 89,
-  "Ancient Studio": 188,
-  "Nasıl Yapıldı": 50,
+  "LVL MAX": 50,
   "Estudio Antiguo": 122,
-  "LVL MAX": 50
+  "Ancient Studio": 188,
+  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 211,
+  "Nasıl Yapıldı": 50,
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -828,8 +828,8 @@
     "medyan": 14
    },
    "18:00": {
-    "n": 11,
-    "medyan": 1192
+    "n": 12,
+    "medyan": 788
    },
    "19:00": {
     "n": 12,
@@ -1460,7 +1460,7 @@
   "Antik Stüdyo · Gece Yasakları: ARTIR — videoların %50'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Gündem + Tarih: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %71'i tuttu (eşik 637 izlenme / 48 sa).",
-  "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %75'i tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %60'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Estudio Antiguo · İnanç & Kültür Tarihi: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",

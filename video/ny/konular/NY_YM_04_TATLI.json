@@ -1,0 +1,113 @@
+{
+ "kanal": "NY",
+ "seri": "İllere Göre Yemekler",
+ "dil": "tr",
+ "baslik_bant": "BU TATLI HANGİ İLİN?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 TATLI",
+   "ust": "HANGİ İLİN?",
+   "alt": "SONUNCUSU ÇOĞUNU YANILTIYOR",
+   "alt_kelime": "sonuncusu"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "KATMER HANGİ İLİN?",
+   "siklar": [
+    "Şanlıurfa",
+    "Gaziantep",
+    "Adana",
+    "Kilis"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/katmer.jpg"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Gaziantep"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "PİŞMANİYE HANGİ İLİN?",
+   "siklar": [
+    "Sakarya",
+    "Bursa",
+    "Kocaeli",
+    "Yalova"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/pismaniye.jpg"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Kocaeli"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "KEMALPAŞA TATLISI HANGİ İLİN?",
+   "siklar": [
+    "İzmir",
+    "Bursa",
+    "Balıkesir",
+    "Manisa"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/kemalpasa.jpg"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Bursa"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "SIRADAKİ TATLIYI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Küre Ansiklopedi – Antep Katmeri: Gaziantep'e özgü; sabah kahvaltılarında tüketilir; TÜRKPATENT mahreç işareti, tescil no 264 (07.12.2017) https://kureansiklopedi.com/tr/detay/antep-katmeri-4a5a6",
+  "TÜRKPATENT – Antep Katmeri coğrafi işaret belgesi (264) https://ci.turkpatent.gov.tr/Files/GeographicalSigns/264.pdf",
+  "Küre Ansiklopedi – İzmit Pişmaniyesi: Kocaeli; menşe adı, tescil no 34 (13.06.2001) https://kureansiklopedi.com/tr/detay/izmit-pismaniyesi-b52f2",
+  "T.C. Kültür ve Turizm Bakanlığı Kültür Portalı – Mustafa Kemalpaşa Tatlısı: Bursa'nın Mustafakemalpaşa ilçesi, tuzsuz taze peynirle yapılır https://beta.kulturportali.gov.tr/turkiye/bursa/neyenir/mustafa-kemalpasa-tatlisi",
+  "Fotoğraflar: Wikimedia Commons serbest lisanslı (lisans/yazar açıklamaya otomatik eklenir)",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu 3 tatlı hangi ilin? Sonuncusu çoğunu yanıltıyor!",
+  "aciklama": "Katmer, pişmaniye ve Kemalpaşa tatlısı... Bu tatlılar hangi ile ait? Cevaplar videonun içinde.\n\n💬 Kaç doğru yaptın? Sıradaki tatlıyı yorumlara yaz.",
+  "etiketler": [
+   "yöresel tatlılar",
+   "türk mutfağı",
+   "hangi ilin",
+   "katmer",
+   "pişmaniye",
+   "kemalpaşa tatlısı",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu 3 tatlı hangi ilin? 🍯 Sonuncusu çoğunu yanıltıyor! #yöreseltatlı #türkmutfağı #quiz",
+  "amac": "İllere göre yemekler serisi (tatlılar); izleyiciden sıradaki tatlı önerisi alarak yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_YM_04_TATLI"
+}

@@ -1,0 +1,112 @@
+{
+ "kanal": "NY",
+ "seri": "Bilgi Şıklı Soru",
+ "dil": "tr",
+ "baslik_bant": "BU YAPI HANGİ İLDE?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 YAPI",
+   "ust": "HANGİ İLDE?",
+   "alt": "SONUNCUSUNDA ÇOĞU KİŞİ YANILIYOR",
+   "alt_kelime": "sonuncusunda"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Trabzon",
+   "soru": "SÜMELA MANASTIRI HANGİ İLDE?",
+   "siklar": [
+    "Rize",
+    "Trabzon",
+    "Giresun",
+    "Artvin"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Trabzon"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Karabük",
+   "soru": "SAFRANBOLU EVLERİ HANGİ İLDE?",
+   "siklar": [
+    "Bartın",
+    "Kastamonu",
+    "Karabük",
+    "Zonguldak"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Karabük"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Ağrı",
+   "soru": "İSHAK PAŞA SARAYI HANGİ İLDE?",
+   "siklar": [
+    "Van",
+    "Kars",
+    "Iğdır",
+    "Ağrı"
+   ],
+   "dogru": 3,
+   "bekle": 3
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Ağrı"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Küre Ansiklopedi – Sümela Manastırı: Trabzon ili Maçka ilçesi, Karadağ'ın sarp kayalıklarına oyulmuş, deniz seviyesinden yaklaşık 1.200 m https://kureansiklopedi.com/tr/detay/sumela-manastiri-4",
+  "Küre Ansiklopedi – Safranbolu Evleri: Karabük ili, 1994'te UNESCO Dünya Mirası Listesi https://kureansiklopedi.com/tr/detay/safranbolu-evleri-a30ba",
+  "NTV – Karabük'ün Safranbolu ilçesinin Dünya Mirası Listesi'ne alınışının 30. yılı (1994) https://www.ntv.com.tr/n-life/kultur-ve-sanat/safranbolunun-dunya-mirasi-listesine-alinisinin-30-yilikutlaniyor,dwXQOBGdJ0SDX4vg5yHSgg",
+  "Küre Ansiklopedi – İshak Paşa Sarayı: Ağrı'nın Doğubayazıt ilçesi; 1685'te başlanıp 1784'te tamamlandı https://kureansiklopedi.com/tr/detay/ishak-pasa-sarayi-9",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu 3 ünlü yapı hangi ilde? Sonuncusunda çoğu kişi yanılıyor!",
+  "aciklama": "Sümela Manastırı, Safranbolu evleri ve İshak Paşa Sarayı... Üçü de çok ünlü ama hangi ilde olduklarını bilen az. Cevaplar videonun içinde.\n\n💬 Kaç doğru yaptın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "türkiye",
+   "bilgi yarışması",
+   "quiz",
+   "sümela manastırı",
+   "safranbolu",
+   "ishak paşa sarayı",
+   "genel kültür",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu 3 yapı hangi ilde? Sonuncusunda çoğu kişi yanılıyor 🤔 #quiz #genelkültür #türkiye",
+  "amac": "Bilgi şıklı soru serisi (tarihi yapılar); izleyiciyi tahmin etmeye ve puanını yorumlamaya teşvik",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_SQ_02_YAPI"
+}

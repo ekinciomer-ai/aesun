@@ -1,0 +1,131 @@
+{
+ "kanal": "NY",
+ "seri": "Görsel Hafıza",
+ "dil": "tr",
+ "baslik_bant": "5 SANİYELİK HARİTA TESTİ",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "5 SANİYE",
+   "ust": "HARİTA TESTİ",
+   "alt": "SONUNCUSU EN ZORU",
+   "alt_kelime": "sonuncusu"
+  },
+  {
+   "id": "s02",
+   "sahne": "h_goster",
+   "iller": [
+    {
+     "ad": "Mardin",
+     "renk": "#ff3b2f"
+    },
+    {
+     "ad": "Muğla",
+     "renk": "#3f8cff"
+    },
+    {
+     "ad": "Artvin",
+     "renk": "#2fe05a"
+    },
+    {
+     "ad": "Ankara",
+     "renk": "#b45cff"
+    },
+    {
+     "ad": "Konya",
+     "renk": "#ffd23f"
+    }
+   ],
+   "bekle": 5
+  },
+  {
+   "id": "s03",
+   "sahne": "h_sor",
+   "soru": "KIRMIZI OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Şanlıurfa",
+    "Mardin",
+    "Batman",
+    "Siirt"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s04",
+   "sahne": "q_cevap",
+   "il": "Mardin"
+  },
+  {
+   "id": "s05",
+   "sahne": "h_sor",
+   "soru": "MAVİ OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Aydın",
+    "Antalya",
+    "Muğla",
+    "Denizli"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s06",
+   "sahne": "q_cevap",
+   "il": "Muğla"
+  },
+  {
+   "id": "s07",
+   "sahne": "h_sor",
+   "soru": "YEŞİL OLAN İL HANGİSİYDİ?",
+   "siklar": [
+    "Rize",
+    "Ardahan",
+    "Erzurum",
+    "Artvin"
+   ],
+   "dogru": 3,
+   "bekle": 3
+  },
+  {
+   "id": "s08",
+   "sahne": "q_cevap",
+   "il": "Artvin"
+  },
+  {
+   "id": "s09",
+   "sahne": "kapanis",
+   "cta": "KAÇINI HATIRLADIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Küre Ansiklopedi – Mardin (İl): Mezopotamya Ovası'nın kuzey sınırında, taş işçiliğiyle öne çıkan mimari https://kureansiklopedi.com/tr/detay/mardin-il-4",
+  "Küre Ansiklopedi – Antik Dünyanın Yedi Harikası: Halikarnas Mozolesi, Bodrum (Muğla) https://kureansiklopedi.com/tr/detay/antik-dunyanin-yedi-harikasi-f09a2",
+  "T.C. Tarım ve Orman Bakanlığı – Yusufeli Barajı (Artvin): temelden 275 m, yükseklikte Türkiye'de birinci https://tarimorman.gov.tr/Haber/5585/Yusufeli-Baraji-Ve-Hes-Aciliyor",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "5 saniye bak, 3 ili bul! Sonuncusu en zoru",
+  "aciklama": "Haritada 5 il renkleniyor, sadece 5 saniyen var. Sonra soruyorum: kırmızı, mavi ve yeşil olan iller hangileriydi?\n\n💬 Kaçını hatırladın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "hafıza testi",
+   "görsel hafıza",
+   "türkiye haritası",
+   "iller",
+   "quiz",
+   "beyin oyunu",
+   "shorts"
+  ],
+  "tiktok_metin": "5 saniye bak, 3 ili bul! 🧠 Sonuncusu en zoru #hafızatesti #türkiye #quiz",
+  "amac": "Görsel hafıza serisi; izleyiciyi puan yazmaya teşvik ederek yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_HF_03_HARITA"
+}

@@ -1,0 +1,61 @@
+{
+  "kod": "KK_MIT_04",
+  "motor": "gemini",
+  "ses": "charon",
+  "model_tercih": "gemini-3.1-flash-tts-preview",
+  "model_kilit": true,
+  "anahtar_haric": [
+    "gemini_api_anahtar_kozmos"
+  ],
+  "parcalar": [
+    {
+      "ad": "V1",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gerilim",
+      "metin": "Kemer takmamak sadece trafik cezasıdır. Çoğu kişi böyle bilir. Peki kaza olunca ne olur?"
+    },
+    {
+      "ad": "V2",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "normal",
+      "metin": "İki otomobil kavşakta çarpışıyor. Kazada karşı araç yüzde yetmiş beş kusurlu."
+    },
+    {
+      "ad": "V3",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gerilim",
+      "metin": "Diğer araçtaki yolcu, çarpışmanın etkisiyle araçtan dışarı fırlıyor ve kalıcı olarak yaralanıyor. Sigortaya tazminat davası açıyor."
+    },
+    {
+      "ad": "V4",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "soru",
+      "metin": "Sizce kemer takmayan yolcu tazminat alabildi mi? A, B, yoksa C? Cevabını yoruma yaz."
+    },
+    {
+      "ad": "V5",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gizem",
+      "metin": "Geri saralım. Tutanakta kemerin takılı olup olmadığı yazmıyor. Ama ifadelere göre yolcu araçtan dışarı fırlamış. Heyet bunu, kemer takılmadığının işareti saydı."
+    },
+    {
+      "ad": "V6",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "vurgu",
+      "metin": "İlk karar: üç yüz altmış dört bin lira tazminat. İtiraz heyeti, emniyet kemeri yüzünden yüzde yirmi kesti: iki yüz doksan bir bin lira. Yani yaklaşık yetmiş üç bin lira kayıp. Yargıtay onadı."
+    },
+    {
+      "ad": "V7",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "vurgu",
+      "metin": "Yani kemer sadece trafik cezası değil. Kaza olursa, tazminatından da keser. Sen hangi şıkkı seçtin?"
+    }
+  ]
+}

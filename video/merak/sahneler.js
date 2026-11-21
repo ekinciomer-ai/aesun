@@ -644,8 +644,9 @@ S.ucak=()=>{const sc=new THREE.Scene();const c=cam(50);uzay(sc);const SY=6.2,EY=
     sy.visible=sv&&!pk;sy.set(syz);sy.position.set(mod==="son"?-3.6:SX-3.0,mod==="son"?sy_-1.8:sy_+.2,0);
     // kamera: önceki parçanın pozundan akar
     const on=o.pi>0?(o.pp[o.pi-1].mod||"soru"):"soru";let A=poz(on),B=poz(mod);if(mod==="soru"){A=P.bas;B=P.tam}
-    const k=mod==="soru"?eio(sm(.25,1,o.pu)):eio(sm(0,.3,o.pu));
-    orb(c,V3(lerp(A.x,B.x,k),lerp(A.y,B.y,k),0),lerp(A.d,B.d,k),lerp(A.w,B.w,k)+Math.sin(t*.2)*.05,lerp(A.p,B.p,k))}}};
+    const k=mod==="soru"?eio(sm(.25,1,o.pu)):eio(sm(0,.3,o.pu));const dd=lerp(A.d,B.d,k);
+    [sa,sy].forEach(x=>{if(!x.userData.s0)x.userData.s0=x.scale.clone();x.scale.set(x.userData.s0.x*dd/47,x.userData.s0.y*dd/47,1)});
+    orb(c,V3(lerp(A.x,B.x,k),lerp(A.y,B.y,k),0),dd,lerp(A.w,B.w,k)+Math.sin(t*.2)*.05,lerp(A.p,B.p,k))}}};
 
 /* ================= TRAFO UĞULTUSU: demir çekirdek her turda 2 kez uzar → 50 Hz × 2 = 100 Hz ================= */
 S.trafo=()=>{const sc=new THREE.Scene();const c=cam(46);studyo(sc);isik(sc,"#ffffff",2.3,"#6FE3FF",1.4);
@@ -704,7 +705,7 @@ S.trafo=()=>{const sc=new THREE.Scene();const c=cam(46);studyo(sc);isik(sc,"#fff
       tep.forEach(([sp,k,uu])=>{const on=ik&&u>=uu;sp.material.opacity=on?1:0;k.material.opacity=on?.6:0})}
     if(sac_.visible){mik.scale.x=sm(.3,.6,o.pu)+.001;sY2.material.opacity=sm(.45,.65,o.pu)}
     if(pi_.visible){tus[4].position.z=-.08*sm(.2,.35,o.pu)}
-    const on=o.pi>0?(o.pp[o.pi-1].mod||"soru"):"soru";const A=poz(on),B=poz(mod);const k=eio(sm(0,.3,o.pu));
+    const on=o.pi>0?(o.pp[o.pi-1].mod||"soru"):"soru";const A=poz(on),B=poz(mod);const k=A.x!==B.x?1:eio(sm(0,.3,o.pu));
     const yw=lerp(A.w,B.w,k)+(B===P.cek?Math.sin(t*.25)*.08:0);
     orb(c,V3(lerp(A.x,B.x,k),lerp(A.y,B.y,k),0),lerp(A.d,B.d,k),yw,lerp(A.p,B.p,k))}}};
 

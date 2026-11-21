@@ -55,7 +55,7 @@ c5 = [c for c in caps if starts['V5'] <= c[0] < starts['V5'] + durs['V5']]
 clue_t = [c5[min(i, len(c5) - 1)][0] for i in (1, 2, 3)]
 TL = {
     "D": D, "seg": seg, "cd0": round(cd0, 2),
-    "map": [[0, 0], [6.5, 2.4], [8.0, 3.8], [9.6, 5.6], [10.6, 7.0], [12.8, 8.8], [15, 12.5], [17, 19.5], [24, 25.5], [27, 25.5]],
+    "map": [[0, 0], [6.5, 1.0], [8.0, 3.0], [9.6, 5.3], [10.6, 6.8], [12.8, 8.8], [15, 12.5], [17, 19.5], [24, 25.5], [27, 25.5]],
     "rew": [[34, 12.5], [36.5, 4.0], [36.51, 20.0], [43, 23.0]],
     "clues": [[clue_t[0], "1", "Ceza tek bir olay için verilmedi"], [clue_t[1], "2", "Tutanak: olaylara 21–22 kişi karıştı"], [clue_t[2], "3", "O, sahaya hiçbir şey fırlatmadı"]],
     "reasons": ["Seyircisiz maç cezası 21–22 kişinin eylemi yüzünden verildi", "Zararın yarısı tek bir taraftara yüklenemez", "Onun kusuru ve cezaya etkisi ayrıca hesaplanmalı"],

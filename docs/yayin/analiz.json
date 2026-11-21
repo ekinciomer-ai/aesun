@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-21T21:36+03:00",
+ "olusturma": "2026-11-22T00:09+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -129,7 +129,9 @@
   },
   "LVL MAX": {
    "gunluk_short_kotasi": 1,
-   "seri_dagilimi": {},
+   "seri_dagilimi": {
+    "Gündem + Tarih": 1
+   },
    "durdurulan": []
   },
   "Ömür Dediğin": {
@@ -748,6 +750,18 @@
    "kaydirmadan_izleme_yuzde": 30
   },
   {
+   "kanal": "LVL MAX",
+   "seri": "Gündem + Tarih",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
    "kanal": "Nasıl Yapıldı",
    "seri": "Sistem Nasıl Çalışır?",
    "karar": "DENE",
@@ -808,15 +822,15 @@
   }
  ],
  "esikler": {
-  "LVL MAX": 50,
+  "Kozmos Lab": 93,
   "Antik Stüdyo": 637,
   "Ancient Studio": 188,
-  "Kozmos Lab": 93,
-  "Yolu Seç !": 262,
-  "Ömür Dediğin": 50,
-  "Nasıl Yapıldı": 50,
   "Estudio Antiguo": 122,
-  "Kozmos Lab TR": 212
+  "Ömür Dediğin": 50,
+  "Yolu Seç !": 262,
+  "Nasıl Yapıldı": 50,
+  "Kozmos Lab TR": 212,
+  "LVL MAX": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -991,14 +1005,6 @@
  "takvim_aciklari": [
   {
    "kanal": "Antik Stüdyo",
-   "tarih": "2026-11-21",
-   "planli_short": 2,
-   "hedef_kota": 2,
-   "eksik": 0,
-   "uyari": "19:00 Gündem+Tarih slotu BOŞ"
-  },
-  {
-   "kanal": "Antik Stüdyo",
    "tarih": "2026-11-22",
    "planli_short": 0,
    "hedef_kota": 2,
@@ -1008,6 +1014,14 @@
   {
    "kanal": "Antik Stüdyo",
    "tarih": "2026-11-23",
+   "planli_short": 0,
+   "hedef_kota": 2,
+   "eksik": 2,
+   "uyari": "19:00 Gündem+Tarih slotu BOŞ"
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "tarih": "2026-11-24",
    "planli_short": 0,
    "hedef_kota": 2,
    "eksik": 2,
@@ -1546,7 +1560,7 @@
   }
  ],
  "bulgular": [
-  "Dün (2026-11-20) 3501 izlenme geldi; bir önceki gün 5958.",
+  "Dün (2026-11-21) 4770 izlenme geldi; bir önceki gün 3501.",
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 188 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
@@ -1591,7 +1605,7 @@
   "Ömür Dediğin: tutan Short'lar ortalama %50 izleniyor, tutmayanlar %190 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Ömür Dediğin: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %20 (hedef ≥%70).",
   "Uzun videolar (13 yayında): medyan 13 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
-  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-21, 2026-11-22, 2026-11-23."
+  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-22, 2026-11-23, 2026-11-24."
  ],
  "en_iyi": [
   {

@@ -41,3 +41,8 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_HF_03_HARITA · Görsel hafıza "5 saniyelik harita testi": Mardin, Muğla, Artvin (+Ankara, Konya)
 - [x] NY_YM_04_TATLI · Bu tatlı hangi ilin: Katmer (Gaziantep), Pişmaniye (Kocaeli), Kemalpaşa (Bursa)
 - Not: havuz "aynı konu" kontrolü `baslik_bant` ile yapılıyor; her videoda farklı bant kullan (YM_03 bu yüzden reddedildi).
+
+## Parti 8 — Karışık formatlar (2026-11-21)
+- [~] NY_EN_05_NUFUS · En kalabalık 5 il (TÜİK ADNKS 2025) — kanca: "Türkiye'nin üçte birinden fazlası sadece 5 ilde"
+- [~] NY_BL_03_PLAKA · Plaka kodlarının sırrı: Zonguldak 67, Düzce 81, Kahramanmaraş 46, Mersin 33 (İçel) — kanca: "Mersin M ile başlıyor, neden 33?"
+- [~] NY_SQ_03_GOL · Bilgi şıklı soru "Bu göl hangi ilde?": Uzungöl (Trabzon), Salda (Burdur), Nemrut Krater Gölü (Bitlis) — tuzak: Adıyaman

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-21T14:01+03:00",
+ "olusturma": "2026-11-21T18:05+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -356,23 +356,23 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 40,
+   "medyan_48sa": 50,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "6 saatlik işini tek tuşa indirip neden ertesi gün istifa etti? 💻🗺️ | Pürdikkat #shorts",
-    "i48": 40
+    "i48": 50
    }
   },
   {
    "kanal": "Antik Stüdyo",
    "seri": "Spor + Tarih",
-   "karar": "SÜRDÜR",
-   "neden": "tutma oranı %33",
+   "karar": "ARTIR",
+   "neden": "videoların %67'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 0,
-   "medyan_48sa": 550,
-   "tutma_orani": 33,
+   "medyan_48sa": 720,
+   "tutma_orani": 67,
    "izlenme_yuzde": 54,
    "en_iyi": {
     "baslik": "Beşiktaş ilk kez bir İskoç takımıyla! Celtic'in şaşırtan hikâyesi ⚽ #shorts",
@@ -386,7 +386,7 @@
    "karar": "ARTIR",
    "neden": "videoların %71'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 14,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 1336,
    "tutma_orani": 71,
    "izlenme_yuzde": 54,
@@ -543,11 +543,11 @@
    "kanal": "Kozmos Lab",
    "seri": "Did you know?",
    "karar": "SÜRDÜR",
-   "neden": "tutma oranı %17",
-   "olculen": 6,
-   "erken": 2,
+   "neden": "tutma oranı %14",
+   "olculen": 7,
+   "erken": 1,
    "medyan_48sa": 2,
-   "tutma_orani": 17,
+   "tutma_orani": 14,
    "izlenme_yuzde": 46,
    "en_iyi": {
     "baslik": "On Venus, a day is longer than a year ☀️ #shorts",
@@ -567,7 +567,7 @@
    "izlenme_yuzde": 13,
    "en_iyi": {
     "baslik": "How does a nuclear power plant make electricity? ⚛️ #shorts",
-    "i48": 76
+    "i48": 80
    },
    "kaydirmadan_izleme_yuzde": 35
   },
@@ -754,12 +754,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 1,
-   "medyan_48sa": 101,
+   "medyan_48sa": 118,
    "tutma_orani": 100,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Çok Çalışan Herkes Zengin Olsaydı Ne Olurdu? ✈️ Düşen Uçaklar Gerçeği #shorts",
-    "i48": 101
+    "i48": 118
    }
   },
   {
@@ -781,7 +781,7 @@
    "neden": "videoların %56'i tuttu (eşik 262 izlenme / 48 sa)",
    "olculen": 9,
    "erken": 3,
-   "medyan_48sa": 553,
+   "medyan_48sa": 579,
    "tutma_orani": 56,
    "izlenme_yuzde": 59,
    "en_iyi": {
@@ -808,14 +808,14 @@
   }
  ],
  "esikler": {
-  "Yolu Seç !": 262,
   "Estudio Antiguo": 122,
-  "Nasıl Yapıldı": 50,
-  "Kozmos Lab": 93,
-  "Antik Stüdyo": 637,
   "Kozmos Lab TR": 211,
-  "Ömür Dediğin": 50,
+  "Nasıl Yapıldı": 50,
+  "Antik Stüdyo": 637,
   "LVL MAX": 50,
+  "Ömür Dediğin": 50,
+  "Yolu Seç !": 262,
+  "Kozmos Lab": 93,
   "Ancient Studio": 188
  },
  "saatler": {
@@ -850,7 +850,7 @@
    },
    "18:00": {
     "n": 13,
-    "medyan": 550
+    "medyan": 720
    },
    "19:00": {
     "n": 13,
@@ -941,8 +941,8 @@
   },
   "Kozmos Lab": {
    "02:00": {
-    "n": 4,
-    "medyan": 36
+    "n": 5,
+    "medyan": 1
    },
    "03:00": {
     "n": 1,
@@ -970,7 +970,7 @@
   "Yolu Seç !": {
    "13:00": {
     "n": 3,
-    "medyan": 553
+    "medyan": 579
    },
    "17:00": {
     "n": 3,
@@ -978,13 +978,13 @@
    },
    "20:00": {
     "n": 3,
-    "medyan": 56
+    "medyan": 89
    }
   },
   "Nasıl Yapıldı": {
    "19:00": {
     "n": 1,
-    "medyan": 101
+    "medyan": 118
    }
   }
  },
@@ -1020,7 +1020,7 @@
    "uzun_vid": "sMHq7klzw2Q",
    "uzun_baslik": "7 famous paintings and the details almost everyone misses",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 0,
+   "uzun_izlenme": 1,
    "baglanacak_shortlar": [
     {
      "vid": "Lcvm_LATwkc",
@@ -1133,7 +1133,7 @@
     {
      "vid": "3RUWUgB1Cko",
      "baslik": "1513 haritasını çizen amiral: Piri Reis",
-     "izlenme": 1691,
+     "izlenme": 1692,
      "durum": "Yayında"
     },
     {
@@ -1156,12 +1156,12 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 257,
+   "uzun_izlenme": 258,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
      "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
-     "izlenme": 20,
+     "izlenme": 21,
      "durum": "Yayında"
     }
    ],
@@ -1183,7 +1183,7 @@
     {
      "vid": "3RUWUgB1Cko",
      "baslik": "1513 haritasını çizen amiral: Piri Reis",
-     "izlenme": 1691,
+     "izlenme": 1692,
      "durum": "Yayında"
     },
     {
@@ -1201,6 +1201,46 @@
    "uzun_baslik": "Süveyş Kanalı'nı 1869'da Fransızlar mı Açtı? | Sokollu Mehmed Paşa'nın 1568 Fermanı",
    "uzun_durum": "Yayında",
    "uzun_izlenme": 12,
+   "baglanacak_shortlar": [
+    {
+     "vid": "AtvyZhEtBkk",
+     "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
+     "izlenme": 2792,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "pkjswpoewrE",
+     "baslik": "Hürmüz Boğazı için savaş 474 yıl önce de vardı #Shorts",
+     "izlenme": 1276,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "7a3yi4BG3Pw",
+     "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
+     "izlenme": 1200,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "ZMMptkEnGMs",
+     "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
+     "izlenme": 193,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "gXn5GB17DUc",
+     "baslik": "Fatih 70 gemiyi karadan nasıl yürüttü? ⚓⛰️ #shorts",
+     "izlenme": 168,
+     "durum": "Yayında"
+    }
+   ],
+   "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın"
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "uzun_vid": "9a9BTiC6ics",
+   "uzun_baslik": "Osmanlı dünyayı 5 boğazdan nasıl kilitlemeye çalıştı?",
+   "uzun_durum": "Yayında",
+   "uzun_izlenme": 8,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
@@ -1257,59 +1297,19 @@
     {
      "vid": "bsK8ALbOA8g",
      "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️ #shorts",
-     "izlenme": 2816,
+     "izlenme": 2817,
      "durum": "Yayında"
     },
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2604,
+     "izlenme": 2605,
      "durum": "Yayında"
     },
     {
      "vid": "FvZCiJBoMyg",
      "baslik": "Bu Rembrandt 36 yıldır kayıp 🕵️ #shorts",
      "izlenme": 2177,
-     "durum": "Yayında"
-    }
-   ],
-   "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın"
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "uzun_vid": "9a9BTiC6ics",
-   "uzun_baslik": "Osmanlı dünyayı 5 boğazdan nasıl kilitlemeye çalıştı?",
-   "uzun_durum": "Yayında",
-   "uzun_izlenme": 1,
-   "baglanacak_shortlar": [
-    {
-     "vid": "AtvyZhEtBkk",
-     "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2792,
-     "durum": "Yayında"
-    },
-    {
-     "vid": "pkjswpoewrE",
-     "baslik": "Hürmüz Boğazı için savaş 474 yıl önce de vardı #Shorts",
-     "izlenme": 1276,
-     "durum": "Yayında"
-    },
-    {
-     "vid": "7a3yi4BG3Pw",
-     "baslik": "Osmanlı 457 yıl önce Karadeniz ile Hazar'ı nasıl birleştirmek istedi? 🗺️ | Don-Volga #shorts",
-     "izlenme": 1200,
-     "durum": "Yayında"
-    },
-    {
-     "vid": "ZMMptkEnGMs",
-     "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
-     "izlenme": 193,
-     "durum": "Yayında"
-    },
-    {
-     "vid": "gXn5GB17DUc",
-     "baslik": "Fatih 70 gemiyi karadan nasıl yürüttü? ⚓⛰️ #shorts",
-     "izlenme": 168,
      "durum": "Yayında"
     }
    ],
@@ -1395,7 +1395,7 @@
     {
      "vid": "MSOsi_wK55Q",
      "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
-     "izlenme": 946,
+     "izlenme": 949,
      "durum": "Yayında"
     },
     {
@@ -1556,7 +1556,7 @@
  "bulgular": [
   "Dün (2026-11-20) 3501 izlenme geldi; bir önceki gün 5958.",
   "Ancient Studio: son 6 Short'tan 0 tanesi tuttu (eşik 188 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 122 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 93 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 5 tanesi tuttu (eşik 211 izlenme / 48 sa).",
@@ -1568,6 +1568,7 @@
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gece Yasakları: ARTIR — videoların %60'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Gündem + Tarih: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
+  "Antik Stüdyo · Spor + Tarih: ARTIR — videoların %67'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %71'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %60'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1580,7 +1581,7 @@
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 5 izlenme, 5 video).",
   "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 934 izlenme, 6 video).",
-  "Kozmos Lab: en iyi yayın saati şimdilik 02:00 (medyan 36 izlenme, 4 video).",
+  "Kozmos Lab: en iyi yayın saati şimdilik 22:00 (medyan 10 izlenme, 4 video).",
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 88 izlenme, 2 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 1266 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %72 izleniyor, tutmayanlar %49 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",

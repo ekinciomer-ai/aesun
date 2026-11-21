@@ -1,0 +1,249 @@
+{
+ "kod": "KZ_MRK_11_UCAK",
+ "no": "MERAK #11",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "GÜNEŞ'E UÇAKLA<br><i>KAÇ YILDA?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "ucak",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Güneş'e uçakla gitsek, hiç durmadan, kaç yılda varırdık? Tahminini aklında tut, cevap seni şaşırtacak.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "ucak",
+   "p": {
+    "mod": "mesafe",
+    "kart": 54
+   },
+   "metin": "Güneş bizden ortalama yüz elli milyon kilometre uzakta. Bu, Ay'a olan yolun neredeyse dört yüz katı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DÜNYA → GÜNEŞ (ORT.)",
+     "on": "≈ ",
+     "say": 150,
+     "ek": "milyon km",
+     "k": "yüz"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 390 × Dünya–Ay yolu 🌙",
+     "k": "dört"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "ucak",
+   "p": {
+    "mod": "hiz",
+    "kart": 54
+   },
+   "metin": "Yolcu uçağı saatte yaklaşık dokuz yüz kilometreyle uçar. Bu hızla Ay'a on sekiz günde varırdık.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "YOLCU UÇAĞI",
+     "on": "≈ ",
+     "say": 900,
+     "ek": "km/sa",
+     "k": "dokuz"
+    },
+    {
+     "tip": "etiket",
+     "y": "Ay'a ≈ 18 gün ✈️",
+     "k": "on"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "ucak",
+   "p": {
+    "mod": "saat",
+    "kart": 54
+   },
+   "metin": "Şimdi yolu hıza böl: yaklaşık yüz altmış yedi bin saat.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "150.000.000 km <em>÷</em> 900 km/sa",
+     "k": "böl"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 166667,
+     "ek": "saat",
+     "k": "yüz"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "ucak",
+   "p": {
+    "mod": "gun",
+    "kart": 54
+   },
+   "metin": "Bunu yirmi dörde bölünce, yaklaşık altı bin dokuz yüz kırk dört gün.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "166.667 saat <em>÷</em> 24",
+     "k": "yirmi"
+    },
+    {
+     "tip": "sayi",
+     "on": "≈ ",
+     "say": 6944,
+     "ek": "gün",
+     "k": "altı"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "ucak",
+   "p": {
+    "mod": "yil",
+    "kart": 54
+   },
+   "metin": "Yani yaklaşık on dokuz yıl. Bugün doğan bir bebek, sen varmadan liseyi bitirmiş olur.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "UÇAKLA GÜNEŞ'E",
+     "on": "≈ ",
+     "say": 19,
+     "ek": "yıl",
+     "k": "on"
+    },
+    {
+     "tip": "etiket",
+     "y": "👶 → 🎓 lise biter",
+     "k": "bebek"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "ucak",
+   "p": {
+    "mod": "hava",
+    "kart": 60
+   },
+   "metin": "Üstelik gerçek bir uçak uzayda hiç uçamaz. Kanadı havaya tutunur, motoru da havadaki oksijeni yakar.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "uzayda hava yok 🚫",
+     "k": "uçamaz"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "ucak",
+   "p": {
+    "mod": "parker",
+    "kart": 54
+   },
+   "metin": "Gerçek rekortmen NASA'nın Parker Güneş Sondası: saatte altı yüz doksan iki bin kilometre.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "PARKER GÜNEŞ SONDASI",
+     "on": "≈ ",
+     "say": 692000,
+     "ek": "km/sa",
+     "k": "altı"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 770 × uçak 🚀",
+     "k": "bin"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "ucak",
+   "p": {
+    "mod": "hizli",
+    "kart": 54
+   },
+   "metin": "Bu inanılmaz hızla dümdüz gitseydi, Güneş'e yaklaşık dokuz günde varırdı.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "150 milyon km <em>÷</em> 692.000 km/sa",
+     "k": "Bu"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 9 gün ⚡",
+     "k": "dokuz"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "ucak",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: uçakla yaklaşık on dokuz yıl. Senin tahminin kaç yıldı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "on": "≈ ",
+     "say": 19,
+     "ek": "yıl",
+     "k": "on"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Güneş'e uçakla gitsek kaç yıl sürer? ✈️☀️ #shorts",
+  "aciklama": "NASA'ya göre Güneş, Dünya'dan ortalama yaklaşık 150 milyon km uzaktadır. Yolcu uçakları seyirde yaklaşık Mach 0,85 (≈ 900 km/sa) hızla uçar.\n\nHesap: 150.000.000 km ÷ 900 km/sa ≈ 166.667 saat ≈ 6.944 gün ≈ 19 yıl. Karşılaştırma: Dünya–Ay ortalama 384.400 km → Güneş yolu ≈ 390 kat; uçakla Ay'a 384.400 ÷ 900 ≈ 427 saat ≈ 18 gün.\n\nNASA'nın Parker Güneş Sondası 24 Aralık 2024'te saatte yaklaşık 430.000 mil (≈ 692.000 km/sa) hıza ulaştı; bu hızla düz bir yolda 150 milyon km ≈ 217 saat ≈ 9 gün sürerdi (gerçekte sonda Güneş'e doğrudan değil, yörüngelerle yaklaşır). 692.000 ÷ 900 ≈ 770 kat uçak hızı.\n\nSenin tahminin kaç yıldı? Yorumlara yaz 👇\n\nUçak uzayda uçamaz (kanat kaldırması ve jet motoru havaya muhtaçtır); hesap yalnızca bir düşünce deneyidir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA Science – Sun Facts; NASA – Parker Solar Probe Makes History With Closest Pass to Sun (27.12.2024); NASA – Moon Facts (ortalama uzaklık 384.400 km); Airbus/Singapore Airlines A350-900 teknik verisi (seyir hızı Mach 0,85); MEB 12 yıllık zorunlu eğitim.\n\n#kozmoslab #güneş #uzay #bilim #merak #shorts",
+  "etiketler": [
+   "güneş",
+   "güneşe yolculuk",
+   "uçak",
+   "parker güneş sondası",
+   "nasa",
+   "uzay",
+   "bilim",
+   "merak lab",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA Science – Sun Facts (science.nasa.gov/sun/facts): 'It's about 93 million miles (150 million kilometers) from Earth'",
+  "NASA – NASA's Parker Solar Probe Makes History With Closest Pass to Sun (27.12.2024): 'at a blazing 430,000 miles per hour' (≈ 692.000 km/sa), 24 Aralık 2024",
+  "Singapore Airlines A350-900 filo sayfası: 'Cruising speed 0.85 Mach' → ~11 km irtifada ses hızı ≈ 1.062 km/sa × 0,85 ≈ 900 km/sa (Merak #05 ile aynı varsayım)",
+  "NASA – Moon: Dünya–Ay ortalama uzaklık 384.400 km (Merak #03 ile aynı)",
+  "Hesap: 150.000.000 ÷ 900 = 166.667 saat; ÷ 24 = 6.944 gün; ÷ 365,25 = 19,0 yıl. 150.000.000 ÷ 384.400 = 390. 384.400 ÷ 900 = 427 saat = 17,8 gün ≈ 18 gün. 430.000 mil/sa × 1,609 = 692.000 km/sa; 150.000.000 ÷ 692.000 = 217 saat = 9,0 gün; 692.000 ÷ 900 = 769 ≈ 770",
+  "Karşılaştırma: Türkiye'de 12 yıllık zorunlu eğitim (MEB, 4+4+4) ~6 yaşında başlar, lise ~18 yaşında biter → 19 yıl"
+ ]
+}

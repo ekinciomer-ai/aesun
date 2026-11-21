@@ -15,12 +15,12 @@ Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Do�
 - [x] KZ_MRK_07_DONUS — Dünya dönmeyi bir anda bıraksa ne olur? (ekvatorda ~1.670 km/sa) — uzay
 - [-] 1 MW güneş santrali kaç futbol sahası kaplar? — enerji (18.11: #02'de zaten cevaplandı, tekrar olur)
 - [x] KZ_MRK_09_MARS — Mars'ta bir gün kaç saat, bir yıl kaç gün? — uzay
-- [ ] Güneş'e uçakla gitsek kaç yıl sürer? — uzay
+- [x] KZ_MRK_11_UCAK — Güneş'e uçakla gitsek kaç yıl sürer? — uzay
 - [x] KZ_MRK_08_PEDAL — Bir ampulü 1 saat yakmak için kaç dakika pedal çevirmek gerekir? — enerji
 - [ ] Ay neden hep aynı yüzünü gösterir? (kütleçekim kilidi) — uzay
 - [x] KZ_MRK_10_TOZ — Panel tozlanınca üretim ne kadar düşer? — enerji
 - [ ] Jüpiter'e Dünya'dan kaç tane sığar? — uzay
-- [ ] Bir trafo neden uğuldar? (50 Hz → 100 Hz manyetostriksiyon) — enerji
+- [x] KZ_MRK_12_TRAFO — Bir trafo neden uğuldar? (50 Hz → 100 Hz manyetostriksiyon) — enerji
 - [ ] Işık hızıyla gitsen en yakın yıldıza ne zaman varırsın? (Proxima, 4,24 ışık yılı) — uzay
 - [ ] Bir barajın türbininden saniyede kaç ton su geçer? — enerji
 - [ ] Satürn suya konsa yüzer mi? (ortalama yoğunluk 0,69 g/cm³) — uzay

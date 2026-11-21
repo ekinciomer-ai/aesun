@@ -99,13 +99,19 @@ def gemini_model(k):
 DIL = "tr"  # iş dosyasındaki "dil" alanı (tr|en|es); yoksa Türkçe
 DILKOD = {"tr": ("tr-TR", "Turkish"), "en": ("en-US", "English"), "es": ("es-ES", "Spanish")}
 
+_KILIT = False  # iş dosyasında "model_kilit": true → yalnız model_tercih kullanılır (Ömer 21.11.2026: model değişince ses değişiyor)
+_HARIC = set()  # iş dosyasında "anahtar_haric": [...] → bu kasa anahtarları kullanılmaz
+
 def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None, anahtar_tercih=None):
     import time, urllib.error
     anahtarlar = gemini_anahtarlar(anahtar_tercih)
     if not anahtarlar: raise RuntimeError("gemini anahtarı yok")
     son_hata = None
     for anahtar_ad, k in anahtarlar:
-        for m in gemini_modeller(k, tercih_ust, anahtar_ad):
+        if anahtar_ad in _HARIC: continue
+        ms = gemini_modeller(k, tercih_ust, anahtar_ad)
+        if _KILIT and tercih_ust: ms = [m for m in ms if m == tercih_ust]  # tek model: farklı modele geçip sesi değiştirmez
+        for m in ms:
             istek_metin = f"{GYON.get(ton, GYON['normal'])} in {DILKOD.get(DIL, DILKOD['tr'])[1]}: {metin}" if "2.5" in m else metin
             sc = {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}
             if m not in _DIL_YOK: sc["languageCode"] = DILKOD.get(DIL, DILKOD["tr"])[0]
@@ -154,6 +160,8 @@ def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None, anahtar_ter
     raise RuntimeError(son_hata or "Tüm kasa anahtarlarındaki Gemini TTS modelleri dolu")
 
 def gemini_uret(is_, parca, tmp):
+    global _KILIT, _HARIC
+    _KILIT = bool(is_.get("model_kilit")); _HARIC = set(is_.get("anahtar_haric") or [])
     anahtar_tercih = parca.get("anahtar") or is_.get("anahtar")
     if parca.get("tek_istek"):
         w = f"{tmp}/g000.wav"

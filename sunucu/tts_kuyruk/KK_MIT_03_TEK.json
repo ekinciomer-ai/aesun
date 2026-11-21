@@ -1,0 +1,61 @@
+{
+  "kod": "KK_MIT_03_TEK",
+  "motor": "gemini",
+  "ses": "charon",
+  "model_tercih": "gemini-3.1-flash-tts-preview",
+  "model_kilit": true,
+  "anahtar_haric": [
+    "gemini_api_anahtar_kozmos"
+  ],
+  "parcalar": [
+    {
+      "ad": "V1",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gerilim",
+      "metin": "Kaza tutanağında kusur yazmıyorsa, sürücü kurtulur. Gerçekten öyle mi?"
+    },
+    {
+      "ad": "V2",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "normal",
+      "metin": "Gündüz, şehir içi bir cadde. Bir yaya, kucağında torunuyla kaldırımdan yola birkaç adım atıyor."
+    },
+    {
+      "ad": "V3",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gerilim",
+      "metin": "Bir otomobil sağ aynasıyla yayaya çarpıyor... ve durmadan yoluna devam ediyor. Yaya ağır yaralanıyor. Tutanağa tek cümle yazılıyor: Sürücü kaçtığı için kusur belirlenemedi."
+    },
+    {
+      "ad": "V4",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "soru",
+      "metin": "Sizce sürücüye ne oldu? A, B, yoksa C? Cevabını yoruma yaz."
+    },
+    {
+      "ad": "V5",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gizem",
+      "metin": "Geri saralım. Güvenlik kamerası çarpan aracı kaydetmiş. Sanığın aracının sağ aynası kırık bulunmuş. Telefonu da kaza saatinde olay yerinin yakınındaymış. Sürücü ise, küt diye bir ses duydum ama fark etmedim, diyor."
+    },
+    {
+      "ad": "V6",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "vurgu",
+      "metin": "İlk mahkeme iki kez, şüpheden sanık yararlanır, deyip beraat verdi. İstinaf bu kararı kaldırdı: Taksirle yaralamadan mahkûmiyet. Hapis cezası paraya çevrildi, ehliyeti geri alındı. Yargıtay onadı."
+    },
+    {
+      "ad": "V7",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "vurgu",
+      "metin": "Yani tutanakta kusur yazmasa da dava bitmez. Kamera, araçtaki hasar, telefon kaydı... Kaçmak kurtarmaz. Sen hangi şıkkı seçtin?"
+    }
+  ]
+}

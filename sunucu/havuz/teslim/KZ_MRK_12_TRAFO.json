@@ -1,0 +1,48 @@
+{
+ "kod": "KZ_MRK_12_TRAFO",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Trafo neden uğuldar? 🔊⚡ #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Trafo neden uğuldar? 🔊⚡ #shorts",
+ "aciklama": "Trafonun uğultusunun ana kaynağı demir çekirdekteki manyetostriksiyondur: manyetik malzeme, manyetik alanın etkisiyle boyutlarını değiştirir. Siemens'in teknik yazısına göre bu boy değişimi metre başına yaklaşık bir mikrometre düzeyindedir ve uğultunun temel frekansı şebeke frekansının iki katıdır (≈ 100 Hz veya 120 Hz).\n\nNeden iki katı? Demir, alan hangi yönde olursa olsun uzar; her elektrik döngüsünde en büyük uzama iki kez olur (HyperPhysics). Türkiye şebekesi 50 Hz → 50 × 2 = 100 Hz. ABD gibi 60 Hz şebekelerde 120 Hz.\n\nKarşılaştırmalar: insan saçının çapı yaklaşık 17–181 µm → 1 µm, en ince saçın bile onda birinden küçüktür. 100 Hz, standart akortta (La = 440 Hz) kalın sol notasına (G2 ≈ 98 Hz) çok yakındır.\n\nSen en son nerede trafo uğultusu duydun? Yorumlara yaz 👇\n\nGerçek uğultuda 200, 300 Hz gibi harmonikler de vardır; animasyondaki titreşim görünür olsun diye abartılmıştır. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Elektrik Şebeke Yönetmeliği md. 7 (nominal frekans 50 Hz, TEİAŞ); Siemens Simcenter – Magnetostriction: a source of noise in transformers; HyperPhysics (Georgia State Univ.) – Magnetostriction; The Physics Factbook / BioNumbers – Diameter of human hair; ISO 16 standart akort (La = 440 Hz).\n\n#kozmoslab #trafo #elektrik #enerji #bilim #merak #shorts",
+ "etiketler": [
+  "trafo",
+  "transformatör",
+  "trafo sesi",
+  "uğultu",
+  "manyetostriksiyon",
+  "50 hz",
+  "elektrik",
+  "enerji",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "Elektrik Şebeke Yönetmeliği (EPDK) MADDE 7(1): 'Sistemin 50 Hertz (Hz) olan nominal frekansı, TEİAŞ tarafından 49,8-50,2 Hz aralığında kontrol edilir.'",
+  "Siemens Simcenter blog – Magnetostriction: a source of noise in transformers: 'the physical dimensions changes are in the range of one micrometer per meter'; 'have harmonic components with a fundamental frequency twice the power frequency'; 'The fundamental frequency would be around either 100Hz or 120Hz'",
+  "HyperPhysics (Georgia State University) – Magnetostriction: 'For 60 Hz applied magnetic fields in AC electrical devices such as transformers, the maximum length change happens twice per cycle, producing the familiar and sometimes annoying 120 Hz hum.'",
+  "Saç çapı: The Physics Factbook (B. Ley, 1999) ve Harvard BioNumbers #106856: '17 to 181 μm' → 1 µm < 17/10 µm",
+  "Nota: ISO 16 (La4 = 440 Hz), eşit tamperaman: Sol2 = 440 × 2^(−26/12) ≈ 98,0 Hz",
+  "Hesap: 50 × 2 = 100 Hz; 60 × 2 = 120 Hz"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_12_TRAFO.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_12_TRAFO.mp4"
+}

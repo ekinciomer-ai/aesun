@@ -1,9 +1,9 @@
-name: Futbol pozisyon görseli (ücretsiz AI)
-# icerik/futbol_tahta/istek/*.json eklenince Pollinations (Flux, anahtarsız, ücretsiz) ile açılı yayın kamerası sahnesi üretir → icerik/futbol_tahta/gorsel/<ad>.jpg
+name: Futbol pozisyon görseli (Gemini, ücretsiz kota)
+# icerik/futbol_tahta/istek/*.json eklenince sunucuda Gemini görsel modeli (kasa: gemini_api_anahtar) ile açılı yayın kamerası sahnesi üretir → icerik/futbol_tahta/gorsel/<ad>.jpg
 on:
   push:
     branches: [main]
-    paths: ['icerik/futbol_tahta/istek/*.json', '.github/workflows/futbol_gorsel.yml']
+    paths: ['icerik/futbol_tahta/istek/*.json', 'sunucu/islem_futbol_gorsel.sh', '.github/workflows/futbol_gorsel.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -14,26 +14,27 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-        with: {sparse-checkout: "icerik/futbol_tahta"}
-      - name: Üret
+        with: {sparse-checkout: "icerik/futbol_tahta\nsunucu"}
+      - name: Sunucuda Gemini ile üret
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
         run: |
-          mkdir -p icerik/futbol_tahta/gorsel
-          python3 - <<'PY'
-          import json, glob, os, time, urllib.parse, urllib.request
-          for jf in sorted(glob.glob("icerik/futbol_tahta/istek/*.json")):
-              for it in json.load(open(jf, encoding="utf-8")):
-                  out = f"icerik/futbol_tahta/gorsel/{it['ad']}.jpg"
-                  if os.path.exists(out): continue
-                  q = urllib.parse.quote(it["istem"])
-                  for d in range(4):
-                      try:
-                          u = f"https://image.pollinations.ai/prompt/{q}?width={it.get('w',768)}&height={it.get('h',1344)}&nologo=true&model={it.get('model','flux')}&seed={it.get('seed',7)}"
-                          b = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=240).read()
-                          if len(b) > 20000: open(out, "wb").write(b); print(f"::notice::{it['ad']} tamam {len(b)//1024} KB"); break
-                          print("küçük yanıt", len(b))
-                      except Exception as e: print("tekrar", it["ad"], e); time.sleep(15 * (d + 1))
-                  time.sleep(5)
-          PY
+          set +e
+          ls icerik/futbol_tahta/istek/*.json >/dev/null 2>&1 || { echo "istek yok"; exit 0; }
+          mkdir -p ~/.ssh /tmp/pk/istek icerik/futbol_tahta/gorsel
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          cp sunucu/islem_futbol_gorsel.sh /tmp/pk/; cp icerik/futbol_tahta/istek/*.json /tmp/pk/istek/
+          tar czf /tmp/paket.tgz -C /tmp/pk .
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "rm -rf /tmp/fb_g && mkdir -p /tmp/fb_g && tar xzf - -C /tmp/fb_g && cd /tmp/fb_g && bash islem_futbol_gorsel.sh < /dev/null; tar czf /tmp/fb_g.tgz -C /tmp/fb_g cikti 2>/dev/null" < /tmp/paket.tgz > /tmp/cikti.txt 2>&1
+          mkdir -p /tmp/al && scp $O root@$ADRES:/tmp/fb_g.tgz /tmp/ && tar xzf /tmp/fb_g.tgz -C /tmp/al
+          ssh $O root@$ADRES "rm -rf /tmp/fb_g /tmp/fb_g.tgz"; rm -f ~/.ssh/k
+          grep '^NOT:' /tmp/cikti.txt | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          pip install -q pillow
+          for f in /tmp/al/cikti/*.png; do [ -f "$f" ] || continue; a=$(basename $f .png); python3 -c "
+          from PIL import Image; im=Image.open('$f').convert('RGB'); im.save('icerik/futbol_tahta/gorsel/$a.jpg',quality=90)"; done
       - name: Kaydet
         run: |
           git config user.name "aesun-bot"; git config user.email "bot@aksarayenerji.net"

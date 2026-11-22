@@ -49,6 +49,7 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - Not: EN_05 (~43 sn) ve BL_03 (~41 sn) hedefin (45-60 sn) biraz altında; sonraki partilerde metni biraz uzat.
 
 ## Parti 9 — Karışık formatlar (2026-11-22)
-- [~] NY_YM_05_LEZZET · Bu lezzet hangi ilin: Tokat kebabı (Tokat), Edirne tava ciğeri (Edirne), Kayseri mantısı (Kayseri) — kanca: "Bir kaşığa 40 tanesi sığmalı"
-- [~] NY_HF_04_RENK · Görsel hafıza "Renkli iller testi": Diyarbakır, Çanakkale, Sinop (+Eskişehir, Adana)
-- [~] NY_BL_04_UNESCO · UNESCO'nun ilk 3 Türk mirası (1985): İstanbul, Göreme-Kapadokya, Divriği — kanca: "Üçüncüsünde 800 yıllık hastane var"
+- [x] NY_YM_05_LEZZET · Bu lezzet hangi ilin: Tokat kebabı (Tokat), Edirne tava ciğeri (Edirne), Kayseri mantısı (Kayseri) — kanca: "Bir kaşığa 40 tanesi sığmalı"
+- [x] NY_HF_04_RENK · Görsel hafıza "Renkli iller testi": Diyarbakır, Çanakkale, Sinop (+Eskişehir, Adana)
+- [x] NY_BL_04_UNESCO · UNESCO'nun ilk 3 Türk mirası (1985): İstanbul, Göreme-Kapadokya, Divriği — kanca: "Üçüncüsünde 800 yıllık hastane var"
+- Not: Gemini YM_05 için ilk denemede 8 sn kısa ses döndürdü (hizalama hatası); metin hafif değiştirilip yeniden okutuldu. Süreler 64/73/79 sn — hedefin üstünde; sonraki partilerde metni kısalt.

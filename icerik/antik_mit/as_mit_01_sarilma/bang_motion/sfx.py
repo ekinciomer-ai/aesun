@@ -21,7 +21,7 @@ for i,L in enumerate([57,44,49]):
     a=58.4+i*3.1
     for k in range(L): add(a+2.4*k/L+rng.random()*.01,key(),.6)
 add(29.6,whoosh(.6),.5); add(66.4,whoosh(.6),.5)
-mix=base+o; mix=mix/np.abs(mix).max()*.95
+mix=base+o*0.6; mix=mix/max(1,np.abs(mix).max()/.95)
 with wave.open('mix2.wav','wb') as w: w.setnchannels(1);w.setsampwidth(2);w.setframerate(SR);w.writeframes((mix*32767).astype(np.int16).tobytes())
-subprocess.run(['ffmpeg','-v','error','-y','-i','mix2.wav','-af','loudnorm=I=-15:TP=-1.2,alimiter=limit=0.95','-ar','44100','-ac','2','mix_final.wav'],check=True)
+subprocess.run(['ffmpeg','-v','error','-y','-i','mix2.wav','-af','alimiter=limit=0.9','-ar','44100','-ac','2','mix_final.wav'],check=True)
 print('ok')

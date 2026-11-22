@@ -14,11 +14,11 @@ html,body{margin:0;background:#000;overflow:hidden}
 #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg);font-family:BC;color:var(--cr)}
 #world{position:absolute;left:0;top:0;width:3240px;height:5760px;transform-origin:0 0}
 .P{position:absolute;width:1080px;height:1920px;overflow:hidden;background:var(--bg)}
-.ph{position:absolute;inset:-60px;background-size:cover;background-position:center;filter:grayscale(1) contrast(1.35) brightness(.78) sepia(.18)}
-.ph.dim{filter:grayscale(1) contrast(1.3) brightness(.45) sepia(.2)}
-.grain{position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");mix-blend-mode:overlay;opacity:.9}
-.vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.75) 100%)}
-.big{position:absolute;left:70px;right:70px;font-weight:800;font-size:132px;line-height:.92;text-transform:uppercase;letter-spacing:.005em}
+.ph{position:absolute;inset:-60px;background-size:cover;background-position:center;filter:saturate(1.45) contrast(1.18) brightness(1.02)}
+.ph.dim{filter:saturate(1.3) contrast(1.15) brightness(.62)}
+.grain{position:absolute;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");mix-blend-mode:overlay;opacity:.35}
+.vig{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55) 0%,transparent 28%,transparent 60%,rgba(0,0,0,.6) 100%)}
+.big{position:absolute;left:70px;right:70px;font-weight:800;font-size:132px;line-height:.92;text-transform:uppercase;letter-spacing:.005em;text-shadow:0 6px 24px rgba(0,0,0,.6)}
 .big .w{display:inline-block;margin-right:.18em;will-change:transform}
 .hl{background:linear-gradient(transparent 12%,var(--rd) 12%,var(--rd) 92%,transparent 92%);padding:0 .08em;color:var(--cr)}
 .lab{position:absolute;font-family:PM;font-size:32px;letter-spacing:.06em;color:var(--yl);text-transform:uppercase}
@@ -77,18 +77,18 @@ html,body{margin:0;background:#000;overflow:hidden}
     <div style="height:56px;background:#d8d2c4;position:relative"><div id="bar4" style="position:absolute;left:0;top:0;bottom:0;width:0;background:#141210"></div></div>
     <div style="font-weight:700;font-size:48px;margin-top:18px">→ sahaya giren taraftara</div></div></div>
   <!-- P5 oylama (0,2) -->
-  <div class="P" style="left:0;top:3840px;background:#151412"><div class="grain"></div>
+  <div class="P" style="left:0;top:3840px;background:radial-gradient(ellipse at 50% 30%,#1d8fa0 0%,#0b3d4a 55%,#06161b 100%)"><div class="grain"></div>
    <div class="big" id="b5" style="top:330px;font-size:120px"></div>
    <div id="opts" style="position:absolute;left:70px;right:70px;top:700px"></div>
    <div id="cd" style="position:absolute;left:390px;top:1400px;width:300px;height:300px;border-radius:50%;border:10px solid var(--rd);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:200px;opacity:0" class="ctr">5</div></div>
   <!-- P6 geri sar (1,2) -->
-  <div class="P" style="left:1080px;top:3840px;background:#121110"><div class="grain"></div>
+  <div class="P" style="left:1080px;top:3840px;background:radial-gradient(ellipse at 50% 25%,#3a0d10 0%,#1a0608 60%,#0b0303 100%)"><div class="grain"></div>
    <div class="lab" style="left:70px;top:330px">TUTANAKTAKİ KİŞİ SAYISI</div>
    <div style="position:absolute;left:70px;top:370px;font-weight:800;font-size:200px" class="ctr" id="kisi">0</div>
    <svg id="ppl" width="1080" height="560" viewBox="0 0 1080 560" style="position:absolute;left:0;top:600px"></svg>
    <div id="clues" style="position:absolute;left:70px;right:70px;top:1150px"></div></div>
   <!-- P7 karar (2,2) -->
-  <div class="P" style="left:2160px;top:3840px;background:#1a1916"><div class="grain"></div>
+  <div class="P" style="left:2160px;top:3840px;background:radial-gradient(ellipse at 50% 20%,#e9c46a 0%,#b8862e 45%,#3a2a10 100%)"><div class="grain"></div>
    <div class="card" style="left:60px;right:60px;top:290px;height:1210px;padding:56px 60px;background:#F2EEE3">
     <div style="font-family:PM;font-size:30px;letter-spacing:.12em;text-align:center">T.C. YARGITAY · İLAM</div>
     <div style="height:3px;background:#141210;margin:24px 0 34px"></div>

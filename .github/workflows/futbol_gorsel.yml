@@ -1,0 +1,43 @@
+name: Futbol pozisyon görseli (ücretsiz AI)
+# icerik/futbol_tahta/istek/*.json eklenince Pollinations (Flux, anahtarsız, ücretsiz) ile açılı yayın kamerası sahnesi üretir → icerik/futbol_tahta/gorsel/<ad>.jpg
+on:
+  push:
+    branches: [main]
+    paths: ['icerik/futbol_tahta/istek/*.json', '.github/workflows/futbol_gorsel.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: futbol-gorsel, cancel-in-progress: false }
+jobs:
+  gorsel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {sparse-checkout: "icerik/futbol_tahta"}
+      - name: Üret
+        run: |
+          mkdir -p icerik/futbol_tahta/gorsel
+          python3 - <<'PY'
+          import json, glob, os, time, urllib.parse, urllib.request
+          for jf in sorted(glob.glob("icerik/futbol_tahta/istek/*.json")):
+              for it in json.load(open(jf, encoding="utf-8")):
+                  out = f"icerik/futbol_tahta/gorsel/{it['ad']}.jpg"
+                  if os.path.exists(out): continue
+                  q = urllib.parse.quote(it["istem"])
+                  for d in range(4):
+                      try:
+                          u = f"https://image.pollinations.ai/prompt/{q}?width={it.get('w',768)}&height={it.get('h',1344)}&nologo=true&model={it.get('model','flux')}&seed={it.get('seed',7)}"
+                          b = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=240).read()
+                          if len(b) > 20000: open(out, "wb").write(b); print(f"::notice::{it['ad']} tamam {len(b)//1024} KB"); break
+                          print("küçük yanıt", len(b))
+                      except Exception as e: print("tekrar", it["ad"], e); time.sleep(15 * (d + 1))
+                  time.sleep(5)
+          PY
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-bot"; git config user.email "bot@aksarayenerji.net"
+          git add icerik/futbol_tahta/gorsel || true
+          git diff --cached --quiet && { echo "yeni görsel yok"; exit 0; }
+          git commit -qm "futbol_tahta: AI görseller"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && break; sleep 5; done

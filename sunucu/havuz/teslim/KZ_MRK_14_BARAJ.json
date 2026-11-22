@@ -1,0 +1,49 @@
+{
+ "kod": "KZ_MRK_14_BARAJ",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Bir baraj türbininden saniyede kaç ton su geçer? 💧⚡ #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Bir baraj türbininden saniyede kaç ton su geçer? 💧⚡ #shorts",
+ "aciklama": "Atatürk Barajı Hidroelektrik Santrali'nde 300 MW gücünde 8 Francis türbini vardır (toplam 2.400 MW). IEA Hydropower vaka çalışmasına göre en büyük etkin düşü 151,2 m, en yüksek güç debisi 241 m³/s'dir; bu değer tek bir ünitenin debisine karşılık gelir (fiziksel kontrol: 1.000 kg/m³ × 9,81 × 241 m³/s × 151,2 m ≈ 357 MW hidrolik güç → yaklaşık %84 toplam verimle 300 MW). Sekiz ünite tam güçte ≈ 8 × 241 ≈ 1.930 m³/s; bu, santralin günlük su salımı için verilen 200–2.000 m³/s aralığıyla uyumludur.\n\nKarşılaştırmalar: 1 m³ su yaklaşık 1 ton gelir. Olimpik havuz 50 × 25 × 2 m = 2.500 m³ (World Aquatics) → 2.500 ÷ 241 ≈ 10 saniye. 151 m ≈ 45 katlı konut binası (CTBUH yükseklik hesaplayıcısı, konut kat yüksekliği 3,1 m).\n\nSenin tahminin kaç tondu? Yorumlara yaz 👇\n\nAnimasyon şematik bir kesittir, ölçeksizdir. Rakamlar santralin tasarım (tam güç) değerleridir; gerçek debi su durumuna ve üretim ihtiyacına göre değişir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: IEA Hydropower Annex VIII Case Study 12-03 – Atatürk HPP (Türkiye); Power Technology – Atatürk power plant profile; Atatürk Barajı (Vikipedi, DSİ verileri); World Aquatics tesis kuralları (olimpik havuz); CTBUH Tall Building Height Calculator.\n\n#kozmoslab #baraj #hidroelektrik #enerji #atatürkbarajı #bilim #merak #shorts",
+ "etiketler": [
+  "baraj",
+  "atatürk barajı",
+  "hidroelektrik",
+  "türbin",
+  "HES",
+  "enerji",
+  "elektrik",
+  "mühendislik",
+  "bilim",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "IEA Hydropower Annex VIII Case Study 12-03 (Atatürk, Türkiye): 'Ataturk Hydroelectric Power Plant is equipped with 8 units, each of units has 300 MW installed capacity.'; Tablo 1: 'Max. Output 2,400 MW', 'Max. Power Discharge 241 m3/sec', 'Max. Effective Head 151.2 m', 'Ave. Annual Generation 8,900 GWh'",
+  "Power Technology (GlobalData) – Atatürk power plant profile: 'The net head of the project is 151m.'; '8 units of francis turbines, each with 300MW nameplate capacity'",
+  "Vikipedi – Atatürk Dam: '8 x 300 MW Francis-type'; 'the daily water release from the HEPP might vary between 200 and 2,000 m3/s'",
+  "Fiziksel tutarlılık (241 m³/s'nin tek üniteye ait olduğu): P = ρ·g·Q·H = 1000 × 9,81 × 241 × 151,2 ≈ 357 MW → 300 MW için verim ≈ %84 (Francis türbin+jeneratör için makul). 241 m³/s tüm santrale ait olsaydı 2.400 MW imkânsız olurdu. 8 × 241 = 1.928 ≈ 1.930 m³/s, günlük salım üst sınırı (2.000 m³/s) ile uyumlu.",
+  "Su yoğunluğu ≈ 1.000 kg/m³ → 1 m³ ≈ 1 ton",
+  "Olimpik havuz (World Aquatics, Vikipedi 'Olympic-size swimming pool'): 50 m × 25 m, en az 2 m derinlik, '2,500 m3 ... assuming a nominal depth of 2 m' → 2.500 ÷ 241 ≈ 10,4 sn",
+  "CTBUH Height Calculator: konut kat yüksekliği 3,1 m; H = 3,1·s + 7,75 + 1,55·(s/30) → s = 45 kat ≈ 149,6 m ≈ 151 m"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_14_BARAJ.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_14_BARAJ.mp4"
+}

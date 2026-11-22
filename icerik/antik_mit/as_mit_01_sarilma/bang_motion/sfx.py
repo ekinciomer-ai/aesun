@@ -8,11 +8,11 @@ def add(t,x,g=1):
 def bp(x,lo,hi): b,a=butter(2,[lo/(SR/2),hi/(SR/2)],'band'); return lfilter(b,a,x)
 def env(n,a,r): e=np.ones(n); na,nr=int(a*SR),int(r*SR); e[:na]=np.linspace(0,1,na); e[-nr:]*=np.linspace(1,0,nr); return e
 def whoosh(d=.45):
-    n=int(d*SR); x=bp(rng.standard_normal(n),400,5000); return x*np.sin(np.linspace(0,np.pi,n))**2*.35
+    n=int(d*SR); t=np.arange(n)/SR; f=300+900*t/d; return np.sin(2*np.pi*np.cumsum(f)/SR)*np.sin(np.linspace(0,np.pi,n))**2*.18
 def stamp():
-    n=int(.35*SR); t=np.arange(n)/SR; return (np.sin(2*np.pi*70*t)*np.exp(-t*14)*1.2+bp(rng.standard_normal(n),200,2500)*np.exp(-t*30)*.8)
+    n=int(.35*SR); t=np.arange(n)/SR; return np.sin(2*np.pi*70*t)*np.exp(-t*14)*1.2
 def tick(f=1800): n=int(.03*SR); t=np.arange(n)/SR; return np.sin(2*np.pi*f*t)*np.exp(-t*160)*.35
-def key(): n=int(.04*SR); t=np.arange(n)/SR; return bp(rng.standard_normal(n),1500,6000)*np.exp(-t*120)*.5
+def key(): n=int(.03*SR); t=np.arange(n)/SR; return np.sin(2*np.pi*2400*t)*np.exp(-t*150)*.25
 for w in [8.9,17.76,32.75,48.66,57.66,69.68]: add(w-.1,whoosh())
 for t in [14.2,23.7,62.0]: add(t,stamp(),.9)
 for a,b,n in [(18.4,20.3,15),(20.5,21.6,3),(21.9,23.0,3),(51.6,53.8,22)]:

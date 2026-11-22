@@ -52,37 +52,37 @@ for k, (t, u, w) in enumerate(zip(ts, us, ws)):
     elif u < D['ders']: lvl[k] = 0
     else: lvl[k] = .2 + .5 * (1 if 3.6 <= ws[k] < 9 else 0)
 L = np.interp(np.arange(N) / SR, ts, lp(np.r_[lvl, np.zeros(0)], 3) if False else np.convolve(lvl, np.ones(30)/30, 'same'))
-out += crowd * L * 1.6
+out += lp(crowd,180) * L * 0.0  # gürültü tabanlı kalabalık sesi kaldırıldı (hışırtı yapıyordu)
 # rüzgâr (boş stat)
 wind = lp(rng.standard_normal(N), 300) * 2.5
 wl = np.interp(np.arange(N)/SR, ts, np.convolve([(1 if (24 <= u < D['poll'] or D['karar'] <= u < D['ders']) else 0) for u in us], np.ones(50)/50, 'same'))
-out += wind * wl * .5
+pass  # rüzgâr gürültüsü kaldırıldı
 # --- efektler
 def thump(f=80, d=.25, g=1):
     n = int(d*SR); t = np.arange(n)/SR; return np.sin(2*np.pi*f*t*np.exp(-t*8)) * np.exp(-t*18) * g
 def click(f=3000, d=.06):
-    n = int(d*SR); t = np.arange(n)/SR; return (np.sin(2*np.pi*f*t) + rng.standard_normal(n)*.5) * np.exp(-t*70)
+    n = int(d*SR); t = np.arange(n)/SR; return np.sin(2*np.pi*f*t) * np.exp(-t*70)
 def whistle(d=.45):
     n = int(d*SR); t = np.arange(n)/SR; f = 2900 + 60*np.sin(2*np.pi*28*t); return np.sin(2*np.pi*np.cumsum(f)/SR) * env(n, .01, .05) * .35
 t_kick = when_world(3.15); t_net = when_world(3.6)
 if t_kick: add(out, t_kick, thump(120, .15, .9))
-if t_net: add(out, t_net, lp(rng.standard_normal(int(.4*SR)), 2500) * env(int(.4*SR), .01, .3) * 3)
+pass
 t_wh = when_world(19.0)
 if t_wh:
     for i, d in enumerate([.3, .3, .9]): add(out, t_wh + i*.45, whistle(d))
 for i in range(21):
     t = when_world(20.6 + i*.22 + rng.random()*.5)
-    if t: add(out, t, click(rng.choice([1800, 2600, 4200])), .35)
+    pass
 # geri sarma
 t_rw = when_u(D['rew'])
 n = int((when_u(36.5) - t_rw) * SR); tt = np.arange(n)/SR; f = 900 * np.exp(-tt*1.2) + 120
-add(out, t_rw, np.sin(2*np.pi*np.cumsum(f)/SR) * .15 * env(n, .02, .1) + lp(rng.standard_normal(n), 3000) * env(n, .02, .1) * 1.2)
+add(out, t_rw, np.sin(2*np.pi*np.cumsum(f)/SR) * .25 * env(n, .02, .1))
 for c in TL['clues']:
     n = int(.18*SR); tt = np.arange(n)/SR; add(out, c[0], (np.sin(2*np.pi*1320*tt) + .5*np.sin(2*np.pi*1980*tt)) * np.exp(-tt*18) * .35)
 for i in range(5):  # geri sayım tıkları
     add(out, TL['cd0'] + i, click(1000, .05), .5)
 t_st = when_u(D['karar'] + 7.8)
-add(out, t_st, thump(60, .5, 1.4)); add(out, t_st, lp(rng.standard_normal(int(.2*SR)), 1200) * env(int(.2*SR), .002, .15) * 4)
+add(out, t_st, thump(60, .5, 1.4))
 # --- müzik altlığı: gerilim pedi (Am - F - Dm - E)
 chords = [[110, 130.8, 164.8], [87.3, 110, 130.8], [73.4, 87.3, 110], [82.4, 103.8, 123.5]]
 t = np.arange(N)/SR; pad = np.zeros(N)

@@ -6,10 +6,11 @@ N=len(base); o=np.zeros(N); rng=np.random.default_rng(9)
 def add(t,x,g=1):
     i=int(t*SR); x=x[:max(0,N-i)]; o[i:i+len(x)]+=x*g
 def bp(x,lo,hi): b,a=butter(2,[lo/(SR/2),hi/(SR/2)],'band'); return lfilter(b,a,x)
-def swipe(d=.35): n=int(d*SR); return bp(rng.standard_normal(n),600,6000)*np.sin(np.linspace(0,np.pi,n))**2*.3
+def swipe(d=.3):
+    n=int(d*SR); t=np.arange(n)/SR; f=500+1200*t/d; return np.sin(2*np.pi*np.cumsum(f)/SR)*np.sin(np.linspace(0,np.pi,n))**2*.15
 def ping(f=1320): n=int(.35*SR); t=np.arange(n)/SR; return (np.sin(2*np.pi*f*t)+.5*np.sin(2*np.pi*f*1.5*t))*np.exp(-t*9)*.3
 def pop(): n=int(.08*SR); t=np.arange(n)/SR; return np.sin(2*np.pi*(900-3000*t)*t)*np.exp(-t*40)*.35
-def stamp(): n=int(.35*SR); t=np.arange(n)/SR; return np.sin(2*np.pi*70*t)*np.exp(-t*14)*1.1+bp(rng.standard_normal(n),200,2500)*np.exp(-t*30)*.7
+def stamp(): n=int(.35*SR); t=np.arange(n)/SR; return np.sin(2*np.pi*70*t)*np.exp(-t*14)*1.1
 def tick(f=1800): n=int(.03*SR); t=np.arange(n)/SR; return np.sin(2*np.pi*f*t)*np.exp(-t*160)*.3
 st=lambda k:V[k][0]
 for t in [st('V2'),st('V3'),st('V3')+8.9,st('V4'),st('V5'),st('V7')]: add(t-.25,swipe())

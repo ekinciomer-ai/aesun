@@ -43,6 +43,7 @@ html,body{margin:0;background:#000;overflow:hidden}
 .nlab{position:absolute;left:40px;top:220px;font-family:PM;font-size:26px;color:var(--rd)}
 .ntitle{position:absolute;left:40px;right:40px;top:260px;font-weight:800;font-size:76px;line-height:.98}
 .nimg{position:absolute;left:40px;right:40px;top:560px;height:420px;background-size:cover;background-position:center;filter:saturate(1.4)}
+.cmt{position:absolute;left:40px;right:40px;background:#fff;border-radius:22px;padding:16px 22px;font-weight:500;font-size:36px;line-height:1.1;box-shadow:0 6px 16px rgba(0,0,0,.1)}.cmt b{display:block;font-size:26px;color:#c0392b}
 .nrow{position:absolute;left:40px;right:40px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:3px solid #ccc;padding:6px 0}
 .nrow b{font-weight:800;font-size:96px;font-variant-numeric:tabular-nums;color:var(--rd)}.nrow span{font-weight:700;font-size:52px}
 /* belge */
@@ -92,7 +93,7 @@ html,body{margin:0;background:#000;overflow:hidden}
   <!-- 3 haber -->
   <div class="scr news" id="s3"><div class="nhead">SPOR HABER</div><div class="nlab">SON DAKİKA · DİSİPLİN KURULU</div>
    <div class="ntitle">Kulübe 1 maç<br>seyircisiz oynama cezası</div><div class="nimg" style="background-image:url(assets/img/s_30.5.jpg)"></div>
-   <div class="nrow" id="nr0" style="top:1010px"><span>Çakmak</span><b id="nn0">0</b></div><div class="nrow" id="nr1" style="top:1135px"><span>Madeni para</span><b id="nn1">0</b></div><div class="nrow" id="nr2" style="top:1260px"><span>Pet şişe</span><b id="nn2">0</b></div></div>
+   <div style="position:absolute;left:40px;top:1000px;font-family:PM;font-size:24px;color:#777">OKUR YORUMLARI</div><div id="cm"></div></div>
   <!-- 4 tebligat -->
   <div class="scr doc" id="s4"><div class="notif" id="n4"><div class="ic" style="background:#2b4c7e">✉</div><div><div class="h">TEBLİGAT</div><div class="b">Adınıza yeni bir tebligat var</div></div><div class="tm">5 ay sonra</div></div>
    <div class="paper" id="p4"><div class="t">TEBLİGAT · TAZMİNAT DAVASI</div><div class="hr"></div>
@@ -122,16 +123,18 @@ html,body{margin:0;background:#000;overflow:hidden}
 </div>
 <script>
 const TL=(()=>{const x=new XMLHttpRequest();x.open('GET','tl.json',false);x.send();return JSON.parse(x.responseText)})();
-const V=TL.vo;const MAP={P1:'V1',P2:'V2',P3:'V3',P4:'V3',P5:'V4',P6:'V5',P7:'V7'};const OFF={P4:8.9};
-const st=k=>V[MAP[k]][0]+(OFF[k]||0),du=k=>k==='P3'?8.9:k==='P4'?V.V3[1]-8.9:k==='P6'?V.V5[1]+V.V6[1]+.3:V[MAP[k]][1];
+const V=TL.vo;const MAP={P1:'V1',P2:'V2',P3:'V3',P4:'V3',P5:'V4',P6:'V5',P7:'V7'};const _cd=(TL.caps.find(c=>c[2].replace('<br>',' ').includes('Kulüp dava'))||[V.V3[0]+8.9])[0];const OFF={P4:_cd-V.V3[0]};
+const st=k=>V[MAP[k]][0]+(OFF[k]||0),du=k=>k==='P3'?OFF.P4:k==='P4'?V.V3[1]-OFF.P4:k==='P6'?V.V5[1]+V.V6[1]+.3:V[MAP[k]][1];
 const $=id=>document.getElementById(id);
 const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),lerp=(a,b,k)=>a+(b-a)*k;
 const eo=x=>1-Math.pow(1-cl(x),3),eio=x=>{x=cl(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2},back=x=>{x=cl(x);const c=1.7;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
 // sohbet mesajları
-const M2=[['Ali','#e67e22','Kanka bu sen misin?!'],['vid'],['Can','#2ecc71','TV yayınında gösterdiler'],['Mert','#9b59b6','Güvenlik seni götürüyor 😅'],['me','','Tutamadım kendimi…']];
+const M2=[['Ali','#e67e22','Kanka bu sen misin?!'],['vid'],['Can','#2ecc71','TV yayınında gösterdiler'],['Mert','#9b59b6','Yarısı alkışladı, yarısı ıslıkladı 😅'],['Ali','#e67e22','Güvenlik götürüyor seni!'],['me','','Tutamadım kendimi…']];
 $('msgs2').innerHTML=M2.map((m,i)=>m[0]==='vid'?`<div class="m vid" id="m2_${i}"><div class="th" style="background-image:url(assets/img/c_9.3.jpg)"><div class="pl">▶</div></div></div>`:m[0]==='me'?`<div class="m me" id="m2_${i}">${m[2]}</div>`:`<div class="m" id="m2_${i}"><div class="who" style="color:${m[1]}">${m[0]}</div>${m[2]}</div>`).join('');
 const M6=[['Avukatın','#5dade2','Ceza tek bir olay için verilmedi.'],['Avukatın','#5dade2','Tutanakta 21–22 kişi var. Sen hiçbir şey atmadın.'],['Avukatın','#5dade2','Yargıtay kararı geldi: BOZULDU ✅']];
 $('msgs6').innerHTML=M6.map((m,i)=>m[0]==='me'?`<div class="m me" id="m6_${i}">${m[2]}</div>`:`<div class="m" id="m6_${i}"><div class="who" style="color:${m[1]}">${m[0]}</div>${m[2]}</div>`).join('');
+const CM=[['tribun_kaplani','Ortalık bir anda karıştı, kimse kendini tutamadı'],['sari_atki','Birkaç kişinin hatası bütün tribüne patladı'],['eski_kale_arkasi','Yazık, bir maç boş tribün…']];
+$('cm').innerHTML=CM.map((c,i)=>`<div class="cmt" id="cm${i}" style="top:${1040+i*150}px"><b>@${c[0]}</b>${c[1]}</div>`).join('');
 const R6=['Ceza 21–22 kişinin eylemi yüzünden verildi.','Zararın yarısı tek taraftara yüklenemez; payın ayrıca hesaplanır.'];
 // ekran sırası ve kaydırma geçişleri
 const SEQ=[['s1',0],['s2',st('P2')-.2],['s3',st('P3')-.2],['s4',st('P4')-.2],['s5',st('P5')-.2],['s6',st('P6')-.2],['s7',st('P7')-.2]];
@@ -160,7 +163,7 @@ window.seekFrame=function(t){
  // s2 mesajlar
  const a2=st('P2');M2.forEach((m,i)=>pop('m2_'+i,t,a2+.4+i*1.15));
  // s3 sayaçlar
- const a3=st('P3');[[15,.6],[3,2.0],[3,3.0]].forEach(([n,o],i)=>{const k=eo((t-a3-o)/1.0);$('nn'+i).textContent=Math.round(n*k);$('nr'+i).style.opacity=t>a3+o-.2?1:.3});
+ const a3=st('P3');CM.forEach((c,i)=>{const k=back((t-a3-.8-i*1.4)/.35);const e=$('cm'+i);e.style.opacity=cl((t-a3-.8-i*1.4)/.12);e.style.transform=`scale(${t<a3+.8+i*1.4?.7:lerp(.7,1,k)})`});
  // s4
  const a4=st('P4');{const k=eo((t-a4-.3)/.4);$('n4').style.transform=`translateY(${(1-k)*-260}px)`;$('n4').style.opacity=t<a4+2.6?k:cl(1-(t-a4-2.6)/.3);
   const kp=eo((t-a4-1.8)/.5);$('p4').style.opacity=kp;$('p4').style.transform=`translateY(${(1-kp)*200}px)`;

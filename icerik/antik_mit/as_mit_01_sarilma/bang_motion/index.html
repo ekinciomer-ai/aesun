@@ -60,7 +60,7 @@ html,body{margin:0;background:#000;overflow:hidden}
     <path id="pathG" d="" stroke="#E30A17" stroke-width="6" fill="none" stroke-dasharray="6 10" stroke-linecap="round"/>
     <g id="dots"></g>
    </svg>
-   <div class="stamp" id="st2" style="left:380px;top:1120px;font-size:96px;opacity:0">SARILDI</div>
+   <div id="rk2" style="position:absolute;left:640px;top:470px;opacity:0;font-weight:800;font-size:64px;background:#2ecc71;color:#08130b;padding:6px 22px;border-radius:30px;transform:rotate(-4deg)">👏 ALKIŞ</div><div id="rk2b" style="position:absolute;left:660px;top:560px;opacity:0;font-weight:800;font-size:64px;background:#E30A17;padding:6px 22px;border-radius:30px;transform:rotate(3deg)">🗯 ISLIK</div><div class="stamp" id="st2" style="left:380px;top:1120px;font-size:96px;opacity:0">SARILDI</div>
    <div class="big" id="b2" style="top:1560px;font-size:96px"></div></div>
   <!-- P3 atılanlar (1,1) -->
   <div class="P" style="left:1080px;top:1920px"><div class="ph" style="background-image:url(assets/img/s_24.5.jpg)"></div><div class="grain"></div><div class="vig"></div>
@@ -125,7 +125,8 @@ const W2=[];
 const W5=words('b5','SENCE YARGITAY NE DEDİ?');
 const W8=words('b8','SAHAYA GİRMEK *MASUM* DEĞİL.'),W8b=words('b8b','AMA BAŞKASININ ÇAKMAĞI SENİN FATURAN DEĞİL.');
 // sayaçlar
-$('cnt3').innerHTML=[['ÇAKMAK',15],['MADENİ PARA',3],['PET ŞİŞE',3]].map((r,i)=>`<div id="c3_${i}" style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid rgba(245,242,234,.35);padding:10px 0"><span style="font-weight:700;font-size:80px">${r[0]}</span><span class="ctr" style="font-weight:800;font-size:150px;min-width:2ch" id="n3_${i}">0</span></div>`).join('');
+const RX=[['Bu ne ya?!',40,170,-6],['Hadi be!',560,260,5],['Sakin olun!',80,430,4],['Yeter artık!',500,540,-5]];
+$('cnt3').innerHTML=`<div id="t3" style="font-weight:800;font-size:128px;line-height:.92">TRİBÜNLER<br><span class="hl">KAYNIYOR</span></div>`+RX.map((r,i)=>`<div id="rx${i}" style="position:absolute;left:${r[1]}px;top:${r[2]+300}px;background:#F5F2EA;color:#141210;font-weight:800;font-size:64px;padding:14px 30px;border-radius:40px;transform:rotate(${r[3]}deg);box-shadow:0 14px 30px rgba(0,0,0,.5)">${r[0]}</div>`).join('')+`<div id="ym3" style="position:absolute;left:0;right:0;top:270px;font-weight:700;font-size:62px;text-align:left">→ Sahaya yabancı maddeler atılıyor</div>`;
 $('opts').innerHTML=[['A','Sahaya girdi, zararın tamamını öder'],['B','Yarısını ödemesi doğru'],['C','Sadece kendi payını öder']].map((o,i)=>`<div id="o${i}" style="display:flex;gap:30px;align-items:center;background:#F5F2EA;color:#141210;margin-bottom:34px;padding:30px 36px;box-shadow:0 20px 40px rgba(0,0,0,.5)"><span style="font-weight:800;font-size:110px;width:90px;text-align:center;color:#E30A17">${o[0]}</span><span style="font-weight:700;font-size:64px;line-height:1">${o[1]}</span></div>`).join('');
 const CLUES=[[50.0,'Ceza tek bir olay için verilmedi'],[52.4,'Tutanak: olaylara 21–22 kişi karıştı'],[55.3,'O, sahaya hiçbir şey fırlatmadı']];
 $('clues').innerHTML=CLUES.map((c,i)=>`<div id="cl${i}" style="display:flex;gap:26px;align-items:center;background:#F5F2EA;color:#141210;margin-bottom:26px;padding:22px 30px"><span style="font-weight:800;font-size:76px;color:#E30A17">${i+1}</span><span style="font-weight:700;font-size:56px;line-height:1.02">${c[1]}</span></div>`).join('');
@@ -164,14 +165,18 @@ function camAt(t){let a=CAM[0],b=CAM[0];for(let i=1;i<CAM.length;i++){if(t<CAM[i
  $('world').style.transform=`translate(${540-cx*s}px,${960-cy*s}px) scale(${s})`;
  const sp=whip?Math.sin(k*Math.PI):0;const dx=Math.abs(pb[0]-pa[0]),dy=Math.abs(pb[1]-pa[1]);
  $('world').style.filter=sp>.05?`blur(${sp*14*(dx||dy?1:0)}px)`:'none'}
-function hud(t){const st=[[0,S.olay],[S.olay,S.poll],[S.poll,S.rew],[S.rew,S.ders],[S.ders,99]];
+function hud(t,rt){const st=[[0,S.olay],[S.olay,S.poll],[S.poll,S.rew],[S.rew,S.ders],[S.ders,99]];
  [...$('prog').children].forEach((d,i)=>d.className=t>=st[i][0]&&t<st[i][1]?'on':(t>=st[i][1]?'done':''));
- const c=TL.caps.find(c=>t>=c[0]&&t<c[1]);$('cap').innerHTML=c?c[2]:'';
+ const c=TL.caps.find(c=>rt>=c[0]&&rt<c[1]);$('cap').innerHTML=c?c[2]:'';
  // whip flaşı
  let f=0;for(const w of [8.9,17.76,32.75,48.66,57.66,69.68])f=Math.max(f,1-Math.abs(t-w-.2)/.18);$('flash').style.opacity=cl(f)*.35;
  const inRew=t>=S.rew&&t<S.rew+1.6;$('rewfx').style.opacity=inRew?1:0;$('rewtag').style.opacity=inRew?(Math.floor(t*4)%2?1:.4):0}
 const fmt=n=>Math.round(n).toLocaleString('tr-TR');
-window.seekFrame=function(t){camAt(t);hud(t);
+const OLD=[0,8.893,17.761,26.7,32.752,48.663,57.66,69.677,81.228,83.828];
+const capT=w=>{const c=TL.caps.find(c=>c[2].replace('<br>',' ').includes(w));return c?c[0]:null};
+const NEW=[0,S.olay,S.olay2,capT('Kulüp dava')||26.7,S.poll,S.rew,S.karar,S.ders,S.end,S.fin];
+function toOld(t){for(let i=1;i<NEW.length;i++){if(t<=NEW[i]||i===NEW.length-1){const k=(t-NEW[i-1])/((NEW[i]-NEW[i-1])||1);return OLD[i-1]+k*(OLD[i]-OLD[i-1])}}return t}
+window.seekFrame=function(rt){const t=toOld(rt);camAt(t);hud(t,rt);
  // P1
  $('ph1').style.transform=`scale(${1+t*.012})`;rise(W1,t,.5);rise(W1b,t,4.4,.12);$('l1').style.opacity=eo((t-.2)/.4);
  // P2: dakika + yollar
@@ -183,9 +188,11 @@ window.seekFrame=function(t){camAt(t);hud(t);
  const gIn=cl((t-15.0)/1.0);const gBase={x:1000,y:620};const gx=lerp(gBase.x,(kG>0?pG:pF).x,eo(gIn)),gy=lerp(gBase.y,(kG>0?pG:pF).y,eo(gIn));
  setDot('dG1',{x:gx-34,y:gy+20},t>14.8?1:0);setDot('dG2',{x:gx+34,y:gy+20},t>14.8?1:0);setTxt('tG',{x:gx,y:gy},-120,80,t>14.8?1:0);
  {const k=cl((t-14.2)/.25);$('st2').style.opacity=t>14.2&&t<16?k:0;$('st2').style.transform=`rotate(-8deg) scale(${lerp(2.2,1,back(k))})`}
- rise(W2,t,9.5);
+ rise(W2,t,9.5);$('rk2').style.opacity=t>15.2&&t<17.6?eo((t-15.2)/.3):0;$('rk2b').style.opacity=t>15.6&&t<17.6?eo((t-15.6)/.3):0;
  // P3 sayaçlar
- [[18.4,20.3,15],[20.5,21.6,3],[21.9,23.0,3]].forEach(([a,b,n],i)=>{const k=cl((t-a)/(b-a));$('n3_'+i).textContent=Math.round(n*eo(k));$('c3_'+i).style.opacity=t>a-.3?1:.25});
+ {const k=eo((t-18.0)/.45);$('t3').style.opacity=k;$('t3').style.transform=`translateY(${(1-k)*80}px)`;
+ RX.forEach((r,i)=>{const kk=back((t-18.9-i*.75)/.35);const e=$('rx'+i);e.style.opacity=cl((t-18.9-i*.75)/.12)*(1-cl((t-23.4)/.3));e.style.transform=`rotate(${r[3]}deg) scale(${t<18.9+i*.75?.5:lerp(.5,1,kk)})`});
+ $('ym3').style.opacity=eo((t-21.4)/.4)}
  {const k=cl((t-23.7)/.25);$('st3').style.opacity=t>23.7?k:0;$('st3').style.transform=`rotate(-6deg) scale(${lerp(2.4,1,back(k))})`}
  // P4
  {const k=cl((t-26.6)/1.6);$('bilet').textContent='₺'+fmt(0);$('bilet').style.opacity=eo((t-26.3)/.3);
@@ -193,7 +200,7 @@ window.seekFrame=function(t){camAt(t);hud(t);
   const kb=cl((t-29.6)/1.8);$('bar4').style.width=(50*eo(kb))+'%';$('yuzde').textContent='%'+Math.round(50*eo(kb))}
  // P5 oylama
  rise(W5,t,33.1);[33.9,36.0,38.5].forEach((a,i)=>{const k=eo((t-a)/.45);const o=$('o'+i);o.style.opacity=k;o.style.transform=`translateX(${(1-k)*-140}px)`});
- {const cd0=TL.cd0;const on=t>=cd0&&t<cd0+5;$('cd').style.opacity=on?1:0;$('cd').textContent=Math.max(1,Math.ceil(cd0+5-t));const fr=(t-cd0)%1;$('cd').style.transform=`scale(${on?1+.15*Math.max(0,1-fr*4):1})`}
+ {const cd0=TL.cd0;const on=rt>=cd0&&rt<cd0+5;$('cd').style.opacity=on?1:0;$('cd').textContent=Math.max(1,Math.ceil(cd0+5-rt));const fr=(rt-cd0)%1;$('cd').style.transform=`scale(${on?1+.15*Math.max(0,1-fr*4):1})`}
  // P6 kişi sayacı + simgeler + ipuçları
  {const k=cl((t-51.6)/2.2);$('kisi').textContent=Math.round(22*eo(k))>=21?'21–22':Math.round(22*eo(k));
   for(let i=0;i<22;i++){const ki=eo((t-51.7-i*.08)/.3);const e=$('pp'+i);e.setAttribute('opacity',ki);e.setAttribute('transform',`translate(${70+(i%11)*88+44},${40+((i/11)|0)*260+(1-ki)*40}) scale(${i===21&&t>55.2?1+.2*Math.sin(t*6):1})`)}

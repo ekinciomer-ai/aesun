@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-22T16:04+03:00",
+ "olusturma": "2026-11-22T17:56+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -747,7 +747,7 @@
     "baslik": "Uzayın Derinliği 🌌 #shorts",
     "i48": 975
    },
-   "kaydirmadan_izleme_yuzde": 31
+   "kaydirmadan_izleme_yuzde": 32
   },
   {
    "kanal": "LVL MAX",
@@ -768,12 +768,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 594,
+   "medyan_48sa": 596,
    "tutma_orani": 50,
    "izlenme_yuzde": 32,
    "en_iyi": {
     "baslik": "Marshmallow Testi Bir Yalan mıydı? 🍬 İrade Efsanesinin Çöküşü #shorts",
-    "i48": 1072
+    "i48": 1075
    },
    "kaydirmadan_izleme_yuzde": 39
   },
@@ -796,7 +796,7 @@
    "neden": "videoların %58'i tuttu (eşik 262 izlenme / 48 sa)",
    "olculen": 12,
    "erken": 0,
-   "medyan_48sa": 434,
+   "medyan_48sa": 450,
    "tutma_orani": 58,
    "izlenme_yuzde": 51,
    "en_iyi": {
@@ -824,14 +824,14 @@
  ],
  "esikler": {
   "Ancient Studio": 188,
+  "Estudio Antiguo": 126,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab": 93,
+  "Yolu Seç !": 262,
   "LVL MAX": 50,
   "Nasıl Yapıldı": 119,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 212,
-  "Yolu Seç !": 262,
-  "Estudio Antiguo": 126,
   "Ömür Dediğin": 50,
-  "Kozmos Lab": 93
+  "Kozmos Lab TR": 212
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -947,7 +947,7 @@
    },
    "19:00": {
     "n": 8,
-    "medyan": 435
+    "medyan": 436
    },
    "21:00": {
     "n": 6,
@@ -985,7 +985,7 @@
   "Yolu Seç !": {
    "13:00": {
     "n": 4,
-    "medyan": 434
+    "medyan": 450
    },
    "17:00": {
     "n": 4,
@@ -993,13 +993,13 @@
    },
    "20:00": {
     "n": 4,
-    "medyan": 612
+    "medyan": 614
    }
   },
   "Nasıl Yapıldı": {
    "19:00": {
     "n": 2,
-    "medyan": 594
+    "medyan": 596
    }
   }
  },
@@ -1015,9 +1015,9 @@
   {
    "kanal": "Antik Stüdyo",
    "tarih": "2026-11-23",
-   "planli_short": 0,
+   "planli_short": 1,
    "hedef_kota": 2,
-   "eksik": 2,
+   "eksik": 1,
    "uyari": "19:00 Gündem+Tarih slotu BOŞ"
   },
   {
@@ -1030,6 +1030,28 @@
   }
  ],
  "kopru_onerileri": [
+  {
+   "kanal": "Ancient Studio",
+   "uzun_vid": "VF_pWVGAxd0",
+   "uzun_baslik": "The Full Story of Piri Reis: From Corsair to Hormuz, From Map to Execution",
+   "uzun_durum": "Yayında",
+   "uzun_izlenme": 2,
+   "baglanacak_shortlar": [
+    {
+     "vid": "lcGHHhXM_74",
+     "baslik": "Why was Piri Reis executed? #Shorts",
+     "izlenme": 928,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "n0NqS1CTDRk",
+     "baslik": "The fight over Hormuz started 474 years ago #Shorts",
+     "izlenme": 32,
+     "durum": "Yayında"
+    }
+   ],
+   "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın"
+  },
   {
    "kanal": "Ancient Studio",
    "uzun_vid": "sMHq7klzw2Q",
@@ -1105,33 +1127,11 @@
    "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın"
   },
   {
-   "kanal": "Ancient Studio",
-   "uzun_vid": "VF_pWVGAxd0",
-   "uzun_baslik": "The Full Story of Piri Reis: From Corsair to Hormuz, From Map to Execution",
-   "uzun_durum": "Yayında",
-   "uzun_izlenme": 0,
-   "baglanacak_shortlar": [
-    {
-     "vid": "lcGHHhXM_74",
-     "baslik": "Why was Piri Reis executed? #Shorts",
-     "izlenme": 928,
-     "durum": "Yayında"
-    },
-    {
-     "vid": "n0NqS1CTDRk",
-     "baslik": "The fight over Hormuz started 474 years ago #Shorts",
-     "izlenme": 32,
-     "durum": "Yayında"
-    }
-   ],
-   "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın"
-  },
-  {
    "kanal": "Antik Stüdyo",
    "uzun_vid": "Ub6wYt_50lY",
    "uzun_baslik": "Piri Reis Neden İdam Edildi? | 474 Yıl Önce Hürmüz Boğazı",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 905,
+   "uzun_izlenme": 906,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
@@ -1171,12 +1171,12 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 261,
+   "uzun_izlenme": 267,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
      "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
-     "izlenme": 21,
+     "izlenme": 23,
      "durum": "Yayında"
     }
    ],
@@ -1215,7 +1215,7 @@
    "uzun_vid": "9a9BTiC6ics",
    "uzun_baslik": "Osmanlı dünyayı 5 boğazdan nasıl kilitlemeye çalıştı?",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 12,
+   "uzun_izlenme": 22,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
@@ -1300,7 +1300,7 @@
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2942,
+     "izlenme": 2947,
      "durum": "Yayında"
     },
     {
@@ -1312,13 +1312,13 @@
     {
      "vid": "bsK8ALbOA8g",
      "baslik": "Mona Lisa'nın kaşları neden yok? 🖼️ #shorts",
-     "izlenme": 2817,
+     "izlenme": 2818,
      "durum": "Yayında"
     },
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2605,
+     "izlenme": 2607,
      "durum": "Yayında"
     },
     {
@@ -1410,7 +1410,7 @@
     {
      "vid": "MSOsi_wK55Q",
      "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
-     "izlenme": 954,
+     "izlenme": 955,
      "durum": "Yayında"
     },
     {
@@ -1525,7 +1525,7 @@
    "kanal": "Kozmos Lab TR",
    "vid": "MH2cG2GIFdk",
    "baslik": "Telefonuna 2 saniye bakmanın gerçek bedeli neden 23 dakika? 🧠📱 #shorts",
-   "tarih": "2026-11-26",
+   "tarih": "2026-11-25",
    "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
@@ -1549,14 +1549,6 @@
    "kanal": "Kozmos Lab TR",
    "vid": "BqJQSRakmho",
    "baslik": "Açık bıraktığın bildirim sekmeleri anlık IQ skorunu 10 puan düşürüyor 🧠💻 #shorts",
-   "tarih": "2026-11-29",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
-   "vid": "v1RarWtOfOc",
-   "baslik": "Bir ekrana hiç bölünmeden kaç saniye bakabiliyorsun? ⏱️💻 #shorts",
    "tarih": "2026-12-02",
    "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   }
@@ -1592,7 +1584,7 @@
   "Kozmos Lab: en iyi yayın saati şimdilik 22:00 (medyan 10 izlenme, 4 video).",
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 88 izlenme, 2 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",
-  "Nasıl Yapıldı: en iyi yayın saati şimdilik 19:00 (medyan 594 izlenme, 2 video).",
+  "Nasıl Yapıldı: en iyi yayın saati şimdilik 19:00 (medyan 596 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %72 izleniyor, tutmayanlar %49 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %43 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %62 izleniyor, tutmayanlar %61 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
@@ -1608,7 +1600,7 @@
   "Yolu Seç !: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %45 (hedef ≥%70).",
   "Ömür Dediğin: tutan Short'lar ortalama %50 izleniyor, tutmayanlar %102 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Ömür Dediğin: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %24 (hedef ≥%70).",
-  "Uzun videolar (13 yayında): medyan 13 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
+  "Uzun videolar (13 yayında): medyan 15 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
   "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-23, 2026-11-24."
  ],
  "en_iyi": [

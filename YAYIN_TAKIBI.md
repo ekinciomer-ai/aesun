@@ -118,3 +118,9 @@ Sayfa sekmeli: Özet · Kanallar & Hesaplar · İçerik Yöneticisi · Yayın Li
   Yeni kanal açılınca buraya eklenir. vidIQ kredisi sınırlı (aylık); ölçümü Claude elle yeniler. Canlı abone/izlenme `analitik.json`'dan gelir.
   Yayın Listesi'ndeki ▲/▼ etiketi videoyu aynı yaştaki tipik videoyla (vidIQ medyanı) kıyaslar.
 - `docs/yayin/havuz.json`: Yükleme Yöneticisi iş durumları; `havuz_disa.yml` saatte bir sunucudan SALT OKUNUR çeker. Elle düzenlenmez.
+
+## Format Raporu (otomatik) — `docs/yayin/format.html` + `format_rapor.json`
+Portal → Yayın Takibi → **🎬 Format Raporu**: kanal, video formatı (seri), video skill'i, ses, ses aracı ve videoda kullanılan araçlara göre izlenme/beğeni/yorum.
+`yayin/format_rapor.py` saatte en çok bir kez (yayin_takip.yml içinde) bütün kanalları YT_API_KEY ile okur (Kara Kutu dahil, yalnız okuma).
+Bilgi önceliği: `sunucu/havuz/teslim` (lisans.ses/gorsel/muzik) → `sunucu/yt_kuyruk/tamam` (kaynaklar, muzik_lisans, tts_motoru) → kanal kararlarından tahmin.
+**Ajanlar:** videoyu havuza teslim ederken `lisans.ses` alanına sesin ADINI (örn. "Gemini TTS, Charon"; "ElevenLabs 'Uğur'") yaz; yoksa rapor sesi tahmin eder.

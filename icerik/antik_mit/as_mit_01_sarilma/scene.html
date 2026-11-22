@@ -426,17 +426,26 @@ function bot(shirt,shorts,sock,scale=1,opt={}){
  M.B={};o.traverse(n=>{if(n.isBone)M.B[n.name.replace('mixamorig','')]=n});
  M.mx=new THREE.AnimationMixer(o);M.act={};for(const k of['idle','run','walk'])M.act[k]=M.mx.clipAction(CLIP[k]);Object.values(M.act).forEach(a=>{a.play();a.weight=0});
  M.g.scale.setScalar(scale);scene.add(M.g);return M}
+const _aq=new THREE.Quaternion(),_pq=new THREE.Quaternion(),_ad=new THREE.Vector3(),_ac=new THREE.Vector3();
+function aimB(M,name,v){const bone=M.B[name];const child=bone.children.find(c=>c.isBone);const ry=M.g.rotation.y;
+ _ad.set(Math.cos(ry)*v[0]+Math.sin(ry)*v[2],v[1],-Math.sin(ry)*v[0]+Math.cos(ry)*v[2]).normalize();
+ _ac.copy(child.position).normalize();bone.getWorldQuaternion(_aq);_ac.applyQuaternion(_aq);
+ const d=new THREE.Quaternion().setFromUnitVectors(_ac,_ad);d.multiply(_aq);bone.parent.getWorldQuaternion(_pq);bone.quaternion.copy(_pq.invert().multiply(d));bone.updateMatrixWorld(true)}
 function addRot(M,b,x,y,z){etmp.set(x,y,z);qtmp.setFromEuler(etmp);M.B[b].quaternion.multiply(qtmp)}
 function bpose(M,type,ph,k=1){
- const clip={idle:'idle',run:'run',armsUp:'run',walk:'walk',hug:'idle',held:'walk',escort:'walk',climb:'run',jumpUp:'idle'}[type]||'idle';
+ const clip={idle:'idle',run:'run',armsUp:'run',walk:'walk',hug:'idle',hugNeck:'idle',kneeSlide:'idle',held:'walk',escort:'walk',climb:'run',jumpUp:'idle'}[type]||'idle';
  const rate={run:1.05,armsUp:.9,walk:1,held:.9,escort:.9}[type]||1;
  for(const n in M.act){M.act[n].weight=n===clip?1:0;M.act[n].time=((curW*rate+M.off)%CLIP[n].duration)}
  if(type==='climb'){M.act.run.time=.18}
- if(type==='hug'){M.act.idle.time=.4}
- M.mx.update(0);M.root.position.y=0;M.root.rotation.z=0;
- if(type==='armsUp'||type==='jumpUp'){const wv=Math.sin(curW*7+M.off)*.25;addRot(M,'LeftArm',0,0,2.45+wv);addRot(M,'RightArm',0,0,-2.45+wv);addRot(M,'LeftForeArm',0,0,.2);addRot(M,'RightForeArm',0,0,-.2);
+ if(type==='hug'||type==='hugNeck'||type==='kneeSlide'){M.act.idle.time=.4}
+ M.mx.update(0);M.root.position.y=0;M.root.rotation.z=0;M.g.updateMatrixWorld(true);
+ if(type==='armsUp'||type==='jumpUp'){const wv=Math.sin(curW*7+M.off)*.12;aimB(M,'LeftArm',[.55,.8+wv,.12]);aimB(M,'RightArm',[-.55,.8-wv,.12]);aimB(M,'LeftForeArm',[.25,1,.1]);aimB(M,'RightForeArm',[-.25,1,.1]);
   if(type==='jumpUp'){M.root.position.y=Math.max(0,Math.sin(curW*8+M.off))*.3}}
- if(type==='hug'){addRot(M,'LeftArm',0,-1.25,.85);addRot(M,'RightArm',0,1.25,-.85);addRot(M,'LeftForeArm',0,-.9,0);addRot(M,'RightForeArm',0,.9,0);addRot(M,'Spine1',.18,0,0)}
+ if(type==='kneeSlide'){M.root.position.y=-.42*k;aimB(M,'LeftLeg',[0,lerp(-1,-.15,k),lerp(0,-1,k)]);aimB(M,'RightLeg',[0,lerp(-1,-.15,k),lerp(0,-1,k)]);
+  aimB(M,'LeftArm',[.85,.5,.15]);aimB(M,'RightArm',[-.85,.5,.15]);aimB(M,'LeftForeArm',[.6,.8,.1]);aimB(M,'RightForeArm',[-.6,.8,.1]);addRot(M,'Spine',-.25*k,0,0);addRot(M,'Head',-.35*k,0,0)}
+ if(type==='hug'){addRot(M,'Spine1',.1,0,0);M.g.updateMatrixWorld(true);aimB(M,'LeftArm',[.45,-.35,.82]);aimB(M,'LeftForeArm',[-.9,.05,.4]);aimB(M,'RightArm',[-.45,-.35,.82]);aimB(M,'RightForeArm',[.9,.05,.4]);addRot(M,'Head',0,.45,0)}
+ if(type==='hugNeck'){if(k>0){M.root.position.y=k*.3;aimB(M,'LeftLeg',[0,-.6,-.8]);aimB(M,'RightLeg',[0,-.6,-.8])}
+  aimB(M,'LeftArm',[.4,.25,.88]);aimB(M,'LeftForeArm',[-.9,.2,.35]);aimB(M,'RightArm',[-.4,.25,.88]);aimB(M,'RightForeArm',[.9,.2,.35]);addRot(M,'Head',0,-.45,0)}
  if(type==='escort'){addRot(M,'LeftArm',0,-.7,.55);addRot(M,'RightArm',0,.7,-.55);addRot(M,'LeftForeArm',0,-.5,0);addRot(M,'RightForeArm',0,.5,0)}
  if(type==='held'){addRot(M,'LeftArm',0,.3,.35);addRot(M,'RightArm',0,-.3,-.35);addRot(M,'Spine',.12,0,0)}
  if(type==='climb'){addRot(M,'LeftArm',0,-1.1,.6);addRot(M,'RightArm',0,1.1,-.6);addRot(M,'Spine',.5,0,0)}}
@@ -491,21 +500,24 @@ const CORNER=[47.6,29.4];
 function sim(w,mode){curW=w;
  const intrude=mode.intrude;
  // home & away players
- home.forEach((M,i)=>{const f=form[i];let x,z,face,type='run',ph=w*9+i;
+ home.forEach((M,i)=>{const f=form[i];let x,z,face,type='run',ph=w*9+i,kk=1;
   const att=w<3.6?[f[0]+30+Math.sin(w*.8+i)*2,f[1]*.85+Math.cos(w*.7+i)*2]:[f[0]+34,f[1]*.8];
   x=att[0];z=att[1];if(i===0){x=-44+Math.sin(w)*.5;z=Math.sin(w*.6)*2;type='idle'}
   if(w<3.6){const b=ballAt(Math.min(w+.15,3.15));if(i===SC){const k=sm(w/3.15);x=lerp(f[0]+30,39.5,k);z=lerp(f[1],-4.3,k)}
    else if(i===7&&w<2.2){x=lerp(att[0],b[0]-.5,.6);z=lerp(att[1],b[2],.6)}face=Math.PI/2;}
   else{const celeb=[SC,10,8,6].includes(i);
-   if(i===SC){if(w<6.6){const k=sm((w-3.6)/3.0);x=lerp(39.5,CORNER[0],k);z=lerp(-4.3,CORNER[1],k);type='armsUp';face=faceTo(39.5,-4.3,CORNER[0],CORNER[1])}
-    else if(w<(intrude?8.6:9.5)){x=CORNER[0];z=CORNER[1];type=intrude&&w>7?'hug':'armsUp';face=intrude?faceTo(x,z,CORNER[0]-.1,CORNER[1]+1):Math.PI;ph=w*6}
+   if(i===SC){const P1=[CORNER[0]-1.2,CORNER[1]-3.4];
+    if(w<5.6){const k=sm((w-3.6)/2.0);x=lerp(39.5,P1[0],k);z=lerp(-4.3,P1[1],k);type='run';face=faceTo(39.5,-4.3,P1[0],P1[1])}
+    else if(w<6.5){const k=(w-5.6)/.9;const e=1-(1-k)*(1-k);x=lerp(P1[0],CORNER[0],e);z=lerp(P1[1],CORNER[1],e);type='kneeSlide';kk=Math.min(1,k*4)*(k>.8?1-(k-.8)*2.5:1);face=faceTo(P1[0],P1[1],CORNER[0],CORNER[1])}
+    else if(w<7.0||(!intrude&&w<9.5)){x=CORNER[0];z=CORNER[1];type='armsUp';face=Math.PI*.9}
+    else if(w<8.8){x=CORNER[0]+Math.sin((w-7)*5)*.07;z=CORNER[1];type='hug';face=faceTo(CORNER[0],CORNER[1],CORNER[0]-.08,CORNER[1]+1)}
     else{const k=sm((w-9)/5);x=lerp(CORNER[0],5,k);z=lerp(CORNER[1],0,k);type='walk';face=faceTo(CORNER[0],CORNER[1],5,0)}}
    else if(celeb&&w<11){const off=[[0,0],[-2.6,-1.5],[-1.5,-2.6],[-3.2,-.2]][[SC,10,8,6].indexOf(i)];const k=sm((w-3.8)/3.2);
     x=lerp(att[0],CORNER[0]+off[0]*(intrude?1.4:1),k);z=lerp(att[1],CORNER[1]+off[1]*(intrude?1.4:1),k);type=k<1?'run':'armsUp';face=faceTo(x,z,CORNER[0],CORNER[1])}
    else{x=att[0];z=att[1];type='walk';face=-Math.PI/2;ph=w*5+i}
    if(w>12.5){const k=sm((w-12.5)/2.5);const bx=f[0]*.9+(i===SC?2:0),bz=f[1]*.9;x=lerp(x,bx,k);z=lerp(z,bz,k);if(k>=1){x=bx+Math.sin(w*.7+i)*2;z=bz+Math.cos(w*.6+i)*2;type='run';ph=w*7+i;face=Math.sin(w*.3+i)*2}}
    if(w>19){const k=sm((w-19)/6);x=lerp(x,(i-5)*1.2,k);z=lerp(z,33,k);type='walk';face=faceTo(x,z,(i-5)*1.2,33)}}
-  place(M,x,z,face);pose(M,type,ph);M.g.visible=!(w>25&&mode.empty)});
+  place(M,x,z,face);pose(M,type,ph,kk);M.g.visible=!(w>25&&mode.empty)});
  away.forEach((M,i)=>{const f=form[i];let x=-f[0]*.95+ (w<3.6?-8:-4),z=f[1]*.9,type='run',face=-Math.PI/2,ph=w*8.5+i*1.3;
   if(i===0){x=51.2;const bz=ballAt(Math.min(w,3.6))[2];z=w<3.4?cl(bz*.5,-2.5,2.5):lerp(cl(bz*.5,-2.5,2.5),-2.2,sm((w-3.4)/.3));type='idle';face=-Math.PI/2}
   else if(w<3.6){x+=Math.sin(w+i)*1.5;z+=Math.cos(w*.8+i)*1.5;const b=ballAt(w);if(i===3||i===2){x=lerp(x,b[0]+3,.45);z=lerp(z,b[2],.45)}}
@@ -516,17 +528,17 @@ function sim(w,mode){curW=w;
   M.g.visible=!(w>25&&mode.empty)});
  const b=ballAt(Math.min(w,4.2));ball.position.set(b[0],b[1],b[2]);ball.visible=w<12.5;
  // fan
- let fx=fanSeat.x,fz=fanSeat.z,fy=fanSeat.y,ft='idle',ff=Math.PI,fph=w*6;fan.g.visible=true;
+ let fx=fanSeat.x,fz=fanSeat.z,fy=fanSeat.y,ft='idle',ff=Math.PI,fph=w*6,fk=0;fan.g.visible=true;
  if(intrude){
   if(w<3.6){ft='idle'}else if(w<4.4){ft='jumpUp';fph=(w-3.6)*6}
   else if(w<5.3){const k=sm((w-4.4)/.9);fz=lerp(fanSeat.z,37.2,k);fy=fanSeat.y+Math.sin(k*Math.PI)*.9-k*fanSeat.y;ft='climb';ff=Math.PI}
-  else if(w<7.0){const k=sm((w-5.3)/1.7);fx=lerp(fanSeat.x,CORNER[0]-.1,k);fz=lerp(37.2,CORNER[1]+.85,k);fy=0;ft='run';fph=w*11;ff=faceTo(fanSeat.x,37.2,CORNER[0],CORNER[1])}
-  else if(w<8.8){fx=CORNER[0]-.1;fz=CORNER[1]+.85;fy=0;ft='hug';ff=faceTo(fx,fz,CORNER[0],CORNER[1])}
-  else if(w<12.5){const k=sm((w-8.8)/3.7);fx=lerp(CORNER[0]-.1,36,k);fz=lerp(CORNER[1]+.85,36.8,k);fy=0;ft='held';fph=w*6;ff=faceTo(CORNER[0],CORNER[1],36,36.8)}
+  else if(w<7.0){const k=sm((w-5.3)/1.7);fx=lerp(fanSeat.x,CORNER[0]-.08,k);fz=lerp(37.2,CORNER[1]+.36,k);fy=0;ft='run';fph=w*11;ff=faceTo(fanSeat.x,37.2,CORNER[0],CORNER[1])}
+  else if(w<8.8){fx=CORNER[0]-.08+Math.sin((w-7)*5)*.07;fz=CORNER[1]+.36;fy=0;ft='hugNeck';fk=w<7.6?Math.sin(cl((w-7)/.6,0,1)*Math.PI):0;ff=faceTo(fx,fz,CORNER[0],CORNER[1])}
+  else if(w<12.5){const k=sm((w-8.8)/3.7);fx=lerp(CORNER[0]-.08,36,k);fz=lerp(CORNER[1]+.6,36.8,k);fy=0;ft='held';fph=w*6;ff=faceTo(CORNER[0],CORNER[1],36,36.8)}
   else{fan.g.visible=false}
   if(w>=12.5&&mode.fanBack){fan.g.visible=true;fx=fanSeat.x;fz=fanSeat.z;fy=fanSeat.y}
  }else{ft=w>3.6&&w<12?'jumpUp':'idle';fph=(w-3.6)*6}
- place(fan,fx,fz,ff,fy);pose(fan,ft,fph);
+ place(fan,fx,fz,ff,fy);pose(fan,ft,fph,fk);
  // guards
  const gs=[[40,36.4],[53,35.9]];
  guards.forEach((M,j)=>{let [x,z]=gs[j],type='idle',face=0,ph=w*9+j;

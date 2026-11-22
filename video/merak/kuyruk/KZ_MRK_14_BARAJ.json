@@ -1,0 +1,205 @@
+{
+ "kod": "KZ_MRK_14_BARAJ",
+ "no": "MERAK #14",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "TEK TÜRBİNDEN<br><i>SANİYEDE KAÇ TON?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "baraj",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Bir barajın tek bir türbininden saniyede kaç ton su geçer? Tahminini aklında tut, cevap sandığından büyük.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "baraj",
+   "p": {
+    "mod": "turbin",
+    "kart": 55
+   },
+   "metin": "Türkiye'nin en büyük barajlarından Atatürk Barajı'nın santralinde sekiz türbin var. Her biri tek başına üç yüz megavat güç üretir.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "TEK TÜRBİN",
+     "say": 300,
+     "ek": "MW",
+     "k": "üç"
+    },
+    {
+     "tip": "etiket",
+     "y": "8 türbin ⚙️",
+     "k": "sekiz"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "baraj",
+   "p": {
+    "mod": "yukseklik",
+    "kart": 55
+   },
+   "metin": "Su, türbine yüz elli bir metre yüksekten iner. Bu, yaklaşık kırk beş katlı bir binanın boyu.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DÜŞÜ YÜKSEKLİĞİ",
+     "say": 151,
+     "ek": "m",
+     "k": "yüz"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 45 katlı bina 🏢",
+     "k": "kırk"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "baraj",
+   "p": {
+    "mod": "debi",
+    "kart": 62
+   },
+   "metin": "Tek bir türbinden saniyede yaklaşık iki yüz kırk bir metreküp su geçer. Hem de durmadan.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "TEK TÜRBİNİN DEBİSİ",
+     "on": "≈ ",
+     "say": 241,
+     "ek": "m³/sn",
+     "k": "iki"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "baraj",
+   "p": {
+    "mod": "ton",
+    "kart": 55
+   },
+   "metin": "Bir metreküp su yaklaşık bir ton gelir. Yani her saniye iki yüz kırk bir ton su!",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1 m³ su <em>≈</em> 1 ton",
+     "k": "metreküp"
+    },
+    {
+     "tip": "sayi",
+     "ust": "HER SANİYE",
+     "say": 241,
+     "ek": "ton",
+     "k": "iki"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "baraj",
+   "p": {
+    "mod": "havuz",
+    "kart": 55
+   },
+   "metin": "Olimpik bir yüzme havuzunda iki bin beş yüz ton su var. Bu türbin onu yaklaşık on saniyede boşaltırdı.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "2.500 <em>÷</em> 241",
+     "k": "iki"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 10 saniye 🏊",
+     "k": "saniyede"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "baraj",
+   "p": {
+    "mod": "sekiz",
+    "kart": 55
+   },
+   "metin": "Sekiz türbin birlikte tam güçte çalışınca saniyede yaklaşık bin dokuz yüz otuz ton su akar.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "8 <em>×</em> 241",
+     "k": "Sekiz"
+    },
+    {
+     "tip": "sayi",
+     "ust": "8 TÜRBİN",
+     "on": "≈ ",
+     "say": 1930,
+     "ek": "ton/sn",
+     "k": "bin"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "baraj",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: tek türbinden her saniye yaklaşık iki yüz kırk bir ton su. Senin tahminin kaç tondu? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "on": "≈ ",
+     "say": 241,
+     "ek": "ton/sn",
+     "k": "iki"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Bir baraj türbininden saniyede kaç ton su geçer? 💧⚡ #shorts",
+  "aciklama": "Atatürk Barajı Hidroelektrik Santrali'nde 300 MW gücünde 8 Francis türbini vardır (toplam 2.400 MW). IEA Hydropower vaka çalışmasına göre en büyük etkin düşü 151,2 m, en yüksek güç debisi 241 m³/s'dir; bu değer tek bir ünitenin debisine karşılık gelir (fiziksel kontrol: 1.000 kg/m³ × 9,81 × 241 m³/s × 151,2 m ≈ 357 MW hidrolik güç → yaklaşık %84 toplam verimle 300 MW). Sekiz ünite tam güçte ≈ 8 × 241 ≈ 1.930 m³/s; bu, santralin günlük su salımı için verilen 200–2.000 m³/s aralığıyla uyumludur.\n\nKarşılaştırmalar: 1 m³ su yaklaşık 1 ton gelir. Olimpik havuz 50 × 25 × 2 m = 2.500 m³ (World Aquatics) → 2.500 ÷ 241 ≈ 10 saniye. 151 m ≈ 45 katlı konut binası (CTBUH yükseklik hesaplayıcısı, konut kat yüksekliği 3,1 m).\n\nSenin tahminin kaç tondu? Yorumlara yaz 👇\n\nAnimasyon şematik bir kesittir, ölçeksizdir. Rakamlar santralin tasarım (tam güç) değerleridir; gerçek debi su durumuna ve üretim ihtiyacına göre değişir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: IEA Hydropower Annex VIII Case Study 12-03 – Atatürk HPP (Türkiye); Power Technology – Atatürk power plant profile; Atatürk Barajı (Vikipedi, DSİ verileri); World Aquatics tesis kuralları (olimpik havuz); CTBUH Tall Building Height Calculator.\n\n#kozmoslab #baraj #hidroelektrik #enerji #atatürkbarajı #bilim #merak #shorts",
+  "etiketler": [
+   "baraj",
+   "atatürk barajı",
+   "hidroelektrik",
+   "türbin",
+   "HES",
+   "enerji",
+   "elektrik",
+   "mühendislik",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "IEA Hydropower Annex VIII Case Study 12-03 (Atatürk, Türkiye): 'Ataturk Hydroelectric Power Plant is equipped with 8 units, each of units has 300 MW installed capacity.'; Tablo 1: 'Max. Output 2,400 MW', 'Max. Power Discharge 241 m3/sec', 'Max. Effective Head 151.2 m', 'Ave. Annual Generation 8,900 GWh'",
+  "Power Technology (GlobalData) – Atatürk power plant profile: 'The net head of the project is 151m.'; '8 units of francis turbines, each with 300MW nameplate capacity'",
+  "Vikipedi – Atatürk Dam: '8 x 300 MW Francis-type'; 'the daily water release from the HEPP might vary between 200 and 2,000 m3/s'",
+  "Fiziksel tutarlılık (241 m³/s'nin tek üniteye ait olduğu): P = ρ·g·Q·H = 1000 × 9,81 × 241 × 151,2 ≈ 357 MW → 300 MW için verim ≈ %84 (Francis türbin+jeneratör için makul). 241 m³/s tüm santrale ait olsaydı 2.400 MW imkânsız olurdu. 8 × 241 = 1.928 ≈ 1.930 m³/s, günlük salım üst sınırı (2.000 m³/s) ile uyumlu.",
+  "Su yoğunluğu ≈ 1.000 kg/m³ → 1 m³ ≈ 1 ton",
+  "Olimpik havuz (World Aquatics, Vikipedi 'Olympic-size swimming pool'): 50 m × 25 m, en az 2 m derinlik, '2,500 m3 ... assuming a nominal depth of 2 m' → 2.500 ÷ 241 ≈ 10,4 sn",
+  "CTBUH Height Calculator: konut kat yüksekliği 3,1 m; H = 3,1·s + 7,75 + 1,55·(s/30) → s = 45 kat ≈ 149,6 m ≈ 151 m"
+ ]
+}

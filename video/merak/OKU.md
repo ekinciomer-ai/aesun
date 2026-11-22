@@ -61,6 +61,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `toz` | `mod: soru / uret / toz / isin / takvim / telefon / yil / robot / son` | Panel + kirlenme örtüsü, tozda duran ışınlar, 365 günlük takvim (11–18 gün gri), yan telefonlar, temizlik robotu |
 | `ucak` | `mod: soru / mesafe / hiz / saat / gun / yil / hava / parker / hizli / son` | Güneş↑–Dünya↓ yolu, 150 milyon km ölçü, yolcu uçağı (saat/gün/yıl sayacı), atmosfer halkası + düşen uçak, Parker sondası (iz, gün sayacı) |
 | `trafo` | `mod: soru / frekans / cekirdek / uzama / olcu / iki / hesap / nota / abd / son` | Lamine demir çekirdek + bakır bobinler, ses halkaları (100/120 Hz), yan alanda akım/boy grafiği (sin → sin²), saç teli vs 1 µm, piyano (sol tuşu) |
+| `kilit` | `mod: soru / tur / eksen / masa / siskin / fren / kilit / yuzde / son` | Dünya çevresinde Ay (Dünya'ya bakan kırmızı yüz işareti), tur çizgisi + gün sayacı, eksen + dönüş oku, 3 hayalet konum (masa deneyi), gelgit şişkinliği, fren (hızlı dönüş yavaşlar), yalpalama + 10 dilimlik pizza (%59) |
+| `baraj` | `mod: soru / turbin / yukseklik / debi / ton / havuz / sekiz / son` | Baraj kesiti (rezervuar, cebri boru, Francis çarkı, su akışı), 151 m ölçü + 45 katlı bina, 8 ünite sırası, 241 küp ızgarası, boşalan olimpik havuz (sn sayacı) |
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
@@ -79,5 +81,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 7 (Dünya dursa kaç km/sa) ve 8 (Ampul için kaç dakika pedal) — 19.11.2026, günlük görev; yeni sahneler `donus`, `pedal`.
 - Bölüm 9 (Mars'ta gün/yıl) ve 10 (Panel tozlanınca kayıp) — 20.11.2026, günlük görev; yeni sahneler `mars`, `toz`.
 - Bölüm 11 (Güneş'e uçakla) ve 12 (Trafo neden uğuldar) — 21.11.2026, günlük görev; yeni sahneler `ucak`, `trafo` (kamera parçalar arasında önceki pozdan akar).
+- Bölüm 13 (Ay neden hep aynı yüz) ve 14 (Baraj türbininden saniyede kaç ton) — 22.11.2026, günlük görev; yeni sahneler `kilit`, `baraj` (kamera pozları parametreyle akar: hedef, uzaklık, açı).
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

@@ -13,6 +13,8 @@ canvas{display:block}
 #prog div.on{background:#c9973f;color:#1a1206}
 #prog div.done{background:rgba(201,151,63,.35);color:#f3e4bf}
 #src{position:absolute;bottom:1.6%;left:0;right:0;text-align:center;font-size:calc(var(--u)*1.75);color:#ddd;text-shadow:0 1px 3px #000}
+#skor{position:absolute;top:13.2%;left:4%;display:flex;align-items:stretch;font-weight:900;font-size:calc(var(--u)*2.3);border-radius:4px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+#skor .t{padding:.25em .5em;color:#fff}#skor .h{background:#1d7f8f}#skor .a{background:#6b2fa0}#skor .sc{background:#111;color:#fff;padding:.25em .55em}#skor .dk{background:#f2f2f2;color:#111;padding:.25em .45em}
 #temsili{position:absolute;top:13.2%;right:4%;font-size:calc(var(--u)*1.7);font-weight:800;background:rgba(160,20,20,.85);padding:.3em .6em;border-radius:4px;letter-spacing:.05em}
 #cap{position:absolute;bottom:13%;left:6%;right:6%;text-align:center;font-weight:800;font-size:calc(var(--u)*3.6);line-height:1.18;text-shadow:0 0 6px #000,0 2px 2px #000,0 0 14px #000}
 #cap b{color:#ffd166}
@@ -65,6 +67,7 @@ canvas{display:block}
  <div id="top"><div id="logo">ANTİK STÜDYO</div><div id="ser">MİT Mİ GERÇEK Mİ?</div></div>
  <div id="prog"><div>MİT</div><div>OLAY</div><div>OYLA</div><div>KARAR</div><div>DERS</div></div>
  <div id="temsili" class="hide">TEMSİLİ CANLANDIRMA</div>
+ <div id="skor" class="hide"><span class="t h">EV</span><span class="sc" id="skn">0 – 0</span><span class="t a">DEP</span><span class="dk" id="dk">78'</span></div>
  <div id="rewtag" class="hide"></div>
  <div id="mit" class="card hide"><div class="tag">MİT</div><div class="t">"Sahaya girip futbolcuya sarılmak<br>masum bir sevinçtir."</div></div>
  <div id="ceza" class="card hide"><div class="a">CEZA: 1 MAÇ SEYİRCİSİZ</div><div class="b">Bilet geliri sıfır · Kulüp dava açtı</div></div>
@@ -122,7 +125,7 @@ const fill=new THREE.DirectionalLight(0xaac4ff,0.6);fill.position.set(60,50,-70)
 function pitchTex(){
  const cw=2300,chh=1560,c=document.createElement('canvas');c.width=cw;c.height=chh;const g=c.getContext('2d');
  const s=cw/115,ox=cw/2,oy=chh/2;const X=x=>ox+x*s,Y=z=>oy+z*s;
- for(let i=0;i<23;i++){g.fillStyle=i%2?'#3f8a3a':'#4a9a42';g.fillRect(i*cw/23,0,cw/23+1,chh)}
+ for(let i=0;i<23;i++){g.fillStyle=i%2?'#3b8436':'#4fa046';g.fillRect(i*cw/23,0,cw/23+1,chh)}
  const im=g.getImageData(0,0,cw,chh),d=im.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-.5)*16;d[i]+=n;d[i+1]+=n*1.2;d[i+2]+=n*.6}g.putImageData(im,0,0);
  g.strokeStyle='rgba(255,255,255,.93)';g.lineWidth=0.14*s;g.fillStyle='#fff';
  const L=52.5,Wd=34;g.strokeRect(X(-L),Y(-Wd),105*s,68*s);
@@ -444,6 +447,26 @@ const home=form.map((f,i)=>bot(i===0?0xf0e000:0x1d7f8f,i===0?0x222222:0xffffff,i
 const away=form.map((f,i)=>bot(i===0?0x2b2b2b:0x6b2fa0,i===0?0x2b2b2b:0x2a1440,i===0?0x2b2b2b:0xf0c419));
 const fan=bot(0xd9d4c7,0x2b3a55,0x2b3a55,1,{boot:0xdddddd});const guards=[bot(0xf2a900,0x222222,0x222222),bot(0xf2a900,0x222222,0x222222)];
 const throwers=throwerSeats.map(c=>man(isAway(c)?0x6b2fa0:homeCols[(c.k*8)|0],0x2b3a55,0x222));
+
+// temas gölgeleri (oyuncuları yere oturtur)
+const blobTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const r=g.createRadialGradient(32,32,2,32,32,30);r.addColorStop(0,'rgba(0,0,0,.55)');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c)})();
+const blobMat=new THREE.MeshBasicMaterial({map:blobTex,transparent:true,depthWrite:false});
+function addBlob(M){const b=new THREE.Mesh(new THREE.PlaneGeometry(1.1,1.1),blobMat);b.rotation.x=-Math.PI/2;b.position.y=.02;b.renderOrder=1;scene.add(b);M.blob=b}
+// hakemler
+const refs=[bot(0x111111,0x111111,0x111111,1,{boot:0x111111}),bot(0x111111,0x111111,0x111111,1,{boot:0x111111})];
+// köşe bayrakları
+for(const sx of[-1,1])for(const sz of[-1,1]){const p=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,1.5,6),white);p.position.set(sx*52.5,.75,sz*34);scene.add(p);
+ const f=new THREE.Mesh(new THREE.PlaneGeometry(.45,.32),new THREE.MeshStandardMaterial({color:0xffd400,side:2}));f.position.set(sx*52.5+.23,1.33,sz*34);scene.add(f)}
+// yedek kulübeleri
+for(const sx of[-1,1]){const g=new THREE.Group();const sh=new THREE.Mesh(new THREE.CylinderGeometry(2,2,10,16,1,true,0,Math.PI),new THREE.MeshStandardMaterial({color:0xcfe3ee,transparent:true,opacity:.55,side:2}));sh.rotation.z=Math.PI/2;sh.position.y=.2;g.add(sh);
+ const bn=new THREE.Mesh(new THREE.BoxGeometry(9.5,.5,.6),new THREE.MeshStandardMaterial({color:sx<0?0x1d7f8f:0x6b2fa0}));bn.position.set(0,.45,.6);g.add(bn);g.position.set(sx*12,0,-37);scene.add(g)}
+// tribünde sallanan bayraklar
+const flags=[];[[ -30,4],[ -10,7],[12,5],[30,8],[44,6],[52,3]].forEach(([x,r],i)=>{const geo=new THREE.PlaneGeometry(3.2,2,16,8);const c=document.createElement('canvas');c.width=128;c.height=80;const g=c.getContext('2d');
+ g.fillStyle=i%2?'#1d7f8f':'#ffffff';g.fillRect(0,0,128,80);g.fillStyle=i%2?'#ffffff':'#1d7f8f';g.fillRect(0,30,128,20);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+ const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:t,side:2,roughness:.8}));const y=0.6+r*.75,z=39.4+r*.85+.45;m.position.set(x,y+2.6,z);m.rotation.y=Math.PI;scene.add(m);
+ const pole=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,3,5),white);pole.position.set(x-1.6,y+1.9,z);scene.add(pole);flags.push({m,base:geo.attributes.position.array.slice(),ph:i})});
+[...home,...away,fan,...guards,...refs].forEach(addBlob);
+function updFlags(w,ex){flags.forEach(f=>{const a=f.m.geometry.attributes.position;for(let i=0;i<a.count;i++){const x=f.base[i*3],y=f.base[i*3+1];const k=(x+1.6)/3.2;a.array[i*3+2]=Math.sin(w*(4+ex*4)+x*2.2+f.ph+y)*.35*k*(.4+ex)}a.needsUpdate=true;f.m.geometry.computeVertexNormals()})}
 const SC=9;// scorer index in home
 // ball
 const ball=new THREE.Mesh(new THREE.SphereGeometry(.16,16,12),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.5}));ball.castShadow=true;scene.add(ball);
@@ -525,12 +548,17 @@ function sim(w,mode){curW=w;
   const x=lerp(sx,o.tx,kk),z=lerp(sz,o.tz,kk),y=lerp(sy,.05,kk)+Math.sin(kk*Math.PI)*5;
   o.m.position.set(x,y,z);if(k<1)o.m.rotation.set(w*o.spin,w*o.spin*.7,0);else o.m.rotation.set(o.kd==='b'?Math.PI/2:Math.PI/2*(o.kd==='l'?1:0),o.spin,0)});
  const excite=w>3.6&&w<12?1-sm((w-9)/3):0;updCrowd(w,excite,!(w>25&&mode.empty));
+ updFlags(w,excite);
+ {const b=ballAt(Math.min(w,4.2));const rx=w<3.6?b[0]-12:30+Math.sin(w*.3)*6,rz=w<3.6?b[2]+10:12;refs[0].g.visible=refs[1].g.visible=!(w>25&&mode.empty);
+  place(refs[0],rx,rz,faceTo(rx,rz,b[0],b[2]));pose(refs[0],w<3.6?'run':'walk',0);
+  const lx=w<3.6?Math.min(b[0],50):40;place(refs[1],lx,34.8,w<3.6?Math.PI/2:Math.PI);pose(refs[1],w<3.6?'run':'idle',0);}
+ [...home,...away,fan,...guards,...refs].forEach(M=>{if(!M.blob)return;M.blob.visible=M.g.visible&&M.g.position.y<1;M.blob.position.x=M.g.position.x;M.blob.position.z=M.g.position.z});
  return {fan:new THREE.Vector3(fx,fy+2.15,fz),sc:home[SC].g.position.clone().add(new THREE.Vector3(0,2.15,0)),g0:guards[0].g.position.clone().add(new THREE.Vector3(0,2.15,0))};
 }
 // ---------- camera keyframes
 const KF=[
  [0,[54,2.8,21],[47.2,1.4,31]],[3.2,[51,3.2,22.5],[46.5,1.4,31.5]],[6.5,[42,4.6,20],[43,1.3,34]],
- [6.51,[-260,170,300],[0,0,0]],[7.6,[-90,70,120],[10,0,0]],[8.4,[10,16,30],[40,1,6]],[9.6,[36,5,18],[46,1.5,35]],[10.6,[40,4.5,21],[47,1.3,31]],[10.61,[53,3.2,23],[47.4,1.3,30]],[12.8,[52,3.4,24.6],[47.2,1.3,30.5]],[15,[44,4,22],[41,1.2,35]],
+ [6.51,[-260,170,300],[0,0,0]],[7.4,[-90,70,120],[10,0,0]],[7.41,[2,21,-46],[10,0,0]],[8.3,[22,19,-44],[34,0,0]],[9.0,[36,17,-40],[47,0,0]],[9.6,[36,5,18],[46,1.5,35]],[10.6,[40,4.5,21],[47,1.3,31]],[10.61,[53,3.2,23],[47.4,1.3,30]],[12.8,[52,3.4,24.6],[47.2,1.3,30.5]],[15,[44,4,22],[41,1.2,35]],
  [15.01,[34,3.5,20],[45,5,38]],[20,[35.5,3.5,22.5],[45,4,36]],[24,[37,3.4,24],[45,3,34]],
  [24.01,[-24,30,-24],[10,3,30]],[27,[0,26,-30],[18,3,30]],
  [27.01,[55,3.0,21],[47.3,1.2,30]],[30.5,[50,2.6,23.5],[47.3,1.2,30]],[34,[43.5,3.0,23.5],[47.3,1.2,30]],
@@ -577,7 +605,7 @@ function worldAt(v){
  if(v<S.karar){const w=pw(TL.rew,v);return{w,mode:{intrude:true,rings:v>=36.5}}}
  if(v<S.ders)return{w:30+(v-S.karar)*.5,mode:{intrude:true,empty:true}};
  return{w:2.2+(v-S.ders)*1.0,mode:{intrude:false,noObjs:true}};}
-window.setT=function(rv){const v=warp(rv);const {w,mode}=worldAt(v);camAt(v);const P=sim(w,mode);R.render(scene,cam);overlay(v,rv);
+window.setT=function(rv){const v=warp(rv);const {w,mode}=worldAt(v);show('skor',v>=S.olay&&v<S.poll&&v<24);$('skn').textContent=(v>=S.olay&&w>=3.6)||v>=S.olay2?'1 – 0':'0 – 0';$('dk').textContent=(w<12.5?78:(w<19?'90+3':'MS'))+(w<12.5?"'":(w<19?"'":''));camAt(v);const P=sim(w,mode);R.render(scene,cam);overlay(v,rv);
  const lab=v>=S.olay&&v<S.olay2;label('fan','TARAFTAR','#ffd166','#1a1206',P.fan,lab&&w>4.4&&w<12.4&&fan.g.visible);
  label('sc','GOLCÜ','#1d7f8f','#fff',P.sc,lab&&w>4&&w<8.8);label('g','GÜVENLİK','#f2a900','#1a1206',P.g0,lab&&w>7.6&&w<12.4);
  label('th','21–22 KİŞİ','#e23b2e','#fff',new THREE.Vector3(45,9.5,40),(v>=S.olay2+2.5&&v<24)||(rv>=TL.clues[1][0]&&v<S.karar));

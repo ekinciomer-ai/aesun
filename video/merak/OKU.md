@@ -5,13 +5,13 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 
 ## Akış (bilgisayar gerekmez)
 1. Senaryo JSON'u `video/merak/kuyruk/` klasörüne push edilir.
-2. `.github/workflows/merak_uret.yml` kendiliğinden çalışır: sunucuda Gemini seslendirme (onaylı ses kütüphanesi `sunucu/tts/kutuphane`, varsayılan `puck`) → kurgu → 3D kare kare render (three.js, headless Chrome) → kodla ses tasarımı → mp4.
+2. `.github/workflows/merak_uret.yml` kendiliğinden çalışır: sunucuda Gemini seslendirme (onaylı ses kütüphanesi `sunucu/tts/kutuphane`, ses `charon`) → kurgu → 3D kare kare render (three.js, headless Chrome) → kodla ses tasarımı → mp4.
 3. Video sunucuya (`/opt/aesun/video_bekleyen/`) ve `video-onizleme` dalına gider, Yükleme Yöneticisi'ne kart teslim edilir (`sunucu/havuz/teslim/`).
 4. **Ömer onaylamadan hiçbir şey yayınlanmaz.** Plan ve yayın saati Yükleme Yöneticisi'nde.
 5. Günlük zamanlanmış görev her gün 2 yeni senaryo yazar (konu bankasından), kuyruğa koyar.
 
 ## Ses
-- gTTS ve edge-tts **kullanılmaz** (Ömer 17.11.2026: gerçekçi değil). Ses yalnız onaylı kütüphaneden (Gemini: puck = canlı Shorts anlatıcısı, charon = tok, kore = kadın). Senaryoda `"ses":"puck"`. Video başına **tek** Gemini isteği: `canli` yönergesi cümleden cümleye ton değiştirir (soruda merak, sayıda vurgu, karşılaştırmada oyunbaz, kapanışta sıcak); ses sonra faster-whisper ile parçalara bölünür. Neden: ücretsiz anahtar günde ~10 istek veriyor; parça başına istek günde 1 video demek. Anahtar: kasa `gemini_api_anahtar_kozmos` (yoksa ortak anahtar).
+- gTTS ve edge-tts **kullanılmaz** (Ömer 17.11.2026: gerçekçi değil). Ses yalnız onaylı kütüphaneden (Gemini: puck = canlı Shorts anlatıcısı, charon = tok, kore = kadın). **Ömer 22.11.2026: ses Charon (tok erkek anlatıcı); bütün bölüm tek ses, tek model (Gemini TTS), araya farklı ses girmez.** Senaryoda `"ses":"charon"`. Video başına **tek** Gemini isteği: `canli` yönergesi cümleden cümleye ton değiştirir (soruda merak, sayıda vurgu, karşılaştırmada oyunbaz, kapanışta sıcak); ses sonra faster-whisper ile parçalara bölünür. Neden: ücretsiz anahtar günde ~10 istek veriyor; parça başına istek günde 1 video demek. Anahtar: kasa `gemini_api_anahtar_kozmos` (yoksa ortak anahtar).
 
 ## Senaryo kuralları
 - 8–10 parça, toplam ~140–160 kelime (≈ 55–65 sn). Parça başına 1–2 cümle.

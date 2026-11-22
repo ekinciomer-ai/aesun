@@ -1,0 +1,115 @@
+{
+ "kanal": "NY",
+ "seri": "İllere Göre Yemekler",
+ "dil": "tr",
+ "baslik_bant": "BU LEZZET HANGİ İLİN?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "40 TANE",
+   "ust": "BİR KAŞIĞA",
+   "alt": "HANGİ İLİN? CEVAP SONDA",
+   "alt_kelime": "kırk"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU KEBAP HANGİ İLİN?",
+   "siklar": [
+    "Amasya",
+    "Sivas",
+    "Tokat",
+    "Çorum"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/tokat_kebabi.jpg"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Tokat"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU TAVA CİĞER HANGİ İLİN?",
+   "siklar": [
+    "Kırklareli",
+    "Tekirdağ",
+    "Edirne",
+    "İstanbul"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/edirne_ciger.jpg"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Edirne"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU MANTI HANGİ İLİN?",
+   "siklar": [
+    "Sivas",
+    "Kayseri",
+    "Niğde",
+    "Yozgat"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/kayseri_manti.jpg"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Kayseri"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "SIRADAKİ LEZZETİ YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "TÜRKPATENT – Tokat Kebabı coğrafi işaret belgesi, tescil no 188, mahreç işareti, koruma tarihi 26.08.2013; kuzu eti, patlıcan, patates, domates, sarımsak, Tokat biberi; ocakta şişler asılarak pişirilir https://ci.turkpatent.gov.tr/Files/GeographicalSigns/188.pdf",
+  "Haber7 – Coğrafi işaret tescilli lezzet: Tokat kebabı https://www.haber7.com/seyahat/haber/2987499-cografi-isaret-tescilli-lezzet-tokat-kebabi",
+  "Küre Ansiklopedi – Edirne Tava Ciğeri: tescil no 128 (mahreç, 2010); ciğer 1 mm'den ince dilimlenir, kızarmış kuru Karaağaç biberiyle servis https://kureansiklopedi.com/tr/detay/edirne-tava-cigeri-c2185",
+  "CNN Türk – Edirne tava ciğeri https://www.cnnturk.com/yasam/edirneye-gelen-tadina-bakmadan-donmuyor-essiz-lezzet-tava-cigeri-icin-tavan-fiyat-uygulamasi-2026388",
+  "Küre Ansiklopedi – Kayseri Mantısı: 2009'da coğrafi işaretle tescil; bir kaşığa kırk adet sığacak küçüklükte olması makbul https://kureansiklopedi.com/tr/detay/kayseri-mantisi-49c06",
+  "Posta – Bir kaşığa 40 tane sığan mantı https://www.posta.com.tr/galeri/bir-kasiga-40-tane-sigan-manti-tarifi-bir-daha-asla-hazir-almayacaksiniz-2969375",
+  "Fotoğraflar: Wikimedia Commons serbest lisanslı (lisans/yazar açıklamaya otomatik eklenir)",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bir kaşığa 40 tanesi sığan yemek hangi ilin? Cevap sonda!",
+  "aciklama": "Taş fırında asılarak pişen kebap, incecik tava ciğer ve bir kaşığa kırk tanesi sığan minik mantı... Bu lezzetler hangi ile ait? Cevaplar videonun içinde.\n\n💬 Kaç doğru yaptın? Sıradaki lezzeti yorumlara yaz.",
+  "etiketler": [
+   "yöresel yemekler",
+   "türk mutfağı",
+   "hangi ilin",
+   "tokat kebabı",
+   "edirne ciğer",
+   "kayseri mantısı",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Bir kaşığa 40 tanesi sığan yemek hangi ilin? 🥟 Cevap sonda! #yöreselyemek #türkmutfağı #quiz",
+  "amac": "İllere göre yemekler serisi; coğrafi işaretli lezzetler, sona saklanan cevap ve yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_YM_05_LEZZET"
+}

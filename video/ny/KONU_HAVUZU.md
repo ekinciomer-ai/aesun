@@ -47,3 +47,8 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_BL_03_PLAKA · Plaka kodlarının sırrı: Zonguldak 67, Düzce 81, Kahramanmaraş 46, Mersin 33 (İçel) — kanca: "Mersin M ile başlıyor, neden 33?"
 - [x] NY_SQ_03_GOL · Bilgi şıklı soru "Bu göl hangi ilde?": Uzungöl (Trabzon), Salda (Burdur), Nemrut Krater Gölü (Bitlis) — tuzak: Adıyaman
 - Not: EN_05 (~43 sn) ve BL_03 (~41 sn) hedefin (45-60 sn) biraz altında; sonraki partilerde metni biraz uzat.
+
+## Parti 9 — Karışık formatlar (2026-11-22)
+- [~] NY_YM_05_LEZZET · Bu lezzet hangi ilin: Tokat kebabı (Tokat), Edirne tava ciğeri (Edirne), Kayseri mantısı (Kayseri) — kanca: "Bir kaşığa 40 tanesi sığmalı"
+- [~] NY_HF_04_RENK · Görsel hafıza "Renkli iller testi": Diyarbakır, Çanakkale, Sinop (+Eskişehir, Adana)
+- [~] NY_BL_04_UNESCO · UNESCO'nun ilk 3 Türk mirası (1985): İstanbul, Göreme-Kapadokya, Divriği — kanca: "Üçüncüsünde 800 yıllık hastane var"

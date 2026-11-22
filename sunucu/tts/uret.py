@@ -288,13 +288,25 @@ def main():
         is_ = json.load(open(jf, encoding="utf-8"))
         global DIL; DIL = is_.get("dil", "tr")
         is_.setdefault("motor", k.get("varsayilan_motor", "gemini")); is_.setdefault("ses", k.get("varsayilan_ses", "charon"))
-        for parca in is_["parcalar"]:
-            with tempfile.TemporaryDirectory() as tmp:
-                try:
-                    yol, n, yedek = uret(is_, parca, tmp)
-                    print(f"NOT: {is_['kod']}/{parca['ad']} tamam ({n} cümle{', ' + str(yedek) + ' yedek' if yedek else ''})")
-                except Exception as e:
-                    print(f"NOT: HATA {is_['kod']}/{parca['ad']}: {str(e)[:160]}")
+        hata = isle(is_)
+        # "yedek_motor": "google" (isteğe bağlı): Gemini'de bir parça bile okunamazsa (ör. günlük kota) BÜTÜN iş
+        # Google Cloud (Chirp 3 HD, aynı ses adı) ile baştan okunur; böylece videoda iki farklı ses karışmaz.
+        if hata and is_.get("motor") == "gemini" and is_.get("yedek_motor") == "google" and os.environ.get("GOOGLE_TTS_KEY"):
+            print(f"NOT: {is_['kod']} Gemini ile tamamlanamadı, bütün parçalar Google Cloud ile yeniden okunuyor")
+            is_["motor"] = "google"; is_["oto_ton"] = False
+            isle(is_)
+
+def isle(is_):
+    hata = 0
+    for parca in is_["parcalar"]:
+        with tempfile.TemporaryDirectory() as tmp:
+            try:
+                yol, n, yedek = uret(is_, parca, tmp)
+                print(f"NOT: {is_['kod']}/{parca['ad']} tamam ({n} cümle{', ' + str(yedek) + ' yedek' if yedek else ''})")
+            except Exception as e:
+                hata += 1
+                print(f"NOT: HATA {is_['kod']}/{parca['ad']}: {str(e)[:160]}")
+    return hata
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--dene":  # ağsız ayrıştırma denemesi

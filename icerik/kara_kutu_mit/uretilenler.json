@@ -57,5 +57,32 @@
    "mit_no": 9,
    "render_no": 10
   }
- ]
+ ],
+ "ertelenen": [
+  {
+   "kod": "KK_MIT_10_SIGORTA",
+   "mit": "Sigortan varsa cebinden para çıkmaz",
+   "mit_no": 10,
+   "render_no": 11,
+   "tts": "KK_MIT_10",
+   "kaynak": "Yargıtay 17. HD E.2013/12195 K.2013/15257 (onama) https://lexara.com.tr/karar/20287259"
+  },
+  {
+   "kod": "KK_MIT_11_TELEFON",
+   "mit": "Telefonla konuşmak sadece idari para cezasıdır",
+   "mit_no": 11,
+   "render_no": 12,
+   "tts": "KK_MIT_11",
+   "kaynak": "Yargıtay 12. CD E.2023/3604 K.2024/3813 (onama) https://lexara.com.tr/karar/413010"
+  },
+  {
+   "kod": "KK_MIT_12_ARIZALI_ISIK",
+   "mit": "Trafik ışığı arızalıysa kimse kusurlu değildir",
+   "mit_no": 12,
+   "render_no": 13,
+   "tts": "KK_MIT_12",
+   "kaynak": "Danıştay 15. D E.2014/626 K.2017/796 (onama) https://lexara.com.tr/karar/18748162"
+  }
+ ],
+ "ertelenen_not": "22.11.2026: Senaryo + sahne hazır (bolumler_mit10_12.json, mk_ep2.py, scene.html upd4/upd2). TTS sunucuda 3 denemede çıktı vermedi (docker çalışması anında bitti, gunluk.txt'de parça satırı yok). Sonraki oturum: tts_kuyruk/tamam/KK_MIT_10..12.json'u kuyruğa geri taşı, sesler gelince `python3 mk_ep2.py bolumler_mit10_12.json --tl`, test kareleri, bitir.sh. Bilinen ince ayar: MİT #11'de minibüs kameraya çok yakın (camRest), MİT #12 kanca karesi karanlık (camKaza)."
 }

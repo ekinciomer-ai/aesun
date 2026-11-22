@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-22T19:37+03:00",
+ "olusturma": "2026-11-22T22:31+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -645,7 +645,7 @@
    "neden": "videoların %100'i tuttu (eşik 212 izlenme / 48 sa)",
    "olculen": 6,
    "erken": 2,
-   "medyan_48sa": 446,
+   "medyan_48sa": 448,
    "tutma_orani": 100,
    "izlenme_yuzde": 47,
    "en_iyi": {
@@ -704,7 +704,7 @@
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 616,
    "tutma_orani": 50,
    "izlenme_yuzde": 62,
@@ -781,12 +781,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 596,
+   "medyan_48sa": 674,
    "tutma_orani": 50,
    "izlenme_yuzde": 32,
    "en_iyi": {
     "baslik": "Marshmallow Testi Bir Yalan mıydı? 🍬 İrade Efsanesinin Çöküşü #shorts",
-    "i48": 1076
+    "i48": 1232
    },
    "kaydirmadan_izleme_yuzde": 39
   },
@@ -796,7 +796,7 @@
    "karar": "DENE",
    "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 0,
-   "erken": 3,
+   "erken": 4,
    "medyan_48sa": null,
    "tutma_orani": null,
    "izlenme_yuzde": null,
@@ -836,15 +836,15 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 188,
+  "Estudio Antiguo": 126,
+  "Antik Stüdyo": 637,
+  "Yolu Seç !": 262,
   "Ömür Dediğin": 50,
-  "LVL MAX": 50,
+  "Ancient Studio": 188,
   "Kozmos Lab": 93,
   "Kozmos Lab TR": 212,
-  "Antik Stüdyo": 637,
-  "Estudio Antiguo": 126,
-  "Nasıl Yapıldı": 119,
-  "Yolu Seç !": 262
+  "Nasıl Yapıldı": 135,
+  "LVL MAX": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -960,7 +960,7 @@
    },
    "19:00": {
     "n": 8,
-    "medyan": 436
+    "medyan": 438
    },
    "21:00": {
     "n": 6,
@@ -1006,13 +1006,13 @@
    },
    "20:00": {
     "n": 4,
-    "medyan": 615
+    "medyan": 618
    }
   },
   "Nasıl Yapıldı": {
    "19:00": {
     "n": 2,
-    "medyan": 596
+    "medyan": 674
    }
   }
  },
@@ -1228,7 +1228,7 @@
    "uzun_vid": "9a9BTiC6ics",
    "uzun_baslik": "Osmanlı dünyayı 5 boğazdan nasıl kilitlemeye çalıştı?",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 23,
+   "uzun_izlenme": 22,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
@@ -1251,7 +1251,7 @@
     {
      "vid": "ZMMptkEnGMs",
      "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
-     "izlenme": 194,
+     "izlenme": 193,
      "durum": "Yayında"
     },
     {
@@ -1291,7 +1291,7 @@
     {
      "vid": "ZMMptkEnGMs",
      "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
-     "izlenme": 194,
+     "izlenme": 193,
      "durum": "Yayında"
     },
     {
@@ -1572,6 +1572,14 @@
    "baslik": "Açık bıraktığın bildirim sekmeleri anlık IQ skorunu 10 puan düşürüyor 🧠💻 #shorts",
    "tarih": "2026-12-02",
    "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Ömür Dediğin",
+   "vid": "fe1xIdsG8CE",
+   "baslik": "Ninemin güneşte salçası 🍅 Eskiden salça nasıl yapılırdı?",
+   "tarih": "2026-11-23",
+   "neden": "odak dönemi: Ömür Dediğin haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   }
  ],
  "bulgular": [
@@ -1581,7 +1589,7 @@
   "Estudio Antiguo: son 6 Short'tan 0 tanesi tuttu (eşik 126 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 93 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 212 izlenme / 48 sa).",
-  "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 119 izlenme / 48 sa).",
+  "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 3 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Ancient Studio · Gündem + Tarih: ARTIR — videoların %50'i tuttu (eşik 188 izlenme / 48 sa).",
@@ -1606,7 +1614,7 @@
   "Kozmos Lab: en iyi yayın saati şimdilik 02:00 (medyan 18 izlenme, 6 video).",
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 88 izlenme, 2 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",
-  "Nasıl Yapıldı: en iyi yayın saati şimdilik 19:00 (medyan 596 izlenme, 2 video).",
+  "Nasıl Yapıldı: en iyi yayın saati şimdilik 19:00 (medyan 674 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %72 izleniyor, tutmayanlar %49 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %43 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %62 izleniyor, tutmayanlar %61 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",

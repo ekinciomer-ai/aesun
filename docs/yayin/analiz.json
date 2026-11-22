@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-22T18:06+03:00",
+ "olusturma": "2026-11-22T19:06+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -656,6 +656,18 @@
   },
   {
    "kanal": "Kozmos Lab TR",
+   "seri": "Drone Nasıl Çalışır?",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
+   "kanal": "Kozmos Lab TR",
    "seri": "Enerji Üretim Kaynakları",
    "karar": "SÜRDÜR",
    "neden": "tutma oranı %33",
@@ -774,7 +786,7 @@
    "izlenme_yuzde": 32,
    "en_iyi": {
     "baslik": "Marshmallow Testi Bir Yalan mıydı? 🍬 İrade Efsanesinin Çöküşü #shorts",
-    "i48": 1075
+    "i48": 1076
    },
    "kaydirmadan_izleme_yuzde": 39
   },
@@ -824,15 +836,15 @@
   }
  ],
  "esikler": {
-  "LVL MAX": 50,
   "Kozmos Lab TR": 212,
-  "Antik Stüdyo": 637,
-  "Ancient Studio": 188,
-  "Kozmos Lab": 93,
-  "Nasıl Yapıldı": 119,
-  "Estudio Antiguo": 126,
   "Ömür Dediğin": 50,
-  "Yolu Seç !": 262
+  "Nasıl Yapıldı": 119,
+  "Ancient Studio": 188,
+  "Antik Stüdyo": 637,
+  "LVL MAX": 50,
+  "Yolu Seç !": 262,
+  "Kozmos Lab": 93,
+  "Estudio Antiguo": 126
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -994,7 +1006,7 @@
    },
    "20:00": {
     "n": 4,
-    "medyan": 614
+    "medyan": 615
    }
   },
   "Nasıl Yapıldı": {
@@ -1137,7 +1149,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2792,
+     "izlenme": 2793,
      "durum": "Yayında"
     },
     {
@@ -1216,12 +1228,12 @@
    "uzun_vid": "9a9BTiC6ics",
    "uzun_baslik": "Osmanlı dünyayı 5 boğazdan nasıl kilitlemeye çalıştı?",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 22,
+   "uzun_izlenme": 23,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2792,
+     "izlenme": 2793,
      "durum": "Yayında"
     },
     {
@@ -1239,7 +1251,7 @@
     {
      "vid": "ZMMptkEnGMs",
      "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
-     "izlenme": 193,
+     "izlenme": 194,
      "durum": "Yayında"
     },
     {
@@ -1261,7 +1273,7 @@
     {
      "vid": "AtvyZhEtBkk",
      "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-     "izlenme": 2792,
+     "izlenme": 2793,
      "durum": "Yayında"
     },
     {
@@ -1279,7 +1291,7 @@
     {
      "vid": "ZMMptkEnGMs",
      "baslik": "İstanbul Boğazı 139 günde nasıl kilitlendi? 🏰 | Fatih ve Boğazkesen (1452) #shorts",
-     "izlenme": 193,
+     "izlenme": 194,
      "durum": "Yayında"
     },
     {
@@ -1384,7 +1396,7 @@
    "uzun_vid": "oKb9BFM4jRg",
    "uzun_baslik": "How Does a Wind Turbine Work? A Piece-by-Piece 3D Teardown | NREL 5 MW",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 15,
+   "uzun_izlenme": 16,
    "baglanacak_shortlar": [
     {
      "vid": "cfbwB6z1_cA",
@@ -1425,36 +1437,6 @@
   }
  ],
  "eylemler": [
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": "jKPKsl3csuo",
-   "neden": "Ömer talebi: Bölüm 1 yorum gelene kadar 2A yayını durduruldu"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": "V3komFR9kpA",
-   "neden": "Ömer talebi: Bölüm 1 yorum gelene kadar 2B yayını durduruldu"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": "g_LE33vsydo",
-   "neden": "Ömer talebi: Bölüm 2 bekletildiği için 3A ertelendi"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": "JMUUKKpw3xg",
-   "neden": "Ömer talebi: Bölüm 2 bekletildiği için 3B ertelendi"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": "r2J8hH8vAZk",
-   "neden": "Ömer talebi: Bölüm 2 bekletildiği için 3C ertelendi"
-  },
   {
    "tur": "KONTROL",
    "kanal": "Antik Stüdyo (@antikstudyo)",
@@ -1520,6 +1502,20 @@
    "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
   {
+   "tur": "ERTELE",
+   "kanal": "Kozmos Lab TR",
+   "vid": "k_KKJUSIjhI",
+   "baslik": "Elektrikli araba 1 kWh elektrikle kaç km gider? 🚗⚡ #shorts",
+   "neden": "'Biliyor muydun?' serisi durduruldu; bu slotu Bu Matematik Hayatında Nerede? kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Kozmos Lab TR",
+   "vid": "hCXKVNENRGQ",
+   "baslik": "Uzay İstasyonu Türkiye'yi kaç saniyede geçer? 🛰️ #shorts",
+   "neden": "'Biliyor muydun?' serisi durduruldu; bu slotu Bu Matematik Hayatında Nerede? kullanır"
+  },
+  {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Ancient Studio",
    "vid": "uj0xUXqOPKo",
@@ -1538,9 +1534,25 @@
   {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Kozmos Lab TR",
+   "vid": "hCXKVNENRGQ",
+   "baslik": "Uzay İstasyonu Türkiye'yi kaç saniyede geçer? 🛰️ #shorts",
+   "tarih": "2026-11-23",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
    "vid": "yCiaMGpe34E",
    "baslik": "Yarın gece Süper Ay: ne zaman, nereye bakmalı? 🌕 #shorts",
    "tarih": "2026-11-23",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "k_KKJUSIjhI",
+   "baslik": "Elektrikli araba 1 kWh elektrikle kaç km gider? 🚗⚡ #shorts",
+   "tarih": "2026-11-24",
    "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
@@ -1632,7 +1644,7 @@
   "Yolu Seç !: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %45 (hedef ≥%70).",
   "Ömür Dediğin: tutan Short'lar ortalama %50 izleniyor, tutmayanlar %102 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Ömür Dediğin: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %24 (hedef ≥%70).",
-  "Uzun videolar (13 yayında): medyan 15 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
+  "Uzun videolar (13 yayında): medyan 16 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
   "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-23, 2026-11-24."
  ],
  "en_iyi": [

@@ -41,8 +41,8 @@ for kod, it in sorted(idx.items()):
         it["kontrol"] = {"engel": engel, "uyari": uyari, "olcum": kk.get("olcum", {})}
         it["durum"] = "kontrol_hatasi" if engel else "onay_bekliyor"
         Y.olay(it, "yeniden kontrol: " + ("engel: " + "; ".join(engel) if engel else "geçti"))
-        Y.kaydet(idx); idx = Y.yukle()
         print(f"NOT: {kod}: yeniden kontrol → {it['durum']}" + (f" · {'; '.join(engel)[:150]}" if engel else ""))
+Y.kaydet(idx)
 with contextlib.redirect_stdout(io.StringIO()): Y.planla(sessiz=True)
 idx = Y.yukle()
 for kod, it in sorted(idx.items()):

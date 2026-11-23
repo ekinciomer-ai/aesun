@@ -100,7 +100,7 @@ jobs:
           cp -r "/tmp/yumurta/stories/$PROJE/voice" /tmp/hazir_out/
           cp -r "/tmp/yumurta/stories/$PROJE/audio" /tmp/hazir_out/
           cp /tmp/audio_ebur128.txt /tmp/hazir_out/
-          [ -f "/tmp/yumurta/stories/$PROJE/out/stills.jpg" ] && cp "/tmp/yumurta/stories/$PROJE/out/stills.jpg" /tmp/hazir_out/
+          if [ -f "/tmp/yumurta/stories/$PROJE/out/stills.jpg" ]; then cp "/tmp/yumurta/stories/$PROJE/out/stills.jpg" /tmp/hazir_out/; fi
       - id: plan
         env:
           PARCA: ${{ inputs.parca }}

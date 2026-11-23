@@ -41,3 +41,21 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_HF_03_HARITA · Görsel hafıza "5 saniyelik harita testi": Mardin, Muğla, Artvin (+Ankara, Konya)
 - [x] NY_YM_04_TATLI · Bu tatlı hangi ilin: Katmer (Gaziantep), Pişmaniye (Kocaeli), Kemalpaşa (Bursa)
 - Not: havuz "aynı konu" kontrolü `baslik_bant` ile yapılıyor; her videoda farklı bant kullan (YM_03 bu yüzden reddedildi).
+
+## Parti 8 — Karışık formatlar (2026-11-21)
+- [x] NY_EN_05_NUFUS · En kalabalık 5 il (TÜİK ADNKS 2025) — kanca: "Türkiye'nin üçte birinden fazlası sadece 5 ilde"
+- [x] NY_BL_03_PLAKA · Plaka kodlarının sırrı: Zonguldak 67, Düzce 81, Kahramanmaraş 46, Mersin 33 (İçel) — kanca: "Mersin M ile başlıyor, neden 33?"
+- [x] NY_SQ_03_GOL · Bilgi şıklı soru "Bu göl hangi ilde?": Uzungöl (Trabzon), Salda (Burdur), Nemrut Krater Gölü (Bitlis) — tuzak: Adıyaman
+- Not: EN_05 (~43 sn) ve BL_03 (~41 sn) hedefin (45-60 sn) biraz altında; sonraki partilerde metni biraz uzat.
+
+## Parti 9 — Karışık formatlar (2026-11-22)
+- [x] NY_YM_05_LEZZET · Bu lezzet hangi ilin: Tokat kebabı (Tokat), Edirne tava ciğeri (Edirne), Kayseri mantısı (Kayseri) — kanca: "Bir kaşığa 40 tanesi sığmalı"
+- [x] NY_HF_04_RENK · Görsel hafıza "Renkli iller testi": Diyarbakır, Çanakkale, Sinop (+Eskişehir, Adana)
+- [x] NY_BL_04_UNESCO · UNESCO'nun ilk 3 Türk mirası (1985): İstanbul, Göreme-Kapadokya, Divriği — kanca: "Üçüncüsünde 800 yıllık hastane var"
+- Not: Gemini YM_05 için ilk denemede 8 sn kısa ses döndürdü (hizalama hatası); metin hafif değiştirilip yeniden okutuldu. Süreler 64/73/79 sn — hedefin üstünde; sonraki partilerde metni kısalt.
+
+## Parti 10 — Karışık formatlar (2026-11-23)
+- [x] NY_EN_06_BARAJ · En büyük 3 baraj gölü: Ilısu 313, Keban 675, Atatürk 817 km² — kanca: "Türkiye'nin 3. büyük gölünü insanlar yaptı". Karakaya (268/298) ve Hirfanlı (263–280) kaynaklarda çelişkili olduğu için liste 3'le sınırlandı.
+- [x] NY_SQ_04_SELALE · Bilgi şıklı soru "Bu şelale hangi ilde?": Muradiye (Van), Tortum (Erzurum), Kapuzbaşı (Kayseri) — tuzak: Niğde/Adana
+- [x] NY_HF_05_OYUN · Görsel hafıza "Haritada hafıza oyunu": Hatay, Afyonkarahisar, Muş (+Sivas, Balıkesir) — turuncu/mor/mavi soruldu
+- Not: Süreler 55/62/65 sn; havuza teslim, plan 17-19.12 13:00 (onay bekliyor). SQ_04 hedefin biraz üstünde.

@@ -1,0 +1,191 @@
+[
+ {
+  "N": 11,
+  "kod": "KK_MIT_10",
+  "havuz": "KK_MIT_10_SIGORTA",
+  "sc": 4,
+  "upd": "upd2",
+  "tiL": 5.0,
+  "impKey": "çarpıyor",
+  "hookNo": "MİT #10",
+  "hookMain": "“SİGORTAN<br>VARSA<br><span style=\"color:#ffb15c;font-size:1.25em\">CEBİNDEN</span><br>PARA ÇIKMAZ”",
+  "pollQ": "ZARARI SONUNDA KİM ÖDEDİ?",
+  "opts": [
+   [
+    "A",
+    "Sigorta ödedi, iş bitti"
+   ],
+   [
+    "B",
+    "Kimse ödemedi"
+   ],
+   [
+    "C",
+    "Sigorta ödedi, sonra geri aldı"
+   ]
+  ],
+  "sonuc": "SONUÇ: 4.388 TL ARAÇ SAHİBİNDEN",
+  "dogru": "Doğru şık: C",
+  "ders1": "Alkollü kazada sigorta önce öder, sonra <b style=\"color:#ffb15c\">parayı senden geri ister.</b>",
+  "ders2": "🚫 İçkiliysen<br><b style=\"color:#34c759\">direksiyona oturma.</b>",
+  "camKaza": "const u=sm(t/T11.kaza);P=new THREE.Vector3(lerp(-14,-9,u),lerp(18,8,u),lerp(-40,-28,u));L=new THREE.Vector3(0,0,-7);f=46;",
+  "camRest": "P=new THREE.Vector3(-9,8,-28);L=new THREE.Vector3(0,0,-7);f=46;",
+  "camKarar": "P=new THREE.Vector3(-8,6.5,-20);L=new THREE.Vector3(0,.5,-5);",
+  "exp": 1.0,
+  "black": "KARŞI ARAÇ<br><span style=\"color:#ff453a\">HASAR GÖRDÜ</span>",
+  "tagsK": "tg+=tag3(st.car,1.9,'ALKOLLÜ SÜRÜCÜ','#ff453a');tg+=tag3(st.W,1.9,'KARŞI ARAÇ','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.car,1.9,'KUSUR KİMDE?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Sürücü alkollü",
+    "Sürücü alkollü"
+   ],
+   [
+    "Kusur yüzde",
+    "Kusur %100 onda"
+   ],
+   [
+    "Bilirkişiye",
+    "Kaza sadece alkol yüzünden"
+   ]
+  ],
+  "reasons": [
+   [
+    "Sigorta,",
+    "Sigorta karşı aracın zararını ödedi"
+   ],
+   [
+    "Kaza tamamen",
+    "Kaza tamamen alkol yüzünden"
+   ]
+  ],
+  "hukumKey": "Dört bin",
+  "src": "Yargıtay"
+ },
+ {
+  "N": 12,
+  "kod": "KK_MIT_11",
+  "havuz": "KK_MIT_11_TELEFON",
+  "sc": 3,
+  "upd": "upd2",
+  "tiL": 6.0,
+  "impKey": "çarpıyor",
+  "hookNo": "MİT #11",
+  "hookMain": "“TELEFONLA<br>KONUŞMAK<br><span style=\"color:#ffb15c;font-size:1.25em\">SADECE</span><br>TRAFİK CEZASI”",
+  "pollQ": "SÜRÜCÜYE NE OLDU?",
+  "opts": [
+   [
+    "A",
+    "Sadece trafik cezası"
+   ],
+   [
+    "B",
+    "Para cezası aldı"
+   ],
+   [
+    "C",
+    "Hapis cezası aldı"
+   ]
+  ],
+  "sonuc": "SONUÇ: 2 YIL 2 AY 20 GÜN HAPİS",
+  "dogru": "Doğru şık: C",
+  "ders1": "Telefon, kazada <b style=\"color:#ffb15c\">hapis cezasını ağırlaştırabilir.</b>",
+  "ders2": "📵 Telefonu bırak,<br><b style=\"color:#34c759\">yola bak.</b>",
+  "camKaza": "const u=sm(t/T12.kaza);P=new THREE.Vector3(lerp(-20,-13,u),lerp(26,10,u),lerp(-5,8,u));L=new THREE.Vector3(-3.5,0,30);f=46;",
+  "camRest": "const bz=Math.min(st.MB.position.z,24);P=new THREE.Vector3(-12,8,bz-14);L=new THREE.Vector3(-3.5,1,bz+10);f=46;",
+  "camKarar": "P=new THREE.Vector3(-11,7,12);L=new THREE.Vector3(-3.5,1,30);",
+  "exp": 1.3,
+  "black": "İKİ YOLCU<br><span style=\"color:#ff453a\">AĞIR YARALI</span>",
+  "tagsK": "tg+=tag3(st.MB,3.2,'SÜRÜCÜ TELEFONDA','#ff453a');tg+=tag3(st.T,4.2,'DURAN TIR','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.MB,3.2,'DİKKAT NEREDE?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Tır,",
+    "Tır önceki kaza yüzünden duruyordu"
+   ],
+   [
+    "Kusurun",
+    "Kusurun tamamı minibüs sürücüsünde"
+   ],
+   [
+    "Ve sürücü",
+    "Kazaya kadar telefonla konuştu"
+   ]
+  ],
+  "reasons": [
+   [
+    "İlk mahkeme",
+    "İlk mahkeme: 4.000 TL para cezası"
+   ],
+   [
+    "Telefonla konuşup",
+    "Telefon + dikkatsizlik: bilinçli taksir"
+   ]
+  ],
+  "hukumKey": "Ceza ağırlaştı",
+  "src": "Yargıtay"
+ },
+ {
+  "N": 13,
+  "kod": "KK_MIT_12",
+  "havuz": "KK_MIT_12_ARIZALI_ISIK",
+  "sc": 0,
+  "upd": "upd4",
+  "tiL": 8.7,
+  "impKey": "çarpışıyor",
+  "hookNo": "MİT #12",
+  "hookMain": "“IŞIK<br>ARIZALIYSA<br><span style=\"color:#ffb15c;font-size:1.25em\">KİMSE</span><br>ÖDEMEZ”",
+  "pollQ": "ZARARI KİM ÖDEDİ?",
+  "opts": [
+   [
+    "A",
+    "Kimse, kader"
+   ],
+   [
+    "B",
+    "Karşı araç sürücüsü"
+   ],
+   [
+    "C",
+    "Işıktan sorumlu idare"
+   ]
+  ],
+  "sonuc": "SONUÇ: 15.380 TL İDARE ÖDEYECEK",
+  "dogru": "Doğru şık: C",
+  "ders1": "Arızalı ışık <b style=\"color:#ffb15c\">kader değil.</b>",
+  "ders2": "🚦 Arıza varsa,<br><b style=\"color:#34c759\">zararı idare öder.</b>",
+  "camKaza": "const u=sm(t/T13.kaza);P=new THREE.Vector3(lerp(-24,-17,u),lerp(26,15,u),lerp(-22,-13,u));L=new THREE.Vector3(-2,0,0);f=46;",
+  "camRest": "P=new THREE.Vector3(-17,15,-13);L=new THREE.Vector3(-2,0,0);f=46;",
+  "camKarar": "P=new THREE.Vector3(-13,11,-9);L=new THREE.Vector3(-1,0,2);",
+  "exp": 1.0,
+  "black": "OTOMOBİL<br><span style=\"color:#ff453a\">HASAR GÖRDÜ</span>",
+  "tagsK": "tg+=tag3(st.B,1.9,'YEŞİL YANAN SÜRÜCÜ','#34c759','#111');tg+=tag3(st.A,1.9,'DİĞER YOLDAN GELEN','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.A,1.9,'IŞIK ÇALIŞIYOR MU?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Sürücüye",
+    "Sürücüye yeşil yanıyordu"
+   ],
+   [
+    "Bilirkişi",
+    "Sinyal sisteminde arıza"
+   ],
+   [
+    "Kaza, bu",
+    "Kaza arıza yüzünden"
+   ]
+  ],
+  "reasons": [
+   [
+    "Arıza,",
+    "Arıza: idarenin hizmet kusuru"
+   ],
+   [
+    "Kusurun",
+    "Kusurun %100'ü idarede"
+   ]
+  ],
+  "hukumKey": "On beş bin",
+  "src": "Danıştay"
+ }
+]

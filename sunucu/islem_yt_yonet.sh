@@ -86,7 +86,7 @@ def yanitlari_gonder(ad, tok):
                 try:
                     v_mevcut = api(f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={y['vid']}", tok)["items"][0]
                     sn_m = v_mevcut["snippet"]
-                    if "Tarihî Not (Safevî Devleti" not in (sn_m.get("description") or ""):
+                    if y.get("aciklamaya_ekle") and "Tarihî Not (Safevî Devleti" not in (sn_m.get("description") or ""):
                         sn_m["description"] = ((sn_m.get("description") or "").rstrip() + "\n\n" + y["yanit"])[:4900]
                         api("https://www.googleapis.com/youtube/v3/videos?part=snippet", tok, {"id": y["vid"], "snippet": sn_m}, "PUT")
                 except Exception:

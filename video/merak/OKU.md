@@ -5,13 +5,13 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 
 ## Akış (bilgisayar gerekmez)
 1. Senaryo JSON'u `video/merak/kuyruk/` klasörüne push edilir.
-2. `.github/workflows/merak_uret.yml` kendiliğinden çalışır: sunucuda Gemini seslendirme (onaylı ses kütüphanesi `sunucu/tts/kutuphane`, varsayılan `puck`) → kurgu → 3D kare kare render (three.js, headless Chrome) → kodla ses tasarımı → mp4.
+2. `.github/workflows/merak_uret.yml` kendiliğinden çalışır: sunucuda Gemini seslendirme (onaylı ses kütüphanesi `sunucu/tts/kutuphane`, ses `charon`) → kurgu → 3D kare kare render (three.js, headless Chrome) → kodla ses tasarımı → mp4.
 3. Video sunucuya (`/opt/aesun/video_bekleyen/`) ve `video-onizleme` dalına gider, Yükleme Yöneticisi'ne kart teslim edilir (`sunucu/havuz/teslim/`).
 4. **Ömer onaylamadan hiçbir şey yayınlanmaz.** Plan ve yayın saati Yükleme Yöneticisi'nde.
 5. Günlük zamanlanmış görev her gün 2 yeni senaryo yazar (konu bankasından), kuyruğa koyar.
 
 ## Ses
-- gTTS ve edge-tts **kullanılmaz** (Ömer 17.11.2026: gerçekçi değil). Ses yalnız onaylı kütüphaneden (Gemini: puck = canlı Shorts anlatıcısı, charon = tok, kore = kadın). Senaryoda `"ses":"puck"`. Video başına **tek** Gemini isteği: `canli` yönergesi cümleden cümleye ton değiştirir (soruda merak, sayıda vurgu, karşılaştırmada oyunbaz, kapanışta sıcak); ses sonra faster-whisper ile parçalara bölünür. Neden: ücretsiz anahtar günde ~10 istek veriyor; parça başına istek günde 1 video demek. Anahtar: kasa `gemini_api_anahtar_kozmos` (yoksa ortak anahtar).
+- gTTS ve edge-tts **kullanılmaz** (Ömer 17.11.2026: gerçekçi değil). Ses yalnız onaylı kütüphaneden (Gemini: puck = canlı Shorts anlatıcısı, charon = tok, kore = kadın). **Ömer 22.11.2026: ses Charon (tok erkek anlatıcı); bütün bölüm tek ses, tek model (Gemini TTS), araya farklı ses girmez.** Senaryoda `"ses":"charon"`. Video başına **tek** Gemini isteği: `canli` yönergesi cümleden cümleye ton değiştirir (soruda merak, sayıda vurgu, karşılaştırmada oyunbaz, kapanışta sıcak); ses sonra faster-whisper ile parçalara bölünür. Neden: ücretsiz anahtar günde ~10 istek veriyor; parça başına istek günde 1 video demek. Anahtar: kasa `gemini_api_anahtar_kozmos` (yoksa ortak anahtar).
 
 ## Senaryo kuralları
 - 8–10 parça, toplam ~140–160 kelime (≈ 55–65 sn). Parça başına 1–2 cümle.
@@ -59,6 +59,12 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `donus` | `mod: soru / cevre / hiz / enlem / sonuc / ses / hisset / gun (yeni:true) / son` | Dönen Dünya durur, ekvator çemberi, İstanbul (41°) işareti, doğuya hız okları (ekvator/İstanbul/ses), dönmeyen Dünya çevresinde Güneş (gün=yıl) |
 | `mars` | `mod: soru / gun / fark / uzak / yil / iki / sol / yas / son` | Mars yakın plan; Dünya–Mars yan yana dönüş (24 sa / 24 sa 37 dk, hafta sayacı); üstten yörüngeler (1× / 1,5× ölçü, gün/tur/sol sayacı); yaş karşılaştırması |
 | `toz` | `mod: soru / uret / toz / isin / takvim / telefon / yil / robot / son` | Panel + kirlenme örtüsü, tozda duran ışınlar, 365 günlük takvim (11–18 gün gri), yan telefonlar, temizlik robotu |
+| `ucak` | `mod: soru / mesafe / hiz / saat / gun / yil / hava / parker / hizli / son` | Güneş↑–Dünya↓ yolu, 150 milyon km ölçü, yolcu uçağı (saat/gün/yıl sayacı), atmosfer halkası + düşen uçak, Parker sondası (iz, gün sayacı) |
+| `trafo` | `mod: soru / frekans / cekirdek / uzama / olcu / iki / hesap / nota / abd / son` | Lamine demir çekirdek + bakır bobinler, ses halkaları (100/120 Hz), yan alanda akım/boy grafiği (sin → sin²), saç teli vs 1 µm, piyano (sol tuşu) |
+| `kilit` | `mod: soru / tur / eksen / masa / siskin / fren / kilit / yuzde / son` | Dünya çevresinde Ay (Dünya'ya bakan kırmızı yüz işareti), tur çizgisi + gün sayacı, eksen + dönüş oku, 3 hayalet konum (masa deneyi), gelgit şişkinliği, fren (hızlı dönüş yavaşlar), yalpalama + 10 dilimlik pizza (%59) |
+| `baraj` | `mod: soru / turbin / yukseklik / debi / ton / havuz / sekiz / son` | Baraj kesiti (rezervuar, cebri boru, Francis çarkı, su akışı), 151 m ölçü + 45 katlı bina, 8 ünite sırası, 241 küp ızgarası, boşalan olimpik havuz (sn sayacı) |
+| `boyut` | `mod: soru / cap / dizi / top / kup / hesap / gun / kutle / son` | Jüpiter + Dünya, 11× çap ölçüsü, 11 Dünya dizisi, golf topu→47 cm + 2 basketbol topu, 11×11×11 küp, hayalet Jüpiter içinde 1.321 küre (sayaç/yıl), terazi (318 Dünya) |
+| `kablo` | `mod: soru / tel / direnc / akim / formul / bir / iki / seksen / son` | Uzatma + çoklu priz + 2 ısıtıcı, büyütülmüş kablo kesiti (gidiş/dönüş damarı, elektron akışı), ısınan bakır + ısı dalgaları, W ısı sütunu, 60 W akkor ampul |
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
@@ -76,5 +82,8 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 5 (Uzay İstasyonu) ve 6 (Elektrikli araba 1 kWh) — 18.11.2026.
 - Bölüm 7 (Dünya dursa kaç km/sa) ve 8 (Ampul için kaç dakika pedal) — 19.11.2026, günlük görev; yeni sahneler `donus`, `pedal`.
 - Bölüm 9 (Mars'ta gün/yıl) ve 10 (Panel tozlanınca kayıp) — 20.11.2026, günlük görev; yeni sahneler `mars`, `toz`.
+- Bölüm 11 (Güneş'e uçakla) ve 12 (Trafo neden uğuldar) — 21.11.2026, günlük görev; yeni sahneler `ucak`, `trafo` (kamera parçalar arasında önceki pozdan akar).
+- Bölüm 13 (Ay neden hep aynı yüz) ve 14 (Baraj türbininden saniyede kaç ton) — 22.11.2026, günlük görev; yeni sahneler `kilit`, `baraj` (kamera pozları parametreyle akar: hedef, uzaklık, açı).
+- Bölüm 15 (Jüpiter'e kaç Dünya sığar) ve 16 (Akım 2 kat → ısı 4 kat, I²R) — 23.11.2026, günlük görev; yeni sahneler `boyut`, `kablo`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

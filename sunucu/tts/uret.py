@@ -99,13 +99,19 @@ def gemini_model(k):
 DIL = "tr"  # iş dosyasındaki "dil" alanı (tr|en|es); yoksa Türkçe
 DILKOD = {"tr": ("tr-TR", "Turkish"), "en": ("en-US", "English"), "es": ("es-ES", "Spanish")}
 
+_KILIT = False  # iş dosyasında "model_kilit": true → yalnız model_tercih kullanılır (Ömer 21.11.2026: model değişince ses değişiyor)
+_HARIC = set()  # iş dosyasında "anahtar_haric": [...] → bu kasa anahtarları kullanılmaz
+
 def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None, anahtar_tercih=None):
     import time, urllib.error
     anahtarlar = gemini_anahtarlar(anahtar_tercih)
     if not anahtarlar: raise RuntimeError("gemini anahtarı yok")
     son_hata = None
     for anahtar_ad, k in anahtarlar:
-        for m in gemini_modeller(k, tercih_ust, anahtar_ad):
+        if anahtar_ad in _HARIC: continue
+        ms = gemini_modeller(k, tercih_ust, anahtar_ad)
+        if _KILIT and tercih_ust: ms = [m for m in ms if m == tercih_ust]  # tek model: farklı modele geçip sesi değiştirmez
+        for m in ms:
             istek_metin = f"{GYON.get(ton, GYON['normal'])} in {DILKOD.get(DIL, DILKOD['tr'])[1]}: {metin}" if "2.5" in m else metin
             sc = {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": GSESLER[GES.get(ses, ses)][0]}}}
             if m not in _DIL_YOK: sc["languageCode"] = DILKOD.get(DIL, DILKOD["tr"])[0]
@@ -154,6 +160,8 @@ def gemini_soyle(metin, ses, yol_wav, ton="normal", tercih_ust=None, anahtar_ter
     raise RuntimeError(son_hata or "Tüm kasa anahtarlarındaki Gemini TTS modelleri dolu")
 
 def gemini_uret(is_, parca, tmp):
+    global _KILIT, _HARIC
+    _KILIT = bool(is_.get("model_kilit")); _HARIC = set(is_.get("anahtar_haric") or [])
     anahtar_tercih = parca.get("anahtar") or is_.get("anahtar")
     if parca.get("tek_istek"):
         w = f"{tmp}/g000.wav"
@@ -280,13 +288,25 @@ def main():
         is_ = json.load(open(jf, encoding="utf-8"))
         global DIL; DIL = is_.get("dil", "tr")
         is_.setdefault("motor", k.get("varsayilan_motor", "gemini")); is_.setdefault("ses", k.get("varsayilan_ses", "charon"))
-        for parca in is_["parcalar"]:
-            with tempfile.TemporaryDirectory() as tmp:
-                try:
-                    yol, n, yedek = uret(is_, parca, tmp)
-                    print(f"NOT: {is_['kod']}/{parca['ad']} tamam ({n} cümle{', ' + str(yedek) + ' yedek' if yedek else ''})")
-                except Exception as e:
-                    print(f"NOT: HATA {is_['kod']}/{parca['ad']}: {str(e)[:160]}")
+        hata = isle(is_)
+        # "yedek_motor": "google" (isteğe bağlı): Gemini'de bir parça bile okunamazsa (ör. günlük kota) BÜTÜN iş
+        # Google Cloud (Chirp 3 HD, aynı ses adı) ile baştan okunur; böylece videoda iki farklı ses karışmaz.
+        if hata and is_.get("motor") == "gemini" and is_.get("yedek_motor") == "google" and os.environ.get("GOOGLE_TTS_KEY"):
+            print(f"NOT: {is_['kod']} Gemini ile tamamlanamadı, bütün parçalar Google Cloud ile yeniden okunuyor")
+            is_["motor"] = "google"; is_["oto_ton"] = False
+            isle(is_)
+
+def isle(is_):
+    hata = 0
+    for parca in is_["parcalar"]:
+        with tempfile.TemporaryDirectory() as tmp:
+            try:
+                yol, n, yedek = uret(is_, parca, tmp)
+                print(f"NOT: {is_['kod']}/{parca['ad']} tamam ({n} cümle{', ' + str(yedek) + ' yedek' if yedek else ''})")
+            except Exception as e:
+                hata += 1
+                print(f"NOT: HATA {is_['kod']}/{parca['ad']}: {str(e)[:160]}")
+    return hata
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--dene":  # ağsız ayrıştırma denemesi

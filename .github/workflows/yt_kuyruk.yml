@@ -83,6 +83,15 @@ jobs:
                   if s['vid'] in ix: ix[s['vid']]['baslik'] = hj['baslik']
                   subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
                   print(f'::notice::{kod}: başlık değişti → {s["vid"]}'); continue
+              if s.get('durum') == 'tarih değişti':
+                  p = datetime.fromisoformat(s['publishAt'])
+                  if s['vid'] in ix:
+                      ix[s['vid']]['tarih'] = p.strftime('%Y-%m-%d')
+                      ix[s['vid']]['saat'] = p.strftime('%H:%M')
+                      ix[s['vid']]['durum'] = 'Planlı'
+                      ix[s['vid']].pop('not', None)
+                  subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
+                  print(f'::notice::{kod}: tarih değişti → {s["vid"]} ({s["publishAt"]})'); continue
               if not s.get('vid'):
                   print('::warning::' + kod + ' ' + s['durum'] + ' ' + s.get('detay', '')); continue
               if s.get('kanal') in ('KK_TR', 'KK_EN', 'KK_ES'):

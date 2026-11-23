@@ -128,6 +128,26 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             urllib.request.urlopen(req, timeout=30).read()
             print(f"NOT: {hv} başlık değişti: {eski_b} → {sn['title']}")
             sonuc.append({"kod": kod, "durum": "başlık değişti", "vid": hv, "eski": eski_b}); continue
+        if it.get("islem") == "tarih_degis":
+            cid = KANAL[dil]
+            if dil not in toklar:
+                toklar[dil] = token(cid); mevcut[dil] = basliklar(toklar[dil], cid)
+            hv = it["vid"]
+            u = f"https://www.googleapis.com/youtube/v3/videos?part=status&id={hv}"
+            with urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": f"Bearer {toklar[dil]}"}), timeout=30) as r:
+                m = json.load(r)["items"][0]
+            json.dump(m, open(os.path.join(D, "yedek", f"tarih_{hv}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+            st = m["status"]
+            if st.get("privacyStatus") == "public":
+                print(f"NOT: {hv} zaten herkese açık; dokunulmadı"); sonuc.append({"kod": kod, "durum": "tarih değişmedi (yayında)", "vid": hv}); continue
+            for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"): st.pop(k, None)
+            st["privacyStatus"] = "private"
+            st["publishAt"] = it["publishAt"]
+            req = urllib.request.Request("https://www.googleapis.com/youtube/v3/videos?part=status", data=json.dumps({"id": hv, "status": st}).encode(),
+                                         method="PUT", headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=30).read()
+            print(f"NOT: {hv} plan tarihi değişti → {it['publishAt']}")
+            sonuc.append({"kod": kod, "durum": "tarih değişti", "vid": hv, "publishAt": it["publishAt"]}); continue
         if kod in kayit:
             sonuc.append({"kod": kod, "durum": "zaten yüklü", "vid": kayit[kod]["vid"], **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         cid = KANAL[dil]

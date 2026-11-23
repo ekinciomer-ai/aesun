@@ -196,7 +196,7 @@ def main():
     except Exception: sp = {}
     gozlem["pi_sef"] = {"t": sp.get("t"), "durum": sp.get("durum"), "eylem": len(sp.get("eylemler") or [])}
     for e in sp.get("eylemler") or []:
-        if not any(x.get("t") == e.get("t") and x.get("eylem") == e.get("eylem") for x in (st.get("gecmis") or [])):
+        if not any(x.get("t") == e.get("t") and x.get("eylem") == "pi_" + e.get("eylem", "") for x in (st.get("gecmis") or [])):
             eylemler.append({**e, "eylem": "pi_" + e.get("eylem", "")})
     for a in sp.get("acik") or []:
         acik.append({"sorun": "Pi: " + a.get("sorun", ""), "neden": a.get("neden", "")})

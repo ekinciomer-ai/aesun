@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-23T02:55+03:00",
+ "olusturma": "2026-11-23T04:20+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -836,14 +836,14 @@
   }
  ],
  "esikler": {
+  "Ancient Studio": 190,
   "Nasıl Yapıldı": 135,
-  "Kozmos Lab TR": 212,
-  "Ömür Dediğin": 50,
   "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 212,
+  "Estudio Antiguo": 126,
   "LVL MAX": 50,
   "Kozmos Lab": 93,
-  "Estudio Antiguo": 126,
-  "Ancient Studio": 190,
+  "Ömür Dediğin": 50,
   "Yolu Seç !": 262
  },
  "saatler": {
@@ -1520,6 +1520,14 @@
   {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Kozmos Lab TR",
+   "vid": "MvRkWFY5Oms",
+   "baslik": "Wi-Fi duvarın içinden nasıl geçiyor? Fikir uzaydan geldi 📶",
+   "tarih": "2026-11-23",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
    "vid": "yCiaMGpe34E",
    "baslik": "Yarın gece Süper Ay: ne zaman, nereye bakmalı? 🌕 #shorts",
    "tarih": "2026-11-23",
@@ -1568,6 +1576,22 @@
   {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Kozmos Lab TR",
+   "vid": "QJyWWhjxDL4",
+   "baslik": "Güneş şu an yok olsa, ne zaman fark ederdin? ☀️ #shorts",
+   "tarih": "2026-11-29",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "H1btzbOdl1U",
+   "baslik": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
+   "tarih": "2026-11-30",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
    "vid": "BqJQSRakmho",
    "baslik": "Açık bıraktığın bildirim sekmeleri anlık IQ skorunu 10 puan düşürüyor 🧠💻 #shorts",
    "tarih": "2026-12-02",
@@ -1580,6 +1604,14 @@
    "baslik": "Ninemin güneşte salçası 🍅 Eskiden salça nasıl yapılırdı?",
    "tarih": "2026-11-23",
    "neden": "odak dönemi: Ömür Dediğin haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "KONU_TEKRARI",
+   "kanal": "Antik Stüdyo",
+   "vid": "oLDtCVjcee4",
+   "baslik": "1621'de İstanbul Boğazı dondu, insanlar yürüyerek geçti ❄️",
+   "tarih": "2026-11-28",
+   "neden": "'Boğaz / Kızıldeniz' konusu 2026-11-20 tarihinde işlendi; 14 gün dolmadan tekrar edilmez"
   }
  ],
  "bulgular": [

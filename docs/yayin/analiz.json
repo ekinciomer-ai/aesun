@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-23T20:43+03:00",
+ "olusturma": "2026-11-23T23:23+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -313,7 +313,7 @@
    "erken": 1,
    "medyan_48sa": 258,
    "tutma_orani": 40,
-   "izlenme_yuzde": 57,
+   "izlenme_yuzde": 54,
    "en_iyi": {
     "baslik": "Mimar Sinan Süleymaniye inşaatını neden 1 yıl durdurdu? 🕌 | Cevahir Minaresi #shorts",
     "i48": 4114
@@ -423,12 +423,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 536,
+   "medyan_48sa": 543,
    "tutma_orani": 50,
    "izlenme_yuzde": 116,
    "en_iyi": {
     "baslik": "Hastane Yeri Seçmek İçin Şehre Neden Çiğ Et Parçaları Astı? 🥩🏥 | Ebû Bekir er-Râzî #shorts",
-    "i48": 1016
+    "i48": 1029
    },
    "kaydirmadan_izleme_yuzde": 32
   },
@@ -721,7 +721,7 @@
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 963,
    "tutma_orani": 100,
    "izlenme_yuzde": 49,
@@ -779,8 +779,8 @@
    "kanal": "LVL MAX",
    "seri": "Gündem + Tarih",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
    "erken": 5,
    "medyan_48sa": 4,
    "tutma_orani": 0,
@@ -825,12 +825,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 3,
-   "medyan_48sa": 162,
+   "medyan_48sa": 167,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Bölüm 1’deki 3 saniyelik o detayı fark ettin mi? 🔍📸 #shorts",
-    "i48": 238
+    "i48": 247
    }
   },
   {
@@ -867,15 +867,15 @@
   }
  ],
  "esikler": {
-  "LVL MAX": 50,
-  "Kozmos Lab": 93,
-  "Antik Stüdyo": 637,
   "Nasıl Yapıldı": 135,
-  "Yolu Seç !": 262,
-  "Ömür Dediğin": 50,
-  "Ancient Studio": 192,
   "Kozmos Lab TR": 212,
-  "Estudio Antiguo": 126
+  "Ömür Dediğin": 50,
+  "Estudio Antiguo": 126,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab": 93,
+  "Ancient Studio": 192,
+  "Yolu Seç !": 262,
+  "LVL MAX": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -909,7 +909,7 @@
    },
    "18:00": {
     "n": 15,
-    "medyan": 487
+    "medyan": 506
    },
    "19:00": {
     "n": 14,
@@ -1041,7 +1041,7 @@
    },
    "21:00": {
     "n": 1,
-    "medyan": 238
+    "medyan": 247
    }
   },
   "Nasıl Yapıldı": {
@@ -1054,6 +1054,10 @@
    "00:00": {
     "n": 1,
     "medyan": 4
+   },
+   "06:00": {
+    "n": 1,
+    "medyan": 3
    }
   }
  },
@@ -1185,7 +1189,7 @@
    "uzun_vid": "Ub6wYt_50lY",
    "uzun_baslik": "Piri Reis Neden İdam Edildi? | 474 Yıl Önce Hürmüz Boğazı",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 908,
+   "uzun_izlenme": 909,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
@@ -1196,7 +1200,7 @@
     {
      "vid": "Ov0ftdfKjCI",
      "baslik": "Piri Reis neden idam edildi? #Shorts",
-     "izlenme": 2296,
+     "izlenme": 2297,
      "durum": "Yayında"
     },
     {
@@ -1225,12 +1229,12 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 267,
+   "uzun_izlenme": 272,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
      "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
-     "izlenme": 23,
+     "izlenme": 24,
      "durum": "Yayında"
     }
    ],
@@ -1246,7 +1250,7 @@
     {
      "vid": "Ov0ftdfKjCI",
      "baslik": "Piri Reis neden idam edildi? #Shorts",
-     "izlenme": 2296,
+     "izlenme": 2297,
      "durum": "Yayında"
     },
     {
@@ -1354,13 +1358,13 @@
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2955,
+     "izlenme": 2956,
      "durum": "Yayında"
     },
     {
      "vid": "0Yhof30_bfg",
      "baslik": "Son Akşam Yemeği neden yok oluyor? 🍞 #shorts",
-     "izlenme": 2909,
+     "izlenme": 2910,
      "durum": "Yayında"
     },
     {
@@ -1372,7 +1376,7 @@
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2607,
+     "izlenme": 2609,
      "durum": "Yayında"
     },
     {
@@ -1389,7 +1393,7 @@
    "uzun_vid": "Bg1kfGUPvnQ",
    "uzun_baslik": "7 cuadros famosos y el detalle que casi nadie ve",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 0,
+   "uzun_izlenme": 1,
    "baglanacak_shortlar": [
     {
      "vid": "2W3av1wzx5A",
@@ -1442,13 +1446,13 @@
     {
      "vid": "cfbwB6z1_cA",
      "baslik": "How does a wind turbine make electricity? 🌬️ #shorts",
-     "izlenme": 25,
+     "izlenme": 27,
      "durum": "Yayında"
     },
     {
      "vid": "7naXMebQd70",
      "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
-     "izlenme": 12,
+     "izlenme": 13,
      "durum": "Yayında"
     }
    ],
@@ -1464,8 +1468,14 @@
     {
      "vid": "MSOsi_wK55Q",
      "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
-     "izlenme": 955,
+     "izlenme": 957,
      "durum": "Yayında"
+    },
+    {
+     "vid": "H1btzbOdl1U",
+     "baslik": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
+     "izlenme": 0,
+     "durum": "Planlı"
     },
     {
      "vid": "j2lpy8oWgVw",
@@ -1553,14 +1563,6 @@
   {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Kozmos Lab TR",
-   "vid": "yCiaMGpe34E",
-   "baslik": "Yarın gece Süper Ay: ne zaman, nereye bakmalı? 🌕 #shorts",
-   "tarih": "2026-11-23",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
    "vid": "k_KKJUSIjhI",
    "baslik": "Elektrikli araba 1 kWh elektrikle kaç km gider? 🚗⚡ #shorts",
    "tarih": "2026-11-24",
@@ -1638,7 +1640,7 @@
   "Estudio Antiguo: son 6 Short'tan 0 tanesi tuttu (eşik 126 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 93 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 212 izlenme / 48 sa).",
-  "LVL MAX: son 1 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "LVL MAX: son 2 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",

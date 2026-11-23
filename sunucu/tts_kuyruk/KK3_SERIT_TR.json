@@ -1,0 +1,60 @@
+{
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "yedek_motor": "google",
+ "dil": "tr",
+ "kod": "KK3_SERIT_TR",
+ "parcalar": [
+  {
+   "ad": "V1",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Yolda duran araca arkadan çarpan, her zaman tam kusurludur. Herkes böyle bilir. Peki mahkeme ne dedi?"
+  },
+  {
+   "ad": "V2",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "normal",
+   "metin": "Gece, şehir dışı, ışıksız bir yol. Bir otomobilin elektriği arızalanıyor. Sürücü aracı yol kenarına çekiyor. Ama emniyet şeridi dar, aracın bir kısmı yolda kalıyor."
+  },
+  {
+   "ad": "V3",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Arkadan, yolcusuyla bir motosiklet geliyor. Duran araca arkadan çarpıyor. Sürücü de yolcu da yaralanıyor."
+  },
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sence duran aracın sürücüsüne ne oldu? A, hiçbir şey, o park halindeydi. B, sadece trafik cezası. C, yaralamadan mahkûm oldu. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. Birinci ipucu: araç yolu kısmen kapatıyordu. İkinci ipucu: gece ve yol karanlıktı. Üçüncü ipucu: sürücü yola hiçbir uyarı işareti koymamıştı."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Duran aracın sürücüsü, taksirle yaralamadan mahkûm oldu. Hapis cezası adli para cezasına çevrildi. Yargıtay onadı. Hatta Yargıtay dedi ki: bu sürücü aslında asli kusurlu sayılmalıydı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "sakin",
+   "metin": "Yani arıza yaptıysan durman yetmez. Dörtlüleri yak, reflektörü koy, aracı yoldan çıkar. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

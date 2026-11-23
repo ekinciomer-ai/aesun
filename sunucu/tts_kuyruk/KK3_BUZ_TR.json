@@ -1,0 +1,60 @@
+{
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "yedek_motor": "google",
+ "dil": "tr",
+ "kod": "KK3_BUZ_TR",
+ "parcalar": [
+  {
+   "ad": "V1",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Yol buzluydu, kaydın. Tuzlama yapılmamış. Faturayı devlet öder. Herkes böyle bilir. Peki mahkeme ne dedi?"
+  },
+  {
+   "ad": "V2",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "normal",
+   "metin": "Kış günü, karlı bir yol. Bir otomobil ilerliyor. Zemin buz tutmuş, tuzlama yapılmamış."
+  },
+  {
+   "ad": "V3",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Otomobil kayıyor, yoldan çıkıyor. Araç ağır hasar görüyor."
+  },
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sence hasarı kim ödedi? A, devlet ödedi. B, yarı yarıya bölündü. C, idare hiç ödemedi. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. Birinci ipucu: zemin gerçekten buz tutmuştu. İkinci ipucu: hasarı kasko ödedi, sonra parayı idareden istedi. Üçüncü ipucu: mahkeme, bir teknik üniversiteden bilirkişi raporu aldı."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Bilirkişi raporu: kazada sürücü yüzde yüz kusurlu. İdarenin hizmet kusuru yok. Yirmi bin yirmi liralık talep reddedildi. Danıştay onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "sakin",
+   "metin": "Yani buzlu yol tek başına bahane değil. Kışın hızını yola göre ayarla, mesafeni aç. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

@@ -1,0 +1,220 @@
+{
+ "kod": "KZ_MRK_12_TRAFO",
+ "no": "MERAK #12",
+ "tema": "acik",
+ "ses": "puck",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "TRAFO NEDEN<br><i>UĞULDAR?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "trafo",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Trafonun yanından geçerken duyduğun o uğultu nereden geliyor? Tahminini aklında tut, cevap demirin içinde.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "trafo",
+   "p": {
+    "mod": "frekans",
+    "kart": 54
+   },
+   "metin": "Türkiye'de şebeke elektriği saniyede elli kez yön değiştirip geri döner. Buna elli hertz denir.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "TÜRKİYE ŞEBEKESİ",
+     "say": 50,
+     "ek": "Hz",
+     "k": "elli"
+    },
+    {
+     "tip": "etiket",
+     "y": "saniyede 50 tur 🔁",
+     "k": "hertz"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "trafo",
+   "p": {
+    "mod": "cekirdek",
+    "kart": 60
+   },
+   "metin": "Trafonun kalbi, ince sac levhalardan yapılmış demir bir çekirdek. Akım değiştikçe demirin mıknatıslığı da değişir.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "demir çekirdek 🧲",
+     "k": "demir"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "trafo",
+   "p": {
+    "mod": "uzama",
+    "kart": 60
+   },
+   "metin": "Demir mıknatıslanınca boyu çok az uzar. Buna manyetostriksiyon denir.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "manyetostriksiyon",
+     "k": "manyetostriksiyon"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "trafo",
+   "p": {
+    "mod": "olcu",
+    "kart": 54
+   },
+   "metin": "Ne kadar mı? Bir metrede yaklaşık bir mikrometre. Bir saç telinin onda birinden bile ince.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 METREDE UZAMA",
+     "on": "≈ ",
+     "say": 1,
+     "ek": "µm",
+     "k": "bir"
+    },
+    {
+     "tip": "etiket",
+     "y": "< saç telinin 1/10'u",
+     "k": "saç"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "trafo",
+   "p": {
+    "mod": "iki",
+    "kart": 60
+   },
+   "metin": "İşin sırrı şu: akım ileri de aksa geri de aksa demir uzar. Yani her turda iki kez.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "1 tur = 2 uzama",
+     "k": "iki"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "trafo",
+   "p": {
+    "mod": "hesap",
+    "kart": 54
+   },
+   "metin": "Elli çarpı iki: saniyede yüz titreşim. Uğultunun temel sesi yüz hertz.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "50 Hz <em>×</em> 2",
+     "k": "Elli"
+    },
+    {
+     "tip": "sayi",
+     "ust": "UĞULTU",
+     "say": 100,
+     "ek": "Hz",
+     "k": "yüz"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "trafo",
+   "p": {
+    "mod": "nota",
+    "kart": 60
+   },
+   "metin": "Bu, piyanodaki kalın bir sol notasına çok yakın bir ses.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ sol notası (98 Hz) 🎹",
+     "k": "sol"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "trafo",
+   "p": {
+    "mod": "abd",
+    "kart": 60
+   },
+   "metin": "Amerika'da şebeke altmış hertz. Oradaki trafolar yüz yirmi hertzle, biraz daha ince uğuldar.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "60 Hz <em>×</em> 2 = 120 Hz",
+     "k": "yüz"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "trafo",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: demir çekirdek saniyede yüz kez uzayıp kısalıyor. Sen en son nerede trafo uğultusu duydun? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "say": 100,
+     "ek": "Hz",
+     "k": "yüz"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Trafo neden uğuldar? 🔊⚡ #shorts",
+  "aciklama": "Trafonun uğultusunun ana kaynağı demir çekirdekteki manyetostriksiyondur: manyetik malzeme, manyetik alanın etkisiyle boyutlarını değiştirir. Siemens'in teknik yazısına göre bu boy değişimi metre başına yaklaşık bir mikrometre düzeyindedir ve uğultunun temel frekansı şebeke frekansının iki katıdır (≈ 100 Hz veya 120 Hz).\n\nNeden iki katı? Demir, alan hangi yönde olursa olsun uzar; her elektrik döngüsünde en büyük uzama iki kez olur (HyperPhysics). Türkiye şebekesi 50 Hz → 50 × 2 = 100 Hz. ABD gibi 60 Hz şebekelerde 120 Hz.\n\nKarşılaştırmalar: insan saçının çapı yaklaşık 17–181 µm → 1 µm, en ince saçın bile onda birinden küçüktür. 100 Hz, standart akortta (La = 440 Hz) kalın sol notasına (G2 ≈ 98 Hz) çok yakındır.\n\nSen en son nerede trafo uğultusu duydun? Yorumlara yaz 👇\n\nGerçek uğultuda 200, 300 Hz gibi harmonikler de vardır; animasyondaki titreşim görünür olsun diye abartılmıştır. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Elektrik Şebeke Yönetmeliği md. 7 (nominal frekans 50 Hz, TEİAŞ); Siemens Simcenter – Magnetostriction: a source of noise in transformers; HyperPhysics (Georgia State Univ.) – Magnetostriction; The Physics Factbook / BioNumbers – Diameter of human hair; ISO 16 standart akort (La = 440 Hz).\n\n#kozmoslab #trafo #elektrik #enerji #bilim #merak #shorts",
+  "etiketler": [
+   "trafo",
+   "transformatör",
+   "trafo sesi",
+   "uğultu",
+   "manyetostriksiyon",
+   "50 hz",
+   "elektrik",
+   "enerji",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "Elektrik Şebeke Yönetmeliği (EPDK) MADDE 7(1): 'Sistemin 50 Hertz (Hz) olan nominal frekansı, TEİAŞ tarafından 49,8-50,2 Hz aralığında kontrol edilir.'",
+  "Siemens Simcenter blog – Magnetostriction: a source of noise in transformers: 'the physical dimensions changes are in the range of one micrometer per meter'; 'have harmonic components with a fundamental frequency twice the power frequency'; 'The fundamental frequency would be around either 100Hz or 120Hz'",
+  "HyperPhysics (Georgia State University) – Magnetostriction: 'For 60 Hz applied magnetic fields in AC electrical devices such as transformers, the maximum length change happens twice per cycle, producing the familiar and sometimes annoying 120 Hz hum.'",
+  "Saç çapı: The Physics Factbook (B. Ley, 1999) ve Harvard BioNumbers #106856: '17 to 181 μm' → 1 µm < 17/10 µm",
+  "Nota: ISO 16 (La4 = 440 Hz), eşit tamperaman: Sol2 = 440 × 2^(−26/12) ≈ 98,0 Hz",
+  "Hesap: 50 × 2 = 100 Hz; 60 × 2 = 120 Hz"
+ ]
+}

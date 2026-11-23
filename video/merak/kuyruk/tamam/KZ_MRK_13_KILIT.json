@@ -1,0 +1,196 @@
+{
+ "kod": "KZ_MRK_13_KILIT",
+ "no": "MERAK #13",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "AY NEDEN HEP<br><i>AYNI YÜZÜ?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kilit",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Ay neden bize hep aynı yüzünü gösteriyor? Yoksa hiç dönmüyor mu? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "kilit",
+   "p": {
+    "mod": "tur",
+    "kart": 55
+   },
+   "metin": "Ay, Dünya'nın çevresindeki bir turunu yaklaşık yirmi yedi günde tamamlar. Neredeyse bir takvim ayı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DÜNYA ÇEVRESİNDE 1 TUR",
+     "on": "≈ ",
+     "say": 27.3,
+     "dec": 1,
+     "ek": "gün",
+     "k": "yirmi"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 1 takvim ayı 📅",
+     "k": "takvim"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "kilit",
+   "p": {
+    "mod": "eksen",
+    "kart": 60
+   },
+   "metin": "Şaşırtıcı kısım şu: Ay kendi ekseni etrafında da aynı sürede, yirmi yedi günde bir döner.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "27,3 gün <em>=</em> 27,3 gün",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "kilit",
+   "p": {
+    "mod": "masa",
+    "kart": 60
+   },
+   "metin": "Bir masanın çevresinde yürürken yüzünü hep masaya çevir. Bir tur atınca sen de kendi etrafında bir kez dönmüş olursun.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "masa deneyi: 1 tur = 1 dönüş 🪑",
+     "k": "masanın"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "kilit",
+   "p": {
+    "mod": "siskin",
+    "kart": 60
+   },
+   "metin": "Peki neden eşit? Dünya'nın kütleçekimi Ay'ı hafifçe uzatıp kayalarda bir şişkinlik oluşturdu.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "gelgit şişkinliği",
+     "k": "şişkinlik"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "kilit",
+   "p": {
+    "mod": "fren",
+    "kart": 60
+   },
+   "metin": "Dünya bu şişkinliği bir tutamak gibi çekti. Ay'ın dönüşü fren yemiş gibi yavaşladı.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "gelgit freni 🛑",
+     "k": "fren"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "kilit",
+   "p": {
+    "mod": "kilit",
+    "kart": 60
+   },
+   "metin": "Sonunda dönüş süresi tur süresine eşitlendi. Buna kütleçekim kilidi denir.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "kütleçekim kilidi 🔒",
+     "k": "kütleçekim"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "kilit",
+   "p": {
+    "mod": "yuzde",
+    "kart": 55
+   },
+   "metin": "Ama Ay hafifçe yalpalar. Bu yüzden yüzeyin yarısını değil, yüzde elli dokuzunu görürüz. On dilimlik pizzanın yaklaşık altı dilimi.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "GÖRDÜĞÜMÜZ YÜZEY",
+     "say": 59,
+     "on": "%",
+     "k": "yüzde"
+    },
+    {
+     "tip": "etiket",
+     "y": "🍕 10 dilimden ≈ 6",
+     "k": "pizzanın"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "kilit",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: Ay dönüyor, ama her turda tam bir kez. Sen arka yüzünde ne olduğunu merak ediyor musun? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "1 tur = 1 dönüş",
+     "k": "Cevap"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Ay neden hep aynı yüzünü gösterir? 🌕 #shorts",
+  "aciklama": "Ay, Dünya çevresindeki bir turunu yaklaşık 27,3 günde (yıldız ayı) tamamlar ve kendi ekseni etrafında da aynı sürede bir kez döner. Bu yüzden hep aynı yüzü bize bakar: buna kütleçekim kilidi (gelgit kilidi) denir.\n\nNeden? Dünya'nın kütleçekimi Ay'da kayalık bir gelgit şişkinliği oluşturdu; Dünya bu şişkinliği bir tutamak gibi çekti ve Ay'ın dönüşünü zamanla yavaşlatıp tur süresine eşitledi (NASA).\n\nAy yörüngesinde hafifçe yalpaladığı (librasyon) için zaman içinde yüzeyinin yaklaşık %59'unu görebiliriz (NASA SVS, NASA). Karşılaştırma: 10 dilimlik pizzanın yaklaşık 6 dilimi.\n\nSen Ay'ın arka yüzünde ne olduğunu merak ediyor musun? Yorumlara yaz 👇\n\nAnimasyon şematiktir: mesafeler ve gelgit şişkinliği görünür olsun diye ölçeksiz/abartılı çizilmiştir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA SVS – Moon Wobble (svs.gsfc.nasa.gov/10836); NASA – What's lunar libration? (eclipse2017.nasa.gov); Hong Kong Gözlemevi – What is lunar libration?; Space.com – Does the moon rotate?; BBC Sky at Night – Why we always see the same side of the Moon.\n\n#kozmoslab #ay #uzay #astronomi #bilim #merak #shorts",
+  "etiketler": [
+   "ay",
+   "ayın karanlık yüzü",
+   "kütleçekim kilidi",
+   "gelgit kilidi",
+   "librasyon",
+   "uzay",
+   "astronomi",
+   "bilim",
+   "merak",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA SVS 10836 – Moon Wobble: 'The moon rotates once on its own axis during each 27-day journey around the Earth.' / 'we actually see about 59 percent of the lunar surface over the course of an orbit.'",
+  "NASA (eclipse2017.nasa.gov) – What's lunar libration?: 'one orbit around Earth in the same time as it makes one rotation on its axis'; 'These tidal bulges ... act like handles for Earth's gravity to hold on to. Over time, this has slowed the moon's rotational speed until it came to rest with only one side facing the Earth.'; 'taking libration into account, the moon presents about 59% of its surface to Earth.'",
+  "Space.com – Does the moon rotate?: 'The moon orbits the Earth once every 27.322 days. It also takes approximately 27 days for the moon to rotate once on its axis.'",
+  "BBC Sky at Night (2026) – 'the Moon rotates once every 27.3 days, which is the same amount of time it takes for the Moon to orbit our planet'; 'Earth's gravity causes a rocky tidal bulge' ... 'acted as a brake'",
+  "Hong Kong Observatory – 'Overall, 59% of the Moon's surface is visible from Earth over time due to libration.'",
+  "Karşılaştırma: 27,3 gün ≈ bir takvim ayı (28–31 gün); %59 ≈ 10 dilimden 5,9 dilim ≈ 6"
+ ]
+}

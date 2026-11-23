@@ -1,0 +1,113 @@
+{
+ "kanal": "NY",
+ "seri": "Bilgi Şıklı Soru",
+ "dil": "tr",
+ "kod": "NY_SQ_03_GOL",
+ "baslik_bant": "BU GÖL HANGİ İLDE?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 GÖL",
+   "ust": "HANGİ İLDE?",
+   "alt": "SONUNCUSU TUZAK",
+   "alt_kelime": "sonuncusu"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Trabzon",
+   "soru": "UZUNGÖL HANGİ İLDE?",
+   "siklar": [
+    "Trabzon",
+    "Rize",
+    "Artvin",
+    "Gümüşhane"
+   ],
+   "dogru": 0,
+   "bekle": 3
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Trabzon"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Burdur",
+   "soru": "SALDA GÖLÜ HANGİ İLDE?",
+   "siklar": [
+    "Isparta",
+    "Denizli",
+    "Burdur",
+    "Afyonkarahisar"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Burdur"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Bitlis",
+   "soru": "NEMRUT KRATER GÖLÜ HANGİ İLDE?",
+   "siklar": [
+    "Adıyaman",
+    "Van",
+    "Malatya",
+    "Bitlis"
+   ],
+   "dogru": 3,
+   "bekle": 3
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Bitlis"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Hürriyet Daily News – Uzungöl (Trabzon) bir heyelanla oluştu https://www.hurriyetdailynews.com/scientists-investigate-landslide-that-birthed-trabzons-iconic-uzungol-217793",
+  "Küre Ansiklopedi – Trabzon Uzungöl (Çaykara) https://kureansiklopedi.com/tr/detay/trabzon-uzungol",
+  "Daily Sabah – Salda Gölü Burdur sınırlarında; NASA'ya göre Perseverance'ın indiği Jezero Krateri ile benzer mineral ve jeolojik özellikler https://www.dailysabah.com/life/travel/in-turquoise-waters-7-dazzling-lakes-from-7-regions-of-turkiye/amp",
+  "Hürriyet – Nemrut Krateri: Bitlis'te Tatvan, Ahlat, Güroymak arazisinde; Nemrut Dağı yanardağının patlamasıyla oluşan kaldera https://www.hurriyet.com.tr/seyahat/ici-yanan-disi-donan-dagin-hediyesi-nemrut-krateri-40621900",
+  "Hürriyet – Nemrut Kalderası, Kommagene heykellerinin olduğu Nemrut Dağı değil https://www.hurriyet.com.tr/seyahat/jeoparkta-bin-bir-cicekli-ilkbahar-nemrut-kalderasi-40796298",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu 3 göl hangi ilde? Sonuncusu herkesi yanıltıyor!",
+  "aciklama": "Uzungöl, Salda Gölü ve Nemrut Krater Gölü hangi illerde? Şıklara bak, 3 saniyede cevapla. Sonuncusu tuzak!\n\n💬 Kaç doğru yaptın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "uzungöl",
+   "salda gölü",
+   "nemrut krater gölü",
+   "göller",
+   "quiz",
+   "bilgi yarışması",
+   "nasıl yapıldı",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu 3 göl hangi ilde? 🏞️ Sonuncusu tuzak! #quiz #türkiye #göl",
+  "amac": "Bilgi şıklı soru serisi (doğa); izleyiciyi puan yazmaya teşvik ederek yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

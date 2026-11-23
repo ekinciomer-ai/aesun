@@ -1,0 +1,214 @@
+{
+ "kod": "KZ_MRK_16_KABLO",
+ "no": "MERAK #16",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "AKIM 2 KAT<br><i>ISI KAÇ KAT?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kablo",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Uzatma kablosuna ikinci bir ısıtıcı taktın, akım iki katına çıktı. Peki kablodaki ısı kaç katına çıkar? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "kablo",
+   "p": {
+    "mod": "tel",
+    "kart": 55
+   },
+   "metin": "Akım uzatmanın içinde gidip gelir. Yani on metrelik bir uzatmada akım yirmi metre bakır tel yürür.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "10 m uzatma = 20 m tel",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "kablo",
+   "p": {
+    "mod": "direnc",
+    "kart": 55
+   },
+   "metin": "Bakır iyi iletkendir ama yine de biraz direnir. Bir buçuk milimetrekarelik bu telin direnci yaklaşık çeyrek ohm.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "TOPLAM DİRENÇ",
+     "say": 0.27,
+     "dec": 2,
+     "ek": "Ω",
+     "on": "≈ ",
+     "k": "çeyrek"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "kablo",
+   "p": {
+    "mod": "akim",
+    "kart": 55
+   },
+   "metin": "İki bin vatlık bir ısıtıcı, iki yüz otuz voltta yaklaşık dokuz amper çeker.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "2.000 W <em>÷</em> 230 V",
+     "k": "İki"
+    },
+    {
+     "tip": "sayi",
+     "ust": "AKIM",
+     "say": 8.7,
+     "dec": 1,
+     "ek": "A",
+     "on": "≈ ",
+     "k": "dokuz"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "kablo",
+   "p": {
+    "mod": "formul",
+    "kart": 55
+   },
+   "metin": "Kablodaki ısı şöyle bulunur: akımın karesi çarpı direnç. Akım iki kez çarpılıyor, sır burada.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "Isı = I <em>×</em> I <em>×</em> R",
+     "k": "akımın"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "kablo",
+   "p": {
+    "mod": "bir",
+    "kart": 55
+   },
+   "metin": "Tek ısıtıcıda kablo yaklaşık yirmi vat ısı yayar. İki LED ampulden biraz fazla.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "TEK ISITICI",
+     "say": 20,
+     "dec": 0,
+     "ek": "W",
+     "on": "≈ ",
+     "k": "yirmi"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 2 LED ampul 💡",
+     "k": "LED"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "kablo",
+   "p": {
+    "mod": "iki",
+    "kart": 55
+   },
+   "metin": "İkinci ısıtıcıyla akım iki katına çıkar. İki çarpı iki: ısı dört kat olur.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "2 <em>×</em> 2 = 4",
+     "k": "çarpı"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "kablo",
+   "p": {
+    "mod": "seksen",
+    "kart": 55
+   },
+   "metin": "Yani yaklaşık seksen vat. Altmış vatlık eski bir akkor ampulden fazla ısı, hem de kablonun içinde.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "İKİ ISITICI",
+     "say": 80,
+     "dec": 0,
+     "ek": "W",
+     "on": "≈ ",
+     "k": "seksen"
+    },
+    {
+     "tip": "etiket",
+     "y": "> 60 W akkor ampul 🔥",
+     "k": "Altmış"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "kablo",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: dört katı. Uzatmanın üstündeki amper sınırı bu yüzden var. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "say": 4,
+     "dec": 0,
+     "ek": "kat ısı",
+     "k": "dört"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Akım 2 katına çıkınca kablo kaç kat ısınır? 🔌🔥 #shorts",
+  "aciklama": "Bir telde ısıya dönüşen güç P = I² × R'dir (Joule yasası; OpenStax College Physics 20.4). Akım karesiyle girdiği için akım 2 katına çıkınca ısı 4 katına çıkar.\n\nHesap: 10 m uzatmada akım gidip geldiği için 20 m iletken vardır. IEC 60228'e göre 1,5 mm² esnek (sınıf 5) bakır iletkenin 20 °C'deki en yüksek direnci 13,3 Ω/km → 20 m ≈ 0,27 Ω. 2.000 W ısıtıcı 230 V'ta I = 2.000 ÷ 230 ≈ 8,7 A çeker → P = 8,7² × 0,266 ≈ 20 W. İki ısıtıcıda ≈ 17,4 A → ≈ 80 W (4 kat). Not: 17,4 A, çoğu uzatmanın 16 A sınırını aşar; uzatmanın üzerindeki amper/vat sınırına uy. Gerçek değer kablonun kesitine, uzunluğuna ve sıcaklığına göre değişir; burada tipik örnek hesap verilmiştir.\n\nKarşılaştırmalar: 800 lümenlik LED ampul ≈ 8,8 W (Signify veri sayfası) → 20 W ≈ 2 LED ampulden biraz fazla; eski akkor ampul 60 W (ENERGY STAR).\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: OpenStax College Physics 2e §20.4 (P = I²R); IEC 60228 iletken direnç tablosu (mycableengineering.com); Signify 8.8A19 LED veri sayfası; ENERGY STAR – Learn About Brightness.\n\n#kozmoslab #elektrik #kablo #enerji #fizik #mühendislik #bilim #merak #shorts",
+  "etiketler": [
+   "kablo",
+   "uzatma kablosu",
+   "elektrik",
+   "akım",
+   "joule yasası",
+   "ısınma",
+   "enerji",
+   "fizik",
+   "mühendislik",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "OpenStax College Physics 2e §20.4 Electric Power and Energy: P = I²R (denklem 20.30)",
+  "IEC 60228 iletken direnci (mycableengineering.com, 'Maximum Resistance of Conductors in mΩ/m'): 1,5 mm² düz bakır sınıf 1/2: 12,1; sınıf 5/6: 13,3",
+  "Signify (Philips) veri sayfası 929003584964, 8.8A19 LED: Power Consumption 8.8 W, 800 lm, 60 W eşdeğeri",
+  "ENERGY STAR – Learn About Brightness: eski 60 W akkor ampul = en az 800 lümen",
+  "Türkiye şebeke gerilimi 230 V (TS EN 50160 / IEC 60038 nominal)",
+  "Hesap: 20 m × 13,3 mΩ/m = 0,266 Ω; 2.000/230 = 8,70 A; 8,70² × 0,266 = 20,1 W; 17,39² × 0,266 = 80,5 W; 80,5/20,1 = 4"
+ ]
+}

@@ -244,18 +244,14 @@ def main():
 
     # depoya yaz (değişince ya da saatte bir) — panel ve denetçi n8n/sef.json'u okur
     ozet = json.dumps({k: cikti[k] for k in ("durum", "eylemler", "acik")}, ensure_ascii=False, sort_keys=True)
-    if ozet != st.get("_son_ozet") or ts - st.get("_son_yazim", 0) > 3600 or sb_degisti:
+    if ozet != st.get("_son_ozet") or ts - st.get("_son_yazim", 0) > 3600:
         for _ in range(3):
             dx("sh", "-c", f"rm -rf {REPO}/.git/rebase-merge {REPO}/.git/rebase-apply {REPO}/.git/MERGE_HEAD && find {REPO}/.git -name '*.lock' -delete 2>/dev/null; true")
             git("fetch", "--depth", "50", "-q", "origin", "+refs/heads/main:refs/remotes/origin/main")
             git("checkout", "-f", "-B", "main", "refs/remotes/origin/main")
             git("reset", "--hard", "refs/remotes/origin/main")
             dx("sh", "-c", f"cat > {REPO}/n8n/sef.json", girdi=json.dumps(cikti, ensure_ascii=False, indent=1))
-            if sb_degisti:
-                dx("sh", "-c", f"cat > {REPO}/n8n/sistem_bekci.json", girdi=json.dumps(sb, ensure_ascii=False, indent=1))
-                git("add", "n8n/sef.json", "n8n/sistem_bekci.json")
-            else:
-                git("add", "n8n/sef.json")
+            git("add", "n8n/sef.json")   # 23.11.2026 tek sahip: sistem_bekci.json yalnız Pi'nin; şef düzelmiş bulguları yalnız kendi hesabında yok sayar
             if not git("diff", "--cached", "--quiet")[0]:
                 break
             git("commit", "-qm", "Şef: " + ("; ".join(e["eylem"] + (" ✓" if e["ok"] else " ✗") for e in eylemler) or cikti["durum"]))

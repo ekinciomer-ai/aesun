@@ -34,6 +34,7 @@ D
 fi
 chown -R 10042:10042 $IS 2>/dev/null || chmod -R a+rwX $IS
 if [ "$MOD" = "taslak" ]; then R="--w 540 --h 960"; else R="--w 1080 --h 1920 --mb 3"; fi
+R="$R --q stil=${STIL:-lowpoly}"
 cat > $IS/calistir.sh <<C
 set -e
 cd /w

@@ -194,6 +194,9 @@ def roller(req: Request):
     return {r for r, v in DURUM["ozet"].items() if hmac.compare_digest(v, h)}
 
 _kasa.bagla(roller)
+import davalar as _davalar   # UYAP dava evrakları (yalnız yönetici, şifreli)
+app.include_router(_davalar.router)
+_davalar.bagla(roller)
 
 # ---- Müşteri Monitoring (AEMonitoring'den ayrı veri: /musteri, aesun-musteri kapsayıcısı yazar) ----
 MUSTERI = Path(os.environ.get("MUSTERI_VERI", "/musteri"))

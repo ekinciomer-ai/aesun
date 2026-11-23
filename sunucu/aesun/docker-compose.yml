@@ -11,6 +11,8 @@ services:
       - /opt/aesun/ssh:/home/aesun/.ssh:ro
       - aesun_musteri:/musteri:ro      # Müşteri Monitoring verisi (yalnız okuma)
       - /opt/aesun/kasa_acik.pem:/kasa_acik.pem:ro   # kasa yalnız şifreler; özel anahtar burada yok
+      - /opt/aesun/ozel/davalar/sunum:/davalar:ro   # dava evrakları (şifreli)
+      - /opt/aesun/ozel/davalar/anahtar.bin:/davalar_anahtar:ro
     networks: [gesfin-net]
     mem_limit: 256m
     logging:

@@ -33,6 +33,11 @@ jobs:
             exit 1
           fi
           not() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | cut -c1-900)"; }
+          if [ "${{ inputs.bolum }}" = "9" ]; then
+            not "Kilit sahipleri" "$($S 'for p in $(fuser /var/lock/aesun_islem.lock 2>/dev/null); do ps -o pid=,etime=,args= -p $p | cut -c1-160; done')"
+            not "Uzun islemler" "$($S 'ps -eo pid,etime,args --sort=-etime | grep -E "aesun_paket|islem_" | grep -v grep | head -15 | cut -c1-160')"
+            exit 0
+          fi
           if [ "${{ inputs.bolum }}" = "8" ]; then
             not "Portal sürüm" "$(curl -s --max-time 15 "https://portal.aksarayenerji.net/?t=$(date +%s)" | grep -c parasalAnahtar) eşleşme; $(curl -sI --max-time 15 https://portal.aksarayenerji.net/ | grep -iE 'cache|expires|last-mod|etag' | tr '\r\n' '  ')"
             exit 0

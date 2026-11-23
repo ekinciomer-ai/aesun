@@ -2,6 +2,26 @@
 # Kullanım: python3 mk_is.py bolumler_isNN.json [--tl]
 import json, sys
 import mk_ep2, mk_tl
+# HIZLI KURGU (Ömer 23.11): ses %12 hızlı, cümle içi uzun duraksamalar kırpılır, parçalar arası boşluklar kısa, geri sayım 3 sn
+SESFILTRE='silenceremove=start_periods=1:start_threshold=-45dB,silenceremove=stop_periods=-1:stop_duration=0.22:stop_threshold=-42dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,atempo=1.12'
+import os, subprocess
+def trim(N, kod):
+  os.makedirs(f'vm{N}', exist_ok=True)
+  for i in range(1, 8):
+    subprocess.run(['ffmpeg','-y','-loglevel','error','-i',f"{mk_ep2.AESUN}/sunucu/tts_kuyruk/cikti/{kod}__V{i}.mp3",'-af',SESFILTRE,'-ar','44100','-ac','1',f'vm{N}/V{i}.wav'],check=True)
+mk_ep2.trim=trim
+def build(kod,vdir,out,mapf,clues,reasons,nextfrac=.45,extra={}):
+  P=json.load(open(f"{mk_ep2.AESUN}/sunucu/tts_kuyruk/tamam/{kod}.json"))['parcalar']
+  D=[mk_tl.dur(f'{vdir}/V{i}.wav') for i in range(1,8)];S=[0]*7
+  S[0]=.25;kaza=S[0]+D[0]+.15;S[1]=kaza+.05;S[2]=S[1]+D[1]+.08;poll=S[2]+D[2]+.1;S[3]=poll+.1;cd0=S[3]+D[3]*.55
+  rew=max(S[3]+D[3]+.15,cd0+3.1);rd=.8;slow=rew+rd;S[4]=slow+.05;karar=S[4]+D[4]+.15;S[5]=karar+.05;ders=S[5]+D[5]+.15;S[6]=ders+.05;end=S[6]+D[6]+.8
+  T={"kaza":kaza,"poll":poll,"cd0":cd0,"rew":rew,"rewDur":rd,"slow":slow,"karar":karar,"ders":ders,"next":S[6]+D[6]*nextfrac,"end":end,"suc":999,"cut":999}
+  T.update(mapf(S,D,T))
+  T["clues"]=[[S[4]+o,x] for o,x in clues];T["reasons"]=[[S[5]+o,x] for o,x in reasons[:-2]]
+  T["hukum"]=S[5]+reasons[-2];T["onay"]=S[5]+D[5]-reasons[-1]
+  T["caps"]=mk_tl.caps_for([p['metin'] for p in P],S,D);T["_starts"]=S;T.update(extra)
+  json.dump(T,open(out,'w'),ensure_ascii=False);return T
+mk_tl.build=build
 mk_tl.DISP = {'yüzde yirmi dokuz': '%29', 'yüzde seksen': '%80', 'yüzde yirmi': '%20',
   'sekiz yüz kırk bin lirayı aşan': '840.314 TL', 'yüz bin lira': '100.000 TL', 'yaklaşık üç metreden': '~3 metreden', **mk_tl.DISP}
 E = json.load(open(sys.argv[1])); s = open('scene.html').read()
@@ -12,7 +32,7 @@ for e in E:
   a = s.index(f"const T{N}=await"); z = s.index("tags.innerHTML=tg;return true};", a) + len("tags.innerHTML=tg;return true};")
   b = s[a:z]
   for o, n in [('MİT Mİ GERÇEK Mİ?', 'PATRON MU HAKLI? · İŞ HUKUKU'), ("['MİT',0]", "['İDDİA',0]"), ('MİT ÇÖKTÜ', 'İDDİA ÇÖKTÜ'),
-               ('Kişi, plaka ve yer bilgisi', 'Kişi, şirket ve yer bilgisi')]:
+               ('Kişi, plaka ve yer bilgisi', 'Kişi, şirket ve yer bilgisi'), ('Math.ceil(5-(t-cd))','Math.ceil(3-(t-cd))'), ('(t-cd)/5,0,1)','(t-cd)/3,0,1)')]:
     b = b.replace(o, n)
   s = s[:a] + b + s[z:]
 open('scene.html', 'w').write(s); print('tamam', [e['N'] for e in E])

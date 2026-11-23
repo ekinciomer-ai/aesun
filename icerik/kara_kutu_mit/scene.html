@@ -1561,7 +1561,7 @@ function hookPi1(t){const e=TPi1.kaza;if(t>e)return '';const o=1-sm((t-e+.4)/.4)
  <div style="display:inline-block;margin-top:.4em;border:5px solid #ffd60a;color:#ffd60a;padding:.05em .4em;font-size:calc(var(--W)*0.09);border-radius:10px;opacity:${st};transform:rotate(-8deg) scale(${lerp(2.2,1,sm(st))})">GERÇEK DAVA</div></div>`}
 function pollPi1(t){const a=TPi1.poll,e=TPi1.rew;if(t<a||t>e)return '';const o=fadeIn(t,a,.3)*(1-sm((t-e+.35)/.35));
  const opts=[['A', 'Hayır, imza onun'], ['B', 'Evet, aldı'], ['C', 'Sadece yarısını']];
- const cd=TPi1.cd0,left=Math.max(0,Math.ceil(5-(t-cd)));const prog=clamp((t-cd)/5,0,1);const R=34,C=2*Math.PI*R;
+ const cd=TPi1.cd0,left=Math.max(0,Math.ceil(3-(t-cd)));const prog=clamp((t-cd)/3,0,1);const R=34,C=2*Math.PI*R;
  let h=`<div id="card" style="top:20%;opacity:${o};text-align:left"><div class="hd" style="font-size:calc(var(--W)*0.066)">ŞOFÖR TAZMİNAT ALDI MI?</div>`;
  opts.forEach(([k,txt],i)=>{const oi=fadeIn(t,a+.5+i*.45,.3);const pulse=t>cd?1+.04*Math.sin(t*9+i):1;h+=`<div style="display:flex;align-items:center;gap:4%;margin:.45em 0;padding:.45em .6em;border-radius:12px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);opacity:${oi};transform:translateX(${(1-oi)*40}px) scale(${pulse});font-size:calc(var(--W)*0.047);font-weight:800"><span style="flex:none;width:1.6em;height:1.6em;border-radius:50%;background:#ff7a00;color:#111;display:flex;align-items:center;justify-content:center;font-family:'Anton'">${k}</span>${txt}</div>`});
  h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.6em;opacity:${fadeIn(t,cd-.2)}"><div style="font-size:calc(var(--W)*0.045);font-weight:800;color:#ffd60a">💬 Harfini yoruma yaz!</div>

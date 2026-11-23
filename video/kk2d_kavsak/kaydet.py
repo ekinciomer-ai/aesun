@@ -4,7 +4,7 @@ import asyncio,json,subprocess,sys,os
 from playwright.async_api import async_playwright
 dil=sys.argv[1];Wd=int(sys.argv[2]) if len(sys.argv)>2 else 1080;Hd=Wd*16//9
 SAHNE=sys.argv[3] if len(sys.argv)>3 else 'sahne.html';AD=sys.argv[4] if len(sys.argv)>4 else 'kk2d_kavsak';OLCEK=1080/Wd
-D=os.path.dirname(os.path.abspath(__file__));O=f"{D}/{dil}";K=json.load(open(f"{O}/kurgu_{dil}.json",encoding="utf-8"));FPS=30
+D=os.path.dirname(os.path.abspath(__file__));O=f"{D}/{os.environ.get('KK_CIKTI',dil)}";K=json.load(open(f"{O}/kurgu_{dil}.json",encoding="utf-8"));FPS=30
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(args=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']);pg=await b.new_page(viewport={'width':Wd,'height':Hd});pg.on('pageerror',lambda e:print('HATA',e))

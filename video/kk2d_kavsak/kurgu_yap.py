@@ -2,8 +2,8 @@
 python3 kurgu_yap.py <dil> <mp3 klasörü>   (mp3: KK2D_KAVSAK_<DİL>__V1..V7.mp3)"""
 import json,subprocess,sys,os,re,tempfile
 import numpy as np
-dil,src=sys.argv[1],sys.argv[2];HIZ=os.environ.get('KK_HIZ','1.32');D=os.path.dirname(os.path.abspath(__file__));OUT=f"{D}/{dil}";os.makedirs(OUT,exist_ok=True)
-kod=f"KK2D_KAVSAK_{dil.upper()}";J=json.load(open(f"{D}/../../sunucu/tts_kuyruk/tamam/{kod}.json",encoding="utf-8")) if os.path.exists(f"{D}/../../sunucu/tts_kuyruk/tamam/{kod}.json") else json.load(open(f"{D}/../../sunucu/tts_kuyruk/{kod}.json",encoding="utf-8"))
+dil,src=sys.argv[1],sys.argv[2];HIZ=os.environ.get('KK_HIZ','1.32');D=os.path.dirname(os.path.abspath(__file__));OUT=f"{D}/{os.environ.get('KK_CIKTI',dil)}";os.makedirs(OUT,exist_ok=True)
+kod=f"{os.environ.get('KK_KOD','KK2D_KAVSAK')}_{dil.upper()}";J=json.load(open(f"{D}/../../sunucu/tts_kuyruk/tamam/{kod}.json",encoding="utf-8")) if os.path.exists(f"{D}/../../sunucu/tts_kuyruk/tamam/{kod}.json") else json.load(open(f"{D}/../../sunucu/tts_kuyruk/{kod}.json",encoding="utf-8"))
 MET={p["ad"]:p["metin"] for p in J["parcalar"]}
 SR=48000;tmp=tempfile.mkdtemp()
 def kirp(a,b):
@@ -14,6 +14,7 @@ def oran(metin,parca):   # parçanın metindeki başlangıç oranı (karakter)
 ANAH={"tr":{"carp":"Çarpış","tali":"Ama","onay":"Yargıtay","ip":["Birinci","İkinci","Üçüncü"]},
       "en":{"carp":"They collide","tali":"But the rider","onay":"Turkey's Supreme","ip":["Clue one","Clue two","Clue three"]},
       "es":{"carp":"Chocan","tali":"Pero el motorista","onay":"El Tribunal","ip":["Pista uno","Pista dos","Pista tres"]}}[dil]
+if os.environ.get("KK_ANAH"): ANAH.update(json.loads(os.environ["KK_ANAH"]))
 t=0.35;P={};L=[];A=[];BOS=0.15
 for v in ["V1","V2","V3","V4","V5","V6","V7"]:
     w=f"{tmp}/{v}.wav";d=kirp(f"{src}/{kod}__{v}.mp3",w);L.append((w,t));P[v]=[round(t,3),round(t+d,3)]

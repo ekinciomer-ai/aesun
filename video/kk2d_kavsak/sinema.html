@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<title>Kara Kutu · Sinematik · Kavşağa önce giren geçer?</title>
+<style>
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-800-normal.woff2) format('woff2');font-weight:800}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-ext-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+html,body{margin:0;background:#000;overflow:hidden}
+#c,#b,#s{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head><body>
+<canvas id="c"></canvas><canvas id="b"></canvas>
+<svg id="s" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid meet"></svg>
+<script type="module">
+// Format 13 · Sinematik 3D: gece, ıslak asfalt, sokak lambaları, far ışıkları, sis, film kadrajı, renk düzeltme, bloom, sabit gren.
+// Çarpışma anı gösterilmez: beyaz flaş → siyah.
+import * as THREE from 'three';
+const SV=document.getElementById('s'),cv=document.getElementById('c'),bc=document.getElementById('b');let K=null;
+const KIR='#ff5a48',SAR='#ffc94a',BEY='#f4f1ea',GRI='#9aa3b5';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=p=>{p=cl(p);return p*p*(3-2*p)},eout=p=>1-Math.pow(1-cl(p),3),lerp=(a,b,k)=>a+(b-a)*k;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const W=innerWidth,H=innerHeight;
+const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});r.setPixelRatio(1);r.setSize(W,H,false);
+r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;r.outputColorSpace=THREE.SRGBColorSpace;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.25;
+bc.width=W;bc.height=H;const b2=bc.getContext('2d');
+const sc=new THREE.Scene();sc.background=new THREE.Color('#e9b98a');sc.fog=new THREE.FogExp2('#e3c3a0',0.007);
+const cam=new THREE.PerspectiveCamera(42,W/H,0.1,300);
+sc.add(new THREE.HemisphereLight('#bcd4f0','#6b5a48',2.2));
+const ay=new THREE.DirectionalLight('#ffd2a0',3.2);ay.position.set(-30,18,10);ay.castShadow=true;ay.shadow.mapSize.set(1024,1024);
+Object.assign(ay.shadow.camera,{left:-25,right:25,top:25,bottom:-25,near:1,far:90});sc.add(ay);
+const M=(c,ro=0.7,me=0)=>new THREE.MeshStandardMaterial({color:c,roughness:ro,metalness:me});
+const kutu=(w,h,d,c,ro,me)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c,ro,me));m.castShadow=m.receiveShadow=true;return m};
+const ekle=(o,x,y,z)=>{o.position.set(x,y,z);sc.add(o);return o};
+// zemin: ıslak asfalt yollar, kaldırım, çim
+ekle(kutu(120,0.2,120,'#5d7a46',0.95),0,-0.1,0);
+ekle(kutu(120,0.05,5,'#454a52',0.45,0.15),0,0.02,0);ekle(kutu(5,0.051,120,'#454a52',0.45,0.15),0,0.02,0);
+for(let i=-50;i<=50;i+=3)if(Math.abs(i)>3){ekle(kutu(1.4,0.06,0.12,'#d9d4c2',0.5),i,0.03,0);ekle(kutu(0.12,0.061,1.4,'#d9d4c2',0.5),0,0.03,i)}
+ekle(kutu(0.25,0.062,2.3,'#e8e4d8',0.5),-2.9,0.03,1.25);
+for(const [x,z] of [[-1,-1],[1,-1],[-1,1],[1,1]])ekle(kutu(56,0.25,56,'#9a958c',0.8),x*31,0.12,z*31);
+// binalar: pencere ışıkları
+const pen=new THREE.MeshStandardMaterial({color:'#2a2a2a',emissive:'#ffcf7a',emissiveIntensity:0.5});
+function bina(x,z,w,h,d,c){ekle(kutu(w,h,d,c,0.85),x,h/2+0.25,z);let n=0;
+ for(let yy=1.6;yy<h-0.5;yy+=1.8)for(let xx=-w/2+0.9;xx<w/2-0.5;xx+=1.6){if(((xx*7+yy*13+x)|0)%3===0)continue;
+  for(const sd of [1,-1]){const p=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.9),pen);p.position.set(x+xx,yy+0.25,z+sd*(d/2+0.01));if(sd<0)p.rotation.y=Math.PI;sc.add(p)}}}
+[[-11,-12,8,9,7,'#b9a48c'],[-22,-11,9,14,8,'#b9a48c'],[11,-13,9,7,8,'#b9a48c'],[22,-12,8,16,9,'#b9a48c'],[-12,12,8,7,8,'#b9a48c'],[-23,13,9,12,8,'#b9a48c'],[12,12,8,10,8,'#b9a48c'],[23,14,9,13,9,'#b9a48c'],
+ [-11,-26,8,18,8,'#b9a48c'],[12,-27,9,11,8,'#b9a48c'],[-12,27,9,14,8,'#b9a48c'],[12,28,8,9,8,'#b9a48c']].forEach(b=>bina(...b));
+// sokak lambaları (4 ışık)
+function lamba(x,z,yon){const g=new THREE.Group();const d=new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.1,5,8),M('#55595e',0.5,0.6));d.position.y=2.5;g.add(d);
+ const k=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.08,0.1),M('#55595e',0.5,0.6));k.position.set(yon*0.6,5,0);g.add(k);
+ const a=new THREE.Mesh(new THREE.SphereGeometry(0.2,12,8),new THREE.MeshBasicMaterial({color:'#ffd9a0'}));a.position.set(yon*1.2,4.9,0);g.add(a);
+ const l=new THREE.PointLight('#ffb867',20,18,1.5);l.position.set(yon*1.2,4.7,0);g.add(l);g.position.set(x,0.25,z);sc.add(g)}
+lamba(-3.6,-3.6,1);lamba(3.6,3.6,-1);lamba(-14,3.4,1);lamba(3.4,-14,-1);
+// DUR levhası
+const levha=new THREE.Group();{const d=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,2.2,8),M('#9aa0a4',0.4,0.6));d.position.y=1.1;levha.add(d);
+ const s=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.05,8),new THREE.MeshStandardMaterial({color:'#d8352a',roughness:0.35,emissive:'#3a0805'}));s.rotation.x=Math.PI/2;s.rotation.y=Math.PI/2;s.position.y=2.35;levha.add(s);levha.userData.s=s}
+ekle(levha,-3.4,0.25,3.4);
+// araçlar + farlar
+function far(grp,x,y,yz){const sp=new THREE.SpotLight('#fff1d0',60,40,0.45,0.5,1.4);sp.position.set(x,y,0);const hd=new THREE.Object3D();hd.position.set(x+10,0,0);grp.add(sp,hd);sp.target=hd;
+ for(const z of yz){const f=new THREE.Mesh(new THREE.SphereGeometry(0.12,10,8),new THREE.MeshBasicMaterial({color:'#fffbe8'}));f.position.set(x,y,z);grp.add(f)}}
+const van=new THREE.Group();{const a=kutu(2.2,1.3,1.3,'#d9d9d4',0.4,0.3);a.position.set(-0.3,0.95,0);van.add(a);const b=kutu(1,1,1.28,'#cfcfca',0.4,0.3);b.position.set(1.3,0.8,0);van.add(b);
+ const c=kutu(0.06,0.5,1.1,'#1d2a33',0.1,0.8);c.position.set(1.81,1.0,0);van.add(c);
+ for(const [x,z] of [[-1,0.62],[-1,-0.62],[1.2,0.62],[1.2,-0.62]]){const w=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.22,14),M('#151617'));w.rotation.x=Math.PI/2;w.position.set(x,0.3,z);van.add(w)}
+ far(van,1.82,0.75,[0.45,-0.45]);for(const z of [0.5,-0.5]){const s=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.18,0.18),new THREE.MeshBasicMaterial({color:'#ff2a1a'}));s.position.set(-1.42,0.9,z);van.add(s)}}
+sc.add(van);
+const moto=new THREE.Group();{const g1=kutu(1.3,0.35,0.26,'#e98a2c',0.35,0.4);g1.position.y=0.55;moto.add(g1);const ri=kutu(0.34,0.6,0.34,'#2b4f80');ri.position.set(-0.1,1.0,0);moto.add(ri);
+ const ka=new THREE.Mesh(new THREE.SphereGeometry(0.2,14,10),M('#e8e8e8',0.25,0.2));ka.position.set(-0.05,1.45,0);moto.add(ka);
+ for(const x of [-0.5,0.5]){const w=new THREE.Mesh(new THREE.TorusGeometry(0.24,0.07,8,18),M('#151617'));w.position.set(x,0.28,0);moto.add(w)}
+ far(moto,0.68,0.75,[0])}
+sc.add(moto);
+const CARP=[1.2,1.25];
+function konumlar(z){
+ const vx=z<1?lerp(-30,-4.6,ease(z)):z<1.7?lerp(-4.6,CARP[0]-1.8,(z-1)/0.7):CARP[0]-1.8+0.35*eout((z-1.7)/0.5);
+ const mz=z<1?lerp(30,5.4,ease(z)):z<1.7?lerp(5.4,CARP[1]+0.7,(z-1)/0.7):CARP[1]+0.7;
+ let m={x:1.25,z:mz,ry:Math.PI/2,rz:0};
+ if(z>1.7){const k=eout((z-1.7)/0.6);m={x:1.25+2.2*k,z:CARP[1]+0.7-1.1*k,ry:Math.PI/2-1.8*k,rz:1.3*k}}
+ return {v:{x:vx,z:1.25},m}}
+function bolum(t){const P=K.parca;for(const k of ['V7','V6','V5','V4','V3','V2','V1'])if(t>=P[k][0])return k;return 'V1'}
+function olayZ(t){const P=K.parca;
+ if(t<P.V2[0])return 0;if(t<P.V3[0])return cl((t-P.V2[0])/(P.V2[1]-P.V2[0]))*0.98;
+ if(t<P.V4[0]){const ct=K.carp-P.V3[0];const k=cl((t-P.V3[0])/ct);return 1+k*0.7+(k>=1?cl((t-K.carp)/0.9)*0.6:0)}
+ if(t<P.V5[0])return 2.3;if(t<P.V6[0])return lerp(2.3,0.9,eout(cl((t-P.V5[0])/1.6)));return 2.3}
+// sabit gren (titreme yok)
+const gr=document.createElement('canvas');gr.width=W;gr.height=H;{const g=gr.getContext('2d'),im=g.createImageData(W,H);let s=7;for(let i=0;i<im.data.length;i+=4){s=(s*16807)%2147483647;const v=s%255;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0)}
+const L={kanal:'KARA KUTU',baslik:'Kavşağa önce giren geçer mi?',van:'KAMYONET',moto:'MOTOSİKLET',temsili:'TEMSİLİ CANLANDIRMA',
+ ksoru:'Kim kusurlu?',sik:['A · Sadece kamyonet','B · Sadece motosiklet','C · İkisi de'],ip:['DUR levhası vardı','Sağdan geliyordu','Yavaşlamadı'],geri:'GERİ SARALIM',
+ asli:'Kamyonet · ASLİ KUSUR',tali:'Motosiklet · TALİ KUSUR',ceza:'4.500 TL adli para cezası · ehliyet 4 ay',onay:'YARGITAY ONADI',dogru:'Doğru şık: C',
+ kural:['1 · Levha ve ışık','2 · Yol türü','3 · İşaret yoksa sağdaki önce'],yav:'Hakkın olsa da YAVAŞLA',
+ anahtar:['DUR','kusur','asli','tali','Yargıtay','yavaş','sağ','önce','kural','ceza','ehliyet','onadı','çarpış'],
+ not:'Yargıtay kararından uyarlanmıştır · Kişi, plaka, yer bilgisi yok · Hukuki danışmanlık değildir'};
+const T=(x,y,t,fs,c=BEY,a=1,anc='middle',fam='Baloo',wt=800,ls=0)=>a<=0?'':`<text x="${x}" y="${y}" text-anchor="${anc}" font-family="${fam}" font-weight="${wt}" font-size="${fs}" fill="${c}" opacity="${a}" letter-spacing="${ls}" style="paint-order:stroke" stroke="#000" stroke-opacity=".55" stroke-width="8">${esc(t)}</text>`;
+const pano=(x,y,w,h,a,k='#ffffff')=>a<=0?'':`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#05070c" fill-opacity=".72" stroke="${k}" stroke-opacity=".5" stroke-width="2" opacity="${a}"/>`;
+const v3=new THREE.Vector3();function ekran(x,y,z){v3.set(x,y,z).project(cam);return [(v3.x+1)/2*1080,(1-v3.y)/2*1920]}
+const ets=(p,txt,c,a)=>`<g opacity="${a}" transform="translate(${p[0]},${p[1]})"><line x1="0" y1="0" x2="0" y2="-60" stroke="${c}" stroke-width="3"/><circle r="7" fill="${c}"/>`+T(0,-74,txt,30,c,1,'middle','Baloo',800,3)+`</g>`;
+// çekim listesi: her parça birkaç kesme
+function kamera(t,v,tv,dv,va,mo){
+ if(v==='V1'){const k=ease(tv/dv);return {p:[lerp(-34,-16,k),lerp(34,15,k),lerp(34,24,k)],h:[0,0,0],f:50}}
+ if(v==='V2'){const c=Math.floor(tv/2.6)%3,u=(tv%2.6)/2.6;
+  if(c===0)return {p:[va.x-10,2.2,va.z+7+u*0.6],h:[va.x+4,0.8,va.z],f:45};                   // kamyonet yanı, alçak takip
+  if(c===1)return {p:[mo.x+4,1.6,mo.z-13],h:[mo.x,1,mo.z],f:40};                            // motosiklete karşıdan
+  return {p:[lerp(-16,-13,u),16,lerp(22,20,u)],h:[0,0,0],f:48}}          // yüksek genel
+ if(v==='V3'){const kc=t-K.carp;
+  if(kc<-1.4)return {p:[-1.2,1.1,11],h:[-3.4,1.7,3.4],f:42};                                    // DUR levhası alttan, kamyonet geçer
+  return {p:[va.x-11,2.4,va.z-5],h:[CARP[0]+2,0.8,CARP[1]+2],f:42}}                       // kamyonet arkası, kavşağa giriş
+ if(v==='V4')return {p:[14+Math.sin(tv*0.2)*2,9,-16],h:[0,0.5,1],f:45};
+ if(v==='V5')return {p:[-14,14,20],h:[(va.x+mo.x)/2,0.5,(va.z+mo.z)/2],f:40};
+ const d=0.6+t*0.05;return {p:[Math.sin(d)*30,14,Math.cos(d)*30],h:[0,0,0],f:46}}
+function kare(t){
+ const P=K.parca,v=bolum(t),tv=t-P[v][0],dv=P[v][1]-P[v][0],kc=t-K.carp;
+ const z=olayZ(t),{v:va,m:mo}=konumlar(z);
+ van.position.set(va.x,0.32,va.z);moto.position.set(mo.x,0.32,mo.z);moto.rotation.set(mo.rz,mo.ry,0);
+ levha.userData.s.material.emissive=new THREE.Color((v==='V5'&&t>K.ip[0]&&t<K.ip[1])||(v==='V3'&&kc<-1.4)?'#ff2a10':'#3a0805');
+ const C=kamera(t,v,tv,dv,va,mo);cam.fov=C.f;cam.updateProjectionMatrix();cam.position.set(...C.p);cam.lookAt(...C.h);cam.updateMatrixWorld();
+ r.render(sc,cam);
+ // bloom + renk düzeltme
+ b2.clearRect(0,0,W,H);b2.globalCompositeOperation='source-over';b2.filter='none';
+ b2.globalCompositeOperation='lighter';b2.globalAlpha=0.3;b2.filter=`brightness(0.6) contrast(3) blur(${Math.round(W/60)}px)`;b2.drawImage(cv,0,0);
+ b2.filter='none';b2.globalAlpha=0.06;b2.globalCompositeOperation='overlay';b2.drawImage(gr,0,0);b2.globalAlpha=1;b2.globalCompositeOperation='source-over';
+ const geri=v==='V5'&&tv<1.6;
+ let o=`<defs><radialGradient id="vg" cx=".5" cy=".48" r=".72"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></radialGradient></defs>`;
+ o+=`<rect width="1080" height="1920" fill="#ff9a4a" opacity=".06" style="mix-blend-mode:color"/><rect width="1080" height="1920" fill="url(#vg)"/>`;
+ if(v==='V5')o+=`<rect width="1080" height="1920" fill="#2a8fb0" opacity="${geri?0.28:0.12}"/>`;
+ if(geri)for(let i=0;i<10;i++)o+=`<rect y="${(i*197+t*1600)%1920}" width="1080" height="${3+i%3*4}" fill="#fff" opacity=".18"/>`;
+ // çarpışma: gösterilmez
+ if(v==='V3'&&kc>=0){const f=kc<0.1?kc/0.1:Math.max(0,1-(kc-0.1)/0.25);o+=`<rect width="1080" height="1920" fill="#000" opacity="${cl(kc/0.3)}"/><rect width="1080" height="1920" fill="#fff" opacity="${f}"/>`}
+ if(v==='V4'||v==='V6'||v==='V7')o+=`<rect width="1080" height="1920" fill="#000" opacity="${0.4*ease(tv/0.5)}"/>`;
+ // film kadrajı
+ o+=`<rect width="1080" height="190" fill="#000"/><rect y="1730" width="1080" height="190" fill="#000"/>`;
+ o+=T(60,120,L.kanal,40,'#e2702c',1,'start','Baloo',800,4);
+ if(v==='V2'||v==='V3'||v==='V5')o+=T(1020,120,L.temsili,24,GRI,1,'end','Baloo',800,3);
+ if(v==='V1'){const a=ease((tv-0.6)/0.8)*(1-ease((tv-dv+0.6)/0.5));o+=T(540,820,L.baslik,66,BEY,a)+`<rect x="390" y="850" width="${300*ease((tv-0.9)/0.6)}" height="4" fill="${SAR}" opacity="${a}"/>`}
+ if(v==='V2'&&Math.floor(tv/2.6)%3===2){const a=ease((tv%2.6)/0.4);o+=ets(ekran(va.x,2.2,va.z),L.van,BEY,a)+ets(ekran(mo.x,2,mo.z),L.moto,SAR,a)}
+ if(v==='V4'){const a=ease(tv/0.4);o+=T(540,560,L.ksoru,78,SAR,a);
+  L.sik.forEach((s,i)=>{const b=ease((tv-0.4-i*0.3)/0.4);o+=pano(150,640+i*150,780,118,b)+T(200,718+i*150,s,54,BEY,b,'start')});
+  const [c0,c1]=K.sayac;if(t>=c0&&t<c1)o+=T(540,1330,String(Math.ceil(c1-t)),200,KIR)}
+ if(v==='V5'){if(geri)o+=T(540,600,'◀◀ '+L.geri,80,BEY,1-ease((tv-1.2)/0.4));
+  K.ip.forEach((x,i)=>{if(t<x)return;const b=eout((t-x)/0.4);o+=pano(110,1080+i*130,860,108,b,[KIR,'#6fa8ff',SAR][i])+T(540,1152+i*130,`${i+1} · ${L.ip[i]}`,50,BEY,b)})}
+ if(v==='V6'){const b1=ease((tv-0.3)/0.5),b2_=ease((t-K.tali)/0.5),c=ease((t-K.onayT)/0.5),d=ease((t-K.onayT-0.7)/0.5);
+  o+=pano(90,430,900,210,b1,KIR)+T(540,520,L.asli,60,KIR,b1)+T(540,590,L.ceza,34,BEY,b1,'middle','Kalam',700);
+  o+=pano(90,670,900,130,b2_,SAR)+T(540,755,L.tali,60,SAR,b2_);
+  o+=`<g opacity="${c}" transform="translate(540,960) rotate(-5) scale(${1+1.2*(1-eout(c))})"><rect x="-300" y="-60" width="600" height="110" rx="8" fill="none" stroke="#4ad07c" stroke-width="8"/><text y="18" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="58" fill="#4ad07c">${esc(L.onay)}</text></g>`;
+  o+=T(540,1110,L.dogru,56,SAR,d)}
+ if(v==='V7'){L.kural.forEach((s,i)=>{const b=ease((tv-0.6-i*dv*0.14)/0.5);o+=pano(110,440+i*150,860,118,b)+T(160,518+i*150,s,52,BEY,b,'start')});
+  const c=ease((tv-dv*0.6)/0.5);o+=pano(110,920,860,140,c,SAR)+T(540,1010,L.yav,58,SAR,c)}
+ o+=altyazi(t);
+ o+=T(540,1880,L.not,21,'#7a8294',1,'middle','Kalam',700);
+ if(t<0.3)o+=`<rect width="1080" height="1920" fill="#000" opacity="${1-t/0.3}"/>`;
+ if(t>K.toplam-0.6)o+=`<rect width="1080" height="1920" fill="#000" opacity="${(t-(K.toplam-0.6))/0.6}"/>`;
+ SV.innerHTML=o}
+const nrm=w=>w.toLocaleLowerCase('tr').replace(/[^\wçğıöşüâ]/g,'');
+function altyazi(t){const A=K.altyazi.find(a=>t>=a.bas&&t<a.son);if(!A)return'';const u=eout((t-A.bas)/0.15);
+ const kel=A.metin.split(' '),sat=[[]];let n=0;for(const k of kel){if(n+k.length>26&&sat[sat.length-1].length){sat.push([]);n=0}sat[sat.length-1].push(k);n+=k.length+1}
+ const y0=1600-(sat.length-1)*34;
+ return `<g opacity="${u}">`+sat.map((s,i)=>`<text x="540" y="${y0+i*68}" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="56" stroke="#000" stroke-width="10" paint-order="stroke">`+s.map(w=>`<tspan fill="${L.anahtar.some(a=>nrm(w).startsWith(nrm(a)))?SAR:BEY}">${esc(w)}</tspan>`).join(' ')+'</text>').join('')+'</g>'}
+window.kurgu=k=>{K=k};window.kare=kare;
+Promise.all(['800 40px Baloo','700 40px Kalam'].map(f=>document.fonts.load(f))).then(()=>{window.HAZIR=true});
+setTimeout(()=>{window.HAZIR=true},5000);
+</script></body></html>

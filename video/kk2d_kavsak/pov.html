@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<title>Kara Kutu · POV · Kavşağa önce giren geçer?</title>
+<style>
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-800-normal.woff2) format('woff2');font-weight:800}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-ext-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+html,body{margin:0;background:#000;overflow:hidden}svg{display:block;width:100vw;height:100vh}
+</style></head><body>
+<svg id="s" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid meet"></svg>
+<script>
+// Format 10 · POV çizgi film: sürücü gözünden, koyu sinematik 2D; üstte büyük sayaç, ortada 1–2 kelimelik dev altyazı.
+const SV=document.getElementById('s');let K=null;
+const GOK1='#5d9be0',GOK2='#cfe6f5',ASF='#5a5f68',ASF2='#4c5058',CIZ='#f4f1e6',KIR='#e0473a',SAR='#ffcc3a',BEY='#ffffff',GRI='#e8ecf2',CIM='#6a9a4c';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=p=>{p=cl(p);return p*p*(3-2*p)},eout=p=>1-Math.pow(1-cl(p),3),lerp=(a,b,k)=>a+(b-a)*k;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const VX=540,VY=860;   // kaçış noktası
+const L={sayac:"DUR'A",m:'METRE',gecti:'DURMADIN',hak:'GEÇİŞ HAKKI: SAĞDAKİ',soru:'SENCE KİM KUSURLU?',sik:['A · Sadece kamyonet','B · Sadece motosiklet','C · İkisi de'],
+ geri:'GERİ SAR',ip:['DUR LEVHASI','SAĞDAN GELDİ','YAVAŞLAMADI'],asli:'KAMYONET: ASLİ KUSUR',tali:'MOTOSİKLET: TALİ KUSUR',ceza:'4.500 TL adli para cezası · ehliyet 4 ay',onay:'YARGITAY ONADI',dogru:'DOĞRU ŞIK: C',
+ kural:['LEVHA · IŞIK','YOL TÜRÜ','İŞARET YOKSA: SAĞDAKİ'],yav:'HAKKIN OLSA DA YAVAŞLA',kanal:'KARA KUTU',temsili:'TEMSİLİ CANLANDIRMA',
+ anahtar:['DUR','kusur','asli','tali','Yargıtay','yavaş','sağ','önce','kural','kırık','ceza','ehliyet','onadı','çarpış'],
+ not:'Yargıtay kararından uyarlanmıştır · Kişi, plaka, yer bilgisi yok · Hukuki danışmanlık değildir'};
+function bolum(t){const P=K.parca;for(const k of ['V7','V6','V5','V4','V3','V2','V1'])if(t>=P[k][0])return k;return 'V1'}
+// kavşağa uzaklık (m): V1 60 → V2 sonu 14 → çarpışmada 0; geri sarmada geri gider
+function uzak(t){const P=K.parca;
+ if(t<P.V2[0])return 60;if(t<P.V3[0])return lerp(60,14,ease((t-P.V2[0])/(P.V2[1]-P.V2[0])));
+ if(t<K.carp)return lerp(14,0,(t-P.V3[0])/(K.carp-P.V3[0]));if(t<P.V5[0])return 0;
+ if(t<P.V6[0])return lerp(0,14,eout((t-P.V5[0])/1.6));return 0}
+const F=693;                                   // odak (piksel); göz yüksekliği 1,5 m
+const ys=d=>VY+F*1.5/Math.max(1.2,d);          // yer düzleminde uzaklık → ekran y
+const sx=(x,d)=>VX+x*F/Math.max(1.2,d);        // yanal x (m) → ekran x
+function sahne(d,t,titre){
+ let o=`<defs><linearGradient id="gk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${GOK1}"/><stop offset="1" stop-color="${GOK2}"/></linearGradient></defs>`;
+ o+=`<rect width="1080" height="${VY}" fill="url(#gk)"/>`;
+ // uzak bina silüetleri
+ let b='';for(let i=0;i<14;i++){const x=i*85-20,h=60+((i*53)%9)*22;b+=`<rect x="${x}" y="${VY-h}" width="78" height="${h}" fill="#8496b0"/>`;for(let j=0;j<3;j++)if((i+j)%3)b+=`<rect x="${x+12+j*20}" y="${VY-h+18}" width="10" height="12" fill="#d8e6f2" opacity=".8"/>`}
+ o+=b+`<rect y="${VY}" width="1080" height="${1920-VY}" fill="${CIM}"/>`;
+ // ana yol (bizim yol) ve kesişen yol
+ o+=`<path d="M${sx(-4,300)},${ys(300)} L${sx(4,300)},${ys(300)} L${sx(4,1.3)},${ys(1.3)} L${sx(-4,1.3)},${ys(1.3)}Z" fill="${ASF}"/>`;
+ const y1=ys(d+4),y2=ys(Math.max(1.2,d-4));   // kesişen yol bandı (8 m genişlik)
+ if(d<45)o+=`<rect x="-10" y="${y1}" width="1100" height="${Math.min(1920,y2)-y1}" fill="${ASF2}"/>`;
+ // şerit çizgileri (bizim yol)
+ for(let k=0;k<14;k++){const z=((k*6-((60-d)%6))+6)%84+1.5;if(Math.abs(z-d)<4.5)continue;const a=ys(z),c=ys(z+2.5);o+=`<path d="M${sx(-0.12,z)},${a} L${sx(0.12,z)},${a} L${sx(0.12,z+2.5)},${c} L${sx(-0.12,z+2.5)},${c}Z" fill="${CIZ}" opacity=".7" transform="scale(1,1)"/>`}
+ // DUR çizgisi ve levha (sağda, kavşaktan 4.6 m önce)
+ const dz=d-4.6;if(dz>0.3){const yy=ys(dz);o+=`<rect x="${sx(0.2,dz)}" y="${yy-3}" width="${sx(4,dz)-sx(0.2,dz)}" height="${Math.max(3,26/(dz+3))}" fill="${BEY}"/>`;
+  const sxx=sx(5.2,dz),s=8.66/Math.max(1.2,dz);o+=`<g transform="translate(${sxx},${yy}) scale(${s})"><rect x="-4" y="-120" width="8" height="120" fill="#8f949a"/><path d="M-26,-178 L-12,-192 L12,-192 L26,-178 L26,-150 L12,-136 L-12,-136 L-26,-150Z" fill="${KIR}" stroke="#fff" stroke-width="3"/><text y="-157" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="17" fill="#fff">DUR</text></g>`}
+ // motosiklet: sağdan kesişen yolda gelir (yanal x: 20 m → 1.5 m)
+ if(d<30&&t<K.parca.V4[0]+0.1||(t>=K.parca.V5[0]&&t<K.parca.V6[0]&&d<30)){const zz=Math.max(1.6,d),mx=0.6*zz+0.8,s=10.4/zz;
+  o+=`<g transform="translate(${sx(mx,zz)},${ys(zz)}) scale(${s})"><circle cx="-26" cy="-14" r="14" fill="#111" stroke="#555" stroke-width="3"/><circle cx="26" cy="-14" r="14" fill="#111" stroke="#555" stroke-width="3"/><path d="M-26,-14 L-6,-38 L20,-38 L26,-14" fill="none" stroke="#e98a2c" stroke-width="8"/><rect x="-14" y="-74" width="20" height="36" rx="8" fill="#3b6fb0"/><circle cx="-4" cy="-86" r="12" fill="#eee"/><circle cx="34" cy="-30" r="6" fill="#fff6c0"/></g>`}
+ // ön cam çerçevesi + gösterge + direksiyon (POV)
+ o+=`<path d="M0,0 L1080,0 L1080,520 Q540,430 0,520Z" fill="#2c323d"/><path d="M0,520 Q540,430 1080,520" fill="none" stroke="#414856" stroke-width="24"/>`;
+ o+=`<path d="M0,1380 Q540,1250 1080,1380 L1080,1920 L0,1920Z" fill="#2f3540"/><path d="M0,1380 Q540,1250 1080,1380" fill="none" stroke="#454c5a" stroke-width="18"/>`;
+ const dr=Math.sin(t*0.9)*2+titre*Math.sin(t*60);
+ o+=`<g transform="translate(540,1720) rotate(${dr})"><circle r="300" fill="none" stroke="#262b34" stroke-width="56"/><circle r="300" fill="none" stroke="#2b313d" stroke-width="10"/><rect x="-80" y="-30" width="160" height="70" rx="30" fill="#1b1f27"/></g>`;
+ // dikiz ayna
+ o+=`<rect x="440" y="80" width="200" height="56" rx="16" fill="#1a1f29" stroke="#2c3240" stroke-width="5"/>`;
+ return o}
+function kare(t){
+ const P=K.parca,v=bolum(t),tv=t-P[v][0],dv=P[v][1]-P[v][0];
+ const d=uzak(t),kc=t-K.carp,titre=(v==='V3'&&kc>-1.5&&kc<0)?3:0;
+ let o='';
+ const shx=(v==='V3'&&kc>0&&kc<0.35)?Math.sin(t*90)*18:0;
+ o+=`<g transform="translate(${shx},0)">`+sahne(d,t,titre)+`</g>`;
+ // çarpışma: beyaz flaş → siyah ekran (an gösterilmez)
+ if(v==='V3'&&kc>=0){const f=kc<0.12?kc/0.12:Math.max(0,1-(kc-0.12)/0.2);o+=`<rect width="1080" height="1920" fill="#000" opacity="${0.55*cl(kc/0.3)}"/><rect width="1080" height="1920" fill="#fff" opacity="${f}"/>`}
+ // koyu sinema filtresi + kenar kararması
+ o+=`<defs><radialGradient id="vg" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></radialGradient></defs><rect width="1080" height="1920" fill="url(#vg)"/>`;
+ // üst sayaç
+ if(v==='V2'||(v==='V3'&&kc<0)||v==='V5'&&t<P.V5[0]+1.8){const m=Math.max(0,Math.round(d-4.6));
+  o+=`<text x="540" y="300" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="70" fill="${GRI}" stroke="#000" stroke-width="8" paint-order="stroke">${esc(L.sayac)}</text><text x="540" y="440" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="170" fill="${m<6?KIR:BEY}" stroke="#000" stroke-width="10" paint-order="stroke">${m}</text><text x="540" y="500" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="46" fill="${GRI}" stroke="#000" stroke-width="8" paint-order="stroke">${esc(L.m)}</text>`}
+ if(v==='V3'&&kc<0&&d<4.6)o+=`<text x="540" y="620" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="90" fill="${KIR}" stroke="#000" stroke-width="10" paint-order="stroke">${esc(L.gecti)}</text>`;
+ if(v==='V2'&&tv>dv*0.6)o+=`<text x="540" y="700" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="56" fill="${SAR}" stroke="#000" stroke-width="10" paint-order="stroke" opacity="${ease((tv-dv*0.6)/0.5)}">${esc(L.hak)} →</text>`;
+ if(v==='V2'||v==='V3')o+=`<text x="1040" y="70" text-anchor="end" font-family="Baloo" font-weight="800" font-size="28" fill="${GRI}">${esc(L.temsili)}</text>`;
+ // kartlar
+ const kartx=(y,h,a,c='#11151e',k='#3a4152')=>a<=0?'':`<rect x="80" y="${y}" width="920" height="${h}" rx="26" fill="${c}" stroke="${k}" stroke-width="5" opacity="${a}"/>`;
+ const yz=(x,y,s,fs,c=BEY,a=1,anc='middle')=>a<=0?'':`<text x="${x}" y="${y}" text-anchor="${anc}" font-family="Baloo" font-weight="800" font-size="${fs}" fill="${c}" opacity="${a}">${esc(s)}</text>`;
+ if(v==='V4'){const a=ease(tv/0.4);o+=`<rect width="1080" height="1920" fill="#000" opacity="${0.45*a}"/>`+yz(540,520,L.soru,76,SAR,a);
+  L.sik.forEach((s,i)=>{const b=ease((tv-0.4-i*0.3)/0.4);o+=kartx(600+i*170,130,b)+yz(140,685+i*170,s,58,BEY,b,'start')});
+  const [c0,c1]=K.sayac;if(t>=c0&&t<c1)o+=yz(540,1280,String(Math.ceil(c1-t)),220,KIR)}
+ if(v==='V5'){if(tv<1.8){const a=1-ease((tv-1.3)/0.5);for(let i=0;i<12;i++)o+=`<rect x="0" y="${(i*173+t*1400)%1920}" width="1080" height="${4+i%3*5}" fill="#fff" opacity="${0.25*a}"/>`;o+=yz(540,700,'◀◀ '+L.geri,90,BEY,a)}
+  K.ip.forEach((x,i)=>{if(t<x)return;const b=eout((t-x)/0.4);o+=kartx(560+i*150,120,b,'#1a1010',[KIR,'#3b6fb0',SAR][i])+yz(540,640+i*150,`${i+1} · ${L.ip[i]}`,56,BEY,b)})}
+ if(v==='V6'){const a=ease(tv/0.4);o+=`<rect width="1080" height="1920" fill="#000" opacity="${0.45*a}"/>`;
+  const b1=ease((tv-0.3)/0.5),b2=ease((t-K.tali)/0.5),c=ease((t-K.onayT)/0.5),d2=ease((t-K.onayT-0.7)/0.5);
+  o+=kartx(420,220,b1,'#1e0f10',KIR)+yz(540,510,L.asli,58,KIR,b1)+yz(540,580,L.ceza,36,BEY,b1);
+  o+=kartx(680,140,b2,'#1e1a0c',SAR)+yz(540,770,L.tali,58,SAR,b2);
+  o+=`<g opacity="${c}" transform="translate(540,960) rotate(-7) scale(${1+1.3*(1-eout(c))})"><rect x="-320" y="-62" width="640" height="112" rx="12" fill="none" stroke="#4ad07c" stroke-width="10"/><text y="18" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="62" fill="#4ad07c">${esc(L.onay)}</text></g>`+yz(540,1110,L.dogru,64,SAR,d2)}
+ if(v==='V7'){const a=ease(tv/0.4);o+=`<rect width="1080" height="1920" fill="#000" opacity="${0.45*a}"/>`;
+  L.kural.forEach((s,i)=>{const b=ease((tv-0.6-i*dv*0.14)/0.5);o+=kartx(430+i*160,120,b)+yz(140,510+i*160,`${i+1}`,64,SAR,b,'start')+yz(220,510+i*160,s,56,BEY,b,'start')});
+  const c=ease((tv-dv*0.6)/0.5);o+=kartx(920,140,c,'#2a2208',SAR)+yz(540,1010,L.yav,58,SAR,c)}
+ // dev 1–2 kelimelik altyazı
+ o+=altyazi(t);
+ o+=`<text x="60" y="80" font-family="Baloo" font-weight="800" font-size="40" fill="#e2702c">${esc(L.kanal)}</text>`;
+ o+=`<text x="540" y="1890" text-anchor="middle" font-family="Kalam" font-weight="700" font-size="22" fill="#6f7688">${esc(L.not)}</text>`;
+ if(t<0.25)o+=`<rect width="1080" height="1920" fill="#000" opacity="${1-t/0.25}"/>`;
+ if(t>K.toplam-0.5)o+=`<rect width="1080" height="1920" fill="#000" opacity="${(t-(K.toplam-0.5))/0.5}"/>`;
+ SV.innerHTML=o}
+const nrm=w=>w.toLocaleLowerCase('tr').replace(/[^\wçğıöşüâ]/g,'');
+function altyazi(t){const A=K.altyazi.find(a=>t>=a.bas&&t<a.son);if(!A)return'';
+ const kel=A.metin.split(' ');const top=A.metin.length;let acc=0;const ks=kel.map(k=>{const b=A.bas+(A.son-A.bas)*acc/top;acc+=k.length+1;return {k,b}});
+ // ikişerli grup
+ let gi=0;for(let i=0;i<ks.length;i+=2)if(t>=ks[i].b)gi=i;const g=ks.slice(gi,gi+2);const u=eout((t-g[0].b)/0.12);
+ const txt=g.map(w=>w.k).join(' ');const fs=Math.min(140,1900/Math.max(6,txt.length));
+ return `<text x="540" y="1560" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${fs*(0.9+0.1*u)}" stroke="#000" stroke-width="16" paint-order="stroke" opacity="${u}">`+
+  g.map(w=>`<tspan fill="${L.anahtar.some(a=>nrm(w.k).startsWith(nrm(a)))?SAR:BEY}">${esc(w.k)}</tspan>`).join(' ')+'</text>'}
+window.kurgu=k=>{K=k};window.kare=kare;
+Promise.all(['800 40px Baloo','700 40px Kalam'].map(f=>document.fonts.load(f))).then(()=>{window.HAZIR=true});
+setTimeout(()=>{window.HAZIR=true},4000);
+</script></body></html>

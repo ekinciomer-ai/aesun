@@ -36,16 +36,24 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/yumurta-stili/engine"
           export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
           printf 'CHROME_PATH=%s\n' "$CHROME_PATH" >> "$GITHUB_ENV"
-      - name: Render and validate image
+      - name: Produce contact sheet
         run: |
           cd "$RUNNER_TEMP/yumurta-stili/engine"
           node render.mjs kayip-golge --scale=0.5 --stills=1,5,9,14,20,25,29,35
-          node render.mjs kayip-golge --scale=0.75 --name=kayip-golge
-          ffmpeg -v error -xerror -i ../stories/kayip-golge/out/kayip-golge.mp4 -f null -
       - uses: actions/upload-artifact@v4
         with:
           name: kayip-golge-kareler
           path: ${{ runner.temp }}/yumurta-stili/stories/kayip-golge/out/stills.jpg
+          if-no-files-found: error
+      - name: Render and validate image
+        run: |
+          cd "$RUNNER_TEMP/yumurta-stili/engine"
+          node render.mjs kayip-golge --scale=0.75 --name=kayip-golge
+          ffmpeg -v error -xerror -i ../stories/kayip-golge/out/kayip-golge.mp4 -f null -
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kayip-golge-goruntu
+          path: ${{ runner.temp }}/yumurta-stili/stories/kayip-golge/out/kayip-golge.mp4
           if-no-files-found: error
       - name: Collect same-model narration
         run: |
@@ -54,7 +62,7 @@ jobs:
             missing=0
             for lang in TR EN; do
               for part in $(seq -w 1 8); do
-                name="YA_KAYIP_GOLGE_${lang}__P0${part}.mp3"
+                name="YA_KAYIP_GOLGE_V2_${lang}__P0${part}.mp3"
                 dest="$RUNNER_TEMP/narration/$name"
                 if [ ! -s "$dest" ]; then
                   if ! curl -fsSL --max-time 8 "https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/sunucu/tts_kuyruk/cikti/$name" -o "$dest.tmp" 2>/dev/null; then
@@ -74,7 +82,7 @@ jobs:
         run: |
           for lang in TR EN; do
             output="$RUNNER_TEMP/delivery/Yumurta_Adam_Kayip_Golge_$lang.mp4"
-            python3 video/yumurta-kayip-golge/mix.py "$RUNNER_TEMP/yumurta-stili/stories/kayip-golge/out/kayip-golge.mp4" "YA_KAYIP_GOLGE_$lang" "$RUNNER_TEMP/narration" "$output"
+            python3 video/yumurta-kayip-golge/mix.py "$RUNNER_TEMP/yumurta-stili/stories/kayip-golge/out/kayip-golge.mp4" "YA_KAYIP_GOLGE_V2_$lang" "$RUNNER_TEMP/narration" "$output"
             ffmpeg -v error -xerror -i "$output" -f null -
             ffprobe -v error -show_entries stream=codec_type,width,height:format=duration "$output"
           done

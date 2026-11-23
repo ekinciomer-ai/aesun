@@ -19,7 +19,7 @@ on:
       parca:
         description: "paralel parca sayisi"
         required: false
-        default: "8"
+        default: "15"
       stills_t:
         description: "istege bagli virgul ayrilmis saniyeler (bossa otomatik 15 kare)"
         required: false
@@ -127,7 +127,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: true
-      max-parallel: 8
+      max-parallel: 15
       matrix:
         p: ${{ fromJSON(needs.hazirla.outputs.parcalar) }}
     steps:

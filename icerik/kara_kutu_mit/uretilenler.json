@@ -102,8 +102,16 @@
    "render_no": 16,
    "tts": "KK_MIT_15_B (V1-V7)",
    "kaynak": "Yargıtay 12. CD E.2023/4326 K.2023/4157 (onama) https://lexara.com.tr/karar/427859"
+  },
+  {
+   "kod": "KK_MIT_16_BUZLU_YOL",
+   "mit": "Yol buzluysa kaza devletin suçudur, idare öder",
+   "mit_no": 16,
+   "render_no": 17,
+   "tts": "KK_MIT_16 (V1-V7, bekleyen_tts/)",
+   "kaynak": "Danıştay 15. D E.2014/435 K.2017/70 (onama) https://lexara.com.tr/karar/18747925"
   }
  ],
- "ertelenen_not": "23.11.2026 (2. tur): Gemini TTS günlük kotası tüm anahtarlarda doldu; KK_MIT_14'ün V5-V7'si ve KK_MIT_15'in tamamı okunamadı. Senaryo + sahne + kamera hazır: bolumler_mit14_15.json, scene.html (S[5].upd2 ehliyetsiz/refüj, S[2].upd2 gece çift çizgide sollama + kaçan sürücü; test kareleriyle kontrol edildi). Sonraki oturum (kota 11:00'de yenilenir): 1) bekleyen_tts/KK_MIT_14_B.json ve KK_MIT_15_B.json'u sunucu/tts_kuyruk/'a taşıyıp push et (aynı model, Charon). 2) Sesler gelince cikti/KK_MIT_14_B__V5..V7.mp3 → KK_MIT_14__V5..V7.mp3, KK_MIT_15_B__V1..V7.mp3 → KK_MIT_15__V1..V7.mp3 olarak kopyala (gunluk.txt'de modeli kontrol et). 3) python3 mk_ep2.py bolumler_mit14_15.json --tl → test kareleri → ./bitir.sh 15 KK_MIT_14 KK_MIT_14_EHLIYETSIZ_ARAC ve ./bitir.sh 16 KK_MIT_15 KK_MIT_15_KACMAK. Bunlar günün 3 bölümünün ikisi sayılabilir; üçüncü için havuzdan yeni konu seç (tercihen idare davası).",
+ "ertelenen_not": "23.11.2026 (2. tur): Gemini TTS günlük kotası tüm anahtarlarda doldu; KK_MIT_14'ün V5-V7'si ve KK_MIT_15'in tamamı okunamadı. Senaryo + sahne + kamera hazır: bolumler_mit14_15.json, scene.html (S[5].upd2 ehliyetsiz/refüj, S[2].upd2 gece çift çizgide sollama + kaçan sürücü; test kareleriyle kontrol edildi). Sonraki oturum (kota 11:00'de yenilenir): 1) bekleyen_tts/KK_MIT_14_B.json ve KK_MIT_15_B.json'u sunucu/tts_kuyruk/'a taşıyıp push et (aynı model, Charon). 2) Sesler gelince cikti/KK_MIT_14_B__V5..V7.mp3 → KK_MIT_14__V5..V7.mp3, KK_MIT_15_B__V1..V7.mp3 → KK_MIT_15__V1..V7.mp3 olarak kopyala (gunluk.txt'de modeli kontrol et). 3) python3 mk_ep2.py bolumler_mit14_15.json --tl → test kareleri → ./bitir.sh 15 KK_MIT_14 KK_MIT_14_EHLIYETSIZ_ARAC ve ./bitir.sh 16 KK_MIT_15 KK_MIT_15_KACMAK. Üçüncü bölüm de hazır: KK_MIT_16 buzlu yol (idare, Danıştay; S[7].upd2 test edildi; bolumler_mit14_15.json'da N=17). bekleyen_tts/KK_MIT_16.json'u da kuyruğa taşı; sesler gelince ./bitir.sh 17 KK_MIT_16 KK_MIT_16_BUZLU_YOL. Teslim kartları (KK_MIT_14/15/16) henüz yazılmadı.",
  "son_gun": "2026-11-23: MİT #10-12 (1. tur) ve #13 kask (2. tur) teslim edildi; #14-15 kota yüzünden ertelendi."
 }

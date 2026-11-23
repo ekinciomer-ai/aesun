@@ -36,7 +36,7 @@ def yaz(ad, veri):
 
 def main():
     simdi = datetime.now(TZ)
-    kayitlar = oku("yayin.json", {"kayitlar": []})["kayitlar"]
+    kayitlar = [x for x in oku("yayin.json", {"kayitlar": []})["kayitlar"] if not x.get("salt_tablo")]   # Kara Kutu: analize girmez
     an = oku("analitik.json", {}).get("kanallar", {})
     izlek = oku("kanca_izlek.json", {"aciklama": "Kanca Bekçisi saat noktaları (1/3/24 sa izlenme)", "videolar": {}})
     V = izlek["videolar"]

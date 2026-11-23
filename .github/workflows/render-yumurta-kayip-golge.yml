@@ -2,13 +2,18 @@ name: Render Kayıp Gölge
 on:
   push:
     branches: [main]
-    paths: [video/yumurta-kayip-golge/story.js]
+    paths:
+      - video/yumurta-kayip-golge/**
+      - .github/workflows/render-yumurta-kayip-golge.yml
 permissions:
   contents: read
+concurrency:
+  group: render-yumurta-kayip-golge
+  cancel-in-progress: true
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 80
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,15 +24,63 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git "$RUNNER_TEMP/yumurta-stili"
           git -C "$RUNNER_TEMP/yumurta-stili" apply "$GITHUB_WORKSPACE/video/pumpkin2/motor/toon_pumpkin.patch"
-          mkdir -p "$RUNNER_TEMP/yumurta-stili/stories/kayip-golge"
-          cp video/yumurta-kayip-golge/story.js "$RUNNER_TEMP/yumurta-stili/stories/kayip-golge/"
+          story="$RUNNER_TEMP/yumurta-stili/stories/kayip-golge"
+          mkdir -p "$story/voice"
+          cp video/yumurta-kayip-golge/story.js "$story/"
+          printf '%s\n' '{"words":[]}' > "$story/voice/words.json"
+          printf '%s\n' '[]' > "$story/voice/env.json"
           npm install --prefix "$RUNNER_TEMP/yumurta-stili/engine"
-      - name: Render draft
+          export CHROME_PATH="$(command -v google-chrome || command -v chromium)"
+          printf 'CHROME_PATH=%s\n' "$CHROME_PATH" >> "$GITHUB_ENV"
+      - name: Render and validate image
         run: |
           cd "$RUNNER_TEMP/yumurta-stili/engine"
           node render.mjs kayip-golge --scale=0.5 --stills=1,5,9,14,20,25,29,35
-          node render.mjs kayip-golge --scale=0.5
+          node render.mjs kayip-golge --scale=0.75 --name=kayip-golge
+          ffmpeg -v error -xerror -i ../stories/kayip-golge/out/kayip-golge.mp4 -f null -
       - uses: actions/upload-artifact@v4
         with:
-          name: kayip-golge-goruntu
-          path: ${{ runner.temp }}/yumurta-stili/stories/kayip-golge/out/
+          name: kayip-golge-kareler
+          path: ${{ runner.temp }}/yumurta-stili/stories/kayip-golge/out/stills.jpg
+          if-no-files-found: error
+      - name: Collect same-model narration
+        run: |
+          mkdir -p "$RUNNER_TEMP/narration" "$RUNNER_TEMP/delivery"
+          for i in $(seq 1 30); do
+            missing=0
+            for lang in TR EN; do
+              for part in $(seq -w 1 8); do
+                name="YA_KAYIP_GOLGE_${lang}__P0${part}.mp3"
+                dest="$RUNNER_TEMP/narration/$name"
+                if [ ! -s "$dest" ]; then
+                  if ! curl -fsSL --max-time 8 "https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/sunucu/tts_kuyruk/cikti/$name" -o "$dest.tmp" 2>/dev/null; then
+                    missing=$((missing+1))
+                  else
+                    mv "$dest.tmp" "$dest"
+                  fi
+                fi
+              done
+            done
+            if [ "$missing" -eq 0 ]; then exit 0; fi
+            echo "Waiting for $missing voice clips"
+            sleep 45
+          done
+          exit 1
+      - name: Mix and validate both videos
+        run: |
+          for lang in TR EN; do
+            output="$RUNNER_TEMP/delivery/Yumurta_Adam_Kayip_Golge_$lang.mp4"
+            python3 video/yumurta-kayip-golge/mix.py "$RUNNER_TEMP/yumurta-stili/stories/kayip-golge/out/kayip-golge.mp4" "YA_KAYIP_GOLGE_$lang" "$RUNNER_TEMP/narration" "$output"
+            ffmpeg -v error -xerror -i "$output" -f null -
+            ffprobe -v error -show_entries stream=codec_type,width,height:format=duration "$output"
+          done
+      - uses: actions/upload-artifact@v4
+        id: delivery
+        with:
+          name: kayip-golge-mp4
+          path: ${{ runner.temp }}/delivery/*.mp4
+          if-no-files-found: error
+      - name: Add download link
+        env:
+          DELIVERY_URL: ${{ steps.delivery.outputs.artifact-url }}
+        run: printf '[Türkçe ve İngilizce MP4 dosyaları](%s)\n' "$DELIVERY_URL" >> "$GITHUB_STEP_SUMMARY"

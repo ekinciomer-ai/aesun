@@ -287,7 +287,7 @@ function buildLab(scene) {
     rung.position.set(0, y, 0); rung.rotation.z = Math.PI / 2; rung.rotation.y = -ang; rung.userData.noShadow = true; dyn.dna.add(rung);
   }
   const dnaLbl = new THREE.Mesh(new THREE.PlaneGeometry(1.42, .56), new THREE.MeshBasicMaterial({ map: badgeTex('ACVR1 GENİ', 'TEK HARF HATASI!', '#1a1c30', '#ffffff', '#ff5447'), transparent: true }));
-  dnaLbl.position.set(0, 3.05, -1.2); dnaLbl.userData.noShadow = true; g.add(dnaLbl);
+  dnaLbl.position.set(0, 3.24, -1.2); dnaLbl.userData.noShadow = true; g.add(dnaLbl);
   dyn.dnaLbl = dnaLbl;
   fx.dnaGlow = glow(scene, [200, 1.75, -1.0], { size: 2.0, color: '#ff5447', strength: .48 });
 
@@ -369,8 +369,8 @@ function cameraPath() {
     { t: PS(6) + .14, dur: .32, move: 'whip', pos: [200.0, 1.82, 4.35], look: [200.0, 1.95, -1.2], fov: 50, creep: .28 },
     // P07 Gündelik benzetme: Bilimci + çatlak duvardan taşan beton blokları (tam kadrajda!)
     { t: PS(7) + .16, dur: .36, move: 'whip', pos: [200.0, 1.18, 4.15], look: [200.0, 1.08, .2], fov: 50, creep: .24 },
-    // P08 WHIP PAN → SET 3: Müze vitrinindeki İkinci İskelet diyagramı + Harry & Bilimci
-    { t: PS(8) + .14, dur: .32, move: 'whip', pos: [300.0, 1.32, 2.55], look: [300.0, 1.38, -1.1], fov: 48, creep: .26 },
+    // P08 WHIP PAN → SET 3: Müze vitrinindeki İkinci İskelet diyagramı + Harry & Bilimci (tam kadraj!)
+    { t: PS(8) + .14, dur: .32, move: 'whip', pos: [300.0, 1.28, 3.35], look: [300.0, 1.32, -1.1], fov: 50, creep: .24 },
     // P09 Taş Adam Sendromu: Harry + Bilimci vitrinin önünde (tam ikili plan!)
     { t: PS(9) + .18, dur: .42, pos: [300.0, 1.22, 3.65], look: [300.0, 1.22, -.8], fov: 50, creep: .20 },
     // P10 Son vuruş: akşam ışığında yumuşakça geri çekilir (~4.45 m)

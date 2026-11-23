@@ -67,6 +67,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `kablo` | `mod: soru / tel / direnc / akim / formul / bir / iki / seksen / son` | Uzatma + çoklu priz + 2 ısıtıcı, büyütülmüş kablo kesiti (gidiş/dönüş damarı, elektron akışı), ısınan bakır + ısı dalgaları, W ısı sütunu, 60 W akkor ampul |
 | `yildiz` | `mod: soru / hiz / yil / mesafe / lise / voyager / sure / gobekli / son` | Güneş↓–Proxima↑ yolu, ışık atımı (yıl sayacı), ışık yılı çentikleri + lise sınıfları, Dünya çevresinde 7,5 tur, Voyager sondası (yıl sayacı), Göbeklitepe T dikili taşı vs yolculuk sütunu |
 | `sicak` | `mod: soru / stc / katsayi / yaz / kayip / kis / neden / gun / son` | Eğik panel, termometre (°C), güç/voltaj sütunu (%), sıcakta ısı dalgası + turuncu örtü, kışta kar, yaz/kış güneş yayları |
+| `saturn` | `mod: soru / hacim / kutle / yogun / su / buz / bat / gaz / son` | Halkalı Satürn + okyanus yüzeyi, hayalet içinde 766 küre (95'i turuncu), su tankında 1 cm³ küpler (buz %90, Satürn %69 batar), Satürn'ün %70 batışı + buzdağı |
+| `maden` | `mod: soru / guc / saat / gun / araba / camasir / telefon / yil / son` | Madencilik cihazı (fanlar), W sayacı, 2 su ısıtıcısı, 24 saat kadranı, kWh sütunu, İstanbul→Ankara yolu + araba, 84 çamaşır makinesi, 3.650 telefon, 365 gün takvimi |
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
@@ -89,5 +91,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 13 (Ay neden hep aynı yüz) ve 14 (Baraj türbininden saniyede kaç ton) — 22.11.2026, günlük görev; yeni sahneler `kilit`, `baraj` (kamera pozları parametreyle akar: hedef, uzaklık, açı).
 - Bölüm 15 (Jüpiter'e kaç Dünya sığar) ve 16 (Akım 2 kat → ısı 4 kat, I²R) — 23.11.2026, günlük görev; yeni sahneler `boyut`, `kablo`.
 - Bölüm 17 (Işık hızıyla Proxima'ya) ve 18 (Panel sıcakta mı soğukta mı) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `yildiz`, `sicak`.
+- Bölüm 19 (Satürn suda yüzer mi) ve 20 (Bitcoin cihazı günde kaç kWh) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `saturn`, `maden`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

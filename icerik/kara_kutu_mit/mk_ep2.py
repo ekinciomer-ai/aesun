@@ -9,7 +9,9 @@ import mk_tl
 AESUN = os.environ.get('AESUN', '/home/claude/aesun')
 mk_tl.DISP.update({'yüzde yüzü': "%100'ü", 'yüzde yüz': '%100', 'Dört bin üç yüz seksen sekiz lira': '4.388 TL',
   'dört bin lira': '4.000 TL', 'iki yıl': '2 yıl', 'iki ay': '2 ay', 'yirmi gün': '20 gün', 'bir yıl': '1 yıl',
-  'On beş bin üç yüz seksen lirayı': "15.380 TL'yi", 'İki yolcu': '2 yolcu', 'İki araç': '2 araç'})
+  'On beş bin üç yüz seksen lirayı': "15.380 TL'yi", 'İki yolcu': '2 yolcu', 'İki araç': '2 araç',
+  'altmış sekiz bin yedi yüz yetmiş bir lira': '68.771 TL', 'elli beş bin on yedi lira': '55.017 TL', 'yüzde yirmi': '%20',
+  'Altı bin beş yüz lira': '6.500 TL', 'altı yıldan': '6 yıldan', 'sekiz yıla': '8 yıla', 'sekiz yıl': '8 yıl'})
 
 def trim(N, kod):
   os.makedirs(f'vm{N}', exist_ok=True)

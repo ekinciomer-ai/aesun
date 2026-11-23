@@ -1,0 +1,130 @@
+[
+ {
+  "N": 15,
+  "kod": "KK_MIT_14",
+  "havuz": "KK_MIT_14_EHLIYETSIZ_ARAC",
+  "sc": 5,
+  "upd": "upd2",
+  "tiL": 6.0,
+  "impKey": "çarpışıyor",
+  "hookNo": "MİT #14",
+  "hookMain": "“ARACINI<br>VERDİN,<br><span style=\"color:#ffb15c;font-size:1.25em\">KAZA</span><br>SENİ İLGİLENDİRMEZ”",
+  "pollQ": "FATURAYI KİM ÖDEDİ?",
+  "opts": [
+   [
+    "A",
+    "Araç sahibi"
+   ],
+   [
+    "B",
+    "Sigorta, iş bitti"
+   ],
+   [
+    "C",
+    "Sadece sürücü"
+   ]
+  ],
+  "sonuc": "SONUÇ: 6.500 TL ARAÇ SAHİBİNDEN",
+  "dogru": "Doğru şık: A",
+  "ders1": "Aracının anahtarı, <b style=\"color:#ffb15c\">sorumluluğun da anahtarı.</b>",
+  "ders2": "🔑 Ehliyeti olmayana<br><b style=\"color:#34c759\">aracını verme.</b>",
+  "camKaza": "const cz=Math.min(st.car.position.z,30);P=new THREE.Vector3(4,18,cz-20);L=new THREE.Vector3(7,0,cz+10);f=46;",
+  "camRest": "const cz=Math.min(st.car.position.z,30);P=new THREE.Vector3(4,17,cz-18);L=new THREE.Vector3(8,0,cz+6);f=46;",
+  "camKarar": "P=new THREE.Vector3(4,15,16);L=new THREE.Vector3(9,.5,36);",
+  "exp": 1.0,
+  "black": "KARŞI ARAÇ<br><span style=\"color:#ff453a\">HASAR GÖRDÜ</span>",
+  "tagsK": "tg+=tag3(st.car,1.9,'EHLİYETSİZ SÜRÜCÜ','#ff453a');tg+=tag3(st.O,1.9,'KARŞI ARAÇ','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.car,1.9,'ARAÇ KİMİN?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Aracın",
+    "Trafik sigortası var"
+   ],
+   [
+    "Ama",
+    "Sürücünün ehliyeti yok"
+   ],
+   [
+    "Ve araç",
+    "Araç başkasına ait"
+   ]
+  ],
+  "reasons": [
+   [
+    "Sigorta,",
+    "Sigorta karşı aracın zararını ödedi"
+   ],
+   [
+    "Araç ehliyetsiz",
+    "Ehliyetsiz kullanım: sigorta rücu eder"
+   ]
+  ],
+  "hukumKey": "Altı bin"
+ },
+ {
+  "N": 16,
+  "kod": "KK_MIT_15",
+  "havuz": "KK_MIT_15_KACMAK",
+  "sc": 2,
+  "upd": "upd2",
+  "tiL": 7.0,
+  "impKey": "çarpıyor",
+  "hookNo": "MİT #15",
+  "hookMain": "“KAÇTIN MI?<br>EN FAZLA<br><span style=\"color:#ffb15c;font-size:1.25em\">BİR CEZA</span><br>DAHA”",
+  "pollQ": "KAÇMAK CEZAYI NASIL ETKİLEDİ?",
+  "opts": [
+   [
+    "A",
+    "Hiç etkilemedi"
+   ],
+   [
+    "B",
+    "Sadece trafik cezası"
+   ],
+   [
+    "C",
+    "İndirim yok: 8 yıl hapis"
+   ]
+  ],
+  "sonuc": "SONUÇ: 8 YIL HAPİS, İNDİRİM YOK",
+  "dogru": "Doğru şık: C",
+  "ders1": "Kaçmak cezadan kurtarmaz, <b style=\"color:#ffb15c\">indirim kapısını kapatır.</b>",
+  "ders2": "🛑 Kaza yaptıysan dur,<br><b style=\"color:#34c759\">yardım çağır.</b>",
+  "camKaza": "const cz=Math.min(st.car.position.z,-2);P=new THREE.Vector3(12,11,cz-15);L=new THREE.Vector3(-.5,0,cz+13);f=46;",
+  "camRest": "const cz=Math.min(st.car.position.z,-2);P=new THREE.Vector3(12,11,cz-15);L=new THREE.Vector3(-.5,0,cz+13);f=46;",
+  "camKarar": "P=new THREE.Vector3(10,8,-12);L=new THREE.Vector3(1.5,.4,3);",
+  "exp": 1.3,
+  "black": "BİR KİŞİ<br><span style=\"color:#ff453a\">HAYATINI KAYBETTİ</span>",
+  "tagsK": "tg+=tag3(st.car,1.9,'EHLİYETSİZ SÜRÜCÜ','#ff453a');tg+=tag3(st.T,4.2,'ÖNDEKİ ARAÇ','#ffd60a','#111');tg+=tag3(st.moto,1.9,'KARŞIDAN GELEN','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.car,1.9,'ÇİFT ÇİZGİ!','#ffd60a','#111')",
+  "clues": [
+   [
+    "Kusurun",
+    "Kusurun tamamı sollayan sürücüde"
+   ],
+   [
+    "Çift",
+    "Çift çizgiyi geçmek: bilinçli taksir"
+   ],
+   [
+    "Ve kaçtığı",
+    "Kaçtı: alkol ölçülemedi"
+   ]
+  ],
+  "reasons": [
+   [
+    "Ceza altı",
+    "Temel ceza 6 yıl"
+   ],
+   [
+    "Bilinçli",
+    "Bilinçli taksir: 8 yıla çıktı"
+   ],
+   [
+    "Ehliyeti yok",
+    "Ehliyetsiz + kaçtı: indirim yok"
+   ]
+  ],
+  "hukumKey": "Sonuç:"
+ }
+]

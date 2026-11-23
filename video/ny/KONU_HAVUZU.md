@@ -55,6 +55,7 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - Not: Gemini YM_05 için ilk denemede 8 sn kısa ses döndürdü (hizalama hatası); metin hafif değiştirilip yeniden okutuldu. Süreler 64/73/79 sn — hedefin üstünde; sonraki partilerde metni kısalt.
 
 ## Parti 10 — Karışık formatlar (2026-11-23)
-- [~] NY_EN_06_BARAJ · En büyük 3 baraj gölü: Ilısu 313, Keban 675, Atatürk 817 km² — kanca: "Türkiye'nin 3. büyük gölünü insanlar yaptı". Karakaya (268/298) ve Hirfanlı (263–280) kaynaklarda çelişkili olduğu için liste 3'le sınırlandı.
-- [~] NY_SQ_04_SELALE · Bilgi şıklı soru "Bu şelale hangi ilde?": Muradiye (Van), Tortum (Erzurum), Kapuzbaşı (Kayseri) — tuzak: Niğde/Adana
-- [~] NY_HF_05_OYUN · Görsel hafıza "Haritada hafıza oyunu": Hatay, Afyonkarahisar, Muş (+Sivas, Balıkesir) — turuncu/mor/mavi soruldu
+- [x] NY_EN_06_BARAJ · En büyük 3 baraj gölü: Ilısu 313, Keban 675, Atatürk 817 km² — kanca: "Türkiye'nin 3. büyük gölünü insanlar yaptı". Karakaya (268/298) ve Hirfanlı (263–280) kaynaklarda çelişkili olduğu için liste 3'le sınırlandı.
+- [x] NY_SQ_04_SELALE · Bilgi şıklı soru "Bu şelale hangi ilde?": Muradiye (Van), Tortum (Erzurum), Kapuzbaşı (Kayseri) — tuzak: Niğde/Adana
+- [x] NY_HF_05_OYUN · Görsel hafıza "Haritada hafıza oyunu": Hatay, Afyonkarahisar, Muş (+Sivas, Balıkesir) — turuncu/mor/mavi soruldu
+- Not: Süreler 55/62/65 sn; havuza teslim, plan 17-19.12 13:00 (onay bekliyor). SQ_04 hedefin biraz üstünde.

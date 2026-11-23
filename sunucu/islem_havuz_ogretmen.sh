@@ -1,9 +1,17 @@
 #!/bin/bash
-# Öğretmenler Günü: Başöğretmen Short'u havuza teslim + Ömer onayı (23.11 23:40, yayın 24.11 09:00) + YouTube kuyruğuna yönlendirme.
+# Öğretmenler Günü: Başöğretmen Short'u (Antik Stüdyo) 24.11 09:00. Ömer 23.11 23:55: o gün tek seferlik 9 video (toplam sınır istisnası).
 set -u
 install -m 755 sunucu/havuz/yonetici.py /opt/aesun/havuz/yonetici.py
 Y=/opt/aesun/havuz/yonetici.py; K=AS_GT_BASOGRETMEN
-timeout 360 python3 $Y teslim sunucu/havuz/teslim/$K.json 2>&1 | grep -E "NOT:" | cut -c1-240 || echo "NOT: HATA $K teslim zaman aşımı"
-python3 $Y onay $K evet "Ömer 23.11 23:40: Öğretmenler Günü sabahı paylaşılsın" "2026-11-24T09:00+03:00" 2>&1 | grep -E "NOT:" | cut -c1-240
-python3 $Y yonlendir 2>&1 | grep -E "NOT:|===|$K" | cut -c1-4000
-python3 $Y durum --json 2>/dev/null | python3 -c "import json,sys;d=json.load(sys.stdin);print('NOT: DURUM', json.dumps(d.get('$K') or [x for x in (d if isinstance(d,list) else d.get('isler',[])) if isinstance(x,dict) and x.get('kod')=='$K'], ensure_ascii=False)[:300])" 2>/dev/null || true
+python3 - <<'PY'
+import sys; sys.path.insert(0, "/opt/aesun/havuz")
+import yonetici as y
+idx = y.yukle(); it = idx.get("AS_GT_BASOGRETMEN")
+if not it:
+    print("NOT: HATA havuzda yok")
+else:
+    it["kart"]["toplam_sinir_istisna"] = "2026-11-24"; it["kart"]["yayin_zamani"] = "2026-11-24T09:00+03:00"
+    y.olay(it, "Ömer 23.11 23:55: 24.11 için tek seferlik toplam sınır istisnası (o gün 9 video)")
+    y.kaydet(idx); print("NOT: istisna yazıldı · durum " + it.get("durum", "?"))
+PY
+python3 $Y yonlendir 2>&1 | grep -E "NOT:|===|$K" | cut -c1-6000

@@ -121,6 +121,62 @@ async def portal_veri_yaz(request: Request, mesaj: str = "güncelleme"):
         raise HTTPException(502, "git yazılamadı: " + str(e)[:180])
     return {"tamam": True, "sha": DURUM["sha"]}
 
+# ---------------- Panelden cihaz komutu (23.11.2026: n8n "Cihaz komutu (panel)" akışının yerine) ----------------
+# Yalnız portal yöneticisi. Komut epias-ptf/antminer_commands.json kuyruğuna eklenir; sahadaki toplayıcı ~15 sn'de uygular.
+KOMUT_SON = {"t": 0.0}
+
+@app.post("/v1/komut")
+async def cihaz_komutu(request: Request):
+    DURUM["istek"] += 1
+    if "yonetici" not in roller(request):
+        DURUM["red"] += 1
+        raise HTTPException(401, "yönetici yetkisi gerekli")
+    if time.time() - KOMUT_SON["t"] < 3:
+        raise HTTPException(429, "çok sık komut; birkaç saniye bekleyin")
+    try:
+        b = json.loads(await request.body())
+    except Exception:
+        raise HTTPException(400, "JSON değil")
+    action = b.get("action")
+    if action not in ("sleep", "wake"):
+        raise HTTPException(400, "action sleep ya da wake olmalı")
+    targets = b.get("targets")
+    if targets != "all":
+        if not isinstance(targets, list) or not targets or len(targets) > 40:
+            raise HTTPException(400, 'targets "all" ya da IP son ek listesi olmalı')
+        try:
+            targets = [int(t) for t in targets]
+        except Exception:
+            raise HTTPException(400, "geçersiz IP son eki")
+        if any(t < 2 or t > 254 for t in targets):
+            raise HTTPException(400, "geçersiz IP son eki")
+    delay = max(0, min(30, int(b.get("delay_sec") or 0)))
+    kim = re.sub(r"[^\w ._-]", "", str(b.get("kim") or "panel"))[:40]
+    tr = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(time.time() + 3 * 3600))
+    cmd = {"id": _secrets.token_hex(4), "action": action, "targets": targets, "delay_sec": delay, "sort_by": None,
+           "issued_at": tr, "issued_by": "panel: " + kim}
+    try:
+        with GIT_KILIT:
+            _git("fetch", "--depth", "1", "{URL}", "main", cwd=VERI)
+            _git("reset", "--hard", "FETCH_HEAD", cwd=VERI)
+            f = VERI / "antminer_commands.json"
+            try:
+                mevcut = json.loads(f.read_text())
+            except Exception:
+                mevcut = {"commands": []}
+            veri = {"updated_at": tr, "commands": (mevcut.get("commands") or [])[-49:] + [cmd]}
+            f.write_text(json.dumps(veri, ensure_ascii=False, indent=1))
+            _git("config", "user.name", "aesun-bot", cwd=VERI)
+            _git("config", "user.email", "aesun-bot@users.noreply.github.com", cwd=VERI)
+            _git("add", "antminer_commands.json", cwd=VERI)
+            _git("commit", "-m", f"panel {action} " + ("tümü" if targets == "all" else ",".join(map(str, targets))), cwd=VERI)
+            _git("push", "{URL}", "HEAD:main", cwd=VERI)
+            DURUM["sha"] = _git("rev-parse", "--short", "HEAD", cwd=VERI)
+        KOMUT_SON["t"] = time.time()
+    except Exception as e:
+        raise HTTPException(502, "komut yazılamadı: " + str(e)[:160])
+    return {"ok": True, "id": cmd["id"], "action": action, "targets": targets}
+
 @app.on_event("startup")
 def basla():
     threading.Thread(target=dongu, daemon=True).start()

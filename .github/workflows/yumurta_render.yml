@@ -24,6 +24,10 @@ on:
         description: "İsteğe bağlı özel stills saniyeleri (boşsa otomatik 15 kare)"
         required: false
         default: ""
+      tempo:
+        description: "Konuşma hız çarpanı (örn. 1.0 normal, 1.20 hızlı)"
+        required: false
+        default: "1.20"
 
 permissions:
   contents: read
@@ -67,6 +71,14 @@ jobs:
           python3 -I "$GITHUB_WORKSPACE/video/pumpkin2/motor/parcalar.py" \
             "$GITHUB_WORKSPACE/sunucu/tts_kuyruk/cikti" "${{ inputs.kod }}" \
             "$SD/metin_tr.json" "$SD"
+
+          # 1b) İsteğe bağlı tempo hızlandırma + zamanlama ölçekleme (voice.wav, words.json, env.json)
+          TEMPO="${{ inputs.tempo }}"
+          if [ "$TEMPO" != "1.0" ] && [ "$TEMPO" != "1" ]; then
+            ffmpeg -y -loglevel error -i "$SD/voice/voice.wav" -af "atempo=${TEMPO}" -ar 48000 -ac 1 "$SD/voice/voice_fast.wav"
+            mv "$SD/voice/voice_fast.wav" "$SD/voice/voice.wav"
+            python3 -c 'import json,sys,wave,numpy as np; sd,tp=sys.argv[1],float(sys.argv[2]); wd=json.load(open(sd+"/voice/words.json",encoding="utf-8")); wd["words"]=[{**w,"start":round(w["start"]/tp,3),"end":round(max(w["start"]/tp+0.05,w["end"]/tp),3)} for w in wd["words"]]; wd["duration"]=round(wd["duration"]/tp,3); json.dump(wd,open(sd+"/voice/words.json","w",encoding="utf-8"),ensure_ascii=False,indent=0); wf=wave.open(sd+"/voice/voice.wav","rb"); y=np.frombuffer(wf.readframes(wf.getnframes()),np.int16).astype(float)/32768.0; sr=wf.getframerate(); h=sr//30; fr=len(y)//h; e=np.sqrt((y[:fr*h].reshape(fr,h)**2).mean(1)); e=np.clip(e/(np.percentile(e,95)+1e-9),0,1); json.dump([round(float(v),3) for v in e],open(sd+"/voice/env.json","w")); print("TEMPO APPLIED:",tp,"new_dur:",wd["duration"])' "$SD" "$TEMPO"
+          fi
 
           # 2) Cues çıkar ve özgün müzik + efekt miksi üret (mix.wav)
           export CHROME_PATH=$(which google-chrome chromium chromium-browser 2>/dev/null | head -1)

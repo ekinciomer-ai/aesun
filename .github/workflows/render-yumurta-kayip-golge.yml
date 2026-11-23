@@ -20,6 +20,10 @@ jobs:
           sparse-checkout: |
             video/yumurta-kayip-golge
             video/pumpkin2/motor
+      - name: Install encoder on runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
       - name: Prepare animation engine
         run: |
           git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git "$RUNNER_TEMP/yumurta-stili"

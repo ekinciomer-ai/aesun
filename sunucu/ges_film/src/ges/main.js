@@ -12,7 +12,8 @@ import { gunIsigi } from './zaman.js';
 const Q = new URLSearchParams(location.search);
 const FIXED_W = +Q.get('w') || 0, FIXED_H = +Q.get('h') || 0;
 const MODS = (Q.get('mods') || 'saha,polyfork').split(',').filter(Boolean);
-const STIL = Q.get('stil') || 'lowpoly';   // lowpoly (Stil 1) | gercek (Stil 2)
+const STIL = Q.get('stil') || 'lowpoly';
+const STABIL = !Q.has('canli');   // varsayılan: gren/sis deseni sabit (titreme yok)   // lowpoly (Stil 1) | gercek (Stil 2)
 const state = { t: +Q.get('t') || 0, shot: Q.get('shot') || '', playing: !Q.has('still') && !FIXED_W, frame: 0 };
 
 // --- görünüm: şafak öncesi mavi → gün doğumu (değerler zaman.js'de lerp edilir) ---
@@ -22,7 +23,7 @@ Object.assign(LOOK, {
   bloom: 0.55, bloomThreshold: 0.9, saturation: 1.08, contrast: 1.08, vignette: 0.28, grain: 0.02, chroma: 0.0004,
 });
 if (STIL === 'gercek') Object.assign(LOOK, {
-  fogDensity: 0.0012, mistDensity: 0.024, ao: 0.9, aoRadius: 1.5, bloom: 0.42, saturation: 0.97, contrast: 1.13, grain: 0.026, vignette: 0.32, chroma: 0.0006,
+  fogDensity: 0.0012, mistDensity: 0.024, ao: 0.9, aoRadius: 1.5, bloom: 0.42, saturation: 0.97, contrast: 1.13, grain: 0.008, vignette: 0.32, chroma: 0.0006,
 });
 
 const canvas = document.getElementById('c');
@@ -101,7 +102,7 @@ function renderAt(t, opts = {}) {
 
   const shot = evalShot(state.shot, t);
   camera.position.set(shot.pos[0], Math.max(0.2, shot.pos[1]), shot.pos[2]);
-  const hd = Math.hypot(shot.tgt[0] - shot.pos[0], shot.tgt[1] - shot.pos[1], shot.tgt[2] - shot.pos[2]) * 0.0018 * (shot.handheld ?? 1);
+  const hd = Math.hypot(shot.tgt[0] - shot.pos[0], shot.tgt[1] - shot.pos[1], shot.tgt[2] - shot.pos[2]) * 0.0018 * (shot.handheld ?? 0);
   const hx = (Math.sin(t * 0.83 + 1.3) + 0.5 * Math.sin(t * 2.17 + 0.4)) * hd;
   const hy = (Math.sin(t * 1.07 + 2.9) + 0.5 * Math.sin(t * 2.63 + 1.7)) * hd * 0.7;
   camera.up.set(0, 1, 0);
@@ -123,7 +124,7 @@ function renderAt(t, opts = {}) {
   // modüllerin istediği sıcak hâleler (inverter ışıkları vb.) — en çok 10
   const gn = Math.min(10, frameInfo.glow.length);
   for (let i = 0; i < gn; i++) { const g = frameInfo.glow[i]; post.glowPos[i].set(g[0], g[1], g[2], g[3]); post.glowCol[i].setRGB(g[4], g[5], g[6]); }
-  post.render(scene, camera, { t, frame, dof: shot.dof, glowN: gn, fade: opts.fade ?? shot.post.fade ?? 1, exposureMul: shot.post.exposureMul, fogMul: shot.post.fogMul, mistMul: shot.post.mistMul, accum: opts.accum });
+  post.render(scene, camera, { t, frame: STABIL ? 0 : frame, dof: shot.dof, glowN: gn, fade: opts.fade ?? shot.post.fade ?? 1, exposureMul: shot.post.exposureMul, fogMul: shot.post.fogMul, mistMul: shot.post.mistMul, accum: opts.accum });
   state.frame++;
 }
 

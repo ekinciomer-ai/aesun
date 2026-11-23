@@ -1,0 +1,64 @@
+[
+ {
+  "N": 14,
+  "kod": "KK_MIT_13",
+  "havuz": "KK_MIT_13_KASK",
+  "sc": 2,
+  "upd": "upd3",
+  "tiL": 5.26,
+  "impKey": "çarpışıyor",
+  "hookNo": "MİT #13",
+  "hookMain": "“KASKSIZ<br>DA OLSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>TAM ÖDENİR”",
+  "pollQ": "TAZMİNATIN NE KADARINI ALDI?",
+  "opts": [
+   [
+    "A",
+    "Tamamını aldı"
+   ],
+   [
+    "B",
+    "%20 kesildi, kalanını aldı"
+   ],
+   [
+    "C",
+    "Hiç alamadı"
+   ]
+  ],
+  "sonuc": "SONUÇ: %20 KESİNTİ, 55.017 TL",
+  "dogru": "Doğru şık: B",
+  "ders1": "Kask takmamak <b style=\"color:#ffb15c\">tazminatından keser.</b>",
+  "ders2": "🪖 Kask sadece kafanı değil,<br><b style=\"color:#34c759\">hakkını da korur.</b>",
+  "camKaza": "const mz=Math.min(st.moto.position.z,-3);P=new THREE.Vector3(-11,8,mz-13);L=new THREE.Vector3(1.9,.5,mz+5);f=50;",
+  "camRest": "const mz=Math.min(st.moto.position.z,-3);P=new THREE.Vector3(-11,7.5,mz-12);L=new THREE.Vector3(1.9,.4,mz+3.5);f=50;",
+  "camKarar": "P=new THREE.Vector3(-7.5,5.2,-11);L=new THREE.Vector3(1.9,.5,-3);",
+  "exp": 1.05,
+  "black": "SÜRÜCÜ<br><span style=\"color:#ff453a\">AĞIR YARALANDI</span>",
+  "tagsK": "tg+=tag3(st.moto,1.9,'KASK YOK','#ff453a');tg+=tag3(st.car,1.9,'OTOMOBİL','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.moto,1.9,'KASK NEREDE?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Kaza tutanağında",
+    "Tutanak: kask takılı değil"
+   ],
+   [
+    "Yaralanma",
+    "Yaralanma kafada"
+   ],
+   [
+    "Heyete",
+    "Kasksızlık zarara katkı yaptı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Tazminat,",
+    "Tazminat: 68.771 TL"
+   ],
+   [
+    "Kask takmadığı",
+    "Kask yok: %20 kesinti"
+   ]
+  ],
+  "hukumKey": "Sürücü, elli"
+ }
+]

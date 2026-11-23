@@ -84,7 +84,7 @@ export function otlar(ctx, adet, alanFn) {
   const p2 = p1.clone(); p2.rotateY(Math.PI / 2);
   const { mergeGeometries } = ctx.BGU;
   const geo = mergeGeometries([p1, p2]);
-  const m = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 0.92 }), adet);
+  const m = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.45, alphaToCoverage: true, side: THREE.DoubleSide, roughness: 0.92 }), adet);
   const o = new THREE.Object3D(); let n = 0;
   for (let i = 0; i < adet * 3 && n < adet; i++) {
     const p = alanFn(rng); if (!p) continue;
@@ -119,8 +119,8 @@ export function asikGeo(THREE) {
 }
 export function galvaniz(ctx, koyu = false) {
   const { THREE } = ctx;
-  const m = new THREE.MeshStandardMaterial({ color: koyu ? 0x9ea4a8 : 0xb8bec2, metalness: 0.7, roughness: koyu ? 0.45 : 0.38, envMapIntensity: 0.35 });
-  ctx.applyWeather(m, { tex: 2.0, grain: 0.6, dirt: 0.12, streak: 0.15, moss: 0, rust: 0.0, wet: 0.0, bump: 0.0004, chip: 0 });
+  const m = new THREE.MeshStandardMaterial({ color: koyu ? 0xa2abb3 : 0xbcc5cd, metalness: 0.25, roughness: koyu ? 0.5 : 0.45, envMapIntensity: 0.3 });
+  ctx.applyWeather(m, { tex: 2.0, grain: 0.45, dirt: 0.0, streak: 0.05, moss: 0, rust: 0.0, wet: 0.0, bump: 0.0004, chip: 0 });
   return m;
 }
 
@@ -146,7 +146,7 @@ export function panelMalzemeleri(ctx) {
     }
   });
   tex.anisotropy = 8;
-  const cam = new THREE.MeshPhysicalMaterial({ map: tex, metalness: 0.1, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.035, envMapIntensity: 1.5 });
+  const cam = new THREE.MeshPhysicalMaterial({ map: tex, metalness: 0.1, roughness: 0.32, clearcoat: 0.6, clearcoatRoughness: 0.06, envMapIntensity: 0.75 });
   const alu = new THREE.MeshStandardMaterial({ color: 0xc2c7cc, metalness: 1, roughness: 0.3 });
   const arka = new THREE.MeshStandardMaterial({ color: 0xe6e6e2, roughness: 0.75 });
   // BoxGeometry yüz sırası: +x, -x, +y, -y, +z, -z
@@ -167,4 +167,54 @@ export function tozHavuzu(ctx, adet) {
     s.visible = false; scene.add(s); havuz.push(s);
   }
   return havuz;
+}
+
+// gerçekçi ağaçlar: kavak (sütun biçimli) ve yuvarlak tepeli ağaç. Gövde + yaprak kartları, tek InstancedMesh çifti/tür.
+export function agaclar(ctx, yerler) {
+  const { THREE, TEX, scene } = ctx;
+  const { mergeGeometries } = ctx.BGU;
+  const yaprakTex = (tohum, renk) => TEX.canvasTexture(256, 256, (g, w, h) => {
+    g.clearRect(0, 0, w, h);
+    const r = ctx.rng(tohum);
+    for (let i = 0; i < 420; i++) {
+      const x = w / 2 + (r() - 0.5) * w * 0.9 * Math.sqrt(r()), y = h / 2 + (r() - 0.5) * h * 0.9 * Math.sqrt(r());
+      if (Math.hypot(x - w / 2, y - h / 2) > w * 0.46) continue;
+      const k = 0.65 + r() * 0.6;
+      g.fillStyle = `rgb(${Math.round(renk[0] * k)},${Math.round(renk[1] * k)},${Math.round(renk[2] * k)})`;
+      g.save(); g.translate(x, y); g.rotate(r() * 6.28); g.beginPath(); g.ellipse(0, 0, 3 + r() * 3, 1.6 + r() * 1.6, 0, 0, 6.28); g.fill(); g.restore();
+    }
+  });
+  function tac(adet, rx, ry, merkezY, kart, tohum) {
+    const r = ctx.rng(tohum), parca = [];
+    for (let i = 0; i < adet; i++) {
+      const q = new THREE.PlaneGeometry(kart, kart);
+      q.rotateX(r() * 6.28); q.rotateY(r() * 6.28); q.rotateZ(r() * 6.28);
+      let x, y, z; do { x = r() * 2 - 1; y = r() * 2 - 1; z = r() * 2 - 1; } while (x * x + y * y + z * z > 1);
+      const d = Math.pow(x * x + y * y + z * z, 0.25);                   // dışa doğru yoğun
+      q.translate(x * rx * d, merkezY + y * ry * d, z * rx * d);
+      parca.push(q);
+    }
+    const g = mergeGeometries(parca);
+    const p = g.attributes.position, n = g.attributes.normal, v = new THREE.Vector3();
+    for (let i = 0; i < p.count; i++) { v.set(p.getX(i), (p.getY(i) - merkezY) * 0.6, p.getZ(i)).normalize(); n.setXYZ(i, v.x, v.y + 0.25, v.z); }
+    return g;
+  }
+  const kabuk = new THREE.MeshStandardMaterial({ color: 0x6b5f52, roughness: 0.95 });
+  ctx.applyWeather(kabuk, { tex: 3, grain: 1, dirt: 0.5, streak: 0.6, moss: 0.3, chip: 0, rust: 0, wet: 0, bump: 0.003 });
+  const turler = [
+    { ad: 'kavak', govde: () => { const g = new THREE.CylinderGeometry(0.12, 0.28, 9, 7); g.translate(0, 4.5, 0); return g; },
+      tac: tac(340, 1.5, 5.8, 8.2, 1.1, 81), renk: [92, 118, 58], tohum: 5 },
+    { ad: 'yuvarlak', govde: () => { const g = new THREE.CylinderGeometry(0.16, 0.32, 3.2, 7); g.translate(0, 1.6, 0); return g; },
+      tac: tac(300, 3.0, 2.4, 4.6, 1.3, 82), renk: [84, 102, 52], tohum: 6 },
+  ];
+  const o = new THREE.Object3D();
+  for (const tr of turler) {
+    const liste = yerler.filter((y) => y.tur === tr.ad);
+    if (!liste.length) continue;
+    const yaprak = new THREE.MeshStandardMaterial({ map: yaprakTex(tr.tohum, tr.renk), alphaTest: 0.4, alphaToCoverage: true, side: THREE.DoubleSide, roughness: 0.85 });
+    const gm = new THREE.InstancedMesh(tr.govde(), kabuk, liste.length), ym = new THREE.InstancedMesh(tr.tac, yaprak, liste.length);
+    liste.forEach((y, i) => { o.position.set(y.x, 0, y.z); o.rotation.set(0, y.a, 0); o.scale.setScalar(y.s); o.updateMatrix(); gm.setMatrixAt(i, o.matrix); ym.setMatrixAt(i, o.matrix); });
+    gm.castShadow = ym.castShadow = true; ym.receiveShadow = true;
+    scene.add(gm, ym);
+  }
 }

@@ -4,6 +4,7 @@
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { Z, clamp01, ease } from '../zaman.js';
+import * as GR from './gercek.js';
 
 const YOL = '/assets/polyfork/';
 
@@ -89,16 +90,25 @@ export async function create(ctx) {
   await isci('construction-worker-c1ad8c', 'Walk', yuru([2, 40.5], [30, 40.5], 1.35, 0), 0);
   await isci('construction-worker-c1ad8c', 'Walk', yuru([60, 31.8], [20, 31.8], 1.3, 3), 0.4);
   await isci('groundworker-083f5c', 'Walk', yuru([10, 22.8], [44, 22.8], 1.25, 1), 0.2);
-  await isci('groundworker-083f5c', 'Idle', null, 0.7).then((o) => { o.position.set(6, 0, 39.6); o.rotation.y = Math.PI * 0.85; });
+  await isci('groundworker-083f5c', 'Idle', null, 0.7).then((o) => { o.position.set(-1.8, 0, 38.6); o.rotation.y = Math.PI * 0.6; });
   await isci('construction-worker-c1ad8c', 'Idle', null, 0.3).then((o) => { o.position.set(22.5, 0, 40.2); o.rotation.y = Math.PI; });
   await isci('crane-banksman-3994e0', 'Idle', null, 0.5).then((o) => { o.position.set(68, 0, 33); o.rotation.y = -Math.PI / 2; });
 
   // --- ağaçlar: çitin dışında kuşak ---
   const agacAd = ['tall-pine-tree-ab4108', 'oak-tree-50ee7c'];
+  const yerler = [];
   for (let i = 0; i < 46; i++) {
     let x, z;
     do { x = -60 + rng() * 190; z = -50 + rng() * 140; } while (x > -30 && x < 96 && z > -14 && z < 80);
-    await koy(agacAd[rng() < 0.6 ? 0 : 1], x, z, rng() * 6.28, 0.8 + rng() * 0.6);
+    const tur = rng() < 0.6 ? 0 : 1, a = rng() * 6.28, s = 0.8 + rng() * 0.6;
+    if (G) yerler.push({ x, z, a, s, tur: tur === 0 ? 'kavak' : 'yuvarlak' });
+    else await koy(agacAd[tur], x, z, a, s);
+  }
+  if (G) {
+    // Anadolu tarlası: sahanın kuzeyinde ve doğusunda kavak sıraları
+    for (let i = 0; i < 26; i++) yerler.push({ x: -40 + i * 6.5 + rng(), z: -24 + rng(), a: rng() * 6.28, s: 0.85 + rng() * 0.3, tur: 'kavak' });
+    for (let i = 0; i < 14; i++) yerler.push({ x: 112 + rng(), z: -10 + i * 6.8 + rng(), a: rng() * 6.28, s: 0.85 + rng() * 0.3, tur: 'kavak' });
+    GR.agaclar(ctx, yerler);
   }
 
   return {

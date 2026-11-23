@@ -56,6 +56,7 @@ export async function create(ctx) {
     const x = -70 + r() * 210, z = -60 + r() * 150;
     if (z > 42.5 && z < 49.5 && x > -45 && x < 105) return null;
     if (x > -11.5 && x < -4.5 && z > -21 && z < 49) return null;
+    if (z > 38.3 && z < 44 && x > -6 && x < 70) return null;
     return [x, z];
   });
 
@@ -250,7 +251,7 @@ export async function create(ctx) {
       paneller.forEach((p, i) => {
         const k = (t - p.tp) / 0.6;
         if (k <= 0) { panelMesh.setMatrixAt(i, gizli); return; }
-        const e = easeOutBack(k), y = p.y + 3.2 * (1 - easeOut(k)), w = 1 - clamp01(k);
+        const e = easeOutBack(k), y = p.y + (G ? 1.6 : 3.2) * (1 - easeOut(k)), w = 1 - clamp01(k);
         o.position.set(p.x, y, p.z);
         o.rotation.set(S.EGIM * clamp01(e) + 0.35 * w, p.yaw * w, 0.15 * w * Math.sin(p.k));
         const s = 0.6 + 0.4 * clamp01(k * 2.5); o.scale.set(s, 1, s);

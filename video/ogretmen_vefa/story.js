@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { painted, flat, rng, woodTex, D } from '/engine/src/paint.js';
 import { Toon, PLUM, flap, blinkAt } from '/engine/src/toon.js';
+import { Clay } from '/engine/src/clay.js';
 import { CamPath, smoother } from '/engine/src/camera.js';
 import { Smoke, beam } from '/engine/src/fx.js';
 import { vistaMat } from '/engine/src/vista.js';
@@ -14,19 +15,19 @@ export let DUR = 34;
 export const CUES = [];
 const UNI = '#2e3f72';
 export const LOOK = {
-  ogretmen:  { longHair: '#c4762e', hairLen: 250, cloth: '#f3f0ea', buttons: '#c8c0d0', pocket: true, collar: true, blush: '#f2a0a0', height: 1.62 },
-  ogretmen2: { longHair: '#d6ccc2', hairLen: 250, cloth: '#f3f0ea', buttons: '#c8c0d0', pocket: true, collar: true, blush: '#f2a0a0', height: 1.6 },
-  c_hem: { longHair: '#3a2620', hairLen: 170, cloth: UNI, skirt: UNI, boots: '#2a2228', blush: '#f2a0a0', drop: 120, height: 1.0 },
-  c_muh: { shortHair: '#8a5a32', cloth: UNI, collar: true, drop: 120, height: 1.0, blush: '#f2a0a0' },
-  c_mez: { longHair: '#7a4a2a', hairLen: 200, cloth: UNI, skirt: UNI, boots: '#2a2228', blush: '#f2a0a0', drop: 120, height: 1.0 },
-  c_sub: { shortHair: '#c69a4a', cloth: UNI, collar: true, drop: 120, height: 1.0, blush: '#f2a0a0' },
-  c_bab: { shortHair: '#2a1e1c', cloth: UNI, collar: true, drop: 120, height: 1.0, blush: '#f2a0a0' },
-  hemsire: { longHair: '#3a2620', hairLen: 170, cloth: '#8fb6de', collar: false, pocket: true, height: 1.6 },
+  ogretmen:  { legs: '#8a6a50', longHair: '#c4762e', hairLen: .3, cloth: '#f3f0ea', buttons: '#c8c0d0', pocket: true, collar: true, blush: '#f2a0a0', height: 1.62 },
+  ogretmen2: { legs: '#8a6a50', longHair: '#d6ccc2', hairLen: .3, cloth: '#f3f0ea', buttons: '#c8c0d0', pocket: true, collar: true, blush: '#f2a0a0', height: 1.6 },
+  c_hem: { longHair: '#3a2620', hairLen: .22, cloth: UNI, skirt: UNI, boots: '#2a2228', blush: '#f2a0a0', child: true, height: 1.05 },
+  c_muh: { shortHair: '#8a5a32', cloth: UNI, collar: true, child: true, height: 1.05, blush: '#f2a0a0' },
+  c_mez: { longHair: '#7a4a2a', hairLen: .24, cloth: UNI, skirt: UNI, boots: '#2a2228', blush: '#f2a0a0', child: true, height: 1.05 },
+  c_sub: { shortHair: '#c69a4a', cloth: UNI, collar: true, child: true, height: 1.05, blush: '#f2a0a0' },
+  c_bab: { shortHair: '#2a1e1c', cloth: UNI, collar: true, child: true, height: 1.05, blush: '#f2a0a0' },
+  hemsire: { longHair: '#3a2620', hairLen: .22, cloth: '#8fb6de', collar: false, pocket: true, height: 1.6 },
   muhendis:{ shortHair: '#8a5a32', hat: 'helmet', cloth: '#ee7a2a', trim: '#f2e04a', height: 1.74 },
-  mezun:   { longHair: '#7a4a2a', hairLen: 200, hat: 'mortar', cloth: '#26262e', sash: '#c8323a', collar: false, height: 1.62 },
+  mezun:   { longHair: '#7a4a2a', hairLen: .24, hat: 'mortar', cloth: '#26262e', sash: '#c8323a', collar: false, height: 1.62 },
   subay:   { shortHair: '#c69a4a', hat: 'peak', cloth: '#5a6a3e', buttons: '#d8b04a', collar: true, height: 1.76 },
   baba:    { shortHair: '#2a1e1c', beard: '#2a1e1c', beardLen: .35, cloth: '#2e3a5e', buttons: '#1e2440', collar: true, height: 1.78 },
-  kiz:     { longHair: '#2a1e1c', hairLen: 170, cloth: UNI, skirt: UNI, boots: '#2a2228', blush: '#f2a0a0', drop: 120, height: 1.0 },
+  kiz:     { longHair: '#2a1e1c', hairLen: .22, cloth: UNI, skirt: UNI, boots: '#2a2228', blush: '#f2a0a0', child: true, height: 1.05 },
 };
 const KIDS = ['c_hem', 'c_muh', 'c_mez', 'c_sub', 'c_bab'], ADULTS = ['hemsire', 'muhendis', 'mezun', 'subay', 'baba'];
 
@@ -115,9 +116,9 @@ function buildRoom(scene) {
   // öğrenci sıraları
   for (const [x, z] of [[-1.9, -.7]]) desk(g, x, z, top, leg);
   // ışık: pencerelerden güneş (sağdan, aşağı, hafif arkaya) + lavanta dolgu
-  g.add(new THREE.HemisphereLight('#f2f0ff', '#c8b8a8', 3.1));
+  g.add(new THREE.HemisphereLight('#f2f0ff', '#c8b8a8', 2.7));
   const dir = V(-.78, -.42, -.22).normalize(); dyn.sunDir = dir;
-  const s = new THREE.DirectionalLight('#ffe6c0', 2.7); s.position.copy(V(0, 1.4, -1).addScaledVector(dir, -14)); s.target.position.set(0, 1, -1);
+  const s = new THREE.DirectionalLight('#ffe6c0', 1.9); s.position.copy(V(0, 1.4, -1).addScaledVector(dir, -14)); s.target.position.set(0, 1, -1);
   s.castShadow = true; s.shadow.mapSize.set(2048, 2048); Object.assign(s.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 40 }); s.shadow.bias = -.0006; s.shadow.normalBias = .03; s.shadow.radius = 3;
   g.add(s); g.add(s.target);
   g.traverse(o => { if (!o.isMesh) return; if (o.material.isMeshLambertMaterial) o.receiveShadow = true; if (/Box|Sphere|Cylinder/.test(o.geometry.type) && !o.userData.noShadow) o.castShadow = true; });
@@ -177,7 +178,7 @@ export async function setup(ctx) {
   DUR = Math.ceil((ctx.words[ctx.words.length - 1].end + 1.8) * FPS) / FPS;
   ctx.scene.background = new THREE.Color('#fbf4ea');
   dyn.room = buildRoom(ctx.scene);
-  for (const n of Object.keys(LOOK)) cast[n] = new Toon(LOOK[n], ctx.scene);
+  for (const n of Object.keys(LOOK)) cast[n] = new Clay(LOOK[n], ctx.scene);
   fx.motes = new Smoke(ctx.scene, { color: '#fff0d0', maxPoints: 400, H: ctx.H, additive: true, near: 1.6 });
   const hash = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
   fx.motes.wisps.push({ n: 260, size: .008, alpha: .55, speed: .03, path: (u, t, i) => [2.4 + (hash(i, 1) - .5) * 3.4 + Math.sin(t * .4 + i) * .05, .9 + hash(i, 2) * 2 + (u - .5) * .3, -1 + (hash(i, 3) - .5) * 4.5] });
@@ -261,7 +262,7 @@ export function frame(t, ctx) {
   fx.motes.update(t); for (const b of fx.beams) b.material.uniforms.uT.value = t;
   // lens ve renk
   const subj = flashBack || (t >= PS(8) && t < PS(9)) ? V(.5, 1.05, -2.05) : t >= PS(9) && t < PS(10) ? V(.95, .7, -1.55) : V(-.2, 1.1, -2.2);
-  const look = { focus: cam.position.distanceTo(subj), coc: t >= PS(8) && t < PS(10) ? 7 : 4, range: 3, sat: 1.12, lift: [.17, .16, .19], bloom: .75, vignette: .1, tint: [1.01, 1.0, .98] };
+  const look = { focus: cam.position.distanceTo(subj), coc: t >= PS(8) && t < PS(10) ? 7 : 4, range: 3, sat: 1.12, lift: [.15, .14, .17], bloom: .55, vignette: .1, tint: [1.01, 1.0, .98] };
   if (flashBack) { look.sat = .85; look.tint = [1.06, 1.0, .9]; look.vignette = .32; }                 // anı: soluk, sıcak
   if (photo) { const k = Math.min(1, (t - P(10, .5)) / .5); look.sat = 1.12 * (1 - k); look.tint = [1.02 + .06 * k, 1.0, .97 - .1 * k]; look.vignette = .1 + .3 * k; look.coc = 2; }
   // flaş: kesmede 2 kare beyaz

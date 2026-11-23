@@ -1,0 +1,39 @@
+--- repo/tools/render.mjs	2026-11-23 15:00:39.496535789 +0300
++++ ges/tools/render.mjs	2026-11-23 15:04:48.689912770 +0300
+@@ -37,14 +37,14 @@
+ async function launch() {
+   const browser = await puppeteer.launch({
+     executablePath: CHROME, headless: 'new', protocolTimeout: 600000,
+-    args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist', '--enable-webgl', '--disable-gpu-vsync', '--hide-scrollbars', '--mute-audio', `--window-size=${W},${H}`, '--disable-background-timer-throttling', '--disable-renderer-backgrounding'],
++    args: [...(process.env.GPU ? ['--use-angle=d3d11'] : ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']), '--enable-gpu', '--ignore-gpu-blocklist', '--enable-webgl', '--disable-gpu-vsync', '--hide-scrollbars', '--mute-audio', `--window-size=${W},${H}`, '--disable-background-timer-throttling', '--disable-renderer-backgrounding'],
+     defaultViewport: { width: W, height: H, deviceScaleFactor: 1 },
+   });
+   const page = await browser.newPage();
+   page.on('pageerror', (e) => console.log('[pageerror]', e.message));
+   const q = new URLSearchParams({ w: W, h: H, still: 1 });
+   if (args.q) for (const kv of String(args.q).split('&')) { const [k, v] = kv.split('='); q.set(k, v ?? '1'); }
+-  await page.goto(`http://127.0.0.1:${port}/?${q}`, { waitUntil: 'load', timeout: 180000 });
++  await page.goto(`http://127.0.0.1:${port}/${args.page || ''}?${q}`, { waitUntil: 'load', timeout: 180000 });
+   await page.waitForFunction('window.__app !== undefined', { timeout: 120000 });
+   const res = await page.evaluate(async (shot) => { const r = await window.__app.ready; if (shot) window.__app.setShot(shot); return r.errors; }, args.shot || '');
+   if (res.length) console.log('MODULE ERRORS:\n' + res.join('\n'));
+--- repo/tools/shot.mjs	2026-11-23 15:00:39.496535789 +0300
++++ ges/tools/shot.mjs	2026-11-23 15:04:48.690382250 +0300
+@@ -28,7 +28,7 @@
+ const { server, port } = await startServer(0);
+ const browser = await puppeteer.launch({
+   executablePath: CHROME, headless: 'new',
+-  args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist', '--enable-webgl', '--disable-gpu-vsync', '--hide-scrollbars', '--mute-audio', `--window-size=${W},${H}`],
++  args: [...(process.env.GPU ? ['--use-angle=d3d11'] : ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']), '--enable-gpu', '--ignore-gpu-blocklist', '--enable-webgl', '--disable-gpu-vsync', '--hide-scrollbars', '--mute-audio', `--window-size=${W},${H}`],
+   defaultViewport: { width: W, height: H, deviceScaleFactor: 1 },
+ });
+ let code = 0;
+@@ -40,7 +40,7 @@
+   const q = new URLSearchParams({ w: W, h: H, still: 1 });
+   if (args.mods) q.set('mods', args.mods);
+   if (args.q) for (const kv of String(args.q).split('&')) { const [k, v] = kv.split('='); q.set(k, v ?? '1'); }
+-  await page.goto(`http://127.0.0.1:${port}/?${q}`, { waitUntil: 'load', timeout: 120000 });
++  await page.goto(`http://127.0.0.1:${port}/${args.page || ''}?${q}`, { waitUntil: 'load', timeout: 120000 });
+   await page.waitForFunction('window.__app !== undefined', { timeout: 240000 });
+   const t0 = Date.now();
+   const res = await page.evaluate(async () => { const r = await window.__app.ready; return { errors: r.errors, info: window.__app.info() }; });

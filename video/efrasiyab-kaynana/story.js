@@ -188,7 +188,7 @@ function buildTepe(scene) {
   const rockMat = painted(stoneTex('#a89e8c', 25, [2, 2]));
   // antik kaya mezar girişi (z = -2.2)
   const mound = new THREE.Mesh(new THREE.SphereGeometry(3.6, 22, 14), rockMat);
-  mound.scale.set(1.5, .85, .8); mound.position.set(0, 1.4, -3.5); g.add(mound);
+  mound.scale.set(1.35, .62, .55); mound.position.set(0, .95, -4.45); g.add(mound);
   const archL = new THREE.Mesh(new THREE.BoxGeometry(.48, 2.2, .65), rockMat); archL.position.set(-.86, 1.1, -1.9); g.add(archL);
   const archR = new THREE.Mesh(new THREE.BoxGeometry(.48, 2.2, .65), rockMat); archR.position.set(.86, 1.1, -1.9); g.add(archR);
   const lintel = new THREE.Mesh(new THREE.BoxGeometry(2.35, .42, .75), rockMat); lintel.position.set(0, 2.35, -1.9); g.add(lintel);
@@ -197,7 +197,7 @@ function buildTepe(scene) {
 
   // sağda kaynananın saklanabileceği kaya + solda çalı/ağaç
   const boulder = new THREE.Mesh(new THREE.DodecahedronGeometry(.58, 1), rockMat);
-  boulder.position.set(1.55, .42, -.35); boulder.scale.set(1.1, .85, .8); g.add(boulder);
+  boulder.position.set(1.42, .30, -.22); boulder.scale.set(.82, .62, .62); g.add(boulder);
   const bushMat = flat('#5e8248');
   for (const [bx, bz, bs] of [[-2.0, -.8, .55], [2.4, -1.1, .6], [-1.7, 1.1, .45]]) {
     const b = new THREE.Mesh(new THREE.SphereGeometry(bs, 14, 10), bushMat);
@@ -240,13 +240,13 @@ function buildMezar(scene) {
   // merkezdeki antik Kral Bidaz taş lahdi (z = -.85)
   const lahitMat = painted(stoneTex('#c8beaa', 71, [2, 1]));
   const lahit = new THREE.Mesh(new THREE.BoxGeometry(1.75, .74, .92), lahitMat);
-  lahit.position.set(0, .37, -.95); g.add(lahit);
+  lahit.position.set(0, .37, -1.65); g.add(lahit);
   // altın rölyef şeridi (lahit üzerinde, .02 m dışarıda — flicker yok)
   const band = new THREE.Mesh(new THREE.BoxGeometry(1.78, .12, .95), flat('#cfa036'));
-  band.position.set(0, .54, -.95); g.add(band);
+  band.position.set(0, .54, -1.65); g.add(band);
   // kayarak açılan taş kapak
   const lid = new THREE.Mesh(new THREE.BoxGeometry(1.82, .16, .98), lahitMat);
-  lid.position.set(0, .82, -.95); g.add(lid);
+  lid.position.set(0, .82, -1.65); g.add(lid);
   dyn.lid = lid;
 
   // lahit yanında mat altın antik küpler
@@ -340,14 +340,14 @@ function cameraPath() {
     { t: PS(5) + .18, dur: .42, pos: [200.0, 1.42, 3.65], look: [200.0, 1.22, -.75], fov: 50, creep: .26 },
     { t: PE(5),       dur: Math.max(.4, PE(5) - PS(5) - .22), pos: [200.0, 1.38, 3.25], look: [200.0, 1.20, -.65], fov: 48, creep: .24 },
     // P06 Kaynana keserle içeri dalar!
-    { t: PS(6) + .16, dur: .30, move: 'whip', pos: [200.35, 1.36, 2.75], look: [200.18, 1.24, -.45], fov: 46, creep: .28 },
-    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .2), pos: [200.12, 1.42, 2.95], look: [200.05, 1.28, -.75], fov: 47, creep: .28 },
+    { t: PS(6) + .16, dur: .30, move: 'whip', pos: [200.10, 1.38, 3.45], look: [200.05, 1.22, -.75], fov: 49, creep: .26 },
+    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .2), pos: [200.05, 1.42, 3.35], look: [200.02, 1.24, -.85], fov: 48, creep: .26 },
     // P07 Kralı devirir -> kaynana som altına dönüşür! (kick!)
-    { t: PS(7) + .18, dur: .35, pos: [200.0, 1.42, 3.15], look: [200.0, 1.24, -.72], fov: 48, creep: .26 },
-    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .22), pos: [200.18, 1.36, 2.55], look: [200.28, 1.22, -.62], fov: 45, creep: .24 },
+    { t: PS(7) + .18, dur: .35, pos: [200.0, 1.42, 3.45], look: [200.0, 1.24, -.82], fov: 49, creep: .26 },
+    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .22), pos: [200.05, 1.36, 3.25], look: [200.05, 1.20, -.72], fov: 48, creep: .24 },
     // P08 Damat şaşkın -> sonra kurnazca keser sapına bakar
-    { t: PS(8) + .20, dur: .45, pos: [199.78, 1.36, 2.65], look: [199.95, 1.22, -.55], fov: 46, creep: .24 },
-    { t: PE(8),       dur: Math.max(.4, PE(8) - PS(8) - .24), pos: [199.92, 1.34, 2.35], look: [200.05, 1.22, -.55], fov: 45, creep: .22 },
+    { t: PS(8) + .20, dur: .45, pos: [199.95, 1.36, 3.25], look: [199.98, 1.20, -.65], fov: 48, creep: .24 },
+    { t: PE(8),       dur: Math.max(.4, PE(8) - PS(8) - .24), pos: [199.98, 1.34, 2.95], look: [200.02, 1.20, -.65], fov: 47, creep: .22 },
     // P09 Whip ile güneşli 77 dönüm tarla & kırmızı traktör!
     { t: PS(9) + .14, dur: .30, move: 'whip', pos: [299.85, 1.38, 2.95], look: [300.15, 1.15, -.95], fov: 48, creep: .24 },
     { t: PE(9),       dur: Math.max(.4, PE(9) - PS(9) - .2), pos: [299.95, 1.40, 3.35], look: [300.12, 1.15, -1.05], fov: 49, creep: .22 },
@@ -481,7 +481,7 @@ export function frame(t, ctx) {
   } else if (here === 'mezar') {
     const isHook = t < PS(2);
     const lidOpen = isHook ? .95 : ramp(t, PS(3) + .15, PS(3) + 1.2);
-    dyn.lid.position.x = lidOpen * .95;
+    dyn.lid.position.z = -1.65 - lidOpen * .55; dyn.lid.position.x = lidOpen * .45;
     dyn.lid.rotation.y = lidOpen * .18;
 
     const riseU = isHook ? ramp(t, P(1, .34), P(1, .68)) : ramp(t, PS(4) - .05, P(4, .58));
@@ -492,7 +492,7 @@ export function frame(t, ctx) {
     if (riseU > .02) {
       bd.show();
       const bdY = -.95 + riseU * .95 - fallenU * .42;
-      bd.place(200.0 - fallenU * .38, bdY, -1.22, cam, tint);
+      bd.place(200.0 - fallenU * .35, bdY, -1.85, cam, tint);
       bd.draw({
         expr: fallenU > .3 ? 'surprised' : 'angry',
         look: fallenU > .2 ? .6 : 0,
@@ -511,7 +511,7 @@ export function frame(t, ctx) {
       const sly8 = t >= P(8, .48);
 
       // Damat (sol)
-      dm.show(); dm.place(199.42 - (panic ? .18 : 0), 0, -.42, cam, tint);
+      dm.show(); dm.place(199.52 - (panic ? .12 : 0), 0, -.45, cam, tint);
       dm.draw({
         expr: sly8 ? 'smug' : t >= P(7, .5) ? 'surprised' : panic ? 'surprised' : laugh3 ? 'laugh' : 'smile',
         look: .72,
@@ -529,7 +529,7 @@ export function frame(t, ctx) {
       // Ortak (P06'da kaynana gelince kenara çekilir)
       if (t < PS(6) + .2) {
         const leave = ramp(t, PS(6) - .1, PS(6) + .2);
-        ot.show(); ot.place(200.56 + leave * 1.1, 0, -.48, cam, tint);
+        ot.show(); ot.place(200.48 + leave * 1.1, 0, -.48, cam, tint);
         ot.draw({
           expr: panic ? 'surprised' : 'worried', look: -.65, sweat: 1,
           mouth: talk(PS(3), P(3, .48)),
@@ -544,8 +544,8 @@ export function frame(t, ctx) {
       if (t >= PS(6) - .05) {
         const runIn = ramp(t, PS(6) - .05, PS(6) + .55);
         const swing = ramp(t, P(7, .05), P(7, .24));
-        const kx = 200.38 + (1 - runIn) * 1.35;
-        const kz = -.56;
+        const kx = 200.42 + (1 - runIn) * 1.35;
+        const kz = -.48;
         if (!turnedGold) {
           kn.show(); kn.place(kx, 0, kz, cam, tint);
           kn.draw({

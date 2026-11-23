@@ -834,7 +834,7 @@ function buildS10(){const s=new THREE.Scene();s.environment=ENV.day;s.background
  const du=dust(s,10,0xb0a896);
  const ti=6.0,y0=top,zW=-.7;
  function pose(ph,lean){set('Hips',0,0,0);set('Spine',-.25*lean,0,0);set('Spine1',-.1*lean,0,0);set('Neck',.2,0,0);
-  set('LeftArm',.5,-1.0,-.2);set('RightArm',.5,1.0,.2);set('LeftForeArm',0,-.4,0);set('RightForeArm',0,.4,0);
+  const A=window.ARMP||[.3,-1.2,-.9,0,-.3,0];set('LeftArm',A[0],A[1],A[2]);set('RightArm',A[0],-A[1],-A[2]);set('LeftForeArm',A[3],A[4],A[5]);set('RightForeArm',A[3],-A[4],-A[5]);
   set('LeftUpLeg',-.35-.15*Math.sin(ph),0,-.08);set('RightUpLeg',-.05+.15*Math.sin(ph),0,.08);set('LeftLeg',.5+.1*Math.sin(ph),0,0);set('RightLeg',.25,0,0)}
  function flail(u){set('Spine',.2,0,0);set('LeftArm',-1.2-.4*Math.sin(u*14),-.3,-.5);set('RightArm',-1.2+.4*Math.sin(u*14),.3,.5);set('LeftForeArm',0,-.6,0);set('RightForeArm',0,.6,0);
   set('LeftUpLeg',-.6,0,-.2);set('RightUpLeg',-.2,0,.2);set('LeftLeg',.8,0,0);set('RightLeg',.4,0,0)}
@@ -1703,6 +1703,7 @@ window.dbg9=function(lt){const sc=S[7];const p=sc.bpose(Math.min(lt,sc.ti));cons
 window.dbgS=function(i,u,lt,P,L,f,ex){const sc=S[i];const st=sc[u](lt);camera.position.set(...P);camera.fov=f||46;camera.updateProjectionMatrix();camera.lookAt(...L);renderer.toneMappingExposure=ex||1;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.dbg10=function(lt){const sc=S[8];const st=sc.upd(lt);camera.position.set(-16,11,-16);camera.fov=46;camera.updateProjectionMatrix();camera.lookAt(-2.5,0,2);renderer.toneMappingExposure=1;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.dbgIs1=function(lt){const sc=S[9];sc.upd(lt);camera.position.set(9,6.5,9);camera.fov=46;camera.updateProjectionMatrix();camera.lookAt(.5,1.6,-1);renderer.toneMappingExposure=1.05;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
+window.dbgIs1yak=function(lt){if(window.ARMV)window.ARMP=window.ARMV[Math.round(lt*10)%10];const sc=S[9];sc.upd(lt);camera.position.set(4.2,3.6,2.2);camera.fov=40;camera.updateProjectionMatrix();camera.lookAt(.6,3.4,-.7);renderer.toneMappingExposure=1.05;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.dbg9top=function(lt){const sc=S[7];sc.upd(lt);camera.position.set(-3,60,20);camera.fov=50;camera.updateProjectionMatrix();camera.lookAt(-3,0,20.01);renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.READY=true;
 </script></body></html>

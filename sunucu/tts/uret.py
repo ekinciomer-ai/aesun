@@ -68,7 +68,7 @@ def gemini_anahtarlar(tercih_ad=None):
     sira = []
     if tercih_ad:
         sira.append((tercih_ad, os.environ.get(f"KASA_{tercih_ad}") or ""))
-    for ad in ("gemini_api_anahtar_nasilyapildi", "gemini_api_key", "gemini_api_anahtar", "gemini_api_anahtar_kozmos"):
+    for ad in ("gemini_api_key_716744873763", "gemini_api_anahtar_nasilyapildi", "gemini_api_key", "gemini_api_anahtar", "gemini_api_anahtar_kozmos"):
         sira.append((ad, os.environ.get(f"KASA_{ad}") or ""))
     sira.append(("varsayilan", os.environ.get("GEMINI_KEY") or ""))
     cikti, gorulen = [], set()

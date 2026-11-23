@@ -17,7 +17,7 @@ export const SHOTS = {
     return { pos: L3([-12, 8.5, 56], [-7, 10.5, 52], ease(k)), tgt: [24, 1.2, 22], fov: 54 }; } },
   // 4. panel dalgası: kamera dalgayla birlikte doğuya kayar
   p_panel: { cam: (tl) => { const k = tl / 3.6;
-    return { pos: L3([2, 5.5, 50], [34, 6.5, 50], ease(k)), tgt: L3([10, 1.2, 28], [44, 1.6, 24], ease(k)), fov: 56, dof: { focus: 24, aperture: 0.5 } }; } },
+    return { pos: L3([2, 5.5, 50], [34, 6.5, 50], ease(k)), tgt: L3([10, 1.2, 28], [44, 1.6, 24], ease(k)), fov: 56, dof: { focus: 24, aperture: 0.5 }, handheld: 0.35 }; } },
   // 5. gün doğumu: vinç gibi yükselip sahayı ve ufku gösterir, sonda kararır
   p_gunes: { cam: (tl) => { const k = ease(tl / 3.6);
     return { pos: L3([18, 4, 58], [30, 34, 72], k), tgt: L3([36, 3, 20], [38, 2, -8], k), fov: L3([58, 0, 0], [62, 0, 0], k)[0], post: { fade: 1 - ease((tl - 2.95) / 0.65) } }; } },

@@ -419,6 +419,42 @@ def main():
                     if x.get(k2) != val:
                         x[k2] = val; degisti += 1
 
+    # 2d) Kanal kartları (hesaplar.json): logo, @adres, abone/izlenme/video sayısı YouTube'dan her turda tazelenir.
+    #     Ayrı dosya; okunamazsa tablo etkilenmez. Elle girilen alanlara (konu, durum, trend) dokunulmaz.
+    if anahtar:
+        try:
+            hyol = os.path.join(os.path.dirname(YOL), "hesaplar.json")
+            H = json.load(open(hyol, encoding="utf-8"))
+            kartlar = [c for h in H.get("hesaplar", []) for c in h.get("kanallar", [])
+                       if c.get("platform") == "YouTube" and str(c.get("id", "")).startswith("UC")]
+            hd = 0
+            for i in range(0, len(kartlar), 50):
+                grup = {c["id"]: c for c in kartlar[i:i + 50]}
+                q = urllib.parse.urlencode({"part": "snippet,statistics", "id": ",".join(grup), "key": anahtar})
+                for it in json.loads(getir("https://www.googleapis.com/youtube/v3/channels?" + q)).get("items", []):
+                    c = grup.get(it["id"])
+                    if c is None:
+                        continue
+                    th = it.get("snippet", {}).get("thumbnails", {})
+                    logo = (th.get("high") or th.get("medium") or th.get("default") or {}).get("url")
+                    st = it.get("statistics", {})
+                    yeni = {"logo": logo, "handle": it.get("snippet", {}).get("customUrl")}
+                    for k2, v2 in yeni.items():
+                        if v2 and c.get(k2) != v2:
+                            c[k2] = v2; hd += 1
+                    cn = c.setdefault("canli", {})   # YouTube'un anlık kanal sayıları (vidIQ ölçümünden ayrı)
+                    for k2, a2 in (("abone", "subscriberCount"), ("izlenme", "viewCount"), ("video", "videoCount")):
+                        if k2 == "abone" and st.get("hiddenSubscriberCount"):
+                            continue
+                        if str(st.get(a2, "")).isdigit() and cn.get(k2) != int(st[a2]):
+                            cn[k2] = int(st[a2]); hd += 1
+            if hd:
+                H["kanal_guncelleme"] = simdi.isoformat(timespec="seconds")
+                json.dump(H, open(hyol, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+                degisti += 1
+        except Exception as e:
+            notlar.append(f"Kanal kartları (logo/sayılar) güncellenemedi: {e}")
+
     # 3) TikTok: plan saati geçen planlı içerik
     for x in K:
         # Yalnız TikTok Studio'da gerçekten planlanmış olanlar (not'u "HAZIR" ile başlayan = henüz yüklenmemiş dosya; dokunma)

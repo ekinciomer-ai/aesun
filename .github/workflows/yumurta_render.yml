@@ -209,7 +209,7 @@ jobs:
           python3 - "/tmp/final_out/${PROJE}_final.mp4" "/tmp/final_out/olcum.json" <<'PY'
           import json, subprocess, sys
           import numpy as np
-                    mp4, outp = sys.argv[1], sys.argv[2]
+          mp4, outp = sys.argv[1], sys.argv[2]
           # 2 fps ornekleme ile hizli ve kesin olcum
           raw = subprocess.run(["ffmpeg", "-v", "error", "-i", mp4, "-vf", "fps=2,scale=270:480", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
           frames = np.frombuffer(raw, np.uint8).reshape(-1, 480, 270, 3)

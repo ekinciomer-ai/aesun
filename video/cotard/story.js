@@ -302,36 +302,36 @@ function buildMind(scene) {
   const backW = new THREE.Mesh(new THREE.PlaneGeometry(24, 14), flat('#18223e'));
   backW.position.set(0, 6, -5.2); g.add(backW);
 
-  // Sol küre: TANIMA MERKEZİ (sıcak altın-kehribar)
-  const rec = new THREE.Mesh(new THREE.SphereGeometry(.56, 26, 20), new THREE.MeshBasicMaterial({ color: '#ffbe58' }));
-  rec.position.set(-1.02, 1.68, -1.4); rec.userData.noShadow = true; g.add(rec);
-  const recRing = new THREE.Mesh(new THREE.TorusGeometry(.76, .035, 12, 40), flat('#ffe29c'));
+  // Sol küre: TANIMA MERKEZİ (sıcak altın-kehribar — dikey kadraja tam sığacak mesafede)
+  const rec = new THREE.Mesh(new THREE.SphereGeometry(.42, 26, 20), new THREE.MeshBasicMaterial({ color: '#ffbe58' }));
+  rec.position.set(-.68, 1.65, -1.4); rec.userData.noShadow = true; g.add(rec);
+  const recRing = new THREE.Mesh(new THREE.TorusGeometry(.56, .03, 12, 40), flat('#ffe29c'));
   recRing.position.copy(rec.position); recRing.userData.noShadow = true; g.add(recRing);
   dyn.recRing = recRing;
-  const recLbl = new THREE.Mesh(new THREE.PlaneGeometry(1.18, .5), new THREE.MeshBasicMaterial({ map: badgeTex('TANIMA', 'SAĞLAM', '#18243c', '#ffffff', '#ffbe58'), transparent: true }));
-  recLbl.position.set(-1.02, 2.66, -1.4); recLbl.userData.noShadow = true; g.add(recLbl);
+  const recLbl = new THREE.Mesh(new THREE.PlaneGeometry(.92, .4), new THREE.MeshBasicMaterial({ map: badgeTex('TANIMA', 'SAĞLAM', '#18243c', '#ffffff', '#ffbe58'), transparent: true }));
+  recLbl.position.set(-.68, 2.48, -1.4); recLbl.userData.noShadow = true; g.add(recLbl);
 
   // Sağ küre: DUYGU MERKEZİ (soğuk buz mavisi)
-  const emo = new THREE.Mesh(new THREE.SphereGeometry(.56, 26, 20), new THREE.MeshBasicMaterial({ color: '#5ec8ff' }));
-  emo.position.set(1.02, 1.68, -1.4); emo.userData.noShadow = true; g.add(emo);
-  const emoRing = new THREE.Mesh(new THREE.TorusGeometry(.76, .035, 12, 40), flat('#a8e4ff'));
+  const emo = new THREE.Mesh(new THREE.SphereGeometry(.42, 26, 20), new THREE.MeshBasicMaterial({ color: '#5ec8ff' }));
+  emo.position.set(.68, 1.65, -1.4); emo.userData.noShadow = true; g.add(emo);
+  const emoRing = new THREE.Mesh(new THREE.TorusGeometry(.56, .03, 12, 40), flat('#a8e4ff'));
   emoRing.position.copy(emo.position); emoRing.userData.noShadow = true; g.add(emoRing);
   dyn.emoRing = emoRing;
-  const emoLbl = new THREE.Mesh(new THREE.PlaneGeometry(1.18, .5), new THREE.MeshBasicMaterial({ map: badgeTex('DUYGU', 'SESSİZ', '#18243c', '#ffffff', '#5ec8ff'), transparent: true }));
-  emoLbl.position.set(1.02, 2.66, -1.4); emoLbl.userData.noShadow = true; g.add(emoLbl);
+  const emoLbl = new THREE.Mesh(new THREE.PlaneGeometry(.92, .4), new THREE.MeshBasicMaterial({ map: badgeTex('DUYGU', 'SESSİZ', '#18243c', '#ffffff', '#5ec8ff'), transparent: true }));
+  emoLbl.position.set(.68, 2.48, -1.4); emoLbl.userData.noShadow = true; g.add(emoLbl);
 
   // İki küreyi bağlayan SİNİR HATTI (sol ve sağ yarı — P06'da ortadan kopup sarkar!)
-  dyn.wireL = new THREE.Mesh(new THREE.CylinderGeometry(.055, .055, .96, 12), new THREE.MeshBasicMaterial({ color: '#ffd866' }));
-  dyn.wireL.rotation.z = Math.PI / 2; dyn.wireL.position.set(-.48, 1.68, -1.4); dyn.wireL.userData.noShadow = true; g.add(dyn.wireL);
-  dyn.wireR = new THREE.Mesh(new THREE.CylinderGeometry(.055, .055, .96, 12), new THREE.MeshBasicMaterial({ color: '#80d8ff' }));
-  dyn.wireR.rotation.z = Math.PI / 2; dyn.wireR.position.set(.48, 1.68, -1.4); dyn.wireR.userData.noShadow = true; g.add(dyn.wireR);
+  dyn.wireL = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .64, 12), new THREE.MeshBasicMaterial({ color: '#ffd866' }));
+  dyn.wireL.rotation.z = Math.PI / 2; dyn.wireL.position.set(-.32, 1.65, -1.4); dyn.wireL.userData.noShadow = true; g.add(dyn.wireL);
+  dyn.wireR = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .64, 12), new THREE.MeshBasicMaterial({ color: '#80d8ff' }));
+  dyn.wireR.rotation.z = Math.PI / 2; dyn.wireR.position.set(.32, 1.65, -1.4); dyn.wireR.userData.noShadow = true; g.add(dyn.wireR);
 
   // Kürelerin parıltı haleleri
-  fx.mGlowL = glow(scene, [198.98, 1.68, -1.3], { size: 2.2, color: '#ffbe58', strength: .45 });
-  fx.mGlowR = glow(scene, [201.02, 1.68, -1.3], { size: 2.2, color: '#5ec8ff', strength: .45 });
+  fx.mGlowL = glow(scene, [199.32, 1.65, -1.3], { size: 1.8, color: '#ffbe58', strength: .45 });
+  fx.mGlowR = glow(scene, [200.68, 1.65, -1.3], { size: 1.8, color: '#5ec8ff', strength: .45 });
 
-  // Gündelik benzetme: BÜYÜK PARLAYAN TELEFON / EKRAN (sağ alt alanda, P07'de kamera buna süzülür!)
-  dyn.phone = new THREE.Group(); dyn.phone.position.set(.56, 1.05, .35); g.add(dyn.phone);
+  // Gündelik benzetme: BÜYÜK PARLAYAN TELEFON / EKRAN (sağda, Dr. Cotard ile birlikte tam kadrajda!)
+  dyn.phone = new THREE.Group(); dyn.phone.position.set(.38, 1.02, .25); dyn.phone.scale.setScalar(.82); g.add(dyn.phone);
   const pBody = new THREE.Mesh(new THREE.BoxGeometry(.76, 1.24, .08), flat('#263042')); dyn.phone.add(pBody);
   const pScr = new THREE.Mesh(new THREE.PlaneGeometry(.66, 1.1), new THREE.MeshBasicMaterial({ map: phoneScreenTex() }));
   pScr.position.z = .045; pScr.userData.noShadow = true; dyn.phone.add(pScr);
@@ -383,24 +383,24 @@ function cameraPath() {
     { t: P(1, .30), dur: .42, pos: [.35, 1.12, 1.55], look: [.55, .95, -.55], fov: 44, creep: .30 },
     { t: P(1, .60), dur: .28, move: 'whip', pos: [-.72, 1.28, 1.55], look: [-.68, 1.25, -.75], fov: 42, creep: .28 },
     { t: P(1, .86), dur: .28, move: 'whip', pos: [-.15, 1.48, -.25], look: [-.15, 1.55, -3.3], fov: 46, creep: .24 },
-    // P02 "Bakın, 1880 Paris'inde...": geri süzülüp Dr. Cotard ve Matmazel ikili plan
-    { t: PS(2) + .16, dur: .32, move: 'whip', pos: [.1, 1.25, 3.2], look: [-.05, 1.12, -.85], fov: 50, creep: .24 },
-    // P03 Matmazel tabağı iter (yakın ikili + masa)
-    { t: PS(3) + .18, dur: .48, pos: [-.18, 1.15, 2.25], look: [-.15, 1.05, -.72], fov: 46, creep: .28 },
+    // P02 "Bakın, 1880 Paris'inde...": geri süzülüp Dr. Cotard ve Matmazel tam ikili plan
+    { t: PS(2) + .16, dur: .32, move: 'whip', pos: [-.1, 1.25, 3.85], look: [-.12, 1.12, -.88], fov: 50, creep: .22 },
+    // P03 Matmazel tabağı iter (ikisi de tam kadrajda + masa)
+    { t: PS(3) + .18, dur: .48, pos: [-.12, 1.18, 3.25], look: [-.1, 1.05, -.82], fov: 48, creep: .24 },
     // P04 Asistan güler/itiraz eder (whip sağa)
-    { t: PS(4) + .14, dur: .30, move: 'whip', pos: [1.35, 1.28, 2.05], look: [1.22, 1.22, -.75], fov: 44, creep: .30 },
+    { t: PS(4) + .14, dur: .30, move: 'whip', pos: [1.3, 1.28, 2.35], look: [1.22, 1.22, -.75], fov: 46, creep: .28 },
     // P05 Matmazel aynaya bakar (whip sola-arkaya, gerilim itmesi)
-    { t: PS(5) + .14, dur: .30, move: 'whip', pos: [-.55, 1.38, 1.35], look: [-.22, 1.45, -2.9], fov: 46, creep: .34 },
-    // P06 WHIP PAN → SET 2: Beyin Bağlantı Odası (iki küre ve kopan hat)
-    { t: PS(6) + .14, dur: .32, move: 'whip', pos: [200.0, 1.62, 3.45], look: [200.0, 1.68, -1.4], fov: 50, creep: .30 },
-    // P07 Gündelik benzetme: Dr. Cotard + parlayan dokunmatiği bozuk telefon
-    { t: PS(7) + .18, dur: .42, pos: [200.1, 1.22, 2.95], look: [200.12, 1.12, .15], fov: 46, creep: .26 },
+    { t: PS(5) + .14, dur: .30, move: 'whip', pos: [-.5, 1.38, 1.55], look: [-.22, 1.45, -2.9], fov: 46, creep: .32 },
+    // P06 WHIP PAN → SET 2: Beyin Bağlantı Odası (iki küre + etiketler %100 kadrajda!)
+    { t: PS(6) + .14, dur: .32, move: 'whip', pos: [200.0, 1.72, 4.75], look: [200.0, 1.72, -1.4], fov: 52, creep: .24 },
+    // P07 Gündelik benzetme: Dr. Cotard + parlayan telefon ekranı %100 kadrajda!
+    { t: PS(7) + .18, dur: .42, pos: [200.0, 1.16, 4.15], look: [200.0, 1.08, .22], fov: 48, creep: .22 },
     // P08 Beynin korkunç sonucu: WHIP → Klinik yakın plan Matmazel gözleri
-    { t: PS(8) + .14, dur: .32, move: 'whip', pos: [-.68, 1.30, 1.45], look: [-.68, 1.28, -.75], fov: 40, creep: .36 },
-    // P09 WHIP PAN → SET 3: Paris akşam balkonu, Dr. Cotard + Matmazel
-    { t: PS(9) + .14, dur: .32, move: 'whip', pos: [300.0, 1.18, 2.75], look: [300.0, 1.18, -1.2], fov: 48, creep: .22 },
-    // P10 Son vuruş: yavaşça geri çekilir (~4.3 m, karakterler net kalır)
-    { t: DUR, dur: Math.max(.5, DUR - PS(10) - .05), pos: [300.0, 1.32, 4.3], look: [300.0, 1.22, -4.0], fov: 52, creep: .16 },
+    { t: PS(8) + .14, dur: .32, move: 'whip', pos: [-.52, 1.30, 1.65], look: [-.52, 1.28, -.75], fov: 42, creep: .32 },
+    // P09 WHIP PAN → SET 3: Paris akşam balkonu, ikisi de tam kadrajda!
+    { t: PS(9) + .14, dur: .32, move: 'whip', pos: [300.0, 1.22, 3.45], look: [300.0, 1.18, -.8], fov: 50, creep: .20 },
+    // P10 Son vuruş: yavaşça geri çekilir (~4.45 m, karakterler net kalır)
+    { t: DUR, dur: Math.max(.5, DUR - PS(10) - .05), pos: [300.0, 1.32, 4.45], look: [300.0, 1.22, -4.0], fov: 52, creep: .15 },
   ];
   const cp = new CamPath(k, { fps: FPS });
   cp.kick(P(6, .56), 1.15); // sinir hattı kopuş darbesi!
@@ -489,7 +489,7 @@ export function frame(t, ctx) {
 
     // Matmazel (sol-orta, donuk ve ifadesiz)
     const mirrorLook = t >= PS(5) && t < PS(6);
-    const mzX = mirrorLook ? -.45 : -.68;
+    const mzX = mirrorLook ? -.42 : -.52;
     const mzZ = mirrorLook ? -1.45 : -.75;
     mz.show(); mz.place(mzX, 0, mzZ, cam, tint);
     const pushing = t >= P(3, .38) && t <= PE(3) + .1;
@@ -543,9 +543,9 @@ export function frame(t, ctx) {
     dyn.recRing.rotation.y = t * .7;
     dyn.emoRing.rotation.y = -t * .55;
     const snapU = ramp(t, P(6, .54), P(6, .76));
-    dyn.wireL.position.set(-.48 - snapU * .18, 1.68 - snapU * .38, -1.4);
+    dyn.wireL.position.set(-.32 - snapU * .14, 1.65 - snapU * .32, -1.4);
     dyn.wireL.rotation.z = Math.PI / 2 + snapU * .72;
-    dyn.wireR.position.set(.48 + snapU * .18, 1.68 - snapU * .38, -1.4);
+    dyn.wireR.position.set(.32 + snapU * .14, 1.65 - snapU * .32, -1.4);
     dyn.wireR.rotation.z = Math.PI / 2 - snapU * .72;
     // Duygu küresi kopuş sonrası soluklaşır
     fx.mGlowR.material.opacity = .45 * (1 - snapU * .65);
@@ -554,8 +554,8 @@ export function frame(t, ctx) {
     const phoneOn = t >= PS(7) - .25;
     dyn.phone.visible = phoneOn;
     if (phoneOn) {
-      dyn.phone.position.y = 1.05 + Math.sin(t * 2.6) * .04;
-      ct.show(); ct.place(199.52, 0, .25, cam, tint);
+      dyn.phone.position.y = 1.02 + Math.sin(t * 2.6) * .04;
+      ct.show(); ct.place(199.58, 0, .22, cam, tint);
       ct.draw({
         expr: 'focused', look: .65, blink: bl(4, PS(7)),
         armR: [88, 30], armL: [24, 20],
@@ -565,7 +565,7 @@ export function frame(t, ctx) {
     }
   } else {
     // SET 3: Paris akşam balkonu — arkada sıcak batan güneş, önde Dr. Cotard + Matmazel
-    mz.show(); mz.place(299.58, 0, -.25, cam, tint);
+    mz.show(); mz.place(299.64, 0, -.25, cam, tint);
     mz.draw({
       expr: t > PS(10) ? 'neutral' : 'worried',
       look: .15, lookY: -.1, lid: .22,
@@ -573,7 +573,7 @@ export function frame(t, ctx) {
       armL: [18, 14], armR: [18, 14],
       lit: -1, shade: '#cfc4ec', rim: { color: '#ffb070', a: .55 },
     });
-    ct.show(); ct.place(300.46, 0, -.32, cam, tint);
+    ct.show(); ct.place(300.38, 0, -.32, cam, tint);
     ct.draw({
       expr: 'focused', look: -.55,
       blink: bl(6, PS(9)),

@@ -76,7 +76,7 @@
   "opts": [
    [
     "A",
-    "Sadece trafik cezası"
+    "Hapis cezası aldı"
    ],
    [
     "B",
@@ -84,15 +84,15 @@
    ],
    [
     "C",
-    "Hapis cezası aldı"
+    "Sadece trafik cezası"
    ]
   ],
   "sonuc": "SONUÇ: 2 YIL 2 AY 20 GÜN HAPİS",
-  "dogru": "Doğru şık: C",
+  "dogru": "Doğru şık: A",
   "ders1": "Telefon, kazada <b style=\"color:#ffb15c\">hapis cezasını ağırlaştırabilir.</b>",
   "ders2": "📵 Telefonu bırak,<br><b style=\"color:#34c759\">yola bak.</b>",
-  "camKaza": "const u=sm(t/T12.kaza);P=new THREE.Vector3(lerp(-20,-13,u),lerp(26,10,u),lerp(-5,8,u));L=new THREE.Vector3(-3.5,0,30);f=46;",
-  "camRest": "const bz=Math.min(st.MB.position.z,24);P=new THREE.Vector3(-12,8,bz-14);L=new THREE.Vector3(-3.5,1,bz+10);f=46;",
+  "camKaza": "const u=sm(t/T12.kaza);P=new THREE.Vector3(lerp(-20,-15,u),lerp(26,13,u),lerp(-5,-2,u));L=new THREE.Vector3(-3.5,0,30);f=46;",
+  "camRest": "const bz=Math.min(st.MB.position.z,24);P=new THREE.Vector3(-15,13,bz-22);L=new THREE.Vector3(-3.5,1,bz+12);f=46;",
   "camKarar": "P=new THREE.Vector3(-11,7,12);L=new THREE.Vector3(-3.5,1,30);",
   "exp": 1.3,
   "black": "İKİ YOLCU<br><span style=\"color:#ff453a\">AĞIR YARALI</span>",
@@ -143,21 +143,21 @@
    ],
    [
     "B",
-    "Karşı araç sürücüsü"
+    "Işıktan sorumlu idare"
    ],
    [
     "C",
-    "Işıktan sorumlu idare"
+    "Karşı araç sürücüsü"
    ]
   ],
   "sonuc": "SONUÇ: 15.380 TL İDARE ÖDEYECEK",
-  "dogru": "Doğru şık: C",
+  "dogru": "Doğru şık: B",
   "ders1": "Arızalı ışık <b style=\"color:#ffb15c\">kader değil.</b>",
   "ders2": "🚦 Arıza varsa,<br><b style=\"color:#34c759\">zararı idare öder.</b>",
-  "camKaza": "const u=sm(t/T13.kaza);P=new THREE.Vector3(lerp(-24,-17,u),lerp(26,15,u),lerp(-22,-13,u));L=new THREE.Vector3(-2,0,0);f=46;",
+  "camKaza": "const u=sm(t/T13.kaza);P=new THREE.Vector3(lerp(-19,-17,u),lerp(17,15,u),lerp(-17,-13,u));L=new THREE.Vector3(-2,0,0);f=46;",
   "camRest": "P=new THREE.Vector3(-17,15,-13);L=new THREE.Vector3(-2,0,0);f=46;",
   "camKarar": "P=new THREE.Vector3(-13,11,-9);L=new THREE.Vector3(-1,0,2);",
-  "exp": 1.0,
+  "exp": 1.2,
   "black": "OTOMOBİL<br><span style=\"color:#ff453a\">HASAR GÖRDÜ</span>",
   "tagsK": "tg+=tag3(st.B,1.9,'YEŞİL YANAN SÜRÜCÜ','#34c759','#111');tg+=tag3(st.A,1.9,'DİĞER YOLDAN GELEN','#ffd60a','#111')",
   "tagsS": "tg+=tag3(st.A,1.9,'IŞIK ÇALIŞIYOR MU?','#ffd60a','#111')",

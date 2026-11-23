@@ -17,6 +17,7 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 12. Trafik ışığı arızalıysa kimse kusurlu değildir — KK_MIT_12
 13. Kask takmayan motorcu da tam tazminat alır — KK_MIT_13
 14. Ehliyetsiz birine aracını verirsen sorumlu olmazsın — KK_MIT_14
+15. Kavşağa önce giren geçer — KK2D_KAVSAK (Format 1: 2D çizgi film, TR/EN/ES; Yargıtay 12. CD düzelterek onama; DUR'da durmayan asli, yavaşlamayan motosikletli tali kusurlu)
 
 ## Bekleyen (öncelik sırası)
 1. Kazadan sonra kaçmak sadece trafik cezasıdır — olay yerini terk, ceza artırımı / ehliyet — ERTELENDİ (KK_MIT_15, ses kotası)
@@ -28,7 +29,6 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 7. Ambulansa yol verirken kırmızıda geçen cezalandırılır — geçiş üstünlüğü olan araç, kusur
 8. Kış lastiği yoksa sadece para cezası yersin — yazlık lastikle karlı yolda kaza, kusur
 9. Ölümlü kazada sürücü mutlaka hapse girer — ölümlü kazada beraat / HAGB / erteleme
-10. Kavşağa önce giren geçer — geçiş hakkı, sağdan gelen, kusur
 11. Emniyet şeridinde duran araca çarpan her zaman tam kusurludur — emniyet şeridinde ışıksız duran araç, kusur dağılımı
 12. Çocuk kucakta önde güvendedir — çocuk yolcu, müterafik kusur, tazminat indirimi
 13. Kazayı polis tutmadıysa sigorta ödemez — anlaşmalı tutanak, sigorta ödemesi

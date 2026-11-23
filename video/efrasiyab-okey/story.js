@@ -1,14 +1,14 @@
-// Efrâsiyâb'ın Hikâyeleri: Ölüm'le Okey Masasına Oturan Kabadayı — yumurta kafa stili.
+// Efrâsiyâb'ın Hikâyeleri: Ölüm'le Okey Masasına Oturan Kabadayı — yumurta kafa stili (AÇIK TEMA, yumuşak göz almayan ışık).
 // Zamanlama KELİMEYE DEĞİL PARÇAYA bağlı: P(k, f) = k. seslendirme parçasının f oranındaki an.
 // Setler (x ekseninde ayrı; sert kesme yok, süzülme + whip pan):
-//   kahve (x=0)   1970'ler dumanlı kahvehane, yeşil çuhalı okey masası, sıcak sarkıt lamba + soğuk gece penceresi
-//   kapi  (x=200) yağmurlu akşam kahvehane girişi (soğuk gece mavisi + camdan sızan sıcak kehribar)
-//   masa  (x=300) yakın masa: takım elbise hayali, taş vuruşu, soğuk fısıltı, savrulan taşlar
+//   kahve (x=0)   Aydınlık 1970'ler gündüz kahvehanesi, krem sıva, bal rengi ahşap, yeşil çuhalı okey masası, mavi göklü pencere
+//   kapi  (x=200) Aydınlık taş sokak, pastel taş cephe, yeşil tente, ahşap kahvehane kapısı (göz almayan mat cam)
+//   masa  (x=300) Aydınlık yakın masa: takım elbise hayali, taş vuruşu, P08'de serin bulutlu gölgeye geçiş, savrulan taşlar
 import * as THREE from 'three';
 import { painted, flat, rng, woodTex, D } from '/engine/src/paint.js';
 import { Toon, PLUM, flap, blinkAt } from '/engine/src/toon.js';
 import { CamPath, smoother } from '/engine/src/camera.js';
-import { Smoke, beam, glow } from '/engine/src/fx.js';
+import { Smoke, beam } from '/engine/src/fx.js';
 import { vistaMat } from '/engine/src/vista.js';
 
 export const NAME = 'efrasiyab-okey';
@@ -25,7 +25,7 @@ export const LOOK = {
     bodyW: 224, height: 1.78
   },
   azrail: {
-    headW: 256, headH: 248, shade: '#c2bede',
+    headW: 256, headH: 248, shade: '#c8c6e0',
     body: 'robe', cloth: '#202634', clothDark: '#10141e',
     trim: '#5b6a84', collar: false,
     hat: 'kulah', hatColor: '#161a24',
@@ -59,7 +59,7 @@ const P = (k, f = 0) => {
 };
 const PS = k => P(k, 0), PE = k => P(k, 1);
 
-// ---------------------------------------------------------------- boyalı dokular
+// ---------------------------------------------------------------- boyalı dokular (açık, göz yormayan mat palet)
 function cnv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
 function tx(c, rep = [1, 1]) {
   const t = new THREE.CanvasTexture(c);
@@ -68,10 +68,10 @@ function tx(c, rep = [1, 1]) {
   return t;
 }
 const sh = (hex, k) => { const c = new THREE.Color(hex); c.multiplyScalar(k); return '#' + c.getHexString(); };
-function dab(g, w, h, base, n, r, amt, seed, a0 = .22) {
+function dab(g, w, h, base, n, r, amt, seed, a0 = .18) {
   const R = rng(seed);
   for (let i = 0; i < n; i++) {
-    g.fillStyle = sh(base, 1 + (R() - .5) * amt); g.globalAlpha = a0 + R() * .25;
+    g.fillStyle = sh(base, 1 + (R() - .5) * amt); g.globalAlpha = a0 + R() * .2;
     g.beginPath(); g.ellipse(R() * w, R() * h, r * (.4 + R()), r * (.25 + R() * .4), R() * 3.14, 0, 6.29); g.fill();
   }
   g.globalAlpha = 1;
@@ -79,31 +79,31 @@ function dab(g, w, h, base, n, r, amt, seed, a0 = .22) {
 
 function feltTex() {
   const [c, g] = cnv(512, 512);
-  g.fillStyle = '#1f6a4a'; g.fillRect(0, 0, 512, 512);
-  dab(g, 512, 512, '#1f6a4a', 700, 14, .24, 31, .2);
-  g.strokeStyle = '#c8a052'; g.lineWidth = 6; g.globalAlpha = .5;
+  g.fillStyle = '#267854'; g.fillRect(0, 0, 512, 512);
+  dab(g, 512, 512, '#267854', 700, 14, .20, 31, .18);
+  g.strokeStyle = '#d4b064'; g.lineWidth = 6; g.globalAlpha = .55;
   g.strokeRect(22, 22, 468, 468);
   g.globalAlpha = 1;
   return tx(c, [1, 1]);
 }
 
-function plasterTex(base = '#9d98a8', seed = 41) {
+function plasterTex(base = '#cfc5b4', seed = 41) {
   const [c, g] = cnv(512, 512);
   g.fillStyle = base; g.fillRect(0, 0, 512, 512);
-  dab(g, 512, 512, base, 520, 26, .22, seed, .22);
+  dab(g, 512, 512, base, 480, 28, .14, seed, .18);
   return tx(c, [2, 1]);
 }
 
 function cobbleTex() {
   const [c, g] = cnv(512, 512);
-  g.fillStyle = '#384664'; g.fillRect(0, 0, 512, 512);
+  g.fillStyle = '#7e8fa8'; g.fillRect(0, 0, 512, 512);
   const R = rng(53);
   for (let y = 0; y < 512; y += 32) {
     const off = (y / 32) % 2 ? 18 : 0;
     for (let x = -16; x < 528; x += 48) {
-      g.fillStyle = sh('#45587c', .85 + R() * .32);
+      g.fillStyle = sh('#93a2b8', .88 + R() * .24);
       g.beginPath(); g.roundRect(x + off + 3, y + 3, 42, 26, 6); g.fill();
-      g.strokeStyle = '#1e273a'; g.lineWidth = 2.5; g.stroke();
+      g.strokeStyle = '#5a687c'; g.lineWidth = 2.5; g.stroke();
     }
   }
   return tx(c, [6, 6]);
@@ -111,7 +111,7 @@ function cobbleTex() {
 
 function tileFaceTex(num, color) {
   const [c, g] = cnv(128, 160);
-  g.fillStyle = '#f2e8d0'; g.fillRect(0, 0, 128, 160);
+  g.fillStyle = '#e8dec6'; g.fillRect(0, 0, 128, 160);
   g.strokeStyle = '#2a1a2c'; g.lineWidth = 10; g.strokeRect(5, 5, 118, 150);
   g.fillStyle = color; g.font = '900 72px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText(num, 64, 68);
@@ -119,35 +119,51 @@ function tileFaceTex(num, color) {
   return tx(c);
 }
 
-function nightCityTex() {
+// aydınlık gündüz gökyüzü ve uzak İstanbul silueti (yumuşak pastel mavi — göz almayan)
+function dayCityTex() {
   const w = 2048, h = 1024, [c, g] = cnv(w, h);
-  const sky = g.createLinearGradient(0, 0, 0, h * .72);
-  sky.addColorStop(0, D('#162344')); sky.addColorStop(.55, D('#2a406e')); sky.addColorStop(1, D('#4b628c'));
+  const sky = g.createLinearGradient(0, 0, 0, h * .70);
+  sky.addColorStop(0, D('#669ed4')); sky.addColorStop(.55, D('#99c4e6')); sky.addColorStop(1, D('#cfe2f0'));
   g.fillStyle = sky; g.fillRect(0, 0, w, h);
-  const mx = w * .62, my = h * .24;
-  const mg = g.createRadialGradient(mx, my, 12, mx, my, 130);
-  mg.addColorStop(0, 'rgba(220,235,255,.9)'); mg.addColorStop(.35, 'rgba(160,195,245,.32)'); mg.addColorStop(1, 'rgba(120,160,220,0)');
-  g.fillStyle = mg; g.beginPath(); g.arc(mx, my, 130, 0, 6.29); g.fill();
-  g.fillStyle = '#e8f2ff'; g.beginPath(); g.arc(mx, my, 24, 0, 6.29); g.fill();
-  const y0 = h * .64, R = rng(77);
-  g.fillStyle = D('#151e34'); g.beginPath(); g.moveTo(0, h); g.lineTo(0, y0);
+  // yumuşak pastel bulutlar
+  const R = rng(77);
+  for (let i = 0; i < 12; i++) {
+    g.fillStyle = D('#e6eff7', .55);
+    g.beginPath(); g.ellipse(R() * w, h * (.14 + R() * .28), 90 + R() * 140, 22 + R() * 18, 0, 0, 6.29); g.fill();
+  }
+  // uzak deniz şeridi
+  const y0 = h * .64;
+  g.fillStyle = D('#5488bc'); g.fillRect(0, y0, w, h - y0);
+  // uzak mavi-gri siluet + genel kubbe & minare
+  g.fillStyle = D('#6078a0'); g.beginPath(); g.moveTo(0, h); g.lineTo(0, y0);
   for (let x = 0; x <= w; x += 36) {
-    const bh = 24 + R() * 74;
+    const bh = 22 + R() * 64;
     g.lineTo(x, y0 - bh); g.lineTo(x + 30, y0 - bh);
   }
   g.lineTo(w, h); g.closePath(); g.fill();
   for (const [cx, rad] of [[w * .34, 48], [w * .74, 38]]) {
-    g.fillStyle = D('#121a2e');
+    g.fillStyle = D('#526a92');
     g.beginPath(); g.arc(cx, y0 - rad * 1.1, rad, Math.PI, 0); g.lineTo(cx + rad, y0); g.lineTo(cx - rad, y0); g.closePath(); g.fill();
     for (const s of [-1, 1]) {
       g.fillRect(cx + s * rad * 1.35 - 5, y0 - rad * 2.4, 10, rad * 2.4);
       g.beginPath(); g.moveTo(cx + s * rad * 1.35 - 6, y0 - rad * 2.4); g.lineTo(cx + s * rad * 1.35, y0 - rad * 2.9); g.lineTo(cx + s * rad * 1.35 + 6, y0 - rad * 2.4); g.fill();
     }
   }
-  for (let i = 0; i < 65; i++) {
-    g.fillStyle = D('#ffca78', .5 + R() * .4);
-    g.fillRect(R() * w, y0 - 8 - R() * 52, 8, 11);
-  }
+  return tx(c);
+}
+
+// kahvehane kapısı ve vitrin camı (mat, sıcak-loş iç mekan yansıması — parlak beyaz kutu YOK!)
+function doorGlassTex() {
+  const [c, g] = cnv(256, 384);
+  const gr = g.createLinearGradient(0, 0, 0, 384);
+  gr.addColorStop(0, '#c8ae82'); gr.addColorStop(1, '#987c56');
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 384);
+  // yumuşak cam yansıması ve ahşap çıtalar
+  g.fillStyle = 'rgba(235,244,252,0.22)';
+  g.beginPath(); g.moveTo(20, 0); g.lineTo(110, 0); g.lineTo(35, 384); g.lineTo(0, 384); g.closePath(); g.fill();
+  g.strokeStyle = '#4e321e'; g.lineWidth = 14;
+  g.strokeRect(7, 7, 242, 370);
+  g.beginPath(); g.moveTo(128, 0); g.lineTo(128, 384); g.moveTo(0, 192); g.lineTo(256, 192); g.stroke();
   return tx(c);
 }
 
@@ -170,21 +186,21 @@ function sun(color, intensity, dir, target, { size = 2048, ext = 7, far = 40 } =
 // ---------------------------------------------------------------- ortak 3B mobilya & aksesuar
 function buildTeaGlass(x, y, z) {
   const grp = new THREE.Group(); grp.position.set(x, y, z);
-  const saucer = new THREE.Mesh(new THREE.CylinderGeometry(.065, .05, .012, 16), flat('#ebe3d2'));
+  const saucer = new THREE.Mesh(new THREE.CylinderGeometry(.065, .05, .012, 16), flat('#dfd6c4'));
   saucer.position.y = .006; grp.add(saucer);
   const rim = new THREE.Mesh(new THREE.TorusGeometry(.055, .005, 8, 18), flat('#b6322a'));
   rim.rotation.x = Math.PI / 2; rim.position.y = .013; grp.add(rim);
   const glass = new THREE.Mesh(new THREE.CylinderGeometry(.032, .026, .085, 14), flat('#9a2a18'));
   glass.position.y = .052; grp.add(glass);
-  const topGlass = new THREE.Mesh(new THREE.CylinderGeometry(.036, .031, .024, 14), flat('#e8e4da'));
+  const topGlass = new THREE.Mesh(new THREE.CylinderGeometry(.036, .031, .024, 14), flat('#dcd8ce'));
   topGlass.position.y = .098; grp.add(topGlass);
   return grp;
 }
 
 function buildOkeyTable(parent, tx0, tz0, { storeDyn = false } = {}) {
   const grp = new THREE.Group(); grp.position.set(tx0, 0, tz0); parent.add(grp);
-  const wood = painted(woodTex({ base: '#6e4228', plank: 36, rep: [2, 2] }));
-  const darkWood = painted(woodTex({ base: '#4a2a18', plank: 36, rep: [1, 1] }));
+  const wood = painted(woodTex({ base: '#8a5634', plank: 36, rep: [2, 2] }));
+  const darkWood = painted(woodTex({ base: '#643c22', plank: 36, rep: [1, 1] }));
   const frame = new THREE.Mesh(new THREE.BoxGeometry(1.58, .08, 1.12), wood);
   frame.position.y = .72; grp.add(frame);
   const felt = new THREE.Mesh(new THREE.BoxGeometry(1.42, .02, .96), painted(feltTex()));
@@ -194,15 +210,15 @@ function buildOkeyTable(parent, tx0, tz0, { storeDyn = false } = {}) {
     leg.position.set(sx, .35, sz); grp.add(leg);
   }
   const rackGeo = new THREE.BoxGeometry(.54, .065, .065);
-  const rackMat = painted(woodTex({ base: '#8c5a34', plank: 24 }));
+  const rackMat = painted(woodTex({ base: '#a67042', plank: 24 }));
   const rLeft = new THREE.Mesh(rackGeo, rackMat); rLeft.position.set(-.44, .81, .16); rLeft.rotation.y = .45; grp.add(rLeft);
   const rRight = new THREE.Mesh(rackGeo, rackMat); rRight.position.set(.44, .81, .16); rRight.rotation.y = -.45; grp.add(rRight);
   const rBack = new THREE.Mesh(rackGeo, rackMat); rBack.position.set(0, .81, -.30); grp.add(rBack);
 
   const nums = [['11', '#c42b24'], ['12', '#1c538c'], ['13', '#1d181e'], ['7', '#c88018'], ['★', '#c42b24']];
   const tileMats = nums.map(([n, col]) => [
-    flat('#d8ccb0'), flat('#d8ccb0'), flat('#e6dcc2'), flat('#c4b698'),
-    new THREE.MeshBasicMaterial({ map: tileFaceTex(n, col) }), flat('#dfd4ba')
+    flat('#d4c8ae'), flat('#d4c8ae'), flat('#e0d6be'), flat('#beb092'),
+    new THREE.MeshBasicMaterial({ map: tileFaceTex(n, col) }), flat('#d8cdb4')
   ]);
   const tileGeo = new THREE.BoxGeometry(.056, .078, .02);
   const scatter = [];
@@ -215,15 +231,15 @@ function buildOkeyTable(parent, tx0, tz0, { storeDyn = false } = {}) {
     scatter.push({ m: tR, base: tR.position.clone(), rot: tR.rotation.clone(), idx: i + 6 });
   }
   for (let s = 0; s < 4; s++) {
-    const st = new THREE.Mesh(new THREE.BoxGeometry(.065, .022, .085), flat('#efe5cc'));
+    const st = new THREE.Mesh(new THREE.BoxGeometry(.065, .022, .085), flat('#e6dcc4'));
     st.position.set(-.18, .79 + s * .023, -.04); grp.add(st);
   }
   grp.add(buildTeaGlass(-.56, .778, -.28));
   grp.add(buildTeaGlass(.56, .778, -.26));
 
   const winTile = new THREE.Mesh(new THREE.BoxGeometry(.095, .03, .125), [
-    flat('#d8ccb0'), flat('#d8ccb0'), new THREE.MeshBasicMaterial({ map: tileFaceTex('★', '#c82420') }),
-    flat('#c4b698'), flat('#d8ccb0'), flat('#d8ccb0')
+    flat('#d4c8ae'), flat('#d4c8ae'), new THREE.MeshBasicMaterial({ map: tileFaceTex('★', '#c82420') }),
+    flat('#beb092'), flat('#d4c8ae'), flat('#d4c8ae')
   ]);
   winTile.position.set(.04, .795, -.02);
   winTile.visible = false;
@@ -237,113 +253,123 @@ function buildOkeyTable(parent, tx0, tz0, { storeDyn = false } = {}) {
   return grp;
 }
 
-// ---------------------------------------------------------------- SET 1: KAHVEHANE (x = 0)
+// ---------------------------------------------------------------- SET 1: AYDINLIK KAHVEHANE (x = 0)
 function buildKahve(scene) {
   const g = new THREE.Group(); scene.add(g);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), painted(woodTex({ base: '#5e3c28', plank: 42, rep: [4, 4] })));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), painted(woodTex({ base: '#9e7048', plank: 42, rep: [4, 4] })));
   floor.rotation.x = -Math.PI / 2; g.add(floor);
-  const wallMat = painted(plasterTex('#8d94aa', 41));
-  const lambriMat = painted(woodTex({ base: '#503220', plank: 34, rep: [4, 1] }));
+  const wallMat = painted(plasterTex('#cfc5b4', 41));
+  const lambriMat = painted(woodTex({ base: '#7d5234', plank: 34, rep: [4, 1] }));
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.2), wallMat); backWall.position.set(0, 2.6, -3.5); g.add(backWall);
   const lambri = new THREE.Mesh(new THREE.BoxGeometry(12, 1.25, .08), lambriMat); lambri.position.set(0, .625, -3.44); g.add(lambri);
   const sideL = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.2), wallMat); sideL.rotation.y = Math.PI / 2; sideL.position.set(-4.2, 2.6, 0); g.add(sideL);
   const sideR = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.2), wallMat); sideR.rotation.y = -Math.PI / 2; sideR.position.set(4.2, 2.6, 0); g.add(sideR);
 
-  const winPane = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.85), new THREE.MeshBasicMaterial({ map: nightCityTex() }));
+  // gündüz penceresi: yumuşak mavi gök ve uzak İstanbul manzarası
+  const winPane = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.85), new THREE.MeshBasicMaterial({ map: dayCityTex() }));
   winPane.position.set(0, 2.15, -3.42); winPane.userData.noShadow = true; g.add(winPane);
-  const frameMat = flat('#3a2418');
+  const frameMat = flat('#5c3b24');
   for (const [fx, fy, fw, fh] of [[0, 3.09, 2.78, .1], [0, 1.21, 2.78, .12], [-1.34, 2.15, .1, 1.98], [1.34, 2.15, .1, 1.98], [0, 2.15, .07, 1.85], [0, 2.15, 2.6, .07]]) {
     const b = new THREE.Mesh(new THREE.BoxGeometry(fw, fh, .1), frameMat); b.position.set(fx, fy, -3.37); g.add(b);
   }
   const clk = new THREE.Group(); clk.position.set(-2.25, 2.25, -3.35); g.add(clk);
-  clk.add(new THREE.Mesh(new THREE.BoxGeometry(.44, .78, .12), flat('#442616')));
-  const dial = new THREE.Mesh(new THREE.CircleGeometry(.16, 20), flat('#ece0c2')); dial.position.set(0, .14, .068); clk.add(dial);
+  clk.add(new THREE.Mesh(new THREE.BoxGeometry(.44, .78, .12), flat('#623c24')));
+  const dial = new THREE.Mesh(new THREE.CircleGeometry(.16, 20), flat('#e6dac0')); dial.position.set(0, .14, .068); clk.add(dial);
   const pend = new THREE.Group(); pend.position.set(0, -.04, .07); clk.add(pend);
   const rod = new THREE.Mesh(new THREE.BoxGeometry(.02, .26, .02), flat('#d9a84a')); rod.position.y = -.13; pend.add(rod);
   const bob = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .02, 14), flat('#e5b856')); bob.rotation.x = Math.PI / 2; bob.position.y = -.26; pend.add(bob);
   dyn.pendulum = pend;
 
-  const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.1, .08, .42), flat('#4c2c1a')); shelf.position.set(2.25, 1.52, -3.22); g.add(shelf);
-  const semBody = new THREE.Mesh(new THREE.CylinderGeometry(.16, .18, .44, 16), flat('#c68038')); semBody.position.set(2.25, 1.78, -3.2); g.add(semBody);
+  const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.1, .08, .42), flat('#6a4026')); shelf.position.set(2.25, 1.52, -3.22); g.add(shelf);
+  const semBody = new THREE.Mesh(new THREE.CylinderGeometry(.16, .18, .44, 16), flat('#c8823a')); semBody.position.set(2.25, 1.78, -3.2); g.add(semBody);
   const semTop = new THREE.Mesh(new THREE.SphereGeometry(.12, 14, 10), flat('#dc9648')); semTop.position.set(2.25, 2.08, -3.2); g.add(semTop);
 
   buildOkeyTable(g, 0, -.55);
   for (const [sx, sz] of [[-1.15, -.45], [1.15, -.45], [0, -1.45]]) {
-    const st = new THREE.Mesh(new THREE.CylinderGeometry(.22, .24, .46, 12), flat('#4e2e1a'));
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(.22, .24, .46, 12), flat('#6e4428'));
     st.position.set(sx, .23, sz); g.add(st);
   }
 
+  // klasik yeşil emaye kahvehane lambası (mat yumuşak ampul — göz alan HDR parlama YOK!)
   const lamp = new THREE.Group(); lamp.position.set(0, 2.55, -.55); g.add(lamp);
-  const cord = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, 1.8, 8), flat('#1e1820')); cord.position.y = .9; lamp.add(cord);
-  const shade = new THREE.Mesh(new THREE.ConeGeometry(.34, .24, 20, 1, true), flat('#22503e')); shade.material.side = THREE.DoubleSide; lamp.add(shade);
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(.075, 14, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(2.4, 1.8, 1.0) }));
+  const cord = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, 1.8, 8), flat('#2e262e')); cord.position.y = .9; lamp.add(cord);
+  const shade = new THREE.Mesh(new THREE.ConeGeometry(.34, .24, 20, 1, true), flat('#2b684e')); shade.material.side = THREE.DoubleSide; lamp.add(shade);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(.068, 14, 10), flat('#eed8a4'));
   bulb.position.y = -.09; bulb.userData.noShadow = true; lamp.add(bulb);
-  dyn.lampHalo = glow(scene, [0, 2.45, -.55], { size: 1.5, color: '#ffcb74', alpha: .38 });
-  dyn.lampBeam = beam(scene, [0, 2.42, -.55], [0, .75, -.55], { r0: .26, r1: 1.45, color: '#ffd48a', strength: .15 });
+  dyn.lampBeam = beam(scene, [0, 2.42, -.55], [0, .85, -.55], { r0: .22, r1: 1.25, color: '#ffe6b8', strength: .05 });
 
+  // açık gündüz ışığı: yumuşak gökyüzü dolgusu + göz yormayan ılık öğleden sonra güneşi
   const L = new THREE.Group();
-  L.add(new THREE.HemisphereLight('#7a9ad6', '#2e2438', 1.35));
-  const keyDir = [.28, -.78, -.55]; dyn.kSun = V(...keyDir).normalize();
-  const s = sun('#ffcf82', 3.2, keyDir, [0, .8, -.55], { ext: 6 }); L.add(s); L.add(s.target);
-  const pt = new THREE.PointLight('#ffbe62', 4.5, 9, 1.6); pt.position.set(0, 2.32, -.45); L.add(pt);
-  const coolFill = new THREE.DirectionalLight('#6c96e0', 1.15); coolFill.position.set(0, 2.4, -5.5); coolFill.target.position.set(0, 1, 0); L.add(coolFill); L.add(coolFill.target);
+  L.add(new THREE.HemisphereLight('#c4def5', '#927c68', 1.75));
+  const keyDir = [.34, -.72, -.58]; dyn.kSun = V(...keyDir).normalize();
+  const s = sun('#ffe0b0', 2.05, keyDir, [0, .8, -.55], { ext: 6 }); L.add(s); L.add(s.target);
+  const coolFill = new THREE.DirectionalLight('#9ec4eb', .65); coolFill.position.set(0, 2.4, -5.5); coolFill.target.position.set(0, 1, 0); L.add(coolFill); L.add(coolFill.target);
   scene.add(L); sets.kahve = { g, L }; shadows(g);
 }
 
-// ---------------------------------------------------------------- SET 2: YAĞMURLU KAPI (x = 200)
+// ---------------------------------------------------------------- SET 2: AYDINLIK KAHVEHANE KAPISI (x = 200)
 function buildKapi(scene) {
   const g = new THREE.Group(); g.position.x = 200; scene.add(g);
   const street = new THREE.Mesh(new THREE.PlaneGeometry(24, 24), painted(cobbleTex()));
   street.rotation.x = -Math.PI / 2; g.add(street);
-  const facade = new THREE.Mesh(new THREE.BoxGeometry(10, 4.8, .4), painted(plasterTex('#566382', 62)));
+  // pastel taş/sıva dış cephe + yeşil kahvehane tentesi
+  const facade = new THREE.Mesh(new THREE.BoxGeometry(10, 4.8, .4), painted(plasterTex('#c8bea8', 62)));
   facade.position.set(0, 2.4, -2.2); g.add(facade);
-  const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(1.36, 2.35, .14), flat('#3d2316')); doorFrame.position.set(0, 1.18, -1.96); g.add(doorFrame);
-  const doorGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.12, 1.45), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1.9, 1.35, .7) }));
-  doorGlow.position.set(0, 1.5, -1.88); doorGlow.userData.noShadow = true; g.add(doorGlow);
-  const winGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.35), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1.75, 1.22, .62) }));
-  winGlow.position.set(-2.35, 1.62, -1.96); winGlow.userData.noShadow = true; g.add(winGlow);
-  const far = new THREE.Mesh(new THREE.CylinderGeometry(42, 42, 36, 40, 1, true), vistaMat(nightCityTex(), { yaw: Math.PI, az: Math.PI * 2, el: [-15 * Math.PI / 180, 35 * Math.PI / 180], gain: .9 }));
+  const awning = new THREE.Mesh(new THREE.BoxGeometry(4.8, .12, .75), flat('#2e6c52'));
+  awning.position.set(-1.1, 2.62, -1.68); awning.rotation.x = .28; g.add(awning);
+  // ahşap kapı ve mat-sıcak cam (parlayan beyaz kutu YOK!)
+  const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(1.36, 2.35, .14), flat('#583722')); doorFrame.position.set(0, 1.18, -1.96); g.add(doorFrame);
+  const glassMat = painted(doorGlassTex());
+  const doorGlass = new THREE.Mesh(new THREE.PlaneGeometry(1.12, 1.48), glassMat);
+  doorGlass.position.set(0, 1.50, -1.87); g.add(doorGlass);
+  const winGlass = new THREE.Mesh(new THREE.PlaneGeometry(2.05, 1.32), glassMat);
+  winGlass.position.set(-2.35, 1.60, -1.95); g.add(winGlass);
+  const winRim = new THREE.Mesh(new THREE.BoxGeometry(2.22, 1.46, .08), flat('#583722'));
+  winRim.position.set(-2.35, 1.60, -2.01); g.add(winRim);
+
+  // açık mavi gündüz göğü panoraması
+  const far = new THREE.Mesh(new THREE.CylinderGeometry(42, 42, 36, 40, 1, true), vistaMat(dayCityTex(), { yaw: Math.PI, az: Math.PI * 2, el: [-15 * Math.PI / 180, 35 * Math.PI / 180], gain: .95 }));
   far.material.side = THREE.BackSide; far.position.set(0, 5, 0); g.add(far);
 
+  // yumuşak gündüz dış ışığı (sıfır aşırı parlama)
   const L = new THREE.Group();
-  L.add(new THREE.HemisphereLight('#5c82c8', '#1f263c', 1.4));
-  const moonDir = [-.45, -.68, -.58]; dyn.dSun = V(...moonDir).normalize();
-  const s = sun('#9cc0ff', 2.4, moonDir, [200, .9, 0], { ext: 7 }); L.add(s); L.add(s.target);
-  const warmDoor = new THREE.PointLight('#ffba5a', 6.5, 10, 1.5); warmDoor.position.set(200, 1.8, -1.35); L.add(warmDoor);
+  L.add(new THREE.HemisphereLight('#b8d8f6', '#8a8278', 1.75));
+  const dayDir = [-.42, -.68, -.60]; dyn.dSun = V(...dayDir).normalize();
+  const s = sun('#ffdfb2', 2.15, dayDir, [200, .9, 0], { ext: 7 }); L.add(s); L.add(s.target);
   scene.add(L); sets.kapi = { g, L }; shadows(g);
 }
 
-// ---------------------------------------------------------------- SET 3: YAKIN MASA & HAYAL/FISILTI (x = 300)
+// ---------------------------------------------------------------- SET 3: AYDINLIK YAKIN MASA (x = 300)
 function buildMasa(scene) {
   const g = new THREE.Group(); g.position.x = 300; scene.add(g);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), painted(woodTex({ base: '#4c3222', plank: 42, rep: [3, 3] })));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), painted(woodTex({ base: '#9e7048', plank: 42, rep: [3, 3] })));
   floor.rotation.x = -Math.PI / 2; g.add(floor);
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), painted(plasterTex('#6d7894', 88)));
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), painted(plasterTex('#cbc1b0', 88)));
   wall.position.set(0, 2.5, -2.9); g.add(wall);
-  const lambri = new THREE.Mesh(new THREE.BoxGeometry(10, 1.25, .08), painted(woodTex({ base: '#4c2e1c', plank: 34, rep: [4, 1] })));
+  const lambri = new THREE.Mesh(new THREE.BoxGeometry(10, 1.25, .08), painted(woodTex({ base: '#7d5234', plank: 34, rep: [4, 1] })));
   lambri.position.set(0, .625, -2.84); g.add(lambri);
   buildOkeyTable(g, 0, -.55, { storeDyn: true });
 
-  // Kan kardesinin hayal ettigi sik takim elbise (Kan Kardesi'nin sag-ustunde, Azrail'in yuzunu kapatmaz)
+  // Kan kardeşinin hayal ettiği şık takım elbise (Kan Kardeşi'nin sağ-üstünde)
   const suit = new THREE.Group(); suit.position.set(.56, 2.02, -.52); suit.visible = false; g.add(suit);
-  const bubble = new THREE.Mesh(new THREE.CircleGeometry(.34, 24), new THREE.MeshBasicMaterial({ color: '#f4ecd8', transparent: true, opacity: .88 }));
+  const bubble = new THREE.Mesh(new THREE.CircleGeometry(.34, 24), new THREE.MeshBasicMaterial({ color: '#ebe2ce', transparent: true, opacity: .92 }));
   bubble.position.set(0, 0, -.09); bubble.userData.noShadow = true; suit.add(bubble);
   const jacket = new THREE.Mesh(new THREE.BoxGeometry(.26, .34, .08), flat('#284674')); suit.add(jacket);
   for (const sx of [-.17, .17]) {
     const slv = new THREE.Mesh(new THREE.BoxGeometry(.085, .30, .07), flat('#233d66'));
     slv.position.set(sx, -.01, 0); slv.rotation.z = sx < 0 ? .18 : -.18; suit.add(slv);
   }
-  const shirt = new THREE.Mesh(new THREE.BoxGeometry(.09, .26, .09), flat('#f7f2e8')); shirt.position.y = .04; suit.add(shirt);
+  const shirt = new THREE.Mesh(new THREE.BoxGeometry(.09, .26, .09), flat('#f0ebe0')); shirt.position.y = .04; suit.add(shirt);
   const tie = new THREE.Mesh(new THREE.BoxGeometry(.035, .21, .10), flat('#c6302a')); tie.position.y = .02; suit.add(tie);
-  const hanger = new THREE.Mesh(new THREE.TorusGeometry(.045, .01, 8, 16, Math.PI), flat('#e6b84c')); hanger.position.y = .19; suit.add(hanger);
+  const hanger = new THREE.Mesh(new THREE.TorusGeometry(.045, .01, 8, 16, Math.PI), flat('#d8aa42')); hanger.position.y = .19; suit.add(hanger);
   dyn.suit = suit;
 
+  // açık gündüz ışığı; P08 fısıltıda serin bulutlu mavi-gri gölgeye kayar (kararmadan dramatik)
   const L = new THREE.Group();
-  const hemi = new THREE.HemisphereLight('#7898d8', '#2c2238', 1.4); L.add(hemi);
-  const kDir = [.25, -.78, -.58]; dyn.mSun = V(...kDir).normalize();
-  const key = sun('#ffd084', 3.2, kDir, [300, .9, -.55], { ext: 5 }); L.add(key); L.add(key.target);
-  const pt = new THREE.PointLight('#ffbe62', 4.2, 8, 1.6); pt.position.set(300, 2.25, -.35); L.add(pt);
-  dyn.mHemi = hemi; dyn.mKey = key; dyn.mPt = pt;
+  const hemi = new THREE.HemisphereLight('#c4def5', '#927c68', 1.75); L.add(hemi);
+  const kDir = [.28, -.74, -.60]; dyn.mSun = V(...kDir).normalize();
+  const key = sun('#ffe0b0', 2.05, kDir, [300, .9, -.55], { ext: 5 }); L.add(key); L.add(key.target);
+  dyn.mHemi = hemi; dyn.mKey = key;
   scene.add(L); sets.masa = { g, L }; shadows(g);
 }
 
@@ -369,7 +395,7 @@ function cameraPath() {
     { t: PE(8),       dur: Math.max(.4, PE(8) - PS(8) - .2), pos: [300.32, 1.42, 2.55], look: [300.28, 1.34, -.68], fov: 45, creep: .24 },
     { t: PS(9) + .15, dur: .32, pos: [300.0, 1.46, 3.05], look: [300.0, 1.26, -.65], fov: 50, creep: .28 },
     { t: PE(9),       dur: Math.max(.4, PE(9) - PS(9) - .18), pos: [300.0, 1.52, 3.35], look: [300.0, 1.22, -.65], fov: 50, creep: .22 },
-    { t: PS(10) + .12, dur: .30, move: 'whip', pos: [0, 1.55, 2.85], look: [0, 1.12, -.65], fov: 48, creep: .24 },
+    { t: PS(10) + .12, dur: .30, move: 'whip', pos: [0, 1.55, 2.95], look: [0, 1.15, -.65], fov: 48, creep: .24 },
     { t: P(10, .46),   dur: .30, move: 'whip', pos: [200.0, 1.35, 2.85], look: [200.0, 1.32, -1.0], fov: 46, creep: .22 },
     { t: DUR,          dur: Math.max(.5, DUR - P(10, .46) - .05), pos: [200.0, 1.45, 4.35], look: [200.0, 1.35, -1.5], fov: 50, creep: .18 },
   ];
@@ -389,7 +415,7 @@ export async function setup(ctx) {
   const lastEnd = ctx.words.length ? ctx.words[ctx.words.length - 1].end : 38;
   DUR = Math.ceil((lastEnd + 1.6) * FPS) / FPS;
   const { scene } = ctx;
-  scene.background = new THREE.Color('#1d2740');
+  scene.background = new THREE.Color('#a6c9e6');
 
   buildKahve(scene);
   buildKapi(scene);
@@ -397,23 +423,25 @@ export async function setup(ctx) {
 
   for (const n of Object.keys(LOOK)) cast[n] = new Toon(LOOK[n], scene);
 
-  fx.smoke = new Smoke(scene, { color: '#c4bac8', maxPoints: 340, H: ctx.H });
+  // hafif çay buharı / kahvehane dumanı (ince ve saydam)
+  fx.smoke = new Smoke(scene, { color: '#dcd6ce', maxPoints: 200, H: ctx.H });
   fx.smoke.wisps.push({
-    n: 65, size: .28, alpha: .14, speed: .08,
+    n: 45, size: .22, alpha: .10, speed: .07,
     on: t => where(t) !== 'kapi',
     path: (u, t, i) => {
       const baseX = where(t) === 'masa' ? 300 : 0;
-      const ox = ((i % 5) - 2) * .42;
-      return [baseX + ox + Math.sin(u * 5 + t * .8 + i) * .18, 1.05 + u * 1.8, -1.25 + Math.cos(u * 4 + t * .6 + i) * .20];
+      const ox = ((i % 4) - 1.5) * .42;
+      return [baseX + ox + Math.sin(u * 4 + t * .7 + i) * .14, 1.0 + u * 1.6, -1.25 + Math.cos(u * 3 + t * .5 + i) * .16];
     }
   });
-  fx.rain = new Smoke(scene, { color: '#b4d0f2', maxPoints: 320, H: ctx.H, additive: true, near: 1.4 });
+  // dışarıda hafif serin yağmur çizgisi / esinti tozları
+  fx.rain = new Smoke(scene, { color: '#9abce0', maxPoints: 160, H: ctx.H, near: 1.5 });
   const hash = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
   fx.rain.wisps.push({
-    n: 200, size: .018, alpha: .42, speed: .85,
+    n: 90, size: .014, alpha: .26, speed: .65,
     on: t => where(t) === 'kapi',
     path: (u, t, i) => [
-      200 + (hash(i, 1) - .5) * 6.5 - u * .35,
+      200 + (hash(i, 1) - .5) * 6.5 - u * .25,
       3.8 - u * 4.0,
       (hash(i, 3) - .5) * 5.0
     ]
@@ -453,7 +481,7 @@ function where(t) {
 }
 function camSet(cam) { return cam.position.x > 250 ? 'masa' : cam.position.x > 100 ? 'kapi' : 'kahve'; }
 
-const WARM = '#ffc474', COOL = '#cfd8f0', ICY = '#9ec6f5';
+const WARM = '#f2c88e', COOL = '#cfd6ec', ICY = '#a8c2e6';
 
 export function frame(t, ctx) {
   const { cam } = ctx, cp = dyn.cam;
@@ -462,7 +490,6 @@ export function frame(t, ctx) {
   for (const s of ['kahve', 'kapi', 'masa']) vis(s, s === here);
   for (const c of Object.values(cast)) c.hide();
 
-  dyn.lampHalo.visible = here === 'kahve';
   dyn.lampBeam.visible = here === 'kahve';
   dyn.lampBeam.material.uniforms.uT.value = t;
   dyn.pendulum.rotation.z = Math.sin(t * 3.1) * .24;
@@ -470,7 +497,8 @@ export function frame(t, ctx) {
   const env = ctx.env, talk = (a, b) => (t >= a && t <= b ? flap(env, t) : 0);
   const bl = (seed, ...sw) => blinkAt(t, seed, sw);
   const ab = cast.abdurrahman, az = cast.azrail, kk = cast.kankardes, kv = cast.kahveci;
-  const tint = here === 'kapi' ? [.98, .99, 1.02] : [1.0, .99, .98];
+  // Kafa beyazını göz yormayan mat kağıt tonunda tut (asla patlayan beyaz değil!)
+  const tint = here === 'kapi' ? [.91, .91, .92] : [.92, .91, .89];
 
   if (here === 'kapi') {
     const isOutro = t > PS(9);
@@ -484,7 +512,7 @@ export function frame(t, ctx) {
       bob: -Math.abs(Math.sin(t * 6.5)) * 8,
       armL: [14 + Math.sin(t * 6.5) * 8, 8],
       armR: [14 - Math.sin(t * 6.5) * 8, 8],
-      lit: -1, shade: '#c4cce8', rim: { color: '#ffbe68', a: .5 }
+      lit: -1, shade: '#c4cce4', rim: { color: '#f0cc96', a: .22 }
     });
     az.castFrom(dyn.dSun, true);
   } else if (here === 'kahve') {
@@ -501,7 +529,7 @@ export function frame(t, ctx) {
         armR: racon ? [105 + Math.sin(t * 8) * 14, 30] : lie ? [75, 45] : [36, 20],
         armL: [24, 16],
         bob: racon ? -Math.abs(Math.sin(t * 5)) * 5 : 0,
-        lit: -1, shade: COOL, rim: { color: WARM, a: .42 }
+        lit: -1, shade: COOL, rim: { color: WARM, a: .22 }
       });
       ab.castFrom(dyn.kSun, true);
 
@@ -509,7 +537,7 @@ export function frame(t, ctx) {
       az.draw({
         expr: 'neutral', look: -.45, blink: bl(3, PS(3)),
         armL: [16, 10], armR: [16, 10],
-        lit: 1, shade: '#bfc4e4', rim: { color: WARM, a: .32 }
+        lit: 1, shade: '#c2c8e2', rim: { color: WARM, a: .18 }
       });
       az.castFrom(dyn.kSun, true);
 
@@ -521,7 +549,7 @@ export function frame(t, ctx) {
           look: -.65, blink: bl(4, PS(4) + .5),
           armL: [28, 22], armR: [24, 18],
           bob: arr < 1 ? -Math.abs(Math.sin(t * 10)) * 9 : 0,
-          lit: 1, shade: COOL, rim: { color: WARM, a: .38 }
+          lit: 1, shade: COOL, rim: { color: WARM, a: .2 }
         });
         kk.castFrom(dyn.kSun, true);
       }
@@ -531,7 +559,7 @@ export function frame(t, ctx) {
         kv.draw({
           expr: 'surprised', look: -.65, sweat: 1, blink: bl(5, P(1, .8)),
           armL: [115, 25], armR: [115, 25],
-          lit: 1, shade: COOL, rim: { color: WARM, a: .35 }
+          lit: 1, shade: COOL, rim: { color: WARM, a: .2 }
         });
         kv.castFrom(dyn.kSun, true);
       }
@@ -540,7 +568,7 @@ export function frame(t, ctx) {
       az.draw({
         expr: 'smug', look: .15, blink: bl(6, PS(10) + .2),
         armL: [18, 10], armR: [18, 10],
-        lit: 1, shade: '#bfc4e4', rim: { color: WARM, a: .35 }
+        lit: 1, shade: '#c2c8e2', rim: { color: WARM, a: .18 }
       });
       az.castFrom(dyn.kSun, true);
     }
@@ -549,9 +577,10 @@ export function frame(t, ctx) {
     const slam = ramp(t, P(7, .42), P(7, .64));
     const chaos = ramp(t, P(9, .22), P(9, .78));
 
-    dyn.mKey.color.set('#ffd084').lerp(new THREE.Color('#7ca8f0'), chill);
-    dyn.mPt.color.set('#ffbe62').lerp(new THREE.Color('#5a8ee8'), chill);
-    dyn.mPt.intensity = 4.2 + (t >= P(9, .24) && t <= P(9, .42) ? 4.0 : 0) - chill * 1.4;
+    // P08 fısıltısında güneşli ılık açıktan serin bulutlu mavi-gri tona yumuşak geçiş
+    dyn.mKey.color.set('#ffe0b0').lerp(new THREE.Color('#8ab0de'), chill);
+    dyn.mHemi.color.set('#c4def5').lerp(new THREE.Color('#84a6d8'), chill);
+    dyn.mHemi.groundColor.set('#927c68').lerp(new THREE.Color('#5a6684'), chill);
 
     const suitOn = t >= PS(5) && t < PS(6) + .15;
     dyn.suit.visible = suitOn;
@@ -591,7 +620,7 @@ export function frame(t, ctx) {
       armR: t >= PS(9) ? [125, 25] : [30, 20],
       armL: t >= PS(9) ? [95, 30] : [20, 16],
       lean: t >= PS(9) ? 8 : 0,
-      lit: -1, shade: chill > .3 ? ICY : COOL, rim: { color: chill > .3 ? '#7ab8ff' : WARM, a: .42 }
+      lit: -1, shade: chill > .3 ? ICY : COOL, rim: { color: chill > .3 ? '#88b4e8' : WARM, a: .2 }
     });
     ab.castFrom(dyn.mSun, true);
 
@@ -610,7 +639,7 @@ export function frame(t, ctx) {
       armR: t >= PS(9) ? [95, 30] : [28, 22],
       bob: laugh5 ? -Math.abs(Math.sin(t * 14)) * 12 : shock8 ? Math.sin(t * 48) * 3 : 0,
       lean: t >= PS(9) ? -8 : 0,
-      lit: 1, shade: chill > .3 ? ICY : COOL, rim: { color: chill > .3 ? '#7ab8ff' : WARM, a: .42 }
+      lit: 1, shade: chill > .3 ? ICY : COOL, rim: { color: chill > .3 ? '#88b4e8' : WARM, a: .2 }
     });
     kk.castFrom(dyn.mSun, true);
 
@@ -624,27 +653,28 @@ export function frame(t, ctx) {
       armR: t >= P(7, .35) && t < PS(8) ? [112 * slam, 28] : [18, 12],
       armL: [18, 12],
       lean: leanW * 10,
-      lit: 1, shade: '#b8c4ea', rim: { color: chill > .3 ? '#8cc8ff' : WARM, a: .4 }
+      lit: 1, shade: '#c0c8e4', rim: { color: chill > .3 ? '#8ab6e8' : WARM, a: .18 }
     });
     az.castFrom(dyn.mSun, true);
   }
 
   for (const s of [fx.smoke, fx.rain]) s.update(t);
 
+  // Göz almayan, yumuşak açık tema renk düzeltmesi (bloom düşük: 0.18!)
   const focusOn = (p, coc, range) => ({ focus: cam.position.distanceTo(p), coc, range });
   let look;
   if (here === 'kapi') {
-    look = { ...focusOn(V(200.0, 1.2, -.5), 4, 4.5), sat: 1.18, lift: [.07, .085, .13], bloom: .85, vignette: .22 };
-    C.scene.fog = new THREE.FogExp2('#1d2c4a', .045);
+    look = { ...focusOn(V(200.0, 1.2, -.5), 3.5, 4.5), sat: 1.12, lift: [.05, .055, .07], bloom: .16, vignette: .11 };
+    C.scene.fog = new THREE.FogExp2('#b6d0e4', .016);
   } else if (here === 'kahve') {
-    look = { ...focusOn(V(0, 1.1, -.65), 4, 4.5), sat: 1.16, lift: [.08, .08, .11], bloom: .78, vignette: .22 };
-    C.scene.fog = new THREE.FogExp2('#242738', .022);
+    look = { ...focusOn(V(0, 1.1, -.65), 3.5, 4.5), sat: 1.12, lift: [.05, .05, .06], bloom: .18, vignette: .12 };
+    C.scene.fog = new THREE.FogExp2('#c8c2b6', .010);
   } else {
     const chill = ramp(t, PS(8) - .1, PS(8) + .55) * (1 - ramp(t, PS(9), PS(9) + .35));
-    look = { ...focusOn(V(300.0, 1.15, -.65), 4.5, 3.8), sat: 1.18, lift: [.075 - chill * .02, .085, .12 + chill * .04], bloom: .8, vignette: .24 };
-    C.scene.fog = new THREE.FogExp2(chill > .35 ? '#1b2b4a' : '#242738', .025);
+    look = { ...focusOn(V(300.0, 1.15, -.65), 4.0, 3.8), sat: 1.12, lift: [.05 - chill * .01, .055, .065 + chill * .03], bloom: .18, vignette: .14 };
+    C.scene.fog = new THREE.FogExp2(chill > .35 ? '#8ca8cc' : '#c6bfb2', .014);
   }
-  look.tint = here === 'kapi' ? [.95, .98, 1.04] : [.99, .99, 1.01];
+  look.tint = [.96, .96, .97];
   look.blur = st.moving > .15 ? 16 : 0;
   return look;
 }

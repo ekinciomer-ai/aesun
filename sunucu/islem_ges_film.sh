@@ -13,7 +13,7 @@ if [ ! -d $O/.git ]; then git clone -q $REPO $O && git -C $O checkout -q $SABIT 
 echo "NOT: orijinal sürüm $(git -C $O rev-parse --short HEAD) (lisans: $(head -1 $O/LICENSE))"
 # iş kopyası: orijinal + bizim sahne dosyaları + CPU yaması
 rm -rf $IS.yeni && cp -a $O $IS.yeni && rm -rf $IS.yeni/.git
-cp -r "$SD/ges_film/src/ges" $IS.yeni/src/ && cp "$SD/ges_film/ges.html" $IS.yeni/ && cp "$SD/ges_film/tools/ges_ses.mjs" $IS.yeni/tools/
+cp -r "$SD/ges_film/src/ges" $IS.yeni/src/ && cp "$SD/ges_film/ges.html" $IS.yeni/ && cp "$SD/ges_film/tools/ges_ses.mjs" "$SD/ges_film/tools/ges_muzik.mjs" $IS.yeni/tools/
 (cd $IS.yeni && patch -s -p1 < "$SD/ges_film/tools/render_cpu.patch") || { echo "NOT: HATA yama uygulanamadı"; exit 1; }
 mkdir -p $IS.yeni/assets/polyfork
 for m in mobile-crane-671d3f tracked-excavator-8ebd3c pickup-truck-a34bf2 construction-worker-c1ad8c groundworker-083f5c crane-banksman-3994e0 cargo-container-fd73bc cargo-forklift-91f591 tall-pine-tree-ab4108 oak-tree-50ee7c articulated-dump-truck-ee50f3 commander-s-tent-c8b8b5; do
@@ -40,7 +40,7 @@ set -e
 cd /w
 npm install --ignore-scripts --no-audit --no-fund -q
 export CHROME_PATH=\$(node -e "console.log(require('puppeteer').executablePath())" 2>/dev/null || ls /home/pptruser/.cache/puppeteer/chrome/*/chrome-linux64/chrome | head -1)
-node tools/ges_ses.mjs --out out/ges_ses.wav
+node tools/ges_muzik.mjs && node tools/ges_ses.mjs --out out/ges_ses.wav
 node tools/render.mjs --page ges.html --fps 30 --from 0 --to 15 $R --dir out/kareler
 if [ "$MOD" = "taslak" ]; then
   ffmpeg -v error -y -framerate 30 -i out/kareler/f_%06d.png -i out/ges_ses.wav -vf "scale=1080:1920:flags=lanczos,unsharp=5:5:0.4,format=yuv420p" -c:v libx264 -preset slow -crf 24 -c:a aac -b:a 192k -shortest -movflags +faststart out/ges_film_taslak.mp4

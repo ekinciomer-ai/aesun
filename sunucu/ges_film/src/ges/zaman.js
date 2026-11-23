@@ -2,11 +2,13 @@
 import * as THREE from 'three';
 
 export const Z = {
-  kazikBas: 2.1, kazikSon: 4.9,      // kazıklar sırayla çakılır
-  konsBas: 5.0, konsSon: 7.9,        // konstrüksiyon yükselir
-  panelBas: 8.0, panelSon: 11.8,     // paneller dalga gibi oturur
-  gunBas: 11.4, gunSon: 14.2,        // güneş doğar
-  ledBas: 12.3, ledSon: 13.2,        // inverter ışıkları yanar
+  // müzik 150 BPM: vuruş 0.4 sn; tüm kesme ve aşamalar vuruş ızgarasında
+  kazikBas: 1.6, kazikSon: 6.4,      // çakma makineleri kazıkları çakar (her kazık 1 vuruş)
+  konsBas: 6.4, konsSon: 8.0,        // konstrüksiyon yükselir
+  panelBas: 8.0, panelSon: 11.2,     // paneller dalga gibi oturur (müzikte ana bölüm)
+  gunBas: 11.2, gunSon: 14.0,        // güneş doğar
+  ledBas: 12.0, ledSon: 12.8,        // inverter ışıkları yanar
+  BPM: 150,
   SON: 15,
 };
 

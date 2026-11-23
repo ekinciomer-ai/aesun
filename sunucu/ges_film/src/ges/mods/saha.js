@@ -2,15 +2,9 @@
 // Tüm geometri kodla; hareket yalnız t'nin fonksiyonu (sabit tohum).
 import { Z, clamp01, ease, easeOut, easeOutBack } from '../zaman.js';
 import * as GR from './gercek.js';
+import { SAHA, ARKA_Y as ARKA_Y0, kazikPlani, kazikUst } from '../kazik_plan.js';
 
-export const SAHA = {
-  SIRA: 5, MASA: 4,            // 5 sıra × 4 masa
-  SIRA_ARA: 9.0, MASA_ARA: 16.0,
-  MASA_BOY: 13.6, AYAK_X: [0.5, 4.7, 8.9, 13.1],
-  EGIM: 25 * Math.PI / 180,
-  PANEL_EN: 1.13, PANEL_BOY: 2.28, PANEL_YAN: 12, PANEL_UST: 2,
-  ON_Z: 1.6, ARKA_Z: -1.6, ON_Y: 1.0,
-};
+export { SAHA };
 const S = SAHA;
 // dalga başlangıç noktası (kameraya yakın köşe)
 const KOSE = [-4, 44];
@@ -23,7 +17,7 @@ export async function create(ctx) {
   const G = ctx.STIL === 'gercek';
   const tan = Math.tan(S.EGIM);
   const tx = (w, h, draw, rep) => { const t = TEX.canvasTexture(w, h, draw, { repeat: true }); t.repeat.set(rep[0], rep[1]); return t; };
-  const ARKA_Y = S.ON_Y + (S.ON_Z - S.ARKA_Z) * tan;
+  const ARKA_Y = ARKA_Y0;
 
   // ---------- zemin ----------
   const zeminTex = tx(1024, 1024, (g, w, h) => {
@@ -104,15 +98,8 @@ export async function create(ctx) {
   const galv = G ? GR.galvaniz(ctx) : new THREE.MeshStandardMaterial({ color: 0xa9aeb2, metalness: 0.45, roughness: 0.45, envMapIntensity: 0.5 });
   const galvKoyu = G ? GR.galvaniz(ctx, true) : new THREE.MeshStandardMaterial({ color: 0x8a8f93, metalness: 0.45, roughness: 0.5, envMapIntensity: 0.5 });
 
-  // kazıklar: her ayakta ön ve arka
-  const kaziklar = [];
-  for (const m of masalar) for (const ax of S.AYAK_X) {
-    for (const on of [true, false]) {
-      const x = m.x0 + ax, z = m.z0 + (on ? S.ON_Z : S.ARKA_Z), top = on ? S.ON_Y : ARKA_Y;
-      const ts = Z.kazikBas + (Z.kazikSon - 0.55 - Z.kazikBas) * uzaklik(x, z) + rng() * 0.06;
-      kaziklar.push({ x, z, top, ts });
-    }
-  }
+  // kazıklar: çakma makinesi planından (her hat bir makine)
+  const kaziklar = kazikPlani().flatMap((h) => h.kaziklar);
   const kazikGeo = G ? GR.kazikGeo(THREE) : new THREE.BoxGeometry(0.15, 1, 0.12); if (!G) kazikGeo.translate(0, 0.5, 0);
   const kazikMesh = new THREE.InstancedMesh(kazikGeo, galv, kaziklar.length);
   kazikMesh.frustumCulled = false; kazikMesh.castShadow = true; kazikMesh.receiveShadow = true; scene.add(kazikMesh);
@@ -195,16 +182,11 @@ export async function create(ctx) {
   const gizli = new THREE.Matrix4().makeScale(0, 0, 0);
   return {
     update(t, fr) {
-      // kazıklar: 5 darbede çakılır
+      // kazıklar: makine mastında tutulur, 2 darbede çakılır
       kaziklar.forEach((p, i) => {
-        const k = (t - p.ts) / 0.55;
-        if (k < -0.25) { kazikMesh.setMatrixAt(i, gizli); return; }
-        let off;
-        if (k < 0) off = 2.4 + (-k) * 4;                     // yukarıdan gelir
-        else { const s = Math.min(5, k * 5), n = Math.floor(s), f = s - n; off = 2.4 * (1 - (n + easeOut(f * 1.6)) / 5); }
-        off = Math.max(0, off);
+        const off = kazikUst(p, t);
+        if (off === null) { kazikMesh.setMatrixAt(i, gizli); return; }
         o.position.set(p.x, 0, p.z); o.rotation.set(0, 0, 0); o.scale.set(1, p.top + off + 0.0001, 1);
-        // gömülü kısım görünmez; görünen boy = top + off, taban y=0
         o.updateMatrix(); kazikMesh.setMatrixAt(i, o.matrix);
       });
       kazikMesh.instanceMatrix.needsUpdate = true;
@@ -212,7 +194,7 @@ export async function create(ctx) {
       if (toz) {
         let n = 0;
         for (const p of kaziklar) {
-          const k = (t - p.ts) / 0.55;
+          const k = (t - p.ts) / 0.25;
           if (k < 0 || k > 2.6 || n >= toz.length) continue;
           for (let j = 0; j < 2 && n < toz.length; j++) {
             const s = toz[n++], a = k * 1.3 + j * 2.1;

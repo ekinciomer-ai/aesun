@@ -56,7 +56,7 @@ export async function create(ctx) {
   // damperli kamyon: ön servis yolunda batıdan doğuya
   {
     const { o } = await koy('articulated-dump-truck-ee50f3', 0, 46, -Math.PI / 2);
-    hareketli.push((t) => { o.position.x = 110 - 16 * t; o.position.z = 46.8; });
+    hareketli.push((t) => { o.position.x = 90 - 16 * t; o.position.z = 46.8; });
   }
   // pikap: batı yolunda kuzeyden güneye, sonra durur
   {
@@ -90,7 +90,7 @@ export async function create(ctx) {
   await isci('construction-worker-c1ad8c', 'Walk', yuru([2, 40.5], [30, 40.5], 1.35, 0), 0);
   await isci('construction-worker-c1ad8c', 'Walk', yuru([60, 31.8], [20, 31.8], 1.3, 3), 0.4);
   await isci('groundworker-083f5c', 'Walk', yuru([10, 22.8], [44, 22.8], 1.25, 1), 0.2);
-  await isci('groundworker-083f5c', 'Idle', null, 0.7).then((o) => { o.position.set(-1.8, 0, 38.6); o.rotation.y = Math.PI * 0.6; });
+  await isci('groundworker-083f5c', 'Idle', null, 0.7).then((o) => { o.position.set(5.8, 0, 41.6); o.rotation.y = Math.PI * 1.15; });
   await isci('construction-worker-c1ad8c', 'Idle', null, 0.3).then((o) => { o.position.set(22.5, 0, 40.2); o.rotation.y = Math.PI; });
   await isci('crane-banksman-3994e0', 'Idle', null, 0.5).then((o) => { o.position.set(68, 0, 33); o.rotation.y = -Math.PI / 2; });
 

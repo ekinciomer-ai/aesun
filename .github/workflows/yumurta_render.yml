@@ -51,7 +51,7 @@ jobs:
           STILLS_T: ${{ inputs.stills_t }}
         run: |
           set -e
-          (command -v ffmpeg >/dev/null && python3 -c 'import numpy' 2>/dev/null) || (sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg python3-numpy >/dev/null)
+          if [ "$MOD" != "faces" ]; then (command -v ffmpeg >/dev/null && python3 -c "import numpy" 2>/dev/null) || (sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg python3-numpy >/dev/null); fi
           git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git /tmp/yumurta
           cd /tmp/yumurta/engine
           npm ci --no-audit --no-fund >/dev/null
@@ -59,11 +59,18 @@ jobs:
           patch -p0 < "$GITHUB_WORKSPACE/video/pumpkin2/motor/faces_full.patch"
           mkdir -p "/tmp/yumurta/stories/$PROJE"
           cp -r "$GITHUB_WORKSPACE/video/$PROJE/." "/tmp/yumurta/stories/$PROJE/"
+          CHROME_PATH=$(which google-chrome chromium chromium-browser 2>/dev/null | head -1)
+          export CHROME_PATH
+          if [ "$MOD" = "faces" ]; then
+            node faces.mjs "$PROJE" --full
+            mkdir -p /tmp/hazir_out/audio
+            cp "/tmp/yumurta/stories/$PROJE/out/faces_full.png" /tmp/hazir_out/
+            echo '{"DUR": 10}' > /tmp/hazir_out/audio/cues.json
+            exit 0
+          fi
           python3 -I "$GITHUB_WORKSPACE/video/pumpkin2/motor/parcalar.py" \
             "$GITHUB_WORKSPACE/sunucu/tts_kuyruk/cikti" "$KOD" \
             "$GITHUB_WORKSPACE/video/$PROJE/metin_tr.json" "/tmp/yumurta/stories/$PROJE"
-          CHROME_PATH=$(which google-chrome chromium chromium-browser 2>/dev/null | head -1)
-          export CHROME_PATH
           node render.mjs "$PROJE" --cues
           python3 -I "/tmp/yumurta/stories/$PROJE/mix.py" "/tmp/yumurta/stories/$PROJE"
           # Ses seviye olcumu (LUFS & True Peak)
@@ -194,7 +201,7 @@ jobs:
           SCALE: ${{ inputs.scale }}
         run: |
           set -e
-          (command -v ffmpeg >/dev/null && python3 -c 'import numpy' 2>/dev/null) || (sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg python3-numpy >/dev/null)
+          if [ "$MOD" != "faces" ]; then (command -v ffmpeg >/dev/null && python3 -c "import numpy" 2>/dev/null) || (sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg python3-numpy >/dev/null); fi
           mkdir -p /tmp/final_out
           cd /tmp/parcalar
           ls parca_*.mp4 | sort | sed "s/^/file '/;s/$/'/" > liste.txt

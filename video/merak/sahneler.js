@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /* Kozmos Lab · Merak — sahne kütüphanesi. Her sahne: S.ad = () => ({sc, c, bl:[güç,yarıçap,eşik], exp, kur(o)})
    o: {t, u (blok 0-1), bt, dur, pi (bloktaki parça), pu (parça 0-1), pt, pd, p (parça ayarı), pp, pb, ev (parçadaki ekran olay zamanları)}
    Yeni sahne eklerken: kur() yalnız o'ya bakarak kareyi çizer (geri dönülebilir, kare kare kayıt). */
@@ -979,4 +977,3 @@ S.kablo=()=>{const sc=new THREE.Scene();const c=cam(46);studyo(sc);isik(sc,"#fff
     c.position.lerpVectors(A.p,B.p,k);c.quaternion.slerpQuaternions(A.q,B.q,k)}}};
 
 })();
->>>>>>> a8c515e67bcc14286ab5df6b5659128419313025

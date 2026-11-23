@@ -21,12 +21,12 @@ Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Do�
 - [x] KZ_MRK_10_TOZ — Panel tozlanınca üretim ne kadar düşer? — enerji
 - [x] KZ_MRK_15_JUPITER — Jüpiter'e Dünya'dan kaç tane sığar? — uzay
 - [x] KZ_MRK_12_TRAFO — Bir trafo neden uğuldar? (50 Hz → 100 Hz manyetostriksiyon) — enerji
-- [ ] Işık hızıyla gitsen en yakın yıldıza ne zaman varırsın? (Proxima, 4,24 ışık yılı) — uzay
+- [x] KZ_MRK_17_PROXIMA — Işık hızıyla gitsen en yakın yıldıza ne zaman varırsın? (Proxima, 4,24 ışık yılı) — uzay
 - [x] KZ_MRK_14_BARAJ — Bir barajın türbininden saniyede kaç ton su geçer? — enerji
 - [ ] Satürn suya konsa yüzer mi? (ortalama yoğunluk 0,69 g/cm³) — uzay
 - [x] KZ_MRK_16_KABLO — Kablo neden ısınır? Akımı 2 katına çıkarınca ısı kaç katına çıkar? (I²R) — enerji
 - [ ] Ay'da zıplasan ne kadar yükselirsin? (1/6 g) — uzay
-- [ ] Güneş paneli neden soğukta daha çok üretir? (sıcaklık katsayısı) — enerji
+- [x] KZ_MRK_18_SICAK — Güneş paneli neden soğukta daha çok üretir? (sıcaklık katsayısı) — enerji
 - [ ] Bir nötron yıldızının bir çay kaşığı kaç ton? — uzay
 - [ ] Bir bitcoin madencilik cihazı bir günde ne kadar elektrik yer? — enerji
 - [ ] Kara delikten kaçmak için ne kadar hızlı olmalısın? — uzay

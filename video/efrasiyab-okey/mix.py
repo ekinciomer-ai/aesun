@@ -6,8 +6,8 @@ import numpy as np
 
 SR = 48000
 story = Path(sys.argv[1])
-cues = json.loads((story / 'out' / 'cues.json').read_text(encoding='utf-8'))
-DUR = float(cues['dur'])
+cues = json.loads((story / 'audio' / 'cues.json').read_text(encoding='utf-8'))
+DUR = float(cues['DUR'])
 N = int(round(DUR * SR))
 rng = np.random.default_rng(1974)
 

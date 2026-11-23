@@ -51,7 +51,7 @@ jobs:
           STILLS_T: ${{ inputs.stills_t }}
         run: |
           set -e
-          if [ "$MOD" != "faces" ]; then (command -v ffmpeg >/dev/null && python3 -c "import numpy" 2>/dev/null) || (sudo python3 -m pip install --break-system-packages -q numpy >/dev/null); fi
+          if [ "$MOD" != "faces" ]; then command -v ffmpeg >/dev/null || (sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null); python3 -c "import numpy" 2>/dev/null || sudo python3 -m pip install --break-system-packages -q numpy >/dev/null; fi
           git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git /tmp/yumurta
           cd /tmp/yumurta/engine
           npm ci --no-audit --no-fund >/dev/null
@@ -158,7 +158,7 @@ jobs:
           IDX: ${{ matrix.p.i }}
         run: |
           set -e
-          command -v ffmpeg >/dev/null || (sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null)
+          command -v ffmpeg >/dev/null || (sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null)
           git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git /tmp/yumurta
           cd /tmp/yumurta/engine
           npm ci --no-audit --no-fund >/dev/null
@@ -201,7 +201,7 @@ jobs:
           SCALE: ${{ inputs.scale }}
         run: |
           set -e
-          if [ "$MOD" != "faces" ]; then (command -v ffmpeg >/dev/null && python3 -c "import numpy" 2>/dev/null) || (sudo python3 -m pip install --break-system-packages -q numpy >/dev/null); fi
+          if [ "$MOD" != "faces" ]; then command -v ffmpeg >/dev/null || (sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null); python3 -c "import numpy" 2>/dev/null || sudo python3 -m pip install --break-system-packages -q numpy >/dev/null; fi
           mkdir -p /tmp/final_out
           cd /tmp/parcalar
           ls parca_*.mp4 | sort | sed "s/^/file '/;s/$/'/" > liste.txt

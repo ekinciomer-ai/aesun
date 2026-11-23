@@ -1,0 +1,11 @@
+{
+ "id": "yumurta-cotard-faces",
+ "durum": "basarisiz",
+ "klon": 0,
+ "kurulum": 1,
+ "duman": 1,
+ "sure_sn": 74,
+ "guvenlik_bulgusu": [],
+ "kurulum_sonu": "\nadded 86 packages in 2s\nerror: engine/toon.js: No such file or directory\n",
+ "duman_sonu": "PAGEERROR Failed to fetch dynamically imported module: http://127.0.0.1:42131/stories/cotard-sendromu/story.js\nfile:///tmp/arac/engine/node_modules/puppeteer-core/lib/esm/puppeteer/common/WaitTask.js:45\n            this.#timeoutError = new TimeoutError(`Waiting failed: ${options.timeout}ms exceeded`);\n                                 ^\n\nTimeoutError: Waiting failed: 60000ms exceeded\n    at new WaitTask (file:///tmp/arac/engine/node_modules/puppeteer-core/lib/esm/puppeteer/common/WaitTask.js:45:34)\n    at IsolatedWorld.waitForFunction (file:///tmp/arac/engine/node_modules/puppeteer-core/lib/esm/puppeteer/api/Realm.js:22:26)\n    at CdpFrame.waitForFunction (file:///tmp/arac/engine/node_modules/puppeteer-core/lib/esm/puppeteer/api/Frame.js:568:43)\n    at CdpFrame.<anonymous> (file:///tmp/arac/engine/node_modules/puppeteer-core/lib/esm/puppeteer/util/decorators.js:101:27)\n    at CdpPage.waitForFunction (file:///tmp/arac/engine/node_modules/puppeteer-core/lib/esm/puppeteer/api/Page.js:1430:37)\n    at file:///tmp/arac/engine/faces.mjs:18:12\n\nNode.js v22.23.5\n"
+}

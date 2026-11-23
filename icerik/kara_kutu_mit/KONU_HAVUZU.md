@@ -2,6 +2,11 @@
 
 Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yapıldı" bölümüne taşınır. Havuz 10'un altına düşerse yeni mitler eklenir (kalıp: insanların yanlış bildiği, merak ettiği, sonu kesin kararlı trafik olayları).
 
+## Üretim kuralı (Kasım 2026)
+- 1 konu = 1 video. Aynı konu birden fazla formatta üretilmez.
+- Format her konu için rastgele seçilir: F13 sinematik maket, F5 maket, KK2D çerçeveli maket, F9 eskiz.
+- Art arda iki konu aynı formatta olmaz. Seçim: `python3 video/kk2d_kavsak/format_sec.py` (son formatı `format_son.txt`'ye yazar).
+
 ## Yapıldı
 1. Arkadan çarpan her zaman %100 kusurludur (ani fren) — KK_MIT_01
 2. Yaya her zaman haklıdır — KK_MIT_02

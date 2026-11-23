@@ -23,7 +23,7 @@ jobs:
       - name: Prepare animation engine
         run: |
           git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git "$RUNNER_TEMP/yumurta-stili"
-          git -C "$RUNNER_TEMP/yumurta-stili" apply "$GITHUB_WORKSPACE/video/pumpkin2/motor/toon_pumpkin.patch"
+          git -C "$RUNNER_TEMP/yumurta-stili" apply -p0 --directory=engine "$GITHUB_WORKSPACE/video/pumpkin2/motor/toon_pumpkin.patch"
           story="$RUNNER_TEMP/yumurta-stili/stories/kayip-golge"
           mkdir -p "$story/voice"
           cp video/yumurta-kayip-golge/story.js "$story/"

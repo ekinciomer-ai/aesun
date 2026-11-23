@@ -1789,7 +1789,7 @@ function aylikMaliyetBolum(dg, DAG, DAG_TOP, DAG_BAS) {
     + '<div class="k">Fatura gelen ayda faturanın saatlik tüketimi ve PTF\'si kullanılır (kesin); gelmeyen ayda OSOS sayacı ve EPİAŞ ile aynı formül (tahmini): enerji = kWh × (PTF + YEKDEM) × 1,025 · dağıtım 1.182,457 TL/MWh · BTV enerjinin %1\'i (KDV hariç). Eylül 2026 öncesi tedarikçi MEDAŞ idi; o aylar aynı formülle hesaplanmış tahmindir (OSOS + EPİAŞ). Pay dağılımı 14.09.2026\'da başladı: gelir 16/29 · 13/29; maliyet 14.09.2026–13.09.2027 arası 8/29 · 21/29 (16 cihaza düşenin yarısı 13\'e yazılır), sonra 16/29 · 13/29. Ay bitince özet WhatsApp\'a da gider. ☀ Güneş: tüketimi güneş karşıladığında o enerji satılabilirdi; maliyeti güneşin karşıladığı tüketim (Pi\'nin ölçtüğü madencilik + yardımcı yük − sayaç çekişi; en çok Sera-2 üretimi kadar) × (elektrik üretim bedeli − sistem kullanım bedeli). Birimler fatura sisteminden (Sera2 satış faturası); dağıtım bedeli ve KDV eklenmez (üretim ve tüketim aynı noktada). Tüketim üretimi aşarsa aşan kısım şebeke formülüyle.</div></section>';
 }
 // ===== Madencilik > Cihazlar: cihaz kartları (F2Pool + son bilinen donanım + sahadaki canlı durum) ve elle uyut/çalıştır
-const KOMUT_URL = 'https://xbay.app.n8n.cloud/webhook/aesun-komut';
+const KOMUT_URL = 'https://api.aksarayenerji.net/v1/komut';   // 23.11.2026: n8n yerine kendi sunucumuz; yetki portal yönetici oturumundan
 let SON_DONANIM = null;
 async function sonDonanimYukle() {
   if (SON_DONANIM) return SON_DONANIM;
@@ -1802,17 +1802,17 @@ async function sonDonanimYukle() {
 const komutAnahtar = () => { try { return localStorage.getItem('aesun_komut_anahtar') || ''; } catch (e) { return ''; } };
 function komutAnahtarKaydet(v) { try { localStorage.setItem('aesun_komut_anahtar', v); } catch (e) {} }
 async function cihazKomut(action, targets, ad) {
-  const anahtar = komutAnahtar();
-  const durum = document.getElementById('komutDurum');
-  if (!anahtar) { durum.innerHTML = '<span style="color:#B42318">Önce komut anahtarını girin (Pi anahtarı).</span>'; return; }
+  const anahtar = await API_BEL;
+  const durum = document.getElementById('komutDurum') || { set innerHTML(v) { if (/B42318/.test(v)) alert(v.replace(/<[^>]+>/g, '')); } };
+  if (!anahtar || !(PORTAL || {}).ka) { durum.innerHTML = '<span style="color:#B42318">Cihaz komutu yalnız portal yöneticisi oturumuyla gönderilebilir.</span>'; return; }
   const ne = action === 'sleep' ? 'UYUT' : 'ÇALIŞTIR';
   if (!window.confirm(ad + ' → ' + ne + '\nKomut sahadaki cihazlara gönderilecek. Emin misiniz?')) return;
   durum.innerHTML = '<span class="k">Komut gönderiliyor…</span>';
   try {
-    const r = await fetch(KOMUT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Aesun-Anahtar': anahtar }, body: JSON.stringify({ action, targets, delay_sec: targets === 'all' ? 10 : 0, kim: 'panel' }) });
+    const r = await fetch(KOMUT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-AE-Anahtar': anahtar }, body: JSON.stringify({ action, targets, delay_sec: targets === 'all' ? 10 : 0, kim: 'panel' }) });
     const t = await r.text(); let j = null; try { j = JSON.parse(t); } catch (e) {}
     if (r.ok && j && j.ok) durum.innerHTML = '<span style="color:#1E7A3C">Komut kuyruğa alındı (' + esc(j.id) + '). Sahadaki toplayıcı ~15 sn içinde uygular; sonuç birkaç dakika içinde burada görünür.</span>';
-    else durum.innerHTML = '<span style="color:#B42318">Komut gönderilemedi: HTTP ' + r.status + (r.status === 403 || r.status === 401 ? ' (anahtar yanlış)' : r.status === 404 ? ' (n8n iş akışı yayında değil)' : '') + '</span>';
+    else durum.innerHTML = '<span style="color:#B42318">Komut gönderilemedi: HTTP ' + r.status + (r.status === 403 || r.status === 401 ? ' (yalnız yönetici)' : r.status === 429 ? ' (çok sık; birkaç saniye bekleyin)' : r.status === 502 ? ' (sunucu kuyruğa yazamadı)' : '') + '</span>';
   } catch (e) { durum.innerHTML = '<span style="color:#B42318">Komut gönderilemedi: ' + esc(e.message || e) + '</span>'; }
 }
 // ===== Cihaz hashrate grafiği: karta tıklayınca açılır (n8n/hash/YYYY-MM-DD.json, 5 dk dilim; Pi her 5 dk yazar) =====
@@ -2061,10 +2061,10 @@ async function cizCihazlar() {
     + (yanitsizIP.length ? '<p class="k" style="margin:0">Toplayıcı listesinde olup hiç yanıt vermeyen adresler: ' + yanitsizIP.map(esc).join(', ') + '</p>' : '')
     + ((AG && AG.web_adaylari || []).length ? '<p class="k" style="margin:0">Ağda web arayüzü olan tanınmayan adresler: ' + AG.web_adaylari.map(x => esc(x.ip)).join(', ') + '</p>' : '') + '</section>';
   h += '<section class="panel" style="gap:10px"><div class="bas"><h2>Elle komut</h2><span class="k">' + (agDisi || !(mad.devices || []).some(d => d.online || d.sleeping) ? 'Toplayıcı saha ağında değil: komut kuyruğa alınır ama cihazlara ancak toplayıcı sahadayken ulaşır' : 'Toplayıcı sahada, cihazlara ulaşılıyor') + '</span></div>'
-    + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><label class="k" style="display:flex;align-items:center;gap:6px">Komut anahtarı <input type="password" autocomplete="off" placeholder="Pi anahtarı" value="' + (komutAnahtar() ? '••••••••' : '') + '" onchange="if(this.value&&!/^•+$/.test(this.value)){komutAnahtarKaydet(this.value);this.value=\'••••••••\';document.getElementById(\'komutDurum\').textContent=\'Anahtar bu tarayıcıya kaydedildi.\'}" style="padding:6px 8px;border:1px solid #DDE1E6;border-radius:6px;width:160px"></label>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">'
     + '<button class="btn" type="button" onclick="cihazKomut(\'wake\',\'all\',\'TÜM CİHAZLAR\')">▶ Tümünü çalıştır</button><button class="btn" type="button" onclick="cihazKomut(\'sleep\',\'all\',\'TÜM CİHAZLAR\')">⏸ Tümünü uyut</button></div>'
     + '<div id="komutDurum" class="k" style="min-height:18px"></div>'
-    + '<div class="k">Komutlar n8n üzerinden <code>antminer_commands.json</code>\'a yazılır, sahadaki toplayıcı (altminer) uygular. Tümü komutunda cihazlar 10 sn arayla açılır/kapanır. Anahtar yalnız bu tarayıcıda saklanır.</div></section>';
+    + '<div class="k">Komutlar kendi sunucumuz üzerinden <code>antminer_commands.json</code>\'a yazılır, sahadaki toplayıcı (altminer) uygular. Tümü komutunda cihazlar 10 sn arayla açılır/kapanır. Yalnız portal yöneticisi gönderebilir.</div></section>';
   h += '<section class="panel" style="gap:12px"><div class="bas"><h2>Cihazlar</h2><span class="k">* son bilinen değer (' + (don.ts ? esc(don.ts) : '—') + '); canlı değerler toplayıcı sahadayken gelir</span></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">' + kartlar.join('') + '</div></section>';
   const sr = ((sonuc && sonuc.results) || []).slice().reverse().slice(0, 10);

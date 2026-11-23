@@ -1,4 +1,4 @@
-# Efrâsiyâb Okey — özgün kahvehane noir müzik (Re Hicaz / minör) + okey taşı / yağmur / darbe efektleri (telifsiz, kodla).
+# Efrâsiyâb Okey — sıfır hışırtılı, saf tınılı özgün müzik (Re Hicaz / minör) + saf ahşap/darbe efektleri (telifsiz, kodla).
 # Kullanım: python3 -I mix.py <hikaye_klasörü>
 import json, subprocess, sys
 from pathlib import Path
@@ -9,7 +9,6 @@ story = Path(sys.argv[1])
 cues = json.loads((story / 'audio' / 'cues.json').read_text(encoding='utf-8'))
 DUR = float(cues['DUR'])
 N = int(round(DUR * SR))
-rng = np.random.default_rng(1974)
 
 def load(p):
     raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(p), '-ac', '1', '-ar', str(SR), '-f', 'f32le', '-'], capture_output=True, check=True).stdout
@@ -20,10 +19,6 @@ def save(p, x):
     x = np.clip(x, -1, 1); st = np.stack([x, x], 1)
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'f32le', '-ar', str(SR), '-ac', '2', '-i', '-', str(p)], input=st.astype(np.float32).tobytes(), check=True)
 
-def band(x, lo, hi):
-    X = np.fft.rfft(x); f = np.fft.rfftfreq(len(x), 1 / SR)
-    return np.fft.irfft(X / (1 + (lo / np.maximum(f, 1)) ** 4) / (1 + (f / hi) ** 4), len(x))
-
 def env(n, a, d):
     t = np.arange(n) / SR
     return np.minimum(1, t / max(a, 1e-4)) * np.exp(-t / max(d, 1e-4))
@@ -32,33 +27,34 @@ def put(buf, t, x, g=1.0):
     i = int(t * SR); j = min(len(buf), i + len(x))
     if 0 <= i < len(buf) and j > i: buf[i:j] += x[:j - i] * g
 
-def noise(d): return rng.standard_normal(max(1, int(round(d * SR))))
 T = lambda d: np.arange(max(1, int(round(d * SR)))) / SR
 
+# ------------------------------------------------------------------ saf sinüs/armonik çalgılar (ZERO white noise, sıfır hışırtı!)
 def oud(f, d=1.1):
     t = T(d)
     x = (np.sin(2 * np.pi * f * t)
-         + .45 * np.sin(2 * np.pi * f * 2 * t) * np.exp(-t * 5)
-         + .22 * np.sin(2 * np.pi * f * 3 * t) * np.exp(-t * 9)
-         + .12 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t * 14))
-    return x * env(len(t), .003, d * .30)
+         + .38 * np.sin(2 * np.pi * f * 2 * t) * np.exp(-t * 6)
+         + .16 * np.sin(2 * np.pi * f * 3 * t) * np.exp(-t * 11))
+    return x * env(len(t), .004, d * .30)
 
 def bell(f, d=2.2):
     t = T(d)
-    return sum(a * np.sin(2 * np.pi * f * m * t) * np.exp(-t * k) for m, a, k in [(1, 1, 1.9), (2, .35, 3.2), (3.01, .16, 4.8)]) * env(len(t), .005, 9)
+    return sum(a * np.sin(2 * np.pi * f * m * t) * np.exp(-t * k) for m, a, k in [(1, 1, 2.0), (2, .28, 3.6), (3, .10, 5.5)]) * env(len(t), .006, 9)
 
 def pizz(f, d=.55):
-    t = T(d); x = np.sin(2 * np.pi * f * t) + .32 * np.sin(4 * np.pi * f * t)
-    return x * env(len(t), .003, .14)
+    t = T(d); x = np.sin(2 * np.pi * f * t) + .26 * np.sin(4 * np.pi * f * t)
+    return x * env(len(t), .004, .14)
 
-def rimtap():
-    return band(noise(.06), 1400, 5200) * env(int(.06 * SR), .002, .016)
+def wood_tap():
+    t = T(.055)
+    return (np.sin(2 * np.pi * 410 * t) * .65 + np.sin(2 * np.pi * 790 * t) * .35) * env(len(t), .002, .012)
 
-def pad(f, d, amp=.055):
+def pad(f, d, amp=.045):
     t = T(d)
-    x = sum(((t * f * k) % 1 * 2 - 1) for k in (1, 1.003, .997, 2.002))
-    x = band(x, 60, 900) * amp
-    return x * np.minimum(1, np.minimum(t / .8, (d - t) / .8))
+    x = (np.sin(2 * np.pi * f * t) * .65
+         + np.sin(2 * np.pi * f * 1.5 * t) * .25
+         + np.sin(2 * np.pi * f * 2.0 * t) * .10) * amp
+    return x * np.minimum(1, np.minimum(t / .9, (d - t) / .9))
 
 NOTE = {
     'D2': 73.42, 'A2': 110.0, 'Bb2': 116.54, 'G2': 98.0, 'C3': 130.81,
@@ -87,71 +83,85 @@ while t < DUR - .3:
     elif sec == 'B':
         n = B_mel[step]
         if n: put(music, t, oud(NOTE[n], .95), .25)
-        if i % 2 == 1: put(music, t, rimtap(), .14)
+        if i % 2 == 1: put(music, t, wood_tap(), .10)
     elif sec == 'C':
         n = C_mel[step]
         if n: put(music, t, oud(NOTE[n], 1.3), .26)
-        if i % 4 == 2: put(music, t, rimtap(), .11)
+        if i % 4 == 2: put(music, t, wood_tap(), .08)
     else:
         if i % 2 == 0: put(music, t, oud(NOTE[D_arp[(i // 2) % 6]], 1.8), .20)
     b = bass[sec][(i // 4) % 4] if i % 4 == 0 else None
     if b: put(music, t, pizz(NOTE[b], .7), .52)
     t += beat / 2; i += 1
 
-put(music, 0, pad(NOTE['D3'], tB + .3, .048))
-put(music, tB, pad(NOTE['A2'], max(.5, tC - tB + .3), .045))
-put(music, tC, pad(NOTE['D3'], max(.5, tD - tC + .3), .052))
-put(music, tD, pad(NOTE['D2'], max(.5, DUR - tD), .055))
-for f in ('D4', 'A4', 'D5'): put(music, max(0, DUR - 1.9), bell(NOTE[f], 1.9), .16)
+put(music, 0, pad(NOTE['D3'], tB + .3, .04))
+put(music, tB, pad(NOTE['A2'], max(.5, tC - tB + .3), .035))
+put(music, tC, pad(NOTE['D3'], max(.5, tD - tC + .3), .04))
+put(music, tD, pad(NOTE['D2'], max(.5, DUR - tD), .045))
+for f in ('D4', 'A4', 'D5'): put(music, max(0, DUR - 1.9), bell(NOTE[f], 1.9), .15)
 
+# ------------------------------------------------------------------ saf efektler (sıfır beyaz gürültü / sıfır hışırtı!)
 sfx = np.zeros(N)
 def okey_clack():
-    tt = T(.09)
-    return (np.sin(2 * np.pi * 1950 * tt) * .55 + np.sin(2 * np.pi * 3250 * tt) * .3 + band(noise(.09), 1500, 6500) * .35) * env(len(tt), .001, .018)
+    tt = T(.065)
+    return (np.sin(2 * np.pi * 1820 * tt) * .55
+            + np.sin(2 * np.pi * 2940 * tt) * .30
+            + np.sin(2 * np.pi * 760 * tt) * .25) * env(len(tt), .001, .013)
+
+def soft_whoosh():
+    tt = T(.26)
+    f = 160 + 170 * np.sin(np.pi * tt / .26)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    return np.sin(ph) * (np.sin(np.pi * tt / .26) ** 2) * .12
 
 for c in cues['cues']:
     t0, ty, d = c['t'], c['type'], c.get('dur', 1.0)
     if ty == 'whoosh':
-        x = noise(.40); tt = np.arange(len(x)) / SR
-        put(sfx, t0, band(x, 280, 3200) * np.sin(np.pi * tt / .40) ** 2, .34)
+        put(sfx, t0, soft_whoosh(), .6)
     elif ty == 'snap':
         put(sfx, t0, okey_clack(), .55)
         put(sfx, t0 + .055, okey_clack(), .30)
     elif ty == 'boom':
-        nb = int(.9 * SR); tt = np.arange(nb) / SR
-        put(sfx, t0, np.sin(2 * np.pi * (55 + 34 * np.exp(-tt * 9)) * tt) * env(nb, .003, .26) + band(noise(.9), 70, 420) * env(nb, .002, .11) * .45, .62)
+        nb = int(.75 * SR); tt = np.arange(nb) / SR
+        thump = np.sin(2 * np.pi * (48 + 34 * np.exp(-tt * 9)) * tt) * env(nb, .003, .22)
+        wood = np.sin(2 * np.pi * 145 * tt) * env(nb, .002, .05) * .35
+        put(sfx, t0, thump + wood, .75)
     elif ty == 'tremble':
         tt = T(d)
-        sh_w = band(noise(d), 400, 2600) * .12 + (np.sin(2 * np.pi * 220 * tt) + np.sin(2 * np.pi * 233.08 * tt)) * .08
-        put(sfx, t0, sh_w * np.minimum(1, np.minimum(tt / .25, (d - tt) / .25)), .42)
-    elif ty == 'rain':
-        x = band(noise(d), 700, 6200); tt = np.arange(len(x)) / SR
-        put(sfx, t0, x * np.minimum(1, np.minimum(tt / .3, (d - tt) / .3)), .055)
+        pulse = .6 + .4 * np.sin(2 * np.pi * 3.5 * tt)
+        sh_w = (np.sin(2 * np.pi * 146.83 * tt) + np.sin(2 * np.pi * 155.56 * tt)) * .12 * pulse
+        put(sfx, t0, sh_w * np.minimum(1, np.minimum(tt / .3, (d - tt) / .3)), .55)
     elif ty == 'steps':
-        for k in range(max(1, int(d * 2.2))):
-            put(sfx, t0 + k / 2.2, band(noise(.08), 80, 520) * env(int(.08 * SR), .002, .025), .38)
+        for k in range(max(1, int(d * 2.1))):
+            tt = T(.07)
+            step_thud = (np.sin(2 * np.pi * 92 * tt) * .7 + np.sin(2 * np.pi * 185 * tt) * .3) * env(len(tt), .002, .022)
+            put(sfx, t0 + k / 2.1, step_thud, .32)
     elif ty == 'shimmer':
         tt = T(2.0)
-        put(sfx, t0, sum(np.sin(2 * np.pi * f * tt) * env(len(tt), .01 + idx * .05, .85) for idx, f in enumerate([587.33, 880.0, 1174.66])) / 3, .16)
+        put(sfx, t0, sum(np.sin(2 * np.pi * f * tt) * env(len(tt), .01 + idx * .05, .85) for idx, f in enumerate([587.33, 880.0, 1174.66])) / 3, .18)
 
+# ------------------------------------------------------------------ miks: saf ses üstte, müzik -19 dB (konuşurken %50 kısık), sfx kontrollü (şişirilmez)
 voice = load(story / 'voice' / 'voice.wav'); voice = np.pad(voice, (0, max(0, N - len(voice))))[:N]
 win = int(.05 * SR); ve = np.sqrt(np.convolve(voice ** 2, np.ones(win) / win, mode='same'))
 active = np.convolve((ve > .02).astype(float), np.ones(int(.25 * SR)) / int(.25 * SR), mode='same')
-duck = 1 - .45 * np.clip(active, 0, 1)
+duck = 1 - .50 * np.clip(active, 0, 1)
 
 def rms(x):
     nz = x[np.abs(x) > 1e-5]
     return float(np.sqrt(np.mean(nz ** 2))) if len(nz) else 1.0
 
 vr = rms(voice)
-music *= (vr / rms(music)) * 10 ** (-17 / 20)
-sfx *= (vr / max(rms(sfx), 1e-6)) * 10 ** (-16 / 20)
+music *= (vr / rms(music)) * 10 ** (-19 / 20)
+# sfx'i seyrek RMS ile şişirmek yerine doğrudan ses seviyesine orantılı temiz kazançla uygula
+sfx_peak = float(np.max(np.abs(sfx))) if np.any(sfx) else 1.0
+sfx *= (vr * 0.55) / max(sfx_peak, 1e-6)
+
 mix = voice + music * duck + sfx
 fl = int(.4 * SR); mix[-fl:] *= np.linspace(1, 0, fl)
 
 out = story / 'audio'
 save(out / 'music.wav', music * duck)
 save(out / 'sfx.wav', sfx)
-save(out / 'premix.wav', mix / max(1e-6, np.abs(mix).max()) * .7)
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(out / 'premix.wav'), '-af', 'loudnorm=I=-14:TP=-2.8:LRA=11,aresample=48000', str(out / 'mix.wav')], check=True)
-print('OK mix.wav', round(DUR, 2), 's')
+save(out / 'premix.wav', mix / max(1e-6, np.abs(mix).max()) * .72)
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', str(out / 'premix.wav'), '-af', 'highpass=f=65,loudnorm=I=-14:TP=-2.8:LRA=11,aresample=48000', str(out / 'mix.wav')], check=True)
+print('OK CLEAN mix.wav (ZERO HISS)', round(DUR, 2), 's')

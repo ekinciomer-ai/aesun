@@ -22,6 +22,7 @@ def build(kod,vdir,out,mapf,clues,reasons,nextfrac=.45,extra={}):
   T["caps"]=mk_tl.caps_for([p['metin'] for p in P],S,D);T["_starts"]=S;T.update(extra)
   json.dump(T,open(out,'w'),ensure_ascii=False);return T
 mk_tl.build=build
+mk_tl.DISP.update({'Sekiz bin dokuz yüz kırk üç lira':'8.943 TL','Yedi yılda':'7 yılda','Yedi yılı':'7 yılı','Yedi yüz kırk dört':'744','yüz otuz altısını':"136'sını",'Yüz otuz altı':'136','On yedi':'17','Üç kadın':'3 kadın','dört yılı':'4 yılı','Beş yıl':'5 yıl'})
 mk_tl.DISP = {'yüzde yirmi dokuz': '%29', 'yüzde seksen': '%80', 'yüzde yirmi': '%20',
   'sekiz yüz kırk bin lirayı aşan': '840.314 TL', 'yüz bin lira': '100.000 TL', 'yaklaşık üç metreden': '~3 metreden', **mk_tl.DISP}
 E = json.load(open(sys.argv[1])); s = open('scene.html').read()

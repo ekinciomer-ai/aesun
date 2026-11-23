@@ -76,7 +76,8 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - **Tema: açık** (Ömer 17.11.2026): chionglab gibi kâğıt beyazı zemin, ince koyu kontur, düz renkler, bloom yok. `tema` alanı yoksa açık kabul edilir (`"koyu"` yalnız istenirse).
 - Ana nesne ekranın %20–55 bandında (üstte soru başlığı, %57'de hesap kartı, %73'te altyazı, alt %18 platform arayüzü).
 - Koyu temada: ACES + bloom; Güneş beyaza patlamasın. Altyazı kelime kelime, sarı vurgu.
-- Ses: atmosfer akoru konuşma altında −9 dB kısılır; geçişte whoosh + darbe, sayıda tık + çan. Müzik sesi bastırmaz.
+- Ses: atmosfer akoru konuşma altında −9 dB kısılır; geçişte yumuşak ton süzülmesi + darbe, sayıda tık + çan. Müzik sesi bastırmaz.
+- **Gürültü (fış/hışırtı) efekti yok** (Ömer 23.11.2026: "fış" sesi itici): whoosh, rüzgâr ve tık hışırtısı kaldırıldı; efektler yalnız tonal.
 
 ## Durum
 - Bölüm 1 (Güneş yok olsa) ve 2 (Tek panel kaç telefon) — 17.11.2026, ilk üretim.

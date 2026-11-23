@@ -138,13 +138,19 @@ def whoosh(d=0.75, yon=1):
     return y * env * 2.2
 
 
+def suzul(d=0.7, yon=1):  # gürültüsüz geçiş: yumuşak yükselen/alçalan ton (Ömer 23.11: "fış" sesi itici)
+    n = int(d * SR); t = np.linspace(0, 1, n)
+    f = 220 * (2 ** ((t if yon > 0 else 1 - t) * 1.0))
+    y = np.sin(2 * np.pi * np.cumsum(f) / SR) + .35 * np.sin(2 * np.pi * np.cumsum(f * 1.5) / SR)
+    return y * np.sin(np.pi * t) ** 2 * .5
+
+
 def darbe(d=1.4, f0=58, f1=32):
     n = int(d * SR); t = np.arange(n) / SR
     f = f1 + (f0 - f1) * np.exp(-t * 7); ph = 2 * np.pi * np.cumsum(f) / SR
     g = np.sin(ph) * zarf(n, .004, d * .55, 3.5)
-    tik = hp(R.standard_normal(n), 2500) * zarf(n, .0005, .03, 4) * .5
-    gov = lp_hizli(R.standard_normal(n), 900) * zarf(n, .002, .25, 4) * .6
-    return (g * 1.1 + tik + gov)
+    gov = lp_hizli(R.standard_normal(n), 250) * zarf(n, .002, .12, 4) * .3
+    return (g * 1.1 + gov)
 
 
 def ping(f=1320, d=1.2, parlak=1.0):
@@ -155,14 +161,13 @@ def ping(f=1320, d=1.2, parlak=1.0):
 
 def tik(f=2400):
     n = int(.045 * SR); t = np.arange(n) / SR
-    return (np.sin(2 * np.pi * f * t) * .6 + hp(R.standard_normal(n), 3000) * .4) * zarf(n, .0005, .02, 4)
+    return np.sin(2 * np.pi * f * t) * zarf(n, .0005, .02, 4) * .8
 
 
 def yukselen(d=1.4):
     n = int(d * SR); t = np.linspace(0, 1, n)
-    x = R.standard_normal(n); y = lp(x, 400 + 7000 * t ** 2) - lp(x, 200 + 1500 * t ** 2)
-    f = 110 * (2 ** (t * 2)); ton = np.sin(2 * np.pi * np.cumsum(f) / SR) * .25
-    return (y * 1.3 + ton) * t ** 2.2
+    f = 110 * (2 ** (t * 2)); ton = np.sin(2 * np.pi * np.cumsum(f) / SR) * .5 + np.sin(2 * np.pi * np.cumsum(f * 2) / SR) * .2
+    return ton * t ** 2.2
 
 
 def guc_kes(d=2.2):  # güneş sönüyor: düşen ton + alt bas
@@ -182,8 +187,6 @@ def atmosfer(dur, mod="uzay"):
             y += np.sin(2 * np.pi * (f + dt) * lfo * t + i) * (.22 / (i + 1))
     ac = .5 + .5 * np.sin(2 * np.pi * t / 9.0 - 1.2)
     y *= .6 + .4 * ac
-    ruz = lp_hizli(R.standard_normal(n), 700) - lp_hizli(R.standard_normal(n), 120)
-    y += ruz * (.10 + .06 * np.sin(2 * np.pi * t / 7.3))
     # uzak pırıltılar
     for k in np.arange(2.0, dur - 1, 3.7):
         i0 = int((k + R.random()) * SR); s = ping(R.choice([1760, 1975, 2349, 2637]), 2.4, .5) * .18
@@ -207,7 +210,7 @@ def sfx(K, IS, mod="uzay"):
     onceki = None
     for i, p in enumerate(K["parcalar"]):
         if p["sahne"] != onceki and i > 0:
-            ekle(fx, whoosh(.7), p["bas"] - .55, .55); ekle(fx, darbe(), p["bas"] - .02, .55)
+            ekle(fx, suzul(.7), p["bas"] - .6, .3); ekle(fx, darbe(), p["bas"] - .02, .5)
         onceki = p["sahne"]
         # sahneye özel olaylar
         if p["sahne"] == "gunes" and p["p"].get("mod") == "son":
@@ -215,7 +218,6 @@ def sfx(K, IS, mod="uzay"):
             ekle(fx, yukselen(1.3), ts - 1.25, .5); ekle(fx, guc_kes(), ts, .9); ekle(fx, darbe(2.0, 50, 26), ts, .7)
         for e in p["ekran"]:
             if e["tip"] == "sayi":
-                ekle(fx, whoosh(.45, 1), e["t"] - .3, .3)
                 sure = e.get("sure", 1.1) if e.get("say") is not None else 0
                 if sure:
                     k = 0
@@ -223,7 +225,7 @@ def sfx(K, IS, mod="uzay"):
                         ekle(fx, tik(2600 + 400 * (k / sure)), e["t"] + k, .16); k += .09 * (1 - .55 * k / sure)
                 ekle(fx, ping(988, 1.6), e["t"] + sure, .55); ekle(fx, darbe(.9, 70, 40), e["t"] + sure, .35)
             elif e["tip"] == "formul":
-                ekle(fx, ping(1568, .6, .4), e["t"], .3); ekle(fx, whoosh(.35, -1), e["t"] - .15, .2)
+                ekle(fx, ping(1568, .6, .4), e["t"], .3)
             else:
                 ekle(fx, ping(1318, .7, .6), e["t"], .3)
     # kapanış: son blok öncesi yükselen + son vuruş

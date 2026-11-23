@@ -2,7 +2,7 @@
   "id": "yumurta-cotard-faces",
   "repo": "https://github.com/kodlaciz/yumurta-stili",
   "ref": "main",
-  "kurulum": "cd engine && npm ci --no-audit --no-fund && git apply \"$GIRDI/toon_pumpkin.patch\" && patch -p0 < \"$GIRDI/faces_full.patch\" && mkdir -p ../stories/cotard-sendromu && cp \"$GIRDI/story.js\" ../stories/cotard-sendromu/story.js",
+  "kurulum": "cd engine && npm ci --no-audit --no-fund && patch -p0 < \"$GIRDI/toon_pumpkin.patch\" && patch -p0 < \"$GIRDI/faces_full.patch\" && mkdir -p ../stories/cotard-sendromu && cp \"$GIRDI/story.js\" ../stories/cotard-sendromu/story.js",
   "duman": "cd engine && CHROME_PATH=$(which google-chrome chromium chromium-browser 2>/dev/null | head -1) node faces.mjs cotard-sendromu --full && cp ../stories/cotard-sendromu/out/faces_full.png \"$CIKTI/faces_full.png\"",
   "sure_dk": 10
 }

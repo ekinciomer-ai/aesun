@@ -1,6 +1,6 @@
 {
- "son_mit_no": 13,
- "son_render_no": 14,
+ "son_mit_no": 14,
+ "son_render_no": 15,
  "not": "Yeni bölüm: mit_no=son_mit_no+1 (ekrandaki MİT #), render_no=son_render_no+1 (renderMit<N>, tl/mit<N>_tl.json), TTS kodu KK_MIT_<mit_no 2 hane>",
  "bolumler": [
   {
@@ -84,17 +84,16 @@
    "mit_no": 13,
    "render_no": 14,
    "kaynak": "Yargıtay 4. HD E.2022/4270 K.2023/9859 (düzelterek onama) https://lexara.com.tr/karar/589321"
-  }
- ],
- "ertelenen": [
+  },
   {
    "kod": "KK_MIT_14_EHLIYETSIZ_ARAC",
    "mit": "Ehliyetsiz birine aracını verirsen sorumlu olmazsın",
    "mit_no": 14,
    "render_no": 15,
-   "tts": "KK_MIT_14 (V1-V4 hazır) + KK_MIT_14_B (V5-V7)",
    "kaynak": "Yargıtay 17. HD E.2016/11942 K.2017/6737 (onama) https://lexara.com.tr/karar/2811799"
-  },
+  }
+ ],
+ "ertelenen": [
   {
    "kod": "KK_MIT_15_KACMAK",
    "mit": "Kazadan sonra kaçmak sadece trafik cezasıdır",
@@ -112,6 +111,6 @@
    "kaynak": "Danıştay 15. D E.2014/435 K.2017/70 (onama) https://lexara.com.tr/karar/18747925"
   }
  ],
- "ertelenen_not": "23.11.2026 (2. tur): Gemini TTS günlük kotası tüm anahtarlarda doldu; KK_MIT_14'ün V5-V7'si ve KK_MIT_15'in tamamı okunamadı. Senaryo + sahne + kamera hazır: bolumler_mit14_15.json, scene.html (S[5].upd2 ehliyetsiz/refüj, S[2].upd2 gece çift çizgide sollama + kaçan sürücü; test kareleriyle kontrol edildi). Sonraki oturum (kota 11:00'de yenilenir): 1) bekleyen_tts/KK_MIT_14_B.json ve KK_MIT_15_B.json'u sunucu/tts_kuyruk/'a taşıyıp push et (aynı model, Charon). 2) Sesler gelince cikti/KK_MIT_14_B__V5..V7.mp3 → KK_MIT_14__V5..V7.mp3, KK_MIT_15_B__V1..V7.mp3 → KK_MIT_15__V1..V7.mp3 olarak kopyala (gunluk.txt'de modeli kontrol et). 3) python3 mk_ep2.py bolumler_mit14_15.json --tl → test kareleri → ./bitir.sh 15 KK_MIT_14 KK_MIT_14_EHLIYETSIZ_ARAC ve ./bitir.sh 16 KK_MIT_15 KK_MIT_15_KACMAK. Üçüncü bölüm de hazır: KK_MIT_16 buzlu yol (idare, Danıştay; S[7].upd2 test edildi; bolumler_mit14_15.json'da N=17). bekleyen_tts/KK_MIT_16.json'u da kuyruğa taşı; sesler gelince ./bitir.sh 17 KK_MIT_16 KK_MIT_16_BUZLU_YOL. Teslim kartları (KK_MIT_14/15/16) henüz yazılmadı.",
- "son_gun": "2026-11-23: MİT #10-12 (1. tur) ve #13 kask (2. tur) teslim edildi; #14-15 kota yüzünden ertelendi."
+ "ertelenen_not": "23.11.2026: #14 tamamlandı. #15 (kaçma) ve #16 (buzlu yol) Gemini kotası yüzünden okunamadı (akşam tekrar denendi, 429). Senaryo + sahne + kamera hazır: bolumler_mit14_15.json (N=16 KK_MIT_15, N=17 KK_MIT_16), scene.html S[2].upd2 ve S[7].upd2 (test kareleriyle kontrol edildi). Sonraki oturum: 1) bekleyen_tts/KK_MIT_15_B.json ve KK_MIT_16.json'u sunucu/tts_kuyruk/'a taşı, push et. 2) Sesler gelince cikti/KK_MIT_15_B__V1..V7.mp3 → KK_MIT_15__V1..V7.mp3 olarak kopyala (gunluk.txt'de model kontrolü). 3) mk_ep2.py'yi yalnız N=16 ve N=17 girdileriyle --tl çalıştır (N=15 zaten bitti, onu yeniden üretme), test kareleri, ./bitir.sh 16 KK_MIT_15 KK_MIT_15_KACMAK ve ./bitir.sh 17 KK_MIT_16 KK_MIT_16_BUZLU_YOL. Teslim kartları yazılmadı.",
+ "son_gun": "2026-11-23: MİT #10-14 teslim edildi; #15-16 ses kotası yüzünden ertelendi."
 }

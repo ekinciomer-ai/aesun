@@ -4,12 +4,15 @@ import * as THREE from 'three';
 import { LOOK, SKY_GLSL } from '../look.js';
 import { createPost } from '../post.js';
 import * as TEX from '../textures.js';
+import { applyWeather } from '../materials.js';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
 import { evalShot, DURATION, TIMELINE } from './shots.js';
 import { gunIsigi } from './zaman.js';
 
 const Q = new URLSearchParams(location.search);
 const FIXED_W = +Q.get('w') || 0, FIXED_H = +Q.get('h') || 0;
 const MODS = (Q.get('mods') || 'saha,polyfork').split(',').filter(Boolean);
+const STIL = Q.get('stil') || 'lowpoly';   // lowpoly (Stil 1) | gercek (Stil 2)
 const state = { t: +Q.get('t') || 0, shot: Q.get('shot') || '', playing: !Q.has('still') && !FIXED_W, frame: 0 };
 
 // --- görünüm: şafak öncesi mavi → gün doğumu (değerler zaman.js'de lerp edilir) ---
@@ -17,6 +20,9 @@ Object.assign(LOOK, {
   fogDensity: 0.0016, mistDensity: 0.03, mistHeight: 2.2, mistNoise: 1.0,
   hemiIntensity: 1.6, envIntensity: 0.9, ao: 0.7, aoRadius: 1.2,
   bloom: 0.55, bloomThreshold: 0.9, saturation: 1.08, contrast: 1.08, vignette: 0.28, grain: 0.02, chroma: 0.0004,
+});
+if (STIL === 'gercek') Object.assign(LOOK, {
+  fogDensity: 0.0012, mistDensity: 0.024, ao: 0.9, aoRadius: 1.5, bloom: 0.42, saturation: 0.97, contrast: 1.13, grain: 0.026, vignette: 0.32, chroma: 0.0006,
 });
 
 const canvas = document.getElementById('c');
@@ -68,7 +74,7 @@ key.shadow.bias = -0.0004; key.shadow.normalBias = 0.06; key.shadow.radius = 4;
 scene.add(key, key.target);
 const SAHA_MERKEZ = new THREE.Vector3(32, 0, 18);
 
-const ctx = { THREE, scene, LOOK, TEX, renderer, camera, post, Q, rng: TEX.mulberry32, SAHA_MERKEZ };
+const ctx = { THREE, scene, LOOK, TEX, renderer, camera, post, Q, rng: TEX.mulberry32, SAHA_MERKEZ, STIL, applyWeather, BGU };
 const modules = [], errors = [], buildMs = {};
 async function loadModules() {
   for (const name of MODS) {

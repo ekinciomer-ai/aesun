@@ -1,6 +1,7 @@
 // GES sahası: zemin, servis yolu, çit, kazıklar, konstrüksiyon (aşık+mertek), paneller, inverterler.
 // Tüm geometri kodla; hareket yalnız t'nin fonksiyonu (sabit tohum).
 import { Z, clamp01, ease, easeOut, easeOutBack } from '../zaman.js';
+import * as GR from './gercek.js';
 
 export const SAHA = {
   SIRA: 5, MASA: 4,            // 5 sıra × 4 masa
@@ -19,6 +20,7 @@ export const uzaklik = (x, z) => clamp01(Math.hypot(x - KOSE[0], z - KOSE[1]) / 
 export async function create(ctx) {
   const { THREE, scene, TEX } = ctx;
   const rng = ctx.rng(20261123);
+  const G = ctx.STIL === 'gercek';
   const tan = Math.tan(S.EGIM);
   const tx = (w, h, draw, rep) => { const t = TEX.canvasTexture(w, h, draw, { repeat: true }); t.repeat.set(rep[0], rep[1]); return t; };
   const ARKA_Y = S.ON_Y + (S.ON_Z - S.ARKA_Z) * tan;
@@ -33,7 +35,7 @@ export async function create(ctx) {
       g.fillRect(x, y, s, s);
     }
   }, [60, 60]);
-  const zemin = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), new THREE.MeshStandardMaterial({ map: zeminTex, roughness: 0.97, metalness: 0 }));
+  const zemin = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), G ? GR.zeminMalzeme(ctx, 200) : new THREE.MeshStandardMaterial({ map: zeminTex, roughness: 0.97, metalness: 0 }));
   zemin.rotation.x = -Math.PI / 2; zemin.receiveShadow = true; scene.add(zemin);
 
   // servis yolu (mıcır): saha önünde X boyunca ve batıda Z boyunca
@@ -42,12 +44,20 @@ export async function create(ctx) {
     const r = ctx.rng(11);
     for (let i = 0; i < 9000; i++) { const c = 110 + r() * 80; g.fillStyle = `rgba(${c},${c * 0.95},${c * 0.86},0.6)`; g.fillRect(r() * w, r() * h, 1 + r() * 2.5, 1 + r() * 2.5); }
   }, [40, 2]);
-  const yolMat = new THREE.MeshStandardMaterial({ map: yolTex, roughness: 0.95 });
+  const yolMat = G ? GR.yolMalzeme(ctx, 35, 1) : new THREE.MeshStandardMaterial({ map: yolTex, roughness: 0.95 });
   const yol1 = new THREE.Mesh(new THREE.PlaneGeometry(140, 6), yolMat);
   yol1.rotation.x = -Math.PI / 2; yol1.position.set(30, 0.02, 46); yol1.receiveShadow = true; scene.add(yol1);
-  const yol2 = new THREE.Mesh(new THREE.PlaneGeometry(6, 70), yolMat.clone());
-  yol2.material.map = yolTex.clone(); yol2.material.map.repeat.set(2, 20); yol2.material.map.needsUpdate = true;
-  yol2.rotation.x = -Math.PI / 2; yol2.position.set(-8, 0.021, 14); yol2.receiveShadow = true; scene.add(yol2);
+  const yol2 = new THREE.Mesh(new THREE.PlaneGeometry(70, 6), G ? GR.yolMalzeme(ctx, 18, 1) : yolMat.clone());
+  if (!G) { yol2.material.map = yolTex.clone(); yol2.material.map.repeat.set(20, 2); yol2.material.map.needsUpdate = true; }
+  yol2.rotation.set(-Math.PI / 2, 0, Math.PI / 2); yol2.position.set(-8, 0.021, 14); yol2.receiveShadow = true; scene.add(yol2);
+
+  // kuru ot öbekleri (yalnız gerçekçi stil): yollar dışında
+  if (G) GR.otlar(ctx, 9000, (r) => {
+    const x = -70 + r() * 210, z = -60 + r() * 150;
+    if (z > 42.5 && z < 49.5 && x > -45 && x < 105) return null;
+    if (x > -11.5 && x < -4.5 && z > -21 && z < 49) return null;
+    return [x, z];
+  });
 
   // uzak tepeler (sis içinde silüet)
   {
@@ -90,8 +100,8 @@ export async function create(ctx) {
     masalar.push({ r, c, x0, z0, d: uzaklik(x0 + S.MASA_BOY / 2, z0) });
   }
 
-  const galv = new THREE.MeshStandardMaterial({ color: 0xa9aeb2, metalness: 0.45, roughness: 0.45, envMapIntensity: 0.5 });
-  const galvKoyu = new THREE.MeshStandardMaterial({ color: 0x8a8f93, metalness: 0.45, roughness: 0.5, envMapIntensity: 0.5 });
+  const galv = G ? GR.galvaniz(ctx) : new THREE.MeshStandardMaterial({ color: 0xa9aeb2, metalness: 0.45, roughness: 0.45, envMapIntensity: 0.5 });
+  const galvKoyu = G ? GR.galvaniz(ctx, true) : new THREE.MeshStandardMaterial({ color: 0x8a8f93, metalness: 0.45, roughness: 0.5, envMapIntensity: 0.5 });
 
   // kazıklar: her ayakta ön ve arka
   const kaziklar = [];
@@ -102,13 +112,13 @@ export async function create(ctx) {
       kaziklar.push({ x, z, top, ts });
     }
   }
-  const kazikGeo = new THREE.BoxGeometry(0.15, 1, 0.12); kazikGeo.translate(0, 0.5, 0);
+  const kazikGeo = G ? GR.kazikGeo(THREE) : new THREE.BoxGeometry(0.15, 1, 0.12); if (!G) kazikGeo.translate(0, 0.5, 0);
   const kazikMesh = new THREE.InstancedMesh(kazikGeo, galv, kaziklar.length);
   kazikMesh.frustumCulled = false; kazikMesh.castShadow = true; kazikMesh.receiveShadow = true; scene.add(kazikMesh);
 
   // mertekler (eğik, ön kazıktan arkaya)
   const mertekL = Math.hypot(S.ON_Z - S.ARKA_Z, ARKA_Y - S.ON_Y) + 0.5;
-  const mertekGeo = new THREE.BoxGeometry(0.1, 0.12, 1); // z boyunca uzar
+  const mertekGeo = G ? GR.mertekGeo(THREE) : new THREE.BoxGeometry(0.1, 0.12, 1); // z boyunca uzar
   const merteklar = [];
   for (const m of masalar) for (const ax of S.AYAK_X) {
     const tc = Z.konsBas + (Z.konsSon - 0.9 - Z.konsBas) * m.d + ax * 0.02;
@@ -118,7 +128,7 @@ export async function create(ctx) {
   mertekMesh.frustumCulled = false; mertekMesh.castShadow = true; scene.add(mertekMesh);
 
   // aşıklar (X boyunca, mertek üstünde 2 adet)
-  const asikGeo = new THREE.BoxGeometry(1, 0.08, 0.08);
+  const asikGeo = G ? GR.asikGeo(THREE) : new THREE.BoxGeometry(1, 0.08, 0.08);
   const asiklar = [];
   for (const m of masalar) for (const s of [-1.15, 1.15]) {
     const tc = Z.konsBas + 0.35 + (Z.konsSon - 0.9 - Z.konsBas) * m.d;
@@ -155,11 +165,12 @@ export async function create(ctx) {
       paneller.push({ x: m.x0 + lx, z: m.z0 + dz, y: egimY(dz), tp, yaw: (rng() - 0.5) * 0.5, k: k++ });
     }
   }
-  const panelMesh = new THREE.InstancedMesh(panelGeo, panelMat, paneller.length);
+  const panelMesh = new THREE.InstancedMesh(panelGeo, G ? GR.panelMalzemeleri(ctx) : panelMat, paneller.length);
   panelMesh.frustumCulled = false; panelMesh.castShadow = true; panelMesh.receiveShadow = true; scene.add(panelMesh);
 
   // inverterler: her sıranın doğu ucunda
   const invMat = new THREE.MeshStandardMaterial({ color: 0xd9dcdf, metalness: 0.3, roughness: 0.5 });
+  if (G) ctx.applyWeather(invMat, { tex: 1.5, grain: 0.5, dirt: 0.35, streak: 0.5, moss: 0, wet: 0, chip: 0, rust: 0 });
   const ledMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0, 0, 0) });
   const inverterler = [];
   for (let r = 0; r < S.SIRA; r++) {
@@ -171,6 +182,8 @@ export async function create(ctx) {
     g.position.set(x, 0, z); scene.add(g);
     inverterler.push({ led, x, z, tl: Z.ledBas + (Z.ledSon - Z.ledBas) * (r / (S.SIRA - 1)) });
   }
+
+  const toz = G ? GR.tozHavuzu(ctx, 40) : null;
 
   // güneş diski (ufukta doğar)
   const gunes = new THREE.Mesh(new THREE.SphereGeometry(22, 24, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(0, 0, 0) }));
@@ -194,6 +207,22 @@ export async function create(ctx) {
         o.updateMatrix(); kazikMesh.setMatrixAt(i, o.matrix);
       });
       kazikMesh.instanceMatrix.needsUpdate = true;
+      // toz: darbe sırasında ve hemen sonra kazık dibinde kabaran bulut
+      if (toz) {
+        let n = 0;
+        for (const p of kaziklar) {
+          const k = (t - p.ts) / 0.55;
+          if (k < 0 || k > 2.6 || n >= toz.length) continue;
+          for (let j = 0; j < 2 && n < toz.length; j++) {
+            const s = toz[n++], a = k * 1.3 + j * 2.1;
+            s.visible = true;
+            s.position.set(p.x + Math.cos(a) * 0.25 * (1 + k), 0.25 + 0.35 * k + j * 0.15, p.z + Math.sin(a) * 0.25 * (1 + k));
+            const sc = 0.6 + 1.2 * k + j * 0.3; s.scale.set(sc, sc * 0.75, 1);
+            s.material.opacity = 0.55 * (k < 1 ? 1 : Math.max(0, 1 - (k - 1) / 1.6)) * (k < 0.15 ? k / 0.15 : 1);
+          }
+        }
+        for (; n < toz.length; n++) toz[n].visible = false;
+      }
 
       // mertekler: önden arkaya uzar
       merteklar.forEach((m, i) => {

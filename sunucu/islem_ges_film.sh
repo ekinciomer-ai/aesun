@@ -1,4 +1,5 @@
 #!/bin/bash
+# Not: taslakta ara kare tahmini (minterpolate) KULLANILMAZ; hızlı hareketlerde su altı gibi dalgalanma yapar. Her kare çizilir.
 # GES kurulum filmi (Walking Block yöntemi + Polyfork modelleri) — tampon bölgede kurar ve render'ı arka planda başlatır.
 # Orijinal repo /opt/tampon/ges_film/orijinal altında değiştirilmeden saklanır; iş kopyası /opt/tampon/ges_film/is.
 # Durum ve teslim: islem_ges_film_bak. Canlı sistemlere dokunmaz.
@@ -32,7 +33,8 @@ D
   docker build -q -t $IMG $T/imaj >/dev/null && echo "NOT: imaj kuruldu ($IMG)" || { echo "NOT: HATA imaj kurulamadı"; exit 1; }
 fi
 chown -R 10042:10042 $IS 2>/dev/null || chmod -R a+rwX $IS
-if [ "$MOD" = "taslak" ]; then R="--w 540 --h 960 --every 3"; else R="--w 1080 --h 1920 --mb 3"; fi
+if [ "$MOD" = "taslak" ]; then R="--w 540 --h 960"; else R="--w 1080 --h 1920 --mb 3"; fi
+R="$R --q stil=${STIL:-lowpoly}"
 cat > $IS/calistir.sh <<C
 set -e
 cd /w
@@ -41,7 +43,7 @@ export CHROME_PATH=\$(node -e "console.log(require('puppeteer').executablePath()
 node tools/ges_ses.mjs --out out/ges_ses.wav
 node tools/render.mjs --page ges.html --fps 30 --from 0 --to 15 $R --dir out/kareler
 if [ "$MOD" = "taslak" ]; then
-  ffmpeg -v error -y -framerate 10 -i out/kareler/f_%06d.png -i out/ges_ses.wav -filter_complex "[0:v]minterpolate=fps=30:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1:scd=fdiff:scd_threshold=8,scale=1080:1920:flags=lanczos,format=yuv420p[v]" -map "[v]" -map 1:a -c:v libx264 -crf 20 -c:a aac -b:a 192k -shortest -movflags +faststart out/ges_film_taslak.mp4
+  ffmpeg -v error -y -framerate 30 -i out/kareler/f_%06d.png -i out/ges_ses.wav -vf "scale=1080:1920:flags=lanczos,unsharp=5:5:0.4,format=yuv420p" -c:v libx264 -preset slow -crf 24 -c:a aac -b:a 192k -shortest -movflags +faststart out/ges_film_taslak.mp4
 else
   ls out/kareler | head -1 | grep -q f_000000 && bash tools/mux.sh out/kareler out/ges_ses.wav out/ges_film_1080x1920.mp4
 fi

@@ -13,13 +13,30 @@ export async function create(ctx) {
   const loader = new GLTFLoader();
   const cache = {};
   const yukle = async (ad) => (cache[ad] ??= loader.loadAsync(`${YOL}${ad}.glb`));
+  const G = ctx.STIL === 'gercek';
+  // Stil 2: makinelere kir/akıntı/çizik, ağaçlarda renk yumuşatma (iskeletli işçilere dokunulmaz)
+  const gercekle = (o, ad) => {
+    if (!G) return;
+    const agac = /tree/.test(ad);
+    o.traverse((m) => {
+      if (!m.isMesh || m.isSkinnedMesh || !m.material) return;
+      const yeni = (mt) => {
+        const c = mt.clone();
+        if (c.color) { const hsl = {}; c.color.getHSL(hsl); c.color.setHSL(hsl.h, hsl.s * (agac ? 0.55 : 0.75), hsl.l * (agac ? 0.8 : 0.92)); }
+        c.roughness = Math.max(c.roughness ?? 0.6, agac ? 0.9 : 0.55);
+        if (!agac && c.isMeshStandardMaterial) ctx.applyWeather(c, { tex: 0.9, grain: 0.6, dirt: 0.55, streak: 0.5, moss: 0, chip: 0.25, rust: 0.08, wet: 0.05, bump: 0.002 });
+        return c;
+      };
+      m.material = Array.isArray(m.material) ? m.material.map(yeni) : yeni(m.material);
+    });
+  };
   const golge = (o, al = true) => o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = al; } });
 
   async function koy(ad, x, z, ry = 0, s = 1) {
     const g = await yukle(ad);
     const o = g.animations?.length ? SkeletonUtils.clone(g.scene) : g.scene.clone(true);
     o.position.set(x, 0, z); o.rotation.y = ry; o.scale.setScalar(s);
-    golge(o); scene.add(o);
+    gercekle(o, ad); golge(o); scene.add(o);
     return { o, clips: g.animations || [] };
   }
 
@@ -38,7 +55,7 @@ export async function create(ctx) {
   // damperli kamyon: ön servis yolunda batıdan doğuya
   {
     const { o } = await koy('articulated-dump-truck-ee50f3', 0, 46, -Math.PI / 2);
-    hareketli.push((t) => { o.position.x = 150 - 10.5 * t; o.position.z = 46.8; });
+    hareketli.push((t) => { o.position.x = 110 - 16 * t; o.position.z = 46.8; });
   }
   // pikap: batı yolunda kuzeyden güneye, sonra durur
   {

@@ -318,15 +318,24 @@ function buildMasa(scene) {
   const g = new THREE.Group(); g.position.x = 300; scene.add(g);
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), painted(woodTex({ base: '#4c3222', plank: 42, rep: [3, 3] })));
   floor.rotation.x = -Math.PI / 2; g.add(floor);
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), painted(plasterTex('#5c6684', 88)));
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), painted(plasterTex('#6d7894', 88)));
   wall.position.set(0, 2.5, -2.9); g.add(wall);
+  const lambri = new THREE.Mesh(new THREE.BoxGeometry(10, 1.25, .08), painted(woodTex({ base: '#4c2e1c', plank: 34, rep: [4, 1] })));
+  lambri.position.set(0, .625, -2.84); g.add(lambri);
   buildOkeyTable(g, 0, -.55, { storeDyn: true });
 
-  const suit = new THREE.Group(); suit.position.set(0, 1.62, -.95); suit.visible = false; g.add(suit);
-  const jacket = new THREE.Mesh(new THREE.BoxGeometry(.44, .56, .16), flat('#2b4a78')); jacket.position.y = 0; suit.add(jacket);
-  const shirt = new THREE.Mesh(new THREE.BoxGeometry(.14, .44, .18), flat('#f4efe4')); shirt.position.y = .04; suit.add(shirt);
-  const tie = new THREE.Mesh(new THREE.BoxGeometry(.055, .34, .20), flat('#c6302a')); tie.position.y = .02; suit.add(tie);
-  const hanger = new THREE.Mesh(new THREE.TorusGeometry(.08, .016, 8, 16, Math.PI), flat('#e6b84c')); hanger.position.y = .31; suit.add(hanger);
+  // Kan kardesinin hayal ettigi sik takim elbise (Kan Kardesi'nin sag-ustunde, Azrail'in yuzunu kapatmaz)
+  const suit = new THREE.Group(); suit.position.set(.56, 2.02, -.52); suit.visible = false; g.add(suit);
+  const bubble = new THREE.Mesh(new THREE.CircleGeometry(.34, 24), new THREE.MeshBasicMaterial({ color: '#f4ecd8', transparent: true, opacity: .88 }));
+  bubble.position.set(0, 0, -.09); bubble.userData.noShadow = true; suit.add(bubble);
+  const jacket = new THREE.Mesh(new THREE.BoxGeometry(.26, .34, .08), flat('#284674')); suit.add(jacket);
+  for (const sx of [-.17, .17]) {
+    const slv = new THREE.Mesh(new THREE.BoxGeometry(.085, .30, .07), flat('#233d66'));
+    slv.position.set(sx, -.01, 0); slv.rotation.z = sx < 0 ? .18 : -.18; suit.add(slv);
+  }
+  const shirt = new THREE.Mesh(new THREE.BoxGeometry(.09, .26, .09), flat('#f7f2e8')); shirt.position.y = .04; suit.add(shirt);
+  const tie = new THREE.Mesh(new THREE.BoxGeometry(.035, .21, .10), flat('#c6302a')); tie.position.y = .02; suit.add(tie);
+  const hanger = new THREE.Mesh(new THREE.TorusGeometry(.045, .01, 8, 16, Math.PI), flat('#e6b84c')); hanger.position.y = .19; suit.add(hanger);
   dyn.suit = suit;
 
   const L = new THREE.Group();
@@ -343,21 +352,21 @@ function cameraPath() {
   const k = [
     { t: 0,           pos: [199.4, 1.32, 3.3],   look: [200.0, 1.28, -1.6], fov: 48, creep: .26, drift: .04 },
     { t: P(1, .30),   dur: .42, pos: [200.25, 1.38, 1.85], look: [200.0, 1.38, -.65], fov: 44, creep: .30 },
-    { t: P(1, .58),   dur: .30, move: 'whip', pos: [-.45, 1.48, 2.55], look: [0, 1.15, -.6], fov: 48, creep: .28 },
-    { t: P(1, .84),   dur: .30, move: 'whip', pos: [1.55, 1.38, 1.65], look: [1.55, 1.32, -1.2], fov: 43, creep: .26 },
-    { t: PS(2) + .16, dur: .30, move: 'whip', pos: [-1.15, 1.42, 2.95], look: [-.25, 1.25, -.75], fov: 46, creep: .24 },
-    { t: PE(2),       dur: Math.max(.4, PE(2) - PS(2) - .2), pos: [-.95, 1.38, 2.25], look: [-.52, 1.28, -.78], fov: 44, creep: .24 },
-    { t: PS(3) + .22, dur: .55, pos: [-.15, 1.42, 3.05], look: [0, 1.32, -.85], fov: 48, creep: .25 },
-    { t: PE(3),       dur: Math.max(.4, PE(3) - PS(3) - .25), pos: [.15, 1.44, 2.75], look: [.18, 1.38, -.95], fov: 46, creep: .24 },
-    { t: PS(4) + .20, dur: .30, move: 'whip', pos: [.15, 1.38, 3.25], look: [.15, 1.25, -.75], fov: 49, creep: .24 },
-    { t: PE(4),       dur: Math.max(.4, PE(4) - PS(4) - .25), pos: [-.05, 1.34, 2.55], look: [.25, 1.26, -.75], fov: 46, creep: .22 },
-    { t: PS(5) + .15, dur: .30, move: 'whip', pos: [300.25, 1.42, 2.25], look: [300.28, 1.32, -.75], fov: 46, creep: .25 },
-    { t: PE(5) + .45, dur: Math.max(.4, PE(5) - PS(5) + .2), pos: [300.12, 1.48, 2.65], look: [300.15, 1.42, -.85], fov: 48, creep: .22 },
-    { t: PS(6) + .20, dur: .50, pos: [299.65, 1.48, 1.95], look: [300.12, 1.12, -.65], fov: 44, creep: .28 },
-    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .22), pos: [300.38, 1.38, 1.85], look: [300.42, 1.22, -.65], fov: 42, creep: .26 },
-    { t: PS(7) + .16, dur: .35, pos: [299.95, 1.56, 1.65], look: [300.02, 1.02, -.58], fov: 42, creep: .32 },
-    { t: PS(8) + .18, dur: .42, pos: [300.25, 1.44, 2.35], look: [300.22, 1.36, -.78], fov: 44, creep: .26 },
-    { t: PE(8),       dur: Math.max(.4, PE(8) - PS(8) - .2), pos: [300.38, 1.40, 1.95], look: [300.32, 1.34, -.72], fov: 42, creep: .24 },
+    { t: P(1, .58),   dur: .30, move: 'whip', pos: [-.10, 1.48, 3.35], look: [0, 1.20, -.65], fov: 48, creep: .28 },
+    { t: P(1, .84),   dur: .30, move: 'whip', pos: [1.55, 1.38, 1.85], look: [1.55, 1.32, -1.2], fov: 44, creep: .26 },
+    { t: PS(2) + .16, dur: .30, move: 'whip', pos: [-.75, 1.42, 3.45], look: [-.25, 1.26, -.72], fov: 47, creep: .24 },
+    { t: PE(2),       dur: Math.max(.4, PE(2) - PS(2) - .2), pos: [-.55, 1.40, 2.85], look: [-.38, 1.28, -.72], fov: 45, creep: .24 },
+    { t: PS(3) + .22, dur: .55, pos: [-.05, 1.42, 3.45], look: [0, 1.30, -.78], fov: 48, creep: .25 },
+    { t: PE(3),       dur: Math.max(.4, PE(3) - PS(3) - .25), pos: [.08, 1.44, 3.15], look: [.06, 1.34, -.85], fov: 47, creep: .24 },
+    { t: PS(4) + .20, dur: .30, move: 'whip', pos: [.05, 1.42, 3.75], look: [.04, 1.26, -.70], fov: 50, creep: .24 },
+    { t: PE(4),       dur: Math.max(.4, PE(4) - PS(4) - .25), pos: [.02, 1.38, 3.35], look: [.06, 1.28, -.70], fov: 48, creep: .22 },
+    { t: PS(5) + .15, dur: .30, move: 'whip', pos: [300.28, 1.46, 3.15], look: [300.24, 1.36, -.72], fov: 48, creep: .25 },
+    { t: PE(5) + .45, dur: Math.max(.4, PE(5) - PS(5) + .2), pos: [300.18, 1.50, 3.35], look: [300.18, 1.42, -.75], fov: 49, creep: .22 },
+    { t: PS(6) + .20, dur: .50, pos: [299.95, 1.46, 2.85], look: [300.12, 1.24, -.65], fov: 47, creep: .26 },
+    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .22), pos: [300.25, 1.42, 2.55], look: [300.26, 1.26, -.65], fov: 45, creep: .26 },
+    { t: PS(7) + .16, dur: .35, pos: [300.0, 1.56, 2.55], look: [300.02, 1.16, -.62], fov: 46, creep: .30 },
+    { t: PS(8) + .18, dur: .42, pos: [300.28, 1.44, 2.85], look: [300.26, 1.34, -.72], fov: 46, creep: .24 },
+    { t: PE(8),       dur: Math.max(.4, PE(8) - PS(8) - .2), pos: [300.32, 1.42, 2.55], look: [300.28, 1.34, -.68], fov: 45, creep: .24 },
     { t: PS(9) + .15, dur: .32, pos: [300.0, 1.46, 3.05], look: [300.0, 1.26, -.65], fov: 50, creep: .28 },
     { t: PE(9),       dur: Math.max(.4, PE(9) - PS(9) - .18), pos: [300.0, 1.52, 3.35], look: [300.0, 1.22, -.65], fov: 50, creep: .22 },
     { t: PS(10) + .12, dur: .30, move: 'whip', pos: [0, 1.55, 2.85], look: [0, 1.12, -.65], fov: 48, creep: .24 },
@@ -390,12 +399,12 @@ export async function setup(ctx) {
 
   fx.smoke = new Smoke(scene, { color: '#c4bac8', maxPoints: 340, H: ctx.H });
   fx.smoke.wisps.push({
-    n: 80, size: .45, alpha: .22, speed: .09,
+    n: 65, size: .28, alpha: .14, speed: .08,
     on: t => where(t) !== 'kapi',
     path: (u, t, i) => {
       const baseX = where(t) === 'masa' ? 300 : 0;
-      const ox = ((i % 5) - 2) * .38;
-      return [baseX + ox + Math.sin(u * 5 + t * .8 + i) * .22, .92 + u * 1.9, -.55 + Math.cos(u * 4 + t * .6 + i) * .25];
+      const ox = ((i % 5) - 2) * .42;
+      return [baseX + ox + Math.sin(u * 5 + t * .8 + i) * .18, 1.05 + u * 1.8, -1.25 + Math.cos(u * 4 + t * .6 + i) * .20];
     }
   });
   fx.rain = new Smoke(scene, { color: '#b4d0f2', maxPoints: 320, H: ctx.H, additive: true, near: 1.4 });
@@ -483,7 +492,7 @@ export function frame(t, ctx) {
     if (!isAfter) {
       const racon = t >= PS(2) && t < PS(4);
       const lie = t >= PS(4);
-      ab.show(); ab.place(-.56, 0, -.58, cam, tint);
+      ab.show(); ab.place(-.46, 0, -.58, cam, tint);
       ab.draw({
         expr: racon ? 'proud' : 'smug',
         look: lie ? .75 : .55,
@@ -506,7 +515,7 @@ export function frame(t, ctx) {
 
       if (t >= PS(4) - .1) {
         const arr = ramp(t, PS(4) - .1, PS(4) + .55);
-        kk.show(); kk.place(.56 + (1 - arr) * .85, 0, -.52, cam, tint);
+        kk.show(); kk.place(.48 + (1 - arr) * .85, 0, -.52, cam, tint);
         kk.draw({
           expr: t > P(4, .55) ? 'grin' : 'smile',
           look: -.65, blink: bl(4, PS(4) + .5),
@@ -549,7 +558,7 @@ export function frame(t, ctx) {
     if (suitOn) {
       const sc = ramp(t, PS(5) + .1, PS(5) + .45) * (1 - ramp(t, PS(6) - .15, PS(6) + .15));
       dyn.suit.scale.setScalar(Math.max(.001, sc));
-      dyn.suit.position.y = 1.66 + Math.sin(t * 4) * .05;
+      dyn.suit.position.y = 2.02 + Math.sin(t * 4) * .04;
       dyn.suit.rotation.y = Math.sin(t * 2.2) * .35;
     }
 
@@ -589,7 +598,7 @@ export function frame(t, ctx) {
     const laugh5 = t >= PS(5) && t < PS(6);
     const greedy6 = t >= PS(6) && t < PS(7);
     const shock8 = t >= P(8, .48) && t < PS(9);
-    kk.show(); kk.place(300.52 + chaos * .14, 0, -.50, cam, tint);
+    kk.show(); kk.place(300.54 + chaos * .14, 0, -.50, cam, tint);
     kk.draw({
       expr: t >= PS(9) ? 'angry' : shock8 ? 'surprised' : t >= PS(7) ? 'worried' : greedy6 ? 'smug' : laugh5 ? 'laugh' : 'grin',
       look: -.72,
@@ -606,7 +615,7 @@ export function frame(t, ctx) {
     kk.castFrom(dyn.mSun, true);
 
     const leanW = ramp(t, PS(8), PS(8) + .45) * (1 - ramp(t, PS(9) - .05, PS(9) + .25));
-    az.show(); az.place(300.0 + leanW * .24, 0, -1.06 + leanW * .26, cam, tint);
+    az.show(); az.place(300.0 + leanW * .12, 0, -1.04 + leanW * .20, cam, tint);
     az.draw({
       expr: t >= P(7, .4) ? 'smug' : 'neutral',
       look: leanW > .1 ? .8 : -.1,

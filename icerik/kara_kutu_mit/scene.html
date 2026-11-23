@@ -100,6 +100,8 @@ const gl=new GLTFLoader();gl.setDRACOLoader(draco);
 const load=u=>new Promise((res,rej)=>gl.load(u,res,undefined,rej));
 const michG=await load('assets/Michelle.glb');
 const isciG=await load('assets/isci.glb');
+const patronG=await load('assets/'+(window.PATRON_GLB||'patron.glb'));
+const ofisciG=await load('assets/ofisci.glb');
 const [carG,botG,envT,envN,envD]=await Promise.all([load('assets/ferrari.glb'),load('assets/Xbot.glb'),
  new RGBELoader().loadAsync('assets/venice_sunset_1k.hdr'),new RGBELoader().loadAsync('assets/moonless_golf_1k.hdr'),new RGBELoader().loadAsync('assets/quarry_01_1k.hdr')]);
 const pmrem=new THREE.PMREMGenerator(renderer);
@@ -790,7 +792,7 @@ function makeBag(){const g=new THREE.Group();const m=new THREE.MeshStandardMater
 function boneMap(root){const M={};root.traverse(o=>{if(o.isBone)M[o.name]=o});return M}
 function wq(o,root){const q=new THREE.Quaternion(),r=new THREE.Quaternion();o.getWorldQuaternion(q);root.getWorldQuaternion(r);return r.invert().multiply(q)}
 function wp(o,root){const v=new THREE.Vector3();o.getWorldPosition(v);return root.worldToLocal(v)}
-function makeReal(){const m=SkeletonUtils.clone(isciG.scene);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});
+function makeReal(){const m=SkeletonUtils.clone(isciG.scene);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});fixMats(m);
  const drv=SkeletonUtils.clone(botG.scene);drv.visible=false;
  const H=boneMap(m),X=boneMap(drv);m.updateMatrixWorld(true);drv.updateMatrixWorld(true);
  const order=[];m.traverse(o=>{if(o.isBone&&X[o.name])order.push(o.name)});
@@ -849,6 +851,72 @@ function buildS10(){const s=new THREE.Scene();s.environment=ENV.day;s.background
   return {dt,w:wk,edge:mEdge,ground:mGround,truck}}
  return {s,upd,ti}}
 S.push(buildS10());
+// ================= SCENE 11 (S[10]): ofis — işveren + işçi, masaya bırakılan belge (Patron mu Haklı, İşçi mi?) =================
+function fixMats(m){m.traverse(o=>{if(o.isMesh){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(t=>{const hairy=/hair|brow|lash|short0|bob0|eyebrow/i.test((t.name||'')+(o.name||''));t.transparent=false;t.depthWrite=true;t.alphaTest=hairy?0.5:0;if(!hairy){t.side=THREE.FrontSide}if(t.map)t.map.colorSpace=THREE.SRGBColorSpace;t.needsUpdate=true})}})}
+function makeRealG(G){if(window.__DUMP&&!window.__D1){window.__D1=1;const d=SkeletonUtils.clone(botG.scene);d.traverse(o=>{if(o.isBone)console.log('XB',o.name,o.rotation.toArray().slice(0,3).map(v=>v.toFixed(2)).join(','))})}const m=SkeletonUtils.clone(G.scene);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});
+ const drv=SkeletonUtils.clone(botG.scene);drv.visible=false;const H=boneMap(m),X=boneMap(drv);m.updateMatrixWorld(true);drv.updateMatrixWorld(true);
+ const order=[];m.traverse(o=>{if(o.isBone&&X[o.name])order.push(o.name)});const kid=n=>{const c=H[n].children.find(c=>c.isBone&&X[c.name]);return c?c.name:null};
+ for(const n of order){const c=kid(n);if(!c)continue;m.updateMatrixWorld(true);const dh=wp(H[c],m).sub(wp(H[n],m)).normalize(),dx=wp(X[c],drv).sub(wp(X[n],drv)).normalize();
+  const fix=new THREE.Quaternion().setFromUnitVectors(dh,dx);const tgt=fix.multiply(wq(H[n],m));const par=H[n].parent&&H[n].parent.isBone?wq(H[n].parent,m):new THREE.Quaternion();H[n].quaternion.copy(par.invert().multiply(tgt))}
+ m.updateMatrixWorld(true);const RH={},RX={};order.forEach(n=>{RH[n]=wq(H[n],m);RX[n]=wq(X[n],drv)});
+ m.userData.sync=()=>{drv.updateMatrixWorld(true);const cur={};for(const n of order){const w=wq(X[n],drv).multiply(RX[n].clone().invert()).multiply(RH[n]);const p=H[n].parent;const pw=p&&p.isBone&&cur[p.name]?cur[p.name]:(p&&p.isBone?wq(p,m):new THREE.Quaternion());H[n].quaternion.copy(pw.clone().invert().multiply(w));cur[n]=w}};
+ const B=n=>drv.getObjectByName('mixamorig'+n);m.userData.set=(n,x,y,z)=>{const b=B(n);if(b)b.rotation.set(x,y,z)};return m}
+function docTex(title,lines,stamp){return canvasTex(512,724,(c,w,h)=>{c.fillStyle='#fbfaf6';c.fillRect(0,0,w,h);c.fillStyle='#1b1d22';c.font='bold 40px Fira Sans, sans-serif';c.textAlign='center';c.fillText(title,w/2,90);
+ c.fillRect(60,115,w-120,3);c.textAlign='left';c.font='26px Fira Sans, sans-serif';let y=180;(lines||[]).forEach(l=>{c.fillText(l,60,y);y+=44});
+ c.fillStyle='rgba(0,0,0,.12)';for(let i=0;i<7;i++)c.fillRect(60,y+20+i*36,w-120-(i%3)*60,10);
+ c.strokeStyle='#1b2a6b';c.lineWidth=4;c.beginPath();c.moveTo(300,h-110);c.bezierCurveTo(330,h-160,360,h-60,400,h-120);c.bezierCurveTo(420,h-150,440,h-90,470,h-115);c.stroke();
+ if(stamp){c.save();c.translate(w/2,h/2+60);c.rotate(-.25);c.strokeStyle='#c8102e';c.fillStyle='#c8102e';c.lineWidth=8;c.strokeRect(-190,-55,380,110);c.font='bold 52px Anton, sans-serif';c.textAlign='center';c.fillText(stamp,0,18);c.restore()}})}
+function buildS11(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1f24);s.environment=ENV.day;s.environmentIntensity=.55;
+ const key=new THREE.DirectionalLight(0xfff0dc,2.2);key.position.set(-6,7,5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-8,right:8,top:8,bottom:-8,far:40});key.shadow.bias=-.0005;s.add(key);
+ s.add(new THREE.HemisphereLight(0xe8eeff,0x3a3028,.55));const lamp=new THREE.PointLight(0xffe2b0,6,9,1.6);lamp.position.set(1.2,2.6,.2);s.add(lamp);
+ const wood=canvasTex(512,512,(c,w,h)=>{for(let i=0;i<16;i++){c.fillStyle=`hsl(28,${30+i%3*6}%,${30+(i*7)%12}%)`;c.fillRect(0,i*32,w,32);c.fillStyle='rgba(0,0,0,.25)';c.fillRect(0,i*32,w,2)}},[4,4]);wood.colorSpace=THREE.SRGBColorSpace;
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(14,14),new THREE.MeshStandardMaterial({map:wood,roughness:.6}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;s.add(floor);
+ const wallM=new THREE.MeshStandardMaterial({color:0xd9d4c9,roughness:.95});const wb=new THREE.Mesh(new THREE.BoxGeometry(14,3.4,.2),wallM);wb.position.set(0,1.7,-3.6);wb.receiveShadow=true;s.add(wb);
+ const wl=new THREE.Mesh(new THREE.BoxGeometry(.2,3.4,14),wallM);wl.position.set(-4.2,1.7,0);wl.receiveShadow=true;s.add(wl);
+ // pencere (arka duvar)
+ const win=new THREE.Mesh(new THREE.PlaneGeometry(2.6,1.5),new THREE.MeshBasicMaterial({color:0xcfe6ff}));win.position.set(1.6,1.9,-3.49);s.add(win);
+ const fr=new THREE.MeshStandardMaterial({color:0x3a3d42,roughness:.5});[[0,.75,2.7,.06],[0,-.75,2.7,.06],[-1.32,0,.06,1.56],[1.32,0,.06,1.56],[0,0,.04,1.5]].forEach(([x,y,w,h])=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,.06),fr);b.position.set(1.6+x,1.9+y,-3.47);s.add(b)});
+ // masa
+ const dM=new THREE.MeshStandardMaterial({color:0x5a3d28,roughness:.45});const top=new THREE.Mesh(new THREE.BoxGeometry(2.2,.06,1.0),dM);top.position.set(0,.76,-.3);top.castShadow=true;top.receiveShadow=true;s.add(top);
+ const side=new THREE.Mesh(new THREE.BoxGeometry(2.1,.7,.05),dM);side.position.set(0,.4,-.75);s.add(side);[-1.05,1.05].forEach(x=>{const l=new THREE.Mesh(new THREE.BoxGeometry(.05,.74,.95),dM);l.position.set(x,.37,-.3);l.castShadow=true;s.add(l)});
+ // monitör, kalemlik, dosyalar
+ const dark=new THREE.MeshStandardMaterial({color:0x15171a,roughness:.4});const mon=new THREE.Mesh(new THREE.BoxGeometry(.7,.42,.03),dark);mon.position.set(-.6,1.08,-.6);mon.rotation.y=.35;s.add(mon);
+ const scr=new THREE.Mesh(new THREE.PlaneGeometry(.66,.38),new THREE.MeshBasicMaterial({color:0x6d8fb8}));scr.position.set(-.594,1.08,-.585);scr.rotation.y=.35;s.add(scr);const st=new THREE.Mesh(new THREE.BoxGeometry(.06,.24,.06),dark);st.position.set(-.6,.88,-.62);s.add(st);
+ const fM=[0xc0392b,0x2c5f9e,0xd4a017];fM.forEach((c,i)=>{const f=new THREE.Mesh(new THREE.BoxGeometry(.34,.05,.25),new THREE.MeshStandardMaterial({color:c,roughness:.7}));f.position.set(.75,.81+i*.05,-.55);f.rotation.y=.1*i;f.castShadow=true;s.add(f)});
+ // sandalyeler
+ function chair(x,z,ry,col){const g=new THREE.Group();const m=new THREE.MeshStandardMaterial({color:col,roughness:.6});const seat=new THREE.Mesh(new THREE.BoxGeometry(.52,.08,.5),m);seat.position.y=.47;g.add(seat);const back=new THREE.Mesh(new THREE.BoxGeometry(.52,.6,.07),m);back.position.set(0,.8,-.23);g.add(back);
+  const leg=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.45),dark);leg.position.y=.22;g.add(leg);const base=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.03,5),dark);base.position.y=.03;g.add(base);g.traverse(o=>{if(o.isMesh)o.castShadow=true});g.position.set(x,0,z);g.rotation.y=ry;s.add(g);return g}
+ chair(0,-1.25,0,0x222428);chair(0,.75,Math.PI,0x3b4a5a);
+ // dolap + bitki
+ const cab=new THREE.Mesh(new THREE.BoxGeometry(.6,1.3,.5),new THREE.MeshStandardMaterial({color:0x8d9399,metalness:.4,roughness:.5}));cab.position.set(-3.6,.65,-3.0);cab.castShadow=true;s.add(cab);
+ const pot=new THREE.Mesh(new THREE.CylinderGeometry(.18,.14,.35,16),new THREE.MeshStandardMaterial({color:0xece6da}));pot.position.set(3.2,.17,-3.1);s.add(pot);const leaf=new THREE.Mesh(new THREE.SphereGeometry(.45,12,10),new THREE.MeshStandardMaterial({color:0x2f6b35,roughness:.9}));leaf.position.set(3.2,.75,-3.1);leaf.scale.set(1,1.3,1);s.add(leaf);
+ // belge
+ const P=window.PI_DOC||{t:'İSTİFA DİLEKÇESİ',l:['Kendi isteğimle','ayrılmak istiyorum.'],s:''};
+ const paper=new THREE.Mesh(new THREE.PlaneGeometry(.30,.42),new THREE.MeshStandardMaterial({map:docTex(P.t,P.l,P.s),roughness:.8,side:THREE.DoubleSide}));paper.material.map.colorSpace=THREE.SRGBColorSpace;paper.castShadow=true;s.add(paper);
+ const boss=makeRealG(patronG);s.add(boss);const wA=makeRealG(ofisciG),wB=makeRealG(isciG);s.add(wA);s.add(wB);let wkr=wA;wB.visible=false;
+ function setWorker(k){wkr=k==='isci'?wB:wA;wA.visible=wkr===wA;wB.visible=wkr===wB}
+ function setDoc(t,l,st){const tx=docTex(t,l,st);tx.colorSpace=THREE.SRGBColorSpace;paper.material.map=tx;paper.material.needsUpdate=true}
+ const mDoc=new THREE.Object3D();s.add(mDoc);
+ const ti=6.0;
+ function upd(lt){const dt=lt-ti;const ta=ti-1.2;
+  // işveren: masanın arkasında ayakta; belgeyi masaya bırakır
+  const bs=boss.userData.set;boss.position.set(.15,0,-1.05);boss.rotation.set(0,0,0);
+  bs('Hips',0,0,0);bs('Spine',.05,0,0);bs('Neck',(window.BNECK!==undefined?window.BNECK:.15),0,0);bs('Head',(window.BHEAD||0),0,0);bs('LeftUpLeg',0,0,-.05);bs('RightUpLeg',0,0,.05);bs('LeftLeg',0,0,0);bs('RightLeg',0,0,0);
+  const r=lt<ta?0:Math.min(1,(lt-ta)/1.1);const back=dt>0?sm(Math.min(1,dt/1.2)):0;const k=r*(1-back);
+  bs('LeftArm',0,0,-1.25);bs('LeftForeArm',0,-.2,0);
+  bs('RightArm',lerp(0,.25,k),lerp(0,1.25,k),lerp(1.25,.55,k));bs('RightForeArm',0,lerp(.2,.15,k),0);bs('Spine1',.25*k,0,0);
+  // işçi: karşıda oturuyor
+  const ws=wkr.userData.set;wkr.position.set(0,-.44,.80);wkr.rotation.set(0,Math.PI,0);
+  ws('Hips',0,0,0);ws('LeftUpLeg',-1.5,0,-.08);ws('RightUpLeg',-1.5,0,.08);ws('LeftLeg',1.55,0,0);ws('RightLeg',1.55,0,0);
+  const lean=dt>0?sm(Math.min(1,dt/.6)):0;ws('Spine',.12+.15*lean,0,0);ws('Neck',.25*lean,0,0);ws('LeftArm',.35,-1.1,-.95);ws('RightArm',.35,1.1,.95);ws('LeftForeArm',0,-.6,0);ws('RightForeArm',0,.6,0);
+  // belge yolu: işverenin elinden masaya kayar
+  const p0=new THREE.Vector3(.45,1.25,-.95),p1=new THREE.Vector3(.05,.795,-.05);const u=lt<ta?0:Math.min(1,(lt-ta)/1.2);const e=u*u*(3-2*u);
+  paper.position.lerpVectors(p0,p1,e);paper.position.y+=Math.sin(Math.PI*e)*.12;paper.rotation.set(-Math.PI/2*Math.min(1,e*1.3),0,lerp(.3,-.08,e));paper.visible=lt>ta-.3;mDoc.position.copy(paper.position);
+  boss.userData.sync();wkr.userData.sync();
+  return {dt,boss,wkr,doc:mDoc}}
+ return {s,upd,ti,setWorker,setDoc}}
+S.push(buildS11());
+
 
 
 
@@ -1757,6 +1825,12 @@ window.dbgS=function(i,u,lt,P,L,f,ex){const sc=S[i];const st=sc[u](lt);camera.po
 window.dbg10=function(lt){const sc=S[8];const st=sc.upd(lt);camera.position.set(-16,11,-16);camera.fov=46;camera.updateProjectionMatrix();camera.lookAt(-2.5,0,2);renderer.toneMappingExposure=1;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.dbgIs1=function(lt){const sc=S[9];sc.upd(lt);camera.position.set(9,6.5,9);camera.fov=46;camera.updateProjectionMatrix();camera.lookAt(.5,1.6,-1);renderer.toneMappingExposure=1.05;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.dbgIs1yak=function(lt){if(window.ARMV)window.ARMP=window.ARMV[Math.round(lt*10)%10];const sc=S[9];sc.upd(lt);camera.position.set(4.2,3.6,2.2);camera.fov=40;camera.updateProjectionMatrix();camera.lookAt(.6,3.4,-.7);renderer.toneMappingExposure=1.05;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
+window.dbgOfYuz=function(lt){const sc=S[10];sc.upd(lt);camera.position.set(.9,1.75,.4);camera.fov=35;camera.updateProjectionMatrix();camera.lookAt(.15,1.6,-1.05);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
+window.dbgOfC=function(lt){const sc=S[10];sc.upd(lt);const c=window.CAMP;camera.position.set(c[0],c[1],c[2]);camera.fov=30;camera.updateProjectionMatrix();camera.lookAt(.15,1.5,-1.05);renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
+window.dbgRaw=function(mode){const sc=new THREE.Scene();sc.background=new THREE.Color(0x888888);sc.add(new THREE.HemisphereLight(0xffffff,0x444444,2));const dl=new THREE.DirectionalLight(0xffffff,2);dl.position.set(2,3,4);sc.add(dl);
+ let m;if(mode==0){m=SkeletonUtils.clone(patronG.scene)}else{m=makeRealG(patronG);if(mode==2){m.userData.set('Hips',0,0,0);m.userData.sync()}}sc.add(m);m.updateMatrixWorld(true);
+ const c=window.CAMP||[0,1.65,1.2];camera.position.set(c[0],c[1],c[2]);camera.fov=30;camera.updateProjectionMatrix();camera.lookAt(0,1.6,0);renderer.render(sc,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
+window.dbgOf=function(lt){const sc=S[10];sc.upd(lt);camera.position.set(3.4,2.6,2.6);camera.fov=48;camera.updateProjectionMatrix();camera.lookAt(0,.95,-.3);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.dbg9top=function(lt){const sc=S[7];sc.upd(lt);camera.position.set(-3,60,20);camera.fov=50;camera.updateProjectionMatrix();camera.lookAt(-3,0,20.01);renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.READY=true;
 </script></body></html>

@@ -1,0 +1,33 @@
+name: Render Kayıp Gölge
+on:
+  push:
+    branches: [main]
+    paths: [video/yumurta-kayip-golge/story.js]
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            video/yumurta-kayip-golge
+            video/pumpkin2/motor
+      - name: Prepare animation engine
+        run: |
+          git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git "$RUNNER_TEMP/yumurta-stili"
+          git -C "$RUNNER_TEMP/yumurta-stili" apply "$GITHUB_WORKSPACE/video/pumpkin2/motor/toon_pumpkin.patch"
+          mkdir -p "$RUNNER_TEMP/yumurta-stili/stories/kayip-golge"
+          cp video/yumurta-kayip-golge/story.js "$RUNNER_TEMP/yumurta-stili/stories/kayip-golge/"
+          npm install --prefix "$RUNNER_TEMP/yumurta-stili/engine"
+      - name: Render draft
+        run: |
+          cd "$RUNNER_TEMP/yumurta-stili/engine"
+          node render.mjs kayip-golge --scale=0.5 --stills=1,5,9,14,20,25,29,35
+          node render.mjs kayip-golge --scale=0.5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kayip-golge-goruntu
+          path: ${{ runner.temp }}/yumurta-stili/stories/kayip-golge/out/

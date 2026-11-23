@@ -26,13 +26,15 @@ KANALLAR = {
     "UCqVae87VSs6HokK4Qdm29Hw": ("Yolu Seç !", "TR"),
     "UCDwQWwMPkGKxsEz7t1HCPbA": ("LVL MAX", "EN"),
 }
-# Yalnız YORUMLARI taranan kanallar (yayın tablosuna / analize / otomatik eylemlere girmez)
+# Ek kanallar: yorumları taranır; videoları Yayın Takibi TABLOSUNA ve "Toplam izlenme"ye girer,
+# ama kayıtları "salt_tablo": True ile işaretlenir → analize / otomatik eylemlere (analiz.py, kanca.py) GİRMEZ.
 YORUM_EK_KANALLAR = {
     "UCYtvxRIP1eF3-f0TAqh2PvA": ("Kara Kutu Mayday", "TR"),
     "UCsV0ubiBEy8dxigNk8I_LqA": ("Black Box Files Mayday", "EN"),
     "UCM6LhKp6tDx4ddZ65oZUCvQ": ("Caja Negra", "ES"),
 }
-KANAL_DIL = {ad: dil for _, (ad, dil) in KANALLAR.items()}
+SALT_TABLO_KANALLAR = {ad for ad, _ in YORUM_EK_KANALLAR.values()}
+KANAL_DIL = {ad: dil for _, (ad, dil) in {**KANALLAR, **YORUM_EK_KANALLAR}.items()}
 KANAL_NORMAL = {
     "Kozmos Lab TR (@kozmoslabtr)": "Kozmos Lab TR",
     "Kozmos Lab (@kozmoslab)": "Kozmos Lab",
@@ -50,6 +52,18 @@ def getir(url):
         return r.read()
 
 
+def yeni_kayit(**alan):
+    """Yeni tablo kaydı; ek (Kara Kutu) kanallarınki salt_tablo ile işaretlenir."""
+    if alan.get("kanal") in SALT_TABLO_KANALLAR:
+        alan["salt_tablo"] = True
+    return alan
+
+
+def yok_404(e):
+    """Yükleme listesi 404: kanalda henüz herkese açık video yok (YouTube listeyi ilk yüklemede açar)."""
+    return getattr(e, "code", None) == 404
+
+
 def seri_tahmin(t, kanal=""):
     tl = (t or "").lower()
     if "kozmos" in (kanal or "").lower():
@@ -62,6 +76,8 @@ def seri_tahmin(t, kanal=""):
         return "Biliyor muydun?" if "TR" in kanal else "Did you know?"
     if kanal == "Ömür Dediğin":
         return "Hatıra Dayı"
+    if kanal in SALT_TABLO_KANALLAR:
+        return "Kara Kutu"
     if any(k in tl for k in ["10 kasım", "10kasım", "09.05", "paseo de la reforma", "memorial to a turkish commander"]):
         return "10 Kasım"
     if any(k in tl for k in ["emu", "kedi", "cat died", "güvercin", "pigeon", "patileri", "paws", "çavuş olan ayı", "caligula"]):
@@ -102,6 +118,8 @@ def main():
             sn = SERI_NORMAL.get(x.get("seri"))
             if sn and x.get("seri") != sn:
                 x["seri"] = sn; degisti += 1
+            if x.get("kanal") in SALT_TABLO_KANALLAR and not x.get("salt_tablo"):
+                x["salt_tablo"] = True; degisti += 1
 
     vid_ix = {x.get("vid"): x for x in K if x.get("vid")}
 
@@ -122,6 +140,7 @@ def main():
                     x["kanal"] = kn
                     x["dil"] = DIL_NORMAL.get(x.get("dil")) or KANAL_DIL.get(kn) or x.get("dil")
                     x.update(seri=seri_tahmin(v.get("baslik", ""), kn), ureten="?")
+                    x = yeni_kayit(**x)
                     K.append(x); vid_ix[v["vid"]] = x; degisti += 1
                     notlar.append(f"Yeni içerik eklendi: {kn} · {v.get('baslik')}")
                 for k in ("durum", "tarih", "saat", "izlenme"):
@@ -132,12 +151,12 @@ def main():
         notlar.append(f"CutkodA canlı ucu okunamadı: {e}")
 
     # 1) RSS (canlı uçta dönmeyen tüm kanallar için de taranır)
-    rss_hedef = {cid: (kanal, dil) for cid, (kanal, dil) in KANALLAR.items() if kanal not in canli_kanallar}
+    rss_hedef = {cid: (kanal, dil) for cid, (kanal, dil) in {**KANALLAR, **YORUM_EK_KANALLAR}.items() if kanal not in canli_kanallar}
     for cid, (kanal, dil) in rss_hedef.items():
         try:
             kok = ET.fromstring(getir(f"https://www.youtube.com/feeds/videos.xml?channel_id={cid}"))
         except Exception as e:
-            if kanal != "Ömür Dediğin":
+            if kanal != "Ömür Dediğin" and not (kanal in SALT_TABLO_KANALLAR and yok_404(e)):
                 notlar.append(f"RSS okunamadı ({kanal}): {e}")
             continue
         for en in kok.findall("a:entry", NS):
@@ -151,7 +170,7 @@ def main():
             short = "/shorts/" in href or "#shorts" in baslik.lower()
             x = vid_ix.get(vid)
             if x is None:
-                x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
+                x = yeni_kayit(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
                          seri=seri_tahmin(baslik, kanal), baslik=baslik, durum="Yayında", tarih="", saat="",
                          izlenme=None, link=(f"https://youtube.com/shorts/{vid}" if short else f"https://youtu.be/{vid}"),
                          vid=vid, ureten="?")
@@ -164,10 +183,13 @@ def main():
                 if x.get(k) != v:
                     x[k] = v; degisti += 1
 
-    # 2) YouTube Data API (isteğe bağlı): kanalların herkese açık yüklemelerini bul + tüm izlenmeleri güncelle
+    # 2) YouTube Data API (isteğe bağlı): kanalların herkese açık yüklemelerini bul + tüm izlenmeleri güncelle.
+    #    İzlenme/beğeni için SON SÖZ API'dedir (Format Raporu ile aynı kaynak); 2c'deki Analytics anlık görüntüsü
+    #    API'nin okuduğu videolarda izlenme/beğeniyi geri yazmaz.
     anahtar = os.environ.get("YT_API_KEY", "").strip()
+    api_okunan = set()
     if anahtar:
-        for cid, (kanal, dil) in KANALLAR.items():
+        for cid, (kanal, dil) in {**KANALLAR, **YORUM_EK_KANALLAR}.items():
             try:
                 q = urllib.parse.urlencode({"part": "contentDetails", "playlistId": "UU" + cid[2:], "maxResults": 50, "key": anahtar})
                 ids = [i["contentDetails"]["videoId"] for i in json.loads(getir("https://www.googleapis.com/youtube/v3/playlistItems?" + q)).get("items", [])]
@@ -180,7 +202,7 @@ def main():
                         dk = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", v["contentDetails"].get("duration", ""))
                         sure = sum(int(a or 0) * b for a, b in zip(dk.groups(), (3600, 60, 1))) if dk else 999
                         short = sure <= 180
-                        x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
+                        x = yeni_kayit(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
                                  seri=seri_tahmin(baslik, kanal), baslik=baslik, durum="Yayında", tarih=yay.strftime("%Y-%m-%d"),
                                  saat=yay.strftime("%H:%M"), izlenme=None,
                                  link=(f"https://youtube.com/shorts/{v['id']}" if short else f"https://youtu.be/{v['id']}"),
@@ -188,6 +210,8 @@ def main():
                         K.append(x); vid_ix[v["id"]] = x; degisti += 1
                         notlar.append(f"Yeni içerik eklendi: {kanal} · {baslik}")
             except Exception as e:
+                if yok_404(e):
+                    continue  # kanalda henüz herkese açık video yok
                 if kanal != "Ömür Dediğin":
                     notlar.append(f"YouTube API kanal listesi okunamadı ({kanal}): {e}")
         vids = [v for v in vid_ix if v]
@@ -200,6 +224,8 @@ def main():
             for it in d.get("items", []):
                 x = vid_ix.get(it["id"])
                 v = it.get("statistics", {}).get("viewCount")
+                if x is not None and v is not None:
+                    api_okunan.add(it["id"])
                 if x is not None and v is not None and x.get("izlenme") != int(v):
                     x["izlenme"] = int(v); degisti += 1
                 lk = it.get("statistics", {}).get("likeCount")
@@ -373,7 +399,7 @@ def main():
                     m = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", sure)
                     sn = (int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + int(m.group(3) or 0)) if m else 999
                     short = sn <= 180
-                    x = dict(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
+                    x = yeni_kayit(platform="YouTube", kanal=kanal, dil=dil, tur="Short" if short else "Video",
                              seri=seri_tahmin(v.get("baslik") or "", kanal), baslik=v.get("baslik") or "", durum=d, tarih="", saat="",
                              izlenme=None, link=(f"https://youtube.com/shorts/{vid}" if short else f"https://youtu.be/{vid}"), vid=vid, ureten="?")
                     K.append(x); vid_ix[vid] = x; degisti += 1
@@ -387,6 +413,8 @@ def main():
                 for ek_alan in ("izlenme_yuzde", "begeni", "izlenme_dk", "etkin_izlenme", "tutma_yuzdesi", "paylasim", "abone_kazanc", "ort_sure_sn"):
                     if v.get(ek_alan) is not None:
                         yeni[ek_alan] = v[ek_alan]
+                if vid in api_okunan:   # izlenme/beğeni: API daha taze, Analytics anlık görüntüsü ezmesin
+                    yeni.pop("izlenme", None); yeni.pop("begeni", None)
                 for k2, val in yeni.items():
                     if x.get(k2) != val:
                         x[k2] = val; degisti += 1

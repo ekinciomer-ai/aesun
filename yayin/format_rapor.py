@@ -158,6 +158,8 @@ def api_videolar(anahtar):
                 tok = d.get("nextPageToken")
                 if not tok: break
         except Exception as e:
+            if getattr(e, "code", None) == 404:   # YouTube yükleme listesini ilk herkese açık videoda açar
+                eksik.append(f"{kanal}: henüz herkese açık video yok"); continue
             eksik.append(f"{kanal}: liste okunamadı ({e})"); continue
         if not ids:
             eksik.append(f"{kanal}: herkese açık video yok"); continue
@@ -182,7 +184,7 @@ def yayin_videolar(yj):
         out.append(dict(ch=kanal, dil=x.get("dil"), id=x["vid"], t=x.get("baslik", ""), d=x.get("tarih", ""),
                         v=x.get("izlenme") or 0, l=x.get("begeni") or 0, c=x.get("yorum_sayisi") or 0,
                         dur=int(x.get("ort_sure_sn") or 0), typ="Shorts" if x.get("tur") == "Short" else "Uzun"))
-    return out, ["YT_API_KEY yok: yalnız Yayın Takibi tablosundaki videolar (Kara Kutu hariç)"]
+    return out, ["YT_API_KEY yok: yalnız Yayın Takibi tablosundaki videolar"]
 
 
 def main():

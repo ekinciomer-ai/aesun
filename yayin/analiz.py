@@ -105,7 +105,7 @@ def main():
     j = yukle("yayin.json", {"kayitlar": []})
     gun = yukle("gecmis.json", {"gunler": {}}).get("gunler", {})
     simdi = datetime.now(TZ)
-    K = j.get("kayitlar", [])
+    K = [x for x in j.get("kayitlar", []) if not x.get("salt_tablo")]   # Kara Kutu kanalları: yalnız tablo, analize girmez
 
     # 1) Video başına ilk 48 saat izlenmesi (Short + Video)
     vids = []

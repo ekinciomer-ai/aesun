@@ -1,0 +1,48 @@
+{
+ "kod": "KZ_MRK_16_KABLO",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Akım 2 katına çıkınca kablo kaç kat ısınır? 🔌🔥 #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Akım 2 katına çıkınca kablo kaç kat ısınır? 🔌🔥 #shorts",
+ "aciklama": "Bir telde ısıya dönüşen güç P = I² × R'dir (Joule yasası; OpenStax College Physics 20.4). Akım karesiyle girdiği için akım 2 katına çıkınca ısı 4 katına çıkar.\n\nHesap: 10 m uzatmada akım gidip geldiği için 20 m iletken vardır. IEC 60228'e göre 1,5 mm² esnek (sınıf 5) bakır iletkenin 20 °C'deki en yüksek direnci 13,3 Ω/km → 20 m ≈ 0,27 Ω. 2.000 W ısıtıcı 230 V'ta I = 2.000 ÷ 230 ≈ 8,7 A çeker → P = 8,7² × 0,266 ≈ 20 W. İki ısıtıcıda ≈ 17,4 A → ≈ 80 W (4 kat). Not: 17,4 A, çoğu uzatmanın 16 A sınırını aşar; uzatmanın üzerindeki amper/vat sınırına uy. Gerçek değer kablonun kesitine, uzunluğuna ve sıcaklığına göre değişir; burada tipik örnek hesap verilmiştir.\n\nKarşılaştırmalar: 800 lümenlik LED ampul ≈ 8,8 W (Signify veri sayfası) → 20 W ≈ 2 LED ampulden biraz fazla; eski akkor ampul 60 W (ENERGY STAR).\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: OpenStax College Physics 2e §20.4 (P = I²R); IEC 60228 iletken direnç tablosu (mycableengineering.com); Signify 8.8A19 LED veri sayfası; ENERGY STAR – Learn About Brightness.\n\n#kozmoslab #elektrik #kablo #enerji #fizik #mühendislik #bilim #merak #shorts",
+ "etiketler": [
+  "kablo",
+  "uzatma kablosu",
+  "elektrik",
+  "akım",
+  "joule yasası",
+  "ısınma",
+  "enerji",
+  "fizik",
+  "mühendislik",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "OpenStax College Physics 2e §20.4 Electric Power and Energy: P = I²R (denklem 20.30)",
+  "IEC 60228 iletken direnci (mycableengineering.com, 'Maximum Resistance of Conductors in mΩ/m'): 1,5 mm² düz bakır sınıf 1/2: 12,1; sınıf 5/6: 13,3",
+  "Signify (Philips) veri sayfası 929003584964, 8.8A19 LED: Power Consumption 8.8 W, 800 lm, 60 W eşdeğeri",
+  "ENERGY STAR – Learn About Brightness: eski 60 W akkor ampul = en az 800 lümen",
+  "Türkiye şebeke gerilimi 230 V (TS EN 50160 / IEC 60038 nominal)",
+  "Hesap: 20 m × 13,3 mΩ/m = 0,266 Ω; 2.000/230 = 8,70 A; 8,70² × 0,266 = 20,1 W; 17,39² × 0,266 = 80,5 W; 80,5/20,1 = 4"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_16_KABLO.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_16_KABLO.mp4"
+}

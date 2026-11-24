@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-24T09:02+03:00",
+ "olusturma": "2026-11-24T10:03+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -781,8 +781,8 @@
    "seri": "Gündem + Tarih",
    "karar": "DURDUR",
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
-   "olculen": 3,
-   "erken": 5,
+   "olculen": 4,
+   "erken": 4,
    "medyan_48sa": 4,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
@@ -868,15 +868,15 @@
   }
  ],
  "esikler": {
+  "Nasıl Yapıldı": 135,
   "LVL MAX": 50,
   "Ömür Dediğin": 50,
-  "Kozmos Lab TR": 212,
   "Estudio Antiguo": 126,
+  "Ancient Studio": 192,
+  "Kozmos Lab TR": 212,
   "Yolu Seç !": 262,
-  "Kozmos Lab": 93,
-  "Nasıl Yapıldı": 135,
   "Antik Stüdyo": 637,
-  "Ancient Studio": 192
+  "Kozmos Lab": 93
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1067,6 +1067,10 @@
    "12:00": {
     "n": 1,
     "medyan": 8
+   },
+   "18:00": {
+    "n": 1,
+    "medyan": 0
    }
   }
  },
@@ -1736,7 +1740,7 @@
   "Estudio Antiguo: son 6 Short'tan 0 tanesi tuttu (eşik 126 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 93 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 212 izlenme / 48 sa).",
-  "LVL MAX: son 3 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "LVL MAX: son 4 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
@@ -1813,11 +1817,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Ancient Studio",
-   "baslik": "What happened to the emus? The end of the Emu War 🐦",
-   "i48": 0
-  },
-  {
    "kanal": "Estudio Antiguo",
    "baslik": "¿Cómo se pasan 70 barcos por encima de una colina? ⚓ #shorts",
    "i48": 0
@@ -1835,6 +1834,11 @@
   {
    "kanal": "Kozmos Lab",
    "baslik": "What is a supermoon? 🌕 #shorts",
+   "i48": 0
+  },
+  {
+   "kanal": "LVL MAX",
+   "baslik": "Çalıntı Araçla Kavşağa Daldı, İçinde 2 Çocuk Varken Kaçmaya Çalıştı!",
    "i48": 0
   }
  ]

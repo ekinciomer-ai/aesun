@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-24T02:52+03:00",
+ "olusturma": "2026-11-24T04:03+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -130,10 +130,10 @@
   },
   "LVL MAX": {
    "gunluk_short_kotasi": 1,
-   "seri_dagilimi": {
-    "Gündem + Tarih": 1
-   },
-   "durdurulan": []
+   "seri_dagilimi": {},
+   "durdurulan": [
+    "Gündem + Tarih"
+   ]
   },
   "Ömür Dediğin": {
    "gunluk_short_kotasi": 0,
@@ -778,16 +778,16 @@
   {
    "kanal": "LVL MAX",
    "seri": "Gündem + Tarih",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
-   "erken": 6,
+   "karar": "DURDUR",
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
+   "olculen": 3,
+   "erken": 5,
    "medyan_48sa": 4,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
-    "baslik": "186 km/s Hızla Kaçarken Kamyona Çarptı! | Polis Kovalamacası",
-    "i48": 4
+    "baslik": "150 km/s Hızla Otoyol Çıkışını Kaçırdı, Doğrudan Duvara Çakıldı!",
+    "i48": 8
    }
   },
   {
@@ -867,15 +867,15 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 93,
-  "Kozmos Lab TR": 212,
-  "Estudio Antiguo": 126,
-  "Ancient Studio": 192,
-  "LVL MAX": 50,
-  "Nasıl Yapıldı": 135,
   "Ömür Dediğin": 50,
   "Antik Stüdyo": 637,
-  "Yolu Seç !": 262
+  "Ancient Studio": 192,
+  "Yolu Seç !": 262,
+  "Kozmos Lab": 93,
+  "Kozmos Lab TR": 212,
+  "LVL MAX": 50,
+  "Nasıl Yapıldı": 135,
+  "Estudio Antiguo": 126
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1058,6 +1058,10 @@
    "06:00": {
     "n": 1,
     "medyan": 3
+   },
+   "12:00": {
+    "n": 1,
+    "medyan": 8
    }
   }
  },
@@ -1672,7 +1676,7 @@
   "Estudio Antiguo: son 6 Short'tan 0 tanesi tuttu (eşik 126 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 93 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 212 izlenme / 48 sa).",
-  "LVL MAX: son 2 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "LVL MAX: son 3 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
@@ -1690,6 +1694,7 @@
   "Kozmos Lab · Energy Sources: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %100'i tuttu (eşik 212 izlenme / 48 sa).",
+  "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1626 izlenme, 3 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",

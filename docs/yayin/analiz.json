@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-24T10:03+03:00",
+ "olusturma": "2026-11-24T11:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -660,13 +660,16 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Drone Nasıl Çalışır?",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 2,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 1,
+   "medyan_48sa": 517,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Drone havada nasıl durur? 🚁 #shorts",
+    "i48": 517
+   }
   },
   {
    "kanal": "Kozmos Lab TR",
@@ -868,15 +871,15 @@
   }
  ],
  "esikler": {
-  "Nasıl Yapıldı": 135,
   "LVL MAX": 50,
-  "Ömür Dediğin": 50,
-  "Estudio Antiguo": 126,
-  "Ancient Studio": 192,
-  "Kozmos Lab TR": 212,
-  "Yolu Seç !": 262,
   "Antik Stüdyo": 637,
-  "Kozmos Lab": 93
+  "Kozmos Lab TR": 212,
+  "Estudio Antiguo": 126,
+  "Ömür Dediğin": 50,
+  "Nasıl Yapıldı": 135,
+  "Kozmos Lab": 93,
+  "Ancient Studio": 192,
+  "Yolu Seç !": 262
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -991,8 +994,8 @@
     "medyan": 12
    },
    "19:00": {
-    "n": 9,
-    "medyan": 427
+    "n": 10,
+    "medyan": 438
    },
    "21:00": {
     "n": 6,

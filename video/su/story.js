@@ -218,10 +218,10 @@ function buildClinic(scene) {
   const flask = new THREE.Mesh(new THREE.CylinderGeometry(.06, .1, .22, 14), new THREE.MeshBasicMaterial({ color: '#6ad2ff' }));
   flask.position.set(-.18, .89, .06); tbl.add(flask);
 
-  // P01 Kanca için büyük düşen parlak mavi SU DAMLASI
-  dyn.hookDrop = new THREE.Mesh(new THREE.SphereGeometry(.12, 18, 14), new THREE.MeshBasicMaterial({ color: '#6cd8ff' }));
-  dyn.hookDrop.scale.set(.82, 1.32, .82); dyn.hookDrop.position.set(-.48, 2.2, -.45); dyn.hookDrop.userData.noShadow = true; g.add(dyn.hookDrop);
-  fx.dropGlow = glow(scene, [-.48, 1.4, -.4], { size: 1.4, color: '#ff5c4d', strength: .45 });
+  // P01 Kanca için Elena'nın yanında düşen parlak mavi SU DAMLASI (yüzünü asla kapatmaz!)
+  dyn.hookDrop = new THREE.Mesh(new THREE.SphereGeometry(.07, 16, 12), new THREE.MeshBasicMaterial({ color: '#6cd8ff' }));
+  dyn.hookDrop.scale.set(.82, 1.32, .82); dyn.hookDrop.position.set(-.20, 2.15, -.58); dyn.hookDrop.userData.noShadow = true; g.add(dyn.hookDrop);
+  fx.dropGlow = glow(scene, [-.48, 1.35, -1.08], { size: 1.3, color: '#ff5c4d', strength: .26 });
 
   // Işık: soğuk yağmur mavisi dolgu + sıcak masa lambası/anahtar ışık
   const L = new THREE.Group();
@@ -269,7 +269,7 @@ function buildHistamine(scene) {
   fx.histGlow = glow(scene, [200, 1.25, -.9], { size: 2.2, color: '#ff5448', strength: .48 });
 
   // P07 GÜNDELİK BENZETME: YANGIN ALARMI DEDEKTÖRÜ (bir damla suya kırmızı siren çalıyor!)
-  dyn.alarmGrp = new THREE.Group(); dyn.alarmGrp.position.set(.30, 0, .2); g.add(dyn.alarmGrp);
+  dyn.alarmGrp = new THREE.Group(); dyn.alarmGrp.position.set(.24, 0, .2); g.add(dyn.alarmGrp);
   // Tavan plakası + kırmızı siren kubbesi
   const detBase = new THREE.Mesh(new THREE.CylinderGeometry(.44, .38, .16, 24), flat('#e6e2d8'));
   detBase.position.set(0, 2.05, 0); dyn.alarmGrp.add(detBase);
@@ -279,11 +279,11 @@ function buildHistamine(scene) {
   dyn.alarmDrop = new THREE.Mesh(new THREE.SphereGeometry(.12, 16, 12), new THREE.MeshBasicMaterial({ color: '#62d4ff' }));
   dyn.alarmDrop.scale.set(.8, 1.35, .8); dyn.alarmDrop.position.set(0, 1.15, .08); dyn.alarmDrop.userData.noShadow = true; dyn.alarmGrp.add(dyn.alarmDrop);
   const alarmLbl = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.22, .44),
+    new THREE.PlaneGeometry(1.06, .38),
     new THREE.MeshBasicMaterial({ map: badgeTex('YANGIN ALARMI!', 'TEK DAMLA SU', '#22141e', '#ffcf5c', '#ff4b3e'), transparent: true })
   );
   alarmLbl.position.set(0, .52, .05); alarmLbl.userData.noShadow = true; dyn.alarmGrp.add(alarmLbl);
-  fx.alarmGlow = glow(scene, [200.30, 1.85, .3], { size: 2.6, color: '#ff4238', strength: .55 });
+  fx.alarmGlow = glow(scene, [200.24, 1.85, .3], { size: 2.5, color: '#ff4238', strength: .52 });
 
   const L = new THREE.Group();
   L.add(new THREE.HemisphereLight('#92b6f2', '#3c3456', 1.95));
@@ -332,7 +332,7 @@ function cameraPath() {
   const k = [
     // P01 PARADOKS KANCA (4 hızlı plan): yağmurlu klinik → düşen mavi damla → kırmızı uyarı → Elena yakın
     { t: 0, pos: [-.35, 1.32, 3.85], look: [-.1, 1.2, -.85], fov: 50, creep: .26, drift: .03 },
-    { t: P(1, .30), dur: .38, pos: [-.48, 1.55, 1.45], look: [-.48, 1.42, -.48], fov: 46, creep: .28 },
+    { t: P(1, .30), dur: .38, pos: [-.36, 1.50, 1.65], look: [-.36, 1.40, -.60], fov: 46, creep: .24 },
     { t: P(1, .60), dur: .28, move: 'whip', pos: [.62, 1.98, .15], look: [.64, 2.02, -3.05], fov: 46, creep: .28 },
     { t: P(1, .86), dur: .28, move: 'whip', pos: [-.48, 1.28, 1.55], look: [-.48, 1.24, -.75], fov: 44, creep: .26 },
     // P02 "Bakın, 1964'te genç bir kız...": Elena + Arkadaşı tam ikili plan!
@@ -341,12 +341,12 @@ function cameraPath() {
     { t: PS(3) + .14, dur: .30, move: 'whip', pos: [.48, 1.28, 2.25], look: [.44, 1.22, -.78], fov: 46, creep: .28 },
     // P04 Dr. Shelley saf su damlatır: test panosu KIRMIZIYA döner!
     { t: PS(4) + .16, dur: .34, move: 'whip', pos: [.0, 1.38, 3.55], look: [.04, 1.34, -1.2], fov: 50, creep: .24 },
-    // P05 Dr. Shelley vakayı kaydeder (< 100 VAKA · 1964)
-    { t: PS(5) + .14, dur: .32, move: 'whip', pos: [.35, 1.52, 2.85], look: [.42, 1.55, -1.7], fov: 50, creep: .26 },
+    // P05 Dr. Shelley vakayı kaydeder (< 100 VAKA · 1964) — Elena, Dr. Shelley ve pano tam kadraj!
+    { t: PS(5) + .14, dur: .32, move: 'whip', pos: [.06, 1.44, 3.65], look: [.06, 1.44, -1.55], fov: 50, creep: .22 },
     // P06 WHIP PAN → SET 2: Dev H2O damlası + Histamin Patlaması!
     { t: PS(6) + .14, dur: .32, move: 'whip', pos: [200.0, 1.65, 4.45], look: [200.0, 1.72, -1.2], fov: 50, creep: .26 },
     // P07 Gündelik benzetme: Dr. Shelley + kırmızı yanıp sönen Yangın Alarmı dedektörü!
-    { t: PS(7) + .16, dur: .36, move: 'whip', pos: [200.0, 1.26, 4.55], look: [199.96, 1.22, .2], fov: 50, creep: .20 },
+    { t: PS(7) + .16, dur: .36, move: 'whip', pos: [200.0, 1.26, 4.82], look: [199.96, 1.22, .2], fov: 50, creep: .18 },
     // P08 WHIP PAN → SET 1: Yağmurlu pencere önünde Elena (hüzünlü/endişeli)
     { t: PS(8) + .14, dur: .32, move: 'whip', pos: [-.62, 1.48, 2.45], look: [-.78, 1.52, -2.0], fov: 48, creep: .24 },
     // P09 WHIP PAN → SET 3: Yağmur sonrası gün batımı terası (Elena + Dr. Shelley tam kadraj!)
@@ -427,17 +427,17 @@ export function frame(t, ctx) {
   for (const b of fx.cBeams) b.visible = here === 'clinic';
   fx.lampGlow.visible = here === 'clinic';
   fx.brdGlow.visible = here === 'clinic';
-  fx.dropGlow.visible = here === 'clinic' && t >= P(1, .45) && t < PS(2);
+  fx.dropGlow.visible = here === 'clinic' && t >= P(1, .45) && t < P(1, .60);
   fx.histGlow.visible = here === 'hist' && t < PS(7) - .1;
   fx.alarmGlow.visible = here === 'hist' && t >= PS(7) - .18;
 
   const el = cast.elena, ar = cast.arkadas, shl = cast.shelley;
 
   if (here === 'clinic') {
-    // P01 düşen kanca su damlası
+    // P01 düşen kanca su damlası (Elena'nın yüzünden uzakta, P01 ortasında kaybolur)
     const dFall = ramp(t, P(1, .12), P(1, .48));
-    dyn.hookDrop.visible = t < PS(2) - .1;
-    dyn.hookDrop.position.y = 2.15 - dFall * .85;
+    dyn.hookDrop.visible = t < P(1, .56);
+    dyn.hookDrop.position.y = 2.15 - dFall * .80;
 
     // P04'ten itibaren test panosu KIRMIZI REAKSİYON moduna geçer!
     const react = t >= P(4, .30);
@@ -511,7 +511,7 @@ export function frame(t, ctx) {
       const flash = .55 + .45 * Math.sin(t * 20);
       fx.alarmGlow.scale.setScalar(.85 + flash * .4);
       dyn.alarmDrop.position.y = 1.65 - ((t * 1.2) % 1) * .78;
-      shl.show(); shl.place(199.54, 0, .22, cam, tint);
+      shl.show(); shl.place(199.46, 0, .22, cam, tint);
       shl.draw({
         expr: 'surprised', look: .65,
         blink: bl(4, PS(7)),

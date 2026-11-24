@@ -1,0 +1,60 @@
+{
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "yedek_motor": "google",
+ "dil": "tr",
+ "kod": "KK3_KACMAK_TR",
+ "parcalar": [
+  {
+   "ad": "V1",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Kaza yaptın, kaçtın. En fazla bir ceza daha. Herkes böyle bilir. Peki mahkeme ne dedi?"
+  },
+  {
+   "ad": "V2",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "normal",
+   "metin": "Gece, iki yönlü bir yol. Ortada devamlı çizgi var. Bir kamyonet ilerliyor. Karşıdan, arkasında yolcusuyla bir motosiklet geliyor."
+  },
+  {
+   "ad": "V3",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Kamyonet çizgiyi geçip karşı şeride giriyor. Çarpışıyorlar. Kamyonet birkaç saniye duruyor, sonra kaçıyor. Motosiklet sürücüsü hayatını kaybediyor, yolcusu ağır yaralanıyor."
+  },
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sence kaçmak sürücüye ne kazandırdı? A, hiçbir şey olmadı. B, sadece trafik cezası. C, dokuz yıl hapis. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. Birinci ipucu: sürücü devamlı çizgiyi geçti. İkinci ipucu: kaçtı ama üç saat sonra alkolü ölçüldü. Bir virgül doksan altı promil. Üçüncü ipucu: daha önce de alkollü araç kullanmaktan hüküm almıştı."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Mahkeme alkolü kaza anına geri hesapladı: yaklaşık iki virgül dört promil. Sürücü asli kusurlu. Temel ceza altı yıl. Bilinçli taksirle dokuz yıl hapis. İndirim yok, erteleme yok. Ehliyeti üç yıl geri alındı. Yargıtay onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "sakin",
+   "metin": "Yani kaçmak kurtarmaz. Alkol saatler sonra bile ölçülür. Kaza yaptıysan dur, yardım çağır. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

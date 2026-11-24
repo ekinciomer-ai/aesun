@@ -1,0 +1,60 @@
+{
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "yedek_motor": "google",
+ "kod": "KK2D_KAVSAK_TR",
+ "dil": "tr",
+ "parcalar": [
+  {
+   "ad": "V1",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Kavşağa önce giren geçer. Herkes böyle bilir. Peki mahkeme ne dedi?"
+  },
+  {
+   "ad": "V2",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "normal",
+   "metin": "Şehir içinde bir kavşak. Hava açık, yol kuru, hız sınırı elli. Bir kamyonet yan sokaktan geliyor. Köşede bir DUR levhası var. Sağ taraftan da bir motosiklet yaklaşıyor."
+  },
+  {
+   "ad": "V3",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Kamyonet durmuyor, kavşağa giriyor. Motosiklet de yavaşlamadan kavşağa giriyor. Çarpışıyorlar. Motosikletlinin kemiği ağır şekilde kırılıyor."
+  },
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sence kim kusurlu? A, sadece kamyonet. B, sadece motosiklet. C, ikisi de. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. Birinci ipucu: kamyonetin önünde DUR levhası vardı. İkinci ipucu: motosiklet sağdan geliyordu. Üçüncü ipucu: motosiklet kavşağa yaklaşırken yavaşlamadı."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Bilirkişi raporları net. Kamyonet sürücüsü DUR levhasında durmadı, geçiş hakkını vermedi: asli kusurlu. Dört bin beş yüz lira adli para cezası, ehliyeti dört ay geri alındı. Ama geçiş hakkı olan motosikletli de yavaşlamadığı için tali kusurlu. Yargıtay hükmü onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Yasada kavşağa önce giren geçer diye bir kural yok. Sırayı levha, ışık ve yol belirler. İşaret yoksa soldaki, sağdan gelene yol verir. Geçiş hakkın olsa bile kavşakta yavaşlamak zorundasın. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

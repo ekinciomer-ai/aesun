@@ -65,6 +65,10 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `baraj` | `mod: soru / turbin / yukseklik / debi / ton / havuz / sekiz / son` | Baraj kesiti (rezervuar, cebri boru, Francis çarkı, su akışı), 151 m ölçü + 45 katlı bina, 8 ünite sırası, 241 küp ızgarası, boşalan olimpik havuz (sn sayacı) |
 | `boyut` | `mod: soru / cap / dizi / top / kup / hesap / gun / kutle / son` | Jüpiter + Dünya, 11× çap ölçüsü, 11 Dünya dizisi, golf topu→47 cm + 2 basketbol topu, 11×11×11 küp, hayalet Jüpiter içinde 1.321 küre (sayaç/yıl), terazi (318 Dünya) |
 | `kablo` | `mod: soru / tel / direnc / akim / formul / bir / iki / seksen / son` | Uzatma + çoklu priz + 2 ısıtıcı, büyütülmüş kablo kesiti (gidiş/dönüş damarı, elektron akışı), ısınan bakır + ısı dalgaları, W ısı sütunu, 60 W akkor ampul |
+| `yildiz` | `mod: soru / hiz / yil / mesafe / lise / voyager / sure / gobekli / son` | Güneş↓–Proxima↑ yolu, ışık atımı (yıl sayacı), ışık yılı çentikleri + lise sınıfları, Dünya çevresinde 7,5 tur, Voyager sondası (yıl sayacı), Göbeklitepe T dikili taşı vs yolculuk sütunu |
+| `sicak` | `mod: soru / stc / katsayi / yaz / kayip / kis / neden / gun / son` | Eğik panel, termometre (°C), güç/voltaj sütunu (%), sıcakta ısı dalgası + turuncu örtü, kışta kar, yaz/kış güneş yayları |
+| `saturn` | `mod: soru / hacim / kutle / yogun / su / buz / bat / gaz / son` | Halkalı Satürn + okyanus yüzeyi, hayalet içinde 766 küre (95'i turuncu), su tankında 1 cm³ küpler (buz %90, Satürn %69 batar), Satürn'ün %70 batışı + buzdağı |
+| `maden` | `mod: soru / guc / saat / gun / araba / camasir / telefon / yil / son` | Madencilik cihazı (fanlar), W sayacı, 2 su ısıtıcısı, 24 saat kadranı, kWh sütunu, İstanbul→Ankara yolu + araba, 84 çamaşır makinesi, 3.650 telefon, 365 gün takvimi |
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
@@ -74,7 +78,8 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - **Tema: açık** (Ömer 17.11.2026): chionglab gibi kâğıt beyazı zemin, ince koyu kontur, düz renkler, bloom yok. `tema` alanı yoksa açık kabul edilir (`"koyu"` yalnız istenirse).
 - Ana nesne ekranın %20–55 bandında (üstte soru başlığı, %57'de hesap kartı, %73'te altyazı, alt %18 platform arayüzü).
 - Koyu temada: ACES + bloom; Güneş beyaza patlamasın. Altyazı kelime kelime, sarı vurgu.
-- Ses: atmosfer akoru konuşma altında −9 dB kısılır; geçişte whoosh + darbe, sayıda tık + çan. Müzik sesi bastırmaz.
+- Ses: atmosfer akoru konuşma altında −9 dB kısılır; geçişte yumuşak ton süzülmesi + darbe, sayıda tık + çan. Müzik sesi bastırmaz.
+- **Gürültü (fış/hışırtı) efekti yok** (Ömer 23.11.2026: "fış" sesi itici): whoosh, rüzgâr ve tık hışırtısı kaldırıldı; efektler yalnız tonal.
 
 ## Durum
 - Bölüm 1 (Güneş yok olsa) ve 2 (Tek panel kaç telefon) — 17.11.2026, ilk üretim.
@@ -85,5 +90,7 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 11 (Güneş'e uçakla) ve 12 (Trafo neden uğuldar) — 21.11.2026, günlük görev; yeni sahneler `ucak`, `trafo` (kamera parçalar arasında önceki pozdan akar).
 - Bölüm 13 (Ay neden hep aynı yüz) ve 14 (Baraj türbininden saniyede kaç ton) — 22.11.2026, günlük görev; yeni sahneler `kilit`, `baraj` (kamera pozları parametreyle akar: hedef, uzaklık, açı).
 - Bölüm 15 (Jüpiter'e kaç Dünya sığar) ve 16 (Akım 2 kat → ısı 4 kat, I²R) — 23.11.2026, günlük görev; yeni sahneler `boyut`, `kablo`.
+- Bölüm 17 (Işık hızıyla Proxima'ya) ve 18 (Panel sıcakta mı soğukta mı) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `yildiz`, `sicak`.
+- Bölüm 19 (Satürn suda yüzer mi) ve 20 (Bitcoin cihazı günde kaç kWh) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `saturn`, `maden`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

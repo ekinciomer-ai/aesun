@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<title>Kara Kutu · Kâğıt eskiz · Kavşağa önce giren geçer?</title>
+<style>
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-400-normal.woff2) format('woff2');font-weight:400}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-800-normal.woff2) format('woff2');font-weight:800}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-ext-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+html,body{margin:0;background:#2a2622;overflow:hidden}svg{display:block;width:100vw;height:100vh}
+</style></head><body>
+<svg id="s" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid meet"></svg>
+<script>
+// Format 9 · Kâğıt eskiz hikâye: krem kâğıt, elle çizilmiş ikonlar kendiliğinden çizilir (stroke çizimi),
+// kırmızı keçeli kalemle daire, ok, üstünü çizme, damga. Aynı kurgu dosyası (V1..V7) kullanılır.
+const SV=document.getElementById('s');let K=null;
+const KAG='#f3ead6',KAG2='#e6d8b8',KUR='#2b2723',KIR='#d23a2a',GRI='#8a8070',SAR='#e8b330';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=p=>{p=cl(p);return p*p*(3-2*p)},eout=p=>1-Math.pow(1-cl(p),3);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+// sabit tohumlu titreme (el çizimi)
+const h=(i)=>{const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+let SID=0;
+// el çizgisi: iki noktayı hafif eğri ve iki kat çizgiyle bağlar; p: 0..1 çizim ilerlemesi
+function cz(x1,y1,x2,y2,p,c=KUR,w=6,j=1){if(p<=0)return'';const id=SID++;const mx=(x1+x2)/2+(h(id)-0.5)*14*j,my=(y1+y2)/2+(h(id+7)-0.5)*14*j;
+ const d=`M${x1},${y1} Q${mx},${my} ${x2},${y2}`;const d2=`M${x1+(h(id+3)-0.5)*5},${y1+(h(id+4)-0.5)*5} Q${mx+3},${my-3} ${x2+(h(id+5)-0.5)*5},${y2+(h(id+6)-0.5)*5}`;
+ return `<path d="${d}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1-cl(p)}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`+
+  `<path d="${d2}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1-cl(p*1.1-0.1)}" fill="none" stroke="${c}" stroke-width="${w*0.45}" stroke-linecap="round" opacity=".6"/>`}
+function yol(d,p,c=KUR,w=6,fill='none'){if(p<=0)return'';return `<path d="${d}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${1-cl(p)}" fill="${fill}" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`}
+// elle daire (kırmızı keçeli): elips, biraz taşan
+function daire(x,y,rx,ry,p,c=KIR,w=8){if(p<=0)return'';const id=SID++;let d='';for(let i=0;i<=40;i++){const a=-0.6+i/40*Math.PI*2.15,r=1+(h(id+i)-0.5)*0.06;d+=`${i?'L':'M'}${x+Math.cos(a)*rx*r},${y+Math.sin(a)*ry*r}`}return yol(d,p,c,w)}
+function ok(x1,y1,x2,y2,p,c=KIR,w=8){const a=Math.atan2(y2-y1,x2-x1),L=30;return cz(x1,y1,x2,y2,p,c,w)+(p>0.85?cz(x2,y2,x2-Math.cos(a-0.5)*L,y2-Math.sin(a-0.5)*L,(p-0.85)/0.15,c,w,0)+cz(x2,y2,x2-Math.cos(a+0.5)*L,y2-Math.sin(a+0.5)*L,(p-0.85)/0.15,c,w,0):'')}
+function yazi(x,y,t,fs,c=KUR,a=1,anc='middle',fam='Kalam',wt=700,rot=0){if(a<=0)return'';return `<text x="${x}" y="${y}" text-anchor="${anc}" font-family="${fam}" font-weight="${wt}" font-size="${fs}" fill="${c}" opacity="${a}" transform="rotate(${rot},${x},${y})">${esc(t)}</text>`}
+function damga(x,y,t,a,c=KIR,rot=-10,fs=54){if(a<=0)return'';const s=1+1.2*(1-eout(a)),w=t.length*fs*0.58+50;return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})" opacity="${cl(a*3)*0.92}"><rect x="${-w/2}" y="${-fs*0.85}" width="${w}" height="${fs*1.5}" rx="8" fill="none" stroke="${c}" stroke-width="8"/><text y="${fs*0.3}" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${fs}" fill="${c}">${esc(t)}</text></g>`}
+// ikonlar (yandan, elle)
+function kamyonetI(x,y,s,p){return `<g transform="translate(${x},${y}) scale(${s})">`+yol('M-90,20 L-90,-40 L30,-40 L30,20 Z',p)+yol('M30,-20 L70,-20 L90,5 L90,20 L30,20',p*1.1-0.1)+yol('M40,-14 L64,-14 L78,4 L40,4 Z',p*1.2-0.2,KUR,4)+
+ daire(-55,28,18,18,p*1.3-0.3,KUR,6)+daire(55,28,18,18,p*1.3-0.3,KUR,6)+'</g>'}
+function motorI(x,y,s,p){return `<g transform="translate(${x},${y}) scale(${s})">`+daire(-45,20,22,22,p,KUR,6)+daire(45,20,22,22,p,KUR,6)+yol('M-45,20 L-10,-15 L25,-15 L45,20 M25,-15 L35,-40 L50,-42',p*1.2-0.2)+
+ daire(0,-55,16,16,p*1.4-0.4,KUR,6)+yol('M0,-39 L-5,-12',p*1.4-0.4)+'</g>'}
+function durI(x,y,s,p,dur){let d='';for(let i=0;i<=8;i++){const a=(i*45+22.5)*Math.PI/180;d+=`${i?'L':'M'}${Math.cos(a)*44},${Math.sin(a)*44}`}
+ return `<g transform="translate(${x},${y}) scale(${s})">`+yol(d,p,KIR,6)+yol('M0,44 L0,130',p*1.2-0.2)+yazi(0,12,dur,30,KIR,ease(p*2-1),'middle','Baloo',800)+'</g>'}
+function hizI(x,y,s,p,ibre){return `<g transform="translate(${x},${y}) scale(${s})">`+yol('M-60,10 A60,60 0 1 1 60,10',p)+cz(0,0,Math.cos(ibre)*48,Math.sin(ibre)*48,p*1.3-0.3,KIR,6,0)+yazi(0,40,'50',30,KUR,ease(p*2-1),'middle','Baloo',800)+'</g>'}
+// kavşak eskizi (üstten): iki çift çizgi
+function kavsakI(x,y,s,p){const a=70;return `<g transform="translate(${x},${y}) scale(${s})">`+
+ cz(-330,-a,-a,-a,p)+cz(a,-a,330,-a,p)+cz(-330,a,-a,a,p)+cz(a,a,330,a,p)+cz(-a,-330,-a,-a,p)+cz(-a,a,-a,330,p)+cz(a,-330,a,-a,p)+cz(a,a,a,330,p)+
+ [-280,-200,-130].map(xx=>cz(xx,0,xx+40,0,p*1.2-0.2,GRI,4,0)).join('')+[130,200,280].map(xx=>cz(xx,0,xx+40,0,p*1.2-0.2,GRI,4,0)).join('')+
+ [-280,-200,-130].map(yy=>cz(0,yy,0,yy+40,p*1.2-0.2,GRI,4,0)).join('')+[130,200,280].map(yy=>cz(0,yy,0,yy+40,p*1.2-0.2,GRI,4,0)).join('')+'</g>'}
+// üstten basit araç kutucukları
+const vanT=(x,y,p)=>yol(`M${x-55},${y-24} h110 v48 h-110 Z M${x+25},${y-24} v48`,p,KUR,6);
+const motoT=(x,y,p)=>yol(`M${x-12},${y-40} h24 v80 h-24 Z`,p,KUR,6)+daire(x,y,10,10,p,KUR,5);
+
+const L={etiket:'Bir kavşak · Yargıtay dosyası',baslik:['Kavşağa önce giren','geçer mi?'],van:'kamyonet',moto:'motosiklet',sag:'sağdan →',dur:'DUR',
+ bilgi:'açık hava · kuru yol · sınır 50',cat:'ÇAT!',kirik:'ağır kemik kırığı',soru:'Kim kusurlu?',sik:['A) Sadece kamyonet','B) Sadece motosiklet','C) İkisi de'],
+ yorum:'cevabını yoruma yaz',geri:'geri saralım',ip:['DUR levhası','sağdan geliyordu','yavaşlamadı'],karar:'KARAR',kv:['Kamyonet','ASLİ KUSUR','4.500 TL adli ceza','ehliyet 4 ay geri alındı'],
+ km:['Motosiklet','TALİ KUSUR',['geçiş hakkı vardı','ama yavaşlamadı']],onay:'YARGITAY ONADI',dogru:'Doğru şık: C',efsane:'"Önce giren geçer"',
+ kural:['1. Levha, ışık','2. Yol türü','3. İşaret yoksa: sağdaki önce'],yav:'Hakkın olsa da YAVAŞLA!',son:'Sen hangi şıkkı seçtin?',
+ kanal:'KARA KUTU',not:'Yargıtay kararından uyarlanmıştır · Kişi, plaka ve yer bilgisi yok · Hukuki danışmanlık değildir',
+ anahtar:['DUR','kusur','asli','tali','Yargıtay','yavaş','sağ','önce','kural','kırık','ceza','ehliyet','onadı']};
+
+function bolum(t){const P=K.parca;for(const k of ['V7','V6','V5','V4','V3','V2','V1'])if(t>=P[k][0])return k;return 'V1'}
+function kagit(){let o=`<rect width="1080" height="1920" fill="#2a2622"/>`;
+ // yırtık alt kenarlı kâğıt
+ let d='M30,40 L1050,40 L1050,1690';for(let i=0;i<=40;i++){const x=1050-i*1020/40,y=1690+(h(i+900)-0.5)*36;d+=` L${x},${y}`}d+=' Z';
+ o+=`<path d="${d}" fill="${KAG}" stroke="#cdbb93" stroke-width="3"/>`;
+ for(let i=0;i<26;i++)o+=`<line x1="60" y1="${130+i*60}" x2="1020" y2="${130+i*60}" stroke="#e3d5b3" stroke-width="2"/>`;
+ o+=`<line x1="120" y1="40" x2="120" y2="1690" stroke="#e8b9a8" stroke-width="3"/>`;
+ return o}
+
+function kare(t){SID=0;const P=K.parca,v=bolum(t),tv=t-P[v][0],dv=P[v][1]-P[v][0],u=tv/dv;
+ let o=kagit();
+ // sol üst el yazısı etiket + kırmızı alt çizgi
+ o+=yazi(150,120,L.etiket,44,KUR,1,'start',  'Kalam',700,-2)+cz(150,138,640,132,1,KIR,6);
+ o+=yazi(1000,118,L.kanal,40,KIR,1,'end','Baloo',800);
+ const A=(a0,d=0.8)=>cl((tv-a0)/d);   // bölüm içi çizim ilerlemesi
+ if(v==='V1'){
+  o+=kavsakI(560,760,1,A(0,1.6));
+  o+=yazi(560,330,L.baslik[0],78,KUR,ease(A(0.2,0.5)),'middle','Baloo',800)+yazi(560,420,L.baslik[1],92,KIR,ease(A(0.6,0.5)),'middle','Baloo',800);
+  o+=daire(560,760,120,120,A(1.4,0.8))+yazi(560,795,'?',140,KIR,ease(A(1.6,0.4)),'middle','Baloo',800);
+ }
+ if(v==='V2'){
+  o+=kavsakI(560,760,1,1);
+  const kx=150+300*eout(u*1.1),my=1080-230*eout(u*1.1);
+  o+=vanT(kx,800,A(0.2))+yazi(kx,740,L.van,44,KUR,ease(A(0.6,0.4)));
+  o+=durI(430,880,0.9,A(1.2),L.dur) ;
+  o+=motoT(600,my,A(2.2))+yazi(700,my+20,L.moto,44,KUR,ease(A(2.6,0.4)),'start');
+  if(u>0.55)o+=ok(760,1000,640,1000,A(dv*0.55,0.6))+yazi(780,1060,L.sag,42,KIR,ease(A(dv*0.6,0.4)),'start');
+  o+=yazi(560,1230,L.bilgi,46,GRI,ease(A(dv*0.3,0.5)));
+  o+=hizI(250,1140,0.7,A(dv*0.35),-0.6);
+ }
+ if(v==='V3'){
+  o+=kavsakI(560,760,1,1)+durI(430,880,0.9,1,L.dur);
+  const cr=(K.carp-P.V3[0]);const k=cl(tv/cr);
+  o+=vanT(450+150*eout(k),800,1)+motoT(600,850-60*eout(k),1);
+  if(tv<cr){o+=ok(380,800,520,800,A(0.1,cr*0.8),KUR,6)+ok(600,960,600,880,A(0.3,cr*0.8),KUR,6)}
+  else{o+=daire(610,800,110,90,A(cr,0.5));
+   // patlama karalaması
+   let d='';for(let i=0;i<=22;i++){const a=i/22*Math.PI*2,r=i%2?50:95;d+=`${i?'L':'M'}${760+Math.cos(a)*r},${620+Math.sin(a)*r*0.8}`}
+   o+=yol(d+'Z',A(cr,0.4),KIR,7)+yazi(760,640,L.cat,58,KIR,ease(A(cr+0.2,0.3)),'middle','Baloo',800,-8);
+   o+=yazi(560,1180,L.kirik,52,KUR,ease(A(cr+0.8,0.5)))+cz(380,1200,740,1195,A(cr+1.1,0.6),KIR,6);
+  }
+ }
+ if(v==='V4'){
+  o+=yazi(560,330,L.soru,96,KUR,ease(A(0,0.4)),'middle','Baloo',800)+cz(330,360,800,354,A(0.3,0.6),KIR,7);
+  L.sik.forEach((s,i)=>{const y=560+i*200,a=A(0.5+i*0.5,0.7);o+=yol(`M200,${y-70} h680 v130 h-680 Z`,a,KUR,6)+yazi(250,y+15,s,62,KUR,ease(a*1.5-0.5),'start','Kalam',700)});
+  const [c0,c1]=K.sayac;
+  if(t>=c0&&t<c1){const n=Math.ceil(c1-t);o+=daire(560,1220,110,110,1-((c1-t)%1),KIR,10)+yazi(560,1265,String(n),140,KUR,1,'middle','Baloo',800)}
+  else if(t<c0)o+=yazi(560,1230,L.yorum,56,GRI,ease(A(2.4,0.5)));
+ }
+ if(v==='V5'){
+  o+=kavsakI(560,700,0.85,1)+durI(450,770,0.8,1,L.dur)+vanT(330,740,1)+motoT(610,880,1);
+  // geri sarma simgesi
+  o+=yol('M350,1140 l60,-45 v90 Z M440,1140 l60,-45 v90 Z',A(0,0.6),KUR,7)+yazi(560,1160,L.geri,60,KUR,ease(A(0.4,0.4)),'start');
+  const ip=K.ip.map(x=>x-P.V5[0]);
+  if(tv>ip[0]){o+=daire(450,770,80,80,A(ip[0],0.6))+yazi(160,560,'1 · '+L.ip[0],46,KIR,ease(A(ip[0]+0.3,0.4)),'start')}
+  if(tv>ip[1]){o+=ok(860,880,670,880,A(ip[1],0.6))+yazi(160,620,'2 · '+L.ip[1],46,KIR,ease(A(ip[1]+0.3,0.4)),'start')}
+  if(tv>ip[2]){o+=hizI(860,1060,0.8,A(ip[2]),0.4)+daire(860,1060,90,90,A(ip[2]+0.4,0.6))+yazi(160,680,'3 · '+L.ip[2],46,KIR,ease(A(ip[2]+0.3,0.4)),'start')}
+ }
+ if(v==='V6'){
+  o+=yazi(560,300,L.karar,110,KUR,ease(A(0,0.4)),'middle','Baloo',800)+cz(390,330,730,324,A(0.3,0.5),KIR,8);
+  o+=kamyonetI(320,520,1.1,A(0.4,1.0))+yazi(320,640,L.kv[0],48,KUR,ease(A(0.8,0.4)));
+  o+=damga(320,740,L.kv[1],A(0.9,0.5),KIR,-8,48)+yazi(320,850,L.kv[2],34,KUR,ease(A(1.3,0.5)))+yazi(320,900,L.kv[3],34,KUR,ease(A(1.5,0.5)));
+  const tl=K.tali-P.V6[0];
+  o+=motorI(800,530,1.1,A(tl,1.0))+yazi(800,640,L.km[0],48,KUR,ease(A(tl+0.3,0.4)));
+  o+=damga(800,740,L.km[1],A(tl+0.4,0.5),'#b8860b',6,48)+yazi(800,850,L.km[2][0],32,KUR,ease(A(tl+0.8,0.5)))+yazi(800,900,L.km[2][1],32,KUR,ease(A(tl+1.0,0.5)));
+  o+=cz(560,470,560,940,A(0.5,0.8),GRI,4,0.3);
+  const on=K.onayT-P.V6[0];o+=damga(560,1080,L.onay,A(on,0.5),KIR,-6,60);
+  o+=yazi(560,1230,L.dogru,64,KUR,ease(A(on+0.6,0.4)),'middle','Baloo',800)+daire(560,1210,230,60,A(on+0.9,0.6),KIR,7);
+ }
+ if(v==='V7'){
+  o+=yazi(560,330,L.efsane,84,KUR,ease(A(0,0.4)),'middle','Baloo',800)+cz(170,310,950,300,A(0.6,0.5),KIR,12)+cz(170,330,950,322,A(0.8,0.5),KIR,8);
+  L.kural.forEach((s,i)=>{const a=A(1.0+i*dv*0.13,0.6);o+=yazi(200,520+i*120,s,60,KUR,ease(a),'start','Kalam',700)+(i===2?cz(200,545+i*120,860,540+i*120,A(1.6+i*dv*0.13,0.5),KIR,6):'')});
+  o+=yazi(560,960,L.yav,74,KIR,ease(A(dv*0.6,0.5)),'middle','Baloo',800,-3)+daire(560,935,420,80,A(dv*0.66,0.7),KIR,7);
+  o+=yazi(560,1180,L.son,64,KUR,ease(A(dv*0.85,0.5)),'middle','Kalam',700);
+ }
+ // ---- altyazı: ortada kalın, anahtar kelime kırmızı ----
+ o+=altyazi(t);
+ o+=yazi(540,1800,L.not,24,'#b8ab90',1,'middle','Kalam',400);
+ if(t<0.25)o+=`<rect width="1080" height="1920" fill="#000" opacity="${1-t/0.25}"/>`;
+ if(t>K.toplam-0.5)o+=`<rect width="1080" height="1920" fill="#000" opacity="${(t-(K.toplam-0.5))/0.5}"/>`;
+ SV.innerHTML=o}
+const nrm=w=>w.toLocaleLowerCase('tr').replace(/[^\wçğıöşüâ]/g,'');
+function altyazi(t){const A=K.altyazi.find(a=>t>=a.bas&&t<a.son);if(!A)return'';const u=eout((t-A.bas)/0.15);
+ const kel=A.metin.split(' '),sat=[[]];let n=0;for(const k of kel){if(n+k.length>24&&sat[sat.length-1].length){sat.push([]);n=0}sat[sat.length-1].push(k);n+=k.length+1}
+ return sat.map((s,i)=>`<text x="540" y="${1490+i*84-(sat.length-1)*42}" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="70" opacity="${u}" stroke="${KAG}" stroke-width="12" paint-order="stroke">`+
+  s.map(k=>`<tspan fill="${L.anahtar.some(a=>nrm(k).startsWith(nrm(a)))?KIR:KUR}">${esc(k)}</tspan>`).join(' ')+`</text>`).join('')}
+window.kurgu=k=>{K=k};window.kare=kare;
+Promise.all(['800 40px Baloo','700 40px Kalam','400 40px Kalam'].map(f=>document.fonts.load(f))).then(()=>{window.HAZIR=true});
+setTimeout(()=>{window.HAZIR=true},4000);
+</script></body></html>

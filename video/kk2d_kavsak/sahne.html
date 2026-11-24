@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<title>Kara Kutu 2D · Kavşağa önce giren geçer?</title>
+<style>
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-400-normal.woff2) format('woff2');font-weight:400}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-400-normal.woff2) format('woff2');font-weight:400;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:Kalam;src:url(fonts/kalam-latin-ext-700-normal.woff2) format('woff2');font-weight:700;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-800-normal.woff2) format('woff2');font-weight:800}
+@font-face{font-family:Baloo;src:url(fonts/baloo-2-latin-ext-800-normal.woff2) format('woff2');font-weight:800;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1E00-1EFF}
+html,body{margin:0;background:#1d1a17;overflow:hidden}
+svg{display:block;width:100vw;height:100vh}
+</style></head>
+<body>
+<svg id="s" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid meet"></svg>
+<script>
+// Kara Kutu · 2D vektör çizgi film (Format 1, kalın mürekkep çizgi). Konu: "Kavşağa önce giren geçer" miti.
+// Olay, kesinleşmiş bir Yargıtay kararındaki olgulara dayanır; kişi, plaka, yer ve karar numarası gösterilmez.
+// Kayıt sözleşmesi (video/arac/kayit.js): window.kurgu(K), window.kare(t), window.HAZIR
+// K = {toplam, dil, parca:{V1:[bas,son],...,V7}, sayac:[bas,son], altyazi:[{bas,son,metin}]}
+const SV=document.getElementById('s');let K=null;
+const Q=new URLSearchParams(location.search);
+const INK='#1f1a16',PAPER='#efe3c6',P2='#e2d0a6',ASF='#8d8a84',ASF2='#7b7872',CIZ='#f4f0e4',KALD='#cfc4ab',CIM='#9db06c',CIM2='#87a05a';
+const MAV='#4f86b8',SAR='#e9b93a',KIR='#c8432f',YES='#4e9a5b',TEN='#f0c9a0';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),ease=p=>{p=cl(p);return p*p*(3-2*p)},eout=p=>1-Math.pow(1-cl(p),3),lerp=(a,b,k)=>a+(b-a)*k;
+const W=6;
+const st=(f,w=W)=>`fill="${f}" stroke="${INK}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+const g=(x,y,s,inner,r=0,op=1)=>`<g transform="translate(${x},${y}) rotate(${r}) scale(${s})" opacity="${op}">${inner}</g>`;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+// ---------- dil ----------
+const T={
+ tr:{kanal:'KARA KUTU',renk:'#e2702c',seri:'MİT Mİ GERÇEK Mİ?',mit:['KAVŞAĞA ÖNCE','GİREN GEÇER?'],adim:['MİT','KAZA','OYLA','KARAR','DERS'],
+  van:'KAMYONET',moto:'MOTOSİKLET',sag:'SAĞDAN',dur:'DUR',temsili:'TEMSİLİ CANLANDIRMA',bilgi:'Hava açık · yol kuru · hız sınırı 50',cat:'ÇARPIŞMA!',
+  soru:'SENCE KİM KUSURLU?',sik:['Sadece kamyonet','Sadece motosiklet','İkisi de'],yorum:'Cevabını yoruma yaz',geri:'GERİ SARALIM',
+  ipucu:['DUR levhası vardı','Motosiklet sağdan geliyordu','Motosiklet yavaşlamadı'],ip:'İPUCU',
+  karar:'MAHKEME KARARI',kv:['KAMYONET','ASLİ KUSURLU','DUR\'da durmadı · yol vermedi','4.500 TL adli para cezası','Ehliyet 4 ay geri alındı'],
+  km:['MOTOSİKLET','TALİ KUSURLU','Geçiş hakkı vardı ama yavaşlamadı'],onay:'YARGITAY ONADI',dogru:'Doğru şık: C',
+  ders:'KAVŞAKTA SIRA',dk:['1. Levha ve ışık','2. Yol türü (ana yol, dönel…)','3. İşaret yoksa: sağdan gelen önce'],yav:'Geçiş hakkın olsa da YAVAŞLA',ceza:'Kurala uymamak: 5.000 TL idari ceza',
+  efsane:'"Önce giren geçer" diye kural YOK',son:['SEN HANGİ','ŞIKKI SEÇTİN?'],
+  not:'Yargıtay kararından uyarlanmıştır · Kişi, plaka ve yer bilgisi verilmemiştir · Genel bilgidir, hukuki danışmanlık değildir'},
+ en:{kanal:'BLACK BOX FILES',renk:'#3d7fc4',seri:'MYTH OR FACT?',mit:['FIRST INTO THE','INTERSECTION GOES?'],adim:['MYTH','CRASH','VOTE','RULING','LESSON'],
+  van:'VAN',moto:'MOTORCYCLE',sag:'FROM RIGHT',dur:'STOP',temsili:'DRAMATIZATION',bilgi:'Clear weather · dry road · limit 50 km/h',cat:'CRASH!',
+  soru:'WHO IS AT FAULT?',sik:['Only the van','Only the motorcycle','Both'],yorum:'Answer in the comments',geri:'REWIND',
+  ipucu:['There was a STOP sign','The motorcycle came from the right','The motorcycle didn\'t slow down'],ip:'CLUE',
+  karar:'THE RULING',kv:['VAN','PRIMARY FAULT','Ran the STOP sign · didn\'t yield','4,500 lira criminal fine','License suspended 4 months'],
+  km:['MOTORCYCLE','SECONDARY FAULT','Had right of way, didn\'t slow down'],onay:'SUPREME COURT UPHELD',dogru:'Right answer: C',
+  ders:'WHO GOES FIRST',dk:['1. Signs and lights','2. Road type (main road, roundabout…)','3. No signs: yield to the right'],yav:'Right of way? Still SLOW DOWN',ceza:'Turkish law · fine for breaking it',
+  efsane:'No "first in goes first" rule',son:['WHICH OPTION','DID YOU PICK?'],
+  not:'Based on a Turkish Supreme Court ruling · Names, plates and places withheld · General information, not legal advice'},
+ es:{kanal:'CAJA NEGRA',renk:'#e0b21f',seri:'¿MITO O VERDAD?',mit:['¿EL PRIMERO QUE','ENTRA, PASA?'],adim:['MITO','CHOQUE','VOTA','FALLO','LECCIÓN'],
+  van:'FURGONETA',moto:'MOTO',sag:'POR LA DERECHA',dur:'STOP',temsili:'RECREACIÓN',bilgi:'Despejado · asfalto seco · límite 50',cat:'¡CHOQUE!',
+  soru:'¿QUIÉN TIENE LA CULPA?',sik:['Solo la furgoneta','Solo la moto','Los dos'],yorum:'Responde en los comentarios',geri:'REBOBINEMOS',
+  ipucu:['Había una señal de STOP','La moto venía por la derecha','La moto no frenó'],ip:'PISTA',
+  karar:'EL FALLO',kv:['FURGONETA','CULPA PRINCIPAL','No paró en el STOP · no cedió','Multa penal de 4.500 liras','4 meses sin carné'],
+  km:['MOTO','CULPA SECUNDARIA','Tenía prioridad, pero no frenó'],onay:'CONFIRMADO POR EL SUPREMO',dogru:'Respuesta correcta: C',
+  ders:'QUIÉN PASA PRIMERO',dk:['1. Señales y semáforos','2. Tipo de vía (principal, rotonda…)','3. Sin señales: prioridad a la derecha'],yav:'Aunque tengas prioridad: FRENA',ceza:'Ley turca · multa por incumplir',
+  efsane:'No existe "el primero que entra, pasa"',son:['¿QUÉ OPCIÓN','ELEGISTE?'],
+  not:'Basado en un fallo del Tribunal Supremo de Turquía · Sin nombres, matrículas ni lugares · Información general, no asesoría legal'},
+};
+let L=T.tr;
+
+// ---------- sahne ögeleri ----------
+const CX=540,CY=900;            // kavşak merkezi
+const YOL=170;                   // yol genişliği
+function zemin(){
+ let o=`<rect x="-20" y="380" width="1120" height="1080" fill="${CIM}"/>`;
+ // çimen dokusu
+ for(let i=0;i<70;i++){const x=(i*137)%1080,y=400+((i*271)%1040);o+=`<path d="M${x},${y} l6,-12 l5,10 l6,-14" fill="none" stroke="${CIM2}" stroke-width="4" stroke-linecap="round"/>`}
+ // kaldırım + bloklar
+ const blok=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="18" ${st(KALD)}/>`;
+ o+=blok(40,420,CX-YOL/2-70,CY-YOL/2-450)+blok(CX+YOL/2+30,420,1040-CX-YOL/2-30,CY-YOL/2-450)+blok(40,CY+YOL/2+30,CX-YOL/2-70,1420-CY-YOL/2-30)+blok(CX+YOL/2+30,CY+YOL/2+30,1040-CX-YOL/2-30,1420-CY-YOL/2-30);
+ // evler (çatılı)
+ const ev=(x,y,s,c)=>g(x,y,s,`<rect x="-70" y="-60" width="140" height="120" ${st('#f6efe0')}/><path d="M-80,-55 L0,-115 L80,-55Z" ${st(c)}/><rect x="-18" y="10" width="36" height="50" ${st('#8fb3bd',4)}/><rect x="-55" y="-35" width="28" height="26" ${st('#8fb3bd',4)}/><rect x="27" y="-35" width="28" height="26" ${st('#8fb3bd',4)}/>`);
+ o+=ev(220,620,1,'#c46a4a')+ev(850,620,1,'#5c8aa8')+ev(870,1210,1,'#c46a4a');
+ const agac=(x,y,s)=>g(x,y,s,`<rect x="-9" y="-10" width="18" height="40" ${st('#8a6a44',4)}/><circle cy="-40" r="46" ${st('#6f8a4f')}/><circle cx="-26" cy="-22" r="26" ${st('#7d9a59',4)}/>`);
+ o+=agac(330,1240,1)+agac(170,1150,0.8)+agac(960,980,0.7)+agac(120,800,0.75);
+ // yollar
+ o+=`<rect x="-20" y="${CY-YOL/2}" width="1120" height="${YOL}" ${st(ASF)}/><rect x="${CX-YOL/2}" y="370" width="${YOL}" height="1100" ${st(ASF)}/>`;
+ o+=`<rect x="${CX-YOL/2+3}" y="${CY-YOL/2+3}" width="${YOL-6}" height="${YOL-6}" fill="${ASF2}"/>`;
+ // şerit çizgileri
+ for(let x=-20;x<CX-YOL/2-20;x+=70)o+=`<rect x="${x}" y="${CY-4}" width="40" height="8" fill="${CIZ}"/>`;
+ for(let x=CX+YOL/2+20;x<1100;x+=70)o+=`<rect x="${x}" y="${CY-4}" width="40" height="8" fill="${CIZ}"/>`;
+ for(let y=370;y<CY-YOL/2-20;y+=70)o+=`<rect x="${CX-4}" y="${y}" width="8" height="40" fill="${CIZ}"/>`;
+ for(let y=CY+YOL/2+20;y<1470;y+=70)o+=`<rect x="${CX-4}" y="${y}" width="8" height="40" fill="${CIZ}"/>`;
+ // kamyonetin durma çizgisi (batı kol, doğuya giden şerit)
+ o+=`<rect x="${CX-YOL/2-22}" y="${CY+4}" width="12" height="${YOL/2-6}" fill="${CIZ}"/>`;
+ return o;
+}
+function durLevha(x,y,s,parla){
+ const p=parla?`<circle r="72" fill="none" stroke="${SAR}" stroke-width="${8+6*parla}" opacity="${0.5+0.5*parla}"/>`:'';
+ let o='';for(let i=0;i<8;i++){const a=(i*45+22.5)*Math.PI/180;o+=`${i?'L':'M'}${Math.cos(a)*48},${Math.sin(a)*48}`}
+ return g(x,y,s,`<rect x="-5" y="40" width="10" height="70" ${st('#9aa0a4',4)}/>`+p+`<path d="${o}Z" ${st(KIR,5)}/><text y="13" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${L.dur.length>3?30:34}" fill="#fff">${esc(L.dur)}</text>`);
+}
+// kamyonet (üstten görünüş, burnu +x yönünde)
+function kamyonet(x,y,r){return g(x,y,1,`<rect x="-82" y="-36" width="164" height="72" rx="10" ${st('#f2f2ee')}/><rect x="-82" y="-36" width="104" height="72" rx="8" ${st('#e8e6df',5)}/>`+
+ `<rect x="28" y="-30" width="40" height="60" rx="8" ${st('#9ec3d6',5)}/><rect x="62" y="-32" width="18" height="64" rx="6" ${st('#d8d6cf',4)}/>`+
+ `<rect x="-70" y="-42" width="26" height="10" rx="3" fill="${INK}"/><rect x="-70" y="32" width="26" height="10" rx="3" fill="${INK}"/><rect x="40" y="-42" width="26" height="10" rx="3" fill="${INK}"/><rect x="40" y="32" width="26" height="10" rx="3" fill="${INK}"/>`,r)}
+// motosiklet (burnu +x; sürücü yüzsüz, kask)
+function motor(x,y,r){return g(x,y,1,`<rect x="-46" y="-9" width="92" height="18" rx="9" ${st('#3b3f45',5)}/><ellipse cx="-38" cy="0" rx="13" ry="7" fill="${INK}"/><ellipse cx="38" cy="0" rx="13" ry="7" fill="${INK}"/>`+
+ `<rect x="-14" y="-17" width="40" height="34" rx="12" ${st(MAV,5)}/><line x1="24" y1="-24" x2="24" y2="24" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><circle cx="-4" cy="0" r="15" ${st('#f1f1ec',5)}/>`,r)}
+function etiket(x,y,txt,c=INK,bg='#fffaf0',fs=30){const w=txt.length*fs*0.56+34;return `<g transform="translate(${x},${y})"><rect x="${-w/2}" y="-26" width="${w}" height="46" rx="14" fill="${bg}" stroke="${INK}" stroke-width="4"/><text y="8" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${fs}" fill="${c}">${esc(txt)}</text></g>`}
+function ok(x1,y1,x2,y2,c=SAR){const a=Math.atan2(y2-y1,x2-x1),h=22;return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${INK}" stroke-width="16" stroke-linecap="round"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="9" stroke-linecap="round"/><path d="M${x2+Math.cos(a)*h},${y2+Math.sin(a)*h} L${x2+Math.cos(a+2.4)*h},${y2+Math.sin(a+2.4)*h} L${x2+Math.cos(a-2.4)*h},${y2+Math.sin(a-2.4)*h}Z" fill="${c}" stroke="${INK}" stroke-width="4"/>`}
+function patlama(x,y,s,txt,t){let d='';const n=14;for(let i=0;i<n*2;i++){const a=i/(n*2)*Math.PI*2,r=i%2?78:140+12*Math.sin(t*40+i);d+=`${i?'L':'M'}${Math.cos(a)*r},${Math.sin(a)*r*0.8}`}
+ return g(x,y,s,`<path d="${d}Z" fill="${SAR}" stroke="${INK}" stroke-width="7"/><text y="16" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${txt.length>9?40:48}" fill="${KIR}" stroke="${INK}" stroke-width="2">${esc(txt)}</text>`,-8)}
+function kart(x,y,w,h,ic,c='#fffaf0',r=0){return g(x,y,1,`<rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" rx="26" fill="${c}" stroke="${INK}" stroke-width="7"/>`+ic,r)}
+function damga(x,y,txt,a,c=KIR){const s=1+1.4*(1-eout(a));return a<=0?'':g(x,y,s,`<rect x="${-txt.length*15-30}" y="-46" width="${txt.length*30+60}" height="88" rx="10" fill="none" stroke="${c}" stroke-width="9"/><text y="16" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="50" fill="${c}">${esc(txt)}</text>`,-9,cl(a*3))}
+
+// ---------- araç hareketleri (olay zamanı z: 0 → 1 V2 sonu, 1 → 2 V3 çarpışma, sonrası) ----------
+// kamyonet batıdan doğuya (alt şerit y=CY+42), motosiklet güneyden kuzeye (sağ şerit x=CX+42)
+const CARP=[CX+20,CY+42];
+function konumlar(z){
+ // z<1: yaklaşma; 1..1.7: kavşağa giriş; 1.7: çarpışma; >1.7 savrulma
+ const vx=z<1?lerp(-160,CX-YOL/2-110,ease(z)):z<1.7?lerp(CX-YOL/2-110,CARP[0]-80,(z-1)/0.7):CARP[0]-80+22*eout((z-1.7)/0.5);
+ const my=z<1?lerp(1600,CY+YOL/2+180,ease(z)):z<1.7?lerp(CY+YOL/2+180,CARP[1]+40,(z-1)/0.7):CARP[1]+40;
+ let m={x:CX+42,y:my,r:-90};
+ if(z>1.7){const k=eout((z-1.7)/0.6);m={x:CX+42+150*k,y:CARP[1]+40-70*k,r:-90+130*k}}
+ return {v:{x:vx,y:CY+42,r:0},m};
+}
+
+// ---------- bölümler ----------
+let SAY=0;
+function bolum(t){const P=K.parca;for(const k of ['V7','V6','V5','V4','V3','V2','V1'])if(t>=P[k][0])return k;return 'V1'}
+function ilerleme(t){const P=K.parca;const v=bolum(t);return {V1:0,V2:1,V3:1,V4:2,V5:3,V6:3,V7:4}[v]}
+function olayZ(t){const P=K.parca;
+ if(t<P.V2[0])return 0.55;
+ if(t<P.V3[0])return cl((t-P.V2[0])/(P.V2[1]-P.V2[0]))*0.98;
+ if(t<P.V4[0]){const ct=K.carp-P.V3[0];const k=cl((t-P.V3[0])/ct);return 1+k*0.7+(k>=1?cl((t-K.carp)/0.9)*0.6:0)}
+ if(t<P.V5[0])return 2.3;
+ if(t<P.V6[0]){const k=cl((t-P.V5[0])/1.6);return lerp(2.3,0.9,eout(k))}
+ return 2.3;
+}
+
+function kare(t){
+ const P=K.parca,v=bolum(t),tv=t-P[v][0],dv=P[v][1]-P[v][0];
+ let o=`<rect width="1080" height="1920" fill="${PAPER}"/>`;
+ // ---- sahne alanı (y 380–1460) ----
+ let s=zemin();
+ const z=olayZ(t),{v:va,m:mo}=konumlar(z);
+ const durParla=(v==='V5'&&tv>K.ip[0]-P.V5[0]&&tv<K.ip[1]-P.V5[0])?0.5+0.5*Math.sin(t*10):(v==='V3'&&z>1&&z<1.7?0.6:0);
+ s+=durLevha(CX-YOL/2-60,CY+YOL/2+70,1,durParla);
+ if(v!=='V1'||true){s+=kamyonet(va.x,va.y,va.r);s+=motor(mo.x,mo.y,mo.r)}
+ // etiketler
+ if(v==='V2'||v==='V5'){const a=v==='V2'?ease(tv/0.6):1;
+  s+=`<g opacity="${a}">`+etiket(va.x,va.y-70,L.van)+etiket(mo.x+(mo.x>800?-120:140),mo.y,L.moto)+`</g>`;
+  if(v==='V2'&&tv>dv*0.55)s+=`<g opacity="${ease((tv-dv*0.55)/0.5)}">`+ok(mo.x+70,mo.y+120,mo.x+70,mo.y+10)+etiket(mo.x+160,mo.y+150,L.sag,INK,SAR,26)+`</g>`;
+ }
+ // V5 ipuçları vurgusu
+ if(v==='V5'){
+  if(t>=K.ip[1])s+=ok(CX+130,CY+330,CX+130,CY+190);
+  if(t>=K.ip[2])s+=g(mo.x+110,mo.y+40,1,`<circle r="46" ${st('#fffaf0',5)}/><path d="M-30,10 A32,32 0 0 1 30,10" fill="none" stroke="${INK}" stroke-width="5"/><line x1="0" y1="10" x2="${22*Math.cos(-0.5)}" y2="${10-22}" stroke="${KIR}" stroke-width="7" stroke-linecap="round"/><text y="36" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="20" fill="${KIR}">50+</text>`);
+ }
+ // çarpışma anı: gösterilmez → patlama yazısı
+ const carpT=K.carp;
+ let titre=0;
+ if(t>=carpT-0.05&&t<P.V4[0]){const k=t-carpT;if(k<0.6)titre=(1-k/0.6)*14;s+=patlama(CARP[0]+30,CARP[1]-30,eout(k/0.25),L.cat,t)}
+ // kamera: V3'te yakınlaşma, V1'de hafif uzak
+ let zoom=1,fx=CX,fy=CY;
+ if(v==='V1')zoom=1.0+0.03*ease(tv/dv);
+ if(v==='V3'){zoom=1+0.35*ease(tv/(dv*0.6));fx=lerp(CX,CARP[0],ease(tv/dv));fy=lerp(CY,CARP[1],ease(tv/dv))}
+ if(v==='V4')zoom=1.35,fx=CARP[0],fy=CARP[1];
+ const sx=Math.sin(t*90)*titre,sy=Math.cos(t*77)*titre;
+ o+=`<defs><clipPath id="kes"><rect x="20" y="380" width="1040" height="1080" rx="30"/></clipPath></defs>`;
+ o+=`<g clip-path="url(#kes)"><g transform="translate(${CX+sx},${CY+sy}) scale(${zoom}) translate(${-fx},${-fy})">${s}</g>`;
+ // geri sarma efekti
+ if(v==='V5'&&tv<1.8){const a=1-ease((tv-1.2)/0.6);for(let i=0;i<9;i++){const yy=380+((i*137+t*900)%1080);o+=`<rect x="20" y="${yy}" width="1040" height="${6+i%3*4}" fill="#fff" opacity="${0.35*a}"/>`}
+  o+=`<g opacity="${a}"><path d="M470,900 l-60,-50 v100Z M560,900 l-60,-50 v100Z" fill="#fff" stroke="${INK}" stroke-width="6"/></g>`}
+ // oylama / karar / ders kartları sahnenin üstünde
+ if(v==='V4'){const a=ease(tv/0.5);o+=`<rect x="20" y="380" width="1040" height="1080" fill="${INK}" opacity="${0.45*a}"/>`;
+  o+=g(540,520,1,`<text text-anchor="middle" font-family="Baloo" font-weight="800" font-size="70" fill="#fff" stroke="${INK}" stroke-width="12" paint-order="stroke">${esc(L.soru)}</text>`,0,a);
+  ['A','B','C'].forEach((h,i)=>{const b=ease((tv-0.4-i*0.35)/0.4);o+=g(540,690+i*190,0.9+0.1*b,`<rect x="-430" y="-72" width="860" height="144" rx="30" fill="#fffaf0" stroke="${INK}" stroke-width="7"/><circle cx="-340" r="50" ${st(SAR,6)}/><text x="-340" y="22" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="64" fill="${INK}">${h}</text><text x="-260" y="20" font-family="Baloo" font-weight="800" font-size="${L.sik[i].length>16?50:58}" fill="${INK}">${esc(L.sik[i])}</text>`,0,b)});
+  // geri sayım
+  const [c0,c1]=K.sayac;if(t>=c0&&t<c1){const n=Math.ceil(c1-t),f=(c1-t)%1;o+=g(540,1300,1,`<circle r="80" ${st('#fffaf0',7)}/><path d="M0,-80 A80,80 0 ${f>0.5?1:0} 1 ${80*Math.sin(f*6.283)},${-80*Math.cos(f*6.283)}" fill="none" stroke="${KIR}" stroke-width="12"/><text y="30" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="86" fill="${INK}">${n}</text>`)}
+  else if(t<c0)o+=g(540,1320,1,`<text text-anchor="middle" font-family="Kalam" font-weight="700" font-size="46" fill="#fff" stroke="${INK}" stroke-width="10" paint-order="stroke">${esc(L.yorum)}</text>`,0,ease((tv-1.2)/0.5));
+ }
+ if(v==='V5'){K.ip.forEach((ti,i)=>{if(t<ti)return;const b=eout((t-ti)/0.4);o+=g(540,1180+i*0,1,'',0,0);
+  o+=g(255+i*285,1330,0.6+0.4*b,`<rect x="-130" y="-92" width="260" height="184" rx="22" fill="#fffaf0" stroke="${INK}" stroke-width="6"/><text y="-48" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="30" fill="${KIR}">${esc(L.ip)} ${i+1}</text>`+
+   satir(L.ipucu[i],0,-6,30,220,INK),i%2?3:-3,b)})}
+ if(v==='V6'){const a=ease(tv/0.5);o+=`<rect x="20" y="380" width="1040" height="1080" fill="${PAPER}" opacity="${0.92*a}"/>`;
+  o+=g(540,470,1,`<text text-anchor="middle" font-family="Baloo" font-weight="800" font-size="64" fill="${INK}">${esc(L.karar)}</text>`,0,a);
+  // tokmak
+  const vur=tv<0.8?Math.sin(cl(tv/0.4)*Math.PI)*-35:0;o+=g(920,470,0.8,`<g transform="rotate(${vur})"><rect x="-70" y="-26" width="90" height="52" rx="10" ${st('#8a6a44',5)}/><rect x="10" y="-8" width="120" height="16" rx="8" ${st('#a07a4c',4)}/></g><rect x="-80" y="40" width="110" height="22" rx="6" ${st('#6e5235',4)}/>`,0,a);
+  const b1=ease((tv-0.6)/0.5),b2=ease((t-K.tali)/0.5);
+  o+=kartK(540,720,L.kv,KIR,b1);
+  o+=kartK(540,1050,L.km,SAR,b2,true);
+  o+=damga(540,1290,L.onay,(t-K.onayT)/0.5);
+  const b3=ease((t-K.onayT-0.6)/0.5);o+=g(540,1400,1,`<rect x="-260" y="-40" width="520" height="72" rx="20" fill="${YES}" stroke="${INK}" stroke-width="5"/><text y="12" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="40" fill="#fff">${esc(L.dogru)}</text>`,0,b3);
+ }
+ if(v==='V7'){const a=ease(tv/0.5);o+=`<rect x="20" y="380" width="1040" height="1080" fill="${PAPER}" opacity="${0.94*a}"/>`;
+  o+=g(540,500,1,`<text text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${L.efsane.length>34?46:54}" fill="${KIR}"><tspan>${esc(L.efsane)}</tspan></text><line x1="-420" y1="18" x2="420" y2="18" stroke="${KIR}" stroke-width="6"/>`,0,a);
+  o+=g(540,600,1,`<text text-anchor="middle" font-family="Baloo" font-weight="800" font-size="60" fill="${INK}">${esc(L.ders)}</text>`,0,a);
+  L.dk.forEach((x,i)=>{const b=ease((tv-0.8-i*dv*0.16)/0.5);o+=g(540,720+i*130,1,`<rect x="-460" y="-52" width="920" height="104" rx="24" fill="#fffaf0" stroke="${INK}" stroke-width="6"/><text x="-420" y="16" font-family="Baloo" font-weight="800" font-size="${x.length>30?40:46}" fill="${INK}">${esc(x)}</text>`,0,b)});
+  const b4=ease((tv-dv*0.62)/0.5);o+=g(540,1140,1,`<rect x="-460" y="-60" width="920" height="120" rx="26" fill="${SAR}" stroke="${INK}" stroke-width="7"/><text y="18" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${L.yav.length>30?44:50}" fill="${INK}">${esc(L.yav)}</text>`,0,b4);
+  const b5=ease((tv-dv*0.82)/0.5);o+=g(540,1310,1,`<text text-anchor="middle" font-family="Baloo" font-weight="800" font-size="66" fill="${INK}">${esc(L.son[0])}</text><text y="76" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="66" fill="${KIR}">${esc(L.son[1])}</text>`,0,b5);
+ }
+ o+=`</g><rect x="20" y="380" width="1040" height="1080" rx="30" fill="none" stroke="${INK}" stroke-width="10"/>`;
+ // temsili etiketi + bilgi
+ if(v==='V2'||v==='V3')o+=etiket(860,420+20,L.temsili,'#fff',INK,22)+(v==='V2'?etiket(540,1420,L.bilgi,INK,'#fffaf0',24):'');
+ // ---- üst bant: kanal + seri + ilerleme ----
+ o+=`<rect x="0" y="0" width="1080" height="14" fill="${P2}"/><rect x="0" y="0" width="${1080*cl(t/K.toplam)}" height="14" fill="${L.renk}"/>`;
+ o+=`<g transform="translate(540,92)"><rect x="-250" y="-46" width="500" height="80" rx="16" fill="${INK}"/><rect x="-236" y="-32" width="52" height="52" rx="8" fill="${L.renk}"/><rect x="-224" y="-20" width="28" height="28" rx="4" fill="${INK}"/><text x="26" y="12" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${L.kanal.length>11?40:46}" fill="#fff">${esc(L.kanal)}</text></g>`;
+ o+=`<text x="540" y="182" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="40" fill="${L.renk}" stroke="${INK}" stroke-width="3">${esc(L.seri)}</text>`;
+ const ad=ilerleme(t);L.adim.forEach((x,i)=>{const xx=150+i*195,on=i===ad,gec=i<ad;o+=`<g transform="translate(${xx},245)"><rect x="-86" y="-28" width="172" height="52" rx="26" fill="${on?L.renk:gec?'#d9c9a2':'#fffaf0'}" stroke="${INK}" stroke-width="4"/><text y="10" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="${x.length>6?24:28}" fill="${INK}">${esc(x)}</text></g>`});
+ // başlık (mit cümlesi) — V1'de büyük, sonra küçük şerit
+ if(v==='V1'){const a=eout(tv/0.5);o+=g(540,330,0.8+0.2*a,`<text text-anchor="middle" font-family="Baloo" font-weight="800" font-size="58" fill="${INK}">${esc(L.mit[0])} <tspan fill="${KIR}">${esc(L.mit[1])}</tspan></text>`,0,a)}
+ else o+=`<text x="540" y="335" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="44" fill="${INK}" opacity=".85">"${esc(L.mit[0])} ${esc(L.mit[1])}"</text>`;
+ if(v==='V1'){const a=ease((tv-0.3)/0.4);o+=g(540,920,1+0.06*Math.sin(t*5),`<circle r="150" fill="${SAR}" stroke="${INK}" stroke-width="10"/><text y="78" text-anchor="middle" font-family="Baloo" font-weight="800" font-size="250" fill="${INK}">?</text>`,0,a*(1-ease((tv-dv+0.4)/0.4)))}
+ // ---- altyazı ----
+ o+=altyazi(t);
+ // ---- alt not ----
+ o+=satir(L.not,540,1860,24,1000,'#6b5a46','Kalam',700);
+ if(t<0.25)o+=`<rect width="1080" height="1920" fill="#000" opacity="${1-t/0.25}"/>`;
+ if(t>K.toplam-0.5)o+=`<rect width="1080" height="1920" fill="#000" opacity="${(t-(K.toplam-0.5))/0.5}"/>`;
+ SV.innerHTML=o;
+}
+function kartK(x,y,dz,c,a,tali){if(a<=0)return'';
+ return g(x,y,0.85+0.15*a,`<rect x="-470" y="-140" width="940" height="${dz.length>3?280:220}" rx="30" fill="#fffaf0" stroke="${INK}" stroke-width="7"/><rect x="-470" y="-140" width="26" height="${dz.length>3?280:220}" rx="10" fill="${c}" stroke="${INK}" stroke-width="5"/>`+
+  `<text x="-410" y="-80" font-family="Baloo" font-weight="800" font-size="40" fill="#6b5a46">${esc(dz[0])}</text><text x="-410" y="-22" font-family="Baloo" font-weight="800" font-size="58" fill="${tali?'#b07d10':KIR}">${esc(dz[1])}</text>`+
+  dz.slice(2).map((s,i)=>`<text x="-410" y="${34+i*46}" font-family="Kalam" font-weight="700" font-size="36" fill="${INK}">• ${esc(s)}</text>`).join(''),0,a)}
+// çok satırlı metin (genişliğe göre böl)
+function satir(txt,x,y,fs,w,c,fam='Baloo',wt=800){const kel=String(txt).split(' '),sat=[];let cur='';const max=Math.floor(w/(fs*0.52));
+ for(const k of kel){if((cur+' '+k).trim().length>max&&cur){sat.push(cur);cur=k}else cur=(cur+' '+k).trim()}if(cur)sat.push(cur);
+ const y0=y-(sat.length-1)*fs*0.55;return sat.map((s,i)=>`<text x="${x}" y="${y0+i*fs*1.1}" text-anchor="middle" font-family="${fam}" font-weight="${wt}" font-size="${fs}" fill="${c}">${esc(s)}</text>`).join('')}
+function altyazi(t){const A=K.altyazi.find(a=>t>=a.bas&&t<a.son);if(!A)return'';const u=ease((t-A.bas)/0.12);
+ const m=A.metin,fs=Math.min(62,1500/Math.max(14,m.length*0.62));
+ return `<g opacity="${u}"><rect x="40" y="1530" width="1000" height="${m.length>34?190:130}" rx="28" fill="#fffaf0" stroke="${INK}" stroke-width="6" opacity=".96"/>`+satir(m,540,m.length>34?1610:1612,fs,930,INK)+`</g>`}
+
+window.kurgu=k=>{K=k;L=T[k.dil]||T.tr};window.kare=kare;
+Promise.all(['800 40px Baloo','700 40px Kalam','400 40px Kalam'].map(f=>document.fonts.load(f))).then(()=>{window.HAZIR=true});
+setTimeout(()=>{window.HAZIR=true},4000);
+// önizleme: kayıt dışında örnek kurgu ile oynat
+if(!Q.has('kayit')){const P={V1:[0.3,4],V2:[4,11],V3:[11,17],V4:[17,25],V5:[25,34],V6:[34,47],V7:[47,58]};
+ window.kurgu({toplam:60,dil:Q.get('dil')||'tr',parca:P,sayac:[21,24],ip:[27,29.5,32],carp:14.7,tali:41,onayT:45,altyazi:[]});let t0=performance.now();
+ (function d(){kare(((performance.now()-t0)/1000)%60);requestAnimationFrame(d)})()}
+</script>
+</body></html>

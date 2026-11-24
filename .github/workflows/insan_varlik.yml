@@ -1,0 +1,28 @@
+name: İnsan modeli varlıkları (MakeHuman CC0)
+# MakeHuman CC0 sistem varlık paketini indirir; seçilen parçaları ayrı "insan-varlik" dalına koyar (ana dal şişmez). Kara Kutu gerçekçi figürleri için.
+on:
+  workflow_dispatch:
+    inputs:
+      desen: {description: "kopyalanacak yollar için regex", required: false, default: "(skins/(young|middleage)[a-z_]*male|clothes/(.*(work|boot|shoe|jean|pants|tshirt|shirt|overall|suit).*)|hair/(short|bob)|eyebrows/eyebrow00[1-4]|eyes/(high-poly|low-poly|materials/brown))"}
+permissions: {contents: write}
+concurrency: {group: insan-varlik}
+jobs:
+  al:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: İndir ve seç
+        run: |
+          cd /tmp && for u in https://files.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip https://files2.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip; do curl -sL -m 1500 "$u" -o p.zip && unzip -tq p.zip >/dev/null 2>&1 && break; done
+          ls -la p.zip; unzip -q p.zip -d sys; cd sys; R=$(dirname "$(find . -maxdepth 4 -type d -name clothes | head -1)"); echo "kök: $R"; cd "$R"
+          mkdir -p /tmp/o2; find . -type f -printf '%s\t%P\n' | sort -k2 > /tmp/o2/LISTE.txt; wc -l /tmp/o2/LISTE.txt
+          find . -type f | sed 's#^\./##' | grep -E "^${{ inputs.desen }}" | while read -r f; do mkdir -p "/tmp/o2/$(dirname "$f")"; cp "$f" "/tmp/o2/$f"; done
+          du -sh /tmp/o2; find /tmp/o2 -size +90M -print -delete
+      - name: insan-varlik dalına koy
+        run: |
+          cd /tmp && rm -rf o && mkdir o && cd o && git init -q
+          git config user.name "icerik-bot"; git config user.email "icerik-bot@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          git checkout -q --orphan insan-varlik; cp -r /tmp/o2/. .
+          git add -A && git commit -qm "MakeHuman CC0 varlıkları (seçili)" || exit 0
+          for i in 1 2 3; do git push -qf origin HEAD:insan-varlik && break; sleep 5; done

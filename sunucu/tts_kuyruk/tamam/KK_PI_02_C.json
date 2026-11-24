@@ -1,0 +1,37 @@
+{
+ "kod": "KK_PI_02_C",
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "parcalar": [
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sizce izin parası ödendi mi? A, evet, ödendi. B, hayır, izinler yandı. C, sadece son yılın parası. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. İşveren, izinleri kullandırdığını gösteren imzalı bir izin defteri sunamıyor. Yargıtay bir şey daha soruyor: Yedi yılda hiç izin kullanmamak olağan mı? Ustanın kaç gün izin kullandığı tek tek soruluyor."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Yargıtay dedi ki: İş sözleşmesi nasıl biterse bitsin, kullanılmayan izinlerin ücreti son ücret üzerinden ödenir. İzni kullandırdığını ispat etmek işverene düşer. Sekiz bin dokuz yüz kırk üç lira izin ücretine hükmedildi. Yargıtay onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Kullanmadığın izin yanmaz, iş bitince paraya dönüşür. İzin kullandığında mutlaka imzalı kayıt olsun. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

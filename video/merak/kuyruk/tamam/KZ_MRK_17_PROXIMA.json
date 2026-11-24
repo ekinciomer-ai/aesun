@@ -1,0 +1,218 @@
+{
+ "kod": "KZ_MRK_17_PROXIMA",
+ "no": "MERAK #17",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "EN YAKIN YILDIZA<br><i>KAÇ YILDA?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Işık hızıyla gitsen, Güneş'ten sonraki en yakın yıldıza kaç yılda varırsın? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "hiz",
+    "kart": 55
+   },
+   "metin": "Işık saniyede yaklaşık üç yüz bin kilometre yol alır. Bir saniyede Dünya'nın çevresini yedi buçuk kez dolanır.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "IŞIK HIZI",
+     "say": 300000,
+     "dec": 0,
+     "ek": "km/sn",
+     "on": "≈ ",
+     "k": "üç"
+    },
+    {
+     "tip": "etiket",
+     "y": "1 saniye = 7,5 tur 🌍",
+     "k": "yedi"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "yil",
+    "kart": 55
+   },
+   "metin": "Bir yılda gittiği yol yaklaşık dokuz buçuk trilyon kilometre. Buna bir ışık yılı denir.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 IŞIK YILI",
+     "say": 9.46,
+     "dec": 2,
+     "ek": "trilyon km",
+     "on": "≈ ",
+     "k": "dokuz"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "mesafe",
+    "kart": 55
+   },
+   "metin": "En yakın yıldız Proxima Centauri, bunun dört katından biraz fazla uzakta.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "PROXIMA CENTAURI",
+     "say": 4.2,
+     "dec": 1,
+     "ek": "ışık yılı",
+     "on": "≈ ",
+     "k": "dört"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "lise",
+    "kart": 55
+   },
+   "metin": "Yani ışık hızıyla bile dört yıldan uzun sürer. Tam bir lise eğitimi kadar.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ 1 lise eğitimi 🎓",
+     "k": "lise"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "voyager",
+    "kart": 55
+   },
+   "metin": "Ama ışık hızında giden bir aracımız yok. İnsan yapımı en uzak araç Voyager bir, saniyede yaklaşık on yedi kilometre gidiyor.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "VOYAGER 1",
+     "say": 17,
+     "dec": 0,
+     "ek": "km/sn",
+     "on": "≈ ",
+     "k": "on"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "sure",
+    "kart": 55
+   },
+   "metin": "Bu hızla Proxima'ya varması yetmiş üç bin yıldan fazla sürerdi. Hem de hiç durmadan giderek.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "VOYAGER İLE",
+     "say": 73000,
+     "dec": 0,
+     "ek": "yıl",
+     "on": "> ",
+     "k": "yetmiş"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "gobekli",
+    "kart": 55
+   },
+   "metin": "Göbeklitepe yaklaşık on bir bin beş yüz yıl önce yapıldı. Bu yolculuk onun altı katından da uzun.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "GÖBEKLİTEPE",
+     "say": 11500,
+     "dec": 0,
+     "ek": "yıl önce",
+     "on": "≈ ",
+     "k": "on"
+    },
+    {
+     "tip": "formul",
+     "y": "73.000 <em>÷</em> 11.500 ≈ 6,3",
+     "k": "altı"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "yildiz",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: ışık hızıyla yaklaşık dört virgül iki yıl. Sen bu yolculuğa çıkar mıydın? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "say": 4.2,
+     "dec": 1,
+     "ek": "yıl",
+     "on": "≈ ",
+     "k": "dört"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Işık hızıyla en yakın yıldıza kaç yılda varırsın? ✨ #shorts",
+  "aciklama": "Güneş'ten sonraki en yakın yıldız Proxima Centauri, yaklaşık 40 trilyon km (≈ 4,2 ışık yılı) uzaktadır. NASA'ya göre ışık hızında gidebilseydik bile yolculuk yaklaşık 4,2 yıl sürerdi. Bir ışık yılı ≈ 9,46 trilyon km'dir. Işık saniyede 299.792 km gider; Dünya'nın ekvator çevresi ≈ 40.075 km olduğundan bu, saniyede ≈ 7,5 tur eder.\n\nİnsan yapımı en uzak araç Voyager 1'dir (NASA). NASA'ya göre Güneş'ten saniyede ≈ 17 km hızla uzaklaşan Voyager bu hızla Proxima'ya 73.000 yıldan uzun sürede varırdı (Voyager aslında Proxima yönünde gitmiyor; bu bir hız karşılaştırmasıdır).\n\nKarşılaştırmalar: lise eğitimi 4 yıl (MEB). UNESCO'ya göre Göbeklitepe'nin anıtsal yapıları yaklaşık 11.500 yıl önce (MÖ 9600–8200) inşa edildi; 73.000 ÷ 11.500 ≈ 6,3.\n\nSen bu yolculuğa çıkar mıydın? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçeksizdir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA Imagine the Universe – The Nearest Star; NIST – ışık hızı; NASA Earth Fact Sheet; UNESCO Dünya Mirası – Göbeklitepe; MEB ortaöğretim.\n\n#kozmoslab #proximacentauri #ışıkyılı #uzay #voyager #göbeklitepe #bilim #merak #shorts",
+  "etiketler": [
+   "proxima centauri",
+   "en yakın yıldız",
+   "ışık yılı",
+   "ışık hızı",
+   "voyager",
+   "uzay",
+   "astronomi",
+   "göbeklitepe",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA Imagine the Universe – The Nearest Star: 'Proxima Centauri, the closest star to our own, is still 40,208,000,000,000 km away'; 'A light year ... is equal to 9.461 x 10^12 km'; 'If we could travel at the speed of light ... it would still take 4.22 years to arrive!'; Voyager 'traveling away from the Sun at a rate of 17.3 km/s'; 'it would take over 73,000 years to arrive'",
+  "NIST CODATA: ışık hızı c = 299.792.458 m/s",
+  "NASA Earth Fact Sheet: ekvator yarıçapı 6.378,137 km → çevre ≈ 40.075 km; 299.792 ÷ 40.075 ≈ 7,48",
+  "UNESCO World Heritage – Göbekli Tepe (1572): 'between 9,600 and 8,200 BCE'; 'about 11,500 years ago'",
+  "MEB: ortaöğretim (lise) 4 yıl",
+  "Hesap: 40,208e12 ÷ 9,461e12 ≈ 4,25 ışık yılı (NASA metninde 4,22–4,25; senaryoda ≈ 4,2); 73.000 ÷ 11.500 ≈ 6,3"
+ ]
+}

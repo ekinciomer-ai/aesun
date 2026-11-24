@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-23T16:04+03:00",
+ "olusturma": "2026-11-24T11:18+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -123,17 +123,18 @@
    "gunluk_short_kotasi": 4,
    "seri_dagilimi": {
     "Yolu Seç · Isınma Turu": 2,
-    "Mühürlü Dosya · Bilgi Kartları": 1,
     "Kara Kutu · Hukuk Dosyaları": 1
    },
-   "durdurulan": []
+   "durdurulan": [
+    "Mühürlü Dosya · Bilgi Kartları"
+   ]
   },
   "LVL MAX": {
    "gunluk_short_kotasi": 1,
-   "seri_dagilimi": {
-    "Gündem + Tarih": 1
-   },
-   "durdurulan": []
+   "seri_dagilimi": {},
+   "durdurulan": [
+    "Gündem + Tarih"
+   ]
   },
   "Ömür Dediğin": {
    "gunluk_short_kotasi": 0,
@@ -164,7 +165,7 @@
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
    "karar": "ARTIR",
-   "neden": "videoların %50'i tuttu (eşik 190 izlenme / 48 sa)",
+   "neden": "videoların %50'i tuttu (eşik 192 izlenme / 48 sa)",
    "olculen": 12,
    "erken": 1,
    "medyan_48sa": 158,
@@ -310,10 +311,10 @@
    "karar": "DEĞİŞTİR",
    "neden": "son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir",
    "olculen": 25,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 258,
    "tutma_orani": 40,
-   "izlenme_yuzde": 57,
+   "izlenme_yuzde": 54,
    "en_iyi": {
     "baslik": "Mimar Sinan Süleymaniye inşaatını neden 1 yıl durdurdu? 🕌 | Cevahir Minaresi #shorts",
     "i48": 4114
@@ -390,7 +391,7 @@
    "karar": "ARTIR",
    "neden": "videoların %62'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 16,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 1274,
    "tutma_orani": 62,
    "izlenme_yuzde": 53,
@@ -423,12 +424,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 466,
+   "medyan_48sa": 544,
    "tutma_orani": 50,
    "izlenme_yuzde": 116,
    "en_iyi": {
     "baslik": "Hastane Yeri Seçmek İçin Şehre Neden Çiğ Et Parçaları Astı? 🥩🏥 | Ebû Bekir er-Râzî #shorts",
-    "i48": 876
+    "i48": 1031
    },
    "kaydirmadan_izleme_yuzde": 32
   },
@@ -549,7 +550,7 @@
    "karar": "DURDUR",
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %12",
    "olculen": 8,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 2,
    "tutma_orani": 12,
    "izlenme_yuzde": 38,
@@ -645,7 +646,7 @@
    "karar": "ARTIR",
    "neden": "videoların %100'i tuttu (eşik 212 izlenme / 48 sa)",
    "olculen": 7,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 448,
    "tutma_orani": 100,
    "izlenme_yuzde": 44,
@@ -659,13 +660,16 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Drone Nasıl Çalışır?",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
    "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "medyan_48sa": 518,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Drone havada nasıl durur? 🚁 #shorts",
+    "i48": 518
+   }
   },
   {
    "kanal": "Kozmos Lab TR",
@@ -721,7 +725,7 @@
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 963,
    "tutma_orani": 100,
    "izlenme_yuzde": 49,
@@ -778,16 +782,16 @@
   {
    "kanal": "LVL MAX",
    "seri": "Gündem + Tarih",
-   "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 5,
+   "karar": "DURDUR",
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
+   "olculen": 4,
+   "erken": 4,
    "medyan_48sa": 4,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
-    "baslik": "186 km/s Hızla Kaçarken Kamyona Çarptı! | Polis Kovalamacası",
-    "i48": 4
+    "baslik": "150 km/s Hızla Otoyol Çıkışını Kaçırdı, Doğrudan Duvara Çakıldı!",
+    "i48": 8
    }
   },
   {
@@ -821,16 +825,16 @@
   {
    "kanal": "Yolu Seç !",
    "seri": "Mühürlü Dosya · Bilgi Kartları",
-   "karar": "DENE",
-   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 2,
-   "erken": 3,
-   "medyan_48sa": 158,
+   "karar": "DURDUR",
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
+   "olculen": 3,
+   "erken": 2,
+   "medyan_48sa": 152,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Bölüm 1’deki 3 saniyelik o detayı fark ettin mi? 🔍📸 #shorts",
-    "i48": 231
+    "i48": 247
    }
   },
   {
@@ -867,15 +871,15 @@
   }
  ],
  "esikler": {
+  "Ancient Studio": 192,
   "Yolu Seç !": 262,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab": 93,
-  "Nasıl Yapıldı": 135,
   "LVL MAX": 50,
   "Kozmos Lab TR": 212,
+  "Nasıl Yapıldı": 135,
+  "Kozmos Lab": 93,
   "Estudio Antiguo": 126,
-  "Ömür Dediğin": 50,
-  "Ancient Studio": 190
+  "Antik Stüdyo": 637,
+  "Ömür Dediğin": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -909,7 +913,7 @@
    },
    "18:00": {
     "n": 15,
-    "medyan": 452
+    "medyan": 506
    },
    "19:00": {
     "n": 14,
@@ -990,8 +994,8 @@
     "medyan": 12
    },
    "19:00": {
-    "n": 9,
-    "medyan": 427
+    "n": 10,
+    "medyan": 438
    },
    "21:00": {
     "n": 6,
@@ -1031,6 +1035,10 @@
     "n": 5,
     "medyan": 320
    },
+   "14:00": {
+    "n": 1,
+    "medyan": 152
+   },
    "17:00": {
     "n": 4,
     "medyan": 711
@@ -1041,7 +1049,7 @@
    },
    "21:00": {
     "n": 1,
-    "medyan": 231
+    "medyan": 247
    }
   },
   "Nasıl Yapıldı": {
@@ -1054,18 +1062,22 @@
    "00:00": {
     "n": 1,
     "medyan": 4
+   },
+   "06:00": {
+    "n": 1,
+    "medyan": 3
+   },
+   "12:00": {
+    "n": 1,
+    "medyan": 8
+   },
+   "18:00": {
+    "n": 1,
+    "medyan": 0
    }
   }
  },
  "takvim_aciklari": [
-  {
-   "kanal": "Antik Stüdyo",
-   "tarih": "2026-11-23",
-   "planli_short": 1,
-   "hedef_kota": 2,
-   "eksik": 1,
-   "uyari": "19:00 Gündem+Tarih slotu BOŞ"
-  },
   {
    "kanal": "Antik Stüdyo",
    "tarih": "2026-11-24",
@@ -1081,6 +1093,14 @@
    "hedef_kota": 2,
    "eksik": 2,
    "uyari": "19:00 Gündem+Tarih slotu BOŞ"
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "tarih": "2026-11-26",
+   "planli_short": 1,
+   "hedef_kota": 2,
+   "eksik": 1,
+   "uyari": "1 Short slotu boş"
   }
  ],
  "kopru_onerileri": [
@@ -1185,7 +1205,7 @@
    "uzun_vid": "Ub6wYt_50lY",
    "uzun_baslik": "Piri Reis Neden İdam Edildi? | 474 Yıl Önce Hürmüz Boğazı",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 908,
+   "uzun_izlenme": 909,
    "baglanacak_shortlar": [
     {
      "vid": "AtvyZhEtBkk",
@@ -1196,7 +1216,7 @@
     {
      "vid": "Ov0ftdfKjCI",
      "baslik": "Piri Reis neden idam edildi? #Shorts",
-     "izlenme": 2296,
+     "izlenme": 2297,
      "durum": "Yayında"
     },
     {
@@ -1225,12 +1245,12 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 267,
+   "uzun_izlenme": 272,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
      "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
-     "izlenme": 23,
+     "izlenme": 24,
      "durum": "Yayında"
     }
    ],
@@ -1246,7 +1266,7 @@
     {
      "vid": "Ov0ftdfKjCI",
      "baslik": "Piri Reis neden idam edildi? #Shorts",
-     "izlenme": 2296,
+     "izlenme": 2297,
      "durum": "Yayında"
     },
     {
@@ -1354,13 +1374,13 @@
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2955,
+     "izlenme": 2956,
      "durum": "Yayında"
     },
     {
      "vid": "0Yhof30_bfg",
      "baslik": "Son Akşam Yemeği neden yok oluyor? 🍞 #shorts",
-     "izlenme": 2909,
+     "izlenme": 2910,
      "durum": "Yayında"
     },
     {
@@ -1372,7 +1392,7 @@
     {
      "vid": "TkHPfx33Jqg",
      "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-     "izlenme": 2607,
+     "izlenme": 2609,
      "durum": "Yayında"
     },
     {
@@ -1389,7 +1409,7 @@
    "uzun_vid": "Bg1kfGUPvnQ",
    "uzun_baslik": "7 cuadros famosos y el detalle que casi nadie ve",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 0,
+   "uzun_izlenme": 1,
    "baglanacak_shortlar": [
     {
      "vid": "2W3av1wzx5A",
@@ -1442,13 +1462,13 @@
     {
      "vid": "cfbwB6z1_cA",
      "baslik": "How does a wind turbine make electricity? 🌬️ #shorts",
-     "izlenme": 25,
+     "izlenme": 27,
      "durum": "Yayında"
     },
     {
      "vid": "7naXMebQd70",
      "baslik": "One blade longer than a football pitch: the 26 MW wind turbine 🌀 #shorts",
-     "izlenme": 12,
+     "izlenme": 13,
      "durum": "Yayında"
     }
    ],
@@ -1464,8 +1484,14 @@
     {
      "vid": "MSOsi_wK55Q",
      "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
-     "izlenme": 955,
+     "izlenme": 957,
      "durum": "Yayında"
+    },
+    {
+     "vid": "H1btzbOdl1U",
+     "baslik": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
+     "izlenme": 0,
+     "durum": "Planlı"
     },
     {
      "vid": "j2lpy8oWgVw",
@@ -1543,6 +1569,69 @@
    "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
   {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": "t75JlucudO8",
+   "baslik": "Paslanmaz çelikte 3 derin çizik var: Aşağı iner misin? 🔪🔬 #shorts",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "Zifiri karanlıkta karşına kör bir canlı çıktı: Feneri kapatır mısın? 🦇🔦 #shorts",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "Yerebatan’ın tabanındaki çamurun altından ne çıktı? 🔍",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "Bölüm 1’de suyun içindeki o kararmayı fark ettin mi? 📸",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "Bizanslılar su altında demiri kurşunla nasıl mühürledi?",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "Bölüm 2’de telsiz kapalıyken o ses nereden geldi? 📻",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "1500 yıl önce bu su kanalı neden tuğlayla örüldü? 🧱",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "Kükürtlü suda ses kaydı yıllarca nasıl sağlam kalır? 💾",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
+   "tur": "ERTELE",
+   "kanal": "Yolu Seç !",
+   "vid": null,
+   "baslik": "Güneş görmeyen sarnıç suyunda hangi canlılar yaşar? 🔬",
+   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
+  },
+  {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Ancient Studio",
    "vid": "uj0xUXqOPKo",
@@ -1553,24 +1642,16 @@
   {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Kozmos Lab TR",
-   "vid": "MvRkWFY5Oms",
-   "baslik": "Wi-Fi duvarın içinden nasıl geçiyor? Fikir uzaydan geldi 📶",
-   "tarih": "2026-11-23",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
-   "vid": "yCiaMGpe34E",
-   "baslik": "Yarın gece Süper Ay: ne zaman, nereye bakmalı? 🌕 #shorts",
-   "tarih": "2026-11-23",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
    "vid": "k_KKJUSIjhI",
    "baslik": "Elektrikli araba 1 kWh elektrikle kaç km gider? 🚗⚡ #shorts",
+   "tarih": "2026-11-24",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "MnKJUzav1K8",
+   "baslik": "Kripto şifreler nasıl kırılmaz? Sır iki asal sayıda 🔐",
    "tarih": "2026-11-24",
    "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
@@ -1625,6 +1706,22 @@
   {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Kozmos Lab TR",
+   "vid": "0Bmsbki6FFo",
+   "baslik": "Ay'a arabayla gitsek kaç günde varırız? 🚗🌙 #shorts",
+   "tarih": "2026-11-30",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
+   "vid": "c_FCnWeZJYs",
+   "baslik": "Rüzgâr türbininin tek turu kaç telefon şarj eder? 🌬️🔋 #shorts",
+   "tarih": "2026-12-01",
+   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
+  },
+  {
+   "tur": "HAFTALIK_KOTA",
+   "kanal": "Kozmos Lab TR",
    "vid": "BqJQSRakmho",
    "baslik": "Açık bıraktığın bildirim sekmeleri anlık IQ skorunu 10 puan düşürüyor 🧠💻 #shorts",
    "tarih": "2026-12-02",
@@ -1640,17 +1737,17 @@
   }
  ],
  "bulgular": [
-  "Dün (2026-11-22) 2746 izlenme geldi; bir önceki gün 4770.",
-  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 190 izlenme / 48 sa).",
+  "Dün (2026-11-23) 11292 izlenme geldi; bir önceki gün 2746.",
+  "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 192 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 0 tanesi tuttu (eşik 126 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 93 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 212 izlenme / 48 sa).",
-  "LVL MAX: son 1 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "LVL MAX: son 4 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
-  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %50'i tuttu (eşik 190 izlenme / 48 sa).",
+  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %50'i tuttu (eşik 192 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gece Yasakları: ARTIR — videoların %60'i tuttu (eşik 637 izlenme / 48 sa).",
@@ -1664,6 +1761,8 @@
   "Kozmos Lab · Energy Sources: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %100'i tuttu (eşik 212 izlenme / 48 sa).",
+  "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
+  "Yolu Seç ! · Mühürlü Dosya · Bilgi Kartları: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1626 izlenme, 3 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
@@ -1690,7 +1789,7 @@
   "Ömür Dediğin: tutan Short'lar ortalama %50 izleniyor, tutmayanlar %102 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Ömür Dediğin: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %24 (hedef ≥%70).",
   "Uzun videolar (14 yayında): medyan 14 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
-  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-23, 2026-11-24, 2026-11-25."
+  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-24, 2026-11-25."
  ],
  "en_iyi": [
   {
@@ -1721,11 +1820,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Ancient Studio",
-   "baslik": "What happened to the emus? The end of the Emu War 🐦",
-   "i48": 0
-  },
-  {
    "kanal": "Estudio Antiguo",
    "baslik": "¿Cómo se pasan 70 barcos por encima de una colina? ⚓ #shorts",
    "i48": 0
@@ -1743,6 +1837,11 @@
   {
    "kanal": "Kozmos Lab",
    "baslik": "What is a supermoon? 🌕 #shorts",
+   "i48": 0
+  },
+  {
+   "kanal": "LVL MAX",
+   "baslik": "Çalıntı Araçla Kavşağa Daldı, İçinde 2 Çocuk Varken Kaçmaya Çalıştı!",
    "i48": 0
   }
  ]

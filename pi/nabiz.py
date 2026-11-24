@@ -79,7 +79,7 @@ def gh_trafik():
     try:
         sinir = datetime.now().timestamp() - 86400
         satir = [s.split(" ", 3) for s in f.read_text(errors="ignore").splitlines()]
-        satir = [a for a in satir if len(a) == 4 and a[0].isdigit() and int(a[0]) >= sinir]
+        satir = [a for a in satir if len(a) == 4 and a[0].isdigit() and a[2].isdigit() and int(a[0]) >= sinir]   # bozuk satır (disk dolu/yarım yazım) atılır
         f.write_text("".join(" ".join(a) + "\n" for a in satir))
         tur, dosya, saat = {}, {}, {}
         sinir1 = datetime.now().timestamp() - 3600

@@ -1,0 +1,255 @@
+name: Yumurta stili render (sunucuda, paralel)
+on:
+  workflow_dispatch:
+    inputs:
+      proje:
+        description: "video/<proje> klasor adi (or. efrasiyab-okey)"
+        required: true
+      kod:
+        description: "TTS kod oneki (or. EFRASIYAB_OKEY_TR)"
+        required: true
+      mod:
+        description: "stills veya render"
+        required: true
+        default: "stills"
+      scale:
+        description: "render olcegi (0.5 taslak / 0.75 final)"
+        required: false
+        default: "0.75"
+      parca:
+        description: "paralel parca sayisi"
+        required: false
+        default: "15"
+      stills_t:
+        description: "istege bagli virgul ayrilmis saniyeler (bossa otomatik 15 kare)"
+        required: false
+        default: ""
+permissions:
+  contents: read
+jobs:
+  hazirla:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      parcalar: ${{ steps.plan.outputs.parcalar }}
+      dur: ${{ steps.plan.outputs.dur }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            video/${{ inputs.proje }}
+            video/pumpkin2/motor
+            sunucu/tts_kuyruk/cikti
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Kurulum, ses birlestirme, mix ve stills
+        env:
+          PROJE: ${{ inputs.proje }}
+          KOD: ${{ inputs.kod }}
+          MOD: ${{ inputs.mod }}
+          PARCA: ${{ inputs.parca }}
+          STILLS_T: ${{ inputs.stills_t }}
+        run: |
+          set -e
+          if [ "$MOD" != "faces" ]; then command -v ffmpeg >/dev/null || (sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null); python3 -c "import numpy" 2>/dev/null || sudo python3 -m pip install --break-system-packages -q numpy >/dev/null; fi
+          git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git /tmp/yumurta
+          cd /tmp/yumurta/engine
+          npm ci --no-audit --no-fund >/dev/null
+          patch -p0 < "$GITHUB_WORKSPACE/video/pumpkin2/motor/toon_pumpkin.patch"
+          patch -p0 < "$GITHUB_WORKSPACE/video/pumpkin2/motor/faces_full.patch"
+          mkdir -p "/tmp/yumurta/stories/$PROJE"
+          cp -r "$GITHUB_WORKSPACE/video/$PROJE/." "/tmp/yumurta/stories/$PROJE/"
+          CHROME_PATH=$(which google-chrome chromium chromium-browser 2>/dev/null | head -1)
+          export CHROME_PATH
+          if [ "$MOD" = "faces" ]; then
+            node faces.mjs "$PROJE" --full
+            mkdir -p /tmp/hazir_out/audio
+            cp "/tmp/yumurta/stories/$PROJE/out/faces_full.png" /tmp/hazir_out/
+            echo '{"DUR": 10}' > /tmp/hazir_out/audio/cues.json
+            exit 0
+          fi
+          python3 -I "$GITHUB_WORKSPACE/video/pumpkin2/motor/parcalar.py" \
+            "$GITHUB_WORKSPACE/sunucu/tts_kuyruk/cikti" "$KOD" \
+            "$GITHUB_WORKSPACE/video/$PROJE/metin_tr.json" "/tmp/yumurta/stories/$PROJE"
+          node render.mjs "$PROJE" --cues
+          python3 -I "/tmp/yumurta/stories/$PROJE/mix.py" "/tmp/yumurta/stories/$PROJE"
+          # Ses seviye olcumu (LUFS & True Peak)
+          ffmpeg -i "/tmp/yumurta/stories/$PROJE/audio/mix.wav" -af ebur128=peak=true -f null - 2>&1 | tail -n 12 | tee /tmp/audio_ebur128.txt
+          # Stills zamanlari (otomatik 15 kare: P01'de 4 vurus + P02..P09 + P10 2 vurus)
+          TS=$(python3 - "/tmp/yumurta/stories/$PROJE/voice/words.json" "/tmp/yumurta/stories/$PROJE/audio/cues.json" "$STILLS_T" <<'PY'
+          import json, sys
+          w = json.load(open(sys.argv[1], encoding="utf-8"))["words"]
+          dur = float(json.load(open(sys.argv[2], encoding="utf-8"))["DUR"])
+          custom = sys.argv[3].strip()
+          if custom:
+              print(custom); sys.exit(0)
+          pt = {}
+          for x in w:
+              p = pt.setdefault(x["part"], [x["start"], x["end"]])
+              p[0] = min(p[0], x["start"]); p[1] = max(p[1], x["end"])
+          def P(k, f):
+              a, b = pt[f"P{k:02d}"]
+              return round(min(dur - 0.1, max(0.05, a + (b - a) * f)), 2)
+          ts = [
+              0.25, P(1, .34), P(1, .64), P(1, .88),
+              P(2, .5), P(3, .5), P(4, .55), P(5, .45),
+              P(6, .45), P(6, .85), P(7, .66), P(8, .55),
+              P(9, .45), P(10, .25), P(10, .82)
+          ]
+          print(",".join(str(x) for x in ts))
+          PY
+          )
+          echo "STILLS TIMESTAMPS: $TS"
+          if [ "$MOD" = "stills" ]; then
+            node render.mjs "$PROJE" --stills="$TS" --scale=0.5 --cols=5 --name=stills.jpg
+          fi
+          mkdir -p /tmp/hazir_out
+          cp -r "/tmp/yumurta/stories/$PROJE/voice" /tmp/hazir_out/
+          cp -r "/tmp/yumurta/stories/$PROJE/audio" /tmp/hazir_out/
+          cp /tmp/audio_ebur128.txt /tmp/hazir_out/
+          if [ -f "/tmp/yumurta/stories/$PROJE/out/stills.jpg" ]; then cp "/tmp/yumurta/stories/$PROJE/out/stills.jpg" /tmp/hazir_out/; fi
+      - id: plan
+        env:
+          PARCA: ${{ inputs.parca }}
+        run: |
+          python3 - /tmp/hazir_out/audio/cues.json "$PARCA" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, math, sys
+          dur = float(json.load(open(sys.argv[1]))["DUR"])
+          P = max(1, int(sys.argv[2]))
+          step = dur / P
+          arr = [{"i": i, "a": round(i * step, 4), "b": round(min(dur, (i + 1) * step), 4)} for i in range(P)]
+          print(f"dur={dur}")
+          print("parcalar=" + json.dumps(arr))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hazir-${{ inputs.proje }}
+          path: /tmp/hazir_out
+          retention-days: 7
+
+  kayit:
+    needs: hazirla
+    if: inputs.mod == 'render'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: true
+      max-parallel: 15
+      matrix:
+        p: ${{ fromJSON(needs.hazirla.outputs.parcalar) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            video/${{ inputs.proje }}
+            video/pumpkin2/motor
+      - uses: actions/download-artifact@v4
+        with:
+          name: hazir-${{ inputs.proje }}
+          path: /tmp/hazir_in
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Parca render (${{ matrix.p.i }})
+        env:
+          PROJE: ${{ inputs.proje }}
+          SCALE: ${{ inputs.scale }}
+          A: ${{ matrix.p.a }}
+          B: ${{ matrix.p.b }}
+          IDX: ${{ matrix.p.i }}
+        run: |
+          set -e
+          command -v ffmpeg >/dev/null || (sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null)
+          git clone --depth 1 https://github.com/kodlaciz/yumurta-stili.git /tmp/yumurta
+          cd /tmp/yumurta/engine
+          npm ci --no-audit --no-fund >/dev/null
+          patch -p0 < "$GITHUB_WORKSPACE/video/pumpkin2/motor/toon_pumpkin.patch"
+          patch -p0 < "$GITHUB_WORKSPACE/video/pumpkin2/motor/faces_full.patch"
+          mkdir -p "/tmp/yumurta/stories/$PROJE"
+          cp -r "$GITHUB_WORKSPACE/video/$PROJE/." "/tmp/yumurta/stories/$PROJE/"
+          cp -r /tmp/hazir_in/voice "/tmp/yumurta/stories/$PROJE/"
+          # audio/mix.wav kopyalanmiyor ki her parca saf video kalsin, birlestirmede tek seferde mix.wav eklensin
+          CHROME_PATH=$(which google-chrome chromium chromium-browser 2>/dev/null | head -1)
+          export CHROME_PATH
+          PAD=$(printf "%02d" "$IDX")
+          node render.mjs "$PROJE" --scale="$SCALE" --from="$A" --to="$B" --name="parca_$PAD"
+          mkdir -p /tmp/parca_out
+          cp "/tmp/yumurta/stories/$PROJE/out/parca_${PAD}.mp4" /tmp/parca_out/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parca-${{ inputs.proje }}-${{ matrix.p.i }}
+          path: /tmp/parca_out
+          retention-days: 1
+
+  birlestir:
+    needs: [hazirla, kayit]
+    if: inputs.mod == 'render'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: hazir-${{ inputs.proje }}
+          path: /tmp/hazir_in
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: parca-${{ inputs.proje }}-*
+          path: /tmp/parcalar
+          merge-multiple: true
+      - name: Birlestir, 1080x1920 lanczos, kontak ve olcum
+        env:
+          PROJE: ${{ inputs.proje }}
+          SCALE: ${{ inputs.scale }}
+        run: |
+          set -e
+          if [ "$MOD" != "faces" ]; then command -v ffmpeg >/dev/null || (sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null); python3 -c "import numpy" 2>/dev/null || sudo python3 -m pip install --break-system-packages -q numpy >/dev/null; fi
+          mkdir -p /tmp/final_out
+          cd /tmp/parcalar
+          ls parca_*.mp4 | sort | sed "s/^/file '/;s/$/'/" > liste.txt
+          ffmpeg -y -v error -f concat -safe 0 -i liste.txt -i /tmp/hazir_in/audio/mix.wav \
+            -map 0:v -map 1:a -vf "scale=1080:1920:flags=lanczos" \
+            -c:v libx264 -crf 17 -preset slow -pix_fmt yuv420p -movflags +faststart \
+            -c:a aac -b:a 256k -shortest "/tmp/final_out/${PROJE}_final.mp4"
+          # 1 fps kontak sayfasi
+          ffmpeg -y -v error -i "/tmp/final_out/${PROJE}_final.mp4" -vf "fps=1,scale=270:-2,tile=8x6" -frames:v 1 "/tmp/final_out/kontak_1fps.jpg"
+          # Kalite olcumu: bos kare, kontrast (p95-p5), sicak pay, sabit kamera, LUFS & True Peak
+          ffmpeg -i "/tmp/final_out/${PROJE}_final.mp4" -af ebur128=peak=true -f null - 2>&1 | tail -n 12 > /tmp/final_out/audio_final_ebur128.txt
+          python3 - "/tmp/final_out/${PROJE}_final.mp4" "/tmp/final_out/olcum.json" <<'PY'
+          import json, subprocess, sys
+          import numpy as np
+          mp4, outp = sys.argv[1], sys.argv[2]
+          # 2 fps ornekleme ile hizli ve kesin olcum
+          raw = subprocess.run(["ffmpeg", "-v", "error", "-i", mp4, "-vf", "fps=2,scale=270:480", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+          frames = np.frombuffer(raw, np.uint8).reshape(-1, 480, 270, 3)
+          blanks, contrasts, warms, diffs = 0, [], [], []
+          prev = None
+          for f in frames:
+              lum = (0.2126 * f[:,:,0] + 0.7152 * f[:,:,1] + 0.0722 * f[:,:,2]) / 255.0
+              c = float(np.percentile(lum, 95) - np.percentile(lum, 5))
+              contrasts.append(c)
+              if float(lum.std()) < 0.02: blanks += 1
+              r, g, b = f[:,:,0].astype(float), f[:,:,1].astype(float), f[:,:,2].astype(float)
+              warm = float(np.mean((r > b + 12) & (r > 55)))
+              warms.append(warm)
+              if prev is not None:
+                  diffs.append(float(np.mean(np.abs(f.astype(float) - prev)) / 255.0))
+              prev = f.astype(float)
+          static_pct = 100.0 * sum(1 for d in diffs if d < 0.002) / max(1, len(diffs))
+          res = {
+              "kare_sayisi_2fps": len(frames),
+              "bos_kare": blanks,
+              "kontrast_min": round(min(contrasts), 3),
+              "kontrast_ort": round(float(np.mean(contrasts)), 3),
+              "sicak_pay_ort_yuzde": round(100.0 * float(np.mean(warms)), 1),
+              "sabit_kamera_yuzde": round(static_pct, 1),
+              "hareket_ort": round(float(np.mean(diffs)), 4) if diffs else 0
+          }
+          json.dump(res, open(outp, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+          print(json.dumps(res, indent=2))
+          PY
+          cp /tmp/hazir_in/audio/cues.json /tmp/final_out/
+          cp /tmp/hazir_in/voice/words.json /tmp/final_out/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ inputs.proje }}-${{ inputs.scale }}
+          path: /tmp/final_out
+          retention-days: 7

@@ -1,6 +1,6 @@
 {
  "guncelleme": "2026-11-18T23:30+03:00",
- "aciklama": "Hesap → kanal haritası ve vidIQ ölçümleri. Canlı abone/izlenme sayfada analitik.json'dan (günde 2 kez) gelir; vidIQ ölçümü Claude tarafından elle yenilenir (aylık kredi sınırlı).",
+ "aciklama": "Hesap → kanal haritası ve vidIQ ölçümleri. Logo, @adres ve canlı abone/izlenme/video (\"canli\") yayin/guncelle.py ile YouTube API'den her turda (10 dk) tazelenir; analitik.json yedek; vidIQ ölçümü Claude tarafından elle yenilenir (aylık kredi sınırlı).",
  "vidiq": {
   "tarih": "2026-11-18",
   "hesap": "ekinci.omer@gmail.com",
@@ -22,7 +22,7 @@
      "dil": "TR",
      "konu": "Gündem + tarih",
      "acilis": "2026-10-31",
-     "logo": "https://yt3.ggpht.com/L5Wo6nj1azTwUzHetqpZHioIKK9_BWoqggYxAwmldSyZezICsEq966kXWX2uC4OwVB2eQIeYtXU=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/L5Wo6nj1azTwUzHetqpZHioIKK9_BWoqggYxAwmldSyZezICsEq966kXWX2uC4OwVB2eQIeYtXU=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 52,
@@ -39,6 +39,11 @@
        "p70_7g": 726.5,
        "olcum": "2026-11-16"
       }
+     },
+     "canli": {
+      "abone": 55,
+      "izlenme": 65130,
+      "video": 77
      }
     },
     {
@@ -50,7 +55,7 @@
      "dil": "EN",
      "konu": "History behind headlines",
      "acilis": "2026-10-31",
-     "logo": "https://yt3.ggpht.com/Lq2xTwBTNUSuQBRFAMWk6A6rrpDK5KtrdVbLefBe8pDAgseQJMCLJHZWJjO4pElws9kkmnwqSg=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/Lq2xTwBTNUSuQBRFAMWk6A6rrpDK5KtrdVbLefBe8pDAgseQJMCLJHZWJjO4pElws9kkmnwqSg=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 2,
@@ -67,6 +72,11 @@
        "p70_7g": 510.9,
        "olcum": "2026-11-16"
       }
+     },
+     "canli": {
+      "abone": 2,
+      "izlenme": 5801,
+      "video": 31
      }
     },
     {
@@ -78,7 +88,7 @@
      "dil": "ES",
      "konu": "Historia y actualidad",
      "acilis": "2026-11-05",
-     "logo": "https://yt3.ggpht.com/jDIB72W18s60KkOnVSEWZuAVTL90eDhcbsLIe98DSnwiDzSUm0l5D_cNZn4hSB0fXInP7MD_9w=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/jDIB72W18s60KkOnVSEWZuAVTL90eDhcbsLIe98DSnwiDzSUm0l5D_cNZn4hSB0fXInP7MD_9w=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 4,
@@ -96,6 +106,11 @@
        "olcum": "2026-11-07",
        "not": "Tek videoya dayalı; güvenilir kıyas değil"
       }
+     },
+     "canli": {
+      "abone": 4,
+      "izlenme": 2287,
+      "video": 9
      }
     },
     {
@@ -103,16 +118,21 @@
      "platform": "YouTube",
      "kod": "OD",
      "id": "UCg75Mvb6C8CBSJPeuwzBFZA",
-     "handle": "",
+     "handle": "@omurdedigin70",
      "dil": "TR",
      "konu": "65+ nostalji · Hatıra Dayı",
      "acilis": "2026-11-09",
-     "logo": "https://yt3.ggpht.com/4K8LUs3GjJcisFVW7ZHM_IIqysCb6Ht4vxELrQ9hwqBeSS6Ysh2NSq_-9jCVL1ASzv_wmNDV2w=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/4K8LUs3GjJcisFVW7ZHM_IIqysCb6Ht4vxELrQ9hwqBeSS6Ysh2NSq_-9jCVL1ASzv_wmNDV2w=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 1,
       "izlenme": 89,
       "video": 2
+     },
+     "canli": {
+      "abone": 1,
+      "izlenme": 236,
+      "video": 4
      }
     },
     {
@@ -120,16 +140,21 @@
      "platform": "YouTube",
      "kod": "KK_TR",
      "id": "UCYtvxRIP1eF3-f0TAqh2PvA",
-     "handle": "@KaraKutu7700",
+     "handle": "@karakutu7700",
      "dil": "TR",
      "konu": "Kaza / afet analizi",
      "acilis": "2026-11-09",
-     "logo": "https://yt3.ggpht.com/3OVrLoYqVEQcoJFf1t-KIQflWMA0WnVyTXa5O2rV6lsOTfewdJmqk55a0oXLKMJ3HBFkThYAdbI=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/3OVrLoYqVEQcoJFf1t-KIQflWMA0WnVyTXa5O2rV6lsOTfewdJmqk55a0oXLKMJ3HBFkThYAdbI=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 0,
       "izlenme": 0,
       "video": 0
+     },
+     "canli": {
+      "abone": 5,
+      "izlenme": 5976,
+      "video": 2
      }
     },
     {
@@ -137,13 +162,18 @@
      "platform": "YouTube",
      "kod": "",
      "id": "UCsV0ubiBEy8dxigNk8I_LqA",
-     "handle": "@BlackBoxFiles7700",
+     "handle": "@blackboxfiles7700",
      "dil": "EN",
      "konu": "Accident analysis",
      "acilis": "2026-11-09",
-     "logo": "https://yt3.ggpht.com/jUXNkza4x-pC8QPjdpBqkuM9608AivArbkeKAM8C1-1_zPKH-vjtICJlWejU6As1kd8MLLSYuA=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/jUXNkza4x-pC8QPjdpBqkuM9608AivArbkeKAM8C1-1_zPKH-vjtICJlWejU6As1kd8MLLSYuA=s800-c-k-c0x00ffffff-no-rj",
      "durum": "beklemede",
      "vidiq": {
+      "abone": 0,
+      "izlenme": 0,
+      "video": 0
+     },
+     "canli": {
       "abone": 0,
       "izlenme": 0,
       "video": 0
@@ -154,13 +184,18 @@
      "platform": "YouTube",
      "kod": "",
      "id": "UCM6LhKp6tDx4ddZ65oZUCvQ",
-     "handle": "@CajaNegra_7700",
+     "handle": "@cajanegra_7700",
      "dil": "ES",
      "konu": "Análisis de accidentes",
      "acilis": "2026-11-09",
-     "logo": "https://yt3.ggpht.com/DqO56Kg1Xr6wcjCiiOBp23zYhhizlRMqmxcP107MwCpcAaZZN7HyBG-5wIJ5cRQgAcC40YtajYY=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/DqO56Kg1Xr6wcjCiiOBp23zYhhizlRMqmxcP107MwCpcAaZZN7HyBG-5wIJ5cRQgAcC40YtajYY=s800-c-k-c0x00ffffff-no-rj",
      "durum": "beklemede",
      "vidiq": {
+      "abone": 0,
+      "izlenme": 0,
+      "video": 0
+     },
+     "canli": {
       "abone": 0,
       "izlenme": 0,
       "video": 0
@@ -181,7 +216,7 @@
      "dil": "TR",
      "konu": "Uzay + teknoloji",
      "acilis": "2026-10-25",
-     "logo": "https://yt3.ggpht.com/cB4AWRstXbLt-pBc3lRnYLawSTsMlzDfmDnLqKhbw9_68DlSUNGUcYFWCdYFYDjpItr7vOuIo44=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/cB4AWRstXbLt-pBc3lRnYLawSTsMlzDfmDnLqKhbw9_68DlSUNGUcYFWCdYFYDjpItr7vOuIo44=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 9,
@@ -198,6 +233,11 @@
        "p70_7g": null,
        "olcum": "2026-11-16"
       }
+     },
+     "canli": {
+      "abone": 15,
+      "izlenme": 11468,
+      "video": 22
      }
     },
     {
@@ -209,12 +249,17 @@
      "dil": "EN",
      "konu": "Space + tech",
      "acilis": "2026-10-25",
-     "logo": "https://yt3.ggpht.com/T_4h7vga8-n23sGKUr7hzc4H1_KbYlUIxnqR6OtmUbyP22c930Pka74McXNwgkJvAf4t2NV-qg=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/T_4h7vga8-n23sGKUr7hzc4H1_KbYlUIxnqR6OtmUbyP22c930Pka74McXNwgkJvAf4t2NV-qg=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 1,
       "izlenme": 1229,
       "video": 11
+     },
+     "canli": {
+      "abone": 1,
+      "izlenme": 1613,
+      "video": 17
      }
     }
    ]
@@ -232,12 +277,17 @@
      "dil": "TR",
      "konu": "Dev yapılar nasıl yapıldı",
      "acilis": "2026-11-15",
-     "logo": "",
+     "logo": "https://yt3.ggpht.com/ytc/AIdro_kXrVzf2kng6Bt3fDoTQur3nO0uITlQpQYpnFjviaOOtG-Tqfo3rW8xJWXn5hrlnURcGA=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 0,
       "izlenme": 0,
       "video": 0
+     },
+     "canli": {
+      "abone": 2,
+      "izlenme": 1359,
+      "video": 2
      }
     },
     {
@@ -249,12 +299,17 @@
      "dil": "TR",
      "konu": "Derinkuyu ve kayıp şehirler · sen seç",
      "acilis": "2026-11-16",
-     "logo": "https://yt3.ggpht.com/pYIDJw27n2kTNzo_YffBX69wbleH8jwWMFJQlb-ctEHzdOc2DRDkRdBGWFT2u1VbQscamqkJK0s=s240-c-k-c0x00ffffff-no-rj",
+     "logo": "https://yt3.ggpht.com/pYIDJw27n2kTNzo_YffBX69wbleH8jwWMFJQlb-ctEHzdOc2DRDkRdBGWFT2u1VbQscamqkJK0s=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 1,
       "izlenme": 0,
       "video": 3
+     },
+     "canli": {
+      "abone": 10,
+      "izlenme": 9505,
+      "video": 12
      }
     }
    ]
@@ -272,12 +327,17 @@
      "dil": "EN",
      "konu": "Seviye 1→5 sıralama",
      "acilis": "2026-11-17",
-     "logo": "",
+     "logo": "https://yt3.ggpht.com/5UGfXVSUN9a5EH0rU-S0kNQIb8nfnMBtJmUOQhd5h1L8KQ4rx8aYOA-7y7nab9hh0tZsXvh4_xs=s800-c-k-c0x00ffffff-no-rj",
      "durum": "aktif",
      "vidiq": {
       "abone": 0,
       "izlenme": 0,
       "video": 0
+     },
+     "canli": {
+      "abone": 1,
+      "izlenme": 18,
+      "video": 11
      }
     }
    ]
@@ -341,5 +401,6 @@
     }
    ]
   }
- ]
+ ],
+ "kanal_guncelleme": "2026-11-24T11:28:05+03:00"
 }

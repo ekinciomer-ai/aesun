@@ -45,7 +45,8 @@ def google_soyle(cumle, ses, ton, oto, yol):
     g = GSESLER[GES.get(ses, ses)][0]
     h, _, v, _ = oynama(cumle, ton, oto)
     hiz = max(0.25, min(2.0, 1 + int(h.rstrip("%")) / 100))
-    govde = {"input": {"text": cumle}, "voice": {"languageCode": "tr-TR", "name": f"tr-TR-Chirp3-HD-{g}"},
+    dk = {"tr": "tr-TR", "en": "en-US", "es": "es-ES", "de": "de-DE", "fr": "fr-FR"}.get(globals().get("DIL", "tr"), "tr-TR")   # iş dosyasındaki "dil"
+    govde = {"input": {"text": cumle}, "voice": {"languageCode": dk, "name": f"{dk}-Chirp3-HD-{g}"},
              "audioConfig": {"audioEncoding": "MP3", "speakingRate": round(hiz, 2), "volumeGainDb": max(-12, min(8, int(v.rstrip("%")) / 4))}}
     r = urllib.request.Request(f"https://texttospeech.googleapis.com/v1/text:synthesize?key={k}", data=json.dumps(govde).encode(),
                                headers={"Content-Type": "application/json"}, method="POST")
@@ -67,7 +68,7 @@ def gemini_anahtarlar(tercih_ad=None):
     sira = []
     if tercih_ad:
         sira.append((tercih_ad, os.environ.get(f"KASA_{tercih_ad}") or ""))
-    for ad in ("gemini_api_anahtar_nasilyapildi", "gemini_api_key", "gemini_api_anahtar", "gemini_api_anahtar_kozmos"):
+    for ad in ("gemini_api_key_716744873763", "gemini_api_anahtar_nasilyapildi", "gemini_api_key", "gemini_api_anahtar", "gemini_api_anahtar_kozmos"):
         sira.append((ad, os.environ.get(f"KASA_{ad}") or ""))
     sira.append(("varsayilan", os.environ.get("GEMINI_KEY") or ""))
     cikti, gorulen = [], set()

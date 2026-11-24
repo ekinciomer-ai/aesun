@@ -28,8 +28,8 @@
   "dogru": "Doğru şık: A",
   "ders1": "Aracının anahtarı, <b style=\"color:#ffb15c\">sorumluluğun da anahtarı.</b>",
   "ders2": "🔑 Ehliyeti olmayana<br><b style=\"color:#34c759\">aracını verme.</b>",
-  "camKaza": "const cz=Math.min(st.car.position.z,30);P=new THREE.Vector3(4,18,cz-20);L=new THREE.Vector3(7,0,cz+10);f=46;",
-  "camRest": "const cz=Math.min(st.car.position.z,30);P=new THREE.Vector3(4,17,cz-18);L=new THREE.Vector3(8,0,cz+6);f=46;",
+  "camKaza": "const cz=Math.min(st.car.position.z,30),lx=2+st.car.position.x*.55;P=new THREE.Vector3(3,17,cz-22);L=new THREE.Vector3(lx,0,cz+8);f=46;",
+  "camRest": "const cz=Math.min(st.car.position.z,30),lx=2+st.car.position.x*.55;P=new THREE.Vector3(3,17,cz-20);L=new THREE.Vector3(lx,0,cz+6);f=46;",
   "camKarar": "P=new THREE.Vector3(4,15,16);L=new THREE.Vector3(9,.5,36);",
   "exp": 1.0,
   "black": "KARŞI ARAÇ<br><span style=\"color:#ff453a\">HASAR GÖRDÜ</span>",
@@ -126,5 +126,68 @@
    ]
   ],
   "hukumKey": "Sonuç:"
+ },
+ {
+  "N": 17,
+  "kod": "KK_MIT_16",
+  "havuz": "KK_MIT_16_BUZLU_YOL",
+  "sc": 7,
+  "upd": "upd2",
+  "tiL": 6.0,
+  "impKey": "kaza yapıyor",
+  "hookNo": "MİT #16",
+  "hookMain": "“YOL BUZLUYSA<br>FATURAYI<br><span style=\"color:#ffb15c;font-size:1.25em\">DEVLET</span><br>ÖDER”",
+  "pollQ": "HASARI İDARE ÖDEDİ Mİ?",
+  "opts": [
+   [
+    "A",
+    "İdare tamamını ödedi"
+   ],
+   [
+    "B",
+    "İdare hiç ödemedi"
+   ],
+   [
+    "C",
+    "Yarı yarıya ödendi"
+   ]
+  ],
+  "sonuc": "SONUÇ: TALEP REDDEDİLDİ",
+  "dogru": "Doğru şık: B",
+  "ders1": "Buzlu yol <b style=\"color:#ffb15c\">kendiliğinden bahane değil.</b>",
+  "ders2": "❄️ Kışın hızını yola göre ayarla,<br><b style=\"color:#34c759\">mesafeni aç.</b>",
+  "camKaza": "const cz=Math.min(st.car.position.z,20);P=new THREE.Vector3(4,9,cz-17);L=new THREE.Vector3(-6,0,cz+8);f=46;",
+  "camRest": "const cz=Math.min(st.car.position.z,20);P=new THREE.Vector3(3,9,cz-17);L=new THREE.Vector3(-7,0,cz+8);f=46;",
+  "camKarar": "P=new THREE.Vector3(3,8,4);L=new THREE.Vector3(-7,.4,21);",
+  "exp": 0.95,
+  "black": "ARAÇ<br><span style=\"color:#ff453a\">HASAR GÖRDÜ</span>",
+  "tagsK": "tg+=tag3(st.car,1.9,'BUZLU ZEMİN','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.car,1.9,'KUSUR KİMDE?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Hasarı",
+    "Hasarı önce kasko ödedi"
+   ],
+   [
+    "Sonra",
+    "İddia: tuzlama yapılmadı"
+   ],
+   [
+    "Mahkeme",
+    "Bilirkişiye soruldu"
+   ]
+  ],
+  "reasons": [
+   [
+    "Kazada",
+    "Sürücü %100 kusurlu"
+   ],
+   [
+    "İdarenin",
+    "İdarenin hizmet kusuru yok"
+   ]
+  ],
+  "hukumKey": "Yirmi bin",
+  "src": "Danıştay"
  }
 ]

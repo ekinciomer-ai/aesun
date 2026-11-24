@@ -1,0 +1,60 @@
+{
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "yedek_motor": "google",
+ "dil": "tr",
+ "kod": "KK3_YAYA_TR",
+ "parcalar": [
+  {
+   "ad": "V1",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Yaya geçidi dışından geçen yayaya çarparsan kusursuzsun. Herkes böyle bilir. Peki mahkeme ne dedi?"
+  },
+  {
+   "ad": "V2",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "normal",
+   "metin": "Sabah, şehir içinde tek yönlü bir cadde. Hız sınırı elli. Bir otomobil trafik ışıklarını geçiyor. Yirmi metre ileride bir yaya, orta refüjden yola iniyor. Orada yaya geçidi yok."
+  },
+  {
+   "ad": "V3",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Otomobil yavaşlamıyor ve yayaya çarpıyor. Yaya hayatını kaybediyor."
+  },
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sence sürücüye ne oldu? A, kusursuz, beraat. B, tali kusurlu, mahkûm. C, tam kusurlu. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. Birinci ipucu: yaya, geçit olmayan yerden yola girdi. İkinci ipucu: yolda hiç fren izi yoktu. Üçüncü ipucu: sürücünün avukatı, kusurun tamamen yayada olduğunu savundu."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Mahkeme dedi ki: yaya kurala uymasa da sürücü de dikkatli değildi. Sürücü tali kusurlu. Taksirle öldürmeden mahkûm oldu. Hapis cezası adli para cezasına çevrildi, ehliyeti geri alındı. Yargıtay onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "sakin",
+   "metin": "Yani yaya hata yapsa bile sürücü sorumluluktan kurtulmaz. Yolu hep izle, yayayı görünce yavaşla. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

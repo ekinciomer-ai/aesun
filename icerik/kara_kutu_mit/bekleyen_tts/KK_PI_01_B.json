@@ -1,0 +1,37 @@
+{
+ "kod": "KK_PI_01_B",
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "parcalar": [
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sizce şoför tazminatını aldı mı? A, hayır, imza onun. B, evet, aldı. C, sadece yarısını aldı. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. O dilekçe, işe girdiği gün, giriş evraklarının arasında imzalatılmış. İlk mahkeme imzaya bakıp tazminatı reddediyor. Ama dosya istinafa gidiyor."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "İstinaf mahkemesi dedi ki: İş arayan birine giriş günü istifa imzalatmak, onun zor durumundan yararlanmaktır. Bu dilekçeye itibar edilmez. Şoför kıdem ve ihbar tazminatını alacak. İzin defteri sunulamadığı için izin ücretini de alacak. Yargıtay onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Mahkemeye göre, işe girerken imzalatılan istifa dilekçesi seni tazminatsız bırakmaz. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

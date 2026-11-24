@@ -1,0 +1,217 @@
+{
+ "kod": "KZ_MRK_20_MADEN",
+ "no": "MERAK #20",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "BİTCOİN CİHAZI<br><i>GÜNDE KAÇ kWh?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "maden",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Tek bir bitcoin madencilik cihazı, bir günde ne kadar elektrik yer? Tahminini aklında tut, cevap sandığından büyük.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "maden",
+   "p": {
+    "mod": "guc",
+    "kart": 55
+   },
+   "metin": "Yaygın bir güncel cihaz, üretici verisine göre üç bin beş yüz vat çeker. Neredeyse aynı anda çalışan iki su ısıtıcısı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "CİHAZ GÜCÜ",
+     "say": 3500,
+     "dec": 0,
+     "ek": "W",
+     "k": "üç"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 2 su ısıtıcısı ☕",
+     "k": "iki"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "maden",
+   "p": {
+    "mod": "saat",
+    "kart": 55
+   },
+   "metin": "Ve bu cihazlar neredeyse hiç durmaz. Günde yirmi dört saat, yılın her günü çalışır.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "3,5 kW <em>×</em> 24 sa",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "maden",
+   "p": {
+    "mod": "gun",
+    "kart": 55
+   },
+   "metin": "Sonuç: tek cihaz, günde seksen dört kilovatsaat elektrik harcar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "BİR GÜNDE",
+     "say": 84,
+     "dec": 0,
+     "ek": "kWh",
+     "k": "seksen"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "maden",
+   "p": {
+    "mod": "araba",
+    "kart": 55
+   },
+   "metin": "Bu enerjiyle elektrikli bir araba yaklaşık dört yüz yirmi kilometre gider. Neredeyse İstanbul'dan Ankara'ya.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "84 <em>×</em> 5 km ≈ 420 km",
+     "k": "dört"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ İstanbul → Ankara 🚗",
+     "k": "İstanbul'dan"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "maden",
+   "p": {
+    "mod": "camasir",
+    "kart": 55
+   },
+   "metin": "Ya da seksen dört kez çamaşır yıkarsın. Bir ailenin aylarca yıkadığı kadar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "ÇAMAŞIR",
+     "say": 84,
+     "dec": 0,
+     "ek": "yıkama",
+     "on": "≈ ",
+     "k": "seksen"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "maden",
+   "p": {
+    "mod": "telefon",
+    "kart": 55
+   },
+   "metin": "Bir telefonu doldurmak yaklaşık yirmi üç vatsaat. Bu enerji üç bin altı yüzden fazla telefonu doldurur.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "84.000 <em>÷</em> 23",
+     "k": "üç"
+    },
+    {
+     "tip": "sayi",
+     "ust": "TELEFON",
+     "say": 3600,
+     "dec": 0,
+     "ek": "şarj",
+     "on": "> ",
+     "k": "üç"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "maden",
+   "p": {
+    "mod": "yil",
+    "kart": 55
+   },
+   "metin": "Bir yıl boyunca durmadan çalışınca, harcadığı elektrik otuz bin kilovatsaati geçer.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "BİR YILDA",
+     "say": 30660,
+     "dec": 0,
+     "ek": "kWh",
+     "on": "≈ ",
+     "k": "otuz"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "maden",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: tek cihaz, günde seksen dört kilovatsaat. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DOĞRU CEVAP",
+     "say": 84,
+     "dec": 0,
+     "ek": "kWh/gün",
+     "k": "seksen"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Bir bitcoin madencilik cihazı günde ne kadar elektrik yer? ⚡ #shorts",
+  "aciklama": "Yaygın kullanılan güncel bir ASIC madencilik cihazının (200 TH/s) üretici teknik sayfasındaki güç değeri 25 °C'de duvardan 3.500 W'tır (17,5 J/TH). Cihazlar kesintisiz çalıştığı için: 3,5 kW × 24 sa = 84 kWh/gün; yılda ≈ 30.660 kWh.\n\nKarşılaştırmalar: su ısıtıcısı ≈ 2.000 W → 3.500 W ≈ 2 ısıtıcı. Elektrikli araba ≈ 20 kWh/100 km (ADAC Ecotest ortalaması 19,7) → 84 kWh ≈ 420 km; İstanbul–Ankara karayolu ≈ 450 km. Çamaşır makinesi ≈ 1 kWh/yıkama (40 °C pamuklu, AB enerji etiketi verileri) → ≈ 84 yıkama. Telefon dolumu kayıplarla ≈ 23 Wh (5.000 mAh × 3,85 V ≈ 19,25 Wh + şarj kaybı) → 84.000 ÷ 23 ≈ 3.650 telefon.\n\nNot: Gerçek tüketim cihaz modeline, ortam sıcaklığına ve çalışma ayarına göre değişir; burada tipik bir güncel cihazın üretici değeri kullanıldı. Bu video yatırım tavsiyesi değildir.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Üretici teknik sayfası (S21 Specification, 200 TH/s, 3.500 W on wall); ADAC Ecotest (ecomento.de, 2024); AB enerji etiketi verileri; tipik telefon pili veri sayfaları.\n\n#kozmoslab #bitcoin #elektrik #enerji #madencilik #mühendislik #bilim #merak #shorts",
+  "etiketler": [
+   "bitcoin",
+   "madencilik",
+   "elektrik tüketimi",
+   "kilovatsaat",
+   "enerji",
+   "elektrik",
+   "mühendislik",
+   "bilim",
+   "merak",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "Üretici teknik sayfası – S21 Specification (support.bitmain.com): 'Hashrate, TH/s | 200'; 'power on wall@25℃, Watt | 3500'; 'Power efficiency on wall @25°C ... | 17.5'; boyut 400×195×290 mm",
+  "ecomento.de (31.01.2024): ADAC testindeki elektrikli arabalar ortalama 19,7 kWh/100 km (#06 ile aynı) → ≈ 5 km/kWh",
+  "İstanbul–Ankara karayolu ≈ 450 km (yaklaşık; #01, #05, #07 ile aynı)",
+  "Çamaşır makinesi: 40 °C pamuklu program ~0,8–1 kWh/yıkama (AB enerji etiketi verileri; #02 ile aynı)",
+  "Telefon pili 5.000 mAh × 3,85 V = 19,25 Wh; kayıplarla ≈ 23 Wh (#02/#04/#06 ile aynı)",
+  "Su ısıtıcısı ≈ 2.000 W (#06 ile aynı)",
+  "Hesap: 3,5 × 24 = 84 kWh; 84 × 365 = 30.660 kWh; 84 × 5 = 420 km; 84.000/23 ≈ 3.652"
+ ]
+}

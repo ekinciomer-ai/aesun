@@ -364,7 +364,8 @@ function kanalOzet(c){const v=K.filter(x=>x.kanal===c.ad);const an=AN&&AN.kanall
  const kota=window._AZ&&window._AZ.plan&&window._AZ.plan[c.ad];
  const bag=window._BG?(window._BG.baglantilar.find(b=>b.ad.startsWith(c.platform)&&(c.platform==='Instagram'||b.ad.includes(c.platform==='TikTok'?c.handle||'#':c.ad)))||null):null;
  const vt=v.reduce((s,x)=>s+(x.izlenme||0),0);
- return {abone:an?an.abone:(c.vidiq.abone??c.vidiq.takipci),izl:Math.max(an?an.toplam_izlenme||0:c.vidiq.izlenme||0,vt)||null,yay:yay.length,pl:pl.length,ts:ts.length,g7,iy,kota,bag,
+ const cn=c.canli||{},vq=c.vidiq||{};
+ return {abone:cn.abone??(an?an.abone:(vq.abone??vq.takipci)),izl:Math.max(cn.izlenme||0,an?an.toplam_izlenme||0:vq.izlenme||0,vt)||null,yay:yay.length,pl:pl.length,ts:ts.length,g7,iy,kota,bag,
   begeni:yay.reduce((s,x)=>s+(x.begeni||0),0),dk:yay.reduce((s,x)=>s+(x.izlenme_dk||0),0),en:yay.filter(x=>x.izlenme!=null).sort((a,b)=>b.izlenme-a.izlenme)[0]}}
 function kanalKart(c){const o=kanalOzet(c),t=c.vidiq&&c.vidiq.trend;const pas=c.durum!=='aktif';
  const url=c.platform==='YouTube'&&c.id?'https://www.youtube.com/channel/'+c.id:c.platform==='TikTok'&&c.handle?'https://www.tiktok.com/'+c.handle:'';

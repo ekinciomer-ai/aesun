@@ -349,7 +349,8 @@ def kilit_kontrol(kod, k, platform, planli):
     def uygun(x):
         if sum(1 for z in ayni if z.date() == x.date()) >= gunluk:
             return f"{x:%d.%m} günü {platform} sınırı dolu ({gunluk}/gün, {tur})"
-        if sum(1 for z in hepsi if z.date() == x.date()) >= toplam:
+        # Ömer'in tek seferlik istisnası (kartta "toplam_sinir_istisna": "YYYY-MM-DD"): yalnız o gün, yalnız toplam sınır atlanır
+        if sum(1 for z in hepsi if z.date() == x.date()) >= toplam and k.get("toplam_sinir_istisna") != x.strftime("%Y-%m-%d"):
             return f"{x:%d.%m} günü {platform} toplam sınırı dolu (tüm kanallar {toplam}/gün)"
         for z in ayni:
             if abs((x - z).total_seconds()) < ara * 3600:

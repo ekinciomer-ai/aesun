@@ -1,0 +1,212 @@
+{
+ "kod": "KZ_MRK_19_SATURN",
+ "no": "MERAK #19",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "SATÜRN SUDA<br><i>YÜZER Mİ?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "saturn",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Satürn'ü sığacağı kadar dev bir okyanusa koysak, batar mı yoksa yüzer mi? Tahminini aklında tut, cevap seni şaşırtabilir.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "saturn",
+   "p": {
+    "mod": "hacim",
+    "kart": 55
+   },
+   "metin": "Satürn kocaman. Hacmi Dünya'nın yaklaşık yedi yüz altmış altı katı. Her gün bir Dünya doldursan iki yıldan uzun sürerdi.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "HACİM",
+     "say": 766,
+     "dec": 0,
+     "ek": "× Dünya",
+     "on": "≈ ",
+     "k": "yedi"
+    },
+    {
+     "tip": "etiket",
+     "y": "her gün 1 Dünya → 2 yıl 📅",
+     "k": "Her"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "saturn",
+   "p": {
+    "mod": "kutle",
+    "kart": 55
+   },
+   "metin": "Ama kütlesi bunun yanında çok küçük: yalnızca doksan beş Dünya kadar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "KÜTLE",
+     "say": 95,
+     "dec": 0,
+     "ek": "× Dünya",
+     "on": "≈ ",
+     "k": "doksan"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "saturn",
+   "p": {
+    "mod": "yogun",
+    "kart": 55
+   },
+   "metin": "Kütleyi hacme bölünce yoğunluk çıkar. Satürn'ün her santimetreküpü ortalama sıfır virgül altmış dokuz gram.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "95 <em>÷</em> 766 <em>×</em> 5,5 ≈ 0,69",
+     "k": "Kütleyi"
+    },
+    {
+     "tip": "sayi",
+     "ust": "YOĞUNLUK",
+     "say": 0.69,
+     "dec": 2,
+     "ek": "g/cm³",
+     "k": "sıfır"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "saturn",
+   "p": {
+    "mod": "su",
+    "kart": 55
+   },
+   "metin": "Suyun yoğunluğu ise yaklaşık bir gram. Sudan hafif olan her şey suda yüzer.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "SU",
+     "say": 1,
+     "dec": 0,
+     "ek": "g/cm³",
+     "on": "≈ ",
+     "k": "bir",
+     "soguk": true
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "saturn",
+   "p": {
+    "mod": "buz",
+    "kart": 55
+   },
+   "metin": "Buz da sudan biraz hafiftir, bardakta yüzdüğünü görürsün. Satürn ise buzdan bile hafif.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "buz ≈ suyun %90'ı 🧊",
+     "k": "Buz"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "saturn",
+   "p": {
+    "mod": "bat",
+    "kart": 55
+   },
+   "metin": "Yüzen bir cisim, yoğunluğu kadar batar. Buzdağının onda dokuzu suyun altındadır, Satürn'ün ise yaklaşık yüzde yetmişi batardı.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "0,69 <em>÷</em> 1 ≈ %70",
+     "k": "yoğunluğu"
+    },
+    {
+     "tip": "etiket",
+     "y": "buzdağı: %90 su altında",
+     "k": "Buzdağının"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "saturn",
+   "p": {
+    "mod": "gaz",
+    "kart": 55
+   },
+   "metin": "Tabii böyle bir okyanus yok. Satürn, çoğunlukla hidrojen ve helyumdan oluşan bir gaz devi. Üstünde duracak katı bir yüzeyi bile yok.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "hidrojen + helyum ☁️",
+     "k": "hidrojen"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "saturn",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: Satürn yüzerdi. Sence halkaları ıslanır mıydı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "Satürn yüzer ✅",
+     "k": "Cevap"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Satürn suya konsa yüzer mi? 🪐💧 #shorts",
+  "aciklama": "Britannica'ya göre Satürn Dünya'nın 95 katı kütleye sahip ama hacmi 766 kat büyük; ortalama yoğunluğu 0,69 g/cm³, yani suyun yaklaşık %70'i. Bu yüzden \"varsayımsal olarak, Satürn onu alacak kadar büyük bir okyanusta yüzerdi\". NASA StarChild da aynı şeyi söyler.\n\nHesap: 95 ÷ 766 × 5,51 (Dünya'nın yoğunluğu, NASA) ≈ 0,68–0,69 g/cm³. Yüzen bir cisim yoğunluğunun suya oranı kadar batar (Arşimet ilkesi): buz suyun ≈ %90'ı yoğunlukta olduğu için buzdağının ≈ %90'ı su altındadır (USGS); Satürn'ün ≈ %70'i batardı. 766 ÷ 365 ≈ 2,1 yıl.\n\nTabii bu bir düşünce deneyi: Satürn çoğunlukla hidrojen ve helyumdan oluşan bir gaz devidir ve bu kadar büyük bir okyanus yoktur.\n\nSence halkaları ıslanır mıydı? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçeksizdir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Britannica – Saturn; NASA StarChild – Saturn; NASA NSSDC Earth/Jupiter Fact Sheet (Dünya yoğunluğu 5.513 kg/m³); USGS Water Science School – Water Density; USGS – Ninety percent of an iceberg is below the waterline.\n\n#kozmoslab #satürn #uzay #gezegen #astronomi #bilim #merak #shorts",
+  "etiketler": [
+   "satürn",
+   "gezegen",
+   "yoğunluk",
+   "yüzer mi",
+   "uzay",
+   "astronomi",
+   "gaz devi",
+   "bilim",
+   "merak",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "Britannica – Saturn: 'the lowest mean density—about 70 percent that of water'; 'mean density 0.69 g/cm3'; 'Saturn is 95 times as massive as Earth but occupies a volume 766 times greater'; 'Hypothetically, Saturn would float in an ocean large enough to hold it.'",
+  "NASA StarChild – Saturn: 'Its density is so low that it would float if it was placed in water.'",
+  "NASA NSSDC Jupiter Fact Sheet (Earth sütunu): Dünya ortalama yoğunluğu 5.513 kg/m³",
+  "USGS Water Science School – Water Density: 'The density of ice is about 90 percent that of water'; su ≈ 1 g/mL",
+  "USGS – 'Ninety percent of an iceberg is below the waterline.'",
+  "Hidrojen + helyum bileşimi: Britannica – Saturn (atmosfer ve iç yapı)",
+  "Hesap: 95/766×5,513 ≈ 0,684; batan oran = 0,69/1 ≈ %70; 766/365 ≈ 2,1 yıl"
+ ]
+}

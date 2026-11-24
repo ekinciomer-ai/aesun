@@ -1,0 +1,201 @@
+{
+ "kod": "KZ_MRK_18_SICAK",
+ "no": "MERAK #18",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "PANEL SICAKTA MI<br><i>SOĞUKTA MI?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "sicak",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Aynı güneş ışığı altında güneş paneli sıcakta mı daha çok üretir, soğukta mı? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "sicak",
+   "p": {
+    "mod": "stc",
+    "kart": 55
+   },
+   "metin": "Panellerin gücü yirmi beş derecede ölçülür. Etiketteki vat, bu sıcaklıktaki değerdir.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "ÖLÇÜM SICAKLIĞI",
+     "say": 25,
+     "dec": 0,
+     "ek": "°C",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "sicak",
+   "p": {
+    "mod": "katsayi",
+    "kart": 55
+   },
+   "metin": "Ama panel her bir derece ısındığında gücünün yaklaşık binde üçünü kaybeder. Küçük görünüyor, değil mi?",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "−%0,29 <em>/</em> °C",
+     "k": "binde"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "sicak",
+   "p": {
+    "mod": "yaz",
+    "kart": 55
+   },
+   "metin": "Yaz öğlesinde panel altmış beş dereceye kadar ısınabilir. Çamaşır makinesinin altmış derece programından bile sıcak.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "YAZ ÖĞLESİ",
+     "say": 65,
+     "dec": 0,
+     "ek": "°C",
+     "on": "≈ ",
+     "k": "altmış"
+    },
+    {
+     "tip": "etiket",
+     "y": "> 60 °C çamaşır programı 🧺",
+     "k": "Çamaşır"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "sicak",
+   "p": {
+    "mod": "kayip",
+    "kart": 55
+   },
+   "metin": "Bu kırk derece fark demek. Güç yaklaşık yüzde on iki düşer, sekiz panelden biri boşa çalışmış gibi.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "40 <em>×</em> 0,29 ≈ 11,6",
+     "k": "kırk"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 8 panelden 1'i boşa",
+     "k": "sekiz"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "sicak",
+   "p": {
+    "mod": "kis",
+    "kart": 55
+   },
+   "metin": "Kışın güneşli bir günde panel sıfır dereceye inerse durum tersine döner: güç yaklaşık yüzde yedi artar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "SIFIR DERECEDE",
+     "say": 7,
+     "dec": 0,
+     "ek": "güç",
+     "on": "+%",
+     "k": "yüzde",
+     "soguk": true
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "sicak",
+   "p": {
+    "mod": "neden",
+    "kart": 55
+   },
+   "metin": "Neden? Isınan hücrenin içinde voltaj düşer. Voltaj düşünce, akım neredeyse aynı kalsa bile güç de düşer.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "sıcak hücre = düşük voltaj",
+     "k": "voltaj"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "sicak",
+   "p": {
+    "mod": "gun",
+    "kart": 55
+   },
+   "metin": "Yine de yazın günler çok daha uzun. Bu yüzden yıllık toplamda çoğu yerde yaz önde.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "uzun gün > serin hava ☀️",
+     "k": "uzun"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "sicak",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: aynı ışıkta soğuk panel daha çok üretir. Senin tahminin neydi? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "soğuk panel = daha çok güç ❄️",
+     "k": "Cevap"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Güneş paneli sıcakta mı soğukta mı daha çok üretir? ☀️❄️ #shorts",
+  "aciklama": "Panel gücü standart test koşulunda (STC: 1000 W/m², hücre sıcaklığı 25 °C) ölçülür. Hücre ısındıkça güç düşer: örnek bir güncel modülün veri sayfasında güç sıcaklık katsayısı −%0,29/°C'dir (Trina Solar TSM-NEG9M5C.26; piyasadaki çoğu panelde yaklaşık −%0,24 ile −%0,35 arası). EnergySage'e göre paneller 65 °C'ye kadar ısınabilir.\n\nHesap: 65 − 25 = 40 °C → 40 × 0,29 ≈ %11,6 güç kaybı (≈ 8 panelden 1'i). 0 °C hücre → 25 × 0,29 ≈ %7,3 fazla güç. Neden: aynı modülün açık devre voltajı da −%0,24/°C değişir; sıcakta voltaj, dolayısıyla güç düşer.\n\nNot: Burada aynı güneş ışığı karşılaştırılıyor. Yazın günler daha uzun ve ışık daha güçlü olduğu için yıllık üretim çoğu yerde yine yazın daha yüksektir.\n\nSenin tahminin neydi? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Trina Solar TSM-NEG9M5C.26 veri sayfası (2025); EnergySage – How hot do solar panels get?; Penn State AE 868 – Temperature and PV Performance.\n\n#kozmoslab #güneşpaneli #ges #güneşenerjisi #enerji #mühendislik #bilim #merak #shorts",
+  "etiketler": [
+   "güneş paneli",
+   "ges",
+   "güneş enerjisi",
+   "sıcaklık katsayısı",
+   "verim",
+   "yenilenebilir enerji",
+   "enerji",
+   "mühendislik",
+   "bilim",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "Trina Solar TSM-NEG9M5C.26 veri sayfası (2025): Temperature Coefficient of PMAX '-0.29% /°C', Voc '-0.24% /°C'; 'STC: Irradiance 1000W/m2, Cell Temperature 25°C, Air Mass AM1.5'; NOCT 43°C (±2°C)",
+  "EnergySage (2024) How hot do solar panels get?: 'they can get as hot as 149°F (65°C)'; 'Home solar panels are tested at 77F (25C)'",
+  "Penn State AE 868 – Temperature and PV Performance Optimization: 'the reference temperature ... is the STC temperature (25°C)'",
+  "Çamaşır makinesi 60 °C programı (yaygın program sıcaklığı) → 65 °C bundan sıcak",
+  "Hesap: (65−25)×0,29 = %11,6 ≈ 1/8 (%12,5); (25−0)×0,29 = %7,25 ≈ %7"
+ ]
+}

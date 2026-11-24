@@ -11,7 +11,7 @@ import { gunIsigi } from './zaman.js';
 
 const Q = new URLSearchParams(location.search);
 const FIXED_W = +Q.get('w') || 0, FIXED_H = +Q.get('h') || 0;
-const MODS = (Q.get('mods') || 'saha,polyfork').split(',').filter(Boolean);
+const MODS = (Q.get('mods') || 'saha,makine,polyfork').split(',').filter(Boolean);
 const STIL = Q.get('stil') || 'lowpoly';
 const STABIL = !Q.has('canli');   // varsayılan: gren/sis deseni sabit (titreme yok)   // lowpoly (Stil 1) | gercek (Stil 2)
 const state = { t: +Q.get('t') || 0, shot: Q.get('shot') || '', playing: !Q.has('still') && !FIXED_W, frame: 0 };

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-24T13:20+03:00",
+ "olusturma": "2026-11-24T13:30+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -123,11 +123,10 @@
    "gunluk_short_kotasi": 4,
    "seri_dagilimi": {
     "Yolu Seç · Isınma Turu": 2,
+    "Mühürlü Dosya · Bilgi Kartları": 1,
     "Kara Kutu · Hukuk Dosyaları": 1
    },
-   "durdurulan": [
-    "Mühürlü Dosya · Bilgi Kartları"
-   ]
+   "durdurulan": []
   },
   "LVL MAX": {
    "gunluk_short_kotasi": 1,
@@ -825,16 +824,16 @@
   {
    "kanal": "Yolu Seç !",
    "seri": "Mühürlü Dosya · Bilgi Kartları",
-   "karar": "DURDUR",
-   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
-   "olculen": 3,
-   "erken": 2,
-   "medyan_48sa": 152,
-   "tutma_orani": 0,
+   "karar": "SÜRDÜR",
+   "neden": "tutma oranı %25",
+   "olculen": 4,
+   "erken": 1,
+   "medyan_48sa": 200,
+   "tutma_orani": 25,
    "izlenme_yuzde": null,
    "en_iyi": {
-    "baslik": "Bölüm 1’deki 3 saniyelik o detayı fark ettin mi? 🔍📸 #shorts",
-    "i48": 247
+    "baslik": "Kuyunun ağzında tozlar aşağı çekiliyor: İner misin, kaçar mısın? 🌪️🕳️ #shorts",
+    "i48": 506
    }
   },
   {
@@ -872,14 +871,14 @@
  ],
  "esikler": {
   "LVL MAX": 50,
-  "Estudio Antiguo": 126,
+  "Antik Stüdyo": 637,
+  "Ancient Studio": 192,
+  "Kozmos Lab": 93,
   "Ömür Dediğin": 50,
   "Yolu Seç !": 262,
-  "Kozmos Lab": 93,
   "Nasıl Yapıldı": 135,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 214,
-  "Ancient Studio": 192
+  "Estudio Antiguo": 126,
+  "Kozmos Lab TR": 214
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1048,8 +1047,8 @@
     "medyan": 618
    },
    "21:00": {
-    "n": 1,
-    "medyan": 247
+    "n": 2,
+    "medyan": 376
    }
   },
   "Nasıl Yapıldı": {
@@ -1569,69 +1568,6 @@
    "neden": "'Pürdikkat Hikâyeleri' serisi durduruldu; bu slotu Gündem + Tarih (19:00, her gün), Tablo Serisi / Tarihi Magazin (18:00, gün aşırı) kullanır"
   },
   {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": "t75JlucudO8",
-   "baslik": "Paslanmaz çelikte 3 derin çizik var: Aşağı iner misin? 🔪🔬 #shorts",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "Zifiri karanlıkta karşına kör bir canlı çıktı: Feneri kapatır mısın? 🦇🔦 #shorts",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "Yerebatan’ın tabanındaki çamurun altından ne çıktı? 🔍",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "Bölüm 1’de suyun içindeki o kararmayı fark ettin mi? 📸",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "Bizanslılar su altında demiri kurşunla nasıl mühürledi?",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "Bölüm 2’de telsiz kapalıyken o ses nereden geldi? 📻",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "1500 yıl önce bu su kanalı neden tuğlayla örüldü? 🧱",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "Kükürtlü suda ses kaydı yıllarca nasıl sağlam kalır? 💾",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
-   "tur": "ERTELE",
-   "kanal": "Yolu Seç !",
-   "vid": null,
-   "baslik": "Güneş görmeyen sarnıç suyunda hangi canlılar yaşar? 🔬",
-   "neden": "'Mühürlü Dosya · Bilgi Kartları' serisi durduruldu; bu slotu Yolu Seç · Isınma Turu, Kara Kutu · Hukuk Dosyaları kullanır"
-  },
-  {
    "tur": "HAFTALIK_KOTA",
    "kanal": "Ancient Studio",
    "vid": "uj0xUXqOPKo",
@@ -1755,7 +1691,6 @@
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %88'i tuttu (eşik 214 izlenme / 48 sa).",
   "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 214 izlenme / 48 sa).",
   "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Yolu Seç ! · Mühürlü Dosya · Bilgi Kartları: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1626 izlenme, 3 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",

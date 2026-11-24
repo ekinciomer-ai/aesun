@@ -13,3 +13,19 @@
   - True Peak: `-2.7 dBFS`
 - **Sunucu Render Koşusu:** `ekinciomer-ai/aesun` Actions Run `#45489976265` (17/17 yeşil, 15 paralel makine)
 - **Yayın Bildirimi:** `kodla üretilmiş animasyon; yapay zekâ seslendirme`
+
+## YouTube Shorts Yayın Metni (Kopyala–Yapıştır)
+
+**Başlık:**
+Şeytan Azazil'i Eski Bir Kilimle Nasıl Yakaladı? | Efrâsiyâb'ın Hikâyeleri
+
+**Açıklama:**
+Simyacı Feyyuz, kâinatın sırrını veren Bilgelik Meyvesi'ni almak için kibirli şeytan Azazil'e kimsenin beklemediği bir tuzak kurdu: Bir ayna ve eski bir kilim!
+
+Not: Videoda geçen "Azazil" bir telaffuz hatası değildir. Azazil, kadim rivayetlerde ve klasik edebiyatta Şeytan'ın (İblis'in) kovulmadan önceki adıdır; Ölüm meleği Azrail'den tamamen farklıdır.
+
+Kaynak: İhsan Oktay Anar — Efrâsiyâb'ın Hikâyeleri
+
+(kodla üretilmiş animasyon; yapay zekâ seslendirme)
+
+#efrasiyabinhikayeleri #ihsanoktayanar #hikaye #animasyon #shorts

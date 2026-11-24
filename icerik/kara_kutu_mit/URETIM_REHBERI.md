@@ -22,7 +22,7 @@ Her bölüm ~60–70 sn, 7 seslendirme parçası:
 
 | # | Bölüm | Ton | İçerik |
 |---|-------|-----|--------|
-| V1 | Kanca | gerilim | Mit cümlesi + "Herkes böyle bilir. Peki mahkeme ne dedi?" |
+| V1 | Kanca | gerilim | Mit cümlesi + "Genelde böyle bilinir. Peki mahkeme ne dedi?" |
 | V2 | Olay 1 | normal | Yer ve başlangıç (şehir adı yok: "şehir içinde ışıklı bir kavşak") |
 | V3 | Olay 2 | gerilim | Kaza anı ve kilit bilgi (promil, kusur oranı…) |
 | V4 | Oylama | soru | "Sizce ne oldu? A, B, yoksa C? Cevabını yoruma yaz." |

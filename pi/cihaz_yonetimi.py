@@ -417,9 +417,29 @@ def yerel_oku():
         return {}
 
 
+def _guvenli_yaz(yol, metin):
+    """Yerel durum dosyasını atomik yazar (geçici dosya + replace). Disk dolu (ENOSPC) vb. hatada
+    işi çökertmez: 22.11'de yazım hatası calistir()'ı GitHub durumunu yazmadan düşürüyordu."""
+    try:
+        yol.parent.mkdir(parents=True, exist_ok=True)
+        gec = yol.with_name(yol.name + ".tmp")
+        gec.write_text(metin)
+        gec.replace(yol)
+        return True
+    except OSError as e:
+        log(f"UYARI: {yol.name} yazılamadı ({e}) — devam ediliyor")
+        return False
+
+
+def _json_oku(yol):
+    try:
+        return json.loads(yol.read_text()) if yol.exists() else {}
+    except Exception:
+        return {}
+
+
 def yerel_yaz(y):
-    YEREL.parent.mkdir(parents=True, exist_ok=True)
-    YEREL.write_text(json.dumps(y, ensure_ascii=False))
+    _guvenli_yaz(YEREL, json.dumps(y, ensure_ascii=False))
 
 
 def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
@@ -592,25 +612,23 @@ def komut_gonder(eylem, a, neden, hedefler="all"):
 
 
 def tk_oku():
-    return json.loads(TAKVIM.read_text()) if TAKVIM.exists() else {}
+    return _json_oku(TAKVIM)
 
 
 def tk_yaz(tk):
-    TAKVIM.parent.mkdir(parents=True, exist_ok=True)
-    TAKVIM.write_text(json.dumps(tk, ensure_ascii=False, default=str))
+    _guvenli_yaz(TAKVIM, json.dumps(tk, ensure_ascii=False, default=str))
 
 
 def tekrar_mi(eylem, a):
-    yerel = json.loads(YEREL.read_text()) if YEREL.exists() else {}
+    yerel = _json_oku(YEREL)
     son = yerel.get("son_komut") or {}
     return son.get("action") == eylem and (time.time() - son.get("t", 0)) < a["komut_arasi_dk"] * 60
 
 
 def son_komut_kaydet(eylem, cid):
-    yerel = json.loads(YEREL.read_text()) if YEREL.exists() else {}
+    yerel = _json_oku(YEREL)
     yerel["son_komut"] = {"action": eylem, "t": time.time(), "id": cid}
-    YEREL.parent.mkdir(parents=True, exist_ok=True)
-    YEREL.write_text(json.dumps(yerel))
+    _guvenli_yaz(YEREL, json.dumps(yerel))
 
 
 def tetik():

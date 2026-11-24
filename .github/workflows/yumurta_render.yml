@@ -24,6 +24,10 @@ on:
         description: "istege bagli virgul ayrilmis saniyeler (bossa otomatik 15 kare)"
         required: false
         default: ""
+      hiz:
+        description: "anlatim ses hizi (or. 1.25)"
+        required: false
+        default: "1.25"
 permissions:
   contents: read
 jobs:
@@ -49,6 +53,7 @@ jobs:
           MOD: ${{ inputs.mod }}
           PARCA: ${{ inputs.parca }}
           STILLS_T: ${{ inputs.stills_t }}
+          HIZ: ${{ inputs.hiz }}
         run: |
           set -e
           if [ "$MOD" != "faces" ]; then command -v ffmpeg >/dev/null || (sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -qq install -y --no-install-recommends ffmpeg >/dev/null); python3 -c "import numpy" 2>/dev/null || sudo python3 -m pip install --break-system-packages -q numpy >/dev/null; fi
@@ -68,8 +73,17 @@ jobs:
             echo '{"DUR": 10}' > /tmp/hazir_out/audio/cues.json
             exit 0
           fi
+          mkdir -p /tmp/tts_hiz
+          for f in "$GITHUB_WORKSPACE/sunucu/tts_kuyruk/cikti/${KOD}__"*.mp3; do
+            bn=$(basename "$f")
+            if [ "${HIZ:-1}" != "1" ] && [ "${HIZ:-1}" != "1.0" ]; then
+              ffmpeg -y -v error -i "$f" -af "atempo=${HIZ}" -b:a 192k "/tmp/tts_hiz/$bn"
+            else
+              cp "$f" "/tmp/tts_hiz/$bn"
+            fi
+          done
           python3 -I "$GITHUB_WORKSPACE/video/pumpkin2/motor/parcalar.py" \
-            "$GITHUB_WORKSPACE/sunucu/tts_kuyruk/cikti" "$KOD" \
+            "/tmp/tts_hiz" "$KOD" \
             "$GITHUB_WORKSPACE/video/$PROJE/metin_tr.json" "/tmp/yumurta/stories/$PROJE"
           node render.mjs "$PROJE" --cues
           python3 -I "/tmp/yumurta/stories/$PROJE/mix.py" "/tmp/yumurta/stories/$PROJE"

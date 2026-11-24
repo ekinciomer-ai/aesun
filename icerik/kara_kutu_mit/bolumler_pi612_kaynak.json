@@ -1,0 +1,520 @@
+[
+ {
+  "n": 6,
+  "kod": "KK_PI_06",
+  "havuz": "KK_PI_06_ELDEN_MAAS",
+  "w": "isci",
+  "v": [
+   "Maaşın bordroda asgari görünüyorsa, tazminatın da asgariden hesaplanır. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir alüminyum ustası yıllardır aynı atölyede çalışıyor. Bordroda asgari ücret yazıyor. Kalanı her ay elden veriliyor.",
+   "İşten çıkarılıyor. Kıdem tazminatı yatıyor ama hesap asgari ücretten yapılmış. İşveren diyor ki: Bordroda ne yazıyorsa maaşın o.",
+   "Sizce usta farkı alabildi mi? A, hayır, bordro esastır. B, evet, gerçek maaşından. C, sadece yarısını. Cevabını yoruma yaz.",
+   "Geri saralım. Mahkeme tanıkları dinliyor. Elden ödemeyi ustanın tanıkları da, işverenin kendi tanıkları da doğruluyor. Gerçek maaşın, asgari ücretin bir virgül yirmi dokuz katı olduğu ortaya çıkıyor.",
+   "Mahkeme dedi ki: Tazminat bordroya göre değil, gerçek ücrete göre hesaplanır. Daha önce asgariden ödenen tazminatların farkı da ödenecek. Kullanılmayan izinler ve fazla mesai de ödenecek. Yargıtay onadı.",
+   "Elden aldığın maaşı tanıkla ispat edebilirsin. Tazminatın gerçek maaşından hesaplanır. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Kıdem tazminatı yatıyor",
+  "hook": "“MAAŞIN<br>ASGARİ GÖRÜNÜYORSA<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>DA ASGARİ”",
+  "pollQ": "USTA FARKI ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hayır, bordro esastır"
+   ],
+   [
+    "B",
+    "Evet, gerçek maaştan"
+   ],
+   [
+    "C",
+    "Sadece yarısını"
+   ]
+  ],
+  "dogru": "B",
+  "sonuc": "SONUÇ: GERÇEK MAAŞTAN HESAPLANDI",
+  "ders1": "Tazminat <b style=\"color:#ffb15c\">gerçek maaştan</b> hesaplanır.",
+  "ders2": "💵 Elden ödemeyi<br><b style=\"color:#34c759\">tanıkla ispat edebilirsin.</b>",
+  "doc": [
+   "ÜCRET BORDROSU",
+   [
+    "Ücret: asgari ücret",
+    "Ödeme: banka",
+    "Kıdem tazminatı",
+    "asgariden hesaplandı."
+   ]
+  ],
+  "black": "ZARFTA<br><span style=\"color:#ff453a\">ELDEN MAAŞ</span><br><span style=\"font-size:.55em\">bordroda: asgari ücret</span>",
+  "tagW": "USTA",
+  "tagD": "GERÇEK MAAŞ?",
+  "clues": [
+   [
+    "Mahkeme tanıkları",
+    "Tanıklar dinleniyor"
+   ],
+   [
+    "Elden ödemeyi",
+    "İşverenin tanıkları da doğruluyor"
+   ],
+   [
+    "Gerçek maaşın",
+    "Gerçek maaş: asgarinin 1,29 katı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Tazminat bordroya",
+    "Gerçek ücret esas alınır"
+   ],
+   [
+    "Daha önce asgariden",
+    "Eksik ödenen fark ödenecek"
+   ]
+  ],
+  "hukumKey": "Kullanılmayan izinler",
+  "lex": "https://lexara.com.tr/karar/21707432"
+ },
+ {
+  "n": 7,
+  "kod": "KK_PI_07",
+  "havuz": "KK_PI_07_MESAI_ODENMEDI",
+  "w": "ofis",
+  "v": [
+   "İşten kendin ayrılırsan, kıdem tazminatı alamazsın. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir bankada müdür yardımcısı on iki yıldır çalışıyor. Akşamları geç saatlere kadar kalıyor. Fazla mesailerinin karşılığı ödenmiyor.",
+   "Sonunda dilekçesini verip ayrılıyor ve kıdem tazminatı istiyor. İşveren diyor ki: Kendisi istifa etti, üstelik başka bir bankaya geçti.",
+   "Sizce müdür yardımcısı kıdem tazminatı aldı mı? A, evet, aldı. B, hayır, istifa etti. C, sadece mesai ücretini. Cevabını yoruma yaz.",
+   "Geri saralım. Bilirkişi hesap yapıyor. Ödenmemiş fazla mesai gerçekten var. Tanıklar da onun, kendi çalışma saatini belirleyen bir yönetici olmadığını söylüyor.",
+   "Mahkeme dedi ki: Ücretin tam ve zamanında ödenmemesi, işçiye haklı fesih hakkı verir. Bu istifa değil, haklı fesihtir. Müdür yardımcısı kıdem tazminatını ve fazla mesai ücretini alacak. Yargıtay onadı.",
+   "Ücretin ya da mesain ödenmediği için ayrılırsan, kıdem tazminatın yanmaz. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Kendisi istifa",
+  "hook": "“KENDİN<br>AYRILIRSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>YOK”",
+  "pollQ": "KIDEM TAZMİNATI ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Evet, aldı"
+   ],
+   [
+    "B",
+    "Hayır, istifa etti"
+   ],
+   [
+    "C",
+    "Sadece mesai ücretini"
+   ]
+  ],
+  "dogru": "A",
+  "sonuc": "SONUÇ: KIDEM + MESAİ ALDI",
+  "ders1": "Ödenmeyen mesai yüzünden ayrılmak <b style=\"color:#ffb15c\">istifa sayılmaz.</b>",
+  "ders2": "⏰ Ücretin ödenmiyorsa<br><b style=\"color:#34c759\">kıdemin yanmaz.</b>",
+  "doc": [
+   "FESİH BİLDİRİMİ",
+   [
+    "Fazla mesai ücretlerimin",
+    "ödenmemesi nedeniyle",
+    "iş sözleşmemi haklı",
+    "nedenle feshediyorum."
+   ]
+  ],
+  "black": "“KENDİSİ<br><span style=\"color:#ff453a\">İSTİFA ETTİ”</span><br><span style=\"font-size:.55em\">işverenin savunması</span>",
+  "tagW": "MÜDÜR YRD.",
+  "tagD": "İSTİFA MI?",
+  "clues": [
+   [
+    "Bilirkişi hesap",
+    "Hesap bilirkişide"
+   ],
+   [
+    "Ödenmemiş fazla",
+    "Ödenmemiş mesai var"
+   ],
+   [
+    "Tanıklar da",
+    "Saatini kendi belirlemiyor"
+   ]
+  ],
+  "reasons": [
+   [
+    "Ücretin tam",
+    "Ücret ödenmezse haklı fesih"
+   ],
+   [
+    "Bu istifa",
+    "İstifa değil, haklı fesih"
+   ]
+  ],
+  "hukumKey": "Müdür yardımcısı kıdem",
+  "lex": "https://lexara.com.tr/karar/21651625"
+ },
+ {
+  "n": 8,
+  "kod": "KK_PI_08",
+  "havuz": "KK_PI_08_IMZALI_BORDRO",
+  "w": "isci",
+  "v": [
+   "Bordroyu imzaladıysan, fazla mesai isteyemezsin. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir şirket çalışanı altı buçuk yıl boyunca çalışıyor. Her ay bordrosunu imzalıyor. Haftada birkaç saat de fazladan kalıyor.",
+   "İşten çıkarılınca fazla mesai ücretini istiyor. İşveren diyor ki: Bordroların hepsi imzalı. Tanıkla fazla mesai ispat edilemez.",
+   "Sizce çalışan fazla mesai ücretini aldı mı? A, hayır, imza onun. B, sadece bir ayını. C, evet, aldı. Cevabını yoruma yaz.",
+   "Geri saralım. Mahkeme iş arkadaşlarını tanık olarak dinliyor. Tanıklar haftada beş buçuk saat fazla çalışıldığını anlatıyor. İşveren bu saatlerin ödendiğini ispat edemiyor.",
+   "Mahkeme imza itirazını kabul etmedi: Fazla mesai tanıkla da ispat edilebilir. Ödendiğini ispat etmek ise işverene düşer. Çalışan fazla mesaisini, kıdem ve ihbar tazminatını, izin ücretini alacak. Yargıtay onadı.",
+   "İmzalı bordro, fazla mesai hakkını tek başına silmez. Mesai saatlerini bilen tanıkların çok önemli. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Bordroların hepsi",
+  "hook": "“BORDROYU<br>İMZALADIYSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">MESAİ</span><br>YOK”",
+  "pollQ": "FAZLA MESAİYİ ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hayır, imza onun"
+   ],
+   [
+    "B",
+    "Sadece bir ayını"
+   ],
+   [
+    "C",
+    "Evet, aldı"
+   ]
+  ],
+  "dogru": "C",
+  "sonuc": "SONUÇ: MESAİ + KIDEM + İHBAR",
+  "ders1": "İmzalı bordro <b style=\"color:#ffb15c\">mesai hakkını silmez.</b>",
+  "ders2": "👥 Mesaini bilen<br><b style=\"color:#34c759\">tanıkların önemli.</b>",
+  "doc": [
+   "ÜCRET BORDROSU",
+   [
+    "Bu bordrodaki",
+    "ödemeleri eksiksiz",
+    "aldım.",
+    "İmza: ✓"
+   ]
+  ],
+  "black": "“BORDROLAR<br><span style=\"color:#ff453a\">İMZALI”</span><br><span style=\"font-size:.55em\">işverenin savunması</span>",
+  "tagW": "ÇALIŞAN",
+  "tagD": "İMZA YETER Mİ?",
+  "clues": [
+   [
+    "Mahkeme iş",
+    "Tanıklar dinleniyor"
+   ],
+   [
+    "Tanıklar haftada",
+    "Haftada 5,5 saat fazla mesai"
+   ],
+   [
+    "İşveren bu",
+    "Ödendiği ispatlanamadı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Fazla mesai tanıkla",
+    "Tanıkla ispat mümkün"
+   ],
+   [
+    "Ödendiğini ispat",
+    "Ödeme ispatı işverende"
+   ]
+  ],
+  "hukumKey": "Çalışan fazla",
+  "lex": "https://lexara.com.tr/karar/21662663"
+ },
+ {
+  "n": 9,
+  "kod": "KK_PI_09",
+  "havuz": "KK_PI_09_EVLILIK_KIDEM",
+  "w": "kadin",
+  "v": [
+   "Evlenip işten ayrılan kadın, tazminat alamaz. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir kalite kontrol sorumlusu üç yıldır aynı iş yerinde çalışıyor. Evleniyor. Dört ay sonra işten ayrılıyor ve kıdem tazminatını istiyor.",
+   "İşveren tazminatı ödemiyor ve bir suçlama ortaya atıyor: İş arkadaşına hakaret etti, onu bu yüzden çıkardık.",
+   "Sizce kadın kıdem tazminatını aldı mı? A, hayır, hakaret var. B, evet, aldı. C, sadece izin ücretini. Cevabını yoruma yaz.",
+   "Geri saralım. Tarihlere bakılıyor. O hakaret olayı, kadın işten ayrıldıktan sonra yaşanmış. Yani ayrılışın sebebi olamaz.",
+   "Mahkeme dedi ki: Kadın işçi evlendikten sonraki bir yıl içinde ayrılırsa, kıdem tazminatına hak kazanır. İşverenin savunmasına itibar edilmedi. Kıdem tazminatını, kalan maaşını ve izin ücretini alacak. Yargıtay da işverenin itirazını reddetti.",
+   "Evlenen kadın işçi, bir yıl içinde ayrılırsa kıdem tazminatını alır. Sonradan ortaya atılan suçlama bunu değiştirmez. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "hakaret",
+  "hook": "“EVLENİP<br>AYRILAN KADIN<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>ALAMAZ”",
+  "pollQ": "KIDEM TAZMİNATI ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hayır, hakaret var"
+   ],
+   [
+    "B",
+    "Evet, aldı"
+   ],
+   [
+    "C",
+    "Sadece izin ücretini"
+   ]
+  ],
+  "dogru": "B",
+  "sonuc": "SONUÇ: KIDEM TAZMİNATI ALDI",
+  "ders1": "Evlendikten sonra 1 yıl içinde ayrılan kadın <b style=\"color:#ffb15c\">kıdem alır.</b>",
+  "ders2": "📅 Sonradan uydurulan suçlama<br><b style=\"color:#34c759\">hakkı silmez.</b>",
+  "doc": [
+   "FESİH BİLDİRİMİ",
+   [
+    "Evlenmem nedeniyle",
+    "iş sözleşmemi",
+    "sona erdiriyorum.",
+    "Kıdem tazminatımı isterim."
+   ]
+  ],
+  "black": "“HAKARET<br><span style=\"color:#ff453a\">ETTİ”</span><br><span style=\"font-size:.55em\">işverenin savunması</span>",
+  "tagW": "KALİTE SORUMLUSU",
+  "tagD": "TARİH?",
+  "clues": [
+   [
+    "Tarihlere",
+    "Tarihler karşılaştırılıyor"
+   ],
+   [
+    "O hakaret",
+    "Olay ayrılıştan SONRA"
+   ],
+   [
+    "Yani ayrılış",
+    "Ayrılış sebebi olamaz"
+   ]
+  ],
+  "reasons": [
+   [
+    "Kadın işçi evlendikten",
+    "Evlilikten sonra 1 yıl içinde"
+   ],
+   [
+    "İşverenin savunmasına",
+    "Savunmaya itibar edilmedi"
+   ]
+  ],
+  "hukumKey": "Kıdem tazminatını,",
+  "lex": "https://lexara.com.tr/karar/21722202"
+ },
+ {
+  "n": 10,
+  "kod": "KK_PI_10",
+  "havuz": "KK_PI_10_MOBBING",
+  "w": "ofis",
+  "v": [
+   "Mobbing ispatlanamaz, susmak zorundasın. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir banka şube müdürü. Bölge müdürü onu toplantılarda, diğer müdürlerin önünde küçük düşürüyor. Aylardır uğraştığı proje elinden alınıyor.",
+   "Emekliliğine iki yıl kalmışken dayanamıyor ve ayrılıyor. Banka diyor ki: Kendi isteğiyle istifa etti. Mobbing falan yok.",
+   "Sizce müdür ne aldı? A, kıdem ve manevi tazminat. B, hiçbir şey, istifa etti. C, sadece kıdem tazminatı. Cevabını yoruma yaz.",
+   "Geri saralım. İlk mahkeme mobbing ispatlanamadı deyip tazminatı reddediyor. Ama dosyada tanıklar, e-postalar ve tedavi kayıtları var. Yargıtay kararı bozuyor.",
+   "Mahkeme yeniden baktı ve dedi ki: İşveren baskı yapılmadığını ispat edemedi. Bu istifa değil, haklı fesihtir. Müdür kıdem tazminatını ve elli bin lira manevi tazminatı alacak. Yargıtay onadı.",
+   "Mobbinge uğruyorsan e-postaları, mesajları ve tanıklarını sakla. Mobbing ispatlanabilir. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Kendi isteğiyle",
+  "hook": "“MOBBİNG<br>İSPATLANAMAZ,<br><span style=\"color:#ffb15c;font-size:1.25em\">SUS</span><br>VE ÇALIŞ”",
+  "pollQ": "MÜDÜR NE ALDI?",
+  "opts": [
+   [
+    "A",
+    "Kıdem + manevi tazminat"
+   ],
+   [
+    "B",
+    "Hiçbir şey, istifa"
+   ],
+   [
+    "C",
+    "Sadece kıdem"
+   ]
+  ],
+  "dogru": "A",
+  "sonuc": "SONUÇ: KIDEM + 50.000 TL MANEVİ",
+  "ders1": "Mobbing <b style=\"color:#ffb15c\">ispatlanabilir.</b>",
+  "ders2": "📧 E-posta, mesaj,<br><b style=\"color:#34c759\">tanık: hepsini sakla.</b>",
+  "doc": [
+   "FESİH BİLDİRİMİ",
+   [
+    "Maruz kaldığım",
+    "psikolojik baskı nedeniyle",
+    "iş sözleşmemi haklı",
+    "nedenle feshediyorum."
+   ]
+  ],
+  "black": "“KENDİ<br><span style=\"color:#ff453a\">İSTEĞİYLE GİTTİ”</span><br><span style=\"font-size:.55em\">bankanın savunması</span>",
+  "tagW": "ŞUBE MÜDÜRÜ",
+  "tagD": "İSPAT?",
+  "clues": [
+   [
+    "İlk mahkeme",
+    "İlk mahkeme: ispat yok"
+   ],
+   [
+    "Ama dosyada",
+    "Tanık + e-posta + tedavi kaydı"
+   ],
+   [
+    "Yargıtay kararı",
+    "Yargıtay: BOZMA"
+   ]
+  ],
+  "reasons": [
+   [
+    "İşveren baskı",
+    "Baskı yok, ispatlanamadı"
+   ],
+   [
+    "Bu istifa",
+    "İstifa değil, haklı fesih"
+   ]
+  ],
+  "hukumKey": "Müdür kıdem",
+  "lex": "https://lexara.com.tr/karar/519913"
+ },
+ {
+  "n": 11,
+  "kod": "KK_PI_11",
+  "havuz": "KK_PI_11_SIGORTASIZ",
+  "w": "kadin",
+  "v": [
+   "Sigortasız çalıştıysan, o ayları geri alamazsın. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir kadın, bir eğitim kurumunda muhasebe yardımcısı olarak işe başlıyor. Maaşı elden veriliyor. Sabahları servis hostesliği de yapıyor.",
+   "Sekiz ay sonra fark ediyor: Sigortası yeni başlatılmış. O sekiz ay kayıtlarda yok. İşveren diyor ki: Zaten o gün işe başladı.",
+   "Sizce o sekiz ay sigortasına sayıldı mı? A, hayır, kayıt yok. B, sadece son iki ayı. C, evet, tamamı sayıldı. Cevabını yoruma yaz.",
+   "Geri saralım. Mahkeme tanıkları dinliyor. Telefon kayıtları da inceleniyor. Hepsi aynı şeyi gösteriyor: Şubattan beri o iş yerinde çalışıyor.",
+   "Mahkeme dedi ki: Sekiz aylık çalışma sigortalı hizmet olarak tescil edilecek. Maaşının yazılı belgesi olmadığı için asgari ücretten sayılacak. Kurumun itirazı reddedildi. Yargıtay onadı.",
+   "Sigortasız geçen ayların kaybolmaz. Tanıkla ve kayıtla ispat edersen o süre sigortana işlenir. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Sigortası yeni",
+  "hook": "“SİGORTASIZ<br>ÇALIŞTIYSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">O AYLAR</span><br>YANDI”",
+  "pollQ": "8 AY SİGORTAYA SAYILDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hayır, kayıt yok"
+   ],
+   [
+    "B",
+    "Sadece son 2 ayı"
+   ],
+   [
+    "C",
+    "Evet, tamamı"
+   ]
+  ],
+  "dogru": "C",
+  "sonuc": "SONUÇ: 8 AY HİZMET TESCİL EDİLDİ",
+  "ders1": "Sigortasız geçen aylar <b style=\"color:#ffb15c\">kaybolmaz.</b>",
+  "ders2": "📞 Tanık ve kayıtla<br><b style=\"color:#34c759\">sigortana işlenir.</b>",
+  "doc": [
+   "SGK İŞE GİRİŞ BİLDİRGESİ",
+   [
+    "İşe giriş: Ekim",
+    "",
+    "Önceki 8 ay:",
+    "kayıt bulunmuyor"
+   ]
+  ],
+  "black": "8 AY<br><span style=\"color:#ff453a\">SİGORTASIZ</span><br><span style=\"font-size:.55em\">maaş elden</span>",
+  "tagW": "MUHASEBE YRD.",
+  "tagD": "GİRİŞ TARİHİ?",
+  "clues": [
+   [
+    "Mahkeme tanıkları",
+    "Tanıklar dinleniyor"
+   ],
+   [
+    "Telefon kayıtları",
+    "Telefon kayıtları inceleniyor"
+   ],
+   [
+    "Hepsi aynı",
+    "Şubattan beri çalışıyor"
+   ]
+  ],
+  "reasons": [
+   [
+    "Sekiz aylık",
+    "8 ay hizmet tescil edilecek"
+   ],
+   [
+    "Maaşının yazılı",
+    "Belge yok: asgari ücretten"
+   ]
+  ],
+  "hukumKey": "Kurumun itirazı",
+  "lex": "https://lexara.com.tr/karar/430315"
+ },
+ {
+  "n": 12,
+  "kod": "KK_PI_12",
+  "havuz": "KK_PI_12_ARABULUCU_IMZA",
+  "w": "ofis",
+  "v": [
+   "Arabulucuda imzaladığın anlaşmayı, sonra mahkemede bozdurursun. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir makine mühendisi, aynı şirkette çalışan bir mühendisle evleniyor. On gün sonra eşi işten ayrılıyor. Ertesi gün ona da işine son verildiği söyleniyor.",
+   "Arabulucuda bir anlaşma imzalıyor. Sonra mahkemeye gidiyor: Baskıyla imzalattılar, hakkım iki yüz yirmi bin lira, bana yüz kırk bir bin lira ödendi. Anlaşma iptal edilsin.",
+   "Sizce anlaşma bozuldu mu? A, evet, baskı var. B, hayır, anlaşma geçerli. C, fark ödenecek. Cevabını yoruma yaz.",
+   "Geri saralım. Arabulucunun işverenle iş birliği yaptığı ispatlanamıyor. Tanıklar o odada değildi. Üstelik görüşme sırasında avukat ağabeyiyle telefonda konuşmuş.",
+   "Mahkeme dedi ki: Bütün belgelerde imzası var, hiçbirine itiraz notu düşülmemiş. Baskı da aşırı dengesizlik de ispat edilemedi. Anlaşma geçerli, iptal talebi reddedildi. Yargıtay onadı.",
+   "Arabulucuda attığın imza sonradan kolay bozulmaz. Rakamı beğenmiyorsan, imzalamadan önce itiraz et. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Baskıyla",
+  "hook": "“ARABULUCUDA<br>İMZALADIN MI?<br><span style=\"color:#ffb15c;font-size:1.25em\">SONRA</span><br>BOZDURURSUN”",
+  "pollQ": "ANLAŞMA BOZULDU MU?",
+  "opts": [
+   [
+    "A",
+    "Evet, baskı var"
+   ],
+   [
+    "B",
+    "Hayır, anlaşma geçerli"
+   ],
+   [
+    "C",
+    "Fark ödenecek"
+   ]
+  ],
+  "dogru": "B",
+  "sonuc": "SONUÇ: ANLAŞMA GEÇERLİ",
+  "ders1": "Arabulucudaki imza <b style=\"color:#ffb15c\">kolay bozulmaz.</b>",
+  "ders2": "✍️ Rakamı beğenmiyorsan<br><b style=\"color:#34c759\">imzalamadan itiraz et.</b>",
+  "doc": [
+   "ARABULUCULUK ANLAŞMASI",
+   [
+    "Kıdem + ihbar: 141.593 TL",
+    "Başkaca hak ve",
+    "alacağım kalmamıştır.",
+    "İmza: ✓"
+   ]
+  ],
+  "black": "“BASKIYLA<br><span style=\"color:#ff453a\">İMZALATTILAR”</span><br><span style=\"font-size:.55em\">mühendisin iddiası</span>",
+  "tagW": "MÜHENDİS",
+  "tagD": "İMZA BOZULUR MU?",
+  "clues": [
+   [
+    "Arabulucunun",
+    "İş birliği ispatlanamadı"
+   ],
+   [
+    "Tanıklar o",
+    "Tanıklar görmedi"
+   ],
+   [
+    "Üstelik görüşme",
+    "Avukat ağabeyiyle konuşmuş"
+   ]
+  ],
+  "reasons": [
+   [
+    "Bütün belgelerde",
+    "Her belgede imza, itiraz notu yok"
+   ],
+   [
+    "Baskı da",
+    "Baskı ispatlanamadı"
+   ]
+  ],
+  "hukumKey": "Anlaşma geçerli",
+  "lex": "https://lexara.com.tr/karar/7345"
+ }
+]

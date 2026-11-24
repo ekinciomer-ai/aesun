@@ -8,7 +8,7 @@ T=$(mktemp -d /root/davalar_yukle.XXXXXX); trap 'rm -rf "$T"' EXIT
 C=$(docker ps --format '{{.Names}}' | grep -E '^aesun[-_]isler' | head -1)
 [ -n "$C" ] || { echo "NOT: HATA aesun-isler kapsayıcısı yok"; exit 1; }
 mkdir -p "$T/d"
-timeout 1500 docker exec -e GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20' -e GIT_TERMINAL_PROMPT=0 "$C" sh -c "cd /veri/epias-ptf && git fetch -q --depth 1 origin $DAL:refs/remotes/origin/$DAL" </dev/null || { echo "NOT: HATA geçici dal çekilemedi"; exit 1; }
+timeout 1500 docker exec -e GIT_SSH_COMMAND='ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20' -e GIT_TERMINAL_PROMPT=0 "$C" sh -c "cd /veri/epias-ptf && git fetch -q --depth 1 origin $DAL:refs/remotes/origin/$DAL" </dev/null > "$T/fetch.log" 2>&1 || { echo "NOT: HATA geçici dal çekilemedi: $(tail -3 "$T/fetch.log" | tr '\n' ' ' | sed -E 's#https?://[^ ]*#URL#g' | cut -c1-300)"; exit 1; }
 timeout 600 docker exec "$C" sh -c "cd /veri/epias-ptf && git archive refs/remotes/origin/$DAL gecici" </dev/null | tar xf - -C "$T/d"
 S="$T/d/gecici"; echo "NOT: $(ls "$S" | wc -l) parça alındı"
 cat "$S"/p_* > "$T/a.enc"

@@ -177,6 +177,7 @@ function buildMirror(parent, x, z, { showDev = true, rotY = 0 } = {}) {
   const frame = new THREE.Mesh(new THREE.BoxGeometry(1.04, 1.88, .10), gold); frame.position.y = 1.06; grp.add(frame);
   const glass = new THREE.Mesh(new THREE.PlaneGeometry(.86, 1.66), new THREE.MeshBasicMaterial({ map: mirrorAzazilTex({ showDev }) }));
   glass.position.set(0, 1.06, .062); glass.userData.noShadow = true; grp.add(glass);
+  grp.userData.glass = glass;
   return grp;
 }
 
@@ -218,26 +219,26 @@ function sun(color, intensity, dir, target, { size = 2048, ext = 7, far = 40 } =
 // ---------------------------------------------------------------- SET 1: AYDINLIK SİMYACI ODASI (x = 0)
 function buildOda(scene) {
   const g = new THREE.Group(); scene.add(g);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), painted(woodTex({ base: '#9e7048', plank: 42, rep: [4, 4] })));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), painted(woodTex({ base: '#b88e64', plank: 42, rep: [4, 4] })));
   floor.rotation.x = -Math.PI / 2; g.add(floor);
-  const wallMat = painted(plasterTex('#d4cab6', 41));
+  const wallMat = painted(plasterTex('#e6dfd0', 41));
   const backWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.2), wallMat); backWall.position.set(0, 2.6, -3.0); g.add(backWall);
   const sideL = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.2), wallMat); sideL.rotation.y = Math.PI / 2; sideL.position.set(-4.0, 2.6, 0); g.add(sideL);
   const sideR = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.2), wallMat); sideR.rotation.y = -Math.PI / 2; sideR.position.set(4.0, 2.6, 0); g.add(sideR);
 
   // solda simyacı kitaplığı ve renkli şişeler
-  const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.1, .38), painted(woodTex({ base: '#72482c' })));
-  shelf.position.set(-1.55, 1.05, -2.75); g.add(shelf);
-  for (const [bx, by, col] of [[-1.95, 1.48, '#2d7c66'], [-1.62, 1.48, '#4668a8'], [-1.25, 1.48, '#c65c3e'], [-1.8, 1.92, '#b88c34']]) {
+  const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.1, .38), painted(woodTex({ base: '#7e5232' })));
+  shelf.position.set(-1.65, 1.05, -2.75); g.add(shelf);
+  for (const [bx, by, col] of [[-2.05, 1.48, '#2d7c66'], [-1.72, 1.48, '#4668a8'], [-1.35, 1.48, '#c65c3e'], [-1.9, 1.92, '#b88c34']]) {
     const fl = new THREE.Mesh(new THREE.SphereGeometry(.09, 12, 10), flat(col)); fl.position.set(bx, by, -2.52); g.add(fl);
   }
   // sağda büyük altın çerçeveli ayna (içinde janti Azazil!)
-  buildMirror(g, .56, -1.25, { showDev: true, rotY: -.24 });
+  buildMirror(g, .56, -1.25, { showDev: true, rotY: -.22 });
 
   const L = new THREE.Group();
-  L.add(new THREE.HemisphereLight('#c4def5', '#96826c', 1.78));
-  const dir = [.34, -.72, -.58]; dyn.oSun = V(...dir).normalize();
-  const s = sun('#ffe0b2', 2.05, dir, [0, 1, -.8], { ext: 6 }); L.add(s); L.add(s.target);
+  L.add(new THREE.HemisphereLight('#d8ecfc', '#b8a892', 2.25));
+  const dir = [.28, -.68, -.66]; dyn.oSun = V(...dir).normalize();
+  const s = sun('#ffebd0', 2.35, dir, [0, 1.2, -.8], { ext: 6 }); L.add(s); L.add(s.target);
   scene.add(L); sets.oda = { g, L }; shadows(g);
 }
 
@@ -254,17 +255,19 @@ function buildAvlu(scene) {
     const pil = new THREE.Mesh(new THREE.BoxGeometry(.48, 2.8, .48), stWall); pil.position.set(px, 1.4, -2.6); g.add(pil);
   }
   // solda Feyyuz'un saklandığı alçak taş duvar
-  const hideWall = new THREE.Mesh(new THREE.BoxGeometry(.88, 1.02, .38), stWall); hideWall.position.set(-1.05, .51, -.95); g.add(hideWall);
+  const hideWall = new THREE.Mesh(new THREE.BoxGeometry(.88, 1.02, .38), stWall); hideWall.position.set(-1.18, .51, -.95); g.add(hideWall);
 
-  // merkez-sağda büyük tuzak aynası (P04-P06)
-  dyn.trapMirror = buildMirror(g, .56, -1.25, { showDev: true, rotY: -.35 });
+  // merkez-sağda büyük tuzak aynası (yansıma yalnız Azazil önündeyken görünür!)
+  dyn.texMirrorDev = mirrorAzazilTex({ showDev: true });
+  dyn.texMirrorBlank = mirrorAzazilTex({ showDev: false });
+  dyn.trapMirror = buildMirror(g, .68, -1.25, { showDev: false, rotY: -.34 });
   // yere serili geniş Anadolu kilimi (P06'da rulo olur!)
   const flatRug = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 1.35), painted(kilimTex()));
-  flatRug.rotation.x = -Math.PI / 2; flatRug.position.set(.15, .016, -.48); g.add(flatRug);
+  flatRug.rotation.x = -Math.PI / 2; flatRug.position.set(.18, .016, -.48); g.add(flatRug);
   dyn.flatRug = flatRug;
 
   // rulo sarılmış kilim (P06'da Azazil'in etrafında belirir!)
-  const rugRoll = buildRugRoll(); rugRoll.position.set(.24, .68, -.48); rugRoll.visible = false; g.add(rugRoll);
+  const rugRoll = buildRugRoll(); rugRoll.position.set(.36, .68, -.48); rugRoll.visible = false; g.add(rugRoll);
   dyn.rugRoll = rugRoll;
 
   const far = new THREE.Mesh(new THREE.CylinderGeometry(48, 48, 40, 40, 1, true), vistaMat(daySkyTex(66), { yaw: Math.PI, az: Math.PI * 2, el: [-14 * Math.PI / 180, 34 * Math.PI / 180], gain: .95 }));
@@ -288,15 +291,15 @@ function buildMeyve(scene) {
     const pil = new THREE.Mesh(new THREE.BoxGeometry(.48, 2.8, .48), stWall); pil.position.set(px, 1.4, -2.6); g.add(pil);
   }
   // devrilmiş ayna arka-sağda (kibrin yıkılışı!)
-  const tipped = buildMirror(g, 1.15, -1.65, { showDev: false, rotY: -.55 });
+  const tipped = buildMirror(g, 1.25, -1.75, { showDev: false, rotY: -.55 });
   tipped.rotation.z = -.85; tipped.position.y = .35;
 
   // Rulo kilim (sağda Azazil'in gövdesinde!)
-  const rugRoll3 = buildRugRoll(); rugRoll3.position.set(.44, .68, -.68); g.add(rugRoll3);
+  const rugRoll3 = buildRugRoll(); rugRoll3.position.set(.50, .68, -.68); g.add(rugRoll3);
   dyn.rugRoll3 = rugRoll3;
 
   // Parlayan Altın Bilgelik Meyvesi!
-  const fruit = buildFruit(); fruit.position.set(-.05, 1.12, -.38); g.add(fruit);
+  const fruit = buildFruit(); fruit.position.set(-.10, 1.06, -.42); g.add(fruit);
   dyn.fruit = fruit;
 
   const far = new THREE.Mesh(new THREE.CylinderGeometry(48, 48, 40, 40, 1, true), vistaMat(daySkyTex(77), { yaw: Math.PI, az: Math.PI * 2, el: [-14 * Math.PI / 180, 34 * Math.PI / 180], gain: .95 }));
@@ -313,33 +316,33 @@ function buildMeyve(scene) {
 function cameraPath() {
   const k = [
     // P01 KANCA (4 görüntü): aynaya şaşkın bakan Feyyuz -> aynadaki şık Azazil -> serili kilim -> rulo sarılmış Azazil!
-    { t: 0,           pos: [-.05, 1.38, 3.25],   look: [.05, 1.24, -.95],  fov: 48, creep: .24, drift: .03 },
-    { t: P(1, .28),   dur: .42, pos: [.52, 1.38, 1.25], look: [.56, 1.30, -1.25], fov: 44, creep: .28 },
-    { t: P(1, .56),   dur: .30, move: 'whip', pos: [200.1, 1.48, 2.85], look: [200.15, .75, -.55], fov: 48, creep: .26 },
-    { t: P(1, .82),   dur: .30, move: 'whip', pos: [300.25, 1.38, 2.75], look: [300.38, 1.18, -.68], fov: 46, creep: .24 },
-    // P02 "Bakın," (oda): Feyyuz + eşi + aynada şık Azazil
-    { t: PS(2) + .16, dur: .30, move: 'whip', pos: [-.05, 1.36, 3.45], look: [-.02, 1.22, -.95], fov: 49, creep: .24 },
-    { t: PE(2),       dur: Math.max(.4, PE(2) - PS(2) - .2), pos: [.22, 1.38, 2.55], look: [.35, 1.28, -1.1], fov: 46, creep: .22 },
+    { t: 0,           pos: [-.05, 1.38, 3.35],   look: [.08, 1.24, -.95],  fov: 48, creep: .24, drift: .03 },
+    { t: P(1, .28),   dur: .42, pos: [.52, 1.38, 1.32], look: [.56, 1.30, -1.25], fov: 44, creep: .28 },
+    { t: P(1, .56),   dur: .30, move: 'whip', pos: [200.18, 1.48, 3.05], look: [200.22, .78, -.60], fov: 48, creep: .26 },
+    { t: P(1, .82),   dur: .30, move: 'whip', pos: [300.38, 1.38, 2.75], look: [300.48, 1.18, -.68], fov: 46, creep: .24 },
+    // P02 "Bakın," (oda): Gelin + Feyyuz + aynada şık Azazil (hepsi kadrajda!)
+    { t: PS(2) + .16, dur: .30, move: 'whip', pos: [-.10, 1.38, 4.15], look: [-.06, 1.22, -.95], fov: 50, creep: .22 },
+    { t: PE(2),       dur: Math.max(.4, PE(2) - PS(2) - .2), pos: [.06, 1.38, 3.55], look: [.14, 1.26, -1.05], fov: 48, creep: .22 },
     // P03 Aynadaki Azazil kibirle güler
-    { t: PS(3) + .16, dur: .40, pos: [.50, 1.36, 1.35], look: [.55, 1.30, -1.22], fov: 44, creep: .24 },
-    { t: PE(3),       dur: Math.max(.4, PE(3) - PS(3) - .2), pos: [.45, 1.38, 1.65], look: [.52, 1.28, -1.22], fov: 45, creep: .20 },
+    { t: PS(3) + .16, dur: .40, pos: [.50, 1.36, 1.40], look: [.55, 1.30, -1.22], fov: 44, creep: .24 },
+    { t: PE(3),       dur: Math.max(.4, PE(3) - PS(3) - .2), pos: [.45, 1.38, 1.68], look: [.52, 1.28, -1.22], fov: 45, creep: .20 },
     // P04 Whip ile güneşli taş avlu: Feyyuz ayna + kilim tuzağını kurup duvar arkasına saklanır
-    { t: PS(4) + .16, dur: .30, move: 'whip', pos: [200.0, 1.44, 3.55], look: [200.0, 1.12, -.85], fov: 49, creep: .24 },
-    { t: PE(4),       dur: Math.max(.4, PE(4) - PS(4) - .2), pos: [199.85, 1.38, 3.15], look: [199.95, 1.10, -.85], fov: 48, creep: .22 },
-    // P05 Azazil gelip aynada kendini seyreder
-    { t: PS(5) + .16, dur: .42, pos: [200.15, 1.42, 3.15], look: [200.28, 1.22, -.85], fov: 47, creep: .24 },
-    { t: PE(5),       dur: Math.max(.4, PE(5) - PS(5) - .2), pos: [200.25, 1.42, 2.75], look: [200.32, 1.24, -.85], fov: 46, creep: .22 },
+    { t: PS(4) + .16, dur: .30, move: 'whip', pos: [200.0, 1.44, 3.70], look: [200.05, 1.12, -.85], fov: 49, creep: .24 },
+    { t: PE(4),       dur: Math.max(.4, PE(4) - PS(4) - .2), pos: [199.92, 1.38, 3.45], look: [200.02, 1.10, -.85], fov: 48, creep: .22 },
+    // P05 Azazil gelip aynada kendini seyreder (gerçek Azazil sol-ortada, ayna sağda!)
+    { t: PS(5) + .16, dur: .42, pos: [200.12, 1.42, 3.45], look: [200.22, 1.22, -.85], fov: 48, creep: .24 },
+    { t: PE(5),       dur: Math.max(.4, PE(5) - PS(5) - .2), pos: [200.18, 1.42, 3.20], look: [200.26, 1.24, -.85], fov: 47, creep: .22 },
     // P06 Feyyuz fırlayıp kilimi Azazil'e rulo sarar! (kick!)
-    { t: PS(6) + .16, dur: .35, pos: [200.0, 1.42, 3.35], look: [200.05, 1.18, -.65], fov: 48, creep: .26 },
-    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .2), pos: [200.12, 1.40, 2.95], look: [200.12, 1.22, -.65], fov: 47, creep: .24 },
+    { t: PS(6) + .16, dur: .35, pos: [200.02, 1.42, 3.65], look: [200.05, 1.18, -.65], fov: 49, creep: .26 },
+    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .2), pos: [200.04, 1.40, 3.35], look: [200.04, 1.22, -.65], fov: 48, creep: .24 },
     // P07 Whip ile yakın plan (set 3): rulo kilimdeki Azazil altın Bilgelik Meyvesi'ni Feyyuz'a verir!
-    { t: PS(7) + .14, dur: .30, move: 'whip', pos: [300.0, 1.38, 3.15], look: [300.05, 1.18, -.62], fov: 47, creep: .24 },
-    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .2), pos: [299.95, 1.36, 2.65], look: [300.0, 1.20, -.58], fov: 46, creep: .22 },
-    // P08-P09 Feyyuz elinde parlayan meyve, arkada mahcup rulo Azazil
-    { t: PS(8) + .18, dur: .45, pos: [299.88, 1.38, 2.85], look: [299.98, 1.22, -.62], fov: 47, creep: .22 },
-    { t: PS(9) + .18, dur: .45, pos: [299.82, 1.36, 2.55], look: [299.85, 1.24, -.58], fov: 46, creep: .20 },
+    { t: PS(7) + .14, dur: .30, move: 'whip', pos: [300.0, 1.38, 3.55], look: [300.0, 1.18, -.62], fov: 48, creep: .24 },
+    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .2), pos: [299.98, 1.36, 3.35], look: [300.0, 1.20, -.60], fov: 47, creep: .22 },
+    // P08-P09 İkisi de kadrajda tam görünür: Feyyuz gururla meyveyi tutar, sağda rulo Azazil mahcup!
+    { t: PS(8) + .18, dur: .45, pos: [299.98, 1.38, 3.45], look: [300.0, 1.22, -.62], fov: 48, creep: .22 },
+    { t: PS(9) + .18, dur: .45, pos: [299.94, 1.38, 3.55], look: [299.98, 1.22, -.62], fov: 48, creep: .20 },
     // P10 Geniş final: güneşli gök altında meyveyi tutan Feyyuz & devrik ayna
-    { t: DUR,         dur: Math.max(.6, DUR - PS(10) + .1), pos: [300.0, 1.56, 4.35], look: [300.05, 1.22, -.85], fov: 51, creep: .16 },
+    { t: DUR,         dur: Math.max(.6, DUR - PS(10) + .1), pos: [300.0, 1.56, 4.45], look: [300.02, 1.22, -.85], fov: 51, creep: .16 },
   ];
   const cp = new CamPath(k, { fps: FPS });
   cp.kick(P(6, .48), 1.2);  // kilim rulosu sarılma darbesi!
@@ -420,7 +423,7 @@ export function frame(t, ctx) {
 
   if (here === 'oda') {
     const sawDev = t < P(1, .55) || t >= P(2, .45);
-    fy.show(); fy.place(-.24, 0, -.78, cam, tint);
+    fy.show(); fy.place(-.16, 0, -.78, cam, tint);
     fy.draw({
       expr: sawDev ? 'surprised' : 'focused',
       look: .65, sweat: sawDev ? .85 : 0,
@@ -431,7 +434,7 @@ export function frame(t, ctx) {
     fy.castFrom(dyn.oSun, true);
 
     if (t >= PS(2) && t < PS(3)) {
-      gl.show(); gl.place(-.82, 0, -.95, cam, tint);
+      gl.show(); gl.place(-.68, 0, -.88, cam, tint);
       gl.draw({
         expr: 'smile', look: .55, blink: bl(2, PS(2) + .4),
         armR: [24, 16], armL: [18, 12],
@@ -445,6 +448,12 @@ export function frame(t, ctx) {
     const leapU = isHook ? 0 : ramp(t, PS(6), P(6, .48));
     const rolled = !isHook && t >= P(6, .46);
 
+    // Avlu aynasında Azazil yansıması YALNIZ Azazil aynanın önündeyken (P05 - P06 sarılmadan önce) görünür!
+    const showRefl = !isHook && !rolled && t >= P(5, .18);
+    const mirGlass = dyn.trapMirror.userData.glass;
+    const targetTex = showRefl ? dyn.texMirrorDev : dyn.texMirrorBlank;
+    if (mirGlass.material.map !== targetTex) { mirGlass.material.map = targetTex; mirGlass.material.needsUpdate = true; }
+
     dyn.flatRug.visible = !rolled;
     dyn.rugRoll.visible = rolled;
     if (rolled) {
@@ -452,27 +461,29 @@ export function frame(t, ctx) {
     }
 
     if (!isHook) {
-      // Feyyuz: P04'te saklanma duvarının arkasına geçer -> P06'da fırlayıp kilimi sarar!
-      const fxPos = leapU > 0 ? 199.05 + leapU * .55 : 199.72 - hideU * .67;
-      const fzPos = leapU > 0 ? -1.12 + leapU * .58 : -.65 - hideU * .48;
+      // Feyyuz: P04'te saklanma duvarının arkasına geçer -> P06'da fırlayıp kilimi sarar (Azazil'le net mesafe!)
+      const fxPos = leapU > 0 ? 198.96 + leapU * .46 : 199.55 - hideU * .60;
+      const fzPos = leapU > 0 ? -1.12 + leapU * .56 : -.65 - hideU * .48;
       fy.show(); fy.place(fxPos, 0, fzPos, cam, tint);
       fy.draw({
         expr: rolled ? 'grin' : leapU > .1 ? 'focused' : 'smug',
         look: .72, blink: bl(3, PS(5), P(6, .48)),
-        armR: leapU > .1 ? [115, 25] : [36, 20], armL: leapU > .1 ? [95, 25] : [24, 16],
+        armR: rolled ? [65, 22] : leapU > .1 ? [102, 24] : [36, 20],
+        armL: leapU > .1 ? [82, 22] : [24, 16],
         bob: leapU > 0 && leapU < 1 ? -Math.abs(Math.sin(t * 14)) * 12 : 0,
         lit: -1, shade: COOL, rim: { color: WARM, a: .2 }
       });
       fy.castFrom(dyn.aSun, true);
 
-      // Azazil: P05'te aynaya poz verir -> P06'da kilim rulosunun içine hapsolur!
+      // Azazil: P05'te aynanın solunda poz verir -> P06'da kilim rulosunun içine hapsolur!
       if (t >= PS(5) - .1) {
         const arr = ramp(t, PS(5) - .1, P(5, .42));
-        const ax = 200.24 + (1 - arr) * 1.1;
+        const axBase = rolled ? 200.36 : 199.96 + leapU * .40;
+        const ax = axBase + (1 - arr) * 1.1;
         az.show(); az.place(ax, 0, rolled ? -.56 : -.48, cam, tint);
         az.draw({
           expr: rolled ? 'surprised' : 'smug',
-          look: rolled ? -.65 : .55,
+          look: rolled ? -.65 : .62,
           sweat: rolled ? 1 : 0,
           blink: bl(4, P(5, .5), P(6, .48)),
           armL: rolled ? [10, 6] : [55, 35], armR: rolled ? [10, 6] : [35, 25],
@@ -489,7 +500,7 @@ export function frame(t, ctx) {
     dyn.rugRoll3.rotation.z = Math.sin(t * 14) * .06;
 
     // Rulo kilimdeki mahcup/paniklemiş Azazil (sağda!)
-    az.show(); az.place(300.44, 0, -.76, cam, tint);
+    az.show(); az.place(300.50, 0, -.76, cam, tint);
     az.draw({
       expr: t >= PS(8) ? 'worried' : 'surprised',
       look: -.65, sweat: 1,
@@ -500,25 +511,25 @@ export function frame(t, ctx) {
     });
     az.castFrom(dyn.fSun, true);
 
-    // Feyyuz solda Bilgelik Meyvesi'ni alır ve gururla gülümser!
+    // Feyyuz solda Bilgelik Meyvesi'ni avucunda tutar ve gururla gülümser!
     if (!isHook) {
-      fy.show(); fy.place(299.56, 0, -.58, cam, tint);
+      fy.show(); fy.place(299.46, 0, -.58, cam, tint);
       fy.draw({
         expr: t >= PS(9) ? 'proud' : t >= PS(8) ? 'smile' : 'grin',
         look: t >= PS(9) ? .15 : .55,
         blink: bl(6, P(7, .75), PS(9)),
-        armR: [78, 35], armL: [24, 16],
+        armR: [42, 74], armL: [24, 16],
         lit: -1, shade: COOL, rim: { color: WARM, a: .22 }
       });
       fy.castFrom(dyn.fSun, true);
     }
 
-    // Altın Bilgelik Meyvesi: Azazil'den Feyyuz'un eline kayar ve hafifçe süzülür!
+    // Altın Bilgelik Meyvesi: Azazil'den Feyyuz'un eline kayar ve elinin tam üzerinde parlar!
     dyn.fruit.visible = !isHook;
     if (!isHook) {
-      const fx0 = .25 - giveU * .45;
-      const fy0 = 1.02 + Math.sin(giveU * Math.PI) * .22 + Math.sin(t * 3.5) * .025;
-      dyn.fruit.position.set(fx0, fy0, -.42);
+      const fx0 = .34 - giveU * .49;
+      const fy0 = 1.06 + Math.sin(giveU * Math.PI) * .20 + Math.sin(t * 3.5) * .022;
+      dyn.fruit.position.set(fx0, fy0, -.44);
       dyn.fruit.rotation.y = t * 1.4;
     }
   }

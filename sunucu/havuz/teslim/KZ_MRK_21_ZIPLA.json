@@ -1,0 +1,50 @@
+{
+ "kod": "KZ_MRK_21_ZIPLA",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Ay'da zıplasan kaç metre yükselirsin? 🌕🏀 #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Ay'da zıplasan kaç metre yükselirsin? 🌕🏀 #shorts",
+ "aciklama": "NASA'nın Ay bilgi sayfasına göre Ay'ın yüzey çekimi 1,62 m/s², Dünya'nınki 9,80 m/s²; oran 0,165, yani yaklaşık altıda bir.\n\nHesap: 80 kg × 0,165 ≈ 13 kg (tartı Ay'da bu kadar gösterir; 19 litrelik dolu damacana ≈ 19 kg). Aynı kalkış hızıyla zıplama yüksekliği h = v²/2g olduğundan çekim 1/6'ya inince yükseklik ≈ 6 katına çıkar: 0,5 m × 6,05 ≈ 3 m. FIBA kurallarına göre basketbol çemberinin üst kenarı yerden 3,05 m yüksekte. Havada kalma süresi de 6 kat uzar: Dünya'da ≈ 0,64 sn, Ay'da ≈ 3,9 sn. Bu basitleştirilmiş bir hesaptır (bacak itişi ve vücut duruşu yok sayıldı).\n\nGerçekte Apollo astronotları, Smithsonian'a göre yaşam destek sırt çantası ve diğer parçalarla Dünya'da yaklaşık 84 kg (185 pound) gelen giysiyle yürüdü ve zıpladı; taşınan kütle arttıkça aynı bacak gücüyle zıplama kısalır.\n\nSen Ay'da hangi sporu oynardın? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçeksizdir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA NSSDC Moon Fact Sheet; NASA Glenn – Beginner's Guide: Moon; FIBA Official Basketball Rules 2026 – Basketball Equipment (1.2.4); Smithsonian National Air and Space Museum – Pressure Suit A7-LB, Young, Apollo 16; NASA History – Apollo suit backpack (PLSS 68 lb).\n\n#kozmoslab #ay #uzay #yerçekimi #fizik #bilim #merak #shorts",
+ "etiketler": [
+  "ay",
+  "ay'da zıplamak",
+  "yerçekimi",
+  "çekim",
+  "uzay",
+  "fizik",
+  "apollo",
+  "astronot",
+  "bilim",
+  "merak",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "NASA NSSDC Moon Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html): Surface gravity Moon 1.62 m/s², Earth 9.80 m/s², ratio 0.165",
+  "NASA Glenn Research Center – Beginner's Guide to Aeronautics, Moon: 'gmn = 1.62 m/sec² = .165 Earth gravity'",
+  "FIBA Official Basketball Rules 2026 – Basketball Equipment, 1.2.4: çember üst kenarı zeminden 3.050 mm",
+  "Smithsonian NASM – Pressure Suit, A7-LB, Young, Apollo 16: PLSS ve diğer parçalarla birlikte Dünya'da yaklaşık 185 pound (≈ 84 kg)",
+  "NASA History – 50 Years Ago: Apollo suit backpack passes vacuum testing: PLSS Dünya'da 68 pound",
+  "Damacana: 19 litre su ≈ 19 kg (suyun yoğunluğu ≈ 1 kg/L, USGS Water Density)",
+  "Hesap: 80×0,165=13,2 kg; h=v²/2g → 0,5/0,165 ≈ 3,03 m; t=2v/g: Dünya 2·√(2·0,5/9,8)=0,64 sn, Ay 0,64/0,165 ≈ 3,9 sn"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_21_ZIPLA.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_21_ZIPLA.mp4"
+}

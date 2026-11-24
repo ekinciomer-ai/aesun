@@ -169,6 +169,29 @@ def calis(simdi=None):
     except Exception as e:
         sorun["is_kaydi"] = f"İş kaydı okunamadı: {str(e)[:60]}"
 
+    # 3) PTF tazeliği (24.11.2026): epias_fiyat.yml yalnız GitHub zamanlamasıyla çalışıyor ve bu depoda zamanlama
+    # günde 2–4 kez tetikleniyor (23.11'deki 14:20–17:20 turlarının hiçbiri çalışmadı). Yarının PTF'si 14:40'tan sonra,
+    # bugününki hiç yoksa aynı işi repository_dispatch (epias_fiyat) ile tetikle — saatte en çok bir kez.
+    try:
+        ep, _ = gh("n8n/epias_gecmis.json")
+        ptf = (ep or {}).get("ptf") or {}
+        tam = lambda g: len([x for x in (ptf.get(g) or []) if x is not None]) >= 24
+        from datetime import timedelta
+        bugun, yarin = simdi.strftime("%Y-%m-%d"), (simdi + timedelta(days=1)).strftime("%Y-%m-%d")
+        eksik = bugun if not tam(bugun) else (yarin if (simdi.hour, simdi.minute) >= (14, 40) and not tam(yarin) else None)
+        bilgi["ptf_son_gun"] = max(ptf) if ptf else None
+        if eksik:
+            sorun["ptf"] = f"{eksik} PTF'si henüz epias_gecmis.json'da yok (cihaz yönetimi vekil fiyatla çalışır)"
+            ys = yedek_son.get("epias_fiyat")
+            if not ys or (simdi - zaman(ys)).total_seconds() > 3600:
+                try:
+                    _yedek("epias_fiyat"); yedek_son["epias_fiyat"] = simdi.isoformat(timespec="seconds")
+                    log("SİSTEM BEKÇİSİ: PTF eksik", eksik, "→ EPİAŞ fiyatları GitHub'da tetiklendi")
+                except Exception as e:
+                    sorun["yedek:ptf"] = f"EPİAŞ fiyatları tetiklenemedi: {str(e)[:60]}"
+    except Exception as e:
+        bilgi["ptf_kontrol"] = f"okunamadı: {str(e)[:60]}"
+
     durum = "sorun" if sorun else "iyi"
     v = {"t": simdi.isoformat(timespec="seconds"), "durum": durum, "sorunlar": sorun, "bilgi": bilgi, "yedek": yedek_son,
          "ogren": {k: o for k, o in ogren.items() if o.get("son") and (simdi - zaman(o["son"])).days <= 30}}

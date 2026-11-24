@@ -1,0 +1,29 @@
+[
+ {
+  "N": "Is1",
+  "kod": "KK_IS_01",
+  "havuz": "KK_IS_01_KASADAN_DUSME",
+  "sc": 9,
+  "upd": "upd",
+  "tiL": 6.0,
+  "impKey": "yere düşüyor",
+  "hookNo": "KİMİN KUSURU? #1",
+  "hookMain": "“EĞİTİM<br>ALDIYSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">SUÇ</span><br>SENİNDİR”",
+  "pollQ": "MAHKEME NE DEDİ?",
+  "opts": [["A","Kusur işçide, tazminat yok"],["B","İşveren %100 kusurlu"],["C","İkisi de kusurlu, işveren %80"]],
+  "sonuc": "SONUÇ: 840.314 TL + 100.000 TL",
+  "dogru": "Doğru şık: C",
+  "ders1": "Eğitim vermek, işverenin <b style=\"color:#ffb15c\">önlem alma borcunu bitirmez.</b>",
+  "ders2": "🦺 Kemer ve yaşam hattı yoksa<br><b style=\"color:#34c759\">“Bu şartlarda çalışmam” de.</b>",
+  "camKaza": "const u=sm(t/TIs1.kaza);P=new THREE.Vector3(lerp(17,10,u),lerp(13,7,u),lerp(15,9,u));L=new THREE.Vector3(.6,1.5,-1);f=46;",
+  "camRest": "P=new THREE.Vector3(10,7,9);L=new THREE.Vector3(.8,1.5,-1);f=46;",
+  "camKarar": "P=new THREE.Vector3(12,8.5,11);L=new THREE.Vector3(.5,1.4,-1);",
+  "exp": 1.05,
+  "black": "İŞÇİ ~3 METREDEN<br><span style=\"color:#ff453a\">DÜŞTÜ</span><br><span style=\"font-size:.6em\">%29 KALICI İŞ GÖREMEZLİK</span>",
+  "tagsK": "tg+=tag3(st.w,2.0,'İŞÇİ','#ffd60a','#111');tg+=tag3(st.edge,.5,'KORKULUK YOK','#ff453a')",
+  "tagsS": "tg+=tag3(st.w,2.0,'KEMER YOK','#ff453a');tg+=tag3(st.edge,.5,'YAŞAM HATTI YOK','#ff453a');tg+=tag3(st.ground,.3,'HAVA YASTIĞI YOK','#ff453a')",
+  "clues": [["Kasada yaşam","Yaşam hattı kurulmamış"],["Zeminde hava","Hava yastığı ve korkuluk yok"],["Ve işçiye","Emniyet kemeri verilmemiş"]],
+  "reasons": [["İşveren yüzde","İşveren %80: güvenlik ve denetim yok"],["İşçi de yüzde","İşçi %20: kaçınma hakkını kullanmadı"]],
+  "hukumKey": "İşveren, sekiz"
+ }
+]

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-24T19:19+03:00",
+ "olusturma": "2026-11-24T19:39+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -646,7 +646,7 @@
    "karar": "ARTIR",
    "neden": "videoların %88'i tuttu (eşik 214 izlenme / 48 sa)",
    "olculen": 8,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 419,
    "tutma_orani": 88,
    "izlenme_yuzde": 44,
@@ -834,7 +834,7 @@
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Kuyunun ağzında tozlar aşağı çekiliyor: İner misin, kaçar mısın? 🌪️🕳️ #shorts",
-    "i48": 516
+    "i48": 517
    }
   },
   {
@@ -872,14 +872,14 @@
  ],
  "esikler": {
   "Estudio Antiguo": 136,
-  "Nasıl Yapıldı": 135,
-  "Kozmos Lab TR": 214,
-  "Kozmos Lab": 94,
-  "LVL MAX": 50,
+  "Antik Stüdyo": 637,
   "Yolu Seç !": 262,
   "Ancient Studio": 192,
+  "Kozmos Lab TR": 214,
+  "Kozmos Lab": 94,
   "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637
+  "Nasıl Yapıldı": 135,
+  "LVL MAX": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1037,7 +1037,7 @@
    },
    "14:00": {
     "n": 1,
-    "medyan": 153
+    "medyan": 152
    },
    "17:00": {
     "n": 4,
@@ -1575,14 +1575,6 @@
    "baslik": "Someone wrote a song on this man's butt 🎵 #shorts",
    "tarih": "2026-11-28",
    "neden": "odak dönemi: Ancient Studio haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
-   "vid": "MnKJUzav1K8",
-   "baslik": "Kripto şifreler nasıl kırılmaz? Sır iki asal sayıda 🔐",
-   "tarih": "2026-11-24",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
    "tur": "HAFTALIK_KOTA",

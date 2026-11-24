@@ -1,0 +1,189 @@
+[
+ {
+  "N": 16,
+  "kod": "KK_MIT_15",
+  "havuz": "KK_MIT_15_OLUMLU_KAZA",
+  "sc": 6,
+  "upd": "upd2",
+  "tiL": 7.0,
+  "impKey": "çarpıyor",
+  "hookNo": "MİT #15",
+  "hookMain": "“BİRİ ÖLDÜYSE<br>SÜRÜCÜ<br><span style=\"color:#ffb15c;font-size:1.25em\">HAPSE</span><br>GİRER”",
+  "pollQ": "SÜRÜCÜYE NE OLDU?",
+  "opts": [
+   [
+    "A",
+    "Hapis cezası aldı"
+   ],
+   [
+    "B",
+    "Para cezası aldı"
+   ],
+   [
+    "C",
+    "Beraat etti"
+   ]
+  ],
+  "sonuc": "SONUÇ: BERAAT",
+  "dogru": "Doğru şık: C",
+  "ders1": "Ölümlü kaza <b style=\"color:#ffb15c\">otomatik hapis değil.</b> Ceza, kusura bakar.",
+  "ders2": "⚖️ Yine de virajda<br><b style=\"color:#34c759\">hızını düşür.</b>",
+  "camKaza": "const cz=Math.min(st.car.position.z,17);P=new THREE.Vector3(9,12,cz-20);L=new THREE.Vector3(-1,0,cz+8);f=46;",
+  "camRest": "const cz=Math.min(st.car.position.z,17);P=new THREE.Vector3(9,12,cz-20);L=new THREE.Vector3(-1,0,cz+8);f=46;",
+  "camKarar": "P=new THREE.Vector3(10,11,2);L=new THREE.Vector3(-1,0,22);",
+  "exp": 1.0,
+  "black": "KARŞI ARAÇ SÜRÜCÜSÜ<br><span style=\"color:#ff453a\">HAYATINI KAYBETTİ</span>",
+  "tagsK": "tg+=tag3(st.car,1.9,'KENDİ ŞERİDİNDE','#34c759','#111');tg+=tag3(st.O,1.9,'KARŞI ARAÇ','#ff453a')",
+  "tagsS": "tg+=tag3(st.car,1.9,'KUSUR?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Birinci",
+    "Sürücü kendi şeridindeydi"
+   ],
+   [
+    "İkinci",
+    "Karşı araç kayarak şeride girdi"
+   ],
+   [
+    "Üçüncü",
+    "İki ayrı bilirkişi raporu"
+   ]
+  ],
+  "reasons": [
+   [
+    "Raporlara",
+    "Kural ihlali yok"
+   ],
+   [
+    "Kazayı önleme",
+    "Kazayı önleme imkânı yok"
+   ]
+  ],
+  "hukumKey": "Mahkeme beraat"
+ },
+ {
+  "N": 17,
+  "kod": "KK_MIT_16",
+  "havuz": "KK_MIT_16_HATIR_TASIMASI",
+  "sc": 6,
+  "upd": "upd3",
+  "tiL": 7.0,
+  "impKey": "kaza yapıyor",
+  "hookNo": "MİT #16",
+  "hookMain": "“BEDAVA<br>BİNDİN,<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>YOK”",
+  "pollQ": "YOLCU TAZMİNAT ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hiç alamadı"
+   ],
+   [
+    "B",
+    "Yarısını aldı"
+   ],
+   [
+    "C",
+    "%20 indirimle aldı"
+   ]
+  ],
+  "sonuc": "SONUÇ: %20 İNDİRİMLE TAZMİNAT",
+  "dogru": "Doğru şık: C",
+  "ders1": "Bedava binmek <b style=\"color:#ffb15c\">tazminat hakkını silmez.</b>",
+  "ders2": "🚗 Hatır taşımasında<br><b style=\"color:#34c759\">sadece indirim olur.</b>",
+  "camKaza": "const cz=st.car.position.z;P=new THREE.Vector3(8,10,cz-16);L=new THREE.Vector3(-2.5,0,cz+6);f=46;",
+  "camRest": "const cz=Math.min(st.car.position.z,-9);P=new THREE.Vector3(8,10,cz-16);L=new THREE.Vector3(-2.5,0,cz+6);f=46;",
+  "camKarar": "P=new THREE.Vector3(8,10,-22);L=new THREE.Vector3(-4,0,-4);",
+  "exp": 1.0,
+  "black": "YOLCU<br><span style=\"color:#ff453a\">KALICI MALUL KALDI</span>",
+  "tagsK": "tg+=tag3(st.car,1.9,'SÜRÜCÜ','#ffd60a','#111');if(st.ped.m.visible)tg+=tag3(st.ped.m,2.1,'ÜCRETSİZ YOLCU','#34c759','#111')",
+  "tagsS": "tg+=tag3(st.car,1.9,'TAZMİNAT?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Birinci",
+    "Yolcu ücret ödemedi"
+   ],
+   [
+    "İkinci",
+    "İlk mahkeme: %50 indirim"
+   ],
+   [
+    "Üçüncü",
+    "Yargıtay: oran fazla, bozdu"
+   ]
+  ],
+  "reasons": [
+   [
+    "Buna hatır",
+    "Hatır taşıması: indirim yapılır"
+   ],
+   [
+    "ama makul",
+    "Ama makul ölçüde: %20"
+   ]
+  ],
+  "hukumKey": "Yüzde yirmi indirimle"
+ },
+ {
+  "N": 18,
+  "kod": "KK_MIT_17",
+  "havuz": "KK_MIT_17_VIRAJ_LEVHA",
+  "sc": 11,
+  "upd": "upd",
+  "tiL": 8.6,
+  "impKey": "Yoldan çıkıp",
+  "hookNo": "MİT #17",
+  "hookMain": "“VİRAJDAN<br>ÇIKTIN,<br><span style=\"color:#ffb15c;font-size:1.25em\">SUÇ</span><br>SENİN”",
+  "pollQ": "KUSUR KİME YAZILDI?",
+  "opts": [
+   [
+    "A",
+    "Sürücü %100"
+   ],
+   [
+    "B",
+    "Yarı yarıya"
+   ],
+   [
+    "C",
+    "Sürücü %75 · İdare %25"
+   ]
+  ],
+  "sonuc": "SONUÇ: İDARE 6.675 TL ÖDER",
+  "dogru": "Doğru şık: C",
+  "ders1": "Yolu yapan da <b style=\"color:#ffb15c\">işaretten sorumlu.</b>",
+  "ders2": "🌧️ Islak yolda, virajda<br><b style=\"color:#34c759\">yavaşla.</b>",
+  "camKaza": "const c=st.car.position;P=new THREE.Vector3(c.x-11,15,c.z-15);L=new THREE.Vector3(c.x+3,0,c.z+4);f=50;",
+  "camRest": "const c=st.car.position;P=new THREE.Vector3(c.x-11,15,c.z-15);L=new THREE.Vector3(c.x+3,0,c.z+4);f=50;",
+  "camKarar": "const c=st.car.position;P=new THREE.Vector3(c.x-11,15,c.z-15);L=new THREE.Vector3(c.x+3,0,c.z+4);f=50;",
+  "exp": 1.0,
+  "black": "KAMYONET<br><span style=\"color:#ff453a\">TAKLA ATTI</span>",
+  "tagsK": "tg+=tag3(st.car,2.3,'KAMYONET','#ffd60a','#111');tg+=tag3(st.sign,2.6,'UYARI LEVHASI YOK','#ff453a')",
+  "tagsS": "tg+=tag3(st.car,2.3,'KUSUR KİMDE?','#ffd60a','#111');tg+=tag3(st.sign,2.6,'LEVHA YOK','#ff453a')",
+  "clues": [
+   [
+    "Birinci",
+    "Sürücü hızını ayarlamadı"
+   ],
+   [
+    "İkinci",
+    "Virajdan önce levha yoktu"
+   ],
+   [
+    "Üçüncü",
+    "Sigorta ödedi, idareye dava açtı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Bilirkişiye",
+    "Sürücü %75 kusurlu"
+   ],
+   [
+    "yolun bakımından",
+    "Levha koymayan idare %25 kusurlu"
+   ]
+  ],
+  "hukumKey": "İdare, altı bin",
+  "src": "Danıştay"
+ }
+]

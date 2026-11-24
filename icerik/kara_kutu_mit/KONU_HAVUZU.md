@@ -27,16 +27,22 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 17. Yol buzluysa devlet öder — KK3_BUZ (F5; Danıştay 15. D E.2014/435 K.2017/70, onama: sürücü %100, idare kusursuz, 20.020 TL ret) https://lexara.com.tr/karar/18747925
 18. Geçit dışı yayaya çarpan kusursuz — KK3_YAYA (KK2D; Yargıtay 12. CD E.2020/3714 K.2022/1730, onama: fren izi yok, sürücü tali kusurlu, mahkûm) https://lexara.com.tr/karar/1670280
 19. Duran araca çarpan hep tam kusurlu — KK3_SERIT (F13; Yargıtay 12. CD E.2014/11896 K.2015/4066, onama: işaretsiz duran araç sürücüsü mahkûm) https://lexara.com.tr/karar/4928038
+20. Ölümlü kazada sürücü mutlaka hapse girer — KK_MIT_15 (Yargıtay 12. CD E.2020/11191 K.2024/4113, onama: kendi şeridindeki sürücü kusursuz, beraat) https://lexara.com.tr/karar/1333360
+21. Bedava bindiysen tazminat isteyemezsin (hatır taşıması) — KK_MIT_16 · HAZIR, SES BEKLİYOR (Yargıtay 4. HD E.2022/6578 K.2024/1013, onama: %20 indirim) https://lexara.com.tr/karar/382473
+22. Virajı alamadıysan suç tamamen sende — KK_MIT_17 · HAZIR, SES BEKLİYOR (Danıştay 15. D E.2016/87 K.2017/2097, onama: sürücü %75, idare %25) https://lexara.com.tr/karar/18748639
 
 ## Bekleyen (öncelik sırası)
-3. Arkadaşını bedava taşıdın, kazada tazminat isteyemez — hatır taşıması, indirim oranı
 4. Ehliyetsiz sürücü kazada otomatik %100 kusurludur — ehliyetsiz ama kusursuz bulunan sürücü
 6. Park halindeki araca çarpıp gitmek önemsizdir — park halindeki araca çarpıp kaçma, tazminat/ceza
 7. Ambulansa yol verirken kırmızıda geçen cezalandırılır — geçiş üstünlüğü olan araç, kusur
 8. Kış lastiği yoksa sadece para cezası yersin — yazlık lastikle karlı yolda kaza, kusur
-9. Ölümlü kazada sürücü mutlaka hapse girer — ölümlü kazada beraat / HAGB / erteleme
 12. Çocuk kucakta önde güvendedir — çocuk yolcu, müterafik kusur, tazminat indirimi
 13. Kazayı polis tutmadıysa sigorta ödemez — anlaşmalı tutanak, sigorta ödemesi
 14. Aracı kazadan sonra kenara çekersen haksız duruma düşersin — maddi hasarlı kaza, aracı kaldırma yükümlülüğü
 15. Sollama yaparken hız sınırını aşmak serbesttir — sollama, hız, kusur
 16. Karşıdan gelen far yaktı, kör oldum: kusur bende değil — gece uzun far, kamaşma, kusur
+17. Yoldaki mıcıra kaydıysan suç senin — işaretlenmemiş gevşek malzeme, idarenin hizmet kusuru (Danıştay 15. D E.2016/268 K.2017/2343 aday)
+18. Alkollü sürücünün arabasına binen yolcu tam tazminat alır — müterafik kusur, yolcunun indirim oranı
+19. Otobüste ayakta giderken düştüysen şoför sorumlu değildir — ani fren, yolcu yaralanması, taşıyanın sorumluluğu
+20. Kırmızıda karşıya geçen yayaya çarpan sürücü her zaman masumdur — yaya kırmızıda, sürücü kusur payı
+21. Emniyet şeridine park etmek, çarpanı tek suçlu yapar — emniyet şeridinde park, tali kusur

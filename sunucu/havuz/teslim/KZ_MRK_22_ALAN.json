@@ -1,0 +1,49 @@
+{
+ "kod": "KZ_MRK_22_ALAN",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Türkiye'nin bütün elektriği için ne kadar güneş paneli gerekir? ☀️🇹🇷 #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Türkiye'nin bütün elektriği için ne kadar güneş paneli gerekir? ☀️🇹🇷 #shorts",
+ "aciklama": "Enerji ve Tabii Kaynaklar Bakanlığı'na göre Türkiye'nin 2025 brüt elektrik tüketimi 364,8 milyar kWh (TWh); günde ≈ 1 milyar kWh. Bakanlığın GEPA verisine göre Türkiye'de ortalama yıllık toplam ışınım 1.527 kWh/m².\n\nHesap: Fraunhofer ISE Photovoltaics Report'a göre kristal silisyum modüllerin ağırlıklı ortalama verimi %22,7 (2024 son çeyrek). Aynı raporun varsaydığı sistem performans oranı %80 (kablo, sıcaklık, inverter kayıpları). 1.527 × 0,227 × 0,8 ≈ 277 kWh/m²·yıl. 364,8 milyar ÷ 277 ≈ 1,32 milyar m² ≈ 1.316 km² panel yüzeyi. İstanbul ili ≈ 5.712 km² (Kültür ve Turizm Bakanlığı) → ≈ %23, yaklaşık dörtte biri. Türkiye 783.562 km² → ≈ binde 1,7.\n\nBu kaba bir hesaptır: yalnız panel yüzeyini sayar; sahada paneller arası boşluk, yollar ve eğim yüzünden arazi bunun birkaç katıdır. Güneş gece yoktur, kışın zayıflar; bu yüzden gerçek bir sistemde depolama, şebeke ve başka santraller de gerekir.\n\nSence bu paneller nereye kurulmalı? Yorumlara yaz 👇\n\nAnimasyon ve harita şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: T.C. Enerji ve Tabii Kaynaklar Bakanlığı – Elektrik bilgi sayfası (2025 tüketimi); ETKB – Güneş (GEPA: 1.527,46 kWh/m²·yıl); Fraunhofer ISE – Photovoltaics Report (Temmuz 2026); Kültür ve Turizm Bakanlığı – İstanbul; Türkiye yüzölçümü 783.562 km².\n\n#kozmoslab #güneşenerjisi #ges #enerji #yenilenebilirenerji #elektrik #merak #shorts",
+ "etiketler": [
+  "güneş paneli",
+  "güneş enerjisi",
+  "ges",
+  "türkiye elektrik",
+  "elektrik tüketimi",
+  "yenilenebilir enerji",
+  "enerji",
+  "mühendislik",
+  "merak",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "T.C. Enerji ve Tabii Kaynaklar Bakanlığı – Electricity (enerji.gov.tr/infobank-energy-electricity): 'The annual gross electricity consumption in 2025 increased by 3.2% to 364.8 TWh'",
+  "Bakan açıklaması (Hürriyet Daily News / CNBC-e, 21.01.2026): 2025 tüketimi 360.929 GWh (net tabanlı; senaryoda 'yaklaşık 365 milyar' Bakanlık brüt rakamıyla)",
+  "ETKB – Güneş (enerji.gov.tr/bilgi-merkezi-enerji-gunes-en): GEPA'ya göre ortalama yıllık toplam ışınım 1.527,46 kWh/m², güneşlenme 2.741 saat",
+  "Fraunhofer ISE – Photovoltaics Report (14.07.2026): 'Total weighted average efficiency of c-Si wafer-based modules is 22.7% in Q4-2024'; PR (initial) 80% varsayımı",
+  "Kültür ve Turizm Bakanlığı – İstanbul (ktb.gov.tr/EN-33048/istanbul.html): Area 5.712 km²",
+  "Türkiye yüzölçümü 783.562 km² (göller dahil) – Sağlık Bakanlığı Haseki EAH 'About Türkiye' ve KTÜ sayfaları",
+  "Hesap: 1527×0,227×0,8=277,3 kWh/m²; 364,8e9/277,3=1,316e9 m²=1.316 km²; 1316/5712=%23; 1316/783562=‰1,68; 1527/365=4,2 kWh/gün"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_22_ALAN.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_22_ALAN.mp4"
+}

@@ -101,7 +101,7 @@ const load=u=>new Promise((res,rej)=>gl.load(u,res,undefined,rej));
 const michG=await load('assets/Michelle.glb');
 const isciG=await load('assets/isci.glb');
 const patronG=await load('assets/'+(window.PATRON_GLB||'patron.glb'));
-const ofisciG=await load('assets/ofisci.glb');
+const ofisciG=await load('assets/ofisci.glb');const kadinG=await load('assets/kadin.glb');
 const [carG,botG,envT,envN,envD]=await Promise.all([load('assets/ferrari.glb'),load('assets/Xbot.glb'),
  new RGBELoader().loadAsync('assets/venice_sunset_1k.hdr'),new RGBELoader().loadAsync('assets/moonless_golf_1k.hdr'),new RGBELoader().loadAsync('assets/quarry_01_1k.hdr')]);
 const pmrem=new THREE.PMREMGenerator(renderer);
@@ -920,8 +920,8 @@ function buildS11(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1
  // belge
  const P=window.PI_DOC||{t:'İSTİFA DİLEKÇESİ',l:['Kendi isteğimle','ayrılmak istiyorum.'],s:''};
  const paper=new THREE.Mesh(new THREE.PlaneGeometry(.30,.42),new THREE.MeshStandardMaterial({map:docTex(P.t,P.l,P.s),roughness:.8,side:THREE.DoubleSide}));paper.material.map.colorSpace=THREE.SRGBColorSpace;paper.castShadow=true;s.add(paper);
- const boss=makeRealG(patronG);s.add(boss);const wA=makeRealG(ofisciG),wB=makeRealG(isciG);s.add(wA);s.add(wB);let wkr=wA;wB.visible=false;
- function setWorker(k){wkr=k==='isci'?wB:wA;wA.visible=wkr===wA;wB.visible=wkr===wB}
+ const boss=makeRealG(patronG);s.add(boss);const wA=makeRealG(ofisciG),wB=makeRealG(isciG),wC=makeRealG(kadinG);s.add(wA);s.add(wB);s.add(wC);let wkr=wA;wB.visible=false;wC.visible=false;
+ function setWorker(k){wkr=k==='isci'?wB:k==='kadin'?wC:wA;wA.visible=wkr===wA;wB.visible=wkr===wB;wC.visible=wkr===wC}
  function setDoc(t,l,st){const tx=docTex(t,l,st);tx.colorSpace=THREE.SRGBColorSpace;paper.material.map=tx;paper.material.needsUpdate=true}
  const mDoc=new THREE.Object3D();s.add(mDoc);
  const ti=6.0;
@@ -2285,7 +2285,7 @@ window.dbgOfC=function(lt){const sc=S[10];sc.upd(lt);const c=window.CAMP;camera.
 window.dbgRaw=function(mode){const sc=new THREE.Scene();sc.background=new THREE.Color(0x888888);sc.add(new THREE.HemisphereLight(0xffffff,0x444444,2));const dl=new THREE.DirectionalLight(0xffffff,2);dl.position.set(2,3,4);sc.add(dl);
  let m;if(mode==0){m=SkeletonUtils.clone(patronG.scene)}else{m=makeRealG(patronG);if(mode==2){m.userData.set('Hips',0,0,0);m.userData.sync()}}sc.add(m);m.updateMatrixWorld(true);
  const c=window.CAMP||[0,1.65,1.2];camera.position.set(c[0],c[1],c[2]);camera.fov=30;camera.updateProjectionMatrix();camera.lookAt(0,1.6,0);renderer.render(sc,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
-window.dbgOf=function(lt){const sc=S[10];sc.upd(lt);camera.position.set(3.4,2.6,2.6);camera.fov=48;camera.updateProjectionMatrix();camera.lookAt(0,.95,-.3);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
+window.dbgKadin=function(lt){S[10].setWorker('kadin');S[10].setDoc('FESİH BİLDİRİMİ',['Evlenmem nedeniyle','iş sözleşmemi','sona erdiriyorum.',''],'');return window.dbgOf(lt)};window.dbgKadinYuz=function(lt){S[10].setWorker('kadin');return window.dbgOfYuz(lt)};window.dbgOf=function(lt){const sc=S[10];sc.upd(lt);camera.position.set(3.4,2.6,2.6);camera.fov=48;camera.updateProjectionMatrix();camera.lookAt(0,.95,-.3);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.dbg9top=function(lt){const sc=S[7];sc.upd(lt);camera.position.set(-3,60,20);camera.fov=50;camera.updateProjectionMatrix();camera.lookAt(-3,0,20.01);renderer.render(sc.s,camera);ui.innerHTML='';tags.innerHTML='';flash.style.opacity=0;return true};
 window.READY=true;
 </script></body></html>

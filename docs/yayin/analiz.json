@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-24T15:55+03:00",
+ "olusturma": "2026-11-24T16:05+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -75,8 +75,9 @@
    "gunluk_short_kotasi": 0,
    "haftalik_short_kotasi": 2,
    "seri_dagilimi": {
-    "Gündem + Tarih": 2,
-    "Spor + Tarih": 1
+    "Gündem + Tarih": 1,
+    "Spor + Tarih": 1,
+    "Tablo Serisi": 1
    },
    "durdurulan": [
     "Tarihi Magazin",
@@ -163,12 +164,12 @@
   {
    "kanal": "Ancient Studio",
    "seri": "Gündem + Tarih",
-   "karar": "ARTIR",
-   "neden": "videoların %50'i tuttu (eşik 192 izlenme / 48 sa)",
-   "olculen": 12,
-   "erken": 1,
-   "medyan_48sa": 158,
-   "tutma_orani": 50,
+   "karar": "SÜRDÜR",
+   "neden": "tutma oranı %46",
+   "olculen": 13,
+   "erken": 0,
+   "medyan_48sa": 70,
+   "tutma_orani": 46,
    "izlenme_yuzde": 54,
    "en_iyi": {
     "baslik": "How Was the Red Sea Locked 471 Years Ago? ⚓ Ozdemir Pasha (1555) #shorts",
@@ -871,14 +872,14 @@
  ],
  "esikler": {
   "Nasıl Yapıldı": 135,
-  "Kozmos Lab TR": 214,
-  "Yolu Seç !": 262,
   "Antik Stüdyo": 637,
+  "Estudio Antiguo": 136,
+  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 214,
   "Ancient Studio": 192,
   "Kozmos Lab": 93,
-  "Estudio Antiguo": 136,
-  "LVL MAX": 50,
-  "Ömür Dediğin": 50
+  "Yolu Seç !": 262,
+  "LVL MAX": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -937,8 +938,8 @@
   },
   "Ancient Studio": {
    "00:00": {
-    "n": 8,
-    "medyan": 62
+    "n": 9,
+    "medyan": 55
    },
    "14:00": {
     "n": 2,
@@ -1675,7 +1676,6 @@
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
-  "Ancient Studio · Gündem + Tarih: ARTIR — videoların %50'i tuttu (eşik 192 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gece Yasakları: ARTIR — videoların %60'i tuttu (eşik 637 izlenme / 48 sa).",

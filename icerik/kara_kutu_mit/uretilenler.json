@@ -93,14 +93,18 @@
    "kaynak": "Yargıtay 17. HD E.2016/11942 K.2017/6737 (onama) https://lexara.com.tr/karar/2811799"
   }
  ],
- "ertelenen": [
+ "ertelenen": [],
+ "ertelenen_not": "24.11.2026: #15 (kaçma) ve #16 (buzlu yol) iptal edildi; aynı konular KK3_KACMAK ve KK3_BUZ olarak başka formatta üretildi. Bekleyen Mit bölümü yok. Yeni konu seçerken KONU_HAVUZU.md'deki 'Üretim kuralı (Kasım 2026)' bölümüne uy.",
+ "son_gun": "2026-11-23: MİT #10-14 teslim edildi; #15-16 ses kotası yüzünden ertelendi.",
+ "iptal": [
   {
    "kod": "KK_MIT_15_KACMAK",
    "mit": "Kazadan sonra kaçmak sadece trafik cezasıdır",
    "mit_no": 15,
    "render_no": 16,
    "tts": "KK_MIT_15_B (V1-V7)",
-   "kaynak": "Yargıtay 12. CD E.2023/4326 K.2023/4157 (onama) https://lexara.com.tr/karar/427859"
+   "kaynak": "Yargıtay 12. CD E.2023/4326 K.2023/4157 (onama) https://lexara.com.tr/karar/427859",
+   "neden": "24.11.2026: Konu başka oturumda yeni formatla üretildi (KK3_KACMAK / KK3_BUZ, KONU_HAVUZU 'Yapıldı' 16-17); '1 konu = 1 video' kuralı gereği bu bölüm yapılmayacak."
   },
   {
    "kod": "KK_MIT_16_BUZLU_YOL",
@@ -108,9 +112,8 @@
    "mit_no": 16,
    "render_no": 17,
    "tts": "KK_MIT_16 (V1-V7, bekleyen_tts/)",
-   "kaynak": "Danıştay 15. D E.2014/435 K.2017/70 (onama) https://lexara.com.tr/karar/18747925"
+   "kaynak": "Danıştay 15. D E.2014/435 K.2017/70 (onama) https://lexara.com.tr/karar/18747925",
+   "neden": "24.11.2026: Konu başka oturumda yeni formatla üretildi (KK3_KACMAK / KK3_BUZ, KONU_HAVUZU 'Yapıldı' 16-17); '1 konu = 1 video' kuralı gereği bu bölüm yapılmayacak."
   }
- ],
- "ertelenen_not": "23.11.2026: #14 tamamlandı. #15 (kaçma) ve #16 (buzlu yol) Gemini kotası yüzünden okunamadı (akşam tekrar denendi, 429). Senaryo + sahne + kamera hazır: bolumler_mit14_15.json (N=16 KK_MIT_15, N=17 KK_MIT_16), scene.html S[2].upd2 ve S[7].upd2 (test kareleriyle kontrol edildi). Sonraki oturum: 1) bekleyen_tts/KK_MIT_15_B.json ve KK_MIT_16.json'u sunucu/tts_kuyruk/'a taşı, push et. 2) Sesler gelince cikti/KK_MIT_15_B__V1..V7.mp3 → KK_MIT_15__V1..V7.mp3 olarak kopyala (gunluk.txt'de model kontrolü). 3) mk_ep2.py'yi yalnız N=16 ve N=17 girdileriyle --tl çalıştır (N=15 zaten bitti, onu yeniden üretme), test kareleri, ./bitir.sh 16 KK_MIT_15 KK_MIT_15_KACMAK ve ./bitir.sh 17 KK_MIT_16 KK_MIT_16_BUZLU_YOL. Teslim kartları yazılmadı.",
- "son_gun": "2026-11-23: MİT #10-14 teslim edildi; #15-16 ses kotası yüzünden ertelendi."
+ ]
 }

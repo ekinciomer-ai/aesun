@@ -59,3 +59,8 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_SQ_04_SELALE · Bilgi şıklı soru "Bu şelale hangi ilde?": Muradiye (Van), Tortum (Erzurum), Kapuzbaşı (Kayseri) — tuzak: Niğde/Adana
 - [x] NY_HF_05_OYUN · Görsel hafıza "Haritada hafıza oyunu": Hatay, Afyonkarahisar, Muş (+Sivas, Balıkesir) — turuncu/mor/mavi soruldu
 - Not: Süreler 55/62/65 sn; havuza teslim, plan 17-19.12 13:00 (onay bekliyor). SQ_04 hedefin biraz üstünde.
+
+## Parti 11 — Karışık formatlar (2026-11-24)
+- [~] NY_YM_06_TAT · Bu tat hangi ilin: Leblebi (Çorum), Pastırma (Kayseri), Maraş dondurması (Kahramanmaraş) — kanca: "Sadece 3 malzeme". Cezerye: serbest lisanslı uygun fotoğraf yok, pastırmayla değiştirildi.
+- [~] NY_SQ_05_ANTIK · Bilgi şıklı soru "Bu antik kent hangi ilde?": Efes (İzmir), Afrodisias (Aydın), Ani (Kars) — tuzak: Denizli
+- [~] NY_BL_05_UNVAN · Unvanını Meclis'ten alan iller: Gazi (1921), Kahraman (1973), Şanlı (1984) — kanca: "En yenisi hangisi?"

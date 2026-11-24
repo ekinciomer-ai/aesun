@@ -1,0 +1,115 @@
+{
+ "kanal": "NY",
+ "seri": "İllere Göre Yemekler",
+ "dil": "tr",
+ "baslik_bant": "BU TAT HANGİ İLİN?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 MALZEME",
+   "ust": "SADECE",
+   "alt": "HANGİ İLİN? CEVAP SONDA",
+   "alt_kelime": "üç"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU ÇEREZ HANGİ İLİN?",
+   "siklar": [
+    "Çorum",
+    "Ankara",
+    "Yozgat",
+    "Kırıkkale"
+   ],
+   "dogru": 0,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/leblebi.jpg"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Çorum"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU PASTIRMA HANGİ İLİN?",
+   "siklar": [
+    "Sivas",
+    "Kayseri",
+    "Nevşehir",
+    "Yozgat"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/kayseri_pastirma.jpg"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Kayseri"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU DONDURMA HANGİ İLİN?",
+   "siklar": [
+    "Gaziantep",
+    "Malatya",
+    "Kahramanmaraş",
+    "Adıyaman"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/maras_dondurma.jpg"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Kahramanmaraş"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "SIRADAKİ LEZZETİ YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Küre Ansiklopedi – Çorum Leblebisi: coğrafi işaret tescil no 42 (yayın 14.04.2002), damla nohut, kavurmalar arasında dinlendirme https://kureansiklopedi.com/tr/detay/corum-leblebisi-0aeae",
+  "OKA – Orta Karadeniz Bölgesi coğrafi işaretli ürünler kataloğu (Çorum leblebisi) https://oka.gov.tr/assets/upload/dosyalar/21orta-karadeniz-bolgesi-cografi-isaretli-urunler-katalogu.pdf",
+  "NTV (AA) – Kayseri pastırması AB'den coğrafi işaret tescili alan Türkiye'nin 46. ürünü (25.03.2026) https://www.ntv.com.tr/ntvpara/kayserinin-pastirmasina-abden-cografi-tescil-1717337",
+  "Küre Ansiklopedi – Kayseri Pastırması: TÜRKPATENT tescil no 36 (2002); çemen: buy (çemen) otu tohumu unu, sarımsak, baharat; kuru hava ile açık havada kurutma https://kureansiklopedi.com/tr/detay/kayseri-pastirmasi-1a346",
+  "TÜRKPATENT – Maraş Dondurması coğrafi işaret belgesi no 344, tescil 18.04.2018; yalnız keçi sütü, salep ve şeker, yoğurularak https://ci.turkpatent.gov.tr/Files/GeographicalSigns/344.pdf",
+  "Küre Ansiklopedi – Maraş Dondurması https://kureansiklopedi.com/tr/detay/maras-dondurmasi-76b7d",
+  "Fotoğraflar: Wikimedia Commons serbest lisanslı (lisans/yazar açıklamaya otomatik eklenir)",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Sadece 3 malzemeyle yapılan bu lezzet hangi ilin? Cevap sonda!",
+  "aciklama": "Kavrula kavrula yapılan bir çerez, çemenle kaplanan bir et ve yalnız keçi sütü, salep ve şekerle yapılan bir dondurma... Bu tatlar hangi ile ait? Cevaplar videonun içinde.\n\n💬 Kaç doğru yaptın? Sıradaki lezzeti yorumlara yaz.",
+  "etiketler": [
+   "yöresel yemekler",
+   "türk mutfağı",
+   "hangi ilin",
+   "maraş dondurması",
+   "kayseri pastırması",
+   "çorum leblebisi",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Sadece 3 malzemeyle yapılan bu lezzet hangi ilin? 🍦 Cevap sonda! #yöreselyemek #türkmutfağı #quiz",
+  "amac": "İllere göre yemekler serisi; coğrafi işaretli lezzetler, sona saklanan cevap ve yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_YM_06_TAT"
+}

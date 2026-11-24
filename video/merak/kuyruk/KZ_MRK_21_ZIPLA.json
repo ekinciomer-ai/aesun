@@ -1,0 +1,217 @@
+{
+ "kod": "KZ_MRK_21_ZIPLA",
+ "no": "MERAK #21",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "AY'DA ZIPLASAN<br><i>KAÇ METRE?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "zipla",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Ay'da var gücünle zıplasan kaç metre yükselirsin? Bir metre mi, on metre mi? Tahminini aklında tut, cevap birazdan.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "zipla",
+   "p": {
+    "mod": "cekim",
+    "kart": 55
+   },
+   "metin": "Ay'ın çekimi, Dünya'nınkinin yalnızca yüzde on altı buçuğu. Yani yaklaşık altıda biri.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "AY'IN ÇEKİMİ",
+     "say": 16.5,
+     "dec": 1,
+     "ek": " Dünya'nın",
+     "k": "yüzde",
+     "on": "%"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 1/6",
+     "k": "altıda"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "zipla",
+   "p": {
+    "mod": "tarti",
+    "kart": 55
+   },
+   "metin": "Seksen kiloluk biri Ay'da tartıya çıksa, tartı on üç kilo gösterir. Dolu bir damacanadan bile hafif.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "80 kg <em>×</em> 0,165 ≈ 13 kg",
+     "k": "tartı"
+    },
+    {
+     "tip": "etiket",
+     "y": "dolu damacana: 19 kg 💧",
+     "k": "Dolu"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "zipla",
+   "p": {
+    "mod": "dunya",
+    "kart": 55
+   },
+   "metin": "Şimdi Dünya'da yarım metre zıplayabilen birini düşünelim. Bu, iyi bir sıçrayış.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DÜNYA'DA ZIPLAMA",
+     "say": 50,
+     "dec": 0,
+     "ek": " cm",
+     "k": "yarım"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "zipla",
+   "p": {
+    "mod": "hesap",
+    "kart": 55
+   },
+   "metin": "Ay'da aynı hızla yerden kalkar. Ama onu geri çeken kuvvet altıda bir, bu yüzden altı kat yükselir.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "0,5 m <em>×</em> 6 ≈ 3 m",
+     "k": "bu"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "zipla",
+   "p": {
+    "mod": "pota",
+    "kart": 55
+   },
+   "metin": "Yani yaklaşık üç metre. Basketbol potası üç metre beş santim; çemberin hizasına çıkarsın.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "AY'DA ZIPLAMA",
+     "say": 3,
+     "dec": 0,
+     "ek": " m",
+     "k": "üç",
+     "on": "≈ "
+    },
+    {
+     "tip": "etiket",
+     "y": "🏀 pota: 3,05 m",
+     "k": "Basketbol"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "zipla",
+   "p": {
+    "mod": "sure",
+    "kart": 55
+   },
+   "metin": "Havada kalma süresi de uzar. Dünya'da bir saniyeden kısa, Ay'da yaklaşık dört saniye. Havada bir, iki, üç, dört diye sayarsın.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "Dünya: 0,6 sn",
+     "k": "Dünya'da"
+    },
+    {
+     "tip": "sayi",
+     "ust": "AY'DA HAVADA",
+     "say": 4,
+     "dec": 0,
+     "ek": " sn",
+     "k": "yaklaşık",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "zipla",
+   "p": {
+    "mod": "giysi",
+    "kart": 55
+   },
+   "metin": "Ama gerçek astronotlar, Dünya'da seksen dört kilo gelen giysiyle zıpladı. Yük artınca zıplama kısalır.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "giysi + sırt çantası ≈ 84 kg 🧑‍🚀",
+     "k": "seksen"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "zipla",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: giysisiz yaklaşık üç metre, pota hizası. Sen Ay'da hangi sporu oynardın? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ 3 m · pota hizası ✅",
+     "k": "Cevap"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Ay'da zıplasan kaç metre yükselirsin? 🌕🏀 #shorts",
+  "aciklama": "NASA'nın Ay bilgi sayfasına göre Ay'ın yüzey çekimi 1,62 m/s², Dünya'nınki 9,80 m/s²; oran 0,165, yani yaklaşık altıda bir.\n\nHesap: 80 kg × 0,165 ≈ 13 kg (tartı Ay'da bu kadar gösterir; 19 litrelik dolu damacana ≈ 19 kg). Aynı kalkış hızıyla zıplama yüksekliği h = v²/2g olduğundan çekim 1/6'ya inince yükseklik ≈ 6 katına çıkar: 0,5 m × 6,05 ≈ 3 m. FIBA kurallarına göre basketbol çemberinin üst kenarı yerden 3,05 m yüksekte. Havada kalma süresi de 6 kat uzar: Dünya'da ≈ 0,64 sn, Ay'da ≈ 3,9 sn. Bu basitleştirilmiş bir hesaptır (bacak itişi ve vücut duruşu yok sayıldı).\n\nGerçekte Apollo astronotları, Smithsonian'a göre yaşam destek sırt çantası ve diğer parçalarla Dünya'da yaklaşık 84 kg (185 pound) gelen giysiyle yürüdü ve zıpladı; taşınan kütle arttıkça aynı bacak gücüyle zıplama kısalır.\n\nSen Ay'da hangi sporu oynardın? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçeksizdir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA NSSDC Moon Fact Sheet; NASA Glenn – Beginner's Guide: Moon; FIBA Official Basketball Rules 2026 – Basketball Equipment (1.2.4); Smithsonian National Air and Space Museum – Pressure Suit A7-LB, Young, Apollo 16; NASA History – Apollo suit backpack (PLSS 68 lb).\n\n#kozmoslab #ay #uzay #yerçekimi #fizik #bilim #merak #shorts",
+  "etiketler": [
+   "ay",
+   "ay'da zıplamak",
+   "yerçekimi",
+   "çekim",
+   "uzay",
+   "fizik",
+   "apollo",
+   "astronot",
+   "bilim",
+   "merak",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA NSSDC Moon Fact Sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html): Surface gravity Moon 1.62 m/s², Earth 9.80 m/s², ratio 0.165",
+  "NASA Glenn Research Center – Beginner's Guide to Aeronautics, Moon: 'gmn = 1.62 m/sec² = .165 Earth gravity'",
+  "FIBA Official Basketball Rules 2026 – Basketball Equipment, 1.2.4: çember üst kenarı zeminden 3.050 mm",
+  "Smithsonian NASM – Pressure Suit, A7-LB, Young, Apollo 16: PLSS ve diğer parçalarla birlikte Dünya'da yaklaşık 185 pound (≈ 84 kg)",
+  "NASA History – 50 Years Ago: Apollo suit backpack passes vacuum testing: PLSS Dünya'da 68 pound",
+  "Damacana: 19 litre su ≈ 19 kg (suyun yoğunluğu ≈ 1 kg/L, USGS Water Density)",
+  "Hesap: 80×0,165=13,2 kg; h=v²/2g → 0,5/0,165 ≈ 3,03 m; t=2v/g: Dünya 2·√(2·0,5/9,8)=0,64 sn, Ay 0,64/0,165 ≈ 3,9 sn"
+ ]
+}

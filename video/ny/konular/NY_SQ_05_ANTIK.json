@@ -1,0 +1,113 @@
+{
+ "kanal": "NY",
+ "seri": "Bilgi Şıklı Soru",
+ "dil": "tr",
+ "baslik_bant": "BU ANTİK KENT HANGİ İLDE?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 ANTİK KENT",
+   "ust": "HANGİ İLDE?",
+   "alt": "İKİNCİSİ TUZAK",
+   "alt_kelime": "ikincisi"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "İzmir",
+   "soru": "EFES ANTİK KENTİ HANGİ İLDE?",
+   "siklar": [
+    "Aydın",
+    "İzmir",
+    "Manisa",
+    "Muğla"
+   ],
+   "dogru": 1,
+   "bekle": 3
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "İzmir"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Aydın",
+   "soru": "AFRODİSİAS HANGİ İLDE?",
+   "siklar": [
+    "Denizli",
+    "Muğla",
+    "Aydın",
+    "Uşak"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Aydın"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "il": "Kars",
+   "soru": "ANİ ARKEOLOJİK ALANI HANGİ İLDE?",
+   "siklar": [
+    "Ardahan",
+    "Iğdır",
+    "Kars",
+    "Erzurum"
+   ],
+   "dogru": 2,
+   "bekle": 3
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Kars"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "T.C. Kültür ve Turizm Bakanlığı – Türkiye on the World Heritage List: Efes (2015), Ani Arkeolojik Alanı (2016), Afrodisias (2017) https://www.ktb.gov.tr/EN-120287/turkiye-on-the-world-heritage-list.html",
+  "UNESCO World Heritage List – Türkiye (yıla göre) https://whc.unesco.org/en/list/search=turkiye&order=year",
+  "Daily Sabah – Aphrodisias (Aydın, Karacasu) 2017'de UNESCO listesinde; Afrodit Tapınağı ve heykel okulu; Efes 2015, Kars Ani 2016 https://www.dailysabah.com/history/2017/09/11/ancient-city-of-aphrodisias-in-turkey-becomes-unesco-world-heritage-site",
+  "NTV – Afrodisyas Arkeolojik Alanı UNESCO Dünya Mirası Listesi'ne girdi https://www.ntv.com.tr/dunya/galeri-afrodisyas-arkeolojik-alani-unesco-dunya-mirasi-listesine-girdi,WePwv-NAT0OMg_7zQpQ40w",
+  "Haber7 – İzmir: Türkiye'nin dünya mirası sayısı artıyor (Efes, Selçuk) https://www.haber7.com/izmir/2374490-turkiyenin-dunya-mirasi-sayisi-artiyor",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu 3 antik kent hangi ilde? İkincisinde çoğu kişi yanılıyor!",
+  "aciklama": "Efes, Afrodisias ve Ani: üçü de UNESCO Dünya Mirası. Peki hangi ilde olduklarını biliyor musun? Kaynak: UNESCO, Kültür ve Turizm Bakanlığı.\n\n💬 Kaç tanesini bildin? Puanını yorumlara yaz.",
+  "etiketler": [
+   "antik kent",
+   "efes",
+   "afrodisias",
+   "ani",
+   "unesco",
+   "türkiye",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu 3 antik kent hangi ilde? 🏛️ İkincisi tuzak! #antikkent #türkiye #quiz",
+  "amac": "Bilgi şıklı soru serisi; UNESCO antik kentleri, tuzak şık ve puan yorumu etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_SQ_05_ANTIK"
+}

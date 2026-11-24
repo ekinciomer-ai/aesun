@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-24T21:54+03:00",
+ "olusturma": "2026-11-24T22:05+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -647,7 +647,7 @@
    "neden": "videoların %88'i tuttu (eşik 214 izlenme / 48 sa)",
    "olculen": 8,
    "erken": 2,
-   "medyan_48sa": 419,
+   "medyan_48sa": 440,
    "tutma_orani": 88,
    "izlenme_yuzde": 41,
    "en_iyi": {
@@ -784,9 +784,9 @@
    "seri": "Gündem + Tarih",
    "karar": "DURDUR",
    "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
-   "olculen": 4,
-   "erken": 5,
-   "medyan_48sa": 4,
+   "olculen": 5,
+   "erken": 4,
+   "medyan_48sa": 3,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
@@ -872,15 +872,15 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 637,
-  "Kozmos Lab TR": 214,
+  "Kozmos Lab": 94,
   "LVL MAX": 50,
+  "Yolu Seç !": 262,
+  "Kozmos Lab TR": 214,
   "Nasıl Yapıldı": 135,
   "Ancient Studio": 192,
-  "Estudio Antiguo": 136,
-  "Yolu Seç !": 262,
-  "Kozmos Lab": 94,
-  "Ömür Dediğin": 50
+  "Ömür Dediğin": 50,
+  "Antik Stüdyo": 637,
+  "Estudio Antiguo": 136
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -996,7 +996,7 @@
    },
    "19:00": {
     "n": 11,
-    "medyan": 427
+    "medyan": 432
    },
    "21:00": {
     "n": 7,
@@ -1038,7 +1038,7 @@
    },
    "14:00": {
     "n": 1,
-    "medyan": 153
+    "medyan": 152
    },
    "17:00": {
     "n": 4,
@@ -1065,8 +1065,8 @@
     "medyan": 4
    },
    "06:00": {
-    "n": 1,
-    "medyan": 3
+    "n": 2,
+    "medyan": 2
    },
    "12:00": {
     "n": 1,
@@ -1623,7 +1623,7 @@
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 94 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 6 tanesi tuttu (eşik 214 izlenme / 48 sa).",
-  "LVL MAX: son 4 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "LVL MAX: son 5 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 2 Short'tan 1 tanesi tuttu (eşik 50 izlenme / 48 sa).",
@@ -1650,6 +1650,7 @@
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 88 izlenme, 2 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",
   "Nasıl Yapıldı: en iyi yayın saati şimdilik 19:00 (medyan 674 izlenme, 2 video).",
+  "LVL MAX: en iyi yayın saati şimdilik 06:00 (medyan 2 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %66 izleniyor, tutmayanlar %53 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %44 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %60 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
@@ -1699,11 +1700,6 @@
  "en_zayif": [
   {
    "kanal": "Estudio Antiguo",
-   "baslik": "¿Cómo se pasan 70 barcos por encima de una colina? ⚓ #shorts",
-   "i48": 0
-  },
-  {
-   "kanal": "Estudio Antiguo",
    "baslik": "¿Por qué decimos \"¡Jesús!\" al estornudar? 🤧 #shorts",
    "i48": 0
   },
@@ -1720,6 +1716,11 @@
   {
    "kanal": "LVL MAX",
    "baslik": "Çalıntı Araçla Kavşağa Daldı, İçinde 2 Çocuk Varken Kaçmaya Çalıştı!",
+   "i48": 0
+  },
+  {
+   "kanal": "LVL MAX",
+   "baslik": "Otoyolda Kaçan Silahlı Motosikletli Araca Çarpıp Havaya Savruldu!",
    "i48": 0
   }
  ]

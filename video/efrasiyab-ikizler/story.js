@@ -161,6 +161,7 @@ function buildSharedSash() {
   const grp = new THREE.Group();
   const body = new THREE.Mesh(new THREE.CylinderGeometry(.32, .30, .44, 24), painted(sashTex()));
   body.scale.set(1.22, 1, .56);
+  body.rotation.y = Math.PI / 2;
   body.position.y = .76;
   grp.add(body);
   return grp;
@@ -302,34 +303,34 @@ function buildMeydan(scene) {
 // ---------------------------------------------------------------- KAMERA YOLU
 function cameraPath() {
   const k = [
-    // P01 KANCA (4 görüntü): yapışık ikizler -> iftara 5 dk saat & simit -> meyhanede kadeh -> başı dönen ikizler!
-    { t: 0,           pos: [-.14, 1.40, 3.55], look: [-.10, 1.24, -.76], fov: 48, creep: .24, drift: .03 },
-    { t: P(1, .28),   dur: .38, pos: [.78, 1.72, 1.65], look: [.90, 1.88, -2.25], fov: 44, creep: .26 },
-    { t: P(1, .56),   dur: .30, move: 'whip', pos: [200.05, 1.38, 3.50], look: [200.08, 1.22, -.85], fov: 48, creep: .24 },
-    { t: P(1, .82),   dur: .30, move: 'whip', pos: [199.82, 1.42, 3.15], look: [199.82, 1.24, -.64], fov: 47, creep: .24 },
+    // P01 KANCA (4 görüntü): yapışık ikizler -> iftara 5 dk duvar saati -> meyhanede kadeh -> başı dönen ikizler!
+    { t: 0,           pos: [-.08, 1.42, 3.85], look: [-.05, 1.24, -.76], fov: 49, creep: .16, drift: .03 },
+    { t: P(1, .28),   dur: .38, pos: [.98, 2.00, .85], look: [.95, 2.02, -2.30], fov: 42, creep: .14 },
+    { t: P(1, .56),   dur: .30, move: 'whip', pos: [200.12, 1.40, 3.95], look: [200.12, 1.24, -.88], fov: 49, creep: .14 },
+    { t: P(1, .82),   dur: .30, move: 'whip', pos: [200.06, 1.42, 3.75], look: [200.06, 1.24, -.76], fov: 48, creep: .14 },
     // P02 "Bakın," (sofra): Abuzer + Alemdar ortak gövdede tanıtılır
-    { t: PS(2) + .16, dur: .30, move: 'whip', pos: [.05, 1.40, 3.95], look: [.05, 1.18, -.76], fov: 49, creep: .22 },
-    { t: PE(2),       dur: Math.max(.4, PE(2) - PS(2) - .2), pos: [-.08, 1.42, 3.45], look: [-.05, 1.22, -.76], fov: 48, creep: .22 },
+    { t: PS(2) + .16, dur: .30, move: 'whip', pos: [.06, 1.40, 4.10], look: [.06, 1.20, -.76], fov: 49, creep: .14 },
+    { t: PE(2),       dur: Math.max(.4, PE(2) - PS(2) - .2), pos: [.00, 1.42, 3.80], look: [.02, 1.22, -.76], fov: 48, creep: .14 },
     // P03 Duvar saati iftara 5 dk -> Alemdar simidi ağzına atar!
-    { t: PS(3) + .16, dur: .40, pos: [.35, 1.56, 3.65], look: [.38, 1.42, -1.25], fov: 48, creep: .24 },
-    { t: PE(3),       dur: Math.max(.4, PE(3) - PS(3) - .2), pos: [.05, 1.38, 3.35], look: [.02, 1.22, -.72], fov: 47, creep: .22 },
+    { t: PS(3) + .16, dur: .40, pos: [.22, 1.54, 4.05], look: [.24, 1.38, -1.15], fov: 49, creep: .14 },
+    { t: PE(3),       dur: Math.max(.4, PE(3) - PS(3) - .2), pos: [.02, 1.40, 3.85], look: [.02, 1.22, -.74], fov: 48, creep: .14 },
     // P04 Abuzer öfkeden kıpkırmızı, Alemdar kahkahalarla güler
-    { t: PS(4) + .16, dur: .38, pos: [-.16, 1.40, 3.15], look: [-.16, 1.28, -.76], fov: 46, creep: .22 },
-    { t: PE(4),       dur: Math.max(.4, PE(4) - PS(4) - .2), pos: [-.14, 1.42, 3.35], look: [-.14, 1.26, -.76], fov: 47, creep: .20 },
+    { t: PS(4) + .16, dur: .38, pos: [-.10, 1.40, 3.70], look: [-.10, 1.26, -.76], fov: 48, creep: .14 },
+    { t: PE(4),       dur: Math.max(.4, PE(4) - PS(4) - .2), pos: [-.08, 1.42, 3.85], look: [-.08, 1.26, -.76], fov: 48, creep: .14 },
     // P05 Whip ile meyhane: Abuzer ciddi öğüt verir, arkada şaşkın usta!
-    { t: PS(5) + .16, dur: .30, move: 'whip', pos: [200.12, 1.40, 3.85], look: [200.12, 1.22, -.88], fov: 49, creep: .22 },
-    { t: PE(5),       dur: Math.max(.4, PE(5) - PS(5) - .2), pos: [199.95, 1.40, 3.45], look: [200.02, 1.24, -.85], fov: 48, creep: .22 },
+    { t: PS(5) + .16, dur: .30, move: 'whip', pos: [200.12, 1.40, 4.10], look: [200.12, 1.22, -.88], fov: 49, creep: .14 },
+    { t: PE(5),       dur: Math.max(.4, PE(5) - PS(5) - .2), pos: [200.06, 1.40, 3.90], look: [200.08, 1.24, -.85], fov: 48, creep: .14 },
     // P06 Alemdar gizlice kadehi diker!
-    { t: PS(6) + .16, dur: .38, pos: [200.02, 1.38, 3.25], look: [200.04, 1.24, -.75], fov: 47, creep: .22 },
-    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .2), pos: [200.08, 1.38, 3.35], look: [200.06, 1.24, -.75], fov: 47, creep: .20 },
+    { t: PS(6) + .16, dur: .38, pos: [200.08, 1.38, 3.80], look: [200.10, 1.24, -.80], fov: 48, creep: .14 },
+    { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .2), pos: [200.10, 1.38, 3.85], look: [200.10, 1.24, -.80], fov: 48, creep: .14 },
     // P07 Kadehin etkisi ortak bedene yayılır — ikisi birden sallanır, usta şaşkın! (kick!)
-    { t: PS(7) + .16, dur: .35, pos: [200.06, 1.42, 3.65], look: [200.10, 1.24, -.85], fov: 49, creep: .24 },
-    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .2), pos: [200.10, 1.42, 3.85], look: [200.12, 1.24, -.88], fov: 49, creep: .20 },
-    // P08 Whip ile güneşli meydan: iki zıt irade tek gövdede
-    { t: PS(8) + .14, dur: .30, move: 'whip', pos: [300.0, 1.40, 3.65], look: [300.0, 1.24, -.68], fov: 48, creep: .22 },
-    { t: PS(9) + .18, dur: .45, pos: [299.96, 1.40, 3.35], look: [300.0, 1.26, -.68], fov: 47, creep: .20 },
+    { t: PS(7) + .16, dur: .35, pos: [200.10, 1.42, 3.95], look: [200.12, 1.24, -.85], fov: 49, creep: .14 },
+    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .2), pos: [200.12, 1.42, 4.10], look: [200.12, 1.24, -.88], fov: 49, creep: .12 },
+    // P08 Whip ile güneşli meydan: iki zıt irade tek gövdede (ikisi de kadrajda tam ortalı!)
+    { t: PS(8) + .14, dur: .30, move: 'whip', pos: [300.0, 1.40, 4.05], look: [300.0, 1.24, -.68], fov: 49, creep: .12 },
+    { t: PS(9) + .18, dur: .45, pos: [300.0, 1.40, 3.85], look: [300.0, 1.24, -.68], fov: 48, creep: .10 },
     // P10 Geniş final: güneşli gök altında tek gövdede iki baş, kamera yavaşça geri çekilir
-    { t: DUR,         dur: Math.max(.6, DUR - PS(10) + .1), pos: [300.0, 1.56, 4.55], look: [300.0, 1.24, -.75], fov: 51, creep: .16 },
+    { t: DUR,         dur: Math.max(.6, DUR - PS(10) + .1), pos: [300.0, 1.56, 4.65], look: [300.0, 1.24, -.75], fov: 51, creep: .10 },
   ];
   const cp = new CamPath(k, { fps: FPS });
   cp.kick(P(7, .24), 1.15); // baş dönmesi / sendeleme anı!
@@ -402,7 +403,7 @@ function placeTwins(cx, cz, cam, tint, sunDir, { sway = 0, abOpts = {}, alOpts =
   const swX = Math.sin(sway) * .06;
   ab.show(); ab.place(cx - .21 + swX, 0, cz, cam, tint);
   ab.draw({
-    lean: -7 + Math.sin(sway) * 11,
+    lean: -4 + Math.sin(sway) * 7,
     lit: -1, shade: COOL, rim: { color: WARM, a: .20 },
     ...abOpts
   });
@@ -410,7 +411,7 @@ function placeTwins(cx, cz, cam, tint, sunDir, { sway = 0, abOpts = {}, alOpts =
 
   al.show(); al.place(cx + .21 + swX, 0, cz + .01, cam, tint);
   al.draw({
-    lean: 7 + Math.sin(sway) * 11,
+    lean: 4 + Math.sin(sway) * 7,
     lit: 1, shade: '#e2d2cc', rim: { color: WARM, a: .20 },
     ...alOpts
   });

@@ -1,0 +1,58 @@
+{
+ "kod": "KK_PI_17",
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "parcalar": [
+  {
+   "ad": "V1",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Hakkında tutanak tutulduysa, tazminatsız çıkarılırsın. Genelde böyle bilinir. Peki mahkeme ne dedi?"
+  },
+  {
+   "ad": "V2",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "normal",
+   "metin": "Bir mağaza sorumlusu dokuz yıldır aynı şirkette çalışıyor. Mağaza devredilirken envanter sayılıyor."
+  },
+  {
+   "ad": "V3",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "Sayımda uyumsuzluk çıkıyor. Bir tutanak tutuluyor ve sorumlu tazminatsız çıkarılıyor: Güveni kötüye kullandın."
+  },
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sizce mağaza sorumlusu tazminat aldı mı? A, evet, kıdem ve ihbar. B, hayır, tutanak var. C, sadece ihbar. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. Mahkeme tanıkları dinliyor. Bir tanık, tutanağın bir kısmını başkasının sözlü talimatıyla imzaladığını söylüyor. Bölge müdürü ise envanterin öteden beri sorunlu olduğunu anlatıyor."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Mahkeme dedi ki: Tutanağın doğruluğu şüpheli. İşveren haklı sebebi şüpheden uzak şekilde ispat edemedi. Mağaza sorumlusu kıdem, ihbar ve fazla mesai ücretini alacak. Yargıtay onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Tutanak tek başına yetmez. Tanıkla çürütülürse tazminatın yanmaz. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

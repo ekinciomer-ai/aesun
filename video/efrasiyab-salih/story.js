@@ -341,12 +341,12 @@ function cameraPath() {
     { t: PS(6) + .16, dur: .30, move: 'whip', pos: [300.0, 1.48, 3.25], look: [300.0, 1.18, -.85], fov: 48, creep: .25 },
     { t: PE(6),       dur: Math.max(.4, PE(6) - PS(6) - .2), pos: [300.15, 1.46, 2.75], look: [300.0, 1.16, -.85], fov: 47, creep: .24 },
     // P07 Kuyunun berrak suyuna eğilip donakalır
-    { t: PS(7) + .16, dur: .42, pos: [300.05, 1.56, 2.35], look: [300.0, 1.26, -.75], fov: 46, creep: .28 },
+    { t: PS(7) + .16, dur: .42, pos: [300.04, 1.52, 2.90], look: [300.06, 1.32, -.68], fov: 47, creep: .24 },
     // P08 Suda rüyasındaki Salih! "Meğer Salih ben imişim!" (yansıma madalyonu + Salih yan yana!)
     { t: PS(8) + .16, dur: .40, pos: [300.0, 1.52, 2.85], look: [300.0, 1.36, -.65], fov: 47, creep: .24 },
     { t: PE(8),       dur: Math.max(.4, PE(8) - PS(8) - .2), pos: [300.0, 1.54, 2.65], look: [300.0, 1.38, -.65], fov: 46, creep: .22 },
     // P09 Tebessüm (gözündeki gözlüğü aramak gibi)
-    { t: PS(9) + .18, dur: .45, pos: [300.12, 1.44, 2.85], look: [300.15, 1.32, -.75], fov: 46, creep: .22 },
+    { t: PS(9) + .18, dur: .45, pos: [300.22, 1.48, 3.15], look: [300.22, 1.32, -.72], fov: 48, creep: .22 },
     // P10 Geniş zirve manzarası: güneşli Anadolu ufku, kamera yavaşça geri ve yukarı çekilir
     { t: DUR,         dur: Math.max(.6, DUR - PS(10) + .1), pos: [300.0, 1.78, 4.55], look: [300.0, 1.35, -1.6], fov: 52, creep: .18 },
   ];
@@ -498,7 +498,7 @@ export function frame(t, ctx) {
     const isHook = t < PS(2);
     const climbU = isHook ? .45 : ramp(t, PS(4), PE(5));
     const zPos = .4 - climbU * 2.2;
-    const becomeSalih = !isHook && t >= P(5, .45);
+    const becomeSalih = !isHook && t >= P(5, .32);
     const walker = becomeSalih ? sl : tc;
     walker.show(); walker.place(200.0, 0, zPos, cam, tint);
     walker.draw({
@@ -526,7 +526,7 @@ export function frame(t, ctx) {
       const mSc = isHook ? 1 : ramp(t, P(7, .45), P(7, .82)) * (1 - ramp(t, PS(9) - .15, PS(9) + .15));
       dyn.mirror.visible = mSc > .01;
       dyn.mirror.scale.setScalar(Math.max(.001, mSc));
-      dyn.mirror.position.set(299.62 - 300, 1.56 + Math.sin(t * 2.8) * .025, -.42);
+      dyn.mirror.position.set(-.26, 1.56 + Math.sin(t * 2.8) * .025, -.42);
       dyn.mirror.lookAt(cam.position);
     }
 
@@ -535,7 +535,7 @@ export function frame(t, ctx) {
       const shocked = t >= P(7, .42) && t < P(8, .85);
       const smiling = t >= P(8, .85);
       // Salih kuyunun hemen sağ-önünde durur (P07-P08'de sol üstte büyük su yansımasıyla yan yana net görünür!)
-      sl.show(); sl.place(300.56, 0, -.62, cam, tint);
+      sl.show(); sl.place(300.46, 0, -.62, cam, tint);
       sl.draw({
         expr: smiling ? (t >= PS(10) ? 'proud' : 'smile') : shocked ? 'surprised' : pushing ? 'focused' : 'neutral',
         look: smiling && t >= PS(10) ? 0 : -.75,

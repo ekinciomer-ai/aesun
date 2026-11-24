@@ -115,9 +115,9 @@ function badgeTex(title, sub, bg, fg, accent) {
   const [c, g] = cnv(560, 210);
   g.fillStyle = bg; g.beginPath(); g.roundRect(12, 12, 536, 186, 32); g.fill();
   g.strokeStyle = accent; g.lineWidth = 10; g.stroke();
-  g.fillStyle = fg; g.font = '900 60px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = fg; g.font = '900 48px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText(title, 280, 82);
-  g.fillStyle = accent; g.font = '800 38px system-ui, sans-serif';
+  g.fillStyle = accent; g.font = '800 34px system-ui, sans-serif';
   g.fillText(sub, 280, 148);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
@@ -278,7 +278,7 @@ function buildBrainSwitch(scene) {
   fx.swGlow = glow(scene, [200, 1.85, -.9], { size: 2.1, color: '#ff5268', strength: .45 });
 
   // P07 GÜNDELİK BENZETME: Sönmeyen Sarı Oda Ampulü + Yapıştırıcılı Duvar Anahtarı!
-  dyn.bulbGrp = new THREE.Group(); dyn.bulbGrp.position.set(.42, 0, .2); g.add(dyn.bulbGrp);
+  dyn.bulbGrp = new THREE.Group(); dyn.bulbGrp.position.set(.28, 0, .2); g.add(dyn.bulbGrp);
   // Tepeden sarkan kablo ve dev parlak sarı ampul
   const cord = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, 1.3, 8), flat('#3a4458'));
   cord.position.set(0, 2.55, 0); dyn.bulbGrp.add(cord);
@@ -296,7 +296,7 @@ function buildBrainSwitch(scene) {
     new THREE.MeshBasicMaterial({ map: badgeTex('IŞIK AÇIK', 'ASLA SÖNMÜYOR', '#182034', '#ffea80', '#ff6454'), transparent: true })
   );
   bulbLbl.position.set(0, .24, .05); bulbLbl.userData.noShadow = true; dyn.bulbGrp.add(bulbLbl);
-  fx.bulbGlow = glow(scene, [200.42, 1.85, .3], { size: 2.6, color: '#ffdf66', strength: .55 });
+  fx.bulbGlow = glow(scene, [200.28, 1.85, .3], { size: 2.6, color: '#ffdf66', strength: .55 });
 
   const L = new THREE.Group();
   L.add(new THREE.HemisphereLight('#92b4f2', '#3c3658', 1.95));
@@ -349,10 +349,10 @@ function cameraPath() {
     { t: PS(5) + .14, dur: .32, move: 'whip', pos: [.22, 1.48, 2.95], look: [.28, 1.52, -1.6], fov: 50, creep: .28 },
     // P06 WHIP PAN → SET 2: Dev Talamus Uyku Şalteri + kilitlenen prion kristalleri!
     { t: PS(6) + .14, dur: .32, move: 'whip', pos: [200.0, 1.78, 4.35], look: [200.0, 1.88, -1.2], fov: 50, creep: .28 },
-    // P07 Gündelik benzetme: Prof. Lugaresi + hiç sönmeyen sarı ampul & yapıştırıcılı düğme!
-    { t: PS(7) + .16, dur: .36, move: 'whip', pos: [200.0, 1.24, 4.25], look: [200.0, 1.18, .2], fov: 50, creep: .22 },
-    // P08 WHIP PAN → SET 1: Kırmızı alarm EEG (`NABIZ: 145 · GÜN 120`) + Silvano bitkin!
-    { t: PS(8) + .14, dur: .32, move: 'whip', pos: [.15, 1.55, 2.75], look: [.12, 1.62, -2.0], fov: 50, creep: .30 },
+    // P07 Gündelik benzetme: Prof. Lugaresi + hiç sönmeyen sarı ampul & yapıştırıcılı düğme (tam kadraj!)
+    { t: PS(7) + .16, dur: .36, move: 'whip', pos: [200.0, 1.24, 4.6], look: [199.96, 1.18, .2], fov: 50, creep: .20 },
+    // P08 WHIP PAN → SET 1: Kırmızı alarm EEG (`NABIZ: 145 · GÜN 120`) + Silvano & Lugaresi tam kadraj!
+    { t: PS(8) + .14, dur: .32, move: 'whip', pos: [0.0, 1.44, 3.65], look: [0.0, 1.46, -1.6], fov: 50, creep: .24 },
     // P09 WHIP PAN → SET 3: Bologna şafak balkonu, Silvano + Prof. Lugaresi (tam kadraj!)
     { t: PS(9) + .14, dur: .32, move: 'whip', pos: [300.0, 1.24, 3.55], look: [300.0, 1.20, -.8], fov: 50, creep: .20 },
     // P10 Son vuruş: yavaşça geri çekilir (~4.45 m)

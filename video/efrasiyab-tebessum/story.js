@@ -286,7 +286,7 @@ function buildDamla(scene) {
   dyn.tear = tear;
 
   // P07-P08'de yükselen büyük Gözyaşı Damlası Madalyonu (içinde güneşli çocukluk cenneti!)
-  const paradise = new THREE.Mesh(new THREE.PlaneGeometry(1.02, 1.02), new THREE.MeshBasicMaterial({ map: teardropParadiseTex(), transparent: true }));
+  const paradise = new THREE.Mesh(new THREE.PlaneGeometry(.84, .84), new THREE.MeshBasicMaterial({ map: teardropParadiseTex(), transparent: true, alphaTest: .05, depthWrite: false }));
   paradise.position.set(-.32, 1.48, -.42); paradise.visible = false; paradise.userData.noShadow = true; g.add(paradise);
   dyn.paradise = paradise;
 
@@ -302,9 +302,9 @@ function cameraPath() {
   const k = [
     // P01 KANCA (4 görüntü): odaya giren taş yüzlü Azrail -> pabuç kaçıran torun -> kahkahalı çocuklar -> gözyaşı damlası & tebessüm
     { t: 0,           pos: [0, 1.44, 3.25],     look: [0, 1.38, -.8],     fov: 47, creep: .24, drift: .03 },
-    { t: P(1, .28),   dur: .30, move: 'whip', pos: [200.2, 1.15, 2.65], look: [200.2, .92, -.75], fov: 46, creep: .28 },
+    { t: P(1, .28),   dur: .30, move: 'whip', pos: [200.05, 1.28, 3.45], look: [200.05, 1.10, -.75], fov: 48, creep: .24 },
     { t: P(1, .56),   dur: .30, move: 'whip', pos: [-.05, 1.25, 3.15], look: [-.05, 1.05, -.65], fov: 48, creep: .26 },
-    { t: P(1, .82),   dur: .30, move: 'whip', pos: [300.0, 1.44, 2.75], look: [300.0, 1.38, -.55], fov: 46, creep: .24 },
+    { t: P(1, .82),   dur: .30, move: 'whip', pos: [300.05, 1.48, 3.15], look: [300.05, 1.40, -.58], fov: 47, creep: .24 },
     // P02 "Bakın," (antre): Cezzar Dede + Azrail + pabuçları kaçıran yaramaz torun
     { t: PS(2) + .16, dur: .30, move: 'whip', pos: [200.0, 1.34, 3.45], look: [200.0, 1.18, -.75], fov: 48, creep: .24 },
     { t: PE(2),       dur: Math.max(.4, PE(2) - PS(2) - .2), pos: [200.22, 1.22, 2.85], look: [200.25, 1.02, -.75], fov: 47, creep: .24 },
@@ -320,8 +320,8 @@ function cameraPath() {
     // P06 En küçük kız torundan düşen tek bir gözyaşı (yakın plan)
     { t: PS(6) + .18, dur: .42, pos: [299.72, 1.02, 1.95], look: [299.72, .92, -.55], fov: 43, creep: .22 },
     // P07 Azrail eğilir -> Gözyaşı Damlası Madalyonunda çocukluk cenneti parlar!
-    { t: PS(7) + .16, dur: .40, pos: [300.08, 1.46, 2.90], look: [300.06, 1.38, -.60], fov: 47, creep: .22 },
-    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .2), pos: [300.08, 1.50, 2.65], look: [300.06, 1.42, -.60], fov: 46, creep: .20 },
+    { t: PS(7) + .16, dur: .40, pos: [300.06, 1.48, 3.25], look: [300.06, 1.38, -.60], fov: 48, creep: .22 },
+    { t: PE(7),       dur: Math.max(.4, PE(7) - PS(7) - .2), pos: [300.06, 1.50, 3.05], look: [300.06, 1.40, -.60], fov: 47, creep: .20 },
     // P08 Bin yıllık taş mühür çatlar... ve Azrail ilk kez gülümser!
     { t: PS(8) + .16, dur: .38, pos: [300.28, 1.58, 2.25], look: [300.38, 1.54, -.72], fov: 44, creep: .22 },
     { t: PE(8),       dur: Math.max(.4, PE(8) - PS(8) - .2), pos: [300.34, 1.60, 1.95], look: [300.42, 1.56, -.72], fov: 42, creep: .18 },
@@ -495,7 +495,7 @@ export function frame(t, ctx) {
     // ---- SET 3: İKİNDİ PENCERESİ, GÖZYAŞI DAMLASI & AZRAİL'İN İLK TEBESSÜMÜ!
     const isHookD = t < PS(2);
     const tearFall = !isHookD && t >= PS(6) && t < PS(7);
-    const showPara = isHookD || (t >= P(7, .12) && t < PS(9) - .1);
+    const showPara = isHookD || (t >= P(7, .12) && t < P(8, .22));
     const smiled = isHookD || t >= P(8, .28);
     const happyEnd = !isHookD && t >= PS(9);
 
@@ -536,7 +536,7 @@ export function frame(t, ctx) {
       if (tearFall) {
         const tf = ramp(t, P(6, .35), PE(6));
         dyn.tear.visible = true;
-        dyn.tear.position.set(-.22, .84 - tf * .76, -.44);
+        dyn.tear.position.set(-.20, .72 - tf * .64, -.44);
       }
     }
 
@@ -556,10 +556,10 @@ export function frame(t, ctx) {
 
     // Gözyaşı Damlası Madalyonu (içinde güneşli çocukluk cenneti!)
     if (showPara) {
-      const pSc = isHookD ? 1 : ramp(t, P(7, .12), P(7, .48)) * (1 - ramp(t, PS(9) - .35, PS(9) - .08));
+      const pSc = isHookD ? 1 : ramp(t, P(7, .12), P(7, .48)) * (1 - ramp(t, PS(8) - .12, P(8, .20)));
       dyn.paradise.visible = pSc > .01;
       dyn.paradise.scale.setScalar(Math.max(.001, pSc));
-      dyn.paradise.position.set(isHookD ? -.26 : -.26, 1.48 + Math.sin(t * 2.6) * .03, -.42);
+      dyn.paradise.position.set(-.34, 1.48 + Math.sin(t * 2.6) * .03, -.46);
       dyn.paradise.lookAt(cam.position);
     }
   }

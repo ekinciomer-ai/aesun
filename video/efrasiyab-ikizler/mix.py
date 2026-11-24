@@ -4,7 +4,7 @@ import numpy as np
 
 SR = 48000
 ROOT = sys.argv[1]
-VOICE = os.path.join(ROOT, 'audio', 'voice.wav')
+VOICE = os.path.join(ROOT, 'voice', 'voice.wav')
 CUES_F = os.path.join(ROOT, 'audio', 'cues.json')
 OUT = os.path.join(ROOT, 'audio', 'mix.wav')
 

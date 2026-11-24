@@ -69,6 +69,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `sicak` | `mod: soru / stc / katsayi / yaz / kayip / kis / neden / gun / son` | Eğik panel, termometre (°C), güç/voltaj sütunu (%), sıcakta ısı dalgası + turuncu örtü, kışta kar, yaz/kış güneş yayları |
 | `saturn` | `mod: soru / hacim / kutle / yogun / su / buz / bat / gaz / son` | Halkalı Satürn + okyanus yüzeyi, hayalet içinde 766 küre (95'i turuncu), su tankında 1 cm³ küpler (buz %90, Satürn %69 batar), Satürn'ün %70 batışı + buzdağı |
 | `maden` | `mod: soru / guc / saat / gun / araba / camasir / telefon / yil / son` | Madencilik cihazı (fanlar), W sayacı, 2 su ısıtıcısı, 24 saat kadranı, kWh sütunu, İstanbul→Ankara yolu + araba, 84 çamaşır makinesi, 3.650 telefon, 365 gün takvimi |
+| `zipla` | `mod: soru / cekim / tarti / dunya / hesap / pota / sure / giysi / son` | Ay yüzeyi (kraterler, gökte Dünya), zıplayan kişi + gölge, m cetveli ve anlık yükseklik, Dünya/Ay çekim okları (9,8 / 1,62), tartı (80→13 kg) + damacana, basketbol potası (3,05 m), havada kalma sayacı, astronot giysisi (84 kg) |
+| `alan` | `mod: soru / tuketim / isin / verim / kayip / hesap / istanbul / turkiye / gece / son` | Şematik Türkiye haritası (1 birim = 111 km), Konya civarında ölçekli GES karesi (1.316 km²) + kırmızı halka, İstanbul ili karesi (5.712 km², 4 çeyrek), 365 günlük takvim, 1 m² panel + Güneş ışınları + kWh sütunları (%23 elektrik / %77 ısı, %20 kayıp), Ay + batarya |
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
@@ -92,5 +94,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 15 (Jüpiter'e kaç Dünya sığar) ve 16 (Akım 2 kat → ısı 4 kat, I²R) — 23.11.2026, günlük görev; yeni sahneler `boyut`, `kablo`.
 - Bölüm 17 (Işık hızıyla Proxima'ya) ve 18 (Panel sıcakta mı soğukta mı) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `yildiz`, `sicak`.
 - Bölüm 19 (Satürn suda yüzer mi) ve 20 (Bitcoin cihazı günde kaç kWh) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `saturn`, `maden`.
+- Bölüm 21 (Ay'da zıplasan kaç metre) ve 22 (Türkiye'nin elektriği için kaç km² panel) — 24.11.2026, günlük görev; yeni sahneler `zipla`, `alan`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

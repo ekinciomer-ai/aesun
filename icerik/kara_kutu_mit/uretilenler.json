@@ -1,6 +1,6 @@
 {
- "son_mit_no": 17,
- "son_render_no": 18,
+ "son_mit_no": 18,
+ "son_render_no": 19,
  "not": "Yeni bölüm: mit_no=son_mit_no+1 (ekrandaki MİT #), render_no=son_render_no+1 (renderMit<N>, tl/mit<N>_tl.json), TTS kodu KK_MIT_<mit_no 2 hane> | 24.11.2026: MİT #15-17 için render_no 16-18 kullanıldı (iptal edilen eski #15/#16'nın render 16/17 numaraları sahnede hiç kullanılmamıştı); TTS kodları KK_MIT_15/16/17 (tamam/ içindeki eski KK_MIT_15.json üzerine yazıldı).",
  "bolumler": [
   {
@@ -97,11 +97,9 @@
    "mit": "Ölümlü kazada sürücü mutlaka hapse girer",
    "mit_no": 15,
    "render_no": 16,
-   "sahne": "S[6].upd2",
+   "sahne": "S[11].upd2 (virajlı yol; 25.11 düzeltme: ilk sürüm düz yoldaydı, Ömer 'virajlı dedin düz yaptın')",
    "kaynak": "Yargıtay 12. CD E.2020/11191 K.2024/4113 (onama, beraat) https://lexara.com.tr/karar/1333360"
-  }
- ],
- "ertelenen": [
+  },
   {
    "kod": "KK_MIT_16_HATIR_TASIMASI",
    "mit": "Bedava bindiysen kazada tazminat isteyemezsin",
@@ -109,10 +107,10 @@
    "render_no": 17,
    "sahne": "S[6].upd3",
    "kaynak": "Yargıtay 4. HD E.2022/6578 K.2024/1013 (onama, %20 hatır indirimi, 31.622 TL maddi + 20.000 TL manevi) https://lexara.com.tr/karar/382473",
-   "ses": "V1-V4: cikti/KK_MIT_16__V1-4.mp3 · V5-V6: cikti/KK_MIT_16_B__V5-6.mp3 · V7 eksik → bekleyen_tts/KK_MIT_16_C.json kuyruğa konacak. Birleştirmede B/C dosyalarını KK_MIT_16__V5..V7 adına kopyala.",
-   "kart": "bekleyen_kart/KK_MIT_16_HATIR_TASIMASI.json",
-   "spec": "bolumler_mit15_17.json (N=17)"
-  },
+   "ses": "V1-4 KK_MIT_16, V5-6 KK_MIT_16_B, V7 KK_MIT_16_C (hepsi gemini-3.1-flash-tts-preview/charon)"
+  }
+ ],
+ "ertelenen": [
   {
    "kod": "KK_MIT_17_VIRAJ_LEVHA",
    "mit": "Virajı alamadıysan suç tamamen sendedir",
@@ -120,13 +118,22 @@
    "render_no": 18,
    "sahne": "S[11].upd (yeni: ıslak sol viraj, makePickup)",
    "kaynak": "Danıştay 15. D E.2016/87 K.2017/2097 (onama; sürücü %75, idare %25; 6.675 TL) https://lexara.com.tr/karar/18748639",
-   "ses": "Hiç okunamadı → bekleyen_tts/KK_MIT_17_B.json kuyruğa konacak; çıktıları KK_MIT_17__V1..V7 adına kopyala (tamam/KK_MIT_17.json metinleri aynı).",
+   "ses": "V1-V4: cikti/KK_MIT_17_B__V1-4.mp3 hazır; V5-V7 eksik (kota). KK_MIT_17_C (V5-V7) ile tamamla, sonra KK_MIT_17__V1..V7 adına kopyala.",
    "kart": "bekleyen_kart/KK_MIT_17_VIRAJ_LEVHA.json",
    "spec": "bolumler_mit15_17.json (N=18, src Danıştay)"
+  },
+  {
+   "kod": "KK_MIT_18_PLAKASIZ_ARAC",
+   "mit": "Kazaya sebep olan araç kaçtıysa, plakası yoksa kimseden para alamazsın",
+   "mit_no": 18,
+   "render_no": 19,
+   "kaynak": "Yargıtay 4. HD E.2021/25417 K.2023/3802 (onama; otobüs ani fren, yolcu %15 malul, plakası tespit edilemeyen araç %75 kusurlu, 82.818,52 TL) https://lexara.com.tr/karar/21247411",
+   "ses": "tamam/KK_MIT_18.json metinleri; hiçbir parça okunamadı → KK_MIT_18_B (V1-V7)",
+   "sahne": "yapılacak: otobüs + öne kıran araç, ani fren (yolcu düşme anı gösterilmez)"
   }
  ],
- "ertelenen_not": "24.11.2026: #16 ve #17 Gemini TTS günlük kotası (tüm anahtarlar 429) yüzünden ertelendi. Sahne, senaryo, kart hazır; ertesi gün önce bekleyen_tts işlerini gönder, sesler gelince mk_ep2.py ile tl+render üret, test karelerine bak, bitir.sh ile bitir, sonra teslim et. Bu iki bölüm biterse o günün yeni konu sayısı 1'e düşer (toplam 3).",
- "son_gun": "2026-11-24: MİT #15 teslim edildi; #16-17 ses kotası yüzünden ertelendi.",
+ "ertelenen_not": "25.11.2026 01:30: #15 virajlı sahneyle yeniden render edildi (değiştirme), #16 teslim edildi. #17 (V5-V7) ve #18 (tümü) Gemini kotası (11:00'de yenilenir) bekliyor; aynı gün tamamlanacak. Ömer: günde en az 3 video.",
+ "son_gun": "2026-11-25: #15 düzeltildi, #16 teslim; #17-18 kota sonrası.",
  "iptal": [
   {
    "kod": "KK_MIT_15_KACMAK",

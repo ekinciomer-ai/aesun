@@ -28,8 +28,10 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 18. Geçit dışı yayaya çarpan kusursuz — KK3_YAYA (KK2D; Yargıtay 12. CD E.2020/3714 K.2022/1730, onama: fren izi yok, sürücü tali kusurlu, mahkûm) https://lexara.com.tr/karar/1670280
 19. Duran araca çarpan hep tam kusurlu — KK3_SERIT (F13; Yargıtay 12. CD E.2014/11896 K.2015/4066, onama: işaretsiz duran araç sürücüsü mahkûm) https://lexara.com.tr/karar/4928038
 20. Ölümlü kazada sürücü mutlaka hapse girer — KK_MIT_15 (Yargıtay 12. CD E.2020/11191 K.2024/4113, onama: kendi şeridindeki sürücü kusursuz, beraat) https://lexara.com.tr/karar/1333360
-21. Bedava bindiysen tazminat isteyemezsin (hatır taşıması) — KK_MIT_16 · HAZIR, SES BEKLİYOR (Yargıtay 4. HD E.2022/6578 K.2024/1013, onama: %20 indirim) https://lexara.com.tr/karar/382473
+21. Bedava bindiysen tazminat isteyemezsin (hatır taşıması) — KK_MIT_16 (Yargıtay 4. HD E.2022/6578 K.2024/1013, onama: %20 indirim) https://lexara.com.tr/karar/382473
 22. Virajı alamadıysan suç tamamen sende — KK_MIT_17 · HAZIR, SES BEKLİYOR (Danıştay 15. D E.2016/87 K.2017/2097, onama: sürücü %75, idare %25) https://lexara.com.tr/karar/18748639
+
+23. Kaçan/plakasız araç yüzünden zarar: kimse ödemez — KK_MIT_18 · SES BEKLİYOR (Yargıtay 4. HD E.2021/25417 K.2023/3802, onama: 82.818 TL) https://lexara.com.tr/karar/21247411
 
 ## Bekleyen (öncelik sırası)
 4. Ehliyetsiz sürücü kazada otomatik %100 kusurludur — ehliyetsiz ama kusursuz bulunan sürücü

@@ -291,9 +291,9 @@ function buildOsloStreet(scene) {
     const sn = new THREE.Mesh(new THREE.ConeGeometry(r * .78, h * .42, 8), flat('#e4effa')); sn.position.y = y + h * .3; pine.add(sn);
   }
 
-  // P01 Kanca: Astrid'in konuşurken havaya yükselen 3B altın-kırmızı notaları (yüzünü asla kapatmaz!)
-  const nMatGold = new THREE.MeshBasicMaterial({ map: noteTex('#ffd45c'), transparent: true, side: THREE.DoubleSide });
-  const nMatRed = new THREE.MeshBasicMaterial({ map: noteTex('#ff6a44'), transparent: true, side: THREE.DoubleSide });
+  // P01 Kanca: Astrid'in konuşurken havaya yükselen 3B altın-kırmızı notaları (alphaTest: 0.5 → kutu kenarı YOK!)
+  const nMatGold = new THREE.MeshBasicMaterial({ map: noteTex('#ffd45c'), transparent: true, alphaTest: .5, side: THREE.DoubleSide });
+  const nMatRed = new THREE.MeshBasicMaterial({ map: noteTex('#ff6a44'), transparent: true, alphaTest: .5, side: THREE.DoubleSide });
   dyn.streetNotes = Array.from({ length: 5 }, (_, i) => {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(.24, .24), i % 2 ? nMatRed : nMatGold);
     m.userData.noShadow = true; m.visible = false; g.add(m); return m;
@@ -365,8 +365,8 @@ function buildConcertHall(scene) {
   dyn.stageMet = new THREE.Mesh(new THREE.BoxGeometry(.035, .66, .035), new THREE.MeshBasicMaterial({ color: '#ffdb66' }));
   dyn.stageMet.position.set(-1.15, 1.74, .52); dyn.stageMet.userData.noShadow = true; dyn.pianoStage.add(dyn.stageMet);
 
-  const nGold = new THREE.MeshBasicMaterial({ map: noteTex('#ffd862'), transparent: true, side: THREE.DoubleSide });
-  const nRed = new THREE.MeshBasicMaterial({ map: noteTex('#ff5a3c'), transparent: true, side: THREE.DoubleSide });
+  const nGold = new THREE.MeshBasicMaterial({ map: noteTex('#ffd862'), transparent: true, alphaTest: .5, side: THREE.DoubleSide });
+  const nRed = new THREE.MeshBasicMaterial({ map: noteTex('#ff5a3c'), transparent: true, alphaTest: .5, side: THREE.DoubleSide });
   dyn.pianoNotes = Array.from({ length: 8 }, (_, i) => {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(.34, .34), i === 3 || i === 6 ? nRed : nGold);
     m.userData.noShadow = true; m.position.set((i - 3.5) * .36, 1.75, .85); dyn.pianoStage.add(m); return m;
@@ -442,7 +442,7 @@ function buildLibrary(scene) {
   // Kapanışta hafifçe yana kayıp parlayan tek bir büyük altın 3B nota!
   dyn.finalNote = new THREE.Mesh(
     new THREE.PlaneGeometry(.46, .46),
-    new THREE.MeshBasicMaterial({ map: noteTex('#ffd862'), transparent: true, side: THREE.DoubleSide })
+    new THREE.MeshBasicMaterial({ map: noteTex('#ffd862'), transparent: true, alphaTest: .5, side: THREE.DoubleSide })
   );
   dyn.finalNote.position.set(0, 2.38, -.35); dyn.finalNote.userData.noShadow = true; g.add(dyn.finalNote);
 
@@ -475,13 +475,13 @@ function cameraPath() {
     { t: PS(3) + .14, dur: .32, move: 'whip', pos: [1.35, 1.35, 1.85], look: [.45, 1.32, -1.6], fov: 46, creep: .24 },
     // P04 DRAMATİK DİYAGONAL: Fırıncı kızgın uzaklaşır, Astrid karlı sokakta yalnız kalır!
     { t: PS(4) + .16, dur: .36, move: 'whip', pos: [-1.45, 1.46, 2.65], look: [.25, 1.25, -1.4], fov: 50, creep: .22 },
-    // P05 WHIP PAN → SET 2 KONSER SALONU: Dr. Krohn altın gramofonla Astrid'i inceler!
-    { t: PS(5) + .14, dur: .34, move: 'whip', pos: [200.25, 1.42, 4.45], look: [200.2, 1.35, -.3], fov: 50, creep: .18 },
+    // P05 WHIP PAN → SET 2 KONSER SALONU: Dr. Krohn + Astrid + dev kuyruklu piyano tam kadraj!
+    { t: PS(5) + .14, dur: .34, move: 'whip', pos: [200.0, 1.44, 4.82], look: [200.0, 1.35, -.3], fov: 50, creep: .16 },
     // P06 DOLLY-IN: Dev kuyruklu piyano üstündeki 9 ışıklı ritim çubuğuna zoom (kıvılcımla kayar!)
     { t: PS(6) + .16, dur: .36, move: 'whip', pos: [200.1, 2.15, 3.75], look: [200.1, 2.15, -.75], fov: 48, creep: .28 },
     // P07 PİYANO TUŞLARI ÜSTÜNDEN YANLAMASINA TAKİP KAMERASI (SOLA → SAĞA KAYAR!)
-    { t: PS(7) + .12, dur: .32, move: 'whip', pos: [199.15, 2.15, 2.75], look: [199.75, 1.30, -.15], fov: 48, creep: .08 },
-    { t: PE(7) - .10, dur: Math.max(.8, PE(7) - PS(7) - .3), pos: [200.85, 2.05, 2.75], look: [200.35, 1.30, -.15], fov: 48, creep: .08 },
+    { t: PS(7) + .12, dur: .32, move: 'whip', pos: [199.30, 2.12, 3.25], look: [199.85, 1.28, -.15], fov: 48, creep: .08 },
+    { t: PE(7) - .10, dur: Math.max(.8, PE(7) - PS(7) - .3), pos: [200.80, 2.04, 3.25], look: [200.35, 1.28, -.15], fov: 48, creep: .08 },
     // P08 KONSER SALONU GENİŞ DRAMATİK SPOT: Astrid ortada, etrafında dönen ses halkaları!
     { t: PS(8) + .14, dur: .34, move: 'whip', pos: [200.0, 1.62, 4.35], look: [200.0, 1.35, -.6], fov: 50, creep: .22 },
     // P09 WHIP PAN → SET 3 TARİHİ KÜTÜPHANE: Açık BRAIN · 1947 dergisinden yükselip karakterleri gösterir!
@@ -565,9 +565,9 @@ export function frame(t, ctx) {
   const ast = cast.astrid, fir = cast.firinci, kr = cast.krohn;
 
   if (here === 'street') {
-    // P02'de Astrid sokakta yürüyerek fırının önüne gelir!
+    // P01'de Astrid tam merkezde (-.46); P02'de sokakta yürüyerek fırının önüne gelir!
     const walkU = ramp(t, PS(2), PE(2));
-    const astX = -.48 - (1 - walkU) * .45;
+    const astX = t < PS(2) ? -.46 : (-.76 + walkU * .30);
     const astZ = -.65 - walkU * .85;
     const walking = t >= PS(2) && t <= PE(2);
     const walkBob = walking ? Math.abs(Math.sin(t * 11)) * 7 : 0;
@@ -658,16 +658,16 @@ export function frame(t, ctx) {
       }
     });
 
-    // Karakter yerleşimi: P05'te Astrid + Dr. Krohn sahne önünde; P07'de Dr. Krohn piyano yanında; P08'de Astrid tek spot altında!
+    // Karakter yerleşimi: P05'te Astrid + Dr. Krohn sahne önünde; P07'de Dr. Krohn piyano yanında (tuşları kapatmaz!); P08'de Astrid tek spot altında!
     if (t < PS(6) - .1) {
-      ast.show(); ast.place(199.42, 0, .85, cam, tint);
+      ast.show(); ast.place(199.56, 0, .82, cam, tint);
       ast.draw({ expr: 'worried', look: .55, blink: bl(3, PS(5)), armL: [18, 16], armR: [18, 16], lit: 1, shade: COOL, rim: { color: WARM, a: .44 } });
-      kr.show(); kr.place(200.55, 0, .82, cam, tint);
+      kr.show(); kr.place(200.44, 0, .82, cam, tint);
       kr.draw({ expr: 'surprised', look: -.55, sweat: 1, blink: bl(4, PS(5)), propL: 'scroll', propR: 'pen', armL: [58, 36], armR: [62, 40], lit: 1, shade: COOL, rim: { color: WARM, a: .44 } });
       ast.castFrom(dyn.mSun, true); kr.castFrom(dyn.mSun, true);
     } else if (inP7) {
-      kr.show(); kr.place(199.95, 0, 1.38, cam, tint);
-      kr.draw({ expr: 'surprised', look: .35, blink: bl(5, PS(7)), armR: [96, 30], armL: [24, 18], lit: 1, shade: COOL, rim: { color: '#ffae4c', a: .5 } });
+      kr.show(); kr.place(199.55, 0, .35, cam, tint);
+      kr.draw({ expr: 'surprised', look: .55, blink: bl(5, PS(7)), armR: [96, 30], armL: [24, 18], lit: 1, shade: COOL, rim: { color: '#ffae4c', a: .5 } });
       kr.castFrom(dyn.mSun, true);
     } else if (inP8) {
       ast.show(); ast.place(200.0, 0, 1.05, cam, tint);

@@ -1,8 +1,8 @@
 """Davalar · geçici salt-okunur görüntüleyici (tek kullanıcı, süreli).
 Portal ve merkez API'den bağımsızdır: şifreli dava klasörünü ve anahtarı yalnız okur, hiçbir şey yazmaz.
-Dışarıya port açmaz; yalnız Cloudflare geçici tüneli (rastgele adres) üzerinden erişilir, sunucu adresi görünmez.
+Sunucu IP adresinde ayrı bir porttan, kendinden imzalı sertifikayla HTTPS yayın yapar (/tls/cert.pem + key.pem).
 Giriş: DG_KUL + DG_PAROLA (PBKDF2 özeti, düz şifre yok). DG_BITIS (epoch) sonrası her istek 410."""
-import base64, hashlib, hmac, json, os, re, secrets, time
+import base64, hashlib, hmac, json, os, re, secrets, ssl, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
@@ -50,7 +50,7 @@ class H(BaseHTTPRequestHandler):
         pass
 
     def ip(self):
-        return self.headers.get("CF-Connecting-IP") or self.client_address[0]
+        return self.client_address[0]
 
     def gonder(self, kod, govde=b"", tur="text/plain; charset=utf-8", ek=None):
         self.send_response(kod)
@@ -126,4 +126,10 @@ class H(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    ThreadingHTTPServer(("0.0.0.0", 8000), H).serve_forever()
+    sv = ThreadingHTTPServer(("0.0.0.0", 8443), H)
+    sv.daemon_threads = True
+    bg = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    bg.minimum_version = ssl.TLSVersion.TLSv1_2
+    bg.load_cert_chain("/tls/cert.pem", "/tls/key.pem")
+    sv.socket = bg.wrap_socket(sv.socket, server_side=True)
+    sv.serve_forever()

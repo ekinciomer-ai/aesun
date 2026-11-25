@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T12:58+03:00",
+ "olusturma": "2026-11-25T13:08+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -391,7 +391,7 @@
    "karar": "ARTIR",
    "neden": "videoların %65'i tuttu (eşik 637 izlenme / 48 sa)",
    "olculen": 17,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": 1221,
    "tutma_orani": 65,
    "izlenme_yuzde": 53,
@@ -724,10 +724,10 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Gökyüzünde Bu Hafta",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 1,
-   "medyan_48sa": 963,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 0,
+   "medyan_48sa": 906,
    "tutma_orani": 100,
    "izlenme_yuzde": 50,
    "en_iyi": {
@@ -804,7 +804,7 @@
    "karar": "DENE",
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 674,
    "tutma_orani": 50,
    "izlenme_yuzde": 38,
@@ -820,7 +820,7 @@
    "karar": "DENE",
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
-   "erken": 1,
+   "erken": 2,
    "medyan_48sa": 969,
    "tutma_orani": 100,
    "izlenme_yuzde": null,
@@ -879,15 +879,15 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 214,
-  "Nasıl Yapıldı": 135,
-  "Ömür Dediğin": 50,
-  "Yolu Seç !": 262,
-  "Ancient Studio": 192,
-  "Kozmos Lab": 95,
   "Antik Stüdyo": 637,
-  "LVL MAX": 50,
-  "Estudio Antiguo": 136
+  "Kozmos Lab TR": 214,
+  "Ömür Dediğin": 50,
+  "Estudio Antiguo": 136,
+  "Ancient Studio": 192,
+  "Yolu Seç !": 262,
+  "Nasıl Yapıldı": 135,
+  "Kozmos Lab": 95,
+  "LVL MAX": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1010,8 +1010,8 @@
     "medyan": 432
    },
    "21:00": {
-    "n": 7,
-    "medyan": 974
+    "n": 8,
+    "medyan": 968
    }
   },
   "Kozmos Lab": {
@@ -1663,7 +1663,7 @@
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1422 izlenme, 4 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 67 izlenme, 7 video).",
-  "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 974 izlenme, 7 video).",
+  "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 968 izlenme, 8 video).",
   "Kozmos Lab: en iyi yayın saati şimdilik 02:00 (medyan 37 izlenme, 7 video).",
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 167 izlenme, 3 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",

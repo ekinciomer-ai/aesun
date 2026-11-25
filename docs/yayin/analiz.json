@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T23:20+03:00",
+ "olusturma": "2026-11-25T23:30+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -663,12 +663,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 786,
+   "medyan_48sa": 788,
    "tutma_orani": 100,
    "izlenme_yuzde": 66,
    "en_iyi": {
     "baslik": "Türkiye'de drone kuralları değişti! P0, P1, P2 🚁 #shorts",
-    "i48": 979
+    "i48": 981
    },
    "kaydirmadan_izleme_yuzde": 36
   },
@@ -819,7 +819,7 @@
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Asfalttan Çıkıp Tarlaya ve Ormana Daldı! Polis Motorundan İnanılmaz Kaçış #shorts",
-    "i48": 6818
+    "i48": 6825
    }
   },
   {
@@ -903,15 +903,15 @@
   }
  ],
  "esikler": {
-  "Ancient Studio": 192,
-  "Kozmos Lab TR": 215,
-  "Yolu Seç !": 262,
-  "Ömür Dediğin": 50,
-  "LVL MAX": 455,
   "Kozmos Lab": 95,
+  "Yolu Seç !": 262,
+  "Kozmos Lab TR": 215,
+  "Estudio Antiguo": 136,
+  "Ancient Studio": 192,
+  "LVL MAX": 456,
   "Nasıl Yapıldı": 135,
   "Antik Stüdyo": 637,
-  "Estudio Antiguo": 136
+  "Ömür Dediğin": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1113,7 +1113,7 @@
    },
    "22:00": {
     "n": 1,
-    "medyan": 6818
+    "medyan": 6825
    }
   }
  },
@@ -1652,7 +1652,7 @@
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 4 tanesi tuttu (eşik 215 izlenme / 48 sa).",
-  "LVL MAX: son 6 Short'tan 1 tanesi tuttu (eşik 455 izlenme / 48 sa).",
+  "LVL MAX: son 6 Short'tan 1 tanesi tuttu (eşik 456 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 3 Short'tan 2 tanesi tuttu (eşik 50 izlenme / 48 sa).",
@@ -1703,7 +1703,7 @@
   {
    "kanal": "LVL MAX",
    "baslik": "Asfalttan Çıkıp Tarlaya ve Ormana Daldı! Polis Motorundan İnanılmaz Kaçış #shorts",
-   "i48": 6818
+   "i48": 6825
   },
   {
    "kanal": "Antik Stüdyo",

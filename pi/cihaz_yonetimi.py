@@ -41,6 +41,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ortak import AESUN, TOK, TR, bildirim_tetikle, gh, log, panel_oku, zaman  # noqa: E402
+from ortak import _onbellek_oku as onbellek_oku  # noqa: E402
 import cihaz_ogrenme as OG  # noqa: E402
 
 YEREL = AESUN / "cihaz_yonetimi_yerel.json"
@@ -78,8 +79,16 @@ VARSAYILAN = {
 
 
 def ayar_oku():
+    """Ayarları okur. Okuma başarısızsa (ns1 yolunda kopya yok, ağ hatası) yerel önbellekteki son ayarlar
+    kullanılır: varsayılanlara düşmek mod'u sessizce "izleme"ye çevirip komutları durduruyordu
+    (25.11 07:50: 6 saatlik sunucu penceresinde mod izleme göründü) ve ayar dosyasının üzerine yazma riski vardı.
+    Varsayılan yazımı yalnız hiç ayar bulunamadığında (ilk kurulum) yapılır."""
     a, _ = gh("cihaz_yonetimi.json")
     if a is None:
+        a = onbellek_oku("cihaz_yonetimi.json")
+        if isinstance(a, dict) and a:
+            log("cihaz_yonetimi.json okunamadı; yerel önbellekteki ayarlar kullanıldı (mod:", a.get("mod"), ")")
+            return {**VARSAYILAN, **a}
         a = dict(VARSAYILAN)
         gh("cihaz_yonetimi.json", a, None, "cihaz yönetimi: varsayılan ayarlar (izleme modu)")
         return a

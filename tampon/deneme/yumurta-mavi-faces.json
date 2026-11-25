@@ -1,0 +1,8 @@
+{
+  "id": "yumurta-mavi-faces",
+  "repo": "https://github.com/kodlaciz/yumurta-stili",
+  "ref": "main",
+  "kurulum": "cd engine && npm ci --no-audit --no-fund && patch -p0 < \"$GIRDI/toon_pumpkin.patch\" && patch -p0 < \"$GIRDI/faces_full.patch\" && mkdir -p ../stories/mavi-deri && cp \"$GIRDI/story.js\" ../stories/mavi-deri/story.js",
+  "duman": "cd engine && CHROME_PATH=$(which google-chrome chromium chromium-browser 2>/dev/null | head -1) node faces.mjs mavi-deri --full && cp ../stories/mavi-deri/out/faces_full.png \"$CIKTI/faces_full.png\"",
+  "sure_dk": 10
+}

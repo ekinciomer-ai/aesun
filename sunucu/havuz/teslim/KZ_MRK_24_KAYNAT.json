@@ -1,0 +1,46 @@
+{
+ "kod": "KZ_MRK_24_KAYNAT",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "1 litre suyu kaynatmak kaç telefon şarjı eder? ☕⚡ #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "1 litre suyu kaynatmak kaç telefon şarjı eder? ☕⚡ #shorts",
+ "aciklama": "USGS'ye göre 1 kilogram suyu 1 °C ısıtmak için 4.184 jul (1 kilokalori) gerekir; 1 litre su yaklaşık 1 kg'dır.\n\nHesap: musluk suyu 15 °C kabul edildi, kaynama 100 °C (deniz seviyesi). 4.184 × 85 ≈ 355.640 J. 1 Wh = 3.600 J olduğundan ≈ 99 Wh (≈ 0,1 kWh). Tipik bir telefon pili 5.000 mAh × 3,85 V ≈ 19 Wh → 99 ÷ 19 ≈ 5 telefon. 2.000 W'lık bir su ısıtıcısında kayıpsız süre 355.640 ÷ 2.000 ≈ 178 saniye (≈ 3 dk). Gerçekte ısıtıcının gövdesi ve hava ısı çeker, bu yüzden biraz daha uzun sürer. Which? testlerine göre yalnız ihtiyacın kadar su kaynatmak enerji tasarrufu sağlar; yarım litre, kabaca yarı enerji demektir.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: USGS Water Science School – Specific Heat Capacity and Water; Which? – Energy efficient kettles (2026); telefon pili 5.000 mAh × 3,85 V (#02 ile aynı varsayım).\n\n#kozmoslab #enerji #elektrik #fizik #tasarruf #merak #shorts",
+ "etiketler": [
+  "su ısıtıcısı",
+  "kettle",
+  "enerji",
+  "elektrik",
+  "enerji tasarrufu",
+  "fizik",
+  "özgül ısı",
+  "merak",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "USGS Water Science School – Specific Heat Capacity and Water: 'Water has to absorb 4,184 Joules of heat (1 kilocalorie) for the temperature of one kilogram of water to increase 1°C.'",
+  "Hesap: 4.184 × 85 = 355.640 J; ÷ 3.600 = 98,8 Wh; ÷ 2.000 W = 177,8 s",
+  "Telefon pili: 5.000 mAh × 3,85 V nominal = 19,25 Wh (#02, #20 ile aynı varsayım)",
+  "Which? – Best energy efficient kettles (2026): 'Boil only the amount of water you need' / 'Boiling a litre of water often uses more than twice the energy it takes to boil the minimum amount.'",
+  "Varsayımlar: musluk suyu 15 °C, kaynama 100 °C (deniz seviyesi), 1 L su ≈ 1 kg; 'kısa bir şarkı ≈ 3 dk' gündelik karşılaştırma"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_24_KAYNAT.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_24_KAYNAT.mp4"
+}

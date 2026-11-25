@@ -6,7 +6,7 @@
    "sure_sn": 310,
    "not": "Piksel efekt kütüphanesi: kamp ateşi, plazma topu, ateş topu atma; 244 efektin hepsi testi geçti.",
    "karar": "✅ Piksel efektleri temiz ve hızlı; Shorts geçiş/vurgu efekti olarak kullanılabilir.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/GFAD-20261108-pixelfx/records_act_moves-fireball-throw.mp4",
@@ -58,7 +58,7 @@
    "sure_sn": 20,
    "not": "20 sn'lik videoda iki adet 3 sn sessizlik vardı; araç otomatik kesti.",
    "karar": "✅ Değer. 20 sn videodaki 6 sn sessizliği 1 sn'de kesti (20 → 14,6 sn). CutkodA otomatik kurgunun ilk adımı.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-auto-editor/once_sessizli.mp4",
@@ -87,7 +87,7 @@
    "sure_sn": 145,
    "not": "Arka plan silme (rembg ile aynı görseller, karşılaştırma için).",
    "karar": "🟡 rembg ile aynı modeli kullanıyor, sonuç neredeyse aynı. Ayrıca kurmaya gerek yok.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-backgroundremover/astronot.jpg",
@@ -124,7 +124,7 @@
    "sure_sn": 55,
    "not": "Görseli hazır renk temalarına çevirme (marka rengine uydurma).",
    "karar": "🔴 Hazır renk temaları zayıf; görsel solgunlaşıyor. İşimize yaramaz.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-gowall/gowall_catppuccin.png",
@@ -166,7 +166,7 @@
    "sure_sn": 32,
    "not": "Yapay zekâ eğitimi için görsel çoğaltma (renk, açı, perspektif) + kenar ve kontrast.",
    "karar": "🟡 Yapay zekâ eğitimi için görsel çoğaltma; ancak kendi modelimizi eğitirsek gerekir. Şimdilik değil.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-kornia/kornia_8.jpg",
@@ -187,7 +187,7 @@
    "sure_sn": 48,
    "not": "Python ile 3 görselden yakınlaşmalı, yazılı, geçişli dikey video.",
    "karar": "✅ Değer. Kodla yakınlaşmalı, yazılı, geçişli dikey video; Türkçe harfler doğru. Basit Shorts/slayt videoları için.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-moviepy/moviepy_ornek.mp4",
@@ -207,7 +207,7 @@
    "sure_sn": 15,
    "not": "Uydu görüntüsünde kenar bulma ve su yüzeyi tespiti; fotoğrafa çizim efekti.",
    "karar": "✅ Değer. Uydu görüntüsünde su yüzeyini otomatik buldu (%13,5). GES arazi/gölge analizi ve görsel efektler için temel kütüphane.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-opencv/opencv_efekt.jpg",
@@ -232,7 +232,7 @@
    "sure_sn": 187,
    "not": "Aynı fotoğrafın arka planı silindi (önce / sonra).",
    "karar": "✅ Değer. 3 sn'de temiz kesim; astronot ve otobüs+insanlar doğru ayrıldı. Kapak, ürün ve kişi görselleri için ilk tercih.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-rembg/astronot.jpg",
@@ -284,7 +284,7 @@
    "sure_sn": 4,
    "not": "Koddan sosyal medya bilgi kartı (1080×1080) üretimi.",
    "karar": "🟡 Koddan bilgi kartını 0,1 sn'de üretti. Ama büyük sayılar taşabiliyor; düzen elle ayarlanmalı. Biz bu işi teardown sayfalarıyla zaten yapıyoruz.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-satori/satori_kart_hoover.png",
@@ -309,7 +309,7 @@
    "sure_sn": 15,
    "not": "Tek görsele 6 işlem (gri, bulanık, kontrast, ton, negatif) ve hız ölçümü.",
    "karar": "✅ Değer. 50 görseli 1080px'e 7 sn'de çevirdi. Portal/site görsellerini küçültme, toplu düzenleme için.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-sharp/sharp_6_islem.jpg",
@@ -329,7 +329,7 @@
    "sure_sn": 113,
    "not": "YOLO11n ile nesne tanıma; kutular ve etiketler supervision ile çizildi.",
    "karar": "✅ Değer. Otobüs ve 4 kişiyi 1,3 sn'de tanıdı (CPU). Saha fotoğrafında kask/insan/araç sayma için. Not: güvenlik taraması kendi belge betiğinde GITHUB_TOKEN kelimesini buldu; araç kodu değil, zararsız.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-supervision/supervision_kare.jpg",
@@ -364,7 +364,7 @@
    "sure_sn": 222,
    "not": "InSPyReNet ile arka plan silme ve arka plan bulanıklaştırma.",
    "karar": "🟡 Kesim iyi; 'arka planı bulanıklaştır' modu güzel (portre etkisi). Ama rembg'den yavaş (3,5 dk kurulum).",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/ornek-transparent-background/astronot.jpg",
@@ -406,7 +406,7 @@
    "sure_sn": 648,
    "not": "Üç hazır stilin (gravür, sessiz film, ağaç baskı) kareleri; 1280×720.",
    "karar": "✅ Stil kareleri kaliteli (gravür, sessiz film). Antik Stüdyo için uygun; video render uzun sürüyor.",
-   "tarih": "2026-11-24",
+   "tarih": "2026-11-25",
    "dosyalar": [
     {
      "f": "ornek/video-opuscar/engraving_16.jpg",

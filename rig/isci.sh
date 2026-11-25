@@ -7,7 +7,7 @@ AD=$(cat ad); AN=$(cat anahtar)
 gonder(){ curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H "X-AE-Anahtar: $AN" -H 'Content-Type: application/json' \
           --data-binary @"$K/is/$1" "$API/v1/veri?a=yaz&yol=rig/$AD/$1"; }
 mkdir -p is; cp deneme.sh is/
-KUTU="docker run --rm --device /dev/dri -v $K/is:/is aerig:1"
+KUTU="docker run --rm --device /dev/dri -e VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/radeon_icd.x86_64.json -v $K/is:/is aerig:1"   # yalnız AMD Vulkan sürücüsü
 # Vulkan aygıt sırası (Intel çıkışı da sayılır); araçlara yalnız AMD aygıtlarının sıra numaraları verilir
 VKL=$($KUTU vulkaninfo 2>/dev/null | grep -iE 'deviceName *=' | sed 's/.*= *//')
 GPUS=$(echo "$VKL" | grep -i -e amd -e radeon | paste -sd';')

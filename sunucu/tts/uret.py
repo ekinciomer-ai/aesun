@@ -70,6 +70,8 @@ def gemini_anahtarlar(tercih_ad=None):
         sira.append((tercih_ad, os.environ.get(f"KASA_{tercih_ad}") or ""))
     for ad in ("gemini_api_key_716744873763", "gemini_api_anahtar_nasilyapildi", "gemini_api_key", "gemini_api_anahtar", "gemini_api_anahtar_kozmos"):
         sira.append((ad, os.environ.get(f"KASA_{ad}") or ""))
+    for ek in sorted(k for k in os.environ if k.startswith("KASA_gemini")):
+        sira.append((ek[5:], os.environ.get(ek) or ""))
     sira.append(("varsayilan", os.environ.get("GEMINI_KEY") or ""))
     cikti, gorulen = [], set()
     for ad, val in sira:

@@ -27,7 +27,11 @@ if [ -s anahtar_adi ]; then AD=$(tr -cd 'a-z0-9_' < anahtar_adi); G=$(/opt/aesun
 [ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_anahtar 2>/dev/null) || G=""
 [ -n "$G" ] || G=$(/opt/aesun/kasa_coz.sh gemini_api_key 2>/dev/null) || G=""
 [ -n "$G" ] && printf 'GEMINI_KEY=%s\n' "$G" >> "$EF" || echo "NOT: uyarı Gemini anahtarı yok"; unset G
-for KA in gemini_api_key_716744873763 gemini_api_anahtar_nasilyapildi gemini_api_key gemini_api_anahtar gemini_api_anahtar_kozmos; do
+GORULEN=""
+KD=$(docker volume inspect aesun_aesun_veri --format '{{.Mountpoint}}' 2>/dev/null)/kasa
+EKA=$(ls "$KD" 2>/dev/null | sed -n 's/^\(gemini[a-z0-9_]*\)\.sifreli$/\1/p' | tr '\n' ' ')
+for KA in gemini_api_key_716744873763 gemini_api_anahtar_nasilyapildi gemini_api_key gemini_api_anahtar gemini_api_anahtar_kozmos $EKA; do
+  case " $GORULEN " in *" $KA "*) continue;; esac; GORULEN="$GORULEN $KA"
   KV=$(/opt/aesun/kasa_coz.sh "$KA" 2>/dev/null) || KV=""
   [ -n "$KV" ] && printf 'KASA_%s=%s\n' "$KA" "$KV" >> "$EF"
   unset KV

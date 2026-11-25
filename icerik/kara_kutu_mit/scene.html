@@ -101,7 +101,7 @@ const load=u=>new Promise((res,rej)=>gl.load(u,res,undefined,rej));
 const michG=await load('assets/Michelle.glb');
 const isciG=await load('assets/isci.glb');
 const patronG=await load('assets/'+(window.PATRON_GLB||'patron.glb'));
-const ofisciG=await load('assets/ofisci.glb');const kadinG=await load('assets/kadin.glb');
+const ofisciG=await load('assets/ofisci.glb');const kIsciG=await load('assets/k_isci.glb'),kOfisciG=await load('assets/k_ofisci.glb'),kPatronG=await load('assets/k_patron.glb'),kKadinG=await load('assets/k_kadin.glb');const kadinG=await load('assets/kadin.glb');
 const [carG,botG,envT,envN,envD]=await Promise.all([load('assets/ferrari.glb'),load('assets/Xbot.glb'),
  new RGBELoader().loadAsync('assets/venice_sunset_1k.hdr'),new RGBELoader().loadAsync('assets/moonless_golf_1k.hdr'),new RGBELoader().loadAsync('assets/quarry_01_1k.hdr')]);
 const pmrem=new THREE.PMREMGenerator(renderer);
@@ -1114,8 +1114,11 @@ function buildSet(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1
  const P0=window.PI_DOC||{t:'BELGE',l:[''],s:''};
  const paper=new THREE.Mesh(new THREE.PlaneGeometry(.30,.42),new THREE.MeshStandardMaterial({map:docTex(P0.t,P0.l,P0.s),roughness:.8,side:THREE.DoubleSide}));paper.material.map.colorSpace=THREE.SRGBColorSpace;paper.castShadow=true;s.add(paper);
  const env=new THREE.Mesh(new THREE.BoxGeometry(.24,.012,.12),M(0xe8d9b5,.8));env.visible=false;s.add(env);
- const boss=makeRealG(patronG);s.add(boss);const wA=makeRealG(ofisciG),wB=makeRealG(isciG),wC=makeRealG(kadinG);s.add(wA);s.add(wB);s.add(wC);
- const extras=[makeRealG(ofisciG),makeRealG(isciG)];extras.forEach(e=>{e.visible=false;s.add(e)});
+ // ---- karakterler: Blender'da elle pozlanmış klipler (AnimationMixer; yeniden hedefleme yok) ----
+ function mkC(G){const m=SkeletonUtils.clone(G.scene);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});fixMats(m);const mx=new THREE.AnimationMixer(m);const A={};G.animations.forEach(c=>{const a=mx.clipAction(c);a.play();a.setEffectiveWeight(0);A[c.name]=a});
+  m.userData.mix=(list,lt)=>{Object.values(A).forEach(a=>{a.setEffectiveWeight(0)});let tw=0;list.forEach(([n,w])=>{if(A[n]&&w>0)tw+=w});list.forEach(([n,w,t])=>{const a=A[n];if(!a||w<=0)return;a.setEffectiveWeight(w/tw);a.time=t!==undefined?t:(lt%2)});mx.update(0)};return m}
+ const boss=mkC(kPatronG);s.add(boss);const wA=mkC(kOfisciG),wB=mkC(kIsciG),wC=mkC(kKadinG);s.add(wA);s.add(wB);s.add(wC);
+ const extras=[mkC(kOfisciG),mkC(kIsciG)];extras.forEach(e=>{e.visible=false;s.add(e)});
  let wkr=wA,mode='masa',setName='ofis2';
  const LOOK={atolye:{bg:0x2a2d31,wall:0x9aa0a6,fl:'beton',key:[0xe8f0ff,2.0],lamp:[0xdfeeff,5],env:.5},banka:{bg:0x0a0f1c,wall:0x6f7d8c,fl:'hali',key:[0x9fb3d9,.7],lamp:[0xffc27a,9],env:.25},
   fabrika:{bg:0x22262b,wall:0x7d8a8f,fl:'epoksi',key:[0xf2f6ff,2.1],lamp:[0xe8f4ff,4],env:.5},toplanti:{bg:0x1b2027,wall:0xbfc6cc,fl:'hali',key:[0xfff3e0,1.8],lamp:[0xffe2b0,5],env:.5},
@@ -1130,41 +1133,37 @@ function buildSet(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1
  function setWorker(k){setSet(setName,mode,k)}
  function setDoc(t,l,st){const tx=docTex(t,l,st);tx.colorSpace=THREE.SRGBColorSpace;paper.material.map=tx;paper.material.needsUpdate=true}
  const mDoc=new THREE.Object3D();s.add(mDoc);const ti=6.0;
- // ---- poz yardımcıları ----
- const stand=(r)=>{const b=r.userData.set;b('Hips',0,0,0);b('Spine',.03,0,0);b('Spine1',0,0,0);b('Neck',.1,0,0);b('Head',0,0,0);b('LeftUpLeg',0,0,-.05);b('RightUpLeg',0,0,.05);b('LeftLeg',0,0,0);b('RightLeg',0,0,0);b('LeftArm',0,0,-1.25);b('RightArm',0,0,1.25);b('LeftForeArm',0,-.15,0);b('RightForeArm',0,.15,0)};
- const sit=(r)=>{const b=r.userData.set;b('Hips',0,0,0);b('LeftUpLeg',-1.5,0,-.08);b('RightUpLeg',-1.5,0,.08);b('LeftLeg',1.55,0,0);b('RightLeg',1.55,0,0);b('Spine',.12,0,0);b('Neck',.05,0,0);b('LeftArm',.35,-1.1,-.95);b('RightArm',.35,1.1,.95);b('LeftForeArm',0,-.6,0);b('RightForeArm',0,.6,0)};
- const walk=(r,ph)=>{const b=r.userData.set;stand(r);const a=Math.sin(ph);b('LeftUpLeg',-.45*a,0,-.05);b('RightUpLeg',.45*a,0,.05);b('LeftLeg',.5*Math.max(0,-Math.cos(ph)),0,0);b('RightLeg',.5*Math.max(0,Math.cos(ph)),0,0);b('LeftArm',.35*a,0,-1.2);b('RightArm',-.35*a,0,1.2);b('Spine',.08,0,0)};
- const offer=(r,k)=>{const b=r.userData.set;b('RightArm',lerp(0,.25,k),lerp(0,1.25,k),lerp(1.25,.55,k));b('RightForeArm',0,lerp(.15,.1,k),0);b('Spine1',.15*k,0,0)};
- const point=(r,k,lt)=>{const b=r.userData.set;b('RightArm',lerp(0,-.1,k),lerp(0,1.35,k),lerp(1.25,.2,k));b('RightForeArm',0,0,0);b('Spine1',.05*k,0,0);b('Head',0,.1*Math.sin(lt*3)*k,0)};
- const protest=(r,k,lt)=>{const b=r.userData.set;const w=.15*Math.sin(lt*6);b('LeftArm',lerp(0,-.3,k),lerp(0,-.8,k),lerp(-1.25,-.35+w,k));b('RightArm',lerp(0,-.3,k),lerp(0,.8,k),lerp(1.25,.35-w,k));b('LeftForeArm',0,lerp(-.15,-1.0,k),0);b('RightForeArm',0,lerp(.15,1.0,k),0);b('Spine',lerp(.03,-.08,k),0,0)};
- const holdDoc=(r,k)=>{const b=r.userData.set;b('LeftArm',lerp(0,.3,k),lerp(0,-1.0,k),lerp(-1.25,-.5,k));b('RightArm',lerp(0,.3,k),lerp(0,1.0,k),lerp(1.25,.5,k));b('LeftForeArm',0,lerp(-.15,-.9,k),0);b('RightForeArm',0,lerp(.15,.9,k),0);b('Neck',lerp(.1,.45,k),0,0)};
- const STAGE={ // [bossPos, bossRy, wkrPos, wkrRy]
-  masa:[[.15,0,-1.05],0,[0,-.44,.80],Math.PI],kalkis:[[.15,0,-1.05],0,[0,-.44,.80],Math.PI],ayakta:[[.1,0,-1.05],0,[.0,0,.25],Math.PI],giris:[[.1,0,-1.05],0,[0,0,.3],Math.PI],
-  toplanti:[[0,0,-2.35],0,[1.0,-.44,.2],-Math.PI/2],arabulucu:[[-.75,-.44,.25],1.95,[.75,-.44,.25],-1.95]};
- const SETPOS={atolye:[0,0,0],banka:[0,0,0],fabrika:[0,0,0],toplanti:[0,0,0],okul:[0,0,0],arabulucu:[0,0,-.2],mutfak:[1.6,0,0],hastane:[0,0,0],magaza:[-.2,0,-.15],lab:[0,0,0],ofis2:[0,0,0]};
+
+ const STAGE={masa:[[.15,0,-1.05],0,[0,-.44,.80],Math.PI],kalkis:[[.15,0,-1.05],0,[0,-.44,.80],Math.PI],ayakta:[[.1,0,-1.05],0,[.0,0,.25],Math.PI],giris:[[.1,0,-1.05],0,[0,0,.3],Math.PI],
+  toplanti:[[0,0,-2.35],0,[1.0,-.44,.2],-Math.PI/2],arabulucu:[[-.75,-.44,.05],1.95,[.75,-.44,.05],-1.95]};
+ const SETPOS={atolye:[0,0,0],banka:[0,0,0],fabrika:[0,0,0],toplanti:[0,0,0],okul:[0,0,0],arabulucu:[0,0,0],mutfak:[1.6,0,0],hastane:[0,0,0],magaza:[-.2,0,-.15],lab:[0,0,0],ofis2:[0,0,0]};
  function upd(lt){const dt=lt-ti;const ta=ti-1.2;const S0=STAGE[mode]||STAGE.masa;const O=SETPOS[setName]||[0,0,0];
-  const bs=boss.userData;stand(boss);boss.position.set(S0[0][0]+O[0],S0[0][1],S0[0][2]+O[2]);boss.rotation.set(0,S0[1],0);
-  const ws=wkr.userData;wkr.position.set(S0[2][0]+O[0],S0[2][1],S0[2][2]+O[2]);wkr.rotation.set(0,S0[3],0);
-  const r=lt<ta?0:Math.min(1,(lt-ta)/1.1);const back=dt>0?sm(Math.min(1,dt/1.2)):0;const k=r*(1-back);
+  boss.position.set(S0[0][0]+O[0],S0[0][1],S0[0][2]+O[2]);boss.rotation.set(0,S0[1],0);
+  wkr.position.set(S0[2][0]+O[0],S0[2][1],S0[2][2]+O[2]);wkr.rotation.set(0,S0[3],0);
+  const r=lt<ta?0:Math.min(1,(lt-ta)/1.1);const back=dt>0?sm(Math.min(1,dt/1.2)):0;const k=sm(r)*(1-back);
   let p0=new THREE.Vector3(.45,1.25,-.95),p1=new THREE.Vector3(.05,.795,-.05),flat=true;
-  if(mode==='masa'||mode==='kalkis'){offer(boss,k);sit(wkr);const lean=dt>0?sm(Math.min(1,dt/.6)):0;ws.set('Spine',.12+.15*lean,0,0);ws.set('Neck',.25*lean,0,0);
-   if(mode==='kalkis'){const u=clamp((lt-2.2)/.8,0,1);if(u>0){const e=sm(u);stand(wkr);if(e<1){sit(wkr);['LeftUpLeg','RightUpLeg'].forEach(n=>ws.set(n,lerp(-1.5,0,e),0,n[0]==='L'?-.08:.08));['LeftLeg','RightLeg'].forEach(n=>ws.set(n,lerp(1.55,0,e),0,0));ws.set('Spine',lerp(.12,.03,e),0,0)}
-     wkr.position.y=lerp(-.44,0,e);wkr.position.z+=.35*e;protest(wkr,clamp((lt-3.2)/.6,0,1)*(1-clamp((lt-ta)/.4,0,1)),lt)}}}
-  else if(mode==='ayakta'||mode==='giris'){
-   if(mode==='giris'){const u=clamp((lt-1.0)/3.0,0,1);const x=lerp(3.2,0,sm(u));wkr.position.x=x+O[0];wkr.rotation.y=u<1?-Math.PI/2+lerp(0,-Math.PI/2,sm(clamp((u-.85)/.15,0,1))):Math.PI;if(u<1)walk(wkr,lt*7);else stand(wkr)}else stand(wkr);
-   offer(boss,k);if(mode==='ayakta'&&lt<ta)protest(wkr,clamp((lt-2.4)/.6,0,1)*(1-clamp((lt-3.8)/.5,0,1)),lt);if(lt>=ta)holdDoc(wkr,clamp((lt-ta-.6)/.5,0,1));
-   const bp=boss.position,wp=wkr.position;p0=new THREE.Vector3(bp.x+.35,1.25,bp.z+.3);p1=new THREE.Vector3(wp.x,1.05,wp.z-.32);flat=false}
-  else if(mode==='toplanti'){point(boss,clamp((lt-1.5)/.6,0,1),lt);sit(wkr);wkr.position.set(1.0+O[0],-.44,.2);
-   extras.forEach((e,i)=>{sit(e);e.position.set(i?-1.0:-1.0,-.44,i?.2:-1.1);e.rotation.set(0,Math.PI/2,0);e.userData.sync()});
-   p0=new THREE.Vector3(.25,1.2,-1.6);p1=new THREE.Vector3(.55,.795,.2);offer(boss,k*.0)}
-  else if(mode==='arabulucu'){sit(boss);sit(wkr);boss.position.y=-.44;const med=extras[0];sit(med);med.position.set(0,-.44,-1.15);med.rotation.set(0,0,0);med.userData.set('RightArm',.3,1.0,.7);med.userData.sync();
-   p0=new THREE.Vector3(0,.795,-.75);p1=new THREE.Vector3(.45,.795,.0)}
+  const B=boss.userData.mix,Wm=wkr.userData.mix;
+  if(mode==='masa'||mode==='kalkis'){B([['ayakta',1-k],['uzat',k]],lt);const lean=dt>0?sm(Math.min(1,dt/.6)):0;let wl=[['otur',1-lean],['otur_egil',lean]];
+   if(mode==='kalkis'){const u=clamp((lt-2.2)/.8,0,1);if(u>0){const e=sm(u);const pr=clamp((lt-3.1)/.5,0,1)*(1-clamp((lt-ta)/.5,0,1));const hd=clamp((lt-ta-.5)/.5,0,1);
+     wl=[['otur',1-e],['ayakta',e*(1-pr)*(1-hd)],['itiraz',e*pr],['tut',e*hd]];wkr.position.y=lerp(-.44,0,e);wkr.position.z+=.4*e;
+     if(hd>0){p1=new THREE.Vector3(wkr.position.x,1.1,wkr.position.z-.3);flat=false}}}
+   Wm(wl,lt)}
+  else if(mode==='ayakta'||mode==='giris'){B([['ayakta',1-k],['uzat',k]],lt);
+   let wl=[['ayakta',1]];
+   if(mode==='giris'){const u=clamp((lt-1.0)/3.0,0,1);const x=lerp(3.2,0,sm(u));wkr.position.x=x+O[0];const tr=sm(clamp((u-.85)/.15,0,1));wkr.rotation.y=-Math.PI/2+lerp(0,-Math.PI/2,tr);if(u<1)wl=[['yuru',1-tr,(lt*1.1)%1],['ayakta',tr]]}
+   else{const pr=clamp((lt-2.4)/.5,0,1)*(1-clamp((lt-3.9)/.5,0,1));wl=[['ayakta',1-pr],['itiraz',pr]]}
+   if(lt>=ta){const hd=clamp((lt-ta-.5)/.5,0,1);wl=[['ayakta',1-hd],['tut',hd]]}
+   Wm(wl,lt);const bp=boss.position,wp=wkr.position;p0=new THREE.Vector3(bp.x+.3,1.2,bp.z+.45);p1=new THREE.Vector3(wp.x,1.12,wp.z-.3);flat=false}
+  else if(mode==='toplanti'){const pt=clamp((lt-1.5)/.6,0,1);B([['ayakta',1-pt],['goster',pt]],lt);Wm([['otur',1]],lt);wkr.position.set(1.0+O[0],-.44,.2);
+   extras.forEach((e,i)=>{e.userData.mix([['otur',1]],lt+i*.7);e.position.set(-1.0,-.44,i?.2:-1.1);e.rotation.set(0,Math.PI/2,0)});
+   p0=new THREE.Vector3(.25,1.2,-1.6);p1=new THREE.Vector3(.55,.795,.2)}
+  else if(mode==='arabulucu'){B([['otur',1]],lt);Wm([['otur',1]],lt+.5);const med=extras[0];med.userData.mix([['otur_egil',1]],lt);med.position.set(0,-.44,-1.15);med.rotation.set(0,0,0);
+   p0=new THREE.Vector3(0,.795,-.75);p1=new THREE.Vector3(.45,.795,-.05)}
   const u=lt<ta?0:Math.min(1,(lt-ta)/1.2);const e=u*u*(3-2*u);paper.position.lerpVectors(p0,p1,e);
-  if(flat){paper.position.y+=Math.sin(Math.PI*e)*.12;paper.rotation.set(-Math.PI/2*Math.min(1,e*1.3),0,lerp(.3,-.08,e))}else{paper.rotation.set(-.35,wkr.rotation.y+Math.PI,0);if(e>=1){paper.position.copy(p1)}}
+  if(flat){paper.position.y+=Math.sin(Math.PI*e)*.12;paper.rotation.set(-Math.PI/2*Math.min(1,e*1.3),0,lerp(.3,-.08,e))}else{paper.rotation.set(-.5,wkr.rotation.y+Math.PI,0)}
   paper.visible=lt>ta-.3;mDoc.position.copy(paper.position);
   if(env.visible){env.position.set(.9+O[0],.96,-.15+O[2]);env.rotation.y=.3}
   const bx=G.fabrika.userData.boxes;if(G.fabrika.visible&&bx)bx.forEach((b,i)=>{b.position.x=-2.8+((i*1.0+lt*.35)%5.0)});
-  boss.userData.sync();wkr.userData.sync();
   return {dt,boss,wkr,doc:mDoc}}
  return {s,upd,ti,setWorker,setDoc,setSet}}
 S.push(buildSet());

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T14:02+03:00",
+ "olusturma": "2026-11-25T14:12+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -131,10 +131,10 @@
   },
   "LVL MAX": {
    "gunluk_short_kotasi": 1,
-   "seri_dagilimi": {},
-   "durdurulan": [
-    "Gündem + Tarih"
-   ]
+   "seri_dagilimi": {
+    "Gündem + Tarih": 1
+   },
+   "durdurulan": []
   },
   "Ömür Dediğin": {
    "gunluk_short_kotasi": 0,
@@ -727,7 +727,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 902,
+   "medyan_48sa": 906,
    "tutma_orani": 100,
    "izlenme_yuzde": 50,
    "en_iyi": {
@@ -743,12 +743,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 2,
-   "medyan_48sa": 169,
+   "medyan_48sa": 172,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Uzay İstasyonu Türkiye'yi kaç saniyede geçer? 🛰️ #shorts",
-    "i48": 169
+    "i48": 172
    }
   },
   {
@@ -786,16 +786,16 @@
   {
    "kanal": "LVL MAX",
    "seri": "Gündem + Tarih",
-   "karar": "DURDUR",
-   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %0",
-   "olculen": 6,
-   "erken": 6,
-   "medyan_48sa": 2,
-   "tutma_orani": 0,
+   "karar": "SÜRDÜR",
+   "neden": "tutma oranı %14",
+   "olculen": 7,
+   "erken": 5,
+   "medyan_48sa": 3,
+   "tutma_orani": 14,
    "izlenme_yuzde": null,
    "en_iyi": {
-    "baslik": "150 km/s Hızla Otoyol Çıkışını Kaçırdı, Doğrudan Duvara Çakıldı!",
-    "i48": 8
+    "baslik": "Asfalttan Çıkıp Tarlaya ve Ormana Daldı! Polis Motorundan İnanılmaz Kaçış #shorts",
+    "i48": 6770
    }
   },
   {
@@ -879,15 +879,15 @@
   }
  ],
  "esikler": {
-  "Estudio Antiguo": 136,
-  "Ömür Dediğin": 50,
-  "Ancient Studio": 192,
-  "Kozmos Lab TR": 214,
-  "Kozmos Lab": 95,
+  "Antik Stüdyo": 637,
   "Yolu Seç !": 262,
+  "Kozmos Lab TR": 214,
+  "LVL MAX": 452,
+  "Ancient Studio": 192,
+  "Estudio Antiguo": 136,
   "Nasıl Yapıldı": 135,
-  "LVL MAX": 50,
-  "Antik Stüdyo": 637
+  "Kozmos Lab": 95,
+  "Ömür Dediğin": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -995,7 +995,7 @@
    },
    "12:00": {
     "n": 1,
-    "medyan": 169
+    "medyan": 172
    },
    "13:00": {
     "n": 3,
@@ -1086,6 +1086,10 @@
    "18:00": {
     "n": 1,
     "medyan": 0
+   },
+   "22:00": {
+    "n": 1,
+    "medyan": 6770
    }
   }
  },
@@ -1640,7 +1644,7 @@
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 95 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 4 tanesi tuttu (eşik 214 izlenme / 48 sa).",
-  "LVL MAX: son 6 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
+  "LVL MAX: son 6 Short'tan 1 tanesi tuttu (eşik 452 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 3 Short'tan 2 tanesi tuttu (eşik 50 izlenme / 48 sa).",
@@ -1657,7 +1661,6 @@
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %78'i tuttu (eşik 214 izlenme / 48 sa).",
   "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 214 izlenme / 48 sa).",
-  "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1422 izlenme, 4 video).",
@@ -1690,6 +1693,11 @@
  ],
  "en_iyi": [
   {
+   "kanal": "LVL MAX",
+   "baslik": "Asfalttan Çıkıp Tarlaya ve Ormana Daldı! Polis Motorundan İnanılmaz Kaçış #shorts",
+   "i48": 6770
+  },
+  {
    "kanal": "Antik Stüdyo",
    "baslik": "Mimar Sinan Süleymaniye inşaatını neden 1 yıl durdurdu? 🕌 | Cevahir Minaresi #shorts",
    "i48": 4114
@@ -1708,11 +1716,6 @@
    "kanal": "Antik Stüdyo",
    "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
    "i48": 2394
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Kızıldeniz ve Babülmendep 471 yıl önce nasıl kilitlendi? ⚓ | Özdemir Paşa #shorts",
-   "i48": 2380
   }
  ],
  "en_zayif": [

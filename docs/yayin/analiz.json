@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T11:06+03:00",
+ "olusturma": "2026-11-25T11:16+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -743,12 +743,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 1,
-   "medyan_48sa": 166,
+   "medyan_48sa": 169,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Uzay İstasyonu Türkiye'yi kaç saniyede geçer? 🛰️ #shorts",
-    "i48": 166
+    "i48": 169
    }
   },
   {
@@ -879,15 +879,15 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 214,
-  "Yolu Seç !": 262,
-  "Nasıl Yapıldı": 135,
-  "LVL MAX": 50,
-  "Antik Stüdyo": 637,
   "Ancient Studio": 192,
-  "Kozmos Lab": 95,
+  "Nasıl Yapıldı": 135,
+  "Estudio Antiguo": 136,
+  "Kozmos Lab TR": 214,
   "Ömür Dediğin": 50,
-  "Estudio Antiguo": 136
+  "LVL MAX": 50,
+  "Kozmos Lab": 95,
+  "Antik Stüdyo": 637,
+  "Yolu Seç !": 262
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -995,7 +995,7 @@
    },
    "12:00": {
     "n": 1,
-    "medyan": 166
+    "medyan": 169
    },
    "13:00": {
     "n": 3,

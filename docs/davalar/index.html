@@ -37,7 +37,7 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
 #gor iframe{width:100%;height:100%;border:0;background:#fff}#gor img{max-width:100%;display:block;margin:0 auto}
 #gor pre{margin:0;padding:14px;white-space:pre-wrap;word-break:break-word;font:14px/1.55 ui-monospace,Consolas,monospace}
 .bilgi{color:var(--s);padding:20px;text-align:center}
-.sek{display:flex;gap:6px;margin:4px 0 14px}.sek button{flex:1;border:1px solid var(--c);background:var(--kart);color:var(--y);padding:10px;border-radius:10px;font:600 14.5px system-ui;cursor:pointer}.sek button.on{background:var(--v);border-color:var(--v);color:#fff}
+.sek{display:flex;gap:6px;margin:4px 0 14px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}.sek button{flex:1;border:1px solid var(--c);background:var(--kart);color:var(--y);padding:10px;border-radius:10px;font:600 14.5px system-ui;cursor:pointer}.sek button.on{background:var(--v);border-color:var(--v);color:#fff}
 #brf{display:none}#brf.on{display:block}#dsy.gizli{display:none}
 .md{background:var(--kart);border:1px solid var(--c);border-radius:14px;padding:6px 16px 18px;overflow-wrap:anywhere}
 .md h1{font-size:20px;margin:14px 0 6px}.md h2{font-size:17px;margin:22px 0 8px;padding-top:10px;border-top:1px solid var(--c)}.md h3{font-size:15px;margin:16px 0 6px;color:var(--s)}
@@ -101,11 +101,14 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
   });
   document.getElementById('ara').addEventListener('input',ciz);
   var gor=document.getElementById('gor'),gov=document.getElementById('gGov');
-  function kapat(){gor.classList.remove('acik');gov.innerHTML='';if(url){URL.revokeObjectURL(url);url=null;}}
+  var gorKayit=false;
+  function gizle(){gor.classList.remove('acik');gov.innerHTML='';if(url){URL.revokeObjectURL(url);url=null;}}
+  function gorAc(){if(!gorKayit){try{history.pushState({gor:1},'',location.href);gorKayit=true;}catch(e){}}gor.classList.add('acik');}
+  function kapat(){if(gorKayit){gorKayit=false;history.back();}else gizle();}
   document.getElementById('gKapat').onclick=kapat;
   document.addEventListener('keydown',function(e){if(e.key==='Escape')kapat();});
   function ac(id,ad,tur){
-    document.getElementById('gAd').textContent=ad; gov.innerHTML='<div class="bilgi">Açılıyor…</div>'; gor.classList.add('acik');
+    document.getElementById('gAd').textContent=ad; gov.innerHTML='<div class="bilgi">Açılıyor…</div>'; gorAc();
     al('evrak/'+id).then(function(r){return r.blob();}).then(function(b){
       if(url)URL.revokeObjectURL(url); url=URL.createObjectURL(b);
       var ind=document.getElementById('gIndir'); ind.href=url; document.getElementById('gYeni').href=url; ind.download=ad.replace(/[\\\/:*?"<>|]+/g,' ')+'.'+tur;
@@ -117,12 +120,16 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
   }
   // ---- Brifing ----
   var B=null;
-  function sekme(b){document.getElementById('sD').classList.toggle('on',!b);document.getElementById('sB').classList.toggle('on',b);
+  try{history.scrollRestoration='manual';}catch(e){}
+  var konum={},sek=false;
+  function sekme(b,yeni){konum[sek]=window.scrollY;sek=b;document.getElementById('sD').classList.toggle('on',!b);document.getElementById('sB').classList.toggle('on',b);
     document.getElementById('dsy').classList.toggle('gizli',b);document.getElementById('brf').classList.toggle('on',b);
-    try{history.replaceState(null,'',b?'#brifing':location.pathname);}catch(e){}
-    if(b&&B===null)brifingAl();}
-  document.getElementById('sD').onclick=function(){sekme(false);};
-  document.getElementById('sB').onclick=function(){sekme(true);};
+    try{if(yeni)history.pushState(null,'',b?'#brifing':'#dosyalar');}catch(e){}
+    if(b&&B===null)brifingAl();
+    var hedef=konum[b]||0;requestAnimationFrame(function(){window.scrollTo(0,hedef);setTimeout(function(){window.scrollTo(0,hedef);},60);});}
+  window.addEventListener('popstate',function(){if(gorKayit){gorKayit=false;gizle();return;}if(gor.classList.contains('acik'))gizle();var b=location.hash==='#brifing';if(b!==sek)sekme(b,false);});
+  document.getElementById('sD').onclick=function(){if(sek)sekme(false,true);};
+  document.getElementById('sB').onclick=function(){if(!sek)sekme(true,true);};
   function satir(s){
     s=esc(s);
     s=s.replace(/\[\[(.+?)::(.+?)::(.+?)\]\]/g,function(m,d,a,l){return '<button class="kanit" data-d="'+d+'" data-a="'+a+'">'+l+'</button>';});
@@ -161,9 +168,9 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
         var z=normal((k.ad||'')+' '+e.ad+' '+(e.tarih||''));
         if(ar.some(function(x){return x&&z.indexOf(x)>=0;}))bul.push(e);});});});
     if(bul.length===1){ac(bul[0].id,bul[0].ad,bul[0].tur);return;}
-    document.getElementById('gAd').textContent=lbl;gor.classList.add('acik');
+    document.getElementById('gAd').textContent=lbl;gorAc();
     if(!bul.length){gov.innerHTML='<div class="bilgi">Bu evrak Davalar listesinde otomatik bulunamadı ('+esc(esas)+').<br><br><button class="kanit" id="gAra">Dosyalar\'da ara</button></div>';
-      document.getElementById('gAra').onclick=function(){kapat();sekme(false);var q=document.getElementById('ara');q.value=esas;ciz();};return;}
+      document.getElementById('gAra').onclick=function(){gorKayit=false;gizle();try{history.replaceState(null,'',location.href);}catch(e){}sekme(false,true);var q=document.getElementById('ara');q.value=esas;ciz();};return;}
     gov.innerHTML='<div style="padding:8px 12px"><div class="alt">'+bul.length+' evrak bulundu:</div>'+bul.map(function(e){return '<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';}).join('')+'</div>';
   });
   gov.addEventListener('click',function(ev){var b=ev.target.closest('.ev');if(b)ac(b.dataset.id,b.dataset.ad,b.dataset.tur);});

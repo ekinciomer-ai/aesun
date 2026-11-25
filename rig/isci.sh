@@ -8,12 +8,12 @@ gonder(){ curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H "X-AE-
           --data-binary @"$K/is/$1" "$API/v1/veri?a=yaz&yol=rig/$AD/$1"; }
 mkdir -p is; cp deneme.sh is/
 KUTU="docker run --rm --device /dev/dri -v $K/is:/is aerig:1"
-GPUS=$($KUTU vulkaninfo --summary 2>/dev/null | grep -i deviceName | grep -vi llvmpipe | sed 's/.*= *//' | paste -sd';')
+GPUS=$($KUTU vulkaninfo 2>/dev/null | grep -iE 'deviceName *=' | grep -vi llvmpipe | sed 's/.*= *//' | paste -sd';')
 NG=$(echo "$GPUS" | tr ';' '\n' | grep -c .)
 # kart görünmüyorsa teşhis: /dev/dri, Vulkan ve VAAPI çıktısının son satırları
 VKT=""
 if [ "$NG" -eq 0 ]; then
-  VKT="dri=$(ls /dev/dri 2>/dev/null | tr '\n' ' ') · vk=$($KUTU sh -c 'vulkaninfo --summary 2>&1 | grep -iE "deviceName|error|ERROR|fail|driver" | head -n 6' 2>&1 | tr '\n' '|' | tr -d '"\\' | cut -c1-500) · mod=$(lsmod | grep -c '^amdgpu')"
+  VKT="dri=$(ls /dev/dri 2>/dev/null | tr '\n' ' ') · vk=$($KUTU sh -c 'vulkaninfo 2>&1 | grep -iE "deviceName *=|error|fail" | head -n 6' 2>&1 | tr '\n' '|' | tr -d '"\\' | cut -c1-500) · mod=$(lsmod | grep -c '^amdgpu')"
 fi
 # nabız kutusuz üretilir (kutu yoksa da rapor gider); son hatalar dahil
 HATA=$(grep -h HATA kur.log guncelle.log 2>/dev/null | tail -n 4 | tr '\n' '|' | tr -d '"\\' | cut -c1-900)

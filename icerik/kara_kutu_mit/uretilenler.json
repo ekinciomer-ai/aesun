@@ -118,7 +118,7 @@
    "render_no": 18,
    "sahne": "S[11].upd (yeni: ıslak sol viraj, makePickup)",
    "kaynak": "Danıştay 15. D E.2016/87 K.2017/2097 (onama; sürücü %75, idare %25; 6.675 TL) https://lexara.com.tr/karar/18748639",
-   "ses": "V1-V4: cikti/KK_MIT_17_B__V1-4.mp3 hazır; V5-V7 eksik (kota). KK_MIT_17_C (V5-V7) ile tamamla, sonra KK_MIT_17__V1..V7 adına kopyala.",
+   "ses": "V1-V4: KK_MIT_17_B, V5: KK_MIT_17_C (hazır); V6-V7 eksik → bekleyen_tts/KK_MIT_17_D.json",
    "kart": "bekleyen_kart/KK_MIT_17_VIRAJ_LEVHA.json",
    "spec": "bolumler_mit15_17.json (N=18, src Danıştay)"
   },
@@ -128,11 +128,13 @@
    "mit_no": 18,
    "render_no": 19,
    "kaynak": "Yargıtay 4. HD E.2021/25417 K.2023/3802 (onama; otobüs ani fren, yolcu %15 malul, plakası tespit edilemeyen araç %75 kusurlu, 82.818,52 TL) https://lexara.com.tr/karar/21247411",
-   "ses": "tamam/KK_MIT_18.json metinleri; hiçbir parça okunamadı → KK_MIT_18_B (V1-V7)",
-   "sahne": "yapılacak: otobüs + öne kıran araç, ani fren (yolcu düşme anı gösterilmez)"
+   "ses": "hiç okunamadı → bekleyen_tts/KK_MIT_18_C.json",
+   "sahne": "S[6].upd4 (otobüs + öne kıran araç, hazır, test edildi)",
+   "spec": "bolumler_mit18.json (N=19)",
+   "kart": "bekleyen_kart/KK_MIT_18_PLAKASIZ_ARAC.json"
   }
  ],
- "ertelenen_not": "25.11.2026 01:30: #15 virajlı sahneyle yeniden render edildi (değiştirme), #16 teslim edildi. #17 (V5-V7) ve #18 (tümü) Gemini kotası (11:00'de yenilenir) bekliyor; aynı gün tamamlanacak. Ömer: günde en az 3 video.",
+ "ertelenen_not": "25.11.2026 11:40: Kota 11:20'de yenilendi ama aynı saatte kuyruğa giren Patron mu Haklı #6-12 (49 parça) kotayı tüketti; #17'ye yalnız V5 düştü. #17 (V6-V7) ve #18 (tümü) bekliyor.",
  "son_gun": "2026-11-25: #15 düzeltildi, #16 teslim; #17-18 kota sonrası.",
  "iptal": [
   {

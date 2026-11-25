@@ -1,0 +1,52 @@
+--- /dev/fd/63	2026-11-23 20:38:41.694614454 +0300
++++ faces.html	2026-11-23 19:33:55.923711905 +0300
+@@ -15,7 +15,7 @@
+ //   /engine/faces.html?story=is-odasi[&zoom=1]   (zoom=1: heads only)   ->  node faces.mjs is-odasi
+ import * as THREE from 'three';
+ import { Toon } from '/engine/src/toon.js';
+-const q = new URLSearchParams(location.search), story = q.get('story') || 'is-odasi', zoom = q.has('zoom');
++const q = new URLSearchParams(location.search), story = q.get('story') || 'is-odasi', zoom = q.has('zoom'), full = q.has('full');
+ const { LOOK } = await import(`/stories/${story}/story.js`);
+ const scene = new THREE.Scene();
+ const POSES = [
+@@ -24,7 +24,7 @@
+   { expr: 'laugh', mouth: .8, laughMarks: .9 }, { expr: 'grin', look: .3 }, { expr: 'neutral', mouth: .7, look: .8, lit: 1, rim: { color: '#ffb050', a: .55 }, shade: '#b9b4dc' },
+   { expr: 'proud', blink: 1 },
+ ];
+-const names = Object.keys(LOOK), cw = zoom ? 300 : 230, chh = zoom ? 300 : 360;
++const names = Object.keys(LOOK), cw = zoom ? 300 : 230, chh = zoom ? 300 : full ? 420 : 360;
+ const c = document.getElementById('sheet'); c.width = cw * POSES.length; c.height = chh * names.length; const g = c.getContext('2d');
+ g.fillStyle = '#8d86a8'; g.fillRect(0, 0, c.width, c.height);
+ names.forEach((n, r) => {
+@@ -33,6 +33,7 @@
+     t.draw({ armL: [14, 10], armR: [14, 10], ...p });
+     const S = t.c.width / 768;                                   // canvas px per design unit
+     if (zoom) g.drawImage(t.c, 144 * S, 96 * S, 480 * S, 480 * S, i * cw, r * chh, cw, chh);
++    else if (full) g.drawImage(t.c, 92 * S, 118 * S, 584 * S, 1066 * S, i * cw, r * chh, cw, chh);
+     else g.drawImage(t.c, 110 * S, 30 * S, 548 * S, 858 * S, i * cw, r * chh, cw, chh);
+     g.fillStyle = '#fff'; g.font = '600 15px sans-serif'; g.fillText(`${n} · ${p.expr}`, i * cw + 8, r * chh + 18);
+   });
+--- /dev/fd/63	2026-11-23 20:38:41.696062093 +0300
++++ faces.mjs	2026-11-23 19:33:38.914072237 +0300
+@@ -6,7 +6,7 @@
+ import { findChrome } from './chrome.mjs';
+ 
+ const here = path.dirname(fileURLToPath(import.meta.url));
+-const story = process.argv[2] || 'is-odasi', zoom = process.argv.includes('--zoom');
++const story = process.argv[2] || 'is-odasi', zoom = process.argv.includes('--zoom'), full = process.argv.includes('--full');
+ const OUT = path.join(here, '..', 'stories', story, 'out'); fs.mkdirSync(OUT, { recursive: true });
+ const CHROME = findChrome();
+ const ANGLE = process.platform === 'win32' ? ['--use-angle=d3d11'] : process.platform === 'darwin' ? ['--use-angle=metal'] : [];
+@@ -14,10 +14,10 @@
+ const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--ignore-gpu-blocklist', ...ANGLE, '--hide-scrollbars'] });
+ const page = await browser.newPage();
+ page.on('pageerror', e => console.log('PAGEERROR', e.message));
+-await page.goto(`http://127.0.0.1:${port}/engine/faces.html?story=${story}${zoom ? '&zoom=1' : ''}`, { waitUntil: 'load' });
++await page.goto(`http://127.0.0.1:${port}/engine/faces.html?story=${story}${zoom ? '&zoom=1' : ''}${full ? '&full=1' : ''}`, { waitUntil: 'load' });
+ await page.waitForFunction(() => window.__ready, { timeout: 60000 });
+ const url = await page.evaluate(() => document.getElementById('sheet').toDataURL('image/png'));
+-const file = path.join(OUT, zoom ? 'faces_zoom.png' : 'faces.png');
++const file = path.join(OUT, zoom ? 'faces_zoom.png' : full ? 'faces_full.png' : 'faces.png');
+ fs.writeFileSync(file, Buffer.from(url.slice(url.indexOf(',') + 1), 'base64'));
+ console.log('->', file);
+ await browser.close(); server.close();

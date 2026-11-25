@@ -1,16 +1,18 @@
-// En Garip Hastalıklar #07: Yabancı Aksan Sendromu (1941 Oslo — Astrid & Dr. Monrad-Krohn) — yumurta kafa stili.
-// Zamanlama KELİMEYE DEĞİL PARÇAYA bağlı: P(k, f) = k. seslendirme parçasının f oranındaki an.
-// Setler: 1941 OSLO FIRIN & KLİNİK (x≈0), KONUŞMA RİTMİ & PİYANO ODASI (x≈200), OSLO LİMANI GÜN BATIMI İSKELESİ (x≈300).
+// En Garip Hastalıklar #07 (YENİ ÖZGÜN TASARIM): Yabancı Aksan Sendromu (1941 Oslo — Astrid & Dr. Monrad-Krohn)
+// ESKİ 3-SET ŞABLONU YOK! 3 Tamamen Özgün 3B Mekân + Hareketli Karakterler + Vinç & Takip Kameraları:
+//   SET 1 (x = 0):   1941 KARLI OSLO SOKAĞI & SICAK FIRIN VİTRİNİ (Arnavut kaldırımı, renkli binalar, sokak lambaları, kar!)
+//   SET 2 (x = 200): 1947 KONSER SALONU & DEV KUYRUKLU PİYANO SAHNESİ (kırmızı kadife perde, 14 tuşlu dev piyano, altın notalar!)
+//   SET 3 (x = 300): 1947 OSLO ÜNİVERSİTESİ TARİHİ KÜTÜPHANE SALONU (meşe kitaplıklar, güneş huzmeleri, açık 1947 dergisi, gramofon!)
 import * as THREE from 'three';
 import { painted, flat, rng, woodTex, D } from '/engine/src/paint.js';
-import { Toon, PLUM, flap, blinkAt } from '/engine/src/toon.js';
+import { Toon, flap, blinkAt } from '/engine/src/toon.js';
 import { CamPath, smoother } from '/engine/src/camera.js';
 import { Smoke, beam, glow } from '/engine/src/fx.js';
 import { vistaMat } from '/engine/src/vista.js';
 
 export const NAME = 'yabanci-aksan';
 export const FPS = 30;
-export let DUR = 40;
+export let DUR = 41.5;
 export const CUES = [];
 export const LOOK = {
   astrid: {
@@ -46,128 +48,164 @@ let C, PT = {}, cast = {}, sets = {}, fx = {}, dyn = {};
 const P = (k, f = 0) => { const p = PT['P' + String(k).padStart(2, '0')]; return p.s + (p.e - p.s) * f; };
 const PS = k => P(k, 0), PE = k => P(k, 1);
 
-// ---------------------------------------------------------------- boyalı dokular
+// ---------------------------------------------------------------- boyalı prosedürel dokular
 function cnv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
 function tx(c, rep = [1, 1]) { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...rep); return t; }
 const sh = (hex, k) => { const c = new THREE.Color(hex); c.multiplyScalar(k); return '#' + c.getHexString(); };
-function dab(g, w, h, base, n, r, amt, seed, a0 = .25) {
+function dab(g, w, h, base, n, r, amt, seed, a0 = .24) {
   const R = rng(seed);
   for (let i = 0; i < n; i++) {
-    g.fillStyle = sh(base, 1 + (R() - .5) * amt); g.globalAlpha = a0 + R() * .24;
+    g.fillStyle = sh(base, 1 + (R() - .5) * amt); g.globalAlpha = a0 + R() * .22;
     g.beginPath(); g.ellipse(R() * w, R() * h, r * (.4 + R()), r * (.25 + R() * .4), R() * 3.14, 0, 6.29); g.fill();
   }
   g.globalAlpha = 1;
 }
 
-// 1941 Oslo sıcak duvar + koyu ahşap lambri
-function osloWallTex(rep = [3, 1]) {
+// Karlı Arnavut kaldırımı (Set 1 Oslo caddesi)
+function cobbleSnowTex() {
   const [c, g] = cnv(512, 512);
-  g.fillStyle = '#c6d2dc'; g.fillRect(0, 0, 512, 512);
-  dab(g, 512, 512, '#c6d2dc', 240, 22, .14, 71, .2);
-  g.fillStyle = '#5a4436'; g.fillRect(0, 385, 512, 127);
-  g.fillStyle = '#7a5e4a'; g.fillRect(0, 376, 512, 12);
-  return tx(c, rep);
+  g.fillStyle = '#566476'; g.fillRect(0, 0, 512, 512);
+  const R = rng(101);
+  for (let y = 0; y < 512; y += 32) {
+    const off = (y / 32) % 2 ? 22 : 0;
+    for (let x = -32; x < 544; x += 48) {
+      g.fillStyle = sh('#6d7c90', .84 + R() * .32);
+      g.beginPath(); g.roundRect(x + off + 3, y + 3, 42, 26, 6); g.fill();
+    }
+  }
+  // kenarlarda ve taş aralarında yumuşak beyaz kar lekeleri
+  dab(g, 512, 512, '#dce8f6', 160, 26, .08, 102, .30);
+  return tx(c, [5, 5]);
 }
 
-// 1941 Oslo kuzey penceresi (dışarıda karlı kuzey gökyüzü ve siluet çatılar)
-function osloWindowTex() {
-  const [c, g] = cnv(512, 640);
-  const gr = g.createLinearGradient(0, 0, 0, 640);
-  gr.addColorStop(0, '#36567e'); gr.addColorStop(.55, '#688eb8'); gr.addColorStop(1, '#3e5c7c');
-  g.fillStyle = gr; g.fillRect(0, 0, 512, 640);
-  // uzaktaki Oslo çatıları
-  g.fillStyle = '#2a3d56';
-  g.beginPath(); g.moveTo(0, 640); g.lineTo(0, 460); g.lineTo(90, 390); g.lineTo(185, 455);
-  g.lineTo(270, 410); g.lineTo(360, 465); g.lineTo(445, 395); g.lineTo(512, 445); g.lineTo(512, 640); g.closePath(); g.fill();
-  // yumuşak kar taneleri
-  const R = rng(72);
-  g.fillStyle = 'rgba(240,248,255,0.72)';
-  for (let i = 0; i < 65; i++) {
-    g.beginPath(); g.arc(R() * 512, R() * 560, 3 + R() * 5, 0, 6.29); g.fill();
-  }
-  return tx(c);
-}
-
-// Ses Analizi & Klinik Pano (mod 0: düzenli mavi ses dalgası, mod 1: kırmızı-altın AKSAN KAYMASI · 1947 · DR. MONRAD-KROHN)
-function waveBoardTex(shifted = false) {
-  const [c, g] = cnv(600, 440);
-  g.fillStyle = shifted ? '#26121c' : '#102236'; g.fillRect(0, 0, 600, 440);
-  g.strokeStyle = shifted ? '#ff8c42' : '#5ec8ff'; g.lineWidth = 10; g.strokeRect(12, 12, 576, 416);
-  // ızgara çizgileri
-  g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 2;
-  for (let y = 90; y <= 270; y += 45) { g.beginPath(); g.moveTo(40, y); g.lineTo(560, y); g.stroke(); }
-  // ses dalgası grafiği
-  g.strokeStyle = shifted ? '#ff644a' : '#64d6ff'; g.lineWidth = 8; g.lineCap = 'round';
-  g.beginPath();
-  for (let x = 50; x <= 550; x += 8) {
-    const u = (x - 50) / 500;
-    const y = shifted
-      ? 180 + Math.sin(u * Math.PI * 10 + 1.1) * 58 * Math.sin(u * Math.PI) + Math.cos(u * Math.PI * 23) * 26
-      : 180 + Math.sin(u * Math.PI * 8) * 62 * Math.sin(u * Math.PI);
-    x === 50 ? g.moveTo(x, y) : g.lineTo(x, y);
-  }
-  g.stroke();
-  if (shifted) {
-    // kayma oku / vurgusu
-    g.strokeStyle = '#ffd15c'; g.lineWidth = 5; g.setLineDash([10, 8]);
-    g.beginPath(); g.moveTo(285, 78); g.lineTo(285, 282); g.moveTo(335, 78); g.lineTo(335, 282); g.stroke();
-    g.setLineDash([]);
-  }
-  g.fillStyle = shifted ? '#ff9454' : '#8edcff'; g.font = '900 40px system-ui, sans-serif'; g.textAlign = 'center';
-  g.fillText(shifted ? 'AKSAN KAYMASI!' : 'SES ANALİZİ', 300, 344);
-  g.fillStyle = '#eceef4'; g.font = '700 26px system-ui, sans-serif';
-  g.fillText(shifted ? '1947 · DR. MONRAD-KROHN' : '1941 · OSLO KLİNİĞİ', 300, 392);
-  return tx(c);
-}
-
-// Etiket tabelası (46px font — asla kutudan taşmaz!)
-function badgeTex(title, sub, bg, fg, accent) {
-  const [c, g] = cnv(560, 200);
-  g.fillStyle = bg; g.beginPath(); g.roundRect(12, 12, 536, 176, 32); g.fill();
-  g.strokeStyle = accent; g.lineWidth = 10; g.stroke();
-  g.fillStyle = fg; g.font = '900 46px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(title, 280, 78);
-  g.fillStyle = accent; g.font = '800 30px system-ui, sans-serif';
-  g.fillText(sub, 280, 142);
+// 1941 Fırın tabelası: BAKERI · OSLO 1941
+function bakerySignTex() {
+  const [c, g] = cnv(640, 180);
+  g.fillStyle = '#3c1e16'; g.fillRect(0, 0, 640, 180);
+  g.strokeStyle = '#e8b658'; g.lineWidth = 10; g.strokeRect(12, 12, 616, 156);
+  g.fillStyle = '#ffe6a8'; g.font = '900 58px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('BAKERI · 1941', 320, 74);
+  g.fillStyle = '#e8b658'; g.font = '700 28px system-ui, sans-serif';
+  g.fillText('OSLO FIRINI', 320, 134);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 
-// Oslo Limanı & Kuzey Fiyordu Gün Batımı Panoraması
+// Sıcak ışıklı fırın vitrini (ekmek rafları!)
+function bakeryShopWindowTex() {
+  const [c, g] = cnv(512, 384);
+  const gr = g.createLinearGradient(0, 0, 0, 384);
+  gr.addColorStop(0, '#ffdf9a'); gr.addColorStop(.65, '#e89d4e'); gr.addColorStop(1, '#9c5a2c');
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 384);
+  // ahşap raflar + altın ekmek somunları
+  for (const ry of [140, 250, 340]) {
+    g.fillStyle = '#5a321c'; g.fillRect(16, ry, 480, 16);
+    for (let x = 60; x <= 440; x += 95) {
+      g.fillStyle = '#c87630'; g.beginPath(); g.ellipse(x, ry - 20, 36, 22, 0, 0, 6.29); g.fill();
+      g.strokeStyle = '#f2c478'; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(x - 14, ry - 28); g.lineTo(x - 4, ry - 14); g.moveTo(x + 6, ry - 28); g.lineTo(x + 16, ry - 14); g.stroke();
+    }
+  }
+  // pencere çıtaları
+  g.strokeStyle = '#4a2a18'; g.lineWidth = 14; g.strokeRect(7, 7, 498, 370);
+  g.beginPath(); g.moveTo(256, 0); g.lineTo(256, 384); g.stroke();
+  return tx(c);
+}
+
+// Oslo karlı kış gökyüzü & binalar panoraması (Set 1 açık hava ufku)
 function pano(w, h, azDeg, el0, el1) {
   const [c, g] = cnv(w, h);
   return { c, g, w, h, X: r => w * (.5 + r / azDeg), Y: e => h * (1 - (e - el0) / (el1 - el0)), s: w / azDeg };
 }
-function osloFjordSunsetTex() {
-  const Pn = pano(4096, 1800, 105, -14, 32), { g } = Pn;
+function osloWinterSkyTex() {
+  const Pn = pano(4096, 1800, 110, -10, 35), { g } = Pn;
   const sky = g.createLinearGradient(0, 0, 0, Pn.Y(0));
-  sky.addColorStop(0, D('#243866')); sky.addColorStop(.45, D('#6c5686')); sky.addColorStop(.78, D('#e28e54')); sky.addColorStop(1, D('#ffd488'));
+  sky.addColorStop(0, D('#1b2d4e')); sky.addColorStop(.55, D('#385984')); sky.addColorStop(.88, D('#7ea2c6')); sky.addColorStop(1, D('#b8d0e4'));
   g.fillStyle = sky; g.fillRect(0, 0, Pn.w, Pn.Y(0));
-  const R = rng(76);
-  for (let i = 0; i < 11; i++) {
-    g.fillStyle = D(i % 2 ? '#f4b278' : '#7074a4', .46);
-    g.beginPath(); g.ellipse(R() * Pn.w, Pn.Y(8 + R() * 16), 220 + R() * 250, 20 + R() * 14, 0, 0, 6.29); g.fill();
+  const R = rng(105);
+  for (let i = 0; i < 12; i++) {
+    g.fillStyle = 'rgba(220,235,250,0.22)';
+    g.beginPath(); g.ellipse(R() * Pn.w, Pn.Y(8 + R() * 18), 220 + R() * 260, 26 + R() * 18, 0, 0, 6.29); g.fill();
   }
-  const sx = Pn.X(4), sy = Pn.Y(4.4), sr = Pn.s * 3.3;
-  const gr = g.createRadialGradient(sx, sy, 0, sx, sy, sr * 3.2);
-  gr.addColorStop(0, 'rgba(255,248,220,1)'); gr.addColorStop(.35, 'rgba(255,214,148,.88)'); gr.addColorStop(1, 'rgba(255,175,105,0)');
-  g.fillStyle = gr; g.beginPath(); g.arc(sx, sy, sr * 3.2, 0, 6.29); g.fill();
-  g.fillStyle = '#fff9e8'; g.beginPath(); g.arc(sx, sy, sr, 0, 6.29); g.fill();
-  // fiyort denizi + güneş yansıması
-  const sea = g.createLinearGradient(0, Pn.Y(0), 0, Pn.h);
-  sea.addColorStop(0, D('#38466e')); sea.addColorStop(1, D('#1e2644'));
-  g.fillStyle = sea; g.fillRect(0, Pn.Y(0), Pn.w, Pn.h - Pn.Y(0));
-  g.fillStyle = 'rgba(255,216,138,0.28)';
-  for (let i = 0; i < 18; i++) g.fillRect(sx - 120 - i * 8, Pn.Y(0) + 12 + i * 16, 240 + i * 16, 6);
-  // uzaktaki Norveç dağları & fiyort kıyısı
-  const y0 = Pn.Y(0.6);
-  g.fillStyle = D('#2e3456');
+  // karlı tepeler + Oslo çan kulesi silüeti
+  const y0 = Pn.Y(0);
+  g.fillStyle = D('#283c5c'); g.fillRect(0, y0, Pn.w, Pn.h - y0);
+  g.fillStyle = D('#344c70');
   g.beginPath(); g.moveTo(0, y0);
-  for (let x = 0; x <= Pn.w; x += 140) g.lineTo(x, y0 - 45 - Math.abs(Math.sin(x * .003)) * 110 - R() * 35);
+  for (let x = 0; x <= Pn.w; x += 120) g.lineTo(x, y0 - 30 - Math.abs(Math.sin(x * .0025)) * 85 - R() * 25);
   g.lineTo(Pn.w, y0); g.closePath(); g.fill();
-  // kıyı ışıkları
-  g.fillStyle = '#ffd47e';
-  for (let i = 0; i < 80; i++) g.fillRect(R() * Pn.w, y0 - 8 - R() * 24, 6, 8);
   const t = new THREE.CanvasTexture(Pn.c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+// Kırmızı kadife konser perdesi dokusu (Set 2)
+function velvetCurtainTex() {
+  const [c, g] = cnv(512, 512);
+  for (let x = 0; x < 512; x += 4) {
+    const shade = .62 + .38 * Math.sin((x / 512) * Math.PI * 14);
+    g.fillStyle = sh('#8c1e2e', shade);
+    g.fillRect(x, 0, 4, 512);
+  }
+  return tx(c, [3, 1]);
+}
+
+// Kütüphane kitap rafları dokusu (Set 3)
+function bookshelfTex() {
+  const [c, g] = cnv(512, 512);
+  g.fillStyle = '#3a2416'; g.fillRect(0, 0, 512, 512);
+  const R = rng(303);
+  const cols = ['#8c2e32', '#2f5848', '#304b72', '#a87c32', '#6a3854', '#5c4430', '#7e4a2c'];
+  for (let row = 0; row < 5; row++) {
+    const y0 = row * 102;
+    g.fillStyle = '#5e3c24'; g.fillRect(0, y0 + 88, 512, 14);
+    let x = 8;
+    while (x < 496) {
+      const bw = 18 + Math.floor(R() * 18);
+      const bh = 64 + Math.floor(R() * 22);
+      g.fillStyle = cols[Math.floor(R() * cols.length)];
+      g.fillRect(x, y0 + 88 - bh, bw - 2, bh);
+      g.fillStyle = 'rgba(255,220,140,0.45)';
+      g.fillRect(x + 2, y0 + 88 - bh + 10, bw - 6, 4);
+      x += bw;
+    }
+  }
+  return tx(c, [2, 1]);
+}
+
+// Açık tıp dergisi: BRAIN · 1947 · DR. MONRAD-KROHN (Set 3 masada!)
+function openJournalTex() {
+  const [c, g] = cnv(600, 380);
+  g.fillStyle = '#f2e8d2'; g.fillRect(0, 0, 600, 380);
+  g.strokeStyle = '#c2b08e'; g.lineWidth = 6; g.strokeRect(8, 8, 584, 364);
+  g.fillStyle = '#d4c4a2'; g.fillRect(296, 0, 8, 380);
+  // Sol sayfa: BRAIN 1947
+  g.fillStyle = '#482428'; g.font = '900 42px Georgia, serif'; g.textAlign = 'center';
+  g.fillText('BRAIN · 1947', 152, 84);
+  g.fillStyle = '#6c3830'; g.font = '700 22px system-ui, sans-serif';
+  g.fillText('DR. MONRAD-KROHN', 152, 128);
+  g.fillStyle = '#7e6e58';
+  for (let y = 170; y <= 310; y += 26) g.fillRect(36, y, 226, 8);
+  // Sağ sayfa: ses dalgası kayması çizimi + YABANCI AKSAN
+  g.fillStyle = '#283c54'; g.font = '900 26px system-ui, sans-serif';
+  g.fillText('YABANCI AKSAN', 448, 84);
+  g.strokeStyle = '#d44830'; g.lineWidth = 6; g.beginPath();
+  for (let x = 336; x <= 560; x += 6) {
+    const u = (x - 336) / 224;
+    const y = 200 + Math.sin(u * Math.PI * 8 + .9) * 44 + Math.cos(u * Math.PI * 19) * 14;
+    x === 336 ? g.moveTo(x, y) : g.lineTo(x, y);
+  }
+  g.stroke();
+  g.fillStyle = '#38485a'; g.font = '800 24px system-ui, sans-serif';
+  g.fillText('~100 VAKA · OSLO', 448, 315);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+// 3B Müzik notası sprite dokusu (P01 ve P07 havada uçan altın/kırmızı notalar!)
+function noteTex(color = '#ffd45c') {
+  const [c, g] = cnv(160, 160);
+  g.fillStyle = color;
+  g.beginPath(); g.ellipse(64, 118, 28, 20, -.35, 0, 6.29); g.fill();
+  g.fillRect(84, 34, 12, 84);
+  g.beginPath(); g.moveTo(84, 34); g.quadraticCurveTo(132, 46, 124, 82); g.quadraticCurveTo(114, 62, 96, 58); g.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 
 function shadows(g) {
@@ -177,202 +215,282 @@ function shadows(g) {
     if (/Box|Cylinder|Sphere|Lathe|Torus|Cone/.test(o.geometry.type) && !o.userData.noShadow) o.castShadow = true;
   });
 }
-function sun(color, intensity, dir, target, { size = 2048, ext = 9, far = 60 } = {}) {
+function sun(color, intensity, dir, target, { size = 2048, ext = 11, far = 70 } = {}) {
   const l = new THREE.DirectionalLight(color, intensity);
-  l.position.copy(V(...target).addScaledVector(V(...dir).normalize(), -24));
+  l.position.copy(V(...target).addScaledVector(V(...dir).normalize(), -26));
   l.target.position.set(...target);
   l.castShadow = true; l.shadow.mapSize.set(size, size);
   Object.assign(l.shadow.camera, { left: -ext, right: ext, top: ext, bottom: -ext, near: 1, far });
   l.shadow.bias = -.0006; l.shadow.normalBias = .03; l.shadow.radius = 3; return l;
 }
 
-// ---------------------------------------------------------------- SET 1: 1941 OSLO FIRIN & KLİNİK KÖŞESİ (x = 0)
-function buildOslo(scene) {
+// ---------------------------------------------------------------- SET 1: 1941 KARLI OSLO SOKAĞI & FIRIN VİTRİNİ (x = 0)
+function buildOsloStreet(scene) {
   const g = new THREE.Group(); scene.add(g);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), painted(woodTex({ base: '#8e6c4a', plank: 42, rep: [4, 4] })));
-  floor.rotation.x = -Math.PI / 2; g.add(floor);
-  const rug = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 3.3), flat('#465a70'));
-  rug.rotation.x = -Math.PI / 2; rug.position.set(0, .006, -.4); g.add(rug);
 
-  const backW = new THREE.Mesh(new THREE.PlaneGeometry(11, 5.2), painted(osloWallTex([3, 1])));
-  backW.position.set(0, 2.6, -3.2); g.add(backW);
-  const leftW = new THREE.Mesh(new THREE.PlaneGeometry(11, 5.2), painted(osloWallTex([3, 1])));
-  leftW.rotation.y = Math.PI / 2; leftW.position.set(-4.8, 2.6, 1.5); g.add(leftW);
-  const rightW = new THREE.Mesh(new THREE.PlaneGeometry(11, 5.2), painted(osloWallTex([3, 1])));
-  rightW.rotation.y = -Math.PI / 2; rightW.position.set(4.8, 2.6, 1.5); g.add(rightW);
+  // Karlı Arnavut kaldırımlı cadde + karlı kaldırım
+  const street = new THREE.Mesh(new THREE.PlaneGeometry(26, 22), painted(cobbleSnowTex()));
+  street.rotation.x = -Math.PI / 2; g.add(street);
+  const sidewalk = new THREE.Mesh(new THREE.BoxGeometry(16, .14, 3.6), flat('#cfdbe8'));
+  sidewalk.position.set(0, .07, -2.5); g.add(sidewalk);
 
-  // Arka duvarda SOLDA 1941 OSLO PENCERESİ
-  const winGrp = new THREE.Group(); winGrp.position.set(-1.12, 2.02, -3.12); g.add(winGrp);
-  const winFrm = new THREE.Mesh(new THREE.BoxGeometry(1.42, 1.88, .12), flat('#46362c')); winGrp.add(winFrm);
-  const winPane = new THREE.Mesh(new THREE.PlaneGeometry(1.26, 1.72), new THREE.MeshBasicMaterial({ map: osloWindowTex() }));
-  winPane.position.z = .07; winPane.userData.noShadow = true; winGrp.add(winPane);
-  const barH = new THREE.Mesh(new THREE.BoxGeometry(1.3, .06, .08), flat('#46362c')); barH.position.z = .08; winGrp.add(barH);
-  const barV = new THREE.Mesh(new THREE.BoxGeometry(.06, 1.76, .08), flat('#46362c')); barV.position.z = .08; winGrp.add(barV);
+  // Arka tarafta 3 adet 1940'lar İskandinav binası (ortadaki SICAK FIRIN: BAKERI · 1941!)
+  // Sol bina (hardal-toprak Norveç ahşap cephe)
+  const bLeft = new THREE.Mesh(new THREE.BoxGeometry(3.8, 5.2, 2.8), flat('#b4864c'));
+  bLeft.position.set(-4.1, 2.6, -4.4); g.add(bLeft);
+  const roofL = new THREE.Mesh(new THREE.ConeGeometry(2.8, 1.5, 4), flat('#dce8f4'));
+  roofL.rotation.y = Math.PI / 4; roofL.position.set(-4.1, 5.9, -4.4); g.add(roofL);
 
-  // Arka duvarda SAĞDA SES ANALİZİ / AKSAN KAYMASI PANOSU
-  const brdFrm = new THREE.Mesh(new THREE.BoxGeometry(1.66, 1.24, .12), flat('#2b3646'));
-  brdFrm.position.set(.64, 2.02, -3.1); g.add(brdFrm);
-  dyn.brdNorm = new THREE.Mesh(new THREE.PlaneGeometry(1.54, 1.12), new THREE.MeshBasicMaterial({ map: waveBoardTex(false) }));
-  dyn.brdNorm.position.set(.64, 2.02, -3.02); dyn.brdNorm.userData.noShadow = true; g.add(dyn.brdNorm);
-  dyn.brdShift = new THREE.Mesh(new THREE.PlaneGeometry(1.54, 1.12), new THREE.MeshBasicMaterial({ map: waveBoardTex(true) }));
-  dyn.brdShift.position.set(.64, 2.02, -3.01); dyn.brdShift.userData.noShadow = true; dyn.brdShift.visible = false; g.add(dyn.brdShift);
-  fx.brdGlow = glow(scene, [.64, 2.02, -2.9], { size: 2.0, color: '#5ec8ff', strength: .32 });
+  // Orta bina: BAKERI · OSLO 1941 (sıcak kiremit-bordo cephe + çizgili tente + ışıklı ekmek vitrini + ahşap kapı!)
+  const bakery = new THREE.Group(); bakery.position.set(.2, 0, -4.2); g.add(bakery);
+  const bMain = new THREE.Mesh(new THREE.BoxGeometry(4.6, 5.4, 2.8), flat('#8f4038'));
+  bMain.position.set(0, 2.7, 0); bakery.add(bMain);
+  // karlı çatı saçakları
+  const bSnowRoof = new THREE.Mesh(new THREE.BoxGeometry(4.9, .32, 3.1), flat('#e6f0fa'));
+  bSnowRoof.position.set(0, 5.48, 0); bakery.add(bSnowRoof);
+  // BAKERI · 1941 tabelası
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .74), new THREE.MeshBasicMaterial({ map: bakerySignTex() }));
+  sign.position.set(0, 3.35, 1.44); sign.userData.noShadow = true; bakery.add(sign);
+  // Çizgili fırın tentesi
+  const awning = new THREE.Mesh(new THREE.BoxGeometry(4.2, .16, 1.15), flat('#d8a63c'));
+  awning.rotation.x = .32; awning.position.set(0, 2.68, 1.85); bakery.add(awning);
+  const awnSnow = new THREE.Mesh(new THREE.BoxGeometry(4.22, .08, 1.12), flat('#eef5fc'));
+  awnSnow.rotation.x = .32; awnSnow.position.set(0, 2.76, 1.85); bakery.add(awnSnow);
+  // Işıklı ekmek vitrini (sol yarıda)
+  const shopWin = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.42), new THREE.MeshBasicMaterial({ map: bakeryShopWindowTex() }));
+  shopWin.position.set(-.88, 1.46, 1.43); shopWin.userData.noShadow = true; bakery.add(shopWin);
+  // Fırın kapısı (sağ yarıda — P04'te kapanış hissi!)
+  const doorFrm = new THREE.Mesh(new THREE.BoxGeometry(1.12, 2.15, .14), flat('#3d2218'));
+  doorFrm.position.set(1.12, 1.15, 1.41); bakery.add(doorFrm);
+  dyn.shopDoor = new THREE.Mesh(new THREE.BoxGeometry(.96, 1.98, .12), flat('#643924'));
+  dyn.shopDoor.position.set(1.12, 1.12, 1.46); bakery.add(dyn.shopDoor);
+  // Sıcak fırın vitrin parıltısı
+  fx.bakeryGlow = glow(scene, [-.65, 1.55, -2.55], { size: 3.4, color: '#ffbd64', strength: .55 });
 
-  // Sıcak ahşap tezgâh / masa + masa lambası + ekmek sepeti (1941 fırın/klinik havası)
-  const tbl = new THREE.Group(); tbl.position.set(.86, 0, -.46); g.add(tbl);
-  const top = new THREE.Mesh(new THREE.BoxGeometry(1.04, .08, .66), painted(woodTex({ base: '#7c5638', plank: 30 })));
-  top.position.y = .74; tbl.add(top);
-  for (const lx of [-.42, .42]) for (const lz of [-.24, .24]) {
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(.04, .035, .74, 10), flat('#523824'));
-    leg.position.set(lx, .37, lz); tbl.add(leg);
+  // Sağ bina (kuzey yeşili)
+  const bRight = new THREE.Mesh(new THREE.BoxGeometry(3.8, 5.0, 2.8), flat('#466862'));
+  bRight.position.set(4.5, 2.5, -4.4); g.add(bRight);
+
+  // 2 Dökme Demir Oslo Sokak Lambası (sol & sağ — sıcak fener ışıklı!)
+  for (const [lx, lz] of [[-2.05, -1.35], [2.45, -1.25]]) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(.045, .07, 3.1, 10), flat('#262e38'));
+    pole.position.set(lx, 1.55, lz); g.add(pole);
+    const bulb = new THREE.Mesh(new THREE.SphereGeometry(.17, 14, 10), new THREE.MeshBasicMaterial({ color: '#ffe598' }));
+    bulb.position.set(lx, 3.18, lz); bulb.userData.noShadow = true; g.add(bulb);
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(.24, .18, 8), flat('#202630'));
+    cap.position.set(lx, 3.38, lz); g.add(cap);
   }
-  const lampB = new THREE.Mesh(new THREE.CylinderGeometry(.08, .12, .18, 14), flat('#c89a48')); lampB.position.set(.32, .87, -.1); tbl.add(lampB);
-  const lampS = new THREE.Mesh(new THREE.CylinderGeometry(.1, .18, .22, 16), new THREE.MeshBasicMaterial({ color: '#ffe28a' }));
-  lampS.position.set(.32, 1.07, -.1); lampS.userData.noShadow = true; tbl.add(lampS);
-  fx.lampGlow = glow(scene, [1.18, 1.1, -.56], { size: 1.5, color: '#ffd070', strength: .42 });
-  // Sıcak fırın ekmeği (basit oval)
-  const loaf = new THREE.Mesh(new THREE.SphereGeometry(.14, 14, 10), flat('#c48442'));
-  loaf.scale.set(1.3, .65, .85); loaf.position.set(-.18, .86, .06); tbl.add(loaf);
+  fx.lampL = glow(scene, [-2.05, 3.18, -1.35], { size: 2.1, color: '#ffd478', strength: .5 });
+  fx.lampR = glow(scene, [2.45, 3.18, -1.25], { size: 2.1, color: '#ffd478', strength: .5 });
 
-  // P01 Kanca: Astrid'in YANINDA parlayan kırmızı-altın ses dalgası halkaları (yüzünü ASLA kapatmaz!)
-  dyn.hookWave = new THREE.Group(); dyn.hookWave.position.set(-.16, 1.44, -.58); g.add(dyn.hookWave);
-  const ringMat = new THREE.MeshBasicMaterial({ color: '#ff9648' });
-  dyn.hookRings = [0.06, 0.11, 0.16].map((r, i) => {
-    const m = new THREE.Mesh(new THREE.TorusGeometry(r, .016, 10, 24), ringMat);
-    m.userData.noShadow = true; m.position.x = i * .03; dyn.hookWave.add(m); return m;
-  });
-  fx.sparkGlow = glow(scene, [-.46, 1.38, -1.08], { size: 1.3, color: '#ff8a42', strength: .26 });
-
-  const L = new THREE.Group();
-  L.add(new THREE.HemisphereLight('#a8c8f0', '#6e5a48', 2.0));
-  const SUN = [-.42, -.44, -.78]; dyn.cSun = V(...SUN).normalize();
-  const key = sun('#ffd898', 2.8, SUN, [0, 1, -1], { ext: 8 }); L.add(key); L.add(key.target);
-  const warmPt = new THREE.PointLight('#ffbe64', 2.3, 8); warmPt.position.set(1.18, 1.35, -.55); L.add(warmPt);
-  scene.add(L); sets.oslo = { g, L }; shadows(g);
-  fx.cBeams = [[-2.4, 3.0, -2.5], [-1.2, 2.9, -2.6]].map(p =>
-    beam(scene, p, [p[0] + 1.8, p[1] - 2.2, p[2] + 2.4], { r0: .4, r1: 1.1, color: '#c4e0ff', strength: .12 })
-  );
-}
-
-// ---------------------------------------------------------------- SET 2: KONUŞMA RİTMİ & DEV PİYANO ODASI (x = 200)
-function buildRhythm(scene) {
-  const g = new THREE.Group(); g.position.x = 200; scene.add(g);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(24, 24), flat('#161e34'));
-  floor.rotation.x = -Math.PI / 2; g.add(floor);
-  const backW = new THREE.Mesh(new THREE.PlaneGeometry(24, 14), flat('#12192c'));
-  backW.position.set(0, 6, -5.0); g.add(backW);
-
-  // P06: 3B BEYİN KONUŞMA MERKEZİ + 7 SES DALGASI ÇUBUĞU (mavi düzenli → kırmızı-altın kaymış!)
-  dyn.brainGrp = new THREE.Group(); dyn.brainGrp.position.set(0, 0, -1.2); g.add(dyn.brainGrp);
-  const lobeL = new THREE.Mesh(new THREE.SphereGeometry(.52, 22, 16), flat('#8892b8'));
-  lobeL.scale.set(.86, 1.0, 1.15); lobeL.position.set(-.34, 1.85, 0); dyn.brainGrp.add(lobeL);
-  const lobeR = new THREE.Mesh(new THREE.SphereGeometry(.52, 22, 16), flat('#747ea4'));
-  lobeR.scale.set(.86, 1.0, 1.15); lobeR.position.set(.34, 1.85, 0); dyn.brainGrp.add(lobeR);
-  // Sol motor konuşma (Broca) bölgesi kıvılcım küresi
-  dyn.broca = new THREE.Mesh(new THREE.SphereGeometry(.22, 18, 14), new THREE.MeshBasicMaterial({ color: '#ff6442' }));
-  dyn.broca.position.set(-.44, 1.82, .42); dyn.broca.userData.noShadow = true; dyn.brainGrp.add(dyn.broca);
-  // 7 ses dalgası çubuğu (altta)
-  dyn.bars = Array.from({ length: 7 }, (_, i) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(.16, .6, .16), new THREE.MeshBasicMaterial({ color: '#5ec8ff' }));
-    m.position.set((i - 3) * .26, .82, .15); m.userData.noShadow = true; dyn.brainGrp.add(m); return m;
-  });
-  dyn.rhythmLbl = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.48, .52),
-    new THREE.MeshBasicMaterial({ map: badgeTex('RİTİM KAYMASI', 'KONUŞMA MERKEZİ', '#1a182c', '#ffffff', '#ff8c42'), transparent: true })
-  );
-  dyn.rhythmLbl.position.set(0, 2.95, -1.2); dyn.rhythmLbl.userData.noShadow = true; g.add(dyn.rhythmLbl);
-  fx.brocaGlow = glow(scene, [199.56, 1.82, -.7], { size: 1.9, color: '#ff6e42', strength: .48 });
-
-  // P07 GÜNDELİK BENZETME: DEV 3B PİYANO KLAVYESİ (kameraya eğik — siyah-beyaz tuşlar net!) + SALINAN METRONOM!
-  dyn.pianoGrp = new THREE.Group(); dyn.pianoGrp.position.set(.24, 0, .2); g.add(dyn.pianoGrp);
-  const keyBed = new THREE.Group(); keyBed.position.set(0, 1.22, .02); keyBed.rotation.x = .58; dyn.pianoGrp.add(keyBed);
-  const pCase = new THREE.Mesh(new THREE.BoxGeometry(1.08, .14, .54), flat('#2c2420'));
-  pCase.position.set(0, -.07, -.04); keyBed.add(pCase);
-  // 6 beyaz tuş
-  dyn.wKeys = Array.from({ length: 6 }, (_, i) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(.14, .09, .44), flat('#f4f0e8'));
-    m.position.set((i - 2.5) * .165, .04, .02); keyBed.add(m); return m;
-  });
-  // 4 siyah tuş
-  for (const bx of [-.33, -.165, .165, .33]) {
-    const bk = new THREE.Mesh(new THREE.BoxGeometry(.085, .11, .26), flat('#18161e'));
-    bk.position.set(bx, .11, -.07); keyBed.add(bk);
+  // Karlı çam ağacı (sol kenarda derinlik verir)
+  const pine = new THREE.Group(); pine.position.set(-2.95, 0, -2.35); g.add(pine);
+  const trk = new THREE.Mesh(new THREE.CylinderGeometry(.1, .14, .7, 8), flat('#4a3222')); trk.position.y = .35; pine.add(trk);
+  for (const [y, r, h] of [[1.05, .82, 1.1], [1.75, .64, .95], [2.35, .44, .78]]) {
+    const c1 = new THREE.Mesh(new THREE.ConeGeometry(r, h, 8), flat('#2f5246')); c1.position.y = y; pine.add(c1);
+    const sn = new THREE.Mesh(new THREE.ConeGeometry(r * .78, h * .42, 8), flat('#e4effa')); sn.position.y = y + h * .3; pine.add(sn);
   }
-  // Üstte altın metronom gövdesi + salınan ibre
-  const metBase = new THREE.Mesh(new THREE.ConeGeometry(.20, .48, 4), flat('#7a5234'));
-  metBase.rotation.y = Math.PI / 4; metBase.position.set(0, 1.72, -.06); dyn.pianoGrp.add(metBase);
-  dyn.metNeedle = new THREE.Mesh(new THREE.BoxGeometry(.03, .56, .03), new THREE.MeshBasicMaterial({ color: '#ffd15c' }));
-  dyn.metNeedle.position.set(0, 1.88, .08); dyn.metNeedle.userData.noShadow = true; dyn.pianoGrp.add(dyn.metNeedle);
-  const pianoLbl = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.06, .38),
-    new THREE.MeshBasicMaterial({ map: badgeTex('AYNI PİYANO!', 'FARKLI RİTİM', '#1e1624', '#ffd466', '#ff7b42'), transparent: true })
-  );
-  pianoLbl.position.set(0, .58, .05); pianoLbl.userData.noShadow = true; dyn.pianoGrp.add(pianoLbl);
-  fx.pianoGlow = glow(scene, [200.24, 1.55, .3], { size: 2.2, color: '#ffaa48', strength: .44 });
 
-  const L = new THREE.Group();
-  L.add(new THREE.HemisphereLight('#92b6f2', '#3c3456', 1.95));
-  const SUN = [-.32, -.45, -.84]; dyn.mSun = V(...SUN).normalize();
-  const s = sun('#ffd694', 2.45, SUN, [200, 1, 0], { ext: 8 }); L.add(s); L.add(s.target);
-  scene.add(L); sets.rhythm = { g, L }; shadows(g);
-}
+  // P01 Kanca: Astrid'in konuşurken havaya yükselen 3B altın-kırmızı notaları (yüzünü asla kapatmaz!)
+  const nMatGold = new THREE.MeshBasicMaterial({ map: noteTex('#ffd45c'), transparent: true, side: THREE.DoubleSide });
+  const nMatRed = new THREE.MeshBasicMaterial({ map: noteTex('#ff6a44'), transparent: true, side: THREE.DoubleSide });
+  dyn.streetNotes = Array.from({ length: 5 }, (_, i) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(.24, .24), i % 2 ? nMatRed : nMatGold);
+    m.userData.noShadow = true; m.visible = false; g.add(m); return m;
+  });
 
-// ---------------------------------------------------------------- SET 3: OSLO LİMANI GÜN BATIMI İSKELESİ (x = 300)
-function buildHarbor(scene) {
-  const g = new THREE.Group(); g.position.x = 300; scene.add(g);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 8), painted(woodTex({ base: '#725846', plank: 44, rep: [3, 3] })));
-  floor.rotation.x = -Math.PI / 2; floor.position.z = 1.6; g.add(floor);
-  // iskele korkuluğu + ahşap babalar
-  const railTop = new THREE.Mesh(new THREE.BoxGeometry(8.5, .12, .22), flat('#8a7262'));
-  railTop.position.set(0, .90, -1.65); g.add(railTop);
-  for (let x = -3.6; x <= 3.6; x += .9) {
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(.07, .085, 1.02, 12), flat('#5a463a'));
-    post.position.set(x, .51, -1.65); g.add(post);
-  }
-  const far = new THREE.Mesh(
+  // Açık hava kış gökyüzü silindiri
+  const sky = new THREE.Mesh(
     new THREE.CylinderGeometry(65, 65, 76, 48, 1, true),
-    vistaMat(osloFjordSunsetTex(), { yaw: Math.PI, az: 105 * Math.PI / 180, el: [-14 * Math.PI / 180, 32 * Math.PI / 180], gain: 1.25 })
+    vistaMat(osloWinterSkyTex(), { yaw: Math.PI, az: 110 * Math.PI / 180, el: [-10 * Math.PI / 180, 35 * Math.PI / 180], gain: 1.15 })
   );
-  far.material.side = THREE.BackSide; g.add(far);
+  sky.material.side = THREE.BackSide; g.add(sky);
 
   const L = new THREE.Group();
-  L.add(new THREE.HemisphereLight('#a89ce8', '#5a4c64', 1.85));
-  const SUN = [0, -.26, 1]; dyn.hSun = V(...SUN).normalize();
-  const s = sun('#ffaa60', 3.0, SUN, [300, 1, 0], { ext: 8 }); L.add(s); L.add(s.target);
-  const fill = new THREE.DirectionalLight('#c4c0ff', 1.2); fill.position.set(302.5, 3.6, 7.5); fill.target.position.set(300, 1.1, 0);
-  L.add(fill); L.add(fill.target);
-  scene.add(L); sets.harbor = { g, L }; shadows(g);
+  L.add(new THREE.HemisphereLight('#9ec0ea', '#4a5268', 1.85));
+  const SUN = [-.38, -.52, -.76]; dyn.sSun = V(...SUN).normalize();
+  const key = sun('#ffe0a6', 2.5, SUN, [0, 1, -1], { ext: 10 }); L.add(key); L.add(key.target);
+  dyn.bakeryLight = new THREE.PointLight('#ffbd62', 3.2, 9); dyn.bakeryLight.position.set(-.4, 1.9, -2.0); L.add(dyn.bakeryLight);
+  scene.add(L); sets.street = { g, L }; shadows(g);
 }
 
-// ---------------------------------------------------------------- KAMERA YOLU (Dikey 9:16 güvenli mesafeler!)
+// ---------------------------------------------------------------- SET 2: 1947 KONSER SALONU & DEV KUYRUKLU PİYANO SAHNESİ (x = 200)
+function buildConcertHall(scene) {
+  const g = new THREE.Group(); g.position.x = 200; scene.add(g);
+
+  // Sıcak cilalı sahne parkesi
+  const stage = new THREE.Mesh(new THREE.PlaneGeometry(24, 18), painted(woodTex({ base: '#8a5c36', plank: 36, rep: [5, 5] })));
+  stage.rotation.x = -Math.PI / 2; g.add(stage);
+
+  // Arkada görkemli KIRMIZI KADİFE KONSER PERDESİ + altın sahne sütunları!
+  const curtain = new THREE.Mesh(new THREE.PlaneGeometry(18, 9), painted(velvetCurtainTex()));
+  curtain.position.set(0, 4.5, -4.6); g.add(curtain);
+  for (const px of [-3.6, 3.6]) {
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(.26, .30, 8.5, 16), flat('#c89c4a'));
+    col.position.set(px, 4.25, -4.2); g.add(col);
+  }
+
+  // DEV 3B SİYAH KUYRUKLU PİYANO (sahnenin merkezinde — 12 beyaz + 8 siyah tuşlu, açık kapaklı!)
+  dyn.pianoStage = new THREE.Group(); dyn.pianoStage.position.set(.1, 0, -.95); g.add(dyn.pianoStage);
+  // Piyano ayakları
+  for (const [lx, lz] of [[-1.35, .55], [1.35, .55], [0, -1.2]]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(.08, .055, .92, 12), flat('#18161c'));
+    leg.position.set(lx, .46, lz); dyn.pianoStage.add(leg);
+  }
+  // Piyano gövdesi & açık kanat kapağı + parlayan altın teller!
+  const body = new THREE.Mesh(new THREE.BoxGeometry(3.1, .34, 2.0), flat('#1d1a22'));
+  body.position.set(0, 1.08, -.25); dyn.pianoStage.add(body);
+  const strings = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.3), new THREE.MeshBasicMaterial({ color: '#d8a444' }));
+  strings.rotation.x = -Math.PI / 2; strings.position.set(0, 1.26, -.45); dyn.pianoStage.add(strings);
+  const lid = new THREE.Mesh(new THREE.BoxGeometry(3.05, .07, 1.85), flat('#141218'));
+  lid.position.set(-.15, 1.88, -.68); lid.rotation.z = .36; dyn.pianoStage.add(lid);
+  const lidProp = new THREE.Mesh(new THREE.CylinderGeometry(.025, .025, 1.15, 8), flat('#e0b254'));
+  lidProp.position.set(1.1, 1.72, -.55); lidProp.rotation.z = -.24; dyn.pianoStage.add(lidProp);
+
+  // Öne doğru hafif eğik 12 BEYAZ + 8 SİYAH DEV TUŞ (kamera tuşların üstünden kayacak!)
+  const kb = new THREE.Group(); kb.position.set(0, 1.06, .88); kb.rotation.x = .28; dyn.pianoStage.add(kb);
+  dyn.pWhite = Array.from({ length: 12 }, (_, i) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(.21, .11, .72), flat('#f6f2ea'));
+    m.position.set((i - 5.5) * .235, 0, 0); kb.add(m); return m;
+  });
+  const blackIdx = [0, 1, 3, 4, 5, 7, 8, 10];
+  blackIdx.forEach(i => {
+    const bk = new THREE.Mesh(new THREE.BoxGeometry(.12, .13, .44), flat('#15131a'));
+    bk.position.set((i - 5.0) * .235, .08, -.14); kb.add(bk);
+  });
+
+  // Piyanonun üstünde salınan BÜYÜK ALTIN METRONOM + havaya fırlayan 3B müzik notaları!
+  const metBody = new THREE.Mesh(new THREE.ConeGeometry(.24, .58, 4), flat('#6e4024'));
+  metBody.rotation.y = Math.PI / 4; metBody.position.set(-1.15, 1.54, .35); dyn.pianoStage.add(metBody);
+  dyn.stageMet = new THREE.Mesh(new THREE.BoxGeometry(.035, .66, .035), new THREE.MeshBasicMaterial({ color: '#ffdb66' }));
+  dyn.stageMet.position.set(-1.15, 1.74, .52); dyn.stageMet.userData.noShadow = true; dyn.pianoStage.add(dyn.stageMet);
+
+  const nGold = new THREE.MeshBasicMaterial({ map: noteTex('#ffd862'), transparent: true, side: THREE.DoubleSide });
+  const nRed = new THREE.MeshBasicMaterial({ map: noteTex('#ff5a3c'), transparent: true, side: THREE.DoubleSide });
+  dyn.pianoNotes = Array.from({ length: 8 }, (_, i) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(.34, .34), i === 3 || i === 6 ? nRed : nGold);
+    m.userData.noShadow = true; m.position.set((i - 3.5) * .36, 1.75, .85); dyn.pianoStage.add(m); return m;
+  });
+
+  // P06 için piyanonun üstünde süzülen 9 ışıklı ses-ritim sütunu (mavi düzenli → kırmızı-altın kaymış!)
+  dyn.ritimBars = Array.from({ length: 9 }, (_, i) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(.16, .65, .16), new THREE.MeshBasicMaterial({ color: '#64d4ff' }));
+    m.position.set((i - 4) * .25, 2.35, .15); m.userData.noShadow = true; dyn.pianoStage.add(m); return m;
+  });
+
+  // Eski tip altın borulu gramofon (P05 Dr. Krohn kayıt sahnesi!)
+  const phono = new THREE.Group(); phono.position.set(1.55, 0, .65); g.add(phono);
+  const pTbl = new THREE.Mesh(new THREE.BoxGeometry(.7, .82, .7), flat('#583822')); pTbl.position.y = .41; phono.add(pTbl);
+  const pBox = new THREE.Mesh(new THREE.BoxGeometry(.44, .22, .44), flat('#7e4e2a')); pBox.position.y = .93; phono.add(pBox);
+  const horn = new THREE.Mesh(new THREE.ConeGeometry(.32, .62, 16, 1, true), flat('#e0b44e'));
+  horn.rotation.z = 1.12; horn.position.set(-.22, 1.24, 0); phono.add(horn);
+
+  // Sahne spot ışık huzmeleri (tepeden sıcak altın spot!)
+  fx.stageBeams = [[-.8, 5.2, -.5], [.8, 5.2, -.5]].map(p =>
+    beam(scene, [200 + p[0], p[1], p[2]], [200 + p[0] * .2, .2, .4], { r0: .35, r1: 1.75, color: '#ffe0a2', strength: .16 })
+  );
+  fx.pianoKeyGlow = glow(scene, [200.1, 1.45, .15], { size: 2.6, color: '#ffae4c', strength: .42 });
+
+  const L = new THREE.Group();
+  L.add(new THREE.HemisphereLight('#c4a8e4', '#4e3428', 1.65));
+  const SUN = [-.25, -.62, -.74]; dyn.mSun = V(...SUN).normalize();
+  const key = sun('#ffe0a4', 2.85, SUN, [200, 1.2, 0], { ext: 10 }); L.add(key); L.add(key.target);
+  const redRim = new THREE.PointLight('#ff6452', 2.2, 10); redRim.position.set(200, 3.2, -3.5); L.add(redRim);
+  scene.add(L); sets.concert = { g, L }; shadows(g);
+}
+
+// ---------------------------------------------------------------- SET 3: 1947 OSLO ÜNİVERSİTESİ TARİHİ KÜTÜPHANE SALONU (x = 300)
+function buildLibrary(scene) {
+  const g = new THREE.Group(); g.position.x = 300; scene.add(g);
+
+  // Sıcak meşe parke + bordo klasik halı
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(18, 16), painted(woodTex({ base: '#7d5636', plank: 40, rep: [4, 4] })));
+  floor.rotation.x = -Math.PI / 2; g.add(floor);
+  const carpet = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 4.2), flat('#742c34'));
+  carpet.rotation.x = -Math.PI / 2; carpet.position.set(0, .008, -.2); g.add(carpet);
+
+  // Arka duvarda devasa MEŞE KİTAPLIKLAR + ortada yüksek kemerli GÜNDÜZ PENCERESİ (gün batımı balkonu DEĞİL!)
+  const wallBack = new THREE.Mesh(new THREE.PlaneGeometry(16, 7), flat('#463022'));
+  wallBack.position.set(0, 3.5, -3.6); g.add(wallBack);
+  for (const sx of [-2.8, 2.8]) {
+    const shelf = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.8, .48), painted(bookshelfTex()));
+    shelf.position.set(sx, 2.4, -3.35); g.add(shelf);
+  }
+  // Ortada yüksek kemerli sıcak gündüz penceresi (mavi-altın öğleden sonra gökyüzü!)
+  const archWin = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 3.6), new THREE.MeshBasicMaterial({ color: '#cbe6ff' }));
+  archWin.position.set(0, 2.6, -3.52); archWin.userData.noShadow = true; g.add(archWin);
+  for (const mx of [-.45, .45]) {
+    const mull = new THREE.Mesh(new THREE.BoxGeometry(.07, 3.6, .1), flat('#4a3222'));
+    mull.position.set(mx, 2.6, -3.46); g.add(mull);
+  }
+  for (const my of [1.6, 2.6, 3.6]) {
+    const cross = new THREE.Mesh(new THREE.BoxGeometry(1.95, .07, .1), flat('#4a3222'));
+    cross.position.set(0, my, -3.46); g.add(cross);
+  }
+
+  // Ön ortada antika meşe çalışma masası + AÇIK 'BRAIN · 1947' TIP DERGİSİ!
+  const desk = new THREE.Group(); desk.position.set(0, 0, .55); g.add(desk);
+  const dTop = new THREE.Mesh(new THREE.BoxGeometry(1.75, .10, .92), painted(woodTex({ base: '#6a4428', plank: 26 })));
+  dTop.position.y = .76; desk.add(dTop);
+  for (const lx of [-.75, .75]) for (const lz of [-.36, .36]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(.045, .04, .76, 10), flat('#4c301c'));
+    leg.position.set(lx, .38, lz); desk.add(leg);
+  }
+  const journal = new THREE.Mesh(new THREE.PlaneGeometry(.86, .54), new THREE.MeshBasicMaterial({ map: openJournalTex() }));
+  journal.rotation.x = -Math.PI / 2 + .24; journal.position.set(0, .86, .04); journal.userData.noShadow = true; desk.add(journal);
+
+  // Kapanışta hafifçe yana kayıp parlayan tek bir büyük altın 3B nota!
+  dyn.finalNote = new THREE.Mesh(
+    new THREE.PlaneGeometry(.46, .46),
+    new THREE.MeshBasicMaterial({ map: noteTex('#ffd862'), transparent: true, side: THREE.DoubleSide })
+  );
+  dyn.finalNote.position.set(0, 2.38, -.35); dyn.finalNote.userData.noShadow = true; g.add(dyn.finalNote);
+
+  // Yüksek pencereden kütüphaneye süzülen sıcak gündüz güneş huzmeleri!
+  fx.libBeams = [[-.4, 4.1, -3.3], [.4, 4.1, -3.3]].map(p =>
+    beam(scene, [300 + p[0], p[1], p[2]], [300 + p[0] * 1.4, .1, 1.4], { r0: .45, r1: 1.45, color: '#fff0c4', strength: .18 })
+  );
+  fx.noteGlow = glow(scene, [300, 2.38, -.35], { size: 1.5, color: '#ffd468', strength: .45 });
+
+  const L = new THREE.Group();
+  L.add(new THREE.HemisphereLight('#dceaff', '#7a5638', 1.95));
+  const SUN = [-.2, -.48, .85]; dyn.lSun = V(...SUN).normalize();
+  const key = sun('#ffe6b0', 2.85, SUN, [300, 1.1, 0], { ext: 9 }); L.add(key); L.add(key.target);
+  const frontFill = new THREE.DirectionalLight('#ffdca4', 1.45);
+  frontFill.position.set(300.5, 3.2, 6.5); frontFill.target.position.set(300, 1.1, -.3);
+  L.add(frontFill); L.add(frontFill.target);
+  scene.add(L); sets.library = { g, L }; shadows(g);
+}
+
+// ---------------------------------------------------------------- KAMERA KOREOGRAFİSİ (VİNÇ + TAKİP + ÇAPRAZ AÇILAR!)
 function cameraPath() {
   const k = [
-    // P01 PARADOKS KANCA (4 hızlı plan): 1941 Oslo → yandan ses halkası → SES ANALİZİ panosu → Astrid yakın yüz
-    { t: 0, pos: [-.35, 1.32, 3.85], look: [-.1, 1.2, -.85], fov: 50, creep: .26, drift: .03 },
-    { t: P(1, .30), dur: .38, pos: [-.36, 1.50, 1.65], look: [-.36, 1.40, -.60], fov: 46, creep: .24 },
-    { t: P(1, .60), dur: .28, move: 'whip', pos: [.62, 1.98, .15], look: [.64, 2.02, -3.05], fov: 46, creep: .28 },
-    { t: P(1, .86), dur: .28, move: 'whip', pos: [-.46, 1.28, 1.55], look: [-.46, 1.24, -.75], fov: 44, creep: .26 },
-    // P02 "Bakın, 1941'de Oslo'da Astrid...": Astrid + Fırıncı tam ikili plan!
-    { t: PS(2) + .16, dur: .32, move: 'whip', pos: [-.02, 1.24, 3.85], look: [-.04, 1.18, -.80], fov: 50, creep: .22 },
-    // P03 Fırıncı güler: "Astrid, bu Alman aksanı nereden çıktı, şaka mı?"
-    { t: PS(3) + .14, dur: .30, move: 'whip', pos: [.48, 1.28, 2.25], look: [.44, 1.22, -.78], fov: 46, creep: .28 },
-    // P04 Ama şaka değildi: Fırıncı kızgın uzaklaşır, pano KIRMIZI-ALTIN AKSAN KAYMASI'na döner!
-    { t: PS(4) + .16, dur: .34, move: 'whip', pos: [.0, 1.38, 3.60], look: [.04, 1.34, -1.2], fov: 50, creep: .24 },
-    // P05 Dr. Krohn inceler + 1947 DR. MONRAD-KROHN panosu tam kadraj!
-    { t: PS(5) + .14, dur: .32, move: 'whip', pos: [.06, 1.44, 3.68], look: [.06, 1.44, -1.55], fov: 50, creep: .22 },
-    // P06 WHIP PAN → SET 2: 3B Beyin Broca Alanı + Kayan Ses Dalgası Çubukları!
-    { t: PS(6) + .14, dur: .32, move: 'whip', pos: [200.0, 1.68, 4.45], look: [200.0, 1.72, -1.2], fov: 50, creep: .24 },
-    // P07 Gündelik benzetme: Dr. Krohn + Dev 3B Piyano Klavyesi & Metronom!
-    { t: PS(7) + .16, dur: .36, move: 'whip', pos: [200.0, 1.26, 4.82], look: [199.96, 1.22, .2], fov: 50, creep: .18 },
-    // P08 WHIP PAN → SET 1: Oslo penceresi önünde Astrid (şaşkın/düşünceli)
-    { t: PS(8) + .14, dur: .32, move: 'whip', pos: [-.62, 1.48, 2.48], look: [-.78, 1.52, -2.0], fov: 48, creep: .24 },
-    // P09 WHIP PAN → SET 3: Oslo Limanı gün batımı iskelesi (Astrid + Dr. Krohn tam kadraj!)
-    { t: PS(9) + .14, dur: .32, move: 'whip', pos: [300.0, 1.22, 3.55], look: [300.0, 1.20, -.8], fov: 50, creep: .20 },
-    // P10 Son vuruş: yavaşça geri çekilir (~4.45 m)
-    { t: DUR, dur: Math.max(.5, DUR - PS(10) - .05), pos: [300.0, 1.32, 4.45], look: [300.0, 1.22, -3.8], fov: 52, creep: .15 },
+    // P01 VİNÇ AÇILIŞI: Karlı Oslo sokağının üstünden aşağı süzülüp şaşkın Astrid'e iner!
+    { t: 0, pos: [-.9, 3.65, 4.65], look: [-.3, 1.45, -1.6], fov: 50, creep: .12, drift: .03 },
+    { t: P(1, .45), dur: .75, pos: [-.45, 1.48, 2.35], look: [-.25, 1.38, -.65], fov: 46, creep: .20 },
+    { t: P(1, .82), dur: .35, pos: [-.45, 1.32, 1.55], look: [-.45, 1.26, -.65], fov: 44, creep: .22 },
+    // P02 TAKİP PLANI: Astrid karlı sokakta yürüyerek BAKERI fırınının önüne gelir!
+    { t: PS(2) + .16, dur: .42, move: 'whip', pos: [-.3, 1.42, 3.85], look: [.1, 1.38, -2.4], fov: 50, creep: .18 },
+    // P03 ÇAPRAZ FIRIN ÖNÜ: Fırıncı BAKERI kapısında kahkahayla güler!
+    { t: PS(3) + .14, dur: .32, move: 'whip', pos: [1.35, 1.35, 1.85], look: [.45, 1.32, -1.6], fov: 46, creep: .24 },
+    // P04 DRAMATİK DİYAGONAL: Fırıncı kızgın uzaklaşır, Astrid karlı sokakta yalnız kalır!
+    { t: PS(4) + .16, dur: .36, move: 'whip', pos: [-1.45, 1.46, 2.65], look: [.25, 1.25, -1.4], fov: 50, creep: .22 },
+    // P05 WHIP PAN → SET 2 KONSER SALONU: Dr. Krohn altın gramofonla Astrid'i inceler!
+    { t: PS(5) + .14, dur: .34, move: 'whip', pos: [200.25, 1.42, 4.45], look: [200.2, 1.35, -.3], fov: 50, creep: .18 },
+    // P06 DOLLY-IN: Dev kuyruklu piyano üstündeki 9 ışıklı ritim çubuğuna zoom (kıvılcımla kayar!)
+    { t: PS(6) + .16, dur: .36, move: 'whip', pos: [200.1, 2.15, 3.75], look: [200.1, 2.15, -.75], fov: 48, creep: .28 },
+    // P07 PİYANO TUŞLARI ÜSTÜNDEN YANLAMASINA TAKİP KAMERASI (SOLA → SAĞA KAYAR!)
+    { t: PS(7) + .12, dur: .32, move: 'whip', pos: [199.15, 2.15, 2.75], look: [199.75, 1.30, -.15], fov: 48, creep: .08 },
+    { t: PE(7) - .10, dur: Math.max(.8, PE(7) - PS(7) - .3), pos: [200.85, 2.05, 2.75], look: [200.35, 1.30, -.15], fov: 48, creep: .08 },
+    // P08 KONSER SALONU GENİŞ DRAMATİK SPOT: Astrid ortada, etrafında dönen ses halkaları!
+    { t: PS(8) + .14, dur: .34, move: 'whip', pos: [200.0, 1.62, 4.35], look: [200.0, 1.35, -.6], fov: 50, creep: .22 },
+    // P09 WHIP PAN → SET 3 TARİHİ KÜTÜPHANE: Açık BRAIN · 1947 dergisinden yükselip karakterleri gösterir!
+    { t: PS(9) + .14, dur: .34, move: 'whip', pos: [300.0, 1.68, 2.75], look: [300.0, 1.05, .25], fov: 48, creep: .12 },
+    // P10 VİNÇ ÇIKIŞI (CRANE-OUT): Kütüphane güneş huzmeleri ve yana kayan altın nota ile kapanış!
+    { t: DUR, dur: Math.max(.8, DUR - PS(10) - .05), pos: [300.0, 2.18, 4.55], look: [300.0, 1.52, -1.2], fov: 52, creep: .12 },
   ];
   const cp = new CamPath(k, { fps: FPS });
-  cp.kick(P(6, .38), 1.15); // konuşma ritmi hasar + dalga kayma anı!
+  cp.kick(P(6, .38), 1.15); // ritim çubukları kayma anı!
   return cp;
 }
 
@@ -385,33 +503,34 @@ export async function setup(ctx) {
   }
   DUR = Math.ceil((ctx.words[ctx.words.length - 1].end + 1.2) * FPS) / FPS;
   const { scene } = ctx;
-  scene.background = new THREE.Color('#24344c');
-  buildOslo(scene); buildRhythm(scene); buildHarbor(scene);
+  scene.background = new THREE.Color('#20324e');
+  buildOsloStreet(scene); buildConcertHall(scene); buildLibrary(scene);
   for (const n of Object.keys(LOOK)) cast[n] = new Toon(LOOK[n], scene);
 
-  fx.motes = new Smoke(scene, { color: '#dcecff', maxPoints: 500, H: ctx.H, additive: true, near: 2.0 });
+  // Set 1'de GERÇEK YAĞAN KAR, Set 2'de altın sahne tozu, Set 3'te kütüphane güneş tozları!
+  fx.motes = new Smoke(scene, { color: '#eef6ff', maxPoints: 550, H: ctx.H, additive: true, near: 2.0 });
   const hash = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
   fx.motes.wisps.push({
-    n: 140, size: .012, alpha: .55, speed: .45, on: t => where(t) === 'oslo',
-    path: (u, t, i) => [-1.1 + (hash(i, 1) - .5) * 2.2 - Math.sin(t + i) * .12, 3.0 - u * 2.4, -2.95 + (hash(i, 2) - .5) * .3],
+    n: 260, size: .018, alpha: .78, speed: .42, on: t => where(t) === 'street',
+    path: (u, t, i) => [(hash(i, 1) - .5) * 9.0 + Math.sin(t * 1.4 + i) * .25, 4.6 - u * 4.5, -2.5 + (hash(i, 2) - .5) * 5.0],
   });
   fx.motes.wisps.push({
-    n: 110, size: .014, alpha: .72, speed: .35, on: t => where(t) === 'rhythm',
-    path: (u, t, i) => [200 + (hash(i, 4) - .5) * 3.2, 1.4 + (hash(i, 5) - .5) * 2.4 + Math.sin(t + i) * .08, -1.0 + (hash(i, 6) - .5) * 2.0],
+    n: 120, size: .013, alpha: .65, speed: .18, on: t => where(t) === 'concert',
+    path: (u, t, i) => [200 + (hash(i, 4) - .5) * 5.0, 4.2 - u * 3.8, -.5 + (hash(i, 6) - .5) * 3.0],
   });
   fx.motes.wisps.push({
-    n: 90, size: .011, alpha: .5, speed: .04, on: t => where(t) === 'harbor',
-    path: (u, t, i) => [300 + (hash(i, 7) - .5) * 5.0, 1.4 + (hash(i, 8) - .5) * 2.4 + (u - .5) * .3, (hash(i, 9) - .5) * 3.0],
+    n: 110, size: .012, alpha: .55, speed: .08, on: t => where(t) === 'library',
+    path: (u, t, i) => [300 + (hash(i, 7) - .5) * 4.2, 3.8 - u * 3.2, -1.5 + (hash(i, 9) - .5) * 3.6],
   });
 
   dyn.cam = cameraPath();
 
   const cue = (t, type, extra = {}) => CUES.push({ t: +t.toFixed(3), type, ...extra });
-  cue(PS(6) - .06, 'whoosh');
+  cue(PS(5) - .06, 'whoosh');
   cue(PS(7) - .06, 'whoosh');
   cue(PS(9) - .06, 'whoosh');
-  cue(P(1, .28), 'spark');
-  cue(P(1, .56), 'wave');
+  cue(P(1, .30), 'spark');
+  cue(P(1, .62), 'wave');
   cue(P(4, .28), 'wave');
   cue(P(6, .38), 'boom');
   cue(PS(7) + .12, 'piano_shift', { dur: PE(7) - PS(7) });
@@ -421,167 +540,183 @@ export async function setup(ctx) {
 
 // ---------------------------------------------------------------- KARE KARE
 const vis = (s, on) => { sets[s].g.visible = on; sets[s].L.visible = on; };
-function where(t) { return (t < PS(6) || (t >= PS(8) && t < PS(9))) ? 'oslo' : t < PS(8) ? 'rhythm' : 'harbor'; }
-function camSet(cam) { return cam.position.x > 250 ? 'harbor' : cam.position.x > 100 ? 'rhythm' : 'oslo'; }
+function where(t) { return t < PS(5) ? 'street' : t < PS(9) ? 'concert' : 'library'; }
+function camSet(cam) { return cam.position.x > 250 ? 'library' : cam.position.x > 100 ? 'concert' : 'street'; }
 const WARM = '#ffd690', COOL = '#cde2f6';
 
 export function frame(t, ctx) {
   const { cam } = ctx, cp = dyn.cam;
   const st = cp.apply(cam, t);
   const here = camSet(cam);
-  for (const s of ['oslo', 'rhythm', 'harbor']) vis(s, s === here);
+  for (const s of ['street', 'concert', 'library']) vis(s, s === here);
   for (const c of Object.values(cast)) c.hide();
   const env = ctx.env, talk = (a, b) => t >= a && t <= b ? flap(env, t) : 0;
   const bl = (seed, ...sw) => blinkAt(t, seed, sw);
-  const tint = here === 'oslo' ? [1, 1, 1] : here === 'rhythm' ? [.98, .99, 1.03] : [1.03, .98, .96];
+  const tint = here === 'street' ? [.98, 1.0, 1.04] : here === 'concert' ? [1.03, .99, .95] : [1.04, 1.01, .95];
 
-  for (const b of fx.cBeams) b.visible = here === 'oslo';
-  fx.lampGlow.visible = here === 'oslo';
-  fx.brdGlow.visible = here === 'oslo';
-  fx.sparkGlow.visible = here === 'oslo' && t >= P(1, .25) && t < P(1, .60);
-  fx.brocaGlow.visible = here === 'rhythm' && t < PS(7) - .1;
-  fx.pianoGlow.visible = here === 'rhythm' && t >= PS(7) - .18;
+  fx.bakeryGlow.visible = here === 'street';
+  fx.lampL.visible = here === 'street';
+  fx.lampR.visible = here === 'street';
+  for (const b of fx.stageBeams) b.visible = here === 'concert';
+  fx.pianoKeyGlow.visible = here === 'concert';
+  for (const b of fx.libBeams) b.visible = here === 'library';
+  fx.noteGlow.visible = here === 'library';
 
   const ast = cast.astrid, fir = cast.firinci, kr = cast.krohn;
 
-  if (here === 'oslo') {
-    // P01 yanda titreşen ses halkaları (Astrid'in yüzünü asla kapatmaz, P01 ortasında kaybolur)
-    dyn.hookWave.visible = t < P(1, .56);
-    const pulse = 1 + .18 * Math.sin(t * 16);
-    dyn.hookRings.forEach((m, i) => m.scale.setScalar(pulse + i * .08));
+  if (here === 'street') {
+    // P02'de Astrid sokakta yürüyerek fırının önüne gelir!
+    const walkU = ramp(t, PS(2), PE(2));
+    const astX = -.48 - (1 - walkU) * .45;
+    const astZ = -.65 - walkU * .85;
+    const walking = t >= PS(2) && t <= PE(2);
+    const walkBob = walking ? Math.abs(Math.sin(t * 11)) * 7 : 0;
 
-    // P04'ten itibaren pano KIRMIZI-ALTIN AKSAN KAYMASI moduna geçer!
-    const shifted = t >= P(4, .28);
-    dyn.brdNorm.visible = !shifted;
-    dyn.brdShift.visible = shifted;
-    fx.brdGlow.material.color.set(shifted ? '#ff8c42' : '#5ec8ff');
-
-    // Astrid (solda; P08'de Oslo penceresinin önünde!)
-    const atWin = t >= PS(8) - .1;
-    ast.show(); ast.place(atWin ? -.74 : -.46, 0, atWin ? -1.45 : -.75, cam, tint);
-    ast.draw({
-      expr: atWin ? 'surprised' : (shifted || t >= P(1, .6) ? 'worried' : 'neutral'),
-      look: atWin ? -.2 : t >= PS(2) && t < PS(5) ? .55 : .15,
-      sweat: (t >= P(1, .7) && t < PS(2)) || (t >= PS(4) && t < PS(5)) ? 1 : 0,
-      blink: bl(1, P(1, .5), PS(4), PS(8)),
-      armL: [18, 16], armR: [18, 16],
-      lit: 1, shade: COOL, rim: { color: WARM, a: .36 },
+    // P01-P03 Astrid'in sağından yükselen parlak müzik notaları (yüzünü asla kapatmaz!)
+    const showNotes = t >= P(1, .28) && t < PS(4);
+    dyn.streetNotes.forEach((m, i) => {
+      m.visible = showNotes;
+      if (showNotes) {
+        const phase = ((t * .85 + i * .22) % 1);
+        m.position.set(astX + .32 + phase * .48, 1.32 + phase * .78 + Math.sin(t * 6 + i) * .06, astZ + .1);
+        m.lookAt(cam.position);
+      }
     });
-    ast.castFrom(dyn.cSun, true);
 
-    // Fırıncı (P02-P04 arası sağda; P03'te kahkahayla güler, P04'te kaşlarını çatıp uzaklaşır!)
-    if (t >= PS(2) - .15 && t < PS(5) - .12) {
-      const angry = t >= PS(4);
-      const stepOut = angry ? ramp(t, PS(4), PE(4)) * .16 : 0;
-      fir.show(); fir.place(.44 + stepOut, 0, -.78, cam, tint);
+    // P04'te fırın ışığı soğur, kapı kapanır!
+    const coldOut = t >= PS(4);
+    dyn.bakeryLight.intensity = coldOut ? 1.4 : 3.4;
+
+    ast.show(); ast.place(astX, 0, astZ, cam, tint);
+    ast.draw({
+      expr: coldOut ? 'worried' : (t >= P(1, .6) && t < PS(2) ? 'surprised' : 'neutral'),
+      look: t >= PS(2) ? .55 : .1,
+      sweat: (t >= P(1, .72) && t < PS(2)) || coldOut ? 1 : 0,
+      blink: bl(1, P(1, .5), PS(3), PS(4)),
+      bob: walkBob,
+      armL: walking ? [36 * Math.sin(t * 11), 16] : [18, 16],
+      armR: walking ? [-36 * Math.sin(t * 11), 16] : [18, 16],
+      lit: 1, shade: COOL, rim: { color: WARM, a: .42 },
+    });
+    ast.castFrom(dyn.sSun, true);
+
+    // Fırıncı (P02-P04 BAKERI kapısında: önce gülümser → P03 kahkaha atar → P04 kızıp geriye çekilir!)
+    if (t >= PS(2) - .1) {
       const laughing = t >= PS(3) && t <= PE(3) + .18;
+      const pullBack = coldOut ? ramp(t, PS(4), PE(4)) * .65 : 0;
+      fir.show(); fir.place(.55 + pullBack * .35, 0, -1.65 - pullBack * .7, cam, tint);
       fir.draw({
-        expr: angry ? 'angry' : (laughing ? 'laugh' : 'smile'),
-        look: angry ? -.35 : -.6,
+        expr: coldOut ? 'angry' : (laughing ? 'laugh' : 'smile'),
+        look: -.6,
         mouth: Math.max(talk(PS(3), PE(3)), laughing ? .65 : 0),
-        laughMarks: laughing ? .88 : 0,
+        laughMarks: laughing ? .9 : 0,
         blink: bl(2, PS(3), PS(4)),
-        armL: laughing ? [112, 34] : (angry ? [70, 28] : [22, 18]),
+        armL: laughing ? [112, 34] : (coldOut ? [76, 26] : [26, 18]),
         armR: laughing ? [64, 38] : [22, 18],
         bob: laughing ? -Math.abs(Math.sin(t * 14)) * 9 : 0,
-        lit: 1, shade: COOL, rim: { color: WARM, a: .35 },
+        lit: 1, shade: COOL, rim: { color: WARM, a: .40 },
       });
-      fir.castFrom(dyn.cSun, true);
+      fir.castFrom(dyn.sSun, true);
     }
+  } else if (here === 'concert') {
+    const inP6 = t >= PS(6) - .15 && t < PS(7) - .12;
+    const inP7 = t >= PS(7) - .12 && t < PS(8) - .12;
+    const inP8 = t >= PS(8) - .12;
 
-    // Dr. Monrad-Krohn (P05 boyunca sağda defter ve kalemle Astrid'i inceler!)
-    if (t >= PS(5) - .12 && t < PS(6)) {
-      kr.show(); kr.place(.42, 0, -.82, cam, tint);
-      kr.draw({
-        expr: 'surprised',
-        look: -.55,
-        sweat: 1,
-        blink: bl(3, PS(5)),
-        propL: 'scroll', propR: 'pen',
-        armL: [58, 36], armR: [62, 40],
-        lit: 1, shade: COOL, rim: { color: WARM, a: .36 },
-      });
-      kr.castFrom(dyn.cSun, true);
-    }
-  } else if (here === 'rhythm') {
-    const showPiano = t >= PS(7) - .18;
-    dyn.brainGrp.visible = !showPiano;
-    dyn.rhythmLbl.visible = !showPiano;
-    dyn.pianoGrp.visible = showPiano;
+    // P06 ışıklı ritim çubukları (piyanonun üstünde süzülür, P(6, .38)'de kayar!)
+    const shiftU = ramp(t, P(6, .36), P(6, .75));
+    dyn.ritimBars.forEach((b, i) => {
+      b.visible = inP6 || inP8;
+      if (b.visible) {
+        const regH = .42 + .36 * Math.abs(Math.sin(t * 6 + i * .65));
+        const offH = .24 + .72 * Math.abs(Math.sin(t * 9.5 + i * 1.45 + 1.2));
+        const u = inP8 ? 1 : shiftU;
+        const h = regH * (1 - u) + offH * u;
+        b.scale.y = h / .65;
+        b.position.y = 2.15 + h * .5;
+        b.position.x = (i - 4) * .25 + u * Math.sin(i * 2.1) * .06;
+        b.material.color.set(u > .32 ? (i % 2 ? '#ff5e3e' : '#ffc24a') : '#64d4ff');
+      }
+    });
 
-    if (!showPiano) {
-      // P06: Broca noktası parlar, 7 ses dalgası çubuğu mavi düzenli ritimden kırmızı-altın kaymış ritme geçer!
-      const shiftU = ramp(t, P(6, .35), P(6, .75));
-      const pulse = 1 + .22 * Math.sin(t * 18) * (.4 + shiftU * .6);
-      dyn.broca.scale.setScalar(pulse);
-      fx.brocaGlow.scale.setScalar(.85 + shiftU * .55);
-      dyn.bars.forEach((b, i) => {
-        const regH = .45 + .35 * Math.abs(Math.sin(t * 6 + i * .7));
-        const offH = .25 + .65 * Math.abs(Math.sin(t * 9.5 + i * 1.45 + 1.2));
-        const h = regH * (1 - shiftU) + offH * shiftU;
-        b.scale.y = h / .6;
-        b.position.y = .52 + h * .5;
-        b.position.x = (i - 3) * .26 + shiftU * Math.sin(i * 2.1) * .06;
-        b.material.color.set(shiftU > .35 ? (i % 2 ? '#ff6a42' : '#ffbd4a') : '#5ec8ff');
-      });
-    } else {
-      // P07: Dev piyano tuşları ritimle basılır, bir tuş gecikmeli parlar, metronom ibresi kayar!
-      const swing = Math.sin(t * 5.2) * .48 + Math.sin(t * 11.4) * .08;
-      dyn.metNeedle.rotation.z = swing;
-      const activeIdx = Math.floor((t * 3.1) % 6);
-      dyn.wKeys.forEach((k, i) => {
-        const pressed = i === activeIdx;
-        k.position.y = pressed ? .00 : .04;
-        k.material.color.set(pressed ? (i === 3 ? '#ff7442' : '#ffd87a') : '#f4f0e8');
-      });
-      kr.show(); kr.place(199.46, 0, .22, cam, tint);
-      kr.draw({
-        expr: 'surprised', look: .65,
-        blink: bl(4, PS(7)),
-        armR: [95, 30], armL: [22, 18],
-        lit: 1, shade: COOL, rim: { color: '#ff9648', a: .48 },
-      });
+    // Dev 12 beyaz piyano tuşu ritimle basılır (P07'de 4. ve 8. tuş kırmızı-turuncu gecikmeli parlar!)
+    const activeK = Math.floor((t * 3.4) % 12);
+    dyn.pWhite.forEach((k, i) => {
+      const pressed = i === activeK;
+      k.position.y = pressed ? -.06 : 0;
+      k.material.color.set(pressed ? (i === 3 || i === 7 ? '#ff5c3c' : '#ffd868') : '#f6f2ea');
+    });
+    dyn.stageMet.rotation.z = Math.sin(t * 5.2) * .52 + (inP7 ? Math.sin(t * 13) * .1 : 0);
+
+    // Piyanodan havaya yükselen 3B müzik notaları!
+    dyn.pianoNotes.forEach((n, i) => {
+      n.visible = inP7 || inP8;
+      if (n.visible) {
+        const ph = (t * .7 + i * .17) % 1;
+        n.position.set((i - 3.5) * .36 + (i === 3 ? .14 : 0), 1.45 + ph * 1.45, .88);
+        n.lookAt(cam.position);
+      }
+    });
+
+    // Karakter yerleşimi: P05'te Astrid + Dr. Krohn sahne önünde; P07'de Dr. Krohn piyano yanında; P08'de Astrid tek spot altında!
+    if (t < PS(6) - .1) {
+      ast.show(); ast.place(199.42, 0, .85, cam, tint);
+      ast.draw({ expr: 'worried', look: .55, blink: bl(3, PS(5)), armL: [18, 16], armR: [18, 16], lit: 1, shade: COOL, rim: { color: WARM, a: .44 } });
+      kr.show(); kr.place(200.55, 0, .82, cam, tint);
+      kr.draw({ expr: 'surprised', look: -.55, sweat: 1, blink: bl(4, PS(5)), propL: 'scroll', propR: 'pen', armL: [58, 36], armR: [62, 40], lit: 1, shade: COOL, rim: { color: WARM, a: .44 } });
+      ast.castFrom(dyn.mSun, true); kr.castFrom(dyn.mSun, true);
+    } else if (inP7) {
+      kr.show(); kr.place(199.95, 0, 1.38, cam, tint);
+      kr.draw({ expr: 'surprised', look: .35, blink: bl(5, PS(7)), armR: [96, 30], armL: [24, 18], lit: 1, shade: COOL, rim: { color: '#ffae4c', a: .5 } });
       kr.castFrom(dyn.mSun, true);
+    } else if (inP8) {
+      ast.show(); ast.place(200.0, 0, 1.05, cam, tint);
+      ast.draw({ expr: 'surprised', look: 0, blink: bl(6, PS(8)), armL: [42, 22], armR: [42, 22], lit: 1, shade: COOL, rim: { color: '#ffd478', a: .52 } });
+      ast.castFrom(dyn.mSun, true);
     }
   } else {
-    // SET 3: Oslo Limanı Gün Batımı İskelesi — Astrid + Dr. Krohn!
-    ast.show(); ast.place(299.60, 0, -.22, cam, tint);
+    // SET 3: 1947 OSLO ÜNİVERSİTESİ TARİHİ KÜTÜPHANE SALONU!
+    // Açık BRAIN 1947 dergisinin arkasında Astrid & Dr. Krohn + havada yana kayan tek altın nota!
+    const shiftNote = ramp(t, PS(10), PE(10));
+    dyn.finalNote.position.set(shiftNote * .42, 2.38 + Math.sin(t * 2.5) * .06, -.35);
+    dyn.finalNote.lookAt(cam.position);
+    fx.noteGlow.position.set(300 + shiftNote * .42, 2.38, -.35);
+
+    ast.show(); ast.place(299.48, 0, -.68, cam, tint);
     ast.draw({
-      expr: t > PS(10) ? 'neutral' : 'worried',
-      look: .2, lookY: -.08,
-      blink: bl(5, PS(9), PS(10)),
-      armL: [18, 14], armR: [18, 14],
-      lit: -1, shade: '#cfc4ec', rim: { color: '#ffb070', a: .54 },
+      expr: t > PS(10) ? 'smile' : 'neutral',
+      look: .28, blink: bl(7, PS(9), PS(10)),
+      armL: [18, 16], armR: [18, 16],
+      lit: 1, shade: '#d4c6b8', rim: { color: '#ffe4a2', a: .48 },
     });
-    kr.show(); kr.place(300.40, 0, -.28, cam, tint);
+    kr.show(); kr.place(300.52, 0, -.72, cam, tint);
     kr.draw({
       expr: 'focused', look: -.45,
-      blink: bl(6, PS(9)),
+      blink: bl(8, PS(9)),
       propL: 'scroll', propR: 'pen',
       armL: [56, 36], armR: [62, 40],
-      lit: 1, shade: '#cfc4ec', rim: { color: '#ffb070', a: .54 },
+      lit: 1, shade: '#d4c6b8', rim: { color: '#ffe4a2', a: .48 },
     });
-    ast.castFrom(dyn.hSun, true); kr.castFrom(dyn.hSun, true);
+    ast.castFrom(dyn.lSun, true); kr.castFrom(dyn.lSun, true);
   }
 
   fx.motes.update(t);
-  for (const b of fx.cBeams) b.material.uniforms.uT.value = t;
+  for (const b of fx.stageBeams) b.material.uniforms.uT.value = t;
+  for (const b of fx.libBeams) b.material.uniforms.uT.value = t;
 
   const focusOn = (p, coc, range) => ({ focus: cam.position.distanceTo(p), coc, range });
   let look;
-  if (here === 'oslo') {
-    const subj = t >= PS(8) ? V(-.74, 1.4, -1.6) : V(0, 1.2, -.8);
-    look = { ...focusOn(subj, 4.2, 4.5), sat: 1.18, lift: [.09, .1, .125], bloom: .78, vignette: .2 };
+  if (here === 'street') {
+    look = { ...focusOn(V(0, 1.3, -1.2), 4.0, 5.2), sat: 1.18, lift: [.09, .10, .13], bloom: .82, vignette: .20 };
     C.scene.fog = null;
-  } else if (here === 'rhythm') {
-    const subj = t >= PS(7) - .15 ? V(200, 1.2, .2) : V(200, 1.5, -1.2);
-    look = { ...focusOn(subj, 3.5, 5), sat: 1.24, lift: [.08, .09, .14], bloom: 1.0, vignette: .22 };
+  } else if (here === 'concert') {
+    look = { ...focusOn(V(200, 1.5, 0), 3.6, 5.5), sat: 1.24, lift: [.09, .08, .11], bloom: .92, vignette: .22 };
     C.scene.fog = null;
   } else {
-    look = { ...focusOn(V(300, 1.2, -.3), 4, 5), sat: 1.2, lift: [.1, .09, .15], bloom: .95, vignette: .22 };
+    look = { ...focusOn(V(300, 1.2, -.2), 3.8, 5.5), sat: 1.18, lift: [.11, .10, .11], bloom: .85, vignette: .18 };
     C.scene.fog = null;
   }
-  look.tint = here === 'oslo' ? [.99, 1.0, 1.02] : here === 'rhythm' ? [.98, 1.0, 1.04] : [1.04, .98, .96];
-  look.blur = st.moving > .15 ? 16 : 0;
+  look.tint = here === 'street' ? [.98, 1.0, 1.03] : here === 'concert' ? [1.03, .99, .96] : [1.03, 1.01, .97];
+  look.blur = st.moving > .15 ? 15 : 0;
   return look;
 }

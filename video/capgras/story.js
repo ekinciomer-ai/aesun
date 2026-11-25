@@ -302,16 +302,18 @@ function buildSwitchboard(scene) {
   // Maun telefon sehpası
   const pTbl = new THREE.Mesh(new THREE.BoxGeometry(1.4, .82, .85), painted(woodTex({ base: '#5a3622', plank: 24 })));
   pTbl.position.y = .41; dyn.phoneGrp.add(pTbl);
-  // 1920'ler siyah-altın çevirmeli telefon gövdesi (solda)
-  const pBody = new THREE.Mesh(new THREE.CylinderGeometry(.24, .34, .34, 18), flat('#1e1c24'));
+  // 1920'ler krem-pirinç Paris çevirmeli telefon gövdesi (koyu duvarda kristal netlikte parlar!)
+  const pBody = new THREE.Mesh(new THREE.CylinderGeometry(.24, .34, .34, 18), flat('#e6d6b4'));
   pBody.position.set(-.34, .99, .05); dyn.phoneGrp.add(pBody);
-  const dial = new THREE.Mesh(new THREE.CylinderGeometry(.15, .15, .04, 18), new THREE.MeshBasicMaterial({ color: '#f2dfb2' }));
+  const dial = new THREE.Mesh(new THREE.CylinderGeometry(.15, .15, .04, 18), new THREE.MeshBasicMaterial({ color: '#ffd97a' }));
   dial.rotation.x = .85; dial.position.set(-.34, .98, .28); dyn.phoneGrp.add(dial);
-  // Titreşip çalan telefon ahizesi!
+  const dialCenter = new THREE.Mesh(new THREE.CylinderGeometry(.07, .07, .05, 14), flat('#3a281c'));
+  dialCenter.rotation.x = .85; dialCenter.position.set(-.34, .98, .29); dyn.phoneGrp.add(dialCenter);
+  // Titreşip çalan pirinç-fildişi telefon ahizesi!
   dyn.handset = new THREE.Group(); dyn.handset.position.set(-.34, 1.24, .05); dyn.phoneGrp.add(dyn.handset);
-  const hsBar = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .64, 12), flat('#18161e')); hsBar.rotation.z = Math.PI / 2; dyn.handset.add(hsBar);
+  const hsBar = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .64, 12), flat('#e8d8b8')); hsBar.rotation.z = Math.PI / 2; dyn.handset.add(hsBar);
   for (const sx of [-.28, .28]) {
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(.11, 14, 10), flat('#d8b050')); cap.position.set(sx, -.04, 0); dyn.handset.add(cap);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(.11, 14, 10), flat('#e4ba52')); cap.position.set(sx, -.04, 0); dyn.handset.add(cap);
   }
   // Sağda telefon sesiyle KIPKIRMIZI parlayan 3B DUYGU KALBİ!
   dyn.pHeart = new THREE.Group(); dyn.pHeart.position.set(.44, 1.52, .05); dyn.phoneGrp.add(dyn.pHeart);
@@ -410,12 +412,12 @@ function cameraPath() {
     { t: PS(4) + .16, dur: .36, move: 'whip', pos: [-1.15, 1.46, 2.65], look: [-.15, 1.36, -1.2], fov: 50, creep: .20 },
     // P05 WHIP PAN → SET 3 (PARİS KAFESİ): Dr. Capgras bistro masasında Madame M.'yi inceler!
     { t: PS(5) + .14, dur: .34, move: 'whip', pos: [300.0, 1.42, 3.75], look: [300.0, 1.35, -.6], fov: 50, creep: .18 },
-    // P06 WHIP PAN → SET 2 (SANTRAL ODASI): YÜZ TANIMA <== KOPAN KABLO ==> DUYGU KALBİ!
-    { t: PS(6) + .14, dur: .34, move: 'whip', pos: [200.0, 1.72, 3.25], look: [200.0, 1.72, -1.0], fov: 50, creep: .22 },
+    // P06 WHIP PAN → SET 2 (SANTRAL ODASI): YÜZ TANIMA <== KOPAN KABLO ==> DUYGU KALBİ (tam kadraj!)
+    { t: PS(6) + .14, dur: .34, move: 'whip', pos: [200.0, 1.72, 3.92], look: [200.0, 1.72, -1.0], fov: 50, creep: .10 },
     // P07 YAKIN TAKİP: Duygu kalbi kararır, Madame M. şaşkın bakar!
-    { t: PS(7) + .14, dur: .34, move: 'whip', pos: [200.0, 1.50, 3.95], look: [200.0, 1.56, -.9], fov: 50, creep: .18 },
-    // P08 YANA KAYAN TAKİP → DEV 3B ÇEVİRMELİ TELEFON TESTİ! (ahize çalar, kalp KIPKIRMIZI yanar!)
-    { t: PS(8) + .14, dur: .38, move: 'whip', pos: [204.22, 1.54, 2.95], look: [204.22, 1.52, -.6], fov: 50, creep: .18 },
+    { t: PS(7) + .14, dur: .34, move: 'whip', pos: [200.0, 1.50, 4.15], look: [200.0, 1.56, -.9], fov: 50, creep: .14 },
+    // P08 YANA KAYAN TAKİP → DEV 3B ÇEVİRMELİ TELEFON TESTİ! (telefon + kalp tam kadraj!)
+    { t: PS(8) + .14, dur: .38, move: 'whip', pos: [204.22, 1.54, 3.55], look: [204.22, 1.52, -.6], fov: 50, creep: .12 },
     // P09 WHIP PAN → SET 3 (PARİS AKŞAM BULVARI & EYFEL): Dr. Capgras & gülümseyen Madame M.!
     { t: PS(9) + .14, dur: .34, move: 'whip', pos: [300.0, 1.44, 3.65], look: [300.0, 1.42, -.8], fov: 50, creep: .16 },
     // P10 VİNÇ ÇIKIŞI: Işıklı Eyfel Kulesi ve sıcak parlayan 3B kalp ile yükselerek kapanış!

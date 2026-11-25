@@ -9,9 +9,13 @@ mkdir -p is; cp deneme.sh is/
 KUTU="docker run --rm --device /dev/dri -v $K/is:/is aerig:1"
 GPUS=$($KUTU vulkaninfo --summary 2>/dev/null | grep -i deviceName | grep -vi llvmpipe | sed 's/.*= *//' | paste -sd';')
 NG=$(echo "$GPUS" | tr ';' '\n' | grep -c .)
-$KUTU python3 -c "import json,time,sys;g=[x for x in sys.argv[1].split(';') if x];print(json.dumps({'ad':sys.argv[2],'zaman':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'gpu_sayisi':len(g),'gpular':g,'imaj':sys.argv[3],'yuk':sys.argv[4]},ensure_ascii=False))" \
-  "$GPUS" "$AD" "$(cat imaj_surum 2>/dev/null)" "$(cut -d' ' -f1-3 /proc/loadavg)" > is/nabiz.json 2>/dev/null
-echo "$(date '+%F %T') nabız: $(gonder nabiz.json) · gpu $NG"
+# nabız kutusuz üretilir (kutu yoksa da rapor gider); son hatalar dahil
+HATA=$(grep -h HATA kur.log guncelle.log 2>/dev/null | tail -n 4 | tr '\n' '|' | tr -d '"\\' | cut -c1-900)
+printf '{"ad":"%s","zaman":"%s","gpu_sayisi":%s,"gpular":"%s","imaj":"%s","docker":"%s","yuk":"%s","pci_amd":%s,"son_hatalar":"%s"}\n' \
+  "$AD" "$(date -u +%FT%TZ)" "$NG" "$(echo "$GPUS" | tr -d '"\\')" "$(cat imaj_surum 2>/dev/null)" "$(docker --version 2>/dev/null | cut -c1-40)" \
+  "$(cut -d' ' -f1-3 /proc/loadavg)" "$(lspci 2>/dev/null | grep -ciE 'vga.*(amd|ati)')" "$HATA" > is/nabiz.json
+NB=$(gonder nabiz.json); echo "$(date '+%F %T') nabız: $NB · gpu $NG"
+[ "$NB" = 200 ] || { echo "nabız gönderilemedi, deneme atlandı"; exit 0; }
 # hız denemesi (imaj başına bir kez)
 if [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
   rm -f is/deneme.json

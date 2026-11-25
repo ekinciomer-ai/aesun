@@ -17,16 +17,40 @@ MAC=$(cat /sys/class/net/$IF/address 2>/dev/null | tr a-f A-F)
 echo "$AD" > ad
 # 3) kazımı durdur (yalnız ilk kurulumda; HiveOS'ta uçuş planını kaldırmak kalıcı yapar)
 [ "${1:-}" = ilk ] && command -v miner >/dev/null && { miner stop >/dev/null 2>&1; log "madenci durduruldu"; }
-# 4) Docker
+# 3b) saat: sunucunun saatine göre (fark 60 sn'den büyükse); geri saat paket indirmeyi bozar
+SS=$(curl -sI --max-time 15 $API/v1/saglik | tr -d '\r' | sed -n 's/^[Dd]ate: //p')
+if [ -n "$SS" ]; then F=$(( $(date -d "$SS" +%s) - $(date +%s) )); F=${F#-}
+  [ "$F" -gt 60 ] && { date -s "$SS" >/dev/null && hwclock -w 2>/dev/null; log "saat düzeltildi (fark ${F} sn)"; }; fi
+# 4) Docker: önce paket kaynağı, olmazsa resmi hazır paket (download.docker.com, sabit sürüm)
 if ! command -v docker >/dev/null; then
-  log "docker kuruluyor"; apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io >/dev/null || log "HATA docker kurulamadı"
-  systemctl enable --now docker >/dev/null 2>&1
+  log "docker kuruluyor (apt)"
+  if ! { apt-get update -qq > apt.log 2>&1 && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io >> apt.log 2>&1; }; then
+    log "HATA apt: $(grep -iE 'err|fail|not valid|unable' apt.log | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
+    log "docker kuruluyor (hazır paket)"
+    if curl -fsSL --retry 3 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o /tmp/docker.tgz \
+       && tar xzf /tmp/docker.tgz -C /tmp && cp /tmp/docker/* /usr/local/bin/ && rm -rf /tmp/docker /tmp/docker.tgz; then
+      cat > /etc/systemd/system/docker.service <<'UNIT'
+[Unit]
+Description=Docker (aerig)
+After=network-online.target
+[Service]
+ExecStart=/usr/local/bin/dockerd --data-root /var/lib/docker
+Restart=always
+[Install]
+WantedBy=multi-user.target
+UNIT
+      systemctl daemon-reload; log "docker hazır paket kuruldu"
+    else log "HATA docker hazır paket indirilemedi"; fi
+  fi
+  systemctl enable --now docker >/dev/null 2>&1; sleep 5
 fi
+docker info >/dev/null 2>&1 || { systemctl restart docker >/dev/null 2>&1; sleep 8; }
+docker info >/dev/null 2>&1 || log "HATA docker çalışmıyor: $(journalctl -u docker -n 3 --no-pager 2>/dev/null | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
 # 5) kutu imajı (Dockerfile değişince yeniden)
 H=$(sha256sum Dockerfile | cut -c1-12)
 if [ "$(cat imaj_surum 2>/dev/null)" != "$H" ]; then
   log "imaj derleniyor ($H)"
-  if docker build -q -t aerig:1 . >> imaj.log 2>&1; then echo "$H" > imaj_surum; rm -f deneme_tamam; log "imaj hazır"; else log "HATA imaj (imaj.log)"; fi
+  if docker build -q -t aerig:1 . > imaj.log 2>&1; then echo "$H" > imaj_surum; rm -f deneme_tamam; log "imaj hazır"; else log "HATA imaj: $(tail -n 3 imaj.log | tr '\n' ' ' | cut -c1-300)"; fi
 fi
 # 6) kayıt (onaylanana kadar her turda yenilenir)
 OZ=$(sha256sum anahtar | cut -c1-64)

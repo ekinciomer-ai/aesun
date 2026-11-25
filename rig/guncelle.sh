@@ -7,8 +7,11 @@ exec 9>/tmp/aerig.lock; flock -n 9 || { echo "zaten çalışıyor"; exit 0; }
 log(){ echo "$(date '+%F %T') $*"; }
 [ -f guncelle.log ] && [ $(stat -c%s guncelle.log) -gt 1000000 ] && tail -n 2000 guncelle.log > g.tmp && mv g.tmp guncelle.log
 # 1) kendini yenile (bir sonraki çalışmada geçerli)
+ESKI=$(sha256sum guncelle.sh | cut -c1-16)
 for f in guncelle.sh isci.sh deneme.sh Dockerfile kaldir.sh; do curl -fsSL --retry 2 "$HAM/$f" -o "$f.yeni" 2>/dev/null && mv "$f.yeni" "$f"; done
 chmod +x *.sh
+# kendisi değiştiyse yeni sürümle hemen yeniden başla (bir kez)
+[ -z "${AERIG_YENI:-}" ] && [ "$ESKI" != "$(sha256sum guncelle.sh | cut -c1-16)" ] && { log "betik yenilendi, yeniden başlıyor"; AERIG_YENI=1 exec bash $K/guncelle.sh "$@"; }
 # 2) kimlik: anahtar yalnız bu rig'de (600); sunucuya yalnız özeti gider
 [ -s anahtar ] || { head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' > anahtar; chmod 600 anahtar; log "anahtar üretildi"; }
 AD=$( (. /hive-config/rig.conf 2>/dev/null; echo "${WORKER_NAME:-$(hostname)}") | tr -cd 'A-Za-z0-9_-' | cut -c1-32)
@@ -24,12 +27,14 @@ if [ -n "$SS" ]; then F=$(( $(date -d "$SS" +%s) - $(date +%s) )); F=${F#-}
 # 4) Docker: önce paket kaynağı, olmazsa resmi hazır paket (download.docker.com, sabit sürüm)
 if ! command -v docker >/dev/null; then
   log "docker kuruluyor (apt)"
-  if ! { apt-get update -qq > apt.log 2>&1 && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io >> apt.log 2>&1; }; then
-    log "HATA apt: $(grep -iE 'err|fail|not valid|unable' apt.log | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
+  apt-get update -qq > apt.log 2>&1      # bozuk üçüncü taraf kaynak (ör. openvpn) olsa da kuruluma devam
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io >> apt.log 2>&1 || log "HATA apt: $(grep -E '^E:' apt.log | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
+  if ! command -v docker >/dev/null; then
     log "docker kuruluyor (hazır paket)"
-    if curl -fsSL --retry 3 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o /tmp/docker.tgz \
-       && tar xzf /tmp/docker.tgz -C /tmp && cp /tmp/docker/* /usr/local/bin/ && rm -rf /tmp/docker /tmp/docker.tgz; then
-      cat > /etc/systemd/system/docker.service <<'UNIT'
+    KOD=$(curl -sSL --retry 3 -w '%{http_code}' -o $K/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz 2>>apt.log)
+    if [ "$KOD" = 200 ] && rm -rf $K/dockerbin && mkdir -p $K/dockerbin && tar xzf $K/docker.tgz -C $K/dockerbin --strip-components=1; then
+      for b in $K/dockerbin/*; do ln -sf "$b" /usr/local/bin/$(basename "$b"); done; rm -f $K/docker.tgz
+      cat > /etc/systemd/system/docker.service <<UNIT
 [Unit]
 Description=Docker (aerig)
 After=network-online.target
@@ -40,7 +45,7 @@ Restart=always
 WantedBy=multi-user.target
 UNIT
       systemctl daemon-reload; log "docker hazır paket kuruldu"
-    else log "HATA docker hazır paket indirilemedi"; fi
+    else log "HATA hazır paket: http $KOD $(tail -n 1 apt.log | cut -c1-200)"; fi
   fi
   systemctl enable --now docker >/dev/null 2>&1; sleep 5
 fi

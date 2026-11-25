@@ -24,17 +24,12 @@ echo "$AD" > ad
 SS=$(curl -sI --max-time 15 $API/v1/saglik | tr -d '\r' | sed -n 's/^[Dd]ate: //p')
 if [ -n "$SS" ]; then F=$(( $(date -d "$SS" +%s) - $(date +%s) )); F=${F#-}
   [ "$F" -gt 60 ] && { date -s "$SS" >/dev/null && hwclock -w 2>/dev/null; log "saat düzeltildi (fark ${F} sn)"; }; fi
-# 4) Docker: önce paket kaynağı, olmazsa resmi hazır paket (download.docker.com, sabit sürüm)
-if ! command -v docker >/dev/null; then
-  log "docker kuruluyor (apt)"
-  apt-get update -qq > apt.log 2>&1      # bozuk üçüncü taraf kaynak (ör. openvpn) olsa da kuruluma devam
-  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io >> apt.log 2>&1 || log "HATA apt: $(grep -E '^E:' apt.log | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
-  if ! command -v docker >/dev/null; then
-    log "docker kuruluyor (hazır paket)"
-    KOD=$(curl -sSL --retry 3 -w '%{http_code}' -o $K/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz 2>>apt.log)
-    if [ "$KOD" = 200 ] && rm -rf $K/dockerbin && mkdir -p $K/dockerbin && tar xzf $K/docker.tgz -C $K/dockerbin --strip-components=1; then
-      for b in $K/dockerbin/*; do ln -sf "$b" /usr/local/bin/$(basename "$b"); done; rm -f $K/docker.tgz
-      cat > /etc/systemd/system/docker.service <<UNIT
+# 4) Docker: resmi hazır paket (download.docker.com, sabit sürüm) rig diskinde açılır; HiveOS paketlerine dokunulmaz
+if ! command -v docker >/dev/null || ! command -v dockerd >/dev/null; then
+  log "docker kuruluyor (hazır paket)"; T=$K/gecici; rm -rf $T; mkdir -p $T
+  if curl -fsSL --retry 3 https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz -o $T/d.tgz 2> $T/curl.log \
+     && tar xzf $T/d.tgz -C $T && [ -x $T/docker/docker ] && { systemctl stop docker 2>/dev/null; true; } && cp -f $T/docker/* /usr/local/bin/; then
+    cat > /etc/systemd/system/docker.service <<'UNIT'
 [Unit]
 Description=Docker (aerig)
 After=network-online.target
@@ -44,9 +39,9 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 UNIT
-      systemctl daemon-reload; log "docker hazır paket kuruldu"
-    else log "HATA hazır paket: http $KOD $(tail -n 1 apt.log | cut -c1-200)"; fi
-  fi
+    systemctl daemon-reload; log "docker hazır paket kuruldu ($(/usr/local/bin/docker --version 2>&1 | cut -c1-40))"
+  else log "HATA docker hazır paket: $(cat $T/curl.log 2>/dev/null | cut -c1-200) disk: $(df -h $K | tail -1 | tr -s ' ')"; fi
+  rm -rf $T
   systemctl enable --now docker >/dev/null 2>&1; sleep 5
 fi
 docker info >/dev/null 2>&1 || { systemctl restart docker >/dev/null 2>&1; sleep 8; }

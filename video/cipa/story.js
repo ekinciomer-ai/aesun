@@ -296,18 +296,18 @@ function buildDashboard(scene) {
   // SAĞ KANAT (x = +5.2): P07 DEV 3B HARARET YAPAN ARABA GÖSTERGE PANELİ!
   dyn.dashGrp = new THREE.Group(); dyn.dashGrp.position.set(5.2, 0, -.6); g.add(dyn.dashGrp);
   // Araba konsol gövdesi
-  const consoleBox = new THREE.Mesh(new THREE.BoxGeometry(2.55, 1.35, .55), flat('#222630'));
+  const consoleBox = new THREE.Mesh(new THREE.BoxGeometry(2.35, 1.28, .55), flat('#222630'));
   consoleBox.position.set(0, 1.48, -.15); dyn.dashGrp.add(consoleBox);
   // Sol kadran: HIZ (180 KM/S!)
-  const spdDial = new THREE.Mesh(new THREE.CircleGeometry(.52, 32), new THREE.MeshBasicMaterial({ map: gaugeTex(false) }));
-  spdDial.position.set(-.60, 1.52, .14); spdDial.userData.noShadow = true; dyn.dashGrp.add(spdDial);
-  dyn.spdNeedle = new THREE.Mesh(new THREE.BoxGeometry(.045, .44, .03), new THREE.MeshBasicMaterial({ color: '#ff4238' }));
-  dyn.spdNeedle.position.set(-.60, 1.52, .18); dyn.spdNeedle.userData.noShadow = true; dyn.dashGrp.add(dyn.spdNeedle);
+  const spdDial = new THREE.Mesh(new THREE.CircleGeometry(.48, 32), new THREE.MeshBasicMaterial({ map: gaugeTex(false) }));
+  spdDial.position.set(-.55, 1.52, .14); spdDial.userData.noShadow = true; dyn.dashGrp.add(spdDial);
+  dyn.spdNeedle = new THREE.Mesh(new THREE.BoxGeometry(.042, .40, .03), new THREE.MeshBasicMaterial({ color: '#ff4238' }));
+  dyn.spdNeedle.position.set(-.55, 1.52, .18); dyn.spdNeedle.userData.noShadow = true; dyn.dashGrp.add(dyn.spdNeedle);
   // Sağ kadran: HARARET (120°C KIRMIZI!)
-  const tmpDial = new THREE.Mesh(new THREE.CircleGeometry(.52, 32), new THREE.MeshBasicMaterial({ map: gaugeTex(true) }));
-  tmpDial.position.set(.60, 1.52, .14); tmpDial.userData.noShadow = true; dyn.dashGrp.add(tmpDial);
-  dyn.tmpNeedle = new THREE.Mesh(new THREE.BoxGeometry(.045, .44, .03), new THREE.MeshBasicMaterial({ color: '#ff3428' }));
-  dyn.tmpNeedle.position.set(.60, 1.52, .18); dyn.tmpNeedle.userData.noShadow = true; dyn.dashGrp.add(dyn.tmpNeedle);
+  const tmpDial = new THREE.Mesh(new THREE.CircleGeometry(.48, 32), new THREE.MeshBasicMaterial({ map: gaugeTex(true) }));
+  tmpDial.position.set(.55, 1.52, .14); tmpDial.userData.noShadow = true; dyn.dashGrp.add(tmpDial);
+  dyn.tmpNeedle = new THREE.Mesh(new THREE.BoxGeometry(.042, .40, .03), new THREE.MeshBasicMaterial({ color: '#ff3428' }));
+  dyn.tmpNeedle.position.set(.55, 1.52, .18); dyn.tmpNeedle.userData.noShadow = true; dyn.dashGrp.add(dyn.tmpNeedle);
   // Ortada 3 KARANLIK / SÖNÜK UYARI IŞIĞI SOKETİ (uyarı ışıkları sökük!)
   for (const wy of [1.74, 1.52, 1.30]) {
     const offLamp = new THREE.Mesh(new THREE.CylinderGeometry(.065, .065, .06, 16), flat('#101218'));
@@ -368,13 +368,13 @@ function buildPediatricClinic(scene) {
   const clkFace = new THREE.Mesh(new THREE.CircleGeometry(.11, 20), new THREE.MeshBasicMaterial({ color: '#ffffff' }));
   clkFace.position.set(.54, .91, .095); clkFace.userData.noShadow = true; tbl.add(clkFace);
 
-  // Sezon Finali: Tepede parlayan altın-turkuaz KORUYUCU ALARM KALKANI!
+  // Sezon Finali: Monitörün hemen üstünde parlayan altın-turkuaz KORUYUCU ALARM KALKANI (yazıyı kapatmaz!)
   dyn.shield = new THREE.Mesh(
-    new THREE.PlaneGeometry(.62, .62),
+    new THREE.PlaneGeometry(.58, .58),
     new THREE.MeshBasicMaterial({ map: shieldTex(), transparent: true, alphaTest: .5, side: THREE.DoubleSide })
   );
-  dyn.shield.position.set(0, 2.38, -.35); dyn.shield.userData.noShadow = true; g.add(dyn.shield);
-  fx.shieldGlow = glow(scene, [300, 2.38, -.40], { size: 1.8, color: '#ffd862', strength: .52 });
+  dyn.shield.position.set(0, 3.02, -.45); dyn.shield.userData.noShadow = true; g.add(dyn.shield);
+  fx.shieldGlow = glow(scene, [300, 3.02, -.50], { size: 1.7, color: '#ffd862', strength: .50 });
 
   const L = new THREE.Group();
   L.add(new THREE.HemisphereLight('#fff8e8', '#68989e', 2.15));
@@ -402,8 +402,8 @@ function cameraPath() {
     { t: PS(5) + .14, dur: .34, move: 'whip', pos: [300.0, 1.48, 4.10], look: [300.0, 1.44, -.65], fov: 50, creep: .16 },
     // P06 WHIP PAN → SET 2 (KAPALI NTRK1 SİNİR OTOYOLU): Ateş sinyali bariyere çarpıp durur!
     { t: PS(6) + .14, dur: .34, move: 'whip', pos: [200.0, 1.65, 3.95], look: [200.0, 1.68, -.8], fov: 50, creep: .14 },
-    // P07 YANA KAYAN TAKİP → DEV 3B ARABA GÖSTERGE PANELİ (180 KM/S + 120°C HARARET + BUHAR!)
-    { t: PS(7) + .14, dur: .38, move: 'whip', pos: [205.2, 1.68, 3.65], look: [205.2, 1.66, -.6], fov: 50, creep: .14 },
+    // P07 YANA KAYAN TAKİP → DEV 3B ARABA GÖSTERGE PANELİ (iki kadran tam kadraj + beyaz buhar!)
+    { t: PS(7) + .14, dur: .38, move: 'whip', pos: [205.2, 1.68, 4.35], look: [205.2, 1.66, -.6], fov: 50, creep: .08 },
     // P08 WHIP PAN → SET 3: 36.8°C GÜVENLİ monitörü + koruyucu kask, buz çantası ve çalar saat!
     { t: PS(8) + .14, dur: .34, move: 'whip', pos: [300.0, 1.38, 3.45], look: [300.0, 1.28, -.25], fov: 48, creep: .16 },
     // P09 İKİLİ SICAK PLAN: Dr. Selin & gülümseyen Kaan!
@@ -542,7 +542,7 @@ export function frame(t, ctx) {
     dyn.shield.visible = finale;
     if (finale) {
       dyn.shield.scale.setScalar(.95 + .09 * Math.sin(t * 6));
-      dyn.shield.position.y = 2.38 + Math.sin(t * 2.5) * .05;
+      dyn.shield.position.y = 3.02 + Math.sin(t * 2.5) * .05;
       dyn.shield.lookAt(cam.position);
     }
 

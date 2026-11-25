@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T20:26+03:00",
+ "olusturma": "2026-11-25T20:36+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -644,7 +644,7 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Bu Matematik Hayatında Nerede?",
    "karar": "ARTIR",
-   "neden": "videoların %78'i tuttu (eşik 214 izlenme / 48 sa)",
+   "neden": "videoların %78'i tuttu (eşik 215 izlenme / 48 sa)",
    "olculen": 9,
    "erken": 2,
    "medyan_48sa": 432,
@@ -663,12 +663,12 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 782,
+   "medyan_48sa": 786,
    "tutma_orani": 100,
    "izlenme_yuzde": 66,
    "en_iyi": {
     "baslik": "Türkiye'de drone kuralları değişti! P0, P1, P2 🚁 #shorts",
-    "i48": 970
+    "i48": 979
    },
    "kaydirmadan_izleme_yuzde": 36
   },
@@ -720,7 +720,7 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Gezegen Kartları",
    "karar": "ARTIR",
-   "neden": "videoların %67'i tuttu (eşik 214 izlenme / 48 sa)",
+   "neden": "videoların %67'i tuttu (eşik 215 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 0,
    "medyan_48sa": 1016,
@@ -739,7 +739,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 949,
+   "medyan_48sa": 945,
    "tutma_orani": 100,
    "izlenme_yuzde": 50,
    "en_iyi": {
@@ -845,12 +845,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 2,
-   "medyan_48sa": 991,
+   "medyan_48sa": 990,
    "tutma_orani": 100,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Evi Boyatmadan Çıktı, Depozitosunu Geri Aldı! | KARA KUTU #1",
-    "i48": 991
+    "i48": 990
    }
   },
   {
@@ -903,15 +903,15 @@
   }
  ],
  "esikler": {
-  "Yolu Seç !": 262,
-  "Nasıl Yapıldı": 135,
-  "Estudio Antiguo": 136,
-  "Kozmos Lab TR": 214,
-  "Ömür Dediğin": 50,
-  "Antik Stüdyo": 637,
+  "Ancient Studio": 192,
   "LVL MAX": 454,
   "Kozmos Lab": 95,
-  "Ancient Studio": 192
+  "Estudio Antiguo": 136,
+  "Kozmos Lab TR": 215,
+  "Nasıl Yapıldı": 135,
+  "Antik Stüdyo": 637,
+  "Ömür Dediğin": 50,
+  "Yolu Seç !": 262
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1651,7 +1651,7 @@
   "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
-  "Kozmos Lab TR: son 6 Short'tan 4 tanesi tuttu (eşik 214 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 6 Short'tan 4 tanesi tuttu (eşik 215 izlenme / 48 sa).",
   "LVL MAX: son 6 Short'tan 1 tanesi tuttu (eşik 454 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
@@ -1667,8 +1667,8 @@
   "Kozmos Lab · Did you know?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %10.",
   "Kozmos Lab · Energy Sources: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %78'i tuttu (eşik 214 izlenme / 48 sa).",
-  "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 214 izlenme / 48 sa).",
+  "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %78'i tuttu (eşik 215 izlenme / 48 sa).",
+  "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 215 izlenme / 48 sa).",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1423 izlenme, 4 video).",

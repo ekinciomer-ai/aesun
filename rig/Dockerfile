@@ -1,6 +1,7 @@
 # AKSARAY 1 video işçisi kutusu: AMD kartlarda Vulkan (RADV) ile büyütme (Real-ESRGAN, BSD-3), akıcılaştırma (RIFE, MIT),
 # kartın kodlayıcısıyla mp4 (VAAPI). HiveOS'un kendi sistemine dokunmaz.
-FROM ubuntu:24.04
+# HiveOS çekirdeği 5.4 (DRM 3.41): yeni Mesa (24.04) bu çekirdekte AMD kartları açmıyor, 20.04 Mesa 21.x açıyor.
+FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers vulkan-tools libvulkan1 \
       mesa-va-drivers vainfo ffmpeg libgomp1 bc curl unzip ca-certificates python3 && rm -rf /var/lib/apt/lists/*

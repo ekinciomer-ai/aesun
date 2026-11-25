@@ -98,6 +98,12 @@ async def portal_veri_yaz(request: Request, mesaj: str = "güncelleme"):
             raise ValueError("eksik alan")
     except Exception:
         raise HTTPException(400, "geçersiz portal verisi")
+    try:   # Özel Alan teklif alanını başka yetkili daha yeni yazdıysa yöneticinin eski kopyası üzerine yazmasın
+        eski_t = (json.loads((VERI / "portal/veri.json").read_text()) or {}).get("teklif2")
+        if isinstance(eski_t, dict) and float(eski_t.get("z") or 0) > float((v.get("teklif2") or {}).get("z") or 0):
+            v["teklif2"] = eski_t
+    except Exception:
+        pass
     icerik = json.dumps(v, ensure_ascii=False, indent=1).encode("utf-8")
     temiz_mesaj = re.sub(r"[\r\n]+", " ", str(mesaj or "güncelleme")).strip()[:80] or "güncelleme"
     try:
@@ -114,6 +120,46 @@ async def portal_veri_yaz(request: Request, mesaj: str = "güncelleme"):
             _git("add", "portal/veri.json", cwd=VERI)
             if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=VERI).returncode != 0:
                 _git("commit", "-m", "portal: " + temiz_mesaj, cwd=VERI)
+                _git("push", "{URL}", "HEAD:main", cwd=VERI)
+                DURUM["sha"] = _git("rev-parse", "--short", "HEAD", cwd=VERI)
+            DURUM["son"] = time.time()
+    except Exception as e:
+        raise HTTPException(502, "git yazılamadı: " + str(e)[:180])
+    return {"tamam": True, "sha": DURUM["sha"]}
+
+@app.post("/v1/portal/teklif")
+async def portal_teklif_yaz(request: Request, mesaj: str = "teklif"):
+    """Özel Alan · Teklifler: 'değiştirir' yetkilisi yalnız teklif2 alanını (kendi anahtarıyla şifreli) yazar."""
+    DURUM["istek"] += 1
+    r = roller(request)
+    if not r & {"yonetici", "oz_teklif_y"}:
+        DURUM["red"] += 1
+        raise HTTPException(401 if not r else 403, "teklif değiştirme yetkisi gerekli")
+    g = await request.body()
+    if len(g) > 1024 * 1024:
+        raise HTTPException(413, "çok büyük")
+    try:
+        t = json.loads(g).get("teklif2")
+        assert isinstance(t, dict) and isinstance(t.get("iv"), str) and isinstance(t.get("ct"), str)
+        t = {"iv": t["iv"], "ct": t["ct"], "z": float(t.get("z") or time.time() * 1000)}
+    except Exception:
+        raise HTTPException(400, "geçersiz teklif verisi")
+    temiz_mesaj = re.sub(r"[\r\n]+", " ", str(mesaj or "teklif")).strip()[:80] or "teklif"
+    try:
+        with GIT_KILIT:
+            if (VERI / ".git").exists():
+                _git("fetch", "--depth", "1", "{URL}", "main", cwd=VERI)
+                _git("reset", "--hard", "FETCH_HEAD", cwd=VERI)
+            hedef = VERI / "portal/veri.json"
+            v = json.loads(hedef.read_text())
+            v["teklif2"] = t
+            v.pop("teklif", None)
+            hedef.write_bytes(json.dumps(v, ensure_ascii=False, indent=1).encode("utf-8"))
+            _git("config", "user.name", "aesun-bot", cwd=VERI)
+            _git("config", "user.email", "aesun-bot@users.noreply.github.com", cwd=VERI)
+            _git("add", "portal/veri.json", cwd=VERI)
+            if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=VERI).returncode != 0:
+                _git("commit", "-m", "portal teklif: " + temiz_mesaj, cwd=VERI)
                 _git("push", "{URL}", "HEAD:main", cwd=VERI)
                 DURUM["sha"] = _git("rev-parse", "--short", "HEAD", cwd=VERI)
             DURUM["son"] = time.time()
@@ -667,7 +713,7 @@ ASISTAN_KOK = Path(os.environ.get("AESUN_ASISTAN", "/veri/asistan"))
 def asistan_durum(request: Request):
     DURUM["istek"] += 1
     r = roller(request)
-    if "yonetici" not in r:
+    if not r & {"yonetici", "oz_asistan", "oz_asistan_y"}:   # oz_*: portal Özel Alan yetkisi (yönetici verir)
         DURUM["red"] += 1
         raise HTTPException(401 if not r else 403, "yönetici yetkisi gerekli")
     durum_p = ASISTAN_KOK / "durum.json"
@@ -680,7 +726,7 @@ def asistan_durum(request: Request):
 async def asistan_islem(request: Request):
     DURUM["istek"] += 1
     r = roller(request)
-    if "yonetici" not in r:
+    if not r & {"yonetici", "oz_asistan_y"}:   # yalnız "değiştirir" yetkisi
         DURUM["red"] += 1
         raise HTTPException(401 if not r else 403, "yönetici yetkisi gerekli")
     try:

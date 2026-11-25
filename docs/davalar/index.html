@@ -52,9 +52,10 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
 (function(){
   var API='https://api.aksarayenerji.net/v1/davalar/', O=null, D=null, url=null;
   try{O=JSON.parse(localStorage.getItem('ae_portal')||'null');}catch(e){}
-  if(!O||!O.S||!O.S.ka||!O.son||O.son<Date.now()){document.querySelector('main').innerHTML='<a href="../">← Portal</a><h1>Davalar</h1><div class="kart" style="padding:16px">Bu sayfa yalnız yönetici hesabıyla açılır. Önce <a href="../">portala giriş yapın</a>, sonra bu sayfayı yeniden açın.</div>';return;}
+  var DA=(O&&O.S&&O.S.anahtarlar)||{};
+  if(!O||!O.S||!(O.S.ka||DA.oz_davalar)||!O.son||O.son<Date.now()){document.querySelector('main').innerHTML='<a href="../">← Portal</a><h1>Davalar</h1><div class="kart" style="padding:16px">Bu sayfa yalnız yetkili hesapla açılır. Önce <a href="../">portala giriş yapın</a>, sonra bu sayfayı yeniden açın.</div>';return;}
   function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}
-  var anahtar=sha('aesun-api|yonetici|'+O.S.ka);
+  var anahtar=O.S.ka?sha('aesun-api|yonetici|'+O.S.ka):sha('aesun-api|oz_davalar|'+DA.oz_davalar);
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function al(yol){return anahtar.then(function(k){return fetch(API+yol,{headers:{'X-AE-Anahtar':k},cache:'no-store'});}).then(function(r){if(!r.ok)throw new Error(r.status===401?'Yönetici girişi gerekli':'HTTP '+r.status);return r;});}
   function kucuk(s){return String(s||'').toLocaleLowerCase('tr');}

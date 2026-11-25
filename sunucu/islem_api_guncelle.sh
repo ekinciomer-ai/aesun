@@ -1,6 +1,7 @@
 #!/bin/bash
 # aesun-api güncelle (yalnız api kapsayıcısı): önce yedek, sonra derle ve başlat, sağlık kontrolü; başarısızsa otomatik geri alma.
 # 23.11.2026: /v1/komut (panelden cihaz komutu, n8n yerine).
+# 25.11.2026: Özel Alan kullanıcı yetkileri (oz_* rolleri: asistan, davalar) + /v1/portal/teklif.
 set -uo pipefail
 Y=/opt/aesun/yedek_api_$(date +%Y%m%d%H%M%S)
 mkdir -p "$Y" && cp -a /opt/aesun/*.py /opt/aesun/Dockerfile /opt/aesun/docker-compose.yml "$Y"/ 2>/dev/null

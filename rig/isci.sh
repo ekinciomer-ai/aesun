@@ -9,7 +9,7 @@ gonder(){ curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H "X-AE-
 mkdir -p is; cp deneme.sh is/
 KUTU="docker run --rm --device /dev/dri -e VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/radeon_icd.x86_64.json -v $K/is:/is aerig:1"   # yalnız AMD Vulkan sürücüsü
 # Vulkan aygıt sırası (Intel çıkışı da sayılır); araçlara yalnız AMD aygıtlarının sıra numaraları verilir
-VKL=$($KUTU vulkaninfo 2>/dev/null | grep -iE 'deviceName *=' | sed 's/.*= *//')
+VKL=$(timeout 90 $KUTU vulkaninfo 2>/dev/null | grep -iE 'deviceName *=' | sed 's/.*= *//')
 GPUS=$(echo "$VKL" | grep -i -e amd -e radeon | paste -sd';')
 NG=$(echo "$GPUS" | tr ';' '\n' | grep -c .)
 GL=$(echo "$VKL" | awk 'tolower($0)~/amd|radeon/{printf "%s%d",(n++?",":""),NR-1}')
@@ -21,7 +21,7 @@ DS=$(cat deneme.sh isci.sh | sha256sum | cut -c1-12)
 # kart görünmüyorsa teşhis: /dev/dri, Vulkan ve VAAPI çıktısının son satırları
 VKT=""
 if [ "$NG" -eq 0 ]; then
-  VKT="dri=$(ls /dev/dri 2>/dev/null | tr '\n' ' ') · vk=$($KUTU sh -c 'vulkaninfo 2>&1 | grep -iE "deviceName *=|error|fail" | head -n 6' 2>&1 | tr '\n' '|' | tr -d '"\\' | cut -c1-500) · mod=$(lsmod | grep -c '^amdgpu')"
+  VKT="dri=$(ls /dev/dri 2>/dev/null | tr '\n' ' ') · vk=$(timeout 90 $KUTU sh -c 'vulkaninfo 2>&1 | grep -iE "deviceName *=|error|fail" | head -n 6' 2>&1 | tr '\n' '|' | tr -d '"\\' | cut -c1-500) · mod=$(lsmod | grep -c '^amdgpu')"
 fi
 # nabız kutusuz üretilir (kutu yoksa da rapor gider); son hatalar dahil
 HATA=$(grep -h HATA kur.log guncelle.log 2>/dev/null | tail -n 4 | tr '\n' '|' | tr -d '"\\' | cut -c1-900)

@@ -74,3 +74,18 @@ def brifing(request: Request):
     if not p.is_file():
         raise HTTPException(404, "brifing yok")
     return Response(_coz(p), media_type="text/markdown; charset=utf-8", headers=BAS)
+
+
+NOTLAR = {"brifing", "yorumlar"}
+
+
+@router.get("/v1/davalar/not/{ad}")
+def not_oku(ad: str, request: Request):
+    """Davalar notları (markdown, şifreli): brifing, yorumlar."""
+    _yonetici(request)
+    if ad not in NOTLAR:
+        raise HTTPException(404, "yok")
+    p = KOK / f"{ad}.sifreli"
+    if not p.is_file():
+        raise HTTPException(404, "not yok")
+    return Response(_coz(p), media_type="text/markdown; charset=utf-8", headers=BAS)

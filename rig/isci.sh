@@ -1,6 +1,7 @@
 #!/bin/bash
 # Nabız + (imaj değişince bir kez) hız denemesi. Sonuçlar sunucuya rig/<ad>/ altına yazılır (rig anahtarı yalnız bu alana yazabilir).
 set -u
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin   # cron yolu kısa; docker /usr/local/bin altında
 K=/opt/aerig; API=https://api.aksarayenerji.net; cd $K || exit 1
 AD=$(cat ad); AN=$(cat anahtar)
 gonder(){ curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H "X-AE-Anahtar: $AN" -H 'Content-Type: application/json' \

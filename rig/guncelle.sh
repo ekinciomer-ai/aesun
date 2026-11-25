@@ -1,6 +1,7 @@
 #!/bin/bash
 # Her 30 dk (cron) ve kurulumda: dosyaları depodan yeniler, anahtar/kayıt, Docker ve kutu imajı, sonra işçi.
 set -u
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin   # cron yolu kısa; docker /usr/local/bin altında
 K=/opt/aerig; HAM=https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/rig; API=https://api.aksarayenerji.net
 cd $K || exit 1
 exec 9>/tmp/aerig.lock; flock -n 9 || { echo "zaten çalışıyor"; exit 0; }

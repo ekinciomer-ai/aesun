@@ -46,6 +46,8 @@ UNIT
 fi
 docker info >/dev/null 2>&1 || { systemctl restart docker >/dev/null 2>&1; sleep 8; }
 docker info >/dev/null 2>&1 || log "HATA docker çalışmıyor: $(journalctl -u docker -n 3 --no-pager 2>/dev/null | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
+# 4b) uzun imaj derlemesinden önce ara nabız (sunucu rig'in yaşadığını ve hangi adımda olduğunu görsün)
+DENEMESIZ=1 bash $K/isci.sh
 # 5) kutu imajı (Dockerfile değişince yeniden)
 H=$(sha256sum Dockerfile | cut -c1-12)
 if [ "$(cat imaj_surum 2>/dev/null)" != "$H" ]; then

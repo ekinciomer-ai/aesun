@@ -17,7 +17,7 @@ printf '{"ad":"%s","zaman":"%s","gpu_sayisi":%s,"gpular":"%s","imaj":"%s","docke
 NB=$(gonder nabiz.json); echo "$(date '+%F %T') nabız: $NB · gpu $NG"
 [ "$NB" = 200 ] || { echo "nabız gönderilemedi, deneme atlandı"; exit 0; }
 # hız denemesi (imaj başına bir kez)
-if [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
+if [ -z "${DENEMESIZ:-}" ] && [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
   rm -f is/deneme.json
   $KUTU bash /is/deneme.sh "$(seq -s, 0 $((NG-1)))" > is/kutu.log 2>&1
   if [ -s is/deneme.json ]; then

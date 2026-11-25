@@ -313,6 +313,9 @@ async def veri(request: Request, a: str = "oku", yol: str = ""):
     DURUM["istek"] += 1
     yol = depo_yol(yol)
     kim = toplayici(request)
+    if kim and kim.startswith("rig_") and not yol.startswith("rig/"):   # video rig'leri yalnız kendi rig/ alanına
+        DURUM["red"] += 1
+        raise HTTPException(403, "Rig yalnız rig/")
     if a == "oku":
         if not kim and yol.startswith("pi/"):   # Pi'ye özel dosyalar (ör. yeni GitHub anahtarı) yalnız toplayıcı anahtarıyla
             DURUM["red"] += 1
@@ -350,6 +353,43 @@ async def veri(request: Request, a: str = "oku", yol: str = ""):
             f.write(f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\t{kim}\t{yol}\t{len(g)}\n")
         return {"tamam": True}
     raise HTTPException(404, "Bilinmeyen işlem")
+
+
+# ---------------- Video rig kaydı (AKSARAY 1 GPU rig'leri) ----------------
+# Rig anahtarını kendisi üretir; buraya yalnız SHA-256 özetini bekleyen olarak bırakır. Anahtar listesine
+# yalnız Ömer'in onayıyla sunucu işlemi (islem_rig_onay) ekler. Kimliksiz uç: boyut, adet ve sıklık sınırlı.
+RIG_BEKLEYEN = Path(os.environ.get("AESUN_RIG_BEKLEYEN", "/veri/rig_bekleyen.json"))
+RIG_AD = re.compile(r"^[A-Za-z0-9_\-]{1,32}$")
+RIG_MAC = re.compile(r"^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}$")
+RIG_SON = {}
+
+@app.post("/v1/rig/kayit")
+async def rig_kayit(request: Request):
+    ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "?").split(",")[0].strip()
+    if time.time() - RIG_SON.get(ip, 0) < 20:
+        raise HTTPException(429, "Yavaş")
+    RIG_SON[ip] = time.time()
+    g = await request.body()
+    if len(g) > 2048:
+        raise HTTPException(413, "Çok büyük")
+    try:
+        d = json.loads(g)
+        ad, mac, oz = str(d["ad"]), str(d["mac"]).upper(), str(d["ozet"]).lower()
+    except Exception:
+        raise HTTPException(400, "Eksik")
+    if not (RIG_AD.match(ad) and RIG_MAC.match(mac) and re.fullmatch(r"[0-9a-f]{64}", oz)):
+        raise HTTPException(400, "Geçersiz")
+    try:
+        b = json.loads(RIG_BEKLEYEN.read_text())
+    except Exception:
+        b = {}
+    if mac not in b and len(b) >= 20:
+        raise HTTPException(429, "Bekleyen dolu")
+    b[mac] = {"ad": ad, "ozet": oz, "ip": ip, "zaman": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+              "gpu": str(d.get("gpu", ""))[:200]}
+    t = RIG_BEKLEYEN.with_name(RIG_BEKLEYEN.name + ".tmp")
+    t.write_text(json.dumps(b, ensure_ascii=False, indent=1)); os.replace(t, RIG_BEKLEYEN)
+    return {"tamam": True, "durum": "onay bekliyor"}
 
 
 # ---------------- Tek giriş (SSO) · fatura.aksarayenerji.net ----------------

@@ -33,8 +33,11 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 
 23. Kaçan/plakasız araç yüzünden zarar: kimse ödemez — KK_MIT_18 · SES BEKLİYOR (Yargıtay 4. HD E.2021/25417 K.2023/3802, onama: 82.818 TL) https://lexara.com.tr/karar/21247411
 
+24. Ehliyetsiz sürücü kazada otomatik suçludur — KK_MIT_19 · SES BEKLİYOR (Yargıtay 12. CD E.2012/22236 K.2013/15336, onama: yaya soldan aniden girdi, sürücü kusursuz, beraat) https://lexara.com.tr/karar/10003318
+25. Alkollü sürücünün yolcusu tam tazminat alır — KK_MIT_20 · SES BEKLİYOR (Yargıtay 4. HD E.2022/1080 K.2023/6785, onama: %20 müterafik kusur, 44.326 TL) https://lexara.com.tr/karar/779170
+26. Yoldaki mıcıra kaydıysan suç tamamen senin — KK_MIT_21 · SES BEKLİYOR (Danıştay 15. D E.2014/1980 K.2017/1205, onama: idare %40, 7.140 TL) https://lexara.com.tr/karar/18748332
+
 ## Bekleyen (öncelik sırası)
-4. Ehliyetsiz sürücü kazada otomatik %100 kusurludur — ehliyetsiz ama kusursuz bulunan sürücü
 6. Park halindeki araca çarpıp gitmek önemsizdir — park halindeki araca çarpıp kaçma, tazminat/ceza
 7. Ambulansa yol verirken kırmızıda geçen cezalandırılır — geçiş üstünlüğü olan araç, kusur
 8. Kış lastiği yoksa sadece para cezası yersin — yazlık lastikle karlı yolda kaza, kusur
@@ -43,8 +46,6 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 14. Aracı kazadan sonra kenara çekersen haksız duruma düşersin — maddi hasarlı kaza, aracı kaldırma yükümlülüğü
 15. Sollama yaparken hız sınırını aşmak serbesttir — sollama, hız, kusur
 16. Karşıdan gelen far yaktı, kör oldum: kusur bende değil — gece uzun far, kamaşma, kusur
-17. Yoldaki mıcıra kaydıysan suç senin — işaretlenmemiş gevşek malzeme, idarenin hizmet kusuru (Danıştay 15. D E.2016/268 K.2017/2343 aday)
-18. Alkollü sürücünün arabasına binen yolcu tam tazminat alır — müterafik kusur, yolcunun indirim oranı
 19. Otobüste ayakta giderken düştüysen şoför sorumlu değildir — ani fren, yolcu yaralanması, taşıyanın sorumluluğu
 20. Kırmızıda karşıya geçen yayaya çarpan sürücü her zaman masumdur — yaya kırmızıda, sürücü kusur payı
 21. Emniyet şeridine park etmek, çarpanı tek suçlu yapar — emniyet şeridinde park, tali kusur

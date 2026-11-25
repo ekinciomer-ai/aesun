@@ -1,6 +1,6 @@
 {
- "son_mit_no": 18,
- "son_render_no": 19,
+ "son_mit_no": 21,
+ "son_render_no": 22,
  "not": "Yeni bölüm: mit_no=son_mit_no+1 (ekrandaki MİT #), render_no=son_render_no+1 (renderMit<N>, tl/mit<N>_tl.json), TTS kodu KK_MIT_<mit_no 2 hane> | 24.11.2026: MİT #15-17 için render_no 16-18 kullanıldı (iptal edilen eski #15/#16'nın render 16/17 numaraları sahnede hiç kullanılmamıştı); TTS kodları KK_MIT_15/16/17 (tamam/ içindeki eski KK_MIT_15.json üzerine yazıldı).",
  "bolumler": [
   {
@@ -132,10 +132,43 @@
    "sahne": "S[6].upd4 (otobüs + öne kıran araç, hazır, test edildi)",
    "spec": "bolumler_mit18.json (N=19)",
    "kart": "bekleyen_kart/KK_MIT_18_PLAKASIZ_ARAC.json"
+  },
+  {
+   "kod": "KK_MIT_19_EHLIYETSIZ",
+   "mit": "Ehliyetsiz sürücü kazaya karıştıysa suç otomatik olarak onundur",
+   "mit_no": 19,
+   "render_no": 20,
+   "kaynak": "Yargıtay 12. CD E.2012/22236 K.2013/15336 (onama; taksirle yaralama + TGTS beraat) https://lexara.com.tr/karar/10003318",
+   "ses": "hiç okunamadı (kota) → bekleyen_tts/KK_MIT_19.json",
+   "spec": "bolumler_mit19_21.json (N=20)",
+   "kart": "bekleyen_kart/KK_MIT_19_EHLIYETSIZ.json",
+   "sahne": "öneri: S[4] gece varyantı (soldan/refüjden çıkan yaya)"
+  },
+  {
+   "kod": "KK_MIT_20_ALKOLLU_YOLCU",
+   "mit": "Yolcuysan kazada kusurun olmaz, tazminatın tam ödenir",
+   "mit_no": 20,
+   "render_no": 21,
+   "kaynak": "Yargıtay 4. HD E.2022/1080 K.2023/6785 (onama; 2,1 promil, %20 müterafik kusur, 44.326,83 TL) https://lexara.com.tr/karar/779170",
+   "ses": "hiç okunamadı (kota) → bekleyen_tts/KK_MIT_20.json",
+   "spec": "bolumler_mit19_21.json (N=21)",
+   "kart": "bekleyen_kart/KK_MIT_20_ALKOLLU_YOLCU.json",
+   "sahne": "öneri: gece yolu, kaza tipi kararda yok → TEMSİLİ, siyah ekran"
+  },
+  {
+   "kod": "KK_MIT_21_MICIR",
+   "mit": "Yoldaki mıcıra kaydıysan suç tamamen senindir",
+   "mit_no": 21,
+   "render_no": 22,
+   "kaynak": "Danıştay 15. D E.2014/1980 K.2017/1205 (onama; idare %40, 7.140 TL, manevi ret) https://lexara.com.tr/karar/18748332",
+   "ses": "hiç okunamadı (kota) → bekleyen_tts/KK_MIT_21.json",
+   "spec": "bolumler_mit19_21.json (N=22, src Danıştay)",
+   "kart": "bekleyen_kart/KK_MIT_21_MICIR.json",
+   "sahne": "YENİ gerekli: ilçe yolu + mıcır yaması + çelik bariyer"
   }
  ],
- "ertelenen_not": "25.11.2026 11:40: Kota 11:20'de yenilendi ama aynı saatte kuyruğa giren Patron mu Haklı #6-12 (49 parça) kotayı tüketti; #17'ye yalnız V5 düştü. #17 (V6-V7) ve #18 (tümü) bekliyor.",
- "son_gun": "2026-11-25: #15 düzeltildi, #16 teslim; #17-18 kota sonrası.",
+ "ertelenen_not": "25.11.2026 11:40: Kota 11:20'de yenilendi ama aynı saatte kuyruğa giren Patron mu Haklı #6-12 (49 parça) kotayı tüketti; #17'ye yalnız V5 düştü. #17 (V6-V7) ve #18 (tümü) bekliyor. | 25.11.2026 13:30 (zamanlanmış görev): #19-21 karar+senaryo+kart+spec hazır; Gemini günlük kota tüm anahtarlarda 11:27'den beri dolu olduğundan ses işleri gönderilmedi (gönderilse başarısız olup tamam/'a taşınacaktı). 26.11 11:00 sonrası önce #17_D, #18_C, sonra #19-21 bekleyen_tts'ten tts_kuyruk'a taşınmalı.",
+ "son_gun": "2026-11-25: #15 düzeltildi, #16 teslim; #17-21 ses kotası bekliyor (26.11 11:00).",
  "iptal": [
   {
    "kod": "KK_MIT_15_KACMAK",

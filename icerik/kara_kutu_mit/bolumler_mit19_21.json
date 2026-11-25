@@ -1,0 +1,162 @@
+[
+ {
+  "N": 20,
+  "kod": "KK_MIT_19",
+  "havuz": "KK_MIT_19_EHLIYETSIZ",
+  "hookNo": "MİT #19",
+  "src": "Yargıtay",
+  "sahne_oneri": "S[4] (şehir, bölünmüş yol, refüjden/soldan çıkan yaya) GECE varyantı gerekli; çarpma anı siyah ekran",
+  "pollQ": "EHLİYETSİZ SÜRÜCÜYE NE OLDU?",
+  "opts": [
+   [
+    "A",
+    "Tam kusurlu, hapis"
+   ],
+   [
+    "B",
+    "Kusurlu, ceza indirimi"
+   ],
+   [
+    "C",
+    "Kusursuz, beraat"
+   ]
+  ],
+  "dogru": "Doğru şık: C",
+  "sonuc": "SONUÇ: İKİ SUÇTAN BERAAT",
+  "clues": [
+   [
+    "Birinci",
+    "Yaya soldan aniden girdi"
+   ],
+   [
+    "İkinci",
+    "Sürücü kendi yolundaydı"
+   ],
+   [
+    "Üçüncü",
+    "Tanık + bilirkişi incelendi"
+   ]
+  ],
+  "reasons": [
+   [
+    "Mahkemeye göre",
+    "Sürücünün kusuru yok"
+   ],
+   [
+    "Ehliyetsiz araç",
+    "Ehliyetsizlik tek başına suç sayılmadı"
+   ]
+  ],
+  "hukumKey": "Sürücü iki suçtan",
+  "ders1": "Kusur <b style=\"color:#ffb15c\">ehliyete değil, kazaya</b> bakılarak belirlenir.",
+  "ders2": "⚠️ Ehliyetsiz kullanmak<br><b style=\"color:#ff453a\">yine yasak, cezası var.</b>",
+  "black": "YAYA YARALANDI"
+ },
+ {
+  "N": 21,
+  "kod": "KK_MIT_20",
+  "havuz": "KK_MIT_20_ALKOLLU_YOLCU",
+  "hookNo": "MİT #20",
+  "src": "Yargıtay",
+  "sahne_oneri": "gece yolu (S[1] yağmursuz varyant ya da S[11] gece); kaza tipi kararda yok → TEMSİLİ CANLANDIRMA, kaza anı siyah ekran",
+  "pollQ": "YOLCUNUN TAZMİNATINA NE OLDU?",
+  "opts": [
+   [
+    "A",
+    "Tamamını aldı"
+   ],
+   [
+    "B",
+    "%20 kesildi"
+   ],
+   [
+    "C",
+    "Hiç alamadı"
+   ]
+  ],
+  "dogru": "Doğru şık: B",
+  "sonuc": "SONUÇ: %20 İNDİRİM · 44.326 TL",
+  "clues": [
+   [
+    "Birinci",
+    "Sürücü 2,1 promil"
+   ],
+   [
+    "İkinci",
+    "Yolcu bunu biliyordu"
+   ],
+   [
+    "Üçüncü",
+    "Sigorta önceden ödeme yaptı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Alkollü olduğunu",
+    "Bilerek binmek = yolcunun kusuru"
+   ],
+   [
+    "Hesaplanan",
+    "Tazminattan %20 kesildi"
+   ]
+  ],
+  "hukumKey": "Önceki ödeme",
+  "ders1": "Yolcu koltuğu <b style=\"color:#ffb15c\">sorumluluktan kurtarmaz.</b>",
+  "ders2": "🚫 Alkollü birinin<br><b style=\"color:#ff453a\">arabasına binme.</b>",
+  "black": "YOLCU YARALANDI<br><span style=\"color:#ff453a\">%8 MALUL KALDI</span>"
+ },
+ {
+  "N": 22,
+  "kod": "KK_MIT_21",
+  "havuz": "KK_MIT_21_MICIR",
+  "hookNo": "MİT #21",
+  "src": "Danıştay",
+  "stamp": "'DANIŞTAY<br>ONADI'",
+  "sahne_oneri": "YENİ: iki şeritli ilçe yolu + yolda mıcır yaması + kenarda çelik bariyer (S[6] köy yolu tabanı uygun); araç mıcırda savrulup bariyere",
+  "pollQ": "ZARARI KİM ÖDEDİ?",
+  "opts": [
+   [
+    "A",
+    "Sürücü, tamamını"
+   ],
+   [
+    "B",
+    "İdare, %40'ını"
+   ],
+   [
+    "C",
+    "İdare, tamamını"
+   ]
+  ],
+  "dogru": "Doğru şık: B",
+  "sonuc": "SONUÇ: İDARE 7.140 TL ÖDEYECEK",
+  "clues": [
+   [
+    "Birinci",
+    "Zarar 17.850 TL"
+   ],
+   [
+    "İkinci",
+    "Mıcır fark edilmedi"
+   ],
+   [
+    "Üçüncü",
+    "Adli Tıp: idare %40 kusurlu"
+   ]
+  ],
+  "reasons": [
+   [
+    "Mahkemeye göre",
+    "İdarenin hizmet kusuru var"
+   ],
+   [
+    "Manevi",
+    "Manevi tazminat reddedildi"
+   ]
+  ],
+  "hukumKey": "İdare, zararın",
+  "ders1": "Yoldaki tehlikeden <b style=\"color:#ffb15c\">idare de sorumlu</b> olabilir.",
+  "ders2": "📸 Kazada tutanak tut,<br><b style=\"color:#34c759\">yolun fotoğrafını çek.</b>",
+  "black": "ARAÇ BARİYERE ÇARPTI"
+ }
+]

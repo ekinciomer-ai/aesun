@@ -25,8 +25,8 @@ def bagla(roller_fn):
 
 
 def _yonetici(req: Request):
-    if _roller is None or "yonetici" not in _roller(req):
-        raise HTTPException(401, "yönetici girişi gerekli")
+    if _roller is None or not _roller(req) & {"yonetici", "oz_davalar", "oz_davalar_y"}:   # oz_*: portal Özel Alan yetkisi
+        raise HTTPException(401, "yetkili girişi gerekli")
 
 
 def _coz(p: Path) -> bytes:

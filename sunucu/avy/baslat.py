@@ -37,7 +37,7 @@ PORTAL_URL = os.environ.get("AVY_PORTAL_URL", "https://portal.aksarayenerji.net"
 VERI_URL = os.environ.get("AVY_VERI_URL", "https://api.aksarayenerji.net/v1/acik/portal/veri.json")
 CEREZ_AD = "ae_avy_sso"
 CEREZ_OMUR = 14 * 86400
-IZINLI_ROLLER = ("yonetici", "avy")
+IZINLI_ROLLER = ("yonetici", "avy", "oz_avy", "oz_avy_y")   # oz_*: portal Özel Alan yetkisi
 AKIS_PARCA = 1024 * 1024
 SIKISTIRILMIS_UZANTILAR = frozenset({
     ".tif", ".tiff", ".png", ".jpg", ".jpeg", ".webp", ".glb", ".bin", ".zip", ".pbf", ".gz",

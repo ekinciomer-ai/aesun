@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Tartışma · Özel Alan</title>
-<script>(function(){var S=null;try{var o=JSON.parse(localStorage.getItem('ae_portal')||'null');if(o&&o.S&&Date.now()<(o.son||0))S=o.S;}catch(e){}if(!S||!S.ka){location.replace('../portal/');return;}window._AE_S=S;})();</script>
+<script>(function(){var S=null;try{var o=JSON.parse(localStorage.getItem('ae_portal')||'null');if(o&&o.S&&Date.now()<(o.son||0))S=o.S;}catch(e){}if(!S||!(S.ka||(S.anahtarlar||{}).oz_tartisma)){location.replace('../portal/');return;}window._AE_S=S;})();</script>
 <style>
 :root{--bg:#F3F4F6;--panel:#fff;--panel2:#F8F9FA;--line:#E2E5EA;--text:#2B2F35;--muted:#5B6470;--kirmizi:#D32027;
   --claude:#C8643C;--gpt:#1E9E73;--agy:#2F6FD6;--omer:#2B2F35;--ok:#1E9E73;--no:#C8303A;--warn:#B7791F}
@@ -282,7 +282,7 @@ $('yazi').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKe
 let zamanlayici;
 (async () => {
   // Tartışmaya özel belirteç: merkez sunucunun yönetici belirtecinden farklıdır, sızarsa yalnızca tartışmalara erişim verir.
-  BELIRTEC = await sha('aesun-api|tartisma|' + S.ka);
+  BELIRTEC = await sha('aesun-api|tartisma|' + (S.ka || (S.anahtarlar || {}).oz_tartisma_y || (S.anahtarlar || {}).oz_tartisma));
   await yenile();
   zamanlayici = setInterval(() => { if (!document.hidden) yenile(); }, 2000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) yenile(); });

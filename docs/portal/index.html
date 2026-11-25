@@ -308,6 +308,7 @@ function girisModal(id, hata) {
     catch (er) { return girisModal(id, er.message); }
     if (HEDEF === 'asistan' && S && S.ka) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/asistan/')); return; }
     if (HEDEF === 'avy' && S && (S.ka || (S.anahtarlar && S.anahtarlar.avy))) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/avy/')); return; }
+    { const oh = OZEL_ALT.find(x => x.id === HEDEF && x.url && !x.ic); if (oh && S && ozVar(HEDEF) && /^https:/.test(oh.url())) { location.replace(oh.url()); return; } }   // Özel Alan yetkilisi: girişten sonra istediği sayfaya döner
     if (HEDEF && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { const u = await ssoUrl(HEDEF); if (u) { location.replace(u); return; } d.close(); git('ana'); return ssoYokDlg(HEDEF); }
     try { if ($('hatirla') && $('hatirla').checked) localStorage.setItem('ae_portal_kul', $('kul').value.trim()); else localStorage.removeItem('ae_portal_kul'); } catch (x) {}
     if (id) acSonuc(id); else d.close();
@@ -393,6 +394,7 @@ async function apiOzetHesapla() {
   if (R.anahtarlar.saha) oz.saha = await sha(await apiBelirtec('saha', R.anahtarlar.saha));
   if (R.anahtarlar.fatura) oz.fatura = await sha(await apiBelirtec('fatura', R.anahtarlar.fatura));
   if (R.parasal && R.parasal.ozel && R.parasal.ozel.d) oz.parasal = await sha(await apiBelirtec('parasal', R.parasal.ozel.d));
+  for (const [id, a] of Object.entries(R.anahtarlar)) if (id.indexOf('oz_') === 0) oz[id] = await sha(await apiBelirtec(id, a));
   for (const [sid, m] of Object.entries(R.musteri || {})) oz['ms_' + sid] = await sha(await apiBelirtec('ms_' + sid, m.k));
   return oz;
 }
@@ -468,11 +470,25 @@ const OZEL_ALT = [
   { id: 'brain', ad: 'Brain 3D', kisa: '3D Galaksi Haritası', ikon: '🌌', renk: '#6B3FA0', aciklama: 'Tüm programların ve otomasyonların 3D galaksi haritası.', url: () => 'https://claude.ai/artifact/8k7gaTwGJyT8N3VVhdt8wh' },
   { id: 'mail', ad: 'Kurumsal Mail', kisa: 'Tüm E-Posta Kutuları', ikon: '✉️', renk: '#5B6470', aciklama: 'Tüm @aksarayenerji.com.tr e-posta hesapları tek yerden.' }
 ];
+// Özel Alan yetkisi (kullanıcı başına, yönetici seçer): oz_<id> anahtarı = girer + izler; oz_<id>_y anahtarı = değiştirir.
+// Anahtarlar rehberde (R.anahtarlar) durur, yalnız yetkili kullanıcının kaydına konur; sunucu rolleri api_ozet'e eklenir.
+const OZ_SEVIYE = [['', 'Kapalı'], ['izle', 'İzler'], ['degistir', 'Değiştirir']];   // İzler = girer ve görür; Değiştirir = girer, görür, değiştirir
+const OZ_MOD = { mail: 'mail' };   // bu kart mevcut bir uygulamanın anahtarını da ister
+const ozA = () => (S && S.anahtarlar) || {};
+const ozVar = id => !!(S && (S.ka || ozA()['oz_' + id]));
+const ozYaz = id => !!(S && (S.ka || ozA()['oz_' + id + '_y']));
+const ozHerhangi = () => !!(S && (S.ka || OZEL_ALT.some(x => ozA()['oz_' + x.id])));
+// API belirteci: okuma için oz_<id>, yazma için oz_<id>_y (yönetici: yonetici)
+async function ozBelirtec(id, yaz) {
+  if (S.ka) return apiBelirtec('yonetici', S.ka);
+  const r = 'oz_' + id + (yaz ? '_y' : ''), a = ozA()[r];
+  return a ? apiBelirtec(r, a) : '';
+}
 let OZEL_SEK = 'hepsi';
 async function asYukleOzel() {
-  const kutu = $('asMesajlar'), oz = $('asOzet'); if (!kutu || !S || !S.ka) return;
+  const kutu = $('asMesajlar'), oz = $('asOzet'); if (!kutu || !S || !ozVar('asistan')) return;
   try {
-    const k = await apiBelirtec('yonetici', S.ka);
+    const k = await ozBelirtec('asistan', false);
     const r = await fetch('https://api.aksarayenerji.net/v1/asistan/durum?t=' + Date.now(), { headers: { 'X-AE-Anahtar': k }, cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
@@ -487,13 +503,13 @@ async function asYukleOzel() {
 }
 async function asGonderOzel(ev, hazirMetin) {
   if (ev) ev.preventDefault();
-  const inp = $('asYazi'), btn = $('asBtn'); if (!S || !S.ka) return false;
+  const inp = $('asYazi'), btn = $('asBtn'); if (!S || !ozYaz('asistan')) return false;
   const metin = (hazirMetin != null ? hazirMetin : (inp ? inp.value : '')).trim();
   if (!metin) return false;
   if (inp && hazirMetin == null) inp.value = '';
   if (btn) { btn.disabled = true; btn.textContent = 'İşleniyor…'; }
   try {
-    const k = await apiBelirtec('yonetici', S.ka);
+    const k = await ozBelirtec('asistan', true);
     const r = await fetch('https://api.aksarayenerji.net/v1/asistan/islem', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-AE-Anahtar': k }, body: JSON.stringify({ tip: 'sohbet', metin }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || j.tamam === false) throw new Error(j.hata || j.detail || ('HTTP ' + r.status));
@@ -504,9 +520,9 @@ async function asGonderOzel(ev, hazirMetin) {
 }
 function acOzel(sek) {
   if (!S) { SAYFA = 'ana'; return girisModal(null); }
-  if (!S.ka) return;
+  if (!ozHerhangi()) return;
   const d = dlg();
-  if (sek === 'mail') {
+  if (sek === 'mail' && ozVar('mail')) {
     const kl = MOD.mail && MOD.mail.aktif !== false ? kutular(MOD.mail) : [];
     const mGovde = kl.length ? '<div style="display:grid;gap:8px;margin-top:12px">' + kl.map(k => '<a class="btn ik tam" style="display:flex;justify-content:space-between;gap:10px;text-align:left;margin-top:0" href="' + esc(k.url) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(k.adr) + '</span><span class="ince">' + esc(k.tur) + ' ↗</span></a>').join('') + '</div>'
       : '<div class="hata">Posta kutusu eklenmedi — Yönetim → Uygulamalar → Mail → “Posta kutuları”.</div>';
@@ -516,10 +532,10 @@ function acOzel(sek) {
     if (!d.open) d.showModal();
     return;
   }
-  const kartlar = OZEL_ALT.map(x => {
+  const kartlar = OZEL_ALT.filter(x => ozVar(x.id)).map(x => {
     const ortakStil = 'display:flex;align-items:flex-start;gap:11px;padding:12px 13px;border-radius:12px;border:1px solid #E2E5EA;background:#fff;text-decoration:none;color:#2B2F35;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s;font:inherit;width:100%';
     const ic = '<span style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:19px;flex:0 0 auto;background:' + x.renk + '18;color:' + x.renk + '">' + x.ikon + '</span>'
-      + '<span style="min-width:0;flex:1"><b style="display:block;font-size:14px;line-height:1.25">' + esc(x.ad) + '</b><span style="display:block;font-size:11.5px;color:#5B6470;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.kisa) + '</span></span>';
+      + '<span style="min-width:0;flex:1"><b style="display:block;font-size:14px;line-height:1.25">' + esc(x.ad) + (ozYaz(x.id) ? '' : ' <small style="font-weight:500;color:#8A93A0">· yalnız izler</small>') + '</b><span style="display:block;font-size:11.5px;color:#5B6470;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(x.kisa) + '</span></span>';
     if (x.ic) return '<button type="button" style="' + ortakStil + '" onmouseover="this.style.borderColor=\'' + x.renk + '\'" onmouseout="this.style.borderColor=\'#E2E5EA\'" onclick="teklifCiz()">' + ic + '</button>';
     if (x.id === 'mail') return '<button type="button" style="' + ortakStil + '" onmouseover="this.style.borderColor=\'' + x.renk + '\'" onmouseout="this.style.borderColor=\'#E2E5EA\'" onclick="acOzel(\'mail\')">' + ic + '</button>';
     const u = x.url();
@@ -530,37 +546,60 @@ function acOzel(sek) {
     + '<button class="kapat" onclick="$(\'dlg\').close()" aria-label="Kapat">×</button>'
     + '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding-right:28px">'
     + '<div>' + MARKA + '<div style="font-size:18px;font-weight:700;margin-top:4px">Özel Alan · Yönetim & Komut Merkezi</div></div>'
-    + '<a class="btn kc" href="' + esc(yerelUrl('https://portal.aksarayenerji.net/asistan/')) + '" target="_blank" rel="noopener noreferrer">🎬 Tam Ekran YouTube & Asistan Paneli ↗</a>'
+    + (ozVar('asistan') ? '<a class="btn kc" href="' + esc(yerelUrl('https://portal.aksarayenerji.net/asistan/')) + '" target="_blank" rel="noopener noreferrer">🎬 Tam Ekran YouTube & Asistan Paneli ↗</a>' : '')
     + '</div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px;margin-bottom:16px">' + kartlar + '</div>'
-    + '<div style="background:#fff;border:1px solid #E2E5EA;border-radius:14px;padding:14px">'
+    + (!ozVar('asistan') ? '</div>' : '<div style="background:#fff;border:1px solid #E2E5EA;border-radius:14px;padding:14px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">'
     + '<b style="font-size:14px">🤖 Doğrudan Sunucu Asistanı (Antigravity — Serbest Komut & Sohbet)</b>'
     + '<span class="ince" id="asOzet" style="font-size:12px">Merkez Sunucu bağlanıyor…</span>'
     + '</div>'
     + '<div id="asMesajlar" style="display:grid;gap:7px;max-height:175px;overflow-y:auto;padding:8px;background:#F8F9FA;border-radius:10px;border:1px solid #EEF0F3;margin-bottom:8px"><div class="ince">Yükleniyor…</div></div>'
     + '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">'
+    + (!ozYaz('asistan') ? '' : ''
     + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'Planlı videoları ve saatlerini listele\')">⏰ Planlı Videolar</button>'
     + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'TR yorumları göster\')">💬 TR Yorumlar</button>'
     + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'docker servis durumu\')">🐳 Servisler</button>'
-    + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'disk ve bellek durumu\')">🖥️ Sunucu Sağlığı</button>'
+    + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asGonderOzel(null,\'disk ve bellek durumu\')">🖥️ Sunucu Sağlığı</button>')
     + '<button type="button" class="tk-cip" style="font-size:11.5px;padding:3px 9px" onclick="asYukleOzel()">↻ Yenile</button>'
     + '</div>'
-    + '<form onsubmit="return asGonderOzel(event)" style="display:flex;gap:8px"><input id="asYazi" type="text" placeholder="Buradaki gibi serbestçe yazın (kod değişikliği, YouTube planlama, !komut)…" style="flex:1;padding:10px 12px;font-size:13.5px;border-radius:10px;border:1px solid #CCD2DA"><button class="btn" id="asBtn" type="submit" style="white-space:nowrap;padding:10px 18px">Gönder</button></form>'
-    + '</div></div>';
+    + (ozYaz('asistan') ? '<form onsubmit="return asGonderOzel(event)" style="display:flex;gap:8px"><input id="asYazi" type="text" placeholder="Buradaki gibi serbestçe yazın (kod değişikliği, YouTube planlama, !komut)…" style="flex:1;padding:10px 12px;font-size:13.5px;border-radius:10px;border:1px solid #CCD2DA"><button class="btn" id="asBtn" type="submit" style="white-space:nowrap;padding:10px 18px">Gönder</button></form>' : '<div class="ince">Yalnız izleme yetkiniz var.</div>')
+    + '</div></div>');
   if (!d.open) d.showModal();
   asYukleOzel();
 }
-// ---- Teklifler (Özel Alan): verdiğimiz teklifler; yalnız yönetici anahtarıyla şifreli saklanır (V.teklif) ----
+// ---- Teklifler (Özel Alan): kendi anahtarıyla (oz_teklif) şifreli saklanır (V.teklif2); eski kayıt V.teklif yönetici anahtarıyla ----
+// Yönetici portal verisini bütün olarak yazar; yetkili kullanıcı yalnız teklif alanını merkez sunucuya yazar (/v1/portal/teklif).
 const TK_DURUM = { hazir: ['Hazırlanıyor', '#8A93A0'], verildi: ['Verildi', '#2F62A8'], gorusme: ['Görüşmede', '#C26A12'], kazanildi: ['Kazanıldı', '#1F8A4C'], kaybedildi: ['Kaybedildi', '#B91C24'], iptal: ['İptal', '#5C6470'] };
 const TK_KAPSAM = ['Mekanik montaj', 'Elektrik montaj', 'Mekanik + elektrik', 'Anahtar teslim (EPC)', 'Proje / mühendislik', 'Bakım / işletme', 'Diğer'];
 let TK = null, TK_F = 'hepsi', TK_Q = '';
-async function tkYukle() { if (TK) return TK; TK = V.teklif ? (await coz(await hamAnahtar(S.ka), V.teklif)).liste || [] : []; return TK; }
-async function tkKaydet(msj) { V.teklif = await sifrele(await hamAnahtar(S.ka), { liste: TK }); await veriKaydet(msj); }
+async function tkAnahtar() { return S.ka ? ((await rehber()).anahtarlar.oz_teklif || '') : (ozA().oz_teklif || ''); }
+async function tkYukle() {
+  if (TK) return TK;
+  const k = await tkAnahtar();
+  if (V.teklif2 && k) TK = (await coz(await hamAnahtar(k), V.teklif2)).liste || [];
+  else if (S.ka && V.teklif) TK = (await coz(await hamAnahtar(S.ka), V.teklif)).liste || [];
+  else TK = [];
+  return TK;
+}
+async function tkKaydet(msj) {
+  if (!ozYaz('teklif')) throw new Error('Tekliflerde değişiklik yetkiniz yok.');
+  if (S.ka) {
+    await rehber();
+    if (!R.anahtarlar.oz_teklif) { R.anahtarlar.oz_teklif = b64(rnd(32)); V.rehber = await sifrele(await hamAnahtar(S.ka), R); }
+    V.teklif2 = { ...(await sifrele(await hamAnahtar(R.anahtarlar.oz_teklif), { liste: TK })), z: Date.now() };
+    delete V.teklif;
+    return veriKaydet(msj);
+  }
+  const t2 = { ...(await sifrele(await hamAnahtar(ozA().oz_teklif), { liste: TK })), z: Date.now() };
+  const r = await fetch('https://api.aksarayenerji.net/v1/portal/teklif?mesaj=' + encodeURIComponent(msj || 'teklif'), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-AE-Anahtar': await ozBelirtec('teklif', true) }, body: JSON.stringify({ teklif2: t2 }) });
+  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error('Merkez sunucu (' + r.status + '): ' + (j.detail || j.hata || 'kaydedilemedi')); }
+  V.teklif2 = t2;
+}
 const tkPara = (v, pb) => v == null || v === '' ? '—' : Number(v).toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' ' + (pb || 'TL');
 const tkMw = t => { const k = parseFloat(String(t.kapasite || '').replace(',', '.')); return isNaN(k) ? 0 : (t.birim === 'kWp' ? k / 1000 : k); };
 async function teklifCiz() {
-  if (!S || !S.ka) return;
+  if (!S || !ozVar('teklif')) return;
   SAYFA = 'teklif'; try { $('dlg') && $('dlg').close(); } catch (e) {}
   let l; try { l = await tkYukle(); } catch (e) { $('ana').innerHTML = '<div class="hata">Teklifler açılamadı: ' + esc(e.message || e) + '</div>'; return; }
   const q = TK_Q.toLocaleLowerCase('tr');
@@ -568,11 +607,11 @@ async function teklifCiz() {
     .sort((a, b) => String(b.tarih || '').localeCompare(String(a.tarih || '')));
   const say = d => l.filter(t => t.durum === d).length, kaz = say('kazanildi'), son = kaz + say('kaybedildi');
   const mw = l.reduce((a, t) => a + tkMw(t), 0), mwK = l.filter(t => t.durum === 'kazanildi').reduce((a, t) => a + tkMw(t), 0);
-  let h = '<h1 class="baslik">Teklifler</h1><p class="alt">Verdiğimiz teklifler · yalnız siz görürsünüz · <a href="#" onclick="git(\'ana\');return false" style="color:#D32027;font-weight:600">← Portal</a></p>';
+  let h = '<h1 class="baslik">Teklifler</h1><p class="alt">Verdiğimiz teklifler · yalnız yetkililer görür · <a href="#" onclick="git(\'ana\');return false" style="color:#D32027;font-weight:600">← Portal</a></p>';
   h += '<div class="tk-oz"><div><b>' + l.length + '</b><span>teklif</span></div><div><b>' + mw.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MWp</b><span>toplam kapasite</span></div>'
     + '<div><b>' + (say('verildi') + say('gorusme')) + '</b><span>cevap bekleyen</span></div><div><b>' + kaz + (son ? ' · %' + Math.round(kaz / son * 100) : '') + '</b><span>kazanılan · oran</span></div>'
     + '<div><b>' + mwK.toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MWp</b><span>kazanılan kapasite</span></div></div>';
-  h += '<div class="tk-ust"><button class="btn kc" onclick="teklifForm(-1)">+ Yeni teklif</button><input id="tkq" type="search" placeholder="Ara: proje, işveren, il…" value="' + esc(TK_Q) + '"></div>';
+  h += '<div class="tk-ust">' + (ozYaz('teklif') ? '<button class="btn kc" onclick="teklifForm(-1)">+ Yeni teklif</button>' : '<span class="ince">Yalnız izleme yetkiniz var.</span>') + '<input id="tkq" type="search" placeholder="Ara: proje, işveren, il…" value="' + esc(TK_Q) + '"></div>';
   h += '<div class="tk-ust">' + [['hepsi', 'Tümü', l.length], ...Object.entries(TK_DURUM).map(([k, v]) => [k, v[0], say(k)])].map(([k, ad, n]) => '<button class="tk-cip' + (TK_F === k ? ' on' : '') + '" onclick="TK_F=\'' + k + '\';teklifCiz()">' + esc(ad) + ' ' + n + '</button>').join('') + '</div>';
   h += g.length ? '<div class="tk-l">' + g.map(t => { const d = TK_DURUM[t.durum] || TK_DURUM.hazir; const bf = t.tutar && tkMw(t) ? (Number(t.tutar) / (tkMw(t) * 1e6)).toLocaleString('tr-TR', { maximumFractionDigits: 3 }) + ' ' + (t.pb || 'TL') + '/Wp' : '';
     return '<button class="tk" style="--tr:' + d[1] + '" onclick="teklifForm(' + t._i + ')"><div class="b"><b>' + esc(t.ad || 'Adsız proje') + '</b><span>' + tkPara(t.tutar, t.pb) + '</span></div>'
@@ -586,7 +625,7 @@ function teklifForm(i) {
   const a = (id, ad, v, tip, ek) => '<label class="alan"><span>' + ad + '</span><input id="tk_' + id + '" type="' + (tip || 'text') + '" value="' + esc(v == null ? '' : v) + '"' + (ek || '') + '></label>';
   const sec = (id, ad, ops, v) => '<label class="alan"><span>' + ad + '</span><select id="tk_' + id + '">' + ops.map(([k, x]) => '<option value="' + esc(k) + '"' + (k === v ? ' selected' : '') + '>' + esc(x) + '</option>').join('') + '</select></label>';
   const d = dlg();
-  d.innerHTML = dlgBas('', i >= 0 ? 'Teklifi düzenle' : 'Yeni teklif', 'Teklifler · yalnız siz görürsünüz')
+  d.innerHTML = dlgBas('', i >= 0 ? 'Teklifi düzenle' : 'Yeni teklif', 'Teklifler · yalnız yetkililer görür')
     + '<form id="tkf">' + a('ad', 'Proje adı', t.ad, 'text', ' required placeholder="ör. Konya 12 MWp GES"') + a('isveren', 'İşveren / müşteri', t.isveren) + a('konum', 'Konum (il / ilçe)', t.konum)
     + '<div class="satir">' + a('kapasite', 'Kapasite', t.kapasite, 'text', ' inputmode="decimal" placeholder="ör. 12,5"') + sec('birim', 'Birim', [['MWp', 'MWp'], ['kWp', 'kWp']], t.birim) + '</div>'
     + sec('kapsam', 'Kapsam', TK_KAPSAM.map(x => [x, x]), t.kapsam || TK_KAPSAM[2])
@@ -596,9 +635,10 @@ function teklifForm(i) {
     + a('kisi', 'İlgili kişi', t.kisi) + a('belge', 'Teklif dosyası bağlantısı (Drive vb.)', t.belge, 'url', ' placeholder="https://"')
     + '<label class="alan"><span>Not</span><textarea id="tk_not">' + esc(t.not || '') + '</textarea></label>'
     + (t.belge ? '<p class="ince" style="margin-top:8px"><a href="' + esc(t.belge) + '" target="_blank" rel="noopener noreferrer">Teklif dosyasını aç ↗</a></p>' : '')
-    + '<div id="tkh"></div><button class="btn tam" type="submit">Kaydet</button>'
-    + (i >= 0 ? '<button type="button" class="btn ik tam" style="margin-top:8px" onclick="teklifSil(' + i + ')">Teklifi sil</button>' : '') + '</form></div></div>';
+    + '<div id="tkh"></div>' + (ozYaz('teklif') ? '<button class="btn tam" type="submit">Kaydet</button>' : '')
+    + (i >= 0 && ozYaz('teklif') ? '<button type="button" class="btn ik tam" style="margin-top:8px" onclick="teklifSil(' + i + ')">Teklifi sil</button>' : '') + '</form></div></div>';
   if (!d.open) d.showModal();
+  if (!ozYaz('teklif')) $('tkf').querySelectorAll('input,select,textarea').forEach(x => { x.disabled = true; });
   $('tkf').onsubmit = async e => {
     e.preventDefault(); const b = e.submitter || $('tkf').querySelector('[type=submit]'); b.disabled = true; b.textContent = 'Kaydediliyor…';
     const y = {}; ['ad', 'isveren', 'konum', 'kapasite', 'birim', 'kapsam', 'tutar', 'pb', 'tarih', 'gecerlilik', 'durum', 'kisi', 'belge', 'not'].forEach(k => { const el = $('tk_' + k); y[k] = el ? el.value.trim() : ''; });
@@ -699,7 +739,7 @@ async function git(s) {
   const vs = ((V && V.vitrin) || []).filter(x => x.aktif !== false && MALI_ICIN.indexOf(x.id) < 0).sort((x, y) => (x.sira || 0) - (y.sira || 0));
   if (!vs.some(x => x.id === 'denetci')) vs.push({ id: 'denetci', ad: 'Sistem Denetçisi', ikon: 'denetci', renk: 'kirmizi', aktif: true, _yerlesik: true });
   vs.push({ id: 'mali', ad: 'Mali', ikon: 'mali', renk: 'yesil', aktif: true, _grup: true });
-  if (S && S.ka) vs.push({ id: 'ozel', ad: 'Özel Alan', ikon: 'ozel', renk: 'kirmizi', aktif: true, _grup: true, _ozel: true });
+  if (S && ozHerhangi()) vs.push({ id: 'ozel', ad: 'Özel Alan', ikon: 'ozel', renk: 'kirmizi', aktif: true, _grup: true, _ozel: true });
   const n = vs.length, R0 = n > 8 ? 42 : 40;
   let h = '<h1 class="baslik">Kurumsal Portal</h1><p class="alt">' + (S ? 'Açmak istediğiniz uygulamaya tıklayın.' : 'Uygulamaya tıklayın; kullanıcı adı ve şifrenizle giriş yapın.') + '</p>'
     + '<div class="hub"><div class="halka"></div><div class="merkez">' + MERKEZ + '</div>';
@@ -756,9 +796,20 @@ async function kullaniciYaz(kul, sifre, yuk) {
 }
 const simdiTR = () => new Date().toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
 const yukHazirla = (kul, x) => ({ ...(x.yonetici ? { kul, ad: x.ad, ka: S.ka, yonetici: true }
-  : { kul, ad: x.ad, izinler: x.izinler || {}, projeler: x.projeler || [], anahtarlar: Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])) }),
+  : { kul, ad: x.ad, izinler: x.izinler || {}, projeler: x.projeler || [], ozel: x.ozel || {}, anahtarlar: Object.assign(Object.fromEntries((x.moduller || []).filter(id => R.anahtarlar[id]).map(id => [id, R.anahtarlar[id]])), ozAnahtarlar(x)) }),
   ...(R.parasal && parasalMi(x) ? { parasal: R.parasal.ozel } : {}),
   ...(!x.yonetici && (x.moduller || []).includes('musteri') && (x.santraller || []).length ? { musteri: Object.fromEntries(x.santraller.filter(s => (R.musteri || {})[s]).map(s => [s, { k: R.musteri[s].k, ad: R.musteri[s].ad }])) } : {}) });
+// Özel Alan: kullanıcıya seçilen seviyeye göre anahtarlar (oz_<id>, değiştir için oz_<id>_y; mail kartı mail uygulama anahtarını da ister)
+function ozAnahtarlar(x) {
+  const o = {};
+  for (const [id, sv] of Object.entries(x.ozel || {})) {
+    if (!sv || !R.anahtarlar['oz_' + id]) continue;
+    o['oz_' + id] = R.anahtarlar['oz_' + id];
+    if (sv === 'degistir' && R.anahtarlar['oz_' + id + '_y']) o['oz_' + id + '_y'] = R.anahtarlar['oz_' + id + '_y'];
+    if (OZ_MOD[id] && R.anahtarlar[OZ_MOD[id]]) o[OZ_MOD[id]] = R.anahtarlar[OZ_MOD[id]];
+  }
+  return o;
+}
 const sifreUret = () => { const h = 'abcdefghjkmnpqrstuvwxyz', r = '23456789', a = rnd(8); let s = ''; for (let i = 0; i < 8; i++) s += (i % 3 === 2 ? r : h)[a[i] % (i % 3 === 2 ? r.length : h.length)]; return s; };
 const basHarf = a => String(a || '?').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toLocaleUpperCase('tr');
 
@@ -781,7 +832,7 @@ async function yonetimCiz() {
       const cips = x.yonetici ? '<span class="et k">Yönetici · tümü</span>' : ((x.moduller || []).map(id => {
         const kn = KONULAR[id], iz = (x.izinler || {})[id] || [];
         return '<span class="et">' + esc(modAd[id] || id) + (kn ? ' <small>' + iz.filter(k => k !== 'parasal').length + '/' + kn.filter(p => p[0] !== 'parasal').length + '</small>' : '') + (iz.includes('parasal') ? ' <b title="Parasal bilgileri görür">₺</b>' : '') + '</span>';
-      }).join('') || '<span class="ince">Yetki yok</span>');
+      }).join('') + Object.entries(x.ozel || {}).map(([id, sv]) => { const o = OZEL_ALT.find(z => z.id === id); return o ? '<span class="et" title="Özel Alan">' + o.ikon + ' ' + esc(o.ad.split(' · ')[0]) + ' <small>' + (sv === 'degistir' ? 'değiştirir' : 'izler') + '</small></span>' : ''; }).join('') || '<span class="ince">Yetki yok</span>');
       h += '<div class="kkart"><div class="kav">' + esc(basHarf(x.ad || kul)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.ad || kul) + '</b><div class="ince">@' + esc(kul) + (x.degisiklik ? ' · ' + esc(x.degisiklik) : '') + '</div><div style="margin-top:8px">' + cips + '</div></div>'
         + '<div class="kbt"><button class="btn ik kc" onclick="kulDlg(\'' + esc(kul) + '\')">Düzenle</button>' + (kul !== S.kul ? '<button class="bag sil" onclick="kulSil(\'' + esc(kul) + '\')">Sil</button>' : '') + '</div></div>';
     }
@@ -821,6 +872,13 @@ function kulDlg(kul) {
       f += '</div>';
     }
     f += '</div>';
+    const xo = x.ozel || {};
+    f += '<label style="margin-top:18px">Özel Alan uygulamaları <span class="ince">(İzler = girer ve görür · Değiştirir = girer, görür ve değiştirir)</span></label><div class="yetki">'
+      + OZEL_ALT.map(o => '<div class="yt' + (xo[o.id] ? ' on' : '') + '"><div class="ytm" style="display:flex;align-items:center;gap:10px"><span class="hd" style="--r:' + o.renk + ';width:30px;height:30px;box-shadow:none;font-size:16px">' + o.ikon + '</span><span style="flex:1;min-width:0">' + esc(o.ad)
+        + (o.id === 'asistan' ? '<small class="ince" style="display:block">“Değiştirir” = sunucuya komut verebilir</small>' : '') + '</span>'
+        + '<select name="oz_' + esc(o.id) + '" onchange="this.closest(\'.yt\').classList.toggle(\'on\',!!this.value)" style="width:auto;max-width:48%;padding:6px 8px;font-size:13px">'
+        + OZ_SEVIYE.map(([k, a]) => '<option value="' + k + '"' + ((xo[o.id] || '') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div></div>').join('')
+      + '</div>';
   }
   f += '<div class="ydalt"><button type="button" class="btn ik" onclick="$(\'ydlg\').close()">Vazgeç</button><button class="btn" id="kf2b">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></div></form>';
   d.innerHTML = f; if (!d.open) d.showModal();
@@ -850,13 +908,23 @@ function kulKaydet(f, kul0) {
       R.musteri = R.musteri || {};
       for (const c of f.querySelectorAll('input[name="ms"]:checked')) { santraller.push(c.value); if (!R.musteri[c.value]) R.musteri[c.value] = { k: b64(rnd(32)), ad: c.dataset.ad || c.value }; }
     }
+    const ozel = {};
+    if (!yon) for (const o of OZEL_ALT) { const el = f.querySelector('select[name="oz_' + o.id + '"]'); if (el && el.value) ozel[o.id] = el.value; }
+    for (const [id, sv] of Object.entries(ozel)) {
+      if (!R.anahtarlar['oz_' + id]) R.anahtarlar['oz_' + id] = b64(rnd(32));
+      if (sv === 'degistir' && !R.anahtarlar['oz_' + id + '_y']) R.anahtarlar['oz_' + id + '_y'] = b64(rnd(32));
+    }
+    if (ozel.teklif && !V.teklif2 && V.teklif) {   // eski teklif kaydı (yönetici anahtarlı) aynen teklif anahtarına taşınır (veri.json git geçmişinde eski hali de durur)
+      const l = (await coz(await hamAnahtar(S.ka), V.teklif)).liste || [];
+      V.teklif2 = { ...(await sifrele(await hamAnahtar(R.anahtarlar.oz_teklif), { liste: l })), z: Date.now() }; delete V.teklif; TK = null;
+    }
     const x = R.kullanicilar[kul] || { olusturma: simdiTR() };
-    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, projeler, santraller, degisiklik: simdiTR() });
+    Object.assign(x, { ad: f.ad.value.trim(), yonetici: yon, moduller: mods, izinler, projeler, santraller, ozel, degisiklik: simdiTR() });
     R.kullanicilar[kul] = x;
     const yuk = yukHazirla(kul, x);
     await kullaniciYaz(kul, sifre || null, yuk);
     V.rehber = await sifrele(await hamAnahtar(S.ka), R);
-    if (santraller.length) V.api_ozet = await apiOzetHesapla();
+    V.api_ozet = await apiOzetHesapla();
     await veriKaydet((yeni ? 'kullanıcı eklendi' : 'kullanıcı güncellendi'));
     if (kul === S.kul) { S = yuk; oturumKaydet(); }
   });
@@ -927,6 +995,7 @@ function modSil(id) {
   if (HEDEF) {
     if (HEDEF === 'asistan' && S && S.ka) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/asistan/')); return; }
     if (HEDEF === 'avy' && S && (S.ka || (S.anahtarlar && S.anahtarlar.avy))) { location.replace(yerelUrl('https://ekinciomer-ai.github.io/aesun/avy/')); return; }
+    { const oh = OZEL_ALT.find(x => x.id === HEDEF && x.url && !x.ic); if (oh && S && ozVar(HEDEF) && /^https:/.test(oh.url())) { location.replace(oh.url()); return; } }   // Özel Alan yetkilisi: girişten sonra istediği sayfaya döner
     if (S && MOD[HEDEF] && String(MOD[HEDEF].url || '').trim()) { const u = await ssoUrl(HEDEF); if (u) { location.replace(u); return; } git('ana'); return ssoYokDlg(HEDEF); }
     git('ana'); return S ? acSonuc(HEDEF) : girisModal(HEDEF);
   }

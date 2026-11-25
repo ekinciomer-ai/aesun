@@ -43,8 +43,9 @@
     location.replace('../portal/?git=avy');
     return;
   }
-  var rol = S.ka ? 'yonetici' : (S.anahtarlar && S.anahtarlar.avy ? 'avy' : '');
-  var anahtar = rol === 'yonetici' ? S.ka : (rol === 'avy' ? S.anahtarlar.avy : '');
+  var A = S.anahtarlar || {};
+  var rol = S.ka ? 'yonetici' : (A.avy ? 'avy' : (A.oz_avy_y ? 'oz_avy_y' : (A.oz_avy ? 'oz_avy' : '')));
+  var anahtar = rol === 'yonetici' ? S.ka : (rol ? A[rol] : '');
   if (!rol || !anahtar) {
     document.getElementById('durum').textContent = 'Yetki Gerekli';
     var h = document.getElementById('hata');

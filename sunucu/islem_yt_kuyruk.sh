@@ -128,6 +128,26 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             urllib.request.urlopen(req, timeout=30).read()
             print(f"NOT: {hv} başlık değişti: {eski_b} → {sn['title']}")
             sonuc.append({"kod": kod, "durum": "başlık değişti", "vid": hv, "eski": eski_b}); continue
+        if it.get("islem") == "hemen_yayinla":
+            cid = KANAL[dil]
+            if dil not in toklar:
+                toklar[dil] = token(cid); mevcut[dil] = basliklar(toklar[dil], cid)
+            hv = it["vid"]
+            u = f"https://www.googleapis.com/youtube/v3/videos?part=status&id={hv}"
+            with urllib.request.urlopen(urllib.request.Request(u, headers={"Authorization": f"Bearer {toklar[dil]}"}), timeout=30) as r:
+                m = json.load(r)["items"][0]
+            json.dump(m, open(os.path.join(D, "yedek", f"yayinla_{hv}.json"), "w", encoding="utf-8"), ensure_ascii=False)
+            st = m["status"]
+            st.pop("publishAt", None)
+            for k in ("uploadStatus", "failureReason", "rejectionReason", "madeForKids"): st.pop(k, None)
+            st["privacyStatus"] = "public"
+            st["selfDeclaredMadeForKids"] = False
+            st["containsSyntheticMedia"] = True
+            req = urllib.request.Request("https://www.googleapis.com/youtube/v3/videos?part=status", data=json.dumps({"id": hv, "status": st}).encode(),
+                                         method="PUT", headers={"Authorization": f"Bearer {toklar[dil]}", "Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=30).read()
+            print(f"NOT: {hv} hemen yayına açıldı (public)")
+            sonuc.append({"kod": kod, "durum": "yayına açıldı", "vid": hv}); continue
         if it.get("islem") == "tarih_degis":
             cid = KANAL[dil]
             if dil not in toklar:

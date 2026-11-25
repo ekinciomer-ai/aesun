@@ -656,7 +656,7 @@ function buildS7(){const s=new THREE.Scene();s.environment=ENV.day;s.background=
  const car=makeCar(0x8f9aa3);s.add(car);
  const sh=shards(s,60),du=dust(s,12,0xa08868);
  const v=15,ti=5.0,ti2=ti+7/v,zf=1.2; // ön teker ofseti
- function upd(lt){O15.visible=false;ped16.m.visible=false;holes.forEach(h=>h.g.visible=true);const dt=lt-ti2;let x=-1.75,z,y=0,rx=0,ry=0,rz=0;
+ function upd(lt){O15.visible=false;ped16.m.visible=false;holes.forEach(h=>h.g.visible=true);B18.visible=X18.visible=false;car.visible=true;const dt=lt-ti2;let x=-1.75,z,y=0,rx=0,ry=0,rz=0;
   if(lt<ti2){z=v*(lt-ti)-zf; // önce
    const d1=lt-ti;if(d1>0&&d1<.35){y=-.16*Math.sin(Math.PI*d1/.35);rx=.07*Math.sin(Math.PI*2*d1/.35)}
    if(d1>.25)ry=.06*Math.sin((d1-.25)*9)}
@@ -667,7 +667,7 @@ function buildS7(){const s=new THREE.Scene();s.environment=ENV.day;s.background=
  // ---- Mit15 (beraat): karşı yönden gelen araç kayarak şeride girer, kendi şeridindeki araca çarpar ----
  const O15=makeCar(0x3c5a78);O15.visible=false;s.add(O15);const sh15=shards(s,70,0xcfe8ff),du15=dust(s,10,0xa08868);
  const P15={ti:7.0,Z:20,v:11,vo:13};
- function upd2(lt){holes.forEach(h=>h.g.visible=false);O15.visible=true;const dt=lt-P15.ti,Z=P15.Z;
+ function upd2(lt){holes.forEach(h=>h.g.visible=false);O15.visible=true;B18.visible=X18.visible=false;car.visible=true;const dt=lt-P15.ti,Z=P15.Z;
   let z,x=-1.75,ry=0;if(dt<0){z=Z-2.3+P15.v*dt}else{const k=2.2;z=Z-2.3+P15.v*.3*(1-Math.exp(-dt*k))/k;x=-1.75-.9*sm(dt/1.2);ry=-.35*sm(dt/1.1)}
   car.position.set(x,0,z);car.rotation.set(0,ry,0);spinWheels(car,z);car.userData.bl.emissiveIntensity=dt>-.5?5:.4;
   let oz,ox,oy;const a=1.8;
@@ -679,7 +679,7 @@ function buildS7(){const s=new THREE.Scene();s.environment=ENV.day;s.background=
   return {dt,car,O:O15}}
  // ---- Mit16 (hatır taşıması): yol kenarındaki yolcuyu alır, sonra tek taraflı kaza (yoldan çıkış) ----
  const ped16=makePed();ped16.m.visible=false;s.add(ped16.m);const du16=dust(s,14,0xa08868);const P16={ti:7.0,Zs:-30,stop:3.8};
- function upd3(lt){holes.forEach(h=>h.g.visible=false);O15.visible=false;const dt=lt-P16.ti;
+ function upd3(lt){holes.forEach(h=>h.g.visible=false);O15.visible=false;B18.visible=X18.visible=false;car.visible=true;const dt=lt-P16.ti;
   // durur → yolcu biner → kalkar (a=4.5 m/s²) → kaza
   const ta=lt-P16.stop;const dist=ta<0?0:(ta<3.4?2.25*ta*ta:2.25*3.4*3.4+15.3*(ta-3.4));
   const tE=P16.ti-P16.stop;const dE=tE<3.4?2.25*tE*tE:2.25*3.4*3.4+15.3*(tE-3.4);
@@ -691,7 +691,18 @@ function buildS7(){const s=new THREE.Scene();s.environment=ENV.day;s.background=
   const pv=lt<P16.stop-.2;ped16.m.visible=pv;const pt=clamp((lt-(P16.stop-1.6))/1.4,0,1);ped16.m.position.set(lerp(-4.6,-2.9,pt),0,P16.Zs+.4);ped16.m.rotation.y=pt>0?Math.PI/2:Math.PI;ped16.mixer.setTime(pt>0&&pt<1?lt*.9:0);
   du16.upd(new THREE.Vector3(x,.3,z),dt);
   return {dt,car,ped:ped16}}
- return {s,upd,upd2,upd3,ti,ti2,holes,P15,P16}}
+ // ---- Mit18 (plakasız araç): öne kıran araç yüzünden otobüs ani fren yapar; araç uzaklaşır ----
+ const B18=makeBus();B18.visible=false;s.add(B18);const X18=makeCar(0x5a5a5a);X18.visible=false;s.add(X18);const du18=dust(s,8,0x9a9488);
+ const P18={ti:7.0,Z:10,v:12};
+ function upd4(lt){holes.forEach(h=>h.g.visible=false);O15.visible=false;ped16.m.visible=false;car.visible=false;B18.visible=X18.visible=true;const dt=lt-P18.ti;
+  let bz,pitch=0;if(dt<0)bz=P18.Z+P18.v*dt;else{const k=3.2;bz=P18.Z+P18.v*(1-Math.exp(-dt*k))/k;pitch=.05*Math.exp(-dt*2.2)*Math.sin(Math.min(dt,.6)/.6*Math.PI*.5)}
+  B18.position.set(-1.75,0,bz);B18.rotation.set(pitch,0,0);
+  // araç: sol şeritten hızla geçer, otobüsün önüne kırar, sonra hızlanıp uzaklaşır
+  const xv=17,xz=15.4+xv*(lt-(P18.ti-.5));const u=clamp((lt-(P18.ti-.9))/.7,0,1);let xx=lerp(1.75,-1.75,sm(u)),xy=-.32*Math.sin(u*Math.PI);
+  if(dt>0)xx=-1.75;const xz2=dt>0?xz+6*dt*dt:xz;X18.position.set(xx,0,xz2);X18.rotation.set(0,xy,0);spinWheels(X18,xz2);X18.userData.bl.emissiveIntensity=dt>-.3&&dt<.4?5:.4;X18.visible=xz2<bz+90;
+  du18.upd(new THREE.Vector3(-1.75,.2,bz+6),dt);
+  return {dt,car:B18,O:X18}}
+ return {s,upd,upd2,upd3,upd4,ti,ti2,holes,P15,P16,P18}}
 S.push(buildS7());
 // ================= otobüs / kar aracı / inek modelleri =================
 function makeBus(){const g=new THREE.Group();

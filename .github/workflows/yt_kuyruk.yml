@@ -83,6 +83,16 @@ jobs:
                   if s['vid'] in ix: ix[s['vid']]['baslik'] = hj['baslik']
                   subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
                   print(f'::notice::{kod}: başlık değişti → {s["vid"]}'); continue
+              if s.get('durum') == 'yayına açıldı':
+                  from datetime import timezone, timedelta
+                  simdi_ist = datetime.now(timezone(timedelta(hours=3)))
+                  if s['vid'] in ix:
+                      ix[s['vid']]['durum'] = 'Yayında'
+                      ix[s['vid']]['tarih'] = simdi_ist.strftime('%Y-%m-%d')
+                      ix[s['vid']]['saat'] = simdi_ist.strftime('%H:%M')
+                      ix[s['vid']].pop('not', None)
+                  subprocess.run(['git', 'mv', f'sunucu/yt_kuyruk/{kod}.json', f'sunucu/yt_kuyruk/tamam/{kod}.json'], check=False)
+                  print(f'::notice::{kod}: yayına açıldı → {s["vid"]}'); continue
               if s.get('durum') == 'tarih değişti':
                   p = datetime.fromisoformat(s['publishAt'])
                   if s['vid'] in ix:

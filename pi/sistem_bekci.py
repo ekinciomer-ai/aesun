@@ -174,7 +174,11 @@ def calis(simdi=None):
     # bugününki hiç yoksa aynı işi repository_dispatch (epias_fiyat) ile tetikle — saatte en çok bir kez.
     try:
         ep, _ = gh("n8n/epias_gecmis.json")
-        ptf = (ep or {}).get("ptf") or {}
+        if not isinstance(ep, dict) or not isinstance(ep.get("ptf"), dict):
+            # okuma başarısız (ör. 25.11 01:49–07:48 GitHub 401 → ns1 penceresi): PTF'yi "eksik" sayıp saatte bir
+            # boşuna EPİAŞ turu tetikleme — o pencerede 6 gereksiz tur, hepsi iş hatası olarak düştü
+            raise ValueError("epias_gecmis.json okunamadı")
+        ptf = ep["ptf"]
         tam = lambda g: len([x for x in (ptf.get(g) or []) if x is not None]) >= 24
         from datetime import timedelta
         bugun, yarin = simdi.strftime("%Y-%m-%d"), (simdi + timedelta(days=1)).strftime("%Y-%m-%d")

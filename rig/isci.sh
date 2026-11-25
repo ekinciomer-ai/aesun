@@ -33,7 +33,9 @@ NB=$(gonder nabiz.json); echo "$(date '+%F %T') nabız: $NB · gpu $NG"
 # hız denemesi (imaj başına bir kez)
 if [ -z "${DENEMESIZ:-}" ] && [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
   rm -f is/deneme.json
-  $KUTU bash /is/deneme.sh "$GL" "${RD:-renderD128}" > is/kutu.log 2>&1
+  docker rm -f aerig_deneme >/dev/null 2>&1
+  timeout 900 ${KUTU/docker run --rm/docker run --rm --name aerig_deneme} bash /is/deneme.sh "$GL" "${RD:-renderD128}" > is/kutu.log 2>&1 \
+    || { docker rm -f aerig_deneme >/dev/null 2>&1; echo "$(date '+%F %T') HATA deneme 15 dk'da bitmedi (takıldı)"; }
   if [ -s is/deneme.json ]; then
     R=$(gonder deneme.json); echo "$(date '+%F %T') deneme: $R $(cat is/deneme.json)"
     [ "$R" = 200 ] && echo "$DS" > deneme_tamam

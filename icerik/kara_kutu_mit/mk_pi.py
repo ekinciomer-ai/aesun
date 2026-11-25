@@ -25,6 +25,7 @@ mk_tl.build=build
 mk_tl.DISP.update({'Sekiz bin dokuz yüz kırk üç lira':'8.943 TL','Yedi yılda':'7 yılda','Yedi yılı':'7 yılı','Yedi yüz kırk dört':'744','yüz otuz altısını':"136'sını",'Yüz otuz altı':'136','On yedi':'17','Üç kadın':'3 kadın','dört yılı':'4 yılı','Beş yıl':'5 yıl'})
 mk_tl.DISP = {'yüzde yirmi dokuz': '%29', 'yüzde seksen': '%80', 'yüzde yirmi': '%20',
   'sekiz yüz kırk bin lirayı aşan': '840.314 TL', 'yüz bin lira': '100.000 TL', 'yaklaşık üç metreden': '~3 metreden', **mk_tl.DISP}
+mk_tl.DISP.update({'bir virgül yirmi dokuz katı':'1,29 katı','haftada beş buçuk saat':'haftada 5,5 saat','bir yıl içinde':'1 yıl içinde','elli bin lira':'50.000 TL','iki yüz yirmi bin lira':'220.000 TL','yüz kırk bir bin lira':'141.593 TL','on iki yıldır':'12 yıldır','Sekiz aylık':'8 aylık','Sekiz ay':'8 ay','sekiz ay':'8 ay','altı buçuk yıl':'6,5 yıl','On gün':'10 gün','dört ay':'4 ay','üç yıldır':'3 yıldır','iki yıl':'2 yıl','Kod yirmi dokuz':'Kod 29','kod yirmi dokuz':'kod 29','kod sıfır dört':'kod 04','dört gün':'4 gün','bir yıllık':'1 yıllık','iki aylık':'2 aylık','İki ay':'2 ay','dokuz yıldır':'9 yıldır','Otuza yakın':'30’a yakın'})
 E = json.load(open(sys.argv[1])); s = open('scene.html').read()
 for e in E:
   import os

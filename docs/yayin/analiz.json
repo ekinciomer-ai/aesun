@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T09:24+03:00",
+ "olusturma": "2026-11-25T09:44+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -879,15 +879,15 @@
   }
  ],
  "esikler": {
-  "Estudio Antiguo": 136,
-  "Kozmos Lab": 95,
-  "Kozmos Lab TR": 214,
-  "LVL MAX": 50,
   "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 214,
+  "Kozmos Lab": 95,
+  "Nasıl Yapıldı": 135,
   "Yolu Seç !": 262,
-  "Antik Stüdyo": 637,
+  "LVL MAX": 50,
   "Ancient Studio": 192,
-  "Nasıl Yapıldı": 135
+  "Estudio Antiguo": 136,
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -905,7 +905,7 @@
    },
    "13:00": {
     "n": 4,
-    "medyan": 1421
+    "medyan": 1422
    },
    "14:00": {
     "n": 9,
@@ -1668,7 +1668,7 @@
   "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",
-  "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1421 izlenme, 4 video).",
+  "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1422 izlenme, 4 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 67 izlenme, 7 video).",
   "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 974 izlenme, 7 video).",

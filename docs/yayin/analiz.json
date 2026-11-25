@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T04:57+03:00",
+ "olusturma": "2026-11-25T05:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -124,8 +124,8 @@
    "gunluk_short_kotasi": 4,
    "seri_dagilimi": {
     "Yolu Seç · Isınma Turu": 2,
-    "Mühürlü Dosya · Bilgi Kartları": 1,
-    "Kara Kutu · Hukuk Dosyaları": 1
+    "Kara Kutu · Hukuk Dosyaları": 1,
+    "Mühürlü Dosya · Bilgi Kartları": 1
    },
    "durdurulan": []
   },
@@ -389,11 +389,11 @@
    "kanal": "Antik Stüdyo",
    "seri": "Tablo Serisi",
    "karar": "ARTIR",
-   "neden": "videoların %62'i tuttu (eşik 637 izlenme / 48 sa)",
-   "olculen": 16,
-   "erken": 3,
-   "medyan_48sa": 1274,
-   "tutma_orani": 62,
+   "neden": "videoların %65'i tuttu (eşik 637 izlenme / 48 sa)",
+   "olculen": 17,
+   "erken": 2,
+   "medyan_48sa": 1221,
+   "tutma_orani": 65,
    "izlenme_yuzde": 53,
    "en_iyi": {
     "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱",
@@ -817,13 +817,16 @@
    "kanal": "Yolu Seç !",
    "seri": "Kara Kutu · Hukuk Dosyaları",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 2,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 1,
+   "medyan_48sa": 965,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Evi Boyatmadan Çıktı, Depozitosunu Geri Aldı! | KARA KUTU #1",
+    "i48": 965
+   }
   },
   {
    "kanal": "Yolu Seç !",
@@ -869,21 +872,21 @@
    "izlenme_yuzde": 76,
    "en_iyi": {
     "baslik": "Ninemin güneşte salçası 🍅 Eskiden salça nasıl yapılırdı?",
-    "i48": 238
+    "i48": 241
    },
    "kaydirmadan_izleme_yuzde": 24
   }
  ],
  "esikler": {
   "Ancient Studio": 192,
-  "Ömür Dediğin": 50,
-  "Nasıl Yapıldı": 135,
-  "LVL MAX": 50,
+  "Estudio Antiguo": 136,
   "Kozmos Lab TR": 214,
   "Yolu Seç !": 262,
+  "LVL MAX": 50,
+  "Nasıl Yapıldı": 135,
+  "Ömür Dediğin": 50,
   "Kozmos Lab": 95,
-  "Antik Stüdyo": 637,
-  "Estudio Antiguo": 136
+  "Antik Stüdyo": 637
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -900,8 +903,8 @@
     "medyan": 708
    },
    "13:00": {
-    "n": 3,
-    "medyan": 1626
+    "n": 4,
+    "medyan": 1418
    },
    "14:00": {
     "n": 9,
@@ -1040,8 +1043,8 @@
   },
   "Yolu Seç !": {
    "13:00": {
-    "n": 5,
-    "medyan": 320
+    "n": 6,
+    "medyan": 450
    },
    "14:00": {
     "n": 1,
@@ -1642,20 +1645,20 @@
  "bulgular": [
   "Dün (2026-11-24) 12277 izlenme geldi; bir önceki gün 11292.",
   "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 192 izlenme / 48 sa).",
-  "Antik Stüdyo: son 6 Short'tan 1 tanesi tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo: son 6 Short'tan 2 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 1 tanesi tuttu (eşik 95 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 5 tanesi tuttu (eşik 214 izlenme / 48 sa).",
   "LVL MAX: son 6 Short'tan 0 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
-  "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
+  "Yolu Seç !: son 6 Short'tan 3 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 3 Short'tan 2 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Ancient Studio · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Antik Stüdyo · Gece Yasakları: ARTIR — videoların %60'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Gündem + Tarih: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Antik Stüdyo · Spor + Tarih: ARTIR — videoların %67'i tuttu (eşik 637 izlenme / 48 sa).",
-  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %62'i tuttu (eşik 637 izlenme / 48 sa).",
+  "Antik Stüdyo · Tablo Serisi: ARTIR — videoların %65'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihi Magazin: ARTIR — videoların %50'i tuttu (eşik 637 izlenme / 48 sa).",
   "Antik Stüdyo · Tarihin Patileri: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab · Did you know?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %11.",
@@ -1666,7 +1669,7 @@
   "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",
-  "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1626 izlenme, 3 video).",
+  "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1418 izlenme, 4 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 67 izlenme, 7 video).",
   "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 974 izlenme, 7 video).",

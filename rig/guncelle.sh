@@ -42,7 +42,7 @@ UNIT
     systemctl daemon-reload; log "docker hazır paket kuruldu ($(/usr/local/bin/docker --version 2>&1 | cut -c1-40))"
   else log "HATA docker hazır paket: $(cat $T/curl.log 2>/dev/null | cut -c1-200) disk: $(df -h $K | tail -1 | tr -s ' ')"; fi
   rm -rf $T
-  systemctl enable --now docker >/dev/null 2>&1; sleep 5
+  timeout 120 systemctl enable --now docker >/dev/null 2>&1; sleep 5
 fi
 docker info >/dev/null 2>&1 || { systemctl restart docker >/dev/null 2>&1; sleep 8; }
 docker info >/dev/null 2>&1 || log "HATA docker çalışmıyor: $(journalctl -u docker -n 3 --no-pager 2>/dev/null | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
@@ -52,7 +52,7 @@ DENEMESIZ=1 bash $K/isci.sh
 H=$(sha256sum Dockerfile | cut -c1-12)
 if [ "$(cat imaj_surum 2>/dev/null)" != "$H" ]; then
   log "imaj derleniyor ($H)"
-  if docker build -q -t aerig:1 . > imaj.log 2>&1; then echo "$H" > imaj_surum; rm -f deneme_tamam; log "imaj hazır"; else log "HATA imaj: $(tail -n 3 imaj.log | tr '\n' ' ' | cut -c1-300)"; fi
+  if timeout 5400 docker build -q -t aerig:1 . > imaj.log 2>&1; then echo "$H" > imaj_surum; rm -f deneme_tamam; log "imaj hazır"; else log "HATA imaj: $(tail -n 3 imaj.log | tr '\n' ' ' | cut -c1-300)"; fi
 fi
 # 6) kayıt (onaylanana kadar her turda yenilenir)
 OZ=$(sha256sum anahtar | cut -c1-64)

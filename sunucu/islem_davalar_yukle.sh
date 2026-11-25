@@ -37,6 +37,7 @@ echo "NOT: $N evrak şifrelendi"
 rm -rf "$T/ac"
 rm -rf "$D/sunum.onceki"; [ -d "$D/sunum" ] && mv "$D/sunum" "$D/sunum.onceki"
 mv "$T/yeni" "$D/sunum"; chown -R 1001:1001 "$D/sunum"; chmod 700 "$D/sunum" "$D/sunum/e"
+[ -f "$D/brifing.sifreli" ] && install -o 1001 -g 1001 -m 600 "$D/brifing.sifreli" "$D/sunum/brifing.sifreli"   # brifing yeni pakette de kalsın
 cp "$T/a.enc" "$D/sunum_paket_$(date +%Y%m%d).enc"; cp "$S/anahtar.sarili" "$D/sunum_paket_$(date +%Y%m%d).anahtar"; chmod 600 "$D"/sunum_paket_*
 docker restart aesun-api >/dev/null && sleep 6
 echo "NOT: yetkisiz istek: $(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://api.aksarayenerji.net/v1/davalar/dizin) (401 beklenir)"

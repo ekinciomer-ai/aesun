@@ -37,6 +37,17 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
 #gor iframe{width:100%;height:100%;border:0;background:#fff}#gor img{max-width:100%;display:block;margin:0 auto}
 #gor pre{margin:0;padding:14px;white-space:pre-wrap;word-break:break-word;font:14px/1.55 ui-monospace,Consolas,monospace}
 .bilgi{color:var(--s);padding:20px;text-align:center}
+.sek{display:flex;gap:6px;margin:4px 0 14px}.sek button{flex:1;border:1px solid var(--c);background:var(--kart);color:var(--y);padding:10px;border-radius:10px;font:600 14.5px system-ui;cursor:pointer}.sek button.on{background:var(--v);border-color:var(--v);color:#fff}
+#brf{display:none}#brf.on{display:block}#dsy.gizli{display:none}
+.md{background:var(--kart);border:1px solid var(--c);border-radius:14px;padding:6px 16px 18px;overflow-wrap:anywhere}
+.md h1{font-size:20px;margin:14px 0 6px}.md h2{font-size:17px;margin:22px 0 8px;padding-top:10px;border-top:1px solid var(--c)}.md h3{font-size:15px;margin:16px 0 6px;color:var(--s)}
+.md p{margin:8px 0}.md ul,.md ol{margin:6px 0;padding-left:22px}.md li{margin:3px 0}
+.md .tb{overflow-x:auto;margin:8px 0}.md table{border-collapse:collapse;width:100%;font-size:13.5px}.md th,.md td{border:1px solid var(--c);padding:6px 8px;vertical-align:top;text-align:left}.md th{background:var(--bg)}
+.md th,.md td{overflow-wrap:normal;word-break:normal}.md td:first-child{min-width:92px}.md td{min-width:70px}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.toc a{font-size:12.5px;padding:4px 9px;border:1px solid var(--c);border-radius:99px;text-decoration:none;color:var(--y);background:var(--bg)}
+.kanit{display:inline;border:1px solid var(--v);color:var(--v);background:none;border-radius:7px;padding:1px 7px;font:600 12.5px system-ui;cursor:pointer;margin:2px 0}
+.kanit:before{content:"📄 "}
+
 </style>
 </head>
 <body>
@@ -44,8 +55,10 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
 <a href="../">← Portal</a>
 <h1>Davalar</h1>
 <p class="alt" id="alt">Yükleniyor…</p>
-<input class="ara" id="ara" type="search" placeholder="Dava, taraf ya da evrak ara…" autocomplete="off">
-<div id="liste"></div>
+<div class="sek"><button id="sD" class="on">Dosyalar</button><button id="sB">Brifing</button></div>
+<div id="dsy"><input class="ara" id="ara" type="search" placeholder="Dava, taraf ya da evrak ara…" autocomplete="off">
+<div id="liste"></div></div>
+<div id="brf"><div class="bilgi">Brifing yükleniyor…</div></div>
 </main>
 <div id="gor"><div class="ust"><b id="gAd"></b><a id="gYeni" target="_blank" rel="noopener">Yeni sekme</a><a id="gIndir" download>İndir</a><button id="gKapat">Kapat</button></div><div class="gov" id="gGov"></div></div>
 <script>
@@ -102,6 +115,59 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
       else gov.innerHTML='<div class="bilgi">Bu evrak tarayıcıda gösterilemiyor. "İndir" ile açabilirsiniz.</div>';
     }).catch(function(e){gov.innerHTML='<div class="bilgi">Açılamadı: '+esc(e.message)+'</div>';});
   }
+  // ---- Brifing ----
+  var B=null;
+  function sekme(b){document.getElementById('sD').classList.toggle('on',!b);document.getElementById('sB').classList.toggle('on',b);
+    document.getElementById('dsy').classList.toggle('gizli',b);document.getElementById('brf').classList.toggle('on',b);
+    try{history.replaceState(null,'',b?'#brifing':location.pathname);}catch(e){}
+    if(b&&B===null)brifingAl();}
+  document.getElementById('sD').onclick=function(){sekme(false);};
+  document.getElementById('sB').onclick=function(){sekme(true);};
+  function satir(s){
+    s=esc(s);
+    s=s.replace(/\[\[(.+?)::(.+?)::(.+?)\]\]/g,function(m,d,a,l){return '<button class="kanit" data-d="'+d+'" data-a="'+a+'">'+l+'</button>';});
+    s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+    s=s.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*)\*/g,'$1<i>$2</i>');
+    return s;}
+  function md(t){
+    var L=t.replace(/\r/g,'').split('\n'),h='',i=0,toc=[],n=0;
+    while(i<L.length){var l=L[i];
+      if(/^\s*$/.test(l)){i++;continue;}
+      var m=l.match(/^(#{1,3})\s+(.*)$/);
+      if(m){var lv=m[1].length;if(lv===2){n++;toc.push(m[2]);h+='<h2 id="b'+n+'">'+satir(m[2])+'</h2>';}else h+='<h'+lv+'>'+satir(m[2])+'</h'+lv+'>';i++;continue;}
+      if(/^\|/.test(l)){var rows=[];while(i<L.length&&/^\|/.test(L[i])){rows.push(L[i]);i++;}
+        var cel=function(r){return r.replace(/^\||\|\s*$/g,'').split('|').map(function(c){return c.trim();});};
+        var x='<div class="tb"><table><thead><tr>'+cel(rows[0]).map(function(c){return '<th>'+satir(c)+'</th>';}).join('')+'</tr></thead><tbody>';
+        rows.slice(1).forEach(function(r){if(/^\|[\s:|-]+\|?\s*$/.test(r))return;x+='<tr>'+cel(r).map(function(c){return '<td>'+satir(c)+'</td>';}).join('')+'</tr>';});
+        h+=x+'</tbody></table></div>';continue;}
+      if(/^\s*[-*]\s+/.test(l)){h+='<ul>';while(i<L.length&&/^\s*[-*]\s+/.test(L[i])){h+='<li>'+satir(L[i].replace(/^\s*[-*]\s+/,''))+'</li>';i++;}h+='</ul>';continue;}
+      if(/^\s*\d+\.\s+/.test(l)){h+='<ol>';while(i<L.length&&/^\s*\d+\.\s+/.test(L[i])){h+='<li>'+satir(L[i].replace(/^\s*\d+\.\s+/,''))+'</li>';i++;}h+='</ol>';continue;}
+      var p=[];while(i<L.length&&!/^\s*$/.test(L[i])&&!/^(#{1,3}\s|\||\s*[-*]\s|\s*\d+\.\s)/.test(L[i])){p.push(L[i]);i++;}
+      h+='<p>'+satir(p.join(' '))+'</p>';}
+    var tc='<div class="toc">'+toc.map(function(x,j){return '<a href="#b'+(j+1)+'">'+esc(x.replace(/\*\*/g,''))+'</a>';}).join('')+'</div>';
+    return h.replace(/(<\/h1>(?:<p>.*?<\/p>)?)/,'$1'+tc);}
+  function brifingAl(){B='';al('brifing').then(function(r){return r.text();}).then(function(t){B=t;
+      document.getElementById('brf').innerHTML='<div class="md">'+md(t)+'</div>';
+    }).catch(function(e){B=null;document.getElementById('brf').innerHTML='<div class="bilgi">Brifing alınamadı: '+esc(e.message)+'</div>';});}
+  function normal(s){return kucuk(s).replace(/\./g,'/');}
+  document.getElementById('brf').addEventListener('click',function(ev){
+    var a=ev.target.closest('a[href^="#b"]');if(a){ev.preventDefault();var h=document.getElementById(a.getAttribute('href').slice(1));if(h)h.scrollIntoView({behavior:'smooth'});return;}
+    var b=ev.target.closest('.kanit');if(!b)return;
+    var esas=b.dataset.d,ar=b.dataset.a.split(';').map(normal),lbl=b.textContent;
+    if(!D){alert('Evrak listesi henüz yüklenmedi.');return;}
+    var bul=[];
+    (D.davalar||[]).forEach(function(d){if(String(d.esas||'').indexOf(esas)<0&&String(d.baslik||'').indexOf(esas)<0)return;
+      (d.klasorler||[]).forEach(function(k){(k.evraklar||[]).forEach(function(e){
+        var z=normal((k.ad||'')+' '+e.ad+' '+(e.tarih||''));
+        if(ar.some(function(x){return x&&z.indexOf(x)>=0;}))bul.push(e);});});});
+    if(bul.length===1){ac(bul[0].id,bul[0].ad,bul[0].tur);return;}
+    document.getElementById('gAd').textContent=lbl;gor.classList.add('acik');
+    if(!bul.length){gov.innerHTML='<div class="bilgi">Bu evrak Davalar listesinde otomatik bulunamadı ('+esc(esas)+').<br><br><button class="kanit" id="gAra">Dosyalar\'da ara</button></div>';
+      document.getElementById('gAra').onclick=function(){kapat();sekme(false);var q=document.getElementById('ara');q.value=esas;ciz();};return;}
+    gov.innerHTML='<div style="padding:8px 12px"><div class="alt">'+bul.length+' evrak bulundu:</div>'+bul.map(function(e){return '<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';}).join('')+'</div>';
+  });
+  gov.addEventListener('click',function(ev){var b=ev.target.closest('.ev');if(b)ac(b.dataset.id,b.dataset.ad,b.dataset.tur);});
+  if(location.hash==='#brifing')sekme(true);
   al('dizin').then(function(r){return r.json();}).then(function(j){
     D=j; var n=0;(D.davalar||[]).forEach(function(d){(d.klasorler||[]).forEach(function(k){n+=(k.evraklar||[]).length;});});
     document.getElementById('alt').textContent=(D.davalar||[]).length+' dava · '+n+' evrak'+(D.guncel?' · güncelleme '+D.guncel:'')+' · yalnız yönetici';

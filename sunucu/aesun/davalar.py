@@ -64,3 +64,13 @@ def evrak(eid: str, request: Request):
     tur = bilgi.get("tur", "pdf")
     return Response(_coz(p), media_type=TURLER.get(tur, "application/octet-stream"),
                     headers={**BAS, "Content-Disposition": f'inline; filename="evrak_{eid}.{tur}"'})
+
+
+@router.get("/v1/davalar/brifing")
+def brifing(request: Request):
+    """Dava brifingi (markdown). Sunucuda şifreli durur: /davalar/brifing.sifreli."""
+    _yonetici(request)
+    p = KOK / "brifing.sifreli"
+    if not p.is_file():
+        raise HTTPException(404, "brifing yok")
+    return Response(_coz(p), media_type="text/markdown; charset=utf-8", headers=BAS)

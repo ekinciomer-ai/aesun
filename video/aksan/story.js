@@ -283,20 +283,20 @@ function buildRhythm(scene) {
   dyn.rhythmLbl.position.set(0, 2.95, -1.2); dyn.rhythmLbl.userData.noShadow = true; g.add(dyn.rhythmLbl);
   fx.brocaGlow = glow(scene, [199.56, 1.82, -.7], { size: 1.9, color: '#ff6e42', strength: .48 });
 
-  // P07 GÜNDELİK BENZETME: DEV 3B PİYANO KLAVYESİ + SALINAN METRONOM İBRESİ!
+  // P07 GÜNDELİK BENZETME: DEV 3B PİYANO KLAVYESİ (kameraya eğik — siyah-beyaz tuşlar net!) + SALINAN METRONOM!
   dyn.pianoGrp = new THREE.Group(); dyn.pianoGrp.position.set(.24, 0, .2); g.add(dyn.pianoGrp);
-  // Piyano gövdesi
-  const pCase = new THREE.Mesh(new THREE.BoxGeometry(1.06, .18, .54), flat('#2c2420'));
-  pCase.position.set(0, 1.15, -.04); dyn.pianoGrp.add(pCase);
+  const keyBed = new THREE.Group(); keyBed.position.set(0, 1.22, .02); keyBed.rotation.x = .58; dyn.pianoGrp.add(keyBed);
+  const pCase = new THREE.Mesh(new THREE.BoxGeometry(1.08, .14, .54), flat('#2c2420'));
+  pCase.position.set(0, -.07, -.04); keyBed.add(pCase);
   // 6 beyaz tuş
   dyn.wKeys = Array.from({ length: 6 }, (_, i) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(.14, .10, .44), flat('#f4f0e8'));
-    m.position.set((i - 2.5) * .165, 1.28, .02); dyn.pianoGrp.add(m); return m;
+    const m = new THREE.Mesh(new THREE.BoxGeometry(.14, .09, .44), flat('#f4f0e8'));
+    m.position.set((i - 2.5) * .165, .04, .02); keyBed.add(m); return m;
   });
   // 4 siyah tuş
   for (const bx of [-.33, -.165, .165, .33]) {
-    const bk = new THREE.Mesh(new THREE.BoxGeometry(.085, .12, .26), flat('#1a181e'));
-    bk.position.set(bx, 1.35, -.07); dyn.pianoGrp.add(bk);
+    const bk = new THREE.Mesh(new THREE.BoxGeometry(.085, .11, .26), flat('#18161e'));
+    bk.position.set(bx, .11, -.07); keyBed.add(bk);
   }
   // Üstte altın metronom gövdesi + salınan ibre
   const metBase = new THREE.Mesh(new THREE.ConeGeometry(.20, .48, 4), flat('#7a5234'));
@@ -531,7 +531,7 @@ export function frame(t, ctx) {
       const activeIdx = Math.floor((t * 3.1) % 6);
       dyn.wKeys.forEach((k, i) => {
         const pressed = i === activeIdx;
-        k.position.y = pressed ? 1.23 : 1.28;
+        k.position.y = pressed ? .00 : .04;
         k.material.color.set(pressed ? (i === 3 ? '#ff7442' : '#ffd87a') : '#f4f0e8');
       });
       kr.show(); kr.place(199.46, 0, .22, cam, tint);

@@ -108,27 +108,25 @@
    "sahne": "S[6].upd3",
    "kaynak": "Yargıtay 4. HD E.2022/6578 K.2024/1013 (onama, %20 hatır indirimi, 31.622 TL maddi + 20.000 TL manevi) https://lexara.com.tr/karar/382473",
    "ses": "V1-4 KK_MIT_16, V5-6 KK_MIT_16_B, V7 KK_MIT_16_C (hepsi gemini-3.1-flash-tts-preview/charon)"
-  }
- ],
- "ertelenen": [
+  },
   {
    "kod": "KK_MIT_17_VIRAJ_LEVHA",
    "mit": "Virajı alamadıysan suç tamamen sendedir",
    "mit_no": 17,
    "render_no": 18,
-   "sahne": "S[11].upd (yeni: ıslak sol viraj, makePickup)",
+   "sahne": "S[11].upd",
    "kaynak": "Danıştay 15. D E.2016/87 K.2017/2097 (onama; sürücü %75, idare %25; 6.675 TL) https://lexara.com.tr/karar/18748639",
-   "ses": "V1-V4: KK_MIT_17_B, V5: KK_MIT_17_C (hazır); V6-V7 eksik → bekleyen_tts/KK_MIT_17_D.json",
-   "kart": "bekleyen_kart/KK_MIT_17_VIRAJ_LEVHA.json",
-   "spec": "bolumler_mit15_17.json (N=18, src Danıştay)"
-  },
+   "ses": "V1-4 KK_MIT_17_B, V5 _C, V6-7 _D (gemini-3.1-flash-tts-preview/charon)"
+  }
+ ],
+ "ertelenen": [
   {
    "kod": "KK_MIT_18_PLAKASIZ_ARAC",
    "mit": "Kazaya sebep olan araç kaçtıysa, plakası yoksa kimseden para alamazsın",
    "mit_no": 18,
    "render_no": 19,
    "kaynak": "Yargıtay 4. HD E.2021/25417 K.2023/3802 (onama; otobüs ani fren, yolcu %15 malul, plakası tespit edilemeyen araç %75 kusurlu, 82.818,52 TL) https://lexara.com.tr/karar/21247411",
-   "ses": "hiç okunamadı → bekleyen_tts/KK_MIT_18_C.json",
+   "ses": "V1: cikti/KK_MIT_18_C__V1.mp3 hazır; V2-V7 → bekleyen_tts/KK_MIT_18_D.json. Birleştirmede KK_MIT_18__V1..V7 adına kopyala.",
    "sahne": "S[6].upd4 (otobüs + öne kıran araç, hazır, test edildi)",
    "spec": "bolumler_mit18.json (N=19)",
    "kart": "bekleyen_kart/KK_MIT_18_PLAKASIZ_ARAC.json"
@@ -167,8 +165,8 @@
    "sahne": "YENİ gerekli: ilçe yolu + mıcır yaması + çelik bariyer"
   }
  ],
- "ertelenen_not": "25.11.2026 11:40: Kota 11:20'de yenilendi ama aynı saatte kuyruğa giren Patron mu Haklı #6-12 (49 parça) kotayı tüketti; #17'ye yalnız V5 düştü. #17 (V6-V7) ve #18 (tümü) bekliyor. | 25.11.2026 13:30 (zamanlanmış görev): #19-21 karar+senaryo+kart+spec hazır; Gemini günlük kota tüm anahtarlarda 11:27'den beri dolu olduğundan ses işleri gönderilmedi (gönderilse başarısız olup tamam/'a taşınacaktı). 26.11 11:00 sonrası önce #17_D, #18_C, sonra #19-21 bekleyen_tts'ten tts_kuyruk'a taşınmalı.",
- "son_gun": "2026-11-25: #15 düzeltildi, #16 teslim; #17-21 ses kotası bekliyor (26.11 11:00).",
+ "ertelenen_not": "26.11.2026 01:05: #17 teslim edildi. #18 V2-V7 (bekleyen_tts/KK_MIT_18_D.json), ardından #19-21 (bekleyen_tts/KK_MIT_19-21.json) 26.11 11:00 sonrası kuyruğa; önce KK_MIT_18_D.",
+ "son_gun": "2026-11-26: #17 teslim (01:05).",
  "iptal": [
   {
    "kod": "KK_MIT_15_KACMAK",

@@ -4,7 +4,7 @@
 set -uo pipefail
 cd /tmp/aesun_paket
 ONAY=$(grep -oE '([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}' sunucu/rig_onay.txt | tr a-f A-F | tr '\n' ' ')
-docker exec -e ONAY="$ONAY" aesun-api python - <<'PY'
+docker exec -i -e ONAY="$ONAY" aesun-api python - <<'PY'
 import json, os
 from pathlib import Path
 b = Path("/veri/rig_bekleyen.json"); a = Path("/veri/anahtarlar.json")

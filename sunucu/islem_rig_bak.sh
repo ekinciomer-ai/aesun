@@ -1,6 +1,6 @@
 #!/bin/bash
 # Yalnız okur: onay bekleyen rig'ler ve rig nabız/deneme sonuçları.
-docker exec aesun-api python - <<'PY'
+docker exec -i aesun-api python - <<'PY'
 import json
 from pathlib import Path
 b = Path("/veri/rig_bekleyen.json")

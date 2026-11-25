@@ -8,8 +8,16 @@ gonder(){ curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST -H "X-AE-
           --data-binary @"$K/is/$1" "$API/v1/veri?a=yaz&yol=rig/$AD/$1"; }
 mkdir -p is; cp deneme.sh is/
 KUTU="docker run --rm --device /dev/dri -v $K/is:/is aerig:1"
-GPUS=$($KUTU vulkaninfo 2>/dev/null | grep -iE 'deviceName *=' | grep -vi llvmpipe | sed 's/.*= *//' | paste -sd';')
+# Vulkan aygıt sırası (Intel çıkışı da sayılır); araçlara yalnız AMD aygıtlarının sıra numaraları verilir
+VKL=$($KUTU vulkaninfo 2>/dev/null | grep -iE 'deviceName *=' | sed 's/.*= *//')
+GPUS=$(echo "$VKL" | grep -i -e amd -e radeon | paste -sd';')
 NG=$(echo "$GPUS" | tr ';' '\n' | grep -c .)
+GL=$(echo "$VKL" | awk 'tolower($0)~/amd|radeon/{printf "%s%d",(n++?",":""),NR-1}')
+# VAAPI için AMD'nin render düğümü (vendor 0x1002)
+RD=$(for r in /sys/class/drm/renderD*; do [ "$(cat $r/device/vendor 2>/dev/null)" = 0x1002 ] && { basename $r; break; }; done)
+# deneme betiği değişince deneme yeniden yapılır
+DS=$(cat deneme.sh isci.sh | sha256sum | cut -c1-12)
+[ "$(cat deneme_tamam 2>/dev/null)" = "$DS" ] || rm -f deneme_tamam
 # kart görünmüyorsa teşhis: /dev/dri, Vulkan ve VAAPI çıktısının son satırları
 VKT=""
 if [ "$NG" -eq 0 ]; then
@@ -25,9 +33,9 @@ NB=$(gonder nabiz.json); echo "$(date '+%F %T') nabız: $NB · gpu $NG"
 # hız denemesi (imaj başına bir kez)
 if [ -z "${DENEMESIZ:-}" ] && [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
   rm -f is/deneme.json
-  $KUTU bash /is/deneme.sh "$(seq -s, 0 $((NG-1)))" > is/kutu.log 2>&1
+  $KUTU bash /is/deneme.sh "$GL" "${RD:-renderD128}" > is/kutu.log 2>&1
   if [ -s is/deneme.json ]; then
     R=$(gonder deneme.json); echo "$(date '+%F %T') deneme: $R $(cat is/deneme.json)"
-    [ "$R" = 200 ] && touch deneme_tamam
+    [ "$R" = 200 ] && echo "$DS" > deneme_tamam
   else echo "$(date '+%F %T') HATA deneme: $(tail -c 400 is/kutu.log)"; fi
 fi

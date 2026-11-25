@@ -265,19 +265,19 @@ function buildBloodTunnel(scene) {
     g.add(ring);
   }
 
-  // 24 adet yüzen 3B bikonkav ALYUVAR (Torus + iç disk = gerçek kan hücresi formu!)
+  // 24 adet yüzen 3B bikonkav ALYUVAR (uçuş koridoru etrafında döner, kamera merceğini asla kapatmaz!)
   const R = rng(820);
   dyn.rbcs = Array.from({ length: 24 }, (_, i) => {
     const cell = new THREE.Group();
-    const mat = new THREE.MeshLambertMaterial({ color: '#5c3c4c' }); // başta koyu kahverengi-mor methemoglobin!
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(.24, .09, 12, 20), mat);
-    const core = new THREE.Mesh(new THREE.CylinderGeometry(.20, .20, .09, 16), mat);
+    const mat = new THREE.MeshLambertMaterial({ color: '#6c3e56' }); // başta koyu kahverengi-mor methemoglobin!
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(.21, .08, 12, 20), mat);
+    const core = new THREE.Mesh(new THREE.CylinderGeometry(.17, .17, .08, 16), mat);
     core.rotation.x = Math.PI / 2;
     cell.add(rim, core);
-    const ang = R() * Math.PI * 2, rad = .55 + R() * 1.35;
+    const ang = (i / 24) * Math.PI * 2 * 3 + R() * .4, rad = .78 + R() * .95;
     cell.userData = {
-      x0: Math.cos(ang) * rad, y0: 1.5 + Math.sin(ang) * rad * .82,
-      z0: 4.5 - i * .58, sp: .5 + R() * .9, ph: R() * 6.29, mat,
+      x0: Math.cos(ang) * rad, y0: 1.48 + Math.sin(ang) * rad * .72,
+      z0: 3.0 - i * .42, sp: .5 + R() * .8, ph: R() * 6.29, mat,
     };
     cell.position.set(cell.userData.x0, cell.userData.y0, cell.userData.z0);
     g.add(cell); return cell;
@@ -305,19 +305,20 @@ function buildBloodTunnel(scene) {
   );
   dyn.lockLbl.position.set(0, -1.02, .12); dyn.lockLbl.userData.noShadow = true; dyn.lockGrp.add(dyn.lockLbl);
 
-  // P06 üst bilgi etiketi (sadece P06'da görünür)
+  // P06 üst bilgi etiketi (sadece P06'da görünür, tünelin açık merkezinde net!)
   dyn.bloodLbl = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.52, .52),
+    new THREE.PlaneGeometry(1.32, .46),
     new THREE.MeshBasicMaterial({ map: badgeTex('METHEMOGLOBİN', 'OKSİJEN KİLİTLENDİ!', '#241422', '#ffbc82', '#5ea6ff'), transparent: true, alphaTest: .35 })
   );
-  dyn.bloodLbl.position.set(0, 2.58, -1.6); dyn.bloodLbl.userData.noShadow = true; g.add(dyn.bloodLbl);
+  dyn.bloodLbl.position.set(0, 2.18, -.5); dyn.bloodLbl.userData.noShadow = true; g.add(dyn.bloodLbl);
 
-  fx.tunnelGlow = glow(scene, [200, 1.5, -1.0], { size: 3.2, color: '#42a2ff', strength: .45 });
+  fx.tunnelGlow = glow(scene, [200, 1.5, -1.95], { size: 3.0, color: '#42a2ff', strength: .42 });
 
   const L = new THREE.Group();
-  L.add(new THREE.HemisphereLight('#ff9aa8', '#381224', 1.85));
-  const p1 = new THREE.PointLight('#ff8490', 3.4, 14); p1.position.set(200, 2.2, 3.2); L.add(p1);
-  const p2 = new THREE.PointLight('#64b8ff', 2.8, 12); p2.position.set(200, 2.0, -2.5); L.add(p2);
+  L.add(new THREE.HemisphereLight('#ffb2be', '#4a1c30', 2.05));
+  const p1 = new THREE.PointLight('#ffaa96', 3.8, 14); p1.position.set(200, 2.1, 2.2); L.add(p1);
+  const p2 = new THREE.PointLight('#ffd49a', 3.2, 10); p2.position.set(200.4, 1.9, .8); L.add(p2);
+  const p3 = new THREE.PointLight('#64b8ff', 2.6, 12); p3.position.set(200, 2.0, -3.0); L.add(p3);
   scene.add(L); sets.tunnel = { g, L };
 }
 
@@ -403,13 +404,13 @@ function cameraPath() {
     { t: PS(3) + .14, dur: .32, move: 'whip', pos: [1.32, 1.42, 1.85], look: [.52, 1.36, -.85], fov: 46, creep: .24 },
     // P04 DİYAGONAL GERİ ÇEKİLİŞ: Fugate üzgün kütük kulübeye doğru uzaklaşır!
     { t: PS(4) + .16, dur: .36, move: 'whip', pos: [1.25, 1.65, 2.95], look: [-.85, 1.35, -2.5], fov: 50, creep: .20 },
-    // P05 WHIP PAN → SET 3 (1960 LAB): Dr. Cawein laboratuvar tezgâhı arkasında mavi yüzlü Fugate'i inceler!
-    { t: PS(5) + .14, dur: .34, move: 'whip', pos: [300.0, 1.52, 3.65], look: [300.0, 1.38, -.55], fov: 50, creep: .18 },
-    // P06 WHIP PAN → SET 2 (3B DAMAR TÜNELİ UÇUŞU!): Kamera tünelin içinden ileri uçar!
-    { t: PS(6) + .10, dur: .30, move: 'whip', pos: [200.0, 1.55, 5.20], look: [200.0, 1.55, -2.0], fov: 54, creep: .06 },
-    { t: PE(6) - .08, dur: Math.max(.8, PE(6) - PS(6) - .25), pos: [200.0, 1.52, 1.65], look: [200.0, 1.52, -4.0], fov: 54, creep: .06 },
-    // P07 WHIP PAN → SET 3: Parlayan METİLEN MAVİSİ şişesi + şok olmuş Fugate & Dr. Cawein!
-    { t: PS(7) + .14, dur: .32, move: 'whip', pos: [300.02, 1.32, 2.85], look: [300.02, 1.24, -.1], fov: 48, creep: .22 },
+    // P05 WHIP PAN → SET 3 (1960 LAB): Dr. Cawein + Fugate + laboratuvar tezgâhı tam kadraj!
+    { t: PS(5) + .14, dur: .34, move: 'whip', pos: [300.0, 1.50, 4.18], look: [300.0, 1.38, -.55], fov: 50, creep: .16 },
+    // P06 WHIP PAN → SET 2 (3B DAMAR TÜNELİ UÇUŞU!): Kamera tünelin açık merkezinden ileri uçar!
+    { t: PS(6) + .10, dur: .30, move: 'whip', pos: [200.0, 1.52, 4.85], look: [200.0, 1.52, -2.0], fov: 54, creep: .06 },
+    { t: PE(6) - .08, dur: Math.max(.8, PE(6) - PS(6) - .25), pos: [200.0, 1.50, 1.85], look: [200.0, 1.50, -4.0], fov: 54, creep: .06 },
+    // P07 WHIP PAN → SET 3: Parlayan METİLEN MAVİSİ şişesi + şok olmuş Fugate & Dr. Cawein (yüzleri açık!)
+    { t: PS(7) + .14, dur: .32, move: 'whip', pos: [300.0, 1.48, 3.45], look: [300.0, 1.32, -.2], fov: 48, creep: .18 },
     // P08 WHIP PAN → SET 2: Dev 3B paslı asma kilit + düşen mavi damla + kilit açılıp alyuvarlar KIPKIRMIZI!
     { t: PS(8) + .14, dur: .32, move: 'whip', pos: [200.0, 1.48, 2.55], look: [200.0, 1.44, -1.2], fov: 50, creep: .20 },
     // P09 WHIP PAN → SET 3: CANLI TEN DÖNÜŞÜMÜ! Fugate'in mavi yüzü gözler önünde sağlıklı renge döner!
@@ -502,7 +503,7 @@ export function frame(t, ctx) {
     const walkU = ramp(t, PS(2), PE(2));
     const retreatU = ramp(t, PS(4), PE(4));
     const walking = (t >= PS(2) && t <= PE(2)) || (t >= PS(4) && t <= PE(4));
-    const fxPos = t < PS(4) ? (-.78 + walkU * .42) : (-.36 - retreatU * 1.15);
+    const fxPos = t < PS(2) ? -.38 : (t < PS(4) ? (-.72 + walkU * .36) : (-.36 - retreatU * 1.15));
     const fzPos = t < PS(4) ? -.82 : (-.82 - retreatU * 2.15);
     const fyPos = t < PS(4) ? .21 : lerp(.21, 0, Math.min(1, retreatU * 2));
     const wBob = walking ? Math.abs(Math.sin(t * 11)) * 7 : 0;
@@ -575,13 +576,13 @@ export function frame(t, ctx) {
     // Deney tüpleri de P09'da koyu kahverengi-mordan PARLAK YAKUT KIRMIZISINA döner!
     const tBad = new THREE.Color('#563c58'), tGood = new THREE.Color('#e82838');
     dyn.tubes.forEach(mat => mat.color.copy(tBad).lerp(tGood, cureU));
-    // P07'de METİLEN MAVİSİ şişesi öne doğru parlayıp yükselir!
+    // P07'de METİLEN MAVİSİ şişesi hafifçe parlayıp yükselir (yüzleri kapatmaz!)
     const showBot = t >= PS(7) - .1 && t < PS(8);
-    dyn.mbBottle.position.y = showBot ? (.96 + Math.sin(t * 7) * .04) : .85;
-    dyn.mbBottle.scale.setScalar(showBot ? 1.24 : 1.0);
-    fx.bottleGlow.scale.setScalar(showBot ? 1.35 : .9);
+    dyn.mbBottle.position.y = showBot ? (.90 + Math.sin(t * 7) * .03) : .85;
+    dyn.mbBottle.scale.setScalar(showBot ? 1.06 : 1.0);
+    fx.bottleGlow.scale.setScalar(showBot ? 1.25 : .9);
 
-    fug.show(); fug.place(299.54, 0, -.68, cam, blueTint);
+    fug.show(); fug.place(299.58, 0, -.68, cam, blueTint);
     fug.draw({
       expr: cureU > .55 ? 'smile' : (showBot ? 'surprised' : 'worried'),
       look: .45,
@@ -591,7 +592,7 @@ export function frame(t, ctx) {
       armR: cureU > .55 ? [48, 22] : [18, 16],
       lit: 1, shade: fugShade, rim: { color: cureU > .55 ? WARM : '#74beff', a: .46 },
     });
-    caw.show(); caw.place(300.46, 0, -.70, cam, [1, 1, 1]);
+    caw.show(); caw.place(300.42, 0, -.70, cam, [1, 1, 1]);
     caw.draw({
       expr: showBot ? 'grin' : (cureU > .55 ? 'proud' : 'focused'),
       look: -.48,

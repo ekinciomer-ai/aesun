@@ -1,0 +1,221 @@
+{
+ "kod": "KZ_MRK_24_KAYNAT",
+ "no": "MERAK #24",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "1 LİTRE SU KAYNATMAK<br><i>KAÇ TELEFON EDER?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Bir litre suyu kaynatmak, kaç telefonu şarj edecek kadar enerji ister? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "isi",
+    "kart": 55
+   },
+   "metin": "Bir kilogram suyu bir derece ısıtmak, dört bin yüz seksen dört jul ister. Bir litre su da yaklaşık bir kilogram.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 kg SU · 1 °C",
+     "say": 4184,
+     "dec": 0,
+     "ek": " J",
+     "k": "dört"
+    },
+    {
+     "tip": "etiket",
+     "y": "1 L su ≈ 1 kg 💧",
+     "k": "litre"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "fark",
+    "kart": 55
+   },
+   "metin": "Musluktan gelen su on beş derece olsun. Kaynaması için seksen beş derece ısınmalı.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "100 <em>−</em> 15 = 85 °C",
+     "k": "seksen"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "hesap",
+    "kart": 55
+   },
+   "metin": "Dört bin yüz seksen dört çarpı seksen beş: yaklaşık üç yüz elli beş bin jul.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "4.184 <em>×</em> 85 ≈ 355.640 J",
+     "k": "çarpı"
+    },
+    {
+     "tip": "sayi",
+     "ust": "GEREKEN ISI",
+     "say": 355,
+     "dec": 0,
+     "ek": " bin J",
+     "k": "üç",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "wh",
+    "kart": 55
+   },
+   "metin": "Bunu vatsaate çevirelim: yaklaşık doksan dokuz vatsaat. Kabaca yüz.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "355.640 <em>÷</em> 3.600 ≈ 99 Wh",
+     "k": "doksan"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "telefon",
+    "kart": 55
+   },
+   "metin": "Bir telefon pili yaklaşık on dokuz vatsaat. Yani bir litre su, beş telefonu dolduracak enerji ister.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "99 <em>÷</em> 19 ≈ 5",
+     "k": "Yani"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 5 telefon 📱",
+     "k": "beş"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "sure",
+    "kart": 63
+   },
+   "metin": "İki bin vatlık bir ısıtıcı bu enerjiyi, kayıpsız olsa, yaklaşık üç dakikada verir. Kısa bir şarkı kadar.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "355.640 <em>÷</em> 2.000 ≈ 178 sn",
+     "k": "üç"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 3 dakika 🎵",
+     "k": "şarkı"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "kayip",
+    "kart": 55
+   },
+   "metin": "Gerçekte ısının bir kısmı havaya kaçar. Bu yüzden biraz daha uzun sürer.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "ısı kaçar → biraz daha uzun ⏱️",
+     "k": "kaçar"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "ipucu",
+    "kart": 55
+   },
+   "metin": "Tek bardak için bir litre kaynatma. Yarım litre, yarı enerji demek.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "½ L <em>→</em> ½ enerji",
+     "k": "Yarım"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "kaynat",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: bir litre su, yaklaşık beş telefon şarjı. Senin tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ 99 Wh ≈ 5 telefon ✅",
+     "k": "Cevap"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "1 litre suyu kaynatmak kaç telefon şarjı eder? ☕⚡ #shorts",
+  "aciklama": "USGS'ye göre 1 kilogram suyu 1 °C ısıtmak için 4.184 jul (1 kilokalori) gerekir; 1 litre su yaklaşık 1 kg'dır.\n\nHesap: musluk suyu 15 °C kabul edildi, kaynama 100 °C (deniz seviyesi). 4.184 × 85 ≈ 355.640 J. 1 Wh = 3.600 J olduğundan ≈ 99 Wh (≈ 0,1 kWh). Tipik bir telefon pili 5.000 mAh × 3,85 V ≈ 19 Wh → 99 ÷ 19 ≈ 5 telefon. 2.000 W'lık bir su ısıtıcısında kayıpsız süre 355.640 ÷ 2.000 ≈ 178 saniye (≈ 3 dk). Gerçekte ısıtıcının gövdesi ve hava ısı çeker, bu yüzden biraz daha uzun sürer. Which? testlerine göre yalnız ihtiyacın kadar su kaynatmak enerji tasarrufu sağlar; yarım litre, kabaca yarı enerji demektir.\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: USGS Water Science School – Specific Heat Capacity and Water; Which? – Energy efficient kettles (2026); telefon pili 5.000 mAh × 3,85 V (#02 ile aynı varsayım).\n\n#kozmoslab #enerji #elektrik #fizik #tasarruf #merak #shorts",
+  "etiketler": [
+   "su ısıtıcısı",
+   "kettle",
+   "enerji",
+   "elektrik",
+   "enerji tasarrufu",
+   "fizik",
+   "özgül ısı",
+   "merak",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "USGS Water Science School – Specific Heat Capacity and Water: 'Water has to absorb 4,184 Joules of heat (1 kilocalorie) for the temperature of one kilogram of water to increase 1°C.'",
+  "Hesap: 4.184 × 85 = 355.640 J; ÷ 3.600 = 98,8 Wh; ÷ 2.000 W = 177,8 s",
+  "Telefon pili: 5.000 mAh × 3,85 V nominal = 19,25 Wh (#02, #20 ile aynı varsayım)",
+  "Which? – Best energy efficient kettles (2026): 'Boil only the amount of water you need' / 'Boiling a litre of water often uses more than twice the energy it takes to boil the minimum amount.'",
+  "Varsayımlar: musluk suyu 15 °C, kaynama 100 °C (deniz seviyesi), 1 L su ≈ 1 kg; 'kısa bir şarkı ≈ 3 dk' gündelik karşılaştırma"
+ ]
+}

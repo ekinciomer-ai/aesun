@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-25T10:35+03:00",
+ "olusturma": "2026-11-25T11:06+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -660,15 +660,15 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Drone Nasıl Çalışır?",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 1,
-   "medyan_48sa": 594,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 0,
+   "medyan_48sa": 751,
    "tutma_orani": 100,
    "izlenme_yuzde": 66,
    "en_iyi": {
-    "baslik": "Drone havada nasıl durur? 🚁 #shorts",
-    "i48": 594
+    "baslik": "Türkiye'de drone kuralları değişti! P0, P1, P2 🚁 #shorts",
+    "i48": 908
    },
    "kaydirmadan_izleme_yuzde": 36
   },
@@ -879,15 +879,15 @@
   }
  ],
  "esikler": {
-  "Ömür Dediğin": 50,
   "Kozmos Lab TR": 214,
-  "Estudio Antiguo": 136,
-  "Nasıl Yapıldı": 135,
-  "Ancient Studio": 192,
   "Yolu Seç !": 262,
-  "Antik Stüdyo": 637,
+  "Nasıl Yapıldı": 135,
   "LVL MAX": 50,
-  "Kozmos Lab": 95
+  "Antik Stüdyo": 637,
+  "Ancient Studio": 192,
+  "Kozmos Lab": 95,
+  "Ömür Dediğin": 50,
+  "Estudio Antiguo": 136
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1006,8 +1006,8 @@
     "medyan": 12
    },
    "19:00": {
-    "n": 11,
-    "medyan": 432
+    "n": 12,
+    "medyan": 440
    },
    "21:00": {
     "n": 7,
@@ -1049,7 +1049,7 @@
    },
    "14:00": {
     "n": 2,
-    "medyan": 124
+    "medyan": 125
    },
    "17:00": {
     "n": 4,

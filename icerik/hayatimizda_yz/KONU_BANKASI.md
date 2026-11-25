@@ -7,8 +7,8 @@ Durum: [ ] sırada · [x] KOD teslim · [-] atlandı (neden)
 ## Sıra (öncelik: herkesin hayatına dokunan, görsel olarak güçlü)
 - [x] KZ_HAYAT_01 · Arabada · 32 yıllık Jeep emisyon testini 3 dolarlık kartla geçti (A)
 - [x] KZ_HAYAT_02 · Otelde · Odada gizli kamera taraması, 19 cihaz, duman dedektörü kamera çıktı (A)
-- [ ] 03 · Ailede · Annesinin iPhone'unda 2 yıldır çıkış yapılmamış eski hesap + konumu 15 dk'da bir okuyan QR uygulaması (A) — herkes kendi telefonunda yapabilir
-- [ ] 04 · Çocuğumuzla · Disleksili oğlu için kendi yapay zekâ öğretmenini yapan anne (B: Scientific American)
+- [ ] 03 · Çocuğumuzla · Disleksili oğlu için kendi yapay zekâ öğretmenini yapan anne (B: Scientific American)
+- [ ] 04 · Ailede · Annesinin iPhone'unda 2 yıldır çıkış yapılmamış eski hesap + konumu 15 dk'da bir okuyan QR uygulaması (A) — herkes kendi telefonunda yapabilir
 - [ ] 05 · Evde · Bilgisayar ısınıyor → sıcaklık monitörü → gizli kripto madencisi bulundu, 112 °C (A)
 - [ ] 06 · Şehirde · Yıllardır kapanmayan çukur: 6 fotoğraf → 3D simülasyon → belediyeye gönderildi → 2 günde kapandı (A, Hollanda)
 - [ ] 07 · Çocuğumuzla · Oğlu oynayamasın diye değil, güvenli oynasın diye: kalabalık görünen ama yabancısız, harf toplayıp kelime öğreten kendi oyunu (A)

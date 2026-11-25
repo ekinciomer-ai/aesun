@@ -1,0 +1,312 @@
+[
+ {
+  "N": "Pi13",
+  "kod": "KK_PI_13",
+  "havuz": "KK_PI_13_KOD_29",
+  "sc": 10,
+  "upd": "upd",
+  "tiL": 6.0,
+  "impKey": "Kabul etmeyince",
+  "hookNo": "PATRON MU HAKLI? #13",
+  "hookMain": "“KOD 29 İLE<br>ÇIKARILDIYSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">İŞ</span><br>BİTER”",
+  "pollQ": "KOD DÜZELTİLDİ Mİ?",
+  "opts": [
+   [
+    "A",
+    "Hayır, kod kesinleşti"
+   ],
+   [
+    "B",
+    "Sadece tazminat aldı"
+   ],
+   [
+    "C",
+    "Evet, kod değişti"
+   ]
+  ],
+  "sonuc": "SONUÇ: KOD 29 → KOD 04",
+  "dogru": "Doğru şık: C",
+  "ders1": "Kod 29 <b style=\"color:#ffb15c\">son söz değil.</b>",
+  "ders2": "🧾 İşveren ispat edemezse<br><b style=\"color:#34c759\">kod düzeltilir.</b>",
+  "camKaza": "if(!window.__dPi13){S[10].setWorker('isci');S[10].setDoc(\"SGK İŞTEN AYRILIŞ\",[\"Çıkış kodu: 29\", \"Ahlak ve iyi niyet\", \"kurallarına aykırı\", \"davranış\"],'');window.__dPi13=1}const u=sm(t/TPi13.kaza);P=new THREE.Vector3(lerp(5.2,3.4,u),lerp(4.2,2.6,u),lerp(4.4,2.6,u));L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camRest": "if(!window.__dPi13){S[10].setWorker('isci');S[10].setDoc(\"SGK İŞTEN AYRILIŞ\",[\"Çıkış kodu: 29\", \"Ahlak ve iyi niyet\", \"kurallarına aykırı\", \"davranış\"],'');window.__dPi13=1}P=new THREE.Vector3(3.4,2.6,2.6);L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camKarar": "P=new THREE.Vector3(4.2,3.1,3.4);L=new THREE.Vector3(0,.9,-.4);",
+  "exp": 1.0,
+  "black": "KOD<br><span style=\"color:#ff453a\">29</span><br><span style=\"font-size:.55em\">ahlak ve iyi niyete aykırılık</span>",
+  "tagsK": "tg+=tag3(st.wkr,1.0,'TEKNİKER','#ffd60a','#111');tg+=tag3(st.boss,2.0,'İŞVEREN','#ff453a')",
+  "tagsS": "tg+=tag3(st.doc,.35,'İSPAT?','#ffd60a','#111')",
+  "clues": [
+   [
+    "İşveren diyor",
+    "İşveren: gece mesaj attı"
+   ],
+   [
+    "Mesajlar mahkemeye",
+    "Mesajlar inceleniyor"
+   ],
+   [
+    "Saatleri geç",
+    "Hakaret YOK"
+   ]
+  ],
+  "reasons": [
+   [
+    "Haklı sebebi",
+    "İspat yükü işverende"
+   ],
+   [
+    "Hakaret ispatlanamadı",
+    "Hakaret ispatlanamadı"
+   ]
+  ],
+  "hukumKey": "Kod yirmi dokuz silinip"
+ },
+ {
+  "N": "Pi14",
+  "kod": "KK_PI_14",
+  "havuz": "KK_PI_14_PERFORMANS_BAHANESI",
+  "sc": 10,
+  "upd": "upd",
+  "tiL": 6.0,
+  "impKey": "Performansın düşük",
+  "hookNo": "PATRON MU HAKLI? #14",
+  "hookMain": "“PERFORMANSIN<br>DÜŞÜK DERLERSE<br><span style=\"color:#ffb15c;font-size:1.25em\">YAPACAK</span><br>BİR ŞEY YOK”",
+  "pollQ": "KOMİ NE ALDI?",
+  "opts": [
+   [
+    "A",
+    "1 yıllık maaş tazminat"
+   ],
+   [
+    "B",
+    "Hiçbir şey"
+   ],
+   [
+    "C",
+    "Sadece ihbar"
+   ]
+  ],
+  "sonuc": "SONUÇ: 1 YILLIK ÜCRET TAZMİNAT",
+  "dogru": "Doğru şık: A",
+  "ders1": "Sendika yüzünden <b style=\"color:#ffb15c\">çıkarılamazsın.</b>",
+  "ders2": "🪧 Bahaneyi<br><b style=\"color:#34c759\">işveren ispat etmeli.</b>",
+  "camKaza": "if(!window.__dPi14){S[10].setWorker('isci');S[10].setDoc(\"FESİH BİLDİRİMİ\",[\"Performansınızın düşük\", \"olması nedeniyle\", \"iş sözleşmeniz\", \"feshedilmiştir.\"],'');window.__dPi14=1}const u=sm(t/TPi14.kaza);P=new THREE.Vector3(lerp(5.2,3.4,u),lerp(4.2,2.6,u),lerp(4.4,2.6,u));L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camRest": "if(!window.__dPi14){S[10].setWorker('isci');S[10].setDoc(\"FESİH BİLDİRİMİ\",[\"Performansınızın düşük\", \"olması nedeniyle\", \"iş sözleşmeniz\", \"feshedilmiştir.\"],'');window.__dPi14=1}P=new THREE.Vector3(3.4,2.6,2.6);L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camKarar": "P=new THREE.Vector3(4.2,3.1,3.4);L=new THREE.Vector3(0,.9,-.4);",
+  "exp": 1.0,
+  "black": "“PERFORMANSIN<br><span style=\"color:#ff453a\">DÜŞÜK”</span><br><span style=\"font-size:.55em\">fesih bildirimi</span>",
+  "tagsK": "tg+=tag3(st.wkr,1.0,'KOMİ','#ffd60a','#111');tg+=tag3(st.boss,2.0,'İŞVEREN','#ff453a')",
+  "tagsS": "tg+=tag3(st.doc,.35,'ASIL SEBEP?','#ffd60a','#111')",
+  "clues": [
+   [
+    "İşveren performansın",
+    "Performans belgesi YOK"
+   ],
+   [
+    "Tanıklar sendika",
+    "Tanıklar: sendika çalışması"
+   ],
+   [
+    "Komi, çıkarılmadan",
+    "Üyelikten 4 gün sonra fesih"
+   ]
+  ],
+  "reasons": [
+   [
+    "Feshin sendika",
+    "İspat yükü işverende"
+   ],
+   [
+    "İşveren ispat",
+    "İşveren ispat edemedi"
+   ]
+  ],
+  "hukumKey": "Komi bir yıllık"
+ },
+ {
+  "N": "Pi15",
+  "kod": "KK_PI_15",
+  "havuz": "KK_PI_15_ASKERLIK",
+  "sc": 10,
+  "upd": "upd",
+  "tiL": 6.0,
+  "impKey": "Taşeron firma reddediyor",
+  "hookNo": "PATRON MU HAKLI? #15",
+  "hookMain": "“ASKERE<br>GİDERSEN<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>YOK”",
+  "pollQ": "KIDEM TAZMİNATI ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hayır, kendisi ayrıldı"
+   ],
+   [
+    "B",
+    "Evet, aldı"
+   ],
+   [
+    "C",
+    "Sadece yarısını"
+   ]
+  ],
+  "sonuc": "SONUÇ: KIDEM TAZMİNATI ALDI",
+  "dogru": "Doğru şık: B",
+  "ders1": "Askerlik için ayrılmak <b style=\"color:#ffb15c\">istifa sayılmaz.</b>",
+  "ders2": "🎖️ 1 yılı doldurduysan<br><b style=\"color:#34c759\">kıdemin yanmaz.</b>",
+  "camKaza": "if(!window.__dPi15){S[10].setWorker('isci');S[10].setDoc(\"FESİH BİLDİRİMİ\",[\"Muvazzaf askerlik\", \"hizmetim nedeniyle\", \"iş sözleşmemi\", \"sona erdiriyorum.\"],'');window.__dPi15=1}const u=sm(t/TPi15.kaza);P=new THREE.Vector3(lerp(5.2,3.4,u),lerp(4.2,2.6,u),lerp(4.4,2.6,u));L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camRest": "if(!window.__dPi15){S[10].setWorker('isci');S[10].setDoc(\"FESİH BİLDİRİMİ\",[\"Muvazzaf askerlik\", \"hizmetim nedeniyle\", \"iş sözleşmemi\", \"sona erdiriyorum.\"],'');window.__dPi15=1}P=new THREE.Vector3(3.4,2.6,2.6);L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camKarar": "P=new THREE.Vector3(4.2,3.1,3.4);L=new THREE.Vector3(0,.9,-.4);",
+  "exp": 1.0,
+  "black": "ASKERLİK<br><span style=\"color:#ff453a\">NEDENİYLE</span><br><span style=\"font-size:.55em\">işten ayrılış</span>",
+  "tagsK": "tg+=tag3(st.wkr,1.0,'TAŞERON İŞÇİ','#ffd60a','#111');tg+=tag3(st.boss,2.0,'İŞVEREN','#ff453a')",
+  "tagsS": "tg+=tag3(st.doc,.35,'İSTİFA MI?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Mahkeme dosyayı",
+    "Dosya inceleniyor"
+   ],
+   [
+    "İşçinin askerlik",
+    "Ayrılış sebebi: askerlik"
+   ],
+   [
+    "Davada hem",
+    "Taşeron + Bakanlık davalı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Askerlik nedeniyle",
+    "Askerlik = kıdem hakkı"
+   ],
+   [
+    "Dava kabul",
+    "Dava kabul edildi"
+   ]
+  ],
+  "hukumKey": "Firmanın ve"
+ },
+ {
+  "N": "Pi16",
+  "kod": "KK_PI_16",
+  "havuz": "KK_PI_16_DENEME_SURESI",
+  "sc": 10,
+  "upd": "upd",
+  "tiL": 6.0,
+  "impKey": "İki ay dolmadan",
+  "hookNo": "PATRON MU HAKLI? #16",
+  "hookMain": "“İŞTEN ÇIKARILAN<br>HERKES<br><span style=\"color:#ffb15c;font-size:1.25em\">İHBAR</span><br>TAZMİNATI ALIR”",
+  "pollQ": "İHBAR TAZMİNATI ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Evet, aldı"
+   ],
+   [
+    "B",
+    "Sadece yarısını"
+   ],
+   [
+    "C",
+    "Hayır, alamadı"
+   ]
+  ],
+  "sonuc": "SONUÇ: İHBAR TAZMİNATI YOK",
+  "dogru": "Doğru şık: C",
+  "ders1": "Deneme süresinde çıkarılan <b style=\"color:#ffb15c\">ihbar alamaz.</b>",
+  "ders2": "📄 İşe girerken<br><b style=\"color:#34c759\">deneme süresine bak.</b>",
+  "camKaza": "if(!window.__dPi16){S[10].setWorker('ofis');S[10].setDoc(\"İŞ SÖZLEŞMESİ\",[\"Deneme süresi: 2 ay\", \"Bu süre içinde taraflar\", \"ihbarsız ve tazminatsız\", \"feshedebilir.\"],'');window.__dPi16=1}const u=sm(t/TPi16.kaza);P=new THREE.Vector3(lerp(5.2,3.4,u),lerp(4.2,2.6,u),lerp(4.4,2.6,u));L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camRest": "if(!window.__dPi16){S[10].setWorker('ofis');S[10].setDoc(\"İŞ SÖZLEŞMESİ\",[\"Deneme süresi: 2 ay\", \"Bu süre içinde taraflar\", \"ihbarsız ve tazminatsız\", \"feshedebilir.\"],'');window.__dPi16=1}P=new THREE.Vector3(3.4,2.6,2.6);L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camKarar": "P=new THREE.Vector3(4.2,3.1,3.4);L=new THREE.Vector3(0,.9,-.4);",
+  "exp": 1.0,
+  "black": "DENEME<br><span style=\"color:#ff453a\">SÜRESİ</span><br><span style=\"font-size:.55em\">2 ay</span>",
+  "tagsK": "tg+=tag3(st.wkr,1.0,'YENİ İŞÇİ','#ffd60a','#111');tg+=tag3(st.boss,2.0,'İŞVEREN','#ff453a')",
+  "tagsS": "tg+=tag3(st.doc,.35,'DENEME SÜRESİ?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Mahkeme sözleşmeye",
+    "Sözleşme inceleniyor"
+   ],
+   [
+    "Süreli yapılması",
+    "Süreli olması için sebep yok"
+   ],
+   [
+    "Yani işçi",
+    "Sözleşme aslında SÜRESİZ"
+   ]
+  ],
+  "reasons": [
+   [
+    "Ama Yargıtay",
+    "Deneme süresi: 2 ay"
+   ],
+   [
+    "Deneme süresi içinde",
+    "Bildirimsiz ve tazminatsız fesih"
+   ]
+  ],
+  "hukumKey": "İhbar tazminatı talebi"
+ },
+ {
+  "N": "Pi17",
+  "kod": "KK_PI_17",
+  "havuz": "KK_PI_17_TUTANAK",
+  "sc": 10,
+  "upd": "upd",
+  "tiL": 6.0,
+  "impKey": "tazminatsız çıkarılıyor",
+  "hookNo": "PATRON MU HAKLI? #17",
+  "hookMain": "“TUTANAK<br>TUTULDUYSA<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>YOK”",
+  "pollQ": "TAZMİNAT ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Evet, kıdem + ihbar"
+   ],
+   [
+    "B",
+    "Hayır, tutanak var"
+   ],
+   [
+    "C",
+    "Sadece ihbar"
+   ]
+  ],
+  "sonuc": "SONUÇ: KIDEM + İHBAR + MESAİ",
+  "dogru": "Doğru şık: A",
+  "ders1": "Tutanak <b style=\"color:#ffb15c\">tek başına yetmez.</b>",
+  "ders2": "👥 Tanıkla çürütülürse<br><b style=\"color:#34c759\">tazminatın yanmaz.</b>",
+  "camKaza": "if(!window.__dPi17){S[10].setWorker('ofis');S[10].setDoc(\"TUTANAK\",[\"Envanter sayımında\", \"uyumsuzluk tespit\", \"edilmiştir.\", \"İmza: ............\"],'');window.__dPi17=1}const u=sm(t/TPi17.kaza);P=new THREE.Vector3(lerp(5.2,3.4,u),lerp(4.2,2.6,u),lerp(4.4,2.6,u));L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camRest": "if(!window.__dPi17){S[10].setWorker('ofis');S[10].setDoc(\"TUTANAK\",[\"Envanter sayımında\", \"uyumsuzluk tespit\", \"edilmiştir.\", \"İmza: ............\"],'');window.__dPi17=1}P=new THREE.Vector3(3.4,2.6,2.6);L=new THREE.Vector3(0,.95,-.3);f=48;",
+  "camKarar": "P=new THREE.Vector3(4.2,3.1,3.4);L=new THREE.Vector3(0,.9,-.4);",
+  "exp": 1.0,
+  "black": "ENVANTER<br><span style=\"color:#ff453a\">TUTANAĞI</span><br><span style=\"font-size:.55em\">“güveni kötüye kullandın”</span>",
+  "tagsK": "tg+=tag3(st.wkr,1.0,'MAĞAZA SORUMLUSU','#ffd60a','#111');tg+=tag3(st.boss,2.0,'İŞVEREN','#ff453a')",
+  "tagsS": "tg+=tag3(st.doc,.35,'TUTANAK DOĞRU MU?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Mahkeme tanıkları",
+    "Tanıklar dinleniyor"
+   ],
+   [
+    "Bir tanık",
+    "Tutanak talimatla imzalanmış"
+   ],
+   [
+    "Bölge müdürü",
+    "Envanter öteden beri sorunlu"
+   ]
+  ],
+  "reasons": [
+   [
+    "Tutanağın doğruluğu",
+    "Tutanak şüpheli"
+   ],
+   [
+    "İşveren haklı",
+    "Haklı sebep ispatlanamadı"
+   ]
+  ],
+  "hukumKey": "Mağaza sorumlusu kıdem"
+ }
+]

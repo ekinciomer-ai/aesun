@@ -1,0 +1,173 @@
+{
+ "kanal": "NY",
+ "seri": "Türkiye'nin En'leri",
+ "dil": "tr",
+ "kod": "NY_EN_07_TENHA",
+ "baslik_bant": "EN AZ NÜFUSLU 5 İL",
+ "tip": "dag",
+ "birim": "KİŞİ",
+ "abartma": 11,
+ "tema": "illustre",
+ "ogeler": [
+  {
+   "id": "kilis",
+   "ad": "KİLİS",
+   "ll": [
+    37.12,
+    36.72
+   ],
+   "sabit": 1,
+   "deger": 157363,
+   "sira": 5,
+   "renk": "#3fd0ff",
+   "alt": "Suriye sınırında",
+   "etiket": []
+  },
+  {
+   "id": "gumushane",
+   "ad": "GÜMÜŞHANE",
+   "ll": [
+    39.48,
+    40.46
+   ],
+   "sabit": 1,
+   "deger": 138807,
+   "sira": 4,
+   "renk": "#2fe0b0",
+   "alt": "Doğu Karadeniz",
+   "etiket": []
+  },
+  {
+   "id": "ardahan",
+   "ad": "ARDAHAN",
+   "ll": [
+    42.7,
+    41.11
+   ],
+   "sabit": 1,
+   "deger": 90392,
+   "sira": 3,
+   "renk": "#b6f04a",
+   "alt": "Kuzeydoğu ucu",
+   "etiket": []
+  },
+  {
+   "id": "tunceli",
+   "ad": "TUNCELİ",
+   "ll": [
+    39.55,
+    39.11
+   ],
+   "sabit": 1,
+   "deger": 85083,
+   "sira": 2,
+   "renk": "#ffd23f",
+   "alt": "Doğu Anadolu",
+   "etiket": []
+  },
+  {
+   "id": "bayburt",
+   "ad": "BAYBURT",
+   "ll": [
+    40.23,
+    40.26
+   ],
+   "sabit": 1,
+   "deger": 82836,
+   "sira": 1,
+   "renk": "#ff3b2f",
+   "alt": "Türkiye'nin en az nüfuslu ili",
+   "etiket": []
+  }
+ ],
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "12",
+   "ust": "BİR İSTANBUL İLÇESİNE",
+   "alt": "BU İLDEN 12 TANE SIĞAR",
+   "alt_kelime": "tane"
+  },
+  {
+   "id": "s02",
+   "sahne": "soru",
+   "buyuk": "?"
+  },
+  {
+   "id": "s03",
+   "sahne": "sira",
+   "oge": "kilis"
+  },
+  {
+   "id": "s04",
+   "sahne": "sira",
+   "oge": "gumushane"
+  },
+  {
+   "id": "s05",
+   "sahne": "sira",
+   "oge": "ardahan"
+  },
+  {
+   "id": "s06",
+   "sahne": "sira",
+   "oge": "tunceli"
+  },
+  {
+   "id": "s07",
+   "sahne": "bir_giris",
+   "oge": "bayburt"
+  },
+  {
+   "id": "s08",
+   "sahne": "sira",
+   "oge": "bayburt"
+  },
+  {
+   "id": "s09",
+   "sahne": "ek",
+   "oge": "bayburt",
+   "cipler": [
+    "ESENYURT: 1.003.905 KİŞİ",
+    "= 12 BAYBURT"
+   ],
+   "cip_kelime": [
+    "Esenyurt",
+    "Bayburt"
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "kapanis",
+   "cta": "BU İLLERDEN BİRİNİ GÖRDÜN MÜ?"
+  }
+ ],
+ "kaynaklar": [
+  "NTV – TÜİK ADNKS 2025 (31.12.2025): Bayburt 82.836 ile en az nüfuslu il; Tunceli 85.083, Ardahan 90.392, Gümüşhane 138.807, Kilis 157.363; Türkiye 86.092.168 https://www.ntv.com.tr/ntvpara/turkiyenin-nufusu-belli-oldu-tuik-acikladi-1711115",
+  "Gazete Birlik – TÜİK ADNKS 2025 en az nüfuslu iller (aynı değerler) https://www.gazetebirlik.com/genel/tuik-adnks-verilerine-gore-nufusu-en-az-olan-il-neresi-nufus-artis-hizi-ne-kadar-oldu-2025-turkiye-nufus-verileri/933827",
+  "Küre Ansiklopedi – Türkiye'nin Nüfus Verileri (2025): il değerleri ve Esenyurt 1.003.905 https://kureansiklopedi.com/tr/detay/turkiyenin-nufus-verileri-2025-68759",
+  "Borsa Gündem – Esenyurt 1 milyon 3 bin 905 kişi, Türkiye'de nüfusu 1 milyonu aşan ilk ilçe, 57 ili geride bıraktı (TÜİK 2025) https://www.borsagundem.com.tr/esenyurt-nufusuyla-57-ili-geride-birakti",
+  "Hesap: 1.003.905 / 82.836 ≈ 12,1",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bir İstanbul ilçesine bu ilden 12 tane sığıyor! Hangisi biliyor musun?",
+  "aciklama": "TÜİK'in 2025 nüfus sonuçlarına göre Türkiye'nin en az nüfuslu 5 ili: Kilis, Gümüşhane, Ardahan, Tunceli ve birinci sıradaki il. Sonuncusunun nüfusu, İstanbul'un Esenyurt ilçesinin yaklaşık on ikide biri.\n\nKaynak: TÜİK ADNKS 2025.\n\n💬 Bu illerden birini gördün mü? Yorumlara yaz.",
+  "etiketler": [
+   "türkiye nüfusu",
+   "en az nüfuslu iller",
+   "tüik 2025",
+   "bayburt",
+   "esenyurt",
+   "türkiyenin en'leri",
+   "coğrafya",
+   "shorts"
+  ],
+  "tiktok_metin": "Bir İstanbul ilçesine bu ilden 12 tane sığıyor! 🏘️ #nüfus #türkiye #bilgi",
+  "amac": "Türkiye'nin En'leri sıralama serisi (en az nüfus, EN_05'in karşıtı); merak kancası + yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

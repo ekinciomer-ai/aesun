@@ -27,7 +27,10 @@ Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Do�
 - [x] KZ_MRK_16_KABLO — Kablo neden ısınır? Akımı 2 katına çıkarınca ısı kaç katına çıkar? (I²R) — enerji
 - [x] KZ_MRK_21_ZIPLA — Ay'da zıplasan ne kadar yükselirsin? (1/6 g) — uzay
 - [x] KZ_MRK_18_SICAK — Güneş paneli neden soğukta daha çok üretir? (sıcaklık katsayısı) — enerji
-- [ ] Bir nötron yıldızının bir çay kaşığı kaç ton? — uzay
+- [x] KZ_MRK_23_NOTRON — Bir nötron yıldızının bir şeker küpü kaç ton? (NASA: ≈ 1 milyar ton; kaynakta çay kaşığı değil şeker küpü var) — uzay
 - [x] KZ_MRK_20_MADEN — Bir bitcoin madencilik cihazı bir günde ne kadar elektrik yer? — enerji
 - [ ] Kara delikten kaçmak için ne kadar hızlı olmalısın? — uzay
 - [x] KZ_MRK_22_ALAN — Türkiye'nin bütün elektriği için ne kadar alan panel gerekir? — enerji
+- [x] KZ_MRK_24_KAYNAT — 1 litre suyu kaynatmak kaç telefon şarjı eder? (4.184 J/kg·°C, ≈ 99 Wh ≈ 5 telefon) — enerji (25.11: bankada enerji konusu kalmadığı için eklendi)
+- [ ] Bir buzdolabı bir günde ne kadar elektrik harcar? — enerji (AB enerji etiketi verisiyle doğrulanmalı)
+- [ ] Bir elektrik direği hattında neden yüksek gerilim kullanılır? (aynı güçte akım düşer, kayıp I²R) — enerji (#16 ile çakışmamasına dikkat)

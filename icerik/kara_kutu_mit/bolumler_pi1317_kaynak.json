@@ -1,0 +1,377 @@
+[
+ {
+  "n": 13,
+  "kod": "KK_PI_13",
+  "havuz": "KK_PI_13_KOD_29",
+  "w": "isci",
+  "v": [
+   "Kod yirmi dokuzla çıkarıldıysan, iş biter. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir fabrikada kimya teknikeri işe başlıyor. Dördüncü gün fark ediyor: Sigorta kaydına paketleme işçisi yazılmış. Düzeltilmesini istiyor.",
+   "Aynı akşam muhasebeye çağrılıyor. Önce istifa etmesi isteniyor. Kabul etmeyince, kod yirmi dokuzla, yani ahlak ve iyi niyete aykırılıktan çıkarılıyor.",
+   "Sizce teknikerin kodu düzeltildi mi? A, hayır, kod kesinleşti. B, sadece tazminat aldı. C, evet, kod değişti. Cevabını yoruma yaz.",
+   "Geri saralım. İşveren diyor ki: Herkes hakkında dedikodu yaptı, gece arkadaşlarına mesaj attı. Mesajlar mahkemeye sunuluyor. Saatleri geç, ama içlerinde tek bir hakaret yok.",
+   "Mahkeme dedi ki: Haklı sebebi ispat etmek işverene düşer. Hakaret ispatlanamadı, fesih haksız. Kod yirmi dokuz silinip kod sıfır dört olarak düzeltilecek. Yargıtay onadı.",
+   "Kod yirmi dokuz son söz değil. İşveren ispat edemezse mahkeme kodu düzeltir. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Kabul etmeyince",
+  "hook": "“KOD 29 İLE<br>ÇIKARILDIYSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">İŞ</span><br>BİTER”",
+  "pollQ": "KOD DÜZELTİLDİ Mİ?",
+  "opts": [
+   [
+    "A",
+    "Hayır, kod kesinleşti"
+   ],
+   [
+    "B",
+    "Sadece tazminat aldı"
+   ],
+   [
+    "C",
+    "Evet, kod değişti"
+   ]
+  ],
+  "dogru": "C",
+  "sonuc": "SONUÇ: KOD 29 → KOD 04",
+  "ders1": "Kod 29 <b style=\"color:#ffb15c\">son söz değil.</b>",
+  "ders2": "🧾 İşveren ispat edemezse<br><b style=\"color:#34c759\">kod düzeltilir.</b>",
+  "doc": [
+   "SGK İŞTEN AYRILIŞ",
+   [
+    "Çıkış kodu: 29",
+    "Ahlak ve iyi niyet",
+    "kurallarına aykırı",
+    "davranış"
+   ]
+  ],
+  "black": "KOD<br><span style=\"color:#ff453a\">29</span><br><span style=\"font-size:.55em\">ahlak ve iyi niyete aykırılık</span>",
+  "tagW": "TEKNİKER",
+  "tagD": "İSPAT?",
+  "clues": [
+   [
+    "İşveren diyor",
+    "İşveren: gece mesaj attı"
+   ],
+   [
+    "Mesajlar mahkemeye",
+    "Mesajlar inceleniyor"
+   ],
+   [
+    "Saatleri geç",
+    "Hakaret YOK"
+   ]
+  ],
+  "reasons": [
+   [
+    "Haklı sebebi",
+    "İspat yükü işverende"
+   ],
+   [
+    "Hakaret ispatlanamadı",
+    "Hakaret ispatlanamadı"
+   ]
+  ],
+  "hukumKey": "Kod yirmi dokuz silinip",
+  "baslik": "Kod 29 ile Çıkarıldım, Ne Yapmalıyım? | Yargıtay Kararı",
+  "lex": "https://lexara.com.tr/karar/640191"
+ },
+ {
+  "n": 14,
+  "kod": "KK_PI_14",
+  "havuz": "KK_PI_14_PERFORMANS_BAHANESI",
+  "w": "isci",
+  "v": [
+   "Performansın düşük deyip çıkarırlarsa, yapacak bir şey yok. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir işletmede komi olarak çalışan bir genç, arkadaşlarıyla sendika için çalışıyor. Otuza yakın çalışan ikna oluyor.",
+   "Yönetim bunu duyuyor. Arkadaşları işten çıkarılıyor. İzinden döndüğünde ona da fesih kâğıdı veriliyor: Performansın düşük.",
+   "Sizce komi ne aldı? A, bir yıllık maaşı kadar tazminat. B, hiçbir şey. C, sadece ihbar tazminatı. Cevabını yoruma yaz.",
+   "Geri saralım. İşveren performansın düşük olduğuna dair tek bir belge sunamıyor. Tanıklar sendika çalışmasını ve ardından gelen işten çıkarmaları anlatıyor. Komi, çıkarılmadan dört gün önce sendikaya üye olmuş.",
+   "Mahkeme dedi ki: Feshin sendika yüzünden yapılmadığını ispat etmek işverene düşer. İşveren ispat edemedi. Komi bir yıllık ücreti tutarında sendikal tazminat alacak. Yargıtay onadı.",
+   "Sendikaya üye olduğun için çıkarılamazsın. Bahane ne olursa olsun, işveren ispat etmek zorunda. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Performansın düşük",
+  "hook": "“PERFORMANSIN<br>DÜŞÜK DERLERSE<br><span style=\"color:#ffb15c;font-size:1.25em\">YAPACAK</span><br>BİR ŞEY YOK”",
+  "pollQ": "KOMİ NE ALDI?",
+  "opts": [
+   [
+    "A",
+    "1 yıllık maaş tazminat"
+   ],
+   [
+    "B",
+    "Hiçbir şey"
+   ],
+   [
+    "C",
+    "Sadece ihbar"
+   ]
+  ],
+  "dogru": "A",
+  "sonuc": "SONUÇ: 1 YILLIK ÜCRET TAZMİNAT",
+  "ders1": "Sendika yüzünden <b style=\"color:#ffb15c\">çıkarılamazsın.</b>",
+  "ders2": "🪧 Bahaneyi<br><b style=\"color:#34c759\">işveren ispat etmeli.</b>",
+  "doc": [
+   "FESİH BİLDİRİMİ",
+   [
+    "Performansınızın düşük",
+    "olması nedeniyle",
+    "iş sözleşmeniz",
+    "feshedilmiştir."
+   ]
+  ],
+  "black": "“PERFORMANSIN<br><span style=\"color:#ff453a\">DÜŞÜK”</span><br><span style=\"font-size:.55em\">fesih bildirimi</span>",
+  "tagW": "KOMİ",
+  "tagD": "ASIL SEBEP?",
+  "clues": [
+   [
+    "İşveren performansın",
+    "Performans belgesi YOK"
+   ],
+   [
+    "Tanıklar sendika",
+    "Tanıklar: sendika çalışması"
+   ],
+   [
+    "Komi, çıkarılmadan",
+    "Üyelikten 4 gün sonra fesih"
+   ]
+  ],
+  "reasons": [
+   [
+    "Feshin sendika",
+    "İspat yükü işverende"
+   ],
+   [
+    "İşveren ispat",
+    "İşveren ispat edemedi"
+   ]
+  ],
+  "hukumKey": "Komi bir yıllık",
+  "baslik": "Haksız Yere İşten Çıkarıldım: \"Performansın Düşük\" Bahanesi | Yargıtay",
+  "lex": "https://lexara.com.tr/karar/825800"
+ },
+ {
+  "n": 15,
+  "kod": "KK_PI_15",
+  "havuz": "KK_PI_15_ASKERLIK",
+  "w": "isci",
+  "v": [
+   "Askere gitmek için işten ayrılırsan, tazminat alamazsın. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir devlet hastanesinde taşeron firma adına çalışan bir işçi. Askerlik vakti geliyor.",
+   "Askere gitmek için işten ayrılıyor ve kıdem tazminatını istiyor. Taşeron firma reddediyor. Bakanlık ise, bize dava açılamaz diyor.",
+   "Sizce işçi kıdem tazminatını aldı mı? A, hayır, kendisi ayrıldı. B, evet, aldı. C, sadece yarısını. Cevabını yoruma yaz.",
+   "Geri saralım. Mahkeme dosyayı inceliyor. İşçinin askerlik nedeniyle ayrıldığı belli. Davada hem taşeron firma, hem de Bakanlık var.",
+   "Mahkeme dedi ki: Askerlik nedeniyle işten ayrılan işçi kıdem tazminatına hak kazanır. Dava kabul edildi. Firmanın ve Bakanlığın itirazları reddedildi. Yargıtay onadı.",
+   "Askerlik için ayrılmak istifa sayılmaz. Bir yılı doldurduysan kıdem tazminatın yanmaz. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "Taşeron firma reddediyor",
+  "hook": "“ASKERE<br>GİDERSEN<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>YOK”",
+  "pollQ": "KIDEM TAZMİNATI ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hayır, kendisi ayrıldı"
+   ],
+   [
+    "B",
+    "Evet, aldı"
+   ],
+   [
+    "C",
+    "Sadece yarısını"
+   ]
+  ],
+  "dogru": "B",
+  "sonuc": "SONUÇ: KIDEM TAZMİNATI ALDI",
+  "ders1": "Askerlik için ayrılmak <b style=\"color:#ffb15c\">istifa sayılmaz.</b>",
+  "ders2": "🎖️ 1 yılı doldurduysan<br><b style=\"color:#34c759\">kıdemin yanmaz.</b>",
+  "doc": [
+   "FESİH BİLDİRİMİ",
+   [
+    "Muvazzaf askerlik",
+    "hizmetim nedeniyle",
+    "iş sözleşmemi",
+    "sona erdiriyorum."
+   ]
+  ],
+  "black": "ASKERLİK<br><span style=\"color:#ff453a\">NEDENİYLE</span><br><span style=\"font-size:.55em\">işten ayrılış</span>",
+  "tagW": "TAŞERON İŞÇİ",
+  "tagD": "İSTİFA MI?",
+  "clues": [
+   [
+    "Mahkeme dosyayı",
+    "Dosya inceleniyor"
+   ],
+   [
+    "İşçinin askerlik",
+    "Ayrılış sebebi: askerlik"
+   ],
+   [
+    "Davada hem",
+    "Taşeron + Bakanlık davalı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Askerlik nedeniyle",
+    "Askerlik = kıdem hakkı"
+   ],
+   [
+    "Dava kabul",
+    "Dava kabul edildi"
+   ]
+  ],
+  "hukumKey": "Firmanın ve",
+  "baslik": "Askerlik Nedeniyle İşten Ayrılan Tazminat Alır mı? | Yargıtay",
+  "lex": "https://lexara.com.tr/karar/4247000"
+ },
+ {
+  "n": 16,
+  "kod": "KK_PI_16",
+  "havuz": "KK_PI_16_DENEME_SURESI",
+  "w": "ofis",
+  "v": [
+   "İşten çıkarılan herkes ihbar tazminatı alır. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir işçi yeni bir işe giriyor. Sözleşmesinde iki şey yazıyor: Süreli sözleşme. Ve iki aylık deneme süresi.",
+   "İki ay dolmadan işten çıkarılıyor. Dava açıyor: Bu sözleşme aslında süresiz, bana ihbar tazminatı ödenmeli.",
+   "Sizce işçi ihbar tazminatı aldı mı? A, evet, aldı. B, sadece yarısını. C, hayır, alamadı. Cevabını yoruma yaz.",
+   "Geri saralım. Mahkeme sözleşmeye bakıyor. Süreli yapılması için ortada geçerli bir sebep yok. Yani işçi bu konuda haklı: Sözleşme aslında süresiz.",
+   "Ama Yargıtay dedi ki: Sözleşmede iki aylık deneme süresi açıkça yazıyor. Deneme süresi içinde taraflar sözleşmeyi bildirimsiz ve tazminatsız bitirebilir. İhbar tazminatı talebi reddedildi. Yargıtay onadı.",
+   "Deneme süresinde çıkarılırsan ihbar tazminatı alamazsın. İşe girerken sözleşmendeki deneme süresine bak. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "İki ay dolmadan",
+  "hook": "“İŞTEN ÇIKARILAN<br>HERKES<br><span style=\"color:#ffb15c;font-size:1.25em\">İHBAR</span><br>TAZMİNATI ALIR”",
+  "pollQ": "İHBAR TAZMİNATI ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Evet, aldı"
+   ],
+   [
+    "B",
+    "Sadece yarısını"
+   ],
+   [
+    "C",
+    "Hayır, alamadı"
+   ]
+  ],
+  "dogru": "C",
+  "sonuc": "SONUÇ: İHBAR TAZMİNATI YOK",
+  "ders1": "Deneme süresinde çıkarılan <b style=\"color:#ffb15c\">ihbar alamaz.</b>",
+  "ders2": "📄 İşe girerken<br><b style=\"color:#34c759\">deneme süresine bak.</b>",
+  "doc": [
+   "İŞ SÖZLEŞMESİ",
+   [
+    "Deneme süresi: 2 ay",
+    "Bu süre içinde taraflar",
+    "ihbarsız ve tazminatsız",
+    "feshedebilir."
+   ]
+  ],
+  "black": "DENEME<br><span style=\"color:#ff453a\">SÜRESİ</span><br><span style=\"font-size:.55em\">2 ay</span>",
+  "tagW": "YENİ İŞÇİ",
+  "tagD": "DENEME SÜRESİ?",
+  "clues": [
+   [
+    "Mahkeme sözleşmeye",
+    "Sözleşme inceleniyor"
+   ],
+   [
+    "Süreli yapılması",
+    "Süreli olması için sebep yok"
+   ],
+   [
+    "Yani işçi",
+    "Sözleşme aslında SÜRESİZ"
+   ]
+  ],
+  "reasons": [
+   [
+    "Ama Yargıtay",
+    "Deneme süresi: 2 ay"
+   ],
+   [
+    "Deneme süresi içinde",
+    "Bildirimsiz ve tazminatsız fesih"
+   ]
+  ],
+  "hukumKey": "İhbar tazminatı talebi",
+  "baslik": "Deneme Süresinde İşten Çıkarılan İhbar Tazminatı Alır mı? | Yargıtay",
+  "lex": "https://lexara.com.tr/karar/20482619"
+ },
+ {
+  "n": 17,
+  "kod": "KK_PI_17",
+  "havuz": "KK_PI_17_TUTANAK",
+  "w": "ofis",
+  "v": [
+   "Hakkında tutanak tutulduysa, tazminatsız çıkarılırsın. Genelde böyle bilinir. Peki mahkeme ne dedi?",
+   "Bir mağaza sorumlusu dokuz yıldır aynı şirkette çalışıyor. Mağaza devredilirken envanter sayılıyor.",
+   "Sayımda uyumsuzluk çıkıyor. Bir tutanak tutuluyor ve sorumlu tazminatsız çıkarılıyor: Güveni kötüye kullandın.",
+   "Sizce mağaza sorumlusu tazminat aldı mı? A, evet, kıdem ve ihbar. B, hayır, tutanak var. C, sadece ihbar. Cevabını yoruma yaz.",
+   "Geri saralım. Mahkeme tanıkları dinliyor. Bir tanık, tutanağın bir kısmını başkasının sözlü talimatıyla imzaladığını söylüyor. Bölge müdürü ise envanterin öteden beri sorunlu olduğunu anlatıyor.",
+   "Mahkeme dedi ki: Tutanağın doğruluğu şüpheli. İşveren haklı sebebi şüpheden uzak şekilde ispat edemedi. Mağaza sorumlusu kıdem, ihbar ve fazla mesai ücretini alacak. Yargıtay onadı.",
+   "Tutanak tek başına yetmez. Tanıkla çürütülürse tazminatın yanmaz. Sen hangi şıkkı seçtin?"
+  ],
+  "impKey": "tazminatsız çıkarılıyor",
+  "hook": "“TUTANAK<br>TUTULDUYSA<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>YOK”",
+  "pollQ": "TAZMİNAT ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Evet, kıdem + ihbar"
+   ],
+   [
+    "B",
+    "Hayır, tutanak var"
+   ],
+   [
+    "C",
+    "Sadece ihbar"
+   ]
+  ],
+  "dogru": "A",
+  "sonuc": "SONUÇ: KIDEM + İHBAR + MESAİ",
+  "ders1": "Tutanak <b style=\"color:#ffb15c\">tek başına yetmez.</b>",
+  "ders2": "👥 Tanıkla çürütülürse<br><b style=\"color:#34c759\">tazminatın yanmaz.</b>",
+  "doc": [
+   "TUTANAK",
+   [
+    "Envanter sayımında",
+    "uyumsuzluk tespit",
+    "edilmiştir.",
+    "İmza: ............"
+   ]
+  ],
+  "black": "ENVANTER<br><span style=\"color:#ff453a\">TUTANAĞI</span><br><span style=\"font-size:.55em\">“güveni kötüye kullandın”</span>",
+  "tagW": "MAĞAZA SORUMLUSU",
+  "tagD": "TUTANAK DOĞRU MU?",
+  "clues": [
+   [
+    "Mahkeme tanıkları",
+    "Tanıklar dinleniyor"
+   ],
+   [
+    "Bir tanık",
+    "Tutanak talimatla imzalanmış"
+   ],
+   [
+    "Bölge müdürü",
+    "Envanter öteden beri sorunlu"
+   ]
+  ],
+  "reasons": [
+   [
+    "Tutanağın doğruluğu",
+    "Tutanak şüpheli"
+   ],
+   [
+    "İşveren haklı",
+    "Haklı sebep ispatlanamadı"
+   ]
+  ],
+  "hukumKey": "Mağaza sorumlusu kıdem",
+  "baslik": "Hakkımda Tutanak Tutuldu, Tazminat Alabilir miyim? | Yargıtay",
+  "lex": "https://lexara.com.tr/karar/27770"
+ }
+]

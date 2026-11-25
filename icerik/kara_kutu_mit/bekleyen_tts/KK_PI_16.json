@@ -1,0 +1,58 @@
+{
+ "kod": "KK_PI_16",
+ "motor": "gemini",
+ "ses": "charon",
+ "model_tercih": "gemini-3.1-flash-tts-preview",
+ "model_kilit": true,
+ "parcalar": [
+  {
+   "ad": "V1",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "İşten çıkarılan herkes ihbar tazminatı alır. Genelde böyle bilinir. Peki mahkeme ne dedi?"
+  },
+  {
+   "ad": "V2",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "normal",
+   "metin": "Bir işçi yeni bir işe giriyor. Sözleşmesinde iki şey yazıyor: Süreli sözleşme. Ve iki aylık deneme süresi."
+  },
+  {
+   "ad": "V3",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gerilim",
+   "metin": "İki ay dolmadan işten çıkarılıyor. Dava açıyor: Bu sözleşme aslında süresiz, bana ihbar tazminatı ödenmeli."
+  },
+  {
+   "ad": "V4",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "soru",
+   "metin": "Sizce işçi ihbar tazminatı aldı mı? A, evet, aldı. B, sadece yarısını. C, hayır, alamadı. Cevabını yoruma yaz."
+  },
+  {
+   "ad": "V5",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "gizem",
+   "metin": "Geri saralım. Mahkeme sözleşmeye bakıyor. Süreli yapılması için ortada geçerli bir sebep yok. Yani işçi bu konuda haklı: Sözleşme aslında süresiz."
+  },
+  {
+   "ad": "V6",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Ama Yargıtay dedi ki: Sözleşmede iki aylık deneme süresi açıkça yazıyor. Deneme süresi içinde taraflar sözleşmeyi bildirimsiz ve tazminatsız bitirebilir. İhbar tazminatı talebi reddedildi. Yargıtay onadı."
+  },
+  {
+   "ad": "V7",
+   "ses": "charon",
+   "tek_istek": true,
+   "ton": "vurgu",
+   "metin": "Deneme süresinde çıkarılırsan ihbar tazminatı alamazsın. İşe girerken sözleşmendeki deneme süresine bak. Sen hangi şıkkı seçtin?"
+  }
+ ]
+}

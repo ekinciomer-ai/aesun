@@ -1,0 +1,64 @@
+[
+ {
+  "N": 19,
+  "kod": "KK_MIT_18",
+  "havuz": "KK_MIT_18_PLAKASIZ_ARAC",
+  "sc": 6,
+  "upd": "upd4",
+  "tiL": 7.0,
+  "impKey": "ani fren",
+  "hookNo": "MİT #18",
+  "hookMain": "“ARAÇ KAÇTI,<br>PLAKA YOK,<br><span style=\"color:#ffb15c;font-size:1.25em\">PARA</span><br>YOK”",
+  "pollQ": "YOLCU TAZMİNAT ALDI MI?",
+  "opts": [
+   [
+    "A",
+    "Hiçbir şey alamadı"
+   ],
+   [
+    "B",
+    "Sadece tedavi masrafı"
+   ],
+   [
+    "C",
+    "82.818 TL tazminat"
+   ]
+  ],
+  "sonuc": "SONUÇ: 82.818 TL TAZMİNAT",
+  "dogru": "Doğru şık: C",
+  "ders1": "Kaçan araç, <b style=\"color:#ffb15c\">hakkını da götürmez.</b>",
+  "ders2": "📄 Kazada hemen<br><b style=\"color:#34c759\">rapor al, başvur.</b>",
+  "camKaza": "const cz=Math.min(st.car.position.z,10);P=new THREE.Vector3(10,16,cz-20);L=new THREE.Vector3(-3,0,cz+12);f=48;",
+  "camRest": "const cz=Math.min(st.car.position.z,10);P=new THREE.Vector3(10,16,cz-20);L=new THREE.Vector3(-3,0,cz+12);f=48;",
+  "camKarar": "const cz=Math.min(st.car.position.z,10);P=new THREE.Vector3(10,16,cz-20);L=new THREE.Vector3(-3,0,cz+12);f=48;",
+  "exp": 1.0,
+  "black": "YOLCU DÜŞTÜ<br><span style=\"color:#ff453a\">%15 MALUL KALDI</span>",
+  "tagsK": "tg+=tag3(st.car,3.8,'OTOBÜS','#ffd60a','#111');if(st.O.visible)tg+=tag3(st.O,1.9,'PLAKASI BİLİNMEYEN ARAÇ','#ff453a')",
+  "tagsS": "tg+=tag3(st.car,3.8,'TAZMİNAT?','#ffd60a','#111')",
+  "clues": [
+   [
+    "Birinci",
+    "Yolcu %15 malul kaldı"
+   ],
+   [
+    "İkinci",
+    "Plakasız araç %75 kusurlu"
+   ],
+   [
+    "Üçüncü",
+    "O araç için daimi arama"
+   ]
+  ],
+  "reasons": [
+   [
+    "Plakası bilinmese",
+    "Plaka yok ama zarar istenebildi"
+   ],
+   [
+    "Sigorta,",
+    "Sigorta tazminatı ödeyecek"
+   ]
+  ],
+  "hukumKey": "Sigorta, seksen"
+ }
+]

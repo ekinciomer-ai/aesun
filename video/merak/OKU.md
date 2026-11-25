@@ -72,6 +72,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `zipla` | `mod: soru / cekim / tarti / dunya / hesap / pota / sure / giysi / son` | Ay yüzeyi (kraterler, gökte Dünya), zıplayan kişi + gölge, m cetveli ve anlık yükseklik, Dünya/Ay çekim okları (9,8 / 1,62), tartı (80→13 kg) + damacana, basketbol potası (3,05 m), havada kalma sayacı, astronot giysisi (84 kg) |
 | `alan` | `mod: soru / tuketim / isin / verim / kayip / hesap / istanbul / turkiye / gece / son` | Şematik Türkiye haritası (1 birim = 111 km), Konya civarında ölçekli GES karesi (1.316 km²) + kırmızı halka, İstanbul ili karesi (5.712 km², 4 çeyrek), 365 günlük takvim, 1 m² panel + Güneş ışınları + kWh sütunları (%23 elektrik / %77 ısı, %20 kayıp), Ay + batarya |
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
+| `notron` | `mod: soru / kutle / cap / sikis / atom / kup / dag / insan / donus / son` | Nötron yıldızı (meridyenler, pulsar ışınları), terazi (Güneş vs mini yıldız; şeker küpü vs dağ / insan kalabalığı), 20 km ölçü + şehir silueti, küçülen Güneş, atom vs nötron yığını, şeker küpü + ton sayacı |
+| `kaynat` | `mod: soru / isi / fark / hesap / wh / telefon / sure / kayip / ipucu / son` | Cam su ısıtıcısı (su seviyesi, kabarcık, buhar), termometre (°C), Wh sütunu, ısı kaybı dalgaları, 5 telefon (sırayla dolar), 4 dk'lık kronometre (178 sn) |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
 Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,goruntu --kareler 60,300,900` → `arac/sayfa.py` ile kontrol sayfası.
@@ -95,5 +97,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 17 (Işık hızıyla Proxima'ya) ve 18 (Panel sıcakta mı soğukta mı) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `yildiz`, `sicak`.
 - Bölüm 19 (Satürn suda yüzer mi) ve 20 (Bitcoin cihazı günde kaç kWh) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `saturn`, `maden`.
 - Bölüm 21 (Ay'da zıplasan kaç metre) ve 22 (Türkiye'nin elektriği için kaç km² panel) — 24.11.2026, günlük görev; yeni sahneler `zipla`, `alan`.
+- Bölüm 23 (Nötron yıldızından şeker küpü kaç ton) ve 24 (1 litre su kaynatmak kaç telefon) — 25.11.2026, günlük görev; yeni sahneler `notron`, `kaynat`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

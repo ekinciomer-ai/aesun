@@ -1,0 +1,176 @@
+--- src/toon.orijinal.js	2026-11-23 19:33:03.585269097 +0300
++++ src/toon.js	2026-11-23 19:48:12.639678599 +0300
+@@ -103,6 +103,15 @@
+     g.beginPath(); g.roundRect(-14, -60, 28, 120, 12); g.fill(); g.stroke(); g.fillStyle = '#b8323a'; g.fillRect(-14, -4, 28, 9); g.restore(); },
+   pen(g, x, y, s) { g.save(); g.translate(x, y); g.rotate(-.7 * s); g.strokeStyle = PLUM; g.lineWidth = 5; g.fillStyle = '#c99a5a';
+     g.beginPath(); g.moveTo(-5, -60); g.lineTo(5, -60); g.lineTo(3, 24); g.lineTo(0, 34); g.lineTo(-3, 24); g.closePath(); g.fill(); g.stroke(); g.restore(); },
++  simit(g, x, y, s) { g.save(); g.translate(x, y - 34); g.strokeStyle = PLUM; g.lineWidth = 7;
++    g.fillStyle = '#c9803a'; g.beginPath(); g.arc(0, 0, 46, 0, 6.29); g.arc(0, 0, 20, 0, 6.29, true); g.fill('evenodd'); g.stroke(); g.beginPath(); g.arc(0, 0, 20, 0, 6.29); g.stroke();
++    g.fillStyle = '#f6e7c2'; for (let i = 0; i < 16; i++) { const a = i * 2.4, r = 27 + (i * 7) % 15; g.beginPath(); g.ellipse(Math.cos(a) * r, Math.sin(a) * r, 3.4, 2, a, 0, 6.29); g.fill(); }
++    g.restore(); },
++  simitYarim(g, x, y, s) { g.save(); g.translate(x, y - 30); g.rotate(s * .5); g.strokeStyle = PLUM; g.lineWidth = 7; g.lineJoin = 'round';
++    g.fillStyle = '#c9803a'; g.beginPath(); g.arc(0, 0, 46, Math.PI, 0); g.lineTo(20, 0); g.arc(0, 0, 20, 0, Math.PI, true); g.closePath(); g.fill(); g.stroke();
++    g.fillStyle = '#f6e7c2'; for (let i = 0; i < 9; i++) { const a = Math.PI + i * .34 + .15, r = 27 + (i * 7) % 15; g.beginPath(); g.ellipse(Math.cos(a) * r, Math.sin(a) * r, 3.4, 2, a, 0, 6.29); g.fill(); }
++    g.fillStyle = '#f2d9a8'; for (const sx of [-1, 1]) { g.beginPath(); g.ellipse(sx * 33, 0, 13, 5, 0, 0, 6.29); g.fill(); }
++    g.restore(); },
+   spoon(g, x, y, s) { g.save(); g.translate(x, y); g.rotate(.2 * s); g.strokeStyle = PLUM; g.lineWidth = 6; g.fillStyle = '#a8763e';
+     g.beginPath(); g.roundRect(-5, -10, 10, 80, 5); g.fill(); g.stroke(); g.beginPath(); g.ellipse(0, 84, 16, 22, 0, 0, 6.29); g.fill(); g.stroke(); g.restore(); },
+ };
+@@ -143,6 +152,63 @@
+   }
+ }
+ 
++// ---------- Pumpkin / Limon eklentileri: uzun saç, yele, kulak, kuyruk, fular, bot ----------
++// Uzun düz saç: başın arkasından bele kadar inen bir panel (gövdenin ARKASINDA çizilir).
++function hairBack(g, cx, hy, hw, hh, waist, col, lit) {
++  const shp = () => { g.beginPath(); g.moveTo(cx - hw * .5, hy - hh * .05);
++    g.bezierCurveTo(cx - hw * .62, hy + hh * .6, cx - hw * .6, waist - 60, cx - hw * .5, waist);
++    g.quadraticCurveTo(cx - hw * .25, waist + 22, cx, waist + 8); g.quadraticCurveTo(cx + hw * .25, waist + 22, cx + hw * .5, waist);
++    g.bezierCurveTo(cx + hw * .6, waist - 60, cx + hw * .62, hy + hh * .6, cx + hw * .5, hy - hh * .05);
++    g.bezierCurveTo(cx + hw * .5, hy - hh * .62, cx - hw * .5, hy - hh * .62, cx - hw * .5, hy - hh * .05); g.closePath(); };
++  under(g, shp, lit, .7);
++  shaded(g, shp, { cx, cy: (hy + waist) / 2, w: hw * 1.2, h: waist - hy + hh * .5 }, col, shade(col, .72), { lit, blur: 16, push: .16, lift: .05 });
++  g.save(); shp(); g.clip(); g.strokeStyle = shade(col, .7); g.lineWidth = 3.4; g.lineCap = 'round';      // düz telli: ince dikey çizgiler
++  for (let k = -5; k <= 5; k++) { const x = cx + k * hw * .1; g.beginPath(); g.moveTo(x, hy + hh * .2); g.quadraticCurveTo(x + k * 2, (hy + waist) / 2, x + k * 3, waist - 6); g.stroke(); }
++  g.restore(); ink(g, shp);
++}
++// Başın üstündeki saç: ortadan ayrık, yüzü açık bırakan iki perde (başın içine kırpılır) + omuza inen yan tutamlar.
++function hairFront(g, w, h, hp, col, lit, turn) {
++  const ox = turn * w * .05, part = -h * .36;
++  const cap = () => { g.beginPath(); g.moveTo(ox, part);
++    g.quadraticCurveTo(ox - w * .3, part + h * .02, ox - w * .37, h * .18); g.lineTo(-w * .8, h * .18); g.lineTo(-w * .8, -h * .9); g.lineTo(w * .8, -h * .9); g.lineTo(w * .8, h * .18);
++    g.lineTo(ox + w * .37, h * .18); g.quadraticCurveTo(ox + w * .3, part + h * .02, ox, part); g.closePath(); };
++  g.save(); hp(); g.clip();
++  shaded(g, cap, { cx: 0, cy: -h * .3, w: w * 1.1, h: h * .8 }, col, shade(col, .74), { lit, blur: 14, push: .12, lift: .12 });
++  g.strokeStyle = shade(col, .68); g.lineWidth = 3.2; g.lineCap = 'round';
++  for (const s of [-1, 1]) for (let k = 1; k <= 3; k++) { g.beginPath(); g.moveTo(ox + s * w * .03, part + 4); g.quadraticCurveTo(ox + s * w * (.12 + k * .08), part + h * .02, ox + s * w * (.2 + k * .09), h * .12); g.stroke(); }
++  g.strokeStyle = PLUM; g.lineWidth = THIN; g.beginPath(); g.moveTo(ox - w * .37, h * .18); g.quadraticCurveTo(ox - w * .3, part + h * .02, ox, part); g.quadraticCurveTo(ox + w * .3, part + h * .02, ox + w * .37, h * .18); g.stroke();
++  g.restore();
++}
++// Aslan yelesi: başın arkasında kıvırcık (fistolu) bir halka, iki yuvarlak kulak.
++function mane(g, w, h, col, lit, ears) {
++  const R = w * .74, n = 18;
++  // kıvrım: her dilimin dışa taşan kontrol noktası
++  const scallop = () => { g.beginPath(); let px, py;
++    for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, x = Math.cos(a) * R, y = Math.sin(a) * R * .96 + h * .05;
++      if (!i) g.moveTo(x, y); else { const am = (i - .5) / n * Math.PI * 2; g.quadraticCurveTo(Math.cos(am) * R * 1.22, Math.sin(am) * R * 1.16 + h * .05, x, y); } }
++    g.closePath(); };
++  if (ears) for (const s of [-1, 1]) {
++    const ex = s * w * .5, ey = -h * .56, ear = () => { g.beginPath(); g.arc(ex, ey, w * .13, 0, 6.29); };
++    under(g, ear, lit, .6); shaded(g, ear, { cx: ex, cy: ey, w: w * .26, h: w * .26 }, col, shade(col, .7), { lit, blur: 6 }); ink(g, ear);
++    g.fillStyle = shade(col, .62); g.beginPath(); g.arc(ex, ey + 4, w * .065, 0, 6.29); g.fill();
++  }
++  under(g, scallop, lit, .9);
++  shaded(g, scallop, { cx: 0, cy: h * .05, w: R * 2.3, h: R * 2.2 }, col, shade(col, .66), { lit, blur: 20, push: .12, lift: .1 });
++  g.save(); scallop(); g.clip(); g.strokeStyle = shade(col, .62); g.lineWidth = 4; g.lineCap = 'round';
++  for (let i = 0; i < n; i++) { const a = (i + .5) / n * Math.PI * 2; g.beginPath(); g.moveTo(Math.cos(a) * R * .62, Math.sin(a) * R * .6 + h * .05); g.quadraticCurveTo(Math.cos(a + .12) * R * .85, Math.sin(a + .12) * R * .82 + h * .05, Math.cos(a) * R * 1.02, Math.sin(a) * R * .98 + h * .05); g.stroke(); }
++  g.restore(); g.strokeStyle = PLUM; g.lineWidth = OUT - 2; g.lineJoin = 'round'; scallop(); g.stroke();
++}
++// Püsküllü kuyruk: kalçadan dışarı kıvrılan çizgi + uçta kıvırcık püskül.
++function tail(g, cx, y, s, col, wag) {
++  const x0 = cx + s * 70, x1 = cx + s * 200, y1 = y - 40 + wag * 30, x2 = cx + s * 236, y2 = y - 150 + wag * 40;
++  g.strokeStyle = PLUM; g.lineWidth = LIMB + 2; g.lineCap = 'round'; g.beginPath(); g.moveTo(x0, y); g.quadraticCurveTo(x1, y1 + 60, x2, y2); g.stroke();
++  const dark = shade(col, .7);
++  for (const [dx, dy, r] of [[0, -22, 26], [-20, -6, 20], [20, -4, 20], [-8, -44, 18], [14, -40, 18]]) {
++    g.fillStyle = col; g.strokeStyle = PLUM; g.lineWidth = OUT - 4; g.beginPath(); g.arc(x2 + s * dx, y2 + dy, r, 0, 6.29); g.fill(); g.stroke();
++    g.strokeStyle = dark; g.lineWidth = 3; g.beginPath(); g.arc(x2 + s * dx, y2 + dy, r * .5, .5, 3.6); g.stroke();
++  }
++}
++
+ // ---------- face ----------
+ //   lid 0..1 how far the lid bar sits into the eye · lt lid tilt (rad, + = inner end down)
+ //   by brow height (× head h, from the face centre) · bt brow tilt (+ = inner end down) · bc how arched
+@@ -198,6 +264,7 @@
+       g.beginPath(); g.ellipse(x + gx, ey + gy, w * .046 * q, w * .074, 0, 0, 6.29); g.fill();
+     }
+   }
++  if (L.blush) { g.save(); g.globalAlpha = .5; g.fillStyle = L.blush; for (const s of [-1, 1]) { g.beginPath(); g.ellipse(fx + s * w * .25, fy + h * .1, w * .07, w * .042, 0, 0, 6.29); g.fill(); } g.restore(); }
+   // mouth
+   const mx = fx + turn * w * .03, my = fy + h * .2, m = clamp(f.mouth || 0, 0, 1), sg = turn < 0 ? -1 : 1;
+   g.strokeStyle = PLUM; g.lineWidth = lw * .95;
+@@ -227,6 +294,13 @@
+     else { g.moveTo(mx - sg * w * .052, my + w * .01); g.quadraticCurveTo(mx - sg * w * .01, my - w * .022, mx + sg * w * .052, my + w * .002); }
+     g.stroke();
+   }
++  if (L.nose) {                                                               // aslan burnu: yuvarlak köşeli üçgen + ağza inen çizgi
++    const nx = mx, ny = my - h * .1, nw = w * .07;
++    g.fillStyle = L.nose; g.strokeStyle = PLUM; g.lineWidth = lw * .6; g.lineJoin = 'round';
++    g.beginPath(); g.moveTo(nx - nw, ny - nw * .45); g.quadraticCurveTo(nx, ny - nw * .75, nx + nw, ny - nw * .45); g.quadraticCurveTo(nx + nw * .3, ny + nw * .55, nx, ny + nw * .6); g.quadraticCurveTo(nx - nw * .3, ny + nw * .55, nx - nw, ny - nw * .45); g.closePath(); g.fill(); g.stroke();
++    g.lineWidth = lw * .55; g.beginPath(); g.moveTo(nx, ny + nw * .6); g.lineTo(nx, my - w * .02); g.stroke();
++    g.fillStyle = PLUM; for (const s of [-1, 1]) for (const [dx, dy] of [[.13, .02], [.17, .05], [.14, .08]]) { g.beginPath(); g.arc(nx + s * w * dx, ny + h * dy, 3.2, 0, 6.29); g.fill(); }
++  }
+   if (L.mustache) {                                                           // two lobes that sweep out and curl up
+     const col = L.mustache === true ? (L.hair || '#2e2026') : L.mustache, y = my - h * .085;
+     g.fillStyle = col; g.strokeStyle = PLUM; g.lineWidth = lw * .5;
+@@ -321,12 +395,19 @@
+     const cx = CW / 2, lit = p.lit ?? -1;
+     g.translate(cx, SOLE); if (p.flip) g.scale(-1, 1); g.rotate((p.lean || 0) * D2R); g.translate(-cx, -SOLE);
+     const hw = L.headW || 276, hh = L.headH || 258;     // 3.5 heads tall
+-    const bob = p.bob || 0;
++    const bob = (p.bob || 0) + (L.drop || 0);             // drop: gövde ve baş aşağı iner, bacak kısalır (çocuk / tıknaz)
+     const sit = L.body === 'sit', robe = L.body === 'robe' || sit;
+-    const bodyTop = 306 + bob, bodyBot = sit ? 820 : robe ? 965 : 648 + bob * .5;
++    const bodyTop = 306 + bob, bodyBot = sit ? 820 : robe ? 965 : 648 + (p.bob || 0) * .5 + (L.drop || 0);
+     const bw = L.bodyW || 184;
++    if (L.longHair) hairBack(g, cx, 200 + bob, hw, hh, bodyTop + (L.hairLen || 300), L.longHair, lit);
++    if (L.tail) tail(g, cx, bodyBot - 40, L.tailSide || 1, L.tail, p.wag || 0);
+     // legs
+-    if (!robe) for (const s of [-1, 1]) {
++    if (!robe && L.boots) for (const s of [-1, 1]) {                         // bot: renkli, mürdüm çizgili
++      g.strokeStyle = PLUM; g.lineWidth = LIMB; g.lineCap = 'round';
++      const fx = cx + s * 38; g.beginPath(); g.moveTo(cx + s * 34, bodyBot - 20); g.lineTo(fx, SOLE - 40); g.stroke();
++      const boot = () => { g.beginPath(); g.moveTo(fx - s * 18, SOLE - 72); g.lineTo(fx + s * 16, SOLE - 72); g.lineTo(fx + s * 18, SOLE - 30); g.quadraticCurveTo(fx + s * 48, SOLE - 30, fx + s * 46, SOLE - 4); g.lineTo(fx - s * 22, SOLE - 4); g.quadraticCurveTo(fx - s * 24, SOLE - 40, fx - s * 18, SOLE - 72); g.closePath(); };
++      g.fillStyle = L.boots; boot(); g.fill(); g.strokeStyle = PLUM; g.lineWidth = 7; g.lineJoin = 'round'; boot(); g.stroke();
++    } else if (!robe) for (const s of [-1, 1]) {
+       g.strokeStyle = PLUM; g.lineWidth = LIMB; g.lineCap = 'round';
+       const fx = cx + s * 40; g.beginPath(); g.moveTo(cx + s * 36, bodyBot - 20); g.lineTo(fx, SOLE - 14); g.stroke();
+       g.fillStyle = PLUM; g.beginPath(); g.ellipse(fx + s * 13, SOLE - 12, 27, 13, 0, 0, 6.29); g.fill();
+@@ -347,6 +428,7 @@
+     under(g, bodyPath, lit, .8);
+     shaded(g, bodyPath, bb, cloth, L.clothDark || shade(cloth, .62), { lit, blur: 18, push: .2, lift: .1 });   // the torso's gradient is strong: 1 -> 0.6
+     g.save(); bodyPath(); g.clip();
++    if (L.pattern === 'hstripes') { g.fillStyle = L.stripe || shade(cloth, .55); for (let y = bodyTop + 40; y < bodyBot; y += 46) g.fillRect(cx - bwid, y, bwid * 2, 11); }
+     if (L.pattern === 'stripes') { g.strokeStyle = shade(cloth, .6); g.lineWidth = 6; g.globalAlpha = .55; for (let x = cx - 160; x < cx + 160; x += 24) { g.beginPath(); g.moveTo(x, bodyTop); g.lineTo(x, bodyBot); g.stroke(); } g.globalAlpha = 1; }
+     if (L.trim) {
+       g.fillStyle = L.trim; g.fillRect(cx - 10, bodyTop, 20, bodyBot - bodyTop);
+@@ -371,6 +453,11 @@
+     g.restore();
+     rimLight(g, bodyPath, bb, p.rim, lit);
+     ink(g, bodyPath);
++    if (L.skirt) {                                                            // keçe etek: belden açılan çan
++      const sy = bodyBot - 70, sb = bodyBot + 64, sw0 = bwid * .5, sw1 = bwid * .74;
++      const sk = () => { g.beginPath(); g.moveTo(cx - sw0, sy); g.lineTo(cx + sw0, sy); g.quadraticCurveTo(cx + sw1 * .9, sy + 50, cx + sw1, sb); g.quadraticCurveTo(cx, sb + 18, cx - sw1, sb); g.quadraticCurveTo(cx - sw1 * .9, sy + 50, cx - sw0, sy); g.closePath(); };
++      under(g, sk, lit, .6); shaded(g, sk, { cx, cy: (sy + sb) / 2, w: sw1 * 2, h: sb - sy }, L.skirt, shade(L.skirt, .66), { lit, blur: 14, push: .2 }); rimLight(g, sk, { cx, cy: (sy + sb) / 2, w: sw1 * 2, h: sb - sy }, p.rim, lit); ink(g, sk);
++    }
+     // arms (behind the head, over the body)
+     const sh = bodyTop + 50;
+     const aL = p.armL || [12, 8], aR = p.armR || [12, 8];
+@@ -386,6 +473,7 @@
+     g.save(); g.translate(cx, 200 + bob); g.rotate((p.tilt || 0) * D2R);
+     const asym = clamp(p.look || 0, -1, 1) * .08, hv = this.hv ||= variation(L);
+     const hb = { cx: 0, cy: 0, w: hw, h: hh }, hp = () => headPath(g, hw, hh, asym, hv);
++    if (L.mane) mane(g, hw, hh, L.mane, lit, L.ears);
+     if (L.hat && L.hatBack) hat(g, L.hat, hw, hh, L, lit);
+     under(g, hp, lit);
+     shaded(g, hp, hb, '#ffffff', p.shade || L.shade || '#e6e1f4', { lit, blur: 15, push: .09, lift: .08, grow: 1.02 });   // white; a lavender crescent (x0.89) at the far edge only
+@@ -397,12 +485,20 @@
+     rimLight(g, hp, hb, p.rim, lit);
+     if (p.soot) { g.save(); hp(); g.clip(); g.fillStyle = '#3a3048'; g.globalAlpha = .4 * p.soot; g.beginPath(); g.ellipse(hw * .22, hh * .14, 30, 18, .4, 0, 6.29); g.ellipse(-hw * .3, -hh * .2, 22, 12, -.3, 0, 6.29); g.fill(); g.restore(); }
+     ink(g, hp);
++    if (L.longHair) hairFront(g, hw, hh, hp, L.longHair, lit, clamp(p.look || 0, -1, 1));
+     if (L.beard) beard(g, hw, hh, L, lit);
+     if (L.hat && !L.hatBack) hat(g, L.hat, hw, hh, L, lit);
+     face(g, hw, hh, p, L);                                                     // after the hat: raised brows stay visible on its edge
+     if (p.sweat) { g.globalAlpha = Math.min(1, p.sweat); g.fillStyle = '#9fd4ff'; g.strokeStyle = PLUM; g.lineWidth = 5; g.beginPath(); g.moveTo(hw * .44, -hh * .3); g.quadraticCurveTo(hw * .58, -hh * .08, hw * .47, -hh * .04); g.quadraticCurveTo(hw * .35, -hh * .08, hw * .44, -hh * .3); g.fill(); g.stroke(); g.globalAlpha = 1; }
+     if (p.laughMarks) { g.strokeStyle = PLUM; g.lineWidth = 6; g.lineCap = 'round'; g.globalAlpha = p.laughMarks; for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { const a = (-40 + k * 25) * D2R; g.beginPath(); g.moveTo(s * (hw * .62 + 6), -hh * .1 + Math.sin(a) * 60); g.lineTo(s * (hw * .62 + 36), -hh * .1 + Math.sin(a) * 80); g.stroke(); } g.globalAlpha = 1; }
+     g.restore();
++    if (L.scarf) {                                                            // fular: boyunda bant + sarkan uç
++      const y0 = bodyTop + (L.scarfY ?? 6), sc = () => { g.beginPath(); g.roundRect(cx - tw * .62, y0 - 6, tw * 1.24, 40, 18); };
++      g.fillStyle = L.scarf; sc(); g.fill(); g.strokeStyle = PLUM; g.lineWidth = 7; sc(); g.stroke();
++      const tl = () => { g.beginPath(); g.moveTo(cx + 20, y0 + 26); g.lineTo(cx + 64, y0 + 26); g.lineTo(cx + 74, y0 + 120); g.lineTo(cx + 46, y0 + 108); g.lineTo(cx + 30, y0 + 124); g.closePath(); };
++      g.fillStyle = shade(L.scarf, .85); tl(); g.fill(); g.stroke();
++      g.fillStyle = '#ffffff'; g.globalAlpha = .7; for (const [dx, dy] of [[-40, 14], [0, 12], [40, 16], [52, 70]]) { g.beginPath(); g.arc(cx + dx, y0 + dy, 5, 0, 6.29); g.fill(); } g.globalAlpha = 1;
++    }
+     this.tex.needsUpdate = true;
+   }
+ }

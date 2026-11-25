@@ -41,6 +41,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ortak import AESUN, TOK, TR, bildirim_tetikle, gh, log, panel_oku, zaman  # noqa: E402
+from ortak import _onbellek_oku as onbellek_oku  # noqa: E402
 import cihaz_ogrenme as OG  # noqa: E402
 
 YEREL = AESUN / "cihaz_yonetimi_yerel.json"
@@ -78,8 +79,16 @@ VARSAYILAN = {
 
 
 def ayar_oku():
+    """Ayarları okur. Okuma başarısızsa (ns1 yolunda kopya yok, ağ hatası) yerel önbellekteki son ayarlar
+    kullanılır: varsayılanlara düşmek mod'u sessizce "izleme"ye çevirip komutları durduruyordu
+    (25.11 07:50: 6 saatlik sunucu penceresinde mod izleme göründü) ve ayar dosyasının üzerine yazma riski vardı.
+    Varsayılan yazımı yalnız hiç ayar bulunamadığında (ilk kurulum) yapılır."""
     a, _ = gh("cihaz_yonetimi.json")
     if a is None:
+        a = onbellek_oku("cihaz_yonetimi.json")
+        if isinstance(a, dict) and a:
+            log("cihaz_yonetimi.json okunamadı; yerel önbellekteki ayarlar kullanıldı (mod:", a.get("mod"), ")")
+            return {**VARSAYILAN, **a}
         a = dict(VARSAYILAN)
         gh("cihaz_yonetimi.json", a, None, "cihaz yönetimi: varsayılan ayarlar (izleme modu)")
         return a
@@ -417,9 +426,29 @@ def yerel_oku():
         return {}
 
 
+def _guvenli_yaz(yol, metin):
+    """Yerel durum dosyasını atomik yazar (geçici dosya + replace). Disk dolu (ENOSPC) vb. hatada
+    işi çökertmez: 22.11'de yazım hatası calistir()'ı GitHub durumunu yazmadan düşürüyordu."""
+    try:
+        yol.parent.mkdir(parents=True, exist_ok=True)
+        gec = yol.with_name(yol.name + ".tmp")
+        gec.write_text(metin)
+        gec.replace(yol)
+        return True
+    except OSError as e:
+        log(f"UYARI: {yol.name} yazılamadı ({e}) — devam ediliyor")
+        return False
+
+
+def _json_oku(yol):
+    try:
+        return json.loads(yol.read_text()) if yol.exists() else {}
+    except Exception:
+        return {}
+
+
 def yerel_yaz(y):
-    YEREL.parent.mkdir(parents=True, exist_ok=True)
-    YEREL.write_text(json.dumps(y, ensure_ascii=False))
+    _guvenli_yaz(YEREL, json.dumps(y, ensure_ascii=False))
 
 
 def gunes_takip(cihazlar, uretim_kw, fs_ts, kw_c, a, simdi, yerel, detay=None):
@@ -592,25 +621,23 @@ def komut_gonder(eylem, a, neden, hedefler="all"):
 
 
 def tk_oku():
-    return json.loads(TAKVIM.read_text()) if TAKVIM.exists() else {}
+    return _json_oku(TAKVIM)
 
 
 def tk_yaz(tk):
-    TAKVIM.parent.mkdir(parents=True, exist_ok=True)
-    TAKVIM.write_text(json.dumps(tk, ensure_ascii=False, default=str))
+    _guvenli_yaz(TAKVIM, json.dumps(tk, ensure_ascii=False, default=str))
 
 
 def tekrar_mi(eylem, a):
-    yerel = json.loads(YEREL.read_text()) if YEREL.exists() else {}
+    yerel = _json_oku(YEREL)
     son = yerel.get("son_komut") or {}
     return son.get("action") == eylem and (time.time() - son.get("t", 0)) < a["komut_arasi_dk"] * 60
 
 
 def son_komut_kaydet(eylem, cid):
-    yerel = json.loads(YEREL.read_text()) if YEREL.exists() else {}
+    yerel = _json_oku(YEREL)
     yerel["son_komut"] = {"action": eylem, "t": time.time(), "id": cid}
-    YEREL.parent.mkdir(parents=True, exist_ok=True)
-    YEREL.write_text(json.dumps(yerel))
+    _guvenli_yaz(YEREL, json.dumps(yerel))
 
 
 def tetik():

@@ -65,3 +65,9 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_SQ_05_ANTIK · Bilgi şıklı soru "Bu antik kent hangi ilde?": Efes (İzmir), Afrodisias (Aydın), Ani (Kars) — tuzak: Denizli
 - [x] NY_BL_05_UNVAN · Unvanını Meclis'ten alan iller: Gazi (1921), Kahraman (1973), Şanlı (1984) — kanca: "En yenisi hangisi?"
 - Not: Süreler 82/81/63 sn; havuza teslim, plan 20-22.12 13:00 (onay bekliyor). Gemini Puck yavaş okudu; YM/SQ hedefin çok üstünde — sonraki şıklı/yemek videolarında metni ~%30 kısalt. BL_05 ilk denemede 13 sn kısa ses (kanca metni değiştirilip yeniden okutuldu).
+
+## Parti 12 — Karışık formatlar (2026-11-25)
+- [~] NY_EN_07_TENHA · En az nüfuslu 5 il (TÜİK ADNKS 2025): Kilis, Gümüşhane, Ardahan, Tunceli, Bayburt — kanca: "Bir İstanbul ilçesine bu ilden 12 tane sığar" (Esenyurt 1.003.905 / Bayburt 82.836)
+- [~] NY_HF_06_ILLER · Görsel hafıza "5 saniye bak, hatırla": Yalova, Zonguldak, Bilecik (+Tokat, Aydın) — kırmızı/mavi/yeşil soruldu
+- [~] NY_BL_06_SINIR · Komşu ülkesi en çok olan il: Edirne, Hakkari, Şırnak, Ardahan (2 ülke) → Iğdır (3 ülke) — kanca: "Bir ilimiz tam 3 ülkeyle komşu"
+- Not: Önceki partilerdeki uzunluk notuna göre metinler kısa tutuldu (88–110 kelime).

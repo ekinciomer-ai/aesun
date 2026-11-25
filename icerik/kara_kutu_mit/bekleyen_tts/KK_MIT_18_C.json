@@ -1,0 +1,58 @@
+{
+  "kod": "KK_MIT_18_C",
+  "motor": "gemini",
+  "ses": "charon",
+  "model_tercih": "gemini-3.1-flash-tts-preview",
+  "model_kilit": true,
+  "parcalar": [
+    {
+      "ad": "V1",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gerilim",
+      "metin": "Kazaya sebep olan araç kaçtıysa, plakası da yoksa, kimseden para alamazsın. Genelde böyle bilinir. Peki mahkeme ne dedi?"
+    },
+    {
+      "ad": "V2",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "normal",
+      "metin": "Bir yolcu otobüsü yolda ilerliyor. İçeride yolcular var."
+    },
+    {
+      "ad": "V3",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gerilim",
+      "metin": "Bir araç yüzünden otobüs ani fren yapıyor. İçerideki bir yolcu düşüyor ve yaralanıyor. Frene sebep olan aracın plakası ise tespit edilemiyor."
+    },
+    {
+      "ad": "V4",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "soru",
+      "metin": "Sizce yaralanan yolcu tazminat alabildi mi? A, B, yoksa C? Cevabını yoruma yaz."
+    },
+    {
+      "ad": "V5",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "gizem",
+      "metin": "Geri saralım. Birinci ipucu: yolcu yüzde on beş oranında malul kaldı. İkinci ipucu: plakası bilinmeyen araç yüzde yetmiş beş kusurlu bulundu. Üçüncü ipucu: o araç için daimi arama kararı verildi."
+    },
+    {
+      "ad": "V6",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "vurgu",
+      "metin": "Plakası bilinmese de, yolcunun zararı sigortadan istenebildi. Sigorta, seksen iki bin sekiz yüz on sekiz lira tazminat ödeyecek. Yargıtay onadı."
+    },
+    {
+      "ad": "V7",
+      "ses": "charon",
+      "tek_istek": true,
+      "ton": "vurgu",
+      "metin": "Yani kaçan araç, hakkını da götürmez. Kaza olunca hemen rapor al, başvurunu yap. Sen hangi şıkkı seçtin?"
+    }
+  ]
+}

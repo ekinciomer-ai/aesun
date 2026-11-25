@@ -1,0 +1,231 @@
+{
+ "kod": "KZ_MRK_23_NOTRON",
+ "no": "MERAK #23",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "NÖTRON YILDIZINDAN<br><i>1 ŞEKER KÜPÜ KAÇ TON?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "notron",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Nötron yıldızından bir şeker küpü kadar parça koparsan, Dünya'da kaç ton gelirdi? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "notron",
+   "p": {
+    "mod": "kutle",
+    "kart": 55
+   },
+   "metin": "Nötron yıldızı, patlayan dev bir yıldızın çöken çekirdeğidir. Kütlesi Güneş'ten bile fazla.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1,5 – 2,5 <em>×</em> Güneş",
+     "k": "Kütlesi"
+    },
+    {
+     "tip": "etiket",
+     "y": "Güneş'ten ağır ☀️",
+     "k": "fazla"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "notron",
+   "p": {
+    "mod": "cap",
+    "kart": 55
+   },
+   "metin": "Ama çapı sadece yirmi kilometre kadar. Bir şehir büyüklüğünde.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "ÇAP",
+     "say": 20,
+     "dec": 0,
+     "ek": " km",
+     "k": "yirmi",
+     "on": "≈ "
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ bir şehir 🏙️",
+     "k": "şehir"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "notron",
+   "p": {
+    "mod": "sikis",
+    "kart": 55
+   },
+   "metin": "Güneş'in çapı ise yaklaşık bir milyon dört yüz bin kilometre. Yani bu kütle, yetmiş bin kat küçük bir topa sıkışmış.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1.400.000 <em>÷</em> 20 = 70.000",
+     "k": "Yani"
+    },
+    {
+     "tip": "etiket",
+     "y": "70.000 kat küçük 🗜️",
+     "k": "yetmiş"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "notron",
+   "p": {
+    "mod": "atom",
+    "kart": 55
+   },
+   "metin": "Normal maddede atomların içi neredeyse boştur. Orada boşluk kalmaz, nötronlar sımsıkı dizilir.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "atom: içi boş ⚛️",
+     "k": "atomların"
+    },
+    {
+     "tip": "etiket",
+     "y": "nötron yıldızı: boşluk yok",
+     "k": "boşluk"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "notron",
+   "p": {
+    "mod": "kup",
+    "kart": 55
+   },
+   "metin": "NASA'ya göre bu maddeden bir şeker küpü, Dünya'da yaklaşık bir milyar ton gelirdi.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 ŞEKER KÜPÜ",
+     "say": 1,
+     "dec": 0,
+     "ek": " milyar ton",
+     "k": "milyar",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "notron",
+   "p": {
+    "mod": "dag",
+    "kart": 55
+   },
+   "metin": "Bu, koca bir dağın ağırlığı kadar. Avucunda bir dağ taşıdığını düşün.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ bir dağ ⛰️",
+     "k": "dağın"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "notron",
+   "p": {
+    "mod": "insan",
+    "kart": 55
+   },
+   "metin": "Avrupa Uzay Ajansı'na göre ise Dünya'daki bütün insanların toplam ağırlığı kadar.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ bütün insanlık 👥",
+     "k": "bütün"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "notron",
+   "p": {
+    "mod": "donus",
+    "kart": 55
+   },
+   "metin": "Üstelik bazıları çok hızlı döner. Bilinen en hızlısı dakikada kırk üç bin tur atar. Mutfak blenderının iki katı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "EN HIZLI DÖNÜŞ",
+     "say": 43000,
+     "dec": 0,
+     "ek": " tur/dk",
+     "k": "kırk"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 2 × blender 🌀",
+     "k": "Mutfak"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "notron",
+   "p": {
+    "mod": "son",
+    "kart": 54
+   },
+   "metin": "Cevap: bir şeker küpü, yaklaşık bir milyar ton. Senin tahminin kaç tondu? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ 1 milyar ton ✅",
+     "k": "Cevap"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Nötron yıldızından bir şeker küpü kaç ton gelir? 🌌 #shorts",
+  "aciklama": "NASA'ya göre nötron yıldızından şeker küpü büyüklüğünde bir parça, Dünya'da yaklaşık 1 trilyon kilogram (1 milyar ton) gelir; bu, aşağı yukarı bir dağın ağırlığıdır. Avrupa Uzay Ajansı (ESA) aynı miktarı Dünya'daki bütün insanların toplam ağırlığına benzetir.\n\nNötron yıldızı, dev bir yıldızın süpernova patlamasından sonra kalan çökmüş çekirdektir. ESA'ya göre kütlesi Güneş'ten fazladır (yaklaşık 1,5–2,5 Güneş kütlesi); NASA'ya göre çapı yaklaşık 20 km'dir, yani bir şehir büyüklüğündedir. Güneş'in çapı ≈ 1,39 milyon km olduğu için bu kütle yaklaşık 70.000 kat küçük bir küreye sığmıştır. NASA'ya göre bilinen en hızlı pulsar PSR J1748-2446ad dakikada 43.000 tur döner, bir mutfak blenderının yaklaşık iki katı.\n\nSenin tahminin kaç tondu? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçekler gerçek değildir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA Science – Neutron Stars Are Weird!; NASA Imagine the Universe – Neutron Stars; ESA – Neutron stars, pulsars and magnetars; ESA – What is a neutron star? (2024); NASA – Sun facts.\n\n#kozmoslab #uzay #nötronyıldızı #astronomi #bilim #merak #shorts",
+  "etiketler": [
+   "nötron yıldızı",
+   "uzay",
+   "astronomi",
+   "pulsar",
+   "yıldız",
+   "nasa",
+   "bilim",
+   "merak",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA Science – Neutron Stars Are Weird! (science.nasa.gov/universe/neutron-stars-are-weird): 'one sugar cube of neutron star material would weigh about 1 trillion kilograms (or 1 billion tons) on Earth – about as much as a mountain'; 'The fastest known pulsar, named PSR J1748-2446ad, spins 43,000 times every minute.' 'That's twice as fast as the typical household blender!'",
+  "NASA Imagine the Universe – Neutron Stars (imagine.gsfc.nasa.gov/science/objects/neutron_stars1.html): 'These stellar remnants measure about 20 kilometers (12.5 miles) across.'; aynı şeker küpü cümlesi",
+  "ESA – Stars: Neutron stars, pulsars and magnetars: 'concentrate more than the mass of our Sun within a sphere of about 20 kilometres in diameter'; ''sugar cube' sized object of neutron star material would weigh as much as all of the people on Earth'",
+  "ESA – What is a neutron star? (2024): '1.5 to 2.5 solar masses'",
+  "NASA – Sun: Facts: Güneş yarıçapı ≈ 696.000 km → çap ≈ 1,39 milyon km; 1.390.000 ÷ 20 ≈ 70.000",
+  "Atomun içinin neredeyse boş olması: standart fizik bilgisi (çekirdek, atomdan ~100.000 kat küçük)"
+ ]
+}

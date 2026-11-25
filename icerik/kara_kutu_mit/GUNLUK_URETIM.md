@@ -5,6 +5,8 @@ Bu dosya zamanlanmış görevin talimatıdır. Görev her gün bu klasörü kull
 Ayrıntılı kurallar: `URETIM_REHBERI.md`. Konu listesi: `KONU_HAVUZU.md`. Yapılanlar: `uretilenler.json`.
 
 ## Değişmez kurallar
+- Günde EN AZ 3 video teslim edilir (Ömer, 25.11.2026). Kota yüzünden kalan bölüm aynı gün kota yenilenince (11:00) tamamlanır; ertesi güne kalan bölüm o günün 3'üne sayılmaz.
+- Senaryoda söylenen yer/yol tipi sahnede birebir görünmeli ("virajlı" dendiyse viraj sahnesi: S[11]). Ömer, 25.11.2026.
 - Kesinleşmiş karar (Yargıtay/Danıştay `onama`) ve sonu net (beraat / mahkûmiyet + ceza / tazminat tutarı ya da oranı). Sonu belirsiz dava kullanılmaz.
 - Videoda kişi adı, plaka, şehir adı, esas/karar numarası, daire, tarih yok (bunlar yalnız teslim kartındaki `kaynaklar`da).
 - Sıradan araçlar (lüks değil), yüzsüz mankenler, geniş açı. Ölüm/yaralanma anı gösterilmez: siyah ekran + yazı.

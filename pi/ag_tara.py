@@ -103,6 +103,24 @@ def incele(ip):
     return o
 
 
+def ssh_baslik(ip):
+    try:
+        with socket.create_connection((ip, 22), timeout=2) as k:
+            k.settimeout(2)
+            return k.recv(200).decode(errors="ignore").strip()[:80]
+    except Exception:
+        return None
+
+
+def diger_incele(o):
+    """Madenci olmayan açık adres: hangi kapılar açık, SSH başlığı (HiveOS GPU rig'leri vb. için). Salt okuma."""
+    kap = [p for p in (22, 80, 443, 3333, 4067, 4200, 5000, 8080) if port(o["ip"], p)]
+    d = {"ip": o["ip"], "mac": o.get("mac"), "acik_kapilar": kap}
+    if 22 in kap:
+        d["ssh"] = ssh_baslik(o["ip"])
+    return d
+
+
 def altminer_ayar():
     """altminer servisinin klasöründe IP/aralık tanımı geçen satırlar (gizli bilgi içeren satırlar atlanır)."""
     sv = komut("systemctl", "cat", "altminer")
@@ -183,12 +201,17 @@ def main():
                       "eski_ip": k.get("son_ip") if not bul else None, "yeni_ip": bul["ip"] if bul else None,
                       "durum": ("agda_var_liste_disi" if bul and not bul["toplayici_listesinde"] else
                                 "agda_var_yanitsiz" if bul else "agda_yok")})
+    with CF.ThreadPoolExecutor(16) as ex:
+        diger = list(ex.map(diger_incele, [o for o in bilgi if o not in madenci and o["ip"] != benim]))
+    # eski GPU rig'lerinin sabit adresi 192.168.1.x olabilir (Rig_243 = .200): ulaşılabiliyor mu?
+    eski_ag = {ip: bool(ping(ip)) for ip in ("192.168.1.1", "192.168.1.200")}
     yanitsiz = [ip for ip, d in taranan.items() if not (d.get("online") or d.get("sleeping"))]
     veri = {"zaman": simdi.isoformat(timespec="seconds"), "alt_ag": str(ag), "pi_ip": benim,
             "acik_adres": len(acik), "madenci_sayisi": len(madenci),
             "madenciler": sorted(madenci, key=lambda o: tuple(int(x) for x in o["ip"].split("."))),
             "toplayici_yanitsiz_ip": sorted(yanitsiz, key=lambda s: int(s.split(".")[-1])),
-            "eksik": eksik, "web_adaylari": aday, "altminer": altminer_ayar()}
+            "eksik": eksik, "web_adaylari": aday,
+            "diger_cihazlar": sorted(diger, key=lambda o: int(o["ip"].split(".")[-1])), "eski_ag_1x": eski_ag, "altminer": altminer_ayar()}
     eski, sha = gh("n8n/ag_tarama.json")
     gh("n8n/ag_tarama.json", veri, sha, "Pi ağ taraması " + simdi.strftime("%H:%M"))
     gh("n8n/cihaz_kimlik.json", kimlik, ksha, "Cihaz kimlikleri " + simdi.strftime("%H:%M"))

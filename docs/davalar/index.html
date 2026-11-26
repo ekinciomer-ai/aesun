@@ -50,6 +50,7 @@ a{color:var(--v)}h1{font-size:22px;margin:6px 0 2px}.alt{color:var(--s);margin:0
 mark{background:#FDE68A;color:#000}
 .kanit:before{content:"📄 "}
 
+.kat.son{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:6px 10px;margin:8px 0 14px}.kat.son>div:first-child{color:#c2410c;font-weight:700}
 </style>
 </head>
 <body>
@@ -89,6 +90,7 @@ mark{background:#FDE68A;color:#000}
       h+='<div class="kart'+(q?' acik':'')+'" data-i="'+di+'"><div class="bas"><div><b>'+esc(d.baslik)+'</b><small>'+esc(d.birim+' · '+d.esas)+'</small>'
         +(d.konu?'<span class="etk">'+esc(d.konu)+'</span>':'')+(d.durusma?'<span class="etk dur">Duruşma '+esc(d.durusma)+'</span>':'')+'<span class="etk">'+n+' evrak</span></div><span class="ok">›</span></div><div class="ic">'
         +(d.taraflar?'<div class="ozet"><b>Taraflar:</b> '+esc(d.taraflar)+'</div>':'')+(d.ozet?'<div class="ozet">'+esc(d.ozet)+'</div>':'');
+      if(!q&&d.son&&d.son.length){h+='<div class="kat son"><div>🆕 Son gelen evraklar</div>';d.son.forEach(function(e){h+='<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';});h+='</div>';}
       kats.forEach(function(k){
         h+='<div class="kat"><div>'+esc(k.ad)+' ('+k.ev.length+')</div>';
         k.ev.forEach(function(e){h+='<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';});

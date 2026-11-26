@@ -79,17 +79,18 @@ for ad in sys.argv[1:]:
         (S / "e" / f"{eid}.sifreli").write_bytes(sif(veri))
         dizin["evrak"][eid] = {"tur": tur}
         yol = [y for y in (e.get("yol") or "").split(" / ") if y]
-        kl = "Evraklar"
-        if len(yol) >= 3 and yol[1] == "Tüm Evraklar": kl = yol[2]
-        elif len(yol) >= 2 and "Son 20" in yol[1]: kl = "Son eklenen evraklar"
         isim = e.get("ad") or ""
+        # klasör = evrak türü (tarih atılmış ad); ekler ana evrakın türüne gider
+        taban = yol[-2] if (re.fullmatch(r"Ek \d+", isim) and len(yol) >= 2) else isim
+        kl = re.sub(r"\s*\d{2}/\d{2}/\d{4}\s*$", "", taban).strip() or "Diğer"
         if re.fullmatch(r"Ek \d+", isim) and len(yol) >= 2: isim = yol[-2] + " — " + isim
         klasor.setdefault(kl, []).append({"id": eid, "ad": isim, "tur": tur, "tarih": tarih(isim) or (tarih(yol[-2]) if len(yol) > 1 else "")})
         n += 1
     kls = []
     for kad, v in klasor.items():
         v.sort(key=sk, reverse=True); kls.append({"ad": kad, "evraklar": v})
-    kls.sort(key=lambda x: (x["ad"] == "Son eklenen evraklar", x["ad"]))
+    ONCE = ["Dava Dilekçesi", "Cevap Dilekçesi", "Cevaba Cevap Dilekçesi", "İkinci Cevap Dilekçesi", "Duruşma Zaptı", "Ön İnceleme Zaptı", "Tensip Zaptı", "Bilirkişi Raporu", "Bilirkişi Ek Raporu", "Karar", "Gerekçeli Karar"]
+    kls.sort(key=lambda x: (ONCE.index(x["ad"]) if x["ad"] in ONCE else 99, -len(x["evraklar"]), x["ad"]))
     tum = sorted([x for kk in kls for x in kk["evraklar"]], key=sk, reverse=True)
     dava = {kk: meta.get(kk, "") for kk in ("esas", "birim", "konu", "grup", "gkod", "durusma", "taraflar", "ozet")}
     dava["baslik"] = meta.get("baslik") or (meta.get("birim", "") + " " + meta.get("esas", "")).strip()

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-26T08:29+03:00",
+ "olusturma": "2026-11-26T10:01+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -812,15 +812,15 @@
    "kanal": "LVL MAX",
    "seri": "Gündem + Tarih",
    "karar": "SÜRDÜR",
-   "neden": "tutma oranı %12",
-   "olculen": 8,
-   "erken": 6,
-   "medyan_48sa": 2,
-   "tutma_orani": 12,
+   "neden": "tutma oranı %22",
+   "olculen": 9,
+   "erken": 5,
+   "medyan_48sa": 3,
+   "tutma_orani": 22,
    "izlenme_yuzde": null,
    "en_iyi": {
-    "baslik": "Asfalttan Çıkıp Tarlaya ve Ormana Daldı! Polis Motorundan İnanılmaz Kaçış #shorts",
-    "i48": 6818
+    "baslik": "Polise Çalım Atıp BMX Bisikletini Geri Aldı ve Kaçtı! #shorts",
+    "i48": 41119
    }
   },
   {
@@ -918,14 +918,14 @@
  ],
  "esikler": {
   "Ancient Studio": 192,
-  "Ömür Dediğin": 50,
-  "Kozmos Lab": 95,
-  "Yolu Seç !": 262,
-  "Kozmos Lab TR": 215,
-  "LVL MAX": 455,
-  "Nasıl Yapıldı": 135,
   "Estudio Antiguo": 136,
-  "Antik Stüdyo": 637
+  "Ömür Dediğin": 50,
+  "LVL MAX": 3196,
+  "Kozmos Lab TR": 215,
+  "Nasıl Yapıldı": 135,
+  "Kozmos Lab": 95,
+  "Antik Stüdyo": 637,
+  "Yolu Seç !": 262
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1126,8 +1126,8 @@
     "medyan": 4
    },
    "18:00": {
-    "n": 1,
-    "medyan": 0
+    "n": 2,
+    "medyan": 20560
    },
    "22:00": {
     "n": 1,
@@ -1706,7 +1706,7 @@
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 3 tanesi tuttu (eşik 215 izlenme / 48 sa).",
-  "LVL MAX: son 6 Short'tan 1 tanesi tuttu (eşik 455 izlenme / 48 sa).",
+  "LVL MAX: son 6 Short'tan 2 tanesi tuttu (eşik 3196 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 3 Short'tan 2 tanesi tuttu (eşik 50 izlenme / 48 sa).",
@@ -1732,7 +1732,7 @@
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 167 izlenme, 3 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",
   "Nasıl Yapıldı: en iyi yayın saati şimdilik 19:00 (medyan 674 izlenme, 2 video).",
-  "LVL MAX: en iyi yayın saati şimdilik 12:00 (medyan 4 izlenme, 2 video).",
+  "LVL MAX: en iyi yayın saati şimdilik 18:00 (medyan 20560 izlenme, 2 video).",
   "Ancient Studio: tutan Short'lar ortalama %66 izleniyor, tutmayanlar %53 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %44 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %59 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
@@ -1754,6 +1754,11 @@
  "en_iyi": [
   {
    "kanal": "LVL MAX",
+   "baslik": "Polise Çalım Atıp BMX Bisikletini Geri Aldı ve Kaçtı! #shorts",
+   "i48": 41119
+  },
+  {
+   "kanal": "LVL MAX",
    "baslik": "Asfalttan Çıkıp Tarlaya ve Ormana Daldı! Polis Motorundan İnanılmaz Kaçış #shorts",
    "i48": 6818
   },
@@ -1771,11 +1776,6 @@
    "kanal": "Antik Stüdyo",
    "baslik": "Son Akşam Yemeği neden yok oluyor? 🍞",
    "i48": 2687
-  },
-  {
-   "kanal": "Antik Stüdyo",
-   "baslik": "Mona Lisa'ya kaş çizdik 🖌️ #shorts",
-   "i48": 2394
   }
  ],
  "en_zayif": [

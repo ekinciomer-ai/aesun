@@ -181,3 +181,45 @@ async def uyap_yukle(request: Request, t: str = "", ad: str = "", p: int = -1, s
     if son:
         (k / "TAMAM").write_text(str(p + 1))
     return JSONResponse({"ok": True, "p": p, "boy": len(govde)}, headers=bas)
+
+
+# ---- Grup filmleri (26.11.2026) ----
+# Video, dava anahtarıyla 1 MiB'lık parçalar hâlinde şifreli durur: /davalar/film/<gkod>__<fid>/<00000>.sifreli + meta.sifreli.
+# Grup listesi: /davalar/film/<gkod>.sifreli (JSON). Akış parça parça çözülür; açık video diske yazılmaz.
+from fastapi.responses import StreamingResponse
+FID_RE = re.compile(r"^[a-z0-9_]{1,40}$")
+
+
+def _grup_izin(gkod: str, request: Request):
+    izin = _izinli_gruplar(request)
+    if not GKOD_RE.match(gkod) or (izin is not None and gkod not in izin):
+        raise HTTPException(404, "yok")
+
+
+@router.get("/v1/davalar/grup/{gkod}/filmler")
+def filmler(gkod: str, request: Request):
+    _grup_izin(gkod, request)
+    p = KOK / "film" / f"{gkod}.sifreli"
+    if not p.is_file():
+        return JSONResponse({"filmler": []}, headers=BAS)
+    return JSONResponse(json.loads(_coz(p)), headers=BAS)
+
+
+@router.get("/v1/davalar/grup/{gkod}/film/{fid}")
+def film(gkod: str, fid: str, request: Request):
+    _grup_izin(gkod, request)
+    if not FID_RE.match(fid):
+        raise HTTPException(404, "yok")
+    k = KOK / "film" / f"{gkod}__{fid}"
+    if not (k / "meta.sifreli").is_file():
+        raise HTTPException(404, "yok")
+    meta = json.loads(_coz(k / "meta.sifreli"))
+    a = AESGCM(ANAHTAR.read_bytes()[:32])
+
+    def akis():
+        for i in range(int(meta["parca"])):
+            b = (k / f"{i:05d}.sifreli").read_bytes()
+            yield a.decrypt(b[:12], b[12:], None)
+    return StreamingResponse(akis(), media_type="video/mp4",
+                             headers={**BAS, "Content-Length": str(int(meta["boy"])),
+                                      "Content-Disposition": f'inline; filename="{fid}.mp4"'})

@@ -77,6 +77,7 @@ mark{background:#FDE68A;color:#000}
     <button data-s="y">Yorumlar</button>
     <button data-s="x">Bekleyen İşler</button>
     <button data-s="k">Karşı Avukat Gözü</button>
+    <button data-s="f">Film</button>
   </div>
   <div id="dsy"><input class="ara" id="ara" type="search" placeholder="Dava, taraf ya da evrak ara…" autocomplete="off">
   <div id="liste"></div></div>
@@ -84,6 +85,7 @@ mark{background:#FDE68A;color:#000}
   <div id="yrm" class="notpane"><div class="bilgi">Yorumlar yükleniyor…</div></div>
   <div id="bek" class="notpane"><div class="bilgi">Bekleyen işler yükleniyor…</div></div>
   <div id="kar" class="notpane"><div class="bilgi">Karşı avukat gözü yükleniyor…</div></div>
+  <div id="flm" class="notpane"><div class="bilgi">Film listesi yükleniyor…</div></div>
 </div>
 </main>
 <div id="gor"><div class="ust"><b id="gAd"></b><a id="gYeni" target="_blank" rel="noopener">Yeni sekme</a><a id="gIndir" download>İndir</a><button id="gKapat">Kapat</button></div><div class="gov" id="gGov"></div></div>
@@ -110,8 +112,8 @@ mark{background:#FDE68A;color:#000}
   var GRUPLAR=[], GRUP=null, SEK='d';   // GRUP = gkod ya da null (klasör ekranı)
   var EL={ik:{samet:'⚖️',depolama:'🔋'}};
   function grupBul(gk){for(var i=0;i<GRUPLAR.length;i++)if(GRUPLAR[i].gkod===gk)return GRUPLAR[i];return null;}
-  var SEKAD={d:'dosyalar',b:'brifing',y:'yorumlar',x:'bekleyen',k:'karsi'};
-  var SEKREV={dosyalar:'d',brifing:'b',yorumlar:'y',bekleyen:'x',karsi:'k'};
+  var SEKAD={d:'dosyalar',b:'brifing',y:'yorumlar',x:'bekleyen',k:'karsi',f:'film'};
+  var SEKREV={dosyalar:'d',brifing:'b',yorumlar:'y',bekleyen:'x',karsi:'k',film:'f'};
 
   // ---------- klasör ekranı ----------
   function klasorleriCiz(){
@@ -161,13 +163,15 @@ mark{background:#FDE68A;color:#000}
     var g=grupBul(GRUP); if(!g){GRUP=null;return ciz();}
     kl.hidden=true; gg.hidden=false; bas.textContent=g.grup;
     alt.textContent=g.davalar.length+' dava · '+g.evrak+' evrak'+(g.guncel?' · güncelleme '+g.guncel:'');
-    ['d','b','y','x','k'].forEach(function(s){document.querySelector('.sek button[data-s="'+s+'"]').classList.toggle('on',s===SEK);});
+    ['d','b','y','x','k','f'].forEach(function(s){document.querySelector('.sek button[data-s="'+s+'"]').classList.toggle('on',s===SEK);});
     document.getElementById('dsy').classList.toggle('gizli',SEK!=='d');
     document.getElementById('brf').classList.toggle('on',SEK==='b');
     document.getElementById('yrm').classList.toggle('on',SEK==='y');
     document.getElementById('bek').classList.toggle('on',SEK==='x');
     document.getElementById('kar').classList.toggle('on',SEK==='k');
+    document.getElementById('flm').classList.toggle('on',SEK==='f');
     if(SEK==='d'){listeCiz();}
+    else if(SEK==='f'){filmGoster(g);}
     else{notGoster(g,SEK);}
     window.scrollTo(0,0);
   }
@@ -286,6 +290,41 @@ mark{background:#FDE68A;color:#000}
   document.getElementById('bek').addEventListener('click',notTik);
   document.getElementById('kar').addEventListener('click',notTik);
   gov.addEventListener('click',function(ev){var b=ev.target.closest('.ev');if(b){onceki={h:gov.innerHTML,ad:document.getElementById('gAd').textContent};ac(b.dataset.id,b.dataset.ad,b.dataset.tur,+b.dataset.ti||0);}});
+
+  // ---------- film (grup animasyonu) ----------
+  // Video sunucuda şifreli parçalar hâlinde durur; yetki başlığıyla bir kez indirilir, tarayıcıda oynatılır (diske yazılmaz).
+  var FILM={}, FURL={};
+  function boyut(b){return (b/1048576).toFixed(0)+' MB';}
+  function filmGoster(g){
+    var el=document.getElementById('flm');
+    if(FILM[g.gkod]){filmCiz(el,g);return;}
+    el.innerHTML='<div class="bilgi">Film listesi yükleniyor…</div>';
+    al('grup/'+encodeURIComponent(g.gkod)+'/filmler',g.ti).then(function(r){return r.json();}).then(function(j){FILM[g.gkod]=j.filmler||[];filmCiz(el,g);})
+    .catch(function(e){el.innerHTML='<div class="bilgi">Film listesi alınamadı: '+esc(e.message)+'</div>';});
+  }
+  function filmCiz(el,g){
+    var L=FILM[g.gkod];
+    if(!L.length){el.innerHTML='<div class="bilgi">Bu klasör için henüz film eklenmedi.</div>';return;}
+    el.innerHTML=L.slice().reverse().map(function(f){
+      return '<div class="kart acik" style="padding:12px 14px"><b>'+esc(f.baslik)+'</b><small style="display:block;color:var(--s);margin:2px 0 8px">'+esc([f.tarih,f.sure,boyut(f.boy)].filter(Boolean).join(' · '))+'</small>'
+        +(f.aciklama?'<div class="ozet">'+esc(f.aciklama)+'</div>':'')
+        +'<div class="fv" data-f="'+esc(f.fid)+'"><button class="kanit" data-oynat="'+esc(f.fid)+'">▶ Oynat ('+boyut(f.boy)+' indirilir)</button></div></div>';
+    }).join('');
+    L.forEach(function(f){if(FURL[g.gkod+'|'+f.fid])filmKoy(el,f.fid,FURL[g.gkod+'|'+f.fid]);});
+  }
+  function filmKoy(el,fid,u){var k=el.querySelector('.fv[data-f="'+fid+'"]');if(k)k.innerHTML='<video controls playsinline preload="metadata" style="width:100%;border-radius:10px;background:#000"></video><div style="margin-top:6px"><a href="'+u+'" download="'+fid+'.mp4">İndir</a></div>',k.firstChild.src=u;}
+  document.getElementById('flm').addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-oynat]');if(!b)return;
+    var g=grupBul(GRUP),fid=b.dataset.oynat,el=document.getElementById('flm'),f=(FILM[g.gkod]||[]).filter(function(x){return x.fid===fid;})[0];
+    b.disabled=true;b.textContent='İndiriliyor… %0';
+    ANAHTARLAR[g.ti].then(function(k){return fetch(API+'grup/'+encodeURIComponent(g.gkod)+'/film/'+fid,{headers:{'X-AE-Anahtar':k},cache:'no-store'});}).then(function(r){
+      if(!r.ok)throw new Error(r.status===401?'Yetkili girişi gerekli':'HTTP '+r.status);
+      var top=+r.headers.get('Content-Length')||(f&&f.boy)||0,al_=0,par=[],rd=r.body.getReader();
+      function oku(){return rd.read().then(function(x){if(x.done)return new Blob(par,{type:'video/mp4'});par.push(x.value);al_+=x.value.length;if(top)b.textContent='İndiriliyor… %'+Math.floor(al_*100/top);return oku();});}
+      return oku();
+    }).then(function(bl){var u=URL.createObjectURL(bl);FURL[g.gkod+'|'+fid]=u;filmKoy(el,fid,u);var v=el.querySelector('.fv[data-f="'+fid+'"] video');if(v)v.play().catch(function(){});})
+    .catch(function(e){b.disabled=false;b.textContent='▶ Tekrar dene ('+e.message+')';});
+  });
 
   // ---------- history / geri tuşu ----------
   window.addEventListener('popstate',function(){

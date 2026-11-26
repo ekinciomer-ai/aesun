@@ -49,6 +49,9 @@ docker info >/dev/null 2>&1 || { systemctl restart docker >/dev/null 2>&1; sleep
 docker info >/dev/null 2>&1 || log "HATA docker çalışmıyor: $(journalctl -u docker -n 3 --no-pager 2>/dev/null | tail -n 2 | tr '\n' ' ' | cut -c1-300)"
 # 4b) uzun imaj derlemesinden önce ara nabız (sunucu rig'in yaşadığını ve hangi adımda olduğunu görsün)
 DENEMESIZ=1 bash $K/isci.sh
+# 4c) disk: kutu için en az 2 GB boş yer (HiveOS USB'leri küçük); yoksa derleme yapılmaz, rapora yazılır
+BOS=$(df -BM --output=avail /var/lib 2>/dev/null | tail -n1 | tr -dc 0-9)
+[ -n "$BOS" ] && [ "$BOS" -lt 2000 ] && [ "$(cat imaj_surum 2>/dev/null)" != "$(sha256sum Dockerfile | cut -c1-12)" ] && { log "HATA disk dolu: ${BOS} MB boş, kutu için 2000 MB gerekli"; docker builder prune -af >/dev/null 2>&1; }
 # 5) kutu imajı (Dockerfile değişince yeniden)
 H=$(sha256sum Dockerfile | cut -c1-12)
 if [ "$(cat imaj_surum 2>/dev/null)" != "$H" ]; then

@@ -118,7 +118,7 @@ def brifing(request: Request):
 
 
 NOTLAR = {"brifing", "yorumlar"}
-GRUP_NOTLARI = {"brifing", "yorumlar", "bekleyen"}
+GRUP_NOTLARI = {"brifing", "yorumlar", "bekleyen", "karsi"}
 GKOD_RE = re.compile(r"^[a-z0-9_]{1,30}$")
 
 
@@ -136,7 +136,7 @@ def not_oku(ad: str, request: Request):
 
 @router.get("/v1/davalar/grup/{gkod}/not/{ad}")
 def grup_not(gkod: str, ad: str, request: Request):
-    """Grup bazlı not (brifing / yorumlar / bekleyen), markdown şifreli: /davalar/<gkod>_<ad>.sifreli.
+    """Grup bazlı not (brifing / yorumlar / bekleyen / karsi), markdown şifreli: /davalar/<gkod>_<ad>.sifreli.
     Yetki: tam yetkili her grubu; grup yetkilisi yalnız kendi grubunu okur.
     Samet brifing/yorumlar için eski genel dosyalara (brifing.sifreli / yorumlar.sifreli) geri dönülür."""
     izin = _izinli_gruplar(request)   # None = tümü; set = yalnız bu gruplar; aksi 401

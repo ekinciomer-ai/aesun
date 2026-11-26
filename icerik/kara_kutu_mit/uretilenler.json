@@ -126,7 +126,7 @@
    "mit_no": 18,
    "render_no": 19,
    "kaynak": "Yargıtay 4. HD E.2021/25417 K.2023/3802 (onama; otobüs ani fren, yolcu %15 malul, plakası tespit edilemeyen araç %75 kusurlu, 82.818,52 TL) https://lexara.com.tr/karar/21247411",
-   "ses": "V1: cikti/KK_MIT_18_C__V1.mp3 hazır; V2-V7 → bekleyen_tts/KK_MIT_18_D.json. Birleştirmede KK_MIT_18__V1..V7 adına kopyala.",
+   "ses": "V1: KK_MIT_18_C, V2-V4: KK_MIT_18_D (hazır); V5-V7 → bekleyen_tts/KK_MIT_18_E.json. Birleştirmede KK_MIT_18__V1..V7 adına kopyala.",
    "sahne": "S[6].upd4 (otobüs + öne kıran araç, hazır, test edildi)",
    "spec": "bolumler_mit18.json (N=19)",
    "kart": "bekleyen_kart/KK_MIT_18_PLAKASIZ_ARAC.json"
@@ -165,7 +165,7 @@
    "sahne": "YENİ gerekli: ilçe yolu + mıcır yaması + çelik bariyer"
   }
  ],
- "ertelenen_not": "26.11.2026 01:05: #17 teslim edildi. #18 V2-V7 (bekleyen_tts/KK_MIT_18_D.json), ardından #19-21 (bekleyen_tts/KK_MIT_19-21.json) 26.11 11:00 sonrası kuyruğa; önce KK_MIT_18_D.",
+ "ertelenen_not": "26.11.2026 13:20: #18 V5-V7 eksik (bekleyen_tts/KK_MIT_18_E.json). Sırada önce KK_MIT_18_E, sonra #19-21.",
  "son_gun": "2026-11-26: #17 teslim (01:05).",
  "iptal": [
   {

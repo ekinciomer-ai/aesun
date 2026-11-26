@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-26T05:02+03:00",
+ "olusturma": "2026-11-26T05:12+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -755,7 +755,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 1,
-   "medyan_48sa": 154,
+   "medyan_48sa": 155,
    "tutma_orani": 0,
    "izlenme_yuzde": 68,
    "en_iyi": {
@@ -905,14 +905,14 @@
   }
  ],
  "esikler": {
-  "Nasıl Yapıldı": 135,
   "Ancient Studio": 192,
-  "Antik Stüdyo": 637,
-  "Kozmos Lab": 95,
-  "Kozmos Lab TR": 215,
   "Yolu Seç !": 262,
-  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 215,
+  "Kozmos Lab": 95,
+  "Antik Stüdyo": 637,
   "LVL MAX": 455,
+  "Ömür Dediğin": 50,
+  "Nasıl Yapıldı": 135,
   "Estudio Antiguo": 136
  },
  "saatler": {
@@ -923,11 +923,11 @@
    },
    "02:00": {
     "n": 2,
-    "medyan": 917
+    "medyan": 927
    },
    "09:00": {
     "n": 1,
-    "medyan": 719
+    "medyan": 759
    },
    "12:00": {
     "n": 4,
@@ -1025,7 +1025,7 @@
    },
    "12:00": {
     "n": 2,
-    "medyan": 154
+    "medyan": 155
    },
    "13:00": {
     "n": 3,

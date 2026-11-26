@@ -198,7 +198,7 @@ for jf in sorted(glob.glob(os.path.join(KQ, "*.json"))):
             sonuc.append({"kod": kod, "durum": "hesap sınırı: sırada", **{k: it.get(k) for k in ("kanal", "baslik", "publishAt", "seri", "ureten", "tur")}}); continue
         _pl = _plan_sayim()
         _t = _dt.fromisoformat(it["publishAt"]).astimezone(_IST)
-        if _t < _dt.now(_IST):
+        if not it.get("hemen_yayin") and _t < _dt.now(_IST):
             _t = _dt.now(_IST).replace(second=0, microsecond=0) + _td(hours=2)
         _eski_pa = it["publishAt"]
         # Tarihe bağlı içerik ("bu gece", maç günü, gök olayı) kuyruk json'unda "tarih_sabit": true taşır; günü kaydırılmaz.

@@ -1,0 +1,42 @@
+name: Gizli seslendirme (şifreli girdi/çıktı)
+# sunucu/gizli_ses/is.sifreli (sunucu açık anahtarıyla şifreli) eklenince sunucuda Gemini/Charon ile seslendirir.
+# Çıktı yalnız alici.pem sahibinin açabileceği şekilde şifreli olarak sunucu/gizli_ses/cikti.sifreli'ye yazılır; is.sifreli silinir.
+on:
+  push:
+    branches: [main]
+    paths: ['sunucu/gizli_ses/is.sifreli']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: tts-kuyruk, cancel-in-progress: false }
+jobs:
+  ses:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sunucuda şifreli seslendir
+        env:
+          ANAHTAR: ${{ secrets.SUNUCU_SSH }}
+          ADRES: ${{ secrets.SUNUCU_ADRES }}
+        run: |
+          [ -f sunucu/gizli_ses/is.sifreli ] || { echo "iş yok"; exit 0; }
+          mkdir -p ~/.ssh /tmp/pk/kutuphane
+          printf '%s' "$ANAHTAR" | python3 -c "import sys,re; t=sys.stdin.read().replace(chr(13),''); m=re.search(r'-----BEGIN ([A-Z ]+)-----(.*?)-----END \\1-----', t, re.S); g=re.sub(r'\\s+','',m.group(2)); print('-----BEGIN '+m.group(1)+'-----'); [print(g[i:i+70]) for i in range(0,len(g),70)]; print('-----END '+m.group(1)+'-----')" > ~/.ssh/k
+          chmod 600 ~/.ssh/k
+          cp sunucu/islem_tts_kuyruk.sh sunucu/tts/uret.py sunucu/gizli_ses/calistir.sh sunucu/gizli_ses/is.sifreli sunucu/gizli_ses/alici.pem /tmp/pk/
+          cp sunucu/tts/kutuphane/SES_KUTUPHANESI.json /tmp/pk/kutuphane/
+          tar czf /tmp/paket.tgz -C /tmp/pk .
+          O="-i $HOME/.ssh/k -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          ssh $O root@$ADRES "rm -rf /tmp/gs_k && mkdir -p /tmp/gs_k && chmod 700 /tmp/gs_k && tar xzf - -C /tmp/gs_k && bash /tmp/gs_k/calistir.sh" < /tmp/paket.tgz 2>&1 | grep '^NOT:' | sed 's/^NOT: *//' | while IFS= read -r l; do echo "::notice::$l"; done
+          scp $O root@$ADRES:/tmp/gs_k/cikti.sifreli sunucu/gizli_ses/cikti.sifreli || echo "::warning::çıktı alınamadı"
+          ssh $O root@$ADRES "rm -rf /tmp/gs_k" || true
+          rm -f ~/.ssh/k
+          git rm -q --cached sunucu/gizli_ses/is.sifreli 2>/dev/null; rm -f sunucu/gizli_ses/is.sifreli
+      - name: Kaydet
+        run: |
+          git config user.name "aesun-yayin"; git config user.email "yayin@aksarayenerji.net"
+          git add -A sunucu/gizli_ses
+          git diff --cached --quiet && exit 0
+          git commit -qm "Gizli seslendirme: şifreli çıktı $(TZ=Europe/Istanbul date +'%d.%m %H:%M')"
+          for i in 1 2 3; do git pull -q --rebase -X theirs origin main && git push -q origin HEAD:main && break; git rebase --abort 2>/dev/null || true; sleep 5; done

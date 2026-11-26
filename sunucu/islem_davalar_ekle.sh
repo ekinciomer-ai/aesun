@@ -38,11 +38,15 @@ sunum = Path("/sunum"); ekle = Path("/ac/ekle")
 mevcut = json.loads(coz(sunum / "dizin.sifreli"))
 mevcut.setdefault("davalar", []); mevcut.setdefault("evrak", {})
 ek = json.loads((ekle / "dizin_ek.json").read_text())
-# 2) mevcut davalara grup etiketi (esas eşleşmesiyle)
-grup_ata = ek.get("grup_ata", {})
+# 2) mevcut davalara grup etiketi + grup kodu (esas/başlık içinde kalıp eşleşmesiyle; biçim farkına dayanıklı)
+grup_ata = ek.get("grup_ata", {})   # {"<kalip>": {"grup": "...", "gkod": "..."}}
 for d in mevcut["davalar"]:
-    g = grup_ata.get(str(d.get("esas", "")))
-    if g: d["grup"] = g
+    hedef = (str(d.get("esas", "")) + " " + str(d.get("baslik", "")))
+    for kalip, info in grup_ata.items():
+        if kalip and kalip in hedef:
+            if info.get("grup"): d["grup"] = info["grup"]
+            if info.get("gkod"): d["gkod"] = info["gkod"]
+            break
 # 3) yeni davaları ekle (esas'a göre tekilleştir; varsa güncelle, yoksa ekle)
 esas_idx = {str(d.get("esas", "")): i for i, d in enumerate(mevcut["davalar"])}
 eklenen = 0

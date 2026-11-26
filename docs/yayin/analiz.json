@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-26T13:53+03:00",
+ "olusturma": "2026-11-26T14:13+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -644,11 +644,11 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Bu Matematik Hayatında Nerede?",
    "karar": "ARTIR",
-   "neden": "videoların %70'i tuttu (eşik 215 izlenme / 48 sa)",
+   "neden": "videoların %80'i tuttu (eşik 215 izlenme / 48 sa)",
    "olculen": 10,
    "erken": 1,
    "medyan_48sa": 411,
-   "tutma_orani": 70,
+   "tutma_orani": 80,
    "izlenme_yuzde": 41,
    "en_iyi": {
     "baslik": "Şarkı neden 10 kat küçülür? MP3'ün matematiği 🎧",
@@ -755,7 +755,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 2,
-   "medyan_48sa": 156,
+   "medyan_48sa": 155,
    "tutma_orani": 0,
    "izlenme_yuzde": 68,
    "en_iyi": {
@@ -917,15 +917,15 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 637,
-  "Kozmos Lab": 95,
-  "Estudio Antiguo": 136,
-  "Ancient Studio": 192,
-  "Yolu Seç !": 262,
-  "LVL MAX": 3204,
   "Kozmos Lab TR": 215,
+  "Antik Stüdyo": 637,
+  "Yolu Seç !": 262,
   "Nasıl Yapıldı": 135,
-  "Ömür Dediğin": 50
+  "LVL MAX": 3204,
+  "Ancient Studio": 192,
+  "Kozmos Lab": 95,
+  "Ömür Dediğin": 50,
+  "Estudio Antiguo": 136
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1037,7 +1037,7 @@
    },
    "12:00": {
     "n": 2,
-    "medyan": 156
+    "medyan": 155
    },
    "13:00": {
     "n": 3,
@@ -1697,7 +1697,7 @@
   "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
-  "Kozmos Lab TR: son 6 Short'tan 3 tanesi tuttu (eşik 215 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 6 Short'tan 4 tanesi tuttu (eşik 215 izlenme / 48 sa).",
   "LVL MAX: son 6 Short'tan 2 tanesi tuttu (eşik 3204 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 2 Short'tan 1 tanesi tuttu (eşik 135 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
@@ -1713,7 +1713,7 @@
   "Kozmos Lab · Energy Sources: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Ay'ın Halleri: ARTIR — videoların %67'i tuttu (eşik 215 izlenme / 48 sa).",
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
-  "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %70'i tuttu (eşik 215 izlenme / 48 sa).",
+  "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %80'i tuttu (eşik 215 izlenme / 48 sa).",
   "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 215 izlenme / 48 sa).",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",

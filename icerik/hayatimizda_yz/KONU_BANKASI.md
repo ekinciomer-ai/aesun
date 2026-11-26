@@ -8,7 +8,7 @@ Durum: [ ] sırada · [x] KOD teslim · [-] atlandı (neden)
 - [x] KZ_HAYAT_01 · Arabada · 32 yıllık Jeep emisyon testini 3 dolarlık kartla geçti (A)
 - [x] KZ_HAYAT_02 · Otelde · Odada gizli kamera taraması, 19 cihaz, duman dedektörü kamera çıktı (A)
 - [x] KZ_HAYAT_03_COCUK · Çocuğumuzla · Disleksili oğlu için kendi yapay zekâ öğretmenini yapan anne (B: Scientific American)
-- [~] KZ_HAYAT_04_AILE (üretimde, ses P2-P3 26.11 11:05'te; günlük görev ATLASIN) · Ailede · Annesinin iPhone'unda 2 yıldır çıkış yapılmamış eski hesap + konumu 15 dk'da bir okuyan QR uygulaması (A) — herkes kendi telefonunda yapabilir
+- [x] KZ_HAYAT_04_AILE · Ailede · Annesinin iPhone'unda 2 yıldır çıkış yapılmamış eski hesap + konumu 15 dk'da bir okuyan QR uygulaması (A) — herkes kendi telefonunda yapabilir
 - [ ] 05 · Mutfakta · Kamerayla meyveyi tanıyıp ekranda adını gösteren akıllı tartı (ESP8266 + Pi kamera, 253 bin izlenme) (C: tiktok.com/@corecortex_uk/video/7711021287723896086) — gerçekten görüntü tanıma mı, videodan doğrula
 - [ ] 06 · Evde · Bilgisayar ısınıyor → sıcaklık monitörü → gizli kripto madencisi bulundu, 112 °C (A)
 - [ ] 07 · Şehirde · Yıllardır kapanmayan çukur: 6 fotoğraf → 3D simülasyon → belediyeye gönderildi → 2 günde kapandı (A, Hollanda)

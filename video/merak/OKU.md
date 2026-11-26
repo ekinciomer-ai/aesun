@@ -74,6 +74,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `pedal` | `mod: soru / guc / eski / sure / mac / led / ledsure / sarki / son` | Jeneratörlü bisiklet + pedal çeviren kişi, kablo, ampul (akkor/LED), 60 dk saat kadranı (dolum, ilk yarı 45 dk çentiği) |
 | `notron` | `mod: soru / kutle / cap / sikis / atom / kup / dag / insan / donus / son` | Nötron yıldızı (meridyenler, pulsar ışınları), terazi (Güneş vs mini yıldız; şeker küpü vs dağ / insan kalabalığı), 20 km ölçü + şehir silueti, küçülen Güneş, atom vs nötron yığını, şeker küpü + ton sayacı |
 | `kaynat` | `mod: soru / isi / fark / hesap / wh / telefon / sure / kayip / ipucu / son` | Cam su ısıtıcısı (su seviyesi, kabarcık, buhar), termometre (°C), Wh sütunu, ısı kaybı dalgaları, 5 telefon (sırayla dolar), 4 dk'lık kronometre (178 sn) |
+| `kacis` | `mod: soru / dunya / gunes / sikis / misket / isik / ufuk / kat / son` | Kara delik (birikim diski, kesik olay ufku çemberi, düşen/kaçan ışık parçacıkları), Dünya'dan ve Güneş'ten kaçan roket (iz + km/s sayacı), küçülen Güneş (yarıçap sayacı 695.700→3 km), misket kadar Dünya, Dünya çevresinde ışık turu (tur sayacı), 11,2 vs 299.792 km/s sütunları |
+| `buzdolabi` | `mod: soru / etiket / yil / gun / telefon / guc / motor / eski / kaynat / son` | Buzdolabı (kapakta A–G enerji etiketi, yan motor + titreşim), kWh sütunları (2020: 181 / 1990: 477), günlük dilim (0,5 kWh), 26 telefon ızgarası, LED ampuller (≈ 21 W), motor aç-kapa grafiği, 5 su ısıtıcısı |
 
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
 Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,goruntu --kareler 60,300,900` → `arac/sayfa.py` ile kontrol sayfası.
@@ -98,5 +100,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 19 (Satürn suda yüzer mi) ve 20 (Bitcoin cihazı günde kaç kWh) — 23.11.2026, Ömer isteğiyle ek üretim; yeni sahneler `saturn`, `maden`.
 - Bölüm 21 (Ay'da zıplasan kaç metre) ve 22 (Türkiye'nin elektriği için kaç km² panel) — 24.11.2026, günlük görev; yeni sahneler `zipla`, `alan`.
 - Bölüm 23 (Nötron yıldızından şeker küpü kaç ton) ve 24 (1 litre su kaynatmak kaç telefon) — 25.11.2026, günlük görev; yeni sahneler `notron`, `kaynat`.
+- Bölüm 25 (Kara delikten kaçış hızı) ve 26 (Buzdolabı günde kaç kWh) — 26.11.2026, günlük görev; yeni sahneler `kacis`, `buzdolabi`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

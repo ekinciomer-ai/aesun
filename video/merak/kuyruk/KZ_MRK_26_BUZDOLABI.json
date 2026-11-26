@@ -1,0 +1,220 @@
+{
+ "kod": "KZ_MRK_26_BUZDOLABI",
+ "no": "MERAK #26",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "BUZDOLABI GÜNDE<br><i>KAÇ kWh YER?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Buzdolabın gece gündüz çalışıyor. Peki bir günde ne kadar elektrik harcar? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "etiket",
+    "kart": 60
+   },
+   "metin": "Cevap kapağındaki enerji etiketinde yazar: bir yılda kaç kilovatsaat harcadığı.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "ENERJİ ETİKETİ: A → G 🏷️",
+     "k": "enerji"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "yil",
+    "kart": 60
+   },
+   "metin": "Avrupa Birliği verisine göre, iki bin yirmide satılan ortalama buzdolabı yılda yüz seksen bir kilovatsaat harcıyor.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "ORTALAMA · YILDA",
+     "say": 181,
+     "dec": 0,
+     "ek": " kWh",
+     "k": "yüz"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "gun",
+    "kart": 60
+   },
+   "metin": "Üç yüz altmış beş güne bölelim: günde yaklaşık yarım kilovatsaat.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "181 <em>÷</em> 365 ≈ 0,5 kWh",
+     "k": "bölelim"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 496 Wh / gün",
+     "k": "yarım"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "telefon",
+    "kart": 60
+   },
+   "metin": "Bir telefon pili yaklaşık on dokuz vatsaat. Yani her gün yirmi altı telefon dolduracak kadar.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "496 <em>÷</em> 19 ≈ 26",
+     "k": "Yani"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 26 telefon 📱",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "guc",
+    "kart": 60
+   },
+   "metin": "Güne yayarsan ortalama yirmi bir vat. İki LED ampulden biraz fazla.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "496 <em>÷</em> 24 ≈ 21 W",
+     "k": "yirmi"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 2 LED ampul 💡",
+     "k": "İki"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "motor",
+    "kart": 62
+   },
+   "metin": "Neden bu kadar az? Çünkü motoru hep çalışmaz. İçerisi soğuyunca durur, ısınınca yeniden çalışır.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "AÇ · KAPA · AÇ ❄️",
+     "k": "durur"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "eski",
+    "kart": 60
+   },
+   "metin": "Bin dokuz yüz doksanda ortalama, yılda dört yüz yetmiş yedi kilovatsaatti. Bugünkünün iki buçuk katından fazla.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1990 · YILDA",
+     "say": 477,
+     "dec": 0,
+     "ek": " kWh",
+     "k": "dört"
+    },
+    {
+     "tip": "formul",
+     "y": "477 <em>÷</em> 181 ≈ 2,6",
+     "k": "iki"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "kaynat",
+    "kart": 60
+   },
+   "metin": "Bugünkü bir günlük tüketim, beş kez bir litre su kaynatmak kadar.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ 5 × 1 L su ☕",
+     "k": "beş"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "buzdolabi",
+   "p": {
+    "mod": "son",
+    "kart": 60
+   },
+   "metin": "Cevap: günde yaklaşık yarım kilovatsaat. Senin buzdolabının etiketinde kaç yazıyor? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "≈ 0,5 kWh / gün",
+     "k": "yarım"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Buzdolabın bir günde ne kadar elektrik harcar? ❄️ #shorts",
+  "aciklama": "Avrupa Komisyonu verilerine göre 2020'de AB'de satılan buzdolabı-dondurucuların ortalama yıllık tüketimi 181 kWh. Günde: 181 ÷ 365 ≈ 0,5 kWh (≈ 496 Wh). Tipik telefon pili 5.000 mAh × 3,85 V ≈ 19 Wh → ≈ 26 telefon. Güne yayılınca ortalama ≈ 21 W; 800 lümenlik bir LED ampul ≈ 8,8 W → iki LED'den biraz fazla. Kompresör termostatla açılıp kapandığı için sürekli tam güçte çalışmaz. 1990'da satılanların ortalaması 477 kWh/yıl idi (≈ 2,6 kat). 1 litre suyu 15 °C'den kaynatmak ≈ 99 Wh (#24) → ≈ 5 kez.\n\nKendi buzdolabının yıllık tüketimi enerji etiketinde \"kWh/annum\" olarak yazar; gerçek tüketim modele, ortam sıcaklığına ve kullanıma göre değişir.\n\nSenin buzdolabının etiketinde kaç yazıyor? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Avrupa Komisyonu – Energy Efficient Products: Fridges and Freezers (1990: 477 kWh/a, 2020: 181 kWh/a, A–G etiket ölçeği); SEAI – Understanding the label on fridge-freezers (kWh/annum); Signify 8.8A19 LED veri sayfası (8,8 W, 800 lm); USGS – Specific Heat Capacity and Water (4.184 J/kg·°C).\n\n#kozmoslab #enerji #elektrik #buzdolabı #tasarruf #merak #shorts",
+  "etiketler": [
+   "buzdolabı",
+   "elektrik tüketimi",
+   "kWh",
+   "enerji etiketi",
+   "tasarruf",
+   "enerji",
+   "merak lab",
+   "kozmos lab",
+   "bilim",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "Avrupa Komisyonu – Energy Efficient Products: Fridges and Freezers (https://energy-efficient-products.ec.europa.eu/ecodesign-and-energy-label/product-list/fridges-and-freezers_en): 1990'da satılan buzdolabı-dondurucu ort. 477 kWh/a; 2020'de 181 kWh/a; A–G ölçeği 1 Mart 2021'den beri",
+  "SEAI – Understanding the label on fridge-freezers: etiketteki kWh/annum = yıllık tüketim, belirli test koşullarında",
+  "Telefon pili 5.000 mAh × 3,85 V ≈ 19 Wh (#02, #24 ile aynı varsayım)",
+  "Signify 8.8A19 LED veri sayfası: 8,8 W, 800 lm (#08, #16 ile aynı)",
+  "USGS – Specific Heat Capacity and Water: 4.184 J/kg·°C → 1 L su 15→100 °C ≈ 99 Wh (#24)"
+ ]
+}

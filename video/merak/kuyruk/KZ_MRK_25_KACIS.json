@@ -1,0 +1,217 @@
+{
+ "kod": "KZ_MRK_25_KACIS",
+ "no": "MERAK #25",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "KARA DELİKTEN KAÇMAK<br><i>NE KADAR HIZ İSTER?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kacis",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Bir kara delikten kaçmak için ne kadar hızlı olman gerekir? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "kacis",
+   "p": {
+    "mod": "dunya",
+    "kart": 57
+   },
+   "metin": "Önce Dünya. Roketin çekimden kurtulması için saniyede on bir virgül iki kilometre gerekir. Bu hızla İstanbul'dan Ankara'ya kırk saniyede varırsın.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DÜNYA'DAN KAÇIŞ",
+     "say": 11.2,
+     "dec": 1,
+     "ek": " km/s",
+     "k": "on"
+    },
+    {
+     "tip": "etiket",
+     "y": "İstanbul–Ankara ≈ 40 sn 🚗",
+     "k": "İstanbul'dan"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "kacis",
+   "p": {
+    "mod": "gunes",
+    "kart": 57
+   },
+   "metin": "Güneş'ten kaçmak içinse saniyede altı yüz on yedi kilometre. Dünya'nın elli beş katı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "GÜNEŞ'TEN KAÇIŞ",
+     "say": 617,
+     "dec": 0,
+     "ek": " km/s",
+     "k": "altı"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 55 × Dünya",
+     "k": "elli"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "kacis",
+   "p": {
+    "mod": "sikis",
+    "kart": 57
+   },
+   "metin": "Şimdi Güneş'i sıkıştıralım. Yarıçapı yedi yüz bin kilometreden üç kilometreye inerse, kara delik olur.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "695.700 km <em>→</em> 3 km",
+     "k": "yedi"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 230.000 kat küçülür",
+     "k": "kara"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "kacis",
+   "p": {
+    "mod": "misket",
+    "kart": 57
+   },
+   "metin": "Dünya'yı aynı şekilde sıkıştırsak, yarıçapı dokuz milimetre olurdu. Bir misket kadar.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DÜNYA KARA DELİK OLSA",
+     "say": 9,
+     "dec": 0,
+     "ek": " mm",
+     "k": "dokuz"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ bir misket 🔵",
+     "k": "misket"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "kacis",
+   "p": {
+    "mod": "isik",
+    "kart": 57
+   },
+   "metin": "Işık saniyede üç yüz bin kilometre gider. Bir saniyede Dünya'nın çevresini yedi buçuk kez dolanır.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "IŞIK HIZI",
+     "say": 299792,
+     "dec": 0,
+     "on": "≈ ",
+     "ek": " km/s",
+     "k": "üç"
+    },
+    {
+     "tip": "etiket",
+     "y": "1 sn = 7,5 tur 🌍",
+     "k": "yedi"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "kacis",
+   "p": {
+    "mod": "ufuk",
+    "kart": 62
+   },
+   "metin": "Kara deliğin sınırına olay ufku denir. Orada kaçış hızı tam ışık hızına eşittir.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "kaçış hızı <em>=</em> ışık hızı",
+     "k": "kaçış"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "kacis",
+   "p": {
+    "mod": "kat",
+    "kart": 66
+   },
+   "metin": "Bu, Dünya'dan kaçış hızının yaklaşık yirmi yedi bin katı.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "299.792 <em>÷</em> 11,2 ≈ 27.000",
+     "k": "yirmi"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "kacis",
+   "p": {
+    "mod": "son",
+    "kart": 57
+   },
+   "metin": "Cevap: ışıktan hızlı olman gerekirdi. Hiçbir şey ışıktan hızlı gidemez, bu yüzden olay ufkunu geçen geri dönemez. Sen ne tahmin etmiştin? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "ışıktan hızlı ❌",
+     "k": "ışıktan"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Kara delikten kaçmak için ne kadar hızlı olmalısın? 🕳️ #shorts",
+  "aciklama": "Dünya'dan kaçmak için bir roket saniyede 11,2 km hıza çıkmalı (NASA). Güneş'ten kaçmak için 617,6 km/s gerekir, yani Dünya'nın yaklaşık 55 katı. Güneş'in kütlesi yarıçapı yaklaşık 3 km'lik bir küreye, Dünya'nınki 9 mm'lik bir küreye sıkıştırılsaydı, kaçış hızı ışık hızına (≈ 299.792 km/s) ulaşırdı: işte kara delik. Kara deliğin sınırı olan olay ufkunda kaçış hızı ışık hızına eşittir; hiçbir şey ışıktan hızlı gidemediği için oradan geri dönüş yoktur.\n\nKarşılaştırmalar: İstanbul–Ankara karayolu ≈ 450 km → 11,2 km/s ile ≈ 40 sn. Dünya'nın ekvator çevresi ≈ 40.075 km → ışık 1 saniyede ≈ 7,5 tur. 299.792 ÷ 11,2 ≈ 27.000 kat.\n\nSenin tahminin neydi? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçekli değildir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA Goddard – Imagine the Universe: Black Holes (11,2 km/s; Dünya 9 mm, Güneş ≈ 3 km; Schwarzschild yarıçapı); NASA NSSDC Sun Fact Sheet (kaçış hızı 617,6 km/s, Dünya 11,19 km/s, Güneş yarıçapı 695.700 km); NASA – What Are Black Holes? (olay ufku); Chandra (Harvard-Smithsonian) Black Hole Primer (Dünya → misket büyüklüğü); NIST – ışık hızı 299.792.458 m/s; NASA Earth Fact Sheet (ekvator yarıçapı 6.378 km).\n\n#kozmoslab #karadelik #uzay #astronomi #bilim #merak #shorts",
+  "etiketler": [
+   "kara delik",
+   "kaçış hızı",
+   "olay ufku",
+   "ışık hızı",
+   "uzay",
+   "astronomi",
+   "bilim",
+   "merak lab",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA Goddard – Imagine the Universe: Black Holes (https://imagine.gsfc.nasa.gov/science/objects/black_holes1.html): roket 11,2 km/s; Dünya kütlesi 9 mm yarıçapa sıkışsa kaçış hızı ışık hızı; Güneş için yaklaşık 3 km",
+  "NASA NSSDC Sun Fact Sheet (https://nssdc.gsfc.nasa.gov/planetary/factsheet/sunfact.html): kaçış hızı Güneş 617,6 km/s, Dünya 11,19 km/s, oran 55,2; Güneş yarıçapı 695.700 km",
+  "NASA – What Are Black Holes? (https://www.nasa.gov/black-holes/what-are-black-holes/): olay ufkunda kaçış hızı ışık hızını aşar",
+  "Chandra X-ray Center – Black Hole Primer: Dünya'yı kara delik yapmak için kütlesi misket büyüklüğünde bir bölgeye sıkıştırılmalı",
+  "NIST CODATA: ışık hızı 299.792.458 m/s (tanım)",
+  "NASA Earth Fact Sheet: ekvator yarıçapı 6.378 km → çevre ≈ 40.075 km; İstanbul–Ankara karayolu ≈ 450 km (#03, #11 ile aynı karşılaştırma)"
+ ]
+}

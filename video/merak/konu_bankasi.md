@@ -29,8 +29,8 @@ Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Do�
 - [x] KZ_MRK_18_SICAK — Güneş paneli neden soğukta daha çok üretir? (sıcaklık katsayısı) — enerji
 - [x] KZ_MRK_23_NOTRON — Bir nötron yıldızının bir şeker küpü kaç ton? (NASA: ≈ 1 milyar ton; kaynakta çay kaşığı değil şeker küpü var) — uzay
 - [x] KZ_MRK_20_MADEN — Bir bitcoin madencilik cihazı bir günde ne kadar elektrik yer? — enerji
-- [ ] Kara delikten kaçmak için ne kadar hızlı olmalısın? — uzay
+- [x] KZ_MRK_25_KACIS — Kara delikten kaçmak için ne kadar hızlı olmalısın? (NASA: Dünya 11,2 km/s, Güneş 617,6 km/s, olay ufkunda ışık hızı) — uzay
 - [x] KZ_MRK_22_ALAN — Türkiye'nin bütün elektriği için ne kadar alan panel gerekir? — enerji
 - [x] KZ_MRK_24_KAYNAT — 1 litre suyu kaynatmak kaç telefon şarjı eder? (4.184 J/kg·°C, ≈ 99 Wh ≈ 5 telefon) — enerji (25.11: bankada enerji konusu kalmadığı için eklendi)
-- [ ] Bir buzdolabı bir günde ne kadar elektrik harcar? — enerji (AB enerji etiketi verisiyle doğrulanmalı)
+- [x] KZ_MRK_26_BUZDOLABI — Bir buzdolabı bir günde ne kadar elektrik harcar? (AB Komisyonu: 2020 ort. 181 kWh/yıl ≈ 0,5 kWh/gün; 1990: 477) — enerji
 - [ ] Bir elektrik direği hattında neden yüksek gerilim kullanılır? (aynı güçte akım düşer, kayıp I²R) — enerji (#16 ile çakışmamasına dikkat)

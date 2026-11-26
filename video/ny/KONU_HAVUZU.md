@@ -77,3 +77,4 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [~] NY_SQ_06_MAGARA · Bilgi şıklı soru "Bu mağara hangi ilde?": Karaca (Gümüşhane), Ballıca (Tokat), Damlataş (Antalya) — kanca: "Biri taş ocağı açılırken tesadüfen bulundu" (1948)
 - [~] NY_HF_07_HAFIZA · Görsel hafıza "Renkleri aklında tut": Rize, Edirne, Gaziantep (+Kastamonu, Van) — turuncu/mavi/mor soruldu
 - Not: Derinkuyu kat sayısı (12 / 18) ve Tekirdağ köftesi köken dönemi (≈1920'ler / 1950'ler) kaynaklarda çelişkili, kullanılmadı. HF'de Nevşehir sayaç dairesinin altında kaldığı için Gaziantep'le değiştirildi (sayaç haritanın ortasında; merkezdeki iller sorulmamalı).
+- Not: "bin dokuz yüz kırk yedide" gibi ekli yıllar altyazıda "1.940 yedide" çıkıyor; yılı her zaman "... yılında" kalıbıyla yaz. HF_07 ve SQ_06 bu yüzden yeniden okutuldu.

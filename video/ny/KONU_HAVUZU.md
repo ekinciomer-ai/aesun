@@ -71,3 +71,9 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_HF_06_ILLER · Görsel hafıza "5 saniye bak, hatırla": Yalova, Zonguldak, Bilecik (+Tokat, Aydın) — kırmızı/mavi/yeşil soruldu
 - [x] NY_BL_06_SINIR · Komşu ülkesi en çok olan il: Edirne, Hakkari, Şırnak, Ardahan (2 ülke) → Iğdır (3 ülke) — kanca: "Bir ilimiz tam 3 ülkeyle komşu"
 - Not: Süreler 50/60/44 sn; havuza teslim, plan 23-25.12 13:00 (onay bekliyor). BL_06 ilk denemede Gemini 10,6 sn kısa ses döndürdü (kanca metni değiştirilip yeniden okutuldu); 44 sn ile hedefin biraz altında — 93 kelime ≈ 44 sn, bilgi videolarında ~105 kelime hedefle.
+
+## Parti 13 — Karışık formatlar (2026-11-26)
+- [~] NY_YM_07_KOFTE · Bu köfte hangi ilin: İnegöl (Bursa), Akçaabat (Trabzon), Tekirdağ (Tekirdağ) — kanca: "Porsiyonu tam 10 tane olmak zorunda" (TÜRKPATENT no 517)
+- [~] NY_SQ_06_MAGARA · Bilgi şıklı soru "Bu mağara hangi ilde?": Karaca (Gümüşhane), Ballıca (Tokat), Damlataş (Antalya) — kanca: "Biri taş ocağı açılırken tesadüfen bulundu" (1948)
+- [~] NY_HF_07_HAFIZA · Görsel hafıza "Renkleri aklında tut": Rize, Edirne, Gaziantep (+Kastamonu, Van) — turuncu/mavi/mor soruldu
+- Not: Derinkuyu kat sayısı (12 / 18) ve Tekirdağ köftesi köken dönemi (≈1920'ler / 1950'ler) kaynaklarda çelişkili, kullanılmadı. HF'de Nevşehir sayaç dairesinin altında kaldığı için Gaziantep'le değiştirildi (sayaç haritanın ortasında; merkezdeki iller sorulmamalı).

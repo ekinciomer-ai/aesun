@@ -1,0 +1,115 @@
+{
+ "kanal": "NY",
+ "seri": "Bilgi Şıklı Soru",
+ "dil": "tr",
+ "baslik_bant": "BU MAĞARA HANGİ İLDE?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 MAĞARA",
+   "ust": "HANGİ İLDE?",
+   "alt": "BİRİ TESADÜFEN BULUNDU",
+   "alt_kelime": "tesadüfen"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "KARACA MAĞARASI HANGİ İLDE?",
+   "siklar": [
+    "Trabzon",
+    "Gümüşhane",
+    "Bayburt",
+    "Giresun"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "il": "Gümüşhane"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Gümüşhane"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BALLICA MAĞARASI HANGİ İLDE?",
+   "siklar": [
+    "Amasya",
+    "Sivas",
+    "Tokat",
+    "Çorum"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "il": "Tokat"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Tokat"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "DAMLATAŞ MAĞARASI HANGİ İLDE?",
+   "siklar": [
+    "Mersin",
+    "Muğla",
+    "Adana",
+    "Antalya"
+   ],
+   "dogru": 3,
+   "bekle": 3,
+   "il": "Antalya"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Antalya"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "TRT Haber (AA) – Karaca Mağarası Gümüşhane'nin Torul ilçesine bağlı Cebeli köyünde; her yıl kasımda bakım için kapatılıp nisanda açılıyor (07.09.2024) https://www.trthaber.com/haber/guncel/karaca-magarasi-5-ayda-100-bini-askin-ziyaretciyi-agirladi-876538.html",
+  "Wikipedia – Karaca Cave: Torul, Gümüşhane; Cebeli köyü https://en.wikipedia.org/wiki/Karaca_Cave",
+  "Kültür ve Turizm Bakanlığı – Caves of Tokat: Ballıca Mağarası, Tokat Pazar ilçesi, Ballıca köyü https://ktb.gov.tr/EN-99379/caves-of-tokat.html",
+  "NTV (AA) – Ballıca Mağarası, Tokat'ın Pazar ilçesine bağlı Ballıca köyünde https://www.ntv.com.tr/seyahat/ballica-magarasi-unesco-yolundabr,W0m48HHTkkm2FW_ZhHcblQ",
+  "Küre Ansiklopedi – Damlataş Mağarası: Antalya Alanya; 1948'de liman inşaatı için taş ocağı açılırken tesadüfen bulundu; Türkiye'de turizme açılan ilk mağara https://kureansiklopedi.com/tr/detay/damlatas-magarasi-9578a",
+  "Cumhuriyet – Türkiye'nin turizme açılan ilk mağarası: Damlataş (liman inşaatı için taş ocağında bulundu) https://www.cumhuriyet.com.tr/gezi/galeri-turkiyenin-turizme-acilan-ilk-magarasi-damlatas-2182374",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu mağara taş ocağı açılırken tesadüfen bulundu! Hangi ilde?",
+  "aciklama": "Biri kışın kapısını kapatıyor, biri Tokat'ın bir köyünde, biri de taş ocağı açılırken tesadüfen bulundu. Bu 3 mağara hangi ilde? Cevaplar videoda.\n\n💬 Kaç doğru yaptın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "mağara",
+   "damlataş mağarası",
+   "karaca mağarası",
+   "ballıca mağarası",
+   "türkiye",
+   "coğrafya",
+   "quiz",
+   "bilgi yarışması",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu mağara taş ocağı açılırken tesadüfen bulundu 🦇 Hangi ilde? #mağara #türkiye #quiz",
+  "amac": "Bilgi şıklı soru serisi; mağaralar, sona saklanan keşif hikâyesi ve puan yorumu",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_SQ_06_MAGARA"
+}

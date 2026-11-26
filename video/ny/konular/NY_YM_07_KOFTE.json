@@ -1,0 +1,116 @@
+{
+ "kanal": "NY",
+ "seri": "İllere Göre Yemekler",
+ "dil": "tr",
+ "baslik_bant": "BU KÖFTE HANGİ İLİN?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "10 KÖFTE",
+   "ust": "BİR PORSİYON TAM",
+   "alt": "HANGİ İLİN? CEVAP SONDA",
+   "alt_kelime": "on"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU KÖFTE HANGİ İLİN?",
+   "siklar": [
+    "Bilecik",
+    "Bursa",
+    "Eskişehir",
+    "Kütahya"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/inegol_kofte.jpg"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Bursa"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU KÖFTE HANGİ İLİN?",
+   "siklar": [
+    "Rize",
+    "Ordu",
+    "Trabzon",
+    "Giresun"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/akcaabat_kofte.jpg"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Trabzon"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU KÖFTE HANGİ İLİN?",
+   "siklar": [
+    "Edirne",
+    "Tekirdağ",
+    "Kırklareli",
+    "Çanakkale"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/tekirdag_kofte.jpg"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Tekirdağ"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "SIRADAKİ KÖFTEYİ YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "TÜRKPATENT / Küre Ansiklopedi – İnegöl Köftesi: mahreç işareti, tescil no 78, 28.02.2006; Bursa ili İnegöl ilçesi; katkı olarak yalnız ekmek (veya galeta unu), tuz, kuru soğan ve sodyum bikarbonat https://kureansiklopedi.com/tr/detay/inegol-koftesi-0f940",
+  "Balıkesir Üniversitesi – Gastronomik kimliğin korunmasında coğrafi işaretlemenin rolü: İnegöl Köftesi örneği https://acikerisim.balikesir.edu.tr/xmlui/handle/20.500.12462/16284",
+  "TÜRKPATENT / Küre Ansiklopedi – Akçaabat Köftesi: mahreç işareti, tescil no 132, 10.05.2010; Trabzon ili Akçaabat ilçesi; sığır eti, içyağı, bayat ekmek, sarımsak ve tuz, başka baharat kullanılmaz https://kureansiklopedi.com/tr/detay/akcaabat-koftesi-477c1",
+  "TÜRKPATENT – Akçaabat Köftesi coğrafi işaret belgesi https://ci.turkpatent.gov.tr/Files/GeographicalSigns/99086701-15f3-41c4-b338-c8cc619782ae.pdf",
+  "TÜRKPATENT – Tekirdağ Köftesi coğrafi işaret belgesi no 517, tescil 07.08.2020, coğrafi sınır Tekirdağ ili; porsiyon 10 adet https://ci.turkpatent.gov.tr/Files/GeographicalSigns/a280d13c-494e-4e95-abf5-2089e1b3cdfc.pdf",
+  "Küre Ansiklopedi – Tekirdağ Köftesi: 2020'de coğrafi işaret; bir porsiyonda 10 köfte https://kureansiklopedi.com/tr/detay/tekirdag-koftesi-cocuk",
+  "Fotoğraflar: Wikimedia Commons serbest lisanslı (lisans/yazar açıklamaya otomatik eklenir)",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bir porsiyonu tam 10 tane olmak zorunda! Bu köfte hangi ilin?",
+  "aciklama": "Biri yalnız et, ekmek, soğan, tuz ve karbonatla yapılıyor, biri başka baharat kullanmıyor, biri de porsiyonu tam 10 tane olmak zorunda. Bu üç coğrafi işaretli köfte hangi illerin? Cevaplar videoda.\n\n💬 Kaç doğru yaptın? Sıradaki köfteyi yorumlara yaz.",
+  "etiketler": [
+   "köfte",
+   "yöresel yemekler",
+   "türk mutfağı",
+   "hangi ilin",
+   "inegöl köftesi",
+   "akçaabat köftesi",
+   "tekirdağ köftesi",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Bir porsiyonu tam 10 tane olmak zorunda 🍢 Bu köfte hangi ilin? Cevap sonda! #köfte #yöreselyemek #quiz",
+  "amac": "İllere göre yemekler serisi; coğrafi işaretli köfteler, ilçe adı tuzağı, sona saklanan cevap ve yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ },
+ "kod": "NY_YM_07_KOFTE"
+}

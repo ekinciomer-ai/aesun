@@ -73,8 +73,9 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - Not: Süreler 50/60/44 sn; havuza teslim, plan 23-25.12 13:00 (onay bekliyor). BL_06 ilk denemede Gemini 10,6 sn kısa ses döndürdü (kanca metni değiştirilip yeniden okutuldu); 44 sn ile hedefin biraz altında — 93 kelime ≈ 44 sn, bilgi videolarında ~105 kelime hedefle.
 
 ## Parti 13 — Karışık formatlar (2026-11-26)
-- [~] NY_YM_07_KOFTE · Bu köfte hangi ilin: İnegöl (Bursa), Akçaabat (Trabzon), Tekirdağ (Tekirdağ) — kanca: "Porsiyonu tam 10 tane olmak zorunda" (TÜRKPATENT no 517)
-- [~] NY_SQ_06_MAGARA · Bilgi şıklı soru "Bu mağara hangi ilde?": Karaca (Gümüşhane), Ballıca (Tokat), Damlataş (Antalya) — kanca: "Biri taş ocağı açılırken tesadüfen bulundu" (1948)
-- [~] NY_HF_07_HAFIZA · Görsel hafıza "Renkleri aklında tut": Rize, Edirne, Gaziantep (+Kastamonu, Van) — turuncu/mavi/mor soruldu
+- [x] NY_YM_07_KOFTE · Bu köfte hangi ilin: İnegöl (Bursa), Akçaabat (Trabzon), Tekirdağ (Tekirdağ) — kanca: "Porsiyonu tam 10 tane olmak zorunda" (TÜRKPATENT no 517)
+- [x] NY_SQ_06_MAGARA · Bilgi şıklı soru "Bu mağara hangi ilde?": Karaca (Gümüşhane), Ballıca (Tokat), Damlataş (Antalya) — kanca: "Biri taş ocağı açılırken tesadüfen bulundu" (1948)
+- [x] NY_HF_07_HAFIZA · Görsel hafıza "Renkleri aklında tut": Rize, Edirne, Gaziantep (+Kastamonu, Van) — turuncu/mavi/mor soruldu
 - Not: Derinkuyu kat sayısı (12 / 18) ve Tekirdağ köftesi köken dönemi (≈1920'ler / 1950'ler) kaynaklarda çelişkili, kullanılmadı. HF'de Nevşehir sayaç dairesinin altında kaldığı için Gaziantep'le değiştirildi (sayaç haritanın ortasında; merkezdeki iller sorulmamalı).
 - Not: "bin dokuz yüz kırk yedide" gibi ekli yıllar altyazıda "1.940 yedide" çıkıyor; yılı her zaman "... yılında" kalıbıyla yaz. HF_07 ve SQ_06 bu yüzden yeniden okutuldu.
+- Not: Süreler 75/60/67 sn; havuza teslim, plan 26-28.12 13:00 (onay bekliyor). YM_07 hedefin üstünde (Puck yavaş); sonraki yemek videosunda metni ~%20 kısalt.

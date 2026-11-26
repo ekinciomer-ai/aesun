@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-26T21:14+03:00",
+ "olusturma": "2026-11-26T21:24+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -408,7 +408,7 @@
    "neden": "son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir",
    "olculen": 7,
    "erken": 2,
-   "medyan_48sa": 337,
+   "medyan_48sa": 341,
    "tutma_orani": 43,
    "izlenme_yuzde": 55,
    "en_iyi": {
@@ -615,7 +615,7 @@
    "neden": "videoların %67'i tuttu (eşik 215 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 0,
-   "medyan_48sa": 967,
+   "medyan_48sa": 970,
    "tutma_orani": 67,
    "izlenme_yuzde": 52,
    "en_iyi": {
@@ -787,7 +787,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 0,
-   "medyan_48sa": 843,
+   "medyan_48sa": 850,
    "tutma_orani": 100,
    "izlenme_yuzde": 67,
    "en_iyi": {
@@ -917,15 +917,15 @@
   }
  ],
  "esikler": {
-  "Antik Stüdyo": 637,
-  "Nasıl Yapıldı": 135,
-  "Kozmos Lab": 95,
-  "Ömür Dediğin": 50,
-  "LVL MAX": 3227,
-  "Estudio Antiguo": 136,
   "Kozmos Lab TR": 215,
+  "Estudio Antiguo": 136,
+  "LVL MAX": 3227,
   "Ancient Studio": 192,
-  "Yolu Seç !": 262
+  "Nasıl Yapıldı": 135,
+  "Ömür Dediğin": 50,
+  "Yolu Seç !": 262,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab": 95
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -939,11 +939,11 @@
    },
    "03:00": {
     "n": 2,
-    "medyan": 675
+    "medyan": 677
    },
    "09:00": {
     "n": 1,
-    "medyan": 800
+    "medyan": 802
    },
    "12:00": {
     "n": 4,
@@ -1057,7 +1057,7 @@
    },
    "21:00": {
     "n": 10,
-    "medyan": 965
+    "medyan": 966
    }
   },
   "Kozmos Lab": {
@@ -1286,12 +1286,12 @@
    "uzun_vid": "2Ks6oA8xFyk",
    "uzun_baslik": "Doğduğu Yerde Kaybolan Nehir: Tuna'nın 2.850 km'lik Yolculuğu",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 276,
+   "uzun_izlenme": 282,
    "baglanacak_shortlar": [
     {
      "vid": "68_OnlgGztU",
      "baslik": "Tuna Nehri Akmam Diyor: Gazi Osman Paşa ve Plevne'nin 5 Ayı",
-     "izlenme": 28,
+     "izlenme": 30,
      "durum": "Yayında"
     }
    ],
@@ -1302,7 +1302,7 @@
    "uzun_vid": "42vh7-zmom4",
    "uzun_baslik": "Piri Reis'in Bütün Hikâyesi: Korsanlıktan Hürmüz'e, Haritadan İdama",
    "uzun_durum": "Yayında",
-   "uzun_izlenme": 47,
+   "uzun_izlenme": 48,
    "baglanacak_shortlar": [
     {
      "vid": "Ov0ftdfKjCI",
@@ -1415,7 +1415,7 @@
     {
      "vid": "wjPmU9N2eAQ",
      "baslik": "Çığlık'taki adam aslında çığlık atmıyor 😱 #shorts",
-     "izlenme": 2970,
+     "izlenme": 2974,
      "durum": "Yayında"
     },
     {
@@ -1529,6 +1529,12 @@
      "durum": "Yayında"
     },
     {
+     "vid": "j2lpy8oWgVw",
+     "baslik": "Güneş panelinde bozuk hücreyi drone nasıl bulur? 🔥 #shorts",
+     "izlenme": 45,
+     "durum": "Yayında"
+    },
+    {
      "vid": "o0g1NJt4fpo",
      "baslik": "Güneş paneli tozlanınca ne kadar kaybeder? ☀️🧹 #shorts",
      "izlenme": 0,
@@ -1537,12 +1543,6 @@
     {
      "vid": "H1btzbOdl1U",
      "baslik": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
-     "izlenme": 0,
-     "durum": "Planlı"
-    },
-    {
-     "vid": "j2lpy8oWgVw",
-     "baslik": "Güneş panelinde bozuk hücreyi drone nasıl bulur? 🔥 #shorts",
      "izlenme": 0,
      "durum": "Planlı"
     }
@@ -1720,7 +1720,7 @@
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1428 izlenme, 4 video).",
   "Ancient Studio: en iyi yayın saati şimdilik 23:00 (medyan 213 izlenme, 2 video).",
   "Estudio Antiguo: en iyi yayın saati şimdilik 23:00 (medyan 67 izlenme, 7 video).",
-  "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 965 izlenme, 10 video).",
+  "Kozmos Lab TR: en iyi yayın saati şimdilik 21:00 (medyan 966 izlenme, 10 video).",
   "Kozmos Lab: en iyi yayın saati şimdilik 02:00 (medyan 54 izlenme, 8 video).",
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 167 izlenme, 3 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",

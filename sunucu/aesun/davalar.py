@@ -118,15 +118,35 @@ def brifing(request: Request):
 
 
 NOTLAR = {"brifing", "yorumlar"}
+GRUP_NOTLARI = {"brifing", "yorumlar", "bekleyen"}
+GKOD_RE = re.compile(r"^[a-z0-9_]{1,30}$")
 
 
 @router.get("/v1/davalar/not/{ad}")
 def not_oku(ad: str, request: Request):
-    """Davalar notları (markdown, şifreli): brifing, yorumlar."""
+    """Davalar notları (markdown, şifreli): brifing, yorumlar. (Eski genel uç — tam yetki.)"""
     _yonetici(request)
     if ad not in NOTLAR:
         raise HTTPException(404, "yok")
     p = KOK / f"{ad}.sifreli"
+    if not p.is_file():
+        raise HTTPException(404, "not yok")
+    return Response(_coz(p), media_type="text/markdown; charset=utf-8", headers=BAS)
+
+
+@router.get("/v1/davalar/grup/{gkod}/not/{ad}")
+def grup_not(gkod: str, ad: str, request: Request):
+    """Grup bazlı not (brifing / yorumlar / bekleyen), markdown şifreli: /davalar/<gkod>_<ad>.sifreli.
+    Yetki: tam yetkili her grubu; grup yetkilisi yalnız kendi grubunu okur.
+    Samet brifing/yorumlar için eski genel dosyalara (brifing.sifreli / yorumlar.sifreli) geri dönülür."""
+    izin = _izinli_gruplar(request)   # None = tümü; set = yalnız bu gruplar; aksi 401
+    if ad not in GRUP_NOTLARI or not GKOD_RE.match(gkod):
+        raise HTTPException(404, "yok")
+    if izin is not None and gkod not in izin:
+        raise HTTPException(404, "yok")   # yetkisiz grup: varlığını sızdırmamak için 404
+    p = KOK / f"{gkod}_{ad}.sifreli"
+    if not p.is_file() and gkod == "samet" and ad in ("brifing", "yorumlar"):
+        p = KOK / f"{ad}.sifreli"   # eski genel dosyalar = Samet içeriği
     if not p.is_file():
         raise HTTPException(404, "not yok")
     return Response(_coz(p), media_type="text/markdown; charset=utf-8", headers=BAS)

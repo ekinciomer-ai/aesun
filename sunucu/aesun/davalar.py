@@ -29,6 +29,41 @@ def _yonetici(req: Request):
         raise HTTPException(401, "yetkili girişi gerekli")
 
 
+# Grup bazlı dosya yetkisi: tam yetkili (yonetici / oz_davalar / oz_davalar_y) tüm grupları görür;
+# grup yetkilisi yalnız oz_davalar_<gkod> rolünü taşıdığı grupları görür. Grup kodları dizindeki 'gkod' alanıyla eşleşir.
+def _izinli_gruplar(req: Request):
+    """None → tüm gruplar (tam yetkili); set → yalnız bu grup kodları; boş set + tam değil → yetkisiz."""
+    if _roller is None:
+        raise HTTPException(401, "yetkili girişi gerekli")
+    r = _roller(req)
+    if r & {"yonetici", "oz_davalar", "oz_davalar_y"}:
+        return None
+    g = {x[len("oz_davalar_"):] for x in r if x.startswith("oz_davalar_")}
+    if not g:
+        raise HTTPException(401, "yetkili girişi gerekli")
+    return g
+
+
+def _dava_gkod(d: dict) -> str:
+    return str(d.get("gkod") or "")
+
+
+def _ev_gkod_haritasi(veri: dict) -> dict:
+    """eid → ait olduğu davanın gkod'u (yetki denetimi için). Dizin önbelleğiyle bir kez hesaplanır."""
+    h = veri.get("_ev_gkod")
+    if h is not None:
+        return h
+    h = {}
+    for d in veri.get("davalar", []):
+        gk = _dava_gkod(d)
+        for k in d.get("klasorler", []):
+            for e in k.get("evraklar", []):
+                if e.get("id"):
+                    h[e["id"]] = gk
+    veri["_ev_gkod"] = h
+    return h
+
+
 def _coz(p: Path) -> bytes:
     b = p.read_bytes()
     return AESGCM(ANAHTAR.read_bytes()[:32]).decrypt(b[:12], b[12:], None)
@@ -47,17 +82,23 @@ def _dizin_oku():
 
 @router.get("/v1/davalar/dizin")
 def dizin(request: Request):
-    _yonetici(request)
+    izin = _izinli_gruplar(request)   # None = tümü; set = yalnız bu gruplar; aksi halde 401 fırlatır
     d = _dizin_oku()
-    return JSONResponse({"guncel": d.get("guncel"), "davalar": d.get("davalar", [])}, headers=BAS)
+    davalar = d.get("davalar", [])
+    if izin is not None:
+        davalar = [x for x in davalar if _dava_gkod(x) in izin]
+    return JSONResponse({"guncel": d.get("guncel"), "davalar": davalar}, headers=BAS)
 
 
 @router.get("/v1/davalar/evrak/{eid}")
 def evrak(eid: str, request: Request):
-    _yonetici(request)
+    izin = _izinli_gruplar(request)
     if not ID.match(eid):
         raise HTTPException(400, "geçersiz")
-    bilgi = _dizin_oku().get("evrak", {}).get(eid)
+    veri = _dizin_oku()
+    if izin is not None and _ev_gkod_haritasi(veri).get(eid) not in izin:
+        raise HTTPException(404, "yok")   # yetkisiz grubun evrakı: varlığını sızdırmamak için 404
+    bilgi = veri.get("evrak", {}).get(eid)
     p = KOK / "e" / f"{eid}.sifreli"
     if not bilgi or not p.is_file():
         raise HTTPException(404, "yok")

@@ -475,7 +475,7 @@ const OZEL_ALT = [
 const OZ_SEVIYE = [['', 'Kapalı'], ['izle', 'İzler'], ['degistir', 'Değiştirir']];   // İzler = girer ve görür; Değiştirir = girer, görür, değiştirir
 const OZ_MOD = { mail: 'mail' };   // bu kart mevcut bir uygulamanın anahtarını da ister
 const ozA = () => (S && S.anahtarlar) || {};
-const ozVar = id => !!(S && (S.ka || ozA()['oz_' + id]));
+const ozVar = id => !!(S && (S.ka || ozA()['oz_' + id] || (id === 'davalar' && (ozA().oz_davalar_samet || ozA().oz_davalar_depolama))));
 const ozYaz = id => !!(S && (S.ka || ozA()['oz_' + id + '_y']));
 const ozHerhangi = () => !!(S && (S.ka || OZEL_ALT.some(x => ozA()['oz_' + x.id])));
 // API belirteci: okuma için oz_<id>, yazma için oz_<id>_y (yönetici: yonetici)
@@ -832,7 +832,7 @@ async function yonetimCiz() {
       const cips = x.yonetici ? '<span class="et k">Yönetici · tümü</span>' : ((x.moduller || []).map(id => {
         const kn = KONULAR[id], iz = (x.izinler || {})[id] || [];
         return '<span class="et">' + esc(modAd[id] || id) + (kn ? ' <small>' + iz.filter(k => k !== 'parasal').length + '/' + kn.filter(p => p[0] !== 'parasal').length + '</small>' : '') + (iz.includes('parasal') ? ' <b title="Parasal bilgileri görür">₺</b>' : '') + '</span>';
-      }).join('') + Object.entries(x.ozel || {}).map(([id, sv]) => { const o = OZEL_ALT.find(z => z.id === id); return o ? '<span class="et" title="Özel Alan">' + o.ikon + ' ' + esc(o.ad.split(' · ')[0]) + ' <small>' + (sv === 'degistir' ? 'değiştirir' : 'izler') + '</small></span>' : ''; }).join('') || '<span class="ince">Yetki yok</span>');
+      }).join('') + Object.entries(x.ozel || {}).map(([id, sv]) => { const dav = id === 'davalar' || id === 'davalar_samet' || id === 'davalar_depolama'; const o = dav ? OZEL_ALT.find(z => z.id === 'davalar') : OZEL_ALT.find(z => z.id === id); if (!o) return ''; const etiket = id === 'davalar_samet' ? 'Samet Uludağ' : id === 'davalar_depolama' ? 'Depolamalı' : dav ? 'tümü' : (sv === 'degistir' ? 'değiştirir' : 'izler'); return '<span class="et" title="Özel Alan">' + o.ikon + ' ' + esc(o.ad.split(' · ')[0]) + ' <small>' + etiket + '</small></span>'; }).join('') || '<span class="ince">Yetki yok</span>');
       h += '<div class="kkart"><div class="kav">' + esc(basHarf(x.ad || kul)) + '</div><div style="flex:1;min-width:0"><b>' + esc(x.ad || kul) + '</b><div class="ince">@' + esc(kul) + (x.degisiklik ? ' · ' + esc(x.degisiklik) : '') + '</div><div style="margin-top:8px">' + cips + '</div></div>'
         + '<div class="kbt"><button class="btn ik kc" onclick="kulDlg(\'' + esc(kul) + '\')">Düzenle</button>' + (kul !== S.kul ? '<button class="bag sil" onclick="kulSil(\'' + esc(kul) + '\')">Sil</button>' : '') + '</div></div>';
     }
@@ -874,10 +874,18 @@ function kulDlg(kul) {
     f += '</div>';
     const xo = x.ozel || {};
     f += '<label style="margin-top:18px">Özel Alan uygulamaları <span class="ince">(İzler = girer ve görür · Değiştirir = girer, görür ve değiştirir)</span></label><div class="yetki">'
-      + OZEL_ALT.map(o => '<div class="yt' + (xo[o.id] ? ' on' : '') + '"><div class="ytm" style="display:flex;align-items:center;gap:10px"><span class="hd" style="--r:' + o.renk + ';width:30px;height:30px;box-shadow:none;font-size:16px">' + o.ikon + '</span><span style="flex:1;min-width:0">' + esc(o.ad)
-        + (o.id === 'asistan' ? '<small class="ince" style="display:block">“Değiştirir” = sunucuya komut verebilir</small>' : '') + '</span>'
-        + '<select name="oz_' + esc(o.id) + '" onchange="this.closest(\'.yt\').classList.toggle(\'on\',!!this.value)" style="width:auto;max-width:48%;padding:6px 8px;font-size:13px">'
-        + OZ_SEVIYE.map(([k, a]) => '<option value="' + k + '"' + ((xo[o.id] || '') === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div></div>').join('')
+      + OZEL_ALT.map(o => {
+          const dav = o.id === 'davalar';
+          const dgrp = dav ? (xo.davalar ? 'davalar' : xo.davalar_samet ? 'davalar_samet' : xo.davalar_depolama ? 'davalar_depolama' : '') : '';
+          const acik = dav ? !!dgrp : !!xo[o.id];
+          const simdi = dav ? dgrp : (xo[o.id] || '');
+          const secenekler = dav ? [['', 'Kapalı'], ['davalar', 'Tümü (tüm davalar)'], ['davalar_samet', 'Yalnız Samet Uludağ'], ['davalar_depolama', 'Yalnız Depolamalı']] : OZ_SEVIYE;
+          return '<div class="yt' + (acik ? ' on' : '') + '"><div class="ytm" style="display:flex;align-items:center;gap:10px"><span class="hd" style="--r:' + o.renk + ';width:30px;height:30px;box-shadow:none;font-size:16px">' + o.ikon + '</span><span style="flex:1;min-width:0">' + esc(o.ad)
+            + (o.id === 'asistan' ? '<small class="ince" style="display:block">“Değiştirir” = sunucuya komut verebilir</small>' : '')
+            + (dav ? '<small class="ince" style="display:block">Grup = kullanıcı yalnız o grubun dosyalarını görür</small>' : '') + '</span>'
+            + '<select name="oz_' + esc(o.id) + '" onchange="this.closest(\'.yt\').classList.toggle(\'on\',!!this.value)" style="width:auto;max-width:48%;padding:6px 8px;font-size:13px">'
+            + secenekler.map(([k, a]) => '<option value="' + k + '"' + (simdi === k ? ' selected' : '') + '>' + a + '</option>').join('') + '</select></div></div>';
+        }).join('')
       + '</div>';
   }
   f += '<div class="ydalt"><button type="button" class="btn ik" onclick="$(\'ydlg\').close()">Vazgeç</button><button class="btn" id="kf2b">' + (yeni ? 'Kullanıcıyı ekle' : 'Kaydet') + '</button></div></form>';
@@ -909,7 +917,7 @@ function kulKaydet(f, kul0) {
       for (const c of f.querySelectorAll('input[name="ms"]:checked')) { santraller.push(c.value); if (!R.musteri[c.value]) R.musteri[c.value] = { k: b64(rnd(32)), ad: c.dataset.ad || c.value }; }
     }
     const ozel = {};
-    if (!yon) for (const o of OZEL_ALT) { const el = f.querySelector('select[name="oz_' + o.id + '"]'); if (el && el.value) ozel[o.id] = el.value; }
+    if (!yon) for (const o of OZEL_ALT) { const el = f.querySelector('select[name="oz_' + o.id + '"]'); if (!el || !el.value) continue; if (o.id === 'davalar') ozel[el.value] = 'izle'; else ozel[o.id] = el.value; }
     for (const [id, sv] of Object.entries(ozel)) {
       if (!R.anahtarlar['oz_' + id]) R.anahtarlar['oz_' + id] = b64(rnd(32));
       if (sv === 'degistir' && !R.anahtarlar['oz_' + id + '_y']) R.anahtarlar['oz_' + id + '_y'] = b64(rnd(32));

@@ -71,11 +71,17 @@ mark{background:#FDE68A;color:#000}
   var API='https://api.aksarayenerji.net/v1/davalar/', O=null, D=null, url=null;
   try{O=JSON.parse(localStorage.getItem('ae_portal')||'null');}catch(e){}
   var DA=(O&&O.S&&O.S.anahtarlar)||{};
-  if(!O||!O.S||!(O.S.ka||DA.oz_davalar)||!O.son||O.son<Date.now()){document.querySelector('main').innerHTML='<a href="../">← Portal</a><h1>Davalar</h1><div class="kart" style="padding:16px">Bu sayfa yalnız yetkili hesapla açılır. Önce <a href="../">portala giriş yapın</a>, sonra bu sayfayı yeniden açın.</div>';return;}
+  // Tam yetki: yönetici anahtarı ya da oz_davalar. Grup yetkisi: oz_davalar_<grup> modül anahtar(lar)ı.
+  var gruplar=Object.keys(DA).filter(function(k){return k.indexOf('oz_davalar_')===0;});
+  var tamYetki=!!(O&&O.S&&(O.S.ka||DA.oz_davalar));
+  if(!O||!O.S||!O.son||O.son<Date.now()||!(tamYetki||gruplar.length)){document.querySelector('main').innerHTML='<a href="../">← Portal</a><h1>Davalar</h1><div class="kart" style="padding:16px">Bu sayfa yalnız yetkili hesapla açılır. Önce <a href="../">portala giriş yapın</a>, sonra bu sayfayı yeniden açın.</div>';return;}
   function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}
-  var anahtar=O.S.ka?sha('aesun-api|yonetici|'+O.S.ka):sha('aesun-api|oz_davalar|'+DA.oz_davalar);
+  // Her yetki kaynağı için ayrı belirteç; grup yetkilisi birden çok gruba sahipse her grup ayrı istek, sonuçlar birleştirilir.
+  var KAYNAK=tamYetki?[O.S.ka?('aesun-api|yonetici|'+O.S.ka):('aesun-api|oz_davalar|'+DA.oz_davalar)]
+                     :gruplar.map(function(g){return 'aesun-api|'+g+'|'+DA[g];});
+  var ANAHTARLAR=KAYNAK.map(sha);
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function al(yol){return anahtar.then(function(k){return fetch(API+yol,{headers:{'X-AE-Anahtar':k},cache:'no-store'});}).then(function(r){if(!r.ok)throw new Error(r.status===401?'Yönetici girişi gerekli':'HTTP '+r.status);return r;});}
+  function al(yol,ti){ti=ti||0;return ANAHTARLAR[ti].then(function(k){return fetch(API+yol,{headers:{'X-AE-Anahtar':k},cache:'no-store'});}).then(function(r){if(!r.ok)throw new Error(r.status===401?'Yetkili girişi gerekli':'HTTP '+r.status);return r;});}
   function kucuk(s){return String(s||'').toLocaleLowerCase('tr');}
   function ciz(){
     var q=kucuk(document.getElementById('ara').value).trim(), h='', son='';
@@ -91,10 +97,10 @@ mark{background:#FDE68A;color:#000}
       h+='<div class="kart'+(q?' acik':'')+'" data-i="'+di+'"><div class="bas"><div><b>'+esc(d.baslik)+'</b><small>'+esc(d.birim+' · '+d.esas)+'</small>'
         +(d.konu?'<span class="etk">'+esc(d.konu)+'</span>':'')+(d.durusma?'<span class="etk dur">Duruşma '+esc(d.durusma)+'</span>':'')+'<span class="etk">'+n+' evrak</span>'+(d.guncelleme?'<span class="etk">Güncelleme '+esc(d.guncelleme)+'</span><span class="etk'+(d.yeni_sayi?' yeni':'')+'">'+(d.yeni_sayi?'+'+d.yeni_sayi+' yeni evrak':'yeni evrak yok')+'</span>':'')+'</div><span class="ok">›</span></div><div class="ic">'
         +(d.taraflar?'<div class="ozet"><b>Taraflar:</b> '+esc(d.taraflar)+'</div>':'')+(d.ozet?'<div class="ozet">'+esc(d.ozet)+'</div>':'');
-      if(!q&&d.son&&d.son.length){h+='<div class="kat son"><div>🆕 Son gelen evraklar</div>';d.son.forEach(function(e){h+='<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+(e.yeni?' <span class="yn">YENİ</span>':'')+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';});h+='</div>';}
+      if(!q&&d.son&&d.son.length){h+='<div class="kat son"><div>🆕 Son gelen evraklar</div>';d.son.forEach(function(e){h+='<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'" data-ti="'+(d.__ti||0)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+(e.yeni?' <span class="yn">YENİ</span>':'')+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';});h+='</div>';}
       kats.forEach(function(k){
         h+='<div class="kat"><div>'+esc(k.ad)+' ('+k.ev.length+')</div>';
-        k.ev.forEach(function(e){h+='<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';});
+        k.ev.forEach(function(e){h+='<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'" data-ti="'+(d.__ti||0)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';});
         h+='</div>';
       });
       h+='</div></div>';
@@ -102,7 +108,7 @@ mark{background:#FDE68A;color:#000}
     document.getElementById('liste').innerHTML=h||'<div class="bilgi">Sonuç yok.</div>';
   }
   document.getElementById('liste').addEventListener('click',function(ev){
-    var b=ev.target.closest('.ev'); if(b){ALINTI='';ac(b.dataset.id,b.dataset.ad,b.dataset.tur);return;}
+    var b=ev.target.closest('.ev'); if(b){ALINTI='';ac(b.dataset.id,b.dataset.ad,b.dataset.tur,+b.dataset.ti||0);return;}
     var k=ev.target.closest('.bas'); if(k)k.parentNode.classList.toggle('acik');
   });
   document.getElementById('ara').addEventListener('input',ciz);
@@ -114,9 +120,9 @@ mark{background:#FDE68A;color:#000}
   document.getElementById('gKapat').onclick=kapat;
   document.addEventListener('keydown',function(e){if(e.key==='Escape')kapat();});
   function isaretle(s){var q=(ALINTI.match(/"([^"]+)"/)||[])[1];if(!q)return s;var p=q.split('…')[0].trim().slice(0,60);if(p.length<12)return s;p=esc(p);var i=s.indexOf(p);return i<0?s:s.slice(0,i)+'<mark>'+p+'</mark>'+s.slice(i+p.length);}
-  function ac(id,ad,tur){document.getElementById('gYeni').style.display=document.getElementById('gIndir').style.display='';
+  function ac(id,ad,tur,ti){document.getElementById('gYeni').style.display=document.getElementById('gIndir').style.display='';
     document.getElementById('gAd').textContent=ad; gov.innerHTML='<div class="bilgi">Açılıyor…</div>'; gorAc();
-    al('evrak/'+id).then(function(r){return r.blob();}).then(function(b){
+    al('evrak/'+id,ti).then(function(r){return r.blob();}).then(function(b){
       if(url)URL.revokeObjectURL(url); url=URL.createObjectURL(b);
       var ind=document.getElementById('gIndir'); ind.href=url; document.getElementById('gYeni').href=url; ind.download=ad.replace(/[\\\/:*?"<>|]+/g,' ')+'.'+tur;
       if(tur==='txt'||tur==='html')return b.text().then(function(t){gov.innerHTML='<pre>'+isaretle(esc(tur==='html'?t.replace(/<[^>]+>/g,' '):t))+'</pre>';var mk=gov.querySelector('mark');if(mk)mk.scrollIntoView({block:'center'});});
@@ -176,22 +182,25 @@ mark{background:#FDE68A;color:#000}
     (D.davalar||[]).forEach(function(d){if(String(d.esas||'').indexOf(esas)<0&&String(d.baslik||'').indexOf(esas)<0)return;
       (d.klasorler||[]).forEach(function(k){(k.evraklar||[]).forEach(function(e){
         var z=normal((k.ad||'')+' '+e.ad+' '+(e.tarih||''));
-        if(ar.some(function(x){return x&&z.indexOf(x)>=0;}))bul.push(e);});});});
+        if(ar.some(function(x){return x&&z.indexOf(x)>=0;})){e.__ti=d.__ti||0;bul.push(e);}});});});
     var q=b.dataset.q||'';ALINTI=q;
     document.getElementById('gAd').textContent=lbl;gorAc();document.getElementById('gYeni').style.display=document.getElementById('gIndir').style.display='none';
     var x='<div style="padding:12px 14px">';
     if(q)x+='<div class="alt" style="margin:0 0 6px">İlgili kısım</div><div class="alinti">'+esc(q)+'</div>';
-    if(bul.length){x+='<div class="alt" style="margin:14px 0 4px">Evrakın aslı ('+esc(esas)+')</div>'+bul.map(function(e){return '<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';}).join('');}
+    if(bul.length){x+='<div class="alt" style="margin:14px 0 4px">Evrakın aslı ('+esc(esas)+')</div>'+bul.map(function(e){return '<button class="ev" data-id="'+esc(e.id)+'" data-ad="'+esc(e.ad)+'" data-tur="'+esc(e.tur)+'" data-ti="'+(e.__ti||0)+'"><span class="tur">'+esc(e.etiket||e.tur.toUpperCase())+'</span><span class="ad">'+esc(e.ad)+'</span><span class="tr">'+esc(e.tarih||'')+'</span></button>';}).join('');}
     else x+='<div class="bilgi">Evrak Davalar listesinde otomatik bulunamadı ('+esc(esas)+').<br><br><button class="kanit" id="gAra">Dosyalar\'da ara</button></div>';
     gov.innerHTML=x+'</div>';
     var ga=document.getElementById('gAra');if(ga)ga.onclick=function(){derin=0;gizle();try{history.replaceState(null,'',location.href);}catch(e){}sekme('d',true);var qq=document.getElementById('ara');qq.value=esas;ciz();};
   }
   document.getElementById('brf').addEventListener('click',notTik);document.getElementById('yrm').addEventListener('click',notTik);
-  gov.addEventListener('click',function(ev){var b=ev.target.closest('.ev');if(b){onceki={h:gov.innerHTML,ad:document.getElementById('gAd').textContent};ac(b.dataset.id,b.dataset.ad,b.dataset.tur);}});
+  gov.addEventListener('click',function(ev){var b=ev.target.closest('.ev');if(b){onceki={h:gov.innerHTML,ad:document.getElementById('gAd').textContent};ac(b.dataset.id,b.dataset.ad,b.dataset.tur,+b.dataset.ti||0);}});
   if(modHash()!=='d')sekme(modHash());
-  al('dizin').then(function(r){return r.json();}).then(function(j){
-    D=j; var n=0;(D.davalar||[]).forEach(function(d){(d.klasorler||[]).forEach(function(k){n+=(k.evraklar||[]).length;});});
-    document.getElementById('alt').textContent=(D.davalar||[]).length+' dava · '+n+' evrak'+(D.guncel?' · güncelleme '+D.guncel:'')+' · yalnız yönetici';
+  Promise.all(ANAHTARLAR.map(function(_,ti){return al('dizin',ti).then(function(r){return r.json();}).then(function(j){return {ti:ti,j:j};}).catch(function(){return {ti:ti,j:{davalar:[]}};});})).then(function(parcalar){
+    var davalar=[],gorulen={},guncel='';
+    parcalar.forEach(function(p){(p.j.davalar||[]).forEach(function(d){var ky=(d.esas||d.baslik||'')+'';if(gorulen[ky])return;gorulen[ky]=1;d.__ti=p.ti;davalar.push(d);});if(p.j.guncel)guncel=p.j.guncel;});
+    D={davalar:davalar,guncel:guncel}; var n=0;davalar.forEach(function(d){(d.klasorler||[]).forEach(function(k){n+=(k.evraklar||[]).length;});});
+    document.getElementById('alt').textContent=davalar.length+' dava · '+n+' evrak'+(guncel?' · güncelleme '+guncel:'')+(tamYetki?' · tam yetki':' · '+gruplar.length+' grup');
+    if(!davalar.length){document.getElementById('alt').textContent='Yetkiniz olan dava bulunamadı.';}
     ciz();
   }).catch(function(e){document.getElementById('alt').textContent='Liste alınamadı: '+e.message;});
 })();

@@ -150,3 +150,34 @@ def grup_not(gkod: str, ad: str, request: Request):
     if not p.is_file():
         raise HTTPException(404, "not yok")
     return Response(_coz(p), media_type="text/markdown; charset=utf-8", headers=BAS)
+
+
+# ---- UYAP doğrudan yükleme (26.11.2026) ----
+# Tarayıcıda açık UYAP Kurum oturumundan indirilen evrak paketleri parça parça buraya gelir; kullanıcının bilgisayarına inmez.
+# Geçici yükleme anahtarının yalnız SHA-256 özeti burada durur (anahtarın kendisi depoda yok); süre dolunca kapı kapanır.
+# Parçalar alındığı anda dava anahtarıyla şifrelenir (/davalar_gelen/<ad>/<parça>.sifreli). İşleme: islem_davalar_uyap_isle.sh
+import hashlib, hmac, time as _time
+GELEN = Path(os.environ.get("AESUN_DAVALAR_GELEN", "/davalar_gelen"))
+YUKLE_OZET = "060b3cfb1f547559c32ee91b56df3cb91001dd807d35f8fa30170880cac5582d"
+YUKLE_SON = 1795813200          # 28.11.2026 00:00 (TSİ) sonrasında kapı kapalı
+UYAP_KOKEN = "https://kurum.uyap.gov.tr"
+AD_RE = re.compile(r"^[a-z0-9_]{3,60}$")
+
+
+@router.post("/v1/davalar/uyap_yukle")
+async def uyap_yukle(request: Request, t: str = "", ad: str = "", p: int = -1, son: int = 0):
+    bas = {"Access-Control-Allow-Origin": UYAP_KOKEN, "Cache-Control": "no-store"}
+    if _time.time() > YUKLE_SON or not hmac.compare_digest(hashlib.sha256(t.encode()).hexdigest(), YUKLE_OZET):
+        return JSONResponse({"hata": "yetkisiz"}, status_code=401, headers=bas)
+    if not AD_RE.match(ad) or not (0 <= p <= 99999):
+        return JSONResponse({"hata": "geçersiz"}, status_code=400, headers=bas)
+    govde = await request.body()
+    if len(govde) > 12 * 1024 * 1024:
+        return JSONResponse({"hata": "parça büyük"}, status_code=413, headers=bas)
+    k = GELEN / ad
+    k.mkdir(parents=True, exist_ok=True)
+    n = os.urandom(12)
+    (k / f"{p:05d}.sifreli").write_bytes(n + AESGCM(ANAHTAR.read_bytes()[:32]).encrypt(n, govde, None))
+    if son:
+        (k / "TAMAM").write_text(str(p + 1))
+    return JSONResponse({"ok": True, "p": p, "boy": len(govde)}, headers=bas)

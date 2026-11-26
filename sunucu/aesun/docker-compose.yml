@@ -13,6 +13,7 @@ services:
       - /opt/aesun/kasa_acik.pem:/kasa_acik.pem:ro   # kasa yalnız şifreler; özel anahtar burada yok
       - /opt/aesun/ozel/davalar/sunum:/davalar:ro   # dava evrakları (şifreli)
       - /opt/aesun/ozel/davalar/anahtar.bin:/davalar_anahtar:ro
+      - /opt/aesun/ozel/davalar/gelen:/davalar_gelen   # UYAP doğrudan yükleme (şifreli parçalar)
     networks: [gesfin-net]
     mem_limit: 256m
     logging:

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-26T05:53+03:00",
+ "olusturma": "2026-11-26T06:03+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -755,7 +755,7 @@
    "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 2,
    "erken": 1,
-   "medyan_48sa": 155,
+   "medyan_48sa": 154,
    "tutma_orani": 0,
    "izlenme_yuzde": 68,
    "en_iyi": {
@@ -824,6 +824,18 @@
    }
   },
   {
+   "kanal": "LVL MAX",
+   "seri": "Tablo Serisi",
+   "karar": "DENE",
+   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 0,
+   "erken": 1,
+   "medyan_48sa": null,
+   "tutma_orani": null,
+   "izlenme_yuzde": null,
+   "en_iyi": null
+  },
+  {
    "kanal": "Nasıl Yapıldı",
    "seri": "Sistem Nasıl Çalışır?",
    "karar": "DENE",
@@ -859,11 +871,11 @@
    "kanal": "Yolu Seç !",
    "seri": "Mühürlü Dosya · Bilgi Kartları",
    "karar": "SÜRDÜR",
-   "neden": "tutma oranı %20",
-   "olculen": 5,
-   "erken": 1,
-   "medyan_48sa": 152,
-   "tutma_orani": 20,
+   "neden": "tutma oranı %17",
+   "olculen": 6,
+   "erken": 0,
+   "medyan_48sa": 128,
+   "tutma_orani": 17,
    "izlenme_yuzde": 29,
    "en_iyi": {
     "baslik": "Kuyunun ağzında tozlar aşağı çekiliyor: İner misin, kaçar mısın? 🌪️🕳️ #shorts",
@@ -905,15 +917,15 @@
   }
  ],
  "esikler": {
-  "Estudio Antiguo": 136,
-  "Kozmos Lab": 95,
   "Ömür Dediğin": 50,
   "Yolu Seç !": 262,
+  "Kozmos Lab": 95,
+  "Kozmos Lab TR": 215,
   "Ancient Studio": 192,
+  "Estudio Antiguo": 136,
   "Antik Stüdyo": 637,
-  "LVL MAX": 455,
   "Nasıl Yapıldı": 135,
-  "Kozmos Lab TR": 215
+  "LVL MAX": 455
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1025,7 +1037,7 @@
    },
    "12:00": {
     "n": 2,
-    "medyan": 155
+    "medyan": 154
    },
    "13:00": {
     "n": 3,
@@ -1078,8 +1090,8 @@
     "medyan": 320
    },
    "14:00": {
-    "n": 2,
-    "medyan": 128
+    "n": 3,
+    "medyan": 103
    },
    "17:00": {
     "n": 4,

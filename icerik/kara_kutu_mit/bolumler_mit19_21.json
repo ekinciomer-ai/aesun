@@ -50,7 +50,18 @@
   "hukumKey": "Sürücü iki suçtan",
   "ders1": "Kusur <b style=\"color:#ffb15c\">ehliyete değil, kazaya</b> bakılarak belirlenir.",
   "ders2": "⚠️ Ehliyetsiz kullanmak<br><b style=\"color:#ff453a\">yine yasak, cezası var.</b>",
-  "black": "YAYA YARALANDI"
+  "black": "YAYA YARALANDI",
+  "sc": 4,
+  "upd": "upd3",
+  "tiL": 4.6,
+  "impKey": "yayaya çarpıyor",
+  "hookMain": "“EHLİYETSİZSE<br>SUÇ<br><span style=\"color:#ffb15c;font-size:1.25em\">OTOMATİK</span><br>ONUNDUR”",
+  "camKaza": "const cz=Math.min(st.car.position.z,sc.zImp-4);P=new THREE.Vector3(-5,13,cz-16);L=new THREE.Vector3(4,0,cz+12);f=48;",
+  "camRest": "const cz=Math.min(st.car.position.z,sc.zImp-4);P=new THREE.Vector3(-5,13,cz-16);L=new THREE.Vector3(4,0,cz+12);f=48;",
+  "camKarar": "P=new THREE.Vector3(-9,14,sc.zImp-14);L=new THREE.Vector3(4,0,sc.zImp+6);f=48;",
+  "exp": 1.0,
+  "tagsK": "tg+=tag3(st.car,1.9,'EHLİYETSİZ SÜRÜCÜ','#ffd60a','#111');if(st.ped.m.visible)tg+=tag3(st.ped.m,2.1,'YAYA','#ff453a')",
+  "tagsS": "tg+=tag3(st.car,1.9,'KUSUR?','#ffd60a','#111')"
  },
  {
   "N": 21,
@@ -103,7 +114,18 @@
   "hukumKey": "Önceki ödeme",
   "ders1": "Yolcu koltuğu <b style=\"color:#ffb15c\">sorumluluktan kurtarmaz.</b>",
   "ders2": "🚫 Alkollü birinin<br><b style=\"color:#ff453a\">arabasına binme.</b>",
-  "black": "YOLCU YARALANDI<br><span style=\"color:#ff453a\">%8 MALUL KALDI</span>"
+  "black": "YOLCU YARALANDI<br><span style=\"color:#ff453a\">%8 MALUL KALDI</span>",
+  "sc": 4,
+  "upd": "upd4",
+  "tiL": 5.2,
+  "impKey": "kaza oluyor",
+  "hookMain": "“YOLCUYSAN<br>KUSURUN YOK,<br><span style=\"color:#ffb15c;font-size:1.25em\">TAZMİNAT</span><br>TAM”",
+  "camKaza": "const cz=Math.min(st.car.position.z,sc.M20.zI-3);P=new THREE.Vector3(-6,12,cz-16);L=new THREE.Vector3(4,0,cz+10);f=48;",
+  "camRest": "const cz=Math.min(st.car.position.z,sc.M20.zI-3);P=new THREE.Vector3(-6,12,cz-16);L=new THREE.Vector3(4,0,cz+10);f=48;",
+  "camKarar": "P=new THREE.Vector3(-8,13,sc.M20.zI-16);L=new THREE.Vector3(4,0,sc.M20.zI+6);f=48;",
+  "exp": 1.0,
+  "tagsK": "tg+=tag3(st.car,1.9,'ALKOLLÜ SÜRÜCÜ + YOLCU','#ff453a')",
+  "tagsS": "tg+=tag3(st.car,1.9,'YOLCUNUN PAYI?','#ffd60a','#111')"
  },
  {
   "N": 22,

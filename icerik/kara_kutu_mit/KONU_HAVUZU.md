@@ -31,10 +31,10 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 21. Bedava bindiysen tazminat isteyemezsin (hatır taşıması) — KK_MIT_16 (Yargıtay 4. HD E.2022/6578 K.2024/1013, onama: %20 indirim) https://lexara.com.tr/karar/382473
 22. Virajı alamadıysan suç tamamen sende — KK_MIT_17 (Danıştay 15. D E.2016/87 K.2017/2097, onama: sürücü %75, idare %25) https://lexara.com.tr/karar/18748639
 
-23. Kaçan/plakasız araç yüzünden zarar: kimse ödemez — KK_MIT_18 · SES BEKLİYOR (Yargıtay 4. HD E.2021/25417 K.2023/3802, onama: 82.818 TL) https://lexara.com.tr/karar/21247411
+23. Kaçan/plakasız araç yüzünden zarar: kimse ödemez — KK_MIT_18 · teslim 26.11 (Yargıtay 4. HD E.2021/25417 K.2023/3802, onama: 82.818 TL) https://lexara.com.tr/karar/21247411
 
-24. Ehliyetsiz sürücü kazada otomatik suçludur — KK_MIT_19 · SES BEKLİYOR (Yargıtay 12. CD E.2012/22236 K.2013/15336, onama: yaya soldan aniden girdi, sürücü kusursuz, beraat) https://lexara.com.tr/karar/10003318
-25. Alkollü sürücünün yolcusu tam tazminat alır — KK_MIT_20 · SES BEKLİYOR (Yargıtay 4. HD E.2022/1080 K.2023/6785, onama: %20 müterafik kusur, 44.326 TL) https://lexara.com.tr/karar/779170
+24. Ehliyetsiz sürücü kazada otomatik suçludur — KK_MIT_19 · SES BEKLİYOR V5-V7, sahne hazır (Yargıtay 12. CD E.2012/22236 K.2013/15336, onama: yaya soldan aniden girdi, sürücü kusursuz, beraat) https://lexara.com.tr/karar/10003318
+25. Alkollü sürücünün yolcusu tam tazminat alır — KK_MIT_20 · SES BEKLİYOR, sahne hazır (Yargıtay 4. HD E.2022/1080 K.2023/6785, onama: %20 müterafik kusur, 44.326 TL) https://lexara.com.tr/karar/779170
 26. Yoldaki mıcıra kaydıysan suç tamamen senin — KK_MIT_21 · SES BEKLİYOR (Danıştay 15. D E.2014/1980 K.2017/1205, onama: idare %40, 7.140 TL) https://lexara.com.tr/karar/18748332
 
 ## Bekleyen (öncelik sırası)

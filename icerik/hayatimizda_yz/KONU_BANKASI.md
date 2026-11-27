@@ -9,12 +9,12 @@ Durum: [ ] sırada · [x] KOD teslim · [-] atlandı (neden)
 - [x] KZ_HAYAT_02 · Otelde · Odada gizli kamera taraması, 19 cihaz, duman dedektörü kamera çıktı (A)
 - [x] KZ_HAYAT_03_COCUK · Çocuğumuzla · Disleksili oğlu için kendi yapay zekâ öğretmenini yapan anne (B: Scientific American)
 - [x] KZ_HAYAT_04_AILE · Ailede · Annesinin iPhone'unda 2 yıldır çıkış yapılmamış eski hesap + konumu 15 dk'da bir okuyan QR uygulaması (A) — herkes kendi telefonunda yapabilir
-- [ ] 05 · Mutfakta · Kamerayla meyveyi tanıyıp ekranda adını gösteren akıllı tartı (ESP8266 + Pi kamera, 253 bin izlenme) (C: tiktok.com/@corecortex_uk/video/7711021287723896086) — gerçekten görüntü tanıma mı, videodan doğrula
-- [ ] 06 · Evde · Bilgisayar ısınıyor → sıcaklık monitörü → gizli kripto madencisi bulundu, 112 °C (A)
-- [ ] 07 · Şehirde · Yıllardır kapanmayan çukur: 6 fotoğraf → 3D simülasyon → belediyeye gönderildi → 2 günde kapandı (A, Hollanda)
+- [-] 05 · Mutfakta · Kamerayla meyveyi tanıyıp ekranda adını gösteren akıllı tartı (ESP8266 + Pi kamera, 253 bin izlenme) (C: tiktok.com/@corecortex_uk/video/7711021287723896086) — gerçekten görüntü tanıma mı, videodan doğrula · ATLANDI 27.11: TikTok sayfası okunamadı, görüntü tanıma doğrulanamadı
+- [x] KZ_HAYAT_05_EV · Evde · Bilgisayar ısınıyor → sıcaklık monitörü → gizli kripto madencisi bulundu, 112 °C (A: Macworld + Wccftech, Reddit paylaşımı; madencinin kaynağı belirsiz diye anlatıldı)
+- [-] 07 · Şehirde · Yıllardır kapanmayan çukur: 6 fotoğraf → 3D simülasyon → belediyeye gönderildi → 2 günde kapandı (A, Hollanda) · ATLANDI 27.11: orijinal bireysel paylaşım bulunamadı
 - [ ] 08 · Evde · Islak ve kuru atığı kendisi ayıran akıllı çöp kutusu (C: tiktok.com/@corecortex_uk/video/7632007727635582230)
 - [ ] 09 · Çocuğumuzla · Oğlu oynayamasın diye değil, güvenli oynasın diye: kalabalık görünen ama yabancısız, harf toplayıp kelime öğreten kendi oyunu (A)
-- [ ] 10 · Tarlada · Ziraat okumamış eski memur, 100 hektar Hokkaido: sera kapaklarını mesajlaşma uygulamasından açıp kapatan sistem, pano şemasını fotoğraftan çıkardı (A)
+- [x] KZ_HAYAT_06_TARLA · Tarlada · Ziraat okumamış eski memur, 100 hektar Hokkaido: sera kapaklarını mesajlaşma uygulamasından açıp kapatan sistem, pano şemasını fotoğraftan çıkardı (A: x.com/tomiyasu16/status/2038922364956914167 + chatgptpro.substack.com röportajı)
 - [ ] 11 · Evde · Duman ve kötü havayı algılayınca öten hava kalitesi alarmı, MQ-135 (C: tiktok.com/@corecortex_uk/video/7711341302213889302)
 - [ ] 12 · Evde · Kayıp telefon: Bul özelliği kapalı, 1 dakikada Bluetooth "sıcak-soğuk" programı (A)
 - [ ] 13 · Evde · Yavaş internet: modemin fotoğrafı → kanal/frekans/Wi-Fi modu düzeltmeleri, her adımda hız ölçümü (A)

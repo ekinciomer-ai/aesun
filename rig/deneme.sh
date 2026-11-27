@@ -9,12 +9,19 @@ N=$(ls d/k | wc -l)
 t=$(s); realesrgan-ncnn-vulkan -i /is/d/k -o /is/d/b -n realesr-animevideov3 -s 2 -g "$G0" >/is/esrgan.log 2>&1; e1=$(f $t)
 nb=$(ls d/b | wc -l); e2=-1
 # tüm kartlar ancak tek kart sorunsuz çalıştıysa denenir (kartlar kilitlenmesin)
-if [ "$nb" -gt 0 ]; then rm -f d/b/*; t=$(s); realesrgan-ncnn-vulkan -i /is/d/k -o /is/d/b -n realesr-animevideov3 -s 2 -g "$GL" >>/is/esrgan.log 2>&1; e2=$(f $t); nb=$(ls d/b | wc -l); fi
+# her karta ayrı iş: kareler kart sayısı kadar parçaya bölünür, her kart kendi parçasını aynı anda işler
+if [ "$nb" -gt 0 ]; then
+  rm -f d/b/*; IFS=, read -ra GA <<< "$GL"; n=${#GA[@]}; i=0
+  for fr in $(ls d/k); do mkdir -p d/p$((i % n)); ln -s /is/d/k/$fr d/p$((i % n))/$fr; i=$((i+1)); done
+  t=$(s)
+  for j in $(seq 0 $((n-1))); do realesrgan-ncnn-vulkan -i /is/d/p$j -o /is/d/b -n realesr-animevideov3 -s 2 -g ${GA[$j]} -j 1:1:1 >>/is/esrgan.log 2>&1 & done; wait
+  e2=$(f $t); nb=$(ls d/b | wc -l)
+fi
 if command -v rife-ncnn-vulkan >/dev/null; then t=$(s); rife-ncnn-vulkan -i /is/d/k -o /is/d/r -g "$G0" >/is/rife.log 2>&1; e3=$(f $t); else e3=-1; fi; nr=$(ls d/r | wc -l)
 t=$(s); if ffmpeg -loglevel error -y -vaapi_device /dev/dri/$RD -i /is/d/test.mp4 -vf format=nv12,hwupload -c:v h264_vaapi /is/d/v.mp4 2>/is/vaapi.log; then e4=$(f $t); else e4=-1; fi
 t=$(s); ffmpeg -loglevel error -y -i /is/d/test.mp4 -c:v libx264 -preset veryfast /is/d/c.mp4; e5=$(f $t)
 python3 -c "import json;print(json.dumps({'kare':$N,'buyutme_2x_tek_gpu_sn':$e1,'buyutme_2x_tum_gpu_sn':$e2,'buyutulen_kare':$nb,
- 'rife_tek_gpu_sn':$e3,'rife_kare':$nr,'kodlama_gpu_sn':$e4,'kodlama_cpu_sn':$e5,'not':'120 kare 640x360 test videosu','gpu_sira':'$GL','render':'$RD',
+ 'rife_tek_gpu_sn':$e3,'rife_kare':$nr,'kodlama_gpu_sn':$e4,'kodlama_cpu_sn':$e5,'not':'120 kare 640x360, kartlar paralel','gpu_sira':'$GL','render':'$RD',
  'esrgan_log':open('/is/esrgan.log').read()[-300:] if $nb==0 else '','vaapi_log':open('/is/vaapi.log').read()[-300:] if '$e4'=='-1' else '',
  'rife_log':open('/is/rife.log').read()[-200:] if $nr==0 and __import__('os').path.exists('/is/rife.log') else ''}))" > /is/deneme.json
 rm -rf d

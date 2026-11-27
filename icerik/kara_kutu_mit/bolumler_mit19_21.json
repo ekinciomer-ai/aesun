@@ -86,7 +86,7 @@
    ]
   ],
   "dogru": "Doğru şık: B",
-  "sonuc": "SONUÇ: %20 İNDİRİM · 44.326 TL",
+  "sonuc": "SONUÇ: %20 İNDİRİM",
   "clues": [
    [
     "Birinci",
@@ -143,7 +143,7 @@
    ],
    [
     "B",
-    "İdare, %40'ını"
+    "İdare, %40’ını"
    ],
    [
     "C",
@@ -151,7 +151,7 @@
    ]
   ],
   "dogru": "Doğru şık: B",
-  "sonuc": "SONUÇ: İDARE 7.140 TL ÖDEYECEK",
+  "sonuc": "SONUÇ: İDARE %40 ÖDER",
   "clues": [
    [
     "Birinci",
@@ -179,6 +179,18 @@
   "hukumKey": "İdare, zararın",
   "ders1": "Yoldaki tehlikeden <b style=\"color:#ffb15c\">idare de sorumlu</b> olabilir.",
   "ders2": "📸 Kazada tutanak tut,<br><b style=\"color:#34c759\">yolun fotoğrafını çek.</b>",
-  "black": "ARAÇ BARİYERE ÇARPTI"
+  "black": "ARAÇ BARİYERE ÇARPTI",
+  "sc": 6,
+  "upd": "upd5",
+  "tiL": 7.0,
+  "impKey": "bariyerlere çarpıyor",
+  "hookMain": "“MICIRA<br>KAYDIYSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">SUÇ</span><br>TAMAMEN SENİN”",
+  "camKaza": "const cz=Math.min(st.car.position.z,sc.M21.zI-2);P=new THREE.Vector3(6,13,cz-18);L=new THREE.Vector3(-3,0,cz+10);f=48;",
+  "camRest": "const cz=Math.min(st.car.position.z,sc.M21.zI-2);P=new THREE.Vector3(6,13,cz-18);L=new THREE.Vector3(-3,0,cz+10);f=48;",
+  "camKarar": "P=new THREE.Vector3(7,12,sc.M21.zI-14);L=new THREE.Vector3(-3,0,sc.M21.zI+4);f=48;",
+  "exp": "1.0",
+  "tagsK": "tg+=tag3(st.car,1.9,'SÜRÜCÜ','#ffd60a','#111')",
+  "tagsS": "tg+=tag3(st.car,1.9,'KUSUR KİMDE?','#ffd60a','#111')",
+  "sahne": "S[6].upd5 (27.11: iki şeritli yol + sağ şeritte mıcır + iki yanda çelik bariyer)"
  }
 ]

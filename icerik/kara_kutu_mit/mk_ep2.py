@@ -16,6 +16,7 @@ mk_tl.DISP.update({'otuz bir bin altı yüz yirmi iki lira': '31.622 TL', 'yirmi
   'yüzde yetmiş beş': '%75', 'yüzde yirmi beş': '%25', 'altı bin altı yüz yetmiş beş lira': '6.675 TL',
   'seksen iki bin sekiz yüz on sekiz lira': '82.818 TL', 'yüzde on beş': '%15'})
 mk_tl.DISP.update({'yüzde sekiz': '%8', 'iki virgül bir promil': '2,1 promil', 'kırk dört bin üç yüz yirmi altı lira': '44.326 TL'})
+mk_tl.DISP.update({'on yedi bin sekiz yüz elli lira': '17.850 TL', 'yüzde kırk': '%40', 'yüzde kırkını': "%40'ını", 'yedi bin yüz kırk lirayı': "7.140 TL'yi"})
 # uzun ifadeler önce değişsin ('yüzde yirmi beş' → '%20 beş' olmasın)
 _d = dict(sorted(mk_tl.DISP.items(), key=lambda kv: -len(kv[0]))); mk_tl.DISP.clear(); mk_tl.DISP.update(_d)
 

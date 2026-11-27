@@ -127,19 +127,16 @@
    "ses": "V1 KK_MIT_18_C, V2-V4 KK_MIT_18_D, V5-V7 KK_MIT_18_E (hepsi gemini-3.1-flash-tts-preview/charon); birleştirmede KK_MIT_18__V1..V7 adına kopyalandı",
    "sahne": "S[6].upd4",
    "teslim": "2026-11-26 (islem_havuz_kk_gunluk_20261126b)"
-  }
- ],
- "ertelenen": [
+  },
   {
    "kod": "KK_MIT_19_EHLIYETSIZ",
    "mit": "Ehliyetsiz sürücü kazaya karıştıysa suç otomatik olarak onundur",
    "mit_no": 19,
    "render_no": 20,
    "kaynak": "Yargıtay 12. CD E.2012/22236 K.2013/15336 (onama; taksirle yaralama + TGTS beraat) https://lexara.com.tr/karar/10003318",
-   "ses": "V1 KK_MIT_19, V2 KK_MIT_19_B, V3-V4 KK_MIT_19_C hazır (cikti/); V5-V7 → bekleyen_tts/KK_MIT_19_E.json. Birleştirmede KK_MIT_19__V1..V7 adına kopyala (metinler tamam/KK_MIT_19.json).",
-   "spec": "bolumler_mit19_21.json (N=20)",
-   "kart": "bekleyen_kart/KK_MIT_19_EHLIYETSIZ.json",
-   "sahne": "S[4].upd3 HAZIR (gece, bölünmüş yol, yaya refüjden/soldan; 26.11 test edildi). bolumler_mit19_21.json N=20 sc/upd/cam/tag alanları dolduruldu."
+   "ses": "V1 KK_MIT_19, V2 _B, V3-V4 _C, V5-V7 _E (hepsi gemini-3.1-flash-tts-preview/charon); birleştirmede KK_MIT_19__V1..V7",
+   "sahne": "S[4].upd3",
+   "teslim": "2026-11-27 (islem_havuz_kk_gunluk_20261127)"
   },
   {
    "kod": "KK_MIT_20_ALKOLLU_YOLCU",
@@ -147,10 +144,9 @@
    "mit_no": 20,
    "render_no": 21,
    "kaynak": "Yargıtay 4. HD E.2022/1080 K.2023/6785 (onama; 2,1 promil, %20 müterafik kusur, 44.326,83 TL) https://lexara.com.tr/karar/779170",
-   "ses": "hiç okunamadı (kota; KK_MIT_20, KK_MIT_20_B denendi) → bekleyen_tts/KK_MIT_20.json",
-   "spec": "bolumler_mit19_21.json (N=21)",
-   "kart": "bekleyen_kart/KK_MIT_20_ALKOLLU_YOLCU.json",
-   "sahne": "S[4].upd4 HAZIR (gece, tek araç zikzak çizip refüje çarpar, TEMSİLİ; kaza anı siyah ekran). bolumler_mit19_21.json N=21 alanları dolduruldu."
+   "ses": "V1-V4 KK_MIT_20, V5-V7 KK_MIT_20_B (hepsi gemini-3.1-flash-tts-preview/charon); birleştirmede KK_MIT_20__V1..V7",
+   "sahne": "S[4].upd4",
+   "teslim": "2026-11-27 (islem_havuz_kk_gunluk_20261127)"
   },
   {
    "kod": "KK_MIT_21_MICIR",
@@ -158,12 +154,12 @@
    "mit_no": 21,
    "render_no": 22,
    "kaynak": "Danıştay 15. D E.2014/1980 K.2017/1205 (onama; idare %40, 7.140 TL, manevi ret) https://lexara.com.tr/karar/18748332",
-   "ses": "hiç okunamadı (kota) → bekleyen_tts/KK_MIT_21.json",
-   "spec": "bolumler_mit19_21.json (N=22, src Danıştay)",
-   "kart": "bekleyen_kart/KK_MIT_21_MICIR.json",
-   "sahne": "YENİ gerekli: ilçe yolu + mıcır yaması + çelik bariyer"
+   "ses": "V1-V5 KK_MIT_21_B, V6-V7 KK_MIT_21_C (hepsi gemini-3.1-flash-tts-preview/charon); birleştirmede KK_MIT_21__V1..V7",
+   "sahne": "S[6].upd5 (27.11 yeni: sağ şeritte mıcır + çelik bariyer)",
+   "teslim": "2026-11-27 (islem_havuz_kk_gunluk_20261127)"
   }
  ],
+ "ertelenen": [],
  "ertelenen_not": "26.11.2026 14:00: #18 teslim edildi. Kota (3 anahtar, 429 PerDay) #19 V5-V7 ve #20'nin tamamını okutmadı; 27.11 11:00 sonrası sırayla bekleyen_tts/KK_MIT_19_E.json, KK_MIT_20.json, KK_MIT_21.json gönder; sahneler #19-#20 hazır, #21 yeni sahne ister.",
  "son_gun": "2026-11-26: #17 teslim (01:05), #18 teslim (14:00). #19-#20 kota nedeniyle 27.11'e kaldı.",
  "iptal": [

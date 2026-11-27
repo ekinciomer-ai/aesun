@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-27T23:05+03:00",
+ "olusturma": "2026-11-27T23:15+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -765,7 +765,7 @@
    "izlenme_yuzde": 58,
    "en_iyi": {
     "baslik": "Dünya bir anda dursa kaç km/sa savrulurdun? 🌍 #shorts",
-    "i48": 586
+    "i48": 587
    },
    "kaydirmadan_izleme_yuzde": 39
   },
@@ -838,12 +838,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 12,
+   "medyan_48sa": 9,
    "tutma_orani": 0,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Dev Dalga Kurtarma Anında Tekneyi 360 Derece Takla Attırdı! #shorts",
-    "i48": 12
+    "i48": 9
    }
   },
   {
@@ -940,15 +940,15 @@
   }
  ],
  "esikler": {
+  "Kozmos Lab": 95,
   "Yolu Seç !": 262,
-  "Antik Stüdyo": 637,
-  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 216,
   "Estudio Antiguo": 136,
-  "Ancient Studio": 192,
+  "Ömür Dediğin": 50,
   "LVL MAX": 3315,
   "Nasıl Yapıldı": 171,
-  "Kozmos Lab": 95,
-  "Kozmos Lab TR": 216
+  "Antik Stüdyo": 637,
+  "Ancient Studio": 192
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -958,11 +958,11 @@
    },
    "02:00": {
     "n": 3,
-    "medyan": 1002
+    "medyan": 1003
    },
    "03:00": {
     "n": 2,
-    "medyan": 735
+    "medyan": 733
    },
    "09:00": {
     "n": 1,
@@ -1150,7 +1150,7 @@
    },
    "06:00": {
     "n": 4,
-    "medyan": 8
+    "medyan": 6
    },
    "12:00": {
     "n": 3,
@@ -1749,7 +1749,7 @@
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 167 izlenme, 3 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",
   "Nasıl Yapıldı: en iyi yayın saati şimdilik 19:00 (medyan 674 izlenme, 2 video).",
-  "LVL MAX: en iyi yayın saati şimdilik 06:00 (medyan 8 izlenme, 4 video).",
+  "LVL MAX: en iyi yayın saati şimdilik 12:00 (medyan 8 izlenme, 3 video).",
   "Ancient Studio: tutan Short'lar ortalama %66 izleniyor, tutmayanlar %53 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %44 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %60 izleniyor, tutmayanlar %60 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",

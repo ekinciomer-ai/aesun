@@ -2636,6 +2636,165 @@ window.renderMit19=function(t){const sc=S[6];const lt=lt19(t);const st=sc.upd4(l
  if(t>=T19.slow&&t<T19.karar&&d<-.05){tg+=tag3(st.car,3.8,'TAZMİNAT?','#ffd60a','#111')}
  tags.innerHTML=tg;return true};
 
+const TPi11=await (await fetch('tl/mitPi11_tl.json?'+Date.now())).json();
+function ltPi11(t){const M=TPi11.map;if(t<TPi11.kaza)return 0.5+t*.2;if(t<TPi11.poll){for(let i=0;i<M.length-1;i++){if(t<=M[i+1][0])return lerp(M[i][1],M[i+1][1],(t-M[i][0])/(M[i+1][0]-M[i][0]))}return M[M.length-1][1]}
+ const lf=M[M.length-1][1];if(t<TPi11.rew)return lf;if(t<TPi11.rew+TPi11.rewDur)return lerp(lf,TPi11.rwTo,sm((t-TPi11.rew)/TPi11.rewDur));if(t<TPi11.slow)return TPi11.rwTo;if(t<TPi11.karar)return TPi11.rwTo+(t-TPi11.slow)*TPi11.slowRate;const l2=TPi11.rwTo+(TPi11.karar-TPi11.slow)*TPi11.slowRate;return l2+(t-TPi11.karar)*.15}
+function pbarPi11(t){const st=[['İDDİA',0],['KAZA',TPi11.kaza],['OYLA',TPi11.poll],['KARAR',TPi11.karar],['DERS',TPi11.ders]];let cur=0;st.forEach((s,i)=>{if(t>=s[1])cur=i});
+ return `<div style="position:absolute;left:5%;right:5%;top:10.2%;display:flex;gap:2%">`+st.map((s,i)=>{const nx=st[i+1]?st[i+1][1]:TPi11.end;const f=i<cur?100:i===cur?Math.min(1,(t-s[1])/(nx-s[1]))*100:0;return `<div style="flex:1;text-align:center;font-size:calc(var(--W)*0.024);font-weight:800;letter-spacing:.06em;opacity:${i<=cur?1:.45}"><div style="height:5px;border-radius:3px;margin-bottom:4px;background:linear-gradient(90deg,#ff7a00 ${f}%,rgba(255,255,255,.25) 0)"></div>${s[0]}</div>`}).join('')+`</div>`}
+function hookPi11(t){const e=TPi11.kaza;if(t>e)return '';const o=1-sm((t-e+.4)/.4);const s1=fadeIn(t,.2,.3),s2=fadeIn(t,3.4,.3);const st=clamp((t-4.4)/.25,0,1);
+ return `<div style="position:absolute;left:6%;right:6%;top:22%;opacity:${o};text-align:center;font-family:'Anton';line-height:1.05">
+ <div style="display:inline-block;background:#ff7a00;color:#111;padding:.1em .5em;font-size:calc(var(--W)*0.045);letter-spacing:.1em;opacity:${s1}">PATRON MU HAKLI? #11</div>
+ <div style="font-size:calc(var(--W)*0.09);margin-top:.3em;opacity:${s1};transform:scale(${lerp(1.15,1,sm((t-.2)/.4))});text-shadow:0 4px 20px #000">“SİGORTASIZ<br>ÇALIŞTIYSAN<br><span style="color:#ffb15c;font-size:1.25em">O AYLAR</span><br>YANDI”</div>
+ <div style="font-size:calc(var(--W)*0.06);margin-top:.5em;opacity:${s2};text-shadow:0 4px 20px #000;font-family:'Fira Sans';font-weight:900">Peki mahkeme<br><span style="color:#ff453a">ne dedi?</span></div>
+ <div style="display:inline-block;margin-top:.4em;border:5px solid #ffd60a;color:#ffd60a;padding:.05em .4em;font-size:calc(var(--W)*0.09);border-radius:10px;opacity:${st};transform:rotate(-8deg) scale(${lerp(2.2,1,sm(st))})">GERÇEK DAVA</div></div>`}
+function pollPi11(t){const a=TPi11.poll,e=TPi11.rew;if(t<a||t>e)return '';const o=fadeIn(t,a,.3)*(1-sm((t-e+.35)/.35));
+ const opts=[['A', 'Hayır, kayıt yok'], ['B', 'Sadece son 2 ayı'], ['C', 'Evet, tamamı']];
+ const cd=TPi11.cd0,left=Math.max(0,Math.ceil(3-(t-cd)));const prog=clamp((t-cd)/3,0,1);const R=34,C=2*Math.PI*R;
+ let h=`<div id="card" style="top:20%;opacity:${o};text-align:left"><div class="hd" style="font-size:calc(var(--W)*0.066)">8 AY SİGORTAYA SAYILDI MI?</div>`;
+ opts.forEach(([k,txt],i)=>{const oi=fadeIn(t,a+.5+i*.45,.3);const pulse=t>cd?1+.04*Math.sin(t*9+i):1;h+=`<div style="display:flex;align-items:center;gap:4%;margin:.45em 0;padding:.45em .6em;border-radius:12px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);opacity:${oi};transform:translateX(${(1-oi)*40}px) scale(${pulse});font-size:calc(var(--W)*0.047);font-weight:800"><span style="flex:none;width:1.6em;height:1.6em;border-radius:50%;background:#ff7a00;color:#111;display:flex;align-items:center;justify-content:center;font-family:'Anton'">${k}</span>${txt}</div>`});
+ h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.6em;opacity:${fadeIn(t,cd-.2)}"><div style="font-size:calc(var(--W)*0.045);font-weight:800;color:#ffd60a">💬 Harfini yoruma yaz!</div>
+ <svg width="${W*0.17}" height="${W*0.17}" viewBox="0 0 80 80"><circle cx="40" cy="40" r="${R}" fill="rgba(0,0,0,.5)" stroke="rgba(255,255,255,.2)" stroke-width="7"/><circle cx="40" cy="40" r="${R}" fill="none" stroke="#ff7a00" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*prog}" transform="rotate(-90 40 40)"/><text x="40" y="51" text-anchor="middle" font-family="Anton" font-size="32" fill="#fff">${left}</text></svg></div></div>`;return h}
+function rewPi11(t){const a=TPi11.rew,e=a+TPi11.rewDur;if(t<a||t>e+.2)return '';const o=1-sm((t-e)/.2);
+ return `<div style="position:absolute;inset:0;opacity:${o};background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,transparent 2px 5px)"></div><div style="position:absolute;left:6%;top:24%;font-family:'Anton';font-size:calc(var(--W)*0.11);color:#fff;text-shadow:3px 0 #ff2d55,-3px 0 #0af;opacity:${o*(Math.floor(t*6)%2?1:.75)}">◀◀ GERİ SAR</div>`}
+function verdictPi11(t){const a=TPi11.karar,e=TPi11.ders;if(t<a||t>e)return '';const o=fadeIn(t,a)*(1-sm((t-e+.4)/.4));
+ let h=`<div id="card" style="top:18%;opacity:${o}"><div class="hd">MAHKEMENİN GEREKÇESİ</div>`;
+ TPi11.reasons.forEach(([b,txt])=>{if(t<b)return;const u=fadeIn(t,b);h+=`<div style="display:flex;gap:3%;align-items:center;font-size:calc(var(--W)*0.04);font-weight:700;padding:.25em 0;opacity:${u};transform:translateX(${(1-u)*30}px)"><span style="color:#34c759;font-weight:900">✓</span>${txt}</div>`});
+ if(t>=TPi11.hukum){const u=fadeIn(t,TPi11.hukum);h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5em;opacity:${u};font-size:calc(var(--W)*0.042);font-weight:900"><span>SONUÇ: 8 AY HİZMET TESCİL EDİLDİ</span><span style="background:#34c759;color:#111;border-radius:6px;padding:.05em .45em;font-size:.8em">Doğru şık: C</span></div>`}
+ return h+'</div>'+(t>=TPi11.onay?stampH(t,TPi11.onay,'YARGITAY<br>ONADI','#34c759',e).replace('class="stamp" style="','class="stamp" style="top:69.5%;right:auto;left:18%;font-size:calc(var(--W)*0.06);'):'')}
+function dersPi11(t){const a=TPi11.ders;if(t<a)return '';const o=fadeIn(t,a);const n=fadeIn(t,TPi11.next);
+ return `<div id="card" style="top:20%;opacity:${o}"><div class="hd">İDDİA ÇÖKTÜ</div><div style="font-size:calc(var(--W)*0.047);font-weight:700;line-height:1.3">Sigortasız geçen aylar <b style="color:#ffb15c">kaybolmaz.</b></div><div style="margin-top:.8em;padding:.6em .7em;border-radius:10px;background:rgba(52,199,89,.15);border:1px solid #34c759;opacity:${n};font-size:calc(var(--W)*0.042);font-weight:800">📞 Tanık ve kayıtla<br><b style="color:#34c759">sigortana işlenir.</b></div></div>`}
+function capPi11(t){for(const [a,b,txt] of TPi11.caps){if(t>=a&&t<b){const o=fadeIn(t,a,.15)*(1-sm((t-b+.15)/.15));return `<div id="cap" style="opacity:${o};bottom:7%">${txt}</div>`}}return ''}
+
+
+let LAMPSPi11=null,ARRPi11=null;
+window.renderMitPi11=function(t){const sc=S[12];const lt=ltPi11(t);const st=sc.upd(lt);
+ if(false){LAMPSPi11=[];ARRPi11=[];sc.s.traverse(o=>{if(o.isMesh&&o.material&&o.material.emissive&&o.geometry&&o.geometry.type==='CircleGeometry')LAMPSPi11.push(o.material);if(o.isMesh&&o.material&&o.material.isMeshBasicMaterial&&o.geometry&&o.geometry.type==='PlaneGeometry'&&o.material.transparent&&(o.material.color.getHex()===0xff3b30||o.material.color.getHex()===0x34c759))ARRPi11.push(o.material)})}
+ 
+ let P,L,f=46;
+ if(t<TPi11.kaza){if(!window.__dPi11){S[12].setSet('okul','masa','kadin');S[12].setDoc("SGK İŞE GİRİŞ BİLDİRGESİ",["İşe giriş: Ekim", "", "Önceki 8 ay:", "kayıt bulunmuyor"],'');window.__dPi11=1}const c=CAMSHOT('yan',sm(t/TPi11.kaza),st);P=c[0];L=c[1];f=c[2];}
+ else{if(!window.__dPi11){S[12].setSet('okul','masa','kadin');S[12].setDoc("SGK İŞE GİRİŞ BİLDİRGESİ",["İşe giriş: Ekim", "", "Önceki 8 ay:", "kayıt bulunmuyor"],'');window.__dPi11=1}const c=CAMSEQ(t,TPi11,st,[["genis", "kaza"], ["omuz_patron", "kaza", 3], ["belge", "_imp", -1.2], ["yan_sol", "rew"], ["tepe", "slow"], ["yaklas", "karar"], ["yorunge", "ders"]]);P=c[0];L=c[1];f=c[2];if(t>=TPi11.karar){}}
+ camera.position.copy(P);camera.fov=f;camera.updateProjectionMatrix();camera.lookAt(L);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);
+ let dim=0;if(t>=TPi11.poll&&t<TPi11.rew)dim=.45*fadeIn(t,TPi11.poll,.4);if(t>=TPi11.karar)dim=.3;
+ let blk=1-sm(t/.3);const d=st.dt;if(t<TPi11.poll&&d>=0){blk=Math.max(blk,d<.5?1:1-sm((d-.5)/.4))}
+ if(t>=TPi11.slow&&t<TPi11.karar&&d>=0)blk=Math.max(blk,1);
+ flash.style.background='#000';flash.style.opacity=Math.max(dim,blk);
+ let h=`<div id="brand"><div class="dot"></div><div>KARA KUTU<small>PATRON MU HAKLI? · İŞ HUKUKU</small></div></div>`+pbarPi11(t)+hookPi11(t)+pollPi11(t)+rewPi11(t)+verdictPi11(t)+dersPi11(t)+capPi11(t);
+ if(t>=TPi11.kaza&&t<TPi11.poll)h+=`<div style="position:absolute;right:6%;top:15%;font-weight:900;font-size:calc(var(--W)*0.03);background:rgba(0,0,0,.6);border:1px solid #fff;padding:.2em .6em;border-radius:6px">TEMSİLİ CANLANDIRMA</div>`;
+ if(t>=TPi11.poll&&t<TPi11.rew)h+=`<div style="position:absolute;right:6%;top:15%;font-weight:900;font-size:calc(var(--W)*0.036);background:rgba(255,255,255,.9);color:#111;padding:.2em .6em;border-radius:6px">❚❚ DURDURULDU</div>`;
+ if(t>=TPi11.slow&&t<TPi11.karar)h+=`<div style="position:absolute;right:6%;top:15%;opacity:${fadeIn(t,TPi11.slow)};font-weight:900;font-size:calc(var(--W)*0.036);background:#ff2d55;padding:.2em .6em;border-radius:6px">● YAVAŞ ÇEKİM</div>`;
+ if(t>=TPi11.slow&&t<TPi11.karar){TPi11.clues.forEach(([b,txt],i)=>{if(t<b)return;h+=`<div style="position:absolute;left:6%;right:6%;top:${22+i*6.2}%;opacity:${fadeIn(t,b)};transform:translateX(${(1-fadeIn(t,b))*-30}px);background:rgba(12,12,14,.85);border-left:5px solid #ffd60a;border-radius:8px;padding:.35em .6em;font-weight:800;font-size:calc(var(--W)*0.04)">🔎 ${txt}</div>`})}
+ if(t<TPi11.poll&&t>=TPi11._imp+.4){h+=`<div style="position:absolute;z-index:20;left:6%;right:6%;top:40%;text-align:center;font-family:'Anton';font-size:calc(var(--W)*0.085);opacity:${fadeIn(t,TPi11._imp+.4)};text-shadow:0 3px 14px #000">8 AY<br><span style="color:#ff453a">SİGORTASIZ</span><br><span style="font-size:.55em">maaş elden</span></div>`}
+ h+=`<div class="src" style="bottom:2.6%">Kaynak: Yargıtay kararı · Kişi, şirket ve yer bilgisi verilmemiştir.</div>`;ui.innerHTML=h;
+ let tg='';if(t>=TPi11.kaza&&t<TPi11.poll&&d<-.05){tg+=tag3(st.wkr,1.0,'MUHASEBE YRD.','#ffd60a','#111');tg+=tag3(st.boss,2.0,'İŞVEREN','#ff453a')}
+ if(t>=TPi11.slow&&t<TPi11.karar&&d<-.05){tg+=tag3(st.doc,.35,'GİRİŞ TARİHİ?','#ffd60a','#111')}
+ tags.innerHTML=tg;return true};
+
+const TPi12=await (await fetch('tl/mitPi12_tl.json?'+Date.now())).json();
+function ltPi12(t){const M=TPi12.map;if(t<TPi12.kaza)return 0.5+t*.2;if(t<TPi12.poll){for(let i=0;i<M.length-1;i++){if(t<=M[i+1][0])return lerp(M[i][1],M[i+1][1],(t-M[i][0])/(M[i+1][0]-M[i][0]))}return M[M.length-1][1]}
+ const lf=M[M.length-1][1];if(t<TPi12.rew)return lf;if(t<TPi12.rew+TPi12.rewDur)return lerp(lf,TPi12.rwTo,sm((t-TPi12.rew)/TPi12.rewDur));if(t<TPi12.slow)return TPi12.rwTo;if(t<TPi12.karar)return TPi12.rwTo+(t-TPi12.slow)*TPi12.slowRate;const l2=TPi12.rwTo+(TPi12.karar-TPi12.slow)*TPi12.slowRate;return l2+(t-TPi12.karar)*.15}
+function pbarPi12(t){const st=[['İDDİA',0],['KAZA',TPi12.kaza],['OYLA',TPi12.poll],['KARAR',TPi12.karar],['DERS',TPi12.ders]];let cur=0;st.forEach((s,i)=>{if(t>=s[1])cur=i});
+ return `<div style="position:absolute;left:5%;right:5%;top:10.2%;display:flex;gap:2%">`+st.map((s,i)=>{const nx=st[i+1]?st[i+1][1]:TPi12.end;const f=i<cur?100:i===cur?Math.min(1,(t-s[1])/(nx-s[1]))*100:0;return `<div style="flex:1;text-align:center;font-size:calc(var(--W)*0.024);font-weight:800;letter-spacing:.06em;opacity:${i<=cur?1:.45}"><div style="height:5px;border-radius:3px;margin-bottom:4px;background:linear-gradient(90deg,#ff7a00 ${f}%,rgba(255,255,255,.25) 0)"></div>${s[0]}</div>`}).join('')+`</div>`}
+function hookPi12(t){const e=TPi12.kaza;if(t>e)return '';const o=1-sm((t-e+.4)/.4);const s1=fadeIn(t,.2,.3),s2=fadeIn(t,3.4,.3);const st=clamp((t-4.4)/.25,0,1);
+ return `<div style="position:absolute;left:6%;right:6%;top:22%;opacity:${o};text-align:center;font-family:'Anton';line-height:1.05">
+ <div style="display:inline-block;background:#ff7a00;color:#111;padding:.1em .5em;font-size:calc(var(--W)*0.045);letter-spacing:.1em;opacity:${s1}">PATRON MU HAKLI? #12</div>
+ <div style="font-size:calc(var(--W)*0.09);margin-top:.3em;opacity:${s1};transform:scale(${lerp(1.15,1,sm((t-.2)/.4))});text-shadow:0 4px 20px #000">“ARABULUCUDA<br>İMZALADIN MI?<br><span style="color:#ffb15c;font-size:1.25em">SONRA</span><br>BOZDURURSUN”</div>
+ <div style="font-size:calc(var(--W)*0.06);margin-top:.5em;opacity:${s2};text-shadow:0 4px 20px #000;font-family:'Fira Sans';font-weight:900">Peki mahkeme<br><span style="color:#ff453a">ne dedi?</span></div>
+ <div style="display:inline-block;margin-top:.4em;border:5px solid #ffd60a;color:#ffd60a;padding:.05em .4em;font-size:calc(var(--W)*0.09);border-radius:10px;opacity:${st};transform:rotate(-8deg) scale(${lerp(2.2,1,sm(st))})">GERÇEK DAVA</div></div>`}
+function pollPi12(t){const a=TPi12.poll,e=TPi12.rew;if(t<a||t>e)return '';const o=fadeIn(t,a,.3)*(1-sm((t-e+.35)/.35));
+ const opts=[['A', 'Evet, baskı var'], ['B', 'Hayır, anlaşma geçerli'], ['C', 'Fark ödenecek']];
+ const cd=TPi12.cd0,left=Math.max(0,Math.ceil(3-(t-cd)));const prog=clamp((t-cd)/3,0,1);const R=34,C=2*Math.PI*R;
+ let h=`<div id="card" style="top:20%;opacity:${o};text-align:left"><div class="hd" style="font-size:calc(var(--W)*0.066)">ANLAŞMA BOZULDU MU?</div>`;
+ opts.forEach(([k,txt],i)=>{const oi=fadeIn(t,a+.5+i*.45,.3);const pulse=t>cd?1+.04*Math.sin(t*9+i):1;h+=`<div style="display:flex;align-items:center;gap:4%;margin:.45em 0;padding:.45em .6em;border-radius:12px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);opacity:${oi};transform:translateX(${(1-oi)*40}px) scale(${pulse});font-size:calc(var(--W)*0.047);font-weight:800"><span style="flex:none;width:1.6em;height:1.6em;border-radius:50%;background:#ff7a00;color:#111;display:flex;align-items:center;justify-content:center;font-family:'Anton'">${k}</span>${txt}</div>`});
+ h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.6em;opacity:${fadeIn(t,cd-.2)}"><div style="font-size:calc(var(--W)*0.045);font-weight:800;color:#ffd60a">💬 Harfini yoruma yaz!</div>
+ <svg width="${W*0.17}" height="${W*0.17}" viewBox="0 0 80 80"><circle cx="40" cy="40" r="${R}" fill="rgba(0,0,0,.5)" stroke="rgba(255,255,255,.2)" stroke-width="7"/><circle cx="40" cy="40" r="${R}" fill="none" stroke="#ff7a00" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*prog}" transform="rotate(-90 40 40)"/><text x="40" y="51" text-anchor="middle" font-family="Anton" font-size="32" fill="#fff">${left}</text></svg></div></div>`;return h}
+function rewPi12(t){const a=TPi12.rew,e=a+TPi12.rewDur;if(t<a||t>e+.2)return '';const o=1-sm((t-e)/.2);
+ return `<div style="position:absolute;inset:0;opacity:${o};background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,transparent 2px 5px)"></div><div style="position:absolute;left:6%;top:24%;font-family:'Anton';font-size:calc(var(--W)*0.11);color:#fff;text-shadow:3px 0 #ff2d55,-3px 0 #0af;opacity:${o*(Math.floor(t*6)%2?1:.75)}">◀◀ GERİ SAR</div>`}
+function verdictPi12(t){const a=TPi12.karar,e=TPi12.ders;if(t<a||t>e)return '';const o=fadeIn(t,a)*(1-sm((t-e+.4)/.4));
+ let h=`<div id="card" style="top:18%;opacity:${o}"><div class="hd">MAHKEMENİN GEREKÇESİ</div>`;
+ TPi12.reasons.forEach(([b,txt])=>{if(t<b)return;const u=fadeIn(t,b);h+=`<div style="display:flex;gap:3%;align-items:center;font-size:calc(var(--W)*0.04);font-weight:700;padding:.25em 0;opacity:${u};transform:translateX(${(1-u)*30}px)"><span style="color:#34c759;font-weight:900">✓</span>${txt}</div>`});
+ if(t>=TPi12.hukum){const u=fadeIn(t,TPi12.hukum);h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5em;opacity:${u};font-size:calc(var(--W)*0.042);font-weight:900"><span>SONUÇ: ANLAŞMA GEÇERLİ</span><span style="background:#34c759;color:#111;border-radius:6px;padding:.05em .45em;font-size:.8em">Doğru şık: B</span></div>`}
+ return h+'</div>'+(t>=TPi12.onay?stampH(t,TPi12.onay,'YARGITAY<br>ONADI','#34c759',e).replace('class="stamp" style="','class="stamp" style="top:69.5%;right:auto;left:18%;font-size:calc(var(--W)*0.06);'):'')}
+function dersPi12(t){const a=TPi12.ders;if(t<a)return '';const o=fadeIn(t,a);const n=fadeIn(t,TPi12.next);
+ return `<div id="card" style="top:20%;opacity:${o}"><div class="hd">İDDİA ÇÖKTÜ</div><div style="font-size:calc(var(--W)*0.047);font-weight:700;line-height:1.3">Arabulucudaki imza <b style="color:#ffb15c">kolay bozulmaz.</b></div><div style="margin-top:.8em;padding:.6em .7em;border-radius:10px;background:rgba(52,199,89,.15);border:1px solid #34c759;opacity:${n};font-size:calc(var(--W)*0.042);font-weight:800">✍️ Rakamı beğenmiyorsan<br><b style="color:#34c759">imzalamadan itiraz et.</b></div></div>`}
+function capPi12(t){for(const [a,b,txt] of TPi12.caps){if(t>=a&&t<b){const o=fadeIn(t,a,.15)*(1-sm((t-b+.15)/.15));return `<div id="cap" style="opacity:${o};bottom:7%">${txt}</div>`}}return ''}
+
+
+let LAMPSPi12=null,ARRPi12=null;
+window.renderMitPi12=function(t){const sc=S[12];const lt=ltPi12(t);const st=sc.upd(lt);
+ if(false){LAMPSPi12=[];ARRPi12=[];sc.s.traverse(o=>{if(o.isMesh&&o.material&&o.material.emissive&&o.geometry&&o.geometry.type==='CircleGeometry')LAMPSPi12.push(o.material);if(o.isMesh&&o.material&&o.material.isMeshBasicMaterial&&o.geometry&&o.geometry.type==='PlaneGeometry'&&o.material.transparent&&(o.material.color.getHex()===0xff3b30||o.material.color.getHex()===0x34c759))ARRPi12.push(o.material)})}
+ 
+ let P,L,f=46;
+ if(t<TPi12.kaza){if(!window.__dPi12){S[12].setSet('arabulucu','arabulucu','ofis');S[12].setDoc("ARABULUCULUK ANLAŞMASI",["Kıdem + ihbar: 141.593 TL", "Başkaca hak ve", "alacağım kalmamıştır.", "İmza: ✓"],'');window.__dPi12=1}const c=CAMSHOT('tepe',sm(t/TPi12.kaza),st);P=c[0];L=c[1];f=c[2];}
+ else{if(!window.__dPi12){S[12].setSet('arabulucu','arabulucu','ofis');S[12].setDoc("ARABULUCULUK ANLAŞMASI",["Kıdem + ihbar: 141.593 TL", "Başkaca hak ve", "alacağım kalmamıştır.", "İmza: ✓"],'');window.__dPi12=1}const c=CAMSEQ(t,TPi12,st,[["yorunge", "kaza"], ["belge", "_imp", -1.4], ["tepe", "rew"], ["genis", "slow"], ["omuz_patron", "karar"], ["genis", "ders"]]);P=c[0];L=c[1];f=c[2];if(t>=TPi12.karar){}}
+ camera.position.copy(P);camera.fov=f;camera.updateProjectionMatrix();camera.lookAt(L);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);
+ let dim=0;if(t>=TPi12.poll&&t<TPi12.rew)dim=.45*fadeIn(t,TPi12.poll,.4);if(t>=TPi12.karar)dim=.3;
+ let blk=1-sm(t/.3);const d=st.dt;if(t<TPi12.poll&&d>=0){blk=Math.max(blk,d<.5?1:1-sm((d-.5)/.4))}
+ if(t>=TPi12.slow&&t<TPi12.karar&&d>=0)blk=Math.max(blk,1);
+ flash.style.background='#000';flash.style.opacity=Math.max(dim,blk);
+ let h=`<div id="brand"><div class="dot"></div><div>KARA KUTU<small>PATRON MU HAKLI? · İŞ HUKUKU</small></div></div>`+pbarPi12(t)+hookPi12(t)+pollPi12(t)+rewPi12(t)+verdictPi12(t)+dersPi12(t)+capPi12(t);
+ if(t>=TPi12.kaza&&t<TPi12.poll)h+=`<div style="position:absolute;right:6%;top:15%;font-weight:900;font-size:calc(var(--W)*0.03);background:rgba(0,0,0,.6);border:1px solid #fff;padding:.2em .6em;border-radius:6px">TEMSİLİ CANLANDIRMA</div>`;
+ if(t>=TPi12.poll&&t<TPi12.rew)h+=`<div style="position:absolute;right:6%;top:15%;font-weight:900;font-size:calc(var(--W)*0.036);background:rgba(255,255,255,.9);color:#111;padding:.2em .6em;border-radius:6px">❚❚ DURDURULDU</div>`;
+ if(t>=TPi12.slow&&t<TPi12.karar)h+=`<div style="position:absolute;right:6%;top:15%;opacity:${fadeIn(t,TPi12.slow)};font-weight:900;font-size:calc(var(--W)*0.036);background:#ff2d55;padding:.2em .6em;border-radius:6px">● YAVAŞ ÇEKİM</div>`;
+ if(t>=TPi12.slow&&t<TPi12.karar){TPi12.clues.forEach(([b,txt],i)=>{if(t<b)return;h+=`<div style="position:absolute;left:6%;right:6%;top:${22+i*6.2}%;opacity:${fadeIn(t,b)};transform:translateX(${(1-fadeIn(t,b))*-30}px);background:rgba(12,12,14,.85);border-left:5px solid #ffd60a;border-radius:8px;padding:.35em .6em;font-weight:800;font-size:calc(var(--W)*0.04)">🔎 ${txt}</div>`})}
+ if(t<TPi12.poll&&t>=TPi12._imp+.4){h+=`<div style="position:absolute;z-index:20;left:6%;right:6%;top:40%;text-align:center;font-family:'Anton';font-size:calc(var(--W)*0.085);opacity:${fadeIn(t,TPi12._imp+.4)};text-shadow:0 3px 14px #000">“BASKIYLA<br><span style="color:#ff453a">İMZALATTILAR”</span><br><span style="font-size:.55em">mühendisin iddiası</span></div>`}
+ h+=`<div class="src" style="bottom:2.6%">Kaynak: Yargıtay kararı · Kişi, şirket ve yer bilgisi verilmemiştir.</div>`;ui.innerHTML=h;
+ let tg='';if(t>=TPi12.kaza&&t<TPi12.poll&&d<-.05){tg+=tag3(st.wkr,1.0,'MÜHENDİS','#ffd60a','#111');tg+=tag3(st.boss,1.5,'İŞVEREN','#ff453a')}
+ if(t>=TPi12.slow&&t<TPi12.karar&&d<-.05){tg+=tag3(st.doc,.35,'İMZA BOZULUR MU?','#ffd60a','#111')}
+ tags.innerHTML=tg;return true};
+
+const TPi13=await (await fetch('tl/mitPi13_tl.json?'+Date.now())).json();
+function ltPi13(t){const M=TPi13.map;if(t<TPi13.kaza)return 0.5+t*.2;if(t<TPi13.poll){for(let i=0;i<M.length-1;i++){if(t<=M[i+1][0])return lerp(M[i][1],M[i+1][1],(t-M[i][0])/(M[i+1][0]-M[i][0]))}return M[M.length-1][1]}
+ const lf=M[M.length-1][1];if(t<TPi13.rew)return lf;if(t<TPi13.rew+TPi13.rewDur)return lerp(lf,TPi13.rwTo,sm((t-TPi13.rew)/TPi13.rewDur));if(t<TPi13.slow)return TPi13.rwTo;if(t<TPi13.karar)return TPi13.rwTo+(t-TPi13.slow)*TPi13.slowRate;const l2=TPi13.rwTo+(TPi13.karar-TPi13.slow)*TPi13.slowRate;return l2+(t-TPi13.karar)*.15}
+function pbarPi13(t){const st=[['İDDİA',0],['KAZA',TPi13.kaza],['OYLA',TPi13.poll],['KARAR',TPi13.karar],['DERS',TPi13.ders]];let cur=0;st.forEach((s,i)=>{if(t>=s[1])cur=i});
+ return `<div style="position:absolute;left:5%;right:5%;top:10.2%;display:flex;gap:2%">`+st.map((s,i)=>{const nx=st[i+1]?st[i+1][1]:TPi13.end;const f=i<cur?100:i===cur?Math.min(1,(t-s[1])/(nx-s[1]))*100:0;return `<div style="flex:1;text-align:center;font-size:calc(var(--W)*0.024);font-weight:800;letter-spacing:.06em;opacity:${i<=cur?1:.45}"><div style="height:5px;border-radius:3px;margin-bottom:4px;background:linear-gradient(90deg,#ff7a00 ${f}%,rgba(255,255,255,.25) 0)"></div>${s[0]}</div>`}).join('')+`</div>`}
+function hookPi13(t){const e=TPi13.kaza;if(t>e)return '';const o=1-sm((t-e+.4)/.4);const s1=fadeIn(t,.2,.3),s2=fadeIn(t,3.4,.3);const st=clamp((t-4.4)/.25,0,1);
+ return `<div style="position:absolute;left:6%;right:6%;top:22%;opacity:${o};text-align:center;font-family:'Anton';line-height:1.05">
+ <div style="display:inline-block;background:#ff7a00;color:#111;padding:.1em .5em;font-size:calc(var(--W)*0.045);letter-spacing:.1em;opacity:${s1}">PATRON MU HAKLI? #13</div>
+ <div style="font-size:calc(var(--W)*0.09);margin-top:.3em;opacity:${s1};transform:scale(${lerp(1.15,1,sm((t-.2)/.4))});text-shadow:0 4px 20px #000">“KOD 29 İLE<br>ÇIKARILDIYSAN<br><span style="color:#ffb15c;font-size:1.25em">İŞ</span><br>BİTER”</div>
+ <div style="font-size:calc(var(--W)*0.06);margin-top:.5em;opacity:${s2};text-shadow:0 4px 20px #000;font-family:'Fira Sans';font-weight:900">Peki mahkeme<br><span style="color:#ff453a">ne dedi?</span></div>
+ <div style="display:inline-block;margin-top:.4em;border:5px solid #ffd60a;color:#ffd60a;padding:.05em .4em;font-size:calc(var(--W)*0.09);border-radius:10px;opacity:${st};transform:rotate(-8deg) scale(${lerp(2.2,1,sm(st))})">GERÇEK DAVA</div></div>`}
+function pollPi13(t){const a=TPi13.poll,e=TPi13.rew;if(t<a||t>e)return '';const o=fadeIn(t,a,.3)*(1-sm((t-e+.35)/.35));
+ const opts=[['A', 'Hayır, kod kesinleşti'], ['B', 'Sadece tazminat aldı'], ['C', 'Evet, kod değişti']];
+ const cd=TPi13.cd0,left=Math.max(0,Math.ceil(3-(t-cd)));const prog=clamp((t-cd)/3,0,1);const R=34,C=2*Math.PI*R;
+ let h=`<div id="card" style="top:20%;opacity:${o};text-align:left"><div class="hd" style="font-size:calc(var(--W)*0.066)">KOD DÜZELTİLDİ Mİ?</div>`;
+ opts.forEach(([k,txt],i)=>{const oi=fadeIn(t,a+.5+i*.45,.3);const pulse=t>cd?1+.04*Math.sin(t*9+i):1;h+=`<div style="display:flex;align-items:center;gap:4%;margin:.45em 0;padding:.45em .6em;border-radius:12px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);opacity:${oi};transform:translateX(${(1-oi)*40}px) scale(${pulse});font-size:calc(var(--W)*0.047);font-weight:800"><span style="flex:none;width:1.6em;height:1.6em;border-radius:50%;background:#ff7a00;color:#111;display:flex;align-items:center;justify-content:center;font-family:'Anton'">${k}</span>${txt}</div>`});
+ h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.6em;opacity:${fadeIn(t,cd-.2)}"><div style="font-size:calc(var(--W)*0.045);font-weight:800;color:#ffd60a">💬 Harfini yoruma yaz!</div>
+ <svg width="${W*0.17}" height="${W*0.17}" viewBox="0 0 80 80"><circle cx="40" cy="40" r="${R}" fill="rgba(0,0,0,.5)" stroke="rgba(255,255,255,.2)" stroke-width="7"/><circle cx="40" cy="40" r="${R}" fill="none" stroke="#ff7a00" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*prog}" transform="rotate(-90 40 40)"/><text x="40" y="51" text-anchor="middle" font-family="Anton" font-size="32" fill="#fff">${left}</text></svg></div></div>`;return h}
+function rewPi13(t){const a=TPi13.rew,e=a+TPi13.rewDur;if(t<a||t>e+.2)return '';const o=1-sm((t-e)/.2);
+ return `<div style="position:absolute;inset:0;opacity:${o};background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,transparent 2px 5px)"></div><div style="position:absolute;left:6%;top:24%;font-family:'Anton';font-size:calc(var(--W)*0.11);color:#fff;text-shadow:3px 0 #ff2d55,-3px 0 #0af;opacity:${o*(Math.floor(t*6)%2?1:.75)}">◀◀ GERİ SAR</div>`}
+function verdictPi13(t){const a=TPi13.karar,e=TPi13.ders;if(t<a||t>e)return '';const o=fadeIn(t,a)*(1-sm((t-e+.4)/.4));
+ let h=`<div id="card" style="top:18%;opacity:${o}"><div class="hd">MAHKEMENİN GEREKÇESİ</div>`;
+ TPi13.reasons.forEach(([b,txt])=>{if(t<b)return;const u=fadeIn(t,b);h+=`<div style="display:flex;gap:3%;align-items:center;font-size:calc(var(--W)*0.04);font-weight:700;padding:.25em 0;opacity:${u};transform:translateX(${(1-u)*30}px)"><span style="color:#34c759;font-weight:900">✓</span>${txt}</div>`});
+ if(t>=TPi13.hukum){const u=fadeIn(t,TPi13.hukum);h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:.5em;opacity:${u};font-size:calc(var(--W)*0.042);font-weight:900"><span>SONUÇ: KOD 29 → KOD 04</span><span style="background:#34c759;color:#111;border-radius:6px;padding:.05em .45em;font-size:.8em">Doğru şık: C</span></div>`}
+ return h+'</div>'+(t>=TPi13.onay?stampH(t,TPi13.onay,'YARGITAY<br>ONADI','#34c759',e).replace('class="stamp" style="','class="stamp" style="top:69.5%;right:auto;left:18%;font-size:calc(var(--W)*0.06);'):'')}
+function dersPi13(t){const a=TPi13.ders;if(t<a)return '';const o=fadeIn(t,a);const n=fadeIn(t,TPi13.next);
+ return `<div id="card" style="top:20%;opacity:${o}"><div class="hd">İDDİA ÇÖKTÜ</div><div style="font-size:calc(var(--W)*0.047);font-weight:700;line-height:1.3">Kod 29 <b style="color:#ffb15c">son söz değil.</b></div><div style="margin-top:.8em;padding:.6em .7em;border-radius:10px;background:rgba(52,199,89,.15);border:1px solid #34c759;opacity:${n};font-size:calc(var(--W)*0.042);font-weight:800">🧾 İşveren ispat edemezse<br><b style="color:#34c759">kod düzeltilir.</b></div></div>`}
+function capPi13(t){for(const [a,b,txt] of TPi13.caps){if(t>=a&&t<b){const o=fadeIn(t,a,.15)*(1-sm((t-b+.15)/.15));return `<div id="cap" style="opacity:${o};bottom:7%">${txt}</div>`}}return ''}
+
+
+let LAMPSPi13=null,ARRPi13=null;
+window.renderMitPi13=function(t){const sc=S[12];const lt=ltPi13(t);const st=sc.upd(lt);
+ if(false){LAMPSPi13=[];ARRPi13=[];sc.s.traverse(o=>{if(o.isMesh&&o.material&&o.material.emissive&&o.geometry&&o.geometry.type==='CircleGeometry')LAMPSPi13.push(o.material);if(o.isMesh&&o.material&&o.material.isMeshBasicMaterial&&o.geometry&&o.geometry.type==='PlaneGeometry'&&o.material.transparent&&(o.material.color.getHex()===0xff3b30||o.material.color.getHex()===0x34c759))ARRPi13.push(o.material)})}
+ 
+ let P,L,f=46;
+ if(t<TPi13.kaza){if(!window.__dPi13){S[12].setSet('lab','ayakta','isci');S[12].setDoc("SGK İŞTEN AYRILIŞ",["Çıkış kodu: 29", "Ahlak ve iyi niyet", "kurallarına aykırı", "davranış"],'');window.__dPi13=1}const c=CAMSHOT('yan_sol',sm(t/TPi13.kaza),st);P=c[0];L=c[1];f=c[2];}
+ else{if(!window.__dPi13){S[12].setSet('lab','ayakta','isci');S[12].setDoc("SGK İŞTEN AYRILIŞ",["Çıkış kodu: 29", "Ahlak ve iyi niyet", "kurallarına aykırı", "davranış"],'');window.__dPi13=1}const c=CAMSEQ(t,TPi13,st,[["genis", "kaza"], ["omuz_isci", "kaza", 3], ["belge", "_imp", -1.2], ["yan", "rew"], ["tepe", "slow"], ["yorunge", "karar"], ["alcak", "ders"]]);P=c[0];L=c[1];f=c[2];if(t>=TPi13.karar){}}
+ camera.position.copy(P);camera.fov=f;camera.updateProjectionMatrix();camera.lookAt(L);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);
+ let dim=0;if(t>=TPi13.poll&&t<TPi13.rew)dim=.45*fadeIn(t,TPi13.poll,.4);if(t>=TPi13.karar)dim=.3;
+ let blk=1-sm(t/.3);const d=st.dt;if(t<TPi13.poll&&d>=0){blk=Math.max(blk,d<.5?1:1-sm((d-.5)/.4))}
+ if(t>=TPi13.slow&&t<TPi13.karar&&d>=0)blk=Math.max(blk,1);
+ flash.style.background='#000';flash.style.opacity=Math.max(dim,blk);
+ let h=`<div id="brand"><div class="dot"></div><div>KARA KUTU<small>PATRON MU HAKLI? · İŞ HUKUKU</small></div></div>`+pbarPi13(t)+hookPi13(t)+pollPi13(t)+rewPi13(t)+verdictPi13(t)+dersPi13(t)+capPi13(t);
+ if(t>=TPi13.kaza&&t<TPi13.poll)h+=`<div style="position:absolute;right:6%;top:15%;font-weight:900;font-size:calc(var(--W)*0.03);background:rgba(0,0,0,.6);border:1px solid #fff;padding:.2em .6em;border-radius:6px">TEMSİLİ CANLANDIRMA</div>`;
+ if(t>=TPi13.poll&&t<TPi13.rew)h+=`<div style="position:absolute;right:6%;top:15%;font-weight:900;font-size:calc(var(--W)*0.036);background:rgba(255,255,255,.9);color:#111;padding:.2em .6em;border-radius:6px">❚❚ DURDURULDU</div>`;
+ if(t>=TPi13.slow&&t<TPi13.karar)h+=`<div style="position:absolute;right:6%;top:15%;opacity:${fadeIn(t,TPi13.slow)};font-weight:900;font-size:calc(var(--W)*0.036);background:#ff2d55;padding:.2em .6em;border-radius:6px">● YAVAŞ ÇEKİM</div>`;
+ if(t>=TPi13.slow&&t<TPi13.karar){TPi13.clues.forEach(([b,txt],i)=>{if(t<b)return;h+=`<div style="position:absolute;left:6%;right:6%;top:${22+i*6.2}%;opacity:${fadeIn(t,b)};transform:translateX(${(1-fadeIn(t,b))*-30}px);background:rgba(12,12,14,.85);border-left:5px solid #ffd60a;border-radius:8px;padding:.35em .6em;font-weight:800;font-size:calc(var(--W)*0.04)">🔎 ${txt}</div>`})}
+ if(t<TPi13.poll&&t>=TPi13._imp+.4){h+=`<div style="position:absolute;z-index:20;left:6%;right:6%;top:40%;text-align:center;font-family:'Anton';font-size:calc(var(--W)*0.085);opacity:${fadeIn(t,TPi13._imp+.4)};text-shadow:0 3px 14px #000">KOD<br><span style="color:#ff453a">29</span><br><span style="font-size:.55em">ahlak ve iyi niyete aykırılık</span></div>`}
+ h+=`<div class="src" style="bottom:2.6%">Kaynak: Yargıtay kararı · Kişi, şirket ve yer bilgisi verilmemiştir.</div>`;ui.innerHTML=h;
+ let tg='';if(t>=TPi13.kaza&&t<TPi13.poll&&d<-.05){tg+=tag3(st.wkr,2.0,'TEKNİKER','#ffd60a','#111');tg+=tag3(st.boss,2.0,'İŞVEREN','#ff453a')}
+ if(t>=TPi13.slow&&t<TPi13.karar&&d<-.05){tg+=tag3(st.doc,.35,'İSPAT?','#ffd60a','#111')}
+ tags.innerHTML=tg;return true};
+
 const T10=await (await fetch('tl/mit10_tl.json?'+Date.now())).json();
 function lt10(t){const M=T10.map;if(t<T10.kaza)return 0.5+t*.2;if(t<T10.poll){for(let i=0;i<M.length-1;i++){if(t<=M[i+1][0])return lerp(M[i][1],M[i+1][1],(t-M[i][0])/(M[i+1][0]-M[i][0]))}return M[M.length-1][1]}
  const lf=M[M.length-1][1];if(t<T10.rew)return lf;if(t<T10.rew+T10.rewDur)return lerp(lf,T10.rwTo,sm((t-T10.rew)/T10.rewDur));if(t<T10.slow)return T10.rwTo;if(t<T10.karar)return T10.rwTo+(t-T10.slow)*T10.slowRate;const l2=T10.rwTo+(T10.karar-T10.slow)*T10.slowRate;return l2+(t-T10.karar)*.15}

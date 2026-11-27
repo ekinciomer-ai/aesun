@@ -30,7 +30,7 @@ ENV=""; [ -f $B/.env ] && ENV="--env-file $B/.env"
 calistir(){ docker run -d --name "$1" --network $AG -m 768m --memory-swap 768m --cpus 1 --pids-limit 256 \
   --security-opt no-new-privileges --cap-drop NET_RAW --cap-drop SYS_ADMIN --cap-drop NET_ADMIN --restart unless-stopped $ENV \
   -v $B/veri:/veri --log-opt max-size=5m --log-opt max-file=2 --label eyk=1 "$2" >/dev/null; }
-saglik(){ for i in $(seq 1 ${2:-30}); do c=$(docker exec ck-caddy wget -q -S -O /dev/null http://$1:8000/ 2>&1 | awk '/HTTP\//{print $2}' | tail -1); [ "$c" = 200 ] && return 0; sleep 2; done; return 1; }
+saglik(){ for i in $(seq 1 ${2:-30}); do c=$(docker exec ck-caddy wget -q -S -O /dev/null http://$1:8000/ 2>&1 | awk '$1 ~ /^HTTP\//{print $2}' | tail -1); [ "$c" = 200 ] && return 0; sleep 2; done; return 1; }
 diger(){ for u in https://portal.aksarayenerji.net/ https://cutkoda.com/; do c=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 $u); case $c in 2*|3*|401) ;; *) echo "$u:$c"; return 1;; esac; done; return 0; }
 docker rm -f $AD-yeni >/dev/null 2>&1
 calistir $AD-yeni $AD:$S7 || { not "HATA kapsayıcı başlamadı"; exit 1; }

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-27T21:12+03:00",
+ "olusturma": "2026-11-27T21:23+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -426,7 +426,7 @@
    "neden": "tutma oranı %33",
    "olculen": 3,
    "erken": 0,
-   "medyan_48sa": 578,
+   "medyan_48sa": 580,
    "tutma_orani": 33,
    "izlenme_yuzde": 94,
    "en_iyi": {
@@ -937,15 +937,15 @@
   }
  ],
  "esikler": {
+  "Kozmos Lab TR": 216,
+  "Ancient Studio": 192,
+  "Nasıl Yapıldı": 171,
   "Kozmos Lab": 95,
   "LVL MAX": 3315,
   "Estudio Antiguo": 136,
   "Antik Stüdyo": 637,
-  "Ömür Dediğin": 50,
-  "Kozmos Lab TR": 216,
-  "Ancient Studio": 192,
   "Yolu Seç !": 262,
-  "Nasıl Yapıldı": 171
+  "Ömür Dediğin": 50
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -955,11 +955,11 @@
    },
    "02:00": {
     "n": 3,
-    "medyan": 990
+    "medyan": 995
    },
    "03:00": {
     "n": 2,
-    "medyan": 734
+    "medyan": 732
    },
    "09:00": {
     "n": 1,
@@ -1547,6 +1547,40 @@
     }
    ],
    "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın"
+  },
+  {
+   "kanal": "Kozmos Lab TR",
+   "uzun_vid": "dNERFLZ93rA",
+   "uzun_baslik": "Kumdan Elektriğe: Bir Güneş Paneli Nasıl Üretilir? | Adım Adım 3D Anlatım",
+   "uzun_durum": "Yayında",
+   "uzun_izlenme": 13,
+   "baglanacak_shortlar": [
+    {
+     "vid": "MSOsi_wK55Q",
+     "baslik": "Bir avuç kum güneş paneline nasıl dönüşür? ☀️ #shorts",
+     "izlenme": 966,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "j2lpy8oWgVw",
+     "baslik": "Güneş panelinde bozuk hücreyi drone nasıl bulur? 🔥 #shorts",
+     "izlenme": 145,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "o0g1NJt4fpo",
+     "baslik": "Güneş paneli tozlanınca ne kadar kaybeder? ☀️🧹 #shorts",
+     "izlenme": 41,
+     "durum": "Yayında"
+    },
+    {
+     "vid": "H1btzbOdl1U",
+     "baslik": "Tek bir güneş paneli günde kaç telefon şarj eder? 🔋 #shorts",
+     "izlenme": 0,
+     "durum": "Planlı"
+    }
+   ],
+   "etki": "YouTube Studio → Shorts → 'İlgili Video (Related Video)' alanından bu uzun videoya bağlayın"
   }
  ],
  "eylemler": [
@@ -1729,7 +1763,7 @@
   "Yolu Seç !: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %41 (hedef ≥%70).",
   "Ömür Dediğin: tutan Short'lar ortalama %45 izleniyor, tutmayanlar %102 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Ömür Dediğin: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %33 (hedef ≥%70).",
-  "Uzun videolar (14 yayında): medyan 14 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (13 eşleşme hazır) kritik.",
+  "Uzun videolar (15 yayında): medyan 13 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
   "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-29."
  ],
  "en_iyi": [

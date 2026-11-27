@@ -54,6 +54,7 @@ mark{background:#FDE68A;color:#000}
 /* Klasörler (seviye 0) */
 .klasorler{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:4px}
 .klasor{display:flex;gap:13px;align-items:center;width:100%;text-align:left;background:var(--kart);border:1px solid var(--c);border-radius:16px;padding:18px 16px;color:var(--y);font:inherit;cursor:pointer;transition:border-color .15s,transform .1s}
+.ustb{margin:18px 2px 8px;font-weight:700;color:var(--s,#8a94a6);font-size:14px;letter-spacing:.3px}
 .klasor:hover{border-color:var(--v)}.klasor:active{transform:scale(.99)}
 .klasor .ik{flex:none;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:24px;background:var(--bg)}
 .klasor .ad{flex:1;min-width:0}.klasor .ad b{display:block;font-size:16px}.klasor .ad span{display:block;color:var(--s);font-size:12.5px;margin-top:3px}
@@ -112,18 +113,22 @@ mark{background:#FDE68A;color:#000}
 
   // ---------- durum ----------
   var GRUPLAR=[], GRUP=null, SEK='d';   // GRUP = gkod ya da null (klasör ekranı)
-  var EL={ik:{samet:'⚖️',depolama:'🔋'}};
+  var EL={ik:{samet:'⚖️',depolama:'🔋',diger_medas:'⚡',diger_ozel:'🏢'}};
+  // Diğer Davalar: sabit alt klasörler (dava gelmeden de görünür, tam yetkiliye)
+  var DIGER=[{gkod:'diger_medas',grup:'MEDAŞ · işçilik, tazminat, MEDAŞ\'ın açtığı davalar'},{gkod:'diger_ozel',grup:'Özel şirketler · PTM Elektrik ve diğerleri'}];
   function grupBul(gk){for(var i=0;i<GRUPLAR.length;i++)if(GRUPLAR[i].gkod===gk)return GRUPLAR[i];return null;}
   var SEKAD={d:'dosyalar',b:'brifing',y:'yorumlar',x:'bekleyen',k:'karsi',c:'claude',f:'film'};
   var SEKREV={dosyalar:'d',brifing:'b',yorumlar:'y',bekleyen:'x',karsi:'k',claude:'c',film:'f'};
 
   // ---------- klasör ekranı ----------
   function klasorleriCiz(){
-    var h=GRUPLAR.map(function(g){
+    var kb=function(g){
       return '<button class="klasor" data-g="'+esc(g.gkod)+'"><span class="ik">'+(EL.ik[g.gkod]||'📁')+'</span>'
         +'<span class="ad"><b>'+esc(g.grup)+'</b><span>'+g.davalar.length+' dava · '+g.evrak+' evrak'+(g.yeni?' · '+g.yeni+' yeni':'')+'</span></span>'
         +'<span class="ok">›</span></button>';
-    }).join('');
+    };
+    var ana=GRUPLAR.filter(function(g){return g.gkod.indexOf('diger_')!==0;}),dg=GRUPLAR.filter(function(g){return g.gkod.indexOf('diger_')===0;});
+    var h=ana.map(kb).join('')+(dg.length?'<div class="ustb">📂 Diğer Davalar</div>'+dg.map(kb).join(''):'');
     document.getElementById('klasorler').innerHTML=h||'<div class="bilgi">Yetkiniz olan klasör bulunamadı.</div>';
   }
 
@@ -150,7 +155,7 @@ mark{background:#FDE68A;color:#000}
       });
       h+='</div></div>';
     });
-    document.getElementById('liste').innerHTML=h||'<div class="bilgi">Sonuç yok.</div>';
+    document.getElementById('liste').innerHTML=h||'<div class="bilgi">'+(g.davalar.length?'Sonuç yok.':'Henüz dava eklenmedi. UYAP\'tan indirme sürüyor; dosyalar geldikçe burada tek tek görünecek.')+'</div>';
   }
 
   // ---------- ana görünüm anahtarı ----------
@@ -350,6 +355,7 @@ mark{background:#FDE68A;color:#000}
     davalar.forEach(function(d){var gk=d.gkod||'';if(!gm[gk]){gm[gk]={gkod:gk,grup:d.grup||gk||'(grup yok)',ti:d.__ti||0,davalar:[],evrak:0,yeni:0,guncel:guncel};sira.push(gk);}
       gm[gk].davalar.push(d);gm[gk].evrak+=(d.klasorler||[]).reduce(function(a,k){return a+(k.evraklar||[]).length;},0);gm[gk].yeni+=(d.yeni_sayi||0);});
     GRUPLAR=sira.map(function(k){return gm[k];});
+    if(tamYetki)DIGER.forEach(function(x){if(!gm[x.gkod])GRUPLAR.push({gkod:x.gkod,grup:x.grup,ti:0,davalar:[],evrak:0,yeni:0,guncel:guncel});});
     if(!davalar.length){document.getElementById('alt').textContent='Yetkiniz olan dava bulunamadı.';document.getElementById('klasorler').innerHTML='<div class="bilgi">Kayıt yok.</div>';return;}
     klasorleriCiz();
     // tek grup varsa doğrudan içine gir; birden çok grup varsa klasör ekranı

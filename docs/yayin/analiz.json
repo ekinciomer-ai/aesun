@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-27T12:22+03:00",
+ "olusturma": "2026-11-27T12:33+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -759,7 +759,7 @@
    "karar": "SÜRDÜR",
    "neden": "tutma oranı %33",
    "olculen": 3,
-   "erken": 2,
+   "erken": 3,
    "medyan_48sa": 172,
    "tutma_orani": 33,
    "izlenme_yuzde": 58,
@@ -808,12 +808,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 997,
+   "medyan_48sa": 1002,
    "tutma_orani": 100,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Telefonuna 2 saniye bakmanın gerçek bedeli neden 23 dakika? 🧠📱 #shorts",
-    "i48": 997
+    "i48": 1002
    }
   },
   {
@@ -937,15 +937,15 @@
   }
  ],
  "esikler": {
-  "Yolu Seç !": 262,
-  "Antik Stüdyo": 637,
-  "LVL MAX": 3315,
-  "Ömür Dediğin": 50,
   "Estudio Antiguo": 136,
+  "LVL MAX": 3315,
   "Kozmos Lab": 95,
-  "Kozmos Lab TR": 216,
+  "Antik Stüdyo": 637,
+  "Ancient Studio": 192,
+  "Ömür Dediğin": 50,
   "Nasıl Yapıldı": 167,
-  "Ancient Studio": 192
+  "Yolu Seç !": 262,
+  "Kozmos Lab TR": 216
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1069,7 +1069,7 @@
    },
    "17:00": {
     "n": 2,
-    "medyan": 504
+    "medyan": 507
    },
    "19:00": {
     "n": 16,
@@ -1620,14 +1620,6 @@
    "baslik": "Someone wrote a song on this man's butt 🎵 #shorts",
    "tarih": "2026-11-28",
    "neden": "odak dönemi: Ancient Studio haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
-  },
-  {
-   "tur": "HAFTALIK_KOTA",
-   "kanal": "Kozmos Lab TR",
-   "vid": "o0g1NJt4fpo",
-   "baslik": "Güneş paneli tozlanınca ne kadar kaybeder? ☀️🧹 #shorts",
-   "tarih": "2026-11-27",
-   "neden": "odak dönemi: Kozmos Lab TR haftada en fazla 2 Short; bu plan kotayı aşıyor (Gizli'ye al ya da ertele)"
   },
   {
    "tur": "HAFTALIK_KOTA",

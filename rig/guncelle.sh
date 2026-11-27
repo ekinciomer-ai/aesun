@@ -20,7 +20,8 @@ IF=$(ip route show default 2>/dev/null | awk '{print $5; exit}')
 MAC=$(cat /sys/class/net/$IF/address 2>/dev/null | tr a-f A-F)
 echo "$AD" > ad
 # 3) kazımı durdur (yalnız ilk kurulumda; HiveOS'ta uçuş planını kaldırmak kalıcı yapar)
-[ "${1:-}" = ilk ] && command -v miner >/dev/null && { miner stop >/dev/null 2>&1; log "madenci durduruldu"; }
+# rig video işçisi: madenci her turda kapalı tutulur (uçuş planı kalsa bile kartları meşgul etmesin)
+command -v miner >/dev/null && pgrep -f -i phoenixminer >/dev/null && { miner stop >/dev/null 2>&1; log "madenci durduruldu"; }
 # 3b) saat: sunucunun saatine göre (fark 60 sn'den büyükse); geri saat paket indirmeyi bozar
 SS=$(curl -sI --max-time 15 $API/v1/saglik | tr -d '\r' | sed -n 's/^[Dd]ate: //p')
 if [ -n "$SS" ]; then F=$(( $(date -d "$SS" +%s) - $(date +%s) )); F=${F#-}

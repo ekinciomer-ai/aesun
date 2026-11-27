@@ -1,5 +1,5 @@
 #!/bin/bash
-# Davalar → Brifing / Yorumlar / grup notları (<gkod>_<ad>.md; ad: brifing|yorumlar|bekleyen|karsi): API'yi günceller (/v1/davalar/brifing), ardından brifing metnini gizli epias-ptf deposunun
+# Davalar → Brifing / Yorumlar / grup notları (<gkod>_<ad>.md; ad: brifing|yorumlar|bekleyen|karsi|ithamlar|claude): API'yi günceller (/v1/davalar/brifing), ardından brifing metnini gizli epias-ptf deposunun
 # geçici dalından alır (sunucu açık anahtarıyla sarılı), dava anahtarıyla (AES-256-GCM) şifreleyip
 # /opt/aesun/ozel/davalar/brifing.sifreli ve sunum/brifing.sifreli olarak koyar. Açık metin diske kalmaz.
 set -euo pipefail
@@ -32,8 +32,8 @@ a = AESGCM(Path("/k").read_bytes()[:32])
 import re
 for f in sorted(Path("/ac").glob("*.md")):
     ad = f.stem
-    # eski genel notlar (brifing, yorumlar) ya da grup notu: <gkod>_<brifing|yorumlar|bekleyen|karsi>
-    if ad in ("brifing", "yorumlar") or re.fullmatch(r"[a-z0-9_]{1,30}_(brifing|yorumlar|bekleyen|karsi)", ad):
+    # eski genel notlar (brifing, yorumlar) ya da grup notu: <gkod>_<brifing|yorumlar|bekleyen|karsi|ithamlar|claude>
+    if ad in ("brifing", "yorumlar") or re.fullmatch(r"[a-z0-9_]{1,30}_(brifing|yorumlar|bekleyen|karsi|ithamlar|claude)", ad):
         n = os.urandom(12); Path(f"/yeni/{ad}.sifreli").write_bytes(n + a.encrypt(n, f.read_bytes(), None)); print(ad)
 P
 chown -R 1001:1001 "$T/yeni"; chmod 755 "$T"; chmod -R a+rX "$T/ac" "$T/s.py"

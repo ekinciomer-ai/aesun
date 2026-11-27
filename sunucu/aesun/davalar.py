@@ -118,7 +118,7 @@ def brifing(request: Request):
 
 
 NOTLAR = {"brifing", "yorumlar"}
-GRUP_NOTLARI = {"brifing", "yorumlar", "bekleyen", "karsi"}
+GRUP_NOTLARI = {"brifing", "yorumlar", "bekleyen", "karsi", "ithamlar", "claude"}
 GKOD_RE = re.compile(r"^[a-z0-9_]{1,30}$")
 
 

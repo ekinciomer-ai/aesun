@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-27T21:53+03:00",
+ "olusturma": "2026-11-27T22:04+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -426,7 +426,7 @@
    "neden": "tutma oranı %33",
    "olculen": 3,
    "erken": 0,
-   "medyan_48sa": 578,
+   "medyan_48sa": 580,
    "tutma_orani": 33,
    "izlenme_yuzde": 94,
    "en_iyi": {
@@ -536,7 +536,7 @@
    "karar": "SÜRDÜR",
    "neden": "tutma oranı %33",
    "olculen": 6,
-   "erken": 0,
+   "erken": 1,
    "medyan_48sa": 38,
    "tutma_orani": 33,
    "izlenme_yuzde": 42,
@@ -765,7 +765,7 @@
    "izlenme_yuzde": 58,
    "en_iyi": {
     "baslik": "Dünya bir anda dursa kaç km/sa savrulurdun? 🌍 #shorts",
-    "i48": 586
+    "i48": 587
    },
    "kaydirmadan_izleme_yuzde": 39
   },
@@ -835,13 +835,16 @@
    "kanal": "LVL MAX",
    "seri": "Tablo Serisi",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 9,
+   "tutma_orani": 0,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Dev Dalga Kurtarma Anında Tekneyi 360 Derece Takla Attırdı! #shorts",
+    "i48": 9
+   }
   },
   {
    "kanal": "Nasıl Yapıldı",
@@ -937,14 +940,14 @@
   }
  ],
  "esikler": {
-  "Yolu Seç !": 262,
   "Estudio Antiguo": 136,
-  "LVL MAX": 3315,
-  "Kozmos Lab TR": 216,
+  "Yolu Seç !": 262,
   "Kozmos Lab": 95,
   "Nasıl Yapıldı": 171,
-  "Antik Stüdyo": 637,
+  "LVL MAX": 3315,
   "Ancient Studio": 192,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 216,
   "Ömür Dediğin": 50
  },
  "saatler": {
@@ -955,11 +958,11 @@
    },
    "02:00": {
     "n": 3,
-    "medyan": 990
+    "medyan": 995
    },
    "03:00": {
     "n": 2,
-    "medyan": 734
+    "medyan": 732
    },
    "09:00": {
     "n": 1,
@@ -1146,8 +1149,8 @@
     "medyan": 2
    },
    "06:00": {
-    "n": 3,
-    "medyan": 3
+    "n": 4,
+    "medyan": 6
    },
    "12:00": {
     "n": 3,
@@ -1717,7 +1720,7 @@
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 5 tanesi tuttu (eşik 216 izlenme / 48 sa).",
-  "LVL MAX: son 6 Short'tan 1 tanesi tuttu (eşik 3315 izlenme / 48 sa).",
+  "LVL MAX: son 6 Short'tan 0 tanesi tuttu (eşik 3315 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 3 Short'tan 2 tanesi tuttu (eşik 171 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 3 Short'tan 2 tanesi tuttu (eşik 50 izlenme / 48 sa).",

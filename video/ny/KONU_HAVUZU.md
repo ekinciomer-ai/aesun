@@ -81,7 +81,8 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - Not: Süreler 75/60/67 sn; havuza teslim, plan 26-28.12 13:00 (onay bekliyor). YM_07 hedefin üstünde (Puck yavaş); sonraki yemek videosunda metni ~%20 kısalt.
 
 ## Parti 14 — Karışık formatlar (2026-11-27)
-- [~] NY_EN_08_TUNEL · En uzun 3 kara yolu tüneli: Eğribel 5.900 m, Ovit 14.346 m, Zigana 14.477 m — kanca: "Rekor 2023'te el değişti". Ilgaz tüp uzunlukları çelişkili (5.370–5.488 m), liste 3'le sınırlandı.
-- [~] NY_BL_07_KOMSU · Komşu il sayısı: Konya/Erzurum/Erzincan 9, Yalova 2 → Kilis 1 (sadece Gaziantep) — kanca: "Bir ilimizin sadece 1 komşusu var"
-- [~] NY_SQ_07_KALE · Bilgi şıklı soru "Bu kale hangi ilde?": Hoşap (Van), Mamure (Mersin), Harput (Elazığ) — kanca: "Birinin harcında süt var" (rivayet)
+- [x] NY_EN_08_TUNEL · En uzun 3 kara yolu tüneli: Eğribel 5.900 m, Ovit 14.346 m, Zigana 14.477 m — kanca: "Rekor 2023'te el değişti". Ilgaz tüp uzunlukları çelişkili (5.370–5.488 m), liste 3'le sınırlandı.
+- [x] NY_BL_07_KOMSU · Komşu il sayısı: Konya/Erzurum/Erzincan 9, Yalova 2 → Kilis 1 (sadece Gaziantep) — kanca: "Bir ilimizin sadece 1 komşusu var"
+- [x] NY_SQ_07_KALE · Bilgi şıklı soru "Bu kale hangi ilde?": Hoşap (Van), Mamure (Mersin), Harput (Elazığ) — kanca: "Birinin harcında süt var" (rivayet)
 - Not: Hoşap yapım tarihi (16. yy / 1649) ve Harput fethi (1515/1516) çelişkili, kullanılmadı.
+- Not: Süreler 63/44/64 sn; havuza teslim, plan 29-31.12 13:00 (onay bekliyor). BL_07 hedefin biraz altında (96 kelime ≈ 44 sn); bilgi videolarında ~110 kelime hedefle.

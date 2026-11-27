@@ -1,0 +1,116 @@
+{
+ "kanal": "NY",
+ "seri": "Bilgi Şıklı Soru",
+ "dil": "tr",
+ "kod": "NY_SQ_07_KALE",
+ "baslik_bant": "BU KALE HANGİ İLDE?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 KALE",
+   "ust": "HANGİ İLDE?",
+   "alt": "BİRİNİN HARCINDA SÜT VAR",
+   "alt_kelime": "süt"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "HOŞAP KALESİ HANGİ İLDE?",
+   "siklar": [
+    "Hakkari",
+    "Bitlis",
+    "Van",
+    "Ağrı"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "il": "Van"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Van"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "MAMURE KALESİ HANGİ İLDE?",
+   "siklar": [
+    "Antalya",
+    "Mersin",
+    "Adana",
+    "Muğla"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "il": "Mersin"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Mersin"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "HARPUT KALESİ HANGİ İLDE?",
+   "siklar": [
+    "Malatya",
+    "Tunceli",
+    "Diyarbakır",
+    "Elazığ"
+   ],
+   "dogru": 3,
+   "bekle": 3,
+   "il": "Elazığ"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Elazığ"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "T.C. Kültür ve Turizm Bakanlığı – Hoşap Castle: Van–Başkale yolu üzerinde; içinde iki cami, üç hamam, çeşmeler ve zindanlar https://www.ktb.gov.tr/EN-113761/hosap-castle.html",
+  "Wikipedia – Hoşap Castle: Van ili Gürpınar ilçesi https://en.wikipedia.org/wiki/Ho%C5%9Fap_Castle",
+  "Küre Ansiklopedi – Mamure Kalesi: Mersin ili Anamur ilçesi, deniz kıyısında; içinde Karamanoğulları dönemi cami https://kureansiklopedi.com/tr/detay/mamure-kalesi-168d4",
+  "NTV (16.04.2026) – Mamure Kalesi içindeki yaklaşık 700 yıllık cami, yaklaşık 7 asırdır ibadete açık https://www.ntv.com.tr/yerel-haberler/galeri-700-yildir-ibadete-acik-deniz-kiyisinda-sapasaglam-duruyor-1720354",
+  "Küre Ansiklopedi – Harput Kalesi (Süt Kalesi): Elazığ; en bilinen rivayete göre kuraklıkta harcına su yerine süt kullanıldı https://kureansiklopedi.com/tr/detay/harput-kalesi-sut-kalesi-217dc",
+  "Türkiye Müzeleri (KTB) – Elazığ Harput Kalesi: Elazığ Merkez; Süt Kalesi adı ve rivayeti https://turkishmuseums.com/museum/detail/22328-elazig-harput-kalesi/22328/4",
+  "Not: Hoşap'ın yapım tarihi (16. yy / 1649) ve Harput'un fethi (1515/1516) kaynaklarda çelişkili, kullanılmadı",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu kalenin harcına süt katıldığı anlatılıyor! Hangi ilde?",
+  "aciklama": "Birinin içinde iki cami ve üç hamam var, birinin camisi yaklaşık 700 yıldır ibadete açık, birinin de harcına su yerine süt katıldığı anlatılıyor. Bu 3 kale hangi ilde? Cevaplar videoda.\n\n💬 Kaç doğru yaptın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "kale",
+   "hoşap kalesi",
+   "mamure kalesi",
+   "harput kalesi",
+   "türkiye",
+   "tarih",
+   "quiz",
+   "bilgi yarışması",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu kalenin harcına süt katıldığı anlatılıyor 🏰 Hangi ilde? #kale #türkiye #quiz",
+  "amac": "Bilgi şıklı soru serisi; kaleler, sona saklanan efsane ve puan yorumu",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-27T07:43+03:00",
+ "olusturma": "2026-11-27T09:05+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -762,7 +762,7 @@
    "izlenme_yuzde": 58,
    "en_iyi": {
     "baslik": "Dünya bir anda dursa kaç km/sa savrulurdun? 🌍 #shorts",
-    "i48": 584
+    "i48": 586
    },
    "kaydirmadan_izleme_yuzde": 39
   },
@@ -802,13 +802,16 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Çalınan Dikkat",
    "karar": "DENE",
-   "neden": "0 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 0,
-   "erken": 1,
-   "medyan_48sa": null,
-   "tutma_orani": null,
+   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 1,
+   "erken": 0,
+   "medyan_48sa": 961,
+   "tutma_orani": 100,
    "izlenme_yuzde": null,
-   "en_iyi": null
+   "en_iyi": {
+    "baslik": "Telefonuna 2 saniye bakmanın gerçek bedeli neden 23 dakika? 🧠📱 #shorts",
+    "i48": 961
+   }
   },
   {
    "kanal": "LVL MAX",
@@ -931,15 +934,15 @@
   }
  ],
  "esikler": {
-  "Yolu Seç !": 262,
-  "Kozmos Lab": 95,
-  "Antik Stüdyo": 637,
+  "Ancient Studio": 192,
   "Estudio Antiguo": 136,
-  "Nasıl Yapıldı": 167,
   "LVL MAX": 3315,
-  "Kozmos Lab TR": 215,
   "Ömür Dediğin": 50,
-  "Ancient Studio": 192
+  "Yolu Seç !": 262,
+  "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 215,
+  "Nasıl Yapıldı": 167,
+  "Kozmos Lab": 95
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1062,8 +1065,8 @@
     "medyan": 69
    },
    "17:00": {
-    "n": 1,
-    "medyan": 12
+    "n": 2,
+    "medyan": 486
    },
    "19:00": {
     "n": 14,

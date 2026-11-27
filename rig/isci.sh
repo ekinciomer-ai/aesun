@@ -23,16 +23,16 @@ VKT=""
 if [ "$NG" -eq 0 ]; then
   VKT="dri=$(ls /dev/dri 2>/dev/null | tr '\n' ' ') · vk=$(timeout 90 $KUTU sh -c 'vulkaninfo 2>&1 | grep -iE "deviceName *=|error|fail" | head -n 6' 2>&1 | tr '\n' '|' | tr -d '"\\' | cut -c1-500) · mod=$(lsmod | grep -c '^amdgpu')"
 fi
+# deneme yalnız depoda rig/deneme_izin "1" ise (kartları kilitleyebildiği için elle açılır)
+IZIN=$(curl -fsS --max-time 15 "https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/rig/deneme_izin?t=$(date +%s)" 2>/dev/null | tr -dc 0-9)
+DDUR="izin=$IZIN ds=$DS tamam=$(cat deneme_tamam 2>/dev/null) dsh=$(grep -o 'testsrc2[^ ]*-t [0-9.]*' deneme.sh)"
 # nabız kutusuz üretilir (kutu yoksa da rapor gider); son hatalar dahil
 HATA=$(grep -h HATA kur.log guncelle.log 2>/dev/null | tail -n 4 | tr '\n' '|' | tr -d '"\\' | cut -c1-900)
-printf '{"ad":"%s","zaman":"%s","gpu_sayisi":%s,"gpular":"%s","imaj":"%s","docker":"%s","yuk":"%s","pci_amd":%s,"vk_tani":"%s","son_hatalar":"%s"}\n' \
+printf '{"ad":"%s","zaman":"%s","gpu_sayisi":%s,"gpular":"%s","imaj":"%s","docker":"%s","yuk":"%s","pci_amd":%s,"vk_tani":"%s","deneme_durum":"%s","son_hatalar":"%s"}\n' \
   "$AD" "$(date -u +%FT%TZ)" "$NG" "$(echo "$GPUS" | tr -d '"\\')" "$(cat imaj_surum 2>/dev/null)" "$(docker --version 2>/dev/null | cut -c1-40)" \
-  "$(cut -d' ' -f1-3 /proc/loadavg)" "$(lspci 2>/dev/null | grep -ciE 'vga.*(amd|ati)')" "$VKT" "$HATA" > is/nabiz.json
+  "$(cut -d' ' -f1-3 /proc/loadavg)" "$(lspci 2>/dev/null | grep -ciE 'vga.*(amd|ati)')" "$VKT" "$DDUR" "$HATA" > is/nabiz.json
 NB=$(gonder nabiz.json); echo "$(date '+%F %T') nabız: $NB · gpu $NG"
 [ "$NB" = 200 ] || { echo "nabız gönderilemedi, deneme atlandı"; exit 0; }
-# hız denemesi (imaj başına bir kez)
-# deneme yalnız depoda rig/deneme_izin "1" ise (kartları kilitleyebildiği için elle açılır)
-IZIN=$(curl -fsS --max-time 15 https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/rig/deneme_izin 2>/dev/null | tr -dc 0-9)
 if [ -z "${DENEMESIZ:-}" ] && [ "$IZIN" = 1 ] && [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
   rm -f is/deneme.json
   docker rm -f aerig_deneme >/dev/null 2>&1

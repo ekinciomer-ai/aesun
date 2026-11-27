@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-27T23:56+03:00",
+ "olusturma": "2026-11-28T00:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -940,15 +940,15 @@
   }
  ],
  "esikler": {
-  "LVL MAX": 3315,
-  "Estudio Antiguo": 136,
   "Yolu Seç !": 262,
-  "Ancient Studio": 192,
   "Antik Stüdyo": 637,
-  "Kozmos Lab": 95,
+  "Nasıl Yapıldı": 171,
+  "Ancient Studio": 192,
+  "LVL MAX": 3315,
   "Kozmos Lab TR": 216,
   "Ömür Dediğin": 50,
-  "Nasıl Yapıldı": 171
+  "Kozmos Lab": 95,
+  "Estudio Antiguo": 136
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1177,6 +1177,14 @@
    "planli_short": 1,
    "hedef_kota": 2,
    "eksik": 1,
+   "uyari": "19:00 Gündem+Tarih slotu BOŞ"
+  },
+  {
+   "kanal": "Antik Stüdyo",
+   "tarih": "2026-11-30",
+   "planli_short": 0,
+   "hedef_kota": 2,
+   "eksik": 2,
    "uyari": "19:00 Gündem+Tarih slotu BOŞ"
   }
  ],
@@ -1714,7 +1722,7 @@
   }
  ],
  "bulgular": [
-  "Dün (2026-11-26) 11807 izlenme geldi; bir önceki gün 55143.",
+  "Dün (2026-11-27) 32136 izlenme geldi; bir önceki gün 11807.",
   "Ancient Studio: son 6 Short'tan 1 tanesi tuttu (eşik 192 izlenme / 48 sa).",
   "Antik Stüdyo: son 6 Short'tan 4 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
@@ -1767,7 +1775,7 @@
   "Ömür Dediğin: tutan Short'lar ortalama %45 izleniyor, tutmayanlar %102 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
   "Ömür Dediğin: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %33 (hedef ≥%70).",
   "Uzun videolar (15 yayında): medyan 13 izlenme → özel kapak (telefon doğrulaması) ve Shorts 'İlgili Video' köprüsü (14 eşleşme hazır) kritik.",
-  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-29."
+  "TAKViM UYARISI · Antik Stüdyo 19:00 Gündem+Tarih slotu şu günlerde boş: 2026-11-29, 2026-11-30."
  ],
  "en_iyi": [
   {

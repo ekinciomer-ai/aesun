@@ -31,7 +31,9 @@ printf '{"ad":"%s","zaman":"%s","gpu_sayisi":%s,"gpular":"%s","imaj":"%s","docke
 NB=$(gonder nabiz.json); echo "$(date '+%F %T') nabız: $NB · gpu $NG"
 [ "$NB" = 200 ] || { echo "nabız gönderilemedi, deneme atlandı"; exit 0; }
 # hız denemesi (imaj başına bir kez)
-if [ -z "${DENEMESIZ:-}" ] && [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
+# deneme yalnız depoda rig/deneme_izin "1" ise (kartları kilitleyebildiği için elle açılır)
+IZIN=$(curl -fsS --max-time 15 https://raw.githubusercontent.com/ekinciomer-ai/aesun/main/rig/deneme_izin 2>/dev/null | tr -dc 0-9)
+if [ -z "${DENEMESIZ:-}" ] && [ "$IZIN" = 1 ] && [ ! -f deneme_tamam ] && [ "$NG" -gt 0 ]; then
   rm -f is/deneme.json
   docker rm -f aerig_deneme >/dev/null 2>&1
   timeout 900 ${KUTU/docker run --rm/docker run --rm --name aerig_deneme} bash /is/deneme.sh "$GL" "${RD:-renderD128}" > is/kutu.log 2>&1 \

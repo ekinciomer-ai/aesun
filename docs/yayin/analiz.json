@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-27T15:30+03:00",
+ "olusturma": "2026-11-27T15:40+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -426,7 +426,7 @@
    "neden": "tutma oranı %33",
    "olculen": 3,
    "erken": 0,
-   "medyan_48sa": 557,
+   "medyan_48sa": 554,
    "tutma_orani": 33,
    "izlenme_yuzde": 94,
    "en_iyi": {
@@ -808,12 +808,12 @@
    "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
    "olculen": 1,
    "erken": 0,
-   "medyan_48sa": 1003,
+   "medyan_48sa": 1002,
    "tutma_orani": 100,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Telefonuna 2 saniye bakmanın gerçek bedeli neden 23 dakika? 🧠📱 #shorts",
-    "i48": 1003
+    "i48": 1002
    }
   },
   {
@@ -847,10 +847,10 @@
    "kanal": "Nasıl Yapıldı",
    "seri": "Sistem Nasıl Çalışır?",
    "karar": "ARTIR",
-   "neden": "videoların %67'i tuttu (eşik 170 izlenme / 48 sa)",
+   "neden": "videoların %67'i tuttu (eşik 167 izlenme / 48 sa)",
    "olculen": 3,
    "erken": 2,
-   "medyan_48sa": 1209,
+   "medyan_48sa": 1164,
    "tutma_orani": 67,
    "izlenme_yuzde": 38,
    "en_iyi": {
@@ -937,15 +937,15 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 216,
   "Yolu Seç !": 262,
   "Ancient Studio": 192,
-  "LVL MAX": 3315,
-  "Estudio Antiguo": 136,
-  "Kozmos Lab": 95,
   "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 216,
+  "Estudio Antiguo": 136,
   "Antik Stüdyo": 637,
-  "Nasıl Yapıldı": 170
+  "Kozmos Lab": 95,
+  "LVL MAX": 3315,
+  "Nasıl Yapıldı": 167
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -995,7 +995,7 @@
    },
    "20:00": {
     "n": 10,
-    "medyan": 685
+    "medyan": 684
    },
    "21:00": {
     "n": 2,
@@ -1069,7 +1069,7 @@
    },
    "17:00": {
     "n": 2,
-    "medyan": 508
+    "medyan": 507
    },
    "19:00": {
     "n": 16,
@@ -1133,7 +1133,7 @@
   "Nasıl Yapıldı": {
    "13:00": {
     "n": 1,
-    "medyan": 1209
+    "medyan": 1164
    },
    "19:00": {
     "n": 2,
@@ -1726,7 +1726,7 @@
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 5 tanesi tuttu (eşik 216 izlenme / 48 sa).",
   "LVL MAX: son 6 Short'tan 1 tanesi tuttu (eşik 3315 izlenme / 48 sa).",
-  "Nasıl Yapıldı: son 3 Short'tan 2 tanesi tuttu (eşik 170 izlenme / 48 sa).",
+  "Nasıl Yapıldı: son 3 Short'tan 2 tanesi tuttu (eşik 167 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 2 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 3 Short'tan 2 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1743,7 +1743,7 @@
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %73'i tuttu (eşik 216 izlenme / 48 sa).",
   "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 216 izlenme / 48 sa).",
   "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %15.",
-  "Nasıl Yapıldı · Sistem Nasıl Çalışır?: ARTIR — videoların %67'i tuttu (eşik 170 izlenme / 48 sa).",
+  "Nasıl Yapıldı · Sistem Nasıl Çalışır?: ARTIR — videoların %67'i tuttu (eşik 167 izlenme / 48 sa).",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",
   "Antik Stüdyo: en iyi yayın saati şimdilik 13:00 (medyan 1230 izlenme, 5 video).",

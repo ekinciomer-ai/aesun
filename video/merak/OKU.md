@@ -77,6 +77,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 | `kacis` | `mod: soru / dunya / gunes / sikis / misket / isik / ufuk / kat / son` | Kara delik (birikim diski, kesik olay ufku çemberi, düşen/kaçan ışık parçacıkları), Dünya'dan ve Güneş'ten kaçan roket (iz + km/s sayacı), küçülen Güneş (yarıçap sayacı 695.700→3 km), misket kadar Dünya, Dünya çevresinde ışık turu (tur sayacı), 11,2 vs 299.792 km/s sütunları |
 | `buzdolabi` | `mod: soru / etiket / yil / gun / telefon / guc / motor / eski / kaynat / son` | Buzdolabı (kapakta A–G enerji etiketi, yan motor + titreşim), kWh sütunları (2020: 181 / 1990: 477), günlük dilim (0,5 kWh), 26 telefon ızgarası, LED ampuller (≈ 21 W), motor aç-kapa grafiği, 5 su ısıtıcısı |
 
+| `venus` | `mod: soru / yil / tur / kiyas / yuru / ters / gunes / takvim / son` | Venüs yakın plan (ters dönüş oku, ekvator çubuğu, tur çizgisi + gün sayacı); üstten yörünge (Güneş, gün sayacı, iz, %tur, Güneş yönü çizgisi = güneş günü); eksen kameraya dönük Venüs üstünde yürüyen kişi; Dünya ⟲ / Venüs ⟳ yan yana; Eylül–Ocak takvimi (117 gün çubuğu, iki Güneş) |
+| `gerilim` | `mod: soru / gerilim / guc / dusuk / yuksek / kayip / saat / basamak / ev / son` | Santral → yükseltici trafo → 3 kafes direk (sarkık teller, akım parçacıkları) → indirici trafo → ahşap direk + direk trafosu → ev; priz; 500 su ısıtıcısı ızgarası (1 MW); kalın 230 V kablo (yoğun elektron, kızaran tel + ısı dalgası) vs ince 380 kV tel (3 elektron) + su ısıtıcısı; 1 saat / 311 yıl kadranları; basamakta kamera zincir boyunca kayar |
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
 Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,goruntu --kareler 60,300,900` → `arac/sayfa.py` ile kontrol sayfası.
 
@@ -101,5 +103,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 21 (Ay'da zıplasan kaç metre) ve 22 (Türkiye'nin elektriği için kaç km² panel) — 24.11.2026, günlük görev; yeni sahneler `zipla`, `alan`.
 - Bölüm 23 (Nötron yıldızından şeker küpü kaç ton) ve 24 (1 litre su kaynatmak kaç telefon) — 25.11.2026, günlük görev; yeni sahneler `notron`, `kaynat`.
 - Bölüm 25 (Kara delikten kaçış hızı) ve 26 (Buzdolabı günde kaç kWh) — 26.11.2026, günlük görev; yeni sahneler `kacis`, `buzdolabi`.
+- Bölüm 27 (Venüs'te gün mü yıl mı uzun) ve 28 (Neden 380 bin volt) — 27.11.2026, günlük görev; yeni sahneler `venus`, `gerilim`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

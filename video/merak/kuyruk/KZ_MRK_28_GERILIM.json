@@ -1,0 +1,231 @@
+{
+ "kod": "KZ_MRK_28_GERILIM",
+ "no": "MERAK #28",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "enerji",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "NEDEN 380 BİN<br><i>VOLT?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Elektrik santralden evine gelirken neden üç yüz seksen bin volta çıkarılır? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "gerilim",
+    "kart": 54
+   },
+   "metin": "Ana iletim hatlarında gerilim üç yüz seksen bin volt. Prizindeki iki yüz otuz voltun yaklaşık bin altı yüz elli katı.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "İLETİM HATTI",
+     "say": 380000,
+     "dec": 0,
+     "ek": " V",
+     "k": "üç"
+    },
+    {
+     "tip": "formul",
+     "y": "380.000 <em>÷</em> 230 ≈ 1.652",
+     "k": "bin"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "guc",
+    "kart": 60
+   },
+   "metin": "Kural basit: güç, gerilim çarpı akım. Bir megavat taşıyalım: beş yüz su ısıtıcısı kadar.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "GÜÇ = GERİLİM <em>×</em> AKIM",
+     "k": "güç"
+    },
+    {
+     "tip": "etiket",
+     "y": "1 MW ≈ 500 su ısıtıcısı ☕",
+     "k": "beş"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "dusuk",
+    "kart": 54
+   },
+   "metin": "Bunu iki yüz otuz voltla taşısan, dört bin üç yüz kırk sekiz amper akım gerekir.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1.000.000 <em>÷</em> 230",
+     "k": "iki"
+    },
+    {
+     "tip": "sayi",
+     "ust": "230 VOLTTA AKIM",
+     "say": 4348,
+     "dec": 0,
+     "ek": " A",
+     "k": "dört",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "yuksek",
+    "kart": 56
+   },
+   "metin": "Üç yüz seksen bin voltla ise sadece iki virgül altı amper. Bir su ısıtıcısından bile az.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "380 kV'DA AKIM",
+     "say": 2.6,
+     "dec": 1,
+     "ek": " A",
+     "k": "iki",
+     "on": "≈ "
+    },
+    {
+     "tip": "etiket",
+     "y": "&lt; 1 su ısıtıcısı (8,7 A) ☕",
+     "k": "Bir"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "kayip",
+    "kart": 60
+   },
+   "metin": "Telde ısıya giden kayıp, akımın karesiyle büyür. Akım bin altı yüz elli kat düşünce, kayıp iki milyon yedi yüz bin kat düşer.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "KAYIP ∝ AKIM²",
+     "k": "karesiyle"
+    },
+    {
+     "tip": "formul",
+     "y": "1.652² ≈ 2,7 milyon",
+     "k": "milyon"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "saat",
+    "kart": 60
+   },
+   "metin": "Yani alçak gerilimde bir saatte ısıya giden enerjiyi, yüksek gerilimde ancak üç yüz on bir yılda kaybedersin.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "1 saat ↔ ≈ 311 yıl ⏳",
+     "k": "üç"
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "basamak",
+    "kart": 60
+   },
+   "metin": "Peki neden evine gelmiyor? Çok tehlikeli. Trafolar gerilimi adım adım düşürür.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "380 <em>→</em> 154 <em>→</em> 34,5 kV",
+     "k": "Trafolar"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "ev",
+    "kart": 60
+   },
+   "metin": "Sokağındaki son trafo da onu iki yüz otuz volta indirir.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "230 V 🔌",
+     "k": "iki"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "sahne": "gerilim",
+   "p": {
+    "mod": "son",
+    "kart": 60
+   },
+   "metin": "Cevap: yüksek gerilim aynı gücü az akımla taşır, kayıp milyonlarca kat azalır. Bu dev direklerin altından hiç geçtin mi? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "Az akım = az kayıp ⚡",
+     "k": "yüksek"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Elektrik neden 380 bin voltla taşınır? ⚡ #shorts",
+  "aciklama": "Türkiye'de ana iletim hatları 380 kV (ayrıca 154 kV); prizde 230 V var → 380.000 ÷ 230 ≈ 1.652 kat. Güç = gerilim × akım (basitleştirilmiş tek faz hesap; gerçek hatlar üç fazlıdır, oranlar aynı kalır). 1 MW (≈ 500 adet 2.000 W'lık su ısıtıcısı) 230 V'ta ≈ 4.348 A, 380 kV'ta ≈ 2,6 A akım ister; 2.000 W'lık su ısıtıcısı 230 V'ta ≈ 8,7 A çeker. Telde ısıya giden kayıp P = I²R olduğundan (aynı tel için) akım 1.652 kat düşünce kayıp ≈ 1.652² ≈ 2,7 milyon kat düşer: 230 V'ta 1 saatte kaybedilecek ısı, 380 kV'ta ≈ 311 yılda kaybedilir. Bu kural #16'daki 'akım 2 kat → ısı 4 kat' ile aynı. Gerilim, trafolarla adım adım düşürülür: 380 → 154 → 34,5 kV → 230 V.\n\nSen bu dev direklerin altından hiç geçtin mi? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: İTÜ, Prof. Dr. Özcan Kalenderli – Yüksek Gerilim Nedir? Neden Gereklidir? (Türkiye'de gerilim kademeleri: 30 kV (34,5 kV), 154 kV, 380 kV (400 kV); yüksek gerilimin nedenleri: kayıpları azaltmak; Güç = Gerilim × Akım); TÜBİTAK Bilim ve Teknik – Elektrik Şebekesi (gerilim santral çıkışında yüksek, tüketiciye yaklaştıkça düşer); OpenStax College Physics 2e §20.4 (P = I²R); IEC 60038 (230 V nominal).\n\n#kozmoslab #elektrik #enerji #yüksekgerilim #trafo #mühendislik #merak #shorts",
+  "etiketler": [
+   "yüksek gerilim",
+   "elektrik iletimi",
+   "380 kV",
+   "trafo",
+   "elektrik",
+   "enerji",
+   "mühendislik",
+   "merak lab",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "İTÜ, Prof. Dr. Özcan Kalenderli – ELK101 'Yüksek Gerilim Nedir? Neden Gereklidir?' (https://web.itu.edu.tr/kalenderli/ELK101-1_Yuksek_Gerilim_Gereksinim24.pdf): 'Türkiye'de Yüksek Gerilim Kademeleri' tablosu: 30 kV (34,5 kV), 66, 154 kV, 380 kV (400 kV); nedenler: 'Kayıpları azaltmak'; 'Güç = Gerilim x Akım'; '1970'de 380 kV'luk enerji iletimi başladı'",
+  "Aydem Perakende – What is a Power Grid? (2025): 'transmitted at high voltage levels such as 154 kV or 380 kV'",
+  "TÜBİTAK Bilim ve Teknik – Elektrik Şebekesi (2008): 'Gerilim santral çıkışlarında yüksek, tüketicilere yaklaştıkça düşüyor.'",
+  "OpenStax College Physics 2e §20.4: P = I²R (#16 ile aynı)",
+  "Türkiye şebeke gerilimi 230 V (IEC 60038 nominal; #16 ile aynı)",
+  "Hesap: 380.000/230 = 1.652,2; 1.000.000/230 = 4.347,8 A; 1.000.000/380.000 = 2,63 A; 2.000/230 = 8,70 A; 1.000.000/2.000 = 500; 1.652,2² = 2.729.670; ÷ 8.766 sa/yıl = 311,4 yıl"
+ ]
+}

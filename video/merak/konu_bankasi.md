@@ -33,4 +33,5 @@ Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Do�
 - [x] KZ_MRK_22_ALAN — Türkiye'nin bütün elektriği için ne kadar alan panel gerekir? — enerji
 - [x] KZ_MRK_24_KAYNAT — 1 litre suyu kaynatmak kaç telefon şarjı eder? (4.184 J/kg·°C, ≈ 99 Wh ≈ 5 telefon) — enerji (25.11: bankada enerji konusu kalmadığı için eklendi)
 - [x] KZ_MRK_26_BUZDOLABI — Bir buzdolabı bir günde ne kadar elektrik harcar? (AB Komisyonu: 2020 ort. 181 kWh/yıl ≈ 0,5 kWh/gün; 1990: 477) — enerji
-- [ ] Bir elektrik direği hattında neden yüksek gerilim kullanılır? (aynı güçte akım düşer, kayıp I²R) — enerji (#16 ile çakışmamasına dikkat)
+- [x] KZ_MRK_28_GERILIM — Bir elektrik direği hattında neden yüksek gerilim kullanılır? (aynı güçte akım düşer, kayıp I²R) — enerji (#16'dan farkı: iletim ve gerilim basamakları; 380 kV ↔ 230 V, kayıp ≈ 2,7 milyon kat az)
+- [x] KZ_MRK_27_VENUS — Venüs'te bir gün mü uzun, bir yıl mı? (NASA: dönüş 243 gün, yıl 224,7 gün, güneş günü 116,75 gün, ters dönüş) — uzay (27.11: bankada uzay konusu kalmadığı için eklendi)

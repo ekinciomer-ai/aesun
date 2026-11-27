@@ -1,0 +1,219 @@
+{
+ "kod": "KZ_MRK_27_VENUS",
+ "no": "MERAK #27",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "VENÜS'TE GÜN MÜ<br><i>YIL MI UZUN?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "venus",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Venüs'te bir gün mü daha uzun, bir yıl mı? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "venus",
+   "p": {
+    "mod": "yil",
+    "kart": 54
+   },
+   "metin": "Venüs, Güneş'in çevresini iki yüz yirmi beş günde dolaşır. Yani bir Venüs yılı, yedi aydan biraz fazla.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "VENÜS YILI",
+     "say": 225,
+     "dec": 0,
+     "ek": " gün",
+     "k": "iki",
+     "on": "≈ "
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 7 ay 📅",
+     "k": "yedi"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "venus",
+   "p": {
+    "mod": "tur",
+    "kart": 60
+   },
+   "metin": "Ama kendi ekseninde tek bir tur atması, iki yüz kırk üç gün sürer.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "KENDİ ETRAFINDA 1 TUR",
+     "say": 243,
+     "dec": 0,
+     "ek": " gün",
+     "k": "iki",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "venus",
+   "p": {
+    "mod": "kiyas",
+    "kart": 60
+   },
+   "metin": "Yani Venüs, kendi etrafında bir kez dönmeden, Güneş'in çevresini bitirir. Gün, yıldan uzun.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "243 <em>&gt;</em> 225",
+     "k": "Yani"
+    },
+    {
+     "tip": "etiket",
+     "y": "1 TUR, 1 YILDAN UZUN 🤯",
+     "k": "bitirir"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "venus",
+   "p": {
+    "mod": "yuru",
+    "kart": 52
+   },
+   "metin": "Bu kadar yavaş dönünce, ekvatordaki bir nokta saatte sadece altı buçuk kilometre gider. Çok hızlı yürüyen biri yetişir.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "38.025 km <em>÷</em> 5.833 sa",
+     "k": "ekvatordaki"
+    },
+    {
+     "tip": "sayi",
+     "ust": "EKVATORDA HIZ",
+     "say": 6.5,
+     "dec": 1,
+     "ek": " km/sa",
+     "k": "altı",
+     "on": "≈ "
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ çok hızlı yürüyüş 🚶",
+     "k": "Çok"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "venus",
+   "p": {
+    "mod": "ters",
+    "kart": 60
+   },
+   "metin": "Üstelik Dünya'nın tersine döner. Orada Güneş batıdan doğar, doğudan batar.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "☀️ BATIDAN DOĞAR",
+     "k": "batıdan"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "venus",
+   "p": {
+    "mod": "gunes",
+    "kart": 54
+   },
+   "metin": "Ters dönüş ve yörünge birleşince, bir gün doğumundan ötekine yüz on yedi Dünya günü geçer.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "2.802 sa <em>÷</em> 24",
+     "k": "birleşince"
+    },
+    {
+     "tip": "sayi",
+     "ust": "GÜN DOĞUMUNDAN GÜN DOĞUMUNA",
+     "say": 117,
+     "dec": 0,
+     "ek": " gün",
+     "k": "yüz",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "venus",
+   "p": {
+    "mod": "takvim",
+    "kart": 60
+   },
+   "metin": "Yani okulun açıldığı gün doğan Güneş, ancak yılbaşından sonra yeniden doğar.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "EYLÜL ☀️ → OCAK ☀️",
+     "k": "yılbaşından"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "venus",
+   "p": {
+    "mod": "son",
+    "kart": 60
+   },
+   "metin": "Cevap: Venüs'te kendi etrafında bir tur, bir yıldan uzun. Sen Venüs'te bir gün yaşasan ne yapardın? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "243 gün &gt; 225 gün",
+     "k": "bir"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Venüs'te bir gün, bir yıldan uzun! 🪐 #shorts",
+  "aciklama": "Venüs Güneş'in çevresini ≈ 224,7 günde dolaşır (≈ 7 ay), ama kendi ekseninde bir turu ≈ 243 gün sürer (5.832,6 saat). Yani kendi etrafında bir kez dönmeden yılı biter. Çok yavaş döndüğü için ekvatordaki bir nokta saatte yalnızca ≈ 6,5 km gider (2π × 6.051,8 km ≈ 38.025 km ÷ 5.832,6 sa); bu, çok hızlı yürüyüş temposu (6,4–7,1 km/sa). Venüs ters yöne döner: Güneş batıdan doğar, doğudan batar. Ters dönüş ve yörünge birleşince bir gün doğumundan ötekine ≈ 116,75 Dünya günü (2.802 saat) geçer; Eylül'de doğan Güneş ancak Ocak'ta yeniden doğar.\n\nNot: 'Venüs'te gün yıldan uzun' derken kendi ekseni etrafındaki tur (yıldız günü) kastedilir; gün doğumundan gün doğumuna süre (güneş günü) ise ≈ 117 gündür.\n\nSen Venüs'te bir gün yaşasan ne yapardın? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçekler gerçek değildir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA NSSDC – Venus Fact Sheet (yıldız dönüşü −5.832,6 sa, gün uzunluğu 2.802 sa, yörünge 224,701 gün, yarıçap 6.051,8 km); NASA Space Place – All About Venus (≈ 243 gün tur, 225 gün yıl, Güneş batıdan doğar); Caltech IPAC Cool Cosmos – Does Venus really spin backwards?; Compendium of Physical Activities – Walking (4,0–4,4 mph = 6,4–7,1 km/sa: 'very brisk pace').\n\n#kozmoslab #venüs #uzay #astronomi #gezegen #merak #shorts",
+  "etiketler": [
+   "venüs",
+   "venüs günü",
+   "gezegenler",
+   "güneş sistemi",
+   "uzay",
+   "astronomi",
+   "merak lab",
+   "kozmos lab",
+   "bilim",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA NSSDC – Venus Fact Sheet (https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html): Sidereal rotation period −5832.6 h (eksi = ters dönüş); Length of day 2802.0 h; Sidereal orbit period 224.701 d; Equatorial radius 6051.8 km",
+  "NASA Space Place – All About Venus (https://spaceplace.nasa.gov/all-about-venus/): 'It takes about 243 Earth days to spin around just once.' / 'It takes 225 Earth days for Venus to go all the way around the Sun.' / 'the Sun rises in the west and sets in the east.'",
+  "Caltech IPAC Cool Cosmos – Does Venus really spin backwards?: 'on Venus the Sun rises in the west and sets in the east'",
+  "Compendium of Physical Activities – Walking, kod 17220: 'Walking, 4.0 to 4.4 mph (6.4 to 7.1 km/h), level, firm surface, very brisk pace'",
+  "Hesap: 5832,6/24 = 243,0 gün; 2802/24 = 116,75 gün; 224,7/30,44 ≈ 7,4 ay; 2π×6051,8 = 38.025 km; 38.025/5832,6 = 6,52 km/sa; 10 Eylül + 117 gün = 5 Ocak"
+ ]
+}

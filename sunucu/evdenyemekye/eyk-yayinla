@@ -1,0 +1,63 @@
+#!/bin/bash
+# evdenyemekye.com yayın çekirdeği (kurallar Aksaray Enerji'de; geliştirici değiştiremez).
+# Kullanım: eyk-yayinla <commit-sha>   — yalnız ekinciomer-ai/evdenyemekye deposundan.
+# Kurallar: ayrı ağ, 768 MB / 1 çekirdek / 256 süreç, ayrıcalık yükseltme yok, sunucu klasörü yok (yalnız /veri),
+# her yayında /veri anlık kopyası, sağlık kontrolü, yayın sonrası diğer siteler bozulursa otomatik geri dönüş.
+set -uo pipefail
+SHA="$1"; K=/opt/aesun/sir/eyk_github; B=/opt/evdenyemekye; G=$B/git; AD=eyk-site; AG=eyk-ag
+export GIT_SSH_COMMAND="ssh -i $K -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20"
+SONUC=$B/son_sonuc; : > $SONUC
+not(){ echo "NOT: $*"; echo "$*" >> $SONUC; }
+[[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { not "HATA geçersiz sürüm"; exit 1; }
+[ -d $G/.git ] || git clone -q git@github.com:ekinciomer-ai/evdenyemekye.git $G || { not "HATA depo okunamadı"; exit 1; }
+cd $G && timeout 120 git fetch -q origin '+refs/heads/*:refs/remotes/origin/*' && git cat-file -e "$SHA^{commit}" 2>/dev/null || { not "HATA $SHA depoda yok"; exit 1; }
+S7=${SHA:0:7}; W=$B/surum/$S7; rm -rf $W; mkdir -p $W; git archive "$SHA" | tar x -C $W
+BOY=$(du -sm $W | cut -f1); [ "$BOY" -le 300 ] || { not "HATA sürüm çok büyük (${BOY} MB > 300 MB)"; exit 1; }
+SIR=$(cd $W && find . -type f \( -name '.env' -o \( -name '.env.*' ! -name '.env.example' \) -o -name '*.pem' -o -name '*.key' -o -name 'id_rsa*' -o -name 'id_ed25519*' -o -name '*.sql' -o -name '*.dump' \) | head -5 | tr '\n' ' ')
+[ -z "$SIR" ] || { not "HATA reddedildi: depoda sır/döküm dosyası var: $SIR"; exit 1; }
+if grep -q -i -E '^\s*(VOLUME|EXPOSE\s+(22|80|443)\b)' $W/Dockerfile 2>/dev/null; then not "HATA reddedildi: Dockerfile'da VOLUME ya da 22/80/443 portu kullanılamaz"; exit 1; fi
+if [ -f $W/Dockerfile ]; then TUR=uygulama; DF=Dockerfile
+elif [ -f $W/public/index.html ]; then TUR=statik; DF=Dockerfile.yayin
+  printf 'FROM nginx:1.27-alpine\nCOPY public /usr/share/nginx/html\nRUN sed -i "s/listen  *80;/listen 8000;/; s/listen  *\\[::\\]:80;/listen [::]:8000;/" /etc/nginx/conf.d/default.conf\n' > $W/$DF
+else not "HATA ne Dockerfile ne public/index.html var"; exit 1; fi
+timeout 900 docker build -q --network bridge -f $W/$DF -t $AD:$S7 $W >/tmp/eyk_b.txt 2>&1 || { tail -8 /tmp/eyk_b.txt | grep -v -i -E 'password|secret|token' | while read l; do not "derleme: $l"; done; not "HATA imaj kurulamadı ($TUR)"; exit 1; }
+# ayrı ağ: site yalnız Caddy ile konuşur, sunucudaki diğer kapsayıcıları görmez
+docker network inspect $AG >/dev/null 2>&1 || docker network create $AG >/dev/null
+docker network connect $AG ck-caddy >/dev/null 2>&1 || true
+# /veri anlık kopyası (son 5)
+mkdir -p $B/veri $B/veri_kopya; tar czf $B/veri_kopya/$(date +%Y%m%d_%H%M%S)_$S7.tgz -C $B veri 2>/dev/null; ls -1t $B/veri_kopya/*.tgz | tail -n +6 | xargs -r rm -f
+ENV=""; [ -f $B/.env ] && ENV="--env-file $B/.env"
+calistir(){ docker run -d --name "$1" --network $AG -m 768m --memory-swap 768m --cpus 1 --pids-limit 256 \
+  --security-opt no-new-privileges --cap-drop NET_RAW --cap-drop SYS_ADMIN --cap-drop NET_ADMIN --restart unless-stopped $ENV \
+  -v $B/veri:/veri --log-opt max-size=5m --log-opt max-file=2 --label eyk=1 "$2" >/dev/null; }
+saglik(){ for i in $(seq 1 ${2:-30}); do c=$(docker exec ck-caddy wget -q -S -O /dev/null http://$1:8000/ 2>&1 | awk '/HTTP\//{print $2}' | tail -1); [ "$c" = 200 ] && return 0; sleep 2; done; return 1; }
+diger(){ for u in https://portal.aksarayenerji.net/ https://cutkoda.com/; do c=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 $u); case $c in 2*|3*|401) ;; *) echo "$u:$c"; return 1;; esac; done; return 0; }
+docker rm -f $AD-yeni >/dev/null 2>&1
+calistir $AD-yeni $AD:$S7 || { not "HATA kapsayıcı başlamadı"; exit 1; }
+if ! saglik $AD-yeni; then docker logs --tail 12 $AD-yeni 2>&1 | grep -v -i -E 'password|secret|token|key=' | while read l; do not "log: $l"; done
+  docker rm -f $AD-yeni >/dev/null 2>&1; not "HATA yeni sürüm açılmadı (8000 portunda GET / 200 dönmeli); canlıdaki sürüm değişmedi"; exit 1; fi
+ONCEKI=$(cat $B/canli 2>/dev/null || true)
+docker rm -f $AD >/dev/null 2>&1; docker rename $AD-yeni $AD
+# Caddy (alan adı sunucuyu gösteriyorsa gerçek adres + önizleme)
+IP=$(curl -s4 --max-time 5 https://api.ipify.org || hostname -I | awk '{print $1}')
+ON="eyk.$(echo $IP | tr . -).sslip.io"; DNS=$(getent ahostsv4 evdenyemekye.com | awk 'NR==1{print $1}')
+ADRES="$ON"; [ "$DNS" = "$IP" ] && ADRES="evdenyemekye.com, $ON"
+EK=/opt/cutkoda/caddy-ek/evdenyemekye.caddy; ESKI=""; [ -f $EK ] && ESKI=$(cat $EK)
+YENI=$( { echo "# evdenyemekye.com (dış geliştirici; kurallar aesun/sunucu/evdenyemekye)"; echo "$ADRES {"
+  printf '\tencode zstd gzip\n\trequest_body {\n\t\tmax_size 50MB\n\t}\n\theader {\n\t\tStrict-Transport-Security "max-age=31536000"\n\t\tX-Content-Type-Options nosniff\n\t\tReferrer-Policy strict-origin-when-cross-origin\n\t\t-Server\n\t}\n\treverse_proxy %s:8000\n}\n' $AD
+  [ "$DNS" = "$IP" ] && printf 'www.evdenyemekye.com {\n\tredir https://evdenyemekye.com{uri} permanent\n}\n'; } )
+if [ "$YENI" != "$ESKI" ]; then echo "$YENI" > $EK
+  if ! { docker exec ck-caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/tmp/eyk_c.txt 2>&1 && docker exec ck-caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile >>/tmp/eyk_c.txt 2>&1; }; then
+    if [ -n "$ESKI" ]; then echo "$ESKI" > $EK; else rm -f $EK; fi
+    docker exec ck-caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1; not "UYARI Caddy ayarı yenilenemedi, eski ayar korundu"; fi; fi
+sleep 3
+if ! D=$(diger); then
+  not "HATA yayından sonra diğer sitelerden biri yanıt vermedi ($D); önceki sürüme dönülüyor"
+  docker rm -f $AD >/dev/null 2>&1
+  if [ -n "$ONCEKI" ] && docker image inspect $AD:$ONCEKI >/dev/null 2>&1; then calistir $AD $AD:$ONCEKI; fi
+  exit 1; fi
+[ -n "$ONCEKI" ] && [ "$ONCEKI" != "$S7" ] && echo "$ONCEKI" > $B/onceki; echo $S7 > $B/canli
+ls -1t $B/surum | tail -n +4 | while read d; do rm -rf "$B/surum/$d"; done
+docker images $AD --format '{{.Tag}}' | grep -v -x -E "$S7|$(cat $B/onceki 2>/dev/null || echo x)" | while read t; do docker rmi -f $AD:$t >/dev/null 2>&1; done
+not "TAMAM canlı sürüm $S7 ($TUR) · https://$ON $( [ "$DNS" = "$IP" ] && echo '· https://evdenyemekye.com' || echo '· evdenyemekye.com A kaydı henüz sunucuyu göstermiyor')"
+exit 0

@@ -1,0 +1,20 @@
+#!/bin/bash
+# Dakikalık: main dalında yeni commit varsa (mod otomatik ise) yayınlar ve sonucu depodaki `yayin-durumu` dalına yazar.
+exec 9>/run/eyk-oto.lock; flock -n 9 || exit 0
+B=/opt/evdenyemekye; G=$B/git; S=$B/oto_son
+[ "$(cat $B/mod 2>/dev/null)" = otomatik ] || exit 0
+export GIT_SSH_COMMAND="ssh -i /opt/aesun/sir/eyk_github -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=20"
+cd $G 2>/dev/null || exit 0
+timeout 60 git fetch -q origin '+refs/heads/*:refs/remotes/origin/*' || exit 0
+YENI=$(git rev-parse origin/main); [ "$YENI" = "$(cat $S 2>/dev/null)" ] && exit 0
+echo $YENI > $S
+# sunucu kilidi: aesun işlemleriyle aynı anda çalışmaz
+exec 8>/var/lock/aesun_islem.lock; flock -w 1800 8 || exit 0
+/usr/local/bin/eyk-yayinla $YENI > /dev/null 2>&1; KOD=$?
+{ echo "# Yayın durumu — evdenyemekye.com"; echo; echo "- Zaman: $(TZ=Europe/Istanbul date '+%d.%m.%Y %H:%M')"
+  echo "- Kayıt: ${YENI:0:7} — $(git log -1 --format=%s $YENI | cut -c1-100)"
+  echo "- Sonuç: **$([ $KOD -eq 0 ] && echo 'TAMAM — yeni sürüm canlıda' || echo 'YAYINLANMADI — canlıdaki sürüm değişmedi')**"; echo; echo '```'; cat $B/son_sonuc; echo '```'
+  echo; echo "Kurallar için README.md. Sorun sürerse Ömer Ekinci'ye bildirin."; } > /tmp/eyk_durum.md
+BL=$(git hash-object -w /tmp/eyk_durum.md); TR=$(printf '100644 blob %s\tYAYIN_DURUMU.md\n' $BL | git mktree)
+P=$(git rev-parse -q --verify origin/yayin-durumu); C=$(git -c user.name=evdenyemekye-sunucu -c user.email=sunucu@aksarayenerji.net commit-tree $TR ${P:+-p $P} -m "Yayın: ${YENI:0:7} $([ $KOD -eq 0 ] && echo TAMAM || echo YAYINLANMADI)")
+timeout 60 git push -q origin $C:refs/heads/yayin-durumu 2>/dev/null || true

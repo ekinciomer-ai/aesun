@@ -1,0 +1,44 @@
+{
+ "kod": "KZ_MRK_30_SARJ",
+ "kanal": "KZ_TR",
+ "platformlar": [
+  "youtube"
+ ],
+ "format": "Short",
+ "seri": "Merak Lab",
+ "dil": "tr",
+ "kategori": "27",
+ "sentetik": true,
+ "ekran_yazisi": "tasarim",
+ "ureten": "Claude",
+ "hedef_kitle": "Türkiye, 16-45, bilim/teknoloji/enerji meraklıları",
+ "konu": "Prizde unutulan şarj aleti bir yılda ne kadar elektrik yer? 🔌 #shorts",
+ "grup": "KZ_MRK",
+ "amac": "Merak Lab serisi: soru kancası + 3D mekanizma + adım adım hesap + net cevap (chionglab formatının Kozmos Lab uyarlaması). Ölçüt: izlemeyi seçme ≥%55, ortalama izleme ≥%70, yorum sayısı.",
+ "baslik": "Prizde unutulan şarj aleti bir yılda ne kadar elektrik yer? 🔌 #shorts",
+ "aciklama": "AB'nin harici güç kaynakları için çevreye duyarlı tasarım kuralı (Tüzük (AB) 2019/1782), 1 Nisan 2020'den beri çıkış gücü 49 W'a kadar olan şarj aletlerinin yüksüz (telefon takılı değilken) en fazla 0,10 W çekmesine izin verir. 0,10 W ile 19,25 Wh'lik bir telefon pili ≈ 192 saatte (≈ 8 gün) dolardı. Bir yıl = 365 × 24 = 8.760 saat → 0,1 × 8.760 = 876 Wh ≈ 0,9 kWh (üst sınır). 876 ÷ 19,25 ≈ 45 telefon şarjı; 876 ÷ 99 ≈ 9 kez 1 litre su kaynatmak. Gerçek tüketim alete göre değişir; kurala uyan pek çok alet sınırın altında kalır. En garantisi kullanılmayan aleti prizden çekmektir.\n\nSenin prizlerinde kaç şarj aleti takılı? Yorumlara yaz 👇\n\nAnimasyon şematiktir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: Komisyon Tüzüğü (AB) 2019/1782, Ek II, 1(a) (yüksüz durumda güç tüketimi: PO ≤ 49,0 W için AC-DC ve düşük gerilimli harici güç kaynaklarında 0,10 W; PO > 49,0 W için 0,21 W; 1 Nisan 2020'den itibaren). Varsayımlar: telefon pili 5.000 mAh × 3,85 V ≈ 19,25 Wh (#02, #20, #24 ile aynı); 1 L suyu 15 °C'den kaynatmak ≈ 99 Wh (#24).\n\n#kozmoslab #elektrik #enerji #şarj #tasarruf #mühendislik #merak #shorts",
+ "etiketler": [
+  "şarj aleti",
+  "bekleme tüketimi",
+  "elektrik tasarrufu",
+  "priz",
+  "elektrik",
+  "enerji",
+  "merak lab",
+  "kozmos lab",
+  "shorts"
+ ],
+ "kaynaklar": [
+  "Komisyon Tüzüğü (AB) 2019/1782, Ek II madde 1(a) (https://eur-lex.europa.eu/eli/reg/2019/1782/oj; legislation.gov.uk/eur/2019/1782/annexes/adopted): 'from 1 April 2020, the no-load condition power consumption shall not exceed': PO ≤ 49,0 W → AC-DC 0,10 W, Low voltage 0,10 W; PO > 49,0 W → 0,21 W",
+  "Telefon pili: 5.000 mAh × 3,85 V nominal = 19,25 Wh (#02, #20, #24 ile aynı varsayım)",
+  "1 L suyu 15 °C'den kaynatmak: 4.184 J/kg·°C × 85 = 355.640 J ≈ 98,8 Wh (USGS; #24)",
+  "Hesap: 19,25 / 0,1 = 192,5 sa ≈ 8,0 gün; 365 × 24 = 8.760 sa; 0,1 × 8.760 = 876 Wh; 876 / 19,25 = 45,5; 876 / 98,8 = 8,9"
+ ],
+ "lisans": {
+  "muzik": "özgün, kodla sentez (numpy) atmosfer + efektler, telif yok",
+  "gorsel": "kodla üretilmiş özgün 3D animasyon (three.js); gezegen dokuları kodla üretildi (kara maskesi: global-land-mask/GLOBE, kamu malı veri)",
+  "ses": "Google Gemini TTS (onaylı ses kütüphanesi), yapay zekâ sesi"
+ },
+ "kaynak_dosya": "/opt/aesun/video_bekleyen/KZ_MRK_30_SARJ.mp4",
+ "kaynak_url": "https://raw.githubusercontent.com/ekinciomer-ai/aesun/video-onizleme/KZ_MRK_30_SARJ.mp4"
+}

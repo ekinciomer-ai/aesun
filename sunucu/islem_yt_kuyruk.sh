@@ -48,7 +48,7 @@ sonuc, toklar, mevcut = [], {}, {}
 from datetime import datetime as _dt, timezone as _tz, timedelta as _td
 HESAP_GUNLUK = 4
 # Tek seferlik istisna (Ömer, 15 Kas 2026 02:04): "15.11'e özel 6 video olsun" — yalnız listedeki maç günü videoları ek hakkı kullanır.
-HESAP_ISTISNA = {"2026-11-15": {"limit": 6, "kodlar": {"SPT_FRA_TUR_KALMA_TR", "SPT_FRA_TUR_KALMA_FR"}}, "2026-11-27": {"limit": 8, "kodlar": {"YS_VIRAL_01", "YS_VIRAL_02", "YS_VIRAL_03", "YS_VIRAL_04"}}}
+HESAP_ISTISNA = {"2026-11-15": {"limit": 6, "kodlar": {"SPT_FRA_TUR_KALMA_TR", "SPT_FRA_TUR_KALMA_FR"}}, "2026-11-27": {"limit": 8, "kodlar": {"YS_VIRAL_01", "YS_VIRAL_02", "YS_VIRAL_03", "YS_VIRAL_04"}}, "2026-11-28": {"limit": 8, "kodlar": {"YS_B2_DESTEK_01", "YS_B2_DESTEK_02", "YS_B2_DESTEK_03"}}}
 _IST = _tz(_td(hours=3))
 _sayac_yol = os.path.join(D, "hesap_sayac.json")
 try:

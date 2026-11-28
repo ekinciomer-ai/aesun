@@ -86,3 +86,10 @@ Her parti: 3 konu kartı + 3 TTS metni + 3 önizleme isteği tek commit. Ömer �
 - [x] NY_SQ_07_KALE · Bilgi şıklı soru "Bu kale hangi ilde?": Hoşap (Van), Mamure (Mersin), Harput (Elazığ) — kanca: "Birinin harcında süt var" (rivayet)
 - Not: Hoşap yapım tarihi (16. yy / 1649) ve Harput fethi (1515/1516) çelişkili, kullanılmadı.
 - Not: Süreler 63/44/64 sn; havuza teslim, plan 29-31.12 13:00 (onay bekliyor). BL_07 hedefin biraz altında (96 kelime ≈ 44 sn); bilgi videolarında ~110 kelime hedefle.
+
+## Parti 15 — Karışık formatlar (2026-11-28)
+- [x] NY_YM_08_KEBAP · Bu kebap hangi ilin: Adana kebabı (Adana), Urfa tepsi kebabı (Şanlıurfa), Beyti (İstanbul) — kanca: "Biri adını bir ustadan alıyor" (Beyti Güler, 1945)
+- [x] NY_HF_08_BAK · Görsel hafıza "Haritaya 5 saniye bak": Bursa, Denizli, Şanlıurfa (+Ordu, Erzurum) — sarı/yeşil/turuncu soruldu; bilgiler UNESCO yılları (2014/1988/2018)
+- [x] NY_SQ_08_ADA · Bilgi şıklı soru "Bu ada hangi ilde?": Marmara Adası (Balıkesir), Gökçeada (Çanakkale), Bozcaada (Çanakkale) — kanca: "Bu adada tek bir köy bile yok"
+- Not: Kağıt kebabı (Hatay ve Malatya ayrı tescilli) ve büryan (Siirt/Bitlis tartışmalı) çelişkili olduğu için kullanılmadı. "Türkiye'nin en kuzey noktası" (Sinop İnceburun / Kırklareli Kofçaz) kaynaklarda çelişkili, bilgi videosu bu yüzden ada sorusuna çevrildi. Urfa soğan kebabının serbest lisanslı fotoğrafı yok.
+- Not: Süreler 64/62/58 sn; havuza teslim, plan 01-03.01 13:00 (onay bekliyor).

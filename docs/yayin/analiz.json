@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-28T03:16+03:00",
+ "olusturma": "2026-11-28T04:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -820,11 +820,11 @@
    "kanal": "LVL MAX",
    "seri": "Gündem + Tarih",
    "karar": "DURDUR",
-   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %14",
-   "olculen": 14,
-   "erken": 2,
-   "medyan_48sa": 4,
-   "tutma_orani": 14,
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %13",
+   "olculen": 15,
+   "erken": 1,
+   "medyan_48sa": 3,
+   "tutma_orani": 13,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Polise Çalım Atıp BMX Bisikletini Geri Aldı ve Kaçtı! #shorts",
@@ -940,15 +940,15 @@
   }
  ],
  "esikler": {
-  "Nasıl Yapıldı": 171,
-  "Kozmos Lab TR": 216,
-  "Antik Stüdyo": 637,
-  "LVL MAX": 3315,
-  "Estudio Antiguo": 136,
   "Yolu Seç !": 262,
+  "Nasıl Yapıldı": 171,
+  "Ömür Dediğin": 50,
   "Kozmos Lab": 95,
+  "Estudio Antiguo": 136,
   "Ancient Studio": 192,
-  "Ömür Dediğin": 50
+  "Antik Stüdyo": 637,
+  "Kozmos Lab TR": 216,
+  "LVL MAX": 3315
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1153,8 +1153,8 @@
     "medyan": 8
    },
    "12:00": {
-    "n": 3,
-    "medyan": 8
+    "n": 4,
+    "medyan": 4
    },
    "18:00": {
     "n": 3,
@@ -1737,7 +1737,7 @@
   "Kozmos Lab TR · Biliyor muydun?: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %73'i tuttu (eşik 216 izlenme / 48 sa).",
   "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 216 izlenme / 48 sa).",
-  "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %14.",
+  "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %13.",
   "Nasıl Yapıldı · Sistem Nasıl Çalışır?: ARTIR — videoların %67'i tuttu (eşik 171 izlenme / 48 sa).",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",
@@ -1798,11 +1798,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Estudio Antiguo",
-   "baslik": "¿Qué hace un líder turco en el Paseo de la Reforma? 🇲🇽 #shorts",
-   "i48": 0
-  },
-  {
    "kanal": "Kozmos Lab",
    "baslik": "What is a supermoon? 🌕 #shorts",
    "i48": 0
@@ -1820,6 +1815,11 @@
   {
    "kanal": "LVL MAX",
    "baslik": "112 km/s Hızla Araca Çarpan Motosikletli Böyle Yakalandı! | SkyFox",
+   "i48": 0
+  },
+  {
+   "kanal": "LVL MAX",
+   "baslik": "AVM Merdivenlerinde Çıkan Arbedeye Polis Anında Müdahale Etti! #shorts",
    "i48": 0
   }
  ]

@@ -101,7 +101,7 @@ const load=u=>new Promise((res,rej)=>gl.load(u,res,undefined,rej));
 const michG=await load('assets/Michelle.glb');
 const isciG=await load('assets/isci.glb');
 const patronG=await load('assets/'+(window.PATRON_GLB||'patron.glb'));
-const ofisciG=await load('assets/ofisci.glb');const kIsciG=await load('assets/k_isci.glb'),kOfisciG=await load('assets/k_ofisci.glb'),kPatronG=await load('assets/k_patron.glb'),kKadinG=await load('assets/k_kadin.glb');const kadinG=await load('assets/kadin.glb');
+const ofisciG=await load('assets/ofisci.glb');const kIsciG=await load('assets/k_isci.glb'),kOfisciG=await load('assets/k_ofisci.glb'),kPatronG=await load('assets/k_patron.glb'),kKadinG=await load('assets/k_kadin.glb'),kKomiG=await load('assets/k_komi.glb');const kadinG=await load('assets/kadin.glb');
 const [carG,botG,envT,envN,envD]=await Promise.all([load('assets/ferrari.glb'),load('assets/Xbot.glb'),
  new RGBELoader().loadAsync('assets/venice_sunset_1k.hdr'),new RGBELoader().loadAsync('assets/moonless_golf_1k.hdr'),new RGBELoader().loadAsync('assets/quarry_01_1k.hdr')]);
 const pmrem=new THREE.PMREMGenerator(renderer);
@@ -1137,6 +1137,18 @@ function buildSet(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1
   for(let i=0;i<5;i++){cyl(g,.15,.15,.02,M(0x3a3a3a,.4,.6),-2.3+i*.5,2.3,-3.45).rotation.x=Math.PI/2}
   box(g,2.4,.9,.8,st,1.6,.45,-.3);box(g,2.4,.05,.85,st,1.6,.92,-.3);box(g,.5,.3,.35,M(0xffffff,.5),1.2,1.1,-.3);
   sign(g,'MUTFAK',2.9,2.7,-3.49,1.0,.3,'#c8102e','#fff')}
+ // 12) RESTORAN — beyaz örtülü masalar, sandalyeler, servis bankosu, sarkıt lambalar
+ {const g=mk('restoran');const wh=M(0xf4f1ea,.8),wd=M(0x5a3a22,.5),dk=M(0x1a1410,.5),gl=new THREE.MeshPhysicalMaterial({color:0xe8f4ff,roughness:.05,transparent:true,opacity:.35});
+  const tbl=(x,z)=>{cyl(g,.5,.5,.03,wh,x,.77,z,32);cyl(g,.5,.53,.32,wh,x,.6,z,32);cyl(g,.06,.06,.45,dk,x,.22,z);cyl(g,.3,.3,.03,dk,x,.015,z);
+   [[0,.32],[0,-.32],[.32,0],[-.32,0]].forEach(([a,b],i)=>{if(i%2===0||x<0){cyl(g,.11,.11,.012,M(0xffffff,.3),x+a*.75,.79,z+b*.75,24);cyl(g,.03,.025,.14,gl,x+a*.45+.08,.86,z+b*.45,12)}});
+   cyl(g,.025,.025,.12,M(0xfff3d6,.6),x,.85,z,10);
+   [[0,.75,Math.PI],[0,-.75,0],[.75,0,-Math.PI/2],[-.75,0,Math.PI/2]].forEach(([a,b,ry])=>{const c=new THREE.Group();box(c,.44,.05,.44,wd,0,.46,0);box(c,.44,.5,.05,wd,0,.72,-.2);[[-.19,-.19],[.19,-.19],[-.19,.19],[.19,.19]].forEach(([p,q])=>box(c,.04,.45,.04,wd,p,.22,q));c.position.set(x+a,0,z+b);c.rotation.y=ry;g.add(c)})};
+  tbl(-1.9,-1.6);tbl(-2.2,1.0);tbl(3.6,-2.3);tbl(-.5,-2.9);
+  box(g,2.6,1.05,.6,wd,1.4,.52,-3.15);box(g,2.7,.05,.66,M(0x2b2420,.3),1.4,1.07,-3.15);
+  for(let i=0;i<3;i++)box(g,2.4,.04,.25,wd,1.4,1.6+i*.42,-3.42);
+  for(let i=0;i<14;i++){const c=[0x2e5e3a,0x6b1f24,0x8a6a2a,0x223a5e][i%4];cyl(g,.035,.035,.26,M(c,.2),.35+(i%7)*.33,1.75+Math.floor(i/7)*.42,-3.42,10)}
+  [[-1.9,-1.6],[-2.2,1.0],[1.4,-2.6]].forEach(([x,z])=>{cyl(g,.005,.005,1.0,dk,x,2.95,z,6);const sh=cyl(g,.05,.22,.18,M(0x1c1c1c,.4,.6),x,2.4,z,20);const bl=new THREE.Mesh(new THREE.SphereGeometry(.06,12,8),new THREE.MeshBasicMaterial({color:0xffe2a8}));bl.position.set(x,2.3,z);g.add(bl)});
+  sign(g,'RESTORAN',-1.2,2.75,-3.49,1.2,.32,'#1b1b1b','#f2c14e')}
  // 8) HASTANE — koridor, bekleme koltukları, sedye, yön tabelası
  {const g=mk('hastane');for(let i=0;i<5;i++){chairG(g,-2.6+i*.6,-3.0,0,0x2f7d6d)}box(g,2.0,.08,.7,M(0xe8ecef,.4),2.2,.85,-1.4);[1.4,3.0].forEach(x=>[-1.7,-1.1].forEach(z=>cyl(g,.03,.03,.8,M(0x999999,.3,.8),x,.42,z)));
   box(g,2.0,.12,.7,M(0x8fd3c4,.6),2.2,.95,-1.4);sign(g,'← POLİKLİNİK   ACİL →',0,2.8,-3.49,3.0,.35,'#0b6e4f','#fff');
@@ -1163,19 +1175,19 @@ function buildSet(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1
  const env=new THREE.Mesh(new THREE.BoxGeometry(.24,.012,.12),M(0xe8d9b5,.8));env.visible=false;s.add(env);
  // ---- karakterler: Blender'da elle pozlanmış klipler (AnimationMixer; yeniden hedefleme yok) ----
  function mkC(G){const m=SkeletonUtils.clone(G.scene);m.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false}});fixMats(m);const mx=new THREE.AnimationMixer(m);const A={};G.animations.forEach(c=>{const a=mx.clipAction(c);a.play();a.setEffectiveWeight(0);A[c.name]=a});
-  m.userData.mix=(list,lt)=>{Object.values(A).forEach(a=>{a.setEffectiveWeight(0)});let tw=0;list.forEach(([n,w])=>{if(A[n]&&w>0)tw+=w});list.forEach(([n,w,t])=>{const a=A[n];if(!a||w<=0)return;a.setEffectiveWeight(w/tw);a.time=t!==undefined?t:(lt%2)});mx.update(0)};return m}
- const boss=mkC(kPatronG);s.add(boss);const wA=mkC(kOfisciG),wB=mkC(kIsciG),wC=mkC(kKadinG);s.add(wA);s.add(wB);s.add(wC);
+  m.userData.mix=(list,lt)=>{Object.values(A).forEach(a=>{a.setEffectiveWeight(0)});let tw=0;list.forEach(([n,w])=>{if(A[n]&&w>0)tw+=w});list.forEach(([n,w,t])=>{const a=A[n];if(!a||w<=0)return;a.setEffectiveWeight(w/tw);const du=a.getClip().duration;a.time=n==='yuru'?((t||0)%1)*du:((t!==undefined?t:(lt%2))%du)});mx.update(0)};return m}
+ const boss=mkC(kPatronG);s.add(boss);const wA=mkC(kOfisciG),wB=mkC(kIsciG),wC=mkC(kKadinG),wD=mkC(kKomiG);s.add(wA);s.add(wB);s.add(wC);s.add(wD);
  const extras=[mkC(kOfisciG),mkC(kIsciG)];extras.forEach(e=>{e.visible=false;s.add(e)});
  let wkr=wA,mode='masa',setName='ofis2';
  const LOOK={atolye:{bg:0x2a2d31,wall:0x9aa0a6,fl:'beton',key:[0xe8f0ff,2.0],lamp:[0xdfeeff,5],env:.5},banka:{bg:0x0a0f1c,wall:0x6f7d8c,fl:'hali',key:[0x9fb3d9,.7],lamp:[0xffc27a,9],env:.25},
   fabrika:{bg:0x22262b,wall:0x7d8a8f,fl:'epoksi',key:[0xf2f6ff,2.1],lamp:[0xe8f4ff,4],env:.5},toplanti:{bg:0x1b2027,wall:0xbfc6cc,fl:'hali',key:[0xfff3e0,1.8],lamp:[0xffe2b0,5],env:.5},
   okul:{bg:0xbfe3ff,wall:0xf1e3c6,fl:'lino',key:[0xfff6e0,2.4],lamp:[0xfff1d6,4],env:.7},arabulucu:{bg:0x231b16,wall:0xcbb89a,fl:'parke',key:[0xffe2c0,1.9],lamp:[0xffd59a,6],env:.5},
-  mutfak:{bg:0x2a2d31,wall:0xf3f5f7,fl:'fayans',key:[0xffffff,2.3],lamp:[0xffffff,4],env:.6},hastane:{bg:0xdfe8e6,wall:0xe7f1ee,fl:'lino',key:[0xf2fbff,2.4],lamp:[0xf2fbff,4],env:.7},
+  mutfak:{bg:0x2a2d31,wall:0xf3f5f7,fl:'fayans',key:[0xffffff,2.3],lamp:[0xffffff,4],env:.6},restoran:{bg:0x1e1612,wall:0xb08a66,fl:'parke',key:[0xffe6c4,2.1],lamp:[0xffd59a,6],env:.55},hastane:{bg:0xdfe8e6,wall:0xe7f1ee,fl:'lino',key:[0xf2fbff,2.4],lamp:[0xf2fbff,4],env:.7},
   magaza:{bg:0x2a2d31,wall:0xf8f9fa,fl:'fayans',key:[0xffffff,2.2],lamp:[0xfff4e0,5],env:.6},lab:{bg:0x20262b,wall:0xe9f3f5,fl:'lino',key:[0xf2fbff,2.3],lamp:[0xe6f7ff,4],env:.6},
   ofis2:{bg:0x1c1f24,wall:0xeceae4,fl:'parke',key:[0xfff0dc,2.2],lamp:[0xffe2b0,5],env:.55}};
  function setSet(n,md,wk){setName=n;mode=md||'masa';Object.entries(G).forEach(([k,g])=>g.visible=k===n);const L=LOOK[n]||LOOK.ofis2;s.background=new THREE.Color(L.bg);wallM.color.setHex(L.wall);floor.material.map=FL[L.fl];floor.material.needsUpdate=true;
   key.color.setHex(L.key[0]);key.intensity=L.key[1];lamp.color.setHex(L.lamp[0]);lamp.intensity=L.lamp[1];s.environmentIntensity=L.env;
-  wkr=wk==='isci'?wB:wk==='kadin'?wC:wA;[wA,wB,wC].forEach(w=>w.visible=w===wkr);
+  wkr=wk==='isci'?wB:wk==='kadin'?wC:wk==='komi'?wD:wA;[wA,wB,wC,wD].forEach(w=>w.visible=w===wkr);
   const showEx=mode==='toplanti'||mode==='arabulucu';extras.forEach((e,i)=>e.visible=showEx&&(mode==='toplanti'||i===0));env.visible=n==='atolye'}
  function setWorker(k){setSet(setName,mode,k)}
  function setDoc(t,l,st){const tx=docTex(t,l,st);tx.colorSpace=THREE.SRGBColorSpace;paper.material.map=tx;paper.material.needsUpdate=true}
@@ -1183,7 +1195,7 @@ function buildSet(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1
 
  const STAGE={masa:[[.15,0,-1.05],0,[0,-.44,.80],Math.PI],kalkis:[[.15,0,-1.05],0,[0,-.44,.80],Math.PI],ayakta:[[.1,0,-1.05],0,[.0,0,.25],Math.PI],giris:[[.1,0,-1.05],0,[0,0,.3],Math.PI],
   toplanti:[[0,0,-2.35],0,[1.0,-.44,.2],-Math.PI/2],arabulucu:[[-.75,-.44,.05],1.95,[.75,-.44,.05],-1.95]};
- const SETPOS={atolye:[0,0,0],banka:[0,0,0],fabrika:[0,0,0],toplanti:[0,0,0],okul:[0,0,0],arabulucu:[0,0,0],mutfak:[1.6,0,0],hastane:[0,0,0],magaza:[-.2,0,-.15],lab:[0,0,0],ofis2:[0,0,0]};
+ const SETPOS={atolye:[0,0,0],banka:[0,0,0],fabrika:[0,0,0],toplanti:[0,0,0],okul:[0,0,0],arabulucu:[0,0,0],mutfak:[1.6,0,0],restoran:[1.2,0,0],hastane:[0,0,0],magaza:[-.2,0,-.15],lab:[0,0,0],ofis2:[0,0,0]};
  function upd(lt){const dt=lt-ti;const ta=ti-1.2;const S0=STAGE[mode]||STAGE.masa;const O=SETPOS[setName]||[0,0,0];
   boss.position.set(S0[0][0]+O[0],S0[0][1],S0[0][2]+O[2]);boss.rotation.set(0,S0[1],0);
   wkr.position.set(S0[2][0]+O[0],S0[2][1],S0[2][2]+O[2]);wkr.rotation.set(0,S0[3],0);
@@ -3015,8 +3027,8 @@ window.renderMitPi14=function(t){const sc=S[12];const lt=ltPi14(t);const st=sc.u
  if(false){LAMPSPi14=[];ARRPi14=[];sc.s.traverse(o=>{if(o.isMesh&&o.material&&o.material.emissive&&o.geometry&&o.geometry.type==='CircleGeometry')LAMPSPi14.push(o.material);if(o.isMesh&&o.material&&o.material.isMeshBasicMaterial&&o.geometry&&o.geometry.type==='PlaneGeometry'&&o.material.transparent&&(o.material.color.getHex()===0xff3b30||o.material.color.getHex()===0x34c759))ARRPi14.push(o.material)})}
  
  let P,L,f=46;
- if(t<TPi14.kaza){if(!window.__dPi14){S[12].setSet('mutfak','giris','isci');S[12].setDoc("FESİH BİLDİRİMİ",["Performansınızın düşük", "olması nedeniyle", "iş sözleşmeniz", "feshedilmiştir."],'');window.__dPi14=1}const c=CAMSHOT('genis',sm(t/TPi14.kaza),st);P=c[0];L=c[1];f=c[2];}
- else{if(!window.__dPi14){S[12].setSet('mutfak','giris','isci');S[12].setDoc("FESİH BİLDİRİMİ",["Performansınızın düşük", "olması nedeniyle", "iş sözleşmeniz", "feshedilmiştir."],'');window.__dPi14=1}const c=CAMSEQ(t,TPi14,st,[["genis", "kaza"], ["alcak", "kaza", 2.5], ["omuz_patron", "_imp", -1.6], ["tepe", "rew"], ["yaklas", "slow"], ["yan_sol", "karar"], ["yorunge", "ders"]]);P=c[0];L=c[1];f=c[2];if(t>=TPi14.karar){}}
+ if(t<TPi14.kaza){if(!window.__dPi14){S[12].setSet('restoran','giris','komi');S[12].setDoc("FESİH BİLDİRİMİ",["Performansınızın düşük", "olması nedeniyle", "iş sözleşmeniz", "feshedilmiştir."],'');window.__dPi14=1}const c=CAMSHOT('genis',sm(t/TPi14.kaza),st);P=c[0];L=c[1];f=c[2];}
+ else{if(!window.__dPi14){S[12].setSet('restoran','giris','komi');S[12].setDoc("FESİH BİLDİRİMİ",["Performansınızın düşük", "olması nedeniyle", "iş sözleşmeniz", "feshedilmiştir."],'');window.__dPi14=1}const c=CAMSEQ(t,TPi14,st,[["genis", "kaza"], ["alcak", "kaza", 2.5], ["omuz_patron", "_imp", -1.6], ["tepe", "rew"], ["yaklas", "slow"], ["yan_sol", "karar"], ["yorunge", "ders"]]);P=c[0];L=c[1];f=c[2];if(t>=TPi14.karar){}}
  camera.position.copy(P);camera.fov=f;camera.updateProjectionMatrix();camera.lookAt(L);renderer.toneMappingExposure=1.0;renderer.render(sc.s,camera);
  let dim=0;if(t>=TPi14.poll&&t<TPi14.rew)dim=.45*fadeIn(t,TPi14.poll,.4);if(t>=TPi14.karar)dim=.3;
  let blk=1-sm(t/.3);const d=st.dt;if(t<TPi14.poll&&d>=0){blk=Math.max(blk,d<.5?1:1-sm((d-.5)/.4))}

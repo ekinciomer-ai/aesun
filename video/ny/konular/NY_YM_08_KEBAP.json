@@ -1,0 +1,116 @@
+{
+ "kanal": "NY",
+ "seri": "İllere Göre Yemekler",
+ "dil": "tr",
+ "kod": "NY_YM_08_KEBAP",
+ "baslik_bant": "BU KEBAP HANGİ İLİN?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "3 KEBAP",
+   "ust": "BİRİ ADINI BİR USTADAN ALIYOR",
+   "alt": "HANGİ İLİN? CEVAP SONDA",
+   "alt_kelime": "usta"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU KEBAP HANGİ İLİN?",
+   "siklar": [
+    "Mersin",
+    "Osmaniye",
+    "Adana",
+    "Hatay"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/adana_kebap.jpg"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Adana"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU KEBAP HANGİ İLİN?",
+   "siklar": [
+    "Şanlıurfa",
+    "Mardin",
+    "Gaziantep",
+    "Diyarbakır"
+   ],
+   "dogru": 0,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/urfa_kebap.jpg"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Şanlıurfa"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BU KEBAP HANGİ İLİN?",
+   "siklar": [
+    "İzmir",
+    "Bursa",
+    "İstanbul",
+    "Ankara"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "gorsel": "gorsel/yemek/beyti.jpg"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "İstanbul"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "EN SEVDİĞİN KEBABI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Hürriyet (DHA, 08.10.2017) – Adana Ticaret Odası, Adana Kebabı için Türk Patent'ten coğrafi işaret ve tescil belgesi aldı https://www.hurriyet.com.tr/ekonomi/adana-kebap-ve-salgami-uluslararasi-alanda-tescillenecek-40603450",
+  "Türkiye Gazetesi (24.01.2017) – ATO, 2004 başvurusuyla Adana Kebabı için coğrafi işaret aldı https://www.turkiyegazetesi.com.tr/yasam/adana-kebabi-avrupaya-aciliyor-440813",
+  "Küre Ansiklopedi – Şanlıurfa/Urfa Tepsi Kebabı: mahreç işareti, tescil no 1171, tescil 19.07.2022; kuzu eti, kuyruk yağı, Birecik patlıcanı, biber; taş fırında https://kureansiklopedi.com/tr/detay/sanliurfa-urfa-tepsi-kebabi-d2a16",
+  "NTV (İHA, 09.08.2022) – Şanlıurfa'nın tepsi kebabı Türk Patent ve Marka Kurumunca tescillendi; kuzu eti ve patlıcan taş fırında https://www.ntv.com.tr/galeri/n-life/n-lezzetler/sanliurfanin-tepsi-kebabi-cografi-isaretle-tescillendi,TskRl0Q95UusgbQHarWpQQ",
+  "Wikipedia – Beyti (Istanbul): 1945'te Küçükçekmece'de kuruldu, 1983'ten beri Florya'da; yemek adını şef Beyti Güler'den alır https://en.wikipedia.org/wiki/Beyti_(Istanbul)",
+  "MICHELIN Guide (27.01.2023) – Beyti Güler 1945'te Küçükçekmece'de restoranını açtı; adını restoranına ve imza yemeğine verdi https://guide.michelin.com/en/article/people/a-living-legend-a-signature-dish-beyti",
+  "Fotoğraflar: Wikimedia Commons serbest lisanslı (lisans/yazar açıklamaya otomatik eklenir)",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu kebap adını bir ustadan alıyor! Hangi ilin biliyor musun?",
+  "aciklama": "Biri şişte pişen coğrafi işaretli bir kıyma kebabı, biri taş fırında patlıcanla pişen bir tepsi kebabı, biri de adını bir ustadan alıyor. Bu üç kebap hangi illerin? Cevaplar videoda.\n\n💬 Kaç doğru yaptın? En sevdiğin kebabı yorumlara yaz.",
+  "etiketler": [
+   "kebap",
+   "yöresel yemekler",
+   "türk mutfağı",
+   "hangi ilin",
+   "adana kebabı",
+   "urfa tepsi kebabı",
+   "beyti",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu kebap adını bir ustadan alıyor 🍢 Hangi ilin? Cevap sonda! #kebap #yöreselyemek #quiz",
+  "amac": "İllere göre yemekler serisi; tescilli kebaplar, sona saklanan cevap ve yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

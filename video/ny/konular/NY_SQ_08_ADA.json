@@ -1,0 +1,115 @@
+{
+ "kanal": "NY",
+ "seri": "Bilgi Şıklı Soru",
+ "dil": "tr",
+ "kod": "NY_SQ_08_ADA",
+ "baslik_bant": "BU ADA HANGİ İLDE?",
+ "tip": "quiz",
+ "abartma": 11,
+ "tema": "illustre",
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "kanca",
+   "buyuk": "0 KÖY",
+   "ust": "BU ADADA TAM",
+   "alt": "HANGİ İLDE? CEVAP SONDA",
+   "alt_kelime": "köy"
+  },
+  {
+   "id": "s02",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "MARMARA ADASI HANGİ İLDE?",
+   "siklar": [
+    "İstanbul",
+    "Tekirdağ",
+    "Balıkesir",
+    "Bursa"
+   ],
+   "dogru": 2,
+   "bekle": 3,
+   "il": "Balıkesir"
+  },
+  {
+   "id": "s03",
+   "sahne": "q_cevap",
+   "il": "Balıkesir"
+  },
+  {
+   "id": "s04",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "GÖKÇEADA HANGİ İLDE?",
+   "siklar": [
+    "Edirne",
+    "Çanakkale",
+    "İzmir",
+    "Balıkesir"
+   ],
+   "dogru": 1,
+   "bekle": 3,
+   "il": "Çanakkale"
+  },
+  {
+   "id": "s05",
+   "sahne": "q_cevap",
+   "il": "Çanakkale"
+  },
+  {
+   "id": "s06",
+   "sahne": "q_soru",
+   "gizli": 1,
+   "soru": "BOZCAADA HANGİ İLDE?",
+   "siklar": [
+    "İzmir",
+    "Balıkesir",
+    "Muğla",
+    "Çanakkale"
+   ],
+   "dogru": 3,
+   "bekle": 3,
+   "il": "Çanakkale"
+  },
+  {
+   "id": "s07",
+   "sahne": "q_cevap",
+   "il": "Çanakkale"
+  },
+  {
+   "id": "s08",
+   "sahne": "kapanis",
+   "cta": "KAÇ DOĞRU YAPTIN?",
+   "cta_alt": "PUANINI YORUMA YAZ ↓"
+  }
+ ],
+ "kaynaklar": [
+  "Sabah (18.06.2026) – Türkiye'nin en büyük 10 adası: 1. Gökçeada (Çanakkale), 2. Marmara Adası (Balıkesir), 3. Bozcaada (Çanakkale); Bozcaada üzerinde hiç köy bulunmayan tek ilçe https://www.sabah.com.tr/yasam/haritada-kucuk-gorunuyorlar-ama-hepsi-birer-dev-iste-turkiyenin-en-buyuk-10-adasi-7605628",
+  "Küre Ansiklopedi – Bozcaada (Tenedos): köyü olmayan tek ilçe; Türkiye'nin üçüncü büyük adası; ekonomisinin ve kültürünün en önemli parçası bağcılık https://kureansiklopedi.com/tr/cocuk-detay/bozcaada-tenedos-dd075",
+  "citypopulation.de – Bozcaada ilçesi (Çanakkale): ilçede yalnız Bozcaada merkezi https://www.citypopulation.de/en/turkey/canakkale/TR22204__bozcaada",
+  "Karar (13.08.2019) – Marmara Adası Balıkesir'e bağlı; Gökçeada'dan sonra Türkiye'nin ikinci büyük adası https://www.karar.com/marmara-adasi-hangi-ile-bagli-marmara-adasi-nerede-marmara-adasi-nufusu-1295758",
+  "Bianet – Marmara Denizi'nin en büyük adası Marmara; mermerleri antik çağdan beri meşhur https://bianet.org/haber/marmara-denizinin-en-buyuk-adasi-marmara-12130",
+  "Wikipedia – List of extreme points of Turkey: en batı nokta Avlaka Burnu, Gökçeada, Çanakkale https://en.wikipedia.org/wiki/List_of_extreme_points_of_Turkey",
+  "Harita: Natural Earth (kamu malı)"
+ ],
+ "yayin": {
+  "baslik": "Bu adada tek bir köy bile yok! Hangi ilde biliyor musun?",
+  "aciklama": "Türkiye'nin en büyük üç adası: biri mermeriyle ünlü, biri ülkenin en batı noktasını taşıyor, birinde ise tek bir köy bile yok. Hangi illerde? Cevaplar videoda.\n\n💬 Kaç doğru yaptın? Puanını yorumlara yaz.",
+  "etiketler": [
+   "adalar",
+   "gökçeada",
+   "bozcaada",
+   "marmara adası",
+   "türkiye",
+   "coğrafya",
+   "hangi ilde",
+   "quiz",
+   "shorts"
+  ],
+  "tiktok_metin": "Bu adada tek bir köy bile yok 🏝️ Hangi ilde? Cevap sonda! #ada #türkiye #quiz",
+  "amac": "Bilgi şıklı soru serisi; Türkiye'nin en büyük adaları, sona saklanan cevap ve yorum etkileşimi",
+  "platformlar": [
+   "youtube"
+  ]
+ }
+}

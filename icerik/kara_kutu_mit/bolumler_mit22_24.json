@@ -1,0 +1,195 @@
+[
+ {
+  "N": 23,
+  "kod": "KK_MIT_22",
+  "havuz": "KK_MIT_22_KIRMIZIDA_YAYA",
+  "hookNo": "MİT #22",
+  "src": "Yargıtay",
+  "sahne": "S[4].upd5 (28.11 yeni: gece, açık hava, aydınlatmalı bölünmüş yol, ışıklı yaya geçidi, kamyonet + yaya ışığı)",
+  "pollQ": "SÜRÜCÜYE NE OLDU?",
+  "opts": [
+   [
+    "A",
+    "Suçsuz, beraat etti"
+   ],
+   [
+    "B",
+    "Tali kusurlu, ertelenmiş hapis"
+   ],
+   [
+    "C",
+    "Tam kusurlu, hapse girdi"
+   ]
+  ],
+  "dogru": "Doğru şık: B",
+  "sonuc": "SONUÇ: 1 YIL 8 AY HAPİS, ERTELENDİ",
+  "clues": [
+   [
+    "Birinci ipucu",
+    "Araca yeşil, yayaya kırmızı"
+   ],
+   [
+    "İkinci ipucu",
+    "Kamyonet hızını azaltmadı"
+   ],
+   [
+    "Üçüncü ipucu",
+    "Bilirkişi: sürücü tali kusurlu"
+   ]
+  ],
+  "reasons": [
+   [
+    "Mahkemeye göre",
+    "Yeşil ışık, geçitte yavaşlama kuralını kaldırmaz"
+   ],
+   [
+    "Sürücü tali",
+    "Sürücü tali kusurlu"
+   ]
+  ],
+  "hukumKey": "Taksirle öldürmeden",
+  "ders1": "Yeşil ışık <b style=\"color:#ffb15c\">yavaşlama kuralını kaldırmaz.</b>",
+  "ders2": "🚸 Yaya geçidine yaklaşırken<br><b style=\"color:#34c759\">her zaman yavaşla.</b>",
+  "black": "YAYA HAYATINI<br><span style=\"color:#ff453a\">KAYBETTİ</span>",
+  "sc": 4,
+  "upd": "upd5",
+  "tiL": 5.2,
+  "impKey": "yayaya çarpıyor",
+  "hookMain": "“YAYA KIRMIZIDA<br>GEÇTİYSE<br><span style=\"color:#ffb15c;font-size:1.25em\">SÜRÜCÜ</span><br>SUÇSUZDUR”",
+  "camKaza": "const cz=Math.min(st.car.position.z,sc.M23.zC-4);P=new THREE.Vector3(-6,12,cz-16);L=new THREE.Vector3(1,0,cz+12);f=48;",
+  "camRest": "const cz=Math.min(st.car.position.z,sc.M23.zC-4);P=new THREE.Vector3(-6,12,cz-16);L=new THREE.Vector3(1,0,cz+12);f=48;",
+  "camKarar": "P=new THREE.Vector3(-10,13,sc.M23.zC-15);L=new THREE.Vector3(1,0,sc.M23.zC+4);f=48;",
+  "exp": 1.0,
+  "tagsK": "tg+=tag3(st.car,2.2,'KAMYONET · YEŞİL IŞIK','#34c759','#111');if(st.ped.m.visible)tg+=tag3(st.ped.m,2.1,'YAYA · KIRMIZI IŞIK','#ff453a')",
+  "tagsS": "tg+=tag3(st.car,2.2,'KUSUR?','#ffd60a','#111')"
+ },
+ {
+  "N": 24,
+  "kod": "KK_MIT_23",
+  "havuz": "KK_MIT_23_OTOBUS_YOLCU",
+  "hookNo": "MİT #23",
+  "src": "Yargıtay",
+  "sahne": "S[4].upd6 (28.11 yeni: gündüz, durakta belediye otobüsü + durak, yolcu biner, ani kalkış + fren; düşme anı siyah ekran)",
+  "pollQ": "ZARARI KİM ÖDEDİ?",
+  "opts": [
+   [
+    "A",
+    "Kimse, suç yolcunun"
+   ],
+   [
+    "B",
+    "İşleten + şoför, birlikte"
+   ],
+   [
+    "C",
+    "Yalnız yolcunun sigortası"
+   ]
+  ],
+  "dogru": "Doğru şık: B",
+  "sonuc": "SONUÇ: 3.469 TL + 5.000 TL TAZMİNAT",
+  "clues": [
+   [
+    "Birinci ipucu",
+    "Yolcu henüz oturmamıştı"
+   ],
+   [
+    "İkinci ipucu",
+    "Ani kalkış, ardından fren"
+   ],
+   [
+    "Üçüncü ipucu",
+    "Bilirkişi kusur raporu esas alındı"
+   ]
+  ],
+  "reasons": [
+   [
+    "Mahkeme davayı",
+    "Dava kısmen kabul edildi"
+   ],
+   [
+    "Otobüsün işleteni",
+    "İşleten ve şoför birlikte öder"
+   ]
+  ],
+  "hukumKey": "üç bin dört yüz",
+  "ders1": "Yolcu düştü diye <b style=\"color:#ffb15c\">suç otomatik onun olmaz.</b>",
+  "ders2": "🚌 Binince hemen<br><b style=\"color:#34c759\">sıkıca tutun.</b>",
+  "black": "YOLCU DÜŞTÜ<br><span style=\"color:#ff453a\">KEMİĞİ KIRILDI</span>",
+  "sc": 4,
+  "upd": "upd6",
+  "tiL": 5.0,
+  "impKey": "Yolcu sırt üstü",
+  "hookMain": "“OTOBÜSTE<br>DÜŞTÜYSEN<br><span style=\"color:#ffb15c;font-size:1.25em\">ŞOFÖR</span><br>SORUMLU DEĞİL”",
+  "camKaza": "P=new THREE.Vector3(-1.5,17,sc.M24.zS-21);L=new THREE.Vector3(-5.5,0,sc.M24.zS+9);f=48;",
+  "camRest": "P=new THREE.Vector3(-1.5,17,sc.M24.zS-21);L=new THREE.Vector3(-5.5,0,sc.M24.zS+9);f=48;",
+  "camKarar": "P=new THREE.Vector3(-1,17,sc.M24.zS-19);L=new THREE.Vector3(-5.5,0,sc.M24.zS+13);f=48;",
+  "exp": 1.0,
+  "tagsK": "tg+=tag3(st.car,3.8,'BELEDİYE OTOBÜSÜ','#ffd60a','#111');if(st.ped.m.visible)tg+=tag3(st.ped.m,2.1,'YOLCU','#ff453a');else tg+=tag3(st.car,1.2,'YOLCU AYAKTA','#ff453a')",
+  "tagsS": "tg+=tag3(st.car,3.8,'KİM ÖDER?','#ffd60a','#111')"
+ },
+ {
+  "N": 25,
+  "kod": "KK_MIT_24",
+  "havuz": "KK_MIT_24_YOLDAKI_TAS",
+  "hookNo": "MİT #24",
+  "src": "Danıştay",
+  "stamp": "'DANIŞTAY<br>ONADI'",
+  "sahne": "S[3].upd3 (28.11 yeni: gündüz otoyol, yolun üzerine dizilmiş taşlar, orta şeritte otomobil)",
+  "pollQ": "ZARARI KİM ÖDEDİ?",
+  "opts": [
+   [
+    "A",
+    "Kimse, sürücüye kaldı"
+   ],
+   [
+    "B",
+    "Sürücü ile idare, yarı yarıya"
+   ],
+   [
+    "C",
+    "İdare, gerçek zararı"
+   ]
+  ],
+  "dogru": "Doğru şık: C",
+  "sonuc": "SONUÇ: İDARE 9.500 TL ÖDER",
+  "clues": [
+   [
+    "Birinci ipucu",
+    "Aracın değeri 12.500 TL"
+   ],
+   [
+    "İkinci ipucu",
+    "Hurda değeri 3.000 TL"
+   ],
+   [
+    "Üçüncü ipucu",
+    "Sürücünün kusuru yok"
+   ]
+  ],
+  "reasons": [
+   [
+    "Mahkemeye göre",
+    "Yol güvenliği idarenin görevi"
+   ],
+   [
+    "İdare bunu",
+    "İdare önlem almadı"
+   ]
+  ],
+  "hukumKey": "Dokuz bin",
+  "ders1": "Yoldaki engelden <b style=\"color:#ffb15c\">idare de sorumlu</b> tutulabilir.",
+  "ders2": "📸 Tutanak tut,<br><b style=\"color:#34c759\">hasar tespiti yaptır.</b>",
+  "black": "ARAÇ TAŞLARA<br><span style=\"color:#ff453a\">ÇARPTI</span>",
+  "sc": 3,
+  "upd": "upd3",
+  "tiL": 6.0,
+  "impKey": "taşlara çarpıyor",
+  "hookMain": "“YOLDAKİ TAŞA<br>ÇARPTIYSAN<br><span style=\"color:#ffb15c;font-size:1.25em\">ZARAR</span><br>SANA KALIR”",
+  "camKaza": "const cz=Math.min(st.car.position.z,sc.M25.zS-4);P=new THREE.Vector3(-6,11,cz-17);L=new THREE.Vector3(1,0,cz+14);f=48;",
+  "camRest": "const cz=Math.min(st.car.position.z,sc.M25.zS-4);P=new THREE.Vector3(-6,11,cz-17);L=new THREE.Vector3(1,0,cz+14);f=48;",
+  "camKarar": "P=new THREE.Vector3(-9,12,sc.M25.zS-16);L=new THREE.Vector3(0,0,sc.M25.zS+4);f=48;",
+  "exp": 1.0,
+  "tagsK": "tg+=tag3(st.car,1.9,'SÜRÜCÜ','#ffd60a','#111');tg+=tag3(st.ST,1.3,'YOLA DİZİLMİŞ TAŞLAR','#ff453a')",
+  "tagsS": "tg+=tag3(st.ST,1.3,'KİM ÖDER?','#ffd60a','#111')"
+ }
+]

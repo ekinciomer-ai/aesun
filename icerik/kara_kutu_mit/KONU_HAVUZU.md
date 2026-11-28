@@ -36,6 +36,9 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 24. Ehliyetsiz sürücü kazada otomatik suçludur — KK_MIT_19 · teslim 27.11 (Yargıtay 12. CD E.2012/22236 K.2013/15336, onama: yaya soldan aniden girdi, sürücü kusursuz, beraat) https://lexara.com.tr/karar/10003318
 25. Alkollü sürücünün yolcusu tam tazminat alır — KK_MIT_20 · teslim 27.11 (Yargıtay 4. HD E.2022/1080 K.2023/6785, onama: %20 müterafik kusur, 44.326 TL) https://lexara.com.tr/karar/779170
 26. Yoldaki mıcıra kaydıysan suç tamamen senin — KK_MIT_21 · teslim 27.11 (Danıştay 15. D E.2014/1980 K.2017/1205, onama: idare %40, 7.140 TL) https://lexara.com.tr/karar/18748332
+27. Kırmızıda geçen yayaya çarpan sürücü suçsuzdur — KK_MIT_22 · teslim 28.11 (Yargıtay 12. CD E.2025/1139 K.2026/390, onama: yeşilde yavaşlamayan sürücü tali kusurlu, 1 yıl 8 ay hapis, ertelendi) https://lexara.com.tr/karar/21295917
+28. Otobüste ayaktayken düştüysen şoför sorumlu değildir — KK_MIT_23 · teslim 28.11 (Yargıtay 17. HD E.2015/13102 K.2016/7657, onama: ani kalkış + fren, 3.469 TL maddi + 5.000 TL manevi) https://lexara.com.tr/karar/4823910
+29. Otoyolda yoldaki taşlara çarptıysan zarar sana kalır — KK_MIT_24 · teslim 28.11 (Danıştay 15. D E.2014/627 K.2017/619, onama: idare hizmet kusuru, 9.500 TL) https://lexara.com.tr/karar/18748163
 
 ## Bekleyen (öncelik sırası)
 6. Park halindeki araca çarpıp gitmek önemsizdir — park halindeki araca çarpıp kaçma, tazminat/ceza
@@ -46,6 +49,9 @@ Her satır: toplumda yaygın inanç · Lexara arama ipucu. Kullanılan konu "Yap
 14. Aracı kazadan sonra kenara çekersen haksız duruma düşersin — maddi hasarlı kaza, aracı kaldırma yükümlülüğü
 15. Sollama yaparken hız sınırını aşmak serbesttir — sollama, hız, kusur
 16. Karşıdan gelen far yaktı, kör oldum: kusur bende değil — gece uzun far, kamaşma, kusur
-19. Otobüste ayakta giderken düştüysen şoför sorumlu değildir — ani fren, yolcu yaralanması, taşıyanın sorumluluğu
-20. Kırmızıda karşıya geçen yayaya çarpan sürücü her zaman masumdur — yaya kırmızıda, sürücü kusur payı
 21. Emniyet şeridine park etmek, çarpanı tek suçlu yapar — emniyet şeridinde park, tali kusur
+22. Sarı ışıkta kavşağa girmek serbesttir — sarı ışıkta kavşağa giriş, kusur (28.11 eklendi)
+23. Geri manevra yaparken çarpan her zaman tam kusurludur — geri manevra, kusur paylaşımı (28.11 eklendi)
+24. Park etmiş aracın kapısını açarken çarpılırsa kapıyı açan sorumlu olmaz — kapı açma, bisikletli/motosikletli, kusur (28.11 eklendi)
+25. Yolda biriken suya girip kaza yaptıysan suç senindir — su birikintisi, idarenin hizmet kusuru (28.11 eklendi)
+26. Kazadan sonra aracın değer kaybı istenemez — değer kaybı tazminatı, sigorta (28.11 eklendi)

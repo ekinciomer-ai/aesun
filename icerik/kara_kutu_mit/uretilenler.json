@@ -1,6 +1,6 @@
 {
- "son_mit_no": 21,
- "son_render_no": 22,
+ "son_mit_no": 24,
+ "son_render_no": 25,
  "not": "Yeni bölüm: mit_no=son_mit_no+1 (ekrandaki MİT #), render_no=son_render_no+1 (renderMit<N>, tl/mit<N>_tl.json), TTS kodu KK_MIT_<mit_no 2 hane> | 24.11.2026: MİT #15-17 için render_no 16-18 kullanıldı (iptal edilen eski #15/#16'nın render 16/17 numaraları sahnede hiç kullanılmamıştı); TTS kodları KK_MIT_15/16/17 (tamam/ içindeki eski KK_MIT_15.json üzerine yazıldı).",
  "bolumler": [
   {
@@ -157,11 +157,41 @@
    "ses": "V1-V5 KK_MIT_21_B, V6-V7 KK_MIT_21_C (hepsi gemini-3.1-flash-tts-preview/charon); birleştirmede KK_MIT_21__V1..V7",
    "sahne": "S[6].upd5 (27.11 yeni: sağ şeritte mıcır + çelik bariyer)",
    "teslim": "2026-11-27 (islem_havuz_kk_gunluk_20261127)"
+  },
+  {
+   "kod": "KK_MIT_22_KIRMIZIDA_YAYA",
+   "mit": "Yaya kırmızıda geçtiyse ona çarpan sürücü suçsuzdur",
+   "mit_no": 22,
+   "render_no": 23,
+   "kaynak": "Yargıtay 12. CD E.2025/1139 K.2026/390 (onama; sürücü tali kusurlu, TCK 85/1, 1 yıl 8 ay hapis, ertelendi) https://lexara.com.tr/karar/21295917",
+   "ses": "KK_MIT_22__V1..V7 (gemini-3.1-flash-tts-preview/charon)",
+   "sahne": "S[4].upd5 (28.11 yeni: gece, açık hava, kamyonet + yaya ışığı)",
+   "teslim": "2026-11-28 (islem_havuz_kk_gunluk_20261128)"
+  },
+  {
+   "kod": "KK_MIT_23_OTOBUS_YOLCU",
+   "mit": "Otobüste ayaktayken düştüysen şoför sorumlu değildir",
+   "mit_no": 23,
+   "render_no": 24,
+   "kaynak": "Yargıtay 17. HD E.2015/13102 K.2016/7657 (onama; kısmen kabul, 3.469,12 TL maddi + 5.000 TL manevi, işleten + sürücü müteselsilen) https://lexara.com.tr/karar/4823910",
+   "ses": "KK_MIT_23__V1..V7 (gemini-3.1-flash-tts-preview/charon)",
+   "sahne": "S[4].upd6 (28.11 yeni: gündüz durak + belediye otobüsü, ani kalkış + fren)",
+   "teslim": "2026-11-28 (islem_havuz_kk_gunluk_20261128)"
+  },
+  {
+   "kod": "KK_MIT_24_YOLDAKI_TAS",
+   "mit": "Otoyolda yoldaki taşlara çarptıysan zarar sana kalır",
+   "mit_no": 24,
+   "render_no": 25,
+   "kaynak": "Danıştay 15. D E.2014/627 K.2017/619 (onama; idare hizmet kusuru, sürücü kusursuz, 9.500 TL) https://lexara.com.tr/karar/18748163",
+   "ses": "KK_MIT_24__V1..V7 (gemini-3.1-flash-tts-preview/charon)",
+   "sahne": "S[3].upd3 (28.11 yeni: gündüz otoyol, yola dizilmiş taşlar)",
+   "teslim": "2026-11-28 (islem_havuz_kk_gunluk_20261128)"
   }
  ],
  "ertelenen": [],
- "ertelenen_not": "26.11.2026 14:00: #18 teslim edildi. Kota (3 anahtar, 429 PerDay) #19 V5-V7 ve #20'nin tamamını okutmadı; 27.11 11:00 sonrası sırayla bekleyen_tts/KK_MIT_19_E.json, KK_MIT_20.json, KK_MIT_21.json gönder; sahneler #19-#20 hazır, #21 yeni sahne ister.",
- "son_gun": "2026-11-26: #17 teslim (01:05), #18 teslim (14:00). #19-#20 kota nedeniyle 27.11'e kaldı.",
+ "ertelenen_not": "28.11.2026: ertelenen yok.",
+ "son_gun": "2026-11-28: #22, #23, #24 teslim (tek oturum, 21 parça ses gemini-3.1-flash-tts-preview/charon).",
  "iptal": [
   {
    "kod": "KK_MIT_15_KACMAK",

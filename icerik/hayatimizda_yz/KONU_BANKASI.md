@@ -12,12 +12,12 @@ Durum: [ ] sırada · [x] KOD teslim · [-] atlandı (neden)
 - [-] 05 · Mutfakta · Kamerayla meyveyi tanıyıp ekranda adını gösteren akıllı tartı (ESP8266 + Pi kamera, 253 bin izlenme) (C: tiktok.com/@corecortex_uk/video/7711021287723896086) — gerçekten görüntü tanıma mı, videodan doğrula · ATLANDI 27.11: TikTok sayfası okunamadı, görüntü tanıma doğrulanamadı
 - [x] KZ_HAYAT_05_EV · Evde · Bilgisayar ısınıyor → sıcaklık monitörü → gizli kripto madencisi bulundu, 112 °C (A: Macworld + Wccftech, Reddit paylaşımı; madencinin kaynağı belirsiz diye anlatıldı)
 - [-] 07 · Şehirde · Yıllardır kapanmayan çukur: 6 fotoğraf → 3D simülasyon → belediyeye gönderildi → 2 günde kapandı (A, Hollanda) · ATLANDI 27.11: orijinal bireysel paylaşım bulunamadı
-- [ ] 08 · Evde · Islak ve kuru atığı kendisi ayıran akıllı çöp kutusu (C: tiktok.com/@corecortex_uk/video/7632007727635582230)
-- [ ] 09 · Çocuğumuzla · Oğlu oynayamasın diye değil, güvenli oynasın diye: kalabalık görünen ama yabancısız, harf toplayıp kelime öğreten kendi oyunu (A)
+- [-] 08 · Evde · Islak ve kuru atığı kendisi ayıran akıllı çöp kutusu (C: tiktok.com/@corecortex_uk/video/7632007727635582230) · ATLANDI 28.11: TikTok sayfası okunamadı, proje doğrulanamadı
+- [-] 09 · Çocuğumuzla · Oğlu oynayamasın diye değil, güvenli oynasın diye: kalabalık görünen ama yabancısız, harf toplayıp kelime öğreten kendi oyunu (A) · ATLANDI 28.11: orijinal paylaşım (x.com/adamlyttleapps) çocuğa söylenmeden botlarla sahte oyuncu kalabalığı kurmak; Futurism 'Truman Show' diye eleştirdi, yazarı da 'öfke çekmek için kurgulandı' dedi; harf/kelime kısmı yok → etik
 - [x] KZ_HAYAT_06_TARLA · Tarlada · Ziraat okumamış eski memur, 100 hektar Hokkaido: sera kapaklarını mesajlaşma uygulamasından açıp kapatan sistem, pano şemasını fotoğraftan çıkardı (A: x.com/tomiyasu16/status/2038922364956914167 + chatgptpro.substack.com röportajı)
-- [ ] 11 · Evde · Duman ve kötü havayı algılayınca öten hava kalitesi alarmı, MQ-135 (C: tiktok.com/@corecortex_uk/video/7711341302213889302)
-- [ ] 12 · Evde · Kayıp telefon: Bul özelliği kapalı, 1 dakikada Bluetooth "sıcak-soğuk" programı (A)
-- [ ] 13 · Evde · Yavaş internet: modemin fotoğrafı → kanal/frekans/Wi-Fi modu düzeltmeleri, her adımda hız ölçümü (A)
+- [-] 11 · Evde · Duman ve kötü havayı algılayınca öten hava kalitesi alarmı, MQ-135 (C: tiktok.com/@corecortex_uk/video/7711341302213889302) · ATLANDI 28.11: C kaynağı TikTok bu ortamda okunamıyor (05, 08 gibi)
+- [x] KZ_HAYAT_07_ISYERI · İş yerinde · Kayıp telefon: Bul özelliği şirket ayarıyla kapalı, 30 dk arama, yapay zekâ ~1 dakikada Bluetooth sinyal ölçer yazdı, masanın yanında bulundu (A: x.com/un1c0rnioz/status/2084686552299634805 + Business Today 06.08.2026)
+- [x] KZ_HAYAT_08_INTERNET · Evde · Yavaş internet: 4,54 → 799 Mbps; yapay zekâ bağlantı hızının 10 Mbps olduğunu yakaladı, sorun eski kablo (A: reddit.com/r/ClaudeAI/comments/1uwtn3m + Wccftech 16.07.2026; modem fotoğraflı/çok adımlı sürümün bireysel YZ kaynağı bulunamadı, kablo örneği kullanıldı)
 - [ ] 14 · Evde · Alevi bulup radar ekranında gösteren yangın dedektörü (C: tiktok.com/@corecortex_uk/video/7710863022025198870)
 - [ ] 15 · Çocuğumuzla · Dili bilmediği oyunu 4 yaşındaki oğlu için ücretsiz yerel ses modelleriyle yeniden seslendirdi (A)
 - [ ] 16 · Gökyüzünde · NASA'nın 7 yıllık açık verisinde 1000+ küçük programla gezegen adayı; 74 analizle kendi bulgusunu çürütmeye çalıştı (A)

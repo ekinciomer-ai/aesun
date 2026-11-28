@@ -1197,7 +1197,7 @@ function buildSet(){const s=new THREE.Scene();s.background=new THREE.Color(0x1c1
    Wm(wl,lt)}
   else if(mode==='ayakta'||mode==='giris'){B([['ayakta',1-k],['uzat',k]],lt);
    let wl=[['ayakta',1]];
-   if(mode==='giris'){const u=clamp((lt-1.0)/3.0,0,1);const x=lerp(3.2,0,sm(u));wkr.position.x=x+O[0];const tr=sm(clamp((u-.85)/.15,0,1));wkr.rotation.y=-Math.PI/2+lerp(0,-Math.PI/2,tr);if(u<1)wl=[['yuru',1-tr,(lt*1.1)%1],['ayakta',tr]]}
+   if(mode==='giris'){const u=clamp((lt-1.0)/3.0,0,1);const x=lerp(3.2,0,sm(u));wkr.position.x=x+O[0];const tr=sm(clamp((u-.85)/.15,0,1));wkr.rotation.y=-Math.PI/2+lerp(0,-Math.PI/2,tr);if(u<1)wl=[['yuru',1-tr,((3.2*sm(u))/0.733)%1],['ayakta',tr]]}
    else{const pr=clamp((lt-2.4)/.5,0,1)*(1-clamp((lt-3.9)/.5,0,1));wl=[['ayakta',1-pr],['itiraz',pr]]}
    if(lt>=ta){const hd=clamp((lt-ta-.5)/.5,0,1);wl=[['ayakta',1-hd],['tut',hd]]}
    Wm(wl,lt);const bp=boss.position,wp=wkr.position;p0=new THREE.Vector3(bp.x+.3,1.2,bp.z+.45);p1=new THREE.Vector3(wp.x,1.12,wp.z-.3);flat=false}

@@ -66,8 +66,37 @@ for name,poses in ACTS.items():
     if hd: hd.rotation_quaternion=hd.rotation_quaternion@Quaternion((0,0,1),.04*amp)
     key_all(f)
   made.append(act)
+def walk_pose(p):
+  reset()
+  hp=P('Hips');bpy.context.view_layer.update()
+  dz=-0.03+0.018*(1-math.cos(4*math.pi*p))/2
+  M=hp.matrix.copy();M.translation=M.translation+(R@Vector((0,0,dz)));hp.matrix=M
+  rx=0.04*math.sin(2*math.pi*p)  # kalça yana hafif dönüş
+  bpy.context.view_layer.update()
+  S=0.22;LIFT=0.10;ANK=0.075;L1=P('LeftUpLeg').bone.length;L2=P('LeftLeg').bone.length
+  for side,ph,sx in (('Left',p,1),('Right',(p+.5)%1,-1)):
+    if ph<0.6: q=ph/0.6;fy=-S+2*S*q;fz=ANK;ft=(0,-.96,-.28)
+    else:
+      q=(ph-0.6)/0.4;fy=S-2*S*(q*q*(3-2*q));fz=ANK+LIFT*math.sin(math.pi*q);ft=(0,-.85,-.52) if q<.5 else (0,-.99,-.1)
+    if ph<0.08: ft=(0,-.99,.05)   # topuk vuruşu: parmak yukarı
+    elif 0.45<ph<0.6: ft=(0,-.6,-.8)  # parmak ucu itiş
+    bpy.context.view_layer.update()
+    hip=rig.matrix_world@P(side+'UpLeg').head
+    tgt=Vector((hip.x+sx*0.02,hip.y+fy,fz));d=tgt-hip;dist=min(d.length,L1+L2-0.005);dn=d.normalized()
+    a=math.acos(max(-1,min(1,(L1*L1+dist*dist-L2*L2)/(2*L1*dist))))
+    ax=Vector((1,0,0));thigh=(mathutils.Matrix.Rotation(a,3,ax)@dn)  # öne doğru büküm (-y)
+    if thigh.y>dn.y: thigh=(mathutils.Matrix.Rotation(-a,3,ax)@dn)
+    knee=hip+thigh*L1;shin=(hip+dn*dist-knee).normalized()
+    aim(side+'UpLeg',tuple(thigh));aim(side+'Leg',tuple(shin));aim(side+'Foot',ft)
+  sw=0.22*math.cos(2*math.pi*p)
+  aim('LeftArm',(.13,sw,-.98));aim('LeftForeArm',(.06,sw-.18,-.98));aim('LeftHand',(.05,sw-.15,-.98))
+  aim('RightArm',(-.13,-sw,-.98));aim('RightForeArm',(-.06,-sw-.18,-.98));aim('RightHand',(-.05,-sw-.15,-.98))
+  bpy.context.view_layer.update()
+def key_hips(f):
+  P('Hips').keyframe_insert('location',frame=f)
 act=bpy.data.actions.new('yuru');rig.animation_data.action=act
-for i in range(0,25,3):pose(W(i/24));key_all(1+i)
+for i in range(0,25):
+  walk_pose((i%24)/24);key_all(1+i);key_hips(1+i)
 made.append(act)
 # NLA'ya it (dışa aktarımda her eylem ayrı animasyon olsun)
 for a in made:
@@ -88,7 +117,9 @@ if os.environ.get('KONTROL'):
   h=mx.z-mn.z;ctr=(mn+mx)/2
   cam.location=ctr+Vector((h*.9,-h*1.6,h*.05));d=ctr-cam.location;cam.rotation_euler=d.to_track_quat('-Z','Y').to_euler();cam.data.lens=50
   out=os.environ['KONTROL'];os.makedirs(out,exist_ok=True);rig.animation_data.use_nla=False
-  for name,poses in list(ACTS.items())+[('yuru0',[W(0)]),('yuru25',[W(.25)])]:
-    pose(poses[0]);sc.render.filepath=f'{out}/{name}.png';bpy.ops.render.render(write_still=True)
+  for name,poses in list(ACTS.items())+[('yuru%02d'%k,[k]) for k in (0,12,25,37,50,62,75,87)]:
+    if name.startswith('yuru'):
+      cam.location=ctr+Vector((h*1.7,0,0));dd=ctr-cam.location;cam.rotation_euler=dd.to_track_quat('-Z','Y').to_euler()
+    (walk_pose(poses[0]/100) if isinstance(poses[0],int) else pose(poses[0]));sc.render.filepath=f'{out}/{name}.png';bpy.ops.render.render(write_still=True)
   reset();rig.animation_data.use_nla=True
   if os.environ.get('SADECE_KONTROL'): raise SystemExit

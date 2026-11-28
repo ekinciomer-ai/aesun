@@ -76,11 +76,11 @@ def pitch(ph):
 def walk_pose(p):
   reset()
   hp=P('Hips');bpy.context.view_layer.update()
-  dz=-0.03+0.018*(1-math.cos(4*math.pi*p))/2
+  dz=-0.045+0.025*(1-math.cos(4*math.pi*p))/2
   M=hp.matrix.copy();M.translation=M.translation+(R@Vector((0,0,dz)));hp.matrix=M
   rx=0.04*math.sin(2*math.pi*p)  # kalça yana hafif dönüş
   bpy.context.view_layer.update()
-  S=0.22;LIFT=0.10;ANK=0.075;L1=P('LeftUpLeg').bone.length;L2=P('LeftLeg').bone.length
+  S=0.36;LIFT=0.11;ANK=0.075;L1=P('LeftUpLeg').bone.length;L2=P('LeftLeg').bone.length
   for side,ph,sx in (('Left',p,1),('Right',(p+.5)%1,-1)):
     if ph<0.6: q=ph/0.6;fy=-S+2*S*q;bump=0
     else: q=(ph-0.6)/0.4;fy=S-2*S*(q*q*(3-2*q));bump=LIFT*math.sin(math.pi*q)
@@ -94,7 +94,7 @@ def walk_pose(p):
     if thigh.y>dn.y: thigh=(mathutils.Matrix.Rotation(-a,3,ax)@dn)
     knee=hip+thigh*L1;shin=(hip+dn*dist-knee).normalized()
     aim(side+'UpLeg',tuple(thigh));aim(side+'Leg',tuple(shin));aim(side+'Foot',ft)
-  sw=0.22*math.cos(2*math.pi*p)
+  sw=0.30*math.cos(2*math.pi*p)
   aim('LeftArm',(.13,sw,-.98));aim('LeftForeArm',(.06,sw-.18,-.98));aim('LeftHand',(.05,sw-.15,-.98))
   aim('RightArm',(-.13,-sw,-.98));aim('RightForeArm',(-.06,-sw-.18,-.98));aim('RightHand',(-.05,-sw-.15,-.98))
   bpy.context.view_layer.update()

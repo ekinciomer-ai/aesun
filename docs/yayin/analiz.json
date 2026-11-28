@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-28T10:58+03:00",
+ "olusturma": "2026-11-28T11:09+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -678,11 +678,11 @@
    "kanal": "Kozmos Lab TR",
    "seri": "Drone Nerede Çalışır?",
    "karar": "DENE",
-   "neden": "1 ölçülmüş video var, karar için en az 3 gerekli",
-   "olculen": 1,
-   "erken": 2,
-   "medyan_48sa": 783,
-   "tutma_orani": 100,
+   "neden": "2 ölçülmüş video var, karar için en az 3 gerekli",
+   "olculen": 2,
+   "erken": 1,
+   "medyan_48sa": 480,
+   "tutma_orani": 50,
    "izlenme_yuzde": 55,
    "en_iyi": {
     "baslik": "Tarlayı drone ilaçlarsa 🌾 #shorts",
@@ -942,15 +942,15 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab TR": 216,
   "Kozmos Lab": 95,
-  "Estudio Antiguo": 136,
-  "Ömür Dediğin": 50,
+  "Antik Stüdyo": 637,
   "LVL MAX": 3315,
   "Yolu Seç !": 262,
-  "Antik Stüdyo": 637,
-  "Ancient Studio": 192,
-  "Nasıl Yapıldı": 181
+  "Estudio Antiguo": 136,
+  "Nasıl Yapıldı": 181,
+  "Ömür Dediğin": 50,
+  "Kozmos Lab TR": 216,
+  "Ancient Studio": 192
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1077,8 +1077,8 @@
     "medyan": 509
    },
    "19:00": {
-    "n": 16,
-    "medyan": 430
+    "n": 17,
+    "medyan": 427
    },
    "21:00": {
     "n": 10,
@@ -1714,7 +1714,7 @@
   "Antik Stüdyo: son 6 Short'tan 3 tanesi tuttu (eşik 637 izlenme / 48 sa).",
   "Estudio Antiguo: son 6 Short'tan 1 tanesi tuttu (eşik 136 izlenme / 48 sa).",
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
-  "Kozmos Lab TR: son 6 Short'tan 5 tanesi tuttu (eşik 216 izlenme / 48 sa).",
+  "Kozmos Lab TR: son 6 Short'tan 4 tanesi tuttu (eşik 216 izlenme / 48 sa).",
   "LVL MAX: son 6 Short'tan 0 tanesi tuttu (eşik 3315 izlenme / 48 sa).",
   "Nasıl Yapıldı: son 4 Short'tan 3 tanesi tuttu (eşik 181 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 1 tanesi tuttu (eşik 262 izlenme / 48 sa).",

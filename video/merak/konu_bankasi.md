@@ -35,3 +35,5 @@ Rakamlar burada ipucudur; senaryodan önce güvenilir kaynakla doğrulanır. Do�
 - [x] KZ_MRK_26_BUZDOLABI — Bir buzdolabı bir günde ne kadar elektrik harcar? (AB Komisyonu: 2020 ort. 181 kWh/yıl ≈ 0,5 kWh/gün; 1990: 477) — enerji
 - [x] KZ_MRK_28_GERILIM — Bir elektrik direği hattında neden yüksek gerilim kullanılır? (aynı güçte akım düşer, kayıp I²R) — enerji (#16'dan farkı: iletim ve gerilim basamakları; 380 kV ↔ 230 V, kayıp ≈ 2,7 milyon kat az)
 - [x] KZ_MRK_27_VENUS — Venüs'te bir gün mü uzun, bir yıl mı? (NASA: dönüş 243 gün, yıl 224,7 gün, güneş günü 116,75 gün, ters dönüş) — uzay (27.11: bankada uzay konusu kalmadığı için eklendi)
+- [x] KZ_MRK_29_HIZ — Bu videoyu izlerken Dünya ile kaç km yol aldın? (NASA: ortalama yörünge hızı 29,78 km/s → 1 dk ≈ 1.787 km; yılda ≈ 940 milyon km) — uzay (28.11: bankada konu kalmadığı için eklendi; #07 dönüş hızıydı, bu yörünge hızı)
+- [x] KZ_MRK_30_SARJ — Prizde unutulan boş şarj aleti bir yılda ne kadar elektrik yer? (Tüzük (AB) 2019/1782: yüksüz ≤ 0,10 W → yılda ≤ 876 Wh ≈ 45 telefon) — enerji (28.11: bankada konu kalmadığı için eklendi)

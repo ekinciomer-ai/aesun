@@ -79,6 +79,8 @@ Kanal: Kozmos Lab TR (`KZ_TR`). Seri: **Merak Lab**. Kod: `KZ_MRK_<NN>_<KISA_AD>
 
 | `venus` | `mod: soru / yil / tur / kiyas / yuru / ters / gunes / takvim / son` | Venüs yakın plan (ters dönüş oku, ekvator çubuğu, tur çizgisi + gün sayacı); üstten yörünge (Güneş, gün sayacı, iz, %tur, Güneş yönü çizgisi = güneş günü); eksen kameraya dönük Venüs üstünde yürüyen kişi; Dünya ⟲ / Venüs ⟳ yan yana; Eylül–Ocak takvimi (117 gün çubuğu, iki Güneş) |
 | `gerilim` | `mod: soru / gerilim / guc / dusuk / yuksek / kayip / saat / basamak / ev / son` | Santral → yükseltici trafo → 3 kafes direk (sarkık teller, akım parçacıkları) → indirici trafo → ahşap direk + direk trafosu → ev; priz; 500 su ısıtıcısı ızgarası (1 MW); kalın 230 V kablo (yoğun elektron, kızaran tel + ısı dalgası) vs ince 380 kV tel (3 elektron) + su ısıtıcısı; 1 saat / 311 yıl kadranları; basamakta kamera zincir boyunca kayar |
+| `hiz` | `mod: soru / hiz / ucak / dakika / ankara / hisset / yil / ocak / son` | Güneş çevresinde yörünge (üstten eğik), Dünya + kalın turuncu iz + km sayacı (1.787 km / 940 milyon km); yakın planda teğet hız oku (Güneş gizli); uçak vs Dünya hız sütunları (900 / 107.208 km/sa); 4 kez İstanbul–Ankara yolu; Dünya üstünde duran kişi; Ocak (30,3) / Temmuz (29,3 km/s) işaretleri |
+| `sarj` | `mod: soru / kural / gun / yil / hesap / telefon / kaynat / sinir / son` | Duvar prizinde boş şarj aleti (sarkan kablo, seyrek elektron), üstte güç ölçer (? / 0,10 / 0,00 W), yavaş dolan telefon (gün sayacı), 12 aylık takvim (8.760 saat), Wh sütunu (876), 45 telefon ızgarası, 9 su ısıtıcısı, fişin çekilmesi |
 Konu kütüphanedeki sahnelerle anlatılamıyorsa: `sahneler.js`'e yeni sahne eklenir (aynı arayüz: `S.ad=()=>({sc,c,bl,kur(o)})`, `kur` yalnız `o`'ya bakar). Yardımcılar `motor.js` (`M.*`): gunes, dunya, jupiter, panel, telefon, olcu, yazi, dyazi, cizgi, pts, uzay, izgara…
 Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,goruntu --kareler 60,300,900` → `arac/sayfa.py` ile kontrol sayfası.
 
@@ -104,5 +106,6 @@ Yerel deneme: `python3 arac/uret.py kuyruk/X.json --sahte-ses --adim ses,kurgu,g
 - Bölüm 23 (Nötron yıldızından şeker küpü kaç ton) ve 24 (1 litre su kaynatmak kaç telefon) — 25.11.2026, günlük görev; yeni sahneler `notron`, `kaynat`.
 - Bölüm 25 (Kara delikten kaçış hızı) ve 26 (Buzdolabı günde kaç kWh) — 26.11.2026, günlük görev; yeni sahneler `kacis`, `buzdolabi`.
 - Bölüm 27 (Venüs'te gün mü yıl mı uzun) ve 28 (Neden 380 bin volt) — 27.11.2026, günlük görev; yeni sahneler `venus`, `gerilim`.
+- Bölüm 29 (Bu videoda Dünya ile kaç km) ve 30 (Prizdeki şarj aleti yılda ne yer) — 28.11.2026, günlük görev; yeni sahneler `hiz`, `sarj`.
 - Düzeltme 18.11: parçalar arası 0,22 sn boşlukta sahne son parçanın moduna sıçrıyordu (kısa titreme); artık önceki parçada kalır (`calistir.js`). #01–#04 bu hatayla üretildi.
 - TikTok/Reels: Kozmos Lab hesapları sunucu oturumuna bağlanınca kartlara `tiktok`/`instagram` eklenecek (şu an yalnız YouTube Shorts).

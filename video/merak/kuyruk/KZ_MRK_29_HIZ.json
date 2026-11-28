@@ -1,0 +1,204 @@
+{
+ "kod": "KZ_MRK_29_HIZ",
+ "no": "MERAK #29",
+ "tema": "acik",
+ "ses": "charon",
+ "ses_modu": "uzay",
+ "soru": {
+  "ust": "MERAK LAB",
+  "t": "BU VİDEODA<br><i>KAÇ KM GİTTİN?</i>"
+ },
+ "parcalar": [
+  {
+   "id": "s01",
+   "sahne": "hiz",
+   "p": {
+    "mod": "soru"
+   },
+   "metin": "Bu videoyu izlerken, hiç kıpırdamadan kaç kilometre yol alacaksın? Tahminini aklında tut.",
+   "ekran": []
+  },
+  {
+   "id": "s02",
+   "sahne": "hiz",
+   "p": {
+    "mod": "hiz",
+    "kart": 58
+   },
+   "metin": "Dünya, Güneş'in çevresinde saniyede yaklaşık otuz kilometre hızla koşuyor. Sen de onunla birlikte.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "DÜNYA'NIN YÖRÜNGE HIZI",
+     "say": 29.78,
+     "dec": 2,
+     "ek": " km/s",
+     "k": "saniyede",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "sahne": "hiz",
+   "p": {
+    "mod": "ucak",
+    "kart": 60
+   },
+   "metin": "Bu, saatte yüz yedi bin kilometre. Bir yolcu uçağından yaklaşık yüz yirmi kat hızlı.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "29,78 <em>×</em> 3.600 ≈ 107.208 km/sa",
+     "k": "saatte"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 120 × yolcu uçağı ✈️",
+     "k": "yolcu"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "sahne": "hiz",
+   "p": {
+    "mod": "dakika",
+    "kart": 52
+   },
+   "metin": "Bir dakikada ne olur? Otuz çarpı altmış: yaklaşık bin yedi yüz seksen yedi kilometre.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "29,78 <em>×</em> 60",
+     "k": "Otuz"
+    },
+    {
+     "tip": "sayi",
+     "ust": "1 DAKİKADA",
+     "say": 1787,
+     "dec": 0,
+     "ek": " km",
+     "k": "bin",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "sahne": "hiz",
+   "p": {
+    "mod": "ankara",
+    "kart": 60
+   },
+   "metin": "Bu, neredeyse dört kez İstanbul'dan Ankara'ya gitmek demek. Hem de sadece bir dakikada.",
+   "ekran": [
+    {
+     "tip": "formul",
+     "y": "1.787 <em>÷</em> 450 ≈ 4",
+     "k": "dört"
+    },
+    {
+     "tip": "etiket",
+     "y": "≈ 4 × İstanbul–Ankara 🚗",
+     "k": "İstanbul"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "sahne": "hiz",
+   "p": {
+    "mod": "hisset",
+    "kart": 60
+   },
+   "metin": "Peki neden hissetmiyoruz? Hız neredeyse hiç değişmiyor, ani fren yok. Hava da biz de birlikte gidiyoruz. Sakin bir uçakta çay bardağının yerinde durması gibi.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "sabit hız = hissedilmez 🛋️",
+     "k": "Hız"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "sahne": "hiz",
+   "p": {
+    "mod": "yil",
+    "kart": 60
+   },
+   "metin": "Bir yılda Güneş'in çevresindeki tam tur, yaklaşık dokuz yüz kırk milyon kilometre.",
+   "ekran": [
+    {
+     "tip": "sayi",
+     "ust": "1 YILDA",
+     "say": 940,
+     "dec": 0,
+     "ek": " milyon km",
+     "k": "dokuz",
+     "on": "≈ "
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "sahne": "hiz",
+   "p": {
+    "mod": "ocak",
+    "kart": 60
+   },
+   "metin": "Küçük bir sır: Ocak başında Güneş'e en yakınken biraz hızlanır, saniyede otuz virgül üç kilometre.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "Ocak 30,3 · Temmuz 29,3 km/s",
+     "k": "Ocak"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "sahne": "hiz",
+   "p": {
+    "mod": "son",
+    "kart": 58
+   },
+   "metin": "Cevap: bu bir dakikalık videoda yaklaşık bin yedi yüz seksen yedi kilometre yol aldın. Tahminin kaçtı? Yorumlara yaz.",
+   "ekran": [
+    {
+     "tip": "etiket",
+     "y": "1 dakika ≈ 1.787 km ✅",
+     "k": "yaklaşık"
+    },
+    {
+     "tip": "etiket",
+     "y": "Yorumlara yaz 👇",
+     "k": "Yorumlara"
+    }
+   ]
+  }
+ ],
+ "yayin": {
+  "baslik": "Bu videoyu izlerken kaç km yol aldın? 🌍 #shorts",
+  "aciklama": "Dünya, Güneş'in çevresinde ortalama saniyede 29,78 km hızla dolanır (NASA). 29,78 × 3.600 ≈ 107.208 km/sa; yolcu uçağı seyirde ≈ 900 km/sa → ≈ 120 kat. 1 dakikada 29,78 × 60 ≈ 1.787 km; İstanbul–Ankara karayolu ≈ 450 km → neredeyse 4 kez. Bir yılda (365,256 gün) yol ≈ 940 milyon km (2π × 149,6 milyon km ≈ 940 milyon km). Hız neredeyse sabit olduğu ve atmosferle birlikte hareket ettiğimiz için hissetmeyiz. Dünya Güneş'e en yakın olduğu Ocak başında en hızlıdır (≈ 30,29 km/s), en uzak olduğu Temmuz başında en yavaştır (≈ 29,29 km/s).\n\nSenin tahminin kaçtı? Yorumlara yaz 👇\n\nAnimasyon şematiktir, ölçekli değildir. 3D animasyon ve ses tasarımı kodla üretilmiştir; seslendirme yapay zekâ sesidir.\n\nKaynaklar: NASA NSSDC Earth Fact Sheet (ortalama yörünge hızı 29,78 km/s; en yüksek 30,29, en düşük 29,29 km/s; yörünge yarı büyük ekseni 149,598 milyon km; yıldız yılı 365,256 gün); Singapore Airlines A350-900 seyir hızı Mach 0,85 (≈ 900 km/sa); İstanbul–Ankara karayolu ≈ 450 km (yaklaşık).\n\n#kozmoslab #dünya #uzay #astronomi #bilim #merak #shorts",
+  "etiketler": [
+   "dünyanın hızı",
+   "yörünge hızı",
+   "dünya güneş",
+   "uzay",
+   "astronomi",
+   "bilim",
+   "merak lab",
+   "kozmos lab",
+   "shorts"
+  ]
+ },
+ "kaynaklar": [
+  "NASA NSSDC Earth Fact Sheet (https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html, güncelleme 15.11.2024): Mean orbital velocity 29.78 km/s; Max. 30.29; Min. 29.29; Semimajor axis 149.598 ×10^6 km; Sidereal orbit period 365.256 gün",
+  "Günberi (Güneş'e en yakın nokta) Ocak başında, günöte Temmuz başında: en yüksek hız günberide, en düşük günötede (Kepler'in ikinci yasası)",
+  "Yolcu uçağı ≈ 900 km/sa (Singapore Airlines A350-900 seyir Mach 0,85; #05, #11 ile aynı varsayım)",
+  "İstanbul–Ankara karayolu ≈ 450 km (#03, #07, #25 ile aynı karşılaştırma)",
+  "Hesap: 29,78 × 3.600 = 107.208 km/sa; 107.208 / 900 = 119,1; 29,78 × 60 = 1.786,8 km; 1.786,8 / 450 = 3,97; 2π × 149,598 = 939,9 milyon km; 29,78 × 365,256 × 86.400 = 939,8 milyon km"
+ ]
+}

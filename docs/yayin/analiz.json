@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-28T15:26+03:00",
+ "olusturma": "2026-11-28T15:36+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -852,10 +852,10 @@
    "kanal": "Nasıl Yapıldı",
    "seri": "Sistem Nasıl Çalışır?",
    "karar": "ARTIR",
-   "neden": "videoların %75'i tuttu (eşik 182 izlenme / 48 sa)",
+   "neden": "videoların %75'i tuttu (eşik 183 izlenme / 48 sa)",
    "olculen": 4,
    "erken": 2,
-   "medyan_48sa": 746,
+   "medyan_48sa": 757,
    "tutma_orani": 75,
    "izlenme_yuzde": 37,
    "en_iyi": {
@@ -954,15 +954,15 @@
   }
  ],
  "esikler": {
-  "Kozmos Lab": 95,
-  "Kozmos Lab TR": 216,
-  "Ömür Dediğin": 50,
   "Yolu Seç !": 262,
-  "Estudio Antiguo": 136,
-  "LVL MAX": 3315,
+  "Kozmos Lab": 95,
   "Antik Stüdyo": 637,
+  "Estudio Antiguo": 136,
   "Ancient Studio": 192,
-  "Nasıl Yapıldı": 182
+  "Ömür Dediğin": 50,
+  "Nasıl Yapıldı": 183,
+  "LVL MAX": 3315,
+  "Kozmos Lab TR": 216
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1150,7 +1150,7 @@
   "Nasıl Yapıldı": {
    "13:00": {
     "n": 2,
-    "medyan": 746
+    "medyan": 757
    },
    "19:00": {
     "n": 2,
@@ -1160,7 +1160,7 @@
   "LVL MAX": {
    "00:00": {
     "n": 3,
-    "medyan": 2
+    "medyan": 3
    },
    "06:00": {
     "n": 4,
@@ -1172,7 +1172,7 @@
    },
    "18:00": {
     "n": 4,
-    "medyan": 12
+    "medyan": 8
    },
    "22:00": {
     "n": 1,
@@ -1712,7 +1712,7 @@
   "Kozmos Lab: son 6 Short'tan 0 tanesi tuttu (eşik 95 izlenme / 48 sa).",
   "Kozmos Lab TR: son 6 Short'tan 4 tanesi tuttu (eşik 216 izlenme / 48 sa).",
   "LVL MAX: son 6 Short'tan 0 tanesi tuttu (eşik 3315 izlenme / 48 sa).",
-  "Nasıl Yapıldı: son 4 Short'tan 3 tanesi tuttu (eşik 182 izlenme / 48 sa).",
+  "Nasıl Yapıldı: son 4 Short'tan 3 tanesi tuttu (eşik 183 izlenme / 48 sa).",
   "Yolu Seç !: son 6 Short'tan 1 tanesi tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin: son 3 Short'tan 2 tanesi tuttu (eşik 50 izlenme / 48 sa).",
   "Ancient Studio · Tarihi Magazin: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %0.",
@@ -1729,7 +1729,7 @@
   "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %75'i tuttu (eşik 216 izlenme / 48 sa).",
   "Kozmos Lab TR · Merak Lab: ARTIR — videoların %60'i tuttu (eşik 216 izlenme / 48 sa).",
   "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %12.",
-  "Nasıl Yapıldı · Sistem Nasıl Çalışır?: ARTIR — videoların %75'i tuttu (eşik 182 izlenme / 48 sa).",
+  "Nasıl Yapıldı · Sistem Nasıl Çalışır?: ARTIR — videoların %75'i tuttu (eşik 183 izlenme / 48 sa).",
   "Yolu Seç ! · Kara Kutu · Hukuk Dosyaları: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
   "Ömür Dediğin · Eskiden Nasıl Yapılırdı?: ARTIR — videoların %67'i tuttu (eşik 50 izlenme / 48 sa).",
@@ -1740,8 +1740,8 @@
   "Kozmos Lab: en iyi yayın saati şimdilik 02:00 (medyan 37 izlenme, 9 video).",
   "Ömür Dediğin: en iyi yayın saati şimdilik 10:00 (medyan 167 izlenme, 3 video).",
   "Yolu Seç !: en iyi yayın saati şimdilik 17:00 (medyan 711 izlenme, 4 video).",
-  "Nasıl Yapıldı: en iyi yayın saati şimdilik 13:00 (medyan 746 izlenme, 2 video).",
-  "LVL MAX: en iyi yayın saati şimdilik 18:00 (medyan 12 izlenme, 4 video).",
+  "Nasıl Yapıldı: en iyi yayın saati şimdilik 13:00 (medyan 757 izlenme, 2 video).",
+  "LVL MAX: en iyi yayın saati şimdilik 06:00 (medyan 8 izlenme, 4 video).",
   "Ancient Studio: tutan Short'lar ortalama %66 izleniyor, tutmayanlar %53 → sorun ilk saniyelerde (kanca/kapak); izleyici videoyu bırakıyor.",
   "Ancient Studio: Shorts kaydırmadan izleme oranı (Viewed vs Swiped) ortalama %44 (hedef ≥%70).",
   "Antik Stüdyo: tutan Short'lar ortalama %61 izleniyor, tutmayanlar %60 → izleyen bitiriyor; sorun dağıtımda (konu/başlık ilgisi), kanca değil.",
@@ -1790,11 +1790,6 @@
  ],
  "en_zayif": [
   {
-   "kanal": "Estudio Antiguo",
-   "baslik": "¿Qué hace un líder turco en el Paseo de la Reforma? 🇲🇽 #shorts",
-   "i48": 0
-  },
-  {
    "kanal": "Kozmos Lab",
    "baslik": "What is a supermoon? 🌕 #shorts",
    "i48": 0
@@ -1812,6 +1807,11 @@
   {
    "kanal": "LVL MAX",
    "baslik": "112 km/s Hızla Araca Çarpan Motosikletli Böyle Yakalandı! | SkyFox",
+   "i48": 0
+  },
+  {
+   "kanal": "LVL MAX",
+   "baslik": "AVM Merdivenlerinde Çıkan Arbedeye Polis Anında Müdahale Etti! #shorts",
    "i48": 0
   }
  ]

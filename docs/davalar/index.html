@@ -80,6 +80,7 @@ mark{background:#FDE68A;color:#000}
     <button data-s="k">Karşı Avukat Gözü</button>
     <button data-s="c">Claude Karşı Avukat</button>
     <button data-s="f">Film</button>
+    <button data-s="m">Mevzuat</button>
   </div>
   <div id="dsy"><input class="ara" id="ara" type="search" placeholder="Dava, taraf ya da evrak ara…" autocomplete="off">
   <div id="liste"></div></div>
@@ -89,6 +90,7 @@ mark{background:#FDE68A;color:#000}
   <div id="kar" class="notpane"><div class="bilgi">Karşı avukat gözü yükleniyor…</div></div>
   <div id="cla" class="notpane"><div class="bilgi">Claude karşı avukat yükleniyor…</div></div>
   <div id="flm" class="notpane"><div class="bilgi">Film listesi yükleniyor…</div></div>
+  <div id="mev" class="notpane"><div class="bilgi">Mevzuat yükleniyor…</div></div>
 </div>
 </main>
 <div id="gor"><div class="ust"><b id="gAd"></b><a id="gYeni" target="_blank" rel="noopener">Yeni sekme</a><a id="gIndir" download>İndir</a><button id="gKapat">Kapat</button></div><div class="gov" id="gGov"></div></div>
@@ -117,8 +119,8 @@ mark{background:#FDE68A;color:#000}
   // Diğer Davalar: sabit alt klasörler (dava gelmeden de görünür, tam yetkiliye)
   var DIGER=[{gkod:'diger_medas',grup:'MEDAŞ · işçilik, tazminat, MEDAŞ\'ın açtığı davalar'},{gkod:'diger_ozel',grup:'Özel şirketler · PTM Elektrik ve diğerleri'}];
   function grupBul(gk){for(var i=0;i<GRUPLAR.length;i++)if(GRUPLAR[i].gkod===gk)return GRUPLAR[i];return null;}
-  var SEKAD={d:'dosyalar',b:'brifing',y:'yorumlar',x:'bekleyen',k:'karsi',c:'claude',f:'film'};
-  var SEKREV={dosyalar:'d',brifing:'b',yorumlar:'y',bekleyen:'x',karsi:'k',claude:'c',film:'f'};
+  var SEKAD={d:'dosyalar',b:'brifing',y:'yorumlar',x:'bekleyen',k:'karsi',c:'claude',f:'film',m:'mevzuat'};
+  var SEKREV={dosyalar:'d',brifing:'b',yorumlar:'y',bekleyen:'x',karsi:'k',claude:'c',film:'f',mevzuat:'m'};
 
   // ---------- klasör ekranı ----------
   function klasorleriCiz(){
@@ -170,7 +172,7 @@ mark{background:#FDE68A;color:#000}
     var g=grupBul(GRUP); if(!g){GRUP=null;return ciz();}
     kl.hidden=true; gg.hidden=false; bas.textContent=g.grup;
     alt.textContent=g.davalar.length+' dava · '+g.evrak+' evrak'+(g.guncel?' · güncelleme '+g.guncel:'');
-    ['d','b','y','x','k','c','f'].forEach(function(s){document.querySelector('.sek button[data-s="'+s+'"]').classList.toggle('on',s===SEK);});
+    ['d','b','y','x','k','c','f','m'].forEach(function(s){document.querySelector('.sek button[data-s="'+s+'"]').classList.toggle('on',s===SEK);});
     document.getElementById('dsy').classList.toggle('gizli',SEK!=='d');
     document.getElementById('brf').classList.toggle('on',SEK==='b');
     document.getElementById('yrm').classList.toggle('on',SEK==='y');
@@ -178,6 +180,7 @@ mark{background:#FDE68A;color:#000}
     document.getElementById('kar').classList.toggle('on',SEK==='k');
     document.getElementById('cla').classList.toggle('on',SEK==='c');
     document.getElementById('flm').classList.toggle('on',SEK==='f');
+    document.getElementById('mev').classList.toggle('on',SEK==='m');
     if(SEK==='d'){listeCiz();}
     else if(SEK==='f'){filmGoster(g);}
     else{notGoster(g,SEK);}
@@ -261,7 +264,7 @@ mark{background:#FDE68A;color:#000}
     var tc='<div class="toc">'+toc.map(function(x,j){return '<a href="#'+pf+(j+1)+'">'+esc(x.replace(/\*\*/g,''))+'</a>';}).join('')+'</div>';
     return h.replace(/(<\/h1>(?:<p>.*?<\/p>)?)/,'$1'+tc);}
   function notGoster(g,s){
-    var el=document.getElementById(s==='b'?'brf':s==='y'?'yrm':s==='k'?'kar':s==='c'?'cla':'bek'), ad=s==='b'?'Brifing':s==='y'?'Yorumlar':s==='k'?'Karşı avukat gözü':s==='c'?'Claude karşı avukat olsaydı':'Bekleyen işler';
+    var el=document.getElementById(s==='b'?'brf':s==='y'?'yrm':s==='k'?'kar':s==='c'?'cla':s==='m'?'mev':'bek'), ad=s==='b'?'Brifing':s==='y'?'Yorumlar':s==='k'?'Karşı avukat gözü':s==='c'?'Claude karşı avukat olsaydı':s==='m'?'Mevzuat':'Bekleyen işler';
     var yol=SEKAD[s], anah=g.gkod+'|'+s;
     if(NOT[anah]!==undefined){cizNot(el,NOT[anah],s,ad);return;}
     el.innerHTML='<div class="bilgi">'+ad+' yükleniyor…</div>';
@@ -278,7 +281,7 @@ mark{background:#FDE68A;color:#000}
   }
   function normal(s){return kucuk(s).replace(/\./g,'/');}
   function notTik(ev){
-    var a=ev.target.closest('a[href^="#b"],a[href^="#y"],a[href^="#x"],a[href^="#k"],a[href^="#c"]');if(a){ev.preventDefault();var h=document.getElementById(a.getAttribute('href').slice(1));if(h)h.scrollIntoView({behavior:'smooth'});return;}
+    var a=ev.target.closest('a[href^="#b"],a[href^="#y"],a[href^="#x"],a[href^="#k"],a[href^="#c"],a[href^="#m"]');if(a){ev.preventDefault();var h=document.getElementById(a.getAttribute('href').slice(1));if(h)h.scrollIntoView({behavior:'smooth'});return;}
     var b=ev.target.closest('.kanit');if(!b)return;
     var esas=b.dataset.d,ar=b.dataset.a.split(';').map(normal),lbl=b.textContent;
     if(!D){alert('Evrak listesi henüz yüklenmedi.');return;}
@@ -301,6 +304,7 @@ mark{background:#FDE68A;color:#000}
   document.getElementById('bek').addEventListener('click',notTik);
   document.getElementById('kar').addEventListener('click',notTik);
   document.getElementById('cla').addEventListener('click',notTik);
+  document.getElementById('mev').addEventListener('click',notTik);
   gov.addEventListener('click',function(ev){var b=ev.target.closest('.ev');if(b){onceki={h:gov.innerHTML,ad:document.getElementById('gAd').textContent};ac(b.dataset.id,b.dataset.ad,b.dataset.tur,+b.dataset.ti||0);}});
 
   // ---------- film (grup animasyonu) ----------

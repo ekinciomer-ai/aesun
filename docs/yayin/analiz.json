@@ -8,7 +8,7 @@
   "kosul": "7 günlük izlenme 200'ü geçince DENE (günde 1); 1.000'i geçince plan YouTube ile aynı kotaya çıkar.",
   "sunucudan_yapilamayan": "Hesabın ilk dağıtıma girmesi için telefondaki TikTok uygulamasından birkaç gün izleme/beğeni/takip ve 1 videonun uygulamadan yüklenmesi gerekir; bu sunucudan yapılamaz."
  },
- "olusturma": "2026-11-28T08:24+03:00",
+ "olusturma": "2026-11-28T10:07+03:00",
  "aciklama": "Otomatik yol haritası. Üretim/planlama yapan her ajan (Claude, Antigravity, CutkodA) önce buna uyar.",
  "kurallar": [
   "ODAK DÖNEMİ (2026-12-12'e kadar, Ömer kararı 12 Kas 2026): Antik Stüdyo günde 2 Short (12 Kas 20:20 kararı): her gün 1 Gündem + Tarih 19:00 + gün aşırı Tablo Serisi / Tarihi Magazin 18:00; Spor + Tarih yalnız önemli maç haftalarında Gündem slotunda. Diğer kanallar haftada en fazla 2 Short. Yeni seri açılmaz. 12 Kas'ta zaten planlı videolar (yayin/odak_istisna.json) silinmez; Antik Stüdyo'dakiler günde 2 olacak şekilde ileri günlere yayıldı (islem_yt_gunde2), diğer kanallardakiler olduğu gibi yayınlanır.",
@@ -822,11 +822,11 @@
    "kanal": "LVL MAX",
    "seri": "Gündem + Tarih",
    "karar": "DURDUR",
-   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %13",
-   "olculen": 15,
-   "erken": 1,
-   "medyan_48sa": 3,
-   "tutma_orani": 13,
+   "neden": "son 3 videonun hiçbiri tutmadı, tutma oranı %12",
+   "olculen": 16,
+   "erken": 0,
+   "medyan_48sa": 4,
+   "tutma_orani": 12,
    "izlenme_yuzde": null,
    "en_iyi": {
     "baslik": "Polise Çalım Atıp BMX Bisikletini Geri Aldı ve Kaçtı! #shorts",
@@ -942,15 +942,15 @@
   }
  ],
  "esikler": {
-  "LVL MAX": 3315,
+  "Estudio Antiguo": 136,
+  "Ancient Studio": 192,
   "Kozmos Lab": 95,
-  "Antik Stüdyo": 637,
-  "Yolu Seç !": 262,
   "Ömür Dediğin": 50,
   "Nasıl Yapıldı": 181,
-  "Estudio Antiguo": 136,
+  "LVL MAX": 3315,
   "Kozmos Lab TR": 216,
-  "Ancient Studio": 192
+  "Antik Stüdyo": 637,
+  "Yolu Seç !": 262
  },
  "saatler": {
   "Antik Stüdyo": {
@@ -1159,8 +1159,8 @@
     "medyan": 4
    },
    "18:00": {
-    "n": 3,
-    "medyan": 3
+    "n": 4,
+    "medyan": 8
    },
    "22:00": {
     "n": 1,
@@ -1732,7 +1732,7 @@
   "Kozmos Lab TR · Bu Matematik Hayatında Nerede?: ARTIR — videoların %73'i tuttu (eşik 216 izlenme / 48 sa).",
   "Kozmos Lab TR · Gezegen Kartları: ARTIR — videoların %67'i tuttu (eşik 216 izlenme / 48 sa).",
   "Kozmos Lab TR · Merak Lab: ARTIR — videoların %50'i tuttu (eşik 216 izlenme / 48 sa).",
-  "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %13.",
+  "LVL MAX · Gündem + Tarih: DURDUR — son 3 videonun hiçbiri tutmadı, tutma oranı %12.",
   "Nasıl Yapıldı · Sistem Nasıl Çalışır?: ARTIR — videoların %75'i tuttu (eşik 181 izlenme / 48 sa).",
   "Yolu Seç ! · Kara Kutu · Hukuk Dosyaları: DEĞİŞTİR — son 3 video tutmadı (önceden tutanlar vardı): kanca/konu seçimini değiştir.",
   "Yolu Seç ! · Yolu Seç · Isınma Turu: ARTIR — videoların %58'i tuttu (eşik 262 izlenme / 48 sa).",
